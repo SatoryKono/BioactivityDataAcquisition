@@ -5,13 +5,13 @@ BioETL Structure Audit Tool.
 Проверяет соответствие структуры проекта File Policy (03-file-policy.md).
 
 Usage:
-    python src/tools/audit_structure.py [--json] [--strict]
+    python scripts/audit_structure.py [--json] [--strict]
 
 Flags:
     --json    Output results in JSON format
     --strict  Exit with code 1 on SHOULD violations too (default: only MUST)
 
-Aligned with RULES.md v5.10 (2026-01-07)
+Aligned with RULES.md v5.23 (2026-03-03)
 """
 
 from __future__ import annotations
@@ -89,6 +89,8 @@ TECHNICAL_DIRS: set[str] = {
     ".venv",
     "venv",
     ".git",
+    ".worktrees",
+    ".rollback",
     "__pycache__",
     ".pytest_cache",
     ".mypy_cache",
@@ -192,6 +194,11 @@ def _is_technical_or_generated(name: str) -> bool:
     return False
 
 
+def _has_path_segment(path: Path, segments: set[str]) -> bool:
+    """Check whether a path contains any segment from a set."""
+    return any(part in segments for part in path.parts)
+
+
 def _check_root_directories(project_root: Path) -> Iterator[Violation]:
     """Проверка корневых каталогов против whitelist."""
     for item in project_root.iterdir():
@@ -230,9 +237,9 @@ def _check_python_locations(project_root: Path) -> Iterator[Violation]:
         posix_path = rel_path.as_posix()
 
         # Skip technical directories
-        if any(tech in posix_path for tech in TECHNICAL_DIRS):
+        if _has_path_segment(rel_path, TECHNICAL_DIRS):
             continue
-        if any(gen in posix_path for gen in GENERATED_DIRS):
+        if _has_path_segment(rel_path, GENERATED_DIRS):
             continue
 
         # Check if in allowed location

@@ -421,8 +421,8 @@ classDiagram
     SemanticScholarPublication ..> PubMedPublication : pmid match
 
     %% Notes
-    note for BaseEntity "All entities inherit lineage fields:\n- entity_id (business key)\n- content_hash (SHA256)\n- run_id (correlation)\n- run_type (INCREMENTAL|BACKFILL|REBUILD)\n- ingestion_ts (timestamp)"
+    note for BaseEntity "Lineage fields:<br/>entity_id (business key)<br/>content_hash (SHA256)<br/>run_id (correlation)<br/>run_type (INCR/BACKFILL/REBUILD)<br/>ingestion_ts (timestamp)"
 
-    note for PublicationEntityBase "Unified publication fields (ADR-024):\n- Cross-ref IDs: pmid, doi, pmc_id\n- Metrics: citations_received, citations_made\n- Year range: 1500-2100\n- ORCID validation: author_orcids"
+    note for PublicationEntityBase "Publication fields (ADR-024):<br/>IDs: pmid, doi, pmc_id<br/>Metrics: citations_in/citations_out<br/>Year range: 1500-2100<br/>ORCID list: author_orcids"
 
-    note for QuarantineRecord "Failed records during DQ validation\nRetention: 30 days\nStates: NEW -> IGNORED | REPROCESSED"
+    note for QuarantineRecord "DQ failed records<br/>Retention: 30 days<br/>States: NEW -> IGNORED | REPROCESSED"

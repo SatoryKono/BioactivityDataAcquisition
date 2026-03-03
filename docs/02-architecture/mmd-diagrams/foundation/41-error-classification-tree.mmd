@@ -31,7 +31,7 @@
   }
 }}%%
 flowchart TB
-    ERROR["Error Occurred<br/><br/><br/>"]
+    ERROR["Error Occurred"]
 
     ERROR --> HTTP{{"HTTP Status Code?"}}
     ERROR --> DOMAIN{{"Domain Error?"}}
@@ -129,7 +129,4 @@ flowchart TB
     class HTTP,AUTH,NOTFOUND,RATE,SERVER,UNKNOWN_HTTP layer_external;
     class ERROR,ACT_RETRY,ACT_QUARANTINE,FAIL_FAST,BATCH_FAIL,EXHAUST layer_application;
 
-    %% Click tooltips
-    click HTTP "../../00-project/RULES.md" "HTTP status routing: auth, 404, 429, 5xx, other"
-    click DOMAIN "../../00-project/RULES.md" "Domain validation routing: schema, missing, format, dq"
-    click INFRA "../../00-project/RULES.md" "Infrastructure routing: lock, storage, circuit-breaker failures"
+    %% Click tooltips    click HTTP ../../00-project/RULES.md "Routes auth/404/429/5xx/other HTTP"    click DOMAIN ../../00-project/RULES.md "Routes schema/missing/format/dq"    click INFRA ../../00-project/RULES.md "Routes lock/storage/cb failures"

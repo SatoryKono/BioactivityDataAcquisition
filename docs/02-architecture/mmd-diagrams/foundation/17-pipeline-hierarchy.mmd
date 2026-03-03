@@ -257,8 +257,8 @@ classDiagram
     BasePipeline --> BaseTransformer : uses
 
     %% Notes
-    note for BasePipeline "Container for configuration\nand injected services.\n\nDoes NOT orchestrate execution\n(that's PipelineRunner's job)"
+    note for BasePipeline "Config + injected services<br/>No execution orchestration<br/>PipelineRunner owns run flow"
 
-    note for BaseTransformer "Template Method Pattern\n━━━━━━━━━━━━━━━━━━━━━━\n• transform() - public API\n• _transform_impl() - override point\n\nProvides:\n• Content hash computation\n• JSON serialization\n• Field extraction utilities"
+    note for BaseTransformer "Template Method core<br/>transform() public API<br/>_transform_impl() override point<br/>hash + serialization helpers<br/>field extraction helpers"
 
-    note for BaseChemblTransformer "ChEMBL-specific normalization:\n• ID formatting (CHEMBL123)\n• Unit conversion (nM → μM)\n• Date parsing"
+    note for BaseChemblTransformer "ChEMBL normalization<br/>ID format: CHEMBL123<br/>unit conversion: nM -> uM<br/>date parsing"

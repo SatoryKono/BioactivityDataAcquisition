@@ -27,8 +27,8 @@ flowchart TB
 
     subgraph Extract["Key Extraction"]
         KE["KeyExtractorService.extract_keys()<br/>• read seed Silver via DeltaReader<br/>• select join_key columns (doi, pmid)<br/>• deduplicate → unique key list<br/>"]
-        DOIS["DOI Keys<br/>(~50,000 unique)<br/><br/><br/>"]
-        PMIDS["PMID Keys<br/>(~30,000 unique)<br/><br/><br/>"]
+        DOIS["DOI Keys<br/>(~50,000 unique)<br/>"]
+        PMIDS["PMID Keys<br/>(~30,000 unique)<br/>"]
     end
 
     subgraph FanOut["Fan-Out (EnrichmentCoordinator)"]
@@ -53,7 +53,7 @@ flowchart TB
     end
 
     subgraph Output["Gold Output"]
-        GW["GoldWriter.write_gold()<br/>CompositePublicationGoldSchema<br/><br/><br/>"]
+        GW["GoldWriter.write_gold()<br/>CompositePublicationGoldSchema<br/>"]
         GT[("gold/composite/publication/"<br/>)]
     end
 

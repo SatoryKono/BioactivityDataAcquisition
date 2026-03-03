@@ -147,7 +147,4 @@ flowchart TB
     class CFG,PFV,BOOT,SP,DC,DEP1,DEP2,KE,KEYS,EC,E1,E2,E3,E4,DD,MS,CO,CR,XV,CCM layer_application;
     class SB,DS1,DS2,ES1,ES2,ES3,ES4,GW,GT layer_infrastructure;
 
-    %% Click tooltips
-    click CCM "../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md" "Saves per-phase checkpoints and supports resume"
-    click MS "../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md" "Merges seed + enricher outputs with conflict resolution"
-    click KE "../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md" "Extracts join keys from seed silver for fan-out enrichment"
+    %% Click tooltips    click CCM ../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md "Saves phase checkpoints + resume"    click MS ../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md "Merges seed + enricher outputs"    click KE ../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md "Extracts join keys for fan-out"

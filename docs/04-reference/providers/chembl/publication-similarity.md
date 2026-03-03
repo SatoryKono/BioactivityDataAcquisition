@@ -43,7 +43,7 @@
 ### Entity ID
 
 ```python
-entity-id = f"chembl:{sim-id}"
+entity_id = f"chembl:{sim-id}"
 ```
 
 ### Вычисляемые метрики

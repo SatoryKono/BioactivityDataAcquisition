@@ -91,7 +91,6 @@ log_test.txt
 .DS_Store
 Thumbs.db
 desktop.ini
-*.stackdump
 
 # Secrets / API keys (RULES.md REQ-SECRET-004)
 *.env
@@ -169,6 +168,10 @@ data/input/chembl_target_component.csv
 .oai_key_tmp
 .codex-sessions/
 
+# Local worktrees and rollback snapshots
+.worktrees/
+.rollback/
+
 # Nested IDEA project files
 data/.idea/
 *.svg
@@ -180,16 +183,5 @@ data/.idea/
 unnamed.patch
 docs/reports/branch-full-diff-matrix-2026-03-01.csv
 .claude/settings.local.json
-.claude/settings.local.json
-.claude/settings.local.json
-.claude/settings.local.json
-.claude/settings.local.json
-.claude/settings.local.json
-.claude/settings.local.json
-.claude/settings.local.json
-.claude/settings.local.json
-.claude/settings.local.json
 .claude/settings.json
 /data/миграция
-/data/миграция
-.claude/settings.local.json

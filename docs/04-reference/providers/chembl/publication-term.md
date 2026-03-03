@@ -24,7 +24,7 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `document-chembl-id` | `str` | FK → ChEMBL ID родительской публикации |
+| `document_chembl_id` | `str` | FK → ChEMBL ID родительской публикации |
 | `term` | `str` | Текст термина (напр., "Aspirin", "kinase inhibitor") |
 | `term-type` | `str` | Тип термина: MESH-HEADING, MESH-QUALIFIER, KEYWORD |
 
@@ -46,8 +46,8 @@
 Entity ID вычисляется как SHA256-хэш композитного ключа:
 
 ```python
-composite = f"{document-chembl-id}:{term-type}:{normalized-term}"
-entity-id = hashlib.sha256(composite.encode()).hexdigest()[:16]
+composite = f"{document_chembl_id}:{term-type}:{normalized-term}"
+entity_id = hashlib.sha256(composite.encode()).hexdigest()[:16]
 ```
 
 **Нормализация термина:** `term.lower().strip()`
@@ -64,7 +64,7 @@ entity-id = hashlib.sha256(composite.encode()).hexdigest()[:16]
 
 ### DQ-правила
 
-1. **`document-chembl-id`** — обязательное, формат `CHEMBL\d+`
+1. **`document_chembl_id`** — обязательное, формат `CHEMBL\d+`
 2. **`term`** — обязательное, минимум 1 символ
 3. **`term-type`** — обязательное, одно из: MESH-HEADING, MESH-QUALIFIER, KEYWORD, CONCEPT
 
@@ -75,7 +75,7 @@ gold_filters:
   columns:
     term-type: [MESH-HEADING, KEYWORD]  # Основные типы терминов
   required_fields:
-    - document-chembl-id
+    - document_chembl_id
     - term
     - term-type
 ```

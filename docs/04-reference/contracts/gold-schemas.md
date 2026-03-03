@@ -82,10 +82,10 @@ Gold-фильтры определяются в YAML-конфигах пайпл
 |-------------|----------|--------|
 | **columns** | Inclusion list (IN) | `standard_type: [IC50, Ki]` |
 | **ranges** | Числовой диапазон | `standard_value: {min: 0}` |
-| **list-lengths** | Длина списка | `component-accessions: {min: 1, max: 1}` |
-| **list-contains** | Содержимое списка | `component-types: {values: [PROTEIN]}` |
-| **required-fields** | Обязательные поля | `[target_id, standard_value]` |
-| **exclude-if-present** | Исключение по наличию | `[deprecated-field]` |
+| **list_lengths** | Длина списка | `component_accessions: {min: 1, max: 1}` |
+| **list_contains** | Содержимое списка | `component_types: {values: [PROTEIN]}` |
+| **required_fields** | Обязательные поля | `[target_id, standard_value]` |
+| **exclude_if_present** | Исключение по наличию | `[deprecated_field]` |
 
 ### Пример конфигурации
 
@@ -99,7 +99,7 @@ gold_filters:
   ranges:
     standard_value:
       min: 0
-      include-min: false
+      include_min: false
   required_fields:
     - standard_type
     - standard_value
@@ -125,7 +125,7 @@ gold_filters:
 | `standard_units` | `[nM]` | Единый масштаб для сравнения |
 | `standard_relation` | `["="]` | Точные значения, не диапазоны |
 | `assay_type` | `[B, F]` | Binding/Functional assays |
-| `potential-duplicate` | `["0"]` | Исключение дубликатов |
+| `potential_duplicate` | `["0"]` | Исключение дубликатов |
 | `standard_value` | `> 0` | Положительные значения активности |
 
 ##### Ключевые поля
@@ -141,17 +141,17 @@ gold_filters:
 | `standard_value` | float | Yes | Значение активности |
 | `standard_units` | str | Yes | Единицы измерения |
 | `pchembl_value` | float | Yes | -log10(IC50) |
-| `canonical-smiles` | str | Yes | SMILES молекулы |
+| `canonical_smiles` | str | Yes | SMILES молекулы |
 | `content_hash` | str | No | SHA256 хэш записи |
 
 ##### Лиганд-эффективность
 
 | Поле | Описание |
 |------|----------|
-| `ligand-efficiency-bei` | Binding Efficiency Index |
-| `ligand-efficiency-le` | Ligand Efficiency |
-| `ligand-efficiency-lle` | Lipophilic Ligand Efficiency |
-| `ligand-efficiency-sei` | Surface Efficiency Index |
+| `ligand_efficiency_bei` | Binding Efficiency Index |
+| `ligand_efficiency_le` | Ligand Efficiency |
+| `ligand_efficiency_lle` | Lipophilic Ligand Efficiency |
+| `ligand_efficiency_sei` | Surface Efficiency Index |
 
 ---
 
@@ -164,33 +164,33 @@ gold_filters:
 
 | Фильтр | Значения | Обоснование |
 |--------|----------|-------------|
-| `molecule-type` | `[Small molecule]` | Drug-like молекулы |
-| `structure-type` | `[MOL]` | Структурированные соединения |
-| `inorganic-flag` | `["0"]` | Только органические |
+| `molecule_type` | `[Small molecule]` | Drug-like молекулы |
+| `structure_type` | `[MOL]` | Структурированные соединения |
+| `inorganic_flag` | `["0"]` | Только органические |
 
 ##### Ключевые поля
 
 | Поле | Тип | Nullable | Описание |
 |------|-----|----------|----------|
 | `molecule_id` | str | No | ChEMBL Molecule ID |
-| `pref-name` | str | Yes | Предпочтительное название |
-| `molecule-type` | str | Yes | Тип молекулы |
-| `max-phase` | float | Yes | Фаза клинических испытаний (0-4) |
-| `structure-canonical-smiles` | str | Yes | Каноническая SMILES |
-| `structure-standard-inchi` | str | Yes | InChI |
-| `structure-standard-inchi-key` | str | Yes | InChIKey |
+| `pref_name` | str | Yes | Предпочтительное название |
+| `molecule_type` | str | Yes | Тип молекулы |
+| `max_phase` | float | Yes | Фаза клинических испытаний (0-4) |
+| `structure_canonical_smiles` | str | Yes | Каноническая SMILES |
+| `structure_standard_inchi` | str | Yes | InChI |
+| `structure_standard_inchi_key` | str | Yes | InChIKey |
 
 ##### Физико-химические свойства
 
 | Поле | Описание |
 |------|----------|
-| `property-alogp` | Расчётный logP |
-| `property-mw-freebase` | Молекулярная масса |
-| `property-hba` | Hydrogen Bond Acceptors |
-| `property-hbd` | Hydrogen Bond Donors |
-| `property-psa` | Polar Surface Area |
-| `property-rtb` | Rotatable Bonds |
-| `property-ro5-violations` | Нарушения правила Lipinski |
+| `property_alogp` | Расчётный logP |
+| `property_mw_freebase` | Молекулярная масса |
+| `property_hba` | Hydrogen Bond Acceptors |
+| `property_hbd` | Hydrogen Bond Donors |
+| `property_psa` | Polar Surface Area |
+| `property_rtb` | Rotatable Bonds |
+| `property_ro5_violations` | Нарушения правила Lipinski |
 
 ---
 
@@ -205,7 +205,7 @@ gold_filters:
 |--------|----------|-------------|
 | `assay_type` | `[B, F]` | Binding, Functional |
 | `confidence_score` | `["8", "9"]` | Высокая уверенность (шкала 0-9) |
-| `relationship-type` | `[D]` | Direct interaction only |
+| `relationship_type` | `[D]` | Direct interaction only |
 
 ##### Ключевые поля
 
@@ -216,8 +216,8 @@ gold_filters:
 | `assay_type` | str | Yes | Тип эксперимента |
 | `description` | str | Yes | Описание |
 | `confidence_score` | float | Yes | Уровень уверенности |
-| `bao-format` | str | Yes | BAO Format ID |
-| `assay-organism` | str | Yes | Организм |
+| `bao_format` | str | Yes | BAO Format ID |
+| `assay_organism` | str | Yes | Организм |
 
 ---
 
@@ -230,66 +230,66 @@ gold_filters:
 
 | Фильтр | Значения | Обоснование |
 |--------|----------|-------------|
-| `target-type` | `[SINGLE PROTEIN]` | Единичные белки |
-| `component-accessions` | length: 1 | Один UniProt accession |
-| `component-types` | contains: `[PROTEIN]` | Тип компонента — белок |
+| `target_type` | `[SINGLE PROTEIN]` | Единичные белки |
+| `component_accessions` | length: 1 | Один UniProt accession |
+| `component_types` | contains: `[PROTEIN]` | Тип компонента — белок |
 
 ##### Ключевые поля
 
 | Поле | Тип | Nullable | Описание |
 |------|-----|----------|----------|
 | `target_id` | str | No | ChEMBL Target ID |
-| `pref-name` | str | Yes | Название |
-| `target-type` | str | Yes | Тип мишени |
+| `pref_name` | str | Yes | Название |
+| `target_type` | str | Yes | Тип мишени |
 | `organism` | str | Yes | Организм |
-| `tax-id` | float | Yes | NCBI Taxonomy ID |
-| `component-accessions` | list[str] | Yes | UniProt accessions |
+| `tax_id` | float | Yes | NCBI Taxonomy ID |
+| `component_accessions` | list[str] | Yes | UniProt accessions |
 
 ---
 
 #### chembl_target_component
 
-**Primary Key**: `component-id`
+**Primary Key**: `component_id`
 **Назначение**: Компоненты мишеней (белковые последовательности)
 
 ##### Gold-фильтры
 
 | Фильтр | Значения | Обоснование |
 |--------|----------|-------------|
-| `component-type` | `[PROTEIN]` | Только белки |
+| `component_type` | `[PROTEIN]` | Только белки |
 | required | `accession` | Наличие UniProt accession |
 
 ##### Ключевые поля
 
 | Поле | Тип | Nullable | Описание |
 |------|-----|----------|----------|
-| `component-id` | float | No | Component ID |
+| `component_id` | float | No | Component ID |
 | `accession` | str | Yes | UniProt accession |
-| `component-type` | str | Yes | Тип компонента |
+| `component_type` | str | Yes | Тип компонента |
 | `organism` | str | Yes | Организм |
-| `protein-classifications` | str | Yes | JSON классификации |
+| `protein_classifications` | str | Yes | JSON классификации |
 
 ---
 
 #### chembl_publication
 
-**Primary Key**: `document-chembl-id`
+**Primary Key**: `document_chembl_id`
 **Назначение**: Научные публикации из ChEMBL API (silver-table/gold-table: `chembl_publication`)
 
 ##### Gold-фильтры
 
 | Фильтр | Значения | Обоснование |
 |--------|----------|-------------|
-| `doc-type` | `[PUBLICATION]` | Только публикации |
+| `doc_type` | `[PUBLICATION]` | Только публикации |
 | `year` | `> 1950` | Современные публикации |
-| required | `document-chembl-id, doc-type, title` | Базовые метаданные (PubMed ID/DOI могут отсутствовать) |
+| required | `document_chembl_id, doc_type, title` | Базовые метаданные (PubMed ID/DOI могут отсутствовать) |
 
 ##### Ключевые поля
 
 | Поле | Тип | Nullable | Описание |
 |------|-----|----------|----------|
-| `document-chembl-id` | str | No | ChEMBL Document ID |
-| `pubmed-id` | float | Yes | PubMed ID |
+| `document_chembl_id` | str | No | ChEMBL Document ID |
+| `pubmed_id` | float | Yes | PubMed ID |
 | `doi` | str | Yes | DOI |
 | `title` | str | Yes | Заголовок |
 | `journal` | str | Yes | Журнал |
@@ -300,48 +300,48 @@ gold_filters:
 
 #### chembl_compound_record
 
-**Primary Key**: `record-id`
+**Primary Key**: `record_id`
 **Назначение**: Связь молекула-документ
 
 ##### Gold-фильтры
 
 | Фильтр | Значения | Обоснование |
 |--------|----------|-------------|
-| required | `molecule_id, document-chembl-id` | Полнота связей |
+| required | `molecule_id, document_chembl_id` | Полнота связей |
 
 ##### Ключевые поля
 
 | Поле | Тип | Nullable | Описание |
 |------|-----|----------|----------|
-| `record-id` | float | No | Record ID |
+| `record_id` | float | No | Record ID |
 | `molecule_id` | str | No | ChEMBL Molecule ID |
-| `document-chembl-id` | str | No | ChEMBL Document ID |
-| `compound-key` | str | Yes | Название в публикации |
-| `compound-name` | str | Yes | Полное название |
+| `document_chembl_id` | str | No | ChEMBL Document ID |
+| `compound_key` | str | Yes | Название в публикации |
+| `compound_name` | str | Yes | Полное название |
 
 ---
 
 #### chembl_cell_line
 
-**Primary Key**: `cell-chembl-id`
+**Primary Key**: `cell_chembl_id`
 **Назначение**: Клеточные линии
 
 ##### Gold-фильтры
 
 | Фильтр | Значения | Обоснование |
 |--------|----------|-------------|
-| required | `cell-name` | Наличие названия |
+| required | `cell_name` | Наличие названия |
 
 ##### Ключевые поля
 
 | Поле | Тип | Nullable | Описание |
 |------|-----|----------|----------|
-| `cell-chembl-id` | str | No | ChEMBL Cell Line ID |
-| `cell-name` | str | No | Название |
-| `cell-description` | str | Yes | Описание |
-| `cell-source-tissue` | str | Yes | Ткань-источник |
-| `cell-source-organism` | str | Yes | Организм |
-| `cellosaurus-id` | str | Yes | Cellosaurus ID |
+| `cell_chembl_id` | str | No | ChEMBL Cell Line ID |
+| `cell_name` | str | No | Название |
+| `cell_description` | str | Yes | Описание |
+| `cell_source_tissue` | str | Yes | Ткань-источник |
+| `cell_source_organism` | str | Yes | Организм |
+| `cellosaurus_id` | str | Yes | Cellosaurus ID |
 
 ---
 
@@ -356,7 +356,7 @@ gold_filters:
 
 | Фильтр | Значения | Обоснование |
 |--------|----------|-------------|
-| required | `cid, molecular-formula` | Минимальные данные |
+| required | `cid, molecular_formula` | Минимальные данные |
 
 ##### Ключевые поля
 
@@ -364,13 +364,13 @@ gold_filters:
 |------|-----|----------|----------|
 | `entity_id` | str | No | Уникальный ID |
 | `cid` | str | No | PubChem Compound ID |
-| `molecular-formula` | str | Yes | Молекулярная формула |
-| `molecular-weight` | str | Yes | Молекулярная масса |
-| `canonical-smiles` | str | Yes | Каноническая SMILES |
-| `isomeric-smiles` | str | Yes | Изомерная SMILES |
+| `molecular_formula` | str | Yes | Молекулярная формула |
+| `molecular_weight` | str | Yes | Молекулярная масса |
+| `canonical_smiles` | str | Yes | Каноническая SMILES |
+| `isomeric_smiles` | str | Yes | Изомерная SMILES |
 | `inchi` | str | Yes | InChI |
 | `inchikey` | str | Yes | InChIKey |
-| `iupac-name` | str | Yes | IUPAC название |
+| `iupac_name` | str | Yes | IUPAC название |
 
 ---
 
@@ -386,7 +386,7 @@ gold_filters:
 | Фильтр | Значения | Обоснование |
 |--------|----------|-------------|
 | `reviewed` | `["true"]` | Только Swiss-Prot (reviewed) |
-| required | `accession, entry-name, organism` | Полнота данных |
+| required | `accession, entry_name, organism` | Полнота данных |
 
 ##### Ключевые поля
 
@@ -394,11 +394,11 @@ gold_filters:
 |------|-----|----------|----------|
 | `entity_id` | str | No | Уникальный ID |
 | `accession` | str | No | UniProt Accession |
-| `entry-name` | str | Yes | Entry name |
-| `protein-name` | str | Yes | Название белка |
-| `gene-names` | list[str] | Yes | Названия генов |
-| `organism-id` | float | Yes | NCBI Taxonomy ID |
-| `sequence-length` | float | Yes | Длина последовательности |
+| `entry_name` | str | Yes | Entry name |
+| `protein_name` | str | Yes | Название белка |
+| `gene_names` | list[str] | Yes | Названия генов |
+| `organism_id` | float | Yes | NCBI Taxonomy ID |
+| `sequence_length` | float | Yes | Длина последовательности |
 
 ---
 
@@ -422,13 +422,13 @@ gold_filters:
 | `entity_id` | str | No | Уникальный ID |
 | `pmid` | str | No | PubMed ID |
 | `doi` | str | Yes | DOI |
-| `pmc-id` | str | Yes | PubMed Central ID |
+| `pmc_id` | str | Yes | PubMed Central ID |
 | `title` | str | Yes | Заголовок |
 | `abstract` | str | Yes | Абстракт |
 | `journal` | str | Yes | Журнал |
 | `authors` | list[str] | Yes | Авторы |
-| `pub-year` | float | Yes | Год публикации |
-| `mesh-terms` | list[str] | Yes | MeSH термины |
+| `pub_year` | float | Yes | Год публикации |
+| `mesh_terms` | list[str] | Yes | MeSH термины |
 | `keywords` | list[str] | Yes | Ключевые слова |
 
 ---
@@ -441,17 +441,17 @@ gold_filters:
 |------|-------|-----|----------|----------|
 | `entity_id` | — | str | No | Глобальный уникальный ID |
 | `content_hash` | — | str | No | SHA256 хэш содержимого |
-| `_run_id` | run-id | str | No | ID запуска пайплайна |
-| `_run_type` | run-type | str | No | Тип запуска (incremental/backfill) |
-| `-source-batch-id` | source-batch-id | str | Yes | ID исходного batch |
-| `-ingestion-ts` | ingestion-ts | str | No | Timestamp загрузки (ISO 8601) |
-| `-index` | index | int | No | Порядковый номер в batch |
+| `_run_id` | run_id | str | No | ID запуска пайплайна |
+| `_run_type` | run_type | str | No | Тип запуска (incremental/backfill) |
+| `_source_batch_id` | source_batch_id | str | Yes | ID исходного batch |
+| `_ingestion_ts` | ingestion_ts | str | No | Timestamp загрузки (ISO 8601) |
+| `_index` | index | int | No | Порядковый номер в batch |
 
 ### Content Hash
 
 Формула вычисления:
 ```python
-sha256(provider + canonical-json(record))
+sha256(provider + canonical_json(record))
 ```
 
 **Нормализация перед хэшированием:**
@@ -459,7 +459,7 @@ sha256(provider + canonical-json(record))
 - Floats → `round(val, 10)`
 - Dates → ISO `YYYY-MM-DD`
 - Strings → `strip()`
-- **Исключаются**: `-ingestion-ts`, `_run_id`, `_run_type`, `-dq-*`
+- **Исключаются**: `_ingestion_ts`, `_run_id`, `_run_type`, `_dq_*`
 
 ---
 
@@ -477,9 +477,9 @@ sha256(provider + canonical-json(record))
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `valid-from` | datetime | Начало действия версии |
-| `valid-to` | datetime | Окончание (NULL = текущая) |
-| `is-current` | bool | Текущая версия |
+| `valid_from` | datetime | Начало действия версии |
+| `valid_to` | datetime | Окончание (NULL = текущая) |
+| `is_current` | bool | Текущая версия |
 | `version` | int | Номер версии |
 
 ---
@@ -494,7 +494,7 @@ from deltalake import DeltaTable
 
 # Загрузка Gold-таблицы
 dt = DeltaTable("data/output/gold/chembl_activity")
-df = pl.from-arrow(dt.to-pyarrow-table())
+df = pl.from_arrow(dt.to_pyarrow_table())
 
 # Фильтрация активных IC50 для конкретной мишени
 activities = df.filter(
@@ -505,7 +505,7 @@ activities = df.filter(
     "molecule_id",
     "standard_value",
     "pchembl_value",
-    "canonical-smiles"
+    "canonical_smiles"
 ])
 ```
 
@@ -521,8 +521,8 @@ SELECT
     molecule_id,
     standard_value,
     pchembl_value,
-    canonical-smiles
-FROM delta-scan('data/output/gold/chembl_activity')
+    canonical_smiles
+FROM delta_scan('data/output/gold/chembl_activity')
 WHERE target_id = 'CHEMBL1234'
   AND standard_type = 'IC50'
 ORDER BY standard_value ASC
@@ -536,12 +536,12 @@ LIMIT 10;
 SELECT
     a.molecule_id,
     a.target_id,
-    a.standard_value AS ic50-nm,
-    m.property-alogp,
-    m.property-mw-freebase AS mw,
-    m.structure-canonical-smiles
-FROM delta-scan('data/output/gold/chembl_activity') a
-JOIN delta-scan('data/output/gold/chembl_molecule') m
+    a.standard_value AS ic50_nm,
+    m.property_alogp,
+    m.property_mw_freebase AS mw,
+    m.structure_canonical_smiles
+FROM delta_scan('data/output/gold/chembl_activity') a
+JOIN delta_scan('data/output/gold/chembl_molecule') m
   ON a.molecule_id = m.molecule_id
 WHERE a.standard_type = 'IC50'
   AND a.standard_value < 100;
@@ -552,17 +552,17 @@ WHERE a.standard_type = 'IC50'
 ```sql
 -- Статистика активности по мишеням
 SELECT
-    t.pref-name AS target-name,
+    t.pref_name AS target_name,
     t.organism,
-    COUNT(*) AS activity-count,
-    AVG(a.pchembl_value) AS avg-pchembl,
-    MIN(a.standard_value) AS best-ic50-nm
-FROM delta-scan('data/output/gold/chembl_activity') a
-JOIN delta-scan('data/output/gold/chembl_target') t
+    COUNT(*) AS activity_count,
+    AVG(a.pchembl_value) AS avg_pchembl,
+    MIN(a.standard_value) AS best_ic50_nm
+FROM delta_scan('data/output/gold/chembl_activity') a
+JOIN delta_scan('data/output/gold/chembl_target') t
   ON a.target_id = t.target_id
 WHERE a.standard_type = 'IC50'
-GROUP BY t.pref-name, t.organism
-ORDER BY activity-count DESC
+GROUP BY t.pref_name, t.organism
+ORDER BY activity_count DESC
 LIMIT 20;
 ```
 
@@ -573,15 +573,15 @@ from deltalake import DeltaTable
 
 # Версия на определённый timestamp
 dt = DeltaTable("data/output/gold/chembl_activity")
-df-historical = pl.from-arrow(
-    dt.load-as-version(datetime(2025, 1, 1)).to-pyarrow-table()
+df_historical = pl.from_arrow(
+    dt.load_as_version(datetime(2025, 1, 1)).to_pyarrow_table()
 )
 
 # Сравнение версий
-current-count = dt.to-pyarrow-table().num-rows
-previous = dt.load-as-version(dt.version() - 1)
-previous-count = previous.to-pyarrow-table().num-rows
-print(f"Added {current-count - previous-count} records")
+current_count = dt.to_pyarrow_table().num_rows
+previous = dt.load_as_version(dt.version() - 1)
+previous_count = previous.to_pyarrow_table().num_rows
+print(f"Added {current_count - previous_count} records")
 ```
 
 ---
@@ -610,8 +610,8 @@ from bioetl.infrastructure.schemas.gold import ChEMBLActivityGoldSchema
 import polars as pl
 
 # Загрузка и валидация
-df = pl.read-delta("data/output/gold/chembl_activity")
-validated = ChEMBLActivityGoldSchema.validate(df.to-pandas())
+df = pl.read_delta("data/output/gold/chembl_activity")
+validated = ChEMBLActivityGoldSchema.validate(df.to_pandas())
 ```
 
 ### Data Quality пороги
@@ -674,10 +674,10 @@ JSON exports для Gold-схем хранятся в `docs/04-reference/contrac
 | ChEMBL | molecule | `molecule_id` | 3 column | ~60 |
 | ChEMBL | assay | `assay_id` | 3 column | ~45 |
 | ChEMBL | target | `target_id` | 1 col + list filters | ~25 |
-| ChEMBL | target-component | `component-id` | 1 column | ~13 |
-| ChEMBL | document | `document-chembl-id` | 1 col + 1 range | ~17 |
-| ChEMBL | compound-record | `record-id` | required only | ~8 |
-| ChEMBL | cell-line | `cell-chembl-id` | required only | ~12 |
+| ChEMBL | target_component | `component_id` | 1 column | ~13 |
+| ChEMBL | document | `document_chembl_id` | 1 col + 1 range | ~17 |
+| ChEMBL | compound_record | `record_id` | required only | ~8 |
+| ChEMBL | cell_line | `cell_chembl_id` | required only | ~12 |
 | PubChem | compound | `cid` | required only | ~10 |
 | UniProt | protein | `accession` | 1 column | ~8 |
 | PubMed | publication | `pmid` | required only | ~24 |

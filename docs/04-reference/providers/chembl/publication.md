@@ -19,7 +19,7 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `document-chembl-id` | `str` | Уникальный ChEMBL ID публикации |
+| `document_chembl_id` | `str` | Уникальный ChEMBL ID публикации |
 | `pubmed-id` | `int` | PubMed ID (если есть) |
 | `doi` | `str` | Digital Object Identifier |
 | `patent-id` | `str` | ID патента (если применимо) |
@@ -42,7 +42,7 @@
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `doc-type` | `str` | Тип публикации (PUBLICATION, PATENT) |
-| `src-id` | `int` | ID источника данных |
+| `src_id` | `int` | ID источника данных |
 
 ---
 
@@ -53,7 +53,7 @@
 ### Entity ID
 
 ```python
-entity-id = f"chembl:{document-chembl-id}"
+entity_id = f"chembl:{document_chembl_id}"
 ```
 
 ---
@@ -62,7 +62,7 @@ entity-id = f"chembl:{document-chembl-id}"
 
 ### DQ-правила
 
-1. **`document-chembl-id`** — обязательное
+1. **`document_chembl_id`** — обязательное
 2. **`doc-type`** — должен быть PUBLICATION или PATENT
 
 ---

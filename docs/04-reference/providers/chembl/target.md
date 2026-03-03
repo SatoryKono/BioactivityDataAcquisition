@@ -19,8 +19,8 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `target-chembl-id` | `str` | Уникальный ChEMBL ID мишени |
-| `pref-name` | `str` | Предпочтительное название |
+| `target_id` | `str` | Уникальный ChEMBL ID мишени |
+| `pref_name` | `str` | Предпочтительное название |
 | `target-type` | `str` | Тип мишени (SINGLE PROTEIN, PROTEIN COMPLEX, etc.) |
 
 ### Таксономия
@@ -35,9 +35,9 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `component-accessions` | `list[str]` | UniProt accessions |
-| `component-ids` | `list[int]` | ID компонентов |
-| `component-types` | `list[str]` | Типы компонентов |
+| `component_accessions` | `list[str]` | UniProt accessions |
+| `component_ids` | `list[int]` | ID компонентов |
+| `component_types` | `list[str]` | Типы компонентов |
 | `component-organisms` | `list[str]` | Организмы компонентов |
 
 ### Связи
@@ -56,13 +56,13 @@
 ### Агрегация компонентов
 
 Компоненты мишени (`target-components`) агрегируются в списки:
-- `component-accessions`, `component-ids`, `component-types`
+- `component_accessions`, `component_ids`, `component_types`
 - `component-organisms`
 
 ### Entity ID
 
 ```python
-entity-id = f"chembl:{target-chembl-id}"
+entity_id = f"chembl:{target_id}"
 ```
 
 ---
@@ -71,7 +71,7 @@ entity-id = f"chembl:{target-chembl-id}"
 
 ### DQ-правила
 
-1. **`target-chembl-id`** — обязательное
+1. **`target_id`** — обязательное
 2. **`target-type`** — должен быть валидным типом
 
 ### Пороги ошибок

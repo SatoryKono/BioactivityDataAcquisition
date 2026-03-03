@@ -10,6 +10,8 @@ Checks:
      - legacy config/script tokens
      - outdated `bioetl run <pipeline>` syntax
      - removed run flags (`--start-date`, `--end-date`, etc.)
+     - legacy run flag (`--run_type`)
+     - legacy docs path (`docs/pipelines/`)
      - invalid env var style (`BIOETL-...`)
      - invalid kebab-case Python snippets in fenced `python` blocks
 
@@ -106,6 +108,14 @@ DRIFT_RULES = (
     DriftRule(
         name="removed_run_flag",
         pattern=re.compile(r"--(?:input-filter|start-date|end-date|batch-size)\b"),
+    ),
+    DriftRule(
+        name="legacy_run_type_flag",
+        pattern=re.compile(r"--run_type\b"),
+    ),
+    DriftRule(
+        name="legacy_docs_pipelines_path",
+        pattern=re.compile(r"docs/pipelines/"),
     ),
     DriftRule(
         name="invalid_env_style",

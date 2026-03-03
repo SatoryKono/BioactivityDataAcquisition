@@ -69,7 +69,7 @@ PubMed API возвращает данные в XML формате. Трансф
 ### Entity ID
 
 ```python
-entity-id = f"pubmed:{pmid}"
+entity_id = f"pubmed:{pmid}"
 ```
 
 ---
