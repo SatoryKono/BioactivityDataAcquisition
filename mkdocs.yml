@@ -4,7 +4,7 @@ site_url: https://SatoryKono.github.io/BioactivityDataAcquisition2/
 repo_url: https://github.com/SatoryKono/BioactivityDataAcquisition2
 repo_name: SatoryKono/BioactivityDataAcquisition2
 edit_uri: "edit/main/docs/"
-site_dir: site
+site_dir: docs/site
 exclude_docs: |
     reports/README.md
     site/**

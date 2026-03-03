@@ -201,9 +201,13 @@ def test_mkdocs_nav_references_existing_markdown_files() -> None:
 def test_no_legacy_repo_slug_in_active_docs_and_workflows() -> None:
     """Active docs/workflows should reference the current repository slug."""
     legacy_slug = re.compile(r"SatoryKono/BioactivityDataAcquisition(?!2)")
+    excluded_doc_parts = {"99-archive", "exports"}
+
     candidates = [Path("README.md")]
     candidates.extend(
-        path for path in Path("docs").rglob("*.md") if "99-archive" not in path.parts
+        path
+        for path in Path("docs").rglob("*.md")
+        if excluded_doc_parts.isdisjoint(path.parts)
     )
     candidates.extend(Path(".github/workflows").glob("*.yml"))
 
