@@ -5,6 +5,12 @@ _Автогенерация: 2026-02-27_
 - Всего диаграмм: **270**
 - Формат карточки: название, описание, метаданные, ссылка на исходник.
 
+## Related Indexes
+
+- [Architecture/Class descriptions index](./mmd-diagrams/class-diagrams/INDEX.md)
+- [MMD diagram descriptions map](../mmd-diagrams/diagram-descriptions.md)
+- [Class diagrams with descriptions](../mmd-diagrams/class-diagrams-with-descriptions.md)
+
 - [mmd-diagrams/architecture/01-high-level-hexagonal.mmd](./mmd-diagrams/architecture/01-high-level-hexagonal.md)
 - [mmd-diagrams/architecture/01a-hexagonal-overview.mmd](./mmd-diagrams/architecture/01a-hexagonal-overview.md)
 - [mmd-diagrams/architecture/01b-hexagonal-domain-app.mmd](./mmd-diagrams/architecture/01b-hexagonal-domain-app.md)
