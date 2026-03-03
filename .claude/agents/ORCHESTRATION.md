@@ -4,7 +4,7 @@
 
 ## 1. Обзор
 
-Команда из **7 субагентов** обеспечивает полный жизненный цикл задачи разработки BioETL — от аудита текущего состояния до финальной верификации изменений. Основной агент (Claude Code) выступает оркестратором, делегируя работу субагентам через `Task` tool с параметром `subagent_type`.
+Команда из **8 субагентов** (7 core + 1 специализированный diagram агент) обеспечивает полный жизненный цикл задачи разработки BioETL — от аудита текущего состояния до финальной верификации изменений. Основной агент (Claude Code) выступает оркестратором, делегируя работу субагентам через `Task` tool с параметром `subagent_type`.
 
 **Запуск субагента:**
 ```
@@ -20,6 +20,7 @@ Task(subagent_type="py-audit-bot", prompt="...", model="opus")
 | V | **py-config-bot** | sonnet | Конфигурации (pipeline, DQ, filter, composite) | `04a-config-log.md` |
 | VI | **py-debug-bot** | opus | Отладка падений | `04-refactoring-log.md` (debug-секции) |
 | VII | **py-doc-bot** | sonnet | Документация, ADR management | `06-doc-update-log.md` |
+| VIII | **py-diagram-bot** | sonnet | Mermaid diagrams, render pipeline, docx/pdf bundles | `06-doc-update-log.md` (diagram sections) |
 
 ### Разделение ответственности (файловые зоны)
 
@@ -32,6 +33,7 @@ Task(subagent_type="py-audit-bot", prompt="...", model="opus")
 | py-debug-bot | `src/bioetl/`, `tests/` (fixes) | `configs/`, `docs/` |
 | py-audit-bot | — (read-only) | всё |
 | py-plan-bot | — (read-only) | всё |
+| py-diagram-bot | `docs/02-architecture/mmd-diagrams/`, `docs/02-architecture/diagram-descriptions/`, `scripts/diagrams/` | `src/bioetl/`, `configs/` |
 
 ### Определения субагентов
 
