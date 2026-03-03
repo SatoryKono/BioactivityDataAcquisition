@@ -58,15 +58,24 @@ def _load_allowed_root_files(repo_root: Path) -> frozenset[str]:
 
 
 def _get_tracked_paths(repo_root: Path) -> list[str]:
-    """Return all tracked paths from git index."""
+    """Return tracked paths from git index, excluding staged deletions."""
     completed = subprocess.run(  # nosec
         ["git", "-C", str(repo_root), "ls-files", "-z"],
         check=True,
         capture_output=True,
         text=False,
     )
+    staged_deleted = subprocess.run(  # nosec
+        ["git", "-C", str(repo_root), "diff", "--cached", "--name-only", "--diff-filter=D", "-z"],
+        check=True,
+        capture_output=True,
+        text=False,
+    )
     decoded = completed.stdout.decode("utf-8", errors="replace")
-    return [path for path in decoded.split("\0") if path]
+    deleted = {
+        path for path in staged_deleted.stdout.decode("utf-8", errors="replace").split("\0") if path
+    }
+    return [path for path in decoded.split("\0") if path and path not in deleted]
 
 
 def _collect_tracked_root_entries(paths: list[str]) -> tuple[set[str], set[str]]:
