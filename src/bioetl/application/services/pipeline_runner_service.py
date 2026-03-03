@@ -20,6 +20,7 @@ from bioetl.domain.context import (
     PipelineRunContext,
     VacuumConfig,
 )
+from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.types import RunID, RunType
 
 if TYPE_CHECKING:
@@ -29,6 +30,15 @@ if TYPE_CHECKING:
         RunnablePort,
         RunnerFactoryPort,
     )
+
+
+_PIPELINE_RUN_ERRORS = (
+    BioETLError,
+    OSError,
+    RuntimeError,
+    ValueError,
+    TypeError,
+)
 
 
 class PipelineRunResult(StrEnum):
@@ -431,7 +441,7 @@ class PipelineRunnerService:
         except PipelineShutdownError:
             status = PipelineRunResult.SHUTDOWN
             run_logger.warning("Pipeline was gracefully shut down")
-        except Exception as e:
+        except _PIPELINE_RUN_ERRORS as e:
             status = PipelineRunResult.FAILED
             error_message = str(e)
             error_type = type(e).__name__

@@ -14,6 +14,7 @@ from dataclasses import dataclass
 from types import TracebackType
 from typing import TYPE_CHECKING, Self
 
+from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.ports import (
     CheckpointPort,
     DataSourcePort,
@@ -36,6 +37,15 @@ if TYPE_CHECKING:
         MetadataWriterPort,
         SilverDQAnalyzerPort,
     )
+
+
+_OBSERVABILITY_CLOSE_ERRORS = (
+    BioETLError,
+    OSError,
+    RuntimeError,
+    ValueError,
+    TypeError,
+)
 
 
 @dataclass(frozen=True)
@@ -151,12 +161,12 @@ class PipelineServices:
         """Close metrics and tracing resources (sync, idempotent)."""
         try:
             self.metrics.close()
-        except Exception as e:
+        except _OBSERVABILITY_CLOSE_ERRORS as e:
             self.logger.warning("Error closing metrics", stage="cleanup", error=str(e))
 
         try:
             self.tracing.close()
-        except Exception as e:
+        except _OBSERVABILITY_CLOSE_ERRORS as e:
             self.logger.warning("Error closing tracing", stage="cleanup", error=str(e))
 
 

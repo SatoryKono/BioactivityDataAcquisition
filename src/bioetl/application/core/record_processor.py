@@ -17,6 +17,7 @@ from bioetl.application.core.batch_metrics import BatchMetricsRecorder
 from bioetl.application.core.batch_transformer import BatchTransformer, TransformResult
 from bioetl.application.core.batch_writer import BatchWriter
 from bioetl.application.core.quarantine_manager import QuarantineManager
+from bioetl.domain.exceptions import BioETLError
 
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
@@ -32,6 +33,15 @@ if TYPE_CHECKING:
     from bioetl.domain.error_classifier import ErrorClassifier
     from bioetl.domain.ports import GoldValidatorPort, TracingPort
     from bioetl.domain.types import BatchID
+
+
+_PROCESSING_SPAN_ERRORS = (
+    BioETLError,
+    OSError,
+    RuntimeError,
+    ValueError,
+    TypeError,
+)
 
 
 class RecordProcessor:
@@ -194,7 +204,7 @@ class RecordProcessor:
             result = await coro
             self._end_span(span)
             return result
-        except Exception as e:
+        except _PROCESSING_SPAN_ERRORS as e:
             self._end_span(span, e)
             if on_error:
                 on_error(e)
@@ -219,7 +229,7 @@ class RecordProcessor:
                 span.set_attribute("bioetl.quarantined_count", result.quarantined_count)
             self._end_span(span)
             return result
-        except Exception as e:
+        except _PROCESSING_SPAN_ERRORS as e:
             self._end_span(span, e)
             raise
 

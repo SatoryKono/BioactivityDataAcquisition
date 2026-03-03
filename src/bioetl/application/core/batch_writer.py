@@ -19,7 +19,7 @@ import orjson
 
 from bioetl.application.composite.column_orderer import ColumnOrderer
 from bioetl.domain.composite.config import DataSchemaConfig
-from bioetl.domain.exceptions import SchemaViolationError
+from bioetl.domain.exceptions import BioETLError, SchemaViolationError
 from bioetl.domain.locking import LockNotHeldError
 
 if TYPE_CHECKING:
@@ -34,6 +34,21 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BatchID
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
+
+
+_WRITE_SPAN_ERRORS = (
+    BioETLError,
+    OSError,
+    RuntimeError,
+    ValueError,
+    TypeError,
+)
+_SCHEMA_EXTRACTION_ERRORS = (
+    OSError,
+    RuntimeError,
+    ValueError,
+    TypeError,
+)
 
 
 class BatchWriter:
@@ -251,7 +266,7 @@ class BatchWriter:
             )
             self._end_span(span)
             return bronze_result
-        except Exception as e:
+        except _WRITE_SPAN_ERRORS as e:
             self._end_span(span, e)
             raise
 
@@ -331,7 +346,7 @@ class BatchWriter:
             )
             self._end_span(span)
             return silver_result
-        except Exception as e:
+        except _WRITE_SPAN_ERRORS as e:
             self._end_span(span, e)
             raise
 
@@ -409,7 +424,7 @@ class BatchWriter:
                 silver_refs=silver_refs,
             )
             self._end_span(span)
-        except Exception as e:
+        except _WRITE_SPAN_ERRORS as e:
             self._end_span(span, e)
             raise
 
@@ -428,7 +443,7 @@ class BatchWriter:
             try:
                 converted = schema.to_schema()
                 return set(converted.columns.keys())
-            except Exception:
+            except _SCHEMA_EXTRACTION_ERRORS:
                 # Catch all: to_schema() may fail for invalid/incomplete schema definitions.
                 # Fall through to next schema type check for graceful degradation.
                 pass
