@@ -2,7 +2,7 @@
 
 Provides loaders for hierarchical YAML configuration files.
 
-Re-exports from _base.py for backward compatibility:
+Re-exports for backward compatibility:
 - Settings: Main application settings (pydantic-settings)
 - get_settings: Get cached application settings
 - get_pipeline_config: Get pipeline config by name (domain object)
@@ -18,7 +18,7 @@ New components:
 
 from __future__ import annotations
 
-# Re-export everything from _base.py for backward compatibility
+# Re-export runtime settings/config mapping from _base.py.
 from bioetl.infrastructure.config._base import (
     ObservabilitySettings,
     PipelineSettings,
@@ -26,8 +26,6 @@ from bioetl.infrastructure.config._base import (
     SourceYamlConfig,
     get_pipeline_config,
     get_settings,
-    load_pipeline_config,
-    load_source_config,
     yaml_config_to_domain,
 )
 from bioetl.infrastructure.config.base_config_loader import BaseConfigLoader
@@ -37,6 +35,10 @@ from bioetl.infrastructure.config.contract_policy_loader import (
 from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
 from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
 from bioetl.infrastructure.config.pipeline_config_loader import PipelineConfigLoader
+from bioetl.infrastructure.config_load_api import (
+    load_pipeline_config,
+    load_source_config,
+)
 
 # Backward compatibility alias
 ConfigLoader = PipelineConfigLoader

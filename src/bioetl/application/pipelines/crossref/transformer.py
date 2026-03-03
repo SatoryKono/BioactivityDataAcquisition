@@ -36,6 +36,7 @@ from bioetl.domain.entities.crossref import CrossRefPublicationEntity
 from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
 from bioetl.domain.normalization import extract_first_string
 from bioetl.domain.services import IdentityService
+from bioetl.domain.types import GoldRecord
 from bioetl.domain.value_objects import DOI, PublicationYear
 
 if TYPE_CHECKING:
@@ -106,7 +107,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             contract_policy=contract_policy,
         )
 
-    def _extract_business_data(self, record: BronzeRecord) -> dict[str, Any]:
+    def _extract_business_data(self, record: BronzeRecord) -> GoldRecord:
         """Extract Publication business data from bronze record.
 
         Delegates field extraction to extractors module and normalization
@@ -364,9 +365,11 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         """
         return True
 
-        # Any: accepts any dataclass ...
+        # Any: generic domain entity; type varies by pipeline
 
-    def entity_to_silver_record(self, entity: Any) -> dict[str, Any]:
+    def entity_to_silver_record(
+        self, entity: Any
+    ) -> GoldRecord:  # Any: generic domain entity
         """Convert Domain Entity to SilverRecord, preserving base schema fields.
 
         Overrides base implementation to handle ISSN list conversion.

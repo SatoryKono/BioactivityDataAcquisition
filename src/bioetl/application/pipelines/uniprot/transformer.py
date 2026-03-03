@@ -27,6 +27,7 @@ from bioetl.application.pipelines.uniprot.extractors import (
 )
 from bioetl.domain.entities import UniprotTarget
 from bioetl.domain.services import IdentityService
+from bioetl.domain.types import GoldRecord
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -157,9 +158,9 @@ class UniProtProteinTransformer(BaseTransformer):
 
     def _build_business_data(
         self, record: BronzeRecord, accession: str, entry_name: str
-    ) -> dict[str, Any]:
+    ) -> GoldRecord:
         """Build the business data dictionary from record."""
-        data: dict[str, Any] = {"accession": accession, "entry_name": entry_name}
+        data: GoldRecord = {"accession": accession, "entry_name": entry_name}
 
         self._add_core_identifiers(record, data)
         self._add_protein_names(record, data)
@@ -183,14 +184,14 @@ class UniProtProteinTransformer(BaseTransformer):
 
         return data
 
-    def _add_core_identifiers(self, record: BronzeRecord, data: dict[str, Any]) -> None:
+    def _add_core_identifiers(self, record: BronzeRecord, data: GoldRecord) -> None:
         """Add core identifier fields."""
         data["entry_type"] = record.get("entryType")
         data["secondary_accessions"] = ExtractorUtils.serialize_list(
             record.get("secondaryAccessions")
         )
 
-    def _add_protein_names(self, record: BronzeRecord, data: dict[str, Any]) -> None:
+    def _add_protein_names(self, record: BronzeRecord, data: GoldRecord) -> None:
         """Add protein name fields."""
         protein_desc = record.get("proteinDescription", {})
         recommended_name = (
@@ -209,7 +210,7 @@ class UniProtProteinTransformer(BaseTransformer):
         data["protein_ec_numbers"] = ExtractorUtils.extract_ec_numbers(recommended_name)
         data["flag"] = self._extract_by_path(record, self._PROTEIN_DESC_FLAG_PATH)
 
-    def _add_gene_data(self, record: BronzeRecord, data: dict[str, Any]) -> None:
+    def _add_gene_data(self, record: BronzeRecord, data: GoldRecord) -> None:
         """Add gene-related fields."""
         genes = record.get("genes")
         data["gene_names"] = self.serialize_json_list(
@@ -219,7 +220,7 @@ class UniProtProteinTransformer(BaseTransformer):
         data["gene_synonyms"] = GeneExtractor.extract_gene_synonyms(genes)
         data["gene_orf_names"] = GeneExtractor.extract_gene_orf_names(genes)
 
-    def _add_organism_data(self, record: BronzeRecord, data: dict[str, Any]) -> None:
+    def _add_organism_data(self, record: BronzeRecord, data: GoldRecord) -> None:
         """Add organism and taxonomy fields."""
         data["organism_scientific"] = self._extract_by_path(
             record, self._ORGANISM_SCIENTIFIC_PATH
@@ -234,7 +235,7 @@ class UniProtProteinTransformer(BaseTransformer):
             self._extract_by_path(record, self._ORGANISM_LINEAGE_PATH)
         )
 
-    def _add_evidence_data(self, record: BronzeRecord, data: dict[str, Any]) -> None:
+    def _add_evidence_data(self, record: BronzeRecord, data: GoldRecord) -> None:
         """Add evidence and quality fields."""
         data["protein_existence"] = ExtractorUtils.extract_protein_existence(
             record.get("proteinExistence")
@@ -242,7 +243,7 @@ class UniProtProteinTransformer(BaseTransformer):
         data["annotation_score"] = record.get("annotationScore")
         data["reviewed"] = ExtractorUtils.is_reviewed(record.get("entryType"))
 
-    def _add_sequence_data(self, record: BronzeRecord, data: dict[str, Any]) -> None:
+    def _add_sequence_data(self, record: BronzeRecord, data: GoldRecord) -> None:
         """Add sequence fields."""
         data["sequence"] = self._extract_by_path(record, self._SEQUENCE_VALUE_PATH)
         data["sequence_length"] = self._extract_by_path(
@@ -261,7 +262,7 @@ class UniProtProteinTransformer(BaseTransformer):
             seq_modified_date.isoformat() if seq_modified_date else None
         )
 
-    def _add_audit_data(self, record: BronzeRecord, data: dict[str, Any]) -> None:
+    def _add_audit_data(self, record: BronzeRecord, data: GoldRecord) -> None:
         """Add entry audit metadata fields.
 
         Extracts entry creation/modification dates and version from entryAudit object.
@@ -283,7 +284,7 @@ class UniProtProteinTransformer(BaseTransformer):
         data["entry_modified"] = modified_date.isoformat() if modified_date else None
 
     def _add_functional_annotations(
-        self, record: BronzeRecord, data: dict[str, Any]
+        self, record: BronzeRecord, data: GoldRecord
     ) -> None:
         """Add functional annotation fields."""
         comments = record.get("comments")
@@ -322,7 +323,7 @@ class UniProtProteinTransformer(BaseTransformer):
         )
         data["induction"] = CommentExtractor.extract_induction(comments)
 
-    def _add_cross_references(self, record: BronzeRecord, data: dict[str, Any]) -> None:
+    def _add_cross_references(self, record: BronzeRecord, data: GoldRecord) -> None:
         """Add cross-reference fields."""
         xrefs = record.get("uniProtKBCrossReferences")
         data["go_terms"] = CrossRefExtractor.extract_go_terms(xrefs)
@@ -338,7 +339,7 @@ class UniProtProteinTransformer(BaseTransformer):
         data["reactome_xrefs"] = CrossRefExtractor.extract_reactome_xrefs(xrefs)
 
     def _add_features_and_keywords(
-        self, record: BronzeRecord, data: dict[str, Any]
+        self, record: BronzeRecord, data: GoldRecord
     ) -> None:
         """Add feature and keyword fields."""
         features = record.get("features")
@@ -351,7 +352,7 @@ class UniProtProteinTransformer(BaseTransformer):
         # Keywords
         data["keywords"] = FeatureExtractor.extract_keywords(record.get("keywords"))
 
-    def _add_counts(self, record: BronzeRecord, data: dict[str, Any]) -> None:
+    def _add_counts(self, record: BronzeRecord, data: GoldRecord) -> None:
         """Add count fields."""
         xrefs = record.get("uniProtKBCrossReferences")
         comments = record.get("comments")
@@ -360,9 +361,7 @@ class UniProtProteinTransformer(BaseTransformer):
         data["keyword_count"] = ExtractorUtils.count_list(record.get("keywords"))
         data["isoform_count"] = CommentExtractor.count_isoforms(comments)
 
-    def _add_taxonomy_components(
-        self, record: BronzeRecord, data: dict[str, Any]
-    ) -> None:
+    def _add_taxonomy_components(self, record: BronzeRecord, data: GoldRecord) -> None:
         """Add parsed taxonomy lineage components."""
         lineage = self._extract_by_path(record, self._ORGANISM_LINEAGE_PATH)
         taxonomy = TaxonomyExtractor.extract_all(lineage)
@@ -370,13 +369,13 @@ class UniProtProteinTransformer(BaseTransformer):
         data["phylum"] = taxonomy["phylum"]
         data["genus"] = taxonomy["genus"]
 
-    def _add_go_components(self, record: BronzeRecord, data: dict[str, Any]) -> None:
+    def _add_go_components(self, record: BronzeRecord, data: GoldRecord) -> None:
         """Add GO terms separated by aspect."""
         xrefs = record.get("uniProtKBCrossReferences")
         data["molecular_function"] = CrossRefExtractor.extract_molecular_function(xrefs)
         data["cellular_component"] = CrossRefExtractor.extract_cellular_component(xrefs)
 
-    def _add_ptm_features(self, record: BronzeRecord, data: dict[str, Any]) -> None:
+    def _add_ptm_features(self, record: BronzeRecord, data: GoldRecord) -> None:
         """Add PTM and structural features."""
         features = record.get("features")
         data["topology"] = FeatureExtractor.extract_topology(features)
@@ -392,7 +391,7 @@ class UniProtProteinTransformer(BaseTransformer):
         data["acetylation"] = FeatureExtractor.extract_acetylation(features)
         data["ubiquitination"] = FeatureExtractor.extract_ubiquitination(features)
 
-    def _add_isoform_details(self, record: BronzeRecord, data: dict[str, Any]) -> None:
+    def _add_isoform_details(self, record: BronzeRecord, data: GoldRecord) -> None:
         """Add detailed isoform information."""
         comments = record.get("comments")
         isoform_data = CommentExtractor.extract_isoform_details(comments)
@@ -400,7 +399,7 @@ class UniProtProteinTransformer(BaseTransformer):
         data["isoform_ids"] = isoform_data["isoform_ids"]
         data["isoform_synonyms"] = isoform_data["isoform_synonyms"]
 
-    def _add_reaction_data(self, record: BronzeRecord, data: dict[str, Any]) -> None:
+    def _add_reaction_data(self, record: BronzeRecord, data: GoldRecord) -> None:
         """Add reaction information from catalytic activity."""
         comments = record.get("comments")
         data["reactions"] = CommentExtractor.extract_reactions(comments)

@@ -29,6 +29,7 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
 from bioetl.domain.entities import ChemblPublication
 from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
 from bioetl.domain.services import IdentityService
+from bioetl.domain.types import BronzeRecord, GoldRecord
 from bioetl.domain.value_objects import DOI, PublicationYear
 
 if TYPE_CHECKING:
@@ -40,7 +41,7 @@ if TYPE_CHECKING:
         PiiHasherPort,
         TracingPort,
     )
-    from bioetl.domain.types import BronzeRecord, PrimaryId, SilverRecord
+    from bioetl.domain.types import PrimaryId, SilverRecord
 
 
 # Declarative field groups for ChemblPublication entity
@@ -198,7 +199,7 @@ class PublicationTransformer(BaseChemblTransformer):
         self,
         record: BronzeRecord,
         primary_id: PrimaryId,
-    ) -> dict[str, Any]:
+    ) -> GoldRecord:
         """Extract ChemblPublication business data from bronze record.
 
         Args:
@@ -291,9 +292,11 @@ class PublicationTransformer(BaseChemblTransformer):
 
         return data
 
-        # Any: accepts any dataclass ...
+        # Any: generic domain entity; type varies by pipeline
 
-    def entity_to_silver_record(self, entity: Any) -> dict[str, Any]:
+    def entity_to_silver_record(
+        self, entity: Any
+    ) -> GoldRecord:  # Any: generic domain entity
         """Convert Domain Entity to SilverRecord.
 
         ChEMBL-specific fields are set to None in _extract_business_data() for

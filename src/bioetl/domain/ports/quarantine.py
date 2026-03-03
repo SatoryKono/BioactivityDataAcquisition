@@ -10,7 +10,13 @@ from collections.abc import Iterator
 from datetime import datetime
 from typing import Any, Protocol, runtime_checkable
 
-from bioetl.domain.types import BatchID, QuarantineRecordStatus, RunID
+from bioetl.domain.types import (
+    BatchID,
+    BronzeRecord,
+    MetaDict,
+    QuarantineRecordStatus,
+    RunID,
+)
 
 
 @runtime_checkable
@@ -25,10 +31,10 @@ class QuarantinePort(Protocol):
         self,
         pipeline: str,
         error_code: str,
-        payload: dict[str, Any],
+        payload: BronzeRecord,
         bronze_batch_id: BatchID,
         run_id: RunID | None = None,
-        metadata: dict[str, Any] | None = None,
+        metadata: MetaDict | None = None,
         *,
         ingestion_ts: datetime,
     ) -> None:
@@ -51,7 +57,7 @@ class QuarantinePort(Protocol):
         pipeline: str,
         limit: int = 10,
         error_code: str | None = None,
-    ) -> list[dict[str, Any]]:
+    ) -> list[BronzeRecord]:
         """Inspect records in quarantine.
 
         Args:
@@ -64,7 +70,7 @@ class QuarantinePort(Protocol):
         """
         ...
 
-    async def get_stats(self, pipeline: str) -> dict[str, Any]:
+    async def get_stats(self, pipeline: str) -> MetaDict:
         """Get statistics about the quarantined records for a pipeline.
 
         Args:
@@ -82,7 +88,7 @@ class QuarantinePort(Protocol):
         max_age_days: int = 7,
         *,
         now: datetime,
-    ) -> Iterator[dict[str, Any]]:
+    ) -> Iterator[BronzeRecord]:
         """Replay quarantine records for reprocessing.
 
         Retrieves quarantined records that match the filter criteria

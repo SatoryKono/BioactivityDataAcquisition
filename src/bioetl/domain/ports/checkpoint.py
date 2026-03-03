@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Any, Protocol, runtime_checkable
 
-from bioetl.domain.types import RunID
+from bioetl.domain.types import MetaDict, RunID
 
 
 @runtime_checkable
@@ -23,7 +23,7 @@ class CheckpointPort(Protocol):
         self,
         pipeline: str,
         run_id: RunID,
-        metadata: dict[str, Any],
+        metadata: MetaDict,
     ) -> None:
         """Save a checkpoint.
 
@@ -37,7 +37,7 @@ class CheckpointPort(Protocol):
     async def load(
         self,
         pipeline: str,
-    ) -> tuple[RunID, dict[str, Any]] | None:
+    ) -> tuple[RunID, MetaDict] | None:
         """Load a checkpoint.
 
         Args:

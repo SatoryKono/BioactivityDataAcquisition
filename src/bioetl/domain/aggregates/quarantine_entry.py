@@ -25,7 +25,7 @@ from bioetl.domain.exceptions import InvalidStateError
 
 if TYPE_CHECKING:
     from bioetl.domain.aggregates.events import DomainEvent
-from bioetl.domain.types import BatchID, ContentHash, RunID
+from bioetl.domain.types import BatchID, BronzeRecord, ContentHash, MetaDict, RunID
 
 
 class QuarantineStatus(StrEnum):
@@ -98,7 +98,7 @@ def _validate_quarantine_required_fields(
     entry_id: str,
     pipeline_name: str,
     error_code: str,
-    payload: dict[str, Any],
+    payload: BronzeRecord,
     payload_hash: ContentHash,
 ) -> None:
     """Validate required quarantine entry fields (extracted for lower CC)."""
@@ -156,12 +156,12 @@ class QuarantineEntry:
         entry_id: str,
         pipeline_name: str,
         error_code: str,
-        payload: dict[str, Any],
+        payload: BronzeRecord,
         payload_hash: ContentHash,
         run_id: RunID,
         batch_id: BatchID,
         created_at: datetime | None = None,
-        metadata: dict[str, Any] | None = None,
+        metadata: MetaDict | None = None,
     ) -> None:
         """Initialize a quarantine entry.
 
@@ -192,7 +192,7 @@ class QuarantineEntry:
         self._batch_id = batch_id
         self._status = QuarantineStatus.NEW
         self._created_at = created_at or datetime.now(UTC)
-        self._metadata = dict(metadata) if metadata else {}
+        self._metadata: MetaDict = dict(metadata) if metadata else {}
         self._resolution_info: ResolutionInfo | None = None
         self._events: list[DomainEvent] = []
 
@@ -201,10 +201,10 @@ class QuarantineEntry:
         cls,
         pipeline_name: str,
         error_code: str,
-        payload: dict[str, Any],
+        payload: BronzeRecord,
         run_id: RunID,
         batch_id: BatchID,
-        metadata: dict[str, Any] | None = None,
+        metadata: MetaDict | None = None,
     ) -> QuarantineEntry:
         """Factory method to create a new quarantine entry.
 
@@ -282,7 +282,7 @@ class QuarantineEntry:
         return self._error_code
 
     @property
-    def payload(self) -> dict[str, Any]:
+    def payload(self) -> BronzeRecord:
         """Copy of the failed record payload (immutable access)."""
         return dict(self._payload)
 
@@ -312,7 +312,7 @@ class QuarantineEntry:
         return self._created_at
 
     @property
-    def metadata(self) -> dict[str, Any]:
+    def metadata(self) -> MetaDict:
         """Copy of additional error context."""
         return dict(self._metadata)
 

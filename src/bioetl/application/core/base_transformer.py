@@ -32,7 +32,7 @@ from bioetl.domain.ports import (
     TracingPort,
 )
 from bioetl.domain.services import DataNormalizationService, IdentityService
-from bioetl.domain.types import ContentHash, EntityID
+from bioetl.domain.types import ContentHash, EntityID, GoldRecord
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -163,7 +163,7 @@ class BaseTransformer(ABC):
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
-        contract_policy: Any = None,  # Any: PipelineContractPolicy from composition
+        contract_policy: Any = None,  # Any: PipelineContractPolicy (avoids composition import)
     ) -> None:
         """Initialize transformer with provider name and observability.
 
@@ -459,8 +459,8 @@ class BaseTransformer(ABC):
         """
         ...
 
-    def should_write_silver(  # Any: record dict has varied values
-        self, _context: PipelineContext, record: dict[str, Any]
+    def should_write_silver(
+        self, _context: PipelineContext, record: GoldRecord
     ) -> bool:
         """Determine if a transformed record should be written to Silver.
 
@@ -479,9 +479,7 @@ class BaseTransformer(ABC):
             return True
         return self._silver_filters.should_include(record)
 
-    def should_write_gold(  # Any: record dict has varied values
-        self, _context: PipelineContext, record: dict[str, Any]
-    ) -> bool:
+    def should_write_gold(self, _context: PipelineContext, record: GoldRecord) -> bool:
         """Determine if a Silver record should be written to Gold.
 
         Uses gold_filters from config if configured, otherwise passes all records.
@@ -499,9 +497,9 @@ class BaseTransformer(ABC):
             return True
         return self._gold_filters.should_include(record)
 
-    def transform_for_gold(  # Any: record dicts have varied values
-        self, _context: PipelineContext, silver_record: dict[str, Any]
-    ) -> dict[str, Any]:  # Any: varied values
+    def transform_for_gold(
+        self, _context: PipelineContext, silver_record: GoldRecord
+    ) -> GoldRecord:
         """Transform Silver record for Gold layer.
 
         Removes JSON string fields that are retained only in Silver for forensic purposes.
@@ -521,7 +519,7 @@ class BaseTransformer(ABC):
 
     def compute_content_hash(
         self,
-        business_data: dict[str, Any],  # Any: varied values
+        business_data: GoldRecord,
         *,
         exclude_none: bool = True,
     ) -> ContentHash:
@@ -551,7 +549,7 @@ class BaseTransformer(ABC):
     def compute_entity_id(
         self,
         source_id: str | None,
-        record: dict[str, Any],  # Any: varied values
+        record: GoldRecord,
     ) -> EntityID:
         """Generate stable entity identifier.
 
@@ -598,7 +596,7 @@ class BaseTransformer(ABC):
             return BaseTransformer._serialize_list(value)
 
         # Non-collection types (str, int, float, bool): return as-is
-        return value
+        return value  # type: ignore[no-any-return]
 
     @staticmethod
     def _serialize_dict(d: dict[str, Any]) -> str | None:  # Any: JSON values
@@ -618,7 +616,7 @@ class BaseTransformer(ABC):
                     if not item
                     else orjson.dumps(item, option=orjson.OPT_SORT_KEYS).decode("utf-8")
                 )
-            return item
+            return item  # type: ignore[no-any-return]
         return orjson.dumps(lst, option=orjson.OPT_SORT_KEYS).decode("utf-8")
 
     @staticmethod
@@ -652,7 +650,7 @@ class BaseTransformer(ABC):
     @classmethod
     def serialize_json_fields(
         cls,
-        record: dict[str, Any],  # Any: varied values
+        record: GoldRecord,
         field_names: Sequence[str],
     ) -> dict[str, str | int | float | bool | None]:
         """Serialize multiple JSON fields at once.
@@ -678,8 +676,9 @@ class BaseTransformer(ABC):
         return {name: cls.serialize_json(record.get(name)) for name in field_names}
 
     def entity_to_silver_record(
-        self, entity: Any
-    ) -> dict[str, Any]:  # Any: generic entity
+        self,
+        entity: Any,  # Any: generic domain entity; type varies by pipeline
+    ) -> GoldRecord:
         """Convert Domain Entity to SilverRecord format using policy rename map.
 
         Args:
@@ -700,7 +699,7 @@ class BaseTransformer(ABC):
 
         return silver_record
 
-    def _apply_hash_policy(self, business_data: dict[str, Any]) -> dict[str, Any]:
+    def _apply_hash_policy(self, business_data: GoldRecord) -> GoldRecord:
         """Apply include/exclude hash policy from contract config."""
         include_fields = self._contract_policy.hash_include
         exclude_fields = set(self._contract_policy.hash_exclude)

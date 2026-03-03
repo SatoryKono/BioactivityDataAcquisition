@@ -18,9 +18,13 @@ from typing import TYPE_CHECKING, Any, Literal, Protocol, runtime_checkable
 from bioetl.domain.types import (
     ArrowSchema,
     BatchID,
+    BronzeRecord,
+    GoldRecord,
     HealthStatus,
+    MetaDict,
     RunID,
     RunType,
+    ScdConfig,
 )
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
@@ -82,7 +86,9 @@ class StoragePort(Protocol):
     async def write_silver(
         self,
         table_name: str,
-        records: list[dict[str, Any]],
+        records: list[
+            BronzeRecord
+        ],  # BronzeRecord: normalized records before Silver write
         primary_keys: list[str],
         schema: ArrowSchema,
         mode: Literal["merge", "append", "delete"] = "merge",
@@ -126,12 +132,12 @@ class StoragePort(Protocol):
     async def write_gold(
         self,
         table_name: str,
-        records: list[dict[str, Any]],
+        records: list[GoldRecord],
         schema: Any,  # Any: Pandera DataFrameModel which has no common base type
         primary_keys: list[str] | None = None,
         mode: Literal["overwrite", "append", "scd2"] = "overwrite",
         *,
-        scd_config: dict[str, Any] | None = None,
+        scd_config: ScdConfig | None = None,
         column_order: list[str] | None = None,
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
@@ -177,7 +183,9 @@ class StoragePort(Protocol):
         self,
         table_name: str,
         columns: list[str] | None = None,
-    ) -> list[dict[str, Any]]:
+    ) -> list[
+        BronzeRecord
+    ]:  # BronzeRecord: read-back Silver records share the same shape
         """Read records from a Silver layer Delta table.
 
         Args:
@@ -195,7 +203,7 @@ class StoragePort(Protocol):
     async def write_silver_merged(
         self,
         table_name: str,
-        records: list[dict[str, Any]],
+        records: list[BronzeRecord],  # BronzeRecord: merged Silver records
         primary_keys: list[str] | None = None,
         *,
         run_id: str | None = None,
@@ -226,7 +234,7 @@ class StoragePort(Protocol):
     async def write_gold_merged(
         self,
         table_name: str,
-        records: list[dict[str, Any]],
+        records: list[GoldRecord],
         primary_keys: list[str] | None = None,
         *,
         run_id: str | None = None,
@@ -386,7 +394,7 @@ class StoragePort(Protocol):
         self,
         silver_table: str,
         gold_table: str | None = None,
-    ) -> dict[str, Any]:
+    ) -> MetaDict:
         """Preview what would be cleared without actual deletion.
 
         Returns:

@@ -27,7 +27,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.models.metadata import SourceMetadata
-from bioetl.domain.types import HealthStatus
+from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.semanticscholar.constants import (
     SEMANTICSCHOLAR_BASE_URL,
@@ -123,7 +123,7 @@ class SemanticScholarAdapter(BaseHttpAdapter):
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
         offset: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch publications via search (for incremental sync).
 
         Note: For batch DOI resolution use fetch_filtered().
@@ -161,7 +161,7 @@ class SemanticScholarAdapter(BaseHttpAdapter):
         fetched = 0
 
         while True:
-            params: dict[str, Any] = {
+            params: dict[str, Any] = {  # Any: HTTP query params (str|int|bool values)
                 "query": query or "*",
                 "fields": self.fields,
                 "offset": offset,
@@ -204,7 +204,7 @@ class SemanticScholarAdapter(BaseHttpAdapter):
         filter_ids: list[str],
         filter_field: str,
         limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Batch DOI resolution via Semantic Scholar POST /paper/batch.
 
         Args:
@@ -246,7 +246,7 @@ class SemanticScholarAdapter(BaseHttpAdapter):
         resolved_dois: set[str],
         limit: int | None,
         start_count: int,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Phase 1: Batch DOI lookup via POST /paper/batch.
 
         Args:
@@ -282,7 +282,7 @@ class SemanticScholarAdapter(BaseHttpAdapter):
         filter_field: str,
         fallback_mapping: dict[str, str],
         limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch with fallback to title search when DOI not found.
 
         Strategy (three-phase fallback):
@@ -346,7 +346,7 @@ class SemanticScholarAdapter(BaseHttpAdapter):
         entity_type: str,
         filters: dict[str, list[str]],
         limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Multi-field filtering - not implemented for Semantic Scholar.
 
         Use fetch_filtered() for DOI-based filtering.
@@ -375,7 +375,7 @@ class SemanticScholarAdapter(BaseHttpAdapter):
     async def _fetch_by_dois(
         self,
         dois: list[str],
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch publications by batch of DOIs.
 
         Uses POST /paper/batch with `ids: ["DOI:..."]`.
@@ -400,7 +400,7 @@ class SemanticScholarAdapter(BaseHttpAdapter):
     async def _fetch_batch_with_nulls(
         self,
         dois: list[str],
-    ) -> list[dict[str, Any] | None]:
+    ) -> list[BronzeRecord | None]:
         """Fetch batch preserving null positions for not-found tracking.
 
         Returns list of same length as input, with None for not-found DOIs.
@@ -423,7 +423,7 @@ class SemanticScholarAdapter(BaseHttpAdapter):
     async def _fetch_batch_raw(
         self,
         paper_ids: list[str],
-    ) -> list[dict[str, Any] | None]:
+    ) -> list[BronzeRecord | None]:
         """Execute batch request and return raw response array.
 
         Semantic Scholar returns array in same order as input,
@@ -459,7 +459,7 @@ class SemanticScholarAdapter(BaseHttpAdapter):
             self._request_collector.record_from_response(response, duration_ms)
 
         # Response is JSON array
-        result: list[dict[str, Any] | None] = response.json()
+        result: list[BronzeRecord | None] = response.json()  # Any: untyped Semantic Scholar API JSON response
         return result
 
     @staticmethod

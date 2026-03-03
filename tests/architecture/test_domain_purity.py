@@ -20,6 +20,8 @@ from pathlib import Path
 
 import pytest
 
+from bioetl.infrastructure.quality import get_registry_values
+
 
 class TestDomainImmutability:
     """Tests ensuring domain value objects are properly immutable."""
@@ -233,62 +235,7 @@ class TestDomainComplexity:
         if not domain_path.exists():
             pytest.skip("Domain layer not found")
 
-        # Exemptions for specific functions (baseline)
-        exemptions = {
-            "__post_init__": 12,  # Dataclass post-init validation with complex context
-            "__init__": 10,  # Constructor with validation logic
-            "TableConfig": 8,  # Dataclass with write mode enum conversion in __post_init__
-            "SchemaEvolutionError": 7,  # Exception with detailed field tracking
-            "_validate_config": 8,  # PipelineConfig validation logic
-            # Domain value object validation
-            "complete": 7,  # PipelineRun state transition with validation
-            "_validate": 8,  # Value object validation with multiple checks
-            "_validate_enabled_fields": 8,  # CC=7 - InputFilterConfig validation with multiple modes
-            "_validate_unique_enrichers": 7,  # CC=6 - CompositeConfig enricher uniqueness validation
-            "PubMedId": 9,  # Value object with multiple format validation
-            "PubChemCid": 9,  # Value object with multiple format validation
-            # Domain services (activity aggregation, normalization)
-            "ActivityAggregator": 8,  # Activity aggregation class init with multiple strategies
-            "aggregate_values": 10,  # Multi-strategy aggregation logic
-            "aggregate_with_uncertainty": 10,  # Uncertainty calculation with bounds
-            "filter_and_aggregate": 8,  # Combined filtering and aggregation
-            "_normalize_value": 13,  # Value normalization with type handling
-            "PChemblRangeConfig": 7,  # Config validation with range checks
-            "normalize_multiple": 10,  # Multi-value normalization
-            "validate_concentration": 7,  # Concentration validation with unit checks
-            "validate_pchembl": 7,  # pChEMBL validation with range checks
-            "validate_activity_value": 10,  # Activity value validation
-            # DQ metrics calculator (moved from application to domain)
-            "DQMetricsCalculator": 7,  # CC=6 - DQ metrics calculator with drift detection
-            "_detect_schema_drift": 10,  # CC=9 - Schema drift detection with severity levels
-            # Value coercion with type handling
-            "_coerce_to_int": 10,  # CC=8 - Integer coercion with multiple type checks
-            # DQ serializer domain functions
-            "_dataclass_to_dict": 13,  # CC=12 - Recursive dataclass conversion
-            "_dict_to_yaml": 7,  # CC=6 - YAML dictionary serialization
-            "_yaml_value": 8,  # CC=7 - YAML value formatting
-            "_render_check_details": 9,  # CC=8 - DQ check details rendering
-            "_serialize_value": 11,  # CC=10 - Value serialization with multiple type checks
-            # Composite pipeline domain models (ADR-026)
-            "DQOverrideConfig": 10,  # CC=9 - DQ override validation with threshold checks
-            "from_dict": 8,  # CC=6 - Dictionary parsing with type conversions
-            # Domain config immutability enforcement
-            "_ensure_immutability": 7,  # CC=6 - Config immutability with nested type checks
-            # Domain DataSchemaConfig/LayerColumnConfig validation
-            "LayerColumnConfig": 10,  # CC=8 - LayerColumnConfig __post_init__ with mutual exclusivity + type coercion
-            # Publication type classification (domain taxonomy mapping)
-            "classify_publication_type": 10,  # CC=9 - Publication type classification with multi-level taxonomy lookup
-            # Page range abbreviation expansion (normalization)
-            "_expand_abbreviated_page": 7,  # CC=6 - Page range expansion with digit extraction and rollover
-            # Cross-validation domain models (ADR-026)
-            "FieldComparisonSpec": 8,  # CC=7 - Field comparison spec __post_init__ with type validation
-            # Author/affiliation normalization helpers (type-checking branches)
-            "normalize_affiliations": 7,  # CC=6 - Affiliation normalization with walrus + None filtering
-            "_extract_name_from_item": 7,  # CC=6 - Name extraction from str or dict
-            "_extract_single_affiliation": 8,  # CC=7 - Affiliation extraction with multi-key probe
-            "collect_affiliations_from_authors": 9,  # CC=8 - Author affiliation collection with type checks
-            "_extract_schema_columns": 8,  # CC=7 - Schema metadata extraction with defensive field handling
-        }
+        exemptions = get_registry_values("domain_complexity")
 
         violations = []
         max_cc = 5  # Strict threshold for domain layer

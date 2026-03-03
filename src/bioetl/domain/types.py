@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, Any, NewType, TypeAlias, TypedDict
 from uuid import UUID
 
 if TYPE_CHECKING:
+    import pandera as _pa
     import pyarrow
 
 # Type aliases for semantic clarity
@@ -34,8 +35,24 @@ BatchID = NewType("BatchID", UUID)
 ArrowSchema: TypeAlias = "pyarrow.Schema"
 """PyArrow schema type alias (runtime: pyarrow.Schema, import-time: string)."""
 
-BronzeRecord: TypeAlias = dict[str, Any]
+BronzeRecord: TypeAlias = dict[str, Any]  # Any: raw API JSON has heterogeneous values
 """Untyped dictionary representing a raw record from the source."""
+
+GoldRecord: TypeAlias = dict[
+    str, Any
+]  # Any: heterogeneous scalar types before Pandera coercion
+"""Record after Silver→Gold transform, before schema validation."""
+
+MetaDict: TypeAlias = dict[
+    str, Any
+]  # Any: freeform metadata (str|int|float|datetime|None)
+"""Freeform metadata bag used in aggregates, audit entries, events."""
+
+ScdConfig: TypeAlias = dict[str, str]
+"""SCD2 configuration mapping (column-role → column-name). Values are always str."""
+
+GoldSchemaType: TypeAlias = "type[_pa.DataFrameModel]"
+"""Pandera DataFrameModel class (not instance). TYPE_CHECKING-only at import time."""
 
 PrimaryId: TypeAlias = str | int
 """Primary identifier extracted from a Bronze record (e.g., ChEMBL ID string or numeric ID)."""

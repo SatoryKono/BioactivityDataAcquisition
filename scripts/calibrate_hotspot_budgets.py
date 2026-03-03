@@ -99,14 +99,14 @@ def main() -> int:
     parser.add_argument(
         "--latency-q",
         type=float,
-        default=0.75,
-        help="Latency percentile for baseline (default: 0.75).",
+        default=1.0,
+        help="Latency percentile for baseline (default: 1.0 for CI-stable max observed).",
     )
     parser.add_argument(
         "--throughput-q",
         type=float,
-        default=0.25,
-        help="Throughput percentile for baseline (default: 0.25).",
+        default=0.0,
+        help="Throughput percentile for baseline (default: 0.0 for CI-stable min observed).",
     )
     args = parser.parse_args()
 

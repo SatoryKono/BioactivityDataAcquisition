@@ -23,6 +23,7 @@ import pyarrow as pa
 from deltalake import DeltaTable
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
+from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.storage.retention_manager import RetentionManager
 
 if TYPE_CHECKING:
@@ -31,8 +32,10 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
-# Any: arbitrary Python value...
-def _serialize_value(value: Any, is_string_field: bool) -> Any:
+# Any: arbitrary Python value from heterogeneous record fields; returns same or JSON string
+def _serialize_value(
+    value: Any, is_string_field: bool
+) -> Any:  # Any: input/output type varies
     """Serialize a value for Arrow storage.
 
     Converts complex Python types (dict, list) to JSON strings for string fields.
@@ -194,7 +197,7 @@ class BaseDeltaWriter:
 
     def _prepare_arrow_data(
         self,
-        records: list[dict[str, Any]],
+        records: list[BronzeRecord],
         schema: pa.Schema,
         primary_keys: list[str],
     ) -> pa.Table:
@@ -311,7 +314,7 @@ class BaseDeltaWriter:
         self,
         table_name: str,
         columns: list[str] | None = None,
-    ) -> list[dict[str, Any]]:
+    ) -> list[BronzeRecord]:  # BronzeRecord: generic record dict from Delta table
         """Read records from a Delta table.
 
         Args:
@@ -336,9 +339,9 @@ class BaseDeltaWriter:
             raise FileNotFoundError(f"Table not found: {table_name}") from e
 
         # Read as PyArrow and convert to list of dicts
-        def _read_table() -> list[dict[str, Any]]:
+        def _read_table() -> list[BronzeRecord]:
             arrow_table = dt.to_pyarrow_table(columns=columns)
-            result: list[dict[str, Any]] = arrow_table.to_pylist()
+            result: list[BronzeRecord] = arrow_table.to_pylist()
             return result
 
         return await loop.run_in_executor(None, _read_table)

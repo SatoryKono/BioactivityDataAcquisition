@@ -288,102 +288,12 @@ module = [
 ]
 ignore_missing_imports = true
 
-# Allow untyped decorators for click CLI, pydantic validators, and pandera checks
-# Click decorators don't have full type stubs, causing untyped-decorator errors
-# Pandera @pa.check decorators also lack proper typing
+# Pandera @register_check_method decorator lacks type stubs
 [[tool.mypy.overrides]]
 module = [
-    "bioetl.interfaces.cli",
-    "bioetl.interfaces.cli.*",
-    "bioetl.interfaces.cli.commands.*",
-    "bioetl.infrastructure.schemas.pipeline_config",
-    "bioetl.infrastructure.schemas.common_config",
-    # Pandera DataFrameModel schemas with @pa.check decorators
-    "bioetl.domain.schemas.uniprot.*",
-    "bioetl.domain.schemas.pubmed.article",
-    "bioetl.domain.schemas.pubmed.publication",
-    "bioetl.domain.schemas.pubchem.compound",
-    # Pandera extensions @register_check_method lacks type stubs
     "bioetl.domain.schemas.validators",
-    # Pandera @pa.check in publication base schema
-    "bioetl.domain.schemas.common.publication_base",
-    # Pydantic validators (@field_validator, @model_validator)
-    "bioetl.domain.models.metadata",
-    "bioetl.infrastructure.schemas.base_schemas",
-    "bioetl.infrastructure.schemas.composite_config",
-    "bioetl.infrastructure.schemas.dq_config",
-    "bioetl.infrastructure.schemas.filter_config",
-    "bioetl.infrastructure.schemas.pipeline_contract_policy",
-    "bioetl.infrastructure.schemas.source_config",
-    # Pandera @pa.check decorators
-    "bioetl.domain.schemas.common.publication_base",
 ]
 disallow_untyped_decorators = false
-
-# Disable misc errors for Pydantic/Pandera subclasses
-# These libraries export BaseModel/DataFrameModel as Any without proper stubs
-# Note: --strict CLI flag re-enables disallow_subclassing_any, so per-module
-# disable_error_code is needed to suppress [misc] for all subclass modules
-[[tool.mypy.overrides]]
-module = [
-    "bioetl.domain.schemas.base",
-    "bioetl.infrastructure.schemas.gold",
-    "bioetl.infrastructure.schemas.pipeline_config",
-    "bioetl.infrastructure.schemas.source_config",
-    "bioetl.infrastructure.schemas.common_config",
-    "bioetl.infrastructure.config",
-    "bioetl.infrastructure.config.*",
-    "bioetl.infrastructure.adapters.uniprot.models",
-    "bioetl.infrastructure.adapters.pubmed.models",
-    "bioetl.infrastructure.adapters.chembl.models",
-    "bioetl.infrastructure.adapters.pubchem.models",
-    "bioetl.infrastructure.adapters.crossref.models",
-    # Domain entities with Pydantic DTOs
-    "bioetl.domain.entities.chembl",
-    "bioetl.domain.entities.crossref",
-    "bioetl.domain.entities.openalex",
-    "bioetl.domain.entities.pubchem",
-    "bioetl.domain.entities.pubmed",
-    # Domain models with Pydantic BaseModel
-    "bioetl.domain.models.metadata",
-    # Pandera DataFrameModel gold contracts
-    "bioetl.domain.contracts.gold.*",
-    # Infrastructure schemas with Pydantic BaseModel
-    "bioetl.infrastructure.schemas.base_schemas",
-    "bioetl.infrastructure.schemas.composite_config",
-    "bioetl.infrastructure.schemas.dq_config",
-    "bioetl.infrastructure.schemas.dq_report_config",
-    "bioetl.infrastructure.schemas.filter_config",
-]
-disable_error_code = ["misc"]
-
-# Disable no-any-return for modules using orjson (type stubs incomplete)
-# and Pandera schemas where Series operations return Any
-[[tool.mypy.overrides]]
-module = [
-    "bioetl.application.core.base_transformer",
-    # Pandera DataFrameModel check methods use Series operations that return Any
-    "bioetl.domain.schemas.uniprot.protein",
-    "bioetl.domain.schemas.uniprot.isoform",
-    "bioetl.domain.schemas.semanticscholar.publication",
-    "bioetl.domain.schemas.pubmed.article",
-    "bioetl.domain.schemas.pubchem.compound",
-    # Pydantic BaseModel.model_validate returns Any without stubs
-    "bioetl.infrastructure.config.filter_config_loader",
-    "bioetl.infrastructure.config.dq_config_loader",
-    "bioetl.infrastructure.config.contract_policy_loader",
-    # orjson returns Any without stubs
-    "bioetl.domain.serialization",
-    "bioetl.domain.services.dq_serializer",
-    # Polars/PyArrow interop returns Any
-    "bioetl.application.composite.deduplication",
-    "bioetl.application.composite.coordinator",
-    "bioetl.application.pipelines.uniprot.extractors.utils",
-    "bioetl.infrastructure.storage.bronze_writer",
-    # Pydantic model_validate returns Any
-    "bioetl.composition.bootstrap.runtime.composite",
-]
-disable_error_code = ["no-any-return", "return-value"]
 
 # Modules with type: ignore comments that may be unused in some environments
 # but needed in others (different type stub versions). Per-module
@@ -394,6 +304,7 @@ module = [
     "bioetl.domain.models.metadata",
     "bioetl.domain.value_objects.dq_metrics",
     "bioetl.domain.schemas.validators",
+    "bioetl.application.core.base_transformer",
     "bioetl.application.services.dq.silver_analyzer",
     "bioetl.application.services.dq.gold_analyzer",
     "bioetl.application.services.dq._checks_integrity",
@@ -403,8 +314,10 @@ module = [
 ]
 warn_unused_ignores = false
 
-# Note: All layers now pass strict mypy checks.
-# ignore_errors was removed as part of architecture review (2025-12-23).
+# Note: All layers pass strict mypy checks.
+# RF-007 (2026-03-03): Reduced overrides from 69 to 12 bioetl modules.
+# Removed: disallow_untyped_decorators (18 modules), disable_error_code["misc"] (24),
+# disable_error_code["no-any-return","return-value"] (15). Added inline type:ignore where needed.
 
 # ============ RUFF ============
 [tool.ruff]

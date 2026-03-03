@@ -25,6 +25,7 @@ from bioetl.application.pipelines.semanticscholar.extractors import (
 )
 from bioetl.domain.entities.semanticscholar import SemanticScholarPublicationEntity
 from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
+from bioetl.domain.types import GoldRecord
 from bioetl.domain.value_objects import DOI, PublicationYear, PubMedId
 
 if TYPE_CHECKING:
@@ -121,8 +122,9 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             contract_policy=contract_policy,
         )
 
-    # Any: raw API JSON
-    def _resolve_publication_type(self, publication_types: Any) -> str:
+    def _resolve_publication_type(
+        self, publication_types: Any
+    ) -> str:  # Any: raw API JSON list|None
         """Resolve raw publication types list to a unified scalar string."""
         if not isinstance(publication_types, list):
             return "PUBLICATION"
@@ -133,8 +135,9 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         ]
         return "|".join(cleaned) if cleaned else "PUBLICATION"
 
-    # Any: raw API JSON
-    def _extract_validated_ids(self, rec: dict[str, Any]) -> dict[str, Any]:
+    def _extract_validated_ids(
+        self, rec: GoldRecord
+    ) -> GoldRecord:  # Any: raw API JSON values
         """Extract and validate external identifiers using Value Objects."""
         external_ids = extract_external_ids(rec.get("externalIds"))
         doi_vo = DOI.from_raw(external_ids.get("doi"))
@@ -147,8 +150,9 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "corpus_id": external_ids.get("corpus_id"),
         }
 
-    # Any: raw API JSON
-    def _extract_author_metadata(self, authors_list: Any) -> dict[str, Any]:
+    def _extract_author_metadata(
+        self, authors_list: Any
+    ) -> GoldRecord:  # Any: raw API JSON
         """Extract author identifiers, h-indices, and affiliations.
 
         Uses unified normalization service for authors and affiliations.
@@ -186,8 +190,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "affiliation_list": affiliations_json,
         }
 
-    # Any: record vals vary
-    def _extract_business_data(self, record: BronzeRecord) -> dict[str, Any]:
+    def _extract_business_data(self, record: BronzeRecord) -> GoldRecord:
         """Extract and normalize fields from Semantic Scholar record.
 
         Args:
@@ -288,8 +291,9 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         return SemanticScholarPublicationEntity
 
     def entity_to_silver_record(
-        self, entity: Any
-    ) -> dict[str, Any]:  # Any: record vals vary
+        self,
+        entity: Any,  # Any: generic domain entity; type varies by pipeline
+    ) -> GoldRecord:
         """Convert Domain Entity to SilverRecord, preserving base schema fields.
 
         Note: pmc_id is kept with None value to satisfy PublicationBaseSchema

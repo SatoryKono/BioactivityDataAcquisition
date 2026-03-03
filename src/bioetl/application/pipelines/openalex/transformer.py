@@ -41,6 +41,7 @@ from bioetl.application.pipelines.openalex.extractors import (
 from bioetl.domain.entities.openalex import OpenAlexPublicationEntity
 from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
 from bioetl.domain.services import IdentityService
+from bioetl.domain.types import GoldRecord
 from bioetl.domain.value_objects import DOI, PublicationYear
 
 if TYPE_CHECKING:
@@ -125,7 +126,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
     # Field Extraction Methods (Orchestration - delegates to extractors)
     # ========================================================================
 
-    def _extract_business_data(self, record: BronzeRecord) -> dict[str, Any]:
+    def _extract_business_data(self, record: BronzeRecord) -> GoldRecord:
         """Extract Publication business data from bronze record.
 
         Delegates field extraction to extractors module per REFACTOR-004.
@@ -308,9 +309,11 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         """
         return OpenAlexPublicationEntity
 
-        # Any: accepts any dataclass ...
+        # Any: generic domain entity; type varies by pipeline
 
-    def entity_to_silver_record(self, entity: Any) -> dict[str, Any]:
+    def entity_to_silver_record(
+        self, entity: Any
+    ) -> GoldRecord:  # Any: generic domain entity
         """Convert Domain Entity to SilverRecord.
 
         OpenAlex doesn't provide pmc_id, so it will be None in the entity.

@@ -23,7 +23,7 @@ from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.normalization import normalize_doi
-from bioetl.domain.types import HealthStatus
+from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.crossref.batch import (
     DoiBatchProcessor,
@@ -112,7 +112,7 @@ class CrossRefAdapter(BaseHttpAdapter):
         filter_ids: list[str],
         filter_field: str,
         limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch CrossRef publications by DOI list (batch resolution).
 
         Implements FilterableDataSourcePort.fetch_filtered().
@@ -162,7 +162,7 @@ class CrossRefAdapter(BaseHttpAdapter):
         entity_type: str,
         filters: dict[str, list[str]],
         limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Multi-field filtering not supported by CrossRef API.
 
         CrossRef only supports single-field filtering by DOI.
@@ -192,7 +192,7 @@ class CrossRefAdapter(BaseHttpAdapter):
         filter_field: str,
         fallback_mapping: dict[str, str],
         limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch with fallback search by title when DOI returns 404.
 
         Strategy (three-phase fallback):
@@ -272,7 +272,7 @@ class CrossRefAdapter(BaseHttpAdapter):
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
         offset: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch CrossRef publications.
 
         Implements DataSourcePort.fetch().

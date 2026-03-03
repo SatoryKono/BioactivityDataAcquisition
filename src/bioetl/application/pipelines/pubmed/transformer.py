@@ -27,6 +27,7 @@ from bioetl.domain.entities.pubmed import PubMedPublicationEntity
 from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
 from bioetl.domain.normalization import normalize_pmc_id, parse_page_range
 from bioetl.domain.services import IdentityService
+from bioetl.domain.types import GoldRecord
 from bioetl.domain.value_objects import DOI, PublicationYear, PubMedId
 
 if TYPE_CHECKING:
@@ -326,7 +327,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "pmc_id": normalize_pmc_id(ids["pmc_id"]),
         }
 
-    def _extract_business_data(self, record: BronzeRecord) -> dict[str, Any]:
+    def _extract_business_data(self, record: BronzeRecord) -> GoldRecord:
         """Extract all business fields from PubMed XML.
 
         Uses the cached XML root from _pre_extract_validation.
@@ -709,9 +710,11 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "date_revised": date_revised,
         }
 
-        # Any: accepts any dataclass ...
+        # Any: generic domain entity; type varies by pipeline
 
-    def entity_to_silver_record(self, entity: Any) -> dict[str, Any]:
+    def entity_to_silver_record(
+        self, entity: Any
+    ) -> GoldRecord:  # Any: generic domain entity
         """Convert Domain Entity to SilverRecord, excluding certain fields.
 
         Overrides base implementation to remove fields not needed for PubMed.

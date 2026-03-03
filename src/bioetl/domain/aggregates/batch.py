@@ -25,7 +25,14 @@ from bioetl.domain.exceptions import InvalidStateError
 
 if TYPE_CHECKING:
     from bioetl.domain.aggregates.events import DomainEvent
-from bioetl.domain.types import BatchID, ContentHash, EntityID, RunID
+from bioetl.domain.types import (
+    BatchID,
+    BronzeRecord,
+    ContentHash,
+    EntityID,
+    MetaDict,
+    RunID,
+)
 
 
 class BatchStatus(StrEnum):
@@ -72,7 +79,7 @@ class BatchRecord:
     index: int
     entity_id: EntityID | None
     content_hash: ContentHash | None
-    data: dict[str, Any]
+    data: BronzeRecord
     is_valid: bool = True
     error: str | None = None
     error_code: str | None = None
@@ -143,7 +150,7 @@ class Batch:
         run_id: RunID,
         start_index: int = 0,
         created_at: datetime | None = None,
-        metadata: dict[str, Any] | None = None,
+        metadata: MetaDict | None = None,
     ) -> None:
         """Initialize a new batch.
 
@@ -166,14 +173,14 @@ class Batch:
         self._created_at = created_at or datetime.now(UTC)
         self._sealed_at: datetime | None = None
         self._events: list[DomainEvent] = []
-        self._metadata = metadata or {}
+        self._metadata: MetaDict = metadata or {}
 
     @classmethod
     def create(
         cls,
         run_id: RunID,
         start_index: int = 0,
-        metadata: dict[str, Any] | None = None,
+        metadata: MetaDict | None = None,
     ) -> Batch:
         """Factory method to create a new batch with generated ID.
 
@@ -273,7 +280,7 @@ class Batch:
         return self._sealed_at
 
     @property
-    def metadata(self) -> dict[str, Any]:
+    def metadata(self) -> MetaDict:
         """Copy of batch metadata."""
         return self._metadata.copy()
 
@@ -283,7 +290,7 @@ class Batch:
 
     def add_record(
         self,
-        data: dict[str, Any],
+        data: BronzeRecord,
         entity_id: EntityID | None = None,
         content_hash: ContentHash | None = None,
     ) -> BatchRecord:
@@ -314,7 +321,7 @@ class Batch:
 
     def add_records(
         self,
-        records: list[dict[str, Any]],
+        records: list[BronzeRecord],
     ) -> list[BatchRecord]:
         """Add multiple records to the batch.
 

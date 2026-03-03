@@ -18,6 +18,7 @@ from bioetl.application.core.base_transformer import FilteredOutError
 from bioetl.application.core.batch_metrics import BatchMetricsRecorder
 from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.domain.exceptions import DataQualityThresholdError
+from bioetl.domain.types import BronzeRecord, GoldRecord
 
 if TYPE_CHECKING:
     from bioetl.application.core.config import RecordProcessorConfig
@@ -36,8 +37,8 @@ if TYPE_CHECKING:
 class TransformResult:
     """Result of batch transformation."""
 
-    silver_records: list[dict[str, Any]]
-    gold_records: list[dict[str, Any]]
+    silver_records: list[BronzeRecord]
+    gold_records: list[GoldRecord]
     quarantined_count: int
     filtered_out_count: int = 0
 
@@ -55,8 +56,8 @@ class TransformedRecord:
 
     """
 
-    silver_record: dict[str, Any] | None
-    gold_record: dict[str, Any] | None
+    silver_record: BronzeRecord | None
+    gold_record: GoldRecord | None
     is_quarantined: bool
     is_filtered_out: bool = False
 
@@ -105,7 +106,7 @@ class BatchTransformer:
         self._gold_transform = gold_transform_callback
 
     async def transform_batch(
-        self, records: list[dict[str, Any]], batch_id: BatchID, start_index: int = 0
+        self, records: list[BronzeRecord], batch_id: BatchID, start_index: int = 0
     ) -> TransformResult:
         """Transform all records in batch, returning silver, gold, and quarantine count.
 
@@ -121,8 +122,8 @@ class BatchTransformer:
             DataQualityThresholdError: If DQ hard threshold exceeded.
 
         """
-        silver_records: list[dict[str, Any]] = []
-        gold_records: list[dict[str, Any]] = []
+        silver_records: list[BronzeRecord] = []
+        gold_records: list[GoldRecord] = []
         records_quarantined = 0
         records_filtered_out = 0
 
@@ -175,7 +176,7 @@ class BatchTransformer:
         )
 
     def _check_dq_thresholds(
-        self, records: list[dict[str, Any]], quarantined_count: int
+        self, records: list[BronzeRecord], quarantined_count: int
     ) -> None:
         """Check DQ thresholds and raise/warn as appropriate.
 
@@ -229,7 +230,7 @@ class BatchTransformer:
             )
 
     async def transform_single(
-        self, raw_record: dict[str, Any], batch_id: BatchID, index: int = 0
+        self, raw_record: BronzeRecord, batch_id: BatchID, index: int = 0
     ) -> TransformedRecord:
         """Transform a single record (for streaming mode).
 
@@ -305,7 +306,7 @@ class BatchTransformer:
 
     async def transform_stream(
         self,
-        records: list[dict[str, Any]],
+        records: list[BronzeRecord],
         batch_id: BatchID,
         start_index: int = 0,
     ) -> TransformResult:
@@ -329,8 +330,8 @@ class BatchTransformer:
             DataQualityThresholdError: If DQ hard threshold exceeded.
 
         """
-        silver_records: list[dict[str, Any]] = []
-        gold_records: list[dict[str, Any]] = []
+        silver_records: list[BronzeRecord] = []
+        gold_records: list[GoldRecord] = []
         records_quarantined = 0
         records_filtered_out = 0
 
@@ -388,7 +389,7 @@ class StreamingBatchProcessor:
 
     async def process_in_chunks(
         self,
-        records: list[dict[str, Any]],
+        records: list[BronzeRecord],
         batch_id: BatchID,
         chunk_size: int = 100,
         start_index: int = 0,
@@ -431,7 +432,7 @@ class StreamingBatchProcessor:
             # Advance by actual sub-batch size processed
             i += len(chunk)
 
-    def iter_records(self, records: list[dict[str, Any]]) -> Iterator[dict[str, Any]]:
+    def iter_records(self, records: list[BronzeRecord]) -> Iterator[BronzeRecord]:
         """Iterate over records without loading all into memory.
 
         This is a simple generator wrapper that can be extended

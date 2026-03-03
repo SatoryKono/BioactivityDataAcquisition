@@ -20,6 +20,7 @@ from bioetl.domain.exceptions import (
 )
 from bioetl.domain.models.filter import ExtractionParams
 from bioetl.domain.resilience import AdapterConfig
+from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.chembl.constants import (
     _NO_PAGINATION_ENTITIES,
@@ -130,7 +131,7 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
 
     def _build_params(
         self, offset: int, entity_type: str | None = None
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any]:  # Any: HTTP query params (str|int|bool values)
         """Build API request parameters with health-aware batch size.
 
         Args:
@@ -141,7 +142,9 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
         Returns:
             Dictionary of query parameters.
         """
-        params: dict[str, Any] = {"format": "json"}
+        params: dict[str, Any] = {
+            "format": "json"
+        }  # Any: HTTP query params (str|int|bool values)
 
         # Some endpoints don't support limit/offset pagination
         if entity_type not in _NO_PAGINATION_ENTITIES:
@@ -156,9 +159,9 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
 
     def _process_response(
         self, response: Response, entity_type: str
-    ) -> tuple[list[dict[str, Any]], bool]:
+    ) -> tuple[list[BronzeRecord], bool]:
         """Process API response, extract records and pagination info."""
-        data = response.json()
+        data = response.json()  # Any: untyped ChEMBL API JSON response
         plural_key = self._mapper.get_plural_key(entity_type)
         records = data.get(plural_key, [])
         if entity_type in {"publication", "publication_term"}:
@@ -204,7 +207,9 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
         api_filter_field = self._normalize_filter_field(entity_type, filter_field)
         return {f"{api_filter_field}__in": joined_ids}
 
-    def _get_projected_url_length(self, url: str, params: dict[str, Any]) -> int:
+    def _get_projected_url_length(
+        self, url: str, params: dict[str, Any]
+    ) -> int:  # Any: HTTP query params (str|int|bool values)
         """Estimate the length of the final URL with parameters."""
         # URL-encode parameters to get accurate length (including escaping)
         query_str = urllib.parse.urlencode(params, doseq=True)
@@ -212,7 +217,7 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
 
     def _compute_composite_key(
         self,
-        record: dict[str, Any],
+        record: BronzeRecord,
         pk_fields: tuple[str, ...],
     ) -> str:
         """Compute composite key string from multiple fields."""
@@ -220,7 +225,7 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
 
     def _is_duplicate_record(
         self,
-        record: dict[str, Any],
+        record: BronzeRecord,
         pk_field: str,
         seen_ids: set[str],
         entity_type: str,
@@ -232,7 +237,7 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
 
     def _is_duplicate_record_composite(
         self,
-        record: dict[str, Any],
+        record: BronzeRecord,
         pk_fields: tuple[str, ...],
         seen_keys: set[str],
         entity_type: str,
@@ -248,8 +253,11 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
         )
 
     async def _fetch_page(
-        self, url: str, params: dict[str, Any], entity_type: str
-    ) -> tuple[list[dict[str, Any]], bool]:
+        self,
+        url: str,
+        params: dict[str, Any],  # Any: HTTP query params (str|int|bool values)
+        entity_type: str,
+    ) -> tuple[list[BronzeRecord], bool]:
         """Fetch a single page and handle errors.
 
         Note: Success/failure tracking is handled by the circuit breaker
@@ -279,7 +287,7 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
         entity_type: str,
         limit: int | None = None,
         start_offset: int = 0,
-    ) -> AsyncIterator[list[dict[str, Any]]]:
+    ) -> AsyncIterator[list[BronzeRecord]]:
         """Yield pages of records.
 
         Args:
@@ -313,13 +321,13 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
 
     def _yield_deduplicated(
         self,
-        records: list[dict[str, Any]],
+        records: list[BronzeRecord],
         seen_ids: set[str],
         pk_field: str,
         entity_type: str,
         filter_field: str,
         pk_fields: tuple[str, ...] | None = None,
-    ) -> Iterator[dict[str, Any]]:
+    ) -> Iterator[BronzeRecord]:
         """Yield records while tracking seen IDs for deduplication.
 
         Supports both single field and composite key deduplication.
@@ -384,7 +392,7 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
         start_offset: int,
         limit: int | None,
         pk_fields: tuple[str, ...] | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Continue pagination after first page.
 
         Args:
@@ -435,7 +443,7 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
         id_batch: list[str],
         filter_field: str,
         limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch records filtered by ID batch with client-side deduplication.
 
         Uses composite key deduplication for entities with multiple primary key fields.
@@ -532,7 +540,7 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
 
     async def _fetch_single_record_direct(
         self, entity_type: str, record_id: str
-    ) -> dict[str, Any] | None:
+    ) -> BronzeRecord | None:
         """Fetch a single record using direct endpoint as fallback.
 
         ChEMBL API has two code paths:
@@ -595,7 +603,7 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
         pk_field: str,
         error: Exception,
         pk_fields: tuple[str, ...] | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Split failed batch in half and retry each part recursively."""
         mid = len(id_batch) // 2
         first_half, second_half = id_batch[:mid], id_batch[mid:]
@@ -629,7 +637,7 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
         seen_ids: set[str],
         pk_field: str,
         pk_fields: tuple[str, ...] | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch a batch of IDs with automatic batch size reduction on failures.
 
         Args:
@@ -706,7 +714,7 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
         limit: int | None,
         filter_ids: list[str],
         filter_field: str,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Perform filtered fetch using ID batches with client-side deduplication.
 
         Uses batch reduction strategy: on failures, splits batch in half
@@ -738,7 +746,7 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
         entity_type: str,
         limit: int | None,
         offset: int = 0,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Perform standard paginated fetch with client-side deduplication."""
         total_fetched = 0
         seen_keys: set[str] = set()
@@ -789,7 +797,7 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
         offset: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch records from ChEMBL.
 
         Implements DataSourcePort.fetch() interface.
@@ -825,7 +833,7 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
         filter_ids: list[str],
         filter_field: str,
         limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch records from ChEMBL with ID filtering.
 
         Implements FilterableDataSourcePort.fetch_filtered().
@@ -852,7 +860,7 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
         entity_type: str,
         filters: dict[str, list[str]],
         limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch records from ChEMBL with multiple filter fields (AND logic).
 
         Implements FilterableDataSourcePort.fetch_multi_filtered().
@@ -948,7 +956,7 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
         filter_field: str,
         fallback_mapping: dict[str, str],
         limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch with fallback (ChEMBL IDs always resolvable, fallback ignored).
 
         Args:

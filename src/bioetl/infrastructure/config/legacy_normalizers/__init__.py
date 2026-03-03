@@ -3,7 +3,7 @@
 Isolates backward-compatibility migration logic from core loaders.
 """
 
-from bioetl.infrastructure.config.legacy_normalizers.source import (
+from bioetl.infrastructure.legacy_normalizers.source import (
     normalize_source_config,
 )
 
