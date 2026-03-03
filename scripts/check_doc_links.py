@@ -13,6 +13,8 @@ Checks:
      - outdated `bioetl run <pipeline>` syntax
      - removed run flags (`--start-date`, `--end-date`, etc.)
      - legacy run flag (`--run_type`)
+     - legacy system-field tokens (`-run-id`, `-ingestion-ts`, etc.)
+     - legacy lineage log tokens (`lineage-log`, `sys.lineage-log`)
      - legacy docs path (`docs/pipelines/`)
      - invalid env var style (`BIOETL-...`)
      - invalid kebab-case Python snippets in fenced `python` blocks
@@ -130,6 +132,19 @@ DRIFT_RULES = (
     DriftRule(
         name="legacy_run_type_flag",
         pattern=re.compile(r"--run_type\b"),
+    ),
+    DriftRule(
+        name="legacy_system_meta_field_token",
+        pattern=re.compile(
+            r"(?<![A-Za-z0-9_-])-"
+            r"(?:run-id|run-type|source-batch-id|ingestion-ts|content-hash|"
+            r"dq-warn|dq-error|lookup-method|original-id|source|index)"
+            r"(?![A-Za-z0-9_-])"
+        ),
+    ),
+    DriftRule(
+        name="legacy_lineage_log_token",
+        pattern=re.compile(r"\b(?:sys\.)?lineage-log\b"),
     ),
     DriftRule(
         name="legacy_docs_pipelines_path",

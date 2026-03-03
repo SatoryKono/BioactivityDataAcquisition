@@ -7,6 +7,7 @@ This script is part of the code quality CI pipeline.
 Usage:
     python src/tools/scripts/lint_terminology.py src/bioetl/
     python src/tools/scripts/lint_terminology.py --strict src/bioetl/domain/
+    python src/tools/scripts/lint_terminology.py --check
 
 Exit codes:
     0: No violations found
@@ -209,6 +210,13 @@ def lint_directory(
     return all_violations
 
 
+def resolve_default_paths() -> list[Path]:
+    """Return default lint scope when no explicit paths are provided."""
+    candidates = [Path("src/bioetl"), Path("docs")]
+    existing = [path for path in candidates if path.exists()]
+    return existing if existing else [Path(".")]
+
+
 def format_violations(violations: list[TermViolation]) -> str:
     """Format violations for output.
 
@@ -245,9 +253,9 @@ def main() -> int:
     )
     parser.add_argument(
         "paths",
-        nargs="+",
+        nargs="*",
         type=Path,
-        help="Files or directories to check",
+        help="Files or directories to check (defaults to src/bioetl and docs)",
     )
     parser.add_argument(
         "--strict",
@@ -274,8 +282,9 @@ def main() -> int:
     args = parser.parse_args()
 
     all_violations = []
+    target_paths = args.paths or resolve_default_paths()
 
-    for path in args.paths:
+    for path in target_paths:
         if not path.exists():
             print(f"Error: Path does not exist: {path}", file=sys.stderr)
             return 1

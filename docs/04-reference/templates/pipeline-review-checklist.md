@@ -53,10 +53,10 @@ Use this checklist when reviewing new or modified pipelines.
 
 ## 5. Metadata & Lineage (RULES.md §2.3, §2.4)
 
-- [ ] Records include `-run-id` (UUID)
-- [ ] Records include `-run-type` (`incremental` | `backfill` | `rebuild`)
-- [ ] Records include `-source-batch-id` (FK to lineage-log)
-- [ ] Lineage recorded in `sys.lineage-log`
+- [ ] Records include `_run_id` (UUID)
+- [ ] Records include `_run_type` (`incremental` | `backfill` | `rebuild`)
+- [ ] Records include `_source_batch_id` (lineage reference in metadata sidecar)
+- [ ] Lineage recorded in metadata sidecar (`*_metadata.yaml`)
 - [ ] Full Bronze paths NOT stored in each record
 
 ## 6. Content Hash / Entity ID (RULES.md §2.8)
@@ -68,7 +68,7 @@ Use this checklist when reviewing new or modified pipelines.
   - [ ] Floats → round(10)
   - [ ] Dates → YYYY-MM-DD
   - [ ] Strings → strip()
-- [ ] Meta-fields excluded from hash (`-ingestion-ts`, `-run-id`, etc.)
+- [ ] Meta-fields excluded from hash (`_ingestion_ts`, `_run_id`, etc.)
 
 ## 7. Error Handling (RULES.md §3.1)
 
@@ -86,12 +86,12 @@ Use this checklist when reviewing new or modified pipelines.
 
 - [ ] DQ failures routed to `common.quarantine`
 - [ ] Quarantine record includes:
-  - [ ] `ingestion-ts`
+  - [ ] `ingestion_ts`
   - [ ] `pipeline`
-  - [ ] `error-code`
+  - [ ] `error_code`
   - [ ] `payload` (truncated to 64KB)
-  - [ ] `bronze-batch-id`
-  - [ ] `dq-status`
+  - [ ] `bronze_batch_id`
+  - [ ] `dq_status`
 - [ ] Quarantine operations testable via `make quarantine-*`
 
 ## 9. Locking & Concurrency (RULES.md §3.3)
@@ -110,11 +110,11 @@ Use this checklist when reviewing new or modified pipelines.
 - [ ] Log schema compliance:
   - [ ] `ts` (MUST)
   - [ ] `level` (MUST)
-  - [ ] `run-id` (MUST)
+  - [ ] `run_id` (MUST)
   - [ ] `pipeline` (MUST)
   - [ ] `stage` (MUST)
   - [ ] `dataset` (SHOULD)
-  - [ ] `record-count` (SHOULD)
+  - [ ] `record_count` (SHOULD)
 - [ ] DQ metrics exported (Prometheus format):
   - [ ] `dq-validation-score`
   - [ ] `data-freshness-seconds`

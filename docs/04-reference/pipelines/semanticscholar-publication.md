@@ -82,7 +82,7 @@ The pipeline supports multiple identifier resolution strategies:
 | **DOI** | `/paper/batch` with `ids=[DOI:...]` | 2 |
 | **Title Fallback** | `/paper/search?query={title}` | 3 (lowest) |
 
-When DOI resolution fails, the pipeline automatically falls back to title-based search. The resolution method is tracked in `-lookup-method` for data quality auditing.
+When DOI resolution fails, the pipeline automatically falls back to title-based search. The resolution method is tracked in `_lookup_method` for data quality auditing.
 
 ### Requested Fields
 
@@ -138,21 +138,21 @@ openAccessPdf, tldr, fieldsOfStudy, publicationTypes, journal
 
 | Silver Field | Type | Source | Description |
 |--------------|------|--------|-------------|
-| `entity-id` | string | Computed | UUID hash of business data |
-| `content-hash` | string | Computed | SHA-256 of normalized content |
-| `-run-id` | string | Context | Pipeline execution ID |
-| `-run-type` | string | Context | "incremental" or "full-scan" |
-| `-source-batch-id` | string | Adapter | Batch identifier |
-| `-source` | string | Fixed | Always "semanticscholar" |
-| `-ingestion-ts` | string | Context | ISO 8601 timestamp |
-| `-index` | int64 | Processor | Record index within batch |
+| `entity_id` | string | Computed | UUID hash of business data |
+| `content_hash` | string | Computed | SHA-256 of normalized content |
+| `_run_id` | string | Context | Pipeline execution ID |
+| `_run_type` | string | Context | `incremental` / `backfill` / `rebuild` |
+| `_source_batch_id` | string | Adapter | Batch identifier |
+| `_source` | string | Fixed | Always "semanticscholar" |
+| `_ingestion_ts` | string | Context | ISO 8601 timestamp |
+| `_index` | int64 | Processor | Record index within batch |
 
 #### Lookup Metadata
 
 | Silver Field | Type | Source | Values |
 |--------------|------|--------|--------|
-| `-lookup-method` | string | Adapter | "direct" \| "doi" \| "pmid" \| "title-fallback" \| "unknown" |
-| `-original-id` | string | Adapter | Original identifier if fallback used |
+| `_lookup_method` | string | Adapter | "direct" \| "doi" \| "pmid" \| "title-fallback" \| "unknown" |
+| `_original_id` | string | Adapter | Original identifier if fallback used |
 
 #### Primary Identifier
 
@@ -254,8 +254,8 @@ Combined formats like `"32 4"` are parsed into separate fields:
 
 | Silver Field | Type | Default | Description |
 |--------------|------|---------|-------------|
-| `-dq-warn` | bool | False | Soft threshold exceeded |
-| `-dq-error` | bool | False | Hard threshold exceeded |
+| `_dq_warn` | bool | False | Soft threshold exceeded |
+| `_dq_error` | bool | False | Hard threshold exceeded |
 
 ---
 
@@ -376,8 +376,8 @@ Publication year is validated against range 1500-2100:
 
 | Field | Type | Nullable | Constraints |
 |-------|------|----------|-------------|
-| `entity-id` | string | **No** | - |
-| `content-hash` | string | **No** | - |
+| `entity_id` | string | **No** | - |
+| `content_hash` | string | **No** | - |
 | `paper-id` | string | **No** | Primary key |
 | `doi` | string | Yes | - |
 | `pmid` | string | Yes | - |
@@ -399,23 +399,23 @@ Publication year is validated against range 1500-2100:
 | `oa-status` | string | Yes | - |
 | `fields-of-study` | string | Yes | JSON array |
 | `publication-types` | string | Yes | JSON array |
-| `-source` | string | Yes | - |
-| `-lookup-method` | string | Yes | - |
-| `-original-id` | string | Yes | - |
-| `-dq-warn` | bool | **No** | default=False |
-| `-dq-error` | bool | **No** | default=False |
-| `-run-id` | string | **No** | - |
-| `-run-type` | string | **No** | - |
-| `-source-batch-id` | string | Yes | - |
-| `-ingestion-ts` | string | **No** | - |
-| `-index` | int | **No** | - |
+| `_source` | string | Yes | - |
+| `_lookup_method` | string | Yes | - |
+| `_original_id` | string | Yes | - |
+| `_dq_warn` | bool | **No** | default=False |
+| `_dq_error` | bool | **No** | default=False |
+| `_run_id` | string | **No** | - |
+| `_run_type` | string | **No** | - |
+| `_source_batch_id` | string | Yes | - |
+| `_ingestion_ts` | string | **No** | - |
+| `_index` | int | **No** | - |
 
 ### Required Fields
 
 - `paper-id` (primary key)
 - `title` (required for identification)
-- System fields: `entity-id`, `content-hash`, `-run-id`, `-run-type`, `-ingestion-ts`, `-index`
-- DQ flags: `-dq-warn`, `-dq-error`
+- System fields: `entity_id`, `content_hash`, `_run_id`, `_run_type`, `_ingestion_ts`, `_index`
+- DQ flags: `_dq_warn`, `_dq_error`
 
 ### Year Filter Range
 
@@ -605,8 +605,8 @@ enrichers:
       "hIndex": 52
     }
   ],
-  "-lookup-method": "doi",
-  "-original-id": "10.1038/nature12373"
+  "_lookup_method": "doi",
+  "_original_id": "10.1038/nature12373"
 }
 ```
 
@@ -614,8 +614,8 @@ enrichers:
 
 ```json
 {
-  "entity-id": "uuid-abc123...",
-  "content-hash": "sha256:def456...",
+  "entity_id": "uuid-abc123...",
+  "content_hash": "sha256:def456...",
   "paper-id": "1234567890abcdef1234567890abcdef12345678",
   "doi": "10.1038/nature12373",
   "pmid": "23831764",
@@ -642,12 +642,12 @@ enrichers:
   "author-s2-ids": "[\"3456789\"]",
   "author-orcids": "[\"0000-0001-2345-6789\"]",
   "author-h-indices": "[52]",
-  "-source": "semanticscholar",
-  "-lookup-method": "doi",
-  "-original-id": "10.1038/nature12373",
-  "-run-id": "run-123",
-  "-dq-warn": false,
-  "-dq-error": false
+  "_source": "semanticscholar",
+  "_lookup_method": "doi",
+  "_original_id": "10.1038/nature12373",
+  "_run_id": "run-123",
+  "_dq_warn": false,
+  "_dq_error": false
 }
 ```
 
@@ -655,8 +655,8 @@ enrichers:
 
 ```json
 {
-  "entity-id": "uuid-abc123...",
-  "content-hash": "sha256:def456...",
+  "entity_id": "uuid-abc123...",
+  "content_hash": "sha256:def456...",
   "paper-id": "1234567890abcdef1234567890abcdef12345678",
   "doi": "10.1038/nature12373",
   "pmid": "23831764",
@@ -678,8 +678,8 @@ enrichers:
   "reference-count": 45,
   "fields-of-study": "[\"Biology\", \"Chemistry\"]",
   "publication-types": "[\"Journal Article\"]",
-  "-source": "semanticscholar",
-  "-lookup-method": "doi"
+  "_source": "semanticscholar",
+  "_lookup_method": "doi"
 }
 ```
 
@@ -761,7 +761,7 @@ erDiagram
 
 3. **Citation Contexts Not in Gold**: Context sentences for citation analysis only in Silver.
 
-4. **Title Fallback Accuracy**: Title-based search may return incorrect matches. Use `-lookup-method` to filter.
+4. **Title Fallback Accuracy**: Title-based search may return incorrect matches. Use `_lookup_method` to filter.
 
 5. **TLDR Coverage**: Not all papers have AI-generated summaries (newer papers more likely).
 

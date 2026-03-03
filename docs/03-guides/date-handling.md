@@ -250,7 +250,7 @@ When computing content hash for deduplication, dates are normalized to ISO forma
 # Dates normalized to YYYY-MM-DD before hashing
 ```
 
-**Excluded from hash**: `-ingestion-ts`, `-run-id`, `-run-type`, `-dq-*` (technical metadata)
+**Excluded from hash**: `_ingestion_ts`, `_run_id`, `_run_type`, `_dq_*` (technical metadata)
 
 ---
 

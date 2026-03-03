@@ -6,7 +6,7 @@
 | Attribute | Value |
 |-----------|-------|
 | **Entity ID** | `molecule-chembl-id` (Business Key) |
-| **Content Hash** | `content-hash` (SHA256 for SCD Type 2) |
+| **Content Hash** | `content_hash` (SHA256 for SCD Type 2) |
 | **Source** | ChEMBL API (`/chembl/api/data/molecule.json`) |
 | **Update Frequency** | Quarterly (ChEMBL release cycle) |
 | **Schema Version** | 1.0.0 (ChEMBL 34 aligned) |
@@ -154,14 +154,14 @@ Use the migration script: `src/tools/scripts/migrations/rename_structure_fields.
 
 | Field | Type | Nullable | Purpose | Included in Content Hash |
 |-------|------|----------|---------|-------------------------|
-| `entity-id` | `str` | No | Business key (= molecule-chembl-id) | Yes |
-| `content-hash` | `str` | No | SHA256 for SCD Type 2 | — |
-| `-run-id` | `UUID` | No | Pipeline run correlation ID | No |
-| `-run-type` | `Enum` | No | incremental/backfill/rebuild | No |
-| `-source-batch-id` | `UUID` | Yes | FK to lineage-log | No |
-| `-ingestion-ts` | `Timestamp` | No | Ingestion time (UTC) | No |
-| `-dq-warn` | `bool` | No | DQ warning flag | No |
-| `-index` | `int` | No | Record index in batch | No |
+| `entity_id` | `str` | No | Business key (= molecule-chembl-id) | Yes |
+| `content_hash` | `str` | No | SHA256 for SCD Type 2 | — |
+| `_run_id` | `UUID` | No | Pipeline run correlation ID | No |
+| `_run_type` | `Enum` | No | incremental/backfill/rebuild | No |
+| `_source_batch_id` | `UUID` | Yes | Lineage reference in metadata sidecar | No |
+| `_ingestion_ts` | `Timestamp` | No | Ingestion time (UTC) | No |
+| `_dq_warn` | `bool` | No | DQ warning flag | No |
+| `_index` | `int` | No | Record index in batch | No |
 
 ---
 
@@ -275,14 +275,14 @@ def -validate-invariants(self) -> None:
 
 ```json
 {
-  "entity-id": "CHEMBL25",
+  "entity_id": "CHEMBL25",
   "molecule-chembl-id": "CHEMBL25",
-  "content-hash": "sha256:abc123...",
-  "-run-id": "550e8400-e29b-41d4-a716-446655440000",
-  "-run-type": "incremental",
-  "-ingestion-ts": "2024-01-15T10:30:00Z",
-  "-dq-warn": false,
-  "-index": 0,
+  "content_hash": "sha256:abc123...",
+  "_run_id": "550e8400-e29b-41d4-a716-446655440000",
+  "_run_type": "incremental",
+  "_ingestion_ts": "2024-01-15T10:30:00Z",
+  "_dq_warn": false,
+  "_index": 0,
 
   "pref-name": "ASPIRIN",
   "molecule-type": "Small molecule",

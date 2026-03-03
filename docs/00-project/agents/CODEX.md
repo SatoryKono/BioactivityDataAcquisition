@@ -174,7 +174,7 @@ Scope: ...
    - float → `round(val, 10)`
    - date → `YYYY-MM-DD`
    - string → `strip()`
-   - исключить: `-ingestion-ts`, `-run-id`, `-run-type`, `-dq-*`
+   - исключить: `_ingestion_ts`, `_run_id`, `_run_type`, `_dq_*`
 1. DQ thresholds:
    - > 5% ошибок → warning
    - > 20% ошибок → fail batch
