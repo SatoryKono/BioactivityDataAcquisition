@@ -51,6 +51,22 @@ bash scripts/check_skills_mirror.sh --sync
 | `documentation-audit` | `.codex/skills/documentation-audit` | Full docs audit and updates |
 | `documentation-cascade-audit` | `.codex/skills/documentation-cascade-audit` | Hierarchical docs audit orchestration |
 
+### Research and Planning Utilities
+
+| Skill | Path | Purpose |
+|------|------|---------|
+| `capability-discovery` | `.codex/skills/capability-discovery` | Discover available agents/skills/quality commands |
+| `collecting-evidence` | `.codex/skills/collecting-evidence` | Build traceable evidence objects |
+| `deep-research` | `.codex/skills/deep-research` | Structured deep research workflow |
+| `synthesizing-pillars` | `.codex/skills/synthesizing-pillars` | Convert evidence into synthesis insights |
+| `making-decisions` | `.codex/skills/making-decisions` | Turn synthesis into explicit decisions |
+| `generating-constrained-specs` | `.codex/skills/generating-constrained-specs` | Generate PRD/architecture specs from decisions |
+| `initializing-ledger` | `.codex/skills/initializing-ledger` | Initialize decision/evidence workspace |
+| `repo-config` | `.codex/skills/repo-config` | Resolve dynamic repository configuration |
+| `suggest-users` | `.codex/skills/suggest-users` | Suggest reviewers/assignees from repo context |
+| `create-pr` | `.codex/skills/create-pr` | PR creation workflow guidance |
+| `nci-analysis` | `.codex/skills/nci-analysis` | Manipulation/disinformation pattern analysis |
+
 ### Build and Design Utilities
 
 | Skill | Path | Purpose |
@@ -62,6 +78,37 @@ bash scripts/check_skills_mirror.sh --sync
 
 - All local skills are structurally valid.
 - `documentation-cascade-audit` has been normalized from template/TODO state to an active skill.
+
+## Mirror Doc Index
+
+- [agent-orchestration](agent-orchestration/SKILL.md)
+- [capability-discovery](capability-discovery/SKILL.md)
+- [collecting-evidence](collecting-evidence/SKILL.md)
+- [create-pr](create-pr/SKILL.md)
+- [deep-research](deep-research/SKILL.md)
+- [documentation-audit](documentation-audit/SKILL.md)
+- [documentation-cascade-audit](documentation-cascade-audit/SKILL.md)
+- [generating-constrained-specs](generating-constrained-specs/SKILL.md)
+- [initializing-ledger](initializing-ledger/SKILL.md)
+- [making-decisions](making-decisions/SKILL.md)
+- [nci-analysis](nci-analysis/SKILL.md)
+- [new-pipeline](new-pipeline/SKILL.md)
+- [py-audit-bot](py-audit-bot/SKILL.md)
+- [py-code-bot](py-code-bot/SKILL.md)
+- [py-config-bot](py-config-bot/SKILL.md)
+- [py-debug-bot](py-debug-bot/SKILL.md)
+- [py-doc-bot](py-doc-bot/SKILL.md)
+- [py-plan-bot](py-plan-bot/SKILL.md)
+- [py-review-orchestrator](py-review-orchestrator/SKILL.md)
+- [py-test-bot](py-test-bot/SKILL.md)
+- [py-test-swarm](py-test-swarm/SKILL.md)
+- [repo-config](repo-config/SKILL.md)
+- [suggest-users](suggest-users/SKILL.md)
+- [synthesizing-pillars](synthesizing-pillars/SKILL.md)
+- [technical-designer-mermaid](technical-designer-mermaid/SKILL.md)
+- [vcr-record](vcr-record/SKILL.md)
+- [verify-architecture](verify-architecture/SKILL.md)
+- [architecture-guardian (public)](public/architecture-guardian/SKILL.md)
 
 ## Shared Generic Skills
 
