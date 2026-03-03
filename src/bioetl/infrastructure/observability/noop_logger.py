@@ -31,7 +31,7 @@ class NoOpLogger:
 
     """
 
-    def bind(self, **_kwargs: Any) -> Self:  # Any: LoggerPort context kwa...
+    def bind(self, **_kwargs: Any) -> Self:  # Any: structlog-compatible API
         """Bind additional context (no-op, returns self).
 
         Args:
@@ -42,7 +42,7 @@ class NoOpLogger:
         """
         return self
 
-    # Any: LoggerPort context kwa...
+    # Any: structlog-compatible API
     def info(self, _event: str, **_kwargs: Any) -> None:
         """Log info message (no-op).
 
@@ -51,7 +51,7 @@ class NoOpLogger:
             **_kwargs: Additional keyword arguments.
         """
 
-    # Any: LoggerPort context kwa...
+    # Any: structlog-compatible API
     def warning(self, _event: str, **_kwargs: Any) -> None:
         """Log warning message (no-op).
 
@@ -60,7 +60,7 @@ class NoOpLogger:
             **_kwargs: Additional keyword arguments.
         """
 
-    # Any: LoggerPort context kwa...
+    # Any: structlog-compatible API
     def error(self, _event: str, **_kwargs: Any) -> None:
         """Log error message (no-op).
 
@@ -69,7 +69,7 @@ class NoOpLogger:
             **_kwargs: Additional keyword arguments.
         """
 
-    # Any: LoggerPort context kwa...
+    # Any: structlog-compatible API
     def debug(self, _event: str, **_kwargs: Any) -> None:
         """Log debug message (no-op).
 
@@ -78,7 +78,7 @@ class NoOpLogger:
             **_kwargs: Additional keyword arguments.
         """
 
-    # Any: LoggerPort context kwa...
+    # Any: structlog-compatible API
     def exception(self, _event: str, **_kwargs: Any) -> None:
         """Log exception with traceback (no-op).
 

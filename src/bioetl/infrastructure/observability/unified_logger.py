@@ -101,7 +101,7 @@ class UnifiedLogger:
             pipeline=pipeline,
         )
 
-    def bind(self, **kwargs: Any) -> Self:  # Any: structlog-compatible a...
+    def bind(self, **kwargs: Any) -> Self:  # Any: structlog-compatible API
         """Bind additional context to the logger.
 
         Returns a new UnifiedLogger instance with additional bound context.
@@ -119,7 +119,7 @@ class UnifiedLogger:
         new_logger._logger = self._logger.bind(**kwargs)
         return new_logger
 
-    # Any: structlog context values
+    # Any: structlog-compatible API
     def _ensure_stage(self, kwargs: dict[str, Any]) -> dict[str, Any]:
         """Ensure stage field is present in kwargs.
 
@@ -135,7 +135,7 @@ class UnifiedLogger:
             kwargs["stage"] = _DEFAULT_STAGE
         return kwargs
 
-    def info(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog context kwar...
+    def info(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
         """Log an informational message.
 
         Implements LoggerPort.info() with Log Schema enforcement.
@@ -153,7 +153,7 @@ class UnifiedLogger:
         """
         return self._logger.info(_event, **self._ensure_stage(kwargs))
 
-    # Any: structlog context kwar...
+    # Any: structlog-compatible API
     def warning(self, _event: str, **kwargs: Any) -> Any:
         """Log a warning message.
 
@@ -171,7 +171,7 @@ class UnifiedLogger:
         """
         return self._logger.warning(_event, **self._ensure_stage(kwargs))
 
-    # Any: structlog context kwar...
+    # Any: structlog-compatible API
     def error(self, _event: str, **kwargs: Any) -> Any:
         """Log an error message.
 
@@ -190,7 +190,7 @@ class UnifiedLogger:
         """
         return self._logger.error(_event, **self._ensure_stage(kwargs))
 
-    # Any: structlog context kwar...
+    # Any: structlog-compatible API
     def debug(self, _event: str, **kwargs: Any) -> Any:
         """Log a debug message.
 
@@ -206,7 +206,7 @@ class UnifiedLogger:
         """
         return self._logger.debug(_event, **self._ensure_stage(kwargs))
 
-    # Any: structlog context kwar...
+    # Any: structlog-compatible API
     def exception(self, _event: str, **kwargs: Any) -> Any:
         """Log an exception with traceback.
 
