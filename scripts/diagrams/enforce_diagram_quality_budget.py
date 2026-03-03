@@ -1,0 +1,312 @@
+#!/usr/bin/env python3
+"""Enforce diagram quality budget across lint/quality/nightly JSON reports."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from dataclasses import asdict, dataclass
+from pathlib import Path
+from typing import Any
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
+@dataclass(frozen=True)
+class BudgetCheck:
+    metric: str
+    value: int
+    limit: int
+    passed: bool
+    source: str
+    message: str
+
+
+@dataclass(frozen=True)
+class BudgetReport:
+    mode: str
+    checks: list[BudgetCheck]
+    failed_checks: int
+    passed: bool
+
+
+def _out(message: str) -> None:
+    sys.stdout.write(f"{message}\n")
+
+
+def _err(message: str) -> None:
+    sys.stderr.write(f"{message}\n")
+
+
+def load_json(path: Path) -> dict[str, Any]:
+    resolved = path if path.is_absolute() else REPO_ROOT / path
+    if not resolved.exists():
+        raise FileNotFoundError(f"report file not found: {resolved}")
+    try:
+        payload = json.loads(resolved.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"invalid JSON in {resolved}: {exc}") from exc
+    if not isinstance(payload, dict):
+        raise ValueError(f"JSON report root must be object: {resolved}")
+    return payload
+
+
+def to_int(payload: dict[str, Any], key: str, default: int = 0) -> int:
+    raw = payload.get(key, default)
+    if isinstance(raw, bool):
+        return int(raw)
+    if isinstance(raw, (int, float)):
+        return int(raw)
+    if isinstance(raw, str) and raw.strip().isdigit():
+        return int(raw.strip())
+    return default
+
+
+def rule_violations(quality_payload: dict[str, Any], rule_id: str) -> int:
+    rules = quality_payload.get("rules", [])
+    if not isinstance(rules, list):
+        return 0
+    for rule in rules:
+        if not isinstance(rule, dict):
+            continue
+        if rule.get("rule_id") == rule_id:
+            return to_int(rule, "violations", 0)
+    return 0
+
+
+def lint_counts(lint_payload: dict[str, Any]) -> tuple[int, int]:
+    issues = lint_payload.get("issues", [])
+    if not isinstance(issues, list):
+        return (0, 0)
+    errors = 0
+    warnings = 0
+    for issue in issues:
+        if not isinstance(issue, dict):
+            continue
+        severity = str(issue.get("severity", "")).upper()
+        if severity == "ERROR":
+            errors += 1
+        elif severity == "WARNING":
+            warnings += 1
+    return errors, warnings
+
+
+def build_check(metric: str, value: int, limit: int, source: str, message: str) -> BudgetCheck:
+    return BudgetCheck(
+        metric=metric,
+        value=value,
+        limit=limit,
+        passed=value <= limit,
+        source=source,
+        message=message,
+    )
+
+
+def render_markdown(report: BudgetReport) -> str:
+    lines: list[str] = []
+    lines.append("# Diagram Quality Budget Report")
+    lines.append("")
+    lines.append("## Summary")
+    lines.append("")
+    lines.append(f"- Mode: {report.mode}")
+    lines.append(f"- Total checks: {len(report.checks)}")
+    lines.append(f"- Failed checks: {report.failed_checks}")
+    lines.append(f"- Status: {'PASS' if report.passed else 'FAIL'}")
+    lines.append("")
+    lines.append("## Budget Checks")
+    lines.append("")
+    lines.append("| Metric | Source | Value | Limit | Status |")
+    lines.append("|---|---|---:|---:|---|")
+    for check in report.checks:
+        lines.append(
+            "| "
+            f"{check.metric} | {check.source} | {check.value} | {check.limit} | "
+            f"{'PASS' if check.passed else 'FAIL'} |"
+        )
+
+    if report.failed_checks > 0:
+        lines.append("")
+        lines.append("## Failed Details")
+        lines.append("")
+        for check in report.checks:
+            if check.passed:
+                continue
+            lines.append(
+                f"- `{check.metric}` ({check.source}): {check.message} "
+                f"(value={check.value}, limit={check.limit})"
+            )
+
+    return "\n".join(lines) + "\n"
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Enforce diagram quality budget")
+    parser.add_argument("--mode", choices=("pr", "nightly"), default="pr")
+    parser.add_argument("--quality-report", type=Path)
+    parser.add_argument("--lint-report", type=Path)
+    parser.add_argument("--nightly-report", type=Path)
+    parser.add_argument("--max-hard-failures", type=int, default=0)
+    parser.add_argument("--max-warning-failures", type=int, default=-1)
+    parser.add_argument("--max-diag-t022", type=int, default=0)
+    parser.add_argument("--max-diag-t023", type=int, default=0)
+    parser.add_argument("--max-lint-errors", type=int, default=0)
+    parser.add_argument("--max-lint-warnings", type=int, default=-1)
+    parser.add_argument("--max-nightly-errors", type=int, default=0)
+    parser.add_argument("--max-nightly-warnings", type=int, default=-1)
+    parser.add_argument("--json-out", type=Path)
+    parser.add_argument("--markdown-out", type=Path)
+    parser.add_argument("--json", action="store_true")
+    return parser.parse_args()
+
+
+def main() -> int:
+    args = parse_args()
+    checks: list[BudgetCheck] = []
+
+    try:
+        if args.quality_report is not None:
+            quality_payload = load_json(args.quality_report)
+            hard_failures = to_int(quality_payload, "hard_failures", 0)
+            warning_failures = to_int(quality_payload, "warning_failures", 0)
+            t022 = rule_violations(quality_payload, "DIAG-T022")
+            t023 = rule_violations(quality_payload, "DIAG-T023")
+
+            checks.append(
+                build_check(
+                    metric="quality.hard_failures",
+                    value=hard_failures,
+                    limit=args.max_hard_failures,
+                    source="check_diagram_quality_gates",
+                    message="hard quality-gate failures exceed budget",
+                )
+            )
+            if args.max_warning_failures >= 0:
+                checks.append(
+                    build_check(
+                        metric="quality.warning_failures",
+                        value=warning_failures,
+                        limit=args.max_warning_failures,
+                        source="check_diagram_quality_gates",
+                        message="warning quality-gate failures exceed budget",
+                    )
+                )
+            checks.append(
+                build_check(
+                    metric="quality.DIAG-T022",
+                    value=t022,
+                    limit=args.max_diag_t022,
+                    source="check_diagram_quality_gates",
+                    message="label-length warnings (DIAG-T022) exceed budget",
+                )
+            )
+            checks.append(
+                build_check(
+                    metric="quality.DIAG-T023",
+                    value=t023,
+                    limit=args.max_diag_t023,
+                    source="check_diagram_quality_gates",
+                    message="multi-line label warnings (DIAG-T023) exceed budget",
+                )
+            )
+        if args.lint_report is not None:
+            lint_payload = load_json(args.lint_report)
+            lint_errors, lint_warnings = lint_counts(lint_payload)
+            checks.append(
+                build_check(
+                    metric="lint.errors",
+                    value=lint_errors,
+                    limit=args.max_lint_errors,
+                    source="lint_diagrams",
+                    message="diagram lint errors exceed budget",
+                )
+            )
+            if args.max_lint_warnings >= 0:
+                checks.append(
+                    build_check(
+                        metric="lint.warnings",
+                        value=lint_warnings,
+                        limit=args.max_lint_warnings,
+                        source="lint_diagrams",
+                        message="diagram lint warnings exceed budget",
+                    )
+                )
+        if args.mode == "nightly":
+            if args.nightly_report is None:
+                _err("[ERROR] --nightly-report is required in nightly mode")
+                return 2
+            nightly_payload = load_json(args.nightly_report)
+            nightly_errors = to_int(nightly_payload, "errors", 0)
+            nightly_warnings = to_int(nightly_payload, "warnings", 0)
+            checks.append(
+                build_check(
+                    metric="nightly.errors",
+                    value=nightly_errors,
+                    limit=args.max_nightly_errors,
+                    source="run_diagram_nightly_suite",
+                    message="nightly suite errors exceed budget",
+                )
+            )
+            if args.max_nightly_warnings >= 0:
+                checks.append(
+                    build_check(
+                        metric="nightly.warnings",
+                        value=nightly_warnings,
+                        limit=args.max_nightly_warnings,
+                        source="run_diagram_nightly_suite",
+                        message="nightly suite warnings exceed budget",
+                    )
+                )
+    except (FileNotFoundError, ValueError) as exc:
+        _err(f"[ERROR] {exc}")
+        return 2
+
+    if not checks:
+        _err("[ERROR] no budget checks configured; provide at least one report input")
+        return 2
+
+    failed_checks = sum(1 for check in checks if not check.passed)
+    report = BudgetReport(
+        mode=args.mode,
+        checks=checks,
+        failed_checks=failed_checks,
+        passed=failed_checks == 0,
+    )
+
+    payload = {
+        "mode": report.mode,
+        "failed_checks": report.failed_checks,
+        "passed": report.passed,
+        "checks": [asdict(check) for check in report.checks],
+    }
+
+    if args.json_out is not None:
+        out_path = args.json_out if args.json_out.is_absolute() else REPO_ROOT / args.json_out
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(payload, indent=2, ensure_ascii=True) + "\n", encoding="utf-8")
+
+    if args.markdown_out is not None:
+        out_path = args.markdown_out if args.markdown_out.is_absolute() else REPO_ROOT / args.markdown_out
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(render_markdown(report), encoding="utf-8")
+
+    if args.json:
+        _out(json.dumps(payload, indent=2, ensure_ascii=True))
+    else:
+        _out(
+            "[INFO] Diagram quality budget: "
+            f"checks={len(report.checks)}, failed={report.failed_checks}, "
+            f"status={'PASS' if report.passed else 'FAIL'}"
+        )
+        for check in report.checks:
+            _out(
+                f"[INFO] {check.metric} [{check.source}] "
+                f"value={check.value} limit={check.limit} "
+                f"{'PASS' if check.passed else 'FAIL'}"
+            )
+
+    return 0 if report.passed else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
