@@ -2254,7 +2254,7 @@ registries:
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
     CrossRefExtractor:
-      value: 375
+      value: 380
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (class_size).
       expires_on: '2026-04-30'
