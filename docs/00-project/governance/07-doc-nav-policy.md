@@ -1,6 +1,6 @@
 # Documentation Navigation Policy
 
-*Version: 1.3 (2026-03-03)*
+*Version: 1.4 (2026-03-03)*
 
 ----------------------------------------------------------------------
 
@@ -129,16 +129,15 @@ A document SHOULD be promoted when at least two criteria are true:
    - `./.venv/Scripts/python.exe -m mkdocs build --strict`
 6. Update baseline only when growth is intentional and justified.
 
-### 6.4 Current Backlog Snapshot (2026-03-03, wave-4)
+### 6.4 Current Backlog Snapshot (2026-03-03, wave-5)
 
-- `outside nav`: `53`
+- `outside nav`: `45`
 - dominant buckets:
   - `99-archive`: `33` (`archive`, intentional)
-  - `skills`: `14` (references/assets and system skill docs)
-  - `02-architecture`: `6` (mostly internal/generated diagram support docs)
+  - `skills`: `12` (references/assets and system skill docs)
 
 Interpretation:
-- further reduction SHOULD focus on `02-architecture/**` and selected `skills/**`;
+- further reduction SHOULD focus on remaining `skills/**` reference pages;
 - `99-archive/**` should remain out of nav unless governance policy changes.
 
 Implementation note:
