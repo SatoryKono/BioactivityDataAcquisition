@@ -187,7 +187,9 @@ def _record_observation(
     obs_out_path: Path | None,
 ) -> None:
     """Append runtime observation to a JSONL file when enabled by env."""
-    out_path_raw = str(obs_out_path) if obs_out_path is not None else os.getenv(_OBS_OUT_ENV)
+    out_path_raw = (
+        str(obs_out_path) if obs_out_path is not None else os.getenv(_OBS_OUT_ENV)
+    )
     if not out_path_raw:
         return
 
@@ -205,6 +207,12 @@ def _record_observation(
     with out_path.open("a", encoding="utf-8") as f:
         f.write(json.dumps(payload, ensure_ascii=True, sort_keys=True))
         f.write("\n")
+
+
+def _obs_out_from_config(pytestconfig: pytest.Config) -> Path | None:
+    """Resolve observation file path from pytest option."""
+    raw = pytestconfig.getoption("perf_obs_out")
+    return Path(raw) if raw else None
 
 
 def test_silver_prepare_arrow_data_budget(
@@ -235,11 +243,7 @@ def test_silver_prepare_arrow_data_budget(
         benchmark_key="silver_prepare_arrow_2000",
         median_latency_s=median_latency,
         processed_records=len(records),
-        obs_out_path=(
-            Path(raw)
-            if (raw := pytestconfig.getoption("--perf-obs-out"))
-            else None
-        ),
+        obs_out_path=_obs_out_from_config(pytestconfig),
     )
 
 
@@ -286,11 +290,7 @@ def test_silver_write_append_budget(
         benchmark_key="silver_write_append_600",
         median_latency_s=median_latency,
         processed_records=600,
-        obs_out_path=(
-            Path(raw)
-            if (raw := pytestconfig.getoption("--perf-obs-out"))
-            else None
-        ),
+        obs_out_path=_obs_out_from_config(pytestconfig),
     )
 
 
@@ -344,11 +344,7 @@ def test_silver_write_merge_budget(
         benchmark_key="silver_write_merge_600",
         median_latency_s=median_latency,
         processed_records=600,
-        obs_out_path=(
-            Path(raw)
-            if (raw := pytestconfig.getoption("--perf-obs-out"))
-            else None
-        ),
+        obs_out_path=_obs_out_from_config(pytestconfig),
     )
 
 
@@ -395,9 +391,5 @@ def test_crossref_batch_adapter_budget(pytestconfig: pytest.Config) -> None:
         benchmark_key="crossref_batch_fetch_200",
         median_latency_s=median_latency,
         processed_records=len(dois),
-        obs_out_path=(
-            Path(raw)
-            if (raw := pytestconfig.getoption("--perf-obs-out"))
-            else None
-        ),
+        obs_out_path=_obs_out_from_config(pytestconfig),
     )
