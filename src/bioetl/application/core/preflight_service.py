@@ -14,7 +14,7 @@ import asyncio
 import time
 from typing import TYPE_CHECKING, Any
 
-from bioetl.domain.exceptions import InfrastructureError, PolicyViolationError
+from bioetl.domain.exceptions import BioETLError, InfrastructureError, PolicyViolationError
 from bioetl.domain.medallion import Layer, MedallionPolicy, WriteMode, WriteModePolicy
 from bioetl.domain.types import (
     ComponentHealthResult,
@@ -35,6 +35,15 @@ if TYPE_CHECKING:
         LoggerPort,
         MetricsPort,
     )
+
+
+_HEALTH_CHECK_ERRORS = (
+    BioETLError,
+    OSError,
+    RuntimeError,
+    ValueError,
+    TypeError,
+)
 
 
 # =============================================================================
@@ -131,7 +140,7 @@ class _HealthAggregator:
                 status=status,
                 duration_seconds=duration,
             )
-        except Exception as e:
+        except _HEALTH_CHECK_ERRORS as e:
             duration = time.perf_counter() - start_time
             result = ComponentHealthResult(
                 component=component,
@@ -181,7 +190,7 @@ class _HealthAggregator:
                     status=status,
                     duration_seconds=duration,
                 )
-        except Exception as e:
+        except _HEALTH_CHECK_ERRORS as e:
             duration = time.perf_counter() - start_time
             result = ComponentHealthResult(
                 component=component,

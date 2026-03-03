@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, Any
 from bioetl.application.core.base_transformer import FilteredOutError
 from bioetl.application.core.batch_metrics import BatchMetricsRecorder
 from bioetl.application.core.quarantine_manager import QuarantineManager
-from bioetl.domain.exceptions import DataQualityThresholdError
+from bioetl.domain.exceptions import BioETLError, DataQualityThresholdError
 from bioetl.domain.types import BronzeRecord, GoldRecord
 
 if TYPE_CHECKING:
@@ -31,6 +31,15 @@ if TYPE_CHECKING:
     from bioetl.domain.error_classifier import ErrorClassifier
     from bioetl.domain.ports import MemoryMonitorPort
     from bioetl.domain.types import BatchID
+
+
+_TRANSFORM_PROCESSING_ERRORS = (
+    BioETLError,
+    OSError,
+    RuntimeError,
+    ValueError,
+    TypeError,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -149,7 +158,7 @@ class BatchTransformer:
                 )
                 records_filtered_out += 1
                 self._batch_metrics.track_processed_records("filtered_out", 1)
-            except Exception as e:
+            except _TRANSFORM_PROCESSING_ERRORS as e:
                 error_type = self._error_classifier.classify(e)
                 if error_type.is_data_quality():
                     await self._quarantine_manager.quarantine_record(
@@ -284,7 +293,7 @@ class BatchTransformer:
                 is_filtered_out=True,
             )
 
-        except Exception as e:
+        except _TRANSFORM_PROCESSING_ERRORS as e:
             error_type = self._error_classifier.classify(e)
             if error_type.is_data_quality():
                 await self._quarantine_manager.quarantine_record(
