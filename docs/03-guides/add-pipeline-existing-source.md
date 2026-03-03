@@ -1,141 +1,138 @@
-# Руководство: Добавление пайплайна для существующего провайдера
+# Guide: Add a Pipeline for an Existing Provider
 
-> **Терминология**: В BioETL термин **провайдер** (provider) обозначает внешний API-источник данных.
-> См. [glossary.md](../00-project/glossary.md) для полного словаря терминов.
+This guide describes the current process for adding a **new entity pipeline** when provider integration already exists.
 
-Этот документ описывает процесс добавления нового ETL-пайплайна для провайдера, который уже интегрирован в систему (например, добавление новой сущности `Target` для провайдера `ChEMBL`).
+Example: add `{provider}=chembl`, `{entity}=mechanism`.
 
-В качестве примера мы рассмотрим добавление сущности `Target` в провайдер `chembl`.
+---
 
-## Общий алгоритм
+## 1. Target Artifacts
 
-1. **Анализ данных**: Изучить структуру данных новой сущности в API провайдера.
-1. **Конфигурация**: Создать YAML-файл конфигурации.
-1. **Реализация пайплайна**: Создать класс пайплайна в слое Application.
-1. **Регистрация**: Добавить пайплайн в `bootstrap.py`.
+For each new pipeline, update these artifacts:
 
-----------------------------------------------------------------------
+1. Config:
+- `configs/entities/{provider}/{entity}.yaml`
 
-## Шаг 1: Конфигурация
+2. Application transformer:
+- `src/bioetl/application/pipelines/{provider}/{entity}_transformer.py`
+  or existing provider transformer module when provider keeps a single `transformer.py`
 
-Создайте файл конфигурации в директории `configs/entities/<provider>/<entity>.yaml`.
+3. Silver schema (Pandera):
+- `src/bioetl/domain/schemas/{provider}/{entity}.py`
 
-**Пример:** `configs/entities/chembl/target.yaml`
+4. Gold contract (Pandera DataFrameModel):
+- `src/bioetl/domain/contracts/gold/{provider}.py`
+- export in `src/bioetl/domain/contracts/gold/__init__.py`
+- export in `src/bioetl/domain/contracts/__init__.py`
 
-```yaml
-# Inherits defaults from ../../base/pipeline.yaml
-pipeline_name: chembl_target
-provider: chembl
-entity_type: target
-version: "1.2.0"
-description: "Extract biological targets from ChEMBL API"
+5. Composition registration:
+- `src/bioetl/composition/factories/transformer_factory.py` (`register_all_transformers`)
+- `src/bioetl/composition/factories/pipeline_factories.py` (imports + `PIPELINE_CONFIGS`)
 
-business_primary_keys: ["target-chembl-id"]
-silver_table: "chembl_target"
-gold_table: "chembl_target"
+6. Tests:
+- `tests/unit/application/pipelines/{provider}/test_{entity}_transformer.py`
+- optional integration/e2e tests for provider adapter and runner path
 
-source_file: ../../providers/chembl.yaml
+---
 
-# DQ rules loaded from hierarchical config files (ADR-027):
-#   1. configs/base/quality.yaml
-#   2. configs/providers/chembl.yaml#quality
-#   3. configs/entities/chembl/target.yaml#quality
-dq_config_file: ../../entities/chembl/target.yaml
+## 2. Create Unified Entity Config
 
-# Paths auto-computed by convention (ADR-029),
-# override only when different from default
-sink:
-  bronze:
-    path: "data/output/bronze/chembl/target"
-  silver:
-    path: "data/output/silver/chembl/target"
-    primary_key: ["target-chembl-id"]
-    partition_by: ["target_type"]
-  gold:
-    path: "data/output/gold/chembl/target"
-```
+Create `configs/entities/{provider}/{entity}.yaml`.
 
-## Шаг 2: Реализация трансформера (Domain/Application Boundary)
+Start from template:
+- `docs/04-reference/templates/config.yaml.tpl`
 
-Создайте отдельный трансформер в `src/bioetl/application/pipelines/<provider>/` (или в выделенном модуле трансформаций, если он уже используется в проекте).
-Логика Bronze -> Silver должна находиться в классе трансформера, а не в классе пайплайна.
+Minimum required sections:
+- top-level: `version`, `provider`, `entity`
+- required sections: `pipeline`, `schema`, `quality`, `filters`, `contracts`
 
-Класс должен наследовать `BaseChemblTransformer` (или `BaseTransformer`) и реализовывать `_transform_impl`.
+Important consistency rules:
+- `provider == pipeline.provider`
+- `entity == pipeline.entity_type`
+- `pipeline.pipeline_name == {provider}_{entity}`
+- `pipeline.business_primary_keys` must be non-empty
 
-**Пример:** `src/bioetl/application/pipelines/chembl/target_transformer.py`
+---
 
-```python
-from __future__ import annotations
+## 3. Implement Transformer
 
-from typing import Any
+Create transformer with `BaseTransformer`.
 
-from bioetl.application.pipelines.chembl.base-transformer import BaseChemblTransformer
-from bioetl.domain.transformations import generate-content-hash, generate-entity-id
+Start from template:
+- `docs/04-reference/templates/pipeline.py.tpl`
 
+Implementation requirements:
+- constructor should receive DI dependencies (tracer/metrics/filters/identity/normalizer)
+- implement `_transform_impl(context, record, index)`
+- compute:
+  - `entity_id` via `compute_entity_id(...)`
+  - `content_hash` via `compute_content_hash(...)`
+- return `SilverRecord` (or `None` for skipped invalid input)
 
-class ChEMBLTargetTransformer(BaseChemblTransformer):
-    """Bronze -> Silver трансформация для сущности ChEMBL Target."""
+---
 
-    def _transform_impl(self, record: dict[str, Any]) -> dict[str, Any] | None:
-        if not record.get("target-chembl-id"):
-            return None
+## 4. Register Transformer and Pipeline Factory
 
-        target_id = str(record["target-chembl-id"])
+### 4.1 Transformer registry
 
-        entity-id = generate-entity-id(
-            record={"target-chembl-id": target_id},
-            provider=self.provider,
-            id-field="target-chembl-id",
-        )
+Update `src/bioetl/composition/factories/transformer_factory.py`:
+- import transformer class
+- add `register_transformer("{provider}", "{entity}", {TransformerClass})`
 
-        return {
-            "entity-id": entity-id,
-            "target-chembl-id": target_id,
-            "pref-name": record.get("pref-name"),
-            "target_type": record.get("target_type"),
-            "organism": record.get("organism"),
-            "content-hash": generate-content-hash(record, self.provider),
-        }
-```
+### 4.2 Pipeline factory registry
 
-## Шаг 3: Регистрация (Composition Layer)
+Update `src/bioetl/composition/factories/pipeline_factories.py`:
+- add imports for transformer/schemas/contracts
+- add new `PipelineFactoryConfig(...)` entry into `PIPELINE_CONFIGS`
 
-В v5.1 вам больше не нужно вручную менять `bootstrap.py`. Достаточно зарегистрировать новый экземпляр `GenericPipelineFactory`.
+Start from template:
+- `docs/04-reference/templates/factory.py.tpl`
 
-Откройте `src/bioetl/composition/factories/pipeline_factories.py` и добавьте определение:
+---
 
-```python
-from bioetl.application.pipelines.chembl.target-transformer import (
-    ChEMBLTargetTransformer,
-)
-from bioetl.application.pipelines.generic import GenericPipeline
-from bioetl.infrastructure.schemas.silver import CHEMBL_TARGET_SCHEMA
+## 5. Provider Config Sync
 
-# Определение фабрики
-chembl_target_factory = GenericPipelineFactory(
-    pipeline_name="chembl_target",
-    pipeline_class=GenericPipeline,
-    provider="chembl",
-    silver_schema=CHEMBL_TARGET_SCHEMA,
-    transformer_class=ChEMBLTargetTransformer,
-)
+Update `configs/providers/{provider}.yaml`:
+- append entity to `entities:` list
+- add `entity_notes.{entity}` block (description/input mode)
 
+---
 
-def register_all_pipelines() -> None:
-    # ...
-    PipelineRegistry.register_factory(chembl_target_factory)
-```
+## 6. Validation and Tests
 
-Теперь пайплайн доступен для запуска:
+Config validation:
 
 ```bash
-python -m bioetl run --pipeline chembl_target
+python scripts/validate_pipeline_configs.py --verbose
 ```
 
-## Чек-лист
+Config load smoke:
 
-- [ ] Конфиг YAML создан.
-- [ ] Класс трансформера реализован (Silver трансформация).
-- [ ] Схема Silver (PyArrow) определена в `infrastructure/schemas/silver.py`.
-- [ ] Пайплайн зарегистрирован в `pipeline_factories.py`.
-- [ ] Тесты добавлены.
+```bash
+python -c "from bioetl.infrastructure.config_loader import load_pipeline_config; load_pipeline_config('chembl_mechanism'); print('ok')"
+```
+
+Targeted tests:
+
+```bash
+python -m pytest tests/unit/application/pipelines/{provider}/ -q
+python -m pytest tests/architecture/test_registry_contracts.py -q
+python -m pytest tests/architecture/test_config_ci_invariants.py -q
+```
+
+Optional runtime smoke:
+
+```bash
+python -m bioetl run --pipeline {provider}_{entity} --limit 10
+```
+
+---
+
+## 7. Definition of Done
+
+Pipeline is complete when:
+- unified entity config passes schema validation
+- transformer registered in both registries (transformer + pipeline factory)
+- Silver and Gold contracts are available and exported
+- unit tests pass
+- documentation/spec for pipeline is updated

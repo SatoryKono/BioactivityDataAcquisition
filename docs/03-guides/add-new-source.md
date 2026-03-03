@@ -1,178 +1,193 @@
-# Руководство: Подключение нового провайдера
+# Guide: Add a New Provider
 
-> **Терминология**: В BioETL термин **провайдер** (provider) обозначает внешний API-источник данных
-> (ChEMBL, PubChem, UniProt и т.д.). См. [glossary.md](../00-project/glossary.md) для полного словаря терминов.
+This guide describes the current (v6.x) process for adding a **new external provider** to BioETL.
 
-Этот документ описывает полный цикл подключения нового провайдера в BioETL.
+Scope:
+- add a provider source config (`configs/providers/{provider}.yaml`)
+- add an infrastructure adapter (`src/bioetl/infrastructure/adapters/{provider}/`)
+- register provider in Composition (`src/bioetl/composition/providers/registration.py`)
+- bootstrap at least one pipeline for this provider
 
-В качестве примера мы рассмотрим подключение провайдера **PubMed** (сущность `Publication`).
-
-## Общий алгоритм
-
-1.  **Инфраструктура**: Создать адаптер (клиент API) для взаимодействия с внешним провайдером.
-2.  **Конфигурация**: Определить настройки подключения (URL, ключи API) и конфиг пайплайна.
-3.  **Приложение**: Реализовать класс пайплайна.
-4.  **Сборка**: Создать фабрику и зарегистрировать провайдера в `ProviderRegistry`.
+Use this guide together with:
+- [add-pipeline-existing-source.md](add-pipeline-existing-source.md)
+- [pipeline-configuration.md](pipeline-configuration.md)
+- [RULES.md](../00-project/RULES.md)
 
 ---
 
-## Шаг 1: Создание адаптера (Infrastructure Layer)
+## 1. Naming and Scope
 
-Создайте клиент для API в `src/bioetl/infrastructure/adapters/<provider>/`.
-Адаптер должен использовать `UnifiedHTTPClient` или специфичную библиотеку, обернутую в наш интерфейс.
+Provider naming rules:
+- provider id: `snake_case` (example: `myprovider`)
+- entity ids: `snake_case` singular (`publication`, `compound`)
+- pipeline name: `{provider}_{entity}`
 
-**Пример:** `src/bioetl/infrastructure/adapters/pubmed/client.py`
+Before implementation:
+- verify provider is not already present in `configs/providers/`
+- define first supported entity (recommended: a small, stable endpoint)
 
-```python
-from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+---
 
-class PubMedAdapter:
-    """Адаптер для PubMed API."""
-    def __init__(self, http_client: UnifiedHTTPClient, api_key: str | None = None):
-        self.http_client = http_client
-        self.base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
-        self.api_key = api_key
+## 2. Create Provider Source Config
 
-    async def fetch_publications(self, query: str, retmax: int = 100):
-        """Получение публикаций."""
-        params = {
-            "db": "pubmed",
-            "term": query,
-            "retmode": "json",
-            "retmax": retmax
-        }
-        if self.api_key:
-            params["api_key"] = self.api_key
+Create `configs/providers/{provider}.yaml`.
 
-        # Используем UnifiedHTTPClient для запросов (с метриками и повторами)
-        return await self.http_client.get(f"{self.base_url}/esearch.fcgi", params=params)
-```
-
-## Шаг 2: Конфигурация
-
-### 2.1 Настройки приложения
-Убедитесь, что настройки (например, API ключи) доступны через `src/bioetl/infrastructure/config.py`.
-
-### 2.2 Конфиг пайплайна
-Создайте `configs/entities/pubmed/publication.yaml`.
+Example template:
 
 ```yaml
-pipeline:
-    name: pubmed_publication
-    provider: pubmed
-    entity: publication
+version: 1.0.0
+provider: myprovider
 
 source:
-    type: api
-    loading_strategy: incremental
+  batch_size: 100
+  provider_config:
+    provider: myprovider
+    base_url: https://api.example.org/v1
+    auth_type: api_key
+    api_key_env: BIOETL_MYPROVIDER_API_KEY
+    client:
+      timeout_sec: 60.0
+      max_retries: 3
+    pagination:
+      page_size: 100
+      id_batch_size: 50
+      strategy: offset
+  circuit_breaker:
+    failure_threshold: 5
+    recovery_timeout: 300
+  rate_limit:
+    requests_per_second: 2.0
+    burst: 5
+  health_check:
+    endpoint: /health
+    timeout: 10
+  retry:
+    use_retry_after: true
 
-sink:
-    silver:
-        path: "data/output/silver/pubmed/publication"
-        format: delta
-        primary_key: ["pmid"]
+entities:
+  - publication
+
+entity_notes:
+  publication:
+    description: Publication metadata
+    input_mode: DOI/title search
+
+quality:
+  version: 1.0.0
+  provider: myprovider
+  thresholds:
+    soft_fail: 0.05
+    hard_fail: 0.15
+  field_validations: []
+
+filters:
+  version: 1.0.0
+  provider: myprovider
+  input_filter:
+    batch_size: 100
+  gold_filters:
+    required_fields: []
+    columns: {}
 ```
 
-## Шаг 3: Реализация пайплайна (Application Layer)
+Notes:
+- `source.provider_config.pagination` is the canonical place for paging defaults.
+- Keep credentials in env vars (`*_ENV`), never in YAML.
 
-Создайте `src/bioetl/application/pipelines/pubmed_publication.py`.
+---
+
+## 3. Implement Infrastructure Adapter
+
+Create adapter module under:
+- `src/bioetl/infrastructure/adapters/{provider}/client.py`
+
+Adapter must satisfy `DataSourcePort`/`FilterableDataSourcePort` contract and use `UnifiedHTTPClient`.
+
+Start from template:
+- `docs/04-reference/templates/source_adapter.py.tpl`
+
+Minimum expectations:
+- implement `fetch(...)` async generator
+- implement or inherit `health_check()`
+- keep API/network logic in infrastructure only
+
+---
+
+## 4. Register Provider in Composition Layer
+
+Update `src/bioetl/composition/providers/registration.py`:
+
+1. Add provider-specific creator function:
+- `_create_{provider}_data_source(...) -> DataSourcePort`
+
+2. Register provider inside `register_all_providers()`:
 
 ```python
-from bioetl.application.core.base import BasePipeline
-# ... (см. шаблоны и примеры для ChEMBL)
-
-class PubMedPublicationPipeline(BasePipeline):
-    # Реализация методов transform_bronze_to_silver и др.
-    pass
+if not ProviderRegistry.is_registered("myprovider"):
+    ProviderRegistry.register(
+        "myprovider",
+        ProviderConfig(
+            adapter_class=MyProviderAdapter,
+            http_config=HttpConfig(rate=2.0, capacity=5),
+            requires_http_client=True,
+            requires_logger=True,
+            data_source_creator=_create_myprovider_data_source,
+        ),
+    )
 ```
 
-## Шаг 4: Регистрация (Composition Layer)
+If provider needs custom lifecycle/constructor wiring, use `custom_creator=` as in existing providers.
 
-В v5.2 сборка пайплайнов декларативна и централизована через `ProviderRegistry`.
+---
 
-### 4.1 Регистрация провайдера в ProviderRegistry
+## 5. Add First Pipeline for the Provider
 
-Добавьте конфигурацию провайдера в `src/bioetl/composition/providers/registration.py`:
+For the first provider entity, complete all items from
+[add-pipeline-existing-source.md](add-pipeline-existing-source.md):
 
-```python
-from bioetl.composition.providers import ProviderConfig, ProviderRegistry
-from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
+- unified entity config: `configs/entities/{provider}/{entity}.yaml`
+- transformer: `src/bioetl/application/pipelines/{provider}/...`
+- Pandera Silver schema + Gold contract
+- `register_all_transformers()` entry
+- `PIPELINE_CONFIGS` entry in `pipeline_factories.py`
 
-def create_pubmed_data_source(
-    settings: Settings,
-    pipeline_config: PipelineYamlConfig,
-    logger: LoggerPort,
-    filter_config: InputFilterConfig | None = None,
-    metrics: MetricsPort | None = None,
-    pipeline_name: str = "unknown",
-) -> DataSourcePort:
-    """Create PubMed data source."""
-    http_client = HttpClientFactory.create-for-provider("pubmed", settings, logger)
-    adapter = PubMedAdapter(http_client, api_key=settings.pubmed-api_key)
-    return wrap_with_filter(adapter, filter_config, logger, pipeline_name)
+---
 
-# Регистрация в register_providers():
-ProviderRegistry.register(
-    "pubmed",
-    ProviderConfig(
-        data_source_creator=create_pubmed_data_source,
-        transformers={"publication": PubMedPublicationTransformer},
-        pipelines=["pubmed_publication"],
-    ),
-)
+## 6. Validation Checklist
+
+Configuration:
+
+```bash
+python scripts/validate_pipeline_configs.py --verbose
 ```
 
-### 4.2 Создание трансформера
+Loadability smoke (provider + one pipeline):
 
-Создайте `src/bioetl/application/pipelines/pubmed/transformer.py`:
-
-```python
-from bioetl.application.core.base-transformer import BaseTransformer
-
-class PubMedPublicationTransformer(BaseTransformer):
-    """Трансформер для PubMed публикаций."""
-
-    def _extract_business_data(self, record: dict) -> dict:
-        """Извлечение бизнес-данных из Bronze записи."""
-        return {
-            "pmid": record.get("pmid"),
-            "title": record.get("title"),
-            "abstract": record.get("abstract"),
-            # ... другие поля
-        }
+```bash
+python -c "from bioetl.infrastructure.config_loader import load_pipeline_config, load_source_config; load_source_config('myprovider'); load_pipeline_config('myprovider_publication'); print('ok')"
 ```
 
-### 4.3 Регистрация пайплайна
+Architecture/registry smoke:
 
-Добавьте фабрику пайплайна в `src/bioetl/composition/factories/pipeline_factories.py`:
-
-```python
-from bioetl.application.pipelines.pubmed.publication import PubMedPublicationPipeline
-from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
-from bioetl.infrastructure.schemas.gold import PubMedPublicationGoldSchema
-
-pubmed_publication_factory = GenericPipelineFactory(
-    pipeline_name="pubmed_publication",
-    pipeline_class=PubMedPublicationPipeline,
-    provider="pubmed",
-    transformer_class=PubMedPublicationTransformer,  # DI через GenericPipelineFactory
-    gold-schema=PubMedPublicationGoldSchema,
-)
-
-def register_all_pipelines() -> None:
-    # ...
-    PipelineRegistry.register_factory(pubmed_publication_factory)
+```bash
+python -m pytest tests/architecture/test_registry_contracts.py -q
+python -m pytest tests/architecture/test_source_config_usage.py -q
 ```
 
-Теперь ваш пайплайн автоматически доступен через CLI по имени `pubmed_publication`.
+Recommended targeted tests:
 
-## Чек-лист
+```bash
+python -m pytest tests/unit/application/pipelines/myprovider/ -q
+python -m pytest tests/integration/ -k myprovider -q
+```
 
-- [ ] Адаптер провайдера реализован (`infrastructure/adapters/pubmed/`)
-- [ ] Конфиг YAML создан (`configs/entities/pubmed/publication.yaml`)
-- [ ] Трансформер реализован с наследованием от `BaseTransformer`
-- [ ] Пайплайн реализован с наследованием от `BasePipeline`
-- [ ] Провайдер зарегистрирован в `ProviderRegistry` (`registration.py`)
-- [ ] Пайплайн зарегистрирован в `pipeline_factories.py` с `transformer_class`
-- [ ] Unit-тесты с инъекцией трансформера
-- [ ] Integration-тесты с VCR-кассетами
+---
+
+## 7. Done Criteria
+
+Provider onboarding is complete when:
+- provider config exists and loads
+- adapter and provider registration are in place
+- at least one pipeline runs end-to-end (`run --pipeline {provider}_{entity}`)
+- config/schema/contract validations pass
+- provider docs and pipeline docs are updated

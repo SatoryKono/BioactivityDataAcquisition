@@ -1,28 +1,45 @@
-"""
-Template for a new Source Adapter.
+"""Template for a new provider adapter.
+
 Location: src/bioetl/infrastructure/adapters/<provider>/client.py
 """
-from typing import Any, AsyncGenerator
 
-from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+from __future__ import annotations
 
-class {{ProviderName}}Adapter:
-    """Adapter for {{ProviderName}} API."""
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Any
 
-    def __init__(self, http_client: UnifiedHTTPClient, api_key: str | None = None):
-        self.http_client = http_client
-        self.base_url = "{{BaseUrl}}"
-        self.api_key = api_key
+from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 
-    async def fetch_data(self, params: dict[str, Any]) -> AsyncGenerator[dict, None]:
-        """
-        Fetch data from the source.
-        Implement pagination and error handling here if not handled by UnifiedHTTPClient.
-        """
-        # Example implementation
-        endpoint = f"{self.base_url}/endpoint"
-        response = await self.http_client.get(endpoint, params=params)
+if TYPE_CHECKING:
+    from collections.abc import AsyncIterator
 
-        # Yield records
-        for item in response.get("results", []):
-            yield item
+    from bioetl.domain.ports import LoggerPort, MetricsPort
+    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+
+
+@dataclass
+class {{Provider}}Adapter(BaseHttpAdapter):
+    """Data source adapter for {{Provider}} API."""
+
+    http_client: UnifiedHTTPClient
+    logger: LoggerPort
+    metrics: MetricsPort | None = None
+    provider_name: str = field(init=False, default="{{provider}}")
+
+    def __post_init__(self) -> None:
+        self._init_adapter_metrics()
+
+    async def fetch(
+        self,
+        entity_type: str,
+        limit: int | None = None,
+        query: str | None = None,
+        filter_ids: list[str] | None = None,
+        filter_field: str | None = None,
+        offset: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch records from provider API (async generator)."""
+        # TODO: implement provider endpoint routing + pagination + filtering.
+        # Use self.http_client.request/get and yield normalized raw records.
+        if False:
+            yield {}
