@@ -88,21 +88,8 @@ def analyze_standard_config(
                 "Mismatch between pipeline.business_primary_keys and contracts.primary_key"
             )
 
-    # === ADR-014/025: Sink checks (optional but recommended when present) ===
+    # === Sink checks (keep aligned with current Pydantic schema) ===
     sink = _as_dict(pipeline_config.get("sink"))
-    if sink:
-        silver = _as_dict(sink.get("silver"))
-        gold = _as_dict(sink.get("gold"))
-
-        if silver:
-            if "sort_by" not in silver:
-                gaps.medium.append("Missing sink.silver.sort_by (ADR-014)")
-            if "primary_key" not in silver:
-                gaps.medium.append("Missing sink.silver.primary_key (ADR-025)")
-        if gold:
-            gold_enabled = gold.get("enabled", True)
-            if gold_enabled and "sort_by" not in gold:
-                gaps.medium.append("Missing sink.gold.sort_by (ADR-014)")
 
     # === ADR-025: Hierarchical paths (SHOULD) ===
     provider = pipeline_config.get("provider", "")
@@ -319,7 +306,7 @@ def generate_report(all_gaps: list[ConfigGaps]) -> str:
             "### Priority 1 (Medium - Should Fix)",
             "1. Add `pipeline.description` and semver `version` where missing",
             "2. Migrate inline `dq_overrides` thresholds to `dq_config_file` (ADR-027)",
-            "3. For configs using `pipeline.sink`, add `sort_by`/`primary_key` for deterministic writes",
+            "3. Keep `pipeline.sink` keys aligned with `PipelineYamlConfig` schema",
             "",
             "### Priority 2 (Low - Nice to Have)",
             "1. Unify `sink.*.path` to end with `{provider}/{entity}`",
