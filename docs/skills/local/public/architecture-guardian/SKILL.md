@@ -30,26 +30,26 @@ interfaces/ -> composition/ -> application/ -> domain/ <- infrastructure/
 | interfaces | OK | OK | OK | OK | OK |
 
 ## Allowed Exceptions
-- Allow `TYPE-CHECKING` imports (type hints only, no runtime dependency).
+- Allow `TYPE_CHECKING` imports (type hints only, no runtime dependency).
 - Allow `domain.ports` imports in infrastructure (port protocols are contracts).
 - Allow `domain.types` and `domain.exceptions` imports everywhere.
 
 ## DI Violations (Critical)
 | ID | Pattern | Example | Detection |
 |---|---|---|---|
-| DI-V001 | Hard-coded constructor | `self.client = ConcreteClass()` | `rg "self\\.[a-z-]* = [A-Z][a-zA-Z]*\\(" src/bioetl/application -g "*.py"` |
+| DI-V001 | Hard-coded constructor | `self.client = ConcreteClass()` | `rg "self\\.[a-z_]* = [A-Z][a-zA-Z]*\\(" src/bioetl/application -g "*.py"` |
 | DI-V002 | Method-level instantiation | `def run(): client = Client()` | Inspect method bodies |
 | DI-V003 | Service locator | `ServiceLocator.get()`, `Container.resolve()` | `rg "Locator|Container\\.resolve" src/bioetl -g "*.py"` |
-| DI-V004 | Import-time side effects | `logger = structlog.get-logger()` at module level | Inspect module-level assignments |
+| DI-V004 | Import-time side effects | `logger = structlog.get_logger()` at module level | Inspect module-level assignments |
 | DI-V005 | Factory in business logic | Factory calls outside composition | Ensure factories exist only in `composition/` |
 
 ## Validation Workflow
 1. Read the target files (focus on changed files).
-2. Check imports against the matrix above (ignore `TYPE-CHECKING`).
+2. Check imports against the matrix above (ignore `TYPE_CHECKING`).
 3. Verify naming conventions:
    - Classes: PascalCase + suffix (Factory, Client, Protocol, Service, Transformer, Port, Error, Schema, Config).
-   - Functions: snake-case + prefix (get-, fetch-, create-, validate-, is-, has-, can-, iter-).
-   - Modules: lowercase-snake-case, no abbreviations.
+   - Functions: snake_case + prefix (get_, fetch_, create_, validate_, is_, has_, can_, iter_).
+   - Modules: lowercase_snake_case, no abbreviations.
 4. Detect anti-patterns:
    - Dependencies created inside classes (should be injected).
    - Direct `import structlog` in application/interfaces (use LoggerPort).
@@ -62,7 +62,7 @@ interfaces/ -> composition/ -> application/ -> domain/ <- infrastructure/
 ## Valid Patterns (Do Not Flag)
 - Optional parameters with defaults, for example `policy: Policy | None = None`.
 - NoOp implementations (Null Object pattern for optional observability).
-- Re-exports for compatibility, for example `from module import X; --all-- = ["X"]`.
+- Re-exports for compatibility, for example `from module import X; __all__ = ["X"]`.
 - Large files that delegate responsibilities cleanly (size alone is not a god object).
 - Graceful degradation with conservative fallback values when dependencies are unavailable.
 - Int to float coercion in Gold schemas for nullable integers.
@@ -70,15 +70,15 @@ interfaces/ -> composition/ -> application/ -> domain/ <- infrastructure/
 ## Verification Commands
 ```bash
 # Import violations
-rg "from bioetl\\.infrastructure" src/bioetl/application -g "*.py" | rg -v "TYPE-CHECKING"
-rg "from bioetl\\.application" src/bioetl/infrastructure -g "*.py" | rg -v "TYPE-CHECKING"
+rg "from bioetl\\.infrastructure" src/bioetl/application -g "*.py" | rg -v "TYPE_CHECKING"
+rg "from bioetl\\.application" src/bioetl/infrastructure -g "*.py" | rg -v "TYPE_CHECKING"
 
 # Anti-patterns
 rg "print\\(" src/bioetl -g "*.py" | rg -v "# noqa"
 rg "import structlog" src/bioetl/application -g "*.py"
 
 # DI violations
-rg "self\\.[a-z-]* = [A-Z][a-zA-Z]*\\(" src/bioetl/application -g "*.py"
+rg "self\\.[a-z_]* = [A-Z][a-zA-Z]*\\(" src/bioetl/application -g "*.py"
 rg "import structlog" src/bioetl/application src/bioetl/domain -g "*.py"
 
 # Architecture checks
@@ -123,14 +123,14 @@ make lint
 ## Constraints
 
 ### MUST
-- Flag all import boundary violations (except `TYPE-CHECKING`).
+- Flag all import boundary violations (except `TYPE_CHECKING`).
 - Provide exact file:line references.
 - Suggest actionable fixes.
 - Reference the relevant `RULES.md` section or ADR.
 - Verify claims by reading actual code.
 
 ### MUST NOT
-- Flag `TYPE-CHECKING` imports as violations.
+- Flag `TYPE_CHECKING` imports as violations.
 - Flag the valid patterns listed above.
 - Make assumptions without code verification.
 - Report false positives (check `CLAUDE.md` section 2.3 for known non-issues).

@@ -1,0 +1,33 @@
+name: Skills Consistency
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - ".codex/skills/**"
+      - "docs/skills/local/**"
+      - "docs/skills/README.md"
+      - "scripts/check_skills_mirror.sh"
+      - ".github/workflows/skills-consistency.yml"
+  pull_request:
+    branches: [ main ]
+    paths:
+      - ".codex/skills/**"
+      - "docs/skills/local/**"
+      - "docs/skills/README.md"
+      - "scripts/check_skills_mirror.sh"
+      - ".github/workflows/skills-consistency.yml"
+
+jobs:
+  verify-local-skills-mirror:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Verify docs/skills/local mirror
+        run: bash scripts/check_skills_mirror.sh --check

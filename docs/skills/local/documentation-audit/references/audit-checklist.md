@@ -1,7 +1,7 @@
-# BioETL Documentation Audit Checklist (v5.23+)
+# BioETL Documentation Audit Checklist (v5.14+)
 
 ## Scope and inventory
-- Confirm repo root and current target version (v5.23+).
+- Confirm repo root and current target version (v5.14+).
 - Identify doc entry points: README.md and mkdocs.yml.
 - List all files under docs/ (use `rg --files docs`).
 

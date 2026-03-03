@@ -1,15 +1,17 @@
-# Local Skills Catalog
+# Local Skills Catalog (BioETL Core)
 
-Consolidated registry of project-local skills under `.codex/skills/`.
+Consolidated registry of BioETL-focused local skills under `.codex/skills/`.
 
 ## Canonical Rules
 
-- Prefer local skills from `.codex/skills/` over global `/root/.codex/skills/` when both exist.
+- `.codex/skills/` is the canonical source for repository-local skills.
+- `docs/skills/local/` is a generated mirror and must not be edited manually.
 - Treat each `SKILL.md` frontmatter (`name`, `description`) as the trigger contract.
-- Validate changed skills with:
+- Verify and sync the local docs mirror with:
 
 ```bash
-python3 /root/.codex/skills/.system/skill-creator/scripts/quick-validate.py <skill-dir>
+bash scripts/check_skills_mirror.sh --check
+bash scripts/check_skills_mirror.sh --sync
 ```
 
 ## Skill Groups
@@ -60,3 +62,7 @@ python3 /root/.codex/skills/.system/skill-creator/scripts/quick-validate.py <ski
 
 - All local skills are structurally valid.
 - `documentation-cascade-audit` has been normalized from template/TODO state to an active skill.
+
+## Shared Generic Skills
+
+Additional non-BioETL generic skills may coexist under `.codex/skills/` (for example discovery, decision, and research helpers). They are intentionally excluded from the core catalog above.

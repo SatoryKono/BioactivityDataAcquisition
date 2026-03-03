@@ -28,13 +28,13 @@ uv run python -m pytest tests/ --durations=20 -q 2>&1 | head -30
 ## 2) Workload score
 
 ```text
-workload-score = files-count * complexity-factor * failing-factor * coverage-gap-factor
+workload_score = files_count * complexity_factor * failing_factor * coverage_gap_factor
 ```
 
-- `files-count`: Python files in scope (source + tests)
-- `complexity-factor`: 1.0 low, 1.5 medium, 2.0 high
-- `failing-factor`: `1 + (fail-ratio * 2)`
-- `coverage-gap-factor`: `1 + gap` (gap in range 0.0-1.0)
+- `files_count`: Python files in scope (source + tests)
+- `complexity_factor`: 1.0 low, 1.5 medium, 2.0 high
+- `failing_factor`: `1 + (fail_ratio * 2)`
+- `coverage_gap_factor`: `1 + gap` (gap in range 0.0-1.0)
 
 Decision:
 - `< 40`: Small, self-execute
@@ -67,7 +67,7 @@ Execution order:
 ## 4) Plan file contract (`00-swarm-plan.md`)
 
 Must contain:
-- task metadata (`task-id`, date, mode, scope)
+- task metadata (`task_id`, date, mode, scope)
 - baseline metrics table (total/pass/fail/skip/error, coverage overall/domain, arch tests, mypy, timings)
 - L2 decomposition table with estimated files and workload score
 - execution order and parallelism constraints
@@ -77,9 +77,9 @@ Must contain:
 1. Read all child `report.md` and `metrics.json`.
 2. Merge `telemetry/raw/*.jsonl`.
 3. Build:
-- `telemetry/aggregated/failure-stats.csv`
-- `telemetry/aggregated/flaky-index.csv`
-- `telemetry/failure-frequency-summary.md`
+- `telemetry/aggregated/failure_stats.csv`
+- `telemetry/aggregated/flaky_index.csv`
+- `telemetry/failure_frequency_summary.md`
 - `flakiness-database.json`
 4. Generate `FINAL-REPORT.md`.
 5. Mark unresolved claims as `Requires Manual Review`.

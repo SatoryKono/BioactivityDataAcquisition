@@ -1,6 +1,6 @@
 ---
 name: py-test-swarm
-description: Orchestrate hierarchical BioETL test swarms (L1/L2/L3) for full-audit, fix-failures, coverage-boost, optimize, and flakiness-scan with workload-based delegation, telemetry aggregation, flaky analysis, and final reporting in reports/test-swarm/task-id/FINAL-REPORT.md. Use when users request broad test campaigns, failure triage at scale, coverage expansion, or stability diagnostics across layers/providers.
+description: Orchestrate hierarchical BioETL test swarms (L1/L2/L3) for full_audit, fix_failures, coverage_boost, optimize, and flakiness_scan with workload-based delegation, telemetry aggregation, flaky analysis, and final reporting in reports/test-swarm/task-id/FINAL-REPORT.md. Use when users request broad test campaigns, failure triage at scale, coverage expansion, or stability diagnostics across layers/providers.
 ---
 
 # py-test-swarm
@@ -17,12 +17,12 @@ Decompose work into L2/L3 agents, enforce constraints, aggregate evidence, and p
 2. Read profile:
 - `../../../.claude/agents/py-test-swarm.md`
 3. Confirm input contract:
-- `task-id` (required)
-- `mode` (required): `full-audit | fix-failures | coverage-boost | optimize | flakiness-scan`
+- `task_id` (required)
+- `mode` (required): `full_audit | fix_failures | coverage_boost | optimize | flakiness_scan`
 - `scope` (optional, default all tests)
-- `baseline-report` (optional)
-- `flakiness-runs` (optional, default `5`)
-4. Create artifact root: `reports/test-swarm/<task-id>/`.
+- `baseline_report` (optional)
+- `flakiness_runs` (optional, default `5`)
+4. Create artifact root: `reports/test-swarm/<task_id>/`.
 
 ## L1 Workflow
 1. Run Discovery baseline commands from [l1-playbook.md](references/l1-playbook.md).
@@ -42,7 +42,7 @@ Use three axes:
 ## Delegation Rules
 Calculate:
 ```text
-workload-score = files-count * complexity-factor * failing-factor * coverage-gap-factor
+workload_score = files_count * complexity_factor * failing_factor * coverage_gap_factor
 ```
 
 Decision:
@@ -72,15 +72,15 @@ For L3 agents always prepend the mandatory leaf-agent instruction from [l2-l3-ta
 
 ## Artifact Contract
 Minimum required outputs:
-- `reports/test-swarm/<task-id>/00-swarm-plan.md`
-- `reports/test-swarm/<task-id>/L2-*/report.md`
-- `reports/test-swarm/<task-id>/L2-*/metrics.json`
-- `reports/test-swarm/<task-id>/telemetry/raw/events-*.jsonl`
-- `reports/test-swarm/<task-id>/telemetry/aggregated/failure-stats.csv`
-- `reports/test-swarm/<task-id>/telemetry/aggregated/flaky-index.csv`
-- `reports/test-swarm/<task-id>/telemetry/failure-frequency-summary.md`
-- `reports/test-swarm/<task-id>/flakiness-database.json`
-- `reports/test-swarm/<task-id>/FINAL-REPORT.md`
+- `reports/test-swarm/<task_id>/00-swarm-plan.md`
+- `reports/test-swarm/<task_id>/L2-*/report.md`
+- `reports/test-swarm/<task_id>/L2-*/metrics.json`
+- `reports/test-swarm/<task_id>/telemetry/raw/events_*.jsonl`
+- `reports/test-swarm/<task_id>/telemetry/aggregated/failure_stats.csv`
+- `reports/test-swarm/<task_id>/telemetry/aggregated/flaky_index.csv`
+- `reports/test-swarm/<task_id>/telemetry/failure_frequency_summary.md`
+- `reports/test-swarm/<task_id>/flakiness-database.json`
+- `reports/test-swarm/<task_id>/FINAL-REPORT.md`
 
 ## Constraints
 MUST:
@@ -99,11 +99,11 @@ MUST NOT:
 - Leak secrets in logs/reports/cassettes.
 
 ## Mode Matrix
-- `full-audit`: phases 0-5
-- `fix-failures`: phases 0-1
-- `coverage-boost`: phases 0 and 2
+- `full_audit`: phases 0-5
+- `fix_failures`: phases 0-1
+- `coverage_boost`: phases 0 and 2
 - `optimize`: phases 0 and 3
-- `flakiness-scan`: phases 0 and 4
+- `flakiness_scan`: phases 0 and 4
 
 ## Completion Criteria
 Treat task as done only when:
