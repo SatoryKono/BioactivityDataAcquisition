@@ -73,7 +73,9 @@ class MergeService:
         self._renamer = ColumnRenamer(logger)
         self._orderer = ColumnOrderer(
             logger,
-            column_groups=merge_config.column_groups if merge_config.column_groups else None,
+            column_groups=merge_config.column_groups
+            if merge_config.column_groups
+            else None,
         )
 
         self._priority_orderer = ColumnPriorityOrderer(logger)
@@ -106,9 +108,11 @@ class MergeService:
         """Merge seed, dependency, and enricher data into unified output."""
         started_at = datetime.now(tz=UTC)
 
-        seed_df, records_from_seed, effective_seed_pipeline = (
-            await self._prepare_seed_dataframe(seed_table, seed_pipeline)
-        )
+        (
+            seed_df,
+            records_from_seed,
+            effective_seed_pipeline,
+        ) = await self._prepare_seed_dataframe(seed_table, seed_pipeline)
 
         sources_used = ["seed"]
         enricher_dfs, enricher_sources = await self._load_enricher_dataframes(
@@ -207,7 +211,9 @@ class MergeService:
         seed_df = await self._read_silver_table(seed_table)
         records_from_seed = len(seed_df)
 
-        effective_seed_pipeline = seed_pipeline or self._infer_pipeline_from_table(seed_table)
+        effective_seed_pipeline = seed_pipeline or self._infer_pipeline_from_table(
+            seed_table
+        )
         if not effective_seed_pipeline:
             return seed_df, records_from_seed, None
 
@@ -225,7 +231,11 @@ class MergeService:
             "Renamed seed columns to qualified format",
             pipeline=effective_seed_pipeline,
             qualified_count=len(
-                [col for col in seed_df.columns if "." in col and not col.startswith("_")]
+                [
+                    col
+                    for col in seed_df.columns
+                    if "." in col and not col.startswith("_")
+                ]
             ),
         )
         return seed_df, records_from_seed, effective_seed_pipeline
@@ -348,7 +358,9 @@ class MergeService:
             return merged_df, None, []
 
         enricher_pipelines_joined = [
-            enricher.pipeline for enricher in enrichers if enricher.pipeline in enricher_dfs
+            enricher.pipeline
+            for enricher in enrichers
+            if enricher.pipeline in enricher_dfs
         ]
         if not enricher_pipelines_joined:
             return merged_df, None, []
@@ -510,7 +522,9 @@ class MergeService:
     def _infer_pipeline_from_table(self, table_path: str) -> str | None:
         """Infer pipeline name from table path (silver/provider/entity)."""
         normalized = table_path.replace("\\", "/")
-        has_layer = any(layer in normalized for layer in ("silver/", "gold/", "bronze/"))
+        has_layer = any(
+            layer in normalized for layer in ("silver/", "gold/", "bronze/")
+        )
         if not has_layer:
             return None
 
@@ -911,7 +925,9 @@ class MergeService:
         if not enricher_cols:
             return 0
 
-        any_enriched = pl.any_horizontal([pl.col(col).is_not_null() for col in enricher_cols])
+        any_enriched = pl.any_horizontal(
+            [pl.col(col).is_not_null() for col in enricher_cols]
+        )
         return len(df.filter(any_enriched))
 
     def _count_fully_enriched(

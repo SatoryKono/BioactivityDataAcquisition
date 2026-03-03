@@ -287,6 +287,7 @@ class TestDomainComplexity:
             "_extract_name_from_item": 7,  # CC=6 - Name extraction from str or dict
             "_extract_single_affiliation": 8,  # CC=7 - Affiliation extraction with multi-key probe
             "collect_affiliations_from_authors": 9,  # CC=8 - Author affiliation collection with type checks
+            "_extract_schema_columns": 8,  # CC=7 - Schema metadata extraction with defensive field handling
         }
 
         violations = []

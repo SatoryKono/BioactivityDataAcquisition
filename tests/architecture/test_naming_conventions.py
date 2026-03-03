@@ -46,6 +46,9 @@ def test_class_naming_suffixes() -> None:
         "Context",
         "Summary",
         "Reason",
+        "Planner",
+        "Policy",
+        "Resolver",
     )
     violations: list[str] = []
     for path in (SRC / "application").rglob("*.py"):
