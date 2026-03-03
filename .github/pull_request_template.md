@@ -1,16 +1,39 @@
 ## Summary
 
-<!-- Brief description of what this PR does -->
+<!-- Brief description of changes (1-3 sentences) -->
 
 ## Changes
 
 -
 
+## Type
+
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Refactoring (no functional changes)
+- [ ] Config / pipeline change
+- [ ] Documentation
+- [ ] CI / infrastructure
+
+## Affected layers
+
+- [ ] Domain
+- [ ] Application
+- [ ] Infrastructure
+- [ ] Composition
+- [ ] Interfaces
+- [ ] Configs
+
+## Test plan
+
+- [ ] Unit tests pass (`pytest tests/unit/`)
+- [ ] Architecture tests pass (`pytest tests/architecture/`)
+- [ ] Type check passes (`mypy --strict src/bioetl/`)
+- [ ] Manual verification (describe below if applicable)
+
 ## Checklist
 
-- [ ] `make lint` passes
-- [ ] `make test` passes
-- [ ] No hardcoded secrets or credentials
-- [ ] Architecture tests pass (`pytest tests/architecture/ -v`)
-- [ ] Documentation updated if behavior changed
-- [ ] Follows Conventional Commits format
+- [ ] No new import boundary violations (ARCH-001)
+- [ ] No hardcoded secrets (AP-005)
+- [ ] Type annotations on all public functions (TYPE-001)
+- [ ] Tests added/updated for new code (TEST-002)
