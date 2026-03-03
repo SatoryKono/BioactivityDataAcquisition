@@ -11,13 +11,13 @@ See Also:
 
 from __future__ import annotations
 
-from typing import Any
-
+from bioetl.domain.ports import CircuitBreakerPort
 from bioetl.domain.types import HealthStatus
 
 
-# Any: structural typing for ...
-def assess_health_from_circuit_breaker(circuit_breaker: Any) -> HealthStatus:
+def assess_health_from_circuit_breaker(
+    circuit_breaker: CircuitBreakerPort,
+) -> HealthStatus:
     """Determine adapter health status from circuit breaker state.
 
     Maps circuit breaker state to a HealthStatus value for use in adapter

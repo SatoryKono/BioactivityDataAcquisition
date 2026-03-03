@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING, Any
 
 from typing_extensions import override
 
-from bioetl.domain.types import HealthStatus
+from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
 from bioetl.infrastructure.adapters.uniprot.fasta_parser import FastaParser
@@ -139,7 +139,7 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
         offset: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch records from UniProt.
 
         If filter_ids are provided, builds an OR-query to fetch specific accessions.
@@ -182,7 +182,7 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         strategy: Any,  # Any: callable fetch strategy (async generator factory)
         filter_ids: list[str],
         limit: int | None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch non-protein entities by iterating through individual IDs.
 
         Args:
@@ -209,7 +209,7 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         filter_ids: list[str],
         filter_field: str,
         limit: int | None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch proteins using batched OR-queries.
 
         Args:
@@ -242,7 +242,7 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         filter_ids: list[str],
         filter_field: str,
         limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch records from UniProt filtered by specific IDs.
 
         Implements FilterableDataSourcePort.fetch_filtered().
@@ -288,7 +288,7 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         entity_type: str,
         filters: dict[str, list[str]],
         limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch records from UniProt filtered by multiple fields (AND logic).
 
         Implements FilterableDataSourcePort.fetch_multi_filtered().
@@ -340,7 +340,7 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         fallback_mapping: dict[str, str],
         limit: int | None,
         already_fetched: int,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Search for missing IDs using fallback values.
 
         Args:
@@ -378,7 +378,7 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         filter_ids: list[str],
         filter_field: str,
         limit: int | None,
-    ) -> AsyncIterator[tuple[dict[str, Any], str | None]]:
+    ) -> AsyncIterator[tuple[BronzeRecord, str | None]]:
         """Perform primary fetch and yield records with their accessions.
 
         Args:
@@ -425,7 +425,7 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         filter_field: str,
         fallback_mapping: dict[str, str],
         limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch records with fallback search when primary lookup fails.
 
         Implements FilterableDataSourcePort.fetch_filtered_with_fallback().
@@ -474,7 +474,7 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
 
     def _build_protein_fetch_params(
         self, query: str, size: int, fetched: int, limit: int | None, cursor: str | None
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any]:  # Any: HTTP query params (str|int|bool values)
         """Build the parameter dictionary for a protein fetch request."""
         params = {
             "query": query,
@@ -488,7 +488,7 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
 
     def _parse_response(
         self, response: httpx.Response
-    ) -> tuple[list[dict[str, Any]], str | None]:
+    ) -> tuple[list[BronzeRecord], str | None]:
         """Process the HTTP response from a protein fetch request."""
         if response.status_code != 200:
             return [], None
@@ -501,14 +501,14 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         self,
         query: str | None,
         limit: int | None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch protein entries from UniProt."""
         query = query or "*"
         size = 500
 
         async def _pagination_callback(
             cursor: str | None, fetched: int
-        ) -> tuple[list[dict[str, Any]], str | None]:
+        ) -> tuple[list[BronzeRecord], str | None]:
             """Execute pagination callback."""
             params = self._build_protein_fetch_params(
                 query, size, fetched, limit, cursor
@@ -560,7 +560,7 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
             )
             raise wrapped from error
 
-    async def _get_features_json(self, query: str) -> list[dict[str, Any]]:
+    async def _get_features_json(self, query: str) -> list[BronzeRecord]:
         """Retrieve features JSON."""
         try:
             start_time = time.perf_counter()
@@ -573,7 +573,9 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
             with contextlib.suppress(Exception):
                 self._request_collector.record_from_response(response, duration_ms)
             if response.status_code == 200:
-                features: list[dict[str, Any]] = response.json().get("features", [])
+                features: list[BronzeRecord] = response.json().get(
+                    "features", []
+                )  # Any: untyped UniProt API JSON response
                 return features
             return []
         except Exception as e:
@@ -584,7 +586,7 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         self,
         query: str | None,
         limit: int | None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch protein features from UniProt."""
         if not query:
             raise ValueError("Query is required for feature search")
@@ -595,7 +597,7 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
                 break
             yield self._format_feature(query, feature)
 
-    def _format_feature(self, query: str, feature: dict[str, Any]) -> dict[str, Any]:
+    def _format_feature(self, query: str, feature: BronzeRecord) -> BronzeRecord:
         """Format a single feature."""
         return {
             "accession": query,
@@ -625,7 +627,7 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
             self._handle_fetch_error("sequence", query, error=e)
             return None
 
-    async def _get_parsed_sequences(self, query: str) -> AsyncIterator[dict[str, Any]]:
+    async def _get_parsed_sequences(self, query: str) -> AsyncIterator[BronzeRecord]:
         """Yield parsed sequences."""
         fasta_text = await self._get_sequence_fasta(query)
         if fasta_text:
@@ -638,7 +640,7 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         self,
         query: str | None,
         limit: int | None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch protein sequences from UniProt."""
         if not query:
             raise ValueError("Query is required for sequence fetch")

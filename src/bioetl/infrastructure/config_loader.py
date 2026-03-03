@@ -13,20 +13,20 @@ from typing import Any
 
 import yaml
 
-from bioetl.infrastructure.config.legacy_normalizers.source import (
+from bioetl.infrastructure.config_merge import config_merge
+from bioetl.infrastructure.legacy_normalizers.source import (
     normalize_source_config,
 )
-from bioetl.infrastructure.config_merge import config_merge
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
 
-def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
+def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
     """Deep merge two dictionaries, with override taking precedence."""
     return config_merge(base, override)
 
 
-def _load_base_config(config_path: Path) -> dict[str, Any]:
+def _load_base_config(config_path: Path) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
     """Load pipeline base configuration from consolidated base path.
 
     Resolution order:
@@ -49,7 +49,7 @@ def _load_base_config(config_path: Path) -> dict[str, Any]:
 
 
 def _apply_file_reference_defaults(
-    config: dict[str, Any], provider: str, entity_type: str
+    config: dict[str, Any], provider: str, entity_type: str  # Any: YAML config has heterogeneous values
 ) -> None:
     """Apply convention-based defaults for file references.
 
@@ -73,7 +73,7 @@ def _apply_file_reference_defaults(
 
 def _load_column_groups_config(
     config_path: Path, column_groups_file: str
-) -> list[dict[str, Any]] | None:
+) -> list[dict[str, Any]] | None:  # Any: YAML config has heterogeneous values
     """Load column group configuration from column_groups_file."""
     column_groups_path = config_path.parent / column_groups_file
     if not column_groups_path.exists():
@@ -95,7 +95,7 @@ def _load_column_groups_config(
 
 def _load_data_schema_config(
     config_path: Path, schema_file: str
-) -> dict[str, Any] | None:
+) -> dict[str, Any] | None:  # Any: YAML config has heterogeneous values
     """Load data schema configuration with layer-specific column definitions.
 
     Supports:
@@ -159,7 +159,7 @@ def _apply_layer_defaults(
     csv_export.setdefault("path", layer["path"])
 
 
-def _apply_convention_defaults(config: dict[str, Any]) -> dict[str, Any]:
+def _apply_convention_defaults(config: dict[str, Any]) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
     """Apply convention-based defaults for paths, references, and table names.
 
     Auto-computes from provider/entity_type when not explicitly specified.
@@ -186,7 +186,7 @@ def _apply_convention_defaults(config: dict[str, Any]) -> dict[str, Any]:
     return config
 
 
-def _read_source_config_payload(provider: str) -> dict[str, Any]:
+def _read_source_config_payload(provider: str) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
     """Read provider YAML and map to source-loader input payload."""
     unified_path = Path(f"configs/providers/{provider}.yaml")
     if not unified_path.exists():
@@ -211,7 +211,7 @@ def _read_source_config_payload(provider: str) -> dict[str, Any]:
     return unified_raw
 
 
-def _validate_source_config_payload(payload: dict[str, Any]) -> SourceYamlConfig:
+def _validate_source_config_payload(payload: dict[str, Any]) -> SourceYamlConfig:  # Any: YAML config has heterogeneous values
     """Validate canonical source payload with pydantic schema."""
     return SourceYamlConfig.model_validate(payload)
 
@@ -341,7 +341,7 @@ def _validate_schema_config(data_schema: dict[str, Any], schema_file: str) -> No
             )
 
 
-def _load_unified_entity_raw(path: Path) -> dict[str, Any]:
+def _load_unified_entity_raw(path: Path) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
     """Load unified entity YAML file, returning empty dict when absent."""
     if not path.exists():
         return {}

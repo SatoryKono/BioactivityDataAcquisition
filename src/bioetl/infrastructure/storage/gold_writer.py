@@ -18,7 +18,7 @@ from deltalake.exceptions import TableNotFoundError
 
 from bioetl.domain.medallion import GoldWriteMode
 from bioetl.domain.ports import AuditEntry, AuditLayer, AuditOperation
-from bioetl.domain.types import RunID
+from bioetl.domain.types import GoldRecord, GoldSchemaType, RunID, ScdConfig
 from bioetl.infrastructure.storage.base_delta_writer import (
     BaseDeltaWriter,
     coerce_null_types_for_delta,
@@ -54,9 +54,9 @@ _SCD_KEY_MAP = {
 
 
 def _normalize_scd_config(
-    scd_config: dict[str, Any],
+    scd_config: ScdConfig,
     primary_keys: list[str] | None,
-) -> dict[str, Any]:
+) -> ScdConfig:
     """Normalize YAML scd_config keys to gold_writer expected format."""
     out = dict(scd_config)
     if "business_key" not in out and primary_keys:
@@ -147,17 +147,18 @@ class GoldWriter(BaseDeltaWriter):
     async def write_gold(
         self,
         table_name: str,
-        records: list[dict[str, Any]],
+        records: list[GoldRecord],
         schema: DataFrameSchema,
         primary_keys: list[str] | None = None,
         mode: str = "overwrite",
         partition_cols: list[str] | None = None,
-        scd_config: dict[str, Any] | None = None,
+        scd_config: ScdConfig | None = None,
         *,
         column_order: list[str] | None = None,
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
-        silver_refs: list[Any] | None = None,
+        silver_refs: list[Any]
+        | None = None,  # Any: SilverRef or SilverWriteResult (duck-typed)
     ) -> None:
         """Write validated records to Gold layer.
 
@@ -244,7 +245,7 @@ class GoldWriter(BaseDeltaWriter):
                 f"Invalid Gold write mode '{mode}'. Allowed: {valid_modes}"
             ) from None
 
-    def _validate_records(self, records: list[dict[str, Any]]) -> None:
+    def _validate_records(self, records: list[GoldRecord]) -> None:
         """Validate that records list is not empty."""
         if not records:
             raise ValueError("No records to write")
@@ -252,7 +253,7 @@ class GoldWriter(BaseDeltaWriter):
     def _validate_scd2_requirements(
         self,
         mode: GoldWriteMode,
-        scd_config: dict[str, Any] | None,
+        scd_config: ScdConfig | None,
         ingestion_ts: datetime | None,
     ) -> None:
         """Validate SCD2-specific requirements."""
@@ -278,7 +279,7 @@ class GoldWriter(BaseDeltaWriter):
     async def write_gold_merged(
         self,
         table_name: str,
-        records: list[dict[str, Any]],
+        records: list[GoldRecord],
         primary_keys: list[str] | None = None,
         *,
         schema: DataFrameSchema | None = None,
@@ -385,7 +386,7 @@ class GoldWriter(BaseDeltaWriter):
         self,
         table_path: str,
         table_name: str,
-        records: list[dict[str, Any]],
+        records: list[GoldRecord],
         primary_keys: list[str],
         run_id: str | None = None,
         sources_used: list[str] | None = None,
@@ -445,7 +446,7 @@ class GoldWriter(BaseDeltaWriter):
         )
 
     async def _validate_records_against_schema(
-        self, records: list[dict[str, Any]], schema: DataFrameSchema
+        self, records: list[GoldRecord], schema: DataFrameSchema
     ) -> None:
         """Validate records against Pandera schema."""
         import pandas as pd
@@ -464,11 +465,11 @@ class GoldWriter(BaseDeltaWriter):
         mode: GoldWriteMode,
         table_path: str,
         table_name: str,
-        records: list[dict[str, Any]],
+        records: list[GoldRecord],
         partition_cols: list[str] | None,
         primary_keys: list[str] | None,
         schema: DataFrameSchema,
-        scd_config: dict[str, Any] | None,
+        scd_config: ScdConfig | None,
         ingestion_ts: datetime | None,
         column_order: list[str] | None,
     ) -> None:
@@ -500,7 +501,7 @@ class GoldWriter(BaseDeltaWriter):
     async def _log_gold_audit(
         self,
         table_name: str,
-        records: list[dict[str, Any]],
+        records: list[GoldRecord],
         mode: GoldWriteMode,
         ingestion_ts: datetime | None,
         run_id: RunID | None,
@@ -590,13 +591,14 @@ class GoldWriter(BaseDeltaWriter):
         self,
         table_path: str,
         table_name: str,
-        records: list[dict[str, Any]],
+        records: list[GoldRecord],
         mode: GoldWriteMode,
-        scd_config: dict[str, Any] | None,
+        scd_config: ScdConfig | None,
         ingestion_ts: datetime | None,
         run_id: RunID | None,
-        silver_refs: list[Any] | None = None,
-        gold_schema: Any | None = None,  # Any: Pandera DataFrameModel class or None
+        silver_refs: list[Any]
+        | None = None,  # Any: SilverRef or SilverWriteResult (duck-typed)
+        gold_schema: GoldSchemaType | None = None,
     ) -> None:
         """Write Gold layer metadata sidecar file.
 
@@ -684,14 +686,14 @@ class GoldWriter(BaseDeltaWriter):
             entity=entity_name,
         )
 
-    # Any: executor forwards arbi...
+    # Any: executor forwards arbitrary positional args to the callable
     async def _run_in_executor(self, func: Callable[..., T], *args: Any) -> T:
         """Run a function in the executor."""
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(None, func, *args)
 
     def _to_arrow_table(
-        self, records: list[dict[str, Any]], column_order: list[str] | None = None
+        self, records: list[GoldRecord], column_order: list[str] | None = None
     ) -> pa.Table:
         """Convert records to PyArrow table, handling null types.
 
@@ -712,7 +714,7 @@ class GoldWriter(BaseDeltaWriter):
         self,
         table_path: str,
         table_name: str,
-        records: list[dict[str, Any]],
+        records: list[GoldRecord],
         mode: str,
         partition_cols: list[str] | None,
         primary_keys: list[str] | None = None,
@@ -767,8 +769,8 @@ class GoldWriter(BaseDeltaWriter):
     async def _write_scd2(
         self,
         table_path: str,
-        records: list[dict[str, Any]],
-        scd_config: dict[str, Any],
+        records: list[GoldRecord],
+        scd_config: ScdConfig,
         partition_cols: list[str] | None,
         ingestion_ts: datetime,
         column_order: list[str] | None = None,
@@ -844,9 +846,9 @@ class GoldWriter(BaseDeltaWriter):
     async def _merge_scd2(
         self,
         dt: DeltaTable,
-        records: list[dict[str, Any]],
+        records: list[GoldRecord],
         business_key: str | list[str],
-        scd_config: dict[str, Any],
+        scd_config: ScdConfig,
         ingestion_ts: datetime,
         column_order: list[str] | None = None,
     ) -> None:
@@ -903,7 +905,7 @@ class GoldWriter(BaseDeltaWriter):
         table_name: str,
         columns: list[str] | None = None,
         current_only: bool = True,
-    ) -> list[dict[str, Any]]:
+    ) -> list[GoldRecord]:
         """Read data from Gold table.
 
         Args:
@@ -923,15 +925,16 @@ class GoldWriter(BaseDeltaWriter):
             import pyarrow.compute as pc
 
             arrow_table = arrow_table.filter(pc.equal(arrow_table["is_current"], True))
-        result: list[dict[str, Any]] = arrow_table.to_pylist()
+        result: list[GoldRecord] = arrow_table.to_pylist()
         return result
 
     async def get_history(
         self,
         table_name: str,
-        business_key_values: dict[str, Any] | None = None,
+        business_key_values: dict[str, Any]
+        | None = None,  # Any: filter values vary per column type
         limit: int = 10,
-    ) -> list[dict[str, Any]]:
+    ) -> list[GoldRecord]:
         """Get history of records in Gold table (for SCD2 tracking).
 
         Args:
@@ -959,5 +962,5 @@ class GoldWriter(BaseDeltaWriter):
 
         if "valid_from" in arrow_table.column_names:
             arrow_table = arrow_table.sort_by([("valid_from", "ascending")])
-        result: list[dict[str, Any]] = arrow_table.to_pylist()
+        result: list[GoldRecord] = arrow_table.to_pylist()
         return result

@@ -33,6 +33,9 @@ env:
   # Optimize Python for CI
   PYTHONDONTWRITEBYTECODE: 1
   PYTHONUNBUFFERED: 1
+  # Quality exemptions gate rollout: warning mode for one sprint, then switch to "block".
+  QUALITY_EXEMPTIONS_GATE_MODE: warn
+  QUALITY_EXEMPTIONS_REGISTRY: configs/quality/architecture_metric_exemptions.yaml
 
 jobs:
   # Smoke check: verify dependencies are installed before running tests
@@ -73,6 +76,12 @@ jobs:
 
       - name: Install dependencies (frozen lock)
         run: uv sync --frozen --extra dev --extra tracing
+
+      - name: Validate quality exemptions registry (owner/reason/expiry metadata)
+        run: |
+          uv run python scripts/check_quality_exemptions.py \
+            --registry "${QUALITY_EXEMPTIONS_REGISTRY}" \
+            --mode "${QUALITY_EXEMPTIONS_GATE_MODE}"
 
       - name: Validate pipeline configs + schema links (blocking)
         run: uv run python scripts/validate_pipeline_configs.py
@@ -250,11 +259,11 @@ jobs:
       - name: Run performance budget gates (hotspots)
         run: |
           mkdir -p reports/performance
-          BIOETL_PERF_OBS_OUT=reports/performance/hotspot-observations.jsonl \
           uv run pytest tests/performance/test_hotspot_budgets.py \
             -m "benchmark and performance" \
             -p no:xdist \
             -q --tb=short \
+            --perf-obs-out reports/performance/hotspot-observations.jsonl \
             --junitxml=reports/performance/hotspot-budgets.xml
 
       - name: Upload performance budget report

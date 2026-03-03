@@ -24,7 +24,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.models.metadata import SourceMetadata
-from bioetl.domain.types import HealthStatus
+from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.openalex.fallback import TitleFallbackHandler
 
@@ -95,7 +95,7 @@ class OpenAlexAdapter(BaseHttpAdapter):
         filter_ids: list[str],
         filter_field: str,
         limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch OpenAlex works by DOI or title.
 
         Implements FilterableDataSourcePort.fetch_filtered().
@@ -144,7 +144,7 @@ class OpenAlexAdapter(BaseHttpAdapter):
         self,
         filter_ids: list[str],
         limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch OpenAlex works by DOI list (batch resolution).
 
         Uses `filter=doi:id1|id2|id3` for efficient batch lookup.
@@ -173,7 +173,7 @@ class OpenAlexAdapter(BaseHttpAdapter):
         self,
         titles: list[str],
         limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch OpenAlex works by title search.
 
         Uses individual title.search queries with rate limiting.
@@ -232,7 +232,7 @@ class OpenAlexAdapter(BaseHttpAdapter):
         entity_type: str,
         filters: dict[str, list[str]],
         limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Multi-field filtering not supported by OpenAlex.
 
         OpenAlex supports DOI filtering via fetch_filtered().
@@ -261,7 +261,7 @@ class OpenAlexAdapter(BaseHttpAdapter):
         found_dois: set[str],
         limit: int | None,
         start_count: int,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Phase 1: Batch DOI lookup for valid DOIs.
 
         Args:
@@ -296,7 +296,7 @@ class OpenAlexAdapter(BaseHttpAdapter):
         filter_field: str,
         fallback_mapping: dict[str, str],
         limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch with fallback search by title when DOI not found.
 
         Strategy:
@@ -396,7 +396,7 @@ class OpenAlexAdapter(BaseHttpAdapter):
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
         offset: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch OpenAlex works.
 
         Implements DataSourcePort.fetch().
@@ -477,7 +477,7 @@ class OpenAlexAdapter(BaseHttpAdapter):
     # Internal methods
     # =========================================================================
 
-    async def _fetch_by_dois(self, dois: list[str]) -> AsyncIterator[dict[str, Any]]:
+    async def _fetch_by_dois(self, dois: list[str]) -> AsyncIterator[BronzeRecord]:
         """Fetch works by batch of DOIs.
 
         Uses `filter=doi:doi1|doi2|doi3` syntax for efficient batch lookup.
@@ -537,7 +537,7 @@ class OpenAlexAdapter(BaseHttpAdapter):
 
     async def _search_by_title(
         self, title: str, limit: int = 3
-    ) -> list[dict[str, Any]]:
+    ) -> list[BronzeRecord]:
         """Search works by title (fuzzy match).
 
         Uses `filter=title.search:...` syntax.
@@ -579,7 +579,7 @@ class OpenAlexAdapter(BaseHttpAdapter):
                 self._request_collector.record_from_response(response, duration_ms)
 
             data = response.json()
-            results: list[dict[str, Any]] = data.get("results", [])
+            results: list[BronzeRecord] = data.get("results", [])  # Any: untyped OpenAlex API JSON response
             return results
 
         except Exception as e:
@@ -617,7 +617,7 @@ class OpenAlexAdapter(BaseHttpAdapter):
         return "+".join(cleaned.split())
 
     @staticmethod
-    def _extract_doi_from_record(record: dict[str, Any]) -> str | None:
+    def _extract_doi_from_record(record: BronzeRecord) -> str | None:
         """Extract normalized DOI from OpenAlex record."""
         doi_url: str = record.get("doi", "") or ""
         if not doi_url:

@@ -284,9 +284,9 @@ class TestPostrunServiceDQReports:
         )
 
         assert result.dq_reports is None
-        # Warning should be logged in warning-mode fallback.
+        # Error + warning should be logged in warning-mode fallback.
+        mock_logger.error.assert_called()
         mock_logger.warning.assert_called()
-        mock_logger.error.assert_not_called()
 
     async def test_dq_configs_passed_to_service(
         self,

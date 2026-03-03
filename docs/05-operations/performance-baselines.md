@@ -76,11 +76,15 @@ pytest tests/benchmarks/ --benchmark-json=benchmark.json
 pytest tests/performance/test_hotspot_budgets.py -m "benchmark and performance" -p no:xdist
 
 # Collect observations and recalibrate baselines
-BIOETL_PERF_OBS_OUT=/tmp/hotspot-observations.jsonl \
-pytest tests/performance/test_hotspot_budgets.py -m "benchmark and performance" -p no:xdist
+pytest tests/performance/test_hotspot_budgets.py \
+  -m "benchmark and performance" \
+  -p no:xdist \
+  --perf-obs-out /tmp/hotspot-observations.jsonl
 python scripts/calibrate_hotspot_budgets.py \
   --observations /tmp/hotspot-observations.jsonl \
-  --budgets tests/performance/hotspot_budgets.json
+  --budgets tests/performance/hotspot_budgets.json \
+  --latency-q 1.0 \
+  --throughput-q 0.0
 ```
 
 ## Updating Baselines

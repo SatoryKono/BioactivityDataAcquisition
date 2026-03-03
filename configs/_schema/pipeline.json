@@ -1374,7 +1374,7 @@
         }
       ],
       "default": null,
-      "description": "Path to DQ config file relative to pipeline config. When set, DQ config is loaded from the hierarchical DQ system. Example: ../../quality/entities/chembl/activity.yaml",
+      "description": "Path to DQ config file relative to pipeline config. When set, DQ config is loaded from the hierarchical DQ system. Example: ../../entities/chembl/activity.yaml",
       "title": "Dq Config File"
     },
     "dq_overrides": {
@@ -1393,7 +1393,7 @@
         }
       ],
       "default": null,
-      "description": "Path to filter config file relative to pipeline config. When set, filter config is loaded from the hierarchical filter system. Example: ../../filters/entities/chembl/activity.yaml",
+      "description": "Path to filter config file relative to pipeline config. When set, filter config is loaded from the hierarchical filter system. Example: ../../entities/chembl/activity.yaml",
       "title": "Filter Config File"
     },
     "filter_rules": {

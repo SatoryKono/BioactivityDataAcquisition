@@ -312,6 +312,13 @@ class PostrunService:
                     strict_mode=True,
                 )
                 raise
+            self._logger.error(
+                "dq_report_generation_failed",
+                error=str(e),
+                error_type=type(e).__name__,
+                reason="dq_report_generation_failed_warning_mode",
+                strict_mode=False,
+            )
             self._logger.warning(
                 "dq_report_generation_failed",
                 error=str(e),

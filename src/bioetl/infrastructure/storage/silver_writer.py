@@ -33,6 +33,7 @@ from bioetl.domain.exceptions import (
     SchemaViolationError,
 )
 from bioetl.domain.medallion import Layer, SilverWriteMode, WriteMode, WriteModePolicy
+from bioetl.domain.types import BronzeRecord, MetaDict
 from bioetl.infrastructure.storage.base_delta_writer import (
     BaseDeltaWriter,
     coerce_null_types_for_delta,
@@ -149,7 +150,7 @@ class SilverWriter(BaseDeltaWriter):
 
     def _prepare_arrow_data(
         self,
-        records: list[dict[str, Any]],
+        records: list[BronzeRecord],
         schema: pa.Schema,
         primary_keys: list[str],
         column_order: list[str] | None = None,
@@ -168,7 +169,7 @@ class SilverWriter(BaseDeltaWriter):
 
         filtered_records = []
         for rec in records:
-            filtered_rec: dict[str, Any] = {}
+            filtered_rec: BronzeRecord = {}
             for k in schema_names:
                 if k in rec:
                     v = rec[k]
@@ -279,12 +280,12 @@ class SilverWriter(BaseDeltaWriter):
             ) from None
 
     def _deduplicate_by_primary_keys(
-        self, records: list[dict[str, Any]], primary_keys: list[str]
-    ) -> list[dict[str, Any]]:
+        self, records: list[BronzeRecord], primary_keys: list[str]
+    ) -> list[BronzeRecord]:
         """Deduplicate records based on primary keys to prevent duplicates in batch."""
         if not primary_keys or not records:
             return records
-        unique_records: dict[tuple[Any, ...], dict[str, Any]] = {}
+        unique_records: dict[tuple[Any, ...], BronzeRecord] = {}
         for record in records:
             key = tuple(record.get(pk) for pk in primary_keys)
             unique_records[key] = record
@@ -344,7 +345,7 @@ class SilverWriter(BaseDeltaWriter):
             raise
 
     def _validate_records(
-        self, records: list[dict[str, Any]], table_name: str, schema: pa.Schema
+        self, records: list[BronzeRecord], table_name: str, schema: pa.Schema
     ) -> None:
         """Validate records have required metadata fields."""
         if not records:
@@ -368,7 +369,7 @@ class SilverWriter(BaseDeltaWriter):
 
     def _validate_key_nullability(
         self,
-        records: list[dict[str, Any]],
+        records: list[BronzeRecord],
         primary_keys: list[str],
         partition_cols: list[str] | None,
         key_nullability_rules: list[KeyNullabilityRule] | None,
@@ -419,7 +420,7 @@ class SilverWriter(BaseDeltaWriter):
             )
 
     def _validate_silver_pandera(
-        self, records: list[dict[str, Any]], table_name: str
+        self, records: list[BronzeRecord], table_name: str
     ) -> None:
         """Validate records using Pandera schema before writing to Silver.
 
@@ -474,7 +475,7 @@ class SilverWriter(BaseDeltaWriter):
     async def _check_schema_drift(
         self,
         table_name: str,
-        records: list[dict[str, Any]],
+        records: list[BronzeRecord],
         on_schema_mismatch: Literal["error", "evolve", "ignore"],
     ) -> None:
         """Check for schema drift and handle according to policy.
@@ -521,7 +522,7 @@ class SilverWriter(BaseDeltaWriter):
     async def _detect_schema_drift(
         self,
         table_name: str,
-        records: list[dict[str, Any]],
+        records: list[BronzeRecord],
     ) -> SchemaDriftInfo | None:
         """Detect schema drift between existing table and incoming records.
 
@@ -568,7 +569,7 @@ class SilverWriter(BaseDeltaWriter):
     async def write_silver(
         self,
         table_name: str,
-        records: list[dict[str, Any]],
+        records: list[BronzeRecord],
         primary_keys: list[str],
         schema: pa.Schema,
         mode: str = "merge",
@@ -718,7 +719,7 @@ class SilverWriter(BaseDeltaWriter):
     async def _compute_dq_metrics(
         self,
         table_name: str,
-        records: list[dict[str, Any]],
+        records: list[BronzeRecord],
         quarantined_count: int = 0,
     ) -> BatchDQMetrics:
         """Compute DQ metrics using centralized calculator.
@@ -754,7 +755,7 @@ class SilverWriter(BaseDeltaWriter):
     async def _log_silver_audit(
         self,
         table_name: str,
-        records: list[dict[str, Any]],
+        records: list[BronzeRecord],
         mode: SilverWriteMode,
     ) -> None:
         """Log audit entry for Silver write operation.
@@ -845,7 +846,7 @@ class SilverWriter(BaseDeltaWriter):
         self,
         table_path: str,
         table_name: str,
-        records: list[dict[str, Any]],
+        records: list[BronzeRecord],
         primary_keys: list[str],
         mode: SilverWriteMode,
         bronze_refs: list[BronzeWriteResult] | None = None,
@@ -1001,7 +1002,7 @@ class SilverWriter(BaseDeltaWriter):
         target_size: int | None = None,
         partition_filters: list[tuple[str, str, Any]]
         | None = None,  # Any: Delta Lake filter value type varies
-    ) -> dict[str, Any]:  # Any: compaction result metrics
+    ) -> MetaDict:
         """Optimize table layout (compaction).
 
         Delegates to RetentionManager for maintenance operations.
@@ -1018,7 +1019,7 @@ class SilverWriter(BaseDeltaWriter):
             table_name, target_size=target_size, partition_filters=partition_filters
         )
 
-    async def get_table_info(self, table_name: str) -> dict[str, Any]:
+    async def get_table_info(self, table_name: str) -> MetaDict:
         """Get metadata about a Delta table.
 
         Delegates to RetentionManager for maintenance operations.
@@ -1057,7 +1058,9 @@ class SilverWriter(BaseDeltaWriter):
         self,
         table_name: str,
         columns: list[str] | None = None,
-    ) -> list[dict[str, Any]]:
+    ) -> list[
+        BronzeRecord
+    ]:  # BronzeRecord: Silver records have same dict shape as Bronze
         """Read records from a Silver layer Delta table.
 
         Args:
@@ -1075,7 +1078,7 @@ class SilverWriter(BaseDeltaWriter):
     async def write_silver_merged(
         self,
         table_name: str,
-        records: list[dict[str, Any]],
+        records: list[BronzeRecord],
         primary_keys: list[str] | None = None,
         *,
         run_id: str | None = None,
@@ -1169,7 +1172,7 @@ class SilverWriter(BaseDeltaWriter):
         self,
         table_path: str,
         table_name: str,
-        records: list[dict[str, Any]],
+        records: list[BronzeRecord],
         primary_keys: list[str],
         run_id: str | None = None,
         sources_used: list[str] | None = None,

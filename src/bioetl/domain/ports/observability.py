@@ -48,7 +48,9 @@ class TracingPort(Protocol):
           NoOp default for local-only deployment.
     """
 
-    def get_tracer(self, name: str) -> Any:  # Any: OTel Tracer (avoids op...
+    def get_tracer(
+        self, name: str
+    ) -> Any:  # Any: OTel Tracer (avoids optional dependency)
         """Return an OpenTelemetry-compatible tracer instance.
 
         The returned object exposes ``start_as_current_span(name, attributes=...)``
@@ -196,7 +198,7 @@ class LoggerPort(Protocol):
     should be fast and non-blocking by design.
     """
 
-    def bind(self, **kwargs: Any) -> Self:  # Any: structlog-compatible a...
+    def bind(self, **kwargs: Any) -> Self:  # Any: structlog-compatible API
         """Bind additional context to the logger.
 
         Returns a new logger instance with the bound context.
@@ -209,7 +211,7 @@ class LoggerPort(Protocol):
         """
         ...
 
-    def info(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible a...
+    def info(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
         """Log an informational message.
 
         Args:
@@ -221,7 +223,7 @@ class LoggerPort(Protocol):
         """
         ...
 
-    # Any: structlog-compatible a...
+    # Any: structlog-compatible API
     def warning(self, _event: str, **kwargs: Any) -> Any:
         """Log a warning message.
 
@@ -234,7 +236,7 @@ class LoggerPort(Protocol):
         """
         ...
 
-    # Any: structlog-compatible a...
+    # Any: structlog-compatible API
     def error(self, _event: str, **kwargs: Any) -> Any:
         """Log an error message.
 
@@ -247,7 +249,7 @@ class LoggerPort(Protocol):
         """
         ...
 
-    # Any: structlog-compatible a...
+    # Any: structlog-compatible API
     def debug(self, _event: str, **kwargs: Any) -> Any:
         """Log a debug message.
 
@@ -260,7 +262,7 @@ class LoggerPort(Protocol):
         """
         ...
 
-    # Any: structlog-compatible a...
+    # Any: structlog-compatible API
     def exception(self, _event: str, **kwargs: Any) -> Any:
         """Log an exception with traceback.
 
@@ -332,7 +334,7 @@ class DQMonitorPort(Protocol):
     def add_metric(
         self,
         metric_name: str,
-        baseline: Any,  # Any: Sequence[float] (avoid...
+        baseline: Any,  # Any: Sequence[float] (avoids importing numpy/Sequence in domain)
         min_threshold: float | None = None,
         max_threshold: float | None = None,
     ) -> None:
@@ -372,7 +374,9 @@ class DQMonitorPort(Protocol):
     def check_quality(
         self,
         metrics: dict[str, float],
-    ) -> list[Any]:  # Any: list[Anomaly] (avoids importing Anomaly in domain port)
+    ) -> list[
+        Any
+    ]:  # Any: list[Anomaly] (avoids importing infrastructure type in domain)
         """Check current metrics against baseline for anomalies.
 
         Args:

@@ -44,7 +44,7 @@ class DQConfigLoader:
         self._relaxed_dq = relaxed_dq
         self._cache: dict[str, DQConfig] = {}
 
-    def _load_provider_layer(self, provider: str) -> dict[str, Any]:
+    def _load_provider_layer(self, provider: str) -> dict[str, Any]:  # Any: YAML DQ config has heterogeneous values
         """Load provider DQ layer from unified provider config."""
         unified_provider_path = self._configs_root / "providers" / f"{provider}.yaml"
         if unified_provider_path.exists():
@@ -67,7 +67,7 @@ class DQConfigLoader:
 
         return {}
 
-    def _load_entity_layer(self, provider: str, entity: str) -> dict[str, Any]:
+    def _load_entity_layer(self, provider: str, entity: str) -> dict[str, Any]:  # Any: YAML DQ config has heterogeneous values
         """Load entity DQ layer from unified entity config."""
         unified_entity_path = (
             self._configs_root / "entities" / provider / f"{entity}.yaml"
@@ -97,7 +97,7 @@ class DQConfigLoader:
         provider: str,
         entity: str,
         inline_overrides: dict[str, Any] | None,
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any]:  # Any: YAML DQ config has heterogeneous values
         """Build merged config from defaults → provider → entity → inline."""
         merged = self._load_defaults_layer()
         if not merged:
@@ -345,7 +345,4 @@ class DQConfigLoader:
             result.setdefault("key_nullability", [])
             result["key_nullability"].extend(result.pop("key_nullability_rules"))
 
-        return result
-
-
-__all__ = ["DQConfigLoader"]
+     

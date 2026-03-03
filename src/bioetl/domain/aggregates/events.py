@@ -22,7 +22,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
-from bioetl.domain.types import BatchID, ContentHash, RunID
+from bioetl.domain.types import BatchID, ContentHash, MetaDict, RunID
 
 
 @dataclass(frozen=True, slots=True)
@@ -180,7 +180,7 @@ class QuarantineEntryCreated(DomainEvent):
     pipeline_name: str
     error_code: str
     payload_hash: ContentHash
-    metadata: dict[str, Any] | None = None
+    metadata: MetaDict | None = None
 
 
 @dataclass(frozen=True, slots=True)
