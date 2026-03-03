@@ -198,4 +198,6 @@ __all__ = [
     "HeavyAtomCount",
     "HydrogenBondCount",
     "LogP",
-    "Po
+    "PolarSurfaceArea",
+    "MolecularWeight",
+]
