@@ -82,10 +82,10 @@ repos:
         verbose: true
 
       - id: validate-pipeline-configs
-        name: Validate pipeline YAML configs
+        name: Validate unified pipeline YAML configs
         entry: python scripts/validate_pipeline_configs.py
         language: python
-        files: ^configs/pipelines/.*\.yaml$
+        files: ^configs/(entities|composites|_schema)/.*\.(yaml|json)$
         pass_filenames: false
         additional_dependencies:
           - jsonschema>=4.0.0
@@ -129,7 +129,13 @@ repos:
         pass_filenames: false
 
       - id: check-root-vcr-cassettes
-        name: Block root-level VCR cassette files
+        name: Block VCR cassette anti-patterns
         entry: python scripts/check_root_vcr_cassettes.py
+        language: system
+        pass_filenames: false
+
+      - id: check-vcr-filename-policy
+        name: Enforce VCR filename policy
+        entry: python scripts/check_vcr_filename_policy.py
         language: system
         pass_filenames: false

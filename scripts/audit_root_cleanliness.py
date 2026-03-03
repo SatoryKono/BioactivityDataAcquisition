@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import subprocess  # nosec B404
 import sys
 from pathlib import Path
@@ -89,7 +90,42 @@ def _collect_tracked_root_entries(paths: list[str]) -> tuple[set[str], set[str]]
     return root_files, root_dirs
 
 
+def _get_untracked_paths(repo_root: Path) -> list[str]:
+    """Return untracked (non-ignored) paths from git working tree."""
+    completed = subprocess.run(  # nosec
+        ["git", "-C", str(repo_root), "ls-files", "--others", "--exclude-standard", "-z"],
+        check=True,
+        capture_output=True,
+        text=False,
+    )
+    decoded = completed.stdout.decode("utf-8", errors="replace")
+    return [path for path in decoded.split("\0") if path]
+
+
+def _collect_untracked_root_files(paths: list[str]) -> set[str]:
+    """Return only root-level untracked files."""
+    return {path for path in paths if "/" not in path}
+
+
+def _collect_untracked_root_dirs(paths: list[str]) -> set[str]:
+    """Return root directory names inferred from untracked nested paths."""
+    return {path.split("/", maxsplit=1)[0] for path in paths if "/" in path}
+
+
+def _parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Validate root tracked layout and flag unexpected untracked root files.",
+    )
+    parser.add_argument(
+        "--strict-untracked",
+        action="store_true",
+        help="Fail when non-ignored untracked root files are present.",
+    )
+    return parser.parse_args()
+
+
 def main() -> int:
+    args = _parse_args()
     repo_root = Path(__file__).resolve().parents[1]
 
     try:
@@ -128,6 +164,38 @@ def main() -> int:
         )
         for entry in missing_allowed_files:
             sys.stdout.write(f"  - {entry}\n")
+
+    try:
+        untracked_paths = _get_untracked_paths(repo_root)
+    except subprocess.CalledProcessError as exc:
+        sys.stderr.write(f"ERROR: failed to query untracked paths: {exc}\n")
+        return 2
+
+    unexpected_untracked_root_files = sorted(_collect_untracked_root_files(untracked_paths))
+    unexpected_untracked_root_dirs = sorted(
+        root_dir
+        for root_dir in _collect_untracked_root_dirs(untracked_paths)
+        if root_dir not in tracked_root_dirs and root_dir not in ALLOWED_ROOT_DIRECTORIES
+    )
+    strict_untracked_violation = False
+    if unexpected_untracked_root_files:
+        strict_untracked_violation = True
+        sys.stdout.write(
+            "WARNING: non-ignored untracked root files detected "
+            "(SHOULD be moved under tests/fixtures/reports or ignored):\n"
+        )
+        for entry in unexpected_untracked_root_files:
+            sys.stdout.write(f"  - {entry}\n")
+    if unexpected_untracked_root_dirs:
+        strict_untracked_violation = True
+        sys.stdout.write(
+            "WARNING: non-ignored untracked root directories detected "
+            "(SHOULD be reviewed/moved/ignored):\n"
+        )
+        for entry in unexpected_untracked_root_dirs:
+            sys.stdout.write(f"  - {entry}\n")
+    if args.strict_untracked and strict_untracked_violation:
+        return 1
 
     sys.stdout.write(
         "OK: root layout audit passed "

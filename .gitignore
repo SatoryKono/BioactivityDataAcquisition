@@ -135,6 +135,7 @@ htmlcov/
 nul
 /profile.svg
 .output.txt
+.mkdocs-site-tmp/
 site/
 docs/site/
 tests.zip
@@ -153,8 +154,12 @@ docs/02-architecture/mmd-diagrams/**/svg/*.svg
 /test_multiple_*
 /test_pipeline_*
 /test_pubchem_*
+/test_pubmed_*
 /test_rebuild_*
 /test_run_type_*
+/test_uniprot_*
+/test_crossref_*
+/Test*.test_*
 /test_vacuum_*
 
 # Temp scripts and artifacts
@@ -186,4 +191,5 @@ data/.idea/
 docs/reports/branch-full-diff-matrix-2026-03-01.csv
 .claude/settings*
 .claude/marketplace.json
+/docs/.claude/settings*
 /data/миграция

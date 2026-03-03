@@ -951,7 +951,7 @@
       "type": "object"
     },
     "ProviderSourceConfig": {
-      "description": "Provider-specific configuration from source YAML.\n\nPydantic model for parsing provider_config section from configs/sources/*.yaml.",
+      "description": "Provider-specific configuration from source YAML.\n\nPydantic model for parsing provider_config section from configs/providers/*.yaml.",
       "properties": {
         "provider": {
           "anyOf": [
@@ -1030,7 +1030,7 @@
       "type": "object"
     },
     "RateLimitSourceConfig": {
-      "description": "Rate limit configuration from source YAML.\n\nPydantic model for parsing rate_limit section from configs/sources/*.yaml.",
+      "description": "Rate limit configuration from source YAML.\n\nPydantic model for parsing rate_limit section from configs/providers/*.yaml.",
       "properties": {
         "requests_per_second": {
           "default": 5.0,
@@ -1200,7 +1200,7 @@
       "type": "object"
     },
     "SourceConfig": {
-      "description": "Configuration for the data source.\n\nParses both pipeline source settings and configs/sources/*.yaml structure.\nThe `rate_limit`, `circuit_breaker`, and `provider_config` fields capture\nsettings from source configuration files.",
+      "description": "Configuration for the data source.\n\nParses both pipeline source settings and configs/providers/*.yaml structure.\nThe `rate_limit`, `circuit_breaker`, and `provider_config` fields capture\nsettings from source configuration files.",
       "properties": {
         "email": {
           "anyOf": [
@@ -1424,10 +1424,17 @@
       "title": "Column Groups File"
     },
     "schema_file": {
-      "description": "Required path to schema config file relative to pipeline config. Example: ../../schemas/chembl/activity.yaml",
-      "minLength": 1,
-      "title": "Schema File",
-      "type": "string"
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Path to schema config file relative to pipeline config. Auto-computed from provider/entity_type by convention if not specified. Example: ../../schemas/chembl/activity.yaml",
+      "title": "Schema File"
     },
     "data_schema_file": {
       "anyOf": [
@@ -1551,7 +1558,7 @@
           }
         ]
       },
-      "description": "Server-side API query parameters for Bronze extraction (ADR-028 \u00a73). Merged from filter config file. Keys are provider-specific query params.",
+      "description": "Server-side API query parameters for Bronze extraction (ADR-028 §3). Merged from filter config file. Keys are provider-specific query params.",
       "title": "Extraction Params",
       "type": "object"
     },
@@ -1573,8 +1580,7 @@
   "required": [
     "pipeline_name",
     "provider",
-    "entity_type",
-    "schema_file"
+    "entity_type"
   ],
   "title": "PipelineYamlConfig",
   "type": "object",

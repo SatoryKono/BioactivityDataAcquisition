@@ -52,6 +52,9 @@ jobs:
       - name: Validate VCR cassette placement
         run: python scripts/check_root_vcr_cassettes.py
 
+      - name: Validate VCR filename policy
+        run: python scripts/check_vcr_filename_policy.py
+
       - name: Validate version consistency
         run: python scripts/check_version_consistency.py
 
@@ -73,6 +76,12 @@ jobs:
 
       - name: Validate pipeline configs + schema links (blocking)
         run: uv run python scripts/validate_pipeline_configs.py
+
+      - name: Validate config invariants (blocking)
+        run: uv run python scripts/check_config_invariants.py
+
+      - name: Check generated config schemas are up to date
+        run: uv run python scripts/generate_pipeline_schema.py --check
 
       - name: Validate docker-compose.yml syntax
         run: docker compose config > /dev/null

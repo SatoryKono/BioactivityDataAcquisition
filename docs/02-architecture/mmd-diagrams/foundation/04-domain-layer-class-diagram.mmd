@@ -9,7 +9,17 @@
 %% @level   Mixed (System / Component / Class)
 %% @nodes   26
 %% @uniform class width=232 height=198 max_title_len=24 max_desc_lines=9
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 classDiagram
     direction TB
 

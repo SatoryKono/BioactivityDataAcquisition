@@ -1,7 +1,7 @@
 # BioETL Makefile
 # Production-ready ETL system for bioactivity data
 
-.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-local-artifacts clean-preflight clean-all diagram-preflight lint-diagrams report-diagrams-policy validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png render-diagrams-descriptions-pdf check-diagrams-visibility check-diagrams-pdf-bounds diagrams-all report-diagram-padding docs-lint
+.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-local-artifacts sanitize-local clean-preflight clean-all diagram-preflight lint-diagrams report-diagrams-policy validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png render-diagrams-descriptions-pdf check-diagrams-visibility check-diagrams-pdf-bounds diagrams-all report-diagram-padding docs-lint
 .DEFAULT_GOAL := help
 
 # Detect uv availability (preferred package manager)
@@ -301,9 +301,9 @@ clean-local-artifacts: ## Clean local-only artifacts in repo root (use DRY_RUN=1
 	else \
 		$(MAKE) clean; \
 	fi; \
-	$$remove_cmd site htmlcov .mypy_cache .pytest_cache .ruff_cache .hypothesis .benchmarks .import_linter_cache; \
+	$$remove_cmd site docs/site .mkdocs-site-tmp htmlcov .mypy_cache .pytest_cache .ruff_cache .hypothesis .benchmarks .import_linter_cache; \
 	$$remove_file_cmd bash.exe.stackdump full_log.txt log_test.txt coverage_output.txt coverage_summary.txt profile.svg; \
-	find . -maxdepth 1 -type f \( -name "test_backfill_*" -o -name "test_chembl_*" -o -name "test_failed_*" -o -name "test_full_pipeline_*" -o -name "test_multiple_*" -o -name "test_pipeline_*" -o -name "test_pubchem_*" -o -name "test_rebuild_*" -o -name "test_run_type_*" -o -name "test_vacuum_*" -o -name "*.stackdump" \) -print | while read -r f; do $$remove_file_cmd "$$f"; done; \
+	find . -maxdepth 1 -type f \( -name "test_backfill_*" -o -name "test_chembl_*" -o -name "test_failed_*" -o -name "test_full_pipeline_*" -o -name "test_multiple_*" -o -name "test_pipeline_*" -o -name "test_pubchem_*" -o -name "test_pubmed_*" -o -name "test_uniprot_*" -o -name "test_crossref_*" -o -name "Test*.test_*" -o -name "test_rebuild_*" -o -name "test_run_type_*" -o -name "test_vacuum_*" -o -name "*.stackdump" \) -print | while read -r f; do $$remove_file_cmd "$$f"; done; \
 	if [ "$(PURGE_WORKTREES)" = "1" ]; then \
 		echo "$(YELLOW)Purging .worktrees and .rollback directories$(NC)"; \
 		$$remove_cmd .worktrees .rollback; \
@@ -311,6 +311,12 @@ clean-local-artifacts: ## Clean local-only artifacts in repo root (use DRY_RUN=1
 		echo "$(BLUE)Skipping .worktrees/.rollback purge (set PURGE_WORKTREES=1 to enable)$(NC)"; \
 	fi
 	@echo "$(GREEN)Local artifact cleanup complete!$(NC)"
+
+sanitize-local: ## Deep local sanitation (set PURGE_WORKTREES=1 to drop .worktrees/.rollback)
+	$(MAKE) clean-local-artifacts PURGE_WORKTREES=$(PURGE_WORKTREES)
+	$(PY_RUN) scripts/check_root_vcr_cassettes.py
+	$(PY_RUN) scripts/check_vcr_filename_policy.py
+	$(PY_RUN) scripts/audit_root_cleanliness.py --strict-untracked
 
 
 clean-preflight: ## Clean preflight artifacts (use DRY_RUN=1 for preview)
@@ -465,7 +471,7 @@ docs-serve: ## Serve documentation locally
 	$(RUN) mkdocs serve
 
 docs-build: ## Build documentation
-	$(RUN) mkdocs build
+	$(RUN) bash scripts/build_docs_site.sh
 
 docs-lint: ## Run documentation guardrails (links + config conventions + drift checks)
 	$(PY_RUN) scripts/check_doc_links.py --links

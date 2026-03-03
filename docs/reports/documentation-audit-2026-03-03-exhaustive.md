@@ -149,7 +149,7 @@
 10. Выполнена wave-3 корректировка и стабилизация:
    - добавлены curated записи для `02-architecture/**` и `skills/**`;
    - `qa_orchestrator` переведён на канонический путь `00-project/agents/qa_orchestrator.md` (nav + links);
-   - `docs/site/**` исключён из KPI/nav-growth как generated-артефакт;
+   - generated site artifacts (`site/**`) исключены из KPI/nav-growth как build output;
    - с учётом текущего workspace-состояния (удаления архивных отчётов) метрика снижена до `65`;
    - KPI статус `on_track` (target `<=120` достигнут с запасом).
 11. Выполнена wave-4 корректировка:
@@ -157,8 +157,18 @@
    - метрика снижена `65 -> 53` (локальная цель `<=55` достигнута);
    - orphan budget сохранён на `0`.
 12. Выполнена wave-5 корректировка:
-   - опубликованы оставшиеся `02-architecture/**` non-nav элементы и часть `skills/global/.system/**`;
+   - опубликованы оставшиеся `02-architecture/**` non-nav элементы;
    - метрика снижена `53 -> 45` (локальная цель `<=45` достигнута);
+   - orphan budget сохранён на `0`.
+13. Выполнена wave-6 корректировка:
+   - опубликована дополнительная curated часть `skills/**` reference-страниц;
+   - зафиксирована policy-классификация для `skills/global/.system/**` и `skills/local/nci-analysis/references/**` как `internal-generated`;
+   - метрика снижена `45 -> 40` (локальная цель `<=40` достигнута);
+   - orphan budget сохранён на `0`.
+14. Выполнена wave-7 корректировка:
+   - `skills/local/nci-analysis/references/{examples,guidance,scoring,vocabulary}.md` добавлены в mkdocs nav;
+   - policy-классификация обновлена: `skills/global/.system/**` остаётся `internal-generated`, NCI references promoted;
+   - метрика снижена `40 -> 36` (локальная цель `<=36` достигнута);
    - orphan budget сохранён на `0`.
 
 ## 9. Re-Audit Snapshot (2026-03-03, latest)
@@ -173,14 +183,14 @@
 
 ### Coverage Metrics
 
-- Total markdown docs under `docs/`: **675**
-- In mkdocs nav: **630**
-- Outside nav: **45**
+- Total markdown docs under `docs/`: **676**
+- In mkdocs nav: **640**
+- Outside nav: **36**
 - Orphan candidates (outside nav, zero inbound links): **0**
 
 Outside-nav distribution:
 - `99-archive`: 33
-- `skills`: 12
+- `skills`: 3
 
 ### Drift and ADR Alignment
 
@@ -192,7 +202,7 @@ Outside-nav distribution:
 1. **P3 — Toolchain migration risk (MkDocs 2.0 advisory)**
    - `mkdocs build --strict` passes, but Material emits advisory on MkDocs 2.0 compatibility.
 2. **P2 — High non-nav volume remains intentional but large**
-   - No orphan drift, yet 45 non-nav docs still require ongoing governance discipline.
+   - No orphan drift, yet 36 non-nav docs still require ongoing governance discipline.
 
 ## 10. Curated Cleanup (Detailed)
 
@@ -207,39 +217,42 @@ Goal is not "put everything into nav", but "maximize discoverability with minima
 
 ### 10.2 How Waves Were Selected
 
-Selection criteria used in wave-1/wave-2/wave-3:
+Selection criteria used in wave-1..wave-7:
 1. Repeatedly referenced by maintainers/review workflows.
 2. Stable enough to be discoverable in nav.
 3. Useful as entrypoints for non-nav clusters.
 4. Low risk of confusing normative vs archival content.
 
 Applied result:
-- promoted architecture extras, selected plans/reports/prompts, curated local skills, and additional architecture/skill reference pages in wave-3;
+- promoted architecture extras, selected plans/reports/prompts, curated local skills, and additional architecture/skill reference pages in waves 3-6;
 - kept `99-archive/**` out of nav intentionally;
 - retained generated/auxiliary docs as non-nav but linked via indexes;
 - aligned `qa_orchestrator` references to canonical `00-project/agents/` path;
-- excluded `docs/site/**` from KPI/nav-growth accounting as generated local artifacts.
+- excluded generated local site artifacts (`site/**`) from KPI/nav-growth accounting;
+- formalized `internal-generated` handling for `skills/global/.system/**`;
+- promoted NCI reference pages to nav in wave-7.
 
-### 10.3 Residual `outside nav` Backlog (45)
+### 10.3 Residual `outside nav` Backlog (36)
 
 Current buckets after curated cleanup:
 - `99-archive/**`: 33 (`archive`, intentional non-nav)
-- `skills/**`: 12 (references/assets/system skills)
+- `skills/**`: 3 (system skills only)
 
 Sub-buckets worth prioritizing next:
-- selected `skills/local/*/references/**` pages with recurring practical value;
-- selected `skills/global/.system/**` references that should be discoverable in docs UI.
+- `skills/global/.system/**` (3 files) — non-nav by policy (`internal-generated`);
+- `skills/local/nci-analysis/references/**` — promoted to nav in wave-7.
 
 ### 10.4 Proposed Next Wave (optional, P2)
 
-If objective is further reduction below `45` (for example `<=40`):
+If objective is further reduction below `36`:
 
-1. Promote 3 to 5 high-use `skills/**` reference pages and keep low-value/internal-only references outside nav.
-2. Re-evaluate whether all `skills/global/.system/**` pages should be represented in nav or linked only from catalog pages.
-3. Keep `99-archive/**` unchanged unless policy decision explicitly reclassifies archive discoverability.
+1. Keep `skills/global/.system/**` outside nav unless docs publication policy is revised.
+2. Keep `99-archive/**` unchanged unless policy decision explicitly reclassifies archive discoverability.
+3. Use policy options document for explicit decision logging:
+   - `docs/plans/wave-8-policy-decisions-2026-03-03.md`
 
 Expected effect:
-- estimated `not_in_nav` improvement: `-3` to `-6`;
+- estimated `not_in_nav` improvement: `0` unless policy changes are approved;
 - orphan budget expected to remain `0` if index linkage is preserved.
 
 ### 10.5 Safety Gates for Each Wave
@@ -248,3 +261,14 @@ Expected effect:
 - `mkdocs build --strict` — PASS
 - `scripts/report_docs_kpi.py --fail-on-breach` — PASS
 - no baseline growth unless intentional and justified
+
+## 11. MkDocs/Material Migration Track
+
+To address the remaining toolchain advisory risk, migration planning is tracked in:
+
+- `docs/plans/mkdocs-material-migration-track-2026-03-03.md`
+
+Track status:
+- owner assigned (documentation/governance maintainers);
+- decision checkpoint planned by `2026-03-24`;
+- rollout window targeted for `2026-03-24..2026-04-21` with strict-build gating.
