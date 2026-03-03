@@ -64,13 +64,6 @@ class TestChemblActivityPipeline(IntegrationPipelineTestCase):
         # Look for both compressed and uncompressed just in case, though BronzeWriter uses zstd
         # Also check the path structure
         # BronzeWriter writes to: {base_path}/v1/{provider}/{entity}/{date}/...
-        # Debug: list all files in storage root
-        import os
-
-        for root, _dirs, files in os.walk(self.storage_root):
-            for file in files:
-                print(f"File found: {os.path.join(root, file)}")
-
         # Bronze writer appends 'bronze' prefix again if path doesn't have it?
         # Output says: File found: .../storage/bronze/bronze/v1/...
         # This is because self.bronze_path is .../storage/bronze

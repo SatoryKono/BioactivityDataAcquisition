@@ -12,6 +12,7 @@ Requirements:
 from __future__ import annotations
 
 import json
+import logging
 import statistics
 import time
 from typing import Any
@@ -23,6 +24,8 @@ from bioetl.infrastructure.serialization.encoders import (
     OrjsonEncoder,
     StdLibJsonEncoder,
 )
+
+logger = logging.getLogger(__name__)
 
 
 @pytest.fixture
@@ -67,8 +70,10 @@ class TestJsonEncoderPerformance:
 
         elapsed = time.perf_counter() - start
         ops_per_sec = (iterations * len(small_payload)) / elapsed
-        print(
-            f"\nStdLib small: {ops_per_sec:.0f} ops/sec, {elapsed / iterations:.4f}s per batch"
+        logger.info(
+            "StdLib small: %.0f ops/sec, %.4fs per batch",
+            ops_per_sec,
+            elapsed / iterations,
         )
 
     @pytest.mark.benchmark
@@ -84,8 +89,10 @@ class TestJsonEncoderPerformance:
 
         elapsed = time.perf_counter() - start
         ops_per_sec = (iterations * len(medium_payload)) / elapsed
-        print(
-            f"\nStdLib medium: {ops_per_sec:.0f} ops/sec, {elapsed / iterations:.4f}s per batch"
+        logger.info(
+            "StdLib medium: %.0f ops/sec, %.4fs per batch",
+            ops_per_sec,
+            elapsed / iterations,
         )
 
     @pytest.mark.benchmark
@@ -102,8 +109,10 @@ class TestJsonEncoderPerformance:
 
         elapsed = time.perf_counter() - start
         ops_per_sec = (iterations * len(small_payload)) / elapsed
-        print(
-            f"\nOrjson small: {ops_per_sec:.0f} ops/sec, {elapsed / iterations:.4f}s per batch"
+        logger.info(
+            "Orjson small: %.0f ops/sec, %.4fs per batch",
+            ops_per_sec,
+            elapsed / iterations,
         )
 
     @pytest.mark.benchmark
@@ -120,8 +129,10 @@ class TestJsonEncoderPerformance:
 
         elapsed = time.perf_counter() - start
         ops_per_sec = (iterations * len(medium_payload)) / elapsed
-        print(
-            f"\nOrjson medium: {ops_per_sec:.0f} ops/sec, {elapsed / iterations:.4f}s per batch"
+        logger.info(
+            "Orjson medium: %.0f ops/sec, %.4fs per batch",
+            ops_per_sec,
+            elapsed / iterations,
         )
 
     @pytest.mark.benchmark
@@ -157,19 +168,19 @@ class TestJsonEncoderPerformance:
         orjson_mean = statistics.mean(orjson_times)
         speedup = stdlib_mean / orjson_mean
 
-        print(f"\n{'=' * 60}")
-        print("JSON Serialization Benchmark Results")
-        print(f"{'=' * 60}")
-        print(f"Payload: {len(medium_payload)} records")
-        print(f"Iterations: {iterations}")
-        print("\nStdLib json:")
-        print(f"  Mean: {stdlib_mean:.4f}s")
-        print(f"  Std:  {statistics.stdev(stdlib_times):.4f}s")
-        print("\nOrjson:")
-        print(f"  Mean: {orjson_mean:.4f}s")
-        print(f"  Std:  {statistics.stdev(orjson_times):.4f}s")
-        print(f"\nSpeedup: {speedup:.2f}x")
-        print(f"{'=' * 60}")
+        logger.info("%s", "=" * 60)
+        logger.info("JSON Serialization Benchmark Results")
+        logger.info("%s", "=" * 60)
+        logger.info("Payload: %d records", len(medium_payload))
+        logger.info("Iterations: %d", iterations)
+        logger.info("StdLib json:")
+        logger.info("  Mean: %.4fs", stdlib_mean)
+        logger.info("  Std:  %.4fs", statistics.stdev(stdlib_times))
+        logger.info("Orjson:")
+        logger.info("  Mean: %.4fs", orjson_mean)
+        logger.info("  Std:  %.4fs", statistics.stdev(orjson_times))
+        logger.info("Speedup: %.2fx", speedup)
+        logger.info("%s", "=" * 60)
 
         # Verify speedup meets the >2x requirement
         assert speedup > 1.5, f"Expected >1.5x speedup, got {speedup:.2f}x"
@@ -227,14 +238,14 @@ class TestJsonEncoderPerformance:
         orjson_mean = statistics.mean(orjson_times)
         speedup = stdlib_mean / orjson_mean
 
-        print(f"\n{'=' * 60}")
-        print("JSON Deserialization Benchmark Results")
-        print(f"{'=' * 60}")
-        print(f"Payload: {len(json_strings)} JSON strings")
-        print(f"\nStdLib json.loads: {stdlib_mean:.4f}s")
-        print(f"Orjson loads:      {orjson_mean:.4f}s")
-        print(f"Speedup:           {speedup:.2f}x")
-        print(f"{'=' * 60}")
+        logger.info("%s", "=" * 60)
+        logger.info("JSON Deserialization Benchmark Results")
+        logger.info("%s", "=" * 60)
+        logger.info("Payload: %d JSON strings", len(json_strings))
+        logger.info("StdLib json.loads: %.4fs", stdlib_mean)
+        logger.info("Orjson loads:      %.4fs", orjson_mean)
+        logger.info("Speedup:           %.2fx", speedup)
+        logger.info("%s", "=" * 60)
 
 
 class TestBatchSerializationPerformance:
@@ -255,9 +266,9 @@ class TestBatchSerializationPerformance:
         total_bytes = sum(len(b) for b in record_bytes)
         mb_per_sec = (total_bytes / (1024 * 1024)) / elapsed
 
-        print(f"\nStdLib batch: {elapsed:.4f}s, {mb_per_sec:.2f} MB/s")
-        print(f"  Records: {len(large_payload)}")
-        print(f"  Total size: {total_bytes / (1024 * 1024):.2f} MB")
+        logger.info("StdLib batch: %.4fs, %.2f MB/s", elapsed, mb_per_sec)
+        logger.info("  Records: %d", len(large_payload))
+        logger.info("  Total size: %.2f MB", total_bytes / (1024 * 1024))
 
     @pytest.mark.benchmark
     @pytest.mark.skipif(not ORJSON_AVAILABLE, reason="orjson not installed")
@@ -275,9 +286,9 @@ class TestBatchSerializationPerformance:
         total_bytes = sum(len(b) for b in record_bytes)
         mb_per_sec = (total_bytes / (1024 * 1024)) / elapsed
 
-        print(f"\nOrjson batch: {elapsed:.4f}s, {mb_per_sec:.2f} MB/s")
-        print(f"  Records: {len(large_payload)}")
-        print(f"  Total size: {total_bytes / (1024 * 1024):.2f} MB")
+        logger.info("Orjson batch: %.4fs, %.2f MB/s", elapsed, mb_per_sec)
+        logger.info("  Records: %d", len(large_payload))
+        logger.info("  Total size: %.2f MB", total_bytes / (1024 * 1024))
 
 
 if __name__ == "__main__":
