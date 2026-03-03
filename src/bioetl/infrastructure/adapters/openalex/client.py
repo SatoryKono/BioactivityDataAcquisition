@@ -535,9 +535,7 @@ class OpenAlexAdapter(BaseHttpAdapter):
         for work in results:
             yield work
 
-    async def _search_by_title(
-        self, title: str, limit: int = 3
-    ) -> list[BronzeRecord]:
+    async def _search_by_title(self, title: str, limit: int = 3) -> list[BronzeRecord]:
         """Search works by title (fuzzy match).
 
         Uses `filter=title.search:...` syntax.
@@ -579,7 +577,9 @@ class OpenAlexAdapter(BaseHttpAdapter):
                 self._request_collector.record_from_response(response, duration_ms)
 
             data = response.json()
-            results: list[BronzeRecord] = data.get("results", [])  # Any: untyped OpenAlex API JSON response
+            results: list[BronzeRecord] = data.get(
+                "results", []
+            )  # Any: untyped OpenAlex API JSON response
             return results
 
         except Exception as e:
