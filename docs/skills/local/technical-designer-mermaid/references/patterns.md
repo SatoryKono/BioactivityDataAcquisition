@@ -3,7 +3,7 @@
 Use these templates as starting points for BioETL diagrams, then adapt node names
 to match actual modules/files in the repository.
 
-## Canonical `.mermaid` Header Template
+## Canonical `.mmd` Header Template
 
 ```mermaid
 %% BioETL - <Title>
@@ -119,21 +119,21 @@ sequenceDiagram
 classDiagram
     class DataSourcePort {
       <<Protocol>>
-      +fetch-batch()
+      +fetch_batch()
     }
     class StoragePort {
       <<Protocol>>
-      +write-bronze()
-      +write-silver()
+      +write_bronze()
+      +write_silver()
     }
     class ChEMBLAdapter {
-      +fetch-batch()
+      +fetch_batch()
     }
     class SilverWriter {
-      +write-silver()
+      +write_silver()
     }
     class BronzeWriter {
-      +write-bronze()
+      +write_bronze()
     }
     class PipelineRunner {
       +run()

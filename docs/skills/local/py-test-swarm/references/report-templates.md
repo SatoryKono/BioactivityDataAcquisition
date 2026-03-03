@@ -3,13 +3,13 @@
 ## L2/L3 `report.md`
 
 ```markdown
-# Test Report: {scope-description}
+# Test Report: {scope_description}
 
 **Date**: YYYY-MM-DD HH:MM
-**Agent ID**: {agent-id}
+**Agent ID**: {agent_id}
 **Agent Level**: L2 | L3
-**Scope**: {test-paths}
-**Source**: {source-paths}
+**Scope**: {test_paths}
+**Source**: {source_paths}
 
 ## Summary
 | Metric | Before | After | Delta | Status |
@@ -69,39 +69,39 @@
 
 ```json
 {
-  "agent-id": "L2-domain-unit",
+  "agent_id": "L2-domain-unit",
   "level": "L2",
   "scope": "tests/unit/domain/",
   "status": "completed",
-  "overall-status": "GREEN",
-  "metrics-before": {
-    "total-tests": 0,
+  "overall_status": "GREEN",
+  "metrics_before": {
+    "total_tests": 0,
     "passed": 0,
     "failed": 0,
     "skipped": 0,
-    "coverage-pct": 0.0,
-    "median-duration-ms": 0,
-    "p95-duration-ms": 0
+    "coverage_pct": 0.0,
+    "median_duration_ms": 0,
+    "p95_duration_ms": 0
   },
-  "metrics-after": {
-    "total-tests": 0,
+  "metrics_after": {
+    "total_tests": 0,
     "passed": 0,
     "failed": 0,
     "skipped": 0,
-    "coverage-pct": 0.0,
-    "median-duration-ms": 0,
-    "p95-duration-ms": 0
+    "coverage_pct": 0.0,
+    "median_duration_ms": 0,
+    "p95_duration_ms": 0
   },
   "actions": {
-    "tests-fixed": 0,
-    "tests-added": 0,
-    "tests-optimized": 0,
-    "flaky-found": 0,
-    "flaky-fixed": 0,
-    "flaky-quarantined": 0
+    "tests_fixed": 0,
+    "tests_added": 0,
+    "tests_optimized": 0,
+    "flaky_found": 0,
+    "flaky_fixed": 0,
+    "flaky_quarantined": 0
   },
-  "top-failures": [],
-  "files-changed": [],
+  "top_failures": [],
+  "files_changed": [],
   "recommendations": []
 }
 ```
@@ -111,7 +111,7 @@
 ```markdown
 # BioETL Test Swarm Final Report
 
-**Task ID**: <task-id>
+**Task ID**: <task_id>
 **Date**: YYYY-MM-DD HH:MM
 **Mode**: <mode>
 **Duration**: <duration>
@@ -166,6 +166,6 @@
 
 ## Appendix
 - flakiness-database.json
-- telemetry/failure-frequency-summary.md
+- telemetry/failure_frequency_summary.md
 - telemetry/raw/
 ```

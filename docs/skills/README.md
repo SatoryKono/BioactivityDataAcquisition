@@ -1,22 +1,23 @@
 # Skills Mirror in docs/
 
-This directory mirrors available Codex skills for documentation and review.
+This directory stores documentation mirrors for Codex skills.
 
-## Sources
+## Canonical Source
 
-- Local repository skills: 
-  - source: \.codex/skills/
-  - mirror: docs/skills/local/
-  - files: 31
-  - SKILL.md files: 17
+- Canonical local skill source: `.codex/skills/`
+- Canonical local mirror: `docs/skills/local/`
+- Rule: edit skills only in `.codex/skills/`; never edit `docs/skills/local/` manually.
 
-- Global skills:
-  - source: /root/.codex/skills/
-  - mirror: docs/skills/global/
-  - files: 54
-  - SKILL.md files: 19
+## Mirror Operations
 
-## Notes
+- Check mirror drift:
+  - `bash scripts/check_skills_mirror.sh --check`
+- Sync mirror from canonical source:
+  - `bash scripts/check_skills_mirror.sh --sync`
 
-- Mirror is created by copy to avoid breaking active skill resolution.
-- Includes auxiliary resources (references/assets/scripts) in addition to SKILL.md files.
+The check is also enforced in CI by `.github/workflows/skills-consistency.yml`.
+
+## Global Snapshot
+
+- `docs/skills/global/` is a documentation snapshot of selected global skills from `/root/.codex/skills/`.
+- It is not the canonical source for repository-local skill behavior.

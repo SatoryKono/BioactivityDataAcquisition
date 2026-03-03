@@ -39,7 +39,7 @@ Otherwise use generic Mermaid mode.
 - `gantt` only when user explicitly asks for timeline planning.
 
 3. Draft with stable naming.
-- Use stable IDs (`service-api`, `db-core`) and clear labels.
+- Use stable IDs (`service_api`, `db_core`) and clear labels.
 - Use action-oriented edge labels (`validates`, `writes`, `publishes`).
 - Keep orientation explicit (`TB` or `LR`).
 
@@ -50,7 +50,7 @@ Otherwise use generic Mermaid mode.
 ## BioETL Project Mode Workflow
 
 1. Choose target file family first.
-- Canonical source diagrams: `docs/02-architecture/mmd-diagrams/**/*.mmd`.
+- Canonical source diagrams: `docs/02-architecture/mmd-diagrams/**.mmd`.
 - Decomposed views: `docs/02-architecture/mmd-diagrams/views/*.mermaid`.
 - Do not create new diagram files under `docs/99-archive/**`.
 
@@ -89,11 +89,11 @@ Otherwise use generic Mermaid mode.
 - Preserve or improve label readability and avoid unnecessary crossing.
 
 7. Run project quality gate after edits.
-- `python scripts/diagrams/lint_diagrams.py docs`
-- `bash scripts/diagrams/validate_mermaid_syntax.sh`
+- `python scripts/lint_diagrams.py docs`
+- `bash scripts/validate_mermaid_syntax.sh`
 - `bash docs/02-architecture/mmd-diagrams/render.sh` (or targeted render command)
 - Optional smoke check:
-  - `python scripts/diagrams/check_diagram_visual_smoke.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`
+  - `python scripts/check_diagram_visual_smoke.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`
 
 8. Respect repository delivery rules.
 - If source `.mmd/.mermaid` changed, ensure rendered `svg/png` outputs are updated in commit.

@@ -47,9 +47,9 @@ Read, in this order:
 ## Deliverables
 
 Required artifacts:
-1. `reports/plans/<task-id>/cascade-audit-report.md`
-2. `reports/plans/<task-id>/cascade-remediation-plan.md`
-3. `reports/plans/<task-id>/cascade-open-questions.md`
+1. `reports/plans/<task_id>/cascade-audit-report.md`
+2. `reports/plans/<task_id>/cascade-remediation-plan.md`
+3. `reports/plans/<task_id>/cascade-open-questions.md`
 
 ## Quality Gates
 

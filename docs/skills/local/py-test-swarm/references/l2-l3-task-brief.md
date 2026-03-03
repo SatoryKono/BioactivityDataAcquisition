@@ -3,12 +3,12 @@
 ## L2 Task Brief
 
 ```text
-Task Brief: <agent-id>
+Task Brief: <agent_id>
 
 Scope
 - Layer/Module: <layer/module>
-- Test paths: <test-paths>
-- Source paths: <source-paths>
+- Test paths: <test_paths>
+- Source paths: <source_paths>
 - Test type: unit | integration | e2e | architecture | contract
 - Baseline FAIL count: <N>
 
@@ -33,12 +33,12 @@ Timebox
 - Runtime budget: <estimate>
 
 Deliverables
-- reports/test-swarm/<task-id>/<agent-id>/report.md
-- reports/test-swarm/<task-id>/<agent-id>/metrics.json
-- reports/test-swarm/<task-id>/telemetry/raw/events-<agent-id>.jsonl
+- reports/test-swarm/<task_id>/<agent_id>/report.md
+- reports/test-swarm/<task_id>/<agent_id>/metrics.json
+- reports/test-swarm/<task_id>/telemetry/raw/events_<agent_id>.jsonl
 
 Escalation rule
-- If workload-score >= 40, create L3 agents and aggregate their reports.
+- If workload_score >= 40, create L3 agents and aggregate their reports.
 ```
 
 ## L2 Prompt Template
@@ -46,7 +46,7 @@ Escalation rule
 Use this for delegated L2 tasks:
 
 ```text
-Ты — L2 тестовый агент проекта BioETL. Твой scope: {scope-description}.
+Ты — L2 тестовый агент проекта BioETL. Твой scope: {scope_description}.
 
 Контекст:
 - BioETL: Hexagonal + Medallion + DDD
@@ -54,10 +54,10 @@ Use this for delegated L2 tasks:
 - Thresholds: coverage >=85% overall, >=90% domain
 
 Task Brief:
-- test-paths: {test-paths}
-- source-paths: {source-paths}
-- test-type: {test-type}
-- baseline-fail-count: {fail-count}
+- test_paths: {test_paths}
+- source_paths: {source_paths}
+- test_type: {test_type}
+- baseline_fail_count: {fail_count}
 - constraints: {constraints}
 - timebox: {timebox}
 
@@ -72,7 +72,7 @@ Task Brief:
 Создай:
 - report.md
 - metrics.json
-- telemetry/raw/events-{agent-id}.jsonl
+- telemetry/raw/events_{agent_id}.jsonl
 ```
 
 ## L3 Mandatory Prefix
@@ -81,7 +81,7 @@ Always prepend this to L3 prompt:
 
 ```text
 ВАЖНО: Ты — листовой агент (L3). Ты НЕ можешь порождать дочерних агентов.
-Выполняй всю работу самостоятельно. Даже при workload-score >= 40 не делегируй,
+Выполняй всю работу самостоятельно. Даже при workload_score >= 40 не делегируй,
 а отметь перегрузку в отчёте.
 ```
 
