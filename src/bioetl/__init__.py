@@ -62,6 +62,6 @@ try:
         return fn(*args, **kwargs)
 
     Dispatcher.__call__ = _dispatcher_call_with_any_fallback  # type: ignore[method-assign]
-except Exception:
+except (ImportError, AttributeError, TypeError, ValueError, RuntimeError):
     # Fail silently to avoid breaking the entire project if Pandera/Pandas are not present
     pass

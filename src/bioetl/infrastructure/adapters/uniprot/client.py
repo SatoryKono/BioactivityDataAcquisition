@@ -18,8 +18,10 @@ import contextlib
 import time
 from typing import TYPE_CHECKING, Any
 
+from httpx import RequestError
 from typing_extensions import override
 
+from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
@@ -89,6 +91,19 @@ _PROTEIN_FETCH_FIELDS: tuple[str, ...] = (
     "xref_pfam",
     "xref_reactome",
     "keyword",  # xrefs
+)
+
+UNIPROT_FETCH_ERRORS = (
+    BioETLError,
+    NetworkError,
+    RequestError,
+    ConnectionError,
+    TimeoutError,
+    OSError,
+    ValueError,
+    TypeError,
+    RuntimeError,
+    KeyError,
 )
 
 
@@ -524,7 +539,7 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
                 with contextlib.suppress(Exception):
                     self._request_collector.record_from_response(response, duration_ms)
                 return self._parse_response(response)
-            except Exception as e:
+            except UNIPROT_FETCH_ERRORS as e:
                 self._handle_fetch_error("protein", query, cursor, error=e)
                 return [], None
 
@@ -578,7 +593,7 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
                 )  # Any: untyped UniProt API JSON response
                 return features
             return []
-        except Exception as e:
+        except UNIPROT_FETCH_ERRORS as e:
             self._handle_fetch_error("feature", query, error=e)
             return []
 
@@ -623,7 +638,7 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
                 text: str = response.text
                 return text
             return None
-        except Exception as e:
+        except UNIPROT_FETCH_ERRORS as e:
             self._handle_fetch_error("sequence", query, error=e)
             return None
 
@@ -670,7 +685,7 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
                 )
                 return HealthStatus.DEGRADED
             return self._fallback_health_status()
-        except Exception as e:
+        except UNIPROT_FETCH_ERRORS as e:
             error_type = self._error_handler.get_error_type(e)
             self.logger.warning(
                 "health_check_failed",

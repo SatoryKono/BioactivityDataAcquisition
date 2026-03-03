@@ -49,6 +49,7 @@ _DEPENDENCY_KEY_READ_ERRORS = (
     TypeError,
 )
 _DEPENDENCY_EXECUTION_ERRORS = (
+    BioETLError,
     NetworkError,
     StorageError,
     CheckpointConflictError,
@@ -60,7 +61,10 @@ _DEPENDENCY_EXECUTION_ERRORS = (
 )
 
 
-class DependencyCoordinator:
+__all__ = ["DependencyCoordinator", "DependencyCoordinatorService"]
+
+
+class DependencyCoordinatorService:
     """Coordinates dependency pipeline execution.
 
     Dependencies run sequentially after the seed but before enrichers.
@@ -457,30 +461,7 @@ class DependencyCoordinator:
                 error_message=str(e),
                 duration_seconds=duration,
             )
-        except BioETLError as e:
-            duration = (datetime.now(tz=UTC) - started_at).total_seconds()
 
-            if dependency.required:
-                self._logger.error(
-                    "Required dependency failed",
-                    dependency=dependency.pipeline,
-                    error=str(e),
-                    error_type=type(e).__name__,
-                    reason_code="unexpected_bioetl_error",
-                    required=True,
-                )
-            else:
-                self._logger.warning(
-                    "Optional dependency failed",
-                    dependency=dependency.pipeline,
-                    error=str(e),
-                    error_type=type(e).__name__,
-                    reason_code="unexpected_bioetl_error",
-                    required=False,
-                )
 
-            return DependencyResult.failed(
-                pipeline_name=dependency.pipeline,
-                error_message=str(e),
-                duration_seconds=duration,
-            )
+# Backward-compatible alias for iterative NAME-001 migration.
+DependencyCoordinator = DependencyCoordinatorService

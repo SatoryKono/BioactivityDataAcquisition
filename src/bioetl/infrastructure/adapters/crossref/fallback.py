@@ -10,12 +10,26 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from httpx import RequestError
+
+from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.infrastructure.adapters.common import BaseTitleFallbackHandler, titles_match
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Callable
 
     from bioetl.domain.ports import LoggerPort
+
+CROSSREF_FALLBACK_ERRORS = (
+    BioETLError,
+    NetworkError,
+    RequestError,
+    OSError,
+    ValueError,
+    TypeError,
+    RuntimeError,
+    KeyError,
+)
 
 
 # Re-export titles_match for backwards compatibility
@@ -85,7 +99,7 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
                 found_title = pub_titles[0] if pub_titles else ""
                 if titles_match(clean_title, found_title):
                     return publication
-        except Exception as e:
+        except CROSSREF_FALLBACK_ERRORS as e:
             self._logger.debug(
                 "crossref_title_search_failed",
                 title=clean_title[:50],

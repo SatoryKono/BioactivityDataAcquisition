@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, Any, Literal, cast
 
 import orjson
 
-from bioetl.application.composite.column_orderer import ColumnOrderer
+from bioetl.application.composite.column_orderer import ColumnOrdererService
 from bioetl.domain.composite.config import DataSchemaConfig
 from bioetl.domain.exceptions import BioETLError, SchemaViolationError
 from bioetl.domain.locking import LockNotHeldError
@@ -110,7 +110,9 @@ class BatchWriter:
         self._column_groups = config.column_groups
         self._data_schema = data_schema_config
         self._column_orderer = (
-            ColumnOrderer(self._context.logger, column_groups=self._column_groups)
+            ColumnOrdererService(
+                self._context.logger, column_groups=self._column_groups
+            )
             if self._column_groups
             else None
         )

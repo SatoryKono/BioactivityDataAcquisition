@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
-class FSMStateHelper:
+class FSMStateHelperService:
     """Helper for FSM state transitions and logging.
 
     Provides methods for:
@@ -215,4 +215,7 @@ class FSMStateHelper:
         )
 
 
-__all__ = ["FSMStateHelper"]
+# Backward-compatible alias for iterative NAME-001 migration.
+FSMStateHelper = FSMStateHelperService
+
+__all__ = ["FSMStateHelper", "FSMStateHelperService"]

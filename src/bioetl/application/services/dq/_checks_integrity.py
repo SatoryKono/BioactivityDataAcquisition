@@ -17,6 +17,14 @@ from bioetl.domain.value_objects.dq_report import (
     SCDIntegrityResult,
 )
 
+_SCD_INTEGRITY_ERRORS = (
+    pl.exceptions.PolarsError,
+    ValueError,
+    TypeError,
+    RuntimeError,
+    KeyError,
+)
+
 
 def check_referential_integrity(
     df: pl.DataFrame, reference_tables: dict[str, pl.DataFrame | pa.Table]
@@ -168,7 +176,7 @@ def check_scd_integrity(
                             and current_to > next_from
                         ):
                             overlapping += 1
-        except Exception:
+        except _SCD_INTEGRITY_ERRORS:
             # Catch all: entity group processing may fail due to missing/invalid
             # temporal fields or sort errors. Skip entity for SCD overlap check.
             pass

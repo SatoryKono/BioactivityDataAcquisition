@@ -16,8 +16,21 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from bioetl.domain.exceptions import BioETLError
+
 if TYPE_CHECKING:
     from bioetl.domain.ports import MetricsPort
+
+
+ADAPTER_REQUEST_ERRORS = (
+    BioETLError,
+    OSError,
+    ConnectionError,
+    TimeoutError,
+    RuntimeError,
+    ValueError,
+    TypeError,
+)
 
 
 @dataclass
@@ -67,7 +80,7 @@ class AdapterMetrics:
         status = "success"
         try:
             yield
-        except Exception:
+        except ADAPTER_REQUEST_ERRORS:
             status = "error"
             raise
         finally:

@@ -1,11 +1,7 @@
-"""Tests for IDMappingDataSource.
-
-Coverage target: ≥80%
-"""
+"""Tests for IDMappingDataSource."""
 
 from __future__ import annotations
 
-from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -14,97 +10,103 @@ from bioetl.application.core.idmapping_data_source import IDMappingDataSource
 from bioetl.domain.types import HealthStatus
 
 
+@pytest.fixture
+def mock_client() -> MagicMock:
+    """Create mock ID mapping client."""
+    client = MagicMock()
+    client.__aenter__ = AsyncMock(return_value=client)
+    client.__aexit__ = AsyncMock(return_value=None)
+    client.map_ids = AsyncMock(
+        return_value={
+            "CHEMBL204": {"uniprot_accession": "P00742", "reviewed": True},
+            "CHEMBL205": {"uniprot_accession": "P12345", "reviewed": True},
+        }
+    )
+    client.health_check = AsyncMock(return_value=HealthStatus.HEALTHY)
+    return client
+
+
+@pytest.fixture
+def mock_reader() -> MagicMock:
+    """Create mock source reader."""
+    reader = MagicMock()
+    reader.read_ids = AsyncMock(return_value=["CHEMBL204", "CHEMBL205", "CHEMBL206"])
+    reader.source_exists = AsyncMock(return_value=True)
+    return reader
+
+
+@pytest.fixture
+def mock_logger() -> MagicMock:
+    """Create mock logger."""
+    return MagicMock()
+
+
+@pytest.fixture
+def data_source(
+    mock_client: MagicMock,
+    mock_reader: MagicMock,
+    mock_logger: MagicMock,
+) -> IDMappingDataSource:
+    """Create default IDMappingDataSource instance."""
+    return IDMappingDataSource(
+        idmapping_client=mock_client,
+        id_source_reader=mock_reader,
+        input_path="data/input/target.csv",
+        logger=mock_logger,
+    )
+
+
+@pytest.mark.unit
 class TestIDMappingDataSourceInit:
     """Tests for IDMappingDataSource initialization."""
 
-    @pytest.fixture
-    def mock_client(self) -> MagicMock:
-        """Create mock ID mapping client."""
-        return MagicMock()
-
-    @pytest.fixture
-    def mock_logger(self) -> MagicMock:
-        """Create mock logger."""
-        return MagicMock()
-
-    def test_initialization(
-        self, mock_client: MagicMock, mock_logger: MagicMock, tmp_path: Path
-    ) -> None:
-        """Test IDMappingDataSource initialization."""
-        input_path = tmp_path / "input.csv"
-        data_source = IDMappingDataSource(
-            idmapping_client=mock_client,
-            input_path=input_path,
-            logger=mock_logger,
-        )
-
+    def test_initialization(self, data_source: IDMappingDataSource) -> None:
+        """Test default initialization."""
         assert data_source.provider_name == "uniprot_idmapping"
-        assert data_source._input_path == input_path
+        assert data_source._input_path == "data/input/target.csv"
         assert data_source._from_db == "ChEMBL"
         assert data_source._to_db == "UniProtKB"
         assert data_source._id_column == "target_id"
 
     def test_initialization_custom_params(
-        self, mock_client: MagicMock, mock_logger: MagicMock, tmp_path: Path
+        self,
+        mock_client: MagicMock,
+        mock_reader: MagicMock,
+        mock_logger: MagicMock,
     ) -> None:
-        """Test IDMappingDataSource with custom parameters."""
-        input_path = tmp_path / "input.csv"
-        data_source = IDMappingDataSource(
+        """Test initialization with custom parameters."""
+        ds = IDMappingDataSource(
             idmapping_client=mock_client,
-            input_path=input_path,
+            id_source_reader=mock_reader,
+            input_path="data/input/custom.csv",
             logger=mock_logger,
             from_db="UniProtKB",
             to_db="PDB",
             id_column="uniprot_id",
         )
 
-        assert data_source._from_db == "UniProtKB"
-        assert data_source._to_db == "PDB"
-        assert data_source._id_column == "uniprot_id"
+        assert ds._from_db == "UniProtKB"
+        assert ds._to_db == "PDB"
+        assert ds._id_column == "uniprot_id"
 
-    def test_repr(
-        self, mock_client: MagicMock, mock_logger: MagicMock, tmp_path: Path
-    ) -> None:
+    def test_repr(self, data_source: IDMappingDataSource) -> None:
         """Test __repr__ method."""
-        input_path = tmp_path / "input.csv"
-        data_source = IDMappingDataSource(
-            idmapping_client=mock_client,
-            input_path=input_path,
-            logger=mock_logger,
-        )
-
         repr_str = repr(data_source)
         assert "IDMappingDataSource" in repr_str
-        assert "input.csv" in repr_str
+        assert "target.csv" in repr_str
         assert "ChEMBL" in repr_str
         assert "UniProtKB" in repr_str
 
 
+@pytest.mark.unit
 class TestIDMappingDataSourceContextManager:
-    """Tests for async context manager."""
-
-    @pytest.fixture
-    def mock_client(self) -> MagicMock:
-        """Create mock ID mapping client."""
-        return MagicMock()
-
-    @pytest.fixture
-    def mock_logger(self) -> MagicMock:
-        """Create mock logger."""
-        return MagicMock()
+    """Tests for async context manager behavior."""
 
     @pytest.mark.asyncio
     async def test_async_context_manager(
-        self, mock_client: MagicMock, mock_logger: MagicMock, tmp_path: Path
+        self, data_source: IDMappingDataSource
     ) -> None:
         """Test async context manager enter/exit."""
-        input_path = tmp_path / "input.csv"
-        data_source = IDMappingDataSource(
-            idmapping_client=mock_client,
-            input_path=input_path,
-            logger=mock_logger,
-        )
-
         assert data_source._is_open is False
 
         async with data_source as ds:
@@ -114,489 +116,237 @@ class TestIDMappingDataSourceContextManager:
         assert data_source._is_open is False
 
     @pytest.mark.asyncio
-    async def test_aclose(
-        self, mock_client: MagicMock, mock_logger: MagicMock, tmp_path: Path
-    ) -> None:
-        """Test aclose method."""
-        input_path = tmp_path / "input.csv"
-        data_source = IDMappingDataSource(
-            idmapping_client=mock_client,
-            input_path=input_path,
-            logger=mock_logger,
-        )
-
+    async def test_aclose(self, data_source: IDMappingDataSource) -> None:
+        """Test aclose method closes client context."""
         data_source._is_open = True
         await data_source.aclose()
         assert data_source._is_open is False
 
 
+@pytest.mark.unit
 class TestIDMappingDataSourceFetch:
     """Tests for fetch method."""
 
-    @pytest.fixture
-    def mock_client(self) -> MagicMock:
-        """Create mock ID mapping client with new dict format."""
-        client = MagicMock()
-        client.map_ids = AsyncMock(
-            return_value={
-                "CHEMBL204": {
-                    "uniprot_accession": "P00742",
-                    "uniprot_entry_name": "FA10_HUMAN",
-                    "organism_scientific": "Homo sapiens",
-                    "taxonomy_id": 9606,
-                    "reviewed": True,
-                },
-                "CHEMBL205": {
-                    "uniprot_accession": "P12345",
-                    "uniprot_entry_name": "TEST_HUMAN",
-                    "organism_scientific": "Homo sapiens",
-                    "taxonomy_id": 9606,
-                    "reviewed": True,
-                },
-            }
-        )
-        return client
-
-    @pytest.fixture
-    def mock_logger(self) -> MagicMock:
-        """Create mock logger."""
-        return MagicMock()
-
-    @pytest.fixture
-    def sample_csv(self, tmp_path: Path) -> Path:
-        """Create sample CSV file."""
-        csv_path = tmp_path / "targets.csv"
-        csv_path.write_text(
-            "target_id,name\n"
-            "CHEMBL204,Target 1\n"
-            "CHEMBL205,Target 2\n"
-            "CHEMBL206,Target 3\n"
-        )
-        return csv_path
-
     @pytest.mark.asyncio
-    async def test_fetch_success(
+    async def test_fetch_uses_seed_ids_over_filter_and_reader(
         self,
         mock_client: MagicMock,
+        mock_reader: MagicMock,
         mock_logger: MagicMock,
-        sample_csv: Path,
     ) -> None:
-        """Test successful fetch with mapping results."""
-        data_source = IDMappingDataSource(
+        """Test priority: seed_ids > filter_ids > source reader."""
+        mock_client.map_ids = AsyncMock(
+            return_value={"CHEMBL1": {"uniprot_accession": "P00001"}}
+        )
+        ds = IDMappingDataSource(
             idmapping_client=mock_client,
-            input_path=sample_csv,
+            id_source_reader=mock_reader,
+            input_path="data/input/target.csv",
             logger=mock_logger,
+            seed_ids=["CHEMBL1", "CHEMBL2"],
         )
 
-        records = []
-        async for record in data_source.fetch("idmapping"):
-            records.append(record)
-
-        assert len(records) == 3
-        assert records[0]["target_id"] == "CHEMBL204"
-        assert records[0]["uniprot_accession"] == "P00742"
-        assert records[1]["target_id"] == "CHEMBL205"
-        assert records[1]["uniprot_accession"] == "P12345"
-        assert records[2]["target_id"] == "CHEMBL206"
-        assert records[2]["uniprot_accession"] is None  # Not in mapping results
-
-    @pytest.mark.asyncio
-    async def test_fetch_with_limit(
-        self,
-        mock_client: MagicMock,
-        mock_logger: MagicMock,
-        sample_csv: Path,
-    ) -> None:
-        """Test fetch with limit parameter."""
-        data_source = IDMappingDataSource(
-            idmapping_client=mock_client,
-            input_path=sample_csv,
-            logger=mock_logger,
-        )
-
-        records = []
-        async for record in data_source.fetch("idmapping", limit=2):
-            records.append(record)
+        records = [
+            record async for record in ds.fetch("idmapping", filter_ids=["CHEMBL999"])
+        ]
 
         assert len(records) == 2
+        assert records[0]["target_id"] == "CHEMBL1"
+        assert records[1]["target_id"] == "CHEMBL2"
+        mock_reader.read_ids.assert_not_called()
+        mock_client.map_ids.assert_awaited_once_with(
+            from_db="ChEMBL",
+            to_db="UniProtKB",
+            ids=["CHEMBL1", "CHEMBL2"],
+        )
 
     @pytest.mark.asyncio
-    async def test_fetch_empty_csv(
+    async def test_fetch_uses_filter_ids_when_seed_missing(
         self,
         mock_client: MagicMock,
+        mock_reader: MagicMock,
         mock_logger: MagicMock,
-        tmp_path: Path,
     ) -> None:
-        """Test fetch with empty CSV (only header)."""
-        csv_path = tmp_path / "empty.csv"
-        csv_path.write_text("target_id,name\n")
-
-        data_source = IDMappingDataSource(
+        """Test filter_ids are used when seed_ids are absent."""
+        ds = IDMappingDataSource(
             idmapping_client=mock_client,
-            input_path=csv_path,
+            id_source_reader=mock_reader,
+            input_path="data/input/target.csv",
             logger=mock_logger,
         )
 
-        records = []
-        async for record in data_source.fetch("idmapping"):
-            records.append(record)
-
-        assert len(records) == 0
-        mock_logger.warning.assert_called()
-
-    @pytest.mark.asyncio
-    async def test_fetch_wrong_entity_type(
-        self,
-        mock_client: MagicMock,
-        mock_logger: MagicMock,
-        sample_csv: Path,
-    ) -> None:
-        """Test fetch logs warning for unexpected entity type."""
-        data_source = IDMappingDataSource(
-            idmapping_client=mock_client,
-            input_path=sample_csv,
-            logger=mock_logger,
-        )
-
-        records = []
-        async for record in data_source.fetch("wrong_entity_type"):
-            records.append(record)
-
-        # Should still work but log warning
-        assert len(records) == 3
-        mock_logger.warning.assert_called_with(
-            "unexpected_entity_type",
-            expected="idmapping",
-            received="wrong_entity_type",
-        )
-
-
-class TestIDMappingDataSourceReadChEMBLIds:
-    """Tests for _read_chembl_ids method."""
-
-    @pytest.fixture
-    def mock_client(self) -> MagicMock:
-        """Create mock ID mapping client."""
-        return MagicMock()
-
-    @pytest.fixture
-    def mock_logger(self) -> MagicMock:
-        """Create mock logger."""
-        return MagicMock()
-
-    def test_read_chembl_ids_success(
-        self,
-        mock_client: MagicMock,
-        mock_logger: MagicMock,
-        tmp_path: Path,
-    ) -> None:
-        """Test successful reading of ChEMBL IDs."""
-        csv_path = tmp_path / "targets.csv"
-        csv_path.write_text("target_id,name\nCHEMBL204,Target 1\nCHEMBL205,Target 2\n")
-
-        data_source = IDMappingDataSource(
-            idmapping_client=mock_client,
-            input_path=csv_path,
-            logger=mock_logger,
-        )
-
-        ids = data_source._read_chembl_ids_sync()
-        assert ids == ["CHEMBL204", "CHEMBL205"]
-
-    def test_read_chembl_ids_file_not_found(
-        self,
-        mock_client: MagicMock,
-        mock_logger: MagicMock,
-        tmp_path: Path,
-    ) -> None:
-        """Test FileNotFoundError when input file doesn't exist."""
-        csv_path = tmp_path / "nonexistent.csv"
-
-        data_source = IDMappingDataSource(
-            idmapping_client=mock_client,
-            input_path=csv_path,
-            logger=mock_logger,
-        )
-
-        with pytest.raises(FileNotFoundError, match="Input file not found"):
-            data_source._read_chembl_ids_sync()
-
-    def test_read_chembl_ids_missing_column(
-        self,
-        mock_client: MagicMock,
-        mock_logger: MagicMock,
-        tmp_path: Path,
-    ) -> None:
-        """Test ValueError when required column is missing."""
-        csv_path = tmp_path / "missing_col.csv"
-        csv_path.write_text("other_column,name\nVAL1,Name1\n")
-
-        data_source = IDMappingDataSource(
-            idmapping_client=mock_client,
-            input_path=csv_path,
-            logger=mock_logger,
-        )
-
-        with pytest.raises(ValueError, match="Missing required column"):
-            data_source._read_chembl_ids_sync()
-
-    def test_read_chembl_ids_skips_empty(
-        self,
-        mock_client: MagicMock,
-        mock_logger: MagicMock,
-        tmp_path: Path,
-    ) -> None:
-        """Test that empty IDs are skipped."""
-        csv_path = tmp_path / "with_empty.csv"
-        csv_path.write_text(
-            "target_id,name\n"
-            "CHEMBL204,Target 1\n"
-            ",Empty\n"
-            "  ,Whitespace\n"
-            "CHEMBL205,Target 2\n"
-        )
-
-        data_source = IDMappingDataSource(
-            idmapping_client=mock_client,
-            input_path=csv_path,
-            logger=mock_logger,
-        )
-
-        ids = data_source._read_chembl_ids_sync()
-        assert ids == ["CHEMBL204", "CHEMBL205"]
-
-    def test_read_chembl_ids_strips_whitespace(
-        self,
-        mock_client: MagicMock,
-        mock_logger: MagicMock,
-        tmp_path: Path,
-    ) -> None:
-        """Test that IDs are stripped of whitespace."""
-        csv_path = tmp_path / "with_whitespace.csv"
-        csv_path.write_text(
-            "target_id,name\n  CHEMBL204  ,Target 1\nCHEMBL205\t,Target 2\n"
-        )
-
-        data_source = IDMappingDataSource(
-            idmapping_client=mock_client,
-            input_path=csv_path,
-            logger=mock_logger,
-        )
-
-        ids = data_source._read_chembl_ids_sync()
-        assert ids == ["CHEMBL204", "CHEMBL205"]
-
-
-class TestIDMappingDataSourceHealthCheck:
-    """Tests for health_check method."""
-
-    @pytest.fixture
-    def mock_client(self) -> MagicMock:
-        """Create mock ID mapping client."""
-        client = MagicMock()
-        client.health_check = AsyncMock(return_value=HealthStatus.HEALTHY)
-        return client
-
-    @pytest.fixture
-    def mock_logger(self) -> MagicMock:
-        """Create mock logger."""
-        return MagicMock()
-
-    @pytest.mark.asyncio
-    async def test_health_check_healthy(
-        self,
-        mock_client: MagicMock,
-        mock_logger: MagicMock,
-        tmp_path: Path,
-    ) -> None:
-        """Test health_check returns HEALTHY when all checks pass."""
-        csv_path = tmp_path / "input.csv"
-        csv_path.write_text("target_id\nCHEMBL1\n")
-
-        data_source = IDMappingDataSource(
-            idmapping_client=mock_client,
-            input_path=csv_path,
-            logger=mock_logger,
-        )
-
-        status = await data_source.health_check()
-
-        assert status == HealthStatus.HEALTHY
-
-    @pytest.mark.asyncio
-    async def test_health_check_file_missing(
-        self,
-        mock_client: MagicMock,
-        mock_logger: MagicMock,
-        tmp_path: Path,
-    ) -> None:
-        """Test health_check returns UNHEALTHY when input file is missing."""
-        csv_path = tmp_path / "nonexistent.csv"
-
-        data_source = IDMappingDataSource(
-            idmapping_client=mock_client,
-            input_path=csv_path,
-            logger=mock_logger,
-        )
-
-        status = await data_source.health_check()
-
-        assert status == HealthStatus.UNHEALTHY
-        mock_logger.warning.assert_called()
-
-    @pytest.mark.asyncio
-    async def test_health_check_api_unhealthy(
-        self,
-        mock_client: MagicMock,
-        mock_logger: MagicMock,
-        tmp_path: Path,
-    ) -> None:
-        """Test health_check returns API status when file exists but API is unhealthy."""
-        csv_path = tmp_path / "input.csv"
-        csv_path.write_text("target_id\nCHEMBL1\n")
-        mock_client.health_check = AsyncMock(return_value=HealthStatus.UNHEALTHY)
-
-        data_source = IDMappingDataSource(
-            idmapping_client=mock_client,
-            input_path=csv_path,
-            logger=mock_logger,
-        )
-
-        status = await data_source.health_check()
-
-        assert status == HealthStatus.UNHEALTHY
-
-    @pytest.mark.asyncio
-    async def test_health_check_api_degraded(
-        self,
-        mock_client: MagicMock,
-        mock_logger: MagicMock,
-        tmp_path: Path,
-    ) -> None:
-        """Test health_check returns DEGRADED when API is degraded."""
-        csv_path = tmp_path / "input.csv"
-        csv_path.write_text("target_id\nCHEMBL1\n")
-        mock_client.health_check = AsyncMock(return_value=HealthStatus.DEGRADED)
-
-        data_source = IDMappingDataSource(
-            idmapping_client=mock_client,
-            input_path=csv_path,
-            logger=mock_logger,
-        )
-
-        status = await data_source.health_check()
-
-        assert status == HealthStatus.DEGRADED
-
-
-class TestIDMappingDataSourceEdgeCases:
-    """Edge case tests for IDMappingDataSource."""
-
-    @pytest.fixture
-    def mock_client(self) -> MagicMock:
-        """Create mock ID mapping client."""
-        return MagicMock()
-
-    @pytest.fixture
-    def mock_logger(self) -> MagicMock:
-        """Create mock logger."""
-        return MagicMock()
-
-    @pytest.mark.asyncio
-    async def test_fetch_with_custom_id_column(
-        self,
-        mock_client: MagicMock,
-        mock_logger: MagicMock,
-        tmp_path: Path,
-    ) -> None:
-        """Test fetch with custom ID column name."""
-        csv_path = tmp_path / "custom.csv"
-        csv_path.write_text("custom_id,name\nCHEMBL1,Name1\n")
-
-        mock_client.map_ids = AsyncMock(
-            return_value={"CHEMBL1": {"uniprot_accession": "P00001", "reviewed": True}}
-        )
-
-        data_source = IDMappingDataSource(
-            idmapping_client=mock_client,
-            input_path=csv_path,
-            logger=mock_logger,
-            id_column="custom_id",
-        )
-
-        records = []
-        async for record in data_source.fetch("idmapping"):
-            records.append(record)
+        records = [
+            record async for record in ds.fetch("idmapping", filter_ids=["CHEMBL1"])
+        ]
 
         assert len(records) == 1
         assert records[0]["target_id"] == "CHEMBL1"
-
-    @pytest.mark.asyncio
-    async def test_fetch_logs_statistics(
-        self,
-        mock_client: MagicMock,
-        mock_logger: MagicMock,
-        tmp_path: Path,
-    ) -> None:
-        """Test that fetch logs mapping statistics."""
-        csv_path = tmp_path / "targets.csv"
-        csv_path.write_text("target_id\nCHEMBL1\nCHEMBL2\n")
-
-        mock_client.map_ids = AsyncMock(
-            return_value={"CHEMBL1": {"uniprot_accession": "P00001", "reviewed": True}}
+        mock_reader.read_ids.assert_not_called()
+        mock_client.map_ids.assert_awaited_once_with(
+            from_db="ChEMBL",
+            to_db="UniProtKB",
+            ids=["CHEMBL1"],
         )
 
-        data_source = IDMappingDataSource(
+    @pytest.mark.asyncio
+    async def test_fetch_reads_from_reader_when_no_seed_or_filter(
+        self,
+        mock_client: MagicMock,
+        mock_reader: MagicMock,
+        mock_logger: MagicMock,
+    ) -> None:
+        """Test source reader is used in standalone mode."""
+        ds = IDMappingDataSource(
             idmapping_client=mock_client,
-            input_path=csv_path,
+            id_source_reader=mock_reader,
+            input_path="data/input/target.csv",
             logger=mock_logger,
         )
 
-        records = []
-        async for record in data_source.fetch("idmapping"):
-            records.append(record)
+        records = [record async for record in ds.fetch("idmapping")]
 
-        # Check that completion log was called
-        mock_logger.info.assert_called()
-        # Find the completion call
-        info_calls = mock_logger.info.call_args_list
-        completion_call = None
-        for call in info_calls:
-            if "idmapping_fetch_completed" in str(call):
-                completion_call = call
-                break
-
-        assert completion_call is not None
-
-    @pytest.mark.asyncio
-    async def test_fetch_ignores_filter_params(
-        self,
-        mock_client: MagicMock,
-        mock_logger: MagicMock,
-        tmp_path: Path,
-    ) -> None:
-        """Test that fetch ignores query, filter_ids, filter_field params."""
-        csv_path = tmp_path / "targets.csv"
-        csv_path.write_text("target_id\nCHEMBL1\n")
-
-        mock_client.map_ids = AsyncMock(
-            return_value={"CHEMBL1": {"uniprot_accession": "P00001", "reviewed": True}}
+        assert len(records) == 3
+        assert records[0]["uniprot_accession"] == "P00742"
+        assert records[2]["uniprot_accession"] is None
+        mock_reader.read_ids.assert_awaited_once_with(
+            source_path="data/input/target.csv",
+            id_column="target_id",
         )
 
-        data_source = IDMappingDataSource(
+    @pytest.mark.asyncio
+    async def test_fetch_applies_limit(self, data_source: IDMappingDataSource) -> None:
+        """Test limit truncates IDs before mapping."""
+        records = [record async for record in data_source.fetch("idmapping", limit=2)]
+        assert len(records) == 2
+
+    @pytest.mark.asyncio
+    async def test_fetch_logs_warning_for_unexpected_entity_type(
+        self,
+        data_source: IDMappingDataSource,
+        mock_logger: MagicMock,
+    ) -> None:
+        """Test warning when entity_type is not idmapping."""
+        _ = [record async for record in data_source.fetch("unexpected")]
+
+        mock_logger.warning.assert_any_call(
+            "unexpected_entity_type",
+            expected="idmapping",
+            received="unexpected",
+        )
+
+    @pytest.mark.asyncio
+    async def test_fetch_returns_empty_when_no_ids(
+        self,
+        mock_client: MagicMock,
+        mock_reader: MagicMock,
+        mock_logger: MagicMock,
+    ) -> None:
+        """Test no map request when source has no IDs."""
+        mock_reader.read_ids = AsyncMock(return_value=[])
+        ds = IDMappingDataSource(
             idmapping_client=mock_client,
-            input_path=csv_path,
+            id_source_reader=mock_reader,
+            input_path="data/input/target.csv",
             logger=mock_logger,
         )
 
-        records = []
-        async for record in data_source.fetch(
-            "idmapping",
-            query="ignored",
-            filter_ids=["ignored"],
-            filter_field="ignored",
-        ):
-            records.append(record)
+        records = [record async for record in ds.fetch("idmapping")]
 
-        # Should still work correctly
-        assert len(records) == 1
+        assert records == []
+        mock_client.map_ids.assert_not_called()
+        mock_logger.warning.assert_any_call(
+            "no_ids_to_map", input_path="data/input/target.csv"
+        )
+
+    @pytest.mark.asyncio
+    async def test_fetch_propagates_reader_errors(
+        self,
+        mock_client: MagicMock,
+        mock_reader: MagicMock,
+        mock_logger: MagicMock,
+    ) -> None:
+        """Test FileNotFoundError from reader is propagated."""
+        mock_reader.read_ids = AsyncMock(side_effect=FileNotFoundError("missing"))
+        ds = IDMappingDataSource(
+            idmapping_client=mock_client,
+            id_source_reader=mock_reader,
+            input_path="data/input/missing.csv",
+            logger=mock_logger,
+        )
+
+        with pytest.raises(FileNotFoundError, match="missing"):
+            _ = [record async for record in ds.fetch("idmapping")]
+
+
+@pytest.mark.unit
+class TestIDMappingDataSourceHealthCheck:
+    """Tests for health_check behavior."""
+
+    @pytest.mark.asyncio
+    async def test_health_check_healthy(self, data_source: IDMappingDataSource) -> None:
+        """Test healthy status when source exists and API is healthy."""
+        status = await data_source.health_check()
+        assert status == HealthStatus.HEALTHY
+
+    @pytest.mark.asyncio
+    async def test_health_check_unhealthy_when_source_missing(
+        self,
+        mock_client: MagicMock,
+        mock_reader: MagicMock,
+        mock_logger: MagicMock,
+    ) -> None:
+        """Test unhealthy status when input source is missing."""
+        mock_reader.source_exists = AsyncMock(return_value=False)
+        ds = IDMappingDataSource(
+            idmapping_client=mock_client,
+            id_source_reader=mock_reader,
+            input_path="data/input/missing.csv",
+            logger=mock_logger,
+        )
+
+        status = await ds.health_check()
+
+        assert status == HealthStatus.UNHEALTHY
+        mock_client.health_check.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_health_check_skips_source_check_when_seed_ids_present(
+        self,
+        mock_client: MagicMock,
+        mock_reader: MagicMock,
+        mock_logger: MagicMock,
+    ) -> None:
+        """Test source existence check is skipped in composite mode."""
+        ds = IDMappingDataSource(
+            idmapping_client=mock_client,
+            id_source_reader=mock_reader,
+            input_path="data/input/target.csv",
+            logger=mock_logger,
+            seed_ids=["CHEMBL1"],
+        )
+
+        status = await ds.health_check()
+
+        assert status == HealthStatus.HEALTHY
+        mock_reader.source_exists.assert_not_called()
+        mock_client.health_check.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def test_health_check_returns_api_status(
+        self,
+        mock_client: MagicMock,
+        mock_reader: MagicMock,
+        mock_logger: MagicMock,
+    ) -> None:
+        """Test non-healthy API status is propagated."""
+        mock_client.health_check = AsyncMock(return_value=HealthStatus.DEGRADED)
+        ds = IDMappingDataSource(
+            idmapping_client=mock_client,
+            id_source_reader=mock_reader,
+            input_path="data/input/target.csv",
+            logger=mock_logger,
+        )
+
+        status = await ds.health_check()
+
+        assert status == HealthStatus.DEGRADED

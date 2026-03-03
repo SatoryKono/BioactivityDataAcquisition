@@ -39,7 +39,7 @@ class CsvFilterReader:
 
         try:
             return pl.read_csv(source_path)
-        except Exception as e:
+        except (pl.exceptions.PolarsError, OSError, ValueError, TypeError) as e:
             raise ValueError(f"Failed to read CSV file: {e}") from e
 
     def _extract_column_ids(self, df: pl.DataFrame, column_name: str) -> list[str]:

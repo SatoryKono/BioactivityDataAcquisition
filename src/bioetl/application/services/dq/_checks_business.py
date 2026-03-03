@@ -15,6 +15,13 @@ from bioetl.domain.value_objects.dq_report import (
     DQCheckStatus,
 )
 
+_BUSINESS_RULE_EVALUATION_ERRORS = (
+    ValueError,
+    TypeError,
+    RuntimeError,
+    KeyError,
+)
+
 
 def _check_not_null_rule(df: pl.DataFrame, column: str) -> tuple[bool, int | None]:
     """Check not_null rule for a column."""
@@ -112,7 +119,7 @@ def check_business_rules(
         column = rule.get("column")
         try:
             passed, violations = _evaluate_single_rule(df, rule)
-        except Exception:
+        except _BUSINESS_RULE_EVALUATION_ERRORS:
             # Catch all: rule evaluation may fail due to missing columns, type errors,
             # or malformed rule expressions. Treat as rule failure for DQ reporting.
             passed, violations = False, None

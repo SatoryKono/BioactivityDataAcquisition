@@ -46,6 +46,13 @@ from bioetl.domain.value_objects.dq_report import (
     ValueDistributionResult,
 )
 
+_SILVER_PROFILE_ERRORS = (
+    pl.exceptions.PolarsError,
+    ValueError,
+    TypeError,
+    RuntimeError,
+)
+
 
 class SilverDQAnalyzer:
     """Analyzer for Silver layer DQ checks.
@@ -62,8 +69,11 @@ class SilverDQAnalyzer:
         input_record_count: int | None,
         quarantined_count: int,
         previous_schema: dict[str, str] | None,
-        key_nullability_rules: list[dict[str, Any]] | None,
-    ) -> tuple[dict[str, Any], int, int, int]:
+        key_nullability_rules: list[dict[str, Any]]
+        | None,  # Any: DQ check values vary by check type
+    ) -> tuple[
+        dict[str, Any], int, int, int
+    ]:  # Any: DQ check values vary by check type
         """Execute all enabled DQ checks and collect results.
 
         Args:
@@ -77,7 +87,7 @@ class SilverDQAnalyzer:
         Returns:
             Tuple of (checks dict, passed count, failed count, warnings count).
         """
-        checks: dict[str, Any] = {}
+        checks: dict[str, Any] = {}  # Any: DQ check values vary by check type
         passed, failed, warnings = 0, 0, 0
 
         if SilverDQCheckType.RECORD_COUNT in enabled_checks:
@@ -210,7 +220,8 @@ class SilverDQAnalyzer:
         input_record_count: int | None = None,
         quarantined_count: int = 0,
         previous_schema: dict[str, str] | None = None,
-        key_nullability_rules: list[dict[str, Any]] | None = None,
+        key_nullability_rules: list[dict[str, Any]]
+        | None = None,  # Any: DQ check values vary by check type
     ) -> SilverDQReport:
         """Analyze Silver data and generate DQ report.
 
@@ -283,10 +294,12 @@ class SilverDQAnalyzer:
     def _check_key_nullability(
         self,
         df: pl.DataFrame,
-        key_nullability_rules: list[dict[str, Any]],
-    ) -> dict[str, Any]:
+        key_nullability_rules: list[
+            dict[str, Any]
+        ],  # Any: DQ check values vary by check type
+    ) -> dict[str, Any]:  # Any: DQ check values vary by check type
         """Check nullability for configured merge/partition keys."""
-        violations: list[dict[str, Any]] = []
+        violations: list[dict[str, Any]] = []  # Any: DQ check values vary by check type
 
         for rule in key_nullability_rules:
             if rule.get("nullable", False):
@@ -409,7 +422,7 @@ class SilverDQAnalyzer:
                     if len(df) > 0
                     else 0.0,
                 }
-            except Exception:
+            except _SILVER_PROFILE_ERRORS:
                 # Catch all: cardinality calculation may fail for unhashable types
                 # or invalid column access. Skip column from cardinality metrics.
                 pass
@@ -429,7 +442,9 @@ class SilverDQAnalyzer:
         """Check type conformance against expected schema."""
         # For now, just validate that columns have consistent types
         errors = []
-        type_coercions: dict[str, dict[str, Any]] = {}
+        type_coercions: dict[
+            str, dict[str, Any]
+        ] = {}  # Any: DQ check values vary by check type
 
         for col in df.columns:
             dtype = df[col].dtype
@@ -474,7 +489,7 @@ class SilverDQAnalyzer:
                             if median_val is not None
                             else None,
                         )
-                except Exception:
+                except _SILVER_PROFILE_ERRORS:
                     # Catch all: numeric stats may fail for mixed types, NaN/Inf,
                     # or non-numeric data in numeric column. Skip column profiling.
                     pass
@@ -498,7 +513,7 @@ class SilverDQAnalyzer:
                         top_values=tuple(top_values),
                         cardinality=cardinality,
                     )
-                except Exception:
+                except _SILVER_PROFILE_ERRORS:
                     # Catch all: value_counts() may fail for unhashable types or
                     # large cardinality. Skip column from categorical profiling.
                     pass
@@ -609,9 +624,11 @@ class SilverDQAnalyzer:
             status=status,
         )
 
-    def _distribution_to_dict(self, result: ValueDistributionResult) -> dict[str, Any]:
+    def _distribution_to_dict(
+        self, result: ValueDistributionResult
+    ) -> dict[str, Any]:  # Any: DQ check values vary by check type
         """Convert distribution result to dict."""
-        output: dict[str, Any] = {
+        output: dict[str, Any] = {  # Any: DQ check values vary by check type
             "numeric_columns": {},
             "categorical_columns": {},
             "status": result.status.value,

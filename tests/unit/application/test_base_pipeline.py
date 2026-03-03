@@ -10,6 +10,7 @@ import pytest
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.core.shutdown import ShutdownSignal
 from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunID, RunType
@@ -190,3 +191,41 @@ async def test_run_id_propagation_is_consistent():
         run_id=str(expected_run_id),
         pipeline=config.pipeline_name,
     )
+
+
+async def test_base_pipeline_uses_injected_shutdown_signal():
+    """BasePipeline should support ShutdownSignal injection for DI compliance."""
+    config = PipelineConfig(
+        pipeline_name="test_pipeline",
+        provider="test_provider",
+        entity_type="test_entity",
+        table=TableConfig(
+            primary_keys=["id"],
+            silver_table="test_provider.test_entity",
+        ),
+    )
+    runtime = RuntimeConfig(run_type=RunType.INCREMENTAL)
+    mock_logger = MagicMock()
+    mock_logger.bind = MagicMock(return_value=mock_logger)
+    services = PipelineServices(
+        data_source=AsyncMock(),
+        storage=AsyncMock(),
+        lock=AsyncMock(),
+        checkpoint=AsyncMock(),
+        quarantine=AsyncMock(),
+        metrics=MagicMock(),
+        tracing=MagicMock(),
+        logger=mock_logger,
+    )
+    run_id: RunID = uuid4()
+    injected_signal = ShutdownSignal()
+
+    pipeline = ConcretePipeline.create(
+        run_id=run_id,
+        runtime=runtime,
+        services=services,
+        config=config,
+        shutdown_signal=injected_signal,
+    )
+
+    assert pipeline.shutdown_signal is injected_signal

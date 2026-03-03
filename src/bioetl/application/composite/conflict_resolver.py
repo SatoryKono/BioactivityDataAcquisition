@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
-from bioetl.application.composite.coalesce_policy import CoalescePolicy
+from bioetl.application.composite.coalesce_policy import CoalescePolicyService
 from bioetl.domain.composite.strategy import ConflictResolution
 
 if TYPE_CHECKING:
@@ -15,14 +15,17 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
-class ConflictResolver:
+__all__ = ["ConflictResolver", "ConflictResolverService"]
+
+
+class ConflictResolverService:
     """Handles column conflict detection and policy-based coalescing."""
 
     def __init__(
         self,
         merge_config: MergeConfig,
         logger: LoggerPort,
-        coalesce_policy: CoalescePolicy,
+        coalesce_policy: CoalescePolicyService,
     ) -> None:
         self._config = merge_config
         self._logger = logger
@@ -125,3 +128,7 @@ class ConflictResolver:
                 )
             case _:
                 return df
+
+
+# Backward-compatible alias for iterative NAME-001 migration.
+ConflictResolver = ConflictResolverService

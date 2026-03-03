@@ -12,10 +12,21 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
+from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.ports import HealthCheckPort, HealthCheckResult
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
+
+
+_HEALTH_SERVICE_ERRORS = (
+    NetworkError,
+    BioETLError,
+    OSError,
+    RuntimeError,
+    ValueError,
+    TypeError,
+)
 
 
 @runtime_checkable
@@ -233,7 +244,7 @@ class HealthService:
                 error="Adapter does not implement HealthCheckPort",
             )
 
-        except Exception as e:
+        except _HEALTH_SERVICE_ERRORS as e:
             self.logger.error(
                 "Health check failed",
                 provider=provider,

@@ -117,7 +117,7 @@ class OpenTelemetryTracer:
             # Force flush with 5 second timeout
             self._provider.force_flush(timeout_millis=5000)
             self._provider.shutdown()
-        except Exception:  # nosec B110
+        except (RuntimeError, OSError, ValueError, TypeError, AttributeError):  # nosec B110
             # Best effort - don't fail the pipeline on tracing cleanup
             pass
         self._closed = True

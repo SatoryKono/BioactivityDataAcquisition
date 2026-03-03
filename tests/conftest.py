@@ -160,11 +160,19 @@ def query_ignore_email(request_1: Any, request_2: Any) -> bool:
 
 
 @pytest.fixture(scope="module")
-def vcr(vcr_config: dict[str, object]) -> Any:  # type: ignore[override]
+def vcr(  # type: ignore[override]
+    vcr_config: dict[str, object],
+    vcr_cassette_dir: Path | str,
+) -> Any:
     """Configure VCR instance with custom matchers."""
     if vcrpy is None:
         pytest.skip("vcrpy not installed")
-    vcr_instance = vcrpy.VCR(**vcr_config)
+    kwargs: dict[str, object] = {
+        "cassette_library_dir": str(vcr_cassette_dir),
+        "path_transformer": vcrpy.VCR.ensure_suffix(".yaml"),
+    }
+    kwargs.update(vcr_config)
+    vcr_instance = vcrpy.VCR(**kwargs)
     vcr_instance.register_matcher("query_ignore_email", query_ignore_email)
     return vcr_instance
 

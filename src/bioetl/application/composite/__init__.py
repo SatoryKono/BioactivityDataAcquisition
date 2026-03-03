@@ -1,45 +1,69 @@
 """Composite pipeline application services.
 
 This package contains application services for composite pipeline orchestration:
-- CompositePipelineRunner: Main orchestrator for composite pipelines
-- DependencyCoordinator: Sequential execution of dependency pipelines
-- EnrichmentCoordinator: Fan-out/fan-in coordination for enrichers
+- CompositePipelineRunnerService: Main orchestrator for composite pipelines
+- DependencyCoordinatorService: Sequential execution of dependency pipelines
+- EnrichmentCoordinatorService: Fan-out/fan-in coordination for enrichers
 - MergeService: Data merging with conflict resolution
 - KeyExtractorService: Extract join keys from seed Silver tables
-- CompositeCheckpointManager: Checkpoint management for resume capability
-- ColumnRenamer: Unified column renaming to qualified format
-- ColumnOrderer: Semantic column ordering for consistent output
-- CompositePreflightValidator: Preflight validation for field_priorities
+- CompositeCheckpointService: Checkpoint management for resume capability
+- ColumnRenamerService: Unified column renaming to qualified format
+- ColumnOrdererService: Semantic column ordering for consistent output
+- CompositePreflightValidationService: Preflight validation for field_priorities
 
 See ADR-026 for architectural decisions.
 """
 
 from bioetl.application.composite.checkpoint import (
     CompositeCheckpointManager,
+    CompositeCheckpointService,
     CompositeCheckpointState,
 )
-from bioetl.application.composite.column_orderer import ColumnOrderer
-from bioetl.application.composite.column_renamer import ColumnRenamer
-from bioetl.application.composite.coordinator import EnrichmentCoordinator
-from bioetl.application.composite.dependency_coordinator import DependencyCoordinator
+from bioetl.application.composite.column_orderer import (
+    ColumnOrderer,
+    ColumnOrdererService,
+)
+from bioetl.application.composite.column_renamer import (
+    ColumnRenamer,
+    ColumnRenamerService,
+)
+from bioetl.application.composite.coordinator import (
+    EnrichmentCoordinator,
+    EnrichmentCoordinatorService,
+)
+from bioetl.application.composite.dependency_coordinator import (
+    DependencyCoordinator,
+    DependencyCoordinatorService,
+)
 from bioetl.application.composite.key_extractor import KeyExtractorService
 from bioetl.application.composite.merger import MergeService
 from bioetl.application.composite.preflight_validator import (
+    CompositePreflightValidationService,
     CompositePreflightValidator,
     PreflightValidationError,
     PreflightValidationResult,
 )
-from bioetl.application.composite.runner import CompositePipelineRunner
+from bioetl.application.composite.runner import (
+    CompositePipelineRunner,
+    CompositePipelineRunnerService,
+)
 
 __all__ = [
     "ColumnOrderer",
+    "ColumnOrdererService",
     "ColumnRenamer",
+    "ColumnRenamerService",
     "CompositeCheckpointManager",
+    "CompositeCheckpointService",
     "CompositeCheckpointState",
     "CompositePipelineRunner",
+    "CompositePipelineRunnerService",
+    "CompositePreflightValidationService",
     "CompositePreflightValidator",
     "DependencyCoordinator",
+    "DependencyCoordinatorService",
     "EnrichmentCoordinator",
+    "EnrichmentCoordinatorService",
     "KeyExtractorService",
     "MergeService",
     "PreflightValidationError",

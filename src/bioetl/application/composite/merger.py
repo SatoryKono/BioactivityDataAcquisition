@@ -6,14 +6,16 @@ from collections.abc import Sequence
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
-from bioetl.application.composite.aggregator import EnricherAggregator
-from bioetl.application.composite.coalesce_policy import CoalescePolicy
-from bioetl.application.composite.column_orderer import ColumnOrderer
-from bioetl.application.composite.column_priority_orderer import ColumnPriorityOrderer
-from bioetl.application.composite.column_renamer import ColumnRenamer
-from bioetl.application.composite.conflict_resolver import ConflictResolver
-from bioetl.application.composite.deduplication import EnricherDeduplicator
-from bioetl.application.composite.join_planner import JoinHow, JoinPlanner
+from bioetl.application.composite.aggregator import EnricherAggregatorService
+from bioetl.application.composite.coalesce_policy import CoalescePolicyService
+from bioetl.application.composite.column_orderer import ColumnOrdererService
+from bioetl.application.composite.column_priority_orderer import (
+    ColumnPriorityOrdererService,
+)
+from bioetl.application.composite.column_renamer import ColumnRenamerService
+from bioetl.application.composite.conflict_resolver import ConflictResolverService
+from bioetl.application.composite.deduplication import EnricherDeduplicatorService
+from bioetl.application.composite.join_planner import JoinHow, JoinPlannerService
 from bioetl.domain.composite.result import (
     DependencyResult,
     EnrichmentResult,
@@ -31,7 +33,9 @@ from bioetl.domain.registry.field_aliases import get_alias_map_for_provider
 if TYPE_CHECKING:
     import polars as pl
 
-    from bioetl.application.composite.cross_validator import EnrichmentCrossValidator
+    from bioetl.application.composite.cross_validator import (
+        EnrichmentCrossValidationService,
+    )
     from bioetl.domain.composite.config import (
         DependencyConfig,
         EnricherConfig,
@@ -76,8 +80,17 @@ class MergeService:
         logger: LoggerPort,
         delta_reader: DeltaReaderPort | None = None,
         field_group_registry: FieldGroupRegistry | None = None,
-        cross_validator: EnrichmentCrossValidator | None = None,
+        cross_validator: EnrichmentCrossValidationService | None = None,
         gold_schema: Any | None = None,
+        *,
+        deduplicator: EnricherDeduplicatorService | None = None,
+        aggregator: EnricherAggregatorService | None = None,
+        renamer: ColumnRenamerService | None = None,
+        orderer: ColumnOrdererService | None = None,
+        priority_orderer: ColumnPriorityOrdererService | None = None,
+        coalesce_policy: CoalescePolicyService | None = None,
+        conflict_resolver: ConflictResolverService | None = None,
+        join_planner: JoinPlannerService | None = None,
     ) -> None:
         self._config = merge_config
         self._storage = storage
@@ -87,24 +100,29 @@ class MergeService:
         self._cross_validator = cross_validator
         self._gold_schema = gold_schema
 
-        self._deduplicator = EnricherDeduplicator(logger)
-        self._aggregator = EnricherAggregator(logger)
-        self._renamer = ColumnRenamer(logger)
-        self._orderer = ColumnOrderer(
+        self._deduplicator = deduplicator or EnricherDeduplicatorService(logger)
+        self._aggregator = aggregator or EnricherAggregatorService(logger)
+        self._renamer = renamer or ColumnRenamerService(logger)
+        self._orderer = orderer or ColumnOrdererService(
             logger,
             column_groups=merge_config.column_groups
             if merge_config.column_groups
             else None,
         )
 
-        self._priority_orderer = ColumnPriorityOrderer(logger)
-        self._coalesce_policy = CoalescePolicy(logger, self._priority_orderer)
-        self._conflict_resolver = ConflictResolver(
+        self._priority_orderer = priority_orderer or ColumnPriorityOrdererService(
+            logger
+        )
+        self._coalesce_policy = coalesce_policy or CoalescePolicyService(
+            logger,
+            self._priority_orderer,
+        )
+        self._conflict_resolver = conflict_resolver or ConflictResolverService(
             merge_config,
             logger,
             self._coalesce_policy,
         )
-        self._join_planner = JoinPlanner(
+        self._join_planner = join_planner or JoinPlannerService(
             merge_config=merge_config,
             logger=logger,
             deduplicator=self._deduplicator,

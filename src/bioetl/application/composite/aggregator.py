@@ -20,7 +20,10 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
-class EnricherAggregator:
+__all__ = ["EnricherAggregator", "EnricherAggregatorService"]
+
+
+class EnricherAggregatorService:
     """Aggregates 1:M enricher data into 1:1 before join."""
 
     def __init__(self, logger: LoggerPort) -> None:
@@ -137,4 +140,5 @@ class EnricherAggregator:
         return None
 
 
-__all__ = ["EnricherAggregator"]
+# Backward-compatible alias for iterative NAME-001 migration.
+EnricherAggregator = EnricherAggregatorService

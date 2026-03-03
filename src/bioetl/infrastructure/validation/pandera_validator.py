@@ -106,6 +106,8 @@ class BasePanderaValidator:
 
         """
         assert self._schema is not None  # Guaranteed by validate()
+        from pandera.errors import SchemaError, SchemaErrors
+
         try:
             df_to_validate = df
             if hasattr(self._schema, "columns"):
@@ -121,7 +123,7 @@ class BasePanderaValidator:
             df_to_validate = self._reorder_to_schema(df_to_validate)
             self._schema.validate(df_to_validate, lazy=True)
             return ValidationResult(valid=True)
-        except Exception as e:
+        except (SchemaError, SchemaErrors, KeyError, TypeError, ValueError) as e:
             return ValidationResult(valid=False, errors=[str(e)])
 
 
@@ -187,6 +189,8 @@ class PanderaGoldValidator(BasePanderaValidator):
 
         """
         assert self._schema is not None  # Guaranteed by validate()
+        from pandera.errors import SchemaError, SchemaErrors
+
         try:
             # If strict is False, we want to allow extra columns.
             # Filter DataFrame to only include columns in the schema before validation.
@@ -209,7 +213,7 @@ class PanderaGoldValidator(BasePanderaValidator):
                 self._schema.validate(df_to_validate, lazy=True)
 
             return ValidationResult(valid=True)
-        except Exception as e:
+        except (SchemaError, SchemaErrors, KeyError, TypeError, ValueError) as e:
             return ValidationResult(valid=False, errors=[str(e)])
 
 

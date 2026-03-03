@@ -21,6 +21,9 @@ from abc import abstractmethod
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
+from httpx import RequestError
+
+from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.types import HealthStatus
 
 if TYPE_CHECKING:
@@ -30,6 +33,19 @@ if TYPE_CHECKING:
         LoggerPort,
         MetricsPort,
     )
+
+HEALTH_CHECK_ERRORS = (
+    BioETLError,
+    NetworkError,
+    RequestError,
+    ConnectionError,
+    TimeoutError,
+    OSError,
+    ValueError,
+    TypeError,
+    RuntimeError,
+    AttributeError,
+)
 
 
 @dataclass
@@ -74,7 +90,7 @@ class HealthCheckMixin:
                     status = await self._probe_health()
                     self._handle_health_check_success(ctx, status)
                     return status
-                except Exception as e:
+                except HEALTH_CHECK_ERRORS as e:
                     return self._handle_health_check_failure(ctx, e)
 
     """
@@ -269,7 +285,7 @@ class HealthCheckProviderMixin(HealthCheckMixin):
             status = await self._probe_health()
             self._handle_health_check_success(ctx, status)
             return status
-        except Exception as e:
+        except HEALTH_CHECK_ERRORS as e:
             fallback_status = self._fallback_health_status()
             # Log and record metrics for the failure
             self._handle_health_check_failure(ctx, e)
@@ -304,7 +320,7 @@ class HealthCheckProviderMixin(HealthCheckMixin):
         try:
             status = await self._probe_health()
             self._handle_health_check_success(ctx, status)
-        except Exception as e:
+        except HEALTH_CHECK_ERRORS as e:
             last_error = str(e)
             # check_health() contract: probe failures must be surfaced as UNHEALTHY
             # with error details so preflight can fail fast instead of proceeding
@@ -315,7 +331,7 @@ class HealthCheckProviderMixin(HealthCheckMixin):
             # Get failure count from circuit breaker
             try:
                 consecutive_failures = self._circuit_breaker.get_failure_count()
-            except Exception:
+            except HEALTH_CHECK_ERRORS:
                 consecutive_failures = 1
 
         latency_ms = ctx.elapsed_seconds * 1000
@@ -356,7 +372,7 @@ class HealthCheckProviderMixin(HealthCheckMixin):
 
         try:
             return assess_health_from_circuit_breaker(self._circuit_breaker)
-        except Exception:
+        except HEALTH_CHECK_ERRORS:
             return HealthStatus.UNHEALTHY
 
     def _get_error_context(self, operation: str) -> dict[str, Any]:
@@ -372,7 +388,7 @@ class HealthCheckProviderMixin(HealthCheckMixin):
         try:
             cb_state = self._circuit_breaker.get_state().value
             cb_failures = self._circuit_breaker.get_failure_count()
-        except Exception:
+        except HEALTH_CHECK_ERRORS:
             cb_state = None
             cb_failures = 0
 

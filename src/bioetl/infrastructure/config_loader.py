@@ -14,11 +14,11 @@ from typing import Any
 import yaml
 
 from bioetl.infrastructure.config_merge import config_merge
-from bioetl.infrastructure.legacy_normalizers.source import (
-    normalize_source_config,
-)
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
+from bioetl.infrastructure.source_normalizers.source import (
+    normalize_source_config,
+)
 
 
 def _deep_merge(

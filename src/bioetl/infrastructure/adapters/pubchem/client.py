@@ -22,6 +22,7 @@ Documentation: https://pubchemdocs.ncbi.nlm.nih.gov/pug-rest
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING, Any
 
@@ -167,7 +168,7 @@ class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
                 yield record
             return
 
-        fetch_methods = {
+        fetch_methods: dict[str, Callable[[], AsyncIterator[dict[str, Any]]]] = {
             "compound": lambda: self._fetch_compound(query, limit),
             "substance": lambda: self._strategies.fetch_substances(query, limit),
             "assay": lambda: self._strategies.fetch_assays(query, limit),

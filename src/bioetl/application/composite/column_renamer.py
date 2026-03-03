@@ -16,17 +16,17 @@ if TYPE_CHECKING:
 
     from bioetl.domain.ports import LoggerPort
 
-__all__ = ["ColumnRenamer"]
+__all__ = ["ColumnRenamer", "ColumnRenamerService"]
 
 
-class ColumnRenamer:
+class ColumnRenamerService:
     """Service for renaming columns to qualified format.
 
     Renames all business columns to {provider}.{entity}.{field} format.
     Excludes join keys and system columns from renaming.
 
     Example:
-        >>> renamer = ColumnRenamer(logger)
+        >>> renamer = ColumnRenamerService(logger)
         >>> result = renamer.rename_dataframe(df, "chembl_publication")
         >>> # 'title' -> 'chembl.publication.title'
         >>> # 'doi' -> 'doi' (join key, unchanged)
@@ -214,3 +214,7 @@ class ColumnRenamer:
     def _is_join_key(self, col: str) -> bool:
         """Check if column is a join key (case-insensitive)."""
         return col.lower() in self.JOIN_KEY_COLUMNS
+
+
+# Backward-compatible alias for iterative NAME-001 migration.
+ColumnRenamer = ColumnRenamerService

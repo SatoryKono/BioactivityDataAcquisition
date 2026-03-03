@@ -11,11 +11,23 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
+from bioetl.domain.exceptions import BioETLError, StorageError
+
 if TYPE_CHECKING:
     from bioetl.application.services.medallion_lifecycle import (
         MedallionLifecycleService,
     )
     from bioetl.domain.ports import LoggerPort
+
+
+_VACUUM_OPERATION_ERRORS = (
+    StorageError,
+    BioETLError,
+    OSError,
+    RuntimeError,
+    ValueError,
+    TypeError,
+)
 
 
 #: Type alias for table collector callable.
@@ -161,7 +173,7 @@ class VacuumService:
                 files_removed=files_removed,
                 error=None,
             )
-        except Exception as e:
+        except _VACUUM_OPERATION_ERRORS as e:
             self.logger.error(
                 "Vacuum failed for table",
                 table_name=table_name,

@@ -12,6 +12,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
+from httpx import RequestError
+
+from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.infrastructure.adapters.common import BaseTitleFallbackHandler, titles_match
 from bioetl.infrastructure.adapters.semanticscholar.constants import (
     SEMANTICSCHOLAR_BASE_URL,
@@ -34,6 +37,17 @@ DEFAULT_SEARCH_FIELDS = (
     "paperId,externalIds,title,abstract,year,publicationDate,"
     "venue,authors,citationCount,referenceCount,isOpenAccess,"
     "openAccessPdf,tldr,fieldsOfStudy,publicationTypes,journal"
+)
+
+SEMANTICSCHOLAR_FALLBACK_ERRORS = (
+    BioETLError,
+    NetworkError,
+    RequestError,
+    OSError,
+    ValueError,
+    TypeError,
+    RuntimeError,
+    KeyError,
 )
 
 
@@ -167,7 +181,7 @@ class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):
                 if not found_title:
                     return cast(dict[str, Any], record)
 
-        except Exception as e:
+        except SEMANTICSCHOLAR_FALLBACK_ERRORS as e:
             self._logger.debug(
                 "semanticscholar_title_search_failed",
                 title=title[:50],

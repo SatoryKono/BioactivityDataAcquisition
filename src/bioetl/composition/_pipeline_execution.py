@@ -25,6 +25,7 @@ from bioetl.domain.context import (
     PipelineRunContext,
     VacuumConfig,
 )
+from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.types import ExecutionContext, RunID, RunType
 from bioetl.infrastructure.config import get_settings
 
@@ -268,7 +269,7 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
         await runner.run()
     except PipelineShutdownError:
         status = PipelineRunResult.SHUTDOWN
-    except Exception as e:
+    except (BioETLError, OSError, RuntimeError, ValueError, TypeError) as e:
         status = PipelineRunResult.FAILED
         error_message = str(e)
         error_type = type(e).__name__

@@ -10,10 +10,22 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
+from bioetl.domain.exceptions import BioETLError, StorageError
+
 if TYPE_CHECKING:
     import pyarrow as pa
 
     from bioetl.domain.ports import DeltaReaderPort, LoggerPort
+
+
+_EXPORT_OPERATION_ERRORS = (
+    StorageError,
+    BioETLError,
+    OSError,
+    RuntimeError,
+    ValueError,
+    TypeError,
+)
 
 
 ExportFormat = Literal["csv", "xlsx", "tsv"]
@@ -349,7 +361,7 @@ class ExportService:
                 row_count=row_count,
             )
 
-        except Exception as e:
+        except _EXPORT_OPERATION_ERRORS as e:
             self.logger.error(
                 "Export failed", table=table_name, layer=layer, error=str(e)
             )

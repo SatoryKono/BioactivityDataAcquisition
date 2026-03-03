@@ -14,7 +14,10 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
-class EnricherDeduplicator:
+__all__ = ["EnricherDeduplicator", "EnricherDeduplicatorService"]
+
+
+class EnricherDeduplicatorService:
     """Handles deduplication of enricher tables before join operations."""
 
     def __init__(self, logger: LoggerPort) -> None:
@@ -213,3 +216,7 @@ class EnricherDeduplicator:
             records_after=records_after,
             columns_with_conflicts=columns_with_conflicts,
         )
+
+
+# Backward-compatible alias for iterative NAME-001 migration.
+EnricherDeduplicator = EnricherDeduplicatorService

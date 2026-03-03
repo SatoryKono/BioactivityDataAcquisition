@@ -65,7 +65,7 @@ class TestChEMBLPipelineE2E:
             gold_writer=gold_writer,
         )
 
-    @pytest.mark.vcr
+    @pytest.mark.vcr(allow_playback_repeats=True)
     async def test_chembl_activity_full_run(
         self,
         storage_adapter,

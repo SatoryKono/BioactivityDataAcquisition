@@ -64,6 +64,46 @@ def merge_service(merge_config, mock_storage, mock_logger):
 
 
 @pytest.mark.unit
+def test_merge_service_accepts_injected_internal_components(
+    merge_config,
+    mock_storage,
+    mock_logger,
+):
+    """MergeService should allow overriding internally constructed collaborators."""
+    deduplicator = MagicMock()
+    aggregator = MagicMock()
+    renamer = MagicMock()
+    orderer = MagicMock()
+    priority_orderer = MagicMock()
+    coalesce_policy = MagicMock()
+    conflict_resolver = MagicMock()
+    join_planner = MagicMock()
+
+    service = MergeService(
+        merge_config=merge_config,
+        storage=mock_storage,
+        logger=mock_logger,
+        deduplicator=deduplicator,
+        aggregator=aggregator,
+        renamer=renamer,
+        orderer=orderer,
+        priority_orderer=priority_orderer,
+        coalesce_policy=coalesce_policy,
+        conflict_resolver=conflict_resolver,
+        join_planner=join_planner,
+    )
+
+    assert service._deduplicator is deduplicator
+    assert service._aggregator is aggregator
+    assert service._renamer is renamer
+    assert service._orderer is orderer
+    assert service._priority_orderer is priority_orderer
+    assert service._coalesce_policy is coalesce_policy
+    assert service._conflict_resolver is conflict_resolver
+    assert service._join_planner is join_planner
+
+
+@pytest.mark.unit
 class TestPathToTableName:
     """Tests for _path_to_table_name helper."""
 

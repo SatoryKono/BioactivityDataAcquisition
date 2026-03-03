@@ -140,7 +140,7 @@ def start_metrics_server(
                     time.sleep(retry_delay * (2**attempt))
                     continue
                 return _handle_os_error(port, e, retry_count, fail_fast, logger)
-            except Exception as e:
+            except (RuntimeError, ValueError, TypeError, AttributeError) as e:
                 return _handle_unexpected_error(port, e, fail_fast, logger)
 
         return False
@@ -190,7 +190,14 @@ def push_metrics_to_gateway(
             grouping_key=grouping_key,
         )
         return True
-    except Exception as e:
+    except (
+        OSError,
+        ConnectionError,
+        TimeoutError,
+        RuntimeError,
+        ValueError,
+        TypeError,
+    ) as e:
         logger.warning(
             "Failed to push metrics to gateway",
             gateway=gateway,

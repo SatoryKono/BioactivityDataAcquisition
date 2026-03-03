@@ -208,7 +208,14 @@ class CsvExporter:
         except ImportError:
             self._logger.warning("Pandas not available for CSV deduplication")
             return table
-        except Exception as e:
+        except (
+            pa.ArrowException,
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            RuntimeError,
+        ) as e:
             self._logger.warning("CSV deduplication failed", error=str(e))
             return table
 
@@ -247,7 +254,13 @@ class CsvExporter:
                     "Target CSV locked, wrote to backup", backup_path=str(backup_path)
                 )
                 return
-        except Exception:
+        except (
+            OSError,
+            pa.ArrowException,
+            ValueError,
+            TypeError,
+            RuntimeError,
+        ):
             if temp_path.exists():
                 temp_path.unlink()
             raise

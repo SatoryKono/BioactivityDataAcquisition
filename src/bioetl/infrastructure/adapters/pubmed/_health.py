@@ -8,6 +8,9 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING
 
+from httpx import RequestError
+
+from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.types import HealthStatus
 
@@ -21,6 +24,16 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 from .constants import ENTREZ_API_BASE
+
+PUBMED_HEALTH_ERRORS = (
+    BioETLError,
+    NetworkError,
+    RequestError,
+    OSError,
+    ValueError,
+    TypeError,
+    RuntimeError,
+)
 
 
 class PubMedHealthMixin:
@@ -72,7 +85,7 @@ class PubMedHealthMixin:
                 return HealthStatus.DEGRADED
 
             return HealthStatus.HEALTHY
-        except Exception as e:
+        except PUBMED_HEALTH_ERRORS as e:
             error_type = self._error_handler.get_error_type(e)
             self.logger.warning(
                 "health_check_failed",

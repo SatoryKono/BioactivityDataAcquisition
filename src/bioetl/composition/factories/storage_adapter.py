@@ -48,7 +48,9 @@ class StorageAdapter:
     Delegates to specialized writers for each layer.
     """
 
-    _COMPOSITE_GOLD_SCHEMAS: ClassVar[dict[str, Any]] = {
+    _COMPOSITE_GOLD_SCHEMAS: ClassVar[
+        dict[str, Any]
+    ] = {  # Any: factory wiring; concrete types resolved at runtime
         "composite/publication": CompositePublicationGoldSchema,
         "composite_publication": CompositePublicationGoldSchema,
         "composite/molecule": CompositeMoleculeGoldSchema,
@@ -129,7 +131,9 @@ class StorageAdapter:
     async def write_silver(
         self,
         table_name: str,
-        records: list[dict[str, Any]],
+        records: list[
+            dict[str, Any]
+        ],  # Any: factory wiring; concrete types resolved at runtime
         primary_keys: list[str],
         schema: ArrowSchema,
         mode: Literal["merge", "append", "delete"] = "merge",
@@ -178,16 +182,20 @@ class StorageAdapter:
     async def write_gold(
         self,
         table_name: str,
-        records: list[dict[str, Any]],
+        records: list[
+            dict[str, Any]
+        ],  # Any: factory wiring; concrete types resolved at runtime
         schema: Any,  # Any: Pandera DataFrameModel class varies per entity Gold schema
         primary_keys: list[str] | None = None,
         mode: Literal["overwrite", "append", "scd2"] = "overwrite",
         *,
-        scd_config: dict[str, Any] | None = None,
+        scd_config: dict[str, Any]
+        | None = None,  # Any: factory wiring; concrete types resolved at runtime
         column_order: list[str] | None = None,
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
-        silver_refs: list[Any] | None = None,
+        silver_refs: list[Any]
+        | None = None,  # Any: factory wiring; concrete types resolved at runtime
     ) -> None:
         """Write aggregated records to Gold layer.
 
@@ -238,7 +246,9 @@ class StorageAdapter:
         self,
         table_name: str,
         columns: list[str] | None = None,
-    ) -> list[dict[str, Any]]:
+    ) -> list[
+        dict[str, Any]
+    ]:  # Any: factory wiring; concrete types resolved at runtime
         """Read records from a Silver layer Delta table.
 
         Args:
@@ -256,7 +266,9 @@ class StorageAdapter:
     async def write_silver_merged(
         self,
         table_name: str,
-        records: list[dict[str, Any]],
+        records: list[
+            dict[str, Any]
+        ],  # Any: factory wiring; concrete types resolved at runtime
         primary_keys: list[str] | None = None,
         *,
         run_id: str | None = None,
@@ -287,7 +299,9 @@ class StorageAdapter:
     async def write_gold_merged(
         self,
         table_name: str,
-        records: list[dict[str, Any]],
+        records: list[
+            dict[str, Any]
+        ],  # Any: factory wiring; concrete types resolved at runtime
         primary_keys: list[str] | None = None,
         *,
         run_id: str | None = None,
@@ -428,7 +442,7 @@ class StorageAdapter:
         self,
         silver_table: str,
         gold_table: str | None = None,
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any]:  # Any: factory wiring; concrete types resolved at runtime
         """Preview what would be cleared without actual deletion.
 
         Implements StoragePort.preview_cleanup().
@@ -441,7 +455,9 @@ class StorageAdapter:
         Returns:
             Dict with layer info including paths and file counts.
         """
-        result: dict[str, Any] = {
+        result: dict[
+            str, Any
+        ] = {  # Any: factory wiring; concrete types resolved at runtime
             "silver": self._preview_layer(self.silver, silver_table),
             "gold": None,
             "total_files": 0,
@@ -459,7 +475,7 @@ class StorageAdapter:
         self,
         writer: SilverWriter | GoldWriter,
         table_name: str,
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any]:  # Any: factory wiring; concrete types resolved at runtime
         """Count files in a layer without deletion.
 
         Args:

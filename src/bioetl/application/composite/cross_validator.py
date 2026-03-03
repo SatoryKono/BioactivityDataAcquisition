@@ -31,6 +31,8 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.ports import LoggerPort
 
+__all__ = ["EnrichmentCrossValidationService", "EnrichmentCrossValidator"]
+
 
 @dataclass
 class _EnricherValidationResult:
@@ -43,7 +45,7 @@ class _EnricherValidationResult:
     detail: pl.Series  # JSON string per row, null where no mismatches
 
 
-class EnrichmentCrossValidator:
+class EnrichmentCrossValidationService:
     """Validates enricher data consistency against seed before merge.
 
     For each enricher with configured field pairings, compares shared fields
@@ -51,7 +53,7 @@ class EnrichmentCrossValidator:
     are counted per record to determine verdicts.
 
     Usage:
-        validator = EnrichmentCrossValidator(config, logger)
+        validator = EnrichmentCrossValidationService(config, logger)
         df, stats = validator.validate(merged_df, enricher_pipelines, seed_pipeline)
     """
 
@@ -520,3 +522,7 @@ def _compare_numeric(
     )
     relative_diff = diff / denom
     return (relative_diff <= tolerance) | s.is_null() | e.is_null()
+
+
+# Backward-compatible alias for iterative NAME-001 migration.
+EnrichmentCrossValidator = EnrichmentCrossValidationService

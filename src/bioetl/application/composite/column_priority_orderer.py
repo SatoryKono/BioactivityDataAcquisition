@@ -12,7 +12,10 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
-class ColumnPriorityOrderer:
+__all__ = ["ColumnPriorityOrderer", "ColumnPriorityOrdererService"]
+
+
+class ColumnPriorityOrdererService:
     """Resolves source column ordering for explicit field priority rules."""
 
     def __init__(self, logger: LoggerPort) -> None:
@@ -128,7 +131,7 @@ class ColumnPriorityOrderer:
     def get_enricher_prefix(enricher_pipeline: str) -> str:
         """Get enricher prefix with trailing separator."""
         try:
-            provider, entity = ColumnPriorityOrderer._parse_pipeline_name(
+            provider, entity = ColumnPriorityOrdererService._parse_pipeline_name(
                 enricher_pipeline
             )
             return f"{provider}.{entity}."
@@ -174,3 +177,7 @@ class ColumnPriorityOrderer:
                 return col
 
         return None
+
+
+# Backward-compatible alias for iterative NAME-001 migration.
+ColumnPriorityOrderer = ColumnPriorityOrdererService

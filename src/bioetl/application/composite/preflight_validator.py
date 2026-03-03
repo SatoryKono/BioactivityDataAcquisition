@@ -18,6 +18,15 @@ if TYPE_CHECKING:
     from bioetl.domain.composite.config import CompositeConfig
     from bioetl.domain.ports import LoggerPort
 
+__all__ = [
+    "CompositePreflightValidationService",
+    "CompositePreflightValidator",
+    "FieldInfo",
+    "PreflightValidationError",
+    "PreflightValidationResult",
+    "ValidationIssue",
+]
+
 
 @dataclass(frozen=True, slots=True)
 class FieldInfo:
@@ -100,7 +109,7 @@ class PreflightValidationError(Exception):
 SchemaFields = dict[str, FieldInfo]
 
 
-class CompositePreflightValidator:
+class CompositePreflightValidationService:
     """Validates composite pipeline configuration before execution.
 
     Performs preflight checks on field_priorities to ensure:
@@ -109,7 +118,7 @@ class CompositePreflightValidator:
     3. Field types are compatible across sources
 
     Usage:
-        >>> validator = CompositePreflightValidator(logger)
+        >>> validator = CompositePreflightValidationService(logger)
         >>> result = validator.validate(composite_config)
         >>> if not result.is_valid:
         ...     raise PreflightValidationError(result)
@@ -662,3 +671,7 @@ class CompositePreflightValidator:
                 field=field_name,
                 primary_source=source,
             )
+
+
+# Backward-compatible alias for iterative NAME-001 migration.
+CompositePreflightValidator = CompositePreflightValidationService

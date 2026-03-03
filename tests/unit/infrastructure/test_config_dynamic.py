@@ -13,7 +13,7 @@ from bioetl.infrastructure.config_loader import (
 from bioetl.infrastructure.config_loader import (
     load_source_config,
 )
-from bioetl.infrastructure.config.legacy_normalizers.source import (
+from bioetl.infrastructure.config.source_normalizers.source import (
     normalize_source_config,
 )
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig

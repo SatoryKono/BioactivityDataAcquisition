@@ -27,6 +27,7 @@ from typing import TYPE_CHECKING, Any, Self
 from bioetl.application.core._data_source_mixins import _SourceMetadataDelegationMixin
 from bioetl.application.core.entity_id import compute_publication_term_entity_id
 from bioetl.domain.ports import FilterableDataSourcePort
+from bioetl.domain.types import BronzeRecord
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -115,7 +116,7 @@ class PublicationTermDataSource(_SourceMetadataDelegationMixin):
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
         offset: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch records, extracting terms if entity_type is publication_term.
 
         For publication_term entity type:
@@ -163,7 +164,7 @@ class PublicationTermDataSource(_SourceMetadataDelegationMixin):
         limit: int | None,
         filter_ids: list[str] | None,
         filter_field: str | None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch publications and extract terms.
 
         Args:
@@ -208,9 +209,9 @@ class PublicationTermDataSource(_SourceMetadataDelegationMixin):
 
     def _extract_terms_from_publication(
         self,
-        record: dict[str, Any],
+        record: BronzeRecord,
         publication_id: str,
-    ) -> list[dict[str, Any]]:
+    ) -> list[BronzeRecord]:
         """Extract and flatten all terms from a Publication record.
 
         Extracts multiple term records from one publication (1:M relationship).
@@ -223,11 +224,11 @@ class PublicationTermDataSource(_SourceMetadataDelegationMixin):
             List of term dictionaries.
 
         """
-        terms: list[dict[str, Any]] = []
+        terms: list[BronzeRecord] = []
 
         # Extract MeSH terms
         raw_mesh_terms = record.get("mesh_terms")
-        mesh_terms: list[Any] = (
+        mesh_terms: list[Any] = (  # Any: untyped nested JSON from ChEMBL API
             raw_mesh_terms if isinstance(raw_mesh_terms, list) else []
         )
         for mesh in mesh_terms:
@@ -261,7 +262,9 @@ class PublicationTermDataSource(_SourceMetadataDelegationMixin):
 
         # Extract keywords
         raw_keywords = record.get("keywords")
-        keywords: list[Any] = raw_keywords if isinstance(raw_keywords, list) else []
+        keywords: list[Any] = (
+            raw_keywords if isinstance(raw_keywords, list) else []
+        )  # Any: untyped nested JSON from ChEMBL API
         for keyword in keywords:
             if isinstance(keyword, str):
                 stripped = keyword.strip()
@@ -285,7 +288,7 @@ class PublicationTermDataSource(_SourceMetadataDelegationMixin):
         term_type: str,
         mesh_id: str | None,
         qualifier: str | None,
-    ) -> dict[str, Any]:
+    ) -> BronzeRecord:
         """Create a single term record dictionary.
 
         Computes entity_id as SHA256 hash of composite key for deduplication.
@@ -377,7 +380,7 @@ class PublicationTermDataSource(_SourceMetadataDelegationMixin):
         filter_ids: list[str],
         filter_field: str,
         limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch filtered records, extracting terms if entity_type is publication_term.
 
         Implements FilterableDataSourcePort.fetch_filtered().
@@ -425,7 +428,7 @@ class PublicationTermDataSource(_SourceMetadataDelegationMixin):
         filter_ids: list[str],
         filter_field: str,
         limit: int | None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch filtered publications and extract terms.
 
         Args:
@@ -466,7 +469,7 @@ class PublicationTermDataSource(_SourceMetadataDelegationMixin):
         entity_type: str,
         filters: dict[str, list[str]],
         limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch records filtered by multiple fields (AND logic).
 
         Implements FilterableDataSourcePort.fetch_multi_filtered().
@@ -527,7 +530,7 @@ class PublicationTermDataSource(_SourceMetadataDelegationMixin):
         filter_field: str,
         fallback_mapping: dict[str, str],
         limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch records with fallback search when primary lookup fails.
 
         Implements FilterableDataSourcePort.fetch_filtered_with_fallback().

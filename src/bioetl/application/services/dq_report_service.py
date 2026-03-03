@@ -14,6 +14,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from bioetl.domain.exceptions import BioETLError, DataQualityError, StorageError
+
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
         BronzeDQAnalyzerPort,
@@ -25,6 +27,17 @@ if TYPE_CHECKING:
         SilverDQAnalyzerPort,
         SilverDQConfigPort,
     )
+
+
+_DQ_REPORT_ERRORS = (
+    DataQualityError,
+    StorageError,
+    BioETLError,
+    OSError,
+    RuntimeError,
+    ValueError,
+    TypeError,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -369,7 +382,7 @@ class DQReportService:
 
             return path
 
-        except Exception as e:
+        except _DQ_REPORT_ERRORS as e:
             self._logger.error(
                 "bronze_dq_report_failed",
                 run_id=context.run_id,
@@ -450,7 +463,7 @@ class DQReportService:
 
             return path
 
-        except Exception as e:
+        except _DQ_REPORT_ERRORS as e:
             self._logger.error(
                 "silver_dq_report_failed",
                 run_id=context.run_id,
@@ -526,7 +539,7 @@ class DQReportService:
 
             return path
 
-        except Exception as e:
+        except _DQ_REPORT_ERRORS as e:
             self._logger.error(
                 "gold_dq_report_failed",
                 run_id=context.run_id,

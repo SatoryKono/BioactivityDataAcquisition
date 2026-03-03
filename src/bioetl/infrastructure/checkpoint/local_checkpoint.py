@@ -97,7 +97,7 @@ class LocalCheckpoint:
                 f.write(checkpoint_json)
             # Use Path.replace for cross-platform atomic overwrite
             Path(temp_path).replace(full_path)
-        except Exception:
+        except (OSError, ValueError, TypeError, RuntimeError):
             # Clean up temp file on error
             temp_file = Path(temp_path)
             if temp_file.exists():
