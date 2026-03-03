@@ -29,13 +29,17 @@ if TYPE_CHECKING:
         SilverDQReport,
     )
 
-DataContainer = Any
+DataContainer = (
+    Any  # Any: polars.DataFrame | pyarrow.Table (avoids infra import in domain)
+)
 """Type alias for data containers (polars.DataFrame or pyarrow.Table).
 
 Uses Any to avoid infrastructure imports in domain layer per Ports & Adapters.
 """
 
-DataContainerDict = dict[str, Any]
+DataContainerDict = dict[
+    str, Any
+]  # Any: polars.DataFrame | pyarrow.Table (avoids infra import)
 """Type alias for dictionary of named data containers.
 
 Maps table names to polars.DataFrame or pyarrow.Table instances.
@@ -103,7 +107,8 @@ class SilverDQAnalyzerPort(Protocol):
         input_record_count: int | None = None,
         quarantined_count: int = 0,
         previous_schema: dict[str, str] | None = None,
-        key_nullability_rules: list[dict[str, Any]] | None = None,
+        key_nullability_rules: list[dict[str, Any]]
+        | None = None,  # Any: DQ report data varies by check type
     ) -> SilverDQReport:
         """Analyze Silver data and generate DQ report.
 
@@ -147,10 +152,13 @@ class GoldDQAnalyzerPort(Protocol):
         timestamp: datetime,
         required_fields: list[str] | None = None,
         completeness_threshold: float = 0.90,
-        business_rules: list[dict[str, Any]] | None = None,
+        business_rules: list[dict[str, Any]]
+        | None = None,  # Any: DQ report data varies by check type
         reference_tables: DataContainerDict | None = None,
-        baseline_stats: dict[str, Any] | None = None,
-        scd_config: dict[str, Any] | None = None,
+        baseline_stats: dict[str, Any]
+        | None = None,  # Any: DQ report data varies by check type
+        scd_config: dict[str, Any]
+        | None = None,  # Any: DQ report data varies by check type
     ) -> GoldDQReport:
         """Analyze Gold data and generate DQ report.
 

@@ -13,6 +13,7 @@ from httpx import RequestError
 
 from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.normalization import normalize_doi
+from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.crossref.exceptions import CrossRefApiError
 
 if TYPE_CHECKING:
@@ -77,7 +78,7 @@ class DoiBatchProcessor:
         self._headers_fn = headers_fn
         self._request_collector = request_collector
 
-    async def fetch_single(self, doi: str) -> dict[str, Any] | None:
+    async def fetch_single(self, doi: str) -> BronzeRecord | None:
         """Fetch a single publication by DOI.
 
         Args:
@@ -91,7 +92,7 @@ class DoiBatchProcessor:
         """
         normalized_doi = normalize_doi(doi) or ""
         url = f"{self._api_base}/works/{normalized_doi}"
-        response: Any | None = None
+        response: Any | None = None  # Any: untyped HTTP response object
 
         try:
             start_time = time.perf_counter()
@@ -120,7 +121,7 @@ class DoiBatchProcessor:
                 )
 
             data = response.json()
-            publication: dict[str, Any] = data.get("message", {})
+            publication: BronzeRecord = data.get("message", {})
             return publication
 
         except CrossRefApiError:
@@ -133,7 +134,7 @@ class DoiBatchProcessor:
 
     async def _fallback_individual_fetch(
         self, dois: list[str]
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fall back to individual DOI fetches."""
         for doi in dois:
             try:
@@ -145,7 +146,7 @@ class DoiBatchProcessor:
                     "crossref_individual_fetch_failed", doi=doi, error=str(e)
                 )
 
-    async def fetch_batch(self, dois: list[str]) -> AsyncIterator[dict[str, Any]]:
+    async def fetch_batch(self, dois: list[str]) -> AsyncIterator[BronzeRecord]:
         """Fetch multiple publications by DOI batch.
 
         Uses CrossRef filter endpoint for batch resolution.
@@ -175,7 +176,7 @@ class DoiBatchProcessor:
             "rows": str(len(normalized_dois)),
             "mailto": self._mailto,
         }
-        response: Any | None = None
+        response: Any | None = None  # Any: untyped HTTP response object
 
         try:
             start_time = time.perf_counter()
@@ -243,7 +244,7 @@ class SearchPaginator:
 
     async def _fetch_page(
         self, query: str, rows: int, cursor: str
-    ) -> tuple[list[dict[str, Any]], str | None]:
+    ) -> tuple[list[BronzeRecord], str | None]:
         """Fetch a single page of search results."""
         url = f"{self._api_base}/works"
         params = {
@@ -252,7 +253,7 @@ class SearchPaginator:
             "cursor": cursor,
             "mailto": self._mailto,
         }
-        response: Any | None = None
+        response: Any | None = None  # Any: untyped HTTP response object
 
         start_time = time.perf_counter()
         with self._metrics.measure_request("/works?query"):
@@ -288,7 +289,7 @@ class SearchPaginator:
         return items, next_cursor
 
     def _should_continue_pagination(
-        self, items: list[dict[str, Any]], next_cursor: str | None, current_cursor: str
+        self, items: list[BronzeRecord], next_cursor: str | None, current_cursor: str
     ) -> bool:
         """Check if pagination should continue.
 
@@ -308,7 +309,7 @@ class SearchPaginator:
 
     async def search(
         self, query: str, limit: int | None = None, cursor: str = "*"
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Search for publications using cursor-based pagination.
 
         Args:

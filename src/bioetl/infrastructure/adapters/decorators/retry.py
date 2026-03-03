@@ -125,6 +125,15 @@ class RetryingDataSourceDecorator:
         # Check configured retryable exceptions
         return self.retry_config.is_retryable_exception(exc)
 
+    def _retryable_exception_types(self) -> tuple[type[Exception], ...]:
+        """Build tuple of retryable exception types for `except` clauses."""
+        configured = tuple(
+            exc_type
+            for exc_type in self.retry_config.retryable_exceptions
+            if exc_type is not Exception
+        )
+        return (RecoverableError, *configured)
+
     async def _calculate_and_wait(self, attempt: int, url: str = "") -> float:
         """Calculate delay and wait before retry.
 
@@ -239,11 +248,10 @@ class RetryingDataSourceDecorator:
                 self._record_retry_metrics("fetch", retries)
                 return
 
-            except Exception as exc:
+            except CircuitBreakerOpenError:
+                raise
+            except self._retryable_exception_types() as exc:
                 last_error = exc
-
-                if not self._is_retryable(exc):
-                    raise
 
                 if self.retry_config.is_last_attempt(attempt):
                     break
@@ -284,11 +292,10 @@ class RetryingDataSourceDecorator:
                 self._record_retry_metrics("health_check", retries)
                 return result
 
-            except Exception as exc:
+            except CircuitBreakerOpenError:
+                raise
+            except self._retryable_exception_types() as exc:
                 last_error = exc
-
-                if not self._is_retryable(exc):
-                    raise
 
                 if self.retry_config.is_last_attempt(attempt):
                     break

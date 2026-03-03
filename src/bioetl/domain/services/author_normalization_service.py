@@ -35,7 +35,10 @@ class AuthorNormalizationService:
 
     def normalize_author_list(
         self,
-        authors: list[str] | list[dict[str, Any]] | str | None,
+        authors: list[str]
+        | list[dict[str, Any]]
+        | str
+        | None,  # Any: raw author data from heterogeneous APIs
     ) -> str | None:
         """Parse and normalize author names to JSON string.
 
@@ -55,7 +58,9 @@ class AuthorNormalizationService:
 
     def normalize_affiliations(
         self,
-        affiliations: list[str] | list[dict[str, Any]] | None,
+        affiliations: list[str]
+        | list[dict[str, Any]]
+        | None,  # Any: raw author data from heterogeneous APIs
     ) -> str | None:
         """Extract, normalize, deduplicate affiliations to JSON string.
 
@@ -76,7 +81,8 @@ class AuthorNormalizationService:
 
     @staticmethod
     def _normalize_affiliation_list(
-        affiliations: list[str] | list[dict[str, Any]],
+        affiliations: list[str]
+        | list[dict[str, Any]],  # Any: raw author data from heterogeneous APIs
     ) -> list[str]:
         """Extract, normalize, and deduplicate affiliation strings."""
         aff_strings = extract_affiliation_strings(affiliations)
@@ -87,7 +93,7 @@ class AuthorNormalizationService:
 
     def extract_affiliations_from_authors(
         self,
-        authors: list[dict[str, Any]],
+        authors: list[dict[str, Any]],  # Any: raw author data from heterogeneous APIs
     ) -> list[str]:
         """Extract unique affiliations from author objects.
 
@@ -108,7 +114,10 @@ class AuthorNormalizationService:
 
     def normalize_author_keys(
         self,
-        authors: list[str] | list[dict[str, Any]] | str | None,
+        authors: list[str]
+        | list[dict[str, Any]]
+        | str
+        | None,  # Any: raw author data from heterogeneous APIs
     ) -> str | None:
         """Normalize author names to short ``Surname_F`` keys.
 
@@ -127,7 +136,9 @@ class AuthorNormalizationService:
 
     def _parse_author_names(
         self,
-        authors: list[str] | list[dict[str, Any]] | str,
+        authors: list[str]
+        | list[dict[str, Any]]
+        | str,  # Any: raw author data from heterogeneous APIs
     ) -> list[str]:
         """Parse various author formats to list of name strings."""
         return parse_author_names(authors)

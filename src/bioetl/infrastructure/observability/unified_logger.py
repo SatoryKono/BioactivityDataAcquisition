@@ -155,8 +155,9 @@ class UnifiedLogger:
         """
         return self._logger.info(_event, **self._ensure_stage(kwargs))
 
-    # Any: structlog-compatible API
-    def warning(self, _event: str, **kwargs: Any) -> Any:
+    def warning(
+        self, _event: str, **kwargs: Any
+    ) -> Any:  # Any: structlog-compatible API
         """Log a warning message.
 
         Implements LoggerPort.warning() with Log Schema enforcement.
@@ -173,8 +174,7 @@ class UnifiedLogger:
         """
         return self._logger.warning(_event, **self._ensure_stage(kwargs))
 
-    # Any: structlog-compatible API
-    def error(self, _event: str, **kwargs: Any) -> Any:
+    def error(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
         """Log an error message.
 
         Implements LoggerPort.error() with Log Schema enforcement.
@@ -192,8 +192,7 @@ class UnifiedLogger:
         """
         return self._logger.error(_event, **self._ensure_stage(kwargs))
 
-    # Any: structlog-compatible API
-    def debug(self, _event: str, **kwargs: Any) -> Any:
+    def debug(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
         """Log a debug message.
 
         Implements LoggerPort.debug() with Log Schema enforcement.
@@ -208,8 +207,9 @@ class UnifiedLogger:
         """
         return self._logger.debug(_event, **self._ensure_stage(kwargs))
 
-    # Any: structlog-compatible API
-    def exception(self, _event: str, **kwargs: Any) -> Any:
+    def exception(
+        self, _event: str, **kwargs: Any
+    ) -> Any:  # Any: structlog-compatible API
         """Log an exception with traceback.
 
         Implements LoggerPort.exception() with Log Schema enforcement.

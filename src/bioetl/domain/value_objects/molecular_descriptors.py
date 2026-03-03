@@ -42,7 +42,7 @@ from bioetl.domain.value_objects.base import ValueObject
 # ============================================================================
 
 
-def _coerce_int(value: Any) -> int:
+def _coerce_int(value: Any) -> int:  # Any: raw input from API (str|int|float|None)
     """Coerce *value* to ``int``, raising ``ValueError`` on failure."""
     if isinstance(value, bool):
         raise ValueError(f"Expected int, got {type(value).__name__}")
@@ -57,7 +57,7 @@ def _coerce_int(value: Any) -> int:
         raise ValueError(f"Cannot convert {value!r} to int") from exc
 
 
-def _coerce_float(value: Any) -> float:
+def _coerce_float(value: Any) -> float:  # Any: raw input from API (str|int|float|None)
     """Coerce *value* to ``float``, raising ``ValueError`` on failure."""
     if isinstance(value, bool):
         raise ValueError(f"Expected float, got {type(value).__name__}")
@@ -86,7 +86,7 @@ class _BoundedIntVO(ValueObject[int]):
     _MAX: int
     _LABEL: str
 
-    def _validate(self, value: Any) -> int:
+    def _validate(self, value: Any) -> int:  # Any: raw input from API (str|int|float|None)
         n = _coerce_int(value)
         if not self._MIN <= n <= self._MAX:
             raise ValueError(f"{self._LABEL} {n} outside [{self._MIN}, {self._MAX}]")
@@ -198,6 +198,4 @@ __all__ = [
     "HeavyAtomCount",
     "HydrogenBondCount",
     "LogP",
-    "PolarSurfaceArea",
-    "RotatableBondCount",
-]
+    "Po

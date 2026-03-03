@@ -37,8 +37,10 @@ class CrossRefAuthor(BaseModel):
         alias="authenticated-orcid",
         description="Whether ORCID is authenticated",
     )
-    affiliation: list[dict[str, Any]] | None = Field(
-        default_factory=list, description="Author affiliations"
+    affiliation: list[dict[str, Any]] | None = (
+        Field(  # Any: nested Crossref JSON with provider-specific schema
+            default_factory=list, description="Author affiliations"
+        )
     )
 
 
@@ -67,7 +69,9 @@ class CrossRefLicense(BaseModel):
     delay_in_days: int | None = Field(
         default=None, alias="delay-in-days", description="Embargo delay"
     )
-    start: dict[str, Any] | None = Field(default=None, description="License start date")
+    start: dict[str, Any] | None = Field(
+        default=None, description="License start date"
+    )  # Any: nested Crossref JSON with provider-specific schema
 
 
 class CrossRefLink(BaseModel):
@@ -123,7 +127,9 @@ class CrossRefAssertion(BaseModel):
     name: str | None = Field(default=None, description="Assertion name")
     value: str | None = Field(default=None, description="Assertion value")
     label: str | None = Field(default=None, description="Assertion label")
-    group: dict[str, Any] | None = Field(default=None, description="Assertion group")
+    group: dict[str, Any] | None = Field(
+        default=None, description="Assertion group"
+    )  # Any: nested Crossref JSON with provider-specific schema
 
 
 class CrossRefClinicalTrial(BaseModel):
@@ -278,12 +284,22 @@ class CrossRefPublicationRecord(BaseModel):
     )
 
     # Relations
-    relation: dict[str, Any] | None = Field(default=None, description="Related works")
-    update_to: list[dict[str, Any]] | None = Field(
-        default_factory=list, alias="update-to", description="Updates to other works"
+    relation: dict[str, Any] | None = Field(
+        default=None, description="Related works"
+    )  # Any: nested Crossref JSON with provider-specific schema
+    update_to: list[dict[str, Any]] | None = (
+        Field(  # Any: nested Crossref JSON with provider-specific schema
+            default_factory=list,
+            alias="update-to",
+            description="Updates to other works",
+        )
     )
-    updated_by: list[dict[str, Any]] | None = Field(
-        default_factory=list, alias="updated-by", description="Works updating this one"
+    updated_by: list[dict[str, Any]] | None = (
+        Field(  # Any: nested Crossref JSON with provider-specific schema
+            default_factory=list,
+            alias="updated-by",
+            description="Works updating this one",
+        )
     )
 
     # References
@@ -315,8 +331,10 @@ class CrossRefPublicationRecord(BaseModel):
     score: float | None = Field(default=None, description="Search relevance score")
 
     # Standards Bodies
-    standards_body: list[dict[str, Any]] | None = Field(
-        default_factory=list, alias="standards-body", description="Standards bodies"
+    standards_body: list[dict[str, Any]] | None = (
+        Field(  # Any: nested Crossref JSON with provider-specific schema
+            default_factory=list, alias="standards-body", description="Standards bodies"
+        )
     )
 
     # Update Policy
@@ -334,7 +352,7 @@ class CrossRefMessage(BaseModel):
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
 
     # Facets
-    facets: dict[str, Any] | None = Field(default=None, description="Search facets")
+    facets: dict[str, Any] | None = Field(default=None, description="Search facets")  # Any: nested Crossref JSON with provider-specific schema
 
     # Pagination
     total_results: int | None = Field(
@@ -343,7 +361,7 @@ class CrossRefMessage(BaseModel):
     items_per_page: int | None = Field(
         default=None, alias="items-per-page", description="Items per page"
     )
-    query: dict[str, Any] | None = Field(default=None, description="Query information")
+    query: dict[str, Any] | None = Field(default=None, description="Query information")  # Any: nested Crossref JSON with provider-specific schema
 
     # Cursor
     next_cursor: str | None = Field(

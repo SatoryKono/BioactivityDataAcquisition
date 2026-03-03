@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, ParamSpec, TypeVar
 
 import httpx
 
-from bioetl.domain.exceptions import CircuitBreakerOpenError
+from bioetl.domain.exceptions import BioETLError, CircuitBreakerOpenError
 from bioetl.domain.types import CircuitBreakerState
 from bioetl.infrastructure.observability.circuit_breaker_mapping import (
     CIRCUIT_BREAKER_STATE_VALUES,
@@ -34,6 +34,17 @@ T = TypeVar("T")
 # Metric names as constants for consistency
 METRIC_CIRCUIT_BREAKER_STATE = "circuit_breaker_state"
 METRIC_CIRCUIT_BREAKER_TRIPS = "circuit_breaker_trips_total"
+CALL_OPERATION_ERRORS: tuple[type[Exception], ...] = (
+    BioETLError,
+    httpx.HTTPError,
+    OSError,
+    RuntimeError,
+    ValueError,
+    TypeError,
+    LookupError,
+    ArithmeticError,
+    AssertionError,
+)
 
 
 @dataclass
@@ -200,7 +211,7 @@ class CircuitBreaker:
 
         Raises:
             CircuitBreakerOpenError: If circuit is open
-            Exception: Re-raises exceptions from func
+            Re-raises operational exceptions from func after failure accounting
 
         """
         async with self._lock:
@@ -213,7 +224,7 @@ class CircuitBreaker:
             async with self._lock:
                 self._on_success()
             return result
-        except Exception:
+        except CALL_OPERATION_ERRORS:
             async with self._lock:
                 self._on_failure()
             raise

@@ -64,13 +64,16 @@ class GoldDQAnalyzer:
         enabled_checks: set[GoldDQCheckType],
         required_fields: list[str],
         completeness_threshold: float,
-        business_rules: list[dict[str, Any]],
+        business_rules: list[dict[str, Any]],  # Any: DQ check values vary by check type
         reference_tables: dict[str, pl.DataFrame | pa.Table],
-        baseline_stats: dict[str, Any] | None,
-        scd_config: dict[str, Any] | None,
-    ) -> tuple[dict[str, Any], int, int, int]:
+        baseline_stats: dict[str, Any]
+        | None,  # Any: DQ check values vary by check type
+        scd_config: dict[str, Any] | None,  # Any: DQ check values vary by check type
+    ) -> tuple[
+        dict[str, Any], int, int, int
+    ]:  # Any: DQ check values vary by check type
         """Execute all enabled DQ checks and collect results."""
-        checks: dict[str, Any] = {}
+        checks: dict[str, Any] = {}  # Any: DQ check values vary by check type
         passed, failed, warnings = 0, 0, 0
 
         if GoldDQCheckType.RECORD_COUNT in enabled_checks:
@@ -135,10 +138,13 @@ class GoldDQAnalyzer:
         timestamp: datetime,
         required_fields: list[str] | None = None,
         completeness_threshold: float = 0.90,
-        business_rules: list[dict[str, Any]] | None = None,
+        business_rules: list[dict[str, Any]]
+        | None = None,  # Any: DQ check values vary by check type
         reference_tables: dict[str, pl.DataFrame | pa.Table] | None = None,
-        baseline_stats: dict[str, Any] | None = None,
-        scd_config: dict[str, Any] | None = None,
+        baseline_stats: dict[str, Any]
+        | None = None,  # Any: DQ check values vary by check type
+        scd_config: dict[str, Any]
+        | None = None,  # Any: DQ check values vary by check type
     ) -> GoldDQReport:
         """Analyze Gold data and generate DQ report.
 

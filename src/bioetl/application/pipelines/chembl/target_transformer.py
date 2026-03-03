@@ -7,6 +7,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
+from bioetl.domain.types import GoldRecord
+
 from bioetl.application.core.dict_transformers import (
     aggregate_nested_lists,
     extract_list_field,
@@ -48,8 +50,9 @@ class TargetTransformer(BaseChemblTransformer):
         return await super()._transform_impl(context, record, index)
 
     def _flatten_target_components(
-        self, components: list[dict[str, Any]] | None
-    ) -> dict[str, list[Any] | None]:
+        self,
+        components: list[dict[str, Any]] | None,  # Any: untyped ChEMBL API JSON
+    ) -> dict[str, list[Any] | None]:  # Any: heterogeneous component field values
         """Flatten target components into aggregated lists.
 
         Args:
@@ -69,7 +72,9 @@ class TargetTransformer(BaseChemblTransformer):
 
         return self._extract_basic_component_fields(components)
 
-    def _empty_component_result(self) -> dict[str, list[Any] | None]:
+    def _empty_component_result(
+        self,
+    ) -> dict[str, list[Any] | None]:  # Any: heterogeneous component field values
         """Return empty result dict for missing components."""
         return {
             "component_accessions": None,
@@ -80,8 +85,9 @@ class TargetTransformer(BaseChemblTransformer):
         }
 
     def _extract_basic_component_fields(
-        self, components: list[dict[str, Any]]
-    ) -> dict[str, list[Any] | None]:
+        self,
+        components: list[dict[str, Any]],  # Any: untyped ChEMBL API JSON
+    ) -> dict[str, list[Any] | None]:  # Any: heterogeneous component field values
         """Extract basic fields from component list via dict_transformers."""
         return {
             "component_accessions": extract_list_field(components, "accession"),
@@ -94,7 +100,8 @@ class TargetTransformer(BaseChemblTransformer):
         }
 
     def _aggregate_synonyms(
-        self, components: list[dict[str, Any]] | None
+        self,
+        components: list[dict[str, Any]] | None,  # Any: untyped ChEMBL API JSON
     ) -> str | int | float | bool | None:
         """Aggregate synonyms from all components into a single JSON list.
 
@@ -111,7 +118,8 @@ class TargetTransformer(BaseChemblTransformer):
         return self.serialize_json(synonyms) if synonyms else None
 
     def _aggregate_component_xrefs(
-        self, components: list[dict[str, Any]] | None
+        self,
+        components: list[dict[str, Any]] | None,  # Any: untyped ChEMBL API JSON
     ) -> str | int | float | bool | None:
         """Aggregate cross-references from all target components.
 
@@ -133,7 +141,7 @@ class TargetTransformer(BaseChemblTransformer):
         self,
         record: BronzeRecord,
         primary_id: PrimaryId,
-    ) -> dict[str, Any]:
+    ) -> GoldRecord:
         """Extract Target business data from bronze record.
 
         Args:
@@ -146,7 +154,8 @@ class TargetTransformer(BaseChemblTransformer):
         """
         # Extract target_components with proper typing
         target_components = cast(
-            "list[dict[str, Any]] | None", record.get("target_components")
+            "list[dict[str, Any]] | None",  # Any: untyped ChEMBL API JSON
+            record.get("target_components"),
         )
 
         # Extract flattened components
