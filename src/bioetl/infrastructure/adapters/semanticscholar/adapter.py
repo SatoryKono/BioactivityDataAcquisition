@@ -26,6 +26,9 @@ import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
+from httpx import RequestError
+
+from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
@@ -50,6 +53,16 @@ DEFAULT_FIELDS = (
     "venue,authors,authors.externalIds,authors.hIndex,authors.authorId,"
     "citationCount,referenceCount,isOpenAccess,"
     "openAccessPdf,tldr,fieldsOfStudy,publicationTypes,journal"
+)
+
+SEMANTICSCHOLAR_HEALTH_ERRORS = (
+    BioETLError,
+    NetworkError,
+    RequestError,
+    OSError,
+    ValueError,
+    TypeError,
+    RuntimeError,
 )
 
 
@@ -529,7 +542,7 @@ class SemanticScholarAdapter(BaseHttpAdapter):
 
             return HealthStatus.HEALTHY
 
-        except Exception as e:
+        except SEMANTICSCHOLAR_HEALTH_ERRORS as e:
             # Check if it's a 429/403 error from httpx
             error_str = str(e)
             if "429" in error_str or "403" in error_str:

@@ -30,7 +30,7 @@ import pubchempy as pcp
 from pydantic import BaseModel
 
 from bioetl.domain.entities.pubchem import PubchemMoleculeRecord
-from bioetl.domain.exceptions import CircuitBreakerOpenError
+from bioetl.domain.exceptions import BioETLError, CircuitBreakerOpenError, NetworkError
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
@@ -53,6 +53,15 @@ if TYPE_CHECKING:
 PUBCHEM_DTO_MODELS: dict[str, type[BaseModel]] = {
     "compound": PubchemMoleculeRecord,
 }
+
+PUBCHEM_HEALTH_ERRORS = (
+    BioETLError,
+    NetworkError,
+    OSError,
+    ValueError,
+    TypeError,
+    RuntimeError,
+)
 
 
 class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
@@ -310,7 +319,7 @@ class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
             )
             return HealthStatus.UNHEALTHY
 
-        except Exception as e:
+        except PUBCHEM_HEALTH_ERRORS as e:
             error_type = self._error_handler.get_error_type(e)
             self.logger.warning(
                 "health_check_failed",

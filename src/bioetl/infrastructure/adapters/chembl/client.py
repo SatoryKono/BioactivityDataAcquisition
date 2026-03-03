@@ -12,9 +12,11 @@ import urllib.parse
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, NoReturn
 
+import httpx
 from pydantic import BaseModel
 
 from bioetl.domain.exceptions import (
+    BioETLError,
     ExternalServiceError,
     RetryExhaustedError,
 )
@@ -47,6 +49,19 @@ if TYPE_CHECKING:
 
     from bioetl.domain.ports import LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+
+CHEMBL_ADAPTER_ERRORS = (
+    BioETLError,
+    ExternalServiceError,
+    RetryExhaustedError,
+    httpx.HTTPError,
+    OSError,
+    ValueError,
+    TypeError,
+    RuntimeError,
+    KeyError,
+    AttributeError,
+)
 
 
 @dataclass
@@ -279,7 +294,7 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
 
             records, has_next = self._process_response(response, entity_type)
             return records, has_next
-        except Exception as e:
+        except CHEMBL_ADAPTER_ERRORS as e:
             self._handle_error(e)
 
     async def _page_iterator(
@@ -416,7 +431,7 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
             )
             try:
                 records, has_next = await self._fetch_page(url, params, entity_type)
-            except Exception:
+            except CHEMBL_ADAPTER_ERRORS:
                 # Catch all: API errors (network, timeout, 500s, malformed response),
                 # JSON decode errors, or validation failures. Log partial success and
                 # gracefully terminate pagination to avoid data loss.
@@ -583,7 +598,7 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
 
             return None
 
-        except Exception as e:
+        except CHEMBL_ADAPTER_ERRORS as e:
             self.logger.warning(
                 "direct_endpoint_fallback_failed",
                 entity_type=entity_type,

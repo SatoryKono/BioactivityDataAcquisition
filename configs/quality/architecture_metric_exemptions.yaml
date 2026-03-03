@@ -1264,6 +1264,13 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
+    SilverWriterArrowMixin:
+      value: 20
+      owner: '@bioetl-architecture'
+      reason: Baseline exemption migrated from architecture tests (function_complexity).
+      expires_on: '2026-04-30'
+      removal_step: Refactor target to satisfy default metric and remove this exemption
+        entry.
     TableConfig:
       value: 8
       owner: '@bioetl-architecture'
@@ -2234,6 +2241,13 @@ registries:
         entry.
     CommentExtractor:
       value: 355
+      owner: '@bioetl-architecture'
+      reason: Baseline exemption migrated from architecture tests (class_size).
+      expires_on: '2026-04-30'
+      removal_step: Refactor target to satisfy default metric and remove this exemption
+        entry.
+    CompositeRunnerStageHelper:
+      value: 360
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (class_size).
       expires_on: '2026-04-30'

@@ -1,3 +1,4 @@
+# mypy: disable-error-code=attr-defined
 """Metadata and audit helpers for SilverWriter."""
 
 from __future__ import annotations

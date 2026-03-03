@@ -20,6 +20,15 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
+CHEMBL_HEALTH_ERRORS = (
+    CriticalError,
+    httpx.HTTPError,
+    OSError,
+    ValueError,
+    TypeError,
+    RuntimeError,
+)
+
 
 class ChemblHealthMixin:
     """Health-check and adaptive batch-sizing mixin for ChEMBL adapter.
@@ -57,7 +66,7 @@ class ChemblHealthMixin:
             with self._adapter_metrics.measure_request("/status"):
                 response = await self.http_client.get_once(CHEMBL_STATUS_URL)
             return self._handle_health_response(response)
-        except Exception as exc:
+        except CHEMBL_HEALTH_ERRORS as exc:
             status_code = self._extract_http_status_code(exc)
             if status_code is not None and 500 <= status_code < 600:
                 self.logger.warning(

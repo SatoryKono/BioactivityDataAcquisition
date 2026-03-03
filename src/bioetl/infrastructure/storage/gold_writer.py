@@ -52,6 +52,15 @@ _SCD_KEY_MAP = {
     "version": "version_col",
 }
 
+GOLD_WRITE_RETRY_ERRORS = (
+    OSError,
+    RuntimeError,
+    ValueError,
+    TypeError,
+    KeyError,
+    pa.ArrowException,
+)
+
 
 def _normalize_scd_config(
     scd_config: ScdConfig,
@@ -747,7 +756,7 @@ class GoldWriter(BaseDeltaWriter):
                     )
                 )
                 break
-            except Exception as e:
+            except GOLD_WRITE_RETRY_ERRORS as e:
                 # Retry on potential concurrency/protocol errors
                 if attempt == 2:
                     raise e
@@ -836,7 +845,7 @@ class GoldWriter(BaseDeltaWriter):
                         )
                     )
                 break
-            except Exception as e:
+            except GOLD_WRITE_RETRY_ERRORS as e:
                 if attempt == 2:
                     raise e
                 # Exponential backoff with fixed jitter (see ADR-014)

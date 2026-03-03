@@ -12,11 +12,11 @@ from __future__ import annotations
 
 from collections.abc import AsyncIterator, Iterator
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.application.core.base_transformer import FilteredOutError
-from bioetl.application.core.batch_metrics import BatchMetricsRecorder
-from bioetl.application.core.quarantine_manager import QuarantineManager
+from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
+from bioetl.application.core.quarantine_manager import QuarantineManagerService
 from bioetl.domain.exceptions import BioETLError, DataQualityThresholdError
 from bioetl.domain.types import BronzeRecord, GoldRecord
 
@@ -86,8 +86,8 @@ class BatchTransformer:
         context: PipelineContext,
         config: RecordProcessorConfig,
         error_classifier: ErrorClassifier,
-        quarantine_manager: QuarantineManager,
-        batch_metrics: BatchMetricsRecorder,
+        quarantine_manager: QuarantineManagerService,
+        batch_metrics: BatchMetricsRecorderService,
         transform_callback: TransformCallback,
         gold_filter_callback: GoldFilterCallback,
         gold_transform_callback: GoldTransformCallback,

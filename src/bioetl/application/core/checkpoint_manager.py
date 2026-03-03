@@ -16,7 +16,7 @@ from bioetl.domain.ports import CheckpointPort, LoggerPort
 from bioetl.domain.types import RunID
 
 
-class CheckpointManager:
+class CheckpointManagerService:
     """Framework-agnostic checkpoint management.
 
     Handles checkpoint persistence for pipeline run tracking with support
@@ -121,3 +121,8 @@ class CheckpointManager:
 
         """
         return await self._checkpoint.list_all()
+
+
+CheckpointManager = CheckpointManagerService
+
+__all__ = ["CheckpointManager", "CheckpointManagerService"]

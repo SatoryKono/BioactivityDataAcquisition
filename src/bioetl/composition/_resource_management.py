@@ -23,15 +23,15 @@ from bioetl.composition.bootstrap import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.application.core.checkpoint_manager import CheckpointManager
+    from bioetl.application.core.checkpoint_manager import CheckpointManagerService
     from bioetl.application.core.cleanup_service import CleanupPreview
-    from bioetl.application.core.quarantine_manager import QuarantineManager
+    from bioetl.application.core.quarantine_manager import QuarantineManagerService
     from bioetl.application.services.medallion_lifecycle import (
         MedallionLifecycleService,
     )
 
 
-def get_quarantine_manager(pipeline: str) -> QuarantineManager:
+def get_quarantine_manager(pipeline: str) -> QuarantineManagerService:
     """Get a quarantine manager for the given pipeline.
 
     Used for inspecting and managing quarantined (failed) records.
@@ -50,7 +50,7 @@ def get_quarantine_manager(pipeline: str) -> QuarantineManager:
     return bootstrap_quarantine_manager(pipeline)
 
 
-def get_checkpoint_manager(pipeline: str) -> CheckpointManager:
+def get_checkpoint_manager(pipeline: str) -> CheckpointManagerService:
     """Get a checkpoint manager for the given pipeline.
 
     Used for listing, loading, and managing pipeline checkpoints.

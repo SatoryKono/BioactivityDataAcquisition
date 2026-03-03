@@ -17,12 +17,12 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 from uuid import uuid4
 
-from bioetl.application.core.batch_memory_manager import BatchMemoryManager
-from bioetl.application.core.batch_metrics import BatchMetricsRecorder
-from bioetl.application.core.batch_tracing import BatchTracingManager
+from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
+from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
+from bioetl.application.core.batch_tracing import BatchTracingManagerService
 from bioetl.application.core.batch_transformer import BatchTransformer, TransformResult
 from bioetl.application.core.batch_writer import BatchWriter
-from bioetl.application.core.quarantine_manager import QuarantineManager
+from bioetl.application.core.quarantine_manager import QuarantineManagerService
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.types import BatchID
@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 
     from opentelemetry.trace import Span
 
-    from bioetl.application.core.checkpoint_manager import CheckpointManager
+    from bioetl.application.core.checkpoint_manager import CheckpointManagerService
     from bioetl.application.core.config import RecordProcessorConfig
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.application.core.protocols import (
@@ -110,7 +110,7 @@ class BatchExecutor:
         gold_filter_callback: GoldFilterCallback,
         gold_transform_callback: GoldTransformCallback,
         gold_validator: GoldValidatorPort,
-        checkpoint_manager: CheckpointManager,
+        checkpoint_manager: CheckpointManagerService,
         shutdown_signal: ShutdownSignal,
         *,
         batch_size: int | None = None,
@@ -158,7 +158,7 @@ class BatchExecutor:
         )
 
         # Memory management (extracted to BatchMemoryManager)
-        self._memory = BatchMemoryManager(
+        self._memory = BatchMemoryManagerService(
             self._initial_batch_size,
             memory_monitor=memory_monitor,
             memory_config=memory_config,
@@ -192,7 +192,7 @@ class BatchExecutor:
 
         # Create internal components (from RecordProcessor)
         pipeline_label = f"{config.provider}_{config.entity_type}"
-        self._batch_metrics = BatchMetricsRecorder(
+        self._batch_metrics = BatchMetricsRecorderService(
             services.metrics, pipeline_label, context.run_type.value
         )
 
@@ -200,7 +200,7 @@ class BatchExecutor:
             context=context,
             config=config,
             error_classifier=error_classifier,
-            quarantine_manager=QuarantineManager(
+            quarantine_manager=QuarantineManagerService(
                 quarantine_port=services.quarantine,
                 pipeline_name=config.pipeline_name,
                 metrics=services.metrics,
@@ -223,7 +223,7 @@ class BatchExecutor:
         )
 
         # Tracing manager (extracted for class size reduction)
-        self._tracing = BatchTracingManager(
+        self._tracing = BatchTracingManagerService(
             tracer=tracer,
             context=context,
             config=config,

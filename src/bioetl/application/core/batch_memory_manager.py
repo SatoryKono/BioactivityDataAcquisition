@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MemoryMonitorPort
 
 
-class BatchMemoryManager:
+class BatchMemoryManagerService:
     """Manages adaptive batch sizing based on memory pressure."""
 
     def __init__(
@@ -124,3 +124,8 @@ class BatchMemoryManager:
             return recovery_size
 
         return current_size
+
+
+BatchMemoryManager = BatchMemoryManagerService
+
+__all__ = ["BatchMemoryManager", "BatchMemoryManagerService"]

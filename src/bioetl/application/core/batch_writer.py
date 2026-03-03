@@ -25,7 +25,7 @@ from bioetl.domain.locking import LockNotHeldError
 if TYPE_CHECKING:
     from typing import Any as SpanType
 
-    from bioetl.application.core.batch_metrics import BatchMetricsRecorder
+    from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
     from bioetl.application.core.config import RecordProcessorConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
@@ -71,7 +71,7 @@ class BatchWriter:
         config: RecordProcessorConfig,
         gold_validator: GoldValidatorPort,
         error_classifier: ErrorClassifier,
-        batch_metrics: BatchMetricsRecorder,
+        batch_metrics: BatchMetricsRecorderService,
         tracer: TracingPort | None = None,
         lock_validator: Callable[[], Awaitable[bool]] | None = None,
         data_schema_config: DataSchemaConfig | None = None,

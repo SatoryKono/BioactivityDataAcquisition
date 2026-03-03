@@ -7,6 +7,8 @@ import csv
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from bioetl.domain.types import HealthStatus
+
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
@@ -25,6 +27,10 @@ class IDMappingCsvReaderAdapter:
     async def source_exists(self, source_path: str) -> bool:
         """Check source file existence in a worker thread."""
         return await asyncio.to_thread(Path(source_path).exists)
+
+    async def health_check(self) -> HealthStatus:
+        """Return health status for local CSV reader adapter."""
+        return HealthStatus.HEALTHY
 
     def _read_ids_sync(self, source_path: str, id_column: str) -> list[str]:
         """Synchronous CSV parsing implementation."""
