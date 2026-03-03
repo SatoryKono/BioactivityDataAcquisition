@@ -170,6 +170,10 @@
    - policy-классификация обновлена: `skills/global/.system/**` остаётся `internal-generated`, NCI references promoted;
    - метрика снижена `40 -> 36` (локальная цель `<=36` достигнута);
    - orphan budget сохранён на `0`.
+15. Выполнена wave-8 governance-ратификация:
+   - утверждён policy baseline `A1 + B1` (archive и system skills остаются non-nav по умолчанию);
+   - decision record оформлен в `docs/plans/wave-8-policy-decisions-2026-03-03.md` со статусом `approved`;
+   - `docs/00-project/governance/07-doc-nav-policy.md` обновлён до версии `1.6`.
 
 ## 9. Re-Audit Snapshot (2026-03-03, latest)
 
@@ -183,8 +187,8 @@
 
 ### Coverage Metrics
 
-- Total markdown docs under `docs/`: **676**
-- In mkdocs nav: **640**
+- Total markdown docs under `docs/`: **677**
+- In mkdocs nav: **641**
 - Outside nav: **36**
 - Orphan candidates (outside nav, zero inbound links): **0**
 
@@ -242,14 +246,14 @@ Sub-buckets worth prioritizing next:
 - `skills/global/.system/**` (3 files) — non-nav by policy (`internal-generated`);
 - `skills/local/nci-analysis/references/**` — promoted to nav in wave-7.
 
-### 10.4 Proposed Next Wave (optional, P2)
+### 10.4 Wave-8 Governance Baseline (ratified)
 
-If objective is further reduction below `36`:
+Ratified defaults:
 
-1. Keep `skills/global/.system/**` outside nav unless docs publication policy is revised.
-2. Keep `99-archive/**` unchanged unless policy decision explicitly reclassifies archive discoverability.
-3. Use policy options document for explicit decision logging:
-   - `docs/plans/wave-8-policy-decisions-2026-03-03.md`
+1. `skills/global/.system/**` remains outside nav unless policy is revised.
+2. `99-archive/**` remains outside nav unless policy is revised.
+3. Decision source:
+   - `docs/plans/wave-8-policy-decisions-2026-03-03.md` (`approved`)
 
 Expected effect:
 - estimated `not_in_nav` improvement: `0` unless policy changes are approved;

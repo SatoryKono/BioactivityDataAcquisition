@@ -1,6 +1,6 @@
 # Wave-8 Policy Decisions (2026-03-03)
 
-*Status: proposal (policy-only, no automatic execution)*
+*Status: approved (governance-ratified)*
 
 ## Objective
 
@@ -88,11 +88,17 @@ Expected result:
 - avoid nav inflation and policy churn;
 - defer any further reduction to explicit governance change.
 
+## Decision Outcome (Ratified: 2026-03-03)
+
+- **Accepted:** `A1` for `99-archive/**` (remain non-nav, `archive` class).
+- **Accepted:** `B1` for `skills/global/.system/**` (remain non-nav, `internal-generated` class).
+- **Not accepted by default:** `A2`, `A3`, `B2` (allowed only via future explicit governance revision).
+
 ## If Governance Chooses Reduction Below 36
 
 1. Apply **B2** first (small, low-risk impact up to `-3`).
 2. Re-run safety gates:
    - `scripts/check_doc_links.py`
    - `scripts/report_docs_kpi.py --fail-on-breach`
-   - `python -m mkdocs build --strict`
+   - `bash scripts/build_docs_site.sh --strict`
 3. Reassess whether archive policy should change before considering any `99-archive/**` promotion.

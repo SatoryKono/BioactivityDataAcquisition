@@ -468,7 +468,7 @@ ci-build: ## Build distribution packages
 
 # Documentation
 docs-serve: ## Serve documentation locally
-	$(RUN) mkdocs serve
+	$(RUN) mkdocs serve --site-dir .mkdocs-site-tmp
 
 docs-build: ## Build documentation
 	$(RUN) bash scripts/build_docs_site.sh

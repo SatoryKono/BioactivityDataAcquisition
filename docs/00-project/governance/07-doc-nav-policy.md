@@ -1,6 +1,6 @@
 # Documentation Navigation Policy
 
-*Version: 1.5 (2026-03-03)*
+*Version: 1.6 (2026-03-03)*
 
 ----------------------------------------------------------------------
 
@@ -47,7 +47,7 @@ Notes:
 
 # Optional focused checks
 ./.venv/Scripts/python.exe scripts/check_doc_links.py --not-in-nav-growth
-./.venv/Scripts/python.exe -m mkdocs build --strict
+bash scripts/build_docs_site.sh --strict
 ```
 
 If non-nav growth is intentional:
@@ -126,7 +126,7 @@ A document SHOULD be promoted when at least two criteria are true:
 4. Ensure every non-promoted cluster has a discoverable index entrypoint.
 5. Re-run:
    - `./.venv/Scripts/python.exe scripts/check_doc_links.py`
-   - `./.venv/Scripts/python.exe -m mkdocs build --strict`
+   - `bash scripts/build_docs_site.sh --strict`
 6. Update baseline only when growth is intentional and justified.
 
 ### 6.4 Current Backlog Snapshot (2026-03-03, wave-7)
@@ -141,9 +141,19 @@ Interpretation:
 - `99-archive/**` should remain out of nav unless governance policy changes.
 
 Implementation note:
-- docs KPI and nav-growth checks ignore generated local site artifacts (`site/**`).
+- docs KPI and nav-growth checks ignore generated local site artifacts (`docs/site/**`, `.mkdocs-site-tmp/**`).
 - `docs/skills/global/.system/**` is treated as `internal-generated` and SHOULD remain non-nav.
 - `docs/skills/local/nci-analysis/references/**` is published in nav (wave-7 curated promotion).
+
+### 6.5 Wave-8 Ratified Decisions (2026-03-03)
+
+Ratified baseline for residual non-nav backlog:
+1. `99-archive/**` remains non-nav by default (`archive`).
+2. `skills/global/.system/**` remains non-nav by default (`internal-generated`).
+3. Any deviation requires explicit governance revision.
+
+Decision record:
+- `docs/plans/wave-8-policy-decisions-2026-03-03.md`
 
 ----------------------------------------------------------------------
 
