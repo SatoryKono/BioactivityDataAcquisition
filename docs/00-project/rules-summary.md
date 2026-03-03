@@ -1,6 +1,6 @@
 # Rules Summary
 
-*Автоматически сгенерировано из RULES.md v5.23 (2026-02-24)*
+*Синхронизировано с `RULES.md` v5.23 (2026-03-02)*
 
 > **Note**: Этот документ — выжимка из `docs/00-project/RULES.md`. Канонический источник правил — `RULES.md`.
 
@@ -15,35 +15,38 @@
 | Задача                              | Раздел RULES.md | Инструмент                  |
 |-------------------------------------|-----------------|-----------------------------|
 | Создать новый пайплайн              | App D           | YAML config                 |
-| Добавить поле в схему               | §2.2, App E     | Pydantic model              |
+| Добавить поле в схему               | 2.2, App E      | Pydantic model              |
 | Ошибка в проде (Alert)              | App C           | Runbook                     |
-| Удалить битые данные                | §2.6            | `make quarantine-purge`     |
-| Развернуть на Staging               | §5.6.1          | CI/CD                       |
-| Восстановление при аварии           | §5.5            | DR Runbook                  |
-| Откат релиза                        | §7.2            | Rollback Strategy           |
-| Безопасность                        | §5.4            | Security Policy             |
-| Forensic retention для таблицы      | §2.1.1, App D   | Config `forensic-retention` |
-| Backfill с эксклюзивной блокировкой | §2.4            | Lock Mechanism              |
-| Deprecation поля                    | §7.1, App E     | Schema Evolution            |
+| Удалить битые данные                | 2.6             | `make quarantine purge`     |
+| Развернуть на Staging               | 5.6.1           | CI/CD                       |
+| Восстановление при аварии           | 5.5             | DR Runbook                  |
+| Откат релиза                        | 7.2             | Rollback Strategy           |
+| Безопасность                        | 5.4             | Security Policy             |
+| Forensic retention для таблицы      | 2.1.1, App D    | Config `forensic-retention` |
+| Backfill с эксклюзивной блокировкой | 2.4             | Lock Mechanism              |
+| Deprecation поля                    | 7.1, App E      | Schema Evolution            |
 
 ## 1. Архитектура
 
 - Hexagonal (Ports & Adapters) + DDD.
 - Слои: `domain`, `application`, `infrastructure`, `interfaces`, `composition`.
 - Контракты через `typing.Protocol` в `domain/ports/`.
+- Импорт портов только через фасад: `from bioetl.domain.ports import ...`.
+- `domain` слой не делает I/O.
 
 ## 2. Medallion Architecture
 
 | Уровень    | Формат        | Валидация               | Retention             | Идемпотентность                                                          |
 |------------|---------------|-------------------------|-----------------------|--------------------------------------------------------------------------|
-| **Bronze** | JSONL + zstd  | Мин./Нет                | 90 дней hot → Archive | Append-only. Path: `bronze/{format-version}/{provider}/{entity}/{date}/` |
+| **Bronze** | JSONL + zstd  | Мин./Нет                | 90 дней hot → Archive | Append-only. Path: `bronze/{provider}/{entity}/{date}/`                 |
 | **Silver** | Delta Lake    | Мягкая (дрейф схемы)    | Постоянно             | **Merge/Upsert**. Raw Parquet **MUST NOT**.                              |
-| **Gold**   | Delta/Parquet | Строгая (`strict=True`) | Постоянно             | SCD Type 2 или партиции по дате                                          |
+| **Gold**   | Delta Lake    | Строгая (`strict=True`) | Постоянно             | SCD Type 2 или партиции по дате                                          |
 
 ### Delta Maintenance
 
 - **VACUUM**: Еженедельно, `retention-period=7 days` (MUST)
 - **Forensic Retention**: 7 дней (default), 30 дней для Critical tables
+- Для `mode: scd2` обязателен явный `scd-config` в entity config.
 
 ## 3. Обработка Ошибок
 
@@ -57,6 +60,7 @@
 
 - Soft: >5% DQ errors → Warning
 - Hard: >20% → Fail Batch
+- Quarantine: единая таблица `common.quarantine`, retention 30 дней.
 
 ### Circuit Breaker
 
@@ -77,6 +81,8 @@
 | Max Duration  | 4 часа                                   |
 
 **Invariant**: Потеря блокировки = Потеря права на запись.
+- Distributed locks (`RedisLockAdapter`) запрещены (ADR-010 Local-Only).
+- Для `backfill/rebuild` используется эксклюзивный lock-key (`:exclusive`).
 
 ## 5. Операции
 
@@ -103,10 +109,11 @@
 
 ## 6. Код и Качество
 
-- PEP8, ruff, mypy (strict)
-- Логирование: `UnifiedLogger`. **print() MUST NOT**
+- PEP8, ruff, mypy (`--strict`)
+- Логирование через `LoggerPort`; `application`/`interfaces` не импортируют `structlog` напрямую.
+- `print()` запрещён.
 - Тесты: Unit, Integration (VCR.py), E2E. Coverage ≥85%
-- Zero-sum class count при дублировании
+- Детерминизм: без `random` в writers, timestamp только из application context.
 
 ## 7. Anti-Patterns (MUST NOT)
 
@@ -116,17 +123,18 @@
 - Блокирующий I/O в async
 - Хардкод секретов
 - `print()` для логирования
+- Внедрение distributed deployment/locking при текущем Local-Only стандарте
 
 ## TL;DR
 
 1. RFC 2119: MUST = блокер, SHOULD = обоснование в PR, MAY = опционально.
 2. Medallion: Bronze (JSONL) → Silver (Delta Lake, merge) → Gold (strict).
 3. Quarantine: `common.quarantine`, retention 30 дней, sentinel values запрещены.
-4. Locks: MemoryLock (local), TTL 90s, Heartbeat 30s, Max 4h.
+4. Locks: только `MemoryLock` (local), TTL 90s, Heartbeat 30s, Max 4h, Redis lock запрещён.
 5. DR: RPO 24h, RTO 4h, Game Days ежегодно.
 6. Schema Evolution: 14-дневный deprecation period, dual-write.
-7. Coverage ≥85%, mypy --strict, zero-sum class count.
+7. Coverage ≥85%, `mypy --strict`, deterministic writes.
 
 ---
 
-*Полная версия: [docs/00-project/RULES.md](../00-project/RULES.md)*
+*Полная версия: [RULES.md](RULES.md)*

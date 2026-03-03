@@ -18,43 +18,55 @@
 **Файл:** `configs/entities/chembl/assay.yaml`
 
 ```yaml
-pipeline_name: chembl_assay
+version: 1.0.0
 provider: chembl
-entity_type: assay
-version: "1.2.0"
-primary_keys: ["assay-chembl-id"]
-silver_table: "chembl_assay"
+entity: assay
 
-gold-filter-types:
-    - B  # Binding
-    - F  # Functional
-gold-min-confidence: 4  # Минимальный confidence-score (0-9)
+pipeline:
+    pipeline_name: chembl_assay
+    provider: chembl
+    entity_type: assay
+    business_primary_keys: [assay_id]
+    batch_size: 1000
 
-transform:
-    steps:
-        - normalize-values
-        - add-metadata
-        - calculate-content-hash
-
-sink:
-    bronze:
-        path: "data/output/bronze"
-        format: jsonl
-        save-json: true
+schema:
+    column_groups:
+        - name: system
+          fields: [entity_id, content_hash, _run_id, _run_type, _source_batch_id, _ingestion_ts, _index]
+        - name: business
+          fields: [assay_id, target_id, document_chembl_id, assay_type, confidence_score, description]
     silver:
-        path: "data/output/silver"
-        format: delta
-        mode: merge
-        partition_by: ["assay-type"]
+        include_groups: [system, business, dq]
     gold:
-        enabled: true
-        path: "data/output/gold"
-        format: delta
-        mode: overwrite
+        include_groups: [system, business]
+        exclude_fields: [_dq_*, _source_batch_id, _index]
+        alias_policy: canonical
 
-dq_overrides:
-    soft_fail_threshold: 0.05   # 5% ошибок → WARNING
-    hard_fail_threshold: 0.20   # 20% ошибок → FAIL BATCH
+quality:
+    version: 1.1.0
+    provider: chembl
+    entity: assay
+    field_validations:
+        - field: assay_id
+          type: required
+          nullable: false
+        - field: confidence_score
+          type: range
+          min: 0
+          max: 9
+          nullable: true
+
+filters:
+    version: 1.0.0
+    provider: chembl
+    entity: assay
+    gold_filters:
+        columns:
+            assay_type: [B, F]
+        ranges:
+            confidence_score:
+                min: 4
+                include_min: true
 ```
 
 ---
@@ -71,104 +83,104 @@ dq_overrides:
 
 | Поле | Тип | Обязательное | Описание |
 |------|-----|--------------|----------|
-| `assay-chembl-id` | `str` | **Да** | Уникальный идентификатор анализа (например, `CHEMBL1234567`) |
-| `target-chembl-id` | `str` | Нет | ChEMBL ID мишени |
-| `document-chembl-id` | `str` | Нет | ChEMBL ID публикации |
-| `cell-chembl-id` | `str` | Нет | ChEMBL ID клеточной линии |
-| `tissue-chembl-id` | `str` | Нет | ChEMBL ID ткани |
-| `src-id` | `int` | Нет | ID источника данных |
-| `src-assay_id` | `str` | Нет | ID анализа в источнике |
+| `assay_id` | `str` | **Да** | Уникальный идентификатор анализа (например, `CHEMBL1234567`) |
+| `target_id` | `str` | Нет | ChEMBL ID мишени |
+| `document_chembl_id` | `str` | Нет | ChEMBL ID публикации |
+| `cell_chembl_id` | `str` | Нет | ChEMBL ID клеточной линии |
+| `tissue_chembl_id` | `str` | Нет | ChEMBL ID ткани |
+| `src_id` | `int` | Нет | ID источника данных |
+| `src_assay_id` | `str` | Нет | ID анализа в источнике |
 | `aidx` | `str` | Нет | Внутренний индекс |
 
 #### Классификация анализа
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `assay-type` | `str` | Код типа: `B` (Binding), `F` (Functional), `A` (ADMET), `T` (Toxicity), `U` (Unassigned), `P` (Physicochemical) |
-| `assay-type-description` | `str` | Полное название типа |
-| `assay-category` | `str` | Категория анализа |
-| `assay-test-type` | `str` | Тип теста |
-| `assay-group` | `str` | Группа анализа |
+| `assay_type` | `str` | Код типа: `B` (Binding), `F` (Functional), `A` (ADMET), `T` (Toxicity), `U` (Unassigned), `P` (Physicochemical) |
+| `assay_type_description` | `str` | Полное название типа |
+| `assay_category` | `str` | Категория анализа |
+| `assay_test_type` | `str` | Тип теста |
+| `assay_group` | `str` | Группа анализа |
 
 #### Биологический контекст
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `assay-organism` | `str` | Организм (например, `Homo sapiens`) |
-| `assay-tax-id` | `int` | Таксономический ID |
-| `assay-cell-type` | `str` | Тип клетки |
-| `assay-tissue` | `str` | Ткань |
-| `assay-strain` | `str` | Штамм |
-| `assay-subcellular-fraction` | `str` | Субклеточная фракция |
+| `assay_organism` | `str` | Организм (например, `Homo sapiens`) |
+| `assay_tax_id` | `int` | Таксономический ID |
+| `assay_cell_type` | `str` | Тип клетки |
+| `assay_tissue` | `str` | Ткань |
+| `assay_strain` | `str` | Штамм |
+| `assay_subcellular_fraction` | `str` | Субклеточная фракция |
 
 #### BAO (BioAssay Ontology) аннотации
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `bao-format` | `str` | BAO формат (URI) |
-| `bao-label` | `str` | BAO метка |
+| `bao_format` | `str` | BAO формат (URI) |
+| `bao_label` | `str` | BAO метка |
 
 #### Описание и качество
 
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `description` | `str` | Текстовое описание анализа |
-| `confidence-score` | `int` | Оценка уверенности (0-9) |
-| `confidence-description` | `str` | Описание уровня уверенности |
-| `relationship-type` | `str` | Тип связи с мишенью |
-| `relationship-description` | `str` | Описание связи |
+| `confidence_score` | `int` | Оценка уверенности (0-9) |
+| `confidence_description` | `str` | Описание уровня уверенности |
+| `relationship_type` | `str` | Тип связи с мишенью |
+| `relationship_description` | `str` | Описание связи |
 
 #### Дополнительные метаданные
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `assay-pref-name` | `str` | Предпочтительное название анализа (если доступно) |
-| `score` | `float` | Оценка анализа (отличается от confidence-score) |
+| `assay_pref_name` | `str` | Предпочтительное название анализа (если доступно) |
+| `score` | `float` | Оценка анализа (отличается от confidence_score) |
 
 #### Вариантная информация (Variant Sequence)
 
-Поля развёрнуты из вложенного словаря ChEMBL API (`variant-sequence`):
+Поля развёрнуты из вложенного словаря ChEMBL API (`variant_sequence`):
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `variant-accession` | `str` | UniProt accession варианта |
-| `variant-isoform` | `str` | Идентификатор изоформы |
-| `variant-mutation` | `str` | Описание мутации (например, V600E) |
-| `variant-organism` | `str` | Организм варианта |
-| `variant-sequence` | `str` | Аминокислотная последовательность |
-| `variant-tax-id` | `int` | NCBI Taxonomy ID |
-| `variant-sequence-json` | `str` | Оригинальный JSON (для forensic-анализа) |
+| `variant_accession` | `str` | UniProt accession варианта |
+| `variant_isoform` | `str` | Идентификатор изоформы |
+| `variant_mutation` | `str` | Описание мутации (например, V600E) |
+| `variant_organism` | `str` | Организм варианта |
+| `variant_sequence` | `str` | Аминокислотная последовательность |
+| `variant_tax_id` | `int` | NCBI Taxonomy ID |
+| `variant_sequence_json` | `str` | Оригинальный JSON (для forensic-анализа) |
 
-> **Примечание**: Поля `variant-*` извлекаются из вложенного словаря API с помощью `flatten-nested-dict()`. Поле `variant-sequence-json` сохраняет оригинальную структуру для аудита.
+> **Примечание**: Поля `variant-*` извлекаются из вложенного словаря API с помощью `flatten_nested_dict()`. Поле `variant_sequence_json` сохраняет оригинальную структуру для аудита.
 
 #### Комплексные поля
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `assay-classifications` | `str` | Классификации (JSON-строка списка) |
-| `assay-parameters` | `str` | Параметры анализа (JSON-строка списка) |
+| `assay_classifications` | `str` | Классификации (JSON-строка списка) |
+| `assay_parameters` | `str` | Параметры анализа (JSON-строка списка) |
 
 #### Системные поля (добавляются при обработке)
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `entity-id` | `str` | `chembl:{assay-chembl-id}` |
-| `content-hash` | `str` | SHA256-хеш содержимого |
-| `-run_id` | `str` | UUID запуска пайплайна |
-| `-run_type` | `str` | `incremental`, `backfill`, `rebuild` |
-| `-source-batch_id` | `str` | UUID батча |
-| `-ingestion_ts` | `str` | Timestamp загрузки (ISO8601) |
+| `entity_id` | `str` | `chembl:{assay_id}` |
+| `content_hash` | `str` | SHA256-хеш содержимого |
+| `_run_id` | `str` | UUID запуска пайплайна |
+| `_run_type` | `str` | `incremental`, `backfill`, `rebuild` |
+| `_source_batch_id` | `str` | UUID батча |
+| `_ingestion_ts` | `str` | Timestamp загрузки (ISO8601) |
 
 ---
 
 ### 3.2. Валидация при создании сущности
 
 ```python
-def -validate-invariants(self) -> None:
-    if not self.assay-chembl-id:
+def validate_invariants(self) -> None:
+    if not self.assay_id:
         raise ValueError("Assay ChEMBL ID is required")
-    if self.confidence-score is not None and not (0 <= self.confidence-score <= 9):
-        raise ValueError(f"Confidence score must be 0-9, got {self.confidence-score}")
+    if self.confidence_score is not None and not (0 <= self.confidence_score <= 9):
+        raise ValueError(f"Confidence score must be 0-9, got {self.confidence_score}")
 ```
 
 ---
@@ -183,13 +195,13 @@ def -validate-invariants(self) -> None:
 Сырой JSON (ChEMBL API)
          │
          ▼
-    1. Генерация entity-id
+    1. Генерация entity_id
          │
          ▼
     2. Нормализация типов
          │
          ▼
-    3. Генерация content-hash
+    3. Генерация content_hash
          │
          ▼
     4. Добавление системных полей
@@ -210,11 +222,11 @@ def -validate-invariants(self) -> None:
 
 ```python
 # Entity ID: уникальный бизнес-ключ
-entity-id = f"chembl:{assay-chembl-id}"
+entity_id = f"chembl:{assay_id}"
 
 # Content Hash: SHA256 для версионирования
-content-hash = sha256(
-    "chembl" + canonical-json(business-fields)
+content_hash = sha256(
+    "chembl" + canonical_json(business_fields)
 )
 ```
 
@@ -228,13 +240,13 @@ content-hash = sha256(
 |-----|-----------|---------|
 | **Critical** | Остановка пайплайна | Auth failure, schema mismatch |
 | **Recoverable** | Retry (3x, backoff 2.0) | 429, 502, 504 |
-| **Data Quality** | Карантин записи | Invalid assay-chembl-id |
+| **Data Quality** | Карантин записи | Invalid assay_id |
 
 ### 5.2. DQ-правила для Assay
 
-1. **`assay-chembl-id`** — обязательное поле
-2. **`confidence-score`** ∈ [0, 9] если присутствует
-3. **`assay-type`** ∈ {B, F, A, T, U, P} (рекомендуется)
+1. **`assay_id`** — обязательное поле
+2. **`confidence_score`** ∈ [0, 9] если присутствует
+3. **`assay_type`** ∈ {B, F, A, T, U, P} (рекомендуется)
 
 ### 5.3. Пороги ошибок
 
@@ -267,21 +279,21 @@ content-hash = sha256(
 
 ```python
 CHEMBL_ASSAY_SCHEMA = pa.schema([
-    pa.field("entity-id", pa.string()),
-    pa.field("content-hash", pa.string()),
-    pa.field("assay-chembl-id", pa.string()),
-    pa.field("target-chembl-id", pa.string()),
-    pa.field("document-chembl-id", pa.string()),
-    pa.field("assay-type", pa.string()),
-    pa.field("assay-type-description", pa.string()),
-    pa.field("assay-organism", pa.string()),
-    pa.field("confidence-score", pa.int64()),
-    pa.field("bao-format", pa.string()),
-    pa.field("bao-label", pa.string()),
+    pa.field("entity_id", pa.string()),
+    pa.field("content_hash", pa.string()),
+    pa.field("assay_id", pa.string()),
+    pa.field("target_id", pa.string()),
+    pa.field("document_chembl_id", pa.string()),
+    pa.field("assay_type", pa.string()),
+    pa.field("assay_type_description", pa.string()),
+    pa.field("assay_organism", pa.string()),
+    pa.field("confidence_score", pa.int64()),
+    pa.field("bao_format", pa.string()),
+    pa.field("bao_label", pa.string()),
     pa.field("description", pa.string()),
-    pa.field("-run_id", pa.string()),
-    pa.field("-run_type", pa.string()),
-    pa.field("-ingestion_ts", pa.string()),
+    pa.field("_run_id", pa.string()),
+    pa.field("_run_type", pa.string()),
+    pa.field("_ingestion_ts", pa.string()),
     # ... всего 43 поля (39 бизнес + 4 системных)
 ])
 ```
@@ -289,8 +301,8 @@ CHEMBL_ASSAY_SCHEMA = pa.schema([
 | Параметр | Значение |
 |----------|----------|
 | **Формат** | Delta Lake |
-| **Merge Key** | `assay-chembl-id` |
-| **Партиционирование** | `assay-type` |
+| **Merge Key** | `assay_id` |
+| **Партиционирование** | `assay_type` |
 
 ---
 
@@ -304,15 +316,15 @@ CHEMBL_ASSAY_SCHEMA = pa.schema([
 ```python
 def should_include(self, -context, record) -> bool:
     # Фильтр по типу анализа
-    if self.preferred-types:
-        assay-type = record.get("assay-type")
-        if assay-type not in self.preferred-types:
+    if self.preferred_types:
+        assay_type = record.get("assay_type")
+        if assay_type not in self.preferred_types:
             return False
 
-    # Фильтр по confidence-score
-    confidence-score = record.get("confidence-score")
-    if confidence-score is not None:
-        if int(confidence-score) < self.min-confidence:
+    # Фильтр по confidence_score
+    confidence_score = record.get("confidence_score")
+    if confidence_score is not None:
+        if int(confidence_score) < self.min_confidence:
             return False
 
     return True
@@ -327,8 +339,8 @@ def should_include(self, -context, record) -> bool:
 #### Критерии Gold
 
 По умолчанию в Gold попадают анализы:
-- `assay-type` = `B` (Binding) или `F` (Functional)
-- `confidence-score` >= 4
+- `assay_type` = `B` (Binding) или `F` (Functional)
+- `confidence_score` >= 4
 
 ---
 
@@ -356,9 +368,9 @@ ChEMBL API (/assay.json)
 │  SILVER (нормализованные данные)        │
 │  ─────────────────────────────────────  │
 │  • Формат: Delta Lake                   │
-│  • Merge by: assay-chembl-id            │
+│  • Merge by: assay_id            │
 │  • Schema: 43 поля (PyArrow)            │
-│  • Партиции: assay-type                 │
+│  • Партиции: assay_type                 │
 └─────────────────────────────────────────┘
          │
          ▼ AssayGoldFilter.should_include()
@@ -408,7 +420,7 @@ ChEMBL API (/assay.json)
 | Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py` |
 | Silver Schema | `src/bioetl/infrastructure/schemas/silver.py` |
 | Gold Schema | `src/bioetl/infrastructure/schemas/gold.py` |
-| Data Contract | `docs/04-reference/contracts/gold/chembl_assay-v1.0.json` |
+| Data Contract | `docs/04-reference/contracts/gold/chembl_assay_v1.0.json` |
 
 ---
 
@@ -422,7 +434,7 @@ bioetl run --pipeline chembl_assay
 bioetl run --pipeline chembl_assay --limit 1000
 
 # Полная перезагрузка
-bioetl run --pipeline chembl_assay --run_type rebuild
+bioetl run --pipeline chembl_assay --run-type rebuild
 
 # С фильтрацией по ID из CSV
 bioetl run --pipeline chembl_assay --input-csv data/input/assay.csv

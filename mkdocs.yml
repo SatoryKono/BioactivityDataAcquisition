@@ -640,9 +640,6 @@ nav:
             -   "Skills":
                 -   "Overview": skills/README.md
                 -   "Global Skills":
-                    -   "Skill": skills/global/.system/skill-creator/SKILL.md
-                    -   "Openai_Yaml": skills/global/.system/skill-creator/references/openai_yaml.md
-                    -   "Skill": skills/global/.system/skill-installer/SKILL.md
                     -   "Skill": skills/global/agent-orchestration/SKILL.md
                     -   "Skill": skills/global/documentation-audit/SKILL.md
                     -   "Audit Checklist": skills/global/documentation-audit/references/audit-checklist.md

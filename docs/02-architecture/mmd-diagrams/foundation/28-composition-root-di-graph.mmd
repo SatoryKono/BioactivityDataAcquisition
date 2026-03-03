@@ -32,53 +32,53 @@
 flowchart TB
 %% keep-orphan: OB
     subgraph Entry["Entry Point"]
-        CLI["CLI run command<br/><br/><br/><br/><br/>"]
-        BOOT["bootstrap/runtime/assembly.py<br/><br/><br/><br/><br/>"]
+        CLI["CLI run command"]
+        BOOT["bootstrap/runtime/assembly.py"]
     end
 
     subgraph Factories["Composition Factories"]
         direction LR
 
         subgraph LoggerFactories["Logger & Observability"]
-            BL["BootstrapLogger<br/>• configure structlog<br/><br/><br/><br/>"]
-            DQF["DQServicesFactory<br/>• create()<br/>→ DQ analyzers + monitor<br/><br/><br/>"]
+            BL["BootstrapLogger<br/>• configure structlog"]
+            DQF["DQServicesFactory<br/>• create()<br/>→ DQ analyzers + monitor"]
         end
 
         subgraph ClientFactories["Client & Data Source"]
-            HCF["HttpClientFactory<br/>• create(provider)<br/>→ UnifiedHTTPClient<br/><br/><br/>"]
-            DSF["DataSourceFactory<br/>• create(provider, config)<br/>→ DataSourcePort impl<br/><br/><br/>"]
+            HCF["HttpClientFactory<br/>• create(provider)<br/>→ UnifiedHTTPClient"]
+            DSF["DataSourceFactory<br/>• create(provider, config)<br/>→ DataSourcePort impl"]
         end
 
         subgraph StorageFactories["Storage & Services"]
-            STF["StorageFactory<br/>• create(config)<br/>→ BronzeWriter + SilverWriter<br/>+ GoldWriter<br/><br/>"]
-            STA["StorageAdapter<br/>• create_bronze()<br/>• create_silver()<br/>• create_gold()<br/><br/>"]
+            STF["StorageFactory<br/>• create(config)<br/>→ BronzeWriter + SilverWriter<br/>+ GoldWriter"]
+            STA["StorageAdapter<br/>• create_bronze()<br/>• create_silver()<br/>• create_gold()"]
             SB["ServicesBuilder<br/>• with_storage()<br/>• with_lock()<br/>• with_logger()<br/>• with_metrics()<br/>• build() → PipelineServices"]
         end
 
         subgraph PipelineFactories["Pipeline Construction"]
-            RF["RunnerFactory<br/>• create_runner()<br/>→ PipelineRunner<br/><br/><br/>"]
-            GPF["GenericPipelineFactory<br/>• _pipeline_class<br/>• _transformer_class<br/>• _gold_schema<br/><br/>"]
+            RF["RunnerFactory<br/>• create_runner()<br/>→ PipelineRunner"]
+            GPF["GenericPipelineFactory<br/>• _pipeline_class<br/>• _transformer_class<br/>• _gold_schema"]
         end
     end
 
     subgraph Registry["Registration"]
-        PR["ProviderRegistry<br/>• 8 providers registered<br/><br/><br/><br/>"]
-        OB["ObservabilityBundle<br/>• logger + metrics + tracing<br/><br/><br/><br/>"]
+        PR["ProviderRegistry<br/>• 8 providers registered"]
+        OB["ObservabilityBundle<br/>• logger + metrics + tracing"]
     end
 
     subgraph Created["Created Instances"]
         direction TB
         subgraph RuntimeInfra["Infra Instances"]
             direction TB
-            UHC["[A] UnifiedHTTPClient<br/>+ TokenBucket<br/>+ CircuitBreaker<br/><br/><br/>"]
-            ADP["[A] Provider Adapter<br/>(ChemblAdapter, etc.)<br/><br/><br/><br/>"]
-            BW["BronzeWriter<br/><br/><br/><br/><br/>"]
-            SLL["StructlogLogger<br/><br/><br/><br/><br/>"]
+            UHC["[A] UnifiedHTTPClient<br/>+ TokenBucket<br/>+ CircuitBreaker"]
+            ADP["[A] Provider Adapter<br/>(ChemblAdapter, etc.)"]
+            BW["BronzeWriter"]
+            SLL["StructlogLogger"]
         end
         subgraph RuntimeCore["Application Instances"]
             direction TB
-            PS["PipelineServices<br/>(frozen bundle)<br/><br/><br/><br/>"]
-            RUN["PipelineRunner<br/>(fully assembled)<br/><br/><br/><br/>"]
+            PS["PipelineServices<br/>(frozen bundle)"]
+            RUN["PipelineRunner<br/>(fully assembled)"]
         end
     end
 
@@ -142,7 +142,4 @@ flowchart TB
     class PS,RUN layer_application;
     class UHC,ADP,BW,SLL layer_infrastructure;
 
-    %% Click tooltips
-    click SB "../../02-architecture/decisions/ADR-005-composition-layer-separation.md" "Injects storage, lock, checkpoint, quarantine, logger, metrics, tracing"
-    click DSF "../../00-project/RULES.md" "Resolves provider registry and shared HTTP client"
-    click RF "../../00-project/RULES.md" "Builds PipelineRunner from composed services and adapter"
+    %% Click tooltips    click SB ../../02-architecture/decisions/ADR-005-composition-layer-separation.md "Injects storage, lock, checkpoint, obs"    click DSF ../../00-project/RULES.md "Resolves adapter via registry"    click RF ../../00-project/RULES.md "Builds PipelineRunner from services"

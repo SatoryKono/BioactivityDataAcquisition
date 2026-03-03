@@ -81,6 +81,14 @@ def test_python_snippet_guardrails_allow_explicit_legacy_marker() -> None:
     assert violations == []
 
 
+def test_drift_rules_include_legacy_run_flag_and_path_tokens() -> None:
+    module = _load_module()
+    rule_names = {rule.name for rule in module.DRIFT_RULES}
+
+    assert "legacy_run_type_flag" in rule_names
+    assert "legacy_docs_pipelines_path" in rule_names
+
+
 def test_guardrails_pass_for_current_nav_docs() -> None:
     module = _load_module()
 

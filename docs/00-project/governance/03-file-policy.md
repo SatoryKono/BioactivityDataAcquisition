@@ -1,6 +1,6 @@
-1# Политика файлов и директорий
+# Политика файлов и директорий
 
-*Синхронизировано с RULES.md v5.23 | Последнее обновление: 2026-02-21*
+*Синхронизировано с RULES.md v5.23 | Последнее обновление: 2026-03-03*
 
 ----------------------------------------------------------------------
 
@@ -12,33 +12,49 @@
 
 ----------------------------------------------------------------------
 
+## 0. Политика корня репозитория
+
+- Root-level tracked файлы MUST соответствовать `.github/root-allowlist.txt`.
+- Root-level tracked директории MUST ограничиваться: `.ai`, `.aiassistant`, `.claude`, `.codex`, `.gemini`, `.github`, `.jules`, `.junie`, `assets`, `configs`, `data`, `docs`, `grafana`, `prompts`, `reports`, `scripts`, `src`, `tests`.
+- Служебные локальные деревья (`.worktrees/`, `.rollback/`) MUST NOT попадать в git-index.
+
+Проверка:
+
+```bash
+python3 scripts/audit_root_cleanliness.py
+```
+
+----------------------------------------------------------------------
+
 ## 1. Структура Конфигураций Pipeline
 
 ### 1.1. Иерархия файлов
 
-```
+```text
 configs/
-├── pipelines/
-│   ├── -base.yaml            # Унифицированная базовая схема (v2.0.0)
-│   ├── -schema.json         # JSON Schema для валидации конфигов
-│   ├── -providers/          # Документация провайдеров
-│   │   ├── chembl.yaml
-│   │   ├── pubchem.yaml
-│   │   └── ...
-│   └── <provider>/          # Entity-специфичные конфиги
-│       └── <entity>.yaml
-└── sources/
-    └── <provider>.yaml      # Настройки API провайдера
+├── _schema/
+│   ├── pipeline.json
+│   └── composite.json
+├── base/
+│   ├── pipeline.yaml
+│   └── quality.yaml
+├── providers/
+│   └── <provider>.yaml
+├── entities/
+│   └── <provider>/<entity>.yaml
+├── composites/
+│   ├── <entity>.yaml
+│   └── field_groups/*.yaml
+└── enums/
 ```
 
 ### 1.2. Цепочка наследования
 
-```
--base.yaml (базовые значения) → <provider>/<entity>.yaml (переопределения)
+```text
+configs/base/*.yaml (базовые значения) → configs/entities/<provider>/<entity>.yaml
 ```
 
-**Примечание**: `-base.yaml` является каноническим файлом для всех базовых настроек
-пайплайнов (v2.0.0).
+`configs/providers/<provider>.yaml` хранит параметры источника и ограничения клиента.
 
 ### 1.3. Обязательные поля entity config
 
@@ -46,25 +62,25 @@ configs/
 
 | Поле                    | Описание                                       | Пример            |
 | ----------------------- | ---------------------------------------------- | ----------------- |
-| `pipeline-name`         | Уникальный идентификатор `{provider}-{entity}` | `chembl_activity` |
+| `pipeline_name`         | Уникальный идентификатор `{provider}_{entity}` | `chembl_activity` |
 | `provider`              | Имя провайдера                                 | `chembl`          |
-| `entity-type`           | Тип сущности                                   | `activity`        |
+| `entity_type`           | Тип сущности                                   | `activity`        |
 | `version`               | Семантическая версия                           | `"1.1.0"`         |
-| `business-primary-keys` | Первичный ключ                                 | `["activity-id"]` |
-| `silver-table`          | Имя Silver-таблицы                             | `chembl_activity` |
-| `gold-table`            | Имя Gold-таблицы                               | `chembl_activity` |
+| `business_primary_keys` | Первичный ключ                                 | `["activity_id"]` |
+| `silver_table`          | Имя Silver-таблицы                             | `chembl_activity` |
+| `gold_table`            | Имя Gold-таблицы                               | `chembl_activity` |
 | `sink`                  | Пути к слоям с `sort-by`                       | См. ниже          |
 
 ### 1.4. Валидация конфигураций
 
-Все entity configs валидируются через `-schema.json`:
+Все entity configs валидируются через `configs/_schema/pipeline.json`:
 
 ```bash
 # Pre-commit hook автоматически проверяет конфиги
 # Ручная валидация:
 python -c "import json, yaml, jsonschema; \
-  schema = json.load(open('configs/-schema/pipeline.json')); \
-  config = yaml.safe-load(open('configs/entities/chembl/activity.yaml')); \
+  schema = json.load(open('configs/_schema/pipeline.json')); \
+  config = yaml.safe_load(open('configs/entities/chembl/activity.yaml')); \
   jsonschema.validate(config, schema)"
 ```
 
@@ -170,7 +186,7 @@ gold_table: "chembl_activity"
 
 ----------------------------------------------------------------------
 
-## 4. Файлы источников (sources)
+## 4. Файлы провайдеров
 
 ### 4.1. Структура
 
@@ -186,10 +202,10 @@ configs/providers/<provider>.yaml
 - `retry` — настройки повторов
 - `circuit-breaker` — настройки Circuit Breaker
 
-### 4.2. Ссылка из entity config
+### 4.2. Связь с entity config
 
 ```yaml
-source_file: ../../sources/chembl.yaml
+provider: chembl
 ```
 
 ----------------------------------------------------------------------
@@ -239,4 +255,4 @@ pre-commit run validate-pipeline-configs --all-files
 
 ----------------------------------------------------------------------
 
-*Последнее обновление: 2026-02-24*
+*Последнее обновление: 2026-03-03*

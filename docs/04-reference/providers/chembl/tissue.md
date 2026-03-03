@@ -22,7 +22,7 @@
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `tissue-id` | `str` | Уникальный ChEMBL ID ткани (PK, формат `CHEMBL\d+`) |
-| `pref-name` | `str` | Предпочтительное название ткани |
+| `pref_name` | `str` | Предпочтительное название ткани |
 
 ### Онтологические ссылки
 
@@ -41,14 +41,14 @@
 
 ### Нормализация данных
 
-- **pref-name:** Строка нормализуется через `normalize-to-string()` (strip whitespace)
+- **pref_name:** Строка нормализуется через `normalize_to_string()` (strip whitespace)
 - **Онтологические ID:** Пустые строки и whitespace преобразуются в `NULL`
 - **tissue-id:** Валидируется через regex `^CHEMBL\d+$`
 
 ### Entity ID
 
 ```python
-entity-id = f"chembl:{tissue-id}"
+entity_id = f"chembl:{tissue-id}"
 ```
 
 ---
@@ -58,7 +58,7 @@ entity-id = f"chembl:{tissue-id}"
 ### DQ-правила
 
 1. **`tissue-id`** — обязательное, формат `^CHEMBL\d+$`
-2. **`pref-name`** — обязательное, длина 1-200 символов
+2. **`pref_name`** — обязательное, длина 1-200 символов
 3. **`bto-id`** — если указан, формат `^BTO:\d{7}$`
 4. **`caloha-id`** — если указан, формат `^TS-\d{4}$`
 5. **`efo-id`** — если указан, формат `^EFO:\d{7}$`
@@ -115,8 +115,8 @@ Tissue (tissue-id)
 
 ```json
 {
-  "tissue-chembl-id": "CHEMBL3638186",
-  "pref-name": "Liver",
+  "tissue_chembl_id": "CHEMBL3638186",
+  "pref_name": "Liver",
   "bto-id": "BTO:0000759",
   "caloha-id": "TS-0564",
   "efo-id": "EFO:0000887",
@@ -126,7 +126,7 @@ Tissue (tissue-id)
 
 ### Silver (нормализованный)
 
-| tissue-id | pref-name | bto-id | uberon-id |
+| tissue-id | pref_name | bto-id | uberon-id |
 |-----------|-----------|--------|-----------|
 | CHEMBL3638186 | Liver | BTO:0000759 | UBERON:0002107 |
 

@@ -24,9 +24,9 @@
 graph TB
 %% keep-orphan: CFG, EXCEPTIONS, OBSERVER, SCHEMAS, TYPES
     subgraph Application["Application Layer"]
-        CORE["Core (Runner, BatchExecutor, Transformer, Writer)"]:::size-sm
-        SERVICES["Services (DQ, Export, Health, Medallion Lifecycle)"]:::size-sm
-        COMPOSITE["Composite Pipeline (Coordinator, Merger, FSM)"]:::size-sm
+        CORE["Core (Runner, Executor,<br/>Transformer, Writer)"]:::size-sm
+        SERVICES["Services (DQ, Export,<br/>Health, Lifecycle)"]:::size-sm
+        COMPOSITE["Composite Pipeline<br/>(Coordinator, Merger, FSM)"]:::size-sm
         PIPELINES["Pipeline Transformers (per provider)"]:::size-sm
         OBSERVER["PipelineObserver"]:::size-sm
     end

@@ -20,7 +20,7 @@
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `molecule-chembl-id` | `str` | Уникальный ChEMBL ID (например, `CHEMBL25`) |
-| `pref-name` | `str` | Предпочтительное название |
+| `pref_name` | `str` | Предпочтительное название |
 | `max-phase` | `int` | Максимальная фаза клинических испытаний (0-4) |
 | `molecule-type` | `str` | Тип молекулы (Small molecule, Protein, etc.) |
 
@@ -28,7 +28,7 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `structure-canonical-smiles` | `str` | Каноническая SMILES-формула |
+| `structure_canonical_smiles` | `str` | Каноническая SMILES-формула |
 | `structure-standard-inchi` | `str` | Стандартный InChI |
 | `structure-standard-inchi-key` | `str` | Ключ InChI |
 
@@ -36,8 +36,8 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `property-alogp` | `float` | Расчётный LogP |
-| `property-mw-freebase` | `float` | Молекулярная масса свободного основания |
+| `property_alogp` | `float` | Расчётный LogP |
+| `property_mw_freebase` | `float` | Молекулярная масса свободного основания |
 | `property-full-mwt` | `float` | Полная молекулярная масса |
 | `property-hba` | `int` | Акцепторы водородных связей |
 | `property-hbd` | `int` | Доноры водородных связей |
@@ -71,7 +71,7 @@
 ### Entity ID
 
 ```python
-entity-id = f"chembl:{molecule-chembl-id}"
+entity_id = f"chembl:{molecule-chembl-id}"
 ```
 
 ---
@@ -81,7 +81,7 @@ entity-id = f"chembl:{molecule-chembl-id}"
 ### DQ-правила
 
 1. **`molecule-chembl-id`** — обязательное, regex `^CHEMBL\d+$`
-2. **`structure-canonical-smiles`** — рекомендуется для анализа
+2. **`structure_canonical_smiles`** — рекомендуется для анализа
 
 ### Пороги ошибок
 

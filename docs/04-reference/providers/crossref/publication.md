@@ -92,15 +92,15 @@ doi = normalize-doi("10.1234/ABC.DEF")  # → "10.1234/abc.def"
 ### Entity ID
 
 ```python
-# Формат entity-id
-entity-id = f"crossref:{normalized-doi}"
+# Формат entity_id
+entity_id = f"crossref:{normalized-doi}"
 ```
 
 ### Content Hash
 
 Вычисляется по бизнес-полям публикации для дедупликации:
 
-- Исключаются lineage поля (`-run-id`, `-ingestion-ts`, etc.)
+- Исключаются lineage поля (`_run_id`, `_ingestion_ts`, etc.)
 - None-значения исключаются из хэша
 
 ----------------------------------------------------------------------
@@ -273,10 +273,10 @@ gold_filters:
   "citations-received": 1500,
   "doc-type": "PUBLICATION",
   "source": "crossref",
-  "-run-id": "...",
-  "-run-type": "incremental",
-  "-ingestion-ts": "2025-01-05T12:00:00Z",
-  "content-hash": "sha256:..."
+  "_run_id": "...",
+  "_run_type": "incremental",
+  "_ingestion_ts": "2025-01-05T12:00:00Z",
+  "content_hash": "sha256:..."
 }
 ```
 

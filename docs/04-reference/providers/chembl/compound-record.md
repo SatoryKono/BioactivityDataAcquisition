@@ -21,15 +21,15 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `record-id` | `int` | Уникальный идентификатор записи (суррогатный ключ ChEMBL) |
+| `record_id` | `int` | Уникальный идентификатор записи (суррогатный ключ ChEMBL) |
 
 ### Внешние ключи
 
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `molecule-chembl-id` | `str` | FK → Molecule (например, `CHEMBL25`) |
-| `document-chembl-id` | `str` | FK → Publication (например, `CHEMBL1121421`) |
-| `src-id` | `int` | FK → Source (источник данных) |
+| `document_chembl_id` | `str` | FK → Publication (например, `CHEMBL1121421`) |
+| `src_id` | `int` | FK → Source (источник данных) |
 
 ### Данные из источника
 
@@ -51,7 +51,7 @@ Compound Record (M:1) → Source
 
 **Граф зависимостей:**
 - Для полного анализа рекомендуется сначала загрузить `chembl_molecule` и `chembl_publication`
-- `src-id` ссылается на источник данных ChEMBL (1 = ChEMBL)
+- `src_id` ссылается на источник данных ChEMBL (1 = ChEMBL)
 
 ---
 
@@ -61,14 +61,14 @@ Compound Record (M:1) → Source
 
 ### Логика трансформации
 
-1. **Primary ID:** `record-id` (int, обязательный)
-2. **Нормализация строк:** Все строковые поля обрабатываются через `normalize-to-string()` — trim whitespace, NULL для пустых строк
-3. **Преобразование типов:** `record-id` и `src-id` преобразуются через `safe-int()`
+1. **Primary ID:** `record_id` (int, обязательный)
+2. **Нормализация строк:** Все строковые поля обрабатываются через `normalize_to_string()` — trim whitespace, NULL для пустых строк
+3. **Преобразование типов:** `record_id` и `src_id` преобразуются через `safe-int()`
 
 ### Entity ID
 
 ```python
-entity-id = f"chembl:{record-id}"
+entity_id = f"chembl:{record_id}"
 ```
 
 ---
@@ -79,10 +79,10 @@ entity-id = f"chembl:{record-id}"
 
 | Поле | Правило | Описание |
 |------|---------|----------|
-| `record-id` | `>= 1` | Положительное целое число |
+| `record_id` | `>= 1` | Положительное целое число |
 | `molecule-chembl-id` | `^CHEMBL\d+$` | Regex для формата ChEMBL ID |
-| `document-chembl-id` | `^CHEMBL\d+$` | Regex для формата ChEMBL ID |
-| `src-id` | `>= 1` | Положительное целое число |
+| `document_chembl_id` | `^CHEMBL\d+$` | Regex для формата ChEMBL ID |
+| `src_id` | `>= 1` | Положительное целое число |
 
 ### Пороги ошибок
 
@@ -117,7 +117,7 @@ bioetl run --pipeline chembl_compound_record --dry-run
 
 Записи проходят в Gold слой только при наличии:
 - `molecule-chembl-id`
-- `document-chembl-id`
+- `document_chembl_id`
 
 Конфигурируется в `configs/entities/chembl/compound_record.yaml`:
 
@@ -125,7 +125,7 @@ bioetl run --pipeline chembl_compound_record --dry-run
 gold_filters:
   required_fields:
     - molecule-chembl-id
-    - document-chembl-id
+    - document_chembl_id
 ```
 
 ---
@@ -136,15 +136,15 @@ gold_filters:
 
 | Столбец | Порядок |
 |---------|---------|
-| `record-id` | ASC |
+| `record_id` | ASC |
 
 ### Gold
 
 | Столбец | Порядок |
 |---------|---------|
 | `molecule-chembl-id` | ASC |
-| `document-chembl-id` | ASC |
-| `record-id` | ASC |
+| `document_chembl_id` | ASC |
+| `record_id` | ASC |
 
 ---
 
@@ -166,19 +166,19 @@ gold_filters:
 
 ```json
 {
-  "record-id": 1234567,
+  "record_id": 1234567,
   "molecule-chembl-id": "CHEMBL25",
-  "document-chembl-id": "CHEMBL1121421",
+  "document_chembl_id": "CHEMBL1121421",
   "compound-key": "Aspirin",
   "compound-name": "acetylsalicylic acid",
-  "src-id": 1,
+  "src_id": 1,
   "src-compound-id": null
 }
 ```
 
 ### Silver (нормализованные данные)
 
-| record-id | molecule-chembl-id | document-chembl-id | compound-key | compound-name | src-id |
+| record_id | molecule-chembl-id | document_chembl_id | compound-key | compound-name | src_id |
 |-----------|--------------------|--------------------|--------------|---------------|--------|
 | 1234567 | CHEMBL25 | CHEMBL1121421 | Aspirin | acetylsalicylic acid | 1 |
 

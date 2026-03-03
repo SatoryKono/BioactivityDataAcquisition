@@ -24,8 +24,8 @@ flowchart TB
 %% keep-orphan: BLOCK, OK, SR
     subgraph Legend["Legend"]
         direction LR
-        OK["✅ Allowed Import<br/><br/><br/><br/>"]
-        BLOCK["❌ Forbidden Import<br/><br/><br/><br/>"]
+        OK["✅ Allowed Import<br/>"]
+        BLOCK["❌ Forbidden Import<br/>"]
     end
 
     subgraph Layers["BioETL Five-Layer Architecture"]
@@ -67,9 +67,9 @@ flowchart TB
     COMP -.-x|"❌ FORBIDDEN"| INT
 
     subgraph Enforcement["Enforcement Mechanism"]
-        IL["import-linter<br/>Blocks PR on violation<br/><br/><br/>"]
-        AT["tests/architecture/<br/>pytest architecture tests<br/><br/><br/>"]
-        SR["ai-selfreview-rules.md<br/>ARCH-001 detection scripts<br/><br/><br/>"]
+        IL["import-linter<br/>Blocks PR on violation<br/>"]
+        AT["tests/architecture/<br/>pytest architecture tests<br/>"]
+        SR["ai-selfreview-rules.md<br/>ARCH-001 detection scripts<br/>"]
     end
 
     IL -.-> Layers

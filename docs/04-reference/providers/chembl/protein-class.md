@@ -33,7 +33,7 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `pref-name` | `str` | Предпочтительное название |
+| `pref_name` | `str` | Предпочтительное название |
 | `short-name` | `str` | Короткое название |
 | `protein-class-desc` | `str` | Описание класса |
 | `definition` | `str` | Определение класса |
@@ -54,7 +54,7 @@
 ### Entity ID
 
 ```python
-entity-id = f"chembl:{protein-class-id}"
+entity_id = f"chembl:{protein-class-id}"
 ```
 
 ### Иерархическая структура
@@ -72,11 +72,11 @@ parent-id → protein-class-id
 ### DQ-правила
 
 1. **`protein-class-id`** — обязательное (primary key)
-2. **`pref-name`** — обязательное (название класса)
+2. **`pref_name`** — обязательное (название класса)
 
 ### Gold-фильтры
 
-- Обязательные поля: `pref-name`
+- Обязательные поля: `pref_name`
 - Фильтр `downgraded = 0` — исключение устаревших записей
 
 ---

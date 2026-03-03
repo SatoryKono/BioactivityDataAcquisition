@@ -22,37 +22,37 @@
 %% @uniform width=712 height=184 max_title_len=71 max_desc_lines=8
 flowchart TB
     subgraph CLI["Interfaces Layer (Click)"]
-        CMD["$ bioetl run --pipeline chembl_activity\n--run-type incremental\n--resume<br/><br/><br/><br/><br/><br/><br/>"]
-        PARSE["Parse CLI Arguments<br/>• pipeline_name<br/>• run_type (RunType enum)<br/>• resume flag<br/><br/><br/><br/>"]
-        OPTS["Build RunOptions<br/>• pipeline_name<br/>• run_type<br/>• resume: bool<br/><br/><br/>"]
+        CMD["bioetl run<br/>pipeline=chembl_activity<br/>run_type=incremental<br/>resume=true"]
+        PARSE["Parse CLI Arguments<br/>• pipeline_name<br/>• run_type (RunType enum)<br/>• resume flag"]
+        OPTS["Build RunOptions<br/>• pipeline_name<br/>• run_type<br/>• resume: bool"]
     end
 
     subgraph Service["Application Service Layer"]
-        PRS["PipelineRunnerService.run()<br/>• lookup pipeline in registry<br/>• validate run options<br/><br/><br/><br/><br/>"]
-        RESOLVE["PipelineRegistry.get(name)<br/>→ PipelineFactoryPort<br/><br/><br/><br/><br/><br/>"]
+        PRS["PipelineRunnerService.run()<br/>• lookup pipeline in registry<br/>• validate run options"]
+        RESOLVE["PipelineRegistry.get(name)<br/>→ PipelineFactoryPort"]
     end
 
     subgraph Bootstrap["Composition Layer"]
-        BOOT["bootstrap_pipeline()<br/>→ assembly.py<br/><br/><br/><br/><br/><br/>"]
+        BOOT["bootstrap_pipeline()<br/>→ assembly.py"]
         ASSEMBLE["Full Assembly Sequence<br/>1. Logger<br/>2. Config<br/>3. Storage<br/>4. HTTP Client<br/>5. Adapter<br/>6. Services<br/>7. Runner"]
     end
 
     subgraph Execute["Application Core"]
-        OBS_ENTER["PipelineObserver.__enter__()<br/>→ log started, inc counter<br/><br/><br/><br/><br/><br/>"]
-        RUNNER["PipelineRunner.run()<br/><br/><br/><br/><br/><br/><br/>"]
-        LOCK["LockManager.acquire()<br/>→ HeartbeatTask.start()<br/><br/><br/><br/><br/><br/>"]
-        PRE["PreflightService.run()<br/>→ PreflightReport<br/><br/><br/><br/><br/><br/>"]
-        BATCH["BatchExecutor loop<br/>→ extract/transform/validate/write<br/><br/><br/><br/><br/><br/>"]
-        POST["PostrunService.run()<br/>→ vacuum, DQ report<br/><br/><br/><br/><br/><br/>"]
-        UNLOCK["LockManager.release()<br/>→ HeartbeatTask.stop()<br/><br/><br/><br/><br/><br/>"]
-        OBS_EXIT["PipelineObserver.__exit__()<br/>→ observe duration<br/><br/><br/><br/><br/><br/>"]
+        OBS_ENTER["PipelineObserver.__enter__()<br/>→ log started, inc counter"]
+        RUNNER["PipelineRunner.run()"]
+        LOCK["LockManager.acquire()<br/>→ HeartbeatTask.start()"]
+        PRE["PreflightService.run()<br/>→ PreflightReport"]
+        BATCH["BatchExecutor loop<br/>→ extract/transform/validate/write"]
+        POST["PostrunService.run()<br/>→ vacuum, DQ report"]
+        UNLOCK["LockManager.release()<br/>→ HeartbeatTask.stop()"]
+        OBS_EXIT["PipelineObserver.__exit__()<br/>→ observe duration"]
     end
 
     subgraph Result["Result & Exit"]
-        RES_OK["RunResult(status=SUCCESS)<br/>PipelineRunResult.SUCCESS<br/><br/><br/><br/><br/><br/>"]
-        RES_FAIL["RunResult(status=FAILED)<br/>PipelineRunResult.FAILED<br/><br/><br/><br/><br/><br/>"]
-        EXIT_OK["ExitCode.SUCCESS (0)<br/><br/><br/><br/><br/><br/><br/>"]
-        EXIT_ERR["ExitCode.PIPELINE_ERROR (1)<br/>ExitCode.CONFIG_ERROR (2)<br/><br/><br/><br/><br/><br/>"]
+        RES_OK["RunResult(status=SUCCESS)<br/>PipelineRunResult.SUCCESS"]
+        RES_FAIL["RunResult(status=FAILED)<br/>PipelineRunResult.FAILED"]
+        EXIT_OK["ExitCode.SUCCESS (0)"]
+        EXIT_ERR["ExitCode.PIPELINE_ERROR (1)<br/>ExitCode.CONFIG_ERROR (2)"]
     end
 
     %% Flow

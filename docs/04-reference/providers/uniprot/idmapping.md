@@ -32,8 +32,8 @@
 
 | Поле | Тип | Nullable | Описание |
 |------|-----|----------|----------|
-| `entity-id` | `str` | ❌ | Формат: `chembl:uniprot:{target-chembl-id}` |
-| `target-chembl-id` | `str` | ❌ | ChEMBL Target ID (e.g., CHEMBL204) — первичный ключ |
+| `entity_id` | `str` | ❌ | Формат: `chembl:uniprot:{target_id}` |
+| `target_id` | `str` | ❌ | ChEMBL Target ID (e.g., CHEMBL204) — первичный ключ |
 | `uniprot-accession` | `str` | ✅ | UniProt Accession (e.g., P00742), null если не найден |
 
 ### Статус маппинга
@@ -47,11 +47,11 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `content-hash` | `str` | SHA256 от business data |
-| `-run-id` | `str` | UUID запуска пайплайна |
-| `-run-type` | `str` | `incremental`, `backfill`, `rebuild` |
-| `-ingestion-ts` | `str` | Timestamp ingestion (ISO 8601) |
-| `-index` | `int` | Порядковый номер записи |
+| `content_hash` | `str` | SHA256 от business data |
+| `_run_id` | `str` | UUID запуска пайплайна |
+| `_run_type` | `str` | `incremental`, `backfill`, `rebuild` |
+| `_ingestion_ts` | `str` | Timestamp ingestion (ISO 8601) |
+| `_index` | `int` | Порядковый номер записи |
 
 ---
 
@@ -65,7 +65,7 @@ provider: uniprot
 entity_type: idmapping
 version: "1.0.0"
 
-primary_keys: ["target-chembl-id"]
+primary_keys: ["target_id"]
 silver_table: "uniprot_idmapping"
 gold_table: "uniprot_idmapping"
 
@@ -88,7 +88,7 @@ rate-limit:
 
 gold_filters:
   required_fields:
-    - target-chembl-id
+    - target_id
     - mapping-status
 ```
 
@@ -99,7 +99,7 @@ gold_filters:
 ### 4.1. Extract
 
 - **Источник:** UniProt ID Mapping REST API (`https://rest.uniprot.org/idmapping`)
-- **Input:** CSV файл с колонкой `target-chembl-id`
+- **Input:** CSV файл с колонкой `target_id`
 - **Batch Size:** 500 IDs per job
 - **API Flow:**
   1. `POST /idmapping/run` — submit job, получить `jobId`
@@ -110,10 +110,10 @@ gold_filters:
 
 **Transformer:** `src/bioetl/application/pipelines/uniprot/idmapping_transformer.py`
 
-1. Извлечение `target-chembl-id` и `uniprot-accession` из API response
+1. Извлечение `target_id` и `uniprot-accession` из API response
 2. Определение `mapping-status`: `found` | `not-found`
-3. Генерация `entity-id`: `chembl:uniprot:{target-chembl-id}`
-4. Вычисление `content-hash` (SHA256)
+3. Генерация `entity_id`: `chembl:uniprot:{target_id}`
+4. Вычисление `content_hash` (SHA256)
 5. Установка `-dq-warn=True` для `not-found`
 
 ### 4.3. Load
@@ -121,7 +121,7 @@ gold_filters:
 | Слой | Формат | Стратегия | Путь |
 |------|--------|-----------|------|
 | **Bronze** | — | Disabled | — |
-| **Silver** | `delta` | Merge по `target-chembl-id` | `data/output/silver/uniprot/idmapping` |
+| **Silver** | `delta` | Merge по `target_id` | `data/output/silver/uniprot/idmapping` |
 | **Gold** | `delta` | Overwrite | `data/output/gold/uniprot/idmapping` |
 
 ---
@@ -173,7 +173,7 @@ await client.health_check()  # Returns HealthStatus.HEALTHY
 ### Входные данные (CSV)
 
 ```csv
-target-chembl-id
+target_id
 CHEMBL204
 CHEMBL2034
 CHEMBL9999999
@@ -184,22 +184,22 @@ CHEMBL9999999
 ```json
 [
   {
-    "entity-id": "chembl:uniprot:CHEMBL204",
-    "target-chembl-id": "CHEMBL204",
+    "entity_id": "chembl:uniprot:CHEMBL204",
+    "target_id": "CHEMBL204",
     "uniprot-accession": "P00742",
     "mapping-status": "found",
     "-dq-warn": false,
-    "-run-id": "...",
-    "-ingestion-ts": "2026-01-06T..."
+    "_run_id": "...",
+    "_ingestion_ts": "2026-01-06T..."
   },
   {
-    "entity-id": "chembl:uniprot:CHEMBL9999999",
-    "target-chembl-id": "CHEMBL9999999",
+    "entity_id": "chembl:uniprot:CHEMBL9999999",
+    "target_id": "CHEMBL9999999",
     "uniprot-accession": null,
     "mapping-status": "not-found",
     "-dq-warn": true,
-    "-run-id": "...",
-    "-ingestion-ts": "2026-01-06T..."
+    "_run_id": "...",
+    "_ingestion_ts": "2026-01-06T..."
   }
 ]
 ```

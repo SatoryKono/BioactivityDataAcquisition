@@ -350,4 +350,4 @@ classDiagram
     FSMStateHelper --> CompositePipelineState : manages
     MergeService ..> EnrichmentCrossValidator : optional validation
 
-    note for CompositePipelineRunner "Application Service (ADR-026)\nNo business logic — delegates to\nspecialized services.\nAll deps injected via constructor."
+    note for CompositePipelineRunner "Application service (ADR-026)<br/>No business logic<br/>delegates to specialized services<br/>all deps via constructor DI"

@@ -18,49 +18,46 @@
 **Файл:** `configs/entities/chembl/activity.yaml`
 
 ```yaml
-pipeline_name: chembl_activity
+version: 1.0.0
 provider: chembl
-entity_type: activity
-version: "1.2.0"
-primary_keys: ["activity_id"]
-silver_table: "chembl_activity"
+entity: activity
 
-gold-filter-types:
-    - IC50
-    - Ki
-    - Kd
-    - EC50
-    - AC50
-    - GI50
-    - ED50
-    - MIC
-    - CC50
+pipeline:
+    pipeline_name: chembl_activity
+    provider: chembl
+    entity_type: activity
+    business_primary_keys: [activity_id]
+    batch_size: 1000
 
-transform:
-    steps:
-        - normalize-values
-        - add-metadata
-        - calculate-content-hash
-
-sink:
-    bronze:
-        path: "data/output/bronze"
-        format: jsonl
-        save-json: true
+schema:
+    column_groups:
+        - name: system
+          fields: [entity_id, content_hash, _run_id, _run_type, _source_batch_id, _ingestion_ts, _index]
+        - name: business
+          fields: [activity_id, molecule_id, target_id, assay_id, standard_type, standard_value, standard_units]
     silver:
-        path: "data/output/silver"
-        format: delta
-        mode: merge
-        partition_by: ["year", "month"]
+        include_groups: [system, business, dq]
     gold:
-        enabled: true
-        path: "data/output/gold"
-        format: delta
-        mode: overwrite
+        include_groups: [system, business]
+        exclude_fields: [_dq_*, _source_batch_id, _index]
+        alias_policy: canonical
 
-dq_overrides:
-    soft_fail_threshold: 0.05   # 5% ошибок → WARNING
-    hard_fail_threshold: 0.20   # 20% ошибок → FAIL BATCH
+quality:
+    version: 1.1.0
+    provider: chembl
+    entity: activity
+    field_validations:
+        - field: activity_id
+          type: required
+          nullable: false
+
+filters:
+    version: 1.0.0
+    provider: chembl
+    entity: activity
+    extraction_params:
+        standard_type__in: IC50,Ki
+        standard_units: nM
 ```
 
 ----------------------------------------------------------------------
@@ -85,36 +82,36 @@ dq_overrides:
 | `publication_doi`    | `str` | Нет          | DOI публикации                             |
 | `publication_pmid`   | `str` | Нет          | PubMed ID                                  |
 | `publication_pmc_id` | `str` | Нет          | PubMed Central ID                          |
-| `record-id`          | `int` | Нет          | Внутренний ID записи                       |
-| `src-id`             | `int` | Нет          | ID источника данных                        |
+| `record_id`          | `int` | Нет          | Внутренний ID записи                       |
+| `src_id`             | `int` | Нет          | ID источника данных                        |
 
 #### Данные молекулы
 
 | Поле                        | Тип   | Описание                           |
 | --------------------------- | ----- | ---------------------------------- |
-| `canonical-smiles`          | `str` | SMILES-формула молекулы            |
-| `molecule-pref-name`        | `str` | Предпочтительное название молекулы |
-| `parent-molecule_id`        | `str` | ID родительской молекулы           |
+| `canonical_smiles`          | `str` | SMILES-формула молекулы            |
+| `molecule_pref_name`        | `str` | Предпочтительное название молекулы |
+| `parent_molecule_id`        | `str` | ID родительской молекулы           |
 
 #### Данные мишени
 
 |Поле|Тип|Описание|
 |---|---|---|
-|`target-pref-name`|`str`|Название мишени|
-|`target-organism`|`str`|Организм мишени|
-|`taxonomy-id`|`float`|NCBI Taxonomy ID (nullable int pattern)|
+|`target_pref_name`|`str`|Название мишени|
+|`target_organism`|`str`|Организм мишени|
+|`target_taxonomy_id`|`float`|NCBI Taxonomy ID (nullable int pattern)|
 
 #### Данные анализа
 
 |Поле|Тип|Описание|
 |---|---|---|
-|`assay-type`|`str`|Тип анализа (B, F, A, T, P)|
-|`assay-description`|`str`|Описание анализа|
-|`assay-variant-accession`|`str`|Accession варианта белка в анализе|
-|`assay-variant-mutation`|`str`|Мутация варианта в анализе|
-|`bao-endpoint`|`str`|BAO endpoint (онтология)|
-|`bao-format`|`str`|BAO format|
-|`bao-label`|`str`|BAO label|
+|`assay_type`|`str`|Тип анализа (B, F, A, T, P)|
+|`assay_description`|`str`|Описание анализа|
+|`assay_variant_accession`|`str`|Accession варианта белка в анализе|
+|`assay_variant_mutation`|`str`|Мутация варианта в анализе|
+|`bao_endpoint`|`str`|BAO endpoint (онтология)|
+|`bao_format`|`str`|BAO format|
+|`bao_label`|`str`|BAO label|
 
 #### Сырые значения активности
 
@@ -124,10 +121,10 @@ dq_overrides:
 | `value`       | `float` | Значение (сырое)               |
 | `units`       | `str`   | Единицы измерения (сырые)      |
 | `relation`    | `str`   | Отношение (`=`, `<`, `>`, `~`) |
-| `upper-value` | `float` | Верхняя граница диапазона      |
-| `text-value`  | `str`   | Текстовое значение             |
-| `qudt-units`  | `str`   | Единицы из онтологии QUDT      |
-| `uo-units`    | `str`   | Единицы из онтологии UO        |
+| `upper_value` | `float` | Верхняя граница диапазона      |
+| `text_value`  | `str`   | Текстовое значение             |
+| `qudt_units`  | `str`   | Единицы из онтологии QUDT      |
+| `uo_units`    | `str`   | Единицы из онтологии UO        |
 
 #### Стандартизированные значения
 
@@ -136,10 +133,10 @@ dq_overrides:
 | `standard_type`        | `str`   | Тип: IC50, Ki, Kd, EC50, AC50, GI50, ED50, MIC, CC50, EC50, Kd и др. |
 | `standard_value`       | `float` | Стандартизированное значение                                         |
 | `standard_units`       | `str`   | Единицы: nM, uM, и др.                                               |
-| `standard-relation`    | `str`   | Отношение                                                            |
-| `standard-upper-value` | `float` | Верхняя граница                                                      |
-| `standard-text-value`  | `str`   | Текстовое стандартизированное значение                               |
-| `standard-flag`        | `int`   | Флаг стандартизации                                                  |
+| `standard_relation`    | `str`   | Отношение                                                            |
+| `standard_upper_value` | `float` | Верхняя граница                                                      |
+| `standard_text_value`  | `str`   | Текстовое стандартизированное значение                               |
+| `standard_flag`        | `int`   | Флаг стандартизации                                                  |
 
 #### Вычисляемые метрики
 
@@ -151,10 +148,10 @@ dq_overrides:
 
 | Поле                    | Тип     | Описание                                                                   |
 | ----------------------- | ------- | -------------------------------------------------------------------------- |
-| `ligand-efficiency-bei` | `float` | **BEI** (Binding Efficiency Index) — эффективность связывания на атом      |
-| `ligand-efficiency-le`  | `float` | **LE** (Ligand Efficiency) — изменение энергии связывания на тяжелый атом  |
-| `ligand-efficiency-lle` | `float` | **LLE** (Lipophilic Ligand Efficiency) — баланс активности и липофильности |
-| `ligand-efficiency-sei` | `float` | **SEI** (Surface Efficiency Index) — эффективность по площади поверхности  |
+| `ligand_efficiency_bei` | `float` | **BEI** (Binding Efficiency Index) — эффективность связывания на атом      |
+| `ligand_efficiency_le`  | `float` | **LE** (Ligand Efficiency) — изменение энергии связывания на тяжелый атом  |
+| `ligand_efficiency_lle` | `float` | **LLE** (Lipophilic Ligand Efficiency) — баланс активности и липофильности |
+| `ligand_efficiency_sei` | `float` | **SEI** (Surface Efficiency Index) — эффективность по площади поверхности  |
 
 > **Примечание**: Все метрики ligand-efficiency вычисляются ChEMBL и предоставляются через API. В Silver слое они разворачиваются из вложенного словаря в отдельные колонки для удобства аналитики.
 
@@ -169,42 +166,42 @@ dq_overrides:
 
 |Поле|Тип|Описание|
 |---|---|---|
-|`activity-comment`|`str`|Комментарий к активности|
+|`activity_comment`|`str`|Комментарий к активности|
 |`data_validity_comment`|`str`|Комментарий о валидности|
-|`data-validity-description`|`str`|Описание проблемы с данными|
-|`potential-duplicate`|`int`|Флаг потенциального дубликата|
-|`manual-curation-flag`|`int`|Флаг ручной кураторской проверки (0/1)|
-|`original-activity_id`|`int`|ID исходной записи активности (traceability)|
+|`data_validity_description`|`str`|Описание проблемы с данными|
+|`potential_duplicate`|`int`|Флаг потенциального дубликата|
+|`manual_curation_flag`|`int`|Флаг ручной кураторской проверки (0/1)|
+|`original_activity_id`|`int`|ID исходной записи активности (traceability)|
 
 #### Тип действия (Action Type)
 
-Поля развёрнуты из вложенного словаря ChEMBL API (`action-type`):
+Поля развёрнуты из вложенного словаря ChEMBL API (`action_type`):
 
 | Поле               | Тип   | Описание                                            |
 | ------------------ | ----- | --------------------------------------------------- |
-| `action-type`      | `str` | Тип действия: INHIBITOR, AGONIST, ANTAGONIST и др.  |
-| `action-type-description` | `str` | Описание типа действия                              |
-| `action-type-parent-type` | `str` | Родительская группа типа действия (может быть null) |
+| `action_type`      | `str` | Тип действия: INHIBITOR, AGONIST, ANTAGONIST и др.  |
+| `action_type_description` | `str` | Описание типа действия                              |
+| `action_type_parent_type` | `str` | Родительская группа типа действия (может быть null) |
 
-> **Примечание**: Поля `action-type-*` извлекаются из вложенного словаря API с помощью `flatten-nested-dict()`. Если запись не содержит информации о типе действия, все поля будут `None`.
+> **Примечание**: Поля `action_type_*` извлекаются из вложенного словаря API с помощью `flatten_nested_dict()`. Если запись не содержит информации о типе действия, все поля будут `None`.
 
 #### Системные поля (добавляются при обработке)
 
 | Поле               | Тип   | Описание                             |
 | ------------------ | ----- | ------------------------------------ |
-| `entity-id`        | `str` | `chembl:{activity_id}`               |
-| `content-hash`     | `str` | SHA256-хеш содержимого               |
-| `-run_id`          | `str` | UUID запуска пайплайна               |
-| `-run_type`        | `str` | `incremental`, `backfill`, `rebuild` |
-| `-source-batch_id` | `str` | UUID батча                           |
-| `-ingestion_ts`    | `str` | Timestamp загрузки (ISO8601)         |
+| `entity_id`        | `str` | `chembl:{activity_id}`               |
+| `content_hash`     | `str` | SHA256-хеш содержимого               |
+| `_run_id`          | `str` | UUID запуска пайплайна               |
+| `_run_type`        | `str` | `incremental`, `backfill`, `rebuild` |
+| `_source_batch_id` | `str` | UUID батча                           |
+| `_ingestion_ts`    | `str` | Timestamp загрузки (ISO8601)         |
 
 ----------------------------------------------------------------------
 
 ### 3.2. Валидация при создании сущности
 
 ```python
-def -validate-invariants(self) -> None:
+def validate_invariants(self) -> None:
     if not self.activity_id:
         raise ValueError("Activity ID is required")
     if not self.molecule_id:
@@ -225,13 +222,13 @@ def -validate-invariants(self) -> None:
 Сырой JSON (ChEMBL API)
          │
          ▼
-    1. Генерация entity-id
+    1. Генерация entity_id
          │
          ▼
     2. Нормализация типов
          │
          ▼
-    3. Генерация content-hash
+    3. Генерация content_hash
          │
          ▼
     4. Добавление системных полей
@@ -254,22 +251,22 @@ def -validate-invariants(self) -> None:
 
 ```python
 # Entity ID: уникальный бизнес-ключ
-entity-id = f"chembl:{activity_id}"
+entity_id = f"chembl:{activity_id}"
 
 # Content Hash: SHA256 для версионирования
-content-hash = sha256("chembl" + canonical-json(business-fields))
+content_hash = sha256("chembl" + canonical_json(business_fields))
 ```
 
 ### 4.4. Поля, исключённые из хеша
 
 ```python
 META_FIELDS = {
-    "-ingestion_ts",
-    "-run_id",
-    "-run_type",
-    "-dq-warn",
-    "-dq-error",
-    "-source-batch_id",
+    "_ingestion_ts",
+    "_run_id",
+    "_run_type",
+    "_dq_warn",
+    "_dq_error",
+    "_source_batch_id",
 }
 ```
 
@@ -304,7 +301,7 @@ META_FIELDS = {
 
 ```python
 {
-    "raw-record": {...},  # Исходная запись
+    "raw_record": {...},  # Исходная запись
     "error_code": "INVALID-STANDARD-VALUE",
     "error_details": "standard_value is negative",
     "batch_id": "uuid",
@@ -355,8 +352,8 @@ META_FIELDS = {
 ```python
 CHEMBL_ACTIVITY_SCHEMA = pa.schema(
     [
-        pa.field("entity-id", pa.string()),
-        pa.field("content-hash", pa.string()),
+        pa.field("entity_id", pa.string()),
+        pa.field("content_hash", pa.string()),
         pa.field("activity_id", pa.string()),
         pa.field("molecule_id", pa.string()),
         pa.field("target_id", pa.string()),
@@ -371,10 +368,10 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("standard_value", pa.float64()),
         pa.field("standard_units", pa.string()),
         pa.field("pchembl_value", pa.float64()),
-        pa.field("-run_id", pa.string()),
-        pa.field("-run_type", pa.string()),
-        pa.field("-ingestion_ts", pa.string()),
-        # ... всего 62 поля (включая action-type*)
+        pa.field("_run_id", pa.string()),
+        pa.field("_run_type", pa.string()),
+        pa.field("_ingestion_ts", pa.string()),
+        # ... всего 62 поля (включая action_type*)
     ]
 )
 ```
@@ -415,15 +412,15 @@ def should_include(self, context, record) -> bool:
 
 #### Data Contract
 
-**Файл:** `docs/04-reference/contracts/gold/chembl_activity-v1.0.json`
+**Файл:** `docs/04-reference/contracts/gold/chembl_activity_v1.0.json`
 
 ```json
 {
     "required": [
         "activity_id",
         "molecule_id",
-        "-content-hash",
-        "-ingestion_ts"
+        "-content_hash",
+        "_ingestion_ts"
     ],
     "properties": {
         "activity_id": {"type": "integer"},
@@ -487,10 +484,10 @@ ChEMBL API (/activity.json)
 ```python
 @dataclass
 class BatchResult:
-    bronze-count: int  # Записей в Bronze
-    silver-count: int  # Успешно трансформировано
-    gold-count: int  # Прошло Gold-фильтр
-    quarantined-count: int  # Отправлено в карантин
+    bronze_count: int  # Записей в Bronze
+    silver_count: int  # Успешно трансформировано
+    gold_count: int  # Прошло Gold-фильтр
+    quarantined_count: int  # Отправлено в карантин
 ```
 
 ----------------------------------------------------------------------
@@ -515,7 +512,7 @@ class BatchResult:
 | Bronze Writer | `src/bioetl/infrastructure/storage/bronze_writer.py`              |
 | Delta Writer  | `src/bioetl/infrastructure/storage/delta_writer.py`               |
 | Gold Writer   | `src/bioetl/infrastructure/storage/gold_writer.py`                |
-| Data Contract | `docs/04-reference/contracts/gold/chembl_activity-v1.0.json`                               |
+| Data Contract | `docs/04-reference/contracts/gold/chembl_activity_v1.0.json`                               |
 
 ----------------------------------------------------------------------
 
@@ -529,10 +526,10 @@ bioetl run --pipeline chembl_activity
 bioetl run --pipeline chembl_activity --limit 1000
 
 # Backfill за период
-bioetl run --pipeline chembl_activity --run_type backfill
+bioetl run --pipeline chembl_activity --run-type backfill
 
 # Полная перезагрузка
-bioetl run --pipeline chembl_activity --run_type rebuild
+bioetl run --pipeline chembl_activity --run-type rebuild
 ```
 
 ----------------------------------------------------------------------

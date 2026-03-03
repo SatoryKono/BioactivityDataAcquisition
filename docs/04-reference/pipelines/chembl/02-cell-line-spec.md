@@ -450,4 +450,4 @@ input_filter:
 
 ## 12. Field Mapping CSV
 
-See `docs/pipelines/chembl/cell-line-fields.csv` for Excel-compatible field mapping.
+See `docs/04-reference/pipelines/chembl/cell-line-fields.csv` for Excel-compatible field mapping.

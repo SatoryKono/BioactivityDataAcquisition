@@ -38,7 +38,7 @@ flowchart TB
 
             PipelineRun["PipelineRun Aggregate<br/>───────────────<br/>• start()<br/>• record_stage_success()<br/>• complete()<br/>• fail()"]
 
-            QuarantineEntry["QuarantineEntry Aggregate<br/>───────────────<br/>• mark_retrying()<br/>• mark_recovered()<br/>• mark_dead_letter()<br/>"]
+            QuarantineEntry["QuarantineEntry Aggregate<br/>───────────────<br/>• mark_retrying()<br/>• mark_recovered()<br/>• mark_dead_letter()"]
         end
 
         subgraph events["Domain Events"]
@@ -51,16 +51,16 @@ flowchart TB
         end
 
         subgraph value_objects["value_objects/"]
-            RunID["RunID (UUID)<br/><br/><br/><br/><br/>"]
-            BatchID["BatchID (UUID)<br/><br/><br/><br/><br/>"]
-            EntityID["EntityID (str)<br/><br/><br/><br/><br/>"]
-            ContentHash["ContentHash (str)<br/><br/><br/><br/><br/>"]
-            Measurement["Measurement<br/>(value, unit, relation)<br/><br/><br/><br/>"]
+            RunID["RunID (UUID)"]
+            BatchID["BatchID (UUID)"]
+            EntityID["EntityID (str)"]
+            ContentHash["ContentHash (str)"]
+            Measurement["Measurement<br/>(value, unit, relation)"]
         end
 
         subgraph types["types.py"]
-            RunType["RunType Enum<br/>(INCREMENTAL, BACKFILL, REBUILD)<br/><br/><br/><br/>"]
-            HealthStatus["HealthStatus Enum<br/>(HEALTHY, DEGRADED, UNHEALTHY)<br/><br/><br/><br/>"]
+            RunType["RunType Enum<br/>(INCREMENTAL, BACKFILL, REBUILD)"]
+            HealthStatus["HealthStatus Enum<br/>(HEALTHY, DEGRADED, UNHEALTHY)"]
         end
 
         subgraph exceptions["exceptions/"]

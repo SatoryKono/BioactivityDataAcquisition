@@ -46,7 +46,7 @@ Perform a full documentation audit of BioETL and bring docs in sync with code an
 rg -n "ADR-010|ADR-014|ADR-017" docs README.md mkdocs.yml
 
 # Version mentions
-rg -n "v5\.14|5\.14" docs README.md
+rg -n "v5\.23|5\.23" docs README.md
 
 # Doc refs in nav
 rg -n "docs/|\.md" mkdocs.yml README.md

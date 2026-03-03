@@ -23,26 +23,26 @@
 graph TB
 %% keep-orphan: DFM, HCP, UIDM
     subgraph Ports["Domain Ports"]
-        DSP["DataSourcePort<br/>(Protocol)<br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        HCP["HealthCheckPort<br/>(Protocol)<br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
+        DSP["DataSourcePort<br/>(Protocol)"]:::size-lg
+        HCP["HealthCheckPort<br/>(Protocol)"]:::size-lg
     end
 
     DSP -->|extends| FDSP
 
     subgraph Mixins["Mixins"]
-        HCM["HealthCheckMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        HCPM["HealthCheckProviderMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        NSMF["NotSupportedMultiFilterMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        DFM["DelegatingFallbackMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        FSM["FilterableStubMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        PFM["PaginatedFetcherMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
+        HCM["HealthCheckMixin"]:::size-lg
+        HCPM["HealthCheckProviderMixin"]:::size-lg
+        NSMF["NotSupportedMultiFilterMixin"]:::size-lg
+        DFM["DelegatingFallbackMixin"]:::size-lg
+        FSM["FilterableStubMixin"]:::size-lg
+        PFM["PaginatedFetcherMixin"]:::size-lg
     end
 
     HCM --> HCPM
 
     subgraph Base["Base Adapters"]
-        BHA["BaseHttpAdapter<br/>━━━━━━━━━━━━━━━━━<br/>http_client: UnifiedHTTPClient<br/>logger: LoggerPort<br/>metrics: MetricsPort<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ health_check()<br/>+ aclose()"]:::size-lg
-        BSA["BaseSyncAdapter<br/>━━━━━━━━━━━━━━━━━<br/>logger: LoggerPort<br/>rate_limiter: TokenBucket<br/>circuit_breaker: CircuitBreaker<br/>thread_pool: ThreadPoolExecutor<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ health_check()"]:::size-lg
+        BHA["BaseHttpAdapter<br/>http_client + logger + metrics<br/>fetch()<br/>health_check()<br/>aclose()"]:::size-lg
+        BSA["BaseSyncAdapter<br/>logger + rate_limiter<br/>circuit_breaker + thread_pool<br/>fetch()<br/>health_check()"]:::size-lg
     end
 
     HCPM --> BHA
@@ -51,9 +51,9 @@ graph TB
     DSP -.->|implements| BSA
 
     subgraph ChEMBL["ChEMBL"]
-        CHM["ChemblHealthMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        CMM["ChemblMetadataMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        CA["ChemblAdapter<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_multi_filtered()<br/>+ fetch_filtered_with_fallback()<br/>+ fetch_as_models()<br/><br/>"]:::size-lg
+        CHM["ChemblHealthMixin"]:::size-lg
+        CMM["ChemblMetadataMixin"]:::size-lg
+        CA["ChemblAdapter<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_multi_filtered()<br/>+ fetch_filtered_with_fallback()<br/>+ fetch_as_models()"]:::size-lg
     end
 
     BHA --> CA
@@ -61,10 +61,10 @@ graph TB
     CMM --> CA
 
     subgraph PubMed["PubMed"]
-        PSM["PubMedSearchMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        PFetchM["PubMedFetchMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        PHM["PubMedHealthMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        PA["PubMedAdapter<br/>━━━━━━━━━━━━━━━━━<br/>email: str<br/>api_key: str | None<br/>batch_size: int<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_filtered_with_fallback()"]:::size-lg
+        PSM["PubMedSearchMixin"]:::size-lg
+        PFetchM["PubMedFetchMixin"]:::size-lg
+        PHM["PubMedHealthMixin"]:::size-lg
+        PA["PubMedAdapter<br/>email + api_key + batch_size<br/>fetch()<br/>fetch_filtered()<br/>fetch_filtered_with_fallback()"]:::size-lg
     end
 
     BHA --> PA
@@ -74,33 +74,33 @@ graph TB
     PHM --> PA
 
     subgraph UniProt["UniProt"]
-        UA["UniProtAdapter<br/>━━━━━━━━━━━━━━━━━<br/>api_key: str | None<br/>base_url: str<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_multi_filtered()<br/>"]:::size-lg
-        UIDM["UniProtIDMappingClient<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
+        UA["UniProtAdapter<br/>━━━━━━━━━━━━━━━━━<br/>api_key: str | None<br/>base_url: str<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_multi_filtered()"]:::size-lg
+        UIDM["UniProtIDMappingClient"]:::size-lg
     end
 
     BHA --> UA
     PFM --> UA
 
     subgraph CrossRef["CrossRef"]
-        CRA["CrossRefAdapter<br/>━━━━━━━━━━━━━━━━━<br/>mailto: str<br/>batch_size: int<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_filtered_with_fallback()<br/>"]:::size-lg
+        CRA["CrossRefAdapter<br/>━━━━━━━━━━━━━━━━━<br/>mailto: str<br/>batch_size: int<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_filtered_with_fallback()"]:::size-lg
     end
 
     BHA --> CRA
 
     subgraph OpenAlex["OpenAlex"]
-        OAA["OpenAlexAdapter<br/>━━━━━━━━━━━━━━━━━<br/>mailto: str<br/>batch_size: int<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_filtered_with_fallback()<br/>"]:::size-lg
+        OAA["OpenAlexAdapter<br/>━━━━━━━━━━━━━━━━━<br/>mailto: str<br/>batch_size: int<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_filtered_with_fallback()"]:::size-lg
     end
 
     BHA --> OAA
 
     subgraph SemanticScholar["Semantic Scholar"]
-        SSA["SemanticScholarAdapter<br/>━━━━━━━━━━━━━━━━━<br/>api_key: str<br/>batch_size: int<br/>fields: str<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_filtered_with_fallback()"]:::size-lg
+        SSA["SemanticScholarAdapter<br/>api_key + batch_size + fields<br/>fetch()<br/>fetch_filtered()<br/>fetch_filtered_with_fallback()"]:::size-lg
     end
 
     BHA --> SSA
 
     subgraph PubChem["PubChem"]
-        PCA["PubChemAdapter<br/>━━━━━━━━━━━━━━━━━<br/>(sync via ThreadPoolExecutor)<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_as_models()<br/><br/>"]:::size-lg
+        PCA["PubChemAdapter<br/>━━━━━━━━━━━━━━━━━<br/>(sync via ThreadPoolExecutor)<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_as_models()"]:::size-lg
     end
 
     BSA --> PCA

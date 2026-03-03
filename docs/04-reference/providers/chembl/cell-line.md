@@ -9,7 +9,7 @@
 
 ## 1. Описание
 
-Пайплайн извлекает данные о клеточных линиях из API ChEMBL. Клеточные линии — это биологические объекты, используемые для in vitro экспериментов. Они имеют связь M:N с сущностью Assay (через FK `assay.cell-chembl-id`).
+Пайплайн извлекает данные о клеточных линиях из API ChEMBL. Клеточные линии — это биологические объекты, используемые для in vitro экспериментов. Они имеют связь M:N с сущностью Assay (через FK `assay.cell_chembl_id`).
 
 **Источник данных:** ChEMBL REST API, таблица `cell-dictionary`
 
@@ -21,7 +21,7 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `cell-chembl-id` | `str` | Уникальный ChEMBL ID клеточной линии (PK) |
+| `cell_chembl_id` | `str` | Уникальный ChEMBL ID клеточной линии (PK) |
 | `cell-name` | `str` | Название клеточной линии (напр., HeLa, MCF7) |
 
 ### Метаданные
@@ -56,14 +56,14 @@
 
 ### Нормализация данных
 
-- **cell-name:** Строка нормализуется через `normalize-to-string()` (strip whitespace)
+- **cell-name:** Строка нормализуется через `normalize_to_string()` (strip whitespace)
 - **cell-source-tax-id:** Валидируется через `validate-positive-int()` (должен быть >= 1)
 - **Внешние ID:** Пустые строки и whitespace преобразуются в `NULL`
 
 ### Entity ID
 
 ```python
-entity-id = f"chembl:{cell-chembl-id}"
+entity_id = f"chembl:{cell_chembl_id}"
 ```
 
 ---
@@ -72,7 +72,7 @@ entity-id = f"chembl:{cell-chembl-id}"
 
 ### DQ-правила
 
-1. **`cell-chembl-id`** — обязательное, формат `^CHEMBL\d+$`
+1. **`cell_chembl_id`** — обязательное, формат `^CHEMBL\d+$`
 2. **`cell-name`** — обязательное
 3. **`cell-source-tax-id`** — если указан, должен быть >= 1
 4. **Внешние ID** — если указаны, валидируются по regex:
@@ -123,8 +123,8 @@ bioetl run --pipeline chembl_cell_line --input-csv data/input/cell.csv
 ## 7. Связи с другими сущностями
 
 ```
-Cell Line (cell-chembl-id)
-    └── Assay (cell-chembl-id FK) [M:N]
+Cell Line (cell_chembl_id)
+    └── Assay (cell_chembl_id FK) [M:N]
         └── Activity [1:N]
 ```
 
@@ -136,7 +136,7 @@ Cell Line (cell-chembl-id)
 
 ```json
 {
-  "cell-chembl-id": "CHEMBL3308376",
+  "cell_chembl_id": "CHEMBL3308376",
   "cell-name": "HeLa",
   "cell-description": "Human cervical cancer cell line",
   "cell-source-tissue": "Cervix",
@@ -152,7 +152,7 @@ Cell Line (cell-chembl-id)
 
 ### Silver (нормализованный)
 
-| cell-chembl-id | cell-name | cell-source-organism | cell-source-tax-id | cellosaurus-id |
+| cell_chembl_id | cell-name | cell-source-organism | cell-source-tax-id | cellosaurus-id |
 |----------------|-----------|----------------------|--------------------|----------------|
 | CHEMBL3308376 | HeLa | Homo sapiens | 9606 | CVCL-0030 |
 

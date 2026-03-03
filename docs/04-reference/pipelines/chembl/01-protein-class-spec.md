@@ -429,4 +429,4 @@ input_filter:
 
 ## 12. Field Mapping CSV
 
-See `docs/pipelines/chembl/protein-class-fields.csv` for Excel-compatible field mapping.
+See `docs/04-reference/pipelines/chembl/protein-class-fields.csv` for Excel-compatible field mapping.

@@ -122,8 +122,8 @@
 ### Entity ID
 
 ```python
-# Формат entity-id
-entity-id = f"openalex:{openalex-id}"
+# Формат entity_id
+entity_id = f"openalex:{openalex-id}"
 ```
 
 ### Content Hash
@@ -131,7 +131,7 @@ entity-id = f"openalex:{openalex-id}"
 Вычисляется по бизнес-полям публикации для дедупликации:
 
 - Исключаются lookup-метаданные (`-lookup-method`, `-original-doi`)
-- Исключаются lineage-поля (`-run-id`, `-ingestion-ts`, etc.)
+- Исключаются lineage-поля (`_run_id`, `_ingestion_ts`, etc.)
 - None-значения исключаются из хэша
 
 ----------------------------------------------------------------------
@@ -180,7 +180,7 @@ OpenAlex API возвращает абстракты в формате inverted 
 
 ```json
 {
-  "abstract-inverted-index": {
+  "abstract-inverted_index": {
     "This": [0],
     "is": [1],
     "an": [2],
@@ -319,7 +319,7 @@ gold_filters:
   "id": "https://openalex.org/W2148763428",
   "doi": "https://doi.org/10.1038/s41586-020-2012-7",
   "title": "A pneumonia outbreak associated with a new coronavirus of probable bat origin",
-  "abstract-inverted-index": {
+  "abstract-inverted_index": {
     "A": [0], "pneumonia": [1], "outbreak": [2], "...": [3]
   },
   "authorships": [
@@ -353,7 +353,7 @@ gold_filters:
 
 ```json
 {
-  "entity-id": "openalex:W2148763428",
+  "entity_id": "openalex:W2148763428",
   "openalex-id": "W2148763428",
   "doi": "10.1038/s41586-020-2012-7",
   "title": "A pneumonia outbreak associated with a new coronavirus of probable bat origin",
@@ -373,10 +373,10 @@ gold_filters:
   "-lookup-method": "doi",
   "-original-doi": null,
   "source": "openalex",
-  "content-hash": "sha256:abc123...",
-  "-run-id": "run-2026-01-06-001",
-  "-run-type": "incremental",
-  "-ingestion-ts": "2026-01-06T12:00:00Z"
+  "content_hash": "sha256:abc123...",
+  "_run_id": "run-2026-01-06-001",
+  "_run_type": "incremental",
+  "_ingestion_ts": "2026-01-06T12:00:00Z"
 }
 ```
 
@@ -384,7 +384,7 @@ gold_filters:
 
 ```json
 {
-  "entity-id": "openalex:W3045876123",
+  "entity_id": "openalex:W3045876123",
   "openalex-id": "W3045876123",
   "doi": "10.1016/j.example.2020.001",
   "title": "Example Publication Title",
@@ -465,11 +465,11 @@ Input CSV → OpenAlexAdapter.fetch-filtered-with-fallback()
 Raw Records → OpenAlexPublicationTransformer.-transform-impl()
     ├─ Extract business data (extractors.py)
     ├─ Validate required fields
-    ├─ Compute entity-id and content-hash
+    ├─ Compute entity_id and content_hash
     └─ Create OpenAlexPublicationEntity
 
 Entity → SilverWriter (Delta Lake)
-    └─ Upsert by content-hash
+    └─ Upsert by content_hash
 
 Silver → GoldWriter (validated)
     └─ Apply gold-filters, export CSV

@@ -2,7 +2,7 @@
 
 **Имя пайплайна:** `chembl_assay_parameters`
 **Провайдер:** `chembl`
-**Сущность:** `assay-parameters`
+**Сущность:** `assay_parameters`
 **Версия схемы:** 1.2.0
 
 ---
@@ -20,7 +20,7 @@
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `assay-param-id` | `int` | Уникальный идентификатор параметра |
-| `assay-chembl-id` | `str` | ChEMBL ID связанного анализа |
+| `assay_id` | `str` | ChEMBL ID связанного анализа |
 
 ### Тип параметра
 
@@ -50,7 +50,7 @@
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `value` | `float` | Числовое значение |
-| `text-value` | `str` | Текстовое значение |
+| `text_value` | `str` | Текстовое значение |
 | `relation` | `str` | Отношение (=, <, >, etc.) |
 | `units` | `str` | Единицы измерения |
 | `comments` | `str` | Комментарии |
@@ -60,9 +60,9 @@
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `standard-value` | `float` | Стандартизированное числовое значение |
-| `standard-text-value` | `str` | Стандартизированное текстовое значение |
+| `standard-text_value` | `str` | Стандартизированное текстовое значение |
 | `standard-type` | `str` | Стандартизированный тип |
-| `standard-relation` | `str` | Стандартизированное отношение |
+| `standard_relation` | `str` | Стандартизированное отношение |
 | `standard-units` | `str` | Стандартизированные единицы |
 
 ---
@@ -74,7 +74,7 @@
 ### Entity ID
 
 ```python
-entity-id = f"chembl:{assay-param-id}"
+entity_id = f"chembl:{assay-param-id}"
 ```
 
 ### Нормализация типа
@@ -90,12 +90,12 @@ type = param-type.upper() if param-type else "UNKNOWN"
 ### DQ-правила
 
 1. **`assay-param-id`** — обязательное (primary key)
-2. **`assay-chembl-id`** — обязательное (foreign key)
+2. **`assay_id`** — обязательное (foreign key)
 3. **`type`** — обязательное
 
 ### Gold-фильтры
 
-- Обязательные поля: `assay-chembl-id`, `type`
+- Обязательные поля: `assay_id`, `type`
 
 ---
 
@@ -109,7 +109,7 @@ bioetl run --pipeline chembl_assay_parameters
 bioetl run --pipeline chembl_assay_parameters --limit 1000
 
 # С входным фильтром
-bioetl run --pipeline chembl_assay_parameters --input-csv data/input/assay-parameters.csv
+bioetl run --pipeline chembl_assay_parameters --input-csv data/input/assay_parameters.csv
 ```
 
 ---

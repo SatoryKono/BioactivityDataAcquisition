@@ -22,13 +22,13 @@
 %% @uniform width=232 height=56 max_title_len=24 max_desc_lines=0
 graph LR
     subgraph Domain["Domain Ports"]
-        SVP["fa:fa-check-double SilverValidatorPort"]:::size-md
-        GVP["fa:fa-shield-check GoldValidatorPort"]:::size-md
-        BDQP["fa:fa-magnifying-glass BronzeDQAnalyzerPort"]:::size-md
-        SDQP["fa:fa-magnifying-glass-plus SilverDQAnalyzerPort"]:::size-md
-        GDQP["fa:fa-magnifying-glass-chart GoldDQAnalyzerPort"]:::size-md
-        DQRWP["fa:fa-file-contract DQReportWriterPort"]:::size-md
-        QRP["fa:fa-biohazard QuarantinePort"]:::size-md
+        SVP["SilverValidatorPort"]:::size-md
+        GVP["GoldValidatorPort"]:::size-md
+        BDQP["BronzeDQ<br/>AnalyzerPort"]:::size-md
+        SDQP["SilverDQ<br/>AnalyzerPort"]:::size-md
+        GDQP["GoldDQ<br/>AnalyzerPort"]:::size-md
+        DQRWP["DQReportWriterPort"]:::size-md
+        QRP["QuarantinePort"]:::size-md
     end
 
     subgraph Infrastructure["Infrastructure"]

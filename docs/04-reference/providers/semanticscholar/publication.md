@@ -110,14 +110,14 @@
 ### Entity ID
 
 ```python
-# Формат entity-id на базе paper-id
-entity-id = f"semanticscholar:{paper-id}"
+# Формат entity_id на базе paper-id
+entity_id = f"semanticscholar:{paper-id}"
 ```
 
 ### Content Hash
 
 Вычисляется по бизнес-полям для дедупликации:
-- Исключаются lineage поля (`-run-id`, `-ingestion-ts`, etc.)
+- Исключаются lineage поля (`_run_id`, `_ingestion_ts`, etc.)
 - Исключаются lookup metadata поля (`-lookup-method`, `-original-doi`)
 - None-значения исключаются из хэша
 
@@ -349,11 +349,11 @@ gold_filters:
   "source": "semanticscholar",
   "-lookup-method": "doi",
   "-original-doi": null,
-  "-run-id": "...",
-  "-run-type": "incremental",
-  "-ingestion-ts": "2026-01-06T12:00:00Z",
-  "entity-id": "semanticscholar:a88fbdb9b47a8e8aef2b8cabd1fe0adfb96a9f25",
-  "content-hash": "sha256:..."
+  "_run_id": "...",
+  "_run_type": "incremental",
+  "_ingestion_ts": "2026-01-06T12:00:00Z",
+  "entity_id": "semanticscholar:a88fbdb9b47a8e8aef2b8cabd1fe0adfb96a9f25",
+  "content_hash": "sha256:..."
 }
 ```
 

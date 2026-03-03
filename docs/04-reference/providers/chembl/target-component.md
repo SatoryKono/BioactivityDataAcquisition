@@ -52,7 +52,7 @@
 ### Entity ID
 
 ```python
-entity-id = f"chembl:component-{component-id}"
+entity_id = f"chembl:component-{component-id}"
 ```
 
 ---
