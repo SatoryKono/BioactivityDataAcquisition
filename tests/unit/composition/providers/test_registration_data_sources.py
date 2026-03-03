@@ -9,6 +9,7 @@ import pytest
 
 from bioetl.composition.providers.registration import (
     _create_chembl_data_source,
+    _create_pubmed_data_source,
     _create_openalex_data_source,
     _create_pubchem_adapter,
     _create_semanticscholar_data_source,
@@ -149,6 +150,81 @@ class TestCrossRefAndOpenAlexCreators:
         assert call_kwargs["mailto"] == "default@example.org"
         assert call_kwargs["batch_size"] == 55
         assert result is mock_adapter
+
+
+@pytest.mark.unit
+class TestPlaceholderResolution:
+    """Covers ${ENV_VAR} placeholder resolution in source config overrides."""
+
+    @patch("bioetl.composition.providers.registration._wrap_with_filter")
+    @patch("bioetl.composition.providers.registration._get_batch_size_from_config")
+    @patch("bioetl.composition.providers.registration._create_crossref_adapter")
+    @patch("bioetl.composition.providers.registration._get_factories")
+    def test_crossref_mailto_resolves_from_env_placeholder(
+        self,
+        mock_get_factories: MagicMock,
+        mock_create_crossref_adapter: MagicMock,
+        mock_get_batch_size_from_config: MagicMock,
+        mock_wrap_with_filter: MagicMock,
+    ) -> None:
+        mock_http_factory = MagicMock()
+        mock_get_factories.return_value = (MagicMock(), mock_http_factory)
+        mock_http_factory.create_for_provider.return_value = MagicMock()
+        mock_get_batch_size_from_config.return_value = 50
+        mock_adapter = MagicMock()
+        mock_create_crossref_adapter.return_value = mock_adapter
+        mock_wrap_with_filter.return_value = mock_adapter
+
+        settings = MagicMock()
+        settings.default_email = "default@example.org"
+        pipeline_config = MagicMock()
+        pipeline_config.source.email = "${BIOETL_CROSSREF_EMAIL}"
+
+        with patch.dict("os.environ", {"BIOETL_CROSSREF_EMAIL": "env@example.org"}):
+            _create_crossref_data_source(
+                settings=settings,
+                pipeline_config=pipeline_config,
+                logger=MagicMock(),
+            )
+
+        call_kwargs = mock_create_crossref_adapter.call_args.kwargs
+        assert call_kwargs["mailto"] == "env@example.org"
+
+    @patch("bioetl.composition.providers.registration._wrap_with_filter")
+    @patch("bioetl.composition.providers.registration.PubMedAdapter")
+    @patch("bioetl.composition.providers.registration._get_factories")
+    def test_pubmed_placeholders_fallback_to_settings_when_env_missing(
+        self,
+        mock_get_factories: MagicMock,
+        mock_pubmed_adapter: MagicMock,
+        mock_wrap_with_filter: MagicMock,
+    ) -> None:
+        mock_http_factory = MagicMock()
+        mock_get_factories.return_value = (MagicMock(), mock_http_factory)
+        mock_http_factory.create_for_provider.return_value = MagicMock()
+        mock_adapter = MagicMock()
+        mock_pubmed_adapter.return_value = mock_adapter
+        mock_wrap_with_filter.return_value = mock_adapter
+
+        settings = MagicMock()
+        settings.default_email = "default@example.org"
+        settings.pubmed_api_key = MagicMock()
+        settings.pubmed_api_key.get_secret_value.return_value = "settings-key"
+
+        pipeline_config = MagicMock()
+        pipeline_config.source.email = "${BIOETL_PUBMED_EMAIL}"
+        pipeline_config.source.api_key = "${BIOETL_PUBMED_API_KEY}"
+
+        with patch.dict("os.environ", {}, clear=True):
+            _create_pubmed_data_source(
+                settings=settings,
+                pipeline_config=pipeline_config,
+                logger=MagicMock(),
+            )
+
+        call_kwargs = mock_pubmed_adapter.call_args.kwargs
+        assert call_kwargs["email"] == "default@example.org"
+        assert call_kwargs["api_key"] == "settings-key"
 
 
 @pytest.mark.unit

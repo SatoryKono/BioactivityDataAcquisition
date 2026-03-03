@@ -26,3 +26,10 @@ The check is also enforced in CI by `.github/workflows/skills-consistency.yml`.
 
 - Internal system skills are mirrored under `docs/skills/global/.system/`.
 - These files are intentionally excluded from the published docs site.
+
+### Internal-Generated Policy
+
+- `docs/skills/global/.system/**` is classified as `internal-generated` and remains non-nav by design.
+- For NCI references, canonical entrypoint is:
+  - `docs/skills/local/nci-analysis/SKILL.md`
+- `docs/skills/local/nci-analysis/references/**` is published in mkdocs nav under `Internal / Extended -> Skills -> Local Skills`.

@@ -30,6 +30,8 @@ Plans in this folder must not override normative documents.
 
 - [DIAGRAMS_DOCS_SCRIPTS_REFACTOR_PLAN.md](DIAGRAMS_DOCS_SCRIPTS_REFACTOR_PLAN.md)
 - [diagram-views-improvement-plan.md](diagram-views-improvement-plan.md)
+- [mkdocs-material-migration-track-2026-03-03.md](mkdocs-material-migration-track-2026-03-03.md)
+- [wave-8-policy-decisions-2026-03-03.md](wave-8-policy-decisions-2026-03-03.md)
 
 ## Related Prompt
 

@@ -123,6 +123,7 @@ def main() -> int:
     args = parser.parse_args()
 
     schema_dir = Path("configs/_schema")
+    pipeline_schema = load_schema(schema_dir / "pipeline.json")
     composite_schema = load_schema(schema_dir / "composite.json")
 
     entity_files = _find_entity_files(Path("configs/entities"))
@@ -155,6 +156,12 @@ def main() -> int:
         if not isinstance(pipeline_payload, dict):
             errors.append(f"{config_path}: missing or invalid 'pipeline' section")
             continue
+
+        valid_pipeline, pipeline_schema_error = _validate_yaml_schema(
+            pipeline_payload, pipeline_schema
+        )
+        if not valid_pipeline:
+            errors.append(f"{config_path}: {pipeline_schema_error}")
 
         for err in _validate_pipeline_payload(pipeline_payload):
             errors.append(f"{config_path}: {err}")

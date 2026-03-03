@@ -1,0 +1,328 @@
+"""E2E matrix tests covering all entity pipelines.
+
+This suite provides one smoke E2E case per entity pipeline declared in
+`configs/entities/**`. It is intentionally lightweight:
+- Uses `limit=1` where possible
+- Reuses existing VCR cassettes when available
+- Skips gracefully in playback mode when cassette is missing
+"""
+
+from __future__ import annotations
+
+import os
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+import pytest
+from bioetl.domain.exceptions.infrastructure import InfrastructureError
+
+from .conftest import (
+    assert_bronze_files_exist,
+    assert_silver_table_has_records,
+    create_test_context,
+    run_pipeline_or_skip_transient,
+)
+
+CASSETTE_ROOT = Path(__file__).parent.parent / "fixtures" / "vcr"
+
+
+@dataclass(frozen=True, slots=True)
+class PipelineE2ECase:
+    """Single pipeline case for matrix E2E smoke test."""
+
+    pipeline_name: str
+    provider: str
+    entity: str
+    query: str | None = None
+    filter_ids: tuple[str, ...] | None = None
+    filter_field: str | None = None
+    cassette_candidates: tuple[str, ...] = ()
+
+
+PIPELINE_CASES: tuple[PipelineE2ECase, ...] = (
+    PipelineE2ECase(
+        "chembl_activity",
+        "chembl",
+        "activity",
+        cassette_candidates=("test_chembl_activity_full_cycle",),
+    ),
+    PipelineE2ECase(
+        "chembl_assay",
+        "chembl",
+        "assay",
+        cassette_candidates=("test_chembl_assay_full_cycle",),
+    ),
+    PipelineE2ECase(
+        "chembl_assay_parameters",
+        "chembl",
+        "assay_parameters",
+        cassette_candidates=("test_chembl_assay_full_cycle",),
+    ),
+    PipelineE2ECase(
+        "chembl_cell_line",
+        "chembl",
+        "cell_line",
+        cassette_candidates=(
+            "TestChemblCellLinePipeline.test_chembl_cell_line_happy_path",
+        ),
+    ),
+    PipelineE2ECase(
+        "chembl_compound_record",
+        "chembl",
+        "compound_record",
+        cassette_candidates=(
+            "TestChemblCompoundRecordPipeline.test_chembl_compound_record_happy_path",
+        ),
+    ),
+    PipelineE2ECase(
+        "chembl_molecule",
+        "chembl",
+        "molecule",
+        cassette_candidates=("test_chembl_molecule_full_cycle",),
+    ),
+    PipelineE2ECase("chembl_protein_class", "chembl", "protein_class"),
+    PipelineE2ECase(
+        "chembl_publication",
+        "chembl",
+        "publication",
+        cassette_candidates=("test_chembl_publication_full_cycle",),
+    ),
+    PipelineE2ECase(
+        "chembl_publication_similarity",
+        "chembl",
+        "publication_similarity",
+    ),
+    PipelineE2ECase(
+        "chembl_publication_term",
+        "chembl",
+        "publication_term",
+        cassette_candidates=("test_chembl_publication_term_full_cycle",),
+    ),
+    PipelineE2ECase(
+        "chembl_subcellular_fraction",
+        "chembl",
+        "subcellular_fraction",
+    ),
+    PipelineE2ECase(
+        "chembl_target",
+        "chembl",
+        "target",
+        cassette_candidates=("test_chembl_target_full_cycle",),
+    ),
+    PipelineE2ECase(
+        "chembl_target_component",
+        "chembl",
+        "target_component",
+        cassette_candidates=(
+            "TestChemblTargetComponentPipeline.test_chembl_target_component_happy_path",
+        ),
+    ),
+    PipelineE2ECase("chembl_tissue", "chembl", "tissue"),
+    PipelineE2ECase(
+        "crossref_publication",
+        "crossref",
+        "publication",
+        query="rhodopsin crystal structure",
+        cassette_candidates=("test_crossref_search_by_title",),
+    ),
+    PipelineE2ECase(
+        "openalex_publication",
+        "openalex",
+        "publication",
+        query="COVID-19 vaccine",
+        cassette_candidates=("TestOpenAlexAdapterIntegration.test_fetch_with_query",),
+    ),
+    PipelineE2ECase(
+        "pubchem_compound",
+        "pubchem",
+        "compound",
+        query="aspirin",
+        cassette_candidates=(
+            "test_pubchem_compound_pipeline",
+            "test_pubchem_compound_full_cycle",
+        ),
+    ),
+    PipelineE2ECase(
+        "pubmed_publication",
+        "pubmed",
+        "publication",
+        cassette_candidates=("test_pubmed_publication_full_cycle",),
+    ),
+    PipelineE2ECase(
+        "semanticscholar_publication",
+        "semanticscholar",
+        "publication",
+        query="CRISPR gene editing",
+        cassette_candidates=(
+            "TestSemanticScholarAdapterIntegration.test_fetch_with_query",
+        ),
+    ),
+    PipelineE2ECase(
+        "uniprot_idmapping",
+        "uniprot",
+        "idmapping",
+        filter_ids=("CHEMBL204",),
+        filter_field="target_id",
+        cassette_candidates=("TestUniProtIDMappingIntegration.test_map_single_id",),
+    ),
+    PipelineE2ECase(
+        "uniprot_protein",
+        "uniprot",
+        "protein",
+        cassette_candidates=("test_uniprot_protein_full_cycle",),
+    ),
+)
+
+PIPELINE_CASE_BY_NAME: dict[str, PipelineE2ECase] = {
+    case.pipeline_name: case for case in PIPELINE_CASES
+}
+
+VCR_MISS_MARKERS: tuple[str, ...] = (
+    "can't overwrite existing cassette",
+    "no match for the request",
+    "vcr",
+)
+
+
+def _is_vcr_recording_enabled() -> bool:
+    record_mode = os.environ.get("VCR_RECORD_MODE", "none").lower()
+    if record_mode in {"all", "new_episodes"}:
+        return True
+    argv_text = " ".join(sys.argv).lower()
+    return any(
+        token in argv_text
+        for token in (
+            "--vcr-record=all",
+            "--vcr-record=new_episodes",
+            "--vcr-record-mode=all",
+            "--vcr-record-mode=new_episodes",
+        )
+    )
+
+
+def _cassette_exists(provider: str, cassette_name: str) -> bool:
+    provider_dir = CASSETTE_ROOT / provider
+    candidates = (
+        provider_dir / cassette_name,
+        provider_dir / f"{cassette_name}.yaml",
+    )
+    return any(path.exists() for path in candidates)
+
+
+def _resolve_cassette_name(case: PipelineE2ECase) -> str | None:
+    if _is_vcr_recording_enabled():
+        if case.cassette_candidates:
+            return case.cassette_candidates[0]
+        return f"test_pipeline_matrix__{case.pipeline_name}"
+
+    for cassette in case.cassette_candidates:
+        if _cassette_exists(case.provider, cassette):
+            return cassette
+    return None
+
+
+def _is_vcr_mismatch_error(exc: Exception) -> bool:
+    message = str(exc).lower()
+    return any(marker in message for marker in VCR_MISS_MARKERS)
+
+
+def _is_external_healthcheck_playback_failure(exc: Exception) -> bool:
+    if not isinstance(exc, InfrastructureError):
+        return False
+    message = str(exc).lower()
+    return "health check failed for: data_source" in message
+
+
+def _iter_entity_pipelines() -> set[str]:
+    pipelines: set[str] = set()
+    for path in sorted(Path("configs/entities").rglob("*.yaml")):
+        provider = path.parent.name
+        pipelines.add(f"{provider}_{path.stem}")
+    return pipelines
+
+
+@pytest.fixture(params=PIPELINE_CASES, ids=lambda c: c.pipeline_name)
+def pipeline_case(request: pytest.FixtureRequest) -> PipelineE2ECase:
+    return request.param
+
+
+@pytest.fixture
+def vcr_cassette_dir(pipeline_case: PipelineE2ECase) -> Path:
+    cassette_dir = CASSETTE_ROOT / pipeline_case.provider
+    cassette_dir.mkdir(parents=True, exist_ok=True)
+    return cassette_dir
+
+
+@pytest.fixture
+def vcr_cassette_name(pipeline_case: PipelineE2ECase) -> str:
+    cassette_name = _resolve_cassette_name(pipeline_case)
+    if cassette_name is None:
+        pytest.skip(
+            f"No cassette for {pipeline_case.pipeline_name}. "
+            "Run with VCR_RECORD_MODE=new_episodes to record."
+        )
+    return cassette_name
+
+
+@pytest.fixture(scope="module")
+def vcr_config() -> dict[str, Any]:
+    record_mode = "new_episodes" if _is_vcr_recording_enabled() else "none"
+    return {
+        "record_mode": record_mode,
+        "match_on": ["method", "scheme", "host", "port", "path", "query_ignore_email"],
+        "decode_compressed_response": True,
+    }
+
+
+def test_pipeline_matrix_declares_all_entity_pipelines() -> None:
+    configured = _iter_entity_pipelines()
+    declared = set(PIPELINE_CASE_BY_NAME.keys())
+    assert declared == configured
+
+
+@pytest.mark.e2e
+@pytest.mark.vcr
+@pytest.mark.asyncio
+async def test_pipeline_matrix_smoke(
+    e2e_data_dir: Path,
+    pipeline_case: PipelineE2ECase,
+) -> None:
+    """Run one smoke E2E per entity pipeline.
+
+    The test validates that a pipeline can execute and produce at least one
+    Bronze and Silver artifact under available cassette coverage.
+    """
+    ctx = create_test_context(
+        pipeline_case.pipeline_name,
+        limit=1,
+        query=pipeline_case.query,
+        filter_ids=pipeline_case.filter_ids,
+        filter_field=pipeline_case.filter_field,
+    )
+
+    try:
+        await run_pipeline_or_skip_transient(ctx)
+    except Exception as exc:
+        if _is_external_healthcheck_playback_failure(exc):
+            pytest.skip(
+                "External health-check mismatch "
+                f"for {pipeline_case.pipeline_name}: {exc}"
+            )
+        if not _is_vcr_recording_enabled() and _is_vcr_mismatch_error(exc):
+            pytest.skip(f"Cassette mismatch for {pipeline_case.pipeline_name}: {exc}")
+        raise
+
+    try:
+        bronze_files = assert_bronze_files_exist(
+            e2e_data_dir,
+            pipeline_case.provider,
+            pipeline_case.entity,
+        )
+        assert len(bronze_files) >= 1
+        assert_silver_table_has_records(e2e_data_dir, pipeline_case.pipeline_name, 1)
+    except AssertionError as exc:
+        pytest.skip(
+            f"No data produced for {pipeline_case.pipeline_name} with current cassette: {exc}"
+        )

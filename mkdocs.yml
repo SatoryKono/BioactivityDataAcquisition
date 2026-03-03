@@ -674,6 +674,8 @@ nav:
                 -   "Diagram Views Improvement Plan": plans/diagram-views-improvement-plan.md
                 -   "Diagram Rendering Improvement Plan 2026 02 26": plans/diagram-rendering-improvement-plan-2026-02-26.md
                 -   "Diagram Workflow Corrective Master Plan 2026 02 27": plans/diagram-workflow-corrective-master-plan-2026-02-27.md
+                -   "MkDocs Material Migration Track 2026 03 03": plans/mkdocs-material-migration-track-2026-03-03.md
+                -   "Wave 8 Policy Decisions 2026 03 03": plans/wave-8-policy-decisions-2026-03-03.md
             -   "Prompts":
                 -   "QA Orchestrator Prompt": 00-project/agents/qa_orchestrator.md
             -   "Reports":
@@ -739,6 +741,10 @@ nav:
                     -   "Risk Ledger Schema": skills/local/making-decisions/references/risk-ledger-schema.md
                     -   "NCI Analysis": skills/local/nci-analysis/SKILL.md
                     -   "NCI Categories": skills/local/nci-analysis/references/categories.md
+                    -   "NCI Examples": skills/local/nci-analysis/references/examples.md
+                    -   "NCI Guidance": skills/local/nci-analysis/references/guidance.md
+                    -   "NCI Scoring": skills/local/nci-analysis/references/scoring.md
+                    -   "NCI Vocabulary": skills/local/nci-analysis/references/vocabulary.md
                     -   "Skill": skills/local/new-pipeline/SKILL.md
                     -   "Skill": skills/local/public/architecture-guardian/SKILL.md
                     -   "Skill": skills/local/py-audit-bot/SKILL.md

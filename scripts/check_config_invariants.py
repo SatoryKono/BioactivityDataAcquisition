@@ -3,10 +3,10 @@
 
 Checks:
   INV-CFG-001  No legacy naming (document->publication, dq/->quality/, filter/->filters/)
-  INV-CFG-002  Schema / DQ / filter / source files exist for every pipeline
+  INV-CFG-002  Unified entity sections exist and provider/entity declarations are consistent
   INV-CFG-003  loading_strategy is null or 'full_scan_only'
   INV-CFG-004  Providers requiring auth declare API key / mailto env vars
-  INV-CFG-005  No unknown top-level keys
+  INV-CFG-005  No unknown keys in unified entity/composite/provider configs
   INV-CFG-006  pipeline_name == {provider}_{entity_type}
 
 Usage:
@@ -31,11 +31,9 @@ import yaml
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 CONFIGS_DIR = PROJECT_ROOT / "configs"
-PIPELINES_DIR = CONFIGS_DIR / "pipelines"
-SOURCES_DIR = CONFIGS_DIR / "providers"
-QUALITY_DIR = CONFIGS_DIR / "quality"
-FILTERS_DIR = CONFIGS_DIR / "filters"
-SCHEMAS_DIR = CONFIGS_DIR / "schemas"
+ENTITIES_DIR = CONFIGS_DIR / "entities"
+COMPOSITES_DIR = CONFIGS_DIR / "composites"
+PROVIDERS_DIR = CONFIGS_DIR / "providers"
 
 # --- Legacy names (ADR-024) ---
 LEGACY_ENTITY_NAMES = {"document", "document_similarity", "document_term"}
@@ -53,7 +51,7 @@ PROVIDER_AUTH_REQUIREMENTS: dict[str, list[str]] = {
 
 VALID_LOADING_STRATEGIES = {"full_scan_only"}
 
-# --- Allowed top-level keys ---
+# --- Allowed keys ---
 PIPELINE_ALLOWED_KEYS = {
     "pipeline_name",
     "provider",
@@ -87,6 +85,17 @@ PIPELINE_ALLOWED_KEYS = {
     "page_size_override",
     "schema_file",
 }
+ENTITY_ALLOWED_KEYS = {
+    "version",
+    "provider",
+    "entity",
+    "pipeline",
+    "schema",
+    "quality",
+    "filters",
+    "contracts",
+    "hash_policy",
+}
 COMPOSITE_ALLOWED_KEYS = {
     "composite",
     "gold_filters",
@@ -95,7 +104,15 @@ COMPOSITE_ALLOWED_KEYS = {
     "filter_rules",
     "maintenance",
 }
-SOURCE_ALLOWED_KEYS = {"source", "entities", "entity_notes"}
+PROVIDER_ALLOWED_KEYS = {
+    "version",
+    "provider",
+    "source",
+    "quality",
+    "filters",
+    "entities",
+    "entity_notes",
+}
 QUALITY_ALLOWED_KEYS = {
     "version",
     "provider",
@@ -121,6 +138,14 @@ FILTER_ALLOWED_KEYS = {
     "batch_size",
     "page_size",
 }
+CONTRACT_ALLOWED_KEYS = {
+    "primary_key",
+    "merge_keys",
+    "rename_map",
+    "hash_include",
+    "hash_exclude",
+}
+REQUIRED_ENTITY_SECTIONS = {"pipeline", "schema", "quality", "filters", "contracts"}
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
@@ -142,18 +167,34 @@ def _deep_string_search(obj: Any, fragment: str) -> bool:
     return False
 
 
-def _pipeline_configs() -> list[Path]:
+def _entity_configs() -> list[Path]:
     return sorted(
-        p for p in PIPELINES_DIR.rglob("*.yaml") if not p.name.startswith("_")
+        p for p in ENTITIES_DIR.rglob("*.yaml") if not p.name.startswith("_")
+    )
+
+
+def _provider_configs() -> list[Path]:
+    return sorted(
+        p for p in PROVIDERS_DIR.glob("*.yaml") if not p.name.startswith("_")
+    )
+
+
+def _composite_configs() -> list[Path]:
+    return sorted(
+        p for p in COMPOSITES_DIR.glob("*.yaml") if not p.name.startswith("_")
     )
 
 
 def check_inv_001(verbose: bool) -> list[str]:
     """INV-CFG-001: No legacy naming."""
     errors: list[str] = []
-    for path in _pipeline_configs():
+    all_config_paths = [*_entity_configs(), *_provider_configs(), *_composite_configs()]
+    for path in all_config_paths:
         data = _load_yaml(path)
-        entity = data.get("entity_type", "")
+        entity = ""
+        pipeline = data.get("pipeline")
+        if isinstance(pipeline, dict):
+            entity = str(pipeline.get("entity_type", ""))
         if entity in LEGACY_ENTITY_NAMES:
             errors.append(f"INV-CFG-001 {_rel(path)}: entity_type={entity!r} is legacy")
         for legacy, canonical in LEGACY_PATH_FRAGMENTS:
@@ -168,50 +209,78 @@ def check_inv_001(verbose: bool) -> list[str]:
 
 
 def check_inv_002(verbose: bool) -> list[str]:
-    """INV-CFG-002: Companion config files exist."""
+    """INV-CFG-002: Unified entity sections and provider declarations are consistent."""
     errors: list[str] = []
-    providers_checked: set[str] = set()
 
-    for path in _pipeline_configs():
-        if "composite" in path.parts:
+    provider_data_by_name = {
+        path.stem: _load_yaml(path) for path in _provider_configs()
+    }
+    declared_pairs: set[tuple[str, str]] = set()
+    for provider, pdata in provider_data_by_name.items():
+        entities = pdata.get("entities")
+        if not isinstance(entities, list) or not entities:
+            errors.append(
+                f"INV-CFG-002 configs/providers/{provider}.yaml: missing/non-list entities"
+            )
             continue
+        for entity in entities:
+            declared_pairs.add((provider, str(entity)))
+
+    actual_pairs: set[tuple[str, str]] = set()
+    for path in _entity_configs():
+        provider = path.parent.name
+        entity = path.stem
+        actual_pairs.add((provider, entity))
+
         data = _load_yaml(path)
-        provider = data.get("provider", path.parent.name)
-        entity = data.get("entity_type", path.stem)
+        missing_sections = REQUIRED_ENTITY_SECTIONS - set(data.keys())
+        if missing_sections:
+            errors.append(
+                f"INV-CFG-002 {_rel(path)}: missing sections {sorted(missing_sections)}"
+            )
 
-        # Schema
-        schema = SCHEMAS_DIR / provider / f"{entity}.yaml"
-        if not schema.exists():
-            errors.append(f"INV-CFG-002 {_rel(path)}: missing {_rel(schema)}")
+        if not (PROVIDERS_DIR / f"{provider}.yaml").exists():
+            errors.append(
+                f"INV-CFG-002 {_rel(path)}: missing provider config "
+                f"configs/providers/{provider}.yaml"
+            )
 
-        # Quality
-        dq = QUALITY_DIR / "entities" / provider / f"{entity}.yaml"
-        if not dq.exists():
-            errors.append(f"INV-CFG-002 {_rel(path)}: missing {_rel(dq)}")
+        if provider in provider_data_by_name:
+            entities = provider_data_by_name[provider].get("entities")
+            if isinstance(entities, list) and entity not in {str(e) for e in entities}:
+                errors.append(
+                    f"INV-CFG-002 {_rel(path)}: entity {entity!r} not declared in "
+                    f"configs/providers/{provider}.yaml entities[]"
+                )
 
-        # Filter
-        flt = FILTERS_DIR / "entities" / provider / f"{entity}.yaml"
-        if not flt.exists():
-            errors.append(f"INV-CFG-002 {_rel(path)}: missing {_rel(flt)}")
+    undeclared = actual_pairs - declared_pairs
+    for provider, entity in sorted(undeclared):
+        errors.append(
+            f"INV-CFG-002 configs/entities/{provider}/{entity}.yaml: missing declaration "
+            f"in configs/providers/{provider}.yaml entities[]"
+        )
 
-        # Source (once per provider)
-        if provider not in providers_checked:
-            providers_checked.add(provider)
-            src = SOURCES_DIR / f"{provider}.yaml"
-            if not src.exists():
-                errors.append(f"INV-CFG-002: missing {_rel(src)}")
+    missing_files = declared_pairs - actual_pairs
+    for provider, entity in sorted(missing_files):
+        errors.append(
+            f"INV-CFG-002 configs/providers/{provider}.yaml: declared entity "
+            f"{entity!r} has no file configs/entities/{provider}/{entity}.yaml"
+        )
 
     if verbose and not errors:
-        sys.stdout.write("  INV-CFG-002: PASS (all companion files exist)\n")
+        sys.stdout.write("  INV-CFG-002: PASS (entity/provider declarations consistent)\n")
     return errors
 
 
 def check_inv_003(verbose: bool) -> list[str]:
     """INV-CFG-003: Valid loading_strategy."""
     errors: list[str] = []
-    for path in _pipeline_configs():
+    for path in _entity_configs():
         data = _load_yaml(path)
-        strategy = data.get("loading_strategy")
+        pipeline = data.get("pipeline")
+        if not isinstance(pipeline, dict):
+            continue
+        strategy = pipeline.get("loading_strategy")
         if strategy is not None and strategy not in VALID_LOADING_STRATEGIES:
             errors.append(
                 f"INV-CFG-003 {_rel(path)}: loading_strategy={strategy!r} "
@@ -226,11 +295,23 @@ def check_inv_004(verbose: bool) -> list[str]:
     """INV-CFG-004: Provider auth requirements."""
     errors: list[str] = []
     for provider, keys in PROVIDER_AUTH_REQUIREMENTS.items():
-        src_path = SOURCES_DIR / f"{provider}.yaml"
+        src_path = PROVIDERS_DIR / f"{provider}.yaml"
         if not src_path.exists():
             continue
-        text = src_path.read_text(encoding="utf-8")
-        found = [k for k in keys if k in text]
+        data = _load_yaml(src_path)
+        source = data.get("source")
+        provider_config = (
+            source.get("provider_config")
+            if isinstance(source, dict)
+            and isinstance(source.get("provider_config"), dict)
+            else {}
+        )
+        found = [
+            key
+            for key in keys
+            if key in provider_config
+            and provider_config.get(key) not in ("", None, [], {})
+        ]
         if not found:
             errors.append(
                 f"INV-CFG-004 configs/providers/{provider}.yaml: "
@@ -242,40 +323,77 @@ def check_inv_004(verbose: bool) -> list[str]:
 
 
 def check_inv_005(verbose: bool) -> list[str]:
-    """INV-CFG-005: No unknown top-level keys."""
+    """INV-CFG-005: No unknown keys in unified entity/composite/provider configs."""
     errors: list[str] = []
 
-    # Pipeline configs
-    for path in _pipeline_configs():
+    # Entity configs
+    for path in _entity_configs():
         data = _load_yaml(path)
-        is_composite = "composite" in path.parts
-        allowed = COMPOSITE_ALLOWED_KEYS if is_composite else PIPELINE_ALLOWED_KEYS
-        unknown = set(data.keys()) - allowed
+        unknown = set(data.keys()) - ENTITY_ALLOWED_KEYS
         if unknown:
             errors.append(f"INV-CFG-005 {_rel(path)}: unknown keys {unknown}")
 
-    # Source configs
-    for path in sorted(SOURCES_DIR.glob("*.yaml")):
+        pipeline = data.get("pipeline")
+        if isinstance(pipeline, dict):
+            unknown_pipeline = set(pipeline.keys()) - PIPELINE_ALLOWED_KEYS
+            if unknown_pipeline:
+                errors.append(
+                    f"INV-CFG-005 {_rel(path)}: unknown pipeline keys {unknown_pipeline}"
+                )
+
+        quality = data.get("quality")
+        if isinstance(quality, dict):
+            unknown_quality = set(quality.keys()) - QUALITY_ALLOWED_KEYS
+            if unknown_quality:
+                errors.append(
+                    f"INV-CFG-005 {_rel(path)}: unknown quality keys {unknown_quality}"
+                )
+
+        filters = data.get("filters")
+        if isinstance(filters, dict):
+            unknown_filters = set(filters.keys()) - FILTER_ALLOWED_KEYS
+            if unknown_filters:
+                errors.append(
+                    f"INV-CFG-005 {_rel(path)}: unknown filters keys {unknown_filters}"
+                )
+
+        contracts = data.get("contracts")
+        if isinstance(contracts, dict):
+            unknown_contracts = set(contracts.keys()) - CONTRACT_ALLOWED_KEYS
+            if unknown_contracts:
+                errors.append(
+                    f"INV-CFG-005 {_rel(path)}: unknown contracts keys {unknown_contracts}"
+                )
+
+    # Provider configs
+    for path in _provider_configs():
         data = _load_yaml(path)
-        unknown = set(data.keys()) - SOURCE_ALLOWED_KEYS
+        unknown = set(data.keys()) - PROVIDER_ALLOWED_KEYS
         if unknown:
             errors.append(f"INV-CFG-005 {_rel(path)}: unknown keys {unknown}")
 
-    # Quality configs (skip defaults)
-    for path in sorted(QUALITY_DIR.rglob("*.yaml")):
-        if path.name.startswith("_"):
-            continue
-        data = _load_yaml(path)
-        unknown = set(data.keys()) - QUALITY_ALLOWED_KEYS
-        if unknown:
-            errors.append(f"INV-CFG-005 {_rel(path)}: unknown keys {unknown}")
+        quality = data.get("quality")
+        if isinstance(quality, dict):
+            unknown_quality = set(quality.keys()) - QUALITY_ALLOWED_KEYS
+            if unknown_quality:
+                errors.append(
+                    f"INV-CFG-005 {_rel(path)}: unknown provider quality keys "
+                    f"{unknown_quality}"
+                )
 
-    # Filter configs (skip defaults)
-    for path in sorted(FILTERS_DIR.rglob("*.yaml")):
-        if path.name.startswith("_"):
-            continue
+        filters = data.get("filters")
+        if isinstance(filters, dict):
+            unknown_filters = set(filters.keys()) - FILTER_ALLOWED_KEYS
+            if unknown_filters:
+                errors.append(
+                    f"INV-CFG-005 {_rel(path)}: unknown provider filters keys "
+                    f"{unknown_filters}"
+                )
+
+    # Composite configs
+    for path in _composite_configs():
         data = _load_yaml(path)
-        unknown = set(data.keys()) - FILTER_ALLOWED_KEYS
+        unknown = set(data.keys()) - COMPOSITE_ALLOWED_KEYS
         if unknown:
             errors.append(f"INV-CFG-005 {_rel(path)}: unknown keys {unknown}")
 
@@ -287,13 +405,15 @@ def check_inv_005(verbose: bool) -> list[str]:
 def check_inv_006(verbose: bool) -> list[str]:
     """INV-CFG-006: pipeline_name == {provider}_{entity_type}."""
     errors: list[str] = []
-    for path in _pipeline_configs():
-        if "composite" in path.parts:
-            continue
+    for path in _entity_configs():
         data = _load_yaml(path)
-        name = data.get("pipeline_name", "")
-        provider = data.get("provider", "")
-        entity = data.get("entity_type", "")
+        pipeline = data.get("pipeline")
+        if not isinstance(pipeline, dict):
+            continue
+
+        name = pipeline.get("pipeline_name", "")
+        provider = pipeline.get("provider", data.get("provider", ""))
+        entity = pipeline.get("entity_type", data.get("entity", ""))
         expected = f"{provider}_{entity}"
         if name != expected:
             errors.append(
@@ -329,7 +449,7 @@ def main() -> int:
             sys.stderr.write(f"  {err}\n")
         return 1
 
-    count = len(list(_pipeline_configs()))
+    count = len(list(_entity_configs()))
     sys.stdout.write(f"All config invariants pass ({count} pipeline configs checked)\n")
     return 0
 

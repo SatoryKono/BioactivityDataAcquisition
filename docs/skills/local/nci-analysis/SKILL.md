@@ -38,6 +38,14 @@ Use TodoWrite to track these mandatory steps:
 4. Note source metadata (publication, date, author)
 5. **If triggers met**: Use `fact-checker` agent to verify key claims
 
+### Reference Index
+
+- [references/categories.md](references/categories.md)
+- [references/examples.md](references/examples.md)
+- [references/guidance.md](references/guidance.md)
+- [references/scoring.md](references/scoring.md)
+- [references/vocabulary.md](references/vocabulary.md)
+
 ## First Principles (Summary)
 
 The NCI Protocol is grounded in these principles (see `agents/perspective-generator.md` for full version):
