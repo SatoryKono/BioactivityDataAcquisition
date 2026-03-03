@@ -184,9 +184,10 @@ def _record_observation(
     benchmark_key: str,
     median_latency_s: float,
     processed_records: int,
+    obs_out_path: Path | None,
 ) -> None:
     """Append runtime observation to a JSONL file when enabled by env."""
-    out_path_raw = os.getenv(_OBS_OUT_ENV)
+    out_path_raw = str(obs_out_path) if obs_out_path is not None else os.getenv(_OBS_OUT_ENV)
     if not out_path_raw:
         return
 
@@ -206,7 +207,10 @@ def _record_observation(
         f.write("\n")
 
 
-def test_silver_prepare_arrow_data_budget(tmp_path: Path) -> None:
+def test_silver_prepare_arrow_data_budget(
+    tmp_path: Path,
+    pytestconfig: pytest.Config,
+) -> None:
     """Budget gate for Arrow preparation hotspot in Silver writer."""
     budgets = _load_budgets()
     budget = budgets["silver_prepare_arrow_2000"]
@@ -231,10 +235,18 @@ def test_silver_prepare_arrow_data_budget(tmp_path: Path) -> None:
         benchmark_key="silver_prepare_arrow_2000",
         median_latency_s=median_latency,
         processed_records=len(records),
+        obs_out_path=(
+            Path(raw)
+            if (raw := pytestconfig.getoption("--perf-obs-out"))
+            else None
+        ),
     )
 
 
-def test_silver_write_append_budget(tmp_path: Path) -> None:
+def test_silver_write_append_budget(
+    tmp_path: Path,
+    pytestconfig: pytest.Config,
+) -> None:
     """Budget gate for Silver append write path."""
     budgets = _load_budgets()
     budget = budgets["silver_write_append_600"]
@@ -274,10 +286,18 @@ def test_silver_write_append_budget(tmp_path: Path) -> None:
         benchmark_key="silver_write_append_600",
         median_latency_s=median_latency,
         processed_records=600,
+        obs_out_path=(
+            Path(raw)
+            if (raw := pytestconfig.getoption("--perf-obs-out"))
+            else None
+        ),
     )
 
 
-def test_silver_write_merge_budget(tmp_path: Path) -> None:
+def test_silver_write_merge_budget(
+    tmp_path: Path,
+    pytestconfig: pytest.Config,
+) -> None:
     """Budget gate for Silver merge write path."""
     budgets = _load_budgets()
     budget = budgets["silver_write_merge_600"]
@@ -324,10 +344,15 @@ def test_silver_write_merge_budget(tmp_path: Path) -> None:
         benchmark_key="silver_write_merge_600",
         median_latency_s=median_latency,
         processed_records=600,
+        obs_out_path=(
+            Path(raw)
+            if (raw := pytestconfig.getoption("--perf-obs-out"))
+            else None
+        ),
     )
 
 
-def test_crossref_batch_adapter_budget() -> None:
+def test_crossref_batch_adapter_budget(pytestconfig: pytest.Config) -> None:
     """Budget gate for adapter batch-path (CrossRef DOI batch fetch)."""
     budgets = _load_budgets()
     budget = budgets["crossref_batch_fetch_200"]
@@ -370,4 +395,9 @@ def test_crossref_batch_adapter_budget() -> None:
         benchmark_key="crossref_batch_fetch_200",
         median_latency_s=median_latency,
         processed_records=len(dois),
+        obs_out_path=(
+            Path(raw)
+            if (raw := pytestconfig.getoption("--perf-obs-out"))
+            else None
+        ),
     )
