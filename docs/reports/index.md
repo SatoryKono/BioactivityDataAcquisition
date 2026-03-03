@@ -7,6 +7,7 @@ This section aggregates dated engineering reports. Use these reports as operatio
 
 ## Latest
 
+- [Architecture Debt Baseline (2026-03-03)](architecture-debt-baseline-2026-03-03.md)
 - [Documentation Audit (2026-03-03, main)](documentation-audit-2026-03-03-main.md)
 - [Documentation Audit (2026-03-03, exhaustive)](documentation-audit-2026-03-03-exhaustive.md)
 - [Documentation Cascade Audit (2026-02-27)](documentation-cascade-audit-2026-02-27.md)

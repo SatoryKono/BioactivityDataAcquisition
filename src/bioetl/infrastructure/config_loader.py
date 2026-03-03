@@ -22,7 +22,8 @@ from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
 
 def _deep_merge(
-    base: dict[str, Any], override: dict[str, Any]
+    base: dict[str, Any],  # Any: YAML config has heterogeneous values
+    override: dict[str, Any],  # Any: YAML config has heterogeneous values
 ) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
     """Deep merge two dictionaries, with override taking precedence."""
     return config_merge(base, override)
@@ -53,9 +54,9 @@ def _load_base_config(
 
 
 def _apply_file_reference_defaults(
-    config: dict[str, Any],
+    config: dict[str, Any],  # Any: YAML config has heterogeneous values
     provider: str,
-    entity_type: str,  # Any: YAML config has heterogeneous values
+    entity_type: str,
 ) -> None:
     """Apply convention-based defaults for file references.
 
@@ -129,7 +130,7 @@ def _load_data_schema_config(
         data = yaml.safe_load(f) or {}
 
     # Build result with backward compatibility
-    result: dict[str, Any] = {}
+    result: dict[str, Any] = {}  # Any: YAML config has heterogeneous values
 
     # Always include column_groups if present (for backward compatibility)
     if "column_groups" in data:
@@ -148,7 +149,7 @@ def _load_data_schema_config(
 
 
 def _apply_layer_defaults(
-    layer: dict[str, Any],
+    layer: dict[str, Any],  # Any: YAML config has heterogeneous values
     provider: str,
     entity_type: str,
     layer_name: str,
@@ -166,7 +167,7 @@ def _apply_layer_defaults(
 
 
 def _apply_convention_defaults(
-    config: dict[str, Any],
+    config: dict[str, Any],  # Any: YAML config has heterogeneous values
 ) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
     """Apply convention-based defaults for paths, references, and table names.
 
@@ -210,7 +211,9 @@ def _read_source_config_payload(
 
     source_section = unified_raw.get("source")
     if isinstance(source_section, dict):
-        payload: dict[str, Any] = {"source": source_section}
+        payload: dict[str, Any] = {
+            "source": source_section
+        }  # Any: YAML config has heterogeneous values
         for key in ("entities", "entity_notes"):
             value = unified_raw.get(key)
             if value is not None:
@@ -222,8 +225,8 @@ def _read_source_config_payload(
 
 
 def _validate_source_config_payload(
-    payload: dict[str, Any],
-) -> SourceYamlConfig:  # Any: YAML config has heterogeneous values
+    payload: dict[str, Any],  # Any: YAML config has heterogeneous values
+) -> SourceYamlConfig:
     """Validate canonical source payload with pydantic schema."""
     return SourceYamlConfig.model_validate(payload)
 
@@ -251,8 +254,8 @@ _FILTER_SECTIONS: tuple[str, ...] = (
 
 
 def _apply_hierarchical_filter_config(
-    config: dict[str, Any],
-    entity_config: dict[str, Any],
+    config: dict[str, Any],  # Any: YAML config has heterogeneous values
+    entity_config: dict[str, Any],  # Any: YAML config has heterogeneous values
 ) -> None:
     """Apply filter config from the hierarchical filter system (ADR-028).
 
@@ -279,7 +282,7 @@ def _apply_hierarchical_filter_config(
         return
 
     # Collect inline filter overrides from pipeline YAML
-    inline_overrides: dict[str, Any] = {}
+    inline_overrides: dict[str, Any] = {}  # Any: YAML config has heterogeneous values
     for section in _FILTER_SECTIONS:
         if section in entity_config:
             inline_overrides[section] = entity_config[section]
@@ -302,7 +305,8 @@ def _apply_hierarchical_filter_config(
 
 
 def _merge_data_schema_into_config(
-    config: dict[str, Any], data_schema: dict[str, Any]
+    config: dict[str, Any],  # Any: YAML config has heterogeneous values
+    data_schema: dict[str, Any],  # Any: YAML config has heterogeneous values
 ) -> None:
     """Merge loaded data schema (column_groups, silver, gold) into pipeline config."""
     if "column_groups" in data_schema:
@@ -315,7 +319,10 @@ def _merge_data_schema_into_config(
         config.setdefault("data_schema", {})["gold"] = data_schema["gold"]
 
 
-def _validate_schema_config(data_schema: dict[str, Any], schema_file: str) -> None:
+def _validate_schema_config(
+    data_schema: dict[str, Any],  # Any: YAML config has heterogeneous values
+    schema_file: str,
+) -> None:
     """Validate schema configuration has required minimum structure.
 
     Required:
@@ -366,18 +373,20 @@ def _load_unified_entity_raw(
 
 
 def _get_unified_section(
-    unified_raw: dict[str, Any], section: str
-) -> dict[str, Any] | None:
+    unified_raw: dict[str, Any],  # Any: YAML config has heterogeneous values
+    section: str,
+) -> dict[str, Any] | None:  # Any: YAML config has heterogeneous values
     """Get a dict section from unified entity config if present."""
     value = unified_raw.get(section)
     return value if isinstance(value, dict) else None
 
 
 def _load_column_groups_section(
-    config: dict[str, Any],
-    entity_config: dict[str, Any],
+    config: dict[str, Any],  # Any: YAML config has heterogeneous values
+    entity_config: dict[str, Any],  # Any: YAML config has heterogeneous values
     config_path: Path,
-    unified_schema: dict[str, Any] | None = None,
+    unified_schema: dict[str, Any]
+    | None = None,  # Any: YAML config has heterogeneous values
 ) -> None:
     """Load column groups from external file unless explicitly set inline.
 
@@ -418,7 +427,10 @@ def _load_column_groups_section(
             config["column_groups"] = column_groups
 
 
-def _load_source_section(config: dict[str, Any], config_path: Path) -> None:
+def _load_source_section(
+    config: dict[str, Any],  # Any: YAML config has heterogeneous values
+    config_path: Path,
+) -> None:
     """Load source config from external file and merge with entity overrides.
 
     The source file (configs/providers/{provider}.yaml) provides base settings.
@@ -453,8 +465,10 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
     Returns:
         Loaded PipelineYamlConfig.
     """
-    unified_raw: dict[str, Any] = {}
-    unified_schema: dict[str, Any] | None = None
+    unified_raw: dict[str, Any] = {}  # Any: YAML config has heterogeneous values
+    unified_schema: dict[str, Any] | None = (
+        None  # Any: YAML config has heterogeneous values
+    )
 
     if "_" not in pipeline_name:
         raise ValueError(

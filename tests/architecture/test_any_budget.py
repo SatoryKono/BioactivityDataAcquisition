@@ -23,7 +23,7 @@ from pathlib import Path
 SRC = Path("src/bioetl")
 
 # ── Graduated threshold (ratchet down over time) ──────────────────────
-MAX_UNJUSTIFIED = 895
+MAX_UNJUSTIFIED = 630
 """Maximum allowed unjustified ``Any`` usages.  Decrease after each iteration."""
 
 # Aliases whose definition already carries ``# Any:`` justification;
