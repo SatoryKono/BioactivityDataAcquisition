@@ -6,8 +6,6 @@ Config helpers extracted to _config_helpers.py per audit-package-structure-2026-
 
 from __future__ import annotations
 
-import os
-import re
 from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING, Any
 
@@ -21,6 +19,7 @@ from bioetl.composition.providers._config_helpers import (
     _get_circuit_breaker_from_config,
     _get_factories,
     _get_rate_limit_from_config,
+    _normalize_optional_override,
     _validate_extraction_input_filter_overlap,
     _wrap_with_filter,
 )
@@ -66,30 +65,6 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
-
-
-_ENV_PLACEHOLDER_RE = re.compile(r"^\$\{([A-Z0-9_]+)\}$")
-
-
-def _resolve_optional_config_value(value: str | None) -> str | None:
-    """Resolve optional config value with ${ENV_VAR} placeholder support.
-
-    Returns ``None`` for empty strings and unresolved placeholders to allow
-    caller fallback (for example, application settings).
-    """
-    if value is None:
-        return None
-
-    cleaned = value.strip()
-    if not cleaned:
-        return None
-
-    match = _ENV_PLACEHOLDER_RE.fullmatch(cleaned)
-    if not match:
-        return cleaned
-
-    env_value = os.getenv(match.group(1), "").strip()
-    return env_value or None
 
 
 def _create_chembl_data_source(
@@ -307,13 +282,13 @@ def _create_pubmed_data_source(
     )
 
     # Determine API key: config takes precedence over settings
-    configured_api_key = _resolve_optional_config_value(pipeline_config.source.api_key)
+    configured_api_key = _normalize_optional_override(pipeline_config.source.api_key)
     settings_api_key = (
         settings.pubmed_api_key.get_secret_value() if settings.pubmed_api_key else None
     )
     api_key = configured_api_key or settings_api_key
 
-    configured_email = _resolve_optional_config_value(pipeline_config.source.email)
+    configured_email = _normalize_optional_override(pipeline_config.source.email)
     email = configured_email or settings.default_email
 
     data_source = PubMedAdapter(
@@ -359,7 +334,7 @@ def _create_crossref_data_source(
     http_client = HttpClientFactory.create_for_provider("crossref", settings)
 
     # Get mailto from pipeline config or settings
-    configured_email = _resolve_optional_config_value(pipeline_config.source.email)
+    configured_email = _normalize_optional_override(pipeline_config.source.email)
     mailto = configured_email or settings.default_email
     batch_size = _get_batch_size_from_config("crossref", default=50)
 
@@ -408,7 +383,7 @@ def _create_openalex_data_source(
     http_client = HttpClientFactory.create_for_provider("openalex", settings)
 
     # Get mailto from pipeline config or settings
-    configured_email = _resolve_optional_config_value(pipeline_config.source.email)
+    configured_email = _normalize_optional_override(pipeline_config.source.email)
     mailto = configured_email or settings.default_email
     batch_size = _get_batch_size_from_config("openalex", default=50)
 

@@ -160,7 +160,7 @@ class TestPlaceholderResolution:
     @patch("bioetl.composition.providers.registration._get_batch_size_from_config")
     @patch("bioetl.composition.providers.registration._create_crossref_adapter")
     @patch("bioetl.composition.providers.registration._get_factories")
-    def test_crossref_mailto_resolves_from_env_placeholder(
+    def test_crossref_mailto_placeholder_falls_back_to_settings(
         self,
         mock_get_factories: MagicMock,
         mock_create_crossref_adapter: MagicMock,
@@ -180,15 +180,14 @@ class TestPlaceholderResolution:
         pipeline_config = MagicMock()
         pipeline_config.source.email = "${BIOETL_CROSSREF_EMAIL}"
 
-        with patch.dict("os.environ", {"BIOETL_CROSSREF_EMAIL": "env@example.org"}):
-            _create_crossref_data_source(
-                settings=settings,
-                pipeline_config=pipeline_config,
-                logger=MagicMock(),
-            )
+        _create_crossref_data_source(
+            settings=settings,
+            pipeline_config=pipeline_config,
+            logger=MagicMock(),
+        )
 
         call_kwargs = mock_create_crossref_adapter.call_args.kwargs
-        assert call_kwargs["mailto"] == "env@example.org"
+        assert call_kwargs["mailto"] == "default@example.org"
 
     @patch("bioetl.composition.providers.registration._wrap_with_filter")
     @patch("bioetl.composition.providers.registration.PubMedAdapter")

@@ -34,7 +34,8 @@
 - Standard docs checks:
 ```bash
 python scripts/check_doc_links.py
-python -m mkdocs build -q
+make docs-build
+bash scripts/build_docs_site.sh --strict
 ```
 - Migration to MkDocs 2.x must be tracked as a dedicated task with explicit compatibility validation.
 

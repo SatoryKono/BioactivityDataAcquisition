@@ -174,3 +174,19 @@ def _wrap_with_filter(
             logger=logger,
         )
     return data_source
+
+
+def _normalize_optional_override(value: str | None) -> str | None:
+    """Normalize optional pipeline override values.
+
+    Empty strings and `${ENV_VAR}` placeholders are treated as unset to allow
+    fallback to centralized settings/config providers.
+    """
+    if value is None:
+        return None
+    cleaned = value.strip()
+    if not cleaned:
+        return None
+    if cleaned.startswith("${") and cleaned.endswith("}"):
+        return None
+    return cleaned
