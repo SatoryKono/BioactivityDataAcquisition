@@ -58,7 +58,7 @@ Uses **enrichers** (not dependencies) because cell-line and tissue are reference
 
 | Group | Fields |
 |-------|--------|
-| system | entity-id, content-hash, -run-id, -run-type, -source-batch-id, ... |
+| system | entity_id, content_hash, _run_id, _run_type, _source_batch_id, ... |
 | identifiers | assay-id, cell-id, tissue-id, target-id, publication-id, src-id, src-assay-id, aidx |
 | classification | assay-type, assay-category, assay-test-type, confidence-score, ... |
 | biological-context | assay-organism, assay-taxonomy-id, assay-strain, assay-tissue, ... |

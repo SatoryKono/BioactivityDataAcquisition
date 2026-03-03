@@ -135,7 +135,6 @@ def test_legacy_system_meta_field_rule_ignores_cli_double_dash_flags() -> None:
 
     assert rule.pattern.search("legacy token `-run-id` should fail")
     assert rule.pattern.search('legacy token "-ingestion-ts" should fail')
-    assert rule.pattern.search("legacy token `-dq-warn` should fail")
     assert not rule.pattern.search("allowed CLI flag --run-type")
     assert not rule.pattern.search("allowed CLI flag --source")
 

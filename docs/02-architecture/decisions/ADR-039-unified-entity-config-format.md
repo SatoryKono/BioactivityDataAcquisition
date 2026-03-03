@@ -72,7 +72,7 @@ schema:
     alias_policy: preserve
   gold:
     include_groups: [system, business]
-    exclude_fields: [-dq-*, -source-batch-id, -index]
+    exclude_fields: [_dq_*, _source_batch_id, _index]
     alias_policy: canonical
 
 quality:
