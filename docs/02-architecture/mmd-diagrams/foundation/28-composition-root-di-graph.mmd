@@ -7,6 +7,7 @@
 %% @date    2026-02-24
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
+%% @nodes   28
 %% @uniform-group entry     nodes=CLI,BOOT
 %% @uniform-group factories nodes=BL,DQF,HCF,DSF,STF,STA,SB,RF,GPF
 %% @uniform-group registry  nodes=PR,OB
@@ -52,7 +53,7 @@ flowchart TB
         subgraph StorageFactories["Storage & Services"]
             STF["StorageFactory<br/>• create(config)<br/>→ BronzeWriter + SilverWriter<br/>+ GoldWriter"]
             STA["StorageAdapter<br/>• create_bronze()<br/>• create_silver()<br/>• create_gold()"]
-            SB["ServicesBuilder<br/>• with_storage()<br/>• with_lock()<br/>• with_logger()<br/>• with_metrics()<br/>• build() → PipelineServices"]
+            SB["ServicesBuilder<br/>with_storage + with_lock<br/>with_logger + metrics<br/>build() -> PipelineServices"]
         end
 
         subgraph PipelineFactories["Pipeline Construction"]

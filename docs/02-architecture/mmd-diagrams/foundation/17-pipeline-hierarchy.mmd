@@ -7,7 +7,7 @@
 %% @date    2026-02-24
 %% @type    classDiagram
 %% @level   Mixed (System / Component / Class)
-
+%% @nodes   14
 %%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
 %% @uniform class width=216 height=240 max_title_len=22 max_desc_lines=13
 classDiagram
@@ -259,6 +259,6 @@ classDiagram
     %% Notes
     note for BasePipeline "Config + injected services<br/>No execution orchestration<br/>PipelineRunner owns run flow"
 
-    note for BaseTransformer "Template Method core<br/>transform() public API<br/>_transform_impl() override point<br/>hash + serialization helpers<br/>field extraction helpers"
+    note for BaseTransformer "Template Method core<br/>transform() API<br/>_transform_impl() hook<br/>hash + serialization helpers"
 
     note for BaseChemblTransformer "ChEMBL normalization<br/>ID format: CHEMBL123<br/>unit conversion: nM -> uM<br/>date parsing"

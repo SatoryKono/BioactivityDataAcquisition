@@ -11,6 +11,23 @@ Render them with any Mermaid-compatible viewer, IDE plugin, or the [Mermaid Live
 
 ---
 
+## Supplementary Non-Nav Indexes
+
+These artifacts are intentionally outside primary nav but linked here for discoverability.
+
+- [architecture/svg/INDEX.md](architecture/svg/INDEX.md)
+- [architecture/png/INDEX.md](architecture/png/INDEX.md)
+- [class-diagrams/svg/INDEX.md](class-diagrams/svg/INDEX.md)
+- [class-diagrams/png/INDEX.md](class-diagrams/png/INDEX.md)
+- [foundation/svg/INDEX.md](foundation/svg/INDEX.md)
+- [foundation/png/INDEX.md](foundation/png/INDEX.md)
+- [views/svg/INDEX.md](views/svg/INDEX.md)
+- [views/png/INDEX.md](views/png/INDEX.md)
+- [diagram-descriptions/class-diagrams-descriptions.md](diagram-descriptions/class-diagrams-descriptions.md)
+- [foundation-diagrams-with-descriptions.md](foundation-diagrams-with-descriptions.md)
+
+---
+
 ## Architecture Diagrams (18 core)
 
 | # | Diagram | File | Description |
@@ -47,26 +64,32 @@ Parent diagrams remain canonical references. Sub-files provide focused, low-dens
 | `architecture/13-port-protocol-contracts.mmd` | `architecture/13a-port-contracts-data-sources.mmd`, `architecture/13b-port-contracts-storage.mmd`, `architecture/13c-port-contracts-observability.mmd`, `architecture/13d-port-contracts-services.mmd` |
 | `architecture/13-port-protocol-contracts.mmd` (alternate slices) | `architecture/13a-data-storage-ports.mmd`, `architecture/13b-operational-ports.mmd`, `architecture/13c-validation-dq-ports.mmd` |
 
-## Class Diagrams (16 families)
+> `13a/13b/13c` have two parallel decomposition tracks by design:
+> `port-contracts-*` = contract-centric views, `*-ports` = operational slices.
+
+## Class Diagrams (19 families)
 
 | # | Family | File | Description |
 |---|--------|------|-------------|
 | 1 | Domain Ports | `class-diagrams/01-domain-ports.mmd` | All 29 Protocol interfaces with method signatures |
-| 2 | Entities & Aggregates | `class-diagrams/02-entities-aggregates.mmd` | BaseEntity, Batch, PipelineRun, BatchRecord |
-| 3 | Value Objects | `class-diagrams/03-value-objects.mmd` | BronzeWriteResult, SilverWriteResult, FencingToken, etc. |
-| 4 | Types & Enums | `class-diagrams/04-types-enums.mmd` | RunType, PublicationType, HealthStatus, NewTypes |
-| 5 | Exceptions | `class-diagrams/05-exceptions.mmd` | BioETLError hierarchy: Critical, Recoverable, DataQuality |
-| 6 | Configuration | `class-diagrams/06-config-classes.mmd` | PipelineConfig, RuntimeConfig, CompositeConfig |
-| 7 | Application Core | `class-diagrams/07-application-core-services.mmd` | PipelineRunner, BatchExecutor, LockManager |
-| 8 | Application Services | `class-diagrams/08-application-services.mmd` | DQ, Health, Export, Vacuum, Quarantine services |
-| 9 | Transformers | `class-diagrams/09-transformers.mmd` | BaseTransformer → ChEMBL/Publication/UniProt/PubChem |
-| 10 | Adapters | `class-diagrams/10-adapters.mmd` | BaseHttpAdapter, all provider adapters, resilience |
-| 11 | Storage | `class-diagrams/11-storage.mmd` | BronzeWriter, SilverWriter, GoldWriter, DeltaReader |
-| 12 | Composite Pipeline | `class-diagrams/12-composite-pipeline.mmd` | Runner, coordinators, merger, FSM |
-| 13 | Domain Services | `class-diagrams/13-domain-services.mmd` | IdentityService, Normalization, UnitConverter |
-| 14 | Observability | `class-diagrams/14-observability.mmd` | Logger, Metrics, Tracing implementations |
-| 15 | Extractors | `class-diagrams/15-extractors.mmd` | BaseFieldExtractor, PubMed & UniProt extractors |
-| 16 | Factories & Bootstrap | `class-diagrams/16-factories-bootstrap.mmd` | DataSourceRegistry, TransformerFactory, RunnerBuilder |
+| 2 | Domain Ports (L2 Methods) | `class-diagrams/01a-domain-ports-method-catalog.mmd` | Method-level catalog for key port protocols |
+| 3 | Entities & Aggregates | `class-diagrams/02-entities-aggregates.mmd` | BaseEntity, Batch, PipelineRun, BatchRecord |
+| 4 | Value Objects | `class-diagrams/03-value-objects.mmd` | BronzeWriteResult, SilverWriteResult, FencingToken, etc. |
+| 5 | Types & Enums | `class-diagrams/04-types-enums.mmd` | RunType, PublicationType, HealthStatus, NewTypes |
+| 6 | Exceptions | `class-diagrams/05-exceptions.mmd` | BioETLError hierarchy: Critical, Recoverable, DataQuality |
+| 7 | Configuration | `class-diagrams/06-config-classes.mmd` | PipelineConfig, RuntimeConfig, CompositeConfig |
+| 8 | Application Core | `class-diagrams/07-application-core-services.mmd` | PipelineRunner, BatchExecutor, LockManager |
+| 9 | Application Services | `class-diagrams/08-application-services.mmd` | DQ, Health, Export, Vacuum, Quarantine services |
+| 10 | Application Services (L2 Ops) | `class-diagrams/08a-application-services-operation-catalog.mmd` | Operation-level catalog for application services |
+| 11 | Transformers | `class-diagrams/09-transformers.mmd` | BaseTransformer → ChEMBL/Publication/UniProt/PubChem |
+| 12 | Adapters | `class-diagrams/10-adapters.mmd` | BaseHttpAdapter, all provider adapters, resilience |
+| 13 | Storage | `class-diagrams/11-storage.mmd` | BronzeWriter, SilverWriter, GoldWriter, DeltaReader |
+| 14 | Composite Pipeline | `class-diagrams/12-composite-pipeline.mmd` | Runner, coordinators, merger, FSM |
+| 15 | Domain Services | `class-diagrams/13-domain-services.mmd` | IdentityService, Normalization, UnitConverter |
+| 16 | Observability | `class-diagrams/14-observability.mmd` | Logger, Metrics, Tracing implementations |
+| 17 | Observability (L2 Methods) | `class-diagrams/14a-observability-method-catalog.mmd` | Method-level catalog for logging/metrics/tracing |
+| 18 | Extractors | `class-diagrams/15-extractors.mmd` | BaseFieldExtractor, PubMed & UniProt extractors |
+| 19 | Factories & Bootstrap | `class-diagrams/16-factories-bootstrap.mmd` | DataSourceRegistry, TransformerFactory, RunnerBuilder |
 
 ## Foundation Diagrams (54)
 
@@ -201,7 +224,15 @@ mmdc -i docs/02-architecture/mmd-diagrams/architecture/01-high-level-hexagonal.m
      -o output.svg \
      -c docs/02-architecture/mmd-diagrams/theme/mermaid-config.json \
      --cssFile docs/02-architecture/mmd-diagrams/theme/custom.css
+
+# Build print-safe PDF bundles with descriptions
+make render-diagrams-descriptions-pdf
 ```
+
+Description PDF generation uses:
+- `scripts/diagrams/generate_with_descriptions_pdf.py`
+- print CSS: `docs/02-architecture/mmd-diagrams/theme/with-descriptions-print.css`
+- post-check: `scripts/diagrams/check_pdf_image_bounds.py`
 
 ### Render options
 
@@ -269,6 +300,47 @@ Diagrams are validated and rendered automatically in GitHub Actions
 (`.github/workflows/docs.yml`). Rendered SVG/PNG are uploaded as build artifacts.
 A drift check warns when `.mmd/.mermaid` sources change without re-rendering.
 The workflow also validates SVG text visibility for the smoke baseline set.
+
+### Quality Budget
+
+Phase C adds explicit budget enforcement via
+`scripts/diagrams/enforce_diagram_quality_budget.py`.
+
+Current PR budget:
+- `quality.hard_failures <= 0`
+- `quality.DIAG-T022 <= 0`
+- `quality.DIAG-T023 <= 0`
+- `lint.errors <= 0`
+
+Current nightly budget adds:
+- `nightly.errors <= 0`
+- `nightly.warnings <= 0`
+
+Local run (PR budget):
+
+```bash
+mkdir -p reports/diagrams
+python3 scripts/diagrams/check_diagram_quality_gates.py \
+  --manifest docs/02-architecture/mmd-diagrams/quality-gate-manifest.txt \
+  --json-out reports/diagrams/diagram-quality-report.json
+python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/mmd-diagrams --json \
+  > reports/diagrams/diagram-lint-report.json || true
+python3 scripts/diagrams/enforce_diagram_quality_budget.py \
+  --mode pr \
+  --quality-report reports/diagrams/diagram-quality-report.json \
+  --lint-report reports/diagrams/diagram-lint-report.json \
+  --max-hard-failures 0 \
+  --max-diag-t022 0 \
+  --max-diag-t023 0 \
+  --max-lint-errors 0
+```
+
+Local run through unified runner:
+
+```bash
+bash scripts/diagrams/run_diagram_checks.sh --profile pr --enforce-budget
+bash scripts/diagrams/run_diagram_checks.sh --profile nightly --enforce-budget
+```
 
 ---
 

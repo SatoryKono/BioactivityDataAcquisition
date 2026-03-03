@@ -21,7 +21,7 @@
 
 - **Job-based API:** Асинхронный трёхэтапный процесс (submit → poll → fetch)
 - **Batch Processing:** До 500 IDs за один API job
-- **DQ Warning:** Записи без маппинга (`not-found`) сохраняются с `-dq-warn=True`
+- **DQ Warning:** Записи без маппинга (`not_found`) сохраняются с `_dq_warn=True`
 - **Bronze Disabled:** Данные идут напрямую из API, минуя Bronze-слой
 
 ---
@@ -34,14 +34,14 @@
 |------|-----|----------|----------|
 | `entity_id` | `str` | ❌ | Формат: `chembl:uniprot:{target_id}` |
 | `target_id` | `str` | ❌ | ChEMBL Target ID (e.g., CHEMBL204) — первичный ключ |
-| `uniprot-accession` | `str` | ✅ | UniProt Accession (e.g., P00742), null если не найден |
+| `uniprot_accession` | `str` | ✅ | UniProt Accession (e.g., P00742), null если не найден |
 
 ### Статус маппинга
 
 | Поле | Тип | Значения | Описание |
 |------|-----|----------|----------|
-| `mapping-status` | `str` | `found`, `not-found`, `error` | Результат маппинга |
-| `-dq-warn` | `bool` | `True`, `False` | DQ предупреждение (`True` для `not-found`) |
+| `mapping_status` | `str` | `found`, `not_found`, `error`, `multiple` | Результат маппинга |
+| `_dq_warn` | `bool` | `True`, `False` | DQ предупреждение (`True` для `not_found`) |
 
 ### Lineage Metadata
 
@@ -60,36 +60,35 @@
 **Источник:** `configs/entities/uniprot/idmapping.yaml`
 
 ```yaml
-pipeline_name: uniprot_idmapping
+version: 1.0.0
 provider: uniprot
-entity_type: idmapping
-version: "1.0.0"
+entity: idmapping
 
-primary_keys: ["target_id"]
-silver_table: "uniprot_idmapping"
-gold_table: "uniprot_idmapping"
+pipeline:
+  pipeline_name: uniprot_idmapping
+  provider: uniprot
+  entity_type: idmapping
+  source:
+    api:
+      base_url: https://rest.uniprot.org
+      from_db: ChEMBL
+      to_db: UniProtKB
 
-source:
-  type: file
-  input-path: data/input/target.csv
-  api:
-    base-url: https://rest.uniprot.org
-    from-db: ChEMBL
-    to-db: UniProtKB
+quality:
+  thresholds:
+    soft_fail: 0.30  # 30% not_found acceptable
+    hard_fail: 0.80  # 80% not_found -> hard failure
 
-# Elevated thresholds for ID mapping
-dq_overrides:
-  soft_fail_threshold: 0.30  # 30% not-found acceptable
-  hard_fail_threshold: 0.80  # 80% not-found → hard failure
-
-rate-limit:
-  requests-per-second: 10.0
-  burst: 20
-
-gold_filters:
-  required_fields:
-    - target_id
-    - mapping-status
+filters:
+  input_filter:
+    enabled: false
+    source_path: data/input/target.csv
+    column_name: target_chembl_id
+    filter_field: target_id
+  gold_filters:
+    required_fields:
+      - target_id
+      - mapping_status
 ```
 
 ---
@@ -110,11 +109,11 @@ gold_filters:
 
 **Transformer:** `src/bioetl/application/pipelines/uniprot/idmapping_transformer.py`
 
-1. Извлечение `target_id` и `uniprot-accession` из API response
-2. Определение `mapping-status`: `found` | `not-found`
+1. Извлечение `target_id` и `uniprot_accession` из API response
+2. Определение `mapping_status`: `found` | `not_found`
 3. Генерация `entity_id`: `chembl:uniprot:{target_id}`
 4. Вычисление `content_hash` (SHA256)
-5. Установка `-dq-warn=True` для `not-found`
+5. Установка `_dq_warn=True` для `not_found`
 
 ### 4.3. Load
 
@@ -132,8 +131,8 @@ gold_filters:
 
 | Порог | Значение | Действие |
 |-------|----------|----------|
-| **Soft** | 30% `not-found` | Warning в логах |
-| **Hard** | 80% `not-found` | Fail batch |
+| **Soft** | 30% `not_found` | Warning в логах |
+| **Hard** | 80% `not_found` | Fail batch |
 
 ### Обоснование elevated thresholds
 
@@ -186,18 +185,18 @@ CHEMBL9999999
   {
     "entity_id": "chembl:uniprot:CHEMBL204",
     "target_id": "CHEMBL204",
-    "uniprot-accession": "P00742",
-    "mapping-status": "found",
-    "-dq-warn": false,
+    "uniprot_accession": "P00742",
+    "mapping_status": "found",
+    "_dq_warn": false,
     "_run_id": "...",
     "_ingestion_ts": "2026-01-06T..."
   },
   {
     "entity_id": "chembl:uniprot:CHEMBL9999999",
     "target_id": "CHEMBL9999999",
-    "uniprot-accession": null,
-    "mapping-status": "not-found",
-    "-dq-warn": true,
+    "uniprot_accession": null,
+    "mapping_status": "not_found",
+    "_dq_warn": true,
     "_run_id": "...",
     "_ingestion_ts": "2026-01-06T..."
   }
@@ -226,3 +225,7 @@ CHEMBL9999999
 - [ChEMBL Target](../chembl/target.md) — Источник Target IDs
 - [Running Pipelines](../../../03-guides/running-pipelines.md) — Запуск пайплайнов
 - [Project Rules](../../../00-project/RULES.md) — Правила обработки данных
+
+---
+
+*Последнее обновление: 2026-03-03*

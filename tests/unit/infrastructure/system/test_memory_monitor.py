@@ -6,7 +6,8 @@ psutil fallback, estimate path, and batch calculation utilities.
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
+from types import SimpleNamespace
+from unittest.mock import MagicMock, mock_open, patch
 
 import pytest
 
@@ -426,3 +427,82 @@ class TestGetMemoryStatsDispatch:
         ) as mock_fallback:
             monitor.get_memory_stats()
         mock_fallback.assert_called_once()
+
+
+@pytest.mark.unit
+class TestFallbackResourcePath:
+    """Tests for Unix resource fallback branch coverage."""
+
+    def test_fallback_uses_resource_on_non_windows(self) -> None:
+        """Non-win32 platform dispatches to _get_stats_resource()."""
+        monitor = _make_monitor()
+        with (
+            patch("sys.platform", "linux"),
+            patch.object(
+                monitor, "_get_stats_resource", return_value=_mock_stats(0.2)
+            ) as mock_resource,
+        ):
+            stats = monitor._get_stats_fallback()
+
+        assert stats.percent_used == 0.2
+        mock_resource.assert_called_once()
+
+    def test_resource_reads_proc_meminfo(self) -> None:
+        """_get_stats_resource parses /proc/meminfo when available."""
+        monitor = _make_monitor()
+        fake_resource = SimpleNamespace(
+            RUSAGE_SELF=0,
+            getrusage=lambda _x: SimpleNamespace(ru_maxrss=1024 * 512),  # 512 MB
+        )
+        meminfo_text = "MemTotal: 8192000 kB\nMemAvailable: 4096000 kB\n"
+
+        with (
+            patch.dict("sys.modules", {"resource": fake_resource}),
+            patch("pathlib.Path.open", mock_open(read_data=meminfo_text)),
+        ):
+            stats = monitor._get_stats_resource()
+
+        assert stats.total_mb == 8000.0
+        assert stats.available_mb == 4000.0
+        assert stats.used_mb == 4000.0
+        assert stats.percent_used == 0.5
+        assert stats.process_mb == 512.0
+
+    def test_resource_falls_back_to_estimate_on_oserror(self) -> None:
+        """_get_stats_resource falls back to estimate when /proc access fails."""
+        monitor = _make_monitor()
+        fake_resource = SimpleNamespace(
+            RUSAGE_SELF=0,
+            getrusage=lambda _x: SimpleNamespace(ru_maxrss=1024 * 256),
+        )
+
+        with (
+            patch.dict("sys.modules", {"resource": fake_resource}),
+            patch("pathlib.Path.open", side_effect=OSError("no meminfo")),
+        ):
+            stats = monitor._get_stats_resource()
+
+        assert stats.total_mb == 8192.0
+        assert stats.percent_used == 0.5
+
+
+@pytest.mark.unit
+class TestRecoveryLogging:
+    """Tests for recovery logging branch in get_recommended_batch_size()."""
+
+    def test_logs_debug_when_pressure_relieved_and_recovering(self) -> None:
+        """Logger.debug is emitted when batch size increases in recovery path."""
+        logger = MagicMock()
+        monitor = _make_monitor(threshold=0.8, logger=logger)
+        monitor._last_batch_size = 1000
+
+        with patch.object(monitor, "get_memory_stats", return_value=_mock_stats(0.2)):
+            result = monitor.get_recommended_batch_size(400)
+
+        assert result == 500
+        logger.debug.assert_any_call(
+            "Memory pressure relieved, increasing batch size",
+            current_batch_size=400,
+            new_batch_size=500,
+            memory_percent_used=20.0,
+        )

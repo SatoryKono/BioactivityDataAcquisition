@@ -66,6 +66,11 @@ jobs:
             --json-out reports/diagrams/diagram-quality-report-nightly.json \
             --markdown-out reports/diagrams/diagram-quality-report-nightly.md
 
+      - name: Diagram policy lint report for nightly budget checks
+        run: |
+          python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/mmd-diagrams --json \
+            > reports/diagrams/diagram-lint-report-nightly.json || true
+
       - name: Run Phase 2 nightly suite (DIAG-T024..T029)
         run: |
           python3 scripts/diagrams/run_diagram_nightly_suite.py \
@@ -75,6 +80,22 @@ jobs:
             --json-out reports/diagrams/diagram-nightly-phase2.json \
             --markdown-out reports/diagrams/diagram-nightly-phase2.md
 
+      - name: Diagram quality budget enforcement (nightly)
+        run: |
+          python3 scripts/diagrams/enforce_diagram_quality_budget.py \
+            --mode nightly \
+            --quality-report reports/diagrams/diagram-quality-report-nightly.json \
+            --lint-report reports/diagrams/diagram-lint-report-nightly.json \
+            --nightly-report reports/diagrams/diagram-nightly-phase2.json \
+            --max-hard-failures 0 \
+            --max-diag-t022 0 \
+            --max-diag-t023 0 \
+            --max-lint-errors 0 \
+            --max-nightly-errors 0 \
+            --max-nightly-warnings 0 \
+            --json-out reports/diagrams/diagram-quality-budget-nightly.json \
+            --markdown-out reports/diagrams/diagram-quality-budget-nightly.md
+
       - name: Upload nightly reports
         uses: actions/upload-artifact@v4
         with:
@@ -82,8 +103,11 @@ jobs:
           path: |
             reports/diagrams/diagram-quality-report-nightly.json
             reports/diagrams/diagram-quality-report-nightly.md
+            reports/diagrams/diagram-lint-report-nightly.json
             reports/diagrams/diagram-nightly-phase2.json
             reports/diagrams/diagram-nightly-phase2.md
+            reports/diagrams/diagram-quality-budget-nightly.json
+            reports/diagrams/diagram-quality-budget-nightly.md
 
       - name: Publish nightly summary
         if: always()
@@ -92,6 +116,12 @@ jobs:
             cat reports/diagrams/diagram-nightly-phase2.md >> "$GITHUB_STEP_SUMMARY"
           else
             echo "Nightly phase2 report was not generated." >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ -f reports/diagrams/diagram-quality-budget-nightly.md ]; then
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            cat reports/diagrams/diagram-quality-budget-nightly.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Nightly diagram quality budget report was not generated." >> "$GITHUB_STEP_SUMMARY"
           fi
 
   mermaid-minor-canary:

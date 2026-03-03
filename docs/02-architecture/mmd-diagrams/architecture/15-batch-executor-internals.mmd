@@ -22,7 +22,7 @@
 }}%%
 graph TB
     subgraph BatchExecutor["BatchExecutor"]
-        BE["BatchExecutor<br/>--------<br/>services, context, config<br/>batch_size, checkpoint_interval<br/>+ execute()<br/>+ process()"]:::size-md
+        BE["BatchExecutor<br/>svc + ctx + cfg<br/>batch_size + checkpoint_interval<br/>execute + process"]:::size-md
     end
 
     subgraph Helpers["Composed Helper Components"]
@@ -46,7 +46,7 @@ graph TB
     end
 
     subgraph TransformResult["TransformResult"]
-        TR["TransformResult<br/>--------<br/>silver_records<br/>gold_records<br/>quarantined_count<br/>errors"]:::size-md
+        TR["TransformResult<br/>silver_records + gold_records<br/>quarantined_count + errors"]:::size-md
     end
 
     subgraph ErrorClassification["Error Classification"]

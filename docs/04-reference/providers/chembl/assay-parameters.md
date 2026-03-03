@@ -19,7 +19,7 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `assay-param-id` | `int` | Уникальный идентификатор параметра |
+| `assay_param_id` | `int` | Уникальный идентификатор параметра |
 | `assay_id` | `str` | ChEMBL ID связанного анализа |
 
 ### Тип параметра
@@ -33,7 +33,7 @@
 - `PH` — кислотность
 - `TEMP` — температура
 - `TIME` — время
-- `CELL-COUNT` — количество клеток
+- `CELL_COUNT` — количество клеток
 - `SERUM` — сыворотка
 - `DOSE` — доза
 - `VOLUME` — объём
@@ -42,7 +42,7 @@
 - `PRESSURE` — давление
 - `HUMIDITY` — влажность
 - `PASSAGE` — пассаж
-- `CELL-DENSITY` — плотность клеток
+- `CELL_DENSITY` — плотность клеток
 - `INCUBATION` — инкубация
 
 ### Сырые значения
@@ -59,11 +59,11 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `standard-value` | `float` | Стандартизированное числовое значение |
-| `standard-text_value` | `str` | Стандартизированное текстовое значение |
-| `standard-type` | `str` | Стандартизированный тип |
+| `standard_value` | `float` | Стандартизированное числовое значение |
+| `standard_text_value` | `str` | Стандартизированное текстовое значение |
+| `standard_type` | `str` | Стандартизированный тип |
 | `standard_relation` | `str` | Стандартизированное отношение |
-| `standard-units` | `str` | Стандартизированные единицы |
+| `standard_units` | `str` | Стандартизированные единицы |
 
 ---
 
@@ -74,13 +74,13 @@
 ### Entity ID
 
 ```python
-entity_id = f"chembl:{assay-param-id}"
+entity_id = f"chembl:{assay_param_id}"
 ```
 
 ### Нормализация типа
 
 ```python
-type = param-type.upper() if param-type else "UNKNOWN"
+type = param_type.upper() if param_type else "UNKNOWN"
 ```
 
 ---
@@ -89,7 +89,7 @@ type = param-type.upper() if param-type else "UNKNOWN"
 
 ### DQ-правила
 
-1. **`assay-param-id`** — обязательное (primary key)
+1. **`assay_param_id`** — обязательное (primary key)
 2. **`assay_id`** — обязательное (foreign key)
 3. **`type`** — обязательное
 
@@ -130,4 +130,4 @@ Silver-таблица партиционируется по полю `type` дл
 
 ---
 
-*Последнее обновление: 2026-01-06*
+*Последнее обновление: 2026-03-03*

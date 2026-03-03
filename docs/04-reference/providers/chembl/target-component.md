@@ -2,7 +2,7 @@
 
 **Имя пайплайна:** `chembl_target_component`
 **Провайдер:** `chembl`
-**Сущность:** `target-component`
+**Сущность:** `target_component`
 **Версия схемы:** 1.2.0
 
 ---
@@ -19,15 +19,15 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `component-id` | `int` | Уникальный ID компонента |
+| `component_id` | `int` | Уникальный ID компонента |
 | `accession` | `str` | UniProt accession |
-| `component-type` | `str` | Тип компонента (PROTEIN, etc.) |
+| `component_type` | `str` | Тип компонента (PROTEIN, etc.) |
 
 ### Описание
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `component-description` | `str` | Описание компонента |
+| `description` | `str` | Описание компонента |
 | `sequence` | `str` | Аминокислотная последовательность |
 
 ### Таксономия
@@ -35,13 +35,13 @@
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `organism` | `str` | Организм |
-| `tax-id` | `int` | NCBI Taxonomy ID |
+| `taxonomy_id` | `int` | NCBI Taxonomy ID |
 
 ### Классификация белков
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `protein-classifications` | `list[dict]` | Классификация по ChEMBL |
+| `protein_classifications` | `list[dict]` | Классификация по ChEMBL |
 
 ---
 
@@ -52,7 +52,7 @@
 ### Entity ID
 
 ```python
-entity_id = f"chembl:component-{component-id}"
+entity_id = f"chembl:{component_id}"
 ```
 
 ---
@@ -78,4 +78,4 @@ bioetl run --pipeline chembl_target_component --limit 500
 
 ---
 
-*Последнее обновление: 2025-12-27*
+*Последнее обновление: 2026-03-03*

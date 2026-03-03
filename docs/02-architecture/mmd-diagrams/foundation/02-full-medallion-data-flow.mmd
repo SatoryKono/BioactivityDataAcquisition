@@ -7,7 +7,7 @@
 %% @date    2026-02-24
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
-
+%% @nodes   16
 %%{init: {
   'flowchart': {
     'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
@@ -34,19 +34,19 @@ flowchart LR
     subgraph Bronze_Layer["Bronze Layer"]
         direction TB
         BronzeWriter["BronzeWriter"]
-        Bronze[("Bronze Storage<br/>━━━━━━━━━━━━━━━<br/>📁 Format: JSONL + zstd<br/>⏱️ Retention: 90 days<br/>✅ Validation: None<br/>📍 Path: bronze/v1/<br/>{provider}/{entity}/{date}/")]
+        Bronze[("Bronze Storage<br/>JSONL + zstd<br/>retention: 90d<br/>path: bronze/v1/{provider}/{entity}/{date}")]
     end
 
     subgraph Silver_Layer["Silver Layer"]
         direction TB
         SilverWriter["SilverWriter"]
-        Silver[("Silver Storage<br/>━━━━━━━━━━━━━━━<br/>Format: Delta Lake<br/>Retention: Permanent<br/>Validation: Pandera soft<br/>Strategy: Merge/Upsert<br/>Key: content_hash")]
+        Silver[("Silver Storage<br/>Delta Lake<br/>validation: Pandera soft<br/>merge/upsert by content_hash")]
     end
 
     subgraph Gold_Layer["Gold Layer"]
         direction TB
         GoldWriter["GoldWriter"]
-        Gold[("Gold Storage<br/>━━━━━━━━━━━━━━━<br/>Format: Delta/Parquet<br/>Retention: Permanent<br/>Validation: Pandera strict<br/>Strategy: SCD2/Append")]
+        Gold[("Gold Storage<br/>Delta/Parquet<br/>validation: Pandera strict<br/>strategy: SCD2/append")]
     end
 
     subgraph DQ_Branch["Data Quality Branch"]

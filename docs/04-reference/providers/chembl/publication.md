@@ -19,10 +19,10 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `document_chembl_id` | `str` | Уникальный ChEMBL ID публикации |
-| `pubmed-id` | `int` | PubMed ID (если есть) |
-| `doi` | `str` | Digital Object Identifier |
-| `patent-id` | `str` | ID патента (если применимо) |
+| `publication_id` | `str` | Уникальный ChEMBL ID публикации |
+| `publication_pmid` | `str` | PubMed ID (если есть) |
+| `publication_doi` | `str` | Digital Object Identifier |
+| `publication_pmc_id` | `str` | PubMed Central ID (если есть) |
 
 ### Метаданные публикации
 
@@ -31,17 +31,17 @@
 | `title` | `str` | Название публикации |
 | `authors` | `str` | Авторы |
 | `journal` | `str` | Название журнала |
-| `year` | `int` | Год публикации |
+| `publication_year` | `int` | Год публикации |
 | `volume` | `str` | Том |
 | `issue` | `str` | Выпуск |
-| `first-page` | `str` | Первая страница |
-| `last-page` | `str` | Последняя страница |
+| `page_first` | `str` | Первая страница |
+| `page_last` | `str` | Последняя страница |
 
 ### Классификация
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `doc-type` | `str` | Тип публикации (PUBLICATION, PATENT) |
+| `publication_type` | `str` | Тип публикации (`journal-article`, `book`, `dataset`, `patent`) |
 | `src_id` | `int` | ID источника данных |
 
 ---
@@ -53,7 +53,7 @@
 ### Entity ID
 
 ```python
-entity_id = f"chembl:{document_chembl_id}"
+entity_id = f"chembl:{publication_id}"
 ```
 
 ---
@@ -62,8 +62,8 @@ entity_id = f"chembl:{document_chembl_id}"
 
 ### DQ-правила
 
-1. **`document_chembl_id`** — обязательное
-2. **`doc-type`** — должен быть PUBLICATION или PATENT
+1. **`publication_id`** — обязательное
+2. **`publication_type`** — должен быть одним из канонических типов (`journal-article`, `book`, `dataset`, `patent`)
 
 ---
 
@@ -89,4 +89,4 @@ bioetl run --pipeline chembl_publication --limit 1000
 
 ---
 
-*Последнее обновление: 2025-12-27*
+*Последнее обновление: 2026-03-03*

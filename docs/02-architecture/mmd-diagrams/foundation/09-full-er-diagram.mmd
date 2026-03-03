@@ -7,8 +7,19 @@
 %% @date    2026-02-24
 %% @type    erDiagram
 %% @level   Mixed (System / Component / Class)
-
-%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
+%% @nodes   14
+%%{init: {
+  'theme': 'base', 'themeVariables': {'lineWidth': '2'}
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 erDiagram
     Activity ||--o{ Assay : "assay_id FK"
     Activity ||--o{ Molecule : "molecule_id FK"

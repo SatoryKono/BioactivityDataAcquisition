@@ -10,13 +10,14 @@
 | Claude Code   | [CLAUDE.md](CLAUDE.md)                                           | Практики для Claude при работе с репозиторием             |
 | Gemini        | [GEMINI.md](GEMINI.md)                                           | Профильный набор правил и ограничений для Gemini          |
 | Codex         | [CODEX.md](CODEX.md)                                             | Инструкции Architecture Auditor + Implementation Engineer |
+| QA Orchestrator | [qa_orchestrator.md](qa_orchestrator.md)                       | Системный prompt для иерархического QA-оркестратора       |
 | Shared memory | [memory.md](memory.md)                                           | Краткая оперативная память по проекту                     |
 | Orchestration | [orchestration/ORCHESTRATION.md](orchestration/ORCHESTRATION.md) | Порядок взаимодействия субагентов и артефакты             |
 
 ## Claude Code Subagents
 
 Канонические спецификации субагентов находятся в `.claude/agents/` (SSOT).
-Файлы в `orchestration/subagents/` — устаревшие дубликаты.
+Справочные legacy-спеки сохранены в `.claude/agents/subagents/` и не используются как источник истины.
 
 ## Notes
 

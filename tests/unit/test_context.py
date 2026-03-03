@@ -8,7 +8,13 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.domain.context import PipelineContext
+from bioetl.domain.context import (
+    CachedBronzeContext,
+    InputFilterContext,
+    PipelineContext,
+    PipelineRunContext,
+    VacuumConfig,
+)
 from bioetl.domain.types import RunID, RunType
 
 
@@ -229,3 +235,59 @@ class TestPipelineContextEquality:
         ctx2 = PipelineContext(run_id=run_id, run_type=RunType.BACKFILL, logger=logger)
 
         assert ctx1 != ctx2
+
+
+class TestRunContextValidationAndProperties:
+    """Coverage tests for context dataclasses used by orchestration."""
+
+    def test_cached_bronze_from_options_and_validation(self) -> None:
+        ctx = CachedBronzeContext.from_options(path="/tmp/bronze", date="2026-01-20")
+
+        assert ctx.enabled is True
+        assert ctx.bronze_path == "/tmp/bronze"
+        assert ctx.bronze_date == "2026-01-20"
+
+        # Exercise early return branch in _validate_date_format
+        disabled = CachedBronzeContext.disabled()
+        disabled._validate_date_format()
+
+    def test_cached_bronze_invalid_date_raises(self) -> None:
+        with pytest.raises(
+            ValueError, match="bronze_date must be in YYYY-MM-DD format"
+        ):
+            CachedBronzeContext.from_options(date="2026/01/20")
+
+    def test_input_filter_from_multi_ids_validation(self) -> None:
+        ctx = InputFilterContext.from_multi_ids(
+            {"molecule_chembl_id": ("CHEMBL1",), "document_chembl_id": ("DOC1",)}
+        )
+        assert ctx.filter_field == "molecule_chembl_id"
+
+        with pytest.raises(ValueError, match="multi_filter_ids must be non-empty"):
+            InputFilterContext.from_multi_ids({})
+
+    def test_input_filter_direct_and_csv_validation(self) -> None:
+        with pytest.raises(ValueError, match="filter_field is required"):
+            InputFilterContext.from_ids(("P12345",), "")
+
+        with pytest.raises(ValueError, match="source_path is required"):
+            InputFilterContext.from_csv("", "accession", "accession")
+
+    def test_vacuum_config_validation(self) -> None:
+        with pytest.raises(ValueError, match="retention_days must be positive"):
+            VacuumConfig(enabled=True, retention_days=0)
+
+    def test_pipeline_run_context_properties(self) -> None:
+        run_id = uuid4()
+        ctx = PipelineRunContext(
+            pipeline_name="chembl_publication",
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            input_filter=InputFilterContext.from_ids(("P12345",), "accession"),
+            cached_bronze=CachedBronzeContext.from_options(),
+            vacuum=VacuumConfig(enabled=True, retention_days=7),
+        )
+
+        assert ctx.has_input_filter is True
+        assert ctx.has_cached_bronze is True
+        assert ctx.vacuum_enabled is True

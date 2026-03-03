@@ -1,6 +1,6 @@
 # BioETL Diagrams — PNG Index
 
-_Generated: 2026-03-03T09:27:05+03:00_
+_Generated: 2026-03-03T12:49:53+03:00_
 
 ## Legend
 
@@ -95,6 +95,18 @@ _Generated: 2026-03-03T09:27:05+03:00_
 ## Medallion Overview
 
 ![02-medallion-overview](./02-medallion-overview.png)
+
+---
+
+## Medallion Data Flow Full
+
+![03-medallion-data-flow-full](./03-medallion-data-flow-full.png)
+
+---
+
+## Medallion Data Flow Overview
+
+![03-medallion-data-flow-overview](./03-medallion-data-flow-overview.png)
 
 ---
 
@@ -368,6 +380,18 @@ _Generated: 2026-03-03T09:27:05+03:00_
 
 ---
 
+## Port Protocol Contracts Full
+
+![13-port-protocol-contracts-full](./13-port-protocol-contracts-full.png)
+
+---
+
+## Port Protocol Contracts Overview
+
+![13-port-protocol-contracts-overview](./13-port-protocol-contracts-overview.png)
+
+---
+
 ## Provider Health States Dataflow
 
 ![14-provider-health-states-dataflow](./14-provider-health-states-dataflow.png)
@@ -425,6 +449,18 @@ _Generated: 2026-03-03T09:27:05+03:00_
 ## Dq Check Workflow Overview
 
 ![15-dq-check-workflow-overview](./15-dq-check-workflow-overview.png)
+
+---
+
+## Transformer Hierarchy Full
+
+![16-transformer-hierarchy-full](./16-transformer-hierarchy-full.png)
+
+---
+
+## Transformer Hierarchy Overview
+
+![16-transformer-hierarchy-overview](./16-transformer-hierarchy-overview.png)
 
 ---
 

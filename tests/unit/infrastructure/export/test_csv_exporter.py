@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import json
+import os
+import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock
 
 import pyarrow as pa
+import pyarrow.csv as pv
 import pytest
 
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
@@ -311,3 +314,135 @@ class TestCsvExporterClear:
         deleted = exporter.clear("nonexistent")
 
         assert deleted == []
+
+    def test_clear_locked_file_logs_warning(
+        self, tmp_path: Path, mock_logger: MagicMock, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Locked CSV files should be skipped with a warning."""
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+        locked = tmp_path / "locked.csv"
+        locked.write_text("x")
+
+        original_unlink = Path.unlink
+
+        def _patched_unlink(path_obj: Path, *args: object, **kwargs: object) -> None:
+            if path_obj == locked:
+                raise PermissionError("locked")
+            original_unlink(path_obj, *args, **kwargs)
+
+        monkeypatch.setattr(Path, "unlink", _patched_unlink)
+
+        deleted = exporter.clear()
+
+        assert deleted == []
+        mock_logger.warning.assert_called()
+        assert locked.exists()
+
+
+@pytest.mark.unit
+class TestCsvExporterInternals:
+    """Coverage tests for internal branch behavior."""
+
+    def test_sort_table_early_returns(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+        table = pa.Table.from_pydict({"id": [2, 1], "name": ["b", "a"]})
+
+        assert exporter._sort_table(table, []) is table
+        assert exporter._sort_table(table, ["missing_column"]) is table
+
+    def test_deduplicate_no_keys_and_missing_keys(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+        table = pa.Table.from_pydict({"id": [1, 1], "name": ["a", "a"]})
+
+        assert exporter._deduplicate(table, []) is table
+        assert exporter._deduplicate(table, ["unknown"]) is table
+        mock_logger.warning.assert_called()
+
+    def test_deduplicate_logs_removed_rows(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+        table = pa.Table.from_pydict({"id": [1, 1, 2], "name": ["a", "b", "c"]})
+
+        dedup = exporter._deduplicate(table, ["id"])
+
+        assert dedup.num_rows == 2
+        mock_logger.debug.assert_called_once()
+
+    def test_deduplicate_handles_import_error(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+        table = MagicMock()
+        table.column_names = ["id"]
+        table.to_pandas.side_effect = ImportError("no pandas")
+        result = exporter._deduplicate(table, ["id"])
+
+        assert result is table
+        mock_logger.warning.assert_called()
+
+    def test_deduplicate_handles_generic_error(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+        table = MagicMock()
+        table.column_names = ["id"]
+        table.to_pandas.side_effect = RuntimeError("boom")
+        result = exporter._deduplicate(table, ["id"])
+
+        assert result is table
+        mock_logger.warning.assert_called()
+
+    def test_atomic_csv_write_locked_target_uses_backup(
+        self, tmp_path: Path, mock_logger: MagicMock, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+        table = pa.Table.from_pydict({"id": [1]})
+        target = tmp_path / "table.csv"
+        write_options = pv.WriteOptions(include_header=True, delimiter=",")
+        original_replace = Path.replace
+        state = {"raised": False}
+
+        def _patched_replace(path_obj: Path, target_obj: Path) -> Path:
+            if target_obj == target and not state["raised"]:
+                state["raised"] = True
+                raise PermissionError("locked")
+            return original_replace(path_obj, target_obj)
+
+        monkeypatch.setattr(Path, "replace", _patched_replace)
+        monkeypatch.setattr("time.time", lambda: 1234567890)
+
+        exporter._atomic_csv_write(table, target, write_options)
+
+        backup_path = tmp_path / "table.1234567890.csv"
+        assert backup_path.exists()
+        mock_logger.warning.assert_called()
+
+    def test_atomic_csv_write_cleans_temp_on_failure(
+        self, tmp_path: Path, mock_logger: MagicMock, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+        table = pa.Table.from_pydict({"id": [1]})
+        target = tmp_path / "table.csv"
+        write_options = pv.WriteOptions(include_header=True, delimiter=",")
+        temp_path = tmp_path / "known_temp.csv.tmp"
+
+        def _fake_mkstemp(**kwargs: object) -> tuple[int, str]:
+            fd = os.open(temp_path, os.O_CREAT | os.O_RDWR)
+            return fd, str(temp_path)
+
+        monkeypatch.setattr(tempfile, "mkstemp", _fake_mkstemp)
+        monkeypatch.setattr(
+            pv,
+            "write_csv",
+            lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("write failed")),
+        )
+
+        with pytest.raises(RuntimeError, match="write failed"):
+            exporter._atomic_csv_write(table, target, write_options)
+
+        assert not temp_path.exists()

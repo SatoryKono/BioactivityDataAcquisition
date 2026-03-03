@@ -7,7 +7,7 @@
 %% @date    2026-02-24
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
-
+%% @nodes   15
 %%{init: {
   'flowchart': {
     'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
@@ -51,7 +51,7 @@ flowchart TB
     end
 
     subgraph Bundle["PipelineServices (frozen dataclass)"]
-        PS["All ports injected:<br/>• storage (bronze+silver+gold)<br/>• lock, checkpoint<br/>• quarantine<br/>• logger, metrics, tracing<br/>• validators, pii_hasher"]
+        PS["Ports bundle<br/>storage + lock + checkpoint<br/>quarantine + logger<br/>metrics + tracing"]
     end
 
     %% Runner orchestration

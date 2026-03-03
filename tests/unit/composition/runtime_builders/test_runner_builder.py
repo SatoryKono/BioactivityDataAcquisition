@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
+from unittest.mock import MagicMock, patch
 from uuid import uuid4
+
+import pytest
 
 from bioetl.composition.runtime_builders import runner_builder
 
@@ -171,3 +174,149 @@ def test_build_pipeline_runner_uses_default_registry() -> None:
     assert result == "runner-instance"
     assert fake_factory.kwargs is not None
     assert fake_factory.kwargs["runtime"] == "runtime"
+
+
+def test_assemble_filter_config_passes_cli_overrides_when_enabled() -> None:
+    ctx = SimpleNamespace(
+        ignore_yaml_filter=False,
+        input_filter=SimpleNamespace(
+            enabled=True,
+            source_path="ids.csv",
+            column_name="compound_id",
+            filter_field="compound_id",
+            fallback_column="legacy_id",
+            filter_ids=["1", "2"],
+            fallback_mapping={"1": "A"},
+            multi_filter_ids={"compound_id": ["1"]},
+            valid_combinations=[{"compound_id": "1"}],
+        ),
+    )
+    sentinel = object()
+
+    with patch.object(
+        runner_builder.FilterConfigBuilder, "build", return_value=sentinel
+    ) as mock_build:
+        result = runner_builder._assemble_filter_config(
+            yaml_filter=SimpleNamespace(),
+            ctx=ctx,
+            test_mode=False,
+        )
+
+    assert result is sentinel
+    assert mock_build.call_args.kwargs["cli_csv"] == "ids.csv"
+    assert mock_build.call_args.kwargs["test_mode"] is False
+
+
+@pytest.mark.unit
+@patch("bioetl.composition.runtime_builders.runner_builder.NoOpMetrics")
+@patch("bioetl.composition.runtime_builders.runner_builder.NoOpTracing")
+@patch("bioetl.composition.runtime_builders.runner_builder.UnifiedLogger")
+def test_build_observability_bundle_uses_noop_when_disabled(
+    mock_logger_cls: MagicMock,
+    mock_noop_tracing_cls: MagicMock,
+    mock_noop_metrics_cls: MagicMock,
+) -> None:
+    logger = MagicMock()
+    tracer = MagicMock()
+    metrics = MagicMock()
+    mock_logger_cls.return_value = logger
+    mock_noop_tracing_cls.return_value = tracer
+    mock_noop_metrics_cls.return_value = metrics
+
+    result = runner_builder._build_observability_bundle(
+        pipeline="chembl_activity",
+        run_id=uuid4(),
+        settings=SimpleNamespace(
+            observability=SimpleNamespace(
+                tracing_enabled=False,
+                metrics_enabled=False,
+                dq_monitor_enabled=False,
+            )
+        ),
+    )
+
+    assert result.logger is logger
+    assert result.tracer is tracer
+    assert result.metrics is metrics
+    assert result.dq_monitor is None
+    mock_noop_metrics_cls.assert_called_once_with(warn_on_use=False)
+
+
+@pytest.mark.unit
+@patch("bioetl.composition.runtime_builders.runner_builder.DataQualityMonitor")
+@patch("bioetl.composition.runtime_builders.runner_builder.PrometheusMetrics")
+@patch("bioetl.composition.runtime_builders.runner_builder.OpenTelemetryTracer")
+@patch("bioetl.composition.runtime_builders.runner_builder.UnifiedLogger")
+def test_build_observability_bundle_configures_dq_monitor_thresholds(
+    mock_logger_cls: MagicMock,
+    mock_tracer_cls: MagicMock,
+    mock_metrics_cls: MagicMock,
+    mock_dq_monitor_cls: MagicMock,
+) -> None:
+    logger = MagicMock()
+    tracer = MagicMock()
+    metrics = MagicMock()
+    dq_monitor = MagicMock()
+    mock_logger_cls.return_value = logger
+    mock_tracer_cls.return_value = tracer
+    mock_metrics_cls.return_value = metrics
+    mock_dq_monitor_cls.return_value = dq_monitor
+
+    settings = SimpleNamespace(
+        observability=SimpleNamespace(
+            tracing_enabled=True,
+            metrics_enabled=True,
+            dq_monitor_enabled=True,
+            dq_baseline_window=20,
+            dq_z_score_threshold=2.5,
+            dq_min_baseline_samples=12,
+            dq_error_rate_max=0.3,
+            dq_quality_score_min=0.7,
+        )
+    )
+
+    result = runner_builder._build_observability_bundle(
+        pipeline="chembl_activity",
+        run_id=uuid4(),
+        settings=settings,
+    )
+
+    assert result.logger is logger
+    assert result.tracer is tracer
+    assert result.metrics is metrics
+    assert result.dq_monitor is dq_monitor
+    assert dq_monitor.detector.min_baseline_samples == 12
+    assert dq_monitor.detector.set_threshold.call_count == 2
+
+
+def test_validate_pk_contract_requires_business_primary_keys() -> None:
+    config = SimpleNamespace(
+        business_primary_keys=[],
+        primary_keys=None,
+        technical_primary_key="entity_id",
+    )
+
+    with pytest.raises(ValueError, match="business_primary_keys must be non-empty"):
+        runner_builder._validate_pk_contract(config)
+
+
+def test_validate_pk_contract_rejects_legacy_pk_mismatch() -> None:
+    config = SimpleNamespace(
+        business_primary_keys=["entity_id"],
+        primary_keys=["legacy_id"],
+        technical_primary_key="entity_id",
+    )
+
+    with pytest.raises(ValueError, match="PK mismatch"):
+        runner_builder._validate_pk_contract(config)
+
+
+def test_validate_pk_contract_requires_technical_primary_key() -> None:
+    config = SimpleNamespace(
+        business_primary_keys=["entity_id"],
+        primary_keys=["entity_id"],
+        technical_primary_key="",
+    )
+
+    with pytest.raises(ValueError, match="technical_primary_key must be non-empty"):
+        runner_builder._validate_pk_contract(config)

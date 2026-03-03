@@ -2,16 +2,16 @@
 
 **Имя пайплайна:** `chembl_cell_line`
 **Провайдер:** `chembl`
-**Сущность:** `cell-line`
+**Сущность:** `cell_line`
 **Версия схемы:** 1.2.0
 
 ---
 
 ## 1. Описание
 
-Пайплайн извлекает данные о клеточных линиях из API ChEMBL. Клеточные линии — это биологические объекты, используемые для in vitro экспериментов. Они имеют связь M:N с сущностью Assay (через FK `assay.cell_chembl_id`).
+Пайплайн извлекает данные о клеточных линиях из API ChEMBL. Клеточные линии — это биологические объекты, используемые для in vitro экспериментов. Они имеют связь M:N с сущностью Assay (через FK `assay.cell_id`).
 
-**Источник данных:** ChEMBL REST API, таблица `cell-dictionary`
+**Источник данных:** ChEMBL REST API, таблица `cell_dictionary`
 
 ---
 
@@ -21,32 +21,32 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `cell_chembl_id` | `str` | Уникальный ChEMBL ID клеточной линии (PK) |
-| `cell-name` | `str` | Название клеточной линии (напр., HeLa, MCF7) |
+| `cell_id` | `str` | Уникальный ChEMBL ID клеточной линии (PK) |
+| `cell_name` | `str` | Название клеточной линии (напр., HeLa, MCF7) |
 
 ### Метаданные
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `cell-description` | `str` | Описание клеточной линии |
-| `cell-type` | `str` | Тип клеточной линии (напр., Cancer cell line) |
+| `cell_description` | `str` | Описание клеточной линии |
+| `cell_type` | `str` | Тип клеточной линии (напр., Cancer cell line) |
 
 ### Источник
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `cell-source-tissue` | `str` | Ткань-источник (напр., Cervix, Breast) |
-| `cell-source-organism` | `str` | Организм-источник (напр., Homo sapiens) |
-| `cell-source-tax-id` | `int` | NCBI Taxonomy ID организма-источника |
+| `cell_source_tissue` | `str` | Ткань-источник (напр., Cervix, Breast) |
+| `cell_source_organism` | `str` | Организм-источник (напр., Homo sapiens) |
+| `cell_source_taxonomy_id` | `int` | NCBI Taxonomy ID организма-источника |
 
 ### Внешние идентификаторы
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `cellosaurus-id` | `str` | Cellosaurus ID (формат: `CVCL-XXXX`) |
-| `clo-id` | `str` | Cell Line Ontology ID (формат: `CLO-XXXXX`) |
-| `cl-lincs-id` | `str` | LINCS ID (Library of Integrated Network-Based Cellular Signatures) |
-| `efo-id` | `str` | EFO ontology ID (формат: `EFO-XXXXX`) |
+| `cellosaurus_id` | `str` | Cellosaurus ID (формат: `CVCL_XXXX`) |
+| `clo_id` | `str` | Cell Line Ontology ID (формат: `CLO_XXXXX`) |
+| `cl_lincs_id` | `str` | LINCS ID (Library of Integrated Network-Based Cellular Signatures) |
+| `efo_id` | `str` | EFO ontology ID (формат: `EFO_XXXXX`) |
 
 ---
 
@@ -56,14 +56,14 @@
 
 ### Нормализация данных
 
-- **cell-name:** Строка нормализуется через `normalize_to_string()` (strip whitespace)
-- **cell-source-tax-id:** Валидируется через `validate-positive-int()` (должен быть >= 1)
+- **cell_name:** Строка нормализуется через `normalize_to_string()` (strip whitespace)
+- **cell_source_taxonomy_id:** Валидируется через `validate_positive_int()` (должен быть >= 1)
 - **Внешние ID:** Пустые строки и whitespace преобразуются в `NULL`
 
 ### Entity ID
 
 ```python
-entity_id = f"chembl:{cell_chembl_id}"
+entity_id = f"chembl:{cell_id}"
 ```
 
 ---
@@ -72,13 +72,13 @@ entity_id = f"chembl:{cell_chembl_id}"
 
 ### DQ-правила
 
-1. **`cell_chembl_id`** — обязательное, формат `^CHEMBL\d+$`
-2. **`cell-name`** — обязательное
-3. **`cell-source-tax-id`** — если указан, должен быть >= 1
+1. **`cell_id`** — обязательное, формат `^CHEMBL\d+$`
+2. **`cell_name`** — обязательное
+3. **`cell_source_taxonomy_id`** — если указан, должен быть >= 1
 4. **Внешние ID** — если указаны, валидируются по regex:
-   - `cellosaurus-id`: `^CVCL-[A-Z0-9]+$`
-   - `clo-id`: `^CLO-\d+$`
-   - `efo-id`: `^EFO-\d+$`
+   - `cellosaurus_id`: `^CVCL_[A-Z0-9]+$`
+   - `clo_id`: `^CLO_\d+$`
+   - `efo_id`: `^EFO_\d+$`
 
 ### Пороги ошибок
 
@@ -123,8 +123,8 @@ bioetl run --pipeline chembl_cell_line --input-csv data/input/cell.csv
 ## 7. Связи с другими сущностями
 
 ```
-Cell Line (cell_chembl_id)
-    └── Assay (cell_chembl_id FK) [M:N]
+Cell Line (cell_id)
+    └── Assay (cell_id FK) [M:N]
         └── Activity [1:N]
 ```
 
@@ -137,25 +137,25 @@ Cell Line (cell_chembl_id)
 ```json
 {
   "cell_chembl_id": "CHEMBL3308376",
-  "cell-name": "HeLa",
-  "cell-description": "Human cervical cancer cell line",
-  "cell-source-tissue": "Cervix",
-  "cell-source-organism": "Homo sapiens",
-  "cell-source-tax-id": 9606,
-  "cell-type": "Cancer cell line",
-  "cellosaurus-id": "CVCL-0030",
-  "clo-id": "CLO-0003684",
-  "cl-lincs-id": "LCL-1234",
-  "efo-id": "EFO-0001185"
+  "cell_name": "HeLa",
+  "cell_description": "Human cervical cancer cell line",
+  "cell_source_tissue": "Cervix",
+  "cell_source_organism": "Homo sapiens",
+  "cell_source_tax_id": 9606,
+  "cell_type": "Cancer cell line",
+  "cellosaurus_id": "CVCL_0030",
+  "clo_id": "CLO_0003684",
+  "cl_lincs_id": "LCL-1234",
+  "efo_id": "EFO_0001185"
 }
 ```
 
 ### Silver (нормализованный)
 
-| cell_chembl_id | cell-name | cell-source-organism | cell-source-tax-id | cellosaurus-id |
-|----------------|-----------|----------------------|--------------------|----------------|
-| CHEMBL3308376 | HeLa | Homo sapiens | 9606 | CVCL-0030 |
+| cell_id | cell_name | cell_source_organism | cell_source_taxonomy_id | cellosaurus_id |
+|---------|-----------|----------------------|-------------------------|----------------|
+| CHEMBL3308376 | HeLa | Homo sapiens | 9606 | CVCL_0030 |
 
 ---
 
-*Последнее обновление: 2025-01-05*
+*Последнее обновление: 2026-03-03*

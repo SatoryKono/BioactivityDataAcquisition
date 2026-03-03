@@ -7,7 +7,7 @@
 %% @date    2026-02-24
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
-
+%% @nodes   19
 %%{init: {
   'flowchart': {
     'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
@@ -53,7 +53,7 @@ flowchart LR
 
     subgraph Merge["Merge Phase"]
         MS["MergeService<br/>LEFT OUTER JOIN<br/>conflict: coalesce"]
-        FIELDS["Field Groups:<br/>• ID_AND_STATUS<br/>• BIBLIOGRAPHY<br/>• AUTHOR<br/>• TERMS<br/>• CITATIONS<br/>• DATES<br/>• PUB_TYPES"]
+        FIELDS["Field groups<br/>id/status + bibliography<br/>author + terms<br/>citations + dates + types"]
     end
 
     subgraph Gold["Gold Output"]

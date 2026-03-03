@@ -21,15 +21,15 @@
 |------|-----|----------|
 | `target_id` | `str` | Уникальный ChEMBL ID мишени |
 | `pref_name` | `str` | Предпочтительное название |
-| `target-type` | `str` | Тип мишени (SINGLE PROTEIN, PROTEIN COMPLEX, etc.) |
+| `target_type` | `str` | Тип мишени (SINGLE PROTEIN, PROTEIN COMPLEX, etc.) |
 
 ### Таксономия
 
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `organism` | `str` | Название организма |
-| `tax-id` | `int` | NCBI Taxonomy ID |
-| `species-group-flag` | `bool` | Флаг группы видов |
+| `taxonomy_id` | `int` | NCBI Taxonomy ID |
+| `species_group_flag` | `bool` | Флаг группы видов |
 
 ### Компоненты мишени
 
@@ -38,14 +38,15 @@
 | `component_accessions` | `list[str]` | UniProt accessions |
 | `component_ids` | `list[int]` | ID компонентов |
 | `component_types` | `list[str]` | Типы компонентов |
-| `component-organisms` | `list[str]` | Организмы компонентов |
+| `component_descriptions` | `list[str]` | Описания компонентов |
+| `component_relationships` | `list[str]` | Тип связи компонента с мишенью |
 
 ### Связи
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `cross-references` | `list[str]` | Кросс-ссылки на внешние БД |
-| `target-synonyms` | `list[str]` | Синонимы названия |
+| `cross_references` | `list[str]` | Кросс-ссылки на внешние БД |
+| `target_component_synonyms` | `list[str]` | Синонимы названия |
 
 ---
 
@@ -55,9 +56,9 @@
 
 ### Агрегация компонентов
 
-Компоненты мишени (`target-components`) агрегируются в списки:
+Компоненты мишени (`target_components`) агрегируются в списки:
 - `component_accessions`, `component_ids`, `component_types`
-- `component-organisms`
+- `component_descriptions`, `component_relationships`
 
 ### Entity ID
 
@@ -72,7 +73,7 @@ entity_id = f"chembl:{target_id}"
 ### DQ-правила
 
 1. **`target_id`** — обязательное
-2. **`target-type`** — должен быть валидным типом
+2. **`target_type`** — должен быть валидным типом
 
 ### Пороги ошибок
 
@@ -108,4 +109,4 @@ bioetl run --pipeline chembl_target --run-type rebuild
 
 ---
 
-*Последнее обновление: 2025-12-27*
+*Последнее обновление: 2026-03-03*

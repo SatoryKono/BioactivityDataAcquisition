@@ -151,7 +151,7 @@ filters:
 | `variant_tax_id` | `int` | NCBI Taxonomy ID |
 | `variant_sequence_json` | `str` | Оригинальный JSON (для forensic-анализа) |
 
-> **Примечание**: Поля `variant-*` извлекаются из вложенного словаря API с помощью `flatten_nested_dict()`. Поле `variant_sequence_json` сохраняет оригинальную структуру для аудита.
+> **Примечание**: Поля `variant_*` извлекаются из вложенного словаря API с помощью `flatten_nested_dict()`. Поле `variant_sequence_json` сохраняет оригинальную структуру для аудита.
 
 #### Комплексные поля
 

@@ -19,42 +19,42 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `molecule-chembl-id` | `str` | Уникальный ChEMBL ID (например, `CHEMBL25`) |
+| `molecule_id` | `str` | Уникальный ChEMBL ID (например, `CHEMBL25`) |
 | `pref_name` | `str` | Предпочтительное название |
-| `max-phase` | `int` | Максимальная фаза клинических испытаний (0-4) |
-| `molecule-type` | `str` | Тип молекулы (Small molecule, Protein, etc.) |
+| `max_phase` | `int` | Максимальная фаза клинических испытаний (0-4) |
+| `molecule_type` | `str` | Тип молекулы (Small molecule, Protein, etc.) |
 
 ### Структурные данные
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `structure_canonical_smiles` | `str` | Каноническая SMILES-формула |
-| `structure-standard-inchi` | `str` | Стандартный InChI |
-| `structure-standard-inchi-key` | `str` | Ключ InChI |
+| `canonical_smiles` | `str` | Каноническая SMILES-формула |
+| `standard_inchi` | `str` | Стандартный InChI |
+| `inchi_key` | `str` | Ключ InChI |
 
 ### Физико-химические свойства
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `property_alogp` | `float` | Расчётный LogP |
-| `property_mw_freebase` | `float` | Молекулярная масса свободного основания |
-| `property-full-mwt` | `float` | Полная молекулярная масса |
-| `property-hba` | `int` | Акцепторы водородных связей |
-| `property-hbd` | `int` | Доноры водородных связей |
-| `property-psa` | `float` | Полярная площадь поверхности |
-| `property-rtb` | `int` | Вращающиеся связи |
-| `property-ro5-violations` | `int` | Нарушения правила Липински |
-| `property-heavy-atoms` | `int` | Тяжёлые атомы |
-| `property-aromatic-rings` | `int` | Ароматические кольца |
-| `property-qed-weighted` | `float` | QED (drug-likeness) |
+| `logp` | `float` | Расчётный LogP |
+| `mw_freebase` | `float` | Молекулярная масса свободного основания |
+| `molecular_weight` | `float` | Полная молекулярная масса |
+| `hba_count` | `int` | Акцепторы водородных связей |
+| `hbd_count` | `int` | Доноры водородных связей |
+| `polar_surface_area` | `float` | Полярная площадь поверхности |
+| `rotatable_bond_count` | `int` | Вращающиеся связи |
+| `ro5_violation_count` | `int` | Нарушения правила Липински |
+| `heavy_atom_count` | `int` | Тяжёлые атомы |
+| `aromatic_ring_count` | `int` | Ароматические кольца |
+| `qed_score` | `float` | QED (drug-likeness) |
 
 ### Иерархия
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `hierarchy-parent-chembl-id` | `str` | ID родительской молекулы |
-| `hierarchy-active-chembl-id` | `str` | ID активной формы |
-| `hierarchy-child-chembl-id` | `str` | ID дочерней молекулы |
+| `hierarchy_parent_chembl_id` | `str` | ID родительской молекулы |
+| `hierarchy_active_chembl_id` | `str` | ID активной формы |
+| `hierarchy_child_chembl_id` | `str` | ID дочерней молекулы |
 
 ---
 
@@ -64,14 +64,14 @@
 
 ### Развёртывание вложенных структур
 
-- `molecule-hierarchy` → `hierarchy-*` поля
-- `molecule-properties` → `property-*` поля
-- `molecule-structures` → `structure-*` поля
+- `molecule_hierarchy` → `hierarchy_*` поля
+- `molecule_properties` → канонические поля свойств (`logp`, `molecular_weight`, и т.д.)
+- `molecule_structures` → структурные поля (`canonical_smiles`, `standard_inchi`, `inchi_key`)
 
 ### Entity ID
 
 ```python
-entity_id = f"chembl:{molecule-chembl-id}"
+entity_id = f"chembl:{molecule_id}"
 ```
 
 ---
@@ -80,8 +80,8 @@ entity_id = f"chembl:{molecule-chembl-id}"
 
 ### DQ-правила
 
-1. **`molecule-chembl-id`** — обязательное, regex `^CHEMBL\d+$`
-2. **`structure_canonical_smiles`** — рекомендуется для анализа
+1. **`molecule_id`** — обязательное, regex `^CHEMBL\d+$`
+2. **`canonical_smiles`** — рекомендуется для анализа
 
 ### Пороги ошибок
 
@@ -117,4 +117,4 @@ bioetl run --pipeline chembl_molecule --run-type rebuild
 
 ---
 
-*Последнее обновление: 2025-12-27*
+*Последнее обновление: 2026-03-03*

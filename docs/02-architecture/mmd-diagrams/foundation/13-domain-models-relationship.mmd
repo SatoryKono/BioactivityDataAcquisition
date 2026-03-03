@@ -7,7 +7,7 @@
 %% @date    2026-02-24
 %% @type    classDiagram
 %% @level   Mixed (System / Component / Class)
-
+%% @nodes   15
 %% @uniform class width=248 height=240 max_title_len=26 max_desc_lines=22
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 classDiagram
@@ -421,8 +421,8 @@ classDiagram
     SemanticScholarPublication ..> PubMedPublication : pmid match
 
     %% Notes
-    note for BaseEntity "Lineage fields:<br/>entity_id (business key)<br/>content_hash (SHA256)<br/>run_id (correlation)<br/>run_type (INCR/BACKFILL/REBUILD)<br/>ingestion_ts (timestamp)"
+    note for BaseEntity "Lineage fields:<br/>entity_id + content_hash<br/>run_id + run_type<br/>ingestion_ts"
 
-    note for PublicationEntityBase "Publication fields (ADR-024):<br/>IDs: pmid, doi, pmc_id<br/>Metrics: citations_in/citations_out<br/>Year range: 1500-2100<br/>ORCID list: author_orcids"
+    note for PublicationEntityBase "Publication fields (ADR-024):<br/>ids: pmid/doi/pmc<br/>citations in/out<br/>year range<br/>author orcids"
 
     note for QuarantineRecord "DQ failed records<br/>Retention: 30 days<br/>States: NEW -> IGNORED | REPROCESSED"

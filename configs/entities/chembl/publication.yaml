@@ -8,6 +8,7 @@ pipeline:
     version: 2.1.0
     description: Extract scientific publications from ChEMBL API
     page_size_override: 1000
+    batch_size: 1000
     loading_strategy: full_scan_only
     business_primary_keys:
         - publication_id

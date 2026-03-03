@@ -21,3 +21,8 @@ The check is also enforced in CI by `.github/workflows/skills-consistency.yml`.
 
 - `docs/skills/global/` is a documentation snapshot of selected global skills from `/root/.codex/skills/`.
 - It is not the canonical source for repository-local skill behavior.
+
+### System Skill References
+
+- Internal system skills are mirrored under `docs/skills/global/.system/`.
+- These files are intentionally excluded from the published docs site.

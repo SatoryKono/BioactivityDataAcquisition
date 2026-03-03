@@ -7,6 +7,7 @@
 %% @date    2026-02-24
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
+%% @nodes   24
 %% @uniform width=256 height=144 max_title_len=25 max_desc_lines=6
 %%{init: {
   'flowchart': {
@@ -34,11 +35,11 @@ flowchart TB
         end
 
         subgraph aggregates["aggregates/"]
-            Batch["Batch Aggregate<br/>───────────────<br/>• add_record()<br/>• quarantine_record()<br/>• seal()<br/>• mark_committed()"]
+            Batch["Batch Aggregate<br/>add_record + quarantine_record<br/>seal + mark_committed"]
 
-            PipelineRun["PipelineRun Aggregate<br/>───────────────<br/>• start()<br/>• record_stage_success()<br/>• complete()<br/>• fail()"]
+            PipelineRun["PipelineRun Aggregate<br/>start + record_stage_success<br/>complete + fail"]
 
-            QuarantineEntry["QuarantineEntry Aggregate<br/>───────────────<br/>• mark_retrying()<br/>• mark_recovered()<br/>• mark_dead_letter()"]
+            QuarantineEntry["QuarantineEntry Aggregate<br/>mark_retrying + mark_recovered<br/>mark_dead_letter"]
         end
 
         subgraph events["Domain Events"]

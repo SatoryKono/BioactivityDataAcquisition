@@ -31,7 +31,7 @@
 
 | Поле          | Тип           | Описание                                              |
 | ------------- | ------------- | ----------------------------------------------------- |
-| `openalex-id` | `str`         | OpenAlex Work ID (e.g., W2148763428) — первичный ключ |
+| `openalex_id` | `str`         | OpenAlex Work ID (e.g., W2148763428) — первичный ключ |
 | `doi`         | `str \| None` | Digital Object Identifier (нормализованный)           |
 
 ### Метаданные публикации
@@ -49,43 +49,44 @@
 
 | Поле               | Тип           | Описание                                                     |
 | ------------------ | ------------- | ------------------------------------------------------------ |
-| `year`             | `int \| None` | Год публикации (валидируется: 1900-2100)                     |
-| `publication-date` | `str \| None` | Дата публикации (YYYY-MM-DD)                                 |
-| `doc-type`         | `str`         | Тип документа: `PUBLICATION`, `PREPRINT`, `DATASET`, `OTHER` |
+| `publication_year` | `int \| None` | Год публикации (валидируется: 1500-2100)                     |
+| `publication_date` | `str \| None` | Дата публикации (YYYY-MM-DD)                                 |
+| `publication_type` | `str \| None` | Нормализованный тип OpenAlex (`journal-article`, `preprint`, и т.д.) |
 
 ### Open Access
 
 | Поле        | Тип            | Описание                                                 |
 | ----------- | -------------- | -------------------------------------------------------- |
-| `is-oa`     | `bool \| None` | Публикация в открытом доступе                            |
-| `oa-status` | `str \| None`  | Статус OA: `gold`, `green`, `hybrid`, `bronze`, `closed` |
+| `is_oa`     | `bool \| None` | Публикация в открытом доступе                            |
+| `oa_status` | `str \| None`  | Статус OA: `gold`, `green`, `hybrid`, `bronze`, `closed` |
 
 ### Авторы и идентификаторы
 
 | Поле                | Тип           | Описание                                                     |
 | ------------------- | ------------- | ------------------------------------------------------------ |
-| `author-keys`       | `str \| None` | Нормализованные ключи авторов (`Surname-F`), разделённые `\|`|
-| `author-openalex-ids` | `str \| None` | JSON-массив OpenAlex author IDs                            |
-| `author-orcids`     | `str \| None` | JSON-массив ORCID идентификаторов                            |
-| `affiliation-list`  | `str \| None` | JSON-массив аффилиаций                                       |
+| `author_keys`       | `str \| None` | Нормализованные ключи авторов (`Surname-F`), разделённые `\|`|
+| `author_openalex_ids` | `str \| None` | JSON-массив OpenAlex author IDs                            |
+| `author_orcids`     | `str \| None` | JSON-массив ORCID идентификаторов                            |
+| `affiliation_list`  | `str \| None` | JSON-массив аффилиаций                                       |
 
 ### Метрики и классификация
 
 | Поле                | Тип           | Описание                                  |
 | ------------------- | ------------- | ----------------------------------------- |
-| `citations-received`| `int \| None` | Количество цитирований                    |
-| `publication-class` | `str`         | Класс публикации: EXP, REV, PEER         |
-| `publication-type`  | `str \| None` | Сырой тип OpenAlex (article, book, и т.д.)|
-| `subject-topics`    | `str \| None` | JSON-массив тем (4-уровневая иерархия)    |
-| `primary-topic`     | `str \| None` | Основная тема                             |
+| `citations_received`| `int \| None` | Количество цитирований                    |
+| `publication_class` | `str`         | Класс публикации: EXP, REV, PEER         |
+| `publication_type`  | `str \| None` | Сырой тип OpenAlex (article, book, и т.д.) |
+| `publication_type_unified` | `str` | Унифицированный тип: `PUBLICATION`, `PREPRINT`, `DATASET`, `OTHER` |
+| `subject_topics`    | `str \| None` | JSON-массив тем (4-уровневая иерархия)    |
+| `primary_topic`     | `str \| None` | Основная тема                             |
 | `language`          | `str \| None` | Код языка публикации                      |
 
 ### Метаданные резолюции
 
 | Поле             | Тип           | Описание                                                |
 | ---------------- | ------------- | ------------------------------------------------------- |
-| `-lookup-method` | `str`         | Метод резолюции: `doi`, `title-fallback`, `title-only`  |
-| `-original-doi`  | `str \| None` | Оригинальный DOI из входного CSV (для fallback записей) |
+| `_lookup_method` | `str`         | Метод резолюции: `doi`, `title_fallback`, `title_only`  |
+| `_original_id`  | `str \| None` | Оригинальный DOI из входного CSV (для fallback записей) |
 
 ----------------------------------------------------------------------
 
@@ -99,14 +100,14 @@
 
 | Функция                      | Назначение                                                |
 | ---------------------------- | --------------------------------------------------------- |
-| `extract-openalex-id()`      | Извлечение ID из URL (https://openalex.org/W... → W...)   |
-| `extract-doi()`              | Нормализация DOI (удаление https://doi.org/)              |
-| `reconstruct-abstract()`     | Реконструкция абстракта из inverted index                 |
-| `extract-authors()`          | Извлечение display-name из authorships                    |
-| `extract-topics()`           | Иерархическая классификация (domain/field/subfield/topic) |
-| `extract-primary-topic()`    | Основная тема для быстрой категоризации                   |
-| `extract-journal-info()`     | Журнал, ISSN-L, издатель из primary-location              |
-| `extract-open-access-info()` | is-oa и oa-status из open-access                          |
+| `extract_openalex_id()`      | Извлечение ID из URL (https://openalex.org/W... → W...)   |
+| `extract_doi()`              | Нормализация DOI (удаление https://doi.org/)              |
+| `reconstruct_abstract()`     | Реконструкция абстракта из inverted index                 |
+| `extract_authors()`          | Извлечение display_name из authorships                    |
+| `extract_topics()`           | Иерархическая классификация (domain/field/subfield/topic) |
+| `extract_primary_topic()`    | Основная тема для быстрой категоризации                   |
+| `extract_journal_info()`     | Журнал, ISSN-L, издатель из primary_location              |
+| `extract_open_access_info()` | is_oa и oa_status из open_access                          |
 
 ### Маппинг типов документов
 
@@ -123,14 +124,14 @@
 
 ```python
 # Формат entity_id
-entity_id = f"openalex:{openalex-id}"
+entity_id = f"openalex:{openalex_id}"
 ```
 
 ### Content Hash
 
 Вычисляется по бизнес-полям публикации для дедупликации:
 
-- Исключаются lookup-метаданные (`-lookup-method`, `-original-doi`)
+- Исключаются lookup-метаданные (`_lookup_method`, `_original_id`)
 - Исключаются lineage-поля (`_run_id`, `_ingestion_ts`, etc.)
 - None-значения исключаются из хэша
 
@@ -161,18 +162,18 @@ OpenAlex предоставляет "polite pool" с повышенными ли
 
 При неудачной резолюции DOI:
 
-1. Если в `fallback-mapping` есть заголовок для DOI
+1. Если в `fallback_mapping` есть заголовок для DOI
 1. Выполняется поиск по заголовку: `title.search:Publication+Title`
 1. Специальные символы экранируются: `:`, `|`, `,` удаляются, пробелы → `+`
-1. Возвращается запись с `-lookup-method = "title-fallback"` или `"title-only"`
+1. Возвращается запись с `_lookup_method = "title_fallback"` или `"title_only"`
 
 ### Title-Only Lookup
 
 Когда DOI пустой во входном CSV:
 
 - Поиск выполняется только по заголовку
-- `-lookup-method = "title-only"`
-- `-original-doi` остаётся пустым
+- `_lookup_method = "title_only"`
+- `_original_id` остаётся пустым
 
 ### Abstract Reconstruction
 
@@ -180,7 +181,7 @@ OpenAlex API возвращает абстракты в формате inverted 
 
 ```json
 {
-  "abstract-inverted_index": {
+  "abstract_inverted_index": {
     "This": [0],
     "is": [1],
     "an": [2],
@@ -232,7 +233,7 @@ doi,title
 ,COVID-19 vaccine development
 ```
 
-**Примечание:** Пустой DOI допустим при наличии заголовка для title-only lookup.
+**Примечание:** Пустой DOI допустим при наличии заголовка для title_only lookup.
 
 ### Переменные окружения
 
@@ -274,8 +275,8 @@ OpenAlex adapter реализует health check через `/works?per-page=1`:
 
 | Условие                 | Поведение                 |
 | ----------------------- | ------------------------- |
-| Missing openalex-id     | Skip record (log warning) |
-| Invalid year range      | Set year = None           |
+| Missing openalex_id     | Skip record (log warning) |
+| Invalid year range      | Set publication_year = None      |
 | Empty title in fallback | Skip title search         |
 
 ----------------------------------------------------------------------
@@ -285,12 +286,12 @@ OpenAlex adapter реализует health check через `/works?per-page=1`:
 ```yaml
 gold_filters:
   required_fields:
-    - openalex-id
+    - openalex_id
     - title
   ranges:
-    year:
-      min: 1500
-      max: 2100
+    publication_year:
+      min: 1950
+      max: 2050
 ```
 
 ----------------------------------------------------------------------
@@ -319,31 +320,31 @@ gold_filters:
   "id": "https://openalex.org/W2148763428",
   "doi": "https://doi.org/10.1038/s41586-020-2012-7",
   "title": "A pneumonia outbreak associated with a new coronavirus of probable bat origin",
-  "abstract-inverted_index": {
+  "abstract_inverted_index": {
     "A": [0], "pneumonia": [1], "outbreak": [2], "...": [3]
   },
   "authorships": [
-    {"author": {"display-name": "Peng Zhou"}},
-    {"author": {"display-name": "Xing-Lou Yang"}}
+    {"author": {"display_name": "Peng Zhou"}},
+    {"author": {"display_name": "Xing-Lou Yang"}}
   ],
-  "primary-location": {
+  "primary_location": {
     "source": {
-      "display-name": "Nature",
-      "issn-l": "0028-0836",
-      "host-organization-name": "Springer Nature"
+      "display_name": "Nature",
+      "issn_l": "0028-0836",
+      "host_organization_name": "Springer Nature"
     }
   },
-  "publication-year": 2020,
-  "publication-date": "2020-02-03",
+  "publication_year": 2020,
+  "publication_date": "2020-02-03",
   "type": "journal-article",
-  "open-access": {
-    "is-oa": true,
-    "oa-status": "gold"
+  "open_access": {
+    "is_oa": true,
+    "oa_status": "gold"
   },
-  "cited-by-count": 15000,
+  "cited_by_count": 15000,
   "concepts": [
-    {"display-name": "Coronavirus", "score": 0.95},
-    {"display-name": "Virology", "score": 0.88}
+    {"display_name": "Coronavirus", "score": 0.95},
+    {"display_name": "Virology", "score": 0.88}
   ],
   "language": "en"
 }
@@ -354,25 +355,36 @@ gold_filters:
 ```json
 {
   "entity_id": "openalex:W2148763428",
-  "openalex-id": "W2148763428",
+  "openalex_id": "W2148763428",
   "doi": "10.1038/s41586-020-2012-7",
+  "pmid": "32015507",
+  "pmc_id": null,
+  "mag_id": "3004922785",
   "title": "A pneumonia outbreak associated with a new coronavirus of probable bat origin",
   "abstract": "A pneumonia outbreak...",
-  "authors": ["Peng Zhou", "Xing-Lou Yang"],
+  "authors": "[\"Peng Zhou\", \"Xing-Lou Yang\"]",
+  "author_keys": "zhou_p|yang_xl",
+  "author_openalex_ids": "[\"A5074809391\", \"A5015691179\"]",
+  "author_orcids": "[\"0000-0002-1234-5678\", null]",
+  "affiliation_list": "[\"Wuhan Institute of Virology\"]",
   "journal": "Nature",
   "issn": "0028-0836",
   "publisher": "Springer Nature",
-  "year": 2020,
-  "publication-date": "2020-02-03",
-  "doc-type": "PUBLICATION",
-  "is-oa": true,
-  "oa-status": "gold",
-  "cited-by-count": 15000,
-  "concepts": ["Coronavirus", "Virology"],
+  "publication_year": 2020,
+  "publication_date": "2020-02-03",
+  "publication_type": "journal-article",
+  "publication_type_unified": "PUBLICATION",
+  "publication_class": "PEER",
+  "is_oa": true,
+  "oa_status": "gold",
+  "citations_received": 15000,
+  "citations_made": 55,
+  "subject_topics": "[{\"id\": \"https://openalex.org/T123\", \"display_name\": \"Coronavirus\", \"score\": 0.95}]",
+  "primary_topic": "{\"id\": \"https://openalex.org/T123\", \"display_name\": \"Coronavirus\"}",
   "language": "en",
-  "-lookup-method": "doi",
-  "-original-doi": null,
-  "source": "openalex",
+  "_lookup_method": "doi",
+  "_original_id": null,
+  "_source": "openalex",
   "content_hash": "sha256:abc123...",
   "_run_id": "run-2026-01-06-001",
   "_run_type": "incremental",
@@ -385,11 +397,11 @@ gold_filters:
 ```json
 {
   "entity_id": "openalex:W3045876123",
-  "openalex-id": "W3045876123",
+  "openalex_id": "W3045876123",
   "doi": "10.1016/j.example.2020.001",
   "title": "Example Publication Title",
-  "-lookup-method": "title-fallback",
-  "-original-doi": "10.1016/j.example.2020.001",
+  "_lookup_method": "title_fallback",
+  "_original_id": "10.1016/j.example.2020.001",
   "...": "..."
 }
 ```
@@ -418,10 +430,10 @@ gold_filters:
 
 ```python
 {
-    "cassette-library-dir": "tests/fixtures/vcr/openalex",
-    "record-mode": "none",
-    "match-on": ["method", "scheme", "host", "port", "path", "query"],
-    "filter-query-parameters": ["mailto"],
+    "cassette_library_dir": "tests/fixtures/vcr/openalex",
+    "record_mode": "none",
+    "match_on": ["method", "scheme", "host", "port", "path", "query"],
+    "filter_query_parameters": ["mailto"],
 }
 ```
 
@@ -457,12 +469,12 @@ gold_filters:
 ### Data Flow
 
 ```
-Input CSV → OpenAlexAdapter.fetch-filtered-with-fallback()
+Input CSV → OpenAlexAdapter.fetch_filtered_with_fallback()
     ├─ Batch DOI lookup (filter=doi:doi1|doi2|...)
     ├─ Title fallback for missing DOIs
-    └─ Yield raw records with -lookup-method
+    └─ Yield raw records with _lookup_method
 
-Raw Records → OpenAlexPublicationTransformer.-transform-impl()
+Raw Records → OpenAlexPublicationTransformer._transform_impl()
     ├─ Extract business data (extractors.py)
     ├─ Validate required fields
     ├─ Compute entity_id and content_hash
@@ -472,9 +484,9 @@ Entity → SilverWriter (Delta Lake)
     └─ Upsert by content_hash
 
 Silver → GoldWriter (validated)
-    └─ Apply gold-filters, export CSV
+    └─ Apply gold_filters, export CSV
 ```
 
 ----------------------------------------------------------------------
 
-*Последнее обновление: 2026-02-16*
+*Последнее обновление: 2026-03-03*

@@ -265,3 +265,39 @@ class TestProcessMissingDois:
         # Should skip because normalized DOI is in found_dois
         assert len(results) == 0
         mock_search_fn.assert_not_called()
+
+
+class TestSearchByTitleEdgeCases:
+    """Direct tests for _search_by_title fallback branches."""
+
+    @pytest.mark.asyncio
+    async def test_returns_first_no_title_candidate_when_no_match(
+        self,
+        handler: TitleFallbackHandler,
+        mock_search_fn: AsyncMock,
+    ) -> None:
+        mock_search_fn.return_value = [
+            {"id": "W1", "title": "Completely Different"},
+            {"id": "W2", "title": ""},
+            {"id": "W3"},
+        ]
+
+        result = await handler._search_by_title("Expected Title")
+
+        assert result is not None
+        assert result["id"] == "W2"
+
+    @pytest.mark.asyncio
+    async def test_returns_none_when_candidates_have_non_matching_titles(
+        self,
+        handler: TitleFallbackHandler,
+        mock_search_fn: AsyncMock,
+    ) -> None:
+        mock_search_fn.return_value = [
+            {"id": "W1", "title": "Different A"},
+            {"id": "W2", "title": "Different B"},
+        ]
+
+        result = await handler._search_by_title("Expected Title")
+
+        assert result is None

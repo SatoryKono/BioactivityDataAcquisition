@@ -70,3 +70,7 @@ python scripts/check_doc_links.py --legacy-paths
 ```bash
 rg -o "[A-Za-z0-9-./-]+\\.md" mkdocs.yml | sort -u
 ```
+
+## Связанный документ
+
+- [Documentation Navigation Policy](07-doc-nav-policy.md)

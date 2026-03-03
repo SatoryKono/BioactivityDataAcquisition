@@ -1,34 +1,62 @@
-# BioETL Project Instructions for GitHub Copilot
+# BioETL Instructions for GitHub Copilot
 
-## Core Mandates
-You are an expert developer on the **BioETL** project. All your suggestions MUST follow these architectural principles:
+Use this file as a strict operating profile for code suggestions in this repository.
 
-### 1. Hexagonal Architecture (Ports & Adapters)
-- **Domain Layer** (`src/bioetl/domain`): PURE logic. NO imports from `infrastructure` or `application`. NO I/O.
-- **Infrastructure Layer** (`src/bioetl/infrastructure`): Implementation of ports (HTTP clients, Delta Lake storage).
-- **Dependency Injection**: Use Constructor Injection ONLY. Never instantiate dependencies directly inside classes.
+## Canonical Sources
 
-### 2. Medallion Data Flow
-- **Bronze**: Raw data (JSONL). Append-only.
-- **Silver**: Cleaned, typed, deduplicated entities. Delta Lake (Merge/Upsert).
-- **Gold**: Aggregated business metrics.
+- `docs/00-project/RULES.md` (project constitution, RFC2119 requirements)
+- `docs/01-requirements/REQUIREMENTS.md` (functional/non-functional requirements)
+- ADRs in `docs/02-architecture/decisions/`
+- `AGENTS.md` (assistant workflow constraints)
 
-### 3. Engineering Standards
-- **Logging**: Use `structlog`. NO `print()` statements.
-- **Processing**: Prefer **Polars Lazy API** (`lf.scan_ndjson`, `lf.collect`) for large datasets.
-- **Validation**: Use **Pandera** for DataFrame schema enforcement.
-- **Errors**: Distinguish between Critical (fail), Recoverable (retry), and DQ (quarantine).
+If guidance conflicts, prioritize canonical sources over this file.
 
-### 4. Naming Conventions
-- Pipelines: `{source}_{entity}` (e.g., `chembl_activity`).
-- Files: Snake_case. Classes: PascalCase.
+## Architecture Guardrails (MUST)
 
-### 5. Testing
-- Integration tests MUST use `VCR.py` cassettes.
-- Unit tests MUST be fast and logic-focused.
+### Hexagonal import boundaries
 
-### 6. Security
-- Never hardcode secrets. Use `.env` and `Settings` (Pydantic).
-- Standardize PII using salt rotation.
+- `domain` must not import `application` or `infrastructure`.
+- `application` must not import `infrastructure`.
+- `infrastructure` may import domain ports/types/exceptions.
+- Ports must be imported via `bioetl.domain.ports` facade.
 
-Follow the instructions in `docs/00-project/rules/` for detailed coding standards.
+### Domain purity
+
+- No I/O in domain (`httpx`, `requests`, `open()`, DB clients, `structlog`).
+- No side effects at module import time in domain/application.
+
+### Dependency injection
+
+- Use constructor injection.
+- Do not instantiate concrete adapters in domain/application classes.
+- Keep wiring/factories in `src/bioetl/composition/`.
+
+### Medallion constraints
+
+- Bronze: raw immutable ingestion artifacts.
+- Silver: Delta Lake only (no raw parquet fallback).
+- Gold: curated business-level outputs.
+
+## Anti-Patterns (MUST NOT Suggest)
+
+- Layer boundary violations for quick fixes.
+- Service locator pattern.
+- Hardcoded secrets, tokens, or credentials.
+- `print()` for runtime logging (use logger ports/structlog adapters).
+- Blocking I/O inside async code.
+- Replacing strict typing with broad `Any` to silence type errors.
+
+## Hallucination Prevention (MUST)
+
+- Do not invent files, modules, classes, commands, or Make targets.
+- Before referencing a path/command/API, verify it exists in the repo context.
+- If uncertain, state uncertainty and suggest verification steps.
+- Keep code changes minimal and evidence-based; avoid speculative refactors.
+
+## Suggestion Quality Checklist
+
+- Includes type annotations for public interfaces.
+- Preserves architecture constraints and naming conventions.
+- Adds/updates tests when behavior changes.
+- Mentions required verification commands (`make lint`, `make test`, architecture tests).
+- Includes migration notes when introducing breaking changes.

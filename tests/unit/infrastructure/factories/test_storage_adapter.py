@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
@@ -19,6 +21,7 @@ def mock_bronze_writer() -> MagicMock:
     writer = MagicMock()
     writer.write_bronze = AsyncMock()
     writer.cleanup_old_files = AsyncMock()
+    writer.base_path = "/tmp/bronze"
     return writer
 
 
@@ -27,7 +30,13 @@ def mock_silver_writer() -> MagicMock:
     """Create mock silver writer."""
     writer = MagicMock()
     writer.write_silver = AsyncMock()
+    writer.write_silver_merged = AsyncMock()
+    writer.read_silver = AsyncMock(return_value=[{"id": 1}])
     writer.vacuum = AsyncMock()
+    writer.clear = MagicMock(return_value=1)
+    writer.get_table_path = MagicMock(return_value=Path("/tmp/silver/table"))
+    writer.base_path = "/tmp/silver"
+    writer.csv_exporter = None
     return writer
 
 
@@ -37,6 +46,10 @@ def mock_gold_writer() -> MagicMock:
     writer = MagicMock()
     writer.write_gold = AsyncMock()
     writer.write_gold_merged = AsyncMock()
+    writer.clear = MagicMock(return_value=1)
+    writer.get_table_path = MagicMock(return_value=Path("/tmp/gold/table"))
+    writer.base_path = "/tmp/gold"
+    writer.csv_exporter = None
     return writer
 
 
@@ -345,3 +358,207 @@ class TestStorageAdapterWriteGoldMerged:
 
         call_kwargs = mock_gold_writer.write_gold_merged.call_args[1]
         assert call_kwargs["schema"] is None
+
+
+@pytest.mark.unit
+class TestStorageAdapterAdditionalPaths:
+    """Additional tests to cover maintenance and utility branches."""
+
+    @pytest.mark.asyncio
+    async def test_read_silver_delegates(
+        self, storage_adapter: StorageAdapter, mock_silver_writer: MagicMock
+    ) -> None:
+        """read_silver should delegate to Silver writer."""
+        mock_silver_writer.read_silver.return_value = [{"id": 42}]
+
+        rows = await storage_adapter.read_silver("chembl.activity", columns=["id"])
+
+        assert rows == [{"id": 42}]
+        mock_silver_writer.read_silver.assert_called_once_with(
+            "chembl.activity", columns=["id"]
+        )
+
+    @pytest.mark.asyncio
+    async def test_write_silver_merged_delegates(
+        self, storage_adapter: StorageAdapter, mock_silver_writer: MagicMock
+    ) -> None:
+        """write_silver_merged should pass through optional parameters."""
+        await storage_adapter.write_silver_merged(
+            table_name="composite/publication",
+            records=[{"id": 1}],
+            primary_keys=["id"],
+            run_id="run-1",
+            sources_used=["chembl_publication"],
+            preserve_column_order=True,
+        )
+
+        mock_silver_writer.write_silver_merged.assert_called_once_with(
+            "composite/publication",
+            [{"id": 1}],
+            ["id"],
+            run_id="run-1",
+            sources_used=["chembl_publication"],
+            preserve_column_order=True,
+        )
+
+    @pytest.mark.asyncio
+    async def test_clear_csv_counts_list_and_int_results(
+        self,
+        storage_adapter: StorageAdapter,
+        mock_silver_writer: MagicMock,
+        mock_gold_writer: MagicMock,
+    ) -> None:
+        """clear_csv should handle both list and int exporter return types."""
+        silver_exporter = MagicMock()
+        silver_exporter.clear = MagicMock(return_value=["a.csv", "b.csv"])
+        gold_exporter = MagicMock()
+        gold_exporter.clear = MagicMock(return_value=3)
+        mock_silver_writer.csv_exporter = silver_exporter
+        mock_gold_writer.csv_exporter = gold_exporter
+
+        deleted = await storage_adapter.clear_csv("chembl.activity")
+
+        assert deleted == 5
+        silver_exporter.clear.assert_called_once_with("chembl.activity")
+        gold_exporter.clear.assert_called_once_with("chembl.activity")
+
+    @pytest.mark.asyncio
+    async def test_clear_delta_with_table_name(
+        self,
+        storage_adapter: StorageAdapter,
+        mock_silver_writer: MagicMock,
+        mock_gold_writer: MagicMock,
+    ) -> None:
+        """clear_delta should clear both layers when table_name is provided."""
+        mock_silver_writer.clear.return_value = 2
+        mock_gold_writer.clear.return_value = 4
+
+        deleted = await storage_adapter.clear_delta("chembl.activity")
+
+        assert deleted == 6
+        mock_silver_writer.clear.assert_called_once_with("chembl.activity")
+        mock_gold_writer.clear.assert_called_once_with("chembl.activity")
+
+    @pytest.mark.asyncio
+    async def test_clear_delta_without_table_name_noop(
+        self,
+        storage_adapter: StorageAdapter,
+        mock_silver_writer: MagicMock,
+        mock_gold_writer: MagicMock,
+    ) -> None:
+        """clear_delta should return 0 when no specific table is given."""
+        deleted = await storage_adapter.clear_delta(None)
+        assert deleted == 0
+        mock_silver_writer.clear.assert_not_called()
+        mock_gold_writer.clear.assert_not_called()
+
+    def test_preview_layer_counts_files(
+        self, storage_adapter: StorageAdapter, tmp_path: Path
+    ) -> None:
+        """_preview_layer should count files only when table path exists."""
+        table_dir = tmp_path / "silver" / "chembl" / "activity"
+        table_dir.mkdir(parents=True)
+        (table_dir / "part-0001.parquet").write_text("x", encoding="utf-8")
+        (table_dir / "_delta_log").mkdir()
+        (table_dir / "_delta_log" / "00000000000000000001.json").write_text(
+            "{}", encoding="utf-8"
+        )
+
+        writer = MagicMock()
+        writer.get_table_path.return_value = table_dir
+
+        preview = storage_adapter._preview_layer(writer, "chembl.activity")
+
+        assert preview["exists"] is True
+        assert preview["file_count"] == 2
+        assert preview["path"] == str(table_dir)
+
+    @pytest.mark.asyncio
+    async def test_health_check_status_transitions(
+        self, storage_adapter: StorageAdapter, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """health_check should map writable-layer count to HealthStatus."""
+        monkeypatch.setattr(
+            storage_adapter, "_check_directory_writable", lambda _: True
+        )
+        assert await storage_adapter.health_check() == "HEALTHY"
+
+        states = iter([True, False, True])
+        monkeypatch.setattr(
+            storage_adapter, "_check_directory_writable", lambda _: next(states)
+        )
+        assert await storage_adapter.health_check() == "DEGRADED"
+
+        monkeypatch.setattr(
+            storage_adapter, "_check_directory_writable", lambda _: False
+        )
+        assert await storage_adapter.health_check() == "UNHEALTHY"
+
+    @pytest.mark.asyncio
+    async def test_vacuum_returns_zero_when_tables_absent(
+        self, storage_adapter: StorageAdapter, tmp_path: Path
+    ) -> None:
+        """vacuum should do nothing if Silver and Gold table paths do not exist."""
+        storage_adapter.silver.get_table_path = MagicMock(
+            return_value=tmp_path / "missing_silver"
+        )
+        storage_adapter.gold.get_table_path = MagicMock(
+            return_value=tmp_path / "missing_gold"
+        )
+
+        removed = await storage_adapter.vacuum("chembl.activity", retention_hours=24)
+
+        assert removed == 0
+
+    @pytest.mark.asyncio
+    async def test_archive_copies_silver_and_gold_and_optional_remove_source(
+        self, storage_adapter: StorageAdapter, tmp_path: Path
+    ) -> None:
+        """archive should copy both layers and optionally remove source directories."""
+        silver_src = tmp_path / "silver_src"
+        gold_src = tmp_path / "gold_src"
+        silver_src.mkdir()
+        gold_src.mkdir()
+        (silver_src / "part-0001.parquet").write_text("s", encoding="utf-8")
+        (gold_src / "part-0001.parquet").write_text("g", encoding="utf-8")
+
+        storage_adapter.silver.get_table_path = MagicMock(return_value=silver_src)
+        storage_adapter.gold.get_table_path = MagicMock(return_value=gold_src)
+
+        target_root = tmp_path / "archive"
+        copied = await storage_adapter.archive(
+            "chembl.activity", str(target_root), remove_source=True
+        )
+
+        assert copied == 2
+        assert (target_root / "silver" / "chembl" / "activity").exists()
+        assert (target_root / "gold" / "chembl" / "activity").exists()
+        assert not silver_src.exists()
+        assert not gold_src.exists()
+
+    @pytest.mark.asyncio
+    async def test_cleanup_bronze_delegates(
+        self, storage_adapter: StorageAdapter, mock_bronze_writer: MagicMock
+    ) -> None:
+        """cleanup_bronze should delegate to Bronze writer."""
+        expected = {"files_deleted": 3, "bytes_freed": 100}
+        mock_bronze_writer.cleanup_old_files.return_value = expected
+        cutoff = datetime(2026, 1, 1, tzinfo=UTC)
+
+        result = await storage_adapter.cleanup_bronze(cutoff_date=cutoff, dry_run=True)
+
+        assert result == expected
+        mock_bronze_writer.cleanup_old_files.assert_called_once_with(
+            cutoff_date=cutoff, dry_run=True
+        )
+
+    def test_check_directory_writable_false_on_oserror(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """_check_directory_writable should return False on filesystem exceptions."""
+
+        def _raise_oserror(*args: object, **kwargs: object) -> None:
+            raise OSError("denied")
+
+        monkeypatch.setattr(Path, "mkdir", _raise_oserror)
+        assert StorageAdapter._check_directory_writable(tmp_path / "x") is False

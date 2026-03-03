@@ -8,7 +8,17 @@
 %% @view    operational-ports-infra
 %% @parent  13b-operational-ports.mmd
 %% @nodes   7
-
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 graph TB
 %% keep-orphan: CB, LC, MCO, ML, MMGR, OTT, UL
     subgraph Infrastructure["Infrastructure Implementations"]
@@ -21,5 +31,7 @@ graph TB
         MMGR["MemoryMonitor"]:::size-sm
     end
 
-    classDef infra fill:#fff1f2,stroke:#dc2626,stroke-width:2px
-    class ML,LC,UL,MCO,OTT,CB,MMGR infra
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    class ML,LC,UL,MCO,OTT,CB adapter
+    class MMGR service

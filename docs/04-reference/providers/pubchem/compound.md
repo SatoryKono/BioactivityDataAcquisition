@@ -14,10 +14,10 @@
 
 | Параметр | Значение | Описание |
 |---|---|---|
-| `pipeline-name` | `pubchem_compound` | Уникальное имя пайплайна. |
+| `pipeline_name` | `pubchem_compound` | Уникальное имя пайплайна. |
 | `provider` | `pubchem` | Имя провайдера данных. |
-| `entity-type` | `compound` | Тип извлекаемой сущности. |
-| `primary-keys` | `["cid"]` | Ключи для слияния в Silver-слое. |
+| `entity_type` | `compound` | Тип извлекаемой сущности. |
+| `primary_keys` | `["cid"]` | Ключи для слияния в Silver-слое. |
 
 ## 3. Процесс (ETL)
 
@@ -38,7 +38,7 @@
 |---|---|---|---|
 | **Bronze** | `jsonl` (сжатый `zstd`) | Append-only | `bronze/pubchem/compound/...` |
 | **Silver** | `delta` | Merge (по `cid`) | `pubchem_compound` |
-| **Gold** | `delta` | - | `dim-compound` |
+| **Gold** | `delta` | - | `dim_compound` |
 
 ## 4. Качество Данных (DQ)
 
@@ -49,3 +49,7 @@
 - [Running Pipelines](../../../03-guides/running-pipelines.md) - Запуск пайплайнов
 - [ChEMBL Activity](../chembl/activity.md) - Детальная документация (пример)
 - [Project Rules](../../../00-project/RULES.md) - Правила обработки данных
+
+---
+
+*Последнее обновление: 2026-03-03*

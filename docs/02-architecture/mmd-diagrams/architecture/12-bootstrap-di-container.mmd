@@ -28,7 +28,7 @@ graph TB
 
     subgraph Composition["composition layer"]
         subgraph Bootstrap["Bootstrap Assembly"]
-            RA["RuntimeAssembly<br/>━━━━━━━━━━━━━━━━━<br/>Central DI wiring point.<br/>Creates all infrastructure<br/>and application components."]:::size-md
+            RA["RuntimeAssembly<br/>central DI wiring point<br/>creates infra + app components"]:::size-md
             RBA["RunnerBootstrap<br/>━━━━━━━━━━━━━━━━━<br/>+ assemble_runner()"]:::size-md
             SBA["StorageBootstrap<br/>━━━━━━━━━━━━━━━━━<br/>+ assemble_storage()"]:::size-md
             HBA["HealthBootstrap<br/>━━━━━━━━━━━━━━━━━<br/>+ assemble_health()"]:::size-md
@@ -44,7 +44,7 @@ graph TB
         end
 
         subgraph Providers["Provider Registry"]
-            PR["ProviderRegistry<br/>━━━━━━━━━━━━━━━━━<br/>Registers all provider<br/>pipelines and their<br/>extraction params"]:::size-md
+            PR["ProviderRegistry<br/>registers provider pipelines<br/>and extraction params"]:::size-md
             EP["ExtractionParams<br/>Registration"]:::size-md
         end
 

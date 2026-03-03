@@ -17,6 +17,7 @@ def mock_checkpoint_port():
     port.load = AsyncMock(return_value=None)
     port.save = AsyncMock()
     port.delete = AsyncMock()
+    port.list_all = AsyncMock(return_value=["pipeline_a", "pipeline_b"])
     return port
 
 
@@ -154,6 +155,20 @@ class TestCheckpointManagerDeleteCheckpoint:
         await checkpoint_manager.delete_checkpoint()
 
         mock_checkpoint_port.delete.assert_called_once_with("test_pipeline")
+
+
+@pytest.mark.unit
+class TestCheckpointManagerListAll:
+    """Tests for CheckpointManager.list_all method."""
+
+    async def test_list_all_delegates_to_port(
+        self, checkpoint_manager, mock_checkpoint_port
+    ):
+        """Test list_all delegates directly to checkpoint port."""
+        result = await checkpoint_manager.list_all()
+
+        mock_checkpoint_port.list_all.assert_called_once_with()
+        assert result == ["pipeline_a", "pipeline_b"]
 
 
 @pytest.mark.unit

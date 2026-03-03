@@ -54,7 +54,7 @@ graph TB
     end
 
     subgraph Retry["Retry Logic"]
-        RP["Retry in UnifiedHTTPClient<br/>--------<br/>max_retries<br/>backoff_factor<br/>exponential backoff + jitter"]:::size-md
+        RP["RetryPolicy (UnifiedHTTPClient)<br/>max_retries + backoff_factor<br/>exp backoff + jitter"]:::size-md
     end
 
     subgraph HealthCheck["Health Check Template"]

@@ -41,8 +41,8 @@ graph TB
     HCM --> HCPM
 
     subgraph Base["Base Adapters"]
-        BHA["BaseHttpAdapter<br/>http_client + logger + metrics<br/>fetch()<br/>health_check()<br/>aclose()"]:::size-lg
-        BSA["BaseSyncAdapter<br/>logger + rate_limiter<br/>circuit_breaker + thread_pool<br/>fetch()<br/>health_check()"]:::size-lg
+        BHA["BaseHttpAdapter<br/>http_client + logger + metrics<br/>core: fetch/health_check/aclose"]:::size-lg
+        BSA["BaseSyncAdapter<br/>logger + rate_limiter<br/>circuit_breaker + thread_pool<br/>core: fetch + health"]:::size-lg
     end
 
     HCPM --> BHA
@@ -53,7 +53,7 @@ graph TB
     subgraph ChEMBL["ChEMBL"]
         CHM["ChemblHealthMixin"]:::size-lg
         CMM["ChemblMetadataMixin"]:::size-lg
-        CA["ChemblAdapter<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_multi_filtered()<br/>+ fetch_filtered_with_fallback()<br/>+ fetch_as_models()"]:::size-lg
+        CA["ChemblAdapter<br/>fetch + filtered + multi-filter<br/>fallback + model output"]:::size-lg
     end
 
     BHA --> CA
@@ -64,7 +64,7 @@ graph TB
         PSM["PubMedSearchMixin"]:::size-lg
         PFetchM["PubMedFetchMixin"]:::size-lg
         PHM["PubMedHealthMixin"]:::size-lg
-        PA["PubMedAdapter<br/>email + api_key + batch_size<br/>fetch()<br/>fetch_filtered()<br/>fetch_filtered_with_fallback()"]:::size-lg
+        PA["PubMedAdapter<br/>email + api_key + batch_size<br/>fetch + filtered + fallback"]:::size-lg
     end
 
     BHA --> PA
@@ -74,7 +74,7 @@ graph TB
     PHM --> PA
 
     subgraph UniProt["UniProt"]
-        UA["UniProtAdapter<br/>━━━━━━━━━━━━━━━━━<br/>api_key: str | None<br/>base_url: str<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_multi_filtered()"]:::size-lg
+        UA["UniProtAdapter<br/>api_key + base_url<br/>fetch + filtered + multi-filter"]:::size-lg
         UIDM["UniProtIDMappingClient"]:::size-lg
     end
 
@@ -82,25 +82,25 @@ graph TB
     PFM --> UA
 
     subgraph CrossRef["CrossRef"]
-        CRA["CrossRefAdapter<br/>━━━━━━━━━━━━━━━━━<br/>mailto: str<br/>batch_size: int<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_filtered_with_fallback()"]:::size-lg
+        CRA["CrossRefAdapter<br/>mailto + batch_size<br/>fetch + filtered + fallback"]:::size-lg
     end
 
     BHA --> CRA
 
     subgraph OpenAlex["OpenAlex"]
-        OAA["OpenAlexAdapter<br/>━━━━━━━━━━━━━━━━━<br/>mailto: str<br/>batch_size: int<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_filtered_with_fallback()"]:::size-lg
+        OAA["OpenAlexAdapter<br/>mailto + batch_size<br/>fetch + filtered + fallback"]:::size-lg
     end
 
     BHA --> OAA
 
     subgraph SemanticScholar["Semantic Scholar"]
-        SSA["SemanticScholarAdapter<br/>api_key + batch_size + fields<br/>fetch()<br/>fetch_filtered()<br/>fetch_filtered_with_fallback()"]:::size-lg
+        SSA["SemanticScholarAdapter<br/>api_key + batch_size + fields<br/>fetch + filtered + fallback"]:::size-lg
     end
 
     BHA --> SSA
 
     subgraph PubChem["PubChem"]
-        PCA["PubChemAdapter<br/>━━━━━━━━━━━━━━━━━<br/>(sync via ThreadPoolExecutor)<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_as_models()"]:::size-lg
+        PCA["PubChemAdapter<br/>sync adapter (ThreadPool)<br/>fetch + filtered + model output"]:::size-lg
     end
 
     BSA --> PCA

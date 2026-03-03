@@ -28,17 +28,17 @@ graph LR
 
     subgraph Writers["Storage Writers"]
         subgraph BronzeStorage["Bronze Storage"]
-            BW["BronzeWriter<br/>base_path + logger + metrics<br/>save_json + validate_json<br/>write_bronze()<br/>aclose()"]:::size-lg
+            BW["BronzeWriter<br/>base_path + logger + metrics<br/>save_json / validate_json<br/>write_bronze + aclose"]:::size-lg
             AWG["AtomicWriteGroup<br/>━━━━━━━━━━━━━━━━━<br/>Atomic multi-file writes<br/>with rollback"]:::size-lg
         end
 
         subgraph SilverStorage["Silver Storage"]
-            BDW["BaseDeltaWriter<br/>base_path + logger<br/>retention manager<br/>get_table_path()<br/>clear()<br/>prepare_arrow_data()"]:::size-lg
-            SWR["SilverWriter<br/>csv_exporter + write_policy<br/>silver_validator<br/>write_silver()<br/>merge_silver()<br/>clear_silver()"]:::size-lg
+            BDW["BaseDeltaWriter<br/>base_path + logger + retention<br/>get_table_path / clear<br/>prepare_arrow_data"]:::size-lg
+            SWR["SilverWriter<br/>csv_exporter + write_policy<br/>silver_validator<br/>write_silver / merge / clear"]:::size-lg
         end
 
         subgraph GoldStorage["Gold Storage"]
-            GWR["GoldWriter<br/>━━━━━━━━━━━━━━━━━<br/>csv_exporter: CsvExporter<br/>audit: AuditPort<br/>metadata_writer: MetadataWriterPort<br/>━━━━━━━━━━━━━━━━━<br/>+ write_gold()<br/>+ clear_gold()"]:::size-lg
+            GWR["GoldWriter<br/>csv_exporter + audit + metadata_writer<br/>write_gold / clear_gold"]:::size-lg
         end
 
         subgraph Reader["Delta Reader"]
@@ -60,9 +60,9 @@ graph LR
     end
 
     subgraph FileSystem["File System Layout"]
-        FS_B["data/<br/>├── bronze/<br/>│   └── {provider}/{entity}/{date}/<br/>│       ├── batch_*.jsonl.zst<br/>│       └── _metadata.yaml"]:::size-lg
-        FS_S["├── silver/<br/>│   └── {provider}_{entity}/<br/>│       ├── _delta_log/<br/>│       ├── part-*.parquet<br/>│       └── _metadata.yaml"]:::size-lg
-        FS_G["└── gold/<br/>└── {provider}_{entity}/<br/>├── _delta_log/<br/>├── part-*.parquet<br/>└── _metadata.yaml"]:::size-lg
+        FS_B["bronze/{provider}/{entity}/{date}<br/>batch_*.jsonl.zst + _metadata.yaml"]:::size-lg
+        FS_S["silver/{provider}_{entity}<br/>_delta_log + parquet + metadata"]:::size-lg
+        FS_G["gold/{provider}_{entity}<br/>_delta_log + parquet + metadata"]:::size-lg
     end
 
     %% Inheritance

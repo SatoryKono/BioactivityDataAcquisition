@@ -21,7 +21,7 @@
 |------|-----|----------|
 | `pmid` | `str` | PubMed ID (уникальный) |
 | `doi` | `str` | Digital Object Identifier |
-| `pmc-id` | `str` | PubMed Central ID |
+| `pmc_id` | `str` | PubMed Central ID |
 
 ### Метаданные статьи
 
@@ -30,31 +30,31 @@
 | `title` | `str` | Название статьи |
 | `abstract` | `str` | Аннотация |
 | `authors` | `list[str]` | Список авторов |
-| `journal-title` | `str` | Название журнала |
-| `publication-date` | `str` | Дата публикации |
+| `journal` | `str` | Название журнала |
+| `publication_date` | `str` | Дата публикации |
 | `volume` | `str` | Том журнала |
 | `issue` | `str` | Выпуск |
-| `pages` | `str` | Страницы |
+| `page_range` | `str` | Страницы |
 
 ### Авторы и аффилиации
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `author-keys` | `str \| None` | Нормализованные ключи авторов в формате `Surname-F`, разделённые `\|` |
-| `affiliation-list` | `str \| None` | JSON-массив уникальных аффилиаций |
-| `authors-with-affiliations` | `str \| None` | JSON-массив: автор → аффилиации |
-| `affiliation-structured` | `str \| None` | JSON-массив с ROR/GRID идентификаторами |
+| `author_keys` | `str \| None` | Нормализованные ключи авторов в формате `Surname-F`, разделённые `\|` |
+| `affiliation_list` | `str \| None` | JSON-массив уникальных аффилиаций |
+| `authors_with_affiliations` | `str \| None` | JSON-массив: автор → аффилиации |
+| `affiliation_structured` | `str \| None` | JSON-массив с ROR/GRID идентификаторами |
 
 ### Классификация
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `publication-class` | `str` | Класс публикации: EXP, REV, PEER |
-| `publication-subclass` | `str \| None` | Подкласс (L2): ~16 групп |
-| `publication-type-unified` | `str \| None` | Унифицированный тип (L3): 214 значений |
-| `mesh-terms` | `list[str]` | MeSH термины |
-| `keywords` | `list[str]` | Ключевые слова |
-| `publication-types` | `list[str]` | Типы публикации |
+| `publication_class` | `str` | Класс публикации: EXP, REV, PEER |
+| `publication_subclass` | `str \| None` | Подкласс (L2): ~16 групп |
+| `publication_type_unified` | `str \| None` | Унифицированный тип (L3): 214 значений |
+| `subject_mesh` | `list[str]` | MeSH термины |
+| `subject_keywords` | `list[str]` | Ключевые слова |
+| `publication_types` | `list[str]` | Типы публикации |
 
 ---
 
@@ -115,4 +115,4 @@ bioetl run --pipeline pubmed_publication --run-type rebuild
 
 ---
 
-*Последнее обновление: 2026-02-16*
+*Последнее обновление: 2026-03-03*

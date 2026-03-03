@@ -7,7 +7,7 @@
 %% @date    2026-02-24
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
-
+%% @nodes   11
 %%{init: {
   'flowchart': {
     'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
@@ -30,10 +30,10 @@ flowchart TB
 
     subgraph Layers["BioETL Five-Layer Architecture"]
         INT["<b>Interfaces Layer</b><br/>CLI (Click), HealthServer<br/><i>src/bioetl/interfaces/</i><br/><br/>"]
-        COMP["<b>Composition Layer</b><br/>GenericPipelineFactory, RunnerFactory<br/>ServicesBuilder, PipelineRegistry<br/><i>src/bioetl/composition/</i><br/>"]
-        APP["<b>Application Layer</b><br/>PipelineRunner, BatchExecutor<br/>PreflightService, PostrunService<br/>23 Transformers<br/><i>src/bioetl/application/</i>"]
-        INFRA["<b>Infrastructure Layer</b><br/>ChemblAdapter, PubChemAdapter<br/>SilverWriter, MemoryLock<br/>UnifiedHTTPClient, PrometheusMetrics<br/><i>src/bioetl/infrastructure/</i>"]
-        DOM["<b>Domain Layer</b><br/>24 Ports (Protocol)<br/>Entities, Aggregates, Schemas<br/>Config, Types, Exceptions<br/><i>src/bioetl/domain/</i>"]
+        COMP["<b>Composition Layer</b><br/>Factories + registries<br/><i>src/bioetl/composition/</i>"]
+        APP["<b>Application Layer</b><br/>Runner + executor + services<br/><i>src/bioetl/application/</i>"]
+        INFRA["<b>Infrastructure Layer</b><br/>Adapters + storage + observability<br/><i>src/bioetl/infrastructure/</i>"]
+        DOM["<b>Domain Layer</b><br/>Ports + entities + types<br/><i>src/bioetl/domain/</i>"]
     end
 
     %% Allowed imports (solid green arrows)
