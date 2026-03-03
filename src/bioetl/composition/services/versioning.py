@@ -14,6 +14,7 @@ import hashlib
 import json
 import subprocess
 from functools import lru_cache
+from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as pkg_version
 from typing import TYPE_CHECKING, Any
 
@@ -157,5 +158,5 @@ def get_pipeline_version(
     # Fallback to bioetl package version
     try:
         return pkg_version("bioetl")
-    except Exception:
+    except (PackageNotFoundError, RuntimeError, ValueError, TypeError):
         return "unknown"

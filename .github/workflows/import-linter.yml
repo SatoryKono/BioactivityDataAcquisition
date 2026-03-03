@@ -60,6 +60,9 @@ jobs:
       - name: Ruff (lint)
         run: uv run ruff check src tests
 
+      - name: Ruff C901 Governance (no new complexity debt)
+        run: uv run python scripts/check_c901_baseline.py --target src/bioetl --baseline-file scripts/baselines/c901_baseline.json
+
       - name: Ruff (format check)
         run: uv run ruff format --check src tests
 

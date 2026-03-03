@@ -80,8 +80,13 @@ def test_pipeline_observer_success(metrics_mock, logger_mock, run_id):
     assert call_args[1]["labels"]["status"] == "success"
     assert call_args[1]["labels"]["pipeline"] == "test_pipeline"
 
-    # Verify counter
-    metrics_mock.increment_counter.assert_called_once()
+    # Verify run counter is emitted (along with unified observability counters)
+    run_counter_calls = [
+        call
+        for call in metrics_mock.increment_counter.call_args_list
+        if call[0][0] == "bioetl_pipeline_runs_total"
+    ]
+    assert len(run_counter_calls) == 1
 
     # Verify logs: start and finish
     assert logger_mock.info.call_count == 2
@@ -180,9 +185,14 @@ def test_observer_tracks_errors(metrics_mock, logger_mock, run_id):
     with pytest.raises(RuntimeError), observer:
         raise RuntimeError("Test error")
 
-    # Verify counter was incremented for failed status
-    metrics_mock.increment_counter.assert_called_once()
-    call_args = metrics_mock.increment_counter.call_args
+    # Verify run counter was incremented for failed status
+    run_counter_calls = [
+        call
+        for call in metrics_mock.increment_counter.call_args_list
+        if call[0][0] == "bioetl_pipeline_runs_total"
+    ]
+    assert len(run_counter_calls) == 1
+    call_args = run_counter_calls[0]
 
     assert call_args[0][0] == "bioetl_pipeline_runs_total"
     assert call_args[0][1] == 1
@@ -296,7 +306,23 @@ class TestObserverEmitEvent:
         assert call_args[0][0] == "custom_event"
         assert call_args[1]["phase"] == "preflight"
         assert call_args[1]["pipeline"] == "test_pipeline"
+        assert call_args[1]["provider"] == "test"
+        assert call_args[1]["run_id"] == str(run_id)
+        assert call_args[1]["severity"] == "info"
+        assert call_args[1]["error_type"] == "none"
         assert call_args[1]["custom_key"] == "custom_value"
+
+        metrics_mock.increment_counter.assert_called_once_with(
+            "observability_events_total",
+            1,
+            labels={
+                "event": "custom_event",
+                "provider": "test",
+                "pipeline": "test_pipeline",
+                "severity": "info",
+                "error_type": "none",
+            },
+        )
 
     def test_emit_event_uses_correct_log_level(self, metrics_mock, logger_mock, run_id):
         """Test emit_event routes to correct log level."""
@@ -358,12 +384,15 @@ class TestObserverEmitPhase:
 
         assert isinstance(start_time, float)
         assert start_time > 0
-        logger_mock.info.assert_called_with(
-            "preflight_started",
-            phase="preflight",
-            pipeline="test_pipeline",
-            run_id=str(run_id),
-        )
+        logger_mock.info.assert_called_once()
+        call_args = logger_mock.info.call_args
+        assert call_args[0][0] == "preflight_started"
+        assert call_args[1]["phase"] == "preflight"
+        assert call_args[1]["pipeline"] == "test_pipeline"
+        assert call_args[1]["provider"] == "test"
+        assert call_args[1]["run_id"] == str(run_id)
+        assert call_args[1]["severity"] == "info"
+        assert call_args[1]["error_type"] == "none"
 
     def test_emit_phase_completed_records_duration_metric(
         self, metrics_mock, logger_mock, run_id
@@ -568,8 +597,13 @@ class TestObserverVacuumEvents:
         )
 
         logger_mock.warning.assert_called()
-        # Counter should NOT be called on failure
-        assert metrics_mock.increment_counter.call_count == 0
+        # VACUUM metric should NOT be incremented on failure.
+        vacuum_calls = [
+            call
+            for call in metrics_mock.increment_counter.call_args_list
+            if call[0][0] == "vacuum_files_removed_total"
+        ]
+        assert len(vacuum_calls) == 0
 
 
 # ==================== Smoke Test: Key Lifecycle Events ====================

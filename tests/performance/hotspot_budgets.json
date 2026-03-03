@@ -1,0 +1,26 @@
+{
+  "version": "1.0",
+  "description": "Relative performance budgets for critical hotspot paths",
+  "benchmarks": {
+    "silver_prepare_arrow_2000": {
+      "baseline_latency_ms": 700.0,
+      "baseline_throughput_rps": 2850.0,
+      "max_regression_pct": 0.25
+    },
+    "silver_write_append_600": {
+      "baseline_latency_ms": 3000.0,
+      "baseline_throughput_rps": 200.0,
+      "max_regression_pct": 0.25
+    },
+    "silver_write_merge_600": {
+      "baseline_latency_ms": 7000.0,
+      "baseline_throughput_rps": 85.0,
+      "max_regression_pct": 0.25
+    },
+    "crossref_batch_fetch_200": {
+      "baseline_latency_ms": 500.0,
+      "baseline_throughput_rps": 400.0,
+      "max_regression_pct": 0.25
+    }
+  }
+}

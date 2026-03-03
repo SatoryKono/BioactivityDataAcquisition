@@ -146,6 +146,7 @@ Implementation note:
 - docs KPI checks ignore generated documentation export artifacts:
   - `docs/exports/*.merged.md`
   - `docs/reports/docs-export-report-YYYY-MM-DD-HHMMSS.md`
+- architecture sync checks (`tests/architecture/test_documentation_sync.py`) exclude generated docs artifacts from active-doc drift rules and validate them via dedicated generated-doc gates.
 - `docs/skills/local/nci-analysis/references/**` is published in nav (wave-7 curated promotion).
 
 ### 6.5 Wave-8 Ratified Decisions (2026-03-03)

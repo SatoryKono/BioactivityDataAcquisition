@@ -24,6 +24,7 @@ from bioetl.application.core.batch_transformer import BatchTransformer, Transfor
 from bioetl.application.core.batch_writer import BatchWriter
 from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
+from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.types import BatchID
 
 if TYPE_CHECKING:
@@ -67,6 +68,37 @@ class BatchExecutor:
 
     DEFAULT_BATCH_SIZE = 1000
     DEFAULT_CHECKPOINT_INTERVAL = 1000
+    _PIPELINE_EXECUTION_ERRORS = (
+        BioETLError,
+        OSError,
+        RuntimeError,
+        ValueError,
+        TypeError,
+        KeyError,
+        AttributeError,
+    )
+    _CHECKPOINT_SAVE_ERRORS = (
+        BioETLError,
+        OSError,
+        RuntimeError,
+        ValueError,
+        TypeError,
+    )
+    _SOURCE_METADATA_ERRORS = (
+        BioETLError,
+        OSError,
+        RuntimeError,
+        ValueError,
+        TypeError,
+        AttributeError,
+    )
+    _DQ_DATAFRAME_ERRORS = (
+        ImportError,
+        ModuleNotFoundError,
+        ValueError,
+        TypeError,
+        RuntimeError,
+    )
 
     def __init__(
         self,
@@ -241,7 +273,7 @@ class BatchExecutor:
         except PipelineShutdownError:
             await self._handle_shutdown(root_span)
             raise
-        except Exception as e:
+        except self._PIPELINE_EXECUTION_ERRORS as e:
             # Save checkpoint on crash for future --resume recovery
             try:
                 total = self._resume_offset + self.records_fetched
@@ -251,9 +283,15 @@ class BatchExecutor:
                         "Checkpoint saved on exception for recovery",
                         records_processed=total,
                         error_type=type(e).__name__,
+                        reason="checkpoint_saved_on_pipeline_exception",
                     )
-            except Exception:
-                pass  # Don't mask the original exception
+            except self._CHECKPOINT_SAVE_ERRORS as checkpoint_error:
+                self._logger.warning(
+                    "Checkpoint save failed during exception handling",
+                    records_processed=self._resume_offset + self.records_fetched,
+                    error_type=type(checkpoint_error).__name__,
+                    reason="checkpoint_save_failed_on_pipeline_exception",
+                )
             self._tracing.end_span(root_span, e)
             raise
         else:
@@ -380,9 +418,12 @@ class BatchExecutor:
                 result = get_metadata()
                 if isinstance(result, SourceMetadata):
                     source_metadata = result
-            except Exception:
-                # Gracefully handle any errors in metadata collection
-                pass
+            except self._SOURCE_METADATA_ERRORS as metadata_error:
+                self._logger.warning(
+                    "Source metadata collection failed",
+                    error_type=type(metadata_error).__name__,
+                    reason="source_metadata_collection_failed",
+                )
 
         # Inject query_string if we have one and it's not already set
         if self._query_string:
@@ -511,7 +552,7 @@ class BatchExecutor:
                 quarantined_count=result.quarantined_count,
             )
 
-        except Exception as e:
+        except self._PIPELINE_EXECUTION_ERRORS as e:
             self._tracing.end_span(span, e)
             raise
         else:
@@ -531,7 +572,7 @@ class BatchExecutor:
             result = await coro
             self._tracing.end_span(span)
             return result
-        except Exception as e:
+        except self._PIPELINE_EXECUTION_ERRORS as e:
             self._tracing.end_span(span, e)
             if on_error:
                 on_error(e)
@@ -556,7 +597,7 @@ class BatchExecutor:
             )
             self._tracing.end_span(span)
             return result
-        except Exception as e:
+        except self._PIPELINE_EXECUTION_ERRORS as e:
             self._tracing.end_span(span, e)
             raise
 
@@ -565,8 +606,13 @@ class BatchExecutor:
         try:
             total = self._resume_offset + self.records_fetched
             await self._checkpoint_manager.save_checkpoint(total)
-        except Exception:
-            pass  # Ignore errors during emergency checkpoint save
+        except self._CHECKPOINT_SAVE_ERRORS as checkpoint_error:
+            self._logger.warning(
+                "Emergency checkpoint save failed during shutdown",
+                records_processed=self._resume_offset + self.records_fetched,
+                error_type=type(checkpoint_error).__name__,
+                reason="checkpoint_save_failed_on_shutdown",
+            )
 
         self._tracing.end_span_with_shutdown(span)
 
@@ -670,10 +716,13 @@ class BatchExecutor:
             import polars as pl
 
             return pl.DataFrame(records)
-        except Exception:
-            # Catch all: Polars import failure OR DataFrame construction errors
-            # (malformed data, type mismatches). Graceful degradation: return None
-            # so DQ analysis can proceed with fallback logic.
+        except self._DQ_DATAFRAME_ERRORS as dataframe_error:
+            self._logger.warning(
+                "Failed to build dataframe for DQ context",
+                records_count=len(records),
+                error_type=type(dataframe_error).__name__,
+                reason="dq_dataframe_build_failed",
+            )
             return None
 
     def _get_dq_thresholds(self) -> tuple[float, float]:

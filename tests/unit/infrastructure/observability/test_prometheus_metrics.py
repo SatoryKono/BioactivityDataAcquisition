@@ -186,6 +186,7 @@ class TestRequiredMetricsSmoke:
         """Verify metrics have expected label names."""
         from bioetl.infrastructure.observability.metrics import (
             CIRCUIT_BREAKER_STATE,
+            OBSERVABILITY_EVENTS_TOTAL,
             PIPELINE_DURATION_SECONDS,
         )
 
@@ -199,6 +200,14 @@ class TestRequiredMetricsSmoke:
         # Circuit breaker state should have adapter label
         cb_labels = CIRCUIT_BREAKER_STATE._labelnames
         assert "adapter" in cb_labels
+
+        # Unified observer events should expose standardized labels
+        event_labels = OBSERVABILITY_EVENTS_TOTAL._labelnames
+        assert "event" in event_labels
+        assert "provider" in event_labels
+        assert "pipeline" in event_labels
+        assert "severity" in event_labels
+        assert "error_type" in event_labels
 
 
 @pytest.mark.unit

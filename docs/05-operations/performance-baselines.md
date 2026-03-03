@@ -7,6 +7,10 @@
 This document defines performance baselines for critical operations in BioETL.
 These baselines are enforced by benchmark tests in `tests/benchmarks/`.
 
+Hotspot regression budgets (relative thresholds for CI stability) are enforced by:
+- `tests/performance/test_hotspot_budgets.py`
+- `tests/performance/hotspot_budgets.json`
+
 ## Overview
 
 Performance baselines ensure that:
@@ -67,6 +71,16 @@ pytest tests/benchmarks/ --benchmark-save=baseline
 
 # Generate JSON report
 pytest tests/benchmarks/ --benchmark-json=benchmark.json
+
+# Run blocking hotspot regression budgets (relative thresholds)
+pytest tests/performance/test_hotspot_budgets.py -m "benchmark and performance" -p no:xdist
+
+# Collect observations and recalibrate baselines
+BIOETL_PERF_OBS_OUT=/tmp/hotspot-observations.jsonl \
+pytest tests/performance/test_hotspot_budgets.py -m "benchmark and performance" -p no:xdist
+python scripts/calibrate_hotspot_budgets.py \
+  --observations /tmp/hotspot-observations.jsonl \
+  --budgets tests/performance/hotspot_budgets.json
 ```
 
 ## Updating Baselines

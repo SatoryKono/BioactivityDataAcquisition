@@ -635,7 +635,7 @@ class TestHealthServerErrorHandling:
         mock_logger = MagicMock()
         server = HealthServer(host="127.0.0.1", port=0, logger=mock_logger)
 
-        # Mock _process_request to raise a generic Exception
+        # Mock _process_request to raise a typed request-processing exception
         mock_reader = AsyncMock()
         mock_writer = MagicMock()
         mock_writer.write = MagicMock()
@@ -643,9 +643,9 @@ class TestHealthServerErrorHandling:
         mock_writer.close = MagicMock()
         mock_writer.wait_closed = AsyncMock()
 
-        # Patch _process_request to raise a generic Exception
+        # Patch _process_request to raise typed exception from allowlist
         with patch.object(
-            server, "_process_request", side_effect=Exception("Test exception")
+            server, "_process_request", side_effect=RuntimeError("Test exception")
         ):
             await server._handle_connection(mock_reader, mock_writer)
 
@@ -656,7 +656,10 @@ class TestHealthServerErrorHandling:
 
         # Verify error was logged
         mock_logger.error.assert_called_with(
-            "health_server_error", error="Test exception"
+            "health_server_error",
+            error="Test exception",
+            error_type="RuntimeError",
+            reason="request_processing_failed",
         )
 
     @pytest.mark.asyncio
@@ -693,7 +696,10 @@ class TestHealthServerErrorHandling:
             await server._handle_request_error(mock_writer, error)
 
             mock_logger.error.assert_called_with(
-                "health_server_error", error="Test error"
+                "health_server_error",
+                error="Test error",
+                error_type="Exception",
+                reason="request_processing_failed",
             )
         finally:
             await server.stop()
@@ -705,7 +711,7 @@ class TestHealthServerErrorHandling:
 
         # Create mock writer that raises on close
         mock_writer = MagicMock()
-        mock_writer.close = MagicMock(side_effect=Exception("Close error"))
+        mock_writer.close = MagicMock(side_effect=OSError("Close error"))
         mock_writer.wait_closed = MagicMock(return_value=asyncio.Future())
         mock_writer.wait_closed.return_value.set_result(None)
 
