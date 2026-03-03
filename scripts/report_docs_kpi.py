@@ -31,6 +31,10 @@ MKDOCS_FILE = PROJECT_ROOT / "mkdocs.yml"
 MD_PATH_RE = re.compile(r"[A-Za-z0-9_./-]+\.md")
 MD_LINK_RE = re.compile(r"\[[^\]]*\]\((?!https?://|mailto:)([^)#]+)")
 INLINE_CODE_RE = re.compile(r"`[^`]*`")
+GENERATED_EXPORT_MERGED_RE = re.compile(r"^exports/.+\.merged\.md$")
+GENERATED_DOCS_EXPORT_REPORT_RE = re.compile(
+    r"^reports/docs-export-report-\d{4}-\d{2}-\d{2}-\d{6}\.md$"
+)
 
 DEFAULT_TARGET_NOT_IN_NAV = 120
 DEFAULT_HARD_LIMIT_NOT_IN_NAV = 135
@@ -40,8 +44,13 @@ DEFAULT_TARGET_DEADLINE = "2026-06-30"
 
 def _is_generated_docs_artifact(path: Path) -> bool:
     """Return True for generated docs artifacts that must be excluded from KPI."""
-    rel_parts = path.relative_to(DOCS_DIR).parts
-    return bool(rel_parts) and rel_parts[0] == "site"
+    rel_path = path.relative_to(DOCS_DIR).as_posix()
+    rel_parts = Path(rel_path).parts
+    if bool(rel_parts) and rel_parts[0] == "site":
+        return True
+    if GENERATED_EXPORT_MERGED_RE.match(rel_path):
+        return True
+    return bool(GENERATED_DOCS_EXPORT_REPORT_RE.match(rel_path))
 
 
 @dataclass(frozen=True)

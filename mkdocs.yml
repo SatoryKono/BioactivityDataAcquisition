@@ -304,8 +304,6 @@ nav:
             -   "PubMed Extraction": 05-operations/verification/pubmed-extraction-verification-report.md
             -   "SemanticScholar Publication": 05-operations/verification/semanticscholar-publication-pipeline-verification.md
     -   "Internal / Extended":
-            -   "Codex Setup": codex-setup.md
-            -   "Audit Merge Plan": audit-bolt-branches-merge-plan.md
             -   Agents:
                     -   "Agents Overview": 00-project/agents/README.md
                     -   "AGENT": 00-project/agents/AGENT.md
