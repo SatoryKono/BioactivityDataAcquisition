@@ -8,8 +8,8 @@ Define explicit policy decisions for the remaining `outside nav` backlog after w
 
 ## Current State Snapshot
 
-- Total docs: `676`
-- In nav: `640`
+- Total docs: `677`
+- In nav: `641`
 - Outside nav: `36`
 - Orphans: `0`
 - Residual buckets:
