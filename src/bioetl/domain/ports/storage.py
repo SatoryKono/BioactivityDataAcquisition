@@ -44,6 +44,7 @@ class StoragePort(Protocol):
     data lake, data warehouse), allowing the application to write data to
     different layers without knowing the implementation details.
     """
+
     async def write_bronze(
         self,
         records: Iterator[bytes],

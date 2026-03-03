@@ -48,7 +48,9 @@ def _extract_id_from_url(url: str | None) -> str | None:
     return url.rstrip("/").split("/")[-1] if "/" in url else url
 
 
-def _get_nested_display_name(obj: Any) -> str | None:  # Any: untyped JSON fragment from OpenAlex API
+def _get_nested_display_name(
+    obj: Any,
+) -> str | None:  # Any: untyped JSON fragment from OpenAlex API
     """Get display_name from nested dict (helper function).
 
     Args:
@@ -62,7 +64,9 @@ def _get_nested_display_name(obj: Any) -> str | None:  # Any: untyped JSON fragm
     return None
 
 
-def _parse_topic_dict(topic: dict[str, Any]) -> dict[str, Any] | None:  # Any: untyped JSON fragment from OpenAlex API
+def _parse_topic_dict(
+    topic: dict[str, Any],
+) -> dict[str, Any] | None:  # Any: untyped JSON fragment from OpenAlex API
     """Parse a single topic dict into normalized format (helper function).
 
     Args:
@@ -124,7 +128,9 @@ def extract_openalex_id(openalex_url: str | None) -> str | None:
     return openalex_url
 
 
-def extract_authors(authorships: list[dict[str, Any]]) -> list[str]:  # Any: untyped JSON fragment from OpenAlex API
+def extract_authors(
+    authorships: list[dict[str, Any]],
+) -> list[str]:  # Any: untyped JSON fragment from OpenAlex API
     """Extract author display names from authorships array.
 
     Args:
@@ -168,7 +174,9 @@ def _extract_orcid_from_url(url: str | None) -> str:
     return ""
 
 
-def extract_author_ids(authorships: list[dict[str, Any]]) -> list[str]:  # Any: untyped JSON fragment from OpenAlex API
+def extract_author_ids(
+    authorships: list[dict[str, Any]],
+) -> list[str]:  # Any: untyped JSON fragment from OpenAlex API
     """Extract OpenAlex author IDs from authorships (preserving order).
 
     Args:
@@ -189,7 +197,9 @@ def extract_author_ids(authorships: list[dict[str, Any]]) -> list[str]:  # Any: 
     return author_ids
 
 
-def extract_author_orcids(authorships: list[dict[str, Any]]) -> list[str]:  # Any: untyped JSON fragment from OpenAlex API
+def extract_author_orcids(
+    authorships: list[dict[str, Any]],
+) -> list[str]:  # Any: untyped JSON fragment from OpenAlex API
     """Extract ORCID identifiers from authorships (preserving order).
 
     Args:
@@ -218,7 +228,9 @@ def extract_author_orcids(authorships: list[dict[str, Any]]) -> list[str]:  # An
     return orcids
 
 
-def extract_affiliations(authorships: list[dict[str, Any]]) -> list[str]:  # Any: untyped JSON fragment from OpenAlex API
+def extract_affiliations(
+    authorships: list[dict[str, Any]],
+) -> list[str]:  # Any: untyped JSON fragment from OpenAlex API
     """Extract unique affiliations from authorships (sorted).
 
     Args:
@@ -243,7 +255,9 @@ def extract_affiliations(authorships: list[dict[str, Any]]) -> list[str]:  # Any
     return sorted(affiliations)
 
 
-def extract_institution_ids(authorships: list[dict[str, Any]]) -> list[str]:
+def extract_institution_ids(
+    authorships: list[dict[str, Any]],
+) -> list[str]:  # Any: untyped JSON fragment from OpenAlex API
     """Extract unique OpenAlex institution IDs from authorships.
 
     Args:
@@ -268,7 +282,7 @@ def extract_institution_ids(authorships: list[dict[str, Any]]) -> list[str]:
     return sorted(ids)
 
 
-def extract_institution_country_codes(authorships: list[dict[str, Any]]) -> list[str]:
+def extract_institution_country_codes(authorships: list[dict[str, Any]]) -> list[str]:  # Any: untyped JSON fragment from OpenAlex API
     """Extract unique institution country codes from authorships.
 
     Args:
@@ -292,7 +306,7 @@ def extract_institution_country_codes(authorships: list[dict[str, Any]]) -> list
     return sorted(codes)
 
 
-def extract_institution_ror_ids(authorships: list[dict[str, Any]]) -> list[str]:
+def extract_institution_ror_ids(authorships: list[dict[str, Any]]) -> list[str]:  # Any: untyped JSON fragment from OpenAlex API
     """Extract unique ROR IDs from authorships institutions.
 
     Args:
