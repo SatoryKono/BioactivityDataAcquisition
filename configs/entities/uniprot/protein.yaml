@@ -12,6 +12,10 @@ pipeline:
     silver:
       partition_by:
       - organism
+      sort_by:
+      - accession
+      primary_key:
+      - accession
 schema:
   content_hash:
     include: []

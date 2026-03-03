@@ -16,6 +16,7 @@ import sys
 from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
+from typing import Any
 
 import yaml
 
@@ -38,90 +39,109 @@ class ConfigGaps:
         return len(self.critical) + len(self.medium) + len(self.low)
 
 
-def analyze_standard_config(config: dict, gaps: ConfigGaps) -> None:
-    """Analyze standard (non-composite) pipeline config."""
-    # === ADR-025: Required fields (MUST) ===
-    for fld in [
-        "pipeline_name",
-        "provider",
-        "entity_type",
-        "primary_keys",
-        "silver_table",
-    ]:
-        if fld not in config:
-            gaps.critical.append(f"Missing MUST field: {fld}")
+def _as_dict(value: Any) -> dict[str, Any]:
+    """Return value as dict if possible, else empty dict."""
+    return value if isinstance(value, dict) else {}
 
-    # === ADR-025: Recommended fields (SHOULD) ===
-    for fld in ["version", "description", "gold_table"]:
-        if fld not in config:
-            gaps.medium.append(f"Missing SHOULD field: {fld}")
+
+def analyze_standard_config(
+    pipeline_config: dict[str, Any],
+    gaps: ConfigGaps,
+    full_config: dict[str, Any] | None = None,
+) -> None:
+    """Analyze standard (non-composite) pipeline config.
+
+    Supports the current unified format:
+    - top-level sections: pipeline/schema/quality/filters/contracts
+    - pipeline.business_primary_keys
+    - optional pipeline.sink.* sections
+    """
+    # === ADR-025: Required pipeline fields (MUST) ===
+    for fld in ("pipeline_name", "provider", "entity_type", "business_primary_keys"):
+        if fld not in pipeline_config:
+            gaps.critical.append(f"Missing MUST field: pipeline.{fld}")
+
+    business_keys = pipeline_config.get("business_primary_keys")
+    if not isinstance(business_keys, list) or not business_keys:
+        gaps.critical.append("pipeline.business_primary_keys must be a non-empty list")
+
+    # === ADR-025: Recommended metadata fields (SHOULD) ===
+    top = full_config or {}
+    if "version" not in top:
+        gaps.medium.append("Missing SHOULD field: top-level version")
+    if "description" not in pipeline_config:
+        gaps.medium.append("Missing SHOULD field: pipeline.description")
 
     # === ADR-025: Version format ===
-    version = config.get("version", "")
+    version = top.get("version")
     if version and not re.match(r"^\d+\.\d+\.\d+$", str(version)):
         gaps.medium.append(f"Version '{version}' not semver format")
 
-    # === ADR-014: sort_by in sink ===
-    sink = config.get("sink", {})
+    # === Unified key consistency checks ===
+    contracts = _as_dict(top.get("contracts"))
+    contract_pk = contracts.get("primary_key")
+    if contract_pk is None:
+        gaps.critical.append("Missing MUST field: contracts.primary_key")
+    elif isinstance(business_keys, list) and isinstance(contract_pk, list):
+        if sorted(str(v) for v in business_keys) != sorted(str(v) for v in contract_pk):
+            gaps.medium.append(
+                "Mismatch between pipeline.business_primary_keys and contracts.primary_key"
+            )
 
-    # Check silver sink
-    silver = sink.get("silver", {})
-    if silver:
-        if "sort_by" not in silver:
-            gaps.critical.append("Missing sink.silver.sort_by (ADR-014)")
-        if "primary_key" not in silver:
-            gaps.critical.append("Missing sink.silver.primary_key (ADR-025)")
-    else:
-        gaps.critical.append("Missing sink.silver section")
+    # === ADR-014/025: Sink checks (optional but recommended when present) ===
+    sink = _as_dict(pipeline_config.get("sink"))
+    if sink:
+        silver = _as_dict(sink.get("silver"))
+        gold = _as_dict(sink.get("gold"))
 
-    # Check gold sink
-    gold = sink.get("gold", {})
-    if gold:
-        # Gold is enabled by default unless explicitly disabled
-        gold_enabled = gold.get("enabled", True)
-        if gold_enabled and "sort_by" not in gold:
-            gaps.critical.append("Missing sink.gold.sort_by (ADR-014)")
-    else:
-        # Missing gold section is medium - not all pipelines need Gold
-        gaps.medium.append("Missing sink.gold section")
-
-    # Check bronze sink
-    if "bronze" not in sink:
-        gaps.medium.append("Missing sink.bronze section")
+        if silver:
+            if "sort_by" not in silver:
+                gaps.medium.append("Missing sink.silver.sort_by (ADR-014)")
+            if "primary_key" not in silver:
+                gaps.medium.append("Missing sink.silver.primary_key (ADR-025)")
+        if gold:
+            gold_enabled = gold.get("enabled", True)
+            if gold_enabled and "sort_by" not in gold:
+                gaps.medium.append("Missing sink.gold.sort_by (ADR-014)")
 
     # === ADR-025: Hierarchical paths (SHOULD) ===
-    provider = config.get("provider", "")
-    entity = config.get("entity_type", "")
-    if provider and entity:
-        expected_pattern = f"{provider}/{entity}"
-        for layer in ["bronze", "silver", "gold"]:
-            layer_cfg = sink.get(layer, {})
+    provider = pipeline_config.get("provider", "")
+    entity = pipeline_config.get("entity_type", "")
+    if provider and entity and sink:
+        expected_suffix = f"{provider}/{entity}"
+        for layer in ("bronze", "silver", "gold"):
+            layer_cfg = _as_dict(sink.get(layer))
             path = layer_cfg.get("path", "")
-            if path and expected_pattern not in path:
+            if isinstance(path, str) and path and not path.endswith(expected_suffix):
                 gaps.low.append(
-                    f"sink.{layer}.path not hierarchical ({provider}/{entity})"
+                    f"sink.{layer}.path should end with '{expected_suffix}' (got '{path}')"
                 )
 
     # === ADR-027: DQ rules ===
-    if "dq_overrides" in config:
-        dq = config["dq_overrides"]
-        # Check for inline thresholds (deprecated)
+    for dq_parent_name, dq_parent in (
+        ("top-level", top),
+        ("pipeline", pipeline_config),
+    ):
+        dq = _as_dict(dq_parent.get("dq_overrides"))
         if "soft_fail_threshold" in dq or "hard_fail_threshold" in dq:
-            gaps.medium.append("Inline dq_overrides thresholds (deprecated per ADR-027)")
+            gaps.medium.append(
+                f"Inline dq_overrides thresholds in {dq_parent_name} (deprecated per ADR-027)"
+            )
 
     # === ADR-025: gold_filters ===
-    gf = config.get("gold_filters", {})
-    if not gf:
-        gaps.low.append("Missing gold_filters section")
-    elif not gf.get("required_fields"):
-        gaps.low.append("gold_filters.required_fields empty or missing")
+    filters = _as_dict(top.get("filters"))
+    gold_filters = _as_dict(filters.get("gold_filters"))
+    if not gold_filters:
+        gaps.low.append("Missing filters.gold_filters section")
+    elif not gold_filters.get("required_fields"):
+        gaps.low.append("filters.gold_filters.required_fields empty or missing")
 
 
-def analyze_composite_config(config: dict, gaps: ConfigGaps) -> None:
+def analyze_composite_config(config: dict[str, Any], gaps: ConfigGaps) -> None:
     """Analyze composite pipeline config (ADR-026 structure)."""
     gaps.is_composite = True
 
-    composite = config.get("composite", {})
+    composite = _as_dict(config.get("composite"))
 
     # === Required composite fields ===
     if not composite:
@@ -133,7 +153,7 @@ def analyze_composite_config(config: dict, gaps: ConfigGaps) -> None:
             gaps.critical.append(f"Missing composite.{fld}")
 
     # === Seed validation ===
-    seed = composite.get("seed", {})
+    seed = _as_dict(composite.get("seed"))
     if seed:
         for fld in ["pipeline", "output_keys", "silver_table"]:
             if fld not in seed:
@@ -150,11 +170,11 @@ def analyze_composite_config(config: dict, gaps: ConfigGaps) -> None:
             gaps.medium.append(f"Missing silver_table in enricher[{i}]")
 
     # === Merge validation ===
-    merge = composite.get("merge", {})
+    merge = _as_dict(composite.get("merge"))
     if merge:
         if "strategy" not in merge:
             gaps.medium.append("Missing composite.merge.strategy")
-        output = merge.get("output", {})
+        output = _as_dict(merge.get("output"))
         if not output.get("silver"):
             gaps.medium.append("Missing composite.merge.output.silver")
         if not output.get("gold"):
@@ -177,7 +197,7 @@ def analyze_config(config_path: Path) -> ConfigGaps:
     gaps = ConfigGaps(path=config_path)
 
     try:
-        with open(config_path) as f:
+        with open(config_path, encoding="utf-8") as f:
             config = yaml.safe_load(f)
     except Exception as e:
         gaps.critical.append(f"YAML parse error: {e}")
@@ -194,7 +214,7 @@ def analyze_config(config_path: Path) -> ConfigGaps:
         pipeline_config = dict(config["pipeline"])
         pipeline_config.setdefault("provider", config.get("provider"))
         pipeline_config.setdefault("entity_type", config.get("entity"))
-        analyze_standard_config(pipeline_config, gaps)
+        analyze_standard_config(pipeline_config, gaps, config)
         for section in ("schema", "quality", "filters", "contracts"):
             if section not in config:
                 gaps.critical.append(f"Missing unified section: {section}")
@@ -255,11 +275,11 @@ def generate_report(all_gaps: list[ConfigGaps]) -> str:
             config_type = " (composite)" if g.is_composite else ""
             lines.append(f"### `{rel}`{config_type}")
             for issue in g.critical:
-                lines.append(f"- ❌ {issue}")
+                lines.append(f"- [CRIT] {issue}")
             lines.append("")
     else:
         lines.extend(
-            ["## Critical Issues (MUST fix)", "", "✅ No critical issues found!", ""]
+            ["## Critical Issues (MUST fix)", "", "No critical issues found.", ""]
         )
 
     # Medium
@@ -271,7 +291,7 @@ def generate_report(all_gaps: list[ConfigGaps]) -> str:
             config_type = " (composite)" if g.is_composite else ""
             lines.append(f"### `{rel}`{config_type}")
             for issue in g.medium:
-                lines.append(f"- ⚠️ {issue}")
+                lines.append(f"- [WARN] {issue}")
             lines.append("")
 
     # Low
@@ -283,7 +303,7 @@ def generate_report(all_gaps: list[ConfigGaps]) -> str:
             config_type = " (composite)" if g.is_composite else ""
             lines.append(f"### `{rel}`{config_type}")
             for issue in g.low:
-                lines.append(f"- ℹ️ {issue}")
+                lines.append(f"- [INFO] {issue}")
             lines.append("")
 
     # Action items
@@ -292,20 +312,19 @@ def generate_report(all_gaps: list[ConfigGaps]) -> str:
             "## Recommended Actions",
             "",
             "### Priority 0 (Critical - Blocks CI)",
-            "1. Add `sort_by` to all silver sinks (ADR-014 compliance)",
-            "2. Add `sort_by` to all gold sinks where gold.enabled=true (ADR-014)",
-            "3. Add `primary_key` to all silver sinks (ADR-025 compliance)",
-            "4. Add required fields: `pipeline_name`, `provider`, `entity_type`, `primary_keys`, `silver_table`",
+            "1. Add missing required pipeline fields (`pipeline_name`, `provider`, `entity_type`, `business_primary_keys`)",
+            "2. Ensure `contracts.primary_key` exists and is aligned with `pipeline.business_primary_keys`",
+            "3. Add missing unified sections (`pipeline`, `schema`, `quality`, `filters`, `contracts`)",
             "",
             "### Priority 1 (Medium - Should Fix)",
-            "1. Add `version`, `description`, `gold_table` where missing (ADR-025)",
+            "1. Add `pipeline.description` and semver `version` where missing",
             "2. Migrate inline `dq_overrides` thresholds to `dq_config_file` (ADR-027)",
-            "3. Add missing `sink.bronze` and `sink.gold` sections",
+            "3. For configs using `pipeline.sink`, add `sort_by`/`primary_key` for deterministic writes",
             "",
             "### Priority 2 (Low - Nice to Have)",
-            "1. Unify path patterns to `{provider}/{entity}` hierarchy",
+            "1. Unify `sink.*.path` to end with `{provider}/{entity}`",
             "2. Reference existing DQ config files via `dq_config_file`",
-            "3. Add `gold_filters.required_fields` where missing",
+            "3. Add `filters.gold_filters.required_fields` where missing",
             "",
             "## ADR References",
             "",
@@ -350,9 +369,9 @@ def main() -> int:
                 except ValueError:
                     continue
             status = (
-                "❌"
+                "[FAIL]"
                 if gaps.critical
-                else ("⚠️" if gaps.medium else ("ℹ️" if gaps.low else "✅"))
+                else ("[WARN]" if gaps.medium else ("[INFO]" if gaps.low else "[OK]"))
             )
             print(
                 f"{status} {rel}: {len(gaps.critical)} critical, {len(gaps.medium)} medium, {len(gaps.low)} low"

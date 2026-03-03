@@ -11,7 +11,6 @@ from datetime import datetime
 
 import polars as pl
 import pyarrow as pa
-import pytest
 
 from bioetl.application.services.dq._checks_integrity import (
     check_referential_integrity,
@@ -66,7 +65,7 @@ class TestCheckReferentialIntegrityExtended:
     def test_small_orphan_rate_warns_not_fails(self) -> None:
         """<=1% orphans → WARN, not FAIL."""
         # 200 records with 1 orphan → 0.5% orphan rate
-        cat_ids = list(range(1, 200)) + [9999]  # 200 records, 1 orphan
+        cat_ids = [*list(range(1, 200)), 9999]  # 200 records, 1 orphan
         df = pl.DataFrame({"cat_id": cat_ids})
         ref = pl.DataFrame({"id": list(range(1, 200))})
         result = check_referential_integrity(df, {"cat_id -> categories.id": ref})
@@ -83,7 +82,7 @@ class TestCheckReferentialIntegrityExtended:
 
     def test_overall_warn_when_small_orphan_no_fail(self) -> None:
         """If some FK has tiny orphan rate → WARN overall."""
-        cat_ids = list(range(1, 200)) + [9999]
+        cat_ids = [*list(range(1, 200)), 9999]
         df = pl.DataFrame({"cat_id": cat_ids})
         ref = pl.DataFrame({"id": list(range(1, 200))})
         result = check_referential_integrity(df, {"cat_id -> categories.id": ref})

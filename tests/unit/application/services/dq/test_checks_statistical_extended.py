@@ -8,7 +8,6 @@ Tests covering gaps identified in coverage analysis:
 from __future__ import annotations
 
 import polars as pl
-import pytest
 
 from bioetl.application.services.dq._checks_statistical import (
     check_anomaly_detection,
@@ -138,7 +137,6 @@ class TestAnomalyDetectionExtended:
 
     def test_record_count_anomaly_large_zscore(self) -> None:
         """Large record count deviation → anomaly."""
-        df = pl.DataFrame({"id": list(range(1))})  # 1 record
         baseline_stats = {
             "days_since_start": 45,
             "null_rate_ma30": 0.0,
