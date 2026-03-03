@@ -1,7 +1,7 @@
 # BioETL Makefile
 # Production-ready ETL system for bioactivity data
 
-.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-preflight clean-all diagram-preflight lint-diagrams report-diagrams-policy validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png check-diagrams-visibility diagrams-all report-diagram-padding docs-lint
+.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-local-artifacts clean-preflight clean-all diagram-preflight lint-diagrams report-diagrams-policy validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png check-diagrams-visibility diagrams-all report-diagram-padding docs-lint
 .DEFAULT_GOAL := help
 
 # Detect uv availability (preferred package manager)
@@ -280,6 +280,28 @@ clean: ## Clean up generated files (Python artifacts, caches, build outputs)
 	find . -type f -name "*.pyo" -delete 2>/dev/null || true
 	rm -rf build/ dist/ htmlcov/ .coverage .coverage.* coverage.xml 2>/dev/null || true
 	@echo "$(GREEN)Cleanup complete!$(NC)"
+
+clean-local-artifacts: ## Clean local-only artifacts in repo root (use DRY_RUN=1, PURGE_WORKTREES=1)
+	@echo "$(YELLOW)Cleaning local-only artifacts (DRY_RUN=$(DRY_RUN), PURGE_WORKTREES=$(PURGE_WORKTREES))...$(NC)"
+	@set -eu; \
+	remove_cmd="rm -rf"; \
+	remove_file_cmd="rm -f"; \
+	if [ "$(DRY_RUN)" = "1" ]; then \
+		remove_cmd="echo [DRY_RUN] rm -rf"; \
+		remove_file_cmd="echo [DRY_RUN] rm -f"; \
+	else \
+		$(MAKE) clean; \
+	fi; \
+	$$remove_cmd site htmlcov .mypy_cache .pytest_cache .ruff_cache .hypothesis .benchmarks .import_linter_cache; \
+	$$remove_file_cmd bash.exe.stackdump full_log.txt log_test.txt coverage_output.txt coverage_summary.txt profile.svg; \
+	find . -maxdepth 1 -type f \( -name "test_backfill_*" -o -name "test_chembl_*" -o -name "test_failed_*" -o -name "test_full_pipeline_*" -o -name "test_multiple_*" -o -name "test_pipeline_*" -o -name "test_pubchem_*" -o -name "test_rebuild_*" -o -name "test_run_type_*" -o -name "test_vacuum_*" -o -name "*.stackdump" \) -print | while read -r f; do $$remove_file_cmd "$$f"; done; \
+	if [ "$(PURGE_WORKTREES)" = "1" ]; then \
+		echo "$(YELLOW)Purging .worktrees and .rollback directories$(NC)"; \
+		$$remove_cmd .worktrees .rollback; \
+	else \
+		echo "$(BLUE)Skipping .worktrees/.rollback purge (set PURGE_WORKTREES=1 to enable)$(NC)"; \
+	fi
+	@echo "$(GREEN)Local artifact cleanup complete!$(NC)"
 
 
 clean-preflight: ## Clean preflight artifacts (use DRY_RUN=1 for preview)
