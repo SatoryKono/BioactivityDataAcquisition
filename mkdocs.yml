@@ -690,8 +690,6 @@ nav:
             -   "Skills":
                 -   "Overview": skills/README.md
                 -   "Global Skills":
-                    -   "Skill Creator (System)": skills/global/.system/skill-creator/SKILL.md
-                    -   "Skill Installer (System)": skills/global/.system/skill-installer/SKILL.md
                     -   "Skill": skills/global/agent-orchestration/SKILL.md
                     -   "Skill": skills/global/documentation-audit/SKILL.md
                     -   "Audit Checklist": skills/global/documentation-audit/references/audit-checklist.md
@@ -721,6 +719,8 @@ nav:
                     -   "Research Protocols": skills/local/collecting-evidence/references/research-protocols.md
                     -   "Create PR": skills/local/create-pr/SKILL.md
                     -   "Deep Research": skills/local/deep-research/SKILL.md
+                    -   "Deep Research Critique Framework": skills/local/deep-research/references/critique-framework.md
+                    -   "Deep Research Report Templates": skills/local/deep-research/references/report-templates.md
                     -   "Deep Research Search Patterns": skills/local/deep-research/references/search-patterns.md
                     -   "Deep Research Source Evaluation": skills/local/deep-research/references/source-evaluation.md
                     -   "Skill": skills/local/documentation-audit/SKILL.md
@@ -729,11 +729,16 @@ nav:
                     -   "Skill": skills/local/documentation-cascade-audit/SKILL.md
                     -   "Generating Constrained Specs": skills/local/generating-constrained-specs/SKILL.md
                     -   "Constrained Specs PRD Template": skills/local/generating-constrained-specs/references/prd-template.md
+                    -   "Constrained Specs Architecture Template": skills/local/generating-constrained-specs/references/architecture-template.md
+                    -   "Constrained Specs Rules": skills/local/generating-constrained-specs/references/constraint-rules.md
                     -   "Initializing Ledger": skills/local/initializing-ledger/SKILL.md
+                    -   "Ledger Brief Template": skills/local/initializing-ledger/references/brief-template.md
+                    -   "Ledger Pillar Definitions": skills/local/initializing-ledger/references/pillar-definitions.md
                     -   "Making Decisions": skills/local/making-decisions/SKILL.md
                     -   "Decision Ledger Schema": skills/local/making-decisions/references/decision-ledger-schema.md
                     -   "Risk Ledger Schema": skills/local/making-decisions/references/risk-ledger-schema.md
                     -   "NCI Analysis": skills/local/nci-analysis/SKILL.md
+                    -   "NCI Categories": skills/local/nci-analysis/references/categories.md
                     -   "Skill": skills/local/new-pipeline/SKILL.md
                     -   "Skill": skills/local/public/architecture-guardian/SKILL.md
                     -   "Skill": skills/local/py-audit-bot/SKILL.md
