@@ -51,6 +51,14 @@ def _parse_args() -> argparse.Namespace:
         action="store_true",
         help="Rewrite .github/vcr-noext-allowlist.txt based on current extensionless files.",
     )
+    parser.add_argument(
+        "--drop-paired",
+        action="store_true",
+        help=(
+            "When used with --apply, delete extensionless files that already have "
+            "a sibling *.yaml file."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -83,9 +91,14 @@ def main() -> int:
         return 0
 
     migrated = 0
+    dropped_paired = 0
     for source, target in solo:
         source.rename(target)
         migrated += 1
+    if args.drop_paired:
+        for source, _ in pairs:
+            source.unlink()
+            dropped_paired += 1
 
     updated_extensionless = _collect_extensionless()
     if args.sync_allowlist:
@@ -93,9 +106,10 @@ def main() -> int:
 
     sys.stdout.write(
         "Migration complete: "
-        f"migrated={migrated}, remaining_extensionless={len(updated_extensionless)}\n"
+        f"migrated={migrated}, dropped_paired={dropped_paired}, "
+        f"remaining_extensionless={len(updated_extensionless)}\n"
     )
-    if pairs:
+    if pairs and not args.drop_paired:
         sys.stdout.write(
             "NOTE: paired files were preserved (manual review required before deletion).\n"
         )

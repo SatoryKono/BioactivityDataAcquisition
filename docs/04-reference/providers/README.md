@@ -31,7 +31,9 @@ ChEMBL provides comprehensive bioactivity data with multiple entity types:
 | [Publication Similarity](chembl/publication-similarity.md) | Publication similarity | Active |
 | [Publication Term](chembl/publication-term.md) | Publication terms | Active |
 | [Protein Class](chembl/protein-class.md) | Protein classification | Active |
+| [Subcellular Fraction](chembl/subcellular-fraction.md) | Subcellular fraction vocabulary | Active |
 | [Target Component](chembl/target-component.md) | Target components | Active |
+| [Tissue](chembl/tissue.md) | Tissue and anatomical context | Active |
 
 ## Provider Configuration
 

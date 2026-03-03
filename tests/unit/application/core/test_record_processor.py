@@ -26,39 +26,38 @@ def _write_temp_pipeline_config(
     """Создаёт временную YAML-конфигурацию пайплайна с кастомными DQ-порогами."""
 
     provider, entity = pipeline_name.split("_", 1)
-    config_dir = base_path / "configs" / "pipelines" / provider
+    config_dir = base_path / "configs" / "entities" / provider
     config_dir.mkdir(parents=True, exist_ok=True)
     config_path = config_dir / f"{entity}.yaml"
-
-    # Create schema file (required by schema_file)
-    schema_dir = base_path / "configs" / "schemas" / provider
-    schema_dir.mkdir(parents=True, exist_ok=True)
-    schema_path = schema_dir / f"{entity}.yaml"
-    schema_path.write_text(
-        "\n".join(
-            [
-                "version: '1.0.0'",
-                "fields: []",
-            ]
-        ),
-        encoding="utf-8",
-    )
 
     config_path.write_text(
         "\n".join(
             [
-                f"pipeline_name: {pipeline_name}",
+                "version: '1.0.0'",
                 f"provider: {provider}",
-                f"entity_type: {entity}",
-                "primary_keys: ['id']",
-                "silver_table: 'tmp_silver'",
-                "batch_size: 10",
-                "checkpoint_interval: 100",
-                "sink: {}",
-                f"schema_file: '../../schemas/{provider}/{entity}.yaml'",
-                "dq_overrides:",
-                f"  soft_fail_threshold: {soft_threshold}",
-                f"  hard_fail_threshold: {hard_threshold}",
+                f"entity: {entity}",
+                "pipeline:",
+                f"  pipeline_name: {pipeline_name}",
+                f"  provider: {provider}",
+                f"  entity_type: {entity}",
+                "  primary_keys: ['id']",
+                "  silver_table: 'tmp_silver'",
+                "  batch_size: 10",
+                "  checkpoint_interval: 100",
+                "  sink: {}",
+                "  dq_overrides:",
+                f"    soft_fail_threshold: {soft_threshold}",
+                f"    hard_fail_threshold: {hard_threshold}",
+                "schema:",
+                "  column_groups:",
+                "    - name: system",
+                "      fields: [entity_id]",
+                "    - name: business",
+                "      fields: [value]",
+                "  silver:",
+                "    include_groups: [system, business]",
+                "  gold:",
+                "    include_groups: [system, business]",
             ]
         ),
         encoding="utf-8",

@@ -37,7 +37,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Thu, 12 Feb 2026 17:09:40 GMT
+      - Tue, 03 Mar 2026 14:18:28 GMT
       Strict-Transport-Security:
       - max-age=31536000; includeSubDomains
       Vary:
@@ -283,7 +283,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Thu, 12 Feb 2026 17:09:45 GMT
+      - Tue, 03 Mar 2026 14:18:32 GMT
       Link:
       - <https://rest.uniprot.org/uniprotkb/search?format=json&fields=accession,id,protein_name,gene_names,organism_name,organism_id,lineage,sequence,length,mass,protein_existence,annotation_score,reviewed,date_created,date_modified,version,cc_function,cc_catalytic_activity,cc_activity_regulation,cc_subunit,cc_pathway,cc_subcellular_location,cc_tissue_specificity,cc_alternative_products,cc_disease,cc_cofactor,ph_dependence,temp_dependence,kinetics,absorption,redox_potential,cc_induction,cc_caution,cc_similarity,cc_pharmaceutical,ft_domain,ft_binding,ft_site,ft_act_site,ft_mod_res,xref_pdb,xref_chembl,xref_drugbank,xref_guidetopharmacology,go_id,xref_interpro,xref_pfam,xref_reactome,keyword&query=%2A&cursor=8q347cwgp85m8w5qa1bgc4nmpzvlxea7aw&size=5>;
         rel="next"
@@ -305,7 +305,7 @@ interactions:
       content-length:
       - '48421'
       x-cache:
-      - hit cached
+      - miss cached
     status:
       code: 200
       message: OK

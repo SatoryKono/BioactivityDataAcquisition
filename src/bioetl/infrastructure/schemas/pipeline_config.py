@@ -667,7 +667,7 @@ class PipelineYamlConfig(BaseModel):
         default=None,
         description="Path to DQ config file relative to pipeline config. "
         "When set, DQ config is loaded from the hierarchical DQ system. "
-        "Example: ../../quality/entities/chembl/activity.yaml",
+        "Example: ../../entities/chembl/activity.yaml",
     )
     dq_overrides: DQConfig = Field(
         default_factory=DQConfig,
@@ -682,7 +682,7 @@ class PipelineYamlConfig(BaseModel):
         default=None,
         description="Path to filter config file relative to pipeline config. "
         "When set, filter config is loaded from the hierarchical filter system. "
-        "Example: ../../filters/entities/chembl/activity.yaml",
+        "Example: ../../entities/chembl/activity.yaml",
     )
     filter_rules: dict[str, Any] | None = Field(
         default=None,

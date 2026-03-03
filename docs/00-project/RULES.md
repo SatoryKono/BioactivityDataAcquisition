@@ -210,13 +210,13 @@ sink:
 
 Оптимизированная схема lineage:
 
-- **Silver Record**: Содержит `-source-batch-id` (FK).
-- **Lineage Log**: Таблица `sys.lineage-log` хранит маппинг `-source-batch-id` -> список файлов Bronze (local paths), версия трансформации, параметры запуска.
+- **Silver Record**: Содержит `_source_batch_id` (FK).
+- **Lineage Metadata**: Sidecar-файлы `*_metadata.yaml` и модели metadata хранят маппинг `_source_batch_id` -> список файлов Bronze (local paths), версию трансформации и параметры запуска.
   Полные пути к файлам в каждой строке данных хранить запрещено (избыточность).
 
 ### 2.4. Политика Backfill / Replay
 
-- **Metadata**: Обязательные поля `-run-id` (UUID), `-run-type` (`incremental` | `backfill` | `rebuild`).
+- **Metadata**: Обязательные поля `_run_id` (UUID), `_run_type` (`incremental` | `backfill` | `rebuild`).
 - **Merge Priority**: `rebuild` > `backfill` > `incremental`. При конфликте версий побеждает более "полный" тип запуска.
 - **Concurrency Constraint**: В один момент времени для одной сущности допустим только один процесс записи типа `rebuild` или `backfill`. Параллельный запуск запрещен (Lock должен это гарантировать).
 
@@ -419,9 +419,9 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 - **Dates**: Приводятся к единому ISO-формату `YYYY-MM-DD`.
 - **Strings**: Удаление пробелов по краям (`strip()`).
 
-**Исключения**: Из расчета хэша исключаются технические мета-поля, включая все поля с префиксом `-` (например: `-ingestion-ts`, `-run-id`, `-run-type`, `-dq-*`, `-source-batch-id`, `-index`, `-lookup-method`, `-original-id`, `-source`).
+**Исключения**: Из расчета хэша исключаются технические мета-поля, включая поля с префиксом `_` (например: `_ingestion_ts`, `_run_id`, `_run_type`, `_dq_*`, `_source_batch_id`, `_index`, `_lookup_method`, `_original_id`, `_source`).
 
-- **Детекция Коллизий**: При upsert проверять `-source-record-id`; если отличается — конфликт, логировать обе записи.
+- **Детекция Коллизий**: При upsert проверять `source_record_id`; если отличается — конфликт, логировать обе записи.
 
 ### 2.9. Composite Pipelines
 
@@ -598,12 +598,12 @@ silver:
 
 gold:
   include-groups: [system, identifiers, title]
-  exclude-fields: [-dq-*, -source-batch-id]
+  exclude-fields: [_dq_*, _source_batch_id]
   rename-fields:
     # Use Silver output names (not original!)
     document-id: publication-id         # Silver renamed entity-id → document-id
     content-version: version-hash       # Silver renamed content-hash → content-version
-    -run-id: pipeline-run-id            # Original name (not renamed in Silver)
+    _run_id: pipeline-run-id            # Original name (not renamed in Silver)
 ```
 
 **Rename Chain:**
@@ -613,7 +613,7 @@ Original → Silver → Gold
 ---------------------------------
 entity-id → document-id → publication-id
 content-hash → content-version → version-hash
--run-id → -run-id → pipeline-run-id
+_run_id → _run_id → pipeline-run-id
 ```
 
 **Когда использовать:**
@@ -624,7 +624,7 @@ content-hash → content-version → version-hash
 **Best Practice:**
 
 - Сохранять оригинальные имена в Silver (упрощает отладку)
-- Применять бизнес-имена только в Gold (`-run-id` → `pipeline-run-id`, `pmid` → `pubmed-id`)
+- Применять бизнес-имена только в Gold (`_run_id` → `pipeline-run-id`, `pmid` → `pubmed-id`)
 
 ## 3. Обработка Ошибок и Наблюдаемость
 
@@ -1126,10 +1126,10 @@ async with services:  # --aenter-- инициализирует ресурсы
 #### MUST (Обязательно)
 
 1. **Randomness**: Модуль `random` **MUST NOT** использоваться в `infrastructure/storage` и других критических узлах записи. Используйте хэш-функции от входных данных или фиксированные константы.
-1. **Time Source**: `datetime.now()` **MUST NOT** вызываться в `infrastructure` слое (за исключением мониторинга реального времени). Все временные метки (`ingestion-ts`, `processing-ts`) **MUST** генерироваться в `Application` слое (`PipelineContext.started-at`) и передаваться вниз.
+1. **Time Source**: `datetime.now()` **MUST NOT** вызываться в `infrastructure` слое (за исключением мониторинга реального времени). Все временные метки (`_ingestion_ts`, `_processing_ts`) **MUST** генерироваться в `Application` слое (`PipelineContext.started_at`) и передаваться вниз.
 1. **Retry Jitter**: При `deterministic=True`, jitter **MUST** вычисляться детерминистично (на основе хэша попытки и URL). Реализация: `domain/resilience.py:RetryConfig.calculate-delay()` использует MD5-based jitter.
 1. **Ordering**: Запись в Delta Lake **MUST** происходить после сортировки данных по Primary Keys (Silver) или Business Keys (Gold).
-1. **Content Hash**: Исключать из расчёта хэша технические мета-поля. Canonical policy: см. `docs/02-architecture/policies/content-hash-identity-policy.md`; все поля с префиксом `-` исключаются из identity/hash (включая `-ingestion-ts`, `-run-id`, `-run-type`, `-source-batch-id`, `-index`, `-dq-*`, `-lookup-method`, `-original-id`, `-source`). Реализация: `domain/constants.py:META-FIELDS` + `domain/transformations.py:-should-include-field()`.
+1. **Content Hash**: Исключать из расчёта хэша технические мета-поля. Canonical policy: см. `docs/02-architecture/policies/content-hash-identity-policy.md`; поля с префиксом `_` исключаются из identity/hash (включая `_ingestion_ts`, `_run_id`, `_run_type`, `_source_batch_id`, `_index`, `_dq_*`, `_lookup_method`, `_original_id`, `_source`). Реализация: `domain/constants.py:META_FIELDS` + `domain/transformations.py:_should_include_field()`.
 
 #### Архитектурные Тесты Детерминизма
 
@@ -1541,17 +1541,17 @@ pipeline:
 schema:
   column-groups:
     - name: system
-      fields: [entity-id, content-hash, -run-id, ...]
+      fields: [entity-id, content-hash, _run_id, ...]
     - name: business
       fields: [activity-id, assay-id, ...]
     - name: dq
-      pattern: ^-dq-
+      pattern: ^_dq_
   silver:
     include-groups: [system, business, dq]
     alias-policy: preserve
   gold:
     include-groups: [system, business]
-    exclude-fields: [-dq-*, -source-batch-id]
+    exclude-fields: [_dq_*, _source_batch_id]
     alias-policy: canonical
 
 quality:
@@ -1574,8 +1574,8 @@ filters:
 contracts:
   primary_key: [activity-id]
   merge-keys: [activity-id]
-  rename-map: {run-id: -run-id}
-  hash-exclude: [-ingestion-ts, -run-id]
+  rename-map: {run_id: _run_id}
+  hash-exclude: [_ingestion_ts, _run_id]
 ```
 
 Composite pipeline конфиги расположены в `configs/composites/{entity}.yaml`.

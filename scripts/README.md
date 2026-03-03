@@ -22,13 +22,6 @@ Canonical diagram scripts now live in:
 
 - `scripts/diagrams/`
 
-Compatibility wrappers remain in:
-
-- `scripts/*.py`
-- `scripts/*.sh`
-
-Wrappers print a deprecation warning and forward to `scripts/diagrams/*`.
-
 ## Migration Rule
 
 For new automation, use canonical paths only:

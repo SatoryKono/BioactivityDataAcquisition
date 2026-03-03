@@ -157,20 +157,20 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Thu, 12 Feb 2026 17:07:16 GMT
+      - Tue, 03 Mar 2026 14:18:03 GMT
       Expires:
-      - Thu, 12 Feb 2026 18:07:16 GMT
+      - Tue, 03 Mar 2026 15:18:03 GMT
       NCBI-PHID:
-      - 90C6181198E08C410000000000000001.m_1
+      - 95B775179A6ED9B10000000000000001.m_1
       NCBI-SID:
-      - 90C6181198E08C41_0000SID
+      - 95B775179A6ED9B1_0000SID
       Referrer-Policy:
       - origin-when-cross-origin
       Server:
       - Apache
       Set-Cookie:
-      - ncbi_sid=90C6181198E08C41_0000SID; domain=.nih.gov; path=/; expires=Fri, 12
-        Feb 2027 17:07:16 GMT
+      - ncbi_sid=95B775179A6ED9B1_0000SID; domain=.nih.gov; path=/; expires=Wed, 03
+        Mar 2027 14:18:03 GMT
       Strict-Transport-Security:
       - max-age=31536000; includeSubDomains; preload
       Transfer-Encoding:
@@ -178,8 +178,8 @@ interactions:
       Vary:
       - Accept-Encoding
       X-Throttling-Control:
-      - 'Request Count status: Green (0%), Request Time status: Green (0%), Service
-        status: Green (17%)'
+      - 'Request Count status: Green (1%), Request Time status: Green (0%), Service
+        status: Green (30%)'
       X-UA-Compatible:
       - IE=Edge
       X-XSS-Protection:
@@ -395,20 +395,20 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Thu, 12 Feb 2026 17:07:17 GMT
+      - Tue, 03 Mar 2026 14:18:04 GMT
       Expires:
-      - Thu, 12 Feb 2026 18:07:17 GMT
+      - Tue, 03 Mar 2026 15:18:04 GMT
       NCBI-PHID:
-      - 95B7AFE898E08C510000000000000001.m_1
+      - 95B7773C9A6ED9C10000000000000001.m_1
       NCBI-SID:
-      - 95B7AFE898E08C51_0000SID
+      - 95B7773C9A6ED9C1_0000SID
       Referrer-Policy:
       - origin-when-cross-origin
       Server:
       - Apache
       Set-Cookie:
-      - ncbi_sid=95B7AFE898E08C51_0000SID; domain=.nih.gov; path=/; expires=Fri, 12
-        Feb 2027 17:07:17 GMT
+      - ncbi_sid=95B7773C9A6ED9C1_0000SID; domain=.nih.gov; path=/; expires=Wed, 03
+        Mar 2027 14:18:04 GMT
       Strict-Transport-Security:
       - max-age=31536000; includeSubDomains; preload
       Transfer-Encoding:
@@ -416,8 +416,8 @@ interactions:
       Vary:
       - Accept-Encoding
       X-Throttling-Control:
-      - 'Request Count status: Green (0%), Request Time status: Green (0%), Service
-        status: Red (83%)'
+      - 'Request Count status: Green (1%), Request Time status: Green (0%), Service
+        status: Green (23%)'
       X-UA-Compatible:
       - IE=Edge
       X-XSS-Protection:

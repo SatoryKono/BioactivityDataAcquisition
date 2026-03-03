@@ -2,11 +2,9 @@
 
 Loads and merges DQ configurations from:
 1. configs/base/quality.yaml (global defaults, preferred)
-2. configs/providers/{provider}.yaml (section "quality", preferred)
-3. configs/quality/providers/{provider}.yaml (legacy fallback)
-4. configs/entities/{provider}/{entity}.yaml (section "quality", preferred)
-5. configs/quality/entities/{provider}/{entity}.yaml (legacy fallback)
-6. Inline overrides from pipeline config
+2. configs/providers/{provider}.yaml (section "quality")
+3. configs/entities/{provider}/{entity}.yaml (section "quality")
+4. Inline overrides from pipeline config
 
 Implements RULES.md §3.1.2 DQ Thresholds.
 """
@@ -31,7 +29,6 @@ class DQConfigLoader:
 
     Attributes:
         _configs_root: Root path to configs/ directory.
-        _dq_root: Path to configs/quality directory.
         _cache: Cache of loaded configs keyed by "provider:entity".
     """
 
@@ -44,17 +41,11 @@ class DQConfigLoader:
         """
         self._configs_root = configs_root
         self._base_root = configs_root / "base"
-        self._dq_root = configs_root / "quality"
         self._relaxed_dq = relaxed_dq
         self._cache: dict[str, DQConfig] = {}
 
-    def _load_optional(self, *parts: str) -> dict[str, Any]:
-        """Load YAML from DQ path if it exists, else return empty dict."""
-        path = self._dq_root.joinpath(*parts)
-        return self._load_yaml(path) if path.exists() else {}
-
     def _load_provider_layer(self, provider: str) -> dict[str, Any]:
-        """Load provider DQ layer from unified provider config or legacy path."""
+        """Load provider DQ layer from unified provider config."""
         unified_provider_path = self._configs_root / "providers" / f"{provider}.yaml"
         if unified_provider_path.exists():
             unified_raw = self._load_yaml(unified_provider_path)
@@ -74,10 +65,10 @@ class DQConfigLoader:
             ):
                 return unified_raw
 
-        return self._load_optional("providers", f"{provider}.yaml")
+        return {}
 
     def _load_entity_layer(self, provider: str, entity: str) -> dict[str, Any]:
-        """Load entity DQ layer from unified entity config or legacy path."""
+        """Load entity DQ layer from unified entity config."""
         unified_entity_path = (
             self._configs_root / "entities" / provider / f"{entity}.yaml"
         )
@@ -99,7 +90,7 @@ class DQConfigLoader:
             ):
                 return unified_raw
 
-        return self._load_optional("entities", provider, f"{entity}.yaml")
+        return {}
 
     def _merge_hierarchy(
         self,

@@ -157,20 +157,20 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Thu, 12 Feb 2026 17:07:13 GMT
+      - Tue, 03 Mar 2026 14:18:01 GMT
       Expires:
-      - Thu, 12 Feb 2026 18:07:13 GMT
+      - Tue, 03 Mar 2026 15:18:01 GMT
       NCBI-PHID:
-      - 95B7A52C98E08C110000000000000001.m_1
+      - 95B769439A6ED9910000000000000001.m_1
       NCBI-SID:
-      - 95B7A52C98E08C11_0000SID
+      - 95B769439A6ED991_0000SID
       Referrer-Policy:
       - origin-when-cross-origin
       Server:
       - Apache
       Set-Cookie:
-      - ncbi_sid=95B7A52C98E08C11_0000SID; domain=.nih.gov; path=/; expires=Fri, 12
-        Feb 2027 17:07:13 GMT
+      - ncbi_sid=95B769439A6ED991_0000SID; domain=.nih.gov; path=/; expires=Wed, 03
+        Mar 2027 14:18:01 GMT
       Strict-Transport-Security:
       - max-age=31536000; includeSubDomains; preload
       Transfer-Encoding:
@@ -179,7 +179,7 @@ interactions:
       - Accept-Encoding
       X-Throttling-Control:
       - 'Request Count status: Green (0%), Request Time status: Green (0%), Service
-        status: Red (83%)'
+        status: Green (33%)'
       X-UA-Compatible:
       - IE=Edge
       X-XSS-Protection:
@@ -385,20 +385,20 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Thu, 12 Feb 2026 17:07:14 GMT
+      - Tue, 03 Mar 2026 14:18:02 GMT
       Expires:
-      - Thu, 12 Feb 2026 18:07:14 GMT
+      - Tue, 03 Mar 2026 15:18:02 GMT
       NCBI-PHID:
-      - 90C613CA98E08C210000000000000001.m_1
+      - 95B76FD19A6ED9A10000000000000001.m_1
       NCBI-SID:
-      - 90C613CA98E08C21_0000SID
+      - 95B76FD19A6ED9A1_0000SID
       Referrer-Policy:
       - origin-when-cross-origin
       Server:
       - Apache
       Set-Cookie:
-      - ncbi_sid=90C613CA98E08C21_0000SID; domain=.nih.gov; path=/; expires=Fri, 12
-        Feb 2027 17:07:14 GMT
+      - ncbi_sid=95B76FD19A6ED9A1_0000SID; domain=.nih.gov; path=/; expires=Wed, 03
+        Mar 2027 14:18:02 GMT
       Strict-Transport-Security:
       - max-age=31536000; includeSubDomains; preload
       Transfer-Encoding:
@@ -407,7 +407,7 @@ interactions:
       - Accept-Encoding
       X-Throttling-Control:
       - 'Request Count status: Green (0%), Request Time status: Green (0%), Service
-        status: Green (27%)'
+        status: Green (30%)'
       X-UA-Compatible:
       - IE=Edge
       X-XSS-Protection:

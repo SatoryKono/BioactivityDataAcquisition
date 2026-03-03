@@ -65,7 +65,6 @@ __all__ = [
 
 # Default composite config path (RF-CFG-036)
 COMPOSITE_CONFIG_DIR = Path("configs/composites")
-LEGACY_COMPOSITE_CONFIG_DIR = Path("configs/pipelines/composite")
 FIELD_GROUP_CONFIG_DIR = Path("configs/composites/field_groups")
 
 
@@ -99,18 +98,12 @@ def _to_id_str(val: Any) -> str:  # Any: accepts int, float, st...
 
 
 def _resolve_composite_config_path(name: str) -> Path:
-    """Resolve composite config path with new-first + legacy fallback."""
-    primary_path = COMPOSITE_CONFIG_DIR / f"{name}.yaml"
-    if primary_path.exists():
-        return primary_path
+    """Resolve composite config path from canonical composites directory."""
+    config_path = COMPOSITE_CONFIG_DIR / f"{name}.yaml"
+    if config_path.exists():
+        return config_path
 
-    legacy_path = LEGACY_COMPOSITE_CONFIG_DIR / f"{name}.yaml"
-    if legacy_path.exists():
-        return legacy_path
-
-    raise FileNotFoundError(
-        f"Composite config not found: {primary_path} (fallback: {legacy_path})"
-    )
+    raise FileNotFoundError(f"Composite config not found: {config_path}")
 
 
 def load_composite_config(name: str) -> CompositeConfig:

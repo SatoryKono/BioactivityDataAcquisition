@@ -70,6 +70,44 @@ class QuarantineManager:
                 reason=error_type.value,
             )
 
+    async def quarantine_filtered_record(
+        self,
+        record: dict[str, Any],
+        batch_id: BatchID,
+        error_details: str,
+        *,
+        ingestion_ts: datetime,
+    ) -> None:
+        """Write filter-excluded record to quasi-quarantine for traceability.
+
+        These records are excluded by Silver filters (expected business rules),
+        not by data-quality exceptions.
+
+        Args:
+            record: The raw record excluded by Silver filters.
+            batch_id: ID of the batch containing this record.
+            error_details: Human-readable exclusion reason.
+            ingestion_ts: Ingestion timestamp from context.
+        """
+        error_code = "FILTERED_OUT_SILVER"
+        await self._quarantine.write(
+            pipeline=self._pipeline_name,
+            error_code=error_code,
+            payload=record,
+            bronze_batch_id=batch_id,
+            metadata={
+                "error_details": {"message": error_details},
+                "quasi_quarantine": True,
+                "classification": "filtered_out",
+            },
+            ingestion_ts=ingestion_ts,
+        )
+        if self._metrics:
+            self._metrics.inc_quarantine_records(
+                pipeline=self._pipeline_name,
+                reason=error_code,
+            )
+
     async def inspect(
         self,
         limit: int = 100,

@@ -1,12 +1,9 @@
 """Filter Configuration loader with hierarchical merge.
 
 Loads and merges filter configurations from:
-1. defaults layer from configs/base/pipeline.yaml (preferred) or
-   configs/filters/_defaults.yaml (legacy fallback)
-2. configs/providers/{provider}.yaml (section "filters", preferred) or
-   configs/filters/providers/{provider}.yaml (legacy fallback)
-3. configs/entities/{provider}/{entity}.yaml (section "filters", preferred) or
-   configs/filters/entities/{provider}/{entity}.yaml (legacy fallback)
+1. defaults layer from configs/base/pipeline.yaml
+2. configs/providers/{provider}.yaml (section "filters")
+3. configs/entities/{provider}/{entity}.yaml (section "filters")
 4. Inline overrides from pipeline config
 
 Implements ADR-028: Filter Rules Externalization.
@@ -39,8 +36,6 @@ class FilterConfigLoader(
 
     Thread-safe with internal caching for performance.
 
-    Attributes:
-        _filter_root: Path to configs/filters directory.
     """
 
     def __init__(self, configs_root: Path) -> None:
@@ -51,7 +46,6 @@ class FilterConfigLoader(
         """
         super().__init__(configs_root)
         self._base_root = configs_root / "base"
-        self._filter_root = configs_root / "filters"
 
     def load(
         self,
@@ -64,9 +58,7 @@ class FilterConfigLoader(
         """Load merged filter config for provider/entity.
 
         Merge order (later wins for scalars, special handling for collections):
-        1. defaults layer (MUST exist):
-           - configs/base/pipeline.yaml (filter defaults), or
-           - configs/filters/_defaults.yaml (legacy fallback)
+        1. defaults layer (MUST exist): configs/base/pipeline.yaml.filter_defaults
         2. providers/{provider}.yaml
         3. entities/{provider}/{entity}.yaml
         4. inline_overrides (from pipeline config filter_rules)
@@ -92,9 +84,8 @@ class FilterConfigLoader(
         defaults = self._load_defaults_layer()
         if not defaults:
             raise FileNotFoundError(
-                "Required filter defaults file not found in "
-                "configs/filters/_defaults.yaml and no filter defaults found in "
-                "configs/base/pipeline.yaml."
+                "Required filter defaults not found in "
+                "configs/base/pipeline.yaml (section 'filter_defaults')."
             )
 
         merged = self._merge_hierarchy(
@@ -187,7 +178,7 @@ class FilterConfigLoader(
         return merged
 
     def _load_defaults_layer(self) -> dict[str, Any]:
-        """Load filter defaults from base/pipeline.yaml or legacy _defaults.yaml."""
+        """Load filter defaults from configs/base/pipeline.yaml."""
         base_pipeline_path = self._base_root / "pipeline.yaml"
         if base_pipeline_path.exists():
             base_pipeline = self._load_yaml(base_pipeline_path)
@@ -206,14 +197,10 @@ class FilterConfigLoader(
                 defaults.setdefault("version", "1.0.0")
                 return defaults
 
-        legacy_defaults_path = self._filter_root / "_defaults.yaml"
-        if legacy_defaults_path.exists():
-            return self._load_yaml(legacy_defaults_path)
-
         return {}
 
     def _load_provider_layer(self, provider: str) -> dict[str, Any]:
-        """Load provider filter layer from unified provider config or legacy path."""
+        """Load provider filter layer from unified provider config."""
         unified_provider_path = self._configs_root / "providers" / f"{provider}.yaml"
         if unified_provider_path.exists():
             unified_raw = self._load_yaml(unified_provider_path)
@@ -233,14 +220,10 @@ class FilterConfigLoader(
             ):
                 return unified_raw
 
-        legacy_provider_path = self._filter_root / "providers" / f"{provider}.yaml"
-        if legacy_provider_path.exists():
-            return self._load_yaml(legacy_provider_path)
-
         return {}
 
     def _load_entity_layer(self, provider: str, entity: str) -> dict[str, Any]:
-        """Load entity filter layer from unified entity config or legacy path."""
+        """Load entity filter layer from unified entity config."""
         unified_entity_path = (
             self._configs_root / "entities" / provider / f"{entity}.yaml"
         )
@@ -261,12 +244,6 @@ class FilterConfigLoader(
                 )
             ):
                 return unified_raw
-
-        legacy_entity_path = (
-            self._filter_root / "entities" / provider / f"{entity}.yaml"
-        )
-        if legacy_entity_path.exists():
-            return self._load_yaml(legacy_entity_path)
 
         return {}
 

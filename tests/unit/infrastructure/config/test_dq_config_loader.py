@@ -54,31 +54,28 @@ common_cross_field_validations: []
 """
     )
 
-    dq_root = tmp_path / "quality"
-    dq_root.mkdir()
-
     # providers/test_provider.yaml
-    providers = dq_root / "providers"
+    providers = tmp_path / "providers"
     providers.mkdir()
     (providers / "test_provider.yaml").write_text(
         """
 version: "1.0.0"
 provider: test_provider
 
-thresholds:
-  soft_fail: 0.05
-  hard_fail: 0.15
-
-provider_field_validations:
-  - field: provider_field
-    type: pattern
-    pattern: '^TEST'
-    nullable: true
+quality:
+  thresholds:
+    soft_fail: 0.05
+    hard_fail: 0.15
+  provider_field_validations:
+    - field: provider_field
+      type: pattern
+      pattern: '^TEST'
+      nullable: true
 """
     )
 
     # entities/test_provider/test_entity.yaml
-    entities = dq_root / "entities" / "test_provider"
+    entities = tmp_path / "entities" / "test_provider"
     entities.mkdir(parents=True)
     (entities / "test_entity.yaml").write_text(
         """
@@ -86,24 +83,23 @@ version: "1.0.0"
 provider: test_provider
 entity: test_entity
 
-entity_field_validations:
-  - field: entity_field
-    type: range
-    min: 0
-    max: 100
-    nullable: true
-
-entity_cross_field_validations:
-  - name: test_cross
-    fields:
-      - field_a
-      - field_b
-    condition: all_present
-
-key_nullability:
-  - field: entity_id
-    key_type: merge
-    nullable: false
+quality:
+  entity_field_validations:
+    - field: entity_field
+      type: range
+      min: 0
+      max: 100
+      nullable: true
+  entity_cross_field_validations:
+    - name: test_cross
+      fields:
+        - field_a
+        - field_b
+      condition: all_present
+  key_nullability:
+    - field: entity_id
+      key_type: merge
+      nullable: false
 """
     )
 
@@ -168,9 +164,6 @@ cross_field_validations: []
 """
         )
 
-        # Keep quality/providers|entities available for optional layers.
-        (tmp_path / "quality").mkdir()
-
         loader = DQConfigLoader(tmp_path)
         config = loader.load("missing_provider", "missing_entity")
         assert config.soft_fail_threshold == 0.07
@@ -211,8 +204,6 @@ quality:
 """
         )
 
-        (tmp_path / "quality").mkdir()
-
         loader = DQConfigLoader(tmp_path)
         config = loader.load("test_provider", "missing_entity")
         assert config.hard_fail_threshold == 0.12
@@ -249,8 +240,6 @@ quality:
       nullable: false
 """
         )
-
-        (tmp_path / "quality").mkdir()
 
         loader = DQConfigLoader(tmp_path)
         config = loader.load("test_provider", "test_entity")
@@ -409,10 +398,6 @@ class TestDQConfigLoaderErrors:
 
     def test_missing_defaults_raises(self, tmp_path: Path) -> None:
         """Missing base/quality.yaml should raise FileNotFoundError."""
-        dq_root = tmp_path / "quality"
-        dq_root.mkdir()
-        # No base/quality.yaml created
-
         loader = DQConfigLoader(tmp_path)
 
         with pytest.raises(FileNotFoundError, match=r"base/quality\.yaml"):

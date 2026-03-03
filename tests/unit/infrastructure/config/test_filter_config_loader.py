@@ -21,11 +21,9 @@ from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
 @pytest.fixture
 def test_configs_root(tmp_path: Path) -> Path:
     """Create test config structure with hierarchical filter configs."""
-    filter_root = tmp_path / "filters"
-    filter_root.mkdir()
-
-    # _defaults.yaml
-    (filter_root / "_defaults.yaml").write_text(
+    base_root = tmp_path / "base"
+    base_root.mkdir(parents=True)
+    (base_root / "pipeline.yaml").write_text(
         """
 version: "1.0.0"
 
@@ -33,35 +31,36 @@ input_filter:
   enabled: false
   batch_size: 100
 
-gold_filters:
-  required_fields: []
-  columns: {}
-  ranges: {}
-  list_lengths: {}
-  list_contains: {}
-  exclude_if_present: []
+filter_defaults:
+  gold_filters:
+    required_fields: []
+    columns: {}
+    ranges: {}
+    list_lengths: {}
+    list_contains: {}
+    exclude_if_present: []
 """
     )
 
     # providers/test_provider.yaml
-    providers = filter_root / "providers"
+    providers = tmp_path / "providers"
     providers.mkdir()
     (providers / "test_provider.yaml").write_text(
         """
 version: "1.0.0"
 provider: test_provider
 
-input_filter:
-  batch_size: 50
-
-gold_filters:
-  columns:
-    provider_column: ["value1", "value2"]
+filters:
+  input_filter:
+    batch_size: 50
+  gold_filters:
+    columns:
+      provider_column: ["value1", "value2"]
 """
     )
 
     # entities/test_provider/test_entity.yaml
-    entities = filter_root / "entities" / "test_provider"
+    entities = tmp_path / "entities" / "test_provider"
     entities.mkdir(parents=True)
     (entities / "test_entity.yaml").write_text(
         """
@@ -69,25 +68,25 @@ version: "1.0.0"
 provider: test_provider
 entity: test_entity
 
-input_filter:
-  enabled: true
-  source_path: "data/input/test.csv"
-  column_name: "test_id"
-  filter_field: "id"
-  batch_size: 20
-
-gold_filters:
-  required_fields:
-    - field_a
-    - field_b
-  columns:
-    entity_column: ["v1", "v2", "v3"]
-  ranges:
-    value_field:
-      min: 0
-      max: 100
-      include_min: true
-      include_max: false
+filters:
+  input_filter:
+    enabled: true
+    source_path: "data/input/test.csv"
+    column_name: "test_id"
+    filter_field: "id"
+    batch_size: 20
+  gold_filters:
+    required_fields:
+      - field_a
+      - field_b
+    columns:
+      entity_column: ["v1", "v2", "v3"]
+    ranges:
+      value_field:
+        min: 0
+        max: 100
+        include_min: true
+        include_max: false
 """
     )
 
@@ -170,9 +169,6 @@ filter_defaults:
 """
         )
 
-        # Keep filters tree available for optional provider/entity layers.
-        (tmp_path / "filters").mkdir()
-
         loader = FilterConfigLoader(tmp_path)
         input_filter, _, gold_filters, _ = loader.load("missing_provider", "missing")
 
@@ -217,8 +213,6 @@ filters:
 """
         )
 
-        (tmp_path / "filters").mkdir()
-
         loader = FilterConfigLoader(tmp_path)
         input_filter, _, gold_filters, _ = loader.load("test_provider", "missing")
         assert input_filter.batch_size == 77
@@ -259,8 +253,6 @@ filters:
     required_fields: [entity_field]
 """
         )
-
-        (tmp_path / "filters").mkdir()
 
         loader = FilterConfigLoader(tmp_path)
         input_filter, _, gold_filters, _ = loader.load("test_provider", "test_entity")
@@ -377,21 +369,17 @@ class TestFilterConfigLoaderErrors:
     """Tests for error handling in FilterConfigLoader."""
 
     def test_missing_defaults_raises(self, tmp_path: Path) -> None:
-        """Missing _defaults.yaml should raise FileNotFoundError."""
-        filter_root = tmp_path / "filters"
-        filter_root.mkdir()
-        # No _defaults.yaml created
-
+        """Missing filter_defaults in base pipeline should raise FileNotFoundError."""
         loader = FilterConfigLoader(tmp_path)
 
-        with pytest.raises(FileNotFoundError, match=r"_defaults\.yaml"):
+        with pytest.raises(FileNotFoundError, match="filter_defaults"):
             loader.load("any_provider", "any_entity")
 
     def test_invalid_yaml_raises(self, tmp_path: Path) -> None:
         """Invalid YAML should raise appropriate error."""
-        filter_root = tmp_path / "filters"
-        filter_root.mkdir()
-        (filter_root / "_defaults.yaml").write_text(
+        base_root = tmp_path / "base"
+        base_root.mkdir(parents=True)
+        (base_root / "pipeline.yaml").write_text(
             """
 version: "1.0.0"
 input_filter:
@@ -558,21 +546,21 @@ class TestFilterConfigLoaderExtractionParams:
 
     def test_extraction_params_from_entity_config(self, tmp_path: Path) -> None:
         """Extraction params should be loaded from entity config."""
-        filter_root = tmp_path / "filters"
-        filter_root.mkdir()
-
-        (filter_root / "_defaults.yaml").write_text(
+        base_root = tmp_path / "base"
+        base_root.mkdir(parents=True)
+        (base_root / "pipeline.yaml").write_text(
             """
 version: "1.0.0"
 input_filter:
   enabled: false
   batch_size: 100
-gold_filters:
-  required_fields: []
+filter_defaults:
+  gold_filters:
+    required_fields: []
 """
         )
 
-        entities = filter_root / "entities" / "chembl"
+        entities = tmp_path / "entities" / "chembl"
         entities.mkdir(parents=True)
         (entities / "activity.yaml").write_text(
             """
@@ -598,18 +586,18 @@ extraction_params:
 
     def test_extraction_params_inline_override(self, tmp_path: Path) -> None:
         """Inline overrides should update extraction_params."""
-        filter_root = tmp_path / "filters"
-        filter_root.mkdir()
-
-        (filter_root / "_defaults.yaml").write_text(
+        base_root = tmp_path / "base"
+        base_root.mkdir(parents=True)
+        (base_root / "pipeline.yaml").write_text(
             """
 version: "1.0.0"
 input_filter:
   enabled: false
-gold_filters:
-  required_fields: []
-extraction_params:
-  standard_type__in: "IC50"
+filter_defaults:
+  gold_filters:
+    required_fields: []
+  extraction_params:
+    standard_type__in: "IC50"
 """
         )
 
@@ -628,21 +616,21 @@ class TestAssayExtractionParamsLoading:
 
     def test_assay_extraction_params_loaded(self, tmp_path: Path) -> None:
         """Extraction params should be loaded from assay entity config."""
-        filter_root = tmp_path / "filters"
-        filter_root.mkdir()
-
-        (filter_root / "_defaults.yaml").write_text(
+        base_root = tmp_path / "base"
+        base_root.mkdir(parents=True)
+        (base_root / "pipeline.yaml").write_text(
             """
 version: "1.0.0"
 input_filter:
   enabled: false
   batch_size: 100
-gold_filters:
-  required_fields: []
+filter_defaults:
+  gold_filters:
+    required_fields: []
 """
         )
 
-        entities = filter_root / "entities" / "chembl"
+        entities = tmp_path / "entities" / "chembl"
         entities.mkdir(parents=True)
         (entities / "assay.yaml").write_text(
             """
@@ -704,20 +692,20 @@ gold_filters:
         self, tmp_path: Path
     ) -> None:
         """Assay extraction_params keys should not overlap with input_filter field."""
-        filter_root = tmp_path / "filters"
-        filter_root.mkdir()
-
-        (filter_root / "_defaults.yaml").write_text(
+        base_root = tmp_path / "base"
+        base_root.mkdir(parents=True)
+        (base_root / "pipeline.yaml").write_text(
             """
 version: "1.0.0"
 input_filter:
   enabled: false
-gold_filters:
-  required_fields: []
+filter_defaults:
+  gold_filters:
+    required_fields: []
 """
         )
 
-        entities = filter_root / "entities" / "chembl"
+        entities = tmp_path / "entities" / "chembl"
         entities.mkdir(parents=True)
         (entities / "assay.yaml").write_text(
             """
@@ -748,20 +736,20 @@ gold_filters:
 
     def test_assay_silver_filters_loaded(self, tmp_path: Path) -> None:
         """Silver filters should be loaded from assay entity config."""
-        filter_root = tmp_path / "filters"
-        filter_root.mkdir()
-
-        (filter_root / "_defaults.yaml").write_text(
+        base_root = tmp_path / "base"
+        base_root.mkdir(parents=True)
+        (base_root / "pipeline.yaml").write_text(
             """
 version: "1.0.0"
 input_filter:
   enabled: false
-gold_filters:
-  required_fields: []
+filter_defaults:
+  gold_filters:
+    required_fields: []
 """
         )
 
-        entities = filter_root / "entities" / "chembl"
+        entities = tmp_path / "entities" / "chembl"
         entities.mkdir(parents=True)
         (entities / "assay.yaml").write_text(
             """
@@ -809,23 +797,23 @@ class TestFilterConfigLoaderIntegration:
 
     def test_load_with_list_filters(self, tmp_path: Path) -> None:
         """Test loading configs with list_lengths and list_contains."""
-        filter_root = tmp_path / "filters"
-        filter_root.mkdir()
-
-        (filter_root / "_defaults.yaml").write_text(
+        base_root = tmp_path / "base"
+        base_root.mkdir(parents=True)
+        (base_root / "pipeline.yaml").write_text(
             """
 version: "1.0.0"
 input_filter:
   enabled: false
   batch_size: 100
-gold_filters:
-  required_fields: []
+filter_defaults:
+  gold_filters:
+    required_fields: []
 """
         )
 
-        entities = filter_root / "entities" / "test" / "test"
+        entities = tmp_path / "entities" / "test"
         entities.mkdir(parents=True)
-        (entities.parent / "entity.yaml").write_text(
+        (entities / "entity.yaml").write_text(
             """
 version: "1.0.0"
 gold_filters:
@@ -858,18 +846,19 @@ gold_filters:
         assert contains_filter.mode == "any"
 
 
-def test_filter_loader_reads_filters_dir(tmp_path: Path) -> None:
-    """Loader should read configs/filters directory."""
-    root = tmp_path / "filters"
-    root.mkdir()
-    (root / "_defaults.yaml").write_text(
+def test_filter_loader_reads_base_pipeline_defaults(tmp_path: Path) -> None:
+    """Loader should read defaults from configs/base/pipeline.yaml."""
+    base_root = tmp_path / "base"
+    base_root.mkdir(parents=True)
+    (base_root / "pipeline.yaml").write_text(
         """
 version: "1.0.0"
 input_filter:
   enabled: false
   batch_size: 111
-gold_filters:
-  required_fields: []
+filter_defaults:
+  gold_filters:
+    required_fields: []
 """
     )
 

@@ -30,7 +30,7 @@ def _load_base_contract_defaults() -> dict[str, Any]:
 
 @lru_cache(maxsize=128)
 def load_pipeline_contract_policy(provider: str, entity: str) -> PipelineContractPolicy:
-    """Load typed policy from unified entity config or legacy contracts path.
+    """Load typed policy from unified entity config contracts section.
 
     Args:
         provider: Data provider name.
@@ -42,28 +42,18 @@ def load_pipeline_contract_policy(provider: str, entity: str) -> PipelineContrac
     base_defaults = _load_base_contract_defaults()
 
     unified_entity_path = _CONFIGS_ROOT / "entities" / provider / f"{entity}.yaml"
-    if unified_entity_path.exists():
-        with open(unified_entity_path, encoding="utf-8") as f:
-            unified_raw: dict[str, Any] = yaml.safe_load(f) or {}
+    if not unified_entity_path.exists():
+        raise ValueError(f"Contract policy file not found: {unified_entity_path}")
 
-        contracts_section = unified_raw.get("contracts")
-        if isinstance(contracts_section, dict):
-            raw = {**base_defaults, **contracts_section}
-            result: PipelineContractPolicy = PipelineContractPolicy.model_validate(raw)
-            return result
+    with open(unified_entity_path, encoding="utf-8") as f:
+        unified_raw: dict[str, Any] = yaml.safe_load(f) or {}
 
-    legacy_path = (
-        _CONFIGS_ROOT / "contracts" / "pipelines" / provider / f"{entity}.yaml"
-    )
-    if not legacy_path.exists():
+    contracts_section = unified_raw.get("contracts")
+    if not isinstance(contracts_section, dict):
         raise ValueError(
-            "Contract policy file not found in "
-            f"{unified_entity_path} (section 'contracts') or {legacy_path}"
+            f"Contract policy section 'contracts' not found in {unified_entity_path}"
         )
 
-    with open(legacy_path, encoding="utf-8") as f:
-        legacy_raw: dict[str, Any] = yaml.safe_load(f) or {}
-
-    raw = legacy_raw
-
-    return PipelineContractPolicy.model_validate(raw)
+    raw = {**base_defaults, **contracts_section}
+    result: PipelineContractPolicy = PipelineContractPolicy.model_validate(raw)
+    return result

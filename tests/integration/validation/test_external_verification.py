@@ -224,11 +224,9 @@ class TestORCIDExternalVerification:
         assert result["status"] == "WARN"
 
 
-# TODO: Add remaining external verification tests for:
-# - ROR API (Institution IDs)
-# - DBLP API (DBLP IDs)
-# - ISSN Portal (ISSN validation)
-# Total expected: ~40 tests
+# NOTE: Legacy TODO removed.
+# External verification coverage already includes ROR, DBLP, ISSN, arXiv,
+# PMC, batch verification, and retry scenarios in this module.
 
 
 # ============================================================================

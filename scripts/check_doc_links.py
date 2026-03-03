@@ -5,7 +5,9 @@ Checks:
   1. Markdown relative links in docs/ resolve to existing files
   2. Pipeline specs referenced in docs/04-reference/pipelines/README.md exist
   3. Config files referenced in pipeline YAML configs exist
-  4. Doc drift guardrails are enforced in mkdocs nav docs:
+  4. Gold contracts index matches exported JSON contracts
+  5. ChEMBL provider overview matches provider docs inventory
+  6. Doc drift guardrails are enforced in mkdocs nav docs:
      - canonical Delta token (`_delta_log`)
      - legacy config/script tokens
      - outdated `bioetl run <pipeline>` syntax
@@ -20,6 +22,8 @@ Usage:
     python scripts/check_doc_links.py          # Full check
     python scripts/check_doc_links.py --specs   # Only spec file check
     python scripts/check_doc_links.py --links   # Only broken link check
+    python scripts/check_doc_links.py --contracts-index  # Gold contract index parity
+    python scripts/check_doc_links.py --provider-overview  # Provider overview parity
     python scripts/check_doc_links.py --not-in-nav-growth   # Only not-in-nav growth guard
     python scripts/check_doc_links.py --legacy-paths   # Only doc drift guardrails
     python scripts/check_doc_links.py --legacy-paths-all   # Drift guardrails incl. internal nav docs
@@ -43,6 +47,10 @@ import yaml
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DOCS_DIR = PROJECT_ROOT / "docs"
 PIPELINES_DIR = DOCS_DIR / "04-reference" / "pipelines"
+GOLD_SCHEMAS_DOC = DOCS_DIR / "04-reference" / "contracts" / "gold-schemas.md"
+GOLD_CONTRACTS_DIR = DOCS_DIR / "04-reference" / "contracts" / "gold"
+PROVIDERS_OVERVIEW_DOC = DOCS_DIR / "04-reference" / "providers" / "README.md"
+CHEMBL_PROVIDERS_DIR = DOCS_DIR / "04-reference" / "providers" / "chembl"
 CANONICAL_REQUIREMENTS_FILE = DOCS_DIR / "01-requirements" / "REQUIREMENTS.md"
 CANONICAL_GOVERNANCE_DIR = DOCS_DIR / "00-project" / "governance"
 NOT_IN_NAV_BASELINE_FILE = (
@@ -75,6 +83,8 @@ INLINE_CODE_RE = re.compile(r"`[^`]*`")
 MD_PATH_RE = re.compile(r"[A-Za-z0-9_./-]+\.md")
 PYTHON_FENCE_START_RE = re.compile(r"^\s*```(?:python|py|python3)\b", re.IGNORECASE)
 FENCE_END_RE = re.compile(r"^\s*```")
+GOLD_CONTRACT_RE = re.compile(r"`([a-z0-9_]+_v1\.0\.json)`")
+CHEMBL_PROVIDER_LINK_RE = re.compile(r"\(chembl/([a-z0-9-]+)\.md\)")
 
 # Directories skipped by default for drift guardrails in nav docs.
 # These sections are mostly historical/internal and can be audited with
@@ -473,11 +483,62 @@ def check_config_existence() -> list[tuple[str, str]]:
     return missing
 
 
+def check_gold_contract_index() -> tuple[list[str], list[str]]:
+    """Compare gold-schemas.md contract list with exported contract JSON files.
+
+    Returns:
+        missing_in_doc: Contract JSON files that exist on disk but are not listed.
+        extra_in_doc: Contract JSON entries listed in docs but not present on disk.
+    """
+    if not GOLD_SCHEMAS_DOC.exists() or not GOLD_CONTRACTS_DIR.exists():
+        return [], []
+
+    documented = set(
+        GOLD_CONTRACT_RE.findall(
+            GOLD_SCHEMAS_DOC.read_text(encoding="utf-8", errors="replace")
+        )
+    )
+    exported = {path.name for path in GOLD_CONTRACTS_DIR.glob("*.json")}
+
+    missing_in_doc = sorted(exported - documented)
+    extra_in_doc = sorted(documented - exported)
+    return missing_in_doc, extra_in_doc
+
+
+def check_chembl_provider_overview() -> tuple[list[str], list[str]]:
+    """Compare ChEMBL overview links in providers README to provider docs inventory.
+
+    Returns:
+        missing_in_readme: Provider docs present on disk but absent in README links.
+        extra_in_readme: README links that have no matching provider doc.
+    """
+    if not PROVIDERS_OVERVIEW_DOC.exists() or not CHEMBL_PROVIDERS_DIR.exists():
+        return [], []
+
+    readme_text = PROVIDERS_OVERVIEW_DOC.read_text(encoding="utf-8", errors="replace")
+    listed = set(CHEMBL_PROVIDER_LINK_RE.findall(readme_text))
+    available = {path.stem for path in CHEMBL_PROVIDERS_DIR.glob("*.md")}
+
+    missing_in_readme = sorted(available - listed)
+    extra_in_readme = sorted(listed - available)
+    return missing_in_readme, extra_in_readme
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Check documentation links and spec files")
     parser.add_argument("--links", action="store_true", help="Only check broken links")
     parser.add_argument("--specs", action="store_true", help="Only check spec files")
     parser.add_argument("--configs", action="store_true", help="Only check config existence")
+    parser.add_argument(
+        "--contracts-index",
+        action="store_true",
+        help="Only check Gold contract index parity (gold-schemas.md vs JSON exports)",
+    )
+    parser.add_argument(
+        "--provider-overview",
+        action="store_true",
+        help="Only check provider overview parity (providers README vs docs inventory)",
+    )
     parser.add_argument(
         "--not-in-nav-growth",
         action="store_true",
@@ -500,6 +561,8 @@ def main() -> int:
         args.links
         or args.specs
         or args.configs
+        or args.contracts_index
+        or args.provider_overview
         or args.not_in_nav_growth
         or args.legacy_paths
         or args.legacy_paths_all
@@ -566,6 +629,42 @@ def main() -> int:
             violations += len(missing_configs)
         else:
             print("Configs: OK (all convention-based config files exist)")
+
+    if run_all or args.contracts_index:
+        missing_in_doc, extra_in_doc = check_gold_contract_index()
+        if missing_in_doc or extra_in_doc:
+            print(f"\n{'='*60}")
+            print("GOLD CONTRACT INDEX MISMATCH")
+            print(f"{'='*60}")
+            if missing_in_doc:
+                print("  Missing in docs/04-reference/contracts/gold-schemas.md:")
+                for item in missing_in_doc:
+                    print(f"    - {item}")
+            if extra_in_doc:
+                print("  Listed in docs but missing on disk:")
+                for item in extra_in_doc:
+                    print(f"    - {item}")
+            violations += len(missing_in_doc) + len(extra_in_doc)
+        else:
+            print("Gold contracts index: OK (docs list matches exported JSON files)")
+
+    if run_all or args.provider_overview:
+        missing_in_readme, extra_in_readme = check_chembl_provider_overview()
+        if missing_in_readme or extra_in_readme:
+            print(f"\n{'='*60}")
+            print("CHEMBL PROVIDER OVERVIEW MISMATCH")
+            print(f"{'='*60}")
+            if missing_in_readme:
+                print("  Missing in docs/04-reference/providers/README.md:")
+                for item in missing_in_readme:
+                    print(f"    - chembl/{item}.md")
+            if extra_in_readme:
+                print("  Linked in README but missing on disk:")
+                for item in extra_in_readme:
+                    print(f"    - chembl/{item}.md")
+            violations += len(missing_in_readme) + len(extra_in_readme)
+        else:
+            print("ChEMBL provider overview: OK (README links match provider docs)")
 
     if run_all or args.not_in_nav_growth:
         current_count, baseline_count, added, removed, baseline_exists = (

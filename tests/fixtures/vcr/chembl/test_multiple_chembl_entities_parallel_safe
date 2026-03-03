@@ -29,7 +29,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 03 Mar 2026 13:28:15 GMT
+      - Tue, 03 Mar 2026 14:13:59 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -269,7 +269,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 03 Mar 2026 13:28:17 GMT
+      - Tue, 03 Mar 2026 14:14:01 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -279,7 +279,7 @@ interactions:
       X-ChEMBL-in-cache:
       - 'True'
       X-ChEMBL-retrieval-time:
-      - '1.5887196063995361'
+      - '1.6924395561218262'
     status:
       code: 200
       message: OK
@@ -313,7 +313,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 03 Mar 2026 13:28:21 GMT
+      - Tue, 03 Mar 2026 14:14:05 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -464,7 +464,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 03 Mar 2026 13:28:22 GMT
+      - Tue, 03 Mar 2026 14:14:06 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -474,7 +474,7 @@ interactions:
       X-ChEMBL-in-cache:
       - 'True'
       X-ChEMBL-retrieval-time:
-      - '1.0417828559875488'
+      - '0.8666462898254395'
     status:
       code: 200
       message: OK
@@ -508,7 +508,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 03 Mar 2026 13:28:26 GMT
+      - Tue, 03 Mar 2026 14:14:11 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -584,7 +584,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 03 Mar 2026 13:28:27 GMT
+      - Tue, 03 Mar 2026 14:14:11 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -594,7 +594,7 @@ interactions:
       X-ChEMBL-in-cache:
       - 'True'
       X-ChEMBL-retrieval-time:
-      - '0.3773825168609619'
+      - '0.2037491798400879'
     status:
       code: 200
       message: OK

@@ -83,8 +83,8 @@
 ### Действие: `lint`
 
 ```bash
-python scripts/lint_diagrams.py docs
-bash scripts/validate_mermaid_syntax.sh
+python scripts/diagrams/lint_diagrams.py docs
+bash scripts/diagrams/validate_mermaid_syntax.sh
 ```
 
 Показать результаты с рекомендациями по исправлению.

@@ -354,14 +354,14 @@ bash scripts/diagrams/run_diagram_checks.sh --profile nightly --enforce-budget
 
 ## Size Normalization
 
-Use `scripts/uniform_diagram_sizes.py` to normalize class/flowchart object sizes:
+Use `scripts/diagrams/uniform_diagram_sizes.py` to normalize class/flowchart object sizes:
 
 ```bash
 # Check normalization drift
-python3 scripts/uniform_diagram_sizes.py --check
+python3 scripts/diagrams/uniform_diagram_sizes.py --check
 
 # Fix specific files
-python3 scripts/uniform_diagram_sizes.py --fix -f docs/02-architecture/mmd-diagrams/class-diagrams/07-application-core-services.mmd
+python3 scripts/diagrams/uniform_diagram_sizes.py --fix -f docs/02-architecture/mmd-diagrams/class-diagrams/07-application-core-services.mmd
 ```
 
 Grouped diagrams support width strategy override:

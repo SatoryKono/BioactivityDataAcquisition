@@ -110,6 +110,19 @@ class TransformationError(Exception):
         self.field = field
 
 
+class FilteredOutError(Exception):
+    """Raised when a record is excluded by Silver filters.
+
+    Unlike data-quality failures, this indicates an expected business filter
+    decision. Batch processing may route such records to quasi-quarantine
+    for traceability.
+    """
+
+    def __init__(self, reason: str = "Record excluded by silver filters") -> None:
+        """Initialize filtered-out error with human-readable reason."""
+        super().__init__(reason)
+
+
 class BaseTransformer(ABC):
     """Abstract base class for Bronze → Silver transformers.
 
@@ -363,7 +376,7 @@ class BaseTransformer(ABC):
                     entity_type=self.entity_type,
                     record_index=index,
                 )
-                return None
+                raise FilteredOutError()
             return result
         except TransformationError as e:
             error_type = "transformation_error"
