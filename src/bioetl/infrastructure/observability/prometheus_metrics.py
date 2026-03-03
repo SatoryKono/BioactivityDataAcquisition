@@ -47,6 +47,7 @@ from bioetl.infrastructure.observability.metrics import (
     HTTP_REQUEST_ERRORS_TOTAL,
     HTTP_RETRIES_TOTAL,
     INFRASTRUCTURE_VALIDATED,
+    OBSERVABILITY_EVENTS_TOTAL,
     PHASE_DURATION_SECONDS,
     PIPELINE_DURATION_SECONDS,
     PIPELINE_HEALTH_CHECK_PASSED,
@@ -155,6 +156,7 @@ COUNTERS = {
     "silver_validation_failures_total": SILVER_VALIDATION_FAILURES_TOTAL,
     "quarantine_records_total": QUARANTINE_RECORDS_TOTAL,
     "dq_validation_failures_total": DQ_VALIDATION_FAILURES_TOTAL,
+    "observability_events_total": OBSERVABILITY_EVENTS_TOTAL,
 }
 
 # Registry of gauge metrics

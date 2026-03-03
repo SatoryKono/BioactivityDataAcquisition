@@ -67,7 +67,7 @@ class OpenTelemetryTracer:
     wrapper rather than a translation layer.
     """
 
-    def __init__(self, service_name: str = "bioetl"):
+    def __init__(self, service_name: str = "bioetl") -> None:
         """Initialize OpenTelemetry tracer.
 
         Args:

@@ -62,6 +62,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
         self.pipeline_name = pipeline_name
         self.run_id = str(run_id)
         self.run_type = run_type.value
+        self.provider_name = self._derive_provider_name(pipeline_name)
         self._metrics = metrics
         self._logger = logger
         self._tracer = tracer
@@ -87,7 +88,19 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
             self.span.__enter__()
 
         # 2. Log Start
-        self._logger.info(PipelineEvent.START, run_type=self.run_type)
+        start_ctx = self._build_observability_context(
+            PipelineEvent.START,
+            severity="info",
+            run_type=self.run_type,
+            phase=LifecyclePhase.STARTUP.value,
+        )
+        self._logger.info(PipelineEvent.START, **start_ctx)
+        self._emit_observability_event_metric(
+            event_name=PipelineEvent.START,
+            provider=str(start_ctx["provider"]),
+            severity=str(start_ctx["severity"]),
+            error_type=str(start_ctx["error_type"]),
+        )
 
         return self
 
@@ -136,18 +149,50 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
         log_ctx = {
             "duration_seconds": duration,
             "status": status,
+            "phase": LifecyclePhase.CLEANUP.value,
         }
         if status == "failed":
-            self._logger.error(
+            failed_ctx = self._build_observability_context(
                 PipelineEvent.FAILED,
+                severity="error",
                 **log_ctx,
                 error=str(exc_val),
                 error_type=type(exc_val).__name__,
             )
+            self._logger.error(PipelineEvent.FAILED, **failed_ctx)
+            self._emit_observability_event_metric(
+                event_name=PipelineEvent.FAILED,
+                provider=str(failed_ctx["provider"]),
+                severity=str(failed_ctx["severity"]),
+                error_type=str(failed_ctx["error_type"]),
+            )
         elif status == "shutdown":
-            self._logger.warning(PipelineEvent.SHUTDOWN, **log_ctx)
+            shutdown_ctx = self._build_observability_context(
+                PipelineEvent.SHUTDOWN,
+                severity="warning",
+                **log_ctx,
+                error_type="pipeline_shutdown",
+            )
+            self._logger.warning(PipelineEvent.SHUTDOWN, **shutdown_ctx)
+            self._emit_observability_event_metric(
+                event_name=PipelineEvent.SHUTDOWN,
+                provider=str(shutdown_ctx["provider"]),
+                severity=str(shutdown_ctx["severity"]),
+                error_type=str(shutdown_ctx["error_type"]),
+            )
         else:
-            self._logger.info(PipelineEvent.COMPLETE, **log_ctx)
+            complete_ctx = self._build_observability_context(
+                PipelineEvent.COMPLETE,
+                severity="info",
+                **log_ctx,
+            )
+            self._logger.info(PipelineEvent.COMPLETE, **complete_ctx)
+            self._emit_observability_event_metric(
+                event_name=PipelineEvent.COMPLETE,
+                provider=str(complete_ctx["provider"]),
+                severity=str(complete_ctx["severity"]),
+                error_type=str(complete_ctx["error_type"]),
+            )
 
         # 3. End Trace Span (O3: handle close errors gracefully)
         if self.span:
@@ -185,15 +230,22 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
             level: Log level ("debug", "info", "warning", "error").
             **extra: Additional context for the event.
         """
-        ctx = {
-            "phase": phase.value,
-            "pipeline": self.pipeline_name,
-            "run_id": self.run_id,
+        severity = self._normalize_severity(level)
+        ctx = self._build_observability_context(
+            event_name,
+            severity=severity,
+            phase=phase.value,
             **extra,
-        }
+        )
 
-        log_method = getattr(self._logger, level, self._logger.info)
+        log_method = getattr(self._logger, severity, self._logger.info)
         log_method(event_name, **ctx)
+        self._emit_observability_event_metric(
+            event_name=event_name,
+            provider=str(ctx["provider"]),
+            severity=str(ctx["severity"]),
+            error_type=str(ctx["error_type"]),
+        )
 
         # Add span event if tracing is active
         if self.span:
@@ -315,7 +367,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
             LifecyclePhase.POSTRUN,
             level=level,
             metric=metric_name,
-            severity=severity,
+            dq_severity=severity,
             anomaly_type=anomaly_type,
             current_value=current_value,
             baseline_mean=baseline_mean,
@@ -367,3 +419,82 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
                 files_removed,
                 {"table": table, "layer": layer},
             )
+
+    @staticmethod
+    def _derive_provider_name(pipeline_name: str) -> str:
+        """Derive provider name from canonical pipeline naming."""
+        if "_" not in pipeline_name:
+            return pipeline_name
+        provider, _entity = pipeline_name.split("_", 1)
+        return provider or pipeline_name
+
+    @staticmethod
+    def _normalize_severity(level: str) -> str:
+        """Normalize severity label for logs and metrics."""
+        normalized = level.strip().lower()
+        if normalized in {"debug", "info", "warning", "error"}:
+            return normalized
+        return "info"
+
+    @staticmethod
+    def _normalize_metric_label(value: str) -> str:
+        """Normalize metric label value to bounded token format."""
+        normalized = (
+            value.strip()
+            .lower()
+            .replace("-", "_")
+            .replace(" ", "_")
+            .replace(".", "_")
+            .replace("/", "_")
+            .replace(":", "_")
+        )
+        return normalized or "none"
+
+    def _build_observability_context(
+        self,
+        event_name: str,
+        *,
+        severity: str,
+        **extra: Any,  # Any: structlog-compatible context kwargs
+    ) -> dict[str, Any]:
+        """Build normalized observability context with dual-write aliases."""
+        context: dict[str, Any] = dict(extra)
+        provider = str(context.get("provider") or self.provider_name)
+
+        context.setdefault("provider", provider)
+        context.setdefault("pipeline", self.pipeline_name)
+        context.setdefault("run_id", self.run_id)
+        context.setdefault("severity", severity)
+
+        if not context.get("error_type"):
+            context["error_type"] = "unknown" if severity == "error" else "none"
+
+        # Dual-write fields for transition period (dashboards/alerts compatibility).
+        context.setdefault("event_name", event_name)
+        context.setdefault("provider_name", provider)
+        context.setdefault("pipeline_name", self.pipeline_name)
+        context.setdefault("correlation_id", self.run_id)
+        context.setdefault("log_level", severity)
+
+        return context
+
+    def _emit_observability_event_metric(
+        self,
+        *,
+        event_name: str,
+        provider: str,
+        severity: str,
+        error_type: str,
+    ) -> None:
+        """Emit unified observability event metric with normalized labels."""
+        self._metrics.increment_counter(
+            "observability_events_total",
+            1,
+            labels={
+                "event": self._normalize_metric_label(event_name),
+                "provider": self._normalize_metric_label(provider),
+                "pipeline": self._normalize_metric_label(self.pipeline_name),
+                "severity": self._normalize_metric_label(severity),
+                "error_type": self._normalize_metric_label(error_type),
+            },
+        )

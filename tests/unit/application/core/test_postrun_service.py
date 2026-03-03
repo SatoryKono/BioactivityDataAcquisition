@@ -402,7 +402,7 @@ class TestPostrunServiceCleanup:
     async def test_cleanup_handles_tracer_error(self, postrun_service, mock_logger):
         """Test cleanup handles tracer close error gracefully."""
         mock_tracer = MagicMock()
-        mock_tracer.close = MagicMock(side_effect=Exception("Close failed"))
+        mock_tracer.close = MagicMock(side_effect=RuntimeError("Close failed"))
 
         # Should not raise
         await postrun_service.cleanup(mock_tracer)

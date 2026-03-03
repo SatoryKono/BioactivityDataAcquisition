@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from bioetl.application.services.data_quality_service import DataQualityService
 from bioetl.application.services.medallion_types import VacuumResult
+from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 
 if TYPE_CHECKING:
@@ -150,6 +151,23 @@ class PostrunService:
         self._bronze_dq_config = bronze_dq_config
         self._silver_dq_config = silver_dq_config
         self._gold_dq_config = gold_dq_config
+        self._postrun_warning_allowlist = (
+            BioETLError,
+            OSError,
+            RuntimeError,
+            ValueError,
+            TypeError,
+            AttributeError,
+        )
+        self._metadata_version_allowlist = (
+            ImportError,
+            ModuleNotFoundError,
+            FileNotFoundError,
+            OSError,
+            RuntimeError,
+            ValueError,
+            TypeError,
+        )
 
     async def run(
         self,
@@ -228,10 +246,12 @@ class PostrunService:
             try:
                 tracer.close()
                 self._logger.debug("Tracer closed successfully")
-            except Exception as e:
+            except self._postrun_warning_allowlist as e:
                 self._logger.warning(
                     "Failed to close tracer",
                     error=str(e),
+                    error_type=type(e).__name__,
+                    reason="tracer_close_failed",
                 )
 
     async def _generate_dq_reports(
@@ -281,11 +301,22 @@ class PostrunService:
 
             return result
 
-        except Exception as e:
-            # Log error but don't fail the pipeline
-            self._logger.error(
+        except self._postrun_warning_allowlist as e:
+            if self._runtime.strict_validation:
+                self._logger.error(
+                    "dq_report_generation_failed",
+                    error=str(e),
+                    error_type=type(e).__name__,
+                    reason="dq_report_generation_failed_strict_mode",
+                    strict_mode=True,
+                )
+                raise
+            self._logger.warning(
                 "dq_report_generation_failed",
                 error=str(e),
+                error_type=type(e).__name__,
+                reason="dq_report_generation_failed_warning_mode",
+                strict_mode=False,
             )
             return None
 
@@ -321,15 +352,10 @@ class PostrunService:
             silver_path = self._storage.get_table_path(silver_table)
 
             # Get Delta version for lineage (REQ-LINEAGE-002)
-            version_after = None
-            try:
-                # Use internal storage helper if available or standard reader
-                from deltalake import DeltaTable
-
-                dt = DeltaTable(str(silver_path))
-                version_after = dt.version()
-            except Exception:
-                pass
+            version_after = self._resolve_delta_version(
+                table_path=str(silver_path),
+                layer="silver",
+            )
 
             silver_input = SilverMetadataInput(
                 table_path=str(silver_path),
@@ -360,14 +386,10 @@ class PostrunService:
             gold_path = self._storage.get_table_path(gold_table)
 
             # Get Delta version
-            version_after = None
-            try:
-                from deltalake import DeltaTable
-
-                dt = DeltaTable(str(gold_path))
-                version_after = dt.version()
-            except Exception:
-                pass
+            version_after = self._resolve_delta_version(
+                table_path=str(gold_path),
+                layer="gold",
+            )
 
             gold_input = GoldMetadataInput(
                 table_path=str(gold_path),
@@ -408,6 +430,81 @@ class PostrunService:
             "silver_yield": executor.records_silver / total_records,
             "gold_yield": executor.records_gold / total_records,
         }
+
+    def _resolve_delta_version(self, table_path: str, *, layer: str) -> int | None:
+        """Resolve Delta table version with warning-mode fallback and allowlist."""
+        try:
+            from deltalake import DeltaTable
+            from deltalake.exceptions import DeltaError, TableNotFoundError
+
+            dt = DeltaTable(table_path)
+            return dt.version()
+        except (ImportError, ModuleNotFoundError) as version_error:
+            if self._runtime.strict_validation:
+                self._logger.error(
+                    "delta_version_resolution_failed",
+                    layer=layer,
+                    table_path=table_path,
+                    error_type=type(version_error).__name__,
+                    error=str(version_error),
+                    reason="delta_dependency_missing_strict_mode",
+                    strict_mode=True,
+                )
+                raise
+            self._logger.warning(
+                "delta_version_resolution_failed",
+                layer=layer,
+                table_path=table_path,
+                error_type=type(version_error).__name__,
+                error=str(version_error),
+                reason="delta_dependency_missing_warning_mode",
+                strict_mode=False,
+            )
+            return None
+        except (TableNotFoundError, DeltaError) as version_error:
+            if self._runtime.strict_validation:
+                self._logger.error(
+                    "delta_version_resolution_failed",
+                    layer=layer,
+                    table_path=table_path,
+                    error_type=type(version_error).__name__,
+                    error=str(version_error),
+                    reason="delta_table_resolution_failed_strict_mode",
+                    strict_mode=True,
+                )
+                raise
+            self._logger.warning(
+                "delta_version_resolution_failed",
+                layer=layer,
+                table_path=table_path,
+                error_type=type(version_error).__name__,
+                error=str(version_error),
+                reason="delta_table_resolution_failed_warning_mode",
+                strict_mode=False,
+            )
+            return None
+        except self._metadata_version_allowlist as version_error:
+            if self._runtime.strict_validation:
+                self._logger.error(
+                    "delta_version_resolution_failed",
+                    layer=layer,
+                    table_path=table_path,
+                    error_type=type(version_error).__name__,
+                    error=str(version_error),
+                    reason="delta_version_resolution_failed_strict_mode",
+                    strict_mode=True,
+                )
+                raise
+            self._logger.warning(
+                "delta_version_resolution_failed",
+                layer=layer,
+                table_path=table_path,
+                error_type=type(version_error).__name__,
+                error=str(version_error),
+                reason="delta_version_resolution_failed_warning_mode",
+                strict_mode=False,
+            )
+            return None
 
 
 __all__ = [

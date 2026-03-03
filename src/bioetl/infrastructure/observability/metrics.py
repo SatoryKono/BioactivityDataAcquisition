@@ -241,6 +241,12 @@ PHASE_DURATION_SECONDS = Histogram(
     buckets=[0.1, 0.5, 1.0, 5.0, 10.0, 30.0, 60.0, 120.0, 300.0, 600.0],
 )
 
+OBSERVABILITY_EVENTS_TOTAL = Counter(
+    "bioetl_observability_events_total",
+    "Unified observability events emitted by pipeline observer",
+    ["event", "provider", "pipeline", "severity", "error_type"],
+)
+
 # =============================================================================
 # Transformer metrics
 # =============================================================================
@@ -423,7 +429,7 @@ class MetricsCollector:
     """
 
     # Any: optional Prometheus Co...
-    def __init__(self, pipeline_name: str, registry: Any = None):
+    def __init__(self, pipeline_name: str, registry: Any = None) -> None:
         """Initialize the metrics collector.
 
         Args:

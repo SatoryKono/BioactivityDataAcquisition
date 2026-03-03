@@ -217,6 +217,58 @@ jobs:
           path: coverage-${{ matrix.test-group.name }}-py${{ matrix.python-version }}.xml
           retention-days: 7
 
+  performance-budgets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: smoke-check
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Cache uv and virtualenv
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/uv
+            .venv
+          key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
+          restore-keys: |
+            uv-${{ runner.os }}-py311-
+
+      - name: Install dependencies (frozen lock)
+        run: uv sync --frozen --extra dev --extra tracing --extra performance
+
+      - name: Run performance budget gates (hotspots)
+        run: |
+          mkdir -p reports/performance
+          BIOETL_PERF_OBS_OUT=reports/performance/hotspot-observations.jsonl \
+          uv run pytest tests/performance/test_hotspot_budgets.py \
+            -m "benchmark and performance" \
+            -p no:xdist \
+            -q --tb=short \
+            --junitxml=reports/performance/hotspot-budgets.xml
+
+      - name: Upload performance budget report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: performance-hotspot-budgets
+          path: |
+            reports/performance/hotspot-budgets.xml
+            reports/performance/hotspot-observations.jsonl
+            tests/performance/hotspot_budgets.json
+          if-no-files-found: warn
+          retention-days: 30
+
   # Final coverage verification (runs full test suite with threshold)
   coverage-verify:
     runs-on: ubuntu-latest

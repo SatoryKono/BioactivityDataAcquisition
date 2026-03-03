@@ -452,7 +452,10 @@ class GoldWriter(BaseDeltaWriter):
 
         df = pd.DataFrame(records)
         try:
-            await self._run_in_executor(lambda: schema.validate(df, lazy=False))
+            # Pandera exposes a generic return type for validate(), which mypy
+            # cannot fully resolve through this executor/lambda boundary.
+            schema_any: Any = schema
+            await self._run_in_executor(lambda: schema_any.validate(df, lazy=False))
         except pandera_pa.errors.SchemaError as e:
             raise ValueError(f"Schema validation failed: {e}") from e
 

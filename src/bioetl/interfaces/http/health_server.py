@@ -38,6 +38,20 @@ class HealthServer:
         self._logger = logger
         self._server: asyncio.Server | None = None
         self._start_time: float | None = None
+        self._request_error_allowlist = (
+            UnicodeDecodeError,
+            ValueError,
+            RuntimeError,
+            OSError,
+            ConnectionError,
+            asyncio.IncompleteReadError,
+        )
+        self._writer_close_allowlist = (
+            OSError,
+            RuntimeError,
+            ConnectionError,
+            BrokenPipeError,
+        )
 
     async def start(self) -> None:
         """Start the health server."""
@@ -92,7 +106,7 @@ class HealthServer:
             await self._process_request(reader, writer)
         except TimeoutError:
             await self._send_response(writer, 408, "Request Timeout")
-        except Exception as e:
+        except self._request_error_allowlist as e:
             await self._handle_request_error(writer, e)
         finally:
             await self._close_writer(writer)
@@ -140,7 +154,12 @@ class HealthServer:
     ) -> None:
         """Handle request processing error."""
         if self._logger:
-            self._logger.error("health_server_error", error=str(error))
+            self._logger.error(
+                "health_server_error",
+                error=str(error),
+                error_type=type(error).__name__,
+                reason="request_processing_failed",
+            )
         await self._send_response(writer, 500, "Internal Server Error")
 
     async def _close_writer(self, writer: asyncio.StreamWriter) -> None:
@@ -148,8 +167,14 @@ class HealthServer:
         try:
             writer.close()
             await writer.wait_closed()
-        except Exception:
-            pass
+        except self._writer_close_allowlist as close_error:
+            if self._logger:
+                self._logger.debug(
+                    "health_server_writer_close_failed",
+                    error=str(close_error),
+                    error_type=type(close_error).__name__,
+                    reason="writer_close_failed",
+                )
 
     async def _route_request(self, writer: asyncio.StreamWriter, path: str) -> None:
         """Route request to appropriate handler."""

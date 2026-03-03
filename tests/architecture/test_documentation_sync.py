@@ -6,9 +6,47 @@ from pathlib import Path
 
 import yaml
 
+ACTIVE_DOC_EXCLUDED_PARTS = frozenset({"99-archive", "exports"})
+GENERATED_EXPORT_MERGED_RE = re.compile(r"^exports/.+\.merged\.md$")
+GENERATED_DOCS_EXPORT_REPORT_RE = re.compile(
+    r"^reports/docs-export-report-\d{4}-\d{2}-\d{2}-\d{6}\.md$"
+)
+
 
 def _resolve_composite_config_dir() -> Path:
     return Path("configs/composites")
+
+
+def _is_generated_docs_artifact(path: Path, docs_root: Path = Path("docs")) -> bool:
+    """Return True for generated docs artifacts excluded from active sync checks."""
+    rel_path = path.relative_to(docs_root).as_posix()
+    rel_parts = Path(rel_path).parts
+    if bool(rel_parts) and rel_parts[0] == "site":
+        return True
+    if GENERATED_EXPORT_MERGED_RE.match(rel_path):
+        return True
+    return bool(GENERATED_DOCS_EXPORT_REPORT_RE.match(rel_path))
+
+
+def _iter_active_docs_markdown() -> list[Path]:
+    """Collect markdown docs included in active docs sync scope."""
+    docs_root = Path("docs")
+    return sorted(
+        path
+        for path in docs_root.rglob("*.md")
+        if ACTIVE_DOC_EXCLUDED_PARTS.isdisjoint(path.parts)
+        and not _is_generated_docs_artifact(path, docs_root)
+    )
+
+
+def _iter_generated_docs_markdown() -> list[Path]:
+    """Collect generated markdown docs tracked by dedicated generated-docs gates."""
+    docs_root = Path("docs")
+    generated: list[Path] = []
+    for path in docs_root.rglob("*.md"):
+        if _is_generated_docs_artifact(path, docs_root):
+            generated.append(path)
+    return sorted(generated)
 
 
 def test_ports_count_matches_docs() -> None:
@@ -201,14 +239,8 @@ def test_mkdocs_nav_references_existing_markdown_files() -> None:
 def test_no_legacy_repo_slug_in_active_docs_and_workflows() -> None:
     """Active docs/workflows should reference the current repository slug."""
     legacy_slug = re.compile(r"SatoryKono/BioactivityDataAcquisition(?!2)")
-    excluded_doc_parts = {"99-archive", "exports"}
-
     candidates = [Path("README.md")]
-    candidates.extend(
-        path
-        for path in Path("docs").rglob("*.md")
-        if excluded_doc_parts.isdisjoint(path.parts)
-    )
+    candidates.extend(_iter_active_docs_markdown())
     candidates.extend(Path(".github/workflows").glob("*.yml"))
 
     violations: list[str] = []
@@ -226,14 +258,8 @@ def test_no_legacy_repo_slug_in_active_docs_and_workflows() -> None:
 def test_no_legacy_contract_path_in_active_docs() -> None:
     """Active docs should use docs/04-reference/contracts/gold path."""
     legacy_path = "docs/contracts/gold/"
-    excluded_doc_parts = {"99-archive", "exports"}
-
     candidates = [Path("README.md")]
-    candidates.extend(
-        path
-        for path in Path("docs").rglob("*.md")
-        if excluded_doc_parts.isdisjoint(path.parts)
-    )
+    candidates.extend(_iter_active_docs_markdown())
 
     violations: list[str] = []
     for path in candidates:
@@ -278,14 +304,8 @@ def test_no_legacy_kebab_pipeline_ids_in_active_docs() -> None:
         "composite-assay",
     }
 
-    excluded_doc_parts = {"99-archive", "exports"}
-
     candidates = [Path("README.md")]
-    candidates.extend(
-        path
-        for path in Path("docs").rglob("*.md")
-        if excluded_doc_parts.isdisjoint(path.parts)
-    )
+    candidates.extend(_iter_active_docs_markdown())
     candidates.extend(Path(".github/workflows").glob("*.yml"))
 
     violations: list[str] = []
@@ -297,6 +317,44 @@ def test_no_legacy_kebab_pipeline_ids_in_active_docs() -> None:
     assert not violations, (
         "Legacy kebab-case pipeline IDs found in active docs/workflows:\n"
         + "\n".join(f"  - {item}" for item in sorted(violations))
+    )
+
+
+def test_generated_docs_artifacts_excluded_from_active_scope() -> None:
+    """Generated docs must be audited by dedicated gates, not active docs sync scope."""
+    active_paths = {path.as_posix() for path in _iter_active_docs_markdown()}
+    generated_paths = [path.as_posix() for path in _iter_generated_docs_markdown()]
+    overlap = sorted(set(generated_paths) & active_paths)
+    assert not overlap, (
+        "Generated docs leaked into active docs sync scope:\n"
+        + "\n".join(f"  - {item}" for item in overlap)
+    )
+
+
+def test_generated_export_markdown_has_generation_marker() -> None:
+    """Generated merged docs in docs/exports must contain explicit generation marker."""
+    exports_dir = Path("docs/exports")
+    merged_docs = sorted(exports_dir.glob("*.merged.md"))
+    for path in merged_docs:
+        lines = path.read_text(encoding="utf-8").splitlines()
+        head = "\n".join(lines[:30])
+        assert re.search(r"^_Generated:\s+\d{4}-\d{2}-\d{2}_$", head, re.MULTILINE), (
+            f"Missing generation marker in {path.as_posix()}"
+        )
+
+
+def test_generated_export_report_names_are_timestamped() -> None:
+    """Generated docs export reports must follow timestamped naming convention."""
+    reports_dir = Path("docs/reports")
+    bad_names = sorted(
+        path.as_posix()
+        for path in reports_dir.glob("docs-export-report-*.md")
+        if GENERATED_DOCS_EXPORT_REPORT_RE.match(path.relative_to("docs").as_posix())
+        is None
+    )
+    assert not bad_names, (
+        "Generated docs export reports with invalid naming:\n"
+        + "\n".join(f"  - {item}" for item in bad_names)
     )
 
 

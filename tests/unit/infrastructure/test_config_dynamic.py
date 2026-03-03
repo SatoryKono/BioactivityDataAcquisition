@@ -8,15 +8,16 @@ import yaml
 
 from bioetl.infrastructure.config import load_pipeline_config
 from bioetl.infrastructure.config_loader import (
-    _normalize_source_config,
-)
-from bioetl.infrastructure.config_loader import (
     load_pipeline_config as load_pipeline_config_cached,
 )
 from bioetl.infrastructure.config_loader import (
     load_source_config,
 )
+from bioetl.infrastructure.config.legacy_normalizers.source import (
+    normalize_source_config,
+)
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
 
 def _create_minimal_schema_for_pipeline(pipeline_yaml_path: Path) -> None:
@@ -56,6 +57,11 @@ def _minimal_unified_schema() -> dict[str, Any]:
         "silver": {"include_groups": ["system", "business"]},
         "gold": {"include_groups": ["business"]},
     }
+
+
+def _dump_source_config(config: SourceYamlConfig) -> dict[str, Any]:
+    """Produce stable dump for source-config golden equivalence checks."""
+    return config.model_dump(mode="json", exclude_none=True)
 
 
 def _write_unified_entity_config(
@@ -287,18 +293,13 @@ def test_load_source_config_legacy_and_new_format_equivalent_chembl(
     (providers_dir / "chembl_legacy.yaml").write_text(yaml.dump(legacy))
     (providers_dir / "chembl_new.yaml").write_text(yaml.dump(new))
 
+    assert normalize_source_config(legacy) == normalize_source_config(new)
+
     cfg_legacy = load_source_config("chembl_legacy")
     load_source_config.cache_clear()
     cfg_new = load_source_config("chembl_new")
 
-    assert cfg_legacy.base_url == cfg_new.base_url
-    assert cfg_legacy.timeout_sec == cfg_new.timeout_sec
-    assert cfg_legacy.max_retries == cfg_new.max_retries
-    assert cfg_legacy.batch_size == cfg_new.batch_size
-    assert (
-        cfg_legacy.rate_limit.requests_per_second
-        == cfg_new.rate_limit.requests_per_second
-    )
+    assert _dump_source_config(cfg_legacy) == _dump_source_config(cfg_new)
 
 
 def test_load_source_config_from_unified_provider_file(tmp_path, monkeypatch):
@@ -393,18 +394,13 @@ def test_load_source_config_legacy_and_new_format_equivalent_pubmed(
     (providers_dir / "pubmed_legacy.yaml").write_text(yaml.dump(legacy))
     (providers_dir / "pubmed_new.yaml").write_text(yaml.dump(new))
 
+    assert normalize_source_config(legacy) == normalize_source_config(new)
+
     cfg_legacy = load_source_config("pubmed_legacy")
     load_source_config.cache_clear()
     cfg_new = load_source_config("pubmed_new")
 
-    assert cfg_legacy.base_url == cfg_new.base_url
-    assert cfg_legacy.timeout_sec == cfg_new.timeout_sec
-    assert cfg_legacy.max_retries == cfg_new.max_retries
-    assert cfg_legacy.batch_size == cfg_new.batch_size
-    assert (
-        cfg_legacy.rate_limit.requests_per_second
-        == cfg_new.rate_limit.requests_per_second
-    )
+    assert _dump_source_config(cfg_legacy) == _dump_source_config(cfg_new)
 
 
 def test_normalize_source_config_maps_rate_limit_and_timeout_aliases() -> None:
@@ -424,7 +420,7 @@ def test_normalize_source_config_maps_rate_limit_and_timeout_aliases() -> None:
         }
     }
 
-    normalized = _normalize_source_config(raw)
+    normalized = normalize_source_config(raw)
     source = normalized["source"]
 
     assert source["rate_limit"]["authenticated"] == source["rate_limit"]["with_api_key"]
@@ -448,7 +444,7 @@ def test_normalize_source_config_supports_top_level_flat_format() -> None:
         "health_check": {"endpoint": "/health", "timeout": 4},
     }
 
-    normalized = _normalize_source_config(raw)
+    normalized = normalize_source_config(raw)
     source = normalized["source"]
 
     assert source["provider_config"]["base_url"] == "https://example.chembl/api"
