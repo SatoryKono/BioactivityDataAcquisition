@@ -61,7 +61,7 @@ MUST:
 - register pipelines declaratively through `PIPELINE_CONFIGS`
 
 MUST NOT:
-- add legacy `configs/pipelines/**`, `configs/sources/**`, `configs/schemas/**` paths
+- add legacy config-tree folders for pipelines/sources/schemas in the config root
 - add `BasePipeline` subclasses for standard provider pipelines (use `GenericPipeline` + transformer)
 - keep secrets in YAML/config files
 
