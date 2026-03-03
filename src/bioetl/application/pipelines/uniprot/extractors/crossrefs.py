@@ -129,7 +129,9 @@ class CrossRefExtractor:
         return serialize_to_json(ids, ensure_ascii=False) if ids else None
 
     @classmethod
-    def _build_pdb_entry(cls, xref: dict[str, Any]) -> dict[str, Any] | None:
+    def _build_pdb_entry(
+        cls, xref: dict[str, Any]
+    ) -> dict[str, Any] | None:  # Any: untyped JSON fragment from UniProt API
         """Build a PDB entry from a cross-reference dict."""
         pdb_id = xref.get("id")
         if not pdb_id:
@@ -177,7 +179,9 @@ class CrossRefExtractor:
         return serialize_to_json(pdb_refs, ensure_ascii=False) if pdb_refs else None
 
     @classmethod
-    def _build_interpro_entry(cls, xref: dict[str, Any]) -> dict[str, Any] | None:
+    def _build_interpro_entry(
+        cls, xref: dict[str, Any]
+    ) -> dict[str, Any] | None:  # Any: untyped JSON fragment from UniProt API
         """Build an InterPro entry from a cross-reference dict."""
         interpro_id = xref.get("id")
         if not interpro_id:
@@ -223,7 +227,9 @@ class CrossRefExtractor:
         )
 
     @classmethod
-    def _build_pfam_entry(cls, xref: dict[str, Any]) -> dict[str, Any] | None:
+    def _build_pfam_entry(
+        cls, xref: dict[str, Any]
+    ) -> dict[str, Any] | None:  # Any: untyped JSON fragment from UniProt API
         """Build a Pfam entry from a cross-reference dict."""
         pfam_id = xref.get("id")
         if not pfam_id:
@@ -268,7 +274,9 @@ class CrossRefExtractor:
         return serialize_to_json(pfam_refs, ensure_ascii=False) if pfam_refs else None
 
     @classmethod
-    def _build_reactome_entry(cls, xref: dict[str, Any]) -> dict[str, Any] | None:
+    def _build_reactome_entry(
+        cls, xref: dict[str, Any]
+    ) -> dict[str, Any] | None:  # Any: untyped JSON fragment from UniProt API
         """Build a Reactome entry from a cross-reference dict."""
         reactome_id = xref.get("id")
         if not reactome_id:

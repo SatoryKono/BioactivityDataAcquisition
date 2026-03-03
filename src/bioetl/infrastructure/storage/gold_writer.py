@@ -9,7 +9,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 import pandera as pandera_pa
 import pyarrow as pa
@@ -18,7 +18,7 @@ from deltalake.exceptions import TableNotFoundError
 
 from bioetl.domain.medallion import GoldWriteMode
 from bioetl.domain.ports import AuditEntry, AuditLayer, AuditOperation
-from bioetl.domain.types import GoldRecord, GoldSchemaType, RunID, ScdConfig
+from bioetl.domain.types import GoldRecord, RunID, ScdConfig
 from bioetl.infrastructure.storage.base_delta_writer import (
     BaseDeltaWriter,
     coerce_null_types_for_delta,
@@ -58,7 +58,7 @@ def _normalize_scd_config(
     primary_keys: list[str] | None,
 ) -> ScdConfig:
     """Normalize YAML scd_config keys to gold_writer expected format."""
-    out = dict(scd_config)
+    out: dict[str, Any] = dict(scd_config)
     if "business_key" not in out and primary_keys:
         out["business_key"] = (
             primary_keys[0] if len(primary_keys) == 1 else primary_keys
@@ -66,7 +66,7 @@ def _normalize_scd_config(
     for src, dst in _SCD_KEY_MAP.items():
         if src in out and dst not in out:
             out[dst] = out[src]
-    return out
+    return cast(ScdConfig, out)
 
 
 class GoldWriter(BaseDeltaWriter):

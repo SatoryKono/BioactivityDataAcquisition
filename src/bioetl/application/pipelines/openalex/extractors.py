@@ -282,7 +282,9 @@ def extract_institution_ids(
     return sorted(ids)
 
 
-def extract_institution_country_codes(authorships: list[dict[str, Any]]) -> list[str]:  # Any: untyped JSON fragment from OpenAlex API
+def extract_institution_country_codes(
+    authorships: list[dict[str, Any]],
+) -> list[str]:  # Any: untyped JSON fragment from OpenAlex API
     """Extract unique institution country codes from authorships.
 
     Args:
@@ -306,7 +308,9 @@ def extract_institution_country_codes(authorships: list[dict[str, Any]]) -> list
     return sorted(codes)
 
 
-def extract_institution_ror_ids(authorships: list[dict[str, Any]]) -> list[str]:  # Any: untyped JSON fragment from OpenAlex API
+def extract_institution_ror_ids(
+    authorships: list[dict[str, Any]],
+) -> list[str]:  # Any: untyped JSON fragment from OpenAlex API
     """Extract unique ROR IDs from authorships institutions.
 
     Args:
@@ -372,7 +376,9 @@ def extract_primary_topic(
     return _parse_topic_dict(primary_topic)
 
 
-def _parse_grant_dict(grant: dict[str, Any]) -> dict[str, Any] | None:  # Any: untyped JSON fragment from OpenAlex API
+def _parse_grant_dict(
+    grant: dict[str, Any],
+) -> dict[str, Any] | None:  # Any: untyped JSON fragment from OpenAlex API
     """Parse a single grant dict into normalized format (helper function).
 
     Args:
@@ -395,7 +401,9 @@ def _parse_grant_dict(grant: dict[str, Any]) -> dict[str, Any] | None:  # Any: u
     }
 
 
-def extract_grants(grants: list[dict[str, Any]] | None) -> list[dict[str, Any]]:  # Any: untyped JSON fragment from OpenAlex API
+def extract_grants(
+    grants: list[dict[str, Any]] | None,
+) -> list[dict[str, Any]]:  # Any: untyped JSON fragment from OpenAlex API
     """Extract grant/funding information from grants array.
 
     Args:
@@ -418,7 +426,9 @@ def extract_grants(grants: list[dict[str, Any]] | None) -> list[dict[str, Any]]:
     return result
 
 
-def extract_journal_info(primary_location: dict[str, Any] | None) -> dict[str, Any]:  # Any: untyped JSON fragment from OpenAlex API
+def extract_journal_info(
+    primary_location: dict[str, Any] | None,
+) -> dict[str, Any]:  # Any: untyped JSON fragment from OpenAlex API
     """Extract journal info (journal, issn, publisher) from primary_location.
 
     Args:
@@ -470,7 +480,9 @@ def reconstruct_abstract(inverted_index: dict[str, list[int]] | None) -> str | N
     return " ".join(word for _, word in word_positions)
 
 
-def extract_open_access_info(open_access: dict[str, Any] | None) -> dict[str, Any]:  # Any: untyped JSON fragment from OpenAlex API
+def extract_open_access_info(
+    open_access: dict[str, Any] | None,
+) -> dict[str, Any]:  # Any: untyped JSON fragment from OpenAlex API
     """Extract Open Access info (is_oa, oa_status).
 
     Args:
@@ -488,7 +500,9 @@ def extract_open_access_info(open_access: dict[str, Any] | None) -> dict[str, An
     }
 
 
-def extract_external_ids(ids: dict[str, Any] | None) -> dict[str, Any]:  # Any: untyped JSON fragment from OpenAlex API
+def extract_external_ids(
+    ids: dict[str, Any] | None,
+) -> dict[str, Any]:  # Any: untyped JSON fragment from OpenAlex API
     """Extract external identifiers (pmid, pmcid, mag_id) from ids object.
 
     Args:
@@ -519,7 +533,9 @@ def extract_external_ids(ids: dict[str, Any] | None) -> dict[str, Any]:  # Any: 
     }
 
 
-def extract_mesh_terms(mesh: list[dict[str, Any]] | None) -> list[str]:  # Any: untyped JSON fragment from OpenAlex API
+def extract_mesh_terms(
+    mesh: list[dict[str, Any]] | None,
+) -> list[str]:  # Any: untyped JSON fragment from OpenAlex API
     """Extract unique MeSH descriptor names from mesh array.
 
     Args:
@@ -545,7 +561,9 @@ def extract_mesh_terms(mesh: list[dict[str, Any]] | None) -> list[str]:  # Any: 
     return result
 
 
-def extract_keywords(keywords: list[dict[str, Any]] | None) -> list[str]:  # Any: untyped JSON fragment from OpenAlex API
+def extract_keywords(
+    keywords: list[dict[str, Any]] | None,
+) -> list[str]:  # Any: untyped JSON fragment from OpenAlex API
     """Extract keyword display names from keywords array.
 
     Args:
@@ -568,7 +586,9 @@ def extract_keywords(keywords: list[dict[str, Any]] | None) -> list[str]:  # Any
     return result
 
 
-def extract_biblio_info(biblio: dict[str, Any] | None) -> dict[str, Any]:  # Any: untyped JSON fragment from OpenAlex API
+def extract_biblio_info(
+    biblio: dict[str, Any] | None,
+) -> dict[str, Any]:  # Any: untyped JSON fragment from OpenAlex API
     """Extract bibliographic info (volume, issue, page_first, page_last).
 
     Args:

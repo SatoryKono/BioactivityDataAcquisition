@@ -48,7 +48,7 @@ MetaDict: TypeAlias = dict[
 ]  # Any: freeform metadata (str|int|float|datetime|None)
 """Freeform metadata bag used in aggregates, audit entries, events."""
 
-ScdConfig: TypeAlias = dict[str, str | list[str]]
+ScdConfig: TypeAlias = dict[str, str]
 """SCD2 configuration mapping (column-role → column-name). Values are always str."""
 
 GoldSchemaType: TypeAlias = "type[_pa.DataFrameModel]"
