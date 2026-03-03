@@ -1,0 +1,89 @@
+"""Unit tests for composition.services.versioning."""
+
+from __future__ import annotations
+
+from types import SimpleNamespace
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+from bioetl.composition.services import versioning
+
+
+@pytest.fixture(autouse=True)
+def _clear_git_commit_cache() -> None:
+    versioning.get_git_commit.cache_clear()
+
+
+@pytest.mark.unit
+@patch("bioetl.composition.services.versioning.subprocess.run")
+def test_get_git_commit_returns_short_hash_on_success(mock_run: MagicMock) -> None:
+    mock_run.return_value = SimpleNamespace(returncode=0, stdout="abc1234\n")
+
+    assert versioning.get_git_commit() == "abc1234"
+
+
+@pytest.mark.unit
+@patch("bioetl.composition.services.versioning.subprocess.run")
+def test_get_git_commit_returns_none_on_nonzero_exit(mock_run: MagicMock) -> None:
+    mock_run.return_value = SimpleNamespace(returncode=1, stdout="")
+
+    assert versioning.get_git_commit() is None
+
+
+@pytest.mark.unit
+@patch("bioetl.composition.services.versioning.subprocess.run")
+def test_get_git_commit_returns_none_on_exception(mock_run: MagicMock) -> None:
+    mock_run.side_effect = FileNotFoundError("git missing")
+
+    assert versioning.get_git_commit() is None
+
+
+@pytest.mark.unit
+def test_normalize_for_hash_handles_none_and_tuple() -> None:
+    assert versioning._normalize_for_hash(None) is None
+    assert versioning._normalize_for_hash(("a", {"b": 1})) == ["a", {"b": 1}]
+
+
+@pytest.mark.unit
+def test_compute_config_hash_supports_legacy_dict_method() -> None:
+    class LegacyConfig:
+        def dict(self, *, exclude_none: bool) -> dict[str, object]:
+            assert exclude_none is True
+            return {"version": "1.0.0", "nested": {"x": 1}}
+
+    digest = versioning.compute_config_hash(LegacyConfig())
+
+    assert len(digest) == 64
+
+
+@pytest.mark.unit
+def test_compute_config_hash_supports_mapping_cast_path() -> None:
+    class MappingConfig:
+        def __iter__(self):
+            return iter([("provider", "chembl"), ("entity", "publication")])
+
+    digest = versioning.compute_config_hash(MappingConfig())
+
+    assert len(digest) == 64
+
+
+@pytest.mark.unit
+def test_get_pipeline_version_reads_dict_version() -> None:
+    assert versioning.get_pipeline_version({"version": "2.3.4"}) == "2.3.4"
+
+
+@pytest.mark.unit
+@patch("bioetl.composition.services.versioning.pkg_version", return_value="9.9.9")
+def test_get_pipeline_version_falls_back_to_package_version(
+    _mock_pkg_version: MagicMock,
+) -> None:
+    assert versioning.get_pipeline_version({}) == "9.9.9"
+
+
+@pytest.mark.unit
+@patch("bioetl.composition.services.versioning.pkg_version", side_effect=RuntimeError)
+def test_get_pipeline_version_falls_back_to_unknown_on_error(
+    _mock_pkg_version: MagicMock,
+) -> None:
+    assert versioning.get_pipeline_version({}) == "unknown"
