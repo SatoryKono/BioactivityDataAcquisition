@@ -46,7 +46,7 @@ Combines ChEMBL bioactivity data with compound record metadata, enabling correla
 
 | Group | Fields |
 |-------|--------|
-| system | entity-id, content-hash, -run-id, -run-type, -source-batch-id, ... |
+| system | entity_id, content_hash, _run_id, _run_type, _source_batch_id, ... |
 | identifiers | activity-id, molecule-id, assay-id, target-id, publication-id |
 | activity-values | standard-type, standard-relation, standard-value, standard-units, pchembl-value, ... |
 | original-values | type, relation, value, units, text-value, ... |

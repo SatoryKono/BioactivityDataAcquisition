@@ -297,7 +297,7 @@ Delta merge by content-hash — критическая операция для i
 
    - Calculate content-hash: `sha256(provider + canonical-json(record))`
    - Normalize data (NaN→null, round floats, ISO dates)
-   - Add metadata (\-run-id, \-ingestion-ts, etc.)
+   - Add metadata (`_run_id`, `_ingestion_ts`, etc.)
 
 1. **Table Check**
 

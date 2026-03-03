@@ -4,11 +4,11 @@
 
 > **Documentation Update:** 2026-03-02
 > - Source Code Map rewritten to match actual codebase structure (v8.0)
-> - Codebase metrics: ~548 src files + ~622 test files
+> - Codebase metrics (snapshot 2026-03-03): 581 src files + 868 test files
 > - ADR count: 40 ADRs (ADR-001 through ADR-040)
 > - Pipeline configs: 27 configurations (21 single-source + 6 composite)
 > - YAML configs total: 39 (`configs/` tree)
-> - Documentation files: 350+ markdown files
+> - Documentation files (snapshot 2026-03-03): 1067 markdown files
 > - All 7 providers documented, all 28 domain ports listed
 > - Diagrams: 271 Mermaid source files (103 .mmd + 168 .mermaid)
 
@@ -411,7 +411,7 @@ src/bioetl/
     │   └── types.py             # HTTP types
     └── orchestration/           # Orchestration helpers
 
-tests/                           # 622 test files
+tests/                           # 868 test files
 ├── unit/                        # Isolated unit tests (mock I/O)
 │   ├── domain/                  # Domain logic tests
 │   ├── application/             # Pipeline/transformer tests

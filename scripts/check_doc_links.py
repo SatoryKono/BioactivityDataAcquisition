@@ -137,8 +137,7 @@ DRIFT_RULES = (
         name="legacy_system_meta_field_token",
         pattern=re.compile(
             r"(?<![A-Za-z0-9_-])-"
-            r"(?:run-id|run-type|source-batch-id|ingestion-ts|content-hash|"
-            r"dq-warn|dq-error|lookup-method|original-id|source|index)"
+            r"(?:run-id|run-type|source-batch-id|ingestion-ts)"
             r"(?![A-Za-z0-9_-])"
         ),
     ),

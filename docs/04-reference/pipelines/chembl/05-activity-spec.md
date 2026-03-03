@@ -192,10 +192,10 @@ hash-fields = [
 
 # Fields EXCLUDED from hash
 excluded = [
-    "-ingestion-ts",
-    "-run-id",
-    "-run-type",
-    "-dq-*",
+    "_ingestion_ts",
+    "_run_id",
+    "_run_type",
+    "_dq_*",
     # Denormalized fields (can change independently)
     "molecule-pref-name",
     "target-pref-name",

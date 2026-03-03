@@ -138,11 +138,11 @@ import polars as pl
 dt = DeltaTable("data/output/silver/chembl/activity")
 df = pl.scan-delta(str(dt)).collect()
 
-# Count records by run-id
-run-stats = df.group-by("-run-id").agg(
+# Count records by run_id
+run-stats = df.group-by("_run_id").agg(
     [
         pl.count().alias("records"),
-        pl.col("-dq-passed").sum().alias("passed"),
+        pl.col("_dq_passed").sum().alias("passed"),
     ]
 )
 print(run-stats)
