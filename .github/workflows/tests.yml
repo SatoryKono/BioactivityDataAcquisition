@@ -56,7 +56,7 @@ jobs:
         run: python scripts/check_version_consistency.py
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v7
 
       - name: Cache uv and virtualenv
         uses: actions/cache@v4
@@ -99,7 +99,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v7
 
       - name: Cache uv and virtualenv
         uses: actions/cache@v4
@@ -166,7 +166,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v7
 
       - name: Cache uv and virtualenv
         uses: actions/cache@v4
@@ -224,7 +224,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v7
 
       - name: Cache uv and virtualenv
         uses: actions/cache@v4
