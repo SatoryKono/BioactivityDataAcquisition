@@ -140,7 +140,7 @@ hash-fields = [
 ]
 
 # Fields EXCLUDED from hash (RULES.md §2.8.1)
-excluded = ["-ingestion-ts", "-run-id", "-run-type", "-dq-*"]
+excluded = ["_ingestion_ts", "_run_id", "_run_type", "_dq_*"]
 
 # Algorithm
 content-hash = sha256(f"chembl{canonical-json(filtered-record)}")
@@ -269,15 +269,15 @@ All records contain:
 
 | Field              | Type     | Source          | In Hash |
 | ------------------ | -------- | --------------- | ------- |
-| `entity-id`        | str      | cell-id         | N/A     |
-| `content-hash`     | str      | Computed        | N/A     |
-| `-run-id`          | UUID     | Generated       | No      |
-| `-run-type`        | Enum     | Config          | No      |
-| `-source-batch-id` | UUID     | Generated       | No      |
-| `-ingestion-ts`    | datetime | Generated (UTC) | No      |
-| `-dq-warn`         | bool     | Validation      | No      |
-| `-dq-error`        | bool     | Validation      | No      |
-| `-index`           | int      | Generated       | No      |
+| `entity_id`        | str      | cell-id         | N/A     |
+| `content_hash`     | str      | Computed        | N/A     |
+| `_run_id`          | UUID     | Generated       | No      |
+| `_run_type`        | Enum     | Config          | No      |
+| `_source_batch_id` | UUID     | Generated       | No      |
+| `_ingestion_ts`    | datetime | Generated (UTC) | No      |
+| `_dq_warn`         | bool     | Validation      | No      |
+| `_dq_error`        | bool     | Validation      | No      |
+| `_index`           | int      | Generated       | No      |
 
 ----------------------------------------------------------------------
 
@@ -307,8 +307,8 @@ VACUUM: Weekly, 7 days retention
 
 | #     | Column                    | Type    | Nullable | Description      |
 | ----- | ------------------------- | ------- | -------- | ---------------- |
-| 1     | `entity-id`               | string  | No       | = cell-id        |
-| 2     | `content-hash`            | string  | No       | SHA256 hash      |
+| 1     | `entity_id`               | string  | No       | = cell-id        |
+| 2     | `content_hash`            | string  | No       | SHA256 hash      |
 | 3     | `cell-id`                 | string  | No       | PK               |
 | 4     | `cell-name`               | string  | No       | Cell line name   |
 | 5     | `cell-description`        | string  | Yes      | Description      |

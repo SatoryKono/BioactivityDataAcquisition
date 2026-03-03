@@ -71,12 +71,12 @@ See `configs/entities/{provider}/{entity}.yaml` for specific configurations.
 
 | Field              | Type      | Description                            |
 | ------------------ | --------- | -------------------------------------- |
-| `-run-id`          | UUID      | Pipeline execution ID                  |
-| `-run-type`        | Enum      | `incremental` / `backfill` / `rebuild` |
-| `-source-batch-id` | UUID      | FK to lineage-log                      |
-| `-ingestion-ts`    | Timestamp | UTC ingestion time                     |
-| `-content-hash`    | String    | SHA256 for deduplication               |
-| `-dq-warn`         | Boolean   | Data quality warning flag              |
+| `_run_id`          | UUID      | Pipeline execution ID                  |
+| `_run_type`        | Enum      | `incremental` / `backfill` / `rebuild` |
+| `_source_batch_id` | UUID      | Lineage reference in metadata sidecar  |
+| `_ingestion_ts`    | Timestamp | UTC ingestion time                     |
+| `content_hash`     | String    | SHA256 for deduplication               |
+| `_dq_warn`         | Boolean   | Data quality warning flag              |
 
 ----------------------------------------------------------------------
 
@@ -100,7 +100,7 @@ See `configs/entities/{provider}/{entity}.yaml` for specific configurations.
 flowchart TD
   INPUT["Input Record"] --> VALIDATE["Pandera Validate"]
   VALIDATE -->|Pass| SILVER["Silver Table"]
-  VALIDATE -->|Warning < 5%| SILVER-WARN["Silver + -dq-warn=true"]
+  VALIDATE -->|Warning < 5%| SILVER-WARN["Silver + _dq_warn=true"]
   VALIDATE -->|Error > 20%| FAIL["Batch FAIL"]
   VALIDATE -->|Per - record error| QUARANTINE["Quarantine Table"]
   QUARANTINE --> REPLAY["Manual Replay<br/>(after fix)"]
@@ -108,7 +108,7 @@ flowchart TD
 
 **Thresholds**:
 
-- `< 5%` errors → Write with `-dq-warn=true`
+- `< 5%` errors → Write with `_dq_warn=true`
 - `5-20%` errors → Warning in logs
 - `> 20%` errors → Batch fails entirely
 

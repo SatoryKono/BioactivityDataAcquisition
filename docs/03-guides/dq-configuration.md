@@ -76,8 +76,8 @@ thresholds:
 
 Two validations are applied globally to all entities:
 
-1. **`-content-hash` required** — Content hash must be present after transform (for deduplication)
-2. **`-ingestion-ts` pattern** — Ingestion timestamp must match ISO 8601 format (`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}`)
+1. **`content_hash` required** — Content hash must be present after transform (for deduplication)
+2. **`_ingestion_ts` pattern** — Ingestion timestamp must match ISO 8601 format (`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}`)
 
 ## Adding DQ Rules for New Entity
 

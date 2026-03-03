@@ -150,7 +150,7 @@ hash-fields = [
 ]
 
 # Fields EXCLUDED from hash (RULES.md §2.8.1)
-excluded = ["-ingestion-ts", "-run-id", "-run-type", "-dq-*"]
+excluded = ["_ingestion_ts", "_run_id", "_run_type", "_dq_*"]
 
 # Algorithm
 content-hash = sha256(f"chembl{canonical-json(filtered-record)}")
@@ -251,15 +251,15 @@ All records contain:
 
 | Field              | Type     | Source                  | In Hash |
 | ------------------ | -------- | ----------------------- | ------- |
-| `entity-id`        | str      | protein-class-id (cast) | N/A     |
-| `content-hash`     | str      | Computed                | N/A     |
-| `-run-id`          | UUID     | Generated               | No      |
-| `-run-type`        | Enum     | Config                  | No      |
-| `-source-batch-id` | UUID     | Generated               | No      |
-| `-ingestion-ts`    | datetime | Generated (UTC)         | No      |
-| `-dq-warn`         | bool     | Validation              | No      |
-| `-dq-error`        | bool     | Validation              | No      |
-| `-index`           | int      | Generated               | No      |
+| `entity_id`        | str      | protein-class-id (cast) | N/A     |
+| `content_hash`     | str      | Computed                | N/A     |
+| `_run_id`          | UUID     | Generated               | No      |
+| `_run_type`        | Enum     | Config                  | No      |
+| `_source_batch_id` | UUID     | Generated               | No      |
+| `_ingestion_ts`    | datetime | Generated (UTC)         | No      |
+| `_dq_warn`         | bool     | Validation              | No      |
+| `_dq_error`        | bool     | Validation              | No      |
+| `_index`           | int      | Generated               | No      |
 
 ----------------------------------------------------------------------
 
@@ -289,8 +289,8 @@ VACUUM: Weekly, 7 days retention
 
 | #   | Column               | Type      | Nullable | Description        |
 | --- | -------------------- | --------- | -------- | ------------------ |
-| 1   | `entity-id`          | string    | No       | = protein-class-id |
-| 2   | `content-hash`       | string    | No       | SHA256 hash        |
+| 1   | `entity_id`          | string    | No       | = protein-class-id |
+| 2   | `content_hash`       | string    | No       | SHA256 hash        |
 | 3   | `protein-class-id`   | int       | No       | PK                 |
 | 4   | `parent-id`          | int       | Yes      | FK to parent       |
 | 5   | `replaced-by`        | int       | Yes      | FK to replacement  |
@@ -301,13 +301,13 @@ VACUUM: Weekly, 7 days retention
 | 10  | `class-level`        | int       | Yes      | Hierarchy level    |
 | 11  | `sort-order`         | int       | Yes      | Sort order         |
 | 12  | `downgraded`         | int       | Yes      | Deprecated flag    |
-| 13  | `-run-id`            | uuid      | No       | Pipeline run ID    |
-| 14  | `-run-type`          | string    | No       | Run type           |
-| 15  | `-source-batch-id`   | uuid      | Yes      | Batch context      |
-| 16  | `-ingestion-ts`      | timestamp | No       | Ingestion time     |
-| 17  | `-dq-warn`           | bool      | No       | DQ warning flag    |
-| 18  | `-dq-error`          | bool      | No       | DQ error flag      |
-| 19  | `-index`             | int       | No       | Record index       |
+| 13  | `_run_id`            | uuid      | No       | Pipeline run ID    |
+| 14  | `_run_type`          | string    | No       | Run type           |
+| 15  | `_source_batch_id`   | uuid      | Yes      | Batch context      |
+| 16  | `_ingestion_ts`      | timestamp | No       | Ingestion time     |
+| 17  | `_dq_warn`           | bool      | No       | DQ warning flag    |
+| 18  | `_dq_error`          | bool      | No       | DQ error flag      |
+| 19  | `_index`             | int       | No       | Record index       |
 
 ### 7.3. Gold
 

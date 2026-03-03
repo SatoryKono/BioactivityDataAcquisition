@@ -120,7 +120,24 @@ def test_drift_rules_include_legacy_run_flag_and_path_tokens() -> None:
     rule_names = {rule.name for rule in module.DRIFT_RULES}
 
     assert "legacy_run_type_flag" in rule_names
+    assert "legacy_system_meta_field_token" in rule_names
+    assert "legacy_lineage_log_token" in rule_names
     assert "legacy_docs_pipelines_path" in rule_names
+
+
+def test_legacy_system_meta_field_rule_ignores_cli_double_dash_flags() -> None:
+    module = _load_module()
+    rule = next(
+        candidate
+        for candidate in module.DRIFT_RULES
+        if candidate.name == "legacy_system_meta_field_token"
+    )
+
+    assert rule.pattern.search("legacy token `-run-id` should fail")
+    assert rule.pattern.search('legacy token "-ingestion-ts" should fail')
+    assert rule.pattern.search("legacy token `-dq-warn` should fail")
+    assert not rule.pattern.search("allowed CLI flag --run-type")
+    assert not rule.pattern.search("allowed CLI flag --source")
 
 
 def test_guardrails_pass_for_current_nav_docs() -> None:

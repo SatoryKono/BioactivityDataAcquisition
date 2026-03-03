@@ -1,502 +1,370 @@
-"""Integration tests for external API verification.
+"""Integration tests for external ID verification via real provider adapters.
 
-Uses VCR.py to record/replay HTTP responses.
-Expected: ~40 tests covering 8 external APIs.
-
-APIs tested:
-- CrossRef (DOI verification)
-- PubMed/NCBI (PMID, PMC ID)
-- OpenAlex (OpenAlex ID, DOI)
-- Semantic Scholar (Paper ID, Corpus ID)
-- ChEMBL (Document ChEMBL ID)
-- ORCID (ORCID validation)
-- ROR (Institution IDs)
-- DBLP (DBLP ID)
+These tests verify adapter-backed lookup behavior (found/not-found/fallback)
+using real adapter code paths and HTTP mocking via respx.
 """
 
-import asyncio
+from __future__ import annotations
 
+import re
+from unittest.mock import MagicMock
+
+from httpx import Response
 import pytest
-from unittest import mock
-from unittest.mock import AsyncMock
+import respx
+
+from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
+from bioetl.infrastructure.adapters.chembl.constants import CHEMBL_API_BASE
+from bioetl.infrastructure.adapters.crossref.client import (
+    CROSSREF_API_BASE,
+    CrossRefAdapter,
+)
+from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+from bioetl.infrastructure.adapters.openalex.client import (
+    OPENALEX_API_BASE,
+    OpenAlexAdapter,
+)
+from bioetl.infrastructure.adapters.pubmed.pubmed_client import (
+    ENTREZ_API_BASE,
+    PubMedAdapter,
+)
+from bioetl.infrastructure.adapters.semanticscholar.adapter import (
+    SemanticScholarAdapter,
+)
+from bioetl.infrastructure.adapters.semanticscholar.constants import (
+    SEMANTICSCHOLAR_BASE_URL,
+)
+
+
+def _build_http_client(provider: str) -> UnifiedHTTPClient:
+    return UnifiedHTTPClient(
+        rate_limiter=TokenBucket(rate=10.0, capacity=20.0, provider=provider),
+        circuit_breaker=CircuitBreaker(provider=provider),
+        timeout=15.0,
+    )
+
+
+@pytest.fixture
+def mock_logger() -> MagicMock:
+    logger = MagicMock()
+    logger.bind.return_value = logger
+    return logger
+
+
+@pytest.fixture
+def crossref_adapter(mock_logger: MagicMock) -> CrossRefAdapter:
+    return CrossRefAdapter(
+        http_client=_build_http_client("crossref_external_verification"),
+        logger=mock_logger,
+        mailto="bioetl-test@example.com",
+        batch_size=10,
+    )
+
+
+@pytest.fixture
+def pubmed_adapter(mock_logger: MagicMock) -> PubMedAdapter:
+    return PubMedAdapter(
+        http_client=_build_http_client("pubmed_external_verification"),
+        logger=mock_logger,
+        email="bioetl-test@example.com",
+        api_key=None,
+        batch_size=100,
+    )
+
+
+@pytest.fixture
+def openalex_adapter(mock_logger: MagicMock) -> OpenAlexAdapter:
+    return OpenAlexAdapter(
+        http_client=_build_http_client("openalex_external_verification"),
+        logger=mock_logger,
+        mailto="bioetl-test@example.com",
+        batch_size=10,
+    )
+
+
+@pytest.fixture
+def semanticscholar_adapter(mock_logger: MagicMock) -> SemanticScholarAdapter:
+    return SemanticScholarAdapter(
+        http_client=_build_http_client("semanticscholar_external_verification"),
+        logger=mock_logger,
+        batch_size=10,
+    )
+
+
+@pytest.fixture
+def chembl_adapter(mock_logger: MagicMock) -> ChemblAdapter:
+    return ChemblAdapter(
+        http_client=_build_http_client("chembl_external_verification"),
+        logger=mock_logger,
+    )
 
 
 @pytest.mark.integration
-@pytest.mark.vcr(cassette_library_dir="tests/fixtures/vcr/crossref")
 class TestCrossRefExternalVerification:
-    """External verification against CrossRef API."""
-
-    @pytest.mark.vcr("crossref_doi_valid.yaml")
-    async def test_doi_exists_in_crossref(self) -> None:
-        """PASS: DOI resolved successfully in CrossRef."""
-        # Mock external verification service
-        from unittest.mock import AsyncMock
-
-        verify_service = AsyncMock()
-        verify_service.verify_doi.return_value = {"status": "PASS", "found": True}
-
-        result = await verify_service.verify_doi("10.1038/nature12373")
-        assert result["status"] == "PASS"
-        assert result["found"] is True
-
-    @pytest.mark.vcr("crossref_doi_not_found.yaml")
-    async def test_doi_not_found_in_crossref_warns(self) -> None:
-        """WARN: DOI not found in CrossRef (non-PK field)."""
-        verify_service = mock.AsyncMock()
-        verify_service.verify_doi.return_value = {"status": "WARN", "found": False}
-
-        result = await verify_service.verify_doi("10.9999/nonexistent.000")
-        assert result["status"] == "WARN"
-        assert result["found"] is False
-
-    @pytest.mark.vcr("crossref_doi_not_found_pk.yaml")
-    async def test_doi_not_found_crossref_pk_fails(self) -> None:
-        """FAIL: DOI not found for CrossRef provider (PK field)."""
-        verify_service = mock.AsyncMock()
-        verify_service.verify_doi.return_value = {"status": "FAIL", "found": False}
-
-        result = await verify_service.verify_doi("10.9999/fake.000")
-        assert result["status"] == "FAIL"
-
-    async def test_crossref_timeout_graceful(self) -> None:
-        """SKIP: API timeout -> graceful degradation, no crash."""
-        verify_service = mock.AsyncMock()
-        verify_service.verify_doi.side_effect = TimeoutError("API timeout")
-
-        with pytest.raises(TimeoutError):
-            await verify_service.verify_doi("10.1038/nature12373")
-
-    async def test_crossref_rate_limit_retry(self) -> None:
-        """SKIP: HTTP 429 rate limit -> retry + graceful skip."""
-        verify_service = mock.AsyncMock()
-        verify_service.verify_doi.return_value = {
-            "status": "SKIP",
-            "reason": "rate_limited",
+    async def test_doi_found(self, crossref_adapter: CrossRefAdapter) -> None:
+        response_json = {
+            "status": "ok",
+            "message": {
+                "items": [
+                    {
+                        "DOI": "10.1038/nature12373",
+                        "title": ["Crystal structure of rhodopsin"],
+                    }
+                ]
+            },
         }
+        with respx.mock(base_url=CROSSREF_API_BASE) as respx_mock:
+            respx_mock.get("/works").mock(
+                return_value=Response(200, json=response_json)
+            )
+            async with crossref_adapter.http_client:
+                records = [
+                    record
+                    async for record in crossref_adapter.fetch_filtered(
+                        entity_type="publication",
+                        filter_ids=["10.1038/nature12373"],
+                        filter_field="doi",
+                    )
+                ]
 
-        result = await verify_service.verify_doi("10.1038/nature12373")
-        assert result["status"] == "SKIP"
+        assert len(records) == 1
+        assert records[0]["DOI"] == "10.1038/nature12373"
+        assert records[0]["_lookup_method"] == "doi"
+
+    async def test_doi_not_found(self, crossref_adapter: CrossRefAdapter) -> None:
+        with respx.mock(base_url=CROSSREF_API_BASE) as respx_mock:
+            respx_mock.get("/works").mock(
+                return_value=Response(
+                    200,
+                    json={"status": "ok", "message": {"items": []}},
+                )
+            )
+            async with crossref_adapter.http_client:
+                records = [
+                    record
+                    async for record in crossref_adapter.fetch_filtered(
+                        entity_type="publication",
+                        filter_ids=["10.9999/nonexistent.000"],
+                        filter_field="doi",
+                    )
+                ]
+
+        assert records == []
 
 
 @pytest.mark.integration
-@pytest.mark.vcr(cassette_library_dir="tests/fixtures/vcr/pubmed")
 class TestPubMedExternalVerification:
-    """External verification against PubMed/NCBI APIs."""
+    async def test_pmid_found(self, pubmed_adapter: PubMedAdapter) -> None:
+        mock_xml = """<?xml version="1.0"?>
+<PubmedArticleSet>
+  <PubmedArticle>
+    <MedlineCitation>
+      <PMID>35486828</PMID>
+      <Article><ArticleTitle>Test Article</ArticleTitle></Article>
+    </MedlineCitation>
+  </PubmedArticle>
+</PubmedArticleSet>
+"""
+        with respx.mock(base_url=ENTREZ_API_BASE) as respx_mock:
+            respx_mock.get("efetch.fcgi").mock(
+                return_value=Response(200, text=mock_xml)
+            )
+            async with pubmed_adapter.http_client:
+                records = [
+                    record
+                    async for record in pubmed_adapter.fetch_filtered(
+                        entity_type="publication",
+                        filter_ids=["35486828"],
+                        filter_field="pmid",
+                    )
+                ]
 
-    @pytest.mark.vcr("pubmed_pmid_valid.yaml")
-    async def test_pmid_exists_in_pubmed(self) -> None:
-        """PASS: PMID resolved successfully."""
-        verify_service = mock.AsyncMock()
-        verify_service.verify_pmid.return_value = {"status": "PASS", "found": True}
+        assert len(records) == 1
+        assert records[0]["pmid"] == "35486828"
+        assert records[0]["_lookup_method"] == "pmid"
 
-        result = await verify_service.verify_pmid("35486828")
-        assert result["status"] == "PASS"
-
-    @pytest.mark.vcr("pubmed_pmid_not_found.yaml")
-    async def test_pmid_not_found_warns(self) -> None:
-        """WARN: PMID not found in PubMed."""
-        verify_service = mock.AsyncMock()
-        verify_service.verify_pmid.return_value = {"status": "WARN", "found": False}
-
-        result = await verify_service.verify_pmid("99999999999")
-        assert result["status"] == "WARN"
-
-    @pytest.mark.vcr("pubmed_pmc_id_valid.yaml")
-    async def test_pmc_id_exists_in_pmc(self) -> None:
-        """PASS: PMC ID resolved successfully."""
-        verify_service = mock.AsyncMock()
-        verify_service.verify_pmc_id.return_value = {"status": "PASS", "found": True}
-
-        result = await verify_service.verify_pmc_id("PMC9046468")
-        assert result["status"] == "PASS"
+    async def test_invalid_entity_type_raises(
+        self, pubmed_adapter: PubMedAdapter
+    ) -> None:
+        async with pubmed_adapter.http_client:
+            with pytest.raises(ValueError, match="only supports 'publication'"):
+                async for _ in pubmed_adapter.fetch_filtered(
+                    entity_type="invalid_entity",
+                    filter_ids=["35486828"],
+                    filter_field="pmid",
+                ):
+                    pass
 
 
 @pytest.mark.integration
-@pytest.mark.vcr(cassette_library_dir="tests/fixtures/vcr/openalex")
 class TestOpenAlexExternalVerification:
-    """External verification against OpenAlex API."""
-
-    @pytest.mark.vcr("openalex_id_valid.yaml")
-    async def test_openalex_id_exists(self) -> None:
-        """PASS: OpenAlex ID resolved successfully."""
-        verify_service = mock.AsyncMock()
-        verify_service.verify_openalex_id.return_value = {
-            "status": "PASS",
-            "found": True,
+    async def test_doi_found(self, openalex_adapter: OpenAlexAdapter) -> None:
+        response_json = {
+            "results": [
+                {
+                    "id": "https://openalex.org/W2148763428",
+                    "doi": "https://doi.org/10.1038/nature12373",
+                    "title": "Crystal structure of rhodopsin",
+                }
+            ],
+            "meta": {"count": 1},
         }
+        with respx.mock(base_url=OPENALEX_API_BASE) as respx_mock:
+            respx_mock.get("/works").mock(
+                return_value=Response(200, json=response_json)
+            )
+            async with openalex_adapter.http_client:
+                records = [
+                    record
+                    async for record in openalex_adapter.fetch_filtered(
+                        entity_type="publication",
+                        filter_ids=["10.1038/nature12373"],
+                        filter_field="doi",
+                        limit=1,
+                    )
+                ]
 
-        result = await verify_service.verify_openalex_id("W2148763428")
-        assert result["status"] == "PASS"
+        assert len(records) == 1
+        assert "W2148763428" in records[0]["id"]
+        assert records[0]["_lookup_method"] == "doi"
 
-    @pytest.mark.vcr("openalex_id_not_found.yaml")
-    async def test_openalex_id_not_found_fails(self) -> None:
-        """FAIL: OpenAlex ID not found (PK for OpenAlex provider)."""
-        verify_service = mock.AsyncMock()
-        verify_service.verify_openalex_id.return_value = {
-            "status": "FAIL",
-            "found": False,
-        }
+    async def test_doi_not_found(self, openalex_adapter: OpenAlexAdapter) -> None:
+        with respx.mock(base_url=OPENALEX_API_BASE) as respx_mock:
+            respx_mock.get("/works").mock(
+                return_value=Response(200, json={"results": [], "meta": {"count": 0}})
+            )
+            async with openalex_adapter.http_client:
+                records = [
+                    record
+                    async for record in openalex_adapter.fetch_filtered(
+                        entity_type="publication",
+                        filter_ids=["10.9999/nonexistent.000"],
+                        filter_field="doi",
+                    )
+                ]
 
-        result = await verify_service.verify_openalex_id("W0000000000")
-        assert result["status"] == "FAIL"
+        assert records == []
 
 
 @pytest.mark.integration
-@pytest.mark.vcr(cassette_library_dir="tests/fixtures/vcr/semanticscholar")
 class TestSemanticScholarExternalVerification:
-    """External verification against Semantic Scholar API."""
+    async def test_doi_batch_found_and_missing(
+        self, semanticscholar_adapter: SemanticScholarAdapter
+    ) -> None:
+        batch_response = [
+            {
+                "paperId": "649def34f8be52c8b66281af98ae884c09aef38b",
+                "externalIds": {"DOI": "10.1038/nature12373"},
+                "title": "Crystal structure of rhodopsin",
+            },
+            None,
+        ]
+        with respx.mock(base_url=SEMANTICSCHOLAR_BASE_URL) as respx_mock:
+            respx_mock.post(re.compile(r".*/paper/batch.*")).mock(
+                return_value=Response(200, json=batch_response)
+            )
+            async with semanticscholar_adapter.http_client:
+                records = [
+                    record
+                    async for record in semanticscholar_adapter.fetch_filtered(
+                        entity_type="publication",
+                        filter_ids=["10.1038/nature12373", "10.9999/nonexistent.000"],
+                        filter_field="doi",
+                    )
+                ]
 
-    @pytest.mark.vcr("s2_paper_id_valid.yaml")
-    async def test_paper_id_exists(self) -> None:
-        """PASS: S2 Paper ID resolved successfully."""
-        verify_service = mock.AsyncMock()
-        verify_service.verify_paper_id.return_value = {"status": "PASS", "found": True}
+        assert len(records) == 1
+        assert records[0]["externalIds"]["DOI"] == "10.1038/nature12373"
+        assert records[0]["_lookup_method"] == "doi"
 
-        result = await verify_service.verify_paper_id(
-            "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0"
-        )
-        assert result["status"] == "PASS"
+    async def test_doi_title_fallback(
+        self, semanticscholar_adapter: SemanticScholarAdapter
+    ) -> None:
+        fallback_mapping = {
+            "10.9999/nonexistent.000": "Crystal structure of rhodopsin",
+        }
+        with respx.mock(base_url=SEMANTICSCHOLAR_BASE_URL) as respx_mock:
+            respx_mock.post(re.compile(r".*/paper/batch.*")).mock(
+                return_value=Response(200, json=[None])
+            )
+            respx_mock.get("/paper/search").mock(
+                return_value=Response(
+                    200,
+                    json={
+                        "data": [
+                            {
+                                "paperId": "649def34f8be52c8b66281af98ae884c09aef38b",
+                                "externalIds": {"DOI": "10.1038/nature12373"},
+                                "title": "Crystal structure of rhodopsin",
+                            }
+                        ]
+                    },
+                )
+            )
+            async with semanticscholar_adapter.http_client:
+                records = [
+                    record
+                    async for record in semanticscholar_adapter.fetch_filtered_with_fallback(
+                        entity_type="publication",
+                        filter_ids=["10.9999/nonexistent.000"],
+                        filter_field="doi",
+                        fallback_mapping=fallback_mapping,
+                    )
+                ]
 
-    @pytest.mark.vcr("s2_corpus_id_valid.yaml")
-    async def test_corpus_id_exists(self) -> None:
-        """PASS: S2 Corpus ID resolved successfully."""
-        verify_service = mock.AsyncMock()
-        verify_service.verify_corpus_id.return_value = {"status": "PASS", "found": True}
-
-        result = await verify_service.verify_corpus_id(12345)
-        assert result["status"] == "PASS"
+        assert len(records) == 1
+        assert records[0]["_lookup_method"] == "title_fallback"
 
 
 @pytest.mark.integration
-@pytest.mark.vcr(cassette_library_dir="tests/fixtures/vcr/chembl")
 class TestChEMBLExternalVerification:
-    """External verification against ChEMBL API."""
-
-    @pytest.mark.vcr("chembl_document_id_valid.yaml")
-    async def test_publication_id_exists(self) -> None:
-        """PASS: ChEMBL Document ID resolved successfully."""
-        verify_service = mock.AsyncMock()
-        verify_service.verify_chembl_id.return_value = {"status": "PASS", "found": True}
-
-        result = await verify_service.verify_chembl_id("CHEMBL1614631")
-        assert result["status"] == "PASS"
-
-    @pytest.mark.vcr("chembl_document_id_not_found.yaml")
-    async def test_publication_id_not_found_fails(self) -> None:
-        """FAIL: ChEMBL ID not found (PK for ChEMBL provider)."""
-        verify_service = mock.AsyncMock()
-        verify_service.verify_chembl_id.return_value = {
-            "status": "FAIL",
-            "found": False,
+    async def test_publication_id_found(self, chembl_adapter: ChemblAdapter) -> None:
+        response_json = {
+            "documents": [
+                {
+                    "document_chembl_id": "CHEMBL1614631",
+                    "title": "Example ChEMBL publication",
+                }
+            ],
+            "page_meta": {"next": None},
         }
-
-        result = await verify_service.verify_chembl_id("CHEMBL9999999999")
-        assert result["status"] == "FAIL"
-
-
-@pytest.mark.integration
-@pytest.mark.vcr(cassette_library_dir="tests/fixtures/vcr/ormolecule_id")
-class TestORCIDExternalVerification:
-    """External verification against ORCID API."""
-
-    @pytest.mark.vcr("ormolecule_id_valid.yaml")
-    async def test_ormolecule_id_valid(self) -> None:
-        """PASS: ORCID resolved successfully."""
-        verify_service = mock.AsyncMock()
-        verify_service.verify_ormolecule_id.return_value = {
-            "status": "PASS",
-            "found": True,
-        }
-
-        result = await verify_service.verify_ormolecule_id("0000-0002-1825-0097")
-        assert result["status"] == "PASS"
-
-    @pytest.mark.vcr("ormolecule_id_not_found.yaml")
-    async def test_ormolecule_id_not_found_warns(self) -> None:
-        """WARN: ORCID not found."""
-        verify_service = mock.AsyncMock()
-        verify_service.verify_ormolecule_id.return_value = {
-            "status": "WARN",
-            "found": False,
-        }
-
-        result = await verify_service.verify_ormolecule_id("0000-0000-0000-0000")
-        assert result["status"] == "WARN"
-
-
-# NOTE: Legacy TODO removed.
-# External verification coverage already includes ROR, DBLP, ISSN, arXiv,
-# PMC, batch verification, and retry scenarios in this module.
-
-
-# ============================================================================
-# ADDITIONAL EXTERNAL VERIFICATION TESTS
-# Generated to complete external verification coverage (+24 tests)
-# ============================================================================
-
-
-@pytest.mark.integration
-class TestRORVerification:
-    """Test ROR (Research Organization Registry) ID verification."""
-
-    @pytest.mark.vcr("ror_valid.yaml")
-    async def test_ror_id_valid(self) -> None:
-        """PASS: Valid ROR ID exists."""
-        verify_service = AsyncMock()
-        verify_service.verify_ror.return_value = {"status": "PASS", "found": True}
-
-        result = await verify_service.verify_ror("https://ror.org/02mhbdp94")
-        assert result["status"] == "PASS"
-        assert result["found"] is True
-
-    @pytest.mark.vcr("ror_not_found.yaml")
-    async def test_ror_id_not_found(self) -> None:
-        """WARN: ROR ID not found."""
-        verify_service = AsyncMock()
-        verify_service.verify_ror.return_value = {"status": "WARN", "found": False}
-
-        result = await verify_service.verify_ror("https://ror.org/invalid123")
-        assert result["status"] == "WARN"
-        assert result["found"] is False
-
-    @pytest.mark.vcr("ror_timeout.yaml")
-    async def test_ror_api_timeout(self) -> None:
-        """SKIP: ROR API timeout."""
-        verify_service = AsyncMock()
-        verify_service.verify_ror.side_effect = TimeoutError()
-
-        with pytest.raises(asyncio.TimeoutError):
-            await verify_service.verify_ror("https://ror.org/02mhbdp94")
-
-    @pytest.mark.vcr("ror_rate_limit.yaml")
-    async def test_ror_rate_limit(self) -> None:
-        """SKIP: ROR API rate limited."""
-        verify_service = AsyncMock()
-        verify_service.verify_ror.return_value = {"status": "SKIP", "http_code": 429}
-
-        result = await verify_service.verify_ror("https://ror.org/02mhbdp94")
-        assert result["status"] == "SKIP"
-        assert result["http_code"] == 429
-
-
-@pytest.mark.integration
-class TestDBLPVerification:
-    """Test DBLP (Digital Bibliography & Library Project) ID verification."""
-
-    @pytest.mark.vcr("dblp_valid.yaml")
-    async def test_dblp_id_valid(self) -> None:
-        """PASS: Valid DBLP ID exists."""
-        verify_service = AsyncMock()
-        verify_service.verify_dblp.return_value = {"status": "PASS", "found": True}
-
-        result = await verify_service.verify_dblp("conf/nips/SmithJ20")
-        assert result["status"] == "PASS"
-        assert result["found"] is True
-
-    @pytest.mark.vcr("dblp_not_found.yaml")
-    async def test_dblp_id_not_found(self) -> None:
-        """WARN: DBLP ID not found."""
-        verify_service = AsyncMock()
-        verify_service.verify_dblp.return_value = {"status": "WARN", "found": False}
-
-        result = await verify_service.verify_dblp("invalid/dblp/id")
-        assert result["status"] == "WARN"
-        assert result["found"] is False
-
-    @pytest.mark.vcr("dblp_timeout.yaml")
-    async def test_dblp_api_timeout(self) -> None:
-        """SKIP: DBLP API timeout."""
-        verify_service = AsyncMock()
-        verify_service.verify_dblp.side_effect = TimeoutError()
-
-        with pytest.raises(asyncio.TimeoutError):
-            await verify_service.verify_dblp("conf/nips/SmithJ20")
-
-
-@pytest.mark.integration
-class TestISSNVerification:
-    """Test ISSN (International Standard Serial Number) verification."""
-
-    @pytest.mark.vcr("issn_valid.yaml")
-    async def test_issn_valid(self) -> None:
-        """PASS: Valid ISSN exists."""
-        verify_service = AsyncMock()
-        verify_service.verify_issn.return_value = {"status": "PASS", "found": True}
-
-        result = await verify_service.verify_issn("0028-0836")  # Nature
-        assert result["status"] == "PASS"
-        assert result["found"] is True
-
-    @pytest.mark.vcr("issn_not_found.yaml")
-    async def test_issn_not_found(self) -> None:
-        """WARN: ISSN not found in ISSN Portal."""
-        verify_service = AsyncMock()
-        verify_service.verify_issn.return_value = {"status": "WARN", "found": False}
-
-        result = await verify_service.verify_issn("9999-9999")
-        assert result["status"] == "WARN"
-        assert result["found"] is False
-
-    @pytest.mark.vcr("issn_format_invalid.yaml")
-    async def test_issn_invalid_format(self) -> None:
-        """FAIL: ISSN format invalid."""
-        verify_service = AsyncMock()
-        verify_service.verify_issn.return_value = {
-            "status": "FAIL",
-            "error": "Invalid format",
-        }
-
-        result = await verify_service.verify_issn("invalid-issn")
-        assert result["status"] == "FAIL"
-
-    @pytest.mark.vcr("eissn_valid.yaml")
-    async def test_eissn_valid(self) -> None:
-        """PASS: Valid eISSN exists."""
-        verify_service = AsyncMock()
-        verify_service.verify_issn.return_value = {"status": "PASS", "found": True}
-
-        result = await verify_service.verify_issn("1476-4687")  # Nature eISSN
-        assert result["status"] == "PASS"
-
-
-@pytest.mark.integration
-class TestArXivVerification:
-    """Test arXiv ID verification."""
-
-    @pytest.mark.vcr("arxiv_valid.yaml")
-    async def test_arxiv_id_valid(self) -> None:
-        """PASS: Valid arXiv ID exists."""
-        verify_service = AsyncMock()
-        verify_service.verify_arxiv.return_value = {"status": "PASS", "found": True}
-
-        result = await verify_service.verify_arxiv("2101.12345")
-        assert result["status"] == "PASS"
-
-    @pytest.mark.vcr("arxiv_not_found.yaml")
-    async def test_arxiv_id_not_found(self) -> None:
-        """WARN: arXiv ID not found."""
-        verify_service = AsyncMock()
-        verify_service.verify_arxiv.return_value = {"status": "WARN", "found": False}
-
-        result = await verify_service.verify_arxiv("9999.99999")
-        assert result["status"] == "WARN"
-
-    @pytest.mark.vcr("arxiv_old_format.yaml")
-    async def test_arxiv_old_format_valid(self) -> None:
-        """PASS: Valid arXiv ID (old format) exists."""
-        verify_service = AsyncMock()
-        verify_service.verify_arxiv.return_value = {"status": "PASS", "found": True}
-
-        result = await verify_service.verify_arxiv("cs.AI/0703001")
-        assert result["status"] == "PASS"
-
-
-@pytest.mark.integration
-class TestPMCVerification:
-    """Additional PMC verification tests."""
-
-    @pytest.mark.vcr("pmc_embargo.yaml")
-    async def test_pmc_embargo_period(self) -> None:
-        """WARN: PMC ID exists but under embargo."""
-        verify_service = AsyncMock()
-        verify_service.verify_pmc.return_value = {
-            "status": "WARN",
-            "found": True,
-            "embargo": True,
-        }
-
-        result = await verify_service.verify_pmc("PMC1234567")
-        assert result["status"] == "WARN"
-        assert result["embargo"] is True
-
-    @pytest.mark.vcr("pmc_retracted.yaml")
-    async def test_pmc_retracted_article(self) -> None:
-        """WARN: PMC ID exists but article retracted."""
-        verify_service = AsyncMock()
-        verify_service.verify_pmc.return_value = {
-            "status": "WARN",
-            "found": True,
-            "retracted": True,
-        }
-
-        result = await verify_service.verify_pmc("PMC9876543")
-        assert result["status"] == "WARN"
-        assert result["retracted"] is True
-
-
-@pytest.mark.integration
-class TestBatchVerification:
-    """Test batch verification for multiple IDs."""
-
-    @pytest.mark.vcr("batch_doi_verification.yaml")
-    async def test_batch_doi_verification(self) -> None:
-        """PASS: Batch verify multiple DOIs."""
-        verify_service = AsyncMock()
-        dois = [
-            "10.1038/nature12373",
-            "10.1126/science.1234567",
-            "10.1016/j.cell.2020.01.001",
-        ]
-
-        verify_service.verify_dois_batch.return_value = {
-            dois[0]: {"status": "PASS", "found": True},
-            dois[1]: {"status": "PASS", "found": True},
-            dois[2]: {"status": "WARN", "found": False},
-        }
-
-        results = await verify_service.verify_dois_batch(dois)
-        assert len(results) == 3
-        assert results[dois[0]]["status"] == "PASS"
-        assert results[dois[2]]["status"] == "WARN"
-
-    @pytest.mark.vcr("batch_pmid_verification.yaml")
-    async def test_batch_pmid_verification(self) -> None:
-        """PASS: Batch verify multiple PMIDs."""
-        verify_service = AsyncMock()
-        pmids = ["12345678", "87654321", "11111111"]
-
-        verify_service.verify_pmids_batch.return_value = {
-            pmids[0]: {"status": "PASS", "found": True},
-            pmids[1]: {"status": "PASS", "found": True},
-            pmids[2]: {"status": "WARN", "found": False},
-        }
-
-        results = await verify_service.verify_pmids_batch(pmids)
-        assert len(results) == 3
-        assert sum(1 for r in results.values() if r["status"] == "PASS") == 2
-
-
-@pytest.mark.integration
-class TestVerificationRetry:
-    """Test retry logic for external verification."""
-
-    @pytest.mark.vcr("retry_success_second_attempt.yaml")
-    async def test_retry_succeeds_on_second_attempt(self) -> None:
-        """PASS: Retry succeeds after initial timeout."""
-        verify_service = AsyncMock()
-
-        # First call times out, second succeeds
-        verify_service.verify_doi.side_effect = [
-            TimeoutError(),
-            {"status": "PASS", "found": True},
-        ]
-
-        # Assuming retry logic wraps this
-        try:
-            result = await verify_service.verify_doi("10.1038/nature12373")
-        except TimeoutError:
-            # Retry
-            result = await verify_service.verify_doi("10.1038/nature12373")
-
-        assert result["status"] == "PASS"
-
-    @pytest.mark.vcr("retry_exhausted.yaml")
-    async def test_retry_exhausted(self) -> None:
-        """SKIP: All retry attempts exhausted."""
-        verify_service = AsyncMock()
-        verify_service.verify_doi.side_effect = TimeoutError()
-
-        max_retries = 3
-        for _ in range(max_retries):
-            with pytest.raises(asyncio.TimeoutError):
-                await verify_service.verify_doi("10.1038/nature12373")
+        with respx.mock(base_url=CHEMBL_API_BASE) as respx_mock:
+            respx_mock.get("/document").mock(
+                return_value=Response(200, json=response_json)
+            )
+            async with chembl_adapter.http_client:
+                records = [
+                    record
+                    async for record in chembl_adapter.fetch_filtered(
+                        entity_type="publication",
+                        filter_ids=["CHEMBL1614631"],
+                        filter_field="publication_id",
+                    )
+                ]
+
+        assert len(records) == 1
+        assert records[0]["publication_id"] == "CHEMBL1614631"
+
+    async def test_publication_id_not_found(
+        self, chembl_adapter: ChemblAdapter
+    ) -> None:
+        with respx.mock(base_url=CHEMBL_API_BASE) as respx_mock:
+            respx_mock.get("/document").mock(
+                return_value=Response(
+                    200,
+                    json={"documents": [], "page_meta": {"next": None}},
+                )
+            )
+            async with chembl_adapter.http_client:
+                records = [
+                    record
+                    async for record in chembl_adapter.fetch_filtered(
+                        entity_type="publication",
+                        filter_ids=["CHEMBL9999999999"],
+                        filter_field="publication_id",
+                    )
+                ]
+
+        assert records == []

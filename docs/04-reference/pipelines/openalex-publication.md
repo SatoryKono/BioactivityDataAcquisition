@@ -70,7 +70,7 @@ The pipeline supports multiple identifier resolution strategies:
 | **DOI** | `/works/doi:{doi}` | 2 |
 | **Title Fallback** | `/works?filter=title.search:{title}` | 3 (lowest) |
 
-When DOI resolution fails, the pipeline automatically falls back to title-based search. The resolution method is tracked in `-lookup-method` for data quality auditing.
+When DOI resolution fails, the pipeline automatically falls back to title-based search. The resolution method is tracked in `_lookup_method` for data quality auditing.
 
 ### API Response Structure
 
@@ -98,21 +98,21 @@ When DOI resolution fails, the pipeline automatically falls back to title-based 
 
 | Silver Field | Type | Source | Description |
 |--------------|------|--------|-------------|
-| `entity-id` | string | Computed | UUID hash of business data |
-| `content-hash` | string | Computed | SHA-256 of normalized content |
-| `-run-id` | string | Context | Pipeline execution ID |
-| `-run-type` | string | Context | "incremental" or "full-scan" |
-| `-source-batch-id` | string | Adapter | Batch identifier |
-| `-source` | string | Fixed | Always "openalex" |
-| `-ingestion-ts` | string | Context | ISO 8601 timestamp |
-| `-index` | int64 | Processor | Record index within batch |
+| `entity_id` | string | Computed | UUID hash of business data |
+| `content_hash` | string | Computed | SHA-256 of normalized content |
+| `_run_id` | string | Context | Pipeline execution ID |
+| `_run_type` | string | Context | `incremental` / `backfill` / `rebuild` |
+| `_source_batch_id` | string | Adapter | Batch identifier |
+| `_source` | string | Fixed | Always "openalex" |
+| `_ingestion_ts` | string | Context | ISO 8601 timestamp |
+| `_index` | int64 | Processor | Record index within batch |
 
 #### Lookup Metadata
 
 | Silver Field | Type | Source | Values |
 |--------------|------|--------|--------|
-| `-lookup-method` | string | Adapter | "direct" \| "doi" \| "title-fallback" \| "unknown" |
-| `-original-id` | string | Adapter | Original identifier if fallback used |
+| `_lookup_method` | string | Adapter | "direct" \| "doi" \| "title-fallback" \| "unknown" |
+| `_original_id` | string | Adapter | Original identifier if fallback used |
 
 #### Primary Identifier
 
@@ -212,8 +212,8 @@ When DOI resolution fails, the pipeline automatically falls back to title-based 
 
 | Silver Field | Type | Default | Description |
 |--------------|------|---------|-------------|
-| `-dq-warn` | bool | False | Soft threshold exceeded |
-| `-dq-error` | bool | False | Hard threshold exceeded |
+| `_dq_warn` | bool | False | Soft threshold exceeded |
+| `_dq_error` | bool | False | Hard threshold exceeded |
 
 ---
 
@@ -301,8 +301,8 @@ Each topic includes 4-level classification hierarchy:
 
 | Field | Type | Nullable | Constraints |
 |-------|------|----------|-------------|
-| `entity-id` | string | **No** | - |
-| `content-hash` | string | **No** | - |
+| `entity_id` | string | **No** | - |
+| `content_hash` | string | **No** | - |
 | `openalex-id` | string | **No** | Primary key |
 | `doi` | string | Yes | - |
 | `pmid` | string | Yes | - |
@@ -326,25 +326,25 @@ Each topic includes 4-level classification hierarchy:
 | `oa-status` | string | Yes | - |
 | `citation-count` | float | Yes | ge=0, coerce=True |
 | `language` | string | Yes | - |
-| `-source` | string | **No** | Always "openalex" |
-| `-lookup-method` | string | **No** | Resolution method |
-| `-original-id` | string | Yes | - |
-| `-dq-warn` | bool | **No** | default=False |
-| `-dq-error` | bool | **No** | default=False |
-| `-run-id` | string | **No** | - |
-| `-run-type` | string | **No** | - |
-| `-source-batch-id` | string | Yes | - |
-| `-ingestion-ts` | string | **No** | - |
-| `-index` | int | **No** | - |
+| `_source` | string | **No** | Always "openalex" |
+| `_lookup_method` | string | **No** | Resolution method |
+| `_original_id` | string | Yes | - |
+| `_dq_warn` | bool | **No** | default=False |
+| `_dq_error` | bool | **No** | default=False |
+| `_run_id` | string | **No** | - |
+| `_run_type` | string | **No** | - |
+| `_source_batch_id` | string | Yes | - |
+| `_ingestion_ts` | string | **No** | - |
+| `_index` | int | **No** | - |
 
 ### Required Fields
 
 The following fields are required (nullable=False):
-- `entity-id`, `content-hash` (system)
+- `entity_id`, `content_hash` (system)
 - `openalex-id` (primary key)
-- `-source`, `-lookup-method` (tracking)
-- `-dq-warn`, `-dq-error` (quality flags)
-- `-run-id`, `-run-type`, `-ingestion-ts`, `-index` (lineage)
+- `_source`, `_lookup_method` (tracking)
+- `_dq_warn`, `_dq_error` (quality flags)
+- `_run_id`, `_run_type`, `_ingestion_ts`, `_index` (lineage)
 
 ### Year Constraints
 
@@ -533,8 +533,8 @@ enrichers:
 
 ```json
 {
-  "entity-id": "uuid-abc123...",
-  "content-hash": "sha256:def456...",
+  "entity_id": "uuid-abc123...",
+  "content_hash": "sha256:def456...",
   "openalex-id": "W2148763428",
   "doi": "10.1038/nature12373",
   "pmid": null,
@@ -552,11 +552,11 @@ enrichers:
   "citation-count": 150,
   "year": 2013,
   "publication-date": "2013-08-15",
-  "-source": "openalex",
-  "-lookup-method": "doi",
-  "-run-id": "run-123",
-  "-dq-warn": false,
-  "-dq-error": false
+  "_source": "openalex",
+  "_lookup_method": "doi",
+  "_run_id": "run-123",
+  "_dq_warn": false,
+  "_dq_error": false
 }
 ```
 
@@ -643,7 +643,7 @@ erDiagram
 
 3. **Concepts Deprecated**: The `concepts` field is deprecated by OpenAlex (2024). Use `topics` for new development.
 
-4. **Title Fallback Accuracy**: Title-based search may return incorrect matches for common titles. The `-lookup-method` field allows filtering these records.
+4. **Title Fallback Accuracy**: Title-based search may return incorrect matches for common titles. The `_lookup_method` field allows filtering these records.
 
 5. **Abstract Coverage**: Not all OpenAlex works have abstracts. The inverted index may be empty or null.
 

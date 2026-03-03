@@ -6,7 +6,7 @@
 | Attribute | Value |
 |-----------|-------|
 | **Entity ID** | `activity-id` (Business Key) |
-| **Content Hash** | `content-hash` (SHA256 for SCD Type 2) |
+| **Content Hash** | `content_hash` (SHA256 for SCD Type 2) |
 | **Source** | ChEMBL API (`/chembl/api/data/activity.json`) |
 | **Update Frequency** | Weekly (ChEMBL release cycle) |
 | **Schema Version** | 1.0.0 (ChEMBL 34 aligned) |
@@ -188,14 +188,14 @@ Gold layer applies strict filters to ensure high-quality data for analysis:
 
 | Field | Type | Nullable | Purpose | Included in Content Hash |
 |-------|------|----------|---------|-------------------------|
-| `entity-id` | `str` | No | Business key (= activity-id) | Yes |
-| `content-hash` | `str` | No | SHA256 for SCD Type 2 | — |
-| `-run-id` | `UUID` | No | Pipeline run correlation ID | No |
-| `-run-type` | `Enum` | No | incremental/backfill/rebuild | No |
-| `-source-batch-id` | `UUID` | Yes | FK to lineage-log | No |
-| `-ingestion-ts` | `Timestamp` | No | Ingestion time (UTC) | No |
-| `-dq-warn` | `bool` | No | DQ warning flag | No |
-| `-index` | `int` | No | Record index in batch | No |
+| `entity_id` | `str` | No | Business key (= activity-id) | Yes |
+| `content_hash` | `str` | No | SHA256 for SCD Type 2 | — |
+| `_run_id` | `UUID` | No | Pipeline run correlation ID | No |
+| `_run_type` | `Enum` | No | incremental/backfill/rebuild | No |
+| `_source_batch_id` | `UUID` | Yes | Lineage reference in metadata sidecar | No |
+| `_ingestion_ts` | `Timestamp` | No | Ingestion time (UTC) | No |
+| `_dq_warn` | `bool` | No | DQ warning flag | No |
+| `_index` | `int` | No | Record index in batch | No |
 
 ---
 
@@ -235,7 +235,7 @@ sha256(
     provider="chembl"
     + canonical-json(
         record,
-        exclude=["-run-id", "-run-type", "-source-batch-id", "-ingestion-ts", "-dq-warn", "-index"]
+        exclude=["_run_id", "_run_type", "_source_batch_id", "_ingestion_ts", "_dq_warn", "_index"]
     )
 )
 ```
@@ -369,15 +369,15 @@ def -validate-invariants(self) -> None:
 
 ```json
 {
-  "entity-id": "31864",
+  "entity_id": "31864",
   "activity-id": "31864",
-  "content-hash": "sha256:a1b2c3d4e5f6...",
-  "-run-id": "550e8400-e29b-41d4-a716-446655440000",
-  "-run-type": "incremental",
-  "-source-batch-id": null,
-  "-ingestion-ts": "2024-01-15T10:30:00Z",
-  "-dq-warn": false,
-  "-index": 0,
+  "content_hash": "sha256:a1b2c3d4e5f6...",
+  "_run_id": "550e8400-e29b-41d4-a716-446655440000",
+  "_run_type": "incremental",
+  "_source_batch_id": null,
+  "_ingestion_ts": "2024-01-15T10:30:00Z",
+  "_dq_warn": false,
+  "_index": 0,
 
   "assay-chembl-id": "CHEMBL872937",
   "molecule-chembl-id": "CHEMBL324340",
@@ -424,9 +424,9 @@ Gold layer contains only records passing gold-filters:
 
 ```json
 {
-  "entity-id": "31864",
+  "entity_id": "31864",
   "activity-id": "31864",
-  "content-hash": "sha256:a1b2c3d4e5f6...",
+  "content_hash": "sha256:a1b2c3d4e5f6...",
 
   "molecule-chembl-id": "CHEMBL324340",
   "target-chembl-id": "CHEMBL3921",
