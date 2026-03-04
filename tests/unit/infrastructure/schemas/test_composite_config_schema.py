@@ -43,7 +43,11 @@ def _base_payload() -> dict[str, object]:
             "output": {
                 "silver": "silver/composite/publication",
                 "gold": "gold/composite/publication",
-            }
+            },
+            "sort_by": {
+                "silver": ["entity_id", "publication_id"],
+                "gold": ["entity_id", "publication_id"],
+            },
         },
     }
 
@@ -142,6 +146,7 @@ def test_merge_and_column_group_validation_paths() -> None:
             {
                 "conflict_resolution": "explicit_rules",
                 "output": {"silver": "silver/path", "gold": "gold/path"},
+                "sort_by": {"silver": ["entity_id"], "gold": ["entity_id"]},
             }
         )
 
@@ -150,6 +155,7 @@ def test_merge_and_column_group_validation_paths() -> None:
             "strategy": "left_outer",
             "conflict_resolution": "coalesce",
             "output": {"silver": "silver/path", "gold": "gold/path"},
+            "sort_by": {"silver": ["entity_id"], "gold": ["entity_id"]},
             "column_groups": [{"name": "ids", "fields": ["doi"]}],
         }
     )

@@ -89,9 +89,7 @@ MergeService = _MergeService
 
 __all__ = [
     "CompositeRuntimeConfig",
-    # Deprecated alias (backward compatibility)
     "bootstrap_composite_pipeline",
-    # Canonical name (use this)
     "bootstrap_composite_runner",
     "load_composite_config",
 ]
@@ -99,7 +97,6 @@ __all__ = [
 # Default composite config path (RF-CFG-036)
 COMPOSITE_CONFIG_DIR = Path("configs/composites")
 FIELD_GROUP_CONFIG_DIR = Path("configs/composites/field_groups")
-
 
 COMPOSITE_GOLD_SCHEMA_REGISTRY: dict[str, type] = {
     "activity": CompositeActivityGoldSchema,

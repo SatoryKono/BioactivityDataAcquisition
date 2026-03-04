@@ -121,6 +121,13 @@ composite:
     output:
       silver: data/output/silver/composite/molecule
       gold: data/output/gold/composite/molecule
+    sort_by:
+      silver:
+        - entity_id
+        - molecule_id
+      gold:
+        - entity_id
+        - molecule_id
 
     # Field-level priority overrides
     # Maps field name to ordered list of source preferences

@@ -34,7 +34,11 @@ def _build_composite_payload(name: str) -> dict[str, Any]:
                 "output": {
                     "silver": "silver/composite/publication",
                     "gold": "gold/composite/publication",
-                }
+                },
+                "sort_by": {
+                    "silver": ["entity_id", "publication_id"],
+                    "gold": ["entity_id", "publication_id"],
+                },
             },
         },
     }
@@ -296,6 +300,16 @@ class TestCompositeDQExternalization:
         before_dq["field_validations"] = deepcopy(field_validations)
 
         after_payload = deepcopy(current_payload)
+        for payload in (before_payload, after_payload):
+            merge = payload["composite"]["merge"]
+            assert isinstance(merge, dict)
+            merge.setdefault(
+                "sort_by",
+                {
+                    "silver": ["entity_id", "publication_id"],
+                    "gold": ["entity_id", "publication_id"],
+                },
+            )
 
         configs_root = tmp_path / "configs"
         composites_dir = configs_root / "composites"

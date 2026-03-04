@@ -158,6 +158,13 @@ composite:
     output:
       silver: data/output/silver/composite/target
       gold: data/output/gold/composite/target
+    sort_by:
+      silver:
+        - entity_id
+        - target_id
+      gold:
+        - entity_id
+        - target_id
 
     # Field-level priority for overlapping fields
     # seed_priority applies globally; these are explicit overrides per field.
