@@ -5,7 +5,7 @@ Contains FilterableDataSourcePort-compatible filtering methods.
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import AsyncIterator, Callable
 from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BronzeRecord
@@ -17,9 +17,6 @@ from bioetl.infrastructure.adapters.uniprot.fallback_resolver import (
     iter_uniprot_fallback_records,
     resolve_uniprot_missing_ids,
 )
-
-if TYPE_CHECKING:
-    from collections.abc import AsyncIterator
 
 _FetchStrategy = Callable[..., AsyncIterator[BronzeRecord]]
 
