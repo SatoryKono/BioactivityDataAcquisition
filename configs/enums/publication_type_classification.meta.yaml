@@ -1,0 +1,10 @@
+schema_version: 1
+asset: publication_type_classification
+asset_version: v1
+source:
+  path: configs/enums/publication_type_classification.csv
+  sha256: 039561f4112e7e3cbca158c8603e06628961b1dc4b418867fc63022069e4e0ea
+  row_count: 214
+generated:
+  path: src/bioetl/domain/mapping/generated/publication_type_classification_data.py
+  sha256: d0d5e87f952c2f9cade753d2bbbe039dfb2a24c14ae207a95049d80e8664700b

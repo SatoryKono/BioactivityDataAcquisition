@@ -115,6 +115,32 @@ def _normalize_source_auth(
     _copy_keys(api, provider_config, _AUTH_KEYS)
 
 
+def _apply_batch_to_pagination(
+    batch: dict[str, Any] | int | None,  # Any: normalizer; input types vary
+    provider_config: dict[str, Any],  # Any: normalizer; input types vary
+    pagination: dict[str, Any],  # Any: normalizer; input types vary
+) -> None:
+    """Extract batch_size, page_size, max_url_length from legacy batch config."""
+    if isinstance(batch, dict):
+        if "batch_size" in batch:
+            provider_config.setdefault("batch_size", batch["batch_size"])
+            pagination.setdefault("id_batch_size", batch["batch_size"])
+        elif "size" in batch:
+            provider_config.setdefault("batch_size", batch["size"])
+            pagination.setdefault("id_batch_size", batch["size"])
+        elif "api_batch_size" in batch:
+            provider_config.setdefault("batch_size", batch["api_batch_size"])
+            pagination.setdefault("id_batch_size", batch["api_batch_size"])
+        if "page_size" in batch:
+            _copy_keys(batch, provider_config, ("page_size", "max_url_length"))
+            pagination.setdefault("page_size", batch["page_size"])
+        if "max_url_length" in batch:
+            pagination.setdefault("max_url_length", batch["max_url_length"])
+    elif isinstance(batch, int):
+        provider_config.setdefault("batch_size", batch)
+        pagination.setdefault("id_batch_size", batch)
+
+
 def _normalize_source_pagination(
     source: dict[str, Any],  # Any: normalizer; input types vary
     provider_config: dict[str, Any],  # Any: normalizer; input types vary
@@ -141,24 +167,7 @@ def _normalize_source_pagination(
         source["batch"] = batch_norm
 
     batch = source.pop("batch", None)
-    if isinstance(batch, dict):
-        if "batch_size" in batch:
-            provider_config.setdefault("batch_size", batch["batch_size"])
-            pagination.setdefault("id_batch_size", batch["batch_size"])
-        elif "size" in batch:
-            provider_config.setdefault("batch_size", batch["size"])
-            pagination.setdefault("id_batch_size", batch["size"])
-        elif "api_batch_size" in batch:
-            provider_config.setdefault("batch_size", batch["api_batch_size"])
-            pagination.setdefault("id_batch_size", batch["api_batch_size"])
-        if "page_size" in batch:
-            _copy_keys(batch, provider_config, ("page_size", "max_url_length"))
-            pagination.setdefault("page_size", batch["page_size"])
-        if "max_url_length" in batch:
-            pagination.setdefault("max_url_length", batch["max_url_length"])
-    elif isinstance(batch, int):
-        provider_config.setdefault("batch_size", batch)
-        pagination.setdefault("id_batch_size", batch)
+    _apply_batch_to_pagination(batch, provider_config, pagination)
 
     if pagination:
         provider_config["pagination"] = pagination
