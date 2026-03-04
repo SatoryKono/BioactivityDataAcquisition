@@ -9,7 +9,7 @@ import pytest
 
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.lock_manager import LockManager
-from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.application.core.postrun_service import PostrunService
 from bioetl.application.core.preflight_service import PreflightService
 from bioetl.application.core.runner import PipelineRunner
@@ -74,7 +74,7 @@ def create_mock_services():
     """
     from bioetl.domain.types import HealthStatus
 
-    services = MagicMock(spec=PipelineServices)
+    services = MagicMock(spec=PipelineService)
     services.lock = AsyncMock()
     services.lock.acquire = AsyncMock(return_value=_MOCK_TOKEN)
     services.lock.release = AsyncMock()

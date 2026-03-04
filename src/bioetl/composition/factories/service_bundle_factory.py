@@ -1,6 +1,6 @@
 """Service Bundle Factory.
 
-Creates PipelineServices and pipeline instances with services.
+Creates PipelineService and pipeline instances with services.
 Extracted from pipeline_factory.py for composition layer LOC compliance.
 """
 
@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.base_transformer import BaseTransformer
-    from bioetl.application.core.pipeline_services import PipelineServices
+    from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.context import CachedBronzeContext
     from bioetl.domain.filtering import InputFilterConfig
@@ -209,7 +209,7 @@ def build_pipeline_services(
     metadata_coordinator: MetadataCoordinator | None = None,
     cached_bronze: CachedBronzeContext | None = None,
     silver_validator: SilverValidatorPort | None = None,
-) -> PipelineServices:
+) -> PipelineService:
     """Build shared pipeline services using DI container.
 
     Args:
@@ -230,7 +230,7 @@ def build_pipeline_services(
             in SilverWriter. Created from Pandera Silver schema.
 
     Returns:
-        Configured PipelineServices instance
+        Configured PipelineService instance
     """
     pipeline_config = config or load_pipeline_config(pipeline_name)
     base_services_factory = _resolve_base_services_factory()

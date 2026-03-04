@@ -15,7 +15,7 @@ import pyarrow as pa
 import pytest
 
 from bioetl.application.core.config import RecordProcessorConfig
-from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.composition.factories.services_factory import ServicesBuilder
 from bioetl.domain.config import DQConfig, TableConfig
@@ -103,7 +103,7 @@ def pipeline_context(run_id: RunID, mock_logger) -> PipelineContext:
 @pytest.fixture
 def mock_services(mock_storage, mock_quarantine):
     """Create mock pipeline services."""
-    services = MagicMock(spec=PipelineServices)
+    services = MagicMock(spec=PipelineService)
     services.storage = mock_storage
     services.metrics = (
         MagicMock()

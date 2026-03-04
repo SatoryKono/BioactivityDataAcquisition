@@ -1,6 +1,6 @@
 """Services Factory.
 
-Contains BaseServicesFactory for creating PipelineServices with all dependencies.
+Contains BaseServicesFactory for creating PipelineService with all dependencies.
 ServicesBuilder and helpers have been extracted to services_builder.py.
 """
 
@@ -9,7 +9,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.composition.factories.dq_context_resolver import (
     create_dq_services as _create_dq_services_impl,
 )
@@ -76,8 +76,8 @@ class BaseServicesFactory:
         dq_monitor: DQMonitorPort | None = None,
         metadata_coordinator: MetadataCoordinator | None = None,
         silver_validator: SilverValidatorPort | None = None,
-    ) -> PipelineServices:
-        """Create a fully wired `PipelineServices` bundle for one pipeline run."""
+    ) -> PipelineService:
+        """Create a fully wired `PipelineService` bundle for one pipeline run."""
         metrics_port = metrics if metrics is not None else cls._create_metrics(settings)
         cls._ensure_prod_silver_validator(settings, pipeline_config, silver_validator)
         storage_ctx = StorageFactory.create(
@@ -151,12 +151,12 @@ class BaseServicesFactory:
         dq_monitor: DQMonitorPort | None,
         metadata_coordinator: MetadataCoordinator | None,
         dq_services: dict[str, Any],  # Any: heterogeneous DQ service instances
-    ) -> PipelineServices:
-        """Assemble PipelineServices from pre-built dependencies."""
+    ) -> PipelineService:
+        """Assemble PipelineService from pre-built dependencies."""
         from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 
         metadata_writer = MetadataWriter(logger=logger)
-        return PipelineServices(
+        return PipelineService(
             data_source=data_source,
             storage=storage_ctx.adapter,
             lock=lock,

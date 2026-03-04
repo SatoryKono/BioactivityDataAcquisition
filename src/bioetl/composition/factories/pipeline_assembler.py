@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.base_transformer import BaseTransformer
-    from bioetl.application.core.pipeline_services import PipelineServices
+    from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.context import CachedBronzeContext
@@ -206,8 +206,8 @@ class GenericPipelineFactory(Generic[TPipeline]):
         filter_config: InputFilterConfig | None = None,
         tracer: TracingPort | None = None,
         dq_monitor: DQMonitorPort | None = None,
-    ) -> PipelineServices:
-        """Build PipelineServices from settings.
+    ) -> PipelineService:
+        """Build PipelineService from settings.
 
         Args:
             settings: Application settings with data paths and credentials.
@@ -218,7 +218,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             dq_monitor: Optional data quality monitor for anomaly detection.
 
         Returns:
-            Configured PipelineServices instance.
+            Configured PipelineService instance.
         """
         return build_pipeline_services(
             pipeline_name=self.pipeline_name,

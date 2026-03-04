@@ -7,7 +7,7 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.application.pipelines.chembl import ChEMBLActivityPipeline
 from bioetl.application.pipelines.chembl.activity_transformer import ActivityTransformer
 from bioetl.domain.config import RuntimeConfig
@@ -28,7 +28,7 @@ def chembl_pipeline():
     mock_logger = MagicMock()
     mock_logger.bind = MagicMock(return_value=mock_logger)
 
-    services = PipelineServices(
+    services = PipelineService(
         data_source=AsyncMock(),
         storage=MagicMock(),
         lock=AsyncMock(),

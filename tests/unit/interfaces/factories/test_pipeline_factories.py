@@ -55,7 +55,7 @@ def mock_pipeline_config():
 
 @pytest.fixture
 def mock_services():
-    """Create mock PipelineServices."""
+    """Create mock PipelineService."""
     services = MagicMock()
     services.data_source = MagicMock()
     services.storage = MagicMock()

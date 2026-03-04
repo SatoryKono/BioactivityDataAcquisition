@@ -10,7 +10,7 @@ from bioetl.domain.exceptions import BioETLError, InfrastructureError
 from bioetl.domain.types import ComponentHealthResult, HealthReport, HealthStatus
 
 if TYPE_CHECKING:
-    from bioetl.application.core.pipeline_services import PipelineServices
+    from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.domain.ports import (
         HealthCheckResult,
         HealthMonitorPort,
@@ -47,7 +47,7 @@ class _HealthAggregator:
         self._health_monitor = health_monitor
         self._pipeline_name = pipeline_name
 
-    async def check_all(self, services: PipelineServices) -> HealthReport:
+    async def check_all(self, services: PipelineService) -> HealthReport:
         """Check storage and data source health in parallel."""
         results = await asyncio.gather(
             self._check_storage(services),
@@ -73,7 +73,7 @@ class _HealthAggregator:
         self._log_report(report)
         return report
 
-    async def _check_storage(self, services: PipelineServices) -> ComponentHealthResult:
+    async def _check_storage(self, services: PipelineService) -> ComponentHealthResult:
         component = "storage"
         start_time = time.perf_counter()
 
@@ -98,7 +98,7 @@ class _HealthAggregator:
         return result
 
     async def _check_data_source(
-        self, services: PipelineServices
+        self, services: PipelineService
     ) -> ComponentHealthResult:
         """Check data source health, preferring enhanced check_health API."""
         component = "data_source"

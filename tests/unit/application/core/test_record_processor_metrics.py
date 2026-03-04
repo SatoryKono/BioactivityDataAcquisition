@@ -8,7 +8,7 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.config import RecordProcessorConfig
-from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.composition.factories.services_factory import ServicesBuilder
 from bioetl.domain.context import PipelineContext
@@ -26,7 +26,7 @@ def mock_metrics():
 @pytest.fixture
 def mock_services(mock_metrics):
     """Create mock pipeline services."""
-    services = MagicMock(spec=PipelineServices)
+    services = MagicMock(spec=PipelineService)
     services.storage = AsyncMock()
     services.metrics = mock_metrics
     services.quarantine = AsyncMock()

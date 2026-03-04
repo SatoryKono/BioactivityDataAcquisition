@@ -21,7 +21,7 @@ from bioetl.application.core.batch_progress_service import BatchProgressService
 from bioetl.application.core.batch_tracing import BatchTracingManagerService
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.config import RecordProcessorConfig
-from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.composition.factories.services_factory import ServicesBuilder
 from bioetl.domain.config import TableConfig
@@ -59,7 +59,7 @@ def mock_quarantine_port():
 @pytest.fixture
 def mock_services(mock_storage, mock_metrics, mock_quarantine_port):
     """Create mock pipeline services."""
-    services = MagicMock(spec=PipelineServices)
+    services = MagicMock(spec=PipelineService)
     services.storage = mock_storage
     services.metrics = mock_metrics
     services.quarantine = mock_quarantine_port
@@ -154,7 +154,7 @@ def processor_config():
 
 def _create_batch_executor(
     *,
-    services: PipelineServices,
+    services: PipelineService,
     context: PipelineContext,
     config: RecordProcessorConfig,
     transform_callback,

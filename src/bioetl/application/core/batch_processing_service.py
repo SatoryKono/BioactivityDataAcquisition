@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.batch_transformer import BatchTransformer
     from bioetl.application.core.batch_writer import BatchWriter
     from bioetl.application.core.config import RecordProcessorConfig
-    from bioetl.application.core.pipeline_services import PipelineServices
+    from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.models.metadata import SourceMetadata
     from bioetl.domain.ports import LoggerPort
@@ -63,7 +63,7 @@ class BatchProcessingService:
     def __init__(
         self,
         *,
-        services: PipelineServices,
+        services: PipelineService,
         context: PipelineContext,
         config: RecordProcessorConfig,
         logger: LoggerPort,

@@ -6,7 +6,7 @@ Uses asyncio for non-blocking token acquisition.
 
 from __future__ import annotations
 
-__all__ = ["TokenBucket", "create_pubchem_bucket", "create_pubmed_bucket"]
+__all__ = ["TokenBucket"]
 
 
 import asyncio
@@ -144,57 +144,3 @@ class TokenBucket:
             self._tokens -= tokens
             return True
         return False
-
-
-def create_pubchem_bucket(
-    *,
-    metrics: MetricsPort | None = None,
-) -> TokenBucket:
-    """Create a TokenBucket configured for PubChem API rate limits.
-
-    PubChem: 5 req/sec, burst of 5 (RULES.md Appendix A).
-
-    Args:
-        metrics: Optional MetricsPort for observing rate limiter metrics.
-
-    Returns:
-        Configured TokenBucket for PubChem.
-    """
-    return TokenBucket(
-        rate=5.0,
-        capacity=5,
-        provider="pubchem",
-        metrics=metrics,
-    )
-
-
-def create_pubmed_bucket(
-    *,
-    with_api_key: bool = False,
-    metrics: MetricsPort | None = None,
-) -> TokenBucket:
-    """Create a TokenBucket configured for PubMed API rate limits.
-
-    PubMed: 3 req/sec without API key, 10 req/sec with API key (RULES.md Appendix A).
-
-    Args:
-        with_api_key: Use higher rate limit (10 req/sec) when API key is available.
-        metrics: Optional MetricsPort for observing rate limiter metrics.
-
-    Returns:
-        Configured TokenBucket for PubMed.
-    """
-    rate = 10.0 if with_api_key else 3.0
-    capacity = 10 if with_api_key else 3
-    return TokenBucket(
-        rate=rate,
-        capacity=capacity,
-        provider="pubmed",
-        metrics=metrics,
-    )
-
-
-_BUCKET_FACTORIES = (create_pubchem_bucket, create_pubmed_bucket)
-
-
-_BUCKET_FACTORIES = (create_pubchem_bucket, create_pubmed_bucket)

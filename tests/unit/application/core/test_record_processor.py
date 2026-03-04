@@ -9,7 +9,7 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.config import RecordProcessorConfig
-from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.composition.factories.services_factory import ServicesBuilder
 from bioetl.domain.config import TableConfig
@@ -120,7 +120,7 @@ def mock_quarantine_port():
 @pytest.fixture
 def mock_services(mock_storage, mock_metrics, mock_quarantine_port):
     """Create mock pipeline services."""
-    services = MagicMock(spec=PipelineServices)
+    services = MagicMock(spec=PipelineService)
     services.storage = mock_storage
     services.metrics = mock_metrics
     services.quarantine = mock_quarantine_port
@@ -195,7 +195,7 @@ def mock_gold_validator():
 
 def _create_record_processor(
     *,
-    services: PipelineServices,
+    services: PipelineService,
     error_classifier: ErrorClassifier,
     context: PipelineContext,
     config: RecordProcessorConfig,
