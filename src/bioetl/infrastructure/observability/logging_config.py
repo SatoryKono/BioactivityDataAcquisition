@@ -73,9 +73,18 @@ _SECRET_PATTERNS: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"(?<![a-zA-Z0-9])[a-zA-Z0-9]{32,}(?![a-zA-Z0-9])"), "[REDACTED_KEY]"),
 ]
 
+# UUID pattern used to avoid redacting identifiers like run_id, batch_id
+_UUID_PATTERN = re.compile(
+    r"^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$",
+    re.IGNORECASE,
+)
+
 
 def _mask_secrets(value: Any) -> Any:  # Any: structlog context values of arbitrary type
     """Mask potential secrets in log values.
+
+    Preserves UUID-format strings (used as run_id, batch_id, etc.)
+    while redacting actual secrets like API keys and tokens.
 
     Args:
         value: Value to check and potentially mask
@@ -84,6 +93,10 @@ def _mask_secrets(value: Any) -> Any:  # Any: structlog context values of arbitr
         Original value or masked version if secrets detected
     """
     if not isinstance(value, str):
+        return value
+
+    # Preserve UUID-format identifiers (run_id, batch_id, content_hash)
+    if _UUID_PATTERN.match(value):
         return value
 
     result = value

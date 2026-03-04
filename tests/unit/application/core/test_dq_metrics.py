@@ -26,9 +26,12 @@ def test_batch_metrics_quarantined_tracking():
     )
 
 
-def test_record_processor_dq_logging():
-    """Test that RecordProcessor logs detailed stats for soft threshold."""
-    # This would require mocking RecordProcessor and its dependencies.
-    # Given the complexity, we rely on the implementation correctness of _collect_dq_stats
-    # which we can unit test in isolation if we extract it or mock context.
-    pass
+def test_batch_metrics_service_noop_when_no_metrics():
+    """Test that BatchMetricsRecorderService is a no-op when metrics=None."""
+    recorder = BatchMetricsRecorder(None, "pipeline_test", "incremental")
+
+    # Should not raise even with metrics=None
+    recorder.track_batch_size("bronze", 10)
+    recorder.track_processed_records("silver", 5)
+    recorder.track_error("transform", ErrorType.DATA_QUALITY)
+    recorder.track_quarantined_records(ErrorType.DATA_QUALITY, 3)

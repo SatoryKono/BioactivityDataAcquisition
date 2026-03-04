@@ -12,7 +12,7 @@ from bioetl.application.composite.runner_constants import (
 from bioetl.application.composite.runner_helpers import calculate_had_warnings
 from bioetl.domain.composite.result import CompositeResult, EnrichmentResult, SeedResult
 from bioetl.domain.events import PipelineEvent
-from bioetl.domain.exceptions import BioETLError
+from bioetl.domain.exceptions import BioETLError, InvalidStateError
 
 if TYPE_CHECKING:
     from bioetl.application.composite.checkpoint import (
@@ -258,9 +258,9 @@ class CompositeRunnerSupportMixin:
         for enricher_name in self._config.required_enrichers:
             result = enrichment_results.get(enricher_name)
             if result is None:
-                raise RuntimeError(f"Required enricher '{enricher_name}' did not run")
+                raise InvalidStateError(f"Required enricher '{enricher_name}' did not run")
             if not result.is_success:
-                raise RuntimeError(
+                raise InvalidStateError(
                     f"Required enricher '{enricher_name}' failed: "
                     f"{result.error_message or result.status.value}"
                 )

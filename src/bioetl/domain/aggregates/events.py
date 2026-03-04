@@ -18,8 +18,9 @@ Usage:
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
+from uuid import uuid4
 
 from bioetl.domain.types import BatchID, ContentHash, MetaDict, RunID
 
@@ -43,6 +44,7 @@ class DomainEvent:
     """Base class for all domain events.
 
     All domain events are immutable (frozen) and contain:
+    - event_id: Unique identifier for idempotency and event bus integration
     - occurred_at: When the event happened (UTC)
     - run_id: Correlation ID for tracing
 
@@ -50,6 +52,7 @@ class DomainEvent:
     """
 
     occurred_at: datetime
+    event_id: str = field(default_factory=lambda: str(uuid4()))
 
 
 # ──────────────────────────────────────────────────────────────────────────────

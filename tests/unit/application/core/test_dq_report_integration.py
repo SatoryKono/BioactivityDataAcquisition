@@ -64,13 +64,13 @@ def mock_lifecycle_service() -> MagicMock:
 
 
 @pytest.fixture
-def mock_dq_report_service() -> MagicMock:
+def mock_dq_report_service(tmp_path: Path) -> MagicMock:
     """Create mock DQReportService."""
     service = MagicMock()
     service.generate_reports = AsyncMock(
         return_value=DQReportResult(
-            bronze_report_path=Path("/tmp/bronze_dq.json"),
-            silver_report_path=Path("/tmp/silver_dq.json"),
+            bronze_report_path=tmp_path / "bronze_dq.json",
+            silver_report_path=tmp_path / "silver_dq.json",
             gold_report_path=None,
             bronze_enabled=True,
             silver_enabled=True,
@@ -81,7 +81,7 @@ def mock_dq_report_service() -> MagicMock:
 
 
 @pytest.fixture
-def sample_dq_context() -> DQReportContext:
+def sample_dq_context(tmp_path: Path) -> DQReportContext:
     """Create sample DQ context."""
     return DQReportContext(
         run_id="test-run-123",
@@ -89,7 +89,7 @@ def sample_dq_context() -> DQReportContext:
         timestamp=datetime.now(UTC),
         bronze_records=[b'{"id": 1}', b'{"id": 2}'],
         bronze_batch_id="batch-001",
-        bronze_source_file="/tmp/bronze/file.jsonl.zst",
+        bronze_source_file=str(tmp_path / "bronze" / "file.jsonl.zst"),
         silver_data=None,
         silver_target_table="chembl_activity",
         silver_source_batch_ids=["batch-001"],
@@ -130,10 +130,10 @@ def mock_executor() -> MagicMock:
 
 
 @pytest.fixture
-def mock_storage() -> MagicMock:
+def mock_storage(tmp_path: Path) -> MagicMock:
     """Create a mock storage port."""
     storage = MagicMock()
-    storage.get_table_path = MagicMock(return_value=Path("/tmp/table"))
+    storage.get_table_path = MagicMock(return_value=tmp_path / "table")
     return storage
 
 
@@ -438,11 +438,11 @@ class TestDQReportResult:
         assert result.any_generated is False
         assert result.reports_count == 0
 
-    def test_dq_report_result_with_reports(self) -> None:
+    def test_dq_report_result_with_reports(self, tmp_path: Path) -> None:
         """Test DQReportResult with reports generated."""
         result = DQReportResult(
-            bronze_report_path=Path("/tmp/bronze_dq.json"),
-            silver_report_path=Path("/tmp/silver_dq.json"),
+            bronze_report_path=tmp_path / "bronze_dq.json",
+            silver_report_path=tmp_path / "silver_dq.json",
             gold_report_path=None,
             bronze_enabled=True,
             silver_enabled=True,
@@ -452,12 +452,12 @@ class TestDQReportResult:
         assert result.any_generated is True
         assert result.reports_count == 2
 
-    def test_dq_report_result_all_enabled(self) -> None:
+    def test_dq_report_result_all_enabled(self, tmp_path: Path) -> None:
         """Test DQReportResult with all reports generated."""
         result = DQReportResult(
-            bronze_report_path=Path("/tmp/bronze_dq.json"),
-            silver_report_path=Path("/tmp/silver_dq.json"),
-            gold_report_path=Path("/tmp/gold_dq.json"),
+            bronze_report_path=tmp_path / "bronze_dq.json",
+            silver_report_path=tmp_path / "silver_dq.json",
+            gold_report_path=tmp_path / "gold_dq.json",
             bronze_enabled=True,
             silver_enabled=True,
             gold_enabled=True,
