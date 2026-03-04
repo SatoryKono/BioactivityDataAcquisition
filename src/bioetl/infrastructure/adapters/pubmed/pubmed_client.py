@@ -44,8 +44,8 @@ ENTREZ_API_BASE = PUBMED_ENTREZ_API_BASE
 @dataclass
 class PubMedAdapter(
     NotSupportedMultiFilterMixin,
-    PubMedSearchMixin,
     PubMedFetchMixin,
+    PubMedSearchMixin,
     PubMedHealthMixin,
     BaseHttpAdapter,
 ):

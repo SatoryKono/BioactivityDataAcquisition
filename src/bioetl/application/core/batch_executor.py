@@ -11,7 +11,7 @@ DQ Report Integration:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Protocol
 from uuid import uuid4
 
 from bioetl.application.core.batch_executor_dq_mixin import _BatchExecutorDQMixin
@@ -46,6 +46,25 @@ class BatchResult:
     silver_count: int
     gold_count: int
     quarantined_count: int
+
+
+class BatchIdGenerator(Protocol):
+    """Generator contract for creating batch identifiers.
+
+    Extracted for deterministic tests and dependency injection.
+    """
+
+    def create(self) -> BatchID:
+        """Create a new batch identifier."""
+        ...
+
+
+class UuidBatchIdGenerator:
+    """Default batch ID generator based on ``uuid4``."""
+
+    def create(self) -> BatchID:
+        """Create a UUID-backed batch identifier."""
+        return BatchID(uuid4())
 
 
 class BatchExecutor(_BatchExecutorDQMixin):
@@ -94,6 +113,7 @@ class BatchExecutor(_BatchExecutorDQMixin):
         batch_size: int | None = None,
         checkpoint_interval: int | None = None,
         logger: LoggerPort | None = None,
+        batch_id_factory: BatchIdGenerator | None = None,
     ) -> None:
         """Initialize batch executor.
 
@@ -111,6 +131,7 @@ class BatchExecutor(_BatchExecutorDQMixin):
             batch_size: Number of records per batch.
             checkpoint_interval: Number of records between checkpoints.
             logger: Logger for memory-related messages.
+            batch_id_factory: Generator for batch ID creation. Defaults to UUID4.
 
         """
         self._services = services
@@ -158,6 +179,7 @@ class BatchExecutor(_BatchExecutorDQMixin):
         self._transformer = transformer
         self._writer = writer
         self._tracing = tracing_manager
+        self._batch_id_factory = batch_id_factory or UuidBatchIdGenerator()
 
         # Query string for metadata (stored during execute())
         self._query_string: str | None = None
@@ -386,7 +408,7 @@ class BatchExecutor(_BatchExecutorDQMixin):
             records: Raw records to process.
             start_index: Starting index for records in this batch.
         """
-        batch_id = BatchID(uuid4())
+        batch_id = self._batch_id_factory.create()
         ingestion_ts = self._context.started_at
 
         # Get source metadata from data source (if available)

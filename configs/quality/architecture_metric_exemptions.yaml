@@ -158,7 +158,7 @@ registries:
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
     composite.py:
-      value: 710
+      value: 720
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (file_size_limits).
       expires_on: '2026-04-30'
@@ -927,13 +927,6 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
-    _apply_joins:
-      value: 60
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (function_length).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
     _build_full_bronze_metadata:
       value: 100
       owner: '@bioetl-architecture'
@@ -941,21 +934,7 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
-    _check_schema_drift:
-      value: 60
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (function_length).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
     _check_value_distribution:
-      value: 70
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (function_length).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    _clear_exports_legacy:
       value: 70
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (function_length).
@@ -990,20 +969,6 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
-    _extract_schema_metadata:
-      value: 80
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (function_length).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    _fetch_batch_publications:
-      value: 75
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (function_length).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
     _log_gold_audit:
       value: 75
       owner: '@bioetl-architecture'
@@ -1018,21 +983,7 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
-    _merge_scd2:
-      value: 55
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (function_length).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
     _normalize_inline_dq_overrides:
-      value: 60
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (function_length).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    _normalize_source_pagination:
       value: 60
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (function_length).
@@ -1041,13 +992,6 @@ registries:
         entry.
     _normalize_to_file_format:
       value: 60
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (function_length).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    _parse_composite_config:
-      value: 95
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (function_length).
       expires_on: '2026-04-30'
@@ -1067,20 +1011,6 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
-    _read_entries_sync:
-      value: 70
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (function_length).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    _render_check_details:
-      value: 60
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (function_length).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
     _resolve_layer_output_path:
       value: 60
       owner: '@bioetl-architecture'
@@ -1095,21 +1025,7 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
-    _run_with_lock:
-      value: 270
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (function_length).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
     _search_by_title:
-      value: 55
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (function_length).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    _to_arrow_table:
       value: 55
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (function_length).
@@ -1118,13 +1034,6 @@ registries:
         entry.
     _transform_impl:
       value: 120
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (function_length).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    _validate_medallion_policy_consistency:
-      value: 65
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (function_length).
       expires_on: '2026-04-30'
@@ -1188,13 +1097,6 @@ registries:
         entry.
     _write_simple:
       value: 60
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (function_length).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    _yield_deduplicated:
-      value: 65
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (function_length).
       expires_on: '2026-04-30'
@@ -1361,13 +1263,6 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
-    create_logger:
-      value: 55
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (function_length).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
     create_runner:
       value: 80
       owner: '@bioetl-architecture'
@@ -1410,13 +1305,6 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
-    fetch_filtered:
-      value: 70
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (function_length).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
     fetch_filtered_with_fallback:
       value: 90
       owner: '@bioetl-architecture'
@@ -1433,13 +1321,6 @@ registries:
         entry.
     flatten_arrow_table_for_export:
       value: 75
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (function_length).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    get_batch_statistics:
-      value: 65
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (function_length).
       expires_on: '2026-04-30'
@@ -1634,22 +1515,8 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
-    vacuum_all_command:
-      value: 90
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (function_length).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
     validate:
       value: 95
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (function_length).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    validate_medallion_config:
-      value: 55
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (function_length).
       expires_on: '2026-04-30'
@@ -1747,13 +1614,6 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
-    BasePipeline:
-      value: 400
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (class_size).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
     BaseTitleFallbackHandler:
       value: 330
       owner: '@bioetl-architecture'
@@ -1789,27 +1649,6 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
-    BronzeWriter:
-      value: 785
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (class_size).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    ChemblAdapter:
-      value: 1120
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (class_size).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    ColumnOrderer:
-      value: 440
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (class_size).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
     ColumnOrdererService:
       value: 434
       owner: '@bioetl-architecture'
@@ -1828,13 +1667,6 @@ registries:
       value: 375
       owner: '@bioetl-architecture'
       reason: Synced to current helper decomposition after RF-001/P0-1 refactors.
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    CompositeRunnerStageMixin:
-      value: 502
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (class_size).
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
@@ -1859,22 +1691,8 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
-    CompositePipelineRunner:
-      value: 1150
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (class_size).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
     CompositePreflightValidationService:
-      value: 562
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (class_size).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    CompositePreflightValidator:
-      value: 562
+      value: 564
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (class_size).
       expires_on: '2026-04-30'
@@ -1915,13 +1733,6 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
-    DependencyCoordinator:
-      value: 375
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (class_size).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
     DependencyCoordinatorService:
       value: 397
       owner: '@bioetl-architecture'
@@ -1950,22 +1761,8 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
-    EnrichmentCoordinator:
-      value: 400
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (class_size).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
     EnrichmentCoordinatorService:
       value: 430
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (class_size).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    EnrichmentCrossValidator:
-      value: 385
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (class_size).
       expires_on: '2026-04-30'
@@ -2006,13 +1803,6 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
-    GenericPipelineFactory:
-      value: 350
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (class_size).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
     GoldDQAnalyzer:
       value: 155
       owner: '@bioetl-architecture'
@@ -2034,13 +1824,6 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
-    JoinPlanner:
-      value: 620
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (class_size).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
     JoinPlannerService:
       value: 620
       owner: '@bioetl-architecture'
@@ -2057,13 +1840,6 @@ registries:
         entry.
     MedallionLifecycleService:
       value: 385
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (class_size).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    MergeService:
-      value: 1835
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (class_size).
       expires_on: '2026-04-30'
@@ -2167,13 +1943,6 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
-    PubMedAdapter:
-      value: 545
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (class_size).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
     PubMedPublicationTransformer:
       value: 711
       owner: '@bioetl-architecture'
@@ -2197,13 +1966,6 @@ registries:
         entry.
     SilverDQAnalyzer:
       value: 600
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (class_size).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    SilverWriter:
-      value: 1165
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (class_size).
       expires_on: '2026-04-30'
@@ -2237,41 +1999,6 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
-    TestClassSize:
-      value: 350
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (class_size).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    TestCliCommands:
-      value: 350
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (class_size).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    TestFileSizeLimits:
-      value: 350
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (class_size).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    TestFunctionComplexity:
-      value: 350
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (class_size).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    TestFunctionLength:
-      value: 350
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (class_size).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
     UnifiedHTTPClient:
       value: 450
       owner: '@bioetl-architecture'
@@ -2300,13 +2027,6 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
-    UniprotTargetSchema:
-      value: 435
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (class_size).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
     ValueValidator:
       value: 320
       owner: '@bioetl-architecture'
@@ -2330,38 +2050,10 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
-    BasePipeline:
-      value: Data container with property accessors, no behavior to delegate
-      owner: '@bioetl-architecture'
-      reason: Data container with property accessors, no behavior to delegate
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
     BaseTransformer:
       value: Template Method pattern - provides hooks for subclasses
       owner: '@bioetl-architecture'
       reason: Template Method pattern - provides hooks for subclasses
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    BronzeWriter:
-      value: Cohesive writer - all methods relate to Bronze layer operations
-      owner: '@bioetl-architecture'
-      reason: Cohesive writer - all methods relate to Bronze layer operations
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    ChemblAdapter:
-      value: HTTP adapter with internal helpers; delegates to ErrorClassifier, EntityMapper
-      owner: '@bioetl-architecture'
-      reason: HTTP adapter with internal helpers; delegates to ErrorClassifier, EntityMapper
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    CLI:
-      value: CLI entry point - commands are cohesive, delegates to entrypoints
-      owner: '@bioetl-architecture'
-      reason: CLI entry point - commands are cohesive, delegates to entrypoints
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
@@ -2380,20 +2072,6 @@ registries:
       owner: '@bioetl-architecture'
       reason: Immutable dataclass - state transitions via with_* methods, serialization
         helpers are cohesive
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    CompositePipelineRunner:
-      value: Thin orchestrator - delegates to coordinator, merger, checkpoint services
-      owner: '@bioetl-architecture'
-      reason: Thin orchestrator - delegates to coordinator, merger, checkpoint services
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    CrossRefAdapter:
-      value: HTTP adapter with internal helpers for batch resolution
-      owner: '@bioetl-architecture'
-      reason: HTTP adapter with internal helpers for batch resolution
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
@@ -2444,20 +2122,6 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
-    EnrichmentCoordinator:
-      value: Cohesive service - all methods relate to enricher orchestration
-      owner: '@bioetl-architecture'
-      reason: Cohesive service - all methods relate to enricher orchestration
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    ErrorService:
-      value: Cohesive utility - all methods relate to error classification and logging
-      owner: '@bioetl-architecture'
-      reason: Cohesive utility - all methods relate to error classification and logging
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
     FeatureExtractor:
       value: Cohesive extractor - all methods relate to UniProt feature extraction
         (domains, PTMs, etc.)
@@ -2476,29 +2140,6 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
-    GenericPipelineFactory:
-      value: Factory pattern - creates objects, not behavior delegation
-      owner: '@bioetl-architecture'
-      reason: Factory pattern - creates objects, not behavior delegation
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    GoldDQAnalyzer:
-      value: Thin orchestrator - delegates to _checks_*.py modules (143 LOC, below
-        threshold)
-      owner: '@bioetl-architecture'
-      reason: Thin orchestrator - delegates to _checks_*.py modules (143 LOC, below
-        threshold)
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    GoldWriter:
-      value: Cohesive writer - delegates to _audit, _tracing; modes are cohesive
-      owner: '@bioetl-architecture'
-      reason: Cohesive writer - delegates to _audit, _tracing; modes are cohesive
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
     GoldWriterIOMixin:
       value: Cohesive IO mixin - isolated Delta write/retry helpers; integration boundary
         to storage backend
@@ -2508,26 +2149,10 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Extract remaining IO helpers into dedicated writer services and remove
         this exemption entry.
-    MedallionConfigValidator:
-      value: Cohesive validator - all methods relate to medallion validation
-      owner: '@bioetl-architecture'
-      reason: Cohesive validator - all methods relate to medallion validation
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
     MedallionLifecycleService:
       value: Lifecycle orchestrator - coordinates Bronze/Silver/Gold operations
       owner: '@bioetl-architecture'
       reason: Lifecycle orchestrator - coordinates Bronze/Silver/Gold operations
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    MergeService:
-      value: Cohesive service - all methods relate to merge operations and conflict
-        resolution
-      owner: '@bioetl-architecture'
-      reason: Cohesive service - all methods relate to merge operations and conflict
-        resolution
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
@@ -2547,26 +2172,10 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
-    OpenAlexAdapter:
-      value: HTTP adapter with FilterableDataSourcePort; batch DOI resolution + title
-        fallback
-      owner: '@bioetl-architecture'
-      reason: HTTP adapter with FilterableDataSourcePort; batch DOI resolution + title
-        fallback
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
     PipelineObserver:
       value: Unified observability - all methods relate to pipeline observation
       owner: '@bioetl-architecture'
       reason: Unified observability - all methods relate to pipeline observation
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    PipelineRunner:
-      value: Thin orchestrator - delegates to preflight, postrun, lifecycle services
-      owner: '@bioetl-architecture'
-      reason: Thin orchestrator - delegates to preflight, postrun, lifecycle services
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
@@ -2577,35 +2186,10 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
-    PreflightService:
-      value: 'Single responsibility: infrastructure validation, delegates to _health_aggregator'
-      owner: '@bioetl-architecture'
-      reason: 'Single responsibility: infrastructure validation, delegates to _health_aggregator'
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    PubChemAdapter:
-      value: Sync adapter using ThreadPoolExecutor; delegates to BaseSyncAdapter,
-        CircuitBreaker
-      owner: '@bioetl-architecture'
-      reason: Sync adapter using ThreadPoolExecutor; delegates to BaseSyncAdapter,
-        CircuitBreaker
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
     PubchemMoleculeSchema:
       value: Pandera schema - declarative field definitions, no behavior to delegate
       owner: '@bioetl-architecture'
       reason: Pandera schema - declarative field definitions, no behavior to delegate
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    PubMedAdapter:
-      value: HTTP adapter with FilterableDataSourcePort implementation; delegates
-        to BaseHttpAdapter
-      owner: '@bioetl-architecture'
-      reason: HTTP adapter with FilterableDataSourcePort implementation; delegates
-        to BaseHttpAdapter
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
@@ -2632,13 +2216,6 @@ registries:
       owner: '@bioetl-architecture'
       reason: Cohesive analyzer - all methods relate to Silver layer data quality
         analysis
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    SilverWriter:
-      value: Cohesive writer - all methods relate to Delta Lake operations
-      owner: '@bioetl-architecture'
-      reason: Cohesive writer - all methods relate to Delta Lake operations
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
@@ -2685,13 +2262,6 @@ registries:
       value: Transformer with comprehensive UniProt field extraction - single responsibility
       owner: '@bioetl-architecture'
       reason: Transformer with comprehensive UniProt field extraction - single responsibility
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    UniprotTargetSchema:
-      value: Pandera schema - declarative field definitions for UniProt proteins
-      owner: '@bioetl-architecture'
-      reason: Pandera schema - declarative field definitions for UniProt proteins
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.

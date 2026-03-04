@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypedDict
 from uuid import UUID, uuid4
 
 import yaml
@@ -279,10 +279,18 @@ def _extract_multi_filter_ids(
     return result
 
 
+class _BronzeOpts(TypedDict):
+    """Typed options for cached Bronze mode passed to RunOptions."""
+
+    use_cached_bronze: bool
+    cached_bronze_path: str | None
+    cached_bronze_date: str | None
+
+
 def _resolve_bronze_opts(
     runtime: CompositeRuntimeConfig,
     phase_override: bool | None,
-) -> dict[str, object]:
+) -> _BronzeOpts:
     """Resolve cached Bronze options for a specific pipeline phase.
 
     Tri-state resolution: phase_override takes precedence over master switch.
@@ -299,11 +307,11 @@ def _resolve_bronze_opts(
     effective = (
         phase_override if phase_override is not None else runtime.use_cached_bronze
     )
-    return {
-        "use_cached_bronze": effective,
-        "cached_bronze_path": runtime.cached_bronze_path if effective else None,
-        "cached_bronze_date": runtime.cached_bronze_date if effective else None,
-    }
+    return _BronzeOpts(
+        use_cached_bronze=effective,
+        cached_bronze_path=runtime.cached_bronze_path if effective else None,
+        cached_bronze_date=runtime.cached_bronze_date if effective else None,
+    )
 
 
 def bootstrap_composite_runner(
@@ -365,7 +373,7 @@ def bootstrap_composite_runner(
             run_type="incremental",
             limit=runtime.seed_limit,
             skip_gold=True,
-            **_seed_bronze_opts,  # type: ignore[arg-type]
+            **_seed_bronze_opts,
         )
         ctx = build_pipeline_context(config.seed.pipeline, options)
         return bootstrap_pipeline_runner(ctx)
@@ -423,7 +431,7 @@ def bootstrap_composite_runner(
             filter_field=filter_field,
             fallback_mapping=fallback_mapping,
             execution_context="enricher",
-            **_enricher_bronze_opts,  # type: ignore[arg-type]
+            **_enricher_bronze_opts,
         )
         ctx = build_pipeline_context(pipeline_name, options)
         return bootstrap_pipeline_runner(ctx)
@@ -511,7 +519,7 @@ def bootstrap_composite_runner(
             ignore_yaml_filter=True,
             skip_gold=True,
             execution_context="dependency",
-            **_dependency_bronze_opts,  # type: ignore[arg-type]
+            **_dependency_bronze_opts,
         )
         ctx = build_pipeline_context(pipeline_name, options)
         return bootstrap_pipeline_runner(ctx)
@@ -614,17 +622,7 @@ def bootstrap_composite_pipeline(
     runtime: CompositeRuntimeConfig,
     run_id: str | None = None,
 ) -> CompositePipelineRunnerService:
-    """Bootstrap a CompositePipelineRunnerService with all dependencies.
-
-
-    Args:
-        config: Composite pipeline configuration.
-        runtime: Runtime options (resume, dry_run, etc.).
-        run_id: Optional run ID (generated if not provided).
-
-    Returns:
-        CompositePipelineRunnerService ready for execution.
-    """
+    """Bootstrap a CompositePipelineRunnerService with all dependencies."""
     return bootstrap_composite_runner(config=config, runtime=runtime, run_id=run_id)
 
 
@@ -682,18 +680,7 @@ def _create_dq_report_service(
     logger: LoggerPort,
     settings: Settings,
 ) -> DQReportService:
-    """Create DQ report service for composite pipelines.
-
-    Args:
-        logger: Structured logger.
-        settings: Application settings.
-
-    Returns:
-        DQReportService instance.
-
-    Raises:
-        ImportError: If required modules are not available.
-    """
+    """Create DQ report service for composite pipelines."""
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.infrastructure.export.dq_report_writer import DQReportWriter
 

@@ -7,7 +7,7 @@ PipelineExecutor and RecordProcessor.
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 
@@ -24,7 +24,7 @@ from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import DataQualityError
 from bioetl.domain.ports import MetricsPort
-from bioetl.domain.types import RunType, ValidationResult
+from bioetl.domain.types import BatchID, RunType, ValidationResult
 
 
 @pytest.fixture
@@ -161,6 +161,7 @@ def _create_batch_executor(
     batch_size: int | None = 10,
     checkpoint_interval: int | None = 5,
     tracer=None,
+    batch_id_factory=None,
 ) -> BatchExecutor:
     """Build BatchExecutor with composition-level dependency wiring."""
     error_classifier = ErrorClassifier()
@@ -202,7 +203,20 @@ def _create_batch_executor(
         memory_manager=memory_manager,
         batch_size=batch_size,
         checkpoint_interval=checkpoint_interval,
+        batch_id_factory=batch_id_factory,
     )
+
+
+class DeterministicBatchIdFactory:
+    """Deterministic factory for batch ID propagation tests."""
+
+    def __init__(self, batch_id: BatchID) -> None:
+        self._batch_id = batch_id
+        self.calls = 0
+
+    def create(self) -> BatchID:
+        self.calls += 1
+        return self._batch_id
 
 
 @pytest.fixture
@@ -481,6 +495,56 @@ class TestBatchExecutorProcessBatch:
         assert executor.records_silver == 1
         assert executor.records_quarantined == 1
         mock_services.quarantine.write.assert_called_once()
+
+    async def test_process_batch_uses_injected_batch_id_factory(
+        self,
+        mock_services,
+        mock_storage,
+        mock_context,
+        processor_config,
+        mock_checkpoint_manager,
+        shutdown_signal,
+        transform_callback,
+        gold_filter_callback,
+        gold_transform_callback,
+        mock_gold_validator,
+    ):
+        """Injected BatchIdFactory must deterministically propagate batch_id."""
+        fixed_batch_id = BatchID(UUID("12345678-1234-5678-1234-567812345678"))
+        batch_id_factory = DeterministicBatchIdFactory(fixed_batch_id)
+
+        executor = _create_batch_executor(
+            services=mock_services,
+            context=mock_context,
+            config=processor_config,
+            transform_callback=transform_callback,
+            gold_filter_callback=gold_filter_callback,
+            gold_transform_callback=gold_transform_callback,
+            gold_validator=mock_gold_validator,
+            checkpoint_manager=mock_checkpoint_manager,
+            shutdown_signal=shutdown_signal,
+            batch_size=10,
+            checkpoint_interval=5,
+            batch_id_factory=batch_id_factory,
+        )
+
+        async def mock_fetch(**kwargs):
+            yield {"id": "1", "value": 10}
+
+        mock_services.data_source.fetch = mock_fetch
+
+        await executor.execute(limit=None)
+
+        assert batch_id_factory.calls == 1
+        assert mock_storage.write_bronze.call_args.kwargs["batch_id"] == fixed_batch_id
+        silver_records = mock_storage.write_silver.call_args.kwargs["records"]
+        assert silver_records
+        assert all(
+            rec.get("_source_batch_id") == str(fixed_batch_id) for rec in silver_records
+        )
+        assert executor.get_run_statistics()["source_batch_ids"] == [
+            str(fixed_batch_id)
+        ]
 
 
 @pytest.fixture

@@ -44,6 +44,12 @@ class TestUnifiedLogger:
         # Without stage should not raise, stage defaults to "init"
         logger.info("Test message")
 
+    def test_unified_logger_info_ignores_event_kwarg_conflict(self) -> None:
+        """Test that kwargs['event'] does not conflict with structlog signature."""
+        logger = UnifiedLogger(pipeline="test", run_id="abc-123")
+
+        logger.info("pipeline_started", event="pipeline_started", stage="extract")
+
     def test_unified_logger_error_with_stage_and_error_type(self) -> None:
         """Test that error() works with stage and error_type."""
         logger = UnifiedLogger(pipeline="test", run_id="abc-123")

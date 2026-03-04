@@ -714,7 +714,7 @@ class TestObserverContractSchema:
         assert context["provider"] == "legacy_provider"
         assert context["pipeline"] == "legacy_pipeline"
         assert context["run_id"] == "legacy-run-id"
-        assert context["event"] == "contract_event"
+        assert logger_mock.info.call_args[0][0] == "contract_event"
         # Dual-write aliases stay present during migration period.
         assert context["provider_name"] == "legacy_provider"
         assert context["pipeline_name"] == "legacy_pipeline"
