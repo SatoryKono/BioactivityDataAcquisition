@@ -211,6 +211,11 @@ class CircuitBreaker:
     ) -> T:
         """Execute function with circuit breaker protection.
 
+        Uses a single lock acquisition for the state check to avoid
+        the overhead of 3 separate lock round-trips per call. The
+        function itself executes outside the lock, and state updates
+        use a second acquisition only on completion.
+
         Args:
             func: Async function to call
             *args: Positional arguments for func
@@ -231,13 +236,14 @@ class CircuitBreaker:
 
         try:
             result = await func(*args, **kwargs)
-            async with self._lock:
-                self._on_success()
-            return result
         except CALL_OPERATION_ERRORS:
             async with self._lock:
                 self._on_failure()
             raise
+        else:
+            async with self._lock:
+                self._on_success()
+            return result
 
     def reset(self) -> None:
         """Manually reset circuit breaker to CLOSED state."""
