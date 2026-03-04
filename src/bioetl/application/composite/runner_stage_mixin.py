@@ -43,8 +43,8 @@ if TYPE_CHECKING:
 __all__ = ["CompositeRunnerStageHelper"]
 
 
-class CompositeRunnerStageHelper:
-    """Mixin with seed/dependencies/enrichment stage orchestration."""
+class _CompositeRunnerStageSupportMixin:
+    """Shared helper calls and small guards for stage orchestration."""
 
     _config: CompositeConfig
     _runtime: CompositeRuntimeConfig
@@ -120,6 +120,10 @@ class CompositeRunnerStageHelper:
             if dep_cfg and dep_cfg.required:
                 failed.append(name)
         return failed
+
+
+class CompositeRunnerStageHelper(_CompositeRunnerStageSupportMixin):
+    """Mixin with seed/dependencies/enrichment stage orchestration."""
 
     async def _execute_seed_phase(
         self,

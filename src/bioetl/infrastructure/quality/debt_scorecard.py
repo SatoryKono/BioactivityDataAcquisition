@@ -452,6 +452,31 @@ def _validate_allowances(
         )
 
 
+def _validate_grace_window_metadata(
+    *,
+    prefix: str,
+    window: dict[str, Any],  # Any: YAML values are heterogeneous
+    errors: list[str],
+) -> None:
+    rf_id = window.get("rf_id")
+    approved = window.get("approved")
+    starts_on = _parse_iso_date(window.get("starts_on"))
+    ends_on = _parse_iso_date(window.get("ends_on"))
+
+    if not isinstance(rf_id, str) or not rf_id.strip():
+        errors.append(f"{prefix}.rf_id: required non-empty string")
+    if not isinstance(approved, bool):
+        errors.append(f"{prefix}.approved: expected bool")
+    if approved and isinstance(rf_id, str) and not rf_id.startswith("RF-"):
+        errors.append(f"{prefix}.rf_id: approved grace window must reference RF-*")
+    if starts_on is None:
+        errors.append(f"{prefix}.starts_on: expected ISO date")
+    if ends_on is None:
+        errors.append(f"{prefix}.ends_on: expected ISO date")
+    if starts_on is not None and ends_on is not None and ends_on < starts_on:
+        errors.append(f"{prefix}: ends_on must be >= starts_on")
+
+
 def _validate_grace_windows_section(
     raw: dict[str, Any],  # Any: YAML values are heterogeneous
     *,
@@ -472,24 +497,7 @@ def _validate_grace_windows_section(
             errors.append(f"{prefix}: expected mapping")
             continue
 
-        rf_id = window.get("rf_id")
-        approved = window.get("approved")
-        starts_on = _parse_iso_date(window.get("starts_on"))
-        ends_on = _parse_iso_date(window.get("ends_on"))
-
-        if not isinstance(rf_id, str) or not rf_id.strip():
-            errors.append(f"{prefix}.rf_id: required non-empty string")
-        if not isinstance(approved, bool):
-            errors.append(f"{prefix}.approved: expected bool")
-        if approved and isinstance(rf_id, str) and not rf_id.startswith("RF-"):
-            errors.append(f"{prefix}.rf_id: approved grace window must reference RF-*")
-        if starts_on is None:
-            errors.append(f"{prefix}.starts_on: expected ISO date")
-        if ends_on is None:
-            errors.append(f"{prefix}.ends_on: expected ISO date")
-        if starts_on is not None and ends_on is not None and ends_on < starts_on:
-            errors.append(f"{prefix}: ends_on must be >= starts_on")
-
+        _validate_grace_window_metadata(prefix=prefix, window=window, errors=errors)
         _validate_allowances(
             allowances=window.get("allowances", {}),
             prefix=prefix,
