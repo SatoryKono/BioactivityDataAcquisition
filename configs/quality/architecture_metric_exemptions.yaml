@@ -395,14 +395,6 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Extract score computation and rendering helpers to reduce module
         size and remove this exemption entry.
-    src/bioetl/infrastructure/quality/debt_scorecard_validation.py:
-      value: 980
-      owner: '@bioetl-architecture'
-      reason: Quality governance validator accumulated multiple policy checks into
-        one module.
-      expires_on: '2026-04-30'
-      removal_step: Split debt scorecard validation rules into focused helper modules
-        and remove this exemption entry.
     src/bioetl/infrastructure/schemas/pipeline_config.py:
       value: 655
       owner: '@bioetl-architecture'
