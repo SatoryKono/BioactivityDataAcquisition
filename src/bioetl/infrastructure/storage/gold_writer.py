@@ -136,18 +136,15 @@ class GoldWriter(
         """Write validated records to Gold layer."""
         tracer = self._tracing.get_tracer(__name__)
         with tracer.start_as_current_span("write_gold") as span:
-            span.set_attribute("table_name", table_name)
-            span.set_attribute("mode", mode)
-            span.set_attribute("record_count", len(records))
-
-            validated_mode = self._validate_write_mode(mode)
-            self._validate_records(records)
-            self._validate_scd2_requirements(validated_mode, scd_config, ingestion_ts)
-            self._validate_schema_strict(schema)
-            await self._validate_records_against_schema(records, schema)
-
-            table_path = self._resolve_table_path(table_name)
-
+            self._set_write_span_attributes(span, table_name, mode, len(records))
+            validated_mode, table_path = await self._prepare_write_gold(
+                table_name=table_name,
+                records=records,
+                mode=mode,
+                schema=schema,
+                scd_config=scd_config,
+                ingestion_ts=ingestion_ts,
+            )
             await self._dispatch_write(
                 validated_mode,
                 table_path,
@@ -160,24 +157,79 @@ class GoldWriter(
                 ingestion_ts,
                 column_order,
             )
-
-            if self._audit:
-                await self._log_gold_audit(
-                    table_name=table_name,
-                    records=records,
-                    mode=validated_mode,
-                    ingestion_ts=ingestion_ts,
-                    run_id=run_id,
-                )
-
-            await self._write_gold_metadata(
+            await self._post_write_gold(
                 table_path=table_path,
                 table_name=table_name,
                 records=records,
-                mode=validated_mode,
-                scd_config=scd_config,
+                validated_mode=validated_mode,
                 ingestion_ts=ingestion_ts,
                 run_id=run_id,
+                scd_config=scd_config,
                 silver_refs=silver_refs,
-                gold_schema=schema,
+                schema=schema,
             )
+
+    async def _prepare_write_gold(
+        self,
+        *,
+        table_name: str,
+        records: list[GoldRecord],
+        mode: str,
+        schema: DataFrameSchema,
+        scd_config: ScdConfig | None,
+        ingestion_ts: datetime | None,
+    ) -> tuple[GoldWriteMode, str]:
+        """Run validation steps and resolve target path."""
+        validated_mode = self._validate_write_mode(mode)
+        self._validate_records(records)
+        self._validate_scd2_requirements(validated_mode, scd_config, ingestion_ts)
+        self._validate_schema_strict(schema)
+        await self._validate_records_against_schema(records, schema)
+        return validated_mode, self._resolve_table_path(table_name)
+
+    async def _post_write_gold(
+        self,
+        *,
+        table_path: str,
+        table_name: str,
+        records: list[GoldRecord],
+        validated_mode: GoldWriteMode,
+        ingestion_ts: datetime | None,
+        run_id: RunID | None,
+        scd_config: ScdConfig | None,
+        silver_refs: list[Any] | None,  # Any: SilverRef heterogeneous
+        schema: DataFrameSchema,
+    ) -> None:
+        """Emit audit and metadata after successful Gold write."""
+        if self._audit:
+            await self._log_gold_audit(
+                table_name=table_name,
+                records=records,
+                mode=validated_mode,
+                ingestion_ts=ingestion_ts,
+                run_id=run_id,
+            )
+
+        await self._write_gold_metadata(
+            table_path=table_path,
+            table_name=table_name,
+            records=records,
+            mode=validated_mode,
+            scd_config=scd_config,
+            ingestion_ts=ingestion_ts,
+            run_id=run_id,
+            silver_refs=silver_refs,
+            gold_schema=schema,
+        )
+
+    @staticmethod
+    def _set_write_span_attributes(
+        span: Any,  # Any: tracing SDK span protocol is runtime-provided
+        table_name: str,
+        mode: str,
+        record_count: int,
+    ) -> None:
+        """Set standard tracing attributes for write_gold span."""
+        span.set_attribute("table_name", table_name)
+        span.set_attribute("mode", mode)
+        span.set_attribute("record_count", record_count)

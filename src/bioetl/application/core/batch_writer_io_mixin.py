@@ -1,0 +1,176 @@
+# mypy: disable-error-code=attr-defined
+"""Write-path methods for BatchWriter (bronze/silver/gold)."""
+
+from __future__ import annotations
+
+from datetime import datetime
+from typing import TYPE_CHECKING
+
+import orjson
+
+from bioetl.domain.exceptions import BioETLError, SchemaViolationError
+
+if TYPE_CHECKING:
+    from bioetl.domain.types import BatchID, BronzeRecord, GoldRecord
+    from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+    from bioetl.domain.value_objects.silver_result import SilverWriteResult
+
+
+_WRITE_SPAN_ERRORS = (
+    BioETLError,
+    OSError,
+    RuntimeError,
+    ValueError,
+    TypeError,
+)
+
+
+class BatchWriterIOMixin:
+    """Layer write orchestration extracted from BatchWriter."""
+
+    async def write_bronze(
+        self,
+        records: list[BronzeRecord],
+        batch_id: BatchID,
+        ingestion_ts: datetime,
+        source_metadata: object | None = None,
+    ) -> BronzeWriteResult:
+        """Write deterministic JSONL batch to Bronze."""
+        await self._validate_lock("write_bronze")
+        span = self._start_span("write_bronze", "bronze", len(records), batch_id)
+
+        try:
+            json_bytes_list = [
+                orjson.dumps(r, option=orjson.OPT_SORT_KEYS) for r in records
+            ]
+            json_bytes_list.sort()
+            record_bytes = (b + b"\n" for b in json_bytes_list)
+
+            bronze_result = await self._storage.write_bronze(
+                records=record_bytes,
+                provider=self._provider,
+                entity=self._entity_type,
+                date=ingestion_ts,
+                batch_id=batch_id,
+                run_id=self._context.run_id,
+                run_type=self._context.run_type,
+                ingestion_ts=ingestion_ts,
+                source_metadata=source_metadata,
+            )
+            self._end_span(span)
+            return bronze_result  # type: ignore[no-any-return]
+        except _WRITE_SPAN_ERRORS as error:
+            self._end_span(span, error)
+            raise
+
+    async def write_silver(
+        self,
+        records: list[GoldRecord],
+        batch_id: BatchID,
+        ingestion_ts: datetime,
+        bronze_refs: list[BronzeWriteResult] | None = None,
+    ) -> SilverWriteResult | None:
+        """Write transformed records to Silver with metadata enrichment."""
+        del ingestion_ts
+        await self._validate_lock("write_silver")
+        span = self._start_span("write_silver", "silver", len(records), batch_id)
+
+        try:
+            batch_id_str = str(batch_id)
+            for record in records:
+                record["_source_batch_id"] = batch_id_str
+
+            available_cols = (
+                list(self._silver_schema.names)
+                if self._silver_schema is not None
+                else self._collect_record_columns(records)
+            )
+            column_order, rename_map = self._resolve_layer_columns(
+                "silver", available_cols
+            )
+            if rename_map:
+                records = self._apply_renames_to_records(records, rename_map)
+
+            silver_result = await self._storage.write_silver(
+                table_name=self._silver_table_name,
+                records=records,
+                primary_keys=list(self._table_config.primary_keys),
+                schema=self._silver_schema,
+                mode=self._silver_mode,
+                partition_cols=list(self._table_config.partition_cols),
+                on_schema_mismatch=self._table_config.on_schema_mismatch,
+                column_order=column_order,
+                bronze_refs=bronze_refs,
+                key_nullability_rules=(
+                    list(self._config.dq_config.key_nullability_rules)
+                    if self._config.dq_config is not None
+                    else None
+                ),
+            )
+            self._end_span(span)
+            return silver_result  # type: ignore[no-any-return]
+        except _WRITE_SPAN_ERRORS as error:
+            self._end_span(span, error)
+            raise
+
+    async def write_gold(
+        self,
+        records: list[GoldRecord],
+        silver_refs: list[SilverWriteResult] | None = None,
+    ) -> None:
+        """Write validated records to Gold."""
+        await self._validate_lock("write_gold")
+        span = self._start_span("write_gold", "gold", len(records))
+
+        try:
+            records, available_cols = self._prepare_gold_records(records)
+            self._validate_gold_records(records)
+
+            column_order, rename_map = self._resolve_layer_columns(
+                "gold", available_cols
+            )
+            if rename_map:
+                records = self._apply_renames_to_records(records, rename_map)
+
+            await self._storage.write_gold(
+                table_name=self._gold_table_name,
+                records=records,
+                schema=self._gold_schema,
+                primary_keys=list(self._table_config.primary_keys),
+                mode=self._gold_mode,
+                scd_config=self._config.scd_config,
+                column_order=column_order,
+                ingestion_ts=self._context.started_at,
+                run_id=self._context.run_id,
+                silver_refs=silver_refs,
+            )
+            self._end_span(span)
+        except _WRITE_SPAN_ERRORS as error:
+            self._end_span(span, error)
+            raise
+
+    def _prepare_gold_records(
+        self,
+        records: list[GoldRecord],
+    ) -> tuple[list[GoldRecord], list[str]]:
+        """Project records to schema and compute available columns."""
+        schema_columns = self._get_schema_columns(self._gold_schema)
+        if not schema_columns:
+            return records, self._collect_record_columns(records)
+
+        dq_defaults = {"_dq_warn": False, "_dq_error": False}
+        projected = [
+            {
+                key: record.get(key, dq_defaults.get(key))
+                for key in schema_columns
+                if key in record or key in dq_defaults
+            }
+            for record in records
+        ]
+        return projected, list(schema_columns)
+
+    def _validate_gold_records(self, records: list[GoldRecord]) -> None:
+        """Validate Gold records against schema contract."""
+        result = self._gold_validator.validate(records)
+        if not result.valid:
+            raise SchemaViolationError("gold", result.errors)

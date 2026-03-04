@@ -222,20 +222,26 @@ def test_get_flat_structure_true_when_gold_enabled() -> None:
 @pytest.mark.unit
 @patch("bioetl.application.services.dq_report_service.DQReportService")
 @patch(
-    "bioetl.composition.factories.services_factory.DQServicesFactory.create_report_writer"
+    "bioetl.composition.factories.dq_context_resolver.DQServicesFactory.create_report_writer"
 )
 @patch(
-    "bioetl.composition.factories.services_factory.DQServicesFactory.create_gold_analyzer"
+    "bioetl.composition.factories.dq_context_resolver.DQServicesFactory.create_gold_analyzer"
 )
 @patch(
-    "bioetl.composition.factories.services_factory.DQServicesFactory.create_silver_analyzer"
+    "bioetl.composition.factories.dq_context_resolver.DQServicesFactory.create_silver_analyzer"
 )
 @patch(
-    "bioetl.composition.factories.services_factory.DQServicesFactory.create_bronze_analyzer"
+    "bioetl.composition.factories.dq_context_resolver.DQServicesFactory.create_bronze_analyzer"
 )
-@patch.object(BaseServicesFactory, "_get_flat_structure", return_value=True)
-@patch.object(BaseServicesFactory, "_get_output_root")
-@patch.object(BaseServicesFactory, "_is_dq_report_enabled", return_value=True)
+@patch(
+    "bioetl.composition.factories.dq_context_resolver.get_flat_structure",
+    return_value=True,
+)
+@patch("bioetl.composition.factories.dq_context_resolver.get_output_root")
+@patch(
+    "bioetl.composition.factories.dq_context_resolver.is_dq_report_enabled",
+    return_value=True,
+)
 def test_create_dq_services_builds_enabled_stack(
     _mock_enabled: MagicMock,
     mock_output_root: MagicMock,
@@ -271,10 +277,10 @@ def test_create_dq_services_builds_enabled_stack(
 
 
 @pytest.mark.unit
-@patch("bioetl.composition.factories.services_factory.RecordProcessor")
-@patch("bioetl.composition.factories.services_factory.PanderaGoldValidator")
-@patch("bioetl.composition.factories.services_factory.RecordProcessorConfig")
-@patch("bioetl.composition.factories.services_factory.TableConfig")
+@patch("bioetl.composition.factories.services_builder.RecordProcessor")
+@patch("bioetl.composition.factories.services_builder.PanderaGoldValidator")
+@patch("bioetl.composition.factories.services_builder.RecordProcessorConfig")
+@patch("bioetl.composition.factories.services_builder.TableConfig")
 def test_create_record_processor_builds_dependencies(
     mock_table_config: MagicMock,
     mock_processor_config: MagicMock,
@@ -341,7 +347,7 @@ def test_create_record_processor_from_pipeline_delegates() -> None:
 
     with (
         patch(
-            "bioetl.composition.factories.services_factory.extract_pipeline_callbacks"
+            "bioetl.composition.factories.services_builder.extract_pipeline_callbacks"
         ) as mock_extract,
         patch.object(ServicesBuilder, "create_record_processor") as mock_create,
     ):

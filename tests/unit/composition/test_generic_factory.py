@@ -124,8 +124,8 @@ class TestGenericPipelineFactory:
         )
         assert result is mock_data_source
 
-    @patch("bioetl.composition.factories.pipeline_factory.load_pipeline_config")
-    @patch("bioetl.composition.factories.pipeline_factory.BaseServicesFactory")
+    @patch("bioetl.composition.factories.service_bundle_factory.load_pipeline_config")
+    @patch("bioetl.composition.factories.service_bundle_factory.BaseServicesFactory")
     def test_build_services(
         self,
         mock_services_factory,

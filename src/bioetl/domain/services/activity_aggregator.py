@@ -81,6 +81,26 @@ def _median_absolute_deviation(values: Sequence[float]) -> float:
     return statistics.median(deviations)
 
 
+def _is_in_range(
+    value: float,
+    min_value: float | None,
+    max_value: float | None,
+) -> bool:
+    """Check if value is within the specified range (inclusive)."""
+    if min_value is not None and value < min_value:
+        return False
+    return not (max_value is not None and value > max_value)
+
+
+def _filter_values_by_range(
+    values: Sequence[float],
+    min_value: float | None,
+    max_value: float | None,
+) -> list[float]:
+    """Filter values to those within the specified range."""
+    return [v for v in values if _is_in_range(v, min_value, max_value)]
+
+
 @dataclass(slots=True)
 class ActivityAggregator:
     """Service for aggregating multiple activity measurements.
@@ -364,29 +384,9 @@ class ActivityAggregator:
             >>> aggregator.filter_and_aggregate(values, min_value=50.0, max_value=500.0)
             150.0
         """
-        filtered = self._filter_by_range(values, min_value, max_value)
+        filtered = _filter_values_by_range(values, min_value, max_value)
 
         if not filtered:
             return None
 
         return self.aggregate_values(filtered, method)
-
-    def _filter_by_range(
-        self,
-        values: Sequence[float],
-        min_value: float | None,
-        max_value: float | None,
-    ) -> list[float]:
-        """Filter values to those within the specified range."""
-        return [v for v in values if self._is_in_range(v, min_value, max_value)]
-
-    def _is_in_range(
-        self,
-        value: float,
-        min_value: float | None,
-        max_value: float | None,
-    ) -> bool:
-        """Check if value is within the specified range (inclusive)."""
-        if min_value is not None and value < min_value:
-            return False
-        return not (max_value is not None and value > max_value)

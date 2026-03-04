@@ -124,6 +124,46 @@ def _ensure_registrations() -> None:
     register_all_pipelines()
 
 
+def _build_input_filter_context(options: RunOptions) -> InputFilterContext:
+    """Build input filter context from CLI options."""
+    if options.multi_filter_ids:
+        return InputFilterContext.from_multi_ids(
+            multi_filter_ids=options.multi_filter_ids,
+        )
+    if options.filter_ids:
+        return InputFilterContext.from_ids(
+            filter_ids=options.filter_ids,
+            filter_field=options.filter_field or "doi",
+            fallback_mapping=options.fallback_mapping,
+        )
+    if options.input_csv:
+        return InputFilterContext(
+            enabled=True,
+            source_path=options.input_csv,
+            column_name=options.filter_column or "",
+            filter_field=options.filter_field or "",
+        )
+    return InputFilterContext.disabled()
+
+
+def _build_vacuum_config(options: RunOptions) -> VacuumConfig:
+    """Build vacuum config from CLI overrides (preserving tri-state)."""
+    return VacuumConfig(
+        enabled=options.vacuum_after_run,
+        retention_days=options.vacuum_retention_days or 7,
+    )
+
+
+def _build_cached_bronze_context(options: RunOptions) -> CachedBronzeContext:
+    """Build cached bronze context from CLI options."""
+    if options.use_cached_bronze:
+        return CachedBronzeContext.from_options(
+            path=options.cached_bronze_path,
+            date=options.cached_bronze_date,
+        )
+    return CachedBronzeContext.disabled()
+
+
 def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext:
     """Build a PipelineRunContext from user-facing options.
 
@@ -134,56 +174,6 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
     Returns:
         PipelineRunContext ready for bootstrap_pipeline_runner.
     """
-    # Build InputFilterContext from CLI options
-    # Priority: multi_filter_ids > filter_ids > input_csv > disabled
-    # - multi_filter_ids: Multi-field AND filtering (composite dependencies)
-    # - filter_ids: Direct IDs for composite mode (no CSV file needed)
-    # - input_csv: CSV file path, column_name/filter_field from YAML defaults
-    if options.multi_filter_ids:
-        # Multi-field filtering mode (composite dependencies with AND logic)
-        input_filter = InputFilterContext.from_multi_ids(
-            multi_filter_ids=options.multi_filter_ids,
-        )
-    elif options.filter_ids:
-        # Direct IDs mode (composite pipelines)
-        input_filter = InputFilterContext.from_ids(
-            filter_ids=options.filter_ids,
-            filter_field=options.filter_field
-            or "doi",  # Default to DOI for publications
-            fallback_mapping=options.fallback_mapping,  # Title fallback for OpenAlex etc.
-        )
-    elif options.input_csv:
-        # CSV-based filtering
-        input_filter = InputFilterContext(
-            enabled=True,
-            source_path=options.input_csv,
-            column_name=options.filter_column or "",
-            filter_field=options.filter_field or "",
-        )
-    else:
-        input_filter = InputFilterContext.disabled()
-
-    # Build VacuumConfig from CLI options (None means use YAML default)
-    # Note: VacuumConfig here only captures CLI overrides.
-    # The final merge with YAML config happens in bootstrap_pipeline_runner.
-    # Tri-state logic:
-    #   - None: No CLI override, use YAML default
-    #   - True: CLI explicitly enables vacuum (--vacuum)
-    #   - False: CLI explicitly disables vacuum (--no-vacuum)
-    vacuum = VacuumConfig(
-        enabled=options.vacuum_after_run,  # Preserve None for tri-state
-        retention_days=options.vacuum_retention_days or 7,
-    )
-
-    # Build CachedBronzeContext from CLI options
-    if options.use_cached_bronze:
-        cached_bronze = CachedBronzeContext.from_options(
-            path=options.cached_bronze_path,
-            date=options.cached_bronze_date,
-        )
-    else:
-        cached_bronze = CachedBronzeContext.disabled()
-
     return PipelineRunContext(
         pipeline_name=name,
         run_id=cast(RunID, uuid4()),
@@ -191,12 +181,12 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
         resume=options.resume,
         limit=options.limit,
         dry_run=options.dry_run,
-        input_filter=input_filter,
-        vacuum=vacuum,
+        input_filter=_build_input_filter_context(options),
+        vacuum=_build_vacuum_config(options),
         log_level=options.log_level,
         ignore_yaml_filter=options.ignore_yaml_filter,
         skip_gold=options.skip_gold,
-        cached_bronze=cached_bronze,
+        cached_bronze=_build_cached_bronze_context(options),
         execution_context=ExecutionContext(options.execution_context),
     )
 

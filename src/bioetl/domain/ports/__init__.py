@@ -36,6 +36,16 @@ from bioetl.domain.ports.audit import (
 from bioetl.domain.ports.batch_id import BatchIdGeneratorPort
 from bioetl.domain.ports.checkpoint import CheckpointPort
 from bioetl.domain.ports.clock import ClockPort
+from bioetl.domain.ports.config_loader_port import (
+    DomainConfigMapperPort,
+    PipelineConfigLoaderPort,
+    SettingsLoaderPort,
+)
+from bioetl.domain.ports.config_port import (
+    PipelineSettingsPort,
+    PipelineYamlConfigPort,
+    SettingsPort,
+)
 from bioetl.domain.ports.contract_policy import ContractPolicyPort
 from bioetl.domain.ports.data_normalization import DataNormalizationPort
 from bioetl.domain.ports.data_source import (
@@ -90,6 +100,10 @@ from bioetl.domain.ports.observability import (
 )
 from bioetl.domain.ports.pii import PiiHasherPort
 from bioetl.domain.ports.quarantine import QuarantinePort
+from bioetl.domain.ports.registry_port import (
+    PipelineRegistryPort,
+    RegistryAccessorPort,
+)
 from bioetl.domain.ports.resilience import CircuitBreakerPort, RateLimiterPort
 from bioetl.domain.ports.runner import (
     MetricsExtractorPort,
@@ -121,6 +135,7 @@ __all__ = [
     "ContractPolicyPort",
     "DQMonitorPort",
     "DQReportWriterPort",
+    "DomainConfigMapperPort",
     "DataNormalizationPort",
     "DataSourcePort",
     "DeltaReaderPort",
@@ -154,10 +169,17 @@ __all__ = [
     "NoOpPiiHasher",
     "NoOpTracing",
     "PiiHasherPort",
+    "PipelineConfigLoaderPort",
+    "PipelineRegistryPort",
+    "PipelineSettingsPort",
+    "PipelineYamlConfigPort",
     "QuarantinePort",
     "RateLimiterPort",
+    "RegistryAccessorPort",
     "RunnablePort",
     "RunnerFactoryPort",
+    "SettingsLoaderPort",
+    "SettingsPort",
     "ShutdownPort",
     "SilverDQAnalyzerPort",
     "SilverDQConfigPort",

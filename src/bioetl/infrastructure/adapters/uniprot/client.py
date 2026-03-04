@@ -15,6 +15,7 @@ from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.common import FallbackFetchOrchestratorService
 from bioetl.infrastructure.adapters.error_handling import ErrorService
 from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
+from bioetl.infrastructure.adapters.uniprot.constants import UNIPROT_API_BASE
 from bioetl.infrastructure.adapters.uniprot.feature_sequence_adapter_mixin import (
     UniProtFeatureSequenceAdapterMixin,
 )
@@ -70,7 +71,7 @@ class UniProtAdapter(
         http_client: UnifiedHTTPClient,
         logger: LoggerPort,
         api_key: str | None = None,
-        base_url: str = "https://rest.uniprot.org",
+        base_url: str = UNIPROT_API_BASE,
         strict_error_handling: bool = False,
         metrics: MetricsPort | None = None,
     ) -> None:
@@ -158,7 +159,7 @@ def _create_uniprot_adapter(
         http_client=http_client,
         logger=logger,
         api_key=kwargs.get("api_key"),
-        base_url=kwargs.get("base_url", "https://rest.uniprot.org"),
+        base_url=kwargs.get("base_url", UNIPROT_API_BASE),
         strict_error_handling=kwargs.get("strict_error_handling", False),
         metrics=kwargs.get("metrics"),
     )

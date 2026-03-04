@@ -45,6 +45,42 @@ PCHEMBL_TYPICAL_MIN = 2.0  # 10 mM - weak binding
 PCHEMBL_TYPICAL_MAX = 12.0  # 1 pM - very strong binding
 
 
+def _normalize_unit_name(unit: str) -> str:
+    """Normalize unit string for lookup."""
+    normalized = unit.strip()
+    unit_aliases = {
+        "um": "µM",
+        "uM": "µM",
+        "micromolar": "µM",
+        "nm": "nM",
+        "nanomolar": "nM",
+        "pm": "pM",
+        "picomolar": "pM",
+        "fm": "fM",
+        "femtomolar": "fM",
+        "mm": "mM",
+        "millimolar": "mM",
+        "m": "M",
+        "molar": "M",
+    }
+    return unit_aliases.get(normalized.lower(), normalized)
+
+
+def _is_percent_inhibition_type(parsed_type: ActivityType | str) -> bool:
+    """Check if activity type is percent inhibition."""
+    return (
+        isinstance(parsed_type, ActivityType)
+        and parsed_type == ActivityType.PERCENT_INHIBITION
+    )
+
+
+def _validate_percent_value(value: float) -> tuple[bool, str | None]:
+    """Validate percentage value is within 0-100 range."""
+    if value < 0 or value > 100:
+        return False, f"Percent inhibition must be 0-100, got {value}"
+    return True, None
+
+
 @dataclass(slots=True)
 class ValueValidator:
     """Service for validating bioactivity measurement values.
@@ -117,7 +153,7 @@ class ValueValidator:
         unit: str,
     ) -> tuple[bool, str | None]:
         """Check if concentration is within valid range for unit."""
-        normalized_unit = self._normalize_unit(unit)
+        normalized_unit = _normalize_unit_name(unit)
         if normalized_unit not in self._concentration_ranges:
             return False, f"Unknown concentration unit: {unit}"
 
@@ -255,21 +291,8 @@ class ValueValidator:
     ) -> tuple[bool, str | None]:
         """Validate value based on specific activity type."""
         # For percentage values (e.g., % Inhibition)
-        if self._is_percent_inhibition_type(parsed_type):
-            return self._validate_percent_value(value)
-        return True, None
-
-    def _is_percent_inhibition_type(self, parsed_type: ActivityType | str) -> bool:
-        """Check if activity type is percent inhibition."""
-        return (
-            isinstance(parsed_type, ActivityType)
-            and parsed_type == ActivityType.PERCENT_INHIBITION
-        )
-
-    def _validate_percent_value(self, value: float) -> tuple[bool, str | None]:
-        """Validate percentage value is within 0-100 range."""
-        if value < 0 or value > 100:
-            return False, f"Percent inhibition must be 0-100, got {value}"
+        if _is_percent_inhibition_type(parsed_type):
+            return _validate_percent_value(value)
         return True, None
 
     def is_potent(
@@ -304,36 +327,6 @@ class ValueValidator:
         """
         return pchembl_value >= threshold
 
-    def _normalize_unit(self, unit: str) -> str:
-        """Normalize unit string for lookup.
-
-        Args:
-            unit: Raw unit string.
-
-        Returns:
-            Normalized unit string.
-        """
-        normalized = unit.strip()
-
-        # Handle common aliases
-        unit_aliases = {
-            "um": "µM",
-            "uM": "µM",
-            "micromolar": "µM",
-            "nm": "nM",
-            "nanomolar": "nM",
-            "pm": "pM",
-            "picomolar": "pM",
-            "fm": "fM",
-            "femtomolar": "fM",
-            "mm": "mM",
-            "millimolar": "mM",
-            "m": "M",
-            "molar": "M",
-        }
-
-        return unit_aliases.get(normalized.lower(), normalized)
-
     def set_concentration_range(
         self,
         unit: str,
@@ -353,5 +346,5 @@ class ValueValidator:
         if min_value >= max_value:
             raise ValueError("min_value must be less than max_value")
 
-        normalized_unit = self._normalize_unit(unit)
+        normalized_unit = _normalize_unit_name(unit)
         self._concentration_ranges[normalized_unit] = (min_value, max_value)

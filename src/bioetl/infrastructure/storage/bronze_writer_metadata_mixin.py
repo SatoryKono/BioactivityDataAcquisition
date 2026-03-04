@@ -49,13 +49,45 @@ class BronzeWriterMetadataMixin:
         source_metadata: SourceMetadata | None = None,
     ) -> BronzeMetadata:
         """Build rich BronzeMetadata for sidecar file."""
+        from bioetl.domain.models.metadata import BronzeMetadata
+
+        payload = self._build_bronze_metadata_payload(
+            run_id=run_id,
+            run_type=run_type,
+            provider=provider,
+            entity=entity,
+            record_count=record_count,
+            compressed_size=compressed_size,
+            output_path=output_path,
+            started_at=started_at,
+            completed_at=completed_at,
+            duration_seconds=duration_seconds,
+            source_metadata=source_metadata,
+        )
+        return BronzeMetadata(**payload)
+
+    def _build_bronze_metadata_payload(
+        self,
+        *,
+        run_id: RunID,
+        run_type: RunType,
+        provider: str,
+        entity: str,
+        record_count: int,
+        compressed_size: int,
+        output_path: str,
+        started_at: datetime,
+        completed_at: datetime,
+        duration_seconds: float,
+        source_metadata: SourceMetadata | None,
+    ) -> dict[str, Any]:  # Any: bronze metadata model fields are heterogeneous
+        """Build Bronze metadata constructor payload."""
         import platform
         import socket
 
         from bioetl import __version__
         from bioetl.domain.models.metadata import (
             BaseOutputMetadata,
-            BronzeMetadata,
             BronzeOutputExt,
             EnvironmentMetadata,
             FileOutputMetadata,
@@ -70,48 +102,45 @@ class BronzeWriterMetadataMixin:
             RunType.BACKFILL: RunTypeEnum.BACKFILL,
             RunType.REBUILD: RunTypeEnum.REBUILD,
         }
-
         resolved_source = (
             source_metadata
             if source_metadata is not None
             else SourceMetadataModel(type="api")
         )
-
         file_metadata = FileOutputMetadata(
             path=output_path,
             size_bytes=compressed_size,
             record_count=record_count,
         )
-
-        return BronzeMetadata(
-            runtime=RuntimeMetadata(
+        return {
+            "runtime": RuntimeMetadata(
                 run_id=str(run_id),
                 run_type=run_type_map.get(run_type, RunTypeEnum.INCREMENTAL),
                 started_at_utc=started_at,
                 completed_at_utc=completed_at,
                 duration_seconds=duration_seconds,
             ),
-            pipeline=PipelineMetadata(
+            "pipeline": PipelineMetadata(
                 name=f"{provider}_{entity}",
                 provider=provider,
                 entity=entity,
             ),
-            source=cast(Any, resolved_source),  # Any: type narrowing cast
-            output=BaseOutputMetadata(
+            "source": cast(Any, resolved_source),  # Any: type narrowing cast
+            "output": BaseOutputMetadata(
                 record_count=record_count,
                 total_bytes=compressed_size,
                 write_started_at=started_at,
                 write_completed_at=completed_at,
             ),
-            output_ext=BronzeOutputExt(
+            "output_ext": BronzeOutputExt(
                 files=[file_metadata],
             ),
-            environment=EnvironmentMetadata(
+            "environment": EnvironmentMetadata(
                 hostname=socket.gethostname(),
                 python_version=platform.python_version(),
                 bioetl_version=__version__,
             ),
-        )
+        }
 
 
 __all__ = ["BronzeWriterMetadataMixin"]

@@ -115,9 +115,9 @@ def test_create_cached_bronze_data_source_falls_back_to_convention_path(
 @pytest.mark.unit
 @patch.object(pipeline_factory.BaseServicesFactory, "create_common_services")
 @patch.object(pipeline_factory.BaseServicesFactory, "_create_metrics")
-@patch("bioetl.composition.factories.pipeline_factory._create_data_source")
+@patch("bioetl.composition.factories.service_bundle_factory._create_data_source")
 @patch(
-    "bioetl.composition.factories.pipeline_factory._create_cached_bronze_data_source"
+    "bioetl.composition.factories.service_bundle_factory._create_cached_bronze_data_source"
 )
 def test_build_pipeline_services_uses_cached_bronze_when_enabled(
     mock_cached_source: MagicMock,
@@ -157,9 +157,9 @@ def test_build_pipeline_services_uses_cached_bronze_when_enabled(
 @pytest.mark.unit
 @patch.object(pipeline_factory.BaseServicesFactory, "create_common_services")
 @patch.object(pipeline_factory.BaseServicesFactory, "_create_metrics")
-@patch("bioetl.composition.factories.pipeline_factory._create_data_source")
+@patch("bioetl.composition.factories.service_bundle_factory._create_data_source")
 @patch(
-    "bioetl.composition.factories.pipeline_factory._create_cached_bronze_data_source"
+    "bioetl.composition.factories.service_bundle_factory._create_cached_bronze_data_source"
 )
 def test_build_pipeline_services_uses_regular_data_source_when_cached_disabled(
     mock_cached_source: MagicMock,

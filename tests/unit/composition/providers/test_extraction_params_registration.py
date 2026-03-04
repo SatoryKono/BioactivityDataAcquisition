@@ -14,7 +14,7 @@ import pytest
 
 from bioetl.domain.filtering import FilterColumn, InputFilterConfig
 from bioetl.domain.models.filter import ExtractionParams
-from bioetl.composition.providers.registration import (
+from bioetl.composition.providers._config_helpers import (
     _validate_extraction_input_filter_overlap,
 )
 
@@ -181,10 +181,10 @@ class TestExtractionParamsPassedToAdapter:
     """Test that extraction_params reaches ChemblAdapter via DataSourceFactory."""
 
     @patch(
-        "bioetl.composition.providers.registration._get_factories",
+        "bioetl.composition.providers.registration_bio._get_factories",
     )
     @patch(
-        "bioetl.composition.providers.registration._get_adapter_config",
+        "bioetl.composition.providers.registration_bio._get_adapter_config",
     )
     def test_extraction_params_passed_to_adapter(
         self,
@@ -192,7 +192,7 @@ class TestExtractionParamsPassedToAdapter:
         mock_get_factories: MagicMock,
     ) -> None:
         """ExtractionParams from pipeline_config reaches DataSourceFactory.create."""
-        from bioetl.composition.providers.registration import (
+        from bioetl.composition.providers.registration_bio import (
             _create_chembl_data_source,
         )
 
@@ -230,10 +230,10 @@ class TestExtractionParamsPassedToAdapter:
         assert extraction_params.params["standard_units"] == "nM"
 
     @patch(
-        "bioetl.composition.providers.registration._get_factories",
+        "bioetl.composition.providers.registration_bio._get_factories",
     )
     @patch(
-        "bioetl.composition.providers.registration._get_adapter_config",
+        "bioetl.composition.providers.registration_bio._get_adapter_config",
     )
     def test_empty_extraction_params_when_not_configured(
         self,
@@ -241,7 +241,7 @@ class TestExtractionParamsPassedToAdapter:
         mock_get_factories: MagicMock,
     ) -> None:
         """Empty ExtractionParams when pipeline has no extraction_params."""
-        from bioetl.composition.providers.registration import (
+        from bioetl.composition.providers.registration_bio import (
             _create_chembl_data_source,
         )
 

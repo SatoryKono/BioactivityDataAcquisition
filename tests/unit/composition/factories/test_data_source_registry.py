@@ -150,7 +150,7 @@ class TestWrapWithFilter:
 
     def test_returns_original_when_no_filter(self):
         """Verify original data source returned when filter is None."""
-        from bioetl.composition.providers.registration import _wrap_with_filter
+        from bioetl.composition.providers._config_helpers import _wrap_with_filter
 
         mock_data_source = MagicMock()
 
@@ -160,7 +160,7 @@ class TestWrapWithFilter:
 
     def test_returns_original_when_filter_disabled(self):
         """Verify original data source returned when filter is disabled."""
-        from bioetl.composition.providers.registration import _wrap_with_filter
+        from bioetl.composition.providers._config_helpers import _wrap_with_filter
 
         mock_data_source = MagicMock()
         mock_filter = MagicMock()
@@ -173,7 +173,7 @@ class TestWrapWithFilter:
     def test_wraps_when_filter_enabled(self):
         """Verify FilteredDataSource is created when filter is enabled."""
         from bioetl.application.core.filtered_data_source import FilteredDataSource
-        from bioetl.composition.providers.registration import _wrap_with_filter
+        from bioetl.composition.providers._config_helpers import _wrap_with_filter
 
         mock_data_source = MagicMock()
         mock_filter = MagicMock()
@@ -189,7 +189,7 @@ class TestWrapWithFilter:
     def test_wraps_with_metrics(self):
         """Verify metrics are passed to FilteredDataSource."""
         from bioetl.application.core.filtered_data_source import FilteredDataSource
-        from bioetl.composition.providers.registration import _wrap_with_filter
+        from bioetl.composition.providers._config_helpers import _wrap_with_filter
 
         mock_data_source = MagicMock()
         mock_filter = MagicMock()

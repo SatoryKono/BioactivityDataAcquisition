@@ -8,11 +8,16 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
-from typing import Any, Literal, cast
+from typing import Literal, Protocol, cast
 
 import click
 
-from bioetl.application.services import ExportOptions
+from bioetl.application.services import (
+    ExportOptions,
+    ExportResult,
+    TableInfo,
+    TablePreview,
+)
 from bioetl.composition.entrypoints import get_export_service
 from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.execution_policy import (
@@ -36,6 +41,19 @@ __all__ = [
 ]
 
 ExportFormat = Literal["csv", "xlsx", "tsv"]
+
+
+class _ExportCommandService(Protocol):
+    async def preview(self, table_name: str, layer: str = "silver") -> TablePreview: ...
+
+    async def export(
+        self,
+        table_name: str,
+        layer: str = "silver",
+        options: ExportOptions | None = None,
+    ) -> ExportResult: ...
+
+    def list_tables(self, layer: str = "all") -> list[TableInfo]: ...
 
 
 def _handle_export_failure(
@@ -102,7 +120,7 @@ def _build_export_options(
 
 
 def _run_preview(
-    service: Any,  # Any: service can be sync mock or async export service in tests
+    service: _ExportCommandService,
     table: str,
     layer: str,
 ) -> None:
@@ -148,7 +166,7 @@ def _run_preview(
 
 
 def _run_export(
-    service: Any,  # Any: service can be sync mock or async export service in tests
+    service: _ExportCommandService,
     table: str,
     layer: str,
     options: ExportOptions,
@@ -191,6 +209,51 @@ def _run_export(
     finally:
         if getattr(coro, "cr_frame", None) is not None:
             coro.close()
+
+
+def _list_tables_or_exit(
+    service: _ExportCommandService,
+    *,
+    layer: str,
+) -> bool:
+    """Handle table listing mode.
+
+    Returns True when list mode is handled and command should return.
+    """
+    try:
+        tables = service.list_tables(layer=_resolve_list_layer(layer))
+    except BioETLError as exc:
+        _handle_export_failure(
+            exc,
+            reason_code="CLI_EXPORT_LIST_DOMAIN_ERROR",
+            table=f"<list:{layer}>",
+            domain_error_title="Export table listing failed with domain error",
+            unexpected_error_title="Unexpected error during export table listing",
+        )
+        return True
+    except KeyboardInterrupt as exc:
+        _handle_export_failure(
+            exc,
+            reason_code="CLI_EXPORT_LIST_SIGINT",
+            table=f"<list:{layer}>",
+            domain_error_title="Export table listing failed with domain error",
+            unexpected_error_title="Unexpected error during export table listing",
+        )
+        return True
+    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
+        _handle_export_failure(
+            exc,
+            reason_code="CLI_EXPORT_LIST_UNEXPECTED_ERROR",
+            table=f"<list:{layer}>",
+            domain_error_title="Export table listing failed with domain error",
+            unexpected_error_title="Unexpected error during export table listing",
+        )
+        return True
+    if not tables:
+        echo_info("No Delta tables found.")
+        return True
+    echo_table_list(tables)
+    return True
 
 
 @click.command("export")
@@ -247,91 +310,19 @@ def export_command(
     limit: int | None,
     columns: str | None,
 ) -> None:
-    """Export Delta Lake tables to CSV, XLSX, or TSV format.
+    """Export Delta Lake tables.
 
-    TABLE: Table name in format "provider.entity" (e.g., chembl.activity)
-
-    Examples:
-
-        # List all available tables
-        bioetl export --list
-
-        # List only Silver layer tables
-        bioetl export --list --layer silver
-
-        # Preview table schema and sample data
-        bioetl export chembl.activity --preview
-
-        # Export to CSV (default)
-        bioetl export chembl.activity
-
-        # Export to Excel format
-        bioetl export chembl.activity --format xlsx
-
-        # Export with row limit
-        bioetl export chembl.activity --limit 10000
-
-        # Export specific columns
-        bioetl export chembl.activity --columns id,name,value
-
-        # Export Gold layer
-        bioetl export chembl.activity --layer gold
-
-        # Export to custom directory
-        bioetl export chembl.activity -o ./my_exports
-
-    Args:
-        table: Table.
-        list_tables: Whether to list tables.
-        preview: Whether to preview.
-        output_format: Output format.
-        layer: Layer.
-        output: Path to output.
-        limit: Maximum number of records to process.
-        columns: List of column names.
+    `table` must use `provider.entity` format (for example `chembl.activity`).
+    Use `--list` to display available tables and `--preview` for schema/sample.
     """
     service = get_export_service()
 
-    # Handle --list flag
     if list_tables:
-        try:
-            tables = service.list_tables(layer=_resolve_list_layer(layer))
-        except BioETLError as exc:
-            _handle_export_failure(
-                exc,
-                reason_code="CLI_EXPORT_LIST_DOMAIN_ERROR",
-                table=f"<list:{layer}>",
-                domain_error_title="Export table listing failed with domain error",
-                unexpected_error_title="Unexpected error during export table listing",
-            )
-            return
-        except KeyboardInterrupt as exc:
-            _handle_export_failure(
-                exc,
-                reason_code="CLI_EXPORT_LIST_SIGINT",
-                table=f"<list:{layer}>",
-                domain_error_title="Export table listing failed with domain error",
-                unexpected_error_title="Unexpected error during export table listing",
-            )
-            return
-        except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
-            _handle_export_failure(
-                exc,
-                reason_code="CLI_EXPORT_LIST_UNEXPECTED_ERROR",
-                table=f"<list:{layer}>",
-                domain_error_title="Export table listing failed with domain error",
-                unexpected_error_title="Unexpected error during export table listing",
-            )
-            return
-        if not tables:
-            echo_info("No Delta tables found.")
-            return
-        echo_table_list(tables)
+        _list_tables_or_exit(service, layer=layer)
         return
 
     resolved_table = _require_table_argument(table)
 
-    # Handle --preview flag
     if preview:
         _run_preview(service=service, table=resolved_table, layer=layer)
         return

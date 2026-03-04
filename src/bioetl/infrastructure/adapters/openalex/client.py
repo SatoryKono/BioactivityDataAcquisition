@@ -20,8 +20,6 @@ from __future__ import annotations
 __all__ = ["OPENALEX_API_BASE", "OPENALEX_RUNTIME_ERRORS", "OpenAlexAdapter"]
 
 
-import contextlib
-import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
@@ -30,23 +28,23 @@ from httpx import HTTPStatusError, RequestError
 from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
-from bioetl.infrastructure.adapters.common import (
-    FallbackFetchOrchestratorService,
-    FallbackFetchRequest,
-)
+from bioetl.infrastructure.adapters.common import FallbackFetchOrchestratorService
 from bioetl.infrastructure.adapters.openalex.client_helpers_adapter_mixin import (
     OpenAlexAdapterHelpersMixin,
 )
-from bioetl.infrastructure.adapters.openalex.fallback import TitleFallbackHandler
-from bioetl.infrastructure.adapters.openalex.health_probe import probe_openalex_health
-from bioetl.infrastructure.adapters.openalex.query_builder import (
-    build_openalex_doi_filter_params,
-    build_openalex_search_params,
-    build_openalex_title_search_params,
+from bioetl.infrastructure.adapters.openalex.cursor_flow import (
+    OpenAlexCursorFlowService,
 )
-from bioetl.infrastructure.adapters.openalex.response_parser import (
-    parse_openalex_next_cursor,
-    parse_openalex_results,
+from bioetl.infrastructure.adapters.openalex.fallback import TitleFallbackHandler
+from bioetl.infrastructure.adapters.openalex.fallback_orchestrator import (
+    OpenAlexFallbackOrchestrator,
+)
+from bioetl.infrastructure.adapters.openalex.health_probe import probe_openalex_health
+from bioetl.infrastructure.adapters.openalex.query_execution import (
+    OpenAlexQueryExecutor,
+)
+from bioetl.infrastructure.adapters.openalex.response_mapping import (
+    OpenAlexResponseMapper,
 )
 
 if TYPE_CHECKING:
@@ -102,24 +100,50 @@ class OpenAlexAdapter(OpenAlexAdapterHelpersMixin, BaseHttpAdapter):
 
     provider_name: str = field(init=False, default="openalex")
     """Provider identifier (required by DataSourcePort)."""
-    _title_search_cache: dict[tuple[str, int], list[BronzeRecord]] = field(
-        init=False, default_factory=dict
-    )
     _fallback_fetch_service: FallbackFetchOrchestratorService = field(
         init=False, repr=False
     )
+    _query_executor: OpenAlexQueryExecutor = field(init=False, repr=False)
+    _response_mapper: OpenAlexResponseMapper = field(init=False, repr=False)
+    _cursor_flow: OpenAlexCursorFlowService = field(init=False, repr=False)
+    _fallback_orchestrator: OpenAlexFallbackOrchestrator = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
-        """Initialize adapter metrics and helper components."""
+        """Initialize adapter metrics and decomposed OpenAlex components."""
         self._init_adapter_metrics()
         self._fallback_fetch_service = FallbackFetchOrchestratorService(
             self._adapter_metrics
         )
+        self._query_executor = OpenAlexQueryExecutor(
+            http_client=self.http_client,
+            adapter_metrics=self._adapter_metrics,
+            request_collector=self._request_collector,
+            headers_provider=self._build_headers,
+            api_base=OPENALEX_API_BASE,
+        )
+        self._response_mapper = OpenAlexResponseMapper()
+        self._cursor_flow = OpenAlexCursorFlowService(
+            mailto=self.mailto,
+            batch_size=self.batch_size,
+            title_search_cache_size=self.title_search_cache_size,
+            normalize_doi=self._normalize_doi,
+            escape_title_for_search=self._escape_title_for_search,
+            query_executor=self._query_executor,
+            response_mapper=self._response_mapper,
+            logger=self.logger,
+            runtime_errors=OPENALEX_RUNTIME_ERRORS,
+        )
 
-        # Initialize helper components for fallback handling
         self._fallback_handler = TitleFallbackHandler(
             logger=self.logger,
             search_fn=self._search_by_title,
+        )
+        self._fallback_orchestrator = OpenAlexFallbackOrchestrator(
+            fallback_fetch_service=self._fallback_fetch_service,
+            fallback_handler=self._fallback_handler,
+            normalize_id=self._normalize_doi,
+            extract_record_id=self._extract_doi_from_record,
+            logger=self.logger,
         )
 
     @staticmethod
@@ -137,20 +161,8 @@ class OpenAlexAdapter(OpenAlexAdapterHelpersMixin, BaseHttpAdapter):
         self,
         params: dict[str, str],
     ) -> dict[str, Any]:  # Any: untyped OpenAlex API payload
-        """Execute OpenAlex `/works` request and return decoded payload."""
-        url = f"{OPENALEX_API_BASE}/works"
-        start_time = time.perf_counter()
-        with self._adapter_metrics.measure_request("/works"):
-            response = await self.http_client.get(
-                url, params=params, headers=self._build_headers()
-            )
-        duration_ms = (time.perf_counter() - start_time) * 1000
-        with contextlib.suppress(Exception):
-            self._request_collector.record_from_response(response, duration_ms)
-        payload = response.json()
-        if isinstance(payload, dict):
-            return payload
-        return {}
+        """Backward-compatible wrapper around query-execution component."""
+        return await self._query_executor.request_works_payload(params)
 
     async def fetch_filtered(
         self,
@@ -182,72 +194,18 @@ class OpenAlexAdapter(OpenAlexAdapterHelpersMixin, BaseHttpAdapter):
         filter_ids: list[str],
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch OpenAlex works by DOI list (batch resolution).
-
-        Uses `filter=doi:id1|id2|id3` for efficient batch lookup.
-
-        Args:
-            filter_ids: List of DOIs to resolve.
-            limit: Maximum number of records to fetch.
-
-        Yields:
-            Dictionary records for each resolved publication.
-        """
-        dois = filter_ids[:limit] if limit else filter_ids
-        fetched = 0
-
-        # Process DOIs in batches (max 50 recommended per request)
-        for i in range(0, len(dois), self.batch_size):
-            batch = dois[i : i + self.batch_size]
-            async for work in self._fetch_by_dois(batch):
-                work["_lookup_method"] = "doi"
-                yield work
-                fetched += 1
-                if limit and fetched >= limit:
-                    return
+        """Fetch OpenAlex works by DOI list via cursor-flow component."""
+        async for work in self._cursor_flow.iter_filtered_by_doi(filter_ids, limit):
+            yield work
 
     async def _fetch_filtered_by_title(
         self,
         titles: list[str],
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch works by title search."""
-        self.logger.info(
-            "openalex_title_search_start",
-            total_titles=len(titles),
-            limit=limit,
-        )
-
-        effective_titles = titles[:limit] if limit else titles
-        fetched = 0
-        found = 0
-
-        for title in effective_titles:
-            if limit and fetched >= limit:
-                break
-
-            # Skip empty titles
-            if not title or not title.strip():
-                continue
-
-            results = await self._search_by_title(title, limit=1)
-            if results:
-                result = dict(results[0])
-                result["_lookup_method"] = "title"
-                result["_original_id"] = title
-                result["_search_title"] = title
-                yield result
-                found += 1
-                fetched += 1
-
-        self.logger.info(
-            "openalex_title_lookup_summary",
-            total_titles=len(effective_titles),
-            found_by_title=found,
-            hit_rate_pct=round(found / len(effective_titles) * 100, 1)
-            if effective_titles
-            else 0.0,
-        )
+        """Fetch works by title via cursor-flow component."""
+        async for work in self._cursor_flow.iter_filtered_by_title(titles, limit):
+            yield work
 
     async def fetch_multi_filtered(
         self,
@@ -281,21 +239,15 @@ class OpenAlexAdapter(OpenAlexAdapterHelpersMixin, BaseHttpAdapter):
         self,
         valid_dois: list[str],
         limit: int | None,
-        start_count: int,
+        start_count: int = 0,
     ) -> AsyncIterator[BronzeRecord]:
-        """Phase-1 batch DOI lookup."""
-        count = start_count
-        for i in range(0, len(valid_dois), self.batch_size):
-            if limit and count >= limit:
-                return
-
-            batch = valid_dois[i : i + self.batch_size]
-            async for work in self._fetch_by_dois(batch):
-                work["_lookup_method"] = "doi"
-                count += 1
-                yield work
-                if limit and count >= limit:
-                    return
+        """Phase-1 DOI lookup via cursor-flow component."""
+        async for work in self._cursor_flow.iter_doi_batches_for_fallback(
+            primary_ids=valid_dois,
+            limit=limit,
+            start_count=start_count,
+        ):
+            yield work
 
     async def fetch_filtered_with_fallback(
         self,
@@ -318,32 +270,17 @@ class OpenAlexAdapter(OpenAlexAdapterHelpersMixin, BaseHttpAdapter):
             )
             return
 
-        def _log_phase1_summary(total: int, found: int) -> None:
-            self.logger.info(
-                "openalex_doi_lookup_summary",
-                total_dois=total,
-                found_by_doi=found,
-                missing_dois=total - found,
-                hit_rate_pct=round(found / total * 100, 1) if total else 0.0,
-            )
-
         def _primary_records(
             primary_ids: list[str], request_limit: int | None
         ) -> AsyncIterator[BronzeRecord]:
-            return self._batch_doi_lookup(primary_ids, request_limit, 0)
+            return self._batch_doi_lookup(primary_ids, request_limit)
 
-        request = FallbackFetchRequest(
+        async for work in self._fallback_orchestrator.execute(
             filter_ids=filter_ids,
             fallback_mapping=fallback_mapping,
             primary_record_fetcher=_primary_records,
-            normalize_id=self._normalize_doi,
-            extract_record_id=self._extract_doi_from_record,
-            fallback_handler=self._fallback_handler,
             limit=limit,
-            primary_lookup_method="doi",
-            phase1_summary_logger=_log_phase1_summary,
-        )
-        async for work in self._fallback_fetch_service.execute(request):
+        ):
             yield work
 
     async def fetch(
@@ -383,98 +320,20 @@ class OpenAlexAdapter(OpenAlexAdapterHelpersMixin, BaseHttpAdapter):
         query: str,
         limit: int | None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch works with cursor pagination for free-text query."""
-        fetched = 0
-        cursor: str | None = "*"
-        per_page = min(self.batch_size, 200)
-
-        while cursor:
-            params = build_openalex_search_params(
-                mailto=self.mailto,
-                query=query,
-                cursor=cursor,
-                per_page=per_page,
-            )
-            payload = await self._request_works_payload(params)
-            results = parse_openalex_results(payload)
-
-            for work in results:
-                if limit and fetched >= limit:
-                    return
-                yield work
-                fetched += 1
-
-            cursor = parse_openalex_next_cursor(payload)
+        """Fetch works with cursor pagination via cursor-flow component."""
+        async for work in self._cursor_flow.iter_query_results(
+            query=query, limit=limit
+        ):
+            yield work
 
     async def _fetch_by_dois(self, dois: list[str]) -> AsyncIterator[BronzeRecord]:
-        """Fetch works by batch DOI filter."""
-        if not dois:
-            return
-
-        normalized_raw = [self._normalize_doi(d) for d in dois if d]
-        normalized: list[str] = [d for d in normalized_raw if d is not None]
-        if not normalized:
-            return
-
-        params = build_openalex_doi_filter_params(
-            mailto=self.mailto,
-            dois=normalized,
-        )
-        self.logger.debug(
-            "openalex_batch_doi_request",
-            doi_count=len(normalized),
-        )
-        payload = await self._request_works_payload(params)
-        results = parse_openalex_results(payload)
-
-        if len(results) < len(normalized):
-            self.logger.info(
-                "openalex_batch_partial_results",
-                requested=len(normalized),
-                found=len(results),
-                hit_rate=round(len(results) / len(normalized) * 100, 1),
-            )
-
-        for work in results:
+        """Fetch works by DOI via cursor-flow component."""
+        async for work in self._cursor_flow.iter_by_dois(dois):
             yield work
 
     async def _search_by_title(self, title: str, limit: int = 3) -> list[BronzeRecord]:
-        """Search works by title with in-memory cache."""
-        normalized_title = title.strip()
-        cache_key = (normalized_title.casefold(), limit)
-        cached = self._title_search_cache.get(cache_key)
-        if cached is not None:
-            return [dict(result) for result in cached]
-
-        clean_title = self._escape_title_for_search(normalized_title[:200])
-        params = build_openalex_title_search_params(
-            mailto=self.mailto,
-            escaped_title=clean_title,
-            limit=limit,
-        )
-        self.logger.debug(
-            "openalex_title_search",
-            title=title[:50],
-        )
-
-        try:
-            payload = await self._request_works_payload(params)
-            results = parse_openalex_results(payload)
-            cached_results = [dict(result) for result in results]
-            self._title_search_cache[cache_key] = cached_results
-            if len(self._title_search_cache) > self.title_search_cache_size:
-                oldest_key = next(iter(self._title_search_cache))
-                del self._title_search_cache[oldest_key]
-            return [dict(result) for result in cached_results]
-
-        except OPENALEX_RUNTIME_ERRORS as e:
-            self.logger.debug(
-                "openalex_title_search_failed",
-                title=title[:50],
-                error=str(e),
-            )
-            self._title_search_cache[cache_key] = []
-            return []
+        """Search works by title via cursor-flow component."""
+        return await self._cursor_flow.search_by_title(title, limit)
 
     async def _probe_health(self) -> HealthStatus:
         """Probe OpenAlex API health."""

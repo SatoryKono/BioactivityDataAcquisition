@@ -9,13 +9,10 @@ from __future__ import annotations
 from typing import cast
 
 from bioetl.application.services import ConfigService
-from bioetl.application.services.config_service import (
-    DomainConfigMapperPort,
-    SettingsLoaderPort,
-)
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.registry import get_default_registry
+from bioetl.domain.ports import DomainConfigMapperPort, SettingsLoaderPort
 from bioetl.infrastructure.config import (
     get_settings,
     load_pipeline_config,

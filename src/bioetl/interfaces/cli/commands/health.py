@@ -47,6 +47,161 @@ def _handle_health_failure(
     )
 
 
+def _provider_subject(provider: tuple[str, ...]) -> str:
+    """Build stable provider subject label for error handling."""
+    return ",".join(provider) if provider else "all"
+
+
+def _echo_health_server_info(host: str, port: int) -> None:
+    """Print startup information for health server command."""
+    click.echo(f"Starting health server on http://{host}:{port}")
+    click.echo("Endpoints:")
+    click.echo(f"  - http://{host}:{port}/health")
+    click.echo(f"  - http://{host}:{port}/health/live")
+    click.echo(f"  - http://{host}:{port}/health/ready")
+    click.echo(f"  - http://{host}:{port}/health/providers")
+    click.echo("\nPress Ctrl+C to stop.")
+
+
+async def _run_health_server(host: str, port: int) -> None:
+    """Start and keep the health server alive until interrupted."""
+    from bioetl.interfaces.http.health_server import HealthServer
+
+    deps = get_health_server_dependencies()
+    server = HealthServer(
+        host=host,
+        port=port,
+        health_monitor=deps.health_monitor,
+    )
+    await server.start()
+    try:
+        while True:
+            await asyncio.sleep(1)
+    except asyncio.CancelledError:
+        pass
+    finally:
+        await server.stop()
+        click.echo("\nHealth server stopped.")
+
+
+def _execute_health_server(host: str, port: int) -> None:
+    """Execute health server coroutine with CLI error policy."""
+    coro = _run_health_server(host=host, port=port)
+    try:
+        asyncio.run(coro)
+    except BioETLError as exc:
+        _handle_health_failure(
+            exc,
+            reason_code="CLI_HEALTH_SERVER_DOMAIN_ERROR",
+            target=f"{host}:{port}",
+            domain_error_title="Health server failed with domain error",
+            unexpected_error_title="Unexpected error in health server command",
+            interrupted_message="Health server interrupted by user (Ctrl+C)",
+        )
+    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
+        _handle_health_failure(
+            exc,
+            reason_code="CLI_HEALTH_SERVER_UNEXPECTED_ERROR",
+            target=f"{host}:{port}",
+            domain_error_title="Health server failed with domain error",
+            unexpected_error_title="Unexpected error in health server command",
+            interrupted_message="Health server interrupted by user (Ctrl+C)",
+        )
+    except KeyboardInterrupt:
+        click.echo("\nShutting down...")
+        sys.exit(ExitCode.OK)
+    finally:
+        if getattr(coro, "cr_frame", None) is not None:
+            coro.close()
+
+
+async def _run_health_checks(provider: tuple[str, ...]) -> dict[str, dict[str, str]]:
+    """Execute health checks and return results as serializable dictionary."""
+    service = get_health_service()
+    providers_list = list(provider) if provider else None
+    summary = await service.check_providers(providers=providers_list)
+    return summary.to_dict()
+
+
+def _execute_health_checks(
+    provider: tuple[str, ...],
+) -> dict[str, dict[str, str]] | None:
+    """Execute health checks with CLI error policy and return results."""
+    providers_subject = _provider_subject(provider)
+    coro = _run_health_checks(provider)
+    try:
+        return asyncio.run(coro)
+    except BioETLError as exc:
+        _handle_health_failure(
+            exc,
+            reason_code="CLI_HEALTH_CHECK_DOMAIN_ERROR",
+            target=providers_subject,
+            domain_error_title="Error running health checks",
+            unexpected_error_title="Error running health checks",
+            interrupted_message="Health checks interrupted by user (Ctrl+C)",
+        )
+    except KeyboardInterrupt as exc:
+        _handle_health_failure(
+            exc,
+            reason_code="CLI_HEALTH_CHECK_SIGINT",
+            target=providers_subject,
+            domain_error_title="Error running health checks",
+            unexpected_error_title="Error running health checks",
+            interrupted_message="Health checks interrupted by user (Ctrl+C)",
+        )
+    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
+        _handle_health_failure(
+            exc,
+            reason_code="CLI_HEALTH_CHECK_UNEXPECTED_ERROR",
+            target=providers_subject,
+            domain_error_title="Error running health checks",
+            unexpected_error_title="Error running health checks",
+            interrupted_message="Health checks interrupted by user (Ctrl+C)",
+        )
+    finally:
+        if getattr(coro, "cr_frame", None) is not None:
+            coro.close()
+    return None
+
+
+def _render_health_results(
+    results: dict[str, dict[str, str]],
+    *,
+    output_json: bool,
+) -> None:
+    """Render health check output and exit with mapped status code."""
+    import json as json_module
+
+    all_healthy = all(
+        result.get("status", "unknown") == "healthy" for result in results.values()
+    )
+    if output_json:
+        click.echo(json_module.dumps(results, indent=2))
+        sys.exit(ExitCode.OK if all_healthy else ExitCode.FAIL)
+
+    for prov, result in results.items():
+        status = result.get("status", "unknown")
+        status_icon = (
+            "[OK]"
+            if status == "healthy"
+            else "[WARN]"
+            if status == "degraded"
+            else "[FAIL]"
+        )
+        line = f"  {status_icon} {prov}: {status}"
+        if "latency_ms" in result:
+            line += f" ({result['latency_ms']}ms)"
+        if "error" in result:
+            line += f" - {result['error']}"
+        click.echo(line)
+
+    if all_healthy:
+        click.echo("\nAll providers healthy.")
+        sys.exit(ExitCode.OK)
+    click.echo("\nSome providers unhealthy.")
+    sys.exit(ExitCode.FAIL)
+
+
 @click.group()
 def health() -> None:
     """Health check and monitoring operations."""
@@ -85,68 +240,8 @@ def health_server_command(host: str, port: int) -> None:
         host: Host.
         port: Port.
     """
-    click.echo(f"Starting health server on http://{host}:{port}")
-    click.echo("Endpoints:")
-    click.echo(f"  - http://{host}:{port}/health")
-    click.echo(f"  - http://{host}:{port}/health/live")
-    click.echo(f"  - http://{host}:{port}/health/ready")
-    click.echo(f"  - http://{host}:{port}/health/providers")
-    click.echo("\nPress Ctrl+C to stop.")
-
-    async def run() -> None:
-        """Start health server and keep it running until interrupted."""
-        # Import HealthServer here (interfaces layer can import from interfaces)
-        from bioetl.interfaces.http.health_server import HealthServer
-
-        # Get dependencies from composition root (proper DI)
-        deps = get_health_server_dependencies()
-
-        # Create server in interfaces layer with injected dependencies
-        server = HealthServer(
-            host=host,
-            port=port,
-            health_monitor=deps.health_monitor,
-        )
-
-        await server.start()
-
-        try:
-            # Keep server running until interrupted
-            while True:
-                await asyncio.sleep(1)
-        except asyncio.CancelledError:
-            pass
-        finally:
-            await server.stop()
-            click.echo("\nHealth server stopped.")
-
-    coro = run()
-    try:
-        asyncio.run(coro)
-    except BioETLError as exc:
-        _handle_health_failure(
-            exc,
-            reason_code="CLI_HEALTH_SERVER_DOMAIN_ERROR",
-            target=f"{host}:{port}",
-            domain_error_title="Health server failed with domain error",
-            unexpected_error_title="Unexpected error in health server command",
-            interrupted_message="Health server interrupted by user (Ctrl+C)",
-        )
-    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
-        _handle_health_failure(
-            exc,
-            reason_code="CLI_HEALTH_SERVER_UNEXPECTED_ERROR",
-            target=f"{host}:{port}",
-            domain_error_title="Health server failed with domain error",
-            unexpected_error_title="Unexpected error in health server command",
-            interrupted_message="Health server interrupted by user (Ctrl+C)",
-        )
-    except KeyboardInterrupt:
-        click.echo("\nShutting down...")
-        sys.exit(ExitCode.OK)
-    finally:
-        if getattr(coro, "cr_frame", None) is not None:
-            coro.close()
+    _echo_health_server_info(host, port)
+    _execute_health_server(host, port)
 
 
 @health.command("check")
@@ -177,95 +272,11 @@ def health_check(provider: tuple[str, ...], output_json: bool) -> None:
         provider: Data provider name.
         output_json: Whether to output json.
     """
-    import json as json_module
-
     click.echo("Running health checks...")
-
-    async def run_checks() -> dict[str, dict[str, str]]:
-        """Execute health checks and return results as dictionary.
-
-        Returns:
-            Result dictionary.
-        """
-        service = get_health_service()
-
-        # Convert tuple to list or None for all providers
-        providers_list = list(provider) if provider else None
-
-        summary = await service.check_providers(providers=providers_list)
-
-        # Convert to dict format for backward compatibility
-        return summary.to_dict()
-
-    coro = run_checks()
-    providers_subject = ",".join(provider) if provider else "all"
-    try:
-        results = asyncio.run(coro)
-    except BioETLError as exc:
-        _handle_health_failure(
-            exc,
-            reason_code="CLI_HEALTH_CHECK_DOMAIN_ERROR",
-            target=providers_subject,
-            domain_error_title="Error running health checks",
-            unexpected_error_title="Error running health checks",
-            interrupted_message="Health checks interrupted by user (Ctrl+C)",
-        )
+    results = _execute_health_checks(provider)
+    if results is None:
         return
-    except KeyboardInterrupt as exc:
-        _handle_health_failure(
-            exc,
-            reason_code="CLI_HEALTH_CHECK_SIGINT",
-            target=providers_subject,
-            domain_error_title="Error running health checks",
-            unexpected_error_title="Error running health checks",
-            interrupted_message="Health checks interrupted by user (Ctrl+C)",
-        )
-        return
-    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
-        _handle_health_failure(
-            exc,
-            reason_code="CLI_HEALTH_CHECK_UNEXPECTED_ERROR",
-            target=providers_subject,
-            domain_error_title="Error running health checks",
-            unexpected_error_title="Error running health checks",
-            interrupted_message="Health checks interrupted by user (Ctrl+C)",
-        )
-        return
-    finally:
-        if getattr(coro, "cr_frame", None) is not None:
-            coro.close()
-
-    all_healthy = all(
-        result.get("status", "unknown") == "healthy" for result in results.values()
-    )
-    if output_json:
-        click.echo(json_module.dumps(results, indent=2))
-        sys.exit(ExitCode.OK if all_healthy else ExitCode.FAIL)
-    else:
-        for prov, result in results.items():
-            status = result.get("status", "unknown")
-            status_icon = (
-                "[OK]"
-                if status == "healthy"
-                else "[WARN]"
-                if status == "degraded"
-                else "[FAIL]"
-            )
-
-            line = f"  {status_icon} {prov}: {status}"
-            if "latency_ms" in result:
-                line += f" ({result['latency_ms']}ms)"
-            if "error" in result:
-                line += f" - {result['error']}"
-
-            click.echo(line)
-
-        if all_healthy:
-            click.echo("\nAll providers healthy.")
-            sys.exit(ExitCode.OK)
-        else:
-            click.echo("\nSome providers unhealthy.")
-            sys.exit(ExitCode.FAIL)
+    _render_health_results(results, output_json=output_json)
 
 
 COMMANDS = (health_server_command,)

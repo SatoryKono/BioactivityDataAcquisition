@@ -58,24 +58,7 @@ class FilterConfigLoader(
     ]:
         """Load merged filter config for provider/entity.
 
-        Merge order (later wins for scalars, special handling for collections):
-        1. defaults layer (MUST exist): configs/base/pipeline.yaml.filter_defaults
-        2. providers/{provider}.yaml
-        3. entities/{provider}/{entity}.yaml
-        4. inline_overrides (from pipeline config filter_rules)
-
-        Args:
-            provider: Provider name (e.g., "chembl").
-            entity: Entity name (e.g., "activity").
-            inline_overrides: Optional inline overrides from pipeline config.
-
-        Returns:
-            Tuple of (InputFilterConfig, SilverFilterConfig, GoldFilterConfig,
-            ExtractionParams) domain objects.
-
-        Raises:
-            FileNotFoundError: If no defaults layer exists.
-            ValidationError: If merged config fails validation.
+        Returns validated domain configs from defaults -> provider -> entity -> inline.
         """
         cache_key = f"{provider}:{entity}"
 

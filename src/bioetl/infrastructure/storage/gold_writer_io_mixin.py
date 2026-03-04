@@ -30,6 +30,61 @@ def _load_gold_writer_module() -> ModuleType:
     return import_module("bioetl.infrastructure.storage.gold_writer")
 
 
+def _initialize_scd2_records(
+    records: list[GoldRecord],
+    scd_config: ScdConfig,
+    ingestion_ts: datetime,
+) -> None:
+    """Populate SCD2 metadata fields before writing."""
+    version_col = scd_config.get("version_col", "version")
+    valid_from_col = scd_config.get("valid_from_col", "valid_from")
+    valid_to_col = scd_config.get("valid_to_col", "valid_to")
+    current_flag_col = scd_config.get("current_flag_col", "is_current")
+    ts_iso = ingestion_ts.isoformat()
+    for record in records:
+        record[valid_from_col] = ts_iso
+        record[valid_to_col] = None
+        record[current_flag_col] = True
+        record[version_col] = record.get(version_col, 1)
+
+
+async def _write_scd2_once(
+    writer: GoldWriterIOMixin,
+    *,
+    module: ModuleType,
+    table_path: str,
+    records: list[GoldRecord],
+    business_key: str | list[str],
+    scd_config: ScdConfig,
+    ingestion_ts: datetime,
+    partition_cols: list[str] | None,
+    column_order: list[str] | None,
+) -> None:
+    """Execute one SCD2 write attempt with merge-or-create flow."""
+    try:
+        dt = await writer._run_in_executor(lambda: module.DeltaTable(table_path))
+        await writer._merge_scd2(
+            dt,
+            records,
+            business_key,
+            scd_config,
+            ingestion_ts,
+            column_order,
+        )
+    except module.TableNotFoundError:
+        arrow_data = writer._to_arrow_table(records, column_order=column_order)
+        await writer._run_in_executor(
+            lambda: module.write_deltalake(
+                table_or_uri=table_path,
+                data=pa.RecordBatchReader.from_batches(
+                    arrow_data.schema, arrow_data.to_batches()
+                ),
+                mode="append",
+                partition_by=partition_cols,
+            )
+        )
+
+
 class _GoldMergedMetadataWriterProtocol(Protocol):
     """Typed contract for merged-metadata writer implementation."""
 
@@ -67,8 +122,6 @@ class GoldWriterIOMixin:
         preserve_column_order: bool = False,
     ) -> None:
         """Write merged records to Gold layer with optional strict validation."""
-        from bioetl.domain.schemas.column_order import canonical_column_order
-
         if not records:
             self.logger.warning(
                 "No records to write for merged Gold",
@@ -78,32 +131,64 @@ class GoldWriterIOMixin:
 
         if schema is not None:
             await self._validate_records_against_schema(records, schema)
+        arrow_table = self._prepare_gold_merged_table(
+            records=records,
+            primary_keys=primary_keys,
+            preserve_column_order=preserve_column_order,
+        )
+        table_path = self._resolve_table_path(table_name)
+        self._log_gold_merged_write(table_name, table_path, len(records))
+        await self._write_gold_merged_delta(table_path, arrow_table)
+        await self._export_gold_merged_csv(table_name, arrow_table)
+        await self._write_gold_merged_sidecar(
+            table_path=table_path,
+            table_name=table_name,
+            records=records,
+            primary_keys=primary_keys,
+            run_id=run_id,
+            sources_used=sources_used,
+            schema=schema,
+        )
 
-        arrow_table = pa.Table.from_pylist(records)
+    def _prepare_gold_merged_table(
+        self,
+        *,
+        records: list[GoldRecord],
+        primary_keys: list[str] | None,
+        preserve_column_order: bool,
+    ) -> pa.Table:
+        """Build deterministic arrow table for merged Gold output."""
+        from bioetl.domain.schemas.column_order import canonical_column_order
 
         module = _load_gold_writer_module()
-        arrow_table = module.coerce_null_types_for_delta(arrow_table)
-
+        arrow_table = module.coerce_null_types_for_delta(pa.Table.from_pylist(records))
         if not preserve_column_order:
             ordered_columns = canonical_column_order(list(arrow_table.column_names))
             arrow_table = arrow_table.select(ordered_columns)
-
         if primary_keys:
             valid_keys = [pk for pk in primary_keys if pk in arrow_table.schema.names]
             if valid_keys:
                 arrow_table = arrow_table.sort_by(
                     [(pk, "ascending") for pk in valid_keys]
                 )
+        return arrow_table
 
-        table_path = self._resolve_table_path(table_name)
-
+    def _log_gold_merged_write(
+        self, table_name: str, table_path: str, count: int
+    ) -> None:
+        """Log merged Gold write intent."""
         self.logger.info(
             "Writing merged Gold records",
             table_name=table_name,
             path=table_path,
-            records=len(records),
+            records=count,
         )
 
+    async def _write_gold_merged_delta(
+        self, table_path: str, arrow_table: pa.Table
+    ) -> None:
+        """Persist merged Gold table to Delta."""
+        module = _load_gold_writer_module()
         await self._run_in_executor(
             lambda: module.write_deltalake(
                 table_path,
@@ -113,13 +198,25 @@ class GoldWriterIOMixin:
             )
         )
 
+    async def _export_gold_merged_csv(
+        self, table_name: str, arrow_table: pa.Table
+    ) -> None:
+        """Export merged Gold table to CSV when exporter is configured."""
         if self.csv_exporter:
-            await self.csv_exporter.export(
-                table_name,
-                arrow_table,
-                append=False,
-            )
+            await self.csv_exporter.export(table_name, arrow_table, append=False)
 
+    async def _write_gold_merged_sidecar(
+        self,
+        *,
+        table_path: str,
+        table_name: str,
+        records: list[GoldRecord],
+        primary_keys: list[str] | None,
+        run_id: str | None,
+        sources_used: list[str] | None,
+        schema: DataFrameSchema | None,
+    ) -> None:
+        """Write merged Gold metadata sidecar via mixin protocol."""
         metadata_writer = cast(_GoldMergedMetadataWriterProtocol, self)
         await metadata_writer._write_gold_merged_metadata(
             table_path=table_path,
@@ -259,54 +356,23 @@ class GoldWriterIOMixin:
         sort_keys = [business_key] if isinstance(business_key, str) else business_key
 
         records.sort(key=lambda record: tuple(record.get(key) for key in sort_keys))
-        version_col = scd_config.get("version_col", "version")
-        valid_from_col = scd_config.get("valid_from_col", "valid_from")
-        valid_to_col = scd_config.get("valid_to_col", "valid_to")
-        current_flag_col = scd_config.get("current_flag_col", "is_current")
-
-        ts_iso = ingestion_ts.isoformat()
-        for record in records:
-            record[valid_from_col] = ts_iso
-            record[valid_to_col] = None
-            record[current_flag_col] = True
-            record[version_col] = record.get(version_col, 1)
+        _initialize_scd2_records(records, scd_config, ingestion_ts)
 
         module = _load_gold_writer_module()
 
         for attempt in range(3):
             try:
-                try:
-                    dt = await self._run_in_executor(
-                        lambda: module.DeltaTable(table_path)
-                    )
-                    await self._merge_scd2(
-                        dt,
-                        records,
-                        business_key,
-                        scd_config,
-                        ingestion_ts,
-                        column_order,
-                    )
-                except module.TableNotFoundError:
-                    arrow_data = self._to_arrow_table(
-                        records, column_order=column_order
-                    )
-
-                    def _append_delta(
-                        table_or_uri: str = table_path,
-                        data: pa.Table = arrow_data,
-                        partition_by: list[str] | None = partition_cols,
-                    ) -> None:
-                        module.write_deltalake(
-                            table_or_uri=table_or_uri,
-                            data=pa.RecordBatchReader.from_batches(
-                                data.schema, data.to_batches()
-                            ),
-                            mode="append",
-                            partition_by=partition_by,
-                        )
-
-                    await self._run_in_executor(_append_delta)
+                await _write_scd2_once(
+                    self,
+                    module=module,
+                    table_path=table_path,
+                    records=records,
+                    business_key=business_key,
+                    scd_config=scd_config,
+                    ingestion_ts=ingestion_ts,
+                    partition_cols=partition_cols,
+                    column_order=column_order,
+                )
                 break
             except module.GOLD_WRITE_RETRY_ERRORS as error:
                 if attempt == 2:

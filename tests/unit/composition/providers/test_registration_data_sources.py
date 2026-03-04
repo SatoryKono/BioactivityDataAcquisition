@@ -7,14 +7,16 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bioetl.composition.providers.registration import (
-    _create_chembl_data_source,
-    _create_pubmed_data_source,
-    _create_openalex_data_source,
-    _create_pubchem_adapter,
-    _create_semanticscholar_data_source,
-    _create_uniprot_idmapping_data_source,
+from bioetl.composition.providers.registration_biblio import (
     _create_crossref_data_source,
+    _create_openalex_data_source,
+    _create_pubmed_data_source,
+    _create_semanticscholar_data_source,
+)
+from bioetl.composition.providers.registration_bio import (
+    _create_chembl_data_source,
+    _create_pubchem_adapter,
+    _create_uniprot_idmapping_data_source,
 )
 
 
@@ -22,10 +24,10 @@ from bioetl.composition.providers.registration import (
 class TestChemblPublicationTermBranch:
     """Covers publication_term wrapper branch in ChEMBL creator."""
 
-    @patch("bioetl.composition.providers.registration._wrap_with_filter")
-    @patch("bioetl.composition.providers.registration.PublicationTermDataSource")
-    @patch("bioetl.composition.providers.registration._get_adapter_config")
-    @patch("bioetl.composition.providers.registration._get_factories")
+    @patch("bioetl.composition.providers.registration_bio._wrap_with_filter")
+    @patch("bioetl.composition.providers.registration_bio.PublicationTermDataSource")
+    @patch("bioetl.composition.providers.registration_bio._get_adapter_config")
+    @patch("bioetl.composition.providers.registration_bio._get_factories")
     def test_wraps_publication_term_adapter(
         self,
         mock_get_factories: MagicMock,
@@ -72,10 +74,12 @@ class TestPubChemCreatorGuard:
 class TestCrossRefAndOpenAlexCreators:
     """Covers helper branches for CrossRef/OpenAlex providers."""
 
-    @patch("bioetl.composition.providers.registration._wrap_with_filter")
-    @patch("bioetl.composition.providers.registration._get_batch_size_from_config")
-    @patch("bioetl.composition.providers.registration._create_crossref_adapter")
-    @patch("bioetl.composition.providers.registration._get_factories")
+    @patch("bioetl.composition.providers.registration_biblio._wrap_with_filter")
+    @patch(
+        "bioetl.composition.providers.registration_biblio._get_batch_size_from_config"
+    )
+    @patch("bioetl.composition.providers.registration_biblio._create_crossref_adapter")
+    @patch("bioetl.composition.providers.registration_biblio._get_factories")
     def test_crossref_creator_uses_pipeline_email_and_batch_size(
         self,
         mock_get_factories: MagicMock,
@@ -113,10 +117,12 @@ class TestCrossRefAndOpenAlexCreators:
         assert call_kwargs["batch_size"] == 77
         assert result is mock_adapter
 
-    @patch("bioetl.composition.providers.registration._wrap_with_filter")
-    @patch("bioetl.composition.providers.registration._get_batch_size_from_config")
-    @patch("bioetl.composition.providers.registration._create_openalex_adapter")
-    @patch("bioetl.composition.providers.registration._get_factories")
+    @patch("bioetl.composition.providers.registration_biblio._wrap_with_filter")
+    @patch(
+        "bioetl.composition.providers.registration_biblio._get_batch_size_from_config"
+    )
+    @patch("bioetl.composition.providers.registration_biblio._create_openalex_adapter")
+    @patch("bioetl.composition.providers.registration_biblio._get_factories")
     def test_openalex_creator_uses_settings_email_fallback(
         self,
         mock_get_factories: MagicMock,
@@ -156,10 +162,12 @@ class TestCrossRefAndOpenAlexCreators:
 class TestPlaceholderResolution:
     """Covers ${ENV_VAR} placeholder resolution in source config overrides."""
 
-    @patch("bioetl.composition.providers.registration._wrap_with_filter")
-    @patch("bioetl.composition.providers.registration._get_batch_size_from_config")
-    @patch("bioetl.composition.providers.registration._create_crossref_adapter")
-    @patch("bioetl.composition.providers.registration._get_factories")
+    @patch("bioetl.composition.providers.registration_biblio._wrap_with_filter")
+    @patch(
+        "bioetl.composition.providers.registration_biblio._get_batch_size_from_config"
+    )
+    @patch("bioetl.composition.providers.registration_biblio._create_crossref_adapter")
+    @patch("bioetl.composition.providers.registration_biblio._get_factories")
     def test_crossref_mailto_placeholder_falls_back_to_settings(
         self,
         mock_get_factories: MagicMock,
@@ -189,9 +197,9 @@ class TestPlaceholderResolution:
         call_kwargs = mock_create_crossref_adapter.call_args.kwargs
         assert call_kwargs["mailto"] == "default@example.org"
 
-    @patch("bioetl.composition.providers.registration._wrap_with_filter")
-    @patch("bioetl.composition.providers.registration.PubMedAdapter")
-    @patch("bioetl.composition.providers.registration._get_factories")
+    @patch("bioetl.composition.providers.registration_biblio._wrap_with_filter")
+    @patch("bioetl.composition.providers.registration_biblio.PubMedAdapter")
+    @patch("bioetl.composition.providers.registration_biblio._get_factories")
     def test_pubmed_placeholders_fallback_to_settings_when_env_missing(
         self,
         mock_get_factories: MagicMock,
@@ -230,10 +238,12 @@ class TestPlaceholderResolution:
 class TestSemanticScholarCreatorBranches:
     """Covers API key warning / non-warning branches."""
 
-    @patch("bioetl.composition.providers.registration._wrap_with_filter")
-    @patch("bioetl.composition.providers.registration._get_batch_size_from_config")
-    @patch("bioetl.composition.providers.registration.SemanticScholarAdapter")
-    @patch("bioetl.composition.providers.registration._get_factories")
+    @patch("bioetl.composition.providers.registration_biblio._wrap_with_filter")
+    @patch(
+        "bioetl.composition.providers.registration_biblio._get_batch_size_from_config"
+    )
+    @patch("bioetl.composition.providers.registration_biblio.SemanticScholarAdapter")
+    @patch("bioetl.composition.providers.registration_biblio._get_factories")
     def test_warns_when_api_key_missing(
         self,
         mock_get_factories: MagicMock,
@@ -263,10 +273,12 @@ class TestSemanticScholarCreatorBranches:
         assert mock_semanticscholar_adapter.call_args.kwargs["api_key"] == ""
         assert result is mock_adapter
 
-    @patch("bioetl.composition.providers.registration._wrap_with_filter")
-    @patch("bioetl.composition.providers.registration._get_batch_size_from_config")
-    @patch("bioetl.composition.providers.registration.SemanticScholarAdapter")
-    @patch("bioetl.composition.providers.registration._get_factories")
+    @patch("bioetl.composition.providers.registration_biblio._wrap_with_filter")
+    @patch(
+        "bioetl.composition.providers.registration_biblio._get_batch_size_from_config"
+    )
+    @patch("bioetl.composition.providers.registration_biblio.SemanticScholarAdapter")
+    @patch("bioetl.composition.providers.registration_biblio._get_factories")
     def test_does_not_warn_when_api_key_present(
         self,
         mock_get_factories: MagicMock,
@@ -301,10 +313,10 @@ class TestSemanticScholarCreatorBranches:
 class TestUniProtIdMappingCreatorBranches:
     """Covers override/default and seed-id branches in ID mapping creator."""
 
-    @patch("bioetl.composition.providers.registration.IDMappingDataSource")
-    @patch("bioetl.composition.providers.registration.IDMappingCsvReaderAdapter")
-    @patch("bioetl.composition.providers.registration.UniProtIDMappingClient")
-    @patch("bioetl.composition.providers.registration._get_factories")
+    @patch("bioetl.composition.providers.registration_bio.IDMappingDataSource")
+    @patch("bioetl.composition.providers.registration_bio.IDMappingCsvReaderAdapter")
+    @patch("bioetl.composition.providers.registration_bio.UniProtIDMappingClient")
+    @patch("bioetl.composition.providers.registration_bio._get_factories")
     def test_uses_api_overrides_and_seed_ids(
         self,
         mock_get_factories: MagicMock,
@@ -354,10 +366,10 @@ class TestUniProtIdMappingCreatorBranches:
         assert call_kwargs["seed_ids"] == ["CHEMBL1", "CHEMBL2"]
         assert result is mock_ds
 
-    @patch("bioetl.composition.providers.registration.IDMappingDataSource")
-    @patch("bioetl.composition.providers.registration.IDMappingCsvReaderAdapter")
-    @patch("bioetl.composition.providers.registration.UniProtIDMappingClient")
-    @patch("bioetl.composition.providers.registration._get_factories")
+    @patch("bioetl.composition.providers.registration_bio.IDMappingDataSource")
+    @patch("bioetl.composition.providers.registration_bio.IDMappingCsvReaderAdapter")
+    @patch("bioetl.composition.providers.registration_bio.UniProtIDMappingClient")
+    @patch("bioetl.composition.providers.registration_bio._get_factories")
     def test_uses_defaults_when_api_and_filter_missing(
         self,
         mock_get_factories: MagicMock,

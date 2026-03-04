@@ -176,6 +176,14 @@ class TestTransformerInjectionPath:
             _get_base_path(Path("src/bioetl/composition/factories"))
             / "pipeline_factory.py"
         )
+        assembler_file = (
+            _get_base_path(Path("src/bioetl/composition/factories"))
+            / "pipeline_assembler.py"
+        )
+        service_bundle_file = (
+            _get_base_path(Path("src/bioetl/composition/factories"))
+            / "service_bundle_factory.py"
+        )
         construction_file = (
             _get_base_path(Path("src/bioetl/composition/factories"))
             / "pipeline_factory_construction.py"
@@ -184,18 +192,27 @@ class TestTransformerInjectionPath:
             pytest.skip("pipeline_factory.py not found")
         if not construction_file.exists():
             pytest.skip("pipeline_factory_construction.py not found")
+        if not assembler_file.exists():
+            pytest.skip("pipeline_assembler.py not found")
+        if not service_bundle_file.exists():
+            pytest.skip("service_bundle_factory.py not found")
 
         content = factory_file.read_text(encoding="utf-8")
+        assembler_content = assembler_file.read_text(encoding="utf-8")
+        service_bundle_content = service_bundle_file.read_text(encoding="utf-8")
         construction_content = construction_file.read_text(encoding="utf-8")
-        combined_content = f"{content}\n{construction_content}"
+        combined_content = (
+            f"{content}\n{assembler_content}\n"
+            f"{service_bundle_content}\n{construction_content}"
+        )
 
         # Check for create_transformer method (public API for direct usage)
-        assert "def create_transformer" in content, (
+        assert "def create_transformer" in combined_content, (
             "GenericPipelineFactory must have create_transformer() method"
         )
 
         # Check that create_with_services passes transformer_class
-        assert "transformer_class=self.transformer_class" in content, (
+        assert "transformer_class=self.transformer_class" in combined_content, (
             "GenericPipelineFactory.create_with_services must pass "
             "transformer_class to create_pipeline_with_services()"
         )
@@ -205,6 +222,6 @@ class TestTransformerInjectionPath:
             "pipeline factory construction path must create transformer "
             "from transformer_class"
         )
-        assert "transformer=transformer" in content, (
+        assert "transformer=transformer" in combined_content, (
             "pipeline_factory must pass transformer to pipeline constructor"
         )

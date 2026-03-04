@@ -55,6 +55,46 @@ def _create_enricher_semaphore(max_concurrency: int) -> asyncio.Semaphore:
     return asyncio.Semaphore(max_concurrency)
 
 
+def _build_enricher_task(
+    service: EnrichmentCoordinatorService,
+    *,
+    keys: pl.DataFrame,
+    enricher: EnricherConfig,
+    completed: frozenset[str],
+    runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
+) -> tuple[str, asyncio.Task[EnrichmentResult]] | None:
+    """Build async task for one enricher or return None when skipped."""
+    if enricher.pipeline in completed:
+        service._logger.debug(
+            "Skipping completed enricher",
+            enricher=enricher.pipeline,
+        )
+        return None
+
+    filtered_keys = service._apply_filter(keys, enricher)
+    if filtered_keys.is_empty():
+        service._logger.info(
+            "Filter excluded all records for enricher",
+            enricher=enricher.pipeline,
+            filter_condition=enricher.filter_condition,
+        )
+        return (
+            enricher.pipeline,
+            asyncio.create_task(service._return_skipped(enricher)),
+        )
+
+    return (
+        enricher.pipeline,
+        asyncio.create_task(
+            service._run_single_enricher(
+                enricher=enricher,
+                keys=filtered_keys,
+                runner_factory=runner_factory,
+            )
+        ),
+    )
+
+
 class EnrichmentCoordinatorService:
     """Coordinates parallel enrichment pipeline execution.
 
@@ -137,55 +177,31 @@ class EnrichmentCoordinatorService:
             >>> results["crossref_publication"].is_success
             True
         """
-        tasks = []
-        enricher_names = []
-
-        for enricher in enrichers:
-            if enricher.pipeline in completed:
-                self._logger.debug(
-                    "Skipping completed enricher",
-                    enricher=enricher.pipeline,
-                )
-                continue
-
-            # Filter keys based on enricher condition
-            filtered_keys = self._apply_filter(keys, enricher)
-
-            if filtered_keys.is_empty():
-                self._logger.info(
-                    "Filter excluded all records for enricher",
-                    enricher=enricher.pipeline,
-                    filter_condition=enricher.filter_condition,
-                )
-                # Create skipped result synchronously
-                tasks.append(asyncio.create_task(self._return_skipped(enricher)))
-                enricher_names.append(enricher.pipeline)
-                continue
-
-            tasks.append(
-                asyncio.create_task(
-                    self._run_single_enricher(
-                        enricher=enricher,
-                        keys=filtered_keys,
-                        runner_factory=runner_factory,
-                    )
+        task_specs = [
+            task_spec
+            for enricher in enrichers
+            if (
+                task_spec := _build_enricher_task(
+                    self,
+                    keys=keys,
+                    enricher=enricher,
+                    completed=completed,
+                    runner_factory=runner_factory,
                 )
             )
-            enricher_names.append(enricher.pipeline)
-
-        if not tasks:
+            is not None
+        ]
+        if not task_specs:
             return {}
 
+        enricher_names = [name for name, _ in task_specs]
+        tasks = [task for _, task in task_specs]
         self._logger.info(
             "Running enrichers",
             count=len(tasks),
             enrichers=enricher_names,
         )
-
-        # Wait for all enrichers to complete
         results = await asyncio.gather(*tasks, return_exceptions=True)
-
-        # Process results
         return self._process_results(enricher_names, results)
 
     def _apply_filter(

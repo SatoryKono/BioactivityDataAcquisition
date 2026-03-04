@@ -19,12 +19,12 @@ governance:
       group:*: '2026-03-03'
 
 baseline:
-  total_exemptions: 293
+  total_exemptions: 224
   by_registry:
-    file_size_limits: 73
+    file_size_limits: 58
     function_complexity: 36
-    function_length: 72
-    class_size: 52
+    function_length: 30
+    class_size: 40
     class_method_count: 1
     god_object: 23
     domain_complexity: 36
