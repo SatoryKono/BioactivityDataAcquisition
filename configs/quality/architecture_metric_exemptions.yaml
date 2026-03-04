@@ -275,13 +275,6 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
-    src/bioetl/domain/services/data_normalization_service.py:
-      value: 473
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (file_size_limits).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
     src/bioetl/domain/services/dq_serializer.py:
       value: 470
       owner: '@bioetl-architecture'
@@ -907,13 +900,6 @@ registries:
         entry.
     CsvExporter:
       value: 320
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (class_size).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    DefaultDataNormalizationService:
-      value: 435
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (class_size).
       expires_on: '2026-04-30'
