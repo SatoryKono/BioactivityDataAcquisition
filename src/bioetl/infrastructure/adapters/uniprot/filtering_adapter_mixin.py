@@ -5,7 +5,8 @@ Contains FilterableDataSourcePort-compatible filtering methods.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.common import FallbackFetchRequest
@@ -20,6 +21,7 @@ from bioetl.infrastructure.adapters.uniprot.fallback_resolver import (
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
+_FetchStrategy = Callable[..., AsyncIterator[BronzeRecord]]
 
 _UNIPROT_FILTER_BATCH_SIZE = 100
 
@@ -29,7 +31,7 @@ class UniProtFilteringAdapterMixin:
 
     async def _fetch_non_protein_filtered(
         self,
-        strategy: Any,  # Any: dynamic payload or structural mixin boundary
+        strategy: _FetchStrategy,
         filter_ids: list[str],
         limit: int | None,
     ) -> AsyncIterator[BronzeRecord]:
@@ -46,7 +48,7 @@ class UniProtFilteringAdapterMixin:
 
     async def _fetch_proteins_batched(
         self,
-        strategy: Any,  # Any: dynamic payload or structural mixin boundary
+        strategy: _FetchStrategy,
         filter_ids: list[str],
         filter_field: str,
         limit: int | None,

@@ -1,4 +1,3 @@
-# mypy: disable-error-code=no-any-return
 """Fetch and fallback entrypoints for SemanticScholarAdapter.
 
 Contains FilterableDataSourcePort-compatible filtering methods.
@@ -8,9 +7,9 @@ from __future__ import annotations
 
 import contextlib
 import time
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
-from bioetl.domain.types import BronzeRecord
+from bioetl.domain.types import BronzeRecord, JsonDict
 from bioetl.infrastructure.adapters.common import FallbackFetchRequest
 from bioetl.infrastructure.adapters.semanticscholar.constants import (
     SEMANTICSCHOLAR_BASE_URL,
@@ -52,9 +51,7 @@ class SemanticScholarFetchAdapterMixin:
         fetched = 0
 
         while True:
-            params: dict[
-                str, Any  # Any: dynamic payload or structural mixin boundary
-            ] = {  # Any: dynamic payload or structural mixin boundary
+            params: JsonDict = {
                 "query": query or "*",
                 "fields": self.fields,
                 "offset": current_offset,

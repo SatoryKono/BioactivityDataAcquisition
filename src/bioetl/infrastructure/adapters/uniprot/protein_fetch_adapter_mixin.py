@@ -1,11 +1,10 @@
-# mypy: disable-error-code=no-any-return
 """Protein fetch internals for UniProtAdapter."""
 
 from __future__ import annotations
 
 import contextlib
 import time
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BronzeRecord, JsonDict
 from bioetl.infrastructure.adapters.uniprot.query_builder import (
@@ -86,7 +85,7 @@ class UniProtProteinFetchAdapterMixin:
         fetched: int,
         limit: int | None,
         cursor: str | None,
-    ) -> JsonDict:  # Any: dynamic payload or structural mixin boundary
+    ) -> JsonDict:
         """Build protein search parameters."""
         return build_uniprot_protein_search_params(
             query=query,

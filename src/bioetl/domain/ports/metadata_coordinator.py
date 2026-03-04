@@ -162,7 +162,7 @@ class GoldMetadataInput:
     transform_version: str | None = None
     transform_steps: tuple[str, ...] | None = None
     dq_report_path: str | None = None
-    gold_schema: Any | None = None  # Any: Pandera DataFrameModel...
+    gold_schema: object | None = None  # object: Pandera DataFrameModel class, only stored/forwarded
     governance: GovernanceMetadata | None = None
     total_bytes: int = 0  # ADR-029: Total size in bytes
     partition_count: int = 0  # ADR-029: Number of partitions

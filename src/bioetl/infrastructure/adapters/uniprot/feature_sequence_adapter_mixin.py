@@ -1,4 +1,3 @@
-# mypy: disable-error-code=no-any-return
 """Feature and sequence fetch methods for UniProtAdapter."""
 
 from __future__ import annotations
@@ -6,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import time
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.uniprot.fasta_parser import FastaParser

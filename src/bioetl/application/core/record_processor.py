@@ -12,7 +12,8 @@ from __future__ import annotations
 __all__ = ["RecordProcessor"]
 
 
-from typing import TYPE_CHECKING, Any
+from collections.abc import Awaitable, Callable
+from typing import TYPE_CHECKING
 
 from bioetl.application.core.batch_executor import BatchResult
 from bioetl.domain.exceptions import BioETLError
@@ -152,11 +153,11 @@ class RecordProcessor:
     async def _execute_with_span(
         self,
         name: str,
-        coro: Any,  # Any: coroutine type varies per pipeline stage
+        coro: Awaitable[object],  # Awaitable: coroutine type varies per pipeline stage
         batch_id: BatchID,
         count: int,
-        on_error: Any = None,  # Any: error callback type varies per caller
-    ) -> Any:  # Any: callback return type varies
+        on_error: Callable[[Exception], object] | None = None,  # callback for error handling
+    ) -> object:  # object: callback return type varies
         """Execute coroutine with tracing span."""
         span = self._start_span(name, batch_id, count)
         try:
@@ -194,7 +195,7 @@ class RecordProcessor:
 
     def _start_span(
         self, name: str, batch_id: BatchID, count: int, input_count: bool = False
-    ) -> Any:  # Any: OTel Span (avoids opentelemetry import)
+    ) -> Span | None:  # OTel Span or None if tracer unavailable
         """Start a tracing span if tracer is available."""
         if not self._tracer:
             return None

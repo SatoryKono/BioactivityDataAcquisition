@@ -50,7 +50,7 @@ def _serialize_dataclass(value: object) -> JsonDict:
 
 def _serialize_collection(
     value: JsonDict | list[object] | tuple[object, ...],
-) -> Any:  # Any: output mirrors heterogeneous input structure
+) -> JsonDict | list[object]:  # output mirrors heterogeneous input structure
     """Serialize dict/list/tuple recursively."""
     if isinstance(value, dict):
         return {key: _serialize_value(item) for key, item in value.items()}
