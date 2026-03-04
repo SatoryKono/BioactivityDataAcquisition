@@ -11,12 +11,14 @@ from __future__ import annotations
 __all__ = ["TitleFallbackHandler"]
 
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
 from bioetl.infrastructure.adapters.common import BaseTitleFallbackHandler, titles_match
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Awaitable, Callable
+
+    from bioetl.domain.types import JsonDict
 
     from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import JsonDict
@@ -33,7 +35,7 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
     def __init__(
         self,
         logger: LoggerPort,
-        search_fn: Callable[[str, int], Any],  # Any: coroutine returning list[dict]
+        search_fn: Callable[[str, int], Awaitable[list[JsonDict]]],
     ) -> None:
         """Initialize fallback handler.
 

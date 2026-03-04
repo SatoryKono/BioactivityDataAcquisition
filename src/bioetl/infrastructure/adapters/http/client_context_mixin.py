@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+from types import TracebackType
 from typing import Any
 
 import httpx
@@ -42,7 +43,7 @@ class HTTPClientContextMixin:
         self: Any,  # Any: mixin self type is provided structurally by composed adapter class
         exc_type: type[BaseException] | None,
         exc_val: BaseException | None,
-        exc_tb: Any,  # Any: context-manager protocol accepts implementation-defined traceback type
+        exc_tb: TracebackType | None,
     ) -> None:
         """Exit async context manager."""
         del exc_type, exc_val, exc_tb

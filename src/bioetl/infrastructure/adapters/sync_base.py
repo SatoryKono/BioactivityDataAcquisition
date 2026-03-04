@@ -25,8 +25,10 @@ __all__ = ["BaseSyncAdapter"]
 
 import asyncio
 import weakref
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
-from typing import TYPE_CHECKING, Any, Self
+from types import TracebackType
+from typing import TYPE_CHECKING, Self
 
 from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort, NoOpMetrics
 from bioetl.infrastructure.adapters.error_handling import ErrorService
@@ -123,13 +125,12 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
         """Enter async context manager."""
         return self
 
-    # Any: standard __aexit__ sig...
     async def __aexit__(
         self,
-        exc_type: Any,  # Any: __aexit__ protocol signature
-        exc_val: Any,  # Any: __aexit__ protocol signature
-        exc_tb: Any,  # Any: __aexit__ protocol signature
-    ) -> None:  # Any: adapter accepts varying types
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         """Exit async context manager."""
         await self.close()
 
@@ -141,12 +142,11 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
         """Gracefully close resources."""
         await self.close()
 
-    # Any: generic executor wrapp...
     async def _run_in_executor(
         self,
-        func: Any,  # Any: executor forwards arbitrary callable and args
-        *args: Any,  # Any: executor forwards arbitrary callable and args
-    ) -> Any:  # Any: adapter forwards arbitrary args
+        func: Callable[..., object],
+        *args: object,
+    ) -> object:
         """Run synchronous function in thread pool."""
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(self.thread_pool, func, *args)

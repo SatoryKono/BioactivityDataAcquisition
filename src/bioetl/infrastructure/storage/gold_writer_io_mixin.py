@@ -271,7 +271,7 @@ class GoldWriterIOMixin:
     async def _run_in_executor(
         self,
         func: Callable[..., T],
-        *args: Any,  # Any: variadic executor args
+        *args: object,
     ) -> T:
         """Run a function in the executor."""
         loop = asyncio.get_running_loop()
