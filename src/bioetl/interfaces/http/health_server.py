@@ -1,28 +1,31 @@
 """HTTP Health Server for BioETL.
 
-Provides Standard liveness and readiness probes.
+Provides standard liveness and readiness probes.
 """
 
 from __future__ import annotations
 
 import asyncio
-import json
 import time
-from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
-from bioetl.domain.types import HealthStatus
+from bioetl.interfaces.http.health_server_http_mixin import HealthServerHTTPMixin
+from bioetl.interfaces.http.health_server_routing_mixin import (
+    HealthServerRoutingMixin,
+)
+from bioetl.interfaces.http.health_server_state_mixin import HealthServerStateMixin
 from bioetl.interfaces.http.types import HealthResponse
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import HealthMonitorPort, LoggerPort
 
 
-class HealthServer:
-    """Async HTTP server for health check endpoints.
-
-    Provides Standard health probes.
-    """
+class HealthServer(
+    HealthServerHTTPMixin,
+    HealthServerRoutingMixin,
+    HealthServerStateMixin,
+):
+    """Async HTTP server for health check endpoints."""
 
     def __init__(
         self,
@@ -70,6 +73,7 @@ class HealthServer:
                     host=self.host,
                     port=self.port,
                     error=str(exc),
+                    reason_code="HEALTH_SERVER_BIND_FAILED",
                 )
             raise
         if self._logger:
@@ -77,12 +81,13 @@ class HealthServer:
 
     async def stop(self) -> None:
         """Stop the health server gracefully."""
-        if self._server:
-            self._server.close()
-            await self._server.wait_closed()
-            self._server = None
-            if self._logger:
-                self._logger.info("health_server_stopped")
+        if not self._server:
+            return
+        self._server.close()
+        await self._server.wait_closed()
+        self._server = None
+        if self._logger:
+            self._logger.info("health_server_stopped")
 
     @property
     def is_running(self) -> bool:
@@ -96,229 +101,6 @@ class HealthServer:
             return 0.0
         return time.monotonic() - self._start_time
 
-    async def _handle_connection(
-        self,
-        reader: asyncio.StreamReader,
-        writer: asyncio.StreamWriter,
-    ) -> None:
-        """Handle incoming HTTP connection."""
-        try:
-            await self._process_request(reader, writer)
-        except TimeoutError:
-            await self._send_response(writer, 408, "Request Timeout")
-        except self._request_error_allowlist as e:
-            await self._handle_request_error(writer, e)
-        finally:
-            await self._close_writer(writer)
-
-    async def _process_request(
-        self,
-        reader: asyncio.StreamReader,
-        writer: asyncio.StreamWriter,
-    ) -> None:
-        """Process incoming HTTP request."""
-        request_line = await asyncio.wait_for(reader.readline(), timeout=5.0)
-        if not request_line:
-            return
-
-        method, path = self._parse_request_line(request_line)
-        if method is None or path is None:
-            await self._send_response(writer, 400, "Bad Request")
-            return
-
-        await self._consume_headers(reader)
-
-        if method != "GET":
-            await self._send_response(writer, 405, "Method Not Allowed")
-            return
-
-        await self._route_request(writer, path)
-
-    def _parse_request_line(self, request_line: bytes) -> tuple[str | None, str | None]:
-        """Parse HTTP request line into method and path."""
-        request = request_line.decode("utf-8").strip()
-        parts = request.split(" ")
-        if len(parts) < 2:
-            return None, None
-        return parts[0], parts[1]
-
-    async def _consume_headers(self, reader: asyncio.StreamReader) -> None:
-        """Read and discard HTTP headers."""
-        while True:
-            line = await reader.readline()
-            if line in (b"\r\n", b"\n", b""):
-                break
-
-    async def _handle_request_error(
-        self, writer: asyncio.StreamWriter, error: Exception
-    ) -> None:
-        """Handle request processing error."""
-        if self._logger:
-            self._logger.error(
-                "health_server_error",
-                error=str(error),
-                error_type=type(error).__name__,
-                reason="request_processing_failed",
-            )
-        await self._send_response(writer, 500, "Internal Server Error")
-
-    async def _close_writer(self, writer: asyncio.StreamWriter) -> None:
-        """Close the stream writer safely."""
-        try:
-            writer.close()
-            await writer.wait_closed()
-        except self._writer_close_allowlist as close_error:
-            if self._logger:
-                self._logger.debug(
-                    "health_server_writer_close_failed",
-                    error=str(close_error),
-                    error_type=type(close_error).__name__,
-                    reason="writer_close_failed",
-                )
-
-    async def _route_request(self, writer: asyncio.StreamWriter, path: str) -> None:
-        """Route request to appropriate handler."""
-        path = path.split("?")[0]  # Remove query string
-        handlers = {
-            "/health": self._handle_health,
-            "/healthz": self._handle_health,
-            "/health/live": self._handle_liveness,
-            "/health/ready": self._handle_readiness,
-            "/health/providers": self._handle_providers,
-        }
-        handler = handlers.get(path)
-        if handler:
-            response = await handler()
-            await self._send_json_response(writer, response)
-        else:
-            await self._send_response(writer, 404, "Not Found")
-
-    async def _handle_health(self) -> HealthResponse:
-        """Handle /health endpoint - overall health status."""
-        status = self._get_overall_status()
-        checks: dict[str, Any] = {  # Any: CLI/HTTP response values are heterogeneous
-            "server": {
-                "status": "healthy",
-                "uptime_seconds": round(self.uptime_seconds, 2),
-            },
-        }
-        if self._health_monitor:
-            checks["providers"] = self._get_provider_statuses()
-        return HealthResponse(
-            status=status.value.lower(),
-            timestamp=datetime.now(tz=UTC).isoformat(),
-            checks=checks,
-        )
-
-    async def _handle_liveness(self) -> HealthResponse:
-        """Handle /health/live - Liveness probe."""
-        return HealthResponse(
-            status="healthy",
-            timestamp=datetime.now(tz=UTC).isoformat(),
-            checks={
-                "server": {
-                    "status": "healthy",
-                    "uptime_seconds": round(self.uptime_seconds, 2),
-                }
-            },
-        )
-
-    async def _handle_readiness(self) -> HealthResponse:
-        """Handle /health/ready - Readiness probe."""
-        if not self._health_monitor:
-            return HealthResponse(
-                status="healthy",
-                timestamp=datetime.now(tz=UTC).isoformat(),
-                checks={"message": "No health monitor configured"},
-            )
-        provider_statuses = self._get_provider_statuses()
-        has_unhealthy = any(
-            p.get("status") == "unhealthy" for p in provider_statuses.values()
-        )
-        status = "unhealthy" if has_unhealthy else "healthy"
-        return HealthResponse(
-            status=status,
-            timestamp=datetime.now(tz=UTC).isoformat(),
-            checks={"providers": provider_statuses},
-        )
-
-    async def _handle_providers(self) -> HealthResponse:
-        """Handle /health/providers - detailed provider status."""
-        if not self._health_monitor:
-            return HealthResponse(
-                status="healthy",
-                timestamp=datetime.now(tz=UTC).isoformat(),
-                checks={"message": "No health monitor configured"},
-            )
-        return HealthResponse(
-            status=self._get_overall_status().value.lower(),
-            timestamp=datetime.now(tz=UTC).isoformat(),
-            checks={"providers": self._get_provider_statuses()},
-        )
-
-    def _get_overall_status(self) -> HealthStatus:
-        """Get overall health status from all providers."""
-        if not self._health_monitor:
-            return HealthStatus.HEALTHY
-        states = self._health_monitor.get_all_states()
-        if not states:
-            return HealthStatus.HEALTHY
-        statuses = [state.status for state in states.values()]
-        if any(s == HealthStatus.UNHEALTHY for s in statuses):
-            return HealthStatus.UNHEALTHY
-        if any(s == HealthStatus.DEGRADED for s in statuses):
-            return HealthStatus.DEGRADED
-        return HealthStatus.HEALTHY
-
-    def _get_provider_statuses(
-        self,
-    ) -> dict[str, dict[str, Any]]:  # Any: CLI/HTTP response values are heterogeneous
-        """Get detailed status for all providers."""
-        if not self._health_monitor:
-            return {}
-        states = self._health_monitor.get_all_states()
-        return {
-            name: {
-                "status": state.status.value.lower(),
-                "consecutive_errors": state.consecutive_errors,
-            }
-            for name, state in states.items()
-        }
-
-    async def _send_json_response(
-        self, writer: asyncio.StreamWriter, response: HealthResponse
-    ) -> None:
-        """Send JSON response."""
-        body = response.to_json()
-        status_code = response.http_status
-        status_text = "OK" if status_code == 200 else "Service Unavailable"
-        http_response = (
-            f"HTTP/1.1 {status_code} {status_text}\r\n"
-            f"Content-Type: application/json\r\n"
-            f"Content-Length: {len(body)}\r\n"
-            f"Connection: close\r\n"
-            f"\r\n"
-            f"{body}"
-        )
-        writer.write(http_response.encode("utf-8"))
-        await writer.drain()
-
-    async def _send_response(
-        self, writer: asyncio.StreamWriter, status_code: int, message: str
-    ) -> None:
-        """Send plain text response."""
-        body = json.dumps({"error": message})
-        http_response = (
-            f"HTTP/1.1 {status_code} {message}\r\n"
-            f"Content-Type: application/json\r\n"
-            f"Content-Length: {len(body)}\r\n"
-            f"Connection: close\r\n"
-            f"\r\n"
-            f"{body}"
-        )
-        writer.write(http_response.encode("utf-8"))
-        await writer.drain()
-
 
 async def run_health_server(
     host: str = "0.0.0.0",
@@ -326,16 +108,12 @@ async def run_health_server(
     health_monitor: HealthMonitorPort | None = None,
     logger: LoggerPort | None = None,
 ) -> None:
-    """Run the health server until interrupted.
-
-    Args:
-        host: Host.
-        port: Port.
-        health_monitor: Health monitor.
-        logger: Logger instance.
-    """
+    """Run the health server until interrupted."""
     server = HealthServer(
-        host=host, port=port, health_monitor=health_monitor, logger=logger
+        host=host,
+        port=port,
+        health_monitor=health_monitor,
+        logger=logger,
     )
     await server.start()
     try:

@@ -2,6 +2,13 @@
 
 from __future__ import annotations
 
+__all__ = [
+    "compute_composite_key",
+    "is_duplicate_record",
+    "is_duplicate_record_composite",
+]
+
+
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:

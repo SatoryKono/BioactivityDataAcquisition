@@ -11,6 +11,9 @@ Implements RULES.md 2.3 and 02-user-rules.md 2.4:
 
 from __future__ import annotations
 
+__all__ = ["METADATA_FILENAME", "MetadataWriter"]
+
+
 import asyncio
 from pathlib import Path
 from typing import TYPE_CHECKING

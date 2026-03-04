@@ -30,6 +30,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **CLI orchestration policy unified for high-impact commands**:
+  - Commands updated: `export`, `health check`, `quarantine` (`inspect/stats/replay/purge/resolve`), `maintenance` (`vacuum`, `vacuum-all`, `archive`, `bronze-cleanup`)
+  - Standardized command-level error handling via shared `execution_policy` with explicit `reason_code` values and deterministic exit mapping
+  - Added compatibility matrix coverage for non-run entrypoints in `tests/integration/interfaces/test_cli_exit_code_matrix.py`
+  - Operator note: `health check --json` now returns non-zero exit code when any provider is unhealthy
+
 - **`config_loader.py` LOC exemption raised**: 680 → 725 LOC in `tests/architecture/test_code_metrics.py` to accommodate unified entity config support logic
   - Comment updated: `config loading with schema validation + schema_file linkage + unified entity config`
 

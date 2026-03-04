@@ -15,6 +15,14 @@ State transitions per RULES.md §3.5:
 
 from __future__ import annotations
 
+__all__ = [
+    "HealthAdjustedConfig",
+    "ProviderHealthMonitor",
+    "ProviderHealthState",
+    "ProviderHealthTracker",
+]
+
+
 import time
 from collections.abc import Mapping
 from dataclasses import dataclass, field

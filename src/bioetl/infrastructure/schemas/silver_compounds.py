@@ -2,6 +2,13 @@
 
 from __future__ import annotations
 
+__all__ = [
+    "PUBCHEM_COMPOUND_SCHEMA",
+    "UNIPROT_ID_MAPPING_SCHEMA",
+    "UNIPROT_PROTEIN_SCHEMA",
+]
+
+
 import pyarrow as pa
 
 PUBCHEM_COMPOUND_SCHEMA = pa.schema(

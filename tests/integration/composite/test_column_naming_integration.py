@@ -7,8 +7,8 @@ from unittest.mock import MagicMock
 import polars as pl
 import pytest
 
-from bioetl.application.composite.column_orderer import ColumnOrderer
-from bioetl.application.composite.column_renamer import ColumnRenamer
+from bioetl.application.composite.column_orderer import ColumnOrdererService
+from bioetl.application.composite.column_renamer import ColumnRenamerService
 from bioetl.domain.value_objects.column_order import SemanticGroup
 
 
@@ -23,15 +23,15 @@ def mock_logger() -> MagicMock:
 
 
 @pytest.fixture
-def renamer(mock_logger: MagicMock) -> ColumnRenamer:
-    """Create ColumnRenamer instance."""
-    return ColumnRenamer(mock_logger)
+def renamer(mock_logger: MagicMock) -> ColumnRenamerService:
+    """Create ColumnRenamerService instance."""
+    return ColumnRenamerService(mock_logger)
 
 
 @pytest.fixture
-def orderer(mock_logger: MagicMock) -> ColumnOrderer:
-    """Create ColumnOrderer instance."""
-    return ColumnOrderer(mock_logger)
+def orderer(mock_logger: MagicMock) -> ColumnOrdererService:
+    """Create ColumnOrdererService instance."""
+    return ColumnOrdererService(mock_logger)
 
 
 @pytest.fixture
@@ -72,8 +72,8 @@ class TestFullPipelineColumnOrder:
 
     def test_full_pipeline_column_order(
         self,
-        renamer: ColumnRenamer,
-        orderer: ColumnOrderer,
+        renamer: ColumnRenamerService,
+        orderer: ColumnOrdererService,
         seed_df: pl.DataFrame,
         enricher_crossref_df: pl.DataFrame,
     ) -> None:
@@ -123,8 +123,8 @@ class TestFullPipelineColumnOrder:
 
     def test_provider_order_within_group(
         self,
-        renamer: ColumnRenamer,
-        orderer: ColumnOrderer,
+        renamer: ColumnRenamerService,
+        orderer: ColumnOrdererService,
     ) -> None:
         """Within same semantic group, chembl comes before crossref."""
         # Create DataFrame with multiple providers for same field
@@ -148,8 +148,8 @@ class TestFullPipelineColumnOrder:
 
     def test_expected_column_order_publication(
         self,
-        renamer: ColumnRenamer,
-        orderer: ColumnOrderer,
+        renamer: ColumnRenamerService,
+        orderer: ColumnOrdererService,
     ) -> None:
         """Verify expected column order for publication composite."""
         df = pl.DataFrame(
@@ -206,7 +206,7 @@ class TestSeedColumnRenaming:
     """Tests for seed column renaming."""
 
     def test_seed_columns_renamed_to_qualified_format(
-        self, renamer: ColumnRenamer, seed_df: pl.DataFrame
+        self, renamer: ColumnRenamerService, seed_df: pl.DataFrame
     ) -> None:
         """Seed business columns become {provider}.{entity}.{field}."""
         result = renamer.rename_dataframe(seed_df, "chembl_publication")
@@ -222,7 +222,7 @@ class TestSeedColumnRenaming:
         assert "journal" not in result.columns
 
     def test_seed_join_keys_not_renamed(
-        self, renamer: ColumnRenamer, seed_df: pl.DataFrame
+        self, renamer: ColumnRenamerService, seed_df: pl.DataFrame
     ) -> None:
         """Join keys (doi, pmid) remain unchanged."""
         result = renamer.rename_dataframe(seed_df, "chembl_publication")
@@ -231,7 +231,7 @@ class TestSeedColumnRenaming:
         assert "pmid" in result.columns
 
     def test_seed_system_columns_not_renamed(
-        self, renamer: ColumnRenamer, seed_df: pl.DataFrame
+        self, renamer: ColumnRenamerService, seed_df: pl.DataFrame
     ) -> None:
         """System columns (prefixed with _) remain unchanged."""
         result = renamer.rename_dataframe(seed_df, "chembl_publication")
@@ -249,7 +249,7 @@ class TestEnricherColumnRenaming:
     """Tests for enricher column renaming."""
 
     def test_enricher_columns_renamed_to_qualified_format(
-        self, renamer: ColumnRenamer, enricher_crossref_df: pl.DataFrame
+        self, renamer: ColumnRenamerService, enricher_crossref_df: pl.DataFrame
     ) -> None:
         """Enricher business columns become {provider}.{entity}.{field}."""
         result = renamer.rename_dataframe(enricher_crossref_df, "crossref_publication")
@@ -264,7 +264,7 @@ class TestNoColumnConflicts:
 
     def test_same_field_different_providers_no_conflict(
         self,
-        renamer: ColumnRenamer,
+        renamer: ColumnRenamerService,
         seed_df: pl.DataFrame,
         enricher_crossref_df: pl.DataFrame,
     ) -> None:
@@ -285,7 +285,7 @@ class TestEdgeCases:
     """Tests for edge cases."""
 
     def test_empty_dataframe(
-        self, renamer: ColumnRenamer, orderer: ColumnOrderer
+        self, renamer: ColumnRenamerService, orderer: ColumnOrdererService
     ) -> None:
         """Empty DataFrame handled correctly."""
         df = pl.DataFrame()
@@ -295,7 +295,7 @@ class TestEdgeCases:
         assert len(ordered.columns) == 0
 
     def test_only_system_columns(
-        self, renamer: ColumnRenamer, orderer: ColumnOrderer
+        self, renamer: ColumnRenamerService, orderer: ColumnOrdererService
     ) -> None:
         """DataFrame with only system columns."""
         df = pl.DataFrame(
@@ -314,7 +314,9 @@ class TestEdgeCases:
 class TestDataPreservation:
     """Tests verifying data integrity through the pipeline."""
 
-    def test_data_values_preserved_through_rename(self, renamer: ColumnRenamer) -> None:
+    def test_data_values_preserved_through_rename(
+        self, renamer: ColumnRenamerService
+    ) -> None:
         """Data values are preserved after renaming."""
         df = pl.DataFrame(
             {
@@ -332,7 +334,7 @@ class TestDataPreservation:
         assert result["doi"].to_list() == ["10.1/test"]
 
     def test_data_values_preserved_through_ordering(
-        self, orderer: ColumnOrderer
+        self, orderer: ColumnOrdererService
     ) -> None:
         """Data values are preserved after ordering."""
         df = pl.DataFrame(
@@ -352,8 +354,8 @@ class TestDataPreservation:
 
     def test_row_count_preserved(
         self,
-        renamer: ColumnRenamer,
-        orderer: ColumnOrderer,
+        renamer: ColumnRenamerService,
+        orderer: ColumnOrdererService,
         seed_df: pl.DataFrame,
     ) -> None:
         """Row count is preserved through full pipeline."""
@@ -369,7 +371,7 @@ class TestMultipleEnrichers:
     """Tests for scenarios with multiple enrichers."""
 
     def test_three_providers_merge_correctly(
-        self, renamer: ColumnRenamer, orderer: ColumnOrderer
+        self, renamer: ColumnRenamerService, orderer: ColumnOrdererService
     ) -> None:
         """Columns from three providers merge and order correctly."""
         # Seed from ChEMBL
@@ -427,7 +429,7 @@ class TestQualifiedColumnHandling:
     """Tests for already-qualified column handling."""
 
     def test_already_qualified_columns_not_double_renamed(
-        self, renamer: ColumnRenamer
+        self, renamer: ColumnRenamerService
     ) -> None:
         """Already qualified columns are not renamed again."""
         df = pl.DataFrame(
@@ -446,7 +448,9 @@ class TestQualifiedColumnHandling:
         # Should not create double-qualified name
         assert "crossref.publication.chembl.publication.title" not in result.columns
 
-    def test_qualified_columns_grouped_by_field(self, orderer: ColumnOrderer) -> None:
+    def test_qualified_columns_grouped_by_field(
+        self, orderer: ColumnOrdererService
+    ) -> None:
         """Qualified columns are grouped by their field semantic group."""
         df = pl.DataFrame(
             {

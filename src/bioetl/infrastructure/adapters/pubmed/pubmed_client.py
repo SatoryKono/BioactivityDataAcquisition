@@ -7,6 +7,9 @@ Split into mixins to comply with LOC limits.
 
 from __future__ import annotations
 
+__all__ = ["ENTREZ_API_BASE", "PubMedAdapter"]
+
+
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
@@ -15,6 +18,10 @@ from pydantic import BaseModel
 from bioetl.domain.entities.pubmed import ArticleRecord
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
+from bioetl.infrastructure.adapters.common import (
+    run_fetch_with_fallback_policy,
+    split_filter_ids_for_fallback,
+)
 from bioetl.infrastructure.adapters.error_handling import ErrorService
 from bioetl.infrastructure.adapters.filterable_mixin import NotSupportedMultiFilterMixin
 from bioetl.infrastructure.adapters.pubmed._fetch import PubMedFetchMixin
@@ -134,49 +141,31 @@ class PubMedAdapter(
         if entity_type != "publication":
             raise ValueError("PubMedAdapter only supports 'publication'")
 
-        valid_ids = [id_ for id_ in filter_ids if id_.strip()]
-        title_only_entries = [id_ for id_ in filter_ids if not id_.strip()]
+        primary_ids, title_only_entries = split_filter_ids_for_fallback(filter_ids)
 
-        fetched = 0
-        found_ids: set[str] = set()
-
-        if valid_ids:
+        async def _primary_records() -> AsyncIterator[BronzeRecord]:
+            if not primary_ids:
+                return
             async for record in self.fetch_filtered(
                 entity_type=entity_type,
-                filter_ids=valid_ids,
+                filter_ids=primary_ids,
                 filter_field=filter_field,
                 limit=limit,
             ):
-                record["_lookup_method"] = "pmid"
-                found_id = str(record.get("pmid", ""))
-                if found_id:
-                    found_ids.add(found_id.lower())
-                fetched += 1
                 yield record
-                if limit and fetched >= limit:
-                    return
 
-        if self._fallback_handler:
-            async for record in self._fallback_handler.process_missing_dois(
-                dois=valid_ids,
-                found_dois=found_ids,
-                fallback_mapping=fallback_mapping,
-                normalize_fn=lambda x: x.lower().strip(),
-                limit=limit,
-                fetched=fetched,
-            ):
-                fetched += 1
-                yield record
-                if limit and fetched >= limit:
-                    return
-
-            async for record in self._fallback_handler.process_title_only_entries(
-                entries=title_only_entries,
-                fallback_mapping=fallback_mapping,
-                limit=limit,
-                fetched=fetched,
-            ):
-                yield record
+        async for record in run_fetch_with_fallback_policy(
+            primary_records=_primary_records(),
+            primary_ids=primary_ids,
+            title_only_entries=title_only_entries,
+            fallback_mapping=fallback_mapping,
+            normalize_id=lambda value: value.lower().strip(),
+            extract_record_id=lambda rec: str(rec.get("pmid", "")),
+            fallback_handler=self._fallback_handler,
+            limit=limit,
+            primary_lookup_method="pmid",
+        ):
+            yield record
 
     async def fetch(
         self,

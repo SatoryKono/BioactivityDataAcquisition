@@ -9,6 +9,9 @@ Supports three-phase fallback strategy:
 
 from __future__ import annotations
 
+__all__ = ["BaseTitleFallbackHandler"]
+
+
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any
 

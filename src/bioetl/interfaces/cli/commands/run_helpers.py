@@ -23,6 +23,10 @@ __all__ = [
 
 from bioetl.composition.entrypoints import preview_cleanup
 from bioetl.composition.registry import get_default_registry
+from bioetl.interfaces.cli.commands.execution_policy import (
+    build_failure_context,
+    render_failure_context,
+)
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import (
     echo_cleanup_preview,
@@ -94,13 +98,15 @@ def show_cleanup_preview(pipeline: str) -> None:
     try:
         asyncio.run(_preview_cleanup_async(pipeline))
     except (BioETLError, FileNotFoundError, OSError, RuntimeError, ValueError) as exc:
+        failure_context = build_failure_context(
+            exc,
+            reason_code="CLI_CLEANUP_PREVIEW_ERROR",
+            subject_key="pipeline",
+            subject_value=pipeline,
+        )
         echo_error(
             "Error previewing cleanup",
-            (
-                f"{exc} "
-                f"(reason_code=CLI_CLEANUP_PREVIEW_ERROR, pipeline={pipeline}, "
-                f"error_type={type(exc).__name__})"
-            ),
+            render_failure_context(failure_context),
         )
 
 

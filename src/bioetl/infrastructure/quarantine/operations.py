@@ -5,6 +5,9 @@ Contains operations for reading and analyzing quarantined records.
 
 from __future__ import annotations
 
+__all__ = ["get_statistics", "inspect_records", "purge_records", "replay_records"]
+
+
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any
 

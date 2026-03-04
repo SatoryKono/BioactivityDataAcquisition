@@ -12,6 +12,9 @@ Uses declarative field_specs DSL for mapping.
 
 from __future__ import annotations
 
+__all__ = ["PublicationTransformer"]
+
+
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import TransformationError

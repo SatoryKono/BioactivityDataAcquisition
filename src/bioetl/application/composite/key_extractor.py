@@ -8,6 +8,9 @@ See ADR-026 for architectural decisions.
 
 from __future__ import annotations
 
+__all__ = ["KeyExtractorService"]
+
+
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 

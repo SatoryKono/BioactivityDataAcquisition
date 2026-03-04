@@ -3,4 +3,7 @@
 
 from __future__ import annotations
 
+__all__ = ["ENTREZ_API_BASE"]
+
+
 ENTREZ_API_BASE = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"

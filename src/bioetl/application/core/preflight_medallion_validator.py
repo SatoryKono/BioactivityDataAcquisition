@@ -20,9 +20,11 @@ class _MedallionConfigValidator:
         self,
         config: PipelineConfig,
         logger: LoggerPort,
+        write_mode_policy: WriteModePolicy | None = None,
     ) -> None:
         self._config = config
         self._logger = logger
+        self._write_mode_policy = write_mode_policy or WriteModePolicy()
 
     def validate_medallion_config(
         self,
@@ -53,7 +55,7 @@ class _MedallionConfigValidator:
     def validate_write_modes(self) -> list[ConfigValidationError]:
         """Validate that configured write modes are allowed by policy."""
         errors: list[ConfigValidationError] = []
-        write_mode_policy = WriteModePolicy()
+        write_mode_policy = self._write_mode_policy
 
         silver_mode = self._config.table.silver_write_mode
         silver_mode_value = str(silver_mode)

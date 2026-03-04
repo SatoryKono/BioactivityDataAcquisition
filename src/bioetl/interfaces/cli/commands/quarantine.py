@@ -9,7 +9,8 @@ from __future__ import annotations
 import asyncio
 import json
 import sys
-from typing import Any
+from collections.abc import Callable, Coroutine
+from typing import Any, TypeVar
 
 import click
 
@@ -19,6 +20,12 @@ from bioetl.composition.entrypoints import (
 )
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.types import QuarantineRecordStatus
+from bioetl.interfaces.cli.commands.execution_policy import (
+    CLI_ENTRYPOINT_TYPED_ERRORS,
+)
+from bioetl.interfaces.cli.commands.execution_policy import (
+    handle_cli_failure as handle_cli_execution_failure,
+)
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import (
     echo_error,
@@ -26,14 +33,111 @@ from bioetl.interfaces.cli.formatters import (
     echo_quarantine_record,
 )
 
+_T = TypeVar("_T")
+
+
+def _handle_quarantine_failure(
+    exc: BaseException,
+    *,
+    reason_code: str,
+    pipeline: str,
+    domain_error_title: str,
+    unexpected_error_title: str,
+    interrupted_message: str = "Quarantine command interrupted by user (Ctrl+C)",
+) -> None:
+    """Handle quarantine command failures with shared CLI policy."""
+    handle_cli_execution_failure(
+        exc,
+        reason_code=reason_code,
+        subject_key="pipeline",
+        subject_value=pipeline,
+        domain_error_title=domain_error_title,
+        unexpected_error_title=unexpected_error_title,
+        interrupted_message=interrupted_message,
+        default_exit_code=ExitCode.FAIL,
+    )
+
+
+def _run_quarantine_async(
+    coro: Coroutine[Any, Any, _T],  # Any: standard Coroutine type params
+    *,
+    pipeline: str,
+    reason_prefix: str,
+    domain_error_title: str,
+    unexpected_error_title: str,
+) -> _T | None:
+    try:
+        return asyncio.run(coro)
+    except BioETLError as exc:
+        _handle_quarantine_failure(
+            exc,
+            reason_code=f"{reason_prefix}_DOMAIN_ERROR",
+            pipeline=pipeline,
+            domain_error_title=domain_error_title,
+            unexpected_error_title=unexpected_error_title,
+        )
+    except KeyboardInterrupt as exc:
+        _handle_quarantine_failure(
+            exc,
+            reason_code=f"{reason_prefix}_SIGINT",
+            pipeline=pipeline,
+            domain_error_title=domain_error_title,
+            unexpected_error_title=unexpected_error_title,
+        )
+    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
+        _handle_quarantine_failure(
+            exc,
+            reason_code=f"{reason_prefix}_UNEXPECTED_ERROR",
+            pipeline=pipeline,
+            domain_error_title=domain_error_title,
+            unexpected_error_title=unexpected_error_title,
+        )
+    finally:
+        if getattr(coro, "cr_frame", None) is not None:
+            coro.close()
+    return None
+
+
+def _run_quarantine_sync(
+    fn: Callable[[], _T],
+    *,
+    pipeline: str,
+    reason_prefix: str,
+    domain_error_title: str,
+    unexpected_error_title: str,
+) -> _T | None:
+    try:
+        return fn()
+    except BioETLError as exc:
+        _handle_quarantine_failure(
+            exc,
+            reason_code=f"{reason_prefix}_DOMAIN_ERROR",
+            pipeline=pipeline,
+            domain_error_title=domain_error_title,
+            unexpected_error_title=unexpected_error_title,
+        )
+    except KeyboardInterrupt as exc:
+        _handle_quarantine_failure(
+            exc,
+            reason_code=f"{reason_prefix}_SIGINT",
+            pipeline=pipeline,
+            domain_error_title=domain_error_title,
+            unexpected_error_title=unexpected_error_title,
+        )
+    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
+        _handle_quarantine_failure(
+            exc,
+            reason_code=f"{reason_prefix}_UNEXPECTED_ERROR",
+            pipeline=pipeline,
+            domain_error_title=domain_error_title,
+            unexpected_error_title=unexpected_error_title,
+        )
+    return None
+
 
 @click.group()
 def quarantine() -> None:
-    """Manage quarantine (failed records).
-
-    Error recovery dashboard commands for inspecting, analyzing,
-    and recovering from pipeline failures.
-    """
+    """Manage quarantine (failed records)."""
 
 
 @quarantine.command("inspect")
@@ -41,17 +145,7 @@ def quarantine() -> None:
 @click.option("--limit", type=int, default=100, help="Maximum records to show")
 @click.option("--error-code", help="Filter by error code")
 def quarantine_inspect(pipeline: str, limit: int, error_code: str | None) -> None:
-    """Inspect quarantined records.
-
-    Example:
-        bioetl quarantine inspect --pipeline chembl_activity
-        bioetl quarantine inspect --pipeline chembl_activity --error-code DQ_MISSING_FIELD
-
-    Args:
-        pipeline: Pipeline.
-        limit: Maximum number of records to process.
-        error_code: Error code.
-    """
+    """Inspect quarantined records for a pipeline."""
     echo_info(f"Inspecting quarantine for {pipeline} (limit {limit})...")
 
     quarantine_manager = get_quarantine_manager(pipeline)
@@ -65,28 +159,20 @@ def quarantine_inspect(pipeline: str, limit: int, error_code: str | None) -> Non
         for rec in records:
             echo_quarantine_record(rec)
 
-    asyncio.run(_inspect())
+    _run_quarantine_async(
+        _inspect(),
+        pipeline=pipeline,
+        reason_prefix="CLI_QUARANTINE_INSPECT",
+        domain_error_title="Failed to inspect quarantine with domain error",
+        unexpected_error_title="Unexpected error during quarantine inspect",
+    )
 
 
 @quarantine.command("stats")
 @click.option("--pipeline", required=True, help="Pipeline name")
 @click.option("--json", "output_json", is_flag=True, help="Output as JSON")
 def quarantine_stats(pipeline: str, output_json: bool) -> None:
-    """Show quarantine statistics dashboard.
-
-    Displays a summary of quarantined records including:
-    - Total count
-    - Breakdown by error code
-    - Breakdown by status (NEW, REVIEWED, RESOLVED)
-
-    Example:
-        bioetl quarantine stats --pipeline chembl_activity
-        bioetl quarantine stats --pipeline chembl_activity --json
-
-    Args:
-        pipeline: Pipeline.
-        output_json: Whether to output json.
-    """
+    """Show quarantine statistics dashboard for a pipeline."""
     quarantine_manager = get_quarantine_manager(pipeline)
 
     async def _stats() -> dict[
@@ -94,18 +180,15 @@ def quarantine_stats(pipeline: str, output_json: bool) -> None:
     ]:  # Any: quarantine record has heterogeneous values
         return await quarantine_manager.get_stats()
 
-    try:
-        stats = asyncio.run(_stats())
-    except (BioETLError, OSError, RuntimeError, ValueError) as exc:
-        echo_error(
-            "Failed to get stats",
-            (
-                f"{exc} "
-                f"(reason_code=CLI_QUARANTINE_STATS_ERROR, pipeline={pipeline}, "
-                f"error_type={type(exc).__name__})"
-            ),
-        )
-        sys.exit(ExitCode.FAIL)
+    stats = _run_quarantine_async(
+        _stats(),
+        pipeline=pipeline,
+        reason_prefix="CLI_QUARANTINE_STATS",
+        domain_error_title="Failed to get stats",
+        unexpected_error_title="Failed to get stats",
+    )
+    if stats is None:
+        return
 
     if output_json:
         click.echo(json.dumps(stats, indent=2))
@@ -147,28 +230,21 @@ def quarantine_replay(
     max_age_days: int,
     dry_run: bool,
 ) -> None:
-    """Replay (retry) quarantined records.
-
-    Retrieves quarantined records for reprocessing by the pipeline.
-    Use --dry-run to preview records without actually replaying.
-
-    Example:
-        bioetl quarantine replay --pipeline chembl_activity --dry-run
-        bioetl quarantine replay --pipeline chembl_activity --error-code DQ_NETWORK_ERROR
-
-    Args:
-        pipeline: Pipeline.
-        error_code: Error code.
-        max_age_days: Maximum age days.
-        dry_run: Dry run mode flag.
-    """
+    """Replay (retry) quarantined records."""
     quarantine_service = get_quarantine_service()
-
-    records = quarantine_service.replay(
+    records = _run_quarantine_sync(
+        lambda: quarantine_service.replay(
+            pipeline=pipeline,
+            error_code=error_code,
+            max_age_days=max_age_days,
+        ),
         pipeline=pipeline,
-        error_code=error_code,
-        max_age_days=max_age_days,
+        reason_prefix="CLI_QUARANTINE_REPLAY",
+        domain_error_title="Failed to replay quarantine records with domain error",
+        unexpected_error_title="Unexpected error during quarantine replay",
     )
+    if records is None:
+        return
 
     if not records:
         echo_info("No records found for replay.")
@@ -186,8 +262,15 @@ def quarantine_replay(
             click.echo(f"  ... and {len(records) - 10} more")
     else:
         click.echo(f"\nReplaying {len(records)} record(s)...")
-        # Mark records as reprocessed
-        marked_count = quarantine_service.mark_as_reprocessed(records)
+        marked_count = _run_quarantine_sync(
+            lambda: quarantine_service.mark_as_reprocessed(records),
+            pipeline=pipeline,
+            reason_prefix="CLI_QUARANTINE_REPLAY_MARK",
+            domain_error_title="Failed to mark replayed records with domain error",
+            unexpected_error_title="Unexpected error during quarantine replay mark",
+        )
+        if marked_count is None:
+            return
         click.echo(f"Marked {marked_count} record(s) as REPROCESSED.")
         echo_info("Records are ready for reprocessing by the pipeline.")
 
@@ -205,21 +288,7 @@ def quarantine_purge(
     dry_run: bool,
     force: bool,
 ) -> None:
-    """Purge old quarantine records.
-
-    Deletes quarantined records older than the specified number of days.
-    Default retention is 30 days per RULES.md §2.6.
-
-    Example:
-        bioetl quarantine purge --pipeline chembl_activity --dry-run
-        bioetl quarantine purge --pipeline chembl_activity --older-than-days 60
-
-    Args:
-        pipeline: Pipeline.
-        older_than_days: Older than days.
-        dry_run: Dry run mode flag.
-        force: Force operation flag.
-    """
+    """Purge old quarantine records."""
     quarantine_service = get_quarantine_service()
 
     if dry_run:
@@ -229,7 +298,15 @@ def quarantine_purge(
         ]:  # Any: quarantine record has heterogeneous values
             return await quarantine_service.get_stats(pipeline)
 
-        stats = asyncio.run(_get_stats())
+        stats = _run_quarantine_async(
+            _get_stats(),
+            pipeline=pipeline,
+            reason_prefix="CLI_QUARANTINE_PURGE_PREVIEW",
+            domain_error_title="Failed to preview quarantine purge with domain error",
+            unexpected_error_title="Unexpected error during quarantine purge preview",
+        )
+        if stats is None:
+            return
         total = stats.get("total_count", 0)
         click.echo(f"\nWould purge records older than {older_than_days} days.")
         click.echo(f"Current total in quarantine: {total}")
@@ -242,10 +319,18 @@ def quarantine_purge(
             abort=True,
         )
 
-    count = quarantine_service.purge(
+    count = _run_quarantine_sync(
+        lambda: quarantine_service.purge(
+            pipeline=pipeline,
+            older_than_days=older_than_days,
+        ),
         pipeline=pipeline,
-        older_than_days=older_than_days,
+        reason_prefix="CLI_QUARANTINE_PURGE",
+        domain_error_title="Failed to purge quarantine records with domain error",
+        unexpected_error_title="Unexpected error during quarantine purge",
     )
+    if count is None:
+        return
 
     click.echo(f"Purged {count} record(s) from quarantine.")
 
@@ -257,28 +342,20 @@ def quarantine_purge(
     "--status", type=click.Choice(["IGNORED", "REPROCESSED"]), default="IGNORED"
 )
 def quarantine_resolve(pipeline: str, payload_hash: str, status: str) -> None:
-    """Mark a quarantine record as resolved.
-
-    Updates the status of a quarantined record to indicate
-    it has been reviewed (IGNORED) or reprocessed (REPROCESSED).
-
-    Status values:
-    - IGNORED: Reviewed and marked as non-actionable
-    - REPROCESSED: Successfully reprocessed and moved to Silver
-
-    Example:
-        bioetl quarantine resolve --pipeline chembl_activity --payload-hash abc123
-        bioetl quarantine resolve --pipeline chembl_activity --payload-hash abc123 --status REPROCESSED
-
-    Args:
-        pipeline: Pipeline.
-        payload_hash: Payload hash.
-        status: Status value.
-    """
+    """Mark a quarantine record as resolved."""
     quarantine_service = get_quarantine_service()
-
-    new_status = QuarantineRecordStatus[status]
-    success = quarantine_service.update_status(payload_hash, new_status)
+    success = _run_quarantine_sync(
+        lambda: quarantine_service.update_status(
+            payload_hash,
+            QuarantineRecordStatus[status],
+        ),
+        pipeline=pipeline,
+        reason_prefix="CLI_QUARANTINE_RESOLVE",
+        domain_error_title="Failed to resolve quarantine record with domain error",
+        unexpected_error_title="Unexpected error during quarantine resolve",
+    )
+    if success is None:
+        return
 
     if success:
         click.echo(f"Record {payload_hash} marked as {status}.")

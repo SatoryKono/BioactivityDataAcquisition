@@ -9,6 +9,9 @@ the PubchemMolecule domain entity for validation and invariant checking.
 
 from __future__ import annotations
 
+__all__ = ["PubChemCompoundTransformer"]
+
+
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import BaseTransformer

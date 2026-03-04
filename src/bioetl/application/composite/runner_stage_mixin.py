@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable
-from typing import TYPE_CHECKING, cast
+from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from bioetl.application.composite.runner_constants import (
     CHECKPOINT_NON_FATAL_ERRORS,
@@ -40,7 +40,7 @@ if TYPE_CHECKING:
     from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
     from bioetl.domain.ports import LoggerPort
 
-__all__ = ["CompositeRunnerStageHelper"]
+__all__ = ["CompositeRunnerStageMixin"]
 
 
 class _CompositeRunnerStageSupportMixin:
@@ -57,47 +57,53 @@ class _CompositeRunnerStageSupportMixin:
     _coordinator: EnrichmentCoordinatorService
     _enricher_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner]
 
+    async def _save_checkpoint_safe(
+        self,
+        state: CompositeCheckpointState,
+        operation: str,
+    ) -> bool:  # pragma: no cover - implemented by support mixin
+        raise NotImplementedError
+
+    async def _run_seed(self) -> SeedResult:  # pragma: no cover - support mixin
+        raise NotImplementedError
+
+    def _get_enrichers_to_run(
+        self,
+        state: CompositeCheckpointState,
+    ) -> list[EnricherConfig]:  # pragma: no cover - implemented by support mixin
+        raise NotImplementedError
+
+    def _check_required_enrichers(
+        self,
+        enrichment_results: dict[str, EnrichmentResult],
+    ) -> None:  # pragma: no cover - implemented by support mixin
+        raise NotImplementedError
+
     async def _call_save_checkpoint_safe(
         self,
         state: CompositeCheckpointState,
         operation: str,
     ) -> bool:
         """Invoke support-layer checkpoint save helper."""
-        save_checkpoint = cast(
-            "Callable[[CompositeCheckpointState, str], Awaitable[bool]]",
-            getattr(self, "_save_checkpoint_safe"),
-        )
-        return await save_checkpoint(state, operation)
+        return await self._save_checkpoint_safe(state, operation)
 
     async def _call_run_seed(self) -> SeedResult:
         """Invoke support-layer seed runner helper."""
-        run_seed = cast(
-            "Callable[[], Awaitable[SeedResult]]",
-            getattr(self, "_run_seed"),
-        )
-        return await run_seed()
+        return await self._run_seed()
 
     def _call_get_enrichers_to_run(
         self,
         state: CompositeCheckpointState,
     ) -> list[EnricherConfig]:
         """Invoke support-layer enricher selection helper."""
-        get_enrichers = cast(
-            "Callable[[CompositeCheckpointState], list[EnricherConfig]]",
-            getattr(self, "_get_enrichers_to_run"),
-        )
-        return get_enrichers(state)
+        return self._get_enrichers_to_run(state)
 
     def _call_check_required_enrichers(
         self,
         enrichment_results: dict[str, EnrichmentResult],
     ) -> None:
         """Invoke support-layer required-enricher validation helper."""
-        check_required = cast(
-            "Callable[[dict[str, EnrichmentResult]], None]",
-            getattr(self, "_check_required_enrichers"),
-        )
-        check_required(enrichment_results)
+        self._check_required_enrichers(enrichment_results)
 
     def _has_dependencies_configured(self) -> bool:
         """Check if dependencies phase is configured and ready."""
@@ -122,7 +128,7 @@ class _CompositeRunnerStageSupportMixin:
         return failed
 
 
-class CompositeRunnerStageHelper(_CompositeRunnerStageSupportMixin):
+class CompositeRunnerStageMixin(_CompositeRunnerStageSupportMixin):
     """Mixin with seed/dependencies/enrichment stage orchestration."""
 
     async def _execute_seed_phase(

@@ -68,7 +68,10 @@ PIPELINE_CASES: tuple[PipelineE2ECase, ...] = (
         "chembl_assay_parameters",
         "chembl",
         "assay_parameters",
-        cassette_candidates=("test_chembl_assay_full_cycle",),
+        cassette_candidates=(
+            "test_pipeline_matrix__chembl_assay_parameters",
+            "test_chembl_assay_full_cycle",
+        ),
     ),
     PipelineE2ECase(
         "chembl_cell_line",
@@ -92,7 +95,13 @@ PIPELINE_CASES: tuple[PipelineE2ECase, ...] = (
         "molecule",
         cassette_candidates=("test_chembl_molecule_full_cycle",),
     ),
-    PipelineE2ECase("chembl_protein_class", "chembl", "protein_class"),
+    PipelineE2ECase(
+        "chembl_protein_class",
+        "chembl",
+        "protein_class",
+        smoke_limit=2,
+        cassette_candidates=("test_pipeline_matrix__chembl_protein_class",),
+    ),
     PipelineE2ECase(
         "chembl_publication",
         "chembl",
@@ -103,12 +112,16 @@ PIPELINE_CASES: tuple[PipelineE2ECase, ...] = (
         "chembl_publication_similarity",
         "chembl",
         "publication_similarity",
+        cassette_candidates=("test_pipeline_matrix__chembl_publication_similarity",),
     ),
     PipelineE2ECase(
         "chembl_publication_term",
         "chembl",
         "publication_term",
-        cassette_candidates=("test_chembl_publication_term_full_cycle",),
+        cassette_candidates=(
+            "test_pipeline_matrix__chembl_publication_term",
+            "test_chembl_publication_term_full_cycle",
+        ),
     ),
     PipelineE2ECase(
         "chembl_subcellular_fraction",

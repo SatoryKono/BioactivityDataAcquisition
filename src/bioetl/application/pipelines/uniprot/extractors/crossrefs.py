@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+__all__ = ["CrossRefExtractor"]
+
+
 from typing import Any
 
 from bioetl.domain.serialization import serialize_to_json

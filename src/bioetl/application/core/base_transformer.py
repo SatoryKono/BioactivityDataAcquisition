@@ -13,12 +13,22 @@ Implements DRY principle by extracting shared logic from entity transformers.
 
 from __future__ import annotations
 
+__all__ = [
+    "BaseTransformer",
+    "FilteredOutError",
+    "T",
+    "TransformationError",
+    "V",
+    "ValueObjectWithFromRaw",
+]
+
+
 import dataclasses
 import time
 from abc import ABC, abstractmethod
 from typing import (
     TYPE_CHECKING,
-    Any,
+    Any,  # Any: transformer input/output payloads are provider-specific
     ClassVar,
     Protocol,
     TypeVar,

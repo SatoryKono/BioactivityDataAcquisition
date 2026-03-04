@@ -2,9 +2,9 @@
 
 This module remains importable to preserve backward compatibility:
 ``bioetl.infrastructure.config.source_normalizers.source``.
-Implementation lives in leaf package ``bioetl.infrastructure.source_normalizers``.
+Implementation lives in ``bioetl.infrastructure.legacy_normalizers``.
 """
 
-from bioetl.infrastructure.source_normalizers.source import normalize_source_config
+from bioetl.infrastructure.legacy_normalizers.source import normalize_source_config
 
 __all__ = ["normalize_source_config"]

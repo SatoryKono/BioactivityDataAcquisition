@@ -27,12 +27,16 @@ class RetryConfig:
 
     Args:
         max_attempts: Maximum number of attempts (default: 3)
+        retry_budget_per_request: Optional cap for number of retries per request.
+            When set, effective retries = min(retry_budget_per_request, max_attempts - 1).
         multiplier: Delay multiplier per attempt (default: 2.0, results in 1s, 2s, 4s)
         jitter_range: Min/max jitter factor as tuple (default: (0.1, 0.5))
         retryable_statuses: HTTP status codes to retry (default: 429, 500, 502, 503, 504)
         retryable_exceptions: Exception types to retry (default: ConnectionError, TimeoutError)
         base_delay: Base delay in seconds (default: 1.0)
         max_delay: Maximum delay in seconds (default: 60.0)
+        max_retry_after_seconds: Optional cap for Retry-After delays. When not set,
+            max_delay is used as upper bound.
         jitter_seed: Seed for deterministic jitter (default: None)
 
     Example:
@@ -43,6 +47,7 @@ class RetryConfig:
     """
 
     max_attempts: int = 3
+    retry_budget_per_request: int | None = None
     multiplier: float = 2.0
     jitter_range: tuple[float, float] = (0.1, 0.5)
     retryable_statuses: frozenset[int] = field(
@@ -51,6 +56,7 @@ class RetryConfig:
     retryable_exceptions: tuple[type[Exception], ...] = (ConnectionError, TimeoutError)
     base_delay: float = 1.0
     max_delay: float = 60.0
+    max_retry_after_seconds: float | None = None
     jitter_seed: int | None = None
 
     def is_retryable_status(self, status_code: int) -> bool:
@@ -118,6 +124,22 @@ class RetryConfig:
             True if no more attempts allowed after this one
         """
         return attempt >= self.max_attempts - 1
+
+    def effective_retry_budget(self) -> int:
+        """Get effective retry budget (number of retries, not attempts)."""
+        max_retries = max(0, self.max_attempts - 1)
+        if self.retry_budget_per_request is None:
+            return max_retries
+        return max(0, min(self.retry_budget_per_request, max_retries))
+
+    def clamp_retry_after(self, retry_after_seconds: float) -> float:
+        """Clamp Retry-After delay to configured upper bound."""
+        upper_bound = (
+            self.max_retry_after_seconds
+            if self.max_retry_after_seconds is not None
+            else self.max_delay
+        )
+        return max(0.0, min(retry_after_seconds, upper_bound))
 
 
 @dataclass(frozen=True, slots=True)

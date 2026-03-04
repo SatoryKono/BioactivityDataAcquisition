@@ -11,6 +11,9 @@ Environment variables:
 
 from __future__ import annotations
 
+__all__ = ["SaltConfig", "Sha256PiiHasher"]
+
+
 import hashlib
 import os
 import unicodedata

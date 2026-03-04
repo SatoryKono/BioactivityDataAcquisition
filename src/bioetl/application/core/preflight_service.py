@@ -32,20 +32,15 @@ class PreflightService:
         context: PipelineContext,
         logger: LoggerPort,
         metrics: MetricsPort,
+        health_aggregator: _HealthAggregator,
+        medallion_validator: _MedallionConfigValidator,
     ) -> None:
         self._config = config
         self._context = context
         self._logger = logger
         self._metrics = metrics
-        self._health_aggregator = _HealthAggregator(
-            metrics=metrics,
-            logger=logger,
-            pipeline_name=config.pipeline_name,
-        )
-        self._medallion_validator = _MedallionConfigValidator(
-            config=config,
-            logger=logger,
-        )
+        self._health_aggregator = health_aggregator
+        self._medallion_validator = medallion_validator
 
     async def validate_infrastructure(self, services: PipelineServices) -> HealthReport:
         """Validate storage and data source health."""

@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+__all__ = ["LockManager"]
+
+
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 

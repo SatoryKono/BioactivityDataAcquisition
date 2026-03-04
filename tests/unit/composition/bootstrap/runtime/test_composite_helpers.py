@@ -1,17 +1,13 @@
-"""Unit tests for pure helper functions in composition/bootstrap/runtime/composite.py.
+"""Unit tests for pure helper functions in composite bootstrap modules.
 
 Covers the stateless helper functions that can be tested without bootstrapping
 the full composition root:
-- _resolve_composite_gold_schema
-- _to_id_str
-- _resolve_composite_config_path
-- _build_fallback_mapping
-- _find_filter_key
-- _extract_filter_ids_from_keys
-- _extract_field_values
-- _extract_multi_filter_ids
-- _resolve_bronze_opts
-- _load_field_group_registry (partial, graceful degradation path)
+- _resolve_composite_gold_schema (composite.py)
+- _to_id_str (composite.py)
+- _resolve_composite_config_path (composite.py)
+- CompositeFilterExtractionService methods (composite_filter_extraction_service.py)
+- resolve_bronze_opts (runner_factory_builder_service.py)
+- _load_field_group_registry (composite.py, graceful degradation path)
 """
 
 from __future__ import annotations
@@ -39,26 +35,48 @@ pytestmark = pytest.mark.skipif(not HAS_POLARS, reason="polars not installed")
 
 
 def _import_helpers():
-    """Import private helper functions from composite module."""
+    """Import helper functions from composite bootstrap modules.
+
+    Functions that were previously compat-wrappers in composite.py now
+    resolve to their canonical locations in extracted service modules.
+    """
     from bioetl.composition.bootstrap.runtime.composite import (
-        _build_fallback_mapping,
-        _extract_field_values,
-        _extract_filter_ids_from_keys,
-        _extract_multi_filter_ids,
-        _find_filter_key,
-        _resolve_bronze_opts,
         _resolve_composite_config_path,
         _resolve_composite_gold_schema,
         _to_id_str,
     )
+    from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
+        CompositeFilterExtractionService,
+    )
+    from bioetl.composition.bootstrap.runtime.runner_factory_builder_service import (
+        resolve_bronze_opts,
+    )
 
     return {
-        "_build_fallback_mapping": _build_fallback_mapping,
-        "_extract_field_values": _extract_field_values,
-        "_extract_filter_ids_from_keys": _extract_filter_ids_from_keys,
-        "_extract_multi_filter_ids": _extract_multi_filter_ids,
-        "_find_filter_key": _find_filter_key,
-        "_resolve_bronze_opts": _resolve_bronze_opts,
+        "_build_fallback_mapping": lambda keys, filter_key, join_keys: (
+            CompositeFilterExtractionService().build_fallback_mapping(
+                keys=keys,
+                filter_key=filter_key,
+                join_keys=join_keys,
+            )
+        ),
+        "_extract_field_values": lambda keys, field: (
+            CompositeFilterExtractionService().extract_field_values(keys, field)
+        ),
+        "_extract_filter_ids_from_keys": lambda enricher_cfg, keys, logger=None: (
+            CompositeFilterExtractionService(logger=logger).extract_enricher_filters(
+                enricher_cfg=enricher_cfg,
+                keys=keys,
+            )
+        ),
+        "_extract_multi_filter_ids": lambda dep_cfg, keys, logger=None: (
+            CompositeFilterExtractionService(logger=logger).extract_multi_filter_ids(
+                dep_cfg=dep_cfg,
+                keys=keys,
+            )
+        ),
+        "_find_filter_key": CompositeFilterExtractionService.find_filter_key,
+        "_resolve_bronze_opts": resolve_bronze_opts,
         "_resolve_composite_config_path": _resolve_composite_config_path,
         "_resolve_composite_gold_schema": _resolve_composite_gold_schema,
         "_to_id_str": _to_id_str,

@@ -1,4 +1,4 @@
-"""Tests for _resolve_bronze_opts helper function.
+"""Tests for resolve_bronze_opts helper function.
 
 Tests tri-state resolution logic for per-phase cached Bronze settings
 in composite pipeline bootstrap.
@@ -7,7 +7,9 @@ in composite pipeline bootstrap.
 from __future__ import annotations
 
 from bioetl.application.composite.runner import CompositeRuntimeConfig
-from bioetl.composition.bootstrap.runtime.composite import _resolve_bronze_opts
+from bioetl.composition.bootstrap.runtime.runner_factory_builder_service import (
+    resolve_bronze_opts as _resolve_bronze_opts,
+)
 
 
 class TestResolveBronzeOpts:

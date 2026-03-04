@@ -5,6 +5,9 @@ Extracted from GoldDQAnalyzer per audit-package-structure-2026-02-07.
 
 from __future__ import annotations
 
+__all__ = ["check_referential_integrity", "check_scd_integrity"]
+
+
 from typing import Any, cast
 
 import polars as pl
@@ -26,6 +29,67 @@ _SCD_INTEGRITY_ERRORS = (
 )
 
 
+def _parse_reference_key(ref_key: str) -> tuple[str, str] | None:
+    """Parse mapping key ``local_col -> table.ref_col``."""
+    parts = ref_key.split("->")
+    if len(parts) != 2:
+        return None
+    local_col = parts[0].strip()
+    ref_parts = parts[1].strip().split(".")
+    if len(ref_parts) != 2:
+        return None
+    return local_col, ref_parts[1]
+
+
+def _as_reference_dataframe(ref_table: pl.DataFrame | pa.Table) -> pl.DataFrame:
+    """Convert reference table to Polars DataFrame."""
+    if isinstance(ref_table, pa.Table):
+        return cast("pl.DataFrame", pl.from_arrow(ref_table))
+    return ref_table
+
+
+def _classify_fk_status(orphan_records: int, total_references: int) -> DQCheckStatus:
+    """Classify FK integrity status from orphan ratio."""
+    if orphan_records <= 0:
+        return DQCheckStatus.PASS
+    orphan_ratio = orphan_records / total_references if total_references > 0 else 0.0
+    return DQCheckStatus.FAIL if orphan_ratio > 0.01 else DQCheckStatus.WARN
+
+
+def _build_fk_result(
+    df: pl.DataFrame,
+    ref_key: str,
+    local_col: str,
+    ref_df: pl.DataFrame,
+    ref_col: str,
+) -> ForeignKeyResult:
+    """Compute foreign-key metrics for one mapping rule."""
+    local_values = df[local_col].drop_nulls()
+    ref_values = ref_df[ref_col].unique()
+
+    total_refs = len(local_values)
+    valid_refs = int(local_values.is_in(ref_values).sum())
+    orphans = total_refs - valid_refs
+    status = _classify_fk_status(orphans, total_refs)
+
+    return ForeignKeyResult(
+        reference=ref_key,
+        total_references=total_refs,
+        valid_references=valid_refs,
+        orphan_records=orphans,
+        status=status,
+    )
+
+
+def _aggregate_dq_status(statuses: list[DQCheckStatus]) -> DQCheckStatus:
+    """Aggregate statuses with FAIL > WARN > PASS precedence."""
+    if any(status == DQCheckStatus.FAIL for status in statuses):
+        return DQCheckStatus.FAIL
+    if any(status == DQCheckStatus.WARN for status in statuses):
+        return DQCheckStatus.WARN
+    return DQCheckStatus.PASS
+
+
 def check_referential_integrity(
     df: pl.DataFrame, reference_tables: dict[str, pl.DataFrame | pa.Table]
 ) -> ReferentialIntegrityResult:
@@ -45,66 +109,31 @@ def check_referential_integrity(
         )
 
     fk_results: dict[str, ForeignKeyResult] = {}
-    has_failures = False
-    has_warnings = False
 
     for ref_key, ref_table in reference_tables.items():
-        parts = ref_key.split("->")
-        if len(parts) != 2:
+        parsed_ref = _parse_reference_key(ref_key)
+        if parsed_ref is None:
             continue
-
-        local_col = parts[0].strip()
-        ref_parts = parts[1].strip().split(".")
-        if len(ref_parts) != 2:
-            continue
-
-        ref_col = ref_parts[1]
+        local_col, ref_col = parsed_ref
 
         if local_col not in df.columns:
             continue
 
-        if isinstance(ref_table, pa.Table):
-            ref_df = cast("pl.DataFrame", pl.from_arrow(ref_table))
-        else:
-            ref_df = ref_table
-
+        ref_df = _as_reference_dataframe(ref_table)
         if ref_col not in ref_df.columns:
             continue
 
-        local_values = df[local_col].drop_nulls()
-        ref_values = ref_df[ref_col].unique()
-
-        total_refs = len(local_values)
-        valid_refs = int(local_values.is_in(ref_values).sum())
-        orphans = total_refs - valid_refs
-
-        if orphans > 0:
-            if orphans / total_refs > 0.01:
-                status = DQCheckStatus.FAIL
-                has_failures = True
-            else:
-                status = DQCheckStatus.WARN
-                has_warnings = True
-        else:
-            status = DQCheckStatus.PASS
-
-        fk_results[ref_key] = ForeignKeyResult(
-            reference=ref_key,
-            total_references=total_refs,
-            valid_references=valid_refs,
-            orphan_records=orphans,
-            status=status,
+        fk_results[ref_key] = _build_fk_result(
+            df=df,
+            ref_key=ref_key,
+            local_col=local_col,
+            ref_df=ref_df,
+            ref_col=ref_col,
         )
-
-    overall_status = DQCheckStatus.PASS
-    if has_failures:
-        overall_status = DQCheckStatus.FAIL
-    elif has_warnings:
-        overall_status = DQCheckStatus.WARN
 
     return ReferentialIntegrityResult(
         foreign_keys=fk_results,
-        status=overall_status,
+        status=_aggregate_dq_status([result.status for result in fk_results.values()]),
     )
 
 

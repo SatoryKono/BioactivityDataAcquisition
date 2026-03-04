@@ -5,6 +5,15 @@ Extracted from GoldDQAnalyzer per audit-package-structure-2026-02-07.
 
 from __future__ import annotations
 
+__all__ = [
+    "FRESHNESS_CRITICAL_HOURS",
+    "FRESHNESS_WARNING_HOURS",
+    "check_completeness",
+    "check_data_freshness",
+    "check_record_count",
+]
+
+
 from datetime import datetime
 
 import polars as pl

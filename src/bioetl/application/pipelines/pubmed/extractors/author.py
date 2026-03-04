@@ -14,6 +14,9 @@ PII Safety (RULES.md §5.4):
 
 from __future__ import annotations
 
+__all__ = ["AuthorExtractor", "EMAIL_PATTERN", "RawAuthor", "StructuredAffiliation"]
+
+
 import re
 from typing import TypedDict
 from xml.etree.ElementTree import Element

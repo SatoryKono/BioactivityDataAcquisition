@@ -23,9 +23,9 @@
 Этот пакет является краеугольным камнем архитектуры **Ports & Adapters**. Он определяет интерфейсы (через
 `typing.Protocol`), которые должны реализовывать адаптеры из слоя `Infrastructure`.
 
-**Структура пакета (26 файлов):**
+**Структура пакета (28 файлов):**
 
-Пакет содержит 26 protocol-файлов (актуально на 2026-02-23), организованных по категориям:
+Пакет содержит 28 protocol-файлов (актуально на 2026-03-04), организованных по категориям:
 
 **Основные порты:**
 
@@ -240,7 +240,7 @@ Domain содержит 11 дополнительных поддиректори
 | Domain DDD           | [08-domain-ddd.mermaid](mmd-diagrams/foundation/08-domain-ddd.mmd)                                 | DDD-структура домена                              |
 | Domain Models        | [13-domain-models-relationship.mermaid](mmd-diagrams/foundation/13-domain-models-relationship.mmd) | Связи доменных моделей                            |
 | DDD Aggregates       | [08-domain-ddd.mermaid](mmd-diagrams/foundation/08-domain-ddd.mmd)                                 | DDD агрегаты: Batch, PipelineRun, QuarantineEntry |
-| Ports Architecture   | [30-port-adapter-mapping.mermaid](mmd-diagrams/foundation/26-hexagonal-ports-adapters.mmd)             | Архитектура 26 портов                             |
+| Ports Architecture   | [30-port-adapter-mapping.mermaid](mmd-diagrams/foundation/26-hexagonal-ports-adapters.mmd)             | Архитектура 28 портов                             |
 
 ### Связанные ADR
 

@@ -5,6 +5,9 @@ Uses standard deviation to identify outliers.
 
 from __future__ import annotations
 
+__all__ = ["ZScoreDetector"]
+
+
 import statistics
 from datetime import datetime
 from typing import TYPE_CHECKING

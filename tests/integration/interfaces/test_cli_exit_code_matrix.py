@@ -1,0 +1,281 @@
+"""Integration matrix for CLI exit-code mapping across orchestration commands."""
+
+from __future__ import annotations
+
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+
+from bioetl.application.services import (
+    ExportResult,
+    PipelineNotFoundError,
+    PipelineRunResult,
+    RunResult,
+)
+from bioetl.interfaces.cli import cli
+from bioetl.interfaces.cli.commands.run_all import BatchRunResult
+from bioetl.interfaces.cli.exit_codes import ExitCode
+
+
+@pytest.mark.integration
+class TestCliExitCodeMatrix:
+    """Validate consistent exit-code policy for run/run-all/run-composite."""
+
+    @pytest.fixture(autouse=True)
+    def _mock_registry(self):
+        registry = MagicMock()
+        registry.list_pipelines.return_value = [
+            "chembl_activity",
+            "chembl_assay",
+            "pubchem_compound",
+        ]
+        with (
+            patch("bioetl.interfaces.cli.main.register_all_pipelines"),
+            patch(
+                "bioetl.interfaces.cli.commands.run_helpers.get_default_registry",
+                return_value=registry,
+            ),
+            patch(
+                "bioetl.interfaces.cli.commands.run_all.get_default_registry",
+                return_value=registry,
+            ),
+        ):
+            yield
+
+    def test_run_exit_code_matrix(self, cli_runner) -> None:
+        with patch("bioetl.interfaces.cli.commands.run.execute_run") as mock_execute:
+            mock_execute.return_value = RunResult(
+                status=PipelineRunResult.SUCCESS,
+                pipeline_name="chembl_activity",
+                run_id="test-run-id",
+                run_type="incremental",
+            )
+            result = cli_runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
+            assert result.exit_code == ExitCode.OK
+
+            mock_execute.return_value = RunResult(
+                status=PipelineRunResult.SHUTDOWN,
+                pipeline_name="chembl_activity",
+                run_id="test-run-id",
+                run_type="incremental",
+            )
+            result = cli_runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
+            assert result.exit_code == ExitCode.SIGINT
+
+            mock_execute.return_value = RunResult(
+                status=PipelineRunResult.FAILED,
+                pipeline_name="chembl_activity",
+                run_id="test-run-id",
+                run_type="incremental",
+                error_type="DataQualityError",
+            )
+            result = cli_runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
+            assert result.exit_code == ExitCode.DATA_QUALITY_ERROR
+
+            mock_execute.side_effect = PipelineNotFoundError(
+                "chembl_activity",
+                ["chembl_assay"],
+            )
+            result = cli_runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
+            assert result.exit_code == ExitCode.CONFIG_ERROR
+
+            mock_execute.side_effect = RuntimeError("boom")
+            result = cli_runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
+            assert result.exit_code == ExitCode.FAIL
+
+    def test_run_all_exit_code_matrix(self, cli_runner) -> None:
+        with patch("bioetl.interfaces.cli.commands.run_all.asyncio.run") as mock_run:
+            mock_run.return_value = BatchRunResult(
+                total=2,
+                succeeded=2,
+                failed=0,
+                skipped=0,
+                results=[
+                    RunResult(
+                        status=PipelineRunResult.SUCCESS,
+                        pipeline_name="chembl_activity",
+                        run_id="test-run-id",
+                        run_type="incremental",
+                    ),
+                    RunResult(
+                        status=PipelineRunResult.SUCCESS,
+                        pipeline_name="chembl_assay",
+                        run_id="test-run-id",
+                        run_type="incremental",
+                    ),
+                ],
+            )
+            result = cli_runner.invoke(cli, ["run-all", "--source", "chembl", "--yes"])
+            assert result.exit_code == ExitCode.OK
+
+            mock_run.return_value = BatchRunResult(
+                total=2,
+                succeeded=1,
+                failed=1,
+                skipped=0,
+                failed_pipelines=["chembl_assay"],
+                results=[
+                    RunResult(
+                        status=PipelineRunResult.SUCCESS,
+                        pipeline_name="chembl_activity",
+                        run_id="test-run-id",
+                        run_type="incremental",
+                    ),
+                    RunResult(
+                        status=PipelineRunResult.FAILED,
+                        pipeline_name="chembl_assay",
+                        run_id="test-run-id",
+                        run_type="incremental",
+                    ),
+                ],
+            )
+            result = cli_runner.invoke(cli, ["run-all", "--source", "chembl", "--yes"])
+            assert result.exit_code == ExitCode.PIPELINE_ERROR
+
+            mock_run.return_value = BatchRunResult(
+                total=1,
+                succeeded=0,
+                failed=0,
+                skipped=1,
+                results=[
+                    RunResult(
+                        status=PipelineRunResult.SHUTDOWN,
+                        pipeline_name="chembl_activity",
+                        run_id="test-run-id",
+                        run_type="incremental",
+                    )
+                ],
+            )
+            result = cli_runner.invoke(cli, ["run-all", "--source", "chembl", "--yes"])
+            assert result.exit_code == ExitCode.SIGINT
+
+    def test_run_composite_exit_code_matrix(self, cli_runner) -> None:
+        with patch(
+            "bioetl.interfaces.cli.commands.run_composite.asyncio.run"
+        ) as mock_run:
+            mock_run.return_value = (True, None)
+            result = cli_runner.invoke(
+                cli,
+                ["run-composite", "--composite", "publication"],
+            )
+            assert result.exit_code == ExitCode.OK
+
+            mock_run.return_value = (False, "failed")
+            result = cli_runner.invoke(
+                cli,
+                ["run-composite", "--composite", "publication"],
+            )
+            assert result.exit_code == ExitCode.PIPELINE_ERROR
+
+            mock_run.side_effect = KeyboardInterrupt()
+            result = cli_runner.invoke(
+                cli,
+                ["run-composite", "--composite", "publication"],
+            )
+            assert result.exit_code == ExitCode.SIGINT
+
+            mock_run.side_effect = RuntimeError("boom")
+            result = cli_runner.invoke(
+                cli,
+                ["run-composite", "--composite", "publication"],
+            )
+            assert result.exit_code == ExitCode.FAIL
+
+    def test_export_exit_code_matrix(self, cli_runner) -> None:
+        service = MagicMock()
+        service.list_tables.return_value = []
+        service.export = AsyncMock(
+            return_value=ExportResult(
+                table_name="chembl.activity",
+                layer="silver",
+                format="csv",
+                output_path=None,
+                row_count=10,
+                error=None,
+            )
+        )
+        service.preview = AsyncMock(return_value=MagicMock())
+
+        with patch(
+            "bioetl.interfaces.cli.commands.export.get_export_service",
+            return_value=service,
+        ):
+            result = cli_runner.invoke(cli, ["export", "--list"])
+            assert result.exit_code == ExitCode.OK
+
+            service.export.return_value = ExportResult(
+                table_name="chembl.activity",
+                layer="silver",
+                format="csv",
+                output_path=None,
+                row_count=0,
+                error="write failed",
+            )
+            result = cli_runner.invoke(cli, ["export", "chembl.activity"])
+            assert result.exit_code == ExitCode.FAIL
+
+            service.list_tables.side_effect = RuntimeError("boom")
+            result = cli_runner.invoke(cli, ["export", "--list"])
+            assert result.exit_code == ExitCode.FAIL
+
+    def test_health_check_exit_code_matrix(self, cli_runner) -> None:
+        with patch("bioetl.interfaces.cli.commands.health.asyncio.run") as mock_run:
+            mock_run.return_value = {
+                "chembl": {"status": "healthy", "latency_ms": "10.0"},
+                "pubchem": {"status": "healthy", "latency_ms": "20.0"},
+            }
+            result = cli_runner.invoke(cli, ["health", "check"])
+            assert result.exit_code == ExitCode.OK
+
+            mock_run.return_value = {
+                "chembl": {"status": "healthy", "latency_ms": "10.0"},
+                "pubchem": {"status": "unhealthy", "error": "timeout"},
+            }
+            result = cli_runner.invoke(cli, ["health", "check", "--json"])
+            assert result.exit_code == ExitCode.FAIL
+
+            mock_run.side_effect = RuntimeError("boom")
+            result = cli_runner.invoke(cli, ["health", "check"])
+            assert result.exit_code == ExitCode.FAIL
+
+    def test_quarantine_stats_exit_code_matrix(self, cli_runner) -> None:
+        manager = MagicMock()
+        manager.get_stats = AsyncMock(
+            return_value={
+                "total_count": 1,
+                "by_error_code": {"DQ_MISSING": 1},
+                "by_status": {"NEW": 1},
+            }
+        )
+        with patch(
+            "bioetl.interfaces.cli.commands.quarantine.get_quarantine_manager",
+            return_value=manager,
+        ):
+            result = cli_runner.invoke(
+                cli, ["quarantine", "stats", "--pipeline", "chembl_activity"]
+            )
+            assert result.exit_code == ExitCode.OK
+
+            manager.get_stats.side_effect = RuntimeError("boom")
+            result = cli_runner.invoke(
+                cli, ["quarantine", "stats", "--pipeline", "chembl_activity"]
+            )
+            assert result.exit_code == ExitCode.FAIL
+
+    def test_maintenance_vacuum_exit_code_matrix(self, cli_runner) -> None:
+        lifecycle = MagicMock()
+        lifecycle.vacuum = AsyncMock(return_value=5)
+        with patch(
+            "bioetl.interfaces.cli.commands.vacuum.get_lifecycle_service",
+            return_value=lifecycle,
+        ):
+            result = cli_runner.invoke(
+                cli, ["maintenance", "vacuum", "chembl.activity"]
+            )
+            assert result.exit_code == ExitCode.OK
+
+            lifecycle.vacuum.side_effect = RuntimeError("boom")
+            result = cli_runner.invoke(
+                cli, ["maintenance", "vacuum", "chembl.activity"]
+            )
+            assert result.exit_code == ExitCode.FAIL

@@ -11,6 +11,9 @@ Delegates data extraction to specialized extractors for maintainability.
 
 from __future__ import annotations
 
+__all__ = ["UniProtProteinTransformer"]
+
+
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import (

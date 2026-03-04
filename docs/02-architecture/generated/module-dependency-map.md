@@ -4,8 +4,8 @@
 
 ## Summary
 
-- Scanned modules: `605`
-- Internal import edges (raw): `2192`
+- Scanned modules: `638`
+- Internal import edges (raw): `2357`
 - Aggregated layer edges: `14`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (top 60): `60`
@@ -19,105 +19,105 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|270 OK| application
-    application -->|413 OK| domain
-    composition -->|122 OK| application
-    composition -->|137 OK| composition
-    composition -->|126 OK| domain
-    composition -->|113 OK| infrastructure
-    domain -->|365 OK| domain
-    infrastructure -->|285 OK| domain
-    infrastructure -->|269 OK| infrastructure
-    interfaces -->|8 OK| application
+    application -->|303 OK| application
+    application -->|444 OK| domain
+    composition -->|147 OK| application
+    composition -->|142 OK| composition
+    composition -->|136 OK| domain
+    composition -->|115 OK| infrastructure
+    domain -->|369 OK| domain
+    infrastructure -->|288 OK| domain
+    infrastructure -->|280 OK| infrastructure
+    interfaces -->|10 OK| application
     interfaces -->|22 OK| composition
-    interfaces -->|12 OK| domain
+    interfaces -->|21 OK| domain
     interfaces -->|1 OK| infrastructure
-    interfaces -->|49 OK| interfaces
+    interfaces -->|79 OK| interfaces
 ```
 
 ## Layer Edge Table
 
 | From | To | Imports | Policy |
 |---|---|---:|---|
-| `application` | `application` | 270 | allowed |
-| `application` | `domain` | 413 | allowed |
-| `composition` | `application` | 122 | allowed |
-| `composition` | `composition` | 137 | allowed |
-| `composition` | `domain` | 126 | allowed |
-| `composition` | `infrastructure` | 113 | allowed |
-| `domain` | `domain` | 365 | allowed |
-| `infrastructure` | `domain` | 285 | allowed |
-| `infrastructure` | `infrastructure` | 269 | allowed |
-| `interfaces` | `application` | 8 | allowed |
+| `application` | `application` | 303 | allowed |
+| `application` | `domain` | 444 | allowed |
+| `composition` | `application` | 147 | allowed |
+| `composition` | `composition` | 142 | allowed |
+| `composition` | `domain` | 136 | allowed |
+| `composition` | `infrastructure` | 115 | allowed |
+| `domain` | `domain` | 369 | allowed |
+| `infrastructure` | `domain` | 288 | allowed |
+| `infrastructure` | `infrastructure` | 280 | allowed |
+| `interfaces` | `application` | 10 | allowed |
 | `interfaces` | `composition` | 22 | allowed |
-| `interfaces` | `domain` | 12 | allowed |
+| `interfaces` | `domain` | 21 | allowed |
 | `interfaces` | `infrastructure` | 1 | allowed |
-| `interfaces` | `interfaces` | 49 | allowed |
+| `interfaces` | `interfaces` | 79 | allowed |
 
 ## Cross-Layer Module-Group Edges (Compact)
 
 | From Group | To Group | Imports |
 |---|---|---:|
-| `application.composite` | `domain.composite` | 47 |
+| `application.composite` | `domain.composite` | 54 |
 | `infrastructure.adapters` | `domain.ports` | 43 |
 | `composition.factories` | `application.pipelines` | 42 |
-| `composition.factories` | `application.core` | 35 |
+| `application.core` | `domain.ports` | 40 |
+| `composition.factories` | `application.core` | 39 |
 | `application.pipelines` | `domain.types` | 33 |
-| `application.core` | `domain.ports` | 32 |
-| `application.core` | `domain.types` | 31 |
-| `infrastructure.adapters` | `domain.types` | 28 |
+| `application.core` | `domain.types` | 32 |
+| `infrastructure.adapters` | `domain.types` | 29 |
+| `application.composite` | `domain.ports` | 28 |
+| `composition.bootstrap` | `application.composite` | 28 |
+| `infrastructure.adapters` | `domain.exceptions` | 26 |
 | `infrastructure.storage` | `domain.ports` | 26 |
-| `infrastructure.adapters` | `domain.exceptions` | 25 |
 | `application.pipelines` | `domain.entities` | 24 |
-| `application.composite` | `domain.ports` | 23 |
 | `composition.factories` | `domain.schemas` | 19 |
 | `application.services` | `domain.ports` | 18 |
 | `interfaces.cli` | `composition.entrypoints` | 17 |
 | `application.pipelines` | `domain.context` | 15 |
+| `application.core` | `domain.context` | 14 |
 | `application.pipelines` | `domain.value_objects` | 14 |
 | `composition.factories` | `domain.ports` | 14 |
 | `composition.providers` | `infrastructure.adapters` | 14 |
 | `infrastructure.storage` | `domain.types` | 14 |
-| `application.core` | `domain.context` | 13 |
+| `application.composite` | `domain.exceptions` | 12 |
+| `composition.bootstrap` | `application.services` | 12 |
+| `composition.bootstrap` | `infrastructure.config` | 12 |
 | `composition.factories` | `infrastructure.storage` | 12 |
 | `infrastructure.schemas` | `domain.config` | 12 |
 | `infrastructure.storage` | `domain.medallion` | 12 |
-| `composition.bootstrap` | `application.services` | 11 |
-| `composition.bootstrap` | `infrastructure.config` | 11 |
-| `application.composite` | `domain.exceptions` | 10 |
+| `application.core` | `domain.exceptions` | 11 |
+| `application.services` | `domain.value_objects` | 11 |
+| `interfaces.cli` | `domain.exceptions` | 11 |
 | `application.pipelines` | `domain.ports` | 10 |
 | `application.pipelines` | `domain.services` | 10 |
+| `composition.bootstrap` | `domain.ports` | 10 |
 | `infrastructure.adapters` | `domain.models` | 10 |
 | `infrastructure.storage` | `domain.models` | 10 |
 | `application.pipelines` | `domain.filtering` | 9 |
 | `application.pipelines` | `domain.transformations` | 9 |
-| `application.services` | `domain.value_objects` | 9 |
 | `composition.factories` | `infrastructure.config` | 9 |
-| `application.core` | `domain.exceptions` | 8 |
 | `application.services` | `domain.exceptions` | 8 |
-| `composition.bootstrap` | `application.composite` | 8 |
 | `composition.factories` | `infrastructure.schemas` | 8 |
 | `infrastructure.storage` | `domain.value_objects` | 8 |
 | `application.core` | `domain.config` | 7 |
-| `composition.bootstrap` | `domain.ports` | 7 |
+| `composition.bootstrap` | `domain.composite` | 7 |
 | `composition.bootstrap` | `infrastructure.observability` | 7 |
+| `composition.bootstrap` | `infrastructure.storage` | 7 |
+| `composition.factories` | `domain.types` | 7 |
 | `infrastructure.schemas` | `domain.filtering` | 7 |
+| `interfaces.cli` | `application.services` | 7 |
 | `application.composite` | `domain.schemas` | 6 |
 | `application.pipelines` | `domain.mapping` | 6 |
-| `composition.bootstrap` | `infrastructure.storage` | 6 |
-| `composition.factories` | `domain.types` | 6 |
 | `infrastructure.observability` | `domain.ports` | 6 |
 | `infrastructure.schemas` | `domain.composite` | 6 |
 | `infrastructure.storage` | `domain.exceptions` | 6 |
-| `interfaces.cli` | `domain.exceptions` | 6 |
 | `application.pipelines` | `domain.normalization` | 5 |
+| `application.services` | `domain.services` | 5 |
 | `composition.bootstrap` | `application.core` | 5 |
 | `composition.factories` | `domain.config` | 5 |
 | `composition.factories` | `infrastructure.adapters` | 5 |
-| `interfaces.cli` | `application.services` | 5 |
 | `application.composite` | `domain.events` | 4 |
-| `application.core` | `domain.value_objects` | 4 |
-| `application.pipelines` | `domain.serialization` | 4 |
 
 ## Policy Violations
 

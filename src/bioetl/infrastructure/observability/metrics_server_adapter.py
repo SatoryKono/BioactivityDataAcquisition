@@ -6,6 +6,9 @@ Wraps the existing start_metrics_server infrastructure function.
 
 from __future__ import annotations
 
+__all__ = ["MetricsServerAdapter"]
+
+
 from typing import TYPE_CHECKING
 
 from bioetl.infrastructure.observability.server import (

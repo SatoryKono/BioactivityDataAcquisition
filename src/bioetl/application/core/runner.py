@@ -13,6 +13,9 @@ Delegates to specialized services (injected directly via DI):
 
 from __future__ import annotations
 
+__all__ = ["PipelineRunner"]
+
+
 from typing import TYPE_CHECKING
 
 from bioetl.domain.events import PipelineEvent

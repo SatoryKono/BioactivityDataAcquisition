@@ -9,6 +9,9 @@ Implements RULES.md §1.1 - Application layer depends only on Domain.
 
 from __future__ import annotations
 
+__all__ = ["BronzeCleanupResult", "BronzeCleanupService"]
+
+
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING

@@ -17,6 +17,9 @@ Polite Pool:
 
 from __future__ import annotations
 
+__all__ = ["CROSSREF_API_BASE", "CROSSREF_HEALTH_ERRORS", "CrossRefAdapter"]
+
+
 import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
@@ -28,6 +31,10 @@ from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.normalization import normalize_doi
 from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
+from bioetl.infrastructure.adapters.common import (
+    run_fetch_with_fallback_policy,
+    split_filter_ids_for_fallback,
+)
 from bioetl.infrastructure.adapters.crossref.batch import (
     DoiBatchProcessor,
     SearchPaginator,
@@ -232,52 +239,28 @@ class CrossRefAdapter(BaseHttpAdapter):
             raise ValueError(
                 f"CrossRefAdapter supports 'work'/'publication', got: {entity_type}"
             )
-
-        fetched = 0
-        found_dois: set[str] = set()
-
-        # Split DOIs into valid and title-only entries
-        valid_dois = [d for d in filter_ids if d and d.strip()]
-        title_only_entries = [d for d in filter_ids if not d or not d.strip()]
-
-        # Apply limit to valid DOIs
+        primary_ids, title_only_entries = split_filter_ids_for_fallback(filter_ids)
         if limit:
-            valid_dois = valid_dois[:limit]
+            primary_ids = primary_ids[:limit]
 
-        # Phase 1: Batch fetch (primary path)
-        for i in range(0, len(valid_dois), self.batch_size):
-            batch = valid_dois[i : i + self.batch_size]
-            async for publication in self._batch_fetcher.fetch_batch(batch):
-                doi = publication.get("DOI", "").lower()
-                found_dois.add(doi)
-                publication["_lookup_method"] = "doi"
-                yield publication
-                fetched += 1
-                if limit and fetched >= limit:
-                    return
+        async def _primary_records() -> AsyncIterator[BronzeRecord]:
+            for i in range(0, len(primary_ids), self.batch_size):
+                batch = primary_ids[i : i + self.batch_size]
+                async for publication in self._batch_fetcher.fetch_batch(batch):
+                    yield publication
 
-        # Phase 2: Fallback for not-found DOIs using handler
-        async for pub in self._fallback_handler.process_missing_dois(
-            dois=valid_dois,
-            found_dois=found_dois,
+        async for publication in run_fetch_with_fallback_policy(
+            primary_records=_primary_records(),
+            primary_ids=primary_ids,
+            title_only_entries=title_only_entries,
             fallback_mapping=fallback_mapping,
-            normalize_fn=normalize_doi,
+            normalize_id=normalize_doi,
+            extract_record_id=lambda rec: str(rec.get("DOI", "")),
+            fallback_handler=self._fallback_handler,
             limit=limit,
-            fetched=fetched,
+            primary_lookup_method="doi",
         ):
-            yield pub
-            fetched += 1
-            if limit and fetched >= limit:
-                return
-
-        # Phase 3: Title-only entries (no DOI provided)
-        async for pub in self._fallback_handler.process_title_only_entries(
-            entries=title_only_entries,
-            fallback_mapping=fallback_mapping,
-            limit=limit,
-            fetched=fetched,
-        ):
-            yield pub
+            yield publication
 
     async def fetch(
         self,

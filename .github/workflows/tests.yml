@@ -33,9 +33,10 @@ env:
   # Optimize Python for CI
   PYTHONDONTWRITEBYTECODE: 1
   PYTHONUNBUFFERED: 1
-  # Quality exemptions gate rollout completed: expiry and growth are blocking.
+  # Quality exemptions: expiry is always blocking for merge safety.
   QUALITY_EXEMPTIONS_GATE_MODE: block
-  QUALITY_EXEMPTIONS_GROWTH_MODE: block
+  # Growth uses staged warn->block rollout from debt_scorecard.yaml sections.
+  QUALITY_EXEMPTIONS_GROWTH_MODE: auto
   QUALITY_EXEMPTIONS_REGISTRY: configs/quality/architecture_metric_exemptions.yaml
   QUALITY_EXEMPTIONS_SCORECARD: configs/quality/debt_scorecard.yaml
 

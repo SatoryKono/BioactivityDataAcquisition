@@ -4,6 +4,16 @@ import polars as pl
 import pytest
 from unittest.mock import MagicMock
 
+from bioetl.application.composite.aggregator import EnricherAggregatorService
+from bioetl.application.composite.coalesce_policy import CoalescePolicyService
+from bioetl.application.composite.column_orderer import ColumnOrdererService
+from bioetl.application.composite.column_priority_orderer import (
+    ColumnPriorityOrdererService,
+)
+from bioetl.application.composite.column_renamer import ColumnRenamerService
+from bioetl.application.composite.conflict_resolver import ConflictResolverService
+from bioetl.application.composite.deduplication import EnricherDeduplicatorService
+from bioetl.application.composite.join_planner import JoinPlannerService
 from bioetl.application.composite.merger import MergeService
 from bioetl.domain.composite.config import MergeConfig
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
@@ -34,7 +44,38 @@ def merge_config() -> MergeConfig:
 def merge_service(merge_config: MergeConfig, mock_logger: MagicMock) -> MergeService:
     """Create MergeService instance."""
     storage = MagicMock()
-    return MergeService(merge_config, storage, mock_logger)
+    deduplicator = EnricherDeduplicatorService(mock_logger)
+    aggregator = EnricherAggregatorService(mock_logger)
+    renamer = ColumnRenamerService(mock_logger)
+    orderer = ColumnOrdererService(mock_logger)
+    priority_orderer = ColumnPriorityOrdererService(mock_logger)
+    coalesce_policy = CoalescePolicyService(mock_logger, priority_orderer)
+    conflict_resolver = ConflictResolverService(
+        merge_config=merge_config,
+        logger=mock_logger,
+        coalesce_policy=coalesce_policy,
+    )
+    join_planner = JoinPlannerService(
+        merge_config=merge_config,
+        logger=mock_logger,
+        deduplicator=deduplicator,
+        aggregator=aggregator,
+        renamer=renamer,
+        conflict_resolver=conflict_resolver,
+    )
+    return MergeService(
+        merge_config=merge_config,
+        storage=storage,
+        logger=mock_logger,
+        deduplicator=deduplicator,
+        aggregator=aggregator,
+        renamer=renamer,
+        orderer=orderer,
+        priority_orderer=priority_orderer,
+        coalesce_policy=coalesce_policy,
+        conflict_resolver=conflict_resolver,
+        join_planner=join_planner,
+    )
 
 
 class TestExtractFieldFromQualified:

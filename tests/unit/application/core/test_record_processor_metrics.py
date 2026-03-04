@@ -13,7 +13,7 @@ from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.composition.factories.services_factory import ServicesBuilder
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier, ErrorType
-from bioetl.domain.ports import MetricsPort
+from bioetl.domain.ports import MetricsPort, NoOpTracing
 from bioetl.domain.types import BatchID, RunType, ValidationResult
 
 
@@ -74,6 +74,7 @@ def _create_record_processor(
     gold_validator,
 ) -> RecordProcessor:
     """Build RecordProcessor with composition-level dependency wiring."""
+    tracer = NoOpTracing()
     components = ServicesBuilder.create_batch_processing_components(
         services=services,
         context=context,
@@ -83,6 +84,7 @@ def _create_record_processor(
         gold_filter_callback=gold_filter_callback,
         gold_transform_callback=gold_transform_callback,
         gold_validator=gold_validator,
+        tracer=tracer,
     )
     return RecordProcessor(
         context=context,
@@ -90,6 +92,7 @@ def _create_record_processor(
         transformer=components.transformer,
         writer=components.writer,
         config=config,
+        tracer=tracer,
     )
 
 

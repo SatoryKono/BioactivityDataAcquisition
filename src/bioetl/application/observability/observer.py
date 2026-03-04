@@ -14,6 +14,9 @@ Unified Observability Pattern:
 
 from __future__ import annotations
 
+__all__ = ["LifecyclePhase", "PipelineObserver"]
+
+
 import time
 from contextlib import AbstractContextManager
 from enum import StrEnum
@@ -22,8 +25,7 @@ from typing import TYPE_CHECKING, Any
 from bioetl.application.core.shutdown import PipelineShutdownError
 from bioetl.domain.events import PipelineEvent
 from bioetl.domain.observability_contract import (
-    normalize_observability_context,
-    normalize_observability_metric_labels,
+    build_observability_contract_payload,
 )
 
 if TYPE_CHECKING:
@@ -92,15 +94,11 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
             self.span.__enter__()
 
         # 2. Log Start
-        start_ctx = self._build_observability_context(
+        self._emit_contract_event(
             PipelineEvent.START,
             severity="info",
             run_type=self.run_type,
             phase=LifecyclePhase.STARTUP.value,
-        )
-        self._log_event(PipelineEvent.START, severity="info", context=start_ctx)
-        self._emit_observability_event_metric(
-            start_ctx,
         )
 
         return self
@@ -153,41 +151,25 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
             "phase": LifecyclePhase.CLEANUP.value,
         }
         if status == "failed":
-            failed_ctx = self._build_observability_context(
+            self._emit_contract_event(
                 PipelineEvent.FAILED,
                 severity="error",
                 **log_ctx,
                 error=str(exc_val),
                 error_type=type(exc_val).__name__,
             )
-            self._log_event(PipelineEvent.FAILED, severity="error", context=failed_ctx)
-            self._emit_observability_event_metric(
-                failed_ctx,
-            )
         elif status == "shutdown":
-            shutdown_ctx = self._build_observability_context(
+            self._emit_contract_event(
                 PipelineEvent.SHUTDOWN,
                 severity="warning",
                 **log_ctx,
                 error_type="pipeline_shutdown",
             )
-            self._log_event(
-                PipelineEvent.SHUTDOWN, severity="warning", context=shutdown_ctx
-            )
-            self._emit_observability_event_metric(
-                shutdown_ctx,
-            )
         else:
-            complete_ctx = self._build_observability_context(
+            self._emit_contract_event(
                 PipelineEvent.COMPLETE,
                 severity="info",
                 **log_ctx,
-            )
-            self._log_event(
-                PipelineEvent.COMPLETE, severity="info", context=complete_ctx
-            )
-            self._emit_observability_event_metric(
-                complete_ctx,
             )
 
         # 3. End Trace Span (O3: handle close errors gracefully)
@@ -227,15 +209,12 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
             **extra: Additional context for the event.
         """
         severity = self._normalize_severity(level)
-        ctx = self._build_observability_context(
+        self._emit_contract_event(
             event_name,
             severity=severity,
             phase=phase.value,
             **extra,
         )
-
-        self._log_event(event_name, severity=severity, context=ctx)
-        self._emit_observability_event_metric(ctx)
 
         # Add span event if tracing is active
         if self.span:
@@ -440,20 +419,15 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
         )
         return normalized or "none"
 
-    def _build_observability_context(
+    def _emit_contract_event(
         self,
         event_name: str,
         *,
         severity: str,
-        **extra: Any,  # Any: structlog-compatible context kwargs
-    ) -> dict[str, Any]:  # Any: OTel span attributes are heterogeneous
-        """Build normalized observability context with dual-write aliases."""
-        context: dict[str, object] = (
-            dict(  # Any: OTel span attributes are heterogeneous
-                extra
-            )
-        )
-        normalized = normalize_observability_context(
+        **context: Any,  # Any: structlog-compatible context kwargs
+    ) -> None:
+        """Validate contract once and emit log+metric payloads."""
+        payload = build_observability_contract_payload(
             event_name=event_name,
             context=context,
             default_provider=self.provider_name,
@@ -461,14 +435,15 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
             default_run_id=self.run_id,
             default_severity=severity,
         )
-        return normalized
+        self._log_event(event_name, severity=severity, context=payload.context)
+        self._emit_observability_event_metric(payload.metric_labels)
 
     def _log_event(
         self,
         event_name: str,
         *,
         severity: str,
-        context: dict[str, Any],  # Any: structlog-compatible context kwargs
+        context: dict[str, object],
     ) -> None:
         """Emit log entry without duplicating structlog reserved ``event`` arg."""
         log_context = dict(context)
@@ -476,9 +451,11 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
         log_method = getattr(self._logger, severity, self._logger.info)
         log_method(event_name, **log_context)
 
-    def _emit_observability_event_metric(self, context: dict[str, Any]) -> None:
+    def _emit_observability_event_metric(
+        self,
+        labels: dict[str, str],
+    ) -> None:
         """Emit unified observability event metric with normalized labels."""
-        labels = normalize_observability_metric_labels(context)
         self._metrics.increment_counter(
             "observability_events_total",
             1,

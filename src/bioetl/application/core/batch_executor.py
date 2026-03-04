@@ -1,32 +1,29 @@
-"""Unified Batch Executor for ETL pipeline orchestration.
-
-Combines extraction, transformation, and writing into a single component with
-adaptive batch sizing, checkpointing, and graceful shutdown handling.
-
-DQ Report Integration:
-- Accumulates data for DQ report generation when DQ report service is available
-- Provides get_dq_context() method for building DQ report context
-"""
+"""Unified Batch Executor for ETL pipeline orchestration."""
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Protocol
-from uuid import uuid4
+__all__ = ["BatchExecutor", "BatchResult"]
 
+
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Protocol
+
+from bioetl.application.core.batch_checkpoint_recovery_service import (
+    BatchCheckpointRecoveryService,
+)
 from bioetl.application.core.batch_executor_dq_mixin import _BatchExecutorDQMixin
-from bioetl.application.core.batch_transformer import TransformResult
+from bioetl.application.core.batch_progress_service import BatchProgressService
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.domain.exceptions import BioETLError
-from bioetl.domain.types import BatchID
+from bioetl.domain.ports import BatchIdGeneratorPort
+from bioetl.domain.types import BronzeRecord, GoldRecord
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-    from opentelemetry.trace import Span
-
     from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
+    from bioetl.application.core.batch_processing_service import BatchProcessingOutput
     from bioetl.application.core.batch_tracing import BatchTracingManagerService
     from bioetl.application.core.batch_transformer import BatchTransformer
     from bioetl.application.core.batch_writer import BatchWriter
@@ -34,7 +31,6 @@ if TYPE_CHECKING:
     from bioetl.application.core.config import RecordProcessorConfig
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.models.metadata import SourceMetadata
     from bioetl.domain.ports import LoggerPort
 
 
@@ -48,27 +44,33 @@ class BatchResult:
     quarantined_count: int
 
 
-class BatchIdGenerator(Protocol):
-    """Generator contract for creating batch identifiers.
+class _BatchProcessingServicePort(Protocol):
+    """Minimal contract required by BatchExecutor for batch processing service."""
 
-    Extracted for deterministic tests and dependency injection.
-    """
+    def set_batch_id_factory(self, batch_id_factory: BatchIdGeneratorPort) -> None:
+        """Inject batch ID factory implementation."""
 
-    def create(self) -> BatchID:
-        """Create a new batch identifier."""
-        ...
+    def extract_records(
+        self,
+        *,
+        limit: int | None,
+        query: str | None = None,
+        offset: int | None = None,
+    ) -> AsyncIterator[BronzeRecord]:
+        """Yield raw Bronze records from data source."""
 
-
-class UuidBatchIdGenerator:
-    """Default batch ID generator based on ``uuid4``."""
-
-    def create(self) -> BatchID:
-        """Create a UUID-backed batch identifier."""
-        return BatchID(uuid4())
+    async def process_batch(
+        self,
+        *,
+        records: list[BronzeRecord],
+        start_index: int,
+        query_string: str | None,
+    ) -> BatchProcessingOutput:
+        """Process one batch and return structured output."""
 
 
 class BatchExecutor(_BatchExecutorDQMixin):
-    """Unified executor for ETL batches: fetch → transform → write with tracing."""
+    """Unified executor for ETL batches: fetch -> transform -> write with tracing."""
 
     DEFAULT_BATCH_SIZE = 1000
     DEFAULT_CHECKPOINT_INTERVAL = 1000
@@ -79,21 +81,6 @@ class BatchExecutor(_BatchExecutorDQMixin):
         ValueError,
         TypeError,
         KeyError,
-        AttributeError,
-    )
-    _CHECKPOINT_SAVE_ERRORS = (
-        BioETLError,
-        OSError,
-        RuntimeError,
-        ValueError,
-        TypeError,
-    )
-    _SOURCE_METADATA_ERRORS = (
-        BioETLError,
-        OSError,
-        RuntimeError,
-        ValueError,
-        TypeError,
         AttributeError,
     )
 
@@ -109,31 +96,16 @@ class BatchExecutor(_BatchExecutorDQMixin):
         writer: BatchWriter,
         tracing_manager: BatchTracingManagerService,
         memory_manager: BatchMemoryManagerService,
+        progress_service: BatchProgressService,
+        checkpoint_recovery_service: BatchCheckpointRecoveryService,
+        batch_processing_service: _BatchProcessingServicePort,
+        batch_id_factory: BatchIdGeneratorPort,
         *,
         batch_size: int | None = None,
         checkpoint_interval: int | None = None,
         logger: LoggerPort | None = None,
-        batch_id_factory: BatchIdGenerator | None = None,
     ) -> None:
-        """Initialize batch executor.
-
-        Args:
-            services: Common pipeline services (data source, storage, metrics, etc.).
-            context: Pipeline execution context (run_id, run_type, started_at).
-            config: Record processor configuration.
-            checkpoint_manager: Checkpoint manager instance.
-            shutdown_signal: Signal to handle graceful shutdown.
-            batch_metrics: Metrics recorder for Bronze/Silver/Gold stages.
-            transformer: Batch transformer for Bronze -> Silver/Gold conversion.
-            writer: Batch writer for Bronze/Silver/Gold persistence.
-            tracing_manager: Tracing manager for span orchestration.
-            memory_manager: Adaptive memory manager for dynamic batch sizing.
-            batch_size: Number of records per batch.
-            checkpoint_interval: Number of records between checkpoints.
-            logger: Logger for memory-related messages.
-            batch_id_factory: Generator for batch ID creation. Defaults to UUID4.
-
-        """
+        """Initialize batch executor."""
         self._services = services
         self._context = context
         self._config = config
@@ -141,7 +113,6 @@ class BatchExecutor(_BatchExecutorDQMixin):
         self._shutdown_signal = shutdown_signal
         self._logger = logger or services.logger
 
-        # Batch configuration
         self._initial_batch_size = batch_size or self.DEFAULT_BATCH_SIZE
         self.batch_size = self._initial_batch_size
         self.checkpoint_interval = (
@@ -150,7 +121,6 @@ class BatchExecutor(_BatchExecutorDQMixin):
 
         self._memory = memory_manager
 
-        # Counters
         self.records_fetched = 0
         self.records_bronze = 0
         self.records_silver = 0
@@ -158,20 +128,9 @@ class BatchExecutor(_BatchExecutorDQMixin):
         self.records_quarantined = 0
         self.records_filtered_out = 0
 
-        # Progress reporting
-        self._total_records: int | None = None
-        self._progress_interval: int | None = None
-        self._next_progress_threshold: int = 0
-
-        # DQ Report data accumulation (only if DQ report service is available)
-        # Collecting data adds memory overhead, so only enabled when needed
         self._bronze_records_for_dq: list[bytes] = []
-        self._silver_records_for_dq: list[
-            dict[str, Any]  # Any: values are heterogeneous
-        ] = []  # Any: record values vary by field type
-        self._gold_records_for_dq: list[
-            dict[str, Any]  # Any: values are heterogeneous
-        ] = []  # Any: record values vary by field type
+        self._silver_records_for_dq: list[BronzeRecord] = []
+        self._gold_records_for_dq: list[GoldRecord] = []
         self._source_batch_ids: list[str] = []
         self._last_bronze_path: str | None = None
 
@@ -179,9 +138,14 @@ class BatchExecutor(_BatchExecutorDQMixin):
         self._transformer = transformer
         self._writer = writer
         self._tracing = tracing_manager
-        self._batch_id_factory = batch_id_factory or UuidBatchIdGenerator()
 
-        # Query string for metadata (stored during execute())
+        self._progress_service = progress_service
+        self._checkpoint_recovery_service = checkpoint_recovery_service
+        self._batch_id_factory = batch_id_factory
+        batch_processing_service.set_batch_id_factory(self._batch_id_factory)
+        self._batch_processing_service = batch_processing_service
+
+        self._resume_offset = 0
         self._query_string: str | None = None
 
     @property
@@ -195,20 +159,10 @@ class BatchExecutor(_BatchExecutorDQMixin):
         query: str | None = None,
         offset: int | None = None,
     ) -> None:
-        """Execute the pipeline: fetch → transform → write.
-
-        Args:
-            limit: Maximum number of records to process. None means no limit.
-            query: Optional query string for data source filtering.
-            offset: Starting offset for checkpoint resume (records already processed).
-
-        Raises:
-            PipelineShutdownError: If shutdown signal received during execution.
-
-        """
+        """Execute the pipeline: fetch -> transform -> write."""
         self._resume_offset = offset or 0
         self._query_string = query
-        await self._init_progress_tracking(limit)
+        await self._progress_service.initialize_tracking(limit)
 
         root_span = self._tracing.start_execution_span()
 
@@ -225,50 +179,22 @@ class BatchExecutor(_BatchExecutorDQMixin):
                 min_batch_size_used=self._memory.min_batch_size_used,
             )
         except PipelineShutdownError:
-            await self._handle_shutdown(root_span)
+            await self._checkpoint_recovery_service.save_checkpoint_on_shutdown(
+                records_fetched=self.records_fetched,
+                resume_offset=self._resume_offset,
+            )
+            self._tracing.end_span_with_shutdown(root_span)
             raise
-        except self._PIPELINE_EXECUTION_ERRORS as e:
-            # Save checkpoint on crash for future --resume recovery
-            try:
-                total = self._resume_offset + self.records_fetched
-                if total > 0:
-                    await self._checkpoint_manager.save_checkpoint(total)
-                    self._logger.warning(
-                        "Checkpoint saved on exception for recovery",
-                        records_processed=total,
-                        error_type=type(e).__name__,
-                        reason="checkpoint_saved_on_pipeline_exception",
-                    )
-            except self._CHECKPOINT_SAVE_ERRORS as checkpoint_error:
-                self._logger.warning(
-                    "Checkpoint save failed during exception handling",
-                    records_processed=self._resume_offset + self.records_fetched,
-                    error_type=type(checkpoint_error).__name__,
-                    reason="checkpoint_save_failed_on_pipeline_exception",
-                )
-            self._tracing.end_span(root_span, e)
+        except self._PIPELINE_EXECUTION_ERRORS as error:
+            await self._checkpoint_recovery_service.save_checkpoint_on_exception(
+                records_fetched=self.records_fetched,
+                resume_offset=self._resume_offset,
+                error=error,
+            )
+            self._tracing.end_span(root_span, error)
             raise
         else:
             self._tracing.end_span(root_span)
-
-    async def _init_progress_tracking(self, limit: int | None) -> None:
-        """Estimate total records and configure progress reporting."""
-        self._total_records = limit
-        if not self._total_records:
-            get_total = getattr(self._services.data_source, "get_total_records", None)
-            if get_total and callable(get_total):
-                result = await get_total()
-                if isinstance(result, int) and result > 0:
-                    self._total_records = result
-
-        if self._total_records:
-            self._progress_interval = max(1, self._total_records // 10)
-            self._next_progress_threshold = self._progress_interval
-            self._logger.info(
-                "Starting pipeline with total records estimate",
-                total_records=self._total_records,
-                progress_interval=self._progress_interval,
-            )
 
     async def _run_extraction_loop(
         self,
@@ -277,68 +203,66 @@ class BatchExecutor(_BatchExecutorDQMixin):
         offset: int | None = None,
     ) -> None:
         """Run the main extraction and processing loop."""
-        batch: list[dict[str, Any]] = []  # Any: record values vary by field type
+        batch: list[BronzeRecord] = []
         current_batch_size = self.batch_size
         check_interval = self._memory.get_check_interval()
 
-        async for raw_record in self._extract(limit, query, offset=offset):
+        async for raw_record in self._batch_processing_service.extract_records(
+            limit=limit,
+            query=query,
+            offset=offset,
+        ):
             if self._shutdown_signal.is_requested:
-                total = self._resume_offset + self.records_fetched
-                await self._checkpoint_manager.save_checkpoint(total)
+                await self._checkpoint_recovery_service.save_checkpoint_now(
+                    records_fetched=self.records_fetched,
+                    resume_offset=self._resume_offset,
+                )
                 raise PipelineShutdownError("Shutdown during extraction")
 
             batch.append(raw_record)
             self.records_fetched += 1
-            self._report_progress()
+            self._progress_service.report_progress(
+                records_fetched=self.records_fetched,
+                records_bronze=self.records_bronze,
+                records_silver=self.records_silver,
+                records_filtered_out=self.records_filtered_out,
+            )
 
             current_batch_size = self._memory.check_pressure(
-                current_batch_size, check_interval, self.records_fetched
+                current_batch_size,
+                check_interval,
+                self.records_fetched,
             )
 
             if len(batch) >= current_batch_size:
                 start_index = self.records_fetched - len(batch)
-                await self._process_batch(batch, start_index)
+                await self._process_batch_and_update_state(batch, start_index)
                 batch = []
                 current_batch_size = self._memory.maybe_recover(current_batch_size)
-                self._report_progress()
+                self._progress_service.report_progress(
+                    records_fetched=self.records_fetched,
+                    records_bronze=self.records_bronze,
+                    records_silver=self.records_silver,
+                    records_filtered_out=self.records_filtered_out,
+                )
 
-            if self.records_fetched % self.checkpoint_interval == 0:
-                total = self._resume_offset + self.records_fetched
-                await self._checkpoint_manager.save_checkpoint(total)
+            await self._checkpoint_recovery_service.save_periodic_checkpoint(
+                records_fetched=self.records_fetched,
+                resume_offset=self._resume_offset,
+                checkpoint_interval=self.checkpoint_interval,
+            )
 
         if batch:
             start_index = self.records_fetched - len(batch)
-            await self._process_batch(batch, start_index)
+            await self._process_batch_and_update_state(batch, start_index)
 
     async def process(
         self,
-        records: list[dict[str, Any]],  # Any: values are heterogeneous
-        start_index: int = 0,  # Any: record values vary by field type
+        records: list[BronzeRecord],
+        start_index: int = 0,
     ) -> BatchResult:
-        """Process a batch of records through the full ETL pipeline.
-
-        Public API for processing individual batches. Delegates to internal
-        processing with full tracing and observability.
-
-        This method is the public entry point for batch processing, enabling:
-        - Direct batch processing from external callers
-        - Integration testing of the processing logic
-        - Custom orchestration scenarios
-
-        Args:
-            records: Raw records to process through Bronze → Silver → Gold.
-            start_index: Starting index for records in this batch. Default 0.
-
-        Returns:
-            BatchResult with counts for each layer.
-
-        Example:
-            >>> executor = BatchExecutor(...)
-            >>> result = await executor.process(records, start_index=0)
-            >>> logger.info("batch_processed", silver_count=result.silver_count)
-
-        """
-        await self._process_batch(records, start_index)
+        """Public API for processing one explicit batch."""
+        await self._process_batch_and_update_state(records, start_index)
         return BatchResult(
             bronze_count=self.records_bronze,
             silver_count=self.records_silver,
@@ -346,287 +270,37 @@ class BatchExecutor(_BatchExecutorDQMixin):
             quarantined_count=self.records_quarantined,
         )
 
-    def _get_source_metadata(self) -> SourceMetadata | None:
-        """Get source metadata from data source if available.
-
-        Checks if the data source has a `get_source_metadata()` method
-        and calls it to retrieve accumulated API request metadata for
-        Bronze layer enrichment.
-
-        Also injects the query_string from execute() if not already set
-        in the source metadata.
-
-        Returns:
-            SourceMetadata with API request details and query_string,
-            or None if not available.
-
-        """
-        # Import SourceMetadata for runtime type check and creation
-        from bioetl.domain.models.metadata import SourceMetadata
-
-        source_metadata: SourceMetadata | None = None
-
-        # Try to get metadata from data source
-        data_source = self._services.data_source
-        get_metadata = getattr(data_source, "get_source_metadata", None)
-        if get_metadata is not None and callable(get_metadata):
-            try:
-                result = get_metadata()
-                if isinstance(result, SourceMetadata):
-                    source_metadata = result
-            except self._SOURCE_METADATA_ERRORS as metadata_error:
-                self._logger.warning(
-                    "Source metadata collection failed",
-                    error_type=type(metadata_error).__name__,
-                    reason="source_metadata_collection_failed",
-                )
-
-        # Inject query_string if we have one and it's not already set
-        if self._query_string:
-            if source_metadata is not None:
-                if source_metadata.query_string is None:
-                    source_metadata = source_metadata.model_copy(
-                        update={"query_string": self._query_string}
-                    )
-            else:
-                # Create minimal SourceMetadata with query_string
-                source_metadata = SourceMetadata(
-                    type="api",
-                    query_string=self._query_string,
-                )
-
-        return source_metadata
-
-    async def _process_batch(
+    async def _process_batch_and_update_state(
         self,
-        records: list[dict[str, Any]],  # Any: values are heterogeneous
-        start_index: int,  # Any: record values vary by field type
+        records: list[BronzeRecord],
+        start_index: int,
     ) -> None:
-        """Process batch through Bronze → Silver → Gold with tracing.
-
-        Args:
-            records: Raw records to process.
-            start_index: Starting index for records in this batch.
-        """
-        batch_id = self._batch_id_factory.create()
-        ingestion_ts = self._context.started_at
-
-        # Get source metadata from data source (if available)
-        source_metadata = self._get_source_metadata()
-
-        # Start batch tracing span
-        span = self._tracing.start_batch_span(batch_id, len(records), start_index)
-
-        try:
-            # Write to Bronze and capture result for lineage tracking (REQ-LINEAGE-001)
-            bronze_result = await self._execute_with_span(
-                "write_bronze",
-                self._writer.write_bronze(
-                    records, batch_id, ingestion_ts, source_metadata=source_metadata
-                ),
-                batch_id,
-                len(records),
-                on_error=lambda e: self._writer.log_and_track_write_error(
-                    "bronze", e, batch_id
-                ),
-            )
-            self._batch_metrics.track_batch_size("bronze", len(records))
-            self._batch_metrics.track_processed_records("bronze", len(records))
-
-            # Transform records
-            result = await self._execute_transform_with_span(
-                records, batch_id, start_index
-            )
-            self._batch_metrics.track_processed_records(
-                "quarantined", result.quarantined_count
-            )
-            self._batch_metrics.track_processed_records(
-                "silver", len(result.silver_records)
-            )
-            self._batch_metrics.track_processed_records(
-                "gold", len(result.gold_records)
-            )
-
-            # Write to Silver with bronze_refs for lineage tracking (REQ-LINEAGE-001)
-            bronze_refs = [bronze_result] if bronze_result else None
-            silver_result = None
-            if result.silver_records:
-                silver_result = await self._execute_with_span(
-                    "write_silver",
-                    self._writer.write_silver(
-                        result.silver_records,
-                        batch_id,
-                        ingestion_ts,
-                        bronze_refs=bronze_refs,
-                    ),
-                    batch_id,
-                    len(result.silver_records),
-                    on_error=lambda e: self._writer.log_and_track_write_error(
-                        "silver", e, batch_id
-                    ),
-                )
-
-            # Write to Gold with silver_refs for lineage tracking (REQ-LINEAGE-002)
-            silver_refs = [silver_result] if silver_result else None
-            if result.gold_records:
-                await self._execute_with_span(
-                    "write_gold",
-                    self._writer.write_gold(
-                        result.gold_records, silver_refs=silver_refs
-                    ),
-                    batch_id,
-                    len(result.gold_records),
-                    on_error=lambda e: self._writer.log_and_track_write_error(
-                        "gold", e, batch_id
-                    ),
-                )
-
-            # Update counters
-            self.records_bronze += len(records)
-            self.records_silver += len(result.silver_records)
-            self.records_gold += len(result.gold_records)
-            self.records_quarantined += result.quarantined_count
-            self.records_filtered_out += result.filtered_out_count
-
-            # Track batch ID for lineage (always enabled)
-            self._source_batch_ids.append(str(batch_id))
-
-            # Collect data for DQ reports (if enabled)
-            if self._should_collect_dq_data():
-                self._collect_dq_data(
-                    records=records,
-                    batch_id=batch_id,
-                    bronze_result=bronze_result,
-                    silver_records=result.silver_records,
-                    gold_records=result.gold_records,
-                )
-
-            # Add result attributes to span
-            self._tracing.set_batch_result(
-                span,
-                bronze_count=len(records),
-                silver_count=len(result.silver_records),
-                gold_count=len(result.gold_records),
-                quarantined_count=result.quarantined_count,
-            )
-
-        except self._PIPELINE_EXECUTION_ERRORS as e:
-            self._tracing.end_span(span, e)
-            raise
-        else:
-            self._tracing.end_span(span)
-
-    async def _execute_with_span(
-        self,
-        name: str,
-        coro: Any,  # Any: Awaitable (generic coroutine)
-        batch_id: BatchID,
-        count: int,
-        on_error: Any = None,  # Any: fallback return value type varies
-    ) -> Any:  # Any: coroutine return type varies
-        """Execute coroutine with tracing span."""
-        span = self._tracing.start_layer_span(name, batch_id, count)
-        try:
-            result = await coro
-            self._tracing.end_span(span)
-            return result
-        except self._PIPELINE_EXECUTION_ERRORS as e:
-            self._tracing.end_span(span, e)
-            if on_error:
-                on_error(e)
-            raise
-
-    async def _execute_transform_with_span(
-        self,
-        records: list[dict[str, Any]],  # Any: values are heterogeneous
-        batch_id: BatchID,
-        start_index: int,  # Any: record values vary by field type
-    ) -> TransformResult:
-        """Execute transformation with extended span attributes."""
-        span = self._tracing.start_layer_span(
-            "transform", batch_id, len(records), input_count=True
+        """Process one batch and apply results to executor-level counters/state."""
+        output = await self._batch_processing_service.process_batch(
+            records=records,
+            start_index=start_index,
+            query_string=self._query_string,
         )
-        try:
-            result = await self._transformer.transform_batch(
-                records, batch_id, start_index=start_index
-            )
-            self._tracing.set_transform_result(
-                span,
-                silver_count=len(result.silver_records),
-                gold_count=len(result.gold_records),
-                quarantined_count=result.quarantined_count,
-            )
-            self._tracing.end_span(span)
-            return result
-        except self._PIPELINE_EXECUTION_ERRORS as e:
-            self._tracing.end_span(span, e)
-            raise
 
-    async def _handle_shutdown(self, span: Span | None) -> None:
-        """Handle graceful shutdown with checkpoint save."""
-        try:
-            total = self._resume_offset + self.records_fetched
-            await self._checkpoint_manager.save_checkpoint(total)
-        except self._CHECKPOINT_SAVE_ERRORS as checkpoint_error:
-            self._logger.warning(
-                "Emergency checkpoint save failed during shutdown",
-                records_processed=self._resume_offset + self.records_fetched,
-                error_type=type(checkpoint_error).__name__,
-                reason="checkpoint_save_failed_on_shutdown",
+        self.records_bronze += len(records)
+        self.records_silver += len(output.silver_records)
+        self.records_gold += len(output.gold_records)
+        self.records_quarantined += output.quarantined_count
+        self.records_filtered_out += output.filtered_out_count
+
+        self._source_batch_ids.append(str(output.batch_id))
+
+        if self._should_collect_dq_data():
+            self._collect_dq_data(
+                records=records,
+                batch_id=output.batch_id,
+                bronze_result=output.bronze_result,
+                silver_records=output.silver_records,
+                gold_records=output.gold_records,
             )
 
-        self._tracing.end_span_with_shutdown(span)
-
-    # -------------------------------------------------------------------------
-    # Progress reporting
-    # -------------------------------------------------------------------------
-
-    def _report_progress(self) -> None:
-        """Report pipeline progress if threshold reached."""
-        if (
-            self._progress_interval
-            and self._total_records
-            and self.records_fetched >= self._next_progress_threshold
-        ):
-            pct = min(100, (self.records_fetched / self._total_records) * 100)
-            self._logger.info(
-                "Pipeline progress",
-                progress=f"{pct:.0f}%",
-                bronze=self.records_bronze,
-                silver=self.records_silver,
-                filtered_out=self.records_filtered_out,
-                fetched=self.records_fetched,
-            )
-            self._next_progress_threshold += self._progress_interval
-
-    # -------------------------------------------------------------------------
-    # Data extraction
-    # -------------------------------------------------------------------------
-
-    async def _extract(
-        self,
-        limit: int | None,
-        query: str | None = None,
-        offset: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:  # Any: record values vary by field type
-        """Extract records from data source."""
-        async for record in self._services.data_source.fetch(
-            entity_type=self._config.entity_type,
-            limit=limit,
-            query=query,
-            offset=offset,
-        ):
-            yield record
-
-    def get_run_statistics(
-        self,
-    ) -> dict[str, Any]:  # Any: statistics values are int|str|list
-        """Get aggregated statistics for the entire pipeline run.
-
-        Returns:
-            Dictionary with total counts and lists of IDs accumulated
-            across all processed batches.
-        """
+    def get_run_statistics(self) -> dict[str, int | list[str]]:
+        """Get aggregated statistics for the entire pipeline run."""
         return {
             "records_fetched": self.records_fetched,
             "records_bronze": self.records_bronze,

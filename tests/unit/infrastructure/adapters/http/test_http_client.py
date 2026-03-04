@@ -21,8 +21,10 @@ class TestRetryConfig:
         """Test default configuration values."""
         config = RetryConfig()
         assert config.max_attempts == 3
+        assert config.retry_budget_per_request is None
         assert config.base_delay == 1.0
         assert config.max_delay == 60.0
+        assert config.max_retry_after_seconds is None
         assert config.multiplier == 2.0
         assert config.jitter_range == (0.1, 0.5)
         assert config.retryable_statuses == frozenset({429, 500, 502, 503, 504})
@@ -166,6 +168,25 @@ class TestRetryConfig:
         assert not config.is_last_attempt(1)
         assert config.is_last_attempt(2)
         assert config.is_last_attempt(3)  # Beyond last
+
+    def test_effective_retry_budget(self):
+        """Test effective retry budget resolution."""
+        default_config = RetryConfig(max_attempts=4)
+        assert default_config.effective_retry_budget() == 3
+
+        budgeted_config = RetryConfig(max_attempts=4, retry_budget_per_request=1)
+        assert budgeted_config.effective_retry_budget() == 1
+
+        oversized_budget = RetryConfig(max_attempts=3, retry_budget_per_request=10)
+        assert oversized_budget.effective_retry_budget() == 2
+
+    def test_clamp_retry_after(self):
+        """Test Retry-After clamping behavior."""
+        config = RetryConfig(max_delay=30.0)
+        assert config.clamp_retry_after(120.0) == 30.0
+
+        custom_cap = RetryConfig(max_delay=60.0, max_retry_after_seconds=10.0)
+        assert custom_cap.clamp_retry_after(25.0) == 10.0
 
 
 @pytest.fixture
@@ -377,6 +398,16 @@ class TestUnifiedHTTPClientHandleRetryDelay:
             await http_client._handle_retry_delay(attempt=0, response=response)
             mock_sleep.assert_called_once_with(5.0)
 
+    @pytest.mark.asyncio
+    async def test_handle_retry_delay_caps_retry_after_to_max_delay(self, http_client):
+        """Test Retry-After values are clamped to configured cap."""
+        response = MagicMock()
+        response.headers = {"Retry-After": "120"}
+
+        with patch("asyncio.sleep", new_callable=AsyncMock) as mock_sleep:
+            await http_client._handle_retry_delay(attempt=0, response=response)
+            mock_sleep.assert_called_once_with(60.0)
+
 
 @pytest.mark.unit
 class TestUnifiedHTTPClientRequestMethods:
@@ -466,6 +497,30 @@ class TestUnifiedHTTPClientRequestMethods:
                 await http_client.get("https://api.example.com/data")
 
         # Should have tried max_attempts times
+        assert mock_circuit_breaker.call.call_count == 2
+
+    @pytest.mark.asyncio
+    async def test_retry_budget_limits_retry_storms(
+        self, mock_rate_limiter, mock_circuit_breaker
+    ):
+        """Test retry budget can stop retries before max_attempts."""
+        client = UnifiedHTTPClient(
+            rate_limiter=mock_rate_limiter,
+            circuit_breaker=mock_circuit_breaker,
+            retry_config=RetryConfig(
+                max_attempts=5,
+                retry_budget_per_request=1,
+                jitter_range=(0.0, 0.0),
+            ),
+            timeout=10.0,
+        )
+        mock_circuit_breaker.call.side_effect = httpx.ConnectError("Connection failed")
+
+        async with client:
+            with pytest.raises(RetryExhaustedError):
+                await client.get("https://api.example.com/data")
+
+        # 1 initial attempt + 1 retry (budgeted)
         assert mock_circuit_breaker.call.call_count == 2
 
     @pytest.mark.asyncio

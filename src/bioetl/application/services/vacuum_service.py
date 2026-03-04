@@ -7,6 +7,14 @@ operations without CLI-specific formatting concerns.
 
 from __future__ import annotations
 
+__all__ = [
+    "TableCollectorPort",
+    "TableVacuumResult",
+    "VacuumAllResult",
+    "VacuumService",
+]
+
+
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING

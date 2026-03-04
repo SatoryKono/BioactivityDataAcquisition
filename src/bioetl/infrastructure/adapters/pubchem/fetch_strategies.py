@@ -6,6 +6,9 @@ Contains helper functions for different fetch modes.
 
 from __future__ import annotations
 
+__all__ = ["PubChemFetchStrategies"]
+
+
 import time
 from typing import TYPE_CHECKING, Any
 

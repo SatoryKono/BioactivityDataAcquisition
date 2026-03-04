@@ -5,6 +5,9 @@ Extracted from medallion_lifecycle.py to reduce file size and coupling.
 
 from __future__ import annotations
 
+__all__ = ["ClearResult", "PrepareResult", "VacuumResult"]
+
+
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 

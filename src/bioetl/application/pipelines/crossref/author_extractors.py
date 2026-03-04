@@ -11,6 +11,9 @@ These functions are:
 
 from __future__ import annotations
 
+__all__ = ["extract_author_details", "extract_author_orcids"]
+
+
 from typing import Any
 
 

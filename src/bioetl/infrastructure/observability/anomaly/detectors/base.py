@@ -5,6 +5,9 @@ Defines interface that all detection algorithms must implement.
 
 from __future__ import annotations
 
+__all__ = ["DetectorStrategy"]
+
+
 from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import TYPE_CHECKING

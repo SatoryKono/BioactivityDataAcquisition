@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+__all__ = ["CHEMBL_HEALTH_ERRORS", "ChemblHealthMixin"]
+
+
 from typing import TYPE_CHECKING, Any
 
 import httpx

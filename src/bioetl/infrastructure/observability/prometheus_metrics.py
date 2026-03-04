@@ -6,6 +6,9 @@ Prometheus client library.
 
 from __future__ import annotations
 
+__all__ = ["COUNTERS", "GAUGES", "HISTOGRAMS", "PrometheusMetrics"]
+
+
 from bioetl.domain.observability_contract import normalize_observability_metric_labels
 from bioetl.domain.ports import MetricsPort
 from bioetl.infrastructure.observability.metrics import (

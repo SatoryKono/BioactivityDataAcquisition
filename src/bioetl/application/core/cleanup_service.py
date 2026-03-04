@@ -6,6 +6,9 @@ Used by both CLI (dry-run preview) and PipelineRunner (actual cleanup).
 
 from __future__ import annotations
 
+__all__ = ["CleanupPreview", "CleanupResult", "CleanupService", "LayerInfo"]
+
+
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 

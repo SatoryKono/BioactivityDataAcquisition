@@ -15,6 +15,7 @@ from typing import Any, get_args, get_origin
 import pytest
 
 from bioetl.domain.ports.checkpoint import CheckpointPort
+from bioetl.domain.ports.clock import ClockPort
 from bioetl.domain.ports.data_normalization import DataNormalizationPort
 from bioetl.domain.ports.data_source import DataSourcePort, FilterableDataSourcePort
 from bioetl.domain.ports.dq_config import (
@@ -61,6 +62,7 @@ PROTOCOL_CLASSES = [
     QuarantinePort,
     LockPort,
     CheckpointPort,
+    ClockPort,
     DataSourcePort,
     FilterableDataSourcePort,
     BronzeDQConfigPort,

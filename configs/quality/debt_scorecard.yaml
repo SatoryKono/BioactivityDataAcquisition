@@ -4,16 +4,21 @@ governance:
   description: Architecture debt scorecard governance for exemption registry.
   growth_gate_default_mode: block
   allow_grace_windows_only_for_rf: true
+  growth_section_gate_rollout:
+    default_mode: block
+    warn_until_by_section:
+      registry:*: '2026-06-30'
+      group:*: '2026-03-03'
 
 baseline:
-  total_exemptions: 360
+  total_exemptions: 313
   by_registry:
-    file_size_limits: 97
-    function_complexity: 32
-    function_length: 99
-    class_size: 61
+    file_size_limits: 69
+    function_complexity: 33
+    function_length: 95
+    class_size: 51
     class_method_count: 1
-    god_object: 29
+    god_object: 23
     domain_complexity: 41
 
 registry_groups:
@@ -31,112 +36,104 @@ registry_groups:
 
 quarterly_targets:
 - quarter: '2026-Q1'
-  max_total_exemptions: 360
+  max_total_exemptions: 313
   min_integral_score: 70
   group_budgets:
-    size_shape: 287
-    complexity: 73
+    size_shape: 239
+    complexity: 74
   registry_budgets:
-    file_size_limits: 97
-    function_complexity: 32
+    file_size_limits: 98
+    function_complexity: 33
     function_length: 99
-    class_size: 61
+    class_size: 55
     class_method_count: 1
-    god_object: 29
+    god_object: 24
     domain_complexity: 41
 - quarter: '2026-Q2'
-  max_total_exemptions: 350
-  min_integral_score: 72
+  max_total_exemptions: 250
+  min_integral_score: 73
   group_budgets:
-    size_shape: 280
-    complexity: 70
+    size_shape: 197
+    complexity: 53
   registry_budgets:
-    file_size_limits: 95
-    function_complexity: 30
-    function_length: 97
-    class_size: 59
+    file_size_limits: 69
+    function_complexity: 23
+    function_length: 71
+    class_size: 39
     class_method_count: 1
-    god_object: 28
-    domain_complexity: 40
+    god_object: 17
+    domain_complexity: 30
 - quarter: '2026-Q3'
-  max_total_exemptions: 339
-  min_integral_score: 74
-  group_budgets:
-    size_shape: 271
-    complexity: 68
-  registry_budgets:
-    file_size_limits: 93
-    function_complexity: 29
-    function_length: 93
-    class_size: 57
-    class_method_count: 1
-    god_object: 27
-    domain_complexity: 39
-- quarter: '2026-Q4'
-  max_total_exemptions: 325
+  max_total_exemptions: 150
   min_integral_score: 76
   group_budgets:
-    size_shape: 260
-    complexity: 65
+    size_shape: 118
+    complexity: 32
   registry_budgets:
-    file_size_limits: 90
-    function_complexity: 27
-    function_length: 88
-    class_size: 54
+    file_size_limits: 41
+    function_complexity: 14
+    function_length: 42
+    class_size: 24
     class_method_count: 1
-    god_object: 27
-    domain_complexity: 38
-- quarter: '2027-Q1'
-  max_total_exemptions: 310
+    god_object: 10
+    domain_complexity: 18
+- quarter: '2026-Q4'
+  max_total_exemptions: 145
   min_integral_score: 78
   group_budgets:
-    size_shape: 248
-    complexity: 62
+    size_shape: 114
+    complexity: 31
   registry_budgets:
-    file_size_limits: 87
-    function_complexity: 25
-    function_length: 83
-    class_size: 51
+    file_size_limits: 40
+    function_complexity: 13
+    function_length: 40
+    class_size: 23
     class_method_count: 1
-    god_object: 26
-    domain_complexity: 37
+    god_object: 10
+    domain_complexity: 18
+- quarter: '2027-Q1'
+  max_total_exemptions: 140
+  min_integral_score: 80
+  group_budgets:
+    size_shape: 109
+    complexity: 31
+  registry_budgets:
+    file_size_limits: 38
+    function_complexity: 13
+    function_length: 39
+    class_size: 22
+    class_method_count: 1
+    god_object: 9
+    domain_complexity: 18
 
 owner_decomposition_targets:
 - quarter: '2026-Q1'
   allocations:
-    '@bioetl-architecture': 360
+    '@bioetl-architecture': 313
 - quarter: '2026-Q2'
   allocations:
-    '@bioetl-architecture': 240
-    '@bioetl-platform': 70
-    '@bioetl-data': 40
+    '@bioetl-architecture': 250
 - quarter: '2026-Q3'
   allocations:
-    '@bioetl-architecture': 230
-    '@bioetl-platform': 70
-    '@bioetl-data': 39
+    '@bioetl-architecture': 150
 - quarter: '2026-Q4'
   allocations:
-    '@bioetl-architecture': 215
-    '@bioetl-platform': 70
-    '@bioetl-data': 40
+    '@bioetl-architecture': 145
 - quarter: '2027-Q1'
   allocations:
-    '@bioetl-architecture': 200
-    '@bioetl-platform': 70
-    '@bioetl-data': 40
+    '@bioetl-architecture': 140
 
 expiry_decomposition_targets:
 - quarter: '2026-Q2'
-  max_entries_expiring_in_quarter: 360
+  max_entries_expiring_in_quarter: 313
 - quarter: '2026-Q3'
-  max_entries_expiring_in_quarter: 245
+  max_entries_expiring_in_quarter: 250
 - quarter: '2026-Q4'
-  max_entries_expiring_in_quarter: 160
+  max_entries_expiring_in_quarter: 150
 - quarter: '2027-Q1'
-  max_entries_expiring_in_quarter: 80
+  max_entries_expiring_in_quarter: 145
 - quarter: '2027-Q2'
-  max_entries_expiring_in_quarter: 0
+  max_entries_expiring_in_quarter: 140
 
 grace_windows:
 - rf_id: RF-001

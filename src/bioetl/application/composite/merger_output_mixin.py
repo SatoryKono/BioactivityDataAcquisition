@@ -1,0 +1,93 @@
+"""Output-writing helpers extracted from MergeIOMixin."""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    import polars as pl
+
+    from bioetl.domain.composite.config import MergeConfig
+    from bioetl.domain.composite.field_groups import FieldGroupRegistry
+    from bioetl.domain.ports import LoggerPort, StoragePort
+
+
+class MergeOutputWriterMixin:
+    """Mixin for persisting merged Silver/Gold outputs."""
+
+    _config: MergeConfig
+    _logger: LoggerPort
+    _storage: StoragePort
+    _field_group_registry: FieldGroupRegistry | None
+    _gold_schema: Any | None  # Any: Pandera DataFrameModel class or instance
+
+    @staticmethod
+    def _path_to_table_name(path: str) -> str:
+        """Convert a full path to a table name by stripping layer prefix."""
+        normalized = path.replace("\\", "/")
+        for layer in ("silver/", "gold/", "bronze/"):
+            if layer in normalized:
+                idx = normalized.find(layer)
+                return normalized[idx + len(layer) :]
+        return path
+
+    def _coerce_null_columns(self, df: pl.DataFrame) -> pl.DataFrame:
+        """Coerce Null-typed columns to String for Delta Lake compatibility."""
+        import polars as pl
+
+        null_cols = [col for col in df.columns if df[col].dtype == pl.Null]
+        if null_cols:
+            self._logger.debug("Coercing null columns to String", columns=null_cols)
+            df = df.with_columns([pl.col(col).cast(pl.String) for col in null_cols])
+        return df
+
+    async def _write_merged_silver(
+        self,
+        df: pl.DataFrame,
+        run_id: str | None = None,
+        sources_used: list[str] | None = None,
+    ) -> None:
+        """Write merged data to Silver layer via StoragePort."""
+        df = self._coerce_null_columns(df)
+
+        table_name = self._path_to_table_name(self._config.output_silver_path)
+        records = df.to_dicts()
+        await self._storage.write_silver_merged(
+            table_name,
+            records,
+            run_id=run_id,
+            sources_used=sources_used,
+            preserve_column_order=True,
+        )
+
+    async def _write_merged_gold(
+        self,
+        df: pl.DataFrame,
+        run_id: str | None = None,
+        sources_used: list[str] | None = None,
+    ) -> None:
+        """Write merged data to Gold layer via StoragePort."""
+        if self._field_group_registry is not None:
+            trash_cols = self._field_group_registry.get_trash_columns(df.columns)
+            if trash_cols:
+                self._logger.info(
+                    "Filtering trash columns from Gold output",
+                    trash_count=len(trash_cols),
+                    trash_columns=trash_cols[:10],
+                )
+                df = df.drop(trash_cols)
+
+        df = self._coerce_null_columns(df)
+        table_name = self._path_to_table_name(self._config.output_gold_path)
+        records = df.to_dicts()
+        await self._storage.write_gold_merged(
+            table_name,
+            records,
+            run_id=run_id,
+            sources_used=sources_used,
+            preserve_column_order=True,
+            schema=self._gold_schema,
+        )
+
+
+__all__ = ["MergeOutputWriterMixin"]

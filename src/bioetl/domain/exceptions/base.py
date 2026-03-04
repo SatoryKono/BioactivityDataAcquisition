@@ -27,6 +27,7 @@ class BioETLError(Exception):
     """
 
     error_type: ClassVar[ErrorType]
+    reason_code: ClassVar[str | None] = None
 
     # Private attributes that should be excluded from context
     _CONTEXT_EXCLUDE: ClassVar[frozenset[str]] = frozenset(
@@ -50,6 +51,17 @@ class BioETLError(Exception):
         from bioetl.domain.types import ErrorType
 
         return getattr(cls, "error_type", ErrorType.INVALID_DATA)
+
+    def get_reason_code(self) -> str | None:
+        """Get semantic reason code for this error instance/class.
+
+        Returns:
+            Optional reason code for policy-based handling and diagnostics.
+        """
+        reason_code = getattr(self, "reason_code", None)
+        if reason_code is None:
+            return None
+        return str(reason_code)
 
     @property
     def context(self) -> dict[str, object]:
@@ -77,6 +89,33 @@ class BioETLError(Exception):
                 continue
             result[key] = value
         return result
+
+    def to_structured_context(
+        self,
+        *,
+        reason_code: str | None = None,
+        **extra: object,
+    ) -> dict[str, object]:
+        """Build a structured error payload for logging/triage.
+
+        Args:
+            reason_code: Optional policy reason code override.
+            **extra: Additional context fields.
+
+        Returns:
+            Structured context with class/category identity and public attrs.
+        """
+        resolved_reason_code = reason_code or self.get_reason_code()
+        structured: dict[str, object] = {
+            "message": str(self),
+            "error_type": type(self).__name__,
+            "error_category": self.get_error_type().value,
+        }
+        if resolved_reason_code is not None:
+            structured["reason_code"] = resolved_reason_code
+        structured.update(self.context)
+        structured.update(extra)
+        return structured
 
     def with_context(self, **extra: object) -> BioETLError:
         """Return self with additional context attributes.

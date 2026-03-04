@@ -7,6 +7,9 @@ entity identification across different pipeline paths.
 
 from __future__ import annotations
 
+__all__ = ["compute_publication_term_entity_id"]
+
+
 import hashlib
 
 

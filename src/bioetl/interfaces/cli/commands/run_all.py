@@ -1,8 +1,4 @@
-"""Run-all command for executing all pipelines for a specific provider.
-
-Provides a universal command to run all pipelines for a given source (provider),
-replacing the need for hardcoded provider-specific commands.
-"""
+"""Run-all CLI command."""
 
 from __future__ import annotations
 
@@ -22,6 +18,13 @@ from bioetl.application.services import (
 from bioetl.composition.entrypoints import get_pipeline_runner_service
 from bioetl.composition.registry import get_default_registry
 from bioetl.domain.exceptions import BioETLError
+from bioetl.interfaces.cli.commands.execution_policy import (
+    CLI_ENTRYPOINT_TYPED_ERRORS,
+    map_batch_run_result_to_exit_code,
+)
+from bioetl.interfaces.cli.commands.execution_policy import (
+    handle_cli_failure as handle_cli_execution_failure,
+)
 from bioetl.interfaces.cli.commands.health_server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
     echo_health_server_info,
@@ -217,12 +220,7 @@ def _show_run_preview(source: str, pipelines: list[str], dry_run: bool) -> None:
 
 def _determine_exit_code(batch_result: BatchRunResult) -> ExitCode:
     """Determine exit code from batch result."""
-    if batch_result.all_succeeded:
-        return ExitCode.OK
-    if batch_result.failed > 0:
-        return ExitCode.PIPELINE_ERROR
-    # All skipped (shutdown)
-    return ExitCode.SIGINT
+    return map_batch_run_result_to_exit_code(batch_result)
 
 
 @click.command("run-all")
@@ -284,55 +282,23 @@ def run_all(
     health_server: bool,
     health_port: int,
 ) -> None:
-    """Run all ETL pipelines for a specific provider.
-
-    Executes all registered pipelines matching the given source (provider).
-    Pipelines are run sequentially in alphabetical order.
-
-    Examples:
-
-        bioetl run-all --source chembl
-
-        bioetl run-all --source chembl --list-only
-
-        bioetl run-all --source pubchem --dry-run
-
-        bioetl run-all --source chembl --run-type rebuild --yes
-
-    Args:
-        source: Data source.
-        run_type: Type of pipeline run.
-        limit: Maximum number of records to process.
-        dry_run: Dry run mode flag.
-        yes: Whether to yes.
-        list_only: Whether to list only.
-        debug: Whether to debug.
-        health_server: Whether to health server.
-        health_port: Health port.
-    """
-    # Validate provider has pipelines
+    """Run all registered pipelines for one provider sequentially."""
     is_valid, error_msg = _validate_provider(source)
     if not is_valid:
         echo_error("Provider error", error_msg)
         sys.exit(ExitCode.FAIL)
 
-    # Get pipelines for provider
     pipelines = _filter_pipelines_by_provider(source)
 
-    # Handle --list-only mode
     if list_only:
         _handle_list_only(source, pipelines)
 
-    # Handle confirmation for destructive operations (CLI responsibility)
     _handle_destructive_confirmation(run_type, pipelines, dry_run, yes)
 
-    # Show what we're about to do
     _show_run_preview(source, pipelines, dry_run)
 
-    # Display health server info
     echo_health_server_info(health_server, health_port)
 
-    # Build options and run pipelines
     options = RunOptions(
         run_type=run_type,
         limit=limit,
@@ -348,34 +314,54 @@ def run_all(
     )
     try:
         batch_result = asyncio.run(coro)
+    except PipelineNotFoundError as exc:
+        handle_cli_execution_failure(
+            exc,
+            reason_code="CLI_RUN_ALL_CONFIG_ERROR",
+            subject_key="source",
+            subject_value=source,
+            domain_error_title="Batch execution failed with domain error",
+            unexpected_error_title="Unexpected error during batch execution",
+            interrupted_message="Batch run interrupted by user (Ctrl+C)",
+            default_exit_code=ExitCode.FAIL,
+        )
     except BioETLError as exc:
-        echo_error(
-            "Batch execution failed with domain error",
-            (
-                f"{exc} "
-                f"(reason_code=CLI_RUN_ALL_DOMAIN_ERROR, source={source}, "
-                f"error_type={type(exc).__name__})"
-            ),
+        handle_cli_execution_failure(
+            exc,
+            reason_code="CLI_RUN_ALL_DOMAIN_ERROR",
+            subject_key="source",
+            subject_value=source,
+            domain_error_title="Batch execution failed with domain error",
+            unexpected_error_title="Unexpected error during batch execution",
+            interrupted_message="Batch run interrupted by user (Ctrl+C)",
+            default_exit_code=ExitCode.FAIL,
         )
-        sys.exit(ExitCode.FAIL)
-    except KeyboardInterrupt:
-        echo_warning("Batch run interrupted by user (Ctrl+C)")
-        sys.exit(ExitCode.SIGINT)
-    except Exception as exc:
-        echo_error(
-            "Unexpected error during batch execution",
-            (
-                f"{exc} "
-                f"(reason_code=CLI_RUN_ALL_UNEXPECTED_ERROR, source={source}, "
-                f"error_type={type(exc).__name__})"
-            ),
+    except KeyboardInterrupt as exc:
+        handle_cli_execution_failure(
+            exc,
+            reason_code="CLI_RUN_ALL_SIGINT",
+            subject_key="source",
+            subject_value=source,
+            domain_error_title="Batch execution failed with domain error",
+            unexpected_error_title="Unexpected error during batch execution",
+            interrupted_message="Batch run interrupted by user (Ctrl+C)",
+            default_exit_code=ExitCode.FAIL,
         )
-        sys.exit(ExitCode.FAIL)
+    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
+        handle_cli_execution_failure(
+            exc,
+            reason_code="CLI_RUN_ALL_UNEXPECTED_ERROR",
+            subject_key="source",
+            subject_value=source,
+            domain_error_title="Batch execution failed with domain error",
+            unexpected_error_title="Unexpected error during batch execution",
+            interrupted_message="Batch run interrupted by user (Ctrl+C)",
+            default_exit_code=ExitCode.FAIL,
+        )
     finally:
         if getattr(coro, "cr_frame", None) is not None:
             coro.close()
 
-    # Output summary and exit
     _echo_batch_summary(batch_result, dry_run)
     sys.exit(_determine_exit_code(batch_result))
 

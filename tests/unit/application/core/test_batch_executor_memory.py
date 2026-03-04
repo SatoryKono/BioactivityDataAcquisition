@@ -8,7 +8,12 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.batch_executor import BatchExecutor
+from bioetl.application.core.batch_checkpoint_recovery_service import (
+    BatchCheckpointRecoveryService,
+)
 from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
+from bioetl.application.core.batch_processing_service import BatchProcessingService
+from bioetl.application.core.batch_progress_service import BatchProgressService
 from bioetl.application.core.batch_tracing import BatchTracingManagerService
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.config import RecordProcessorConfig
@@ -19,7 +24,7 @@ from bioetl.domain.config import MemoryConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.ports import MemoryMonitorPort, MetricsPort
-from bioetl.domain.types import RunType, ValidationResult
+from bioetl.domain.types import BatchID, RunType, ValidationResult
 
 
 @pytest.fixture
@@ -158,6 +163,26 @@ def _create_batch_executor(
         initial_batch_size=initial_batch_size,
         adaptive_sizing_enabled=mem_manager.enabled,
     )
+    progress_service = BatchProgressService(
+        logger=services.logger,
+        data_source=services.data_source,
+    )
+    checkpoint_recovery_service = BatchCheckpointRecoveryService(
+        checkpoint_manager=checkpoint_manager,
+        logger=services.logger,
+    )
+    batch_id_factory = BatchExecutorUuidFactoryAdapter()
+    batch_processing_service = BatchProcessingService(
+        services=services,
+        context=context,
+        config=config,
+        logger=services.logger,
+        batch_metrics=components.batch_metrics,
+        transformer=components.transformer,
+        writer=components.writer,
+        tracing_manager=tracing_manager,
+        batch_id_factory=batch_id_factory,
+    )
 
     return BatchExecutor(
         services=services,
@@ -170,9 +195,20 @@ def _create_batch_executor(
         writer=components.writer,
         tracing_manager=tracing_manager,
         memory_manager=mem_manager,
+        progress_service=progress_service,
+        checkpoint_recovery_service=checkpoint_recovery_service,
+        batch_processing_service=batch_processing_service,
+        batch_id_factory=batch_id_factory,
         batch_size=batch_size,
         checkpoint_interval=checkpoint_interval,
     )
+
+
+class BatchExecutorUuidFactoryAdapter:
+    """Default batch-id factory adapter mirroring production uuid4 behavior."""
+
+    def create(self) -> BatchID:
+        return BatchID(uuid4())
 
 
 class TestBatchExecutorMemory:

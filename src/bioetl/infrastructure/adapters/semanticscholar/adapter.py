@@ -21,6 +21,9 @@ Error Handling (RULES.md §3.1):
 
 from __future__ import annotations
 
+__all__ = ["DEFAULT_FIELDS", "SEMANTICSCHOLAR_HEALTH_ERRORS", "SemanticScholarAdapter"]
+
+
 import contextlib
 import time
 from dataclasses import dataclass, field

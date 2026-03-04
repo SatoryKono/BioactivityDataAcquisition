@@ -11,6 +11,9 @@ See Also:
 
 from __future__ import annotations
 
+__all__ = ["assess_health_from_circuit_breaker"]
+
+
 from bioetl.domain.ports import CircuitBreakerPort
 from bioetl.domain.types import HealthStatus
 

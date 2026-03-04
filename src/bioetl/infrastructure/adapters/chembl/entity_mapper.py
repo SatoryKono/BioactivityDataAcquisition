@@ -23,6 +23,9 @@ See Also:
 
 from __future__ import annotations
 
+__all__ = ["ChemblEntityMapper"]
+
+
 from bioetl.domain.registry.publication import (
     get_dedup_key_fields,
     get_publication_mapping,

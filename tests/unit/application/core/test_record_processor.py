@@ -16,7 +16,7 @@ from bioetl.domain.config import TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import DataQualityError, DataQualityThresholdError
-from bioetl.domain.ports import MetricsPort
+from bioetl.domain.ports import MetricsPort, NoOpTracing
 from bioetl.domain.types import BatchID, RunType, ValidationResult
 from bioetl.infrastructure.config import get_pipeline_config
 
@@ -207,6 +207,7 @@ def _create_record_processor(
     lock_validator=None,
 ) -> RecordProcessor:
     """Build RecordProcessor with composition-level dependency wiring."""
+    effective_tracer = tracer if tracer is not None else NoOpTracing()
     components = ServicesBuilder.create_batch_processing_components(
         services=services,
         context=context,
@@ -216,7 +217,7 @@ def _create_record_processor(
         gold_filter_callback=gold_filter_callback,
         gold_transform_callback=gold_transform_callback,
         gold_validator=gold_validator,
-        tracer=tracer,
+        tracer=effective_tracer,
         lock_validator=lock_validator,
     )
     return RecordProcessor(
@@ -225,7 +226,7 @@ def _create_record_processor(
         transformer=components.transformer,
         writer=components.writer,
         config=config,
-        tracer=tracer,
+        tracer=effective_tracer,
     )
 
 

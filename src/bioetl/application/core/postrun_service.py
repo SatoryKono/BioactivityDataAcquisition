@@ -16,6 +16,15 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
+from bioetl.application.core.postrun_cleanup_orchestrator import (
+    PostrunCleanupService,
+)
+from bioetl.application.core.postrun_dq_report_orchestrator import (
+    PostrunDQReportService,
+)
+from bioetl.application.core.postrun_metadata_version_resolver import (
+    PostrunMetadataVersionResolver,
+)
 from bioetl.application.services.data_quality_service import DataQualityService
 from bioetl.application.services.medallion_types import VacuumResult
 from bioetl.domain.exceptions import BioETLError
@@ -59,6 +68,50 @@ class ExecutorMetricsPort(Protocol):
     records_quarantined: int
 
 
+def _create_postrun_cleanup_service(
+    logger: LoggerPort,
+    warning_allowlist: tuple[type[BaseException], ...],
+) -> PostrunCleanupService:
+    return PostrunCleanupService(
+        logger=logger,
+        warning_allowlist=warning_allowlist,
+    )
+
+
+def _create_postrun_dq_report_service(
+    *,
+    logger: LoggerPort,
+    runtime: RuntimeConfig,
+    dq_report_service: DQReportService | None,
+    bronze_dq_config: BronzeDQConfigPort | None,
+    silver_dq_config: SilverDQConfigPort | None,
+    gold_dq_config: GoldDQConfigPort | None,
+    warning_allowlist: tuple[type[BaseException], ...],
+) -> PostrunDQReportService:
+    return PostrunDQReportService(
+        logger=logger,
+        runtime=runtime,
+        dq_report_service=dq_report_service,
+        bronze_dq_config=bronze_dq_config,
+        silver_dq_config=silver_dq_config,
+        gold_dq_config=gold_dq_config,
+        warning_allowlist=warning_allowlist,
+    )
+
+
+def _create_postrun_metadata_version_resolver(
+    *,
+    logger: LoggerPort,
+    runtime: RuntimeConfig,
+    warning_allowlist: tuple[type[BaseException], ...],
+) -> PostrunMetadataVersionResolver:
+    return PostrunMetadataVersionResolver(
+        logger=logger,
+        runtime=runtime,
+        warning_allowlist=warning_allowlist,
+    )
+
+
 @dataclass(frozen=True, slots=True)
 class PostrunResult:
     """Combined result of all post-run operations.
@@ -92,6 +145,9 @@ class PostrunService:
         _storage: Storage port for path resolution.
         _metrics: Optional metrics port.
         _logger: Structured logger.
+        _cleanup_orchestrator: Tracer cleanup orchestration helper.
+        _dq_report_orchestrator: DQ report generation orchestration helper.
+        _metadata_version_resolver: Delta version resolution helper.
         _dq_report_service: Optional DQ report service for report generation.
         _bronze_dq_config: Optional Bronze DQ report configuration.
         _silver_dq_config: Optional Silver DQ report configuration.
@@ -158,7 +214,6 @@ class PostrunService:
             ValueError,
             TypeError,
             AttributeError,
-            Exception,  # External report generation boundary can raise generic exceptions.
         )
         self._metadata_version_allowlist = (
             ImportError,
@@ -168,6 +223,24 @@ class PostrunService:
             RuntimeError,
             ValueError,
             TypeError,
+        )
+        self._cleanup_orchestrator = _create_postrun_cleanup_service(
+            logger=logger,
+            warning_allowlist=self._postrun_warning_allowlist,
+        )
+        self._dq_report_orchestrator = _create_postrun_dq_report_service(
+            logger=logger,
+            runtime=runtime,
+            dq_report_service=dq_report_service,
+            bronze_dq_config=bronze_dq_config,
+            silver_dq_config=silver_dq_config,
+            gold_dq_config=gold_dq_config,
+            warning_allowlist=self._postrun_warning_allowlist,
+        )
+        self._metadata_version_resolver = _create_postrun_metadata_version_resolver(
+            logger=logger,
+            runtime=runtime,
+            warning_allowlist=self._metadata_version_allowlist,
         )
 
     async def run(
@@ -243,17 +316,7 @@ class PostrunService:
         Args:
             tracer: Optional tracing port to close.
         """
-        if tracer is not None:
-            try:
-                tracer.close()
-                self._logger.debug("Tracer closed successfully")
-            except self._postrun_warning_allowlist as e:
-                self._logger.warning(
-                    "Failed to close tracer",
-                    error=str(e),
-                    error_type=type(e).__name__,
-                    reason="tracer_close_failed",
-                )
+        await self._cleanup_orchestrator.cleanup_tracer(tracer)
 
     async def _generate_dq_reports(
         self,
@@ -273,60 +336,7 @@ class PostrunService:
             - No context provided
             - No reports are enabled in configuration
         """
-        if self._dq_report_service is None:
-            return None
-
-        if context is None:
-            self._logger.debug(
-                "dq_report_skipped",
-                reason="no context provided",
-            )
-            return None
-
-        try:
-            result = await self._dq_report_service.generate_reports(
-                context=context,
-                bronze_config=self._bronze_dq_config,
-                silver_config=self._silver_dq_config,
-                gold_config=self._gold_dq_config,
-            )
-
-            if result.any_generated:
-                self._logger.info(
-                    "dq_reports_completed",
-                    reports_count=result.reports_count,
-                    bronze_enabled=result.bronze_enabled,
-                    silver_enabled=result.silver_enabled,
-                    gold_enabled=result.gold_enabled,
-                )
-
-            return result
-
-        except self._postrun_warning_allowlist as e:
-            if self._is_strict_validation_enabled():
-                self._logger.error(
-                    "dq_report_generation_failed",
-                    error=str(e),
-                    error_type=type(e).__name__,
-                    reason="dq_report_generation_failed_strict_mode",
-                    strict_mode=True,
-                )
-                raise
-            self._logger.error(
-                "dq_report_generation_failed",
-                error=str(e),
-                error_type=type(e).__name__,
-                reason="dq_report_generation_failed_warning_mode",
-                strict_mode=False,
-            )
-            self._logger.warning(
-                "dq_report_generation_failed",
-                error=str(e),
-                error_type=type(e).__name__,
-                reason="dq_report_generation_failed_warning_mode",
-                strict_mode=False,
-            )
-            return None
+        return await self._dq_report_orchestrator.generate_reports(context)
 
     async def _write_final_metadata(
         self,
@@ -441,82 +451,10 @@ class PostrunService:
 
     def _resolve_delta_version(self, table_path: str, *, layer: str) -> int | None:
         """Resolve Delta table version with warning-mode fallback and allowlist."""
-        try:
-            from deltalake import DeltaTable
-            from deltalake.exceptions import DeltaError, TableNotFoundError
-
-            dt = DeltaTable(table_path)
-            return dt.version()
-        except (ImportError, ModuleNotFoundError) as version_error:
-            if self._is_strict_validation_enabled():
-                self._logger.error(
-                    "delta_version_resolution_failed",
-                    layer=layer,
-                    table_path=table_path,
-                    error_type=type(version_error).__name__,
-                    error=str(version_error),
-                    reason="delta_dependency_missing_strict_mode",
-                    strict_mode=True,
-                )
-                raise
-            self._logger.warning(
-                "delta_version_resolution_failed",
-                layer=layer,
-                table_path=table_path,
-                error_type=type(version_error).__name__,
-                error=str(version_error),
-                reason="delta_dependency_missing_warning_mode",
-                strict_mode=False,
-            )
-            return None
-        except (TableNotFoundError, DeltaError) as version_error:
-            if self._is_strict_validation_enabled():
-                self._logger.error(
-                    "delta_version_resolution_failed",
-                    layer=layer,
-                    table_path=table_path,
-                    error_type=type(version_error).__name__,
-                    error=str(version_error),
-                    reason="delta_table_resolution_failed_strict_mode",
-                    strict_mode=True,
-                )
-                raise
-            self._logger.warning(
-                "delta_version_resolution_failed",
-                layer=layer,
-                table_path=table_path,
-                error_type=type(version_error).__name__,
-                error=str(version_error),
-                reason="delta_table_resolution_failed_warning_mode",
-                strict_mode=False,
-            )
-            return None
-        except self._metadata_version_allowlist as version_error:
-            if self._is_strict_validation_enabled():
-                self._logger.error(
-                    "delta_version_resolution_failed",
-                    layer=layer,
-                    table_path=table_path,
-                    error_type=type(version_error).__name__,
-                    error=str(version_error),
-                    reason="delta_version_resolution_failed_strict_mode",
-                    strict_mode=True,
-                )
-                raise
-            self._logger.warning(
-                "delta_version_resolution_failed",
-                layer=layer,
-                table_path=table_path,
-                error_type=type(version_error).__name__,
-                error=str(version_error),
-                reason="delta_version_resolution_failed_warning_mode",
-                strict_mode=False,
-            )
-            return None
-
-    def _is_strict_validation_enabled(self) -> bool:
-        """Return True only when strict validation is explicitly enabled."""
-        return getattr(self._runtime, "strict_validation", False) is True
+        return self._metadata_version_resolver.resolve_delta_version(
+            table_path,
+            layer=layer,
+        )
 
 
 __all__ = [

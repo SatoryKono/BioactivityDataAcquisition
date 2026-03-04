@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from bioetl.application.composite.runner_constants import (
     CHECKPOINT_NON_FATAL_ERRORS,
@@ -33,10 +32,10 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.ports import LoggerPort
 
-__all__ = ["CompositeRunnerMergeStageHelper"]
+__all__ = ["CompositeRunnerMergeStageMixin"]
 
 
-class CompositeRunnerMergeStageHelper:
+class CompositeRunnerMergeStageMixin:
     """Mixin containing merge execution and finalization."""
 
     _runtime: CompositeRuntimeConfig
@@ -47,33 +46,40 @@ class CompositeRunnerMergeStageHelper:
     _merger: MergeService
     _checkpoint_manager: CompositeCheckpointService
 
+    async def _save_checkpoint_safe(
+        self,
+        state: CompositeCheckpointState,
+        operation: str,
+    ) -> bool:  # pragma: no cover - implemented by support mixin
+        raise NotImplementedError
+
+    async def _generate_dq_reports(
+        self,
+        merge_result: MergeResult,
+    ) -> None:  # pragma: no cover - implemented by support mixin
+        raise NotImplementedError
+
+    async def _write_cv_quarantine(
+        self,
+        merge_result: MergeResult,
+    ) -> None:  # pragma: no cover - implemented by support mixin
+        raise NotImplementedError
+
     async def _call_save_checkpoint_safe(
         self,
         state: CompositeCheckpointState,
         operation: str,
     ) -> bool:
         """Invoke support-layer checkpoint save helper."""
-        save_checkpoint = cast(
-            "Callable[[CompositeCheckpointState, str], Awaitable[bool]]",
-            getattr(self, "_save_checkpoint_safe"),
-        )
-        return await save_checkpoint(state, operation)
+        return await self._save_checkpoint_safe(state, operation)
 
     async def _call_generate_dq_reports(self, merge_result: MergeResult) -> None:
         """Invoke support-layer DQ report generation helper."""
-        generate_reports = cast(
-            "Callable[[MergeResult], Awaitable[None]]",
-            getattr(self, "_generate_dq_reports"),
-        )
-        await generate_reports(merge_result)
+        await self._generate_dq_reports(merge_result)
 
     async def _call_write_cv_quarantine(self, merge_result: MergeResult) -> None:
         """Invoke support-layer quarantine write helper."""
-        write_quarantine = cast(
-            "Callable[[MergeResult], Awaitable[None]]",
-            getattr(self, "_write_cv_quarantine"),
-        )
-        await write_quarantine(merge_result)
+        await self._write_cv_quarantine(merge_result)
 
     async def _execute_merge_stage(
         self,

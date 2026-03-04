@@ -10,6 +10,9 @@ it's a concrete implementation detail, even though it does nothing.
 
 from __future__ import annotations
 
+__all__ = ["NoOpLogger"]
+
+
 from typing import Any, Self
 
 

@@ -15,7 +15,9 @@ import polars as pl
 import pyarrow as pa
 import pytest
 
-from bioetl.application.composite.dependency_coordinator import DependencyCoordinator
+from bioetl.application.composite.dependency_coordinator import (
+    DependencyCoordinatorService,
+)
 from bioetl.application.composite.key_extractor import KeyExtractorService
 from bioetl.domain.composite.config import DependencyConfig, SeedConfig
 
@@ -198,7 +200,7 @@ class TestDependencyWithMoleculeFilter:
         compound_record_dep_config: DependencyConfig,
     ) -> None:
         """Dependency should receive unique molecule IDs as filter."""
-        coordinator = DependencyCoordinator(
+        coordinator = DependencyCoordinatorService(
             logger=mock_logger,
             delta_reader=mock_delta_reader,
         )

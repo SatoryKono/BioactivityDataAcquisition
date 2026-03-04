@@ -6,7 +6,7 @@ resilience and run tracking.
 
 from __future__ import annotations
 
-from typing import Any, Protocol, runtime_checkable
+from typing import Protocol, runtime_checkable
 
 from bioetl.domain.types import MetaDict, RunID
 

@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+__all__ = ["SilverWriterArrowMixin"]
+
+
 from typing import TYPE_CHECKING
 
 import orjson

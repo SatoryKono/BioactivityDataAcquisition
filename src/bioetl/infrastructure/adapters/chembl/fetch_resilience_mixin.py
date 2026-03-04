@@ -15,6 +15,7 @@ from bioetl.domain.exceptions import (
     RetryExhaustedError,
 )
 from bioetl.domain.types import BronzeRecord
+from bioetl.infrastructure.adapters.common import is_retry_exhausted_error
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -74,11 +75,7 @@ class ChemblFetchResilienceMixin:
         error: Exception,
     ) -> bool:
         """Check if exception is a retry exhausted error (direct or wrapped)."""
-        if isinstance(error, RetryExhaustedError):
-            return True
-        return isinstance(error, ExternalServiceError) and isinstance(
-            error.__cause__, RetryExhaustedError
-        )
+        return is_retry_exhausted_error(error)
 
     def _log_single_id_failure(
         self, entity_type: str, filter_field: str, id_batch: list[str], error: Exception

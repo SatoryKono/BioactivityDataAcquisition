@@ -7,10 +7,15 @@ from uuid import uuid4
 
 import pytest
 
+from bioetl.application.core.preflight_health_aggregator import _HealthAggregator
+from bioetl.application.core.preflight_medallion_validator import (
+    _MedallionConfigValidator,
+)
 from bioetl.application.core.preflight_service import PreflightService
 from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.exceptions import InfrastructureError
+from bioetl.domain.medallion import WriteModePolicy
 from bioetl.domain.types import (
     ConfigValidationError,
     HealthReport,
@@ -18,6 +23,26 @@ from bioetl.domain.types import (
     PreflightReport,
     RunType,
 )
+
+
+def _build_preflight_dependencies(
+    config: PipelineConfig,
+    logger: MagicMock,
+    metrics: MagicMock,
+) -> dict[str, object]:
+    """Build injected dependencies for PreflightService."""
+    return {
+        "health_aggregator": _HealthAggregator(
+            metrics=metrics,
+            logger=logger,
+            pipeline_name=config.pipeline_name,
+        ),
+        "medallion_validator": _MedallionConfigValidator(
+            config=config,
+            logger=logger,
+            write_mode_policy=WriteModePolicy(),
+        ),
+    }
 
 
 @pytest.fixture
@@ -90,6 +115,7 @@ def preflight_service(pipeline_config, mock_context, mock_logger, mock_metrics):
         context=mock_context,
         logger=mock_logger,
         metrics=mock_metrics,
+        **_build_preflight_dependencies(pipeline_config, mock_logger, mock_metrics),
     )
 
 
@@ -106,6 +132,7 @@ class TestPreflightServiceInit:
             context=mock_context,
             logger=mock_logger,
             metrics=mock_metrics,
+            **_build_preflight_dependencies(pipeline_config, mock_logger, mock_metrics),
         )
 
         assert service._config == pipeline_config
@@ -249,6 +276,7 @@ class TestPreflightServiceMetrics:
             context=mock_context,
             logger=mock_logger,
             metrics=mock_metrics,
+            **_build_preflight_dependencies(pipeline_config, mock_logger, mock_metrics),
         )
 
         unhealthy_services = MagicMock()
@@ -684,6 +712,7 @@ class TestValidateWriteModes:
             context=mock_context,
             logger=mock_logger,
             metrics=mock_metrics,
+            **_build_preflight_dependencies(config, mock_logger, mock_metrics),
         )
         errors = service.validate_write_modes()
         assert len([e for e in errors if e.field == "write_mode"]) == 0
@@ -706,6 +735,7 @@ class TestValidateWriteModes:
             context=mock_context,
             logger=mock_logger,
             metrics=mock_metrics,
+            **_build_preflight_dependencies(config, mock_logger, mock_metrics),
         )
         errors = service.validate_write_modes()
         assert len([e for e in errors if e.field == "write_mode"]) == 0
@@ -751,6 +781,7 @@ class TestValidateWriteModes:
             context=mock_context,
             logger=mock_logger,
             metrics=mock_metrics,
+            **_build_preflight_dependencies(config, mock_logger, mock_metrics),
         )
         errors = service.validate_write_modes()
         assert len([e for e in errors if e.field == "gold_write_mode"]) == 0
@@ -774,6 +805,7 @@ class TestValidateWriteModes:
             context=mock_context,
             logger=mock_logger,
             metrics=mock_metrics,
+            **_build_preflight_dependencies(config, mock_logger, mock_metrics),
         )
         errors = service.validate_write_modes()
         assert len([e for e in errors if e.field == "gold_write_mode"]) == 0
@@ -795,6 +827,7 @@ class TestValidateWriteModes:
             context=mock_context,
             logger=mock_logger,
             metrics=mock_metrics,
+            **_build_preflight_dependencies(config, mock_logger, mock_metrics),
         )
         errors = service.validate_write_modes()
         assert len([e for e in errors if e.field == "gold_write_mode"]) == 0
@@ -829,6 +862,7 @@ class TestValidateWriteModes:
             context=mock_context,
             logger=mock_logger,
             metrics=mock_metrics,
+            **_build_preflight_dependencies(config, mock_logger, mock_metrics),
         )
         errors = service.validate_write_modes()
         gold_errors = [e for e in errors if e.field == "gold_write_mode"]
@@ -859,6 +893,7 @@ class TestValidateWriteModes:
             context=mock_context,
             logger=mock_logger,
             metrics=mock_metrics,
+            **_build_preflight_dependencies(config, mock_logger, mock_metrics),
         )
         service.validate_write_modes()
         mock_logger.warning.assert_called()
@@ -1006,6 +1041,7 @@ class TestValidatePreflight:
             context=mock_context,
             logger=mock_logger,
             metrics=mock_metrics,
+            **_build_preflight_dependencies(config, mock_logger, mock_metrics),
         )
 
         report = await service.validate_preflight(

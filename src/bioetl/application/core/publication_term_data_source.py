@@ -4,6 +4,9 @@ Wraps a DataSourcePort to extract terms from ChEMBL publication records.
 This is a derived entity pattern - publication_term entities are extracted
 from the nested mesh_terms and keywords fields in publication records.
 
+__all__ = ["PublicationTermDataSource"]
+
+
 Architecture:
     ChEMBL API (document endpoint)
            ↓

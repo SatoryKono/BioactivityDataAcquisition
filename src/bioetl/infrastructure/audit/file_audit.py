@@ -15,6 +15,9 @@ Requirements:
 
 from __future__ import annotations
 
+__all__ = ["FileAuditAdapter"]
+
+
 import asyncio
 from datetime import UTC, datetime
 from pathlib import Path

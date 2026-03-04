@@ -65,6 +65,7 @@ if TYPE_CHECKING:
     from bioetl.domain.config import DQConfig, MemoryConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import (
+        BatchIdGeneratorPort,
         CheckpointPort,
         DataNormalizationPort,
         DataSourcePort,
@@ -485,6 +486,7 @@ class ServicesBuilder:
         transform_callback: TransformCallback,
         gold_filter_callback: GoldFilterCallback,
         gold_transform_callback: GoldTransformCallback,
+        tracer: TracingPort | None = None,
         *,
         strict_gold_validation: bool = True,
         lock_validator: Callable[[], Awaitable[bool]] | None = None,
@@ -521,6 +523,7 @@ class ServicesBuilder:
         Returns:
             Configured RecordProcessor instance
         """
+        effective_tracer = tracer or services.tracing
         error_classifier = ErrorClassifier()
         table_config = TableConfig(
             primary_keys=tuple(primary_keys),
@@ -559,6 +562,7 @@ class ServicesBuilder:
             gold_filter_callback=gold_filter_callback,
             gold_transform_callback=gold_transform_callback,
             gold_validator=gold_validator,
+            tracer=effective_tracer,
             lock_validator=lock_validator,
         )
 
@@ -568,6 +572,7 @@ class ServicesBuilder:
             transformer=components.transformer,
             writer=components.writer,
             config=processor_config,
+            tracer=effective_tracer,
         )
 
     @staticmethod
@@ -589,6 +594,7 @@ class ServicesBuilder:
             create_record_processor_fn=ServicesBuilder.create_record_processor,
             strict_gold_validation=strict_gold_validation,
             lock_validator=lock_validator,
+            tracer=pipeline.services.tracing,
         )
 
     @staticmethod
@@ -609,6 +615,7 @@ class ServicesBuilder:
         silver_output_path: str | None = None,
         gold_output_path: str | None = None,
         flat_structure: bool = False,
+        batch_id_factory: BatchIdGeneratorPort | None = None,
     ) -> BatchExecutor:
         """Create BatchExecutor from pipeline instance."""
         callbacks = extract_pipeline_callbacks(pipeline)
@@ -631,6 +638,7 @@ class ServicesBuilder:
             silver_output_path=silver_output_path,
             gold_output_path=gold_output_path,
             flat_structure=flat_structure,
+            batch_id_factory=batch_id_factory,
         )
 
 

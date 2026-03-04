@@ -6,6 +6,9 @@ Extracted from pubchem/client.py for better separation of concerns.
 
 from __future__ import annotations
 
+__all__ = ["PubChemEntityMapper"]
+
+
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:

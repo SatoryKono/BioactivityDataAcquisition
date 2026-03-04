@@ -6,6 +6,9 @@ Extracted from pubmed_client.py for better separation of concerns.
 
 from __future__ import annotations
 
+__all__ = ["PubMedXmlProcessor"]
+
+
 import xml.etree.ElementTree as ET
 from typing import Any
 

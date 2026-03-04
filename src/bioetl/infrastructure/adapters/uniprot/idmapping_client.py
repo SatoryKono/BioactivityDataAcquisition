@@ -16,6 +16,9 @@ Rate Limits:
 
 from __future__ import annotations
 
+__all__ = ["IDMappingJobError", "IDMappingTimeoutError", "UniProtIDMappingClient"]
+
+
 import asyncio
 import json
 import re

@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+__all__ = ["ChemblFetchMultiFilterMixin"]
+
+
 import itertools
 from typing import TYPE_CHECKING, Any
 

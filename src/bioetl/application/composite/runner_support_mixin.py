@@ -4,12 +4,10 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from bioetl.application.composite.runner_constants import (
     CHECKPOINT_NON_FATAL_ERRORS,
-    DQ_REPORT_NON_FATAL_ERRORS,
-    QUARANTINE_WRITE_NON_FATAL_ERRORS,
 )
 from bioetl.application.composite.runner_helpers import calculate_had_warnings
 from bioetl.domain.composite.result import CompositeResult, EnrichmentResult, SeedResult
@@ -27,16 +25,14 @@ if TYPE_CHECKING:
     )
     from bioetl.application.composite.runner import CompositeRuntimeConfig
     from bioetl.application.core.runner import PipelineRunner
-    from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
     from bioetl.domain.composite.result import DependencyResult, MergeResult
-    from bioetl.domain.ports import LoggerPort, MetricsPort, QuarantinePort
-    from bioetl.domain.types import RunID
+    from bioetl.domain.ports import LoggerPort
 
-__all__ = ["CompositeRunnerSupportHelper"]
+__all__ = ["CompositeRunnerSupportMixin"]
 
 
-class CompositeRunnerSupportHelper:
+class CompositeRunnerSupportMixin:
     """Mixin with utility and side-effect helpers."""
 
     _config: CompositeConfig
@@ -45,12 +41,8 @@ class CompositeRunnerSupportHelper:
     _checkpoint_manager: CompositeCheckpointService
     _logger: LoggerPort
     _run_id_str: str
-    _run_id: RunID
     _started_at: datetime | None
-    _dq_report_service: DQReportService | None
     _preflight_validator: CompositePreflightValidationService | None
-    _quarantine_port: QuarantinePort | None
-    _metrics: MetricsPort | None
     _fsm: FSMStateHelperService
 
     def _build_composite_result(
@@ -271,104 +263,4 @@ class CompositeRunnerSupportHelper:
                 raise RuntimeError(
                     f"Required enricher '{enricher_name}' failed: "
                     f"{result.error_message or result.status.value}"
-                )
-
-    async def _generate_dq_reports(self, merge_result: MergeResult) -> None:
-        """Generate DQ reports for composite pipeline."""
-        if self._dq_report_service is None:
-            self._logger.debug(
-                "dq_reports_skipped",
-                reason="DQReportService not configured",
-                composite=self._config.name,
-            )
-            return
-
-        try:
-            from bioetl.application.services.dq_report_service import DQReportContext
-
-            context = DQReportContext(
-                run_id=self._run_id_str,
-                pipeline_name=f"composite_{self._config.name}",
-                timestamp=datetime.now(tz=UTC),
-                provider="composite",
-                entity=self._config.name,
-                silver_target_table=self._config.merge.output_silver_path,
-                silver_input_count=merge_result.records_from_seed,
-                gold_target_table=self._config.merge.output_gold_path,
-                dq_soft_threshold=self._config.dq.soft_fail_threshold,
-                dq_hard_threshold=self._config.dq.hard_fail_threshold,
-            )
-            await self._dq_report_service.generate_reports(context)
-
-            self._logger.info(
-                "dq_reports_generated",
-                composite=self._config.name,
-                run_id=self._run_id_str,
-            )
-
-        except DQ_REPORT_NON_FATAL_ERRORS as error:
-            self._logger.warning(
-                "dq_reports_failed",
-                composite=self._config.name,
-                error=str(error),
-                error_type=type(error).__name__,
-            )
-        except BioETLError as error:
-            self._logger.warning(
-                "dq_reports_failed",
-                composite=self._config.name,
-                error=str(error),
-                error_type=type(error).__name__,
-                reason_code="unexpected_bioetl_error",
-            )
-
-    async def _write_cv_quarantine(self, merge_result: MergeResult) -> None:
-        """Write cross-validation quarantine records if any exist."""
-        if self._quarantine_port is None or not merge_result.quarantine_payloads:
-            return
-
-        from bioetl.domain.types import BatchID
-
-        now = datetime.now(tz=UTC)
-        pipeline_name = f"composite:{self._config.name}"
-        written = 0
-
-        for payload in merge_result.quarantine_payloads:
-            try:
-                await self._quarantine_port.write(
-                    pipeline=pipeline_name,
-                    error_code="CROSS_VALIDATION_QUARANTINE",
-                    payload=dict(payload),
-                    bronze_batch_id=cast(BatchID, self._run_id),
-                    run_id=self._run_id,
-                    ingestion_ts=now,
-                )
-                written += 1
-            except QUARANTINE_WRITE_NON_FATAL_ERRORS as error:
-                self._logger.warning(
-                    "Failed to write quarantine record",
-                    pipeline=pipeline_name,
-                    error=str(error),
-                    error_type=type(error).__name__,
-                )
-            except BioETLError as error:
-                self._logger.warning(
-                    "Failed to write quarantine record",
-                    pipeline=pipeline_name,
-                    error=str(error),
-                    error_type=type(error).__name__,
-                    reason_code="unexpected_bioetl_error",
-                )
-
-        if written > 0:
-            self._logger.info(
-                "Cross-validation quarantine records written",
-                composite=self._config.name,
-                quarantine_count=written,
-            )
-            if self._metrics:
-                self._metrics.inc_quarantine_records(
-                    pipeline=pipeline_name,
-                    reason="cross_validation",
-                    count=written,
                 )

@@ -425,6 +425,8 @@ def test_dead_code_vulture(src_dir: Path) -> None:
         "param",  # Click callback signature requires param argument
         # Prefect task decorators
         "execute",
+        # Protocol callable parameter names
+        "awaitable",
     }
 
     # Get unused code with confidence threshold

@@ -6,6 +6,9 @@ Extracted from uniprot/client.py for better separation of concerns.
 
 from __future__ import annotations
 
+__all__ = ["FastaParser"]
+
+
 from typing import Any
 
 

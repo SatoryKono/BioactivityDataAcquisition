@@ -219,7 +219,9 @@ def _evaluate_policy(
             print(f"  - {prefix}: {count} > {limit}")
 
     if resolved_violations:
-        _print_violation_list("\n[INFO] Resolved baseline violations:", resolved_violations)
+        _print_violation_list(
+            "\n[INFO] Resolved baseline violations:", resolved_violations
+        )
 
     has_blockers = bool(new_violations or regressions or budget_violations)
     if has_blockers:
@@ -245,6 +247,15 @@ def parse_args() -> argparse.Namespace:
         default=str(DEFAULT_BASELINE.relative_to(PROJECT_ROOT)),
         help="Baseline JSON path relative to project root.",
     )
+    parser.add_argument(
+        "--mode",
+        choices=("block", "warn"),
+        default="block",
+        help=(
+            "Governance mode: 'block' fails CI on violations, "
+            "'warn' reports violations but exits 0."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -256,7 +267,12 @@ def main() -> int:
     baseline_map, folder_budgets = _load_baseline(baseline_path)
     current = _run_ruff_c901(args.target)
 
-    return _evaluate_policy(current, baseline_map, folder_budgets)
+    exit_code = _evaluate_policy(current, baseline_map, folder_budgets)
+    if exit_code == 0 or args.mode == "block":
+        return exit_code
+
+    print("\nMode: WARN (non-blocking rollout enabled)")
+    return 0
 
 
 if __name__ == "__main__":

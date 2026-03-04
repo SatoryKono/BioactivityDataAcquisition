@@ -11,6 +11,9 @@ Safety Guard (RULES.md §4.6):
 
 from __future__ import annotations
 
+__all__ = ["BatchWriter"]
+
+
 from collections.abc import Awaitable, Callable, Sequence
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Literal, cast

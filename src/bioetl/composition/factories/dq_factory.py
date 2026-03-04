@@ -19,6 +19,8 @@ from bioetl.application.services.dq import (
     BronzeDQAnalyzer,
     GoldDQAnalyzer,
     SilverDQAnalyzer,
+    SilverStatisticsCalculator,
+    SilverThresholdChecker,
 )
 from bioetl.infrastructure.export.dq_report_writer import DQReportWriter
 
@@ -62,7 +64,12 @@ class DQServicesFactory:
         Returns:
             SilverDQAnalyzerPort implementation for analyzing normalized Silver data.
         """
-        return SilverDQAnalyzer()
+        statistics = SilverStatisticsCalculator()
+        threshold_checker = SilverThresholdChecker()
+        return SilverDQAnalyzer(
+            statistics=statistics,
+            threshold_checker=threshold_checker,
+        )
 
     @staticmethod
     def create_gold_analyzer() -> GoldDQAnalyzerPort:

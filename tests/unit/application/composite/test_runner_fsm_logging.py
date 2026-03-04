@@ -93,7 +93,7 @@ def mock_key_extractor() -> AsyncMock:
 
 @pytest.fixture
 def mock_coordinator() -> AsyncMock:
-    """Create a mock EnrichmentCoordinator."""
+    """Create a mock EnrichmentCoordinatorService."""
     coordinator = AsyncMock()
     coordinator.run_enrichers = AsyncMock(
         return_value={

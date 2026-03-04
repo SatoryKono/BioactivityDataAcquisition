@@ -7,6 +7,9 @@ column ordering and matching.
 
 from __future__ import annotations
 
+__all__ = ["LEGACY_PUBLICATION_ALIASES_CUTOFF_DATE"]
+
+
 # Explicit deprecation window for legacy publication aliases.
 LEGACY_PUBLICATION_ALIASES_CUTOFF_DATE = "2026-06-30"
 

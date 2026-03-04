@@ -5,6 +5,9 @@ Health-aware fetching: HEALTHY=full batch, DEGRADED=batch/2, UNHEALTHY=fail fast
 
 from __future__ import annotations
 
+__all__ = ["ChemblAdapter"]
+
+
 import urllib.parse
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any

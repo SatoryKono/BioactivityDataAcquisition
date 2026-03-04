@@ -5,6 +5,9 @@ Main entry point for anomaly detection functionality.
 
 from __future__ import annotations
 
+__all__ = ["AnomalyDetector"]
+
+
 import statistics
 from datetime import datetime
 from typing import TYPE_CHECKING

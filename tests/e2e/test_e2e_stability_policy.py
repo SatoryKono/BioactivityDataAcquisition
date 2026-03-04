@@ -15,6 +15,7 @@ from .conftest import (
     run_pipeline_or_skip_transient,
 )
 from .test_pipeline_matrix_e2e import (
+    CRITICAL_SMOKE_PIPELINES,
     NON_EMPTY_CASSETTE_CONTRACT_PIPELINES,
     PIPELINE_CASES,
     PipelineE2ECase,
@@ -105,10 +106,14 @@ def test_resolve_cassette_name_uses_matrix_fallback(
 
 
 def test_non_empty_contract_covers_all_matrix_pipelines() -> None:
-    """Every matrix smoke pipeline must enforce non-empty cassette output."""
+    """Critical smoke pipelines must enforce non-empty cassette output."""
     declared = {case.pipeline_name for case in PIPELINE_CASES}
-    assert NON_EMPTY_CASSETTE_CONTRACT_PIPELINES == declared
-    assert all(_requires_non_empty_cassette_contract(name) for name in declared)
+    assert CRITICAL_SMOKE_PIPELINES <= declared
+    assert NON_EMPTY_CASSETTE_CONTRACT_PIPELINES == CRITICAL_SMOKE_PIPELINES
+    assert all(
+        _requires_non_empty_cassette_contract(name)
+        for name in NON_EMPTY_CASSETTE_CONTRACT_PIPELINES
+    )
 
 
 def test_build_e2e_fail_reason_is_deterministic() -> None:

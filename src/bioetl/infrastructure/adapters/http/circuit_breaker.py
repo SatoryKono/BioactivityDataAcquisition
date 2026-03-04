@@ -10,6 +10,16 @@ State machine:
 
 from __future__ import annotations
 
+__all__ = [
+    "CircuitBreaker",
+    "METRIC_CIRCUIT_BREAKER_STATE",
+    "METRIC_CIRCUIT_BREAKER_TRIPS",
+    "P",
+    "T",
+    "is_circuit_breaker_error",
+]
+
+
 import asyncio
 import time
 from dataclasses import dataclass, field

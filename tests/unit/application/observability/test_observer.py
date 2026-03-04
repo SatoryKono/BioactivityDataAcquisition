@@ -7,14 +7,17 @@ Tests cover:
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
 import pytest
 
 from bioetl.application.core.shutdown import PipelineShutdownError
 from bioetl.application.observability.observer import LifecyclePhase, PipelineObserver
-from bioetl.domain.observability_contract import missing_observability_fields
+from bioetl.domain.observability_contract import (
+    ObservabilityContractPayload,
+    missing_observability_fields,
+)
 from bioetl.domain.types import RunType
 
 
@@ -686,7 +689,8 @@ class TestObserverContractSchema:
         observer.emit_event("contract_event", LifecyclePhase.EXECUTION, level="info")
 
         logger_mock.info.assert_called_once()
-        context = logger_mock.info.call_args[1]
+        event_name = logger_mock.info.call_args[0][0]
+        context = {"event": event_name, **logger_mock.info.call_args[1]}
         assert missing_observability_fields(context) == ()
 
     def test_emit_event_migrates_legacy_keys_to_canonical(
@@ -715,11 +719,48 @@ class TestObserverContractSchema:
         assert context["pipeline"] == "legacy_pipeline"
         assert context["run_id"] == "legacy-run-id"
         assert logger_mock.info.call_args[0][0] == "contract_event"
-        # Dual-write aliases stay present during migration period.
-        assert context["provider_name"] == "legacy_provider"
-        assert context["pipeline_name"] == "legacy_pipeline"
-        assert context["correlation_id"] == "legacy-run-id"
-        assert context["event_name"] == "contract_event"
+        # Legacy aliases are not emitted after migration completion.
+        assert "provider_name" not in context
+        assert "pipeline_name" not in context
+        assert "correlation_id" not in context
+        assert "event_name" not in context
+
+    def test_emit_event_uses_single_contract_validation_point(
+        self, metrics_mock, logger_mock, run_id
+    ):
+        observer = PipelineObserver(
+            pipeline_name="test_pipeline",
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            metrics=metrics_mock,
+            logger=logger_mock,
+        )
+
+        payload = ObservabilityContractPayload(
+            context={
+                "event": "contract_event",
+                "provider": "test",
+                "pipeline": "test_pipeline",
+                "run_id": str(run_id),
+                "severity": "info",
+                "error_type": "none",
+            },
+            metric_labels={
+                "event": "contract_event",
+                "provider": "test",
+                "pipeline": "test_pipeline",
+                "severity": "info",
+                "error_type": "none",
+            },
+        )
+
+        with patch(
+            "bioetl.application.observability.observer.build_observability_contract_payload",
+            return_value=payload,
+        ) as build_mock:
+            observer.emit_event("contract_event", LifecyclePhase.EXECUTION)
+
+        build_mock.assert_called_once()
 
     def test_full_lifecycle_events_have_required_fields(
         self, metrics_mock, logger_mock, run_id
@@ -745,5 +786,25 @@ class TestObserverContractSchema:
         )
         assert calls
         for call in calls:
-            context = call[1]
+            event_name = call[0][0] if call[0] else ""
+            context = {"event": event_name, **call[1]}
             assert missing_observability_fields(context) == ()
+
+        metric_calls = [
+            call
+            for call in metrics_mock.increment_counter.call_args_list
+            if call[0][0] == "observability_events_total"
+        ]
+        assert metric_calls
+        required_metric_labels = {
+            "event",
+            "provider",
+            "pipeline",
+            "severity",
+            "error_type",
+        }
+        for call in metric_calls:
+            labels = call[1]["labels"]
+            assert required_metric_labels.issubset(set(labels))
+            for key in required_metric_labels:
+                assert str(labels[key]).strip() != ""

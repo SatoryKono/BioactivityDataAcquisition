@@ -14,6 +14,10 @@ Usage:
 
 from __future__ import annotations
 
+__all__ = ["traced_async_operation"]
+
+
+import sys
 from contextlib import asynccontextmanager, contextmanager
 from typing import TYPE_CHECKING, Any
 
@@ -38,12 +42,14 @@ def _span_context(
 
     try:
         yield span
-    except BaseException as e:
-        span.set_attribute("error", True)
-        span.set_attribute("error.type", type(e).__name__)
-        span.record_exception(e)
-        raise
     finally:
+        exc_type, exc, exc_tb = sys.exc_info()
+        if exc is not None:
+            span.set_attribute("error", True)
+            span.set_attribute("error.type", type(exc).__name__)
+            if isinstance(exc, Exception):
+                span.record_exception(exc)
+        # Keep closing semantics stable for existing OTel facade tests.
         span.__exit__(None, None, None)
 
 

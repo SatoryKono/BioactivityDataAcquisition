@@ -13,6 +13,9 @@ Documentation: https://www.uniprot.org/help/api
 
 from __future__ import annotations
 
+__all__ = ["UNIPROT_BATCH_SIZE", "UNIPROT_FETCH_ERRORS", "UniProtAdapter"]
+
+
 import asyncio
 import contextlib
 import time
@@ -377,6 +380,7 @@ class UniProtAdapter(
             return
 
         fetched = already_fetched
+        fallback_result_cache: dict[str, BronzeRecord | None] = {}
         for missing_id in missing_ids:
             if limit and fetched >= limit:
                 break
@@ -385,8 +389,24 @@ class UniProtAdapter(
             if not fallback_value:
                 continue
 
+            if fallback_value in fallback_result_cache:
+                cached_record = fallback_result_cache[fallback_value]
+                if cached_record is None:
+                    continue
+                yield dict(cached_record)
+                fetched += 1
+                if limit and fetched >= limit:
+                    return
+                continue
+
+            first_record: BronzeRecord | None = None
             async for record in strategy(query=fallback_value, limit=1):
-                yield record
+                first_record = dict(record)
+                break
+
+            fallback_result_cache[fallback_value] = first_record
+            if first_record is not None:
+                yield dict(first_record)
                 fetched += 1
                 if limit and fetched >= limit:
                     return
@@ -435,7 +455,18 @@ class UniProtAdapter(
         """
         if not fallback_mapping:
             return []
-        return [fid for fid in filter_ids if fid not in found_ids]
+        missing_ids: list[str] = []
+        seen_missing: set[str] = set()
+        for filter_id in filter_ids:
+            if filter_id in found_ids:
+                continue
+            if filter_id not in fallback_mapping:
+                continue
+            if filter_id in seen_missing:
+                continue
+            seen_missing.add(filter_id)
+            missing_ids.append(filter_id)
+        return missing_ids
 
     async def fetch_filtered_with_fallback(
         self,
@@ -469,11 +500,19 @@ class UniProtAdapter(
         if not filter_ids:
             return
 
+        requested_ids: list[str] = []
+        seen_requested: set[str] = set()
+        for filter_id in filter_ids:
+            if filter_id in seen_requested:
+                continue
+            seen_requested.add(filter_id)
+            requested_ids.append(filter_id)
+
         fetched = 0
         found_ids: set[str] = set()
 
         async for record, accession in self._do_primary_fetch(
-            entity_type, filter_ids, filter_field, limit
+            entity_type, requested_ids, filter_field, limit
         ):
             yield record
             fetched += 1
@@ -482,7 +521,9 @@ class UniProtAdapter(
             if limit and fetched >= limit:
                 return
 
-        missing_ids = self._should_do_fallback(filter_ids, found_ids, fallback_mapping)
+        missing_ids = self._should_do_fallback(
+            requested_ids, found_ids, fallback_mapping
+        )
         if not missing_ids:
             return
 

@@ -131,10 +131,10 @@ class TestDomainCompositeLayerBoundaries:
 
 
 class TestCoordinatorIsolation:
-    """Tests for EnrichmentCoordinator FSM isolation."""
+    """Tests for EnrichmentCoordinatorService FSM isolation."""
 
     def test_coordinator_no_fsm_state_import(self, src_dir: Path) -> None:
-        """EnrichmentCoordinator MUST NOT import CompositePipelineState.
+        """EnrichmentCoordinatorService MUST NOT import CompositePipelineState.
 
         REQ-ARCH-FSM-004: Coordinator is a delegated service that runs enrichers.
         It should not know about FSM states - that's Runner's responsibility.
@@ -149,13 +149,13 @@ class TestCoordinatorIsolation:
 
         # Check for CompositePipelineState import
         assert "CompositePipelineState" not in content, (
-            "EnrichmentCoordinator imports CompositePipelineState.\n"
+            "EnrichmentCoordinatorService imports CompositePipelineState.\n"
             "FSM state management is Runner's responsibility, not Coordinator's.\n"
             "See ADR-026 §FSM Pattern."
         )
 
     def test_coordinator_no_checkpoint_import(self, src_dir: Path) -> None:
-        """EnrichmentCoordinator MUST NOT import checkpoint classes.
+        """EnrichmentCoordinatorService MUST NOT import checkpoint classes.
 
         REQ-ARCH-FSM-005: Coordinator should not directly manage checkpoints.
         Checkpoint management is Runner's responsibility.
@@ -187,7 +187,7 @@ class TestCoordinatorIsolation:
                         checkpoint_imports.append(alias.name)
 
         assert not checkpoint_imports, (
-            f"EnrichmentCoordinator imports checkpoint classes at module level: "
+            f"EnrichmentCoordinatorService imports checkpoint classes at module level: "
             f"{checkpoint_imports}\n"
             "Checkpoint management is Runner's responsibility."
         )

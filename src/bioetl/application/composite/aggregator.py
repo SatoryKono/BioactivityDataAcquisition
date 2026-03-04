@@ -6,6 +6,7 @@ row before joining with seed data. See ADR-026.
 
 from __future__ import annotations
 
+import warnings
 from typing import TYPE_CHECKING
 
 from bioetl.domain.composite.aggregation import AggregationFunction
@@ -140,5 +141,17 @@ class EnricherAggregatorService:
         return None
 
 
-# Backward-compatible alias for iterative NAME-001 migration.
-EnricherAggregator = EnricherAggregatorService
+if TYPE_CHECKING:
+    EnricherAggregator = EnricherAggregatorService
+
+
+def __getattr__(name: str) -> object:
+    """Resolve deprecated compatibility aliases lazily."""
+    if name == "EnricherAggregator":
+        warnings.warn(
+            "EnricherAggregator is deprecated; use EnricherAggregatorService.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return EnricherAggregatorService
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

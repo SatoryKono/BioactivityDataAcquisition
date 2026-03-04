@@ -1,9 +1,6 @@
-"""Composite Pipeline Runner.
+"""Composite pipeline runner facade.
 
-Application Service that orchestrates composite pipeline execution.
-Coordinates seed execution, parallel enrichment, and merge operations.
-
-See ADR-026 for architectural decisions.
+Coordinates high-level execution flow while delegating stage logic to mixins.
 """
 
 from __future__ import annotations
@@ -16,11 +13,14 @@ from uuid import UUID, uuid4
 
 from bioetl.application.composite.runner_constants import PIPELINE_EXECUTION_ERRORS
 from bioetl.application.composite.runner_merge_stage_mixin import (
-    CompositeRunnerMergeStageHelper,
+    CompositeRunnerMergeStageMixin,
 )
-from bioetl.application.composite.runner_stage_mixin import CompositeRunnerStageHelper
+from bioetl.application.composite.runner_observability_mixin import (
+    CompositeRunnerObservabilityMixin,
+)
+from bioetl.application.composite.runner_stage_mixin import CompositeRunnerStageMixin
 from bioetl.application.composite.runner_support_mixin import (
-    CompositeRunnerSupportHelper,
+    CompositeRunnerSupportMixin,
 )
 from bioetl.domain.composite.result import CompositeResult
 from bioetl.domain.composite.state import CompositePipelineState
@@ -35,21 +35,22 @@ from bioetl.domain.types import RunID
 if TYPE_CHECKING:
     import polars as pl
 
-    from bioetl.application.composite.checkpoint import CompositeCheckpointService
-    from bioetl.application.composite.coordinator import EnrichmentCoordinatorService
+    from bioetl.application.composite.checkpoint import CompositeCheckpointManager
+    from bioetl.application.composite.coordinator import EnrichmentCoordinator
     from bioetl.application.composite.dependency_coordinator import (
-        DependencyCoordinatorService,
+        DependencyCoordinator,
     )
     from bioetl.application.composite.fsm_helper import FSMStateHelperService
     from bioetl.application.composite.key_extractor import KeyExtractorService
     from bioetl.application.composite.merger import MergeService
     from bioetl.application.composite.preflight_validator import (
-        CompositePreflightValidationService,
+        CompositePreflightValidator,
     )
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.domain.composite.config import CompositeConfig
     from bioetl.domain.ports import LockPort, LoggerPort, MetricsPort, QuarantinePort
+
 
 __all__ = [
     "CompositePipelineRunner",
@@ -58,43 +59,21 @@ __all__ = [
 ]
 
 
-def _create_fsm_state_helper(
+def _create_fsm_helper_for_legacy_fallback(
+    *,
     config: CompositeConfig,
     logger: LoggerPort,
     run_id: str,
 ) -> FSMStateHelperService:
-    """Build FSM helper for legacy callsites."""
-    from bioetl.application.composite.fsm_helper import FSMStateHelperService
+    """Create FSM helper for transitional legacy callsites (EXC-003)."""
+    from bioetl.application.composite.fsm_helper import FSMStateHelper
 
-    return FSMStateHelperService(
-        config=config,
-        logger=logger,
-        run_id=run_id,
-    )
+    return FSMStateHelper(config=config, logger=logger, run_id=run_id)
 
 
 @dataclass(frozen=True, slots=True)
 class CompositeRuntimeConfig:
-    """Runtime configuration for composite pipeline execution.
-
-    Attributes:
-        resume: Resume from checkpoint if available.
-        dry_run: Extract and transform without writing.
-        enrich_only: Run only specified enrichers (comma-separated).
-        required_only: Skip optional enrichers.
-        force_enricher: Force re-run of specified enricher.
-        seed_limit: Optional limit for seed pipeline.
-        use_cached_bronze: Load data from Bronze cache instead of API (master switch).
-        cached_bronze_path: Explicit path to Bronze cache directory.
-        cached_bronze_date: Filter Bronze cache by date (YYYY-MM-DD).
-        cached_bronze_enrichers: Override cached Bronze for enrichers.
-            None=follow master, True=force cache, False=force API.
-        cached_bronze_dependencies: Override cached Bronze for dependencies.
-            False by default — dependencies call APIs with seed-derived keys,
-            so their Bronze cache is often stale or absent (e.g. uniprot_idmapping
-            on first composite run). Set True to force cache if Bronze was
-            pre-populated by a standalone run with identical keys.
-    """
+    """Runtime configuration for composite pipeline execution."""
 
     resume: bool = False
     dry_run: bool = False
@@ -109,17 +88,18 @@ class CompositeRuntimeConfig:
     cached_bronze_dependencies: bool = False
 
     def __post_init__(self) -> None:
-        """Convert list values into immutable tuples."""
+        """Normalize mutable values into immutable runtime fields."""
         if isinstance(self.enrich_only, list):
             object.__setattr__(self, "enrich_only", tuple(self.enrich_only))
 
 
-class CompositePipelineRunnerService(
-    CompositeRunnerStageHelper,
-    CompositeRunnerMergeStageHelper,
-    CompositeRunnerSupportHelper,
+class CompositePipelineRunner(
+    CompositeRunnerSupportMixin,
+    CompositeRunnerObservabilityMixin,
+    CompositeRunnerStageMixin,
+    CompositeRunnerMergeStageMixin,
 ):
-    """Application-service orchestrator for composite pipeline execution."""
+    """Facade/orchestrator for composite pipeline lifecycle."""
 
     def __init__(
         self,
@@ -128,22 +108,22 @@ class CompositePipelineRunnerService(
         seed_runner_factory: Callable[[], PipelineRunner],
         enricher_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
         key_extractor: KeyExtractorService,
-        coordinator: EnrichmentCoordinatorService,
+        coordinator: EnrichmentCoordinator,
         merger: MergeService,
-        checkpoint_manager: CompositeCheckpointService,
+        checkpoint_manager: CompositeCheckpointManager,
         logger: LoggerPort,
         lock: LockPort,
         fsm_state_helper: FSMStateHelperService | None = None,
         run_id: str | None = None,
         dq_report_service: DQReportService | None = None,
-        preflight_validator: CompositePreflightValidationService | None = None,
+        preflight_validator: CompositePreflightValidator | None = None,
         dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner]
         | None = None,
-        dependency_coordinator: DependencyCoordinatorService | None = None,
+        dependency_coordinator: DependencyCoordinator | None = None,
         quarantine_port: QuarantinePort | None = None,
         metrics: MetricsPort | None = None,
     ) -> None:
-        """Initialize runner and all stage dependencies."""
+        """Initialize composite pipeline orchestrator with injected dependencies."""
         self._config = config
         self._runtime = runtime
         self._seed_runner_factory = seed_runner_factory
@@ -159,17 +139,23 @@ class CompositePipelineRunnerService(
         self._run_id_str = run_id or str(uuid4())
         self._run_id: RunID = cast(RunID, UUID(self._run_id_str))
         self._started_at: datetime | None = None
-        self._finished: bool = False
+        self._finished = False
         self._final_state: CompositePipelineState | None = None
         self._dq_report_service = dq_report_service
         self._preflight_validator = preflight_validator
         self._quarantine_port = quarantine_port
         self._metrics = metrics
+
         if fsm_state_helper is not None:
             self._fsm = fsm_state_helper
         else:
-            # Transitional fallback for legacy callsites; composition should inject this.
-            self._fsm = _create_fsm_state_helper(
+            self._logger.warning(
+                "composite_runner_fsm_fallback_used",
+                reason_code="EXC-003",
+                run_id=self._run_id_str,
+                note="inject fsm_state_helper from composition",
+            )
+            self._fsm = _create_fsm_helper_for_legacy_fallback(
                 config=config,
                 logger=logger,
                 run_id=self._run_id_str,
@@ -177,16 +163,16 @@ class CompositePipelineRunnerService(
 
     @property
     def run_id(self) -> str:
-        """Get the run ID as string."""
+        """Return current run ID."""
         return self._run_id_str
 
     @property
     def config(self) -> CompositeConfig:
-        """Get the composite configuration."""
+        """Return composite configuration."""
         return self._config
 
     async def run(self) -> CompositeResult:
-        """Execute full composite pipeline lifecycle."""
+        """Execute full composite pipeline under distributed lock."""
         if self._finished:
             raise RunnerAlreadyExecutedError(
                 runner_type="CompositePipelineRunner",
@@ -222,7 +208,6 @@ class CompositePipelineRunnerService(
                 return result
             finally:
                 await self._lock.release(key=lock_key, owner_id=self._run_id)
-
         except PIPELINE_EXECUTION_ERRORS as error:
             self._finished = True
             self._final_state = CompositePipelineState.FAILED
@@ -248,16 +233,16 @@ class CompositePipelineRunnerService(
             raise
 
     async def _run_with_lock(self) -> CompositeResult:
-        """Execute composite pipeline while lock is held."""
+        """Execute pipeline stages while lock is held."""
         state = await self._checkpoint_manager.load()
 
         if self._runtime.resume and state.state == CompositePipelineState.FAILED:
             state = self._fsm.handle_resume_from_failed(state)
-
         if self._runtime.resume and state.is_resumable:
             self._fsm.log_resume_context(state)
 
         state, seed_result = await self._execute_seed_phase(state)
+
         keys_df = await self._key_extractor.extract(
             silver_table=self._config.seed.silver_table,
             keys=self._config.seed.output_keys,
@@ -274,13 +259,18 @@ class CompositePipelineRunnerService(
         state, enrichment_results = await self._execute_enrichment_phase(state, keys_df)
         state = await self._transition_to_enrichment_completed(state)
         state, merge_result = await self._execute_merge_stage(
-            state, enrichment_results, dependency_results
+            state,
+            enrichment_results,
+            dependency_results,
         )
         await self._finalize_pipeline(state)
-
         return self._build_composite_result(
-            seed_result, dependency_results, enrichment_results, merge_result
+            seed_result,
+            dependency_results,
+            enrichment_results,
+            merge_result,
         )
 
 
-CompositePipelineRunner = CompositePipelineRunnerService
+# Backward-compatible alias for iterative NAME-001 migration.
+CompositePipelineRunnerService = CompositePipelineRunner

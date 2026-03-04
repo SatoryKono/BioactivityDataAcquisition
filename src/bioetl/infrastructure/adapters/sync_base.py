@@ -20,6 +20,9 @@ Health Check Observability (RULES.md §4.8):
 
 from __future__ import annotations
 
+__all__ = ["BaseSyncAdapter"]
+
+
 import asyncio
 import weakref
 from concurrent.futures import ThreadPoolExecutor

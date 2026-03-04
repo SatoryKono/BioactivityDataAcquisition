@@ -13,6 +13,22 @@ See RULES.md §8.2 for JSON response modeling guidelines.
 
 from __future__ import annotations
 
+__all__ = [
+    "PubMedArticleId",
+    "PubMedArticleRecord",
+    "PubMedAuthor",
+    "PubMedChemical",
+    "PubMedExtendedRecord",
+    "PubMedGrant",
+    "PubMedJournal",
+    "PubMedMeshHeading",
+    "PubMedPubDate",
+    "PubMedReference",
+    "PubMedSearchResponse",
+    "PubMedSearchResult",
+]
+
+
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field

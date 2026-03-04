@@ -7,18 +7,21 @@ entity config support (ADR-039).
 
 from __future__ import annotations
 
+__all__ = ["load_pipeline_config", "load_source_config"]
+
+
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
 import yaml
 
+from bioetl.infrastructure.config.source_config_loader import (
+    load_source_config_uncached,
+)
 from bioetl.infrastructure.config_merge import config_merge
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
-from bioetl.infrastructure.source_normalizers.source import (
-    normalize_source_config,
-)
 
 
 def _deep_merge(
@@ -195,54 +198,10 @@ def _apply_convention_defaults(
     return config
 
 
-def _read_source_config_payload(
-    provider: str,
-) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
-    """Read provider YAML and map to source-loader input payload."""
-    unified_path = Path(f"configs/providers/{provider}.yaml")
-    if not unified_path.exists():
-        raise ValueError(
-            f"Source configuration file not found: {unified_path}. "
-            "Create provider config with source/rate_limit/circuit_breaker settings."
-        )
-
-    with open(unified_path, encoding="utf-8") as f:
-        unified_raw = yaml.safe_load(f) or {}
-
-    source_section = unified_raw.get("source")
-    if isinstance(source_section, dict):
-        payload: dict[str, Any] = {  # Any: YAML config has heterogeneous values
-            "source": source_section
-        }  # Any: YAML config has heterogeneous values
-        for key in ("entities", "entity_notes"):
-            value = unified_raw.get(key)
-            if value is not None:
-                payload[key] = value
-        return payload
-
-    # Accept legacy-flat provider payload for compatibility with test fixtures.
-    return unified_raw
-
-
-def _validate_source_config_payload(
-    payload: dict[str, Any],  # Any: YAML config has heterogeneous values
-) -> SourceYamlConfig:
-    """Validate canonical source payload with pydantic schema."""
-    return SourceYamlConfig.model_validate(payload)
-
-
-def _map_source_config(validated_config: SourceYamlConfig) -> SourceYamlConfig:
-    """Map validated source config to loader return type."""
-    return validated_config
-
-
 @lru_cache(maxsize=10)
 def load_source_config(provider: str) -> SourceYamlConfig:
     """Load source configuration using read -> normalize -> validate -> map."""
-    raw_payload = _read_source_config_payload(provider)
-    normalized_payload = normalize_source_config(raw_payload)
-    validated_payload = _validate_source_config_payload(normalized_payload)
-    return _map_source_config(validated_payload)
+    return load_source_config_uncached(provider)
 
 
 _FILTER_SECTIONS: tuple[str, ...] = (

@@ -10,6 +10,14 @@ Supports two processing modes:
 
 from __future__ import annotations
 
+__all__ = [
+    "BatchTransformer",
+    "StreamingBatchProcessor",
+    "TransformResult",
+    "TransformedRecord",
+]
+
+
 from collections.abc import AsyncIterator, Iterator
 from dataclasses import dataclass
 from typing import TYPE_CHECKING

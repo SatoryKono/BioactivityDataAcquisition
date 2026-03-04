@@ -20,6 +20,9 @@ on:
       - '.claude/**'
       - '.github/workflows/**'
       - 'LICENSE'
+  workflow_dispatch:
+  schedule:
+    - cron: '30 2 * * 1'
 
 jobs:
   type-check:
@@ -53,8 +56,14 @@ jobs:
       - name: Run mypy (strict mode)
         run: |
           echo "Running mypy with strict mode on all source code..."
-          rm -rf .mypy_cache
-          uv run mypy --config-file pyproject.toml --no-incremental src/bioetl
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            echo "Weekly cold mypy run (--no-incremental)"
+            rm -rf .mypy_cache
+            uv run mypy --config-file pyproject.toml --no-incremental src/bioetl
+          else
+            echo "Fast mypy run (incremental)"
+            uv run mypy --config-file pyproject.toml src/bioetl
+          fi
 
       - name: Verify NewType and Protocol usage in domain layer
         run: |
@@ -162,8 +171,12 @@ jobs:
       - name: Generate type coverage report
         run: |
           mkdir -p reports
-          rm -rf .mypy_cache
-          uv run mypy --config-file pyproject.toml --no-incremental src/bioetl --txt-report reports/mypy_report || true
+          MYPY_INCREMENTAL_FLAG=""
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            rm -rf .mypy_cache
+            MYPY_INCREMENTAL_FLAG="--no-incremental"
+          fi
+          uv run mypy --config-file pyproject.toml ${MYPY_INCREMENTAL_FLAG} src/bioetl --txt-report reports/mypy_report || true
           echo "Type checking report generated"
 
       - name: Upload type checking reports

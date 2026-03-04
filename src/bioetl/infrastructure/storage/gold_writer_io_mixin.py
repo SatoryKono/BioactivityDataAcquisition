@@ -23,12 +23,18 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 
-class _WriteMergedMetadataCallable(Protocol):
-    """Callable contract for merged metadata sidecar writer."""
+def _load_gold_writer_module() -> ModuleType:
+    """Load canonical gold_writer module to preserve monkeypatch points."""
+    from importlib import import_module
 
-    def __call__(
+    return import_module("bioetl.infrastructure.storage.gold_writer")
+
+
+class _GoldMergedMetadataWriterProtocol(Protocol):
+    """Typed contract for merged-metadata writer implementation."""
+
+    async def _write_gold_merged_metadata(
         self,
-        *,
         table_path: str,
         table_name: str,
         records: list[GoldRecord],
@@ -36,16 +42,7 @@ class _WriteMergedMetadataCallable(Protocol):
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         schema: DataFrameSchema | None = None,
-    ) -> Awaitable[None]:
-        """Write metadata for merged Gold records."""
-        ...
-
-
-def _load_gold_writer_module() -> ModuleType:
-    """Load canonical gold_writer module to preserve monkeypatch points."""
-    from importlib import import_module
-
-    return import_module("bioetl.infrastructure.storage.gold_writer")
+    ) -> None: ...
 
 
 class GoldWriterIOMixin:
@@ -123,11 +120,8 @@ class GoldWriterIOMixin:
                 append=False,
             )
 
-        write_merged_metadata = cast(
-            _WriteMergedMetadataCallable,
-            getattr(self, "_write_gold_merged_metadata"),
-        )
-        await write_merged_metadata(
+        metadata_writer = cast(_GoldMergedMetadataWriterProtocol, self)
+        await metadata_writer._write_gold_merged_metadata(
             table_path=table_path,
             table_name=table_name,
             records=records,
@@ -221,7 +215,11 @@ class GoldWriterIOMixin:
         for attempt in range(3):
             try:
                 await self._run_in_executor(
-                    lambda table_or_uri=table_path, data=arrow_data, write_mode=mode, partition_by=partition_cols, resolved_schema_mode=schema_mode: (
+                    lambda table_or_uri=table_path,
+                    data=arrow_data,
+                    write_mode=mode,
+                    partition_by=partition_cols,
+                    resolved_schema_mode=schema_mode: (
                         module.write_deltalake(
                             table_or_uri=table_or_uri,
                             data=pa.RecordBatchReader.from_batches(
@@ -297,7 +295,10 @@ class GoldWriterIOMixin:
                         records, column_order=column_order
                     )
                     await self._run_in_executor(
-                        lambda table_or_uri=table_path, data=arrow_data, write_mode="append", partition_by=partition_cols: (
+                        lambda table_or_uri=table_path,
+                        data=arrow_data,
+                        write_mode="append",
+                        partition_by=partition_cols: (
                             module.write_deltalake(
                                 table_or_uri=table_or_uri,
                                 data=pa.RecordBatchReader.from_batches(

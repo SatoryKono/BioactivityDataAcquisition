@@ -6,6 +6,7 @@ See ADR-026 for rationale.
 
 from __future__ import annotations
 
+import warnings
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, Final
 
@@ -216,5 +217,17 @@ class ColumnRenamerService:
         return col.lower() in self.JOIN_KEY_COLUMNS
 
 
-# Backward-compatible alias for iterative NAME-001 migration.
-ColumnRenamer = ColumnRenamerService
+if TYPE_CHECKING:
+    ColumnRenamer = ColumnRenamerService
+
+
+def __getattr__(name: str) -> object:
+    """Resolve deprecated compatibility aliases lazily."""
+    if name == "ColumnRenamer":
+        warnings.warn(
+            "ColumnRenamer is deprecated; use ColumnRenamerService.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return ColumnRenamerService
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

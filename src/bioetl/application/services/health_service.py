@@ -8,6 +8,14 @@ Implements RULES.md §1.1 - Application layer depends only on Domain.
 
 from __future__ import annotations
 
+__all__ = [
+    "DataSourceFactoryPort",
+    "HealthCheckSummary",
+    "HealthResult",
+    "HealthService",
+]
+
+
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable

@@ -6,6 +6,9 @@ the IDMappingResult domain entity for validation.
 
 from __future__ import annotations
 
+__all__ = ["IDMappingTransformer"]
+
+
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import BaseTransformer

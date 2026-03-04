@@ -409,6 +409,36 @@ runner = PipelineFactory.create()
 | Context | `*Context` | `PipelineContext` |
 | Spec | `*Spec` | `FieldSpec` |
 | Mixin | `*Mixin` | `HealthCheckMixin` |
+| Pipeline | `*Pipeline` | `ChEMBLActivityPipeline` |
+| Source | `*Source` | `FilteredDataSource` |
+| Analyzer | `*Analyzer` | `SilverDQAnalyzer` |
+| Calculator | `*Calculator` | `SilverStatisticsCalculator` |
+| Checker | `*Checker` | `SilverThresholdChecker` |
+| Observer | `*Observer` | `PipelineObserver` |
+| Callback | `*Callback` | `TransformCallback` |
+| Callable | `*Callable` | `RunPipelineAsyncCallable` |
+| Runner | `*Runner` | `CompositePipelineRunner` |
+| Executor | `*Executor` | `BatchExecutor` |
+| Processor | `*Processor` | `RecordProcessor` |
+| Validator | `*Validator` | `PreflightValidator` |
+| Coordinator | `*Coordinator` | `EnrichmentCoordinator` |
+| Resolver | `*Resolver` | `SeedKeyResolver` |
+| Generator | `*Generator` | `UuidBatchIdGenerator` |
+| Writer | `*Writer` | `DQReportWriter` |
+| Policy | `*Policy` | `MedallionPolicy` |
+| Planner | `*Planner` | `BatchPlanner` |
+| Helper | `*Helper` | `FSMStateHelper` |
+| Group | `*Group` | `FieldGroup` |
+| Summary | `*Summary` | `HealthCheckSummary` |
+| Task | `*Task` | `PipelineTask` |
+| Orderer | `*Orderer` | `ColumnOrderer` |
+| Deduplicator | `*Deduplicator` | `RecordDeduplicator` |
+| Renamer | `*Renamer` | `ColumnRenamer` |
+
+> **Value Object suffixes** (не требуют проверки — исключены из NAME-001):
+> `*Record`, `*Options`, `*Status`, `*Preview`, `*Phase`, `*Issue`,
+> `*Ids`, `*Date`, `*Identifiers`, `*Classification`, `*Author`,
+> `*Affiliation`, `*Raw`, `*Output`.
 
 **Детекция:**
 ```bash

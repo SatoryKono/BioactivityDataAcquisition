@@ -14,25 +14,19 @@ This package contains application services for composite pipeline orchestration:
 See ADR-026 for architectural decisions.
 """
 
+from __future__ import annotations
+
+import warnings
+
 from bioetl.application.composite.checkpoint import (
     CompositeCheckpointManager,
     CompositeCheckpointService,
     CompositeCheckpointState,
 )
-from bioetl.application.composite.column_orderer import (
-    ColumnOrderer,
-    ColumnOrdererService,
-)
-from bioetl.application.composite.column_renamer import (
-    ColumnRenamer,
-    ColumnRenamerService,
-)
-from bioetl.application.composite.coordinator import (
-    EnrichmentCoordinator,
-    EnrichmentCoordinatorService,
-)
+from bioetl.application.composite.column_orderer import ColumnOrdererService
+from bioetl.application.composite.column_renamer import ColumnRenamerService
+from bioetl.application.composite.coordinator import EnrichmentCoordinatorService
 from bioetl.application.composite.dependency_coordinator import (
-    DependencyCoordinator,
     DependencyCoordinatorService,
 )
 from bioetl.application.composite.key_extractor import KeyExtractorService
@@ -47,6 +41,27 @@ from bioetl.application.composite.runner import (
     CompositePipelineRunner,
     CompositePipelineRunnerService,
 )
+
+_DEPRECATED_CLASS_ALIASES: dict[str, type[object]] = {
+    "ColumnOrderer": ColumnOrdererService,
+    "ColumnRenamer": ColumnRenamerService,
+    "DependencyCoordinator": DependencyCoordinatorService,
+    "EnrichmentCoordinator": EnrichmentCoordinatorService,
+}
+
+
+def __getattr__(name: str) -> object:
+    """Resolve deprecated class aliases lazily."""
+    replacement = _DEPRECATED_CLASS_ALIASES.get(name)
+    if replacement is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    warnings.warn(
+        f"{name} is deprecated; use {replacement.__name__}.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return replacement
+
 
 __all__ = [
     "ColumnOrderer",

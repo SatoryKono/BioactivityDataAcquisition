@@ -36,6 +36,43 @@ from bioetl.infrastructure.schemas.base_schemas import (
 RateLimitYamlConfig = BaseRateLimitConfig
 RateLimitYamlConfig.__doc__ = """Rate limit configuration from YAML."""
 
+_LEGACY_PAGINATION_FIELD_MAP: dict[str, str] = {
+    "batch_size": "id_batch_size",
+    "page_size": "page_size",
+    "max_url_length": "max_url_length",
+}
+
+
+def _collect_legacy_pagination_values(
+    data: dict[str, Any],  # Any: YAML config has heterogeneous values
+) -> dict[str, object]:
+    """Collect legacy pagination-like fields into pagination keys."""
+    promoted: dict[str, object] = {}
+    for legacy_key, pagination_key in _LEGACY_PAGINATION_FIELD_MAP.items():
+        value = data.get(legacy_key)
+        if value is not None:
+            promoted[pagination_key] = value
+    return promoted
+
+
+def _merge_legacy_into_pagination(
+    pagination: dict[str, Any],  # Any: YAML config has heterogeneous values
+    legacy_values: dict[str, object],
+) -> None:
+    """Fill missing pagination keys from legacy values."""
+    for key, value in legacy_values.items():
+        pagination.setdefault(key, value)
+
+
+def _build_pagination_from_legacy(
+    data: dict[str, Any],  # Any: YAML config has heterogeneous values
+) -> dict[str, object]:
+    """Build pagination dict from legacy fields when section is absent."""
+    pagination = _collect_legacy_pagination_values(data)
+    if data.get("cursor_pagination"):
+        pagination["strategy"] = "cursor"
+    return pagination
+
 
 class CircuitBreakerYamlConfig(BaseCircuitBreakerConfig):
     """Circuit breaker configuration from YAML.
@@ -129,29 +166,14 @@ class ProviderConfigYaml(BaseModel):
 
         pagination = data.get("pagination")
         if isinstance(pagination, dict):
-            # Explicit pagination section — use legacy fields only as fallback
-            if "id_batch_size" not in pagination and data.get("batch_size") is not None:
-                pagination.setdefault("id_batch_size", data["batch_size"])
-            if "page_size" not in pagination and data.get("page_size") is not None:
-                pagination.setdefault("page_size", data["page_size"])
-            if (
-                "max_url_length" not in pagination
-                and data.get("max_url_length") is not None
-            ):
-                pagination.setdefault("max_url_length", data["max_url_length"])
-        else:
-            # No explicit pagination section — build from legacy fields
-            pag: dict[str, object] = {}
-            if data.get("batch_size") is not None:
-                pag["id_batch_size"] = data["batch_size"]
-            if data.get("page_size") is not None:
-                pag["page_size"] = data["page_size"]
-            if data.get("max_url_length") is not None:
-                pag["max_url_length"] = data["max_url_length"]
-            if data.get("cursor_pagination"):
-                pag["strategy"] = "cursor"
-            if pag:
-                data["pagination"] = pag
+            _merge_legacy_into_pagination(
+                pagination, _collect_legacy_pagination_values(data)
+            )
+            return data
+
+        built_pagination = _build_pagination_from_legacy(data)
+        if built_pagination:
+            data["pagination"] = built_pagination
 
         return data
 
