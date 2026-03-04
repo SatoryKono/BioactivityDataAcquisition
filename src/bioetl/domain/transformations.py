@@ -16,7 +16,7 @@ import hashlib
 import math
 from datetime import date, datetime
 from functools import singledispatch
-from typing import Any  # Any: required for singledispatch base + list[Any] in normalize
+from typing import Any  # Any: required for singledispatch base case signature
 from bioetl.domain.types import JsonDict
 
 from .constants import META_FIELDS
@@ -82,7 +82,7 @@ def _normalize_dict(value: JsonDict) -> JsonDict:
 
 
 @_normalize_value.register(list)
-def _normalize_list(value: list[Any]) -> list[Any]:  # Any: singledispatch recurses over heterogeneous items
+def _normalize_list(value: list[object]) -> list[object]:
     """Normalize list by recursively normalizing elements."""
     return [_normalize_value(v) for v in value]
 

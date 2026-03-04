@@ -24,7 +24,7 @@ class SemanticScholarFetchAdapterMixin:
     """Public fetch/filter/fallback paths extracted from adapter facade."""
 
     async def fetch(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         entity_type: str,
         limit: int | None = None,
         query: str | None = None,
@@ -84,7 +84,7 @@ class SemanticScholarFetchAdapterMixin:
             current_offset = next_offset
 
     async def fetch_filtered(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         entity_type: str,
         filter_ids: list[str],
         filter_field: str,
@@ -111,7 +111,7 @@ class SemanticScholarFetchAdapterMixin:
                     return
 
     async def _batch_doi_phase(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         valid_dois: list[str],
         resolved_dois: set[str],
         limit: int | None,
@@ -137,7 +137,7 @@ class SemanticScholarFetchAdapterMixin:
                     return
 
     async def fetch_filtered_with_fallback(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         entity_type: str,
         filter_ids: list[str],
         filter_field: str,
@@ -173,7 +173,7 @@ class SemanticScholarFetchAdapterMixin:
             yield record
 
     async def fetch_multi_filtered(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         entity_type: str,
         filters: dict[str, list[str]],
         limit: int | None = None,

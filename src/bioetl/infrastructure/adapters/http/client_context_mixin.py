@@ -1,10 +1,9 @@
-# mypy: disable-error-code=no-any-return
 """Context-manager helpers for UnifiedHTTPClient."""
 
 from __future__ import annotations
 
 from types import TracebackType
-from typing import Any
+from typing import Self
 
 import httpx
 
@@ -15,8 +14,8 @@ class HTTPClientContextMixin:
     _client: httpx.AsyncClient | None
 
     async def __aenter__(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
-    ) -> Any:  # Any: mixin self type is provided structurally by composed adapter class
+        self,
+    ) -> Self:
         """Enter async context manager."""
         user_agent = self.user_agent
         if self.contact_email:
@@ -40,7 +39,7 @@ class HTTPClientContextMixin:
         return self
 
     async def __aexit__(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         exc_type: type[BaseException] | None,
         exc_val: BaseException | None,
         exc_tb: TracebackType | None,
@@ -52,10 +51,8 @@ class HTTPClientContextMixin:
             self._client = None
 
     def _get_client(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
-    ) -> (
-        httpx.AsyncClient
-    ):  # Any: mixin self type is provided structurally by composed adapter class
+        self,
+    ) -> httpx.AsyncClient:
         """Get httpx client, raising if client not entered."""
         if self._client is None:
             raise RuntimeError(

@@ -9,7 +9,7 @@ from __future__ import annotations
 from dataclasses import fields, is_dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, cast  # Any: needed for recursive serialization of heterogeneous structures
+from typing import Any, cast  # Any: needed for _serialize_value recursive return
 
 import orjson
 
@@ -49,7 +49,7 @@ def _serialize_dataclass(value: object) -> JsonDict:
 
 
 def _serialize_collection(
-    value: JsonDict | list[Any] | tuple[Any, ...],  # Any: recursive serialization of heterogeneous items
+    value: JsonDict | list[object] | tuple[object, ...],
 ) -> Any:  # Any: output mirrors heterogeneous input structure
     """Serialize dict/list/tuple recursively."""
     if isinstance(value, dict):

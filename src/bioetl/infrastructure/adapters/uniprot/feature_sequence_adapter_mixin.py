@@ -21,7 +21,7 @@ _UNIPROT_FEATURE_SEQUENCE_ERRORS = (Exception,)
 class UniProtFeatureSequenceAdapterMixin:
     """Feature/sequence endpoint helpers."""
 
-    async def _get_features_json(self: Any, query: str) -> list[BronzeRecord]:
+    async def _get_features_json(self, query: str) -> list[BronzeRecord]:
         """Retrieve feature payload from UniProt JSON endpoint."""
         try:
             start_time = time.perf_counter()
@@ -41,7 +41,7 @@ class UniProtFeatureSequenceAdapterMixin:
             return []
 
     async def _fetch_features(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         query: str | None,
         limit: int | None,
     ) -> AsyncIterator[BronzeRecord]:
@@ -55,7 +55,7 @@ class UniProtFeatureSequenceAdapterMixin:
                 break
             yield self._format_feature(query, feature)
 
-    def _format_feature(self: Any, query: str, feature: BronzeRecord) -> BronzeRecord:
+    def _format_feature(self, query: str, feature: BronzeRecord) -> BronzeRecord:
         """Normalize feature payload to record contract."""
         return {
             "accession": query,
@@ -65,11 +65,9 @@ class UniProtFeatureSequenceAdapterMixin:
         }
 
     async def _get_sequence_fasta(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
-        query: str,  # Any: mixin self type is provided structurally by composed adapter class
-    ) -> (
-        str | None
-    ):  # Any: mixin self type is provided structurally by composed adapter class
+        self,
+        query: str,
+    ) -> str | None:
         """Retrieve FASTA sequence text."""
         try:
             start_time = time.perf_counter()
@@ -89,8 +87,8 @@ class UniProtFeatureSequenceAdapterMixin:
             return None
 
     async def _get_parsed_sequences(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
-        query: str,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
+        query: str,
     ) -> AsyncIterator[BronzeRecord]:
         """Parse FASTA into sequence records."""
         fasta_text = await self._get_sequence_fasta(query)
@@ -101,7 +99,7 @@ class UniProtFeatureSequenceAdapterMixin:
                 yield record
 
     async def _fetch_sequences(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         query: str | None,
         limit: int | None,
     ) -> AsyncIterator[BronzeRecord]:

@@ -9,7 +9,7 @@ Implements REQ-DQ-001: DQ metrics in Silver metadata.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Literal  # Any: needed for list[Any] in filter/stats functions
+from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import ColumnMetrics, DQSummary, SchemaDrift
@@ -297,8 +297,8 @@ def _compute_single_column_stats(
 
 
 def _filter_non_null(
-    values: list[Any],  # Any: values from JsonDict.get() are heterogeneous
-) -> list[Any]:  # Any: values from JsonDict.get() are heterogeneous
+    values: list[object],
+) -> list[object]:
     """Filter out None values from a list.
 
     Args:
@@ -311,7 +311,7 @@ def _filter_non_null(
 
 
 def _calculate_null_rate(
-    values: list[Any],  # Any: values from JsonDict.get() are heterogeneous
+    values: list[object],
     total: int,
 ) -> float:
     """Calculate the null rate for a list of values.
@@ -346,7 +346,7 @@ def _make_hashable(value: object) -> object:
 
 
 def _calculate_unique_count(
-    values: list[Any],  # Any: values from JsonDict.get() are heterogeneous
+    values: list[object],
 ) -> int:
     """Calculate the count of unique values.
 
@@ -366,7 +366,7 @@ def _calculate_unique_count(
 
 
 def _compute_numeric_stats(
-    values: list[Any],  # Any: values from JsonDict.get() are heterogeneous
+    values: list[object],
 ) -> tuple[float | None, float | None, float | None]:
     """Compute numeric statistics (min, max, mean) for values.
 
@@ -406,7 +406,7 @@ def _is_valid_numeric(v: object) -> bool:
 
 
 def _extract_numeric_values(
-    values: list[Any],  # Any: values from JsonDict.get() are heterogeneous
+    values: list[object],
 ) -> list[float]:
     """Extract numeric values from a list of mixed values.
 
