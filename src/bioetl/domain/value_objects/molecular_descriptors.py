@@ -89,7 +89,7 @@ class _BoundedIntVO(ValueObject[int]):
     def _validate(
         self,
         value: Any,  # Any: raw input value from API (str|int|float|None)
-    ) -> int:  # Any: raw input from API (str|int|float|None)
+    ) -> int:
         n = _coerce_int(value)
         if not self._MIN <= n <= self._MAX:
             raise ValueError(f"{self._LABEL} {n} outside [{self._MIN}, {self._MAX}]")

@@ -99,7 +99,19 @@ class SilverWriterMetadataMixin:
             timestamp = datetime.fromisoformat(ingestion_ts)
         elif isinstance(ingestion_ts, datetime):
             timestamp = ingestion_ts
+        elif (
+            hasattr(self, "_context")
+            and self._context
+            and hasattr(self._context, "started_at")
+        ):
+            timestamp = self._context.started_at
         else:
+            self.logger.warning(
+                "audit_fallback_timestamp_used",
+                table=table_name,
+                run_id=run_id_str,
+                reason="No ingestion_ts or context.started_at available",
+            )
             timestamp = datetime.fromtimestamp(0, tz=UTC)
         if timestamp.tzinfo is None:
             timestamp = timestamp.replace(tzinfo=UTC)
