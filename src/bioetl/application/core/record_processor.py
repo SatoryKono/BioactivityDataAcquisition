@@ -13,25 +13,17 @@ from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.batch_executor import BatchResult
-from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
-from bioetl.application.core.batch_transformer import BatchTransformer, TransformResult
-from bioetl.application.core.batch_writer import BatchWriter
-from bioetl.application.core.quarantine_manager import QuarantineManagerService
 from bioetl.domain.exceptions import BioETLError
 
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
+    from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
+    from bioetl.application.core.batch_transformer import BatchTransformer, TransformResult
+    from bioetl.application.core.batch_writer import BatchWriter
     from bioetl.application.core.config import RecordProcessorConfig
-    from bioetl.application.core.pipeline_services import PipelineServices
-    from bioetl.application.core.protocols import (
-        GoldFilterCallback,
-        GoldTransformCallback,
-        TransformCallback,
-    )
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.error_classifier import ErrorClassifier
-    from bioetl.domain.ports import GoldValidatorPort, TracingPort
+    from bioetl.domain.ports import TracingPort
     from bioetl.domain.types import BatchID
 
 
@@ -49,67 +41,29 @@ class RecordProcessor:
 
     def __init__(
         self,
-        services: PipelineServices,
-        error_classifier: ErrorClassifier,
         context: PipelineContext,
+        batch_metrics: BatchMetricsRecorderService,
+        transformer: BatchTransformer,
+        writer: BatchWriter,
         config: RecordProcessorConfig,
-        transform_callback: TransformCallback,
-        gold_filter_callback: GoldFilterCallback,
-        gold_transform_callback: GoldTransformCallback,
-        gold_validator: GoldValidatorPort,
         tracer: TracingPort | None = None,
-        lock_validator: Callable[[], Awaitable[bool]] | None = None,
     ):
         """Initialize RecordProcessor.
 
         Args:
-            services: Pipeline services bundle.
-            error_classifier: Service for error classification.
             context: Pipeline execution context.
+            batch_metrics: Metrics recorder for Bronze/Silver/Gold stages.
+            transformer: Batch transformer for Bronze -> Silver/Gold conversion.
+            writer: Batch writer orchestrating Bronze/Silver/Gold writes.
             config: Record processor configuration.
-            transform_callback: Callback for record transformation.
-            gold_filter_callback: Callback for Gold layer filtering.
-            gold_transform_callback: Callback for Gold layer transformation.
-            gold_validator: Validator for Gold layer records.
             tracer: Optional tracing port for distributed tracing.
-            lock_validator: Async callable that validates lock ownership.
-                Returns True if lock is still held, False otherwise.
-                Typically LockManager.validate(). If None, lock validation
-                is skipped (for tests).
         """
+        _ = config
         self._context = context
         self._tracer = tracer
-
-        pipeline_label = f"{config.provider}_{config.entity_type}"
-        self._batch_metrics = BatchMetricsRecorderService(
-            services.metrics, pipeline_label, context.run_type.value
-        )
-
-        self._transformer = BatchTransformer(
-            context=context,
-            config=config,
-            error_classifier=error_classifier,
-            quarantine_manager=QuarantineManagerService(
-                quarantine_port=services.quarantine,
-                pipeline_name=config.pipeline_name,
-                metrics=services.metrics,
-            ),
-            batch_metrics=self._batch_metrics,
-            transform_callback=transform_callback,
-            gold_filter_callback=gold_filter_callback,
-            gold_transform_callback=gold_transform_callback,
-        )
-
-        self._writer = BatchWriter(
-            storage=services.storage,
-            context=context,
-            config=config,
-            gold_validator=gold_validator,
-            error_classifier=error_classifier,
-            batch_metrics=self._batch_metrics,
-            tracer=tracer,
-            lock_validator=lock_validator,
-        )
+        self._batch_metrics = batch_metrics
+        self._transformer = transformer
+        self._writer = writer
 
     async def process_batch(
         # Any: record vals vary
