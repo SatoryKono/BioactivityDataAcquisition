@@ -36,6 +36,7 @@ class _FetchState:
     limit: int | None = None
 
     def limit_reached(self) -> bool:
+        """Check whether the fetch count has reached the configured limit."""
         return self.limit is not None and self.fetched >= self.limit
 
 

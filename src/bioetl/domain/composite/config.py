@@ -99,22 +99,26 @@ class CompositeConfig:
 
     @property
     def required_enrichers(self) -> tuple[str, ...]:
+        """Return pipeline names of required enrichers."""
         return tuple(
             enricher.pipeline for enricher in self.enrichers if enricher.required
         )
 
     @property
     def optional_enrichers(self) -> tuple[str, ...]:
+        """Return pipeline names of optional enrichers."""
         return tuple(
             enricher.pipeline for enricher in self.enrichers if not enricher.required
         )
 
     @property
     def all_enricher_names(self) -> tuple[str, ...]:
+        """Return all enricher pipeline names (required and optional)."""
         return tuple(enricher.pipeline for enricher in self.enrichers)
 
     @property
     def required_dependencies(self) -> tuple[str, ...]:
+        """Return pipeline names of required dependencies."""
         return tuple(
             dependency.pipeline
             for dependency in self.dependencies
@@ -123,6 +127,7 @@ class CompositeConfig:
 
     @property
     def optional_dependencies(self) -> tuple[str, ...]:
+        """Return pipeline names of optional dependencies."""
         return tuple(
             dependency.pipeline
             for dependency in self.dependencies
@@ -131,15 +136,18 @@ class CompositeConfig:
 
     @property
     def all_dependency_names(self) -> tuple[str, ...]:
+        """Return all dependency pipeline names."""
         return tuple(dependency.pipeline for dependency in self.dependencies)
 
     def get_dependency(self, pipeline_name: str) -> DependencyConfig | None:
+        """Look up a dependency config by pipeline name."""
         for dependency in self.dependencies:
             if dependency.pipeline == pipeline_name:
                 return dependency
         return None
 
     def get_enricher(self, pipeline_name: str) -> EnricherConfig | None:
+        """Look up an enricher config by pipeline name."""
         for enricher in self.enrichers:
             if enricher.pipeline == pipeline_name:
                 return enricher
@@ -147,13 +155,16 @@ class CompositeConfig:
 
     @property
     def lock_key(self) -> str:
+        """Return the distributed lock key for this composite pipeline."""
         return f"composite:{self.name}"
 
     def to_dict(self) -> dict[str, object]:
+        """Serialize this config to a plain dictionary."""
         return _composite_to_dict(self)
 
     @classmethod
     def from_dict(cls, data: dict[str, object]) -> CompositeConfig:
+        """Deserialize a CompositeConfig from a plain dictionary."""
         return _composite_from_dict(data)
 
 

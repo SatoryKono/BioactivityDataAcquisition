@@ -44,16 +44,24 @@ ExportFormat = Literal["csv", "xlsx", "tsv"]
 
 
 class _ExportCommandService(Protocol):
-    async def preview(self, table_name: str, layer: str = "silver") -> TablePreview: ...
+    """Service protocol for export CLI commands."""
+
+    async def preview(self, table_name: str, layer: str = "silver") -> TablePreview:
+        """Return a preview of the given table."""
+        ...
 
     async def export(
         self,
         table_name: str,
         layer: str = "silver",
         options: ExportOptions | None = None,
-    ) -> ExportResult: ...
+    ) -> ExportResult:
+        """Export the given table to the specified format."""
+        ...
 
-    def list_tables(self, layer: str = "all") -> list[TableInfo]: ...
+    def list_tables(self, layer: str = "all") -> list[TableInfo]:
+        """List available tables for export."""
+        ...
 
 
 def _handle_export_failure(
