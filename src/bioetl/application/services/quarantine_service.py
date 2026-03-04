@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
-from bioetl.domain.types import QuarantineRecordStatus
+from bioetl.domain.types import JsonDict, QuarantineRecordStatus
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, QuarantinePort
@@ -35,11 +35,11 @@ class QuarantineRecord:
     """
 
     error_code: str | None
-    payload: dict[str, Any]  # Any: quarantine payload has heterogeneous values
+    payload: JsonDict  # Any: quarantine payload has heterogeneous values
     batch_id: str | None
     pipeline: str
     ingestion_ts: datetime | None
-    metadata: dict[str, Any]  # Any: metadata values are heterogeneous
+    metadata: JsonDict  # Any: metadata values are heterogeneous
 
 
 @dataclass
@@ -115,7 +115,7 @@ class QuarantineService:
 
     async def get_stats(
         self, pipeline: str
-    ) -> dict[str, Any]:  # Any: quarantine record has heterogeneous values
+    ) -> JsonDict:  # Any: quarantine record has heterogeneous values
         """Get statistics about quarantined records.
 
         Args:
@@ -141,7 +141,7 @@ class QuarantineService:
         pipeline: str,
         error_code: str | None = None,
         max_age_days: int = 7,
-    ) -> list[dict[str, Any]]:  # Any: quarantine record has heterogeneous values
+    ) -> list[JsonDict]:  # Any: quarantine record has heterogeneous values
         """Replay quarantine records for reprocessing.
 
         Retrieves quarantined records that match the filter criteria
@@ -183,7 +183,7 @@ class QuarantineService:
     def mark_as_reprocessed(
         self,
         records: list[
-            dict[str, Any]  # Any: quarantine record has heterogeneous values
+            JsonDict  # Any: quarantine record has heterogeneous values
         ],  # Any: quarantine record has heterogeneous values
     ) -> int:
         """Mark replay records as reprocessed.

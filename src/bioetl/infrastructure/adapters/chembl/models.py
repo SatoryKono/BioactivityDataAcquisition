@@ -41,7 +41,7 @@ __all__ = [
 ]
 
 
-from typing import Any
+from bioetl.domain.types import JsonDict
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -218,7 +218,7 @@ class ChemblActivityRecord(BaseModel):
 
     # Activity Properties (complex field)
     activity_properties: (
-        list[dict[str, Any]] | None  # Any: untyped API JSON record
+        list[JsonDict] | None  # Any: untyped API JSON record
     ) = (  # Any: nested API JSON has heterogeneous values
         Field(  # Any: nested ChEMBL JSON with provider-specific schema
             default_factory=list, description="Additional activity properties"
@@ -298,7 +298,7 @@ class ChemblAssayRecord(BaseModel):
     # Variants
     variant_sequence: str | None = Field(default=None, description="Variant sequence")
     assay_parameters: (
-        list[dict[str, Any]] | None  # Any: untyped API JSON record
+        list[JsonDict] | None  # Any: untyped API JSON record
     ) = (  # Any: nested API JSON has heterogeneous values
         Field(  # Any: nested ChEMBL JSON with provider-specific schema
             default_factory=list, description="Assay parameters"
@@ -409,12 +409,12 @@ class ChemblMoleculeRecord(BaseModel):
     molecule_hierarchy: MoleculeHierarchy | None = Field(default=None)
     molecule_properties: MoleculeProperties | None = Field(default=None)
     molecule_structures: MoleculeStructures | None = Field(default=None)
-    molecule_synonyms: list[dict[str, Any]] | None = (  # Any: untyped API JSON record
+    molecule_synonyms: list[JsonDict] | None = (  # Any: untyped API JSON record
         Field(  # Any: nested API JSON has heterogeneous values
             default_factory=list
         )
     )  # Any: nested ChEMBL JSON with provider-specific schema
-    cross_references: list[dict[str, Any]] | None = (  # Any: untyped API JSON record
+    cross_references: list[JsonDict] | None = (  # Any: untyped API JSON record
         Field(  # Any: nested API JSON has heterogeneous values
             default_factory=list
         )
@@ -469,12 +469,12 @@ class ChemblTargetRecord(BaseModel):
     species_group_flag: int | None = Field(default=None)
 
     # Complex Fields
-    target_components: list[dict[str, Any]] | None = (  # Any: untyped API JSON record
+    target_components: list[JsonDict] | None = (  # Any: untyped API JSON record
         Field(  # Any: nested API JSON has heterogeneous values
             default_factory=list
         )
     )  # Any: nested ChEMBL JSON with provider-specific schema
-    cross_references: list[dict[str, Any]] | None = (  # Any: untyped API JSON record
+    cross_references: list[JsonDict] | None = (  # Any: untyped API JSON record
         Field(  # Any: nested API JSON has heterogeneous values
             default_factory=list
         )
@@ -600,7 +600,7 @@ class ChemblTargetComponentRecord(BaseModel):
     tax_id: int | None = Field(default=None)
 
     # GO Classifications
-    go_slims: list[dict[str, Any]] | None = (  # Any: untyped API JSON record
+    go_slims: list[JsonDict] | None = (  # Any: untyped API JSON record
         Field(  # Any: nested API JSON has heterogeneous values
             default_factory=list
         )
@@ -608,7 +608,7 @@ class ChemblTargetComponentRecord(BaseModel):
 
     # Protein Classifications
     protein_classifications: (
-        list[dict[str, Any]] | None  # Any: untyped API JSON record
+        list[JsonDict] | None  # Any: untyped API JSON record
     ) = (  # Any: untyped API JSON record
         Field(  # Any: nested API JSON has heterogeneous values
             default_factory=list
@@ -617,14 +617,14 @@ class ChemblTargetComponentRecord(BaseModel):
 
     # Target Relations
     target_component_synonyms: (
-        list[dict[str, Any]] | None  # Any: untyped API JSON record
+        list[JsonDict] | None  # Any: untyped API JSON record
     ) = (  # Any: untyped API JSON record
         Field(  # Any: nested API JSON has heterogeneous values
             default_factory=list
         )
     )  # Any: nested ChEMBL JSON with provider-specific schema
     target_component_xrefs: (
-        list[dict[str, Any]] | None  # Any: untyped API JSON record
+        list[JsonDict] | None  # Any: untyped API JSON record
     ) = (  # Any: untyped API JSON record
         Field(  # Any: nested API JSON has heterogeneous values
             default_factory=list

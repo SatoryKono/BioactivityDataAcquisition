@@ -153,7 +153,7 @@ def map_field(record: BronzeRecord, spec: FieldSpec) -> tuple[str, Any]:
 def map_fields(
     record: BronzeRecord,
     specs: Sequence[FieldSpec],
-) -> dict[str, Any]:  # Any: heterogeneous record values
+) -> JsonDict:  # Any: heterogeneous record values
     """Map multiple fields from record according to specifications.
 
     Args:
@@ -175,7 +175,7 @@ def map_fields(
         >>> map_fields({"activity_id": 123, "value": "5.5", "type": "IC50"}, specs)
         {'activity_id': '123', 'value': 5.5, 'type': 'IC50'}
     """
-    result: dict[str, Any] = {}  # Any: heterogeneous record values
+    result: JsonDict = {}  # Any: heterogeneous record values
 
     for spec in specs:
         target, value = map_field(record, spec)
@@ -187,7 +187,7 @@ def map_fields(
 def map_field_group(
     record: BronzeRecord,
     group: FieldGroup,
-) -> dict[str, Any]:  # Any: heterogeneous record values
+) -> JsonDict:  # Any: heterogeneous record values
     """Map a group of fields with optional prefix.
 
     Args:
@@ -219,7 +219,7 @@ def map_field_group(
 def map_field_groups(
     record: BronzeRecord,
     groups: Sequence[FieldGroup],
-) -> dict[str, Any]:  # Any: heterogeneous record values
+) -> JsonDict:  # Any: heterogeneous record values
     """Map multiple field groups, merging results.
 
     Args:
@@ -229,7 +229,7 @@ def map_field_groups(
     Returns:
         Merged dictionary with all mapped fields.
     """
-    result: dict[str, Any] = {}  # Any: heterogeneous record values
+    result: JsonDict = {}  # Any: heterogeneous record values
 
     for group in groups:
         result.update(map_field_group(record, group))

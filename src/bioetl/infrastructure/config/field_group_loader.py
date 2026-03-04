@@ -21,6 +21,7 @@ from bioetl.domain.composite.field_groups import (
     FieldMapping,
     build_field_group_registry,
 )
+from bioetl.domain.types import JsonDict
 
 __all__ = [
     "FieldGroupLoadError",
@@ -63,7 +64,7 @@ def load_field_groups(path: Path) -> FieldGroupRegistry:
 
 
 def _parse_config(
-    raw: dict[str, Any],  # Any: YAML config has heterogeneous values
+    raw: JsonDict,  # Any: YAML config has heterogeneous values
     source: str,  # Any: YAML config has heterogeneous values
 ) -> FieldGroupRegistry:  # Any: YAML config has heterogeneous values
     """Parse raw YAML dict into FieldGroupRegistry.
@@ -105,7 +106,7 @@ def _parse_config(
 
 
 def _parse_group(
-    raw_group: dict[str, Any],  # Any: YAML config has heterogeneous values
+    raw_group: JsonDict,  # Any: YAML config has heterogeneous values
     index: int,  # Any: YAML config has heterogeneous values
 ) -> FieldGroupDefinition:  # Any: YAML config has heterogeneous values
     """Parse a single group definition from YAML.
@@ -150,7 +151,7 @@ def _parse_group(
 
 
 def _parse_field(
-    raw_field: dict[str, Any],  # Any: YAML config has heterogeneous values
+    raw_field: JsonDict,  # Any: YAML config has heterogeneous values
     group_id: FieldGroupId,  # Any: YAML config has heterogeneous values
 ) -> FieldMapping:  # Any: YAML config has heterogeneous values
     """Parse a single field mapping from YAML.

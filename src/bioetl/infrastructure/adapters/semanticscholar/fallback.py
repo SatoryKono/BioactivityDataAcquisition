@@ -134,12 +134,12 @@ class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):
 
     async def _search_by_title(
         self, title: str
-    ) -> dict[str, Any] | None:  # Any: untyped API JSON record
+    ) -> JsonDict | None:  # Any: untyped API JSON record
         """Search Semantic Scholar by title and return best matching record."""
         try:
             cleaned_title = self._escape_title_for_search(title)
 
-            params: dict[str, Any] = {  # Any: untyped API JSON record
+            params: JsonDict = {  # Any: untyped API JSON record
                 "query": cleaned_title,
                 "fields": self._fields,
                 "limit": 5,  # Return top matches for validation
@@ -168,10 +168,10 @@ class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):
                 # Validate title match to reduce false positives
                 found_title = record.get("title", "")
                 if found_title and titles_match(title, found_title):
-                    return cast(dict[str, Any], record)  # Any: untyped API JSON record
+                    return cast(JsonDict, record)  # Any: untyped API JSON record
                 # If no title in record, return first result
                 if not found_title:
-                    return cast(dict[str, Any], record)  # Any: untyped API JSON record
+                    return cast(JsonDict, record)  # Any: untyped API JSON record
 
         except SEMANTICSCHOLAR_FALLBACK_ERRORS as e:
             self._logger.debug(
@@ -210,7 +210,7 @@ class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):
 
     def _get_result_identifier(
         self,
-        result: dict[str, Any],  # Any: untyped API JSON record
+        result: JsonDict,  # Any: untyped API JSON record
     ) -> tuple[str, str]:  # Any: untyped API JSON record
         """Return Semantic Scholar paper ID for logging."""
         return ("found_paper_id", str(result.get("paperId", "unknown")))

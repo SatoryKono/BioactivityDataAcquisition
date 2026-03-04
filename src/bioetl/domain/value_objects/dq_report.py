@@ -14,7 +14,7 @@ from enum import StrEnum
 from typing import Any
 
 from bioetl.domain.medallion import Layer as MedallionLayer
-from bioetl.domain.types import DriftLevel
+from bioetl.domain.types import DriftLevel, JsonDict
 
 
 class DQReportFormat(StrEnum):
@@ -179,7 +179,7 @@ class UniquenessResult:
     total_count: int
     duplicate_rate: float
     column_stats: dict[
-        str, dict[str, Any]  # Any: port contract allows heterogeneous record values
+        str, JsonDict  # Any: port contract allows heterogeneous record values
     ] = (  # Any: port contract allows heterogeneous record values
         field(  # Any: DQ check values vary by check type
             default_factory=dict
@@ -196,7 +196,7 @@ class TypeConformanceResult:
     pandera_passed: bool
     errors: tuple[str, ...] = ()
     type_coercions: dict[
-        str, dict[str, Any]  # Any: port contract allows heterogeneous record values
+        str, JsonDict  # Any: port contract allows heterogeneous record values
     ] = (  # Any: port contract allows heterogeneous record values
         field(  # Any: DQ check values vary by check type
             default_factory=dict
@@ -229,7 +229,7 @@ class NumericDistribution:
 class CategoricalDistribution:
     """Statistics for a categorical column."""
 
-    top_values: tuple[dict[str, Any], ...]  # Any: DQ report values vary by check type
+    top_values: tuple[JsonDict, ...]  # Any: DQ report values vary by check type
     cardinality: int
 
     def __post_init__(self) -> None:
@@ -483,7 +483,7 @@ class BronzeDQReport:
     pipeline: str
     batch_id: str
     source_file: str
-    checks: dict[str, Any]  # Any: DQ report values vary by check type
+    checks: JsonDict  # Any: DQ report values vary by check type
     summary: DQReportSummary
 
     def __post_init__(self) -> None:
@@ -515,7 +515,7 @@ class SilverDQReport:
     pipeline: str
     source_batch_ids: tuple[str, ...]
     target_table: str
-    checks: dict[str, Any]  # Any: DQ report values vary by check type
+    checks: JsonDict  # Any: DQ report values vary by check type
     thresholds: DQThresholds
     summary: DQReportSummary
     # Cross-reference to metadata
@@ -549,7 +549,7 @@ class GoldDQReport:
     run_id: str
     pipeline: str
     target_table: str
-    checks: dict[str, Any]  # Any: DQ report values vary by check type
+    checks: JsonDict  # Any: DQ report values vary by check type
     data_freshness: DataFreshnessResult | None
     summary: DQReportSummary
 

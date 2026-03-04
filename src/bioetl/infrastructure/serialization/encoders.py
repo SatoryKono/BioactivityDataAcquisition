@@ -29,6 +29,7 @@ from functools import lru_cache
 from typing import Any
 
 from bioetl.domain.ports import JsonEncoderPort
+from bioetl.domain.types import JsonDict
 
 # Optional orjson import
 try:
@@ -50,7 +51,7 @@ class StdLibJsonEncoder:
 
     def dumps(
         self,
-        obj: dict[str, Any]  # Any: JSON values are heterogeneous
+        obj: JsonDict  # Any: JSON values are heterogeneous
         | list[Any],  # Any: JSON values are heterogeneous
         *,
         sort_keys: bool = True,
@@ -75,7 +76,7 @@ class StdLibJsonEncoder:
 
     def dumps_canonical(
         self,
-        obj: dict[str, Any],  # Any: JSON values are heterogeneous
+        obj: JsonDict,  # Any: JSON values are heterogeneous
     ) -> str:
         """Serialize object to canonical JSON for hashing.
 
@@ -96,7 +97,7 @@ class StdLibJsonEncoder:
 
     def loads(
         self, data: str | bytes
-    ) -> dict[str, Any] | list[Any]:  # Any: JSON-serializable values are heterogeneous
+    ) -> JsonDict | list[Any]:  # Any: JSON-serializable values are heterogeneous
         """Deserialize JSON string to Python object.
 
         Args:
@@ -109,7 +110,7 @@ class StdLibJsonEncoder:
             ValueError: If JSON is invalid
         """
         try:
-            result: dict[str, Any] | list[Any] = (  # Any: JSON heterogeneous
+            result: JsonDict | list[Any] = (  # Any: JSON heterogeneous
                 json.loads(data)
             )
             return result
@@ -139,7 +140,7 @@ class OrjsonEncoder:
 
     def dumps(
         self,
-        obj: dict[str, Any]  # Any: JSON values are heterogeneous
+        obj: JsonDict  # Any: JSON values are heterogeneous
         | list[Any],  # Any: JSON values are heterogeneous
         *,
         sort_keys: bool = True,
@@ -171,7 +172,7 @@ class OrjsonEncoder:
 
     def dumps_canonical(
         self,
-        obj: dict[str, Any],  # Any: JSON values are heterogeneous
+        obj: JsonDict,  # Any: JSON values are heterogeneous
     ) -> str:
         """Serialize object to canonical JSON for hashing.
 
@@ -191,7 +192,7 @@ class OrjsonEncoder:
 
     def loads(
         self, data: str | bytes
-    ) -> dict[str, Any] | list[Any]:  # Any: JSON-serializable values are heterogeneous
+    ) -> JsonDict | list[Any]:  # Any: JSON-serializable values are heterogeneous
         """Deserialize JSON string to Python object using orjson.
 
         Args:
@@ -205,7 +206,7 @@ class OrjsonEncoder:
         """
         assert _orjson is not None
         try:
-            result: dict[str, Any] | list[Any] = (  # Any: JSON heterogeneous
+            result: JsonDict | list[Any] = (  # Any: JSON heterogeneous
                 _orjson.loads(data)
             )
             return result

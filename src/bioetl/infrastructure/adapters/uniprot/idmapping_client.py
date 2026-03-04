@@ -26,7 +26,7 @@ from collections.abc import AsyncIterator, Mapping
 from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.ports import NoOpMetrics
-from bioetl.domain.types import HealthStatus
+from bioetl.domain.types import HealthStatus, JsonDict
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
 from bioetl.infrastructure.adapters.uniprot.constants import UNIPROT_API_BASE
@@ -114,7 +114,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         from_db: str,
         to_db: str,
         ids: list[str],
-    ) -> Mapping[str, dict[str, Any] | None]:  # Any: untyped API JSON
+    ) -> Mapping[str, JsonDict | None]:  # Any: untyped API JSON
         """Map identifiers using UniProt ID Mapping API.
 
         Args:
@@ -136,7 +136,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         if not ids:
             return {}
 
-        results: dict[str, dict[str, Any] | None] = dict.fromkeys(ids, None)  # Any: API
+        results: dict[str, JsonDict | None] = dict.fromkeys(ids, None)  # Any: API
 
         # Process in batches
         for batch_start in range(0, len(ids), self.MAX_IDS_PER_BATCH):
@@ -151,7 +151,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         from_db: str,
         to_db: str,
         ids: list[str],
-    ) -> dict[str, dict[str, Any] | None]:  # Any: untyped API JSON
+    ) -> dict[str, JsonDict | None]:  # Any: untyped API JSON
         """Map a batch of IDs.
 
         Args:
@@ -328,7 +328,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         job_id: str,
         original_ids: list[str],
         results_url: str | None = None,
-    ) -> dict[str, dict[str, Any] | None]:  # Any: untyped API JSON
+    ) -> dict[str, JsonDict | None]:  # Any: untyped API JSON
         """Fetch mapping results with full entry metadata.
 
         GET /idmapping/results/{jobId}
@@ -349,7 +349,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
             Dict mapping source IDs to entry data dicts (None if not found).
         """
         # Collect all entries per source ID (for multiple mappings)
-        entries_by_id: dict[str, list[dict[str, Any]]] = {  # Any: untyped API JSON
+        entries_by_id: dict[str, list[JsonDict]] = {  # Any: untyped API JSON
             id_: [] for id_ in original_ids
         }
         url: str | None = results_url or f"{self.base_url}/idmapping/results/{job_id}"
@@ -378,7 +378,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
             url = self._get_next_page_url(response.headers)
 
         # Select primary entry for each ID, handle multiple mappings
-        results: dict[str, dict[str, Any] | None] = {}  # Any: untyped API JSON
+        results: dict[str, JsonDict | None] = {}  # Any: untyped API JSON
         for id_, entries in entries_by_id.items():
             results[id_] = self._select_primary_entry(entries)
 
@@ -397,8 +397,8 @@ class UniProtIDMappingClient(BaseHttpAdapter):
 
     @staticmethod
     def _select_primary_entry(
-        entries: list[dict[str, Any]],  # Any: untyped API JSON
-    ) -> dict[str, Any] | None:  # Any: untyped API JSON
+        entries: list[JsonDict],  # Any: untyped API JSON
+    ) -> JsonDict | None:  # Any: untyped API JSON
         """Select primary entry from list, handling multiple mappings.
 
         When multiple mappings exist, selects the best entry based on:
@@ -525,8 +525,8 @@ class UniProtIDMappingClient(BaseHttpAdapter):
 
     @staticmethod
     def _parse_mapping_entry(
-        mapping: dict[str, Any],  # Any: untyped API JSON
-    ) -> tuple[str | None, dict[str, Any] | None]:  # Any: untyped API JSON
+        mapping: JsonDict,  # Any: untyped API JSON
+    ) -> tuple[str | None, JsonDict | None]:  # Any: untyped API JSON
         """Parse a single mapping entry from API response.
 
         Extracts comprehensive entry metadata from UniProtKB responses.
@@ -624,7 +624,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
         offset: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:  # Any: untyped API JSON
+    ) -> AsyncIterator[JsonDict]:  # Any: untyped API JSON
         """Not implemented - use IDMappingDataSource instead.
 
         This client is designed to be used via IDMappingDataSource,

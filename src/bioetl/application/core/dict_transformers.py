@@ -24,18 +24,19 @@ from bioetl.domain.normalization import normalize_string as _domain_normalize_st
 from bioetl.domain.normalization import parse_date_field as _domain_parse_date_field
 from bioetl.domain.transformations import safe_float, safe_int
 from bioetl.domain.validation import validate_smiles as _domain_validate_smiles
+from bioetl.domain.types import JsonDict
 
 T = TypeVar("T")
 
 
 def flatten_nested_dict(
-    data: dict[str, Any] | None,  # Any: dict values vary by field type
+    data: JsonDict | None,  # Any: dict values vary by field type
     prefix: str,
     field_mapping: dict[
         str, Callable[[Any], Any] | None  # Any: heterogeneous record values
     ],
     renames: dict[str, str] | None = None,
-) -> dict[str, Any]:  # Any: dict values vary by field type
+) -> JsonDict:  # Any: dict values vary by field type
     """Flatten a nested dict into a flat structure with a key prefix.
 
     Used to extract fields from nested API structures
@@ -72,7 +73,7 @@ def flatten_nested_dict(
     """
     # Optimized for speed: Single-pass iteration merging prefixing and renaming.
     # Uses explicit type annotation for mypy strict mode.
-    result: dict[str, Any] = {}  # Any: dict values vary by field type
+    result: JsonDict = {}  # Any: dict values vary by field type
 
     if not data or not isinstance(data, dict):
         for key in field_mapping:
@@ -97,7 +98,7 @@ def flatten_nested_dict(
 
 
 def extract_list_field(
-    items: list[dict[str, Any]] | None,  # Any: dict values vary by field type
+    items: list[JsonDict] | None,  # Any: dict values vary by field type
     field: str,
     converter: Callable[[Any], T]  # Any: converter accepts heterogeneous input
     | None = None,
@@ -146,7 +147,7 @@ def extract_list_field(
 
 
 def _extract_nested_values(
-    items: list[dict[str, Any]],  # Any: dict values vary by field type
+    items: list[JsonDict],  # Any: dict values vary by field type
     field: str,
 ) -> list[Any]:  # Any: nested list elements have heterogeneous types
     """Extract all nested list values from a field across items."""
@@ -160,7 +161,7 @@ def _extract_nested_values(
 
 
 def aggregate_nested_lists(
-    items: list[dict[str, Any]] | None,  # Any: dict values vary by field type
+    items: list[JsonDict] | None,  # Any: dict values vary by field type
     field: str,
     deduplicate: bool = True,
 ) -> list[Any] | None:  # Any: nested list elements have heterogeneous types
@@ -292,7 +293,7 @@ def validate_smiles(smiles: str | None) -> bool:
 
 
 def safe_extract(
-    record: dict[str, Any],  # Any: dict values vary by field type
+    record: JsonDict,  # Any: dict values vary by field type
     key: str,
     default: T | None = None,
 ) -> T | Any | None:  # Any: dict value type unknown at extraction time

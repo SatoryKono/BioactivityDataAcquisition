@@ -22,6 +22,7 @@ if TYPE_CHECKING:
         LoggerPort,
         SilverDQConfigPort,
     )
+    from bioetl.domain.types import JsonDict
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
@@ -235,7 +236,7 @@ def create_dq_services(
     settings: Settings,
     pipeline_config: PipelineYamlConfig,
     logger: LoggerPort,
-) -> dict[str, Any]:  # Any: heterogeneous DQ service instances
+) -> JsonDict:  # Any: heterogeneous DQ service instances
     """Create DQ analyzers/writer/services when DQ reporting is enabled."""
     dq_enabled = is_dq_report_enabled(pipeline_config)
 

@@ -9,7 +9,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any, Protocol, Self, runtime_checkable
 
-from bioetl.domain.types import HealthStatus
+from bioetl.domain.types import HealthStatus, JsonDict
 
 __all__ = [
     "IDMappingPort",
@@ -59,7 +59,7 @@ class IDMappingPort(Protocol):
         ids: list[str],
     ) -> Mapping[
         str,
-        dict[str, Any] | None,  # Any: port contract allows heterogeneous record values
+        JsonDict | None,  # Any: port contract allows heterogeneous record values
     ]:  # Any: port contract allows heterogeneous record values
         """Map identifiers from source database to target database.
 

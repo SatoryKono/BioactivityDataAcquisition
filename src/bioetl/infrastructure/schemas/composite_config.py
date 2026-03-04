@@ -33,6 +33,7 @@ from bioetl.domain.composite.strategy import (
     ConflictResolution,
     MergeStrategy,
 )
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.schemas.composite_config_base import (
     AggregationFieldSchema,
     AggregationSchema,
@@ -543,12 +544,12 @@ class CompositeConfigFileSchema(BaseModel):
     composite: CompositeConfigSchema = Field(
         ..., description="The composite pipeline configuration"
     )
-    gold_filters: dict[str, Any] | None = (  # Any: YAML config has heterogeneous values
+    gold_filters: JsonDict | None = (  # Any: YAML config has heterogeneous values
         Field(  # Any: YAML config has heterogeneous values
             default=None, description="Optional gold layer filters"
         )
     )
-    maintenance: dict[str, Any] | None = (  # Any: YAML config has heterogeneous values
+    maintenance: JsonDict | None = (  # Any: YAML config has heterogeneous values
         Field(  # Any: YAML config has heterogeneous values
             default=None, description="Optional maintenance configuration"
         )
@@ -587,7 +588,7 @@ COMPOSITE_VERSION_DEPRECATION_TARGET = "6.2.0"
 
 
 def validate_composite_config_payload(
-    payload: dict[str, Any],  # Any: YAML config has heterogeneous values
+    payload: JsonDict,  # Any: YAML config has heterogeneous values
 ) -> CompositeConfigFileSchema:
     """Validate composite YAML payload with explicit legacy fallback.
 

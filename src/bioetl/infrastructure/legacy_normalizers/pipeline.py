@@ -8,13 +8,14 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
+from bioetl.domain.types import JsonDict
 
 import yaml
 
 
 def _load_column_groups_config(
     config_path: Path, column_groups_file: str
-) -> list[dict[str, Any]] | None:  # Any: YAML config has heterogeneous values
+) -> list[JsonDict] | None:  # Any: YAML config has heterogeneous values
     """Load column group configuration from column_groups_file."""
     column_groups_path = config_path.parent / column_groups_file
     if not column_groups_path.exists():
@@ -36,7 +37,7 @@ def _load_column_groups_config(
 
 def _load_data_schema_config(
     config_path: Path, schema_file: str
-) -> dict[str, Any] | None:  # Any: YAML config has heterogeneous values
+) -> JsonDict | None:  # Any: YAML config has heterogeneous values
     """Load data schema configuration with layer-specific column definitions."""
     schema_path = (config_path.parent / schema_file).resolve()
     if not schema_path.exists():
@@ -48,7 +49,7 @@ def _load_data_schema_config(
     with open(schema_path, encoding="utf-8") as f:
         data = yaml.safe_load(f) or {}
 
-    result: dict[str, Any] = {}  # Any: YAML config has heterogeneous values
+    result: JsonDict = {}  # Any: YAML config has heterogeneous values
     if "column_groups" in data:
         result["column_groups"] = data["column_groups"]
     if "content_hash" in data:
@@ -62,8 +63,8 @@ def _load_data_schema_config(
 
 
 def _merge_data_schema_into_config(
-    config: dict[str, Any],  # Any: YAML config has heterogeneous values
-    data_schema: dict[str, Any],  # Any: YAML config has heterogeneous values
+    config: JsonDict,  # Any: YAML config has heterogeneous values
+    data_schema: JsonDict,  # Any: YAML config has heterogeneous values
 ) -> None:
     """Merge loaded data schema (column_groups, silver, gold) into config."""
     if "column_groups" in data_schema:
@@ -77,7 +78,7 @@ def _merge_data_schema_into_config(
 
 
 def _validate_schema_config(
-    data_schema: dict[str, Any],  # Any: YAML config has heterogeneous values
+    data_schema: JsonDict,  # Any: YAML config has heterogeneous values
     schema_file: str,
 ) -> None:
     """Validate schema configuration has required minimum structure."""
@@ -112,11 +113,11 @@ def _validate_schema_config(
 
 
 def apply_pipeline_schema_normalization(
-    config: dict[str, Any],  # Any: YAML config has heterogeneous values
+    config: JsonDict,  # Any: YAML config has heterogeneous values
     *,
-    entity_config: dict[str, Any],  # Any: YAML config has heterogeneous values
+    entity_config: JsonDict,  # Any: YAML config has heterogeneous values
     config_path: Path,
-    unified_schema: dict[str, Any] | None = None,  # Any: YAML values are heterogeneous
+    unified_schema: JsonDict | None = None,  # Any: YAML values are heterogeneous
 ) -> None:
     """Normalize schema references across new and legacy pipeline formats.
 

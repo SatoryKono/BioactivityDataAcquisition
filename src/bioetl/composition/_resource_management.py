@@ -8,6 +8,7 @@ Split from entrypoints.py per audit-package-structure-2026-02-07.
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
+from bioetl.domain.types import JsonDict
 
 from bioetl.composition._pipeline_execution import (
     ArchiveOptions,
@@ -177,7 +178,7 @@ async def preview_cleanup(pipeline: str) -> CleanupPreview:
 
 async def inspect_quarantine(
     pipeline: str, limit: int = 100
-) -> list[dict[str, Any]]:  # Any: quarantine record has heterogeneous values
+) -> list[JsonDict]:  # Any: quarantine record has heterogeneous values
     """Inspect quarantined records for a pipeline.
 
     Convenience function for quick quarantine inspection.
@@ -196,7 +197,7 @@ async def inspect_quarantine(
     """
     manager = get_quarantine_manager(pipeline)
     records: list[
-        dict[str, Any]  # Any: factory wiring; concrete types resolved at runtime
+        JsonDict  # Any: factory wiring; concrete types resolved at runtime
     ] = await manager.inspect(  # Any: factory wiring; concrete types resolved at runtime
         limit=limit
     )  # Any: factory wiring; concrete types resolved at runtime

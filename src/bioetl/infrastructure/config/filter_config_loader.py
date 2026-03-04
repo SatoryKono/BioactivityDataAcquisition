@@ -20,6 +20,7 @@ from bioetl.domain.filtering import (
     SilverFilterConfig,
 )
 from bioetl.domain.models.filter import ExtractionParams
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config.base_config_loader import BaseConfigLoader
 from bioetl.infrastructure.schemas.filter_config import FilterConfigFile
 
@@ -51,7 +52,7 @@ class FilterConfigLoader(
         self,
         provider: str,
         entity: str,
-        inline_overrides: dict[str, Any]  # Any: YAML config has heterogeneous values
+        inline_overrides: JsonDict  # Any: YAML config has heterogeneous values
         | None = None,  # Any: YAML filter config has heterogeneous values
     ) -> tuple[
         InputFilterConfig, SilverFilterConfig, GoldFilterConfig, ExtractionParams
@@ -95,9 +96,9 @@ class FilterConfigLoader(
         self,
         provider: str,
         entity: str,
-        inline_overrides: dict[str, Any]  # Any: YAML config has heterogeneous values
+        inline_overrides: JsonDict  # Any: YAML config has heterogeneous values
         | None = None,  # Any: YAML filter config has heterogeneous values
-    ) -> dict[str, Any]:  # Any: YAML filter config has heterogeneous values
+    ) -> JsonDict:  # Any: YAML filter config has heterogeneous values
         """Load merged filter config hierarchy as raw dict.
 
         Same 4-level merge order as :meth:`load` but returns the merged
@@ -127,11 +128,11 @@ class FilterConfigLoader(
         self,
         provider: str,
         entity: str,
-        inline_overrides: dict[str, Any]  # Any: YAML config has heterogeneous values
+        inline_overrides: JsonDict  # Any: YAML config has heterogeneous values
         | None = None,  # Any: YAML filter config has heterogeneous values
-        defaults: dict[str, Any]  # Any: YAML config has heterogeneous values
+        defaults: JsonDict  # Any: YAML config has heterogeneous values
         | None = None,  # Any: YAML filter config has heterogeneous values
-    ) -> dict[str, Any]:  # Any: YAML filter config has heterogeneous values
+    ) -> JsonDict:  # Any: YAML filter config has heterogeneous values
         """Merge the 4-level filter config hierarchy into a single dict.
 
         Shared logic for both :meth:`load` and :meth:`load_as_dict`.
@@ -166,7 +167,7 @@ class FilterConfigLoader(
 
     def _load_defaults_layer(
         self,
-    ) -> dict[str, Any]:  # Any: YAML filter config has heterogeneous values
+    ) -> JsonDict:  # Any: YAML filter config has heterogeneous values
         """Load filter defaults from configs/base/pipeline.yaml."""
         base_pipeline_path = self._base_root / "pipeline.yaml"
         if base_pipeline_path.exists():
@@ -192,7 +193,7 @@ class FilterConfigLoader(
 
     def _load_provider_layer(
         self, provider: str
-    ) -> dict[str, Any]:  # Any: YAML filter config has heterogeneous values
+    ) -> JsonDict:  # Any: YAML filter config has heterogeneous values
         """Load provider filter layer from unified provider config."""
         unified_provider_path = self._configs_root / "providers" / f"{provider}.yaml"
         if unified_provider_path.exists():
@@ -217,7 +218,7 @@ class FilterConfigLoader(
 
     def _load_entity_layer(
         self, provider: str, entity: str
-    ) -> dict[str, Any]:  # Any: YAML filter config has heterogeneous values
+    ) -> JsonDict:  # Any: YAML filter config has heterogeneous values
         """Load entity filter layer from unified entity config."""
         unified_entity_path = (
             self._configs_root / "entities" / provider / f"{entity}.yaml"
@@ -244,9 +245,9 @@ class FilterConfigLoader(
 
     def _deep_merge(
         self,
-        base: dict[str, Any],  # Any: YAML filter config has heterogeneous values
-        override: dict[str, Any],  # Any: YAML filter config has heterogeneous values
-    ) -> dict[str, Any]:  # Any: YAML filter config has heterogeneous values
+        base: JsonDict,  # Any: YAML filter config has heterogeneous values
+        override: JsonDict,  # Any: YAML filter config has heterogeneous values
+    ) -> JsonDict:  # Any: YAML filter config has heterogeneous values
         """Deep merge two dicts with filter-specific rules.
 
         Rules:

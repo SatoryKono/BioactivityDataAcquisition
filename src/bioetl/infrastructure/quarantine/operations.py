@@ -16,7 +16,7 @@ from deltalake import DeltaTable
 from deltalake.exceptions import TableNotFoundError
 
 from bioetl.domain.serialization import deserialize_from_json
-from bioetl.domain.types import QuarantineRecordStatus
+from bioetl.domain.types import JsonDict, QuarantineRecordStatus
 from bioetl.infrastructure.quarantine.record_encoding import quote_literal
 
 if TYPE_CHECKING:
@@ -30,7 +30,7 @@ def inspect_records(
     limit: int = 100,
     error_code: str | None = None,
     dq_status: QuarantineRecordStatus | None = None,
-) -> list[dict[str, Any]]:  # Any: quarantine record has heterogeneous values
+) -> list[JsonDict]:  # Any: quarantine record has heterogeneous values
     """Inspect quarantine records for a pipeline.
 
     Args:
@@ -63,7 +63,7 @@ def inspect_records(
     if limit > 0:
         filtered_table = filtered_table.slice(length=limit)
 
-    records: list[dict[str, Any]] = (  # Any: quarantine record has heterogeneous values
+    records: list[JsonDict] = (  # Any: quarantine record has heterogeneous values
         filtered_table.to_pylist()
     )  # Any: quarantine record has heterogeneous values
     for record in records:
@@ -81,7 +81,7 @@ def replay_records(
     max_age_days: int = 7,
     *,
     now: datetime,
-) -> Iterator[dict[str, Any]]:  # Any: quarantine record has heterogeneous values
+) -> Iterator[JsonDict]:  # Any: quarantine record has heterogeneous values
     """Replay quarantine records for reprocessing.
 
     Args:
@@ -127,7 +127,7 @@ def get_statistics(
     base_path: str,
     storage_options: dict[str, str] | None,
     pipeline: str,
-) -> dict[str, Any]:  # Any: quarantine record has heterogeneous values
+) -> JsonDict:  # Any: quarantine record has heterogeneous values
     """Get quarantine statistics for a pipeline.
 
     Args:

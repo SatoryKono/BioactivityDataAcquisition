@@ -25,13 +25,14 @@ if TYPE_CHECKING:
     from collections.abc import AsyncGenerator, Generator
 
     from bioetl.domain.ports import TracingPort
+from bioetl.domain.types import JsonDict
 
 
 @contextmanager
 def _span_context(
     tracer: TracingPort,
     name: str,
-    attributes: dict[str, Any]  # Any: OTel span attributes are heterogeneous
+    attributes: JsonDict  # Any: OTel span attributes are heterogeneous
     | None = None,  # Any: OTel span attributes are heterogeneous
     tracer_name: str = "bioetl",
 ) -> Generator[Any, None, None]:  # Any: OTel span context manager yield type
@@ -60,7 +61,7 @@ traced_operation = _span_context
 async def traced_async_operation(
     tracer: TracingPort,
     name: str,
-    attributes: dict[str, Any]  # Any: OTel span attributes are heterogeneous
+    attributes: JsonDict  # Any: OTel span attributes are heterogeneous
     | None = None,  # Any: OTel span attributes are heterogeneous
     tracer_name: str = "bioetl",
 ) -> AsyncGenerator[Any, None]:  # Any: OTel span context manager yield type

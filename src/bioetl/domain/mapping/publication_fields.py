@@ -16,6 +16,7 @@ Usage:
     >>> mapping["doc_type"]  # Returns: "publication_type"
 
     >>> from bioetl.domain.mapping import get_unified_name
+from bioetl.domain.types import JsonDict
     >>> get_unified_name("chembl", "year")  # Returns: "publication_year"
 """
 
@@ -197,9 +198,9 @@ def get_provider_name(provider: ProviderName, unified_field: str) -> str:
 
 
 def apply_field_mapping(
-    record: dict[str, Any],  # Any: record values are heterogeneous
+    record: JsonDict,  # Any: record values are heterogeneous
     provider: ProviderName,
-) -> dict[str, Any]:  # Any: record values are heterogeneous
+) -> JsonDict:  # Any: record values are heterogeneous
     """Apply field name mapping to a record (provider → unified names).
 
     Renames fields according to PUBLICATION_FIELD_MAPPING for the given provider.

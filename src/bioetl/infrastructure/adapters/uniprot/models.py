@@ -39,6 +39,7 @@ __all__ = [
 
 
 from typing import Any
+from bioetl.domain.types import JsonDict
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -262,10 +263,10 @@ class UniProtFeatureLocation(BaseModel):
 
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
 
-    start: dict[str, Any] | None = Field(  # Any: untyped API JSON record
+    start: JsonDict | None = Field(  # Any: untyped API JSON record
         default=None, description="Start position"
     )  # Any: nested API JSON has heterogeneous values
-    end: dict[str, Any] | None = Field(  # Any: untyped API JSON record
+    end: JsonDict | None = Field(  # Any: untyped API JSON record
         default=None, description="End position"
     )  # Any: nested API JSON has heterogeneous values
 
@@ -430,7 +431,7 @@ class UniProtFeatureRecord(BaseModel):
 
     accession: str = Field(description="Protein accession")
     type: str | None = Field(default=None, description="Feature type")
-    location: dict[str, Any] | None = (  # Any: untyped API JSON record
+    location: JsonDict | None = (  # Any: untyped API JSON record
         Field(  # Any: nested API JSON has heterogeneous values
             default=None, description="Feature location"
         )

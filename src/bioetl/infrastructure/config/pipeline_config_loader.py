@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Any
 
 from bioetl.domain.config import DQConfig
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config.converters import dq_overrides_to_domain
 from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
 from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
@@ -154,9 +155,9 @@ class PipelineConfigLoader:
     def _normalize_inline_dq_overrides(
         self,
         dq_overrides: Any,  # Any: Pydantic model instance
-    ) -> dict[str, Any]:  # Any: dynamic YAML config values
+    ) -> JsonDict:  # Any: dynamic YAML config values
         """Convert inline Pydantic DQ overrides into mergeable file-shape dict."""
-        result: dict[str, Any] = {}  # Any: dynamic YAML config values
+        result: JsonDict = {}  # Any: dynamic YAML config values
 
         # Thresholds normalization
         result["thresholds"] = {
@@ -202,7 +203,7 @@ class PipelineConfigLoader:
     def _field_validation_to_dict(
         self,
         fv: Any,  # Any: YAML config has heterogeneous values
-    ) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
+    ) -> JsonDict:  # Any: YAML config has heterogeneous values
         """Convert FieldValidationConfig to dict.
 
         Args:
@@ -211,7 +212,7 @@ class PipelineConfigLoader:
         Returns:
             Dict representation for YAML merge.
         """
-        result: dict[str, Any] = {  # Any: dynamic YAML config values
+        result: JsonDict = {  # Any: dynamic YAML config values
             "field": fv.field,
             "type": fv.type,
             "nullable": fv.nullable,
@@ -234,7 +235,7 @@ class PipelineConfigLoader:
     def _cross_field_validation_to_dict(
         self,
         cfv: Any,  # Any: YAML config has heterogeneous values
-    ) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
+    ) -> JsonDict:  # Any: YAML config has heterogeneous values
         """Convert CrossFieldValidationConfig to dict.
 
         Args:
@@ -243,7 +244,7 @@ class PipelineConfigLoader:
         Returns:
             Dict representation for YAML merge.
         """
-        result: dict[str, Any] = {  # Any: dynamic YAML config values
+        result: JsonDict = {  # Any: dynamic YAML config values
             "name": cfv.name,
             "fields": list(cfv.fields),
             "condition": cfv.condition,
@@ -264,7 +265,7 @@ class PipelineConfigLoader:
     def _conditional_validation_to_dict(
         self,
         cv: Any,  # Any: YAML config has heterogeneous values
-    ) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
+    ) -> JsonDict:  # Any: YAML config has heterogeneous values
         """Convert ConditionalValidationConfig to dict.
 
         Args:
@@ -273,7 +274,7 @@ class PipelineConfigLoader:
         Returns:
             Dict representation for YAML merge.
         """
-        result: dict[str, Any] = {  # Any: dynamic YAML config values
+        result: JsonDict = {  # Any: dynamic YAML config values
             "name": cv.name,
             "condition_field": cv.condition_field,
             "condition_value": (

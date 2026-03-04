@@ -14,7 +14,7 @@ from bioetl.domain.exceptions import (
     ExternalServiceError,
     RetryExhaustedError,
 )
-from bioetl.domain.types import BronzeRecord
+from bioetl.domain.types import BronzeRecord, JsonDict
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Iterator
@@ -49,7 +49,7 @@ class ChemblFetchPagingMixin:
     async def _fetch_page(
         self: Any,  # Any: mixin self type
         url: str,
-        params: dict[str, Any],  # Any: HTTP query params (str|int|bool values)
+        params: JsonDict,  # Any: HTTP query params (str|int|bool values)
         entity_type: str,
     ) -> tuple[list[BronzeRecord], bool]:
         """Fetch a single page and handle errors."""

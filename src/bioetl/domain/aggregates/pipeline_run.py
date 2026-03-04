@@ -11,7 +11,7 @@ from bioetl.domain.exceptions import InvalidStateError
 
 if TYPE_CHECKING:
     from bioetl.domain.aggregates.events import DomainEvent
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types import JsonDict, RunID, RunType
 
 __all__ = [
     "PipelineRun",
@@ -224,7 +224,7 @@ class PipelineRun:
         run_id: RunID,
         run_type: RunType,
         pipeline_name: str = "",
-        metadata: dict[str, Any] | None = None,  # Any: heterogeneous pipeline metrics
+        metadata: JsonDict | None = None,  # Any: heterogeneous pipeline metrics
     ) -> None:
         """Initialize a new pipeline run.
 
@@ -280,7 +280,7 @@ class PipelineRun:
         return self._ended_at
 
     @property
-    def metadata(self) -> dict[str, Any]:  # Any: heterogeneous pipeline metrics
+    def metadata(self) -> JsonDict:  # Any: heterogeneous pipeline metrics
         """Copy of run metadata."""
         return self._metadata.copy()
 

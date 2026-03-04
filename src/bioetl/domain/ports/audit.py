@@ -15,7 +15,7 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Any, Protocol, runtime_checkable
 
-from bioetl.domain.types import MetaDict, RunID
+from bioetl.domain.types import JsonDict, MetaDict, RunID
 
 __all__ = [
     "AuditEntry",
@@ -82,7 +82,7 @@ class AuditEntry:
     records_count: int
     metadata: MetaDict = field(default_factory=dict)
 
-    def to_dict(self) -> dict[str, Any]:  # Any: serialized repr mixes str/int/list
+    def to_dict(self) -> JsonDict:  # Any: serialized repr mixes str/int/list
         """Convert entry to dictionary for serialization.
 
         Returns:

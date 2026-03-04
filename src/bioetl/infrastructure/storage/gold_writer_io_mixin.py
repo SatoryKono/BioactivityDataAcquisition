@@ -449,7 +449,7 @@ class GoldWriterIOMixin:
     async def get_history(
         self,
         table_name: str,
-        business_key_values: dict[str, Any] | None = None,  # Any: heterogeneous values
+        business_key_values: JsonDict | None = None,  # Any: heterogeneous values
         limit: int = 10,
     ) -> list[GoldRecord]:
         """Get history of records in Gold table (for SCD2 tracking)."""

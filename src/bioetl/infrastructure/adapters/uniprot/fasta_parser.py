@@ -10,13 +10,14 @@ __all__ = ["FastaParser"]
 
 
 from typing import Any
+from bioetl.domain.types import JsonDict
 
 
 class FastaParser:
     """Parses FASTA format text into sequence records."""
 
     @staticmethod
-    def parse(fasta_text: str) -> list[dict[str, Any]]:  # Any: untyped API JSON record
+    def parse(fasta_text: str) -> list[JsonDict]:  # Any: untyped API JSON record
         """Parse FASTA format text into sequence records.
 
         Args:
@@ -30,7 +31,7 @@ class FastaParser:
             >>> FastaParser.parse(text)
             [{'header': 'sp|P12345|GENE_HUMAN Description', 'sequence': 'MKTAYIAKQR'}]
         """
-        records: list[dict[str, Any]] = []  # Any: untyped API JSON record
+        records: list[JsonDict] = []  # Any: untyped API JSON record
         current_header: str | None = None
         current_sequence: list[str] = []
 

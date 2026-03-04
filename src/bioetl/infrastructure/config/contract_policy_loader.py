@@ -8,6 +8,7 @@ __all__ = ["load_pipeline_contract_policy"]
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
+from bioetl.domain.types import JsonDict
 
 import yaml
 
@@ -27,7 +28,7 @@ def _load_base_contract_defaults() -> dict[
         return {}
 
     with open(base_path, encoding="utf-8") as f:
-        base_raw: dict[str, Any] = (  # Any: YAML config has heterogeneous values
+        base_raw: JsonDict = (  # Any: YAML config has heterogeneous values
             yaml.safe_load(f) or {}
         )  # Any: YAML config has heterogeneous values
 
@@ -53,7 +54,7 @@ def load_pipeline_contract_policy(provider: str, entity: str) -> PipelineContrac
         raise ValueError(f"Contract policy file not found: {unified_entity_path}")
 
     with open(unified_entity_path, encoding="utf-8") as f:
-        unified_raw: dict[str, Any] = (  # Any: YAML config has heterogeneous values
+        unified_raw: JsonDict = (  # Any: YAML config has heterogeneous values
             yaml.safe_load(f) or {}
         )  # Any: YAML config has heterogeneous values
 

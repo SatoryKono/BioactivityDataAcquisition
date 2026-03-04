@@ -41,6 +41,7 @@ from bioetl.domain.ports import (
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
+from bioetl.domain.types import JsonDict
 
 
 @dataclass(frozen=True, slots=True)
@@ -94,7 +95,7 @@ class SettingsInfo:
     metrics_enabled: bool
     metrics_port: int
     batch_size: int
-    additional: dict[str, Any]  # Any: YAML config has heterogeneous values
+    additional: JsonDict  # Any: YAML config has heterogeneous values
 
 
 @dataclass
@@ -199,7 +200,7 @@ class ConfigService:
 
     def get_pipeline_yaml_config(
         self, pipeline_name: str
-    ) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
+    ) -> JsonDict:  # Any: YAML config has heterogeneous values
         """Get raw pipeline YAML configuration as dictionary.
 
         Useful for CLI display commands that show full configuration.

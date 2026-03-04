@@ -15,6 +15,7 @@ __all__ = ["extract_references"]
 
 
 from typing import Any
+from bioetl.domain.types import JsonDict
 
 
 # Any: untyped JSON
@@ -46,8 +47,8 @@ def _parse_year(year_raw: Any) -> int | None:  # Any: untyped API JSON
 
 # Any: raw API JSON
 def extract_references(
-    publication: dict[str, Any],  # Any: untyped API JSON record
-) -> list[dict[str, Any]]:  # Any: untyped API JSON record
+    publication: JsonDict,  # Any: untyped API JSON record
+) -> list[JsonDict]:  # Any: untyped API JSON record
     """Extract bibliographic references from CrossRef publication.
 
     Parses the 'reference' array containing citations to other works.
@@ -61,7 +62,7 @@ def extract_references(
         Each reference contains available bibliographic metadata.
 
     """
-    references: list[dict[str, Any]] = []  # Any: heterogeneous reference field values
+    references: list[JsonDict] = []  # Any: heterogeneous reference field values
     for ref in publication.get("reference", []):
         if not isinstance(ref, dict):
             continue

@@ -27,6 +27,7 @@ if TYPE_CHECKING:
         SilverDQAnalyzerPort,
         SilverDQConfigPort,
     )
+from bioetl.domain.types import JsonDict
 
 
 _DQ_REPORT_ERRORS = (
@@ -143,7 +144,7 @@ class DQReportContext:
     silver_previous_schema: dict[str, str] | None = None
     silver_output_path: str | None = None
     silver_key_nullability_rules: (
-        list[dict[str, Any]]  # Any: DQ rule definitions have heterogeneous values
+        list[JsonDict]  # Any: DQ rule definitions have heterogeneous values
         | None
     ) = None
 
@@ -153,10 +154,10 @@ class DQReportContext:
     gold_required_fields: list[str] | None = None
     # Any: heterogeneous DQ metri...
     gold_business_rules: (
-        list[dict[str, Any]]  # Any: DQ rule definitions have heterogeneous values
+        list[JsonDict]  # Any: DQ rule definitions have heterogeneous values
         | None
     ) = None
-    gold_baseline_stats: dict[str, Any] | None = None  # Any: heterogeneous DQ metri...
+    gold_baseline_stats: JsonDict | None = None  # Any: heterogeneous DQ metri...
     gold_output_path: str | None = None
 
     # DQ thresholds

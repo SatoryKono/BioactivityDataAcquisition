@@ -7,7 +7,7 @@ import contextlib
 import time
 from typing import TYPE_CHECKING, Any
 
-from bioetl.domain.types import BronzeRecord
+from bioetl.domain.types import BronzeRecord, JsonDict
 from bioetl.infrastructure.adapters.uniprot.query_builder import (
     build_uniprot_protein_search_params,
 )
@@ -86,7 +86,7 @@ class UniProtProteinFetchAdapterMixin:
         fetched: int,
         limit: int | None,
         cursor: str | None,
-    ) -> dict[str, Any]:  # Any: dynamic payload or structural mixin boundary
+    ) -> JsonDict:  # Any: dynamic payload or structural mixin boundary
         """Build protein search parameters."""
         return build_uniprot_protein_search_params(
             query=query,

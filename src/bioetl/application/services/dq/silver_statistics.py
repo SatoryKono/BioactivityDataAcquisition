@@ -34,6 +34,7 @@ from bioetl.domain.value_objects.dq_report import (
     UniquenessResult,
     ValueDistributionResult,
 )
+from bioetl.domain.types import JsonDict
 
 _SILVER_PROFILE_ERRORS = (
     pl.exceptions.PolarsError,
@@ -91,9 +92,9 @@ def _check_content_hash_integrity_stats(df: pl.DataFrame) -> ContentHashIntegrit
 
 def _value_distribution_to_dict(
     result: ValueDistributionResult,
-) -> dict[str, Any]:  # Any: DQ check values vary by check type
+) -> JsonDict:  # Any: DQ check values vary by check type
     """Convert value-distribution result to serializable dictionary."""
-    output: dict[str, Any] = {  # Any: DQ check values vary by check type
+    output: JsonDict = {  # Any: DQ check values vary by check type
         "numeric_columns": {},
         "categorical_columns": {},
         "status": result.status.value,
@@ -234,7 +235,7 @@ class SilverStatisticsCalculator:
         """Check type conformance against expected schema."""
         errors = []
         type_coercions: dict[
-            str, dict[str, Any]  # Any: DQ check values vary by check type
+            str, JsonDict  # Any: DQ check values vary by check type
         ] = {}  # Any: DQ check values vary by check type
 
         for col in df.columns:
@@ -395,7 +396,7 @@ class SilverStatisticsCalculator:
 
     def distribution_to_dict(
         self, result: ValueDistributionResult
-    ) -> dict[str, Any]:  # Any: DQ check values vary by check type
+    ) -> JsonDict:  # Any: DQ check values vary by check type
         """Convert distribution result to dict."""
         return _value_distribution_to_dict(result)
 

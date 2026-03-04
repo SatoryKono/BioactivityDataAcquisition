@@ -20,7 +20,7 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
 from bioetl.domain.entities import Target
 from bioetl.domain.services import OrganismClassificationService
 from bioetl.domain.transformations import safe_int
-from bioetl.domain.types import GoldRecord
+from bioetl.domain.types import GoldRecord, JsonDict
 from bioetl.domain.value_objects import TaxonomyId
 
 if TYPE_CHECKING:
@@ -61,7 +61,7 @@ class TargetTransformer(BaseChemblTransformer):
 
     def _flatten_target_components(
         self,
-        components: list[dict[str, Any]] | None,  # Any: untyped ChEMBL API JSON
+        components: list[JsonDict] | None,  # Any: untyped ChEMBL API JSON
     ) -> dict[str, list[Any] | None]:  # Any: heterogeneous component field values
         """Flatten target components into aggregated lists.
 
@@ -96,7 +96,7 @@ class TargetTransformer(BaseChemblTransformer):
 
     def _extract_basic_component_fields(
         self,
-        components: list[dict[str, Any]],  # Any: untyped ChEMBL API JSON
+        components: list[JsonDict],  # Any: untyped ChEMBL API JSON
     ) -> dict[str, list[Any] | None]:  # Any: heterogeneous component field values
         """Extract basic fields from component list via dict_transformers."""
         return {
@@ -111,7 +111,7 @@ class TargetTransformer(BaseChemblTransformer):
 
     def _aggregate_synonyms(
         self,
-        components: list[dict[str, Any]] | None,  # Any: untyped ChEMBL API JSON
+        components: list[JsonDict] | None,  # Any: untyped ChEMBL API JSON
     ) -> str | int | float | bool | None:
         """Aggregate synonyms from all components into a single JSON list.
 
@@ -129,7 +129,7 @@ class TargetTransformer(BaseChemblTransformer):
 
     def _aggregate_component_xrefs(
         self,
-        components: list[dict[str, Any]] | None,  # Any: untyped ChEMBL API JSON
+        components: list[JsonDict] | None,  # Any: untyped ChEMBL API JSON
     ) -> str | int | float | bool | None:
         """Aggregate cross-references from all target components.
 
@@ -164,7 +164,7 @@ class TargetTransformer(BaseChemblTransformer):
         """
         # Extract target_components with proper typing
         target_components = cast(
-            "list[dict[str, Any]] | None",  # Any: untyped ChEMBL API JSON
+            "list[JsonDict] | None",  # Any: untyped ChEMBL API JSON
             record.get("target_components"),
         )
 

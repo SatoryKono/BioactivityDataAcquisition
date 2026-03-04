@@ -7,6 +7,7 @@ from collections import Counter
 from datetime import date
 from itertools import pairwise
 from typing import Any, TypedDict, cast
+from bioetl.domain.types import JsonDict
 
 _QUARTER_RE = re.compile(r"^(20\d{2})-Q([1-4])$")
 
@@ -69,7 +70,7 @@ def _validate_gate_mode(
 
 
 def _validate_baseline_section(
-    raw: dict[str, Any],  # Any: YAML values are heterogeneous
+    raw: JsonDict,  # Any: YAML values are heterogeneous
     errors: list[str],
 ) -> tuple[int | None, dict[str, int]] | None:
     baseline = raw.get("baseline")
@@ -141,7 +142,7 @@ def _validate_registry_group_entry(
 
 
 def _validate_registry_groups_section(
-    raw: dict[str, Any],  # Any: YAML values are heterogeneous
+    raw: JsonDict,  # Any: YAML values are heterogeneous
     *,
     baseline_registry_names: set[str],
     errors: list[str],
@@ -209,7 +210,7 @@ def _is_valid_rollout_section_key(
 
 
 def _validate_governance_section(
-    raw: dict[str, Any],  # Any: YAML values are heterogeneous
+    raw: JsonDict,  # Any: YAML values are heterogeneous
     *,
     baseline_registry_names: set[str],
     group_names: set[str],
@@ -361,7 +362,7 @@ def _validate_quarter_target(
 
 
 def _validate_quarterly_targets_section(
-    raw: dict[str, Any],  # Any: YAML values are heterogeneous
+    raw: JsonDict,  # Any: YAML values are heterogeneous
     *,
     group_names: set[str],
     baseline_registry_names: set[str],
@@ -466,7 +467,7 @@ def _validate_allowances(
 def _validate_grace_window_metadata(
     *,
     prefix: str,
-    window: dict[str, Any],  # Any: YAML values are heterogeneous
+    window: JsonDict,  # Any: YAML values are heterogeneous
     allow_rf_only_for_rf: bool,
     errors: list[str],
 ) -> None:
@@ -540,7 +541,7 @@ def _validate_grace_window_dates(
 
 
 def _validate_grace_windows_section(
-    raw: dict[str, Any],  # Any: YAML values are heterogeneous
+    raw: JsonDict,  # Any: YAML values are heterogeneous
     *,
     baseline_registry_names: set[str],
     group_names: set[str],
@@ -576,7 +577,7 @@ def _validate_grace_windows_section(
 
 
 def _collect_quarterly_registry_budgets(
-    raw: dict[str, Any],  # Any: YAML values are heterogeneous
+    raw: JsonDict,  # Any: YAML values are heterogeneous
 ) -> dict[str, dict[str, int]]:
     """Collect validated-looking quarterly registry budgets for monotonic checks."""
     quarterly_targets = raw.get("quarterly_targets", [])
@@ -600,7 +601,7 @@ def _collect_quarterly_registry_budgets(
 
 
 def _validate_owner_diversification_policy(
-    raw: dict[str, Any],  # Any: YAML values are heterogeneous
+    raw: JsonDict,  # Any: YAML values are heterogeneous
     errors: list[str],
 ) -> tuple[tuple[int, int] | None, int]:
     """Validate governance.owner_diversification and return normalized settings."""
@@ -643,7 +644,7 @@ def _validate_owner_diversification_policy(
 
 
 def _validate_owner_decomposition_targets_section(
-    raw: dict[str, Any],  # Any: YAML values are heterogeneous
+    raw: JsonDict,  # Any: YAML values are heterogeneous
     *,
     quarter_budget_map: dict[str, int],
     owner_diversification_start: tuple[int, int] | None,
@@ -720,7 +721,7 @@ def _validate_owner_decomposition_targets_section(
 
 
 def _validate_expiry_decomposition_targets_section(
-    raw: dict[str, Any],  # Any: YAML values are heterogeneous
+    raw: JsonDict,  # Any: YAML values are heterogeneous
     errors: list[str],
 ) -> None:
     """Validate expiry decomposition targets as monotonically decreasing caps."""
@@ -767,7 +768,7 @@ def _validate_expiry_decomposition_targets_section(
 
 
 def _validate_priority_registry_burndown(
-    raw: dict[str, Any],  # Any: YAML values are heterogeneous
+    raw: JsonDict,  # Any: YAML values are heterogeneous
     *,
     baseline_registry_names: set[str],
     errors: list[str],
@@ -834,7 +835,7 @@ def _validate_priority_registry_burndown(
 
 
 def _validate_program_done_criteria_section(
-    raw: dict[str, Any],  # Any: YAML values are heterogeneous
+    raw: JsonDict,  # Any: YAML values are heterogeneous
     errors: list[str],
 ) -> None:
     """Validate long-horizon program done criteria section."""
@@ -874,7 +875,7 @@ def _validate_program_done_criteria_section(
 
 
 def validate_debt_scorecard_structure(
-    raw: dict[str, Any],  # Any: YAML values are heterogeneous
+    raw: JsonDict,  # Any: YAML values are heterogeneous
 ) -> list[str]:
     """Validate debt scorecard schema and monotonic governance targets."""
     errors: list[str] = []

@@ -25,6 +25,7 @@ import re
 import sys
 import threading
 from typing import Any
+from bioetl.domain.types import JsonDict
 
 import structlog
 
@@ -95,8 +96,8 @@ def _mask_secrets(value: Any) -> Any:  # Any: structlog context values of arbitr
 def secret_filter_processor(
     logger: Any,  # Any: structlog wrapped logger instance
     _method_name: str,
-    event_dict: dict[str, Any],  # Any: OTel span attributes are heterogeneous
-) -> dict[str, Any]:  # Any: OTel span attributes are heterogeneous
+    event_dict: JsonDict,  # Any: OTel span attributes are heterogeneous
+) -> JsonDict:  # Any: OTel span attributes are heterogeneous
     """Structlog processor that filters secrets from log entries.
 
     Scans all string values in the event dict and masks potential secrets

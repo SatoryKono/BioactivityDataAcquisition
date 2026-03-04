@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any, Protocol, runtime_checkable
+from bioetl.domain.types import JsonDict
 
 __all__ = [
     "PipelineSettingsPort",
@@ -61,7 +62,7 @@ class SettingsPort(Protocol):
         """Path for quarantine storage."""
         ...
 
-    def model_dump(self) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
+    def model_dump(self) -> JsonDict:  # Any: YAML config has heterogeneous values
         """Convert settings to dictionary.
 
         Returns:
@@ -79,7 +80,7 @@ class PipelineYamlConfigPort(Protocol):
     silver_table: str
     gold_table: str | None
 
-    def model_dump(self) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
+    def model_dump(self) -> JsonDict:  # Any: YAML config has heterogeneous values
         """Convert configuration to dictionary.
 
         Returns:

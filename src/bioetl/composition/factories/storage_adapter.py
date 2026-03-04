@@ -33,6 +33,7 @@ from bioetl.domain.contracts.gold.composite import (
     CompositeMoleculeGoldSchema,
     CompositePublicationGoldSchema,
 )
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
@@ -54,7 +55,7 @@ class StorageAdapter(
     """
 
     _COMPOSITE_GOLD_SCHEMAS: ClassVar[
-        dict[str, Any]  # Any: record/metadata values are heterogeneous
+        JsonDict  # Any: record/metadata values are heterogeneous
     ] = {
         "composite/publication": CompositePublicationGoldSchema,
         "composite_publication": CompositePublicationGoldSchema,

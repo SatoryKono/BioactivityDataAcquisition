@@ -22,6 +22,7 @@ from bioetl.domain.models.metadata import (
     RateLimitInfo,
     SourceMetadata,
 )
+from bioetl.domain.types import JsonDict
 
 
 class APIRequestCollector:
@@ -55,7 +56,7 @@ class APIRequestCollector:
         response_size: int = 0,
         duration_ms: float = 0.0,
         status_code: int = 200,
-        params: dict[str, Any] | None = None,  # Any: untyped API JSON record
+        params: JsonDict | None = None,  # Any: untyped API JSON record
         rate_limit_remaining: int | None = None,
         rate_limit_limit: int | None = None,
         rate_limit_reset: datetime | None = None,
@@ -232,7 +233,7 @@ class APIRequestCollector:
 
     def _sanitize_params(
         self,
-        params: dict[str, Any],  # Any: untyped API JSON record
+        params: JsonDict,  # Any: untyped API JSON record
     ) -> dict[str, str | int | float | bool | None]:
         """Sanitize query parameters to exclude sensitive data.
 

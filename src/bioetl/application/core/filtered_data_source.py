@@ -258,7 +258,7 @@ class FilteredDataSource(_SourceMetadataDelegationMixin):
 
     def _matches_valid_combination(
         self,
-        record: dict[str, Any],  # Any: filter record values vary (str|int|float|list)
+        record: JsonDict,  # Any: filter record values vary (str|int|float|list)
     ) -> bool:  # Any: filter record values vary (str|int|float|list)
         """Check if record matches one of the valid combinations."""
         if not self._valid_combinations or not self._filter_fields:
@@ -280,7 +280,7 @@ class FilteredDataSource(_SourceMetadataDelegationMixin):
     async def _fetch_multi_column(
         self, entity_type: str, limit: int | None
     ) -> AsyncIterator[
-        dict[str, Any]  # Any: filter record values vary (str|int|float|list)
+        JsonDict  # Any: filter record values vary (str|int|float|list)
     ]:  # Any: filter record values vary (str|int|float|list)
         """Fetch with multi-column filtering (hybrid approach)."""
         self._ensure_filterable_adapter("Multi-column filtering")
@@ -301,7 +301,7 @@ class FilteredDataSource(_SourceMetadataDelegationMixin):
     async def _fetch_single_column(
         self, entity_type: str, limit: int | None
     ) -> AsyncIterator[
-        dict[str, Any]  # Any: filter record values vary (str|int|float|list)
+        JsonDict  # Any: filter record values vary (str|int|float|list)
     ]:  # Any: filter record values vary (str|int|float|list)
         """Fetch with single-column filtering."""
         self._ensure_filterable_adapter("Filtering")
@@ -343,7 +343,7 @@ class FilteredDataSource(_SourceMetadataDelegationMixin):
         filter_field: str | None = None,
         offset: int | None = None,
     ) -> AsyncIterator[
-        dict[str, Any]  # Any: filter record values vary (str|int|float|list)
+        JsonDict  # Any: filter record values vary (str|int|float|list)
     ]:  # Any: filter record values vary (str|int|float|list)
         """Fetch records with optional filtering from internal CSV config.
 
