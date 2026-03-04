@@ -91,7 +91,9 @@ def mock_data_source_enhanced() -> MagicMock:
 
 
 @pytest.fixture
-def mock_services(mock_storage: MagicMock, mock_data_source_legacy: MagicMock) -> MagicMock:
+def mock_services(
+    mock_storage: MagicMock, mock_data_source_legacy: MagicMock
+) -> MagicMock:
     """PipelineService mock using legacy data source."""
     services = MagicMock()
     services.storage = mock_storage
@@ -100,7 +102,9 @@ def mock_services(mock_storage: MagicMock, mock_data_source_legacy: MagicMock) -
 
 
 @pytest.fixture
-def health_aggregator(mock_metrics: MagicMock, mock_logger: MagicMock) -> _HealthAggregator:
+def health_aggregator(
+    mock_metrics: MagicMock, mock_logger: MagicMock
+) -> _HealthAggregator:
     return _HealthAggregator(metrics=mock_metrics, logger=mock_logger)
 
 
@@ -436,29 +440,37 @@ class TestHealthAggregatorAssertHealthy:
         self, health_aggregator: _HealthAggregator
     ) -> None:
         """Test assert_healthy passes when all components are HEALTHY."""
-        report = HealthReport(results=[
-            ComponentHealthResult("storage", HealthStatus.HEALTHY, 0.1),
-            ComponentHealthResult("data_source", HealthStatus.HEALTHY, 0.2),
-        ])
+        report = HealthReport(
+            results=[
+                ComponentHealthResult("storage", HealthStatus.HEALTHY, 0.1),
+                ComponentHealthResult("data_source", HealthStatus.HEALTHY, 0.2),
+            ]
+        )
         health_aggregator.assert_healthy(report)  # must not raise
 
     def test_does_not_raise_when_degraded(
         self, health_aggregator: _HealthAggregator
     ) -> None:
         """Test assert_healthy passes when components are DEGRADED (not failure)."""
-        report = HealthReport(results=[
-            ComponentHealthResult("storage", HealthStatus.DEGRADED, 0.1),
-            ComponentHealthResult("data_source", HealthStatus.HEALTHY, 0.2),
-        ])
+        report = HealthReport(
+            results=[
+                ComponentHealthResult("storage", HealthStatus.DEGRADED, 0.1),
+                ComponentHealthResult("data_source", HealthStatus.HEALTHY, 0.2),
+            ]
+        )
         health_aggregator.assert_healthy(report)  # must not raise
 
     def test_raises_infrastructure_error_when_unhealthy(
         self, health_aggregator: _HealthAggregator
     ) -> None:
         """Test assert_healthy raises InfrastructureError when any component UNHEALTHY."""
-        report = HealthReport(results=[
-            ComponentHealthResult("storage", HealthStatus.UNHEALTHY, 0.1, "disk full"),
-        ])
+        report = HealthReport(
+            results=[
+                ComponentHealthResult(
+                    "storage", HealthStatus.UNHEALTHY, 0.1, "disk full"
+                ),
+            ]
+        )
 
         with pytest.raises(InfrastructureError) as exc_info:
             health_aggregator.assert_healthy(report)
@@ -469,11 +481,13 @@ class TestHealthAggregatorAssertHealthy:
         self, health_aggregator: _HealthAggregator
     ) -> None:
         """Test assert_healthy includes component error_message in exception."""
-        report = HealthReport(results=[
-            ComponentHealthResult(
-                "storage", HealthStatus.UNHEALTHY, 0.1, "Permission denied"
-            ),
-        ])
+        report = HealthReport(
+            results=[
+                ComponentHealthResult(
+                    "storage", HealthStatus.UNHEALTHY, 0.1, "Permission denied"
+                ),
+            ]
+        )
 
         with pytest.raises(InfrastructureError) as exc_info:
             health_aggregator.assert_healthy(report)
@@ -484,10 +498,14 @@ class TestHealthAggregatorAssertHealthy:
         self, health_aggregator: _HealthAggregator
     ) -> None:
         """Test assert_healthy lists all UNHEALTHY components in exception."""
-        report = HealthReport(results=[
-            ComponentHealthResult("storage", HealthStatus.UNHEALTHY, 0.1, "err1"),
-            ComponentHealthResult("data_source", HealthStatus.UNHEALTHY, 0.2, "err2"),
-        ])
+        report = HealthReport(
+            results=[
+                ComponentHealthResult("storage", HealthStatus.UNHEALTHY, 0.1, "err1"),
+                ComponentHealthResult(
+                    "data_source", HealthStatus.UNHEALTHY, 0.2, "err2"
+                ),
+            ]
+        )
 
         with pytest.raises(InfrastructureError) as exc_info:
             health_aggregator.assert_healthy(report)

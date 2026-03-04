@@ -20,6 +20,7 @@ from bioetl.domain.exceptions import BioETLError
 # Shared fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def mock_checkpoint_manager():
     manager = MagicMock()
@@ -46,6 +47,7 @@ def service(mock_checkpoint_manager, mock_logger):
 # ---------------------------------------------------------------------------
 # save_periodic_checkpoint
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 class TestSavePeriodicCheckpoint:
@@ -102,9 +104,7 @@ class TestSavePeriodicCheckpoint:
 
         assert mock_checkpoint_manager.save_checkpoint.await_count == 5
 
-    async def test_no_save_at_zero_records(
-        self, service, mock_checkpoint_manager
-    ):
+    async def test_no_save_at_zero_records(self, service, mock_checkpoint_manager):
         """records_fetched=0 triggers save only if 0 % interval == 0 (edge)."""
         # 0 % 100 == 0 in Python, so this DOES save — documenting the behaviour
         await service.save_periodic_checkpoint(
@@ -119,6 +119,7 @@ class TestSavePeriodicCheckpoint:
 # ---------------------------------------------------------------------------
 # save_checkpoint_on_exception
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 class TestSaveCheckpointOnException:
@@ -230,6 +231,7 @@ class TestSaveCheckpointOnException:
 # save_checkpoint_on_shutdown
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.unit
 class TestSaveCheckpointOnShutdown:
     """Tests for BatchCheckpointRecoveryService.save_checkpoint_on_shutdown."""
@@ -300,6 +302,7 @@ class TestSaveCheckpointOnShutdown:
 # save_checkpoint_now
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.unit
 class TestSaveCheckpointNow:
     """Tests for BatchCheckpointRecoveryService.save_checkpoint_now."""
@@ -338,6 +341,7 @@ class TestSaveCheckpointNow:
 # ---------------------------------------------------------------------------
 # _total_processed (static helper)
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 class TestTotalProcessed:

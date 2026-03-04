@@ -12,12 +12,12 @@ from typing import Any
 
 import polars as pl
 
+from bioetl.domain.types import JsonDict
 from bioetl.domain.value_objects.dq_report import (
     BusinessRuleResult,
     BusinessRulesResult,
     DQCheckStatus,
 )
-from bioetl.domain.types import JsonDict
 
 _BUSINESS_RULE_EVALUATION_ERRORS = (
     ValueError,

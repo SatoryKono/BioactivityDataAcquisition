@@ -9,10 +9,10 @@ __all__ = ["ClassificationExtractor", "NormalizedClassification", "RawClassifica
 
 
 from typing import Any, TypedDict
-from bioetl.domain.types import JsonDict
 from xml.etree.ElementTree import Element
 
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
+from bioetl.domain.types import JsonDict
 
 
 class RawClassification(TypedDict):

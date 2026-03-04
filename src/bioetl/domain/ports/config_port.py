@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any, Protocol, runtime_checkable
+
 from bioetl.domain.types import JsonDict
 
 __all__ = [

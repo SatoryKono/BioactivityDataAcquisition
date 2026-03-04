@@ -20,6 +20,7 @@ from typing import Any, cast
 import polars as pl
 
 from bioetl.domain.services.dq_serializer import to_dict
+from bioetl.domain.types import JsonDict
 from bioetl.domain.value_objects.dq_report import (
     CategoricalDistribution,
     ContentHashIntegrityResult,
@@ -34,7 +35,6 @@ from bioetl.domain.value_objects.dq_report import (
     UniquenessResult,
     ValueDistributionResult,
 )
-from bioetl.domain.types import JsonDict
 
 _SILVER_PROFILE_ERRORS = (
     pl.exceptions.PolarsError,

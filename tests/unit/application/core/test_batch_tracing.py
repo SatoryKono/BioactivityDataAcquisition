@@ -59,7 +59,9 @@ def test_start_execution_span(service: BatchTracingManagerService) -> None:
 
 def test_start_batch_span(service: BatchTracingManagerService) -> None:
     """Batch span is created with batch_id and record_count."""
-    span = service.start_batch_span(batch_id="batch-001", record_count=50, start_index=0)
+    span = service.start_batch_span(
+        batch_id="batch-001", record_count=50, start_index=0
+    )
 
     assert span is not None
     span.__enter__.assert_called_once()

@@ -8,7 +8,6 @@ Split from entrypoints.py per audit-package-structure-2026-02-07.
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
-from bioetl.domain.types import JsonDict
 
 from bioetl.composition._pipeline_execution import (
     ArchiveOptions,
@@ -22,6 +21,7 @@ from bioetl.composition.bootstrap import (
     bootstrap_quarantine_manager,
     load_pipeline_config,
 )
+from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from bioetl.application.core.checkpoint_manager import CheckpointManagerService

@@ -20,6 +20,7 @@ from bioetl.domain.types import BatchID
 # Concrete test double
 # ---------------------------------------------------------------------------
 
+
 class _TracingWriter(BatchWriterTracingMixin):
     """Minimal concrete subclass wiring required mixin attributes."""
 
@@ -67,6 +68,7 @@ def _make_tracer_mock(span=None):
 # ---------------------------------------------------------------------------
 # _validate_lock
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 class TestValidateLock:
@@ -148,6 +150,7 @@ class TestValidateLock:
 # _start_span
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.unit
 class TestStartSpan:
     """Tests for BatchWriterTracingMixin._start_span."""
@@ -173,7 +176,9 @@ class TestStartSpan:
     def test_span_attributes_contain_layer_and_record_count(self):
         """Span attributes include layer and record_count."""
         tracer, inner, span = _make_tracer_mock()
-        writer = _TracingWriter(tracer=tracer, provider="chembl", entity_type="activity")
+        writer = _TracingWriter(
+            tracer=tracer, provider="chembl", entity_type="activity"
+        )
 
         writer._start_span("write_silver", "silver", 42)
 
@@ -226,6 +231,7 @@ class TestStartSpan:
 # ---------------------------------------------------------------------------
 # _end_span
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 class TestEndSpan:
@@ -288,6 +294,7 @@ class TestEndSpan:
 # ---------------------------------------------------------------------------
 # log_and_track_write_error
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 class TestLogAndTrackWriteError:
@@ -358,7 +365,9 @@ class TestLogAndTrackWriteError:
             batch_metrics=MagicMock(),
         )
 
-        writer.log_and_track_write_error("bronze", RuntimeError("crash"), BatchID(uuid4()))
+        writer.log_and_track_write_error(
+            "bronze", RuntimeError("crash"), BatchID(uuid4())
+        )
 
         call_kwargs = mock_logger.error.call_args[1]
         # error_type value must be a non-empty string

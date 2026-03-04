@@ -5,7 +5,6 @@ from __future__ import annotations
 __all__ = ["TaxonomyExtractor"]
 
 
-
 class TaxonomyExtractor:
     """Extracts taxonomy lineage components from UniProt organism data.
 

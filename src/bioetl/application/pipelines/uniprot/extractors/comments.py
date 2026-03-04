@@ -6,6 +6,7 @@ __all__ = ["CommentExtractor"]
 
 
 from collections.abc import Callable
+
 from bioetl.domain.serialization import serialize_to_json
 from bioetl.domain.types import JsonDict
 

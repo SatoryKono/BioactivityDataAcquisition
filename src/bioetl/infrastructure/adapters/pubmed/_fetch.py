@@ -4,6 +4,7 @@ Part of PubMedAdapter split to comply with LOC limits.
 """
 
 from __future__ import annotations
+
 from bioetl.domain.types import JsonDict
 
 __all__ = ["PUBMED_FETCH_ERRORS", "PubMedFetchMixin"]

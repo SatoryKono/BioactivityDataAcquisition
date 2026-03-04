@@ -13,11 +13,11 @@ from typing import Any
 
 import polars as pl
 
+from bioetl.domain.types import JsonDict
 from bioetl.domain.value_objects.dq_report import (
     DQCheckStatus,
     DQThresholds,
 )
-from bioetl.domain.types import JsonDict
 
 
 class SilverThresholdChecker:

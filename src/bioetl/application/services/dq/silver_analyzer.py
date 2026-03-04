@@ -24,13 +24,13 @@ from bioetl.application.services.dq.silver_statistics import SilverStatisticsCal
 from bioetl.application.services.dq.silver_threshold import SilverThresholdChecker
 from bioetl.domain.ports import SilverDQConfigPort
 from bioetl.domain.services.dq_serializer import to_dict
+from bioetl.domain.types import JsonDict
 from bioetl.domain.value_objects.dq_report import (
     DQCheckStatus,
     MedallionLayer,
     SilverDQCheckType,
     SilverDQReport,
 )
-from bioetl.domain.types import JsonDict
 
 
 class SilverDQAnalyzer:

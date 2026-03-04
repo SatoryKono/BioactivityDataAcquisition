@@ -8,9 +8,10 @@ human-readable format.
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
-from bioetl.domain.types import JsonDict
 
 import click
+
+from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from bioetl.application.core.cleanup_service import CleanupPreview

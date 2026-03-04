@@ -15,7 +15,6 @@ from dataclasses import dataclass, field
 from enum import StrEnum
 
 
-
 class DQEvaluationStatus(StrEnum):
     """Status of Data Quality evaluation.
 

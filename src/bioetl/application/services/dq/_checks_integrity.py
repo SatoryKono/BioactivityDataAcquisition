@@ -13,13 +13,13 @@ from typing import Any, cast
 import polars as pl
 import pyarrow as pa
 
+from bioetl.domain.types import JsonDict
 from bioetl.domain.value_objects.dq_report import (
     DQCheckStatus,
     ForeignKeyResult,
     ReferentialIntegrityResult,
     SCDIntegrityResult,
 )
-from bioetl.domain.types import JsonDict
 
 _SCD_INTEGRITY_ERRORS = (
     pl.exceptions.PolarsError,

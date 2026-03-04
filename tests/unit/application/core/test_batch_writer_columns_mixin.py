@@ -17,6 +17,7 @@ from bioetl.application.core.batch_writer_columns_mixin import BatchWriterColumn
 # Concrete test double — gives the mixin its required attributes via __init__
 # ---------------------------------------------------------------------------
 
+
 class _Writer(BatchWriterColumnsMixin):
     """Minimal concrete subclass that wires mixin dependencies."""
 
@@ -33,6 +34,7 @@ class _Writer(BatchWriterColumnsMixin):
 # ---------------------------------------------------------------------------
 # _get_schema_columns
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 class TestGetSchemaColumns:
@@ -128,6 +130,7 @@ class TestGetSchemaColumns:
 # _collect_record_columns
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.unit
 class TestCollectRecordColumns:
     """Tests for BatchWriterColumnsMixin._collect_record_columns."""
@@ -172,6 +175,7 @@ class TestCollectRecordColumns:
 # ---------------------------------------------------------------------------
 # _apply_renames_to_records
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 class TestApplyRenamesToRecords:
@@ -230,6 +234,7 @@ class TestApplyRenamesToRecords:
 # _get_column_order
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.unit
 class TestGetColumnOrder:
     """Tests for BatchWriterColumnsMixin._get_column_order."""
@@ -268,6 +273,7 @@ class TestGetColumnOrder:
 # ---------------------------------------------------------------------------
 # _apply_system_prefix_order
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 class TestApplySystemPrefixOrder:
@@ -322,6 +328,7 @@ class TestApplySystemPrefixOrder:
 # _resolve_layer_columns
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.unit
 class TestResolveLayerColumns:
     """Tests for BatchWriterColumnsMixin._resolve_layer_columns."""
@@ -332,7 +339,9 @@ class TestResolveLayerColumns:
         orderer.order_column_names.return_value = ["entity_id", "value"]
         writer = _Writer(column_orderer=orderer, data_schema=None)
 
-        col_order, renames = writer._resolve_layer_columns("silver", ["entity_id", "value"])
+        col_order, renames = writer._resolve_layer_columns(
+            "silver", ["entity_id", "value"]
+        )
 
         assert renames == {}
         orderer.order_column_names.assert_called_once()
@@ -410,9 +419,7 @@ class TestResolveLayerColumns:
         orderer.filter_by_layer_config.return_value = ["entity_id", "value"]
 
         writer = _Writer(column_orderer=orderer, data_schema=schema)
-        col_order, _ = writer._resolve_layer_columns(
-            "silver", ["entity_id", "value"]
-        )
+        col_order, _ = writer._resolve_layer_columns("silver", ["entity_id", "value"])
 
         orderer.filter_by_layer_config.assert_called_once()
         assert col_order is not None

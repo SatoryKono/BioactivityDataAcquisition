@@ -7,9 +7,10 @@ __all__ = ["ExtractorHelper"]
 
 from datetime import date
 from typing import ClassVar
-from bioetl.domain.types import JsonDict
 
 import orjson
+
+from bioetl.domain.types import JsonDict
 
 
 class ExtractorHelper:

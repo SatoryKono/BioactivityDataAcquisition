@@ -30,7 +30,6 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import JsonDict
 
-
 _FILTER_CONDITION_ERRORS = (
     ValueError,
     TypeError,

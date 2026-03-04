@@ -330,7 +330,9 @@ def _parse_authors_from_list(authors: list[object]) -> list[str]:
     return [a.strip() for a in authors if isinstance(a, str) and a.strip()]
 
 
-def _try_parse_json_array(text: str) -> list[Any] | None:  # Any: JSON parse result type varies
+def _try_parse_json_array(
+    text: str,
+) -> list[Any] | None:  # Any: JSON parse result type varies
     """Try to parse text as JSON array. Returns None if invalid."""
     try:
         parsed = deserialize_from_json(text)

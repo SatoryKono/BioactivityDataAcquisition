@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from bioetl.domain.types import JsonDict
-
 import httpx
+
+from bioetl.domain.types import JsonDict
 
 
 class HTTPClientRequestMethodsMixin:

@@ -18,6 +18,7 @@ from bioetl.domain.config import MemoryConfig
 # Shared helpers
 # ---------------------------------------------------------------------------
 
+
 def _make_monitor(recommended: int = 100) -> MagicMock:
     monitor = MagicMock()
     monitor.get_recommended_batch_size = MagicMock(return_value=recommended)
@@ -42,6 +43,7 @@ def _make_config(
 # ---------------------------------------------------------------------------
 # __init__ / enabled flag
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 class TestBatchMemoryManagerInit:
@@ -101,6 +103,7 @@ class TestBatchMemoryManagerInit:
 # get_check_interval
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.unit
 class TestGetCheckInterval:
     """Tests for BatchMemoryManagerService.get_check_interval."""
@@ -131,6 +134,7 @@ class TestGetCheckInterval:
 # check_pressure
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.unit
 class TestCheckPressure:
     """Tests for BatchMemoryManagerService.check_pressure."""
@@ -138,7 +142,9 @@ class TestCheckPressure:
     def test_returns_current_size_when_disabled(self):
         """Returns current_size unchanged when adaptive sizing is disabled."""
         manager = BatchMemoryManagerService(initial_batch_size=500)
-        result = manager.check_pressure(current_size=500, check_interval=100, records_fetched=100)
+        result = manager.check_pressure(
+            current_size=500, check_interval=100, records_fetched=100
+        )
         assert result == 500
 
     def test_returns_current_size_before_interval(self):
@@ -147,7 +153,9 @@ class TestCheckPressure:
             initial_batch_size=500,
             memory_monitor=_make_monitor(recommended=200),
         )
-        result = manager.check_pressure(current_size=500, check_interval=100, records_fetched=50)
+        result = manager.check_pressure(
+            current_size=500, check_interval=100, records_fetched=50
+        )
         assert result == 500
 
     def test_calls_adjust_at_interval_boundary(self):
@@ -157,7 +165,9 @@ class TestCheckPressure:
             initial_batch_size=500,
             memory_monitor=monitor,
         )
-        result = manager.check_pressure(current_size=500, check_interval=100, records_fetched=100)
+        result = manager.check_pressure(
+            current_size=500, check_interval=100, records_fetched=100
+        )
         monitor.get_recommended_batch_size.assert_called_once_with(500)
         assert result == 300
 
@@ -168,7 +178,9 @@ class TestCheckPressure:
             initial_batch_size=500,
             memory_monitor=monitor,
         )
-        result = manager.check_pressure(current_size=500, check_interval=100, records_fetched=100)
+        result = manager.check_pressure(
+            current_size=500, check_interval=100, records_fetched=100
+        )
         assert result == 50
         assert manager.batch_size_reductions == 1
 
@@ -179,7 +191,9 @@ class TestCheckPressure:
             initial_batch_size=500,
             memory_monitor=monitor,
         )
-        manager.check_pressure(current_size=500, check_interval=100, records_fetched=100)
+        manager.check_pressure(
+            current_size=500, check_interval=100, records_fetched=100
+        )
         assert manager.min_batch_size_used == 25
 
     def test_logs_size_reduction(self):
@@ -191,7 +205,9 @@ class TestCheckPressure:
             memory_monitor=monitor,
             logger=mock_logger,
         )
-        manager.check_pressure(current_size=500, check_interval=100, records_fetched=100)
+        manager.check_pressure(
+            current_size=500, check_interval=100, records_fetched=100
+        )
         mock_logger.info.assert_called_once()
 
     def test_does_not_log_when_no_reduction(self):
@@ -203,7 +219,9 @@ class TestCheckPressure:
             memory_monitor=monitor,
             logger=mock_logger,
         )
-        manager.check_pressure(current_size=500, check_interval=100, records_fetched=100)
+        manager.check_pressure(
+            current_size=500, check_interval=100, records_fetched=100
+        )
         mock_logger.info.assert_not_called()
 
     def test_accumulates_reduction_count_across_calls(self):
@@ -215,7 +233,9 @@ class TestCheckPressure:
             memory_monitor=monitor,
         )
         for fetched in [100, 200, 300]:
-            manager.check_pressure(current_size=500, check_interval=100, records_fetched=fetched)
+            manager.check_pressure(
+                current_size=500, check_interval=100, records_fetched=fetched
+            )
 
         assert manager.batch_size_reductions == 3
 
@@ -223,6 +243,7 @@ class TestCheckPressure:
 # ---------------------------------------------------------------------------
 # maybe_recover
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 class TestMaybeRecover:
@@ -277,6 +298,7 @@ class TestMaybeRecover:
 # ---------------------------------------------------------------------------
 # _estimate_from_config
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 class TestEstimateFromConfig:

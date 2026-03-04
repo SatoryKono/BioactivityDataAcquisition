@@ -8,10 +8,10 @@ __all__ = ["load_pipeline_contract_policy"]
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
-from bioetl.domain.types import JsonDict
 
 import yaml
 
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.schemas.pipeline_contract_policy import (
     PipelineContractPolicy,
 )
