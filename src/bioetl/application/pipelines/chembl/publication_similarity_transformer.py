@@ -9,6 +9,9 @@ Computes derived Tanimoto metrics (avg_tani, max_tani).
 
 from __future__ import annotations
 
+__all__ = ["PublicationSimilarityTransformer"]
+
+
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.field_specs import normalize_pmid

@@ -5,6 +5,9 @@ Contains enums and data classes shared across detection strategies.
 
 from __future__ import annotations
 
+__all__ = ["Anomaly", "AnomalySeverity", "AnomalyType"]
+
+
 from dataclasses import dataclass
 from enum import StrEnum
 from typing import TYPE_CHECKING

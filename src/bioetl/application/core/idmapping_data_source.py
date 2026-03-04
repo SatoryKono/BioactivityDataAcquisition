@@ -6,6 +6,9 @@ Loads ChEMBL target IDs via a reader port and maps them to UniProt accessions.
 
 from __future__ import annotations
 
+__all__ = ["IDMappingDataSource"]
+
+
 from typing import TYPE_CHECKING, Any, Self
 
 from bioetl.domain.types import HealthStatus

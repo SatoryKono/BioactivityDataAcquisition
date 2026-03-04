@@ -660,6 +660,7 @@ class TestHealthServerErrorHandling:
             error="Test exception",
             error_type="RuntimeError",
             reason="request_processing_failed",
+            reason_code="HEALTH_REQUEST_PROCESSING_FAILED",
         )
 
     @pytest.mark.asyncio
@@ -700,6 +701,7 @@ class TestHealthServerErrorHandling:
                 error="Test error",
                 error_type="Exception",
                 reason="request_processing_failed",
+                reason_code="HEALTH_REQUEST_PROCESSING_FAILED",
             )
         finally:
             await server.stop()

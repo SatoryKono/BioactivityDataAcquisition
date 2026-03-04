@@ -17,7 +17,9 @@ Polite Pool:
 
 from __future__ import annotations
 
-import asyncio
+__all__ = ["OPENALEX_API_BASE", "OPENALEX_RUNTIME_ERRORS", "OpenAlexAdapter"]
+
+
 import contextlib
 import time
 from dataclasses import dataclass, field
@@ -28,6 +30,10 @@ from httpx import HTTPStatusError, RequestError
 from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
+from bioetl.infrastructure.adapters.common import (
+    run_fetch_with_fallback_policy,
+    split_filter_ids_for_fallback,
+)
 from bioetl.infrastructure.adapters.openalex.client_helpers_adapter_mixin import (
     OpenAlexAdapterHelpersMixin,
 )
@@ -82,9 +88,13 @@ class OpenAlexAdapter(OpenAlexAdapterHelpersMixin, BaseHttpAdapter):
     mailto: str
     batch_size: int = 50
     metrics: MetricsPort | None = None
+    title_search_cache_size: int = 256
 
     provider_name: str = field(init=False, default="openalex")
     """Provider identifier (required by DataSourcePort)."""
+    _title_search_cache: dict[tuple[str, int], list[BronzeRecord]] = field(
+        init=False, default_factory=dict
+    )
 
     def __post_init__(self) -> None:
         """Initialize adapter metrics and helper components."""
@@ -184,7 +194,7 @@ class OpenAlexAdapter(OpenAlexAdapterHelpersMixin, BaseHttpAdapter):
         """Fetch OpenAlex works by title search.
 
         Uses individual title.search queries with rate limiting.
-        Rate limit: 100ms delay between requests (10 req/sec).
+        Request pacing is delegated to the shared UnifiedHTTPClient rate limiter.
 
         Args:
             titles: List of publication titles to search.
@@ -213,16 +223,13 @@ class OpenAlexAdapter(OpenAlexAdapterHelpersMixin, BaseHttpAdapter):
 
             results = await self._search_by_title(title, limit=1)
             if results:
-                result = results[0]
+                result = dict(results[0])
                 result["_lookup_method"] = "title"
                 result["_original_id"] = title
                 result["_search_title"] = title  # Track which title matched
                 yield result
                 found += 1
                 fetched += 1
-
-            # Rate limiting: 100ms delay between requests (10 req/sec)
-            await asyncio.sleep(0.1)
 
         # Log summary statistics
         self.logger.info(
@@ -337,61 +344,32 @@ class OpenAlexAdapter(OpenAlexAdapterHelpersMixin, BaseHttpAdapter):
                 msg="OpenAlex fallback only supports 'doi' filtering, skipping",
             )
             return
+        primary_ids, title_only_entries = split_filter_ids_for_fallback(filter_ids)
 
-        fetched = 0
-        found_dois: set[str] = set()
+        async def _primary_records() -> AsyncIterator[BronzeRecord]:
+            async for work in self._batch_doi_lookup(primary_ids, set(), limit, 0):
+                yield work
 
-        # Separate DOIs from title-only markers (__title_only_N__ format)
-        valid_dois = [
-            d
-            for d in filter_ids
-            if d and d.strip() and not d.startswith("__title_only_")
-        ]
-        title_only_entries = [
-            d
-            for d in filter_ids
-            if not d or not d.strip() or d.startswith("__title_only_")
-        ]
-
-        # Phase 1: Batch DOI lookup
-        async for work in self._batch_doi_lookup(
-            valid_dois, found_dois, limit, fetched
-        ):
-            yield work
-            fetched += 1
-            if limit and fetched >= limit:
-                return
-
-        # Log Phase 1 summary
-        if valid_dois:
+        def _log_phase1_summary(total: int, found: int) -> None:
             self.logger.info(
                 "openalex_doi_lookup_summary",
-                total_dois=len(valid_dois),
-                found_by_doi=len(found_dois),
-                missing_dois=len(valid_dois) - len(found_dois),
-                hit_rate_pct=round(len(found_dois) / len(valid_dois) * 100, 1),
+                total_dois=total,
+                found_by_doi=found,
+                missing_dois=total - found,
+                hit_rate_pct=round(found / total * 100, 1) if total else 0.0,
             )
 
-        # Phase 2: Fallback by title for unresolved DOIs
-        async for work in self._fallback_handler.process_missing_dois(
-            dois=valid_dois,
-            found_dois=found_dois,
+        async for work in run_fetch_with_fallback_policy(
+            primary_records=_primary_records(),
+            primary_ids=primary_ids,
+            title_only_entries=title_only_entries,
             fallback_mapping=fallback_mapping,
-            normalize_fn=self._normalize_doi,
+            normalize_id=self._normalize_doi,
+            extract_record_id=self._extract_doi_from_record,
+            fallback_handler=self._fallback_handler,
             limit=limit,
-            fetched=fetched,
-        ):
-            yield work
-            fetched += 1
-            if limit and fetched >= limit:
-                return
-
-        # Phase 3: Title-only entries (using handler)
-        async for work in self._fallback_handler.process_title_only_entries(
-            entries=title_only_entries,
-            fallback_mapping=fallback_mapping,
-            limit=limit,
-            fetched=fetched,
+            primary_lookup_method="doi",
+            phase1_summary_logger=_log_phase1_summary,
         ):
             yield work
 
@@ -554,8 +532,14 @@ class OpenAlexAdapter(OpenAlexAdapterHelpersMixin, BaseHttpAdapter):
         Returns:
             List of relevant publications (empty if none found).
         """
+        normalized_title = title.strip()
+        cache_key = (normalized_title.casefold(), limit)
+        cached = self._title_search_cache.get(cache_key)
+        if cached is not None:
+            return [dict(result) for result in cached]
+
         # Clean title for search
-        clean_title = self._escape_title_for_search(title.strip()[:200])
+        clean_title = self._escape_title_for_search(normalized_title[:200])
 
         params = self._build_base_params()
         params.update(
@@ -587,7 +571,12 @@ class OpenAlexAdapter(OpenAlexAdapterHelpersMixin, BaseHttpAdapter):
             results: list[BronzeRecord] = data.get(
                 "results", []
             )  # Any: untyped OpenAlex API JSON response
-            return results
+            cached_results = [dict(result) for result in results]
+            self._title_search_cache[cache_key] = cached_results
+            if len(self._title_search_cache) > self.title_search_cache_size:
+                oldest_key = next(iter(self._title_search_cache))
+                del self._title_search_cache[oldest_key]
+            return [dict(result) for result in cached_results]
 
         except OPENALEX_RUNTIME_ERRORS as e:
             self.logger.debug(
@@ -595,6 +584,7 @@ class OpenAlexAdapter(OpenAlexAdapterHelpersMixin, BaseHttpAdapter):
                 title=title[:50],
                 error=str(e),
             )
+            self._title_search_cache[cache_key] = []
             return []
 
     async def _probe_health(self) -> HealthStatus:

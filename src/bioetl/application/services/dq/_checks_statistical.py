@@ -5,6 +5,16 @@ Extracted from GoldDQAnalyzer per audit-package-structure-2026-02-07.
 
 from __future__ import annotations
 
+__all__ = [
+    "NULL_RATE_CRITICAL_MULTIPLIER",
+    "NULL_RATE_WARNING_MULTIPLIER",
+    "RECORD_COUNT_CRITICAL_THRESHOLD",
+    "RECORD_COUNT_WARNING_THRESHOLD",
+    "check_anomaly_detection",
+    "check_statistical_profile",
+]
+
+
 from typing import Any
 
 import polars as pl
@@ -22,6 +32,75 @@ NULL_RATE_WARNING_MULTIPLIER = 2.0
 NULL_RATE_CRITICAL_MULTIPLIER = 5.0
 RECORD_COUNT_WARNING_THRESHOLD = 0.70
 RECORD_COUNT_CRITICAL_THRESHOLD = 0.50
+
+
+def _null_rate_status(ratio: float) -> DQCheckStatus:
+    if ratio > NULL_RATE_CRITICAL_MULTIPLIER:
+        return DQCheckStatus.FAIL
+    if ratio > NULL_RATE_WARNING_MULTIPLIER:
+        return DQCheckStatus.WARN
+    return DQCheckStatus.PASS
+
+
+def _record_count_status(ratio: float) -> DQCheckStatus:
+    if ratio < RECORD_COUNT_CRITICAL_THRESHOLD:
+        return DQCheckStatus.FAIL
+    if ratio < RECORD_COUNT_WARNING_THRESHOLD:
+        return DQCheckStatus.WARN
+    return DQCheckStatus.PASS
+
+
+def _build_null_rate_metric(
+    df: pl.DataFrame,
+    baseline_stats: dict[str, Any],  # Any: heterogeneous baseline map
+) -> StatisticalMetric | None:
+    baseline_null_rate = baseline_stats.get("null_rate_ma30")
+    if baseline_null_rate is None:
+        return None
+
+    total_nulls = sum(df[col].null_count() for col in df.columns)
+    total_cells = len(df) * len(df.columns)
+    current_null_rate = total_nulls / total_cells if total_cells > 0 else 0.0
+    ratio = current_null_rate / baseline_null_rate if baseline_null_rate > 0 else 1.0
+    status = _null_rate_status(ratio)
+    return StatisticalMetric(
+        current=round(current_null_rate, 4),
+        baseline=round(baseline_null_rate, 4),
+        ratio=round(ratio, 4),
+        threshold_warning=NULL_RATE_WARNING_MULTIPLIER,
+        threshold_critical=NULL_RATE_CRITICAL_MULTIPLIER,
+        status=status,
+    )
+
+
+def _build_record_count_metric(
+    df: pl.DataFrame,
+    baseline_stats: dict[str, Any],  # Any: heterogeneous baseline map
+) -> StatisticalMetric | None:
+    baseline_count = baseline_stats.get("record_count_ma30")
+    if baseline_count is None:
+        return None
+
+    current_count = len(df)
+    ratio = current_count / baseline_count if baseline_count > 0 else 1.0
+    status = _record_count_status(ratio)
+    return StatisticalMetric(
+        current=float(current_count),
+        baseline=float(baseline_count),
+        ratio=round(ratio, 4),
+        threshold_warning=RECORD_COUNT_WARNING_THRESHOLD,
+        threshold_critical=RECORD_COUNT_CRITICAL_THRESHOLD,
+        status=status,
+    )
+
+
+def _aggregate_profile_status(metrics: dict[str, StatisticalMetric]) -> DQCheckStatus:
+    statuses = [metric.status for metric in metrics.values()]
+    if any(status == DQCheckStatus.FAIL for status in statuses):
+        return DQCheckStatus.FAIL
+    if any(status == DQCheckStatus.WARN for status in statuses):
+        return DQCheckStatus.WARN
+    return DQCheckStatus.PASS
 
 
 def check_statistical_profile(
@@ -46,67 +125,18 @@ def check_statistical_profile(
         )
 
     metrics: dict[str, StatisticalMetric] = {}
+    null_rate_metric = _build_null_rate_metric(df, baseline_stats)
+    if null_rate_metric is not None:
+        metrics["null_rate_avg"] = null_rate_metric
 
-    if "null_rate_ma30" in baseline_stats:
-        total_nulls = sum(df[col].null_count() for col in df.columns)
-        total_cells = len(df) * len(df.columns)
-        current_null_rate = total_nulls / total_cells if total_cells > 0 else 0.0
-        baseline_null_rate = baseline_stats["null_rate_ma30"]
-
-        ratio = (
-            current_null_rate / baseline_null_rate if baseline_null_rate > 0 else 1.0
-        )
-
-        if ratio > NULL_RATE_CRITICAL_MULTIPLIER:
-            status = DQCheckStatus.FAIL
-        elif ratio > NULL_RATE_WARNING_MULTIPLIER:
-            status = DQCheckStatus.WARN
-        else:
-            status = DQCheckStatus.PASS
-
-        metrics["null_rate_avg"] = StatisticalMetric(
-            current=round(current_null_rate, 4),
-            baseline=round(baseline_null_rate, 4),
-            ratio=round(ratio, 4),
-            threshold_warning=NULL_RATE_WARNING_MULTIPLIER,
-            threshold_critical=NULL_RATE_CRITICAL_MULTIPLIER,
-            status=status,
-        )
-
-    if "record_count_ma30" in baseline_stats:
-        current_count = len(df)
-        baseline_count = baseline_stats["record_count_ma30"]
-
-        ratio = current_count / baseline_count if baseline_count > 0 else 1.0
-
-        if ratio < RECORD_COUNT_CRITICAL_THRESHOLD:
-            status = DQCheckStatus.FAIL
-        elif ratio < RECORD_COUNT_WARNING_THRESHOLD:
-            status = DQCheckStatus.WARN
-        else:
-            status = DQCheckStatus.PASS
-
-        metrics["record_count_daily"] = StatisticalMetric(
-            current=float(current_count),
-            baseline=float(baseline_count),
-            ratio=round(ratio, 4),
-            threshold_warning=RECORD_COUNT_WARNING_THRESHOLD,
-            threshold_critical=RECORD_COUNT_CRITICAL_THRESHOLD,
-            status=status,
-        )
-
-    overall_status = DQCheckStatus.PASS
-    for metric in metrics.values():
-        if metric.status == DQCheckStatus.FAIL:
-            overall_status = DQCheckStatus.FAIL
-            break
-        elif metric.status == DQCheckStatus.WARN:
-            overall_status = DQCheckStatus.WARN
+    record_count_metric = _build_record_count_metric(df, baseline_stats)
+    if record_count_metric is not None:
+        metrics["record_count_daily"] = record_count_metric
 
     return StatisticalProfileResult(
         baseline_period_days=30,
         metrics=metrics,
-        status=overall_status,
+        status=_aggregate_profile_status(metrics),
     )
 
 

@@ -11,6 +11,9 @@ These functions are:
 
 from __future__ import annotations
 
+__all__ = ["extract_references"]
+
+
 from typing import Any
 
 

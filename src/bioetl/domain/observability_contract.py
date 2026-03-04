@@ -1,12 +1,13 @@
 """Shared observability contract utilities.
 
 Defines canonical event context fields used across logs and metrics, plus
-compatibility mapping for legacy field names during migration.
+legacy-key migration mapping for input compatibility.
 """
 
 from __future__ import annotations
 
 from collections.abc import Mapping
+from dataclasses import dataclass
 from typing import Final
 
 REQUIRED_OBSERVABILITY_FIELDS: Final[tuple[str, ...]] = (
@@ -34,13 +35,17 @@ OBSERVABILITY_LEGACY_TO_CANONICAL: Final[dict[str, str]] = {
     "log_level": "severity",
 }
 
-OBSERVABILITY_CANONICAL_TO_LEGACY: Final[dict[str, str]] = {
-    canonical: legacy for legacy, canonical in OBSERVABILITY_LEGACY_TO_CANONICAL.items()
-}
-
 _ALLOWED_SEVERITY_VALUES: Final[frozenset[str]] = frozenset(
     {"debug", "info", "warning", "error"}
 )
+
+
+@dataclass(frozen=True)
+class ObservabilityContractPayload:
+    """Validated event payload with canonical metric labels."""
+
+    context: dict[str, object]
+    metric_labels: dict[str, str]
 
 
 def _coerce_non_empty(value: object | None, *, fallback: str) -> str:
@@ -62,20 +67,14 @@ def _migrate_legacy_keys(normalized: dict[str, object]) -> None:
             normalized[canonical_key] = normalized[legacy_key]
 
 
-def _write_dual_aliases(normalized: dict[str, object]) -> None:
-    """Write legacy aliases for canonical keys (dashboard migration period)."""
-    for canonical_key, legacy_key in OBSERVABILITY_CANONICAL_TO_LEGACY.items():
-        normalized.setdefault(legacy_key, normalized[canonical_key])
+def _strip_legacy_keys(normalized: dict[str, object]) -> None:
+    """Drop legacy aliases from output context after canonicalization."""
+    for legacy_key in OBSERVABILITY_LEGACY_TO_CANONICAL:
+        normalized.pop(legacy_key, None)
 
 
 def _has_required_context_value(context: Mapping[str, object], field: str) -> bool:
     return _coerce_non_empty(context.get(field), fallback="") != ""
-
-
-def _has_event_value(context: Mapping[str, object]) -> bool:
-    return _has_required_context_value(context, "event") or _has_required_context_value(
-        context, "event_name"
-    )
 
 
 def normalize_observability_context(
@@ -87,24 +86,29 @@ def normalize_observability_context(
     default_run_id: str,
     default_severity: str,
 ) -> dict[str, object]:
-    """Normalize event context to canonical keys and keep dual-write aliases."""
+    """Normalize event context to canonical keys."""
     normalized: dict[str, object] = {
         key: value for key, value in context.items() if value is not None
     }
+    safe_event_name = _coerce_non_empty(event_name, fallback="unknown_event")
+    safe_provider = _coerce_non_empty(default_provider, fallback="unknown")
+    safe_pipeline = _coerce_non_empty(default_pipeline, fallback="unknown")
+    safe_run_id = _coerce_non_empty(default_run_id, fallback="unknown")
 
     _migrate_legacy_keys(normalized)
+    _strip_legacy_keys(normalized)
 
     normalized["event"] = _coerce_non_empty(
-        normalized.get("event"), fallback=event_name
+        normalized.get("event"), fallback=safe_event_name
     )
     normalized["provider"] = _coerce_non_empty(
-        normalized.get("provider"), fallback=default_provider
+        normalized.get("provider"), fallback=safe_provider
     )
     normalized["pipeline"] = _coerce_non_empty(
-        normalized.get("pipeline"), fallback=default_pipeline
+        normalized.get("pipeline"), fallback=safe_pipeline
     )
     normalized["run_id"] = _coerce_non_empty(
-        normalized.get("run_id"), fallback=default_run_id
+        normalized.get("run_id"), fallback=safe_run_id
     )
 
     severity = _normalize_severity(
@@ -119,26 +123,91 @@ def normalize_observability_context(
         fallback=default_error_type,
     )
 
-    _write_dual_aliases(normalized)
-
     return normalized
+
+
+def enforce_observability_contract_context(
+    *,
+    event_name: str,
+    context: Mapping[str, object],
+    default_provider: str,
+    default_pipeline: str,
+    default_run_id: str,
+    default_severity: str,
+) -> dict[str, object]:
+    """Normalize and enforce required observability contract fields."""
+    safe_event_name = _coerce_non_empty(event_name, fallback="unknown_event")
+    safe_provider = _coerce_non_empty(default_provider, fallback="unknown")
+    safe_pipeline = _coerce_non_empty(default_pipeline, fallback="unknown")
+    safe_run_id = _coerce_non_empty(default_run_id, fallback="unknown")
+    normalized = normalize_observability_context(
+        event_name=safe_event_name,
+        context=context,
+        default_provider=safe_provider,
+        default_pipeline=safe_pipeline,
+        default_run_id=safe_run_id,
+        default_severity=default_severity,
+    )
+
+    missing = missing_observability_fields(normalized)
+    if not missing:
+        return normalized
+
+    # Last-resort safety net: never emit incompatible event payloads.
+    repaired = dict(normalized)
+    repaired["event"] = _coerce_non_empty(
+        repaired.get("event"), fallback=safe_event_name
+    )
+    repaired["provider"] = _coerce_non_empty(
+        repaired.get("provider"),
+        fallback=safe_provider,
+    )
+    repaired["pipeline"] = _coerce_non_empty(
+        repaired.get("pipeline"),
+        fallback=safe_pipeline,
+    )
+    repaired["run_id"] = _coerce_non_empty(
+        repaired.get("run_id"),
+        fallback=safe_run_id,
+    )
+    repaired["severity"] = _normalize_severity(
+        repaired.get("severity"),
+        fallback=_normalize_severity(default_severity, fallback="info"),
+    )
+    repaired["error_type"] = _coerce_non_empty(
+        repaired.get("error_type"),
+        fallback="unknown" if repaired["severity"] == "error" else "none",
+    )
+    return repaired
+
+
+def is_observability_contract_valid(context: Mapping[str, object]) -> bool:
+    """Return ``True`` when all required observability contract fields are present."""
+    return len(missing_observability_fields(context)) == 0
 
 
 def normalize_observability_metric_labels(
     labels: Mapping[str, object],
 ) -> dict[str, str]:
     """Return canonical labels for ``observability_events_total``."""
-    normalized = normalize_observability_context(
-        event_name=_coerce_non_empty(labels.get("event"), fallback="unknown_event"),
-        context=labels,
-        default_provider="unknown",
-        default_pipeline="unknown",
-        default_run_id="unknown",
-        default_severity=_coerce_non_empty(labels.get("severity"), fallback="info"),
+    normalized: dict[str, object] = {
+        key: value for key, value in labels.items() if value is not None
+    }
+    _migrate_legacy_keys(normalized)
+    event = _coerce_non_empty(normalized.get("event"), fallback="unknown_event")
+    provider = _coerce_non_empty(normalized.get("provider"), fallback="unknown")
+    pipeline = _coerce_non_empty(normalized.get("pipeline"), fallback="unknown")
+    severity = _normalize_severity(normalized.get("severity"), fallback="info")
+    error_type = _coerce_non_empty(
+        normalized.get("error_type"),
+        fallback="unknown" if severity == "error" else "none",
     )
     return {
-        key: _coerce_non_empty(normalized.get(key), fallback="unknown")
-        for key in OBSERVABILITY_METRIC_LABEL_FIELDS
+        "event": event,
+        "provider": provider,
+        "pipeline": pipeline,
+        "severity": severity,
+        "error_type": error_type,
     }
 
 
@@ -147,9 +216,29 @@ def missing_observability_fields(context: Mapping[str, object]) -> tuple[str, ..
     return tuple(
         field
         for field in REQUIRED_OBSERVABILITY_FIELDS
-        if not (
-            _has_event_value(context)
-            if field == "event"
-            else _has_required_context_value(context, field)
-        )
+        if not _has_required_context_value(context, field)
+    )
+
+
+def build_observability_contract_payload(
+    *,
+    event_name: str,
+    context: Mapping[str, object],
+    default_provider: str,
+    default_pipeline: str,
+    default_run_id: str,
+    default_severity: str,
+) -> ObservabilityContractPayload:
+    """Validate event context once and derive canonical metric labels."""
+    normalized = enforce_observability_contract_context(
+        event_name=event_name,
+        context=context,
+        default_provider=default_provider,
+        default_pipeline=default_pipeline,
+        default_run_id=default_run_id,
+        default_severity=default_severity,
+    )
+    return ObservabilityContractPayload(
+        context=normalized,
+        metric_labels=normalize_observability_metric_labels(normalized),
     )

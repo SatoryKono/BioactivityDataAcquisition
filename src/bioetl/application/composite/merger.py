@@ -2,23 +2,16 @@
 
 from __future__ import annotations
 
+__all__ = ["MergeService"]
+
+
 from collections.abc import Sequence
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
-from bioetl.application.composite.aggregator import EnricherAggregatorService
-from bioetl.application.composite.coalesce_policy import CoalescePolicyService
-from bioetl.application.composite.column_orderer import ColumnOrdererService
-from bioetl.application.composite.column_priority_orderer import (
-    ColumnPriorityOrdererService,
-)
-from bioetl.application.composite.column_renamer import ColumnRenamerService
-from bioetl.application.composite.conflict_resolver import ConflictResolverService
-from bioetl.application.composite.deduplication import EnricherDeduplicatorService
-from bioetl.application.composite.join_planner import JoinPlannerService
-from bioetl.application.composite.merger_compat_mixin import MergeCompatibilityHelper
-from bioetl.application.composite.merger_io_mixin import MergeIOHelper
-from bioetl.application.composite.merger_metrics_mixin import MergeMetricsHelper
+from bioetl.application.composite.merger_compat_mixin import MergeCompatibilityMixin
+from bioetl.application.composite.merger_io_mixin import MergeIOMixin
+from bioetl.application.composite.merger_metrics_mixin import MergeMetricsRecorderMixin
 from bioetl.domain.composite.result import (
     DependencyResult,
     EnrichmentResult,
@@ -26,9 +19,19 @@ from bioetl.domain.composite.result import (
 )
 
 if TYPE_CHECKING:
+    from bioetl.application.composite.aggregator import EnricherAggregatorService
+    from bioetl.application.composite.coalesce_policy import CoalescePolicyService
+    from bioetl.application.composite.column_orderer import ColumnOrdererService
+    from bioetl.application.composite.column_priority_orderer import (
+        ColumnPriorityOrdererService,
+    )
+    from bioetl.application.composite.column_renamer import ColumnRenamerService
+    from bioetl.application.composite.conflict_resolver import ConflictResolverService
     from bioetl.application.composite.cross_validator import (
         EnrichmentCrossValidationService,
     )
+    from bioetl.application.composite.deduplication import EnricherDeduplicatorService
+    from bioetl.application.composite.join_planner import JoinPlannerService
     from bioetl.domain.composite.config import (
         DependencyConfig,
         EnricherConfig,
@@ -50,7 +53,7 @@ def _path_to_table_name(path: str) -> str:
     return path
 
 
-class MergeService(MergeIOHelper, MergeCompatibilityHelper, MergeMetricsHelper):
+class MergeService(MergeIOMixin, MergeCompatibilityMixin, MergeMetricsRecorderMixin):
     """Facade/orchestrator for seed+dependency+enricher merge workflow."""
 
     def __init__(
@@ -63,14 +66,14 @@ class MergeService(MergeIOHelper, MergeCompatibilityHelper, MergeMetricsHelper):
         cross_validator: EnrichmentCrossValidationService | None = None,
         gold_schema: Any | None = None,  # Any: Pandera DataFrameModel class or instance
         *,
-        deduplicator: EnricherDeduplicatorService | None = None,
-        aggregator: EnricherAggregatorService | None = None,
-        renamer: ColumnRenamerService | None = None,
-        orderer: ColumnOrdererService | None = None,
-        priority_orderer: ColumnPriorityOrdererService | None = None,
-        coalesce_policy: CoalescePolicyService | None = None,
-        conflict_resolver: ConflictResolverService | None = None,
-        join_planner: JoinPlannerService | None = None,
+        deduplicator: EnricherDeduplicatorService,
+        aggregator: EnricherAggregatorService,
+        renamer: ColumnRenamerService,
+        orderer: ColumnOrdererService,
+        priority_orderer: ColumnPriorityOrdererService,
+        coalesce_policy: CoalescePolicyService,
+        conflict_resolver: ConflictResolverService,
+        join_planner: JoinPlannerService,
     ) -> None:
         self._config = merge_config
         self._storage = storage
@@ -80,37 +83,14 @@ class MergeService(MergeIOHelper, MergeCompatibilityHelper, MergeMetricsHelper):
         self._cross_validator = cross_validator
         self._gold_schema = gold_schema
 
-        self._deduplicator = deduplicator or EnricherDeduplicatorService(logger)
-        self._aggregator = aggregator or EnricherAggregatorService(logger)
-        self._renamer = renamer or ColumnRenamerService(logger)
-        self._orderer = orderer or ColumnOrdererService(
-            logger,
-            column_groups=merge_config.column_groups
-            if merge_config.column_groups
-            else None,
-        )
-
-        self._priority_orderer = priority_orderer or ColumnPriorityOrdererService(
-            logger
-        )
-        self._coalesce_policy = coalesce_policy or CoalescePolicyService(
-            logger,
-            self._priority_orderer,
-        )
-        self._conflict_resolver = conflict_resolver or ConflictResolverService(
-            merge_config,
-            logger,
-            self._coalesce_policy,
-        )
-        self._join_planner = join_planner or JoinPlannerService(
-            merge_config=merge_config,
-            logger=logger,
-            deduplicator=self._deduplicator,
-            aggregator=self._aggregator,
-            renamer=self._renamer,
-            conflict_resolver=self._conflict_resolver,
-            field_alias_resolver=self._get_field_aliases,
-        )
+        self._deduplicator = deduplicator
+        self._aggregator = aggregator
+        self._renamer = renamer
+        self._orderer = orderer
+        self._priority_orderer = priority_orderer
+        self._coalesce_policy = coalesce_policy
+        self._conflict_resolver = conflict_resolver
+        self._join_planner = join_planner
 
     async def merge(
         self,

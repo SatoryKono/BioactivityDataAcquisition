@@ -5,6 +5,9 @@ Transforms Bronze records to Silver format (Target entity inflation).
 
 from __future__ import annotations
 
+__all__ = ["TargetTransformer"]
+
+
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.dict_transformers import (
@@ -25,16 +28,24 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, PrimaryId, SilverRecord
 
 
+def _create_default_organism_classifier() -> OrganismClassificationService:
+    """Create default organism classifier used by target transformer."""
+    return OrganismClassificationService(
+        organism_field="organism",
+        taxonomy_id_field="tax_id",
+    )
+
+
+_DEFAULT_ORGANISM_CLASSIFIER = _create_default_organism_classifier()
+
+
 class TargetTransformer(BaseChemblTransformer):
     """Transforms ChEMBL bronze target records to silver."""
 
     entity_class = Target
     primary_id_field = "target_id"
 
-    _organism_classifier: OrganismClassificationService = OrganismClassificationService(
-        organism_field="organism",
-        taxonomy_id_field="tax_id",
-    )
+    _organism_classifier: OrganismClassificationService = _DEFAULT_ORGANISM_CLASSIFIER
 
     async def _transform_impl(
         self,

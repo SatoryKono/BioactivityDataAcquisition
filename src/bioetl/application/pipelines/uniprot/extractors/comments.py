@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+__all__ = ["CommentExtractor"]
+
+
+from collections.abc import Callable
 from typing import Any
 
 from bioetl.domain.serialization import serialize_to_json
@@ -73,6 +77,67 @@ def _build_isoform_data(iso: dict[str, Any]) -> dict[str, Any]:  # Any: JSON val
     if isinstance(name, dict) and name.get("value"):
         isoform_data["name"] = name.get("value")
     return isoform_data
+
+
+def _extract_isoform_id_values(
+    isoform: dict[str, Any],  # Any: untyped JSON fragment from UniProt API
+) -> list[str]:
+    """Extract normalized isoform IDs."""
+    raw_ids = isoform.get("isoformIds", [])
+    if not isinstance(raw_ids, list):
+        return []
+    return [str(iso_id) for iso_id in raw_ids if iso_id]
+
+
+def _extract_isoform_name_values(
+    isoform: dict[str, Any],  # Any: untyped JSON fragment from UniProt API
+) -> list[str]:
+    """Extract normalized isoform primary name."""
+    name = isoform.get("name", {})
+    if isinstance(name, dict) and name.get("value"):
+        return [str(name["value"])]
+    return []
+
+
+def _extract_isoform_synonym_values(
+    isoform: dict[str, Any],  # Any: untyped JSON fragment from UniProt API
+) -> list[str]:
+    """Extract normalized isoform synonyms."""
+    raw_synonyms = isoform.get("synonyms", [])
+    if not isinstance(raw_synonyms, list):
+        return []
+    return [
+        str(item["value"])
+        for item in raw_synonyms
+        if isinstance(item, dict) and item.get("value")
+    ]
+
+
+def _iter_alternative_product_isoforms(
+    comments: Any,  # Any: untyped UniProt API JSON
+) -> list[dict[str, Any]]:  # Any: untyped UniProt JSON
+    """Collect ALTERNATIVE PRODUCTS isoform dicts."""
+    if not comments or not isinstance(comments, list):
+        return []
+
+    isoforms: list[dict[str, Any]] = []  # Any: untyped UniProt API JSON objects
+    for comment in comments:
+        if not _is_comment_of_type(comment, "ALTERNATIVE PRODUCTS"):
+            continue
+        comment_isoforms = comment.get("isoforms", [])
+        if not isinstance(comment_isoforms, list):
+            continue
+        isoforms.extend(item for item in comment_isoforms if isinstance(item, dict))
+    return isoforms
+
+
+_IsoformPayload = dict[str, Any]  # Any: untyped UniProt API JSON objects
+_IsoformExtractor = Callable[[_IsoformPayload], list[str]]
+_ISOFORM_SECTION_NORMALIZERS: tuple[tuple[str, _IsoformExtractor], ...] = (
+    ("isoform_names", _extract_isoform_name_values),
+    ("isoform_ids", _extract_isoform_id_values),
+    ("isoform_synonyms", _extract_isoform_synonym_values),
+)
 
 
 def _extract_texts_from_dict(
@@ -499,56 +564,19 @@ class CommentExtractor:
                 - isoform_synonyms: JSON array of synonyms
         """
         result: dict[str, str | None] = {
-            "isoform_names": None,
-            "isoform_ids": None,
-            "isoform_synonyms": None,
+            section: None for section, _ in _ISOFORM_SECTION_NORMALIZERS
+        }
+        section_values: dict[str, list[str]] = {
+            section: [] for section, _ in _ISOFORM_SECTION_NORMALIZERS
         }
 
-        if not comments or not isinstance(comments, list):
-            return result
+        for isoform in _iter_alternative_product_isoforms(comments):
+            for section, normalize in _ISOFORM_SECTION_NORMALIZERS:
+                section_values[section].extend(normalize(isoform))
 
-        names: list[str] = []
-        ids: list[str] = []
-        synonyms: list[str] = []
-
-        for comment in comments:
-            if not _is_comment_of_type(comment, "ALTERNATIVE PRODUCTS"):
-                continue
-
-            isoforms = comment.get("isoforms", [])
-            if not isinstance(isoforms, list):
-                continue
-
-            for iso in isoforms:
-                if not isinstance(iso, dict):
-                    continue
-
-                # Extract isoform IDs
-                isoform_ids = iso.get("isoformIds", [])
-                if isinstance(isoform_ids, list):
-                    for iso_id in isoform_ids:
-                        if iso_id:
-                            ids.append(str(iso_id))
-
-                # Extract isoform name
-                name = iso.get("name", {})
-                if isinstance(name, dict) and name.get("value"):
-                    names.append(str(name["value"]))
-
-                # Extract synonyms
-                iso_synonyms = iso.get("synonyms", [])
-                if isinstance(iso_synonyms, list):
-                    for syn in iso_synonyms:
-                        if isinstance(syn, dict) and syn.get("value"):
-                            synonyms.append(str(syn["value"]))
-
-        if names:
-            result["isoform_names"] = serialize_to_json(names, ensure_ascii=False)
-        if ids:
-            result["isoform_ids"] = serialize_to_json(ids, ensure_ascii=False)
-        if synonyms:
-            result["isoform_synonyms"] = serialize_to_json(synonyms, ensure_ascii=False)
-
+        for section, values in section_values.items():
+            if values:
+                result[section] = serialize_to_json(values, ensure_ascii=False)
         return result
 
     @staticmethod

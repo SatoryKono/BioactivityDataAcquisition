@@ -5,6 +5,9 @@ Handles extraction of keywords, MeSH terms, and publication types.
 
 from __future__ import annotations
 
+__all__ = ["ClassificationExtractor", "NormalizedClassification", "RawClassification"]
+
+
 from typing import Any, TypedDict
 from xml.etree.ElementTree import Element
 

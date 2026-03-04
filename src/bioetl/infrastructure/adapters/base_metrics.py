@@ -10,6 +10,9 @@ Metrics collected:
 
 from __future__ import annotations
 
+__all__ = ["ADAPTER_REQUEST_ERRORS", "AdapterMetrics"]
+
+
 import time
 from collections.abc import Iterator
 from contextlib import contextmanager

@@ -13,6 +13,9 @@ Reduces code duplication by extracting shared logic:
 
 from __future__ import annotations
 
+__all__ = ["BasePublicationTransformer"]
+
+
 from abc import abstractmethod
 from typing import TYPE_CHECKING, Any, cast
 

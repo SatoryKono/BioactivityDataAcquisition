@@ -5,6 +5,16 @@ Provides batch DOI resolution and pagination support.
 
 from __future__ import annotations
 
+__all__ = [
+    "BaseMetrics",
+    "CROSSREF_FALLBACK_ERRORS",
+    "CROSSREF_RUNTIME_ERRORS",
+    "DoiBatchProcessor",
+    "HttpTransport",
+    "SearchPaginator",
+]
+
+
 import contextlib
 import time
 from typing import TYPE_CHECKING, Any

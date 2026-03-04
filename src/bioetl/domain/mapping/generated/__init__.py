@@ -5,4 +5,4 @@ from bioetl.domain.mapping.generated.publication_type_classification_data import
     CLASSIFICATION_TABLE_SIZE,
 )
 
-__all__ = ["_CLASSIFICATION_TABLE", "CLASSIFICATION_TABLE_SIZE"]
+__all__ = ["CLASSIFICATION_TABLE_SIZE", "_CLASSIFICATION_TABLE"]

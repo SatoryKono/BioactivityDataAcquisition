@@ -2,6 +2,14 @@
 
 from __future__ import annotations
 
+__all__ = [
+    "CHECKPOINT_NON_FATAL_ERRORS",
+    "DQ_REPORT_NON_FATAL_ERRORS",
+    "PIPELINE_EXECUTION_ERRORS",
+    "QUARANTINE_WRITE_NON_FATAL_ERRORS",
+]
+
+
 from bioetl.domain.exceptions import (
     CheckpointConflictError,
     DataQualityError,

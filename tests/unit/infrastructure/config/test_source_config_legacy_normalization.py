@@ -1,0 +1,196 @@
+from __future__ import annotations
+
+import json
+import os
+from pathlib import Path
+from typing import Any
+
+import pytest
+
+from bioetl.infrastructure.config.source_config_loader import (
+    load_source_config_uncached,
+)
+from bioetl.infrastructure.legacy_normalizers.source import normalize_source_config
+from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
+
+SNAPSHOT_FILE = Path("tests/snapshots/source_config_legacy_normalization.json")
+
+
+def _dump_source_config(payload: dict[str, Any]) -> dict[str, Any]:
+    normalized = normalize_source_config(payload)
+    config = SourceYamlConfig.model_validate(normalized)
+    return config.model_dump(mode="json", exclude_none=True)
+
+
+def _load_snapshot() -> dict[str, Any]:
+    if not SNAPSHOT_FILE.exists():
+        return {}
+    with open(SNAPSHOT_FILE, encoding="utf-8") as f:
+        data = json.load(f)
+    return data if isinstance(data, dict) else {}
+
+
+def _save_snapshot(payload: dict[str, Any]) -> None:
+    SNAPSHOT_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(SNAPSHOT_FILE, "w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2, sort_keys=True)
+
+
+_CASE_CHEMBL_LEGACY: dict[str, Any] = {
+    "source": {
+        "type": "api",
+        "load_strategy": "full",
+        "provider_config": {
+            "provider": "chembl",
+            "base_url": "https://example.chembl/api",
+            "auth_type": "public",
+            "api_version": "v1",
+            "client": {"timeout_sec": 60.0, "max_retries": 3},
+            "batch_size": 25,
+        },
+        "rate_limit": {
+            "requests_per_second": 3.0,
+            "burst": 10,
+            "with_api_key": {"requests_per_second": 6.0, "burst": 20},
+        },
+        "circuit_breaker": {"failure_threshold": 5, "recovery_timeout": 300},
+        "health_check": {"endpoint": "/health", "timeout": 5},
+    }
+}
+
+_CASE_CHEMBL_NEW: dict[str, Any] = {
+    "source": {
+        "type": "api",
+        "load_strategy": "full",
+        "api": {
+            "base_url": "https://example.chembl/api",
+            "auth_type": "public",
+            "api_version": "v1",
+        },
+        "client": {"timeout": 60.0, "max_retries": 3},
+        "batch": {"batch_size": 25},
+        "provider_config": {"provider": "chembl"},
+        "rate_limit": {
+            "requests_per_second": 3.0,
+            "burst": 10,
+            "authenticated": {"requests_per_second": 6.0, "burst": 20},
+        },
+        "circuit_breaker": {"failure_threshold": 5, "recovery_timeout": 300},
+        "health_check": {"endpoint": "/health", "timeout_sec": 5},
+    }
+}
+
+_CASE_PUBMED_LEGACY_FLAT: dict[str, Any] = {
+    "api": {
+        "base_url": "https://example.pubmed/api",
+        "auth_type": "api_key",
+        "api_key": "${BIOETL_PUBMED_API_KEY}",
+        "api_version": "v2",
+    },
+    "client": {"timeout": 45.0, "max_retries": 3},
+    "batch": {"api_batch_size": 120},
+    "rate_limit": {
+        "requests_per_second": 5.0,
+        "burst": 12,
+        "with_api_key": {"requests_per_second": 7.5, "burst": 20},
+    },
+    "circuit_breaker": {"failure_threshold": 5, "recovery_timeout": 300},
+    "health_check": {"endpoint": "/health", "timeout": 7},
+}
+
+_CASE_PUBMED_NEW: dict[str, Any] = {
+    "source": {
+        "type": "api",
+        "load_strategy": "full",
+        "api": {
+            "base_url": "https://example.pubmed/api",
+            "auth_type": "api_key",
+            "api_key": "${BIOETL_PUBMED_API_KEY}",
+            "api_version": "v2",
+        },
+        "client": {"timeout_sec": 45.0, "max_retries": 3},
+        "batch": {"size": 120},
+        "provider_config": {},
+        "rate_limit": {
+            "requests_per_second": 5.0,
+            "burst": 12,
+            "authenticated": {"requests_per_second": 7.5, "burst": 20},
+        },
+        "circuit_breaker": {"failure_threshold": 5, "recovery_timeout": 300},
+        "health_check": {"endpoint": "/health", "timeout_sec": 7},
+    }
+}
+
+_GOLDEN_CASES: dict[str, tuple[dict[str, Any], dict[str, Any]]] = {
+    "chembl_aliases": (_CASE_CHEMBL_LEGACY, _CASE_CHEMBL_NEW),
+    "pubmed_flat_payload": (_CASE_PUBMED_LEGACY_FLAT, _CASE_PUBMED_NEW),
+}
+
+
+@pytest.mark.parametrize("legacy_payload,new_payload", _GOLDEN_CASES.values())
+def test_legacy_and_new_payloads_are_equivalent(
+    legacy_payload: dict[str, Any], new_payload: dict[str, Any]
+) -> None:
+    legacy_dump = _dump_source_config(legacy_payload)
+    new_dump = _dump_source_config(new_payload)
+    assert legacy_dump == new_dump
+
+
+def test_source_legacy_normalization_golden_snapshot() -> None:
+    current = {
+        name: _dump_source_config(payloads[0])
+        for name, payloads in _GOLDEN_CASES.items()
+    }
+    update_snapshots = os.environ.get("UPDATE_SNAPSHOTS", "0") == "1"
+    if update_snapshots:
+        _save_snapshot(current)
+        pytest.skip("Updated source normalization snapshot")
+
+    snapshot = _load_snapshot()
+    if not snapshot:
+        pytest.fail(
+            "Missing source normalization snapshot. "
+            "Run with UPDATE_SNAPSHOTS=1 to create baseline."
+        )
+    assert current == snapshot
+
+
+def test_load_source_config_uncached_calls_pipeline_in_order(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    events: list[str] = []
+
+    def fake_read(provider: str) -> dict[str, Any]:
+        assert provider == "chembl"
+        events.append("read")
+        return {"raw": True}
+
+    def fake_normalize(payload: dict[str, Any]) -> dict[str, Any]:
+        assert payload == {"raw": True}
+        events.append("normalize")
+        return {"normalized": True}
+
+    validated = SourceYamlConfig.model_validate(
+        {"source": {"provider_config": {"provider": "chembl"}}}
+    )
+
+    def fake_validate(payload: dict[str, Any]) -> SourceYamlConfig:
+        assert payload == {"normalized": True}
+        events.append("validate")
+        return validated
+
+    def fake_map(payload: SourceYamlConfig) -> SourceYamlConfig:
+        assert payload is validated
+        events.append("map")
+        return payload
+
+    import bioetl.infrastructure.config.source_config_loader as module
+
+    monkeypatch.setattr(module, "read_source_config_payload", fake_read)
+    monkeypatch.setattr(module, "normalize_source_config_payload", fake_normalize)
+    monkeypatch.setattr(module, "validate_source_config_payload", fake_validate)
+    monkeypatch.setattr(module, "map_source_config", fake_map)
+
+    loaded = load_source_config_uncached("chembl")
+    assert loaded is validated
+    assert events == ["read", "normalize", "validate", "map"]

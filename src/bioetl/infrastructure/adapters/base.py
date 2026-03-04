@@ -20,6 +20,9 @@ Health Check Observability (RULES.md §4.8):
 
 from __future__ import annotations
 
+__all__ = ["BaseHttpAdapter"]
+
+
 from types import TracebackType
 from typing import TYPE_CHECKING, Self
 

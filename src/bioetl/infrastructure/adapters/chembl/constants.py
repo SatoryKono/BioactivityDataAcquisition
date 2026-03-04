@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+__all__ = ["CHEMBL_API_BASE", "CHEMBL_STATUS_URL"]
+
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

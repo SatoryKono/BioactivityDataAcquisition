@@ -5,6 +5,9 @@ Combines multiple detectors to monitor data quality metrics.
 
 from __future__ import annotations
 
+__all__ = ["DataQualityMonitor"]
+
+
 from datetime import datetime
 from typing import TYPE_CHECKING
 

@@ -15,6 +15,9 @@ to follow DRY principle and simplify maintenance.
 
 from __future__ import annotations
 
+__all__ = ["BaseDeltaWriter", "coerce_null_types_for_delta"]
+
+
 import asyncio
 from typing import TYPE_CHECKING, Any
 

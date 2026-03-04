@@ -17,6 +17,9 @@ Architecture:
 
 from __future__ import annotations
 
+__all__ = ["LocalCheckpoint"]
+
+
 import asyncio
 import os
 import tempfile

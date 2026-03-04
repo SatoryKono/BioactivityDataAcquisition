@@ -15,6 +15,9 @@ Note: Business logic functions are delegated to extractors module.
 
 from __future__ import annotations
 
+__all__ = ["OpenAlexPublicationTransformer"]
+
+
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.pipelines.common import BasePublicationTransformer

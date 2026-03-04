@@ -5,6 +5,9 @@ Provides reusable low-level functions for extracting data from XML elements.
 
 from __future__ import annotations
 
+__all__ = ["get_int", "get_text"]
+
+
 import xml.etree.ElementTree as ET
 
 

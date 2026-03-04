@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -44,6 +45,8 @@ def test_nightly_workflow_regenerates_dependency_map() -> None:
 
 
 def test_dependency_map_drift_check_passes_current_repo() -> None:
+    env = dict(os.environ)
+    env.pop("PYTEST_CURRENT_TEST", None)
     result = subprocess.run(
         [
             sys.executable,
@@ -51,6 +54,7 @@ def test_dependency_map_drift_check_passes_current_repo() -> None:
             "--check",
         ],
         capture_output=True,
+        env=env,
         text=True,
     )
     assert result.returncode == 0, (

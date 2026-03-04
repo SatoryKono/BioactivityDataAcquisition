@@ -9,6 +9,24 @@ Consolidated from 14 individual files per audit-package-structure-2026-02-07.
 
 from __future__ import annotations
 
+__all__ = [
+    "ChEMBLActivityPipeline",
+    "ChEMBLAssayParametersPipeline",
+    "ChEMBLAssayPipeline",
+    "ChEMBLCellLinePipeline",
+    "ChEMBLCompoundRecordPipeline",
+    "ChEMBLMoleculePipeline",
+    "ChEMBLProteinClassPipeline",
+    "ChEMBLPublicationPipeline",
+    "ChEMBLPublicationSimilarityPipeline",
+    "ChEMBLPublicationTermPipeline",
+    "ChEMBLSubcellularFractionPipeline",
+    "ChEMBLTargetComponentPipeline",
+    "ChEMBLTargetPipeline",
+    "ChEMBLTissuePipeline",
+]
+
+
 from bioetl.application.core.base import BasePipeline
 
 

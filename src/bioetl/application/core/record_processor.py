@@ -9,6 +9,9 @@ Safety Guard (RULES.md §4.6):
 
 from __future__ import annotations
 
+__all__ = ["RecordProcessor"]
+
+
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.batch_executor import BatchResult
@@ -48,8 +51,8 @@ class RecordProcessor:
         transformer: BatchTransformer,
         writer: BatchWriter,
         config: RecordProcessorConfig,
-        tracer: TracingPort | None = None,
-    ):
+        tracer: TracingPort,
+    ) -> None:
         """Initialize RecordProcessor.
 
         Args:
@@ -58,7 +61,7 @@ class RecordProcessor:
             transformer: Batch transformer for Bronze -> Silver/Gold conversion.
             writer: Batch writer orchestrating Bronze/Silver/Gold writes.
             config: Record processor configuration.
-            tracer: Optional tracing port for distributed tracing.
+            tracer: Tracing port for distributed tracing.
         """
         _ = config
         self._context = context

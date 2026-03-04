@@ -16,6 +16,31 @@ See RULES.md §8.2 for JSON response modeling guidelines.
 
 from __future__ import annotations
 
+__all__ = [
+    "ActionType",
+    "ChemblActivityRecord",
+    "ChemblActivityResponse",
+    "ChemblAssayRecord",
+    "ChemblAssayResponse",
+    "ChemblCellLineRecord",
+    "ChemblCellLineResponse",
+    "ChemblMoleculeRecord",
+    "ChemblMoleculeResponse",
+    "ChemblPageMeta",
+    "ChemblPublicationApiRecord",
+    "ChemblPublicationResponse",
+    "ChemblReleaseInfo",
+    "ChemblTargetComponentRecord",
+    "ChemblTargetComponentResponse",
+    "ChemblTargetRecord",
+    "ChemblTargetResponse",
+    "LigandEfficiency",
+    "MoleculeHierarchy",
+    "MoleculeProperties",
+    "MoleculeStructures",
+]
+
+
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field

@@ -399,3 +399,23 @@ class TestErrorContext:
         ctx = err.context
 
         assert set(ctx.keys()) == expected_keys
+
+    def test_get_reason_code_defaults_to_none(self) -> None:
+        """Reason code should be optional by default."""
+        err = StorageError("storage down")
+        assert err.get_reason_code() is None
+
+    def test_to_structured_context_includes_error_metadata(self) -> None:
+        """Structured payload should include type/category and extra context."""
+        err = NetworkError("Connection refused").with_context(provider="chembl")
+        payload = err.to_structured_context(
+            reason_code="CLI_TEST_ERROR",
+            pipeline="chembl_activity",
+        )
+
+        assert payload["message"] == "Connection refused"
+        assert payload["error_type"] == "NetworkError"
+        assert payload["error_category"] == "NETWORK_ERROR"
+        assert payload["reason_code"] == "CLI_TEST_ERROR"
+        assert payload["provider"] == "chembl"
+        assert payload["pipeline"] == "chembl_activity"

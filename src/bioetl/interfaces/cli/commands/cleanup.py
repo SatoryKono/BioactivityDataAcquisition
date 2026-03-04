@@ -10,11 +10,37 @@ import asyncio
 import click
 
 from bioetl.composition.entrypoints import get_bronze_cleanup_service
+from bioetl.domain.exceptions import BioETLError
+from bioetl.interfaces.cli.commands.execution_policy import (
+    CLI_ENTRYPOINT_TYPED_ERRORS,
+)
+from bioetl.interfaces.cli.commands.execution_policy import (
+    handle_cli_failure as handle_cli_execution_failure,
+)
+from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import (
     echo_dry_run_prefix,
     echo_info,
     format_bytes,
 )
+
+
+def _handle_cleanup_failure(
+    exc: BaseException,
+    *,
+    reason_code: str,
+) -> None:
+    """Handle cleanup command failures with shared CLI policy."""
+    handle_cli_execution_failure(
+        exc,
+        reason_code=reason_code,
+        subject_key="target",
+        subject_value="bronze",
+        domain_error_title="Maintenance bronze-cleanup failed with domain error",
+        unexpected_error_title="Unexpected error during maintenance bronze-cleanup",
+        interrupted_message="Maintenance bronze-cleanup interrupted by user (Ctrl+C)",
+        default_exit_code=ExitCode.FAIL,
+    )
 
 
 @click.command("bronze-cleanup")
@@ -58,4 +84,24 @@ def bronze_cleanup_command(retention_days: int, dry_run: bool) -> None:
         )
         echo_info(f"{action} {result.directories_removed} empty directories")
 
-    asyncio.run(_run())
+    coro = _run()
+    try:
+        asyncio.run(coro)
+    except BioETLError as exc:
+        _handle_cleanup_failure(
+            exc,
+            reason_code="CLI_MAINTENANCE_BRONZE_CLEANUP_DOMAIN_ERROR",
+        )
+    except KeyboardInterrupt as exc:
+        _handle_cleanup_failure(
+            exc,
+            reason_code="CLI_MAINTENANCE_BRONZE_CLEANUP_SIGINT",
+        )
+    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
+        _handle_cleanup_failure(
+            exc,
+            reason_code="CLI_MAINTENANCE_BRONZE_CLEANUP_UNEXPECTED_ERROR",
+        )
+    finally:
+        if getattr(coro, "cr_frame", None) is not None:
+            coro.close()

@@ -262,7 +262,7 @@ class TestPostrunServiceDQReports:
         """DQ report errors should not fail the pipeline."""
         mock_dq_report_service = MagicMock()
         mock_dq_report_service.generate_reports = AsyncMock(
-            side_effect=Exception("Report generation failed")
+            side_effect=RuntimeError("Report generation failed")
         )
 
         service = PostrunService(

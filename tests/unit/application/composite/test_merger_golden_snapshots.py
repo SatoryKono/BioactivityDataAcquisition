@@ -8,6 +8,16 @@ from unittest.mock import MagicMock
 
 import polars as pl
 
+from bioetl.application.composite.aggregator import EnricherAggregatorService
+from bioetl.application.composite.coalesce_policy import CoalescePolicyService
+from bioetl.application.composite.column_orderer import ColumnOrdererService
+from bioetl.application.composite.column_priority_orderer import (
+    ColumnPriorityOrdererService,
+)
+from bioetl.application.composite.column_renamer import ColumnRenamerService
+from bioetl.application.composite.conflict_resolver import ConflictResolverService
+from bioetl.application.composite.deduplication import EnricherDeduplicatorService
+from bioetl.application.composite.join_planner import JoinPlannerService
 from bioetl.application.composite.merger import MergeService
 from bioetl.domain.composite.config import MergeConfig
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
@@ -26,7 +36,38 @@ def _build_merge_service() -> MergeService:
     )
     storage = MagicMock()
     logger = MagicMock()
-    return MergeService(merge_config=merge_config, storage=storage, logger=logger)
+    deduplicator = EnricherDeduplicatorService(logger)
+    aggregator = EnricherAggregatorService(logger)
+    renamer = ColumnRenamerService(logger)
+    orderer = ColumnOrdererService(logger)
+    priority_orderer = ColumnPriorityOrdererService(logger)
+    coalesce_policy = CoalescePolicyService(logger, priority_orderer)
+    conflict_resolver = ConflictResolverService(
+        merge_config=merge_config,
+        logger=logger,
+        coalesce_policy=coalesce_policy,
+    )
+    join_planner = JoinPlannerService(
+        merge_config=merge_config,
+        logger=logger,
+        deduplicator=deduplicator,
+        aggregator=aggregator,
+        renamer=renamer,
+        conflict_resolver=conflict_resolver,
+    )
+    return MergeService(
+        merge_config=merge_config,
+        storage=storage,
+        logger=logger,
+        deduplicator=deduplicator,
+        aggregator=aggregator,
+        renamer=renamer,
+        orderer=orderer,
+        priority_orderer=priority_orderer,
+        coalesce_policy=coalesce_policy,
+        conflict_resolver=conflict_resolver,
+        join_planner=join_planner,
+    )
 
 
 def test_conflict_resolution_seed_priority_golden_snapshot() -> None:

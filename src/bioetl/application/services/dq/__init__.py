@@ -13,6 +13,8 @@ Components:
 from bioetl.application.services.dq.bronze_analyzer import BronzeDQAnalyzer
 from bioetl.application.services.dq.gold_analyzer import GoldDQAnalyzer
 from bioetl.application.services.dq.silver_analyzer import SilverDQAnalyzer
+from bioetl.application.services.dq.silver_statistics import SilverStatisticsCalculator
+from bioetl.application.services.dq.silver_threshold import SilverThresholdChecker
 from bioetl.domain.services.dq_serializer import DQReportSerializer
 
 __all__ = [
@@ -20,4 +22,6 @@ __all__ = [
     "DQReportSerializer",
     "GoldDQAnalyzer",
     "SilverDQAnalyzer",
+    "SilverStatisticsCalculator",
+    "SilverThresholdChecker",
 ]

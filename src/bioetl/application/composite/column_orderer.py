@@ -7,6 +7,7 @@ See ADR-026 for rationale.
 from __future__ import annotations
 
 import re
+import warnings
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
@@ -511,5 +512,17 @@ class ColumnOrdererService:
         return [rename_map.get(col, col) for col in columns]
 
 
-# Backward-compatible alias for iterative NAME-001 migration.
-ColumnOrderer = ColumnOrdererService
+if TYPE_CHECKING:
+    ColumnOrderer = ColumnOrdererService
+
+
+def __getattr__(name: str) -> object:
+    """Resolve deprecated compatibility aliases lazily."""
+    if name == "ColumnOrderer":
+        warnings.warn(
+            "ColumnOrderer is deprecated; use ColumnOrdererService.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return ColumnOrdererService
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

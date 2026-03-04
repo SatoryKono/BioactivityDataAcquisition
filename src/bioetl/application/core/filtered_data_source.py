@@ -6,6 +6,9 @@ Loads filter IDs from external sources (CSV) and passes them to the adapter.
 
 from __future__ import annotations
 
+__all__ = ["FilteredDataSource"]
+
+
 from typing import TYPE_CHECKING, Any, Self
 
 from bioetl.application.core._data_source_mixins import _SourceMetadataDelegationMixin

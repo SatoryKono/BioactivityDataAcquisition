@@ -6,6 +6,14 @@ Implements RULES.md §1 (Domain Layer - Ports).
 
 from __future__ import annotations
 
+__all__ = [
+    "GoldFilterCallback",
+    "GoldTransformCallback",
+    "TransformCallback",
+    "TransformerPort",
+]
+
+
 from typing import TYPE_CHECKING, Any, Protocol
 
 if TYPE_CHECKING:

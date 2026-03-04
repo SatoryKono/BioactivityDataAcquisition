@@ -6,8 +6,16 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.application.composite.aggregator import EnricherAggregator
+from bioetl.application.composite.aggregator import EnricherAggregatorService
+from bioetl.application.composite.coalesce_policy import CoalescePolicyService
+from bioetl.application.composite.column_orderer import ColumnOrdererService
+from bioetl.application.composite.column_priority_orderer import (
+    ColumnPriorityOrdererService,
+)
+from bioetl.application.composite.column_renamer import ColumnRenamerService
+from bioetl.application.composite.conflict_resolver import ConflictResolverService
 from bioetl.application.composite.deduplication import EnricherDeduplicator
+from bioetl.application.composite.join_planner import JoinPlannerService
 from bioetl.application.composite.merger import MergeService, _path_to_table_name
 from bioetl.domain.composite.config import EnricherConfig, MergeConfig
 from bioetl.domain.composite.result import EnrichmentResult, EnrichmentStatus
@@ -38,8 +46,8 @@ def deduplicator(mock_logger):
 
 @pytest.fixture
 def aggregator(mock_logger):
-    """Create an EnricherAggregator instance."""
-    return EnricherAggregator(mock_logger)
+    """Create an EnricherAggregatorService instance."""
+    return EnricherAggregatorService(mock_logger)
 
 
 @pytest.fixture
@@ -56,10 +64,37 @@ def merge_config():
 @pytest.fixture
 def merge_service(merge_config, mock_storage, mock_logger):
     """Create a MergeService instance."""
+    deduplicator = EnricherDeduplicator(mock_logger)
+    aggregator = EnricherAggregatorService(mock_logger)
+    renamer = ColumnRenamerService(mock_logger)
+    orderer = ColumnOrdererService(mock_logger)
+    priority_orderer = ColumnPriorityOrdererService(mock_logger)
+    coalesce_policy = CoalescePolicyService(mock_logger, priority_orderer)
+    conflict_resolver = ConflictResolverService(
+        merge_config=merge_config,
+        logger=mock_logger,
+        coalesce_policy=coalesce_policy,
+    )
+    join_planner = JoinPlannerService(
+        merge_config=merge_config,
+        logger=mock_logger,
+        deduplicator=deduplicator,
+        aggregator=aggregator,
+        renamer=renamer,
+        conflict_resolver=conflict_resolver,
+    )
     return MergeService(
         merge_config=merge_config,
         storage=mock_storage,
         logger=mock_logger,
+        deduplicator=deduplicator,
+        aggregator=aggregator,
+        renamer=renamer,
+        orderer=orderer,
+        priority_orderer=priority_orderer,
+        coalesce_policy=coalesce_policy,
+        conflict_resolver=conflict_resolver,
+        join_planner=join_planner,
     )
 
 
@@ -836,7 +871,7 @@ class TestApplyJoinsSmartColumnRenaming:
             seed_pipeline=None,  # No seed pipeline
         )
 
-        # ColumnRenamer always uses qualified format from enricher pipeline
+        # ColumnRenamerService always uses qualified format from enricher pipeline
         assert "crossref.publication.title" in result.columns
 
 

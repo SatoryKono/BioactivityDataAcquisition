@@ -6,6 +6,9 @@ Uses Polars for efficient CSV parsing with asyncio.to_thread for non-blocking I/
 
 from __future__ import annotations
 
+__all__ = ["CsvFilterReader"]
+
+
 import asyncio
 from collections import Counter
 from pathlib import Path

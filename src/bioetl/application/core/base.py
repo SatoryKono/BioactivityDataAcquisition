@@ -10,6 +10,9 @@ Updated: Removed default_transformer_class fallback (REQ-ARCH-DI-007).
 
 from __future__ import annotations
 
+__all__ = ["BasePipeline"]
+
+
 from abc import ABC
 from typing import TYPE_CHECKING, Self
 

@@ -232,6 +232,11 @@ async def test_fetch_multi_filtered_paths(adapter):
 async def test_do_fallback_search_and_should_do_fallback(adapter):
     assert adapter._should_do_fallback(["P1"], {"P1"}, {}) == []
     assert adapter._should_do_fallback(["P1", "P2"], {"P1"}, {"P2": "GENE2"}) == ["P2"]
+    assert adapter._should_do_fallback(
+        ["P1", "P2", "P2", "P3"],
+        {"P1"},
+        {"P2": "GENE2"},
+    ) == ["P2"]
 
     no_strategy_records = []
     async for record in adapter._do_fallback_search(
@@ -281,6 +286,31 @@ async def test_do_fallback_search_and_should_do_fallback(adapter):
     ):
         prelimited.append(record)
     assert prelimited == []
+
+
+@pytest.mark.asyncio
+async def test_do_fallback_search_reuses_query_cache(adapter):
+    call_queries: list[str | None] = []
+
+    async def protein_strategy(query=None, limit=None):
+        call_queries.append(query)
+        yield {"accession": "PX", "query": query, "limit": limit}
+
+    adapter._fetch_strategies["protein"] = protein_strategy
+
+    records = []
+    async for record in adapter._do_fallback_search(
+        "protein",
+        ["P1", "P2"],
+        {"P1": "GENE_X", "P2": "GENE_X"},
+        limit=10,
+        already_fetched=0,
+    ):
+        records.append(record)
+
+    # Two IDs should still yield two records, but only one upstream query.
+    assert len(records) == 2
+    assert call_queries == ["GENE_X"]
 
 
 @pytest.mark.asyncio

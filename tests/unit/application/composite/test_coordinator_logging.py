@@ -1,4 +1,4 @@
-"""Unit tests for EnrichmentCoordinator logging.
+"""Unit tests for EnrichmentCoordinatorService logging.
 
 Tests verify that:
 1. Optional enricher failures are logged as warnings
@@ -13,7 +13,7 @@ from unittest.mock import AsyncMock, MagicMock
 import polars as pl
 import pytest
 
-from bioetl.application.composite.coordinator import EnrichmentCoordinator
+from bioetl.application.composite.coordinator import EnrichmentCoordinatorService
 
 
 @pytest.fixture
@@ -47,9 +47,9 @@ def sample_keys() -> pl.DataFrame:
 
 
 @pytest.fixture
-def coordinator(mock_logger, mock_dq_config) -> EnrichmentCoordinator:
-    """Create EnrichmentCoordinator instance."""
-    return EnrichmentCoordinator(
+def coordinator(mock_logger, mock_dq_config) -> EnrichmentCoordinatorService:
+    """Create EnrichmentCoordinatorService instance."""
+    return EnrichmentCoordinatorService(
         logger=mock_logger,
         dq_config=mock_dq_config,
         max_concurrency=4,

@@ -1,4 +1,4 @@
-"""Tests for DependencyCoordinator.
+"""Tests for DependencyCoordinatorService.
 
 Covers chained dependencies where one dependency provides keys for another.
 See ADR-026 for architectural context.
@@ -6,6 +6,7 @@ See ADR-026 for architectural context.
 
 from __future__ import annotations
 
+import warnings
 from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock
 
@@ -13,8 +14,11 @@ import polars as pl
 import pyarrow as pa
 import pytest
 
-from bioetl.application.composite.dependency_coordinator import DependencyCoordinator
+from bioetl.application.composite.dependency_coordinator import (
+    DependencyCoordinatorService,
+)
 from bioetl.domain.composite.config import DependencyConfig
+from bioetl.domain.composite.result import DependencyResult, DependencyStatus
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import DeltaReaderPort, LoggerPort
@@ -60,7 +64,7 @@ class TestGetEffectiveKeys:
         seed_keys: pl.DataFrame,
     ) -> None:
         """Standard dependency (uses_seed_keys=True) should return seed keys."""
-        coordinator = DependencyCoordinator(
+        coordinator = DependencyCoordinatorService(
             logger=mock_logger,
             delta_reader=mock_delta_reader,
         )
@@ -96,7 +100,7 @@ class TestGetEffectiveKeys:
         )
         mock_delta_reader.read_table.return_value = source_data
 
-        coordinator = DependencyCoordinator(
+        coordinator = DependencyCoordinatorService(
             logger=mock_logger,
             delta_reader=mock_delta_reader,
         )
@@ -149,7 +153,7 @@ class TestGetEffectiveKeys:
         )
         mock_delta_reader.read_table.return_value = source_data
 
-        coordinator = DependencyCoordinator(
+        coordinator = DependencyCoordinatorService(
             logger=mock_logger,
             delta_reader=mock_delta_reader,
         )
@@ -183,7 +187,7 @@ class TestGetEffectiveKeys:
         seed_keys: pl.DataFrame,
     ) -> None:
         """Chained dependency should raise if no delta_reader."""
-        coordinator = DependencyCoordinator(
+        coordinator = DependencyCoordinatorService(
             logger=mock_logger,
             delta_reader=None,  # No reader!
         )
@@ -209,7 +213,7 @@ class TestGetEffectiveKeys:
         seed_keys: pl.DataFrame,
     ) -> None:
         """Chained dependency should raise if key_source not found."""
-        coordinator = DependencyCoordinator(
+        coordinator = DependencyCoordinatorService(
             logger=mock_logger,
             delta_reader=mock_delta_reader,
         )
@@ -237,7 +241,7 @@ class TestGetEffectiveKeys:
         """Chained dependency should fallback to seed if table not found (first run)."""
         mock_delta_reader.read_table.side_effect = FileNotFoundError("Table not found")
 
-        coordinator = DependencyCoordinator(
+        coordinator = DependencyCoordinatorService(
             logger=mock_logger,
             delta_reader=mock_delta_reader,
         )
@@ -282,7 +286,7 @@ class TestGetEffectiveKeys:
             }
         )
 
-        coordinator = DependencyCoordinator(
+        coordinator = DependencyCoordinatorService(
             logger=mock_logger,
             delta_reader=mock_delta_reader,
         )
@@ -322,7 +326,7 @@ class TestGetEffectiveKeys:
         """Chained dependency should raise on unexpected errors (not silent fallback)."""
         mock_delta_reader.read_table.side_effect = RuntimeError("Unexpected error")
 
-        coordinator = DependencyCoordinator(
+        coordinator = DependencyCoordinatorService(
             logger=mock_logger,
             delta_reader=mock_delta_reader,
         )
@@ -351,3 +355,235 @@ class TestGetEffectiveKeys:
             )
 
         mock_logger.error.assert_called()
+
+
+@pytest.mark.unit
+class TestDependencyExecution:
+    """Tests for dependency execution and orchestration paths."""
+
+    @pytest.mark.asyncio
+    async def test_run_dependencies_returns_empty_when_no_dependencies(
+        self,
+        mock_logger: LoggerPort,
+        seed_keys: pl.DataFrame,
+    ) -> None:
+        coordinator = DependencyCoordinatorService(logger=mock_logger)
+
+        result = await coordinator.run_dependencies(
+            keys=seed_keys,
+            dependencies=[],
+            completed=frozenset(),
+            runner_factory=lambda _name, _keys: MagicMock(),
+        )
+
+        assert result == {}
+        mock_logger.debug.assert_called()
+
+    @pytest.mark.asyncio
+    async def test_run_dependencies_marks_completed_dependency_as_skipped(
+        self,
+        mock_logger: LoggerPort,
+        seed_keys: pl.DataFrame,
+    ) -> None:
+        coordinator = DependencyCoordinatorService(logger=mock_logger)
+        dependency = DependencyConfig(
+            pipeline="chembl_publication_term",
+            join_keys=("document_chembl_id",),
+            required=False,
+        )
+
+        result = await coordinator.run_dependencies(
+            keys=seed_keys,
+            dependencies=[dependency],
+            completed=frozenset({dependency.pipeline}),
+            runner_factory=lambda _name, _keys: MagicMock(),
+        )
+
+        assert dependency.pipeline in result
+        assert result[dependency.pipeline].status == DependencyStatus.SKIPPED
+        assert "Already completed" in (result[dependency.pipeline].error_message or "")
+
+    @pytest.mark.asyncio
+    async def test_run_dependencies_stops_after_required_failure(
+        self,
+        mock_logger: LoggerPort,
+        seed_keys: pl.DataFrame,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        coordinator = DependencyCoordinatorService(logger=mock_logger)
+        dep_a = DependencyConfig(
+            pipeline="chembl_publication_term",
+            join_keys=("document_chembl_id",),
+            required=True,
+        )
+        dep_b = DependencyConfig(
+            pipeline="chembl_target_component",
+            join_keys=("target_chembl_id",),
+            required=False,
+        )
+
+        get_keys_mock = AsyncMock(return_value=seed_keys)
+        run_single_mock = AsyncMock(
+            side_effect=[
+                DependencyResult.failed(dep_a.pipeline, "required failed"),
+                DependencyResult.success(
+                    dep_b.pipeline, records_extracted=1, records_silver=1
+                ),
+            ]
+        )
+        monkeypatch.setattr(coordinator, "_get_effective_keys", get_keys_mock)
+        monkeypatch.setattr(coordinator, "_run_single_dependency", run_single_mock)
+
+        result = await coordinator.run_dependencies(
+            keys=seed_keys,
+            dependencies=[dep_a, dep_b],
+            completed=frozenset(),
+            runner_factory=lambda _name, _keys: MagicMock(),
+        )
+
+        assert dep_a.pipeline in result
+        assert dep_b.pipeline not in result
+        assert run_single_mock.await_count == 1
+        mock_logger.error.assert_called()
+
+    @pytest.mark.asyncio
+    async def test_run_single_dependency_success_uses_executor_metrics(
+        self,
+        mock_logger: LoggerPort,
+        seed_keys: pl.DataFrame,
+    ) -> None:
+        coordinator = DependencyCoordinatorService(logger=mock_logger)
+        dependency = DependencyConfig(
+            pipeline="chembl_publication_term",
+            join_keys=("document_chembl_id",),
+            required=False,
+            timeout_seconds=30,
+        )
+
+        runner = MagicMock()
+        runner.run = AsyncMock(return_value=None)
+        runner._executor = MagicMock(records_fetched=7, records_silver=5)
+
+        result = await coordinator._run_single_dependency(
+            dependency=dependency,
+            keys=seed_keys,
+            runner_factory=lambda _pipeline, _keys: runner,
+        )
+
+        assert result.status == DependencyStatus.SUCCESS
+        assert result.records_extracted == 7
+        assert result.records_silver == 5
+        assert result.duration_seconds >= 0.0
+
+    @pytest.mark.asyncio
+    async def test_run_single_dependency_timeout_returns_timeout_result(
+        self,
+        mock_logger: LoggerPort,
+        seed_keys: pl.DataFrame,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        coordinator = DependencyCoordinatorService(logger=mock_logger)
+        dependency = DependencyConfig(
+            pipeline="chembl_publication_term",
+            join_keys=("document_chembl_id",),
+            required=False,
+            timeout_seconds=5,
+        )
+
+        class _ImmediateTimeout:
+            async def __aenter__(self) -> None:
+                raise TimeoutError
+
+            async def __aexit__(self, *_args: object) -> bool:
+                return False
+
+        monkeypatch.setattr(
+            "bioetl.application.composite.dependency_coordinator.asyncio.timeout",
+            lambda _seconds: _ImmediateTimeout(),
+        )
+
+        result = await coordinator._run_single_dependency(
+            dependency=dependency,
+            keys=seed_keys,
+            runner_factory=lambda _pipeline, _keys: MagicMock(),
+        )
+
+        assert result.status == DependencyStatus.TIMEOUT
+        mock_logger.warning.assert_called()
+
+    @pytest.mark.asyncio
+    async def test_run_single_dependency_optional_failure_returns_failed(
+        self,
+        mock_logger: LoggerPort,
+        seed_keys: pl.DataFrame,
+    ) -> None:
+        coordinator = DependencyCoordinatorService(logger=mock_logger)
+        dependency = DependencyConfig(
+            pipeline="chembl_publication_term",
+            join_keys=("document_chembl_id",),
+            required=False,
+        )
+
+        runner = MagicMock()
+        runner.run = AsyncMock(side_effect=RuntimeError("boom"))
+
+        result = await coordinator._run_single_dependency(
+            dependency=dependency,
+            keys=seed_keys,
+            runner_factory=lambda _pipeline, _keys: runner,
+        )
+
+        assert result.status == DependencyStatus.FAILED
+        assert "boom" in (result.error_message or "")
+        mock_logger.warning.assert_called()
+
+    @pytest.mark.asyncio
+    async def test_run_single_dependency_required_failure_returns_failed_with_error_log(
+        self,
+        mock_logger: LoggerPort,
+        seed_keys: pl.DataFrame,
+    ) -> None:
+        coordinator = DependencyCoordinatorService(logger=mock_logger)
+        dependency = DependencyConfig(
+            pipeline="chembl_publication_term",
+            join_keys=("document_chembl_id",),
+            required=True,
+        )
+
+        runner = MagicMock()
+        runner.run = AsyncMock(side_effect=RuntimeError("required boom"))
+
+        result = await coordinator._run_single_dependency(
+            dependency=dependency,
+            keys=seed_keys,
+            runner_factory=lambda _pipeline, _keys: runner,
+        )
+
+        assert result.status == DependencyStatus.FAILED
+        assert "required boom" in (result.error_message or "")
+        mock_logger.error.assert_called()
+
+
+@pytest.mark.unit
+class TestDependencyCoordinatorCompatibilityAlias:
+    """Tests for deprecated alias compatibility helper."""
+
+    def test_getattr_dependency_coordinator_returns_service_with_warning(self) -> None:
+        import bioetl.application.composite.dependency_coordinator as module
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            alias = module.__getattr__("DependencyCoordinator")
+
+        assert alias is DependencyCoordinatorService
+        assert any(
+            isinstance(item.message, DeprecationWarning)
+            and "deprecated" in str(item.message).lower()
+            for item in caught
+        )
+
+    def test_getattr_unknown_raises_attribute_error(self) -> None:
+        import bioetl.application.composite.dependency_coordinator as module
+
+        with pytest.raises(AttributeError):
+            module.__getattr__("UnknownAlias")

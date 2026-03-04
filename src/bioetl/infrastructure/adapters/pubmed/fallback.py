@@ -8,6 +8,9 @@ Supports three-phase fallback strategy:
 
 from __future__ import annotations
 
+__all__ = ["PUBMED_FALLBACK_ERRORS", "TitleFallbackHandler"]
+
+
 from typing import TYPE_CHECKING, Any
 
 from httpx import RequestError

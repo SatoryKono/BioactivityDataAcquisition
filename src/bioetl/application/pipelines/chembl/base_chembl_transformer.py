@@ -12,6 +12,9 @@ Implements Template Method pattern to eliminate duplication across:
 
 from __future__ import annotations
 
+__all__ = ["BaseChemblTransformer"]
+
+
 from abc import abstractmethod
 from typing import TYPE_CHECKING, Any, ClassVar, cast
 

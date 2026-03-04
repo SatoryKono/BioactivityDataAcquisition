@@ -8,6 +8,9 @@ Supports three-phase fallback strategy:
 
 from __future__ import annotations
 
+__all__ = ["TitleFallbackHandler"]
+
+
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.infrastructure.adapters.common import BaseTitleFallbackHandler, titles_match

@@ -10,7 +10,34 @@ import asyncio
 import click
 
 from bioetl.composition.entrypoints import get_lifecycle_service
+from bioetl.domain.exceptions import BioETLError
+from bioetl.interfaces.cli.commands.execution_policy import (
+    CLI_ENTRYPOINT_TYPED_ERRORS,
+)
+from bioetl.interfaces.cli.commands.execution_policy import (
+    handle_cli_failure as handle_cli_execution_failure,
+)
+from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_info
+
+
+def _handle_archive_failure(
+    exc: BaseException,
+    *,
+    reason_code: str,
+    table: str,
+) -> None:
+    """Handle archive command failures with shared CLI policy."""
+    handle_cli_execution_failure(
+        exc,
+        reason_code=reason_code,
+        subject_key="table",
+        subject_value=table,
+        domain_error_title="Maintenance archive failed with domain error",
+        unexpected_error_title="Unexpected error during maintenance archive",
+        interrupted_message="Maintenance archive interrupted by user (Ctrl+C)",
+        default_exit_code=ExitCode.FAIL,
+    )
 
 
 @click.command("archive")
@@ -50,4 +77,27 @@ def archive_command(table: str, target_path: str, remove_source: bool) -> None:
 
         echo_info(f"Archived {files_archived} files to {target_path}")
 
-    asyncio.run(_run())
+    coro = _run()
+    try:
+        asyncio.run(coro)
+    except BioETLError as exc:
+        _handle_archive_failure(
+            exc,
+            reason_code="CLI_MAINTENANCE_ARCHIVE_DOMAIN_ERROR",
+            table=table,
+        )
+    except KeyboardInterrupt as exc:
+        _handle_archive_failure(
+            exc,
+            reason_code="CLI_MAINTENANCE_ARCHIVE_SIGINT",
+            table=table,
+        )
+    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
+        _handle_archive_failure(
+            exc,
+            reason_code="CLI_MAINTENANCE_ARCHIVE_UNEXPECTED_ERROR",
+            table=table,
+        )
+    finally:
+        if getattr(coro, "cr_frame", None) is not None:
+            coro.close()

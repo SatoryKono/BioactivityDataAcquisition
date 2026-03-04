@@ -7,6 +7,10 @@ from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.lock_manager import LockManager
 from bioetl.application.core.postrun_service import PostrunService
+from bioetl.application.core.preflight_health_aggregator import _HealthAggregator
+from bioetl.application.core.preflight_medallion_validator import (
+    _MedallionConfigValidator,
+)
 from bioetl.application.core.preflight_service import PreflightService
 from bioetl.application.core.runner import PipelineRunner
 from bioetl.application.observability.observer import PipelineObserver
@@ -18,7 +22,7 @@ from bioetl.composition.factories.pipeline_factory_dq_helpers import (
 )
 from bioetl.composition.factories.services_factory import ServicesBuilder
 from bioetl.domain.locking import LockContextHolder
-from bioetl.domain.medallion import LoadingStrategy
+from bioetl.domain.medallion import LoadingStrategy, WriteModePolicy
 
 if TYPE_CHECKING:
     import pandera
@@ -77,11 +81,24 @@ def assemble_runner_impl(
         context_holder=context_holder,
     )
 
+    health_aggregator = _HealthAggregator(
+        metrics=pipeline.services.metrics,
+        logger=logger_port,
+        pipeline_name=pipeline.config.pipeline_name,
+    )
+    medallion_validator = _MedallionConfigValidator(
+        config=pipeline.config,
+        logger=logger_port,
+        write_mode_policy=WriteModePolicy(),
+    )
+
     preflight_service = PreflightService(
         config=pipeline.config,
         context=pipeline.context,
         logger=logger_port,
         metrics=pipeline.services.metrics,
+        health_aggregator=health_aggregator,
+        medallion_validator=medallion_validator,
     )
 
     dq_service = DataQualityService(

@@ -174,7 +174,9 @@ async def test_apply_dependency_joins_delegates_composite_key(
     )
 
     expected = pl.DataFrame({"ok": [1]})
-    planner.apply_composite_key_dependency_join = MagicMock(return_value=expected)
+    planner._dependency_joiner.apply_composite_key_dependency_join = MagicMock(
+        return_value=expected
+    )
 
     result = await planner.apply_dependency_joins(
         merged_df=merged_df,
@@ -184,7 +186,7 @@ async def test_apply_dependency_joins_delegates_composite_key(
     )
 
     assert result.equals(expected)
-    planner.apply_composite_key_dependency_join.assert_called_once()
+    planner._dependency_joiner.apply_composite_key_dependency_join.assert_called_once()
 
 
 @pytest.mark.unit

@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+__all__ = ["FeatureExtractor"]
+
+
 from typing import Any, ClassVar
 
 from bioetl.domain.serialization import serialize_to_json

@@ -1,9 +1,9 @@
-"""Source configuration normalizers for infrastructure config loading.
+"""Compatibility package for source-config normalizer imports.
 
-This package intentionally lives outside ``infrastructure.config`` to avoid
-import-time cycles when loading ``bioetl.infrastructure.config_loader``.
+Canonical legacy migration logic lives in
+``bioetl.infrastructure.legacy_normalizers``.
 """
 
-from bioetl.infrastructure.source_normalizers.source import normalize_source_config
+from bioetl.infrastructure.legacy_normalizers.source import normalize_source_config
 
 __all__ = ["normalize_source_config"]

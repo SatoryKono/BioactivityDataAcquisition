@@ -1,0 +1,60 @@
+{
+  "chembl_aliases": {
+    "source": {
+      "batch_size": 100,
+      "circuit_breaker": {
+        "failure_threshold": 5,
+        "recovery_timeout": 300
+      },
+      "provider_config": {
+        "api_version": "v1",
+        "base_url": "https://example.chembl/api",
+        "batch_size": 25,
+        "client": {
+          "max_retries": 3,
+          "retry_base_delay": 1.0,
+          "retry_max_delay": 60.0,
+          "timeout_sec": 60.0
+        },
+        "pagination": {
+          "id_batch_size": 25,
+          "strategy": "offset"
+        },
+        "provider": "chembl"
+      },
+      "rate_limit": {
+        "burst": 10,
+        "requests_per_second": 3.0
+      }
+    }
+  },
+  "pubmed_flat_payload": {
+    "source": {
+      "batch_size": 100,
+      "circuit_breaker": {
+        "failure_threshold": 5,
+        "recovery_timeout": 300
+      },
+      "provider_config": {
+        "api_version": "v2",
+        "base_url": "https://example.pubmed/api",
+        "batch_size": 120,
+        "client": {
+          "max_retries": 3,
+          "retry_base_delay": 1.0,
+          "retry_max_delay": 60.0,
+          "timeout_sec": 45.0
+        },
+        "pagination": {
+          "id_batch_size": 120,
+          "strategy": "offset"
+        },
+        "provider": ""
+      },
+      "rate_limit": {
+        "burst": 12,
+        "requests_per_second": 5.0
+      }
+    }
+  }
+}

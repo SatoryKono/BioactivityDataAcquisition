@@ -20,6 +20,13 @@ from bioetl.composition.bootstrap.runtime.composite import (
 )
 from bioetl.composition.entrypoints import push_metrics_to_gateway
 from bioetl.domain.exceptions import BioETLError
+from bioetl.interfaces.cli.commands.execution_policy import (
+    CLI_ENTRYPOINT_TYPED_ERRORS,
+    map_success_flag_to_exit_code,
+)
+from bioetl.interfaces.cli.commands.execution_policy import (
+    handle_cli_failure as handle_cli_execution_failure,
+)
 from bioetl.interfaces.cli.commands.health_server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
     echo_health_server_info,
@@ -280,36 +287,47 @@ def run_composite(
     try:
         success, error_message = asyncio.run(coro)
     except BioETLError as exc:
-        echo_error(
-            "Composite execution failed with domain error",
-            (
-                f"{exc} "
-                f"(reason_code=CLI_COMPOSITE_DOMAIN_ERROR, composite={composite}, "
-                f"error_type={type(exc).__name__})"
-            ),
+        handle_cli_execution_failure(
+            exc,
+            reason_code="CLI_COMPOSITE_DOMAIN_ERROR",
+            subject_key="composite",
+            subject_value=composite,
+            domain_error_title="Composite execution failed with domain error",
+            unexpected_error_title="Unexpected error during composite execution",
+            interrupted_message="Composite pipeline interrupted by user (Ctrl+C)",
+            default_exit_code=ExitCode.FAIL,
         )
-        sys.exit(ExitCode.FAIL)
-    except KeyboardInterrupt:
-        echo_warning("Composite pipeline interrupted by user (Ctrl+C)")
-        sys.exit(ExitCode.SIGINT)
-    except Exception as exc:
-        echo_error(
-            "Unexpected error during composite execution",
-            (
-                f"{exc} "
-                f"(reason_code=CLI_COMPOSITE_UNEXPECTED_ERROR, composite={composite}, "
-                f"error_type={type(exc).__name__})"
-            ),
+    except KeyboardInterrupt as exc:
+        handle_cli_execution_failure(
+            exc,
+            reason_code="CLI_COMPOSITE_SIGINT",
+            subject_key="composite",
+            subject_value=composite,
+            domain_error_title="Composite execution failed with domain error",
+            unexpected_error_title="Unexpected error during composite execution",
+            interrupted_message="Composite pipeline interrupted by user (Ctrl+C)",
+            default_exit_code=ExitCode.FAIL,
         )
-        sys.exit(ExitCode.FAIL)
+    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
+        handle_cli_execution_failure(
+            exc,
+            reason_code="CLI_COMPOSITE_UNEXPECTED_ERROR",
+            subject_key="composite",
+            subject_value=composite,
+            domain_error_title="Composite execution failed with domain error",
+            unexpected_error_title="Unexpected error during composite execution",
+            interrupted_message="Composite pipeline interrupted by user (Ctrl+C)",
+            default_exit_code=ExitCode.FAIL,
+        )
     finally:
         push_metrics_to_gateway(pipeline_name=f"composite_{composite}")
         if getattr(coro, "cr_frame", None) is not None:
             coro.close()
 
+    exit_code = map_success_flag_to_exit_code(success)
     if success:
         echo_info("Composite pipeline completed successfully")
-        sys.exit(ExitCode.OK)
+        sys.exit(exit_code)
     else:
         echo_error("Composite pipeline failed", error_message or "Unknown error")
-        sys.exit(ExitCode.PIPELINE_ERROR)
+        sys.exit(exit_code)

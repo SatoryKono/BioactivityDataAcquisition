@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+__all__ = ["IDMappingCsvReaderAdapter"]
+
+
 import asyncio
 import csv
 from pathlib import Path

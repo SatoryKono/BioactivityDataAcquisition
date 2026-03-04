@@ -1,12 +1,12 @@
-"""Unit tests for ColumnOrderer rename functionality."""
+"""Unit tests for ColumnOrdererService rename functionality."""
 
-from bioetl.application.composite.column_orderer import ColumnOrderer
+from bioetl.application.composite.column_orderer import ColumnOrdererService
 from bioetl.domain.composite.config import ColumnGroupConfig, LayerColumnConfig
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 
 class TestColumnOrdererRenames:
-    """Test ColumnOrderer rename functionality."""
+    """Test ColumnOrdererService rename functionality."""
 
     def setup_method(self):
         """Set up test fixtures."""
@@ -14,7 +14,7 @@ class TestColumnOrdererRenames:
 
     def test_apply_renames_basic(self):
         """Apply basic column renames."""
-        orderer = ColumnOrderer(self.logger)
+        orderer = ColumnOrdererService(self.logger)
         columns = ["entity_id", "doi", "pmid", "title"]
         rename_map = {"entity_id": "publication_id", "pmid": "pubmed_id"}
 
@@ -24,7 +24,7 @@ class TestColumnOrdererRenames:
 
     def test_apply_renames_empty_map(self):
         """Empty rename map returns original columns."""
-        orderer = ColumnOrderer(self.logger)
+        orderer = ColumnOrdererService(self.logger)
         columns = ["entity_id", "doi", "title"]
 
         renamed = orderer._apply_renames(columns, {})
@@ -33,7 +33,7 @@ class TestColumnOrdererRenames:
 
     def test_apply_renames_partial(self):
         """Only specified columns are renamed."""
-        orderer = ColumnOrderer(self.logger)
+        orderer = ColumnOrdererService(self.logger)
         columns = ["entity_id", "doi", "pmid", "title"]
         rename_map = {"doi": "digital_object_id"}
 
@@ -43,7 +43,7 @@ class TestColumnOrdererRenames:
 
     def test_filter_by_layer_config_with_renames(self):
         """filter_by_layer_config applies renames to explicit columns."""
-        orderer = ColumnOrderer(self.logger)
+        orderer = ColumnOrdererService(self.logger)
         available = ["entity_id", "doi", "pmid", "title", "abstract"]
         layer_config = LayerColumnConfig(
             columns=["entity_id", "doi", "title"],
@@ -61,7 +61,7 @@ class TestColumnOrdererRenames:
             ColumnGroupConfig(name="identifiers", fields=["doi", "pmid"]),
             ColumnGroupConfig(name="title", fields=["title"]),
         ]
-        orderer = ColumnOrderer(self.logger, column_groups=column_groups)
+        orderer = ColumnOrdererService(self.logger, column_groups=column_groups)
 
         available = ["entity_id", "_run_id", "doi", "pmid", "title", "abstract"]
         layer_config = LayerColumnConfig(
@@ -82,7 +82,7 @@ class TestColumnOrdererRenames:
 
     def test_filter_by_layer_config_no_renames(self):
         """filter_by_layer_config works without renames."""
-        orderer = ColumnOrderer(self.logger)
+        orderer = ColumnOrdererService(self.logger)
         available = ["entity_id", "doi", "title"]
         layer_config = LayerColumnConfig(columns=["entity_id", "doi"])
 
@@ -92,7 +92,7 @@ class TestColumnOrdererRenames:
 
     def test_rename_preserves_order(self):
         """Renames preserve the original column order."""
-        orderer = ColumnOrderer(self.logger)
+        orderer = ColumnOrdererService(self.logger)
         columns = ["z_field", "a_field", "m_field"]
         rename_map = {"z_field": "renamed_z", "a_field": "renamed_a"}
 
@@ -102,7 +102,7 @@ class TestColumnOrdererRenames:
 
     def test_rename_with_conflicting_names(self):
         """Renames can create conflicts (caller responsibility to avoid)."""
-        orderer = ColumnOrderer(self.logger)
+        orderer = ColumnOrdererService(self.logger)
         columns = ["field_a", "field_b"]
         rename_map = {"field_a": "same_name", "field_b": "same_name"}
 

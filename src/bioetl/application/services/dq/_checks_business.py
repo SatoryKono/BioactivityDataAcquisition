@@ -5,6 +5,9 @@ Extracted from GoldDQAnalyzer per audit-package-structure-2026-02-07.
 
 from __future__ import annotations
 
+__all__ = ["check_business_rules"]
+
+
 from typing import Any
 
 import polars as pl

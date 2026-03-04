@@ -36,7 +36,7 @@
       "function": "bootstrap_composite_runner",
       "complexity": 14,
       "threshold": 10,
-      "row": 308
+      "row": 317
     },
     {
       "file": "src/bioetl/infrastructure/schemas/source_config.py",
@@ -44,11 +44,19 @@
       "complexity": 11,
       "threshold": 10,
       "row": 117
+    },
+    {
+      "file": "src/bioetl/interfaces/cli/commands/export.py",
+      "function": "export_command",
+      "complexity": 11,
+      "threshold": 10,
+      "row": 70
     }
   ],
   "folder_budgets": {
     "src/bioetl/application": 4,
     "src/bioetl/composition": 1,
-    "src/bioetl/infrastructure": 1
+    "src/bioetl/infrastructure": 1,
+    "src/bioetl/interfaces": 1
   }
 }

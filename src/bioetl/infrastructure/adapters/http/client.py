@@ -161,9 +161,32 @@ class UnifiedHTTPClient:
             retry_after = response.headers.get("Retry-After")
             if retry_after:
                 with suppress(ValueError):
-                    delay = float(retry_after)
+                    delay = self.retry_config.clamp_retry_after(float(retry_after))
         await asyncio.sleep(delay)
         return delay
+
+    def _can_retry(self, attempt: int, retries_used: int) -> bool:
+        """Determine whether another retry is allowed for current request."""
+        if self.retry_config.is_last_attempt(attempt):
+            return False
+        return retries_used < self.retry_config.effective_retry_budget()
+
+    def _record_retry_budget_exhausted(self, method: str, url: str) -> None:
+        """Record retry-budget exhaustion for observability and diagnostics."""
+        self._metrics.increment_counter(
+            "http_retry_budget_exhausted_total",
+            1,
+            {"provider": self.provider, "method": method.upper()},
+        )
+        if self.logger:
+            self.logger.warning(
+                "http_retry_budget_exhausted",
+                provider=self.provider,
+                method=method,
+                url=url,
+                retry_budget=self.retry_config.effective_retry_budget(),
+                max_attempts=self.retry_config.max_attempts,
+            )
 
     def _record_request_metrics(
         self,
@@ -265,6 +288,7 @@ class UnifiedHTTPClient:
         start_time = time.perf_counter()
         status_code = 0
         retries = 0
+        attempts_made = 0
 
         # Start tracing span
         otel_tracer = self._tracer.get_tracer("bioetl.http")
@@ -281,8 +305,9 @@ class UnifiedHTTPClient:
 
         try:
             for attempt in range(self.retry_config.max_attempts):
+                attempts_made = attempt + 1
                 result = await self._attempt_request(
-                    client, method, url, attempt, span, kwargs
+                    client, method, url, attempt, retries, span, kwargs
                 )
                 if isinstance(result, httpx.Response):
                     status_code = result.status_code
@@ -298,7 +323,7 @@ class UnifiedHTTPClient:
             span.set_attribute("error.type", "retry_exhausted")
             if last_error:
                 span.record_exception(last_error)
-            raise RetryExhaustedError(url, self.retry_config.max_attempts, last_error)
+            raise RetryExhaustedError(url, attempts_made, last_error)
 
         finally:
             duration = time.perf_counter() - start_time
@@ -341,6 +366,7 @@ class UnifiedHTTPClient:
         method: str,
         url: str,
         attempt: int,
+        retries_used: int,
         span: Span,
         kwargs: dict[str, Any],  # Any: raw HTTP request kwargs (params, headers, json)
     ) -> httpx.Response | tuple[bool, int, int, Exception | None]:
@@ -354,9 +380,9 @@ class UnifiedHTTPClient:
             response = await self._execute_single_attempt(client, method, url, **kwargs)
             status_code = response.status_code
 
-            if self.retry_config.is_retryable_status(
-                status_code
-            ) and not self.retry_config.is_last_attempt(attempt):
+            if self.retry_config.is_retryable_status(status_code) and self._can_retry(
+                attempt, retries_used
+            ):
                 wait_seconds = await self._handle_retry_delay(attempt, url, response)
                 self._log_retry(
                     url, method, attempt, wait_seconds, status_code=status_code
@@ -396,10 +422,27 @@ class UnifiedHTTPClient:
                 span.record_exception(exc)
                 raise
 
-            if not self.retry_config.is_last_attempt(attempt):
+            if self._can_retry(attempt, retries_used):
                 wait_seconds = await self._handle_retry_delay(attempt, url)
                 self._log_retry(url, method, attempt, wait_seconds, reason=str(exc))
-            return (True, 0, 1, exc)
+                status_code = (
+                    exc.response.status_code
+                    if isinstance(exc, httpx.HTTPStatusError)
+                    else 0
+                )
+                return (True, status_code, 1, exc)
+
+            if (
+                self.retry_config.retry_budget_per_request is not None
+                and not self.retry_config.is_last_attempt(attempt)
+            ):
+                self._record_retry_budget_exhausted(method, url)
+            status_code = (
+                exc.response.status_code
+                if isinstance(exc, httpx.HTTPStatusError)
+                else 0
+            )
+            return (False, status_code, 0, exc)
 
     async def get(
         self,

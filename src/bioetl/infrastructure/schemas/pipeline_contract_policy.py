@@ -7,6 +7,9 @@ externalized from transformer and factory code.
 
 from __future__ import annotations
 
+__all__ = ["PipelineContractPolicy"]
+
+
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 

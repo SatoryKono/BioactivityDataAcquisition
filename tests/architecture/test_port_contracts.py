@@ -190,6 +190,7 @@ class TestPortExportsComplete:
             "StoragePort",
             "LockPort",
             "CheckpointPort",
+            "ClockPort",
             "QuarantinePort",
             "MetricsPort",
             "LoggerPort",

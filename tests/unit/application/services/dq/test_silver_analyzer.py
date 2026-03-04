@@ -81,7 +81,7 @@ class TestCalculateThresholds:
 
     def test_pass_status_no_quarantined(self, analyzer: SilverDQAnalyzer) -> None:
         """No quarantined records → PASS."""
-        result = analyzer._calculate_thresholds(
+        result = analyzer._threshold.calculate_thresholds(
             df_len=100,
             input_record_count=100,
             quarantined_count=0,
@@ -93,7 +93,7 @@ class TestCalculateThresholds:
 
     def test_warn_status_at_soft_threshold(self, analyzer: SilverDQAnalyzer) -> None:
         """Error rate at soft threshold → WARN."""
-        result = analyzer._calculate_thresholds(
+        result = analyzer._threshold.calculate_thresholds(
             df_len=95,
             input_record_count=100,
             quarantined_count=10,  # 10% error rate ≥ 5% → WARN
@@ -105,7 +105,7 @@ class TestCalculateThresholds:
 
     def test_fail_status_at_hard_threshold(self, analyzer: SilverDQAnalyzer) -> None:
         """Error rate at hard threshold → FAIL."""
-        result = analyzer._calculate_thresholds(
+        result = analyzer._threshold.calculate_thresholds(
             df_len=80,
             input_record_count=100,
             quarantined_count=25,  # 25% ≥ 20% → FAIL
@@ -118,7 +118,7 @@ class TestCalculateThresholds:
         self, analyzer: SilverDQAnalyzer
     ) -> None:
         """When input_record_count is None, total = df_len + quarantined_count."""
-        result = analyzer._calculate_thresholds(
+        result = analyzer._threshold.calculate_thresholds(
             df_len=90,
             input_record_count=None,
             quarantined_count=10,  # total=100, rate=0.10
@@ -130,7 +130,7 @@ class TestCalculateThresholds:
 
     def test_zero_total_no_division_error(self, analyzer: SilverDQAnalyzer) -> None:
         """total_input=0 → error_rate=0.0, no ZeroDivisionError."""
-        result = analyzer._calculate_thresholds(
+        result = analyzer._threshold.calculate_thresholds(
             df_len=0,
             input_record_count=0,
             quarantined_count=0,
@@ -150,7 +150,7 @@ class TestCheckRecordCount:
 
     def test_pass_no_quarantine(self, analyzer: SilverDQAnalyzer) -> None:
         df = pl.DataFrame({"id": [1, 2, 3]})
-        result = analyzer._check_record_count(df, None, 0)
+        result = analyzer._statistics.check_record_count(df, None, 0)
         assert result.status == DQCheckStatus.PASS
         assert result.output_records == 3
         assert result.quarantine_rate == 0.0
@@ -158,13 +158,13 @@ class TestCheckRecordCount:
     def test_warn_high_quarantine_rate(self, analyzer: SilverDQAnalyzer) -> None:
         """More than 10% quarantined → WARN."""
         df = pl.DataFrame({"id": [1, 2, 3, 4, 5, 6, 7, 8, 9]})
-        result = analyzer._check_record_count(df, 10, 2)  # 20% quarantined
+        result = analyzer._statistics.check_record_count(df, 10, 2)  # 20% quarantined
         assert result.status == DQCheckStatus.WARN
         assert result.quarantined_records == 2
 
     def test_input_count_explicit(self, analyzer: SilverDQAnalyzer) -> None:
         df = pl.DataFrame({"id": [1, 2, 3]})
-        result = analyzer._check_record_count(df, 10, 0)
+        result = analyzer._statistics.check_record_count(df, 10, 0)
         assert result.input_records == 10
         assert result.output_records == 3
 
@@ -179,7 +179,7 @@ class TestCheckNullRates:
 
     def test_no_nulls(self, analyzer: SilverDQAnalyzer) -> None:
         df = pl.DataFrame({"a": [1, 2, 3], "b": ["x", "y", "z"]})
-        results, overall = analyzer._check_null_rates(df)
+        results, overall = analyzer._statistics.check_null_rates(df)
         assert overall == 0.0
         assert all(r.null_rate == 0.0 for r in results)
         assert all(r.status == DQCheckStatus.PASS for r in results)
@@ -187,19 +187,19 @@ class TestCheckNullRates:
     def test_column_with_high_null_rate_warns(self, analyzer: SilverDQAnalyzer) -> None:
         """Column with >50% nulls → WARN."""
         df = pl.DataFrame({"a": [1, None, None]})
-        results, overall = analyzer._check_null_rates(df)
+        results, overall = analyzer._statistics.check_null_rates(df)
         assert results[0].status == DQCheckStatus.WARN
         assert results[0].null_rate > 0.5
 
     def test_overall_rate_calculation(self, analyzer: SilverDQAnalyzer) -> None:
         """Overall rate is total nulls / total cells."""
         df = pl.DataFrame({"a": [None, None], "b": [1, 1]})  # 2 nulls / 4 cells = 0.5
-        _, overall = analyzer._check_null_rates(df)
+        _, overall = analyzer._statistics.check_null_rates(df)
         assert overall == 0.5
 
     def test_empty_dataframe(self, analyzer: SilverDQAnalyzer) -> None:
         df = pl.DataFrame({"a": pl.Series([], dtype=pl.Int64)})
-        results, overall = analyzer._check_null_rates(df)
+        results, overall = analyzer._statistics.check_null_rates(df)
         assert overall == 0.0
 
 
@@ -213,32 +213,32 @@ class TestCheckUniqueness:
 
     def test_unique_records_pass(self, analyzer: SilverDQAnalyzer) -> None:
         df = pl.DataFrame({"id": [1, 2, 3]})
-        result = analyzer._check_uniqueness(df, ["id"])
+        result = analyzer._statistics.check_uniqueness(df, ["id"])
         assert result.status == DQCheckStatus.PASS
         assert result.duplicate_rate == 0.0
 
     def test_duplicates_warn(self, analyzer: SilverDQAnalyzer) -> None:
         df = pl.DataFrame({"id": [1, 1, 2]})
-        result = analyzer._check_uniqueness(df, ["id"])
+        result = analyzer._statistics.check_uniqueness(df, ["id"])
         assert result.status == DQCheckStatus.WARN
         assert result.duplicate_rate > 0
 
     def test_no_primary_keys_pass(self, analyzer: SilverDQAnalyzer) -> None:
         """Empty primary_keys list → PASS with no duplicate check."""
         df = pl.DataFrame({"id": [1, 1, 1]})
-        result = analyzer._check_uniqueness(df, [])
+        result = analyzer._statistics.check_uniqueness(df, [])
         assert result.status == DQCheckStatus.PASS
         assert result.primary_key == ""
 
     def test_missing_primary_key_column_warn(self, analyzer: SilverDQAnalyzer) -> None:
         """Primary key column not in DataFrame → WARN."""
         df = pl.DataFrame({"id": [1, 2, 3]})
-        result = analyzer._check_uniqueness(df, ["nonexistent_column"])
+        result = analyzer._statistics.check_uniqueness(df, ["nonexistent_column"])
         assert result.status == DQCheckStatus.WARN
 
     def test_column_cardinality_stats(self, analyzer: SilverDQAnalyzer) -> None:
         df = pl.DataFrame({"id": [1, 2, 3], "category": ["a", "b", "a"]})
-        result = analyzer._check_uniqueness(df, ["id"])
+        result = analyzer._statistics.check_uniqueness(df, ["id"])
         # Column stats computed for first 10 columns
         assert "id" in result.column_stats
         assert result.column_stats["id"]["cardinality"] == 3
@@ -254,14 +254,14 @@ class TestCheckTypeConformance:
 
     def test_pass_normal_types(self, analyzer: SilverDQAnalyzer) -> None:
         df = pl.DataFrame({"id": [1, 2], "name": ["a", "b"], "v": [1.0, 2.0]})
-        result = analyzer._check_type_conformance(df)
+        result = analyzer._statistics.check_type_conformance(df)
         assert result.status == DQCheckStatus.PASS
         assert result.pandera_passed is True
 
     def test_warn_object_column(self, analyzer: SilverDQAnalyzer) -> None:
         """Object dtype column → type error → WARN status."""
         df = pl.DataFrame({"mixed": pl.Series([1, "str"], dtype=pl.Object)})
-        result = analyzer._check_type_conformance(df)
+        result = analyzer._statistics.check_type_conformance(df)
         assert result.status == DQCheckStatus.WARN
         assert result.pandera_passed is False
         assert len(result.errors) > 0
@@ -277,7 +277,7 @@ class TestCheckValueDistribution:
 
     def test_numeric_columns_profiled(self, analyzer: SilverDQAnalyzer) -> None:
         df = pl.DataFrame({"score": [1.0, 2.0, 3.0, 4.0, 5.0]})
-        result = analyzer._check_value_distribution(df)
+        result = analyzer._statistics.check_value_distribution(df)
         assert "score" in result.numeric_columns
         stat = result.numeric_columns["score"]
         assert stat.min == 1.0
@@ -286,7 +286,7 @@ class TestCheckValueDistribution:
 
     def test_categorical_columns_profiled(self, analyzer: SilverDQAnalyzer) -> None:
         df = pl.DataFrame({"category": ["a", "b", "a", "c", "b", "a"]})
-        result = analyzer._check_value_distribution(df)
+        result = analyzer._statistics.check_value_distribution(df)
         assert "category" in result.categorical_columns
         cat = result.categorical_columns["category"]
         assert cat.cardinality == 3
@@ -294,13 +294,13 @@ class TestCheckValueDistribution:
 
     def test_status_always_pass(self, analyzer: SilverDQAnalyzer) -> None:
         df = pl.DataFrame({"id": [1, 2, 3]})
-        result = analyzer._check_value_distribution(df)
+        result = analyzer._statistics.check_value_distribution(df)
         assert result.status == DQCheckStatus.PASS
 
     def test_empty_numeric_column_skipped(self, analyzer: SilverDQAnalyzer) -> None:
         """Numeric column with all nulls: no crash."""
         df = pl.DataFrame({"v": pl.Series([None, None], dtype=pl.Float64)})
-        result = analyzer._check_value_distribution(df)
+        result = analyzer._statistics.check_value_distribution(df)
         # Empty stats column — may be empty or may have None fields; no exception
         assert result.status == DQCheckStatus.PASS
 
@@ -308,7 +308,7 @@ class TestCheckValueDistribution:
         """Only first 20 columns are profiled."""
         data = {f"col_{i}": [i * 1.0, i * 2.0] for i in range(25)}
         df = pl.DataFrame(data)
-        result = analyzer._check_value_distribution(df)
+        result = analyzer._statistics.check_value_distribution(df)
         total_profiled = len(result.numeric_columns) + len(result.categorical_columns)
         assert total_profiled <= 20
 
@@ -326,7 +326,7 @@ class TestCheckSchemaDrift:
         from bioetl.domain.value_objects.dq_report import DriftLevel
 
         df = pl.DataFrame({"id": [1, 2], "name": ["a", "b"]})
-        result = analyzer._check_schema_drift(df, None)
+        result = analyzer._statistics.check_schema_drift(df, None)
         assert result.drift_level == DriftLevel.INFO
         assert result.status == DQCheckStatus.PASS
 
@@ -335,7 +335,7 @@ class TestCheckSchemaDrift:
 
         df = pl.DataFrame({"id": [1, 2], "name": ["a", "b"]})
         previous = {"id": "Int64", "name": "String"}
-        result = analyzer._check_schema_drift(df, previous)
+        result = analyzer._statistics.check_schema_drift(df, previous)
         assert result.drift_level == DriftLevel.INFO
         assert result.status == DQCheckStatus.PASS
         assert len(result.new_fields) == 0
@@ -346,7 +346,7 @@ class TestCheckSchemaDrift:
 
         df = pl.DataFrame({"id": [1], "name": ["a"], "extra": [42]})
         previous = {"id": "Int64", "name": "String"}
-        result = analyzer._check_schema_drift(df, previous)
+        result = analyzer._statistics.check_schema_drift(df, previous)
         assert result.drift_level == DriftLevel.INFO
         assert "extra" in result.new_fields
 
@@ -355,7 +355,7 @@ class TestCheckSchemaDrift:
 
         df = pl.DataFrame({"id": [1]})
         previous = {"id": "Int64", "name": "String"}
-        result = analyzer._check_schema_drift(df, previous)
+        result = analyzer._statistics.check_schema_drift(df, previous)
         assert result.drift_level == DriftLevel.CRITICAL
         assert result.status == DQCheckStatus.WARN
         assert "name" in result.missing_fields
@@ -365,7 +365,7 @@ class TestCheckSchemaDrift:
 
         df = pl.DataFrame({"id": pl.Series([1, 2], dtype=pl.Float64)})
         previous = {"id": "Int64"}
-        result = analyzer._check_schema_drift(df, previous)
+        result = analyzer._statistics.check_schema_drift(df, previous)
         assert result.drift_level == DriftLevel.CRITICAL
         assert len(result.type_changes) > 0
 
@@ -380,14 +380,14 @@ class TestCheckDeduplication:
 
     def test_no_duplication(self, analyzer: SilverDQAnalyzer) -> None:
         df = pl.DataFrame({"id": [1, 2, 3]})
-        result = analyzer._check_deduplication(df, ["id"], 3)
+        result = analyzer._statistics.check_deduplication(df, ["id"], 3)
         assert result.output_after_dedupe == 3
         assert result.input_before_dedupe == 3
         assert result.status == DQCheckStatus.PASS
 
     def test_with_input_larger_than_output(self, analyzer: SilverDQAnalyzer) -> None:
         df = pl.DataFrame({"id": [1, 2, 3]})
-        result = analyzer._check_deduplication(df, ["id"], 10)
+        result = analyzer._statistics.check_deduplication(df, ["id"], 10)
         assert result.input_before_dedupe == 10
         assert result.output_after_dedupe == 3
 
@@ -398,12 +398,12 @@ class TestCheckDeduplication:
                 "id": [1, 2, 3],
             }
         )
-        result = analyzer._check_deduplication(df, ["id"], 3)
+        result = analyzer._statistics.check_deduplication(df, ["id"], 3)
         assert result.duplicates_by_content_hash == 1  # 3 records - 2 unique hashes
 
     def test_no_content_hash_column(self, analyzer: SilverDQAnalyzer) -> None:
         df = pl.DataFrame({"id": [1, 2, 3]})
-        result = analyzer._check_deduplication(df, ["id"], 5)
+        result = analyzer._statistics.check_deduplication(df, ["id"], 5)
         assert result.duplicates_by_content_hash == 0
 
 
@@ -417,20 +417,20 @@ class TestCheckContentHashIntegrity:
 
     def test_no_hash_column_pass(self, analyzer: SilverDQAnalyzer) -> None:
         df = pl.DataFrame({"id": [1, 2, 3]})
-        result = analyzer._check_content_hash_integrity(df)
+        result = analyzer._statistics.check_content_hash_integrity(df)
         assert result.status == DQCheckStatus.PASS
         assert result.records_checked == 0
 
     def test_unique_hashes_pass(self, analyzer: SilverDQAnalyzer) -> None:
         df = pl.DataFrame({"_content_hash": ["a", "b", "c"], "id": [1, 2, 3]})
-        result = analyzer._check_content_hash_integrity(df)
+        result = analyzer._statistics.check_content_hash_integrity(df)
         assert result.status == DQCheckStatus.PASS
         assert result.hash_collisions == 0
         assert result.records_checked == 3
 
     def test_duplicate_hashes_warn(self, analyzer: SilverDQAnalyzer) -> None:
         df = pl.DataFrame({"_content_hash": ["a", "a", "b"], "id": [1, 2, 3]})
-        result = analyzer._check_content_hash_integrity(df)
+        result = analyzer._statistics.check_content_hash_integrity(df)
         assert result.status == DQCheckStatus.WARN
         assert result.hash_collisions > 0
 
@@ -445,21 +445,21 @@ class TestCheckKeyNullability:
 
     def test_no_rules_pass(self, analyzer: SilverDQAnalyzer) -> None:
         df = pl.DataFrame({"id": [1, 2, None]})
-        result = analyzer._check_key_nullability(df, [])
+        result = analyzer._threshold.check_key_nullability(df, [])
         assert result["status"] == DQCheckStatus.PASS.value
         assert result["violations"] == []
 
     def test_nullable_rule_skipped(self, analyzer: SilverDQAnalyzer) -> None:
         df = pl.DataFrame({"id": [1, None, 3]})
         rules = [{"field": "id", "key_type": "merge", "nullable": True}]
-        result = analyzer._check_key_nullability(df, rules)
+        result = analyzer._threshold.check_key_nullability(df, rules)
         assert result["status"] == DQCheckStatus.PASS.value
         assert result["violations"] == []
 
     def test_non_nullable_violation_fail(self, analyzer: SilverDQAnalyzer) -> None:
         df = pl.DataFrame({"id": [1, None, 3]})
         rules = [{"field": "id", "key_type": "merge", "nullable": False}]
-        result = analyzer._check_key_nullability(df, rules)
+        result = analyzer._threshold.check_key_nullability(df, rules)
         assert result["status"] == DQCheckStatus.FAIL.value
         assert len(result["violations"]) == 1
         assert result["violations"][0]["field"] == "id"
@@ -468,7 +468,7 @@ class TestCheckKeyNullability:
     def test_missing_column_skipped(self, analyzer: SilverDQAnalyzer) -> None:
         df = pl.DataFrame({"other": [1, 2, 3]})
         rules = [{"field": "id", "key_type": "merge", "nullable": False}]
-        result = analyzer._check_key_nullability(df, rules)
+        result = analyzer._threshold.check_key_nullability(df, rules)
         assert result["status"] == DQCheckStatus.PASS.value
 
     def test_rules_checked_count(self, analyzer: SilverDQAnalyzer) -> None:
@@ -477,7 +477,7 @@ class TestCheckKeyNullability:
             {"field": "id", "key_type": "merge", "nullable": False},
             {"field": "key", "key_type": "partition", "nullable": False},
         ]
-        result = analyzer._check_key_nullability(df, rules)
+        result = analyzer._threshold.check_key_nullability(df, rules)
         assert result["rules_checked"] == 2
 
 
@@ -678,14 +678,14 @@ class TestDistributionToDict:
 
     def test_empty_distribution_serializes(self, analyzer: SilverDQAnalyzer) -> None:
         df = pl.DataFrame({"id": [1, 2, 3]})
-        dist_result = analyzer._check_value_distribution(df)
-        output = analyzer._distribution_to_dict(dist_result)
+        dist_result = analyzer._statistics.check_value_distribution(df)
+        output = analyzer._statistics.distribution_to_dict(dist_result)
         assert "numeric_columns" in output
         assert "categorical_columns" in output
         assert output["status"] == DQCheckStatus.PASS.value
 
     def test_numeric_distribution_in_dict(self, analyzer: SilverDQAnalyzer) -> None:
         df = pl.DataFrame({"score": [1.0, 2.0, 3.0]})
-        dist_result = analyzer._check_value_distribution(df)
-        output = analyzer._distribution_to_dict(dist_result)
+        dist_result = analyzer._statistics.check_value_distribution(df)
+        output = analyzer._statistics.distribution_to_dict(dist_result)
         assert "score" in output["numeric_columns"]

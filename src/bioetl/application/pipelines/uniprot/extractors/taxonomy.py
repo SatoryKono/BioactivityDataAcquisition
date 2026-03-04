@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+__all__ = ["TaxonomyExtractor"]
+
+
 from typing import Any
 
 # Any: UniProt API returns untyped JSON; lineage parameter is narrowed

@@ -6,9 +6,14 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
+from bioetl.application.core.batch_checkpoint_recovery_service import (
+    BatchCheckpointRecoveryService,
+)
 from bioetl.application.core.batch_executor import BatchExecutor
 from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
 from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
+from bioetl.application.core.batch_processing_service import BatchProcessingService
+from bioetl.application.core.batch_progress_service import BatchProgressService
 from bioetl.application.core.batch_tracing import BatchTracingManagerService
 from bioetl.application.core.batch_transformer import BatchTransformer
 from bioetl.application.core.batch_writer import BatchWriter
@@ -22,6 +27,7 @@ from bioetl.application.core.protocols import (
 from bioetl.application.core.quarantine_manager import QuarantineManagerService
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
+from bioetl.composition.factories.batch_id_generator import UuidBatchIdGenerator
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.infrastructure.validation import PanderaGoldValidator
 
@@ -37,6 +43,7 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.medallion import LoadingStrategy
     from bioetl.domain.ports import (
+        BatchIdGeneratorPort,
         CheckpointPort,
         GoldValidatorPort,
         LoggerPort,
@@ -135,6 +142,7 @@ def create_record_processor_from_pipeline(
     create_record_processor_fn: Callable[..., RecordProcessor],
     strict_gold_validation: bool = True,
     lock_validator: Callable[[], Awaitable[bool]] | None = None,
+    tracer: TracingPort | None = None,
 ) -> RecordProcessor:
     """Create RecordProcessor from pipeline using delegated builder."""
     return create_record_processor_fn(
@@ -157,6 +165,7 @@ def create_record_processor_from_pipeline(
         gold_transform_callback=callbacks.gold_transform,
         strict_gold_validation=strict_gold_validation,
         lock_validator=lock_validator,
+        tracer=tracer,
         column_groups=tuple(pipeline.config.column_groups),
         scd_config=pipeline.config.scd_config,
     )
@@ -180,6 +189,7 @@ def create_batch_executor_from_pipeline(
     silver_output_path: str | None = None,
     gold_output_path: str | None = None,
     flat_structure: bool = False,
+    batch_id_factory: BatchIdGeneratorPort | None = None,
 ) -> BatchExecutor:
     """Create BatchExecutor from pipeline using delegated component factories."""
     skip = pipeline.runtime.skip_gold
@@ -233,6 +243,26 @@ def create_batch_executor_from_pipeline(
         initial_batch_size=initial_batch_size,
         adaptive_sizing_enabled=memory_manager.enabled,
     )
+    effective_batch_id_factory = batch_id_factory or UuidBatchIdGenerator()
+    progress_service = BatchProgressService(
+        logger=pipeline.services.logger,
+        data_source=pipeline.services.data_source,
+    )
+    checkpoint_recovery_service = BatchCheckpointRecoveryService(
+        checkpoint_manager=checkpoint_manager,
+        logger=pipeline.services.logger,
+    )
+    batch_processing_service = BatchProcessingService(
+        services=pipeline.services,
+        context=pipeline.context,
+        config=processor_config,
+        logger=pipeline.services.logger,
+        batch_metrics=components.batch_metrics,
+        transformer=components.transformer,
+        writer=components.writer,
+        tracing_manager=tracing_manager,
+        batch_id_factory=effective_batch_id_factory,
+    )
 
     return BatchExecutor(
         services=pipeline.services,
@@ -245,6 +275,10 @@ def create_batch_executor_from_pipeline(
         writer=components.writer,
         tracing_manager=tracing_manager,
         memory_manager=memory_manager,
+        progress_service=progress_service,
+        checkpoint_recovery_service=checkpoint_recovery_service,
+        batch_processing_service=batch_processing_service,
+        batch_id_factory=effective_batch_id_factory,
         batch_size=pipeline.config.batch_size,
         checkpoint_interval=pipeline.config.checkpoint_interval,
     )

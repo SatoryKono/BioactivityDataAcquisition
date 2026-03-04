@@ -2,6 +2,14 @@
 
 from __future__ import annotations
 
+__all__ = [
+    "CROSSREF_PUBLICATION_SCHEMA",
+    "OPENALEX_PUBLICATION_SCHEMA",
+    "PUBMED_PUBLICATION_SCHEMA",
+    "SEMANTICSCHOLAR_PUBLICATION_SCHEMA",
+]
+
+
 import pyarrow as pa
 
 PUBMED_PUBLICATION_SCHEMA = pa.schema(

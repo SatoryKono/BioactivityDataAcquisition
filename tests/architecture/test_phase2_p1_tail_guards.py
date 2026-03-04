@@ -10,13 +10,11 @@ CRITICAL_MODULES = (
     "src/bioetl/application/core/idmapping_data_source.py",
     "src/bioetl/infrastructure/adapters/uniprot/idmapping_client.py",
 )
-ALLOWED_BROAD_EXCEPTION_FILES = frozenset(
-    {
-        "src/bioetl/interfaces/cli/commands/run.py",
-        "src/bioetl/interfaces/cli/commands/run_all.py",
-        "src/bioetl/interfaces/cli/commands/run_composite.py",
-    }
-)
+ALLOWED_BROAD_EXCEPTION_POLICIES = {
+    "src/bioetl/interfaces/cli/commands/run.py": frozenset(
+        {"CLI_CLEANUP_PREVIEW_UNEXPECTED_ERROR"}
+    ),
+}
 
 
 def _load_tree(path: str) -> ast.AST:
@@ -81,6 +79,9 @@ def test_idmapping_data_source_has_no_direct_file_io_imports() -> None:
 def test_broad_exception_handlers_are_limited_to_cli_entrypoints() -> None:
     """Allow `except Exception` only in top-level CLI entrypoints with guard rails."""
     violations: list[str] = []
+    seen_reason_codes: dict[str, set[str]] = {
+        file_path: set() for file_path in ALLOWED_BROAD_EXCEPTION_POLICIES
+    }
 
     for file_path in Path("src/bioetl").rglob("*.py"):
         rel_path = str(file_path).replace("\\", "/")
@@ -98,7 +99,8 @@ def test_broad_exception_handlers_are_limited_to_cli_entrypoints() -> None:
                 if not _has_exception_name(handler.type):
                     continue
 
-                if rel_path not in ALLOWED_BROAD_EXCEPTION_FILES:
+                allowed_reason_codes = ALLOWED_BROAD_EXCEPTION_POLICIES.get(rel_path)
+                if allowed_reason_codes is None:
                     violations.append(
                         f"{rel_path}:{handler.lineno} catches Exception outside CLI allowlist"
                     )
@@ -114,10 +116,36 @@ def test_broad_exception_handlers_are_limited_to_cli_entrypoints() -> None:
                     )
 
                 handler_source = ast.get_source_segment(source, handler) or ""
-                if "reason_code=CLI_" not in handler_source:
+                if "reason_code=" not in handler_source:
                     violations.append(
                         f"{rel_path}:{handler.lineno} missing reason_code in fallback handler"
                     )
+                    continue
+
+                matched_reason_codes = {
+                    code for code in allowed_reason_codes if code in handler_source
+                }
+                if not matched_reason_codes:
+                    violations.append(
+                        f"{rel_path}:{handler.lineno} reason_code not in allowlist "
+                        f"{sorted(allowed_reason_codes)}"
+                    )
+                    continue
+
+                seen_reason_codes[rel_path].update(matched_reason_codes)
+
+    for rel_path, allowed_reason_codes in ALLOWED_BROAD_EXCEPTION_POLICIES.items():
+        missing = allowed_reason_codes - seen_reason_codes[rel_path]
+        if missing:
+            violations.append(
+                f"{rel_path} missing broad-exception handlers for {sorted(missing)}"
+            )
+        unexpected = seen_reason_codes[rel_path] - allowed_reason_codes
+        if unexpected:
+            violations.append(
+                f"{rel_path} has unexpected broad-exception reason_code values "
+                f"{sorted(unexpected)}"
+            )
 
     assert not violations, "Broad exception policy violations:\n" + "\n".join(
         violations

@@ -10,6 +10,7 @@ bootstrap details.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
@@ -18,7 +19,6 @@ from bioetl.composition.registry import PipelineRegistry, get_default_registry
 from bioetl.composition.runtime_builders.runner_builder import build_pipeline_runner
 
 if TYPE_CHECKING:
-    from bioetl.application.core.runner import PipelineRunner
     from bioetl.domain.context import PipelineRunContext
     from bioetl.domain.ports import RunnablePort
 
@@ -33,13 +33,19 @@ class RunnerFactory:
         registry: Optional custom registry for test isolation.
     """
 
-    def __init__(self, registry: PipelineRegistry | None = None) -> None:
+    def __init__(
+        self,
+        registry: PipelineRegistry | None = None,
+        runner_builder: Callable[..., RunnablePort] | None = None,
+    ) -> None:
         """Initialize the factory.
 
         Args:
             registry: Optional custom registry. If None, uses default.
+            runner_builder: Optional runner assembly function for DI/testing.
         """
         self._registry = registry
+        self._runner_builder = runner_builder
         self._registrations_done = False
 
     def _ensure_registrations(self) -> None:
@@ -71,7 +77,8 @@ class RunnerFactory:
             FileNotFoundError: If pipeline config file is missing.
         """
         self._ensure_registrations()
-        runner: PipelineRunner = build_pipeline_runner(context, registry=self._registry)
+        runner_builder = self._runner_builder or build_pipeline_runner
+        runner: RunnablePort = runner_builder(context, registry=self._registry)
         return runner
 
     def list_pipelines(self) -> list[str]:
@@ -135,16 +142,18 @@ class MetricsExtractor:
 
 def create_runner_factory(
     registry: PipelineRegistry | None = None,
+    runner_builder: Callable[..., RunnablePort] | None = None,
 ) -> RunnerFactory:
     """Create a new RunnerFactory instance.
 
     Args:
         registry: Optional custom registry for test isolation.
+        runner_builder: Optional runner assembly function for DI/testing.
 
     Returns:
         RunnerFactory instance.
     """
-    return RunnerFactory(registry=registry)
+    return RunnerFactory(registry=registry, runner_builder=runner_builder)
 
 
 def create_metrics_extractor() -> MetricsExtractor:

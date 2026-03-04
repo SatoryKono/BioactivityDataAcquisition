@@ -8,6 +8,15 @@ Implements RULES.md §1.1 - Application Layer depends only on Domain.
 
 from __future__ import annotations
 
+__all__ = [
+    "PipelineNotFoundError",
+    "PipelineRunResult",
+    "PipelineRunnerService",
+    "RunOptions",
+    "RunResult",
+]
+
+
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import StrEnum

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from datetime import datetime
-from typing import Any, Protocol, runtime_checkable
+from typing import Protocol, runtime_checkable
 
 from bioetl.domain.types import (
     BatchID,

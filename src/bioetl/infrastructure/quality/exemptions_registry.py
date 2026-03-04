@@ -1,13 +1,20 @@
 """Registry loader/validator for architecture metric exemptions.
 
-Exemptions are stored in a YAML registry with mandatory ownership metadata:
+Exemptions are stored in a YAML registry with mandatory metadata:
 - owner
 - reason
-- expires_on
+- due date (`expires_on` or `due_on`)
 - removal_step
 """
 
 from __future__ import annotations
+
+__all__ = [
+    "get_registry_values",
+    "load_exemptions_registry",
+    "validate_exemptions_registry",
+]
+
 
 import re
 from datetime import date
@@ -17,7 +24,8 @@ from typing import Any
 import yaml
 
 _DEFAULT_REGISTRY_PATH = Path("configs/quality/architecture_metric_exemptions.yaml")
-_REQUIRED_FIELDS = ("value", "owner", "reason", "expires_on", "removal_step")
+_DEFAULT_REQUIRED_FIELDS = ("value", "owner", "reason", "expires_on", "removal_step")
+_DUE_DATE_FIELDS = ("expires_on", "due_on")
 _PLACEHOLDER_NAME_RE = re.compile(
     r"^(todo|tbd|unknown|temp|fixme|example|placeholder)$",
     re.IGNORECASE,
@@ -81,16 +89,71 @@ def get_registry_values(
 def _validate_required_fields(
     prefix: str,
     entry: dict[str, Any],  # Any: DQ check values vary by check type
+    required_fields: tuple[str, ...],
     metadata_errors: list[str],
 ) -> None:
     """Validate presence and non-empty values for required entry fields."""
-    for field_name in _REQUIRED_FIELDS:
+    for field_name in required_fields:
+        if field_name in _DUE_DATE_FIELDS:
+            continue
         value = entry.get(field_name)
         if value is None:
             metadata_errors.append(f"{prefix}: missing required field '{field_name}'")
             continue
         if isinstance(value, str) and not value.strip():
             metadata_errors.append(f"{prefix}: empty required field '{field_name}'")
+
+
+def _normalize_required_fields(
+    raw_fields: object,
+    metadata_errors: list[str],
+) -> tuple[str, ...]:
+    """Normalize policy.required_fields into stable tuple with fallbacks."""
+    if not isinstance(raw_fields, list) or not raw_fields:
+        metadata_errors.append(
+            "policy.required_fields: expected non-empty list, "
+            f"falling back to default {list(_DEFAULT_REQUIRED_FIELDS)}"
+        )
+        return _DEFAULT_REQUIRED_FIELDS
+
+    normalized: list[str] = []
+    for item in raw_fields:
+        if not isinstance(item, str) or not item.strip():
+            metadata_errors.append(
+                "policy.required_fields: field names must be non-empty strings"
+            )
+            continue
+        normalized.append(item.strip())
+
+    return tuple(normalized) if normalized else _DEFAULT_REQUIRED_FIELDS
+
+
+def _get_policy_required_fields(
+    raw: dict[str, Any],  # Any: DQ check values vary by check type
+    metadata_errors: list[str],
+) -> tuple[str, ...]:
+    """Read required field policy and enforce owner+due-date governance."""
+    required_fields: tuple[str, ...]
+    policy = raw.get("policy", {})
+    if not isinstance(policy, dict):
+        metadata_errors.append("policy: expected mapping, falling back to defaults")
+        required_fields = _DEFAULT_REQUIRED_FIELDS
+    else:
+        required_fields = _normalize_required_fields(
+            policy.get("required_fields", list(_DEFAULT_REQUIRED_FIELDS)),
+            metadata_errors,
+        )
+
+    if "owner" not in required_fields:
+        metadata_errors.append("policy.required_fields must include 'owner'")
+
+    if not any(field in required_fields for field in _DUE_DATE_FIELDS):
+        metadata_errors.append(
+            "policy.required_fields must include due date field "
+            "('expires_on' or 'due_on')"
+        )
+
+    return required_fields
 
 
 def _validate_owner(
@@ -104,30 +167,43 @@ def _validate_owner(
         metadata_errors.append(f"{prefix}: owner placeholder is not allowed")
 
 
-def _validate_expiry(
+def _validate_due_date(
     prefix: str,
     entry: dict[str, Any],  # Any: DQ check values vary by check type
+    required_fields: tuple[str, ...],
     now: date,
     metadata_errors: list[str],
     expired_entries: list[str],
 ) -> None:
-    """Validate expires_on field format and expiration status."""
-    expires_on = entry.get("expires_on")
-    if not isinstance(expires_on, str):
+    """Validate due-date field format and expiration status."""
+    due_candidates: list[str] = [
+        field for field in required_fields if field in _DUE_DATE_FIELDS
+    ]
+    for field in _DUE_DATE_FIELDS:
+        if field not in due_candidates:
+            due_candidates.append(field)
+
+    due_field = next((field for field in due_candidates if field in entry), None)
+    selected_field = due_field or due_candidates[0]
+    due_value = entry.get(selected_field)
+
+    if not isinstance(due_value, str):
         metadata_errors.append(
-            f"{prefix}: expires_on must be ISO date string (YYYY-MM-DD)"
+            f"{prefix}: due date field '{selected_field}' must be ISO date string (YYYY-MM-DD)"
         )
         return
 
     try:
-        expiry_date = date.fromisoformat(expires_on)
+        expiry_date = date.fromisoformat(due_value)
     except ValueError:
-        metadata_errors.append(f"{prefix}: expires_on must be ISO date (YYYY-MM-DD)")
+        metadata_errors.append(
+            f"{prefix}: due date field '{selected_field}' must be ISO date (YYYY-MM-DD)"
+        )
         return
 
     if expiry_date < now:
         expired_entries.append(
-            f"{prefix} expired on {expires_on} (owner={entry.get('owner')})"
+            f"{prefix} expired on {due_value} (field={selected_field}, owner={entry.get('owner')})"
         )
 
 
@@ -135,6 +211,7 @@ def _validate_exemption_entry(
     registry_name: str,
     exemption_name: object,
     entry: object,
+    required_fields: tuple[str, ...],
     now: date,
     metadata_errors: list[str],
     expired_entries: list[str],
@@ -153,9 +230,16 @@ def _validate_exemption_entry(
         metadata_errors.append(f"{prefix}: entry must be mapping")
         return
 
-    _validate_required_fields(prefix, entry, metadata_errors)
+    _validate_required_fields(prefix, entry, required_fields, metadata_errors)
     _validate_owner(prefix, entry, metadata_errors)
-    _validate_expiry(prefix, entry, now, metadata_errors, expired_entries)
+    _validate_due_date(
+        prefix,
+        entry,
+        required_fields,
+        now,
+        metadata_errors,
+        expired_entries,
+    )
 
 
 def validate_exemptions_registry(
@@ -168,6 +252,7 @@ def validate_exemptions_registry(
     now = today or date.today()
     metadata_errors: list[str] = []
     expired_entries: list[str] = []
+    required_fields = _get_policy_required_fields(raw, metadata_errors)
 
     registries = raw.get("registries")
     if not isinstance(registries, dict):
@@ -185,6 +270,7 @@ def validate_exemptions_registry(
                 registry_name,
                 exemption_name,
                 entry,
+                required_fields,
                 now,
                 metadata_errors,
                 expired_entries,

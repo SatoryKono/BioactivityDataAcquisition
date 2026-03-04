@@ -251,6 +251,36 @@ class TestFetchFiltered:
         mock_http_client.get.assert_called_once()
 
     @pytest.mark.asyncio
+    async def test_fetch_filtered_by_title_uses_cache_for_duplicate_queries(
+        self, adapter: OpenAlexAdapter, mock_http_client: MagicMock
+    ) -> None:
+        """Should reuse title-search results for repeated titles."""
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "results": [
+                {
+                    "id": "https://openalex.org/W123",
+                    "title": "Machine Learning in Drug Discovery",
+                }
+            ]
+        }
+        mock_http_client.get.return_value = mock_response
+
+        results = []
+        async for work in adapter.fetch_filtered(
+            "publication",
+            [
+                "Machine Learning in Drug Discovery",
+                "Machine Learning in Drug Discovery",
+            ],
+            "title",
+        ):
+            results.append(work)
+
+        assert len(results) == 2
+        assert mock_http_client.get.call_count == 1
+
+    @pytest.mark.asyncio
     async def test_fetch_filtered_by_title_respects_limit(
         self, adapter: OpenAlexAdapter, mock_http_client: MagicMock
     ) -> None:

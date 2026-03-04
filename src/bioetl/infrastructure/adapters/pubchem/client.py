@@ -22,6 +22,9 @@ Documentation: https://pubchemdocs.ncbi.nlm.nih.gov/pug-rest
 
 from __future__ import annotations
 
+__all__ = ["PUBCHEM_HEALTH_ERRORS", "PubChemAdapter"]
+
+
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING, Any

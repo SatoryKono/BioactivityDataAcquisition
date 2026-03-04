@@ -14,6 +14,9 @@ should remain in provider-specific extractors.
 
 from __future__ import annotations
 
+__all__ = ["extract_author_names"]
+
+
 from typing import Any
 
 

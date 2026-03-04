@@ -12,7 +12,12 @@ from uuid import UUID, uuid4
 import pytest
 
 from bioetl.application.core.batch_executor import BatchExecutor, BatchResult
+from bioetl.application.core.batch_checkpoint_recovery_service import (
+    BatchCheckpointRecoveryService,
+)
 from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
+from bioetl.application.core.batch_processing_service import BatchProcessingService
+from bioetl.application.core.batch_progress_service import BatchProgressService
 from bioetl.application.core.batch_tracing import BatchTracingManagerService
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.config import RecordProcessorConfig
@@ -189,6 +194,26 @@ def _create_batch_executor(
         initial_batch_size=initial_batch_size,
         adaptive_sizing_enabled=memory_manager.enabled,
     )
+    progress_service = BatchProgressService(
+        logger=services.logger,
+        data_source=services.data_source,
+    )
+    checkpoint_recovery_service = BatchCheckpointRecoveryService(
+        checkpoint_manager=checkpoint_manager,
+        logger=services.logger,
+    )
+    effective_batch_id_factory = batch_id_factory or BatchExecutorUuidFactoryAdapter()
+    batch_processing_service = BatchProcessingService(
+        services=services,
+        context=context,
+        config=config,
+        logger=services.logger,
+        batch_metrics=components.batch_metrics,
+        transformer=components.transformer,
+        writer=components.writer,
+        tracing_manager=tracing_manager,
+        batch_id_factory=effective_batch_id_factory,
+    )
 
     return BatchExecutor(
         services=services,
@@ -201,10 +226,20 @@ def _create_batch_executor(
         writer=components.writer,
         tracing_manager=tracing_manager,
         memory_manager=memory_manager,
+        progress_service=progress_service,
+        checkpoint_recovery_service=checkpoint_recovery_service,
+        batch_processing_service=batch_processing_service,
+        batch_id_factory=effective_batch_id_factory,
         batch_size=batch_size,
         checkpoint_interval=checkpoint_interval,
-        batch_id_factory=batch_id_factory,
     )
+
+
+class BatchExecutorUuidFactoryAdapter:
+    """Default batch-id factory adapter mirroring production uuid4 behavior."""
+
+    def create(self) -> BatchID:
+        return BatchID(uuid4())
 
 
 class DeterministicBatchIdFactory:
@@ -409,6 +444,54 @@ class TestBatchExecutorExecute:
         await batch_executor.execute(limit=100)
 
         assert captured_kwargs.get("limit") == 100
+
+    async def test_execute_checkpoint_uses_resume_offset(
+        self,
+        batch_executor,
+        mock_services,
+        mock_checkpoint_manager,
+    ):
+        """Checkpoint totals must include resume offset."""
+
+        async def mock_fetch(**kwargs):
+            for i in range(5):  # checkpoint_interval in fixture is 5
+                yield {"id": str(i), "value": 10}
+
+        mock_services.data_source.fetch = mock_fetch
+
+        await batch_executor.execute(limit=None, offset=10)
+
+        mock_checkpoint_manager.save_checkpoint.assert_any_call(15)
+
+    async def test_execute_shutdown_checkpoint_uses_resume_offset(
+        self,
+        batch_executor,
+        mock_services,
+        mock_checkpoint_manager,
+        shutdown_signal,
+    ):
+        """Shutdown checkpoint must include resume offset and fetched count."""
+        records_yielded = 0
+
+        async def mock_fetch(**kwargs):
+            nonlocal records_yielded
+            for i in range(10):
+                yield {"id": str(i), "value": 10}
+                records_yielded += 1
+                if records_yielded == 2:
+                    shutdown_signal.request()
+
+        mock_services.data_source.fetch = mock_fetch
+
+        with pytest.raises(PipelineShutdownError):
+            await batch_executor.execute(limit=None, offset=8)
+
+        checkpoint_totals = [
+            call.args[0]
+            for call in mock_checkpoint_manager.save_checkpoint.call_args_list
+        ]
+        assert checkpoint_totals
+        assert all(total == 10 for total in checkpoint_totals)
 
 
 @pytest.mark.unit

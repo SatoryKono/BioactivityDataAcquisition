@@ -5,6 +5,9 @@ Part of PubMedAdapter split to comply with LOC limits.
 
 from __future__ import annotations
 
+__all__ = ["PUBMED_SEARCH_ERRORS", "PubMedSearchMixin"]
+
+
 import contextlib
 import time
 from typing import TYPE_CHECKING, Any

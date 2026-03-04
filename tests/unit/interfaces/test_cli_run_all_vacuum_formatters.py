@@ -16,6 +16,8 @@ import pytest
 from click.testing import CliRunner
 
 from bioetl.application.services import (
+    PipelineRunResult,
+    RunResult,
     TableVacuumResult,
     VacuumAllResult,
 )
@@ -240,12 +242,23 @@ class TestDetermineExitCode:
         result = BatchRunResult(total=3, succeeded=1, failed=2, skipped=0)
         assert _determine_exit_code(result) == ExitCode.PIPELINE_ERROR
 
-    def test_ok_when_all_skipped_no_failures(self):
-        """Test ExitCode.OK when all skipped but no failures (considered success)."""
-        # Per the logic: all_succeeded = (failed == 0) and (total > 0)
-        # Skipped pipelines don't count as failures
-        result = BatchRunResult(total=3, succeeded=0, failed=0, skipped=3)
-        assert _determine_exit_code(result) == ExitCode.OK
+    def test_sigint_when_shutdown_present(self):
+        """Test ExitCode.SIGINT when batch contains a shutdown status."""
+        result = BatchRunResult(
+            total=1,
+            succeeded=0,
+            failed=0,
+            skipped=1,
+            results=[
+                RunResult(
+                    status=PipelineRunResult.SHUTDOWN,
+                    pipeline_name="chembl_activity",
+                    run_id="test-run-id",
+                    run_type="incremental",
+                )
+            ],
+        )
+        assert _determine_exit_code(result) == ExitCode.SIGINT
 
     def test_sigint_when_no_total(self):
         """Test ExitCode.SIGINT when total is 0 (all_succeeded is False)."""

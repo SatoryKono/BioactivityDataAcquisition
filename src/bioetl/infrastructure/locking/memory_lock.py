@@ -5,6 +5,9 @@ This lock is not distributed and only works within a single process.
 
 from __future__ import annotations
 
+__all__ = ["MemoryLock"]
+
+
 import asyncio
 import contextlib
 import time

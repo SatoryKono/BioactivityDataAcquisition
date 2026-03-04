@@ -9,6 +9,7 @@ See ADR-026 for architectural decisions.
 from __future__ import annotations
 
 import asyncio
+import warnings
 from collections.abc import Callable, Sequence
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
@@ -487,5 +488,17 @@ class EnrichmentCoordinatorService:
         return processed
 
 
-# Backward-compatible alias for iterative NAME-001 migration.
-EnrichmentCoordinator = EnrichmentCoordinatorService
+if TYPE_CHECKING:
+    EnrichmentCoordinator = EnrichmentCoordinatorService
+
+
+def __getattr__(name: str) -> object:
+    """Resolve deprecated compatibility aliases lazily."""
+    if name == "EnrichmentCoordinator":
+        warnings.warn(
+            "EnrichmentCoordinator is deprecated; use EnrichmentCoordinatorService.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return EnrichmentCoordinatorService
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

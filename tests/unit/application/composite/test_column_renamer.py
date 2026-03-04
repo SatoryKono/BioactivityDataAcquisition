@@ -1,10 +1,10 @@
-"""Tests for ColumnRenamer service."""
+"""Tests for ColumnRenamerService service."""
 
 import polars as pl
 import pytest
 from unittest.mock import MagicMock
 
-from bioetl.application.composite.column_renamer import ColumnRenamer
+from bioetl.application.composite.column_renamer import ColumnRenamerService
 
 
 @pytest.fixture
@@ -16,15 +16,15 @@ def mock_logger() -> MagicMock:
 
 
 @pytest.fixture
-def renamer(mock_logger: MagicMock) -> ColumnRenamer:
-    """Create ColumnRenamer instance."""
-    return ColumnRenamer(mock_logger)
+def renamer(mock_logger: MagicMock) -> ColumnRenamerService:
+    """Create ColumnRenamerService instance."""
+    return ColumnRenamerService(mock_logger)
 
 
 class TestColumnRenamer:
-    """Tests for ColumnRenamer."""
+    """Tests for ColumnRenamerService."""
 
-    def test_rename_all_business_columns(self, renamer: ColumnRenamer) -> None:
+    def test_rename_all_business_columns(self, renamer: ColumnRenamerService) -> None:
         """All business columns get qualified names."""
         df = pl.DataFrame(
             {
@@ -39,7 +39,7 @@ class TestColumnRenamer:
         assert "chembl.publication.abstract" in result.columns
         assert "chembl.publication.journal" in result.columns
 
-    def test_exclude_join_keys_by_default(self, renamer: ColumnRenamer) -> None:
+    def test_exclude_join_keys_by_default(self, renamer: ColumnRenamerService) -> None:
         """Join keys are not renamed by default."""
         df = pl.DataFrame(
             {
@@ -56,7 +56,9 @@ class TestColumnRenamer:
         assert "pmc_id" in result.columns
         assert "chembl.publication.title" in result.columns
 
-    def test_include_join_keys_when_disabled(self, renamer: ColumnRenamer) -> None:
+    def test_include_join_keys_when_disabled(
+        self, renamer: ColumnRenamerService
+    ) -> None:
         """Join keys are renamed when exclude_join_keys=False."""
         df = pl.DataFrame({"doi": ["10.1/a"], "title": ["T1"]})
         result = renamer.rename_dataframe(
@@ -66,7 +68,7 @@ class TestColumnRenamer:
         assert "chembl.publication.doi" in result.columns
         assert "chembl.publication.title" in result.columns
 
-    def test_skip_system_columns(self, renamer: ColumnRenamer) -> None:
+    def test_skip_system_columns(self, renamer: ColumnRenamerService) -> None:
         """System columns (starting with _) are not renamed."""
         df = pl.DataFrame(
             {
@@ -81,7 +83,7 @@ class TestColumnRenamer:
         assert "_ingestion_ts" in result.columns
         assert "chembl.publication.title" in result.columns
 
-    def test_skip_already_qualified(self, renamer: ColumnRenamer) -> None:
+    def test_skip_already_qualified(self, renamer: ColumnRenamerService) -> None:
         """Already qualified columns are not renamed."""
         df = pl.DataFrame(
             {
@@ -94,31 +96,31 @@ class TestColumnRenamer:
         assert "crossref.publication.title" in result.columns
         assert "chembl.publication.abstract" in result.columns
 
-    def test_empty_dataframe(self, renamer: ColumnRenamer) -> None:
+    def test_empty_dataframe(self, renamer: ColumnRenamerService) -> None:
         """Empty DataFrame returns empty DataFrame."""
         df = pl.DataFrame()
         result = renamer.rename_dataframe(df, "chembl_publication")
         assert len(result.columns) == 0
 
-    def test_build_rename_map(self, renamer: ColumnRenamer) -> None:
+    def test_build_rename_map(self, renamer: ColumnRenamerService) -> None:
         """Build correct rename mapping."""
         columns = ["title", "doi", "_run_id", "chembl.activity.name"]
         mapping = renamer.build_rename_map(columns, "chembl_publication")
 
         assert mapping == {"title": "chembl.publication.title"}
 
-    def test_parse_pipeline_valid(self, renamer: ColumnRenamer) -> None:
+    def test_parse_pipeline_valid(self, renamer: ColumnRenamerService) -> None:
         """Parse valid pipeline name."""
         provider, entity = renamer._parse_pipeline("chembl_publication")
         assert provider == "chembl"
         assert entity == "publication"
 
-    def test_parse_pipeline_invalid(self, renamer: ColumnRenamer) -> None:
+    def test_parse_pipeline_invalid(self, renamer: ColumnRenamerService) -> None:
         """Reject pipeline without underscore."""
         with pytest.raises(ValueError, match="must be in format"):
             renamer._parse_pipeline("chemblpublication")
 
-    def test_case_insensitive_join_keys(self, renamer: ColumnRenamer) -> None:
+    def test_case_insensitive_join_keys(self, renamer: ColumnRenamerService) -> None:
         """Join key detection is case-insensitive."""
         df = pl.DataFrame({"DOI": ["10.1/a"], "PMID": ["123"]})
         result = renamer.rename_dataframe(df, "chembl_publication")
@@ -127,7 +129,7 @@ class TestColumnRenamer:
         assert "DOI" in result.columns
         assert "PMID" in result.columns
 
-    def test_data_preserved_after_rename(self, renamer: ColumnRenamer) -> None:
+    def test_data_preserved_after_rename(self, renamer: ColumnRenamerService) -> None:
         """Data values are preserved after renaming."""
         df = pl.DataFrame(
             {
@@ -140,7 +142,7 @@ class TestColumnRenamer:
         assert result["chembl.publication.title"].to_list() == ["Title 1", "Title 2"]
         assert result["doi"].to_list() == ["10.1/a", "10.1/b"]
 
-    def test_normalization_to_lowercase(self, renamer: ColumnRenamer) -> None:
+    def test_normalization_to_lowercase(self, renamer: ColumnRenamerService) -> None:
         """Provider and entity are normalized to lowercase."""
         df = pl.DataFrame({"title": ["T1"]})
         result = renamer.rename_dataframe(df, "ChEMBL_Publication")
@@ -149,9 +151,9 @@ class TestColumnRenamer:
 
 
 class TestColumnRenamerFieldAliases:
-    """Tests for ColumnRenamer with field alias support."""
+    """Tests for ColumnRenamerService with field alias support."""
 
-    def test_alias_normalizes_field_name(self, renamer: ColumnRenamer) -> None:
+    def test_alias_normalizes_field_name(self, renamer: ColumnRenamerService) -> None:
         """Field aliases should normalize provider-specific names to canonical."""
         df = pl.DataFrame(
             {
@@ -166,7 +168,7 @@ class TestColumnRenamerFieldAliases:
         assert "pubchem.compound.molecular_weight" in result.columns
         assert "pubchem.compound.h_bond_acceptor_count" not in result.columns
 
-    def test_alias_preserves_data_values(self, renamer: ColumnRenamer) -> None:
+    def test_alias_preserves_data_values(self, renamer: ColumnRenamerService) -> None:
         """Data should be preserved after alias-based renaming."""
         df = pl.DataFrame(
             {
@@ -183,7 +185,7 @@ class TestColumnRenamerFieldAliases:
         assert result["pubchem.compound.hba_count"].to_list() == [5, 3]
         assert result["pubchem.compound.hbd_count"].to_list() == [2, 1]
 
-    def test_alias_multiple_fields(self, renamer: ColumnRenamer) -> None:
+    def test_alias_multiple_fields(self, renamer: ColumnRenamerService) -> None:
         """Multiple field aliases should all be applied."""
         df = pl.DataFrame(
             {
@@ -209,7 +211,7 @@ class TestColumnRenamerFieldAliases:
         assert "pubchem.compound.logp" in result.columns
         assert "pubchem.compound.standard_inchi" in result.columns
 
-    def test_no_alias_passthrough(self, renamer: ColumnRenamer) -> None:
+    def test_no_alias_passthrough(self, renamer: ColumnRenamerService) -> None:
         """Fields not in alias map should pass through unchanged."""
         df = pl.DataFrame({"molecular_weight": [180.0]})
         aliases = {"h_bond_acceptor_count": "hba_count"}  # No mapping for MW
@@ -217,21 +219,21 @@ class TestColumnRenamerFieldAliases:
 
         assert "pubchem.compound.molecular_weight" in result.columns
 
-    def test_none_aliases_no_effect(self, renamer: ColumnRenamer) -> None:
+    def test_none_aliases_no_effect(self, renamer: ColumnRenamerService) -> None:
         """None field_aliases should behave like no aliases (backward compat)."""
         df = pl.DataFrame({"h_bond_acceptor_count": [5]})
         result = renamer.rename_dataframe(df, "pubchem_compound", field_aliases=None)
 
         assert "pubchem.compound.h_bond_acceptor_count" in result.columns
 
-    def test_empty_aliases_no_effect(self, renamer: ColumnRenamer) -> None:
+    def test_empty_aliases_no_effect(self, renamer: ColumnRenamerService) -> None:
         """Empty alias dict should behave like no aliases."""
         df = pl.DataFrame({"h_bond_acceptor_count": [5]})
         result = renamer.rename_dataframe(df, "pubchem_compound", field_aliases={})
 
         assert "pubchem.compound.h_bond_acceptor_count" in result.columns
 
-    def test_build_rename_map_with_aliases(self, renamer: ColumnRenamer) -> None:
+    def test_build_rename_map_with_aliases(self, renamer: ColumnRenamerService) -> None:
         """build_rename_map should apply aliases in the mapping."""
         columns = ["h_bond_acceptor_count", "molecular_weight", "_run_id"]
         aliases = {"h_bond_acceptor_count": "hba_count"}

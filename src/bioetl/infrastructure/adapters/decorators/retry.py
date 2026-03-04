@@ -13,6 +13,9 @@ Usage:
     from bioetl.infrastructure.adapters.decorators import RetryingDataSourceDecorator
     from bioetl.domain.resilience import RetryConfig
 
+__all__ = ["RetryingDataSourceDecorator"]
+
+
     retry_config = RetryConfig(max_attempts=3, multiplier=2.0)
     decorated = RetryingDataSourceDecorator(
         data_source=base_adapter,

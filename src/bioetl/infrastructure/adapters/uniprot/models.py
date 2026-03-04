@@ -10,6 +10,34 @@ See RULES.md §8.2 for JSON response modeling guidelines.
 
 from __future__ import annotations
 
+__all__ = [
+    "UniProtComment",
+    "UniProtCrossReference",
+    "UniProtEcNumber",
+    "UniProtEvidence",
+    "UniProtExtraAttributes",
+    "UniProtFeature",
+    "UniProtFeatureLocation",
+    "UniProtFeatureRecord",
+    "UniProtFullName",
+    "UniProtGene",
+    "UniProtIsoform",
+    "UniProtKeyword",
+    "UniProtLocation",
+    "UniProtName",
+    "UniProtOrganism",
+    "UniProtProteinDescription",
+    "UniProtProteinRecord",
+    "UniProtReaction",
+    "UniProtRecommendedName",
+    "UniProtSearchResponse",
+    "UniProtSequence",
+    "UniProtSequenceRecord",
+    "UniProtSubcellularLocation",
+    "UniProtText",
+]
+
+
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field

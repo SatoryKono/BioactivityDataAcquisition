@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from collections import Counter
 from dataclasses import dataclass
 from datetime import date
@@ -60,6 +61,16 @@ def _resolve_scorecard_path(path: Path | str | None = None) -> Path:
 def _quarter_label(target_date: date) -> str:
     quarter = ((target_date.month - 1) // 3) + 1
     return f"{target_date.year}-Q{quarter}"
+
+
+_REGISTRY_VIOLATION_RE = re.compile(
+    r"^registry '([^']+)' count \d+ exceeds budget \d+$"
+)
+_GROUP_VIOLATION_RE = re.compile(r"^group '([^']+)' count \d+ exceeds budget \d+$")
+_TOTAL_VIOLATION_RE = re.compile(r"^total exemptions \d+ exceeds budget \d+$")
+_INTEGRAL_SCORE_VIOLATION_RE = re.compile(
+    r"^integral debt score [\d.]+ is below target [\d.]+$"
+)
 
 
 def load_debt_scorecard(
@@ -135,6 +146,83 @@ def validate_debt_scorecard(
     return validate_debt_scorecard_raw(raw)
 
 
+def validate_scorecard_registry_sync(
+    *,
+    registry_path: Path | str | None = None,
+    scorecard_path: Path | str | None = None,
+    today: date | None = None,
+) -> list[str]:
+    """Validate that scorecard baseline is synchronized with exemption registry.
+
+    This check is intentionally conservative:
+    - scorecard must declare every live registry from exemptions YAML
+    - no live registry count may exceed baseline.by_registry budget
+    - total live exemptions may not exceed baseline.total_exemptions
+
+    The check prevents silent drift where scorecard budgets lag behind the real
+    exemption registry and CI gates become misleading.
+    """
+    now = today or date.today()
+    inventory = build_exemption_inventory(registry_path, today=now)
+    scorecard = load_debt_scorecard(scorecard_path)
+
+    baseline = scorecard.get("baseline", {})
+    if not isinstance(baseline, dict):
+        return ["scorecard.baseline: expected mapping"]
+
+    baseline_by_registry = baseline.get("by_registry", {})
+    if not isinstance(baseline_by_registry, dict):
+        return ["scorecard.baseline.by_registry: expected mapping"]
+
+    errors: list[str] = []
+    inventory_registry_names = set(inventory.by_registry)
+    baseline_registry_names = set(baseline_by_registry)
+
+    missing_in_scorecard = sorted(inventory_registry_names - baseline_registry_names)
+    if missing_in_scorecard:
+        errors.append(
+            "scorecard.baseline.by_registry missing live registries: "
+            f"{missing_in_scorecard}"
+        )
+
+    stale_in_scorecard = sorted(baseline_registry_names - inventory_registry_names)
+    if stale_in_scorecard:
+        errors.append(
+            "scorecard.baseline.by_registry has stale registries not present in "
+            f"exemptions YAML: {stale_in_scorecard}"
+        )
+
+    comparable_registries = sorted(inventory_registry_names & baseline_registry_names)
+    for registry_name in comparable_registries:
+        baseline_value = baseline_by_registry.get(registry_name)
+        if not isinstance(baseline_value, int):
+            errors.append(
+                "scorecard.baseline.by_registry."
+                f"{registry_name}: expected int, got {type(baseline_value).__name__}"
+            )
+            continue
+        live_count = inventory.by_registry.get(registry_name, 0)
+        if live_count > baseline_value:
+            errors.append(
+                f"registry '{registry_name}' live count {live_count} exceeds "
+                f"scorecard baseline {baseline_value}"
+            )
+
+    baseline_total = baseline.get("total_exemptions")
+    if not isinstance(baseline_total, int):
+        errors.append(
+            "scorecard.baseline.total_exemptions: expected int, "
+            f"got {type(baseline_total).__name__}"
+        )
+    elif inventory.total_exemptions > baseline_total:
+        errors.append(
+            f"live total_exemptions {inventory.total_exemptions} exceeds "
+            f"scorecard baseline {baseline_total}"
+        )
+
+    return errors
+
+
 def compute_integral_debt_score(
     *,
     total_exemptions: int,
@@ -163,7 +251,7 @@ def _current_quarter_target(
     scorecard: dict[str, Any],  # Any: YAML scorecard sections are heterogeneous
     *,
     today: date,
-) -> dict[str, Any] | None:
+) -> dict[str, Any] | None:  # Any: YAML scorecard sections are heterogeneous
     quarter = _quarter_label(today)
     for item in scorecard.get("quarterly_targets", []):
         if isinstance(item, dict) and item.get("quarter") == quarter:
@@ -212,6 +300,95 @@ def _collect_allowances(
                     allowance_by_group[group_name] += value
 
     return allowance_total, allowance_by_registry, allowance_by_group
+
+
+def _extract_growth_violation_section(violation: str) -> str:
+    """Map a human-readable growth violation to section key."""
+    registry_match = _REGISTRY_VIOLATION_RE.match(violation)
+    if registry_match is not None:
+        return f"registry:{registry_match.group(1)}"
+
+    group_match = _GROUP_VIOLATION_RE.match(violation)
+    if group_match is not None:
+        return f"group:{group_match.group(1)}"
+
+    if _TOTAL_VIOLATION_RE.match(violation):
+        return "total_exemptions"
+    if _INTEGRAL_SCORE_VIOLATION_RE.match(violation):
+        return "integral_score"
+    return "unknown"
+
+
+def _resolve_rollout_mode_for_section(
+    *,
+    scorecard: dict[str, Any],  # Any: YAML scorecard sections are heterogeneous
+    section_key: str,
+    today: date,
+    fallback_mode: str,
+) -> str:
+    """Resolve warn/block mode for section with staged rollout overrides."""
+    governance = scorecard.get("governance", {})
+    if not isinstance(governance, dict):
+        return fallback_mode
+
+    rollout = governance.get("growth_section_gate_rollout", {})
+    if not isinstance(rollout, dict):
+        return fallback_mode
+
+    default_mode = rollout.get("default_mode", fallback_mode)
+    default_mode_str = (
+        default_mode.strip().lower() if isinstance(default_mode, str) else fallback_mode
+    )
+    if default_mode_str not in {"warn", "block"}:
+        default_mode_str = fallback_mode
+
+    warn_until_by_section = rollout.get("warn_until_by_section", {})
+    if not isinstance(warn_until_by_section, dict):
+        return default_mode_str
+
+    rollout_keys = [section_key]
+    if ":" in section_key:
+        section_prefix = section_key.split(":", 1)[0]
+        rollout_keys.append(f"{section_prefix}:*")
+    rollout_keys.append("*")
+
+    for key in rollout_keys:
+        raw_cutoff = warn_until_by_section.get(key)
+        cutoff = _parse_iso_date(raw_cutoff)
+        if cutoff is not None and today <= cutoff:
+            return "warn"
+
+    return default_mode_str
+
+
+def split_growth_violations_by_severity(
+    *,
+    violations: list[str],
+    scorecard: dict[str, Any],  # Any: YAML scorecard sections are heterogeneous
+    today: date | None = None,
+    fallback_mode: str = "block",
+) -> tuple[list[str], list[str]]:
+    """Split growth violations into (blocking, warning) using staged rollout policy."""
+    now = today or date.today()
+    default_mode = fallback_mode.strip().lower()
+    if default_mode not in {"warn", "block"}:
+        default_mode = "block"
+
+    blocking: list[str] = []
+    warning: list[str] = []
+    for violation in violations:
+        section_key = _extract_growth_violation_section(violation)
+        section_mode = _resolve_rollout_mode_for_section(
+            scorecard=scorecard,
+            section_key=section_key,
+            today=now,
+            fallback_mode=default_mode,
+        )
+        if section_mode == "warn":
+            warning.append(violation)
+        else:
+            blocking.append(violation)
+    return blocking, warning
 
 
 def _evaluate_registry_budgets(
@@ -356,5 +533,7 @@ __all__ = [
     "compute_integral_debt_score",
     "evaluate_debt_scorecard",
     "load_debt_scorecard",
+    "split_growth_violations_by_severity",
     "validate_debt_scorecard",
+    "validate_scorecard_registry_sync",
 ]

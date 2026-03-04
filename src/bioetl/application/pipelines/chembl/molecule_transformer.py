@@ -6,6 +6,9 @@ Uses declarative field_specs DSL for mapping where applicable.
 
 from __future__ import annotations
 
+__all__ = ["MoleculeTransformer"]
+
+
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.dict_transformers import flatten_nested_dict

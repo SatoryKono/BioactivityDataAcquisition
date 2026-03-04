@@ -16,10 +16,17 @@ from typing import Final
 
 from bioetl.domain.mapping.generated.publication_type_classification_data import (
     _CLASSIFICATION_TABLE,
+    _CROSSREF_ROW_INDEX,
+    _ENTRY_CORE,
+    _OPENALEX_ROW_INDEX,
+    _PUBMED_ROW_INDEX,
+    _S2_ROW_INDEX,
     CLASSIFICATION_TABLE_SIZE,
 )
 
 __all__ = [
+    "CLASSIFICATION_TABLE_SIZE",
+    "_CLASSIFICATION_TABLE",
     "PublicationTypeEntry",
     "classify_publication_type",
 ]
@@ -42,52 +49,41 @@ class PublicationTypeEntry:
     specificity: int
 
 
-_DASH = "—"
+_ENTRY_BY_SPECIFICITY: Final[tuple[PublicationTypeEntry, ...]] = tuple(
+    PublicationTypeEntry(
+        unified_type=unified_type,
+        subclass=subclass,
+        class_code=class_code,
+        specificity=row_idx,
+    )
+    for row_idx, (unified_type, subclass, class_code) in enumerate(_ENTRY_CORE, start=1)
+)
 
 
-def _build_lookups() -> tuple[
-    dict[str, PublicationTypeEntry],
-    dict[str, PublicationTypeEntry],
-    dict[str, PublicationTypeEntry],
-    dict[str, PublicationTypeEntry],
-]:
-    """Build provider-specific lookup dictionaries.
-
-    Keys are normalized to lowercase. If a key ends with ``*`` in source CSV,
-    it is treated as an additional (secondary) alias and does not override a
-    primary key already registered earlier.
-    """
-
-    openalex: dict[str, PublicationTypeEntry] = {}
-    crossref: dict[str, PublicationTypeEntry] = {}
-    pubmed: dict[str, PublicationTypeEntry] = {}
-    s2: dict[str, PublicationTypeEntry] = {}
-
-    for row_idx, row in enumerate(_CLASSIFICATION_TABLE, start=1):
-        unified_type, subclass, class_code, oa_keys, cr_keys, pm_keys, s2_keys = row
-        entry = PublicationTypeEntry(
-            unified_type=unified_type,
-            subclass=subclass,
-            class_code=class_code,
-            specificity=row_idx,
-        )
-
-        for raw_key, target in (
-            (oa_keys, openalex),
-            (cr_keys, crossref),
-            (pm_keys, pubmed),
-            (s2_keys, s2),
-        ):
-            if raw_key == _DASH:
-                continue
-            key = raw_key.rstrip("*").lower()
-            if key not in target:
-                target[key] = entry
-
-    return openalex, crossref, pubmed, s2
+def _build_lookup_from_row_index(
+    row_index: dict[str, int],
+) -> dict[str, PublicationTypeEntry]:
+    """Build provider lookup using precomputed row-index mapping."""
+    max_idx = len(_ENTRY_BY_SPECIFICITY)
+    return {
+        raw_key: _ENTRY_BY_SPECIFICITY[idx - 1]
+        for raw_key, idx in row_index.items()
+        if 0 < idx <= max_idx
+    }
 
 
-_OPENALEX_LOOKUP, _CROSSREF_LOOKUP, _PUBMED_LOOKUP, _S2_LOOKUP = _build_lookups()
+_OPENALEX_LOOKUP: Final[dict[str, PublicationTypeEntry]] = _build_lookup_from_row_index(
+    _OPENALEX_ROW_INDEX
+)
+_CROSSREF_LOOKUP: Final[dict[str, PublicationTypeEntry]] = _build_lookup_from_row_index(
+    _CROSSREF_ROW_INDEX
+)
+_PUBMED_LOOKUP: Final[dict[str, PublicationTypeEntry]] = _build_lookup_from_row_index(
+    _PUBMED_ROW_INDEX
+)
+_S2_LOOKUP: Final[dict[str, PublicationTypeEntry]] = _build_lookup_from_row_index(
+    _S2_ROW_INDEX
+)
 
 _PROVIDER_LOOKUPS: Final[dict[str, dict[str, PublicationTypeEntry]]] = {
     "openalex": _OPENALEX_LOOKUP,

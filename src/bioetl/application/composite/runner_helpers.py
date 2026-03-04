@@ -6,6 +6,15 @@ These functions have no side effects and operate on data passed as arguments.
 
 from __future__ import annotations
 
+__all__ = [
+    "add_not_run_results",
+    "calculate_had_warnings",
+    "get_mergeable_dependencies",
+    "get_mergeable_enrichers",
+    "log_enrichment_summary",
+]
+
+
 from collections.abc import Iterable
 from typing import TYPE_CHECKING
 

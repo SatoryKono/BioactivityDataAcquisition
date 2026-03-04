@@ -36,7 +36,7 @@ def _path_to_table_name_local(path: str) -> str:
     return path
 
 
-class MergeCompatibilityHelper:
+class MergeCompatibilityMixin:
     """Mixin preserving legacy MergeService helper API."""
 
     # -- Host-class attributes (set by MergeService.__init__) --
@@ -388,6 +388,4 @@ class MergeCompatibilityHelper:
         )
 
 
-MergeCompatibilityMixin = MergeCompatibilityHelper
-
-__all__ = ["MergeCompatibilityHelper", "MergeCompatibilityMixin"]
+__all__ = ["MergeCompatibilityMixin"]

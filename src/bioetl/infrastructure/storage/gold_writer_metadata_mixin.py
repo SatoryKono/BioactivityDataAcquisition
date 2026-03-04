@@ -95,8 +95,9 @@ class GoldWriterMetadataMixin:
         try:
             dt = await self._run_in_executor(lambda: module.DeltaTable(table_path))
             delta_table = cast(
-                "Any", dt
-            )  # Any: runtime DeltaTable is loaded dynamically
+                "Any",  # Any: runtime DeltaTable is loaded dynamically
+                dt,
+            )
             version: int = delta_table.version()
             return version
         except module.TableNotFoundError:

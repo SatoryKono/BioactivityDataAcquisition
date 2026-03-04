@@ -8,6 +8,9 @@ with other publication pipelines (CrossRef, OpenAlex, SemanticScholar).
 
 from __future__ import annotations
 
+__all__ = ["PubMedPublicationTransformer"]
+
+
 import re
 import xml.etree.ElementTree as ET
 from typing import TYPE_CHECKING, Any, ClassVar, cast

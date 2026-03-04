@@ -4,6 +4,9 @@ Transforms Publication records to extract and flatten associated terms.
 This is a derived entity transformer - it extracts nested term data
 from Publication (ChEMBL Document) API responses and flattens the 1:M relationship.
 
+__all__ = ["PublicationTermTransformer"]
+
+
 Uses declarative field_specs DSL for mapping.
 
 .. versionchanged:: 2.0.0

@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+__all__ = ["ChemblMetadataMixin"]
+
+
 from typing import TYPE_CHECKING
 
 from bioetl.infrastructure.adapters.chembl.constants import CHEMBL_API_BASE

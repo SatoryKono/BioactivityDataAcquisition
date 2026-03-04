@@ -8,12 +8,20 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
-from typing import Literal, cast
+from typing import Any, Literal, cast
 
 import click
 
 from bioetl.application.services import ExportOptions
 from bioetl.composition.entrypoints import get_export_service
+from bioetl.domain.exceptions import BioETLError
+from bioetl.interfaces.cli.commands.execution_policy import (
+    CLI_ENTRYPOINT_TYPED_ERRORS,
+)
+from bioetl.interfaces.cli.commands.execution_policy import (
+    handle_cli_failure as handle_cli_execution_failure,
+)
+from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import (
     echo_error,
     echo_export_preview,
@@ -21,6 +29,163 @@ from bioetl.interfaces.cli.formatters import (
     echo_info,
     echo_table_list,
 )
+
+ExportFormat = Literal["csv", "xlsx", "tsv"]
+
+
+def _handle_export_failure(
+    exc: BaseException,
+    *,
+    reason_code: str,
+    table: str,
+    domain_error_title: str,
+    unexpected_error_title: str,
+) -> None:
+    """Handle export command failures with shared CLI policy."""
+    handle_cli_execution_failure(
+        exc,
+        reason_code=reason_code,
+        subject_key="table",
+        subject_value=table,
+        domain_error_title=domain_error_title,
+        unexpected_error_title=unexpected_error_title,
+        interrupted_message="Export interrupted by user (Ctrl+C)",
+        default_exit_code=ExitCode.FAIL,
+    )
+
+
+def _resolve_list_layer(layer: str) -> str:
+    """Map CLI layer value to service list scope."""
+    return layer if layer != "silver" else "all"
+
+
+def _require_table_argument(table: str | None) -> str:
+    """Validate table argument for non-list operations."""
+    if table:
+        return table
+    echo_error("TABLE argument is required (or use --list to see available tables)")
+    raise SystemExit(ExitCode.FAIL)
+
+
+def _parse_columns(columns: str | None) -> list[str] | None:
+    """Parse comma-separated columns from CLI option."""
+    if not columns:
+        return None
+    return [column.strip() for column in columns.split(",")]
+
+
+def _parse_export_format(output_format: str) -> ExportFormat:
+    """Parse output format value into strict ExportFormat literal."""
+    if output_format in {"csv", "xlsx", "tsv"}:
+        return cast("ExportFormat", output_format)
+    return "csv"
+
+
+def _build_export_options(
+    output_format: str,
+    output: Path | None,
+    limit: int | None,
+    columns: str | None,
+) -> ExportOptions:
+    """Build validated ExportOptions from CLI parameters."""
+    return ExportOptions(
+        format=_parse_export_format(output_format),
+        output_path=output,
+        limit=limit,
+        columns=_parse_columns(columns),
+    )
+
+
+def _run_preview(
+    service: Any,  # Any: service can be sync mock or async export service in tests
+    table: str,
+    layer: str,
+) -> None:
+    """Execute async preview operation from sync CLI context."""
+
+    async def _preview() -> None:
+        table_preview = await service.preview(table, layer=layer)
+        echo_export_preview(table_preview)
+
+    coro = _preview()
+    try:
+        asyncio.run(coro)
+    except FileNotFoundError as exc:
+        echo_error(str(exc))
+        raise SystemExit(ExitCode.FAIL) from None
+    except BioETLError as exc:
+        _handle_export_failure(
+            exc,
+            reason_code="CLI_EXPORT_PREVIEW_DOMAIN_ERROR",
+            table=table,
+            domain_error_title="Export preview failed with domain error",
+            unexpected_error_title="Unexpected error during export preview",
+        )
+    except KeyboardInterrupt as exc:
+        _handle_export_failure(
+            exc,
+            reason_code="CLI_EXPORT_PREVIEW_SIGINT",
+            table=table,
+            domain_error_title="Export preview failed with domain error",
+            unexpected_error_title="Unexpected error during export preview",
+        )
+    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
+        _handle_export_failure(
+            exc,
+            reason_code="CLI_EXPORT_PREVIEW_UNEXPECTED_ERROR",
+            table=table,
+            domain_error_title="Export preview failed with domain error",
+            unexpected_error_title="Unexpected error during export preview",
+        )
+    finally:
+        if getattr(coro, "cr_frame", None) is not None:
+            coro.close()
+
+
+def _run_export(
+    service: Any,  # Any: service can be sync mock or async export service in tests
+    table: str,
+    layer: str,
+    options: ExportOptions,
+) -> None:
+    """Execute async export operation from sync CLI context."""
+
+    async def _export() -> None:
+        result = await service.export(table, layer=layer, options=options)
+        echo_export_result(result)
+        if not result.success:
+            raise SystemExit(ExitCode.FAIL)
+
+    coro = _export()
+    try:
+        asyncio.run(coro)
+    except BioETLError as exc:
+        _handle_export_failure(
+            exc,
+            reason_code="CLI_EXPORT_RUN_DOMAIN_ERROR",
+            table=table,
+            domain_error_title="Export failed with domain error",
+            unexpected_error_title="Unexpected error during export",
+        )
+    except KeyboardInterrupt as exc:
+        _handle_export_failure(
+            exc,
+            reason_code="CLI_EXPORT_RUN_SIGINT",
+            table=table,
+            domain_error_title="Export failed with domain error",
+            unexpected_error_title="Unexpected error during export",
+        )
+    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
+        _handle_export_failure(
+            exc,
+            reason_code="CLI_EXPORT_RUN_UNEXPECTED_ERROR",
+            table=table,
+            domain_error_title="Export failed with domain error",
+            unexpected_error_title="Unexpected error during export",
+        )
+    finally:
+        if getattr(coro, "cr_frame", None) is not None:
+            coro.close()
 
 
 @click.command("export")
@@ -124,53 +289,52 @@ def export_command(
 
     # Handle --list flag
     if list_tables:
-        tables = service.list_tables(layer=layer if layer != "silver" else "all")
+        try:
+            tables = service.list_tables(layer=_resolve_list_layer(layer))
+        except BioETLError as exc:
+            _handle_export_failure(
+                exc,
+                reason_code="CLI_EXPORT_LIST_DOMAIN_ERROR",
+                table=f"<list:{layer}>",
+                domain_error_title="Export table listing failed with domain error",
+                unexpected_error_title="Unexpected error during export table listing",
+            )
+            return
+        except KeyboardInterrupt as exc:
+            _handle_export_failure(
+                exc,
+                reason_code="CLI_EXPORT_LIST_SIGINT",
+                table=f"<list:{layer}>",
+                domain_error_title="Export table listing failed with domain error",
+                unexpected_error_title="Unexpected error during export table listing",
+            )
+            return
+        except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
+            _handle_export_failure(
+                exc,
+                reason_code="CLI_EXPORT_LIST_UNEXPECTED_ERROR",
+                table=f"<list:{layer}>",
+                domain_error_title="Export table listing failed with domain error",
+                unexpected_error_title="Unexpected error during export table listing",
+            )
+            return
         if not tables:
             echo_info("No Delta tables found.")
             return
         echo_table_list(tables)
         return
 
-    # Validate table argument for other operations
-    if not table:
-        echo_error("TABLE argument is required (or use --list to see available tables)")
-        raise SystemExit(1)
+    resolved_table = _require_table_argument(table)
 
     # Handle --preview flag
     if preview:
-
-        async def _preview() -> None:
-            try:
-                table_preview = await service.preview(table, layer=layer)
-                echo_export_preview(table_preview)
-            except FileNotFoundError as e:
-                echo_error(str(e))
-                raise SystemExit(1) from None
-
-        asyncio.run(_preview())
+        _run_preview(service=service, table=resolved_table, layer=layer)
         return
 
-    # Parse columns
-    column_list = None
-    if columns:
-        column_list = [c.strip() for c in columns.split(",")]
-
-    # Build export options
-    export_format: Literal["csv", "xlsx", "tsv"] = "csv"
-    if output_format in {"csv", "xlsx", "tsv"}:
-        export_format = cast("Literal['csv', 'xlsx', 'tsv']", output_format)
-
-    options = ExportOptions(
-        format=export_format,
-        output_path=output,
+    options = _build_export_options(
+        output_format=output_format,
+        output=output,
         limit=limit,
-        columns=column_list,
+        columns=columns,
     )
-
-    async def _export() -> None:
-        result = await service.export(table, layer=layer, options=options)
-        echo_export_result(result)
-        if not result.success:
-            raise SystemExit(1)
-
-    asyncio.run(_export())
+    _run_export(service=service, table=resolved_table, layer=layer, options=options)

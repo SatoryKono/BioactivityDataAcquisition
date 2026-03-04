@@ -578,12 +578,7 @@ class TestRunAllShutdownScenarios:
         mock_registry,
         mock_pipeline_runner_service,
     ):
-        """Test shutdown without failures returns OK exit code.
-
-        Note: Current logic considers no failures as success, even if
-        all pipelines were shutdown. This is intentional - SIGINT is only
-        returned when succeeded=0 and skipped>0.
-        """
+        """Test shutdown without failures returns SIGINT exit code."""
         mock_get_registry.return_value = mock_registry
         mock_get_service.return_value = mock_pipeline_runner_service
         mock_registry.list_pipelines.return_value = ["chembl_activity"]
@@ -596,8 +591,7 @@ class TestRunAllShutdownScenarios:
             cli, ["run-all", "--source", "chembl", "--no-health-server"]
         )
 
-        # No failures means OK (all_succeeded returns True when failed=0)
-        assert result.exit_code == ExitCode.OK
+        assert result.exit_code == ExitCode.SIGINT
 
 
 # =============================================================================

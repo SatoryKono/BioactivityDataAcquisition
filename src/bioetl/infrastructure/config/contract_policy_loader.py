@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+__all__ = ["load_pipeline_contract_policy"]
+
+
 from functools import lru_cache
 from pathlib import Path
 from typing import Any

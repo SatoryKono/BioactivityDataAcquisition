@@ -6,9 +6,19 @@ import re
 from collections import Counter
 from datetime import date
 from itertools import pairwise
-from typing import Any
+from typing import Any, TypedDict, cast
 
 _QUARTER_RE = re.compile(r"^(20\d{2})-Q([1-4])$")
+
+
+class QuarterTarget(TypedDict):
+    """Normalized quarterly target entry."""
+
+    quarter: str
+    max_total_exemptions: int
+    min_integral_score: int | float
+    group_budgets: dict[str, int]
+    registry_budgets: dict[str, int]
 
 
 def _parse_iso_date(raw_value: object) -> date | None:
@@ -40,6 +50,22 @@ def _validate_non_negative_int(
         errors.append(f"{field_name}: expected non-negative int, got {value}")
         return None
     return value
+
+
+def _validate_gate_mode(
+    *,
+    value: object,
+    field_name: str,
+    errors: list[str],
+) -> str | None:
+    if not isinstance(value, str):
+        errors.append(f"{field_name}: expected string ('warn' or 'block')")
+        return None
+    mode = value.strip().lower()
+    if mode not in {"warn", "block"}:
+        errors.append(f"{field_name}: expected 'warn' or 'block', got {value!r}")
+        return None
+    return mode
 
 
 def _validate_baseline_section(
@@ -158,6 +184,101 @@ def _validate_registry_groups_section(
     return normalized_groups
 
 
+def _is_valid_rollout_section_key(
+    *,
+    key: str,
+    baseline_registry_names: set[str],
+    group_names: set[str],
+) -> bool:
+    if key in {"*", "total_exemptions", "integral_score"}:
+        return True
+
+    if key == "registry:*":
+        return True
+    if key.startswith("registry:"):
+        registry_name = key.split(":", 1)[1]
+        return registry_name in baseline_registry_names
+
+    if key == "group:*":
+        return True
+    if key.startswith("group:"):
+        group_name = key.split(":", 1)[1]
+        return group_name in group_names
+
+    return False
+
+
+def _validate_governance_section(
+    raw: dict[str, Any],  # Any: YAML values are heterogeneous
+    *,
+    baseline_registry_names: set[str],
+    group_names: set[str],
+    errors: list[str],
+) -> bool:
+    governance = raw.get("governance")
+    if not isinstance(governance, dict):
+        errors.append("governance: required mapping")
+        return False
+
+    _validate_gate_mode(
+        value=governance.get("growth_gate_default_mode", "block"),
+        field_name="governance.growth_gate_default_mode",
+        errors=errors,
+    )
+
+    allow_rf_only = governance.get("allow_grace_windows_only_for_rf")
+    allow_rf_only_flag = False
+    if not isinstance(allow_rf_only, bool):
+        errors.append("governance.allow_grace_windows_only_for_rf: expected bool")
+    else:
+        allow_rf_only_flag = allow_rf_only
+
+    rollout = governance.get("growth_section_gate_rollout", {})
+    if not isinstance(rollout, dict):
+        errors.append("governance.growth_section_gate_rollout: expected mapping")
+        return allow_rf_only_flag
+
+    _validate_gate_mode(
+        value=rollout.get(
+            "default_mode", governance.get("growth_gate_default_mode", "block")
+        ),
+        field_name="governance.growth_section_gate_rollout.default_mode",
+        errors=errors,
+    )
+
+    warn_until = rollout.get("warn_until_by_section", {})
+    if not isinstance(warn_until, dict):
+        errors.append(
+            "governance.growth_section_gate_rollout.warn_until_by_section: expected mapping"
+        )
+        return allow_rf_only_flag
+
+    for section_key, cutoff in sorted(warn_until.items()):
+        if not isinstance(section_key, str) or not section_key.strip():
+            errors.append(
+                "governance.growth_section_gate_rollout.warn_until_by_section: "
+                "section key must be non-empty string"
+            )
+            continue
+        if not _is_valid_rollout_section_key(
+            key=section_key,
+            baseline_registry_names=baseline_registry_names,
+            group_names=group_names,
+        ):
+            errors.append(
+                "governance.growth_section_gate_rollout.warn_until_by_section: "
+                f"unknown section key '{section_key}'"
+            )
+            continue
+        if _parse_iso_date(cutoff) is None:
+            errors.append(
+                "governance.growth_section_gate_rollout.warn_until_by_section."
+                f"{section_key}: expected ISO date (YYYY-MM-DD)"
+            )
+
+    return allow_rf_only_flag
+
+
 def _validate_budget_mapping(
     mapping: object,
     *,
@@ -191,7 +312,13 @@ def _validate_quarter_target(
     group_names: set[str],
     baseline_registry_names: set[str],
     errors: list[str],
-) -> tuple[tuple[int, int], dict[str, Any]] | None:
+) -> (
+    tuple[
+        tuple[int, int],
+        QuarterTarget,
+    ]
+    | None
+):
     prefix = f"quarterly_targets[{index}]"
     if not isinstance(target, dict):
         errors.append(f"{prefix}: expected mapping")
@@ -230,7 +357,7 @@ def _validate_quarter_target(
 
     if max_total is None or not isinstance(min_score, (int, float)):
         return None
-    return quarter_tuple, target
+    return quarter_tuple, cast(QuarterTarget, target)
 
 
 def _validate_quarterly_targets_section(
@@ -245,7 +372,7 @@ def _validate_quarterly_targets_section(
         errors.append("quarterly_targets: required non-empty list")
         return
 
-    parsed_targets: list[tuple[tuple[int, int], dict[str, Any]]] = []
+    parsed_targets: list[tuple[tuple[int, int], QuarterTarget]] = []
     seen_quarters: set[str] = set()
     for index, target in enumerate(quarterly_targets):
         parsed = _validate_quarter_target(
@@ -340,6 +467,7 @@ def _validate_grace_window_metadata(
     *,
     prefix: str,
     window: dict[str, Any],  # Any: YAML values are heterogeneous
+    allow_rf_only_for_rf: bool,
     errors: list[str],
 ) -> None:
     rf_id = window.get("rf_id")
@@ -347,12 +475,62 @@ def _validate_grace_window_metadata(
     starts_on = _parse_iso_date(window.get("starts_on"))
     ends_on = _parse_iso_date(window.get("ends_on"))
 
-    if not isinstance(rf_id, str) or not rf_id.strip():
+    _validate_grace_window_identity_fields(
+        prefix=prefix,
+        rf_id=rf_id,
+        approved=approved,
+        allow_rf_only_for_rf=allow_rf_only_for_rf,
+        errors=errors,
+    )
+    _validate_grace_window_dates(
+        prefix=prefix,
+        starts_on=starts_on,
+        ends_on=ends_on,
+        errors=errors,
+    )
+
+
+def _validate_grace_window_identity_fields(
+    *,
+    prefix: str,
+    rf_id: object,
+    approved: object,
+    allow_rf_only_for_rf: bool,
+    errors: list[str],
+) -> None:
+    rf_id_str = rf_id if isinstance(rf_id, str) else None
+    rf_id_is_valid = rf_id_str is not None and bool(rf_id_str.strip())
+    rf_id_is_rf_ref = rf_id_str is not None and rf_id_str.startswith("RF-")
+    approved_is_bool = isinstance(approved, bool)
+
+    if not rf_id_is_valid:
         errors.append(f"{prefix}.rf_id: required non-empty string")
-    if not isinstance(approved, bool):
+
+    if not approved_is_bool:
         errors.append(f"{prefix}.approved: expected bool")
-    if approved and isinstance(rf_id, str) and not rf_id.startswith("RF-"):
+        return
+
+    if allow_rf_only_for_rf and approved is False:
+        errors.append(
+            f"{prefix}.approved: must be true when "
+            "governance.allow_grace_windows_only_for_rf=true"
+        )
+    if approved and rf_id_is_valid and not rf_id_is_rf_ref:
         errors.append(f"{prefix}.rf_id: approved grace window must reference RF-*")
+    if allow_rf_only_for_rf and rf_id_is_valid and not rf_id_is_rf_ref:
+        errors.append(
+            f"{prefix}.rf_id: must reference RF-* when "
+            "governance.allow_grace_windows_only_for_rf=true"
+        )
+
+
+def _validate_grace_window_dates(
+    *,
+    prefix: str,
+    starts_on: date | None,
+    ends_on: date | None,
+    errors: list[str],
+) -> None:
     if starts_on is None:
         errors.append(f"{prefix}.starts_on: expected ISO date")
     if ends_on is None:
@@ -366,6 +544,7 @@ def _validate_grace_windows_section(
     *,
     baseline_registry_names: set[str],
     group_names: set[str],
+    allow_rf_only_for_rf: bool,
     errors: list[str],
 ) -> None:
     grace_windows = raw.get("grace_windows", [])
@@ -381,7 +560,12 @@ def _validate_grace_windows_section(
             errors.append(f"{prefix}: expected mapping")
             continue
 
-        _validate_grace_window_metadata(prefix=prefix, window=window, errors=errors)
+        _validate_grace_window_metadata(
+            prefix=prefix,
+            window=window,
+            allow_rf_only_for_rf=allow_rf_only_for_rf,
+            errors=errors,
+        )
         _validate_allowances(
             allowances=window.get("allowances", {}),
             prefix=prefix,
@@ -415,6 +599,13 @@ def validate_debt_scorecard_structure(
     if not normalized_groups:
         return errors
 
+    allow_rf_only_for_rf = _validate_governance_section(
+        raw,
+        baseline_registry_names=baseline_registry_names,
+        group_names=set(normalized_groups),
+        errors=errors,
+    )
+
     _validate_quarterly_targets_section(
         raw,
         group_names=set(normalized_groups),
@@ -425,6 +616,7 @@ def validate_debt_scorecard_structure(
         raw,
         baseline_registry_names=baseline_registry_names,
         group_names=set(normalized_groups),
+        allow_rf_only_for_rf=allow_rf_only_for_rf,
         errors=errors,
     )
 

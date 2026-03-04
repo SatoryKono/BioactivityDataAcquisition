@@ -5,6 +5,9 @@ Implements Template Method pattern for consistent extraction process.
 
 from __future__ import annotations
 
+__all__ = ["BaseFieldExtractor"]
+
+
 from abc import ABC, abstractmethod
 from typing import Any
 from xml.etree.ElementTree import Element

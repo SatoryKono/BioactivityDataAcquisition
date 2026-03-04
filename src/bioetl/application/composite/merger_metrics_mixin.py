@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
-class MergeMetricsHelper:
+class MergeMetricsRecorderMixin:
     """Mixin for lineage enrichment and post-merge metric calculations."""
 
     _config: MergeConfig
@@ -124,6 +124,4 @@ class MergeMetricsHelper:
         return coverage
 
 
-MergeMetricsMixin = MergeMetricsHelper
-
-__all__ = ["MergeMetricsHelper", "MergeMetricsMixin"]
+__all__ = ["MergeMetricsRecorderMixin"]

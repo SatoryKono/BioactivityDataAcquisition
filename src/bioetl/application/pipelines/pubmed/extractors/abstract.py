@@ -5,6 +5,9 @@ Handles structured and unstructured abstract parsing.
 
 from __future__ import annotations
 
+__all__ = ["AbstractExtractor"]
+
+
 from typing import cast
 from xml.etree.ElementTree import Element
 
