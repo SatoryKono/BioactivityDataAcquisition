@@ -131,6 +131,7 @@ class BatchExecutor(_BatchExecutorDQMixin):
         self._bronze_records_for_dq: list[bytes] = []
         self._silver_records_for_dq: list[BronzeRecord] = []
         self._gold_records_for_dq: list[GoldRecord] = []
+        self._dq_total_seen: int = 0
         self._source_batch_ids: list[str] = []
         self._last_bronze_path: str | None = None
 

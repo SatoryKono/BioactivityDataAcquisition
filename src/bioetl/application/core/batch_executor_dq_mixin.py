@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import random
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
@@ -23,6 +24,10 @@ _DQ_DATAFRAME_ERRORS: tuple[type[Exception], ...] = (
     RuntimeError,
 )
 
+# Maximum DQ sample size to prevent OOM on large pipeline runs.
+# Uses reservoir sampling to maintain a statistically representative subset.
+_DQ_MAX_SAMPLE_SIZE = 50_000
+
 
 class _BatchExecutorDQMixin:
     """Provides DQ data collection and report context construction."""
@@ -36,6 +41,7 @@ class _BatchExecutorDQMixin:
     _gold_records_for_dq: list[GoldRecord]
     _source_batch_ids: list[str]
     _last_bronze_path: str | None
+    _dq_total_seen: int
     records_fetched: int
     records_quarantined: int
 
@@ -51,22 +57,41 @@ class _BatchExecutorDQMixin:
         silver_records: list[BronzeRecord],
         gold_records: list[GoldRecord],
     ) -> None:
-        """Collect Bronze/Silver/Gold payloads used by post-run DQ reports."""
+        """Collect Bronze/Silver/Gold payloads used by post-run DQ reports.
+
+        Uses reservoir sampling to bound memory: once the sample reaches
+        ``_DQ_MAX_SAMPLE_SIZE``, new records randomly replace existing ones
+        with decreasing probability, keeping the sample representative.
+        """
         _ = batch_id
 
         for record in records:
             try:
-                self._bronze_records_for_dq.append(
-                    json.dumps(record, default=str).encode("utf-8")
-                )
+                encoded = json.dumps(record, default=str).encode("utf-8")
             except (TypeError, ValueError):
                 continue
+            self._reservoir_add(self._bronze_records_for_dq, encoded)
 
         if bronze_result is not None and hasattr(bronze_result, "path"):
             self._last_bronze_path = str(bronze_result.path)
 
-        self._silver_records_for_dq.extend(silver_records)
-        self._gold_records_for_dq.extend(gold_records)
+        for rec in silver_records:
+            self._reservoir_add(self._silver_records_for_dq, rec)
+        for rec in gold_records:
+            self._reservoir_add(self._gold_records_for_dq, rec)
+
+    def _reservoir_add(self, reservoir: list[object], item: object) -> None:
+        """Add item to a bounded reservoir using Algorithm R."""
+        if not hasattr(self, "_dq_total_seen"):
+            self._dq_total_seen = 0
+        self._dq_total_seen += 1
+
+        if len(reservoir) < _DQ_MAX_SAMPLE_SIZE:
+            reservoir.append(item)
+        else:
+            idx = random.randrange(self._dq_total_seen)  # noqa: S311
+            if idx < _DQ_MAX_SAMPLE_SIZE:
+                reservoir[idx] = item
 
     def _build_dataframe_from_records(
         self,
