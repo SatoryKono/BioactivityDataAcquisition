@@ -14,6 +14,8 @@ from httpx import RequestError
 from bioetl.domain.exceptions import BioETLError, NetworkError
 
 if TYPE_CHECKING:
+    from collections.abc import AsyncIterator
+
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
     from bioetl.infrastructure.adapters.common.api_request_collector import (
@@ -46,6 +48,12 @@ class PubMedSearchMixin:
     _request_collector: APIRequestCollector
     provider_name: str
     batch_size: int
+
+    # Provided by PubMedFetchMixin in the concrete class
+    def _yield_articles_from_pmids(
+        self, pmids: list[str], limit: int | None
+    ) -> AsyncIterator[dict[str, Any]]:  # Any: untyped API JSON record
+        raise NotImplementedError  # mixin stub; overridden by PubMedFetchMixin
 
     async def _get_pmids(self, search_term: str, max_count: int) -> list[str]:
         """Get PMIDs for a search term."""
@@ -103,8 +111,7 @@ class PubMedSearchMixin:
                 return []
 
             results: list[dict[str, Any]] = []  # Any: untyped API JSON record
-            # Note: _yield_articles_from_pmids is expected to be in PubMedFetchMixin
-            async for record in self._yield_articles_from_pmids(pmids, limit):  # type: ignore
+            async for record in self._yield_articles_from_pmids(pmids, limit):
                 results.append(record)
 
             return results

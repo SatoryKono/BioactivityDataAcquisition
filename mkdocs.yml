@@ -99,6 +99,7 @@ nav:
             -   "Data Flow": 02-architecture/data-flow.md
             -   "Data Layers": 02-architecture/data-layers.md
             -   "Observability Layers": 02-architecture/observability-layers.md
+            -   "Module Dependency Map": 02-architecture/generated/module-dependency-map.md
             -   Diagrams:
                     -   "Overview": 02-architecture/diagrams.md
                     -   "Diagramming Policy": 02-architecture/mmd-diagrams/docs/00-diagramming-policy.md

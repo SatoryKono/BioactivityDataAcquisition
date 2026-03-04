@@ -357,6 +357,7 @@ class CompositePreflightValidationService:
                 schema=schema_class.__name__,
                 error=str(e),
                 error_type=type(e).__name__,
+                reason_code="schema_field_extraction_failed",
             )
             # Fallback: try to get fields from class annotations
             fields = self._extract_fields_from_annotations(schema_class, source)
@@ -366,7 +367,7 @@ class CompositePreflightValidationService:
                 schema=schema_class.__name__,
                 error=str(e),
                 error_type=type(e).__name__,
-                reason_code="unexpected_bioetl_error",
+                reason_code="schema_field_extraction_failed",
             )
             # Fallback: try to get fields from class annotations
             fields = self._extract_fields_from_annotations(schema_class, source)

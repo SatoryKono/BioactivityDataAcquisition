@@ -219,5 +219,5 @@ class CompositeRunnerMergeStageHelper:
                 run_id=self._run_id_str,
                 error=str(delete_error),
                 error_type=type(delete_error).__name__,
-                reason_code="unexpected_bioetl_error",
+                reason_code="checkpoint_delete_failed",
             )

@@ -46,8 +46,19 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--expected-total",
         type=int,
-        default=22,
-        help="Expected number of matrix smoke cases.",
+        default=0,
+        help="Expected number of matrix smoke cases (0 disables fixed-total check).",
+    )
+    parser.add_argument(
+        "--expected-total-from-configs",
+        action="store_true",
+        help="Derive expected total from configs/entities/*.yaml count.",
+    )
+    parser.add_argument(
+        "--configs-root",
+        type=Path,
+        default=Path("configs/entities"),
+        help="Path used with --expected-total-from-configs.",
     )
     parser.add_argument(
         "--max-skips",
@@ -178,13 +189,17 @@ def main() -> int:
         return 1
 
     summary = _build_summary(args.junit)
+    expected_total = args.expected_total
+    if args.expected_total_from_configs:
+        expected_total = len(sorted(args.configs_root.rglob("*.yaml")))
+
     violations: list[str] = []
 
     if summary.total == 0:
         violations.append("No matrix smoke test cases found in JUnit report")
-    if args.expected_total > 0 and summary.total != args.expected_total:
+    if expected_total > 0 and summary.total != expected_total:
         violations.append(
-            f"expected total={args.expected_total}, observed total={summary.total}"
+            f"expected total={expected_total}, observed total={summary.total}"
         )
     if summary.skipped > args.max_skips:
         violations.append(

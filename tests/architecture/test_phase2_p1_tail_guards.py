@@ -122,3 +122,73 @@ def test_broad_exception_handlers_are_limited_to_cli_entrypoints() -> None:
     assert not violations, "Broad exception policy violations:\n" + "\n".join(
         violations
     )
+
+
+_BIOETL_ERROR_NAMES = frozenset(
+    {"BioETLError", "CriticalError", "RecoverableError", "DataQualityError"}
+)
+
+
+def _is_bioetl_error_handler(handler: ast.ExceptHandler) -> bool:
+    """Return True when handler catches BioETLError or a known subclass."""
+    if handler.type is None:
+        return False
+    if isinstance(handler.type, ast.Name):
+        return handler.type.id in _BIOETL_ERROR_NAMES
+    if isinstance(handler.type, ast.Tuple):
+        return any(
+            isinstance(elt, ast.Name) and elt.id in _BIOETL_ERROR_NAMES
+            for elt in handler.type.elts
+        )
+    return False
+
+
+def _handler_has_logger_call(handler: ast.ExceptHandler) -> bool:
+    """Return True when handler body contains self._logger.* calls."""
+    for node in ast.walk(handler):
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
+            value = node.func.value
+            if (
+                isinstance(value, ast.Attribute)
+                and isinstance(value.value, ast.Name)
+                and value.value.id == "self"
+                and value.attr == "_logger"
+            ):
+                return True
+    return False
+
+
+def _handler_has_reason_code(handler: ast.ExceptHandler) -> bool:
+    """Return True when handler body contains reason_code= keyword arg."""
+    for node in ast.walk(handler):
+        if isinstance(node, ast.keyword) and node.arg == "reason_code":
+            return True
+    return False
+
+
+def test_application_bioetl_error_handlers_have_reason_code() -> None:
+    """All except BioETLError handlers that log must include reason_code."""
+    violations: list[str] = []
+
+    for file_path in Path("src/bioetl/application").rglob("*.py"):
+        rel_path = str(file_path).replace("\\", "/")
+        source = file_path.read_text(encoding="utf-8")
+        tree = ast.parse(source, filename=rel_path)
+
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.ExceptHandler):
+                continue
+            if not _is_bioetl_error_handler(node):
+                continue
+            if not _handler_has_logger_call(node):
+                continue
+            if not _handler_has_reason_code(node):
+                violations.append(
+                    f"{rel_path}:{node.lineno} except BioETLError with logging "
+                    f"but no reason_code="
+                )
+
+    assert not violations, (
+        "Application-layer BioETLError handlers missing reason_code:\n"
+        + "\n".join(violations)
+    )

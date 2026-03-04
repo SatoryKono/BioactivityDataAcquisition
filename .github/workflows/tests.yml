@@ -96,6 +96,9 @@ jobs:
       - name: Check generated config schemas are up to date
         run: uv run python scripts/generate_pipeline_schema.py --check
 
+      - name: Check architecture dependency docs drift
+        run: uv run python scripts/generate_architecture_dependency_map.py --check
+
       - name: Validate docker-compose.yml syntax
         run: docker compose config > /dev/null
 

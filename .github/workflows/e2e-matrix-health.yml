@@ -76,7 +76,8 @@ jobs:
         run: |
           uv run python scripts/ci/check_e2e_matrix_skip_rate.py \
             --junit reports/e2e/matrix-smoke.xml \
-            --expected-total 22 \
+            --expected-total-from-configs \
+            --configs-root configs/entities \
             --max-skips 1 \
             --max-skip-rate 0.0455 \
             --markdown-out reports/e2e/matrix-smoke-summary.md
@@ -145,7 +146,8 @@ jobs:
           set +e
           uv run python scripts/ci/check_e2e_matrix_skip_rate.py \
             --junit reports/e2e/matrix-smoke-live.xml \
-            --expected-total 22 \
+            --expected-total-from-configs \
+            --configs-root configs/entities \
             --max-skips 22 \
             --max-skip-rate 1.0 \
             --allow-unknown-labels \
