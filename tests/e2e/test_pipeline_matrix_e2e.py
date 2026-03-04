@@ -205,6 +205,9 @@ CRITICAL_SMOKE_PIPELINES: frozenset[str] = frozenset(
         "uniprot_protein",
     }
 )
+NON_EMPTY_CASSETTE_CONTRACT_PIPELINES: frozenset[str] = frozenset(
+    PIPELINE_CASE_BY_NAME.keys()
+)
 
 VCR_MISS_MARKERS: tuple[str, ...] = (
     "can't overwrite existing cassette",
@@ -243,6 +246,21 @@ def _cassette_exists(provider: str, cassette_name: str) -> bool:
         provider_dir / f"{cassette_name}.yaml",
     )
     return any(path.exists() for path in candidates)
+
+
+def _build_e2e_fail_reason(
+    reason_code: str,
+    *,
+    pipeline_name: str,
+    detail: str,
+) -> str:
+    """Build deterministic failure reason for CI classification."""
+    return f"E2E_FAIL[{reason_code}] pipeline={pipeline_name}; {detail}"
+
+
+def _requires_non_empty_cassette_contract(pipeline_name: str) -> bool:
+    """Return True if matrix smoke pipeline must have non-empty cassette sample."""
+    return pipeline_name in NON_EMPTY_CASSETTE_CONTRACT_PIPELINES
 
 
 def _resolve_cassette_name(case: PipelineE2ECase) -> str | None:
@@ -379,7 +397,7 @@ async def test_pipeline_matrix_smoke(
         if _is_external_healthcheck_playback_failure(exc):
             pytest.skip(
                 build_e2e_skip_reason(
-                    "CASSETTE_HEALTHCHECK_MISMATCH",
+                    "INFRA_FLAKY_CASSETTE_HEALTHCHECK_MISMATCH",
                     pipeline_name=pipeline_case.pipeline_name,
                     detail=str(exc),
                 )
@@ -387,17 +405,19 @@ async def test_pipeline_matrix_smoke(
         if not _is_vcr_recording_enabled() and _is_vcr_mismatch_error(exc):
             pytest.skip(
                 build_e2e_skip_reason(
-                    "CASSETTE_MISMATCH",
+                    "INFRA_FLAKY_CASSETTE_MISMATCH",
                     pipeline_name=pipeline_case.pipeline_name,
                     detail=str(exc),
                 )
             )
         raise
     except Exception as exc:
-        pytest.fail(
-            "E2E_FAIL[CODE_REGRESSION] "
-            f"pipeline={pipeline_case.pipeline_name}; "
-            f"error_type={type(exc).__name__}; {exc}"
+        pytest.fail(  # pragma: no cover - defensive branch
+            _build_e2e_fail_reason(
+                "CODE_REGRESSION",
+                pipeline_name=pipeline_case.pipeline_name,
+                detail=f"error_type={type(exc).__name__}; {exc}",
+            )
         )
 
     try:
@@ -409,9 +429,17 @@ async def test_pipeline_matrix_smoke(
         assert len(bronze_files) >= 1
         assert_silver_table_has_records(e2e_data_dir, pipeline_case.pipeline_name, 1)
     except (AssertionError, DeltaError, TableNotFoundError) as exc:
+        if _requires_non_empty_cassette_contract(pipeline_case.pipeline_name):
+            pytest.fail(
+                _build_e2e_fail_reason(
+                    "INFRA_FLAKY_CASSETTE_EMPTY",
+                    pipeline_name=pipeline_case.pipeline_name,
+                    detail=str(exc),
+                )
+            )
         pytest.skip(
             build_e2e_skip_reason(
-                "CASSETTE_SAMPLE_EMPTY",
+                "INFRA_FLAKY_CASSETTE_EMPTY",
                 pipeline_name=pipeline_case.pipeline_name,
                 detail=str(exc),
             )

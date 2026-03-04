@@ -21,6 +21,10 @@ from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.shutdown import PipelineShutdownError
 from bioetl.domain.events import PipelineEvent
+from bioetl.domain.observability_contract import (
+    normalize_observability_context,
+    normalize_observability_metric_labels,
+)
 
 if TYPE_CHECKING:
     from types import TracebackType
@@ -96,10 +100,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
         )
         self._logger.info(PipelineEvent.START, **start_ctx)
         self._emit_observability_event_metric(
-            event_name=PipelineEvent.START,
-            provider=str(start_ctx["provider"]),
-            severity=str(start_ctx["severity"]),
-            error_type=str(start_ctx["error_type"]),
+            start_ctx,
         )
 
         return self
@@ -161,10 +162,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
             )
             self._logger.error(PipelineEvent.FAILED, **failed_ctx)
             self._emit_observability_event_metric(
-                event_name=PipelineEvent.FAILED,
-                provider=str(failed_ctx["provider"]),
-                severity=str(failed_ctx["severity"]),
-                error_type=str(failed_ctx["error_type"]),
+                failed_ctx,
             )
         elif status == "shutdown":
             shutdown_ctx = self._build_observability_context(
@@ -175,10 +173,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
             )
             self._logger.warning(PipelineEvent.SHUTDOWN, **shutdown_ctx)
             self._emit_observability_event_metric(
-                event_name=PipelineEvent.SHUTDOWN,
-                provider=str(shutdown_ctx["provider"]),
-                severity=str(shutdown_ctx["severity"]),
-                error_type=str(shutdown_ctx["error_type"]),
+                shutdown_ctx,
             )
         else:
             complete_ctx = self._build_observability_context(
@@ -188,10 +183,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
             )
             self._logger.info(PipelineEvent.COMPLETE, **complete_ctx)
             self._emit_observability_event_metric(
-                event_name=PipelineEvent.COMPLETE,
-                provider=str(complete_ctx["provider"]),
-                severity=str(complete_ctx["severity"]),
-                error_type=str(complete_ctx["error_type"]),
+                complete_ctx,
             )
 
         # 3. End Trace Span (O3: handle close errors gracefully)
@@ -240,12 +232,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
 
         log_method = getattr(self._logger, severity, self._logger.info)
         log_method(event_name, **ctx)
-        self._emit_observability_event_metric(
-            event_name=event_name,
-            provider=str(ctx["provider"]),
-            severity=str(ctx["severity"]),
-            error_type=str(ctx["error_type"]),
-        )
+        self._emit_observability_event_metric(ctx)
 
         # Add span event if tracing is active
         if self.span:
@@ -458,45 +445,32 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
         **extra: Any,  # Any: structlog-compatible context kwargs
     ) -> dict[str, Any]:  # Any: OTel span attributes are heterogeneous
         """Build normalized observability context with dual-write aliases."""
-        context: dict[str, Any] = dict(  # Any: OTel span attributes are heterogeneous
-            extra
+        context: dict[str, object] = (
+            dict(  # Any: OTel span attributes are heterogeneous
+                extra
+            )
         )
-        provider = str(context.get("provider") or self.provider_name)
+        normalized = normalize_observability_context(
+            event_name=event_name,
+            context=context,
+            default_provider=self.provider_name,
+            default_pipeline=self.pipeline_name,
+            default_run_id=self.run_id,
+            default_severity=severity,
+        )
+        return normalized
 
-        context.setdefault("provider", provider)
-        context.setdefault("pipeline", self.pipeline_name)
-        context.setdefault("run_id", self.run_id)
-        context.setdefault("severity", severity)
-
-        if not context.get("error_type"):
-            context["error_type"] = "unknown" if severity == "error" else "none"
-
-        # Dual-write fields for transition period (dashboards/alerts compatibility).
-        context.setdefault("event_name", event_name)
-        context.setdefault("provider_name", provider)
-        context.setdefault("pipeline_name", self.pipeline_name)
-        context.setdefault("correlation_id", self.run_id)
-        context.setdefault("log_level", severity)
-
-        return context
-
-    def _emit_observability_event_metric(
-        self,
-        *,
-        event_name: str,
-        provider: str,
-        severity: str,
-        error_type: str,
-    ) -> None:
+    def _emit_observability_event_metric(self, context: dict[str, Any]) -> None:
         """Emit unified observability event metric with normalized labels."""
+        labels = normalize_observability_metric_labels(context)
         self._metrics.increment_counter(
             "observability_events_total",
             1,
             labels={
-                "event": self._normalize_metric_label(event_name),
-                "provider": self._normalize_metric_label(provider),
-                "pipeline": self._normalize_metric_label(self.pipeline_name),
-                "severity": self._normalize_metric_label(severity),
-                "error_type": self._normalize_metric_label(error_type),
+                "event": self._normalize_metric_label(labels["event"]),
+                "provider": self._normalize_metric_label(labels["provider"]),
+                "pipeline": self._normalize_metric_label(labels["pipeline"]),
+                "severity": self._normalize_metric_label(labels["severity"]),
+                "error_type": self._normalize_metric_label(labels["error_type"]),
             },
         )

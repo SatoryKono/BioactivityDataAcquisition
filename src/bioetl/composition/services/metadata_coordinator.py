@@ -23,7 +23,7 @@ import platform
 import socket
 from datetime import datetime
 from functools import cached_property
-from typing import Any, Literal
+from typing import Literal
 
 from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
 from bioetl.domain.models.metadata import (
@@ -59,8 +59,8 @@ from bioetl.domain.version import get_version as _get_bioetl_version
 
 
 def _parse_composite_list(
-    value: Any,  # Any: factory wiring; concrete types resolved at runtime
-) -> list[str]:  # Any: factory wiring; concrete types resolved at runtime
+    value: object,
+) -> list[str]:
     """Parse composite list metadata stored as list or stringified list."""
     if isinstance(value, list):
         return [str(item) for item in value]
@@ -75,8 +75,8 @@ def _parse_composite_list(
 
 
 def _parse_composite_status(
-    value: Any,  # Any: factory wiring; concrete types resolved at runtime
-) -> dict[str, str]:  # Any: factory wiring; concrete types resolved at runtime
+    value: object,
+) -> dict[str, str]:
     """Parse enrichment status stored as dict or stringified dict."""
     if isinstance(value, dict):
         return {str(k): str(v) for k, v in value.items()}
@@ -91,9 +91,7 @@ def _parse_composite_status(
 
 
 def _extract_composite_output_ext(
-    records: list[
-        dict[str, Any]  # Any: factory wiring; concrete types resolved at runtime
-    ],  # Any: factory wiring; concrete types resolved at runtime
+    records: list[dict[str, object]],
     partition_count: int,
     *,
     schema_validation_enabled: bool = False,

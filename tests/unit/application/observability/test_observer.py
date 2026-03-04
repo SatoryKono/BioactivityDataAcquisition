@@ -14,6 +14,7 @@ import pytest
 
 from bioetl.application.core.shutdown import PipelineShutdownError
 from bioetl.application.observability.observer import LifecyclePhase, PipelineObserver
+from bioetl.domain.observability_contract import missing_observability_fields
 from bioetl.domain.types import RunType
 
 
@@ -666,3 +667,83 @@ class TestObserverSmokeTest:
             c for c in counter_calls if c[0][0] == "vacuum_files_removed_total"
         ]
         assert len(vacuum_counters) == 1
+
+
+class TestObserverContractSchema:
+    """Contract-level checks for mandatory observability fields."""
+
+    def test_emit_event_contains_required_canonical_fields(
+        self, metrics_mock, logger_mock, run_id
+    ):
+        observer = PipelineObserver(
+            pipeline_name="test_pipeline",
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            metrics=metrics_mock,
+            logger=logger_mock,
+        )
+
+        observer.emit_event("contract_event", LifecyclePhase.EXECUTION, level="info")
+
+        logger_mock.info.assert_called_once()
+        context = logger_mock.info.call_args[1]
+        assert missing_observability_fields(context) == ()
+
+    def test_emit_event_migrates_legacy_keys_to_canonical(
+        self, metrics_mock, logger_mock, run_id
+    ):
+        observer = PipelineObserver(
+            pipeline_name="test_pipeline",
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            metrics=metrics_mock,
+            logger=logger_mock,
+        )
+
+        observer.emit_event(
+            "contract_event",
+            LifecyclePhase.EXECUTION,
+            provider_name="legacy_provider",
+            pipeline_name="legacy_pipeline",
+            correlation_id="legacy-run-id",
+            log_level="warning",
+        )
+
+        logger_mock.info.assert_called_once()
+        context = logger_mock.info.call_args[1]
+        assert context["provider"] == "legacy_provider"
+        assert context["pipeline"] == "legacy_pipeline"
+        assert context["run_id"] == "legacy-run-id"
+        assert context["event"] == "contract_event"
+        # Dual-write aliases stay present during migration period.
+        assert context["provider_name"] == "legacy_provider"
+        assert context["pipeline_name"] == "legacy_pipeline"
+        assert context["correlation_id"] == "legacy-run-id"
+        assert context["event_name"] == "contract_event"
+
+    def test_full_lifecycle_events_have_required_fields(
+        self, metrics_mock, logger_mock, run_id
+    ):
+        observer = PipelineObserver(
+            pipeline_name="chembl_activity",
+            run_id=run_id,
+            run_type=RunType.REBUILD,
+            metrics=metrics_mock,
+            logger=logger_mock,
+        )
+
+        with observer:
+            preflight_start = observer.emit_phase_started(LifecyclePhase.PREFLIGHT)
+            observer.emit_health_check_result("storage", healthy=True)
+            observer.emit_phase_completed(LifecyclePhase.PREFLIGHT, preflight_start)
+
+        calls = (
+            logger_mock.debug.call_args_list
+            + logger_mock.info.call_args_list
+            + logger_mock.warning.call_args_list
+            + logger_mock.error.call_args_list
+        )
+        assert calls
+        for call in calls:
+            context = call[1]
+            assert missing_observability_fields(context) == ()

@@ -256,3 +256,48 @@ class TestPrometheusCustomCounters:
             COUNTERS[
                 "dq_validation_failures_total"
             ].labels().inc.assert_called_once_with(1)
+
+
+@pytest.mark.unit
+class TestObservabilityMetricContract:
+    """Tests for observability_events_total label schema normalization."""
+
+    def test_observability_counter_normalizes_legacy_labels(self, prometheus_metrics):
+        with patch.dict(COUNTERS, {"observability_events_total": MagicMock()}):
+            prometheus_metrics.increment_counter(
+                name="observability_events_total",
+                value=1,
+                labels={
+                    "event_name": "pipeline_started",
+                    "provider_name": "chembl",
+                    "pipeline_name": "chembl_activity",
+                    "log_level": "INFO",
+                },
+            )
+
+            COUNTERS["observability_events_total"].labels.assert_called_once_with(
+                event="pipeline_started",
+                provider="chembl",
+                pipeline="chembl_activity",
+                severity="info",
+                error_type="none",
+            )
+            COUNTERS["observability_events_total"].labels().inc.assert_called_once_with(
+                1
+            )
+
+    def test_observability_counter_always_has_required_labels(self, prometheus_metrics):
+        with patch.dict(COUNTERS, {"observability_events_total": MagicMock()}):
+            prometheus_metrics.increment_counter(
+                name="observability_events_total",
+                value=1,
+                labels={},
+            )
+
+            COUNTERS["observability_events_total"].labels.assert_called_once_with(
+                event="unknown_event",
+                provider="unknown",
+                pipeline="unknown",
+                severity="info",
+                error_type="none",
+            )

@@ -2,19 +2,35 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.composition.bootstrap_contexts import DQConfigsContext, DQOutputPathsContext
 
 if TYPE_CHECKING:
+    from pydantic import BaseModel
+
+    from bioetl.domain.ports import (
+        BronzeDQConfigPort,
+        GoldDQConfigPort,
+        SilverDQConfigPort,
+    )
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
+class _ModelDumpable(Protocol):
+    """Protocol for Pydantic-like models exposing model_dump()."""
+
+    def model_dump(self) -> dict[str, object]:
+        """Serialize model to dictionary."""
+        ...
+
+
 def extract_single_dq_config(
-    sink: Any,  # Any: factory wiring; concrete types resolved at runtime
+    sink: Mapping[str, object],
     layer_name: str,
-    config_class: Any,  # Any: factory wiring; concrete types resolved at runtime
-) -> Any | None:  # Any: factory wiring; concrete types resolved at runtime
+    config_class: type[BaseModel],
+) -> BronzeDQConfigPort | SilverDQConfigPort | GoldDQConfigPort | None:
     """Extract DQ config for a single layer."""
     sink_config = sink.get(layer_name)
     if not sink_config:
@@ -23,9 +39,14 @@ def extract_single_dq_config(
     if not hasattr(sink_config, "model_dump"):
         return None
 
-    validated = config_class.model_validate(sink_config.model_dump())
-    if hasattr(validated, "dq_report") and validated.dq_report.enabled:
-        return validated.dq_report
+    dumpable = cast(_ModelDumpable, sink_config)
+    validated = config_class.model_validate(dumpable.model_dump())
+    dq_report = getattr(validated, "dq_report", None)
+    if dq_report is not None and getattr(dq_report, "enabled", False):
+        return cast(
+            "BronzeDQConfigPort | SilverDQConfigPort | GoldDQConfigPort",
+            dq_report,
+        )
     return None
 
 
@@ -41,12 +62,13 @@ def extract_dq_configs(yaml_config: PipelineYamlConfig | None) -> DQConfigsConte
         return DQConfigsContext(bronze=None, silver=None, gold=None)
 
     sink = getattr(yaml_config, "sink", None)
-    if sink is None:
+    if sink is None or not isinstance(sink, Mapping):
         return DQConfigsContext(bronze=None, silver=None, gold=None)
 
-    bronze_config = extract_single_dq_config(sink, "bronze", BronzeSinkConfig)
-    silver_config = extract_single_dq_config(sink, "silver", SilverSinkConfig)
-    gold_config = extract_single_dq_config(sink, "gold", GoldSinkConfig)
+    sink_mapping = cast(Mapping[str, object], sink)
+    bronze_config = extract_single_dq_config(sink_mapping, "bronze", BronzeSinkConfig)
+    silver_config = extract_single_dq_config(sink_mapping, "silver", SilverSinkConfig)
+    gold_config = extract_single_dq_config(sink_mapping, "gold", GoldSinkConfig)
 
     return DQConfigsContext(
         bronze=bronze_config,
@@ -56,15 +78,15 @@ def extract_dq_configs(yaml_config: PipelineYamlConfig | None) -> DQConfigsConte
 
 
 def get_layer_path(
-    config: Any,  # Any: DQ check values vary by check type
-) -> str | None:  # Any: factory wiring; concrete types resolved at runtime
+    config: object,
+) -> str | None:
     """Extract path from layer config if available."""
     return getattr(config, "path", None) if config else None
 
 
 def has_flat_structure(
-    config: Any,  # Any: DQ check values vary by check type
-) -> bool:  # Any: factory wiring; concrete types resolved at runtime
+    config: object,
+) -> bool:
     """Check if layer config has flat_structure enabled."""
     return bool(config and getattr(config, "flat_structure", False))
 
@@ -82,7 +104,7 @@ def extract_dq_output_paths(
         )
 
     sink = getattr(yaml_config, "sink", None)
-    if sink is None:
+    if sink is None or not isinstance(sink, Mapping):
         return DQOutputPathsContext(
             bronze_path=None,
             silver_path=None,
@@ -90,9 +112,10 @@ def extract_dq_output_paths(
             flat_structure=False,
         )
 
-    bronze_config = sink.get("bronze")
-    silver_config = sink.get("silver")
-    gold_config = sink.get("gold")
+    sink_mapping = cast(Mapping[str, object], sink)
+    bronze_config = sink_mapping.get("bronze")
+    silver_config = sink_mapping.get("silver")
+    gold_config = sink_mapping.get("gold")
 
     flat_structure = has_flat_structure(silver_config) or has_flat_structure(
         gold_config

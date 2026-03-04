@@ -13,11 +13,13 @@ A default global instance is provided for backward compatibility.
 from __future__ import annotations
 
 import threading
-from typing import TYPE_CHECKING, Any, NamedTuple, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, NamedTuple, Protocol, cast, runtime_checkable
 
 import pyarrow as pa
 
 if TYPE_CHECKING:
+    import pandera
+
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.composition.observability import ObservabilityBundle
@@ -36,7 +38,7 @@ class PipelineFactoryPort(Protocol):
 
     pipeline_name: str
     silver_schema: pa.Schema | None
-    pandera_silver_schema: Any  # Any: Pandera DataFrameModel (no common base type)
+    pandera_silver_schema: type[pandera.DataFrameModel] | None
 
     def create_with_services(
         self,
@@ -106,10 +108,10 @@ class PipelineDefinition(NamedTuple):
     silver_schema: pa.Schema | None
     """PyArrow schema for Silver layer validation."""
 
-    gold_schema: Any  # Any: Pandera DataFrameModel (no common base type)
+    gold_schema: type[pandera.DataFrameModel]
     """Pandera schema for Gold layer validation (required)."""
 
-    pandera_silver_schema: Any = None  # Any: Pandera DataFrameModel...
+    pandera_silver_schema: type[pandera.DataFrameModel] | None = None
     """Pandera DataFrameModel class for Silver layer validation."""
 
 
@@ -152,7 +154,10 @@ class PipelineRegistry:
             ValueError: If factory does not have gold_schema attribute
             ValueError: If pipeline is already registered (prevents double registration)
         """
-        gold_schema = getattr(factory, "gold_schema", None)
+        gold_schema = cast(
+            "type[pandera.DataFrameModel] | None",
+            getattr(factory, "gold_schema", None),
+        )
         if gold_schema is None:
             raise ValueError(
                 f"Factory '{factory.pipeline_name}' must have gold_schema. "
@@ -169,7 +174,10 @@ class PipelineRegistry:
                 factory=factory,
                 silver_schema=factory.silver_schema,
                 gold_schema=gold_schema,
-                pandera_silver_schema=getattr(factory, "pandera_silver_schema", None),
+                pandera_silver_schema=cast(
+                    "type[pandera.DataFrameModel] | None",
+                    getattr(factory, "pandera_silver_schema", None),
+                ),
             )
 
     def get(self, pipeline_name: str) -> PipelineDefinition:
@@ -232,7 +240,10 @@ class PipelineRegistry:
             ValueError: If factory does not have gold_schema attribute
             ValueError: If pipeline is already registered
         """
-        gold_schema = getattr(value, "gold_schema", None)
+        gold_schema = cast(
+            "type[pandera.DataFrameModel] | None",
+            getattr(value, "gold_schema", None),
+        )
         if gold_schema is None:
             raise ValueError(
                 f"Factory '{key}' must have gold_schema. "
@@ -248,7 +259,10 @@ class PipelineRegistry:
                 factory=value,
                 silver_schema=value.silver_schema,
                 gold_schema=gold_schema,
-                pandera_silver_schema=getattr(value, "pandera_silver_schema", None),
+                pandera_silver_schema=cast(
+                    "type[pandera.DataFrameModel] | None",
+                    getattr(value, "pandera_silver_schema", None),
+                ),
             )
 
     def list_keys(self) -> list[str]:

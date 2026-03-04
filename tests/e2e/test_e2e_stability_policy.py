@@ -14,7 +14,14 @@ from .conftest import (
     create_test_context,
     run_pipeline_or_skip_transient,
 )
-from .test_pipeline_matrix_e2e import PipelineE2ECase, _resolve_cassette_name
+from .test_pipeline_matrix_e2e import (
+    NON_EMPTY_CASSETTE_CONTRACT_PIPELINES,
+    PIPELINE_CASES,
+    PipelineE2ECase,
+    _build_e2e_fail_reason,
+    _requires_non_empty_cassette_contract,
+    _resolve_cassette_name,
+)
 
 
 def test_build_e2e_skip_reason_is_deterministic() -> None:
@@ -95,3 +102,21 @@ def test_resolve_cassette_name_uses_matrix_fallback(
         entity="protein_class",
     )
     assert _resolve_cassette_name(case) == "test_pipeline_matrix__chembl_protein_class"
+
+
+def test_non_empty_contract_covers_all_matrix_pipelines() -> None:
+    """Every matrix smoke pipeline must enforce non-empty cassette output."""
+    declared = {case.pipeline_name for case in PIPELINE_CASES}
+    assert NON_EMPTY_CASSETTE_CONTRACT_PIPELINES == declared
+    assert all(_requires_non_empty_cassette_contract(name) for name in declared)
+
+
+def test_build_e2e_fail_reason_is_deterministic() -> None:
+    """Failure reason format must stay parseable for CI classification."""
+    reason = _build_e2e_fail_reason(
+        "CODE_REGRESSION",
+        pipeline_name="chembl_activity",
+        detail="error_type=RuntimeError; boom",
+    )
+    assert reason.startswith("E2E_FAIL[CODE_REGRESSION] pipeline=")
+    assert "chembl_activity" in reason

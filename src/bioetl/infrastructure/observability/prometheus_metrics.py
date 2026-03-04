@@ -6,6 +6,7 @@ Prometheus client library.
 
 from __future__ import annotations
 
+from bioetl.domain.observability_contract import normalize_observability_metric_labels
 from bioetl.domain.ports import MetricsPort
 from bioetl.infrastructure.observability.metrics import (
     ADAPTER_BATCH_SIZE,
@@ -211,6 +212,10 @@ class PrometheusMetrics(MetricsPort):
             labels: Labels.
         """
         if name in COUNTERS:
+            if name == "observability_events_total":
+                normalized_labels = normalize_observability_metric_labels(labels)
+                COUNTERS[name].labels(**normalized_labels).inc(value)
+                return
             COUNTERS[name].labels(**labels).inc(value)
 
     def set_gauge(self, name: str, value: float, labels: dict[str, str]) -> None:

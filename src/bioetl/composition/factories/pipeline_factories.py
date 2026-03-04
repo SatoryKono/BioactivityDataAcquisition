@@ -34,7 +34,7 @@ Usage:
 from __future__ import annotations
 
 import threading
-from typing import TYPE_CHECKING, Any, NamedTuple
+from typing import TYPE_CHECKING, NamedTuple
 
 # Transformers (all DI-injected)
 from bioetl.application.pipelines.chembl.activity_transformer import ActivityTransformer
@@ -169,6 +169,7 @@ from bioetl.infrastructure.schemas.silver import (
 )
 
 if TYPE_CHECKING:
+    import pandera
     import pyarrow as pa
 
     from bioetl.application.core.base_transformer import BaseTransformer
@@ -207,8 +208,8 @@ class PipelineFactoryConfig(NamedTuple):
     entity_type: str
     transformer_class: type[BaseTransformer]
     silver_schema: pa.Schema | None
-    gold_schema: Any  # Any: Pandera DataFrameModel (no common base type)
-    pandera_silver_schema: Any = None  # Any: Pandera DataFrameModel...
+    gold_schema: type[pandera.DataFrameModel]
+    pandera_silver_schema: type[pandera.DataFrameModel] | None = None
     data_source_provider: str | None = None
 
 
@@ -413,8 +414,8 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
 
 
 def _schema_columns(
-    schema_class: Any,  # Any: factory wiring; concrete types resolved at runtime
-) -> set[str]:  # Any: factory wiring; concrete types resolved at runtime
+    schema_class: type[pandera.DataFrameModel],
+) -> set[str]:
     """Extract column names from a Pandera DataFrameModel class."""
     try:
         schema = schema_class.to_schema()

@@ -22,8 +22,6 @@ Requirements:
 
 from __future__ import annotations
 
-from typing import Any
-
 import structlog
 
 from bioetl.infrastructure.observability.logging_config import (
@@ -100,7 +98,7 @@ class BootstrapLogger:
         """Initialize with the bootstrap logger."""
         self._logger = get_bootstrap_logger()
 
-    def debug(self, event: str, **kwargs: Any) -> None:  # Any: structlog context kwargs
+    def debug(self, event: str, **kwargs: object) -> None:
         """Log a debug message.
 
         Args:
@@ -109,7 +107,7 @@ class BootstrapLogger:
         """
         self._logger.debug(event, **kwargs)
 
-    def info(self, event: str, **kwargs: Any) -> None:  # Any: structlog context kwargs
+    def info(self, event: str, **kwargs: object) -> None:
         """Log an informational message.
 
         Args:
@@ -118,12 +116,11 @@ class BootstrapLogger:
         """
         self._logger.info(event, **kwargs)
 
-    # Any: structlog context kwargs
     def warning(
         self,
         event: str,
-        **kwargs: Any,  # Any: factory wiring; concrete types resolved at runtime
-    ) -> None:  # Any: structlog-compatible API
+        **kwargs: object,
+    ) -> None:
         """Log a warning message.
 
         Args:
@@ -132,7 +129,7 @@ class BootstrapLogger:
         """
         self._logger.warning(event, **kwargs)
 
-    def error(self, event: str, **kwargs: Any) -> None:  # Any: structlog context kwargs
+    def error(self, event: str, **kwargs: object) -> None:
         """Log an error message.
 
         Args:

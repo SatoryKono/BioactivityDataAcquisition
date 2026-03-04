@@ -7,17 +7,12 @@ configuration and assembly in the composition layer.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast
+from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
-from bioetl.application.core.lock_manager import LockManager
-from bioetl.application.core.postrun_service import PostrunService
-from bioetl.application.core.preflight_service import PreflightService
 from bioetl.application.core.runner import PipelineRunner
-from bioetl.application.observability.observer import PipelineObserver
-from bioetl.application.services.data_quality_service import DataQualityService
-from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
 from bioetl.composition.bootstrap_contexts import DQConfigsContext, DQOutputPathsContext
 from bioetl.composition.factories.data_source_factory import (
     DataSourceCreator,
@@ -43,7 +38,6 @@ from bioetl.composition.factories.pipeline_factory_runner_assembly import (
 )
 from bioetl.composition.factories.services_factory import (
     BaseServicesFactory,
-    ServicesBuilder,
 )
 from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
 from bioetl.composition.services.versioning import (
@@ -51,8 +45,6 @@ from bioetl.composition.services.versioning import (
     get_git_commit,
     get_pipeline_version,
 )
-from bioetl.domain.locking import LockContextHolder
-from bioetl.domain.medallion import LoadingStrategy
 from bioetl.domain.services import IdentityService
 from bioetl.domain.value_objects.run_context import RunContext
 from bioetl.infrastructure.config import (
@@ -63,7 +55,9 @@ from bioetl.infrastructure.config import (
 from bioetl.infrastructure.config.pipeline_config_loader import PipelineConfigLoader
 
 if TYPE_CHECKING:
+    import pandera
     import pyarrow as pa
+    from pydantic import BaseModel
 
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.base_transformer import BaseTransformer
@@ -82,6 +76,7 @@ if TYPE_CHECKING:
         LoggerPort,
         MetricsPort,
         PiiHasherPort,
+        SilverValidatorPort,
         TracingPort,
     )
     from bioetl.domain.types import RunID
@@ -136,8 +131,8 @@ class GenericPipelineFactory(Generic[TPipeline]):
         pipeline_class: type[TPipeline],
         provider: str,
         silver_schema: pa.Schema | None = None,
-        gold_schema: Any = None,  # Any: Pandera DataFrameModel (no common base type)
-        pandera_silver_schema: Any = None,  # Any: Pandera DataFrameModel...
+        gold_schema: type[pandera.DataFrameModel] | None = None,
+        pandera_silver_schema: type[pandera.DataFrameModel] | None = None,
         data_source_creator: DataSourceCreator | None = None,
         transformer_class: type[BaseTransformer] | None = None,
     ) -> None:
@@ -418,8 +413,8 @@ def create_pipeline_factory(
     pipeline_class: type[TPipeline],
     provider: str,
     silver_schema: pa.Schema | None = None,
-    gold_schema: Any = None,  # Any: Pandera DataFrameModel (no common base type)
-    pandera_silver_schema: Any = None,  # Any: Pandera DataFrameModel...
+    gold_schema: type[pandera.DataFrameModel] | None = None,
+    pandera_silver_schema: type[pandera.DataFrameModel] | None = None,
     transformer_class: type[BaseTransformer] | None = None,
 ) -> GenericPipelineFactory[TPipeline]:
     """Convenience function for creating pipeline factories.
@@ -548,7 +543,7 @@ def build_pipeline_services(
     dq_monitor: DQMonitorPort | None = None,
     metadata_coordinator: MetadataCoordinator | None = None,
     cached_bronze: CachedBronzeContext | None = None,
-    silver_validator: Any = None,  # Any: SilverValidatorPort (optional lazy import)
+    silver_validator: SilverValidatorPort | None = None,
 ) -> PipelineServices:
     """Build shared pipeline services using DI container.
 
@@ -629,7 +624,7 @@ def create_pipeline_with_services(
     dq_monitor: DQMonitorPort | None = None,
     metrics: MetricsPort | None = None,
     cached_bronze: CachedBronzeContext | None = None,
-    pandera_silver_schema: Any = None,  # Any: Pandera DataFrameModel...
+    pandera_silver_schema: type[pandera.DataFrameModel] | None = None,
 ) -> BasePipeline:
     """Create pipeline instance with services.
 
@@ -742,7 +737,7 @@ def assemble_runner(
     pipeline: BasePipeline,
     observability: ObservabilityBundle,
     silver_schema: pa.Schema | None,
-    gold_schema: Any,  # Any: Pandera DataFrameModel (no common base type)
+    gold_schema: type[pandera.DataFrameModel],
     strict_gold_validation: bool,
     yaml_config: PipelineYamlConfig | None = None,
 ) -> PipelineRunner:
@@ -759,10 +754,10 @@ def assemble_runner(
 
 
 def _extract_single_dq_config(
-    sink: Any,  # Any: dynamic Pydantic sink config (heterogeneous per pipeline)
+    sink: Mapping[str, object],
     layer_name: str,
-    config_class: Any,  # Any: Pydantic model class (layer-specific)
-) -> Any | None:  # Any: DQ report config varies by layer
+    config_class: type[BaseModel],
+) -> object | None:
     """Extract DQ config for a single layer."""
     return _extract_single_dq_config_impl(sink, layer_name, config_class)
 
@@ -772,12 +767,12 @@ def _extract_dq_configs(yaml_config: PipelineYamlConfig | None) -> DQConfigsCont
     return _extract_dq_configs_impl(yaml_config)
 
 
-def _get_layer_path(config: Any) -> str | None:  # Any: dynamic sink layer config
+def _get_layer_path(config: object) -> str | None:
     """Extract path from layer config if available."""
     return _get_layer_path_impl(config)
 
 
-def _has_flat_structure(config: Any) -> bool:  # Any: dynamic sink layer config
+def _has_flat_structure(config: object) -> bool:
     """Check if layer config has flat_structure enabled."""
     return _has_flat_structure_impl(config)
 
