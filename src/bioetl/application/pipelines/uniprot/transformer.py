@@ -125,7 +125,7 @@ class UniProtProteinTransformer(BaseTransformer):
         index: int,
     ) -> SilverRecord | None:
         """Transform raw UniProt record to Silver format."""
-        accession = self._get_required_field(record, "primaryAccession")
+        accession = str(self._get_required_field(record, "primaryAccession"))
         entry_name = self._get_entry_name(record)
 
         business_data = self._build_business_data(record, accession, entry_name)

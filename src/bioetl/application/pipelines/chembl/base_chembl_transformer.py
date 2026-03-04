@@ -133,7 +133,10 @@ class BaseChemblTransformer(BaseTransformer):
 
         """
         # 1. Validate primary ID
-        primary_id = self._get_required_field(record, self.primary_id_field)
+        primary_id = cast(
+            "PrimaryId",
+            self._get_required_field(record, self.primary_id_field),
+        )
 
         # 2. Generate entity ID using IdentityService
         entity_id = self.compute_entity_id(

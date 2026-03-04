@@ -98,7 +98,7 @@ class IDMappingTransformer(BaseTransformer):
             ValueError: If IDMappingResult entity validation fails.
         """
         # Step 1: Extract required field
-        target_id = self._get_required_field(record, "target_id")
+        target_id = str(self._get_required_field(record, "target_id"))
         uniprot_accession = record.get("uniprot_accession")  # Can be None
         all_mappings = record.get("all_mappings")
 

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.composite.runner_constants import (
     CHECKPOINT_NON_FATAL_ERRORS,
@@ -46,9 +46,34 @@ class CompositeRunnerMergeStageHelper:
     _run_id_str: str
     _merger: MergeService
     _checkpoint_manager: CompositeCheckpointService
-    _save_checkpoint_safe: Callable[[CompositeCheckpointState, str], Awaitable[bool]]
-    _generate_dq_reports: Callable[[MergeResult], Awaitable[None]]
-    _write_cv_quarantine: Callable[[MergeResult], Awaitable[None]]
+
+    async def _call_save_checkpoint_safe(
+        self,
+        state: CompositeCheckpointState,
+        operation: str,
+    ) -> bool:
+        """Invoke support-layer checkpoint save helper."""
+        save_checkpoint = cast(
+            "Callable[[CompositeCheckpointState, str], Awaitable[bool]]",
+            getattr(self, "_save_checkpoint_safe"),
+        )
+        return await save_checkpoint(state, operation)
+
+    async def _call_generate_dq_reports(self, merge_result: MergeResult) -> None:
+        """Invoke support-layer DQ report generation helper."""
+        generate_reports = cast(
+            "Callable[[MergeResult], Awaitable[None]]",
+            getattr(self, "_generate_dq_reports"),
+        )
+        await generate_reports(merge_result)
+
+    async def _call_write_cv_quarantine(self, merge_result: MergeResult) -> None:
+        """Invoke support-layer quarantine write helper."""
+        write_quarantine = cast(
+            "Callable[[MergeResult], Awaitable[None]]",
+            getattr(self, "_write_cv_quarantine"),
+        )
+        await write_quarantine(merge_result)
 
     async def _execute_merge_stage(
         self,
@@ -66,7 +91,7 @@ class CompositeRunnerMergeStageHelper:
                 CompositePipelineState.MERGING,
             )
             state = state.with_state(CompositePipelineState.MERGING)
-            await self._save_checkpoint_safe(state, "merging")
+            await self._call_save_checkpoint_safe(state, "merging")
 
             self._fsm.log_fsm_transition(
                 from_state=previous_state,
@@ -108,8 +133,8 @@ class CompositeRunnerMergeStageHelper:
                     records_merged=merge_result.records_merged,
                 )
 
-                await self._generate_dq_reports(merge_result)
-                await self._write_cv_quarantine(merge_result)
+                await self._call_generate_dq_reports(merge_result)
+                await self._call_write_cv_quarantine(merge_result)
 
             except PIPELINE_EXECUTION_ERRORS as merge_error:
                 self._fsm.log_fsm_transition(
@@ -126,7 +151,7 @@ class CompositeRunnerMergeStageHelper:
                     error_type=type(merge_error).__name__,
                 )
                 state = state.with_state(CompositePipelineState.FAILED)
-                await self._save_checkpoint_safe(state, "merge_failed")
+                await self._call_save_checkpoint_safe(state, "merge_failed")
                 raise
             except BioETLError as merge_error:
                 self._fsm.log_fsm_transition(
@@ -144,7 +169,7 @@ class CompositeRunnerMergeStageHelper:
                     reason_code="unexpected_bioetl_error",
                 )
                 state = state.with_state(CompositePipelineState.FAILED)
-                await self._save_checkpoint_safe(state, "merge_failed")
+                await self._call_save_checkpoint_safe(state, "merge_failed")
                 raise
         else:
             self._fsm.log_fsm_transition(
@@ -175,7 +200,7 @@ class CompositeRunnerMergeStageHelper:
                 to_state=CompositePipelineState.COMPLETED,
                 stage="pipeline_complete",
             )
-        await self._save_checkpoint_safe(state, "completed")
+        await self._call_save_checkpoint_safe(state, "completed")
 
         try:
             await self._checkpoint_manager.delete()
