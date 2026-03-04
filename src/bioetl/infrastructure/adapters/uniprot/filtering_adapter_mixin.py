@@ -28,7 +28,7 @@ class UniProtFilteringAdapterMixin:
     """Filtering and fallback orchestration extracted from UniProtAdapter."""
 
     async def _fetch_non_protein_filtered(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         strategy: Any,  # Any: dynamic payload or structural mixin boundary
         filter_ids: list[str],
         limit: int | None,
@@ -45,7 +45,7 @@ class UniProtFilteringAdapterMixin:
                     break
 
     async def _fetch_proteins_batched(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         strategy: Any,  # Any: dynamic payload or structural mixin boundary
         filter_ids: list[str],
         filter_field: str,
@@ -67,7 +67,7 @@ class UniProtFilteringAdapterMixin:
                     return
 
     async def fetch_filtered(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         entity_type: str,
         filter_ids: list[str],
         filter_field: str,
@@ -97,7 +97,7 @@ class UniProtFilteringAdapterMixin:
             yield record
 
     async def fetch_multi_filtered(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         entity_type: str,
         filters: dict[str, list[str]],
         limit: int | None = None,
@@ -127,7 +127,7 @@ class UniProtFilteringAdapterMixin:
             yield record
 
     async def _do_fallback_search(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         entity_type: str,
         missing_ids: list[str],
         fallback_mapping: dict[str, str],
@@ -149,7 +149,7 @@ class UniProtFilteringAdapterMixin:
             yield record
 
     async def _do_primary_fetch(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         entity_type: str,
         filter_ids: list[str],
         filter_field: str,
@@ -165,7 +165,7 @@ class UniProtFilteringAdapterMixin:
             yield record, record.get("accession")
 
     def _should_do_fallback(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         filter_ids: list[str],
         found_ids: set[str],
         fallback_mapping: dict[str, str],
@@ -190,7 +190,7 @@ class UniProtFilteringAdapterMixin:
         return unique_ids
 
     async def fetch_filtered_with_fallback(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         entity_type: str,
         filter_ids: list[str],
         filter_field: str,

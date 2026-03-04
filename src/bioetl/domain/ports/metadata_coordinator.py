@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import (
@@ -88,12 +88,12 @@ class SilverMetadataInput:
 
     table_path: str
     primary_keys: list[str]
-    mode: Any  # Any: SilverWriteMode - avoid circular import
-    records: list[JsonDict] | None = None  # Any: heterogeneous record values
+    mode: object  # object: SilverWriteMode - avoid circular import, only stored
+    records: list[JsonDict] | None = None
     total_records: int | None = None
     source_batch_ids: list[str] | None = None
-    bronze_refs: Any | None = None  # Any: list[BronzeWriteResult...
-    dq_metrics: Any | None = None  # Any: BatchDQMetrics - avoid circular import
+    bronze_refs: object | None = None  # object: list[BronzeWriteResult] - avoid circular import, only stored
+    dq_metrics: object | None = None  # object: BatchDQMetrics - avoid circular import, only stored
     version_before: int | None = None  # ADR-029: Delta version before write
     version_after: int | None = None
     transform_version: str | None = None
@@ -152,8 +152,8 @@ class GoldMetadataInput:
 
     table_path: str
     table_name: str
-    mode: Any  # Any: GoldWriteMode - avoid circular import
-    records: list[JsonDict] | None = None  # Any: heterogeneous record values
+    mode: object  # object: GoldWriteMode - avoid circular import, only stored
+    records: list[JsonDict] | None = None
     total_records: int | None = None
     scd_config: JsonDict | None = None  # Any: SCD2 config values
     started_at: datetime | None = None  # ADR-029: Write start timestamp

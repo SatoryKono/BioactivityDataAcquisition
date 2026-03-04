@@ -20,7 +20,7 @@ class SemanticScholarBatchRequestMixin:
     """Raw batch request and DOI normalization helpers."""
 
     async def _fetch_by_dois(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         dois: list[str],
     ) -> AsyncIterator[BronzeRecord]:
         """Fetch batch DOIs and filter out null/not-found entries."""
@@ -32,7 +32,7 @@ class SemanticScholarBatchRequestMixin:
                 yield record
 
     async def _fetch_batch_with_nulls(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         dois: list[str],
     ) -> list[BronzeRecord | None]:
         """Fetch batch preserving null slots for not-found IDs."""
@@ -43,7 +43,7 @@ class SemanticScholarBatchRequestMixin:
         return await self._fetch_batch_raw(formatted_ids)
 
     async def _fetch_batch_raw(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         paper_ids: list[str],
     ) -> list[BronzeRecord | None]:
         """Execute raw batch request and return response array."""

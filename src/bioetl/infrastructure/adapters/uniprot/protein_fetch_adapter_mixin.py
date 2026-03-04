@@ -80,7 +80,7 @@ class UniProtProteinFetchAdapterMixin:
     """Protein endpoint helpers and pagination callbacks."""
 
     def _build_protein_fetch_params(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         query: str,
         size: int,
         fetched: int,
@@ -98,14 +98,14 @@ class UniProtProteinFetchAdapterMixin:
         )
 
     def _parse_response(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
-        response: httpx.Response,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
+        response: httpx.Response,
     ) -> tuple[list[BronzeRecord], str | None]:
         """Parse UniProt protein response payload."""
         return parse_uniprot_protein_response(response)
 
     async def _fetch_proteins(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         query: str | None,
         limit: int | None,
     ) -> AsyncIterator[BronzeRecord]:
@@ -137,7 +137,7 @@ class UniProtProteinFetchAdapterMixin:
             yield item
 
     def _handle_fetch_error(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         entity_type: str,
         query: str | None,
         cursor: str | None = None,

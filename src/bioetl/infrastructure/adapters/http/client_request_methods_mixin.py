@@ -13,7 +13,7 @@ class HTTPClientRequestMethodsMixin:
     """Thin request verb wrappers around retry-orchestrated request flow."""
 
     async def get(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         url: str,
         params: JsonDict  # Any: dynamic payload or structural mixin boundary
         | None = None,  # Any: dynamic payload or structural mixin boundary
@@ -25,7 +25,7 @@ class HTTPClientRequestMethodsMixin:
         )
 
     async def post(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         url: str,
         json: JsonDict  # Any: dynamic payload or structural mixin boundary
         | None = None,  # Any: dynamic payload or structural mixin boundary
@@ -39,7 +39,7 @@ class HTTPClientRequestMethodsMixin:
         )
 
     async def head(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         url: str,
         headers: dict[str, str] | None = None,
     ) -> httpx.Response:
@@ -47,7 +47,7 @@ class HTTPClientRequestMethodsMixin:
         return await self._request_with_retry("HEAD", url, headers=headers)
 
     async def get_once(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         url: str,
         params: JsonDict  # Any: dynamic payload or structural mixin boundary
         | None = None,  # Any: dynamic payload or structural mixin boundary
