@@ -18,9 +18,16 @@ Example:
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING
 
 from bioetl.domain.config import DQConfig
+
+if TYPE_CHECKING:
+    from bioetl.infrastructure.schemas.pipeline_config_common import (
+        ConditionalValidationConfig,
+        CrossFieldValidationConfig,
+        FieldValidationConfig,
+    )
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config.converters import dq_overrides_to_domain
 from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
@@ -154,7 +161,7 @@ class PipelineConfigLoader:
 
     def _normalize_inline_dq_overrides(
         self,
-        dq_overrides: Any,  # Any: Pydantic model instance
+        dq_overrides: DQConfig,
     ) -> JsonDict:  # Any: dynamic YAML config values
         """Convert inline Pydantic DQ overrides into mergeable file-shape dict."""
         result: JsonDict = {}  # Any: dynamic YAML config values
@@ -199,11 +206,10 @@ class PipelineConfigLoader:
 
         return result
 
-    # Any: Pydantic model instance
     def _field_validation_to_dict(
         self,
-        fv: Any,  # Any: YAML config has heterogeneous values
-    ) -> JsonDict:  # Any: YAML config has heterogeneous values
+        fv: FieldValidationConfig,
+    ) -> JsonDict:  # Any: dynamic YAML config values
         """Convert FieldValidationConfig to dict.
 
         Args:
@@ -231,11 +237,10 @@ class PipelineConfigLoader:
             result["error_message"] = fv.error_message
         return result
 
-    # Any: Pydantic model instance
     def _cross_field_validation_to_dict(
         self,
-        cfv: Any,  # Any: YAML config has heterogeneous values
-    ) -> JsonDict:  # Any: YAML config has heterogeneous values
+        cfv: CrossFieldValidationConfig,
+    ) -> JsonDict:  # Any: dynamic YAML config values
         """Convert CrossFieldValidationConfig to dict.
 
         Args:
@@ -261,11 +266,10 @@ class PipelineConfigLoader:
             result["error_message"] = cfv.error_message
         return result
 
-    # Any: Pydantic model instance
     def _conditional_validation_to_dict(
         self,
-        cv: Any,  # Any: YAML config has heterogeneous values
-    ) -> JsonDict:  # Any: YAML config has heterogeneous values
+        cv: ConditionalValidationConfig,
+    ) -> JsonDict:  # Any: dynamic YAML config values
         """Convert ConditionalValidationConfig to dict.
 
         Args:

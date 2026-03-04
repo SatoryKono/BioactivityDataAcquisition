@@ -11,7 +11,7 @@ from __future__ import annotations
 __all__ = ["PUBMED_FALLBACK_ERRORS", "TitleFallbackHandler"]
 
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from httpx import RequestError
 
@@ -19,7 +19,7 @@ from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.infrastructure.adapters.common import BaseTitleFallbackHandler, titles_match
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Coroutine
+    from collections.abc import Awaitable, Callable
 
     from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import JsonDict
@@ -49,8 +49,8 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
         logger: LoggerPort,
         search_fn: Callable[
             [str, int],
-            Coroutine[Any, Any, list[JsonDict]],  # Any: untyped API JSON record
-        ],  # Any: untyped API JSON record
+            Awaitable[list[JsonDict]],
+        ],
     ) -> None:
         """Initialize fallback handler.
 
