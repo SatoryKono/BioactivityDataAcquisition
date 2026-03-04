@@ -16,6 +16,7 @@ Provider-specific fields (pmc_id, journal_name_short, etc.) are defined here.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+
 from pydantic import BaseModel, ConfigDict
 from pydantic import Field as PydanticField
 

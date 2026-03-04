@@ -8,9 +8,10 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
-from bioetl.domain.types import JsonDict
 
 import yaml
+
+from bioetl.domain.types import JsonDict
 
 
 def _load_column_groups_config(

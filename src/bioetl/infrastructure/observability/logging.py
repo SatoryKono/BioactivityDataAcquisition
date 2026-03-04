@@ -21,11 +21,11 @@ __all__ = ["StructlogLogger", "create_logger"]
 
 
 from typing import Any, Self
-from bioetl.domain.types import JsonDict
 from uuid import UUID
 
 import structlog
 
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.observability.logging_config import configure_logging
 
 _EVENT_KWARG = "event"

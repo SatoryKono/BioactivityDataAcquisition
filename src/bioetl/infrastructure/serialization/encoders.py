@@ -26,6 +26,7 @@ import json
 import os
 import types
 from functools import lru_cache
+
 from bioetl.domain.ports import JsonEncoderPort
 from bioetl.domain.types import JsonDict
 
@@ -49,8 +50,7 @@ class StdLibJsonEncoder:
 
     def dumps(
         self,
-        obj: JsonDict
-        | list[object],
+        obj: JsonDict | list[object],
         *,
         sort_keys: bool = True,
         ensure_ascii: bool = False,
@@ -93,9 +93,7 @@ class StdLibJsonEncoder:
             ensure_ascii=True,
         )
 
-    def loads(
-        self, data: str | bytes
-    ) -> JsonDict | list[object]:
+    def loads(self, data: str | bytes) -> JsonDict | list[object]:
         """Deserialize JSON string to Python object.
 
         Args:
@@ -108,9 +106,7 @@ class StdLibJsonEncoder:
             ValueError: If JSON is invalid
         """
         try:
-            result: JsonDict | list[object] = (
-                json.loads(data)
-            )
+            result: JsonDict | list[object] = json.loads(data)
             return result
         except json.JSONDecodeError as e:
             raise ValueError(f"Invalid JSON: {e}") from e
@@ -138,8 +134,7 @@ class OrjsonEncoder:
 
     def dumps(
         self,
-        obj: JsonDict
-        | list[object],
+        obj: JsonDict | list[object],
         *,
         sort_keys: bool = True,
         ensure_ascii: bool = False,
@@ -188,9 +183,7 @@ class OrjsonEncoder:
         # Escape non-ASCII for canonical form
         return result.encode("unicode_escape").decode("ascii")
 
-    def loads(
-        self, data: str | bytes
-    ) -> JsonDict | list[object]:
+    def loads(self, data: str | bytes) -> JsonDict | list[object]:
         """Deserialize JSON string to Python object using orjson.
 
         Args:
@@ -204,9 +197,7 @@ class OrjsonEncoder:
         """
         assert _orjson is not None
         try:
-            result: JsonDict | list[object] = (
-                _orjson.loads(data)
-            )
+            result: JsonDict | list[object] = _orjson.loads(data)
             return result
         except json.JSONDecodeError as e:
             # orjson.JSONDecodeError inherits from json.JSONDecodeError

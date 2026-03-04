@@ -428,9 +428,7 @@ class TestKeyNullabilityPolicyValidation:
 class TestWriteModeValidation:
     """Tests for validate_write_modes method."""
 
-    def test_valid_silver_merge_passes(
-        self, mock_logger: MagicMock
-    ) -> None:
+    def test_valid_silver_merge_passes(self, mock_logger: MagicMock) -> None:
         """Test that merge is valid for silver."""
         config = MagicMock()
         config.table.silver_write_mode = "merge"
@@ -438,9 +436,7 @@ class TestWriteModeValidation:
         validator = _MedallionConfigValidator(config=config, logger=mock_logger)
         assert validator.validate_write_modes() == []
 
-    def test_valid_silver_append_passes(
-        self, mock_logger: MagicMock
-    ) -> None:
+    def test_valid_silver_append_passes(self, mock_logger: MagicMock) -> None:
         """Test that append is valid for silver."""
         config = MagicMock()
         config.table.silver_write_mode = "append"
@@ -448,9 +444,7 @@ class TestWriteModeValidation:
         validator = _MedallionConfigValidator(config=config, logger=mock_logger)
         assert validator.validate_write_modes() == []
 
-    def test_invalid_silver_overwrite_fails(
-        self, mock_logger: MagicMock
-    ) -> None:
+    def test_invalid_silver_overwrite_fails(self, mock_logger: MagicMock) -> None:
         """Test that overwrite is invalid for silver layer."""
         config = MagicMock()
         config.table.silver_write_mode = "overwrite"
@@ -460,9 +454,7 @@ class TestWriteModeValidation:
         assert len(errors) == 1
         assert errors[0].field == "write_mode"
 
-    def test_valid_gold_merge_passes(
-        self, mock_logger: MagicMock
-    ) -> None:
+    def test_valid_gold_merge_passes(self, mock_logger: MagicMock) -> None:
         """Test that merge is valid for gold."""
         config = MagicMock()
         config.table.silver_write_mode = "merge"
@@ -470,9 +462,7 @@ class TestWriteModeValidation:
         validator = _MedallionConfigValidator(config=config, logger=mock_logger)
         assert validator.validate_write_modes() == []
 
-    def test_valid_gold_scd2_passes(
-        self, mock_logger: MagicMock
-    ) -> None:
+    def test_valid_gold_scd2_passes(self, mock_logger: MagicMock) -> None:
         """Test that scd2 is valid for gold (mapped to merge internally)."""
         config = MagicMock()
         config.table.silver_write_mode = "merge"
@@ -480,9 +470,7 @@ class TestWriteModeValidation:
         validator = _MedallionConfigValidator(config=config, logger=mock_logger)
         assert validator.validate_write_modes() == []
 
-    def test_valid_gold_overwrite_passes(
-        self, mock_logger: MagicMock
-    ) -> None:
+    def test_valid_gold_overwrite_passes(self, mock_logger: MagicMock) -> None:
         """Test that overwrite is valid for gold."""
         config = MagicMock()
         config.table.silver_write_mode = "merge"
@@ -490,9 +478,7 @@ class TestWriteModeValidation:
         validator = _MedallionConfigValidator(config=config, logger=mock_logger)
         assert validator.validate_write_modes() == []
 
-    def test_invalid_gold_mode_fails(
-        self, mock_logger: MagicMock
-    ) -> None:
+    def test_invalid_gold_mode_fails(self, mock_logger: MagicMock) -> None:
         """Test that an unknown gold write mode produces a validation error."""
         config = MagicMock()
         config.table.silver_write_mode = "merge"
@@ -575,9 +561,7 @@ class TestMedallionValidatorLogging:
 
         mock_logger.warning.assert_called_once()
 
-    def test_write_mode_debug_logged_when_valid(
-        self, mock_logger: MagicMock
-    ) -> None:
+    def test_write_mode_debug_logged_when_valid(self, mock_logger: MagicMock) -> None:
         """Test that debug is logged when write mode validation passes."""
         config = MagicMock()
         config.table.silver_write_mode = "merge"

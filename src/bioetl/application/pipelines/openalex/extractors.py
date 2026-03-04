@@ -6,6 +6,7 @@ Pure functions for extracting/normalizing fields from OpenAlex API responses.
 from __future__ import annotations
 
 import re
+
 from bioetl.domain.types import JsonDict
 
 # ORCID format: NNNN-NNNN-NNNN-NNNN (last char can be X for checksum)

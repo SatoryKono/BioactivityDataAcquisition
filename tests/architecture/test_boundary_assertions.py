@@ -79,9 +79,7 @@ class TestBoundaryAssertionsExist:
                                 if func_source and port_name in func_source:
                                     has_isinstance_assert = True
 
-        assert func_body_found, (
-            f"Function '{func_name}' not found in {module_path}"
-        )
+        assert func_body_found, f"Function '{func_name}' not found in {module_path}"
         assert has_isinstance_assert, (
             f"Function '{func_name}' in {module_path} MUST contain "
             f"`assert isinstance(..., {port_name})` for boundary validation."

@@ -314,7 +314,8 @@ class GoldMetadataBuilder(_MetadataBuilderBase):
         scd_config: JsonDict | None = None,  # Any: dynamic layer config
         ingestion_ts: datetime | None = None,
         run_id: object | None = None,
-        gold_schema: Any | None = None,  # Any: Pandera schema class, untyped at this layer
+        gold_schema: Any
+        | None = None,  # Any: Pandera schema class, untyped at this layer
     ) -> GoldMetadata:
         """Build Gold metadata using fallback logic (no coordinator).
 

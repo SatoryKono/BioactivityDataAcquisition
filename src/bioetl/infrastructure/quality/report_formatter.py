@@ -9,7 +9,6 @@ from datetime import date
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.quality._primitives import _parse_iso_date
 
-
 _REGISTRY_VIOLATION_RE = re.compile(
     r"^registry '([^']+)' count \d+ exceeds budget \d+$"
 )

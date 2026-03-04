@@ -156,7 +156,8 @@ class RecordProcessor:
         coro: Awaitable[object],  # Awaitable: coroutine type varies per pipeline stage
         batch_id: BatchID,
         count: int,
-        on_error: Callable[[Exception], object] | None = None,  # callback for error handling
+        on_error: Callable[[Exception], object]
+        | None = None,  # callback for error handling
     ) -> object:  # object: callback return type varies
         """Execute coroutine with tracing span."""
         span = self._start_span(name, batch_id, count)

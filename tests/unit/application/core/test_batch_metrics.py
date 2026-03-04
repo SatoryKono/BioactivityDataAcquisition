@@ -186,9 +186,7 @@ class TestTrackProcessedRecords:
             },
         )
 
-    def test_includes_run_type_label(
-        self, mock_metrics: MagicMock
-    ) -> None:
+    def test_includes_run_type_label(self, mock_metrics: MagicMock) -> None:
         """Test that run_type label is included in counter call."""
         recorder = BatchMetricsRecorderService(
             metrics=mock_metrics,
@@ -356,9 +354,7 @@ class TestTrackQuarantinedRecords:
         self, recorder: BatchMetricsRecorderService, mock_metrics: MagicMock
     ) -> None:
         """Test that inc_quarantine_records is also called."""
-        recorder.track_quarantined_records(
-            error_type=ErrorType.INVALID_DATA, count=3
-        )
+        recorder.track_quarantined_records(error_type=ErrorType.INVALID_DATA, count=3)
 
         mock_metrics.inc_quarantine_records.assert_called_once_with(
             pipeline="test_pipeline",
@@ -378,9 +374,7 @@ class TestTrackQuarantinedRecords:
         self, recorder: BatchMetricsRecorderService, mock_metrics: MagicMock
     ) -> None:
         """Test that the error_type.value is used as reason label."""
-        recorder.track_quarantined_records(
-            error_type=ErrorType.DATA_QUALITY, count=1
-        )
+        recorder.track_quarantined_records(error_type=ErrorType.DATA_QUALITY, count=1)
 
         inc_kwargs = mock_metrics.inc_quarantine_records.call_args[1]
         assert inc_kwargs["reason"] == ErrorType.DATA_QUALITY.value

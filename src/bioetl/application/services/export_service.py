@@ -5,6 +5,7 @@ to CSV, XLSX, and TSV formats.
 """
 
 from __future__ import annotations
+
 from bioetl.domain.types import JsonDict
 
 __all__ = [

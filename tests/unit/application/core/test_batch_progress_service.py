@@ -22,7 +22,9 @@ def mock_data_source() -> MagicMock:
 
 
 @pytest.fixture
-def service(mock_logger: MagicMock, mock_data_source: MagicMock) -> BatchProgressService:
+def service(
+    mock_logger: MagicMock, mock_data_source: MagicMock
+) -> BatchProgressService:
     return BatchProgressService(logger=mock_logger, data_source=mock_data_source)
 
 
@@ -159,7 +161,9 @@ class TestInitializeTrackingEdgeCases:
         await svc.initialize_tracking(limit=None)
         assert svc._total_records is None
 
-    async def test_ignores_non_int_from_data_source(self, mock_logger: MagicMock) -> None:
+    async def test_ignores_non_int_from_data_source(
+        self, mock_logger: MagicMock
+    ) -> None:
         """Non-int result from data source is ignored."""
         ds = MagicMock()
         ds.get_total_records = AsyncMock(return_value="many")

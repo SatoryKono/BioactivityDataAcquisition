@@ -7,7 +7,6 @@ before pydantic validation.
 from __future__ import annotations
 
 from bioetl.domain.types import JsonDict
-
 from bioetl.infrastructure.config_merge import config_merge
 
 _ENDPOINT_KEYS: tuple[str, ...] = ("base_url", "api_version")

@@ -30,15 +30,15 @@ __all__ = [
 class DataNormalizationPort(Protocol):
     """Port for text and data normalization operations.
 
-    Provides a unified interface for normalizing publication metadata,
-    identifiers, and text content from various data sources.
+        Provides a unified interface for normalizing publication metadata,
+        identifiers, and text content from various data sources.
 
-    Example:
-        >>> from bioetl.domain.services import DataNormalizationService
-from bioetl.domain.types import JsonDict
-        >>> normalizer = DataNormalizationService()
-        >>> normalizer.normalize_doi("10.1038/NATURE12373")
-        '10.1038/nature12373'
+        Example:
+            >>> from bioetl.domain.services import DataNormalizationService
+    from bioetl.domain.types import JsonDict
+            >>> normalizer = DataNormalizationService()
+            >>> normalizer.normalize_doi("10.1038/NATURE12373")
+            '10.1038/nature12373'
     """
 
     def normalize_doi(self, doi: str | None) -> str | None:
@@ -208,10 +208,7 @@ from bioetl.domain.types import JsonDict
 
     def normalize_author_list(
         self,
-        authors: list[str]
-        | list[JsonDict]
-        | str
-        | None,
+        authors: list[str] | list[JsonDict] | str | None,
     ) -> str | None:
         """Parse and normalize author names to JSON string.
 
@@ -225,10 +222,7 @@ from bioetl.domain.types import JsonDict
 
     def normalize_author_keys(
         self,
-        authors: list[str]
-        | list[JsonDict]
-        | str
-        | None,
+        authors: list[str] | list[JsonDict] | str | None,
     ) -> str | None:
         """Normalize author names to short Surname_F keys (pipe-delimited).
 
@@ -242,9 +236,7 @@ from bioetl.domain.types import JsonDict
 
     def normalize_affiliations(
         self,
-        affiliations: list[str]
-        | list[JsonDict]
-        | None,
+        affiliations: list[str] | list[JsonDict] | None,
     ) -> str | None:
         """Extract, normalize, deduplicate affiliations to JSON string.
 
@@ -258,9 +250,7 @@ from bioetl.domain.types import JsonDict
 
     def extract_affiliations_from_authors(
         self,
-        authors: list[
-            JsonDict
-        ],
+        authors: list[JsonDict],
     ) -> list[str]:
         """Extract unique affiliations from author objects.
 

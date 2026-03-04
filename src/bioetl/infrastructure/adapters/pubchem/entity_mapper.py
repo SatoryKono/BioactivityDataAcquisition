@@ -10,6 +10,7 @@ __all__ = ["PubChemEntityMapper"]
 
 
 from typing import TYPE_CHECKING, Any
+
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:

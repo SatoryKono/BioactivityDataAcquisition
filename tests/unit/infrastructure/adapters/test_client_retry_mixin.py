@@ -92,7 +92,9 @@ async def test_handle_retry_delay_sleeps_for_calculated_duration(
 ) -> None:
     """_handle_retry_delay should sleep for the delay returned by retry_config."""
     with patch("asyncio.sleep", new_callable=AsyncMock) as mock_sleep:
-        returned = await client._handle_retry_delay(attempt=0, url="https://api.example.com")
+        returned = await client._handle_retry_delay(
+            attempt=0, url="https://api.example.com"
+        )
 
     # With zero jitter: base_delay * multiplier^0 = 1.0
     assert returned == pytest.approx(1.0)
@@ -199,7 +201,9 @@ def test_can_retry_returns_false_when_budget_exhausted(
 
 def test_can_retry_with_explicit_budget_per_request() -> None:
     """retry_budget_per_request caps effective retries below max_attempts-1."""
-    config = RetryConfig(max_attempts=5, retry_budget_per_request=1, jitter_range=(0.0, 0.0))
+    config = RetryConfig(
+        max_attempts=5, retry_budget_per_request=1, jitter_range=(0.0, 0.0)
+    )
     client = _ConcreteRetryClient(retry_config=config)
 
     # Budget of 1: first retry allowed, second is not
@@ -229,7 +233,9 @@ def test_record_retry_budget_exhausted_logs_warning(
     client: _ConcreteRetryClient, mock_logger: MagicMock
 ) -> None:
     """Should emit a structured warning log with provider and method info."""
-    client._record_retry_budget_exhausted(method="post", url="https://api.example.com/data")
+    client._record_retry_budget_exhausted(
+        method="post", url="https://api.example.com/data"
+    )
 
     mock_logger.warning.assert_called_once()
     call_kwargs = mock_logger.warning.call_args
@@ -420,7 +426,9 @@ def test_is_retryable_error_returns_true_for_retryable_http_status(
     """HTTPStatusError with a retryable status code must be classified as retryable."""
     mock_response = MagicMock(spec=httpx.Response)
     mock_response.status_code = 503
-    exc = httpx.HTTPStatusError("Service Unavailable", request=MagicMock(), response=mock_response)
+    exc = httpx.HTTPStatusError(
+        "Service Unavailable", request=MagicMock(), response=mock_response
+    )
     assert client._is_retryable_error(exc) is True
 
 
@@ -430,7 +438,9 @@ def test_is_retryable_error_returns_false_for_non_retryable_http_status(
     """HTTPStatusError with a non-retryable status code must not be retried."""
     mock_response = MagicMock(spec=httpx.Response)
     mock_response.status_code = 400
-    exc = httpx.HTTPStatusError("Bad Request", request=MagicMock(), response=mock_response)
+    exc = httpx.HTTPStatusError(
+        "Bad Request", request=MagicMock(), response=mock_response
+    )
     assert client._is_retryable_error(exc) is False
 
 

@@ -1,6 +1,7 @@
 """Utility functions and helpers for ChEMBL adapter."""
 
 from __future__ import annotations
+
 from bioetl.domain.types import JsonDict
 
 __all__ = [
