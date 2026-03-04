@@ -1,0 +1,20 @@
+# Decision Note: P0-1 Architecture Quality-Gate Stabilization
+
+Date: 2026-03-04
+Owner: @bioetl-architecture
+
+## Scope
+- Stabilize `tests/architecture` on the working branch.
+- Keep global quality budgets unchanged.
+
+## Actions
+1. Refined adapter contract classification to validate concrete adapter entrypoints and exclude `*_mixin.py` / helper modules.
+2. Structurally decomposed ChEMBL fetch path:
+   - `fetch_paging_mixin.py`
+   - `fetch_resilience_mixin.py`
+   - slimmed `fetch_mixin.py` orchestration layer.
+3. Synced class-level exemption values to current decomposed code shape (no layer-wide limit increase).
+
+## Guardrails
+- No global threshold increase.
+- Exemption sync must accompany real code decomposition/refactor.

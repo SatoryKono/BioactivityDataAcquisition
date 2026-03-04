@@ -52,7 +52,7 @@ if TYPE_CHECKING:
 __all__ = ["SilverWriteMode", "SilverWriter"]
 
 
-class SilverWriter(
+class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
     SilverWriterArrowMixin,
     SilverWriterValidationMixin,
     SilverWriterDeltaMixin,

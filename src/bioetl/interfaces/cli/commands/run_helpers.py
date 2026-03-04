@@ -102,15 +102,6 @@ def show_cleanup_preview(pipeline: str) -> None:
                 f"error_type={type(exc).__name__})"
             ),
         )
-    except Exception as exc:
-        echo_error(
-            "Error previewing cleanup",
-            (
-                f"{exc} "
-                f"(reason_code=CLI_CLEANUP_PREVIEW_UNEXPECTED_ERROR, pipeline={pipeline}, "
-                f"error_type={type(exc).__name__})"
-            ),
-        )
 
 
 def handle_destructive_run_confirmation(
@@ -138,7 +129,7 @@ def handle_destructive_run_confirmation(
 
     if not yes:
         echo_warning(f"{run_type} will clear existing data for {pipeline}.")
-        if not click.confirm("Do you want to continue?"):
+        if not click.confirm("Do you want to continue?", default=None):
             echo_info("Operation cancelled.")
             sys.exit(ExitCode.OK)
 

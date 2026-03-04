@@ -295,7 +295,33 @@ def run(
             sys.exit(ExitCode.CONFIG_ERROR)
 
     # Handle confirmation for destructive operations (CLI responsibility)
-    if not handle_destructive_run_confirmation(pipeline, run_type, dry_run, yes):
+    try:
+        should_continue = handle_destructive_run_confirmation(
+            pipeline, run_type, dry_run, yes
+        )
+    except click.Abort:
+        raise
+    except BioETLError as exc:
+        echo_error(
+            "Error previewing cleanup",
+            (
+                f"{exc} "
+                f"(reason_code=CLI_CLEANUP_PREVIEW_ERROR, pipeline={pipeline}, "
+                f"error_type={type(exc).__name__})"
+            ),
+        )
+        return
+    except Exception as exc:
+        echo_error(
+            "Error previewing cleanup",
+            (
+                f"{exc} "
+                f"(reason_code=CLI_CLEANUP_PREVIEW_UNEXPECTED_ERROR, pipeline={pipeline}, "
+                f"error_type={type(exc).__name__})"
+            ),
+        )
+        return
+    if not should_continue:
         return
 
     # Build options using application-layer RunOptions

@@ -19,6 +19,8 @@ from bioetl.domain.ports import (
 )
 
 if TYPE_CHECKING:
+    import pyarrow as pa
+
     from bioetl.domain.ports import (
         AuditPort,
         LoggerPort,
@@ -42,7 +44,7 @@ class SilverWriterMetadataMixin:
     _transform_version: str | None
     _transform_steps: tuple[str, ...]
     _dq_calculator: DQMetricsCalculator
-    _get_table_schema: Callable[[str], Awaitable[object | None]]
+    _get_table_schema: Callable[[str], Awaitable[pa.Schema | None]]
 
     async def _compute_dq_metrics(
         self,

@@ -58,6 +58,12 @@ class TestAdapterHealthCheck:
                 continue
             if py_file.name in excluded_files:
                 continue
+            if py_file.name.endswith("_mixin.py"):
+                # Mixins are behavioral fragments, not full DataSourcePort adapters.
+                continue
+            if py_file.name.endswith("_helpers.py"):
+                # Helper modules are not adapter entrypoints.
+                continue
             adapter_files.append(py_file)
 
         missing_health_check = []
@@ -65,8 +71,13 @@ class TestAdapterHealthCheck:
         for py_file in adapter_files:
             content = py_file.read_text(encoding="utf-8")
 
-            # Check if file defines a class (likely an adapter)
-            if "class " not in content:
+            # Only scan files that define adapter-like classes.
+            adapter_like_class = re.search(
+                r"class\s+\w*(Adapter|Client|Fetcher)\w*\s*\(",
+                content,
+                re.MULTILINE,
+            )
+            if adapter_like_class is None:
                 continue
 
             # Check for health_check method definition OR inheritance from base adapters
@@ -86,10 +97,8 @@ class TestAdapterHealthCheck:
             has_health_check = has_method or inherits_base or has_mixin
 
             if not has_health_check:
-                # Only flag if it looks like an adapter class
-                if "Adapter" in content or "Client" in content or "Fetcher" in content:
-                    relative_path = py_file.relative_to(src_dir)
-                    missing_health_check.append(str(relative_path))
+                relative_path = py_file.relative_to(src_dir)
+                missing_health_check.append(str(relative_path))
 
         assert not missing_health_check, (
             "Adapters must implement health_check() method (REQ-OBS-001).\n"

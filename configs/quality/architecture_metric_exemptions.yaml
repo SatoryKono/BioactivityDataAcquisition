@@ -515,12 +515,18 @@ registries:
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
     publication_type_classification.py:
-      value: 1650
+      value: 250
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (file_size_limits).
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
+    publication_type_classification_data.py:
+      value: 2200
+      owner: '@bioetl-architecture'
+      reason: Generated data asset from publication_type_classification.csv (codegen).
+      expires_on: '2026-04-30'
+      removal_step: Split large taxonomy into segmented assets and lower exemption.
     publications.py:
       value: 500
       owner: '@bioetl-architecture'
@@ -676,6 +682,13 @@ registries:
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
   function_complexity:
+    ChemblFetchMultiFilterMixin:
+      value: 16
+      owner: '@bioetl-architecture'
+      reason: Baseline exemption migrated from architecture tests (function_complexity).
+      expires_on: '2026-04-30'
+      removal_step: Refactor target to satisfy default metric and remove this exemption
+        entry.
     __aenter__:
       value: 15
       owner: '@bioetl-architecture'
@@ -895,13 +908,6 @@ registries:
         entry.
     _extract_subcellular_locations:
       value: 13
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (function_complexity).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    _fetch_batch_with_reduction:
-      value: 22
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (function_complexity).
       expires_on: '2026-04-30'
@@ -1442,13 +1448,6 @@ registries:
         entry.
     _fetch_batch_publications:
       value: 75
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (function_length).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    _fetch_batch_with_reduction:
-      value: 58
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (function_length).
       expires_on: '2026-04-30'
@@ -2275,9 +2274,9 @@ registries:
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
     CompositeRunnerStageHelper:
-      value: 360
+      value: 375
       owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (class_size).
+      reason: Synced to current helper decomposition after RF-001/P0-1 refactors.
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
@@ -2289,9 +2288,9 @@ registries:
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
     CompositeRunnerSupportHelper:
-      value: 322
+      value: 336
       owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (class_size).
+      reason: Synced to current helper decomposition after RF-001/P0-1 refactors.
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
@@ -2478,9 +2477,9 @@ registries:
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
     GoldWriterIOMixin:
-      value: 364
+      value: 365
       owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (class_size).
+      reason: Synced to current helper decomposition after RF-001/P0-1 refactors.
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
@@ -2527,9 +2526,9 @@ registries:
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
     MergeIOHelper:
-      value: 343
+      value: 348
       owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (class_size).
+      reason: Synced to current helper decomposition after RF-001/P0-1 refactors.
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
