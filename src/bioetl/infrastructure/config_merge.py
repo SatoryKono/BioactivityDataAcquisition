@@ -9,6 +9,7 @@ from __future__ import annotations
 import copy
 from collections.abc import Callable, Mapping
 from typing import Any
+from bioetl.domain.types import JsonDict
 
 ListMergeFn = Callable[
     [list[Any], list[Any], str],  # Any: heterogeneous YAML values
@@ -49,7 +50,7 @@ def config_merge(
     list_concat_keys: frozenset[str] = frozenset(),
     concat_list_merger: ListMergeFn | None = None,
     list_merger_resolver: ListMergeResolver | None = None,
-) -> dict[str, Any]:  # Any: YAML config values are heterogeneous
+) -> JsonDict:  # Any: YAML config values are heterogeneous
     """Deep-merge two config mappings with optional key-specific list strategies."""
     result = copy.deepcopy(dict(base))
     concat_merger = concat_list_merger or _default_concat_list_merger

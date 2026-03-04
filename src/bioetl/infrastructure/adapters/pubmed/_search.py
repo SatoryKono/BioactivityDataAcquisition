@@ -4,6 +4,7 @@ Part of PubMedAdapter split to comply with LOC limits.
 """
 
 from __future__ import annotations
+from bioetl.domain.types import JsonDict
 
 __all__ = ["PUBMED_SEARCH_ERRORS", "PubMedSearchMixin"]
 
@@ -56,7 +57,7 @@ class PubMedSearchMixin:
     # Provided by PubMedFetchMixin in the concrete class
     def _yield_articles_from_pmids(
         self, pmids: list[str], limit: int | None
-    ) -> AsyncIterator[dict[str, Any]]:  # Any: untyped API JSON record
+    ) -> AsyncIterator[JsonDict]:  # Any: untyped API JSON record
         raise NotImplementedError  # mixin stub; overridden by PubMedFetchMixin
 
     async def _get_pmids(self, search_term: str, max_count: int) -> list[str]:
@@ -99,7 +100,7 @@ class PubMedSearchMixin:
 
     async def _search_by_title(
         self, title: str, limit: int = 3
-    ) -> list[dict[str, Any]]:  # Any: untyped API JSON record
+    ) -> list[JsonDict]:  # Any: untyped API JSON record
         """Search PubMed by title using esearch + efetch."""
         clean_title = title.replace('"', "'").strip()[:200]
         search_term = f'"{clean_title}"[Title]'
@@ -114,7 +115,7 @@ class PubMedSearchMixin:
             if not pmids:
                 return []
 
-            results: list[dict[str, Any]] = []  # Any: untyped API JSON record
+            results: list[JsonDict] = []  # Any: untyped API JSON record
             async for record in self._yield_articles_from_pmids(pmids, limit):
                 results.append(record)
 

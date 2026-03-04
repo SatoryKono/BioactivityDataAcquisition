@@ -5,11 +5,13 @@ from __future__ import annotations
 from collections import Counter
 from typing import Any
 
+from bioetl.domain.types import JsonDict
+
 from bioetl.infrastructure.quality._primitives import _validate_non_negative_int
 
 
 def _validate_baseline_section(
-    raw: dict[str, Any],  # Any: YAML values are heterogeneous
+    raw: JsonDict,  # Any: YAML values are heterogeneous
     errors: list[str],
 ) -> tuple[int | None, dict[str, int]] | None:
     baseline = raw.get("baseline")
@@ -81,7 +83,7 @@ def _validate_registry_group_entry(
 
 
 def _validate_registry_groups_section(
-    raw: dict[str, Any],  # Any: YAML values are heterogeneous
+    raw: JsonDict,  # Any: YAML values are heterogeneous
     *,
     baseline_registry_names: set[str],
     errors: list[str],

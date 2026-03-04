@@ -5,14 +5,15 @@ from __future__ import annotations
 __all__ = ["FeatureExtractor"]
 
 
-from typing import Any, ClassVar
+from typing import ClassVar
 
 from bioetl.domain.serialization import serialize_to_json
+from bioetl.domain.types import JsonDict
 
 
 def _extract_feature_location(  # Any: JSON values
-    location: dict[str, Any],  # Any: untyped API JSON record
-    feature_data: dict[str, Any],  # Any: untyped API JSON record
+    location: JsonDict,  # Any: untyped API JSON record
+    feature_data: JsonDict,  # Any: untyped API JSON record
 ) -> None:
     """Extract start/end positions from feature location.
 
@@ -28,7 +29,7 @@ def _extract_feature_location(  # Any: JSON values
         feature_data["end"] = end.get("value")
 
 
-def _build_feature_dict(feature: dict[str, Any]) -> dict[str, Any]:  # Any: JSON values
+def _build_feature_dict(feature: JsonDict) -> JsonDict:  # Any: JSON values
     """Build a feature data dictionary.
 
     Args:
@@ -37,7 +38,7 @@ def _build_feature_dict(feature: dict[str, Any]) -> dict[str, Any]:  # Any: JSON
     Returns:
         Extracted feature data dict.
     """
-    feature_data: dict[str, Any] = {}  # Any: JSON values
+    feature_data: JsonDict = {}  # Any: JSON values
     if val := feature.get("type"):
         feature_data["type"] = val
     if val := feature.get("description"):
@@ -52,7 +53,7 @@ def _build_feature_dict(feature: dict[str, Any]) -> dict[str, Any]:  # Any: JSON
     return feature_data
 
 
-def _build_keyword_dict(kw: dict[str, Any]) -> dict[str, Any]:  # Any: JSON values
+def _build_keyword_dict(kw: JsonDict) -> JsonDict:  # Any: JSON values
     """Build a keyword data dictionary.
 
     Args:
@@ -61,7 +62,7 @@ def _build_keyword_dict(kw: dict[str, Any]) -> dict[str, Any]:  # Any: JSON valu
     Returns:
         Extracted keyword data dict.
     """
-    kw_data: dict[str, Any] = {}  # Any: JSON values
+    kw_data: JsonDict = {}  # Any: JSON values
     if kw.get("id"):
         kw_data["id"] = kw.get("id")
     if kw.get("name"):
@@ -95,7 +96,7 @@ class FeatureExtractor:
     }
 
     @staticmethod
-    def extract_features(features: Any) -> str | None:  # Any: untyped API JSON
+    def extract_features(features: list[JsonDict] | None) -> str | None:
         """Extract sequence features.
 
         Args:
@@ -107,7 +108,7 @@ class FeatureExtractor:
         if not features or not isinstance(features, list):
             return None
 
-        extracted: list[dict[str, Any]] = []  # Any: JSON values
+        extracted: list[JsonDict] = []  # Any: JSON values
         for feature in features:
             if not isinstance(feature, dict):
                 continue
@@ -118,7 +119,7 @@ class FeatureExtractor:
         return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
 
     @staticmethod
-    def extract_keywords(keywords: Any) -> str | None:  # Any: untyped API JSON
+    def extract_keywords(keywords: list[JsonDict] | None) -> str | None:
         """Extract UniProt keywords.
 
         Args:
@@ -130,7 +131,7 @@ class FeatureExtractor:
         if not keywords or not isinstance(keywords, list):
             return None
 
-        extracted: list[dict[str, Any]] = []  # Any: JSON values
+        extracted: list[JsonDict] = []  # Any: JSON values
         for kw in keywords:
             if not isinstance(kw, dict):
                 continue
@@ -143,9 +144,9 @@ class FeatureExtractor:
     @classmethod
     def extract_features_by_type(
         cls,
-        features: Any,  # Any: untyped API JSON
-        feature_type: str,  # Any: untyped UniProt API JSON
-    ) -> str | None:  # Any: untyped UniProt JSON
+        features: list[JsonDict] | None,
+        feature_type: str,
+    ) -> str | None:
         """Extract sequence features by type.
 
         Args:
@@ -158,7 +159,7 @@ class FeatureExtractor:
         if not features or not isinstance(features, list):
             return None
 
-        extracted: list[dict[str, Any]] = []  # Any: JSON values
+        extracted: list[JsonDict] = []  # Any: JSON values
         for feature in features:
             if not isinstance(feature, dict):
                 continue
@@ -170,7 +171,7 @@ class FeatureExtractor:
         return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
 
     @classmethod
-    def extract_domains(cls, features: Any) -> str | None:  # Any: untyped API JSON
+    def extract_domains(cls, features: list[JsonDict] | None) -> str | None:
         """Extract protein domain features.
 
         Args:
@@ -182,7 +183,7 @@ class FeatureExtractor:
         return cls.extract_features_by_type(features, "Domain")
 
     @classmethod
-    def extract_binding_sites(cls, features: Any) -> str | None:  # Any: untyped JSON
+    def extract_binding_sites(cls, features: list[JsonDict] | None) -> str | None:
         """Extract binding site features.
 
         Args:
@@ -194,7 +195,7 @@ class FeatureExtractor:
         return cls.extract_features_by_type(features, "Binding site")
 
     @classmethod
-    def extract_active_sites(cls, features: Any) -> str | None:  # Any: untyped API JSON
+    def extract_active_sites(cls, features: list[JsonDict] | None) -> str | None:
         """Extract active site features.
 
         Args:
@@ -206,7 +207,7 @@ class FeatureExtractor:
         return cls.extract_features_by_type(features, "Active site")
 
     @classmethod
-    def extract_topology(cls, features: Any) -> str | None:  # Any: untyped API JSON
+    def extract_topology(cls, features: list[JsonDict] | None) -> str | None:
         """Extract topological domain features.
 
         Args:
@@ -218,7 +219,7 @@ class FeatureExtractor:
         return cls.extract_features_by_type(features, cls.FEATURE_TYPES["topology"])
 
     @classmethod
-    def extract_transmembrane(cls, features: Any) -> str | None:  # Any: untyped JSON
+    def extract_transmembrane(cls, features: list[JsonDict] | None) -> str | None:
         """Extract transmembrane region features.
 
         Args:
@@ -232,7 +233,7 @@ class FeatureExtractor:
         )
 
     @classmethod
-    def extract_intramembrane(cls, features: Any) -> str | None:  # Any: untyped JSON
+    def extract_intramembrane(cls, features: list[JsonDict] | None) -> str | None:
         """Extract intramembrane region features.
 
         Args:
@@ -246,7 +247,7 @@ class FeatureExtractor:
         )
 
     @classmethod
-    def extract_glycosylation(cls, features: Any) -> str | None:  # Any: untyped JSON
+    def extract_glycosylation(cls, features: list[JsonDict] | None) -> str | None:
         """Extract glycosylation site features.
 
         Args:
@@ -260,7 +261,7 @@ class FeatureExtractor:
         )
 
     @classmethod
-    def extract_lipidation(cls, features: Any) -> str | None:  # Any: untyped API JSON
+    def extract_lipidation(cls, features: list[JsonDict] | None) -> str | None:
         """Extract lipidation site features.
 
         Args:
@@ -272,7 +273,7 @@ class FeatureExtractor:
         return cls.extract_features_by_type(features, cls.FEATURE_TYPES["lipidation"])
 
     @classmethod
-    def extract_disulfide_bonds(cls, features: Any) -> str | None:  # Any: untyped JSON
+    def extract_disulfide_bonds(cls, features: list[JsonDict] | None) -> str | None:
         """Extract disulfide bond features.
 
         Args:
@@ -288,8 +289,8 @@ class FeatureExtractor:
     @classmethod
     def extract_modified_residues(
         cls,
-        features: Any,  # Any: untyped UniProt API JSON
-    ) -> str | None:  # Any: untyped UniProt JSON
+        features: list[JsonDict] | None,
+    ) -> str | None:
         """Extract modified residue features.
 
         Args:
@@ -303,7 +304,7 @@ class FeatureExtractor:
         )
 
     @classmethod
-    def extract_signal_peptide(cls, features: Any) -> str | None:  # Any: untyped JSON
+    def extract_signal_peptide(cls, features: list[JsonDict] | None) -> str | None:
         """Extract signal peptide features.
 
         Args:
@@ -317,7 +318,7 @@ class FeatureExtractor:
         )
 
     @classmethod
-    def extract_propeptide(cls, features: Any) -> str | None:  # Any: untyped API JSON
+    def extract_propeptide(cls, features: list[JsonDict] | None) -> str | None:
         """Extract propeptide features.
 
         Args:
@@ -331,8 +332,8 @@ class FeatureExtractor:
     @classmethod
     def extract_ptm_by_pattern(  # Any: untyped JSON
         cls,
-        features: Any,  # Any: untyped API JSON
-        patterns: tuple[str, ...],  # Any: untyped UniProt API JSON
+        features: list[JsonDict] | None,
+        patterns: tuple[str, ...],
     ) -> str | None:
         """Extract modified residue features matching PTM patterns.
 
@@ -353,7 +354,7 @@ class FeatureExtractor:
             return None
 
         mod_res_type = cls.FEATURE_TYPES["modified_residue"]
-        extracted: list[dict[str, Any]] = []  # Any: JSON values
+        extracted: list[JsonDict] = []  # Any: JSON values
 
         # Pre-normalize patterns once to avoid repeated lower() calls
         normalized_patterns = tuple(p.lower() for p in patterns)
@@ -377,7 +378,7 @@ class FeatureExtractor:
         return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
 
     @classmethod
-    def extract_phosphorylation(cls, features: Any) -> str | None:  # Any: untyped JSON
+    def extract_phosphorylation(cls, features: list[JsonDict] | None) -> str | None:
         """Extract phosphorylation site features.
 
         Args:
@@ -389,7 +390,7 @@ class FeatureExtractor:
         return cls.extract_ptm_by_pattern(features, cls.PTM_PATTERNS["phosphorylation"])
 
     @classmethod
-    def extract_acetylation(cls, features: Any) -> str | None:  # Any: untyped API JSON
+    def extract_acetylation(cls, features: list[JsonDict] | None) -> str | None:
         """Extract acetylation site features.
 
         Args:
@@ -401,7 +402,7 @@ class FeatureExtractor:
         return cls.extract_ptm_by_pattern(features, cls.PTM_PATTERNS["acetylation"])
 
     @classmethod
-    def extract_ubiquitination(cls, features: Any) -> str | None:  # Any: untyped JSON
+    def extract_ubiquitination(cls, features: list[JsonDict] | None) -> str | None:
         """Extract ubiquitination site features.
 
         Args:

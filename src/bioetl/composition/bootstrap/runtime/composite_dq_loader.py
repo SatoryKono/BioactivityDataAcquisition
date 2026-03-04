@@ -5,14 +5,15 @@ from __future__ import annotations
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
+from bioetl.domain.types import JsonDict
 
 import yaml
 
 
 def _deep_merge_dicts(
-    base: dict[str, Any],  # Any: YAML config has heterogeneous values
-    override: dict[str, Any],  # Any: YAML config has heterogeneous values
-) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
+    base: JsonDict,  # Any: YAML config has heterogeneous values
+    override: JsonDict,  # Any: YAML config has heterogeneous values
+) -> JsonDict:  # Any: YAML config has heterogeneous values
     """Recursively merge two dictionaries with override precedence."""
     merged = deepcopy(base)
     for key, value in override.items():
@@ -25,7 +26,7 @@ def _deep_merge_dicts(
 
 
 def merge_external_dq_overrides(
-    raw: dict[str, Any],  # Any: YAML config has heterogeneous values
+    raw: JsonDict,  # Any: YAML config has heterogeneous values
     config_path: Path,
 ) -> None:
     """Merge external composite DQ config file into inline dq_overrides.

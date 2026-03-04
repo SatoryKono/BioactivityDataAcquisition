@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, StoragePort
+from bioetl.domain.types import JsonDict
 
 
 @dataclass(frozen=True, slots=True)
@@ -187,7 +188,7 @@ class CleanupService:
 
     def _parse_layer_info(
         self,
-        info_dict: dict[str, Any],  # Any: values are heterogeneous
+        info_dict: JsonDict,  # Any: values are heterogeneous
     ) -> LayerInfo:  # Any: values are heterogeneous
         """Parse layer info from storage preview response.
 

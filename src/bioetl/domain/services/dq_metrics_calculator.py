@@ -15,6 +15,7 @@ from dataclasses import dataclass
 from typing import Any, Literal
 
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics, SchemaDriftInfo
+from bioetl.domain.types import JsonDict
 
 
 @dataclass(frozen=True, slots=True)
@@ -29,7 +30,7 @@ class DQMetricsInput:
         validation_errors: List of validation error messages.
     """
 
-    records: list[dict[str, Any]]  # Any: DQ check values vary by check type
+    records: list[JsonDict]  # Any: DQ check values vary by check type
     existing_schema_fields: set[str] | None = None
     quarantined_count: int = 0
     validation_errors: list[str] | None = None
@@ -71,7 +72,7 @@ class DQMetricsCalculator:
 
     def _detect_schema_drift(
         self,
-        records: list[dict[str, Any]],  # Any: DQ check values vary by check type
+        records: list[JsonDict],  # Any: DQ check values vary by check type
         existing_fields: set[str] | None,
     ) -> SchemaDriftInfo | None:
         """Detect schema drift between existing and incoming schema.
@@ -104,7 +105,7 @@ class DQMetricsCalculator:
 
     @staticmethod
     def _extract_incoming_fields(
-        records: list[dict[str, Any]],  # Any: DQ check values vary by check type
+        records: list[JsonDict],  # Any: DQ check values vary by check type
     ) -> set[str]:
         """Extract incoming field names from first record."""
         return set(records[0].keys())

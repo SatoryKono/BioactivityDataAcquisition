@@ -7,9 +7,10 @@ Used for ChEMBL → UniProt and similar cross-database mappings.
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, Protocol, Self, runtime_checkable
+from types import TracebackType
+from typing import Protocol, Self, runtime_checkable
 
-from bioetl.domain.types import HealthStatus
+from bioetl.domain.types import HealthStatus, JsonDict
 
 __all__ = [
     "IDMappingPort",
@@ -47,7 +48,7 @@ class IDMappingPort(Protocol):
         self,
         exc_type: type[BaseException] | None,
         exc_val: BaseException | None,
-        exc_tb: Any,  # Any: traceback type from __aexit__ protocol
+        exc_tb: TracebackType | None,
     ) -> None:
         """Exit async context manager."""
         ...
@@ -59,8 +60,8 @@ class IDMappingPort(Protocol):
         ids: list[str],
     ) -> Mapping[
         str,
-        dict[str, Any] | None,  # Any: port contract allows heterogeneous record values
-    ]:  # Any: port contract allows heterogeneous record values
+        JsonDict | None,
+    ]:
         """Map identifiers from source database to target database.
 
         Args:

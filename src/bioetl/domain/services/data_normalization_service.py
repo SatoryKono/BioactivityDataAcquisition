@@ -13,7 +13,7 @@ Pure domain service (no I/O) per RULES.md §1.1.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.domain.services.author_normalization_service import (
     AuthorNormalizationService,
@@ -151,8 +151,8 @@ class DefaultDataNormalizationService(AuthorNormalizationService):
 
     def normalize_to_string(
         self,
-        value: Any,  # Any: raw input value from API (str|int|float|None)
-    ) -> str | None:  # Any: raw input value from API (str|int|float|None)
+        value: object,
+    ) -> str | None:
         """Convert value to string, strip whitespace, return None if empty.
 
         Args:

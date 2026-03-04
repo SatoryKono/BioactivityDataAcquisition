@@ -23,7 +23,7 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
 )
 from bioetl.domain.entities import Molecule
 from bioetl.domain.transformations import safe_float, safe_int
-from bioetl.domain.types import GoldRecord
+from bioetl.domain.types import GoldRecord, JsonDict
 from bioetl.domain.value_objects import SMILES, InChIKey
 
 if TYPE_CHECKING:
@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 
 
 # Field mappings for molecule nested structures
-_HIERARCHY_FIELDS: dict[str, Any] = {  # Any: converter callables or None
+_HIERARCHY_FIELDS: JsonDict = {  # Any: converter callables or None
     "parent_chembl_id": None,
     "active_chembl_id": None,
     "molecule_chembl_id": None,
@@ -45,7 +45,7 @@ _HIERARCHY_RENAMES: dict[str, str] = {
     "hierarchy_molecule_id": "hierarchy_child_chembl_id",
 }
 
-_PROPERTIES_FIELDS: dict[str, Any] = {  # Any: converter callables or None
+_PROPERTIES_FIELDS: JsonDict = {  # Any: converter callables or None
     "alogp": safe_float,
     "mw_freebase": safe_float,
     "full_mwt": safe_float,
@@ -78,7 +78,7 @@ _PROPERTIES_RENAMES: dict[str, str] = {
     "property_ro3_pass": "ro3_pass",
 }
 
-_STRUCTURES_FIELDS: dict[str, Any] = {  # Any: converter callables or None
+_STRUCTURES_FIELDS: JsonDict = {  # Any: converter callables or None
     "canonical_smiles": None,
     "standard_inchi": None,
     "standard_inchi_key": None,
@@ -187,13 +187,13 @@ class MoleculeTransformer(BaseChemblTransformer):
             Dictionary of Molecule business fields.
 
         """
-        # BronzeRecord is already a dict[str, Any]
+        # BronzeRecord is already a JsonDict
         rec = record
 
         # Extract structure fields
         structure_data = flatten_nested_dict(
             cast(
-                "dict[str, Any] | None",  # Any: untyped ChEMBL API JSON
+                "JsonDict | None",  # Any: untyped ChEMBL API JSON
                 rec.get("molecule_structures"),
             ),
             "",  # No prefix - unified naming with PubChem
@@ -216,7 +216,7 @@ class MoleculeTransformer(BaseChemblTransformer):
 
         properties = flatten_nested_dict(
             cast(
-                "dict[str, Any] | None",  # Any: untyped ChEMBL API JSON
+                "JsonDict | None",  # Any: untyped ChEMBL API JSON
                 rec.get("molecule_properties"),
             ),
             "property_",
@@ -237,7 +237,7 @@ class MoleculeTransformer(BaseChemblTransformer):
             # Nested dict extraction with renames
             **flatten_nested_dict(
                 cast(
-                    "dict[str, Any] | None",  # Any: untyped ChEMBL API JSON
+                    "JsonDict | None",  # Any: untyped ChEMBL API JSON
                     rec.get("molecule_hierarchy"),
                 ),
                 "hierarchy_",

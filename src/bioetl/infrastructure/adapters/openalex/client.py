@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING, Any
 from httpx import HTTPStatusError, RequestError
 
 from bioetl.domain.exceptions import BioETLError, NetworkError
-from bioetl.domain.types import BronzeRecord, HealthStatus
+from bioetl.domain.types import BronzeRecord, HealthStatus, JsonDict
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.common import FallbackFetchOrchestratorService
 from bioetl.infrastructure.adapters.openalex.client_helpers_adapter_mixin import (
@@ -160,7 +160,7 @@ class OpenAlexAdapter(OpenAlexAdapterHelpersMixin, BaseHttpAdapter):
     async def _request_works_payload(
         self,
         params: dict[str, str],
-    ) -> dict[str, Any]:  # Any: untyped OpenAlex API payload
+    ) -> JsonDict:  # Any: untyped OpenAlex API payload
         """Backward-compatible wrapper around query-execution component."""
         return await self._query_executor.request_works_payload(params)
 

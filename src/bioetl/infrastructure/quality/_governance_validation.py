@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from bioetl.domain.types import JsonDict
+
 from bioetl.infrastructure.quality._baseline_validation import (
     _is_valid_rollout_section_key,
 )
@@ -14,7 +16,7 @@ from bioetl.infrastructure.quality._primitives import (
 
 
 def _validate_governance_section(
-    raw: dict[str, Any],  # Any: YAML values are heterogeneous
+    raw: JsonDict,  # Any: YAML values are heterogeneous
     *,
     baseline_registry_names: set[str],
     group_names: set[str],

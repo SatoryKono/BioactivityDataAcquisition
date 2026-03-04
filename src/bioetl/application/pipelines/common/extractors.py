@@ -18,10 +18,11 @@ __all__ = ["extract_author_names"]
 
 
 from typing import Any
+from bioetl.domain.types import JsonDict
 
 
 def extract_author_names(
-    items: list[dict[str, Any]] | None,  # Any: untyped API JSON record
+    items: list[JsonDict] | None,  # Any: untyped API JSON record
     name_field: str = "name",
     nested_field: str | None = None,
 ) -> list[str]:

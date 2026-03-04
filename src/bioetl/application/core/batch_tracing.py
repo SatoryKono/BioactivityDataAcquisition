@@ -13,7 +13,7 @@ Responsibilities:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.domain.ports import NoOpTracing
 
@@ -62,7 +62,7 @@ class BatchTracingManagerService:
         self._initial_batch_size = initial_batch_size
         self._adaptive_sizing_enabled = adaptive_sizing_enabled
 
-    def start_execution_span(self) -> Any | None:  # Any: OTel Span (avoids open...
+    def start_execution_span(self) -> Span | None:
         """Start root tracing span for pipeline execution.
 
         Returns:
@@ -86,7 +86,7 @@ class BatchTracingManagerService:
 
     def start_batch_span(
         self, batch_id: BatchID, record_count: int, start_index: int
-    ) -> Any | None:  # Any: OTel Span (avoids opentelemetry import)
+    ) -> Span | None:
         """Start tracing span for a batch.
 
         Args:
@@ -118,7 +118,7 @@ class BatchTracingManagerService:
         batch_id: BatchID,
         count: int,
         input_count: bool = False,
-    ) -> Any:  # Any: OTel Span (avoids opentelemetry import)
+    ) -> Span:
         """Start a tracing span for a layer operation.
 
         Args:

@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable
 from datetime import datetime
 from types import ModuleType
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING
 
 from bioetl.domain.medallion import GoldWriteMode
 from bioetl.domain.ports import AuditEntry, AuditLayer, AuditOperation
@@ -14,13 +14,16 @@ from bioetl.domain.types import RunID
 if TYPE_CHECKING:
     from pandera.polars import DataFrameSchema
 
+    from bioetl.domain.models.metadata import GoldMetadata
     from bioetl.domain.ports import (
         AuditPort,
+        GoldMetadataInput,
         LoggerPort,
         MetadataCoordinatorPort,
         MetadataWriterPort,
     )
     from bioetl.domain.types import GoldRecord, ScdConfig
+    from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 
 class GoldWriterMetadataMixin:
@@ -91,11 +94,7 @@ class GoldWriterMetadataMixin:
 
         try:
             dt = await self._run_in_executor(lambda: module.DeltaTable(table_path))
-            delta_table = cast(
-                "Any",  # Any: runtime DeltaTable is loaded dynamically
-                dt,
-            )
-            version: int = delta_table.version()
+            version: int = dt.version()  # type: ignore[union-attr]
             return version
         except module.TableNotFoundError:
             return None
@@ -109,8 +108,8 @@ class GoldWriterMetadataMixin:
         scd_config: ScdConfig | None,
         ingestion_ts: datetime | None,
         run_id: RunID | None,
-        silver_refs: list[Any] | None = None,  # Any: SilverRef heterogeneous
-        gold_schema: Any | None = None,  # Any: Pandera model class
+        silver_refs: list[SilverWriteResult] | None = None,
+        gold_schema: object | None = None,
     ) -> None:
         """Write Gold layer metadata sidecar file."""
         if not records:
@@ -151,9 +150,9 @@ class GoldWriterMetadataMixin:
         scd_config: ScdConfig | None,
         ingestion_ts: datetime | None,
         run_id: RunID | None,
-        silver_refs: list[Any] | None,  # Any: SilverRef heterogeneous
-        gold_schema: Any | None,  # Any: Pandera model class
-    ) -> Any:  # Any: metadata payload type comes from ports layer
+        silver_refs: list[SilverWriteResult] | None,
+        gold_schema: object | None,
+    ) -> GoldMetadata:
         """Create metadata via coordinator when configured, else fallback builder."""
         if self._metadata_coordinator is not None:
             return self._create_gold_metadata_via_coordinator(
@@ -185,9 +184,9 @@ class GoldWriterMetadataMixin:
         mode: GoldWriteMode,
         scd_config: ScdConfig | None,
         ingestion_ts: datetime | None,
-        silver_refs: list[Any] | None,  # Any: SilverRef heterogeneous
-        gold_schema: Any | None,  # Any: Pandera model class
-    ) -> Any:  # Any: metadata payload type comes from ports layer
+        silver_refs: list[SilverWriteResult] | None,
+        gold_schema: object | None,
+    ) -> GoldMetadata:
         """Build Gold metadata using MetadataCoordinator."""
         from bioetl.domain.ports import GoldMetadataInput, SilverRef
 
@@ -227,8 +226,8 @@ class GoldWriterMetadataMixin:
         scd_config: ScdConfig | None,
         ingestion_ts: datetime | None,
         run_id: RunID | None,
-        gold_schema: Any | None,  # Any: Pandera model class
-    ) -> Any:  # Any: metadata payload type comes from ports layer
+        gold_schema: object | None,
+    ) -> GoldMetadata:
         """Build Gold metadata through fallback builder."""
         from bioetl.infrastructure.storage.metadata_builder import GoldMetadataBuilder
 
@@ -250,7 +249,7 @@ class GoldWriterMetadataMixin:
         self,
         *,
         table_path: str,
-        metadata: Any,  # Any: metadata payload type comes from ports layer
+        metadata: GoldMetadata,
         table_name: str,
         provider_name: str,
         entity_name: str,
@@ -312,7 +311,7 @@ class GoldWriterMetadataMixin:
         table_name: str,
         records: list[GoldRecord],
         schema: DataFrameSchema | None,
-    ) -> Any:  # Any: GoldMetadataInput import is runtime-only
+    ) -> GoldMetadataInput:
         """Build metadata input payload for merged Gold writes."""
         from bioetl.domain.ports import GoldMetadataInput
 

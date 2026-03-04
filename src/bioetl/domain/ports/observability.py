@@ -20,6 +20,7 @@ Design Decision — TracingPort as OpenTelemetry facade:
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import Any, Protocol, Self, runtime_checkable
 
 __all__ = [
@@ -345,7 +346,7 @@ class DQMonitorPort(Protocol):
     def add_metric(
         self,
         metric_name: str,
-        baseline: Any,  # Any: Sequence[float] (avoids importing numpy/Sequence in domain)
+        baseline: Sequence[float],
         min_threshold: float | None = None,
         max_threshold: float | None = None,
     ) -> None:

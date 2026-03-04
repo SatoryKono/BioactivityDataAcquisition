@@ -9,13 +9,14 @@ from __future__ import annotations
 __all__ = ["FilteredDataSource"]
 
 
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Self
 
 from bioetl.application.core._data_source_mixins import _SourceMetadataDelegationMixin
 from bioetl.domain.ports import FilterableDataSourcePort, InputFilterPort
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Mapping
+    from types import TracebackType
 
     from bioetl.domain.filtering import FilterLoadResult, InputFilterConfig
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
@@ -251,14 +252,14 @@ class FilteredDataSource(_SourceMetadataDelegationMixin):
         self,
         exc_type: type[BaseException] | None,
         exc_val: BaseException | None,
-        exc_tb: Any,  # Any: TracebackType | None per async context manager protocol
+        exc_tb: TracebackType | None,
     ) -> None:
         """Exit async context."""
         await self._data_source.__aexit__(exc_type, exc_val, exc_tb)
 
     def _matches_valid_combination(
         self,
-        record: dict[str, Any],  # Any: filter record values vary (str|int|float|list)
+        record: JsonDict,  # Any: filter record values vary (str|int|float|list)
     ) -> bool:  # Any: filter record values vary (str|int|float|list)
         """Check if record matches one of the valid combinations."""
         if not self._valid_combinations or not self._filter_fields:
@@ -280,7 +281,7 @@ class FilteredDataSource(_SourceMetadataDelegationMixin):
     async def _fetch_multi_column(
         self, entity_type: str, limit: int | None
     ) -> AsyncIterator[
-        dict[str, Any]  # Any: filter record values vary (str|int|float|list)
+        JsonDict  # Any: filter record values vary (str|int|float|list)
     ]:  # Any: filter record values vary (str|int|float|list)
         """Fetch with multi-column filtering (hybrid approach)."""
         self._ensure_filterable_adapter("Multi-column filtering")
@@ -301,7 +302,7 @@ class FilteredDataSource(_SourceMetadataDelegationMixin):
     async def _fetch_single_column(
         self, entity_type: str, limit: int | None
     ) -> AsyncIterator[
-        dict[str, Any]  # Any: filter record values vary (str|int|float|list)
+        JsonDict  # Any: filter record values vary (str|int|float|list)
     ]:  # Any: filter record values vary (str|int|float|list)
         """Fetch with single-column filtering."""
         self._ensure_filterable_adapter("Filtering")
@@ -343,7 +344,7 @@ class FilteredDataSource(_SourceMetadataDelegationMixin):
         filter_field: str | None = None,
         offset: int | None = None,
     ) -> AsyncIterator[
-        dict[str, Any]  # Any: filter record values vary (str|int|float|list)
+        JsonDict  # Any: filter record values vary (str|int|float|list)
     ]:  # Any: filter record values vary (str|int|float|list)
         """Fetch records with optional filtering from internal CSV config.
 

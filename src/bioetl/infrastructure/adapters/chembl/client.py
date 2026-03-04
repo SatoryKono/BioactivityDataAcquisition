@@ -16,7 +16,7 @@ from pydantic import BaseModel
 
 from bioetl.domain.models.filter import ExtractionParams
 from bioetl.domain.resilience import AdapterConfig
-from bioetl.domain.types import BronzeRecord
+from bioetl.domain.types import BronzeRecord, JsonDict
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.chembl.constants import (
     _NO_PAGINATION_ENTITIES,
@@ -133,7 +133,7 @@ class ChemblAdapter(
 
     def _build_params(
         self, offset: int, entity_type: str | None = None
-    ) -> dict[str, Any]:  # Any: HTTP query params (str|int|bool values)
+    ) -> JsonDict:  # Any: HTTP query params (str|int|bool values)
         """Build API request parameters with health-aware batch size.
 
         Args:
@@ -144,7 +144,7 @@ class ChemblAdapter(
         Returns:
             Dictionary of query parameters.
         """
-        params: dict[str, Any] = {  # Any: untyped API JSON record
+        params: JsonDict = {  # Any: untyped API JSON record
             "format": "json"
         }  # Any: HTTP query params (str|int|bool values)
 
@@ -212,7 +212,7 @@ class ChemblAdapter(
     def _get_projected_url_length(
         self,
         url: str,
-        params: dict[str, Any],  # Any: untyped API JSON record
+        params: JsonDict,  # Any: untyped API JSON record
     ) -> int:  # Any: HTTP query params (str|int|bool values)
         """Estimate the length of the final URL with parameters."""
         # URL-encode parameters to get accurate length (including escaping)

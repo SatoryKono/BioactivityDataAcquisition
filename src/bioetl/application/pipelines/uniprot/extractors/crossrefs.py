@@ -5,9 +5,8 @@ from __future__ import annotations
 __all__ = ["CrossRefExtractor"]
 
 
-from typing import Any
-
 from bioetl.domain.serialization import serialize_to_json
+from bioetl.domain.types import JsonDict
 
 # Any: UniProt REST API returns untyped JSON; dict values are heterogeneous
 # (str | int | float | list | dict | None). All public methods accept
@@ -24,7 +23,7 @@ class CrossRefExtractor:
     GO_ASPECTS = frozenset(("F", "P", "C"))
 
     @classmethod
-    def extract_go_terms(cls, xrefs: Any) -> str | None:  # Any: untyped API JSON
+    def extract_go_terms(cls, xrefs: list[JsonDict] | None) -> str | None:
         """Extract GO terms with structured data.
 
         Args:
@@ -36,7 +35,7 @@ class CrossRefExtractor:
         if not xrefs or not isinstance(xrefs, list):
             return None
 
-        go_terms: list[dict[str, Any]] = []  # Any: JSON values
+        go_terms: list[JsonDict] = []  # Any: JSON values
         for xref in xrefs:
             if not isinstance(xref, dict):
                 continue
@@ -62,7 +61,7 @@ class CrossRefExtractor:
         return serialize_to_json(go_terms, ensure_ascii=False) if go_terms else None
 
     @staticmethod
-    def _parse_properties(properties: list[Any]) -> dict[str, str]:  # Any: untyped JSON
+    def _parse_properties(properties: list[JsonDict]) -> dict[str, str]:
         """Parse cross-reference properties into key-value dict.
 
         Args:
@@ -105,7 +104,7 @@ class CrossRefExtractor:
         return aspect, term
 
     @staticmethod
-    def extract_xref_ids(xrefs: Any, database: str) -> str | None:  # Any: untyped JSON
+    def extract_xref_ids(xrefs: list[JsonDict] | None, database: str) -> str | None:
         """Extract cross-reference IDs for specific database.
 
         Args:
@@ -134,14 +133,14 @@ class CrossRefExtractor:
     @classmethod
     def _build_pdb_entry(
         cls,
-        xref: dict[str, Any],  # Any: untyped API JSON record
-    ) -> dict[str, Any] | None:  # Any: untyped JSON fragment from UniProt API
+        xref: JsonDict,  # Any: untyped API JSON record
+    ) -> JsonDict | None:  # Any: untyped JSON fragment from UniProt API
         """Build a PDB entry from a cross-reference dict."""
         pdb_id = xref.get("id")
         if not pdb_id:
             return None
 
-        pdb_entry: dict[str, Any] = {"id": str(pdb_id)}  # Any: JSON values
+        pdb_entry: JsonDict = {"id": str(pdb_id)}  # Any: JSON values
         props = cls._parse_properties(xref.get("properties", []))
 
         for key, field in [
@@ -155,7 +154,7 @@ class CrossRefExtractor:
         return pdb_entry
 
     @classmethod
-    def extract_pdb_xrefs(cls, xrefs: Any) -> str | None:  # Any: untyped API JSON
+    def extract_pdb_xrefs(cls, xrefs: list[JsonDict] | None) -> str | None:
         """Extract PDB cross-references with structural details.
 
         PDB references include information about 3D structure availability,
@@ -185,14 +184,14 @@ class CrossRefExtractor:
     @classmethod
     def _build_interpro_entry(
         cls,
-        xref: dict[str, Any],  # Any: untyped API JSON record
-    ) -> dict[str, Any] | None:  # Any: untyped JSON fragment from UniProt API
+        xref: JsonDict,  # Any: untyped API JSON record
+    ) -> JsonDict | None:  # Any: untyped JSON fragment from UniProt API
         """Build an InterPro entry from a cross-reference dict."""
         interpro_id = xref.get("id")
         if not interpro_id:
             return None
 
-        interpro_entry: dict[str, Any] = {"id": str(interpro_id)}  # Any: JSON values
+        interpro_entry: JsonDict = {"id": str(interpro_id)}  # Any: JSON values
         props = cls._parse_properties(xref.get("properties", []))
 
         if props.get("EntryName"):
@@ -201,7 +200,7 @@ class CrossRefExtractor:
         return interpro_entry
 
     @classmethod
-    def extract_interpro_xrefs(cls, xrefs: Any) -> str | None:  # Any: untyped API JSON
+    def extract_interpro_xrefs(cls, xrefs: list[JsonDict] | None) -> str | None:
         """Extract InterPro cross-references with domain family information.
 
         InterPro provides protein domain and family classification based on
@@ -234,14 +233,14 @@ class CrossRefExtractor:
     @classmethod
     def _build_pfam_entry(
         cls,
-        xref: dict[str, Any],  # Any: untyped API JSON record
-    ) -> dict[str, Any] | None:  # Any: untyped JSON fragment from UniProt API
+        xref: JsonDict,  # Any: untyped API JSON record
+    ) -> JsonDict | None:  # Any: untyped JSON fragment from UniProt API
         """Build a Pfam entry from a cross-reference dict."""
         pfam_id = xref.get("id")
         if not pfam_id:
             return None
 
-        pfam_entry: dict[str, Any] = {"id": str(pfam_id)}  # Any: JSON values
+        pfam_entry: JsonDict = {"id": str(pfam_id)}  # Any: JSON values
         props = cls._parse_properties(xref.get("properties", []))
 
         if props.get("EntryName"):
@@ -252,7 +251,7 @@ class CrossRefExtractor:
         return pfam_entry
 
     @classmethod
-    def extract_pfam_xrefs(cls, xrefs: Any) -> str | None:  # Any: untyped API JSON
+    def extract_pfam_xrefs(cls, xrefs: list[JsonDict] | None) -> str | None:
         """Extract Pfam cross-references with protein family information.
 
         Pfam is a database of protein families represented by multiple
@@ -282,14 +281,14 @@ class CrossRefExtractor:
     @classmethod
     def _build_reactome_entry(
         cls,
-        xref: dict[str, Any],  # Any: untyped API JSON record
-    ) -> dict[str, Any] | None:  # Any: untyped JSON fragment from UniProt API
+        xref: JsonDict,  # Any: untyped API JSON record
+    ) -> JsonDict | None:  # Any: untyped JSON fragment from UniProt API
         """Build a Reactome entry from a cross-reference dict."""
         reactome_id = xref.get("id")
         if not reactome_id:
             return None
 
-        reactome_entry: dict[str, Any] = {"id": str(reactome_id)}  # Any: JSON values
+        reactome_entry: JsonDict = {"id": str(reactome_id)}  # Any: JSON values
         props = cls._parse_properties(xref.get("properties", []))
 
         if props.get("PathwayName"):
@@ -298,7 +297,7 @@ class CrossRefExtractor:
         return reactome_entry
 
     @classmethod
-    def extract_reactome_xrefs(cls, xrefs: Any) -> str | None:  # Any: untyped API JSON
+    def extract_reactome_xrefs(cls, xrefs: list[JsonDict] | None) -> str | None:
         """Extract Reactome cross-references with pathway information.
 
         Reactome is a free, open-source, curated and peer-reviewed pathway
@@ -332,9 +331,9 @@ class CrossRefExtractor:
     @classmethod
     def extract_go_by_aspect(
         cls,
-        xrefs: Any,  # Any: untyped API JSON
-        aspect: str,  # Any: untyped UniProt API JSON
-    ) -> str | None:  # Any: untyped UniProt JSON
+        xrefs: list[JsonDict] | None,
+        aspect: str,
+    ) -> str | None:
         """Extract GO terms filtered by aspect.
 
         Args:
@@ -350,7 +349,7 @@ class CrossRefExtractor:
         if not xrefs or not isinstance(xrefs, list):
             return None
 
-        go_terms: list[dict[str, Any]] = []  # Any: JSON values
+        go_terms: list[JsonDict] = []  # Any: JSON values
         for xref in xrefs:
             if not isinstance(xref, dict):
                 continue
@@ -378,7 +377,7 @@ class CrossRefExtractor:
         return serialize_to_json(go_terms, ensure_ascii=False) if go_terms else None
 
     @classmethod
-    def extract_molecular_function(cls, xrefs: Any) -> str | None:  # Any: untyped JSON
+    def extract_molecular_function(cls, xrefs: list[JsonDict] | None) -> str | None:
         """Extract GO terms for molecular function (F aspect).
 
         Args:
@@ -390,7 +389,7 @@ class CrossRefExtractor:
         return cls.extract_go_by_aspect(xrefs, "F")
 
     @classmethod
-    def extract_cellular_component(cls, xrefs: Any) -> str | None:  # Any: untyped JSON
+    def extract_cellular_component(cls, xrefs: list[JsonDict] | None) -> str | None:
         """Extract GO terms for cellular component (C aspect).
 
         Args:

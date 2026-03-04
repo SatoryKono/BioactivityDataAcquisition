@@ -25,7 +25,7 @@ from typing import TYPE_CHECKING, Any, Self
 
 from bioetl.domain.exceptions import CachedBronzeEmptyError
 from bioetl.domain.ports import LoggerPort
-from bioetl.domain.types import HealthStatus
+from bioetl.domain.types import HealthStatus, JsonDict
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -177,7 +177,7 @@ class CachedBronzeDataSource:
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
         offset: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:  # Any: untyped API JSON record
+    ) -> AsyncIterator[JsonDict]:  # Any: untyped API JSON record
         """Fetch records from cached Bronze files.
 
         Reads JSONL+zstd files from Bronze storage and yields records.

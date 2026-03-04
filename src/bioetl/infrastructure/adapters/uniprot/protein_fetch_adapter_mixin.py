@@ -1,13 +1,12 @@
-# mypy: disable-error-code=no-any-return
 """Protein fetch internals for UniProtAdapter."""
 
 from __future__ import annotations
 
 import contextlib
 import time
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
-from bioetl.domain.types import BronzeRecord
+from bioetl.domain.types import BronzeRecord, JsonDict
 from bioetl.infrastructure.adapters.uniprot.query_builder import (
     build_uniprot_protein_search_params,
 )
@@ -80,13 +79,13 @@ class UniProtProteinFetchAdapterMixin:
     """Protein endpoint helpers and pagination callbacks."""
 
     def _build_protein_fetch_params(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         query: str,
         size: int,
         fetched: int,
         limit: int | None,
         cursor: str | None,
-    ) -> dict[str, Any]:  # Any: dynamic payload or structural mixin boundary
+    ) -> JsonDict:
         """Build protein search parameters."""
         return build_uniprot_protein_search_params(
             query=query,
@@ -98,14 +97,14 @@ class UniProtProteinFetchAdapterMixin:
         )
 
     def _parse_response(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
-        response: httpx.Response,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
+        response: httpx.Response,
     ) -> tuple[list[BronzeRecord], str | None]:
         """Parse UniProt protein response payload."""
         return parse_uniprot_protein_response(response)
 
     async def _fetch_proteins(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         query: str | None,
         limit: int | None,
     ) -> AsyncIterator[BronzeRecord]:
@@ -137,7 +136,7 @@ class UniProtProteinFetchAdapterMixin:
             yield item
 
     def _handle_fetch_error(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         entity_type: str,
         query: str | None,
         cursor: str | None = None,

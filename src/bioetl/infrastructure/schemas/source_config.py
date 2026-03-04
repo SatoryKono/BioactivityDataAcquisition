@@ -27,6 +27,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from bioetl.domain.resilience import AdapterConfig as DomainAdapterConfig
 from bioetl.domain.resilience import CircuitBreakerConfig as DomainCircuitBreakerConfig
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.schemas.base_schemas import (
     BaseCircuitBreakerConfig,
     BaseClientConfig,
@@ -44,7 +45,7 @@ _LEGACY_PAGINATION_FIELD_MAP: dict[str, str] = {
 
 
 def _collect_legacy_pagination_values(
-    data: dict[str, Any],  # Any: YAML config has heterogeneous values
+    data: JsonDict,  # Any: YAML config has heterogeneous values
 ) -> dict[str, object]:
     """Collect legacy pagination-like fields into pagination keys."""
     promoted: dict[str, object] = {}
@@ -56,7 +57,7 @@ def _collect_legacy_pagination_values(
 
 
 def _merge_legacy_into_pagination(
-    pagination: dict[str, Any],  # Any: YAML config has heterogeneous values
+    pagination: JsonDict,  # Any: YAML config has heterogeneous values
     legacy_values: dict[str, object],
 ) -> None:
     """Fill missing pagination keys from legacy values."""
@@ -65,7 +66,7 @@ def _merge_legacy_into_pagination(
 
 
 def _build_pagination_from_legacy(
-    data: dict[str, Any],  # Any: YAML config has heterogeneous values
+    data: JsonDict,  # Any: YAML config has heterogeneous values
 ) -> dict[str, object]:
     """Build pagination dict from legacy fields when section is absent."""
     pagination = _collect_legacy_pagination_values(data)
@@ -153,8 +154,8 @@ class ProviderConfigYaml(BaseModel):
     @classmethod
     def _promote_legacy_pagination(
         cls,
-        data: dict[str, Any],  # Any: YAML config has heterogeneous values
-    ) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
+        data: JsonDict,  # Any: YAML config has heterogeneous values
+    ) -> JsonDict:  # Any: YAML config has heterogeneous values
         """Promote legacy batch_size/page_size/max_url_length into pagination.
 
         When the ``pagination`` section is absent but legacy fields are set,

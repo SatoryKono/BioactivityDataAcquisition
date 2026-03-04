@@ -33,7 +33,7 @@ from bioetl.domain.entities.pubmed import PubMedPublicationEntity
 from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
 from bioetl.domain.normalization import normalize_pmc_id
 from bioetl.domain.services import IdentityService
-from bioetl.domain.types import GoldRecord
+from bioetl.domain.types import GoldRecord, JsonDict
 from bioetl.domain.value_objects import DOI, PubMedId
 
 if TYPE_CHECKING:
@@ -175,7 +175,7 @@ class PubMedPublicationTransformer(
         self,
         medline: ET.Element | None,
         pubmed_data: ET.Element | None,
-    ) -> dict[str, Any]:  # Any: untyped PubMed XML/JSON values
+    ) -> JsonDict:  # Any: untyped PubMed XML/JSON values
         """Extract MEDLINE-specific metadata."""
         medline_info = medline.find("MedlineJournalInfo") if medline else None
         citation_subsets = (
@@ -232,7 +232,7 @@ class PubMedPublicationTransformer(
 
     def _extract_classification_data(
         self, article: ET.Element, medline: ET.Element | None
-    ) -> dict[str, Any]:  # Any: untyped PubMed XML/JSON values
+    ) -> JsonDict:  # Any: untyped PubMed XML/JSON values
         """Extract classification-related fields."""
         publication_types = ClassificationExtractor.parse_publication_types(article)
         subject_keywords = ClassificationExtractor.parse_keywords(medline)
@@ -258,7 +258,7 @@ class PubMedPublicationTransformer(
 
     def _extract_author_block(
         self, article: ET.Element, raw_author_data: list[RawAuthor]
-    ) -> dict[str, Any]:  # Any: untyped PubMed XML/JSON values
+    ) -> JsonDict:  # Any: untyped PubMed XML/JSON values
         """Extract and process author-related fields from article XML.
 
         Uses unified normalization service for authors and affiliations.
@@ -282,7 +282,7 @@ class PubMedPublicationTransformer(
         # Extract affiliations using unified service
         affiliation_strings = normalizer.extract_affiliations_from_authors(
             cast(
-                "list[dict[str, Any]]",  # Any: transformer record has heterogeneous values
+                "list[JsonDict]",  # Any: transformer record has heterogeneous values
                 raw_author_data,  # Any: transformer record has heterogeneous values
             )  # Any: RawAuthor is TypedDict-like
         )
@@ -318,7 +318,7 @@ class PubMedPublicationTransformer(
 
     def _extract_identifiers(
         self, root: ET.Element
-    ) -> dict[str, Any]:  # Any: untyped PubMed XML/JSON values
+    ) -> JsonDict:  # Any: untyped PubMed XML/JSON values
         """Extract and normalize all identifier fields from PubMed XML root."""
         # Optimized single-pass extraction for multiple identifiers
         # Reduces XML traversals from ~7 to 2 (ELocationID + ArticleIdList)
@@ -421,7 +421,7 @@ class PubMedPublicationTransformer(
 
     def _process_structured_affiliations(
         self, affiliations: list[StructuredAffiliation]
-    ) -> list[dict[str, Any]]:  # Any: untyped PubMed XML/JSON values
+    ) -> list[JsonDict]:  # Any: untyped PubMed XML/JSON values
         """Process structured affiliations with PII handling for emails.
 
         Email addresses in affiliations are PII and must be hashed before
@@ -435,7 +435,7 @@ class PubMedPublicationTransformer(
         """
         processed = []
         for aff in affiliations:
-            processed_aff: dict[str, Any] = {  # Any: untyped PubMed XML/JSON values
+            processed_aff: JsonDict = {  # Any: untyped PubMed XML/JSON values
                 "text": aff.get("text"),
                 "identifier": aff.get("identifier"),
                 "identifier_source": aff.get("identifier_source"),
@@ -454,7 +454,7 @@ class PubMedPublicationTransformer(
 
     def _build_authors_with_affiliations(
         self, raw_authors: list[RawAuthor]
-    ) -> list[dict[str, Any]]:  # Any: untyped PubMed XML/JSON values
+    ) -> list[JsonDict]:  # Any: untyped PubMed XML/JSON values
         """Build structured author-affiliation mapping.
 
         Links each author to their specific affiliations with identifiers.
@@ -466,7 +466,7 @@ class PubMedPublicationTransformer(
         Returns:
             List of author objects with hashed names and affiliations.
         """
-        result: list[dict[str, Any]] = []  # Any: untyped PubMed XML/JSON values
+        result: list[JsonDict] = []  # Any: untyped PubMed XML/JSON values
 
         for author in raw_authors:
             # Build author name for hashing
@@ -493,12 +493,12 @@ class PubMedPublicationTransformer(
 
             # Process affiliations for this author (use pre-computed ror_id/grid_id)
             affiliations: list[
-                dict[str, Any]  # Any: transformer record has heterogeneous values
+                JsonDict  # Any: transformer record has heterogeneous values
             ] = []  # Any: untyped PubMed XML/JSON values
             structured_affs = author.get("structured_affiliations") or []
 
             for aff in structured_affs:
-                aff_entry: dict[str, Any] = {  # Any: untyped PubMed XML/JSON values
+                aff_entry: JsonDict = {  # Any: untyped PubMed XML/JSON values
                     "text": aff.get("text"),
                     "ror_id": aff.get("ror_id"),
                     "grid_id": aff.get("grid_id"),

@@ -23,7 +23,7 @@ from bioetl.domain.transformations import (
     generate_content_hash,
     normalize_for_hash,
 )
-from bioetl.domain.types import ContentHash, EntityID
+from bioetl.domain.types import ContentHash, EntityID, JsonDict
 
 __all__ = [
     "IdentityService",
@@ -75,7 +75,7 @@ class IdentityService:
         provider: str,
         entity_type: str,  # noqa: ARG002 - reserved for future use
         source_id: str | None,
-        record: dict[str, Any],  # Any: record values are heterogeneous
+        record: JsonDict,  # Any: record values are heterogeneous
     ) -> EntityID:
         """Compute stable entity identifier.
 
@@ -110,7 +110,7 @@ class IdentityService:
     def compute_content_hash(
         self,
         provider: str,
-        record: dict[str, Any],  # Any: record values are heterogeneous
+        record: JsonDict,  # Any: record values are heterogeneous
         *,
         exclude_none: bool = False,
         include_fields: set[str] | None = None,
@@ -155,12 +155,12 @@ class IdentityService:
 
     def _normalize_for_hash(
         self,
-        record: dict[str, Any],  # Any: record values are heterogeneous
+        record: JsonDict,  # Any: record values are heterogeneous
         *,
         exclude_none: bool = False,
         include_fields: set[str] | None = None,
         exclude_fields: set[str] | None = None,
-    ) -> dict[str, Any]:  # Any: record values are heterogeneous
+    ) -> JsonDict:  # Any: record values are heterogeneous
         """Normalize record before hashing for consistency.
 
         Delegates to ``bioetl.domain.transformations.normalize_for_hash``.

@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from itertools import pairwise
-from typing import Any, cast
+from typing import Any
+
+from bioetl.domain.types import JsonDict, cast
 
 from bioetl.infrastructure.quality._primitives import (
     QuarterTarget,
@@ -69,7 +71,7 @@ def _validate_quarter_target(
 
 
 def _validate_quarterly_targets_section(
-    raw: dict[str, Any],  # Any: YAML values are heterogeneous
+    raw: JsonDict,  # Any: YAML values are heterogeneous
     *,
     group_names: set[str],
     baseline_registry_names: set[str],
