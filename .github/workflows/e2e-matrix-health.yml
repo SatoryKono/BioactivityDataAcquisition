@@ -1,0 +1,165 @@
+name: E2E Matrix Health
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [ main, master, develop ]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.ai/**'
+      - '.claude/**'
+      - 'LICENSE'
+  pull_request:
+    branches: [ main, master, develop ]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.ai/**'
+      - '.claude/**'
+      - 'LICENSE'
+  schedule:
+    - cron: '30 2 * * *'
+  workflow_dispatch:
+    inputs:
+      run_live:
+        description: 'Run nightly live-check job'
+        required: false
+        default: 'false'
+
+jobs:
+  matrix-smoke-blocking:
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Cache uv and virtualenv
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/uv
+            .venv
+          key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
+          restore-keys: |
+            uv-${{ runner.os }}-py311-
+
+      - name: Install dependencies (frozen lock)
+        run: uv sync --frozen --extra dev --extra tracing
+
+      - name: Run matrix smoke in cassette playback mode
+        run: |
+          mkdir -p reports/e2e
+          set +e
+          VCR_RECORD_MODE=none uv run pytest \
+            tests/e2e/test_pipeline_matrix_e2e.py \
+            -k "test_pipeline_matrix_smoke" \
+            --vcr-record=none \
+            -q --tb=short \
+            --junitxml=reports/e2e/matrix-smoke.xml
+          echo $? > reports/e2e/pytest_exit_code.txt
+
+      - name: Enforce matrix smoke skip-rate SLO
+        run: |
+          uv run python scripts/ci/check_e2e_matrix_skip_rate.py \
+            --junit reports/e2e/matrix-smoke.xml \
+            --expected-total 22 \
+            --max-skips 1 \
+            --max-skip-rate 0.0455 \
+            --markdown-out reports/e2e/matrix-smoke-summary.md
+
+          PYTEST_EXIT="$(cat reports/e2e/pytest_exit_code.txt)"
+          if [ "$PYTEST_EXIT" -ne 0 ]; then
+            exit "$PYTEST_EXIT"
+          fi
+
+      - name: Upload E2E matrix health artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-matrix-health-blocking
+          path: |
+            reports/e2e/matrix-smoke.xml
+            reports/e2e/matrix-smoke-summary.md
+            reports/e2e/pytest_exit_code.txt
+          if-no-files-found: warn
+          retention-days: 14
+
+  matrix-smoke-nightly-live:
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.run_live == 'true')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Cache uv and virtualenv
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/uv
+            .venv
+          key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
+          restore-keys: |
+            uv-${{ runner.os }}-py311-
+
+      - name: Install dependencies (frozen lock)
+        run: uv sync --frozen --extra dev --extra tracing
+
+      - name: Run matrix smoke live-check (nightly)
+        run: |
+          mkdir -p reports/e2e
+          set +e
+          VCR_RECORD_MODE=new_episodes uv run pytest \
+            tests/e2e/test_pipeline_matrix_e2e.py \
+            -k "test_pipeline_matrix_smoke" \
+            --vcr-record=new_episodes \
+            -q --tb=short \
+            --junitxml=reports/e2e/matrix-smoke-live.xml
+          echo $? > reports/e2e/pytest_exit_code_live.txt
+
+      - name: Build nightly health summary
+        run: |
+          set +e
+          uv run python scripts/ci/check_e2e_matrix_skip_rate.py \
+            --junit reports/e2e/matrix-smoke-live.xml \
+            --expected-total 22 \
+            --max-skips 22 \
+            --max-skip-rate 1.0 \
+            --allow-unknown-labels \
+            --markdown-out reports/e2e/matrix-smoke-live-summary.md
+          exit 0
+
+      - name: Upload E2E nightly artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-matrix-health-nightly-live
+          path: |
+            reports/e2e/matrix-smoke-live.xml
+            reports/e2e/matrix-smoke-live-summary.md
+            reports/e2e/pytest_exit_code_live.txt
+          if-no-files-found: warn
+          retention-days: 14
