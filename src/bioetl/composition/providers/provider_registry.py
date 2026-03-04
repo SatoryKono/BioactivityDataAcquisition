@@ -21,6 +21,15 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
+__all__ = [
+    "AdapterCreator",
+    "DataSourceCreator",
+    "HttpConfig",
+    "ProviderConfig",
+    "ProviderRegistry",
+]
+
+
 @dataclass(frozen=True)
 class HttpConfig:
     """HTTP client configuration for a provider.

@@ -14,6 +14,17 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any
 
+__all__ = [
+    "ComparisonMethod",
+    "CrossValidationStats",
+    "CrossValidationVerdict",
+    "EnricherCVStats",
+    "EnricherFieldPairing",
+    "FieldComparisonSpec",
+    "FieldMismatch",
+    "RecordCrossValidationResult",
+]
+
 
 class ComparisonMethod(StrEnum):
     """Method used to compare a field between seed and enricher."""

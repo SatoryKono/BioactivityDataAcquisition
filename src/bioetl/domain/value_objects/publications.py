@@ -13,6 +13,11 @@ import re
 
 from bioetl.domain.value_objects.base import ValueObject
 
+__all__ = [
+    "DOI",
+    "PubMedId",
+]
+
 
 class DOI(ValueObject[str]):
     """Digital Object Identifier.

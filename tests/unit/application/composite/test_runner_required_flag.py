@@ -225,6 +225,7 @@ def create_runner(
         checkpoint_manager=checkpoint_manager,
         logger=logger,
         lock=create_mock_lock(),
+        fsm_state_helper=MagicMock(),
     )
 
 

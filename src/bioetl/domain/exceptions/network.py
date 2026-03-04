@@ -19,6 +19,21 @@ from __future__ import annotations
 from bioetl.domain.exceptions.base import RecoverableError
 from bioetl.domain.types import ErrorType
 
+__all__ = [
+    "ApiError",
+    "CircuitBreakerOpenError",
+    "DataValidationError",
+    "ExternalServiceError",
+    "NetworkError",
+    "RateLimitError",
+    "RateLimitExceededError",
+    "RetryExhaustedError",
+    "ServiceAuthenticationError",
+    "ServiceUnavailableError",
+    "TimeoutError",
+]
+
+
 # =============================================================================
 # Base Network Exceptions
 # =============================================================================

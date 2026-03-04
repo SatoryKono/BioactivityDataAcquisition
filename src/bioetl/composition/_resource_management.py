@@ -31,6 +31,18 @@ if TYPE_CHECKING:
     )
 
 
+__all__ = [
+    "archive_table",
+    "get_checkpoint_manager",
+    "get_lifecycle_service",
+    "get_quarantine_manager",
+    "inspect_quarantine",
+    "list_checkpoints",
+    "preview_cleanup",
+    "vacuum_table",
+]
+
+
 def get_quarantine_manager(pipeline: str) -> QuarantineManagerService:
     """Get a quarantine manager for the given pipeline.
 

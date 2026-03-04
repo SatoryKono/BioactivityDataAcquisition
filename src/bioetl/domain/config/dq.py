@@ -15,6 +15,12 @@ from bioetl.domain.config.validation import (
     FieldValidation,
 )
 
+__all__ = [
+    "DQConfig",
+    "DQReportConfig",
+    "KeyNullabilityRule",
+]
+
 
 @dataclass(frozen=True, slots=True)
 class DQReportConfig:

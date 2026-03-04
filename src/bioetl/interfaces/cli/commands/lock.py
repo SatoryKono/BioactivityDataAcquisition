@@ -16,6 +16,13 @@ from bioetl.composition.entrypoints import get_lock_service
 from bioetl.domain.types import RunID
 from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning
 
+__all__ = [
+    "COMMANDS",
+    "check_command",
+    "lock",
+    "release_command",
+]
+
 
 @click.group()
 def lock() -> None:

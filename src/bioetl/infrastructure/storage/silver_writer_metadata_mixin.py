@@ -8,7 +8,7 @@ __all__ = ["SilverWriterMetadataMixin"]
 import asyncio
 from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 from deltalake import DeltaTable
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
@@ -20,6 +20,7 @@ from bioetl.domain.ports import (
     AuditOperation,
     SilverMetadataInput,
 )
+from bioetl.infrastructure.storage.metadata_builder import _parse_table_name
 
 if TYPE_CHECKING:
     import pyarrow as pa
@@ -48,6 +49,11 @@ class SilverWriterMetadataMixin:
     _transform_steps: tuple[str, ...]
     _dq_calculator: DQMetricsCalculator
     _get_table_schema: Callable[[str], Awaitable[pa.Schema | None]]
+    _SILVER_AUDIT_OPERATION_MAP: ClassVar[dict[SilverWriteMode, AuditOperation]] = {
+        SilverWriteMode.MERGE: AuditOperation.MERGE,
+        SilverWriteMode.APPEND: AuditOperation.APPEND,
+        SilverWriteMode.DELETE: AuditOperation.DELETE,
+    }
 
     async def _compute_dq_metrics(
         self,
@@ -79,7 +85,6 @@ class SilverWriterMetadataMixin:
         """Log audit entry for Silver write operation."""
         if self._audit is None:
             return
-
         from uuid import UUID
 
         from bioetl.domain.types import RunID
@@ -97,7 +102,6 @@ class SilverWriterMetadataMixin:
                 run_id=run_id_str,
             )
             return
-
         if isinstance(ingestion_ts, str):
             timestamp = datetime.fromisoformat(ingestion_ts)
         elif isinstance(ingestion_ts, datetime):
@@ -106,14 +110,7 @@ class SilverWriterMetadataMixin:
             timestamp = datetime.fromtimestamp(0, tz=UTC)
         if timestamp.tzinfo is None:
             timestamp = timestamp.replace(tzinfo=UTC)
-
-        operation_map = {
-            SilverWriteMode.MERGE: AuditOperation.MERGE,
-            SilverWriteMode.APPEND: AuditOperation.APPEND,
-            SilverWriteMode.DELETE: AuditOperation.DELETE,
-        }
-        operation = operation_map[mode]
-
+        operation = self._SILVER_AUDIT_OPERATION_MAP[mode]
         audit_entry = AuditEntry(
             run_id=run_id,
             timestamp=timestamp,
@@ -157,11 +154,7 @@ class SilverWriterMetadataMixin:
         """Write Silver layer metadata sidecar file."""
         if not records:
             return
-
-        from bioetl.infrastructure.storage.metadata_builder import _parse_table_name
-
         provider_name, entity_name = _parse_table_name(table_name)
-
         if self._metadata_coordinator is None:
             self.logger.warning(
                 "silver_metadata_skipped",
@@ -169,9 +162,7 @@ class SilverWriterMetadataMixin:
                 table_path=table_path,
             )
             return
-
         version_after = await self._get_delta_version(table_path)
-
         silver_input = SilverMetadataInput(
             table_path=table_path,
             records=records,
@@ -209,14 +200,11 @@ class SilverWriterMetadataMixin:
         """Write Silver metadata sidecar for merged composite data."""
         if not records:
             return
-
         from bioetl.infrastructure.storage.metadata_builder import (
             SilverMetadataBuilder,
-            _parse_table_name,
         )
 
         provider_name, entity_name = _parse_table_name(table_name)
-
         if self._metadata_coordinator is None:
             self.logger.debug(
                 "silver_merged_metadata_skipped",
@@ -224,9 +212,7 @@ class SilverWriterMetadataMixin:
                 table_path=table_path,
             )
             return
-
         version_after = await self._get_delta_version(table_path)
-
         builder = SilverMetadataBuilder(
             transform_version=self._transform_version,
             transform_steps=self._transform_steps,
@@ -240,7 +226,6 @@ class SilverWriterMetadataMixin:
             sources_used=sources_used,
             version_after=version_after,
         )
-
         await self._metadata_writer.write_silver_metadata(
             table_path,
             metadata,

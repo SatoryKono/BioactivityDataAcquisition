@@ -13,6 +13,14 @@ import click
 from bioetl.composition.entrypoints import get_adr_service
 from bioetl.interfaces.cli.formatters import echo_error, echo_info
 
+__all__ = [
+    "COMMANDS",
+    "adr",
+    "list_command",
+    "show_command",
+    "validate_command",
+]
+
 
 @click.group()
 def adr() -> None:

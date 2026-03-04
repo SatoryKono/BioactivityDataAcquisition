@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+__all__ = [
+    "MOLECULE_FIELD_MAPPING",
+]
+
+
 MOLECULE_FIELD_MAPPING = {
     "chembl": {
         "logp": "logp",

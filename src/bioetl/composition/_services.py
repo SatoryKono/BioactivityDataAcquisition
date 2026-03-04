@@ -43,6 +43,24 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import AdrServicePort, QuarantinePort
 
 
+__all__ = [
+    "cleanup_bronze",
+    "get_adr_service",
+    "get_bronze_cleanup_service",
+    "get_checkpoint_service",
+    "get_config_service",
+    "get_export_service",
+    "get_health_server_dependencies",
+    "get_health_service",
+    "get_lock_service",
+    "get_metrics_service",
+    "get_pipeline_runner_service",
+    "get_quarantine_service",
+    "get_quarantine_store",
+    "get_vacuum_service",
+]
+
+
 def get_checkpoint_service() -> CheckpointService:
     """Get a checkpoint service for administrative operations.
 

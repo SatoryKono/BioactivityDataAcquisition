@@ -10,6 +10,12 @@ from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
 
+__all__ = [
+    "MetricsExtractorPort",
+    "RunnablePort",
+    "RunnerFactoryPort",
+]
+
 
 @runtime_checkable
 class RunnablePort(Protocol):

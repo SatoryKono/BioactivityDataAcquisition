@@ -12,6 +12,10 @@ from pandera.typing import Series
 from bioetl.domain.schemas.base import ETLRecordSchema
 from bioetl.domain.schemas.constants import CHEMBL_ID_PATTERN
 
+__all__ = [
+    "CompoundRecordSchema",
+]
+
 
 class CompoundRecordSchema(ETLRecordSchema):
     """Compound Record validation schema for Silver layer.

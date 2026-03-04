@@ -11,6 +11,10 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
+__all__ = [
+    "PiiHasherPort",
+]
+
 
 @runtime_checkable
 class PiiHasherPort(Protocol):

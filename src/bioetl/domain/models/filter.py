@@ -11,6 +11,10 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass
 
+__all__ = [
+    "ExtractionParams",
+]
+
 
 @dataclass(frozen=True, slots=True)
 class ExtractionParams:

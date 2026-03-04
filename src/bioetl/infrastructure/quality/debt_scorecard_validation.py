@@ -498,7 +498,7 @@ def _validate_grace_window_identity_fields(
     allow_rf_only_for_rf: bool,
     errors: list[str],
 ) -> None:
-    rf_id_str = rf_id if isinstance(rf_id, str) else None
+    rf_id_str: str | None = rf_id if isinstance(rf_id, str) else None
     rf_id_is_valid = rf_id_str is not None and bool(rf_id_str.strip())
     rf_id_is_rf_ref = rf_id_str is not None and rf_id_str.startswith("RF-")
     approved_is_bool = isinstance(approved, bool)

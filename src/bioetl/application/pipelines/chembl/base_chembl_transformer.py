@@ -26,6 +26,7 @@ if TYPE_CHECKING:
     from bioetl.domain.entities import BaseEntity
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
     from bioetl.domain.ports import (
+        ContractPolicyPort,
         DataNormalizationPort,
         MetricsPort,
         PiiHasherPort,
@@ -72,7 +73,7 @@ class BaseChemblTransformer(BaseTransformer):
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
-        contract_policy: Any = None,  # Any: PipelineContractPolicy from composition
+        contract_policy: ContractPolicyPort | None = None,
     ) -> None:
         """Initialize ChEMBL transformer.
 

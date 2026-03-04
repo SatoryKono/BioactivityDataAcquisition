@@ -206,6 +206,10 @@ class SinkLayerConfig(BaseModel):
         default=True,
         description="Enable deterministic write order for Gold layer output",
     )
+    sort_by: list[str] = Field(
+        default_factory=list,
+        description="Deterministic sort policy for layer output ordering.",
+    )
     # Partitioning (Silver layer)
     partition_by: list[str] = Field(
         default_factory=list,
@@ -222,6 +226,17 @@ class SinkLayerConfig(BaseModel):
         description="If True, Delta data written directly to path without table_name subdirectory. "
         "CSV, metadata, and DQ reports use {table_name}_* naming pattern.",
     )
+
+    @field_validator("sort_by")
+    @classmethod
+    def validate_sort_by(cls, value: list[str]) -> list[str]:
+        """Validate deterministic sort policy column names."""
+        normalized = [column.strip() for column in value]
+        if any(not column for column in normalized):
+            raise ValueError("sort_by must not contain empty column names")
+        if len(normalized) != len(set(normalized)):
+            raise ValueError("sort_by must not contain duplicate columns")
+        return normalized
 
 
 class GoldRangeFilterConfig(BaseGoldRangeFilterConfig):
@@ -556,6 +571,15 @@ class PipelineYamlConfig(BaseModel):
             raise ValueError(
                 "technical_primary_key MUST NOT be part of composite business_primary_keys"
             )
+
+        for layer_name in ("silver", "gold"):
+            layer = self.sink.get(layer_name)
+            if layer is None or not layer.enabled:
+                continue
+            if not layer.sort_by:
+                raise ValueError(
+                    f"sink.{layer_name}.sort_by must be configured for deterministic output"
+                )
 
         return self
 

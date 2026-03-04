@@ -18,6 +18,14 @@ from __future__ import annotations
 from collections.abc import Mapping
 from enum import StrEnum
 
+__all__ = [
+    "CompositePipelineState",
+    "TransitionRules",
+    "can_transition",
+    "get_transition_rules",
+    "validate_transition",
+]
+
 
 class CompositePipelineState(StrEnum):
     """State of composite pipeline execution.

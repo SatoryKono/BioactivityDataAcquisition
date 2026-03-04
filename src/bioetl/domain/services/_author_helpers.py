@@ -14,6 +14,20 @@ from typing import Any
 
 from bioetl.domain.serialization import deserialize_from_json
 
+__all__ = [
+    "collect_affiliations_from_authors",
+    "deduplicate_case_insensitive",
+    "extract_affiliation_strings",
+    "hash_author_name",
+    "normalize_affiliation_string",
+    "normalize_to_surname_initial",
+    "parse_author_names",
+    "parse_author_string",
+    "parse_delimited_authors",
+    "try_parse_json_authors",
+]
+
+
 # Regex patterns
 _HTML_TAG_PATTERN = re.compile(r"<[^>]+>")
 _WHITESPACE_PATTERN = re.compile(r"\s+")

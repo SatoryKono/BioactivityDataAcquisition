@@ -68,6 +68,11 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
+__all__ = [
+    "register_all_providers",
+]
+
+
 def _create_chembl_data_source(
     settings: Settings,
     pipeline_config: PipelineYamlConfig,
@@ -396,23 +401,7 @@ def _create_semanticscholar_data_source(
     metrics: MetricsPort | None = None,
     pipeline_name: str = "unknown",
 ) -> DataSourcePort:
-    """Create Semantic Scholar data source with optional CSV filtering.
-
-    Semantic Scholar requires API key for stable rate limits (1 req/sec).
-    API key is obtained from settings.semanticscholar_api_key.
-
-    Args:
-        settings: Application settings.
-        pipeline_config: Pipeline configuration from YAML.
-        logger: LoggerPort for structured logging.
-        filter_config: Optional filter configuration for CSV-based DOI filtering.
-        metrics: Optional MetricsPort for recording adapter metrics.
-        pipeline_name: Pipeline name for metrics labels.
-
-    Returns:
-        Configured DataSourcePort with optional filtering wrapper.
-
-    """
+    """Create Semantic Scholar adapter and optionally wrap it with input filtering."""
     _, HttpClientFactory = _get_factories(
         get_data_source_factory, get_http_client_factory
     )

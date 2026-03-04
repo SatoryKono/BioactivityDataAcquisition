@@ -11,16 +11,27 @@ from typing import Any, Protocol, Self, runtime_checkable
 
 from bioetl.domain.types import HealthStatus
 
+__all__ = [
+    "IDMappingPort",
+    "IDMappingSourceReaderPort",
+]
+
 
 @runtime_checkable
 class IDMappingPort(Protocol):
     """Port for ID mapping between databases.
 
-    This interface abstracts ID mapping services that convert identifiers
-    from one database format to another (e.g., ChEMBL → UniProt).
+        This interface abstracts ID mapping services that convert identifiers
+        from one database format to another (e.g., ChEMBL → UniProt).
 
-    Implementations may use REST APIs (UniProt ID Mapping), local databases,
-    or other mapping services.
+    __all__ = [
+        "IDMappingPort",
+        "IDMappingSourceReaderPort",
+    ]
+
+
+        Implementations may use REST APIs (UniProt ID Mapping), local databases,
+        or other mapping services.
     """
 
     @property

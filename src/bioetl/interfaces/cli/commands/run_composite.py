@@ -38,6 +38,10 @@ from bioetl.interfaces.cli.commands.metrics_server_integration import (
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning
 
+__all__ = [
+    "run_composite",
+]
+
 
 def _validate_composite_name(
     _ctx: click.Context, _param: click.Parameter, value: str

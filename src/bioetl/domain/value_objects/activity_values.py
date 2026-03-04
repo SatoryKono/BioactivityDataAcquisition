@@ -17,6 +17,13 @@ import re
 from dataclasses import dataclass
 from enum import StrEnum
 
+__all__ = [
+    "ActivityType",
+    "Concentration",
+    "ConcentrationUnit",
+    "PChemblValue",
+]
+
 
 class ConcentrationUnit(StrEnum):
     """Concentration units commonly used in bioactivity data.

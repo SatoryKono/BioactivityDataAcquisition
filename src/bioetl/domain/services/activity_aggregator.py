@@ -23,6 +23,11 @@ from bioetl.domain.value_objects.activity_values import (
 if TYPE_CHECKING:
     from bioetl.domain.services.normalization_config import NormalizationConfig
 
+__all__ = [
+    "ActivityAggregator",
+    "AggregationMethod",
+]
+
 
 class AggregationMethod(StrEnum):
     """Supported aggregation methods for bioactivity values."""

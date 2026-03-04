@@ -11,6 +11,10 @@ import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
+__all__ = [
+    "UniprotFeatureSchema",
+]
+
 
 class UniprotFeatureSchema(pa.DataFrameModel):  # Pandera typing limitation
     """Sequence features, keywords, PTMs, isoforms and counts."""

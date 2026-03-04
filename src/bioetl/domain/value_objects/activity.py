@@ -18,6 +18,13 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.activity_values import Concentration
 
 
+__all__ = [
+    "ActivityValue",
+    "ConfidenceScore",
+    "RelationOperator",
+]
+
+
 class RelationOperator(StrEnum):
     """Comparison operators for activity values.
 

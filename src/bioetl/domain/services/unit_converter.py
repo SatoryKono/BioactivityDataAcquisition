@@ -16,6 +16,10 @@ from bioetl.domain.value_objects.activity_values import (
     PChemblValue,
 )
 
+__all__ = [
+    "UnitConverter",
+]
+
 
 @dataclass(frozen=True, slots=True)
 class UnitConverter:

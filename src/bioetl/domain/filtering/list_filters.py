@@ -7,6 +7,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+__all__ = [
+    "GoldListContainsFilter",
+    "GoldListLengthFilter",
+]
+
 
 @dataclass(frozen=True, slots=True)
 class GoldListLengthFilter:

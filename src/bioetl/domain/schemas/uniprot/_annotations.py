@@ -8,6 +8,10 @@ from __future__ import annotations
 import pandera.pandas as pa
 from pandera.typing import Series
 
+__all__ = [
+    "UniprotAnnotationSchema",
+]
+
 
 class UniprotAnnotationSchema(pa.DataFrameModel):  # Pandera typing limitation
     """Functional annotations, cofactors and biophysicochemical properties."""

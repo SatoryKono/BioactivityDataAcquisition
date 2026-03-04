@@ -22,6 +22,11 @@ if TYPE_CHECKING:
 
     from bioetl.domain.value_objects.activity_values import Concentration
 
+__all__ = [
+    "NormalizationResult",
+    "NormalizationService",
+]
+
 
 @dataclass(slots=True)
 class NormalizationResult:

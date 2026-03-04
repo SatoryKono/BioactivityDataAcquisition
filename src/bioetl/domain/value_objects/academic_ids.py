@@ -15,6 +15,13 @@ import re
 
 from bioetl.domain.value_objects.base import ValueObject
 
+__all__ = [
+    "ISSN",
+    "ORCID",
+    "OpenAlexId",
+    "SemanticScholarId",
+]
+
 
 class OpenAlexId(ValueObject[str]):
     """OpenAlex Work ID.

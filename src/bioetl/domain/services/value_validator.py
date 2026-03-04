@@ -16,6 +16,14 @@ from bioetl.domain.value_objects.activity_values import ActivityType
 if TYPE_CHECKING:
     from bioetl.domain.services.normalization_config import NormalizationConfig
 
+__all__ = [
+    "PCHEMBL_MAX",
+    "PCHEMBL_MIN",
+    "PCHEMBL_TYPICAL_MAX",
+    "PCHEMBL_TYPICAL_MIN",
+    "ValueValidator",
+]
+
 
 # Default validation ranges for bioactivity values
 # Values outside these ranges are considered invalid/suspicious

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
@@ -212,3 +213,101 @@ class TestCompositeConfigColumnGroups:
 
         with pytest.raises(ValueError, match="Invalid composite config 'broken'"):
             composite_runtime.load_composite_config("broken")
+
+
+class TestCompositeDQExternalization:
+    """Tests for externalized composite DQ config loading."""
+
+    def test_dq_config_file_inline_precedence(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        configs_root = tmp_path / "configs"
+        composites_dir = configs_root / "composites"
+        quality_file = (
+            configs_root / "quality" / "entities" / "composite" / "publication.yaml"
+        )
+
+        payload = _build_composite_payload("composite_precedence")
+        composite_payload = payload["composite"]
+        assert isinstance(composite_payload, dict)
+        composite_payload["dq_overrides"] = {
+            "dq_config_file": "../quality/entities/composite/publication.yaml",
+            "soft_fail_threshold": 0.10,
+            "enricher_overrides": {
+                "crossref_publication": {
+                    "hard_fail_threshold": 0.50,
+                }
+            },
+        }
+
+        _write_yaml(composites_dir / "publication.yaml", payload)
+        _write_yaml(
+            quality_file,
+            {
+                "dq_overrides": {
+                    "soft_fail_threshold": 0.05,
+                    "hard_fail_threshold": 0.25,
+                    "required_fields": ["publication_id"],
+                    "enricher_overrides": {
+                        "crossref_publication": {
+                            "soft_fail_threshold": 0.15,
+                            "hard_fail_threshold": 0.30,
+                        }
+                    },
+                }
+            },
+        )
+
+        monkeypatch.setattr(composite_runtime, "COMPOSITE_CONFIG_DIR", composites_dir)
+
+        config = composite_runtime.load_composite_config("publication")
+
+        assert config.dq.soft_fail_threshold == 0.10
+        assert config.dq.hard_fail_threshold == 0.25
+        assert config.dq.required_fields == ("publication_id",)
+        override = config.dq.enricher_overrides["crossref_publication"]
+        assert override.soft_fail_threshold == 0.15
+        assert override.hard_fail_threshold == 0.50
+
+    def test_publication_resolved_config_golden_master_before_after(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        current_path = Path("configs/composites/publication.yaml")
+        external_path = Path("configs/quality/entities/composite/publication.yaml")
+
+        current_payload = yaml.safe_load(current_path.read_text(encoding="utf-8"))
+        external_payload = yaml.safe_load(external_path.read_text(encoding="utf-8"))
+
+        assert isinstance(current_payload, dict)
+        assert isinstance(external_payload, dict)
+        external_dq = external_payload.get("dq_overrides", {})
+        assert isinstance(external_dq, dict)
+        field_validations = external_dq.get("field_validations")
+        assert isinstance(field_validations, dict)
+
+        before_payload = deepcopy(current_payload)
+        before_dq = before_payload["composite"]["dq_overrides"]
+        assert isinstance(before_dq, dict)
+        before_dq.pop("dq_config_file", None)
+        before_dq["field_validations"] = deepcopy(field_validations)
+
+        after_payload = deepcopy(current_payload)
+
+        configs_root = tmp_path / "configs"
+        composites_dir = configs_root / "composites"
+        quality_dir = configs_root / "quality" / "entities" / "composite"
+
+        _write_yaml(composites_dir / "publication_inline.yaml", before_payload)
+        _write_yaml(composites_dir / "publication_external.yaml", after_payload)
+        _write_yaml(quality_dir / "publication.yaml", external_payload)
+
+        monkeypatch.setattr(composite_runtime, "COMPOSITE_CONFIG_DIR", composites_dir)
+
+        before_config = composite_runtime.load_composite_config("publication_inline")
+        after_config = composite_runtime.load_composite_config("publication_external")
+
+        assert after_config == before_config

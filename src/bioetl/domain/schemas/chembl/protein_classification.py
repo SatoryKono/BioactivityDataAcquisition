@@ -11,6 +11,10 @@ from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
 
+__all__ = [
+    "ProteinClassificationSchema",
+]
+
 
 class ProteinClassificationSchema(ETLRecordSchema):
     """Protein Classification validation schema for Silver layer."""

@@ -17,6 +17,17 @@ from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.exit_codes import ExitCode, get_exit_code_for_exception
 from bioetl.interfaces.cli.formatters import echo_error, echo_warning
 
+__all__ = [
+    "BatchRunResultProtocol",
+    "CLI_ENTRYPOINT_TYPED_ERRORS",
+    "build_failure_context",
+    "handle_cli_failure",
+    "map_batch_run_result_to_exit_code",
+    "map_run_status_to_exit_code",
+    "map_success_flag_to_exit_code",
+    "render_failure_context",
+]
+
 CLI_ENTRYPOINT_TYPED_ERRORS = (
     OSError,
     RuntimeError,

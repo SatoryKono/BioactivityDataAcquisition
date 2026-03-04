@@ -22,6 +22,23 @@ if TYPE_CHECKING:
     )
 
 
+__all__ = [
+    "echo_checkpoint",
+    "echo_cleanup_preview",
+    "echo_dry_run_prefix",
+    "echo_error",
+    "echo_export_preview",
+    "echo_export_result",
+    "echo_info",
+    "echo_quarantine_record",
+    "echo_table_list",
+    "echo_vacuum_all_summary",
+    "echo_vacuum_result",
+    "echo_warning",
+    "format_bytes",
+]
+
+
 def format_bytes(b: int) -> str:
     """Format bytes as human-readable string.
 

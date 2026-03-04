@@ -23,6 +23,20 @@ from datetime import datetime
 
 from bioetl.domain.types import BatchID, ContentHash, MetaDict, RunID
 
+__all__ = [
+    "BatchCreated",
+    "BatchFailed",
+    "BatchSealed",
+    "BatchWritten",
+    "DomainEvent",
+    "PipelineCompleted",
+    "PipelineFailed",
+    "PipelineShutdown",
+    "QuarantineEntryCreated",
+    "QuarantineEntryResolved",
+    "RecordQuarantined",
+]
+
 
 @dataclass(frozen=True, slots=True)
 class DomainEvent:

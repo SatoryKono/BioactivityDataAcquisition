@@ -13,6 +13,13 @@ if TYPE_CHECKING:
     from bioetl.domain.aggregates.events import DomainEvent
 from bioetl.domain.types import RunID, RunType
 
+__all__ = [
+    "PipelineRun",
+    "PipelineRunState",
+    "StageResult",
+    "StageStatus",
+]
+
 
 class StageStatus(StrEnum):
     """Status of a pipeline stage."""

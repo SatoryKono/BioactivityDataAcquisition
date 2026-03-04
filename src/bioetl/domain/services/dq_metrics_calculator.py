@@ -86,9 +86,11 @@ class DQMetricsCalculator:
         if not existing_fields or not records:
             return None
 
-        incoming_fields = set(records[0].keys())
-        new_fields = incoming_fields - existing_fields
-        missing_fields = existing_fields - incoming_fields
+        incoming_fields = self._extract_incoming_fields(records)
+        new_fields, missing_fields = self._compute_schema_delta(
+            incoming_fields=incoming_fields,
+            existing_fields=existing_fields,
+        )
 
         if not new_fields and not missing_fields:
             return None
@@ -99,6 +101,22 @@ class DQMetricsCalculator:
             new_fields=tuple(sorted(new_fields)),
             missing_fields=tuple(sorted(missing_fields)),
         )
+
+    @staticmethod
+    def _extract_incoming_fields(
+        records: list[dict[str, Any]],  # Any: DQ check values vary by check type
+    ) -> set[str]:
+        """Extract incoming field names from first record."""
+        return set(records[0].keys())
+
+    @staticmethod
+    def _compute_schema_delta(
+        *,
+        incoming_fields: set[str],
+        existing_fields: set[str],
+    ) -> tuple[set[str], set[str]]:
+        """Return (new_fields, missing_fields) delta between incoming/existing schema."""
+        return incoming_fields - existing_fields, existing_fields - incoming_fields
 
     def _determine_drift_status(
         self,
@@ -112,13 +130,21 @@ class DQMetricsCalculator:
         - warn: More than 3 new fields
         - info: Minor schema changes
         """
-        # Critical: missing required fields (business fields without underscore prefix)
-        has_critical_missing = any(not f.startswith("_") for f in missing_fields)
-        if has_critical_missing:
+        if self._has_critical_missing_fields(missing_fields):
             return "critical"
-        if len(new_fields) > 3:
+        if self._has_excessive_new_fields(new_fields):
             return "warn"
         return "info"
+
+    @staticmethod
+    def _has_critical_missing_fields(missing_fields: set[str]) -> bool:
+        """Return True when required (non-metadata) fields are missing."""
+        return any(not field.startswith("_") for field in missing_fields)
+
+    @staticmethod
+    def _has_excessive_new_fields(new_fields: set[str]) -> bool:
+        """Return True when incoming schema introduces too many new fields."""
+        return len(new_fields) > 3
 
 
 __all__ = ["DQMetricsCalculator", "DQMetricsInput"]

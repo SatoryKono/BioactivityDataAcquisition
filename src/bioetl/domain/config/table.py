@@ -11,6 +11,10 @@ from typing import Literal
 from bioetl.domain.config._converters import convert_write_mode, freeze_sequences
 from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
 
+__all__ = [
+    "TableConfig",
+]
+
 
 @dataclass(frozen=True, slots=True)
 class TableConfig:

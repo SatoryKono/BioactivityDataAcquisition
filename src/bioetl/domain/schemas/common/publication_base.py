@@ -17,6 +17,12 @@ from bioetl.domain.validation import (
     MIN_PUBLICATION_YEAR,
 )
 
+__all__ = [
+    "LOOKUP_METHODS",
+    "OA_STATUS_VALUES",
+    "PublicationBaseSchema",
+]
+
 # Lookup method values (used by all publication providers)
 LOOKUP_METHODS = ["direct", "doi", "pmid", "title_fallback", "title_only", "unknown"]
 

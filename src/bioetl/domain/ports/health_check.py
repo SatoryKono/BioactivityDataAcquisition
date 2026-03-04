@@ -18,6 +18,14 @@ from bioetl.domain.types import HealthStatus
 if TYPE_CHECKING:
     from bioetl.domain.ports.observability import LoggerPort
 
+__all__ = [
+    "HealthCheckPort",
+    "HealthCheckResult",
+    "HealthMonitorPort",
+    "HealthStatePort",
+    "HealthStatusLiteral",
+]
+
 
 @dataclass(frozen=True, slots=True)
 class HealthCheckResult:

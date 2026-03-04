@@ -7,6 +7,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+__all__ = [
+    "MemoryConfig",
+]
+
 
 @dataclass(frozen=True, slots=True)
 class MemoryConfig:

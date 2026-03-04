@@ -10,6 +10,10 @@ from dataclasses import dataclass
 
 from bioetl.domain.entities.base import BaseEntity
 
+__all__ = [
+    "Tissue",
+]
+
 
 @dataclass(frozen=True, kw_only=True)
 class Tissue(BaseEntity):

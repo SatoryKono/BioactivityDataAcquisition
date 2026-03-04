@@ -9,6 +9,12 @@ if TYPE_CHECKING:
     from bioetl.composition.factories.http_client_factory import HttpClientFactory
 
 
+__all__ = [
+    "get_data_source_factory",
+    "get_http_client_factory",
+]
+
+
 def get_data_source_factory() -> type[DataSourceFactory]:
     """Resolve DataSourceFactory lazily to avoid circular imports.
 

@@ -17,6 +17,13 @@ from typing import Any, Protocol, runtime_checkable
 
 from bioetl.domain.types import MetaDict, RunID
 
+__all__ = [
+    "AuditEntry",
+    "AuditLayer",
+    "AuditOperation",
+    "AuditPort",
+]
+
 
 class AuditOperation(StrEnum):
     """Types of auditable write operations."""

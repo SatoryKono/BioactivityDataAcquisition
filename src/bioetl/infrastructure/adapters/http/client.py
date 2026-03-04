@@ -73,6 +73,8 @@ class UnifiedHTTPClient:
         user_agent: User-Agent string (default: "BioETL/5.0.0")
         contact_email: Optional contact email to append to User-Agent
         provider: Provider name for metrics labels (default: "unknown")
+        max_connections: Maximum concurrent connections (default: 50)
+        max_keepalive_connections: Maximum keep-alive connections (default: 10)
         tracer: TracingPort for distributed tracing (default: NoOpTracing)
         metrics: MetricsPort for metrics collection (default: NoOpMetrics)
         logger: LoggerPort for structured logging (optional)
@@ -95,6 +97,8 @@ class UnifiedHTTPClient:
     user_agent: str = "BioETL/5.0.0"
     contact_email: str | None = None
     provider: str = "unknown"
+    max_connections: int = 50
+    max_keepalive_connections: int = 10
     tracer: TracingPort | None = None
     metrics: MetricsPort | None = None
     logger: LoggerPort | None = None
@@ -124,6 +128,10 @@ class UnifiedHTTPClient:
             timeout=httpx.Timeout(self.timeout),
             headers=headers,
             follow_redirects=True,
+            limits=httpx.Limits(
+                max_connections=self.max_connections,
+                max_keepalive_connections=self.max_keepalive_connections,
+            ),
         )
         return self
 

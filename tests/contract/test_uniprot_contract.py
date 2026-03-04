@@ -16,6 +16,7 @@ import pytest
 from tests.contract.conftest import UNIPROT_PROTEIN_REQUIRED_FIELDS
 
 UNIPROT_API_BASE = "https://rest.uniprot.org"
+pytestmark = pytest.mark.network
 
 
 @pytest.mark.uniprot

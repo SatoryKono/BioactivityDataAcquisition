@@ -11,6 +11,10 @@ from typing import TYPE_CHECKING, Protocol, runtime_checkable
 if TYPE_CHECKING:
     import pyarrow as pa
 
+__all__ = [
+    "DeltaReaderPort",
+]
+
 
 @runtime_checkable
 class DeltaReaderPort(Protocol):

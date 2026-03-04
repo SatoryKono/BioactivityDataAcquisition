@@ -9,6 +9,13 @@ from __future__ import annotations
 from bioetl.composition.providers.provider_registry import ProviderRegistry
 from bioetl.composition.providers.registration import register_all_providers
 
+__all__ = [
+    "ensure_providers_loaded",
+    "get_loaded_status",
+    "load_providers",
+    "reset_loader",
+]
+
 _loaded = False
 
 

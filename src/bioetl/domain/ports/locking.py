@@ -11,6 +11,10 @@ from typing import Protocol, runtime_checkable
 from bioetl.domain.locking import FencingToken
 from bioetl.domain.types import RunID
 
+__all__ = [
+    "LockPort",
+]
+
 
 @runtime_checkable
 class LockPort(Protocol):

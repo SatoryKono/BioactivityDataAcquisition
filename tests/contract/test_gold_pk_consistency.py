@@ -16,6 +16,7 @@ from tests.contract.silver_schemas.conftest import (
 
 ENTITIES_DIR = Path("configs/entities")
 GOLD_CONTRACTS_DIR = Path("docs/04-reference/contracts/gold")
+pytestmark = pytest.mark.network
 
 
 @pytest.mark.contracts

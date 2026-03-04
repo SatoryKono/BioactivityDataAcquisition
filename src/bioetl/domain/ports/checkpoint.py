@@ -10,6 +10,10 @@ from typing import Protocol, runtime_checkable
 
 from bioetl.domain.types import MetaDict, RunID
 
+__all__ = [
+    "CheckpointPort",
+]
+
 
 @runtime_checkable
 class CheckpointPort(Protocol):

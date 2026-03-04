@@ -15,6 +15,23 @@ from __future__ import annotations
 from bioetl.domain.exceptions.base import CriticalError, RecoverableError
 from bioetl.domain.types import ErrorType
 
+__all__ = [
+    "BronzeValidationError",
+    "BucketNotFoundError",
+    "CachedBronzeEmptyError",
+    "DeltaOptimizeError",
+    "DeltaSchemaValidationError",
+    "DeltaTransactionError",
+    "DeltaWriteConflictError",
+    "InfrastructureError",
+    "SchemaEvolutionError",
+    "StorageError",
+    "StorageQuotaExceededError",
+    "TableNotFoundError",
+    "UploadError",
+]
+
+
 # =============================================================================
 # Base Infrastructure Exception
 # =============================================================================

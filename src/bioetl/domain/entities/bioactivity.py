@@ -11,6 +11,11 @@ from uuid import UUID
 from bioetl.domain.entities.base import BaseEntity
 from bioetl.domain.types import BatchID, ContentHash, EntityID, RunID, RunType
 
+__all__ = [
+    "Bioactivity",
+    "BioactivityState",
+]
+
 
 def _safe_int(val: Any) -> int | None:  # Any: raw API value (str | int | None)
     """Convert value to int, returning None if conversion fails."""

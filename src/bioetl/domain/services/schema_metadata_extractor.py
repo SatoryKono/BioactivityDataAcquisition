@@ -11,6 +11,10 @@ from typing import Any, Literal
 
 from bioetl.domain.models.metadata import SchemaColumnMetadata, SchemaMetadata
 
+__all__ = [
+    "extract_schema_metadata",
+]
+
 
 def extract_schema_metadata(
     gold_schema: Any | None,  # Any: untyped API JSON

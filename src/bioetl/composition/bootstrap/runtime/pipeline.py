@@ -37,45 +37,7 @@ def bootstrap_pipeline_runner(
     ctx: PipelineRunContext,
     registry: PipelineRegistry | None = None,
 ) -> PipelineRunner:
-    """Composition Root: Assembles and returns a fully configured PipelineRunner.
-
-    This is the main entry point for creating a pipeline runner. It:
-    1. Registers all providers and pipelines (idempotent)
-    2. Loads settings and YAML configuration
-    3. Bootstraps observability (logging, tracing, metrics)
-    4. Builds filter configuration from CLI/YAML
-    5. Delegates to the appropriate factory to create the runner
-
-    Layer: Returns application-level runner (PipelineRunner) ready for execution.
-
-    Args:
-        ctx: Pipeline run context containing launch parameters including
-            pipeline_name, run_id, run_type, resume flag, limit, filters, etc.
-        registry: Optional PipelineRegistry instance. If None, uses the
-            default global registry. Pass a custom registry for test isolation.
-
-    Returns:
-        PipelineRunner: Fully configured runner ready for execution.
-
-    Example:
-        >>> from bioetl.domain.context import PipelineRunContext
-        >>> from bioetl.domain.types import RunType
-        >>> from uuid import uuid4
-        >>>
-        >>> ctx = PipelineRunContext(
-        ...     pipeline_name="chembl_activity",
-        ...     run_id=uuid4(),
-        ...     run_type=RunType.INCREMENTAL,
-        ... )
-        >>> runner = bootstrap_pipeline_runner(ctx)
-        >>> await runner.run()
-
-        # For test isolation:
-        >>> from bioetl.composition.registry import create_registry
-        >>> registry = create_registry()
-        >>> register_all_pipelines(registry=registry)
-        >>> runner = bootstrap_pipeline_runner(ctx, registry=registry)
-    """
+    """Build a ready-to-run pipeline runner from runtime context and registry."""
     # Explicit registration retained for deterministic bootstrap semantics.
     register_all_providers()
     register_all_pipelines(registry=registry)

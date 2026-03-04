@@ -27,6 +27,12 @@ if TYPE_CHECKING:
     from bioetl.domain.aggregates.events import DomainEvent
 from bioetl.domain.types import BatchID, BronzeRecord, ContentHash, MetaDict, RunID
 
+__all__ = [
+    "QuarantineEntry",
+    "QuarantineStatus",
+    "ResolutionInfo",
+]
+
 
 class QuarantineStatus(StrEnum):
     """Status of a quarantine entry."""

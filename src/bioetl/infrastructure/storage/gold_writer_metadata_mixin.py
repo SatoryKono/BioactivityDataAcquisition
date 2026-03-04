@@ -56,7 +56,6 @@ class GoldWriterMetadataMixin:
                 mode=mode.value,
             )
             raise ValueError("ingestion_ts is required for audit logging")
-
         if run_id is not None:
             audit_run_id = run_id
         else:
@@ -66,14 +65,12 @@ class GoldWriterMetadataMixin:
                 mode=mode.value,
             )
             audit_run_id = RunID(uuid4())
-
         operation_map = {
             GoldWriteMode.OVERWRITE: AuditOperation.OVERWRITE,
             GoldWriteMode.APPEND: AuditOperation.APPEND,
             GoldWriteMode.SCD2: AuditOperation.MERGE,
         }
         operation = operation_map[mode]
-
         audit_entry = AuditEntry(
             run_id=audit_run_id,
             timestamp=timestamp,

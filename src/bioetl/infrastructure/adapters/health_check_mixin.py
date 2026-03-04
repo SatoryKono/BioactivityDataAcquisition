@@ -302,24 +302,7 @@ class HealthCheckProviderMixin(HealthCheckMixin):
             return fallback_status
 
     async def check_health(self) -> HealthCheckResult:
-        """Perform health check and return detailed result.
-
-        This method provides enhanced health check with latency tracking
-        and error details. It wraps the Template Method pattern used by
-        health_check() with additional metrics.
-
-        Observability (via HealthCheckMixin):
-        - SUCCESS: DEBUG log, success counter, latency histogram
-        - FAILURE: WARNING log with details, failure counter, latency histogram
-
-        Returns:
-            HealthCheckResult with status, latency, and error details.
-
-        Note:
-            This method never raises exceptions. All errors are caught
-            and returned as UNHEALTHY status with error details.
-
-        """
+        """Run probe health check and return status, latency, and failure context."""
         # Import here to avoid circular imports
         from bioetl.domain.ports import HealthCheckResult
 
@@ -332,13 +315,8 @@ class HealthCheckProviderMixin(HealthCheckMixin):
             self._handle_health_check_success(ctx, status)
         except HEALTH_CHECK_ERRORS as e:
             last_error = str(e)
-            # check_health() contract: probe failures must be surfaced as UNHEALTHY
-            # with error details so preflight can fail fast instead of proceeding
-            # with a false healthy status from circuit-breaker fallback.
             status = HealthStatus.UNHEALTHY
-            # Log and record metrics for the failure
             self._handle_health_check_failure(ctx, e)
-            # Get failure count from circuit breaker
             try:
                 consecutive_failures = self._circuit_breaker.get_failure_count()
             except HEALTH_CHECK_ERRORS:

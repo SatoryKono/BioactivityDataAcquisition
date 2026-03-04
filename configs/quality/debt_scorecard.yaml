@@ -11,15 +11,15 @@ governance:
       group:*: '2026-03-03'
 
 baseline:
-  total_exemptions: 313
+  total_exemptions: 284
   by_registry:
-    file_size_limits: 69
+    file_size_limits: 70
     function_complexity: 33
-    function_length: 95
+    function_length: 72
     class_size: 51
     class_method_count: 1
-    god_object: 23
-    domain_complexity: 41
+    god_object: 22
+    domain_complexity: 35
 
 registry_groups:
   size_shape:
@@ -39,8 +39,8 @@ quarterly_targets:
   max_total_exemptions: 313
   min_integral_score: 70
   group_budgets:
-    size_shape: 239
-    complexity: 74
+    size_shape: 240
+    complexity: 68
   registry_budgets:
     file_size_limits: 98
     function_complexity: 33
@@ -48,7 +48,7 @@ quarterly_targets:
     class_size: 55
     class_method_count: 1
     god_object: 24
-    domain_complexity: 41
+    domain_complexity: 35
 - quarter: '2026-Q2'
   max_total_exemptions: 250
   min_integral_score: 73

@@ -64,25 +64,7 @@ def validate_record(
     logger: LoggerPort | None = None,
     context: str = "",
 ) -> ValidationResult:
-    """Validate a single record against a Pydantic model.
-
-    Args:
-        record: Dictionary record to validate.
-        model_class: Pydantic model class for validation.
-        logger: Optional logger for validation errors.
-        context: Context string for error logging (e.g., "chembl_activity").
-
-    Returns:
-        ValidationResult containing validation outcome.
-
-    Example:
-        >>> from bioetl.infrastructure.adapters.chembl.models import ChemblActivityRecord
-        >>> result = validate_record(raw_record, ChemblActivityRecord)
-        >>> if result.is_valid:
-        ...     process(result.validated)
-        ... else:
-        ...     quarantine(result.record, result.error)
-    """
+    """Validate one record against a Pydantic model and capture error details."""
     try:
         validated = model_class.model_validate(record)
         return ValidationResult(

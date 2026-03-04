@@ -180,7 +180,10 @@ class TestDomainPurity:
         # Patterns that indicate direct I/O
         io_patterns = [
             (r"\bopen\s*\(", "open() file access"),
-            (r"Path\s*\([^)]+\)\s*\.\s*(read|write|mkdir|unlink)", "Path I/O methods"),
+            (
+                r"Path\s*\([^)]+\)\s*\.\s*(read|write|mkdir|unlink|exists)",
+                "Path I/O methods",
+            ),
             (r"os\.(read|write|mkdir|remove|rename)", "os module I/O"),
             (r"shutil\.(copy|move|rmtree)", "shutil I/O operations"),
         ]

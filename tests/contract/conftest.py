@@ -6,12 +6,51 @@ Provides common fixtures for live API contract testing.
 from __future__ import annotations
 
 import os
+import socket
+from functools import lru_cache
 
 import pytest
+
+_CONTRACT_PATH_TOKEN_POSIX = "/contract/"
+_CONTRACT_PATH_TOKEN_WINDOWS = "\\contract\\"
+_NETWORK_PROBE_HOSTS = (
+    "www.ebi.ac.uk",
+    "pubchem.ncbi.nlm.nih.gov",
+    "rest.uniprot.org",
+    "eutils.ncbi.nlm.nih.gov",
+)
+_NETWORK_PROBE_PORT = 443
+_NETWORK_PROBE_TIMEOUT_SECONDS = 2.0
+
+
+def _is_contract_test_path(path_str: str) -> bool:
+    return (
+        _CONTRACT_PATH_TOKEN_POSIX in path_str
+        or _CONTRACT_PATH_TOKEN_WINDOWS in path_str
+    )
+
+
+@lru_cache(maxsize=1)
+def _has_outbound_connectivity() -> bool:
+    """Best-effort outbound connectivity probe for contract tests."""
+    for host in _NETWORK_PROBE_HOSTS:
+        try:
+            with socket.create_connection(
+                (host, _NETWORK_PROBE_PORT),
+                timeout=_NETWORK_PROBE_TIMEOUT_SECONDS,
+            ):
+                return True
+        except OSError:
+            continue
+    return False
 
 
 def pytest_configure(config: pytest.Config) -> None:
     """Register custom markers for contract tests."""
+    config.addinivalue_line(
+        "markers",
+        "network: tests requiring outbound network access (opt-in via --network)",
+    )
     config.addinivalue_line("markers", "chembl: ChEMBL API contract tests")
     config.addinivalue_line("markers", "pubchem: PubChem API contract tests")
     config.addinivalue_line("markers", "uniprot: UniProt API contract tests")
@@ -39,14 +78,39 @@ def pytest_collection_modifyitems(
             reason="Live API tests disabled. Set BIOETL_LIVE_API_TESTS=true to enable."
         )
         for item in items:
-            # Only skip tests in tests/contract/ directory (not files with "contract" in name)
-            # Check for /contract/ or \contract\ path separator to avoid matching
-            # files like test_port_contracts.py in other directories
             fspath_str = str(item.fspath)
-            if "/contract/" in fspath_str or "\\contract\\" in fspath_str:
+            if _is_contract_test_path(fspath_str):
+                item.add_marker(pytest.mark.network)
                 # Skip tests that require live API access (not marked with no_api)
                 if "no_api" not in item.keywords:
                     item.add_marker(skip_marker)
+    else:
+        for item in items:
+            if _is_contract_test_path(str(item.fspath)):
+                item.add_marker(pytest.mark.network)
+
+
+@pytest.fixture(scope="session")
+def no_network(pytestconfig: pytest.Config) -> bool:
+    """Return True when network tests must be skipped.
+
+    Network tests require both:
+    - explicit opt-in via `--network`
+    - successful outbound connectivity probe
+    """
+    network_opt_in = bool(pytestconfig.getoption("--network"))
+    if not network_opt_in:
+        return True
+    return not _has_outbound_connectivity()
+
+
+@pytest.fixture(autouse=True)
+def _network_guard(request: pytest.FixtureRequest, no_network: bool) -> None:
+    """Skip network-marked tests when connectivity guard is active."""
+    if no_network and "network" in request.node.keywords:
+        pytest.skip(
+            "Network tests disabled. Use --network with outbound connectivity to run."
+        )
 
 
 @pytest.fixture

@@ -18,6 +18,10 @@ from __future__ import annotations
 from bioetl.domain.exceptions.base import BioETLError
 from bioetl.domain.types import ErrorType
 
+__all__ = [
+    "DataQualityThresholdError",
+]
+
 
 class DataQualityThresholdError(BioETLError):
     """Raised when Data Quality error rate exceeds the hard threshold.

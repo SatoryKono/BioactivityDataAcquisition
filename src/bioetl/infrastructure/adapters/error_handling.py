@@ -147,23 +147,7 @@ class ErrorService:
         status_code: int,
         response: Response | None = None,
     ) -> ErrorCategory:
-        """Classify HTTP error by status code.
-
-        Args:
-            status_code: HTTP status code.
-            response: Optional HTTP response for additional context.
-
-        Returns:
-            ErrorCategory based on status code.
-
-        Examples:
-            >>> handler.classify_http_error(401)
-            ErrorCategory.CRITICAL
-            >>> handler.classify_http_error(429)
-            ErrorCategory.RECOVERABLE
-            >>> handler.classify_http_error(400)
-            ErrorCategory.DATA_QUALITY
-        """
+        """Classify HTTP error status code into retryability categories."""
         if status_code in _HTTP_STATUS_CATEGORIES:
             return _HTTP_STATUS_CATEGORIES[status_code]
 

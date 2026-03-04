@@ -14,6 +14,16 @@ if TYPE_CHECKING:
     from bioetl.domain.composite.cross_validation import CrossValidationStats
     from bioetl.domain.composite.lineage import CompositeLineageMetadata
 
+__all__ = [
+    "CompositeResult",
+    "DependencyResult",
+    "DependencyStatus",
+    "EnrichmentResult",
+    "EnrichmentStatus",
+    "MergeResult",
+    "SeedResult",
+]
+
 
 class EnrichmentStatus(StrEnum):
     """Status of enrichment pipeline execution."""

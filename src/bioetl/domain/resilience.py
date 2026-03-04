@@ -9,6 +9,13 @@ from __future__ import annotations
 import hashlib
 from dataclasses import dataclass, field
 
+__all__ = [
+    "AdapterConfig",
+    "CircuitBreakerConfig",
+    "RetryConfig",
+]
+
+
 # Default retryable HTTP status codes per RULES.md §3.1.3
 # 429: Rate Limit, 500: Internal Server Error, 502-504: Gateway errors
 DEFAULT_RETRYABLE_STATUSES: frozenset[int] = frozenset({429, 500, 502, 503, 504})

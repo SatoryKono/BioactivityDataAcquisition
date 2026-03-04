@@ -30,6 +30,15 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
+__all__ = [
+    "PipelineDefinition",
+    "PipelineFactoryPort",
+    "PipelineRegistry",
+    "create_registry",
+    "get_default_registry",
+]
+
+
 @runtime_checkable
 class PipelineFactoryPort(Protocol):
     """Protocol for pipeline factories."""

@@ -36,6 +36,7 @@ from bioetl.domain.ports.audit import (
 from bioetl.domain.ports.batch_id import BatchIdGeneratorPort
 from bioetl.domain.ports.checkpoint import CheckpointPort
 from bioetl.domain.ports.clock import ClockPort
+from bioetl.domain.ports.contract_policy import ContractPolicyPort
 from bioetl.domain.ports.data_normalization import DataNormalizationPort
 from bioetl.domain.ports.data_source import (
     DataSourcePort,
@@ -116,6 +117,7 @@ __all__ = [
     "CheckpointPort",
     "CircuitBreakerPort",
     "ClockPort",
+    "ContractPolicyPort",
     "DQMonitorPort",
     "DQReportWriterPort",
     "DataNormalizationPort",

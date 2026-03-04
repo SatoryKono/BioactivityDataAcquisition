@@ -35,6 +35,20 @@ def test_exemption_registry_metadata_is_complete() -> None:
     assert isinstance(expired_entries, list)
 
 
+def test_exemption_registry_policy_requires_owner_and_due_date() -> None:
+    """Registry policy must enforce owner + due-date metadata for each entry."""
+    raw = load_exemptions_registry()
+    policy = raw.get("policy", {})
+    assert isinstance(policy, dict), "policy section must be a mapping"
+
+    required_fields = policy.get("required_fields", [])
+    assert isinstance(required_fields, list), "policy.required_fields must be a list"
+    assert "owner" in required_fields, "policy.required_fields must include 'owner'"
+    assert any(field in required_fields for field in ("expires_on", "due_on")), (
+        "policy.required_fields must include due-date field ('expires_on' or 'due_on')"
+    )
+
+
 def test_exemption_registries_are_not_empty() -> None:
     for registry_name in (
         "file_size_limits",

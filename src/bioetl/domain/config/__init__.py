@@ -54,9 +54,9 @@ from bioetl.domain.configs.base import (
 )
 
 __all__ = [
+    "DEFAULT_VALIDATION_CONFIG",
     "BaseClientConfig",
     "BaseProviderConfig",
-    "DEFAULT_VALIDATION_CONFIG",
     "ConditionalValidation",
     "CrossFieldValidation",
     "DQConfig",

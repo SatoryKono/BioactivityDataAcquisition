@@ -19,7 +19,12 @@ from bioetl.domain.services.author_normalization_service import (
 from bioetl.domain.services.data_normalization_config import DataNormalizationConfig
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Callable, Sequence
+
+
+__all__ = [
+    "DefaultDataNormalizationService",
+]
 
 _HTML_TAG_PATTERN = re.compile(r"<[^>]+>")
 _WHITESPACE_PATTERN = re.compile(r"\s+")
@@ -429,21 +434,40 @@ class DefaultDataNormalizationService(AuthorNormalizationService):
         if not text:
             return None
 
-        # Step 1: Strip HTML tags and decode entities
-        normalized = _HTML_TAG_PATTERN.sub("", text)
-        normalized = unescape(normalized)
-
-        # Step 2: Remove non-whitespace control characters (NUL, DEL, C1 controls)
-        # Note: \t, \n, \r are handled by whitespace collapse in step 4
-        normalized = _CONTROL_CHARS_PATTERN.sub("", normalized)
-
-        # Step 3: Unicode NFC normalization (canonical composition)
-        normalized = unicodedata.normalize("NFC", normalized)
-
-        # Step 4: Collapse multiple whitespace to single space
-        normalized = _WHITESPACE_PATTERN.sub(" ", normalized)
+        normalized = text
+        for step in self._text_normalization_steps():
+            normalized = step(normalized)
 
         # Step 5: Trim leading/trailing whitespace
         normalized = normalized.strip()
 
         return normalized if normalized else None
+
+    def _text_normalization_steps(self) -> tuple[Callable[[str], str], ...]:
+        """Return normalization strategy chain for text fields."""
+        return (
+            self._strip_html_and_decode_entities,
+            self._remove_control_characters,
+            self._normalize_unicode_nfc,
+            self._collapse_whitespace,
+        )
+
+    @staticmethod
+    def _strip_html_and_decode_entities(text: str) -> str:
+        """Strip HTML tags and decode HTML entities."""
+        return unescape(_HTML_TAG_PATTERN.sub("", text))
+
+    @staticmethod
+    def _remove_control_characters(text: str) -> str:
+        """Remove non-whitespace control characters."""
+        return _CONTROL_CHARS_PATTERN.sub("", text)
+
+    @staticmethod
+    def _normalize_unicode_nfc(text: str) -> str:
+        """Normalize unicode using NFC canonical composition."""
+        return unicodedata.normalize("NFC", text)
+
+    @staticmethod
+    def _collapse_whitespace(text: str) -> str:
+        """Collapse any whitespace sequence into a single space."""
+        return _WHITESPACE_PATTERN.sub(" ", text)

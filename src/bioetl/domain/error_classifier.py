@@ -12,6 +12,11 @@ from bioetl.domain.exceptions import (
 )
 from bioetl.domain.types import ErrorType
 
+__all__ = [
+    "ErrorClassifier",
+]
+
+
 # Keyword to ErrorType mapping for legacy/external exceptions
 # Maps (keywords_tuple, error_type) - first match wins
 _ERROR_KEYWORDS: list[tuple[tuple[str, ...], ErrorType]] = [

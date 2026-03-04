@@ -14,9 +14,12 @@ Requirements:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from pathlib import Path
 
 from bioetl.domain.types import BatchID
+
+__all__ = [
+    "BronzeWriteResult",
+]
 
 
 @dataclass(frozen=True, slots=True)
@@ -85,14 +88,6 @@ class BronzeWriteResult:
             raise ValueError("absolute_path cannot be empty")
         if not self.checksum_blake2:
             raise ValueError("checksum_blake2 cannot be empty")
-
-    def exists(self) -> bool:
-        """Check if the written Bronze file exists on disk.
-
-        Returns:
-            True if condition is met, False otherwise.
-        """
-        return Path(self.absolute_path).exists()
 
     @property
     def compression_ratio(self) -> float:

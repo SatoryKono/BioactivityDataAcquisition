@@ -18,6 +18,10 @@ from bioetl.domain.schemas.constants import (
     RELATIONSHIP_TYPES,
 )
 
+__all__ = [
+    "AssaySchema",
+]
+
 
 class AssaySchema(ETLRecordSchema):
     """Assay validation schema for Silver layer."""

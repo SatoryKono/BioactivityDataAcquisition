@@ -14,6 +14,14 @@ from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
 
+__all__ = [
+    "ENTRY_TYPES",
+    "PROTEIN_EXISTENCE_LEVELS",
+    "PROTEIN_FLAGS",
+    "UniprotCoreSchema",
+]
+
+
 # === Fixed Value Constants ===
 PROTEIN_EXISTENCE_LEVELS = [
     "Evidence at protein level",

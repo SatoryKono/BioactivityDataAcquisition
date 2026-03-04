@@ -170,16 +170,24 @@ class TestTransformerInjectionPath:
         Verify that:
         1. Factory has create_transformer() method (public API)
         2. create_with_services() passes transformer_class to pipeline creation
-        3. pipeline_factory creates transformer and injects it into pipeline
+        3. construction helpers build transformer and injection reaches pipeline
         """
         factory_file = (
             _get_base_path(Path("src/bioetl/composition/factories"))
             / "pipeline_factory.py"
         )
+        construction_file = (
+            _get_base_path(Path("src/bioetl/composition/factories"))
+            / "pipeline_factory_construction.py"
+        )
         if not factory_file.exists():
             pytest.skip("pipeline_factory.py not found")
+        if not construction_file.exists():
+            pytest.skip("pipeline_factory_construction.py not found")
 
         content = factory_file.read_text(encoding="utf-8")
+        construction_content = construction_file.read_text(encoding="utf-8")
+        combined_content = f"{content}\n{construction_content}"
 
         # Check for create_transformer method (public API for direct usage)
         assert "def create_transformer" in content, (
@@ -192,10 +200,10 @@ class TestTransformerInjectionPath:
             "transformer_class to create_pipeline_with_services()"
         )
 
-        # Verify pipeline_factory creates transformer and passes to pipeline
-        # Check that factory creates transformer and passes to pipeline
-        assert "transformer_class(" in content, (
-            "pipeline_factory must create transformer from transformer_class"
+        # Verify builder path creates transformer and pipeline receives it.
+        assert "transformer_class(" in combined_content, (
+            "pipeline factory construction path must create transformer "
+            "from transformer_class"
         )
         assert "transformer=transformer" in content, (
             "pipeline_factory must pass transformer to pipeline constructor"

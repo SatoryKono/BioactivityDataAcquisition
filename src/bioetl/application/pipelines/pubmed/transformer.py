@@ -41,6 +41,7 @@ if TYPE_CHECKING:
     from bioetl.domain.entities import BaseEntity
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
     from bioetl.domain.ports import (
+        ContractPolicyPort,
         DataNormalizationPort,
         MetricsPort,
         PiiHasherPort,
@@ -105,7 +106,7 @@ class PubMedPublicationTransformer(
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
-        contract_policy: Any = None,  # Any: concrete type resolved at runtime
+        contract_policy: ContractPolicyPort | None = None,
         author_extractor: AuthorExtractor | None = None,
         date_extractor: DateExtractor | None = None,
     ):

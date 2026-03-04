@@ -25,6 +25,10 @@ from bioetl.domain.transformations import (
 )
 from bioetl.domain.types import ContentHash, EntityID
 
+__all__ = [
+    "IdentityService",
+]
+
 
 class IdentityService:
     """Service for generating entity identifiers and content hashes.

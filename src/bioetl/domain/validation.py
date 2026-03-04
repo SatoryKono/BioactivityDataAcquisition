@@ -22,6 +22,19 @@ from .transformations import safe_int
 if TYPE_CHECKING:
     from bioetl.domain.config import ValidationConfig
 
+
+__all__ = [
+    "validate_doi",
+    "validate_inchi_key",
+    "validate_molecular_weight",
+    "validate_non_empty_string",
+    "validate_non_negative",
+    "validate_positive_int",
+    "validate_publication_year",
+    "validate_smiles",
+    "validate_year_range",
+]
+
 # =============================================================================
 # SMILES Validation (Chemical Structure)
 # =============================================================================
@@ -241,42 +254,7 @@ def validate_molecular_weight(
     value: Any,  # Any: record field value type varies
     config: ValidationConfig | None = None,
 ) -> float | None:
-    """Validate and convert molecular weight to float.
-
-    Handles string-to-float conversion (PubChem API may return strings)
-    and validates the range. Precision from config (default 10 decimals)
-    per RULES.md §2.8.1.
-
-    When config is provided, uses config.min_molecular_weight and
-    config.max_molecular_weight (exclusive bounds).
-
-    When config is None, uses legacy bounds (0, 100000) for backward
-    compatibility. For stricter validation, use MolecularWeight Value Object.
-
-    Args:
-        value: Raw molecular weight value (string, int, float, or None).
-        config: Optional ValidationConfig for custom ranges and precision.
-
-    Returns:
-        Valid float rounded to precision, or None if invalid/out of range.
-
-    Example:
-        >>> validate_molecular_weight(180.156)
-        180.156
-        >>> validate_molecular_weight("342.30")  # String from API
-        342.3
-        >>> validate_molecular_weight(0)  # Zero is invalid
-        None
-        >>> validate_molecular_weight(-1.0)  # Negative is invalid
-        None
-        >>> validate_molecular_weight(100001)  # Too large (legacy bounds)
-        None
-        >>> validate_molecular_weight(None)
-        None
-        >>> validate_molecular_weight("invalid")
-        None
-
-    """
+    """Convert molecular weight to float and enforce configured bounds."""
     if value is None:
         return None
     try:

@@ -19,6 +19,12 @@ if TYPE_CHECKING:
 
     from bioetl.domain.ports import DataSourcePort
 
+
+__all__ = [
+    "T",
+    "register_provider",
+]
+
 T = TypeVar("T", bound="DataSourcePort")
 
 

@@ -22,6 +22,11 @@ if TYPE_CHECKING:
     )
 
 
+__all__ = [
+    "MetadataWriterPort",
+]
+
+
 @runtime_checkable
 class MetadataWriterPort(Protocol):
     """Port for writing metadata sidecar files.

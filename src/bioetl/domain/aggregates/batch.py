@@ -34,6 +34,12 @@ from bioetl.domain.types import (
     RunID,
 )
 
+__all__ = [
+    "Batch",
+    "BatchRecord",
+    "BatchStatus",
+]
+
 
 class BatchStatus(StrEnum):
     """Status of a batch."""

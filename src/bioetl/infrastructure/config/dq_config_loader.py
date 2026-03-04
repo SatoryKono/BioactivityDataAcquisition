@@ -311,25 +311,9 @@ class DQConfigLoader:
         self,
         merged: dict[str, Any],  # Any: YAML DQ config has heterogeneous values
     ) -> dict[str, Any]:  # Any: YAML DQ config has heterogeneous values
-        """Normalize merged dict to DQConfigFile schema.
-
-        Handles conversion from inline format (soft_fail_threshold)
-        to file format (thresholds.soft_fail).
-
-        Also maps field_validations, cross_field_validations,
-        conditional_validations to their hierarchical counterparts.
-
-        Args:
-            merged: Raw merged configuration dict.
-
-        Returns:
-            Dict compatible with DQConfigFile schema.
-        """
+        """Normalize merged config to DQConfigFile-compatible shape."""
         result = copy.deepcopy(merged)
 
-        # Handle threshold normalization
-        # inline: soft_fail_threshold, hard_fail_threshold
-        # file: thresholds.soft_fail, thresholds.hard_fail
         if "soft_fail_threshold" in result or "hard_fail_threshold" in result:
             thresholds = result.get("thresholds", {})
             if not isinstance(thresholds, dict):
@@ -342,10 +326,7 @@ class DQConfigLoader:
 
             result["thresholds"] = thresholds
 
-        # Map flat validation lists to hierarchical structure
-        # This handles cases where inline config has flat lists
         if "field_validations" in result:
-            # Move to entity level (highest priority in merge)
             result.setdefault("entity_field_validations", [])
             result["entity_field_validations"].extend(result.pop("field_validations"))
 
