@@ -31,8 +31,6 @@ from bioetl.infrastructure.storage.silver_writer import SilverWriter
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from pandera.api.dataframe.container import DataFrameSchema
-
     from bioetl.domain.config import KeyNullabilityRule
     from bioetl.domain.models.metadata import SourceMetadata
     from bioetl.domain.types import ArrowSchema, BatchID, RunID, RunType
@@ -185,7 +183,7 @@ class StorageAdapter:
         records: list[
             dict[str, Any]  # Any: record/metadata values are heterogeneous
         ],  # Any: factory wiring; concrete types resolved at runtime
-        schema: DataFrameSchema,
+        schema: object,
         primary_keys: list[str] | None = None,
         mode: Literal["overwrite", "append", "scd2"] = "overwrite",
         *,

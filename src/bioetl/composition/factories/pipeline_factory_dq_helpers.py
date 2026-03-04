@@ -66,9 +66,18 @@ def extract_dq_configs(yaml_config: PipelineYamlConfig | None) -> DQConfigsConte
         return DQConfigsContext(bronze=None, silver=None, gold=None)
 
     sink_mapping = cast(Mapping[str, object], sink)
-    bronze_config = extract_single_dq_config(sink_mapping, "bronze", BronzeSinkConfig)
-    silver_config = extract_single_dq_config(sink_mapping, "silver", SilverSinkConfig)
-    gold_config = extract_single_dq_config(sink_mapping, "gold", GoldSinkConfig)
+    bronze_config = cast(
+        "BronzeDQConfigPort | None",
+        extract_single_dq_config(sink_mapping, "bronze", BronzeSinkConfig),
+    )
+    silver_config = cast(
+        "SilverDQConfigPort | None",
+        extract_single_dq_config(sink_mapping, "silver", SilverSinkConfig),
+    )
+    gold_config = cast(
+        "GoldDQConfigPort | None",
+        extract_single_dq_config(sink_mapping, "gold", GoldSinkConfig),
+    )
 
     return DQConfigsContext(
         bronze=bronze_config,

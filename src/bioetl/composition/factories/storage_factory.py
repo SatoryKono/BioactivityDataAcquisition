@@ -32,7 +32,6 @@ if TYPE_CHECKING:
     )
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import (
-        CsvExportConfig,
         PipelineYamlConfig,
         SinkLayerConfig,
     )
@@ -66,7 +65,7 @@ class StorageFactory:
 
     @staticmethod
     def _create_csv_exporter_from_config(
-        csv_cfg: CsvExportConfig | None,
+        csv_cfg: object | None,
         logger: LoggerPort,
         override_path: Path | None = None,
     ) -> CsvExporter | None:
@@ -78,15 +77,17 @@ class StorageFactory:
             override_path: If provided, use this path instead of csv_cfg.path.
                           Used in test mode to respect test isolation.
         """
-        if csv_cfg and csv_cfg.enabled:
+        if csv_cfg and getattr(csv_cfg, "enabled", False):
             # Convert to str for CsvExporter (expects str, not Path)
-            path = override_path or csv_cfg.path
+            path = override_path or getattr(csv_cfg, "path", None)
+            if path is None:
+                return None
             return CsvExporter(
                 base_path=str(path),
                 logger=logger,
-                delimiter=csv_cfg.delimiter,
-                header=csv_cfg.header,
-                encoding=csv_cfg.encoding,
+                delimiter=str(getattr(csv_cfg, "delimiter", ",")),
+                header=bool(getattr(csv_cfg, "header", True)),
+                encoding=str(getattr(csv_cfg, "encoding", "utf-8")),
             )
         return None
 

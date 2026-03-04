@@ -44,7 +44,6 @@ if TYPE_CHECKING:
         TracingPort,
     )
     from bioetl.domain.types import RunID
-    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
 @dataclass(frozen=True, slots=True)

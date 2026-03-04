@@ -34,7 +34,7 @@ Usage:
 from __future__ import annotations
 
 import threading
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING, NamedTuple, Protocol, cast
 
 # Transformers (all DI-injected)
 from bioetl.application.pipelines.chembl.activity_transformer import ActivityTransformer
@@ -169,7 +169,6 @@ from bioetl.infrastructure.schemas.silver import (
 )
 
 if TYPE_CHECKING:
-    import pandera
     import pyarrow as pa
 
     from bioetl.application.core.base_transformer import BaseTransformer
@@ -208,9 +207,18 @@ class PipelineFactoryConfig(NamedTuple):
     entity_type: str
     transformer_class: type[BaseTransformer]
     silver_schema: pa.Schema | None
-    gold_schema: type[pandera.DataFrameModel]
-    pandera_silver_schema: type[pandera.DataFrameModel] | None = None
+    gold_schema: object
+    pandera_silver_schema: object | None = None
     data_source_provider: str | None = None
+
+
+class _SchemaBuilder(Protocol):
+    """Protocol for schema classes exposing ``to_schema``."""
+
+    @classmethod
+    def to_schema(cls) -> object:
+        """Materialize schema representation."""
+        ...
 
 
 # Consolidated pipeline definitions - single source of truth
@@ -414,11 +422,14 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
 
 
 def _schema_columns(
-    schema_class: type[pandera.DataFrameModel],
+    schema_class: object,
 ) -> set[str]:
     """Extract column names from a Pandera DataFrameModel class."""
+    if not hasattr(schema_class, "to_schema"):
+        raise ValueError(f"Schema {schema_class!r} does not expose to_schema()")
     try:
-        schema = schema_class.to_schema()
+        schema_builder = cast("_SchemaBuilder", schema_class)
+        schema = schema_builder.to_schema()
     except (
         AttributeError,
         TypeError,
