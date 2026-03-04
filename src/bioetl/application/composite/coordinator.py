@@ -153,30 +153,7 @@ class EnrichmentCoordinatorService:
         completed: frozenset[str],
         runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
     ) -> dict[str, EnrichmentResult]:
-        """Run all enrichers in parallel.
-
-        Executes enrichers concurrently up to max_concurrency limit.
-        Each enricher receives filtered keys based on its filter_condition.
-
-        Args:
-            keys: DataFrame with join keys from seed.
-            enrichers: Enricher configurations.
-            completed: Set of already-completed enrichers (for resume).
-            runner_factory: Factory to create PipelineRunner for each enricher.
-
-        Returns:
-            Mapping of enricher name to result.
-
-        Example:
-            >>> results = await coordinator.run_enrichers(
-            ...     keys=keys_df,
-            ...     enrichers=[crossref_config, pubmed_config],
-            ...     completed=frozenset(),
-            ...     runner_factory=factory,
-            ... )
-            >>> results["crossref_publication"].is_success
-            True
-        """
+        """Run all enrichers concurrently and collect typed enrichment results."""
         task_specs = [
             task_spec
             for enricher in enrichers
