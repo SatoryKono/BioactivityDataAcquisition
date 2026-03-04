@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from itertools import pairwise
-from typing import Any
+from typing import Any, cast
 
-from bioetl.domain.types import JsonDict, cast
+from bioetl.domain.types import JsonDict
 
 from bioetl.infrastructure.quality._primitives import (
     QuarterTarget,
