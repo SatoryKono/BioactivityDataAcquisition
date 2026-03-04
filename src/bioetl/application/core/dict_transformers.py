@@ -18,7 +18,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from datetime import date
-from typing import Any, TypeVar
+from typing import TypeVar
 
 from bioetl.domain.normalization import normalize_string as _domain_normalize_string
 from bioetl.domain.normalization import parse_date_field as _domain_parse_date_field
@@ -33,7 +33,7 @@ def flatten_nested_dict(
     data: JsonDict | None,  # Any: dict values vary by field type
     prefix: str,
     field_mapping: dict[
-        str, Callable[[Any], Any] | None  # Any: heterogeneous record values
+        str, Callable[[object], object] | None  # object: heterogeneous record values
     ],
     renames: dict[str, str] | None = None,
 ) -> JsonDict:  # Any: dict values vary by field type
@@ -100,7 +100,7 @@ def flatten_nested_dict(
 def extract_list_field(
     items: list[JsonDict] | None,  # Any: dict values vary by field type
     field: str,
-    converter: Callable[[Any], T]  # Any: converter accepts heterogeneous input
+    converter: Callable[[object], T]  # object: converter accepts heterogeneous input
     | None = None,
 ) -> list[T] | None:
     """Extract field values from a list of dicts.
@@ -149,9 +149,9 @@ def extract_list_field(
 def _extract_nested_values(
     items: list[JsonDict],  # Any: dict values vary by field type
     field: str,
-) -> list[Any]:  # Any: nested list elements have heterogeneous types
+) -> list[object]:  # object: nested list elements have heterogeneous types
     """Extract all nested list values from a field across items."""
-    values: list[Any] = []  # Any: nested list elements have heterogeneous types
+    values: list[object] = []  # object: nested list elements have heterogeneous types
     for item in items:
         if isinstance(item, dict):
             nested = item.get(field)
@@ -164,7 +164,7 @@ def aggregate_nested_lists(
     items: list[JsonDict] | None,  # Any: dict values vary by field type
     field: str,
     deduplicate: bool = True,
-) -> list[Any] | None:  # Any: nested list elements have heterogeneous types
+) -> list[object] | None:  # object: nested list elements have heterogeneous types
     """Aggregate nested lists from a list of dicts.
 
     Used to collect synonyms, xrefs, and other nested lists
@@ -197,7 +197,7 @@ def aggregate_nested_lists(
 
     if deduplicate:
         seen: set[str] = set()
-        unique: list[Any] = []  # Any: nested list elements have heterogeneous types
+        unique: list[object] = []  # object: nested list elements have heterogeneous types
         for val in values:
             key = str(val)
             if key not in seen:
@@ -296,7 +296,7 @@ def safe_extract(
     record: JsonDict,  # Any: dict values vary by field type
     key: str,
     default: T | None = None,
-) -> T | Any | None:  # Any: dict value type unknown at extraction time
+) -> T | object | None:  # object: dict value type unknown at extraction time
     """Safely extract a value from a dict with logging support.
 
     Wrapper around dict.get() for unified field extraction.

@@ -1,11 +1,10 @@
-# mypy: disable-error-code=no-any-return
 """Batch request internals for SemanticScholarAdapter."""
 
 from __future__ import annotations
 
 import contextlib
 import time
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.semanticscholar.constants import (

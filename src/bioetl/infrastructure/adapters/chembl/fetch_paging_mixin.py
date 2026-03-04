@@ -59,7 +59,7 @@ class ChemblFetchPagingMixin:
     async def _fetch_page(
         self,
         url: str,
-        params: JsonDict,  # Any: HTTP query params (str|int|bool values)
+        params: JsonDict,
         entity_type: str,
     ) -> tuple[list[BronzeRecord], bool]:
         """Fetch a single page and handle errors."""

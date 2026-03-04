@@ -1,9 +1,7 @@
-# mypy: disable-error-code=no-any-return
 """Public HTTP verb methods for UnifiedHTTPClient."""
 
 from __future__ import annotations
 
-from typing import Any
 from bioetl.domain.types import JsonDict
 
 import httpx
@@ -15,8 +13,7 @@ class HTTPClientRequestMethodsMixin:
     async def get(
         self,
         url: str,
-        params: JsonDict  # Any: dynamic payload or structural mixin boundary
-        | None = None,  # Any: dynamic payload or structural mixin boundary
+        params: JsonDict | None = None,
         headers: dict[str, str] | None = None,
     ) -> httpx.Response:
         """Send GET request with retry policy."""
@@ -27,10 +24,8 @@ class HTTPClientRequestMethodsMixin:
     async def post(
         self,
         url: str,
-        json: JsonDict  # Any: dynamic payload or structural mixin boundary
-        | None = None,  # Any: dynamic payload or structural mixin boundary
-        data: JsonDict  # Any: dynamic payload or structural mixin boundary
-        | None = None,  # Any: dynamic payload or structural mixin boundary
+        json: JsonDict | None = None,
+        data: JsonDict | None = None,
         headers: dict[str, str] | None = None,
     ) -> httpx.Response:
         """Send POST request with retry policy."""
@@ -49,8 +44,7 @@ class HTTPClientRequestMethodsMixin:
     async def get_once(
         self,
         url: str,
-        params: JsonDict  # Any: dynamic payload or structural mixin boundary
-        | None = None,  # Any: dynamic payload or structural mixin boundary
+        params: JsonDict | None = None,
         headers: dict[str, str] | None = None,
     ) -> httpx.Response:
         """Send single GET request without retry loop."""

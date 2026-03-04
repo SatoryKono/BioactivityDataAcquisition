@@ -36,6 +36,7 @@ if TYPE_CHECKING:
         MetadataWriterPort,
         TracingPort,
     )
+    from bioetl.domain.value_objects.silver_result import SilverWriteResult
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 __all__ = ["GoldWriteMode", "GoldWriter"]
@@ -131,7 +132,7 @@ class GoldWriter(
         column_order: list[str] | None = None,
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
-        silver_refs: list[Any] | None = None,  # Any: SilverRef heterogeneous
+        silver_refs: list[SilverWriteResult] | None = None,
     ) -> None:
         """Write validated records to Gold layer."""
         tracer = self._tracing.get_tracer(__name__)
@@ -197,7 +198,7 @@ class GoldWriter(
         ingestion_ts: datetime | None,
         run_id: RunID | None,
         scd_config: ScdConfig | None,
-        silver_refs: list[Any] | None,  # Any: SilverRef heterogeneous
+        silver_refs: list[SilverWriteResult] | None,
         schema: DataFrameSchema,
     ) -> None:
         """Emit audit and metadata after successful Gold write."""
