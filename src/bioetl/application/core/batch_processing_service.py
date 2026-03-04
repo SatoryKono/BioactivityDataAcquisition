@@ -5,6 +5,7 @@ from __future__ import annotations
 __all__ = ["BatchProcessingOutput", "BatchProcessingService"]
 
 
+import asyncio
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
@@ -152,38 +153,48 @@ class BatchProcessingService:
                 len(transform_result.gold_records),
             )
 
-            silver_result = None
+            # Fire Silver and Gold writes concurrently — they target
+            # independent Delta tables and silver_refs is only a lineage
+            # reference, not a data dependency.
             bronze_refs = [bronze_result] if bronze_result else None
+            write_coros = []
+
             if transform_result.silver_records:
-                silver_result = await self._execute_with_span(
-                    "write_silver",
-                    self._writer.write_silver(
-                        transform_result.silver_records,
+                write_coros.append(
+                    self._execute_with_span(
+                        "write_silver",
+                        self._writer.write_silver(
+                            transform_result.silver_records,
+                            batch_id,
+                            ingestion_ts,
+                            bronze_refs=bronze_refs,
+                        ),
                         batch_id,
-                        ingestion_ts,
-                        bronze_refs=bronze_refs,
-                    ),
-                    batch_id,
-                    len(transform_result.silver_records),
-                    on_error=lambda error: self._writer.log_and_track_write_error(
-                        "silver", error, batch_id
-                    ),
+                        len(transform_result.silver_records),
+                        on_error=lambda error: self._writer.log_and_track_write_error(
+                            "silver", error, batch_id
+                        ),
+                    )
                 )
 
-            silver_refs = [silver_result] if silver_result else None
             if transform_result.gold_records:
-                await self._execute_with_span(
-                    "write_gold",
-                    self._writer.write_gold(
-                        transform_result.gold_records,
-                        silver_refs=silver_refs,
-                    ),
-                    batch_id,
-                    len(transform_result.gold_records),
-                    on_error=lambda error: self._writer.log_and_track_write_error(
-                        "gold", error, batch_id
-                    ),
+                write_coros.append(
+                    self._execute_with_span(
+                        "write_gold",
+                        self._writer.write_gold(
+                            transform_result.gold_records,
+                            silver_refs=bronze_refs,
+                        ),
+                        batch_id,
+                        len(transform_result.gold_records),
+                        on_error=lambda error: self._writer.log_and_track_write_error(
+                            "gold", error, batch_id
+                        ),
+                    )
                 )
+
+            if write_coros:
+                await asyncio.gather(*write_coros)
 
             self._tracing.set_batch_result(
                 span,

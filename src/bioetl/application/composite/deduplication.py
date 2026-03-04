@@ -111,14 +111,46 @@ class EnricherDeduplicatorService:
         key_columns: list[str],
         non_key_columns: list[str],
     ) -> tuple[list[str], list[str]]:
-        """Classify columns into those with and without conflicts."""
+        """Classify columns into those with and without conflicts.
+
+        Performs a single group_by with all column aggregations combined,
+        instead of N separate group_by operations (one per column).
+        """
+        import polars as pl
+
+        # Build all conflict-detection aggregations in one pass
+        agg_exprs: list[pl.Expr] = []
+        for col in non_key_columns:
+            agg_exprs.append(
+                pl.col(col).drop_nulls().n_unique().alias(f"{col}__n_unique")
+            )
+            agg_exprs.append(
+                pl.col(col).is_null().any().alias(f"{col}__has_null")
+            )
+            agg_exprs.append(
+                pl.col(col).is_null().all().alias(f"{col}__all_null")
+            )
+
+        aggregated = df.group_by(key_columns).agg(agg_exprs)
+
+        # Classify each column based on the single aggregation result
         columns_with_conflicts: list[str] = []
         columns_without_conflicts: list[str] = []
         for col in non_key_columns:
-            if self._has_group_conflicts(df, key_columns, col):
+            n_unique_col = f"{col}__n_unique"
+            has_null_col = f"{col}__has_null"
+            all_null_col = f"{col}__all_null"
+
+            has_conflict = aggregated.filter(
+                (pl.col(n_unique_col) > 1)
+                | (pl.col(has_null_col) & ~pl.col(all_null_col))
+            ).height > 0
+
+            if has_conflict:
                 columns_with_conflicts.append(col)
             else:
                 columns_without_conflicts.append(col)
+
         return columns_with_conflicts, columns_without_conflicts
 
     def _build_aggregation_exprs(
@@ -136,28 +168,6 @@ class EnricherDeduplicatorService:
         for col in columns_with_conflicts:
             agg_exprs.append(self._build_concat_expr(col, df.schema[col]))
         return agg_exprs
-
-    def _has_group_conflicts(
-        self,
-        df: pl.DataFrame,
-        key_columns: list[str],
-        column: str,
-    ) -> bool:
-        """Check if column has conflicting values in any group."""
-        import polars as pl
-
-        conflict_check = df.group_by(key_columns).agg(
-            [
-                pl.col(column).drop_nulls().n_unique().alias("n_unique"),
-                pl.col(column).is_null().any().alias("has_null"),
-                pl.col(column).is_null().all().alias("all_null"),
-            ]
-        )
-        conflicts = conflict_check.filter(
-            (pl.col("n_unique") > 1) | (pl.col("has_null") & ~pl.col("all_null"))
-        )
-        has_conflicts: bool = conflicts.height > 0
-        return has_conflicts
 
     def _build_concat_expr(self, column: str, dtype: pl.DataType) -> pl.Expr:
         """Build expression that concatenates values with |.
