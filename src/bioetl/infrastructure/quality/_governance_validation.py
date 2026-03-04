@@ -5,7 +5,6 @@ from __future__ import annotations
 from typing import Any
 
 from bioetl.domain.types import JsonDict
-
 from bioetl.infrastructure.quality._baseline_validation import (
     _is_valid_rollout_section_key,
 )

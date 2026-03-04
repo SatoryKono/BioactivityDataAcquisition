@@ -18,9 +18,8 @@ from bioetl.infrastructure.adapters.common import BaseTitleFallbackHandler, titl
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable
 
-    from bioetl.domain.types import JsonDict
-
     from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.types import JsonDict
 from bioetl.domain.types import JsonDict
 
 

@@ -13,13 +13,13 @@ from typing import Any, cast  # Any: needed for _serialize_value recursive retur
 
 import orjson
 
+from bioetl.domain.types import JsonDict
 from bioetl.domain.value_objects.dq_report import (
     BronzeDQReport,
     DQReportFormat,
     GoldDQReport,
     SilverDQReport,
 )
-from bioetl.domain.types import JsonDict
 
 
 def to_dict(obj: object) -> JsonDict:
@@ -62,7 +62,9 @@ def _is_dataclass_instance(value: object) -> bool:
     return is_dataclass(value) and not isinstance(value, type)
 
 
-def _serialize_value(value: Any) -> Any:  # Any: recursive serializer handles heterogeneous types
+def _serialize_value(
+    value: Any,
+) -> Any:  # Any: recursive serializer handles heterogeneous types
     """Serialize a value with dataclass/enum/datetime/collection support."""
     if _is_dataclass_instance(value):
         return _serialize_dataclass(value)

@@ -143,8 +143,7 @@ class StorageAdapterWriteMixin:
         column_order: list[str] | None = None,
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
-        silver_refs: list[SilverWriteResult]
-        | None = None,
+        silver_refs: list[SilverWriteResult] | None = None,
     ) -> None:
         """Write aggregated records to Gold layer.
 

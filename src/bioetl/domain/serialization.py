@@ -191,7 +191,8 @@ def _deserialize_with_orjson(
     assert orjson is not None
     try:
         result: (
-            JsonDict | list[object]  # Any: JSON deserialization produces heterogeneous types
+            JsonDict
+            | list[object]  # Any: JSON deserialization produces heterogeneous types
         ) = orjson.loads(data)
         return result
     except orjson.JSONDecodeError as e:
@@ -205,7 +206,9 @@ def _deserialize_with_stdlib(
     import json
 
     try:
-        result: JsonDict | list[object] = (  # Any: JSON deserialization produces heterogeneous types
+        result: (
+            JsonDict | list[object]
+        ) = (  # Any: JSON deserialization produces heterogeneous types
             json.loads(  # Any: JSON values are heterogeneous
                 data
             )

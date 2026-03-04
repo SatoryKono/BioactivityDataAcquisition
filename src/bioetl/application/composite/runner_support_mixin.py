@@ -258,7 +258,9 @@ class CompositeRunnerSupportMixin:
         for enricher_name in self._config.required_enrichers:
             result = enrichment_results.get(enricher_name)
             if result is None:
-                raise InvalidStateError(f"Required enricher '{enricher_name}' did not run")
+                raise InvalidStateError(
+                    f"Required enricher '{enricher_name}' did not run"
+                )
             if not result.is_success:
                 raise InvalidStateError(
                     f"Required enricher '{enricher_name}' failed: "

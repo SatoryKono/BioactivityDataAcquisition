@@ -26,7 +26,9 @@ Usage::
 from __future__ import annotations
 
 import math
-from typing import Any  # Any: needed for _validate override accepting Any from base class
+from typing import (
+    Any,  # Any: needed for _validate override accepting Any from base class
+)
 
 from bioetl.domain.schemas.constants import (
     CANONICAL_HBA_COUNT_RANGE,

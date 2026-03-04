@@ -56,6 +56,7 @@ def mock_context():
 def mock_services():
     svc = MagicMock()
     svc.data_source = MagicMock()
+
     # fetch yields nothing by default
     async def _empty_fetch(**kwargs):
         return
@@ -215,9 +216,15 @@ class TestSetBatchIdFactory:
     ):
         """set_batch_id_factory replaces the injected factory."""
         svc = _make_service(
-            mock_context, mock_services, mock_config, mock_logger,
-            mock_batch_metrics, mock_transformer, mock_writer,
-            mock_tracing, mock_batch_id_factory,
+            mock_context,
+            mock_services,
+            mock_config,
+            mock_logger,
+            mock_batch_metrics,
+            mock_transformer,
+            mock_writer,
+            mock_tracing,
+            mock_batch_id_factory,
         )
         new_factory = MagicMock()
         svc.set_batch_id_factory(new_factory)
@@ -247,9 +254,15 @@ class TestProcessBatchHappyPath:
     ):
         """process_batch calls write_bronze with the raw records."""
         svc = _make_service(
-            mock_context, mock_services, mock_config, mock_logger,
-            mock_batch_metrics, mock_transformer, mock_writer,
-            mock_tracing, mock_batch_id_factory,
+            mock_context,
+            mock_services,
+            mock_config,
+            mock_logger,
+            mock_batch_metrics,
+            mock_transformer,
+            mock_writer,
+            mock_tracing,
+            mock_batch_id_factory,
         )
         records: list[BronzeRecord] = [{"id": "1", "val": 10}]
 
@@ -273,9 +286,15 @@ class TestProcessBatchHappyPath:
     ):
         """process_batch calls transformer.transform_batch with the records."""
         svc = _make_service(
-            mock_context, mock_services, mock_config, mock_logger,
-            mock_batch_metrics, mock_transformer, mock_writer,
-            mock_tracing, mock_batch_id_factory,
+            mock_context,
+            mock_services,
+            mock_config,
+            mock_logger,
+            mock_batch_metrics,
+            mock_transformer,
+            mock_writer,
+            mock_tracing,
+            mock_batch_id_factory,
         )
         records: list[BronzeRecord] = [{"id": "2"}]
 
@@ -303,14 +322,18 @@ class TestProcessBatchHappyPath:
             )
         )
         svc = _make_service(
-            mock_context, mock_services, mock_config, mock_logger,
-            mock_batch_metrics, mock_transformer, mock_writer,
-            mock_tracing, mock_batch_id_factory,
+            mock_context,
+            mock_services,
+            mock_config,
+            mock_logger,
+            mock_batch_metrics,
+            mock_transformer,
+            mock_writer,
+            mock_tracing,
+            mock_batch_id_factory,
         )
 
-        await svc.process_batch(
-            records=[{"id": "1"}], start_index=0, query_string=None
-        )
+        await svc.process_batch(records=[{"id": "1"}], start_index=0, query_string=None)
 
         mock_writer.write_silver.assert_awaited_once()
 
@@ -331,14 +354,18 @@ class TestProcessBatchHappyPath:
             return_value=_make_transform_result(silver=[], gold=[])
         )
         svc = _make_service(
-            mock_context, mock_services, mock_config, mock_logger,
-            mock_batch_metrics, mock_transformer, mock_writer,
-            mock_tracing, mock_batch_id_factory,
+            mock_context,
+            mock_services,
+            mock_config,
+            mock_logger,
+            mock_batch_metrics,
+            mock_transformer,
+            mock_writer,
+            mock_tracing,
+            mock_batch_id_factory,
         )
 
-        await svc.process_batch(
-            records=[{"id": "1"}], start_index=0, query_string=None
-        )
+        await svc.process_batch(records=[{"id": "1"}], start_index=0, query_string=None)
 
         mock_writer.write_silver.assert_not_awaited()
 
@@ -356,19 +383,21 @@ class TestProcessBatchHappyPath:
     ):
         """write_gold is called when transform produces gold records."""
         mock_transformer.transform_batch = AsyncMock(
-            return_value=_make_transform_result(
-                silver=[], gold=[{"entity_id": "g1"}]
-            )
+            return_value=_make_transform_result(silver=[], gold=[{"entity_id": "g1"}])
         )
         svc = _make_service(
-            mock_context, mock_services, mock_config, mock_logger,
-            mock_batch_metrics, mock_transformer, mock_writer,
-            mock_tracing, mock_batch_id_factory,
+            mock_context,
+            mock_services,
+            mock_config,
+            mock_logger,
+            mock_batch_metrics,
+            mock_transformer,
+            mock_writer,
+            mock_tracing,
+            mock_batch_id_factory,
         )
 
-        await svc.process_batch(
-            records=[{"id": "1"}], start_index=0, query_string=None
-        )
+        await svc.process_batch(records=[{"id": "1"}], start_index=0, query_string=None)
 
         mock_writer.write_gold.assert_awaited_once()
 
@@ -389,14 +418,18 @@ class TestProcessBatchHappyPath:
             return_value=_make_transform_result(silver=[], gold=[])
         )
         svc = _make_service(
-            mock_context, mock_services, mock_config, mock_logger,
-            mock_batch_metrics, mock_transformer, mock_writer,
-            mock_tracing, mock_batch_id_factory,
+            mock_context,
+            mock_services,
+            mock_config,
+            mock_logger,
+            mock_batch_metrics,
+            mock_transformer,
+            mock_writer,
+            mock_tracing,
+            mock_batch_id_factory,
         )
 
-        await svc.process_batch(
-            records=[{"id": "1"}], start_index=0, query_string=None
-        )
+        await svc.process_batch(records=[{"id": "1"}], start_index=0, query_string=None)
 
         mock_writer.write_gold.assert_not_awaited()
 
@@ -414,9 +447,15 @@ class TestProcessBatchHappyPath:
     ):
         """process_batch returns a BatchProcessingOutput instance."""
         svc = _make_service(
-            mock_context, mock_services, mock_config, mock_logger,
-            mock_batch_metrics, mock_transformer, mock_writer,
-            mock_tracing, mock_batch_id_factory,
+            mock_context,
+            mock_services,
+            mock_config,
+            mock_logger,
+            mock_batch_metrics,
+            mock_transformer,
+            mock_writer,
+            mock_tracing,
+            mock_batch_id_factory,
         )
 
         output = await svc.process_batch(
@@ -439,9 +478,15 @@ class TestProcessBatchHappyPath:
     ):
         """batch_metrics.track_batch_size and track_processed_records called for bronze."""
         svc = _make_service(
-            mock_context, mock_services, mock_config, mock_logger,
-            mock_batch_metrics, mock_transformer, mock_writer,
-            mock_tracing, mock_batch_id_factory,
+            mock_context,
+            mock_services,
+            mock_config,
+            mock_logger,
+            mock_batch_metrics,
+            mock_transformer,
+            mock_writer,
+            mock_tracing,
+            mock_batch_id_factory,
         )
         records: list[BronzeRecord] = [{"id": "1"}, {"id": "2"}]
 
@@ -471,9 +516,15 @@ class TestProcessBatchHappyPath:
             )
         )
         svc = _make_service(
-            mock_context, mock_services, mock_config, mock_logger,
-            mock_batch_metrics, mock_transformer, mock_writer,
-            mock_tracing, mock_batch_id_factory,
+            mock_context,
+            mock_services,
+            mock_config,
+            mock_logger,
+            mock_batch_metrics,
+            mock_transformer,
+            mock_writer,
+            mock_tracing,
+            mock_batch_id_factory,
         )
 
         output = await svc.process_batch(
@@ -507,9 +558,15 @@ class TestProcessBatchErrorPropagation:
         """BioETLError from write_bronze propagates out of process_batch."""
         mock_writer.write_bronze = AsyncMock(side_effect=BioETLError("bronze fail"))
         svc = _make_service(
-            mock_context, mock_services, mock_config, mock_logger,
-            mock_batch_metrics, mock_transformer, mock_writer,
-            mock_tracing, mock_batch_id_factory,
+            mock_context,
+            mock_services,
+            mock_config,
+            mock_logger,
+            mock_batch_metrics,
+            mock_transformer,
+            mock_writer,
+            mock_tracing,
+            mock_batch_id_factory,
         )
 
         with pytest.raises(BioETLError):
@@ -534,9 +591,15 @@ class TestProcessBatchErrorPropagation:
             side_effect=RuntimeError("transform crashed")
         )
         svc = _make_service(
-            mock_context, mock_services, mock_config, mock_logger,
-            mock_batch_metrics, mock_transformer, mock_writer,
-            mock_tracing, mock_batch_id_factory,
+            mock_context,
+            mock_services,
+            mock_config,
+            mock_logger,
+            mock_batch_metrics,
+            mock_transformer,
+            mock_writer,
+            mock_tracing,
+            mock_batch_id_factory,
         )
 
         with pytest.raises(RuntimeError):
@@ -559,9 +622,15 @@ class TestProcessBatchErrorPropagation:
         """Tracing span is ended (with error) when process_batch raises."""
         mock_writer.write_bronze = AsyncMock(side_effect=ValueError("bad"))
         svc = _make_service(
-            mock_context, mock_services, mock_config, mock_logger,
-            mock_batch_metrics, mock_transformer, mock_writer,
-            mock_tracing, mock_batch_id_factory,
+            mock_context,
+            mock_services,
+            mock_config,
+            mock_logger,
+            mock_batch_metrics,
+            mock_transformer,
+            mock_writer,
+            mock_tracing,
+            mock_batch_id_factory,
         )
 
         with pytest.raises(ValueError):
@@ -585,15 +654,19 @@ class TestProcessBatchErrorPropagation:
     ):
         """log_and_track_write_error called when write_silver raises."""
         mock_transformer.transform_batch = AsyncMock(
-            return_value=_make_transform_result(
-                silver=[{"entity_id": "s1"}], gold=[]
-            )
+            return_value=_make_transform_result(silver=[{"entity_id": "s1"}], gold=[])
         )
         mock_writer.write_silver = AsyncMock(side_effect=OSError("disk error"))
         svc = _make_service(
-            mock_context, mock_services, mock_config, mock_logger,
-            mock_batch_metrics, mock_transformer, mock_writer,
-            mock_tracing, mock_batch_id_factory,
+            mock_context,
+            mock_services,
+            mock_config,
+            mock_logger,
+            mock_batch_metrics,
+            mock_transformer,
+            mock_writer,
+            mock_tracing,
+            mock_batch_id_factory,
         )
 
         with pytest.raises(OSError):
@@ -628,9 +701,15 @@ class TestGetSourceMetadata:
         mock_batch_id_factory,
     ) -> BatchProcessingService:
         return _make_service(
-            mock_context, mock_services, mock_config, mock_logger,
-            mock_batch_metrics, mock_transformer, mock_writer,
-            mock_tracing, mock_batch_id_factory,
+            mock_context,
+            mock_services,
+            mock_config,
+            mock_logger,
+            mock_batch_metrics,
+            mock_transformer,
+            mock_writer,
+            mock_tracing,
+            mock_batch_id_factory,
         )
 
     def test_returns_none_when_no_get_source_metadata_method(
@@ -648,9 +727,15 @@ class TestGetSourceMetadata:
         """Returns None when data_source has no get_source_metadata method."""
         del mock_services.data_source.get_source_metadata
         svc = self._make_svc(
-            mock_context, mock_services, mock_config, mock_logger,
-            mock_batch_metrics, mock_transformer, mock_writer,
-            mock_tracing, mock_batch_id_factory,
+            mock_context,
+            mock_services,
+            mock_config,
+            mock_logger,
+            mock_batch_metrics,
+            mock_transformer,
+            mock_writer,
+            mock_tracing,
+            mock_batch_id_factory,
         )
 
         result = svc._get_source_metadata(None)
@@ -672,9 +757,15 @@ class TestGetSourceMetadata:
         """Creates a minimal SourceMetadata from query_string when data_source returns None."""
         mock_services.data_source.get_source_metadata = MagicMock(return_value=None)
         svc = self._make_svc(
-            mock_context, mock_services, mock_config, mock_logger,
-            mock_batch_metrics, mock_transformer, mock_writer,
-            mock_tracing, mock_batch_id_factory,
+            mock_context,
+            mock_services,
+            mock_config,
+            mock_logger,
+            mock_batch_metrics,
+            mock_transformer,
+            mock_writer,
+            mock_tracing,
+            mock_batch_id_factory,
         )
 
         result = svc._get_source_metadata("CHEMBL25")
@@ -699,9 +790,15 @@ class TestGetSourceMetadata:
             side_effect=RuntimeError("source meta error")
         )
         svc = self._make_svc(
-            mock_context, mock_services, mock_config, mock_logger,
-            mock_batch_metrics, mock_transformer, mock_writer,
-            mock_tracing, mock_batch_id_factory,
+            mock_context,
+            mock_services,
+            mock_config,
+            mock_logger,
+            mock_batch_metrics,
+            mock_transformer,
+            mock_writer,
+            mock_tracing,
+            mock_batch_id_factory,
         )
 
         result = svc._get_source_metadata(None)
@@ -724,9 +821,15 @@ class TestGetSourceMetadata:
         """Returns None when query_string is None and data source provides no metadata."""
         mock_services.data_source.get_source_metadata = MagicMock(return_value=None)
         svc = self._make_svc(
-            mock_context, mock_services, mock_config, mock_logger,
-            mock_batch_metrics, mock_transformer, mock_writer,
-            mock_tracing, mock_batch_id_factory,
+            mock_context,
+            mock_services,
+            mock_config,
+            mock_logger,
+            mock_batch_metrics,
+            mock_transformer,
+            mock_writer,
+            mock_tracing,
+            mock_batch_id_factory,
         )
 
         result = svc._get_source_metadata(None)

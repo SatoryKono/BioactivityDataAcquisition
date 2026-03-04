@@ -36,10 +36,10 @@ __all__ = ["StageType", "UnifiedLogger", "create_unified_logger"]
 
 
 from typing import TYPE_CHECKING, Any, Literal, Self
-from bioetl.domain.types import JsonDict
 
 import structlog
 
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.observability.logging_config import configure_logging
 
 if TYPE_CHECKING:

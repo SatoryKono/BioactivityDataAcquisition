@@ -40,12 +40,12 @@ from bioetl.application.services.dq.dq_report_builders import (
 )
 from bioetl.domain.ports import GoldDQConfigPort
 from bioetl.domain.services.dq_serializer import to_dict
+from bioetl.domain.types import JsonDict
 from bioetl.domain.value_objects.dq_report import (
     GoldDQCheckType,
     GoldDQReport,
     MedallionLayer,
 )
-from bioetl.domain.types import JsonDict
 
 
 class GoldDQAnalyzer:

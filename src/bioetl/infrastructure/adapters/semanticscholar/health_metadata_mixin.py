@@ -10,7 +10,6 @@ from bioetl.infrastructure.adapters.semanticscholar.constants import (
     SEMANTICSCHOLAR_BASE_URL,
 )
 
-
 _SEMANTICSCHOLAR_HEALTH_ERRORS = (
     OSError,
     ValueError,

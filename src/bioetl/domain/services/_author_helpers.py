@@ -10,6 +10,7 @@ import hashlib
 import re
 import unicodedata
 from html import unescape
+
 from bioetl.domain.serialization import deserialize_from_json
 from bioetl.domain.types import JsonDict
 

@@ -29,7 +29,6 @@ if TYPE_CHECKING:
     )
 from bioetl.domain.types import JsonDict
 
-
 _DQ_REPORT_ERRORS = (
     DataQualityError,
     StorageError,

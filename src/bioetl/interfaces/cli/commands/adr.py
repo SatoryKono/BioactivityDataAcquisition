@@ -7,11 +7,11 @@ from __future__ import annotations
 
 import json
 from typing import Any
-from bioetl.domain.types import JsonDict
 
 import click
 
 from bioetl.composition.entrypoints import get_adr_service
+from bioetl.domain.types import JsonDict
 from bioetl.interfaces.cli.formatters import echo_error, echo_info
 
 __all__ = [

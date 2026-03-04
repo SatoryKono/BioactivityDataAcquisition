@@ -160,7 +160,12 @@ class TestCliMaintenanceArchivePathValidation:
         ):
             result = cli_runner.invoke(
                 cli,
-                ["maintenance", "archive", "chembl.activity", str(tmp_path / "archive" / "delta")],
+                [
+                    "maintenance",
+                    "archive",
+                    "chembl.activity",
+                    str(tmp_path / "archive" / "delta"),
+                ],
             )
 
         assert result.exit_code == 0

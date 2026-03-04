@@ -27,7 +27,6 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import JsonDict
 
-
 _HEALTH_SERVICE_ERRORS = (
     NetworkError,
     BioETLError,
@@ -55,7 +54,9 @@ class DataSourceFactoryPort(Protocol):
         ...
 
     @staticmethod
-    def create(provider: str) -> Any:  # Any: returns different adapter types per provider
+    def create(
+        provider: str,
+    ) -> Any:  # Any: returns different adapter types per provider
         """Create a data source adapter for the given provider.
 
         Args:

@@ -18,6 +18,7 @@ __all__ = ["extract_author_names"]
 
 
 from typing import Any
+
 from bioetl.domain.types import JsonDict
 
 

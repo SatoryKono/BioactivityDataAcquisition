@@ -7,6 +7,7 @@ Topics provide a 4-level hierarchy: domain -> field -> subfield -> topic.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+
 from bioetl.domain.entities.publication_base import PublicationEntityBase
 from bioetl.domain.schemas.common.publication_base import LOOKUP_METHODS
 from bioetl.domain.types import JsonDict

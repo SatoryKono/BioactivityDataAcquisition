@@ -23,8 +23,8 @@ from typing import TypeVar
 from bioetl.domain.normalization import normalize_string as _domain_normalize_string
 from bioetl.domain.normalization import parse_date_field as _domain_parse_date_field
 from bioetl.domain.transformations import safe_float, safe_int
-from bioetl.domain.validation import validate_smiles as _domain_validate_smiles
 from bioetl.domain.types import JsonDict
+from bioetl.domain.validation import validate_smiles as _domain_validate_smiles
 
 T = TypeVar("T")
 
@@ -197,7 +197,9 @@ def aggregate_nested_lists(
 
     if deduplicate:
         seen: set[str] = set()
-        unique: list[object] = []  # object: nested list elements have heterogeneous types
+        unique: list[
+            object
+        ] = []  # object: nested list elements have heterogeneous types
         for val in values:
             key = str(val)
             if key not in seen:

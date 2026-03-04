@@ -7,11 +7,11 @@ Uses ConfigService from composition entrypoints for clean layering.
 from __future__ import annotations
 
 import json
-from bioetl.domain.types import JsonDict
 
 import click
 
 from bioetl.composition.entrypoints import get_config_service
+from bioetl.domain.types import JsonDict
 from bioetl.interfaces.cli.formatters import echo_error, echo_info
 
 __all__ = [

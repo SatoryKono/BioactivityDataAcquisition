@@ -9,10 +9,10 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
-from bioetl.domain.types import JsonDict
 
 import yaml
 
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.legacy_normalizers.source import normalize_source_config
 from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
