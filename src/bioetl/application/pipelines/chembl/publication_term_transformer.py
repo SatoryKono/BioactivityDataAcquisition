@@ -85,7 +85,10 @@ class PublicationTermTransformer(BaseChemblTransformer):
             record["publication_id"] = record.get("document_chembl_id")
 
         # 1. Validate primary ID (publication_id)
-        primary_id = self._get_required_field(record, self.primary_id_field)
+        primary_id = cast(
+            "PrimaryId",
+            self._get_required_field(record, self.primary_id_field),
+        )
 
         # 2. Extract business data (term details)
         business_data = self._extract_business_data(record, primary_id)

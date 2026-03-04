@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.composite.runner_constants import (
     CHECKPOINT_NON_FATAL_ERRORS,
@@ -56,10 +56,48 @@ class CompositeRunnerStageHelper:
     _dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner] | None
     _coordinator: EnrichmentCoordinatorService
     _enricher_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner]
-    _run_seed: Callable[[], Awaitable[SeedResult]]
-    _save_checkpoint_safe: Callable[[CompositeCheckpointState, str], Awaitable[bool]]
-    _get_enrichers_to_run: Callable[[CompositeCheckpointState], list[EnricherConfig]]
-    _check_required_enrichers: Callable[[dict[str, EnrichmentResult]], None]
+
+    async def _call_save_checkpoint_safe(
+        self,
+        state: CompositeCheckpointState,
+        operation: str,
+    ) -> bool:
+        """Invoke support-layer checkpoint save helper."""
+        save_checkpoint = cast(
+            "Callable[[CompositeCheckpointState, str], Awaitable[bool]]",
+            getattr(self, "_save_checkpoint_safe"),
+        )
+        return await save_checkpoint(state, operation)
+
+    async def _call_run_seed(self) -> SeedResult:
+        """Invoke support-layer seed runner helper."""
+        run_seed = cast(
+            "Callable[[], Awaitable[SeedResult]]",
+            getattr(self, "_run_seed"),
+        )
+        return await run_seed()
+
+    def _call_get_enrichers_to_run(
+        self,
+        state: CompositeCheckpointState,
+    ) -> list[EnricherConfig]:
+        """Invoke support-layer enricher selection helper."""
+        get_enrichers = cast(
+            "Callable[[CompositeCheckpointState], list[EnricherConfig]]",
+            getattr(self, "_get_enrichers_to_run"),
+        )
+        return get_enrichers(state)
+
+    def _call_check_required_enrichers(
+        self,
+        enrichment_results: dict[str, EnrichmentResult],
+    ) -> None:
+        """Invoke support-layer required-enricher validation helper."""
+        check_required = cast(
+            "Callable[[dict[str, EnrichmentResult]], None]",
+            getattr(self, "_check_required_enrichers"),
+        )
+        check_required(enrichment_results)
 
     def _has_dependencies_configured(self) -> bool:
         """Check if dependencies phase is configured and ready."""
@@ -127,10 +165,10 @@ class CompositeRunnerStageHelper:
             composite=self._config.name,
             run_id=self._run_id_str,
         )
-        await self._save_checkpoint_safe(state, "seed_running")
+        await self._call_save_checkpoint_safe(state, "seed_running")
 
         try:
-            seed_result = await self._run_seed()
+            seed_result = await self._call_run_seed()
         except PIPELINE_EXECUTION_ERRORS as error:
             self._logger.error(
                 "Seed pipeline failed",
@@ -147,7 +185,7 @@ class CompositeRunnerStageHelper:
                 error=str(error),
             )
             failed_state = state.with_state(CompositePipelineState.FAILED)
-            await self._save_checkpoint_safe(failed_state, "seed_failed")
+            await self._call_save_checkpoint_safe(failed_state, "seed_failed")
             raise
         except BioETLError as error:
             self._logger.error(
@@ -166,7 +204,7 @@ class CompositeRunnerStageHelper:
                 error=str(error),
             )
             failed_state = state.with_state(CompositePipelineState.FAILED)
-            await self._save_checkpoint_safe(failed_state, "seed_failed")
+            await self._call_save_checkpoint_safe(failed_state, "seed_failed")
             raise
 
         state = state.with_seed_completed(seed_result)
@@ -184,7 +222,7 @@ class CompositeRunnerStageHelper:
             records_extracted=seed_result.records_extracted,
             records_silver=seed_result.records_silver,
         )
-        await self._save_checkpoint_safe(state, "seed_completed")
+        await self._call_save_checkpoint_safe(state, "seed_completed")
         return state, seed_result
 
     async def _execute_dependencies_phase(
@@ -276,7 +314,7 @@ class CompositeRunnerStageHelper:
         keys_df: pl.DataFrame,
     ) -> tuple[CompositeCheckpointState, dict[str, EnrichmentResult]]:
         """Execute the enrichment phase."""
-        enrichers_to_run = self._get_enrichers_to_run(state)
+        enrichers_to_run = self._call_get_enrichers_to_run(state)
         enrichment_results: dict[str, EnrichmentResult] = {}
 
         if enrichers_to_run:
@@ -337,7 +375,7 @@ class CompositeRunnerStageHelper:
         )
 
         try:
-            self._check_required_enrichers(enrichment_results)
+            self._call_check_required_enrichers(enrichment_results)
         except RuntimeError as error:
             previous_state = state.state
             state = state.with_state(CompositePipelineState.FAILED)
@@ -405,7 +443,7 @@ class CompositeRunnerStageHelper:
                 CompositePipelineState.ENRICHMENT_COMPLETED,
             )
             state = state.with_state(CompositePipelineState.ENRICHMENT_COMPLETED)
-            await self._save_checkpoint_safe(state, "enrichment_completed")
+            await self._call_save_checkpoint_safe(state, "enrichment_completed")
 
             self._fsm.log_fsm_transition(
                 from_state=enriching_state,

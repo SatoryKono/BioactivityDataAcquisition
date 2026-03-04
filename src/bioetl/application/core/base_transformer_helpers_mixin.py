@@ -20,7 +20,7 @@ TEntity_co = TypeVar("TEntity_co", bound="BaseEntity", covariant=True)
 ScalarValue = str | int | float | bool | None
 
 
-class _EntityFactory(Protocol[TEntity_co]):
+class _EntityConstructor(Protocol[TEntity_co]):
     """Constructor protocol for entity dataclasses with lineage kwargs."""
 
     def __call__(
@@ -177,7 +177,7 @@ class _BaseTransformerRecordHelpersMixin:
         **business_data: object,
     ) -> T:
         """Create a domain entity with lineage metadata."""
-        entity_factory = cast("_EntityFactory[T]", entity_class)
+        entity_factory = cast("_EntityConstructor[T]", entity_class)
         return entity_factory(
             entity_id=EntityID(entity_id),
             content_hash=ContentHash(content_hash),

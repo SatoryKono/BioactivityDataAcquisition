@@ -64,7 +64,10 @@ class SubcellularFractionTransformer(BaseChemblTransformer):
 
         """
         # 1. Validate primary ID (subcellular_fraction)
-        primary_id = self._get_required_field(record, self.primary_id_field)
+        primary_id = cast(
+            "PrimaryId",
+            self._get_required_field(record, self.primary_id_field),
+        )
         if not primary_id:
             return None
 

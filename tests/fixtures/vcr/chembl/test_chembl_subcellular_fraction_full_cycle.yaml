@@ -1,0 +1,99 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.ebi.ac.uk
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://www.ebi.ac.uk/chembl/api/data/status
+  response:
+    body:
+      string: '{"activities": 24267312, "chembl_db_version": "ChEMBL_36", "chembl_release_date":
+        "2025-07-28", "compound_records": 3774137, "disinct_compounds": 2878135, "publications":
+        99142, "status": "UP", "targets": 17803}'
+    headers:
+      Cache-Control:
+      - max-age=30000000, s-maxage=30000000
+      Connection:
+      - Keep-Alive
+      Content-Length:
+      - '211'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 04 Mar 2026 06:22:54 GMT
+      Server:
+      - gunicorn/20.0.4
+      Strict-Transport-Security:
+      - max-age=0
+      Vary:
+      - Accept, Origin
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.ebi.ac.uk
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://www.ebi.ac.uk/chembl/api/data/assay?format=json&limit=1&offset=0
+  response:
+    body:
+      string: '{"assays": [{"aidx": "CLD0", "assay_category": null, "assay_cell_type":
+        null, "assay_chembl_id": "CHEMBL615117", "assay_classifications": [], "assay_group":
+        null, "assay_organism": null, "assay_parameters": [], "assay_strain": null,
+        "assay_subcellular_fraction": null, "assay_tax_id": null, "assay_test_type":
+        null, "assay_tissue": null, "assay_type": "B", "assay_type_description": "Binding",
+        "bao_format": "BAO_0000019", "bao_label": "assay format", "cell_chembl_id":
+        null, "confidence_description": "Homologous single protein target assigned",
+        "confidence_score": 8, "description": "The compound was tested for the in
+        vitro inhibition of platelet 12-lipoxygenase at a concentration of 30 uM",
+        "document_chembl_id": "CHEMBL1125582", "relationship_description": "Homologous
+        protein target assigned", "relationship_type": "H", "src_assay_id": null,
+        "src_id": 1, "target_chembl_id": "CHEMBL2741", "tissue_chembl_id": null, "variant_sequence":
+        null}], "page_meta": {"limit": 1, "next": "/chembl/api/data/assay.json?limit=1&offset=1",
+        "offset": 0, "previous": null, "total_count": 1890749}}'
+    headers:
+      Cache-Control:
+      - max-age=30000000, s-maxage=30000000
+      Connection:
+      - Keep-Alive
+      Content-Disposition:
+      - inline
+      Content-Length:
+      - '1087'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 04 Mar 2026 06:22:54 GMT
+      Server:
+      - gunicorn/20.0.4
+      Strict-Transport-Security:
+      - max-age=0
+      Vary:
+      - Accept, Origin
+      X-ChEMBL-in-cache:
+      - 'True'
+      X-ChEMBL-retrieval-time:
+      - '0.2337963581085205'
+    status:
+      code: 200
+      message: OK
+version: 1

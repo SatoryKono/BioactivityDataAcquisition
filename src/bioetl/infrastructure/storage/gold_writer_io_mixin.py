@@ -41,6 +41,13 @@ class _WriteMergedMetadataCallable(Protocol):
         ...
 
 
+def _load_gold_writer_module() -> ModuleType:
+    """Load canonical gold_writer module to preserve monkeypatch points."""
+    from importlib import import_module
+
+    return import_module("bioetl.infrastructure.storage.gold_writer")
+
+
 class GoldWriterIOMixin:
     """Mixin with write dispatch, SCD2 merge, and read helpers."""
 
@@ -50,13 +57,6 @@ class GoldWriterIOMixin:
     _validate_records_against_schema: Callable[
         [list[GoldRecord], DataFrameSchema], Awaitable[None]
     ]
-
-    @staticmethod
-    def _load_gold_writer_module() -> ModuleType:
-        """Load canonical gold_writer module to preserve monkeypatch points."""
-        from importlib import import_module
-
-        return import_module("bioetl.infrastructure.storage.gold_writer")
 
     async def write_gold_merged(
         self,
@@ -84,7 +84,7 @@ class GoldWriterIOMixin:
 
         arrow_table = pa.Table.from_pylist(records)
 
-        module = self._load_gold_writer_module()
+        module = _load_gold_writer_module()
         arrow_table = module.coerce_null_types_for_delta(arrow_table)
 
         if not preserve_column_order:
@@ -151,7 +151,7 @@ class GoldWriterIOMixin:
         column_order: list[str] | None,
     ) -> None:
         """Dispatch to appropriate write method based on mode."""
-        module = self._load_gold_writer_module()
+        module = _load_gold_writer_module()
 
         if mode == GoldWriteMode.SCD2:
             assert ingestion_ts is not None
@@ -216,7 +216,7 @@ class GoldWriterIOMixin:
             arrow_data = arrow_data.sort_by([(pk, "ascending") for pk in primary_keys])
 
         schema_mode = "overwrite" if mode == "overwrite" else None
-        module = self._load_gold_writer_module()
+        module = _load_gold_writer_module()
 
         for attempt in range(3):
             try:
@@ -276,7 +276,7 @@ class GoldWriterIOMixin:
             record[current_flag_col] = True
             record[version_col] = record.get(version_col, 1)
 
-        module = self._load_gold_writer_module()
+        module = _load_gold_writer_module()
 
         for attempt in range(3):
             try:
@@ -368,7 +368,7 @@ class GoldWriterIOMixin:
     ) -> list[GoldRecord]:
         """Read data from Gold table."""
         table_path = self._resolve_table_path(table_name)
-        module = self._load_gold_writer_module()
+        module = _load_gold_writer_module()
 
         dt = await self._run_in_executor(lambda: module.DeltaTable(table_path))
         arrow_table = await self._run_in_executor(dt.to_pyarrow_table)
@@ -390,7 +390,7 @@ class GoldWriterIOMixin:
     ) -> list[GoldRecord]:
         """Get history of records in Gold table (for SCD2 tracking)."""
         table_path = self._resolve_table_path(table_name)
-        module = self._load_gold_writer_module()
+        module = _load_gold_writer_module()
 
         dt = await self._run_in_executor(lambda: module.DeltaTable(table_path))
         arrow_table = await self._run_in_executor(dt.to_pyarrow_table)
