@@ -54,14 +54,22 @@ _FAILED_STATUS_EXIT_OVERRIDES: Mapping[str, ExitCode] = {
 
 
 class BatchRunResultProtocol(Protocol):
-    @property
-    def failed(self) -> int: ...
+    """Protocol for batch run result objects used in exit-code mapping."""
 
     @property
-    def total(self) -> int: ...
+    def failed(self) -> int:
+        """Return the number of failed runs."""
+        ...
 
     @property
-    def results(self) -> Sequence[object]: ...
+    def total(self) -> int:
+        """Return the total number of runs."""
+        ...
+
+    @property
+    def results(self) -> Sequence[object]:
+        """Return the individual run results."""
+        ...
 
 
 def map_run_status_to_exit_code(

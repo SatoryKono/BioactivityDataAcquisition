@@ -43,6 +43,7 @@ class SeedKeyResolver:
         dep_config_lookup: dict[str, DependencyConfig],
         delta_reader: DeltaReaderPort | None,
     ) -> pl.DataFrame:
+        """Resolve keys by passing through the seed keys unchanged."""
         del dep_config_lookup, delta_reader
         self._logger.debug(
             "Using seed keys for dependency",
@@ -65,6 +66,7 @@ class ChainedKeyResolver:
         dep_config_lookup: dict[str, DependencyConfig],
         delta_reader: DeltaReaderPort | None,
     ) -> pl.DataFrame:
+        """Resolve keys by reading them from the source dependency's Silver table."""
         reader = self._require_delta_reader(dependency, delta_reader)
         source_config = self._resolve_source_config(dependency, dep_config_lookup)
         source_table = source_config.silver_table
