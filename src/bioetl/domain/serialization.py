@@ -41,7 +41,8 @@ except ImportError:
 
 
 def serialize_to_json(
-    data: JsonDict | list[object],    *,
+    data: JsonDict | list[object],  # Any: JSON arrays contain heterogeneous values
+    *,
     sort_keys: bool = True,
     ensure_ascii: bool = True,
 ) -> str:
@@ -78,7 +79,9 @@ def serialize_to_json(
 
 
 def serialize_to_json_canonical(
-    data: JsonDict,) -> str:    """Serialize data to canonical JSON for content hash computation.
+    data: JsonDict,  # Any: JSON values are heterogeneous
+) -> str:  # Any: JSON values are heterogeneous
+    """Serialize data to canonical JSON for content hash computation.
 
     This is a convenience wrapper that always uses:
     - Sorted keys
@@ -104,7 +107,7 @@ def serialize_to_json_canonical(
 
 def deserialize_from_json(
     data: str | bytes,
-) -> JsonDict | list[object]:
+) -> JsonDict | list[object]:  # Any: JSON deserialization produces heterogeneous types
     """Deserialize JSON string or bytes to Python object.
 
     Uses orjson when available for optimal performance.
@@ -150,7 +153,8 @@ def _get_orjson_options(sort_keys: bool) -> int:
 
 
 def _serialize_with_orjson(
-    data: JsonDict | list[object],    *,
+    data: JsonDict | list[object],  # Any: JSON arrays contain heterogeneous values
+    *,
     sort_keys: bool = True,
     ensure_ascii: bool = True,
 ) -> str:
@@ -164,7 +168,8 @@ def _serialize_with_orjson(
 
 
 def _serialize_with_stdlib(
-    data: JsonDict | list[object],    *,
+    data: JsonDict | list[object],  # Any: JSON arrays contain heterogeneous values
+    *,
     sort_keys: bool = True,
     ensure_ascii: bool = True,
 ) -> str:
@@ -181,11 +186,13 @@ def _serialize_with_stdlib(
 
 def _deserialize_with_orjson(
     data: str | bytes,
-) -> JsonDict | list[object]:    """Deserialize using orjson."""
+) -> JsonDict | list[object]:  # Any: JSON deserialization produces heterogeneous types
+    """Deserialize using orjson."""
     assert orjson is not None
     try:
         result: (
-            JsonDict | list[object]        ) = orjson.loads(data)
+            JsonDict | list[object]  # Any: JSON deserialization produces heterogeneous types
+        ) = orjson.loads(data)
         return result
     except orjson.JSONDecodeError as e:
         raise ValueError(f"Invalid JSON: {e}") from e
@@ -193,13 +200,17 @@ def _deserialize_with_orjson(
 
 def _deserialize_with_stdlib(
     data: str | bytes,
-) -> JsonDict | list[object]:    """Deserialize using stdlib json as fallback."""
+) -> JsonDict | list[object]:  # Any: JSON deserialization produces heterogeneous types
+    """Deserialize using stdlib json as fallback."""
     import json
 
     try:
-        result: JsonDict | list[object] = (            json.loads(                data
+        result: JsonDict | list[object] = (  # Any: JSON deserialization produces heterogeneous types
+            json.loads(  # Any: JSON values are heterogeneous
+                data
             )
-        )        return result
+        )  # Any: JSON values are heterogeneous
+        return result
     except json.JSONDecodeError as e:
         raise ValueError(f"Invalid JSON: {e}") from e
 
