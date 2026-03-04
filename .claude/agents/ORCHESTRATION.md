@@ -1,14 +1,14 @@
 # ORCHESTRATION.md — Оркестрация команды subagent-ов BioETL
 
-*Версия: 3.0 | Дата: 2026-02-08 | Supersedes v2.2 | Платформа: Claude Code CLI*
+*Версия: 4.0 | Дата: 2026-03-04 | Supersedes v3.0 | Платформа: Claude Code CLI*
 
 ## 1. Обзор
 
-Команда из **8 субагентов** (7 core + 1 специализированный diagram агент) обеспечивает полный жизненный цикл задачи разработки BioETL — от аудита текущего состояния до финальной верификации изменений. Основной агент (Claude Code) выступает оркестратором, делегируя работу субагентам через `Task` tool с параметром `subagent_type`.
+Команда из **9 субагентов** (6 core + 3 orchestrator/swarm) обеспечивает полный жизненный цикл задачи разработки BioETL. Основной агент (Claude Code) выступает оркестратором, делегируя работу субагентам через `Agent` tool с параметром `subagent_type`. Production-код пишется напрямую оркестратором (без отдельного py-code-bot).
 
 **Запуск субагента:**
 ```
-Task(subagent_type="py-audit-bot", prompt="...", model="opus")
+Agent(subagent_type="py-audit-bot", prompt="...", model="opus")
 ```
 
 | # | Субагент (`subagent_type`) | Model | Роль | Артефакт |
@@ -16,28 +16,30 @@ Task(subagent_type="py-audit-bot", prompt="...", model="opus")
 | I | **py-audit-bot** | opus | Baseline/final аудит, code review, arch guardian, API validation | `00-audit-baseline.md`, `07-audit-final.md` |
 | II | **py-plan-bot** | opus | Планирование, декомпозиция, composite design | `01-plan-initial.md`, `03-plan-updated.md` |
 | III | **py-test-bot** | sonnet | Тестирование | `02-test-baseline.md`, `05-test-final.md` |
-| IV | **py-code-bot** | opus | Production-код, pipeline scaffolding | `04-refactoring-log.md` |
-| V | **py-config-bot** | sonnet | Конфигурации (pipeline, DQ, filter, composite) | `04a-config-log.md` |
-| VI | **py-debug-bot** | opus | Отладка падений | `04-refactoring-log.md` (debug-секции) |
-| VII | **py-doc-bot** | sonnet | Документация, ADR management | `06-doc-update-log.md` |
-| VIII | **py-diagram-bot** | sonnet | Mermaid diagrams, render pipeline, docx/pdf bundles | `06-doc-update-log.md` (diagram sections) |
+| IV | **py-config-bot** | sonnet | Конфигурации (pipeline, DQ, filter, composite) | `04a-config-log.md` |
+| V | **py-debug-bot** | opus | Отладка падений | `04-refactoring-log.md` (debug-секции) |
+| VI | **py-doc-bot** | sonnet | Документация, ADR, диаграммы (Mermaid) | `06-doc-update-log.md` |
+| VII | **py-test-swarm** | opus | Иерархическое тестирование (L1→L2→L3) | test reports |
+| VIII | **py-doc-swarm** | opus | Иерархическое документирование, drift detection | doc reports |
+| IX | **py-review-orchestrator** | opus | Иерархический code review (S1-S8) | review reports |
+
+> **Note:** `py-code-bot` removed in v4.0 — production code is written directly by the orchestrator. `py-diagram-bot` merged into `py-doc-bot`.
 
 ### Разделение ответственности (файловые зоны)
 
 | Субагент | Зона записи | Только чтение |
 |----------|-------------|---------------|
-| py-code-bot | `src/bioetl/`, `tests/` (scaffolding) | `configs/`, `docs/` |
+| orchestrator (direct) | `src/bioetl/`, `tests/` | `configs/`, `docs/` |
 | py-config-bot | `configs/` | `src/bioetl/`, `docs/` |
-| py-doc-bot | `docs/`, docstrings в `src/` | `configs/`, `tests/` |
+| py-doc-bot | `docs/`, docstrings, `scripts/diagrams/` | `configs/`, `tests/` |
 | py-test-bot | `tests/` | `src/bioetl/`, `configs/` |
 | py-debug-bot | `src/bioetl/`, `tests/` (fixes) | `configs/`, `docs/` |
 | py-audit-bot | — (read-only) | всё |
 | py-plan-bot | — (read-only) | всё |
-| py-diagram-bot | `docs/02-architecture/mmd-diagrams/`, `docs/02-architecture/diagram-descriptions/`, `scripts/diagrams/` | `src/bioetl/`, `configs/` |
 
 ### Определения субагентов
 
-Файлы: `.claude/agents/py-*.md` — каждый содержит YAML-frontmatter (`name`, `description`, `model`) + полную спецификацию с инлайнированными знаниями. Оригинальные спецификации Codex сохранены в `.claude/agents/subagents/` как справочный материал.
+Файлы: `.claude/agents/py-*.md` — каждый содержит YAML-frontmatter (`name`, `description`, `model`) + полную спецификацию с инлайнированными знаниями.
 
 ---
 
@@ -91,7 +93,7 @@ Task(subagent_type="py-audit-bot", prompt="...", model="opus")
 ┌─────────────────────────────────────────────────────┐
 │  ④ РЕАЛИЗАЦИЯ (параллельно по зонам ответственности) │
 │                                                       │
-│  py-code-bot ─→ src/bioetl/  ──→ 04-refactoring-log.md│
+│  orchestrator ─→ src/bioetl/ ──→ 04-refactoring-log.md│
 │       │                                                │
 │       ├─ (entity scaffolding?) ──→ py-config-bot        │
 │       │                                                │
@@ -152,25 +154,24 @@ Task(subagent_type="py-audit-bot", prompt="...", model="opus")
 
 ## 3. Матрица взаимодействий
 
-| Отправитель → | py-plan-bot | py-test-bot | py-code-bot | py-config-bot | py-debug-bot | py-doc-bot | py-audit-bot |
-|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **py-audit-bot** | findings → RF-* | — | — | config gaps | — | drift findings | — |
-| **py-plan-bot** | — | scope RF-* | RF-* to implement | config RF-* | — | — | scope |
-| **py-test-bot** | — | — | — | — | FAIL report | — | — |
-| **py-code-bot** | need new RF-* | — | — | entity scaffolding | — | — | — |
-| **py-config-bot** | — | config tests | — | — | — | DQ migration docs | — |
-| **py-debug-bot** | plan update | retest trigger | fix code | fix config | — | fix → doc | fix → re-audit |
-| **py-doc-bot** | — | — | — | — | — | — | terminology check |
+| Отправитель → | py-plan-bot | py-test-bot | py-config-bot | py-debug-bot | py-doc-bot | py-audit-bot |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **py-audit-bot** | findings → RF-* | — | config gaps | — | drift findings | — |
+| **py-plan-bot** | — | scope RF-* | config RF-* | — | — | scope |
+| **py-test-bot** | — | — | — | FAIL report | — | — |
+| **py-config-bot** | — | config tests | — | — | DQ migration docs | — |
+| **py-debug-bot** | plan update | retest trigger | fix config | — | fix → doc | fix → re-audit |
+| **py-doc-bot** | — | — | — | — | — | terminology check |
 
 ### Ключевые потоки данных
 
 ```
 py-plan-bot (RF-*)
-    ├──→ py-code-bot (type=refactor|feature|bugfix → src/)
+    ├──→ orchestrator (type=refactor|feature|bugfix → src/)
     ├──→ py-config-bot (type=config → configs/)
     └──→ py-test-bot (test impact → tests/)
 
-py-code-bot (entity scaffolding)
+orchestrator (entity scaffolding)
     └──→ py-config-bot (pipeline + DQ + filter configs)
 
 py-audit-bot (config findings)
@@ -190,7 +191,7 @@ reports/plans/<task_id>/
 ├── 01-plan-initial.md        ← py-plan-bot (initial)
 ├── 02-test-baseline.md       ← py-test-bot (baseline)
 ├── 03-plan-updated.md        ← py-plan-bot (update)          [опционально]
-├── 04-refactoring-log.md     ← py-code-bot + py-debug-bot
+├── 04-refactoring-log.md     ← orchestrator + py-debug-bot
 ├── 04a-config-log.md         ← py-config-bot
 ├── 05-test-final.md          ← py-test-bot (final)
 ├── 06-doc-update-log.md      ← py-doc-bot
@@ -217,7 +218,7 @@ reports/plans/<task_id>/
 | py-audit-bot baseline | Задача = чистый bugfix одного файла, scope очевиден |
 | py-plan-bot | Задача = single-file doc update |
 | py-test-bot baseline | Нет существующих тестов для scope (→ сразу new_tests) |
-| py-code-bot | Задача = чистый config/doc change |
+| orchestrator code | Задача = чистый config/doc change |
 | py-config-bot | Задача не затрагивает configs/ |
 | py-debug-bot | Все тесты проходят |
 | py-doc-bot | Задача не меняет публичный API / поведение |
@@ -227,9 +228,9 @@ reports/plans/<task_id>/
 
 | RF type | Primary subagent | Secondary |
 |---------|:---:|:---:|
-| `refactor` | py-code-bot | py-config-bot (если config impact) |
-| `feature` | py-code-bot | py-config-bot (если новый entity) |
-| `bugfix` | py-code-bot / py-debug-bot | py-config-bot (если config-related bug) |
+| `refactor` | orchestrator | py-config-bot (если config impact) |
+| `feature` | orchestrator | py-config-bot (если новый entity) |
+| `bugfix` | orchestrator / py-debug-bot | py-config-bot (если config-related bug) |
 | `config` | py-config-bot | — |
 | `doc` | py-doc-bot | — |
 
@@ -248,7 +249,7 @@ reports/plans/<task_id>/
 В Claude Code субагенты могут запускаться как параллельно (`run_in_background: true`), так и последовательно. Допустимые параллельные запуски:
 
 - `py-test-bot` (baseline) ∥ `py-audit-bot` (baseline) — оба read-only
-- `py-code-bot` ∥ `py-config-bot` — разные файловые зоны (src/ vs configs/)
+- `orchestrator` ∥ `py-config-bot` — разные файловые зоны (src/ vs configs/)
 - `py-doc-bot` ∥ `py-audit-bot` (final) — если doc changes не влияют на code audit scope
 
 ---
@@ -276,7 +277,7 @@ reports/plans/<task_id>/
 4. **No untested changes**: каждый `RF-*` проверяется через `py-test-bot`.
 5. **Architecture gate**: финальный аудит (`py-audit-bot`) является обязательным gate перед завершением задачи.
 6. **Config compliance gate**: `config_gap_analysis.py` MUST иметь 0 critical findings после `py-config-bot`.
-7. **Zone isolation**: py-code-bot пишет только в `src/`, py-config-bot — только в `configs/`, py-doc-bot — только в `docs/` + docstrings.
+7. **Zone isolation**: orchestrator writes `src/`, py-config-bot — только в `configs/`, py-doc-bot — только в `docs/` + docstrings + diagrams.
 
 ---
 
@@ -286,7 +287,7 @@ reports/plans/<task_id>/
 
 ```
 py-test-bot (baseline, scope=1 file)
-→ py-code-bot (fix)
+→ orchestrator (fix)
 → py-test-bot (final)
 → py-doc-bot (docstring only)
 ```
@@ -312,7 +313,7 @@ py-audit-bot (targeted, audit_type=config)
 
 ```
 py-plan-bot (plan)
-  → py-code-bot (domain entity + transformer + schema + adapter)
+  → orchestrator (domain entity + transformer + schema + adapter)
   → py-config-bot (pipeline + DQ + filter + source configs)
   → py-test-bot (new_tests + final)
   → py-doc-bot (docstrings + provider docs)
@@ -325,7 +326,7 @@ py-plan-bot (plan)
 py-audit-bot (baseline, scope=seed + enricher pipelines)
   → py-plan-bot (composite plan)
   → py-config-bot (composite config: seed/enrichers/merge)
-  → py-code-bot (composite orchestrator, если требуется новый код)
+  → orchestrator (composite orchestrator, если требуется новый код)
   → py-test-bot (integration tests)
   → py-doc-bot (composite pipeline docs)
   → py-audit-bot (final)
@@ -338,7 +339,6 @@ py-audit-bot (baseline, scope=seed + enricher pipelines)
 | Документ | Описание |
 |----------|----------|
 | `.claude/agents/py-*.md` | Спецификации субагентов для Claude Code CLI |
-| `.claude/agents/subagents/` | Оригинальные спецификации (справочный материал) |
 | `.claude/rules/ai-selfreview-rules.md` | Правила автоматической самопроверки кода |
 | `docs/00-project/RULES.md` | Архитектурные правила проекта |
 | `docs/02-architecture/decisions/` | ADR-001..ADR-040 |
@@ -359,10 +359,9 @@ py-audit-bot (baseline, scope=seed + enricher pipelines)
 | I | py-audit-bot | ETL system auditing, code review | Software architecture, REST API validation |
 | II | py-plan-bot | Software architecture | REST API, data engineering, composite pipelines |
 | III | py-test-bot | Python testing (pytest, VCR.py) | Data engineering (Pandera, DQ) |
-| IV | py-code-bot | Python development, pipeline scaffolding | REST API, composite pipelines |
-| V | py-config-bot | Data engineering, YAML configs | REST API config |
-| VI | py-debug-bot | Python debugging, RCA | REST API debugging, Pandera issues |
-| VII | py-doc-bot | Technical writing, ADR management | Bioinformatics terminology |
+| IV | py-config-bot | Data engineering, YAML configs | REST API config |
+| V | py-debug-bot | Python debugging, RCA | REST API debugging, Pandera issues |
+| VI | py-doc-bot | Technical writing, ADR, diagrams | Bioinformatics terminology, Mermaid |
 
 ### 9a.2 Rule References
 
@@ -386,21 +385,21 @@ py-audit-bot (baseline, scope=seed + enricher pipelines)
 
 > **Примечание:** Перед использованием MCP инструментов необходимо вызвать `ToolSearch("<provider>")` для загрузки.
 
-| MCP Server | py-audit-bot | py-plan-bot | py-test-bot | py-code-bot | py-config-bot | py-debug-bot | py-doc-bot |
-|------------|:----------:|:---------:|:---------:|:---------:|:-----------:|:----------:|:--------:|
-| **ChEMBL** | ✅ Schema validation | — | ✅ Golden data, contracts | ✅ API reference | ✅ Field reference | ✅ Error repro | — |
-| **PubMed** | — | ✅ Coverage eval | ✅ Test data | ✅ Publication ref | — | — | ✅ Citations |
-| **bioRxiv** | — | ✅ Trends, research | ✅ Preprint test data | — | — | — | ✅ Context |
-| **Open Targets** | ✅ Target validation | ✅ Data availability | — | ✅ GraphQL schema | ✅ Join key validation | — | — |
-| **Mermaid Chart** | ✅ Arch diagrams | — | — | — | — | — | ✅ All diagrams |
-| **BioRender** | — | — | — | — | — | — | ✅ Scientific figs |
+| MCP Server | py-audit-bot | py-plan-bot | py-test-bot | py-config-bot | py-debug-bot | py-doc-bot |
+|------------|:----------:|:---------:|:---------:|:-----------:|:----------:|:--------:|
+| **ChEMBL** | ✅ Schema validation | — | ✅ Golden data, contracts | ✅ Field reference | ✅ Error repro | — |
+| **PubMed** | — | ✅ Coverage eval | ✅ Test data | — | — | ✅ Citations |
+| **bioRxiv** | — | ✅ Trends, research | ✅ Preprint test data | — | — | ✅ Context |
+| **Open Targets** | ✅ Target validation | ✅ Data availability | — | ✅ Join key validation | — | — |
+| **Mermaid Chart** | ✅ Arch diagrams | — | — | — | — | ✅ All diagrams |
+| **BioRender** | — | — | — | — | — | ✅ Scientific figs |
 
 ### 10.2 Матрица Platform Tools × Субагенты
 
-| Tool | py-audit-bot | py-plan-bot | py-test-bot | py-code-bot | py-config-bot | py-debug-bot | py-doc-bot |
-|------|:----------:|:---------:|:---------:|:---------:|:-----------:|:----------:|:--------:|
-| `WebSearch` | Docs | Research | — | Lib docs | Schema docs | Solutions | API docs |
-| `WebFetch` | Pages | Pages | — | Pages | — | SO/GH Issues | Pages |
+| Tool | py-audit-bot | py-plan-bot | py-test-bot | py-config-bot | py-debug-bot | py-doc-bot |
+|------|:----------:|:---------:|:---------:|:-----------:|:----------:|:--------:|
+| `WebSearch` | Docs | Research | — | Schema docs | Solutions | API docs |
+| `WebFetch` | Pages | Pages | — | — | SO/GH Issues | Pages |
 
 ### 10.3 Протокол использования MCP
 
@@ -427,13 +426,23 @@ py-audit-bot (baseline, scope=seed + enricher pipelines)
 | Contract Testing | py-test-bot | final (ChEMBL scope) | ChEMBL MCP → compare with contract | FAIL-CONTRACT-* |
 | Research Context | py-plan-bot | new entity planning | bioRxiv:search_preprints → analyze | 01-plan §Research Context |
 | Documentation Diagrams | py-doc-bot | DOC-* for architecture | Mermaid:validate_and_render → save | docs/diagrams/*.svg |
-| API Reference | py-code-bot | new adapter implementation | ChEMBL/OT/PubMed → study response | Field mapping in code |
+| API Reference | orchestrator | new adapter implementation | ChEMBL/OT/PubMed → study response | Field mapping in code |
 | Config Fields Validation | py-config-bot | new pipeline config | ChEMBL MCP → compare fields | CFG-DRIFT-* |
 | Error Reproduction | py-debug-bot | DBG-* for API failure | ChEMBL MCP → reproduce request | DBG-* root cause |
 
 ---
 
 ## 11. Changelog (ORCHESTRATION.md)
+
+### v4.0 (2026-03-04)
+
+- **REMOVED**: `py-code-bot` — production code now written directly by orchestrator
+- **MERGED**: `py-diagram-bot` into `py-doc-bot` (diagrams are documentation artifacts)
+- **ADDED**: `py-test-swarm`, `py-doc-swarm`, `py-review-orchestrator` to agent table
+- **REMOVED**: `.claude/agents/subagents/` reference (deleted in Phase 1)
+- **CHANGED**: Agent count: 8 → 9 (6 core + 3 orchestrator/swarm)
+- **CHANGED**: All workflow references updated: py-code-bot → orchestrator
+- **CHANGED**: MCP matrices reduced from 7×7 to 6×6
 
 ### v3.0 (2026-02-08)
 
