@@ -57,7 +57,7 @@ ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar, IUPHAR, O
 
 | RF type | Primary agent | Secondary agent |
 |---------|:------------:|:---------------:|
-| `refactor` / `feature` / `bugfix` | py-code-bot (direct) | py-config-bot (if config impact) |
+| `refactor` / `feature` / `bugfix` | orchestrator (direct) | py-config-bot (if config impact) |
 | `config` | py-config-bot | — |
 | `doc` | py-doc-bot | — |
 | `test` | py-test-bot | — |
@@ -177,7 +177,7 @@ Every RF-* MUST be validated against this matrix before inclusion in plan.
 ## 11. Parallelization Rules
 
 - `py-test-bot (baseline)` || `py-audit-bot (baseline)` — both read-only
-- `py-code-bot` || `py-config-bot` — different file zones
+- `orchestrator` || `py-config-bot` — different file zones
 - `py-doc-bot` || `py-audit-bot (final)` — if doc doesn't affect code audit
 
 ---
