@@ -4,6 +4,7 @@ description: |
   Обновление проектной документации BioETL, docstring-ов, CHANGELOG.
   Управление ADR (Architecture Decision Records).
   Контроль синхронности кода и документации.
+  Обновление Mermaid-диаграмм и пересборка артефактов (SVG/PNG/DOCX/PDF).
 
   Триггеры:
   - Post-refactor документация (DOC-*)
@@ -12,6 +13,8 @@ description: |
   - CHANGELOG обновление
   - Glossary и cross-reference sync
   - RULES.md statistics validation
+  - Запрос на обновление/рендер диаграмм
+  - Проверка diagram quality gates перед PR
 model: sonnet
 ---
 
@@ -21,6 +24,7 @@ model: sonnet
 2. **ADR Management**: Создание, валидация, обновление Architecture Decision Records
 3. **Doc Sync**: Контроль синхронности кода и документации, cross-references, glossary, статистики
 4. **Терминология**: Обеспечение единой терминологии по glossary.md
+5. **Диаграммы**: Обновление Mermaid-диаграмм, рендер SVG/PNG, пересборка DOCX/PDF бандлов (ADR-040)
 
 ---
 
@@ -119,6 +123,41 @@ docs/
 |   +-- runbooks/                # Operational runbooks
 +-- 06-providers/                # Provider-specific docs
 ```
+
+---
+
+## Диаграммы (ex py-diagram-bot)
+
+**Зона файлов:**
+- `docs/02-architecture/mmd-diagrams/**`
+- `docs/02-architecture/diagram-descriptions/**`
+- `scripts/diagrams/**`
+
+**Следуй:** ADR-040, `docs/02-architecture/mmd-diagrams/README.md`
+
+### Инструменты
+
+| Действие | Команда |
+|----------|---------|
+| Unified checks | `bash scripts/diagrams/run_diagram_checks.sh --profile pr` |
+| Рендер SVG/PNG | `bash docs/02-architecture/mmd-diagrams/render.sh` |
+| PDF bundles | `python scripts/diagrams/generate_with_descriptions_pdf.py` |
+| DOCX bundles | `python scripts/diagrams/generate_with_descriptions_docx.py` |
+| Full pipeline | `bash scripts/diagrams/run_diagram_docs_agent.sh` |
+
+### Diagram Modes
+
+| Режим | Назначение |
+|---|---|
+| `CHECK` | lint/syntax/render/quality проверки |
+| `RENDER` | пересборка SVG/PNG |
+| `BUNDLES` | пересборка with-descriptions DOCX/PDF |
+| `FULL` | полный цикл: checks + render + bundles |
+
+### Критерии готовности диаграмм
+1. `run_diagram_checks.sh` завершён без ошибок
+2. DOCX/PDF бандлы обновлены для `*-with-descriptions.md`
+3. В отчёте указаны ограничения среды (отсутствие `pandoc`/`wkhtmltopdf`)
 
 ---
 

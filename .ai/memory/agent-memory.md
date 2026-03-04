@@ -111,10 +111,9 @@ make run-local     # Запуск на фикстурах
 | III | `py-test-bot` | sonnet | `tests/` | Baseline/final/retest тесты, coverage ≥85%, VCR |
 | IV | `py-config-bot` | sonnet | `configs/` | Pipeline/DQ/filter YAML configs, composite, gap remediation |
 | V | `py-debug-bot` | opus | `src/bioetl/`, `tests/` (fixes) | RCA падений, DBG-* итерации (макс 5), mypy/import/runtime |
-| VI | `py-doc-bot` | sonnet | `docs/`, docstrings | ADR, CHANGELOG, docstrings, doc-code sync |
+| VI | `py-doc-bot` | sonnet | `docs/`, docstrings | ADR, CHANGELOG, docstrings, diagrams, doc-code sync |
 
-> **py-code-bot** (opus, `src/bioetl/`) — определён в `.claude/agents/py-code-bot.md`,
-> но НЕ зарегистрирован как `subagent_type`. Production-код пишем напрямую через Edit/Write.
+> Production-код пишем напрямую через Edit/Write (без отдельного субагента).
 
 ### 3.2 Полные спецификации и память субагентов
 
@@ -124,10 +123,9 @@ make run-local     # Запуск на фикстурах
 .claude/agents/py-audit-bot.md    — входы, выходы, чеклисты, scoring
 .claude/agents/py-plan-bot.md     — шаблоны планов, RF-* routing
 .claude/agents/py-test-bot.md     — test selection strategy, VCR management
-.claude/agents/py-code-bot.md     — паттерны реализации, scaffolding (СПРАВОЧНИК)
 .claude/agents/py-config-bot.md   — шаблоны YAML, иерархия configs
 .claude/agents/py-debug-bot.md    — методология отладки, классификация ошибок
-.claude/agents/py-doc-bot.md      — структура docs, ADR management
+.claude/agents/py-doc-bot.md      — структура docs, ADR management, diagrams
 .claude/agents/ORCHESTRATION.md   — полный workflow, матрица взаимодействий
 ```
 
@@ -139,8 +137,7 @@ make run-local     # Запуск на фикстурах
 .ai/memory/memory-py-test-bot.md    — test structure, thresholds, VCR, failure classification
 .ai/memory/memory-py-config-bot.md  — config hierarchy, templates, ADR compliance, composite rules
 .ai/memory/memory-py-debug-bot.md   — error classification, debugging methodology, fix patterns
-.ai/memory/memory-py-doc-bot.md     — doc structure, ADR management, CHANGELOG, docstrings
-.ai/memory/memory-py-code-bot.md    — layer constraints, implementation patterns, scaffolding
+.ai/memory/memory-py-doc-bot.md     — doc structure, ADR management, CHANGELOG, docstrings, diagrams
 ```
 
 ### 3.3 Входы субагентов (обязательные параметры)
@@ -164,7 +161,7 @@ reports/plans/<task_id>/
 ├── 01-plan-initial.md        ← py-plan-bot (initial)
 ├── 02-test-baseline.md       ← py-test-bot (baseline)
 ├── 03-plan-updated.md        ← py-plan-bot (update)          [опционально]
-├── 04-refactoring-log.md     ← py-code-bot + py-debug-bot
+├── 04-refactoring-log.md     ← orchestrator + py-debug-bot
 ├── 04a-config-log.md         ← py-config-bot
 ├── 05-test-final.md          ← py-test-bot (final)
 ├── 06-doc-update-log.md      ← py-doc-bot
@@ -192,7 +189,7 @@ reports/plans/<task_id>/
 ③ py-test-bot (baseline)      → 02-test-baseline.md
    [если FAIL → py-debug-bot → py-test-bot (retest) цикл]
 ④ Реализация (параллельно):
-   - py-code-bot / напрямую   → src/bioetl/  → 04-refactoring-log.md
+   - напрямую (orchestrator)   → src/bioetl/  → 04-refactoring-log.md
    - py-config-bot             → configs/     → 04a-config-log.md
 ⑤ py-test-bot (final)         → 05-test-final.md
    [если FAIL → py-debug-bot → py-test-bot (retest) цикл ≤5]
@@ -214,7 +211,7 @@ reports/plans/<task_id>/
 ### 4.2 Параллелизация
 
 - `py-test-bot (baseline)` || `py-audit-bot (baseline)` — оба read-only
-- `py-code-bot` || `py-config-bot` — разные файловые зоны
+- `orchestrator` || `py-config-bot` — разные файловые зоны
 - `py-doc-bot` || `py-audit-bot (final)` — если doc не влияет на code audit
 
 ---
@@ -231,18 +228,20 @@ reports/plans/<task_id>/
 | keybindings-help | `Skill("keybindings-help")` | Настройка keyboard shortcuts |
 | session-start-hook | `Skill("session-start-hook")` | SessionStart hook для web |
 
-### 5.2 Репозиторные Skills (ручное исполнение по спецификации)
+### 5.2 Slash Commands (self-contained, инлайнированы)
 
-Эти skills определены в `.claude/skills/`, но НЕ зарегистрированы автоматически.
-Для использования — прочитай файл и выполни инструкции вручную.
+BioETL-специфичные навыки инлайнированы в `.claude/commands/`. Вызов через `/command-name`:
 
-| Skill | Файл | Назначение | Как использовать |
-|-------|------|------------|-----------------|
-| architecture-guardian | `.claude/skills/architecture-guardian.skill.md` | Проверка arch boundaries, DI, naming, ADR | Прочитать → выполнить Verification Commands |
-| documentation-audit | `.claude/skills/documentation-audit.skill.md` | Полный аудит документации | Прочитать → follow Workflow |
-| new-pipeline | `.claude/skills/new-pipeline.md` | Scaffolding нового ETL pipeline (7 файлов) | Прочитать → генерировать по шаблонам |
-| vcr-record | `.claude/skills/vcr-record.md` | VCR cassettes management | Прочитать → выполнить команды |
-| verify-architecture | `.claude/skills/verify-architecture.md` | Pre-commit/PR arch check (1392 теста) | Прочитать → `pytest tests/architecture/ -v` |
+| Command | Назначение |
+|---------|------------|
+| `/verify-architecture` | Pre-commit проверка (43 теста) |
+| `/architecture-guardian` | Аудит arch boundaries |
+| `/new-pipeline` | Scaffolding нового ETL pipeline |
+| `/new-composite` | Создание composite pipeline |
+| `/config-validate` | Валидация YAML vs JSON-schemas |
+| `/documentation-audit` | Аудит документации |
+| `/vcr-record` | VCR cassettes management |
+| `/release-checklist` | Pre-release audit |
 
 ---
 
@@ -335,8 +334,8 @@ reports/plans/<task_id>/
 3. **Прочитать `.claude/rules/ai-selfreview-rules.md`** — правила самопроверки
 4. **При работе с кодом** — прочитать `.claude/agents/ORCHESTRATION.md` для workflow
 5. **При использовании субагента** — прочитать его спецификацию `.claude/agents/py-{name}.md`
-6. **При scaffolding** — прочитать `.claude/skills/new-pipeline.md`
-7. **Перед коммитом** — прочитать `.claude/skills/verify-architecture.md`
+6. **При scaffolding** — использовать `/new-pipeline` command
+7. **Перед коммитом** — использовать `/verify-architecture` command
 
 ### Команда для загрузки полного контекста:
 

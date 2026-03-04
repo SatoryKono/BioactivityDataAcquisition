@@ -248,7 +248,7 @@ Always declare mode at the start of response.
 |-------|--------|
 | py-test-bot (final pass) | -> doc-bot updates docs/docstrings |
 | py-audit-bot (doc drift finding) | -> doc-bot corrects drift |
-| py-code-bot (new entity) | -> doc-bot adds provider docs |
+| orchestrator (new entity) | -> doc-bot adds provider docs |
 | New ADR needed | -> doc-bot creates ADR |
 | Refactoring complete | -> doc-bot updates CHANGELOG |
 

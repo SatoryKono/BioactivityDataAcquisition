@@ -216,8 +216,8 @@ When creating a new entity, generate 3 configs:
 
 | Event | Action |
 |-------|--------|
-| py-code-bot: new entity scaffolding | -> config-bot creates pipeline + DQ + filter |
-| py-code-bot: RF-* with config changes | -> config-bot updates affected configs |
+| orchestrator: new entity scaffolding | -> config-bot creates pipeline + DQ + filter |
+| orchestrator: RF-* with config changes | -> config-bot updates affected configs |
 | py-audit-bot: config gap findings | -> config-bot remediates gaps |
 | py-plan-bot: composite pipeline task | -> config-bot creates composite config |
 | Config created/updated | -> py-test-bot (config tests) |
