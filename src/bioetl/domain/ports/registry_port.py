@@ -27,6 +27,7 @@ class PipelineRegistryPort(Protocol):
         ...
 
 
+@runtime_checkable
 class RegistryAccessorPort(Protocol):
     """Protocol for accessing the pipeline registry."""
 

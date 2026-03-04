@@ -11,14 +11,10 @@ Note:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
+from bioetl.domain.ports import CheckpointPort, QuarantinePort
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.quarantine import UnifiedQuarantine
-
-if TYPE_CHECKING:
-    from bioetl.domain.ports import CheckpointPort, QuarantinePort
 
 __all__ = [
     # Deprecated aliases (backward compatibility)
@@ -43,7 +39,11 @@ def bootstrap_quarantine_port() -> QuarantinePort:
         QuarantinePort implementation for quarantine operations.
     """
     settings = get_settings()
-    return UnifiedQuarantine(base_path=str(settings.quarantine_path))
+    quarantine = UnifiedQuarantine(base_path=str(settings.quarantine_path))
+    assert isinstance(quarantine, QuarantinePort), (
+        f"UnifiedQuarantine must implement QuarantinePort, got {type(quarantine)}"
+    )
+    return quarantine
 
 
 def bootstrap_quarantine() -> QuarantinePort:
@@ -71,10 +71,14 @@ def bootstrap_checkpoint_port(pipeline_name: str) -> CheckpointPort:
         CheckpointPort implementation for checkpoint operations.
     """
     settings = get_settings()
-    return LocalCheckpoint(
+    checkpoint = LocalCheckpoint(
         base_path=settings.checkpoint_path,
         pipeline_name=pipeline_name,
     )
+    assert isinstance(checkpoint, CheckpointPort), (
+        f"LocalCheckpoint must implement CheckpointPort, got {type(checkpoint)}"
+    )
+    return checkpoint
 
 
 def bootstrap_checkpoint(pipeline_name: str) -> CheckpointPort:
