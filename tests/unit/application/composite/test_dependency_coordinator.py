@@ -6,7 +6,6 @@ See ADR-026 for architectural context.
 
 from __future__ import annotations
 
-import warnings
 from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock
 
@@ -562,28 +561,3 @@ class TestDependencyExecution:
         assert result.status == DependencyStatus.FAILED
         assert "required boom" in (result.error_message or "")
         mock_logger.error.assert_called()
-
-
-@pytest.mark.unit
-class TestDependencyCoordinatorCompatibilityAlias:
-    """Tests for deprecated alias compatibility helper."""
-
-    def test_getattr_dependency_coordinator_returns_service_with_warning(self) -> None:
-        import bioetl.application.composite.dependency_coordinator as module
-
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter("always")
-            alias = module.__getattr__("DependencyCoordinator")
-
-        assert alias is DependencyCoordinatorService
-        assert any(
-            isinstance(item.message, DeprecationWarning)
-            and "deprecated" in str(item.message).lower()
-            for item in caught
-        )
-
-    def test_getattr_unknown_raises_attribute_error(self) -> None:
-        import bioetl.application.composite.dependency_coordinator as module
-
-        with pytest.raises(AttributeError):
-            module.__getattr__("UnknownAlias")

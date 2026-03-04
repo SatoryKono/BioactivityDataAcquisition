@@ -104,7 +104,8 @@ class ChemblAdapter(
     def __post_init__(self) -> None:
         """Initialize adapter with config values and metrics."""
         # Initialize error handler from base class
-        self._error_handler = ErrorService(self.logger)
+        metrics_port = self.metrics if self.metrics is not None else None
+        self._error_handler = ErrorService(self.logger, metrics=metrics_port)
         # Resolve configuration: use provided config or domain defaults
         config = (
             self.adapter_config if self.adapter_config is not None else AdapterConfig()

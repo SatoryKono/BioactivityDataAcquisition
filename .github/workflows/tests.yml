@@ -274,6 +274,28 @@ jobs:
             --perf-obs-out reports/performance/hotspot-observations.jsonl \
             --junitxml=reports/performance/hotspot-budgets.xml
 
+      - name: Build hotspot degradation report
+        if: always()
+        run: |
+          mkdir -p reports/performance
+          if [ -f reports/performance/hotspot-observations.jsonl ]; then
+            uv run python scripts/generate_hotspot_degradation_report.py \
+              --observations reports/performance/hotspot-observations.jsonl \
+              --budgets tests/performance/hotspot_budgets.json \
+              --window-size 5 \
+              --json-out reports/performance/hotspot-degradation.json \
+              --markdown-out reports/performance/hotspot-degradation.md
+          else
+            echo "No hotspot observations file found; skipping degradation report generation."
+          fi
+
+      - name: Publish hotspot degradation summary
+        if: always()
+        run: |
+          if [ -f reports/performance/hotspot-degradation.md ]; then
+            cat reports/performance/hotspot-degradation.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - name: Upload performance budget report
         uses: actions/upload-artifact@v4
         if: always()
@@ -282,6 +304,8 @@ jobs:
           path: |
             reports/performance/hotspot-budgets.xml
             reports/performance/hotspot-observations.jsonl
+            reports/performance/hotspot-degradation.json
+            reports/performance/hotspot-degradation.md
             tests/performance/hotspot_budgets.json
           if-no-files-found: warn
           retention-days: 30

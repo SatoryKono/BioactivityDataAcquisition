@@ -19,8 +19,8 @@ from bioetl.domain.entities.pubmed import ArticleRecord
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.common import (
-    run_fetch_with_fallback_policy,
-    split_filter_ids_for_fallback,
+    FallbackFetchOrchestratorService,
+    FallbackFetchRequest,
 )
 from bioetl.infrastructure.adapters.error_handling import ErrorService
 from bioetl.infrastructure.adapters.filterable_mixin import NotSupportedMultiFilterMixin
@@ -77,11 +77,20 @@ class PubMedAdapter(
     _fallback_handler: TitleFallbackHandler | None = field(
         default=None, init=False, repr=False
     )
+    _fallback_fetch_service: FallbackFetchOrchestratorService = field(
+        default_factory=FallbackFetchOrchestratorService,
+        init=False,
+        repr=False,
+    )
 
     def __post_init__(self) -> None:
         """Initialize metrics, error handler and fallback handler."""
-        self._error_handler = ErrorService(self.logger)
+        metrics_port = self.metrics if self.metrics is not None else None
+        self._error_handler = ErrorService(self.logger, metrics=metrics_port)
         self._init_adapter_metrics()
+        self._fallback_fetch_service = FallbackFetchOrchestratorService(
+            self._adapter_metrics
+        )
 
         self._fallback_handler = TitleFallbackHandler(
             logger=self.logger,
@@ -141,30 +150,32 @@ class PubMedAdapter(
         if entity_type != "publication":
             raise ValueError("PubMedAdapter only supports 'publication'")
 
-        primary_ids, title_only_entries = split_filter_ids_for_fallback(filter_ids)
-
-        async def _primary_records() -> AsyncIterator[BronzeRecord]:
+        async def _primary_records(
+            primary_ids: list[str],
+            request_limit: int | None,
+        ) -> AsyncIterator[BronzeRecord]:
             if not primary_ids:
                 return
             async for record in self.fetch_filtered(
                 entity_type=entity_type,
                 filter_ids=primary_ids,
                 filter_field=filter_field,
-                limit=limit,
+                limit=request_limit,
             ):
                 yield record
 
-        async for record in run_fetch_with_fallback_policy(
-            primary_records=_primary_records(),
-            primary_ids=primary_ids,
-            title_only_entries=title_only_entries,
+        request = FallbackFetchRequest(
+            filter_ids=filter_ids,
             fallback_mapping=fallback_mapping,
+            primary_record_fetcher=_primary_records,
             normalize_id=lambda value: value.lower().strip(),
             extract_record_id=lambda rec: str(rec.get("pmid", "")),
             fallback_handler=self._fallback_handler,
             limit=limit,
             primary_lookup_method="pmid",
-        ):
+        )
+
+        async for record in self._fallback_fetch_service.execute(request):
             yield record
 
     async def fetch(

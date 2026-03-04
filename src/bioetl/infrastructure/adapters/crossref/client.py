@@ -32,8 +32,8 @@ from bioetl.domain.normalization import normalize_doi
 from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.common import (
-    run_fetch_with_fallback_policy,
-    split_filter_ids_for_fallback,
+    FallbackFetchOrchestratorService,
+    FallbackFetchRequest,
 )
 from bioetl.infrastructure.adapters.crossref.batch import (
     DoiBatchProcessor,
@@ -92,10 +92,16 @@ class CrossRefAdapter(BaseHttpAdapter):
 
     provider_name: str = field(init=False, default="crossref")
     """Provider identifier (required by DataSourcePort)."""
+    _fallback_fetch_service: FallbackFetchOrchestratorService = field(
+        init=False, repr=False
+    )
 
     def __post_init__(self) -> None:
         """Initialize adapter metrics and helper components."""
         self._init_adapter_metrics()
+        self._fallback_fetch_service = FallbackFetchOrchestratorService(
+            self._adapter_metrics
+        )
 
         # Initialize helper components for batch fetching and search
         self._batch_fetcher = DoiBatchProcessor(
@@ -215,51 +221,40 @@ class CrossRefAdapter(BaseHttpAdapter):
         fallback_mapping: dict[str, str],
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch with fallback search by title when DOI returns 404.
-
-        Strategy (three-phase fallback):
-        1. Batch DOI lookup for valid DOIs
-        2. For DOIs not found -> search by title from fallback_mapping
-        3. For empty DOIs (in filter_ids as "") -> search by title only
-
-        Args:
-            entity_type: Must be 'work' or 'publication'.
-            filter_ids: List of DOIs to resolve (may include empty strings).
-            filter_field: Field name for filtering ('doi').
-            fallback_mapping: Mapping {doi: title} for fallback search.
-            limit: Maximum number of records to fetch.
-
-        Yields:
-            Publication records with `_lookup_method` field indicating resolution method.
-
-        Returns:
-            Async iterator yielding fetched records.
-        """
+        """Fetch publications by DOI with title-search fallback for misses."""
         if entity_type not in ("work", "publication"):
             raise ValueError(
                 f"CrossRefAdapter supports 'work'/'publication', got: {entity_type}"
             )
-        primary_ids, title_only_entries = split_filter_ids_for_fallback(filter_ids)
-        if limit:
-            primary_ids = primary_ids[:limit]
+        if filter_field != "doi":
+            self.logger.warning(
+                "unsupported_filter_field_for_fallback",
+                field=filter_field,
+                msg="CrossRef fallback only supports 'doi' filtering, proceeding with DOI semantics",
+            )
 
-        async def _primary_records() -> AsyncIterator[BronzeRecord]:
+        async def _primary_records(
+            primary_ids: list[str], request_limit: int | None
+        ) -> AsyncIterator[BronzeRecord]:
             for i in range(0, len(primary_ids), self.batch_size):
+                if request_limit is not None and request_limit <= 0:
+                    return
                 batch = primary_ids[i : i + self.batch_size]
                 async for publication in self._batch_fetcher.fetch_batch(batch):
                     yield publication
 
-        async for publication in run_fetch_with_fallback_policy(
-            primary_records=_primary_records(),
-            primary_ids=primary_ids,
-            title_only_entries=title_only_entries,
+        request = FallbackFetchRequest(
+            filter_ids=filter_ids,
             fallback_mapping=fallback_mapping,
+            primary_record_fetcher=_primary_records,
             normalize_id=normalize_doi,
             extract_record_id=lambda rec: str(rec.get("DOI", "")),
             fallback_handler=self._fallback_handler,
             limit=limit,
             primary_lookup_method="doi",
-        ):
+            trim_primary_ids_to_limit=True,
+        )
+        async for publication in self._fallback_fetch_service.execute(request):
             yield publication
 
     async def fetch(

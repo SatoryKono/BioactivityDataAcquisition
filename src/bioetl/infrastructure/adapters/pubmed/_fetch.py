@@ -20,7 +20,7 @@ from bioetl.infrastructure.adapters.pubmed.xml_processor import PubMedXmlProcess
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
     from bioetl.infrastructure.adapters.common.api_request_collector import (
         APIRequestCollector,
@@ -52,6 +52,7 @@ class PubMedFetchMixin:
     _request_collector: APIRequestCollector
     provider_name: str
     batch_size: int
+    metrics: MetricsPort | None
 
     def _build_fetch_params(self, id_batch: list[str]) -> dict[str, str]:
         """Build parameters for efetch API call."""
@@ -97,7 +98,7 @@ class PubMedFetchMixin:
         except PUBMED_FETCH_ERRORS as e:
             from bioetl.infrastructure.adapters.error_handling import ErrorService
 
-            error_handler = ErrorService(self.logger)
+            error_handler = ErrorService(self.logger, metrics=self.metrics)
             wrapped = error_handler.handle_error(
                 error=e,
                 provider=self.provider_name,

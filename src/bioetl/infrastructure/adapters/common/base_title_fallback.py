@@ -220,22 +220,7 @@ class BaseTitleFallbackHandler(ABC):
         limit: int | None,
         fetched: int,
     ) -> AsyncIterator[dict[str, Any]]:  # Any: untyped API response data
-        """Process DOIs not found via batch fetch using title fallback.
-
-        Args:
-            dois: List of DOIs that were requested.
-            found_dois: Set of DOIs that were successfully resolved (lowercase).
-            fallback_mapping: Mapping {doi: title} for fallback search.
-            normalize_fn: Function to normalize DOI strings.
-            limit: Maximum total records to return.
-            fetched: Number of records already fetched.
-
-        Yields:
-            Publication records found via title search.
-
-        Returns:
-            Processed result.
-        """
+        """Resolve unfetched DOIs via title fallback search."""
         for doi in dois:
             if limit and fetched >= limit:
                 return

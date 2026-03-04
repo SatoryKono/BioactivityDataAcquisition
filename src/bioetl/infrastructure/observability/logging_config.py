@@ -129,31 +129,13 @@ def configure_logging(
     *,
     force: bool = False,
 ) -> bool:
-    """Configure structlog globally for the application.
-
-    This function should be called once at application startup.
-    Subsequent calls are no-ops unless force=True.
-
-    Args:
-        json_format: Use JSON output format (default: True)
-        log_level: Logging level (default: INFO)
-        force: Force reconfiguration even if already configured
-
-    Returns:
-        True if configuration was applied, False if already configured
-    """
+    """Configure global structlog/stdlib logging; optionally force reconfiguration."""
     global _configured, _current_format
 
     with _config_lock:
         if _configured and not force:
-            # Already configured - check if format matches
-            if _current_format != json_format:
-                # Format mismatch - log warning but don't reconfigure
-                # This prevents issues with multiple loggers requesting different formats
-                pass
             return False
 
-        # Build processor chain with secret filtering
         processors: list[
             Any  # Any: structlog processor chain has heterogeneous callables
         ] = [
@@ -164,7 +146,7 @@ def configure_logging(
             structlog.processors.TimeStamper(fmt="iso"),
             structlog.processors.StackInfoRenderer(),
             structlog.processors.UnicodeDecoder(),
-            secret_filter_processor,  # Filter secrets before output
+            secret_filter_processor,
         ]
 
         if json_format:
@@ -179,12 +161,11 @@ def configure_logging(
             cache_logger_on_first_use=True,
         )
 
-        # Configure stdlib logging level
         logging.basicConfig(
             level=log_level.upper(),
             stream=sys.stdout,
             format="%(message)s",
-            force=True,  # Override any existing configuration
+            force=True,
         )
 
         _configured = True

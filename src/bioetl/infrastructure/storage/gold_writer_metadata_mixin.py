@@ -246,5 +246,4 @@ class GoldWriterMetadataMixin:
         )
 
 
-
 __all__ = ["GoldWriterMetadataMixin"]

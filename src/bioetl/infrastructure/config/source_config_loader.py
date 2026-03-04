@@ -32,7 +32,7 @@ def read_source_config_payload(
 
     source_section = unified_raw.get("source")
     if isinstance(source_section, dict):
-        payload: dict[str, Any] = {
+        payload: dict[str, Any] = {  # Any: dynamic payload or structural mixin boundary
             "source": source_section
         }  # Any: heterogeneous YAML values
         for key in ("entities", "entity_notes"):

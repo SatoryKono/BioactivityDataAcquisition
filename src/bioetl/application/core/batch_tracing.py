@@ -253,5 +253,4 @@ class BatchTracingManagerService:
             span.__exit__(None, None, None)
 
 
-
 __all__ = ["BatchTracingManagerService"]

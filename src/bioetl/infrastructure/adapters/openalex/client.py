@@ -31,15 +31,13 @@ from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.common import (
-    split_filter_ids_for_fallback,
+    FallbackFetchOrchestratorService,
+    FallbackFetchRequest,
 )
 from bioetl.infrastructure.adapters.openalex.client_helpers_adapter_mixin import (
     OpenAlexAdapterHelpersMixin,
 )
 from bioetl.infrastructure.adapters.openalex.fallback import TitleFallbackHandler
-from bioetl.infrastructure.adapters.openalex.fallback_resolver import (
-    resolve_openalex_fallback,
-)
 from bioetl.infrastructure.adapters.openalex.health_probe import probe_openalex_health
 from bioetl.infrastructure.adapters.openalex.query_builder import (
     build_openalex_doi_filter_params,
@@ -107,10 +105,16 @@ class OpenAlexAdapter(OpenAlexAdapterHelpersMixin, BaseHttpAdapter):
     _title_search_cache: dict[tuple[str, int], list[BronzeRecord]] = field(
         init=False, default_factory=dict
     )
+    _fallback_fetch_service: FallbackFetchOrchestratorService = field(
+        init=False, repr=False
+    )
 
     def __post_init__(self) -> None:
         """Initialize adapter metrics and helper components."""
         self._init_adapter_metrics()
+        self._fallback_fetch_service = FallbackFetchOrchestratorService(
+            self._adapter_metrics
+        )
 
         # Initialize helper components for fallback handling
         self._fallback_handler = TitleFallbackHandler(
@@ -314,8 +318,6 @@ class OpenAlexAdapter(OpenAlexAdapterHelpersMixin, BaseHttpAdapter):
             )
             return
 
-        primary_ids, title_only_entries = split_filter_ids_for_fallback(filter_ids)
-
         def _log_phase1_summary(total: int, found: int) -> None:
             self.logger.info(
                 "openalex_doi_lookup_summary",
@@ -325,17 +327,23 @@ class OpenAlexAdapter(OpenAlexAdapterHelpersMixin, BaseHttpAdapter):
                 hit_rate_pct=round(found / total * 100, 1) if total else 0.0,
             )
 
-        async for work in resolve_openalex_fallback(
-            primary_records=self._batch_doi_lookup(primary_ids, limit, 0),
-            primary_ids=primary_ids,
-            title_only_entries=title_only_entries,
+        def _primary_records(
+            primary_ids: list[str], request_limit: int | None
+        ) -> AsyncIterator[BronzeRecord]:
+            return self._batch_doi_lookup(primary_ids, request_limit, 0)
+
+        request = FallbackFetchRequest(
+            filter_ids=filter_ids,
             fallback_mapping=fallback_mapping,
+            primary_record_fetcher=_primary_records,
             normalize_id=self._normalize_doi,
             extract_record_id=self._extract_doi_from_record,
             fallback_handler=self._fallback_handler,
             limit=limit,
+            primary_lookup_method="doi",
             phase1_summary_logger=_log_phase1_summary,
-        ):
+        )
+        async for work in self._fallback_fetch_service.execute(request):
             yield work
 
     async def fetch(

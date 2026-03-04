@@ -386,5 +386,3 @@ class JoinPlannerService(JoinPlannerCompatibilityMixin):
             dep=dep,
             seed_pipeline=seed_pipeline,
         )
-
-

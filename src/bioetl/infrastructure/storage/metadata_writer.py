@@ -180,20 +180,7 @@ class MetadataWriter:
         provider: str | None = None,
         entity: str | None = None,
     ) -> str:
-        """Write metadata to sidecar file.
-
-        Args:
-            base_path: Base path for metadata file.
-            metadata: Pydantic metadata model.
-            layer: Layer name for logging.
-            table_name: Table name for flat_structure naming pattern (deprecated).
-            flat_structure: If True and provider/entity provided, uses new naming.
-            provider: Provider name (e.g., 'chembl') for filename generation.
-            entity: Entity type (e.g., 'activity') for filename generation.
-
-        Returns:
-            Absolute path to written metadata file.
-        """
+        """Write sidecar metadata for Bronze/Silver/Gold layers and return file path."""
         path = Path(base_path)
 
         # Use provider/entity naming if both are provided

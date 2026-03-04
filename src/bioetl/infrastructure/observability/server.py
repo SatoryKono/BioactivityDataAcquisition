@@ -89,26 +89,7 @@ def start_metrics_server(
     retry_delay: float = 1.0,
     logger: LoggerPort | None = None,
 ) -> bool:
-    """Start Prometheus metrics HTTP server.
-
-    Ensures the server is started only once per process.
-    Run in a daemon thread (non-blocking).
-
-    Args:
-        port: Port to bind the HTTP server (default: 8000)
-        addr: Address to bind the HTTP server (default: 0.0.0.0)
-        fail_fast: If True, raise MetricsServerError on failure
-        retry_count: Number of retries for transient errors (default: 3)
-        retry_delay: Delay between retries in seconds (default: 1.0)
-        logger: Structured logger for observability. If None, uses NoOpLogger.
-
-    Returns:
-        True if server started successfully, False otherwise
-
-    Raises:
-        MetricsServerError: If fail_fast=True and server cannot start
-
-    """
+    """Start Prometheus metrics server once with retry and optional fail-fast."""
     global _SERVER_STARTED
 
     if logger is None:

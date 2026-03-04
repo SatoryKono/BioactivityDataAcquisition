@@ -69,23 +69,7 @@ class DQReportWriter:
         entity: str | None = None,
         date_str: str | None = None,  # Deprecated: no longer used in path/filename
     ) -> Path:
-        """Write Bronze DQ report to file.
-
-        Output path structure (unified with Silver/Gold):
-        - Normal: {base_path}/bronze/{provider}/{entity}/bronze_{provider}_{entity}_dq_report.json
-        - Flat: {base_path}/bronze_{provider}_{entity}_dq_report.json
-
-        Args:
-            report: Bronze DQ report to write.
-            output_path: Output path (None = auto-generated at entity level).
-            format: Output format (None = JSON).
-            provider: Provider name for filename generation.
-            entity: Entity name for filename generation.
-            date_str: Deprecated, kept for backward compatibility (ignored).
-
-        Returns:
-            Path to the written report file.
-        """
+        """Write Bronze DQ report using unified Bronze/Silver/Gold path conventions."""
         format = format or DQReportFormat.JSON
         extension = self._get_extension(format)
 

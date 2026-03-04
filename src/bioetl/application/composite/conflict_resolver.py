@@ -128,5 +128,3 @@ class ConflictResolverService:
                 )
             case _:
                 return df
-
-

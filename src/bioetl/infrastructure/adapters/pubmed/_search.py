@@ -19,7 +19,7 @@ from bioetl.domain.exceptions import BioETLError, NetworkError
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
     from bioetl.infrastructure.adapters.common.api_request_collector import (
         APIRequestCollector,
@@ -51,6 +51,7 @@ class PubMedSearchMixin:
     _request_collector: APIRequestCollector
     provider_name: str
     batch_size: int
+    metrics: MetricsPort | None
 
     # Provided by PubMedFetchMixin in the concrete class
     def _yield_articles_from_pmids(
@@ -87,7 +88,7 @@ class PubMedSearchMixin:
         except PUBMED_SEARCH_ERRORS as e:
             from bioetl.infrastructure.adapters.error_handling import ErrorService
 
-            error_handler = ErrorService(self.logger)
+            error_handler = ErrorService(self.logger, metrics=self.metrics)
             wrapped = error_handler.handle_error(
                 error=e,
                 provider=self.provider_name,

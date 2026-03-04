@@ -15,7 +15,7 @@ def build_uniprot_protein_search_params(
     fields: tuple[str, ...],
 ) -> dict[str, Any]:  # Any: mixed query values (str|int)
     """Build UniProt protein search parameters."""
-    params: dict[str, Any] = {
+    params: dict[str, Any] = {  # Any: dynamic payload or structural mixin boundary
         "query": query,
         "size": min(size, (limit - fetched) if limit else size),
         "format": "json",

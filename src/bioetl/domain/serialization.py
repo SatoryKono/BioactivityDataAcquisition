@@ -226,36 +226,11 @@ def is_orjson_available() -> bool:
 
 
 def flatten_arrow_table_for_export(table: pa.Table) -> pa.Table:
-    """Convert complex PyArrow types (list, struct) to JSON strings for export.
-
-    This function prepares Arrow tables for export to formats that don't support
-    complex nested types (CSV, TSV, XLSX). List and struct columns are serialized
-    to JSON strings.
-
-    Args:
-        table: PyArrow Table with potentially complex types.
-
-    Returns:
-        PyArrow Table with complex types converted to JSON strings.
-
-    Example:
-        >>> import pyarrow as pa
-        >>> table = pa.table({"ids": [[1, 2], [3]], "name": ["a", "b"]})
-        >>> flat = flatten_arrow_table_for_export(table)
-        >>> flat.column("ids").to_pylist()
-        ['[1,2]', '[3]']
-    """
+    """Convert list/struct Arrow columns to JSON strings for export-safe flattening."""
     import pyarrow as pa
 
     def is_complex_type(field_type: pa.DataType) -> bool:
-        """Check if a PyArrow type is complex (list or struct).
-
-        Args:
-            field_type: Type of field.
-
-        Returns:
-            True if the condition is met, False otherwise.
-        """
+        """Return True for list/large_list/struct Arrow types."""
         return bool(
             pa.types.is_list(field_type)
             or pa.types.is_large_list(field_type)
@@ -263,14 +238,7 @@ def flatten_arrow_table_for_export(table: pa.Table) -> pa.Table:
         )
 
     def serialize_column_to_json(col: pa.ChunkedArray) -> pa.Array:
-        """Serialize a column of complex values to JSON strings.
-
-        Args:
-            col: Col.
-
-        Returns:
-            Serialized representation.
-        """
+        """Serialize a complex Arrow column into stringified JSON values."""
         vals = [
             serialize_to_json(v.as_py()) if v.as_py() is not None else None for v in col
         ]

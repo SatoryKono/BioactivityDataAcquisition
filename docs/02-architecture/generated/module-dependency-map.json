@@ -1,7 +1,7 @@
 {
   "summary": {
-    "scanned_modules": 663,
-    "total_internal_imports": 2440,
+    "scanned_modules": 680,
+    "total_internal_imports": 2479,
     "layer_edges": 14,
     "cross_layer_group_edges": 60,
     "violations": 0
@@ -10,13 +10,13 @@
     {
       "source": "application",
       "target": "application",
-      "imports": 302,
+      "imports": 307,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 444,
+      "imports": 447,
       "allowed": true
     },
     {
@@ -46,19 +46,19 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 387,
+      "imports": 397,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 298,
+      "imports": 306,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 300,
+      "imports": 313,
       "allowed": true
     },
     {
@@ -101,7 +101,7 @@
     {
       "source": "infrastructure.adapters",
       "target": "domain.ports",
-      "imports": 45
+      "imports": 47
     },
     {
       "source": "composition.factories",
@@ -109,9 +109,14 @@
       "imports": 42
     },
     {
+      "source": "infrastructure.adapters",
+      "target": "domain.types",
+      "imports": 42
+    },
+    {
       "source": "application.core",
       "target": "domain.ports",
-      "imports": 40
+      "imports": 41
     },
     {
       "source": "composition.factories",
@@ -119,19 +124,14 @@
       "imports": 40
     },
     {
-      "source": "infrastructure.adapters",
+      "source": "application.core",
       "target": "domain.types",
-      "imports": 36
+      "imports": 35
     },
     {
       "source": "application.pipelines",
       "target": "domain.types",
       "imports": 33
-    },
-    {
-      "source": "application.core",
-      "target": "domain.types",
-      "imports": 32
     },
     {
       "source": "composition.bootstrap",

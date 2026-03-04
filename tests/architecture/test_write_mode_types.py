@@ -220,7 +220,9 @@ def test_no_silent_degradation_in_batch_writer() -> None:
         'Remove the \'if write_mode == "overwrite": write_mode = "append"\' logic.'
     )
 
-    # Check that new pattern is present
-    assert "Pass write mode directly without silent degradation" in source, (
-        "R1 refactoring comment should be present in batch_writer.py"
+    # Check behavior invariant instead of implementation comment marker:
+    # Silver mode must not include "overwrite" alias in runtime cast.
+    assert 'Literal["merge", "append", "delete"]' in source, (
+        "BatchWriter silver mode must use explicit delete/append/merge set "
+        "without overwrite alias."
     )

@@ -14,9 +14,11 @@ __all__ = ["ADAPTER_REQUEST_ERRORS", "AdapterMetrics"]
 
 
 import time
+from collections import defaultdict, deque
 from collections.abc import Iterator
 from contextlib import contextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from threading import Lock
 from typing import TYPE_CHECKING
 
 from bioetl.domain.exceptions import BioETLError
@@ -58,6 +60,18 @@ class AdapterMetrics:
 
     metrics: MetricsPort
     provider: str
+    _p95_window_size: int = 50
+    _request_duration_windows: dict[str, deque[float]] = field(
+        init=False,
+        repr=False,
+    )
+    _window_lock: Lock = field(default_factory=Lock, init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        """Initialize bounded request-duration windows per endpoint."""
+        self._request_duration_windows = defaultdict(
+            lambda: deque(maxlen=self._p95_window_size)
+        )
 
     @contextmanager
     def measure_request(self, endpoint: str) -> Iterator[None]:
@@ -101,6 +115,7 @@ class AdapterMetrics:
                 1,
                 {**labels, "status": status},
             )
+            self._record_request_p95(endpoint, duration)
 
     def record_batch_size(self, endpoint: str, size: int) -> None:
         """Record batch size for a request.
@@ -141,4 +156,47 @@ class AdapterMetrics:
             "adapter_dropped_duplicates_total",
             count,
             {"provider": self.provider, "entity_type": entity_type},
+        )
+
+    def record_fallback_outcome(
+        self,
+        operation: str,
+        *,
+        candidates: int,
+        hits: int,
+    ) -> None:
+        """Record fallback attempt/hit counters and hit-rate gauge."""
+        total_candidates = max(candidates, 0)
+        total_hits = max(0, min(hits, total_candidates))
+        labels = {"provider": self.provider, "operation": operation}
+
+        if total_candidates > 0:
+            self.metrics.increment_counter(
+                "adapter_fallback_attempts_total",
+                total_candidates,
+                labels,
+            )
+        if total_hits > 0:
+            self.metrics.increment_counter(
+                "adapter_fallback_hits_total",
+                total_hits,
+                labels,
+            )
+
+        hit_rate = (total_hits / total_candidates) if total_candidates else 0.0
+        self.metrics.set_gauge("adapter_fallback_hit_rate", hit_rate, labels)
+
+    def _record_request_p95(self, endpoint: str, duration_seconds: float) -> None:
+        """Update rolling p95 latency gauge for provider+endpoint."""
+        with self._window_lock:
+            samples = self._request_duration_windows[endpoint]
+            samples.append(duration_seconds)
+            sorted_samples = sorted(samples)
+
+        p95_index = int((len(sorted_samples) - 1) * 0.95)
+        p95_value = sorted_samples[p95_index]
+        self.metrics.set_gauge(
+            "adapter_request_p95_seconds",
+            p95_value,
+            {"provider": self.provider, "endpoint": endpoint},
         )

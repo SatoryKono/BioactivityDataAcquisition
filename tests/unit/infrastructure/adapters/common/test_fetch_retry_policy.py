@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from collections.abc import AsyncIterator
 
 import pytest
@@ -48,6 +49,113 @@ def test_is_retry_exhausted_error_direct_and_wrapped() -> None:
     assert is_retry_exhausted_error(retry_error) is True
     assert is_retry_exhausted_error(wrapped) is True
     assert is_retry_exhausted_error(unrelated) is False
+
+
+@st.composite
+def _fallback_chain_case(
+    draw: st.DrawFn,
+) -> tuple[list[str], set[str], list[str], int | None]:
+    id_alphabet = st.characters(
+        whitelist_categories=("Ll", "Lu", "Nd"),
+        min_codepoint=48,
+        max_codepoint=122,
+    )
+    primary_ids = draw(
+        st.lists(
+            st.text(id_alphabet, min_size=1, max_size=8),
+            min_size=0,
+            max_size=8,
+            unique=True,
+        )
+    )
+    if primary_ids:
+        resolved_ids = draw(st.sets(st.sampled_from(primary_ids)))
+    else:
+        resolved_ids = set()
+    title_entries = draw(
+        st.lists(
+            st.one_of(
+                st.just(""),
+                st.from_regex(r"__title_only_[0-9]{1,2}__", fullmatch=True),
+            ),
+            min_size=0,
+            max_size=5,
+        )
+    )
+    max_flow = len(primary_ids) + len(title_entries)
+    limit = draw(st.one_of(st.none(), st.integers(min_value=0, max_value=max_flow + 2)))
+    return primary_ids, resolved_ids, title_entries, limit
+
+
+@given(case=_fallback_chain_case())
+def test_run_fetch_with_fallback_policy_prefix_property(
+    case: tuple[list[str], set[str], list[str], int | None],
+) -> None:
+    primary_ids, resolved_ids, title_only_entries, limit = case
+    fallback_mapping = {
+        **{doi: f"title:{doi}" for doi in primary_ids},
+        **{entry: f"title:{entry or 'empty'}" for entry in title_only_entries},
+    }
+
+    async def primary_records() -> AsyncIterator[dict[str, object]]:
+        for doi in primary_ids:
+            if doi not in resolved_ids:
+                continue
+            yield {"id": f"p:{doi}", "doi": doi}
+
+    class _Policy:
+        async def process_missing_dois(
+            self,
+            dois: list[str],
+            found_dois: set[str],
+            fallback_mapping: dict[str, str],
+            normalize_fn,
+            limit: int | None,
+            fetched: int,
+        ) -> AsyncIterator[dict[str, object]]:
+            del fallback_mapping, normalize_fn, limit, fetched
+            for doi in dois:
+                if doi.lower() in found_dois:
+                    continue
+                yield {"id": f"m:{doi}"}
+
+        async def process_title_only_entries(
+            self,
+            entries: list[str],
+            fallback_mapping: dict[str, str],
+            limit: int | None,
+            fetched: int,
+        ) -> AsyncIterator[dict[str, object]]:
+            del fallback_mapping, limit, fetched
+            for entry in entries:
+                yield {"id": f"t:{entry}"}
+
+    expected_ids = [
+        *(f"p:{doi}" for doi in primary_ids if doi in resolved_ids),
+        *(f"m:{doi}" for doi in primary_ids if doi not in resolved_ids),
+        *(f"t:{entry}" for entry in title_only_entries),
+    ]
+    if limit is not None:
+        expected_ids = expected_ids[:limit]
+
+    async def _collect_ids() -> list[str]:
+        rows = [
+            record
+            async for record in run_fetch_with_fallback_policy(
+                primary_records=primary_records(),
+                primary_ids=primary_ids,
+                title_only_entries=title_only_entries,
+                fallback_mapping=fallback_mapping,
+                normalize_id=lambda value: value,
+                extract_record_id=lambda rec: str(rec.get("doi", "")),
+                fallback_handler=_Policy(),
+                limit=limit,
+                primary_lookup_method="doi",
+            )
+        ]
+        return [str(row["id"]) for row in rows]
+
+    assert asyncio.run(_collect_ids()) == expected_ids
 
 
 class _FallbackStub:

@@ -37,29 +37,17 @@ def log_enrichment_summary(
     composite_name: str,
     logger: LoggerPort,
 ) -> None:
-    """Log aggregated summary of enrichment results.
-
-    Args:
-        enrichment_results: Results from enrichers.
-        composite_name: Name of the composite pipeline.
-        logger: Logger port for structured logging.
-    """
+    """Log aggregated summary of enrichment results."""
     if not enrichment_results:
         return
 
-    # Aggregate by status using counter
     status_counts: dict[EnrichmentStatus, int] = dict.fromkeys(EnrichmentStatus, 0)
-    total_records_input = 0
-    total_records_enriched = 0
-    total_records_errored = 0
-
     failed_enrichers: list[str] = []
     successful_enrichers: list[str] = []
     not_run_enrichers: list[str] = []
-
-    # Track which statuses map to which enricher lists
     success_statuses = {EnrichmentStatus.SUCCESS, EnrichmentStatus.PARTIAL}
     failure_statuses = {EnrichmentStatus.FAILED, EnrichmentStatus.TIMEOUT}
+    total_records_input = total_records_enriched = total_records_errored = 0
 
     for name, result in enrichment_results.items():
         total_records_input += result.records_input
@@ -67,7 +55,6 @@ def log_enrichment_summary(
         total_records_errored += result.records_errored
         status_counts[result.status] += 1
 
-        # Categorize enrichers
         if result.status in success_statuses:
             successful_enrichers.append(name)
         elif result.status in failure_statuses:
@@ -143,24 +130,7 @@ def add_not_run_results(
     composite_name: str,
     logger: LoggerPort,
 ) -> dict[str, EnrichmentResult]:
-    """Add NOT_RUN results for optional enrichers skipped due to required_only mode.
-
-    When required_only is True, optional enrichers are not executed. This function
-    adds explicit NOT_RUN results for these enrichers so they appear in the
-    final enrichment_results for complete lineage tracking.
-
-    Args:
-        enrichment_results: Current enrichment results from executed enrichers.
-        enrichers_to_run: List of enrichers that were actually run.
-        all_enrichers: All enrichers in the config.
-        completed_enrichers: Set of previously completed enricher names.
-        required_only: Whether required_only mode is active.
-        composite_name: Name of the composite pipeline.
-        logger: Logger port for structured logging.
-
-    Returns:
-        Updated enrichment_results with NOT_RUN entries for skipped optional enrichers.
-    """
+    """Mark optional enrichers skipped in required-only mode as NOT_RUN."""
     if not required_only:
         return enrichment_results
 

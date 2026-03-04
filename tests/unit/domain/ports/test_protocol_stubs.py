@@ -29,6 +29,7 @@ from bioetl.domain.ports.dq_report import (
     GoldDQAnalyzerPort,
     SilverDQAnalyzerPort,
 )
+from bioetl.domain.ports.fallback_policy import FallbackPolicyPort
 from bioetl.domain.ports.health_check import (
     HealthCheckPort,
     HealthMonitorPort,
@@ -65,6 +66,7 @@ PROTOCOL_CLASSES = [
     ClockPort,
     DataSourcePort,
     FilterableDataSourcePort,
+    FallbackPolicyPort,
     BronzeDQConfigPort,
     SilverDQConfigPort,
     GoldDQConfigPort,

@@ -409,5 +409,4 @@ class GoldWriterIOMixin:
         return result[:limit] if limit > 0 else result
 
 
-
 __all__ = ["GoldWriterIOMixin"]

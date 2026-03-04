@@ -20,7 +20,11 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.infrastructure.quality import get_registry_values
+from bioetl.infrastructure.quality import (
+    build_module_path_key,
+    get_registry_values,
+    resolve_registry_value,
+)
 
 
 class TestDomainImmutability:
@@ -253,7 +257,13 @@ class TestDomainComplexity:
             try:
                 results = cc_visit(content)
                 for item in results:
-                    func_max_cc = exemptions.get(item.name, max_cc)
+                    func_max_cc = resolve_registry_value(
+                        exemptions,
+                        module_path=build_module_path_key(py_file, src_root=src_dir),
+                        symbol_name=item.name,
+                    )
+                    if func_max_cc is None:
+                        func_max_cc = max_cc
                     if item.complexity > func_max_cc:
                         violations.append(
                             f"{py_file}:{item.lineno} - {item.name}() "

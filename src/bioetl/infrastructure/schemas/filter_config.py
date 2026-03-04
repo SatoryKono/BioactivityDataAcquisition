@@ -30,28 +30,9 @@ from bioetl.domain.filtering import (
 from bioetl.domain.filtering import InputFilterConfig as DomainInputFilterConfig
 from bioetl.domain.models.filter import ExtractionParams
 from bioetl.infrastructure.schemas.base_schemas import (
-    BaseFilterColumnSchema,
-    BaseGoldColumnFilterConfig,
     BaseGoldFiltersConfig,
-    BaseGoldListContainsFilterConfig,
-    BaseGoldListLengthFilterConfig,
-    BaseGoldRangeFilterConfig,
     BaseInputFilterConfig,
 )
-
-# =============================================================================
-# Type Aliases for Backward Compatibility
-# =============================================================================
-# These are type aliases pointing to base classes for API consistency.
-# New code should use the classes from base_schemas directly.
-
-# Re-export base classes with filter_config-specific names
-FilterColumnSchema = BaseFilterColumnSchema
-GoldRangeFilterConfig = BaseGoldRangeFilterConfig
-GoldListLengthFilterConfig = BaseGoldListLengthFilterConfig
-GoldListContainsFilterConfig = BaseGoldListContainsFilterConfig
-GoldColumnFilterConfig = BaseGoldColumnFilterConfig
-
 
 # =============================================================================
 # Filter Configuration File Schemas
@@ -227,13 +208,8 @@ class FilterConfigFile(BaseModel):
 
 
 __all__ = [
-    "FilterColumnSchema",
     "FilterConfigFile",
-    "GoldColumnFilterConfig",
     "GoldFiltersFileConfig",
-    "GoldListContainsFilterConfig",
-    "GoldListLengthFilterConfig",
-    "GoldRangeFilterConfig",
     "InputFilterFileConfig",
     "SilverFiltersFileConfig",
 ]

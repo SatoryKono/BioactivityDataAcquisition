@@ -177,5 +177,3 @@ class ColumnPriorityOrdererService:
                 return col
 
         return None
-
-

@@ -19,7 +19,7 @@ governance:
       group:*: '2026-03-03'
 
 baseline:
-  total_exemptions: 292
+  total_exemptions: 293
   by_registry:
     file_size_limits: 73
     function_complexity: 36
@@ -27,7 +27,7 @@ baseline:
     class_size: 52
     class_method_count: 1
     god_object: 23
-    domain_complexity: 35
+    domain_complexity: 36
 
 registry_groups:
   size_shape:

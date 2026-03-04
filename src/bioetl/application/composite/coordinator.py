@@ -9,7 +9,6 @@ See ADR-026 for architectural decisions.
 from __future__ import annotations
 
 import asyncio
-import warnings
 from collections.abc import Callable, Sequence
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
@@ -48,7 +47,7 @@ _ENRICHER_EXECUTION_ERRORS = (
 )
 
 
-__all__ = ["EnrichmentCoordinator", "EnrichmentCoordinatorService"]
+__all__ = ["EnrichmentCoordinatorService"]
 
 
 def _create_enricher_semaphore(max_concurrency: int) -> asyncio.Semaphore:
@@ -192,42 +191,28 @@ class EnrichmentCoordinatorService:
     def _apply_filter(
         self, keys: pl.DataFrame, enricher: EnricherConfig
     ) -> pl.DataFrame:
-        """Apply filter condition to keys DataFrame.
-
-        Filters keys based on the enricher's filter_condition.
-        If no condition, returns all keys.
-
-        Args:
-            keys: Full keys DataFrame.
-            enricher: Enricher configuration with optional filter.
-
-        Returns:
-            Filtered DataFrame.
-        """
+        """Apply simple NULL/NOT NULL filter condition for enricher keys."""
         import polars as pl
 
         if not enricher.filter_condition:
             return keys
 
         try:
-            # Parse simple SQL-like conditions
-            # Supports: "field IS NOT NULL", "field IS NULL"
             condition = enricher.filter_condition.strip()
+            condition_upper = condition.upper()
 
-            if " IS NOT NULL" in condition.upper():
-                raw_field = condition.upper().replace(" IS NOT NULL", "").strip()
+            if " IS NOT NULL" in condition_upper:
+                raw_field = condition_upper.replace(" IS NOT NULL", "").strip()
                 matched = self._find_column_case_insensitive(keys, raw_field)
                 if matched:
                     return keys.filter(pl.col(matched).is_not_null())
 
-            if " IS NULL" in condition.upper():
-                raw_field = condition.upper().replace(" IS NULL", "").strip()
+            if " IS NULL" in condition_upper:
+                raw_field = condition_upper.replace(" IS NULL", "").strip()
                 matched = self._find_column_case_insensitive(keys, raw_field)
                 if matched:
                     return keys.filter(pl.col(matched).is_null())
 
-            # For complex conditions, try SQL expression
-            # This is a simplified implementation
             self._logger.warning(
                 "Complex filter condition not fully supported",
                 enricher=enricher.pipeline,
@@ -235,23 +220,16 @@ class EnrichmentCoordinatorService:
             )
             return keys
 
-        except _FILTER_CONDITION_ERRORS as e:
+        except (*_FILTER_CONDITION_ERRORS, BioETLError) as e:
             self._logger.warning(
                 "Failed to apply filter condition",
                 enricher=enricher.pipeline,
                 condition=enricher.filter_condition,
                 error=str(e),
                 error_type=type(e).__name__,
-            )
-            return keys
-        except BioETLError as e:
-            self._logger.warning(
-                "Failed to apply filter condition",
-                enricher=enricher.pipeline,
-                condition=enricher.filter_condition,
-                error=str(e),
-                error_type=type(e).__name__,
-                reason_code="unexpected_bioetl_error",
+                reason_code=(
+                    "unexpected_bioetl_error" if isinstance(e, BioETLError) else None
+                ),
             )
             return keys
 
@@ -486,19 +464,3 @@ class EnrichmentCoordinatorService:
                 processed[name] = result
 
         return processed
-
-
-if TYPE_CHECKING:
-    EnrichmentCoordinator = EnrichmentCoordinatorService
-
-
-def __getattr__(name: str) -> object:
-    """Resolve deprecated compatibility aliases lazily."""
-    if name == "EnrichmentCoordinator":
-        warnings.warn(
-            "EnrichmentCoordinator is deprecated; use EnrichmentCoordinatorService.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return EnrichmentCoordinatorService
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

@@ -5,6 +5,11 @@ from __future__ import annotations
 __all__ = [
     "ADAPTER_BATCH_SIZE",
     "ADAPTER_DROPPED_DUPLICATES_TOTAL",
+    "ADAPTER_ERROR_TAXONOMY_TOTAL",
+    "ADAPTER_FALLBACK_ATTEMPTS_TOTAL",
+    "ADAPTER_FALLBACK_HIT_RATE",
+    "ADAPTER_FALLBACK_HITS_TOTAL",
+    "ADAPTER_REQUEST_P95_SECONDS",
     "ADAPTER_REQUESTS_TOTAL",
     "ADAPTER_REQUEST_DURATION_SECONDS",
     "ARCHIVE_DURATION_SECONDS",
@@ -382,6 +387,12 @@ ADAPTER_REQUEST_DURATION_SECONDS = Histogram(
     buckets=[0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0, 30.0],
 )
 
+ADAPTER_REQUEST_P95_SECONDS = Gauge(
+    "bioetl_adapter_request_p95_seconds",
+    "Rolling p95 latency of adapter requests in seconds",
+    ["provider", "endpoint"],
+)
+
 ADAPTER_REQUESTS_TOTAL = Counter(
     "bioetl_adapter_requests_total",
     "Total adapter API requests",
@@ -399,6 +410,30 @@ ADAPTER_DROPPED_DUPLICATES_TOTAL = Counter(
     "bioetl_adapter_dropped_duplicates_total",
     "Total duplicate records dropped by adapter dedup",
     ["provider", "entity_type"],
+)
+
+ADAPTER_FALLBACK_ATTEMPTS_TOTAL = Counter(
+    "bioetl_adapter_fallback_attempts_total",
+    "Total fallback resolution candidates processed by adapter flows",
+    ["provider", "operation"],
+)
+
+ADAPTER_FALLBACK_HITS_TOTAL = Counter(
+    "bioetl_adapter_fallback_hits_total",
+    "Total records resolved via fallback paths",
+    ["provider", "operation"],
+)
+
+ADAPTER_FALLBACK_HIT_RATE = Gauge(
+    "bioetl_adapter_fallback_hit_rate",
+    "Fallback hit-rate for adapter flows (0-1)",
+    ["provider", "operation"],
+)
+
+ADAPTER_ERROR_TAXONOMY_TOTAL = Counter(
+    "bioetl_adapter_error_taxonomy_total",
+    "Error taxonomy counter for adapter failures",
+    ["provider", "operation", "error_category", "error_type"],
 )
 
 DATA_SOURCE_RETRIES_TOTAL = Counter(

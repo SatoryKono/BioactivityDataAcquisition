@@ -231,36 +231,7 @@ def create_pipeline_runner(name: str, options: RunOptions) -> PipelineRunner:
 
 
 async def run_pipeline(name: str, options: RunOptions) -> RunResult:
-    """Run a pipeline with the given options.
-
-    Unified pipeline execution interface that creates a runner, executes the
-    pipeline, and returns structured results. This is the recommended way to
-    run pipelines programmatically from any orchestration layer.
-
-    For lower-level control over execution (e.g., signal handling, custom
-    logging), use create_pipeline_runner() directly.
-
-    Args:
-        name: Pipeline name (e.g., 'chembl_activity').
-        options: User-facing run options.
-
-    Returns:
-        RunResult with execution metrics and status.
-
-    Raises:
-        ValueError: If pipeline name is unknown or options are invalid.
-        FileNotFoundError: If pipeline config file is missing.
-
-    Example:
-        >>> options = RunOptions(run_type="incremental", limit=100)
-        >>> result = await run_pipeline("chembl_activity", options)
-        >>> if result.status == PipelineRunResult.SUCCESS:
-        ...     logger.info("pipeline_success", records_silver=result.records_silver)
-        >>> elif result.status == PipelineRunResult.SHUTDOWN:
-        ...     logger.info("pipeline_shutdown", pipeline="chembl_activity")
-        >>> else:
-        ...     logger.error("pipeline_failed", error_message=result.error_message)
-    """
+    """Run pipeline end-to-end and return structured execution result."""
     # Start metrics server if enabled (side-effect in entrypoint, not bootstrap)
     settings = get_settings()
     maybe_start_metrics_server(settings)

@@ -557,9 +557,8 @@ composite:
     # Data Quality Configuration
     # ---------------------------------------------------------------------------
     dq_overrides:
-        # Composite-level thresholds (applied to merge result)
-        soft_fail_threshold: 0.10  # 10% errors = warning
-        hard_fail_threshold: 0.30  # 30% errors = failure
+        # External baseline DQ config (ADR-027)
+        dq_config_file: ../quality/entities/composite/publication.yaml
 
         # Per-enricher threshold overrides
         enricher_overrides:
@@ -571,15 +570,6 @@ composite:
             pubmed_publication:
                 soft_fail_threshold: 0.15
                 hard_fail_threshold: 0.40
-
-        # Required fields in final Gold output
-        required_fields:
-            - publication_id
-            - title
-
-        # Field-level validations externalized per ADR-027.
-        # Inline values in this section keep highest precedence over file values.
-        dq_config_file: ../quality/entities/composite/publication.yaml
 
     # ---------------------------------------------------------------------------
     # Execution Options

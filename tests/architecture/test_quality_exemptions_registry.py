@@ -5,6 +5,7 @@ from __future__ import annotations
 from bioetl.infrastructure.quality import (
     get_registry_values,
     load_exemptions_registry,
+    validate_exemption_key_normalization,
     validate_exemptions_registry,
 )
 
@@ -33,6 +34,14 @@ def test_exemption_registry_metadata_is_complete() -> None:
     )
     # Expiry enforcement is controlled by CI gate mode (warn/block).
     assert isinstance(expired_entries, list)
+
+
+def test_exemption_registry_file_size_keys_are_normalized() -> None:
+    key_errors = validate_exemption_key_normalization()
+    assert not key_errors, (
+        "Exemption registry key normalization errors found:\n"
+        + "\n".join(f"  - {e}" for e in key_errors)
+    )
 
 
 def test_exemption_registry_policy_requires_owner_and_due_date() -> None:

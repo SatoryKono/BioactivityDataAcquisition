@@ -1,4 +1,4 @@
-"""Compatibility shim for ChEMBL fetch adapter mixin.
+"""Compatibility shim for ChEMBL adapter fetch mixin.
 
 Canonical implementation lives in ``fetch_adapter_mixin.py``.
 """
