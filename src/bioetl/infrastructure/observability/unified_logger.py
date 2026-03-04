@@ -156,7 +156,9 @@ class UnifiedLogger:
         return self._logger.info(_event, **self._ensure_stage(kwargs))
 
     def warning(
-        self, _event: str, **kwargs: Any
+        self,
+        _event: str,
+        **kwargs: Any,  # Any: structlog/OTel-compatible API
     ) -> Any:  # Any: structlog-compatible API
         """Log a warning message.
 
@@ -208,7 +210,9 @@ class UnifiedLogger:
         return self._logger.debug(_event, **self._ensure_stage(kwargs))
 
     def exception(
-        self, _event: str, **kwargs: Any
+        self,
+        _event: str,
+        **kwargs: Any,  # Any: structlog/OTel-compatible API
     ) -> Any:  # Any: structlog-compatible API
         """Log an exception with traceback.
 

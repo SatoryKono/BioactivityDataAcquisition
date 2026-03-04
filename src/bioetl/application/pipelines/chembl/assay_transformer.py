@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 
 # Mapping for variant sequence fields extraction (from ChEMBL nested structure)
 # Source field is 'tax_id' from API, will be renamed to 'taxonomy_id' via renames
-_VARIANT_FIELDS: dict[str, Any] = {
+_VARIANT_FIELDS: dict[str, Any] = {  # Any: transformer record has heterogeneous values
     "accession": safe_str,
     "isoform": safe_str,
     "mutation": safe_str,
@@ -48,7 +48,9 @@ _VARIANT_RENAMES: dict[str, str] = {
 }
 
 
-def _extract_variant(data: dict[str, Any] | None) -> dict[str, Any]:
+def _extract_variant(
+    data: dict[str, Any] | None,  # Any: transformer record has heterogeneous values
+) -> dict[str, Any]:  # Any: transformer record has heterogeneous values
     """Extract variant sequence fields using flatten_nested_dict.
 
     Args:
@@ -160,7 +162,7 @@ class AssayTransformer(BaseChemblTransformer):
         self,
         record: BronzeRecord,
         primary_id: PrimaryId,
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any]:  # Any: transformer record has heterogeneous values
         """Extract Assay business data from bronze record.
 
         Args:
@@ -178,7 +180,12 @@ class AssayTransformer(BaseChemblTransformer):
             **map_field_groups(record, _ASSAY_GROUPS),
             # Nested dict extraction (variant)
             **_extract_variant(
-                cast("dict[str, Any] | None", record.get("variant_sequence"))
+                cast(
+                    "dict[str, Any] | None",  # Any: transformer record has heterogeneous values
+                    record.get(
+                        "variant_sequence"
+                    ),  # Any: transformer record has heterogeneous values
+                )  # Any: transformer record has heterogeneous values
             ),
             # JSON serialization
             "variant_sequence_json": self.serialize_json(

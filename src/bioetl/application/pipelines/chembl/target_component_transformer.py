@@ -56,7 +56,7 @@ class TargetComponentTransformer(BaseChemblTransformer):
         self,
         record: BronzeRecord,
         primary_id: PrimaryId,
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any]:  # Any: transformer record has heterogeneous values
         """Extract TargetComponent business data from bronze record.
 
         Args:
@@ -81,7 +81,7 @@ class TargetComponentTransformer(BaseChemblTransformer):
             if (
                 classification_ids := extract_list_field(
                     cast(
-                        "list[dict[str, Any]] | None",
+                        "list[dict[str, Any]] | None",  # Any: transformer record has heterogeneous values
                         rec.get("protein_classifications"),
                     ),
                     "protein_classification_id",

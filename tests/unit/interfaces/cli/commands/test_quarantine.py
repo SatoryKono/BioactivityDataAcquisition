@@ -294,7 +294,7 @@ class TestQuarantineStats:
     ) -> None:
         """Test quarantine stats handles exceptions."""
         mock_quarantine_manager.get_stats = AsyncMock(
-            side_effect=Exception("Database error")
+            side_effect=RuntimeError("Database error")
         )
 
         with patch(

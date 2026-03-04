@@ -108,9 +108,11 @@ class ArticleRecord(BaseModel):
     gene_symbols: list[str] = PydanticField(
         default_factory=list, description="Gene symbols from GeneSymbolList"
     )
-    databanks: list[dict[str, Any]] = PydanticField(
-        default_factory=list,
-        description="Data bank references (list of {databank_name, accession_numbers})",
+    databanks: list[dict[str, Any]] = (  # Any: nested API JSON has heterogeneous values
+        PydanticField(  # Any: nested API JSON has heterogeneous values
+            default_factory=list,
+            description="Data bank references (list of {databank_name, accession_numbers})",
+        )
     )
 
     # Additional metadata
@@ -196,7 +198,11 @@ class PubMedPublicationEntity(PublicationEntityBase):
     # PubMed-specific chemical and genetic data
     chemicals: list[str] = field(default_factory=list)  # ChemicalList/NameOfSubstance
     gene_symbols: list[str] = field(default_factory=list)  # GeneSymbolList
-    databanks: list[dict[str, Any]] = field(default_factory=list)  # DataBankList
+    databanks: list[dict[str, Any]] = (  # Any: nested API JSON has heterogeneous values
+        field(  # Any: nested API JSON has heterogeneous values
+            default_factory=list
+        )
+    )  # DataBankList  # Any: nested API JSON has heterogeneous values
 
     # PubMed-specific metadata
     country: str | None = None

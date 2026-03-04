@@ -59,7 +59,9 @@ class DQResult:
 
     error_rate: float
     status: DQEvaluationStatus
-    anomalies: tuple[Any, ...] = field(default_factory=tuple)
+    anomalies: tuple[Any, ...] = field(  # Any: DQ anomaly type varies by check
+        default_factory=tuple
+    )  # Any: DQ anomaly type varies by check
     has_critical: bool = False
     check_duration_ms: float = 0.0
 

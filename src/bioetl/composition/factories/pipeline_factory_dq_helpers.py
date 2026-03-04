@@ -11,10 +11,10 @@ if TYPE_CHECKING:
 
 
 def extract_single_dq_config(
-    sink: Any,
+    sink: Any,  # Any: factory wiring; concrete types resolved at runtime
     layer_name: str,
-    config_class: Any,
-) -> Any | None:
+    config_class: Any,  # Any: factory wiring; concrete types resolved at runtime
+) -> Any | None:  # Any: factory wiring; concrete types resolved at runtime
     """Extract DQ config for a single layer."""
     sink_config = sink.get(layer_name)
     if not sink_config:
@@ -55,12 +55,16 @@ def extract_dq_configs(yaml_config: PipelineYamlConfig | None) -> DQConfigsConte
     )
 
 
-def get_layer_path(config: Any) -> str | None:
+def get_layer_path(
+    config: Any,  # Any: DQ check values vary by check type
+) -> str | None:  # Any: factory wiring; concrete types resolved at runtime
     """Extract path from layer config if available."""
     return getattr(config, "path", None) if config else None
 
 
-def has_flat_structure(config: Any) -> bool:
+def has_flat_structure(
+    config: Any,  # Any: DQ check values vary by check type
+) -> bool:  # Any: factory wiring; concrete types resolved at runtime
     """Check if layer config has flat_structure enabled."""
     return bool(config and getattr(config, "flat_structure", False))
 

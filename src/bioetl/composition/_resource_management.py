@@ -163,7 +163,9 @@ async def preview_cleanup(pipeline: str) -> CleanupPreview:
     )
 
 
-async def inspect_quarantine(pipeline: str, limit: int = 100) -> list[dict[str, Any]]:
+async def inspect_quarantine(
+    pipeline: str, limit: int = 100
+) -> list[dict[str, Any]]:  # Any: quarantine record has heterogeneous values
     """Inspect quarantined records for a pipeline.
 
     Convenience function for quick quarantine inspection.
@@ -181,7 +183,11 @@ async def inspect_quarantine(pipeline: str, limit: int = 100) -> list[dict[str, 
         ['DQ_MISSING_FIELD', 'DQ_INVALID_SMILES']
     """
     manager = get_quarantine_manager(pipeline)
-    records: list[dict[str, Any]] = await manager.inspect(limit=limit)
+    records: list[
+        dict[str, Any]  # Any: factory wiring; concrete types resolved at runtime
+    ] = await manager.inspect(  # Any: factory wiring; concrete types resolved at runtime
+        limit=limit
+    )  # Any: factory wiring; concrete types resolved at runtime
     return records
 
 

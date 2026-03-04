@@ -27,7 +27,7 @@ class CheckpointInfo:
 
     pipeline_name: str
     run_id: str | None
-    metadata: dict[str, Any]
+    metadata: dict[str, Any]  # Any: checkpoint metadata values are heterogeneous
 
 
 @dataclass

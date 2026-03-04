@@ -38,7 +38,7 @@ class QuarantineManagerService:
 
     async def quarantine_record(
         self,
-        record: dict[str, Any],
+        record: dict[str, Any],  # Any: quarantine record has heterogeneous values
         error_type: ErrorType,
         batch_id: BatchID,
         error_details: str,
@@ -72,7 +72,7 @@ class QuarantineManagerService:
 
     async def quarantine_filtered_record(
         self,
-        record: dict[str, Any],
+        record: dict[str, Any],  # Any: quarantine record has heterogeneous values
         batch_id: BatchID,
         error_details: str,
         *,
@@ -112,7 +112,7 @@ class QuarantineManagerService:
         self,
         limit: int = 100,
         error_code: str | None = None,
-    ) -> list[dict[str, Any]]:
+    ) -> list[dict[str, Any]]:  # Any: quarantine record has heterogeneous values
         """Inspect quarantined records for this pipeline.
 
         Delegates to QuarantinePort.inspect() for CLI inspection commands.
@@ -131,7 +131,9 @@ class QuarantineManagerService:
             error_code=error_code,
         )
 
-    async def get_stats(self) -> dict[str, Any]:
+    async def get_stats(
+        self,
+    ) -> dict[str, Any]:  # Any: quarantine record has heterogeneous values
         """Get statistics about quarantined records for this pipeline.
 
         Delegates to QuarantinePort.get_stats() for CLI reporting.

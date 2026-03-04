@@ -53,7 +53,9 @@ class CheckpointManagerService:
         self._resume = resume
         self._loading_strategy = loading_strategy
 
-    async def load_checkpoint(self) -> dict[str, Any] | None:
+    async def load_checkpoint(
+        self,
+    ) -> dict[str, Any] | None:  # Any: checkpoint state has heterogeneous values
         """Load checkpoint if resuming.
 
         When loading_strategy is FULL_SCAN_ONLY (ADR-030, ADR-031), checkpoint loading

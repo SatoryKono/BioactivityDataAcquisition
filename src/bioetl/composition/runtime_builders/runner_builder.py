@@ -220,7 +220,9 @@ def _build_observability_bundle(
     )
 
 
-def _validate_pk_contract(config: Any) -> None:
+def _validate_pk_contract(
+    config: Any,  # Any: factory wiring; concrete types resolved at runtime
+) -> None:  # Any: factory wiring; concrete types resolved at runtime
     """Fail-fast validation for PK configuration consistency."""
     business_primary_keys = tuple(getattr(config, "business_primary_keys", ()) or ())
     legacy_primary_keys = getattr(config, "primary_keys", None)
@@ -251,7 +253,7 @@ def build_pipeline_runner(
     register_all_pipelines_fn: Callable[..., None] = register_all_pipelines,
     get_settings_fn: Callable[[], Settings] = get_settings,
     load_pipeline_config_fn: Callable[
-        [str], Any
+        [str], Any  # Any: factory wiring; concrete types resolved at runtime
     ] = load_pipeline_config,  # Any: config type varies per pipeline
     build_observability_bundle_fn: Callable[
         ..., ObservabilityBundle

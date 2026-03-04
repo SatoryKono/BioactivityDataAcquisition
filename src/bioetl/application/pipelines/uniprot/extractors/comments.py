@@ -282,7 +282,9 @@ class CommentExtractor:
 
     @classmethod
     def extract_by_type(
-        cls, comments: Any, comment_type: str
+        cls,
+        comments: Any,  # Any: untyped API JSON
+        comment_type: str,  # Any: untyped UniProt API JSON
     ) -> str | None:  # Any: untyped UniProt JSON
         """Extract comments of specific type as JSON string.
 
@@ -441,7 +443,7 @@ class CommentExtractor:
 
     @staticmethod
     def extract_biophysicochemical_properties(
-        comments: Any,
+        comments: Any,  # Any: untyped UniProt API JSON
     ) -> str | None:  # Any: untyped UniProt JSON
         """Extract biophysicochemical properties from comments.
 
@@ -481,7 +483,7 @@ class CommentExtractor:
 
     @staticmethod
     def extract_isoform_details(
-        comments: Any,
+        comments: Any,  # Any: untyped UniProt API JSON
     ) -> dict[str, str | None]:  # Any: untyped UniProt JSON
         """Extract detailed isoform information from ALTERNATIVE PRODUCTS.
 

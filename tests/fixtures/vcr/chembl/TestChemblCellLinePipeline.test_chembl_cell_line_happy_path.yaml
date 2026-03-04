@@ -332,8 +332,8 @@ interactions:
         "WiDr-NTR", "cell_source_organism": "Homo sapiens", "cell_source_tax_id":
         9606, "cell_source_tissue": "Colon Adenocarcinoma", "cellosaurus_id": null,
         "cl_lincs_id": null, "clo_id": null, "efo_id": null}], "page_meta": {"limit":
-        10, "next": "/chembl/api/data/cell_line?limit=10&offset=10", "offset":
-        0, "previous": null, "total_count": 2215}}'
+        10, "next": "/chembl/api/data/cell_line?limit=10&offset=10", "offset": 0,
+        "previous": null, "total_count": 2215}}'
     headers:
       cache-control:
       - max-age=30000000, s-maxage=30000000
@@ -355,6 +355,95 @@ interactions:
       - 'True'
       x-chembl-retrieval-time:
       - '0.008122682571411133'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.ebi.ac.uk
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://www.ebi.ac.uk/chembl/api/data/status
+  response:
+    body:
+      string: '{"activities": 24267312, "chembl_db_version": "ChEMBL_36", "chembl_release_date":
+        "2025-07-28", "compound_records": 3774137, "disinct_compounds": 2878135, "publications":
+        99142, "status": "UP", "targets": 17803}'
+    headers:
+      Cache-Control:
+      - max-age=30000000, s-maxage=30000000
+      Connection:
+      - Keep-Alive
+      Content-Length:
+      - '211'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 04 Mar 2026 04:28:17 GMT
+      Server:
+      - gunicorn/20.0.4
+      Strict-Transport-Security:
+      - max-age=0
+      Vary:
+      - Accept, Origin
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.ebi.ac.uk
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://www.ebi.ac.uk/chembl/api/data/cell_line?format=json&limit=1&offset=0
+  response:
+    body:
+      string: '{"cell_lines": [{"cell_chembl_id": "CHEMBL3307241", "cell_description":
+        "DC3F", "cell_id": 1, "cell_name": "DC3F", "cell_source_organism": "Cricetulus
+        griseus", "cell_source_tax_id": 10029, "cell_source_tissue": "Lung", "cellosaurus_id":
+        "CVCL_4704", "cl_lincs_id": null, "clo_id": null, "efo_id": null}], "page_meta":
+        {"limit": 1, "next": "/chembl/api/data/cell_line.json?limit=1&offset=1", "offset":
+        0, "previous": null, "total_count": 2215}}'
+    headers:
+      Cache-Control:
+      - max-age=30000000, s-maxage=30000000
+      Connection:
+      - Keep-Alive
+      Content-Disposition:
+      - inline
+      Content-Length:
+      - '444'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 04 Mar 2026 04:28:18 GMT
+      Server:
+      - gunicorn/20.0.4
+      Strict-Transport-Security:
+      - max-age=0
+      Vary:
+      - Accept, Origin
+      X-ChEMBL-in-cache:
+      - 'True'
+      X-ChEMBL-retrieval-time:
+      - '0.00964212417602539'
     status:
       code: 200
       message: OK

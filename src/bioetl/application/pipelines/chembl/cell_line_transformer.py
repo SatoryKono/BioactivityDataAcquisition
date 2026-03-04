@@ -51,7 +51,7 @@ class CellLineTransformer(BaseChemblTransformer):
         self,
         record: BronzeRecord,
         primary_id: PrimaryId,
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any]:  # Any: transformer record has heterogeneous values
         """Extract CellLine business data from bronze record.
 
         Delegates normalization/validation to domain layer per REFACTOR-004.

@@ -86,7 +86,7 @@ class StorageFactory:
     @staticmethod
     def _resolve_layer_path(
         # Any: dynamic Pydantic sink ...
-        layer_config: Any,
+        layer_config: Any,  # Any: factory wiring; concrete types resolved at runtime
         default_path: Path,
         use_yaml_paths: bool,
     ) -> Path:

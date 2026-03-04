@@ -39,12 +39,12 @@ BronzeRecord: TypeAlias = dict[str, Any]  # Any: raw API JSON has heterogeneous 
 """Untyped dictionary representing a raw record from the source."""
 
 GoldRecord: TypeAlias = dict[
-    str, Any
-]  # Any: heterogeneous scalar types before Pandera coercion
+    str, Any  # Any: heterogeneous scalar types before Pandera coercion
+]
 """Record after Silver→Gold transform, before schema validation."""
 
 MetaDict: TypeAlias = dict[
-    str, Any
+    str, Any  # Any: values are heterogeneous
 ]  # Any: freeform metadata (str|int|float|datetime|None)
 """Freeform metadata bag used in aggregates, audit entries, events."""
 

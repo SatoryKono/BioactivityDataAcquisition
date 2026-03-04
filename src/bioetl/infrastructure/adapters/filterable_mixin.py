@@ -29,7 +29,9 @@ class HasFetchFiltered(Protocol):
         filter_ids: list[str],
         filter_field: str,
         limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[
+        dict[str, Any]  # Any: filter record values vary (str|int|float|list)
+    ]:  # Any: filter record values vary (str|int|float|list)
         """Fetch records filtered by specific IDs.
 
         Args:
@@ -67,7 +69,9 @@ class NotSupportedMultiFilterMixin:
         entity_type: str,
         filters: dict[str, list[str]],
         limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[
+        dict[str, Any]  # Any: filter record values vary (str|int|float|list)
+    ]:  # Any: filter record values vary (str|int|float|list)
         """Multi-field filtering not supported - raises NotImplementedError.
 
         Args:
@@ -115,7 +119,9 @@ class DelegatingFallbackMixin:
         filter_field: str,
         fallback_mapping: dict[str, str],
         limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[
+        dict[str, Any]  # Any: filter record values vary (str|int|float|list)
+    ]:  # Any: filter record values vary (str|int|float|list)
         """Fallback not needed - delegates to fetch_filtered().
 
         The fallback_mapping parameter is ignored since the primary IDs

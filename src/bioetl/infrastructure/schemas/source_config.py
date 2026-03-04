@@ -114,7 +114,10 @@ class ProviderConfigYaml(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def _promote_legacy_pagination(cls, data: dict[str, Any]) -> dict[str, Any]:
+    def _promote_legacy_pagination(
+        cls,
+        data: dict[str, Any],  # Any: YAML config has heterogeneous values
+    ) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
         """Promote legacy batch_size/page_size/max_url_length into pagination.
 
         When the ``pagination`` section is absent but legacy fields are set,

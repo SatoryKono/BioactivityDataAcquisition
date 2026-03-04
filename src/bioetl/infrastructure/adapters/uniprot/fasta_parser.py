@@ -13,7 +13,7 @@ class FastaParser:
     """Parses FASTA format text into sequence records."""
 
     @staticmethod
-    def parse(fasta_text: str) -> list[dict[str, Any]]:
+    def parse(fasta_text: str) -> list[dict[str, Any]]:  # Any: untyped API JSON record
         """Parse FASTA format text into sequence records.
 
         Args:
@@ -27,7 +27,7 @@ class FastaParser:
             >>> FastaParser.parse(text)
             [{'header': 'sp|P12345|GENE_HUMAN Description', 'sequence': 'MKTAYIAKQR'}]
         """
-        records: list[dict[str, Any]] = []
+        records: list[dict[str, Any]] = []  # Any: untyped API JSON record
         current_header: str | None = None
         current_sequence: list[str] = []
 

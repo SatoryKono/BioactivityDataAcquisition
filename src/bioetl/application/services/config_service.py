@@ -63,7 +63,7 @@ class SettingsPort(Protocol):
         """Path for quarantine storage."""
         ...
 
-    def model_dump(self) -> dict[str, Any]:
+    def model_dump(self) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
         """Convert settings to dictionary.
 
         Returns:
@@ -81,7 +81,7 @@ class PipelineYamlConfigPort(Protocol):
     silver_table: str
     gold_table: str | None
 
-    def model_dump(self) -> dict[str, Any]:
+    def model_dump(self) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
         """Convert configuration to dictionary.
 
         Returns:
@@ -186,7 +186,7 @@ class SettingsInfo:
     metrics_enabled: bool
     metrics_port: int
     batch_size: int
-    additional: dict[str, Any]
+    additional: dict[str, Any]  # Any: YAML config has heterogeneous values
 
 
 @dataclass
@@ -289,7 +289,9 @@ class ConfigService:
 
         return domain_config
 
-    def get_pipeline_yaml_config(self, pipeline_name: str) -> dict[str, Any]:
+    def get_pipeline_yaml_config(
+        self, pipeline_name: str
+    ) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
         """Get raw pipeline YAML configuration as dictionary.
 
         Useful for CLI display commands that show full configuration.

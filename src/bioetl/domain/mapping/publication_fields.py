@@ -189,9 +189,9 @@ def get_provider_name(provider: ProviderName, unified_field: str) -> str:
 
 
 def apply_field_mapping(
-    record: dict[str, Any],
+    record: dict[str, Any],  # Any: record values are heterogeneous
     provider: ProviderName,
-) -> dict[str, Any]:
+) -> dict[str, Any]:  # Any: record values are heterogeneous
     """Apply field name mapping to a record (provider → unified names).
 
     Renames fields according to PUBLICATION_FIELD_MAPPING for the given provider.

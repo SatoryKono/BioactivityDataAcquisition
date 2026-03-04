@@ -69,10 +69,12 @@ class SilverDQAnalyzer:
         input_record_count: int | None,
         quarantined_count: int,
         previous_schema: dict[str, str] | None,
-        key_nullability_rules: list[dict[str, Any]]
+        key_nullability_rules: list[
+            dict[str, Any]  # Any: DQ check values vary by check type
+        ]  # Any: DQ rule definitions have heterogeneous values
         | None,  # Any: DQ check values vary by check type
     ) -> tuple[
-        dict[str, Any], int, int, int
+        dict[str, Any], int, int, int  # Any: DQ check values vary by check type
     ]:  # Any: DQ check values vary by check type
         """Execute all enabled DQ checks and collect results.
 
@@ -220,7 +222,9 @@ class SilverDQAnalyzer:
         input_record_count: int | None = None,
         quarantined_count: int = 0,
         previous_schema: dict[str, str] | None = None,
-        key_nullability_rules: list[dict[str, Any]]
+        key_nullability_rules: list[
+            dict[str, Any]  # Any: DQ check values vary by check type
+        ]  # Any: DQ rule definitions have heterogeneous values
         | None = None,  # Any: DQ check values vary by check type
     ) -> SilverDQReport:
         """Analyze Silver data and generate DQ report.
@@ -295,7 +299,7 @@ class SilverDQAnalyzer:
         self,
         df: pl.DataFrame,
         key_nullability_rules: list[
-            dict[str, Any]
+            dict[str, Any]  # Any: DQ check values vary by check type
         ],  # Any: DQ check values vary by check type
     ) -> dict[str, Any]:  # Any: DQ check values vary by check type
         """Check nullability for configured merge/partition keys."""
@@ -443,7 +447,7 @@ class SilverDQAnalyzer:
         # For now, just validate that columns have consistent types
         errors = []
         type_coercions: dict[
-            str, dict[str, Any]
+            str, dict[str, Any]  # Any: DQ check values vary by check type
         ] = {}  # Any: DQ check values vary by check type
 
         for col in df.columns:

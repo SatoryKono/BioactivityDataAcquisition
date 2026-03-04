@@ -128,7 +128,9 @@ class BaseTitleFallbackHandler(ABC):
         return "title_only_not_found"
 
     @abstractmethod
-    async def _search_by_title(self, title: str) -> dict[str, Any] | None:  # Any: untyped API response data
+    async def _search_by_title(
+        self, title: str
+    ) -> dict[str, Any] | None:  # Any: untyped API response data
         """Search for publication by title.
 
         Args:
@@ -139,7 +141,10 @@ class BaseTitleFallbackHandler(ABC):
         """
         ...
 
-    def _get_result_identifier(self, result: dict[str, Any]) -> tuple[str, str]:  # Any: untyped API response data
+    def _get_result_identifier(
+        self,
+        result: dict[str, Any],  # Any: untyped API response
+    ) -> tuple[str, str]:
         """Return (field_name, value) for logging the found result.
 
         Args:
@@ -151,8 +156,10 @@ class BaseTitleFallbackHandler(ABC):
         return ("found_id", str(result.get("id", "unknown")))
 
     def _process_found_result(
-        self, result: dict[str, Any], original_doi: str  # Any: untyped API response data
-    ) -> dict[str, Any]:  # Any: untyped API response data
+        self,
+        result: dict[str, Any],  # Any: untyped API response
+        original_doi: str,
+    ) -> dict[str, Any]:  # Any: untyped API response
         """Process found result before yielding.
 
         Default implementation adds standard metadata fields:
@@ -263,7 +270,10 @@ class BaseTitleFallbackHandler(ABC):
                     title=title[:50],
                 )
 
-    def _process_title_only_result(self, result: dict[str, Any]) -> dict[str, Any]:  # Any: untyped API response data
+    def _process_title_only_result(
+        self,
+        result: dict[str, Any],  # Any: untyped API response
+    ) -> dict[str, Any]:  # Any: untyped API response
         """Process title-only result before yielding.
 
         Override to add metadata like _lookup_method.

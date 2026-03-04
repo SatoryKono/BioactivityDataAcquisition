@@ -77,7 +77,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
-        contract_policy: Any = None,
+        contract_policy: Any = None,  # Any: contract policy type varies by pipeline
     ) -> None:
         """Initialize CrossRef transformer.
 
@@ -293,8 +293,11 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             raise ValueError(f"Invalid DOI format: {raw_doi}")
 
     def _hash_author_details(
-        self, author_details: list[dict[str, Any]]
-    ) -> list[dict[str, Any]]:
+        self,
+        author_details: list[
+            dict[str, Any]  # Any: transformer record has heterogeneous values
+        ],  # Any: transformer record has heterogeneous values
+    ) -> list[dict[str, Any]]:  # Any: transformer record has heterogeneous values
         """Hash PII fields in author details while preserving non-PII data.
 
         Author names (given, family, name) are PII and should be hashed.
@@ -307,10 +310,14 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             List of author details with hashed PII fields.
 
         """
-        hashed_details: list[dict[str, Any]] = []
+        hashed_details: list[
+            dict[str, Any]  # Any: transformer record has heterogeneous values
+        ] = []  # Any: transformer record has heterogeneous values
 
         for author in author_details:
-            hashed_author: dict[str, Any] = {}
+            hashed_author: dict[
+                str, Any  # Any: transformer record has heterogeneous values
+            ] = {}  # Any: transformer record has heterogeneous values
 
             # Hash PII fields (author names)
             for pii_field in ("given", "family", "name"):
@@ -368,7 +375,8 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         # Any: generic domain entity; type varies by pipeline
 
     def entity_to_silver_record(
-        self, entity: Any
+        self,
+        entity: Any,  # Any: generic domain entity; type varies by pipeline
     ) -> GoldRecord:  # Any: generic domain entity
         """Convert Domain Entity to SilverRecord, preserving base schema fields.
 

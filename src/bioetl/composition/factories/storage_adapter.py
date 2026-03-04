@@ -49,7 +49,7 @@ class StorageAdapter:
     """
 
     _COMPOSITE_GOLD_SCHEMAS: ClassVar[
-        dict[str, Any]
+        dict[str, Any]  # Any: record/metadata values are heterogeneous
     ] = {  # Any: factory wiring; concrete types resolved at runtime
         "composite/publication": CompositePublicationGoldSchema,
         "composite_publication": CompositePublicationGoldSchema,
@@ -132,7 +132,7 @@ class StorageAdapter:
         self,
         table_name: str,
         records: list[
-            dict[str, Any]
+            dict[str, Any]  # Any: record/metadata values are heterogeneous
         ],  # Any: factory wiring; concrete types resolved at runtime
         primary_keys: list[str],
         schema: ArrowSchema,
@@ -183,18 +183,18 @@ class StorageAdapter:
         self,
         table_name: str,
         records: list[
-            dict[str, Any]
+            dict[str, Any]  # Any: record/metadata values are heterogeneous
         ],  # Any: factory wiring; concrete types resolved at runtime
         schema: Any,  # Any: Pandera DataFrameModel class varies per entity Gold schema
         primary_keys: list[str] | None = None,
         mode: Literal["overwrite", "append", "scd2"] = "overwrite",
         *,
-        scd_config: dict[str, Any]
+        scd_config: dict[str, Any]  # Any: record/metadata values are heterogeneous
         | None = None,  # Any: factory wiring; concrete types resolved at runtime
         column_order: list[str] | None = None,
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
-        silver_refs: list[Any]
+        silver_refs: list[Any]  # Any: Delta Lake reference types vary
         | None = None,  # Any: factory wiring; concrete types resolved at runtime
     ) -> None:
         """Write aggregated records to Gold layer.
@@ -247,7 +247,7 @@ class StorageAdapter:
         table_name: str,
         columns: list[str] | None = None,
     ) -> list[
-        dict[str, Any]
+        dict[str, Any]  # Any: record/metadata values are heterogeneous
     ]:  # Any: factory wiring; concrete types resolved at runtime
         """Read records from a Silver layer Delta table.
 
@@ -267,7 +267,7 @@ class StorageAdapter:
         self,
         table_name: str,
         records: list[
-            dict[str, Any]
+            dict[str, Any]  # Any: record/metadata values are heterogeneous
         ],  # Any: factory wiring; concrete types resolved at runtime
         primary_keys: list[str] | None = None,
         *,
@@ -300,7 +300,7 @@ class StorageAdapter:
         self,
         table_name: str,
         records: list[
-            dict[str, Any]
+            dict[str, Any]  # Any: record/metadata values are heterogeneous
         ],  # Any: factory wiring; concrete types resolved at runtime
         primary_keys: list[str] | None = None,
         *,
@@ -456,7 +456,7 @@ class StorageAdapter:
             Dict with layer info including paths and file counts.
         """
         result: dict[
-            str, Any
+            str, Any  # Any: record/metadata values are heterogeneous
         ] = {  # Any: factory wiring; concrete types resolved at runtime
             "silver": self._preview_layer(self.silver, silver_table),
             "gold": None,

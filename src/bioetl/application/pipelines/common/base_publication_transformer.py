@@ -137,8 +137,11 @@ class BasePublicationTransformer(BaseTransformer):
     """
 
     def _normalize_content_fields(
-        self, business_data: dict[str, Any]
-    ) -> dict[str, Any]:
+        self,
+        business_data: dict[
+            str, Any  # Any: transformer record has heterogeneous values
+        ],  # Any: transformer record has heterogeneous values
+    ) -> dict[str, Any]:  # Any: transformer record has heterogeneous values
         """Apply uniform content normalization to text fields.
 
         Strips residual HTML/XML tags from abstract (and other fields

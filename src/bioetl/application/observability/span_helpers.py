@@ -27,9 +27,10 @@ if TYPE_CHECKING:
 def _span_context(
     tracer: TracingPort,
     name: str,
-    attributes: dict[str, Any] | None = None,
+    attributes: dict[str, Any]  # Any: OTel span attributes are heterogeneous
+    | None = None,  # Any: OTel span attributes are heterogeneous
     tracer_name: str = "bioetl",
-) -> Generator[Any, None, None]:
+) -> Generator[Any, None, None]:  # Any: OTel span context manager yield type
     """Internal helper to manage span lifecycle."""
     otel_tracer = tracer.get_tracer(tracer_name)
     span = otel_tracer.start_as_current_span(name, attributes=attributes or {})
@@ -53,9 +54,10 @@ traced_operation = _span_context
 async def traced_async_operation(
     tracer: TracingPort,
     name: str,
-    attributes: dict[str, Any] | None = None,
+    attributes: dict[str, Any]  # Any: OTel span attributes are heterogeneous
+    | None = None,  # Any: OTel span attributes are heterogeneous
     tracer_name: str = "bioetl",
-) -> AsyncGenerator[Any, None]:
+) -> AsyncGenerator[Any, None]:  # Any: OTel span context manager yield type
     """Async context manager for tracing spans.
 
     Args:

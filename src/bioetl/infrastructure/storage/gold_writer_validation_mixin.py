@@ -1,0 +1,80 @@
+"""Validation helpers for GoldWriter."""
+
+from __future__ import annotations
+
+from collections.abc import Awaitable, Callable
+from typing import TYPE_CHECKING, Any
+
+import pandera as pandera_pa
+
+from bioetl.domain.medallion import GoldWriteMode
+
+if TYPE_CHECKING:
+    from pandera.polars import DataFrameSchema
+
+    from bioetl.domain.types import GoldRecord, ScdConfig
+
+
+class GoldWriterValidationMixin:
+    """Mixin with mode/record/schema validation helpers for Gold writes."""
+
+    _run_in_executor: Callable[..., Awaitable[object]]
+
+    def _validate_write_mode(self, mode: str) -> GoldWriteMode:
+        """Validate and return the write mode enum."""
+        try:
+            return GoldWriteMode(mode)
+        except ValueError:
+            valid_modes = [m.value for m in GoldWriteMode]
+            raise ValueError(
+                f"Invalid Gold write mode '{mode}'. Allowed: {valid_modes}"
+            ) from None
+
+    def _validate_records(self, records: list[GoldRecord]) -> None:
+        """Validate that records list is not empty."""
+        if not records:
+            raise ValueError("No records to write")
+
+    def _validate_scd2_requirements(
+        self,
+        mode: GoldWriteMode,
+        scd_config: ScdConfig | None,
+        ingestion_ts: Any,  # Any: datetime or None at validation
+    ) -> None:
+        """Validate SCD2-specific requirements."""
+        if mode != GoldWriteMode.SCD2:
+            return
+
+        if scd_config is None:
+            raise ValueError("scd_config required for SCD Type 2 mode")
+        if ingestion_ts is None:
+            raise ValueError(
+                "ingestion_ts required for SCD Type 2 mode "
+                "(timestamp must come from application layer per ADR-014)"
+            )
+
+    def _validate_schema_strict(self, schema: DataFrameSchema) -> None:
+        """Validate that schema has strict=True."""
+        is_strict = getattr(schema, "strict", False) or getattr(
+            getattr(schema, "Config", None), "strict", False
+        )
+        if not is_strict:
+            raise ValueError("Gold layer requires strict=True schema validation")
+
+    async def _validate_records_against_schema(
+        self, records: list[GoldRecord], schema: DataFrameSchema
+    ) -> None:
+        """Validate records against Pandera schema."""
+        import pandas as pd
+
+        df = pd.DataFrame(records)
+        try:
+            schema_any: Any = schema  # Any: Pandera model class
+            await self._run_in_executor(lambda: schema_any.validate(df, lazy=False))
+        except pandera_pa.errors.SchemaError as exc:
+            raise ValueError(f"Schema validation failed: {exc}") from exc
+
+
+GoldWriterValidationHelper = GoldWriterValidationMixin
+
+__all__ = ["GoldWriterValidationHelper", "GoldWriterValidationMixin"]

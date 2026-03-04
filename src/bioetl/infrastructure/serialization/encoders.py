@@ -50,7 +50,8 @@ class StdLibJsonEncoder:
 
     def dumps(
         self,
-        obj: dict[str, Any] | list[Any],  # Any: JSON-serializable values are heterogeneous
+        obj: dict[str, Any]  # Any: JSON values are heterogeneous
+        | list[Any],  # Any: JSON values are heterogeneous
         *,
         sort_keys: bool = True,
         ensure_ascii: bool = False,
@@ -72,7 +73,10 @@ class StdLibJsonEncoder:
             separators=(",", ":"),
         )
 
-    def dumps_canonical(self, obj: dict[str, Any]) -> str:  # Any: JSON-serializable values are heterogeneous
+    def dumps_canonical(
+        self,
+        obj: dict[str, Any],  # Any: JSON values are heterogeneous
+    ) -> str:
         """Serialize object to canonical JSON for hashing.
 
         Canonical format: sorted keys, compact separators, ASCII-only.
@@ -90,7 +94,9 @@ class StdLibJsonEncoder:
             ensure_ascii=True,
         )
 
-    def loads(self, data: str | bytes) -> dict[str, Any] | list[Any]:  # Any: JSON-serializable values are heterogeneous
+    def loads(
+        self, data: str | bytes
+    ) -> dict[str, Any] | list[Any]:  # Any: JSON-serializable values are heterogeneous
         """Deserialize JSON string to Python object.
 
         Args:
@@ -103,7 +109,9 @@ class StdLibJsonEncoder:
             ValueError: If JSON is invalid
         """
         try:
-            result: dict[str, Any] | list[Any] = json.loads(data)  # Any: JSON-serializable values are heterogeneous
+            result: dict[str, Any] | list[Any] = (  # Any: JSON heterogeneous
+                json.loads(data)
+            )
             return result
         except json.JSONDecodeError as e:
             raise ValueError(f"Invalid JSON: {e}") from e
@@ -131,7 +139,8 @@ class OrjsonEncoder:
 
     def dumps(
         self,
-        obj: dict[str, Any] | list[Any],  # Any: JSON-serializable values are heterogeneous
+        obj: dict[str, Any]  # Any: JSON values are heterogeneous
+        | list[Any],  # Any: JSON values are heterogeneous
         *,
         sort_keys: bool = True,
         ensure_ascii: bool = False,
@@ -160,7 +169,10 @@ class OrjsonEncoder:
 
         return result
 
-    def dumps_canonical(self, obj: dict[str, Any]) -> str:  # Any: JSON-serializable values are heterogeneous
+    def dumps_canonical(
+        self,
+        obj: dict[str, Any],  # Any: JSON values are heterogeneous
+    ) -> str:
         """Serialize object to canonical JSON for hashing.
 
         Canonical format: sorted keys, compact output, ASCII-only.
@@ -177,7 +189,9 @@ class OrjsonEncoder:
         # Escape non-ASCII for canonical form
         return result.encode("unicode_escape").decode("ascii")
 
-    def loads(self, data: str | bytes) -> dict[str, Any] | list[Any]:  # Any: JSON-serializable values are heterogeneous
+    def loads(
+        self, data: str | bytes
+    ) -> dict[str, Any] | list[Any]:  # Any: JSON-serializable values are heterogeneous
         """Deserialize JSON string to Python object using orjson.
 
         Args:
@@ -191,7 +205,9 @@ class OrjsonEncoder:
         """
         assert _orjson is not None
         try:
-            result: dict[str, Any] | list[Any] = _orjson.loads(data)  # Any: JSON-serializable values are heterogeneous
+            result: dict[str, Any] | list[Any] = (  # Any: JSON heterogeneous
+                _orjson.loads(data)
+            )
             return result
         except json.JSONDecodeError as e:
             # orjson.JSONDecodeError inherits from json.JSONDecodeError

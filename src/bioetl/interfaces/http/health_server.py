@@ -196,7 +196,7 @@ class HealthServer:
     async def _handle_health(self) -> HealthResponse:
         """Handle /health endpoint - overall health status."""
         status = self._get_overall_status()
-        checks: dict[str, Any] = {
+        checks: dict[str, Any] = {  # Any: CLI/HTTP response values are heterogeneous
             "server": {
                 "status": "healthy",
                 "uptime_seconds": round(self.uptime_seconds, 2),
@@ -270,7 +270,9 @@ class HealthServer:
             return HealthStatus.DEGRADED
         return HealthStatus.HEALTHY
 
-    def _get_provider_statuses(self) -> dict[str, dict[str, Any]]:
+    def _get_provider_statuses(
+        self,
+    ) -> dict[str, dict[str, Any]]:  # Any: CLI/HTTP response values are heterogeneous
         """Get detailed status for all providers."""
         if not self._health_monitor:
             return {}

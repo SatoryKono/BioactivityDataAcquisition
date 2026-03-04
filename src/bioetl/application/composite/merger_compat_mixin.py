@@ -1,4 +1,3 @@
-# mypy: disable-error-code=attr-defined
 """Compatibility and delegation helpers for MergeService."""
 
 from __future__ import annotations

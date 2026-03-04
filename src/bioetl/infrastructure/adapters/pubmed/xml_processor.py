@@ -29,7 +29,9 @@ class PubMedXmlProcessor:
             return None
 
     @staticmethod
-    def extract_record(article_node: ET.Element) -> dict[str, Any]:
+    def extract_record(
+        article_node: ET.Element,
+    ) -> dict[str, Any]:  # Any: untyped API JSON record
         """Extract record dict from a PubmedArticle XML node.
 
         Args:
@@ -61,7 +63,9 @@ class PubMedXmlProcessor:
         return root.findall(".//PubmedArticle")
 
     @staticmethod
-    def extract_all_records(root: ET.Element) -> list[dict[str, Any]]:
+    def extract_all_records(
+        root: ET.Element,
+    ) -> list[dict[str, Any]]:  # Any: untyped API JSON record
         """Extract all article records from XML root.
 
         Args:

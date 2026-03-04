@@ -44,7 +44,7 @@ class TissueTransformer(BaseChemblTransformer):
         self,
         record: BronzeRecord,
         primary_id: PrimaryId,
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any]:  # Any: transformer record has heterogeneous values
         """Extract Tissue business data from bronze record.
 
         Args:

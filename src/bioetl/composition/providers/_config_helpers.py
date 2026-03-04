@@ -30,10 +30,10 @@ if TYPE_CHECKING:
 
 def _get_factories(
     data_source_factory_getter: Callable[
-        [], Any
+        [], Any  # Any: factory wiring; concrete types resolved at runtime
     ],  # Any: factory type varies per provider
     http_client_factory_getter: Callable[
-        [], Any
+        [], Any  # Any: factory wiring; concrete types resolved at runtime
     ],  # Any: factory type varies per provider
 ) -> tuple[Any, Any]:  # Any: resolved factory instances
     """Resolve factory classes via injected getters.

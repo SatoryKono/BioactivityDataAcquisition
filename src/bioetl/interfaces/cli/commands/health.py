@@ -15,6 +15,7 @@ from bioetl.composition.entrypoints import (
     get_health_server_dependencies,
     get_health_service,
 )
+from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.exit_codes import ExitCode
 
 
@@ -153,8 +154,17 @@ def health_check(provider: tuple[str, ...], output_json: bool) -> None:
     coro = run_checks()
     try:
         results = asyncio.run(coro)
-    except Exception as e:
-        click.echo(f"Error running health checks: {e}", err=True)
+    except (BioETLError, OSError, RuntimeError, ValueError) as exc:
+        click.echo(
+            (
+                "Error running health checks: "
+                f"{exc} "
+                f"(reason_code=CLI_HEALTH_CHECK_ERROR, "
+                f"providers={','.join(provider) if provider else 'all'}, "
+                f"error_type={type(exc).__name__})"
+            ),
+            err=True,
+        )
         sys.exit(ExitCode.FAIL)
     finally:
         if getattr(coro, "cr_frame", None) is not None:

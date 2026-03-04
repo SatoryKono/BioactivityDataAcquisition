@@ -207,7 +207,9 @@ class ClassificationExtractor(BaseFieldExtractor):
         return cls()._normalize_list(raw)
 
     @classmethod
-    def parse_databanks(cls, medline_citation: Element | None) -> list[dict[str, Any]]:
+    def parse_databanks(
+        cls, medline_citation: Element | None
+    ) -> list[dict[str, Any]]:  # Any: untyped API JSON record
         """Extract data bank references from DataBankList.
 
         Returns structured data with bank name and accession numbers.
@@ -234,7 +236,7 @@ class ClassificationExtractor(BaseFieldExtractor):
         if databank_list is None:
             return []
 
-        result: list[dict[str, Any]] = []
+        result: list[dict[str, Any]] = []  # Any: untyped API JSON record
         for databank in databank_list.findall("DataBank"):
             name_elem = databank.find("DataBankName")
             if name_elem is None or not name_elem.text:

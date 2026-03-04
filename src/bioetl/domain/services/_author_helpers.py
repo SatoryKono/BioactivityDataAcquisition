@@ -140,7 +140,9 @@ def extract_affiliation_strings(
 
 
 # Any: heterogeneous field va...
-def _extract_affiliation_from_dict(aff: dict[str, Any]) -> str | None:
+def _extract_affiliation_from_dict(
+    aff: dict[str, Any],  # Any: record values are heterogeneous
+) -> str | None:  # Any: record values are heterogeneous
     """Extract first non-empty affiliation value from known keys."""
     for key in _AFFILIATION_KEYS:
         result = _strip_or_none(aff.get(key))

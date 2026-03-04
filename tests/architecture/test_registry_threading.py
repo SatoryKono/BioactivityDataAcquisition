@@ -52,16 +52,12 @@ class TestConcurrentRegistration:
         """
         num_threads = 10
         results: list[tuple[str, bool]] = []
-        errors: list[Exception] = []
 
         def register_factory(idx: int) -> None:
             """Register a factory with unique name."""
-            try:
-                factory = create_mock_factory(f"test_pipeline_{idx}")
-                isolated_registry.register_factory(factory)
-                results.append((f"test_pipeline_{idx}", True))
-            except Exception as e:
-                errors.append(e)
+            factory = create_mock_factory(f"test_pipeline_{idx}")
+            isolated_registry.register_factory(factory)
+            results.append((f"test_pipeline_{idx}", True))
 
         # Execute all registrations concurrently
         with ThreadPoolExecutor(max_workers=num_threads) as executor:
@@ -70,7 +66,6 @@ class TestConcurrentRegistration:
                 future.result()  # Raise any exceptions
 
         # Verify all registrations succeeded
-        assert len(errors) == 0, f"Errors during registration: {errors}"
         assert len(results) == num_threads, (
             f"Expected {num_threads} registrations, got {len(results)}"
         )
@@ -91,7 +86,6 @@ class TestConcurrentRegistration:
         num_writers = 5
         num_readers = 10
         read_results: list[list[str]] = []
-        errors: list[Exception] = []
 
         def writer(idx: int) -> None:
             """Register a factory."""
@@ -101,18 +95,13 @@ class TestConcurrentRegistration:
             except ValueError:
                 # Already registered - expected in some race scenarios
                 pass
-            except Exception as e:
-                errors.append(e)
 
         def reader() -> None:
             """Read the registry."""
-            try:
-                # Small delay to interleave with writes
-                time.sleep(0.001)
-                result = isolated_registry.list_pipelines()
-                read_results.append(result)
-            except Exception as e:
-                errors.append(e)
+            # Small delay to interleave with writes
+            time.sleep(0.001)
+            result = isolated_registry.list_pipelines()
+            read_results.append(result)
 
         # Mix readers and writers
         with ThreadPoolExecutor(max_workers=num_writers + num_readers) as executor:
@@ -126,8 +115,6 @@ class TestConcurrentRegistration:
                 future.result()
 
         # Verify no errors during concurrent access
-        assert len(errors) == 0, f"Errors during concurrent access: {errors}"
-
         # Verify all reads returned valid lists
         for result in read_results:
             assert isinstance(result, list), "list_pipelines() must return a list"
@@ -236,7 +223,6 @@ class TestRegisterAllPipelinesThreadSafety:
         call_count = []
         lock = threading.Lock()
         barrier = threading.Barrier(num_threads)
-        errors: list[Exception] = []
 
         def call_register() -> None:
             """Call register_all_pipelines()."""
@@ -248,8 +234,6 @@ class TestRegisterAllPipelinesThreadSafety:
             except ValueError:
                 # Expected for duplicate registrations
                 pass
-            except Exception as e:
-                errors.append(e)
             with lock:
                 call_count.append(1)
 
@@ -263,24 +247,16 @@ class TestRegisterAllPipelinesThreadSafety:
             f"Expected {num_threads} completions, got {len(call_count)}"
         )
 
-        # Verify no unexpected errors
-        assert len(errors) == 0, f"Unexpected errors: {errors}"
-
     def test_multiple_registries_parallel(self) -> None:
         """Multiple isolated registries can be populated in parallel."""
         num_registries = 5
         registries: list[PipelineRegistry] = []
-        errors: list[Exception] = []
 
         def populate_registry() -> PipelineRegistry:
             """Create and populate a registry."""
-            try:
-                registry = create_registry()
-                register_all_pipelines(registry=registry)
-                return registry
-            except Exception as e:
-                errors.append(e)
-                raise
+            registry = create_registry()
+            register_all_pipelines(registry=registry)
+            return registry
 
         with ThreadPoolExecutor(max_workers=num_registries) as executor:
             futures = [
@@ -291,7 +267,6 @@ class TestRegisterAllPipelinesThreadSafety:
 
         # All registries should be populated
         assert len(registries) == num_registries
-        assert len(errors) == 0, f"Errors: {errors}"
 
         # All registries should have same pipelines
         first_pipelines = registries[0].list_pipelines()

@@ -29,7 +29,9 @@ from bioetl.application.pipelines.semanticscholar._page_parsing import (
 from bioetl.domain.schemas.common.publication_base import OA_STATUS_VALUES
 
 
-def extract_external_ids(external_ids: dict[str, Any] | None) -> dict[str, Any]:  # Any: untyped JSON fragment from Semantic Scholar API
+def extract_external_ids(
+    external_ids: dict[str, Any] | None,  # Any: raw S2 API JSON
+) -> dict[str, Any]:  # Any: raw S2 API JSON
     """Extract all external identifiers from S2 response.
 
     Args:
@@ -60,7 +62,8 @@ def extract_external_ids(external_ids: dict[str, Any] | None) -> dict[str, Any]:
 
 
 def extract_citation_contexts(
-    citations: list[dict[str, Any]] | None,  # Any: untyped JSON fragment from Semantic Scholar API
+    citations: list[dict[str, Any]]  # Any: raw S2 API JSON
+    | None,
     max_contexts: int = 100,
 ) -> list[str]:
     """Extract citation context sentences from citations/references.
@@ -104,9 +107,10 @@ def extract_citation_contexts(
 
 
 def extract_journal_info(
-    journal: dict[str, Any] | None,  # Any: untyped JSON fragment from Semantic Scholar API
+    journal: dict[str, Any]  # Any: raw S2 API JSON
+    | None,
     venue: str | None,
-) -> dict[str, Any]:  # Any: untyped JSON fragment from Semantic Scholar API
+) -> dict[str, Any]:  # Any: raw S2 API JSON
     """Extract journal information with volume/issue and page parsing.
 
     Parses combined volume/issue strings (e.g., "32 4" → volume=32, issue=4)
@@ -194,8 +198,9 @@ def normalize_oa_status(status: str | None) -> str | None:
 
 def extract_open_access_info(
     is_open_access: bool | None,
-    open_access_pdf: dict[str, Any] | None,  # Any: untyped JSON fragment from Semantic Scholar API
-) -> dict[str, Any]:  # Any: untyped JSON fragment from Semantic Scholar API
+    open_access_pdf: dict[str, Any]  # Any: raw S2 API JSON
+    | None,
+) -> dict[str, Any]:  # Any: raw S2 API JSON
     """Extract open access information with normalized status.
 
     Extracts OA information from S2 API response and normalizes the status
@@ -255,7 +260,9 @@ def extract_open_access_info(
     }
 
 
-def extract_tldr(tldr: dict[str, Any] | None) -> str | None:  # Any: untyped JSON fragment from Semantic Scholar API
+def extract_tldr(
+    tldr: dict[str, Any] | None,  # Any: raw S2 API JSON
+) -> str | None:
     """Extract AI-generated summary from tldr field.
 
     Args:

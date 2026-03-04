@@ -422,4 +422,167 @@ interactions:
     status:
       code: 200
       message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/uniprotkb/search?query=accession%3AP62988&size=1&format=json
+  response:
+    body:
+      string: '{"results":[{"entryType":"Inactive","primaryAccession":"P62988","uniProtkbId":"UBIQ_HUMAN","annotationScore":0.0,"inactiveReason":{"inactiveReasonType":"DEMERGED","mergeDemergeTo":["P0CG47","P0CG48","P62979","P62987"]},"extraAttributes":{"uniParcId":"UPI00000006C4"}}]}'
+    headers:
+      Access-Control-Allow-Credentials:
+      - 'true'
+      Access-Control-Allow-Headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      Access-Control-Allow-Methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      Access-Control-Max-Age:
+      - '1728000'
+      Cache-Control:
+      - public, max-age=43200
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 04 Mar 2026 04:30:35 GMT
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent,
+        Accept-Encoding
+      X-API-Deployment-Date:
+      - 09-February-2026
+      X-Total-Results:
+      - '1'
+      X-UniProt-Release:
+      - '2026_01'
+      X-UniProt-Release-Date:
+      - 28-January-2026
+      content-length:
+      - '269'
+      x-cache:
+      - miss cached
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - rest.uniprot.org
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://rest.uniprot.org/uniprotkb/search?query=%2A&size=1&format=json&fields=accession%2Cid%2Cprotein_name%2Cgene_names%2Corganism_name%2Corganism_id%2Clineage%2Csequence%2Clength%2Cmass%2Cprotein_existence%2Cannotation_score%2Creviewed%2Cdate_created%2Cdate_modified%2Cversion%2Ccc_function%2Ccc_catalytic_activity%2Ccc_activity_regulation%2Ccc_subunit%2Ccc_pathway%2Ccc_subcellular_location%2Ccc_tissue_specificity%2Ccc_alternative_products%2Ccc_disease%2Ccc_cofactor%2Cph_dependence%2Ctemp_dependence%2Ckinetics%2Cabsorption%2Credox_potential%2Ccc_induction%2Ccc_caution%2Ccc_similarity%2Ccc_pharmaceutical%2Cft_domain%2Cft_binding%2Cft_site%2Cft_act_site%2Cft_mod_res%2Cxref_pdb%2Cxref_chembl%2Cxref_drugbank%2Cxref_guidetopharmacology%2Cgo_id%2Cxref_interpro%2Cxref_pfam%2Cxref_reactome%2Ckeyword
+  response:
+    body:
+      string: '{"results":[{"entryType":"UniProtKB reviewed (Swiss-Prot)","primaryAccession":"A0A009IHW8","uniProtkbId":"ABTIR_ACIB9","entryAudit":{"firstPublicDate":"2020-02-26","lastAnnotationUpdateDate":"2026-01-28","entryVersion":29},"annotationScore":5.0,"organism":{"scientificName":"Acinetobacter
+        baumannii (strain 1295743)","taxonId":1310613,"lineage":["Bacteria","Pseudomonadati","Pseudomonadota","Gammaproteobacteria","Moraxellales","Moraxellaceae","Acinetobacter","Acinetobacter
+        calcoaceticus/baumannii complex"]},"proteinExistence":"1: Evidence at protein
+        level","proteinDescription":{"recommendedName":{"fullName":{"evidences":[{"evidenceCode":"ECO:0000305"}],"value":"2''
+        cyclic ADP-D-ribose synthase AbTIR"},"shortNames":[{"evidences":[{"evidenceCode":"ECO:0000305"}],"value":"2''cADPR
+        synthase AbTIR"}],"ecNumbers":[{"evidences":[{"evidenceCode":"ECO:0000269","source":"PubMed","id":"36048923"}],"value":"3.2.2.-"}]},"alternativeNames":[{"fullName":{"evidences":[{"evidenceCode":"ECO:0000305"}],"value":"NAD(+)
+        hydrolase AbTIR"},"ecNumbers":[{"evidences":[{"evidenceCode":"ECO:0000269","source":"PubMed","id":"29395922"}],"value":"3.2.2.6"}]},{"fullName":{"evidences":[{"evidenceCode":"ECO:0000303","source":"PubMed","id":"29395922"}],"value":"TIR
+        domain-containing protein in A.baumannii"},"shortNames":[{"evidences":[{"evidenceCode":"ECO:0000303","source":"PubMed","id":"29395922"}],"value":"AbTIR"}]}]},"genes":[{"orfNames":[{"evidences":[{"evidenceCode":"ECO:0000312","source":"EMBL","id":"EXB04249.1"}],"value":"J512_3302"}]}],"comments":[{"texts":[{"evidences":[{"evidenceCode":"ECO:0000269","source":"PubMed","id":"29395922"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"36048923"}],"value":"NAD(+)
+        hydrolase (NADase) that catalyzes cleavage of NAD(+) into ADP-D-ribose (ADPR)
+        and nicotinamide (PubMed:29395922). In addition to ADPR, also generates a
+        cyclization variant of cyclic ADPR (cADPR), termed 2''cADPR (v-cADPR) (PubMed:29395922,
+        PubMed:36048923). Cleaves NADP(+), but does not cyclize the product (PubMed:36048923)"}],"commentType":"FUNCTION"},{"commentType":"CATALYTIC
+        ACTIVITY","reaction":{"name":"NAD(+) = 2''cADPR + nicotinamide + H(+)","reactionCrossReferences":[{"database":"Rhea","id":"RHEA:75299"},{"database":"ChEBI","id":"CHEBI:15378"},{"database":"ChEBI","id":"CHEBI:17154"},{"database":"ChEBI","id":"CHEBI:57540"},{"database":"ChEBI","id":"CHEBI:194248"}],"evidences":[{"evidenceCode":"ECO:0000269","source":"PubMed","id":"36048923"}]},"physiologicalReactions":[{"directionType":"left-to-right","reactionCrossReference":{"database":"Rhea","id":"RHEA:75300"},"evidences":[{"evidenceCode":"ECO:0000269","source":"PubMed","id":"36048923"}]}]},{"commentType":"CATALYTIC
+        ACTIVITY","reaction":{"name":"NAD(+) + H2O = ADP-D-ribose + nicotinamide +
+        H(+)","reactionCrossReferences":[{"database":"Rhea","id":"RHEA:16301"},{"database":"ChEBI","id":"CHEBI:15377"},{"database":"ChEBI","id":"CHEBI:15378"},{"database":"ChEBI","id":"CHEBI:17154"},{"database":"ChEBI","id":"CHEBI:57540"},{"database":"ChEBI","id":"CHEBI:57967"}],"ecNumber":"3.2.2.6","evidences":[{"evidenceCode":"ECO:0000269","source":"PubMed","id":"29395922"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"36048923"}]},"physiologicalReactions":[{"directionType":"left-to-right","reactionCrossReference":{"database":"Rhea","id":"RHEA:16302"},"evidences":[{"evidenceCode":"ECO:0000269","source":"PubMed","id":"29395922"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"36048923"}]}]},{"commentType":"CATALYTIC
+        ACTIVITY","reaction":{"name":"NADP(+) + H2O = ADP-D-ribose 2''-phosphate +
+        nicotinamide + H(+)","reactionCrossReferences":[{"database":"Rhea","id":"RHEA:19849"},{"database":"ChEBI","id":"CHEBI:15377"},{"database":"ChEBI","id":"CHEBI:15378"},{"database":"ChEBI","id":"CHEBI:17154"},{"database":"ChEBI","id":"CHEBI:58349"},{"database":"ChEBI","id":"CHEBI:58673"}],"evidences":[{"evidenceCode":"ECO:0000269","source":"PubMed","id":"36048923"}]},"physiologicalReactions":[{"directionType":"left-to-right","reactionCrossReference":{"database":"Rhea","id":"RHEA:19850"},"evidences":[{"evidenceCode":"ECO:0000269","source":"PubMed","id":"36048923"}]}]},{"texts":[{"evidences":[{"evidenceCode":"ECO:0000269","source":"PubMed","id":"36048923"}],"value":"Homodimer.
+        In the presence of NAD(+) analog 8-amino-isoquinoline adenine dinucleotide
+        (3AD) forms filaments with 3AD between monomers; conformational changes occur
+        upon 3AD binding"}],"commentType":"SUBUNIT"}],"features":[{"type":"Domain","location":{"start":{"value":133,"modifier":"EXACT"},"end":{"value":266,"modifier":"EXACT"}},"description":"TIR","evidences":[{"evidenceCode":"ECO:0000255","source":"PROSITE-ProRule","id":"PRU00204"},{"evidenceCode":"ECO:0000269","source":"PubMed","id":"36048923"}]},{"type":"Active
+        site","location":{"start":{"value":208,"modifier":"EXACT"},"end":{"value":208,"modifier":"EXACT"}},"description":"","evidences":[{"evidenceCode":"ECO:0000255","source":"PROSITE-ProRule","id":"PRU00204"}]},{"type":"Binding
+        site","location":{"start":{"value":143,"modifier":"EXACT"},"end":{"value":143,"modifier":"EXACT"}},"description":"","featureCrossReferences":[{"database":"ChEBI","id":"CHEBI:57540"}],"evidences":[{"evidenceCode":"ECO:0000305","source":"PubMed","id":"36048923"},{"evidenceCode":"ECO:0007744","source":"PDB","id":"7UXU"}],"ligand":{"name":"NAD(+)","id":"ChEBI:CHEBI:57540"}},{"type":"Binding
+        site","location":{"start":{"value":172,"modifier":"EXACT"},"end":{"value":172,"modifier":"EXACT"}},"description":"","featureCrossReferences":[{"database":"ChEBI","id":"CHEBI:57540"}],"evidences":[{"evidenceCode":"ECO:0000255","source":"PROSITE-ProRule","id":"PRU00204"}],"ligand":{"name":"NAD(+)","id":"ChEBI:CHEBI:57540"}},{"type":"Binding
+        site","location":{"start":{"value":202,"modifier":"EXACT"},"end":{"value":202,"modifier":"EXACT"}},"description":"","featureCrossReferences":[{"database":"ChEBI","id":"CHEBI:57540"}],"evidences":[{"evidenceCode":"ECO:0000305","source":"PubMed","id":"36048923"},{"evidenceCode":"ECO:0007744","source":"PDB","id":"7UXU"}],"ligand":{"name":"NAD(+)","id":"ChEBI:CHEBI:57540"}},{"type":"Binding
+        site","location":{"start":{"value":245,"modifier":"EXACT"},"end":{"value":245,"modifier":"EXACT"}},"description":"","featureCrossReferences":[{"database":"ChEBI","id":"CHEBI:57540"}],"evidences":[{"evidenceCode":"ECO:0000305","source":"PubMed","id":"36048923"},{"evidenceCode":"ECO:0007744","source":"PDB","id":"7UXU"}],"ligand":{"name":"NAD(+)","id":"ChEBI:CHEBI:57540"}},{"type":"Site","location":{"start":{"value":204,"modifier":"EXACT"},"end":{"value":204,"modifier":"EXACT"}},"description":"Important
+        for ADPR cyclization","evidences":[{"evidenceCode":"ECO:0000269","source":"PubMed","id":"36048923"}]}],"keywords":[{"id":"KW-0002","category":"Technical
+        term","name":"3D-structure"},{"id":"KW-0175","category":"Domain","name":"Coiled
+        coil"},{"id":"KW-0378","category":"Molecular function","name":"Hydrolase"},{"id":"KW-0520","category":"Ligand","name":"NAD"}],"uniProtKBCrossReferences":[{"database":"PDB","id":"7UWG","properties":[{"key":"Method","value":"X-ray"},{"key":"Resolution","value":"2.16
+        A"},{"key":"Chains","value":"A/B/C/D=134-267"}]},{"database":"PDB","id":"7UXU","properties":[{"key":"Method","value":"EM"},{"key":"Resolution","value":"2.74
+        A"},{"key":"Chains","value":"A/B/C/D=134-267"}]},{"database":"PDB","id":"8G83","properties":[{"key":"Method","value":"X-ray"},{"key":"Resolution","value":"3.03
+        A"},{"key":"Chains","value":"A/B=134-269"}]},{"database":"GO","id":"GO:0003953","properties":[{"key":"GoTerm","value":"F:NAD+
+        nucleosidase activity"},{"key":"GoEvidenceType","value":"IDA:UniProtKB"}],"evidences":[{"evidenceCode":"ECO:0000314","source":"PubMed","id":"29395922"}]},{"database":"GO","id":"GO:0061809","properties":[{"key":"GoTerm","value":"F:NAD+
+        nucleosidase activity, cyclic ADP-ribose generating"},{"key":"GoEvidenceType","value":"IEA:UniProtKB-EC"}]},{"database":"GO","id":"GO:0050135","properties":[{"key":"GoTerm","value":"F:NADP+
+        nucleosidase activity"},{"key":"GoEvidenceType","value":"IEA:RHEA"}]},{"database":"GO","id":"GO:0019677","properties":[{"key":"GoTerm","value":"P:NAD+
+        catabolic process"},{"key":"GoEvidenceType","value":"IDA:UniProtKB"}],"evidences":[{"evidenceCode":"ECO:0000314","source":"PubMed","id":"29395922"}]},{"database":"GO","id":"GO:0007165","properties":[{"key":"GoTerm","value":"P:signal
+        transduction"},{"key":"GoEvidenceType","value":"IEA:InterPro"}]},{"database":"InterPro","id":"IPR000157","properties":[{"key":"EntryName","value":"TIR_dom"}]},{"database":"InterPro","id":"IPR035897","properties":[{"key":"EntryName","value":"Toll_tir_struct_dom_sf"}]},{"database":"Pfam","id":"PF13676","properties":[{"key":"EntryName","value":"TIR_2"},{"key":"MatchStatus","value":"1"}]}],"sequence":{"value":"MSLEQKKGADIISKILQIQNSIGKTTSPSTLKTKLSEISRKEQENARIQSKLSDLQKKKIDIDNKLLKEKQNLIKEEILERKKLEVLTKKQQKDEIEHQKKLKREIDAIKASTQYITDVSISSYNNTIPETEPEYDLFISHASEDKEDFVRPLAETLQQLGVNVWYDEFTLKVGDSLRQKIDSGLRNSKYGTVVLSTDFIKKDWTNYELDGLVAREMNGHKMILPIWHKITKNDVLDYSPNLADKVALNTSVNSIEEIAHQLADVILNR","length":269,"molWeight":30922,"crc64":"4963BA0FB34B3ED7","md5":"550B1C7BAD80EC161CD7BC17CB9CFA07"},"lineages":[{"scientificName":"cellular
+        organisms","taxonId":131567,"rank":"no rank","hidden":true},{"scientificName":"Bacteria","commonName":"bacteria","taxonId":2,"rank":"domain","hidden":false},{"scientificName":"Pseudomonadati","taxonId":3379134,"rank":"kingdom","hidden":false},{"scientificName":"Pseudomonadota","commonName":"proteobacteria","taxonId":1224,"rank":"phylum","hidden":false},{"scientificName":"Gammaproteobacteria","commonName":"g-proteobacteria","taxonId":1236,"rank":"class","hidden":false},{"scientificName":"Moraxellales","taxonId":2887326,"rank":"order","hidden":false},{"scientificName":"Moraxellaceae","taxonId":468,"rank":"family","hidden":false},{"scientificName":"Acinetobacter","taxonId":469,"rank":"genus","hidden":false},{"scientificName":"Acinetobacter
+        calcoaceticus/baumannii complex","taxonId":909768,"rank":"no rank","hidden":false},{"scientificName":"Acinetobacter
+        baumannii","taxonId":470,"rank":"species","hidden":true}],"extraAttributes":{"uniParcId":"UPI0001AF1EF1"}}]}'
+    headers:
+      Access-Control-Allow-Credentials:
+      - 'true'
+      Access-Control-Allow-Headers:
+      - DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization
+      Access-Control-Allow-Methods:
+      - GET, PUT, POST, DELETE, PATCH, OPTIONS
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - Link, X-Total-Results, X-UniProt-Release, X-UniProt-Release-Date, X-API-Deployment-Date
+      Access-Control-Max-Age:
+      - '1728000'
+      Cache-Control:
+      - public, max-age=43200
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 04 Mar 2026 04:30:39 GMT
+      Link:
+      - <https://rest.uniprot.org/uniprotkb/search?format=json&fields=accession,id,protein_name,gene_names,organism_name,organism_id,lineage,sequence,length,mass,protein_existence,annotation_score,reviewed,date_created,date_modified,version,cc_function,cc_catalytic_activity,cc_activity_regulation,cc_subunit,cc_pathway,cc_subcellular_location,cc_tissue_specificity,cc_alternative_products,cc_disease,cc_cofactor,ph_dependence,temp_dependence,kinetics,absorption,redox_potential,cc_induction,cc_caution,cc_similarity,cc_pharmaceutical,ft_domain,ft_binding,ft_site,ft_act_site,ft_mod_res,xref_pdb,xref_chembl,xref_drugbank,xref_guidetopharmacology,go_id,xref_interpro,xref_pfam,xref_reactome,keyword&query=%2A&cursor=verqtw3fkc1l84zknpzrxvs31sw5p8uzdhwiqzpln35p31&size=1>;
+        rel="next"
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent,
+        Accept-Encoding
+      X-API-Deployment-Date:
+      - 09-February-2026
+      X-Total-Results:
+      - '203130940'
+      X-UniProt-Release:
+      - '2026_01'
+      X-UniProt-Release-Date:
+      - 28-January-2026
+      content-length:
+      - '10166'
+      x-cache:
+      - miss cached
+    status:
+      code: 200
+      message: OK
 version: 1

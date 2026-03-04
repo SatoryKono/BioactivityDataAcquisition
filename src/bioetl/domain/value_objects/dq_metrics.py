@@ -181,7 +181,7 @@ class BatchDQMetrics:
     def from_records(
         cls,
         records: list[
-            dict[str, Any]
+            dict[str, Any]  # Any: DQ check values vary by check type
         ],  # Any: DQ metric values vary (int|float|str|None)
         error_count: int = 0,
         warning_count: int = 0,
@@ -229,7 +229,7 @@ class BatchDQMetrics:
 
 
 def _compute_column_stats(
-    records: list[dict[str, Any]],
+    records: list[dict[str, Any]],  # Any: DQ check values vary by check type
 ) -> dict[str, ColumnStats]:  # Any: DQ metric values vary (int|float|str|None)
     """Compute column statistics from records.
 
@@ -252,7 +252,7 @@ def _compute_column_stats(
 
 
 def _collect_all_columns(
-    records: list[dict[str, Any]],
+    records: list[dict[str, Any]],  # Any: DQ check values vary by check type
 ) -> set[str]:  # Any: DQ metric values vary (int|float|str|None)
     """Collect all unique column names from records.
 
@@ -298,7 +298,7 @@ def _compute_single_column_stats(
 
 
 def _filter_non_null(
-    values: list[Any],
+    values: list[Any],  # Any: DQ values vary by check type
 ) -> list[Any]:  # Any: DQ metric values vary (int|float|str|None)
     """Filter out None values from a list.
 
@@ -312,7 +312,8 @@ def _filter_non_null(
 
 
 def _calculate_null_rate(
-    values: list[Any], total: int
+    values: list[Any],  # Any: DQ values vary by check type
+    total: int,  # Any: DQ values vary by check type
 ) -> float:  # Any: DQ metric values vary (int|float|str|None)
     """Calculate the null rate for a list of values.
 
@@ -346,7 +347,7 @@ def _make_hashable(value: Any) -> Any:  # Any: record vals vary
 
 
 def _calculate_unique_count(
-    values: list[Any],
+    values: list[Any],  # Any: DQ values vary by check type
 ) -> int:  # Any: DQ metric values vary (int|float|str|None)
     """Calculate the count of unique values.
 
@@ -406,7 +407,7 @@ def _is_valid_numeric(v: Any) -> bool:  # Any: heterogeneous record values
 
 
 def _extract_numeric_values(
-    values: list[Any],
+    values: list[Any],  # Any: DQ values vary by check type
 ) -> list[float]:  # Any: DQ metric values vary (int|float|str|None)
     """Extract numeric values from a list of mixed values.
 

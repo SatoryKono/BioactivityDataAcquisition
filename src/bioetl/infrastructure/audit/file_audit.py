@@ -243,7 +243,10 @@ class FileAuditAdapter:
         entries.sort(key=lambda e: e.timestamp, reverse=True)
         return entries[:limit]
 
-    def _parse_entry(self, data: dict[str, Any]) -> AuditEntry:
+    def _parse_entry(
+        self,
+        data: dict[str, Any],  # Any: audit entry fields have heterogeneous values
+    ) -> AuditEntry:  # Any: audit entry fields have heterogeneous values
         """Parse a dictionary into an AuditEntry.
 
         Args:

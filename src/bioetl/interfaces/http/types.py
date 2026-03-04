@@ -14,7 +14,9 @@ class HealthResponse:
     status: str
     timestamp: str
     version: str = "1.0.0"
-    checks: dict[str, Any] = field(default_factory=dict)
+    checks: dict[str, Any] = field(  # Any: CLI/HTTP response values are heterogeneous
+        default_factory=dict
+    )  # Any: CLI/HTTP response values are heterogeneous
 
     def to_json(self) -> str:
         """Convert to JSON string.

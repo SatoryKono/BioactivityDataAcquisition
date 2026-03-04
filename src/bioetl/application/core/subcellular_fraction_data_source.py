@@ -128,7 +128,9 @@ class SubcellularFractionDataSource(_SourceMetadataDelegationMixin):
 
     @staticmethod
     # Any: untyped API field value
-    def _normalize_fraction(raw_fraction: Any) -> str | None:
+    def _normalize_fraction(
+        raw_fraction: Any,  # Any: type varies at runtime
+    ) -> str | None:  # Any: type varies at runtime
         """Normalize subcellular fraction string."""
         if raw_fraction is None:
             return None

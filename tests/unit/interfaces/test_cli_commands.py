@@ -1379,7 +1379,7 @@ class TestShowCleanupPreview:
 
         with patch(
             "bioetl.interfaces.cli.commands.run_helpers.preview_cleanup",
-            side_effect=Exception("Preview failed"),
+            side_effect=RuntimeError("Preview failed"),
         ):
             show_cleanup_preview("chembl_activity")
 

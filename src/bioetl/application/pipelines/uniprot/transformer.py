@@ -89,7 +89,7 @@ class UniProtProteinTransformer(BaseTransformer):
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
-        contract_policy: Any = None,
+        contract_policy: Any = None,  # Any: contract policy type varies by pipeline
     ):
         """Initialize UniProt protein transformer.
 

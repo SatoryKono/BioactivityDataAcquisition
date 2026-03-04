@@ -119,7 +119,11 @@ class BootstrapLogger:
         self._logger.info(event, **kwargs)
 
     # Any: structlog context kwargs
-    def warning(self, event: str, **kwargs: Any) -> None:
+    def warning(
+        self,
+        event: str,
+        **kwargs: Any,  # Any: factory wiring; concrete types resolved at runtime
+    ) -> None:  # Any: structlog-compatible API
         """Log a warning message.
 
         Args:

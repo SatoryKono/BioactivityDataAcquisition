@@ -63,7 +63,9 @@ class PubMedFetchMixin:
             params["api_key"] = self.api_key
         return params
 
-    async def _fetch_batch(self, id_batch: list[str]) -> list[dict[str, Any]]:
+    async def _fetch_batch(
+        self, id_batch: list[str]
+    ) -> list[dict[str, Any]]:  # Any: untyped API JSON record
         """Fetch a batch of articles and return parsed records."""
         params = self._build_fetch_params(id_batch)
         try:
@@ -103,7 +105,7 @@ class PubMedFetchMixin:
 
     async def _yield_articles_from_pmids(
         self, pmids: list[str], limit: int | None
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[dict[str, Any]]:  # Any: untyped API JSON record
         """Yield article records from a list of PMIDs."""
         total_fetched = 0
         for i in range(0, len(pmids), self.batch_size):

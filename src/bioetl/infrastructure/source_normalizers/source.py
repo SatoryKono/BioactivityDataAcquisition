@@ -120,7 +120,7 @@ def _normalize_source_pagination(
     provider_config: dict[str, Any],  # Any: normalizer; input types vary
 ) -> None:
     """Normalize pagination and batch configuration."""
-    pagination: dict[str, Any] = _get_dict_or_empty(
+    pagination: dict[str, Any] = _get_dict_or_empty(  # Any: values are heterogeneous
         provider_config, "pagination"
     )  # Any: normalizer; input types vary
 

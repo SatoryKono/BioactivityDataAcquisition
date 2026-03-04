@@ -15,7 +15,9 @@ try:
     # Fix typing_inspect.get_origin BEFORE importing pandera backends
     _orig_get_origin = typing_inspect.get_origin
 
-    def _get_origin_with_union_fix(tp: typing.Any) -> typing.Any:
+    def _get_origin_with_union_fix(
+        tp: typing.Any,  # Any: multipledispatch requires erased types
+    ) -> typing.Any:  # Any: multipledispatch requires erased types
         origin = _orig_get_origin(tp)
         if origin is None:
             # Fallback to typing.get_origin for Python 3.10+ unions (A | B)
@@ -31,8 +33,10 @@ try:
     _orig_dispatcher_call = Dispatcher.__call__
 
     def _dispatcher_call_with_any_fallback(
-        self: typing.Any, *args: typing.Any, **kwargs: typing.Any
-    ) -> typing.Any:
+        self: typing.Any,  # Any: multipledispatch requires erased types
+        *args: typing.Any,  # Any: multipledispatch requires erased types
+        **kwargs: typing.Any,  # Any: multipledispatch requires erased types
+    ) -> typing.Any:  # Any: multipledispatch requires erased types
         input_data_type = type(args[0])
         fn = self._function_registry.get(input_data_type)
 
@@ -40,7 +44,10 @@ try:
         # (e.g., pandas.Series | pandas.DataFrame) in Pandera's registry.
         if fn is None:
             for registered_type, registered_fn in self._function_registry.items():
-                if registered_type is typing.Any:
+                if (
+                    registered_type
+                    is typing.Any  # Any: multipledispatch requires erased types
+                ):  # Any: multipledispatch requires erased types
                     continue
                 if isinstance(registered_type, type) and issubclass(
                     input_data_type, registered_type
@@ -55,8 +62,14 @@ try:
                     fn = registered_fn
                     break
 
-        if fn is None and typing.Any in self._function_registry:
-            fn = self._function_registry[typing.Any]
+        if (
+            fn is None
+            and typing.Any  # Any: multipledispatch requires erased types
+            in self._function_registry  # Any: multipledispatch requires erased types
+        ):  # Any: multipledispatch requires erased types
+            fn = self._function_registry[
+                typing.Any  # Any: multipledispatch requires erased types
+            ]  # Any: multipledispatch requires erased types
         if fn is None:
             return _orig_dispatcher_call(self, *args, **kwargs)  # type: ignore[no-untyped-call]
         return fn(*args, **kwargs)

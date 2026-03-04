@@ -142,14 +142,20 @@ class DQReportContext:
     silver_quarantined_count: int = 0
     silver_previous_schema: dict[str, str] | None = None
     silver_output_path: str | None = None
-    silver_key_nullability_rules: list[dict[str, Any]] | None = None
+    silver_key_nullability_rules: (
+        list[dict[str, Any]]  # Any: DQ rule definitions have heterogeneous values
+        | None
+    ) = None
 
     # Gold context
     gold_data: Any | None = None  # Any: pl.DataFrame (avoids polars import)
     gold_target_table: str | None = None
     gold_required_fields: list[str] | None = None
     # Any: heterogeneous DQ metri...
-    gold_business_rules: list[dict[str, Any]] | None = None
+    gold_business_rules: (
+        list[dict[str, Any]]  # Any: DQ rule definitions have heterogeneous values
+        | None
+    ) = None
     gold_baseline_stats: dict[str, Any] | None = None  # Any: heterogeneous DQ metri...
     gold_output_path: str | None = None
 

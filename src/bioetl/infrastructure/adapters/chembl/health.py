@@ -175,7 +175,7 @@ class ChemblHealthMixin:
         status_code = getattr(response, "status_code", None)
         return int(status_code) if isinstance(status_code, int) else None
 
-    def get_error_stats(self) -> dict[str, Any]:
+    def get_error_stats(self) -> dict[str, Any]:  # Any: untyped API JSON record
         """Get error statistics from circuit breaker for monitoring.
 
         Returns:

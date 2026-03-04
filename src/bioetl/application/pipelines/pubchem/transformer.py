@@ -49,7 +49,7 @@ class PubChemCompoundTransformer(BaseTransformer):
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
-        contract_policy: Any = None,
+        contract_policy: Any = None,  # Any: contract policy type varies by pipeline
     ):
         """Initialize PubChem compound transformer.
 
@@ -177,7 +177,9 @@ class PubChemCompoundTransformer(BaseTransformer):
             return None
 
         # Build business data with all physicochemical properties
-        business_data: dict[str, Any] = {
+        business_data: dict[
+            str, Any  # Any: transformer record has heterogeneous values
+        ] = {  # Any: transformer record has heterogeneous values
             "molecule_id": str(cid),
             "canonical_smiles": record.get("canonical_smiles"),
             "isomeric_smiles": record.get("isomeric_smiles"),

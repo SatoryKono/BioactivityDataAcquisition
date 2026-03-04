@@ -34,7 +34,8 @@ if TYPE_CHECKING:
 
 # Any: arbitrary Python value from heterogeneous record fields; returns same or JSON string
 def _serialize_value(
-    value: Any, is_string_field: bool
+    value: Any,  # Any: Arrow field value type varies
+    is_string_field: bool,  # Any: Arrow field value type varies
 ) -> Any:  # Any: input/output type varies
     """Serialize a value for Arrow storage.
 

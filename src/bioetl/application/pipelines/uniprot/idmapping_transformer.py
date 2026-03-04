@@ -48,7 +48,7 @@ class IDMappingTransformer(BaseTransformer):
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
-        contract_policy: Any = None,
+        contract_policy: Any = None,  # Any: contract policy type varies by pipeline
     ):
         """Initialize ID Mapping transformer.
 
@@ -111,7 +111,9 @@ class IDMappingTransformer(BaseTransformer):
             mapping_status = "not_found"
 
         # Step 3: Build business data dictionary for content hash
-        business_data: dict[str, Any] = {
+        business_data: dict[
+            str, Any  # Any: transformer record has heterogeneous values
+        ] = {  # Any: transformer record has heterogeneous values
             "target_id": target_id,
             "uniprot_accession": uniprot_accession,
             "mapping_status": mapping_status,

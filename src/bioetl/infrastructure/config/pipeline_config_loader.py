@@ -222,7 +222,10 @@ class PipelineConfigLoader:
         return result
 
     # Any: Pydantic model instance
-    def _field_validation_to_dict(self, fv: Any) -> dict[str, Any]:
+    def _field_validation_to_dict(
+        self,
+        fv: Any,  # Any: YAML config has heterogeneous values
+    ) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
         """Convert FieldValidationConfig to dict.
 
         Args:
@@ -251,7 +254,10 @@ class PipelineConfigLoader:
         return result
 
     # Any: Pydantic model instance
-    def _cross_field_validation_to_dict(self, cfv: Any) -> dict[str, Any]:
+    def _cross_field_validation_to_dict(
+        self,
+        cfv: Any,  # Any: YAML config has heterogeneous values
+    ) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
         """Convert CrossFieldValidationConfig to dict.
 
         Args:
@@ -278,7 +284,10 @@ class PipelineConfigLoader:
         return result
 
     # Any: Pydantic model instance
-    def _conditional_validation_to_dict(self, cv: Any) -> dict[str, Any]:
+    def _conditional_validation_to_dict(
+        self,
+        cv: Any,  # Any: YAML config has heterogeneous values
+    ) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
         """Convert ConditionalValidationConfig to dict.
 
         Args:

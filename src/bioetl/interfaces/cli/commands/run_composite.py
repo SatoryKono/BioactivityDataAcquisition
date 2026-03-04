@@ -19,6 +19,7 @@ from bioetl.composition.bootstrap.runtime.composite import (
     load_composite_config,
 )
 from bioetl.composition.entrypoints import push_metrics_to_gateway
+from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.health_server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
     echo_health_server_info,
@@ -71,8 +72,15 @@ async def _run_composite_inner(
         if failed:
             return False, f"Failed enrichers: {', '.join(failed)}"
         return False, "Composite pipeline failed"
-    except Exception as e:
-        return False, str(e)
+    except (BioETLError, OSError, RuntimeError, ValueError) as exc:
+        return (
+            False,
+            (
+                f"{exc} "
+                f"(reason_code=CLI_COMPOSITE_RUNNER_ERROR, composite={composite_name}, "
+                f"error_type={type(exc).__name__})"
+            ),
+        )
 
 
 async def _run_composite_async(
@@ -271,11 +279,28 @@ def run_composite(
     )
     try:
         success, error_message = asyncio.run(coro)
+    except BioETLError as exc:
+        echo_error(
+            "Composite execution failed with domain error",
+            (
+                f"{exc} "
+                f"(reason_code=CLI_COMPOSITE_DOMAIN_ERROR, composite={composite}, "
+                f"error_type={type(exc).__name__})"
+            ),
+        )
+        sys.exit(ExitCode.FAIL)
     except KeyboardInterrupt:
         echo_warning("Composite pipeline interrupted by user (Ctrl+C)")
         sys.exit(ExitCode.SIGINT)
-    except Exception as e:
-        echo_error("Unexpected error during composite execution", str(e))
+    except Exception as exc:
+        echo_error(
+            "Unexpected error during composite execution",
+            (
+                f"{exc} "
+                f"(reason_code=CLI_COMPOSITE_UNEXPECTED_ERROR, composite={composite}, "
+                f"error_type={type(exc).__name__})"
+            ),
+        )
         sys.exit(ExitCode.FAIL)
     finally:
         push_metrics_to_gateway(pipeline_name=f"composite_{composite}")

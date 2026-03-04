@@ -18,7 +18,7 @@ from typing import Any
 
 
 def extract_author_names(
-    items: list[dict[str, Any]] | None,
+    items: list[dict[str, Any]] | None,  # Any: untyped API JSON record
     name_field: str = "name",
     nested_field: str | None = None,
 ) -> list[str]:

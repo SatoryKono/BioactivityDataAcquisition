@@ -42,12 +42,14 @@ class ValidationResult:
     error: str | None = None
     """Error message if validation failed."""
 
-    error_details: list[dict[str, Any]] = field(default_factory=list)  # Any: validation input types vary
+    error_details: list[
+        dict[str, Any]  # Any: validated records have heterogeneous field types
+    ] = field(default_factory=list)
     """Detailed error information from Pydantic validation."""
 
 
 def validate_record(
-    record: dict[str, Any],
+    record: dict[str, Any],  # Any: validated records have heterogeneous field types
     model_class: type[T],
     logger: LoggerPort | None = None,
     context: str = "",
@@ -107,7 +109,9 @@ def validate_record(
 
 
 def validate_records(
-    records: list[dict[str, Any]],
+    records: list[
+        dict[str, Any]  # Any: validated records have heterogeneous field types
+    ],  # Any: validated records have heterogeneous field types
     model_class: type[T],
     logger: LoggerPort | None = None,
     context: str = "",
@@ -140,12 +144,12 @@ def validate_records(
 
 
 def parse_with_validation(
-    record: dict[str, Any],
+    record: dict[str, Any],  # Any: validated records have heterogeneous field types
     model_class: type[T],
     strict: bool = False,
     logger: LoggerPort | None = None,
     context: str = "",
-) -> dict[str, Any]:
+) -> dict[str, Any]:  # Any: validated records have heterogeneous field types
     """Parse a record with optional validation.
 
     If validation is enabled (strict=True) and fails, raises ValueError.
@@ -174,7 +178,9 @@ def parse_with_validation(
     result = validate_record(record, model_class, logger, context)
 
     if result.is_valid and result.validated is not None:
-        validated_dict: dict[str, Any] = result.validated.model_dump(by_alias=False)
+        validated_dict: dict[
+            str, Any  # Any: validated records have heterogeneous field types
+        ] = result.validated.model_dump(by_alias=False)
         return validated_dict
 
     if strict:

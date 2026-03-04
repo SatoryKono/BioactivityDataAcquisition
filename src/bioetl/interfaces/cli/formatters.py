@@ -94,7 +94,9 @@ def echo_vacuum_all_summary(result: VacuumAllResult) -> None:
         click.echo(f"Failed tables: {', '.join(result.failed_tables)}", err=True)
 
 
-def echo_quarantine_record(record: dict[str, Any]) -> None:
+def echo_quarantine_record(
+    record: dict[str, Any],  # Any: CLI/HTTP response values are heterogeneous
+) -> None:  # Any: quarantine record has heterogeneous values
     """Output a single quarantine record.
 
     Args:

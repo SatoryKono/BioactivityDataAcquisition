@@ -43,7 +43,10 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
     def __init__(
         self,
         logger: LoggerPort,
-        search_fn: Callable[[str, int], Coroutine[Any, Any, list[dict[str, Any]]]],
+        search_fn: Callable[
+            [str, int],
+            Coroutine[Any, Any, list[dict[str, Any]]],  # Any: untyped API JSON record
+        ],  # Any: untyped API JSON record
     ) -> None:
         """Initialize fallback handler.
 
@@ -55,7 +58,9 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
         super().__init__(logger, provider_prefix="pubmed")
         self._search_fn = search_fn
 
-    async def _search_by_title(self, title: str) -> dict[str, Any] | None:
+    async def _search_by_title(
+        self, title: str
+    ) -> dict[str, Any] | None:  # Any: untyped API JSON record
         """Search for publication by title using PubMed esearch.
 
         Validates results using title matching to reduce false positives.
@@ -91,6 +96,9 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
 
         return None
 
-    def _get_result_identifier(self, result: dict[str, Any]) -> tuple[str, str]:
+    def _get_result_identifier(
+        self,
+        result: dict[str, Any],  # Any: untyped API JSON record
+    ) -> tuple[str, str]:  # Any: untyped API JSON record
         """Return PubMed PMID for logging."""
         return ("found_pmid", str(result.get("pmid", "unknown")))

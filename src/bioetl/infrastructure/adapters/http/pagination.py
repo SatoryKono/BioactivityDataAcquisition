@@ -22,7 +22,10 @@ class PaginatedFetcherMixin:
     async def paginated_fetch(
         self,
         fetch_func: Callable[
-            [Any | None, int], Awaitable[tuple[list[T], Any | None]]
+            [Any | None, int],  # Any: pagination cursor type varies by API
+            Awaitable[
+                tuple[list[T], Any | None]  # Any: pagination cursor type varies by API
+            ],  # Any: pagination cursor type varies by API
         ],  # Any: cursor type varies per API
         limit: int | None = None,
         initial_cursor: Any | None = None,  # Any: cursor type varies per...

@@ -34,7 +34,7 @@ class JsonEncoderPort(Protocol):
 
     def dumps(
         self,
-        obj: dict[str, Any] | list[Any],
+        obj: dict[str, Any] | list[Any],  # Any: JSON values are heterogeneous
         *,
         sort_keys: bool = True,
         ensure_ascii: bool = False,
@@ -54,7 +54,10 @@ class JsonEncoderPort(Protocol):
         """
         ...
 
-    def dumps_canonical(self, obj: dict[str, Any]) -> str:
+    def dumps_canonical(
+        self,
+        obj: dict[str, Any],  # Any: port contract allows heterogeneous record values
+    ) -> str:  # Any: JSON values are heterogeneous
         """Serialize object to canonical JSON for hashing.
 
         Canonical JSON has:
@@ -72,7 +75,9 @@ class JsonEncoderPort(Protocol):
         """
         ...
 
-    def loads(self, data: str | bytes) -> dict[str, Any] | list[Any]:
+    def loads(
+        self, data: str | bytes
+    ) -> dict[str, Any] | list[Any]:  # Any: JSON values are heterogeneous
         """Deserialize JSON string to Python object.
 
         Args:

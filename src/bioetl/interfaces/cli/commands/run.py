@@ -20,6 +20,7 @@ from bioetl.composition.entrypoints import (
     get_pipeline_runner_service,
     push_metrics_to_gateway,
 )
+from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.health_server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
     echo_health_server_info,
@@ -330,11 +331,28 @@ def run(
     except PipelineNotFoundError as e:
         echo_error("Pipeline not found", str(e))
         sys.exit(ExitCode.CONFIG_ERROR)
+    except BioETLError as exc:
+        echo_error(
+            "Pipeline execution failed with domain error",
+            (
+                f"{exc} "
+                f"(reason_code=CLI_RUN_DOMAIN_ERROR, pipeline={pipeline}, "
+                f"error_type={type(exc).__name__})"
+            ),
+        )
+        sys.exit(ExitCode.FAIL)
     except KeyboardInterrupt:
         echo_warning("Pipeline interrupted by user (Ctrl+C)")
         sys.exit(ExitCode.SIGINT)
-    except Exception as e:
-        echo_error("Unexpected error during pipeline execution", str(e))
+    except Exception as exc:
+        echo_error(
+            "Unexpected error during pipeline execution",
+            (
+                f"{exc} "
+                f"(reason_code=CLI_RUN_UNEXPECTED_ERROR, pipeline={pipeline}, "
+                f"error_type={type(exc).__name__})"
+            ),
+        )
         sys.exit(ExitCode.FAIL)
     finally:
         push_metrics_to_gateway(pipeline_name=pipeline)

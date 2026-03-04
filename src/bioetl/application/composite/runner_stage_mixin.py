@@ -1,8 +1,8 @@
-# mypy: disable-error-code=attr-defined
 """Stage execution helpers for CompositePipelineRunner."""
 
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite.runner_constants import (
@@ -26,13 +26,40 @@ from bioetl.domain.exceptions import BioETLError
 if TYPE_CHECKING:
     import polars as pl
 
-    from bioetl.application.composite.checkpoint import CompositeCheckpointState
+    from bioetl.application.composite.checkpoint import (
+        CompositeCheckpointService,
+        CompositeCheckpointState,
+    )
+    from bioetl.application.composite.coordinator import EnrichmentCoordinatorService
+    from bioetl.application.composite.dependency_coordinator import (
+        DependencyCoordinatorService,
+    )
+    from bioetl.application.composite.fsm_helper import FSMStateHelperService
+    from bioetl.application.composite.runner import CompositeRuntimeConfig
+    from bioetl.application.core.runner import PipelineRunner
+    from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
+    from bioetl.domain.ports import LoggerPort
 
-__all__ = ["CompositeRunnerStageHelper", "CompositeRunnerStageMixin"]
+__all__ = ["CompositeRunnerStageHelper"]
 
 
 class CompositeRunnerStageHelper:
     """Mixin with seed/dependencies/enrichment stage orchestration."""
+
+    _config: CompositeConfig
+    _runtime: CompositeRuntimeConfig
+    _logger: LoggerPort
+    _run_id_str: str
+    _fsm: FSMStateHelperService
+    _checkpoint_manager: CompositeCheckpointService
+    _dependency_coordinator: DependencyCoordinatorService | None
+    _dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner] | None
+    _coordinator: EnrichmentCoordinatorService
+    _enricher_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner]
+    _run_seed: Callable[[], Awaitable[SeedResult]]
+    _save_checkpoint_safe: Callable[[CompositeCheckpointState, str], Awaitable[bool]]
+    _get_enrichers_to_run: Callable[[CompositeCheckpointState], list[EnricherConfig]]
+    _check_required_enrichers: Callable[[dict[str, EnrichmentResult]], None]
 
     def _has_dependencies_configured(self) -> bool:
         """Check if dependencies phase is configured and ready."""
@@ -391,7 +418,3 @@ class CompositeRunnerStageHelper:
                 run_id=self._run_id_str,
             )
         return state
-
-
-# Backward-compatible alias for transition period.
-CompositeRunnerStageMixin = CompositeRunnerStageHelper

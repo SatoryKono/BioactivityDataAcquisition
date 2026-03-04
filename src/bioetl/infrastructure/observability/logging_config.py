@@ -95,8 +95,8 @@ def _mask_secrets(value: Any) -> Any:  # Any: structlog context values of arbitr
 def secret_filter_processor(
     logger: Any,  # Any: structlog wrapped logger instance
     _method_name: str,
-    event_dict: dict[str, Any],
-) -> dict[str, Any]:
+    event_dict: dict[str, Any],  # Any: OTel span attributes are heterogeneous
+) -> dict[str, Any]:  # Any: OTel span attributes are heterogeneous
     """Structlog processor that filters secrets from log entries.
 
     Scans all string values in the event dict and masks potential secrets
@@ -154,7 +154,9 @@ def configure_logging(
             return False
 
         # Build processor chain with secret filtering
-        processors: list[Any] = [
+        processors: list[
+            Any  # Any: structlog processor chain has heterogeneous callables
+        ] = [
             structlog.contextvars.merge_contextvars,
             structlog.stdlib.add_logger_name,
             structlog.stdlib.add_log_level,

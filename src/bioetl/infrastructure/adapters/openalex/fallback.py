@@ -40,7 +40,9 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
         super().__init__(logger, provider_prefix="openalex")
         self._search_fn = search_fn
 
-    async def _search_by_title(self, title: str) -> dict[str, Any] | None:
+    async def _search_by_title(
+        self, title: str
+    ) -> dict[str, Any] | None:  # Any: untyped API JSON record
         """Search for work by title using OpenAlex API.
 
         Validates results using title matching to reduce false positives.
@@ -60,12 +62,12 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
         for result in candidates:
             found_title = result.get("title", "")
             if found_title and titles_match(title, found_title):
-                return cast("dict[str, Any]", result)
+                return cast("dict[str, Any]", result)  # Any: untyped API JSON record
 
         # Fallback: check if any candidate has no title (rare edge case)
         # Only return if we haven't found a match yet
         for result in candidates:
             if not result.get("title"):
-                return cast("dict[str, Any]", result)
+                return cast("dict[str, Any]", result)  # Any: untyped API JSON record
 
         return None

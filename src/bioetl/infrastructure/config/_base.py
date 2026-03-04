@@ -45,7 +45,7 @@ class YamlSettingsSource(PydanticBaseSettingsSource):
 
     def get_field_value(
         self, field: FieldInfo, field_name: str
-    ) -> tuple[Any, str, bool]:
+    ) -> tuple[Any, str, bool]:  # Any: YAML config has heterogeneous values
         """Get value of a field from YAML file.
 
         Args:
@@ -88,8 +88,8 @@ class YamlSettingsSource(PydanticBaseSettingsSource):
         """
         return value
 
-    def __call__(self) -> dict[str, Any]:
-        d: dict[str, Any] = {}
+    def __call__(self) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
+        d: dict[str, Any] = {}  # Any: YAML config has heterogeneous values
 
         for field_name, field in self.settings_cls.model_fields.items():
             field_value, field_key, value_is_complex = self.get_field_value(

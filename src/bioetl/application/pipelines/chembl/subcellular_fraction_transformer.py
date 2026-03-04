@@ -99,7 +99,7 @@ class SubcellularFractionTransformer(BaseChemblTransformer):
         self,
         record: BronzeRecord,
         primary_id: PrimaryId,
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any]:  # Any: transformer record has heterogeneous values
         """Extract subcellular fraction data from the record.
 
         Handles two cases:
@@ -123,7 +123,9 @@ class SubcellularFractionTransformer(BaseChemblTransformer):
 
         return {
             "subcellular_fraction": fraction,
-            "assay_count": int(cast(Any, assay_count))
+            "assay_count": int(
+                cast(Any, assay_count)  # Any: cast for nullable numeric coercion
+            )  # Any: cast for nullable numeric coercion
             if assay_count is not None
             else None,
             "example_assay_id": (str(example_assay).strip() if example_assay else None),
@@ -153,7 +155,7 @@ class SubcellularFractionTransformer(BaseChemblTransformer):
     def extract_fraction_from_assay(
         self,
         record: BronzeRecord,
-    ) -> dict[str, Any] | None:
+    ) -> dict[str, Any] | None:  # Any: transformer record has heterogeneous values
         """Extract subcellular fraction from a raw Assay record.
 
         This method is used when processing raw assay records directly

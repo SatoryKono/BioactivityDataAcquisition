@@ -26,9 +26,11 @@ from typing import TYPE_CHECKING, Any
 from httpx import HTTPStatusError, RequestError
 
 from bioetl.domain.exceptions import BioETLError, NetworkError
-from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
+from bioetl.infrastructure.adapters.openalex.client_helpers_mixin import (
+    _OpenAlexAdapterHelpersMixin,
+)
 from bioetl.infrastructure.adapters.openalex.fallback import TitleFallbackHandler
 
 if TYPE_CHECKING:
@@ -55,7 +57,7 @@ OPENALEX_RUNTIME_ERRORS = (
 
 
 @dataclass
-class OpenAlexAdapter(BaseHttpAdapter):
+class OpenAlexAdapter(_OpenAlexAdapterHelpersMixin, BaseHttpAdapter):
     """OpenAlex data source adapter.
 
     Inherits from BaseHttpAdapter for standardized lifecycle management
@@ -93,17 +95,6 @@ class OpenAlexAdapter(BaseHttpAdapter):
             logger=self.logger,
             search_fn=self._search_by_title,
         )
-
-    def _build_headers(self) -> dict[str, str]:
-        """Build request headers for OpenAlex API."""
-        return {
-            "User-Agent": f"BioETL/1.0 (mailto:{self.mailto})",
-            "Accept": "application/json",
-        }
-
-    def _build_base_params(self) -> dict[str, str]:
-        """Build base query parameters with mailto for polite pool."""
-        return {"mailto": self.mailto}
 
     async def fetch_filtered(
         self,
@@ -606,44 +597,6 @@ class OpenAlexAdapter(BaseHttpAdapter):
             )
             return []
 
-    @staticmethod
-    def _normalize_doi(doi: str) -> str | None:
-        """Normalize DOI by removing URL prefix."""
-        if not doi:
-            return None
-        doi = doi.strip()
-        if doi.startswith("https://doi.org/"):
-            return doi[16:]
-        if doi.startswith("http://doi.org/"):
-            return doi[15:]
-        if doi.startswith("doi:"):
-            return doi[4:]
-        return doi
-
-    @staticmethod
-    def _escape_title_for_search(title: str) -> str:
-        """Escape title for OpenAlex title.search filter.
-
-        OpenAlex uses + for spaces in search queries.
-        Special characters that break the filter are removed.
-        """
-        # Remove special characters that break the filter
-        cleaned = title.replace(":", " ").replace("|", " ").replace(",", " ")
-        # Replace spaces with + for search
-        return "+".join(cleaned.split())
-
-    @staticmethod
-    def _extract_doi_from_record(record: BronzeRecord) -> str | None:
-        """Extract normalized DOI from OpenAlex record."""
-        doi_url: str = record.get("doi", "") or ""
-        if not doi_url:
-            return None
-        if doi_url.startswith("https://doi.org/"):
-            extracted: str = doi_url[16:].lower()
-            return extracted
-        lowered: str = doi_url.lower()
-        return lowered
-
     async def _probe_health(self) -> HealthStatus:
         """Probe OpenAlex API health. Returns DEGRADED if response >5 sec."""
         try:
@@ -683,53 +636,6 @@ class OpenAlexAdapter(BaseHttpAdapter):
                 error=str(e),
             )
             raise  # Let health_check() return _fallback_health_status()
-
-    def _fallback_health_status(self) -> HealthStatus:
-        """Get fallback health status on probe failure.
-
-        Overrides BaseHttpAdapter._fallback_health_status().
-
-        Returns:
-            HealthStatus.UNHEALTHY
-
-        """
-        return HealthStatus.UNHEALTHY
-
-    def _get_health_endpoint(self) -> str:
-        """Get the health check endpoint for OpenAlex.
-
-        Returns:
-            OpenAlex works endpoint used for health probe.
-
-        """
-        return "/works"
-
-    def get_source_metadata(self, api_version: str | None = None) -> SourceMetadata:
-        """Get API request metadata and clear collector.
-
-        Returns aggregated metadata from all API requests made since last clear.
-        Used by BatchExecutor to enrich Bronze layer metadata.
-
-        Args:
-            api_version: Optional API version string.
-
-        Returns:
-            SourceMetadata with request details and statistics.
-        """
-        metadata = self._request_collector.to_source_metadata(
-            source_type="api", url=OPENALEX_API_BASE, api_version=api_version
-        )
-        self._request_collector.clear()
-        return metadata
-
-    def clear_request_collector(self) -> None:
-        """Clear the collector without returning metadata."""
-        self._request_collector.clear()
-
-    @property
-    def request_count(self) -> int:
-        """Number of recorded API requests since last clear."""
-        return self._request_collector.request_count
 
     async def aclose(self) -> None:
         """Close adapter resources.

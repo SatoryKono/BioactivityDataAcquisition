@@ -234,8 +234,12 @@ class UniProtFeatureLocation(BaseModel):
 
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
 
-    start: dict[str, Any] | None = Field(default=None, description="Start position")
-    end: dict[str, Any] | None = Field(default=None, description="End position")
+    start: dict[str, Any] | None = Field(  # Any: untyped API JSON record
+        default=None, description="Start position"
+    )  # Any: nested API JSON has heterogeneous values
+    end: dict[str, Any] | None = Field(  # Any: untyped API JSON record
+        default=None, description="End position"
+    )  # Any: nested API JSON has heterogeneous values
 
 
 class UniProtFeature(BaseModel):
@@ -398,8 +402,10 @@ class UniProtFeatureRecord(BaseModel):
 
     accession: str = Field(description="Protein accession")
     type: str | None = Field(default=None, description="Feature type")
-    location: dict[str, Any] | None = Field(
-        default=None, description="Feature location"
+    location: dict[str, Any] | None = (  # Any: untyped API JSON record
+        Field(  # Any: nested API JSON has heterogeneous values
+            default=None, description="Feature location"
+        )
     )
     description: str | None = Field(default=None, description="Feature description")
 

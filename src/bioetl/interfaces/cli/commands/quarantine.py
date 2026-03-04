@@ -17,6 +17,7 @@ from bioetl.composition.entrypoints import (
     get_quarantine_manager,
     get_quarantine_service,
 )
+from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.types import QuarantineRecordStatus
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import (
@@ -88,13 +89,22 @@ def quarantine_stats(pipeline: str, output_json: bool) -> None:
     """
     quarantine_manager = get_quarantine_manager(pipeline)
 
-    async def _stats() -> dict[str, Any]:
+    async def _stats() -> dict[
+        str, Any  # Any: CLI/HTTP response values are heterogeneous
+    ]:  # Any: quarantine record has heterogeneous values
         return await quarantine_manager.get_stats()
 
     try:
         stats = asyncio.run(_stats())
-    except Exception as e:
-        echo_error(f"Failed to get stats: {e}")
+    except (BioETLError, OSError, RuntimeError, ValueError) as exc:
+        echo_error(
+            "Failed to get stats",
+            (
+                f"{exc} "
+                f"(reason_code=CLI_QUARANTINE_STATS_ERROR, pipeline={pipeline}, "
+                f"error_type={type(exc).__name__})"
+            ),
+        )
         sys.exit(ExitCode.FAIL)
 
     if output_json:
@@ -214,7 +224,9 @@ def quarantine_purge(
 
     if dry_run:
         # Get count of records that would be purged
-        async def _get_stats() -> dict[str, Any]:
+        async def _get_stats() -> dict[
+            str, Any  # Any: CLI/HTTP response values are heterogeneous
+        ]:  # Any: quarantine record has heterogeneous values
             return await quarantine_service.get_stats(pipeline)
 
         stats = asyncio.run(_get_stats())

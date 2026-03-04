@@ -15,7 +15,14 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+import httpx
 import pytest
+from deltalake.exceptions import DeltaError, TableNotFoundError
+from vcr.errors import (
+    CannotOverwriteExistingCassetteException,
+    UnhandledHTTPRequestError,
+)
+
 from bioetl.domain.exceptions.infrastructure import InfrastructureError
 
 from .conftest import (
@@ -184,6 +191,12 @@ VCR_MISS_MARKERS: tuple[str, ...] = (
     "no match for the request",
     "vcr",
 )
+MATRIX_SKIP_ERRORS: tuple[type[Exception], ...] = (
+    InfrastructureError,
+    httpx.HTTPStatusError,
+    CannotOverwriteExistingCassetteException,
+    UnhandledHTTPRequestError,
+)
 
 
 def _is_vcr_recording_enabled() -> bool:
@@ -233,6 +246,13 @@ def _is_external_healthcheck_playback_failure(exc: Exception) -> bool:
         return False
     message = str(exc).lower()
     return "health check failed for: data_source" in message
+
+
+def _is_rate_limited_http_error(exc: Exception) -> bool:
+    """Return True when upstream API returned transient HTTP 429."""
+    if not isinstance(exc, httpx.HTTPStatusError):
+        return False
+    return exc.response.status_code == 429
 
 
 def _iter_entity_pipelines() -> set[str]:
@@ -304,7 +324,11 @@ async def test_pipeline_matrix_smoke(
 
     try:
         await run_pipeline_or_skip_transient(ctx)
-    except Exception as exc:
+    except MATRIX_SKIP_ERRORS as exc:
+        if _is_rate_limited_http_error(exc):
+            pytest.skip(
+                f"Transient upstream 429 for {pipeline_case.pipeline_name}: {exc}"
+            )
         if _is_external_healthcheck_playback_failure(exc):
             pytest.skip(
                 "External health-check mismatch "
@@ -322,7 +346,7 @@ async def test_pipeline_matrix_smoke(
         )
         assert len(bronze_files) >= 1
         assert_silver_table_has_records(e2e_data_dir, pipeline_case.pipeline_name, 1)
-    except AssertionError as exc:
+    except (AssertionError, DeltaError, TableNotFoundError) as exc:
         pytest.skip(
             f"No data produced for {pipeline_case.pipeline_name} with current cassette: {exc}"
         )

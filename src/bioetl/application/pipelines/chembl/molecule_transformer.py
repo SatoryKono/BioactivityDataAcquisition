@@ -8,8 +8,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
-from bioetl.domain.types import GoldRecord
-
 from bioetl.application.core.dict_transformers import flatten_nested_dict
 from bioetl.application.core.field_specs import (
     FieldGroup,
@@ -22,6 +20,7 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
 )
 from bioetl.domain.entities import Molecule
 from bioetl.domain.transformations import safe_float, safe_int
+from bioetl.domain.types import GoldRecord
 from bioetl.domain.value_objects import SMILES, InChIKey
 
 if TYPE_CHECKING:
@@ -190,7 +189,10 @@ class MoleculeTransformer(BaseChemblTransformer):
 
         # Extract structure fields
         structure_data = flatten_nested_dict(
-            cast("dict[str, Any] | None", rec.get("molecule_structures")),  # Any: untyped ChEMBL API JSON
+            cast(
+                "dict[str, Any] | None",  # Any: untyped ChEMBL API JSON
+                rec.get("molecule_structures"),
+            ),
             "",  # No prefix - unified naming with PubChem
             _STRUCTURES_FIELDS,
             renames=_STRUCTURES_RENAMES,
@@ -210,7 +212,10 @@ class MoleculeTransformer(BaseChemblTransformer):
         structure_data["canonical_smiles"] = str(smiles) if smiles else None
 
         properties = flatten_nested_dict(
-            cast("dict[str, Any] | None", rec.get("molecule_properties")),  # Any: untyped ChEMBL API JSON
+            cast(
+                "dict[str, Any] | None",  # Any: untyped ChEMBL API JSON
+                rec.get("molecule_properties"),
+            ),
             "property_",
             _PROPERTIES_FIELDS,
             renames=_PROPERTIES_RENAMES,
@@ -228,7 +233,10 @@ class MoleculeTransformer(BaseChemblTransformer):
             **self.serialize_json_fields(rec, _JSON_FIELDS),
             # Nested dict extraction with renames
             **flatten_nested_dict(
-                cast("dict[str, Any] | None", rec.get("molecule_hierarchy")),  # Any: untyped ChEMBL API JSON
+                cast(
+                    "dict[str, Any] | None",  # Any: untyped ChEMBL API JSON
+                    rec.get("molecule_hierarchy"),
+                ),
                 "hierarchy_",
                 _HIERARCHY_FIELDS,
                 renames=_HIERARCHY_RENAMES,

@@ -99,8 +99,8 @@ def flatten_nested_dict(
 def extract_list_field(
     items: list[dict[str, Any]] | None,  # Any: dict values vary by field type
     field: str,
-    converter: Callable[[Any], T]
-    | None = None,  # Any: converter accepts heterogeneous input
+    converter: Callable[[Any], T]  # Any: converter accepts heterogeneous input
+    | None = None,
 ) -> list[T] | None:
     """Extract field values from a list of dicts.
 

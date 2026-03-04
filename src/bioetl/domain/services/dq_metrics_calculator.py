@@ -29,7 +29,7 @@ class DQMetricsInput:
         validation_errors: List of validation error messages.
     """
 
-    records: list[dict[str, Any]]
+    records: list[dict[str, Any]]  # Any: DQ check values vary by check type
     existing_schema_fields: set[str] | None = None
     quarantined_count: int = 0
     validation_errors: list[str] | None = None
@@ -71,7 +71,7 @@ class DQMetricsCalculator:
 
     def _detect_schema_drift(
         self,
-        records: list[dict[str, Any]],
+        records: list[dict[str, Any]],  # Any: DQ check values vary by check type
         existing_fields: set[str] | None,
     ) -> SchemaDriftInfo | None:
         """Detect schema drift between existing and incoming schema.

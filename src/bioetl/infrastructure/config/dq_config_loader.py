@@ -100,7 +100,7 @@ class DQConfigLoader:
         self,
         provider: str,
         entity: str,
-        inline_overrides: dict[str, Any]
+        inline_overrides: dict[str, Any]  # Any: YAML config has heterogeneous values
         | None,  # Any: YAML DQ config has heterogeneous values
     ) -> dict[str, Any]:  # Any: YAML DQ config has heterogeneous values
         """Build merged config from defaults → provider → entity → inline."""
@@ -140,7 +140,7 @@ class DQConfigLoader:
         self,
         provider: str,
         entity: str,
-        inline_overrides: dict[str, Any]
+        inline_overrides: dict[str, Any]  # Any: YAML config has heterogeneous values
         | None = None,  # Any: YAML DQ config has heterogeneous values
     ) -> DQConfig:
         """Load merged DQ config for provider/entity.
@@ -244,8 +244,14 @@ class DQConfigLoader:
             return copy.deepcopy(override)
 
         return self._merge_validation_lists(
-            cast(list[dict[str, Any]], base),
-            cast(list[dict[str, Any]], override),
+            cast(
+                list[dict[str, Any]],  # Any: DQ check values vary by check type
+                base,  # Any: DQ check values vary by check type
+            ),  # Any: YAML config has heterogeneous values
+            cast(
+                list[dict[str, Any]],  # Any: DQ check values vary by check type
+                override,  # Any: DQ check values vary by check type
+            ),  # Any: YAML config has heterogeneous values
         )
 
     def _merge_validation_lists(
@@ -266,7 +272,7 @@ class DQConfigLoader:
         """
 
         def get_key(
-            item: dict[str, Any],
+            item: dict[str, Any],  # Any: YAML config has heterogeneous values
         ) -> str:  # Any: YAML DQ config has heterogeneous values
             """Get unique key for validation item.
 
@@ -289,7 +295,7 @@ class DQConfigLoader:
 
         # Build result map, override entries replace base entries with same key
         result_map: dict[
-            str, dict[str, Any]
+            str, dict[str, Any]  # Any: YAML config has heterogeneous values
         ] = {}  # Any: YAML DQ config has heterogeneous values
         for item in base:
             key = get_key(item)

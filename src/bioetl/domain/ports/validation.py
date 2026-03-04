@@ -25,7 +25,12 @@ class SilverValidatorPort(Protocol):
     should be a CPU-bound operation without I/O.
     """
 
-    def validate(self, records: list[dict[str, Any]]) -> ValidationResult:
+    def validate(
+        self,
+        records: list[
+            dict[str, Any]  # Any: port contract allows heterogeneous record values
+        ],  # Any: port contract allows heterogeneous record values
+    ) -> ValidationResult:  # Any: validated records have heterogeneous field types
         """Validate records for Silver layer.
 
         Args:
@@ -49,7 +54,12 @@ class GoldValidatorPort(Protocol):
     should be a CPU-bound operation without I/O.
     """
 
-    def validate(self, records: list[dict[str, Any]]) -> ValidationResult:
+    def validate(
+        self,
+        records: list[
+            dict[str, Any]  # Any: port contract allows heterogeneous record values
+        ],  # Any: port contract allows heterogeneous record values
+    ) -> ValidationResult:  # Any: validated records have heterogeneous field types
         """Validate records for Gold layer.
 
         Args:

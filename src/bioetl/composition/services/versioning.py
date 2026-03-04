@@ -89,7 +89,10 @@ def _normalize_for_hash(obj: Any) -> Any:  # Any: recursive normalizer a...
     return obj
 
 
-def compute_config_hash(config: PipelineYamlConfig | dict[str, Any]) -> str:
+def compute_config_hash(
+    config: PipelineYamlConfig
+    | dict[str, Any],  # Any: factory wiring; concrete types resolved at runtime
+) -> str:  # Any: factory wiring; concrete types resolved at runtime
     """Compute SHA256 hash of pipeline configuration.
 
     Creates a deterministic hash of the configuration for change detection.
@@ -127,7 +130,9 @@ def compute_config_hash(config: PipelineYamlConfig | dict[str, Any]) -> str:
 
 
 def get_pipeline_version(
-    config: PipelineYamlConfig | dict[str, Any] | None = None,
+    config: PipelineYamlConfig
+    | dict[str, Any]  # Any: factory wiring; concrete types resolved at runtime
+    | None = None,  # Any: factory wiring; concrete types resolved at runtime
 ) -> str:
     """Get pipeline version from config or fallback to package version.
 

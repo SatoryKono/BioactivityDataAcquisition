@@ -33,7 +33,7 @@ class CompoundRecordTransformer(BaseChemblTransformer):
         self,
         record: BronzeRecord,
         primary_id: PrimaryId,
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any]:  # Any: transformer record has heterogeneous values
         """Extract CompoundRecord business data from bronze record.
 
         Delegates normalization to domain layer per REFACTOR-004.

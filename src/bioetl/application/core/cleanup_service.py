@@ -182,7 +182,10 @@ class CleanupService:
 
         return result
 
-    def _parse_layer_info(self, info_dict: dict[str, Any]) -> LayerInfo:
+    def _parse_layer_info(
+        self,
+        info_dict: dict[str, Any],  # Any: values are heterogeneous
+    ) -> LayerInfo:  # Any: values are heterogeneous
         """Parse layer info from storage preview response.
 
         Args:

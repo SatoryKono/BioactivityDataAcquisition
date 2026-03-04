@@ -12,7 +12,9 @@ from typing import Any, Literal
 from bioetl.domain.models.metadata import SchemaColumnMetadata, SchemaMetadata
 
 
-def extract_schema_metadata(gold_schema: Any | None) -> SchemaMetadata:
+def extract_schema_metadata(
+    gold_schema: Any | None,  # Any: untyped API JSON
+) -> SchemaMetadata:  # Any: Pandera DataFrameModel class or instance
     """Extract schema metadata from a Pandera DataFrameModel class.
 
     Args:
@@ -37,7 +39,9 @@ def extract_schema_metadata(gold_schema: Any | None) -> SchemaMetadata:
     )
 
 
-def _extract_contract_path(gold_schema: Any) -> str | None:
+def _extract_contract_path(
+    gold_schema: Any,  # Any: untyped API JSON
+) -> str | None:  # Any: Pandera DataFrameModel class or instance
     """Extract source path relative to project root from schema module."""
     try:
         module = inspect.getmodule(gold_schema)
@@ -51,7 +55,9 @@ def _extract_contract_path(gold_schema: Any) -> str | None:
     return None
 
 
-def _extract_schema_version(gold_schema: Any) -> str:
+def _extract_schema_version(
+    gold_schema: Any,  # Any: untyped API JSON
+) -> str:  # Any: Pandera DataFrameModel class or instance
     """Extract schema version from inner Config class."""
     version = "1.0"
     if hasattr(gold_schema, "Config"):
@@ -62,7 +68,9 @@ def _extract_schema_version(gold_schema: Any) -> str:
     return version
 
 
-def _extract_validation_mode(gold_schema: Any) -> Literal["strict", "lenient"]:
+def _extract_validation_mode(
+    gold_schema: Any,  # Any: untyped API JSON
+) -> Literal["strict", "lenient"]:  # Any: Pandera DataFrameModel class or instance
     """Extract strict/lenient validation mode from inner Config class."""
     validation: Literal["strict", "lenient"] = "strict"
     if hasattr(gold_schema, "Config"):
@@ -72,7 +80,9 @@ def _extract_validation_mode(gold_schema: Any) -> Literal["strict", "lenient"]:
     return validation
 
 
-def _extract_schema_columns(gold_schema: Any) -> list[SchemaColumnMetadata]:
+def _extract_schema_columns(
+    gold_schema: Any,  # Any: untyped API JSON
+) -> list[SchemaColumnMetadata]:  # Any: Pandera DataFrameModel class or instance
     """Extract columns from schema via to_schema() when available."""
     columns: list[SchemaColumnMetadata] = []
     try:

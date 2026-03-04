@@ -10,7 +10,9 @@ from __future__ import annotations
 from typing import Any
 
 
-def extract_authors(authors: list[dict[str, Any]] | None) -> list[str]:
+def extract_authors(
+    authors: list[dict[str, Any]] | None,  # Any: untyped API JSON record
+) -> list[str]:  # Any: untyped API JSON record
     """Extract author display names from authors list.
 
     Filters out None, empty strings, and whitespace-only names.
@@ -41,7 +43,9 @@ def extract_authors(authors: list[dict[str, Any]] | None) -> list[str]:
     return result
 
 
-def extract_author_ids(authors: list[dict[str, Any]] | None) -> list[str]:
+def extract_author_ids(
+    authors: list[dict[str, Any]] | None,  # Any: untyped API JSON record
+) -> list[str]:  # Any: untyped API JSON record
     """Extract author IDs from authors list.
 
     Args:
@@ -66,7 +70,9 @@ def extract_author_ids(authors: list[dict[str, Any]] | None) -> list[str]:
     return result
 
 
-def extract_author_s2_ids(authors: list[dict[str, Any]] | None) -> list[str]:
+def extract_author_s2_ids(
+    authors: list[dict[str, Any]] | None,  # Any: untyped API JSON record
+) -> list[str]:  # Any: untyped API JSON record
     """Extract Semantic Scholar author IDs from authors list.
 
     Extracts the 40-character hex S2 author IDs for author-level analytics
@@ -99,7 +105,9 @@ def extract_author_s2_ids(authors: list[dict[str, Any]] | None) -> list[str]:
     return result
 
 
-def extract_author_orcids(authors: list[dict[str, Any]] | None) -> list[str]:
+def extract_author_orcids(
+    authors: list[dict[str, Any]] | None,  # Any: untyped API JSON record
+) -> list[str]:  # Any: untyped API JSON record
     """Extract ORCID identifiers from authors list.
 
     ORCID (Open Researcher and Contributor ID) provides persistent digital
@@ -138,7 +146,9 @@ def extract_author_orcids(authors: list[dict[str, Any]] | None) -> list[str]:
     return result
 
 
-def extract_author_h_indices(authors: list[dict[str, Any]] | None) -> list[int | None]:
+def extract_author_h_indices(
+    authors: list[dict[str, Any]] | None,  # Any: untyped API JSON record
+) -> list[int | None]:  # Any: untyped API JSON record
     """Extract h-index values from authors list.
 
     The h-index is a metric for research impact. This extracts h-index
@@ -173,7 +183,9 @@ def extract_author_h_indices(authors: list[dict[str, Any]] | None) -> list[int |
     return result
 
 
-def extract_affiliations(authors: list[dict[str, Any]] | None) -> list[str]:
+def extract_affiliations(
+    authors: list[dict[str, Any]] | None,  # Any: untyped API JSON record
+) -> list[str]:  # Any: untyped API JSON record
     """Extract affiliations from authors list.
 
 

@@ -377,7 +377,9 @@ class HealthCheckProviderMixin(HealthCheckMixin):
         except HEALTH_CHECK_ERRORS:
             return HealthStatus.UNHEALTHY
 
-    def _get_error_context(self, operation: str) -> dict[str, Any]:
+    def _get_error_context(
+        self, operation: str
+    ) -> dict[str, Any]:  # Any: untyped API JSON record
         """Build error context with circuit breaker info.
 
         Args:

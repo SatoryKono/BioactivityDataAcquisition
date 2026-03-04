@@ -48,7 +48,12 @@ class BasePanderaValidator:
         self._schema = schema
         self._strict = strict
 
-    def validate(self, records: list[dict[str, Any]]) -> ValidationResult:
+    def validate(
+        self,
+        records: list[
+            dict[str, Any]  # Any: validated records have heterogeneous field types
+        ],  # Any: validated records have heterogeneous field types
+    ) -> ValidationResult:  # Any: validated records have heterogeneous field types
         """Validate records using Pandera schema.
 
         Args:
@@ -224,7 +229,12 @@ class NoOpValidator:
     with pass-through behavior. Used when validation is not required.
     """
 
-    def validate(self, records: list[dict[str, Any]]) -> ValidationResult:
+    def validate(
+        self,
+        records: list[
+            dict[str, Any]  # Any: validated records have heterogeneous field types
+        ],  # Any: validated records have heterogeneous field types
+    ) -> ValidationResult:  # Any: validated records have heterogeneous field types
         """Pass through records without validation.
 
         Args:

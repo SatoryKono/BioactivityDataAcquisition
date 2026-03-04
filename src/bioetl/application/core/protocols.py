@@ -19,8 +19,11 @@ class TransformCallback(Protocol):
     """Bronze to Silver transformation callback."""
 
     def __call__(
-        self, context: PipelineContext, record: dict[str, Any], index: int
-    ) -> Awaitable[dict[str, Any] | None]:
+        self,
+        context: PipelineContext,
+        record: dict[str, Any],  # Any: values are heterogeneous
+        index: int,  # Any: values are heterogeneous
+    ) -> Awaitable[dict[str, Any] | None]:  # Any: values are heterogeneous
         """Execute transformation."""
         ...
 
@@ -28,7 +31,11 @@ class TransformCallback(Protocol):
 class GoldFilterCallback(Protocol):
     """Filter callback to determine if Silver record should go to Gold."""
 
-    def __call__(self, context: PipelineContext, record: dict[str, Any]) -> bool:
+    def __call__(
+        self,
+        context: PipelineContext,
+        record: dict[str, Any],  # Any: values are heterogeneous
+    ) -> bool:  # Any: values are heterogeneous
         """Evaluate if record should be included in Gold layer."""
         ...
 
@@ -40,8 +47,10 @@ class GoldTransformCallback(Protocol):
     """
 
     def __call__(
-        self, context: PipelineContext, record: dict[str, Any]
-    ) -> dict[str, Any]:
+        self,
+        context: PipelineContext,
+        record: dict[str, Any],  # Any: values are heterogeneous
+    ) -> dict[str, Any]:  # Any: values are heterogeneous
         """Execute transformation."""
         ...
 

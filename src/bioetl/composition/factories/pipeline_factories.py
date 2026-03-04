@@ -412,7 +412,9 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
 )
 
 
-def _schema_columns(schema_class: Any) -> set[str]:
+def _schema_columns(
+    schema_class: Any,  # Any: factory wiring; concrete types resolved at runtime
+) -> set[str]:  # Any: factory wiring; concrete types resolved at runtime
     """Extract column names from a Pandera DataFrameModel class."""
     try:
         schema = schema_class.to_schema()

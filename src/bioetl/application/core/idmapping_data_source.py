@@ -109,7 +109,7 @@ class IDMappingDataSource:
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
         offset: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[dict[str, Any]]:  # Any: record values are heterogeneous
         """Fetch ID mapping records.
 
         Resolves ChEMBL IDs from one of three sources (priority order):
@@ -192,7 +192,9 @@ class IDMappingDataSource:
             entry_data = mapping_results.get(chembl_id)
             if entry_data is not None and isinstance(entry_data, dict):
                 found_count += 1
-                result: dict[str, Any] = {"target_id": chembl_id}
+                result: dict[str, Any] = {  # Any: record values are heterogeneous
+                    "target_id": chembl_id
+                }  # Any: record values are heterogeneous
                 result.update(entry_data)
                 yield result
             else:
