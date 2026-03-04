@@ -184,7 +184,8 @@ class TestCompositePublicationColumns:
         # Verify ordering of these keys
         # system -> provider_ids -> journal -> authors -> biomedical -> citations -> doc_type -> DQ
         # 1. entity_id, content_hash (system)
-        # 2. chembl.publication.publication_id, pubmed.publication.pmid, doi (provider_ids / journal - wait, doi is in journal)
+        # 2. chembl.publication.publication_id, pubmed.publication.pmid, doi
+        #    (provider_ids / journal - wait, doi is in journal)
         # 3. chembl.publication.title, pubmed.publication.abstract (journal)
         # 4. pubmed.publication.authors_with_affiliations (authors)
         # 5. pubmed.publication.chemicals (biomedical)

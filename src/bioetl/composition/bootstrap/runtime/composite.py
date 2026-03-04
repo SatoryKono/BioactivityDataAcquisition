@@ -12,9 +12,6 @@ from pydantic import ValidationError
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointService
 from bioetl.application.composite.coordinator import EnrichmentCoordinatorService
-from bioetl.application.composite.cross_validator import (
-    EnrichmentCrossValidationService,
-)
 from bioetl.application.composite.dependency_coordinator import (
     DependencyCoordinatorService,
 )
@@ -60,7 +57,6 @@ from bioetl.infrastructure.locking.memory_lock import MemoryLock
 from bioetl.infrastructure.schemas.composite_config import (
     validate_composite_config_payload,
 )
-from bioetl.infrastructure.storage.delta_reader import DeltaReader as _DeltaReader
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -76,16 +72,6 @@ if TYPE_CHECKING:
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.ports import LockPort, MetricsPort, QuarantinePort
     from bioetl.infrastructure.config import Settings
-
-# Backward-compatible aliases for iterative NAME-001 migration.
-CompositeCheckpointManager = CompositeCheckpointService
-EnrichmentCrossValidator = EnrichmentCrossValidationService
-EnrichmentCoordinator = EnrichmentCoordinatorService
-DependencyCoordinator = DependencyCoordinatorService
-# Backward-compatible patch points used by legacy bootstrap tests.
-DeltaReader = _DeltaReader
-KeyExtractorService = _KeyExtractorService
-MergeService = _MergeService
 
 __all__ = [
     "CompositeRuntimeConfig",
@@ -170,7 +156,7 @@ def create_composite_runner_with_legacy_fsm_adapter(
     )
 
 
-# Backward-compatible patch point for legacy bootstrap callsites/tests.
+# Backward-compatible patch point used by legacy bootstrap tests.
 CompositePipelineRunner = create_composite_runner_with_legacy_fsm_adapter
 
 
@@ -178,20 +164,6 @@ def _resolve_composite_gold_schema(composite_name: str) -> type | None:
     """Resolve composite Gold contract by composite pipeline name."""
     key = composite_name.removeprefix("composite_")
     return COMPOSITE_GOLD_SCHEMA_REGISTRY.get(key)
-
-
-def _to_id_str(val: object) -> str:
-    """Convert value to ID string, handling float-to-int conversion.
-
-    External APIs (like ChEMBL) often expect integer IDs and return 400
-    if given floats (e.g., '4044.0'). This helper ensures '4044.0'
-    becomes '4044'.
-    """
-    if val is None:
-        return ""
-    if isinstance(val, float) and val.is_integer():
-        return str(int(val))
-    return str(val)
 
 
 def _resolve_composite_config_path(name: str) -> Path:
@@ -313,7 +285,7 @@ def bootstrap_composite_runner(
         resolve_gold_schema=_resolve_composite_gold_schema,
         load_field_group_registry=_load_field_group_registry,
         create_dq_report_service=_create_dq_report_service,
-        checkpoint_manager_cls=CompositeCheckpointManager,
+        checkpoint_manager_cls=CompositeCheckpointService,
     ).build()
 
     return CompositePipelineRunner(

@@ -126,6 +126,5 @@ class BatchMemoryManagerService:
         return current_size
 
 
-BatchMemoryManager = BatchMemoryManagerService
 
-__all__ = ["BatchMemoryManager", "BatchMemoryManagerService"]
+__all__ = ["BatchMemoryManagerService"]

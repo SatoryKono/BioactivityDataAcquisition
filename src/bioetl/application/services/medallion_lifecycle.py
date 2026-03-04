@@ -152,22 +152,7 @@ class MedallionLifecycleService:
         retention_days: int = 7,
         dry_run: bool = False,
     ) -> int:
-        """Vacuum Delta table to reclaim storage space.
-
-        Removes files older than retention period that are no longer
-        referenced by the Delta log. Safe to run concurrently with reads.
-
-        Args:
-            table: Table name in format "provider.entity"
-            retention_days: Minimum age of files to remove (default 7)
-            dry_run: If True, only report what would be removed
-
-        Returns:
-            Number of files removed
-
-        Raises:
-            StorageError: If vacuum fails
-        """
+        """Vacuum a Delta table and return removed file count."""
         retention_hours = retention_days * 24
 
         self.logger.info(

@@ -27,6 +27,10 @@ from typing_extensions import override
 from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
+from bioetl.infrastructure.adapters.common import (
+    run_fetch_with_fallback_policy,
+    split_filter_ids_for_fallback,
+)
 from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
 from bioetl.infrastructure.adapters.uniprot.fallback_resolver import (
     iter_uniprot_fallback_records,
@@ -121,6 +125,76 @@ UNIPROT_FETCH_ERRORS = (
     RuntimeError,
     KeyError,
 )
+
+
+class _UniProtFallbackPolicyHandler:
+    """Adapter-specific fallback hooks for shared fetch/fallback orchestration."""
+
+    def __init__(self, adapter: UniProtAdapter, entity_type: str) -> None:
+        self._adapter = adapter
+        self._entity_type = entity_type
+
+    async def process_missing_dois(
+        self,
+        *,
+        dois: list[str],
+        found_dois: set[str],
+        fallback_mapping: dict[str, str],
+        normalize_fn: Any,  # Any: compatibility with shared hook signature
+        limit: int | None,
+        fetched: int,
+    ) -> AsyncIterator[BronzeRecord]:
+        """Process unresolved primary IDs through UniProt fallback search."""
+        del normalize_fn
+        missing_ids = self._adapter._should_do_fallback(
+            dois,
+            found_dois,
+            fallback_mapping,
+        )
+        if not missing_ids:
+            return
+        async for record in self._adapter._do_fallback_search(
+            self._entity_type,
+            missing_ids,
+            fallback_mapping,
+            limit,
+            fetched,
+        ):
+            yield record
+
+    async def process_title_only_entries(
+        self,
+        *,
+        entries: list[str],
+        fallback_mapping: dict[str, str],
+        limit: int | None,
+        fetched: int,
+    ) -> AsyncIterator[BronzeRecord]:
+        """Process title-only marker entries for legacy empty-ID fallback keys."""
+        if not entries:
+            return
+
+        fallback_ids: list[str] = []
+        seen_ids: set[str] = set()
+        for entry in entries:
+            fallback_id = entry if entry in fallback_mapping else ""
+            if fallback_id not in fallback_mapping:
+                continue
+            if fallback_id in seen_ids:
+                continue
+            seen_ids.add(fallback_id)
+            fallback_ids.append(fallback_id)
+
+        if not fallback_ids:
+            return
+        async for record in self._adapter._do_fallback_search(
+            self._entity_type,
+            fallback_ids,
+            fallback_mapping,
+            limit,
+            fetched,
+        ):
+            yield record
 
 
 class UniProtAdapter(
@@ -452,28 +526,31 @@ class UniProtAdapter(
             return
 
         requested_ids = self._deduplicate_filter_ids(filter_ids)
+        primary_ids, title_only_entries = split_filter_ids_for_fallback(requested_ids)
+        fallback_handler = _UniProtFallbackPolicyHandler(self, entity_type)
 
-        fetched = 0
-        found_ids: set[str] = set()
+        async def _primary_records() -> AsyncIterator[BronzeRecord]:
+            async for record, _ in self._do_primary_fetch(
+                entity_type, primary_ids, filter_field, limit
+            ):
+                yield record
 
-        async for record, accession in self._do_primary_fetch(
-            entity_type, requested_ids, filter_field, limit
-        ):
-            yield record
-            fetched += 1
-            if accession:
-                found_ids.add(accession)
-            if limit and fetched >= limit:
-                return
+        def _extract_accession(record: BronzeRecord) -> str | None:
+            accession = record.get("accession")
+            if not isinstance(accession, str):
+                return None
+            normalized = accession.strip()
+            return normalized if normalized else None
 
-        missing_ids = self._should_do_fallback(
-            requested_ids, found_ids, fallback_mapping
-        )
-        if not missing_ids:
-            return
-
-        async for record in self._do_fallback_search(
-            entity_type, missing_ids, fallback_mapping, limit, fetched
+        async for record in run_fetch_with_fallback_policy(
+            primary_records=_primary_records(),
+            primary_ids=primary_ids,
+            title_only_entries=title_only_entries,
+            fallback_mapping=fallback_mapping,
+            normalize_id=lambda value: value.strip(),
+            extract_record_id=_extract_accession,
+            fallback_handler=fallback_handler,
+            limit=limit,
         ):
             yield record
 

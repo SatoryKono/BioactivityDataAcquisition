@@ -87,6 +87,5 @@ class GoldWriterValidationMixin:
             raise ValueError(f"Schema validation failed: {exc}") from exc
 
 
-GoldWriterValidationHelper = GoldWriterValidationMixin
 
-__all__ = ["GoldWriterValidationHelper", "GoldWriterValidationMixin"]
+__all__ = ["GoldWriterValidationMixin"]

@@ -837,7 +837,8 @@ class TestValidateWriteModes:
         # Wait, append IS valid for Gold according to RULES.md §4.1 (Overwrite/Append)
         # But the error message said: "Valid modes: append, scd2, overwrite"
         # So 'append' should be valid.
-        # Let's check the error message again: "ValueError: Invalid Gold write mode: 'merge'. Valid modes: append, scd2, overwrite"
+        # Let's check the error message again:
+        # "ValueError: Invalid Gold write mode: 'merge'. Valid modes: append, scd2, overwrite"
         # So 'merge' is invalid, but 'append' is valid.
 
         # The test I'm editing was: test_gold_append_mode_is_invalid

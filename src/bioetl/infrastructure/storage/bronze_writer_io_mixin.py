@@ -237,6 +237,5 @@ class BronzeWriterIOMixin:
         }
 
 
-BronzeWriterIOHelper = BronzeWriterIOMixin
 
-__all__ = ["BronzeWriterIOHelper", "BronzeWriterIOMixin"]
+__all__ = ["BronzeWriterIOMixin"]

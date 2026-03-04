@@ -253,6 +253,5 @@ class BatchTracingManagerService:
             span.__exit__(None, None, None)
 
 
-BatchTracingManager = BatchTracingManagerService
 
-__all__ = ["BatchTracingManager", "BatchTracingManagerService"]
+__all__ = ["BatchTracingManagerService"]

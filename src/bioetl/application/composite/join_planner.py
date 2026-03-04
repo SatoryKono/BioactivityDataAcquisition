@@ -34,7 +34,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
-__all__ = ["JoinHow", "JoinPlanner", "JoinPlannerService"]
+__all__ = ["JoinHow", "JoinPlannerService"]
 
 
 class JoinPlannerCompatibilityMixin:
@@ -388,5 +388,3 @@ class JoinPlannerService(JoinPlannerCompatibilityMixin):
         )
 
 
-# Backward-compatible alias for iterative NAME-001 migration.
-JoinPlanner = JoinPlannerService

@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
-__all__ = ["ColumnPriorityOrderer", "ColumnPriorityOrdererService"]
+__all__ = ["ColumnPriorityOrdererService"]
 
 
 class ColumnPriorityOrdererService:
@@ -179,5 +179,3 @@ class ColumnPriorityOrdererService:
         return None
 
 
-# Backward-compatible alias for iterative NAME-001 migration.
-ColumnPriorityOrderer = ColumnPriorityOrdererService

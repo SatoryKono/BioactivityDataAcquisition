@@ -135,6 +135,9 @@ class HttpClientFactory:
             max_retries = source_config.max_retries
             base_delay = source_config.retry_base_delay
             max_delay = source_config.retry_max_delay
+            # Connection pool limits
+            max_connections = source_config.max_connections
+            max_keepalive = source_config.max_keepalive_connections
         else:
             # Fallback to ProviderRegistry
             http_config = ProviderRegistry.get_http_config(provider)
@@ -155,6 +158,8 @@ class HttpClientFactory:
                 max_retries = 3  # Default
             base_delay = 1.0  # RetryConfig default
             max_delay = 60.0  # RetryConfig default
+            max_connections = 50  # httpx default
+            max_keepalive = 10  # httpx default
 
         # Apply rate overrides based on settings (API key boosts)
         http_config = ProviderRegistry.get_http_config(provider)
@@ -181,6 +186,8 @@ class HttpClientFactory:
             timeout=timeout,
             provider=provider,
             run_id=run_id,
+            max_connections=max_connections,
+            max_keepalive_connections=max_keepalive,
             tracer=tracer,
             metrics=metrics,
             logger=logger,

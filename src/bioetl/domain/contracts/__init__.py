@@ -30,8 +30,10 @@ See also:
 
 from __future__ import annotations
 
-# Re-export all Gold schemas for convenient access
-from bioetl.domain.contracts.gold import (  # ChEMBL schemas; Composite schemas; CrossRef schemas; OpenAlex schemas; PubChem schemas; PubMed schemas; SemanticScholar schemas; UniProt schemas
+# Re-export all Gold schemas for convenient access:
+# ChEMBL, Composite, CrossRef, OpenAlex, PubChem, PubMed,
+# SemanticScholar, and UniProt schemas.
+from bioetl.domain.contracts.gold import (
     ChEMBLActivityGoldSchema,
     ChEMBLAssayGoldSchema,
     ChEMBLAssayParametersGoldSchema,

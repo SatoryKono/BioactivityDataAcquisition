@@ -246,6 +246,5 @@ class GoldWriterMetadataMixin:
         )
 
 
-GoldWriterMetadataHelper = GoldWriterMetadataMixin
 
-__all__ = ["GoldWriterMetadataHelper", "GoldWriterMetadataMixin"]
+__all__ = ["GoldWriterMetadataMixin"]

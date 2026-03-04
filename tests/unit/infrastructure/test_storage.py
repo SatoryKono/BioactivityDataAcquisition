@@ -112,7 +112,14 @@ class TestBronzeWriter:
         # Check path contains expected parts (path format: {provider}/{entity}/{date}/batch_{date}_{id}.jsonl.zst)
         # Note: BronzeWriter returns relative path without 'bronze/' prefix (base_path already contains it)
         # Normalize path separators for cross-platform compatibility
-        expected_path = "test_provider/test_entity/2023-01-01/batch_2023-01-01_12345678-1234-5678-1234-567812345678.jsonl.zst"
+        expected_path = "/".join(
+            [
+                "test_provider",
+                "test_entity",
+                "2023-01-01",
+                "batch_2023-01-01_12345678-1234-5678-1234-567812345678.jsonl.zst",
+            ]
+        )
         assert result.relative_path.replace("\\", "/") == expected_path
 
     async def test_write_bronze_compresses_with_zstd(self, tmp_path, noop_logger):
