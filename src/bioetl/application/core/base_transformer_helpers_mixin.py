@@ -80,11 +80,11 @@ class _BaseTransformerRecordHelpersMixin:
         return orjson.dumps(lst, option=orjson.OPT_SORT_KEYS).decode("utf-8")
 
     @staticmethod
-    def serialize_json_list(value: list[object] | None) -> str | None:
+    def serialize_json_list(value: Sequence[object] | None) -> str | None:
         """Serialize list to JSON string without unwrapping single elements."""
         if value is None or len(value) == 0:
             return None
-        json_bytes: bytes = orjson.dumps(value, option=orjson.OPT_SORT_KEYS)
+        json_bytes: bytes = orjson.dumps(list(value), option=orjson.OPT_SORT_KEYS)
         return json_bytes.decode("utf-8")
 
     @classmethod

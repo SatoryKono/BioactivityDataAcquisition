@@ -24,6 +24,7 @@ from vcr.errors import (
 )
 
 from bioetl.domain.exceptions.infrastructure import InfrastructureError
+from bioetl.domain.exceptions.network import ExternalServiceError
 
 from .conftest import (
     assert_bronze_files_exist,
@@ -209,6 +210,7 @@ VCR_MISS_MARKERS: tuple[str, ...] = (
 )
 MATRIX_SKIP_ERRORS: tuple[type[Exception], ...] = (
     InfrastructureError,
+    ExternalServiceError,
     httpx.HTTPStatusError,
     CannotOverwriteExistingCassetteException,
     UnhandledHTTPRequestError,
@@ -274,6 +276,8 @@ def _is_external_healthcheck_playback_failure(exc: Exception) -> bool:
 
 def _is_rate_limited_http_error(exc: Exception) -> bool:
     """Return True when upstream API returned transient HTTP 429."""
+    if isinstance(exc, ExternalServiceError):
+        return exc.status_code == 429
     if not isinstance(exc, httpx.HTTPStatusError):
         return False
     return exc.response.status_code == 429

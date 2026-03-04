@@ -2,33 +2,14 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
+
+from bioetl.infrastructure.adapters.common.api_request_collector import (
+    APIRequestCollector,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import SourceMetadata
-
-
-class _RequestCollectorPort(Protocol):
-    """Protocol for request collector used by metadata mixin."""
-
-    def to_source_metadata(
-        self,
-        source_type: str = "api",
-        url: str | None = None,
-        api_version: str | None = None,
-        query_string: str | None = None,
-    ) -> SourceMetadata:
-        """Build source metadata from collected requests."""
-        ...
-
-    def clear(self) -> None:
-        """Clear collected request snapshots."""
-        ...
-
-    @property
-    def request_count(self) -> int:
-        """Current number of captured requests."""
-        ...
 
 
 class UniProtAdapterMetadataMixin:
@@ -37,7 +18,7 @@ class UniProtAdapterMetadataMixin:
     # Host-class attributes (provided by UniProtAdapter.__init__)
     api_key: str | None
     base_url: str
-    _request_collector: _RequestCollectorPort
+    _request_collector: APIRequestCollector
 
     def _get_health_endpoint(self) -> str:
         """Return health check endpoint."""

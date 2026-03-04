@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+import re
 from collections import Counter
 from dataclasses import dataclass
 from datetime import date
+from itertools import pairwise
 from pathlib import Path
-import re
 from typing import Any
 
 import yaml
@@ -322,7 +323,7 @@ def validate_debt_scorecard(
             parsed_targets.append((parsed_quarter, target))
 
     ordered_targets = [item[1] for item in sorted(parsed_targets, key=lambda item: item[0])]
-    for previous, current in zip(ordered_targets, ordered_targets[1:], strict=False):
+    for previous, current in pairwise(ordered_targets):
         prev_total = int(previous["max_total_exemptions"])
         curr_total = int(current["max_total_exemptions"])
         if curr_total >= prev_total:

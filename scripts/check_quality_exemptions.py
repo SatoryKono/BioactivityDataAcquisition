@@ -14,12 +14,12 @@ import os
 import sys
 from pathlib import Path
 
-from bioetl.infrastructure.quality.exemptions_registry import (
-    validate_exemptions_registry,
-)
 from bioetl.infrastructure.quality.debt_scorecard import (
     evaluate_debt_scorecard,
     validate_debt_scorecard,
+)
+from bioetl.infrastructure.quality.exemptions_registry import (
+    validate_exemptions_registry,
 )
 
 
