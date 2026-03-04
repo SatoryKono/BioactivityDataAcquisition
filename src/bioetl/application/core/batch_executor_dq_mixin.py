@@ -10,7 +10,7 @@ from bioetl.domain.types import BatchID, BronzeRecord, GoldRecord
 
 if TYPE_CHECKING:
     from bioetl.application.core.config import RecordProcessorConfig
-    from bioetl.application.core.pipeline_services import PipelineServices
+    from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.application.services.dq_report_service import DQReportContext
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import LoggerPort
@@ -27,7 +27,7 @@ _DQ_DATAFRAME_ERRORS: tuple[type[Exception], ...] = (
 class _BatchExecutorDQMixin:
     """Provides DQ data collection and report context construction."""
 
-    _services: PipelineServices
+    _services: PipelineService
     _context: PipelineContext
     _config: RecordProcessorConfig
     _logger: LoggerPort

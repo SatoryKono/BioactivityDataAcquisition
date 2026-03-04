@@ -785,13 +785,6 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
-    run_enrichers:
-      value: 90
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (function_length).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
     to_domain:
       value: 100
       owner: '@bioetl-architecture'

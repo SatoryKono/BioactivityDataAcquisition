@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.batch_executor import BatchExecutor
     from bioetl.application.core.checkpoint_manager import CheckpointManagerService
     from bioetl.application.core.lock_manager import LockManager
-    from bioetl.application.core.pipeline_services import PipelineServices
+    from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.application.core.postrun_service import PostrunService
     from bioetl.application.core.preflight_service import PreflightService
     from bioetl.application.core.shutdown import ShutdownSignal
@@ -54,7 +54,7 @@ class PipelineRunner:
         self,
         config: PipelineConfig,
         runtime: RuntimeConfig,
-        services: PipelineServices,
+        services: PipelineService,
         context: PipelineContext,
         executor: BatchExecutor,
         checkpoint_manager: CheckpointManagerService,
@@ -116,7 +116,7 @@ class PipelineRunner:
         return self._shutdown_signal
 
     @property
-    def services(self) -> PipelineServices:
+    def services(self) -> PipelineService:
         """Access injected services."""
         return self._services
 

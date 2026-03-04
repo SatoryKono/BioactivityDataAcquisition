@@ -17,7 +17,7 @@ from bioetl.domain.types import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.application.core.pipeline_services import PipelineServices
+    from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import LoggerPort, MetricsPort
@@ -42,7 +42,7 @@ class PreflightService:
         self._health_aggregator = health_aggregator
         self._medallion_validator = medallion_validator
 
-    async def validate_infrastructure(self, services: PipelineServices) -> HealthReport:
+    async def validate_infrastructure(self, services: PipelineService) -> HealthReport:
         """Validate storage and data source health."""
         self._logger.info(
             "Validating infrastructure health",
@@ -122,7 +122,7 @@ class PreflightService:
 
     async def validate_preflight(
         self,
-        services: PipelineServices,
+        services: PipelineService,
         runtime: RuntimeConfig,
         bronze_path: str,
         silver_path: str,

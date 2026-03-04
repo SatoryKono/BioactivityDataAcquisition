@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-__all__ = ["ExtractorUtils"]
+__all__ = ["ExtractorHelper"]
 
 
 from datetime import date
@@ -11,7 +11,7 @@ from typing import Any, ClassVar
 import orjson
 
 
-class ExtractorUtils:
+class ExtractorHelper:
     """Common utility methods for UniProt data extraction."""
 
     # Mapping of UniProt protein existence values
@@ -120,7 +120,7 @@ class ExtractorUtils:
         short_names = recommended_name.get("shortNames")
         if not isinstance(short_names, list):
             return None
-        values = ExtractorUtils._extract_values_from_list(short_names)
+        values = ExtractorHelper._extract_values_from_list(short_names)
         return orjson.dumps(values).decode("utf-8") if values else None
 
     @staticmethod
@@ -168,7 +168,7 @@ class ExtractorUtils:
         ec_numbers = recommended_name.get("ecNumbers")
         if not isinstance(ec_numbers, list):
             return None
-        values = ExtractorUtils._extract_values_from_list(ec_numbers)
+        values = ExtractorHelper._extract_values_from_list(ec_numbers)
         return orjson.dumps(values).decode("utf-8") if values else None
 
     @staticmethod

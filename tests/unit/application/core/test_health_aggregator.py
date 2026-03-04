@@ -93,7 +93,7 @@ def mock_data_source_with_check_health():
 
 @pytest.fixture
 def mock_services(mock_storage, mock_data_source, mock_logger):
-    """Create a mock PipelineServices."""
+    """Create a mock PipelineService."""
     services = MagicMock()
     services.storage = mock_storage
     services.data_source = mock_data_source

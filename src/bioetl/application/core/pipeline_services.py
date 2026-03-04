@@ -49,7 +49,7 @@ _OBSERVABILITY_CLOSE_ERRORS = (
 
 
 @dataclass(frozen=True)
-class PipelineServices:
+class PipelineService:
     """Injected dependencies for pipeline execution.
 
     All fields are Protocol-typed for testability and flexibility.
@@ -77,7 +77,7 @@ class PipelineServices:
         dq_report_service: Optional orchestration service for DQ reports.
 
     Example:
-        >>> services = PipelineServices(
+        >>> services = PipelineService(
         ...     data_source=chembl_client,
         ...     storage=delta_storage,
         ...     lock=memory_lock,
@@ -170,4 +170,4 @@ class PipelineServices:
             self.logger.warning("Error closing tracing", stage="cleanup", error=str(e))
 
 
-__all__ = ["PipelineServices"]
+__all__ = ["PipelineService"]

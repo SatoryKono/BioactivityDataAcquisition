@@ -10,7 +10,7 @@ from uuid import UUID, uuid4
 
 import pytest
 
-from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.application.pipelines.pubchem import PubChemCompoundPipeline
 from bioetl.application.pipelines.pubchem.transformer import PubChemCompoundTransformer
 from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
@@ -64,7 +64,7 @@ def pubchem_runtime() -> RuntimeConfig:
 
 
 @pytest.fixture
-def mock_pubchem_services(mock_logger) -> PipelineServices:
+def mock_pubchem_services(mock_logger) -> PipelineService:
     """Создаёт mock сервисы для тестирования."""
     mock_data_source = AsyncMock()
     mock_data_source.provider_name = "pubchem"
@@ -93,7 +93,7 @@ def mock_pubchem_services(mock_logger) -> PipelineServices:
 
     mock_tracing = MagicMock()
 
-    return PipelineServices(
+    return PipelineService(
         data_source=mock_data_source,
         storage=mock_storage,
         lock=mock_lock,

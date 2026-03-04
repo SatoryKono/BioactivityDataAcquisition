@@ -35,7 +35,7 @@ FORBIDDEN_SERVICE_INSTANTIATIONS: set[str] = {
     # Lifecycle services
     "MedallionLifecycleService",
     # Service containers (must be injected, not created)
-    "PipelineServices",
+    "PipelineService",
     # Note: HealthAggregator is excluded as it's a lightweight helper
     # that delegates to injected metrics/logger dependencies.
     # Consider adding it in future if testability becomes an issue.

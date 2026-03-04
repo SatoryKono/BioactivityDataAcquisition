@@ -1484,76 +1484,76 @@ class TestParseUniprotDate:
         """Test parsing of valid ISO date string."""
         from datetime import date
 
-        from bioetl.application.pipelines.uniprot.extractors import ExtractorUtils
+        from bioetl.application.pipelines.uniprot.extractors import ExtractorHelper
 
-        result = ExtractorUtils.parse_uniprot_date("2024-07-24")
+        result = ExtractorHelper.parse_uniprot_date("2024-07-24")
         assert result == date(2024, 7, 24)
 
     def test_valid_date_beginning_of_year(self):
         """Test parsing date at beginning of year."""
         from datetime import date
 
-        from bioetl.application.pipelines.uniprot.extractors import ExtractorUtils
+        from bioetl.application.pipelines.uniprot.extractors import ExtractorHelper
 
-        result = ExtractorUtils.parse_uniprot_date("2000-01-01")
+        result = ExtractorHelper.parse_uniprot_date("2000-01-01")
         assert result == date(2000, 1, 1)
 
     def test_valid_date_end_of_year(self):
         """Test parsing date at end of year."""
         from datetime import date
 
-        from bioetl.application.pipelines.uniprot.extractors import ExtractorUtils
+        from bioetl.application.pipelines.uniprot.extractors import ExtractorHelper
 
-        result = ExtractorUtils.parse_uniprot_date("1999-12-31")
+        result = ExtractorHelper.parse_uniprot_date("1999-12-31")
         assert result == date(1999, 12, 31)
 
     def test_none_input(self):
         """Test that None input returns None."""
-        from bioetl.application.pipelines.uniprot.extractors import ExtractorUtils
+        from bioetl.application.pipelines.uniprot.extractors import ExtractorHelper
 
-        result = ExtractorUtils.parse_uniprot_date(None)
+        result = ExtractorHelper.parse_uniprot_date(None)
         assert result is None
 
     def test_empty_string(self):
         """Test that empty string returns None."""
-        from bioetl.application.pipelines.uniprot.extractors import ExtractorUtils
+        from bioetl.application.pipelines.uniprot.extractors import ExtractorHelper
 
-        result = ExtractorUtils.parse_uniprot_date("")
+        result = ExtractorHelper.parse_uniprot_date("")
         assert result is None
 
     def test_invalid_format_slash(self):
         """Test that slash-separated date returns None."""
-        from bioetl.application.pipelines.uniprot.extractors import ExtractorUtils
+        from bioetl.application.pipelines.uniprot.extractors import ExtractorHelper
 
-        result = ExtractorUtils.parse_uniprot_date("2024/07/24")
+        result = ExtractorHelper.parse_uniprot_date("2024/07/24")
         assert result is None
 
     def test_invalid_format_text(self):
         """Test that text date returns None."""
-        from bioetl.application.pipelines.uniprot.extractors import ExtractorUtils
+        from bioetl.application.pipelines.uniprot.extractors import ExtractorHelper
 
-        result = ExtractorUtils.parse_uniprot_date("July 24, 2024")
+        result = ExtractorHelper.parse_uniprot_date("July 24, 2024")
         assert result is None
 
     def test_invalid_date_values(self):
         """Test that invalid date values return None."""
-        from bioetl.application.pipelines.uniprot.extractors import ExtractorUtils
+        from bioetl.application.pipelines.uniprot.extractors import ExtractorHelper
 
-        result = ExtractorUtils.parse_uniprot_date("2024-13-01")  # Invalid month
+        result = ExtractorHelper.parse_uniprot_date("2024-13-01")  # Invalid month
         assert result is None
 
-        result = ExtractorUtils.parse_uniprot_date("2024-02-30")  # Invalid day
+        result = ExtractorHelper.parse_uniprot_date("2024-02-30")  # Invalid day
         assert result is None
 
     def test_non_string_input(self):
         """Test that non-string input returns None."""
-        from bioetl.application.pipelines.uniprot.extractors import ExtractorUtils
+        from bioetl.application.pipelines.uniprot.extractors import ExtractorHelper
 
-        result = ExtractorUtils.parse_uniprot_date(12345)
+        result = ExtractorHelper.parse_uniprot_date(12345)
         assert result is None
 
-        result = ExtractorUtils.parse_uniprot_date(["2024-07-24"])
+        result = ExtractorHelper.parse_uniprot_date(["2024-07-24"])
         assert result is None
 
-        result = ExtractorUtils.parse_uniprot_date({"date": "2024-07-24"})
+        result = ExtractorHelper.parse_uniprot_date({"date": "2024-07-24"})
         assert result is None

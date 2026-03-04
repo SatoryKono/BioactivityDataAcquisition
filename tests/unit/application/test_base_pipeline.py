@@ -9,7 +9,7 @@ import pytest
 
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.base_transformer import BaseTransformer
-from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.application.core.shutdown import ShutdownSignal
 from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
@@ -53,7 +53,7 @@ def mock_pipeline():
     mock_logger = MagicMock()
     mock_logger.bind = MagicMock(return_value=mock_logger)
 
-    services = PipelineServices(
+    services = PipelineService(
         data_source=AsyncMock(),
         storage=MagicMock(),
         lock=AsyncMock(),
@@ -97,7 +97,7 @@ async def test_base_pipeline_accepts_five_params():
     runtime = RuntimeConfig(run_type=RunType.INCREMENTAL)
     mock_logger = MagicMock()
     mock_logger.bind = MagicMock(return_value=mock_logger)
-    services = PipelineServices(
+    services = PipelineService(
         data_source=AsyncMock(),
         storage=AsyncMock(),
         lock=AsyncMock(),
@@ -162,7 +162,7 @@ async def test_run_id_propagation_is_consistent():
     runtime = RuntimeConfig(run_type=RunType.INCREMENTAL)
     mock_logger = MagicMock()
     mock_logger.bind = MagicMock(return_value=mock_logger)
-    services = PipelineServices(
+    services = PipelineService(
         data_source=AsyncMock(),
         storage=AsyncMock(),
         lock=AsyncMock(),
@@ -207,7 +207,7 @@ async def test_base_pipeline_uses_injected_shutdown_signal():
     runtime = RuntimeConfig(run_type=RunType.INCREMENTAL)
     mock_logger = MagicMock()
     mock_logger.bind = MagicMock(return_value=mock_logger)
-    services = PipelineServices(
+    services = PipelineService(
         data_source=AsyncMock(),
         storage=AsyncMock(),
         lock=AsyncMock(),

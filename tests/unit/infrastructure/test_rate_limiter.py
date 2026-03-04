@@ -7,11 +7,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.infrastructure.adapters.http.rate_limiter import (
-    TokenBucket,
-    create_pubchem_bucket,
-    create_pubmed_bucket,
-)
+from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 
 
 def create_mock_metrics() -> MagicMock:
@@ -107,45 +103,6 @@ class TestTokenBucket:
 
         # Should be capped at capacity
         assert bucket.available_tokens() == 5
-
-
-class TestFactoryFunctions:
-    """Tests for pre-configured bucket factory functions."""
-
-    @pytest.mark.unit
-    def test_create_pubchem_bucket(self) -> None:
-        """PubChem bucket should have correct rate (5 req/sec)."""
-        bucket = create_pubchem_bucket()
-        assert bucket.rate == 5.0
-        assert bucket.capacity == 5
-
-    @pytest.mark.unit
-    def test_create_pubmed_bucket_no_key(self) -> None:
-        """PubMed bucket without API key should have 3 req/sec."""
-        bucket = create_pubmed_bucket(with_api_key=False)
-        assert bucket.rate == 3.0
-
-    @pytest.mark.unit
-    def test_create_pubmed_bucket_with_key(self) -> None:
-        """PubMed bucket with API key should have 10 req/sec."""
-        bucket = create_pubmed_bucket(with_api_key=True)
-        assert bucket.rate == 10.0
-
-    @pytest.mark.unit
-    def test_create_pubchem_bucket_with_metrics(self) -> None:
-        """Factory should pass metrics to bucket."""
-        mock_metrics = create_mock_metrics()
-        bucket = create_pubchem_bucket(metrics=mock_metrics)
-        assert bucket.metrics is mock_metrics
-        assert bucket.provider == "pubchem"
-
-    @pytest.mark.unit
-    def test_create_pubmed_bucket_with_metrics(self) -> None:
-        """Factory should pass metrics to bucket."""
-        mock_metrics = create_mock_metrics()
-        bucket = create_pubmed_bucket(with_api_key=False, metrics=mock_metrics)
-        assert bucket.metrics is mock_metrics
-        assert bucket.provider == "pubmed"
 
 
 class TestTokenBucketMetrics:

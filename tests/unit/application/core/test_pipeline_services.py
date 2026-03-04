@@ -1,4 +1,4 @@
-"""Unit tests for PipelineServices."""
+"""Unit tests for PipelineService."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.core.pipeline_services import PipelineService
 
 
 @pytest.fixture
@@ -35,7 +35,7 @@ def mock_services():
     mock_tracing = MagicMock()
     mock_tracing.get_tracer = MagicMock()
 
-    return PipelineServices(
+    return PipelineService(
         data_source=mock_data_source,
         storage=mock_storage,
         lock=mock_lock,
@@ -49,7 +49,7 @@ def mock_services():
 
 @pytest.mark.unit
 class TestPipelineServicesInit:
-    """Tests for PipelineServices initialization."""
+    """Tests for PipelineService initialization."""
 
     def test_init_stores_all_services(self, mock_services):
         """Test that initialization stores all services."""

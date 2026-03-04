@@ -29,7 +29,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.batch_writer import BatchWriter
     from bioetl.application.core.checkpoint_manager import CheckpointManagerService
     from bioetl.application.core.config import RecordProcessorConfig
-    from bioetl.application.core.pipeline_services import PipelineServices
+    from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import LoggerPort
 
@@ -86,7 +86,7 @@ class BatchExecutor(_BatchExecutorDQMixin):
 
     def __init__(
         self,
-        services: PipelineServices,
+        services: PipelineService,
         context: PipelineContext,
         config: RecordProcessorConfig,
         checkpoint_manager: CheckpointManagerService,

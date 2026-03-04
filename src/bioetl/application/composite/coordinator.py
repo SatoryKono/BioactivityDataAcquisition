@@ -11,7 +11,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable, Sequence
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.composite.result import EnrichmentResult, EnrichmentStatus
 from bioetl.domain.exceptions import (
@@ -285,19 +285,9 @@ class EnrichmentCoordinatorService:
                 completed_at = datetime.now(tz=UTC)
                 duration = (completed_at - started_at).total_seconds()
 
-                # Extract stats from runner
-                executor = getattr(runner, "_executor", None)
-                records_enriched = 0
-                records_errored = 0
-
-                if executor:
-                    records_enriched = getattr(executor, "records_silver", 0)
-                    records_errored = getattr(executor, "records_quarantined", 0)
-
-                # Calculate DQ error rate
-                dq_error_rate = 0.0
-                if records_input > 0:
-                    dq_error_rate = records_errored / records_input
+                records_enriched, records_errored, dq_error_rate = (
+                    self._extract_runner_stats(runner, records_input)
+                )
 
                 # Check against thresholds
                 hard_threshold = self._dq_config.get_enricher_hard_threshold(
@@ -366,65 +356,68 @@ class EnrichmentCoordinatorService:
                 )
 
             except _ENRICHER_EXECUTION_ERRORS as e:
-                duration = (datetime.now(tz=UTC) - started_at).total_seconds()
-
-                # Re-raise for required enrichers (logged as error)
-                if enricher.required:
-                    self._logger.error(
-                        "Required enricher failed",
-                        enricher=enricher.pipeline,
-                        error=str(e),
-                        error_type=type(e).__name__,
-                        required=True,
-                    )
-                    raise
-
-                # Optional enricher failures are warnings (pipeline continues)
-                self._logger.warning(
-                    "Optional enricher failed",
-                    enricher=enricher.pipeline,
-                    error=str(e),
-                    error_type=type(e).__name__,
-                    required=False,
-                )
-
-                return EnrichmentResult.failed(
-                    enricher_name=enricher.pipeline,
-                    error_message=str(e),
-                    records_input=records_input,
-                    duration_seconds=duration,
+                return self._handle_enricher_error(
+                    e,
+                    enricher,
+                    records_input,
+                    started_at,
                 )
             except BioETLError as e:
-                duration = (datetime.now(tz=UTC) - started_at).total_seconds()
-
-                # Re-raise for required enrichers (logged as error)
-                if enricher.required:
-                    self._logger.error(
-                        "Required enricher failed",
-                        enricher=enricher.pipeline,
-                        error=str(e),
-                        error_type=type(e).__name__,
-                        reason_code="unexpected_bioetl_error",
-                        required=True,
-                    )
-                    raise
-
-                # Optional enricher failures are warnings (pipeline continues)
-                self._logger.warning(
-                    "Optional enricher failed",
-                    enricher=enricher.pipeline,
-                    error=str(e),
-                    error_type=type(e).__name__,
+                return self._handle_enricher_error(
+                    e,
+                    enricher,
+                    records_input,
+                    started_at,
                     reason_code="unexpected_bioetl_error",
-                    required=False,
                 )
 
-                return EnrichmentResult.failed(
-                    enricher_name=enricher.pipeline,
-                    error_message=str(e),
-                    records_input=records_input,
-                    duration_seconds=duration,
-                )
+    @staticmethod
+    def _extract_runner_stats(
+        runner: PipelineRunner,
+        records_input: int,
+    ) -> tuple[int, int, float]:
+        """Extract enrichment stats from runner executor."""
+        executor = getattr(runner, "_executor", None)
+        records_enriched = getattr(executor, "records_silver", 0) if executor else 0
+        records_errored = getattr(executor, "records_quarantined", 0) if executor else 0
+        dq_error_rate = records_errored / records_input if records_input > 0 else 0.0
+        return records_enriched, records_errored, dq_error_rate
+
+    def _handle_enricher_error(
+        self,
+        error: Exception,
+        enricher: EnricherConfig,
+        records_input: int,
+        started_at: datetime,
+        *,
+        reason_code: str | None = None,
+    ) -> EnrichmentResult:
+        """Handle enricher execution error.
+
+        Required enrichers: log as error and re-raise.
+        Optional enrichers: log as warning and return failed result.
+        """
+        duration = (datetime.now(tz=UTC) - started_at).total_seconds()
+        log_kwargs: dict[str, Any] = {
+            "enricher": enricher.pipeline,
+            "error": str(error),
+            "error_type": type(error).__name__,
+            "required": enricher.required,
+        }
+        if reason_code:
+            log_kwargs["reason_code"] = reason_code
+
+        if enricher.required:
+            self._logger.error("Required enricher failed", **log_kwargs)
+            raise
+
+        self._logger.warning("Optional enricher failed", **log_kwargs)
+        return EnrichmentResult.failed(
+            enricher_name=enricher.pipeline,
+            error_message=str(error),
+            records_input=records_input,
+            duration_seconds=duration,
+        )
 
     def _process_results(
         self,

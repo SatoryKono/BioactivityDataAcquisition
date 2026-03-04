@@ -17,7 +17,7 @@ from bioetl.application.core.batch_progress_service import BatchProgressService
 from bioetl.application.core.batch_tracing import BatchTracingManagerService
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.config import RecordProcessorConfig
-from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.application.core.shutdown import ShutdownSignal
 from bioetl.composition.factories.services_factory import ServicesBuilder
 from bioetl.domain.config import MemoryConfig, TableConfig
@@ -30,7 +30,7 @@ from bioetl.domain.types import BatchID, RunType, ValidationResult
 @pytest.fixture
 def mock_services():
     """Create mock pipeline services."""
-    services = MagicMock(spec=PipelineServices)
+    services = MagicMock(spec=PipelineService)
     services.storage = AsyncMock()
     services.metrics = MagicMock(spec=MetricsPort)
     services.quarantine = AsyncMock()
@@ -121,7 +121,7 @@ def memory_config():
 
 def _create_batch_executor(
     *,
-    services: PipelineServices,
+    services: PipelineService,
     context: PipelineContext,
     config: RecordProcessorConfig,
     callbacks: dict,

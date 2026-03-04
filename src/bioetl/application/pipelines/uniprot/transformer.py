@@ -23,7 +23,7 @@ from bioetl.application.core.base_transformer import (
 from bioetl.application.pipelines.uniprot.extractors import (
     CommentExtractor,
     CrossRefExtractor,
-    ExtractorUtils,
+    ExtractorHelper,
     FeatureExtractor,
     GeneExtractor,
     TaxonomyExtractor,
@@ -57,7 +57,7 @@ class UniProtProteinTransformer(BaseTransformer):
     - CrossRefExtractor: GO terms, database references
     - FeatureExtractor: sequence features and keywords
     - GeneExtractor: gene names and synonyms
-    - ExtractorUtils: protein names and utilities
+    - ExtractorHelper: protein names and utilities
     """
 
     # Pre-defined paths for optimized extraction
@@ -191,7 +191,7 @@ class UniProtProteinTransformer(BaseTransformer):
     def _add_core_identifiers(self, record: BronzeRecord, data: GoldRecord) -> None:
         """Add core identifier fields."""
         data["entry_type"] = record.get("entryType")
-        data["secondary_accessions"] = ExtractorUtils.serialize_list(
+        data["secondary_accessions"] = ExtractorHelper.serialize_list(
             record.get("secondaryAccessions")
         )
 
@@ -205,13 +205,15 @@ class UniProtProteinTransformer(BaseTransformer):
         )
 
         data["protein_name"] = self._extract_protein_name(record)
-        data["protein_short_names"] = ExtractorUtils.extract_short_names(
+        data["protein_short_names"] = ExtractorHelper.extract_short_names(
             recommended_name
         )
-        data["protein_alternative_names"] = ExtractorUtils.extract_alternative_names(
+        data["protein_alternative_names"] = ExtractorHelper.extract_alternative_names(
             protein_desc
         )
-        data["protein_ec_numbers"] = ExtractorUtils.extract_ec_numbers(recommended_name)
+        data["protein_ec_numbers"] = ExtractorHelper.extract_ec_numbers(
+            recommended_name
+        )
         data["flag"] = self._extract_by_path(record, self._PROTEIN_DESC_FLAG_PATH)
 
     def _add_gene_data(self, record: BronzeRecord, data: GoldRecord) -> None:
@@ -235,17 +237,17 @@ class UniProtProteinTransformer(BaseTransformer):
         data["taxonomy_id"] = self._extract_by_path(
             record, self._ORGANISM_TAXON_ID_PATH
         )
-        data["lineage"] = ExtractorUtils.serialize_list(
+        data["lineage"] = ExtractorHelper.serialize_list(
             self._extract_by_path(record, self._ORGANISM_LINEAGE_PATH)
         )
 
     def _add_evidence_data(self, record: BronzeRecord, data: GoldRecord) -> None:
         """Add evidence and quality fields."""
-        data["protein_existence"] = ExtractorUtils.extract_protein_existence(
+        data["protein_existence"] = ExtractorHelper.extract_protein_existence(
             record.get("proteinExistence")
         )
         data["annotation_score"] = record.get("annotationScore")
-        data["reviewed"] = ExtractorUtils.is_reviewed(record.get("entryType"))
+        data["reviewed"] = ExtractorHelper.is_reviewed(record.get("entryType"))
 
     def _add_sequence_data(self, record: BronzeRecord, data: GoldRecord) -> None:
         """Add sequence fields."""
@@ -261,7 +263,7 @@ class UniProtProteinTransformer(BaseTransformer):
         )
         # Sequence modification date
         seq_modified_str = self._extract_by_path(record, self._SEQUENCE_MODIFIED_PATH)
-        seq_modified_date = ExtractorUtils.parse_uniprot_date(seq_modified_str)
+        seq_modified_date = ExtractorHelper.parse_uniprot_date(seq_modified_str)
         data["sequence_modified"] = (
             seq_modified_date.isoformat() if seq_modified_date else None
         )
@@ -279,12 +281,12 @@ class UniProtProteinTransformer(BaseTransformer):
 
         # Entry creation date
         created_str = self._extract_by_path(record, self._ENTRY_AUDIT_CREATED_PATH)
-        created_date = ExtractorUtils.parse_uniprot_date(created_str)
+        created_date = ExtractorHelper.parse_uniprot_date(created_str)
         data["entry_created"] = created_date.isoformat() if created_date else None
 
         # Entry last modification date
         modified_str = self._extract_by_path(record, self._ENTRY_AUDIT_MODIFIED_PATH)
-        modified_date = ExtractorUtils.parse_uniprot_date(modified_str)
+        modified_date = ExtractorHelper.parse_uniprot_date(modified_str)
         data["entry_modified"] = modified_date.isoformat() if modified_date else None
 
     def _add_functional_annotations(
@@ -360,9 +362,9 @@ class UniProtProteinTransformer(BaseTransformer):
         """Add count fields."""
         xrefs = record.get("uniProtKBCrossReferences")
         comments = record.get("comments")
-        data["cross_reference_count"] = ExtractorUtils.count_list(xrefs)
-        data["feature_count"] = ExtractorUtils.count_list(record.get("features"))
-        data["keyword_count"] = ExtractorUtils.count_list(record.get("keywords"))
+        data["cross_reference_count"] = ExtractorHelper.count_list(xrefs)
+        data["feature_count"] = ExtractorHelper.count_list(record.get("features"))
+        data["keyword_count"] = ExtractorHelper.count_list(record.get("keywords"))
         data["isoform_count"] = CommentExtractor.count_isoforms(comments)
 
     def _add_taxonomy_components(self, record: BronzeRecord, data: GoldRecord) -> None:
