@@ -98,6 +98,13 @@ composite:
     output:
       silver: data/output/silver/composite/activity
       gold: data/output/gold/composite/activity
+    sort_by:
+      silver:
+        - entity_id
+        - activity_id
+      gold:
+        - entity_id
+        - activity_id
 
     # Field-level priority for overlapping fields
     field_priorities:

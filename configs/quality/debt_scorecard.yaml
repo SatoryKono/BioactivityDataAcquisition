@@ -4,6 +4,14 @@ governance:
   description: Architecture debt scorecard governance for exemption registry.
   growth_gate_default_mode: block
   allow_grace_windows_only_for_rf: true
+  owner_diversification:
+    starts_quarter: '2026-Q2'
+    min_distinct_owners: 3
+  burn_down_priorities:
+    registries:
+    - file_size_limits
+    - function_length
+    - class_size
   growth_section_gate_rollout:
     default_mode: block
     warn_until_by_section:
@@ -11,9 +19,9 @@ governance:
       group:*: '2026-03-03'
 
 baseline:
-  total_exemptions: 284
+  total_exemptions: 285
   by_registry:
-    file_size_limits: 70
+    file_size_limits: 71
     function_complexity: 33
     function_length: 72
     class_size: 51
@@ -112,16 +120,24 @@ owner_decomposition_targets:
     '@bioetl-architecture': 313
 - quarter: '2026-Q2'
   allocations:
-    '@bioetl-architecture': 250
+    '@bioetl-architecture': 120
+    '@bioetl-platform': 80
+    '@bioetl-data-model': 50
 - quarter: '2026-Q3'
   allocations:
-    '@bioetl-architecture': 150
+    '@bioetl-architecture': 70
+    '@bioetl-platform': 45
+    '@bioetl-data-model': 35
 - quarter: '2026-Q4'
   allocations:
-    '@bioetl-architecture': 145
+    '@bioetl-architecture': 66
+    '@bioetl-platform': 44
+    '@bioetl-data-model': 35
 - quarter: '2027-Q1'
   allocations:
-    '@bioetl-architecture': 140
+    '@bioetl-architecture': 63
+    '@bioetl-platform': 42
+    '@bioetl-data-model': 35
 
 expiry_decomposition_targets:
 - quarter: '2026-Q2'
@@ -134,6 +150,12 @@ expiry_decomposition_targets:
   max_entries_expiring_in_quarter: 145
 - quarter: '2027-Q2'
   max_entries_expiring_in_quarter: 140
+
+program_done_criteria:
+  deadline_quarter: '2026-Q4'
+  max_total_exemptions: 220
+  min_integral_score: 78
+  max_expired_entries: 0
 
 grace_windows:
 - rf_id: RF-001

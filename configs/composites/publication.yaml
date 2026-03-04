@@ -202,6 +202,13 @@ composite:
         output:
             silver: data/output/silver/composite/publication
             gold: data/output/gold/composite/publication
+        sort_by:
+            silver:
+                - entity_id
+                - publication_id
+            gold:
+                - entity_id
+                - publication_id
 
         # Field-level priority overrides (when using explicit_rules)
         # Maps field name to ordered list of source preferences

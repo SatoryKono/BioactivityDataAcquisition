@@ -85,6 +85,13 @@ composite:
     output:
       silver: data/output/silver/composite/assay
       gold: data/output/gold/composite/assay
+    sort_by:
+      silver:
+        - entity_id
+        - assay_id
+      gold:
+        - entity_id
+        - assay_id
 
     # Field-level priority overrides
     field_priorities:
