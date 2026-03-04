@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, ClassVar, Protocol
+from typing import TYPE_CHECKING, ClassVar, Protocol
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import InputFilterConfig
@@ -95,9 +95,7 @@ class ProviderConfig:
     http_config: HttpConfig | None = None
     requires_http_client: bool = True
     requires_logger: bool = True
-    default_kwargs: dict[
-        str, Any  # Any: provider kwargs vary by adapter
-    ] = field(default_factory=dict)
+    default_kwargs: dict[str, object] = field(default_factory=dict)
     custom_creator: AdapterCreator | None = None
     data_source_creator: DataSourceCreator | None = None
 
@@ -172,7 +170,7 @@ class ProviderRegistry:
         http_client: UnifiedHTTPClient | None = None,
         logger: LoggerPort | None = None,
         settings: Settings | None = None,
-        **kwargs: Any,  # Any: forwarded adapter cons...
+        **kwargs: object,
     ) -> DataSourcePort:
         """Create a provider adapter instance.
 
@@ -203,12 +201,10 @@ class ProviderRegistry:
             )
 
         # Standard creation logic
-        init_kwargs: dict[
-            str, Any  # Any: factory wiring; concrete types resolved at runtime
-        ] = {  # Any: factory wiring; concrete types resolved at runtime
+        init_kwargs: dict[str, object] = {
             **config.default_kwargs,
             **kwargs,
-        }  # Any: factory wiring; concrete types resolved at runtime
+        }
 
         if config.requires_http_client:
             if http_client is None:

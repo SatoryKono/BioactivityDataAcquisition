@@ -63,16 +63,19 @@ class SubcellularFractionTransformer(BaseChemblTransformer):
             SilverRecord if transformation successful, None if skipped.
 
         """
-        # 1. Validate primary ID (subcellular_fraction)
-        primary_id = cast(
-            "PrimaryId",
-            self._get_required_field(record, self.primary_id_field),
-        )
-        if not primary_id:
-            return None
+        # 1. Resolve subcellular fraction from normalized or raw assay payload
+        extracted_from_assay = self.extract_fraction_from_assay(record)
+        primary_value = record.get(self.primary_id_field)
 
-        # 2. Extract business data
-        business_data = self._extract_business_data(record, primary_id)
+        if extracted_from_assay and primary_value is None:
+            primary_id = cast("PrimaryId", extracted_from_assay["subcellular_fraction"])
+            business_data = extracted_from_assay
+        else:
+            primary_id = cast(
+                "PrimaryId",
+                self._get_required_field(record, self.primary_id_field),
+            )
+            business_data = self._extract_business_data(record, primary_id)
 
         # 3. Compute entity_id
         # Priority: pre-computed entity_id from record > computed from subcellular_fraction

@@ -15,7 +15,7 @@ After the registry unification, both classes delegate to ProviderRegistry.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
 from bioetl.composition.providers.loader import ensure_providers_loaded
 from bioetl.composition.providers.provider_registry import (
@@ -48,7 +48,7 @@ class DataSourceFactory:
         http_client: UnifiedHTTPClient | None = None,
         logger: LoggerPort | None = None,
         settings: Settings | None = None,
-        **kwargs: Any,  # Any: forwarded adapter cons...
+        **kwargs: object,
     ) -> DataSourcePort:
         """Create a data source adapter.
 

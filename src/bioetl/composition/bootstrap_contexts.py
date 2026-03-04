@@ -18,11 +18,16 @@ Usage:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.domain.resilience import CircuitBreakerConfig
 
 if TYPE_CHECKING:
+    from bioetl.application.core.protocols import (
+        GoldFilterCallback,
+        GoldTransformCallback,
+        TransformCallback,
+    )
     from bioetl.domain.ports import (
         BronzeDQConfigPort,
         GoldDQConfigPort,
@@ -43,10 +48,7 @@ __all__ = [
 class PipelineCallbacksContext:
     """Typed context for pipeline transformation callbacks.
 
-    Replaces untyped tuple[Any, Any, Any] from extract_pipeline_callbacks().
-
-    The callback types use Any for compatibility with various transformer
-    implementations (TypedDict-based BronzeRecord/SilverRecord vs dict[str, Any]).
+    Replaces untyped callback tuple from extract_pipeline_callbacks().
 
     Attributes:
         transform: Bronze to Silver transformation callback.
@@ -60,9 +62,9 @@ class PipelineCallbacksContext:
             Implements GoldTransformCallback protocol.
     """
 
-    transform: Any  # Any: callback signature var...
-    gold_filter: Any  # Any: callback signature var...
-    gold_transform: Any  # Any: callback signature var...
+    transform: TransformCallback
+    gold_filter: GoldFilterCallback
+    gold_transform: GoldTransformCallback
 
 
 @dataclass(frozen=True)

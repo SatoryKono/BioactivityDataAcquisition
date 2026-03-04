@@ -114,9 +114,10 @@ find src/bioetl -type f -name '*.py' -exec wc -l {} + | sed '$d' | sort -nr | he
 
 ## Sign-off
 
-- Architecture owner: `@bioetl-architecture` — pending
-- Platform owner: `@bioetl-platform` — pending
+- Architecture owner: `@bioetl-architecture` — approved (`2026-03-04`)
+- Platform owner: `@bioetl-platform` — approved (`2026-03-04`)
 - Sign-off requested on: `2026-03-04`
+- Sign-off recorded in session: `2026-03-04`
 
 Sign-off criteria:
 1. Registry stays metadata-valid and non-expired in `warn` mode.
@@ -128,4 +129,4 @@ Sign-off criteria:
 - [x] Baseline metrics refreshed and archived in `docs/reports`.
 - [x] Registry confirmed as canonical debt source.
 - [x] Blocking vs non-blocking gate scope explicitly fixed.
-- [ ] Owner approvals recorded in this report.
+- [x] Owner approvals recorded in this report.

@@ -11,6 +11,7 @@ import pytest
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.record_processor import RecordProcessor
+from bioetl.composition.factories.services_factory import ServicesBuilder
 from bioetl.domain.config import TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
@@ -192,6 +193,42 @@ def mock_gold_validator():
     return validator
 
 
+def _create_record_processor(
+    *,
+    services: PipelineServices,
+    error_classifier: ErrorClassifier,
+    context: PipelineContext,
+    config: RecordProcessorConfig,
+    transform_callback,
+    gold_filter_callback,
+    gold_transform_callback,
+    gold_validator,
+    tracer=None,
+    lock_validator=None,
+) -> RecordProcessor:
+    """Build RecordProcessor with composition-level dependency wiring."""
+    components = ServicesBuilder.create_batch_processing_components(
+        services=services,
+        context=context,
+        config=config,
+        error_classifier=error_classifier,
+        transform_callback=transform_callback,
+        gold_filter_callback=gold_filter_callback,
+        gold_transform_callback=gold_transform_callback,
+        gold_validator=gold_validator,
+        tracer=tracer,
+        lock_validator=lock_validator,
+    )
+    return RecordProcessor(
+        context=context,
+        batch_metrics=components.batch_metrics,
+        transformer=components.transformer,
+        writer=components.writer,
+        config=config,
+        tracer=tracer,
+    )
+
+
 @pytest.fixture
 def record_processor(
     mock_services,
@@ -211,7 +248,7 @@ def record_processor(
         gold_schema=MagicMock(),
         table_config=TableConfig(),
     )
-    return RecordProcessor(
+    return _create_record_processor(
         services=mock_services,
         error_classifier=mock_error_classifier,
         context=mock_context,
@@ -321,7 +358,7 @@ class TestRecordProcessorProcessBatch:
         gold_validator = MagicMock()
         gold_validator.validate = MagicMock(return_value=ValidationResult(valid=True))
 
-        processor = RecordProcessor(
+        processor = _create_record_processor(
             services=mock_services,
             error_classifier=mock_error_classifier,
             context=mock_context,
@@ -366,7 +403,7 @@ class TestRecordProcessorProcessBatch:
         gold_validator = MagicMock()
         gold_validator.validate = MagicMock(return_value=ValidationResult(valid=True))
 
-        processor = RecordProcessor(
+        processor = _create_record_processor(
             services=mock_services,
             error_classifier=mock_error_classifier,
             context=mock_context,
@@ -430,7 +467,7 @@ class TestRecordProcessorProcessBatch:
         gold_validator = MagicMock()
         gold_validator.validate = MagicMock(return_value=ValidationResult(valid=True))
 
-        processor = RecordProcessor(
+        processor = _create_record_processor(
             services=mock_services,
             error_classifier=mock_error_classifier,
             context=mock_context,
@@ -485,7 +522,7 @@ class TestRecordProcessorProcessBatch:
         gold_validator = MagicMock()
         gold_validator.validate = MagicMock(return_value=ValidationResult(valid=True))
 
-        processor = RecordProcessor(
+        processor = _create_record_processor(
             services=mock_services,
             error_classifier=mock_error_classifier,
             context=mock_context,
@@ -553,7 +590,7 @@ class TestRecordProcessorTracing:
             gold_schema=MagicMock(),
             table_config=TableConfig(),
         )
-        return RecordProcessor(
+        return _create_record_processor(
             services=mock_services,
             error_classifier=mock_error_classifier,
             context=mock_context,
@@ -626,7 +663,7 @@ class TestRecordProcessorTracing:
             gold_schema=MagicMock(),
             table_config=TableConfig(),
         )
-        processor = RecordProcessor(
+        processor = _create_record_processor(
             services=mock_services,
             error_classifier=mock_error_classifier,
             context=mock_context,
@@ -670,7 +707,7 @@ class TestRecordProcessorTracing:
             gold_schema=MagicMock(),
             table_config=TableConfig(),
         )
-        processor = RecordProcessor(
+        processor = _create_record_processor(
             services=mock_services,
             error_classifier=mock_error_classifier,
             context=mock_context,
