@@ -2,17 +2,29 @@
 
 from __future__ import annotations
 
+import re
 import xml.etree.ElementTree as ET
-from typing import cast
+from typing import TYPE_CHECKING
 
 from bioetl.application.pipelines.pubmed.extractors import DateExtractor
 from bioetl.application.pipelines.pubmed.xml_parser import get_text
 from bioetl.domain.normalization import parse_page_range
 from bioetl.domain.value_objects import PublicationYear
 
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from bioetl.domain.ports import DataNormalizationPort
+
 
 class _PubMedTransformerDatesMixin:
     """Provides PubMed date/journal extraction routines."""
+
+    _VALID_DATE_PATTERNS: tuple[re.Pattern[str], ...]
+    _MONTH_MAP: dict[str, int]
+    _data_normalizer: DataNormalizationPort
+    _date_extractor: DateExtractor
+    validate_value_object: Callable[..., str | int | None]
 
     def _is_valid_date_format(self, date_str: str | None) -> bool:
         """Validate that date string matches YYYY, YYYY-MM, or YYYY-MM-DD format."""
@@ -76,9 +88,7 @@ class _PubMedTransformerDatesMixin:
             return epub_date[:10]
 
         if pub_date:
-            return cast(
-                "str | None", self._data_normalizer.normalize_partial_date(pub_date)
-            )
+            return self._data_normalizer.normalize_partial_date(pub_date)
 
         if year:
             return f"{year}-12-31"
@@ -111,7 +121,7 @@ class _PubMedTransformerDatesMixin:
             return None
 
         month_lower = month_text.strip().lower()[:3]
-        result = cast("int | None", self._MONTH_MAP.get(month_lower))
+        result = self._MONTH_MAP.get(month_lower)
         if result is None and month_text.isdigit():
             result = int(month_text)
         return result

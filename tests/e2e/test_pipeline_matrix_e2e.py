@@ -28,6 +28,7 @@ from bioetl.domain.exceptions.infrastructure import InfrastructureError
 from .conftest import (
     assert_bronze_files_exist,
     assert_silver_table_has_records,
+    build_e2e_skip_reason,
     create_test_context,
     run_pipeline_or_skip_transient,
 )
@@ -185,6 +186,21 @@ PIPELINE_CASES: tuple[PipelineE2ECase, ...] = (
 PIPELINE_CASE_BY_NAME: dict[str, PipelineE2ECase] = {
     case.pipeline_name: case for case in PIPELINE_CASES
 }
+CRITICAL_SMOKE_PIPELINES: frozenset[str] = frozenset(
+    {
+        "chembl_activity",
+        "chembl_assay",
+        "chembl_molecule",
+        "chembl_publication",
+        "chembl_target",
+        "crossref_publication",
+        "openalex_publication",
+        "pubchem_compound",
+        "pubmed_publication",
+        "semanticscholar_publication",
+        "uniprot_protein",
+    }
+)
 
 VCR_MISS_MARKERS: tuple[str, ...] = (
     "can't overwrite existing cassette",
@@ -225,12 +241,20 @@ def _cassette_exists(provider: str, cassette_name: str) -> bool:
 
 
 def _resolve_cassette_name(case: PipelineE2ECase) -> str | None:
+    dynamic_candidates = (
+        f"test_{case.pipeline_name}_full_cycle",
+        f"test_pipeline_matrix__{case.pipeline_name}",
+    )
+    all_candidates = tuple(
+        dict.fromkeys((*case.cassette_candidates, *dynamic_candidates))
+    )
+
     if _is_vcr_recording_enabled():
-        if case.cassette_candidates:
-            return case.cassette_candidates[0]
+        if all_candidates:
+            return all_candidates[0]
         return f"test_pipeline_matrix__{case.pipeline_name}"
 
-    for cassette in case.cassette_candidates:
+    for cassette in all_candidates:
         if _cassette_exists(case.provider, cassette):
             return cassette
     return None
@@ -279,9 +303,21 @@ def vcr_cassette_dir(pipeline_case: PipelineE2ECase) -> Path:
 def vcr_cassette_name(pipeline_case: PipelineE2ECase) -> str:
     cassette_name = _resolve_cassette_name(pipeline_case)
     if cassette_name is None:
+        if (
+            pipeline_case.pipeline_name in CRITICAL_SMOKE_PIPELINES
+            and not _is_vcr_recording_enabled()
+        ):
+            pytest.fail(
+                "E2E_POLICY[CRITICAL_CASSETTE_MISSING] "
+                f"pipeline={pipeline_case.pipeline_name}; "
+                "record cassette via VCR_RECORD_MODE=new_episodes."
+            )
         pytest.skip(
-            f"No cassette for {pipeline_case.pipeline_name}. "
-            "Run with VCR_RECORD_MODE=new_episodes to record."
+            build_e2e_skip_reason(
+                "CASSETTE_MISSING",
+                pipeline_name=pipeline_case.pipeline_name,
+                detail="run with VCR_RECORD_MODE=new_episodes to record",
+            )
         )
     return cassette_name
 
@@ -327,16 +363,35 @@ async def test_pipeline_matrix_smoke(
     except MATRIX_SKIP_ERRORS as exc:
         if _is_rate_limited_http_error(exc):
             pytest.skip(
-                f"Transient upstream 429 for {pipeline_case.pipeline_name}: {exc}"
+                build_e2e_skip_reason(
+                    "INFRA_FLAKY_429",
+                    pipeline_name=pipeline_case.pipeline_name,
+                    detail=str(exc),
+                )
             )
         if _is_external_healthcheck_playback_failure(exc):
             pytest.skip(
-                "External health-check mismatch "
-                f"for {pipeline_case.pipeline_name}: {exc}"
+                build_e2e_skip_reason(
+                    "CASSETTE_HEALTHCHECK_MISMATCH",
+                    pipeline_name=pipeline_case.pipeline_name,
+                    detail=str(exc),
+                )
             )
         if not _is_vcr_recording_enabled() and _is_vcr_mismatch_error(exc):
-            pytest.skip(f"Cassette mismatch for {pipeline_case.pipeline_name}: {exc}")
+            pytest.skip(
+                build_e2e_skip_reason(
+                    "CASSETTE_MISMATCH",
+                    pipeline_name=pipeline_case.pipeline_name,
+                    detail=str(exc),
+                )
+            )
         raise
+    except Exception as exc:
+        pytest.fail(
+            "E2E_FAIL[CODE_REGRESSION] "
+            f"pipeline={pipeline_case.pipeline_name}; "
+            f"error_type={type(exc).__name__}; {exc}"
+        )
 
     try:
         bronze_files = assert_bronze_files_exist(
@@ -348,5 +403,9 @@ async def test_pipeline_matrix_smoke(
         assert_silver_table_has_records(e2e_data_dir, pipeline_case.pipeline_name, 1)
     except (AssertionError, DeltaError, TableNotFoundError) as exc:
         pytest.skip(
-            f"No data produced for {pipeline_case.pipeline_name} with current cassette: {exc}"
+            build_e2e_skip_reason(
+                "CASSETTE_SAMPLE_EMPTY",
+                pipeline_name=pipeline_case.pipeline_name,
+                detail=str(exc),
+            )
         )

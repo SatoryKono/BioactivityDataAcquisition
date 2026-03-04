@@ -14,10 +14,46 @@ See CLAUDE.md §7 Technology Stack and §14 Creating Components.
 
 from __future__ import annotations
 
+import ast
 import re
 from pathlib import Path
 
 import pytest
+
+ADAPTER_MIXIN_CANONICAL_FILES = frozenset(
+    {
+        "chembl/fetch_adapter_mixin.py",
+        "openalex/client_helpers_adapter_mixin.py",
+        "uniprot/metadata_adapter_mixin.py",
+    }
+)
+
+ADAPTER_MIXIN_LEGACY_SHIMS: dict[str, str] = {
+    "chembl/fetch_mixin.py": "fetch_adapter_mixin",
+    "openalex/client_helpers_mixin.py": "client_helpers_adapter_mixin",
+    "uniprot/metadata_mixin.py": "metadata_adapter_mixin",
+}
+
+LEGACY_SHIM_IMPORT_PATHS = frozenset(
+    {
+        "bioetl.infrastructure.adapters.chembl.fetch_mixin",
+        "bioetl.infrastructure.adapters.openalex.client_helpers_mixin",
+        "bioetl.infrastructure.adapters.uniprot.metadata_mixin",
+    }
+)
+
+LEGACY_SHIM_SYMBOLS = frozenset(
+    {
+        "ChemblFetchMixin",
+        "_OpenAlexAdapterHelpersMixin",
+        "_UniProtAdapterMetadataMixin",
+    }
+)
+
+
+def _rel_adapter_path(adapters_path: Path, py_file: Path) -> str:
+    """Return adapter path normalized to POSIX separators."""
+    return py_file.relative_to(adapters_path).as_posix()
 
 
 class TestAdapterHealthCheck:
@@ -54,9 +90,16 @@ class TestAdapterHealthCheck:
         }
         adapter_files = []
         for py_file in adapters_path.rglob("*.py"):
+            rel_path = _rel_adapter_path(adapters_path, py_file)
             if py_file.name.startswith("_"):
                 continue
             if py_file.name in excluded_files:
+                continue
+            if rel_path in ADAPTER_MIXIN_CANONICAL_FILES:
+                # Adapter mixins are behavioral fragments, not entrypoints.
+                continue
+            if rel_path in ADAPTER_MIXIN_LEGACY_SHIMS:
+                # Legacy shim modules are compatibility re-exports only.
                 continue
             if py_file.name.endswith("_mixin.py"):
                 # Mixins are behavioral fragments, not full DataSourcePort adapters.
@@ -105,6 +148,149 @@ class TestAdapterHealthCheck:
             "Files missing health_check:\n"
             + "\n".join(f"  - {f}" for f in missing_health_check)
             + "\n\nSee: docs/05-operations/runbooks/observability-checklist.md"
+        )
+
+
+class TestAdapterMixinPolicy:
+    """Tests ensuring explicit adapter mixin naming and shim contract."""
+
+    def test_adapter_mixins_use_canonical_naming(self, src_dir: Path) -> None:
+        """Adapter mixins must live in explicit *_adapter_mixin.py modules."""
+        adapters_path = src_dir / "bioetl" / "infrastructure" / "adapters"
+        if not adapters_path.exists():
+            pytest.skip("Infrastructure adapters not found")
+
+        missing = [
+            rel
+            for rel in sorted(ADAPTER_MIXIN_CANONICAL_FILES)
+            if not (adapters_path / rel).exists()
+        ]
+
+        assert not missing, "Missing canonical adapter mixin modules:\n" + "\n".join(
+            f"  - {m}" for m in missing
+        )
+
+    def test_adapter_mixins_do_not_implement_health_check(self, src_dir: Path) -> None:
+        """Adapter mixins should not duplicate HealthCheckProviderMixin logic."""
+        adapters_path = src_dir / "bioetl" / "infrastructure" / "adapters"
+        if not adapters_path.exists():
+            pytest.skip("Infrastructure adapters not found")
+
+        violations: list[str] = []
+        for rel in sorted(ADAPTER_MIXIN_CANONICAL_FILES):
+            file_path = adapters_path / rel
+            content = file_path.read_text(encoding="utf-8")
+            if "def health_check" in content or "async def health_check" in content:
+                violations.append(rel)
+
+        assert not violations, (
+            "Adapter mixins must not implement health_check() directly. "
+            "Use BaseHttpAdapter/BaseSyncAdapter with HealthCheckProviderMixin.\n"
+            + "\n".join(f"  - {v}" for v in violations)
+        )
+
+    def test_legacy_mixin_shims_are_reexport_only(self, src_dir: Path) -> None:
+        """Legacy mixin modules must remain thin compatibility shims."""
+        adapters_path = src_dir / "bioetl" / "infrastructure" / "adapters"
+        if not adapters_path.exists():
+            pytest.skip("Infrastructure adapters not found")
+
+        violations: list[str] = []
+        for rel, expected_import in ADAPTER_MIXIN_LEGACY_SHIMS.items():
+            file_path = adapters_path / rel
+            if not file_path.exists():
+                violations.append(f"{rel}: missing legacy shim")
+                continue
+
+            content = file_path.read_text(encoding="utf-8")
+            tree = ast.parse(content)
+            has_runtime_defs = any(
+                isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef))
+                for node in tree.body
+            )
+            if has_runtime_defs:
+                violations.append(
+                    f"{rel}: must not define classes/functions (re-export only)"
+                )
+
+            if expected_import not in content:
+                violations.append(
+                    f"{rel}: must import canonical module '{expected_import}'"
+                )
+
+        assert not violations, "Legacy adapter-mixin shim violations:\n" + "\n".join(
+            f"  - {v}" for v in violations
+        )
+
+    def test_src_does_not_import_legacy_adapter_mixin_modules(
+        self, src_dir: Path
+    ) -> None:
+        """Production source must import canonical *_adapter_mixin modules only."""
+        src_root = src_dir / "bioetl"
+        if not src_root.exists():
+            pytest.skip("bioetl source not found")
+
+        violations: list[str] = []
+        for py_file in src_root.rglob("*.py"):
+            rel_path = py_file.relative_to(src_dir).as_posix()
+            if rel_path.endswith("/__init__.py"):
+                continue
+            if rel_path.startswith(
+                "bioetl/infrastructure/adapters/"
+            ) and rel_path.split("bioetl/infrastructure/adapters/", 1)[1] in {
+                *ADAPTER_MIXIN_LEGACY_SHIMS.keys()
+            }:
+                # Skip legacy shim modules themselves.
+                continue
+
+            tree = ast.parse(py_file.read_text(encoding="utf-8"), filename=rel_path)
+            for node in ast.walk(tree):
+                if (
+                    isinstance(node, ast.ImportFrom)
+                    and node.module in LEGACY_SHIM_IMPORT_PATHS
+                ):
+                    violations.append(
+                        f"{rel_path}:{node.lineno} imports legacy module '{node.module}'"
+                    )
+                if isinstance(node, ast.Import):
+                    for alias in node.names:
+                        if alias.name in LEGACY_SHIM_IMPORT_PATHS:
+                            violations.append(
+                                f"{rel_path}:{node.lineno} imports legacy module '{alias.name}'"
+                            )
+
+        assert not violations, (
+            "Legacy adapter-mixin module imports are forbidden in src.\n"
+            + "\n".join(f"  - {v}" for v in violations)
+        )
+
+    def test_src_does_not_use_legacy_adapter_mixin_symbols(self, src_dir: Path) -> None:
+        """Production source must not reference legacy shim symbol names."""
+        src_root = src_dir / "bioetl"
+        if not src_root.exists():
+            pytest.skip("bioetl source not found")
+
+        violations: list[str] = []
+        for py_file in src_root.rglob("*.py"):
+            rel_path = py_file.relative_to(src_dir).as_posix()
+            if rel_path.startswith(
+                "bioetl/infrastructure/adapters/"
+            ) and rel_path.split("bioetl/infrastructure/adapters/", 1)[1] in {
+                *ADAPTER_MIXIN_LEGACY_SHIMS.keys()
+            }:
+                # Legacy shim files define the aliases intentionally.
+                continue
+
+            content = py_file.read_text(encoding="utf-8")
+            for symbol in LEGACY_SHIM_SYMBOLS:
+                if re.search(rf"\b{re.escape(symbol)}\b", content):
+                    violations.append(
+                        f"{rel_path}: references legacy symbol '{symbol}'"
+                    )
+
+        assert not violations, (
+            "Legacy adapter-mixin symbols are forbidden in src.\n"
+            + "\n".join(f"  - {v}" for v in violations)
         )
 
 

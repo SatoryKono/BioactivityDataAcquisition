@@ -1,0 +1,154 @@
+schema_version: 1
+governance:
+  baseline_date: '2026-03-04'
+  description: Architecture debt scorecard governance for exemption registry.
+  growth_gate_default_mode: block
+  allow_grace_windows_only_for_rf: true
+
+baseline:
+  total_exemptions: 485
+  by_registry:
+    file_size_limits: 97
+    function_complexity: 97
+    function_length: 118
+    class_size: 82
+    class_method_count: 1
+    god_object: 49
+    domain_complexity: 41
+
+registry_groups:
+  size_shape:
+    registries:
+    - file_size_limits
+    - function_length
+    - class_size
+    - class_method_count
+    - god_object
+  complexity:
+    registries:
+    - function_complexity
+    - domain_complexity
+
+quarterly_targets:
+- quarter: '2026-Q1'
+  max_total_exemptions: 485
+  min_integral_score: 70
+  group_budgets:
+    size_shape: 347
+    complexity: 138
+  registry_budgets:
+    file_size_limits: 97
+    function_complexity: 97
+    function_length: 118
+    class_size: 82
+    class_method_count: 1
+    god_object: 49
+    domain_complexity: 41
+- quarter: '2026-Q2'
+  max_total_exemptions: 466
+  min_integral_score: 73
+  group_budgets:
+    size_shape: 332
+    complexity: 134
+  registry_budgets:
+    file_size_limits: 94
+    function_complexity: 94
+    function_length: 112
+    class_size: 78
+    class_method_count: 1
+    god_object: 47
+    domain_complexity: 40
+- quarter: '2026-Q3'
+  max_total_exemptions: 443
+  min_integral_score: 76
+  group_budgets:
+    size_shape: 315
+    complexity: 128
+  registry_budgets:
+    file_size_limits: 90
+    function_complexity: 90
+    function_length: 105
+    class_size: 74
+    class_method_count: 1
+    god_object: 45
+    domain_complexity: 38
+- quarter: '2026-Q4'
+  max_total_exemptions: 419
+  min_integral_score: 79
+  group_budgets:
+    size_shape: 297
+    complexity: 122
+  registry_budgets:
+    file_size_limits: 86
+    function_complexity: 86
+    function_length: 98
+    class_size: 70
+    class_method_count: 1
+    god_object: 42
+    domain_complexity: 36
+- quarter: '2027-Q1'
+  max_total_exemptions: 390
+  min_integral_score: 82
+  group_budgets:
+    size_shape: 278
+    complexity: 112
+  registry_budgets:
+    file_size_limits: 79
+    function_complexity: 79
+    function_length: 92
+    class_size: 65
+    class_method_count: 1
+    god_object: 41
+    domain_complexity: 33
+
+owner_decomposition_targets:
+- quarter: '2026-Q1'
+  allocations:
+    '@bioetl-architecture': 485
+- quarter: '2026-Q2'
+  allocations:
+    '@bioetl-architecture': 340
+    '@bioetl-platform': 80
+    '@bioetl-data': 46
+- quarter: '2026-Q3'
+  allocations:
+    '@bioetl-architecture': 310
+    '@bioetl-platform': 85
+    '@bioetl-data': 48
+- quarter: '2026-Q4'
+  allocations:
+    '@bioetl-architecture': 285
+    '@bioetl-platform': 86
+    '@bioetl-data': 48
+- quarter: '2027-Q1'
+  allocations:
+    '@bioetl-architecture': 260
+    '@bioetl-platform': 82
+    '@bioetl-data': 48
+
+expiry_decomposition_targets:
+- quarter: '2026-Q2'
+  max_entries_expiring_in_quarter: 485
+- quarter: '2026-Q3'
+  max_entries_expiring_in_quarter: 360
+- quarter: '2026-Q4'
+  max_entries_expiring_in_quarter: 250
+- quarter: '2027-Q1'
+  max_entries_expiring_in_quarter: 120
+- quarter: '2027-Q2'
+  max_entries_expiring_in_quarter: 0
+
+grace_windows:
+- rf_id: RF-001
+  approved: true
+  starts_on: '2026-03-01'
+  ends_on: '2026-03-31'
+  allowances:
+    total_exemptions: 10
+    group_budgets:
+      size_shape: 8
+      complexity: 2
+    registry_budgets:
+      class_size: 5
+      file_size_limits: 3
+  note: Temporary headroom during approved mixin type-safety refactor wave.

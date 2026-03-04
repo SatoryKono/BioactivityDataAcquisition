@@ -28,7 +28,9 @@ from bioetl.infrastructure.adapters.chembl.deduplication import (
 from bioetl.infrastructure.adapters.chembl.entity_mapper import (
     ChemblEntityMapper,
 )
-from bioetl.infrastructure.adapters.chembl.fetch_mixin import ChemblFetchMixin
+from bioetl.infrastructure.adapters.chembl.fetch_adapter_mixin import (
+    ChemblFetchAdapterMixin,
+)
 from bioetl.infrastructure.adapters.chembl.health import ChemblHealthMixin
 from bioetl.infrastructure.adapters.chembl.metadata import ChemblMetadataMixin
 from bioetl.infrastructure.adapters.error_handling import ErrorService
@@ -45,7 +47,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class ChemblAdapter(
-    ChemblFetchMixin, ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter
+    ChemblFetchAdapterMixin, ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter
 ):
     """ChEMBL REST API adapter implementing DataSourcePort.
 

@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable
 from datetime import datetime
 from types import ModuleType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.domain.medallion import GoldWriteMode
 from bioetl.domain.ports import AuditEntry, AuditLayer, AuditOperation
@@ -94,7 +94,10 @@ class GoldWriterMetadataMixin:
 
         try:
             dt = await self._run_in_executor(lambda: module.DeltaTable(table_path))
-            version: int = dt.version()
+            delta_table = cast(
+                "Any", dt
+            )  # Any: runtime DeltaTable is loaded dynamically
+            version: int = delta_table.version()
             return version
         except module.TableNotFoundError:
             return None

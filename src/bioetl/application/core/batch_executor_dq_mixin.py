@@ -4,12 +4,16 @@ from __future__ import annotations
 
 import json
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
-from bioetl.domain.types import BatchID
+from bioetl.domain.types import BatchID, BronzeRecord, GoldRecord
 
 if TYPE_CHECKING:
+    from bioetl.application.core.config import RecordProcessorConfig
+    from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.application.services.dq_report_service import DQReportContext
+    from bioetl.domain.context import PipelineContext
+    from bioetl.domain.ports import LoggerPort
 
 _DQ_DATAFRAME_ERRORS: tuple[type[Exception], ...] = (
     ImportError,
@@ -23,7 +27,17 @@ _DQ_DATAFRAME_ERRORS: tuple[type[Exception], ...] = (
 class _BatchExecutorDQMixin:
     """Provides DQ data collection and report context construction."""
 
+    _services: PipelineServices
+    _context: PipelineContext
+    _config: RecordProcessorConfig
+    _logger: LoggerPort
+    _bronze_records_for_dq: list[bytes]
+    _silver_records_for_dq: list[BronzeRecord]
+    _gold_records_for_dq: list[GoldRecord]
+    _source_batch_ids: list[str]
     _last_bronze_path: str | None
+    records_fetched: int
+    records_quarantined: int
 
     def _should_collect_dq_data(self) -> bool:
         """Return True when DQ report service is configured."""
@@ -31,11 +45,11 @@ class _BatchExecutorDQMixin:
 
     def _collect_dq_data(
         self,
-        records: list[dict[str, object]],
+        records: list[BronzeRecord],
         batch_id: BatchID,
         bronze_result: object,
-        silver_records: list[dict[str, object]],
-        gold_records: list[dict[str, object]],
+        silver_records: list[BronzeRecord],
+        gold_records: list[GoldRecord],
     ) -> None:
         """Collect Bronze/Silver/Gold payloads used by post-run DQ reports."""
         _ = batch_id
@@ -56,7 +70,7 @@ class _BatchExecutorDQMixin:
 
     def _build_dataframe_from_records(
         self,
-        records: list[dict[str, object]],
+        records: list[BronzeRecord] | list[GoldRecord],
     ) -> object | None:
         """Build Polars dataframe from records, returning None on failure."""
         if not records:
@@ -85,8 +99,8 @@ class _BatchExecutorDQMixin:
 
     def _extract_dq_entity(self) -> str:
         """Derive entity name for report naming from silver table naming."""
-        silver_table = cast(str | None, self._config.table_config.silver_table)
-        entity_type = cast(str, self._config.entity_type)
+        silver_table = self._config.table_config.silver_table
+        entity_type = self._config.entity_type
         if silver_table and "_" in silver_table:
             return silver_table.split("_", 1)[1]
         if silver_table and "." in silver_table:

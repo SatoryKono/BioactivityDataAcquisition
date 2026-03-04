@@ -26,8 +26,8 @@ from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
 from bioetl.infrastructure.adapters.uniprot.fasta_parser import FastaParser
-from bioetl.infrastructure.adapters.uniprot.metadata_mixin import (
-    _UniProtAdapterMetadataMixin,
+from bioetl.infrastructure.adapters.uniprot.metadata_adapter_mixin import (
+    UniProtAdapterMetadataMixin,
 )
 
 if TYPE_CHECKING:
@@ -110,7 +110,7 @@ UNIPROT_FETCH_ERRORS = (
 
 
 class UniProtAdapter(
-    _UniProtAdapterMetadataMixin, BaseHttpAdapter, PaginatedFetcherMixin
+    UniProtAdapterMetadataMixin, BaseHttpAdapter, PaginatedFetcherMixin
 ):
     """UniProt API adapter implementing DataSourcePort.
 

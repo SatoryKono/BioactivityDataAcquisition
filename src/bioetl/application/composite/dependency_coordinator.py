@@ -292,22 +292,13 @@ class DependencyCoordinatorService:
                         original_count=original_count,
                         filtered_count=filtered_count,
                     )
-                except _KEY_FILTER_ERRORS as e:
+                except (*_KEY_FILTER_ERRORS, BioETLError) as e:
                     self._logger.warning(
                         "Failed to apply key_filter, using all keys",
                         dependency=dependency.pipeline,
                         key_filter=dependency.key_filter,
                         error=str(e),
                         error_type=type(e).__name__,
-                    )
-                except BioETLError as e:
-                    self._logger.warning(
-                        "Failed to apply key_filter, using all keys",
-                        dependency=dependency.pipeline,
-                        key_filter=dependency.key_filter,
-                        error=str(e),
-                        error_type=type(e).__name__,
-                        reason_code="unexpected_bioetl_error",
                     )
 
             self._logger.info(
@@ -334,7 +325,7 @@ class DependencyCoordinatorService:
             # Re-raise validation errors
             raise
 
-        except _DEPENDENCY_KEY_READ_ERRORS as e:
+        except (*_DEPENDENCY_KEY_READ_ERRORS, BioETLError) as e:
             # For chained dependencies, errors should be explicit, not silent
             self._logger.error(
                 "Failed to read chained dependency keys",
@@ -343,21 +334,6 @@ class DependencyCoordinatorService:
                 source_table=source_config.silver_table,
                 error=str(e),
                 error_type=type(e).__name__,
-            )
-            raise ValueError(
-                f"Failed to read keys for chained dependency '{dependency.pipeline}' "
-                f"from '{source_config.silver_table}': {e}"
-            ) from e
-        except BioETLError as e:
-            # For chained dependencies, errors should be explicit, not silent
-            self._logger.error(
-                "Failed to read chained dependency keys",
-                dependency=dependency.pipeline,
-                key_source=dependency.key_source,
-                source_table=source_config.silver_table,
-                error=str(e),
-                error_type=type(e).__name__,
-                reason_code="unexpected_bioetl_error",
             )
             raise ValueError(
                 f"Failed to read keys for chained dependency '{dependency.pipeline}' "

@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Awaitable, Callable
 from types import ModuleType
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, Protocol, TypeVar, cast
 
 import pyarrow as pa
 
@@ -23,6 +23,24 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 
+class _WriteMergedMetadataCallable(Protocol):
+    """Callable contract for merged metadata sidecar writer."""
+
+    def __call__(
+        self,
+        *,
+        table_path: str,
+        table_name: str,
+        records: list[GoldRecord],
+        primary_keys: list[str],
+        run_id: str | None = None,
+        sources_used: list[str] | None = None,
+        schema: DataFrameSchema | None = None,
+    ) -> Awaitable[None]:
+        """Write metadata for merged Gold records."""
+        ...
+
+
 class GoldWriterIOMixin:
     """Mixin with write dispatch, SCD2 merge, and read helpers."""
 
@@ -32,7 +50,6 @@ class GoldWriterIOMixin:
     _validate_records_against_schema: Callable[
         [list[GoldRecord], DataFrameSchema], Awaitable[None]
     ]
-    _write_gold_merged_metadata: Callable[..., Awaitable[None]]
 
     @staticmethod
     def _load_gold_writer_module() -> ModuleType:
@@ -106,7 +123,11 @@ class GoldWriterIOMixin:
                 append=False,
             )
 
-        await self._write_gold_merged_metadata(
+        write_merged_metadata = cast(
+            _WriteMergedMetadataCallable,
+            getattr(self, "_write_gold_merged_metadata"),
+        )
+        await write_merged_metadata(
             table_path=table_path,
             table_name=table_name,
             records=records,
