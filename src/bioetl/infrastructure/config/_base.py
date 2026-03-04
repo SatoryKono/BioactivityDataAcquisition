@@ -106,7 +106,10 @@ class YamlSettingsSource(PydanticBaseSettingsSource):
 
 
 @lru_cache(maxsize=10)
-def get_pipeline_config(pipeline_name: str) -> PipelineConfig:
+def get_pipeline_config(
+    pipeline_name: str,
+    config_root: str | None = None,
+) -> PipelineConfig:
     """Get PipelineConfig object from YAML configuration.
 
     Convenience function that loads and maps config in one step.
@@ -118,6 +121,8 @@ def get_pipeline_config(pipeline_name: str) -> PipelineConfig:
 
     Args:
         pipeline_name: Name of the pipeline (e.g., 'chembl_activity')
+        config_root: Root directory for config files. Defaults to 'configs'.
+            Accepts str instead of Path because lru_cache requires hashable args.
 
     Returns:
         PipelineConfig instance
@@ -131,7 +136,8 @@ def get_pipeline_config(pipeline_name: str) -> PipelineConfig:
     yaml_config = load_pipeline_config(pipeline_name)
 
     # Use PipelineConfigLoader to resolve DQ config from hierarchy
-    config_loader = PipelineConfigLoader(Path("configs"))
+    root = Path(config_root) if config_root is not None else Path("configs")
+    config_loader = PipelineConfigLoader(root)
     resolved_dq = config_loader.resolve_dq_config(yaml_config)
 
     return yaml_config_to_domain(yaml_config, resolved_dq_config=resolved_dq)
