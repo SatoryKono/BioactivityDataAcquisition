@@ -146,8 +146,8 @@ class UniProtAdapter(
 def _create_uniprot_adapter(
     http_client: UnifiedHTTPClient | None,
     logger: LoggerPort | None,
-    _settings: Any | None,  # Any: dynamic payload or structural mixin boundary
-    **kwargs: Any,  # Any: forwarding arbitrary request kwargs to underlying HTTP client
+    _settings: object | None,  # noqa: ARG001
+    **kwargs: Any,  # Any: forwarding arbitrary kwargs to HTTP client
 ) -> UniProtAdapter:
     """Factory helper for registry-based adapter construction."""
     if http_client is None:
