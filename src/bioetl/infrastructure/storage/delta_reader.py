@@ -160,10 +160,20 @@ class DeltaReader:
                     f"Delta table not found: {resolved_path}"
                 ) from e
 
-            # Use metadata if available, otherwise count from data
-            # delta-rs doesn't expose row count in metadata directly,
-            # so we read minimal data to count
-            return int(dt.to_pyarrow_table().num_rows)
+            # Sum row counts from Parquet file metadata (add actions)
+            # to avoid loading the entire table into memory.
+            try:
+                add_actions = dt.get_add_actions(flatten=True).to_pydict()
+                num_records = add_actions.get("num_records")
+                if num_records and all(v is not None for v in num_records):
+                    return int(sum(num_records))
+            except (KeyError, AttributeError, TypeError):
+                pass
+
+            # Fallback: read only row count via PyArrow dataset
+            # (reads footer metadata, not full data)
+            dataset = dt.to_pyarrow_dataset()
+            return dataset.count_rows()
 
         return await loop.run_in_executor(None, _count_rows)
 
