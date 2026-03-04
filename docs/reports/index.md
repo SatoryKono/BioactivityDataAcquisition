@@ -7,6 +7,7 @@ This section aggregates dated engineering reports. Use these reports as operatio
 
 ## Latest
 
+- [Architecture Debt Baseline (2026-03-04, Phase A freeze)](architecture-debt-baseline-2026-03-04.md)
 - [Architecture Debt Baseline (2026-03-03)](architecture-debt-baseline-2026-03-03.md)
 - [Quality Debt Scorecard (2026-Q1)](quality-debt-scorecard-2026-Q1.md)
 - [Documentation Audit (2026-03-03, main)](documentation-audit-2026-03-03-main.md)

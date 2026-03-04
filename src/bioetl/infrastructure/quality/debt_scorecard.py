@@ -119,7 +119,11 @@ def build_exemption_inventory(
             by_registry[registry_name] += 1
 
             owner = entry.get("owner")
-            owner_name = owner.strip() if isinstance(owner, str) and owner.strip() else "<missing>"
+            owner_name = (
+                owner.strip()
+                if isinstance(owner, str) and owner.strip()
+                else "<missing>"
+            )
             by_owner[owner_name] += 1
 
             expiry_date = _parse_iso_date(entry.get("expires_on"))
@@ -177,7 +181,9 @@ def _validate_baseline_section(
     normalized_registry_counts: dict[str, int] = {}
     for registry_name, count in sorted(baseline_by_registry.items()):
         if not isinstance(registry_name, str) or not registry_name.strip():
-            errors.append("baseline.by_registry: registry name must be non-empty string")
+            errors.append(
+                "baseline.by_registry: registry name must be non-empty string"
+            )
             continue
         parsed = _validate_non_negative_int(
             count,
@@ -187,8 +193,12 @@ def _validate_baseline_section(
         if parsed is not None:
             normalized_registry_counts[registry_name] = parsed
 
-    if baseline_total is not None and baseline_total != sum(normalized_registry_counts.values()):
-        errors.append("baseline.total_exemptions must equal sum(baseline.by_registry.*)")
+    if baseline_total is not None and baseline_total != sum(
+        normalized_registry_counts.values()
+    ):
+        errors.append(
+            "baseline.total_exemptions must equal sum(baseline.by_registry.*)"
+        )
 
     return baseline_total, normalized_registry_counts
 
@@ -204,13 +214,17 @@ def _validate_registry_group_entry(
         return None
     registries = group_data.get("registries")
     if not isinstance(registries, list) or not registries:
-        errors.append(f"registry_groups.{group_name}.registries: expected non-empty list")
+        errors.append(
+            f"registry_groups.{group_name}.registries: expected non-empty list"
+        )
         return None
 
     clean: list[str] = []
     for item in registries:
         if not isinstance(item, str) or not item.strip():
-            errors.append(f"registry_groups.{group_name}.registries: invalid registry name")
+            errors.append(
+                f"registry_groups.{group_name}.registries: invalid registry name"
+            )
             continue
         clean.append(item)
     return tuple(clean)
@@ -246,7 +260,9 @@ def _validate_registry_groups_section(
     grouped_counter = Counter(grouped_registries)
     duplicates = sorted(name for name, count in grouped_counter.items() if count > 1)
     if duplicates:
-        errors.append(f"registry_groups: registries listed in multiple groups: {duplicates}")
+        errors.append(
+            f"registry_groups: registries listed in multiple groups: {duplicates}"
+        )
 
     grouped_registry_names = set(grouped_counter)
     missing_groups = sorted(baseline_registry_names - grouped_registry_names)
@@ -359,12 +375,16 @@ def _validate_quarterly_targets_section(
             continue
         quarter = str(parsed[1]["quarter"])
         if quarter in seen_quarters:
-            errors.append(f"quarterly_targets[{index}].quarter: duplicate quarter '{quarter}'")
+            errors.append(
+                f"quarterly_targets[{index}].quarter: duplicate quarter '{quarter}'"
+            )
             continue
         seen_quarters.add(quarter)
         parsed_targets.append(parsed)
 
-    ordered_targets = [item[1] for item in sorted(parsed_targets, key=lambda item: item[0])]
+    ordered_targets = [
+        item[1] for item in sorted(parsed_targets, key=lambda item: item[0])
+    ]
     for previous, current in pairwise(ordered_targets):
         prev_total = int(previous["max_total_exemptions"])
         curr_total = int(current["max_total_exemptions"])
@@ -421,7 +441,9 @@ def _validate_allowances(
         return
     for group_name, value in group_allowances.items():
         if group_name not in group_names:
-            errors.append(f"{prefix}.allowances.group_budgets: unknown group '{group_name}'")
+            errors.append(
+                f"{prefix}.allowances.group_budgets: unknown group '{group_name}'"
+            )
             continue
         _validate_non_negative_int(
             value,
@@ -605,9 +627,9 @@ def _evaluate_registry_budgets(
 ) -> list[str]:
     violations: list[str] = []
     for registry_name, current_count in sorted(by_registry.items()):
-        budget = int(target_registry_budgets[registry_name]) + allowance_by_registry.get(
-            registry_name, 0
-        )
+        budget = int(
+            target_registry_budgets[registry_name]
+        ) + allowance_by_registry.get(registry_name, 0)
         if current_count > budget:
             violations.append(
                 f"registry '{registry_name}' count {current_count} exceeds budget {budget}"
@@ -665,14 +687,18 @@ def evaluate_debt_scorecard(
 
     target = _current_quarter_target(scorecard, today=now)
     if target is None:
-        return [f"Missing quarterly target for current quarter '{_quarter_label(now)}'"], None
+        return [
+            f"Missing quarterly target for current quarter '{_quarter_label(now)}'"
+        ], None
 
     active_windows = [
         window
         for window in scorecard.get("grace_windows", [])
         if _is_active_grace_window(window, today=now)
     ]
-    typed_active_windows = [window for window in active_windows if isinstance(window, dict)]
+    typed_active_windows = [
+        window for window in active_windows if isinstance(window, dict)
+    ]
     allowance_total, allowance_by_registry, allowance_by_group = _collect_allowances(
         typed_active_windows
     )
