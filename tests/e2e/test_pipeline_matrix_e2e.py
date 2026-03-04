@@ -44,6 +44,7 @@ class PipelineE2ECase:
     pipeline_name: str
     provider: str
     entity: str
+    smoke_limit: int = 1
     query: str | None = None
     filter_ids: tuple[str, ...] | None = None
     filter_field: str | None = None
@@ -113,6 +114,7 @@ PIPELINE_CASES: tuple[PipelineE2ECase, ...] = (
         "chembl_subcellular_fraction",
         "chembl",
         "subcellular_fraction",
+        smoke_limit=100,
     ),
     PipelineE2ECase(
         "chembl_target",
@@ -163,6 +165,7 @@ PIPELINE_CASES: tuple[PipelineE2ECase, ...] = (
         "semanticscholar_publication",
         "semanticscholar",
         "publication",
+        smoke_limit=3,
         query="CRISPR gene editing",
         cassette_candidates=(
             "TestSemanticScholarAdapterIntegration.test_fetch_with_query",
@@ -356,7 +359,7 @@ async def test_pipeline_matrix_smoke(
     """
     ctx = create_test_context(
         pipeline_case.pipeline_name,
-        limit=1,
+        limit=pipeline_case.smoke_limit,
         query=pipeline_case.query,
         filter_ids=pipeline_case.filter_ids,
         filter_field=pipeline_case.filter_field,
