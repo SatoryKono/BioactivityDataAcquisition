@@ -152,17 +152,18 @@ class TestCliRunDryRun:
         self,
         cli_runner: CliRunner,
         temp_env: dict[str, str],
+        tmp_path: "Path",
     ):
         """Test that --dry-run handles non-existent tables gracefully."""
         mock_preview = MagicMock()
         mock_preview.silver = MagicMock(
             exists=False,
-            path="/tmp/silver/chembl_activity",
+            path=str(tmp_path / "silver" / "chembl_activity"),
             file_count=0,
         )
         mock_preview.gold = MagicMock(
             exists=False,
-            path="/tmp/gold/chembl/activity",
+            path=str(tmp_path / "gold" / "chembl" / "activity"),
             file_count=0,
         )
         mock_preview.total_files = 0
@@ -191,17 +192,18 @@ class TestCliRunDryRun:
         self,
         cli_runner: CliRunner,
         temp_env: dict[str, str],
+        tmp_path: "Path",
     ):
         """Test that --dry-run shows file counts for existing tables."""
         mock_preview = MagicMock()
         mock_preview.silver = MagicMock(
             exists=True,
-            path="/tmp/silver/chembl_activity",
+            path=str(tmp_path / "silver" / "chembl_activity"),
             file_count=42,
         )
         mock_preview.gold = MagicMock(
             exists=True,
-            path="/tmp/gold/chembl/activity",
+            path=str(tmp_path / "gold" / "chembl" / "activity"),
             file_count=17,
         )
         mock_preview.total_files = 59
