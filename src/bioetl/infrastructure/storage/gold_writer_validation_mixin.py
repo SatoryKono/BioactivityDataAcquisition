@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Protocol
 
 import pandera as pandera_pa
 
@@ -15,10 +15,20 @@ if TYPE_CHECKING:
     from bioetl.domain.types import GoldRecord, ScdConfig
 
 
+class _RunInExecutorHost(Protocol):
+    """Host contract for mixins that rely on executor offloading."""
+
+    def _run_in_executor(
+        self,
+        func: Callable[..., object],
+        *args: object,
+    ) -> Awaitable[object]:
+        """Execute callable in executor context."""
+        ...
+
+
 class GoldWriterValidationMixin:
     """Mixin with mode/record/schema validation helpers for Gold writes."""
-
-    _run_in_executor: Callable[..., Awaitable[object]]
 
     def _validate_write_mode(self, mode: str) -> GoldWriteMode:
         """Validate and return the write mode enum."""
@@ -62,7 +72,9 @@ class GoldWriterValidationMixin:
             raise ValueError("Gold layer requires strict=True schema validation")
 
     async def _validate_records_against_schema(
-        self, records: list[GoldRecord], schema: DataFrameSchema
+        self: _RunInExecutorHost,
+        records: list[GoldRecord],
+        schema: DataFrameSchema,
     ) -> None:
         """Validate records against Pandera schema."""
         import pandas as pd

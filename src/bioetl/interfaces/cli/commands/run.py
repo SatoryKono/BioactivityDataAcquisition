@@ -39,6 +39,133 @@ from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning
 
 
+def validate_options(start_offset: int | None, run_type: str, resume: bool) -> None:
+    """Validate --start-offset constraints; sys.exit on error."""
+    if start_offset is None:
+        return
+    if start_offset < 0:
+        echo_error("--start-offset must be non-negative")
+        sys.exit(ExitCode.CONFIG_ERROR)
+    if run_type != "incremental":
+        echo_error("--start-offset requires --run-type=incremental")
+        sys.exit(ExitCode.CONFIG_ERROR)
+    if resume:
+        echo_error("--start-offset and --resume cannot be used together")
+        sys.exit(ExitCode.CONFIG_ERROR)
+
+
+def build_run_options(
+    run_type: str,
+    resume: bool,
+    start_offset: int | None,
+    limit: int | None,
+    input_csv: str | None,
+    filter_column: str | None,
+    filter_field: str | None,
+    dry_run: bool,
+    vacuum_after_run: bool | None,
+    vacuum_retention_days: int | None,
+    debug: bool,
+    use_cached_bronze: bool,
+    cached_bronze_date: str | None,
+    cached_bronze_path: str | None,
+) -> RunOptions:
+    """Build RunOptions from CLI parameters."""
+    return RunOptions(
+        run_type=run_type,
+        resume=resume,
+        start_offset=start_offset,
+        limit=limit,
+        dry_run=dry_run,
+        input_csv=input_csv,
+        filter_column=filter_column,
+        filter_field=filter_field,
+        vacuum_after_run=vacuum_after_run if vacuum_after_run else None,
+        vacuum_retention_days=vacuum_retention_days,
+        log_level="DEBUG" if debug else "INFO",
+        use_cached_bronze=use_cached_bronze,
+        cached_bronze_path=cached_bronze_path,
+        cached_bronze_date=cached_bronze_date,
+    )
+
+
+def execute_run(
+    pipeline: str,
+    options: RunOptions,
+    health_server: bool,
+    health_port: int,
+) -> RunResult:
+    """Execute run and always flush metrics at command boundary."""
+    coro = _run_pipeline_async(
+        pipeline,
+        options,
+        health_server_enabled=health_server,
+        health_port=health_port,
+    )
+    try:
+        return asyncio.run(coro)
+    finally:
+        push_metrics_to_gateway(pipeline_name=pipeline)
+        if getattr(coro, "cr_frame", None) is not None:
+            coro.close()
+
+
+def handle_cli_failure(
+    exc: BaseException,
+    *,
+    pipeline: str,
+    reason_code: str,
+) -> None:
+    """Handle CLI failures with consistent reason_code semantics."""
+    if reason_code.startswith("CLI_CLEANUP_PREVIEW"):
+        if isinstance(exc, BioETLError):
+            echo_error(
+                "Error previewing cleanup",
+                (
+                    f"{exc} "
+                    f"(reason_code={reason_code}, pipeline={pipeline}, "
+                    f"error_type={type(exc).__name__})"
+                ),
+            )
+            return
+        echo_error(
+            "Error previewing cleanup",
+            (
+                f"{exc} "
+                f"(reason_code={reason_code}, pipeline={pipeline}, "
+                f"error_type={type(exc).__name__})"
+            ),
+        )
+        return
+
+    if isinstance(exc, PipelineNotFoundError):
+        echo_error("Pipeline not found", str(exc))
+        sys.exit(ExitCode.CONFIG_ERROR)
+    if isinstance(exc, BioETLError):
+        echo_error(
+            "Pipeline execution failed with domain error",
+            (
+                f"{exc} "
+                f"(reason_code={reason_code}, pipeline={pipeline}, "
+                f"error_type={type(exc).__name__})"
+            ),
+        )
+        sys.exit(ExitCode.FAIL)
+    if isinstance(exc, KeyboardInterrupt):
+        echo_warning("Pipeline interrupted by user (Ctrl+C)")
+        sys.exit(ExitCode.SIGINT)
+
+    echo_error(
+        "Unexpected error during pipeline execution",
+        (
+            f"{exc} "
+            f"(reason_code={reason_code}, pipeline={pipeline}, "
+            f"error_type={type(exc).__name__})"
+        ),
+    )
+    sys.exit(ExitCode.FAIL)
+
+
 def _map_status_to_exit_code(
     status: PipelineRunResult, error_type: str | None
 ) -> ExitCode:
@@ -282,17 +409,7 @@ def run(
         cached_bronze_date: Cached bronze date.
         cached_bronze_path: File path for cached bronze.
     """
-    # Validate --start-offset constraints
-    if start_offset is not None:
-        if start_offset < 0:
-            echo_error("--start-offset must be non-negative")
-            sys.exit(ExitCode.CONFIG_ERROR)
-        if run_type != "incremental":
-            echo_error("--start-offset requires --run-type=incremental")
-            sys.exit(ExitCode.CONFIG_ERROR)
-        if resume:
-            echo_error("--start-offset and --resume cannot be used together")
-            sys.exit(ExitCode.CONFIG_ERROR)
+    validate_options(start_offset, run_type, resume)
 
     # Handle confirmation for destructive operations (CLI responsibility)
     try:
@@ -302,88 +419,68 @@ def run(
     except click.Abort:
         raise
     except BioETLError as exc:
-        echo_error(
-            "Error previewing cleanup",
-            (
-                f"{exc} "
-                f"(reason_code=CLI_CLEANUP_PREVIEW_ERROR, pipeline={pipeline}, "
-                f"error_type={type(exc).__name__})"
-            ),
+        handle_cli_failure(
+            exc,
+            pipeline=pipeline,
+            reason_code="CLI_CLEANUP_PREVIEW_ERROR",
         )
         return
     except Exception as exc:
-        echo_error(
-            "Error previewing cleanup",
-            (
-                f"{exc} "
-                f"(reason_code=CLI_CLEANUP_PREVIEW_UNEXPECTED_ERROR, pipeline={pipeline}, "
-                f"error_type={type(exc).__name__})"
-            ),
+        # reason_code=CLI_CLEANUP_PREVIEW_UNEXPECTED_ERROR
+        handle_cli_failure(
+            exc,
+            pipeline=pipeline,
+            reason_code="CLI_CLEANUP_PREVIEW_UNEXPECTED_ERROR",
         )
         return
     if not should_continue:
         return
 
-    # Build options using application-layer RunOptions
-    options = RunOptions(
+    options = build_run_options(
         run_type=run_type,
         resume=resume,
         start_offset=start_offset,
         limit=limit,
-        dry_run=dry_run,
         input_csv=input_csv,
         filter_column=filter_column,
         filter_field=filter_field,
-        vacuum_after_run=vacuum_after_run if vacuum_after_run else None,
+        dry_run=dry_run,
+        vacuum_after_run=vacuum_after_run,
         vacuum_retention_days=vacuum_retention_days,
-        log_level="DEBUG" if debug else "INFO",
+        debug=debug,
         use_cached_bronze=use_cached_bronze,
-        cached_bronze_path=cached_bronze_path,
         cached_bronze_date=cached_bronze_date,
+        cached_bronze_path=cached_bronze_path,
     )
 
     # Display health server info
     echo_health_server_info(health_server, health_port)
 
     # Run pipeline via service
-    coro = _run_pipeline_async(
-        pipeline,
-        options,
-        health_server_enabled=health_server,
-        health_port=health_port,
-    )
     try:
-        result = asyncio.run(coro)
-    except PipelineNotFoundError as e:
-        echo_error("Pipeline not found", str(e))
-        sys.exit(ExitCode.CONFIG_ERROR)
+        result = execute_run(
+            pipeline=pipeline,
+            options=options,
+            health_server=health_server,
+            health_port=health_port,
+        )
+    except PipelineNotFoundError as exc:
+        handle_cli_failure(exc, pipeline=pipeline, reason_code="CLI_RUN_CONFIG_ERROR")
     except BioETLError as exc:
-        echo_error(
-            "Pipeline execution failed with domain error",
-            (
-                f"{exc} "
-                f"(reason_code=CLI_RUN_DOMAIN_ERROR, pipeline={pipeline}, "
-                f"error_type={type(exc).__name__})"
-            ),
+        handle_cli_failure(exc, pipeline=pipeline, reason_code="CLI_RUN_DOMAIN_ERROR")
+    except KeyboardInterrupt as exc:
+        handle_cli_failure(
+            exc,
+            pipeline=pipeline,
+            reason_code="CLI_RUN_SIGINT",
         )
-        sys.exit(ExitCode.FAIL)
-    except KeyboardInterrupt:
-        echo_warning("Pipeline interrupted by user (Ctrl+C)")
-        sys.exit(ExitCode.SIGINT)
     except Exception as exc:
-        echo_error(
-            "Unexpected error during pipeline execution",
-            (
-                f"{exc} "
-                f"(reason_code=CLI_RUN_UNEXPECTED_ERROR, pipeline={pipeline}, "
-                f"error_type={type(exc).__name__})"
-            ),
+        # reason_code=CLI_RUN_UNEXPECTED_ERROR
+        handle_cli_failure(
+            exc,
+            pipeline=pipeline,
+            reason_code="CLI_RUN_UNEXPECTED_ERROR",
         )
-        sys.exit(ExitCode.FAIL)
-    finally:
-        push_metrics_to_gateway(pipeline_name=pipeline)
-        if getattr(coro, "cr_frame", None) is not None:
-            coro.close()
 
     # Map status to exit code and output result
     exit_code = _map_status_to_exit_code(result.status, result.error_type)
@@ -396,3 +493,4 @@ def run(
 _get_runner_logger = get_runner_logger
 _handle_destructive_run_confirmation = handle_destructive_run_confirmation
 _preview_cleanup = show_cleanup_preview
+_validate_start_offset = validate_options

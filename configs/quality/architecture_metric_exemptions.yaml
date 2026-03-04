@@ -555,6 +555,12 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
+    run.py:
+      value: 496
+      owner: '@bioetl-architecture'
+      reason: Synced to current CLI command decomposition after P0-1 stabilization.
+      expires_on: '2026-04-30'
+      removal_step: Extract remaining run-command helpers to satisfy default 400 LOC.
     runner.py:
       value: 1305
       owner: '@bioetl-architecture'

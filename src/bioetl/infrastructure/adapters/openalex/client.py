@@ -28,8 +28,8 @@ from httpx import HTTPStatusError, RequestError
 from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
-from bioetl.infrastructure.adapters.openalex.client_helpers_mixin import (
-    _OpenAlexAdapterHelpersMixin,
+from bioetl.infrastructure.adapters.openalex.client_helpers_adapter_mixin import (
+    OpenAlexAdapterHelpersMixin,
 )
 from bioetl.infrastructure.adapters.openalex.fallback import TitleFallbackHandler
 
@@ -57,7 +57,7 @@ OPENALEX_RUNTIME_ERRORS = (
 
 
 @dataclass
-class OpenAlexAdapter(_OpenAlexAdapterHelpersMixin, BaseHttpAdapter):
+class OpenAlexAdapter(OpenAlexAdapterHelpersMixin, BaseHttpAdapter):
     """OpenAlex data source adapter.
 
     Inherits from BaseHttpAdapter for standardized lifecycle management

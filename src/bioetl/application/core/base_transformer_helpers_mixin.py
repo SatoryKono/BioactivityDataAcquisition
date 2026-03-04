@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import datetime
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, TypeVar, cast
+from typing import TYPE_CHECKING, Protocol, TypeVar, cast
 
 import orjson
 
@@ -16,7 +16,27 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
 
 T = TypeVar("T", bound="BaseEntity")
+TEntity_co = TypeVar("TEntity_co", bound="BaseEntity", covariant=True)
 ScalarValue = str | int | float | bool | None
+
+
+class _EntityFactory(Protocol[TEntity_co]):
+    """Constructor protocol for entity dataclasses with lineage kwargs."""
+
+    def __call__(
+        self,
+        *,
+        entity_id: EntityID,
+        content_hash: ContentHash,
+        run_id: object,
+        run_type: object,
+        source_batch_id: object | None,
+        ingestion_ts: datetime.datetime,
+        _index: int,
+        **business_data: object,
+    ) -> TEntity_co:
+        """Create and return an entity instance."""
+        ...
 
 
 class _BaseTransformerRecordHelpersMixin:
@@ -29,12 +49,12 @@ class _BaseTransformerRecordHelpersMixin:
             return None
 
         if isinstance(value, dict):
-            typed_value = cast("dict[str, object]", value)
-            return _BaseTransformerRecordHelpersMixin._serialize_dict(typed_value)
+            typed_dict = cast("dict[str, object]", value)
+            return _BaseTransformerRecordHelpersMixin._serialize_dict(typed_dict)
 
         if isinstance(value, list):
-            typed_value = cast("list[object]", value)
-            return _BaseTransformerRecordHelpersMixin._serialize_list(typed_value)
+            typed_list = cast("list[object]", value)
+            return _BaseTransformerRecordHelpersMixin._serialize_list(typed_list)
 
         return cast("ScalarValue", value)
 
@@ -157,7 +177,8 @@ class _BaseTransformerRecordHelpersMixin:
         **business_data: object,
     ) -> T:
         """Create a domain entity with lineage metadata."""
-        return entity_class(
+        entity_factory = cast("_EntityFactory[T]", entity_class)
+        return entity_factory(
             entity_id=EntityID(entity_id),
             content_hash=ContentHash(content_hash),
             run_id=context.run_id,

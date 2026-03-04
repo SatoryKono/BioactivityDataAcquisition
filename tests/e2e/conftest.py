@@ -13,17 +13,21 @@ E2E тесты используют локальное файловое хран
 
 from __future__ import annotations
 
+import asyncio
 import os
+from dataclasses import replace
 from collections.abc import Generator
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
+import httpx
 import pytest
 from deltalake import DeltaTable
 
 from bioetl.domain.context import PipelineRunContext
 from bioetl.domain.exceptions.network import ExternalServiceError
+from bioetl.domain.resilience import RetryConfig
 from bioetl.domain.types import RunType
 
 # Default timeout for E2E tests (seconds)
@@ -38,6 +42,17 @@ _TRANSIENT_EXTERNAL_ERROR_MARKERS: tuple[str, ...] = (
     "504",
     "timeout",
 )
+_TRANSIENT_HTTP_STATUS_CODES: frozenset[int] = frozenset({429, 500, 502, 503, 504})
+_E2E_RETRY_CONFIG = RetryConfig(
+    max_attempts=3,
+    multiplier=2.0,
+    base_delay=0.25,
+    max_delay=1.0,
+    jitter_range=(0.0, 0.0),
+    retryable_statuses=_TRANSIENT_HTTP_STATUS_CODES,
+    jitter_seed=20260304,
+)
+_E2E_SKIP_PREFIX = "E2E_SKIP"
 
 
 _E2E_VCR_CASSETTE_DIR_BY_TEST: dict[str, str] = {
@@ -274,22 +289,73 @@ def create_test_context(
 
 def _is_transient_external_error(exc: ExternalServiceError) -> bool:
     """Return True when ExternalServiceError is likely upstream/transient."""
+    if exc.status_code in _TRANSIENT_HTTP_STATUS_CODES:
+        return True
     message = str(exc).lower()
     return any(marker in message for marker in _TRANSIENT_EXTERNAL_ERROR_MARKERS)
 
 
+def _is_transient_http_status_error(exc: httpx.HTTPStatusError) -> bool:
+    """Return True when HTTPStatusError is likely upstream/transient."""
+    return exc.response.status_code in _TRANSIENT_HTTP_STATUS_CODES
+
+
+def build_e2e_skip_reason(
+    reason_code: str,
+    *,
+    pipeline_name: str,
+    detail: str,
+) -> str:
+    """Build deterministic skip reason message for CI classification."""
+    return f"{_E2E_SKIP_PREFIX}[{reason_code}] pipeline={pipeline_name}; {detail}"
+
+
 async def run_pipeline_or_skip_transient(context: PipelineRunContext) -> Any:
-    """Run pipeline and skip current test on transient upstream failures."""
+    """Run pipeline with deterministic retries; skip on transient exhaustion."""
     from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 
-    runner = bootstrap_pipeline_runner(context)
-    try:
-        await runner.run()
-    except ExternalServiceError as exc:
-        if _is_transient_external_error(exc):
-            pytest.skip(f"Transient upstream/API error during E2E execution: {exc}")
-        raise
-    return runner
+    transient_exc: Exception | None = None
+    for attempt in range(_E2E_RETRY_CONFIG.max_attempts):
+        run_context = context if attempt == 0 else replace(context, run_id=uuid4())
+        runner = bootstrap_pipeline_runner(run_context)
+        try:
+            await runner.run()
+            return runner
+        except ExternalServiceError as exc:
+            if not _is_transient_external_error(exc):
+                raise
+            transient_exc = exc
+        except httpx.HTTPStatusError as exc:
+            if not _is_transient_http_status_error(exc):
+                raise
+            transient_exc = exc
+
+        if _E2E_RETRY_CONFIG.is_last_attempt(attempt):
+            reason_code = "INFRA_FLAKY_UPSTREAM"
+            if isinstance(transient_exc, ExternalServiceError):
+                if transient_exc.status_code == 429:
+                    reason_code = "INFRA_FLAKY_429"
+            elif (
+                isinstance(transient_exc, httpx.HTTPStatusError)
+                and transient_exc.response.status_code == 429
+            ):
+                reason_code = "INFRA_FLAKY_429"
+            pytest.skip(
+                build_e2e_skip_reason(
+                    reason_code,
+                    pipeline_name=context.pipeline_name,
+                    detail=(
+                        f"transient upstream error after "
+                        f"{_E2E_RETRY_CONFIG.max_attempts} attempts: {transient_exc}"
+                    ),
+                )
+            )
+
+        delay = _E2E_RETRY_CONFIG.calculate_delay(attempt, url=context.pipeline_name)
+        await asyncio.sleep(delay)
+
+    msg = "run_pipeline_or_skip_transient exhausted without terminal decision"
+    raise RuntimeError(msg)
 
 
 # ============================================================================
