@@ -181,26 +181,7 @@ if TYPE_CHECKING:
 
 
 class PipelineFactoryConfig(NamedTuple):
-    """Configuration for creating a pipeline factory.
-
-    This is a value object that holds all metadata needed to create a
-    GenericPipelineFactory instance.
-
-    Attributes:
-        pipeline_name: Unique identifier for the pipeline (e.g., "chembl_activity")
-        provider: Data provider name (e.g., "chembl", "pubchem").
-            Used for transformer metadata (content hash, entity ID, tracing).
-        transformer_class: Transformer class for Bronze→Silver transformation
-        silver_schema: PyArrow schema for Silver layer validation
-        gold_schema: Pandera schema for Gold layer validation (required)
-        pandera_silver_schema: Pandera DataFrameModel class for Silver validation.
-            If provided, PanderaSilverValidator is created and injected into
-            SilverWriter for pre-write validation.
-        data_source_provider: Override provider name for DataSourceRegistry lookup.
-            When set, data source is created using this provider name instead of
-            ``provider``. Use when the ProviderRegistry key differs from the
-            transformer provider (e.g., "uniprot_idmapping" vs "uniprot").
-    """
+    """Value object describing one pipeline factory registration."""
 
     pipeline_name: str
     provider: str
@@ -219,6 +200,12 @@ class _SchemaBuilder(Protocol):
     def to_schema(cls) -> object:
         """Materialize schema representation."""
         ...
+
+
+class _ResolvedSchema(Protocol):
+    """Protocol for resolved schema objects exposing columns mapping."""
+
+    columns: dict[str, object]
 
 
 # Consolidated pipeline definitions - single source of truth
@@ -429,7 +416,7 @@ def _schema_columns(
         raise ValueError(f"Schema {schema_class!r} does not expose to_schema()")
     try:
         schema_builder = cast("_SchemaBuilder", schema_class)
-        schema = schema_builder.to_schema()
+        schema = cast(_ResolvedSchema, schema_builder.to_schema())
     except (
         AttributeError,
         TypeError,

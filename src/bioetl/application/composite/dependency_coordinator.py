@@ -299,6 +299,7 @@ class DependencyCoordinatorService:
                         key_filter=dependency.key_filter,
                         error=str(e),
                         error_type=type(e).__name__,
+                        reason_code="key_filter_apply_failed",
                     )
 
             self._logger.info(
@@ -334,6 +335,7 @@ class DependencyCoordinatorService:
                 source_table=source_config.silver_table,
                 error=str(e),
                 error_type=type(e).__name__,
+                reason_code="chained_dependency_read_failed",
             )
             raise ValueError(
                 f"Failed to read keys for chained dependency '{dependency.pipeline}' "

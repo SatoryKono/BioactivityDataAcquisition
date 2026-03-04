@@ -10,7 +10,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Generic, TypeVar, cast
+from typing import TYPE_CHECKING, Generic, Protocol, TypeVar, cast
 
 from bioetl.application.core.runner import PipelineRunner
 from bioetl.composition.bootstrap_contexts import DQConfigsContext, DQOutputPathsContext
@@ -55,7 +55,6 @@ from bioetl.infrastructure.config import (
 from bioetl.infrastructure.config.pipeline_config_loader import PipelineConfigLoader
 
 if TYPE_CHECKING:
-    import pandera
     import pyarrow as pa
     from pydantic import BaseModel
 
@@ -84,6 +83,15 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
+
+
+class _SchemaBuilder(Protocol):
+    """Protocol for schema classes exposing ``to_schema``."""
+
+    @classmethod
+    def to_schema(cls) -> object:
+        """Materialize schema representation."""
+        ...
 
 
 __all__ = [
@@ -131,8 +139,8 @@ class GenericPipelineFactory(Generic[TPipeline]):
         pipeline_class: type[TPipeline],
         provider: str,
         silver_schema: pa.Schema | None = None,
-        gold_schema: type[pandera.DataFrameModel] | None = None,
-        pandera_silver_schema: type[pandera.DataFrameModel] | None = None,
+        gold_schema: object | None = None,
+        pandera_silver_schema: object | None = None,
         data_source_creator: DataSourceCreator | None = None,
         transformer_class: type[BaseTransformer] | None = None,
     ) -> None:
@@ -413,8 +421,8 @@ def create_pipeline_factory(
     pipeline_class: type[TPipeline],
     provider: str,
     silver_schema: pa.Schema | None = None,
-    gold_schema: type[pandera.DataFrameModel] | None = None,
-    pandera_silver_schema: type[pandera.DataFrameModel] | None = None,
+    gold_schema: object | None = None,
+    pandera_silver_schema: object | None = None,
     transformer_class: type[BaseTransformer] | None = None,
 ) -> GenericPipelineFactory[TPipeline]:
     """Convenience function for creating pipeline factories.
@@ -624,7 +632,7 @@ def create_pipeline_with_services(
     dq_monitor: DQMonitorPort | None = None,
     metrics: MetricsPort | None = None,
     cached_bronze: CachedBronzeContext | None = None,
-    pandera_silver_schema: type[pandera.DataFrameModel] | None = None,
+    pandera_silver_schema: object | None = None,
 ) -> BasePipeline:
     """Create pipeline instance with services.
 
@@ -665,7 +673,9 @@ def create_pipeline_with_services(
             PanderaSilverValidator,
         )
 
-        silver_validator = PanderaSilverValidator(pandera_silver_schema.to_schema())
+        schema_builder = cast(_SchemaBuilder, pandera_silver_schema)
+        typed_schema = cast("pa.DataFrameSchema | None", schema_builder.to_schema())
+        silver_validator = PanderaSilverValidator(typed_schema)
 
     # Create RunContext with versioning metadata for MetadataCoordinator
     run_context = RunContext.create(
@@ -737,7 +747,7 @@ def assemble_runner(
     pipeline: BasePipeline,
     observability: ObservabilityBundle,
     silver_schema: pa.Schema | None,
-    gold_schema: type[pandera.DataFrameModel],
+    gold_schema: object,
     strict_gold_validation: bool,
     yaml_config: PipelineYamlConfig | None = None,
 ) -> PipelineRunner:

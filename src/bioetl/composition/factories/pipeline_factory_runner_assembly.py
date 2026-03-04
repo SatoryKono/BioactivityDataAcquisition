@@ -33,7 +33,7 @@ def assemble_runner_impl(
     pipeline: BasePipeline,
     observability: ObservabilityBundle,
     silver_schema: pa.Schema | None,
-    gold_schema: type[pandera.DataFrameModel],
+    gold_schema: object,
     strict_gold_validation: bool,
     yaml_config: PipelineYamlConfig | None = None,
     dq_configs_extractor: Callable[
@@ -130,7 +130,7 @@ def assemble_runner_impl(
     batch_executor = ServicesBuilder.create_batch_executor_from_pipeline(
         pipeline=pipeline,
         silver_schema=silver_schema,
-        gold_schema=gold_schema,
+        gold_schema=cast("type[pandera.DataFrameModel]", gold_schema),
         checkpoint_manager=checkpoint_manager,
         shutdown_signal=pipeline.shutdown_signal,
         strict_gold_validation=strict_gold_validation,

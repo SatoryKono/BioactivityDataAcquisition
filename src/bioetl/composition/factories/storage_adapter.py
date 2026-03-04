@@ -15,7 +15,7 @@ from __future__ import annotations
 import asyncio
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, ClassVar, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, cast
 
 from bioetl.domain.contracts.gold.composite import (
     CompositeMoleculeGoldSchema,
@@ -30,6 +30,8 @@ from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
+
+    from pandera.polars import DataFrameSchema
 
     from bioetl.domain.config import KeyNullabilityRule
     from bioetl.domain.models.metadata import SourceMetadata
@@ -217,7 +219,7 @@ class StorageAdapter:
         await self.gold.write_gold(
             table_name=table_name,
             records=records,
-            schema=schema,
+            schema=cast("DataFrameSchema", schema),
             primary_keys=primary_keys,
             mode=mode,
             scd_config=scd_config,
@@ -305,7 +307,7 @@ class StorageAdapter:
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
-        schema: DataFrameSchema | None = None,  # type: ignore[type-arg]
+        schema: object | None = None,
     ) -> None:
         """Write merged records to Gold layer without Pandera schema.
 
