@@ -168,4 +168,100 @@ interactions:
     status:
       code: 429
       message: ''
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Host:
+      - api.semanticscholar.org
+      User-Agent:
+      - BioETL/1.0
+    method: GET
+    uri: https://api.semanticscholar.org/graph/v1/paper/search?query=test&limit=1&fields=paperId
+  response:
+    body:
+      string: '{"message": "Too Many Requests. Please wait and try again or apply
+        for a key for higher rate limits. https://www.semanticscholar.org/product/api#api-key-form",
+        "code": "429"}'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '174'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 04 Mar 2026 06:24:47 GMT
+      Via:
+      - 1.1 d7bebac50c7ad62389565ea65a2e0944.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - RAJuq-U04R8_X80RN9qYvs93t-U4dTGBr7v_OwHRdHaw6dhr8PMSRQ==
+      X-Amz-Cf-Pop:
+      - LHR82-P1
+      X-Cache:
+      - Error from cloudfront
+      x-amz-apigw-id:
+      - Zr13bGp7vHcEGEg=
+      x-amzn-ErrorType:
+      - TooManyRequestsException
+      x-amzn-RequestId:
+      - 6a713bcb-1b30-48eb-bf32-d9b105e54c4e
+    status:
+      code: 429
+      message: ''
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Host:
+      - api.semanticscholar.org
+      User-Agent:
+      - BioETL/1.0
+    method: GET
+    uri: https://api.semanticscholar.org/graph/v1/paper/search?query=CRISPR+gene+editing&fields=paperId%2CexternalIds%2Ctitle%2Cabstract%2Cyear%2CpublicationDate%2Cvenue%2Cauthors%2Cauthors.externalIds%2Cauthors.hIndex%2Cauthors.authorId%2CcitationCount%2CreferenceCount%2CisOpenAccess%2CopenAccessPdf%2Ctldr%2CfieldsOfStudy%2CpublicationTypes%2Cjournal&offset=0&limit=1
+  response:
+    body:
+      string: '{"message": "Too Many Requests. Please wait and try again or apply
+        for a key for higher rate limits. https://www.semanticscholar.org/product/api#api-key-form",
+        "code": "429"}'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '174'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 04 Mar 2026 06:24:57 GMT
+      Via:
+      - 1.1 1d169b6c2ebf6eb3b67f4ca6479df76c.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - gPABA3VhaxorUXLnVD-sT-IYBUkayE5JP_GRusxUzF-Kthcd37i30A==
+      X-Amz-Cf-Pop:
+      - LHR82-P1
+      X-Cache:
+      - Error from cloudfront
+      x-amz-apigw-id:
+      - Zr14-EvaPHcETNA=
+      x-amzn-ErrorType:
+      - TooManyRequestsException
+      x-amzn-RequestId:
+      - 3fd99f15-2c52-4d5e-868e-578403c118d4
+    status:
+      code: 429
+      message: ''
 version: 1
