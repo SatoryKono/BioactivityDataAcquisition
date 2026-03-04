@@ -258,7 +258,7 @@ async def test_search_by_title_error(pubmed_adapter: PubMedAdapter, mock_logger)
     # This should trigger the exception block in _search_by_title
     # which returns [] and logs debug
     with respx.mock(base_url=ENTREZ_API_BASE) as respx_mock:
-        respx_mock.get("esearch.fcgi").mock(side_effect=Exception("search error"))
+        respx_mock.get("esearch.fcgi").mock(side_effect=RuntimeError("search error"))
 
         async with pubmed_adapter.http_client:
             results = await pubmed_adapter._search_by_title("some title")

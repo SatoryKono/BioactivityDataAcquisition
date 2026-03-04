@@ -46,7 +46,10 @@ class IDMappingPort(Protocol):
         from_db: str,
         to_db: str,
         ids: list[str],
-    ) -> Mapping[str, dict[str, Any] | None]:
+    ) -> Mapping[
+        str,
+        dict[str, Any] | None,  # Any: port contract allows heterogeneous record values
+    ]:  # Any: port contract allows heterogeneous record values
         """Map identifiers from source database to target database.
 
         Args:

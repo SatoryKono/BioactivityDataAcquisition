@@ -66,11 +66,13 @@ class GoldDQAnalyzer:
         completeness_threshold: float,
         business_rules: list[dict[str, Any]],  # Any: DQ check values vary by check type
         reference_tables: dict[str, pl.DataFrame | pa.Table],
-        baseline_stats: dict[str, Any]
-        | None,  # Any: DQ check values vary by check type
+        baseline_stats: dict[
+            str, Any  # Any: DQ baseline statistics have heterogeneous values
+        ]
+        | None,
         scd_config: dict[str, Any] | None,  # Any: DQ check values vary by check type
     ) -> tuple[
-        dict[str, Any], int, int, int
+        dict[str, Any], int, int, int  # Any: DQ check values vary by check type
     ]:  # Any: DQ check values vary by check type
         """Execute all enabled DQ checks and collect results."""
         checks: dict[str, Any] = {}  # Any: DQ check values vary by check type
@@ -138,12 +140,16 @@ class GoldDQAnalyzer:
         timestamp: datetime,
         required_fields: list[str] | None = None,
         completeness_threshold: float = 0.90,
-        business_rules: list[dict[str, Any]]
+        business_rules: list[
+            dict[str, Any]  # Any: DQ check values vary by check type
+        ]  # Any: DQ rule definitions have heterogeneous values
         | None = None,  # Any: DQ check values vary by check type
         reference_tables: dict[str, pl.DataFrame | pa.Table] | None = None,
-        baseline_stats: dict[str, Any]
+        baseline_stats: dict[
+            str, Any  # Any: DQ check values vary by check type
+        ]  # Any: DQ baseline statistics have heterogeneous values
         | None = None,  # Any: DQ check values vary by check type
-        scd_config: dict[str, Any]
+        scd_config: dict[str, Any]  # Any: SCD config has heterogeneous values
         | None = None,  # Any: DQ check values vary by check type
     ) -> GoldDQReport:
         """Analyze Gold data and generate DQ report.

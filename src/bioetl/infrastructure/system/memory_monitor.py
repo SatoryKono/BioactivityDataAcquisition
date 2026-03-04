@@ -80,7 +80,9 @@ class MemoryMonitor:
     _last_batch_size: int = field(default=100, init=False)
     _consecutive_pressure_count: int = field(default=0, init=False)
     # Any: optional psutil.Proces...
-    _cached_process: Any = field(default=None, init=False)
+    _cached_process: Any = field(  # Any: type varies at runtime
+        default=None, init=False
+    )  # Any: psutil.Process cached; optional dependency
 
     def __post_init__(self) -> None:
         """Initialize memory monitor with lazy psutil detection.
@@ -143,7 +145,7 @@ class MemoryMonitor:
         """
         import resource
 
-        resource_module: Any = resource
+        resource_module: Any = resource  # Any: resource module unavailable on Windows
 
         # Get process memory usage (Unix-only attributes)
         rusage = resource_module.getrusage(resource_module.RUSAGE_SELF)

@@ -15,14 +15,18 @@ from bioetl.infrastructure.schemas.pipeline_contract_policy import (
 _CONFIGS_ROOT = Path("configs")
 
 
-def _load_base_contract_defaults() -> dict[str, Any]:
+def _load_base_contract_defaults() -> dict[
+    str, Any  # Any: YAML config has heterogeneous values
+]:  # Any: YAML config has heterogeneous values
     """Load contract defaults from consolidated base config if present."""
     base_path = _CONFIGS_ROOT / "base" / "pipeline.yaml"
     if not base_path.exists():
         return {}
 
     with open(base_path, encoding="utf-8") as f:
-        base_raw: dict[str, Any] = yaml.safe_load(f) or {}
+        base_raw: dict[str, Any] = (  # Any: YAML config has heterogeneous values
+            yaml.safe_load(f) or {}
+        )  # Any: YAML config has heterogeneous values
 
     defaults = base_raw.get("contract_defaults")
     return defaults if isinstance(defaults, dict) else {}
@@ -46,7 +50,9 @@ def load_pipeline_contract_policy(provider: str, entity: str) -> PipelineContrac
         raise ValueError(f"Contract policy file not found: {unified_entity_path}")
 
     with open(unified_entity_path, encoding="utf-8") as f:
-        unified_raw: dict[str, Any] = yaml.safe_load(f) or {}
+        unified_raw: dict[str, Any] = (  # Any: YAML config has heterogeneous values
+            yaml.safe_load(f) or {}
+        )  # Any: YAML config has heterogeneous values
 
     contracts_section = unified_raw.get("contracts")
     if not isinstance(contracts_section, dict):

@@ -429,7 +429,11 @@ class MetricsCollector:
     """
 
     # Any: optional Prometheus Co...
-    def __init__(self, pipeline_name: str, registry: Any = None) -> None:
+    def __init__(
+        self,
+        pipeline_name: str,
+        registry: Any = None,  # Any: Prometheus registry type varies
+    ) -> None:  # Any: Prometheus registry type varies
         """Initialize the metrics collector.
 
         Args:

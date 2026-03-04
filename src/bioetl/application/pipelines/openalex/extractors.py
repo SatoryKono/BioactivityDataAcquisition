@@ -361,7 +361,7 @@ def extract_topics(
 
 
 def extract_primary_topic(
-    primary_topic: dict[str, Any]
+    primary_topic: dict[str, Any]  # Any: untyped API JSON record
     | None,  # Any: untyped JSON fragment from OpenAlex API
 ) -> dict[str, Any] | None:  # Any: untyped JSON fragment from OpenAlex API
     """Extract single most relevant topic for a work.
@@ -428,7 +428,7 @@ def extract_grants(
 
 
 def extract_journal_info(
-    primary_location: dict[str, Any]
+    primary_location: dict[str, Any]  # Any: untyped API JSON record
     | None,  # Any: untyped JSON fragment from OpenAlex API
 ) -> dict[str, Any]:  # Any: untyped JSON fragment from OpenAlex API
     """Extract journal info (journal, issn, publisher) from primary_location.
@@ -564,7 +564,7 @@ def extract_mesh_terms(
 
 
 def extract_keywords(
-    keywords: list[dict[str, Any]]
+    keywords: list[dict[str, Any]]  # Any: untyped API JSON record
     | None,  # Any: untyped JSON fragment from OpenAlex API
 ) -> list[str]:
     """Extract keyword display names from keywords array.

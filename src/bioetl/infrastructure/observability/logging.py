@@ -101,7 +101,11 @@ class StructlogLogger:
         """
         return self._logger.info(_event, **kwargs)
 
-    def warning(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
+    def warning(
+        self,
+        _event: str,
+        **kwargs: Any,  # Any: structlog API
+    ) -> Any:  # Any: structlog API
         """Log a warning message.
 
         Args:
@@ -137,7 +141,11 @@ class StructlogLogger:
         """
         return self._logger.debug(_event, **kwargs)
 
-    def exception(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
+    def exception(
+        self,
+        _event: str,
+        **kwargs: Any,  # Any: structlog API
+    ) -> Any:  # Any: structlog API
         """Log an exception with traceback.
 
         Args:

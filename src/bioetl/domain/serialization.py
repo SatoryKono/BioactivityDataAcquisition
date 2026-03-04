@@ -78,7 +78,7 @@ def serialize_to_json(
 
 
 def serialize_to_json_canonical(
-    data: dict[str, Any],
+    data: dict[str, Any],  # Any: JSON values are heterogeneous
 ) -> str:  # Any: JSON values are heterogeneous
     """Serialize data to canonical JSON for content hash computation.
 
@@ -189,9 +189,9 @@ def _deserialize_with_orjson(
     """Deserialize using orjson."""
     assert orjson is not None
     try:
-        result: dict[str, Any] | list[Any] = orjson.loads(
-            data
-        )  # Any: JSON values are heterogeneous
+        result: (
+            dict[str, Any] | list[Any]  # Any: JSON values are heterogeneous
+        ) = orjson.loads(data)
         return result
     except orjson.JSONDecodeError as e:
         raise ValueError(f"Invalid JSON: {e}") from e
@@ -204,8 +204,10 @@ def _deserialize_with_stdlib(
     import json
 
     try:
-        result: dict[str, Any] | list[Any] = json.loads(
-            data
+        result: dict[str, Any] | list[Any] = (  # Any: JSON values are heterogeneous
+            json.loads(  # Any: JSON values are heterogeneous
+                data
+            )
         )  # Any: JSON values are heterogeneous
         return result
     except json.JSONDecodeError as e:

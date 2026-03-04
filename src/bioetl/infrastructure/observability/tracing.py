@@ -34,7 +34,12 @@ from bioetl.domain.ports import NoOpTracing
 
 # Store OTLP exporter class if available (for runtime use)
 # This avoids reassigning an imported type to None, which mypy strict rejects
-_OtlpExporterClass: type[Any] | None = None
+_OtlpExporterClass: (
+    type[
+        Any  # Any: OTel exporter class resolved at runtime
+    ]
+    | None
+) = None
 
 try:
     from opentelemetry import trace

@@ -87,7 +87,8 @@ class _BoundedIntVO(ValueObject[int]):
     _LABEL: str
 
     def _validate(
-        self, value: Any
+        self,
+        value: Any,  # Any: raw input value from API (str|int|float|None)
     ) -> int:  # Any: raw input from API (str|int|float|None)
         n = _coerce_int(value)
         if not self._MIN <= n <= self._MAX:
@@ -96,7 +97,8 @@ class _BoundedIntVO(ValueObject[int]):
 
     @classmethod
     def from_raw(
-        cls, raw: Any
+        cls,
+        raw: Any,  # Any: raw input value from API (str|int|float|None)
     ) -> _BoundedIntVO | None:  # Any: raw input from API (str|int|float|None)
         """Create from raw value; returns ``None`` on invalid input.
 
@@ -159,7 +161,8 @@ class _BoundedFloatVO(ValueObject[float]):
     _PRECISION: int = 10
 
     def _validate(
-        self, value: Any
+        self,
+        value: Any,  # Any: raw input value from API (str|int|float|None)
     ) -> float:  # Any: raw input from API (str|int|float|None)
         f = _coerce_float(value)
         if not self._MIN <= f <= self._MAX:
@@ -168,7 +171,8 @@ class _BoundedFloatVO(ValueObject[float]):
 
     @classmethod
     def from_raw(
-        cls, raw: Any
+        cls,
+        raw: Any,  # Any: raw input value from API (str|int|float|None)
     ) -> _BoundedFloatVO | None:  # Any: raw input from API (str|int|float|None)
         """Create from raw value; returns ``None`` on invalid input.
 

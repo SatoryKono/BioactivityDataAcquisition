@@ -25,7 +25,9 @@ RECORD_COUNT_CRITICAL_THRESHOLD = 0.50
 
 
 def check_statistical_profile(
-    df: pl.DataFrame, baseline_stats: dict[str, Any] | None
+    df: pl.DataFrame,
+    baseline_stats: dict[str, Any]  # Any: DQ check values vary by check type
+    | None,  # Any: DQ baseline statistics have heterogeneous values
 ) -> StatisticalProfileResult:
     """Compare statistics against baseline (MA30).
 
@@ -109,7 +111,9 @@ def check_statistical_profile(
 
 
 def check_anomaly_detection(
-    df: pl.DataFrame, baseline_stats: dict[str, Any] | None
+    df: pl.DataFrame,
+    baseline_stats: dict[str, Any]  # Any: DQ check values vary by check type
+    | None,  # Any: DQ baseline statistics have heterogeneous values
 ) -> AnomalyDetectionResult:
     """Detect anomalies using baseline comparison.
 

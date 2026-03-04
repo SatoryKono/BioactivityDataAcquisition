@@ -14,14 +14,13 @@ Implements DRY principle by extracting shared logic from entity transformers.
 from __future__ import annotations
 
 import dataclasses
-import datetime
 import time
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any, ClassVar, Protocol, TypeVar, runtime_checkable
 
-import orjson
-
+from bioetl.application.core.base_transformer_helpers_mixin import (
+    _BaseTransformerRecordHelpersMixin,
+)
 from bioetl.domain.ports import (
     DataNormalizationPort,
     MetricsPort,
@@ -123,7 +122,7 @@ class FilteredOutError(Exception):
         super().__init__(reason)
 
 
-class BaseTransformer(ABC):
+class BaseTransformer(_BaseTransformerRecordHelpersMixin, ABC):
     """Abstract base class for Bronze → Silver transformers.
 
     Implements Template Method pattern for unified transformation flow:
@@ -573,108 +572,6 @@ class BaseTransformer(ABC):
             record=record,
         )
 
-    @staticmethod
-    def serialize_json(value: Any) -> str | int | float | bool | None:  # Any: any JSON
-        """Serialize dict/list to JSON string or native type for Silver layer.
-
-        Empty collections → None; single-element lists → unwrapped native type;
-        multi-element lists/dicts → JSON string (orjson with OPT_SORT_KEYS).
-
-        Args:
-            value: Input value.
-
-        Returns:
-            Serialized representation.
-        """
-        if value is None:
-            return None
-
-        if isinstance(value, dict):
-            return BaseTransformer._serialize_dict(value)
-
-        if isinstance(value, list):
-            return BaseTransformer._serialize_list(value)
-
-        # Non-collection types (str, int, float, bool): return as-is
-        return value  # type: ignore[no-any-return]
-
-    @staticmethod
-    def _serialize_dict(d: dict[str, Any]) -> str | None:  # Any: JSON values
-        if not d:
-            return None
-        return orjson.dumps(d, option=orjson.OPT_SORT_KEYS).decode("utf-8")
-
-    @staticmethod
-    def _serialize_list(lst: list[Any]) -> str | int | float | bool | None:  # Any: JSON
-        if not lst:
-            return None
-        if len(lst) == 1:
-            item = lst[0]
-            if isinstance(item, (dict, list)):
-                return (
-                    None
-                    if not item
-                    else orjson.dumps(item, option=orjson.OPT_SORT_KEYS).decode("utf-8")
-                )
-            return item  # type: ignore[no-any-return]
-        return orjson.dumps(lst, option=orjson.OPT_SORT_KEYS).decode("utf-8")
-
-    @staticmethod
-    def serialize_json_list(value: list[Any] | None) -> str | None:  # Any: JSON values
-        """Serialize list to JSON string without unwrapping single elements.
-
-        Unlike serialize_json(), this method always preserves the array format,
-        even for single-element lists. Used for fields like 'authors' where
-        the JSON array structure must be maintained.
-
-        Args:
-            value: List to serialize, or None.
-
-        Returns:
-            JSON array string, or None if input is None or empty list.
-
-        Example:
-            >>> serialize_json_list(["John Doe"])
-            '["John Doe"]'
-            >>> serialize_json_list(["John Doe", "Jane Smith"])
-            '["John Doe","Jane Smith"]'
-            >>> serialize_json_list([])
-            None
-
-        """
-        if value is None or len(value) == 0:
-            return None
-        json_bytes: bytes = orjson.dumps(value, option=orjson.OPT_SORT_KEYS)
-        return json_bytes.decode("utf-8")
-
-    @classmethod
-    def serialize_json_fields(
-        cls,
-        record: GoldRecord,
-        field_names: Sequence[str],
-    ) -> dict[str, str | int | float | bool | None]:
-        """Serialize multiple JSON fields at once.
-
-        Convenience method to reduce repetitive serialize_json() calls
-        in transformers with many nested JSON fields.
-
-        Args:
-            record: Source record dictionary.
-            field_names: Names of fields to serialize.
-
-        Returns:
-            Dictionary with serialized values (JSON strings, native types, or None).
-
-        Example:
-            >>> result = self.serialize_json_fields(record, [
-            ...     "molecule_hierarchy",
-            ...     "molecule_properties",
-            ...     "cross_references",
-            ... ])
-            # Returns: {"molecule_hierarchy": "{...}", "molecule_properties": "{...}", ...}
-        """
-        return {name: cls.serialize_json(record.get(name)) for name in field_names}
-
     def entity_to_silver_record(
         self,
         entity: Any,  # Any: generic domain entity; type varies by pipeline
@@ -715,165 +612,3 @@ class BaseTransformer(ABC):
             scoped.pop(field, None)
 
         return scoped
-
-    @staticmethod
-    def _normalize_lineage_value(field_name: str, value: Any) -> Any:
-        """Normalize lineage/meta field values after rename."""
-        if field_name == "run_id" and value is not None:
-            return str(value)
-        if field_name == "run_type" and value is not None:
-            return str(value.value)
-        if field_name == "source_batch_id":
-            return str(value) if value else None
-        if field_name == "ingestion_ts" and isinstance(value, datetime.datetime):
-            return value.isoformat()
-        return value
-
-    # ==================== Helper Methods ====================
-
-    @staticmethod
-    def _get_required_field(
-        record: BronzeRecord,
-        field: str,
-        *,
-        allow_empty: bool = False,
-    ) -> Any:  # Any: record field value type varies by field
-        """Extract and validate a required field from the record.
-
-        Args:
-            record: Bronze record dictionary.
-            field: Name of the required field.
-            allow_empty: If False, empty strings and empty collections raise error.
-
-        Returns:
-            Field value if present and valid.
-
-        Raises:
-            TransformationError: If field is missing or empty (when allow_empty=False).
-
-        """
-        value = record.get(field)
-        if value is None:
-            raise TransformationError(f"Missing required field: {field}", field=field)
-
-        if not allow_empty:
-            # Check for empty strings, lists, dicts
-            if isinstance(value, str) and not value.strip():
-                raise TransformationError(
-                    f"Required field is empty: {field}", field=field
-                )
-            if isinstance(value, (list, dict)) and len(value) == 0:
-                raise TransformationError(
-                    f"Required field is empty: {field}", field=field
-                )
-
-        return value
-
-    @staticmethod
-    def _extract_by_path(
-        record: BronzeRecord,
-        keys: Sequence[str],
-        default: Any = None,  # Any: caller-defined default type
-    ) -> Any:  # Any: nested dict value type unknown at compile time
-        """Safely extract a value from nested dictionaries using a sequence of keys.
-
-        Optimized version of _extract_nested that avoids string splitting.
-        Useful when paths are constant and can be pre-defined.
-
-        Args:
-            record: Bronze record dictionary.
-            keys: Sequence of keys to traverse.
-            default: Value to return if path is not found.
-
-        Returns:
-            Extracted value or default.
-
-        """
-        current: Any = record  # Any: traverses nested dicts
-        for key in keys:
-            if not isinstance(current, dict):
-                return default
-            current = current.get(key)
-            if current is None:
-                return default
-        return current
-
-    @staticmethod
-    def _extract_nested(
-        record: BronzeRecord,
-        path: str,
-        default: Any = None,  # Any: caller-defined default type
-    ) -> Any:  # Any: nested dict value type unknown at compile time
-        """Safely extract a value from nested dictionaries using dot notation.
-
-        Supports paths like "organism.taxonId" or "proteinDescription.recommendedName.fullName.value".
-
-        Args:
-            record: Bronze record dictionary.
-            path: Dot-separated path to the nested value (e.g., "a.b.c").
-            default: Value to return if path is not found.
-
-        Returns:
-            Extracted value or default if path doesn't exist or any intermediate is None.
-
-        Example:
-            >>> record = {"organism": {"taxonId": 9606}}
-            >>> BaseTransformer._extract_nested(record, "organism.taxonId")
-            9606
-            >>> BaseTransformer._extract_nested(record, "organism.name", "unknown")
-            'unknown'
-
-        """
-        keys = path.split(".")
-        return BaseTransformer._extract_by_path(record, keys, default)
-
-    def _create_entity(
-        self,
-        entity_class: type[T],
-        context: PipelineContext,
-        entity_id: str,
-        content_hash: str,
-        index: int,
-        **business_data: Any,  # Any: entity-specific fields vary by subclass
-    ) -> T:
-        """Create a domain entity with lineage metadata.
-
-        Unified entity creation that automatically adds lineage fields
-        from the pipeline context.
-
-        Args:
-            entity_class: The domain entity class to instantiate.
-            context: Pipeline context with run_id, run_type.
-            entity_id: Unique entity identifier.
-            content_hash: Content hash for versioning.
-            index: Sequential index of the record in the pipeline run.
-            **business_data: Entity-specific business data.
-
-        Returns:
-            Instantiated domain entity.
-
-        Raises:
-            ValueError: If entity validation fails.
-
-        Example:
-            >>> entity = self._create_entity(
-            ...     Activity,
-            ...     context,
-            ...     entity_id="chembl:activity:12345",
-            ...     content_hash="abc123...",
-            ...     index=0,
-            ...     activity_id="12345",
-            ...     molecule_chembl_id="CHEMBL25",
-            ... )
-
-        """
-        return entity_class(
-            entity_id=EntityID(entity_id),
-            content_hash=ContentHash(content_hash),
-            run_id=context.run_id,
-            run_type=context.run_type,
-            source_batch_id=None,
-            ingestion_ts=context.started_at,
-            _index=index,
-            **business_data,
-        )

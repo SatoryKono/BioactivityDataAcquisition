@@ -45,7 +45,7 @@ __all__ = [
 
 
 def extract_authors(
-    publication: dict[str, Any],
+    publication: dict[str, Any],  # Any: untyped API JSON record
 ) -> list[str]:  # Any: untyped JSON fragment from Crossref API
     """Extract author names from CrossRef publication.
 
@@ -92,7 +92,7 @@ def extract_authors(
 
 
 def extract_affiliations(
-    publication: dict[str, Any],
+    publication: dict[str, Any],  # Any: untyped API JSON record
 ) -> list[str]:  # Any: untyped JSON fragment from Crossref API
     """Extract unique affiliations from CrossRef publication.
 
@@ -137,7 +137,7 @@ def extract_affiliations(
 
 
 def extract_license_url(
-    publication: dict[str, Any],
+    publication: dict[str, Any],  # Any: untyped API JSON record
 ) -> str | None:  # Any: untyped JSON fragment from Crossref API
     """Extract first license URL from publication.
 
@@ -168,7 +168,7 @@ def extract_license_url(
 
 
 def extract_journal_info(
-    publication: dict[str, Any],
+    publication: dict[str, Any],  # Any: untyped API JSON record
 ) -> dict[str, Any]:  # Any: untyped JSON fragment from Crossref API
     """Extract journal information from publication.
 
@@ -202,7 +202,7 @@ def extract_journal_info(
 
 
 def extract_page_info(
-    publication: dict[str, Any],
+    publication: dict[str, Any],  # Any: untyped API JSON record
 ) -> dict[str, Any]:  # Any: untyped JSON fragment from Crossref API
     """Extract pagination information from publication.
 
@@ -237,7 +237,7 @@ def extract_page_info(
 
 
 def extract_dates(
-    publication: dict[str, Any],
+    publication: dict[str, Any],  # Any: untyped API JSON record
 ) -> dict[str, Any]:  # Any: untyped JSON fragment from Crossref API
     """Extract publication dates from date-parts fields.
 
@@ -281,7 +281,7 @@ def extract_dates(
 
 
 def extract_content_domain(
-    publication: dict[str, Any],
+    publication: dict[str, Any],  # Any: untyped API JSON record
 ) -> dict[str, Any]:  # Any: untyped JSON fragment from Crossref API
     """Extract content-domain metadata.
 
@@ -316,7 +316,7 @@ def extract_content_domain(
 
 
 def extract_issn_by_type(
-    publication: dict[str, Any],
+    publication: dict[str, Any],  # Any: untyped API JSON record
 ) -> dict[str, Any]:  # Any: untyped JSON fragment from Crossref API
     """Extract ISSN values by type (print/electronic).
 
@@ -366,7 +366,7 @@ def extract_issn_by_type(
 
 
 def extract_published_date(
-    publication: dict[str, Any],
+    publication: dict[str, Any],  # Any: untyped API JSON record
 ) -> str | None:  # Any: untyped JSON fragment from Crossref API
     """Extract 'published' date (canonical publication date).
 

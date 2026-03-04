@@ -121,7 +121,12 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
         return self
 
     # Any: standard __aexit__ sig...
-    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+    async def __aexit__(
+        self,
+        exc_type: Any,  # Any: __aexit__ protocol signature
+        exc_val: Any,  # Any: __aexit__ protocol signature
+        exc_tb: Any,  # Any: __aexit__ protocol signature
+    ) -> None:  # Any: adapter accepts varying types
         """Exit async context manager."""
         await self.close()
 
@@ -134,7 +139,11 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
         await self.close()
 
     # Any: generic executor wrapp...
-    async def _run_in_executor(self, func: Any, *args: Any) -> Any:
+    async def _run_in_executor(
+        self,
+        func: Any,  # Any: executor forwards arbitrary callable and args
+        *args: Any,  # Any: executor forwards arbitrary callable and args
+    ) -> Any:  # Any: adapter forwards arbitrary args
         """Run synchronous function in thread pool."""
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(self.thread_pool, func, *args)

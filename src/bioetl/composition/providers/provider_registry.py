@@ -95,7 +95,9 @@ class ProviderConfig:
     http_config: HttpConfig | None = None
     requires_http_client: bool = True
     requires_logger: bool = True
-    default_kwargs: dict[str, Any] = field(default_factory=dict)
+    default_kwargs: dict[
+        str, Any  # Any: provider kwargs vary by adapter
+    ] = field(default_factory=dict)
     custom_creator: AdapterCreator | None = None
     data_source_creator: DataSourceCreator | None = None
 
@@ -201,7 +203,12 @@ class ProviderRegistry:
             )
 
         # Standard creation logic
-        init_kwargs: dict[str, Any] = {**config.default_kwargs, **kwargs}
+        init_kwargs: dict[
+            str, Any  # Any: factory wiring; concrete types resolved at runtime
+        ] = {  # Any: factory wiring; concrete types resolved at runtime
+            **config.default_kwargs,
+            **kwargs,
+        }  # Any: factory wiring; concrete types resolved at runtime
 
         if config.requires_http_client:
             if http_client is None:

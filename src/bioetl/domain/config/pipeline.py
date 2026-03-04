@@ -68,7 +68,7 @@ class PipelineConfig:
     scd_config: dict[str, str] | None = None
 
     # Gold schema for validation
-    gold_schema: Any | None = None
+    gold_schema: Any | None = None  # Any: Pandera DataFrameModel class or instance
 
     def __post_init__(self) -> None:
         """Convert lists to tuples and validate configuration on creation."""

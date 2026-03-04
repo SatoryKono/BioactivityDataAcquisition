@@ -101,7 +101,7 @@ class AdapterErrorContext:
     error_type: ErrorType | None = None
     error_category: ErrorCategory | None = None
     retry_after: float | None = None
-    extra: dict[str, Any] = field(default_factory=dict)
+    extra: dict[str, Any] = field(default_factory=dict)  # Any: untyped API JSON record
 
 
 class ErrorService:
@@ -258,7 +258,7 @@ class ErrorService:
         provider: str,
         operation: str,
         error: Exception,
-        context: dict[str, Any] | None = None,
+        context: dict[str, Any] | None = None,  # Any: untyped API JSON record
     ) -> AdapterErrorContext:
         """Log error with unified format.
 
@@ -557,7 +557,7 @@ class ErrorService:
         error: Exception,
         provider: str,
         operation: str,
-        context: dict[str, Any] | None = None,
+        context: dict[str, Any] | None = None,  # Any: untyped API JSON record
     ) -> ExternalServiceError:
         """Handle error: log and wrap in one step.
 

@@ -7,8 +7,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
-from bioetl.domain.types import GoldRecord
-
 from bioetl.application.core.dict_transformers import (
     aggregate_nested_lists,
     extract_list_field,
@@ -19,6 +17,7 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
 from bioetl.domain.entities import Target
 from bioetl.domain.services import OrganismClassificationService
 from bioetl.domain.transformations import safe_int
+from bioetl.domain.types import GoldRecord
 from bioetl.domain.value_objects import TaxonomyId
 
 if TYPE_CHECKING:

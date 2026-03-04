@@ -11,17 +11,90 @@ interactions:
       User-Agent:
       - BioETL/1.0 (mailto:bioetl-test@example.com)
     method: GET
-    uri: https://api.openalex.org/works?mailto=bioetl-test%40example.com&filter=doi%3A10.1038%2Ftest0%7C10.1038%2Ftest1%7C10.1038%2Ftest2%7C10.1038%2Ftest3%7C10.1038%2Ftest4&per-page=5
+    uri: https://api.openalex.org/works?filter=doi%3A10.1038%2Ftest0%7C10.1038%2Ftest1%7C10.1038%2Ftest2%7C10.1038%2Ftest3%7C10.1038%2Ftest4&per-page=5
   response:
     body:
-      string: |
-        {
-          "meta": {"count": 0, "db_response_time_ms": 10, "page": null, "per_page": 5},
-          "results": []
-        }
+      string: "{\n  \"meta\": {\"count\": 0, \"db_response_time_ms\": 10, \"page\":
+        null, \"per_page\": 5},\n  \"results\": []\n}\n"
     headers:
       Content-Type:
       - application/json
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - api.openalex.org
+      User-Agent:
+      - BioETL/1.0 (mailto:bioetl-test@example.com)
+    method: GET
+    uri: https://api.openalex.org/works?filter=doi%3A10.1038%2Ftest0%7C10.1038%2Ftest1%7C10.1038%2Ftest2%7C10.1038%2Ftest3%7C10.1038%2Ftest4&per-page=5
+  response:
+    body:
+      string: '{"meta": {"count": 0, "db_response_time_ms": 7, "page": 1, "per_page":
+        5, "groups_count": null, "cost_usd": 0.0001}, "results": [], "group_by": []}'
+    headers:
+      Access-Control-Allow-Headers:
+      - Accept, Accept-Language, Accept-Encoding, Authorization, Content-Type
+      Access-Control-Allow-Methods:
+      - GET, HEAD, POST, OPTIONS
+      Access-Control-Allow-Origin:
+      - '*'
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 9d6e3157afbc2bd7-FRA
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 04 Mar 2026 04:38:40 GMT
+      Nel:
+      - '{"report_to":"heroku-nel","response_headers":["Via"],"max_age":3600,"success_fraction":0.01,"failure_fraction":0.1}'
+      Report-To:
+      - '{"group":"heroku-nel","endpoints":[{"url":"https://nel.heroku.com/reports?s=NTuWnoxlhX1s9BMe5Fb6VwIeTQsIungu5ZnOzhOrB38%3D\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\u0026ts=1772599120"}],"max_age":3600}'
+      Reporting-Endpoints:
+      - heroku-nel="https://nel.heroku.com/reports?s=NTuWnoxlhX1s9BMe5Fb6VwIeTQsIungu5ZnOzhOrB38%3D&sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&ts=1772599120"
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      Via:
+      - 1.1 heroku-router
+      X-RateLimit-Cost-USD:
+      - '0.0001'
+      X-RateLimit-Credits-Used:
+      - '1'
+      X-RateLimit-Limit:
+      - '10000'
+      X-RateLimit-Limit-USD:
+      - '1'
+      X-RateLimit-Onetime-Remaining:
+      - '0'
+      X-RateLimit-Prepaid-Remaining-USD:
+      - '0'
+      X-RateLimit-Remaining:
+      - '9964'
+      X-RateLimit-Remaining-USD:
+      - '0.9964'
+      X-RateLimit-Reset:
+      - '69680'
+      access-control-expose-headers:
+      - Cache-Control, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Onetime-Remaining,
+        X-RateLimit-Credits-Used, X-RateLimit-Credits-Required, X-RateLimit-Reset,
+        X-RateLimit-Limit-USD, X-RateLimit-Remaining-USD, X-RateLimit-Prepaid-Remaining-USD,
+        X-RateLimit-Cost-USD, X-RateLimit-Cost-Required-USD, Retry-After
+      content-length:
+      - '147'
     status:
       code: 200
       message: OK

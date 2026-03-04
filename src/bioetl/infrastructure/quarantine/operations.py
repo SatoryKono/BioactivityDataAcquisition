@@ -27,7 +27,7 @@ def inspect_records(
     limit: int = 100,
     error_code: str | None = None,
     dq_status: QuarantineRecordStatus | None = None,
-) -> list[dict[str, Any]]:
+) -> list[dict[str, Any]]:  # Any: quarantine record has heterogeneous values
     """Inspect quarantine records for a pipeline.
 
     Args:
@@ -60,7 +60,9 @@ def inspect_records(
     if limit > 0:
         filtered_table = filtered_table.slice(length=limit)
 
-    records: list[dict[str, Any]] = filtered_table.to_pylist()
+    records: list[dict[str, Any]] = (  # Any: quarantine record has heterogeneous values
+        filtered_table.to_pylist()
+    )  # Any: quarantine record has heterogeneous values
     for record in records:
         record["payload"] = deserialize_from_json(record["payload"])
         record["error_details"] = deserialize_from_json(record["error_details"])
@@ -76,7 +78,7 @@ def replay_records(
     max_age_days: int = 7,
     *,
     now: datetime,
-) -> Iterator[dict[str, Any]]:
+) -> Iterator[dict[str, Any]]:  # Any: quarantine record has heterogeneous values
     """Replay quarantine records for reprocessing.
 
     Args:
@@ -122,7 +124,7 @@ def get_statistics(
     base_path: str,
     storage_options: dict[str, str] | None,
     pipeline: str,
-) -> dict[str, Any]:
+) -> dict[str, Any]:  # Any: quarantine record has heterogeneous values
     """Get quarantine statistics for a pipeline.
 
     Args:

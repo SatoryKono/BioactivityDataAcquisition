@@ -1,8 +1,8 @@
-# mypy: disable-error-code=attr-defined
 """Support helpers for CompositePipelineRunner."""
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, cast
 
@@ -17,15 +17,41 @@ from bioetl.domain.events import PipelineEvent
 from bioetl.domain.exceptions import BioETLError
 
 if TYPE_CHECKING:
-    from bioetl.application.composite.checkpoint import CompositeCheckpointState
-    from bioetl.domain.composite.config import EnricherConfig
+    from bioetl.application.composite.checkpoint import (
+        CompositeCheckpointService,
+        CompositeCheckpointState,
+    )
+    from bioetl.application.composite.fsm_helper import FSMStateHelperService
+    from bioetl.application.composite.preflight_validator import (
+        CompositePreflightValidationService,
+    )
+    from bioetl.application.composite.runner import CompositeRuntimeConfig
+    from bioetl.application.core.runner import PipelineRunner
+    from bioetl.application.services.dq_report_service import DQReportService
+    from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
     from bioetl.domain.composite.result import DependencyResult, MergeResult
+    from bioetl.domain.ports import LoggerPort, MetricsPort, QuarantinePort
+    from bioetl.domain.types import RunID
 
-__all__ = ["CompositeRunnerSupportHelper", "CompositeRunnerSupportMixin"]
+__all__ = ["CompositeRunnerSupportHelper"]
 
 
 class CompositeRunnerSupportHelper:
     """Mixin with utility and side-effect helpers."""
+
+    _config: CompositeConfig
+    _runtime: CompositeRuntimeConfig
+    _seed_runner_factory: Callable[[], PipelineRunner]
+    _checkpoint_manager: CompositeCheckpointService
+    _logger: LoggerPort
+    _run_id_str: str
+    _run_id: RunID
+    _started_at: datetime | None
+    _dq_report_service: DQReportService | None
+    _preflight_validator: CompositePreflightValidationService | None
+    _quarantine_port: QuarantinePort | None
+    _metrics: MetricsPort | None
+    _fsm: FSMStateHelperService
 
     def _build_composite_result(
         self,
@@ -346,7 +372,3 @@ class CompositeRunnerSupportHelper:
                     reason="cross_validation",
                     count=written,
                 )
-
-
-# Backward-compatible alias for transition period.
-CompositeRunnerSupportMixin = CompositeRunnerSupportHelper

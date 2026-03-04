@@ -262,7 +262,7 @@ class PublicationTermDataSource(_SourceMetadataDelegationMixin):
 
         # Extract keywords
         raw_keywords = record.get("keywords")
-        keywords: list[Any] = (
+        keywords: list[Any] = (  # Any: list items have heterogeneous types
             raw_keywords if isinstance(raw_keywords, list) else []
         )  # Any: untyped nested JSON from ChEMBL API
         for keyword in keywords:

@@ -53,7 +53,8 @@ class LocalCheckpoint:
         self,
         pipeline: str,
         run_id: RunID,
-        metadata: dict[str, Any] | None = None,
+        metadata: dict[str, Any]  # Any: checkpoint state has heterogeneous values
+        | None = None,  # Any: checkpoint metadata values are heterogeneous
     ) -> None:
         """Save checkpoint atomically using temp file + rename.
 
@@ -71,7 +72,8 @@ class LocalCheckpoint:
         self,
         pipeline: str,
         run_id: RunID,
-        metadata: dict[str, Any] | None,
+        metadata: dict[str, Any]  # Any: checkpoint state has heterogeneous values
+        | None,  # Any: checkpoint metadata values are heterogeneous
     ) -> None:
         """Synchronous save implementation."""
         key = self._get_key(pipeline)
@@ -104,7 +106,12 @@ class LocalCheckpoint:
                 temp_file.unlink()
             raise
 
-    async def load(self, pipeline: str) -> tuple[RunID, dict[str, Any]] | None:
+    async def load(
+        self, pipeline: str
+    ) -> (
+        tuple[RunID, dict[str, Any]]  # Any: checkpoint state has heterogeneous values
+        | None  # Any: checkpoint state has heterogeneous values
+    ):  # Any: checkpoint state has heterogeneous values
         """Load last checkpoint.
 
         Uses run_in_executor to avoid blocking the event loop.
@@ -118,7 +125,12 @@ class LocalCheckpoint:
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(None, self._load_sync, pipeline)
 
-    def _load_sync(self, pipeline: str) -> tuple[RunID, dict[str, Any]] | None:
+    def _load_sync(
+        self, pipeline: str
+    ) -> (
+        tuple[RunID, dict[str, Any]]  # Any: checkpoint state has heterogeneous values
+        | None  # Any: checkpoint state has heterogeneous values
+    ):  # Any: checkpoint state has heterogeneous values
         """Synchronous load implementation."""
         key = self._get_key(pipeline)
         full_path = self.base_path / key

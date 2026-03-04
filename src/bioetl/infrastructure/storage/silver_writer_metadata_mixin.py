@@ -1,9 +1,9 @@
-# mypy: disable-error-code=attr-defined
 """Metadata and audit helpers for SilverWriter."""
 
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
@@ -19,6 +19,13 @@ from bioetl.domain.ports import (
 )
 
 if TYPE_CHECKING:
+    from bioetl.domain.ports import (
+        AuditPort,
+        LoggerPort,
+        MetadataCoordinatorPort,
+        MetadataWriterPort,
+    )
+    from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
     from bioetl.domain.types import BronzeRecord
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
@@ -27,30 +34,36 @@ if TYPE_CHECKING:
 class SilverWriterMetadataMixin:
     """Mixin with metadata, lineage, and audit helpers."""
 
+    logger: LoggerPort
+    _audit: AuditPort | None
+    _metadata_coordinator: MetadataCoordinatorPort | None
+    _metadata_writer: MetadataWriterPort
+    _flat_structure: bool
+    _transform_version: str | None
+    _transform_steps: tuple[str, ...]
+    _dq_calculator: DQMetricsCalculator
+    _get_table_schema: Callable[[str], Awaitable[object | None]]
+
     async def _compute_dq_metrics(
         self,
         table_name: str,
         records: list[BronzeRecord],
         quarantined_count: int = 0,
     ) -> BatchDQMetrics:
-        """Compute DQ metrics using centralized calculator."""
-        from bioetl.domain.services.dq_metrics_calculator import (
-            DQMetricsCalculator,
-            DQMetricsInput,
-        )
+        """Compute DQ metrics using injected calculator."""
+        from bioetl.domain.services.dq_metrics_calculator import DQMetricsInput
 
         existing_schema = await self._get_table_schema(table_name)
         existing_fields: set[str] | None = None
         if existing_schema is not None:
             existing_fields = set(existing_schema.names)
 
-        calculator = DQMetricsCalculator()
         input_data = DQMetricsInput(
             records=records,
             existing_schema_fields=existing_fields,
             quarantined_count=quarantined_count,
         )
-        return calculator.calculate(input_data)
+        return self._dq_calculator.calculate(input_data)
 
     async def _log_silver_audit(
         self,
@@ -85,7 +98,7 @@ class SilverWriterMetadataMixin:
         elif isinstance(ingestion_ts, datetime):
             timestamp = ingestion_ts
         else:
-            timestamp = datetime.now(UTC)
+            timestamp = datetime.fromtimestamp(0, tz=UTC)
         if timestamp.tzinfo is None:
             timestamp = timestamp.replace(tzinfo=UTC)
 

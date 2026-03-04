@@ -48,7 +48,7 @@ def atomic_write(
     suffix: str = ".tmp",
     prefix: str = ".",
     encoding: str | None = None,
-) -> Iterator[IO[Any]]:
+) -> Iterator[IO[Any]]:  # Any: IO stream type varies (text/binary)
     """Context manager for atomic file writes.
 
     Writes to a temporary file first, then atomically replaces the target.

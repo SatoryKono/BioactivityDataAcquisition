@@ -43,7 +43,7 @@ def test_start_metrics_server_failure():
     """
     with mock.patch(
         "bioetl.infrastructure.observability.server.start_http_server",
-        side_effect=Exception("Failed"),
+        side_effect=RuntimeError("Failed"),
     ):
         # Server catches exceptions and returns False for graceful degradation
         result = obs_server.start_metrics_server(port=8000, fail_fast=False)

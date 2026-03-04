@@ -63,7 +63,7 @@ def arbitrary_record_strategy() -> st.SearchStrategy[dict[str, Any]]:
         ...         result = transformer.transform(record)
         ...     except ValidationError:
         ...         pass  # Expected for invalid data
-        ...     except Exception as e:
+        ...     except (TypeError, ValueError) as e:
         ...         pytest.fail(f"Unexpected exception: {e}")
     """
     return st.dictionaries(

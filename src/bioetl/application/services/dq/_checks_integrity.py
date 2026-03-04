@@ -109,7 +109,8 @@ def check_referential_integrity(
 
 
 def check_scd_integrity(
-    df: pl.DataFrame, scd_config: dict[str, Any] | None
+    df: pl.DataFrame,
+    scd_config: dict[str, Any] | None,  # Any: SCD config has heterogeneous values
 ) -> SCDIntegrityResult:
     """Check SCD (Slowly Changing Dimension) integrity.
 

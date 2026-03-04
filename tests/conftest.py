@@ -18,7 +18,7 @@ def pytest_cmdline_main(config):
                 val = getattr(config.option, attr)
                 if isinstance(val, enum.Enum):
                     setattr(config.option, attr, val.value)
-            except Exception:
+            except (AttributeError, TypeError, ValueError):
                 pass
 
 

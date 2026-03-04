@@ -92,7 +92,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
-        contract_policy: Any = None,
+        contract_policy: Any = None,  # Any: contract policy type varies by pipeline
     ) -> None:
         """Initialize transformer.
 
@@ -123,7 +123,8 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         )
 
     def _resolve_publication_type(
-        self, publication_types: Any
+        self,
+        publication_types: Any,  # Any: raw API value type varies
     ) -> str:  # Any: raw API JSON list|None
         """Resolve raw publication types list to a unified scalar string."""
         if not isinstance(publication_types, list):
@@ -151,7 +152,8 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         }
 
     def _extract_author_metadata(
-        self, authors_list: Any
+        self,
+        authors_list: Any,  # Any: raw API value type varies
     ) -> GoldRecord:  # Any: raw API JSON
         """Extract author identifiers, h-indices, and affiliations.
 

@@ -10,13 +10,12 @@ DQ Report Integration:
 
 from __future__ import annotations
 
-import json
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 from uuid import uuid4
 
+from bioetl.application.core.batch_executor_dq_mixin import _BatchExecutorDQMixin
 from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
 from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
 from bioetl.application.core.batch_tracing import BatchTracingManagerService
@@ -40,7 +39,6 @@ if TYPE_CHECKING:
         GoldTransformCallback,
         TransformCallback,
     )
-    from bioetl.application.services.dq_report_service import DQReportContext
     from bioetl.domain.config import MemoryConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
@@ -63,7 +61,7 @@ class BatchResult:
     quarantined_count: int
 
 
-class BatchExecutor:
+class BatchExecutor(_BatchExecutorDQMixin):
     """Unified executor for ETL batches: fetch → transform → write with tracing."""
 
     DEFAULT_BATCH_SIZE = 1000
@@ -91,13 +89,6 @@ class BatchExecutor:
         ValueError,
         TypeError,
         AttributeError,
-    )
-    _DQ_DATAFRAME_ERRORS = (
-        ImportError,
-        ModuleNotFoundError,
-        ValueError,
-        TypeError,
-        RuntimeError,
     )
 
     def __init__(
@@ -182,10 +173,10 @@ class BatchExecutor:
         # Collecting data adds memory overhead, so only enabled when needed
         self._bronze_records_for_dq: list[bytes] = []
         self._silver_records_for_dq: list[
-            dict[str, Any]
+            dict[str, Any]  # Any: values are heterogeneous
         ] = []  # Any: record values vary by field type
         self._gold_records_for_dq: list[
-            dict[str, Any]
+            dict[str, Any]  # Any: values are heterogeneous
         ] = []  # Any: record values vary by field type
         self._source_batch_ids: list[str] = []
         self._last_bronze_path: str | None = None
@@ -362,7 +353,7 @@ class BatchExecutor:
 
     async def process(
         self,
-        records: list[dict[str, Any]],
+        records: list[dict[str, Any]],  # Any: values are heterogeneous
         start_index: int = 0,  # Any: record values vary by field type
     ) -> BatchResult:
         """Process a batch of records through the full ETL pipeline.
@@ -449,7 +440,7 @@ class BatchExecutor:
 
     async def _process_batch(
         self,
-        records: list[dict[str, Any]],
+        records: list[dict[str, Any]],  # Any: values are heterogeneous
         start_index: int,  # Any: record values vary by field type
     ) -> None:
         """Process batch through Bronze → Silver → Gold with tracing.
@@ -588,7 +579,7 @@ class BatchExecutor:
 
     async def _execute_transform_with_span(
         self,
-        records: list[dict[str, Any]],
+        records: list[dict[str, Any]],  # Any: values are heterogeneous
         batch_id: BatchID,
         start_index: int,  # Any: record values vary by field type
     ) -> TransformResult:
@@ -667,175 +658,6 @@ class BatchExecutor:
             offset=offset,
         ):
             yield record
-
-    # -------------------------------------------------------------------------
-    # DQ Report data collection
-    # -------------------------------------------------------------------------
-
-    def _should_collect_dq_data(self) -> bool:
-        """Check if DQ report service is available.
-
-        Returns:
-            True if DQ report service is configured and data should be collected.
-        """
-        return self._services.dq_report_service is not None
-
-    def _collect_dq_data(
-        self,
-        records: list[dict[str, Any]],  # Any: record values vary by field type
-        batch_id: BatchID,
-        bronze_result: Any,  # Any: BronzeWriteResult (avoids circular import)
-        silver_records: list[dict[str, Any]],  # Any: record values vary by field type
-        gold_records: list[dict[str, Any]],  # Any: record values vary by field type
-    ) -> None:
-        """Collect data from batch processing for DQ reports.
-
-        Args:
-            records: Raw Bronze records.
-            batch_id: Batch identifier.
-            bronze_result: Result from Bronze write operation (contains path).
-            silver_records: Transformed Silver records.
-            gold_records: Transformed Gold records.
-        """
-        # Collect Bronze records as bytes (JSON-encoded)
-        for record in records:
-            try:
-                self._bronze_records_for_dq.append(
-                    json.dumps(record, default=str).encode("utf-8")
-                )
-            except (TypeError, ValueError):
-                # Skip records that can't be serialized
-                pass
-
-        # Track Bronze file path if available
-        if bronze_result is not None and hasattr(bronze_result, "path"):
-            self._last_bronze_path = str(bronze_result.path)
-
-        # Collect Silver records
-        self._silver_records_for_dq.extend(silver_records)
-
-        # Collect Gold records
-        self._gold_records_for_dq.extend(gold_records)
-
-    def _build_dataframe_from_records(
-        self,
-        records: list[dict[str, Any]],  # Any: record values vary by field type
-    ) -> Any | None:  # Any: pl.DataFrame (avoids polars import at module level)
-        """Build a Polars DataFrame from records, returning None on failure."""
-        if not records:
-            return None
-        try:
-            import polars as pl
-
-            return pl.DataFrame(records)
-        except self._DQ_DATAFRAME_ERRORS as dataframe_error:
-            self._logger.warning(
-                "Failed to build dataframe for DQ context",
-                records_count=len(records),
-                error_type=type(dataframe_error).__name__,
-                reason="dq_dataframe_build_failed",
-            )
-            return None
-
-    def _get_dq_thresholds(self) -> tuple[float, float]:
-        """Get DQ thresholds from config or defaults."""
-        if self._config.dq_config:
-            return (
-                self._config.dq_config.soft_fail_threshold,
-                self._config.dq_config.hard_fail_threshold,
-            )
-        return (0.05, 0.20)
-
-    def _extract_dq_entity(self) -> str:
-        """Extract entity name from silver_table for DQ report naming.
-
-        Ensures consistency with actual table names (e.g., "publication" not "document").
-
-        Returns:
-            Entity name extracted from silver_table or fallback to entity_type.
-        """
-        silver_table = self._config.table_config.silver_table
-        if silver_table and "_" in silver_table:
-            return silver_table.split("_", 1)[1]
-        if silver_table and "." in silver_table:
-            return silver_table.split(".")[-1]
-        return silver_table or self._config.entity_type
-
-    def get_dq_context(self) -> DQReportContext | None:
-        """Build DQ report context from accumulated data.
-
-        Creates a DQReportContext containing all data collected during
-        batch processing. This context is used by PostrunService to
-        generate DQ reports for Bronze, Silver, and Gold layers.
-
-        Returns:
-            DQReportContext if DQ reporting is enabled and data is available,
-            None otherwise.
-
-        Note:
-            This method should be called after execute() completes.
-            The returned context contains snapshots of the accumulated data.
-        """
-        if not self._should_collect_dq_data():
-            return None
-
-        # Import here to avoid circular dependency
-        from bioetl.application.services.dq_report_service import DQReportContext
-
-        silver_data = self._build_dataframe_from_records(self._silver_records_for_dq)
-        gold_data = self._build_dataframe_from_records(self._gold_records_for_dq)
-        primary_keys = list(self._config.table_config.primary_keys)
-        soft_threshold, hard_threshold = self._get_dq_thresholds()
-        key_nullability_rules = None
-        if self._config.dq_config is not None:
-            key_nullability_rules = [
-                {
-                    "field": rule.field,
-                    "key_type": rule.key_type,
-                    "nullable": rule.nullable,
-                }
-                for rule in self._config.dq_config.key_nullability_rules
-            ]
-
-        # Get current date for Bronze DQ report filename
-        current_date_str = datetime.now(UTC).strftime("%Y-%m-%d")
-        dq_entity = self._extract_dq_entity()
-
-        return DQReportContext(
-            run_id=str(self._context.run_id),
-            pipeline_name=self._config.pipeline_name,
-            timestamp=datetime.now(UTC),
-            # Provider and entity for DQ report naming
-            # Use extracted entity from silver_table for consistency
-            provider=self._config.provider,
-            entity=dq_entity,
-            # Bronze context
-            bronze_records=self._bronze_records_for_dq or None,
-            bronze_batch_id=self._source_batch_ids[-1]
-            if self._source_batch_ids
-            else None,
-            bronze_source_file=self._last_bronze_path,
-            bronze_output_path=self._config.bronze_output_path,
-            bronze_date_str=current_date_str,
-            # Silver context
-            silver_data=silver_data,
-            silver_target_table=self._config.table_config.silver_table,
-            silver_source_batch_ids=self._source_batch_ids or None,
-            silver_primary_keys=primary_keys or None,
-            silver_input_count=self.records_fetched,
-            silver_quarantined_count=self.records_quarantined,
-            silver_output_path=self._config.silver_output_path,
-            silver_key_nullability_rules=key_nullability_rules,
-            # Gold context
-            gold_data=gold_data,
-            gold_target_table=self._config.table_config.gold_table,
-            gold_output_path=self._config.gold_output_path,
-            # DQ thresholds from config (use defaults if not configured)
-            dq_soft_threshold=soft_threshold,
-            dq_hard_threshold=hard_threshold,
-            # Flat structure flag for DQ reports
-            flat_structure=self._config.flat_structure,
-        )
 
     def get_run_statistics(
         self,

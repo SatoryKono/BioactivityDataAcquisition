@@ -223,7 +223,11 @@ class LoggerPort(Protocol):
         """
         ...
 
-    def warning(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
+    def warning(
+        self,
+        _event: str,
+        **kwargs: Any,  # Any: structlog-compatible API
+    ) -> Any:  # Any: structlog-compatible API
         """Log a warning message.
 
         Args:
@@ -259,7 +263,11 @@ class LoggerPort(Protocol):
         """
         ...
 
-    def exception(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
+    def exception(
+        self,
+        _event: str,
+        **kwargs: Any,  # Any: structlog-compatible API
+    ) -> Any:  # Any: structlog-compatible API
         """Log an exception with traceback.
 
         Args:
@@ -371,8 +379,8 @@ class DQMonitorPort(Protocol):
         self,
         metrics: dict[str, float],
     ) -> list[
-        Any
-    ]:  # Any: list[Anomaly] (avoids importing infrastructure type in domain)
+        Any  # Any: list[Anomaly] (avoids importing infrastructure type in domain)
+    ]:
         """Check current metrics against baseline for anomalies.
 
         Args:

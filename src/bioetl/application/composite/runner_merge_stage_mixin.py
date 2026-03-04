@@ -1,8 +1,8 @@
-# mypy: disable-error-code=attr-defined
 """Merge/finalization stage helpers for CompositePipelineRunner."""
 
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite.runner_constants import (
@@ -18,18 +18,37 @@ from bioetl.domain.events import PipelineEvent
 from bioetl.domain.exceptions import BioETLError
 
 if TYPE_CHECKING:
-    from bioetl.application.composite.checkpoint import CompositeCheckpointState
+    from bioetl.application.composite.checkpoint import (
+        CompositeCheckpointService,
+        CompositeCheckpointState,
+    )
+    from bioetl.application.composite.fsm_helper import FSMStateHelperService
+    from bioetl.application.composite.merger import MergeService
+    from bioetl.application.composite.runner import CompositeRuntimeConfig
+    from bioetl.domain.composite.config import CompositeConfig
     from bioetl.domain.composite.result import (
         DependencyResult,
         EnrichmentResult,
         MergeResult,
     )
+    from bioetl.domain.ports import LoggerPort
 
-__all__ = ["CompositeRunnerMergeStageHelper", "CompositeRunnerMergeStageMixin"]
+__all__ = ["CompositeRunnerMergeStageHelper"]
 
 
 class CompositeRunnerMergeStageHelper:
     """Mixin containing merge execution and finalization."""
+
+    _runtime: CompositeRuntimeConfig
+    _fsm: FSMStateHelperService
+    _logger: LoggerPort
+    _config: CompositeConfig
+    _run_id_str: str
+    _merger: MergeService
+    _checkpoint_manager: CompositeCheckpointService
+    _save_checkpoint_safe: Callable[[CompositeCheckpointState, str], Awaitable[bool]]
+    _generate_dq_reports: Callable[[MergeResult], Awaitable[None]]
+    _write_cv_quarantine: Callable[[MergeResult], Awaitable[None]]
 
     async def _execute_merge_stage(
         self,
@@ -177,7 +196,3 @@ class CompositeRunnerMergeStageHelper:
                 error_type=type(delete_error).__name__,
                 reason_code="unexpected_bioetl_error",
             )
-
-
-# Backward-compatible alias for transition period.
-CompositeRunnerMergeStageMixin = CompositeRunnerMergeStageHelper

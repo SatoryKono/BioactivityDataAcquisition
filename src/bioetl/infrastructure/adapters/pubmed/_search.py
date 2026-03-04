@@ -87,7 +87,7 @@ class PubMedSearchMixin:
 
     async def _search_by_title(
         self, title: str, limit: int = 3
-    ) -> list[dict[str, Any]]:
+    ) -> list[dict[str, Any]]:  # Any: untyped API JSON record
         """Search PubMed by title using esearch + efetch."""
         clean_title = title.replace('"', "'").strip()[:200]
         search_term = f'"{clean_title}"[Title]'
@@ -102,7 +102,7 @@ class PubMedSearchMixin:
             if not pmids:
                 return []
 
-            results: list[dict[str, Any]] = []
+            results: list[dict[str, Any]] = []  # Any: untyped API JSON record
             # Note: _yield_articles_from_pmids is expected to be in PubMedFetchMixin
             async for record in self._yield_articles_from_pmids(pmids, limit):  # type: ignore
                 results.append(record)

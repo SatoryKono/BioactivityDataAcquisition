@@ -21,6 +21,7 @@ from bioetl.application.services import (
 )
 from bioetl.composition.entrypoints import get_pipeline_runner_service
 from bioetl.composition.registry import get_default_registry
+from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.health_server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
     echo_health_server_info,
@@ -122,10 +123,17 @@ async def _run_pipelines_batch(
             batch_result.failed += 1
             batch_result.failed_pipelines.append(pipeline)
             echo_error(f"[FAIL] {pipeline}: not found", str(e))
-        except Exception as e:
+        except (BioETLError, OSError, RuntimeError, ValueError) as exc:
             batch_result.failed += 1
             batch_result.failed_pipelines.append(pipeline)
-            echo_error(f"[FAIL] {pipeline}: unexpected error", str(e))
+            echo_error(
+                f"[FAIL] {pipeline}: unexpected error",
+                (
+                    f"{exc} "
+                    f"(reason_code=CLI_RUN_ALL_PIPELINE_ERROR, pipeline={pipeline}, "
+                    f"error_type={type(exc).__name__})"
+                ),
+            )
 
     return batch_result
 
@@ -340,11 +348,28 @@ def run_all(
     )
     try:
         batch_result = asyncio.run(coro)
+    except BioETLError as exc:
+        echo_error(
+            "Batch execution failed with domain error",
+            (
+                f"{exc} "
+                f"(reason_code=CLI_RUN_ALL_DOMAIN_ERROR, source={source}, "
+                f"error_type={type(exc).__name__})"
+            ),
+        )
+        sys.exit(ExitCode.FAIL)
     except KeyboardInterrupt:
         echo_warning("Batch run interrupted by user (Ctrl+C)")
         sys.exit(ExitCode.SIGINT)
-    except Exception as e:
-        echo_error("Unexpected error during batch execution", str(e))
+    except Exception as exc:
+        echo_error(
+            "Unexpected error during batch execution",
+            (
+                f"{exc} "
+                f"(reason_code=CLI_RUN_ALL_UNEXPECTED_ERROR, source={source}, "
+                f"error_type={type(exc).__name__})"
+            ),
+        )
         sys.exit(ExitCode.FAIL)
     finally:
         if getattr(coro, "cr_frame", None) is not None:

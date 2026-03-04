@@ -304,7 +304,7 @@ class TestHealthCheckCommand:
         cli_runner: CliRunner,
     ) -> None:
         """Test health check handles exceptions gracefully."""
-        with mock_asyncio_run(side_effect=Exception("Unexpected error")):
+        with mock_asyncio_run(side_effect=RuntimeError("Unexpected error")):
             result = cli_runner.invoke(cli, ["health", "check"])
 
         assert "Error running health checks" in result.output

@@ -32,7 +32,7 @@ def assemble_runner_impl(
     pipeline: BasePipeline,
     observability: ObservabilityBundle,
     silver_schema: pa.Schema | None,
-    gold_schema: Any,
+    gold_schema: Any,  # Any: Pandera DataFrameModel class or instance
     strict_gold_validation: bool,
     yaml_config: PipelineYamlConfig | None = None,
     dq_configs_extractor: Callable[

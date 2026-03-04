@@ -123,7 +123,7 @@ class PublicationTransformer(BaseChemblTransformer):
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
-        contract_policy: Any = None,
+        contract_policy: Any = None,  # Any: contract policy type varies by pipeline
     ) -> None:
         """Initialize ChEMBL Publication transformer.
 
@@ -295,7 +295,8 @@ class PublicationTransformer(BaseChemblTransformer):
         # Any: generic domain entity; type varies by pipeline
 
     def entity_to_silver_record(
-        self, entity: Any
+        self,
+        entity: Any,  # Any: generic domain entity; type varies by pipeline
     ) -> GoldRecord:  # Any: generic domain entity
         """Convert Domain Entity to SilverRecord.
 

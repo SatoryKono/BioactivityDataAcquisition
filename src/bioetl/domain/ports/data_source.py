@@ -48,7 +48,9 @@ class DataSourcePort(Protocol):
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
         offset: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[
+        dict[str, Any]  # Any: port contract allows heterogeneous record values
+    ]:  # Any: port contract allows heterogeneous record values
         """Fetch records from the data source (async generator).
 
         Note: This is NOT an async def because async generator functions
@@ -110,7 +112,9 @@ class FilterableDataSourcePort(DataSourcePort, Protocol):
         filter_ids: list[str],
         filter_field: str,
         limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[
+        dict[str, Any]  # Any: port contract allows heterogeneous record values
+    ]:  # Any: port contract allows heterogeneous record values
         """Fetch records filtered by specific IDs at the source level.
 
         This method enables efficient server-side filtering by passing
@@ -135,7 +139,9 @@ class FilterableDataSourcePort(DataSourcePort, Protocol):
         entity_type: str,
         filters: dict[str, list[str]],
         limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[
+        dict[str, Any]  # Any: port contract allows heterogeneous record values
+    ]:  # Any: port contract allows heterogeneous record values
         """Fetch records filtered by multiple fields (AND logic).
 
         This method enables multi-field server-side filtering by passing
@@ -163,7 +169,9 @@ class FilterableDataSourcePort(DataSourcePort, Protocol):
         filter_field: str,
         fallback_mapping: dict[str, str],
         limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[
+        dict[str, Any]  # Any: port contract allows heterogeneous record values
+    ]:  # Any: port contract allows heterogeneous record values
         """Fetch records with fallback search when primary lookup fails.
 
         When a primary ID lookup fails (e.g., DOI returns 404), attempts

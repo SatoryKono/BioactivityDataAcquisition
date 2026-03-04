@@ -32,11 +32,11 @@ class QuarantineRecord:
     """
 
     error_code: str | None
-    payload: dict[str, Any]
+    payload: dict[str, Any]  # Any: quarantine payload has heterogeneous values
     batch_id: str | None
     pipeline: str
     ingestion_ts: datetime | None
-    metadata: dict[str, Any]
+    metadata: dict[str, Any]  # Any: metadata values are heterogeneous
 
 
 @dataclass
@@ -110,7 +110,9 @@ class QuarantineService:
 
         return records
 
-    async def get_stats(self, pipeline: str) -> dict[str, Any]:
+    async def get_stats(
+        self, pipeline: str
+    ) -> dict[str, Any]:  # Any: quarantine record has heterogeneous values
         """Get statistics about quarantined records.
 
         Args:
@@ -136,7 +138,7 @@ class QuarantineService:
         pipeline: str,
         error_code: str | None = None,
         max_age_days: int = 7,
-    ) -> list[dict[str, Any]]:
+    ) -> list[dict[str, Any]]:  # Any: quarantine record has heterogeneous values
         """Replay quarantine records for reprocessing.
 
         Retrieves quarantined records that match the filter criteria
@@ -177,7 +179,9 @@ class QuarantineService:
 
     def mark_as_reprocessed(
         self,
-        records: list[dict[str, Any]],
+        records: list[
+            dict[str, Any]  # Any: quarantine record has heterogeneous values
+        ],  # Any: quarantine record has heterogeneous values
     ) -> int:
         """Mark replay records as reprocessed.
 

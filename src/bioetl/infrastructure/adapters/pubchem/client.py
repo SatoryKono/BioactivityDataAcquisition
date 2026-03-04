@@ -142,7 +142,7 @@ class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
 
     async def _fetch_compound(
         self, query: str | None, limit: int | None
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[dict[str, Any]]:  # Any: untyped API JSON record
         """Fetch compounds by query."""
         if not query:
             raise ValueError("Query is required for compound fetch")
@@ -157,7 +157,7 @@ class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
         offset: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[dict[str, Any]]:  # Any: untyped API JSON record
         """Fetch records from PubChem. Supports SMILES/CID filtering and name search.
 
         Args:
@@ -178,7 +178,10 @@ class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
                 yield record
             return
 
-        fetch_methods: dict[str, Callable[[], AsyncIterator[dict[str, Any]]]] = {
+        fetch_methods: dict[
+            str,
+            Callable[[], AsyncIterator[dict[str, Any]]],  # Any: untyped API JSON record
+        ] = {  # Any: untyped API JSON record
             "compound": lambda: self._fetch_compound(query, limit),
             "substance": lambda: self._strategies.fetch_substances(query, limit),
             "assay": lambda: self._strategies.fetch_assays(query, limit),
@@ -197,7 +200,7 @@ class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
         filter_ids: list[str],
         filter_field: str,
         limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[dict[str, Any]]:  # Any: untyped API JSON record
         """Fetch PubChem records by filter ID list. Implements FilterableDataSourcePort.
 
         Args:

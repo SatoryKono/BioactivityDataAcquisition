@@ -1,0 +1,169 @@
+"""Shared record conversion and extraction helpers for BaseTransformer."""
+
+from __future__ import annotations
+
+import datetime
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, TypeVar, cast
+
+import orjson
+
+from bioetl.domain.types import ContentHash, EntityID, GoldRecord
+
+if TYPE_CHECKING:
+    from bioetl.domain.context import PipelineContext
+    from bioetl.domain.entities import BaseEntity
+    from bioetl.domain.types import BronzeRecord
+
+T = TypeVar("T", bound="BaseEntity")
+ScalarValue = str | int | float | bool | None
+
+
+class _BaseTransformerRecordHelpersMixin:
+    """Serialization and record helper methods shared by transformers."""
+
+    @staticmethod
+    def serialize_json(value: object) -> ScalarValue:
+        """Serialize dict/list to JSON string or native type for Silver layer."""
+        if value is None:
+            return None
+
+        if isinstance(value, dict):
+            typed_value = cast("dict[str, object]", value)
+            return _BaseTransformerRecordHelpersMixin._serialize_dict(typed_value)
+
+        if isinstance(value, list):
+            typed_value = cast("list[object]", value)
+            return _BaseTransformerRecordHelpersMixin._serialize_list(typed_value)
+
+        return cast("ScalarValue", value)
+
+    @staticmethod
+    def _serialize_dict(d: dict[str, object]) -> str | None:
+        if not d:
+            return None
+        return orjson.dumps(d, option=orjson.OPT_SORT_KEYS).decode("utf-8")
+
+    @staticmethod
+    def _serialize_list(lst: list[object]) -> ScalarValue:
+        if not lst:
+            return None
+        if len(lst) == 1:
+            item = lst[0]
+            if isinstance(item, (dict, list)):
+                return (
+                    None
+                    if not item
+                    else orjson.dumps(item, option=orjson.OPT_SORT_KEYS).decode("utf-8")
+                )
+            return cast("ScalarValue", item)
+        return orjson.dumps(lst, option=orjson.OPT_SORT_KEYS).decode("utf-8")
+
+    @staticmethod
+    def serialize_json_list(value: list[object] | None) -> str | None:
+        """Serialize list to JSON string without unwrapping single elements."""
+        if value is None or len(value) == 0:
+            return None
+        json_bytes: bytes = orjson.dumps(value, option=orjson.OPT_SORT_KEYS)
+        return json_bytes.decode("utf-8")
+
+    @classmethod
+    def serialize_json_fields(
+        cls,
+        record: GoldRecord,
+        field_names: Sequence[str],
+    ) -> dict[str, str | int | float | bool | None]:
+        """Serialize multiple JSON fields at once."""
+        return {name: cls.serialize_json(record.get(name)) for name in field_names}
+
+    @staticmethod
+    def _normalize_lineage_value(
+        field_name: str,
+        value: object,
+    ) -> object:
+        """Normalize lineage/meta field values after rename."""
+        if field_name == "run_id" and value is not None:
+            return str(value)
+        if field_name == "run_type" and value is not None:
+            return str(getattr(value, "value", value))
+        if field_name == "source_batch_id":
+            return str(value) if value else None
+        if field_name == "ingestion_ts" and isinstance(value, datetime.datetime):
+            return value.isoformat()
+        return value
+
+    @staticmethod
+    def _get_required_field(
+        record: BronzeRecord,
+        field: str,
+        *,
+        allow_empty: bool = False,
+    ) -> object:
+        """Extract and validate a required field from the record."""
+        from bioetl.application.core.base_transformer import TransformationError
+
+        value = record.get(field)
+        if value is None:
+            raise TransformationError(f"Missing required field: {field}", field=field)
+
+        if not allow_empty:
+            if isinstance(value, str) and not value.strip():
+                raise TransformationError(
+                    f"Required field is empty: {field}", field=field
+                )
+            if isinstance(value, (list, dict)) and len(value) == 0:
+                raise TransformationError(
+                    f"Required field is empty: {field}", field=field
+                )
+
+        return value
+
+    @staticmethod
+    def _extract_by_path(
+        record: BronzeRecord,
+        keys: Sequence[str],
+        default: object | None = None,
+    ) -> object | None:
+        """Safely extract a value from nested dictionaries by key sequence."""
+        current: object = record
+        for key in keys:
+            if not isinstance(current, dict):
+                return default
+            current_dict = cast("dict[str, object]", current)
+            current = current_dict.get(key)
+            if current is None:
+                return default
+        return current
+
+    @staticmethod
+    def _extract_nested(
+        record: BronzeRecord,
+        path: str,
+        default: object | None = None,
+    ) -> object | None:
+        """Safely extract a value from nested dictionaries using dot path."""
+        keys = path.split(".")
+        return _BaseTransformerRecordHelpersMixin._extract_by_path(
+            record, keys, default
+        )
+
+    def _create_entity(
+        self,
+        entity_class: type[T],
+        context: PipelineContext,
+        entity_id: str,
+        content_hash: str,
+        index: int,
+        **business_data: object,
+    ) -> T:
+        """Create a domain entity with lineage metadata."""
+        return entity_class(
+            entity_id=EntityID(entity_id),
+            content_hash=ContentHash(content_hash),
+            run_id=context.run_id,
+            run_type=context.run_type,
+            source_batch_id=None,
+            ingestion_ts=context.started_at,
+            _index=index,
+            **business_data,
+        )

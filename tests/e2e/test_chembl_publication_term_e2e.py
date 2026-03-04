@@ -20,6 +20,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from deltalake.exceptions import DeltaError, TableNotFoundError
 
 from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 from .conftest import (
@@ -32,6 +33,12 @@ from .conftest import (
 # VCR cassette directory for ChEMBL E2E tests
 CASSETTE_DIR = Path(__file__).parent.parent / "fixtures" / "vcr" / "chembl"
 TERM_PAYLOAD_MARKERS = ('"mesh_terms"', '"keywords"')
+SILVER_READ_SKIP_ERRORS: tuple[type[Exception], ...] = (
+    DeltaError,
+    OSError,
+    TableNotFoundError,
+    ValueError,
+)
 
 
 def _is_vcr_recording_enabled() -> bool:
@@ -146,7 +153,7 @@ async def test_chembl_publication_term_types(e2e_data_dir: Path):
     # Assert - Check term types
     try:
         records = get_silver_records(e2e_data_dir, "chembl_publication_term")
-    except Exception as exc:
+    except SILVER_READ_SKIP_ERRORS as exc:
         pytest.skip(f"No Silver publication_term table for cassette sample: {exc}")
 
     valid_term_types = {"MESH_HEADING", "MESH_QUALIFIER", "KEYWORD", "CONCEPT"}
@@ -180,7 +187,7 @@ async def test_chembl_publication_term_mesh_fields(e2e_data_dir: Path):
     # Assert - Check MeSH fields presence
     try:
         records = get_silver_records(e2e_data_dir, "chembl_publication_term")
-    except Exception as exc:
+    except SILVER_READ_SKIP_ERRORS as exc:
         pytest.skip(f"No Silver publication_term table for cassette sample: {exc}")
 
     mesh_records = [

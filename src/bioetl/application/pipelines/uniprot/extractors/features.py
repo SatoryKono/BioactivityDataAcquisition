@@ -8,7 +8,8 @@ from bioetl.domain.serialization import serialize_to_json
 
 
 def _extract_feature_location(  # Any: JSON values
-    location: dict[str, Any], feature_data: dict[str, Any]
+    location: dict[str, Any],  # Any: untyped API JSON record
+    feature_data: dict[str, Any],  # Any: untyped API JSON record
 ) -> None:
     """Extract start/end positions from feature location.
 
@@ -138,7 +139,9 @@ class FeatureExtractor:
 
     @classmethod
     def extract_features_by_type(
-        cls, features: Any, feature_type: str
+        cls,
+        features: Any,  # Any: untyped API JSON
+        feature_type: str,  # Any: untyped UniProt API JSON
     ) -> str | None:  # Any: untyped UniProt JSON
         """Extract sequence features by type.
 
@@ -281,7 +284,8 @@ class FeatureExtractor:
 
     @classmethod
     def extract_modified_residues(
-        cls, features: Any
+        cls,
+        features: Any,  # Any: untyped UniProt API JSON
     ) -> str | None:  # Any: untyped UniProt JSON
         """Extract modified residue features.
 
@@ -323,7 +327,9 @@ class FeatureExtractor:
 
     @classmethod
     def extract_ptm_by_pattern(  # Any: untyped JSON
-        cls, features: Any, patterns: tuple[str, ...]
+        cls,
+        features: Any,  # Any: untyped API JSON
+        patterns: tuple[str, ...],  # Any: untyped UniProt API JSON
     ) -> str | None:
         """Extract modified residue features matching PTM patterns.
 

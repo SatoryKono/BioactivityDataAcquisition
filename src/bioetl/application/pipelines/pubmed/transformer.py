@@ -22,13 +22,16 @@ from bioetl.application.pipelines.pubmed.extractors import (
     RawAuthor,
     StructuredAffiliation,
 )
+from bioetl.application.pipelines.pubmed.transformer_dates_mixin import (
+    _PubMedTransformerDatesMixin,
+)
 from bioetl.application.pipelines.pubmed.xml_parser import get_text
 from bioetl.domain.entities.pubmed import PubMedPublicationEntity
 from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
-from bioetl.domain.normalization import normalize_pmc_id, parse_page_range
+from bioetl.domain.normalization import normalize_pmc_id
 from bioetl.domain.services import IdentityService
 from bioetl.domain.types import GoldRecord
-from bioetl.domain.value_objects import DOI, PublicationYear, PubMedId
+from bioetl.domain.value_objects import DOI, PubMedId
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -43,7 +46,9 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
 
 
-class PubMedPublicationTransformer(BasePublicationTransformer):
+class PubMedPublicationTransformer(
+    _PubMedTransformerDatesMixin, BasePublicationTransformer
+):
     """Transformer for PubMed publication records.
 
     Implements BasePublicationTransformer pattern for unified transformation flow:
@@ -162,12 +167,6 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             )
             raise ValueError(f"XML parse error: {e}") from e
 
-    def _is_valid_date_format(self, date_str: str | None) -> bool:
-        """Validate that date string matches YYYY, YYYY-MM, or YYYY-MM-DD format."""
-        if not date_str:
-            return False
-        return any(pattern.match(date_str) for pattern in self._VALID_DATE_PATTERNS)
-
     def _extract_medline_metadata(
         self,
         medline: ET.Element | None,
@@ -279,7 +278,8 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         # Extract affiliations using unified service
         affiliation_strings = normalizer.extract_affiliations_from_authors(
             cast(
-                "list[dict[str, Any]]", raw_author_data
+                "list[dict[str, Any]]",  # Any: transformer record has heterogeneous values
+                raw_author_data,  # Any: transformer record has heterogeneous values
             )  # Any: RawAuthor is TypedDict-like
         )
 
@@ -489,7 +489,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
             # Process affiliations for this author (use pre-computed ror_id/grid_id)
             affiliations: list[
-                dict[str, Any]
+                dict[str, Any]  # Any: transformer record has heterogeneous values
             ] = []  # Any: untyped PubMed XML/JSON values
             structured_affs = author.get("structured_affiliations") or []
 
@@ -546,188 +546,9 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         """
         return True
 
-    def _extract_journal_data(
-        self, article: ET.Element
-    ) -> dict[str, Any]:  # Any: untyped PubMed XML/JSON values
-        """Extract journal-related data from article XML."""
-        journal_elem = article.find(".//Journal")
-        pages = get_text(article.find(".//Pagination/MedlinePgn"))
-        first_page, last_page = parse_page_range(pages)
-
-        if not journal_elem:
-            return {
-                "journal": None,
-                "journal_name_short": None,
-                "journal_iso_abbrev": None,
-                "journal_issn_type": None,
-                "issn": None,
-                "volume": None,
-                "issue": None,
-                "page_range": pages,
-                "medline_pgn": pages,
-                "page_first": first_page,
-                "page_last": last_page,
-            }
-
-        journal_issue = journal_elem.find("JournalIssue")
-        journal_title = get_text(journal_elem.find("Title"))
-        journal_abbrev = get_text(journal_elem.find("ISOAbbreviation"))
-        issn_elem = journal_elem.find("ISSN")
-        issn = get_text(issn_elem)
-        issn_type = issn_elem.get("IssnType") if issn_elem is not None else None
-
-        return {
-            "journal": journal_title,
-            "journal_name_short": journal_abbrev,
-            "journal_iso_abbrev": journal_abbrev,  # Alias for Gold schema
-            "journal_issn_type": issn_type,
-            "issn": issn,
-            "volume": get_text(journal_issue.find("Volume")) if journal_issue else None,
-            "issue": get_text(journal_issue.find("Issue")) if journal_issue else None,
-            "page_range": pages,
-            "medline_pgn": pages,  # Alias for Gold schema
-            "page_first": first_page,
-            "page_last": last_page,
-        }
-
-    def _compute_publication_date(
-        self, epub_date: str | None, pub_date: str | None, year: int | None
-    ) -> str | None:
-        """Compute unified publication_date (YYYY-MM-DD).
-
-        Priority: epub_date > pub_date > year
-        All outputs normalized to full YYYY-MM-DD format using end-of-period strategy.
-
-        Args:
-            epub_date: Electronic publication date (YYYY-MM-DD or partial).
-            pub_date: Publication date (YYYY-MM-DD or partial).
-            year: Publication year.
-
-        Returns:
-            ISO date string (YYYY-MM-DD) or None.
-        """
-        # Priority 1: epub_date if it's a complete date
-        if epub_date and len(epub_date) >= 10:
-            return epub_date[:10]
-
-        # Priority 2: pub_date (may be partial, normalize it)
-        if pub_date:
-            return self._data_normalizer.normalize_partial_date(pub_date)
-
-        # Priority 3: Construct from year (end of year)
-        if year:
-            return f"{year}-12-31"
-
-        return None
-
-    def _parse_month_day(
-        self, pub_date_node: ET.Element | None
-    ) -> tuple[int | None, int | None]:
-        """Extract month and day as integers from PubDate node.
-
-        Uses DateExtractor to handle both structured (Year/Month/Day)
-        and unstructured (MedlineDate) formats.
-        """
-        if pub_date_node is None:
-            return None, None
-
-        # Use DateExtractor logic to support MedlineDate parsing
-        raw_date = self._date_extractor.extract(pub_date_node)
-        if not raw_date:
-            return None, None
-
-        month_text = raw_date.get("month")
-        day_text = raw_date.get("day")
-
-        pub_month = self._parse_month(month_text)
-        pub_day = int(day_text) if day_text and day_text.isdigit() else None
-
-        return pub_month, pub_day
-
-    def _parse_month(self, month_text: str | None) -> int | None:
-        """Convert month text (name or number) to integer."""
-        if not month_text:
-            return None
-
-        month_lower = month_text.strip().lower()[:3]
-        result = self._MONTH_MAP.get(month_lower)
-        if result is None and month_text.isdigit():
-            result = int(month_text)
-        return result
-
-    def _extract_date_data(
-        self,
-        article: ET.Element,
-        pubmed_data: ET.Element | None,
-        medline: ET.Element | None,
-    ) -> dict[str, Any]:  # Any: untyped PubMed XML/JSON values
-        """Extract date-related data from article and MedlineCitation XML.
-
-        Validates date formats before use to prevent invalid dates like
-        "2024-13-99" or "n/a" from causing inconsistent publication_date
-        computation. Invalid dates are set to None.
-
-        Args:
-            article: Article XML element.
-            pubmed_data: PubmedData XML element (contains History with manuscript dates).
-            medline: MedlineCitation XML element (contains DateCompleted/DateRevised).
-
-        Returns:
-            Dictionary with all date-related fields.
-        """
-        journal = article.find(".//Journal")
-        journal_issue = journal.find("JournalIssue") if journal else None
-        pub_date_node = journal_issue.find("PubDate") if journal_issue else None
-        raw_pub_date, raw_year = DateExtractor.extract_date(pub_date_node)
-
-        pub_month, pub_day = self._parse_month_day(pub_date_node)
-
-        _validated_year = self.validate_value_object(
-            PublicationYear, raw_year, as_string=False
-        )
-        validated_year: int | None = (
-            int(_validated_year) if _validated_year is not None else None
-        )
-
-        raw_epub_date = DateExtractor.extract_article_date(article, "Electronic")
-
-        # Validate date formats before passing to _compute_publication_date.
-        # Invalid dates (e.g., "2024-13-99", "n/a") are set to None to ensure
-        # _compute_publication_date falls back to the next priority source.
-        pub_date = raw_pub_date if self._is_valid_date_format(raw_pub_date) else None
-        epub_date = raw_epub_date if self._is_valid_date_format(raw_epub_date) else None
-
-        publication_date = self._compute_publication_date(
-            epub_date, pub_date, validated_year
-        )
-
-        # Extract MEDLINE indexing dates from MedlineCitation element
-        date_completed, _ = (
-            DateExtractor.extract_date(medline.find("DateCompleted"))
-            if medline is not None
-            else (None, None)
-        )
-        date_revised, _ = (
-            DateExtractor.extract_date(medline.find("DateRevised"))
-            if medline is not None
-            else (None, None)
-        )
-
-        return {
-            "pub_date": pub_date,
-            "pub_month": pub_month,
-            "pub_day": pub_day,
-            "publication_date": publication_date,
-            "publication_year": validated_year,
-            # Excluded per user request: accepted_date, received_date, revised_date, epub_date
-            "date_completed": date_completed,
-            "date_revised": date_revised,
-        }
-
-        # Any: generic domain entity; type varies by pipeline
-
     def entity_to_silver_record(
-        self, entity: Any
+        self,
+        entity: Any,  # Any: generic domain entity; type varies by pipeline
     ) -> GoldRecord:  # Any: generic domain entity
         """Convert Domain Entity to SilverRecord, excluding certain fields.
 

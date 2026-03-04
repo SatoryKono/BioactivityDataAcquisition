@@ -160,11 +160,8 @@ class TestGenerateContentHash:
     )
     def test_hash_always_valid(self, record):
         """Property: Hash generation should never fail."""
-        try:
-            hash_val = generate_content_hash(record, "test")
-            assert len(hash_val) == 64
-        except Exception as e:
-            pytest.fail(f"Hash generation failed: {e}")
+        hash_val = generate_content_hash(record, "test")
+        assert len(hash_val) == 64
 
 
 @pytest.mark.unit

@@ -25,7 +25,9 @@ if TYPE_CHECKING:
     )
 
 
-def _parse_composite_list(value: Any) -> list[str]:
+def _parse_composite_list(
+    value: Any,  # Any: Arrow field value type varies
+) -> list[str]:  # Any: Arrow field value type varies
     """Parse composite list metadata stored as list or stringified list."""
     if isinstance(value, list):
         return [str(item) for item in value]
@@ -39,7 +41,9 @@ def _parse_composite_list(value: Any) -> list[str]:
     return []
 
 
-def _parse_composite_status(value: Any) -> dict[str, str]:
+def _parse_composite_status(
+    value: Any,  # Any: Arrow field value type varies
+) -> dict[str, str]:  # Any: Arrow field value type varies
     """Parse enrichment status stored as dict or stringified dict."""
     if isinstance(value, dict):
         return {str(k): str(v) for k, v in value.items()}
@@ -53,7 +57,9 @@ def _parse_composite_status(value: Any) -> dict[str, str]:
     return {}
 
 
-def _build_composite_output_ext(records: list[dict[str, Any]]) -> Any | None:
+def _build_composite_output_ext(
+    records: list[dict[str, Any]],  # Any: record/metadata values are heterogeneous
+) -> Any | None:  # Any: record/metadata values are heterogeneous
     """Build CompositeOutputExt when composite lineage columns are present."""
     from bioetl.domain.models.metadata import (
         CompositeOutputExt,

@@ -18,7 +18,7 @@ import contextlib
 import time
 from typing import TYPE_CHECKING, Any
 
-from httpx import RequestError
+from httpx import HTTPStatusError, RequestError
 from typing_extensions import override
 
 from bioetl.domain.exceptions import BioETLError, NetworkError
@@ -26,16 +26,17 @@ from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
 from bioetl.infrastructure.adapters.uniprot.fasta_parser import FastaParser
+from bioetl.infrastructure.adapters.uniprot.metadata_mixin import (
+    _UniProtAdapterMetadataMixin,
+)
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
     import httpx
 
-    from bioetl.domain.models.metadata import SourceMetadata
     from bioetl.domain.ports import LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-
 
 # Maximum IDs per batch for UniProt OR-query (API recommendation)
 UNIPROT_BATCH_SIZE = 100
@@ -97,6 +98,7 @@ UNIPROT_FETCH_ERRORS = (
     BioETLError,
     NetworkError,
     RequestError,
+    HTTPStatusError,
     ConnectionError,
     TimeoutError,
     OSError,
@@ -107,7 +109,9 @@ UNIPROT_FETCH_ERRORS = (
 )
 
 
-class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
+class UniProtAdapter(
+    _UniProtAdapterMetadataMixin, BaseHttpAdapter, PaginatedFetcherMixin
+):
     """UniProt API adapter implementing DataSourcePort.
 
     Provides access to protein sequence and functional information from UniProt database.
@@ -694,35 +698,3 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
                 error=str(e),
             )
             raise
-
-    def _get_health_endpoint(self) -> str:
-        """Return health check endpoint."""
-        return "/uniprotkb/search"
-
-    def __repr__(self) -> str:
-        key_info = "with API key" if self.api_key else "without API key"
-        return f"UniProtAdapter(base_url='{self.base_url}', {key_info})"
-
-    def get_source_metadata(self, api_version: str | None = None) -> SourceMetadata:
-        """Get API request metadata and clear collector.
-
-        Args:
-            api_version: Api version.
-
-        Returns:
-            Source metadata.
-        """
-        metadata = self._request_collector.to_source_metadata(
-            source_type="api", url=self.base_url, api_version=api_version
-        )
-        self._request_collector.clear()
-        return metadata
-
-    def clear_request_collector(self) -> None:
-        """Clear the collector without returning metadata."""
-        self._request_collector.clear()
-
-    @property
-    def request_count(self) -> int:
-        """Number of recorded API requests since last clear."""
-        return self._request_collector.request_count

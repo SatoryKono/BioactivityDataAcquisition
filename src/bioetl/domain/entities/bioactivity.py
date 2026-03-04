@@ -38,7 +38,10 @@ def _safe_str(val: Any) -> str | None:  # Any: raw API value (str | int | None)
 
 
 # Any: heterogeneous JSON fie...
-def _require_field(raw_data: dict[str, Any], field: str) -> Any:
+def _require_field(
+    raw_data: dict[str, Any],  # Any: nested API JSON has heterogeneous values
+    field: str,  # Any: nested API JSON has heterogeneous values
+) -> Any:  # Any: nested API JSON has heterogeneous values
     """Extract required field, raise ValueError if missing."""
     value = raw_data.get(field)
     if value is None:

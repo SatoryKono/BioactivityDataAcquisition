@@ -335,7 +335,10 @@ class PipelineContext:
         )
 
     # Any: arbitrary structured l...
-    def bind_logger(self, **kwargs: Any) -> PipelineContext:
+    def bind_logger(
+        self,
+        **kwargs: Any,  # Any: structlog-compatible API
+    ) -> PipelineContext:  # Any: structlog-compatible API
         """Bind additional context to the logger.
 
         Returns a new context with the bound logger.

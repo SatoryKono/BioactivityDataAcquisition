@@ -1,8 +1,8 @@
-# mypy: disable-error-code=attr-defined
 """Validation and policy helpers for SilverWriter."""
 
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Any, Literal
 
 import pyarrow as pa
@@ -16,12 +16,20 @@ from bioetl.domain.medallion import Layer, SilverWriteMode, WriteMode
 
 if TYPE_CHECKING:
     from bioetl.domain.config import KeyNullabilityRule
+    from bioetl.domain.medallion import WriteModePolicy
+    from bioetl.domain.ports import LoggerPort, MetricsPort, SilverValidatorPort
     from bioetl.domain.types import BronzeRecord
     from bioetl.domain.value_objects.dq_metrics import SchemaDriftInfo
 
 
 class SilverWriterValidationMixin:
     """Mixin with write policy and schema validation logic."""
+
+    logger: LoggerPort
+    _write_policy: WriteModePolicy
+    _metrics: MetricsPort | None
+    _silver_validator: SilverValidatorPort
+    _get_table_schema: Callable[[str], Awaitable[pa.Schema | None]]
 
     def _validate_write_mode(self, mode: str) -> SilverWriteMode:
         """Validate and convert write mode string to enum."""

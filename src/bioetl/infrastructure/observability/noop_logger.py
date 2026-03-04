@@ -43,7 +43,11 @@ class NoOpLogger:
         return self
 
     # Any: structlog-compatible API
-    def info(self, _event: str, **_kwargs: Any) -> None:
+    def info(
+        self,
+        _event: str,
+        **_kwargs: Any,  # Any: structlog/OTel-compatible API
+    ) -> None:  # Any: structlog/OTel-compatible API
         """Log info message (no-op).
 
         Args:
@@ -52,7 +56,11 @@ class NoOpLogger:
         """
 
     # Any: structlog-compatible API
-    def warning(self, _event: str, **_kwargs: Any) -> None:
+    def warning(
+        self,
+        _event: str,
+        **_kwargs: Any,  # Any: structlog/OTel-compatible API
+    ) -> None:  # Any: structlog/OTel-compatible API
         """Log warning message (no-op).
 
         Args:
@@ -61,7 +69,11 @@ class NoOpLogger:
         """
 
     # Any: structlog-compatible API
-    def error(self, _event: str, **_kwargs: Any) -> None:
+    def error(
+        self,
+        _event: str,
+        **_kwargs: Any,  # Any: structlog/OTel-compatible API
+    ) -> None:  # Any: structlog/OTel-compatible API
         """Log error message (no-op).
 
         Args:
@@ -70,7 +82,11 @@ class NoOpLogger:
         """
 
     # Any: structlog-compatible API
-    def debug(self, _event: str, **_kwargs: Any) -> None:
+    def debug(
+        self,
+        _event: str,
+        **_kwargs: Any,  # Any: structlog/OTel-compatible API
+    ) -> None:  # Any: structlog/OTel-compatible API
         """Log debug message (no-op).
 
         Args:
@@ -79,7 +95,11 @@ class NoOpLogger:
         """
 
     # Any: structlog-compatible API
-    def exception(self, _event: str, **_kwargs: Any) -> None:
+    def exception(
+        self,
+        _event: str,
+        **_kwargs: Any,  # Any: structlog/OTel-compatible API
+    ) -> None:  # Any: structlog/OTel-compatible API
         """Log exception with traceback (no-op).
 
         Args:

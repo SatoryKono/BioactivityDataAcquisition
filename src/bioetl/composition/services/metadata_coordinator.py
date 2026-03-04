@@ -58,7 +58,9 @@ from bioetl.domain.value_objects.run_context import RunContext
 from bioetl.domain.version import get_version as _get_bioetl_version
 
 
-def _parse_composite_list(value: Any) -> list[str]:
+def _parse_composite_list(
+    value: Any,  # Any: factory wiring; concrete types resolved at runtime
+) -> list[str]:  # Any: factory wiring; concrete types resolved at runtime
     """Parse composite list metadata stored as list or stringified list."""
     if isinstance(value, list):
         return [str(item) for item in value]
@@ -72,7 +74,9 @@ def _parse_composite_list(value: Any) -> list[str]:
     return []
 
 
-def _parse_composite_status(value: Any) -> dict[str, str]:
+def _parse_composite_status(
+    value: Any,  # Any: factory wiring; concrete types resolved at runtime
+) -> dict[str, str]:  # Any: factory wiring; concrete types resolved at runtime
     """Parse enrichment status stored as dict or stringified dict."""
     if isinstance(value, dict):
         return {str(k): str(v) for k, v in value.items()}
@@ -87,7 +91,9 @@ def _parse_composite_status(value: Any) -> dict[str, str]:
 
 
 def _extract_composite_output_ext(
-    records: list[dict[str, Any]],
+    records: list[
+        dict[str, Any]  # Any: factory wiring; concrete types resolved at runtime
+    ],  # Any: factory wiring; concrete types resolved at runtime
     partition_count: int,
     *,
     schema_validation_enabled: bool = False,

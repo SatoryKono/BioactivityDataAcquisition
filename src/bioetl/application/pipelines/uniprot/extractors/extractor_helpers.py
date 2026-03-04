@@ -65,7 +65,10 @@ class ExtractorUtils:
 
     @classmethod
     # Any: untyped JSON
-    def extract_protein_existence(cls, existence: Any) -> str | None:
+    def extract_protein_existence(
+        cls,
+        existence: Any,  # Any: untyped API JSON
+    ) -> str | None:  # Any: untyped API JSON
         """Extract and normalize protein existence level.
 
         Args:
@@ -81,7 +84,7 @@ class ExtractorUtils:
 
     @staticmethod
     def _extract_values_from_list(
-        data: list[dict[str, Any]],
+        data: list[dict[str, Any]],  # Any: untyped API JSON record
         key: str = "value",  # Any: record vals vary
     ) -> list[str]:
         """Extract values from a list of dictionaries.
@@ -98,7 +101,9 @@ class ExtractorUtils:
 
     @staticmethod
     # Any: JSON vals
-    def extract_short_names(recommended_name: dict[str, Any] | None) -> str | None:
+    def extract_short_names(
+        recommended_name: dict[str, Any] | None,  # Any: untyped API JSON record
+    ) -> str | None:  # Any: untyped API JSON record
         """Extract short names from recommended name.
 
         Args:
@@ -144,7 +149,9 @@ class ExtractorUtils:
 
     @staticmethod
     # Any: JSON vals
-    def extract_ec_numbers(recommended_name: dict[str, Any] | None) -> str | None:
+    def extract_ec_numbers(
+        recommended_name: dict[str, Any] | None,  # Any: untyped API JSON record
+    ) -> str | None:  # Any: untyped API JSON record
         """Extract EC numbers from recommended name.
 
         Args:

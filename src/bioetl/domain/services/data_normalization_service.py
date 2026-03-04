@@ -192,7 +192,10 @@ class DefaultDataNormalizationService(AuthorNormalizationService):
         stripped = value.strip()
         return stripped if stripped else None
 
-    def normalize_to_string(self, value: Any) -> str | None:
+    def normalize_to_string(
+        self,
+        value: Any,  # Any: raw input value from API (str|int|float|None)
+    ) -> str | None:  # Any: raw input value from API (str|int|float|None)
         """Convert value to string, strip whitespace, return None if empty.
 
         Args:
@@ -223,7 +226,10 @@ class DefaultDataNormalizationService(AuthorNormalizationService):
             return self._parse_authors_string(authors.strip())
         return []
 
-    def _parse_authors_from_list(self, authors: list[Any]) -> list[str]:
+    def _parse_authors_from_list(
+        self,
+        authors: list[Any],  # Any: input list items have heterogeneous types
+    ) -> list[str]:  # Any: input list items have heterogeneous types
         """Parse author list, filtering non-strings and empty values."""
         return [a.strip() for a in authors if isinstance(a, str) and a.strip()]
 
@@ -241,14 +247,17 @@ class DefaultDataNormalizationService(AuthorNormalizationService):
             return self._filter_json_authors(parsed)
         return None
 
-    def _try_json_loads(self, text: str) -> Any:
+    def _try_json_loads(self, text: str) -> Any:  # Any: JSON parse result type varies
         """Attempt JSON parsing, returning None on failure."""
         try:
             return deserialize_from_json(text)
         except ValueError:
             return None
 
-    def _filter_json_authors(self, items: list[Any]) -> list[str]:
+    def _filter_json_authors(
+        self,
+        items: list[Any],  # Any: input list items have heterogeneous types
+    ) -> list[str]:  # Any: input list items have heterogeneous types
         """Filter and convert JSON array items to author strings."""
         return [str(a).strip() for a in items if a is not None and str(a).strip()]
 

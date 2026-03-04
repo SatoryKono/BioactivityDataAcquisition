@@ -38,7 +38,7 @@ Uses Any to avoid infrastructure imports in domain layer per Ports & Adapters.
 """
 
 DataContainerDict = dict[
-    str, Any
+    str, Any  # Any: port contract allows heterogeneous values
 ]  # Any: polars.DataFrame | pyarrow.Table (avoids infra import)
 """Type alias for dictionary of named data containers.
 
@@ -107,7 +107,9 @@ class SilverDQAnalyzerPort(Protocol):
         input_record_count: int | None = None,
         quarantined_count: int = 0,
         previous_schema: dict[str, str] | None = None,
-        key_nullability_rules: list[dict[str, Any]]
+        key_nullability_rules: list[
+            dict[str, Any]  # Any: port contract allows heterogeneous record values
+        ]  # Any: DQ rule definitions have heterogeneous values
         | None = None,  # Any: DQ report data varies by check type
     ) -> SilverDQReport:
         """Analyze Silver data and generate DQ report.
@@ -152,12 +154,16 @@ class GoldDQAnalyzerPort(Protocol):
         timestamp: datetime,
         required_fields: list[str] | None = None,
         completeness_threshold: float = 0.90,
-        business_rules: list[dict[str, Any]]
+        business_rules: list[
+            dict[str, Any]  # Any: port contract allows heterogeneous record values
+        ]  # Any: DQ rule definitions have heterogeneous values
         | None = None,  # Any: DQ report data varies by check type
         reference_tables: DataContainerDict | None = None,
-        baseline_stats: dict[str, Any]
+        baseline_stats: dict[
+            str, Any  # Any: port contract allows heterogeneous values
+        ]  # Any: DQ baseline statistics have heterogeneous values
         | None = None,  # Any: DQ report data varies by check type
-        scd_config: dict[str, Any]
+        scd_config: dict[str, Any]  # Any: SCD config has heterogeneous values
         | None = None,  # Any: DQ report data varies by check type
     ) -> GoldDQReport:
         """Analyze Gold data and generate DQ report.

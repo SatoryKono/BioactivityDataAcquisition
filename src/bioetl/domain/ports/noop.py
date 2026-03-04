@@ -57,7 +57,11 @@ class _NoOpSpan:
         """Context manager exit."""
 
     # Any: OTel Tracer facade (Nu...
-    def set_attribute(self, key: str, value: Any) -> None:
+    def set_attribute(
+        self,
+        key: str,
+        value: Any,  # Any: NoOp accepts any value (Null Object pattern)
+    ) -> None:  # Any: port contract accepts any attribute value
         """Set span attribute (no-op).
 
         Args:
@@ -90,7 +94,11 @@ class _NoOpOtelTracer:
     """
 
     # Any: OTel Tracer facade (Nu...
-    def start_as_current_span(self, *_args: Any, **_kwargs: Any) -> _NoOpSpan:
+    def start_as_current_span(
+        self,
+        *_args: Any,  # Any: structlog/OTel-compatible API
+        **_kwargs: Any,  # Any: structlog/OTel-compatible API
+    ) -> _NoOpSpan:  # Any: structlog/OTel-compatible API
         """Start a new span (no-op).
 
         Accepts any arguments to be compatible with OpenTelemetry tracer.

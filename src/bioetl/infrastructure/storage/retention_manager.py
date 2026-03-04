@@ -94,7 +94,9 @@ class RetentionManager:
         self,
         table_name: str,
         target_size: int | None = None,
-        partition_filters: list[tuple[str, str, Any]]
+        partition_filters: list[
+            tuple[str, str, Any]  # Any: Delta Lake partition filter values vary
+        ]  # Any: Delta Lake partition filter values vary
         | None = None,  # Any: Delta Lake filter value type varies
     ) -> dict[str, Any]:  # Any: compaction result metrics
         """Optimize table layout through file compaction.
@@ -130,7 +132,9 @@ class RetentionManager:
         except DeltaTableNotFoundError as e:
             raise TableNotFoundError(table_path) from e
 
-    async def get_table_info(self, table_name: str) -> dict[str, Any]:
+    async def get_table_info(
+        self, table_name: str
+    ) -> dict[str, Any]:  # Any: record/metadata values are heterogeneous
         """Get metadata about a Delta table.
 
         Args:

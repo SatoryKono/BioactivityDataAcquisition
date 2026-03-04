@@ -14,13 +14,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
-from bioetl.domain.types import GoldRecord
-
 from bioetl.application.core.entity_id import compute_publication_term_entity_id
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
 from bioetl.domain.entities import DocumentTerm
+from bioetl.domain.types import GoldRecord
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -235,7 +234,9 @@ class PublicationTermTransformer(BaseChemblTransformer):
 
         # Extract keywords
         raw_keywords = record.get("keywords")
-        keywords: list[Any] = raw_keywords if isinstance(raw_keywords, list) else []  # Any: untyped ChEMBL API JSON list elements
+        keywords: list[Any] = (  # Any: untyped ChEMBL API JSON
+            raw_keywords if isinstance(raw_keywords, list) else []
+        )
         for keyword in keywords:
             if isinstance(keyword, str):
                 stripped = keyword.strip()

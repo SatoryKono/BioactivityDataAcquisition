@@ -303,7 +303,10 @@ def detect_hash_collision(
     return existing_source_id is not None and source_record_id != existing_source_id
 
 
-def safe_float(value: Any, default: float | None = None) -> float | None:  # Any: record field type varies
+def safe_float(
+    value: Any,  # Any: accepts any input type
+    default: float | None = None,
+) -> float | None:
     """Safely convert value to float.
 
     Args:
@@ -321,7 +324,10 @@ def safe_float(value: Any, default: float | None = None) -> float | None:  # Any
         return default
 
 
-def safe_int(value: Any, default: int | None = None) -> int | None:  # Any: record field type varies
+def safe_int(
+    value: Any,  # Any: accepts any input type
+    default: int | None = None,
+) -> int | None:
     """Safely convert value to int.
 
     Args:
@@ -339,7 +345,10 @@ def safe_int(value: Any, default: int | None = None) -> int | None:  # Any: reco
         return default
 
 
-def safe_str(value: Any, default: str | None = None) -> str | None:  # Any: record field type varies
+def safe_str(
+    value: Any,  # Any: accepts any input type
+    default: str | None = None,
+) -> str | None:
     """Safely convert value to string.
 
     Useful for fields that may come as int/float from API but need to be

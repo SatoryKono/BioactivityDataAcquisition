@@ -296,7 +296,10 @@ class CompositeCheckpointState:
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> CompositeCheckpointState:
+    def from_dict(
+        cls,
+        data: dict[str, Any],  # Any: checkpoint state has heterogeneous values
+    ) -> CompositeCheckpointState:  # Any: checkpoint state has heterogeneous values
         """Create state from dictionary.
 
         Handles backward compatibility for checkpoints without state field

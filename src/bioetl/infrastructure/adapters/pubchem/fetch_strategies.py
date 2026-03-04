@@ -54,8 +54,8 @@ class PubChemFetchStrategies:
         circuit_breaker: CircuitBreaker,
         mapper: PubChemEntityMapper,
         run_in_executor: Callable[
-            ..., Any
-        ],  # Any: executor wraps sync calls with varying return types
+            ..., Any  # Any: executor wraps sync calls with varying return types
+        ],
         provider_name: str = "pubchem",
         request_collector: APIRequestCollector | None = None,
     ) -> None:

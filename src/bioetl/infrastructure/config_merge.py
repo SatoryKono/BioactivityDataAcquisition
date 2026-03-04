@@ -10,7 +10,10 @@ import copy
 from collections.abc import Callable, Mapping
 from typing import Any
 
-ListMergeFn = Callable[[list[Any], list[Any], str], list[Any]]  # Any: YAML config values are heterogeneous
+ListMergeFn = Callable[
+    [list[Any], list[Any], str],  # Any: heterogeneous YAML values
+    list[Any],  # Any: heterogeneous YAML values
+]
 ListMergeResolver = Callable[[str], ListMergeFn | None]
 
 

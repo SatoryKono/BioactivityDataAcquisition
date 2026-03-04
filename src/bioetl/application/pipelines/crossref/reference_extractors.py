@@ -15,7 +15,10 @@ from typing import Any
 
 
 # Any: untyped JSON
-def _clean_string(value: Any, lowercase: bool = False) -> str | None:
+def _clean_string(
+    value: Any,  # Any: untyped API JSON
+    lowercase: bool = False,  # Any: untyped API JSON
+) -> str | None:  # Any: untyped API JSON
     """Clean and optionally lowercase a string value."""
     if not value or not isinstance(value, str):
         return None
@@ -39,7 +42,9 @@ def _parse_year(year_raw: Any) -> int | None:  # Any: untyped API JSON
 
 
 # Any: raw API JSON
-def extract_references(publication: dict[str, Any]) -> list[dict[str, Any]]:
+def extract_references(
+    publication: dict[str, Any],  # Any: untyped API JSON record
+) -> list[dict[str, Any]]:  # Any: untyped API JSON record
     """Extract bibliographic references from CrossRef publication.
 
     Parses the 'reference' array containing citations to other works.

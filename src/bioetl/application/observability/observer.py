@@ -456,9 +456,11 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
         *,
         severity: str,
         **extra: Any,  # Any: structlog-compatible context kwargs
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any]:  # Any: OTel span attributes are heterogeneous
         """Build normalized observability context with dual-write aliases."""
-        context: dict[str, Any] = dict(extra)
+        context: dict[str, Any] = dict(  # Any: OTel span attributes are heterogeneous
+            extra
+        )
         provider = str(context.get("provider") or self.provider_name)
 
         context.setdefault("provider", provider)

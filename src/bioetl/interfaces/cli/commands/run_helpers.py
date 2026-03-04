@@ -12,6 +12,8 @@ from typing import TYPE_CHECKING
 
 import click
 
+from bioetl.domain.exceptions import BioETLError
+
 __all__ = [
     "get_runner_logger",
     "handle_destructive_run_confirmation",
@@ -91,8 +93,24 @@ def show_cleanup_preview(pipeline: str) -> None:
     """
     try:
         asyncio.run(_preview_cleanup_async(pipeline))
-    except Exception as e:
-        echo_error("Error previewing cleanup", str(e))
+    except (BioETLError, FileNotFoundError, OSError, RuntimeError, ValueError) as exc:
+        echo_error(
+            "Error previewing cleanup",
+            (
+                f"{exc} "
+                f"(reason_code=CLI_CLEANUP_PREVIEW_ERROR, pipeline={pipeline}, "
+                f"error_type={type(exc).__name__})"
+            ),
+        )
+    except Exception as exc:
+        echo_error(
+            "Error previewing cleanup",
+            (
+                f"{exc} "
+                f"(reason_code=CLI_CLEANUP_PREVIEW_UNEXPECTED_ERROR, pipeline={pipeline}, "
+                f"error_type={type(exc).__name__})"
+            ),
+        )
 
 
 def handle_destructive_run_confirmation(

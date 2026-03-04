@@ -13,6 +13,7 @@ from deltalake.exceptions import DeltaError, SchemaMismatchError
 
 from bioetl.domain.exceptions import MergeConflictError, SchemaViolationError
 from bioetl.domain.medallion import SilverWriteMode, WriteModePolicy
+from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
 from bioetl.domain.types import BronzeRecord, MetaDict
 from bioetl.infrastructure.storage.base_delta_writer import (
     BaseDeltaWriter,
@@ -75,9 +76,11 @@ class SilverWriter(
         transform_version: str | None = None,
         transform_steps: tuple[str, ...] | None = None,
         flat_structure: bool = False,
+        dq_calculator: DQMetricsCalculator | None = None,
     ) -> None:
         """Initialize Silver writer."""
         super().__init__(base_path, logger, flat_structure=flat_structure)
+        self._dq_calculator = dq_calculator or DQMetricsCalculator()
 
         if tracing is None:
             from bioetl.domain.ports import NoOpTracing
@@ -239,7 +242,10 @@ class SilverWriter(
         self,
         table_name: str,
         target_size: int | None = None,
-        partition_filters: list[tuple[str, str, Any]] | None = None,
+        partition_filters: list[
+            tuple[str, str, Any]  # Any: Delta Lake partition filter values vary
+        ]  # Any: Delta Lake partition filter values vary
+        | None = None,  # Any: Delta Lake partition filter values vary
     ) -> MetaDict:
         """Optimize table layout (compaction)."""
         return await self._retention_manager.optimize(

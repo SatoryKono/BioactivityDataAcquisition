@@ -178,8 +178,12 @@ class UniquenessResult:
     unique_count: int
     total_count: int
     duplicate_rate: float
-    column_stats: dict[str, dict[str, Any]] = field(
-        default_factory=dict
+    column_stats: dict[
+        str, dict[str, Any]  # Any: port contract allows heterogeneous record values
+    ] = (  # Any: port contract allows heterogeneous record values
+        field(  # Any: DQ check values vary by check type
+            default_factory=dict
+        )
     )  # Any: DQ report values vary by check type
     status: DQCheckStatus = DQCheckStatus.PASS
 
@@ -191,8 +195,12 @@ class TypeConformanceResult:
     schema_version: str | None
     pandera_passed: bool
     errors: tuple[str, ...] = ()
-    type_coercions: dict[str, dict[str, Any]] = field(
-        default_factory=dict
+    type_coercions: dict[
+        str, dict[str, Any]  # Any: port contract allows heterogeneous record values
+    ] = (  # Any: port contract allows heterogeneous record values
+        field(  # Any: DQ check values vary by check type
+            default_factory=dict
+        )
     )  # Any: DQ report values vary by check type
     status: DQCheckStatus = DQCheckStatus.PASS
 

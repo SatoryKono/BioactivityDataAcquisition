@@ -23,7 +23,9 @@ from bioetl.infrastructure.config_merge import config_merge
 T = TypeVar("T")
 
 
-def _load_yaml_file(path: Path) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
+def _load_yaml_file(
+    path: Path,
+) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
     """Load YAML file, returning empty dict if missing or empty."""
     if not path.exists():
         return {}
@@ -64,7 +66,8 @@ class BaseConfigLoader(ABC, Generic[T]):
         self,
         provider: str,
         entity: str,
-        inline_overrides: dict[str, Any] | None = None,  # Any: YAML config has heterogeneous values
+        inline_overrides: dict[str, Any]  # Any: YAML config heterogeneous
+        | None = None,
     ) -> T:
         """Load merged config for provider/entity.
 
@@ -78,7 +81,9 @@ class BaseConfigLoader(ABC, Generic[T]):
         """
         ...
 
-    def _load_yaml(self, path: Path) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
+    def _load_yaml(
+        self, path: Path
+    ) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
         """Load YAML file, return empty dict if not exists.
 
         Args:

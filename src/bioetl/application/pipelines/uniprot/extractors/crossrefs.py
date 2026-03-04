@@ -130,7 +130,8 @@ class CrossRefExtractor:
 
     @classmethod
     def _build_pdb_entry(
-        cls, xref: dict[str, Any]
+        cls,
+        xref: dict[str, Any],  # Any: untyped API JSON record
     ) -> dict[str, Any] | None:  # Any: untyped JSON fragment from UniProt API
         """Build a PDB entry from a cross-reference dict."""
         pdb_id = xref.get("id")
@@ -180,7 +181,8 @@ class CrossRefExtractor:
 
     @classmethod
     def _build_interpro_entry(
-        cls, xref: dict[str, Any]
+        cls,
+        xref: dict[str, Any],  # Any: untyped API JSON record
     ) -> dict[str, Any] | None:  # Any: untyped JSON fragment from UniProt API
         """Build an InterPro entry from a cross-reference dict."""
         interpro_id = xref.get("id")
@@ -228,7 +230,8 @@ class CrossRefExtractor:
 
     @classmethod
     def _build_pfam_entry(
-        cls, xref: dict[str, Any]
+        cls,
+        xref: dict[str, Any],  # Any: untyped API JSON record
     ) -> dict[str, Any] | None:  # Any: untyped JSON fragment from UniProt API
         """Build a Pfam entry from a cross-reference dict."""
         pfam_id = xref.get("id")
@@ -275,7 +278,8 @@ class CrossRefExtractor:
 
     @classmethod
     def _build_reactome_entry(
-        cls, xref: dict[str, Any]
+        cls,
+        xref: dict[str, Any],  # Any: untyped API JSON record
     ) -> dict[str, Any] | None:  # Any: untyped JSON fragment from UniProt API
         """Build a Reactome entry from a cross-reference dict."""
         reactome_id = xref.get("id")
@@ -324,7 +328,9 @@ class CrossRefExtractor:
 
     @classmethod
     def extract_go_by_aspect(
-        cls, xrefs: Any, aspect: str
+        cls,
+        xrefs: Any,  # Any: untyped API JSON
+        aspect: str,  # Any: untyped UniProt API JSON
     ) -> str | None:  # Any: untyped UniProt JSON
         """Extract GO terms filtered by aspect.
 

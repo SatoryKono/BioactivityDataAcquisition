@@ -640,12 +640,8 @@ def test_pipeline_configs_schema(project_root: Path):
         with yaml_file.open(encoding="utf-8") as f:
             data = yaml.safe_load(f)
 
-        # Use source file for merging if present, simplified for test
-        try:
-            # We just check if it instantiates without error, basic validation
-            PipelineYamlConfig(**data)
-        except Exception as e:
-            pytest.fail(f"Config {yaml_file} failed schema validation: {e}")
+        # We just check if it instantiates without error, basic validation
+        PipelineYamlConfig(**data)
 
 
 # =============================================================================

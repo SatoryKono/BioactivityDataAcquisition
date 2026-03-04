@@ -1,4 +1,3 @@
-# mypy: disable-error-code=attr-defined
 """Delta operation helpers for SilverWriter."""
 
 from __future__ import annotations
@@ -16,6 +15,8 @@ from bioetl.domain.medallion import SilverWriteMode
 if TYPE_CHECKING:
     from deltalake import DeltaTable as DeltaTableType
 
+    from bioetl.domain.ports import LoggerPort
+
 
 class SilverWriterDeltaMixin:
     """Mixin with Delta write/merge operations."""
@@ -23,9 +24,10 @@ class SilverWriterDeltaMixin:
     _MERGE_MAX_RETRIES = 3
     _MERGE_RETRY_DELAY = 0.5
     _MERGE_EXEC_TIMEOUT_SECONDS = 45.0
+    logger: LoggerPort
 
     @staticmethod
-    def _load_silver_writer_module() -> Any:
+    def _load_silver_writer_module() -> Any:  # Any: return type varies at runtime
         """Load silver_writer module for backward-compatible patch points."""
         from bioetl.infrastructure.storage import silver_writer as silver_writer_module
 

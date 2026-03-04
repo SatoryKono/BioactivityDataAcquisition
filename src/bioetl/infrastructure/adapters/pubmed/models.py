@@ -94,8 +94,10 @@ class PubMedMeshHeading(BaseModel):
     descriptor_name: str | None = Field(default=None, description="MeSH descriptor")
     descriptor_ui: str | None = Field(default=None, description="MeSH descriptor UI")
     major_topic: bool = Field(default=False, description="Is major topic")
-    qualifiers: list[dict[str, Any]] | None = Field(
-        default_factory=list, description="MeSH qualifiers"
+    qualifiers: list[dict[str, Any]] | None = (  # Any: untyped API JSON record
+        Field(  # Any: nested API JSON has heterogeneous values
+            default_factory=list, description="MeSH qualifiers"
+        )
     )
 
 

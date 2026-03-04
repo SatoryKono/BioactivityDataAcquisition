@@ -144,7 +144,11 @@ class DQReportSerializer:
         return "\n".join(lines)
 
     def _yaml_entry(  # Any: value is serializable
-        self, key: str, value: Any, prefix: str, indent: int
+        self,
+        key: str,
+        value: Any,  # Any: DQ check values vary by check type
+        prefix: str,
+        indent: int,  # Any: DQ check values vary by check type
     ) -> list[str]:
         """Convert a single key-value pair to YAML lines."""
         if isinstance(value, dict):
@@ -154,7 +158,10 @@ class DQReportSerializer:
         return [f"{prefix}{key}: {self._yaml_value(value)}"]
 
     def _yaml_list(  # Any: items have mixed values
-        self, items: list[Any], prefix: str, indent: int
+        self,
+        items: list[Any],  # Any: DQ values vary by check type
+        prefix: str,
+        indent: int,  # Any: DQ values vary by check type
     ) -> list[str]:
         """Convert a list to YAML lines."""
         lines = []

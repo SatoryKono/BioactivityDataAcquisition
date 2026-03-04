@@ -211,7 +211,7 @@ def _read_source_config_payload(
 
     source_section = unified_raw.get("source")
     if isinstance(source_section, dict):
-        payload: dict[str, Any] = {
+        payload: dict[str, Any] = {  # Any: YAML config has heterogeneous values
             "source": source_section
         }  # Any: YAML config has heterogeneous values
         for key in ("entities", "entity_notes"):
@@ -385,7 +385,7 @@ def _load_column_groups_section(
     config: dict[str, Any],  # Any: YAML config has heterogeneous values
     entity_config: dict[str, Any],  # Any: YAML config has heterogeneous values
     config_path: Path,
-    unified_schema: dict[str, Any]
+    unified_schema: dict[str, Any]  # Any: YAML config has heterogeneous values
     | None = None,  # Any: YAML config has heterogeneous values
 ) -> None:
     """Load column groups from external file unless explicitly set inline.
@@ -466,9 +466,12 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
         Loaded PipelineYamlConfig.
     """
     unified_raw: dict[str, Any] = {}  # Any: YAML config has heterogeneous values
-    unified_schema: dict[str, Any] | None = (
-        None  # Any: YAML config has heterogeneous values
-    )
+    unified_schema: (
+        dict[
+            str, Any  # Any: YAML config has heterogeneous values
+        ]
+        | None
+    ) = None
 
     if "_" not in pipeline_name:
         raise ValueError(

@@ -192,7 +192,9 @@ class ChemblActivityRecord(BaseModel):
     document_year: int | None = Field(default=None, description="Publication year")
 
     # Activity Properties (complex field)
-    activity_properties: list[dict[str, Any]] | None = (
+    activity_properties: (
+        list[dict[str, Any]] | None  # Any: untyped API JSON record
+    ) = (  # Any: nested API JSON has heterogeneous values
         Field(  # Any: nested ChEMBL JSON with provider-specific schema
             default_factory=list, description="Additional activity properties"
         )
@@ -270,7 +272,9 @@ class ChemblAssayRecord(BaseModel):
 
     # Variants
     variant_sequence: str | None = Field(default=None, description="Variant sequence")
-    assay_parameters: list[dict[str, Any]] | None = (
+    assay_parameters: (
+        list[dict[str, Any]] | None  # Any: untyped API JSON record
+    ) = (  # Any: nested API JSON has heterogeneous values
         Field(  # Any: nested ChEMBL JSON with provider-specific schema
             default_factory=list, description="Assay parameters"
         )
@@ -380,11 +384,15 @@ class ChemblMoleculeRecord(BaseModel):
     molecule_hierarchy: MoleculeHierarchy | None = Field(default=None)
     molecule_properties: MoleculeProperties | None = Field(default=None)
     molecule_structures: MoleculeStructures | None = Field(default=None)
-    molecule_synonyms: list[dict[str, Any]] | None = Field(
-        default_factory=list
+    molecule_synonyms: list[dict[str, Any]] | None = (  # Any: untyped API JSON record
+        Field(  # Any: nested API JSON has heterogeneous values
+            default_factory=list
+        )
     )  # Any: nested ChEMBL JSON with provider-specific schema
-    cross_references: list[dict[str, Any]] | None = Field(
-        default_factory=list
+    cross_references: list[dict[str, Any]] | None = (  # Any: untyped API JSON record
+        Field(  # Any: nested API JSON has heterogeneous values
+            default_factory=list
+        )
     )  # Any: nested ChEMBL JSON with provider-specific schema
     atc_classifications: list[str] | None = Field(default_factory=list)
 
@@ -436,11 +444,15 @@ class ChemblTargetRecord(BaseModel):
     species_group_flag: int | None = Field(default=None)
 
     # Complex Fields
-    target_components: list[dict[str, Any]] | None = Field(
-        default_factory=list
+    target_components: list[dict[str, Any]] | None = (  # Any: untyped API JSON record
+        Field(  # Any: nested API JSON has heterogeneous values
+            default_factory=list
+        )
     )  # Any: nested ChEMBL JSON with provider-specific schema
-    cross_references: list[dict[str, Any]] | None = Field(
-        default_factory=list
+    cross_references: list[dict[str, Any]] | None = (  # Any: untyped API JSON record
+        Field(  # Any: nested API JSON has heterogeneous values
+            default_factory=list
+        )
     )  # Any: nested ChEMBL JSON with provider-specific schema
 
 
@@ -563,21 +575,35 @@ class ChemblTargetComponentRecord(BaseModel):
     tax_id: int | None = Field(default=None)
 
     # GO Classifications
-    go_slims: list[dict[str, Any]] | None = Field(
-        default_factory=list
+    go_slims: list[dict[str, Any]] | None = (  # Any: untyped API JSON record
+        Field(  # Any: nested API JSON has heterogeneous values
+            default_factory=list
+        )
     )  # Any: nested ChEMBL JSON with provider-specific schema
 
     # Protein Classifications
-    protein_classifications: list[dict[str, Any]] | None = Field(
-        default_factory=list
+    protein_classifications: (
+        list[dict[str, Any]] | None  # Any: untyped API JSON record
+    ) = (  # Any: untyped API JSON record
+        Field(  # Any: nested API JSON has heterogeneous values
+            default_factory=list
+        )
     )  # Any: nested ChEMBL JSON with provider-specific schema
 
     # Target Relations
-    target_component_synonyms: list[dict[str, Any]] | None = Field(
-        default_factory=list
+    target_component_synonyms: (
+        list[dict[str, Any]] | None  # Any: untyped API JSON record
+    ) = (  # Any: untyped API JSON record
+        Field(  # Any: nested API JSON has heterogeneous values
+            default_factory=list
+        )
     )  # Any: nested ChEMBL JSON with provider-specific schema
-    target_component_xrefs: list[dict[str, Any]] | None = Field(
-        default_factory=list
+    target_component_xrefs: (
+        list[dict[str, Any]] | None  # Any: untyped API JSON record
+    ) = (  # Any: untyped API JSON record
+        Field(  # Any: nested API JSON has heterogeneous values
+            default_factory=list
+        )
     )  # Any: nested ChEMBL JSON with provider-specific schema
 
 

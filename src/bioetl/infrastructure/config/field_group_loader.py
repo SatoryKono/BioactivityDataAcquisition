@@ -62,7 +62,10 @@ def load_field_groups(path: Path) -> FieldGroupRegistry:
     return _parse_config(raw, source=str(path))
 
 
-def _parse_config(raw: dict[str, Any], source: str) -> FieldGroupRegistry:
+def _parse_config(
+    raw: dict[str, Any],  # Any: YAML config has heterogeneous values
+    source: str,  # Any: YAML config has heterogeneous values
+) -> FieldGroupRegistry:  # Any: YAML config has heterogeneous values
     """Parse raw YAML dict into FieldGroupRegistry.
 
     Args:
@@ -101,7 +104,10 @@ def _parse_config(raw: dict[str, Any], source: str) -> FieldGroupRegistry:
     )
 
 
-def _parse_group(raw_group: dict[str, Any], index: int) -> FieldGroupDefinition:
+def _parse_group(
+    raw_group: dict[str, Any],  # Any: YAML config has heterogeneous values
+    index: int,  # Any: YAML config has heterogeneous values
+) -> FieldGroupDefinition:  # Any: YAML config has heterogeneous values
     """Parse a single group definition from YAML.
 
     Args:
@@ -143,7 +149,10 @@ def _parse_group(raw_group: dict[str, Any], index: int) -> FieldGroupDefinition:
     )
 
 
-def _parse_field(raw_field: dict[str, Any], group_id: FieldGroupId) -> FieldMapping:
+def _parse_field(
+    raw_field: dict[str, Any],  # Any: YAML config has heterogeneous values
+    group_id: FieldGroupId,  # Any: YAML config has heterogeneous values
+) -> FieldMapping:  # Any: YAML config has heterogeneous values
     """Parse a single field mapping from YAML.
 
     Args:

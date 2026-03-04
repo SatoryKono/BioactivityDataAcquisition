@@ -1,8 +1,8 @@
-# mypy: disable-error-code=attr-defined
 """I/O and load/write helpers for MergeService."""
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.composite.column_renamer import ColumnRenamerService
@@ -24,7 +24,11 @@ if TYPE_CHECKING:
     from bioetl.application.composite.cross_validator import (
         EnrichmentCrossValidationService,
     )
-    from bioetl.domain.composite.config import DependencyConfig, EnricherConfig
+    from bioetl.domain.composite.config import (
+        DependencyConfig,
+        EnricherConfig,
+        MergeConfig,
+    )
     from bioetl.domain.composite.cross_validation import CrossValidationStats
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.composite.result import (
@@ -62,15 +66,20 @@ class MergeIOHelper:
     """Mixin for merge data loading, cross-validation, and output persistence."""
 
     # -- Host-class attributes (set by MergeService.__init__) --
-    _config: Any
+    _config: MergeConfig
     _logger: LoggerPort
     _storage: StoragePort
     _delta_reader: DeltaReaderPort | None
     _field_group_registry: FieldGroupRegistry | None
     _cross_validator: EnrichmentCrossValidationService | None
-    _gold_schema: Any | None
+    _gold_schema: Any | None  # Any: Pandera DataFrameModel class or instance
     _join_planner: JoinPlannerService
     _renamer: ColumnRenamerService
+    _get_field_aliases: Callable[[str], dict[str, str] | None]
+    _infer_pipeline_from_table: Callable[[str], str | None]
+    _infer_silver_table: Callable[[str], str]
+    _calculate_field_coverage: Callable[[pl.DataFrame], dict[str, float]]
+    _count_fully_enriched: Callable[[pl.DataFrame, Sequence[EnricherConfig]], int]
 
     async def _prepare_seed_dataframe(
         self,

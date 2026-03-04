@@ -64,7 +64,9 @@ class TablePreview:
     layer: str
     row_count: int
     columns: tuple[ColumnInfo, ...]
-    sample_rows: tuple[dict[str, Any], ...]
+    sample_rows: tuple[
+        dict[str, Any], ...  # Any: port contract allows heterogeneous record values
+    ]  # Any: port contract allows heterogeneous record values
 
 
 @dataclass(frozen=True, slots=True)

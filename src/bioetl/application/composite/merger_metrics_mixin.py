@@ -1,8 +1,8 @@
-# mypy: disable-error-code=attr-defined
 """Lineage and metrics helpers for MergeService."""
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
@@ -11,12 +11,17 @@ if TYPE_CHECKING:
 
     import polars as pl
 
-    from bioetl.domain.composite.config import EnricherConfig
+    from bioetl.domain.composite.config import EnricherConfig, MergeConfig
     from bioetl.domain.composite.result import DependencyResult, EnrichmentResult
+    from bioetl.domain.ports import LoggerPort
 
 
 class MergeMetricsHelper:
     """Mixin for lineage enrichment and post-merge metric calculations."""
+
+    _config: MergeConfig
+    _logger: LoggerPort
+    _parse_pipeline_name: Callable[[str], tuple[str, str]]
 
     def _add_lineage(
         self,
