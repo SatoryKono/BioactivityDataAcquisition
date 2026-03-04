@@ -43,6 +43,8 @@ class TestHttpClientFactory:
             max_retries=5,
             retry_base_delay=0.5,
             retry_max_delay=9.0,
+            max_connections=100,
+            max_keepalive_connections=20,
         )
         client_ctor = MagicMock(return_value="client-from-source")
 
@@ -65,6 +67,8 @@ class TestHttpClientFactory:
         assert kwargs["retry_config"].max_attempts == 5
         assert kwargs["retry_config"].base_delay == 0.5
         assert kwargs["retry_config"].max_delay == 9.0
+        assert kwargs["max_connections"] == 100
+        assert kwargs["max_keepalive_connections"] == 20
 
     def test_create_applies_rate_override_from_settings(
         self, monkeypatch: pytest.MonkeyPatch

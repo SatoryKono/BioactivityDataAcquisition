@@ -17,15 +17,10 @@ __all__ = [
 
 from collections.abc import AsyncIterator, Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import Protocol
 
 from bioetl.domain.exceptions import RetryExhaustedError
 from bioetl.domain.types import BronzeRecord
-
-if TYPE_CHECKING:
-    from bioetl.infrastructure.adapters.common.base_title_fallback import (
-        BaseTitleFallbackHandler,
-    )
 
 TITLE_ONLY_MARKER_PREFIX = "__title_only_"
 
@@ -39,6 +34,30 @@ class _FetchState:
 
     def limit_reached(self) -> bool:
         return self.limit is not None and self.fetched >= self.limit
+
+
+class FallbackPolicyHandler(Protocol):
+    """Provider-specific fallback hooks for the shared three-phase orchestrator."""
+
+    def process_missing_dois(
+        self,
+        *,
+        dois: list[str],
+        found_dois: set[str],
+        fallback_mapping: dict[str, str],
+        normalize_fn: Callable[[str], str | None],
+        limit: int | None,
+        fetched: int,
+    ) -> AsyncIterator[BronzeRecord]: ...
+
+    def process_title_only_entries(
+        self,
+        *,
+        entries: list[str],
+        fallback_mapping: dict[str, str],
+        limit: int | None,
+        fetched: int,
+    ) -> AsyncIterator[BronzeRecord]: ...
 
 
 def split_filter_ids_for_fallback(
@@ -135,7 +154,7 @@ async def run_fetch_with_fallback_policy(
     fallback_mapping: dict[str, str],
     normalize_id: Callable[[str], str | None],
     extract_record_id: Callable[[BronzeRecord], str | None],
-    fallback_handler: BaseTitleFallbackHandler | None,
+    fallback_handler: FallbackPolicyHandler | None,
     limit: int | None = None,
     primary_lookup_method: str | None = None,
     phase1_summary_logger: Callable[[int, int], None] | None = None,

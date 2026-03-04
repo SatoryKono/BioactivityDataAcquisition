@@ -3,9 +3,12 @@ from __future__ import annotations
 from collections.abc import AsyncIterator
 
 import pytest
+from hypothesis import given
+from hypothesis import strategies as st
 
 from bioetl.domain.exceptions import ExternalServiceError, RetryExhaustedError
 from bioetl.infrastructure.adapters.common.fetch_retry_policy import (
+    TITLE_ONLY_MARKER_PREFIX,
     is_retry_exhausted_error,
     run_fetch_with_fallback_policy,
     split_filter_ids_for_fallback,
@@ -18,6 +21,22 @@ def test_split_filter_ids_for_fallback_supports_markers_and_empty() -> None:
     )
     assert primary == ["10.1/a", "10.2/b"]
     assert title_only == ["", "  ", "__title_only_0__"]
+
+
+@given(filter_ids=st.lists(st.text(max_size=32), max_size=30))
+def test_split_filter_ids_for_fallback_partition_property(
+    filter_ids: list[str],
+) -> None:
+    """Property: every input ID is classified consistently by fallback predicate."""
+    primary, title_only = split_filter_ids_for_fallback(filter_ids)
+    assert len(primary) + len(title_only) == len(filter_ids)
+
+    for raw_id in primary:
+        assert raw_id.strip()
+        assert not raw_id.strip().startswith(TITLE_ONLY_MARKER_PREFIX)
+
+    for raw_id in title_only:
+        assert not raw_id.strip() or raw_id.strip().startswith(TITLE_ONLY_MARKER_PREFIX)
 
 
 def test_is_retry_exhausted_error_direct_and_wrapped() -> None:

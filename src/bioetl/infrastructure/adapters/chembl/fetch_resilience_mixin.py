@@ -15,7 +15,10 @@ from bioetl.domain.exceptions import (
     RetryExhaustedError,
 )
 from bioetl.domain.types import BronzeRecord
-from bioetl.infrastructure.adapters.common import is_retry_exhausted_error
+from bioetl.infrastructure.adapters.common import (
+    is_retry_exhausted_error,
+    run_retry_exhausted_recovery_policy,
+)
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -92,6 +95,28 @@ class ChemblFetchResilienceMixin:
             error_class=type(error).__name__,
         )
 
+    def _log_batch_reduction_retry(
+        self,
+        *,
+        entity_type: str,
+        filter_field: str,
+        id_batch: list[str],
+        first_half: list[str],
+        second_half: list[str],
+        error: Exception,
+    ) -> None:
+        """Log split-batch retry decision for retry-exhausted failures."""
+        self.logger.warning(
+            "batch_reduction_retry",
+            provider=self.provider_name,
+            entity_type=entity_type,
+            original_batch_size=len(id_batch),
+            first_half_size=len(first_half),
+            second_half_size=len(second_half),
+            filter_field=filter_field,
+            error=str(error),
+        )
+
     async def _fetch_single_record_direct(
         self, entity_type: str, record_id: str
     ) -> BronzeRecord | None:
@@ -138,27 +163,49 @@ class ChemblFetchResilienceMixin:
         error: Exception,
         pk_fields: tuple[str, ...] | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Split failed batch in half and retry each part recursively."""
-        mid = len(id_batch) // 2
-        first_half, second_half = id_batch[:mid], id_batch[mid:]
+        """Recover retry-exhausted batch via shared split-or-single policy."""
 
-        self.logger.warning(
-            "batch_reduction_retry",
-            provider=self.provider_name,
-            entity_type=entity_type,
-            original_batch_size=len(id_batch),
-            first_half_size=len(first_half),
-            second_half_size=len(second_half),
-            filter_field=filter_field,
-            error=str(error),
-        )
+        async def _fetch_reduced_batch(batch: list[str]) -> AsyncIterator[BronzeRecord]:
+            async for record in self._fetch_batch_with_reduction(
+                entity_type,
+                batch,
+                filter_field,
+                limit,
+                seen_ids,
+                pk_field,
+                pk_fields,
+            ):
+                yield record
 
-        async for record in self._fetch_batch_with_reduction(
-            entity_type, first_half, filter_field, limit, seen_ids, pk_field, pk_fields
-        ):
-            yield record
-        async for record in self._fetch_batch_with_reduction(
-            entity_type, second_half, filter_field, limit, seen_ids, pk_field, pk_fields
+        async def _fetch_single_fallback(
+            single_id: str, retry_error: Exception
+        ) -> AsyncIterator[BronzeRecord]:
+            async for record in self._yield_single_id_fallback(
+                entity_type,
+                [single_id],
+                filter_field,
+                seen_ids,
+                pk_field,
+                retry_error,
+                pk_fields,
+            ):
+                yield record
+
+        async for record in run_retry_exhausted_recovery_policy(
+            id_batch=id_batch,
+            retry_error=error,
+            on_split=lambda first_half, second_half, retry_error: (
+                self._log_batch_reduction_retry(
+                    entity_type=entity_type,
+                    filter_field=filter_field,
+                    id_batch=id_batch,
+                    first_half=first_half,
+                    second_half=second_half,
+                    error=retry_error,
+                )
+            ),
+            fetch_reduced_batch=_fetch_reduced_batch,
+            fetch_single_fallback=_fetch_single_fallback,
         ):
             yield record
 
@@ -233,25 +280,12 @@ class ChemblFetchResilienceMixin:
         error: Exception,
         pk_fields: tuple[str, ...] | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Recover from RetryExhaustedError using split-batch or direct fallback."""
-        if len(id_batch) > 1:
-            async for record in self._retry_with_split_batches(
-                entity_type,
-                id_batch,
-                filter_field,
-                limit,
-                seen_ids,
-                pk_field,
-                error,
-                pk_fields,
-            ):
-                yield record
-            return
-
-        async for record in self._yield_single_id_fallback(
+        """Recover from RetryExhaustedError using shared policy orchestrator."""
+        async for record in self._retry_with_split_batches(
             entity_type,
             id_batch,
             filter_field,
+            limit,
             seen_ids,
             pk_field,
             error,

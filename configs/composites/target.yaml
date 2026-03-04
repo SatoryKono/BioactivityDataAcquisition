@@ -369,6 +369,8 @@ composite:
   #   configs/quality/entities/composite/target.yaml
   # Only pipeline-specific enricher_overrides remain inline.
   dq_overrides:
+    # External baseline DQ config (ADR-027)
+    dq_config_file: ../quality/entities/composite/target.yaml
     # Per-dependency threshold overrides (pipeline-specific)
     enricher_overrides:
       # Many non-protein targets -> UniProt mapping_status="not_found" is expected

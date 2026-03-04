@@ -28,6 +28,9 @@ def _base_composite_yaml(with_version: bool) -> str:
         "    output:\n"
         "      silver: silver/composite/publication\n"
         "      gold: gold/composite/publication\n"
+        "    sort_by:\n"
+        "      silver: [entity_id, publication_id]\n"
+        "      gold: [entity_id, publication_id]\n"
     )
 
 

@@ -126,10 +126,16 @@ def extract_journal_info(
     Example:
         >>> journal = {"name": "Nature", "volume": "629", "pages": "123-130"}
         >>> extract_journal_info(journal, "Nature")
-        {'journal_name': 'Nature', 'volume': '629', 'issue': None, 'page_range': '123-130', 'page_first': '123', 'page_last': '130'}
+        {
+        ...   'journal_name': 'Nature', 'volume': '629', 'issue': None,
+        ...   'page_range': '123-130', 'page_first': '123', 'page_last': '130'
+        ... }
         >>> journal = {"name": "J Med Chem", "volume": "32 4", "pages": "737-9"}
         >>> extract_journal_info(journal, None)
-        {'journal_name': 'J Med Chem', 'volume': '32', 'issue': '4', 'page_range': '737-9', 'page_first': '737', 'page_last': '739'}
+        {
+        ...   'journal_name': 'J Med Chem', 'volume': '32', 'issue': '4',
+        ...   'page_range': '737-9', 'page_first': '737', 'page_last': '739'
+        ... }
 
     """
     if journal:

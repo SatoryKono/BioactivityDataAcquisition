@@ -340,7 +340,8 @@ def test_silver_schemas_match_domain_entities(src_dir: Path):
                 # Temporary workaround: only warn for missing fields to allow build to pass
                 # while aligning schema and entities.
                 # violations.append(
-                #     f"Field '{field}' (mapped to '{entity_field_name}') in {schema} not found in {entity_cls.__name__}"
+                #     f"Field '{field}' (mapped to '{entity_field_name}') in "
+                #     f"{schema} not found in {entity_cls.__name__}"
                 # )
                 pass
     assert not violations, "\n".join(violations)

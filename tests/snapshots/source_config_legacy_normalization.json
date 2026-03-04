@@ -11,6 +11,8 @@
         "base_url": "https://example.chembl/api",
         "batch_size": 25,
         "client": {
+          "max_connections": 50,
+          "max_keepalive_connections": 10,
           "max_retries": 3,
           "retry_base_delay": 1.0,
           "retry_max_delay": 60.0,
@@ -40,6 +42,8 @@
         "base_url": "https://example.pubmed/api",
         "batch_size": 120,
         "client": {
+          "max_connections": 50,
+          "max_keepalive_connections": 10,
           "max_retries": 3,
           "retry_base_delay": 1.0,
           "retry_max_delay": 60.0,

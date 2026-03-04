@@ -16,6 +16,9 @@ from bioetl.infrastructure.adapters.common.fetch_retry_policy import (
     run_fetch_with_fallback_policy,
     split_filter_ids_for_fallback,
 )
+from bioetl.infrastructure.adapters.common.retry_reduction_policy import (
+    run_retry_exhausted_recovery_policy,
+)
 from bioetl.infrastructure.adapters.common.title_matching import (
     normalize_title,
     titles_match,
@@ -27,6 +30,7 @@ __all__ = [
     "is_retry_exhausted_error",
     "normalize_title",
     "run_fetch_with_fallback_policy",
+    "run_retry_exhausted_recovery_policy",
     "split_filter_ids_for_fallback",
     "titles_match",
 ]

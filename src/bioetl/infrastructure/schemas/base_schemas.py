@@ -158,6 +158,8 @@ class BaseClientConfig(BaseModel):
     max_retries: int = Field(default=3, ge=0, le=10)
     retry_base_delay: float = Field(default=1.0, ge=0.1, le=120.0)
     retry_max_delay: float = Field(default=60.0, ge=1.0, le=600.0)
+    max_connections: int = Field(default=50, ge=1, le=500)
+    max_keepalive_connections: int = Field(default=10, ge=1, le=100)
 
 
 class BaseApiConfig(BaseModel):

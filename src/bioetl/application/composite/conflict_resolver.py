@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
-__all__ = ["ConflictResolver", "ConflictResolverService"]
+__all__ = ["ConflictResolverService"]
 
 
 class ConflictResolverService:
@@ -130,5 +130,3 @@ class ConflictResolverService:
                 return df
 
 
-# Backward-compatible alias for iterative NAME-001 migration.
-ConflictResolver = ConflictResolverService

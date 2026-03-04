@@ -114,6 +114,5 @@ class BronzeWriterMetadataMixin:
         )
 
 
-BronzeWriterMetadataHelper = BronzeWriterMetadataMixin
 
-__all__ = ["BronzeWriterMetadataHelper", "BronzeWriterMetadataMixin"]
+__all__ = ["BronzeWriterMetadataMixin"]

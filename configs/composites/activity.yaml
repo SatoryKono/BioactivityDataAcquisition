@@ -265,6 +265,8 @@ composite:
   #   configs/quality/entities/composite/activity.yaml
   # Only pipeline-specific enricher_overrides remain inline.
   dq_overrides:
+    # External baseline DQ config (ADR-027)
+    dq_config_file: ../quality/entities/composite/activity.yaml
     # Per-dependency threshold overrides (pipeline-specific)
     enricher_overrides:
       # compound_record may not exist for all molecules

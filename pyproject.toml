@@ -341,11 +341,14 @@ select = [
     "T201", # flake8-print (no print statements in production code)
 ]
 ignore = [
-    "E501",  # Line too long
     "RUF001",  # Ambiguous unicode in strings - project uses Russian help text
     "RUF002",  # Ambiguous unicode - project uses Russian docstrings
     "RUF003",  # Ambiguous unicode in comments - project uses math symbols (×, ÷)
 ]
+
+[tool.ruff.lint.pycodestyle]
+# Keep formatter width conservative (88) while linting E501 against a migration target.
+max-line-length = 120
 
 [tool.ruff.lint.isort]
 known-first-party = ["bioetl", "tests"]

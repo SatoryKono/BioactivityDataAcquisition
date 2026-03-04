@@ -318,6 +318,16 @@ class SourceYamlConfig(BaseModel):
         return self.source.provider_config.client.retry_max_delay
 
     @property
+    def max_connections(self) -> int:
+        """Get max concurrent connections for httpx."""
+        return self.source.provider_config.client.max_connections
+
+    @property
+    def max_keepalive_connections(self) -> int:
+        """Get max keep-alive connections for httpx."""
+        return self.source.provider_config.client.max_keepalive_connections
+
+    @property
     def base_url(self) -> str | None:
         """Get base URL."""
         return self.source.provider_config.base_url

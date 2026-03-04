@@ -240,6 +240,8 @@ composite:
   #   configs/quality/entities/composite/assay.yaml
   # Only pipeline-specific enricher_overrides remain inline.
   dq_overrides:
+    # External baseline DQ config (ADR-027)
+    dq_config_file: ../quality/entities/composite/assay.yaml
     # Per-enricher threshold overrides (lenient - many nulls expected)
     enricher_overrides:
       chembl_cell_line:

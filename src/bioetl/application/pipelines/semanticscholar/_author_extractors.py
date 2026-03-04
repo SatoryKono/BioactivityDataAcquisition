@@ -208,7 +208,10 @@ def extract_affiliations(
         List of unique affiliation strings (sorted).
 
     Example:
-        >>> authors = [{"name": "John", "affiliations": ["Univ A"]}, {"name": "Jane", "affiliations": ["Univ B", "Univ A"]}]
+        >>> authors = [
+        ...     {"name": "John", "affiliations": ["Univ A"]},
+        ...     {"name": "Jane", "affiliations": ["Univ B", "Univ A"]},
+        ... ]
         >>> extract_affiliations(authors)
         ['Univ A', 'Univ B']
     """

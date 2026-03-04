@@ -144,9 +144,9 @@ registries:
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
     composite.py:
-      value: 478
+      value: 400
       owner: '@bioetl-architecture'
-      reason: External code growth in domain composite module.
+      reason: Domain gold contracts and composition bootstrap both named composite.py.
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
@@ -192,6 +192,13 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
+    debt_scorecard.py:
+      value: 740
+      owner: '@bioetl-architecture'
+      reason: Debt scorecard logic still aggregates scoring, reporting, and policy rules in one module.
+      expires_on: '2026-04-30'
+      removal_step: Extract score computation and rendering helpers to reduce module size
+        and remove this exemption entry.
     debt_scorecard_validation.py:
       value: 980
       owner: '@bioetl-architecture'
@@ -221,7 +228,7 @@ registries:
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
     dq_serializer.py:
-      value: 464
+      value: 470
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (file_size_limits).
       expires_on: '2026-04-30'
@@ -666,6 +673,13 @@ registries:
       reason: Baseline exemption migrated from architecture tests (function_complexity).
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
+        entry.
+    from_dict:
+      value: 11
+      owner: '@bioetl-architecture'
+      reason: Domain config reconstruction keeps backward-compatibility branches.
+      expires_on: '2026-04-30'
+      removal_step: Extract compatibility parsing helpers and remove this exemption
         entry.
     load_pipeline_config:
       value: 18
@@ -1264,6 +1278,13 @@ registries:
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
   class_size:
+    CompositeConfig:
+      value: 335
+      owner: '@bioetl-architecture'
+      reason: Domain composite config with many nested dataclass fields.
+      expires_on: '2026-04-30'
+      removal_step: Refactor target to satisfy default metric and remove this exemption
+        entry.
     ActivityAggregator:
       value: 320
       owner: '@bioetl-architecture'
@@ -1630,6 +1651,14 @@ registries:
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
   god_object:
+    CompositeConfig:
+      value: Domain value object - immutable dataclass with many nested config fields, no delegation needed
+      owner: '@bioetl-architecture'
+      reason: Domain value object - immutable dataclass with many nested config fields,
+        no delegation needed.
+      expires_on: '2026-04-30'
+      removal_step: Refactor target to satisfy default metric and remove this exemption
+        entry.
     ActivityAggregator:
       value: Cohesive service - all methods relate to activity aggregation strategies
       owner: '@bioetl-architecture'

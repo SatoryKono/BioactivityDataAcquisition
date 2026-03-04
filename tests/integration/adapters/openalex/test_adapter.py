@@ -132,7 +132,9 @@ class TestOpenAlexAdapterIntegration:
         # Valid DOI and title for fallback
         dois = ["10.1038/s41586-020-2012-7"]
         fallback_mapping = {
-            "10.1038/s41586-020-2012-7": "A pneumonia outbreak associated with a new coronavirus of probable bat origin",
+            "10.1038/s41586-020-2012-7": (
+                "A pneumonia outbreak associated with a new coronavirus of probable bat origin"
+            ),
         }
 
         results = []

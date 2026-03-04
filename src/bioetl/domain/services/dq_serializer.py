@@ -454,7 +454,10 @@ class DQReportSerializer:
                 <tr><td><strong>Soft Fail Threshold</strong></td><td>{soft if soft is not None else "—"}</td></tr>
                 <tr><td><strong>Hard Fail Threshold</strong></td><td>{hard if hard is not None else "—"}</td></tr>
                 <tr><td><strong>Current Error Rate</strong></td><td>{rate if rate is not None else "—"}</td></tr>
-                <tr><td><strong>Status</strong></td><td><span class="status-badge status-{status_class}">{status}</span></td></tr>
+                <tr>
+                    <td><strong>Status</strong></td>
+                    <td><span class="status-badge status-{status_class}">{status}</span></td>
+                </tr>
             </table>
         </div>
     </div>

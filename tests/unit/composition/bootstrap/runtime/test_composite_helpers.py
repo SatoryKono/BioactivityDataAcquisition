@@ -3,7 +3,6 @@
 Covers the stateless helper functions that can be tested without bootstrapping
 the full composition root:
 - _resolve_composite_gold_schema (composite.py)
-- _to_id_str (composite.py)
 - _resolve_composite_config_path (composite.py)
 - CompositeFilterExtractionService methods (composite_filter_extraction_service.py)
 - resolve_bronze_opts (runner_factory_builder_service.py)
@@ -43,7 +42,6 @@ def _import_helpers():
     from bioetl.composition.bootstrap.runtime.composite import (
         _resolve_composite_config_path,
         _resolve_composite_gold_schema,
-        _to_id_str,
     )
     from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
         CompositeFilterExtractionService,
@@ -79,7 +77,6 @@ def _import_helpers():
         "_resolve_bronze_opts": resolve_bronze_opts,
         "_resolve_composite_config_path": _resolve_composite_config_path,
         "_resolve_composite_gold_schema": _resolve_composite_gold_schema,
-        "_to_id_str": _to_id_str,
     }
 
 
@@ -166,59 +163,6 @@ class TestResolveCompositeGoldSchema:
         from bioetl.domain.contracts import CompositeActivityGoldSchema
 
         assert result is CompositeActivityGoldSchema
-
-
-# =============================================================================
-# Tests for _to_id_str
-# =============================================================================
-
-
-@pytest.mark.unit
-class TestToIdStr:
-    """Tests for _to_id_str function."""
-
-    def test_integer_converts_to_string(self) -> None:
-        """Test that integer converts to string."""
-        helpers = _import_helpers()
-        fn = helpers["_to_id_str"]
-
-        assert fn(42) == "42"
-
-    def test_float_integer_converts_without_decimal(self) -> None:
-        """Test that float like 4044.0 converts to '4044' (not '4044.0')."""
-        helpers = _import_helpers()
-        fn = helpers["_to_id_str"]
-
-        assert fn(4044.0) == "4044"
-
-    def test_float_non_integer_keeps_decimal(self) -> None:
-        """Test that float with actual decimal is kept as-is."""
-        helpers = _import_helpers()
-        fn = helpers["_to_id_str"]
-
-        result = fn(3.14)
-        assert "3.14" in result
-
-    def test_none_returns_empty_string(self) -> None:
-        """Test that None returns empty string."""
-        helpers = _import_helpers()
-        fn = helpers["_to_id_str"]
-
-        assert fn(None) == ""
-
-    def test_string_returns_unchanged(self) -> None:
-        """Test that string is returned unchanged."""
-        helpers = _import_helpers()
-        fn = helpers["_to_id_str"]
-
-        assert fn("CHEMBL25") == "CHEMBL25"
-
-    def test_zero_float_converts_to_zero_string(self) -> None:
-        """Test that 0.0 converts to '0'."""
-        helpers = _import_helpers()
-        fn = helpers["_to_id_str"]
-
-        assert fn(0.0) == "0"
 
 
 # =============================================================================

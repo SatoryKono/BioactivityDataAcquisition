@@ -212,19 +212,25 @@ class GoldWriterIOMixin:
         module = _load_gold_writer_module()
         for attempt in range(3):
             try:
-                await self._run_in_executor(
-                    lambda table_or_uri=table_path, data=arrow_data, write_mode=mode, partition_by=partition_cols, resolved_schema_mode=schema_mode: (
-                        module.write_deltalake(
-                            table_or_uri=table_or_uri,
-                            data=pa.RecordBatchReader.from_batches(
-                                data.schema, data.to_batches()
-                            ),
-                            mode=write_mode,
-                            partition_by=partition_by,
-                            schema_mode=resolved_schema_mode,
-                        )
+
+                def _write_delta_with_mode(
+                    table_or_uri: str = table_path,
+                    data: pa.Table = arrow_data,
+                    write_mode: str = mode,
+                    partition_by: list[str] | None = partition_cols,
+                    resolved_schema_mode: str | None = schema_mode,
+                ) -> None:
+                    module.write_deltalake(
+                        table_or_uri=table_or_uri,
+                        data=pa.RecordBatchReader.from_batches(
+                            data.schema, data.to_batches()
+                        ),
+                        mode=write_mode,
+                        partition_by=partition_by,
+                        schema_mode=resolved_schema_mode,
                     )
-                )
+
+                await self._run_in_executor(_write_delta_with_mode)
                 break
             except module.GOLD_WRITE_RETRY_ERRORS as error:
                 if attempt == 2:
@@ -285,18 +291,22 @@ class GoldWriterIOMixin:
                     arrow_data = self._to_arrow_table(
                         records, column_order=column_order
                     )
-                    await self._run_in_executor(
-                        lambda table_or_uri=table_path, data=arrow_data, write_mode="append", partition_by=partition_cols: (
-                            module.write_deltalake(
-                                table_or_uri=table_or_uri,
-                                data=pa.RecordBatchReader.from_batches(
-                                    data.schema, data.to_batches()
-                                ),
-                                mode=write_mode,
-                                partition_by=partition_by,
-                            )
+
+                    def _append_delta(
+                        table_or_uri: str = table_path,
+                        data: pa.Table = arrow_data,
+                        partition_by: list[str] | None = partition_cols,
+                    ) -> None:
+                        module.write_deltalake(
+                            table_or_uri=table_or_uri,
+                            data=pa.RecordBatchReader.from_batches(
+                                data.schema, data.to_batches()
+                            ),
+                            mode="append",
+                            partition_by=partition_by,
                         )
-                    )
+
+                    await self._run_in_executor(_append_delta)
                 break
             except module.GOLD_WRITE_RETRY_ERRORS as error:
                 if attempt == 2:
@@ -314,10 +324,9 @@ class GoldWriterIOMixin:
         column_order: list[str] | None = None,
     ) -> None:
         """Merge records using SCD Type 2 logic."""
-        if isinstance(business_key, str):
-            business_keys = [business_key]
-        else:
-            business_keys = business_key
+        business_keys = (
+            [business_key] if isinstance(business_key, str) else business_key
+        )
 
         new_data = self._to_arrow_table(records, column_order=column_order)
         valid_to_col = scd_config.get("valid_to_col", "valid_to")
@@ -400,6 +409,5 @@ class GoldWriterIOMixin:
         return result[:limit] if limit > 0 else result
 
 
-GoldWriterIOHelper = GoldWriterIOMixin
 
-__all__ = ["GoldWriterIOHelper", "GoldWriterIOMixin"]
+__all__ = ["GoldWriterIOMixin"]

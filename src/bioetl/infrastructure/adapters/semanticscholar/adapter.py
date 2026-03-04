@@ -35,6 +35,10 @@ from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
+from bioetl.infrastructure.adapters.common import (
+    run_fetch_with_fallback_policy,
+    split_filter_ids_for_fallback,
+)
 from bioetl.infrastructure.adapters.semanticscholar.constants import (
     SEMANTICSCHOLAR_BASE_URL,
 )
@@ -288,6 +292,9 @@ class SemanticScholarAdapter(BaseHttpAdapter):
                 if record is not None:
                     resolved_dois.add(doi.lower())
                     record["_lookup_method"] = "doi"
+                    # Shared fallback policy extracts this transient marker and removes it
+                    # before yielding to downstream consumers.
+                    record["_resolved_doi"] = doi
                     count += 1
                     yield record
                     if limit and count >= limit:
@@ -321,41 +328,34 @@ class SemanticScholarAdapter(BaseHttpAdapter):
         Returns:
             Async iterator yielding fetched records.
         """
-        fetched = 0
+        primary_ids, title_only_entries = split_filter_ids_for_fallback(filter_ids)
         resolved_dois: set[str] = set()
 
-        valid_dois = [d for d in filter_ids if d and d.strip()]
-        title_only_entries = [d for d in filter_ids if not d or not d.strip()]
+        async def _primary_records() -> AsyncIterator[BronzeRecord]:
+            async for record in self._batch_doi_phase(
+                primary_ids,
+                resolved_dois,
+                limit,
+                0,
+            ):
+                yield record
 
-        # Phase 1: Batch DOI lookup
-        async for record in self._batch_doi_phase(
-            valid_dois, resolved_dois, limit, fetched
-        ):
-            yield record
-            fetched += 1
-            if limit and fetched >= limit:
-                return
+        def _extract_record_doi(record: BronzeRecord) -> str | None:
+            resolved = record.pop("_resolved_doi", None)
+            if isinstance(resolved, str) and resolved.strip():
+                return self._normalize_doi(resolved)
+            return None
 
-        # Phase 2: Fallback by title for unresolved DOIs (using handler)
-        async for record in self._fallback_handler.process_missing_dois(
-            dois=valid_dois,
-            found_dois=resolved_dois,
+        async for record in run_fetch_with_fallback_policy(
+            primary_records=_primary_records(),
+            primary_ids=primary_ids,
+            title_only_entries=title_only_entries,
             fallback_mapping=fallback_mapping,
-            normalize_fn=lambda x: x,  # DOIs already normalized
+            normalize_id=self._normalize_doi,
+            extract_record_id=_extract_record_doi,
+            fallback_handler=self._fallback_handler,
             limit=limit,
-            fetched=fetched,
-        ):
-            yield record
-            fetched += 1
-            if limit and fetched >= limit:
-                return
-
-        # Phase 3: Title-only entries (using handler)
-        async for record in self._fallback_handler.process_title_only_entries(
-            entries=title_only_entries,
-            fallback_mapping=fallback_mapping,
-            limit=limit,
-            fetched=fetched,
+            primary_lookup_method="doi",
         ):
             yield record
 

@@ -25,7 +25,7 @@ def test_yaml_config_to_domain_mapping():
         silver_table="silver.test",
         schema_file="../../schemas/chembl/activity.yaml",
         dq_overrides=YamlDQConfig(),
-        sink={"silver": SinkLayerConfig(mode="append")},
+        sink={"silver": SinkLayerConfig(mode="append", sort_by=["id"])},
     )
 
     domain_config = yaml_config_to_domain(yaml_config)
@@ -167,7 +167,7 @@ class TestMedallionFormatValidation:
             "silver_table": "silver.test",
             "schema_file": "../../schemas/chembl/activity.yaml",
             "sink": {
-                "silver": {"format": "parquet"},
+                "silver": {"format": "parquet", "sort_by": ["id"]},
             },
         }
 
@@ -184,7 +184,7 @@ class TestMedallionFormatValidation:
             "silver_table": "silver.test",
             "schema_file": "../../schemas/chembl/activity.yaml",
             "sink": {
-                "gold": {"format": "parquet"},
+                "gold": {"format": "parquet", "sort_by": ["id"]},
             },
         }
 
@@ -202,7 +202,7 @@ class TestMedallionFormatValidation:
             "silver_table": "silver.test",
             "schema_file": "../../schemas/chembl/activity.yaml",
             "sink": {
-                "silver": {"format": "delta"},
+                "silver": {"format": "delta", "sort_by": ["id"]},
             },
         }
 
@@ -219,7 +219,7 @@ class TestMedallionFormatValidation:
             "silver_table": "silver.test",
             "schema_file": "../../schemas/chembl/activity.yaml",
             "sink": {
-                "gold": {"format": "delta"},
+                "gold": {"format": "delta", "sort_by": ["id"]},
             },
         }
 
@@ -303,7 +303,7 @@ class TestMedallionFormatValidation:
             "silver_table": "silver.test",
             "schema_file": "../../schemas/chembl/activity.yaml",
             "sink": {
-                "silver": {"format": "jsonl"},
+                "silver": {"format": "jsonl", "sort_by": ["id"]},
             },
         }
 

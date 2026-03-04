@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
-__all__ = ["CoalescePolicy", "CoalescePolicyService"]
+__all__ = ["CoalescePolicyService"]
 
 
 class CoalescePolicyService:
@@ -234,5 +234,3 @@ class CoalescePolicyService:
             return None
 
 
-# Backward-compatible alias for iterative NAME-001 migration.
-CoalescePolicy = CoalescePolicyService
