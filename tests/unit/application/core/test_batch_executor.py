@@ -12,10 +12,13 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.batch_executor import BatchExecutor, BatchResult
+from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
+from bioetl.application.core.batch_tracing import BatchTracingManagerService
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
+from bioetl.composition.factories.services_factory import ServicesBuilder
 from bioetl.domain.config import TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
@@ -144,6 +147,64 @@ def processor_config():
     )
 
 
+def _create_batch_executor(
+    *,
+    services: PipelineServices,
+    context: PipelineContext,
+    config: RecordProcessorConfig,
+    transform_callback,
+    gold_filter_callback,
+    gold_transform_callback,
+    gold_validator,
+    checkpoint_manager,
+    shutdown_signal,
+    batch_size: int | None = 10,
+    checkpoint_interval: int | None = 5,
+    tracer=None,
+) -> BatchExecutor:
+    """Build BatchExecutor with composition-level dependency wiring."""
+    error_classifier = ErrorClassifier()
+    components = ServicesBuilder.create_batch_processing_components(
+        services=services,
+        context=context,
+        config=config,
+        error_classifier=error_classifier,
+        transform_callback=transform_callback,
+        gold_filter_callback=gold_filter_callback,
+        gold_transform_callback=gold_transform_callback,
+        gold_validator=gold_validator,
+        tracer=tracer,
+    )
+
+    initial_batch_size = batch_size or BatchExecutor.DEFAULT_BATCH_SIZE
+    memory_manager = BatchMemoryManagerService(
+        initial_batch_size=initial_batch_size,
+        logger=services.logger,
+    )
+    tracing_manager = BatchTracingManagerService(
+        tracer=tracer,
+        context=context,
+        config=config,
+        initial_batch_size=initial_batch_size,
+        adaptive_sizing_enabled=memory_manager.enabled,
+    )
+
+    return BatchExecutor(
+        services=services,
+        context=context,
+        config=config,
+        checkpoint_manager=checkpoint_manager,
+        shutdown_signal=shutdown_signal,
+        batch_metrics=components.batch_metrics,
+        transformer=components.transformer,
+        writer=components.writer,
+        tracing_manager=tracing_manager,
+        memory_manager=memory_manager,
+        batch_size=batch_size,
+        checkpoint_interval=checkpoint_interval,
+    )
+
+
 @pytest.fixture
 def batch_executor(
     mock_services,
@@ -157,11 +218,10 @@ def batch_executor(
     mock_gold_validator,
 ):
     """Create BatchExecutor instance."""
-    return BatchExecutor(
+    return _create_batch_executor(
         services=mock_services,
         context=mock_context,
         config=processor_config,
-        error_classifier=ErrorClassifier(),
         transform_callback=transform_callback,
         gold_filter_callback=gold_filter_callback,
         gold_transform_callback=gold_transform_callback,
@@ -198,17 +258,18 @@ class TestBatchExecutorInit:
         mock_gold_validator,
     ):
         """Test default batch size when not specified."""
-        executor = BatchExecutor(
+        executor = _create_batch_executor(
             services=mock_services,
             context=mock_context,
             config=processor_config,
-            error_classifier=ErrorClassifier(),
             transform_callback=transform_callback,
             gold_filter_callback=gold_filter_callback,
             gold_transform_callback=gold_transform_callback,
             gold_validator=mock_gold_validator,
             checkpoint_manager=mock_checkpoint_manager,
             shutdown_signal=shutdown_signal,
+            batch_size=None,
+            checkpoint_interval=None,
         )
         assert executor.batch_size == BatchExecutor.DEFAULT_BATCH_SIZE
 
@@ -395,11 +456,10 @@ class TestBatchExecutorProcessBatch:
                 raise DataQualityError("Invalid data")
             return {"entity_id": record.get("id"), "value": record.get("value")}
 
-        executor = BatchExecutor(
+        executor = _create_batch_executor(
             services=mock_services,
             context=mock_context,
             config=processor_config,
-            error_classifier=ErrorClassifier(),
             transform_callback=failing_transform,
             gold_filter_callback=lambda c, r: True,
             gold_transform_callback=lambda c, r: r,
@@ -454,11 +514,10 @@ def batch_executor_with_tracer(
     mock_tracer,
 ):
     """Create BatchExecutor instance with tracer."""
-    return BatchExecutor(
+    return _create_batch_executor(
         services=mock_services,
         context=mock_context,
         config=processor_config,
-        error_classifier=ErrorClassifier(),
         transform_callback=transform_callback,
         gold_filter_callback=gold_filter_callback,
         gold_transform_callback=gold_transform_callback,

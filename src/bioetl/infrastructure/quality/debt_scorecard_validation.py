@@ -391,7 +391,7 @@ def _validate_grace_windows_section(
         )
 
 
-def validate_debt_scorecard_raw(
+def validate_debt_scorecard_structure(
     raw: dict[str, Any],  # Any: YAML values are heterogeneous
 ) -> list[str]:
     """Validate debt scorecard schema and monotonic governance targets."""
@@ -431,4 +431,7 @@ def validate_debt_scorecard_raw(
     return errors
 
 
-__all__ = ["validate_debt_scorecard_raw"]
+validate_debt_scorecard_raw = validate_debt_scorecard_structure
+
+
+__all__ = ["validate_debt_scorecard_raw", "validate_debt_scorecard_structure"]

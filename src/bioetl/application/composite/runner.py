@@ -58,6 +58,21 @@ __all__ = [
 ]
 
 
+def _create_fsm_state_helper(
+    config: CompositeConfig,
+    logger: LoggerPort,
+    run_id: str,
+) -> FSMStateHelperService:
+    """Build FSM helper for legacy callsites."""
+    from bioetl.application.composite.fsm_helper import FSMStateHelperService
+
+    return FSMStateHelperService(
+        config=config,
+        logger=logger,
+        run_id=run_id,
+    )
+
+
 @dataclass(frozen=True, slots=True)
 class CompositeRuntimeConfig:
     """Runtime configuration for composite pipeline execution.
@@ -116,9 +131,9 @@ class CompositePipelineRunnerService(
         coordinator: EnrichmentCoordinatorService,
         merger: MergeService,
         checkpoint_manager: CompositeCheckpointService,
-        fsm_state_helper: FSMStateHelperService,
         logger: LoggerPort,
         lock: LockPort,
+        fsm_state_helper: FSMStateHelperService | None = None,
         run_id: str | None = None,
         dq_report_service: DQReportService | None = None,
         preflight_validator: CompositePreflightValidationService | None = None,
@@ -139,7 +154,6 @@ class CompositePipelineRunnerService(
         self._coordinator = coordinator
         self._merger = merger
         self._checkpoint_manager = checkpoint_manager
-        self._fsm = fsm_state_helper
         self._logger = logger
         self._lock = lock
         self._run_id_str = run_id or str(uuid4())
@@ -151,6 +165,15 @@ class CompositePipelineRunnerService(
         self._preflight_validator = preflight_validator
         self._quarantine_port = quarantine_port
         self._metrics = metrics
+        if fsm_state_helper is not None:
+            self._fsm = fsm_state_helper
+        else:
+            # Transitional fallback for legacy callsites; composition should inject this.
+            self._fsm = _create_fsm_state_helper(
+                config=config,
+                logger=logger,
+                run_id=self._run_id_str,
+            )
 
     @property
     def run_id(self) -> str:

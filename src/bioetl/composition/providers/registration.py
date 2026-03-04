@@ -7,7 +7,7 @@ Config helpers extracted to _config_helpers.py per audit-package-structure-2026-
 from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.application.core.idmapping_data_source import IDMappingDataSource
 from bioetl.application.core.publication_term_data_source import (
@@ -126,7 +126,7 @@ def _create_pubchem_adapter(
     http_client: UnifiedHTTPClient | None = None,
     logger: LoggerPort | None = None,
     settings: Settings | None = None,
-    **kwargs: Any,  # Any: forwarded adapter kwar...
+    **kwargs: object,
 ) -> DataSourcePort:
     """Create PubChem adapter with all dependencies injected from Composition Root."""
     if logger is None:
