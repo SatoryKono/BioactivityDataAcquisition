@@ -53,7 +53,8 @@ jobs:
       - name: Run mypy (strict mode)
         run: |
           echo "Running mypy with strict mode on all source code..."
-          uv run mypy --config-file pyproject.toml src/bioetl
+          rm -rf .mypy_cache
+          uv run mypy --config-file pyproject.toml --no-incremental src/bioetl
 
       - name: Verify NewType and Protocol usage in domain layer
         run: |
@@ -161,7 +162,8 @@ jobs:
       - name: Generate type coverage report
         run: |
           mkdir -p reports
-          uv run mypy --config-file pyproject.toml src/bioetl --txt-report reports/mypy_report || true
+          rm -rf .mypy_cache
+          uv run mypy --config-file pyproject.toml --no-incremental src/bioetl --txt-report reports/mypy_report || true
           echo "Type checking report generated"
 
       - name: Upload type checking reports

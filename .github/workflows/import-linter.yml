@@ -67,7 +67,9 @@ jobs:
         run: uv run ruff format --check src tests
 
       - name: Mypy (strict-ish)
-        run: uv run mypy --config-file pyproject.toml src/bioetl
+        run: |
+          rm -rf .mypy_cache
+          uv run mypy --config-file pyproject.toml --no-incremental src/bioetl
 
   arch-tests:
     runs-on: ubuntu-latest
