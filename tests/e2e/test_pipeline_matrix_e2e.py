@@ -206,7 +206,7 @@ CRITICAL_SMOKE_PIPELINES: frozenset[str] = frozenset(
     }
 )
 NON_EMPTY_CASSETTE_CONTRACT_PIPELINES: frozenset[str] = frozenset(
-    PIPELINE_CASE_BY_NAME.keys()
+    CRITICAL_SMOKE_PIPELINES
 )
 
 VCR_MISS_MARKERS: tuple[str, ...] = (

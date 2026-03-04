@@ -46,6 +46,7 @@ StageType = Literal["extract", "transform", "load", "validate", "init", "cleanup
 
 # Default stage when not provided (for LoggerPort compatibility)
 _DEFAULT_STAGE: StageType = "init"
+_EVENT_KWARG: str = "event"
 
 
 class UnifiedLogger:
@@ -137,6 +138,17 @@ class UnifiedLogger:
             kwargs["stage"] = _DEFAULT_STAGE
         return kwargs
 
+    @staticmethod
+    def _sanitize_kwargs(
+        kwargs: dict[str, Any],  # Any: structlog-compatible API
+    ) -> dict[str, Any]:  # Any: structlog-compatible API
+        """Drop kwargs that conflict with structlog positional parameters."""
+        if _EVENT_KWARG in kwargs:
+            sanitized = dict(kwargs)
+            sanitized.pop(_EVENT_KWARG, None)
+            return sanitized
+        return kwargs
+
     def info(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
         """Log an informational message.
 
@@ -153,7 +165,8 @@ class UnifiedLogger:
         Returns:
             The Any result.
         """
-        return self._logger.info(_event, **self._ensure_stage(kwargs))
+        context = self._sanitize_kwargs(self._ensure_stage(kwargs))
+        return self._logger.info(_event, **context)
 
     def warning(
         self,
@@ -174,7 +187,8 @@ class UnifiedLogger:
         Returns:
             The Any result.
         """
-        return self._logger.warning(_event, **self._ensure_stage(kwargs))
+        context = self._sanitize_kwargs(self._ensure_stage(kwargs))
+        return self._logger.warning(_event, **context)
 
     def error(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
         """Log an error message.
@@ -192,7 +206,8 @@ class UnifiedLogger:
         Returns:
             The Any result.
         """
-        return self._logger.error(_event, **self._ensure_stage(kwargs))
+        context = self._sanitize_kwargs(self._ensure_stage(kwargs))
+        return self._logger.error(_event, **context)
 
     def debug(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
         """Log a debug message.
@@ -207,7 +222,8 @@ class UnifiedLogger:
         Returns:
             The Any result.
         """
-        return self._logger.debug(_event, **self._ensure_stage(kwargs))
+        context = self._sanitize_kwargs(self._ensure_stage(kwargs))
+        return self._logger.debug(_event, **context)
 
     def exception(
         self,
@@ -228,7 +244,8 @@ class UnifiedLogger:
         Returns:
             The Any result.
         """
-        return self._logger.exception(_event, **self._ensure_stage(kwargs))
+        context = self._sanitize_kwargs(self._ensure_stage(kwargs))
+        return self._logger.exception(_event, **context)
 
 
 def create_unified_logger(

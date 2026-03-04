@@ -1,7 +1,7 @@
 {
   "summary": {
     "scanned_modules": 605,
-    "total_internal_imports": 2191,
+    "total_internal_imports": 2192,
     "layer_edges": 14,
     "cross_layer_group_edges": 60,
     "violations": 0
@@ -46,7 +46,7 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 364,
+      "imports": 365,
       "allowed": true
     },
     {

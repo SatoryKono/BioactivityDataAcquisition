@@ -498,16 +498,14 @@ class MetadataCoordinator:
         # Extract schema metadata from Gold schema (contract_path, version, columns)
         schema_info = extract_schema_metadata(input_data.gold_schema)
 
-        # Note: schema_info uses Field(alias="schema") with populate_by_name=True
-        # mypy doesn't understand this Pydantic feature, but it works at runtime
-        return GoldMetadata(  # type: ignore[call-arg]
+        return GoldMetadata(
             runtime=self._build_runtime_metadata(
                 completed_at=input_data.completed_at,
                 duration_seconds=0.0,  # Gold duration currently not tracked per batch
             ),
             pipeline=self._build_pipeline_metadata(),
             lineage=lineage,
-            schema_info=schema_info,
+            schema=schema_info,
             dq_summary=dq_summary,
             output=output,
             output_ext=output_ext,

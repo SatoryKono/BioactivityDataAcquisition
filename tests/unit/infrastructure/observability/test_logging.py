@@ -66,6 +66,16 @@ class TestStructlogLogger:
         # exception requires exc_info in context, just check it exists
         assert hasattr(logger, "exception")
 
+    def test_structlog_logger_ignores_event_kwarg_conflict(self) -> None:
+        """Test that kwargs['event'] is sanitized before structlog call."""
+        run_id = uuid4()
+        logger = create_logger(
+            pipeline="test_pipeline",
+            run_id=run_id,
+        )
+
+        logger.info("pipeline_started", event="pipeline_started", stage="extract")
+
 
 @pytest.mark.unit
 class TestCreateLogger:

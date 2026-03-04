@@ -55,6 +55,29 @@ def _normalize_severity(value: object | None, *, fallback: str) -> str:
     return normalized if normalized in _ALLOWED_SEVERITY_VALUES else "info"
 
 
+def _migrate_legacy_keys(normalized: dict[str, object]) -> None:
+    """Promote legacy context keys to their canonical equivalents in-place."""
+    for legacy_key, canonical_key in OBSERVABILITY_LEGACY_TO_CANONICAL.items():
+        if canonical_key not in normalized and legacy_key in normalized:
+            normalized[canonical_key] = normalized[legacy_key]
+
+
+def _write_dual_aliases(normalized: dict[str, object]) -> None:
+    """Write legacy aliases for canonical keys (dashboard migration period)."""
+    for canonical_key, legacy_key in OBSERVABILITY_CANONICAL_TO_LEGACY.items():
+        normalized.setdefault(legacy_key, normalized[canonical_key])
+
+
+def _has_required_context_value(context: Mapping[str, object], field: str) -> bool:
+    return _coerce_non_empty(context.get(field), fallback="") != ""
+
+
+def _has_event_value(context: Mapping[str, object]) -> bool:
+    return _has_required_context_value(context, "event") or _has_required_context_value(
+        context, "event_name"
+    )
+
+
 def normalize_observability_context(
     *,
     event_name: str,
@@ -69,10 +92,7 @@ def normalize_observability_context(
         key: value for key, value in context.items() if value is not None
     }
 
-    # Backward-compatible mapping: migrate legacy keys into canonical keys.
-    for legacy_key, canonical_key in OBSERVABILITY_LEGACY_TO_CANONICAL.items():
-        if canonical_key not in normalized and legacy_key in normalized:
-            normalized[canonical_key] = normalized[legacy_key]
+    _migrate_legacy_keys(normalized)
 
     normalized["event"] = _coerce_non_empty(
         normalized.get("event"), fallback=event_name
@@ -99,9 +119,7 @@ def normalize_observability_context(
         fallback=default_error_type,
     )
 
-    # Dual-write aliases for dashboard migration period.
-    for canonical_key, legacy_key in OBSERVABILITY_CANONICAL_TO_LEGACY.items():
-        normalized.setdefault(legacy_key, normalized[canonical_key])
+    _write_dual_aliases(normalized)
 
     return normalized
 
@@ -129,5 +147,9 @@ def missing_observability_fields(context: Mapping[str, object]) -> tuple[str, ..
     return tuple(
         field
         for field in REQUIRED_OBSERVABILITY_FIELDS
-        if _coerce_non_empty(context.get(field), fallback="") == ""
+        if not (
+            _has_event_value(context)
+            if field == "event"
+            else _has_required_context_value(context, field)
+        )
     )

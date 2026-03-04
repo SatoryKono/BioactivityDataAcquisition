@@ -24,6 +24,19 @@ import structlog
 
 from bioetl.infrastructure.observability.logging_config import configure_logging
 
+_EVENT_KWARG = "event"
+
+
+def _sanitize_event_kwargs(
+    kwargs: dict[str, Any],  # Any: structlog-compatible API
+) -> dict[str, Any]:  # Any: structlog-compatible API
+    """Drop kwargs that collide with structlog positional event parameter."""
+    if _EVENT_KWARG in kwargs:
+        sanitized = dict(kwargs)
+        sanitized.pop(_EVENT_KWARG, None)
+        return sanitized
+    return kwargs
+
 
 def create_logger(
     pipeline: str,
@@ -99,7 +112,7 @@ class StructlogLogger:
         Returns:
             The Any result.
         """
-        return self._logger.info(_event, **kwargs)
+        return self._logger.info(_event, **_sanitize_event_kwargs(kwargs))
 
     def warning(
         self,
@@ -115,7 +128,7 @@ class StructlogLogger:
         Returns:
             The Any result.
         """
-        return self._logger.warning(_event, **kwargs)
+        return self._logger.warning(_event, **_sanitize_event_kwargs(kwargs))
 
     def error(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
         """Log an error message.
@@ -127,7 +140,7 @@ class StructlogLogger:
         Returns:
             The Any result.
         """
-        return self._logger.error(_event, **kwargs)
+        return self._logger.error(_event, **_sanitize_event_kwargs(kwargs))
 
     def debug(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
         """Log a debug message.
@@ -139,7 +152,7 @@ class StructlogLogger:
         Returns:
             The Any result.
         """
-        return self._logger.debug(_event, **kwargs)
+        return self._logger.debug(_event, **_sanitize_event_kwargs(kwargs))
 
     def exception(
         self,
@@ -155,4 +168,4 @@ class StructlogLogger:
         Returns:
             The Any result.
         """
-        return self._logger.exception(_event, **kwargs)
+        return self._logger.exception(_event, **_sanitize_event_kwargs(kwargs))

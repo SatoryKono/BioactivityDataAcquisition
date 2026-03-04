@@ -98,7 +98,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
             run_type=self.run_type,
             phase=LifecyclePhase.STARTUP.value,
         )
-        self._logger.info(PipelineEvent.START, **start_ctx)
+        self._log_event(PipelineEvent.START, severity="info", context=start_ctx)
         self._emit_observability_event_metric(
             start_ctx,
         )
@@ -160,7 +160,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
                 error=str(exc_val),
                 error_type=type(exc_val).__name__,
             )
-            self._logger.error(PipelineEvent.FAILED, **failed_ctx)
+            self._log_event(PipelineEvent.FAILED, severity="error", context=failed_ctx)
             self._emit_observability_event_metric(
                 failed_ctx,
             )
@@ -171,7 +171,9 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
                 **log_ctx,
                 error_type="pipeline_shutdown",
             )
-            self._logger.warning(PipelineEvent.SHUTDOWN, **shutdown_ctx)
+            self._log_event(
+                PipelineEvent.SHUTDOWN, severity="warning", context=shutdown_ctx
+            )
             self._emit_observability_event_metric(
                 shutdown_ctx,
             )
@@ -181,7 +183,9 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
                 severity="info",
                 **log_ctx,
             )
-            self._logger.info(PipelineEvent.COMPLETE, **complete_ctx)
+            self._log_event(
+                PipelineEvent.COMPLETE, severity="info", context=complete_ctx
+            )
             self._emit_observability_event_metric(
                 complete_ctx,
             )
@@ -230,8 +234,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
             **extra,
         )
 
-        log_method = getattr(self._logger, severity, self._logger.info)
-        log_method(event_name, **ctx)
+        self._log_event(event_name, severity=severity, context=ctx)
         self._emit_observability_event_metric(ctx)
 
         # Add span event if tracing is active
@@ -459,6 +462,19 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
             default_severity=severity,
         )
         return normalized
+
+    def _log_event(
+        self,
+        event_name: str,
+        *,
+        severity: str,
+        context: dict[str, Any],  # Any: structlog-compatible context kwargs
+    ) -> None:
+        """Emit log entry without duplicating structlog reserved ``event`` arg."""
+        log_context = dict(context)
+        log_context.pop("event", None)
+        log_method = getattr(self._logger, severity, self._logger.info)
+        log_method(event_name, **log_context)
 
     def _emit_observability_event_metric(self, context: dict[str, Any]) -> None:
         """Emit unified observability event metric with normalized labels."""
