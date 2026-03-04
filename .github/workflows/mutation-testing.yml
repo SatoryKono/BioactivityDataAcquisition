@@ -94,14 +94,12 @@ jobs:
           print(f"  Timeout: {timeout}")
           print(f"  Total: {total}")
 
-          # Threshold: 60% minimum mutation score
-          # This is a reasonable starting point; increase as test quality improves
-          THRESHOLD = 60.0
+          # Threshold: 70% minimum mutation score (raised from 60%)
+          THRESHOLD = 70.0
           if score < THRESHOLD:
               print(f"\n⚠️  Mutation score {score:.1f}% is below threshold {THRESHOLD}%")
               print("Consider improving test coverage for the surviving mutants")
-              # Warning only for now - uncomment to enforce
-              # sys.exit(1)
+              sys.exit(1)
           else:
               print(f"\n✅ Mutation score {score:.1f}% meets threshold {THRESHOLD}%")
           PY

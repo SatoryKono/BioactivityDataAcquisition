@@ -35,6 +35,11 @@ def _parse_quarter_label(value: str) -> tuple[int, int] | None:
     return int(match.group(1)), int(match.group(2))
 
 
+def _quarter_label(target_date: date) -> str:
+    quarter = ((target_date.month - 1) // 3) + 1
+    return f"{target_date.year}-Q{quarter}"
+
+
 def _validate_non_negative_int(
     value: object,
     *,
