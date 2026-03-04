@@ -9,12 +9,13 @@ from __future__ import annotations
 __all__ = ["IDMappingDataSource"]
 
 
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Self
 
 from bioetl.domain.types import HealthStatus, JsonDict
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
+    from types import TracebackType
 
     from bioetl.domain.ports import (
         IDMappingPort,
@@ -92,7 +93,7 @@ class IDMappingDataSource:
         self,
         exc_type: type[BaseException] | None,
         exc_val: BaseException | None,
-        exc_tb: Any,  # Any: TracebackType | None per async context manager protocol
+        exc_tb: TracebackType | None,
     ) -> None:
         """Exit async context manager."""
         await self.aclose()

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Self  # Any: needed for _OPERATOR_CHECKERS callable signature
+from typing import Self
 from bioetl.domain.filtering.column_filter import FilterOperator, GoldColumnFilter
 from bioetl.domain.filtering.list_filters import (
     GoldListContainsFilter,
@@ -91,7 +91,7 @@ class BaseFilterConfig:
     def _check_single_column(
         self,
         record: JsonDict,
-        f: GoldColumnFilter,  # Any: YAML config has heterogeneous values
+        f: GoldColumnFilter,
     ) -> bool:
         """Check a single column value against its filter operator."""
         val = record.get(f.column)
@@ -176,7 +176,7 @@ class BaseFilterConfig:
     def _check_single_list_length(
         self,
         record: JsonDict,
-        f: GoldListLengthFilter,  # Any: record vals vary
+        f: GoldListLengthFilter,
     ) -> bool:
         """Check the length of a single list column."""
         length = self._get_list_length(record.get(f.column))
@@ -213,7 +213,7 @@ class BaseFilterConfig:
     def _check_single_list_contains(
         self,
         record: JsonDict,
-        f: GoldListContainsFilter,  # Any: record vals vary
+        f: GoldListContainsFilter,
     ) -> bool:
         """Check a single list-contains filter against a record value."""
         val = record.get(f.column)
@@ -224,7 +224,7 @@ class BaseFilterConfig:
         return self._matches_contains_mode(val_set, f.values, f.mode)
 
     @staticmethod
-    def _to_string_set(val: Any) -> set[str]:  # Any: record value type varies
+    def _to_string_set(val: object) -> set[str]:
         """Convert a value to a set of strings."""
         if not isinstance(val, list):
             val = [val]
@@ -242,7 +242,7 @@ class BaseFilterConfig:
     def _check_single_range(
         self,
         record: JsonDict,
-        f: GoldRangeFilter,  # Any: YAML config has heterogeneous values
+        f: GoldRangeFilter,
     ) -> bool:
         """Check a single value against a range filter."""
         val = record.get(f.column)
@@ -293,12 +293,12 @@ class BaseFilterConfig:
         return not any(all_filters)
 
 
-_OPERATOR_CHECKERS: dict[  # Any: record value type varies per column
+_OPERATOR_CHECKERS: dict[
     FilterOperator,
     Callable[
         [
             BaseFilterConfig,
-            Any,  # Any: filter value type varies (str|int|float|list)
+            object,
             frozenset[str] | None,
         ],
         bool,

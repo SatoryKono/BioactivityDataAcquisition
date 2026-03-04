@@ -6,7 +6,6 @@ Pure functions for extracting/normalizing fields from OpenAlex API responses.
 from __future__ import annotations
 
 import re
-from typing import Any
 from bioetl.domain.types import JsonDict
 
 # ORCID format: NNNN-NNNN-NNNN-NNNN (last char can be X for checksum)
@@ -50,7 +49,7 @@ def _extract_id_from_url(url: str | None) -> str | None:
 
 
 def _get_nested_display_name(
-    obj: Any,  # Any: untyped JSON fragment from OpenAlex API
+    obj: object,
 ) -> str | None:
     """Get display_name from nested dict (helper function).
 

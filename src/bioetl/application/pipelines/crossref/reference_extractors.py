@@ -14,15 +14,13 @@ from __future__ import annotations
 __all__ = ["extract_references"]
 
 
-from typing import Any
 from bioetl.domain.types import JsonDict
 
 
-# Any: untyped JSON
 def _clean_string(
-    value: Any,  # Any: untyped API JSON
-    lowercase: bool = False,  # Any: untyped API JSON
-) -> str | None:  # Any: untyped API JSON
+    value: object,
+    lowercase: bool = False,
+) -> str | None:
     """Clean and optionally lowercase a string value."""
     if not value or not isinstance(value, str):
         return None
@@ -32,7 +30,7 @@ def _clean_string(
     return cleaned.lower() if lowercase else cleaned
 
 
-def _parse_year(year_raw: Any) -> int | None:  # Any: untyped API JSON
+def _parse_year(year_raw: object) -> int | None:
     """Parse year from string or int value."""
     if not year_raw:
         return None

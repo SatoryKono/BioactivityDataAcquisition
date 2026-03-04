@@ -90,12 +90,11 @@ class ValueObject(ABC, Generic[T]):
         """String representation of the value."""
         return str(self._value)
 
-    # Any: standard __setattr__ s...
     def __setattr__(
         self,
         name: str,
         value: Any,  # Any: Python __setattr__ protocol requires Any
-    ) -> None:  # Any: raw input value from API (str|int|float|None)
+    ) -> None:
         """Prevent mutation of Value Object."""
         if hasattr(self, "_value"):
             raise AttributeError(f"{self.__class__.__name__} is immutable")

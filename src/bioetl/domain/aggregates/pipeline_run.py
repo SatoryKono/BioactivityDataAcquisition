@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from enum import StrEnum
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.domain.exceptions import InvalidStateError
 
@@ -110,7 +110,7 @@ class StageResult:
     status: StageStatus
     started_at: datetime
     completed_at: datetime | None = None
-    result: Any = None  # Any: dynamic event data
+    result: object = None
     error: str | None = None
     error_type: str | None = None
     records_processed: int = 0
@@ -135,7 +135,7 @@ class StageResult:
     def with_success(
         self,
         completed_at: datetime,
-        result: Any = None,  # Any: dynamic event data
+        result: object = None,
         records_processed: int = 0,
     ) -> StageResult:
         """Create a new StageResult marking this stage as successful.
@@ -224,7 +224,7 @@ class PipelineRun:
         run_id: RunID,
         run_type: RunType,
         pipeline_name: str = "",
-        metadata: JsonDict | None = None,  # Any: heterogeneous pipeline metrics
+        metadata: JsonDict | None = None,
     ) -> None:
         """Initialize a new pipeline run.
 
@@ -280,7 +280,7 @@ class PipelineRun:
         return self._ended_at
 
     @property
-    def metadata(self) -> JsonDict:  # Any: heterogeneous pipeline metrics
+    def metadata(self) -> JsonDict:
         """Copy of run metadata."""
         return self._metadata.copy()
 
@@ -351,7 +351,7 @@ class PipelineRun:
     def record_stage_success(
         self,
         stage: str,
-        result: Any = None,  # Any: dynamic event data
+        result: object = None,
         records_processed: int = 0,
         started_at: datetime | None = None,
         completed_at: datetime | None = None,

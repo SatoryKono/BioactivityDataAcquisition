@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import StrEnum
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import (
@@ -219,7 +219,7 @@ class ErrorService:
         self,
         *,
         error: Exception,
-        status_code: Any,  # Any: untyped API JSON record
+        status_code: int | None,
     ) -> ErrorCategory:
         """Resolve error category from HTTP status code or exception type."""
         if status_code is not None:
@@ -234,7 +234,7 @@ class ErrorService:
         context: JsonDict,  # Any: untyped API JSON record
         error_type: ErrorType,
         error_category: ErrorCategory,
-        status_code: Any,  # Any: untyped API JSON record
+        status_code: int | None,
     ) -> AdapterErrorContext:
         """Build strongly typed adapter error context payload."""
         return AdapterErrorContext(
@@ -262,7 +262,7 @@ class ErrorService:
         error_type: ErrorType,
         error_category: ErrorCategory,
         error_context: AdapterErrorContext,
-        status_code: Any,  # Any: untyped API JSON record
+        status_code: int | None,
     ) -> None:
         """Emit error log and taxonomy counter in unified format."""
         self._logger.error(

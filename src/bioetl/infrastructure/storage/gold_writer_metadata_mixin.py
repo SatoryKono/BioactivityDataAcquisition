@@ -153,7 +153,7 @@ class GoldWriterMetadataMixin:
         run_id: RunID | None,
         silver_refs: list[Any] | None,  # Any: SilverRef heterogeneous
         gold_schema: Any | None,  # Any: Pandera model class
-    ) -> Any:  # Any: metadata payload type comes from ports layer
+    ) -> GoldMetadata:
         """Create metadata via coordinator when configured, else fallback builder."""
         if self._metadata_coordinator is not None:
             return self._create_gold_metadata_via_coordinator(
@@ -187,7 +187,7 @@ class GoldWriterMetadataMixin:
         ingestion_ts: datetime | None,
         silver_refs: list[Any] | None,  # Any: SilverRef heterogeneous
         gold_schema: Any | None,  # Any: Pandera model class
-    ) -> Any:  # Any: metadata payload type comes from ports layer
+    ) -> GoldMetadata:
         """Build Gold metadata using MetadataCoordinator."""
         from bioetl.domain.ports import GoldMetadataInput, SilverRef
 
@@ -228,7 +228,7 @@ class GoldWriterMetadataMixin:
         ingestion_ts: datetime | None,
         run_id: RunID | None,
         gold_schema: Any | None,  # Any: Pandera model class
-    ) -> Any:  # Any: metadata payload type comes from ports layer
+    ) -> GoldMetadata:
         """Build Gold metadata through fallback builder."""
         from bioetl.infrastructure.storage.metadata_builder import GoldMetadataBuilder
 
@@ -250,7 +250,7 @@ class GoldWriterMetadataMixin:
         self,
         *,
         table_path: str,
-        metadata: Any,  # Any: metadata payload type comes from ports layer
+        metadata: GoldMetadata,
         table_name: str,
         provider_name: str,
         entity_name: str,

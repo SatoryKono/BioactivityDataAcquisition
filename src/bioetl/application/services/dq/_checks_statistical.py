@@ -15,8 +15,6 @@ __all__ = [
 ]
 
 
-from typing import Any
-
 import polars as pl
 
 from bioetl.domain.value_objects.dq_report import (

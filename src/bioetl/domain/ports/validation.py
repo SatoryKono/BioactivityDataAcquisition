@@ -32,10 +32,8 @@ class SilverValidatorPort(Protocol):
 
     def validate(
         self,
-        records: list[
-            JsonDict  # Any: port contract allows heterogeneous record values
-        ],  # Any: port contract allows heterogeneous record values
-    ) -> ValidationResult:  # Any: validated records have heterogeneous field types
+        records: list[JsonDict],
+    ) -> ValidationResult:
         """Validate records for Silver layer.
 
         Args:
@@ -61,10 +59,8 @@ class GoldValidatorPort(Protocol):
 
     def validate(
         self,
-        records: list[
-            JsonDict  # Any: port contract allows heterogeneous record values
-        ],  # Any: port contract allows heterogeneous record values
-    ) -> ValidationResult:  # Any: validated records have heterogeneous field types
+        records: list[JsonDict],
+    ) -> ValidationResult:
         """Validate records for Gold layer.
 
         Args:

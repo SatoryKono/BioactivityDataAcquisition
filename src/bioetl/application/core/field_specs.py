@@ -120,8 +120,9 @@ class FieldGroup:
     prefix: str = ""
 
 
-# Any: record vals vary
-def map_field(record: BronzeRecord, spec: FieldSpec) -> tuple[str, Any]:
+def map_field(
+    record: BronzeRecord, spec: FieldSpec,
+) -> tuple[str, Any]:  # Any: field value type varies (str | int | float | None)
     """Map a single field from record according to specification.
 
     Args:

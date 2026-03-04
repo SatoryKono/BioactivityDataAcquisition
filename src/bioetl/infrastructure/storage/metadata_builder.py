@@ -20,14 +20,15 @@ from bioetl.domain.version import get_version as _get_bioetl_version
 if TYPE_CHECKING:
     from bioetl.domain.medallion import GoldWriteMode
     from bioetl.domain.models.metadata import (
+        CompositeOutputExt,
         GoldMetadata,
         SilverMetadata,
     )
 
 
 def _parse_composite_list(
-    value: Any,  # Any: Arrow field value type varies
-) -> list[str]:  # Any: Arrow field value type varies
+    value: object,
+) -> list[str]:
     """Parse composite list metadata stored as list or stringified list."""
     if isinstance(value, list):
         return [str(item) for item in value]
@@ -42,8 +43,8 @@ def _parse_composite_list(
 
 
 def _parse_composite_status(
-    value: Any,  # Any: Arrow field value type varies
-) -> dict[str, str]:  # Any: Arrow field value type varies
+    value: object,
+) -> dict[str, str]:
     """Parse enrichment status stored as dict or stringified dict."""
     if isinstance(value, dict):
         return {str(k): str(v) for k, v in value.items()}
@@ -59,7 +60,7 @@ def _parse_composite_status(
 
 def _build_composite_output_ext(
     records: list[JsonDict],  # Any: record/metadata values are heterogeneous
-) -> Any | None:  # Any: record/metadata values are heterogeneous
+) -> CompositeOutputExt | None:
     """Build CompositeOutputExt when composite lineage columns are present."""
     from bioetl.domain.models.metadata import (
         CompositeOutputExt,
@@ -312,8 +313,8 @@ class GoldMetadataBuilder(_MetadataBuilderBase):
         mode: GoldWriteMode,
         scd_config: JsonDict | None = None,  # Any: dynamic layer config
         ingestion_ts: datetime | None = None,
-        run_id: Any | None = None,  # Any: heterogeneous run ID (str, int, UUID)
-        gold_schema: Any | None = None,  # Any: dynamic Pandera schema class
+        run_id: object | None = None,
+        gold_schema: Any | None = None,  # Any: Pandera schema class, untyped at this layer
     ) -> GoldMetadata:
         """Build Gold metadata using fallback logic (no coordinator).
 

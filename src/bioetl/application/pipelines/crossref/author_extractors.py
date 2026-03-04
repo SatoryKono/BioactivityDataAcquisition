@@ -14,7 +14,6 @@ from __future__ import annotations
 __all__ = ["extract_author_details", "extract_author_orcids"]
 
 
-from typing import Any
 from bioetl.domain.types import JsonDict
 
 

@@ -380,8 +380,8 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
 
     def entity_to_silver_record(
         self,
-        entity: Any,  # Any: generic domain entity; type varies by pipeline
-    ) -> GoldRecord:  # Any: generic domain entity
+        entity: Any,  # Any: domain entity dataclass; concrete type varies by pipeline subclass
+    ) -> GoldRecord:
         """Convert Domain Entity to SilverRecord, preserving base schema fields.
 
         Overrides base implementation to handle ISSN list conversion.
