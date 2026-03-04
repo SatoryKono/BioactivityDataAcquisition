@@ -9,7 +9,7 @@ from __future__ import annotations
 from dataclasses import fields, is_dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, cast
+from typing import Any, cast  # Any: needed for _serialize_value recursive return
 
 import orjson
 
@@ -19,9 +19,10 @@ from bioetl.domain.value_objects.dq_report import (
     GoldDQReport,
     SilverDQReport,
 )
+from bioetl.domain.types import JsonDict
 
 
-def to_dict(obj: Any) -> dict[str, Any]:  # Any: serializable
+def to_dict(obj: object) -> JsonDict:
     """Convert an object to a dictionary suitable for serialization.
 
     Handles dataclasses, enums, datetimes, and collection types.
@@ -33,13 +34,13 @@ def to_dict(obj: Any) -> dict[str, Any]:  # Any: serializable
         Dictionary representation of the object.
     """
     if is_dataclass(obj) and not isinstance(obj, type):
-        return cast(dict[str, Any], _serialize_value(obj))  # Any: varied
+        return cast(JsonDict, _serialize_value(obj))
     if isinstance(obj, dict):
-        return cast(dict[str, Any], _serialize_value(obj))  # Any: varied
+        return cast(JsonDict, _serialize_value(obj))
     return {"value": _serialize_value(obj)}
 
 
-def _serialize_dataclass(value: Any) -> dict[str, Any]:  # Any: serializable
+def _serialize_dataclass(value: object) -> JsonDict:
     """Serialize a dataclass instance to dict."""
     return {
         field.name: _serialize_value(getattr(value, field.name))
@@ -48,20 +49,20 @@ def _serialize_dataclass(value: Any) -> dict[str, Any]:  # Any: serializable
 
 
 def _serialize_collection(
-    value: dict[str, Any] | list[Any] | tuple[Any, ...],  # Any: varied
-) -> Any:  # Any: mirrors input
+    value: JsonDict | list[object] | tuple[object, ...],
+) -> JsonDict | list[object]:  # output mirrors heterogeneous input structure
     """Serialize dict/list/tuple recursively."""
     if isinstance(value, dict):
         return {key: _serialize_value(item) for key, item in value.items()}
     return [_serialize_value(item) for item in value]
 
 
-def _is_dataclass_instance(value: Any) -> bool:  # Any: any obj
+def _is_dataclass_instance(value: object) -> bool:
     """Check if value is a dataclass instance (not a class)."""
     return is_dataclass(value) and not isinstance(value, type)
 
 
-def _serialize_value(value: Any) -> Any:  # Any: serializable
+def _serialize_value(value: Any) -> Any:  # Any: recursive serializer handles heterogeneous types
     """Serialize a value with dataclass/enum/datetime/collection support."""
     if _is_dataclass_instance(value):
         return _serialize_dataclass(value)
@@ -105,7 +106,7 @@ class DQReportSerializer:
 
     def to_dict(
         self, report: BronzeDQReport | SilverDQReport | GoldDQReport
-    ) -> dict[str, Any]:  # Any: serialized values are heterogeneous
+    ) -> JsonDict:
         """Convert report to dictionary.
 
         Args:
@@ -133,7 +134,7 @@ class DQReportSerializer:
         """Serialize to HTML report with styling."""
         return self._generate_html(to_dict(report), report)
 
-    def _dict_to_yaml(self, data: dict[str, Any], indent: int = 0) -> str:  # Any: mixed
+    def _dict_to_yaml(self, data: JsonDict, indent: int = 0) -> str:
         """Simple YAML serialization without external dependencies."""
         lines = []
         prefix = "  " * indent
@@ -143,12 +144,12 @@ class DQReportSerializer:
 
         return "\n".join(lines)
 
-    def _yaml_entry(  # Any: value is serializable
+    def _yaml_entry(
         self,
         key: str,
-        value: Any,  # Any: DQ check values vary by check type
+        value: object,
         prefix: str,
-        indent: int,  # Any: DQ check values vary by check type
+        indent: int,
     ) -> list[str]:
         """Convert a single key-value pair to YAML lines."""
         if isinstance(value, dict):
@@ -157,11 +158,11 @@ class DQReportSerializer:
             return [f"{prefix}{key}:", *self._yaml_list(value, prefix, indent)]
         return [f"{prefix}{key}: {self._yaml_value(value)}"]
 
-    def _yaml_list(  # Any: items have mixed values
+    def _yaml_list(
         self,
-        items: list[Any],  # Any: DQ values vary by check type
+        items: list[object],
         prefix: str,
-        indent: int,  # Any: DQ values vary by check type
+        indent: int,
     ) -> list[str]:
         """Convert a list to YAML lines."""
         lines = []
@@ -173,7 +174,7 @@ class DQReportSerializer:
                 lines.append(f"{prefix}  - {self._yaml_value(item)}")
         return lines
 
-    def _yaml_value(self, value: Any) -> str:  # Any: any obj
+    def _yaml_value(self, value: object) -> str:
         """Format a single value for YAML."""
         if value is None:
             return "null"
@@ -191,7 +192,7 @@ class DQReportSerializer:
 
     def _generate_html(
         self,
-        data: dict[str, Any],  # Any: serialized values are heterogeneous
+        data: JsonDict,
         report: BronzeDQReport | SilverDQReport | GoldDQReport,  # noqa: ARG002
     ) -> str:
         """Generate HTML report."""
@@ -379,7 +380,7 @@ class DQReportSerializer:
         else:
             return "fail"
 
-    def _render_checks_html(self, checks: dict[str, Any]) -> str:  # Any: mixed
+    def _render_checks_html(self, checks: JsonDict) -> str:
         """Render checks as HTML."""
         if not checks:
             return "<p>No checks performed.</p>"
@@ -411,7 +412,7 @@ class DQReportSerializer:
 
         return "\n".join(html_parts)
 
-    def _render_check_details(self, data: dict[str, Any]) -> str:  # Any: mixed
+    def _render_check_details(self, data: JsonDict) -> str:
         """Render check details as HTML table."""
         rows = []
         for key, value in data.items():
@@ -427,7 +428,7 @@ class DQReportSerializer:
 
         return f"<table>{''.join(rows)}</table>"
 
-    def _format_detail_value(self, value: Any) -> str:  # Any: any obj
+    def _format_detail_value(self, value: object) -> str:
         """Format a detail value for HTML display."""
         if isinstance(value, dict):
             return (
@@ -437,7 +438,7 @@ class DQReportSerializer:
             return ", ".join(str(v) for v in value) if value else "[]"
         return str(value)
 
-    def _render_thresholds_html(self, thresholds: dict[str, Any]) -> str:  # Any: mixed
+    def _render_thresholds_html(self, thresholds: JsonDict) -> str:
         """Render thresholds card as HTML."""
         if not thresholds:
             return ""

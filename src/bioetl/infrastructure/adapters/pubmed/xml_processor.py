@@ -11,6 +11,7 @@ __all__ = ["PubMedXmlProcessor"]
 
 import xml.etree.ElementTree as ET
 from typing import Any
+from bioetl.domain.types import JsonDict
 
 
 class PubMedXmlProcessor:
@@ -34,7 +35,7 @@ class PubMedXmlProcessor:
     @staticmethod
     def extract_record(
         article_node: ET.Element,
-    ) -> dict[str, Any]:  # Any: untyped API JSON record
+    ) -> JsonDict:  # Any: untyped API JSON record
         """Extract record dict from a PubmedArticle XML node.
 
         Args:
@@ -68,7 +69,7 @@ class PubMedXmlProcessor:
     @staticmethod
     def extract_all_records(
         root: ET.Element,
-    ) -> list[dict[str, Any]]:  # Any: untyped API JSON record
+    ) -> list[JsonDict]:  # Any: untyped API JSON record
         """Extract all article records from XML root.
 
         Args:

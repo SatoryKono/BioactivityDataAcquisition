@@ -19,7 +19,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from enum import StrEnum
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.domain.exceptions import InvalidStateError
 
@@ -471,7 +471,7 @@ class QuarantineEntry:
             reason="Retention period exceeded",
         )
 
-    def add_metadata(self, key: str, value: Any) -> None:  # Any: metadata vals
+    def add_metadata(self, key: str, value: object) -> None:
         """Add metadata to the entry.
 
         Only allowed while entry is not resolved.

@@ -21,6 +21,7 @@ from bioetl.domain.services._author_helpers import (
     parse_author_string,
     parse_delimited_authors,
 )
+from bioetl.domain.types import JsonDict
 
 
 def _filter_string_items(
@@ -79,7 +80,7 @@ class AuthorNormalizationService:
     def normalize_author_list(
         self,
         authors: list[str]
-        | list[dict[str, Any]]  # Any: record values are heterogeneous
+        | list[JsonDict]  # Any: record values are heterogeneous
         | str
         | None,  # Any: raw author data from heterogeneous APIs
     ) -> str | None:
@@ -102,7 +103,7 @@ class AuthorNormalizationService:
     def normalize_affiliations(
         self,
         affiliations: list[str]
-        | list[dict[str, Any]]  # Any: record values are heterogeneous
+        | list[JsonDict]  # Any: record values are heterogeneous
         | None,  # Any: raw author data from heterogeneous APIs
     ) -> str | None:
         """Extract, normalize, deduplicate affiliations to JSON string.
@@ -125,7 +126,7 @@ class AuthorNormalizationService:
     @staticmethod
     def _normalize_affiliation_list(
         affiliations: list[str]
-        | list[dict[str, Any]],  # Any: raw author data from heterogeneous APIs
+        | list[JsonDict],  # Any: raw author data from heterogeneous APIs
     ) -> list[str]:
         """Extract, normalize, and deduplicate affiliation strings."""
         aff_strings = extract_affiliation_strings(affiliations)
@@ -136,7 +137,7 @@ class AuthorNormalizationService:
 
     def extract_affiliations_from_authors(
         self,
-        authors: list[dict[str, Any]],  # Any: raw author data from heterogeneous APIs
+        authors: list[JsonDict],  # Any: raw author data from heterogeneous APIs
     ) -> list[str]:
         """Extract unique affiliations from author objects.
 
@@ -158,7 +159,7 @@ class AuthorNormalizationService:
     def normalize_author_keys(
         self,
         authors: list[str]
-        | list[dict[str, Any]]  # Any: record values are heterogeneous
+        | list[JsonDict]  # Any: record values are heterogeneous
         | str
         | None,  # Any: raw author data from heterogeneous APIs
     ) -> str | None:
@@ -180,7 +181,7 @@ class AuthorNormalizationService:
     def _parse_author_names(
         self,
         authors: list[str]
-        | list[dict[str, Any]]  # Any: record values are heterogeneous
+        | list[JsonDict]  # Any: record values are heterogeneous
         | str,  # Any: raw author data from heterogeneous APIs
     ) -> list[str]:
         """Parse various author formats to list of name strings."""

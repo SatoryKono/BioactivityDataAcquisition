@@ -15,7 +15,7 @@ Split from monolithic 761-LOC class per audit-package-structure-2026-02-07.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, cast
+from typing import cast
 
 import polars as pl
 import pyarrow as pa
@@ -45,6 +45,7 @@ from bioetl.domain.value_objects.dq_report import (
     GoldDQReport,
     MedallionLayer,
 )
+from bioetl.domain.types import JsonDict
 
 
 class GoldDQAnalyzer:
@@ -64,18 +65,18 @@ class GoldDQAnalyzer:
         enabled_checks: set[GoldDQCheckType],
         required_fields: list[str],
         completeness_threshold: float,
-        business_rules: list[dict[str, Any]],  # Any: DQ check values vary by check type
+        business_rules: list[JsonDict],  # Any: DQ check values vary by check type
         reference_tables: dict[str, pl.DataFrame | pa.Table],
         baseline_stats: dict[
             str, Any  # Any: DQ baseline statistics have heterogeneous values
         ]
         | None,
-        scd_config: dict[str, Any] | None,  # Any: DQ check values vary by check type
+        scd_config: JsonDict | None,  # Any: DQ check values vary by check type
     ) -> tuple[
-        dict[str, Any], int, int, int  # Any: DQ check values vary by check type
+        JsonDict, int, int, int  # Any: DQ check values vary by check type
     ]:  # Any: DQ check values vary by check type
         """Execute all enabled DQ checks and collect results."""
-        checks: dict[str, Any] = {}  # Any: DQ check values vary by check type
+        checks: JsonDict = {}  # Any: DQ check values vary by check type
         passed, failed, warnings = 0, 0, 0
 
         if GoldDQCheckType.RECORD_COUNT in enabled_checks:
@@ -141,7 +142,7 @@ class GoldDQAnalyzer:
         required_fields: list[str] | None = None,
         completeness_threshold: float = 0.90,
         business_rules: list[
-            dict[str, Any]  # Any: DQ check values vary by check type
+            JsonDict  # Any: DQ check values vary by check type
         ]  # Any: DQ rule definitions have heterogeneous values
         | None = None,  # Any: DQ check values vary by check type
         reference_tables: dict[str, pl.DataFrame | pa.Table] | None = None,
@@ -149,7 +150,7 @@ class GoldDQAnalyzer:
             str, Any  # Any: DQ check values vary by check type
         ]  # Any: DQ baseline statistics have heterogeneous values
         | None = None,  # Any: DQ check values vary by check type
-        scd_config: dict[str, Any]  # Any: SCD config has heterogeneous values
+        scd_config: JsonDict  # Any: SCD config has heterogeneous values
         | None = None,  # Any: DQ check values vary by check type
     ) -> GoldDQReport:
         """Analyze Gold data and generate DQ report.

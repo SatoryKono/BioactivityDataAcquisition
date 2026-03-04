@@ -8,6 +8,7 @@ human-readable format.
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
+from bioetl.domain.types import JsonDict
 
 import click
 
@@ -112,7 +113,7 @@ def echo_vacuum_all_summary(result: VacuumAllResult) -> None:
 
 
 def echo_quarantine_record(
-    record: dict[str, Any],  # Any: CLI/HTTP response values are heterogeneous
+    record: JsonDict,  # Any: CLI/HTTP response values are heterogeneous
 ) -> None:  # Any: quarantine record has heterogeneous values
     """Output a single quarantine record.
 

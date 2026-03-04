@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from bioetl.domain.composite.cross_validation import CrossValidationStats
     from bioetl.domain.composite.lineage import CompositeLineageMetadata
+from bioetl.domain.types import JsonDict
 
 __all__ = [
     "CompositeResult",
@@ -380,9 +381,7 @@ class MergeResult:
     output_gold_path: str | None = None
     lineage_summary: dict[str, int] = field(default_factory=dict)
     cross_validation_stats: CrossValidationStats | None = None
-    quarantine_payloads: tuple[
-        dict[str, Any], ...  # Any: values are heterogeneous
-    ] = ()  # Any: quarantine record has heterogeneous values
+    quarantine_payloads: tuple[JsonDict, ...] = ()
 
     def __post_init__(self) -> None:
         """Convert lists to tuples for immutability."""

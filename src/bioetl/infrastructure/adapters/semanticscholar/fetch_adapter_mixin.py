@@ -1,4 +1,3 @@
-# mypy: disable-error-code=no-any-return
 """Fetch and fallback entrypoints for SemanticScholarAdapter.
 
 Contains FilterableDataSourcePort-compatible filtering methods.
@@ -8,9 +7,9 @@ from __future__ import annotations
 
 import contextlib
 import time
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
-from bioetl.domain.types import BronzeRecord
+from bioetl.domain.types import BronzeRecord, JsonDict
 from bioetl.infrastructure.adapters.common import FallbackFetchRequest
 from bioetl.infrastructure.adapters.semanticscholar.constants import (
     SEMANTICSCHOLAR_BASE_URL,
@@ -24,7 +23,7 @@ class SemanticScholarFetchAdapterMixin:
     """Public fetch/filter/fallback paths extracted from adapter facade."""
 
     async def fetch(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         entity_type: str,
         limit: int | None = None,
         query: str | None = None,
@@ -52,9 +51,7 @@ class SemanticScholarFetchAdapterMixin:
         fetched = 0
 
         while True:
-            params: dict[
-                str, Any  # Any: dynamic payload or structural mixin boundary
-            ] = {  # Any: dynamic payload or structural mixin boundary
+            params: JsonDict = {
                 "query": query or "*",
                 "fields": self.fields,
                 "offset": current_offset,
@@ -84,7 +81,7 @@ class SemanticScholarFetchAdapterMixin:
             current_offset = next_offset
 
     async def fetch_filtered(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         entity_type: str,
         filter_ids: list[str],
         filter_field: str,
@@ -111,7 +108,7 @@ class SemanticScholarFetchAdapterMixin:
                     return
 
     async def _batch_doi_phase(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         valid_dois: list[str],
         resolved_dois: set[str],
         limit: int | None,
@@ -137,7 +134,7 @@ class SemanticScholarFetchAdapterMixin:
                     return
 
     async def fetch_filtered_with_fallback(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         entity_type: str,
         filter_ids: list[str],
         filter_field: str,
@@ -173,7 +170,7 @@ class SemanticScholarFetchAdapterMixin:
             yield record
 
     async def fetch_multi_filtered(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         entity_type: str,
         filters: dict[str, list[str]],
         limit: int | None = None,

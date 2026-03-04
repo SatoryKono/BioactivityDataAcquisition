@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 from typing import Any
+from bioetl.domain.types import JsonDict
 
 import click
 
@@ -39,7 +40,7 @@ def list_command(as_json: bool) -> None:
     items = service.list_adrs()
     if as_json:
         payload: list[
-            dict[str, Any]  # Any: CLI/HTTP response values are heterogeneous
+            JsonDict  # Any: CLI/HTTP response values are heterogeneous
         ] = [  # Any: CLI/HTTP response values are heterogeneous
             {"number": i.number, "title": i.title, "path": i.path} for i in items
         ]

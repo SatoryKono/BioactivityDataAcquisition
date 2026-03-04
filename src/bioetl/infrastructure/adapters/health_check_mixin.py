@@ -32,7 +32,7 @@ from typing import TYPE_CHECKING, Any
 from httpx import HTTPStatusError, RequestError
 
 from bioetl.domain.exceptions import BioETLError, NetworkError
-from bioetl.domain.types import HealthStatus
+from bioetl.domain.types import HealthStatus, JsonDict
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
@@ -365,7 +365,7 @@ class HealthCheckProviderMixin(HealthCheckMixin):
 
     def _get_error_context(
         self, operation: str
-    ) -> dict[str, Any]:  # Any: untyped API JSON record
+    ) -> JsonDict:  # Any: untyped API JSON record
         """Build error context with circuit breaker info.
 
         Args:

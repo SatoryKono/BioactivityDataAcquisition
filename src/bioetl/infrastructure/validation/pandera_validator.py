@@ -20,7 +20,7 @@ __all__ = [
 
 from typing import TYPE_CHECKING, Any, ClassVar
 
-from bioetl.domain.types import ValidationResult
+from bioetl.domain.types import JsonDict, ValidationResult
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -61,7 +61,7 @@ class BasePanderaValidator:
     def validate(
         self,
         records: list[
-            dict[str, Any]  # Any: validated records have heterogeneous field types
+            JsonDict  # Any: validated records have heterogeneous field types
         ],  # Any: validated records have heterogeneous field types
     ) -> ValidationResult:  # Any: validated records have heterogeneous field types
         """Validate records using Pandera schema.
@@ -242,7 +242,7 @@ class NoOpValidator:
     def validate(
         self,
         records: list[
-            dict[str, Any]  # Any: validated records have heterogeneous field types
+            JsonDict  # Any: validated records have heterogeneous field types
         ],  # Any: validated records have heterogeneous field types
     ) -> ValidationResult:  # Any: validated records have heterogeneous field types
         """Pass through records without validation.

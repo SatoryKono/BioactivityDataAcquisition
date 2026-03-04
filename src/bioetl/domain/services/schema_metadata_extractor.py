@@ -7,7 +7,7 @@ infrastructure metadata builders.
 from __future__ import annotations
 
 import inspect
-from typing import Any, Literal
+from typing import Literal
 
 from bioetl.domain.models.metadata import SchemaColumnMetadata, SchemaMetadata
 
@@ -17,8 +17,8 @@ __all__ = [
 
 
 def extract_schema_metadata(
-    gold_schema: Any | None,  # Any: untyped API JSON
-) -> SchemaMetadata:  # Any: Pandera DataFrameModel class or instance
+    gold_schema: object | None,
+) -> SchemaMetadata:
     """Extract schema metadata from a Pandera DataFrameModel class.
 
     Args:
@@ -44,8 +44,8 @@ def extract_schema_metadata(
 
 
 def _extract_contract_path(
-    gold_schema: Any,  # Any: untyped API JSON
-) -> str | None:  # Any: Pandera DataFrameModel class or instance
+    gold_schema: object,
+) -> str | None:
     """Extract source path relative to project root from schema module."""
     try:
         module = inspect.getmodule(gold_schema)
@@ -60,8 +60,8 @@ def _extract_contract_path(
 
 
 def _extract_schema_version(
-    gold_schema: Any,  # Any: untyped API JSON
-) -> str:  # Any: Pandera DataFrameModel class or instance
+    gold_schema: object,
+) -> str:
     """Extract schema version from inner Config class."""
     version = "1.0"
     if hasattr(gold_schema, "Config"):
@@ -73,8 +73,8 @@ def _extract_schema_version(
 
 
 def _extract_validation_mode(
-    gold_schema: Any,  # Any: untyped API JSON
-) -> Literal["strict", "lenient"]:  # Any: Pandera DataFrameModel class or instance
+    gold_schema: object,
+) -> Literal["strict", "lenient"]:
     """Extract strict/lenient validation mode from inner Config class."""
     validation: Literal["strict", "lenient"] = "strict"
     if hasattr(gold_schema, "Config"):
@@ -85,8 +85,8 @@ def _extract_validation_mode(
 
 
 def _extract_schema_columns(
-    gold_schema: Any,  # Any: untyped API JSON
-) -> list[SchemaColumnMetadata]:  # Any: Pandera DataFrameModel class or instance
+    gold_schema: object,
+) -> list[SchemaColumnMetadata]:
     """Extract columns from schema via to_schema() when available."""
     columns: list[SchemaColumnMetadata] = []
     try:

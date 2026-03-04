@@ -57,7 +57,7 @@ class BasePublicationTransformer(BaseTransformer):
     """
 
     @abstractmethod
-    def _extract_business_data(self, record: BronzeRecord) -> dict[str, Any]:
+    def _extract_business_data(self, record: BronzeRecord) -> JsonDict:
         """Extract and normalize fields from bronze record.
 
         Provider-specific extraction logic. Delegates to extractors module.
@@ -144,7 +144,7 @@ class BasePublicationTransformer(BaseTransformer):
         business_data: dict[
             str, Any  # Any: transformer record has heterogeneous values
         ],  # Any: transformer record has heterogeneous values
-    ) -> dict[str, Any]:  # Any: transformer record has heterogeneous values
+    ) -> JsonDict:  # Any: transformer record has heterogeneous values
         """Apply uniform content normalization to text fields.
 
         Strips residual HTML/XML tags from abstract (and other fields

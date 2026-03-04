@@ -9,7 +9,7 @@ existing call-sites continue to work without changes.
 
 from __future__ import annotations
 
-from typing import Any
+from bioetl.domain.types import JsonDict
 
 from bioetl.infrastructure.quality._baseline_validation import (
     _validate_baseline_section,
@@ -37,7 +37,7 @@ from bioetl.infrastructure.quality._quarterly_targets_validation import (
 
 
 def validate_debt_scorecard_structure(
-    raw: dict[str, Any],  # Any: YAML values are heterogeneous
+    raw: JsonDict,
 ) -> list[str]:
     """Validate debt scorecard schema and monotonic governance targets."""
     errors: list[str] = []

@@ -5,6 +5,8 @@ from __future__ import annotations
 from datetime import date
 from typing import Any
 
+from bioetl.domain.types import JsonDict
+
 from bioetl.infrastructure.quality._primitives import (
     _parse_iso_date,
     _validate_non_negative_int,
@@ -65,7 +67,7 @@ def _validate_allowances(
 def _validate_grace_window_metadata(
     *,
     prefix: str,
-    window: dict[str, Any],  # Any: YAML values are heterogeneous
+    window: JsonDict,  # Any: YAML values are heterogeneous
     allow_rf_only_for_rf: bool,
     errors: list[str],
 ) -> None:
@@ -139,7 +141,7 @@ def _validate_grace_window_dates(
 
 
 def _validate_grace_windows_section(
-    raw: dict[str, Any],  # Any: YAML values are heterogeneous
+    raw: JsonDict,  # Any: YAML values are heterogeneous
     *,
     baseline_registry_names: set[str],
     group_names: set[str],

@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from typing import Any
+from bioetl.domain.types import JsonDict
 
 
 @dataclass
@@ -14,7 +15,7 @@ class HealthResponse:
     status: str
     timestamp: str
     version: str = "1.0.0"
-    checks: dict[str, Any] = field(  # Any: CLI/HTTP response values are heterogeneous
+    checks: JsonDict = field(  # Any: CLI/HTTP response values are heterogeneous
         default_factory=dict
     )  # Any: CLI/HTTP response values are heterogeneous
 

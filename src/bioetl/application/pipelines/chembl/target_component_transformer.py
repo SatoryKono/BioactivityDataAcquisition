@@ -59,7 +59,7 @@ class TargetComponentTransformer(BaseChemblTransformer):
         self,
         record: BronzeRecord,
         primary_id: PrimaryId,
-    ) -> dict[str, Any]:  # Any: transformer record has heterogeneous values
+    ) -> JsonDict:  # Any: transformer record has heterogeneous values
         """Extract TargetComponent business data from bronze record.
 
         Args:
@@ -70,7 +70,7 @@ class TargetComponentTransformer(BaseChemblTransformer):
             Dictionary of TargetComponent business fields.
 
         """
-        # BronzeRecord is already a dict[str, Any]
+        # BronzeRecord is already a JsonDict
         rec = record
         return {
             # Primary identifier (int)
@@ -84,7 +84,7 @@ class TargetComponentTransformer(BaseChemblTransformer):
             if (
                 classification_ids := extract_list_field(
                     cast(
-                        "list[dict[str, Any]] | None",  # Any: transformer record has heterogeneous values
+                        "list[JsonDict] | None",  # Any: transformer record has heterogeneous values
                         rec.get("protein_classifications"),
                     ),
                     "protein_classification_id",

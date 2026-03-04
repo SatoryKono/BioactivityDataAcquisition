@@ -1,19 +1,14 @@
-# mypy: disable-error-code=no-any-return
 """Health and metadata helpers for SemanticScholarAdapter."""
 
 from __future__ import annotations
 
 import time
-from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.semanticscholar.constants import (
     SEMANTICSCHOLAR_BASE_URL,
 )
-
-if TYPE_CHECKING:
-    pass
 
 
 _SEMANTICSCHOLAR_HEALTH_ERRORS = (
@@ -29,10 +24,8 @@ class SemanticScholarHealthMetadataMixin:
     """Health probe and request-metadata collection methods."""
 
     async def _probe_health(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
-    ) -> (
-        HealthStatus
-    ):  # Any: mixin self type is provided structurally by composed adapter class
+        self,
+    ) -> HealthStatus:
         """Probe Semantic Scholar health endpoint."""
         try:
             url = f"{SEMANTICSCHOLAR_BASE_URL}/paper/search"
@@ -81,24 +74,17 @@ class SemanticScholarHealthMetadataMixin:
             )
             raise
 
-    def _fallback_health_status(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
-    ) -> (
-        HealthStatus
-    ):  # Any: mixin self type is provided structurally by composed adapter class
+    def _fallback_health_status(self) -> HealthStatus:
         """Fallback health status when probe fails."""
         return HealthStatus.UNHEALTHY
 
-    def _get_health_endpoint(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
-    ) -> str:  # Any: mixin self type is provided structurally by composed adapter class
+    def _get_health_endpoint(self) -> str:
         """Health endpoint path used by probes."""
         return "/paper/search"
 
     def get_source_metadata(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
-        api_version: str
-        | None = None,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
+        api_version: str | None = None,
     ) -> SourceMetadata:
         """Return and clear request metadata collector state."""
         metadata = self._request_collector.to_source_metadata(
@@ -109,26 +95,16 @@ class SemanticScholarHealthMetadataMixin:
         self._request_collector.clear()
         return metadata
 
-    def clear_request_collector(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
-    ) -> (
-        None
-    ):  # Any: mixin self type is provided structurally by composed adapter class
+    def clear_request_collector(self) -> None:
         """Clear request collector without returning metadata."""
         self._request_collector.clear()
 
     @property
-    def request_count(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
-    ) -> int:  # Any: mixin self type is provided structurally by composed adapter class
+    def request_count(self) -> int:
         """Recorded API-request count since last clear."""
         return self._request_collector.request_count
 
-    async def aclose(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
-    ) -> (
-        None
-    ):  # Any: mixin self type is provided structurally by composed adapter class
+    async def aclose(self) -> None:
         """Close adapter resources."""
         if self.http_client:
             await self.http_client.__aexit__(None, None, None)

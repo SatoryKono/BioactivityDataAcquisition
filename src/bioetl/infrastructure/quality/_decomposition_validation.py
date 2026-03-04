@@ -5,6 +5,8 @@ from __future__ import annotations
 from itertools import pairwise
 from typing import Any
 
+from bioetl.domain.types import JsonDict
+
 from bioetl.infrastructure.quality._primitives import (
     _parse_quarter_label,
     _validate_non_negative_int,
@@ -12,7 +14,7 @@ from bioetl.infrastructure.quality._primitives import (
 
 
 def _collect_quarterly_registry_budgets(
-    raw: dict[str, Any],  # Any: YAML values are heterogeneous
+    raw: JsonDict,  # Any: YAML values are heterogeneous
 ) -> dict[str, dict[str, int]]:
     """Collect validated-looking quarterly registry budgets for monotonic checks."""
     quarterly_targets = raw.get("quarterly_targets", [])
@@ -36,7 +38,7 @@ def _collect_quarterly_registry_budgets(
 
 
 def _validate_owner_diversification_policy(
-    raw: dict[str, Any],  # Any: YAML values are heterogeneous
+    raw: JsonDict,  # Any: YAML values are heterogeneous
     errors: list[str],
 ) -> tuple[tuple[int, int] | None, int]:
     """Validate governance.owner_diversification and return normalized settings."""
@@ -79,7 +81,7 @@ def _validate_owner_diversification_policy(
 
 
 def _validate_owner_decomposition_targets_section(
-    raw: dict[str, Any],  # Any: YAML values are heterogeneous
+    raw: JsonDict,  # Any: YAML values are heterogeneous
     *,
     quarter_budget_map: dict[str, int],
     owner_diversification_start: tuple[int, int] | None,
@@ -156,7 +158,7 @@ def _validate_owner_decomposition_targets_section(
 
 
 def _validate_expiry_decomposition_targets_section(
-    raw: dict[str, Any],  # Any: YAML values are heterogeneous
+    raw: JsonDict,  # Any: YAML values are heterogeneous
     errors: list[str],
 ) -> None:
     """Validate expiry decomposition targets as monotonically decreasing caps."""
@@ -203,7 +205,7 @@ def _validate_expiry_decomposition_targets_section(
 
 
 def _validate_priority_registry_burndown(
-    raw: dict[str, Any],  # Any: YAML values are heterogeneous
+    raw: JsonDict,  # Any: YAML values are heterogeneous
     *,
     baseline_registry_names: set[str],
     errors: list[str],
@@ -270,7 +272,7 @@ def _validate_priority_registry_burndown(
 
 
 def _validate_program_done_criteria_section(
-    raw: dict[str, Any],  # Any: YAML values are heterogeneous
+    raw: JsonDict,  # Any: YAML values are heterogeneous
     errors: list[str],
 ) -> None:
     """Validate long-horizon program done criteria section."""

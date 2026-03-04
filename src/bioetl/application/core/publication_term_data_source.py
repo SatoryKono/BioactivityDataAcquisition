@@ -5,7 +5,7 @@ Transforms publication records from wrapped adapter into publication_term record
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Self
 
 __all__ = ["PublicationTermDataSource"]
 
@@ -20,6 +20,7 @@ from bioetl.domain.types import BronzeRecord
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
+    from types import TracebackType
 
     from bioetl.domain.ports import DataSourcePort
     from bioetl.domain.types import HealthStatus
@@ -54,7 +55,7 @@ class PublicationTermDataSource(
         self,
         exc_type: type[BaseException] | None,
         exc_val: BaseException | None,
-        exc_tb: Any,  # Any: context-manager protocol accepts implementation-defined traceback type
+        exc_tb: TracebackType | None,
     ) -> None:
         """Exit async context."""
         await self._data_source.__aexit__(exc_type, exc_val, exc_tb)

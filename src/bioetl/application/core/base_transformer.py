@@ -262,7 +262,7 @@ class BaseTransformer(_BaseTransformerRecordHelpersMixin, ABC):
     @staticmethod
     def validate_value_object(
         vo_class: type[ValueObjectWithFromRaw[Any]],  # Any: generic VO type param
-        value: Any,  # Any: raw input from API (str | int | None)
+        value: object,  # object: raw input from API (str | int | None)
         *,
         as_string: bool = True,
     ) -> str | int | None:
@@ -299,7 +299,7 @@ class BaseTransformer(_BaseTransformerRecordHelpersMixin, ABC):
     @staticmethod
     def validate_value_objects(
         vo_class: type[ValueObjectWithFromRaw[Any]],  # Any: generic VO type param
-        values: list[Any] | None,  # Any: raw inputs from API
+        values: list[object] | None,  # object: raw inputs from API
         *,
         as_string: bool = True,
     ) -> list[str | int] | None:
@@ -594,7 +594,7 @@ class BaseTransformer(_BaseTransformerRecordHelpersMixin, ABC):
 
     def entity_to_silver_record(
         self,
-        entity: Any,  # Any: generic domain entity; type varies by pipeline
+        entity: object,  # object: generic domain entity; type varies by pipeline
     ) -> GoldRecord:
         """Convert Domain Entity to SilverRecord format using policy rename map.
 

@@ -1,9 +1,8 @@
-# mypy: disable-error-code=no-any-return
 """Public HTTP verb methods for UnifiedHTTPClient."""
 
 from __future__ import annotations
 
-from typing import Any
+from bioetl.domain.types import JsonDict
 
 import httpx
 
@@ -12,10 +11,9 @@ class HTTPClientRequestMethodsMixin:
     """Thin request verb wrappers around retry-orchestrated request flow."""
 
     async def get(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         url: str,
-        params: dict[str, Any]  # Any: dynamic payload or structural mixin boundary
-        | None = None,  # Any: dynamic payload or structural mixin boundary
+        params: JsonDict | None = None,
         headers: dict[str, str] | None = None,
     ) -> httpx.Response:
         """Send GET request with retry policy."""
@@ -24,12 +22,10 @@ class HTTPClientRequestMethodsMixin:
         )
 
     async def post(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         url: str,
-        json: dict[str, Any]  # Any: dynamic payload or structural mixin boundary
-        | None = None,  # Any: dynamic payload or structural mixin boundary
-        data: dict[str, Any]  # Any: dynamic payload or structural mixin boundary
-        | None = None,  # Any: dynamic payload or structural mixin boundary
+        json: JsonDict | None = None,
+        data: JsonDict | None = None,
         headers: dict[str, str] | None = None,
     ) -> httpx.Response:
         """Send POST request with retry policy."""
@@ -38,7 +34,7 @@ class HTTPClientRequestMethodsMixin:
         )
 
     async def head(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         url: str,
         headers: dict[str, str] | None = None,
     ) -> httpx.Response:
@@ -46,10 +42,9 @@ class HTTPClientRequestMethodsMixin:
         return await self._request_with_retry("HEAD", url, headers=headers)
 
     async def get_once(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         url: str,
-        params: dict[str, Any]  # Any: dynamic payload or structural mixin boundary
-        | None = None,  # Any: dynamic payload or structural mixin boundary
+        params: JsonDict | None = None,
         headers: dict[str, str] | None = None,
     ) -> httpx.Response:
         """Send single GET request without retry loop."""

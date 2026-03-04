@@ -32,6 +32,7 @@ from pydantic_settings import (
 )
 
 from bioetl.domain.config import PipelineConfig
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config.converters import yaml_config_to_domain
 from bioetl.infrastructure.config_loader import (
     load_pipeline_config,
@@ -88,8 +89,8 @@ class YamlSettingsSource(PydanticBaseSettingsSource):
         """
         return value
 
-    def __call__(self) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
-        d: dict[str, Any] = {}  # Any: YAML config has heterogeneous values
+    def __call__(self) -> JsonDict:  # Any: YAML config has heterogeneous values
+        d: JsonDict = {}  # Any: YAML config has heterogeneous values
 
         for field_name, field in self.settings_cls.model_fields.items():
             field_value, field_key, value_is_complex = self.get_field_value(

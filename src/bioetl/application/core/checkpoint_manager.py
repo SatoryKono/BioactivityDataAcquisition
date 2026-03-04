@@ -13,7 +13,7 @@ from typing import Any
 
 from bioetl.domain.medallion import LoadingStrategy
 from bioetl.domain.ports import CheckpointPort, LoggerPort
-from bioetl.domain.types import RunID
+from bioetl.domain.types import JsonDict, RunID
 
 
 class CheckpointManagerService:
@@ -55,7 +55,7 @@ class CheckpointManagerService:
 
     async def load_checkpoint(
         self,
-    ) -> dict[str, Any] | None:  # Any: checkpoint state has heterogeneous values
+    ) -> JsonDict | None:  # Any: checkpoint state has heterogeneous values
         """Load checkpoint if resuming.
 
         When loading_strategy is FULL_SCAN_ONLY (ADR-030, ADR-031), checkpoint loading

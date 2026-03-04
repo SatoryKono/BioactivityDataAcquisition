@@ -13,6 +13,7 @@ from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.composition.factories.dq_context_resolver import (
     create_dq_services as _create_dq_services_impl,
 )
+from bioetl.domain.types import JsonDict
 from bioetl.composition.factories.dq_context_resolver import (
     get_flat_structure as _get_flat_structure_impl,
 )
@@ -150,7 +151,7 @@ class BaseServicesFactory:
         logger: LoggerPort,
         dq_monitor: DQMonitorPort | None,
         metadata_coordinator: MetadataCoordinator | None,
-        dq_services: dict[str, Any],  # Any: heterogeneous DQ service instances
+        dq_services: JsonDict,  # Any: heterogeneous DQ service instances
     ) -> PipelineService:
         """Assemble PipelineService from pre-built dependencies."""
         from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
@@ -210,7 +211,7 @@ class BaseServicesFactory:
         settings: Settings,
         pipeline_config: PipelineYamlConfig,
         logger: LoggerPort,
-    ) -> dict[str, Any]:  # Any: heterogeneous DQ service instances
+    ) -> JsonDict:  # Any: heterogeneous DQ service instances
         """Create DQ analyzers/writer/services when DQ reporting is enabled."""
         return _create_dq_services_impl(settings, pipeline_config, logger)
 

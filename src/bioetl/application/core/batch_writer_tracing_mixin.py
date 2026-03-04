@@ -7,6 +7,7 @@ from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.locking import LockNotHeldError
+from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from typing import Any as SpanType
@@ -43,9 +44,7 @@ class BatchWriterTracingMixin:
         if not self._tracer:
             return None
 
-        attrs: dict[
-            str, Any  # Any: dynamic payload or structural mixin boundary
-        ] = {  # Any: span attributes are heterogeneous by tracing contract
+        attrs: JsonDict = {
             "bioetl.layer": layer,
             "bioetl.record_count": record_count,
             "bioetl.provider": self._provider,

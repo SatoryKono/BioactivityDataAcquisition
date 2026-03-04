@@ -28,6 +28,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.domain.composite.config import CompositeDQConfig, EnricherConfig
     from bioetl.domain.ports import LoggerPort
+from bioetl.domain.types import JsonDict
 
 
 _FILTER_CONDITION_ERRORS = (
@@ -398,7 +399,7 @@ class EnrichmentCoordinatorService:
         Optional enrichers: log as warning and return failed result.
         """
         duration = (datetime.now(tz=UTC) - started_at).total_seconds()
-        log_kwargs: dict[str, Any] = {
+        log_kwargs: JsonDict = {
             "enricher": enricher.pipeline,
             "error": str(error),
             "error_type": type(error).__name__,

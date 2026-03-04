@@ -36,6 +36,7 @@ __all__ = ["StageType", "UnifiedLogger", "create_unified_logger"]
 
 
 from typing import TYPE_CHECKING, Any, Literal, Self
+from bioetl.domain.types import JsonDict
 
 import structlog
 
@@ -125,8 +126,8 @@ class UnifiedLogger:
 
     def _ensure_stage(
         self,
-        kwargs: dict[str, Any],  # Any: structlog-compatible API
-    ) -> dict[str, Any]:  # Any: structlog-compatible API
+        kwargs: JsonDict,  # Any: structlog-compatible API
+    ) -> JsonDict:  # Any: structlog-compatible API
         """Ensure stage field is present in kwargs.
 
         If stage is not provided, defaults to "init" for LoggerPort compatibility.
@@ -143,8 +144,8 @@ class UnifiedLogger:
 
     @staticmethod
     def _sanitize_kwargs(
-        kwargs: dict[str, Any],  # Any: structlog-compatible API
-    ) -> dict[str, Any]:  # Any: structlog-compatible API
+        kwargs: JsonDict,  # Any: structlog-compatible API
+    ) -> JsonDict:  # Any: structlog-compatible API
         """Drop kwargs that conflict with structlog positional parameters."""
         if _EVENT_KWARG in kwargs:
             sanitized = dict(kwargs)
