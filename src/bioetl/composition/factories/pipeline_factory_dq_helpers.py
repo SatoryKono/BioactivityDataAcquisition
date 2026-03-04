@@ -18,6 +18,15 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
+__all__ = [
+    "extract_dq_configs",
+    "extract_dq_output_paths",
+    "extract_single_dq_config",
+    "get_layer_path",
+    "has_flat_structure",
+]
+
+
 class _ModelDumpable(Protocol):
     """Protocol for Pydantic-like models exposing model_dump()."""
 

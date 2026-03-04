@@ -12,6 +12,11 @@ from typing import Any, Protocol, Self, runtime_checkable
 
 from bioetl.domain.types import HealthStatus
 
+__all__ = [
+    "DataSourcePort",
+    "FilterableDataSourcePort",
+]
+
 
 @runtime_checkable
 class DataSourcePort(Protocol):

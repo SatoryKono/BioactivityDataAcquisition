@@ -15,6 +15,16 @@ ALLOWED_BROAD_EXCEPTION_POLICIES = {
         {"CLI_CLEANUP_PREVIEW_UNEXPECTED_ERROR"}
     ),
 }
+P0_2_CRITICAL_ERROR_MODULES = (
+    "src/bioetl/application/core/batch_executor.py",
+    "src/bioetl/application/core/postrun_cleanup_orchestrator.py",
+    "src/bioetl/application/core/postrun_dq_report_orchestrator.py",
+    "src/bioetl/application/core/postrun_metadata_version_resolver.py",
+    "src/bioetl/application/composite/runner.py",
+    "src/bioetl/interfaces/http/health_server.py",
+    "src/bioetl/interfaces/http/health_server_http_mixin.py",
+)
+P0_2_REASON_CODE_MIN_COVERAGE = 0.95
 
 
 def _load_tree(path: str) -> ast.AST:
@@ -194,6 +204,37 @@ def _handler_has_reason_code(handler: ast.ExceptHandler) -> bool:
     return False
 
 
+def _is_structured_error_call(call: ast.Call) -> bool:
+    """Return True when call is a structured error sink in handler body."""
+    if isinstance(call.func, ast.Name):
+        return call.func.id in {"handle_cli_failure", "render_exception"}
+    if isinstance(call.func, ast.Attribute):
+        method_name = call.func.attr
+        if method_name in {"error", "warning", "exception", "critical"}:
+            receiver = call.func.value
+            if (
+                isinstance(receiver, ast.Attribute)
+                and isinstance(receiver.value, ast.Name)
+                and receiver.value.id == "self"
+                and receiver.attr == "_logger"
+            ):
+                return True
+            if isinstance(receiver, ast.Name) and receiver.id in {
+                "logger",
+                "_logger",
+            }:
+                return True
+    return False
+
+
+def _handler_has_structured_error_call(handler: ast.ExceptHandler) -> bool:
+    """Return True when handler emits structured error/warning output."""
+    for node in ast.walk(handler):
+        if isinstance(node, ast.Call) and _is_structured_error_call(node):
+            return True
+    return False
+
+
 def test_application_bioetl_error_handlers_have_reason_code() -> None:
     """All except BioETLError handlers that log must include reason_code."""
     violations: list[str] = []
@@ -219,4 +260,53 @@ def test_application_bioetl_error_handlers_have_reason_code() -> None:
     assert not violations, (
         "Application-layer BioETLError handlers missing reason_code:\n"
         + "\n".join(violations)
+    )
+
+
+def test_p0_2_critical_modules_have_no_broad_exception_handlers() -> None:
+    """P0-2 critical paths must avoid broad catch in non-entrypoint layers."""
+    violations: list[str] = []
+    for path in P0_2_CRITICAL_ERROR_MODULES:
+        tree = _load_tree(path)
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.ExceptHandler):
+                continue
+            if node.type is None:
+                violations.append(f"{path}:{node.lineno} uses bare except")
+                continue
+            if _has_exception_name(node.type):
+                violations.append(f"{path}:{node.lineno} catches Exception")
+
+    assert not violations, (
+        "Broad exception handlers found in P0-2 critical modules:\n"
+        + "\n".join(violations)
+    )
+
+
+def test_p0_2_reason_code_coverage_on_critical_paths() -> None:
+    """P0-2: structured handlers in critical paths must carry reason_code >=95%."""
+    covered = 0
+    total = 0
+    missing: list[str] = []
+
+    for path in P0_2_CRITICAL_ERROR_MODULES:
+        tree = _load_tree(path)
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.ExceptHandler):
+                continue
+            if not _handler_has_structured_error_call(node):
+                continue
+            total += 1
+            if _handler_has_reason_code(node):
+                covered += 1
+            else:
+                missing.append(f"{path}:{node.lineno}")
+
+    assert total > 0, "No structured exception handlers found in critical modules"
+
+    coverage = covered / total
+    assert coverage >= P0_2_REASON_CODE_MIN_COVERAGE, (
+        f"reason_code coverage in critical modules is {coverage:.2%}, "
+        f"required >= {P0_2_REASON_CODE_MIN_COVERAGE:.0%}. "
+        f"Missing handlers: {missing}"
     )

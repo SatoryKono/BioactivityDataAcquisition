@@ -262,7 +262,7 @@ class TestPrometheusCustomCounters:
 class TestObservabilityMetricContract:
     """Tests for observability_events_total label schema normalization."""
 
-    def test_observability_counter_normalizes_legacy_labels(self, prometheus_metrics):
+    def test_observability_counter_ignores_legacy_labels(self, prometheus_metrics):
         with patch.dict(COUNTERS, {"observability_events_total": MagicMock()}):
             prometheus_metrics.increment_counter(
                 name="observability_events_total",
@@ -276,14 +276,41 @@ class TestObservabilityMetricContract:
             )
 
             COUNTERS["observability_events_total"].labels.assert_called_once_with(
-                event="pipeline_started",
-                provider="chembl",
-                pipeline="chembl_activity",
+                event="unknown_event",
+                provider="unknown",
+                pipeline="unknown",
                 severity="info",
                 error_type="none",
             )
             COUNTERS["observability_events_total"].labels().inc.assert_called_once_with(
                 1
+            )
+
+    def test_observability_counter_prefers_canonical_over_legacy(
+        self, prometheus_metrics
+    ):
+        with patch.dict(COUNTERS, {"observability_events_total": MagicMock()}):
+            prometheus_metrics.increment_counter(
+                name="observability_events_total",
+                value=1,
+                labels={
+                    "event": "pipeline_started",
+                    "provider": "chembl",
+                    "pipeline": "chembl_activity",
+                    "severity": "info",
+                    "event_name": "legacy_event",
+                    "provider_name": "legacy_provider",
+                    "pipeline_name": "legacy_pipeline",
+                    "log_level": "warning",
+                },
+            )
+
+            COUNTERS["observability_events_total"].labels.assert_called_once_with(
+                event="pipeline_started",
+                provider="chembl",
+                pipeline="chembl_activity",
+                severity="info",
+                error_type="none",
             )
 
     def test_observability_counter_always_has_required_labels(self, prometheus_metrics):

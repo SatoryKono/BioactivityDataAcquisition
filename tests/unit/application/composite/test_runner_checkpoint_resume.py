@@ -17,6 +17,7 @@ from bioetl.application.composite.checkpoint import (
     CompositeCheckpointManager,
     CompositeCheckpointState,
 )
+from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.runner import (
     CompositePipelineRunner,
     CompositeRuntimeConfig,
@@ -175,6 +176,20 @@ def create_mock_merger() -> AsyncMock:
     return merger
 
 
+def create_mock_fsm_state_helper(
+    *,
+    config: MockCompositeConfig | None = None,
+    logger: MagicMock | None = None,
+    run_id: str | None = None,
+) -> FSMStateHelperService:
+    """Create a real FSM helper service for checkpoint resume tests."""
+    return FSMStateHelperService(
+        config=config or MockCompositeConfig(),
+        logger=logger or create_mock_logger(),
+        run_id=run_id or str(uuid4()),
+    )
+
+
 class TestResumeFromFailedState:
     """Tests for resuming from FAILED state."""
 
@@ -205,6 +220,7 @@ class TestResumeFromFailedState:
             checkpoint_manager=checkpoint_manager,
             logger=logger,
             lock=create_mock_lock(),
+            fsm_state_helper=create_mock_fsm_state_helper(logger=logger),
         )
 
         await runner.run()
@@ -268,6 +284,7 @@ class TestResumeFromFailedState:
             checkpoint_manager=checkpoint_manager,
             logger=logger,
             lock=create_mock_lock(),
+            fsm_state_helper=create_mock_fsm_state_helper(config=config, logger=logger),
         )
 
         await runner.run()
@@ -339,6 +356,7 @@ class TestResumeFromFailedState:
             checkpoint_manager=checkpoint_manager,
             logger=logger,
             lock=create_mock_lock(),
+            fsm_state_helper=create_mock_fsm_state_helper(config=config, logger=logger),
         )
 
         await runner.run()
@@ -415,6 +433,7 @@ class TestResumeContextLogging:
             checkpoint_manager=checkpoint_manager,
             logger=logger,
             lock=create_mock_lock(),
+            fsm_state_helper=create_mock_fsm_state_helper(config=config, logger=logger),
         )
 
         await runner.run()
@@ -442,6 +461,7 @@ class TestResumeContextLogging:
             checkpoint_manager=checkpoint_manager,
             logger=logger,
             lock=create_mock_lock(),
+            fsm_state_helper=create_mock_fsm_state_helper(logger=logger),
         )
 
         await runner.run()
@@ -619,6 +639,7 @@ class TestFSMStateTransitionOnResume:
             checkpoint_manager=checkpoint_manager,
             logger=logger,
             lock=create_mock_lock(),
+            fsm_state_helper=create_mock_fsm_state_helper(logger=logger),
         )
 
         await runner.run()
@@ -665,6 +686,7 @@ class TestFSMStateTransitionOnResume:
         checkpoint_manager = create_mock_checkpoint_manager(failed_state)
         saved_states: list[CompositePipelineState] = []
         original_save = checkpoint_manager.save
+        logger = create_mock_logger()
 
         async def tracking_save(state: CompositeCheckpointState) -> None:
             saved_states.append(state.state)
@@ -681,8 +703,9 @@ class TestFSMStateTransitionOnResume:
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),
             checkpoint_manager=checkpoint_manager,
-            logger=create_mock_logger(),
+            logger=logger,
             lock=create_mock_lock(),
+            fsm_state_helper=create_mock_fsm_state_helper(config=config, logger=logger),
         )
 
         await runner.run()

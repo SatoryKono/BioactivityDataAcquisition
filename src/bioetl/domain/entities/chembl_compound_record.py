@@ -9,6 +9,10 @@ from dataclasses import dataclass
 
 from bioetl.domain.entities.base import BaseEntity
 
+__all__ = [
+    "CompoundRecord",
+]
+
 
 @dataclass(frozen=True, kw_only=True)
 class CompoundRecord(BaseEntity):

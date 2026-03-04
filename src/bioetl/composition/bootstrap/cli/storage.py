@@ -121,31 +121,10 @@ def bootstrap_vacuum_service() -> VacuumService:
 
 
 def _create_table_collector() -> Callable[[str], list[tuple[str, str]]]:
-    """Create a table collector function for VacuumService.
-
-    This function queries the pipeline registry and config loader
-    to collect silver/gold tables. It lives in composition layer
-    to maintain proper dependency direction (application -> domain <- composition).
-
-    Returns:
-        Callable that collects tables for a given layer.
-
-    Raises:
-        ValueError: If config file for a registered pipeline is not found.
-    """
+    """Create a callable that gathers Silver/Gold table names from registry configs."""
 
     def collect_tables(layer: str) -> list[tuple[str, str]]:
-        """Collect tables from all registered pipelines.
-
-        Args:
-            layer: Which layer to collect - "all", "silver", or "gold".
-
-        Returns:
-            List of (table_name, layer) tuples sorted alphabetically.
-
-        Raises:
-            ValueError: If config file for a registered pipeline is not found.
-        """
+        """Collect `(table_name, layer)` pairs for requested layer scope."""
         registry = get_default_registry()
         pipelines = registry.list_pipelines()
 

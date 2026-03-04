@@ -30,29 +30,7 @@ async def health_server_context(
     host: str = "127.0.0.1",
     port: int = DEFAULT_HEALTH_SERVER_PORT,
 ) -> AsyncIterator[HealthServer | None]:
-    """Context manager that optionally runs a health server.
-
-    When enabled, starts an HTTP health server before yielding and
-    gracefully shuts it down afterward. Provides Kubernetes-compatible
-    liveness and readiness probes.
-
-    Args:
-        enabled: Whether to start the health server.
-        host: Host to bind the server to.
-        port: Port for the health server.
-
-    Yields:
-        HealthServer instance if enabled, None otherwise.
-
-    Example:
-        async with health_server_context(enabled=True, port=DEFAULT_HEALTH_SERVER_PORT) as server:
-            # Health server is running
-            await run_pipeline()
-        # Health server is stopped
-
-    Returns:
-        Iterator over results.
-    """
+    """Run health server for the context lifetime when enabled."""
     if not enabled:
         yield None
         return

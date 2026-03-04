@@ -13,6 +13,7 @@ from uuid import UUID, uuid4
 import pytest
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointState
+from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.runner import (
     CompositePipelineRunner,
     CompositeRuntimeConfig,
@@ -162,6 +163,19 @@ def create_mock_merger() -> AsyncMock:
     return merger
 
 
+def create_mock_fsm_state_helper(
+    logger: MagicMock,
+    config: MockCompositeConfig | None = None,
+    run_id: str | None = None,
+) -> FSMStateHelperService:
+    """Create a real FSM helper service for runner tests."""
+    return FSMStateHelperService(
+        config=config or MockCompositeConfig(),
+        logger=logger,
+        run_id=run_id or str(uuid4()),
+    )
+
+
 def create_runner(
     seed_runner: MockPipelineRunner | None = None,
     checkpoint_manager: AsyncMock | None = None,
@@ -174,9 +188,12 @@ def create_runner(
         checkpoint_manager = create_mock_checkpoint_manager()
     if runtime is None:
         runtime = CompositeRuntimeConfig()
+    config = MockCompositeConfig()
+    logger = create_mock_logger()
+    run_id = str(uuid4())
 
     return CompositePipelineRunner(
-        config=MockCompositeConfig(),
+        config=config,
         runtime=runtime,
         seed_runner_factory=lambda: seed_runner,
         enricher_runner_factory=lambda name, df: MockPipelineRunner(),
@@ -184,8 +201,14 @@ def create_runner(
         coordinator=create_mock_coordinator(),
         merger=create_mock_merger(),
         checkpoint_manager=checkpoint_manager,
-        logger=create_mock_logger(),
+        logger=logger,
         lock=create_mock_lock(),
+        fsm_state_helper=create_mock_fsm_state_helper(
+            logger=logger,
+            config=config,
+            run_id=run_id,
+        ),
+        run_id=run_id,
     )
 
 
@@ -314,6 +337,7 @@ class TestFSMSeedFailure:
             checkpoint_manager=checkpoint_manager,
             logger=logger,
             lock=create_mock_lock(),
+            fsm_state_helper=create_mock_fsm_state_helper(logger=logger),
         )
 
         with pytest.raises(RuntimeError):
@@ -423,6 +447,7 @@ class TestFSMSeedResume:
             checkpoint_manager=checkpoint_manager,
             logger=logger,
             lock=create_mock_lock(),
+            fsm_state_helper=create_mock_fsm_state_helper(logger=logger),
         )
 
         await runner.run()
@@ -455,6 +480,7 @@ class TestFSMTransitionLogging:
             checkpoint_manager=create_mock_checkpoint_manager(),
             logger=logger,
             lock=create_mock_lock(),
+            fsm_state_helper=create_mock_fsm_state_helper(logger=logger),
         )
 
         await runner.run()
@@ -480,6 +506,7 @@ class TestFSMTransitionLogging:
             checkpoint_manager=create_mock_checkpoint_manager(),
             logger=logger,
             lock=create_mock_lock(),
+            fsm_state_helper=create_mock_fsm_state_helper(logger=logger),
         )
 
         await runner.run()
@@ -506,6 +533,7 @@ class TestFSMTransitionLogging:
             checkpoint_manager=create_mock_checkpoint_manager(),
             logger=logger,
             lock=create_mock_lock(),
+            fsm_state_helper=create_mock_fsm_state_helper(logger=logger),
         )
 
         with pytest.raises(RuntimeError):
@@ -542,6 +570,7 @@ class TestCheckpointSaveErrorHandling:
             checkpoint_manager=checkpoint_manager,
             logger=logger,
             lock=create_mock_lock(),
+            fsm_state_helper=create_mock_fsm_state_helper(logger=logger),
         )
 
         # Should not raise despite checkpoint save failure
@@ -577,6 +606,7 @@ class TestCheckpointSaveErrorHandling:
             checkpoint_manager=checkpoint_manager,
             logger=logger,
             lock=create_mock_lock(),
+            fsm_state_helper=create_mock_fsm_state_helper(logger=logger),
         )
 
         await runner.run()

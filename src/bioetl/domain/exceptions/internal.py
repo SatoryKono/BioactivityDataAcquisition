@@ -16,6 +16,19 @@ from __future__ import annotations
 from bioetl.domain.exceptions.base import CriticalError
 from bioetl.domain.types import ErrorType
 
+__all__ = [
+    "AuthFailureError",
+    "CheckpointConflictError",
+    "InvalidStateError",
+    "LockAcquisitionError",
+    "LockLostError",
+    "MergeConflictError",
+    "MetricsServerError",
+    "PolicyViolationError",
+    "RunnerAlreadyExecutedError",
+]
+
+
 # =============================================================================
 # State and Invariant Violations
 # =============================================================================

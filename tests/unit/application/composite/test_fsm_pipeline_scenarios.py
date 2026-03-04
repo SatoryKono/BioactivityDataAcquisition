@@ -23,6 +23,7 @@ import polars as pl
 import pytest
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointState
+from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.runner import (
     CompositePipelineRunner,
     CompositeRuntimeConfig,
@@ -461,6 +462,11 @@ def create_test_runner(
         lock = FakeLockPort()
     if run_id is None:
         run_id = str(uuid4())
+    fsm_state_helper = FSMStateHelperService(
+        config=config,
+        logger=logger,
+        run_id=run_id,
+    )
 
     runner = CompositePipelineRunner(
         config=config,
@@ -473,6 +479,7 @@ def create_test_runner(
         checkpoint_manager=checkpoint_manager,
         logger=logger,
         lock=lock,
+        fsm_state_helper=fsm_state_helper,
         run_id=run_id,
     )
 

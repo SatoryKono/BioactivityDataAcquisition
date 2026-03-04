@@ -21,6 +21,10 @@ from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
+__all__ = [
+    "DataNormalizationPort",
+]
+
 
 @runtime_checkable
 class DataNormalizationPort(Protocol):

@@ -17,6 +17,14 @@ from typing import Any
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import ExecutionContext, RunID, RunType
 
+__all__ = [
+    "CachedBronzeContext",
+    "InputFilterContext",
+    "PipelineContext",
+    "PipelineRunContext",
+    "VacuumConfig",
+]
+
 
 def _now_utc() -> datetime:
     """Factory function for default started_at timestamp."""

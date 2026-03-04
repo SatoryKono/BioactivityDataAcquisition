@@ -16,6 +16,8 @@ from bioetl.domain.schemas.semanticscholar.publication import (
     SemanticScholarPublicationSchema,
 )
 
+pytestmark = pytest.mark.network
+
 
 @pytest.mark.architecture
 class TestSchemaInheritance:

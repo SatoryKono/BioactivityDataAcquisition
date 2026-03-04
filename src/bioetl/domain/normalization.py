@@ -12,6 +12,20 @@ from typing import Any
 
 from bioetl.domain.serialization import deserialize_from_json
 
+__all__ = [
+    "extract_first_item",
+    "extract_first_string",
+    "format_date_parts",
+    "normalize_doi",
+    "normalize_pmc_id",
+    "normalize_string",
+    "normalize_to_string",
+    "parse_authors_to_list",
+    "parse_date_field",
+    "parse_page_range",
+    "strip_html_tags",
+]
+
 
 def normalize_string(value: str | None) -> str | None:
     """Normalize string by stripping whitespace, return None for empty.

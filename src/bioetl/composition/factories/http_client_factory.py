@@ -32,6 +32,11 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.config import Settings
 
 
+__all__ = [
+    "HttpClientFactory",
+]
+
+
 class HttpClientFactory:
     """Factory for creating HTTP clients.
 

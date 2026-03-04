@@ -16,6 +16,13 @@ from typing import Literal, Self
 from bioetl.domain.value_objects.base import ValueObject
 from bioetl.domain.value_objects.identifiers import ChemblId, PubChemCid
 
+__all__ = [
+    "AssayId",
+    "CompoundId",
+    "CompoundIdUnion",
+    "CompoundSource",
+]
+
 
 class CompoundSource(StrEnum):
     """Source database for compound identifiers.

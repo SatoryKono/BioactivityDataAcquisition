@@ -12,6 +12,10 @@ from bioetl.interfaces.cli.commands.archive import archive_command
 from bioetl.interfaces.cli.commands.cleanup import bronze_cleanup_command
 from bioetl.interfaces.cli.commands.vacuum import vacuum_all_command, vacuum_command
 
+__all__ = [
+    "maintenance",
+]
+
 
 @click.group()
 def maintenance() -> None:

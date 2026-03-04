@@ -693,7 +693,7 @@ class TestObserverContractSchema:
         context = {"event": event_name, **logger_mock.info.call_args[1]}
         assert missing_observability_fields(context) == ()
 
-    def test_emit_event_migrates_legacy_keys_to_canonical(
+    def test_emit_event_ignores_legacy_keys_after_grace_period(
         self, metrics_mock, logger_mock, run_id
     ):
         observer = PipelineObserver(
@@ -715,11 +715,12 @@ class TestObserverContractSchema:
 
         logger_mock.info.assert_called_once()
         context = logger_mock.info.call_args[1]
-        assert context["provider"] == "legacy_provider"
-        assert context["pipeline"] == "legacy_pipeline"
-        assert context["run_id"] == "legacy-run-id"
+        assert context["provider"] == "test"
+        assert context["pipeline"] == "test_pipeline"
+        assert context["run_id"] == str(run_id)
+        assert context["severity"] == "info"
         assert logger_mock.info.call_args[0][0] == "contract_event"
-        # Legacy aliases are not emitted after migration completion.
+        # Legacy aliases are ignored and never emitted.
         assert "provider_name" not in context
         assert "pipeline_name" not in context
         assert "correlation_id" not in context

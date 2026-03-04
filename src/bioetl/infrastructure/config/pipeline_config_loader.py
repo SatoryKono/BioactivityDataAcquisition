@@ -91,20 +91,7 @@ class PipelineConfigLoader:
         self,
         yaml_config: PipelineYamlConfig,
     ) -> DQConfig:
-        """Resolve DQ config from file reference and/or inline rules.
-
-        Resolution order:
-        1. If dq_config_file present: load from DQ hierarchy
-        2. If dq_overrides present: apply as inline overrides
-        3. If both: merge (file + inline overrides)
-        4. If neither: load defaults from DQ hierarchy
-
-        Args:
-            yaml_config: Validated pipeline YAML configuration.
-
-        Returns:
-            Resolved DQConfig domain object.
-        """
+        """Resolve DQ config from hierarchy with optional inline overrides."""
         provider = yaml_config.provider
         entity = yaml_config.entity_type
 
@@ -168,17 +155,7 @@ class PipelineConfigLoader:
         self,
         dq_overrides: Any,  # Any: Pydantic model instance
     ) -> dict[str, Any]:  # Any: dynamic YAML config values
-        """Normalize inline dq_overrides to DQConfigFile format.
-
-        Converts the Pydantic DQConfig model to a dict compatible with
-        the DQConfigLoader merge format.
-
-        Args:
-            dq_overrides: DQConfig Pydantic model from pipeline config.
-
-        Returns:
-            Dict in DQConfigFile format for merge.
-        """
+        """Convert inline Pydantic DQ overrides into mergeable file-shape dict."""
         result: dict[str, Any] = {}  # Any: dynamic YAML config values
 
         # Thresholds normalization

@@ -38,6 +38,35 @@ def _log_missing_composite_key_columns(
     )
 
 
+def _resolve_left_pipeline(
+    dep: DependencyConfig,
+    seed_pipeline: str | None,
+) -> str | None:
+    if dep.key_source and dep.key_source != "seed":
+        return dep.key_source
+    return seed_pipeline
+
+
+def _build_asymmetric_join_key_set(
+    *,
+    left_join_key: str,
+    right_join_key: str,
+    left_join_key_qualified: str | None,
+) -> set[str]:
+    join_key_set = {left_join_key, right_join_key}
+    if left_join_key_qualified and left_join_key_qualified != left_join_key:
+        join_key_set.add(left_join_key_qualified)
+    return join_key_set
+
+
+def _count_qualified_columns(columns: list[str]) -> int:
+    return len([col for col in columns if "." in col and not col.startswith("_")])
+
+
+def _find_missing_keys(columns: list[str], keys: list[str]) -> list[str]:
+    return [key for key in keys if key not in columns]
+
+
 class DependencyJoinerService:
     """Encapsulates dependency join preparation and execution logic."""
 
@@ -105,23 +134,14 @@ class DependencyJoinerService:
     ) -> pl.DataFrame:
         """Join dependency using all configured composite join keys."""
         join_keys_list = list(dep.join_keys)
-        left_pipeline = self._resolve_left_pipeline(dep, seed_pipeline)
-
-        dep_df = self._prepare_dependency_dataframe(
-            dep_df=dep_df,
-            dep=dep,
-            deduplicate_keys=join_keys_list,
-        )
-        merged_df, dep_df = self._normalize_dependency_join_inputs(
+        left_pipeline = _resolve_left_pipeline(dep, seed_pipeline)
+        merged_df, dep_df = self._prepare_dependency_join_frames(
             merged_df=merged_df,
             dep_df=dep_df,
+            dep=dep,
             left_join_keys=join_keys_list,
             right_join_keys=join_keys_list,
             seed_pipeline=seed_pipeline,
-        )
-        dep_df = self._rename_dependency_dataframe(
-            dep_df=dep_df,
-            dependency=dep.pipeline,
         )
         left_keys, right_keys, all_join_key_set = (
             self._join_key_resolver.resolve_composite_join_keys(
@@ -136,8 +156,8 @@ class DependencyJoinerService:
             dep_df,
             all_join_key_set,
         )
-        missing_left = [key for key in left_keys if key not in merged_df.columns]
-        missing_right = [key for key in right_keys if key not in dep_df.columns]
+        missing_left = _find_missing_keys(merged_df.columns, left_keys)
+        missing_right = _find_missing_keys(dep_df.columns, right_keys)
         if missing_left or missing_right:
             _log_missing_composite_key_columns(
                 logger=self._logger,
@@ -189,23 +209,14 @@ class DependencyJoinerService:
         primary_key = join_keys_list[0]
         right_key = dep.filter_field if dep.filter_field else primary_key
         right_keys_list = [right_key] if dep.filter_field else join_keys_list
-        left_pipeline = self._resolve_left_pipeline(dep, seed_pipeline)
-
-        dep_df = self._prepare_dependency_dataframe(
-            dep_df=dep_df,
-            dep=dep,
-            deduplicate_keys=right_keys_list,
-        )
-        result, dep_df = self._normalize_dependency_join_inputs(
+        left_pipeline = _resolve_left_pipeline(dep, seed_pipeline)
+        result, dep_df = self._prepare_dependency_join_frames(
             merged_df=result,
             dep_df=dep_df,
+            dep=dep,
             left_join_keys=join_keys_list,
             right_join_keys=right_keys_list,
             seed_pipeline=seed_pipeline,
-        )
-        dep_df = self._rename_dependency_dataframe(
-            dep_df=dep_df,
-            dependency=dep.pipeline,
         )
         seed_join_key, dep_join_key, seed_join_key_qualified = (
             self._join_key_resolver.resolve_join_key_names_asymmetric(
@@ -217,7 +228,7 @@ class DependencyJoinerService:
             )
         )
 
-        join_key_set = self._build_asymmetric_join_key_set(
+        join_key_set = _build_asymmetric_join_key_set(
             left_join_key=seed_join_key,
             right_join_key=dep_join_key,
             left_join_key_qualified=seed_join_key_qualified,
@@ -243,15 +254,6 @@ class DependencyJoinerService:
             result_rows=len(result),
         )
         return result
-
-    @staticmethod
-    def _resolve_left_pipeline(
-        dep: DependencyConfig,
-        seed_pipeline: str | None,
-    ) -> str | None:
-        if dep.key_source and dep.key_source != "seed":
-            return dep.key_source
-        return seed_pipeline
 
     def _prepare_dependency_dataframe(
         self,
@@ -287,6 +289,34 @@ class DependencyJoinerService:
         )
         return normalized_merged, normalized_dep
 
+    def _prepare_dependency_join_frames(
+        self,
+        *,
+        merged_df: pl.DataFrame,
+        dep_df: pl.DataFrame,
+        dep: DependencyConfig,
+        left_join_keys: list[str],
+        right_join_keys: list[str],
+        seed_pipeline: str | None,
+    ) -> tuple[pl.DataFrame, pl.DataFrame]:
+        prepared_dep = self._prepare_dependency_dataframe(
+            dep_df=dep_df,
+            dep=dep,
+            deduplicate_keys=right_join_keys,
+        )
+        normalized_merged, normalized_dep = self._normalize_dependency_join_inputs(
+            merged_df=merged_df,
+            dep_df=prepared_dep,
+            left_join_keys=left_join_keys,
+            right_join_keys=right_join_keys,
+            seed_pipeline=seed_pipeline,
+        )
+        renamed_dep = self._rename_dependency_dataframe(
+            dep_df=normalized_dep,
+            dependency=dep.pipeline,
+        )
+        return normalized_merged, renamed_dep
+
     def _rename_dependency_dataframe(
         self,
         *,
@@ -302,24 +332,6 @@ class DependencyJoinerService:
         self._logger.debug(
             "Renamed dependency columns to qualified format",
             dependency=dependency,
-            qualified_count=len(
-                [
-                    col
-                    for col in renamed.columns
-                    if "." in col and not col.startswith("_")
-                ]
-            ),
+            qualified_count=_count_qualified_columns(renamed.columns),
         )
         return self.drop_system_columns(renamed)
-
-    @staticmethod
-    def _build_asymmetric_join_key_set(
-        *,
-        left_join_key: str,
-        right_join_key: str,
-        left_join_key_qualified: str | None,
-    ) -> set[str]:
-        join_key_set = {left_join_key, right_join_key}
-        if left_join_key_qualified and left_join_key_qualified != left_join_key:
-            join_key_set.add(left_join_key_qualified)
-        return join_key_set

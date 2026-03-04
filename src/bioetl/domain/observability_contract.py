@@ -1,7 +1,7 @@
 """Shared observability contract utilities.
 
-Defines canonical event context fields used across logs and metrics, plus
-legacy-key migration mapping for input compatibility.
+Defines canonical event context fields used across logs and metrics.
+Legacy alias keys are no longer migrated after grace-period completion.
 """
 
 from __future__ import annotations
@@ -9,6 +9,17 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Final
+
+__all__ = [
+    "ObservabilityContractPayload",
+    "build_observability_contract_payload",
+    "enforce_observability_contract_context",
+    "is_observability_contract_valid",
+    "missing_observability_fields",
+    "normalize_observability_context",
+    "normalize_observability_metric_labels",
+]
+
 
 REQUIRED_OBSERVABILITY_FIELDS: Final[tuple[str, ...]] = (
     "event",
@@ -60,13 +71,6 @@ def _normalize_severity(value: object | None, *, fallback: str) -> str:
     return normalized if normalized in _ALLOWED_SEVERITY_VALUES else "info"
 
 
-def _migrate_legacy_keys(normalized: dict[str, object]) -> None:
-    """Promote legacy context keys to their canonical equivalents in-place."""
-    for legacy_key, canonical_key in OBSERVABILITY_LEGACY_TO_CANONICAL.items():
-        if canonical_key not in normalized and legacy_key in normalized:
-            normalized[canonical_key] = normalized[legacy_key]
-
-
 def _strip_legacy_keys(normalized: dict[str, object]) -> None:
     """Drop legacy aliases from output context after canonicalization."""
     for legacy_key in OBSERVABILITY_LEGACY_TO_CANONICAL:
@@ -95,7 +99,7 @@ def normalize_observability_context(
     safe_pipeline = _coerce_non_empty(default_pipeline, fallback="unknown")
     safe_run_id = _coerce_non_empty(default_run_id, fallback="unknown")
 
-    _migrate_legacy_keys(normalized)
+    # Migration grace-period is complete: legacy aliases are ignored.
     _strip_legacy_keys(normalized)
 
     normalized["event"] = _coerce_non_empty(
@@ -189,19 +193,23 @@ def is_observability_contract_valid(context: Mapping[str, object]) -> bool:
 def normalize_observability_metric_labels(
     labels: Mapping[str, object],
 ) -> dict[str, str]:
-    """Return canonical labels for ``observability_events_total``."""
-    normalized: dict[str, object] = {
-        key: value for key, value in labels.items() if value is not None
-    }
-    _migrate_legacy_keys(normalized)
+    """Return canonical labels for ``observability_events_total``.
+
+    Uses the same contract-enforcement path as log-event context validation.
+    """
+    normalized = enforce_observability_contract_context(
+        event_name=_coerce_non_empty(labels.get("event"), fallback="unknown_event"),
+        context=labels,
+        default_provider="unknown",
+        default_pipeline="unknown",
+        default_run_id="unknown",
+        default_severity="info",
+    )
     event = _coerce_non_empty(normalized.get("event"), fallback="unknown_event")
     provider = _coerce_non_empty(normalized.get("provider"), fallback="unknown")
     pipeline = _coerce_non_empty(normalized.get("pipeline"), fallback="unknown")
     severity = _normalize_severity(normalized.get("severity"), fallback="info")
-    error_type = _coerce_non_empty(
-        normalized.get("error_type"),
-        fallback="unknown" if severity == "error" else "none",
-    )
+    error_type = _coerce_non_empty(normalized.get("error_type"), fallback="none")
     return {
         "event": event,
         "provider": provider,

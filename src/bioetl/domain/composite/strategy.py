@@ -10,6 +10,12 @@ from __future__ import annotations
 
 from enum import StrEnum
 
+__all__ = [
+    "ConflictResolution",
+    "FallbackStrategy",
+    "MergeStrategy",
+]
+
 
 class MergeStrategy(StrEnum):
     """Strategy for merging enriched data from multiple sources.
@@ -62,26 +68,33 @@ class MergeStrategy(StrEnum):
 class ConflictResolution(StrEnum):
     """Strategy for resolving field conflicts between sources.
 
-    When the same field is populated by multiple sources (e.g., 'title'
-    from both ChEMBL and CrossRef), this strategy determines which
-    value to use.
+        When the same field is populated by multiple sources (e.g., 'title'
+        from both ChEMBL and CrossRef), this strategy determines which
 
-    Attributes:
-        SEED_PRIORITY: Seed pipeline value wins. Use when seed is
-            authoritative and enrichers provide supplemental data.
-        ENRICHER_PRIORITY: Most recent enricher value wins. Use when
-            enrichers have more up-to-date information.
-        LATEST_TIMESTAMP: Value from source with latest extraction timestamp.
-            Requires timestamp tracking in lineage.
-        EXPLICIT_RULES: Use field_priorities mapping in config. Allows
-            field-by-field control over priority order.
-        COALESCE: First non-null value in order: seed, then enrichers.
-            Use when any source is acceptable.
+    __all__ = [
+        "ConflictResolution",
+        "FallbackStrategy",
+        "MergeStrategy",
+    ]
 
-    Example:
-        >>> resolution = ConflictResolution.SEED_PRIORITY
-        >>> resolution.value
-        'seed_priority'
+        value to use.
+
+        Attributes:
+            SEED_PRIORITY: Seed pipeline value wins. Use when seed is
+                authoritative and enrichers provide supplemental data.
+            ENRICHER_PRIORITY: Most recent enricher value wins. Use when
+                enrichers have more up-to-date information.
+            LATEST_TIMESTAMP: Value from source with latest extraction timestamp.
+                Requires timestamp tracking in lineage.
+            EXPLICIT_RULES: Use field_priorities mapping in config. Allows
+                field-by-field control over priority order.
+            COALESCE: First non-null value in order: seed, then enrichers.
+                Use when any source is acceptable.
+
+        Example:
+            >>> resolution = ConflictResolution.SEED_PRIORITY
+            >>> resolution.value
+            'seed_priority'
     """
 
     SEED_PRIORITY = "seed_priority"

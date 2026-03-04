@@ -22,6 +22,21 @@ from .constants import META_FIELDS
 from .serialization import serialize_to_json_canonical
 from .types import ContentHash, DriftLevel, EntityID
 
+__all__ = [
+    "calculate_dq_score",
+    "canonical_json_dumps",
+    "detect_hash_collision",
+    "detect_schema_drift",
+    "exceeds_threshold",
+    "generate_content_hash",
+    "generate_entity_id",
+    "normalize_for_hash",
+    "safe_float",
+    "safe_int",
+    "safe_str",
+]
+
+
 # =============================================================================
 # Content Hash Generation (RULES.md §2.8)
 # =============================================================================

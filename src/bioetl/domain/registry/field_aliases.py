@@ -34,6 +34,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Final
 
+__all__ = [
+    "FieldAlias",
+    "get_alias_map_for_provider",
+    "get_canonical_name",
+    "get_provider_field",
+]
+
 
 @dataclass(frozen=True, slots=True)
 class FieldAlias:

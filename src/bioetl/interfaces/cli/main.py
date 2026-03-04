@@ -22,6 +22,11 @@ from bioetl.interfaces.cli.commands.run import run
 from bioetl.interfaces.cli.commands.run_all import run_all
 from bioetl.interfaces.cli.commands.run_composite import run_composite
 
+__all__ = [
+    "cli",
+    "main",
+]
+
 
 @click.group()
 @click.version_option(version=__version__)

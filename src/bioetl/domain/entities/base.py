@@ -25,6 +25,10 @@ from datetime import datetime
 
 from bioetl.domain.types import BatchID, ContentHash, EntityID, RunID, RunType
 
+__all__ = [
+    "BaseEntity",
+]
+
 
 @dataclass(frozen=True, kw_only=True)
 class BaseEntity:

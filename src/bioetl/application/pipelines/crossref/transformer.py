@@ -46,6 +46,7 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
     from bioetl.domain.ports import (
+        ContractPolicyPort,
         DataNormalizationPort,
         MetricsPort,
         PiiHasherPort,
@@ -80,7 +81,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
-        contract_policy: Any = None,  # Any: contract policy type varies by pipeline
+        contract_policy: ContractPolicyPort | None = None,
     ) -> None:
         """Initialize CrossRef transformer.
 

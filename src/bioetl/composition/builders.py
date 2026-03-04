@@ -16,6 +16,11 @@ if TYPE_CHECKING:
     )
 
 
+__all__ = [
+    "FilterConfigBuilder",
+]
+
+
 class FilterConfigBuilder:
     """Builder for InputFilterConfig."""
 

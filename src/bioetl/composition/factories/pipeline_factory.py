@@ -8,7 +8,7 @@ configuration and assembly in the composition layer.
 from __future__ import annotations
 
 from collections.abc import Mapping
-from datetime import UTC, datetime
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Generic, Protocol, TypeVar, cast
 
@@ -17,6 +17,11 @@ from bioetl.composition.bootstrap_contexts import DQConfigsContext, DQOutputPath
 from bioetl.composition.factories.data_source_factory import (
     DataSourceCreator,
     DataSourceRegistry,
+)
+from bioetl.composition.factories.pipeline_factory_construction import (
+    DomainConfigResolver,
+    RunContextFactory,
+    TransformerBuilder,
 )
 from bioetl.composition.factories.pipeline_factory_dq_helpers import (
     extract_dq_configs as _extract_dq_configs_impl,
@@ -46,7 +51,6 @@ from bioetl.composition.services.versioning import (
     get_pipeline_version,
 )
 from bioetl.domain.services import IdentityService
-from bioetl.domain.value_objects.run_context import RunContext
 from bioetl.infrastructure.config import (
     load_pipeline_config,
     load_pipeline_contract_policy,
@@ -634,113 +638,127 @@ def create_pipeline_with_services(
     cached_bronze: CachedBronzeContext | None = None,
     pandera_silver_schema: object | None = None,
 ) -> BasePipeline:
-    """Create pipeline instance with services.
-
-    Loads config once and reuses it for both services and pipeline.
-    If transformer_class is configured, creates and injects transformer via DI.
-
-    Args:
-        pipeline_name: Name of the pipeline
-        pipeline_class: Pipeline class to instantiate
-        provider: Data provider name
-        create_data_source_fn: Data source creator function
-        transformer_class: Optional transformer class for Bronze→Silver
-        run_id: Unique identifier for this pipeline run
-        runtime: Pipeline runtime configuration
-        settings: Application settings
-        logger: Structured logger
-        config: Pre-loaded pipeline config (avoids duplicate I/O)
-        filter_config: Optional input filter configuration
-        tracer: Optional tracer for distributed tracing
-        dq_monitor: Optional data quality monitor
-        metrics: Optional metrics port for transformer observability
-        cached_bronze: Optional CachedBronzeContext for reading from Bronze
-                      cache instead of API.
-        pandera_silver_schema: Optional Pandera DataFrameModel class for Silver
-            validation. If provided, PanderaSilverValidator is created and
-            injected into SilverWriter.
-
-    Returns:
-        Configured pipeline instance
-    """
-    yaml_config = config or load_pipeline_config(pipeline_name)
-    entity = _extract_entity_type(pipeline_name) or pipeline_name
-
-    # Create Silver validator from Pandera schema if provided (DI pattern)
-    silver_validator = None
-    if pandera_silver_schema is not None:
-        from bioetl.infrastructure.validation.pandera_validator import (
-            PanderaSilverValidator,
+    """Create pipeline instance with services and optional transformer."""
+    return _create_pipeline_with_services_impl(
+        _PipelineCreationInputs(
+            pipeline_name=pipeline_name,
+            pipeline_class=pipeline_class,
+            provider=provider,
+            create_data_source_fn=create_data_source_fn,
+            transformer_class=transformer_class,
+            run_id=run_id,
+            runtime=runtime,
+            settings=settings,
+            logger=logger,
+            config=config,
+            filter_config=filter_config,
+            tracer=tracer,
+            dq_monitor=dq_monitor,
+            metrics=metrics,
+            cached_bronze=cached_bronze,
+            pandera_silver_schema=pandera_silver_schema,
         )
-
-        schema_builder = cast(_SchemaBuilder, pandera_silver_schema)
-        typed_schema = cast("pa.DataFrameSchema | None", schema_builder.to_schema())
-        silver_validator = PanderaSilverValidator(typed_schema)
-
-    # Create RunContext with versioning metadata for MetadataCoordinator
-    run_context = RunContext.create(
-        run_id=run_id,
-        run_type=runtime.run_type,
-        started_at=datetime.now(UTC),
-        provider=provider,
-        entity=entity,
-        pipeline_version=get_pipeline_version(yaml_config),
-        git_commit=get_git_commit(),
-        config_hash=compute_config_hash(yaml_config),
     )
-    metadata_coordinator = MetadataCoordinator(run_context)
+
+
+@dataclass(frozen=True, slots=True)
+class _PipelineCreationInputs:
+    pipeline_name: str
+    pipeline_class: type[BasePipeline]
+    provider: str
+    create_data_source_fn: DataSourceCreator
+    transformer_class: type[BaseTransformer] | None
+    run_id: RunID
+    runtime: RuntimeConfig
+    settings: Settings
+    logger: LoggerPort
+    config: PipelineYamlConfig | None = None
+    filter_config: InputFilterConfig | None = None
+    tracer: TracingPort | None = None
+    dq_monitor: DQMonitorPort | None = None
+    metrics: MetricsPort | None = None
+    cached_bronze: CachedBronzeContext | None = None
+    pandera_silver_schema: object | None = None
+
+
+def _create_pipeline_with_services_impl(
+    inputs: _PipelineCreationInputs,
+) -> BasePipeline:
+    """Implement pipeline construction for ``create_pipeline_with_services``."""
+    yaml_config = inputs.config or load_pipeline_config(inputs.pipeline_name)
+    run_context_factory = RunContextFactory(
+        pipeline_name=inputs.pipeline_name,
+        provider=inputs.provider,
+        entity_type_extractor=_extract_entity_type,
+        pipeline_version_getter=get_pipeline_version,
+        git_commit_getter=get_git_commit,
+        config_hash_getter=compute_config_hash,
+    )
+    metadata_coordinator = MetadataCoordinator(
+        run_context_factory.create(
+            run_id=inputs.run_id,
+            runtime=inputs.runtime,
+            yaml_config=yaml_config,
+        )
+    )
 
     services = build_pipeline_services(
-        pipeline_name=pipeline_name,
-        create_data_source_fn=create_data_source_fn,
-        settings=settings,
-        logger=logger,
+        pipeline_name=inputs.pipeline_name,
+        create_data_source_fn=inputs.create_data_source_fn,
+        settings=inputs.settings,
+        logger=inputs.logger,
         config=yaml_config,
-        filter_config=filter_config,
-        tracer=tracer,
-        dq_monitor=dq_monitor,
+        filter_config=inputs.filter_config,
+        tracer=inputs.tracer,
+        dq_monitor=inputs.dq_monitor,
         metadata_coordinator=metadata_coordinator,
-        cached_bronze=cached_bronze,
-        silver_validator=silver_validator,
+        cached_bronze=inputs.cached_bronze,
+        silver_validator=_create_silver_validator(inputs.pandera_silver_schema),
+    )
+    domain_config = DomainConfigResolver(
+        configs_root=Path("configs"),
+        loader_class=PipelineConfigLoader,
+        domain_mapper=yaml_config_to_domain,
+    ).resolve(
+        yaml_config,
+        relaxed_dq=inputs.settings.pipeline.relaxed_dq,
+    )
+    transformer = TransformerBuilder(
+        provider=inputs.provider,
+        pipeline_name=inputs.pipeline_name,
+        entity_type_extractor=_extract_entity_type,
+        contract_policy_loader=load_pipeline_contract_policy,
+    ).build(
+        transformer_class=inputs.transformer_class,
+        yaml_config=yaml_config,
+        domain_config=domain_config,
+        tracer=inputs.tracer,
+        metrics=inputs.metrics,
     )
 
-    config_loader = PipelineConfigLoader(
-        Path("configs"), relaxed_dq=settings.pipeline.relaxed_dq
-    )
-    resolved_dq = config_loader.resolve_dq_config(yaml_config)
-    domain_config = yaml_config_to_domain(yaml_config, resolved_dq_config=resolved_dq)
-
-    # Create transformer via DI if configured (with observability)
-    transformer = None
-    if transformer_class is not None:
-        identity_service = IdentityService(
-            content_hash_include_fields=set(yaml_config.content_hash.include) or None,
-            content_hash_exclude_fields=set(yaml_config.content_hash.exclude),
-        )
-        try:
-            contract_policy = load_pipeline_contract_policy(
-                provider, _extract_entity_type(pipeline_name)
-            )
-        except ValueError:
-            contract_policy = None
-        transformer = transformer_class(
-            provider=provider,
-            entity_type=_extract_entity_type(pipeline_name),
-            tracer=tracer,
-            metrics=metrics,
-            silver_filters=domain_config.silver_filters,
-            gold_filters=domain_config.gold_filters,
-            identity_service=identity_service,
-            contract_policy=contract_policy,
-        )
-
-    return pipeline_class.create(
-        run_id=run_id,
-        runtime=runtime,
+    return inputs.pipeline_class.create(
+        run_id=inputs.run_id,
+        runtime=inputs.runtime,
         services=services,
         config=domain_config,
         transformer=transformer,
     )
+
+
+def _create_silver_validator(
+    pandera_silver_schema: object | None,
+) -> SilverValidatorPort | None:
+    """Create Pandera silver validator when schema is configured."""
+    if pandera_silver_schema is None:
+        return None
+
+    from bioetl.infrastructure.validation.pandera_validator import (
+        PanderaSilverValidator,
+    )
+
+    schema_builder = cast(_SchemaBuilder, pandera_silver_schema)
+    typed_schema = cast("pa.DataFrameSchema | None", schema_builder.to_schema())
+    return PanderaSilverValidator(typed_schema)
 
 
 def assemble_runner(

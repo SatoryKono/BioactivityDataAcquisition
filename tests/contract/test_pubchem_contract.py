@@ -14,6 +14,7 @@ import httpx
 import pytest
 
 PUBCHEM_API_BASE = "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
+pytestmark = pytest.mark.network
 
 
 @pytest.mark.pubchem

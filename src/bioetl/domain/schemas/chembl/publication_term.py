@@ -15,6 +15,10 @@ from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
 
+__all__ = [
+    "PublicationTermSchema",
+]
+
 
 class PublicationTermSchema(ETLRecordSchema):
     """Publication Term validation schema for Silver layer.

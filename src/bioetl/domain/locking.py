@@ -18,6 +18,13 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from bioetl.domain.types import RunID
 
+__all__ = [
+    "FencingToken",
+    "LockContext",
+    "LockContextHolder",
+    "LockNotHeldError",
+]
+
 
 @dataclass(frozen=True, slots=True)
 class FencingToken:

@@ -18,6 +18,12 @@ import re
 
 from bioetl.domain.value_objects.base import ValueObject
 
+__all__ = [
+    "ChemblId",
+    "PubChemCid",
+    "UniProtId",
+]
+
 
 class ChemblId(ValueObject[str]):
     """ChEMBL identifier for molecules, targets, assays, documents, etc.

@@ -12,6 +12,12 @@ import click
 from bioetl.composition.entrypoints import get_checkpoint_manager
 from bioetl.interfaces.cli.formatters import echo_checkpoint, echo_info
 
+__all__ = [
+    "COMMANDS",
+    "checkpoint",
+    "checkpoint_list",
+]
+
 
 @click.group()
 def checkpoint() -> None:

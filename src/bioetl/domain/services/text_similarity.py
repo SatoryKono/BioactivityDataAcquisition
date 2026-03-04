@@ -12,6 +12,11 @@ from __future__ import annotations
 
 import string
 
+__all__ = [
+    "jaccard_similarity",
+    "normalize_text",
+]
+
 
 def normalize_text(text: str) -> str:
     """Normalize text for comparison.

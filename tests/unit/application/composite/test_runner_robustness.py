@@ -162,6 +162,7 @@ def create_runner(
         checkpoint_manager=checkpoint_manager,
         logger=mock_logger,
         lock=mock_lock,
+        fsm_state_helper=MagicMock(),
         run_id=test_run_id,
     )
 

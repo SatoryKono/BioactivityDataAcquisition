@@ -11,6 +11,10 @@ from pandera.typing import Series
 from bioetl.domain.schemas.base import ETLRecordSchema
 from bioetl.domain.schemas.constants import CHEMBL_ID_PATTERN, TARGET_TYPES
 
+__all__ = [
+    "TargetSchema",
+]
+
 
 class TargetSchema(ETLRecordSchema):
     """Target validation schema for Silver layer."""

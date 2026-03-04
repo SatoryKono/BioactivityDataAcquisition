@@ -54,6 +54,9 @@ class FakeLogger:
 def test_bronze_write_small(benchmark, small_payload, bronze_output_dir):
     """Benchmark Bronze write with small payload (100 records)."""
     from bioetl.domain.types import BatchID, RunID, RunType
+    from bioetl.infrastructure.storage.bronze_write_result_helpers import (
+        is_bronze_write_result_persisted,
+    )
     from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 
     logger = FakeLogger()
@@ -81,7 +84,7 @@ def test_bronze_write_small(benchmark, small_payload, bronze_output_dir):
 
     # Verify output exists
     assert result is not None
-    assert result.exists()
+    assert is_bronze_write_result_persisted(result)
 
     # Report payload size
     size_mb = calculate_payload_size_mb(small_payload)
@@ -93,6 +96,9 @@ def test_bronze_write_small(benchmark, small_payload, bronze_output_dir):
 def test_bronze_write_medium(benchmark, medium_payload, bronze_output_dir):
     """Benchmark Bronze write with medium payload (1000 records)."""
     from bioetl.domain.types import BatchID, RunID, RunType
+    from bioetl.infrastructure.storage.bronze_write_result_helpers import (
+        is_bronze_write_result_persisted,
+    )
     from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 
     logger = FakeLogger()
@@ -119,7 +125,7 @@ def test_bronze_write_medium(benchmark, medium_payload, bronze_output_dir):
     result = benchmark(lambda: asyncio.run(write_batch()))
 
     assert result is not None
-    assert result.exists()
+    assert is_bronze_write_result_persisted(result)
 
     size_mb = calculate_payload_size_mb(medium_payload)
     benchmark.extra_info["payload_size_mb"] = round(size_mb, 3)
@@ -130,6 +136,9 @@ def test_bronze_write_medium(benchmark, medium_payload, bronze_output_dir):
 def test_bronze_write_large(benchmark, large_payload, bronze_output_dir):
     """Benchmark Bronze write with large payload (5000 records)."""
     from bioetl.domain.types import BatchID, RunID, RunType
+    from bioetl.infrastructure.storage.bronze_write_result_helpers import (
+        is_bronze_write_result_persisted,
+    )
     from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 
     logger = FakeLogger()
@@ -156,7 +165,7 @@ def test_bronze_write_large(benchmark, large_payload, bronze_output_dir):
     result = benchmark(lambda: asyncio.run(write_batch()))
 
     assert result is not None
-    assert result.exists()
+    assert is_bronze_write_result_persisted(result)
 
     size_mb = calculate_payload_size_mb(large_payload)
     benchmark.extra_info["payload_size_mb"] = round(size_mb, 3)

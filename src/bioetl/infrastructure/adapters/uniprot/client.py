@@ -28,9 +28,20 @@ from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
+from bioetl.infrastructure.adapters.uniprot.fallback_resolver import (
+    iter_uniprot_fallback_records,
+    resolve_uniprot_missing_ids,
+)
 from bioetl.infrastructure.adapters.uniprot.fasta_parser import FastaParser
+from bioetl.infrastructure.adapters.uniprot.health_probe import probe_uniprot_health
 from bioetl.infrastructure.adapters.uniprot.metadata_adapter_mixin import (
     UniProtAdapterMetadataMixin,
+)
+from bioetl.infrastructure.adapters.uniprot.query_builder import (
+    build_uniprot_protein_search_params,
+)
+from bioetl.infrastructure.adapters.uniprot.response_parser import (
+    parse_uniprot_protein_response,
 )
 
 if TYPE_CHECKING:
@@ -363,53 +374,19 @@ class UniProtAdapter(
         limit: int | None,
         already_fetched: int,
     ) -> AsyncIterator[BronzeRecord]:
-        """Search for missing IDs using fallback values.
-
-        Args:
-            entity_type: Type of entity to fetch.
-            missing_ids: IDs not found in primary lookup.
-            fallback_mapping: Mapping from primary ID to fallback value.
-            limit: Maximum total records to fetch.
-            already_fetched: Number of records already yielded.
-
-        Yields:
-            Dictionary records found via fallback search.
-        """
+        """Search missing IDs via fallback mapping."""
         strategy = self._fetch_strategies.get(entity_type)
         if not strategy:
             return
 
-        fetched = already_fetched
-        fallback_result_cache: dict[str, BronzeRecord | None] = {}
-        for missing_id in missing_ids:
-            if limit and fetched >= limit:
-                break
-
-            fallback_value = fallback_mapping.get(missing_id)
-            if not fallback_value:
-                continue
-
-            if fallback_value in fallback_result_cache:
-                cached_record = fallback_result_cache[fallback_value]
-                if cached_record is None:
-                    continue
-                yield dict(cached_record)
-                fetched += 1
-                if limit and fetched >= limit:
-                    return
-                continue
-
-            first_record: BronzeRecord | None = None
-            async for record in strategy(query=fallback_value, limit=1):
-                first_record = dict(record)
-                break
-
-            fallback_result_cache[fallback_value] = first_record
-            if first_record is not None:
-                yield dict(first_record)
-                fetched += 1
-                if limit and fetched >= limit:
-                    return
+        async for record in iter_uniprot_fallback_records(
+            strategy=strategy,
+            missing_ids=missing_ids,
+            fallback_mapping=fallback_mapping,
+            limit=limit,
+            already_fetched=already_fetched,
+        ):
+            yield record
 
     async def _do_primary_fetch(
         self,
@@ -443,30 +420,24 @@ class UniProtAdapter(
         found_ids: set[str],
         fallback_mapping: dict[str, str],
     ) -> list[str]:
-        """Determine which IDs need fallback search.
+        """Determine IDs that require fallback search."""
+        return resolve_uniprot_missing_ids(
+            filter_ids=filter_ids,
+            found_ids=found_ids,
+            fallback_mapping=fallback_mapping,
+        )
 
-        Args:
-            filter_ids: Original list of IDs requested.
-            found_ids: Set of IDs successfully found.
-            fallback_mapping: Mapping for fallback values.
-
-        Returns:
-            List of missing IDs that have fallback values, or empty list.
-        """
-        if not fallback_mapping:
-            return []
-        missing_ids: list[str] = []
-        seen_missing: set[str] = set()
+    @staticmethod
+    def _deduplicate_filter_ids(filter_ids: list[str]) -> list[str]:
+        """Deduplicate input IDs preserving original order."""
+        unique_ids: list[str] = []
+        seen_ids: set[str] = set()
         for filter_id in filter_ids:
-            if filter_id in found_ids:
+            if filter_id in seen_ids:
                 continue
-            if filter_id not in fallback_mapping:
-                continue
-            if filter_id in seen_missing:
-                continue
-            seen_missing.add(filter_id)
-            missing_ids.append(filter_id)
-        return missing_ids
+            seen_ids.add(filter_id)
+            unique_ids.append(filter_id)
+        return unique_ids
 
     async def fetch_filtered_with_fallback(
         self,
@@ -476,37 +447,11 @@ class UniProtAdapter(
         fallback_mapping: dict[str, str],
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch records with fallback search when primary lookup fails.
-
-        Implements FilterableDataSourcePort.fetch_filtered_with_fallback().
-
-        UniProt accessions are stable identifiers, so fallback is rarely needed.
-        This method first tries the primary lookup, then falls back to search
-        for any IDs not found.
-
-        Args:
-            entity_type: Type of entity to fetch
-            filter_ids: List of primary IDs to filter by
-            filter_field: Field name for primary filtering
-            fallback_mapping: Mapping from primary ID to fallback value (e.g., gene name)
-            limit: Maximum number of records to fetch
-
-        Yields:
-            Dictionary records found via primary lookup or fallback search
-
-        Returns:
-            Async iterator yielding fetched records.
-        """
+        """Fetch records with primary lookup and fallback search."""
         if not filter_ids:
             return
 
-        requested_ids: list[str] = []
-        seen_requested: set[str] = set()
-        for filter_id in filter_ids:
-            if filter_id in seen_requested:
-                continue
-            seen_requested.add(filter_id)
-            requested_ids.append(filter_id)
+        requested_ids = self._deduplicate_filter_ids(filter_ids)
 
         fetched = 0
         found_ids: set[str] = set()
@@ -536,26 +481,20 @@ class UniProtAdapter(
         self, query: str, size: int, fetched: int, limit: int | None, cursor: str | None
     ) -> dict[str, Any]:  # Any: HTTP query params (str|int|bool values)
         """Build the parameter dictionary for a protein fetch request."""
-        params = {
-            "query": query,
-            "size": min(size, (limit - fetched) if limit else size),
-            "format": "json",
-            "fields": ",".join(_PROTEIN_FETCH_FIELDS),
-        }
-        if cursor:
-            params["cursor"] = cursor
-        return params
+        return build_uniprot_protein_search_params(
+            query=query,
+            fetched=fetched,
+            limit=limit,
+            cursor=cursor,
+            size=size,
+            fields=_PROTEIN_FETCH_FIELDS,
+        )
 
     def _parse_response(
         self, response: httpx.Response
     ) -> tuple[list[BronzeRecord], str | None]:
         """Process the HTTP response from a protein fetch request."""
-        if response.status_code != 200:
-            return [], None
-        data = response.json()
-        results = data.get("results", [])
-        cursor = data.get("nextCursor")
-        return results, cursor
+        return parse_uniprot_protein_response(response)
 
     async def _fetch_proteins(
         self,
@@ -716,20 +655,14 @@ class UniProtAdapter(
     async def _probe_health(self) -> HealthStatus:
         """Perform health probe using Ubiquitin P62988 query."""
         try:
-            params = {"query": "accession:P62988", "size": 1, "format": "json"}
-            with self._adapter_metrics.measure_request("/health"):
-                resp = await self.http_client.get_once(
-                    f"{self.base_url}/uniprotkb/search", params=params
-                )
-            if resp.status_code != 200:
-                self.logger.warning(
-                    "health_check_degraded",
-                    provider=self.provider_name,
-                    reason="non_200_response",
-                    status_code=resp.status_code,
-                )
-                return HealthStatus.DEGRADED
-            return self._fallback_health_status()
+            return await probe_uniprot_health(
+                base_url=self.base_url,
+                provider_name=self.provider_name,
+                http_client=self.http_client,
+                logger=self.logger,
+                adapter_metrics=self._adapter_metrics,
+                healthy_status_provider=self._fallback_health_status,
+            )
         except UNIPROT_FETCH_ERRORS as e:
             error_type = self._error_handler.get_error_type(e)
             self.logger.warning(

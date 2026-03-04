@@ -20,6 +20,7 @@ from tests.contract.conftest import (
 )
 
 CHEMBL_API_BASE = "https://www.ebi.ac.uk/chembl/api/data"
+pytestmark = pytest.mark.network
 
 
 @pytest.mark.chembl

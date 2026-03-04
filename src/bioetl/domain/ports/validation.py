@@ -12,6 +12,11 @@ from typing import Any, Protocol, runtime_checkable
 
 from bioetl.domain.types import ValidationResult
 
+__all__ = [
+    "GoldValidatorPort",
+    "SilverValidatorPort",
+]
+
 
 @runtime_checkable
 class SilverValidatorPort(Protocol):

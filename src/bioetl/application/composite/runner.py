@@ -11,7 +11,6 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, cast
 from uuid import UUID, uuid4
 
-from bioetl.application.composite.runner_constants import PIPELINE_EXECUTION_ERRORS
 from bioetl.application.composite.runner_merge_stage_mixin import (
     CompositeRunnerMergeStageMixin,
 )
@@ -59,18 +58,6 @@ __all__ = [
 ]
 
 
-def _create_fsm_helper_for_legacy_fallback(
-    *,
-    config: CompositeConfig,
-    logger: LoggerPort,
-    run_id: str,
-) -> FSMStateHelperService:
-    """Create FSM helper for transitional legacy callsites (EXC-003)."""
-    from bioetl.application.composite.fsm_helper import FSMStateHelper
-
-    return FSMStateHelper(config=config, logger=logger, run_id=run_id)
-
-
 @dataclass(frozen=True, slots=True)
 class CompositeRuntimeConfig:
     """Runtime configuration for composite pipeline execution."""
@@ -113,7 +100,7 @@ class CompositePipelineRunner(
         checkpoint_manager: CompositeCheckpointManager,
         logger: LoggerPort,
         lock: LockPort,
-        fsm_state_helper: FSMStateHelperService | None = None,
+        fsm_state_helper: FSMStateHelperService,
         run_id: str | None = None,
         dq_report_service: DQReportService | None = None,
         preflight_validator: CompositePreflightValidator | None = None,
@@ -145,21 +132,7 @@ class CompositePipelineRunner(
         self._preflight_validator = preflight_validator
         self._quarantine_port = quarantine_port
         self._metrics = metrics
-
-        if fsm_state_helper is not None:
-            self._fsm = fsm_state_helper
-        else:
-            self._logger.warning(
-                "composite_runner_fsm_fallback_used",
-                reason_code="EXC-003",
-                run_id=self._run_id_str,
-                note="inject fsm_state_helper from composition",
-            )
-            self._fsm = _create_fsm_helper_for_legacy_fallback(
-                config=config,
-                logger=logger,
-                run_id=self._run_id_str,
-            )
+        self._fsm = fsm_state_helper
 
     @property
     def run_id(self) -> str:
@@ -191,6 +164,12 @@ class CompositePipelineRunner(
             stage="composite_start",
         )
 
+        # Resolve exception group at call-time to avoid stale module-state issues
+        # from test-time monkeypatching/reloads.
+        from bioetl.application.composite.runner_constants import (
+            PIPELINE_EXECUTION_ERRORS as pipeline_execution_errors,
+        )
+
         try:
             lock_key = self._config.lock_key
             acquired = await self._lock.acquire(
@@ -208,7 +187,7 @@ class CompositePipelineRunner(
                 return result
             finally:
                 await self._lock.release(key=lock_key, owner_id=self._run_id)
-        except PIPELINE_EXECUTION_ERRORS as error:
+        except pipeline_execution_errors as error:
             self._finished = True
             self._final_state = CompositePipelineState.FAILED
             self._logger.error(
@@ -217,6 +196,8 @@ class CompositePipelineRunner(
                 run_id=self._run_id_str,
                 error=str(error),
                 error_type=type(error).__name__,
+                reason_code="composite_pipeline_execution_failed",
+                stage="run_with_lock",
             )
             raise
         except BioETLError as error:

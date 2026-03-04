@@ -159,50 +159,26 @@ class DQReportWriter:
         target_table: str,
         run_id: str,
     ) -> Path:
-        """Resolve output path for Silver/Gold DQ report.
-
-        Unified path structure:
-        - Normal: {base_path}/{layer}/{provider}/{entity}/{layer}_{provider}_{entity}_dq_report{ext}
-        - Flat: {base_path}/{layer}_{provider}_{entity}_dq_report{ext}
-
-        Args:
-            layer: Layer name ('silver' or 'gold').
-            output_path: Explicit output path or None for auto-generation.
-            extension: File extension including dot.
-            provider: Provider name for filename.
-            entity: Entity name for filename.
-            target_table: Target table name.
-            run_id: Run ID.
-
-        Returns:
-            Resolved output path.
-        """
+        """Resolve final report file path for Silver/Gold DQ outputs."""
         filename = self._build_layer_filename(
             layer, extension, provider, entity, target_table, run_id
         )
 
         if output_path is not None:
             output_path = Path(output_path)
-            # Always treat output_path as a directory and append filename.
-            # Previous logic used is_dir() which returned False for not-yet-created
-            # directories, causing the DQ report to be written as a file with the
-            # entity name (e.g. "target_component") instead of inside the directory.
             output_path.mkdir(parents=True, exist_ok=True)
             return output_path / filename
 
         if self._flat_structure:
             return self._base_path / filename
 
-        # Unified structure: {layer}/{provider}/{entity}/
         if provider and entity:
             return self._base_path / layer / provider / entity / filename
 
-        # Fallback: extract from table name (e.g., "chembl_activity" -> "chembl/activity")
         if "_" in target_table:
             parts = target_table.split("_", 1)
             return self._base_path / layer / parts[0] / parts[1] / filename
 
-        # Last resort: use table name directly
         return self._base_path / layer / target_table / filename
 
     async def write_silver_report(

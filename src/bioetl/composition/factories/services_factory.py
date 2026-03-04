@@ -316,16 +316,7 @@ class BaseServicesFactory:
         pipeline_config: PipelineYamlConfig,
         logger: LoggerPort,
     ) -> dict[str, Any]:  # Any: heterogeneous DQ service instances
-        """Create DQ services if any layer has dq_report enabled.
-
-        Args:
-            settings: Application settings.
-            pipeline_config: Pipeline YAML configuration.
-            logger: Structured logger.
-
-        Returns:
-            Dictionary with DQ services (empty if none enabled).
-        """
+        """Create DQ analyzers/writer/services when DQ reporting is enabled."""
         # Check if any DQ report is enabled in sink config
         dq_enabled = cls._is_dq_report_enabled(pipeline_config)
 

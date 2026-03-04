@@ -11,6 +11,10 @@ from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
 
+__all__ = [
+    "TargetComponentSchema",
+]
+
 
 class TargetComponentSchema(ETLRecordSchema):
     """Target Component validation schema for Silver layer."""

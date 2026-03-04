@@ -26,6 +26,10 @@ from bioetl.domain.exceptions import (
     TableNotFoundError,
     UploadError,
 )
+from bioetl.infrastructure.storage.bronze_write_result_helpers import (
+    bronze_write_result_exists,
+    is_bronze_write_result_persisted,
+)
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta_reader import DeltaReader
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
@@ -44,4 +48,6 @@ __all__ = [
     "StorageError",
     "TableNotFoundError",
     "UploadError",
+    "bronze_write_result_exists",
+    "is_bronze_write_result_persisted",
 ]

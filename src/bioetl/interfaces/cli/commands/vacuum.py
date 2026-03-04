@@ -25,6 +25,11 @@ from bioetl.interfaces.cli.formatters import (
     echo_vacuum_result,
 )
 
+__all__ = [
+    "vacuum_all_command",
+    "vacuum_command",
+]
+
 
 def _handle_maintenance_failure(
     exc: BaseException,

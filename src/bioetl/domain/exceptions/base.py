@@ -12,6 +12,14 @@ if TYPE_CHECKING:
     from bioetl.domain.types import ErrorType
 
 
+__all__ = [
+    "BioETLError",
+    "CriticalError",
+    "DataQualityError",
+    "RecoverableError",
+]
+
+
 class BioETLError(Exception):
     """Base exception for all BioETL errors.
 

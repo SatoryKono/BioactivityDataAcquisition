@@ -205,21 +205,15 @@ class GoldWriterIOMixin:
     ) -> None:
         """Write records using simple overwrite or append mode."""
         arrow_data = self._to_arrow_table(records, column_order=column_order)
-
         if primary_keys:
             arrow_data = arrow_data.sort_by([(pk, "ascending") for pk in primary_keys])
 
         schema_mode = "overwrite" if mode == "overwrite" else None
         module = _load_gold_writer_module()
-
         for attempt in range(3):
             try:
                 await self._run_in_executor(
-                    lambda table_or_uri=table_path,
-                    data=arrow_data,
-                    write_mode=mode,
-                    partition_by=partition_cols,
-                    resolved_schema_mode=schema_mode: (
+                    lambda table_or_uri=table_path, data=arrow_data, write_mode=mode, partition_by=partition_cols, resolved_schema_mode=schema_mode: (
                         module.write_deltalake(
                             table_or_uri=table_or_uri,
                             data=pa.RecordBatchReader.from_batches(
@@ -237,15 +231,12 @@ class GoldWriterIOMixin:
                     raise error
                 delay = 0.5 * (2**attempt) + 0.05
                 await module.asyncio.sleep(delay)
-
         if self.csv_exporter:
-            csv_append = mode != "overwrite"
-            csv_primary_keys = primary_keys if mode != "overwrite" else None
             await self.csv_exporter.export(
                 table_name,
                 arrow_data,
-                append=csv_append,
-                primary_keys=csv_primary_keys,
+                append=mode != "overwrite",
+                primary_keys=primary_keys if mode != "overwrite" else None,
             )
 
     async def _write_scd2(
@@ -295,10 +286,7 @@ class GoldWriterIOMixin:
                         records, column_order=column_order
                     )
                     await self._run_in_executor(
-                        lambda table_or_uri=table_path,
-                        data=arrow_data,
-                        write_mode="append",
-                        partition_by=partition_cols: (
+                        lambda table_or_uri=table_path, data=arrow_data, write_mode="append", partition_by=partition_cols: (
                             module.write_deltalake(
                                 table_or_uri=table_or_uri,
                                 data=pa.RecordBatchReader.from_batches(

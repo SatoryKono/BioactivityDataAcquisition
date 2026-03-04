@@ -9,6 +9,10 @@ from dataclasses import dataclass
 
 from bioetl.domain.types import RunType
 
+__all__ = [
+    "RuntimeConfig",
+]
+
 
 @dataclass(frozen=True, slots=True)
 class RuntimeConfig:

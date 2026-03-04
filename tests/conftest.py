@@ -7,6 +7,16 @@ from urllib.parse import parse_qsl, urlparse
 import pytest
 
 
+def pytest_addoption(parser: pytest.Parser) -> None:
+    """Register global test options."""
+    parser.addoption(
+        "--network",
+        action="store_true",
+        default=False,
+        help="Enable tests that require outbound network connectivity.",
+    )
+
+
 def pytest_cmdline_main(config):
     # Workaround for xdist serialization error with enums (like syrupy DiffMode)
     # This must run early in pytest_cmdline_main before xdist plugins serialize the config

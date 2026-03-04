@@ -17,6 +17,7 @@ from bioetl.application.composite.checkpoint import (
     CompositeCheckpointManager,
     CompositeCheckpointState,
 )
+from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.runner import (
     CompositePipelineRunner,
     CompositeRuntimeConfig,
@@ -175,6 +176,9 @@ class TestFSMMergeStateTransitions:
             checkpoint_manager=checkpoint_manager,
             logger=mock_logger,
             lock=mock_lock,
+            fsm_state_helper=FSMStateHelperService(
+                config=mock_config, logger=mock_logger, run_id=test_run_id
+            ),
             run_id=test_run_id,
         )
 
@@ -235,6 +239,9 @@ class TestFSMMergeStateTransitions:
             checkpoint_manager=checkpoint_manager,
             logger=mock_logger,
             lock=mock_lock,
+            fsm_state_helper=FSMStateHelperService(
+                config=mock_config, logger=mock_logger, run_id=test_run_id
+            ),
             run_id=test_run_id,
         )
 
@@ -295,6 +302,9 @@ class TestFSMDryRunMode:
             checkpoint_manager=checkpoint_manager,
             logger=mock_logger,
             lock=mock_lock,
+            fsm_state_helper=FSMStateHelperService(
+                config=mock_config, logger=mock_logger, run_id=test_run_id
+            ),
             run_id=test_run_id,
         )
 
@@ -359,6 +369,9 @@ class TestFSMEnrichmentCompletedTransition:
             checkpoint_manager=checkpoint_manager,
             logger=mock_logger,
             lock=mock_lock,
+            fsm_state_helper=FSMStateHelperService(
+                config=mock_config, logger=mock_logger, run_id=test_run_id
+            ),
             run_id=test_run_id,
         )
 
@@ -446,6 +459,9 @@ class TestFSMResumeFromFailed:
             checkpoint_manager=checkpoint_manager,
             logger=mock_logger,
             lock=mock_lock,
+            fsm_state_helper=FSMStateHelperService(
+                config=mock_config, logger=mock_logger, run_id=test_run_id
+            ),
             run_id=test_run_id,
         )
 
@@ -501,6 +517,9 @@ class TestFSMCheckpointDeletion:
             checkpoint_manager=checkpoint_manager,
             logger=mock_logger,
             lock=mock_lock,
+            fsm_state_helper=FSMStateHelperService(
+                config=mock_config, logger=mock_logger, run_id=test_run_id
+            ),
             run_id=test_run_id,
         )
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
@@ -26,6 +27,9 @@ from bioetl.application.composite.runner import (
     CompositeRuntimeConfig,
 )
 from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
+from bioetl.composition.bootstrap.runtime.composite_dq_loader import (
+    merge_external_dq_overrides,
+)
 from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
     CompositeFilterExtractionService,
 )
@@ -59,13 +63,22 @@ from bioetl.infrastructure.schemas.composite_config import (
 from bioetl.infrastructure.storage.delta_reader import DeltaReader as _DeltaReader
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    import polars as pl
+
+    from bioetl.application.composite.fsm_helper import FSMStateHelperService
+    from bioetl.application.composite.preflight_validator import (
+        CompositePreflightValidator,
+    )
+    from bioetl.application.core.runner import PipelineRunner
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
+    from bioetl.domain.ports import LockPort, MetricsPort, QuarantinePort
     from bioetl.infrastructure.config import Settings
 
 # Backward-compatible aliases for iterative NAME-001 migration.
 CompositeCheckpointManager = CompositeCheckpointService
-CompositePipelineRunner = CompositePipelineRunnerService
 EnrichmentCrossValidator = EnrichmentCrossValidationService
 EnrichmentCoordinator = EnrichmentCoordinatorService
 DependencyCoordinator = DependencyCoordinatorService
@@ -95,6 +108,73 @@ COMPOSITE_GOLD_SCHEMA_REGISTRY: dict[str, type] = {
     "publication": CompositePublicationGoldSchema,
     "target": CompositeTargetGoldSchema,
 }
+
+
+def create_composite_runner_with_legacy_fsm_adapter(
+    *,
+    config: CompositeConfig,
+    runtime: CompositeRuntimeConfig,
+    seed_runner_factory: Callable[[], PipelineRunner],
+    enricher_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
+    key_extractor: _KeyExtractorService,
+    coordinator: EnrichmentCoordinatorService,
+    merger: _MergeService,
+    checkpoint_manager: CompositeCheckpointService,
+    logger: LoggerPort,
+    lock: LockPort,
+    fsm_state_helper: FSMStateHelperService | None = None,
+    run_id: str | None = None,
+    dq_report_service: DQReportService | None = None,
+    preflight_validator: CompositePreflightValidator | None = None,
+    dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner]
+    | None = None,
+    dependency_coordinator: DependencyCoordinatorService | None = None,
+    quarantine_port: QuarantinePort | None = None,
+    metrics: MetricsPort | None = None,
+) -> CompositePipelineRunnerService:
+    """Create composite runner with temporary legacy FSM injection in composition."""
+    effective_run_id = run_id or str(uuid4())
+    effective_fsm_state_helper = fsm_state_helper
+
+    if effective_fsm_state_helper is None:
+        from bioetl.application.composite.fsm_helper import FSMStateHelperService
+
+        warnings.warn(
+            "Creating CompositePipelineRunner without fsm_state_helper is deprecated; "
+            "inject fsm_state_helper from composition.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        effective_fsm_state_helper = FSMStateHelperService(
+            config=config,
+            logger=logger,
+            run_id=effective_run_id,
+        )
+
+    return CompositePipelineRunnerService(
+        config=config,
+        runtime=runtime,
+        seed_runner_factory=seed_runner_factory,
+        enricher_runner_factory=enricher_runner_factory,
+        key_extractor=key_extractor,
+        coordinator=coordinator,
+        merger=merger,
+        checkpoint_manager=checkpoint_manager,
+        logger=logger,
+        lock=lock,
+        fsm_state_helper=effective_fsm_state_helper,
+        run_id=effective_run_id,
+        dq_report_service=dq_report_service,
+        preflight_validator=preflight_validator,
+        dependencies_runner_factory=dependencies_runner_factory,
+        dependency_coordinator=dependency_coordinator,
+        quarantine_port=quarantine_port,
+        metrics=metrics,
+    )
+
+
+# Backward-compatible patch point for legacy bootstrap callsites/tests.
+CompositePipelineRunner = create_composite_runner_with_legacy_fsm_adapter
 
 
 def _resolve_composite_gold_schema(composite_name: str) -> type | None:
@@ -139,6 +219,9 @@ def load_composite_config(name: str) -> CompositeConfig:
 
     with config_path.open(encoding="utf-8") as f:
         raw = yaml.safe_load(f)
+
+    if isinstance(raw, dict):
+        merge_external_dq_overrides(raw, config_path)
 
     merge = (raw or {}).get("composite", {}).get("merge", {})
     column_groups_file = merge.get("column_groups_file")

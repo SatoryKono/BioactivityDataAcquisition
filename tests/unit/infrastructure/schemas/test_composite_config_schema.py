@@ -186,7 +186,10 @@ def test_composite_config_schema_requires_enricher_or_dependency() -> None:
     payload["enrichers"] = []
     payload["dependencies"] = []
 
-    with pytest.raises(ValidationError, match="At least one enricher or dependency"):
+    with pytest.raises(
+        ValidationError,
+        match="composite must have at least one enricher or dependency",
+    ):
         CompositeConfigSchema.model_validate(payload)
 
 
@@ -236,7 +239,7 @@ def test_composite_config_schema_dependency_key_validation_and_chained_skip() ->
         }
     ]
     with pytest.raises(
-        ValidationError, match="Dependency 'chembl_document' join_key 'document_id'"
+        ValidationError, match="Dependency chembl_document join_key 'document_id'"
     ):
         CompositeConfigSchema.model_validate(payload_bad)
 

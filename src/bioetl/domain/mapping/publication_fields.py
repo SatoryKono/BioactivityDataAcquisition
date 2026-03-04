@@ -23,6 +23,14 @@ from __future__ import annotations
 
 from typing import Any, Final, Literal
 
+__all__ = [
+    "ProviderName",
+    "apply_field_mapping",
+    "get_provider_name",
+    "get_unified_name",
+]
+
+
 # Provider type for type safety
 ProviderName = Literal["chembl", "crossref", "openalex", "pubmed", "semanticscholar"]
 

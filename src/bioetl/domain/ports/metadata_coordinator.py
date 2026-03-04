@@ -22,6 +22,14 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.types import BatchID
 
+__all__ = [
+    "BronzeMetadataInput",
+    "GoldMetadataInput",
+    "MetadataCoordinatorPort",
+    "SilverMetadataInput",
+    "SilverRef",
+]
+
 
 @dataclass(frozen=True, slots=True)
 class BronzeMetadataInput:

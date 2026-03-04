@@ -175,22 +175,7 @@ class RetentionManager:
         version: int | None = None,
         timestamp: datetime | None = None,
     ) -> DeltaTable:
-        """Read a previous version of the table.
-
-        Implements REQ-DATA-008 Time Travel support.
-
-        Args:
-            table_name: Table name.
-            version: Version number to read (mutually exclusive with timestamp).
-            timestamp: Timestamp to read table as of (mutually exclusive with version).
-
-        Returns:
-            DeltaTable instance at the specified version/timestamp.
-
-        Raises:
-            ValueError: If both version and timestamp are specified, or neither is specified.
-            TableNotFoundError: If table does not exist.
-        """
+        """Read table snapshot by version or timestamp."""
         if version is not None and timestamp is not None:
             raise ValueError("Specify either version or timestamp, not both")
 

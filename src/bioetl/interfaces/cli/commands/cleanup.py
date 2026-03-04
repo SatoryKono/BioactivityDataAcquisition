@@ -24,6 +24,10 @@ from bioetl.interfaces.cli.formatters import (
     format_bytes,
 )
 
+__all__ = [
+    "bronze_cleanup_command",
+]
+
 
 def _handle_cleanup_failure(
     exc: BaseException,

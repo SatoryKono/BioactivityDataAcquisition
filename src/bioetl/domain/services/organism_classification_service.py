@@ -13,6 +13,7 @@ Pure domain service (no I/O) per RULES.md §1.1.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any, Final
 
@@ -36,6 +37,7 @@ _DEFAULT_TAXONOMY_ID_FIELD: Final[str] = "assay_tax_id"
 _OUT_CELLULARITY: Final[str] = "organism_class"
 _OUT_NORMALIZED_ORGANISM: Final[str] = "normalized_organism"
 _OUT_CLASSIFICATION_SOURCE: Final[str] = "classification_source"
+CellularityFilterStrategy = Callable[[CellularityType | None], bool]
 
 
 @dataclass(frozen=True, slots=True)
@@ -243,33 +245,70 @@ class OrganismClassificationService:
             ... )
             [{'assay_organism': 'Homo sapiens', 'assay_tax_id': 9606}]
         """
+        strategy = self._build_filter_strategy(
+            include=include,
+            exclude=exclude,
+            keep_unresolved=keep_unresolved,
+        )
         filtered: list[dict[str, Any]] = []  # Any: untyped organism taxonomy data
         for record in records:
             result = self._classify_record(record)
-            if self._passes_filter(result, include, exclude, keep_unresolved):
+            if strategy(result.organism_class):
                 filtered.append(record)
         return filtered
 
-    def _passes_filter(
+    def _build_filter_strategy(
         self,
-        result: OrganismClassificationResult,
+        *,
         include: set[CellularityType] | None,
         exclude: set[CellularityType] | None,
         keep_unresolved: bool,
-    ) -> bool:
-        """Check if a classification result passes the filter criteria."""
-        cellularity = result.organism_class
-
-        if cellularity is None:
-            return keep_unresolved
-
+    ) -> CellularityFilterStrategy:
+        """Build filter strategy for include/exclude/unresolved policy."""
         if include is not None:
+            return self._include_strategy(include, keep_unresolved)
+        if exclude is not None:
+            return self._exclude_strategy(exclude, keep_unresolved)
+        return self._pass_all_strategy(keep_unresolved)
+
+    @staticmethod
+    def _include_strategy(
+        include: set[CellularityType],
+        keep_unresolved: bool,
+    ) -> CellularityFilterStrategy:
+        """Return include-only filter strategy."""
+
+        def strategy(cellularity: CellularityType | None) -> bool:
+            if cellularity is None:
+                return keep_unresolved
             return cellularity in include
 
-        if exclude is not None:
+        return strategy
+
+    @staticmethod
+    def _exclude_strategy(
+        exclude: set[CellularityType],
+        keep_unresolved: bool,
+    ) -> CellularityFilterStrategy:
+        """Return exclusion filter strategy."""
+
+        def strategy(cellularity: CellularityType | None) -> bool:
+            if cellularity is None:
+                return keep_unresolved
             return cellularity not in exclude
 
-        return True
+        return strategy
+
+    @staticmethod
+    def _pass_all_strategy(keep_unresolved: bool) -> CellularityFilterStrategy:
+        """Return strategy when neither include nor exclude is provided."""
+
+        def strategy(cellularity: CellularityType | None) -> bool:
+            if cellularity is None:
+                return keep_unresolved
+            return True
+
+        return strategy
 
     # ------------------------------------------------------------------
     # Statistics

@@ -18,6 +18,10 @@ from bioetl.domain.types import (
     RunID,
 )
 
+__all__ = [
+    "QuarantinePort",
+]
+
 
 @runtime_checkable
 class QuarantinePort(Protocol):

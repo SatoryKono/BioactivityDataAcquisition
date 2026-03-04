@@ -21,6 +21,14 @@ if TYPE_CHECKING:
     from bioetl.domain.config import ValidationConfig
 
 
+__all__ = [
+    "SMILES",
+    "InChIKey",
+    "MolecularWeight",
+    "PublicationYear",
+]
+
+
 class InChIKey(ValueObject[str]):
     """InChI Key value object.
 

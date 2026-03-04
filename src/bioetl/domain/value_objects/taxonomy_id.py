@@ -11,6 +11,11 @@ from __future__ import annotations
 
 from bioetl.domain.value_objects.base import ValueObject
 
+__all__ = [
+    "TaxonomyId",
+    "validate_taxonomy_id",
+]
+
 
 class TaxonomyId(ValueObject[int]):
     """NCBI Taxonomy ID.

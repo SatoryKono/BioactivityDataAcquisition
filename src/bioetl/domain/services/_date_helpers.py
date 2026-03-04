@@ -12,6 +12,12 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
+
+__all__ = [
+    "format_date_parts",
+    "normalize_partial_date",
+]
+
 _DateHandler = Callable[[str], str | None]
 
 _DATE_FULL_FMT = "{0:04d}-{1:02d}-{2:02d}"

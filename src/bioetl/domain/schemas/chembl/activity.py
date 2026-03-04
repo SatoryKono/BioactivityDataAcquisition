@@ -20,6 +20,10 @@ from bioetl.domain.schemas.constants import (
 )
 from bioetl.domain.validation import MAX_PUBLICATION_YEAR, MIN_PUBLICATION_YEAR
 
+__all__ = [
+    "ActivitySchema",
+]
+
 
 class ActivitySchema(ETLRecordSchema):
     """Activity validation schema for Silver layer."""

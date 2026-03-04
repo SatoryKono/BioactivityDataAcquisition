@@ -35,6 +35,10 @@ if TYPE_CHECKING:
     from bioetl.domain.config import KeyNullabilityRule
     from bioetl.domain.models.metadata import SourceMetadata
 
+__all__ = [
+    "StoragePort",
+]
+
 
 @runtime_checkable
 class StoragePort(Protocol):

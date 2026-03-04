@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from typing import Any, Literal, Self
 
-from pydantic import BaseModel, Field, ValidationError, model_validator
+from pydantic import BaseModel, Field, ValidationError, field_validator, model_validator
 
 from bioetl.domain.composite.config import (
     ColumnGroupConfig,
@@ -47,6 +47,28 @@ class MergeOutputSchema(BaseModel):
 
     silver: str = Field(..., min_length=1, description="Path for merged Silver table")
     gold: str = Field(..., min_length=1, description="Path for merged Gold table")
+
+
+class MergeSortBySchema(BaseModel):
+    """Deterministic sort policy for merged Silver/Gold outputs."""
+
+    silver: list[str] = Field(
+        ..., min_length=1, description="Sort columns for merged Silver output"
+    )
+    gold: list[str] = Field(
+        ..., min_length=1, description="Sort columns for merged Gold output"
+    )
+
+    @field_validator("silver", "gold")
+    @classmethod
+    def validate_non_empty_unique_columns(cls, value: list[str]) -> list[str]:
+        """Normalize and validate deterministic sort columns."""
+        normalized = [column.strip() for column in value]
+        if any(not column for column in normalized):
+            raise ValueError("sort_by must not contain empty column names")
+        if len(normalized) != len(set(normalized)):
+            raise ValueError("sort_by must not contain duplicate columns")
+        return normalized
 
 
 class ColumnGroupSchema(BaseModel):
@@ -109,6 +131,9 @@ class MergeSchema(BaseModel):
     output: MergeOutputSchema = Field(
         ..., description="Output paths for Silver and Gold tables"
     )
+    sort_by: MergeSortBySchema = Field(
+        ..., description="Deterministic row ordering policy for merged outputs"
+    )
     preserve_all_sources: bool = Field(
         default=False,
         description="Keep all provider-qualified columns instead of coalescing",
@@ -165,6 +190,8 @@ class MergeSchema(BaseModel):
             ),
             output_silver_path=self.output.silver,
             output_gold_path=self.output.gold,
+            sort_by_silver=tuple(self.sort_by.silver),
+            sort_by_gold=tuple(self.sort_by.gold),
             field_priorities=field_priorities_tuples,
             field_mappings=self.field_mappings,
             preserve_all_sources=self.preserve_all_sources,
@@ -434,9 +461,11 @@ class CrossValidationSchema(BaseModel):
 class CompositeConfigSchema(BaseModel):
     """Pydantic schema for complete composite pipeline configuration.
 
-    Validates the 'composite' section of YAML files and converts to
-    domain CompositeConfig. Includes cross-field validation for join keys
-    and enricher/dependency uniqueness.
+    Validates structural/types contract for the 'composite' YAML section and
+    converts to domain CompositeConfig.
+
+    Business invariants (join-key compatibility, uniqueness, etc.) are owned by
+    the domain layer and enforced via delegated validation.
     """
 
     name: str = Field(..., min_length=1, description="Composite pipeline name")
@@ -469,85 +498,16 @@ class CompositeConfigSchema(BaseModel):
     )
 
     @model_validator(mode="after")
-    def validate_has_enrichers_or_dependencies(self) -> CompositeConfigSchema:
-        """Validate that at least one enricher or dependency is defined.
+    def validate_domain_invariants(self) -> Self:
+        """Delegate business invariant checks to domain CompositeConfig.
 
-        Returns:
-            Validated CompositeConfigSchema.
+        Keeps infrastructure schema focused on structural/type validation and
+        conversion while preserving ValidationError UX at schema boundary.
         """
-        if not self.enrichers and not self.dependencies:
-            raise ValueError("At least one enricher or dependency must be defined")
-        return self
-
-    @model_validator(mode="after")
-    def validate_enricher_join_keys(self) -> CompositeConfigSchema:
-        """Validate that enricher join keys exist in seed output_keys.
-
-        Returns:
-            Validated CompositeConfigSchema.
-        """
-        if not self.enrichers:
-            return self  # Skip if no enrichers
-        seed_keys = set(self.seed.output_keys)
-        for enricher in self.enrichers:
-            for key in enricher.join_keys:
-                if key not in seed_keys:
-                    raise ValueError(
-                        f"Enricher '{enricher.pipeline}' join_key '{key}' "
-                        f"not found in seed output_keys: {self.seed.output_keys}"
-                    )
-        return self
-
-    @model_validator(mode="after")
-    def validate_dependency_join_keys(self) -> CompositeConfigSchema:
-        """Validate that dependency join keys exist in seed output_keys.
-
-        For chained dependencies (key_source != None and != "seed"),
-        join_keys are taken from the key_source's Silver table,
-        so they are NOT validated against seed output_keys.
-
-        Returns:
-            Validated CompositeConfigSchema.
-        """
-        seed_keys = set(self.seed.output_keys)
-        for dep in self.dependencies:
-            # Skip validation for chained dependencies
-            if dep.key_source is not None and dep.key_source != "seed":
-                continue
-            for key in dep.join_keys:
-                if key not in seed_keys:
-                    raise ValueError(
-                        f"Dependency '{dep.pipeline}' join_key '{key}' "
-                        f"not found in seed output_keys: {self.seed.output_keys}"
-                    )
-        return self
-
-    @model_validator(mode="after")
-    def validate_unique_enricher_names(self) -> CompositeConfigSchema:
-        """Validate that enricher pipeline names are unique.
-
-        Returns:
-            Validated CompositeConfigSchema.
-        """
-        if not self.enrichers:
-            return self  # Skip if no enrichers
-        names = [e.pipeline for e in self.enrichers]
-        if len(names) != len(set(names)):
-            duplicates = {n for n in names if names.count(n) > 1}
-            raise ValueError(f"Duplicate enricher pipelines: {duplicates}")
-        return self
-
-    @model_validator(mode="after")
-    def validate_unique_dependency_names(self) -> CompositeConfigSchema:
-        """Validate that dependency pipeline names are unique.
-
-        Returns:
-            Validated CompositeConfigSchema.
-        """
-        names = [d.pipeline for d in self.dependencies]
-        if len(names) != len(set(names)):
-            duplicates = {n for n in names if names.count(n) > 1}
-            raise ValueError(f"Duplicate dependency pipelines: {duplicates}")
+        try:
+            self.to_domain()
+        except ValueError as exc:
+            raise ValueError(str(exc)) from exc
         return self
 
     def to_domain(self) -> CompositeConfig:
@@ -671,6 +631,7 @@ __all__ = [
     "FieldComparisonSpecSchema",
     "LineageSchema",
     "MergeOutputSchema",
+    "MergeSortBySchema",
     "MergeSchema",
     "RetrySchema",
     "SeedSchema",

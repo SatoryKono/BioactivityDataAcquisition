@@ -45,24 +45,20 @@ class BronzeWriterIOMixin:
     ) -> tuple[int, int]:
         """Stream compress records directly to a temp file, then rename atomically."""
         target_path.parent.mkdir(parents=True, exist_ok=True)
-
         fd, temp_path_str = tempfile.mkstemp(
             suffix=".tmp",
             prefix="." + target_path.stem + "_",
             dir=target_path.parent,
         )
         temp_path = Path(temp_path_str)
-
         compressor = zstd.ZstdCompressor(
             level=self.COMPRESSION_LEVEL,
             threads=self.COMPRESSION_THREADS,
             write_content_size=True,
         )
-
         record_count = 0
         uncompressed_size = 0
         chunk_buffer = bytearray()
-
         try:
             with (
                 open(fd, "wb") as f_out,
@@ -82,18 +78,14 @@ class BronzeWriterIOMixin:
                 if chunk_buffer:
                     writer.write(chunk_buffer)
                     chunk_buffer.clear()
-
             if record_count == 0:
                 temp_path.unlink()
                 raise ValueError("No records to write")
-
             temp_path.replace(target_path)
-
         except BRONZE_WRITE_ERRORS:
             if temp_path.exists():
                 temp_path.unlink()
             raise
-
         return record_count, uncompressed_size
 
     async def _calculate_checksum(self, file_path: Path) -> str:

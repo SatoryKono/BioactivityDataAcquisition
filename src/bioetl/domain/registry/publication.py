@@ -35,6 +35,16 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Final
 
+__all__ = [
+    "PublicationMapping",
+    "get_dedup_key_fields",
+    "get_publication_mapping",
+    "has_composite_key",
+    "is_legacy_publication_alias",
+    "is_publication_entity",
+    "validate_publication_entity_type",
+]
+
 
 @dataclass(frozen=True, slots=True)
 class PublicationMapping:

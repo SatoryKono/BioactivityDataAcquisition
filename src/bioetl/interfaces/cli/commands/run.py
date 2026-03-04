@@ -48,6 +48,14 @@ from bioetl.interfaces.cli.commands.run_helpers import (
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning
 
+__all__ = [
+    "build_run_options",
+    "execute_run",
+    "handle_cli_failure",
+    "run",
+    "validate_options",
+]
+
 _CLI_RUN_ORCHESTRATION_SERVICE = CliRunOrchestrationService()
 
 

@@ -14,6 +14,10 @@ from datetime import datetime
 
 from bioetl.domain.types import RunID, RunType
 
+__all__ = [
+    "RunContext",
+]
+
 
 @dataclass(frozen=True, slots=True)
 class RunContext:

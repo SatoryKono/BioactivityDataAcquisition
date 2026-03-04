@@ -8,6 +8,10 @@ from __future__ import annotations
 import pandera.pandas as pa
 from pandera.typing import Series
 
+__all__ = [
+    "UniprotXrefSchema",
+]
+
 
 class UniprotXrefSchema(pa.DataFrameModel):  # Pandera typing limitation
     """Database cross-references, taxonomy and GO components."""

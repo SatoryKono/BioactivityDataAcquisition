@@ -14,6 +14,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+__all__ = [
+    "SilverWriteResult",
+]
+
 
 @dataclass(frozen=True, slots=True)
 class SilverWriteResult:

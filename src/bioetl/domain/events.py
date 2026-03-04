@@ -13,6 +13,10 @@ Usage:
 
 from __future__ import annotations
 
+__all__ = [
+    "PipelineEvent",
+]
+
 
 class PipelineEvent:
     """Standardized pipeline event names.

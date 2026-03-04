@@ -14,6 +14,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import StrEnum
 
+__all__ = [
+    "FilterOperator",
+    "GoldColumnFilter",
+]
+
 
 class FilterOperator(StrEnum):
     """Comparison operators for column filters.

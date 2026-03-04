@@ -34,6 +34,16 @@ if TYPE_CHECKING:
     from bioetl.domain.types import RunID
 
 
+__all__ = [
+    "NoOpAudit",
+    "NoOpMemoryMonitor",
+    "NoOpMetadataWriter",
+    "NoOpMetrics",
+    "NoOpPiiHasher",
+    "NoOpTracing",
+]
+
+
 class _NoOpSpan:
     """No-op span that mirrors the ``opentelemetry.trace.Span`` interface.
 

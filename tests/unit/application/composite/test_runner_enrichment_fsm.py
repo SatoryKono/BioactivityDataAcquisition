@@ -225,6 +225,7 @@ def runner(
         checkpoint_manager=mock_checkpoint_manager,
         logger=mock_logger,
         lock=mock_lock,
+        fsm_state_helper=MagicMock(),
         run_id="00000000-0000-0000-0000-000000000123",
     )
 
@@ -356,6 +357,7 @@ class TestEnrichmentFSMFailure:
             checkpoint_manager=mock_checkpoint_manager,
             logger=mock_logger,
             lock=mock_lock,
+            fsm_state_helper=MagicMock(),
             run_id="00000000-0000-0000-0000-000000000123",
         )
 
@@ -404,6 +406,7 @@ class TestEnrichmentFSMFailure:
             checkpoint_manager=mock_checkpoint_manager,
             logger=mock_logger,
             lock=mock_lock,
+            fsm_state_helper=MagicMock(),
             run_id="00000000-0000-0000-0000-000000000123",
         )
 
@@ -451,6 +454,7 @@ class TestEnrichmentFSMFailure:
             checkpoint_manager=mock_checkpoint_manager,
             logger=mock_logger,
             lock=mock_lock,
+            fsm_state_helper=MagicMock(),
             run_id="00000000-0000-0000-0000-000000000123",
         )
 
@@ -500,6 +504,7 @@ class TestEnrichmentSkipStage:
             checkpoint_manager=mock_checkpoint_manager,
             logger=mock_logger,
             lock=mock_lock,
+            fsm_state_helper=MagicMock(),
             run_id="00000000-0000-0000-0000-000000000123",
         )
 
@@ -544,6 +549,7 @@ class TestEnrichmentSkipStage:
             checkpoint_manager=mock_checkpoint_manager,
             logger=mock_logger,
             lock=mock_lock,
+            fsm_state_helper=MagicMock(),
             run_id="00000000-0000-0000-0000-000000000123",
         )
 
@@ -605,6 +611,7 @@ class TestOptionalEnricherFailure:
             checkpoint_manager=mock_checkpoint_manager,
             logger=mock_logger,
             lock=mock_lock,
+            fsm_state_helper=MagicMock(),
             run_id="00000000-0000-0000-0000-000000000123",
         )
 
@@ -677,6 +684,7 @@ class TestOptionalEnricherFailure:
             checkpoint_manager=mock_checkpoint_manager,
             logger=mock_logger,
             lock=mock_lock,
+            fsm_state_helper=MagicMock(),
             run_id="00000000-0000-0000-0000-000000000123",
         )
 

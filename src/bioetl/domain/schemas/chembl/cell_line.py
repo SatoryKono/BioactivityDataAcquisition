@@ -17,6 +17,10 @@ from bioetl.domain.schemas.constants import (
     EFO_ID_PATTERN,
 )
 
+__all__ = [
+    "CellLineSchema",
+]
+
 
 class CellLineSchema(ETLRecordSchema):
     """Cell Line validation schema for Silver layer.

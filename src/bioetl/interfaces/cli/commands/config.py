@@ -14,6 +14,15 @@ import click
 from bioetl.composition.entrypoints import get_config_service
 from bioetl.interfaces.cli.formatters import echo_error, echo_info
 
+__all__ = [
+    "COMMANDS",
+    "config",
+    "list_pipelines_command",
+    "show_command",
+    "show_settings_command",
+    "validate_command",
+]
+
 
 def _config_to_dict(config: Any) -> dict[str, Any]:  # Any: accepts Pydantic model...
     """Convert a Pydantic model or dataclass to a JSON-serializable dict."""

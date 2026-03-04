@@ -33,6 +33,11 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
+__all__ = [
+    "assemble_runner_impl",
+]
+
+
 def assemble_runner_impl(
     pipeline: BasePipeline,
     observability: ObservabilityBundle,

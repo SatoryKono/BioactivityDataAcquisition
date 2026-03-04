@@ -40,6 +40,7 @@ from bioetl.application.core.base_transformer_helpers_mixin import (
     _BaseTransformerRecordHelpersMixin,
 )
 from bioetl.domain.ports import (
+    ContractPolicyPort,
     DataNormalizationPort,
     MetricsPort,
     NoOpMetrics,
@@ -180,7 +181,7 @@ class BaseTransformer(_BaseTransformerRecordHelpersMixin, ABC):
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
-        contract_policy: Any = None,  # Any: PipelineContractPolicy (avoids composition import)
+        contract_policy: ContractPolicyPort | None = None,
     ) -> None:
         """Initialize transformer with provider name and observability.
 
@@ -217,9 +218,10 @@ class BaseTransformer(_BaseTransformerRecordHelpersMixin, ABC):
             if data_normalizer is not None
             else DataNormalizationService()
         )
-        self._contract_policy = (
+        resolved_contract_policy: ContractPolicyPort = (
             contract_policy if contract_policy is not None else _DefaultContractPolicy()
         )
+        self._contract_policy = resolved_contract_policy
 
     # ========================================================================
     # PII Hashing Methods (RULES.md §5.4)

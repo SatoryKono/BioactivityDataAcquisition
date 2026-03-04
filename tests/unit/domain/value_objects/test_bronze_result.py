@@ -107,7 +107,7 @@ class TestBronzeWriteResultProperties:
         result = _make_valid_result(compressed_size=50000, uncompressed_size=0)
         assert result.compression_ratio == 1.0
 
-    def test_exists_returns_false_for_nonexistent_path(self) -> None:
-        """Test exists() returns False for non-existent path."""
+    def test_exists_method_removed_from_domain_vo(self) -> None:
+        """BronzeWriteResult must not perform filesystem I/O in domain layer."""
         result = _make_valid_result(absolute_path="/nonexistent/path/to/file.jsonl.zst")
-        assert result.exists() is False
+        assert not hasattr(result, "exists")

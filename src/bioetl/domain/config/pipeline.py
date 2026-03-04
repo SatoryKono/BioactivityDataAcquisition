@@ -18,6 +18,10 @@ from bioetl.domain.medallion import LoadingStrategy
 if TYPE_CHECKING:
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
 
+__all__ = [
+    "PipelineConfig",
+]
+
 
 @dataclass(frozen=True, slots=True)
 class PipelineConfig:

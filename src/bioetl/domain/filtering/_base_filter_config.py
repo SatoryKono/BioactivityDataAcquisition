@@ -16,6 +16,10 @@ from bioetl.domain.filtering.list_filters import (
 )
 from bioetl.domain.filtering.range_filter import GoldRangeFilter
 
+__all__ = [
+    "BaseFilterConfig",
+]
+
 
 @dataclass(frozen=True, slots=True)
 class BaseFilterConfig:

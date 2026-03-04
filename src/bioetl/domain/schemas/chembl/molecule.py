@@ -23,6 +23,10 @@ from bioetl.domain.validation import (
     MIN_PUBLICATION_YEAR,
 )
 
+__all__ = [
+    "MoleculeSchema",
+]
+
 
 class MoleculeSchema(ETLRecordSchema):
     """Molecule validation schema for Silver layer."""

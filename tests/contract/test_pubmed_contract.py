@@ -14,6 +14,7 @@ import httpx
 import pytest
 
 EUTILS_BASE = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
+pytestmark = pytest.mark.network
 
 
 @pytest.mark.pubmed

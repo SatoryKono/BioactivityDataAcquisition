@@ -20,6 +20,10 @@ from bioetl.interfaces.cli.commands.execution_policy import (
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_info
 
+__all__ = [
+    "archive_command",
+]
+
 
 def _handle_archive_failure(
     exc: BaseException,

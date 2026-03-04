@@ -8,6 +8,10 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 
+__all__ = [
+    "FilterLoadResult",
+]
+
 
 @dataclass(frozen=True)
 class FilterLoadResult:

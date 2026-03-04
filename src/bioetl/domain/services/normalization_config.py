@@ -12,6 +12,12 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Literal
 
+__all__ = [
+    "ConcentrationRangeConfig",
+    "NormalizationConfig",
+    "PChemblRangeConfig",
+]
+
 
 @dataclass(frozen=True, slots=True)
 class ConcentrationRangeConfig:
