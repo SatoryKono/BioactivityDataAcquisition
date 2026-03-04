@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from typing import Any
 
-from bioetl.domain.types import BronzeRecord
+from bioetl.domain.types import BronzeRecord, JsonDict
 
 
 def parse_openalex_results(
-    payload: dict[str, Any],  # Any: untyped OpenAlex API payload
+    payload: JsonDict,  # Any: untyped OpenAlex API payload
 ) -> list[BronzeRecord]:
     """Extract `results` list from OpenAlex payload."""
     raw_results = payload.get("results")
@@ -18,7 +18,7 @@ def parse_openalex_results(
 
 
 def parse_openalex_next_cursor(
-    payload: dict[str, Any],  # Any: untyped OpenAlex API payload
+    payload: JsonDict,  # Any: untyped OpenAlex API payload
 ) -> str | None:
     """Extract next cursor from OpenAlex payload meta."""
     raw_meta = payload.get("meta")

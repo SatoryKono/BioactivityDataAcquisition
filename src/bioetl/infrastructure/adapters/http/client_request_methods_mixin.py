@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from typing import Any
+from bioetl.domain.types import JsonDict
 
 import httpx
 
@@ -14,7 +15,7 @@ class HTTPClientRequestMethodsMixin:
     async def get(
         self: Any,  # Any: mixin self type is provided structurally by composed adapter class
         url: str,
-        params: dict[str, Any]  # Any: dynamic payload or structural mixin boundary
+        params: JsonDict  # Any: dynamic payload or structural mixin boundary
         | None = None,  # Any: dynamic payload or structural mixin boundary
         headers: dict[str, str] | None = None,
     ) -> httpx.Response:
@@ -26,9 +27,9 @@ class HTTPClientRequestMethodsMixin:
     async def post(
         self: Any,  # Any: mixin self type is provided structurally by composed adapter class
         url: str,
-        json: dict[str, Any]  # Any: dynamic payload or structural mixin boundary
+        json: JsonDict  # Any: dynamic payload or structural mixin boundary
         | None = None,  # Any: dynamic payload or structural mixin boundary
-        data: dict[str, Any]  # Any: dynamic payload or structural mixin boundary
+        data: JsonDict  # Any: dynamic payload or structural mixin boundary
         | None = None,  # Any: dynamic payload or structural mixin boundary
         headers: dict[str, str] | None = None,
     ) -> httpx.Response:
@@ -48,7 +49,7 @@ class HTTPClientRequestMethodsMixin:
     async def get_once(
         self: Any,  # Any: mixin self type is provided structurally by composed adapter class
         url: str,
-        params: dict[str, Any]  # Any: dynamic payload or structural mixin boundary
+        params: JsonDict  # Any: dynamic payload or structural mixin boundary
         | None = None,  # Any: dynamic payload or structural mixin boundary
         headers: dict[str, str] | None = None,
     ) -> httpx.Response:

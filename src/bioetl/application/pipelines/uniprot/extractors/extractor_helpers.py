@@ -6,7 +6,8 @@ __all__ = ["ExtractorHelper"]
 
 
 from datetime import date
-from typing import Any, ClassVar
+from typing import ClassVar
+from bioetl.domain.types import JsonDict
 
 import orjson
 
@@ -87,7 +88,7 @@ class ExtractorHelper:
 
     @staticmethod
     def _extract_values_from_list(
-        data: list[dict[str, Any]],  # Any: untyped API JSON record
+        data: list[JsonDict],  # Any: untyped API JSON record
         key: str = "value",  # Any: record vals vary
     ) -> list[str]:
         """Extract values from a list of dictionaries.
@@ -105,7 +106,7 @@ class ExtractorHelper:
     @staticmethod
     # Any: JSON vals
     def extract_short_names(
-        recommended_name: dict[str, Any] | None,  # Any: untyped API JSON record
+        recommended_name: JsonDict | None,  # Any: untyped API JSON record
     ) -> str | None:  # Any: untyped API JSON record
         """Extract short names from recommended name.
 
@@ -153,7 +154,7 @@ class ExtractorHelper:
     @staticmethod
     # Any: JSON vals
     def extract_ec_numbers(
-        recommended_name: dict[str, Any] | None,  # Any: untyped API JSON record
+        recommended_name: JsonDict | None,  # Any: untyped API JSON record
     ) -> str | None:  # Any: untyped API JSON record
         """Extract EC numbers from recommended name.
 

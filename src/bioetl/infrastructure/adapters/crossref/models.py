@@ -26,7 +26,7 @@ __all__ = [
 ]
 
 
-from typing import Any
+from bioetl.domain.types import JsonDict
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -54,7 +54,7 @@ class CrossRefAuthor(BaseModel):
         description="Whether ORCID is authenticated",
     )
     affiliation: (
-        list[dict[str, Any]] | None  # Any: untyped API JSON record
+        list[JsonDict] | None  # Any: untyped API JSON record
     ) = (  # Any: nested API JSON has heterogeneous values
         Field(  # Any: nested Crossref JSON with provider-specific schema
             default_factory=list, description="Author affiliations"
@@ -87,7 +87,7 @@ class CrossRefLicense(BaseModel):
     delay_in_days: int | None = Field(
         default=None, alias="delay-in-days", description="Embargo delay"
     )
-    start: dict[str, Any] | None = (  # Any: untyped API JSON record
+    start: JsonDict | None = (  # Any: untyped API JSON record
         Field(  # Any: nested API JSON has heterogeneous values
             default=None, description="License start date"
         )
@@ -147,7 +147,7 @@ class CrossRefAssertion(BaseModel):
     name: str | None = Field(default=None, description="Assertion name")
     value: str | None = Field(default=None, description="Assertion value")
     label: str | None = Field(default=None, description="Assertion label")
-    group: dict[str, Any] | None = (  # Any: untyped API JSON record
+    group: JsonDict | None = (  # Any: untyped API JSON record
         Field(  # Any: nested API JSON has heterogeneous values
             default=None, description="Assertion group"
         )
@@ -306,13 +306,13 @@ class CrossRefPublicationRecord(BaseModel):
     )
 
     # Relations
-    relation: dict[str, Any] | None = (  # Any: untyped API JSON record
+    relation: JsonDict | None = (  # Any: untyped API JSON record
         Field(  # Any: nested API JSON has heterogeneous values
             default=None, description="Related works"
         )
     )  # Any: nested Crossref JSON with provider-specific schema
     update_to: (
-        list[dict[str, Any]] | None  # Any: untyped API JSON record
+        list[JsonDict] | None  # Any: untyped API JSON record
     ) = (  # Any: nested API JSON has heterogeneous values
         Field(  # Any: nested Crossref JSON with provider-specific schema
             default_factory=list,
@@ -321,7 +321,7 @@ class CrossRefPublicationRecord(BaseModel):
         )
     )
     updated_by: (
-        list[dict[str, Any]] | None  # Any: untyped API JSON record
+        list[JsonDict] | None  # Any: untyped API JSON record
     ) = (  # Any: nested API JSON has heterogeneous values
         Field(  # Any: nested Crossref JSON with provider-specific schema
             default_factory=list,
@@ -360,7 +360,7 @@ class CrossRefPublicationRecord(BaseModel):
 
     # Standards Bodies
     standards_body: (
-        list[dict[str, Any]] | None  # Any: untyped API JSON record
+        list[JsonDict] | None  # Any: untyped API JSON record
     ) = (  # Any: nested API JSON has heterogeneous values
         Field(  # Any: nested Crossref JSON with provider-specific schema
             default_factory=list, alias="standards-body", description="Standards bodies"
@@ -382,7 +382,7 @@ class CrossRefMessage(BaseModel):
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
 
     # Facets
-    facets: dict[str, Any] | None = Field(  # Any: untyped API JSON record
+    facets: JsonDict | None = Field(  # Any: untyped API JSON record
         default=None, description="Search facets"
     )  # Any: nested Crossref JSON with provider-specific schema
 
@@ -393,7 +393,7 @@ class CrossRefMessage(BaseModel):
     items_per_page: int | None = Field(
         default=None, alias="items-per-page", description="Items per page"
     )
-    query: dict[str, Any] | None = Field(  # Any: untyped API JSON record
+    query: JsonDict | None = Field(  # Any: untyped API JSON record
         default=None, description="Query information"
     )  # Any: nested Crossref JSON with provider-specific schema
 

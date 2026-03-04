@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import CheckpointPort, LoggerPort
+from bioetl.domain.types import JsonDict
 
 
 @dataclass(frozen=True, slots=True)
@@ -30,7 +31,7 @@ class CheckpointInfo:
 
     pipeline_name: str
     run_id: str | None
-    metadata: dict[str, Any]  # Any: checkpoint metadata values are heterogeneous
+    metadata: JsonDict  # Any: checkpoint metadata values are heterogeneous
 
 
 @dataclass

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from bioetl.domain.types import HealthStatus
+from bioetl.domain.types import HealthStatus, JsonDict
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import HealthMonitorPort
@@ -31,7 +31,7 @@ class HealthServerStateMixin:
 
     def _get_provider_statuses(
         self,
-    ) -> dict[str, dict[str, Any]]:  # Any: response payload values are heterogeneous
+    ) -> dict[str, JsonDict]:  # Any: response payload values are heterogeneous
         """Get detailed status for all providers."""
         if not self._health_monitor:
             return {}

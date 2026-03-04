@@ -14,7 +14,7 @@ from bioetl.domain.exceptions import (
     ServiceUnavailableError,
 )
 from bioetl.domain.ports import NoOpMetrics
-from bioetl.domain.types import ErrorType
+from bioetl.domain.types import ErrorType, JsonDict
 
 if TYPE_CHECKING:
     from httpx import Response
@@ -70,7 +70,7 @@ class AdapterErrorContext:
     error_type: ErrorType | None = None
     error_category: ErrorCategory | None = None
     retry_after: float | None = None
-    extra: dict[str, Any] = field(default_factory=dict)  # Any: untyped API JSON record
+    extra: JsonDict = field(default_factory=dict)  # Any: untyped API JSON record
 
 
 class ErrorService:
@@ -187,7 +187,7 @@ class ErrorService:
         provider: str,
         operation: str,
         error: Exception,
-        context: dict[str, Any] | None = None,  # Any: untyped API JSON record
+        context: JsonDict | None = None,  # Any: untyped API JSON record
     ) -> AdapterErrorContext:
         """Log error with unified structured context."""
         context = context or {}
@@ -231,7 +231,7 @@ class ErrorService:
         *,
         provider: str,
         operation: str,
-        context: dict[str, Any],  # Any: untyped API JSON record
+        context: JsonDict,  # Any: untyped API JSON record
         error_type: ErrorType,
         error_category: ErrorCategory,
         status_code: Any,  # Any: untyped API JSON record
@@ -484,7 +484,7 @@ class ErrorService:
         error: Exception,
         provider: str,
         operation: str,
-        context: dict[str, Any] | None = None,  # Any: untyped API JSON record
+        context: JsonDict | None = None,  # Any: untyped API JSON record
     ) -> ExternalServiceError:
         """Handle error: log and wrap in one step.
 

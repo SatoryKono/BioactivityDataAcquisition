@@ -19,6 +19,7 @@ from bioetl.domain.value_objects.dq_report import (
     ReferentialIntegrityResult,
     SCDIntegrityResult,
 )
+from bioetl.domain.types import JsonDict
 
 _SCD_INTEGRITY_ERRORS = (
     pl.exceptions.PolarsError,
@@ -139,7 +140,7 @@ def check_referential_integrity(
 
 def check_scd_integrity(
     df: pl.DataFrame,
-    scd_config: dict[str, Any] | None,  # Any: SCD config has heterogeneous values
+    scd_config: JsonDict | None,  # Any: SCD config has heterogeneous values
 ) -> SCDIntegrityResult:
     """Check SCD (Slowly Changing Dimension) integrity.
 

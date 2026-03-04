@@ -9,10 +9,11 @@ Implements REQ-DQ-001: DQ metrics in Silver metadata.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal  # Any: needed for list[Any] in filter/stats functions
 
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import ColumnMetrics, DQSummary, SchemaDrift
+    from bioetl.domain.types import JsonDict
 
 
 @dataclass(frozen=True, slots=True)
@@ -180,9 +181,7 @@ class BatchDQMetrics:
     @classmethod
     def from_records(
         cls,
-        records: list[
-            dict[str, Any]  # Any: DQ check values vary by check type
-        ],  # Any: DQ metric values vary (int|float|str|None)
+        records: list[JsonDict],
         error_count: int = 0,
         warning_count: int = 0,
         validation_errors: list[str] | None = None,
@@ -229,8 +228,8 @@ class BatchDQMetrics:
 
 
 def _compute_column_stats(
-    records: list[dict[str, Any]],  # Any: DQ check values vary by check type
-) -> dict[str, ColumnStats]:  # Any: DQ metric values vary (int|float|str|None)
+    records: list[JsonDict],
+) -> dict[str, ColumnStats]:
     """Compute column statistics from records.
 
     Args:
@@ -252,8 +251,8 @@ def _compute_column_stats(
 
 
 def _collect_all_columns(
-    records: list[dict[str, Any]],  # Any: DQ check values vary by check type
-) -> set[str]:  # Any: DQ metric values vary (int|float|str|None)
+    records: list[JsonDict],
+) -> set[str]:
     """Collect all unique column names from records.
 
     Args:
@@ -269,7 +268,7 @@ def _collect_all_columns(
 
 
 def _compute_single_column_stats(
-    records: list[dict[str, Any]],  # Any: DQ metric values vary (int|float|str|None)
+    records: list[JsonDict],
     col_name: str,
 ) -> ColumnStats:
     """Compute statistics for a single column.
@@ -298,8 +297,8 @@ def _compute_single_column_stats(
 
 
 def _filter_non_null(
-    values: list[Any],  # Any: DQ values vary by check type
-) -> list[Any]:  # Any: DQ metric values vary (int|float|str|None)
+    values: list[Any],  # Any: values from JsonDict.get() are heterogeneous
+) -> list[Any]:  # Any: values from JsonDict.get() are heterogeneous
     """Filter out None values from a list.
 
     Args:
@@ -312,9 +311,9 @@ def _filter_non_null(
 
 
 def _calculate_null_rate(
-    values: list[Any],  # Any: DQ values vary by check type
-    total: int,  # Any: DQ values vary by check type
-) -> float:  # Any: DQ metric values vary (int|float|str|None)
+    values: list[Any],  # Any: values from JsonDict.get() are heterogeneous
+    total: int,
+) -> float:
     """Calculate the null rate for a list of values.
 
     Args:
@@ -328,7 +327,7 @@ def _calculate_null_rate(
     return round(null_count / total, 4)
 
 
-def _make_hashable(value: Any) -> Any:  # Any: record vals vary
+def _make_hashable(value: object) -> object:
     """Convert a value to a hashable representation.
 
     Args:
@@ -347,8 +346,8 @@ def _make_hashable(value: Any) -> Any:  # Any: record vals vary
 
 
 def _calculate_unique_count(
-    values: list[Any],  # Any: DQ values vary by check type
-) -> int:  # Any: DQ metric values vary (int|float|str|None)
+    values: list[Any],  # Any: values from JsonDict.get() are heterogeneous
+) -> int:
     """Calculate the count of unique values.
 
     Args:
@@ -367,7 +366,7 @@ def _calculate_unique_count(
 
 
 def _compute_numeric_stats(
-    values: list[Any],  # Any: DQ metric values vary (int|float|str|None)
+    values: list[Any],  # Any: values from JsonDict.get() are heterogeneous
 ) -> tuple[float | None, float | None, float | None]:
     """Compute numeric statistics (min, max, mean) for values.
 
@@ -388,7 +387,7 @@ def _compute_numeric_stats(
     )
 
 
-def _is_valid_numeric(v: Any) -> bool:  # Any: heterogeneous record values
+def _is_valid_numeric(v: object) -> bool:
     """Check if value is a valid numeric (not bool, NaN, or Inf).
 
     Args:
@@ -407,8 +406,8 @@ def _is_valid_numeric(v: Any) -> bool:  # Any: heterogeneous record values
 
 
 def _extract_numeric_values(
-    values: list[Any],  # Any: DQ values vary by check type
-) -> list[float]:  # Any: DQ metric values vary (int|float|str|None)
+    values: list[Any],  # Any: values from JsonDict.get() are heterogeneous
+) -> list[float]:
     """Extract numeric values from a list of mixed values.
 
     Args:

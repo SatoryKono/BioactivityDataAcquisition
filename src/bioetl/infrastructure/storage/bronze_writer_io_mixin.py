@@ -128,7 +128,7 @@ class BronzeWriterIOMixin:
 
     async def read_bronze(
         self, path: str
-    ) -> AsyncIterator[dict[str, Any]]:  # Any: record/metadata values are heterogeneous
+    ) -> AsyncIterator[JsonDict]:  # Any: record/metadata values are heterogeneous
         """Read and decompress Bronze file (for testing/debugging)."""
         full_path = self.base_path / path
 

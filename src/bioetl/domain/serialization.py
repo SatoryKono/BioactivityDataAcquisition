@@ -14,6 +14,7 @@ implementations. It automatically selects orjson when available for
 
 Usage:
     >>> from bioetl.domain.serialization import serialize_to_json, deserialize_from_json
+from bioetl.domain.types import JsonDict
     >>> data = {"b": 2, "a": 1}
     >>> serialize_to_json(data)
     '{"a":1,"b":2}'  # Sorted keys, compact
@@ -40,7 +41,7 @@ except ImportError:
 
 
 def serialize_to_json(
-    data: dict[str, Any] | list[Any],  # Any: JSON values are heterogeneous
+    data: JsonDict | list[Any],  # Any: JSON values are heterogeneous
     *,
     sort_keys: bool = True,
     ensure_ascii: bool = True,
@@ -78,7 +79,7 @@ def serialize_to_json(
 
 
 def serialize_to_json_canonical(
-    data: dict[str, Any],  # Any: JSON values are heterogeneous
+    data: JsonDict,  # Any: JSON values are heterogeneous
 ) -> str:  # Any: JSON values are heterogeneous
     """Serialize data to canonical JSON for content hash computation.
 
@@ -106,7 +107,7 @@ def serialize_to_json_canonical(
 
 def deserialize_from_json(
     data: str | bytes,
-) -> dict[str, Any] | list[Any]:  # Any: JSON values are heterogeneous
+) -> JsonDict | list[Any]:  # Any: JSON values are heterogeneous
     """Deserialize JSON string or bytes to Python object.
 
     Uses orjson when available for optimal performance.
@@ -152,7 +153,7 @@ def _get_orjson_options(sort_keys: bool) -> int:
 
 
 def _serialize_with_orjson(
-    data: dict[str, Any] | list[Any],  # Any: JSON values are heterogeneous
+    data: JsonDict | list[Any],  # Any: JSON values are heterogeneous
     *,
     sort_keys: bool = True,
     ensure_ascii: bool = True,
@@ -167,7 +168,7 @@ def _serialize_with_orjson(
 
 
 def _serialize_with_stdlib(
-    data: dict[str, Any] | list[Any],  # Any: JSON values are heterogeneous
+    data: JsonDict | list[Any],  # Any: JSON values are heterogeneous
     *,
     sort_keys: bool = True,
     ensure_ascii: bool = True,
@@ -185,12 +186,12 @@ def _serialize_with_stdlib(
 
 def _deserialize_with_orjson(
     data: str | bytes,
-) -> dict[str, Any] | list[Any]:  # Any: JSON values are heterogeneous
+) -> JsonDict | list[Any]:  # Any: JSON values are heterogeneous
     """Deserialize using orjson."""
     assert orjson is not None
     try:
         result: (
-            dict[str, Any] | list[Any]  # Any: JSON values are heterogeneous
+            JsonDict | list[Any]  # Any: JSON values are heterogeneous
         ) = orjson.loads(data)
         return result
     except orjson.JSONDecodeError as e:
@@ -199,12 +200,12 @@ def _deserialize_with_orjson(
 
 def _deserialize_with_stdlib(
     data: str | bytes,
-) -> dict[str, Any] | list[Any]:  # Any: JSON values are heterogeneous
+) -> JsonDict | list[Any]:  # Any: JSON values are heterogeneous
     """Deserialize using stdlib json as fallback."""
     import json
 
     try:
-        result: dict[str, Any] | list[Any] = (  # Any: JSON values are heterogeneous
+        result: JsonDict | list[Any] = (  # Any: JSON values are heterogeneous
             json.loads(  # Any: JSON values are heterogeneous
                 data
             )

@@ -73,7 +73,7 @@ class RecordProcessor:
     async def process_batch(
         # Any: record vals vary
         self,
-        records: list[dict[str, Any]],  # Any: values are heterogeneous
+        records: list[JsonDict],  # Any: values are heterogeneous
         batch_id: BatchID,
         start_index: int = 0,
     ) -> BatchResult:
@@ -172,7 +172,7 @@ class RecordProcessor:
     async def _execute_transform_with_span(
         # Any: record vals vary
         self,
-        records: list[dict[str, Any]],  # Any: values are heterogeneous
+        records: list[JsonDict],  # Any: values are heterogeneous
         batch_id: BatchID,
         start_index: int,
     ) -> TransformResult:

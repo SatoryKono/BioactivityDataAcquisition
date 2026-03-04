@@ -23,6 +23,7 @@ import re
 from datetime import date
 from pathlib import Path
 from typing import Any
+from bioetl.domain.types import JsonDict
 
 import yaml
 
@@ -96,7 +97,7 @@ def build_module_path_key(
 
 def load_exemptions_registry(
     path: Path | str | None = None,
-) -> dict[str, Any]:  # Any: DQ check values vary by check type
+) -> JsonDict:  # Any: DQ check values vary by check type
     """Load YAML exemptions registry as dictionary."""
     registry_path = _resolve_registry_path(path)
     if not registry_path.exists():
@@ -111,7 +112,7 @@ def load_exemptions_registry(
 def get_registry_values(
     registry_name: str,
     path: Path | str | None = None,
-) -> dict[str, Any]:  # Any: DQ check values vary by check type
+) -> JsonDict:  # Any: DQ check values vary by check type
     """Return value-only mapping for a concrete registry section."""
     raw = load_exemptions_registry(path)
     registries = raw.get("registries", {})
@@ -122,7 +123,7 @@ def get_registry_values(
     if not isinstance(entries, dict):
         raise ValueError(f"Invalid registry '{registry_name}': expected mapping")
 
-    values: dict[str, Any] = {}  # Any: DQ check values vary by check type
+    values: JsonDict = {}  # Any: DQ check values vary by check type
     for name, entry in entries.items():
         if not isinstance(entry, dict) or "value" not in entry:
             raise ValueError(
@@ -133,7 +134,7 @@ def get_registry_values(
 
 
 def resolve_registry_value(
-    values: dict[str, Any],  # Any: check-specific thresholds vary by registry
+    values: JsonDict,  # Any: check-specific thresholds vary by registry
     *,
     module_path: Path | str,
     symbol_name: str | None = None,
@@ -215,7 +216,7 @@ def validate_exemption_key_normalization(
 
 def _validate_required_fields(
     prefix: str,
-    entry: dict[str, Any],  # Any: DQ check values vary by check type
+    entry: JsonDict,  # Any: DQ check values vary by check type
     required_fields: tuple[str, ...],
     metadata_errors: list[str],
 ) -> None:
@@ -256,7 +257,7 @@ def _normalize_required_fields(
 
 
 def _get_policy_required_fields(
-    raw: dict[str, Any],  # Any: DQ check values vary by check type
+    raw: JsonDict,  # Any: DQ check values vary by check type
     metadata_errors: list[str],
 ) -> tuple[str, ...]:
     """Read required field policy and enforce owner+due-date governance."""
@@ -285,7 +286,7 @@ def _get_policy_required_fields(
 
 def _validate_owner(
     prefix: str,
-    entry: dict[str, Any],  # Any: DQ check values vary by check type
+    entry: JsonDict,  # Any: DQ check values vary by check type
     metadata_errors: list[str],
 ) -> None:
     """Validate owner field is not using placeholders."""
@@ -296,7 +297,7 @@ def _validate_owner(
 
 def _validate_due_date(
     prefix: str,
-    entry: dict[str, Any],  # Any: DQ check values vary by check type
+    entry: JsonDict,  # Any: DQ check values vary by check type
     required_fields: tuple[str, ...],
     now: date,
     metadata_errors: list[str],

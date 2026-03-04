@@ -30,6 +30,7 @@ from bioetl.domain.value_objects.dq_report import (
     SilverDQCheckType,
     SilverDQReport,
 )
+from bioetl.domain.types import JsonDict
 
 
 class SilverDQAnalyzer:
@@ -57,11 +58,11 @@ class SilverDQAnalyzer:
         quarantined_count: int,
         previous_schema: dict[str, str] | None,
         key_nullability_rules: list[
-            dict[str, Any]  # Any: DQ check values vary by check type
+            JsonDict  # Any: DQ check values vary by check type
         ]  # Any: DQ rule definitions have heterogeneous values
         | None,  # Any: DQ check values vary by check type
     ) -> tuple[
-        dict[str, Any], int, int, int  # Any: DQ check values vary by check type
+        JsonDict, int, int, int  # Any: DQ check values vary by check type
     ]:  # Any: DQ check values vary by check type
         """Execute all enabled DQ checks and collect results.
 
@@ -77,7 +78,7 @@ class SilverDQAnalyzer:
         Returns:
             Tuple of (checks dict, passed count, failed count, warnings count).
         """
-        checks: dict[str, Any] = {}  # Any: DQ check values vary by check type
+        checks: JsonDict = {}  # Any: DQ check values vary by check type
         passed, failed, warnings = 0, 0, 0
         stats = self._statistics
 
@@ -175,7 +176,7 @@ class SilverDQAnalyzer:
         quarantined_count: int = 0,
         previous_schema: dict[str, str] | None = None,
         key_nullability_rules: list[
-            dict[str, Any]  # Any: DQ check values vary by check type
+            JsonDict  # Any: DQ check values vary by check type
         ]  # Any: DQ rule definitions have heterogeneous values
         | None = None,  # Any: DQ check values vary by check type
     ) -> SilverDQReport:

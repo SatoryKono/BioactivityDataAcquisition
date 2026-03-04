@@ -8,7 +8,7 @@ from __future__ import annotations
 import re
 from datetime import date
 from html import unescape
-from typing import Any
+from typing import Any  # Any: used for list[Any] in JSON parsing results
 
 from bioetl.domain.serialization import deserialize_from_json
 
@@ -42,7 +42,7 @@ def normalize_string(value: str | None) -> str | None:
     return stripped if stripped else None
 
 
-def normalize_to_string(value: Any) -> str | None:  # Any: raw API value for norm...
+def normalize_to_string(value: object) -> str | None:
     """Convert value to string, strip whitespace, return None if empty.
 
     Args:
@@ -287,7 +287,7 @@ def normalize_pmc_id(pmc_id: str | None) -> str | None:
     return pmc_id.upper()
 
 
-def extract_first_item(items: list[Any] | None) -> Any | None:  # Any: record vals vary
+def extract_first_item(items: list[object] | None) -> object | None:
     """Extract first non-None item from list.
 
     Args:
@@ -301,7 +301,7 @@ def extract_first_item(items: list[Any] | None) -> Any | None:  # Any: record va
     return next((item for item in items if item is not None), None)
 
 
-def _is_valid_string(item: Any) -> str | None:  # Any: raw API value for normalization
+def _is_valid_string(item: object) -> str | None:
     """Return stripped string if non-empty, else None."""
     return str(item).strip() if item is not None else None
 
@@ -320,17 +320,17 @@ def extract_first_string(items: list[str] | None) -> str | None:
     return next((s for item in items if (s := _is_valid_string(item))), None)
 
 
-def _filter_valid_strings(items: list[Any]) -> list[str]:  # Any: record vals vary
+def _filter_valid_strings(items: list[object]) -> list[str]:
     """Filter list to valid non-empty strings."""
     return [str(a).strip() for a in items if a is not None and str(a).strip()]
 
 
-def _parse_authors_from_list(authors: list[Any]) -> list[str]:  # Any: record vals vary
+def _parse_authors_from_list(authors: list[object]) -> list[str]:
     """Parse author list, filtering non-strings and empty values."""
     return [a.strip() for a in authors if isinstance(a, str) and a.strip()]
 
 
-def _try_parse_json_array(text: str) -> list[Any] | None:  # Any: record vals vary
+def _try_parse_json_array(text: str) -> list[Any] | None:  # Any: JSON parse result type varies
     """Try to parse text as JSON array. Returns None if invalid."""
     try:
         parsed = deserialize_from_json(text)

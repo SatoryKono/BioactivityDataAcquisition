@@ -11,7 +11,7 @@ __all__ = ["IDMappingDataSource"]
 
 from typing import TYPE_CHECKING, Any, Self
 
-from bioetl.domain.types import HealthStatus
+from bioetl.domain.types import HealthStatus, JsonDict
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -112,7 +112,7 @@ class IDMappingDataSource:
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
         offset: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:  # Any: record values are heterogeneous
+    ) -> AsyncIterator[JsonDict]:  # Any: record values are heterogeneous
         """Fetch ID mapping records.
 
         Resolves ChEMBL IDs from one of three sources (priority order):
@@ -195,7 +195,7 @@ class IDMappingDataSource:
             entry_data = mapping_results.get(chembl_id)
             if entry_data is not None and isinstance(entry_data, dict):
                 found_count += 1
-                result: dict[str, Any] = {  # Any: record values are heterogeneous
+                result: JsonDict = {  # Any: record values are heterogeneous
                     "target_id": chembl_id
                 }  # Any: record values are heterogeneous
                 result.update(entry_data)

@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 from typing import Any
+from bioetl.domain.types import JsonDict
 
 import yaml
 
@@ -85,7 +86,7 @@ _QUARTER_RE = re.compile(r"^(20\d{2})-Q([1-4])$")
 
 def load_debt_scorecard(
     path: Path | str | None = None,
-) -> dict[str, Any]:  # Any: scorecard sections are heterogeneous
+) -> JsonDict:  # Any: scorecard sections are heterogeneous
     """Load debt scorecard YAML as dictionary."""
     scorecard_path = _resolve_scorecard_path(path)
     if not scorecard_path.exists():
@@ -258,10 +259,10 @@ def compute_integral_debt_score(
 
 
 def _current_quarter_target(
-    scorecard: dict[str, Any],  # Any: YAML scorecard sections are heterogeneous
+    scorecard: JsonDict,  # Any: YAML scorecard sections are heterogeneous
     *,
     today: date,
-) -> dict[str, Any] | None:  # Any: YAML scorecard sections are heterogeneous
+) -> JsonDict | None:  # Any: YAML scorecard sections are heterogeneous
     quarter = _quarter_label(today)
     for item in scorecard.get("quarterly_targets", []):
         if isinstance(item, dict) and item.get("quarter") == quarter:
@@ -284,7 +285,7 @@ def _is_active_grace_window(
 
 
 def _collect_allowances(
-    active_windows: list[dict[str, Any]],  # Any: YAML values are heterogeneous
+    active_windows: list[JsonDict],  # Any: YAML values are heterogeneous
 ) -> tuple[int, Counter[str], Counter[str]]:
     allowance_total = 0
     allowance_by_registry: Counter[str] = Counter()
@@ -331,7 +332,7 @@ def _extract_growth_violation_section(violation: str) -> str:
 
 def _resolve_rollout_mode_for_section(
     *,
-    scorecard: dict[str, Any],  # Any: YAML scorecard sections are heterogeneous
+    scorecard: JsonDict,  # Any: YAML scorecard sections are heterogeneous
     section_key: str,
     today: date,
     fallback_mode: str,
@@ -374,7 +375,7 @@ def _resolve_rollout_mode_for_section(
 def split_growth_violations_by_severity(
     *,
     violations: list[str],
-    scorecard: dict[str, Any],  # Any: YAML scorecard sections are heterogeneous
+    scorecard: JsonDict,  # Any: YAML scorecard sections are heterogeneous
     today: date | None = None,
     fallback_mode: str = "block",
 ) -> tuple[list[str], list[str]]:
@@ -422,7 +423,7 @@ def _evaluate_registry_budgets(
 def _compute_group_counts(
     *,
     by_registry: dict[str, int],
-    registry_groups: dict[str, Any],  # Any: YAML values are heterogeneous
+    registry_groups: JsonDict,  # Any: YAML values are heterogeneous
 ) -> dict[str, int]:
     by_group: dict[str, int] = {}
     for group_name, group_cfg in sorted(registry_groups.items()):
@@ -451,7 +452,7 @@ def _evaluate_group_budgets(
 
 def _owner_allocations_for_quarter(
     *,
-    scorecard: dict[str, Any],  # Any: YAML scorecard sections are heterogeneous
+    scorecard: JsonDict,  # Any: YAML scorecard sections are heterogeneous
     quarter: str,
 ) -> dict[str, int]:
     targets = scorecard.get("owner_decomposition_targets", [])
@@ -492,7 +493,7 @@ def _evaluate_owner_allocations(
 
 def _expiry_cap_for_quarter(
     *,
-    scorecard: dict[str, Any],  # Any: YAML scorecard sections are heterogeneous
+    scorecard: JsonDict,  # Any: YAML scorecard sections are heterogeneous
     quarter: str,
 ) -> int | None:
     targets = scorecard.get("expiry_decomposition_targets", [])
@@ -526,7 +527,7 @@ def _evaluate_expiry_cap(
 
 def _evaluate_program_done_criteria(
     *,
-    scorecard: dict[str, Any],  # Any: YAML scorecard sections are heterogeneous
+    scorecard: JsonDict,  # Any: YAML scorecard sections are heterogeneous
     current_quarter: str,
     total_exemptions: int,
     integral_score: float,

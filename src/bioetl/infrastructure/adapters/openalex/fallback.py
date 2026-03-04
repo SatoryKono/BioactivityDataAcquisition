@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
     from bioetl.domain.ports import LoggerPort
+from bioetl.domain.types import JsonDict
 
 
 class TitleFallbackHandler(BaseTitleFallbackHandler):
@@ -45,7 +46,7 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
 
     async def _search_by_title(
         self, title: str
-    ) -> dict[str, Any] | None:  # Any: untyped API JSON record
+    ) -> JsonDict | None:  # Any: untyped API JSON record
         """Search for work by title using OpenAlex API.
 
         Validates results using title matching to reduce false positives.
@@ -65,12 +66,12 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
         for result in candidates:
             found_title = result.get("title", "")
             if found_title and titles_match(title, found_title):
-                return cast("dict[str, Any]", result)  # Any: untyped API JSON record
+                return cast("JsonDict", result)  # Any: untyped API JSON record
 
         # Fallback: check if any candidate has no title (rare edge case)
         # Only return if we haven't found a match yet
         for result in candidates:
             if not result.get("title"):
-                return cast("dict[str, Any]", result)  # Any: untyped API JSON record
+                return cast("JsonDict", result)  # Any: untyped API JSON record
 
         return None

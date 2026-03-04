@@ -26,6 +26,7 @@ from bioetl.domain.exceptions import BioETLError, CheckpointConflictError, Stora
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
+from bioetl.domain.types import JsonDict
 
 __all__ = [
     "CompositeCheckpointManager",
@@ -298,7 +299,7 @@ class CompositeCheckpointState:
     @classmethod
     def from_dict(
         cls,
-        data: dict[str, Any],  # Any: checkpoint state has heterogeneous values
+        data: JsonDict,  # Any: checkpoint state has heterogeneous values
     ) -> CompositeCheckpointState:  # Any: checkpoint state has heterogeneous values
         """Create state from dictionary.
 

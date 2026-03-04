@@ -10,9 +10,8 @@ import hashlib
 import re
 import unicodedata
 from html import unescape
-from typing import Any
-
 from bioetl.domain.serialization import deserialize_from_json
+from bioetl.domain.types import JsonDict
 
 __all__ = [
     "collect_affiliations_from_authors",
@@ -52,7 +51,7 @@ def hash_author_name(name: str, salt: str) -> str:
 
 
 def parse_author_names(
-    authors: list[str] | list[dict[str, Any]] | str,  # Any: heterogeneous field values
+    authors: list[str] | list[JsonDict] | str,
 ) -> list[str]:
     """Parse various author formats to list of name strings.
 
@@ -69,12 +68,12 @@ def parse_author_names(
     return []
 
 
-def _strip_or_none(value: Any) -> str | None:  # Any: raw API JSON value
+def _strip_or_none(value: object) -> str | None:
     """Strip string and return None if empty or non-string."""
     return value.strip() or None if isinstance(value, str) else None
 
 
-def _extract_name_from_item(item: Any) -> str | None:  # Any: raw API JSON value
+def _extract_name_from_item(item: object) -> str | None:
     """Extract author name from a string or dict item."""
     if isinstance(item, str):
         return _strip_or_none(item)
@@ -135,7 +134,7 @@ def parse_delimited_authors(text: str) -> list[str]:
 
 
 def extract_affiliation_strings(
-    affiliations: list[str] | list[dict[str, Any]],  # Any: heterogeneous field values
+    affiliations: list[str] | list[JsonDict],
 ) -> list[str]:
     """Extract affiliation strings from a mixed list of strings and dicts.
 
@@ -153,10 +152,9 @@ def extract_affiliation_strings(
     return strings
 
 
-# Any: heterogeneous field va...
 def _extract_affiliation_from_dict(
-    aff: dict[str, Any],  # Any: record values are heterogeneous
-) -> str | None:  # Any: record values are heterogeneous
+    aff: JsonDict,
+) -> str | None:
     """Extract first non-empty affiliation value from known keys."""
     for key in _AFFILIATION_KEYS:
         result = _strip_or_none(aff.get(key))
@@ -165,7 +163,7 @@ def _extract_affiliation_from_dict(
     return None
 
 
-def _extract_single_affiliation(aff: Any) -> str | None:  # Any: raw API JSON value
+def _extract_single_affiliation(aff: object) -> str | None:
     """Extract affiliation string from a single item (str or dict)."""
     if isinstance(aff, str):
         return _strip_or_none(aff)
@@ -288,7 +286,7 @@ def normalize_to_surname_initial(name: str) -> str | None:
     return _surname_initial_from_tokens(tokens)
 
 
-def _collect_affiliation_values(aff_data: Any) -> list[str]:  # Any: raw API JSON value
+def _collect_affiliation_values(aff_data: object) -> list[str]:
     """Extract affiliation strings from a single author's affiliation field."""
     if isinstance(aff_data, list):
         return [str(a) for a in aff_data if a]
@@ -298,7 +296,7 @@ def _collect_affiliation_values(aff_data: Any) -> list[str]:  # Any: raw API JSO
 
 
 def collect_affiliations_from_authors(
-    authors: list[dict[str, Any]],  # Any: heterogeneous field values
+    authors: list[JsonDict],
 ) -> list[str]:
     """Collect raw affiliation strings from author dicts.
 

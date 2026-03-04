@@ -120,7 +120,7 @@ class AssayParametersTransformer(BaseChemblTransformer):
         self,
         record: BronzeRecord,
         primary_id: PrimaryId,
-    ) -> dict[str, Any]:  # Any: transformer record has heterogeneous values
+    ) -> JsonDict:  # Any: transformer record has heterogeneous values
         """Extract AssayParameters business data from bronze record.
 
         Args:

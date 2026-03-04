@@ -102,7 +102,7 @@ class ArrowDataConverter:
 
     def convert_records_to_arrow(
         self,
-        records: list[dict[str, Any]],  # Any: record/metadata values are heterogeneous
+        records: list[JsonDict],  # Any: record/metadata values are heterogeneous
         primary_keys: list[str] | None = None,
         column_order: list[str] | None = None,
     ) -> pa.Table:

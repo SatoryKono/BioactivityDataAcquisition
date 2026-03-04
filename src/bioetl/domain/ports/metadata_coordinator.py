@@ -89,7 +89,7 @@ class SilverMetadataInput:
     table_path: str
     primary_keys: list[str]
     mode: Any  # Any: SilverWriteMode - avoid circular import
-    records: list[dict[str, Any]] | None = None  # Any: heterogeneous record values
+    records: list[JsonDict] | None = None  # Any: heterogeneous record values
     total_records: int | None = None
     source_batch_ids: list[str] | None = None
     bronze_refs: Any | None = None  # Any: list[BronzeWriteResult...
@@ -153,9 +153,9 @@ class GoldMetadataInput:
     table_path: str
     table_name: str
     mode: Any  # Any: GoldWriteMode - avoid circular import
-    records: list[dict[str, Any]] | None = None  # Any: heterogeneous record values
+    records: list[JsonDict] | None = None  # Any: heterogeneous record values
     total_records: int | None = None
-    scd_config: dict[str, Any] | None = None  # Any: SCD2 config values
+    scd_config: JsonDict | None = None  # Any: SCD2 config values
     started_at: datetime | None = None  # ADR-029: Write start timestamp
     completed_at: datetime | None = None
     silver_refs: list[SilverRef] | None = None

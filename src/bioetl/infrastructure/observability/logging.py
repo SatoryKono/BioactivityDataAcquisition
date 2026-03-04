@@ -21,6 +21,7 @@ __all__ = ["StructlogLogger", "create_logger"]
 
 
 from typing import Any, Self
+from bioetl.domain.types import JsonDict
 from uuid import UUID
 
 import structlog
@@ -31,8 +32,8 @@ _EVENT_KWARG = "event"
 
 
 def _sanitize_event_kwargs(
-    kwargs: dict[str, Any],  # Any: structlog-compatible API
-) -> dict[str, Any]:  # Any: structlog-compatible API
+    kwargs: JsonDict,  # Any: structlog-compatible API
+) -> JsonDict:  # Any: structlog-compatible API
     """Drop kwargs that collide with structlog positional event parameter."""
     if _EVENT_KWARG in kwargs:
         sanitized = dict(kwargs)

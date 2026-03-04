@@ -40,7 +40,7 @@ from bioetl.domain.exceptions import (
     RetryExhaustedError,
 )
 from bioetl.domain.resilience import RetryConfig
-from bioetl.domain.types import HealthStatus
+from bioetl.domain.types import HealthStatus, JsonDict
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
@@ -206,7 +206,7 @@ class RetryingDataSourceDecorator:
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
         offset: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:  # Any: untyped API JSON record
+    ) -> AsyncIterator[JsonDict]:  # Any: untyped API JSON record
         """Fetch records with retry logic.
 
         Retries the entire fetch operation on recoverable errors.

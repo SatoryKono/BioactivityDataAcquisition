@@ -11,7 +11,7 @@ from deltalake import DeltaTable, write_deltalake  # noqa: F401
 from deltalake.exceptions import TableNotFoundError  # noqa: F401
 
 from bioetl.domain.medallion import GoldWriteMode
-from bioetl.domain.types import GoldRecord, RunID, ScdConfig
+from bioetl.domain.types import GoldRecord, JsonDict, RunID, ScdConfig
 from bioetl.infrastructure.storage.base_delta_writer import (
     BaseDeltaWriter,
     coerce_null_types_for_delta,  # noqa: F401
@@ -62,7 +62,7 @@ def _normalize_scd_config(
     primary_keys: list[str] | None,
 ) -> ScdConfig:
     """Normalize YAML scd_config keys to gold_writer expected format."""
-    out: dict[str, Any] = dict(scd_config)  # Any: ScdConfig is heterogeneous
+    out: JsonDict = dict(scd_config)  # Any: ScdConfig is heterogeneous
     if "business_key" not in out and primary_keys:
         out["business_key"] = (
             primary_keys[0] if len(primary_keys) == 1 else primary_keys

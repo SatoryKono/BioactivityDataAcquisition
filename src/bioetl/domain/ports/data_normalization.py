@@ -35,6 +35,7 @@ class DataNormalizationPort(Protocol):
 
     Example:
         >>> from bioetl.domain.services import DataNormalizationService
+from bioetl.domain.types import JsonDict
         >>> normalizer = DataNormalizationService()
         >>> normalizer.normalize_doi("10.1038/NATURE12373")
         '10.1038/nature12373'
@@ -208,7 +209,7 @@ class DataNormalizationPort(Protocol):
     def normalize_author_list(
         self,
         authors: list[str]
-        | list[dict[str, Any]]  # Any: port contract allows heterogeneous record values
+        | list[JsonDict]  # Any: port contract allows heterogeneous record values
         | str
         | None,  # Any: port contract allows heterogeneous record values
     ) -> str | None:
@@ -225,7 +226,7 @@ class DataNormalizationPort(Protocol):
     def normalize_author_keys(
         self,
         authors: list[str]
-        | list[dict[str, Any]]  # Any: port contract allows heterogeneous record values
+        | list[JsonDict]  # Any: port contract allows heterogeneous record values
         | str
         | None,  # Any: port contract allows heterogeneous record values
     ) -> str | None:
@@ -242,7 +243,7 @@ class DataNormalizationPort(Protocol):
     def normalize_affiliations(
         self,
         affiliations: list[str]
-        | list[dict[str, Any]]  # Any: port contract allows heterogeneous record values
+        | list[JsonDict]  # Any: port contract allows heterogeneous record values
         | None,  # Any: port contract allows heterogeneous record values
     ) -> str | None:
         """Extract, normalize, deduplicate affiliations to JSON string.
@@ -258,7 +259,7 @@ class DataNormalizationPort(Protocol):
     def extract_affiliations_from_authors(
         self,
         authors: list[
-            dict[str, Any]  # Any: port contract allows heterogeneous record values
+            JsonDict  # Any: port contract allows heterogeneous record values
         ],  # Any: port contract allows heterogeneous record values
     ) -> list[str]:
         """Extract unique affiliations from author objects.
