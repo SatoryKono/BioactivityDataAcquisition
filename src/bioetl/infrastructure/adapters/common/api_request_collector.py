@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import threading
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 from urllib.parse import urlparse
 
 if TYPE_CHECKING:
@@ -107,8 +107,8 @@ class APIRequestCollector:
         request_details = APIRequestDetails(
             endpoint=endpoint,
             base_url=base_url,
-            query_params=sanitized_params,  # type: ignore[arg-type]
-            http_method=method.upper(),  # type: ignore[arg-type]
+            query_params=sanitized_params,
+            http_method=self._normalize_method(method),
             response_size_bytes=response_size,
             request_duration_ms=duration_ms,
             status_code=status_code,
@@ -167,7 +167,7 @@ class APIRequestCollector:
 
     def to_source_metadata(
         self,
-        source_type: str = "api",
+        source_type: Literal["api", "csv", "parquet"] = "api",
         url: str | None = None,
         api_version: str | None = None,
         query_string: str | None = None,
@@ -198,7 +198,7 @@ class APIRequestCollector:
             avg_duration = 0.0
 
         return SourceMetadata(
-            type=source_type,  # type: ignore[arg-type]
+            type=source_type,
             url=url,
             query_string=query_string,
             api_version=api_version,
@@ -263,6 +263,17 @@ class APIRequestCollector:
                 # Convert other types to string
                 result[key] = str(value)
         return result
+
+    def _normalize_method(self, method: str) -> Literal["GET", "POST", "HEAD"]:
+        """Normalize HTTP method to SourceMetadata-compatible literal."""
+        normalized = method.upper()
+        if normalized == "GET":
+            return "GET"
+        if normalized == "POST":
+            return "POST"
+        if normalized == "HEAD":
+            return "HEAD"
+        return "GET"
 
     def _parse_int_header(self, value: str | None) -> int | None:
         """Parse integer header value."""

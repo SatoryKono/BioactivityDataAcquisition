@@ -243,6 +243,7 @@ class SilverWriterValidationMixin:
         critical_missing = [
             field for field in missing_fields if not field.startswith("_")
         ]
+        status: Literal["info", "warn", "critical"]
         if critical_missing:
             status = "critical"
         elif len(new_fields) > 3:

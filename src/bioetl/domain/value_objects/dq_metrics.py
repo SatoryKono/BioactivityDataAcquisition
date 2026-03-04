@@ -9,7 +9,7 @@ Implements REQ-DQ-001: DQ metrics in Silver metadata.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import ColumnMetrics, DQSummary, SchemaDrift
@@ -60,7 +60,7 @@ class SchemaDriftInfo:
         missing_fields: List of missing fields detected.
     """
 
-    status: str = "info"  # Literal["info", "warn", "critical"]
+    status: Literal["info", "warn", "critical"] = "info"
     new_fields: tuple[str, ...] = ()
     missing_fields: tuple[str, ...] = ()
 
@@ -80,7 +80,7 @@ class SchemaDriftInfo:
         from bioetl.domain.models.metadata import SchemaDrift
 
         return SchemaDrift(
-            status=self.status,  # type: ignore[arg-type]
+            status=self.status,
             new_fields=list(self.new_fields),
             missing_fields=list(self.missing_fields),
         )

@@ -395,7 +395,7 @@ def _build_enricher_detail(
 
     bool_df = pl.DataFrame(field_mismatch_bools)
 
-    def _row_to_json(row: dict) -> str | None:  # type: ignore[type-arg]
+    def _row_to_json(row: dict[str, object]) -> str | None:
         fields = [f for f, v in row.items() if v]
         if not fields:
             return None
@@ -433,8 +433,8 @@ def _combine_cv_details(
     cols = {f"_d{i}": s for i, s in enumerate(enricher_details)}
     detail_df = pl.DataFrame(cols)
 
-    def _merge_row(row: dict) -> str | None:  # type: ignore[type-arg]
-        parts = [v for v in row.values() if v is not None]
+    def _merge_row(row: dict[str, object]) -> str | None:
+        parts = [v for v in row.values() if isinstance(v, str) and v]
         if not parts:
             return None
         items = [json.loads(p) for p in parts]
@@ -479,7 +479,7 @@ def _compare_fuzzy(
     """Fuzzy comparison using Jaccard similarity on word sets."""
     import polars as pl
 
-    def _fuzzy_match(row: dict) -> bool:  # type: ignore[type-arg]
+    def _fuzzy_match(row: dict[str, object]) -> bool:
         s_val = row["seed"]
         e_val = row["enricher"]
         if s_val is None or e_val is None:

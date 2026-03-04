@@ -282,10 +282,11 @@ class FilteredDataSource(_SourceMetadataDelegationMixin):
         """Fetch with multi-column filtering (hybrid approach)."""
         self._ensure_filterable_adapter("Multi-column filtering")
         assert isinstance(self._data_source, FilterableDataSourcePort)
+        assert self._multi_filter_ids is not None
         fetched_count = 0
         async for record in self._data_source.fetch_multi_filtered(
             entity_type=entity_type,
-            filters=dict(self._multi_filter_ids),  # type: ignore[arg-type]
+            filters=dict(self._multi_filter_ids),
             limit=None,  # Don't limit server-side, we filter client-side
         ):
             if self._matches_valid_combination(record):
@@ -308,12 +309,13 @@ class FilteredDataSource(_SourceMetadataDelegationMixin):
                 "filter_field must be specified in InputFilterConfig "
                 "when filtering is enabled."
             )
+        assert self._filter_ids is not None
 
         # Check if we have fallback mapping (adapter implements FilterableDataSourcePort)
         if self._fallback_mapping:
             async for record in self._data_source.fetch_filtered_with_fallback(
                 entity_type=entity_type,
-                filter_ids=self._filter_ids,  # type: ignore[arg-type]
+                filter_ids=self._filter_ids,
                 filter_field=config_filter_field,
                 fallback_mapping=self._fallback_mapping,
                 limit=limit,
@@ -323,7 +325,7 @@ class FilteredDataSource(_SourceMetadataDelegationMixin):
             # Standard path without fallback
             async for record in self._data_source.fetch_filtered(
                 entity_type=entity_type,
-                filter_ids=self._filter_ids,  # type: ignore[arg-type]
+                filter_ids=self._filter_ids,
                 filter_field=config_filter_field,
                 limit=limit,
             ):

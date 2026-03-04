@@ -17,10 +17,41 @@ import pytest
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.record_processor import RecordProcessor
+from bioetl.composition.factories.services_factory import ServicesBuilder
 from bioetl.domain.config import DQConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.types import BatchID, RunID, RunType, ValidationResult
+
+
+def _create_record_processor(
+    *,
+    services,
+    context,
+    config,
+    transform_callback,
+    gold_filter_callback,
+    gold_transform_callback,
+    gold_validator,
+) -> RecordProcessor:
+    """Build RecordProcessor with composition-level dependency wiring."""
+    components = ServicesBuilder.create_batch_processing_components(
+        services=services,
+        context=context,
+        config=config,
+        error_classifier=ErrorClassifier(),
+        transform_callback=transform_callback,
+        gold_filter_callback=gold_filter_callback,
+        gold_transform_callback=gold_transform_callback,
+        gold_validator=gold_validator,
+    )
+    return RecordProcessor(
+        context=context,
+        batch_metrics=components.batch_metrics,
+        transformer=components.transformer,
+        writer=components.writer,
+        config=config,
+    )
 
 
 @pytest.fixture
@@ -140,9 +171,8 @@ class TestRunIdPropagation:
             table_config=TableConfig(primary_keys=["id"]),
         )
 
-        processor = RecordProcessor(
+        processor = _create_record_processor(
             services=mock_services,
-            error_classifier=ErrorClassifier(),
             context=pipeline_context,
             config=config,
             transform_callback=transform,
@@ -206,9 +236,8 @@ class TestRunIdPropagation:
             table_config=TableConfig(primary_keys=["id"]),
         )
 
-        processor = RecordProcessor(
+        processor = _create_record_processor(
             services=mock_services,
-            error_classifier=ErrorClassifier(),
             context=pipeline_context,
             config=config,
             transform_callback=transform,
@@ -279,9 +308,8 @@ class TestRunIdPropagation:
                 table_config=TableConfig(primary_keys=["id"]),
             )
 
-            processor = RecordProcessor(
+            processor = _create_record_processor(
                 services=mock_services,
-                error_classifier=ErrorClassifier(),
                 context=context,
                 config=config,
                 transform_callback=transform,

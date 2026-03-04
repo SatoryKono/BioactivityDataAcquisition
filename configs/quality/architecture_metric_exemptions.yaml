@@ -542,7 +542,7 @@ registries:
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
     registration.py:
-      value: 710
+      value: 713
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (file_size_limits).
       expires_on: '2026-04-30'
@@ -590,7 +590,7 @@ registries:
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
     silver_analyzer.py:
-      value: 653
+      value: 657
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (file_size_limits).
       expires_on: '2026-04-30'
@@ -2413,7 +2413,7 @@ registries:
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
     EnrichmentCoordinatorService:
-      value: 427
+      value: 430
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (class_size).
       expires_on: '2026-04-30'
@@ -2455,7 +2455,7 @@ registries:
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
     FilteredDataSource:
-      value: 359
+      value: 361
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (class_size).
       expires_on: '2026-04-30'

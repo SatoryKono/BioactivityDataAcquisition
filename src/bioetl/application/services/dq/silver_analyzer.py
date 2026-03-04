@@ -16,7 +16,7 @@ Follows RULES.md §3.1 DQ strategy for Silver layer.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import Any, cast
 
 import polars as pl
 import pyarrow as pa
@@ -249,7 +249,7 @@ class SilverDQAnalyzer:
         """
         # Convert PyArrow to Polars for consistent processing
         if isinstance(data, pa.Table):
-            df: pl.DataFrame = pl.from_arrow(data)  # type: ignore[assignment]
+            df = cast("pl.DataFrame", pl.from_arrow(data))
         else:
             df = data
 
@@ -483,14 +483,18 @@ class SilverDQAnalyzer:
                         mean_val = stats.mean()
                         std_val = stats.std()
                         median_val = stats.median()
-                        # Type narrowing: values are numeric due to dtype check above
+                        min_num = cast("int | float | None", min_val)
+                        max_num = cast("int | float | None", max_val)
+                        mean_num = cast("int | float | None", mean_val)
+                        std_num = cast("int | float | None", std_val)
+                        median_num = cast("int | float | None", median_val)
                         numeric_cols[col] = NumericDistribution(
-                            min=float(min_val) if min_val is not None else None,  # type: ignore[arg-type]
-                            max=float(max_val) if max_val is not None else None,  # type: ignore[arg-type]
-                            mean=float(mean_val) if mean_val is not None else None,  # type: ignore[arg-type]
-                            std=float(std_val) if std_val is not None else None,  # type: ignore[arg-type]
-                            median=float(median_val)  # type: ignore[arg-type]
-                            if median_val is not None
+                            min=float(min_num) if min_num is not None else None,
+                            max=float(max_num) if max_num is not None else None,
+                            mean=float(mean_num) if mean_num is not None else None,
+                            std=float(std_num) if std_num is not None else None,
+                            median=float(median_num)
+                            if median_num is not None
                             else None,
                         )
                 except _SILVER_PROFILE_ERRORS:

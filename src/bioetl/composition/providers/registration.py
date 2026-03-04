@@ -7,7 +7,7 @@ Config helpers extracted to _config_helpers.py per audit-package-structure-2026-
 from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.idmapping_data_source import IDMappingDataSource
 from bioetl.application.core.publication_term_data_source import (
@@ -134,14 +134,17 @@ def _create_pubchem_adapter(
 
     rate_limit = _get_rate_limit_from_config("pubchem")
     cb_config = _get_circuit_breaker_from_config("pubchem")
-
-    rate = kwargs.pop("rate", rate_limit.rate)
-    capacity = kwargs.pop("capacity", rate_limit.capacity)
-    cb_threshold = kwargs.pop("circuit_breaker_threshold", cb_config.failure_threshold)
-    cb_timeout = kwargs.pop("circuit_breaker_timeout", cb_config.recovery_timeout)
-    max_workers = kwargs.pop("max_workers", 4)
-    strict_error_handling = kwargs.pop("strict_error_handling", False)
-    metrics = kwargs.pop("metrics", None)
+    rate = cast(float, kwargs.pop("rate", rate_limit.rate))
+    capacity = cast(int, kwargs.pop("capacity", rate_limit.capacity))
+    cb_threshold = cast(
+        int, kwargs.pop("circuit_breaker_threshold", cb_config.failure_threshold)
+    )
+    cb_timeout = cast(
+        int, kwargs.pop("circuit_breaker_timeout", cb_config.recovery_timeout)
+    )
+    max_workers = cast(int, kwargs.pop("max_workers", 4))
+    strict_error_handling = cast(bool, kwargs.pop("strict_error_handling", False))
+    metrics = cast("MetricsPort | None", kwargs.pop("metrics", None))
 
     return PubChemAdapter(
         logger=logger,
@@ -165,24 +168,10 @@ def _create_pubchem_data_source(
     metrics: MetricsPort | None = None,
     pipeline_name: str = "unknown",
 ) -> DataSourcePort:
-    """Create PubChem data source with optional CSV filtering.
+    """Create PubChem data source with optional filtering.
 
-    PubChem uses a synchronous adapter with its own ThreadPoolExecutor for
-    concurrent compound lookups. Dependencies (TokenBucket, CircuitBreaker,
-    ThreadPoolExecutor) are assembled in ``_create_pubchem_adapter`` following
-    the Composition Root pattern instead of the generic DataSourceFactory path.
-
-    Args:
-        settings: Application settings (used for strict_error_handling flag).
-        pipeline_config: Pipeline configuration from YAML.
-        logger: LoggerPort for structured logging.
-        filter_config: Optional filter configuration for CSV-based CID filtering.
-        metrics: Optional MetricsPort for recording adapter metrics.
-        pipeline_name: Pipeline name for metrics labels.
-
-    Returns:
-        Configured DataSourcePort with optional filtering wrapper.
-
+    PubChem adapter dependencies are assembled in `_create_pubchem_adapter`
+    (Composition Root), then optionally wrapped with input filtering.
     """
     data_source = _create_pubchem_adapter(
         logger=logger,
