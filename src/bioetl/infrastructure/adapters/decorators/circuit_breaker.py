@@ -32,7 +32,8 @@ from __future__ import annotations
 
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Self
+from types import TracebackType
+from typing import TYPE_CHECKING, Self
 
 from bioetl.domain.exceptions import BioETLError, CircuitBreakerOpenError
 from bioetl.domain.types import CircuitBreakerState, HealthStatus, JsonDict
@@ -99,7 +100,7 @@ class CircuitBreakerDataSourceDecorator:
         self,
         exc_type: type[BaseException] | None,
         exc_val: BaseException | None,
-        exc_tb: Any,  # Any: traceback type from __aexit__ protocol
+        exc_tb: TracebackType | None,
     ) -> None:
         """Exit async context by delegating to wrapped data source."""
         await self.data_source.__aexit__(exc_type, exc_val, exc_tb)

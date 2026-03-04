@@ -14,13 +14,21 @@ from bioetl.domain.services._author_helpers import (
     collect_affiliations_from_authors,
     deduplicate_case_insensitive,
     extract_affiliation_strings,
+    hash_author_name,
     normalize_affiliation_string,
     normalize_to_surname_initial,
     parse_author_names,
+    parse_author_string,
+    parse_delimited_authors,
 )
 from bioetl.domain.types import JsonDict
 
-# Note: hash_author_name import removed - no longer hashing author names
+
+def _filter_string_items(
+    items: list[Any],
+) -> list[str]:  # Any: input items heterogeneous
+    """Filter list to non-empty stripped strings."""
+    return [a.strip() for a in items if isinstance(a, str) and a.strip()]
 
 
 @dataclass(frozen=True, slots=True)
@@ -33,6 +41,41 @@ class AuthorNormalizationService:
     - CrossRef: dicts with ORCID and affiliations
     - OpenAlex/SemanticScholar: authorships with institutions
     """
+
+    def normalize_authors(
+        self, authors: list[str] | str | None, salt: str
+    ) -> str | None:
+        """Parse, hash, and serialize author names. Returns JSON string or None.
+
+        Args:
+            authors: Author data in any supported format (list, JSON string, or delimited).
+            salt: Cryptographic salt for PII hashing.
+
+        Returns:
+            JSON string of hashed author names, or None if no authors found.
+        """
+        author_list = self.parse_authors_to_list(authors)
+        if not author_list:
+            return None
+        hashed = [hash_author_name(name, salt) for name in author_list]
+        return serialize_to_json(hashed, ensure_ascii=True)
+
+    def parse_authors_to_list(self, authors: list[str] | str | None) -> list[str]:
+        """Parse various author formats into a list of names.
+
+        Args:
+            authors: Author data (list, JSON/delimited string, or None).
+
+        Returns:
+            List of author name strings.
+        """
+        if authors is None:
+            return []
+        if isinstance(authors, list):
+            return _filter_string_items(authors)
+        if isinstance(authors, str) and authors.strip():
+            return parse_author_string(authors.strip())
+        return []
 
     def normalize_author_list(
         self,

@@ -14,8 +14,10 @@ from bioetl.domain.types import RunID
 if TYPE_CHECKING:
     from pandera.polars import DataFrameSchema
 
+    from bioetl.domain.models.metadata import GoldMetadata
     from bioetl.domain.ports import (
         AuditPort,
+        GoldMetadataInput,
         LoggerPort,
         MetadataCoordinatorPort,
         MetadataWriterPort,
@@ -312,7 +314,7 @@ class GoldWriterMetadataMixin:
         table_name: str,
         records: list[GoldRecord],
         schema: DataFrameSchema | None,
-    ) -> Any:  # Any: GoldMetadataInput import is runtime-only
+    ) -> GoldMetadataInput:
         """Build metadata input payload for merged Gold writes."""
         from bioetl.domain.ports import GoldMetadataInput
 
