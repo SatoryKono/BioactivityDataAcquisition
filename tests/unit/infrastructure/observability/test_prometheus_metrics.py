@@ -182,6 +182,28 @@ class TestRequiredMetricsSmoke:
                 f"Required CB gauge '{metric}' not found in GAUGES registry"
             )
 
+    def test_required_adapter_operational_metrics_registered(self):
+        """Verify adapter p95/fallback/error taxonomy metrics are registered."""
+        required_counters = [
+            "adapter_fallback_attempts_total",
+            "adapter_fallback_hits_total",
+            "adapter_error_taxonomy_total",
+        ]
+        required_gauges = [
+            "adapter_request_p95_seconds",
+            "adapter_fallback_hit_rate",
+        ]
+
+        for metric in required_counters:
+            assert metric in COUNTERS, (
+                f"Required adapter counter '{metric}' not found in COUNTERS registry"
+            )
+
+        for metric in required_gauges:
+            assert metric in GAUGES, (
+                f"Required adapter gauge '{metric}' not found in GAUGES registry"
+            )
+
     def test_metrics_have_correct_labels(self):
         """Verify metrics have expected label names."""
         from bioetl.infrastructure.observability.metrics import (

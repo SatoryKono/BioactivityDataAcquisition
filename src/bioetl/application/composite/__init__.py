@@ -16,8 +16,6 @@ See ADR-026 for architectural decisions.
 
 from __future__ import annotations
 
-import warnings
-
 from bioetl.application.composite.checkpoint import (
     CompositeCheckpointManager,
     CompositeCheckpointService,
@@ -42,31 +40,8 @@ from bioetl.application.composite.runner import (
     CompositePipelineRunnerService,
 )
 
-_DEPRECATED_CLASS_ALIASES: dict[str, type[object]] = {
-    "ColumnOrderer": ColumnOrdererService,
-    "ColumnRenamer": ColumnRenamerService,
-    "DependencyCoordinator": DependencyCoordinatorService,
-    "EnrichmentCoordinator": EnrichmentCoordinatorService,
-}
-
-
-def __getattr__(name: str) -> object:
-    """Resolve deprecated class aliases lazily."""
-    replacement = _DEPRECATED_CLASS_ALIASES.get(name)
-    if replacement is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    warnings.warn(
-        f"{name} is deprecated; use {replacement.__name__}.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return replacement
-
-
 __all__ = [
-    "ColumnOrderer",
     "ColumnOrdererService",
-    "ColumnRenamer",
     "ColumnRenamerService",
     "CompositeCheckpointManager",
     "CompositeCheckpointService",
@@ -75,9 +50,7 @@ __all__ = [
     "CompositePipelineRunnerService",
     "CompositePreflightValidationService",
     "CompositePreflightValidator",
-    "DependencyCoordinator",
     "DependencyCoordinatorService",
-    "EnrichmentCoordinator",
     "EnrichmentCoordinatorService",
     "KeyExtractorService",
     "MergeService",

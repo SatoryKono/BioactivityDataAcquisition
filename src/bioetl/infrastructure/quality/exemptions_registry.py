@@ -10,8 +10,11 @@ Exemptions are stored in a YAML registry with mandatory metadata:
 from __future__ import annotations
 
 __all__ = [
+    "build_module_path_key",
     "get_registry_values",
     "load_exemptions_registry",
+    "resolve_registry_value",
+    "validate_exemption_key_normalization",
     "validate_exemptions_registry",
 ]
 
@@ -34,6 +37,7 @@ _PLACEHOLDER_OWNER_RE = re.compile(
     r"^(todo|tbd|unknown|none|unassigned|team)$",
     re.IGNORECASE,
 )
+_SRC_ROOT_PREFIX = "src/bioetl/"
 
 
 def _project_root() -> Path:
@@ -46,6 +50,48 @@ def _resolve_registry_path(path: Path | str | None = None) -> Path:
     if candidate.is_absolute():
         return candidate
     return _project_root() / candidate
+
+
+def _normalize_path_text(value: str) -> str:
+    return value.replace("\\", "/").lstrip("./")
+
+
+def _is_module_path_key(value: str) -> bool:
+    normalized = _normalize_path_text(value)
+    return normalized.startswith(_SRC_ROOT_PREFIX) and normalized.endswith(".py")
+
+
+def build_module_path_key(
+    module_path: Path | str,
+    *,
+    src_root: Path | str | None = None,
+) -> str:
+    """Build canonical registry key for a module path.
+
+    Canonical format is repository-relative POSIX path:
+    ``src/bioetl/<layer>/.../<module>.py``.
+    """
+    text = _normalize_path_text(str(module_path))
+    if _is_module_path_key(text):
+        return text
+
+    src_root_path = (
+        _project_root() / "src" if src_root is None else Path(src_root).resolve()
+    )
+    path_obj = Path(module_path)
+    if not path_obj.is_absolute():
+        path_obj = path_obj.resolve()
+
+    if path_obj.is_relative_to(src_root_path):
+        rel = path_obj.relative_to(src_root_path).as_posix()
+        return f"src/{rel}"
+
+    if text.startswith("bioetl/") and text.endswith(".py"):
+        return f"src/{text}"
+
+    raise ValueError(
+        f"module_path must resolve under src/ or already be canonical ({module_path!r})"
+    )
 
 
 def load_exemptions_registry(
@@ -84,6 +130,87 @@ def get_registry_values(
             )
         values[name] = entry["value"]
     return values
+
+
+def resolve_registry_value(
+    values: dict[str, Any],  # Any: check-specific thresholds vary by registry
+    *,
+    module_path: Path | str,
+    symbol_name: str | None = None,
+    legacy_name: str | None = None,
+) -> Any | None:  # Any: dynamic payload or structural mixin boundary
+    """Resolve exemption value using canonical path key with dual-read fallback.
+
+    Lookup priority:
+    1) ``src/bioetl/.../module.py::symbol`` (when ``symbol_name`` is provided)
+    2) ``src/bioetl/.../module.py``
+    3) legacy symbol key (``symbol_name``)
+    4) explicit ``legacy_name`` (typically basename)
+    5) basename of ``module_path``
+
+    This keeps one-release compatibility during key migration from basename/symbol
+    to path-aware identifiers.
+    """
+    module_key = build_module_path_key(module_path)
+    candidates: list[str] = []
+    if symbol_name:
+        candidates.append(f"{module_key}::{symbol_name}")
+    candidates.append(module_key)
+    if symbol_name:
+        candidates.append(symbol_name)
+    if legacy_name:
+        candidates.append(legacy_name)
+    candidates.append(Path(module_key).name)
+
+    for candidate in candidates:
+        if candidate in values:
+            return values[candidate]
+    return None
+
+
+def validate_exemption_key_normalization(
+    path: Path | str | None = None,
+) -> list[str]:
+    """Validate that file-size exemptions use canonical path keys.
+
+    During transition, other registries may still use symbol-only keys. This
+    validator focuses on collision-prone ``file_size_limits`` entries.
+    """
+    raw = load_exemptions_registry(path)
+    registries = raw.get("registries", {})
+    if not isinstance(registries, dict):
+        return ["registries: expected mapping"]
+
+    file_size = registries.get("file_size_limits", {})
+    if not isinstance(file_size, dict):
+        return ["registries.file_size_limits: expected mapping"]
+
+    errors: list[str] = []
+    src_root = _project_root() / "src"
+
+    for key in sorted(file_size):
+        if not isinstance(key, str) or not key.strip():
+            errors.append("file_size_limits: key must be non-empty string")
+            continue
+
+        normalized = _normalize_path_text(key)
+        if not _is_module_path_key(normalized):
+            errors.append(
+                f"file_size_limits.{key}: expected canonical path key "
+                f"'{_SRC_ROOT_PREFIX}.../*.py'"
+            )
+            continue
+
+        module_path = _project_root() / normalized
+        if not module_path.exists():
+            errors.append(f"file_size_limits.{key}: target file does not exist")
+            continue
+        if not module_path.is_relative_to(src_root):
+            errors.append(
+                f"file_size_limits.{key}: target path must be inside src/ tree"
+            )
+
+    return errors
 
 
 def _validate_required_fields(
@@ -276,4 +403,5 @@ def validate_exemptions_registry(
                 expired_entries,
             )
 
+    metadata_errors.extend(validate_exemption_key_normalization(path))
     return metadata_errors, expired_entries

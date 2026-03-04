@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-import warnings
 from collections.abc import Callable, Sequence
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
@@ -44,7 +43,7 @@ _DEPENDENCY_EXECUTION_ERRORS = (
 )
 
 
-__all__ = ["DependencyCoordinator", "DependencyCoordinatorService"]
+__all__ = ["DependencyCoordinatorService"]
 
 
 class DependencyCoordinatorService:
@@ -318,19 +317,3 @@ class DependencyCoordinatorService:
                 error_message=str(e),
                 duration_seconds=duration,
             )
-
-
-if TYPE_CHECKING:
-    DependencyCoordinator = DependencyCoordinatorService
-
-
-def __getattr__(name: str) -> object:
-    """Resolve deprecated compatibility aliases lazily."""
-    if name == "DependencyCoordinator":
-        warnings.warn(
-            "DependencyCoordinator is deprecated; use DependencyCoordinatorService.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return DependencyCoordinatorService
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

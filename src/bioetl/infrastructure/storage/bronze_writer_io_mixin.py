@@ -237,5 +237,4 @@ class BronzeWriterIOMixin:
         }
 
 
-
 __all__ = ["BronzeWriterIOMixin"]

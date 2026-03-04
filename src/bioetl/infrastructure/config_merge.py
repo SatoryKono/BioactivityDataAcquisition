@@ -50,28 +50,7 @@ def config_merge(
     concat_list_merger: ListMergeFn | None = None,
     list_merger_resolver: ListMergeResolver | None = None,
 ) -> dict[str, Any]:  # Any: YAML config values are heterogeneous
-    """Deep merge two config mappings.
-
-    Rules:
-    - Scalars: override wins.
-    - Dicts: recursive merge.
-    - Lists: strategy-based merge
-      1) `list_merger_resolver(key)` if provided and returns merger
-      2) `concat_list_merger` when key in `list_concat_keys`
-      3) override wins
-
-    Returns a new object; inputs are never mutated.
-
-    Args:
-        base: Base.
-        override: Override.
-        list_concat_keys: List concat keys.
-        concat_list_merger: Concat list merger.
-        list_merger_resolver: List merger resolver.
-
-    Returns:
-        Result dictionary.
-    """
+    """Deep-merge two config mappings with optional key-specific list strategies."""
     result = copy.deepcopy(dict(base))
     concat_merger = concat_list_merger or _default_concat_list_merger
 

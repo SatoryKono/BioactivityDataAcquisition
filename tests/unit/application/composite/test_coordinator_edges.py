@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import warnings
 from unittest.mock import AsyncMock, MagicMock
 
 import polars as pl
@@ -220,27 +219,3 @@ def test_process_results_converts_exceptions_to_failed_result(
     result = processed["crossref_publication"]
     assert result.status == EnrichmentStatus.FAILED
     assert result.error_message == "boom"
-
-
-@pytest.mark.unit
-def test_getattr_enrichment_coordinator_returns_alias_with_warning() -> None:
-    import bioetl.application.composite.coordinator as module
-
-    with warnings.catch_warnings(record=True) as caught:
-        warnings.simplefilter("always")
-        alias = module.__getattr__("EnrichmentCoordinator")
-
-    assert alias is EnrichmentCoordinatorService
-    assert any(
-        isinstance(item.message, DeprecationWarning)
-        and "deprecated" in str(item.message).lower()
-        for item in caught
-    )
-
-
-@pytest.mark.unit
-def test_getattr_unknown_raises_attribute_error() -> None:
-    import bioetl.application.composite.coordinator as module
-
-    with pytest.raises(AttributeError):
-        module.__getattr__("UnknownAlias")

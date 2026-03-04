@@ -62,47 +62,20 @@ class APIRequestCollector:
         retry_after_seconds: float | None = None,
         timestamp: datetime | None = None,
     ) -> None:
-        """Record a completed API request.
-
-        Args:
-            url: Full request URL (base URL + endpoint + query string).
-            method: HTTP method (GET, POST, HEAD).
-            response_size: Size of response body in bytes.
-            duration_ms: Request duration in milliseconds.
-            status_code: HTTP response status code.
-            params: Query parameters dict (alternative to parsing from URL).
-            rate_limit_remaining: Value of X-RateLimit-Remaining header.
-            rate_limit_limit: Value of X-RateLimit-Limit header.
-            rate_limit_reset: Parsed X-RateLimit-Reset timestamp.
-            retry_after_seconds: Value of Retry-After header in seconds.
-            timestamp: UTC timestamp when request was made. Defaults to now.
-        """
+        """Record normalized request telemetry (URL, timing, status, and rate-limit data)."""
         parsed = urlparse(url)
         base_url = f"{parsed.scheme}://{parsed.netloc}"
         endpoint = parsed.path
 
-        # Parse query params from URL if not provided
         if params is None:
             params = self._parse_query_params(parsed.query)
-        # Sanitize params to ensure no sensitive data (API keys, etc.)
         sanitized_params = self._sanitize_params(params)
-
-        # Build rate limit info if any headers present
-        rate_limit: RateLimitInfo | None = None
-        if any(
-            [
-                rate_limit_remaining,
-                rate_limit_limit,
-                rate_limit_reset,
-                retry_after_seconds,
-            ]
-        ):
-            rate_limit = RateLimitInfo(
-                remaining=rate_limit_remaining,
-                limit=rate_limit_limit,
-                reset_at=rate_limit_reset,
-                retry_after_seconds=retry_after_seconds,
-            )
+        rate_limit = self._build_rate_limit_info(
+            rate_limit_remaining=rate_limit_remaining,
+            rate_limit_limit=rate_limit_limit,
+            rate_limit_reset=rate_limit_reset,
+            retry_after_seconds=retry_after_seconds,
+        )
 
         request_details = APIRequestDetails(
             endpoint=endpoint,
@@ -118,6 +91,31 @@ class APIRequestCollector:
 
         with self._lock:
             self._requests.append(request_details)
+
+    @staticmethod
+    def _build_rate_limit_info(
+        *,
+        rate_limit_remaining: int | None,
+        rate_limit_limit: int | None,
+        rate_limit_reset: datetime | None,
+        retry_after_seconds: float | None,
+    ) -> RateLimitInfo | None:
+        """Build RateLimitInfo if at least one rate-limit attribute is present."""
+        if not any(
+            (
+                rate_limit_remaining,
+                rate_limit_limit,
+                rate_limit_reset,
+                retry_after_seconds,
+            )
+        ):
+            return None
+        return RateLimitInfo(
+            remaining=rate_limit_remaining,
+            limit=rate_limit_limit,
+            reset_at=rate_limit_reset,
+            retry_after_seconds=retry_after_seconds,
+        )
 
     def record_from_response(
         self,

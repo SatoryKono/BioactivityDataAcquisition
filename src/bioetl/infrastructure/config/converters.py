@@ -73,28 +73,16 @@ def yaml_config_to_domain(
     yaml_config: PipelineYamlConfig,
     resolved_dq_config: DQConfig | None = None,
 ) -> PipelineConfig:
-    """Map PipelineYamlConfig to domain PipelineConfig.
-
-    Args:
-        yaml_config: Configuration for yaml.
-        resolved_dq_config: Configuration for resolved dq.
-
-    Returns:
-        The PipelineConfig result.
-    """
+    """Map validated YAML schema config to immutable domain PipelineConfig."""
     source_fields = _extract_source_fields(yaml_config)
     write_mode, gold_write_mode = _extract_write_modes(yaml_config)
     silver_filters = _build_silver_filters(yaml_config)
     gold_filters = _build_gold_filters(yaml_config)
-
-    on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error"
-    if yaml_config.sink:
-        silver_sink = yaml_config.sink.get("silver")
-        if silver_sink:
-            on_schema_mismatch = silver_sink.on_schema_mismatch
-
+    silver_sink = yaml_config.sink.get("silver")
+    on_schema_mismatch: Literal["error", "evolve", "ignore"] = (
+        silver_sink.on_schema_mismatch if silver_sink else "error"
+    )
     dq_config = resolved_dq_config or dq_overrides_to_domain(yaml_config)
-
     transform_version = yaml_config.transform.version
     transform_steps = tuple(yaml_config.transform.steps)
     column_groups = tuple(

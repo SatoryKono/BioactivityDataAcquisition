@@ -54,6 +54,7 @@ from bioetl.domain.ports.dq_report import (
     GoldDQAnalyzerPort,
     SilverDQAnalyzerPort,
 )
+from bioetl.domain.ports.fallback_policy import FallbackPolicyPort
 from bioetl.domain.ports.filtering import InputFilterPort
 from bioetl.domain.ports.health_check import (
     HealthCheckPort,
@@ -123,6 +124,7 @@ __all__ = [
     "DataNormalizationPort",
     "DataSourcePort",
     "DeltaReaderPort",
+    "FallbackPolicyPort",
     "FilterableDataSourcePort",
     "GoldDQAnalyzerPort",
     "GoldDQConfigPort",

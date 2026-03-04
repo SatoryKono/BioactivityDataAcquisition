@@ -126,5 +126,4 @@ class BatchMemoryManagerService:
         return current_size
 
 
-
 __all__ = ["BatchMemoryManagerService"]

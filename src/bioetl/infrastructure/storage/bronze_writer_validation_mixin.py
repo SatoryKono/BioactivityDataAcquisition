@@ -67,5 +67,4 @@ class BronzeWriterValidationMixin:
             yield record
 
 
-
 __all__ = ["BronzeWriterValidationMixin"]

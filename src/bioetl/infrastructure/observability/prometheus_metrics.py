@@ -14,7 +14,12 @@ from bioetl.domain.ports import MetricsPort
 from bioetl.infrastructure.observability.metrics import (
     ADAPTER_BATCH_SIZE,
     ADAPTER_DROPPED_DUPLICATES_TOTAL,
+    ADAPTER_ERROR_TAXONOMY_TOTAL,
+    ADAPTER_FALLBACK_ATTEMPTS_TOTAL,
+    ADAPTER_FALLBACK_HIT_RATE,
+    ADAPTER_FALLBACK_HITS_TOTAL,
     ADAPTER_REQUEST_DURATION_SECONDS,
+    ADAPTER_REQUEST_P95_SECONDS,
     ADAPTER_REQUESTS_TOTAL,
     ARCHIVE_DURATION_SECONDS,
     ARCHIVE_FILES_TOTAL,
@@ -148,6 +153,9 @@ COUNTERS = {
     "transform_errors_total": TRANSFORM_ERRORS_TOTAL,
     "adapter_requests_total": ADAPTER_REQUESTS_TOTAL,
     "adapter_dropped_duplicates_total": ADAPTER_DROPPED_DUPLICATES_TOTAL,
+    "adapter_fallback_attempts_total": ADAPTER_FALLBACK_ATTEMPTS_TOTAL,
+    "adapter_fallback_hits_total": ADAPTER_FALLBACK_HITS_TOTAL,
+    "adapter_error_taxonomy_total": ADAPTER_ERROR_TAXONOMY_TOTAL,
     "data_source_retries_total": DATA_SOURCE_RETRIES_TOTAL,
     "data_source_retry_exhausted_total": DATA_SOURCE_RETRY_EXHAUSTED_TOTAL,
     "health_check_success_total": HEALTH_CHECK_SUCCESS_TOTAL,
@@ -175,6 +183,8 @@ GAUGES = {
     "preflight_medallion_policy_valid": PREFLIGHT_MEDALLION_POLICY_VALID,
     "preflight_config_errors_total": PREFLIGHT_CONFIG_ERRORS_TOTAL,
     "provider_health_status": PROVIDER_HEALTH_STATUS,
+    "adapter_request_p95_seconds": ADAPTER_REQUEST_P95_SECONDS,
+    "adapter_fallback_hit_rate": ADAPTER_FALLBACK_HIT_RATE,
     "bioetl_rate_limiter_tokens_available": RATE_LIMITER_TOKENS_AVAILABLE,
 }
 

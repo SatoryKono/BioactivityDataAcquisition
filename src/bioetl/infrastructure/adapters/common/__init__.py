@@ -11,6 +11,10 @@ from bioetl.infrastructure.adapters.common.api_request_collector import (
 from bioetl.infrastructure.adapters.common.base_title_fallback import (
     BaseTitleFallbackHandler,
 )
+from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
+    FallbackFetchOrchestratorService,
+    FallbackFetchRequest,
+)
 from bioetl.infrastructure.adapters.common.fetch_retry_policy import (
     is_retry_exhausted_error,
     run_fetch_with_fallback_policy,
@@ -27,6 +31,8 @@ from bioetl.infrastructure.adapters.common.title_matching import (
 __all__ = [
     "APIRequestCollector",
     "BaseTitleFallbackHandler",
+    "FallbackFetchOrchestratorService",
+    "FallbackFetchRequest",
     "is_retry_exhausted_error",
     "normalize_title",
     "run_fetch_with_fallback_policy",

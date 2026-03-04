@@ -203,21 +203,7 @@ class MemoryMonitor:
         return stats.percent_used >= self.config.memory_pressure_threshold
 
     def get_recommended_batch_size(self, current_batch_size: int) -> int:
-        """Get recommended batch size based on memory pressure.
-
-        Implements adaptive batch sizing:
-        - If under memory pressure, reduces batch size by 50%
-        - If pressure persists for 3+ checks, reduces more aggressively
-        - Never goes below min_batch_size
-        - Gradually increases batch size when pressure is relieved
-
-        Args:
-            current_batch_size: Current batch size.
-
-        Returns:
-            Recommended batch size (may be smaller if under pressure).
-
-        """
+        """Return adaptive batch size recommendation based on current memory pressure."""
         if not self.config.enable_adaptive_sizing:
             return current_batch_size
 

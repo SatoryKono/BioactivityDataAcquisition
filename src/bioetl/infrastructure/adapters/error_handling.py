@@ -30,12 +30,13 @@ from bioetl.domain.exceptions import (
     RateLimitExceededError,
     ServiceUnavailableError,
 )
+from bioetl.domain.ports import NoOpMetrics
 from bioetl.domain.types import ErrorType
 
 if TYPE_CHECKING:
     from httpx import Response
 
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort
 
 
 class ErrorCategory(StrEnum):
@@ -132,15 +133,18 @@ class ErrorService:
         self,
         logger: LoggerPort,
         classifier: ErrorClassifier | None = None,
+        metrics: MetricsPort | None = None,
     ) -> None:
         """Initialize ErrorService.
 
         Args:
             logger: LoggerPort instance for structured logging.
             classifier: Optional ErrorClassifier. Defaults to new instance.
+            metrics: Optional MetricsPort for taxonomy counters.
         """
         self._logger = logger
         self._classifier = classifier or ErrorClassifier()
+        self._metrics = metrics if metrics is not None else NoOpMetrics()
 
     def classify_http_error(
         self,
@@ -307,6 +311,16 @@ class ErrorService:
             error=str(error),
             error_class=type(error).__name__,
             **error_context.extra,
+        )
+        self._metrics.increment_counter(
+            "adapter_error_taxonomy_total",
+            1,
+            {
+                "provider": provider,
+                "operation": operation,
+                "error_category": error_category.value,
+                "error_type": error_type.value,
+            },
         )
 
         return error_context

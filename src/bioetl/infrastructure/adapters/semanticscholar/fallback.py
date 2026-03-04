@@ -135,17 +135,7 @@ class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):
     async def _search_by_title(
         self, title: str
     ) -> dict[str, Any] | None:  # Any: untyped API JSON record
-        """Search for publication by title.
-
-        Uses GET /paper/search with query for best title match.
-        Validates results using title matching to reduce false positives.
-
-        Args:
-            title: Publication title to search for.
-
-        Returns:
-            First matching publication or None.
-        """
+        """Search Semantic Scholar by title and return best matching record."""
         try:
             cleaned_title = self._escape_title_for_search(title)
 

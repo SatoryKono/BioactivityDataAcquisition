@@ -126,3 +126,41 @@ class TestAdapterMetrics:
         calls = mock_metrics.observe_histogram.call_args_list
         assert calls[0][0][2]["provider"] == "chembl"
         assert calls[1][0][2]["provider"] == "uniprot"
+
+    def test_measure_request_updates_p95_gauge(self):
+        """Rolling request p95 should be updated after request completion."""
+        mock_metrics = MagicMock()
+        adapter_metrics = AdapterMetrics(metrics=mock_metrics, provider="chembl")
+
+        with adapter_metrics.measure_request("/activity"):
+            pass
+
+        mock_metrics.set_gauge.assert_called_once()
+        call_args = mock_metrics.set_gauge.call_args
+        assert call_args[0][0] == "adapter_request_p95_seconds"
+        assert call_args[0][2] == {"provider": "chembl", "endpoint": "/activity"}
+        assert call_args[0][1] >= 0.0
+
+    def test_record_fallback_outcome_records_counters_and_hit_rate(self):
+        """Fallback attempts/hits and hit-rate should be emitted consistently."""
+        mock_metrics = MagicMock()
+        adapter_metrics = AdapterMetrics(metrics=mock_metrics, provider="pubmed")
+
+        adapter_metrics.record_fallback_outcome(
+            "fetch_filtered_with_fallback",
+            candidates=4,
+            hits=3,
+        )
+
+        assert mock_metrics.increment_counter.call_count == 2
+        attempt_call = mock_metrics.increment_counter.call_args_list[0]
+        hit_call = mock_metrics.increment_counter.call_args_list[1]
+        assert attempt_call[0][0] == "adapter_fallback_attempts_total"
+        assert attempt_call[0][1] == 4
+        assert hit_call[0][0] == "adapter_fallback_hits_total"
+        assert hit_call[0][1] == 3
+        mock_metrics.set_gauge.assert_called_once_with(
+            "adapter_fallback_hit_rate",
+            0.75,
+            {"provider": "pubmed", "operation": "fetch_filtered_with_fallback"},
+        )

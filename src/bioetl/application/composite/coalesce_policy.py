@@ -232,5 +232,3 @@ class CoalescePolicyService:
             return f"{provider}.{entity}."
         except ValueError:
             return None
-
-

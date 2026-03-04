@@ -46,35 +46,12 @@ class ChemblFetchMultiFilterMixin:
         filters: dict[str, list[str]],
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch records from ChEMBL with multiple filter fields (AND logic).
-
-        Implements FilterableDataSourcePort.fetch_multi_filtered().
-
-        Makes requests with multiple __in parameters, e.g.:
-        ?molecule_chembl_id__in=CHEMBL25,CHEMBL26&document_chembl_id__in=CHEMBL1123
-
-        ChEMBL API returns records matching ALL filter conditions (AND logic).
-        Supports automatic batching and URL length validation (1000 char limit).
-
-        Args:
-            entity_type: Type of entity to fetch
-            filters: Mapping from filter_field to list of IDs
-            limit: Maximum number of records to fetch
-
-        Yields:
-            Dictionary records matching ALL filter criteria
-
-        Returns:
-            Async iterator yielding fetched records.
-        """
+        """Fetch ChEMBL data with AND-logic multi-field filtering and batching."""
         if not filters:
             return
-
         url = self._mapper.get_resource_url(entity_type)
         pk_field = self._get_api_pk_field(entity_type)
         batch_size = self._determine_multi_filter_batch_size(url, filters, entity_type)
-
-        # Prepare batches for each filter field
         filter_keys = list(filters.keys())
         api_filter_keys = [
             self._normalize_filter_field(entity_type, k) for k in filter_keys
@@ -82,12 +59,8 @@ class ChemblFetchMultiFilterMixin:
         filter_batches = [
             list(self._batch_ids(filters[k], batch_size)) for k in filter_keys
         ]
-
         total_fetched = 0
         seen_ids: set[str] = set()
-
-        # Iterate over cartesian product of batches to cover all combinations
-        # ChEMBL API returns records matching ALL filters in the request (AND logic)
         for batch_combination in itertools.product(*filter_batches):
             current_filters = dict(zip(api_filter_keys, batch_combination, strict=True))
             filter_params = self._build_filter_in_params(current_filters)

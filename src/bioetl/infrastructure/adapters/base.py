@@ -90,7 +90,7 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
         self.http_client = http_client
         self.logger = logger
         self.metrics = metrics if metrics is not None else NoOpMetrics()
-        self._error_handler = ErrorService(logger)
+        self._error_handler = ErrorService(logger, metrics=self.metrics)
         self._init_adapter_metrics()
 
     def _init_adapter_metrics(self) -> None:

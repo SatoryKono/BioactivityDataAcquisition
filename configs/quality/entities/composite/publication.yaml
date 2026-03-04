@@ -3,6 +3,12 @@ provider: composite
 entity: publication
 
 dq_overrides:
+  soft_fail_threshold: 0.10
+  hard_fail_threshold: 0.30
+  required_fields:
+    - publication_id
+    - title
+
   field_validations:
     # === Quality Indicators (CRITICAL) ===
     is_retracted:

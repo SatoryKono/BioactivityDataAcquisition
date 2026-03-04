@@ -10,6 +10,7 @@ These baselines are enforced by benchmark tests in `tests/benchmarks/`.
 Hotspot regression budgets (relative thresholds for CI stability) are enforced by:
 - `tests/performance/test_hotspot_budgets.py`
 - `tests/performance/hotspot_budgets.json`
+- `scripts/generate_hotspot_degradation_report.py` (rolling-window degradation report)
 
 ## Overview
 
@@ -85,6 +86,14 @@ python scripts/calibrate_hotspot_budgets.py \
   --budgets tests/performance/hotspot_budgets.json \
   --latency-q 1.0 \
   --throughput-q 0.0
+
+# Build rolling-window degradation report (for CI summary/artifacts)
+python scripts/generate_hotspot_degradation_report.py \
+  --observations /tmp/hotspot-observations.jsonl \
+  --budgets tests/performance/hotspot_budgets.json \
+  --window-size 5 \
+  --json-out /tmp/hotspot-degradation.json \
+  --markdown-out /tmp/hotspot-degradation.md
 ```
 
 ## Updating Baselines

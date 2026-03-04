@@ -4,8 +4,8 @@
 
 ## Summary
 
-- Scanned modules: `663`
-- Internal import edges (raw): `2440`
+- Scanned modules: `680`
+- Internal import edges (raw): `2479`
 - Aggregated layer edges: `14`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (top 60): `60`
@@ -19,15 +19,15 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|302 OK| application
-    application -->|444 OK| domain
+    application -->|307 OK| application
+    application -->|447 OK| domain
     composition -->|151 OK| application
     composition -->|151 OK| composition
     composition -->|144 OK| domain
     composition -->|130 OK| infrastructure
-    domain -->|387 OK| domain
-    infrastructure -->|298 OK| domain
-    infrastructure -->|300 OK| infrastructure
+    domain -->|397 OK| domain
+    infrastructure -->|306 OK| domain
+    infrastructure -->|313 OK| infrastructure
     interfaces -->|10 OK| application
     interfaces -->|22 OK| composition
     interfaces -->|21 OK| domain
@@ -39,15 +39,15 @@ flowchart LR
 
 | From | To | Imports | Policy |
 |---|---|---:|---|
-| `application` | `application` | 302 | allowed |
-| `application` | `domain` | 444 | allowed |
+| `application` | `application` | 307 | allowed |
+| `application` | `domain` | 447 | allowed |
 | `composition` | `application` | 151 | allowed |
 | `composition` | `composition` | 151 | allowed |
 | `composition` | `domain` | 144 | allowed |
 | `composition` | `infrastructure` | 130 | allowed |
-| `domain` | `domain` | 387 | allowed |
-| `infrastructure` | `domain` | 298 | allowed |
-| `infrastructure` | `infrastructure` | 300 | allowed |
+| `domain` | `domain` | 397 | allowed |
+| `infrastructure` | `domain` | 306 | allowed |
+| `infrastructure` | `infrastructure` | 313 | allowed |
 | `interfaces` | `application` | 10 | allowed |
 | `interfaces` | `composition` | 22 | allowed |
 | `interfaces` | `domain` | 21 | allowed |
@@ -59,13 +59,13 @@ flowchart LR
 | From Group | To Group | Imports |
 |---|---|---:|
 | `application.composite` | `domain.composite` | 54 |
-| `infrastructure.adapters` | `domain.ports` | 45 |
+| `infrastructure.adapters` | `domain.ports` | 47 |
 | `composition.factories` | `application.pipelines` | 42 |
-| `application.core` | `domain.ports` | 40 |
+| `infrastructure.adapters` | `domain.types` | 42 |
+| `application.core` | `domain.ports` | 41 |
 | `composition.factories` | `application.core` | 40 |
-| `infrastructure.adapters` | `domain.types` | 36 |
+| `application.core` | `domain.types` | 35 |
 | `application.pipelines` | `domain.types` | 33 |
-| `application.core` | `domain.types` | 32 |
 | `composition.bootstrap` | `application.composite` | 30 |
 | `application.composite` | `domain.ports` | 28 |
 | `infrastructure.adapters` | `domain.exceptions` | 26 |

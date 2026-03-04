@@ -210,6 +210,30 @@ class TestErrorService:
         kwargs = call_args[1]
         assert kwargs["circuit_breaker_state"] == "OPEN"
 
+    def test_log_error_records_taxonomy_metric(self, mock_logger: MagicMock) -> None:
+        """Error taxonomy metric should be emitted with unified labels."""
+        mock_metrics = MagicMock()
+        handler = ErrorService(mock_logger, metrics=mock_metrics)
+        error = RateLimitExceededError("Rate limit", service_name="test")
+
+        handler.log_error(
+            provider="crossref",
+            operation="fetch_batch",
+            error=error,
+            context={"status_code": 429},
+        )
+
+        mock_metrics.increment_counter.assert_called_once_with(
+            "adapter_error_taxonomy_total",
+            1,
+            {
+                "provider": "crossref",
+                "operation": "fetch_batch",
+                "error_category": "RECOVERABLE",
+                "error_type": ErrorType.RATE_LIMIT.value,
+            },
+        )
+
     # should_retry Tests
 
     def test_should_retry_rate_limit(self, handler: ErrorService) -> None:

@@ -59,32 +59,7 @@ def atomic_write(
     prefix: str = ".",
     encoding: str | None = None,
 ) -> Iterator[IO[Any]]:  # Any: IO stream type varies (text/binary)
-    """Context manager for atomic file writes.
-
-    Writes to a temporary file first, then atomically replaces the target.
-    If any error occurs, the temp file is cleaned up and target is unchanged.
-
-    Args:
-        target: Path to the final destination file
-        mode: File open mode ('wb' for binary, 'w' for text)
-        suffix: Suffix for temp file (default: '.tmp')
-        prefix: Prefix for temp file (default: '.')
-        encoding: Text encoding for text mode (ignored in binary mode)
-
-    Yields:
-        File handle for writing
-
-    Raises:
-        AtomicWriteError: If write or rename fails
-
-    Example:
-        >>> with atomic_write(Path("/data/file.json")) as f:
-        ...     f.write(b'{"key": "value"}')
-        # File is only visible at target after successful completion
-
-    Returns:
-        Iterator over results.
-    """
+    """Write through temp file and atomically replace target on success."""
     # Ensure parent directory exists
     target.parent.mkdir(parents=True, exist_ok=True)
 

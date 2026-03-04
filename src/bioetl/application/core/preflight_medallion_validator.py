@@ -54,46 +54,65 @@ class _MedallionConfigValidator:
 
     def validate_write_modes(self) -> list[ConfigValidationError]:
         """Validate that configured write modes are allowed by policy."""
-        errors: list[ConfigValidationError] = []
-        write_mode_policy = self._write_mode_policy
-
         silver_mode = self._config.table.silver_write_mode
         silver_mode_value = str(silver_mode)
-        try:
-            write_mode_policy.validate(Layer.SILVER, WriteMode(silver_mode_value))
-        except (PolicyViolationError, ValueError):
-            allowed = WriteModePolicy.ALLOWED_MODES[Layer.SILVER]
-            allowed_names = ", ".join(
-                mode.value for mode in sorted(allowed, key=lambda item: item.value)
-            )
-            errors.append(
-                ConfigValidationError(
-                    field="write_mode",
-                    expected=f"one of: {allowed_names}",
-                    actual=silver_mode_value,
-                    rule="RULES §2.1: Silver layer allowed modes",
-                )
-            )
-
         gold_mode = self._config.table.gold_write_mode
         gold_mode_value = str(gold_mode)
         effective_gold_mode = "merge" if gold_mode_value == "scd2" else gold_mode_value
+        errors = [
+            *self._validate_single_write_mode(
+                layer=Layer.SILVER,
+                mode_value=silver_mode_value,
+                field="write_mode",
+                rule="RULES §2.1: Silver layer allowed modes",
+            ),
+            *self._validate_single_write_mode(
+                layer=Layer.GOLD,
+                mode_value=effective_gold_mode,
+                field="gold_write_mode",
+                rule="RULES §2.1: Gold layer allowed modes",
+                actual_mode=gold_mode_value,
+                expected_suffix=", scd2",
+            ),
+        ]
+        self._log_write_mode_validation_result(
+            errors, silver_mode_value, gold_mode_value
+        )
+        return errors
+
+    def _validate_single_write_mode(
+        self,
+        *,
+        layer: Layer,
+        mode_value: str,
+        field: str,
+        rule: str,
+        actual_mode: str | None = None,
+        expected_suffix: str = "",
+    ) -> list[ConfigValidationError]:
         try:
-            write_mode_policy.validate(Layer.GOLD, WriteMode(effective_gold_mode))
+            self._write_mode_policy.validate(layer, WriteMode(mode_value))
         except (PolicyViolationError, ValueError):
-            allowed = WriteModePolicy.ALLOWED_MODES[Layer.GOLD]
+            allowed = WriteModePolicy.ALLOWED_MODES[layer]
             allowed_names = ", ".join(
                 mode.value for mode in sorted(allowed, key=lambda item: item.value)
             )
-            errors.append(
+            return [
                 ConfigValidationError(
-                    field="gold_write_mode",
-                    expected=f"one of: {allowed_names}, scd2",
-                    actual=gold_mode_value,
-                    rule="RULES §2.1: Gold layer allowed modes",
+                    field=field,
+                    expected=f"one of: {allowed_names}{expected_suffix}",
+                    actual=actual_mode or mode_value,
+                    rule=rule,
                 )
-            )
+            ]
+        return []
 
+    def _log_write_mode_validation_result(
+        self,
+        errors: list[ConfigValidationError],
+        silver_mode_value: str,
+        gold_mode_value: str,
+    ) -> None:
         if errors:
             self._logger.warning(
                 "Write mode validation found issues",
@@ -104,16 +123,11 @@ class _MedallionConfigValidator:
                     ],
                 },
             )
-        else:
-            self._logger.debug(
-                "Write mode validation passed",
-                extra={
-                    "silver_mode": silver_mode_value,
-                    "gold_mode": gold_mode_value,
-                },
-            )
-
-        return errors
+            return
+        self._logger.debug(
+            "Write mode validation passed",
+            extra={"silver_mode": silver_mode_value, "gold_mode": gold_mode_value},
+        )
 
     def _validate_layer_formats(
         self, silver_format: str | None, gold_format: str | None

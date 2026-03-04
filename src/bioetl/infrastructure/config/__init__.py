@@ -40,12 +40,8 @@ from bioetl.infrastructure.config_load_api import (
     load_source_config,
 )
 
-# Backward compatibility alias
-ConfigLoader = PipelineConfigLoader
-
 __all__ = [
     "BaseConfigLoader",
-    "ConfigLoader",
     "DQConfigLoader",
     "FilterConfigLoader",
     "ObservabilitySettings",

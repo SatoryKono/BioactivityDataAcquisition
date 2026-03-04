@@ -7,7 +7,6 @@ See ADR-026 for rationale.
 from __future__ import annotations
 
 import re
-import warnings
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
@@ -33,7 +32,7 @@ if TYPE_CHECKING:
 
     _SortFn = Callable[[list[str], tuple[str, ...]], list[str]]
 
-__all__ = ["ColumnOrderer", "ColumnOrdererService"]
+__all__ = ["ColumnOrdererService"]
 
 
 def _collect_pattern_columns(
@@ -510,19 +509,3 @@ class ColumnOrdererService:
             return columns
 
         return [rename_map.get(col, col) for col in columns]
-
-
-if TYPE_CHECKING:
-    ColumnOrderer = ColumnOrdererService
-
-
-def __getattr__(name: str) -> object:
-    """Resolve deprecated compatibility aliases lazily."""
-    if name == "ColumnOrderer":
-        warnings.warn(
-            "ColumnOrderer is deprecated; use ColumnOrdererService.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return ColumnOrdererService
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

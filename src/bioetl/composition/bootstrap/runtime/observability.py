@@ -341,33 +341,7 @@ def bootstrap_observability_bundle(
     settings: Settings,
     log_level: str = "INFO",
 ) -> ObservabilityBundle:
-    """Create a complete observability bundle for pipeline execution.
-
-    Unified Observability Contract:
-    - Always returns a valid ObservabilityBundle with non-None logger and metrics
-    - Logger: UnifiedLogger with Log Schema enforcement (run_id, pipeline, stage)
-    - Fallback to NoOpMetrics when Prometheus is disabled
-    - Tracer and DQ monitor remain optional
-
-    Creates a unified observability bundle containing logger, tracer, metrics,
-    and data quality monitor.
-
-    Layer: Returns application-level bundle (ObservabilityBundle) containing
-    port implementations.
-
-    Args:
-        pipeline: Pipeline name for logger context.
-        run_id: Unique run identifier.
-        settings: Application settings.
-        log_level: Logging level (DEBUG, INFO, WARNING, ERROR). Default: INFO.
-
-    Returns:
-        Configured ObservabilityBundle instance with valid implementations.
-        Logger and metrics are guaranteed to be non-None.
-
-    Raises:
-        ObservabilityContractError: If bundle creation fails validation.
-    """
+    """Build validated logger/metrics/tracer/DQ-monitor bundle for a pipeline run."""
     logger = bootstrap_logger_port(
         pipeline=pipeline, run_id=run_id, log_level=log_level
     )

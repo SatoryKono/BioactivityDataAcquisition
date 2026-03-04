@@ -102,7 +102,7 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
         self.circuit_breaker = circuit_breaker
         self.thread_pool = thread_pool
         self.strict_error_handling = strict_error_handling
-        self._error_handler = ErrorService(logger)
+        self._error_handler = ErrorService(logger, metrics=self.metrics)
 
         # Safety: ensure shutdown if aclose/context manager is misused
         self._finalizer = weakref.finalize(self, self.thread_pool.shutdown, wait=False)

@@ -6,7 +6,6 @@ See ADR-026 for rationale.
 
 from __future__ import annotations
 
-import warnings
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, Final
 
@@ -17,7 +16,7 @@ if TYPE_CHECKING:
 
     from bioetl.domain.ports import LoggerPort
 
-__all__ = ["ColumnRenamer", "ColumnRenamerService"]
+__all__ = ["ColumnRenamerService"]
 
 
 class ColumnRenamerService:
@@ -215,19 +214,3 @@ class ColumnRenamerService:
     def _is_join_key(self, col: str) -> bool:
         """Check if column is a join key (case-insensitive)."""
         return col.lower() in self.JOIN_KEY_COLUMNS
-
-
-if TYPE_CHECKING:
-    ColumnRenamer = ColumnRenamerService
-
-
-def __getattr__(name: str) -> object:
-    """Resolve deprecated compatibility aliases lazily."""
-    if name == "ColumnRenamer":
-        warnings.warn(
-            "ColumnRenamer is deprecated; use ColumnRenamerService.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return ColumnRenamerService
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

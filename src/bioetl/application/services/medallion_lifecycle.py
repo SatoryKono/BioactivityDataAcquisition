@@ -192,22 +192,7 @@ class MedallionLifecycleService:
         target_path: str,
         remove_source: bool = False,
     ) -> int:
-        """Archive Delta table to cold storage.
-
-        Copies table data to archive location. Optionally removes source
-        after successful copy.
-
-        Args:
-            table: Table name to archive
-            target_path: Destination path for archive
-            remove_source: If True, remove source after successful copy
-
-        Returns:
-            Number of files archived
-
-        Raises:
-            StorageError: If archive fails
-        """
+        """Archive table data to target path and optionally remove source."""
         self.logger.info(
             "Starting archive operation",
             table=table,

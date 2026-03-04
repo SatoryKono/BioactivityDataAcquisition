@@ -114,5 +114,4 @@ class BronzeWriterMetadataMixin:
         )
 
 
-
 __all__ = ["BronzeWriterMetadataMixin"]

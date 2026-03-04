@@ -11,7 +11,11 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.infrastructure.quality import get_registry_values
+from bioetl.infrastructure.quality import (
+    build_module_path_key,
+    get_registry_values,
+    resolve_registry_value,
+)
 
 
 class TestFileSizeLimits:
@@ -63,14 +67,19 @@ class TestFileSizeLimits:
                 continue
 
             # Check for exemptions
-            if py_file.name in self.EXEMPTIONS:
-                file_limit = self.EXEMPTIONS[py_file.name]
-            else:
+            file_limit = resolve_registry_value(
+                self.EXEMPTIONS,
+                module_path=build_module_path_key(py_file, src_root=src_dir),
+                legacy_name=py_file.name,
+            )
+            if file_limit is None:
                 file_limit = limit
 
             loc = len(py_file.read_text(encoding="utf-8").splitlines())
             if loc > file_limit:
-                violations.append(f"{py_file.name}: {loc} LOC (limit: {file_limit})")
+                violations.append(
+                    f"{py_file.relative_to(src_dir)}: {loc} LOC (limit: {file_limit})"
+                )
 
         assert not violations, f"Files exceeding LOC limit in {layer}:\n" + "\n".join(
             f"  - {v}" for v in violations
@@ -127,10 +136,16 @@ class TestFunctionComplexity:
                 results = cc_visit(content)
                 for item in results:
                     # Check for exemptions
-                    func_max_cc = self.EXEMPTIONS.get(item.name, max_cc)
+                    func_max_cc = resolve_registry_value(
+                        self.EXEMPTIONS,
+                        module_path=build_module_path_key(py_file, src_root=src_dir),
+                        symbol_name=item.name,
+                    )
+                    if func_max_cc is None:
+                        func_max_cc = max_cc
                     if item.complexity > func_max_cc:
                         violations.append(
-                            f"{py_file.name}:{item.lineno} - {item.name}() "
+                            f"{py_file.relative_to(src_dir)}:{item.lineno} - {item.name}() "
                             f"CC={item.complexity} (max={func_max_cc})"
                         )
             except SyntaxError:
@@ -185,11 +200,17 @@ class TestFunctionLength:
                     func_lines = end_line - start_line + 1
 
                     # Check exemptions
-                    max_lines = self.EXEMPTIONS.get(node.name, self.MAX_LINES)
+                    max_lines = resolve_registry_value(
+                        self.EXEMPTIONS,
+                        module_path=build_module_path_key(py_file, src_root=src_dir),
+                        symbol_name=node.name,
+                    )
+                    if max_lines is None:
+                        max_lines = self.MAX_LINES
 
                     if func_lines > max_lines:
                         violations.append(
-                            f"{py_file.name}:{start_line} - {node.name}() "
+                            f"{py_file.relative_to(src_dir)}:{start_line} - {node.name}() "
                             f"is {func_lines} lines (max={max_lines})"
                         )
 
@@ -235,11 +256,17 @@ class TestClassSize:
                     end_line = node.end_lineno or start_line
                     class_lines = end_line - start_line + 1
 
-                    max_lines = self.EXEMPTIONS.get(node.name, self.MAX_CLASS_LINES)
+                    max_lines = resolve_registry_value(
+                        self.EXEMPTIONS,
+                        module_path=build_module_path_key(py_file, src_root=src_dir),
+                        symbol_name=node.name,
+                    )
+                    if max_lines is None:
+                        max_lines = self.MAX_CLASS_LINES
 
                     if class_lines > max_lines:
                         violations.append(
-                            f"{py_file.name}:{start_line} - {node.name} "
+                            f"{py_file.relative_to(src_dir)}:{start_line} - {node.name} "
                             f"is {class_lines} lines (max={max_lines})"
                         )
 
@@ -278,13 +305,17 @@ class TestClassSize:
                     ]
 
                     # Check for exemptions
-                    max_methods = self.METHOD_EXEMPTIONS.get(
-                        node.name, self.MAX_METHODS_PER_CLASS
+                    max_methods = resolve_registry_value(
+                        self.METHOD_EXEMPTIONS,
+                        module_path=build_module_path_key(py_file, src_root=src_dir),
+                        symbol_name=node.name,
                     )
+                    if max_methods is None:
+                        max_methods = self.MAX_METHODS_PER_CLASS
 
                     if len(public_methods) > max_methods:
                         violations.append(
-                            f"{py_file.name} - {node.name} has "
+                            f"{py_file.relative_to(src_dir)} - {node.name} has "
                             f"{len(public_methods)} public methods "
                             f"(max={max_methods})"
                         )
@@ -340,7 +371,12 @@ class TestGodObjectDetection:
             for node in ast.walk(tree):
                 if isinstance(node, ast.ClassDef):
                     # Skip exempted classes
-                    if node.name in self.EXEMPTIONS:
+                    god_object_exemption = resolve_registry_value(
+                        self.EXEMPTIONS,
+                        module_path=build_module_path_key(py_file, src_root=src_dir),
+                        symbol_name=node.name,
+                    )
+                    if god_object_exemption is not None:
                         continue
 
                     start_line = node.lineno

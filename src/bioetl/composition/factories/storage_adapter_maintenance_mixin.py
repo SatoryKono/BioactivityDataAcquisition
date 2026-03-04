@@ -109,19 +109,7 @@ class StorageAdapterMaintenanceMixin:
         target_path: str,
         remove_source: bool = False,
     ) -> int:
-        """Archive table to target path.
-
-        Implements StoragePort.archive().
-        Archives both Silver and Gold layers for the specified table.
-
-        Args:
-            table_name: Table name to archive
-            target_path: Destination path for archive
-            remove_source: If True, remove source after successful copy
-
-        Returns:
-            Number of files archived
-        """
+        """Archive Silver and Gold table directories to a target path."""
         import shutil
 
         total_archived = 0
