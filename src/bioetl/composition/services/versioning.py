@@ -16,7 +16,7 @@ import subprocess
 from functools import lru_cache
 from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as pkg_version
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -63,7 +63,7 @@ def get_git_commit() -> str | None:
         return None
 
 
-def _normalize_for_hash(obj: Any) -> Any:  # Any: recursive normalizer a...
+def _normalize_for_hash(obj: object) -> object:
     """Normalize object for deterministic hashing.
 
     Converts:
@@ -90,9 +90,8 @@ def _normalize_for_hash(obj: Any) -> Any:  # Any: recursive normalizer a...
 
 
 def compute_config_hash(
-    config: PipelineYamlConfig
-    | dict[str, Any],  # Any: factory wiring; concrete types resolved at runtime
-) -> str:  # Any: factory wiring; concrete types resolved at runtime
+    config: PipelineYamlConfig | dict[str, object],
+) -> str:
     """Compute SHA256 hash of pipeline configuration.
 
     Creates a deterministic hash of the configuration for change detection.
@@ -130,9 +129,7 @@ def compute_config_hash(
 
 
 def get_pipeline_version(
-    config: PipelineYamlConfig
-    | dict[str, Any]  # Any: factory wiring; concrete types resolved at runtime
-    | None = None,  # Any: factory wiring; concrete types resolved at runtime
+    config: PipelineYamlConfig | dict[str, object] | None = None,
 ) -> str:
     """Get pipeline version from config or fallback to package version.
 

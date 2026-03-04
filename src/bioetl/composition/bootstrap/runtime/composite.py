@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
 import yaml
@@ -95,7 +95,7 @@ def _resolve_composite_gold_schema(composite_name: str) -> type | None:
     return COMPOSITE_GOLD_SCHEMA_REGISTRY.get(key)
 
 
-def _to_id_str(val: Any) -> str:  # Any: accepts int, float, st...
+def _to_id_str(val: object) -> str:
     """Convert value to ID string, handling float-to-int conversion.
 
     External APIs (like ChEMBL) often expect integer IDs and return 400

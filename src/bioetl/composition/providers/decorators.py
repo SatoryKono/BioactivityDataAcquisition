@@ -5,7 +5,7 @@ Provides a declarative API for registering provider adapters.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, TypeVar
 
 from bioetl.composition.providers.provider_registry import (
     AdapterCreator,
@@ -31,7 +31,7 @@ def register_provider(
     requires_logger: bool = True,
     rate_overrides: dict[str, float] | None = None,
     custom_creator: AdapterCreator | None = None,
-    **default_kwargs: Any,  # Any: adapter-specific defau...
+    **default_kwargs: object,
 ) -> Callable[[type[T]], type[T]]:
     """Decorator for registering a data provider.
 

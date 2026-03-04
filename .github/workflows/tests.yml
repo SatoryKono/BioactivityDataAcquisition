@@ -33,8 +33,8 @@ env:
   # Optimize Python for CI
   PYTHONDONTWRITEBYTECODE: 1
   PYTHONUNBUFFERED: 1
-  # Quality exemptions gate rollout: warning mode for one sprint, then switch to "block".
-  QUALITY_EXEMPTIONS_GATE_MODE: warn
+  # Quality exemptions gate rollout completed: expiry and growth are blocking.
+  QUALITY_EXEMPTIONS_GATE_MODE: block
   QUALITY_EXEMPTIONS_GROWTH_MODE: block
   QUALITY_EXEMPTIONS_REGISTRY: configs/quality/architecture_metric_exemptions.yaml
   QUALITY_EXEMPTIONS_SCORECARD: configs/quality/debt_scorecard.yaml

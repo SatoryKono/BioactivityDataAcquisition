@@ -23,12 +23,19 @@ from bioetl.infrastructure.storage.silver_writer import SilverWriter
 from .storage_adapter import StorageAdapter
 
 if TYPE_CHECKING:
-    from typing import Any
-
     from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
-    from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
+    from bioetl.domain.ports import (
+        LoggerPort,
+        MetricsPort,
+        SilverValidatorPort,
+        TracingPort,
+    )
     from bioetl.infrastructure.config import Settings
-    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+    from bioetl.infrastructure.schemas.pipeline_config import (
+        CsvExportConfig,
+        PipelineYamlConfig,
+        SinkLayerConfig,
+    )
 
 
 __all__ = ["StorageContext", "StorageFactory"]
@@ -59,7 +66,7 @@ class StorageFactory:
 
     @staticmethod
     def _create_csv_exporter_from_config(
-        csv_cfg: Any,  # Any: dynamic Pydantic CsvExportConfig from YAML
+        csv_cfg: CsvExportConfig | None,
         logger: LoggerPort,
         override_path: Path | None = None,
     ) -> CsvExporter | None:
@@ -85,8 +92,7 @@ class StorageFactory:
 
     @staticmethod
     def _resolve_layer_path(
-        # Any: dynamic Pydantic sink ...
-        layer_config: Any,  # Any: factory wiring; concrete types resolved at runtime
+        layer_config: SinkLayerConfig | None,
         default_path: Path,
         use_yaml_paths: bool,
     ) -> Path:
@@ -100,9 +106,9 @@ class StorageFactory:
         bronze_path: Path,
         silver_path: Path,
         gold_path: Path,
-        bronze_config: Any,  # Any: dynamic Pydantic sink layer config
-        silver_config: Any,  # Any: dynamic Pydantic sink layer config
-        gold_config: Any,  # Any: dynamic Pydantic sink layer config
+        bronze_config: SinkLayerConfig | None,
+        silver_config: SinkLayerConfig | None,
+        gold_config: SinkLayerConfig | None,
         silver_csv_exporter: CsvExporter | None,
         gold_csv_exporter: CsvExporter | None,
         logger: LoggerPort,
@@ -114,7 +120,7 @@ class StorageFactory:
         bronze_flat_structure: bool = False,
         silver_flat_structure: bool = False,
         gold_flat_structure: bool = False,
-        silver_validator: Any = None,  # Any: SilverValidatorPort (optional lazy import)
+        silver_validator: SilverValidatorPort | None = None,
     ) -> StorageAdapter:
         """Create StorageAdapter with all writers configured.
 
@@ -229,7 +235,7 @@ class StorageFactory:
         metrics: MetricsPort,
         tracing: TracingPort | None = None,
         metadata_coordinator: MetadataCoordinator | None = None,
-        silver_validator: Any = None,  # Any: SilverValidatorPort (optional lazy import)
+        silver_validator: SilverValidatorPort | None = None,
     ) -> StorageContext:
         """Create a StorageAdapter for local deployment.
 

@@ -185,7 +185,7 @@ class StorageAdapter:
         records: list[
             dict[str, Any]  # Any: record/metadata values are heterogeneous
         ],  # Any: factory wiring; concrete types resolved at runtime
-        schema: Any,  # Any: Pandera DataFrameModel class varies per entity Gold schema
+        schema: DataFrameSchema,
         primary_keys: list[str] | None = None,
         mode: Literal["overwrite", "append", "scd2"] = "overwrite",
         *,

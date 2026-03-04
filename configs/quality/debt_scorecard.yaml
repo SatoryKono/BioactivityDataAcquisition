@@ -6,10 +6,10 @@ governance:
   allow_grace_windows_only_for_rf: true
 
 baseline:
-  total_exemptions: 485
+  total_exemptions: 420
   by_registry:
     file_size_limits: 97
-    function_complexity: 97
+    function_complexity: 32
     function_length: 118
     class_size: 82
     class_method_count: 1
@@ -31,110 +31,110 @@ registry_groups:
 
 quarterly_targets:
 - quarter: '2026-Q1'
-  max_total_exemptions: 485
+  max_total_exemptions: 420
   min_integral_score: 70
   group_budgets:
     size_shape: 347
-    complexity: 138
+    complexity: 73
   registry_budgets:
     file_size_limits: 97
-    function_complexity: 97
+    function_complexity: 32
     function_length: 118
     class_size: 82
     class_method_count: 1
     god_object: 49
     domain_complexity: 41
 - quarter: '2026-Q2'
-  max_total_exemptions: 466
-  min_integral_score: 73
+  max_total_exemptions: 410
+  min_integral_score: 72
   group_budgets:
-    size_shape: 332
-    complexity: 134
+    size_shape: 340
+    complexity: 70
   registry_budgets:
-    file_size_limits: 94
-    function_complexity: 94
+    file_size_limits: 95
+    function_complexity: 30
+    function_length: 116
+    class_size: 80
+    class_method_count: 1
+    god_object: 48
+    domain_complexity: 40
+- quarter: '2026-Q3'
+  max_total_exemptions: 399
+  min_integral_score: 74
+  group_budgets:
+    size_shape: 331
+    complexity: 68
+  registry_budgets:
+    file_size_limits: 93
+    function_complexity: 29
     function_length: 112
     class_size: 78
     class_method_count: 1
     god_object: 47
-    domain_complexity: 40
-- quarter: '2026-Q3'
-  max_total_exemptions: 443
+    domain_complexity: 39
+- quarter: '2026-Q4'
+  max_total_exemptions: 385
   min_integral_score: 76
   group_budgets:
-    size_shape: 315
-    complexity: 128
+    size_shape: 320
+    complexity: 65
   registry_budgets:
     file_size_limits: 90
-    function_complexity: 90
-    function_length: 105
-    class_size: 74
+    function_complexity: 27
+    function_length: 107
+    class_size: 75
     class_method_count: 1
-    god_object: 45
+    god_object: 47
     domain_complexity: 38
-- quarter: '2026-Q4'
-  max_total_exemptions: 419
-  min_integral_score: 79
-  group_budgets:
-    size_shape: 297
-    complexity: 122
-  registry_budgets:
-    file_size_limits: 86
-    function_complexity: 86
-    function_length: 98
-    class_size: 70
-    class_method_count: 1
-    god_object: 42
-    domain_complexity: 36
 - quarter: '2027-Q1'
-  max_total_exemptions: 390
-  min_integral_score: 82
+  max_total_exemptions: 370
+  min_integral_score: 78
   group_budgets:
-    size_shape: 278
-    complexity: 112
+    size_shape: 308
+    complexity: 62
   registry_budgets:
-    file_size_limits: 79
-    function_complexity: 79
-    function_length: 92
-    class_size: 65
+    file_size_limits: 87
+    function_complexity: 25
+    function_length: 102
+    class_size: 72
     class_method_count: 1
-    god_object: 41
-    domain_complexity: 33
+    god_object: 46
+    domain_complexity: 37
 
 owner_decomposition_targets:
 - quarter: '2026-Q1'
   allocations:
-    '@bioetl-architecture': 485
+    '@bioetl-architecture': 420
 - quarter: '2026-Q2'
   allocations:
-    '@bioetl-architecture': 340
-    '@bioetl-platform': 80
-    '@bioetl-data': 46
+    '@bioetl-architecture': 300
+    '@bioetl-platform': 70
+    '@bioetl-data': 40
 - quarter: '2026-Q3'
   allocations:
-    '@bioetl-architecture': 310
-    '@bioetl-platform': 85
-    '@bioetl-data': 48
+    '@bioetl-architecture': 290
+    '@bioetl-platform': 70
+    '@bioetl-data': 39
 - quarter: '2026-Q4'
   allocations:
-    '@bioetl-architecture': 285
-    '@bioetl-platform': 86
-    '@bioetl-data': 48
+    '@bioetl-architecture': 275
+    '@bioetl-platform': 70
+    '@bioetl-data': 40
 - quarter: '2027-Q1'
   allocations:
     '@bioetl-architecture': 260
-    '@bioetl-platform': 82
-    '@bioetl-data': 48
+    '@bioetl-platform': 70
+    '@bioetl-data': 40
 
 expiry_decomposition_targets:
 - quarter: '2026-Q2'
-  max_entries_expiring_in_quarter: 485
+  max_entries_expiring_in_quarter: 420
 - quarter: '2026-Q3'
-  max_entries_expiring_in_quarter: 360
+  max_entries_expiring_in_quarter: 300
 - quarter: '2026-Q4'
-  max_entries_expiring_in_quarter: 250
+  max_entries_expiring_in_quarter: 200
 - quarter: '2027-Q1'
-  max_entries_expiring_in_quarter: 120
+  max_entries_expiring_in_quarter: 100
 - quarter: '2027-Q2'
   max_entries_expiring_in_quarter: 0
 

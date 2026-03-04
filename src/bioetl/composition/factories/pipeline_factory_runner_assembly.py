@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.lock_manager import LockManager
 from bioetl.application.core.postrun_service import PostrunService
@@ -21,6 +21,7 @@ from bioetl.domain.locking import LockContextHolder
 from bioetl.domain.medallion import LoadingStrategy
 
 if TYPE_CHECKING:
+    import pandera
     import pyarrow as pa
 
     from bioetl.application.core.base import BasePipeline
@@ -32,7 +33,7 @@ def assemble_runner_impl(
     pipeline: BasePipeline,
     observability: ObservabilityBundle,
     silver_schema: pa.Schema | None,
-    gold_schema: Any,  # Any: Pandera DataFrameModel class or instance
+    gold_schema: type[pandera.DataFrameModel],
     strict_gold_validation: bool,
     yaml_config: PipelineYamlConfig | None = None,
     dq_configs_extractor: Callable[
