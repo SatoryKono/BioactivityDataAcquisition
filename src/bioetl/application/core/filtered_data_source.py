@@ -9,13 +9,14 @@ from __future__ import annotations
 __all__ = ["FilteredDataSource"]
 
 
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Self
 
 from bioetl.application.core._data_source_mixins import _SourceMetadataDelegationMixin
 from bioetl.domain.ports import FilterableDataSourcePort, InputFilterPort
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Mapping
+    from types import TracebackType
 
     from bioetl.domain.filtering import FilterLoadResult, InputFilterConfig
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
@@ -251,7 +252,7 @@ class FilteredDataSource(_SourceMetadataDelegationMixin):
         self,
         exc_type: type[BaseException] | None,
         exc_val: BaseException | None,
-        exc_tb: Any,  # Any: TracebackType | None per async context manager protocol
+        exc_tb: TracebackType | None,
     ) -> None:
         """Exit async context."""
         await self._data_source.__aexit__(exc_type, exc_val, exc_tb)

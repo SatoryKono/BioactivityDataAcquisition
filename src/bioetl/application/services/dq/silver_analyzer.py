@@ -11,7 +11,7 @@ Implements SilverDQAnalyzerPort. Follows RULES.md §3.1 DQ strategy.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, cast
+from typing import cast
 
 import polars as pl
 import pyarrow as pa

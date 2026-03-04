@@ -178,13 +178,7 @@ class UniquenessResult:
     unique_count: int
     total_count: int
     duplicate_rate: float
-    column_stats: dict[
-        str, JsonDict  # Any: port contract allows heterogeneous record values
-    ] = (  # Any: port contract allows heterogeneous record values
-        field(  # Any: DQ check values vary by check type
-            default_factory=dict
-        )
-    )  # Any: DQ report values vary by check type
+    column_stats: dict[str, JsonDict] = field(default_factory=dict)
     status: DQCheckStatus = DQCheckStatus.PASS
 
 
@@ -195,13 +189,7 @@ class TypeConformanceResult:
     schema_version: str | None
     pandera_passed: bool
     errors: tuple[str, ...] = ()
-    type_coercions: dict[
-        str, JsonDict  # Any: port contract allows heterogeneous record values
-    ] = (  # Any: port contract allows heterogeneous record values
-        field(  # Any: DQ check values vary by check type
-            default_factory=dict
-        )
-    )  # Any: DQ report values vary by check type
+    type_coercions: dict[str, JsonDict] = field(default_factory=dict)
     status: DQCheckStatus = DQCheckStatus.PASS
 
     def __post_init__(self) -> None:
@@ -229,7 +217,7 @@ class NumericDistribution:
 class CategoricalDistribution:
     """Statistics for a categorical column."""
 
-    top_values: tuple[JsonDict, ...]  # Any: DQ report values vary by check type
+    top_values: tuple[JsonDict, ...]
     cardinality: int
 
     def __post_init__(self) -> None:
@@ -483,7 +471,7 @@ class BronzeDQReport:
     pipeline: str
     batch_id: str
     source_file: str
-    checks: JsonDict  # Any: DQ report values vary by check type
+    checks: JsonDict
     summary: DQReportSummary
 
     def __post_init__(self) -> None:
@@ -515,7 +503,7 @@ class SilverDQReport:
     pipeline: str
     source_batch_ids: tuple[str, ...]
     target_table: str
-    checks: JsonDict  # Any: DQ report values vary by check type
+    checks: JsonDict
     thresholds: DQThresholds
     summary: DQReportSummary
     # Cross-reference to metadata
@@ -549,7 +537,7 @@ class GoldDQReport:
     run_id: str
     pipeline: str
     target_table: str
-    checks: JsonDict  # Any: DQ report values vary by check type
+    checks: JsonDict
     data_freshness: DataFreshnessResult | None
     summary: DQReportSummary
 

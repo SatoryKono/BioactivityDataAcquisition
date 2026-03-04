@@ -7,13 +7,14 @@ from Assay records and emit derived subcellular_fraction records.
 from __future__ import annotations
 
 import hashlib
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Self
 
 from bioetl.application.core._data_source_mixins import _SourceMetadataDelegationMixin
 from bioetl.domain.ports import FilterableDataSourcePort
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
+    from types import TracebackType
 
     from bioetl.domain.ports import DataSourcePort
     from bioetl.domain.types import HealthStatus
@@ -45,7 +46,7 @@ class SubcellularFractionDataSource(_SourceMetadataDelegationMixin):
         self,
         exc_type: type[BaseException] | None,
         exc_val: BaseException | None,
-        exc_tb: Any,  # Any: TracebackType | None (standard __aexit__ signature)
+        exc_tb: TracebackType | None,
     ) -> None:
         """Exit async context."""
         await self._data_source.__aexit__(exc_type, exc_val, exc_tb)

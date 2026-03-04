@@ -55,7 +55,7 @@ class DataSourceFactoryPort(Protocol):
         ...
 
     @staticmethod
-    def create(provider: str) -> Any:  # Any: polymorphic adapter
+    def create(provider: str) -> Any:  # Any: returns different adapter types per provider
         """Create a data source adapter for the given provider.
 
         Args:

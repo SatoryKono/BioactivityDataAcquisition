@@ -381,9 +381,7 @@ class MergeResult:
     output_gold_path: str | None = None
     lineage_summary: dict[str, int] = field(default_factory=dict)
     cross_validation_stats: CrossValidationStats | None = None
-    quarantine_payloads: tuple[
-        JsonDict, ...  # Any: values are heterogeneous
-    ] = ()  # Any: quarantine record has heterogeneous values
+    quarantine_payloads: tuple[JsonDict, ...] = ()
 
     def __post_init__(self) -> None:
         """Convert lists to tuples for immutability."""

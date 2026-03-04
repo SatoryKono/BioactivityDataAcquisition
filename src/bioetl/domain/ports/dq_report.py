@@ -108,10 +108,7 @@ class SilverDQAnalyzerPort(Protocol):
         input_record_count: int | None = None,
         quarantined_count: int = 0,
         previous_schema: dict[str, str] | None = None,
-        key_nullability_rules: list[
-            JsonDict  # Any: port contract allows heterogeneous record values
-        ]  # Any: DQ rule definitions have heterogeneous values
-        | None = None,  # Any: DQ report data varies by check type
+        key_nullability_rules: list[JsonDict] | None = None,
     ) -> SilverDQReport:
         """Analyze Silver data and generate DQ report.
 
@@ -155,17 +152,13 @@ class GoldDQAnalyzerPort(Protocol):
         timestamp: datetime,
         required_fields: list[str] | None = None,
         completeness_threshold: float = 0.90,
-        business_rules: list[
-            JsonDict  # Any: port contract allows heterogeneous record values
-        ]  # Any: DQ rule definitions have heterogeneous values
-        | None = None,  # Any: DQ report data varies by check type
+        business_rules: list[JsonDict] | None = None,
         reference_tables: DataContainerDict | None = None,
         baseline_stats: dict[
-            str, Any  # Any: port contract allows heterogeneous values
-        ]  # Any: DQ baseline statistics have heterogeneous values
-        | None = None,  # Any: DQ report data varies by check type
-        scd_config: JsonDict  # Any: SCD config has heterogeneous values
-        | None = None,  # Any: DQ report data varies by check type
+            str, Any  # Any: baseline stat values are float|int|str|None
+        ]
+        | None = None,
+        scd_config: JsonDict | None = None,
     ) -> GoldDQReport:
         """Analyze Gold data and generate DQ report.
 

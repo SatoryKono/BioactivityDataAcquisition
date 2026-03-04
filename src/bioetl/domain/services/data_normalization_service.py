@@ -10,7 +10,7 @@ import re
 import unicodedata
 from dataclasses import dataclass, field
 from html import unescape
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.domain.serialization import deserialize_from_json, serialize_to_json
 from bioetl.domain.services.author_normalization_service import (
@@ -199,8 +199,8 @@ class DefaultDataNormalizationService(AuthorNormalizationService):
 
     def normalize_to_string(
         self,
-        value: Any,  # Any: raw input value from API (str|int|float|None)
-    ) -> str | None:  # Any: raw input value from API (str|int|float|None)
+        value: object,
+    ) -> str | None:
         """Convert value to string, strip whitespace, return None if empty.
 
         Args:
@@ -233,8 +233,8 @@ class DefaultDataNormalizationService(AuthorNormalizationService):
 
     def _parse_authors_from_list(
         self,
-        authors: list[Any],  # Any: input list items have heterogeneous types
-    ) -> list[str]:  # Any: input list items have heterogeneous types
+        authors: list[object],
+    ) -> list[str]:
         """Parse author list, filtering non-strings and empty values."""
         return [a.strip() for a in authors if isinstance(a, str) and a.strip()]
 
@@ -252,7 +252,7 @@ class DefaultDataNormalizationService(AuthorNormalizationService):
             return self._filter_json_authors(parsed)
         return None
 
-    def _try_json_loads(self, text: str) -> Any:  # Any: JSON parse result type varies
+    def _try_json_loads(self, text: str) -> object:
         """Attempt JSON parsing, returning None on failure."""
         try:
             return deserialize_from_json(text)
@@ -261,8 +261,8 @@ class DefaultDataNormalizationService(AuthorNormalizationService):
 
     def _filter_json_authors(
         self,
-        items: list[Any],  # Any: input list items have heterogeneous types
-    ) -> list[str]:  # Any: input list items have heterogeneous types
+        items: list[object],
+    ) -> list[str]:
         """Filter and convert JSON array items to author strings."""
         return [str(a).strip() for a in items if a is not None and str(a).strip()]
 

@@ -15,7 +15,7 @@ Split from monolithic 761-LOC class per audit-package-structure-2026-02-07.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, cast
+from typing import cast
 
 import polars as pl
 import pyarrow as pa

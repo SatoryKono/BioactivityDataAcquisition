@@ -11,8 +11,6 @@ Split into submodules per audit-package-structure-2026-02-07:
 
 from __future__ import annotations
 
-from typing import Any
-
 # Re-export from submodules for backward compatibility
 from bioetl.application.pipelines.semanticscholar._author_extractors import (
     extract_affiliations,

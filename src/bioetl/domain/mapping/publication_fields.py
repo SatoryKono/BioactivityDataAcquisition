@@ -22,7 +22,7 @@ from bioetl.domain.types import JsonDict
 
 from __future__ import annotations
 
-from typing import Any, Final, Literal
+from typing import Final, Literal
 
 __all__ = [
     "ProviderName",
@@ -198,9 +198,9 @@ def get_provider_name(provider: ProviderName, unified_field: str) -> str:
 
 
 def apply_field_mapping(
-    record: JsonDict,  # Any: record values are heterogeneous
+    record: JsonDict,
     provider: ProviderName,
-) -> JsonDict:  # Any: record values are heterogeneous
+) -> JsonDict:
     """Apply field name mapping to a record (provider → unified names).
 
     Renames fields according to PUBLICATION_FIELD_MAPPING for the given provider.

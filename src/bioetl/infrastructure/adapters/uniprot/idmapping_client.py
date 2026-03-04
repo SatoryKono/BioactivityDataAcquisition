@@ -23,7 +23,7 @@ import asyncio
 import json
 import re
 from collections.abc import AsyncIterator, Mapping
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.domain.ports import NoOpMetrics
 from bioetl.domain.types import HealthStatus, JsonDict
@@ -431,7 +431,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         return primary
 
     @staticmethod
-    def _get_next_page_url(headers: Mapping[str, Any]) -> str | None:  # Any: JSON
+    def _get_next_page_url(headers: Mapping[str, str]) -> str | None:
         """Extract next page URL from Link header.
 
         Args:
@@ -449,7 +449,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
 
     @staticmethod
     def _extract_organism_info(
-        organism: Any,  # Any: untyped API JSON
+        organism: object,
     ) -> tuple[str | None, str | None, int | None]:
         """Extract organism metadata from entry.
 
@@ -468,7 +468,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         )
 
     @staticmethod
-    def _extract_protein_name(protein_desc: Any) -> str | None:  # Any: untyped API JSON
+    def _extract_protein_name(protein_desc: object) -> str | None:
         """Extract recommended protein name from description.
 
         Args:
@@ -488,7 +488,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         return full_name.get("value")
 
     @staticmethod
-    def _extract_gene_primary(genes: Any) -> str | None:  # Any: untyped API JSON
+    def _extract_gene_primary(genes: object) -> str | None:
         """Extract primary gene name from genes list.
 
         Args:
@@ -509,7 +509,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
 
     @staticmethod
     def _extract_sequence_info(
-        sequence: Any,  # Any: API JSON
+        sequence: object,
     ) -> tuple[int | None, int | None]:
         """Extract sequence length and mass from entry.
 

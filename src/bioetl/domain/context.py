@@ -342,11 +342,10 @@ class PipelineContext:
             started_at=started_at or datetime.now(UTC),
         )
 
-    # Any: arbitrary structured l...
     def bind_logger(
         self,
-        **kwargs: Any,  # Any: structlog-compatible API
-    ) -> PipelineContext:  # Any: structlog-compatible API
+        **kwargs: Any,  # Any: structlog-compatible key=value pairs
+    ) -> PipelineContext:
         """Bind additional context to the logger.
 
         Returns a new context with the bound logger.
