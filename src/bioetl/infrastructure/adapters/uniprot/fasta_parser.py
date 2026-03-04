@@ -10,6 +10,7 @@ __all__ = ["FastaParser"]
 
 
 from typing import Any
+
 from bioetl.domain.types import JsonDict
 
 

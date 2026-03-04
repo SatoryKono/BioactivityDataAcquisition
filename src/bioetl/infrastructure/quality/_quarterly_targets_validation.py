@@ -8,7 +8,6 @@ from typing import Any
 from typing import cast
 
 from bioetl.domain.types import JsonDict
-
 from bioetl.infrastructure.quality._primitives import (
     QuarterTarget,
     _parse_quarter_label,

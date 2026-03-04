@@ -13,7 +13,6 @@ from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.composition.factories.dq_context_resolver import (
     create_dq_services as _create_dq_services_impl,
 )
-from bioetl.domain.types import JsonDict
 from bioetl.composition.factories.dq_context_resolver import (
     get_flat_structure as _get_flat_structure_impl,
 )
@@ -37,6 +36,7 @@ from bioetl.domain.ports import (
     NoOpMetrics,
     QuarantinePort,
 )
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
@@ -182,7 +182,9 @@ class BaseServicesFactory:
     def _create_lock() -> LockPort:
         """Create in-memory lock for local deployment."""
         lock = MemoryLock()
-        assert isinstance(lock, LockPort), f"MemoryLock must implement LockPort, got {type(lock)}"
+        assert isinstance(lock, LockPort), (
+            f"MemoryLock must implement LockPort, got {type(lock)}"
+        )
         return lock
 
     @staticmethod

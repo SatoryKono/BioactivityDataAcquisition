@@ -13,10 +13,10 @@ __all__ = ["load_pipeline_config", "load_source_config"]
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
-from bioetl.domain.types import JsonDict
 
 import yaml
 
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config_merge import config_merge
 from bioetl.infrastructure.legacy_normalizers import (
     pipeline as legacy_pipeline_normalizers,

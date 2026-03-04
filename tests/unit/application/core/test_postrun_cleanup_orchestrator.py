@@ -64,9 +64,7 @@ class TestPostrunCleanupServiceInit:
         )
         assert service._warning_allowlist == allowlist
 
-    def test_initialization_with_empty_allowlist(
-        self, mock_logger: MagicMock
-    ) -> None:
+    def test_initialization_with_empty_allowlist(self, mock_logger: MagicMock) -> None:
         """Test initialization with empty warning_allowlist tuple."""
         service = PostrunCleanupService(
             logger=mock_logger,

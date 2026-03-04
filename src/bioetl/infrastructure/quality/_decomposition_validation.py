@@ -6,7 +6,6 @@ from itertools import pairwise
 from typing import Any
 
 from bioetl.domain.types import JsonDict
-
 from bioetl.infrastructure.quality._primitives import (
     _parse_quarter_label,
     _validate_non_negative_int,

@@ -15,10 +15,10 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Generic, TypeVar
-from bioetl.domain.types import JsonDict
 
 import yaml
 
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config_merge import config_merge
 
 T = TypeVar("T")

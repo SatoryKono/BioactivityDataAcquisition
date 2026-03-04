@@ -29,7 +29,9 @@ from bioetl.infrastructure.adapters.openalex.fallback_orchestrator import (
 # ---------------------------------------------------------------------------
 
 
-def _make_service_yielding(records: list[BronzeRecord]) -> FallbackFetchOrchestratorService:
+def _make_service_yielding(
+    records: list[BronzeRecord],
+) -> FallbackFetchOrchestratorService:
     """Return a FallbackFetchOrchestratorService that yields the given records."""
 
     async def _fake_execute(
@@ -62,7 +64,9 @@ def _make_orchestrator(
     )
 
 
-async def _collect(orchestrator: OpenAlexFallbackOrchestrator, **kwargs: Any) -> list[BronzeRecord]:
+async def _collect(
+    orchestrator: OpenAlexFallbackOrchestrator, **kwargs: Any
+) -> list[BronzeRecord]:
     """Collect all records produced by orchestrator.execute(...)."""
     result: list[BronzeRecord] = []
     async for record in orchestrator.execute(**kwargs):

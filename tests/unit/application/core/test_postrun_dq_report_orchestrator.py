@@ -82,9 +82,7 @@ def strict_runtime() -> MagicMock:
 def mock_dq_report_service() -> MagicMock:
     """Create a mock DQReportService."""
     service = MagicMock()
-    service.generate_reports = AsyncMock(
-        return_value=_make_dq_report_result()
-    )
+    service.generate_reports = AsyncMock(return_value=_make_dq_report_result())
     return service
 
 
@@ -299,9 +297,7 @@ class TestPostrunDQReportServiceWarningMode:
     ) -> None:
         """Test that both error and warning are logged in warning mode."""
         service_mock = MagicMock()
-        service_mock.generate_reports = AsyncMock(
-            side_effect=RuntimeError("io error")
-        )
+        service_mock.generate_reports = AsyncMock(side_effect=RuntimeError("io error"))
         service = PostrunDQReportService(
             logger=mock_logger,
             runtime=mock_runtime,
@@ -327,9 +323,7 @@ class TestPostrunDQReportServiceWarningMode:
     ) -> None:
         """Test that BioETLError returns None in warning mode."""
         service_mock = MagicMock()
-        service_mock.generate_reports = AsyncMock(
-            side_effect=BioETLError("dq failed")
-        )
+        service_mock.generate_reports = AsyncMock(side_effect=BioETLError("dq failed"))
         service = PostrunDQReportService(
             logger=mock_logger,
             runtime=mock_runtime,
@@ -409,7 +403,10 @@ class TestPostrunDQReportServiceStrictMode:
         mock_logger.error.assert_called_once()
         error_kwargs = mock_logger.error.call_args[1]
         assert error_kwargs.get("strict_mode") is True
-        assert error_kwargs.get("reason_code") == "POSTRUN_DQ_REPORT_GENERATION_FAILED_STRICT"
+        assert (
+            error_kwargs.get("reason_code")
+            == "POSTRUN_DQ_REPORT_GENERATION_FAILED_STRICT"
+        )
 
     @pytest.mark.asyncio
     async def test_bioetl_error_raises_in_strict_mode(
@@ -480,9 +477,7 @@ class TestIsStrictValidationEnabled:
         )
         assert service._is_strict_validation_enabled() is True
 
-    def test_returns_false_when_attribute_missing(
-        self, mock_logger: MagicMock
-    ) -> None:
+    def test_returns_false_when_attribute_missing(self, mock_logger: MagicMock) -> None:
         """Test helper returns False when runtime lacks strict_validation."""
         runtime = object()  # has no strict_validation attribute
         service = PostrunDQReportService(

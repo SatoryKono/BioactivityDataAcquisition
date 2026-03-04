@@ -6,10 +6,9 @@ from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 
-from bioetl.domain.types import JsonDict
-
 import yaml
 
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.quality._primitives import _quarter_label
 from bioetl.infrastructure.quality.debt_scorecard_validation import (
     validate_debt_scorecard_raw,

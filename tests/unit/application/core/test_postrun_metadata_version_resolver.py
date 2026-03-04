@@ -91,7 +91,9 @@ class TestPostrunMetadataVersionResolverSuccess:
         with patch.dict(
             "sys.modules",
             {
-                "deltalake": MagicMock(DeltaTable=MagicMock(return_value=mock_delta_table)),
+                "deltalake": MagicMock(
+                    DeltaTable=MagicMock(return_value=mock_delta_table)
+                ),
                 "deltalake.exceptions": MagicMock(
                     DeltaError=Exception, TableNotFoundError=Exception
                 ),
@@ -111,7 +113,9 @@ class TestPostrunMetadataVersionResolverSuccess:
         with patch.dict(
             "sys.modules",
             {
-                "deltalake": MagicMock(DeltaTable=MagicMock(return_value=mock_delta_table)),
+                "deltalake": MagicMock(
+                    DeltaTable=MagicMock(return_value=mock_delta_table)
+                ),
                 "deltalake.exceptions": MagicMock(
                     DeltaError=Exception, TableNotFoundError=Exception
                 ),
@@ -204,7 +208,9 @@ class TestPostrunMetadataVersionResolverImportError:
 class TestPostrunMetadataVersionResolverDeltaErrors:
     """Tests for DeltaError and TableNotFoundError handling."""
 
-    def _make_delta_module(self, *, raises: type[Exception]) -> tuple[MagicMock, MagicMock]:
+    def _make_delta_module(
+        self, *, raises: type[Exception]
+    ) -> tuple[MagicMock, MagicMock]:
         """Create mock deltalake module that raises on DeltaTable construction."""
         mock_exceptions = MagicMock()
         # Make both DeltaError and TableNotFoundError real exception classes
@@ -214,7 +220,8 @@ class TestPostrunMetadataVersionResolverDeltaErrors:
         )
         mock_delta = MagicMock()
         mock_delta.DeltaTable.side_effect = raises(
-            mock_exceptions.DeltaError if raises is mock_exceptions.DeltaError
+            mock_exceptions.DeltaError
+            if raises is mock_exceptions.DeltaError
             else mock_exceptions.TableNotFoundError
         )
         mock_delta.exceptions = mock_exceptions
@@ -295,7 +302,10 @@ class TestPostrunMetadataVersionResolverDeltaErrors:
             resolver.resolve_delta_version("/path/table", layer="silver")
 
         call_kwargs = mock_logger.warning.call_args[1]
-        assert call_kwargs["reason_code"] == "POSTRUN_DELTA_TABLE_RESOLUTION_FAILED_WARNING"
+        assert (
+            call_kwargs["reason_code"]
+            == "POSTRUN_DELTA_TABLE_RESOLUTION_FAILED_WARNING"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -384,9 +394,7 @@ class TestPostrunMetadataVersionResolverAllowlistedErrors:
 class TestIsStrictValidationEnabled:
     """Tests for _is_strict_validation_enabled private helper."""
 
-    def test_returns_false_when_strict_false(
-        self, mock_logger: MagicMock
-    ) -> None:
+    def test_returns_false_when_strict_false(self, mock_logger: MagicMock) -> None:
         """Test returns False when runtime.strict_validation is False."""
         runtime = MagicMock()
         runtime.strict_validation = False
@@ -397,9 +405,7 @@ class TestIsStrictValidationEnabled:
         )
         assert resolver._is_strict_validation_enabled() is False
 
-    def test_returns_true_when_strict_true(
-        self, mock_logger: MagicMock
-    ) -> None:
+    def test_returns_true_when_strict_true(self, mock_logger: MagicMock) -> None:
         """Test returns True when runtime.strict_validation is True."""
         runtime = MagicMock()
         runtime.strict_validation = True
@@ -410,9 +416,7 @@ class TestIsStrictValidationEnabled:
         )
         assert resolver._is_strict_validation_enabled() is True
 
-    def test_returns_false_when_attribute_missing(
-        self, mock_logger: MagicMock
-    ) -> None:
+    def test_returns_false_when_attribute_missing(self, mock_logger: MagicMock) -> None:
         """Test returns False when runtime lacks strict_validation attr."""
         runtime = object()
         resolver = PostrunMetadataVersionResolver(

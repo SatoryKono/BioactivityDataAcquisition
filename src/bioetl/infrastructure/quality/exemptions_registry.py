@@ -23,9 +23,10 @@ import re
 from datetime import date
 from pathlib import Path
 from typing import Any
-from bioetl.domain.types import JsonDict
 
 import yaml
+
+from bioetl.domain.types import JsonDict
 
 _DEFAULT_REGISTRY_PATH = Path("configs/quality/architecture_metric_exemptions.yaml")
 _DEFAULT_REQUIRED_FIELDS = ("value", "owner", "reason", "expires_on", "removal_step")

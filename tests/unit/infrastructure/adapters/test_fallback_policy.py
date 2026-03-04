@@ -178,7 +178,9 @@ async def test_process_missing_dois_passes_limit_and_fetched_to_search() -> None
     def resolve(ids: list[str], found: set[str], mapping: dict[str, str]) -> list[str]:
         return ids
 
-    handler = _make_handler(resolve_missing_ids=resolve, search_fallback=search_fallback)
+    handler = _make_handler(
+        resolve_missing_ids=resolve, search_fallback=search_fallback
+    )
 
     async for _ in handler.process_missing_dois(
         dois=["P00002"],
@@ -201,7 +203,7 @@ async def test_process_missing_dois_ignores_normalize_fn_parameter() -> None:
     handler = _make_handler()
 
     called: list[bool] = []
-    normalize_fn_called = lambda x: (called.append(True) or x)  # noqa: E731
+    normalize_fn_called = lambda x: called.append(True) or x  # noqa: E731
 
     results: list[BronzeRecord] = []
     async for record in handler.process_missing_dois(
@@ -253,7 +255,9 @@ async def test_process_title_only_entries_yields_records_for_mapped_entries() ->
 
 
 @pytest.mark.asyncio
-async def test_process_title_only_entries_yields_nothing_when_no_mapped_entries() -> None:
+async def test_process_title_only_entries_yields_nothing_when_no_mapped_entries() -> (
+    None
+):
     """Entries not present in fallback_mapping produce no records."""
     handler = _make_handler()
 

@@ -22,6 +22,7 @@ __all__ = [
 
 
 from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
+
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:

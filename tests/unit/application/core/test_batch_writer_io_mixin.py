@@ -27,6 +27,7 @@ from bioetl.domain.types import BatchID, RunType, ValidationResult
 # Shared fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def mock_storage():
     storage = AsyncMock()
@@ -98,6 +99,7 @@ def batch_writer(mock_storage, mock_context, mock_gold_validator):
 # ---------------------------------------------------------------------------
 # write_bronze
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.unit
 class TestBatchWriterIOMixinBronze:
@@ -203,6 +205,7 @@ class TestBatchWriterIOMixinBronze:
 # write_silver
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.unit
 class TestBatchWriterIOMixinSilver:
     """Tests for write_silver path in BatchWriterIOMixin."""
@@ -252,7 +255,9 @@ class TestBatchWriterIOMixinSilver:
     ):
         """primary_keys from table config are forwarded to storage."""
         writer = _make_writer(
-            mock_storage, mock_context, mock_gold_validator,
+            mock_storage,
+            mock_context,
+            mock_gold_validator,
             primary_keys=["entity_id", "version"],
         )
 
@@ -357,13 +362,12 @@ class TestBatchWriterIOMixinSilver:
 # write_gold
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.unit
 class TestBatchWriterIOMixinGold:
     """Tests for write_gold path in BatchWriterIOMixin."""
 
-    async def test_write_gold_calls_storage_once(
-        self, batch_writer, mock_storage
-    ):
+    async def test_write_gold_calls_storage_once(self, batch_writer, mock_storage):
         """Gold records are written to storage exactly once."""
         await batch_writer.write_gold([{"entity_id": "1"}])
 
@@ -373,6 +377,7 @@ class TestBatchWriterIOMixinGold:
         self, mock_storage, mock_context
     ):
         """Records are projected to schema columns before writing."""
+
         class _Schema:
             @staticmethod
             def to_schema():
@@ -448,11 +453,16 @@ class TestBatchWriterIOMixinGold:
         self, mock_storage, mock_context
     ):
         """_dq_warn and _dq_error get default False values from projection."""
+
         class _Schema:
             @staticmethod
             def to_schema():
                 s = MagicMock()
-                s.columns = {"entity_id": object(), "_dq_warn": object(), "_dq_error": object()}
+                s.columns = {
+                    "entity_id": object(),
+                    "_dq_warn": object(),
+                    "_dq_error": object(),
+                }
                 return s
 
         config = RecordProcessorConfig(
@@ -486,7 +496,9 @@ class TestBatchWriterIOMixinGold:
     ):
         """primary_keys from table config are forwarded to storage."""
         writer = _make_writer(
-            mock_storage, mock_context, mock_gold_validator,
+            mock_storage,
+            mock_context,
+            mock_gold_validator,
             primary_keys=["entity_id"],
         )
 
@@ -500,13 +512,12 @@ class TestBatchWriterIOMixinGold:
 # _prepare_gold_records
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.unit
 class TestPrepareGoldRecords:
     """Tests for BatchWriterIOMixin._prepare_gold_records."""
 
-    def test_returns_all_records_when_no_schema_columns(
-        self, batch_writer
-    ):
+    def test_returns_all_records_when_no_schema_columns(self, batch_writer):
         """Without schema columns, returns original records and collected columns."""
         records = [{"a": 1, "b": 2}]
         # batch_writer's gold_schema has no .to_schema()/.columns attributes
@@ -520,6 +531,7 @@ class TestPrepareGoldRecords:
 
     def test_projects_records_to_schema_columns(self, mock_storage, mock_context):
         """Records filtered to schema column set."""
+
         class _Schema:
             @staticmethod
             def to_schema():

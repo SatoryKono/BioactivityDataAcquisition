@@ -14,8 +14,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Literal
 
-from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics, SchemaDriftInfo
 from bioetl.domain.types import JsonDict
+from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics, SchemaDriftInfo
 
 
 @dataclass(frozen=True, slots=True)

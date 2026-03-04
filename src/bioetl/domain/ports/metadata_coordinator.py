@@ -92,8 +92,12 @@ class SilverMetadataInput:
     records: list[JsonDict] | None = None
     total_records: int | None = None
     source_batch_ids: list[str] | None = None
-    bronze_refs: object | None = None  # object: list[BronzeWriteResult] - avoid circular import, only stored
-    dq_metrics: object | None = None  # object: BatchDQMetrics - avoid circular import, only stored
+    bronze_refs: object | None = (
+        None  # object: list[BronzeWriteResult] - avoid circular import, only stored
+    )
+    dq_metrics: object | None = (
+        None  # object: BatchDQMetrics - avoid circular import, only stored
+    )
     version_before: int | None = None  # ADR-029: Delta version before write
     version_after: int | None = None
     transform_version: str | None = None
@@ -162,7 +166,9 @@ class GoldMetadataInput:
     transform_version: str | None = None
     transform_steps: tuple[str, ...] | None = None
     dq_report_path: str | None = None
-    gold_schema: object | None = None  # object: Pandera DataFrameModel class, only stored/forwarded
+    gold_schema: object | None = (
+        None  # object: Pandera DataFrameModel class, only stored/forwarded
+    )
     governance: GovernanceMetadata | None = None
     total_bytes: int = 0  # ADR-029: Total size in bytes
     partition_count: int = 0  # ADR-029: Number of partitions
