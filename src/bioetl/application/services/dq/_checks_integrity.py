@@ -29,6 +29,53 @@ _SCD_INTEGRITY_ERRORS = (
 )
 
 
+def _build_default_scd_result(
+    *,
+    scd_type: int,
+    total_entities: int,
+) -> SCDIntegrityResult:
+    """Return default PASS result for missing/disabled SCD checks."""
+    return SCDIntegrityResult(
+        scd_type=scd_type,
+        total_entities=total_entities,
+        entities_with_history=0,
+        avg_versions_per_entity=1.0,
+        version_gaps=0,
+        temporal_conflicts=0,
+        overlapping_validity_periods=0,
+        status=DQCheckStatus.PASS,
+    )
+
+
+def _count_scd_overlaps(
+    *,
+    df: pl.DataFrame,
+    entity_key: str,
+    valid_from: str,
+    valid_to: str,
+) -> int:
+    """Count overlapping SCD validity periods for a bounded entity sample."""
+    overlaps = 0
+    try:
+        for entity in df[entity_key].unique().to_list()[:100]:
+            entity_records = df.filter(pl.col(entity_key) == entity).sort(valid_from)
+            if len(entity_records) <= 1:
+                continue
+            for index in range(len(entity_records) - 1):
+                current_to = entity_records[valid_to][index]
+                next_from = entity_records[valid_from][index + 1]
+                if (
+                    current_to is not None
+                    and next_from is not None
+                    and current_to > next_from
+                ):
+                    overlaps += 1
+    except _SCD_INTEGRITY_ERRORS:
+        # Skip malformed partitions during overlap analysis.
+        return overlaps
+    return overlaps
+
+
 def _parse_reference_key(ref_key: str) -> tuple[str, str] | None:
     """Parse mapping key ``local_col -> table.ref_col``."""
     parts = ref_key.split("->")
@@ -141,42 +188,22 @@ def check_scd_integrity(
     df: pl.DataFrame,
     scd_config: dict[str, Any] | None,  # Any: SCD config has heterogeneous values
 ) -> SCDIntegrityResult:
-    """Check SCD (Slowly Changing Dimension) integrity.
-
-    Args:
-        df: Input DataFrame.
-        scd_config: Configuration for scd.
-
-    Returns:
-        Check result as SCDIntegrityResult.
-    """
+    """Check Slowly Changing Dimension (SCD) integrity metrics."""
+    scd_type = 2 if not scd_config else scd_config.get("type", 2)
     if not scd_config:
-        return SCDIntegrityResult(
-            scd_type=2,
+        return _build_default_scd_result(
+            scd_type=scd_type,
             total_entities=len(df),
-            entities_with_history=0,
-            avg_versions_per_entity=1.0,
-            version_gaps=0,
-            temporal_conflicts=0,
-            overlapping_validity_periods=0,
-            status=DQCheckStatus.PASS,
         )
 
-    scd_type = scd_config.get("type", 2)
     entity_key = scd_config.get("entity_key")
     valid_from = scd_config.get("valid_from_col", "_valid_from")
     valid_to = scd_config.get("valid_to_col", "_valid_to")
 
     if not entity_key or entity_key not in df.columns:
-        return SCDIntegrityResult(
+        return _build_default_scd_result(
             scd_type=scd_type,
             total_entities=len(df),
-            entities_with_history=0,
-            avg_versions_per_entity=1.0,
-            version_gaps=0,
-            temporal_conflicts=0,
-            overlapping_validity_periods=0,
-            status=DQCheckStatus.PASS,
         )
 
     unique_entities = df[entity_key].n_unique()
@@ -186,40 +213,24 @@ def check_scd_integrity(
     entities_with_history = int((version_counts["versions"] > 1).sum())
     avg_versions = total_records / unique_entities if unique_entities > 0 else 1.0
 
-    version_gaps = 0
-    temporal_conflicts = 0
-    overlapping = 0
-
-    if valid_from in df.columns and valid_to in df.columns:
-        try:
-            for entity in df[entity_key].unique().to_list()[:100]:
-                entity_records = df.filter(pl.col(entity_key) == entity).sort(
-                    valid_from
-                )
-                if len(entity_records) > 1:
-                    for i in range(len(entity_records) - 1):
-                        current_to = entity_records[valid_to][i]
-                        next_from = entity_records[valid_from][i + 1]
-                        if (
-                            current_to is not None
-                            and next_from is not None
-                            and current_to > next_from
-                        ):
-                            overlapping += 1
-        except _SCD_INTEGRITY_ERRORS:
-            # Catch all: entity group processing may fail due to missing/invalid
-            # temporal fields or sort errors. Skip entity for SCD overlap check.
-            pass
-
-    status = DQCheckStatus.PASS if overlapping == 0 else DQCheckStatus.WARN
+    overlapping = (
+        _count_scd_overlaps(
+            df=df,
+            entity_key=entity_key,
+            valid_from=valid_from,
+            valid_to=valid_to,
+        )
+        if valid_from in df.columns and valid_to in df.columns
+        else 0
+    )
 
     return SCDIntegrityResult(
         scd_type=scd_type,
         total_entities=unique_entities,
         entities_with_history=entities_with_history,
         avg_versions_per_entity=round(avg_versions, 2),
-        version_gaps=version_gaps,
-        temporal_conflicts=temporal_conflicts,
+        version_gaps=0,
+        temporal_conflicts=0,
         overlapping_validity_periods=overlapping,
-        status=status,
+        status=DQCheckStatus.PASS if overlapping == 0 else DQCheckStatus.WARN,
     )

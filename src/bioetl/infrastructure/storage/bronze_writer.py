@@ -165,36 +165,18 @@ class BronzeWriter(
             compressed_size = full_path.stat().st_size
 
             duration = time.perf_counter() - start_time
-            labels = {"provider": provider, "entity": entity}
 
-            self._metrics.observe_histogram(
-                "bronze_write_duration_seconds",
-                duration,
-                labels,
-            )
-            self._metrics.increment_counter(
-                "bronze_records_written_total",
-                record_count,
-                labels,
-            )
-            self._metrics.increment_counter(
-                "bronze_bytes_written_total",
-                compressed_size,
-                labels,
-            )
-
-            self.logger.info(
-                "bronze_write_complete",
-                path=relative_path,
+            self._emit_bronze_write_metrics(
+                duration=duration,
                 provider=provider,
                 entity=entity,
-                batch_id=str(batch_id),
-                run_id=str(run_id),
-                run_type=run_type.value,
                 record_count=record_count,
-                compressed_bytes=compressed_size,
-                uncompressed_bytes=uncompressed_size,
-                duration_seconds=round(duration, 3),
+                compressed_size=compressed_size,
+                uncompressed_size=uncompressed_size,
+                relative_path=relative_path,
+                batch_id=batch_id,
+                run_id=run_id,
+                run_type=run_type,
             )
 
             if self.save_json:
@@ -222,59 +204,18 @@ class BronzeWriter(
                 await self._audit.log_write(audit_entry)
 
             if self._save_metadata:
-                completed_at = ingestion_ts + timedelta(seconds=duration)
-
-                if self._metadata_coordinator is not None:
-                    from bioetl.domain.ports import BronzeMetadataInput
-
-                    query_string = (
-                        source_metadata.query_string if source_metadata else None
-                    )
-                    bronze_input = BronzeMetadataInput(
-                        batch_id=batch_id,
-                        record_count=record_count,
-                        compressed_size=compressed_size,
-                        output_path=relative_path,
-                        started_at=ingestion_ts,
-                        completed_at=completed_at,
-                        source_metadata=source_metadata,
-                        query_string=query_string,
-                    )
-                    bronze_metadata = self._metadata_coordinator.create_bronze_metadata(
-                        bronze_input
-                    )
-                else:
-                    bronze_metadata = self._build_full_bronze_metadata(
-                        run_id=run_id,
-                        run_type=run_type,
-                        provider=provider,
-                        entity=entity,
-                        batch_id=batch_id,
-                        record_count=record_count,
-                        compressed_size=compressed_size,
-                        output_path=relative_path,
-                        started_at=ingestion_ts,
-                        completed_at=completed_at,
-                        duration_seconds=duration,
-                        source_metadata=source_metadata,
-                    )
-
-                if self._flat_structure:
-                    metadata_base_path = self.base_path
-                else:
-                    metadata_base_path = self.base_path / provider / entity
-                await self._metadata_writer.write_bronze_metadata(
-                    base_path=metadata_base_path,
-                    metadata=bronze_metadata,
+                await self._maybe_write_bronze_metadata(
+                    run_id=run_id,
+                    run_type=run_type,
                     provider=provider,
                     entity=entity,
-                )
-                self.logger.debug(
-                    "bronze_metadata_written",
-                    metadata_path=str(
-                        metadata_base_path / f"{provider}_{entity}_metadata.yaml"
-                    ),
-                    run_id=str(run_id),
+                    batch_id=batch_id,
+                    record_count=record_count,
+                    compressed_size=compressed_size,
+                    relative_path=relative_path,
+                    ingestion_ts=ingestion_ts,
+                    duration=duration,
+                    source_metadata=source_metadata,
                 )
 
             span.set_attribute("record_count", record_count)
@@ -291,3 +232,121 @@ class BronzeWriter(
                 uncompressed_size=uncompressed_size,
                 checksum_blake2=checksum,
             )
+
+    def _emit_bronze_write_metrics(
+        self,
+        *,
+        duration: float,
+        provider: str,
+        entity: str,
+        record_count: int,
+        compressed_size: int,
+        uncompressed_size: int,
+        relative_path: str,
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+    ) -> None:
+        """Emit metrics counters and structured log for a bronze write."""
+        labels = {"provider": provider, "entity": entity}
+
+        self._metrics.observe_histogram(
+            "bronze_write_duration_seconds",
+            duration,
+            labels,
+        )
+        self._metrics.increment_counter(
+            "bronze_records_written_total",
+            record_count,
+            labels,
+        )
+        self._metrics.increment_counter(
+            "bronze_bytes_written_total",
+            compressed_size,
+            labels,
+        )
+
+        self.logger.info(
+            "bronze_write_complete",
+            path=relative_path,
+            provider=provider,
+            entity=entity,
+            batch_id=str(batch_id),
+            run_id=str(run_id),
+            run_type=run_type.value,
+            record_count=record_count,
+            compressed_bytes=compressed_size,
+            uncompressed_bytes=uncompressed_size,
+            duration_seconds=round(duration, 3),
+        )
+
+    async def _maybe_write_bronze_metadata(
+        self,
+        *,
+        run_id: RunID,
+        run_type: RunType,
+        provider: str,
+        entity: str,
+        batch_id: BatchID,
+        record_count: int,
+        compressed_size: int,
+        relative_path: str,
+        ingestion_ts: datetime,
+        duration: float,
+        source_metadata: SourceMetadata | None,
+    ) -> None:
+        """Create and persist bronze metadata via coordinator or fallback."""
+        completed_at = ingestion_ts + timedelta(seconds=duration)
+
+        if self._metadata_coordinator is not None:
+            from bioetl.domain.ports import BronzeMetadataInput
+
+            query_string = (
+                source_metadata.query_string if source_metadata else None
+            )
+            bronze_input = BronzeMetadataInput(
+                batch_id=batch_id,
+                record_count=record_count,
+                compressed_size=compressed_size,
+                output_path=relative_path,
+                started_at=ingestion_ts,
+                completed_at=completed_at,
+                source_metadata=source_metadata,
+                query_string=query_string,
+            )
+            bronze_metadata = self._metadata_coordinator.create_bronze_metadata(
+                bronze_input
+            )
+        else:
+            bronze_metadata = self._build_full_bronze_metadata(
+                run_id=run_id,
+                run_type=run_type,
+                provider=provider,
+                entity=entity,
+                batch_id=batch_id,
+                record_count=record_count,
+                compressed_size=compressed_size,
+                output_path=relative_path,
+                started_at=ingestion_ts,
+                completed_at=completed_at,
+                duration_seconds=duration,
+                source_metadata=source_metadata,
+            )
+
+        if self._flat_structure:
+            metadata_base_path = self.base_path
+        else:
+            metadata_base_path = self.base_path / provider / entity
+        await self._metadata_writer.write_bronze_metadata(
+            base_path=metadata_base_path,
+            metadata=bronze_metadata,
+            provider=provider,
+            entity=entity,
+        )
+        self.logger.debug(
+            "bronze_metadata_written",
+            metadata_path=str(
+                metadata_base_path / f"{provider}_{entity}_metadata.yaml"
+            ),
+            run_id=str(run_id),
+        )

@@ -680,8 +680,15 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
+    _maybe_write_bronze_metadata:
+      value: 75
+      owner: '@bioetl-architecture'
+      reason: Extracted from write_bronze during RF-039 function length reduction.
+      expires_on: '2026-06-30'
+      removal_step: Refactor target to satisfy default metric and remove this exemption
+        entry.
     _run_single_enricher:
-      value: 150
+      value: 130
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (function_length).
       expires_on: '2026-04-30'
@@ -702,7 +709,7 @@ registries:
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
     bootstrap_composite_runner:
-      value: 175
+      value: 95
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (function_length).
       expires_on: '2026-04-30'
@@ -724,13 +731,6 @@ registries:
         entry.
     check_anomaly_detection:
       value: 90
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (function_length).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    check_scd_integrity:
-      value: 80
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (function_length).
       expires_on: '2026-04-30'
@@ -814,7 +814,7 @@ registries:
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
     write_bronze:
-      value: 235
+      value: 135
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (function_length).
       expires_on: '2026-04-30'
