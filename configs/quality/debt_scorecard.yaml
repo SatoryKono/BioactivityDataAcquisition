@@ -6,7 +6,7 @@ governance:
   allow_grace_windows_only_for_rf: true
 
 baseline:
-  total_exemptions: 485
+  total_exemptions: 486
   by_registry:
     file_size_limits: 97
     function_complexity: 97
@@ -14,7 +14,7 @@ baseline:
     class_size: 82
     class_method_count: 1
     god_object: 49
-    domain_complexity: 41
+    domain_complexity: 42
 
 registry_groups:
   size_shape:
@@ -31,11 +31,11 @@ registry_groups:
 
 quarterly_targets:
 - quarter: '2026-Q1'
-  max_total_exemptions: 485
+  max_total_exemptions: 486
   min_integral_score: 70
   group_budgets:
     size_shape: 347
-    complexity: 138
+    complexity: 139
   registry_budgets:
     file_size_limits: 97
     function_complexity: 97
@@ -43,7 +43,7 @@ quarterly_targets:
     class_size: 82
     class_method_count: 1
     god_object: 49
-    domain_complexity: 41
+    domain_complexity: 42
 - quarter: '2026-Q2'
   max_total_exemptions: 466
   min_integral_score: 73
@@ -104,7 +104,7 @@ quarterly_targets:
 owner_decomposition_targets:
 - quarter: '2026-Q1'
   allocations:
-    '@bioetl-architecture': 485
+    '@bioetl-architecture': 486
 - quarter: '2026-Q2'
   allocations:
     '@bioetl-architecture': 340

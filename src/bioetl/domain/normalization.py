@@ -103,6 +103,16 @@ def _format_parts_to_date(parts: list[int]) -> str:
     return _DATE_FULL_FMT.format(year, 12, 31)
 
 
+def _try_fast_iso_date(val: str) -> date | None:
+    """Fast path for YYYY-MM-DD: string slicing ~4.7x faster than strptime."""
+    if len(val) == 10 and val[4] == "-" and val[7] == "-":
+        try:
+            return date(int(val[0:4]), int(val[5:7]), int(val[8:10]))
+        except ValueError:
+            pass
+    return None
+
+
 def parse_date_field(value: str | None, fmt: str = "%Y-%m-%d") -> date | None:
     """Parse date string to date object, return None on error.
 
@@ -118,24 +128,10 @@ def parse_date_field(value: str | None, fmt: str = "%Y-%m-%d") -> date | None:
 
     try:
         val_stripped = value.strip()
-        # Fast path for standard YYYY-MM-DD format (used in list_batches filtering)
-        # Manual parsing is ~4.7x faster than strptime
-        if (
-            fmt == "%Y-%m-%d"
-            and len(val_stripped) == 10
-            and val_stripped[4] == "-"
-            and val_stripped[7] == "-"
-        ):
-            from datetime import date
-
-            try:
-                return date(
-                    int(val_stripped[0:4]),
-                    int(val_stripped[5:7]),
-                    int(val_stripped[8:10]),
-                )
-            except ValueError:
-                pass
+        if fmt == "%Y-%m-%d":
+            result = _try_fast_iso_date(val_stripped)
+            if result is not None:
+                return result
 
         from datetime import datetime
 

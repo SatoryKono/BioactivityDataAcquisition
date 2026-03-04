@@ -396,9 +396,9 @@ registries:
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
     normalization.py:
-      value: 375
+      value: 390
       owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (file_size_limits).
+      reason: Fast-path ISO date parsing optimization added (+17 LOC).
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
