@@ -131,10 +131,7 @@ class PreflightService:
         gold_format: str | None = None,
     ) -> PreflightReport:
         """Execute all preflight checks and return aggregated report."""
-        self._logger.info(
-            "Starting preflight validation",
-            extra={"stage": "preflight", "strict_mode": runtime.strict_validation},
-        )
+        self._log_preflight_started(runtime)
 
         health_report = await self.validate_infrastructure(services)
 
@@ -159,27 +156,8 @@ class PreflightService:
         )
 
         self._record_preflight_metrics(report)
-
-        self._logger.info(
-            "Preflight validation completed",
-            extra={
-                "stage": "preflight",
-                "medallion_policy_valid": medallion_policy_valid,
-                "config_error_count": len(config_errors),
-                "is_healthy": health_report.is_healthy,
-                "should_block": report.should_block_startup,
-            },
-        )
-
-        if report.should_block_startup and runtime.strict_validation:
-            error_messages = [
-                f"{error.field}: {error.actual} (expected: {error.expected})"
-                for error in config_errors
-            ]
-            raise ValueError(
-                "Preflight validation failed (strict mode): "
-                f"{', '.join(error_messages)}"
-            )
+        self._log_preflight_completed(report, health_report.is_healthy)
+        self._raise_if_strict_blocking(report, runtime)
 
         return report
 
@@ -198,6 +176,44 @@ class PreflightService:
             "preflight_config_errors_total",
             float(len(report.config_errors)),
             {"pipeline": pipeline, "run_id": run_id},
+        )
+
+    def _log_preflight_started(self, runtime: RuntimeConfig) -> None:
+        """Log preflight start event."""
+        self._logger.info(
+            "Starting preflight validation",
+            extra={"stage": "preflight", "strict_mode": runtime.strict_validation},
+        )
+
+    def _log_preflight_completed(
+        self, report: PreflightReport, is_healthy: bool
+    ) -> None:
+        """Log preflight completion event."""
+        self._logger.info(
+            "Preflight validation completed",
+            extra={
+                "stage": "preflight",
+                "medallion_policy_valid": report.medallion_policy_valid,
+                "config_error_count": len(report.config_errors),
+                "is_healthy": is_healthy,
+                "should_block": report.should_block_startup,
+            },
+        )
+
+    def _raise_if_strict_blocking(
+        self,
+        report: PreflightReport,
+        runtime: RuntimeConfig,
+    ) -> None:
+        """Raise strict-mode preflight error when startup should be blocked."""
+        if not (report.should_block_startup and runtime.strict_validation):
+            return
+        error_messages = [
+            f"{error.field}: {error.actual} (expected: {error.expected})"
+            for error in report.config_errors
+        ]
+        raise ValueError(
+            "Preflight validation failed (strict mode): " + ", ".join(error_messages)
         )
 
 

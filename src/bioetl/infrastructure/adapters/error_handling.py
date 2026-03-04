@@ -1,21 +1,4 @@
-"""Unified error handling for BioETL adapters.
-
-Provides standardized error classification, logging, and wrapping
-for all DataSourcePort adapters (RULES.md §4.1).
-
-Error Categories (§4.1):
-- CRITICAL: Auth failures (401, 403) - fail immediately
-- RECOVERABLE: Rate limits (429), timeouts (5xx) - retry with backoff
-- DATA_QUALITY: Validation errors - log and skip record
-
-Retry Strategy (§4.3):
-- Max retries: 3
-- Backoff: exponential with base 2.0
-- Jitter: 0.1-0.5s random
-
-Log Format (§10.4.2):
-Structured JSON via LoggerPort with consistent fields.
-"""
+"""Unified error classification/logging/wrapping helpers for adapters."""
 
 from __future__ import annotations
 
@@ -40,22 +23,11 @@ if TYPE_CHECKING:
 
 
 class ErrorCategory(StrEnum):
-    """Error category for adapter error handling (RULES.md §4.1).
-
-    Determines pipeline behavior:
-    - CRITICAL: Fail pipeline immediately (auth failures)
-    - RECOVERABLE: Retry with exponential backoff (rate limits, timeouts)
-    - DATA_QUALITY: Log and skip record (validation errors)
-    """
+    """Error categories driving pipeline failure/retry/skip policy."""
 
     CRITICAL = "CRITICAL"
-    """Critical error - fail pipeline immediately (e.g., auth failure)."""
-
     RECOVERABLE = "RECOVERABLE"
-    """Recoverable error - retry with backoff (e.g., rate limit, timeout)."""
-
     DATA_QUALITY = "DATA_QUALITY"
-    """Data quality error - log and skip record (e.g., validation error)."""
 
 
 # HTTP status code to error category mapping
@@ -76,23 +48,19 @@ _HTTP_STATUS_CATEGORIES: dict[int, ErrorCategory] = {
     422: ErrorCategory.DATA_QUALITY,
 }
 
+_ERROR_CONTEXT_RESERVED_KEYS = frozenset(
+    {
+        "status_code",
+        "retry_count",
+        "circuit_breaker_state",
+        "retry_after",
+    }
+)
+
 
 @dataclass
 class AdapterErrorContext:
-    """Context for adapter error handling.
-
-    Contains all relevant information about the error for logging and metrics.
-
-    Attributes:
-        provider: Name of the data provider (e.g., 'chembl', 'uniprot').
-        operation: Operation that failed (e.g., 'fetch', 'health_check').
-        status_code: HTTP status code if applicable.
-        retry_count: Number of retry attempts so far.
-        circuit_breaker_state: Current circuit breaker state if available.
-        error_type: Classified error type from ErrorClassifier.
-        error_category: High-level error category (CRITICAL/RECOVERABLE/DATA_QUALITY).
-        retry_after: Seconds to wait before retry (from Retry-After header).
-    """
+    """Structured context carried through adapter error handling flow."""
 
     provider: str
     operation: str
@@ -106,28 +74,7 @@ class AdapterErrorContext:
 
 
 class ErrorService:
-    """Unified error service for all adapters.
-
-    Provides consistent error classification, logging, and exception wrapping
-    across all DataSourcePort implementations.
-
-    Note:
-        Renamed from ErrorHandler to ErrorService to align with glossary.md
-        Ubiquitous Language (avoid "Handler", use "Service").
-
-    Usage:
-        >>> service = ErrorService(logger)
-        >>> try:
-        ...     response = await client.get(url)
-        ... except httpx.HTTPStatusError as e:
-        ...     category = service.classify_http_error(e.response.status_code)
-        ...     service.log_error("chembl", "fetch", e, {"status_code": e.response.status_code})
-        ...     raise service.wrap_error(e, "chembl")
-
-    Attributes:
-        logger: LoggerPort instance for structured logging.
-        classifier: ErrorClassifier for domain error classification.
-    """
+    """Adapter-facing service for classification, logging, and error wrapping."""
 
     def __init__(
         self,
@@ -135,13 +82,7 @@ class ErrorService:
         classifier: ErrorClassifier | None = None,
         metrics: MetricsPort | None = None,
     ) -> None:
-        """Initialize ErrorService.
-
-        Args:
-            logger: LoggerPort instance for structured logging.
-            classifier: Optional ErrorClassifier. Defaults to new instance.
-            metrics: Optional MetricsPort for taxonomy counters.
-        """
+        """Initialize service with logging, optional classifier, and metrics."""
         self._logger = logger
         self._classifier = classifier or ErrorClassifier()
         self._metrics = metrics if metrics is not None else NoOpMetrics()
@@ -248,32 +189,55 @@ class ErrorService:
         error: Exception,
         context: dict[str, Any] | None = None,  # Any: untyped API JSON record
     ) -> AdapterErrorContext:
-        """Log error with unified format.
-
-        Logs error with full context as structured JSON (RULES.md §10.4.2).
-
-        Args:
-            provider: Name of the data provider.
-            operation: Operation that failed.
-            error: The exception that occurred.
-            context: Additional context (status_code, retry_count, etc.).
-
-        Returns:
-            AdapterErrorContext with all error details.
-        """
+        """Log error with unified structured context."""
         context = context or {}
-
-        # Classify error
         error_type = self._classifier.classify(error)
         status_code = context.get("status_code")
+        error_category = self._resolve_error_category(
+            error=error, status_code=status_code
+        )
+        error_context = self._build_error_context(
+            provider=provider,
+            operation=operation,
+            context=context,
+            error_type=error_type,
+            error_category=error_category,
+            status_code=status_code,
+        )
+        self._emit_error_telemetry(
+            provider=provider,
+            operation=operation,
+            error=error,
+            error_type=error_type,
+            error_category=error_category,
+            error_context=error_context,
+            status_code=status_code,
+        )
+        return error_context
 
+    def _resolve_error_category(
+        self,
+        *,
+        error: Exception,
+        status_code: Any,  # Any: untyped API JSON record
+    ) -> ErrorCategory:
+        """Resolve error category from HTTP status code or exception type."""
         if status_code is not None:
-            error_category = self.classify_http_error(status_code)
-        else:
-            error_category = self.classify_exception(error)
+            return self.classify_http_error(status_code)
+        return self.classify_exception(error)
 
-        # Build context object
-        error_context = AdapterErrorContext(
+    def _build_error_context(
+        self,
+        *,
+        provider: str,
+        operation: str,
+        context: dict[str, Any],  # Any: untyped API JSON record
+        error_type: ErrorType,
+        error_category: ErrorCategory,
+        status_code: Any,  # Any: untyped API JSON record
+    ) -> AdapterErrorContext:
+        """Build strongly typed adapter error context payload."""
+        return AdapterErrorContext(
             provider=provider,
             operation=operation,
             status_code=status_code,
@@ -285,17 +249,22 @@ class ErrorService:
             extra={
                 k: v
                 for k, v in context.items()
-                if k
-                not in {
-                    "status_code",
-                    "retry_count",
-                    "circuit_breaker_state",
-                    "retry_after",
-                }
+                if k not in _ERROR_CONTEXT_RESERVED_KEYS
             },
         )
 
-        # Log with unified format
+    def _emit_error_telemetry(
+        self,
+        *,
+        provider: str,
+        operation: str,
+        error: Exception,
+        error_type: ErrorType,
+        error_category: ErrorCategory,
+        error_context: AdapterErrorContext,
+        status_code: Any,  # Any: untyped API JSON record
+    ) -> None:
+        """Emit error log and taxonomy counter in unified format."""
         self._logger.error(
             "external_api_error",
             provider=provider,
@@ -322,8 +291,6 @@ class ErrorService:
                 "error_type": error_type.value,
             },
         )
-
-        return error_context
 
     def should_retry(self, error: Exception) -> bool:
         """Determine if error should be retried.
@@ -482,70 +449,32 @@ class ErrorService:
         retry_after: float | None,
         original_error: Exception,
     ) -> ExternalServiceError:
-        """Wrap error based on HTTP status code.
-
-        Args:
-            message: Error message.
-            provider: Provider name.
-            status_code: HTTP status code.
-            retry_after: Retry-After value.
-            original_error: Original exception.
-
-        Returns:
-            Appropriate ExternalServiceError subclass.
-
-        Raises:
-            CriticalError: For 401/403 (authentication failures).
-        """
-        # Authentication errors - raise CriticalError
+        """Wrap HTTP error by status code."""
         if status_code in (401, 403):
             raise CriticalError(
                 f"{provider} authentication failed (HTTP {status_code}): {message}"
             ) from original_error
 
-        # Rate limit
         if status_code == 429:
-            effective_retry_after = retry_after or 60.0
-            self._logger.info(
-                "http_error_wrapped_rate_limit",
+            return _build_rate_limit_status_error(
+                logger=self._logger,
+                message=message,
                 provider=provider,
                 status_code=status_code,
-                retry_after=effective_retry_after,
-                recovery_action="retry_after_delay",
+                retry_after=retry_after,
             )
-            return RateLimitExceededError(
-                message=message,
-                service_name=provider,
-                retry_after=effective_retry_after,
-            )
-
-        # Server errors
         if status_code >= 500:
-            self._logger.info(
-                "http_error_wrapped_server_error",
+            return _build_server_status_error(
+                logger=self._logger,
+                message=message,
                 provider=provider,
                 status_code=status_code,
                 retry_after=retry_after,
-                recovery_action="retry_with_backoff",
             )
-            return ServiceUnavailableError(
-                message=message,
-                service_name=provider,
-                status_code=status_code,
-                retry_after=retry_after,
-            )
-
-        # Default to generic error
-        self._logger.debug(
-            "http_error_wrapped_generic",
-            provider=provider,
-            status_code=status_code,
-            retry_after=retry_after,
-            recovery_action="no_retry",
-        )
-        return ExternalServiceError(
+        return _build_generic_status_error(
+            logger=self._logger,
             message=message,
-            service_name=provider,
+            provider=provider,
             status_code=status_code,
             retry_after=retry_after,
         )
@@ -582,6 +511,78 @@ class ErrorService:
             status_code=error_context.status_code,
             retry_after=error_context.retry_after,
         )
+
+
+def _build_rate_limit_status_error(
+    *,
+    logger: LoggerPort,
+    message: str,
+    provider: str,
+    status_code: int,
+    retry_after: float | None,
+) -> RateLimitExceededError:
+    """Build wrapped rate-limit error for HTTP 429 responses."""
+    effective_retry_after = retry_after or 60.0
+    logger.info(
+        "http_error_wrapped_rate_limit",
+        provider=provider,
+        status_code=status_code,
+        retry_after=effective_retry_after,
+        recovery_action="retry_after_delay",
+    )
+    return RateLimitExceededError(
+        message=message,
+        service_name=provider,
+        retry_after=effective_retry_after,
+    )
+
+
+def _build_server_status_error(
+    *,
+    logger: LoggerPort,
+    message: str,
+    provider: str,
+    status_code: int,
+    retry_after: float | None,
+) -> ServiceUnavailableError:
+    """Build wrapped service-unavailable error for HTTP 5xx responses."""
+    logger.info(
+        "http_error_wrapped_server_error",
+        provider=provider,
+        status_code=status_code,
+        retry_after=retry_after,
+        recovery_action="retry_with_backoff",
+    )
+    return ServiceUnavailableError(
+        message=message,
+        service_name=provider,
+        status_code=status_code,
+        retry_after=retry_after,
+    )
+
+
+def _build_generic_status_error(
+    *,
+    logger: LoggerPort,
+    message: str,
+    provider: str,
+    status_code: int,
+    retry_after: float | None,
+) -> ExternalServiceError:
+    """Build generic wrapped error for non-special HTTP status codes."""
+    logger.debug(
+        "http_error_wrapped_generic",
+        provider=provider,
+        status_code=status_code,
+        retry_after=retry_after,
+        recovery_action="no_retry",
+    )
+    return ExternalServiceError(
+        message=message,
+        service_name=provider,
+        status_code=status_code,
+        retry_after=retry_after,
+    )
 
 
 __all__ = [

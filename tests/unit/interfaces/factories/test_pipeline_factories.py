@@ -88,8 +88,8 @@ class TestPubChemCompoundFactory:
         # Restore after test
         pubchem_compound_factory._create_data_source = original_creator
 
-    @patch("bioetl.composition.factories.pipeline_factory.BaseServicesFactory")
-    @patch("bioetl.composition.factories.pipeline_factory.load_pipeline_config")
+    @patch("bioetl.composition.factories.service_bundle_factory.BaseServicesFactory")
+    @patch("bioetl.composition.factories.service_bundle_factory.load_pipeline_config")
     def test_build_services_creates_data_source(
         self,
         mock_load_config,
@@ -122,8 +122,8 @@ class TestPubChemCompoundFactory:
         # Verify data source creator was called
         pubchem_compound_factory._create_data_source.assert_called_once()
 
-    @patch("bioetl.composition.factories.pipeline_factory.BaseServicesFactory")
-    @patch("bioetl.composition.factories.pipeline_factory.load_pipeline_config")
+    @patch("bioetl.composition.factories.service_bundle_factory.BaseServicesFactory")
+    @patch("bioetl.composition.factories.service_bundle_factory.load_pipeline_config")
     def test_build_services_calls_base_services_factory(
         self,
         mock_load_config,
@@ -154,8 +154,8 @@ class TestPubChemCompoundFactory:
 
         mock_base_services.create_common_services.assert_called_once()
 
-    @patch("bioetl.composition.factories.pipeline_factory.BaseServicesFactory")
-    @patch("bioetl.composition.factories.pipeline_factory.load_pipeline_config")
+    @patch("bioetl.composition.factories.service_bundle_factory.BaseServicesFactory")
+    @patch("bioetl.composition.factories.service_bundle_factory.load_pipeline_config")
     def test_build_services_uses_provided_config(
         self,
         mock_load_config,

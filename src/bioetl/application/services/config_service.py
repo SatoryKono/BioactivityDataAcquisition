@@ -25,130 +25,22 @@ __all__ = [
 
 from collections.abc import Mapping
 from dataclasses import dataclass
-from pathlib import Path
-from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.config import PipelineConfig
+from bioetl.domain.ports import (
+    DomainConfigMapperPort,
+    PipelineConfigLoaderPort,
+    PipelineRegistryPort,
+    PipelineSettingsPort,
+    PipelineYamlConfigPort,
+    RegistryAccessorPort,
+    SettingsLoaderPort,
+    SettingsPort,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
-
-
-@runtime_checkable
-class PipelineSettingsPort(Protocol):
-    """Protocol for pipeline-specific settings."""
-
-    batch_size: int
-    relaxed_dq: bool
-
-
-@runtime_checkable
-class SettingsPort(Protocol):
-    """Protocol for application settings."""
-
-    env: str
-    data_dir: str | Path
-    debug: bool
-    test_mode: bool
-    metrics_enabled: bool
-    metrics_port: int
-    pipeline: PipelineSettingsPort
-
-    @property
-    def bronze_path(self) -> str | Path:
-        """Path for Bronze layer storage."""
-        ...
-
-    @property
-    def silver_path(self) -> str | Path:
-        """Path for Silver layer storage."""
-        ...
-
-    @property
-    def gold_path(self) -> str | Path:
-        """Path for Gold layer storage."""
-        ...
-
-    @property
-    def checkpoint_path(self) -> str | Path:
-        """Path for checkpoint storage."""
-        ...
-
-    @property
-    def quarantine_path(self) -> str | Path:
-        """Path for quarantine storage."""
-        ...
-
-    def model_dump(self) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
-        """Convert settings to dictionary.
-
-        Returns:
-            Model data as dictionary.
-        """
-        ...
-
-
-@runtime_checkable
-class PipelineYamlConfigPort(Protocol):
-    """Protocol for pipeline YAML configuration."""
-
-    provider: str
-    entity_type: str
-    silver_table: str
-    gold_table: str | None
-
-    def model_dump(self) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
-        """Convert configuration to dictionary.
-
-        Returns:
-            Model data as dictionary.
-        """
-        ...
-
-
-@runtime_checkable
-class PipelineRegistryPort(Protocol):
-    """Protocol for pipeline registry."""
-
-    def list_pipelines(self) -> list[str]:
-        """List all registered pipeline names.
-
-        Returns:
-            Collection of pipelines.
-        """
-        ...
-
-
-class SettingsLoaderPort(Protocol):
-    """Protocol for loading application settings."""
-
-    def __call__(self) -> SettingsPort:
-        """Load settings."""
-        ...
-
-
-class PipelineConfigLoaderPort(Protocol):
-    """Protocol for loading pipeline YAML configuration."""
-
-    def __call__(self, pipeline_name: str) -> PipelineYamlConfigPort:
-        """Load pipeline configuration."""
-        ...
-
-
-class DomainConfigMapperPort(Protocol):
-    """Protocol for mapping YAML configuration to domain configuration."""
-
-    def __call__(self, yaml_config: PipelineYamlConfigPort) -> PipelineConfig:
-        """Map YAML config to domain config."""
-        ...
-
-
-class RegistryAccessorPort(Protocol):
-    """Protocol for accessing the pipeline registry."""
-
-    def __call__(self) -> PipelineRegistryPort:
-        """Access registry."""
-        ...
 
 
 @dataclass(frozen=True, slots=True)

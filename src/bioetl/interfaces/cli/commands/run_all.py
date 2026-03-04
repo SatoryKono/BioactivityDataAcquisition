@@ -223,6 +223,69 @@ def _determine_exit_code(batch_result: BatchRunResult) -> ExitCode:
     return map_batch_run_result_to_exit_code(batch_result)
 
 
+def _handle_run_all_failure(
+    exc: BaseException, *, source: str, reason_code: str
+) -> None:
+    """Handle run-all CLI failures with consistent error policy."""
+    handle_cli_execution_failure(
+        exc,
+        reason_code=reason_code,
+        subject_key="source",
+        subject_value=source,
+        domain_error_title="Batch execution failed with domain error",
+        unexpected_error_title="Unexpected error during batch execution",
+        interrupted_message="Batch run interrupted by user (Ctrl+C)",
+        default_exit_code=ExitCode.FAIL,
+    )
+
+
+def _run_batch_with_policy(
+    *,
+    source: str,
+    pipelines: list[str],
+    options: RunOptions,
+    health_server: bool,
+    health_port: int,
+) -> BatchRunResult | None:
+    """Execute async batch run with typed exception policy."""
+    coro = _run_all_pipelines_async(
+        pipelines,
+        options,
+        health_server_enabled=health_server,
+        health_port=health_port,
+    )
+    try:
+        return asyncio.run(coro)
+    except PipelineNotFoundError as exc:
+        _handle_run_all_failure(
+            exc,
+            source=source,
+            reason_code="CLI_RUN_ALL_CONFIG_ERROR",
+        )
+    except BioETLError as exc:
+        _handle_run_all_failure(
+            exc,
+            source=source,
+            reason_code="CLI_RUN_ALL_DOMAIN_ERROR",
+        )
+    except KeyboardInterrupt as exc:
+        _handle_run_all_failure(
+            exc,
+            source=source,
+            reason_code="CLI_RUN_ALL_SIGINT",
+        )
+    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
+        _handle_run_all_failure(
+            exc,
+            source=source,
+            reason_code="CLI_RUN_ALL_UNEXPECTED_ERROR",
+        )
+    finally:
+        if getattr(coro, "cr_frame", None) is not None:
+            coro.close()
+    return None
+
+
 @click.command("run-all")
 @click.option(
     "--source",
@@ -305,62 +368,15 @@ def run_all(
         dry_run=dry_run,
         log_level="DEBUG" if debug else "INFO",
     )
-
-    coro = _run_all_pipelines_async(
-        pipelines,
-        options,
-        health_server_enabled=health_server,
+    batch_result = _run_batch_with_policy(
+        source=source,
+        pipelines=pipelines,
+        options=options,
+        health_server=health_server,
         health_port=health_port,
     )
-    try:
-        batch_result = asyncio.run(coro)
-    except PipelineNotFoundError as exc:
-        handle_cli_execution_failure(
-            exc,
-            reason_code="CLI_RUN_ALL_CONFIG_ERROR",
-            subject_key="source",
-            subject_value=source,
-            domain_error_title="Batch execution failed with domain error",
-            unexpected_error_title="Unexpected error during batch execution",
-            interrupted_message="Batch run interrupted by user (Ctrl+C)",
-            default_exit_code=ExitCode.FAIL,
-        )
-    except BioETLError as exc:
-        handle_cli_execution_failure(
-            exc,
-            reason_code="CLI_RUN_ALL_DOMAIN_ERROR",
-            subject_key="source",
-            subject_value=source,
-            domain_error_title="Batch execution failed with domain error",
-            unexpected_error_title="Unexpected error during batch execution",
-            interrupted_message="Batch run interrupted by user (Ctrl+C)",
-            default_exit_code=ExitCode.FAIL,
-        )
-    except KeyboardInterrupt as exc:
-        handle_cli_execution_failure(
-            exc,
-            reason_code="CLI_RUN_ALL_SIGINT",
-            subject_key="source",
-            subject_value=source,
-            domain_error_title="Batch execution failed with domain error",
-            unexpected_error_title="Unexpected error during batch execution",
-            interrupted_message="Batch run interrupted by user (Ctrl+C)",
-            default_exit_code=ExitCode.FAIL,
-        )
-    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
-        handle_cli_execution_failure(
-            exc,
-            reason_code="CLI_RUN_ALL_UNEXPECTED_ERROR",
-            subject_key="source",
-            subject_value=source,
-            domain_error_title="Batch execution failed with domain error",
-            unexpected_error_title="Unexpected error during batch execution",
-            interrupted_message="Batch run interrupted by user (Ctrl+C)",
-            default_exit_code=ExitCode.FAIL,
-        )
-    finally:
-        if getattr(coro, "cr_frame", None) is not None:
-            coro.close()
+    if batch_result is None:
+        return
 
     _echo_batch_summary(batch_result, dry_run)
     sys.exit(_determine_exit_code(batch_result))

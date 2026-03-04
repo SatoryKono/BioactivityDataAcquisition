@@ -317,77 +317,127 @@ class ExportService:
         layer: str = "silver",
         options: ExportOptions | None = None,
     ) -> ExportResult:
-        """Export a Delta table to the specified format.
-
-        Args:
-            table_name: Table name in format "provider.entity".
-            layer: Medallion layer to read from.
-            options: Export options (format, output path, etc.).
-
-        Returns:
-            ExportResult with export outcome.
-        """
+        """Export a Delta table to the specified format."""
         options = options or ExportOptions()
         table_path = self._get_table_path(table_name, layer)
 
         try:
             if not await self.reader.table_exists(str(table_path)):
-                return ExportResult(
+                return self._create_missing_table_result(
                     table_name=table_name,
                     layer=layer,
-                    format=options.format,
-                    output_path=None,
-                    row_count=0,
-                    error=f"Table not found: {table_path}",
+                    options=options,
+                    table_path=table_path,
                 )
-
-            self.logger.info(
-                "Reading table for export",
-                table=table_name,
-                layer=layer,
-                format=options.format,
-                limit=options.limit,
-            )
-
-            table = await self.reader.read_table(
-                str(table_path), columns=options.columns, limit=options.limit
-            )
-            row_count = table.num_rows
-
-            output_dir = options.output_path or self.export_path
-            output_dir.mkdir(parents=True, exist_ok=True)
-
-            output_path = self._write_export(
-                table, table_name, layer, options.format, output_dir
-            )
-
-            self.logger.info(
-                "Export completed",
-                table=table_name,
-                rows=row_count,
-                output=str(output_path),
-            )
-
-            return ExportResult(
+            return await self._export_existing_table(
                 table_name=table_name,
                 layer=layer,
-                format=options.format,
-                output_path=output_path,
-                row_count=row_count,
+                options=options,
+                table_path=table_path,
             )
-
         except _EXPORT_OPERATION_ERRORS as e:
             self.logger.error(
                 "Export failed", table=table_name, layer=layer, error=str(e)
             )
-            return ExportResult(
+            return self._create_failed_result(
                 table_name=table_name,
                 layer=layer,
-                format=options.format,
-                output_path=None,
-                row_count=0,
+                options=options,
                 error=str(e),
             )
+
+    async def _export_existing_table(
+        self,
+        *,
+        table_name: str,
+        layer: str,
+        options: ExportOptions,
+        table_path: Path,
+    ) -> ExportResult:
+        """Export an existing table and build success result."""
+        self.logger.info(
+            "Reading table for export",
+            table=table_name,
+            layer=layer,
+            format=options.format,
+            limit=options.limit,
+        )
+        table = await self.reader.read_table(
+            str(table_path), columns=options.columns, limit=options.limit
+        )
+        row_count = table.num_rows
+        output_dir = options.output_path or self.export_path
+        output_dir.mkdir(parents=True, exist_ok=True)
+        output_path = self._write_export(
+            table, table_name, layer, options.format, output_dir
+        )
+        self.logger.info(
+            "Export completed",
+            table=table_name,
+            rows=row_count,
+            output=str(output_path),
+        )
+        return self._create_success_result(
+            table_name=table_name,
+            layer=layer,
+            options=options,
+            output_path=output_path,
+            row_count=row_count,
+        )
+
+    def _create_missing_table_result(
+        self,
+        *,
+        table_name: str,
+        layer: str,
+        options: ExportOptions,
+        table_path: Path,
+    ) -> ExportResult:
+        """Build result payload for missing table case."""
+        return ExportResult(
+            table_name=table_name,
+            layer=layer,
+            format=options.format,
+            output_path=None,
+            row_count=0,
+            error=f"Table not found: {table_path}",
+        )
+
+    def _create_success_result(
+        self,
+        *,
+        table_name: str,
+        layer: str,
+        options: ExportOptions,
+        output_path: Path,
+        row_count: int,
+    ) -> ExportResult:
+        """Build result payload for successful export case."""
+        return ExportResult(
+            table_name=table_name,
+            layer=layer,
+            format=options.format,
+            output_path=output_path,
+            row_count=row_count,
+        )
+
+    def _create_failed_result(
+        self,
+        *,
+        table_name: str,
+        layer: str,
+        options: ExportOptions,
+        error: str,
+    ) -> ExportResult:
+        """Build result payload for failed export case."""
+        return ExportResult(
+            table_name=table_name,
+            layer=layer,
+            format=options.format,
+            output_path=None,
+            row_count=0,
+            error=error,
+        )
 
     def _write_export(
         self,

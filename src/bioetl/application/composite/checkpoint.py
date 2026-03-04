@@ -496,70 +496,66 @@ class CompositeCheckpointService:
                 reason_code="unexpected_bioetl_error",
             )
 
+    def _resolve_resume_checkpoint_path(self) -> Path | None:
+        """Resolve checkpoint path for resume mode."""
+        if self._checkpoint_path.exists():
+            return self._checkpoint_path
+        return self._get_latest_checkpoint_path()
+
+    def _load_checkpoint_state(
+        self,
+        checkpoint_path: Path,
+    ) -> CompositeCheckpointState | None:
+        """Load checkpoint state from path, returning None on failure."""
+        try:
+            data = json.loads(checkpoint_path.read_text())
+            state = CompositeCheckpointState.from_dict(data)
+            raw_state = data.get("state")
+            if raw_state is not None and state.state.value != raw_state:
+                self._logger.warning(
+                    "Checkpoint state value corrupted, using default",
+                    composite=self._composite_name,
+                    raw_state=raw_state,
+                    parsed_state=state.state.value,
+                )
+            self._logger.info(
+                "Loaded checkpoint",
+                composite=self._composite_name,
+                checkpoint_path=str(checkpoint_path),
+                state=state.state.value,
+                seed_completed=state.seed_completed,
+                completed_enrichers=list(state.completed_enrichers),
+            )
+            return state
+        except _CHECKPOINT_READ_ERRORS as e:
+            self._logger.warning(
+                "Failed to load checkpoint",
+                composite=self._composite_name,
+                error=str(e),
+                error_type=type(e).__name__,
+                reason_code="checkpoint_load_failed",
+            )
+        except BioETLError as e:
+            self._logger.warning(
+                "Failed to load checkpoint",
+                composite=self._composite_name,
+                error=str(e),
+                error_type=type(e).__name__,
+                reason_code="unexpected_bioetl_error",
+            )
+        return None
+
     async def load(self) -> CompositeCheckpointState:
-        """Load checkpoint state.
-
-        If resume=True and checkpoint exists, load it.
-        Otherwise, create fresh state.
-
-        When resume=False but a checkpoint with progress exists, logs a warning
-        that the checkpoint will be overwritten.
-
-        Returns:
-            Checkpoint state (loaded or fresh).
-        """
+        """Load checkpoint state or create a fresh one."""
         if self._resume:
-            # Try to load existing checkpoint
-            checkpoint_path: Path | None = None
-            if self._checkpoint_path.exists():
-                checkpoint_path = self._checkpoint_path
-            else:
-                # Try to find latest checkpoint for this composite
-                checkpoint_path = self._get_latest_checkpoint_path()
-
+            checkpoint_path = self._resolve_resume_checkpoint_path()
             if checkpoint_path is not None and checkpoint_path.exists():
-                try:
-                    data = json.loads(checkpoint_path.read_text())
-                    state = CompositeCheckpointState.from_dict(data)
-                    # Check for state mismatch (corrupted file)
-                    raw_state = data.get("state")
-                    if raw_state is not None and state.state.value != raw_state:
-                        self._logger.warning(
-                            "Checkpoint state value corrupted, using default",
-                            composite=self._composite_name,
-                            raw_state=raw_state,
-                            parsed_state=state.state.value,
-                        )
-                    self._logger.info(
-                        "Loaded checkpoint",
-                        composite=self._composite_name,
-                        checkpoint_path=str(checkpoint_path),
-                        state=state.state.value,
-                        seed_completed=state.seed_completed,
-                        completed_enrichers=list(state.completed_enrichers),
-                    )
+                state = self._load_checkpoint_state(checkpoint_path)
+                if state is not None:
                     return state
-                except _CHECKPOINT_READ_ERRORS as e:
-                    self._logger.warning(
-                        "Failed to load checkpoint",
-                        composite=self._composite_name,
-                        error=str(e),
-                        error_type=type(e).__name__,
-                        reason_code="checkpoint_load_failed",
-                    )
-                except BioETLError as e:
-                    self._logger.warning(
-                        "Failed to load checkpoint",
-                        composite=self._composite_name,
-                        error=str(e),
-                        error_type=type(e).__name__,
-                        reason_code="unexpected_bioetl_error",
-                    )
         else:
-            # resume=False: check if existing checkpoint with progress will be overwritten
             self._warn_if_checkpoint_exists_with_progress()
 
-        # Create fresh state
         return CompositeCheckpointState(
             composite_name=self._composite_name,
             run_id=self._run_id,

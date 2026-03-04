@@ -276,59 +276,57 @@ class CsvExporter:
         sort_by: list[str] | None = None,
         primary_keys: list[str] | None = None,
     ) -> Path:
-        """Export PyArrow table to CSV file.
-
-        Args:
-            table_name: Name of the table (used for file naming)
-            data: PyArrow table to export
-            append: If True, append to existing file; if False, overwrite
-            sort_by: Override default sort columns for this export
-            primary_keys: Optional list of primary keys for deduplication (upsert simulation)
-
-        Returns:
-            Path to the written CSV file
-
-        """
+        """Export PyArrow table to CSV file."""
         csv_full_path = self.base_path / f"{table_name}.csv"
         csv_full_path.parent.mkdir(parents=True, exist_ok=True)
-
-        # Convert list/struct columns to JSON strings for CSV compatibility
         csv_data = self._flatten_for_csv(data)
-
         loop = asyncio.get_running_loop()
-
-        # If append mode and file exists, read and concatenate
-        if append and csv_full_path.exists():
-            csv_data = await loop.run_in_executor(
-                None,
-                lambda: self._read_and_concat(csv_full_path, csv_data),
-            )
-
-            # Deduplicate if primary keys provided (simulate upsert)
-            if primary_keys:
-                csv_data = await loop.run_in_executor(
-                    None,
-                    lambda: self._deduplicate(csv_data, primary_keys),
-                )
-
-        # Sort for deterministic output
+        csv_data = await self._merge_for_append_mode(
+            loop=loop,
+            csv_full_path=csv_full_path,
+            csv_data=csv_data,
+            append=append,
+            primary_keys=primary_keys,
+        )
         sort_columns = sort_by if sort_by is not None else self.sort_by
         if sort_columns:
             csv_data = self._sort_table(csv_data, sort_columns)
-
-        # Build CSV write options
-        write_options = pv.WriteOptions(
-            include_header=self.header,
-            delimiter=self.delimiter,
-        )
-
-        # Atomic write in executor to avoid blocking
+        write_options = self._build_write_options()
         await loop.run_in_executor(
             None,
             lambda: self._atomic_csv_write(csv_data, csv_full_path, write_options),
         )
-
         return csv_full_path
+
+    async def _merge_for_append_mode(
+        self,
+        *,
+        loop: asyncio.AbstractEventLoop,
+        csv_full_path: Path,
+        csv_data: pa.Table,
+        append: bool,
+        primary_keys: list[str] | None,
+    ) -> pa.Table:
+        """Read/concat and optional deduplication for append workflow."""
+        if not append or not csv_full_path.exists():
+            return csv_data
+        merged = await loop.run_in_executor(
+            None,
+            lambda: self._read_and_concat(csv_full_path, csv_data),
+        )
+        if not primary_keys:
+            return merged
+        return await loop.run_in_executor(
+            None,
+            lambda: self._deduplicate(merged, primary_keys),
+        )
+
+    def _build_write_options(self) -> pv.WriteOptions:
+        """Build CSV writer options from exporter configuration."""
+        return pv.WriteOptions(
+            include_header=self.header,
+            delimiter=self.delimiter,
+        )
 
     def _read_and_concat(self, existing_path: Path, new_data: pa.Table) -> pa.Table:
         """Read existing CSV and concatenate with new data."""

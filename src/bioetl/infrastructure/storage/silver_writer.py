@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-import asyncio
+import asyncio as _asyncio
 import time
 from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, Any, Literal
 
 import pyarrow as pa
-from deltalake import DeltaTable, write_deltalake
+from deltalake import DeltaTable, write_deltalake  # noqa: F401
+from deltalake import write_deltalake as _write_deltalake
 from deltalake.exceptions import DeltaError, SchemaMismatchError
 
 from bioetl.domain.exceptions import MergeConflictError, SchemaViolationError
@@ -17,7 +18,6 @@ from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
 from bioetl.domain.types import BronzeRecord, MetaDict
 from bioetl.infrastructure.storage.base_delta_writer import (
     BaseDeltaWriter,
-    coerce_null_types_for_delta,
 )
 from bioetl.infrastructure.storage.silver_writer_arrow_mixin import (
     SilverWriterArrowMixin,
@@ -25,12 +25,19 @@ from bioetl.infrastructure.storage.silver_writer_arrow_mixin import (
 from bioetl.infrastructure.storage.silver_writer_delta_mixin import (
     SilverWriterDeltaMixin,
 )
+from bioetl.infrastructure.storage.silver_writer_merged_mixin import (
+    SilverWriterMergedMixin,
+)
 from bioetl.infrastructure.storage.silver_writer_metadata_mixin import (
     SilverWriterMetadataMixin,
 )
 from bioetl.infrastructure.storage.silver_writer_validation_mixin import (
     SilverWriterValidationMixin,
 )
+
+# Backward-compatible module aliases for tests patching historical symbols.
+asyncio = _asyncio
+write_deltalake = _write_deltalake
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -57,6 +64,7 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
     SilverWriterValidationMixin,
     SilverWriterDeltaMixin,
     SilverWriterMetadataMixin,
+    SilverWriterMergedMixin,
     BaseDeltaWriter,
 ):
     """Writer for Silver layer (normalized data in Delta Lake)."""
@@ -278,74 +286,3 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
     ) -> list[BronzeRecord]:
         """Read records from a Silver layer Delta table."""
         return await self.read_table(table_name, columns=columns)
-
-    async def write_silver_merged(
-        self,
-        table_name: str,
-        records: list[BronzeRecord],
-        primary_keys: list[str] | None = None,
-        *,
-        run_id: str | None = None,
-        sources_used: list[str] | None = None,
-        preserve_column_order: bool = False,
-    ) -> None:
-        """Write merged records to Silver layer without explicit schema."""
-        from bioetl.domain.schemas.column_order import canonical_column_order
-
-        if not records:
-            self.logger.warning(
-                "No records to write for merged Silver",
-                table_name=table_name,
-            )
-            return
-
-        arrow_table = pa.Table.from_pylist(records)
-        arrow_table = coerce_null_types_for_delta(arrow_table)
-        schema = arrow_table.schema
-
-        if not preserve_column_order:
-            ordered_columns = canonical_column_order(list(arrow_table.column_names))
-            arrow_table = arrow_table.select(ordered_columns)
-
-        if primary_keys:
-            valid_keys = [key for key in primary_keys if key in schema.names]
-            if valid_keys:
-                arrow_table = arrow_table.sort_by(
-                    [(key, "ascending") for key in valid_keys]
-                )
-
-        table_path = self._resolve_table_path(table_name)
-
-        self.logger.info(
-            "Writing merged Silver records",
-            table_name=table_name,
-            path=table_path,
-            records=len(records),
-        )
-
-        loop = asyncio.get_running_loop()
-        await loop.run_in_executor(
-            None,
-            lambda: write_deltalake(
-                table_path,
-                arrow_table,
-                mode="overwrite",
-                schema_mode="overwrite",
-            ),
-        )
-
-        if self.csv_exporter:
-            await self.csv_exporter.export(
-                table_name,
-                arrow_table,
-                append=False,
-            )
-
-        await self._write_silver_merged_metadata(
-            table_path=table_path,
-            table_name=table_name,
-            records=records,
-            primary_keys=primary_keys or [],
-            run_id=run_id,
-            sources_used=sources_used,
-        )

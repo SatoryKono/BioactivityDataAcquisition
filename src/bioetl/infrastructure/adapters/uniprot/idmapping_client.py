@@ -29,6 +29,7 @@ from bioetl.domain.ports import NoOpMetrics
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+from bioetl.infrastructure.adapters.uniprot.constants import UNIPROT_API_BASE
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort
@@ -83,7 +84,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
     provider_name: str = "uniprot_idmapping"
 
     # UniProt ID Mapping constants
-    BASE_URL = "https://rest.uniprot.org"
+    BASE_URL = UNIPROT_API_BASE
     POLLING_INTERVAL = 3.0  # seconds
     MAX_POLL_ATTEMPTS = 100  # ~5 minutes max wait
     MAX_IDS_PER_BATCH = 500  # Conservative batch size

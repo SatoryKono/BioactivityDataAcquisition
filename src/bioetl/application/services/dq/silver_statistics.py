@@ -262,62 +262,72 @@ class SilverStatisticsCalculator:
             dtype = df[col].dtype
 
             if dtype in (pl.Float64, pl.Float32, pl.Int64, pl.Int32, pl.Int16, pl.Int8):
-                try:
-                    stats = df[col].drop_nulls()
-                    if len(stats) > 0:
-                        min_val = stats.min()
-                        max_val = stats.max()
-                        mean_val = stats.mean()
-                        std_val = stats.std()
-                        median_val = stats.median()
-                        min_num = cast("int | float | None", min_val)
-                        max_num = cast("int | float | None", max_val)
-                        mean_num = cast("int | float | None", mean_val)
-                        std_num = cast("int | float | None", std_val)
-                        median_num = cast("int | float | None", median_val)
-                        numeric_cols[col] = NumericDistribution(
-                            min=float(min_num) if min_num is not None else None,
-                            max=float(max_num) if max_num is not None else None,
-                            mean=float(mean_num) if mean_num is not None else None,
-                            std=float(std_num) if std_num is not None else None,
-                            median=float(median_num)
-                            if median_num is not None
-                            else None,
-                        )
-                except _SILVER_PROFILE_ERRORS:
-                    # Catch all: numeric stats may fail for mixed types, NaN/Inf,
-                    # or non-numeric data in numeric column. Skip column profiling.
-                    pass
+                numeric_dist = self._profile_numeric_column(df, col)
+                if numeric_dist is not None:
+                    numeric_cols[col] = numeric_dist
 
             elif dtype in (pl.Utf8, pl.Categorical):
-                try:
-                    value_counts = df[col].value_counts().head(5)
-                    cardinality = df[col].n_unique()
-                    top_values = []
-                    for row in value_counts.iter_rows(named=True):
-                        val = row.get(col) or row.get("value")
-                        count = row.get("count") or row.get("counts", 0)
-                        top_values.append(
-                            {
-                                "value": str(val) if val is not None else None,
-                                "count": count,
-                                "pct": round(count / len(df), 4) if len(df) > 0 else 0,
-                            }
-                        )
-                    categorical_cols[col] = CategoricalDistribution(
-                        top_values=tuple(top_values),
-                        cardinality=cardinality,
-                    )
-                except _SILVER_PROFILE_ERRORS:
-                    # Catch all: value_counts() may fail for unhashable types or
-                    # large cardinality. Skip column from categorical profiling.
-                    pass
+                categorical_dist = self._profile_categorical_column(df, col)
+                if categorical_dist is not None:
+                    categorical_cols[col] = categorical_dist
 
         return ValueDistributionResult(
             numeric_columns=numeric_cols,
             categorical_columns=categorical_cols,
             status=DQCheckStatus.PASS,
         )
+
+    def _profile_numeric_column(
+        self,
+        df: pl.DataFrame,
+        col: str,
+    ) -> NumericDistribution | None:
+        """Build numeric distribution for one column."""
+        try:
+            stats = df[col].drop_nulls()
+            if len(stats) == 0:
+                return None
+            min_num = cast("int | float | None", stats.min())
+            max_num = cast("int | float | None", stats.max())
+            mean_num = cast("int | float | None", stats.mean())
+            std_num = cast("int | float | None", stats.std())
+            median_num = cast("int | float | None", stats.median())
+            return NumericDistribution(
+                min=float(min_num) if min_num is not None else None,
+                max=float(max_num) if max_num is not None else None,
+                mean=float(mean_num) if mean_num is not None else None,
+                std=float(std_num) if std_num is not None else None,
+                median=float(median_num) if median_num is not None else None,
+            )
+        except _SILVER_PROFILE_ERRORS:
+            return None
+
+    def _profile_categorical_column(
+        self,
+        df: pl.DataFrame,
+        col: str,
+    ) -> CategoricalDistribution | None:
+        """Build categorical distribution for one column."""
+        try:
+            value_counts = df[col].value_counts().head(5)
+            cardinality = df[col].n_unique()
+            top_values = []
+            for row in value_counts.iter_rows(named=True):
+                val = row.get(col) or row.get("value")
+                count = row.get("count") or row.get("counts", 0)
+                top_values.append(
+                    {
+                        "value": str(val) if val is not None else None,
+                        "count": count,
+                        "pct": round(count / len(df), 4) if len(df) > 0 else 0,
+                    }
+                )
+            return CategoricalDistribution(
+                top_values=tuple(top_values),
+                cardinality=cardinality,
+            )
+        except _SILVER_PROFILE_ERRORS:
+            return None
 
     def check_schema_drift(
         self, df: pl.DataFrame, previous_schema: dict[str, str] | None

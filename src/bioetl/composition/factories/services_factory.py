@@ -1,153 +1,64 @@
 """Services Factory.
 
-Consolidated module for creating pipeline infrastructure services.
-
-Contains:
-- BaseServicesFactory: Creates PipelineServices with all dependencies
-- ServicesBuilder: Creates CheckpointManagerService, RecordProcessor, BatchExecutor
-
-This module follows the DI pattern: all services are created in the
-composition layer and injected into pipeline components.
+Contains BaseServicesFactory for creating PipelineServices with all dependencies.
+ServicesBuilder and helpers have been extracted to services_builder.py.
 """
 
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable, Sequence
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal, cast
+from typing import TYPE_CHECKING, Any
 
-from bioetl.application.core.batch_executor import BatchExecutor
-from bioetl.application.core.checkpoint_manager import CheckpointManagerService
-from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.pipeline_services import PipelineServices
-from bioetl.application.core.protocols import (
-    GoldFilterCallback,
-    GoldTransformCallback,
-    TransformCallback,
+from bioetl.composition.factories.dq_context_resolver import (
+    create_dq_services as _create_dq_services_impl,
 )
-from bioetl.application.core.record_processor import RecordProcessor
-from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
+from bioetl.composition.factories.dq_context_resolver import (
+    get_flat_structure as _get_flat_structure_impl,
+)
+from bioetl.composition.factories.dq_context_resolver import (
+    get_output_root as _get_output_root_impl,
+)
+from bioetl.composition.factories.dq_context_resolver import (
+    is_dq_report_enabled as _is_dq_report_enabled_impl,
+)
 from bioetl.composition.factories.dq_factory import DQServicesFactory
-from bioetl.composition.factories.services_factory_pipeline_builder import (
-    BatchProcessingComponents,
-)
-from bioetl.composition.factories.services_factory_pipeline_builder import (
-    create_batch_executor_from_pipeline as _create_batch_executor_from_pipeline,
-)
-from bioetl.composition.factories.services_factory_pipeline_builder import (
-    create_batch_processing_components as _create_batch_processing_components,
-)
-from bioetl.composition.factories.services_factory_pipeline_builder import (
-    create_checkpoint_manager as _create_checkpoint_manager,
-)
-from bioetl.composition.factories.services_factory_pipeline_builder import (
-    create_record_processor_from_pipeline as _create_record_processor_from_pipeline,
+from bioetl.composition.factories.services_builder import (
+    ServicesBuilder,
+    create_data_normalization_service,
+    extract_pipeline_callbacks,
 )
 from bioetl.composition.factories.storage import StorageContext, StorageFactory
-from bioetl.domain.composite.config import ColumnGroupConfig
-from bioetl.domain.config import TableConfig
-from bioetl.domain.error_classifier import ErrorClassifier
-from bioetl.domain.medallion import GoldWriteMode, LoadingStrategy, SilverWriteMode
 from bioetl.domain.ports import NoOpMetrics
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 from bioetl.infrastructure.quarantine import UnifiedQuarantine
-from bioetl.infrastructure.validation import PanderaGoldValidator
 
 if TYPE_CHECKING:
-    import pandera
-    import pyarrow as pa
-
-    from bioetl.application.core.base import BasePipeline
-    from bioetl.application.core.shutdown import ShutdownSignal
     from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
-    from bioetl.domain.config import DQConfig, MemoryConfig
-    from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import (
-        BatchIdGeneratorPort,
         CheckpointPort,
-        DataNormalizationPort,
         DataSourcePort,
         DQMonitorPort,
-        GoldValidatorPort,
         LockPort,
         LoggerPort,
-        MemoryMonitorPort,
         MetricsPort,
         QuarantinePort,
         SilverValidatorPort,
         TracingPort,
     )
-    from bioetl.domain.services import DataNormalizationConfig
-    from bioetl.domain.types import RunID
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
 __all__ = [
     "BaseServicesFactory",
-    "PipelineCallbacksContext",
+    "DQServicesFactory",
     "ServicesBuilder",
     "create_data_normalization_service",
     "extract_pipeline_callbacks",
 ]
-
-
-# =============================================================================
-# Helper Functions
-# =============================================================================
-
-
-def extract_pipeline_callbacks(
-    pipeline: BasePipeline,
-) -> PipelineCallbacksContext:
-    """Extract transformation callbacks from pipeline.
-
-    Extracts callbacks from the pipeline's transformer if available,
-    otherwise falls back to pipeline methods (legacy support).
-
-    Args:
-        pipeline: Pipeline instance with transformer or legacy methods.
-
-    Returns:
-        PipelineCallbacksContext with transform, gold_filter, and gold_transform callbacks.
-
-    Raises:
-        AttributeError: If pipeline has no transformer and doesn't implement
-            transform_bronze_to_silver (enforces REQ-ARCH-REF-001).
-    """
-    transformer = pipeline.transformer
-    if transformer is not None:
-        return PipelineCallbacksContext(
-            transform=transformer.transform,
-            gold_filter=transformer.should_write_gold,
-            gold_transform=transformer.transform_for_gold,
-        )
-
-    # Fallback for pipelines without explicit transformer (legacy)
-    # NOTE: BasePipeline no longer implements these methods.
-    # If a subclass does not implement them and has no transformer, this will raise AttributeError.
-    # This is intentional to enforce the new architecture (REQ-ARCH-REF-001).
-    transform_cb = pipeline.transform_bronze_to_silver
-    gold_filter_cb = getattr(
-        pipeline, "should_write_gold", lambda _context, record: True
-    )
-    gold_transform_cb = getattr(
-        pipeline,
-        "transform_for_gold",
-        lambda _context, silver_record: silver_record,
-    )
-    return PipelineCallbacksContext(
-        transform=transform_cb,
-        gold_filter=gold_filter_cb,
-        gold_transform=gold_transform_cb,
-    )
-
-
-# =============================================================================
-# BaseServicesFactory - Creates PipelineServices
-# =============================================================================
 
 
 class BaseServicesFactory:
@@ -166,27 +77,47 @@ class BaseServicesFactory:
         metadata_coordinator: MetadataCoordinator | None = None,
         silver_validator: SilverValidatorPort | None = None,
     ) -> PipelineServices:
-        """Create services with injected data source.
-
-        Args:
-            settings: Application settings
-            logger: Structured logger
-            data_source: Data source port implementation
-            pipeline_config: Pipeline YAML configuration
-            metrics: Optional shared MetricsPort. If not provided, created from settings.
-            tracer: Optional tracer (defaults to NoOpTracing if not provided)
-            dq_monitor: Optional data quality monitor for anomaly detection
-            metadata_coordinator: Optional MetadataCoordinator for centralized
-                                metadata creation across Bronze, Silver, Gold.
-            silver_validator: Optional SilverValidatorPort for Pandera validation
-                in SilverWriter. If None, validation is skipped by storage layer.
-
-        Returns:
-            PipelineServices with all dependencies configured
-        """
-        # Reuse shared metrics when provided so data source/storage write to same port.
+        """Create a fully wired `PipelineServices` bundle for one pipeline run."""
         metrics_port = metrics if metrics is not None else cls._create_metrics(settings)
+        cls._ensure_prod_silver_validator(settings, pipeline_config, silver_validator)
+        storage_ctx = StorageFactory.create(
+            settings,
+            pipeline_config,
+            logger,
+            metrics=metrics_port,
+            metadata_coordinator=metadata_coordinator,
+            silver_validator=silver_validator,
+        )
+        lock = cls._create_lock()
+        checkpoint = cls._create_checkpoint(storage_ctx)
+        quarantine = cls._create_quarantine(settings)
+        tracer_port = cls._resolve_tracer(tracer)
+        dq_services = cls._create_dq_services(
+            settings=settings,
+            pipeline_config=pipeline_config,
+            logger=logger,
+        )
+        return cls._build_pipeline_services(
+            data_source=data_source,
+            storage_ctx=storage_ctx,
+            lock=lock,
+            checkpoint=checkpoint,
+            quarantine=quarantine,
+            metrics_port=metrics_port,
+            tracer=tracer_port,
+            logger=logger,
+            dq_monitor=dq_monitor,
+            metadata_coordinator=metadata_coordinator,
+            dq_services=dq_services,
+        )
 
+    @staticmethod
+    def _ensure_prod_silver_validator(
+        settings: Settings,
+        pipeline_config: PipelineYamlConfig,
+        silver_validator: SilverValidatorPort | None,
+    ) -> None:
+        """Enforce validator requirement in production mode."""
         if (
             settings.env == "prod"
             and not settings.test_mode
@@ -197,38 +128,34 @@ class BaseServicesFactory:
                 f"(pipeline={pipeline_config.pipeline_name})"
             )
 
-        storage_ctx = StorageFactory.create(
-            settings,
-            pipeline_config,
-            logger,
-            metrics=metrics_port,
-            metadata_coordinator=metadata_coordinator,
-            silver_validator=silver_validator,
-        )
-
-        lock = cls._create_lock()
-        checkpoint = cls._create_checkpoint(storage_ctx)
-        quarantine = cls._create_quarantine(settings)
-
-        # Use provided tracer or fallback to NoOpTracing
-        # Tracer should be created via bootstrap_tracer_port() for consistent configuration
+    @staticmethod
+    def _resolve_tracer(tracer: TracingPort | None) -> TracingPort:
+        """Return tracer or fallback to NoOpTracing."""
         if tracer is None:
             from bioetl.domain.ports import NoOpTracing
 
-            tracer = NoOpTracing()
+            return NoOpTracing()
+        return tracer
 
-        # Create DQ services if any layer has dq_report enabled
-        dq_services = cls._create_dq_services(
-            settings=settings,
-            pipeline_config=pipeline_config,
-            logger=logger,
-        )
-
-        # Create MetadataWriter
+    @staticmethod
+    def _build_pipeline_services(
+        *,
+        data_source: DataSourcePort,
+        storage_ctx: StorageContext,
+        lock: LockPort,
+        checkpoint: CheckpointPort,
+        quarantine: QuarantinePort,
+        metrics_port: MetricsPort,
+        tracer: TracingPort,
+        logger: LoggerPort,
+        dq_monitor: DQMonitorPort | None,
+        metadata_coordinator: MetadataCoordinator | None,
+        dq_services: dict[str, Any],  # Any: heterogeneous DQ service instances
+    ) -> PipelineServices:
+        """Assemble PipelineServices from pre-built dependencies."""
         from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 
         metadata_writer = MetadataWriter(logger=logger)
-
         return PipelineServices(
             data_source=data_source,
             storage=storage_ctx.adapter,
@@ -260,14 +187,8 @@ class BaseServicesFactory:
 
     @staticmethod
     def _create_quarantine(settings: Settings) -> QuarantinePort:
-        """Create unified quarantine storage independent of entity paths.
-
-        Quarantine storage is centralized at data_dir/quarantine to avoid
-        coupling with Silver path structure and simplify management.
-        """
-        return UnifiedQuarantine(
-            base_path=str(settings.quarantine_path),
-        )
+        """Create unified quarantine storage."""
+        return UnifiedQuarantine(base_path=str(settings.quarantine_path))
 
     @staticmethod
     def _create_metrics(settings: Settings) -> MetricsPort:
@@ -280,34 +201,8 @@ class BaseServicesFactory:
         settings: Settings,
         pipeline_config: PipelineYamlConfig,
     ) -> Path:
-        """Derive output root from pipeline config or fall back to settings.
-
-        DQ reports should be written alongside the data. This method extracts
-        the output root from the bronze sink path configuration when available.
-
-        For paths like 'data/output/bronze/chembl/activity':
-        - parent = 'data/output/bronze/chembl'
-        - parent.parent = 'data/output/bronze'
-        - parent.parent.parent = 'data/output' (output root)
-
-        Args:
-            settings: Application settings.
-            pipeline_config: Pipeline YAML configuration.
-
-        Returns:
-            Path to the output root directory.
-        """
-        bronze_config = pipeline_config.sink.get("bronze")
-
-        # Use bronze path from config if available and not in test mode
-        if not settings.test_mode and bronze_config and bronze_config.path:
-            bronze_path = Path(bronze_config.path)
-            # Go up 3 levels: bronze/provider/entity -> output root
-            # e.g., data/output/bronze/chembl/activity -> data/output
-            return bronze_path.parent.parent.parent
-
-        # Fall back to settings data_dir
-        return settings.data_dir
+        """Derive output root from pipeline config or fall back to settings."""
+        return _get_output_root_impl(settings, pipeline_config)
 
     @classmethod
     def _create_dq_services(
@@ -317,356 +212,14 @@ class BaseServicesFactory:
         logger: LoggerPort,
     ) -> dict[str, Any]:  # Any: heterogeneous DQ service instances
         """Create DQ analyzers/writer/services when DQ reporting is enabled."""
-        # Check if any DQ report is enabled in sink config
-        dq_enabled = cls._is_dq_report_enabled(pipeline_config)
-
-        if not dq_enabled:
-            return {}
-
-        # Create DQ analyzers
-        bronze_analyzer = DQServicesFactory.create_bronze_analyzer()
-        silver_analyzer = DQServicesFactory.create_silver_analyzer()
-        gold_analyzer = DQServicesFactory.create_gold_analyzer()
-
-        # DQ reports are written to dedicated reports/dq/ directory
-        output_root = cls._get_output_root(settings, pipeline_config)
-        dq_reports_path = output_root / "reports" / "dq"
-        # Get flat_structure from sink config (use Silver as primary)
-        flat_structure = cls._get_flat_structure(pipeline_config)
-        report_writer = DQServicesFactory.create_report_writer(
-            base_path=dq_reports_path,
-            logger=logger,
-            flat_structure=flat_structure,
-        )
-
-        # Create DQ report service
-        from bioetl.application.services.dq_report_service import DQReportService
-
-        report_service = DQReportService(
-            logger=logger,
-            bronze_analyzer=bronze_analyzer,
-            silver_analyzer=silver_analyzer,
-            gold_analyzer=gold_analyzer,
-            report_writer=report_writer,
-        )
-
-        return {
-            "bronze_analyzer": bronze_analyzer,
-            "silver_analyzer": silver_analyzer,
-            "gold_analyzer": gold_analyzer,
-            "report_writer": report_writer,
-            "report_service": report_service,
-        }
+        return _create_dq_services_impl(settings, pipeline_config, logger)
 
     @staticmethod
     def _is_dq_report_enabled(config: PipelineYamlConfig) -> bool:
-        """Check if any DQ report is enabled in pipeline config.
-
-        Args:
-            config: Pipeline YAML configuration.
-
-        Returns:
-            True if any layer has dq_report.enabled = true.
-        """
-        sink = config.sink
-
-        # Check each layer for dq_report.enabled
-        for layer_name in ("bronze", "silver", "gold"):
-            layer_config = sink.get(layer_name)
-            if layer_config and layer_config.dq_report.enabled:
-                return True
-
-        return False
+        """Check if any DQ report is enabled in pipeline config."""
+        return _is_dq_report_enabled_impl(config)
 
     @staticmethod
     def _get_flat_structure(config: PipelineYamlConfig) -> bool:
-        """Get flat_structure setting from pipeline config.
-
-        Checks Silver and Gold layers for flat_structure setting.
-        Returns True if either layer has flat_structure enabled.
-
-        Args:
-            config: Pipeline YAML configuration.
-
-        Returns:
-            True if flat_structure is enabled for any layer.
-        """
-        sink = config.sink
-
-        # Check Silver and Gold for flat_structure
-        for layer_name in ("silver", "gold"):
-            layer_config = sink.get(layer_name)
-            if layer_config and getattr(layer_config, "flat_structure", False):
-                return True
-
-        return False
-
-
-# =============================================================================
-# ServicesBuilder - Creates infrastructure components
-# =============================================================================
-
-
-class ServicesBuilder:
-    """Builder for pipeline infrastructure components."""
-
-    @staticmethod
-    def create_batch_processing_components(
-        *,
-        services: PipelineServices,
-        context: PipelineContext,
-        config: RecordProcessorConfig,
-        error_classifier: ErrorClassifier,
-        transform_callback: TransformCallback,
-        gold_filter_callback: GoldFilterCallback,
-        gold_transform_callback: GoldTransformCallback,
-        gold_validator: GoldValidatorPort,
-        tracer: TracingPort | None = None,
-        lock_validator: Callable[[], Awaitable[bool]] | None = None,
-    ) -> BatchProcessingComponents:
-        """Create batch metrics/transformer/writer stack via composition DI."""
-        return _create_batch_processing_components(
-            services=services,
-            context=context,
-            config=config,
-            error_classifier=error_classifier,
-            transform_callback=transform_callback,
-            gold_filter_callback=gold_filter_callback,
-            gold_transform_callback=gold_transform_callback,
-            gold_validator=gold_validator,
-            tracer=tracer,
-            lock_validator=lock_validator,
-        )
-
-    @staticmethod
-    def create_checkpoint_manager(
-        checkpoint_port: CheckpointPort,
-        logger: LoggerPort,
-        pipeline_name: str,
-        run_id: RunID,
-        resume: bool,
-        *,
-        loading_strategy: LoadingStrategy | None = None,
-    ) -> CheckpointManagerService:
-        """Create configured CheckpointManagerService."""
-        return _create_checkpoint_manager(
-            checkpoint_port=checkpoint_port,
-            logger=logger,
-            pipeline_name=pipeline_name,
-            run_id=run_id,
-            resume=resume,
-            loading_strategy=loading_strategy,
-        )
-
-    @staticmethod
-    def create_record_processor(
-        services: PipelineServices,
-        context: PipelineContext,
-        pipeline_name: str,
-        provider: str,
-        entity_type: str,
-        silver_schema: pa.Schema | None,
-        gold_schema: type[pandera.DataFrameModel],
-        dq_config: DQConfig | None,
-        primary_keys: Sequence[str],
-        silver_table: str,
-        gold_table: str | None,
-        silver_write_mode: SilverWriteMode,
-        gold_write_mode: GoldWriteMode,
-        on_schema_mismatch: Literal["error", "evolve", "ignore"],
-        transform_callback: TransformCallback,
-        gold_filter_callback: GoldFilterCallback,
-        gold_transform_callback: GoldTransformCallback,
-        tracer: TracingPort | None = None,
-        *,
-        strict_gold_validation: bool = True,
-        lock_validator: Callable[[], Awaitable[bool]] | None = None,
-        column_groups: tuple[ColumnGroupConfig, ...] = (),
-        scd_config: dict[str, str] | None = None,
-    ) -> RecordProcessor:
-        """Create configured RecordProcessor.
-
-        Args:
-            services: Pipeline services
-            context: Pipeline context
-            pipeline_name: Name of the pipeline
-            provider: Data provider name
-            entity_type: Entity type being processed
-            silver_schema: PyArrow schema for Silver layer
-            gold_schema: Pandera schema for Gold layer
-            dq_config: Data quality configuration
-            primary_keys: Primary key fields
-            silver_table: Silver table name
-            gold_table: Gold table name
-            silver_write_mode: Write mode for Silver
-            gold_write_mode: Write mode for Gold
-            on_schema_mismatch: Schema mismatch handling strategy
-            transform_callback: Bronze to Silver transformation callback
-            gold_filter_callback: Gold filtering callback
-            gold_transform_callback: Silver to Gold transformation callback
-            strict_gold_validation: If True, validation fails when gold_schema is None.
-                Default True to enforce strict Gold validation.
-            lock_validator: Async callable that validates lock ownership.
-                Returns True if lock is still held, False otherwise.
-                Typically LockManager.validate(). If None, lock validation
-                is skipped (Safety Guard §4.6).
-
-        Returns:
-            Configured RecordProcessor instance
-        """
-        effective_tracer = tracer or services.tracing
-        error_classifier = ErrorClassifier()
-        table_config = TableConfig(
-            primary_keys=tuple(primary_keys),
-            silver_table=silver_table,
-            gold_table=gold_table,
-            silver_write_mode=silver_write_mode,
-            gold_write_mode=gold_write_mode,
-            on_schema_mismatch=on_schema_mismatch,
-        )
-
-        processor_config = RecordProcessorConfig(
-            pipeline_name=pipeline_name,
-            provider=provider,
-            entity_type=entity_type,
-            silver_schema=silver_schema,
-            gold_schema=gold_schema,
-            dq_config=dq_config,
-            table_config=table_config,
-            column_groups=column_groups,
-            scd_config=scd_config,
-        )
-
-        # Create Gold validator from schema (DI pattern)
-        # strict mode requires schema to be provided
-        typed_gold_schema = cast("pa.DataFrameSchema | None", gold_schema)
-        gold_validator = PanderaGoldValidator(
-            typed_gold_schema, strict=strict_gold_validation
-        )
-
-        components = ServicesBuilder.create_batch_processing_components(
-            services=services,
-            context=context,
-            config=processor_config,
-            error_classifier=error_classifier,
-            transform_callback=transform_callback,
-            gold_filter_callback=gold_filter_callback,
-            gold_transform_callback=gold_transform_callback,
-            gold_validator=gold_validator,
-            tracer=effective_tracer,
-            lock_validator=lock_validator,
-        )
-
-        return RecordProcessor(
-            context=context,
-            batch_metrics=components.batch_metrics,
-            transformer=components.transformer,
-            writer=components.writer,
-            config=processor_config,
-            tracer=effective_tracer,
-        )
-
-    @staticmethod
-    def create_record_processor_from_pipeline(
-        pipeline: BasePipeline,
-        silver_schema: pa.Schema | None,
-        gold_schema: type[pandera.DataFrameModel],
-        *,
-        strict_gold_validation: bool = True,
-        lock_validator: Callable[[], Awaitable[bool]] | None = None,
-    ) -> RecordProcessor:
-        """Create RecordProcessor from pipeline instance."""
-        callbacks = extract_pipeline_callbacks(pipeline)
-        return _create_record_processor_from_pipeline(
-            pipeline=pipeline,
-            silver_schema=silver_schema,
-            gold_schema=gold_schema,
-            callbacks=callbacks,
-            create_record_processor_fn=ServicesBuilder.create_record_processor,
-            strict_gold_validation=strict_gold_validation,
-            lock_validator=lock_validator,
-            tracer=pipeline.services.tracing,
-        )
-
-    @staticmethod
-    def create_batch_executor_from_pipeline(
-        pipeline: BasePipeline,
-        silver_schema: pa.Schema | None,
-        gold_schema: type[pandera.DataFrameModel],
-        checkpoint_manager: CheckpointManagerService,
-        shutdown_signal: ShutdownSignal,
-        *,
-        strict_gold_validation: bool = True,
-        lock_validator: Callable[[], Awaitable[bool]] | None = None,
-        tracer: TracingPort | None = None,
-        memory_monitor: MemoryMonitorPort | None = None,
-        memory_config: MemoryConfig | None = None,
-        # DQ report output paths (for flat_structure support)
-        bronze_output_path: str | None = None,
-        silver_output_path: str | None = None,
-        gold_output_path: str | None = None,
-        flat_structure: bool = False,
-        batch_id_factory: BatchIdGeneratorPort | None = None,
-    ) -> BatchExecutor:
-        """Create BatchExecutor from pipeline instance."""
-        callbacks = extract_pipeline_callbacks(pipeline)
-        return _create_batch_executor_from_pipeline(
-            pipeline=pipeline,
-            callbacks=callbacks,
-            silver_schema=silver_schema,
-            gold_schema=gold_schema,
-            checkpoint_manager=checkpoint_manager,
-            shutdown_signal=shutdown_signal,
-            create_batch_processing_components_fn=(
-                ServicesBuilder.create_batch_processing_components
-            ),
-            strict_gold_validation=strict_gold_validation,
-            lock_validator=lock_validator,
-            tracer=tracer,
-            memory_monitor=memory_monitor,
-            memory_config=memory_config,
-            bronze_output_path=bronze_output_path,
-            silver_output_path=silver_output_path,
-            gold_output_path=gold_output_path,
-            flat_structure=flat_structure,
-            batch_id_factory=batch_id_factory,
-        )
-
-
-# =============================================================================
-# Domain Service Factory Functions
-# =============================================================================
-
-
-def create_data_normalization_service(
-    config: DataNormalizationConfig | None = None,
-) -> DataNormalizationPort:
-    """Create DataNormalizationService with optional configuration.
-
-    Factory function for creating DataNormalizationService instances.
-    Uses default configuration if not provided.
-
-    Args:
-        config: Optional configuration for normalization behavior.
-
-    Returns:
-        DataNormalizationPort implementation (DefaultDataNormalizationService).
-
-    Example:
-        >>> from bioetl.composition.factories import create_data_normalization_service
-        >>> normalizer = create_data_normalization_service()
-        >>> normalizer.normalize_doi("10.1038/NATURE12373")
-        '10.1038/nature12373'
-
-        >>> from bioetl.domain.services import DataNormalizationConfig
-        >>> config = DataNormalizationConfig(min_publication_year=1900)
-        >>> normalizer = create_data_normalization_service(config)
-    """
-    from bioetl.domain.services import (
-        DataNormalizationConfig,
-        DefaultDataNormalizationService,
-    )
-
-    if config is None:
-        config = DataNormalizationConfig()
-    return DefaultDataNormalizationService(config=config)
+        """Get flat_structure setting from pipeline config."""
+        return _get_flat_structure_impl(config)
