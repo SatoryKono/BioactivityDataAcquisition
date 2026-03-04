@@ -279,6 +279,7 @@ class OrganismClassificationService:
         """Return include-only filter strategy."""
 
         def strategy(cellularity: CellularityType | None) -> bool:
+            """Accept cellularity if it is in the include set."""
             if cellularity is None:
                 return keep_unresolved
             return cellularity in include
@@ -293,6 +294,7 @@ class OrganismClassificationService:
         """Return exclusion filter strategy."""
 
         def strategy(cellularity: CellularityType | None) -> bool:
+            """Reject cellularity if it is in the exclude set."""
             if cellularity is None:
                 return keep_unresolved
             return cellularity not in exclude
@@ -304,6 +306,7 @@ class OrganismClassificationService:
         """Return strategy when neither include nor exclude is provided."""
 
         def strategy(cellularity: CellularityType | None) -> bool:
+            """Accept all resolved cellularity values."""
             if cellularity is None:
                 return keep_unresolved
             return True

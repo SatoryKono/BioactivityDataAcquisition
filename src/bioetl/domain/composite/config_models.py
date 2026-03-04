@@ -29,6 +29,8 @@ __all__ = [
 
 @dataclass(frozen=True, slots=True)
 class SeedConfig:
+    """Configuration for the seed phase of a composite pipeline."""
+
     pipeline: str
     output_keys: tuple[str, ...]
     silver_table: str
@@ -48,6 +50,8 @@ class SeedConfig:
 
 @dataclass(frozen=True, slots=True)
 class DependencyConfig:
+    """Configuration for a dependency pipeline in a composite run."""
+
     pipeline: str
     join_keys: tuple[str, ...]
     required: bool = False
@@ -79,14 +83,17 @@ class DependencyConfig:
 
     @property
     def primary_join_key(self) -> str:
+        """Return the first join key used for primary matching."""
         return self.join_keys[0]
 
     @property
     def uses_seed_keys(self) -> bool:
+        """Check whether this dependency resolves keys from the seed phase."""
         return self.key_source is None or self.key_source == "seed"
 
     @property
     def effective_filter_fields(self) -> tuple[str, ...]:
+        """Return the resolved filter fields, falling back to the primary join key."""
         if self.filter_fields:
             return self.filter_fields
         if self.filter_field:
@@ -95,11 +102,14 @@ class DependencyConfig:
 
     @property
     def is_multi_field_filter(self) -> bool:
+        """Check whether filtering uses more than one field."""
         return len(self.effective_filter_fields) > 1
 
 
 @dataclass(frozen=True, slots=True)
 class EnricherConfig:
+    """Configuration for an enricher pipeline in a composite run."""
+
     pipeline: str
     join_keys: tuple[str, ...]
     required: bool = False
@@ -151,14 +161,17 @@ class EnricherConfig:
 
     @property
     def primary_join_key(self) -> str:
+        """Return the first join key used for primary matching."""
         return self.join_keys[0]
 
     @property
     def has_fallback_keys(self) -> bool:
+        """Check whether this enricher defines fallback join keys."""
         return len(self.join_keys) > 1
 
     @property
     def is_many_to_one(self) -> bool:
+        """Check whether this enricher uses many-to-one cardinality."""
         return self.cardinality == EnricherCardinality.MANY_TO_ONE
 
 
@@ -183,6 +196,8 @@ def _coerce_column_groups(obj: object, attr: str) -> None:
 
 @dataclass(frozen=True, slots=True)
 class LayerColumnConfig:
+    """Column selection and renaming configuration for a medallion layer."""
+
     columns: tuple[str, ...] | None = None
     column_groups: tuple[ColumnGroupConfig, ...] | None = None
     include_groups: tuple[str, ...] | None = None
@@ -214,6 +229,8 @@ class LayerColumnConfig:
 
 @dataclass(frozen=True, slots=True)
 class DataSchemaConfig:
+    """Schema configuration with column groups for silver and gold layers."""
+
     column_groups: tuple[ColumnGroupConfig, ...] = ()
     silver: LayerColumnConfig | None = None
     gold: LayerColumnConfig | None = None
@@ -226,12 +243,14 @@ class DataSchemaConfig:
             object.__setattr__(self, "gold", LayerColumnConfig(**self.gold))
 
     def get_layer_groups(self, layer: str) -> tuple[ColumnGroupConfig, ...]:
+        """Return column groups for the given layer, falling back to top-level groups."""
         layer_config: LayerColumnConfig | None = getattr(self, layer, None)
         if layer_config and layer_config.column_groups:
             return layer_config.column_groups
         return self.column_groups
 
     def should_include_group(self, layer: str, group_name: str) -> bool:
+        """Check whether the named column group is included for the given layer."""
         layer_config = getattr(self, layer, None)
         if not layer_config or not layer_config.include_groups:
             return True
@@ -240,6 +259,8 @@ class DataSchemaConfig:
 
 @dataclass(frozen=True, slots=True)
 class CrossValidationConfig:
+    """Configuration for cross-enricher data validation."""
+
     enabled: bool = True
     warning_threshold: int = 1
     error_threshold: int = 2
@@ -284,6 +305,7 @@ class CrossValidationConfig:
             )
 
     def get_pairing(self, enricher_pipeline: str) -> EnricherFieldPairing | None:
+        """Look up field pairing config for the given enricher pipeline."""
         for pairing in self.enricher_pairings:
             if pairing.enricher_pipeline == enricher_pipeline:
                 return pairing
