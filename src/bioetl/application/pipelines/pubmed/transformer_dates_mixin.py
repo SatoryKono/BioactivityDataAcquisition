@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 import xml.etree.ElementTree as ET
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 from bioetl.application.pipelines.pubmed.extractors import DateExtractor
 from bioetl.application.pipelines.pubmed.xml_parser import get_text
@@ -20,8 +20,8 @@ if TYPE_CHECKING:
 class _PubMedTransformerDatesMixin:
     """Provides PubMed date/journal extraction routines."""
 
-    _VALID_DATE_PATTERNS: tuple[re.Pattern[str], ...]
-    _MONTH_MAP: dict[str, int]
+    _VALID_DATE_PATTERNS: ClassVar[tuple[re.Pattern[str], ...]]
+    _MONTH_MAP: ClassVar[dict[str, int]]
     _data_normalizer: DataNormalizationPort
     _date_extractor: DateExtractor
     validate_value_object: Callable[..., str | int | None]

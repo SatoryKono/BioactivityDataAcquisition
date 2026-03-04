@@ -35,7 +35,9 @@ env:
   PYTHONUNBUFFERED: 1
   # Quality exemptions gate rollout: warning mode for one sprint, then switch to "block".
   QUALITY_EXEMPTIONS_GATE_MODE: warn
+  QUALITY_EXEMPTIONS_GROWTH_MODE: block
   QUALITY_EXEMPTIONS_REGISTRY: configs/quality/architecture_metric_exemptions.yaml
+  QUALITY_EXEMPTIONS_SCORECARD: configs/quality/debt_scorecard.yaml
 
 jobs:
   # Smoke check: verify dependencies are installed before running tests
@@ -81,7 +83,9 @@ jobs:
         run: |
           uv run python scripts/check_quality_exemptions.py \
             --registry "${QUALITY_EXEMPTIONS_REGISTRY}" \
-            --mode "${QUALITY_EXEMPTIONS_GATE_MODE}"
+            --scorecard "${QUALITY_EXEMPTIONS_SCORECARD}" \
+            --mode "${QUALITY_EXEMPTIONS_GATE_MODE}" \
+            --growth-mode "${QUALITY_EXEMPTIONS_GROWTH_MODE}"
 
       - name: Validate pipeline configs + schema links (blocking)
         run: uv run python scripts/validate_pipeline_configs.py

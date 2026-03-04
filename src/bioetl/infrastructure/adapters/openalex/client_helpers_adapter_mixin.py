@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BronzeRecord, HealthStatus
+from bioetl.infrastructure.adapters.common.api_request_collector import (
+    APIRequestCollector,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import SourceMetadata
@@ -12,35 +15,12 @@ if TYPE_CHECKING:
 _OPENALEX_BASE_URL = "https://api.openalex.org"
 
 
-class _RequestCollectorPort(Protocol):
-    """Protocol for request collector used by adapter mixins."""
-
-    def to_source_metadata(
-        self,
-        source_type: str = "api",
-        url: str | None = None,
-        api_version: str | None = None,
-        query_string: str | None = None,
-    ) -> SourceMetadata:
-        """Build source metadata from collected requests."""
-        ...
-
-    def clear(self) -> None:
-        """Clear collected request snapshots."""
-        ...
-
-    @property
-    def request_count(self) -> int:
-        """Current number of captured requests."""
-        ...
-
-
 class OpenAlexAdapterHelpersMixin:
     """Utility helpers extracted from the main OpenAlex adapter."""
 
     # Host-class attributes (provided by OpenAlexAdapter.__post_init__)
     mailto: str
-    _request_collector: _RequestCollectorPort
+    _request_collector: APIRequestCollector
 
     def _build_headers(self) -> dict[str, str]:
         """Build request headers for OpenAlex API."""

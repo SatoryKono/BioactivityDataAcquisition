@@ -1,13 +1,14 @@
 # Reports Index
 
 *Status: Internal / Extended documentation (non-normative)*
-*Last updated: 2026-03-03*
+*Last updated: 2026-03-04*
 
 This section aggregates dated engineering reports. Use these reports as operational history, not as the primary source of architectural truth.
 
 ## Latest
 
 - [Architecture Debt Baseline (2026-03-03)](architecture-debt-baseline-2026-03-03.md)
+- [Quality Debt Scorecard (2026-Q1)](quality-debt-scorecard-2026-Q1.md)
 - [Documentation Audit (2026-03-03, main)](documentation-audit-2026-03-03-main.md)
 - [Documentation Audit (2026-03-03, exhaustive)](documentation-audit-2026-03-03-exhaustive.md)
 - [Documentation Cascade Audit (2026-02-27)](documentation-cascade-audit-2026-02-27.md)
