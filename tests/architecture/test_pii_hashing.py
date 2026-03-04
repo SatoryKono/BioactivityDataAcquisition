@@ -157,10 +157,13 @@ class TestPiiFieldsInTransformers:
         )
         content = transformer_path.read_text(encoding="utf-8")
 
-        # Unified normalization: normalize_author_list() handles parse+hash+serialize
-        assert "normalize_author_list" in content, (
+        # Unified normalization: normalize_author_list() or _normalize_author_block()
+        # (mixin wraps normalize_author_list internally)
+        assert (
+            "normalize_author_list" in content or "_normalize_author_block" in content
+        ), (
             "CrossRefPublicationTransformer MUST use normalize_author_list() "
-            "for authors field"
+            "or _normalize_author_block() for authors field"
         )
 
     def test_pubmed_transformer_hashes_authors(self) -> None:
@@ -170,9 +173,12 @@ class TestPiiFieldsInTransformers:
         )
         content = transformer_path.read_text(encoding="utf-8")
 
-        assert "normalize_author_list" in content, (
+        # normalize_author_list() or _normalize_author_block() (mixin wraps it)
+        assert (
+            "normalize_author_list" in content or "_normalize_author_block" in content
+        ), (
             "PubMedPublicationTransformer MUST use normalize_author_list() "
-            "for authors field"
+            "or _normalize_author_block() for authors field"
         )
 
     def test_chembl_publication_transformer_hashes_authors(self) -> None:

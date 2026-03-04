@@ -44,8 +44,7 @@ from bioetl.application.pipelines.openalex.extractors import (
 from bioetl.domain.entities.openalex import OpenAlexPublicationEntity
 from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
 from bioetl.domain.services import IdentityService
-from bioetl.domain.types import GoldRecord, JsonDict
-from bioetl.domain.value_objects import DOI, PublicationYear
+from bioetl.domain.types import GoldRecord
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
@@ -148,9 +147,8 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         # Extract OpenAlex ID from URL
         openalex_id = extract_openalex_id(rec.get("id"))
 
-        # Validate DOI using Value Object (returns None for invalid/empty)
-        # OpenAlex stores DOIs as full URLs (e.g., "https://doi.org/10.1038/...")
-        doi = self.validate_value_object(DOI, rec.get("doi"))
+        # Validate DOI using mixin
+        doi = self._validate_doi(rec.get("doi"))
 
         # Reconstruct abstract from inverted index (then strip HTML for cleaning)
         abstract_index = rec.get("abstract_inverted_index")
@@ -158,25 +156,18 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             reconstruct_abstract(abstract_index)
         )
 
-        # Extract and normalize authors using unified service (PII)
-        normalizer = self._data_normalizer
-
+        # Extract and normalize authors using mixin
         raw_authors = extract_authors(rec.get("authorships", []))
-        authors_json = normalizer.normalize_author_list(raw_authors)
-        author_keys = normalizer.normalize_author_keys(raw_authors)
-
-        # Extract and normalize affiliations using unified service
         authorships = rec.get("authorships")
         raw_affiliations = (
             extract_affiliations(authorships) if isinstance(authorships, list) else None
         )
-        affiliations_json = (
-            normalizer.normalize_affiliations(raw_affiliations)
-            if raw_affiliations
-            else None
+        author_block = self._normalize_author_block(
+            raw_authors,
+            raw_affiliations=raw_affiliations,
         )
 
-        # Extract institution IDs and country codes (for cross-referencing and geographic analysis)
+        # Extract institution IDs and country codes
         institution_ids = extract_institution_ids(rec.get("authorships", []))
         institution_country_codes = extract_institution_country_codes(
             rec.get("authorships", [])
@@ -216,31 +207,19 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         # Extract bibliographic info (volume, issue, pages)
         biblio_info = extract_biblio_info(rec.get("biblio", {}))
 
-        # Validate year using PublicationYear Value Object
-        year = self.validate_value_object(
-            PublicationYear, rec.get("publication_year"), as_string=False
-        )
-
-        # Lookup metadata (from adapter)
-        lookup_method = rec.get("_lookup_method", "unknown")
-        original_id = rec.get("_original_id")
-
         return {
             "openalex_id": openalex_id,
             "doi": doi,
             "pmid": external_ids.get("pmid"),
-            "pmc_id": None,  # Not available from OpenAlex API
+            "pmc_id": None,
             "mag_id": external_ids.get("mag_id"),
             "title": rec.get("title"),
             "abstract": abstract,
-            "authors": authors_json,
-            "author_keys": author_keys,
-            "affiliation_list": affiliations_json,
+            **author_block,
             "institution_ids": self.serialize_json_list(institution_ids),
             "institution_country_codes": self.serialize_json_list(
                 institution_country_codes
             ),
-            # ROR IDs (may be empty if not returned by Works API)
             "ror_ids": self.serialize_json_list(ror_ids) if ror_ids else None,
             "author_orcids": (
                 self.serialize_json_list(author_orcids) if any(author_orcids) else None
@@ -253,46 +232,35 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "journal": journal_info.get("journal"),
             "issn": journal_info.get("issn"),
             "publisher": journal_info.get("publisher"),
-            "publication_year": year,
-            "publication_date": self._data_normalizer.normalize_partial_date(
+            "publication_year": self._validate_publication_year(
+                rec.get("publication_year")
+            ),
+            "publication_date": self._normalize_publication_date(
                 rec.get("publication_date")
             ),
             "publication_type": normalize_publication_type(rec.get("type")),
             **self._classify_publication_type("openalex", raw_type=rec.get("type")),
             "is_oa": oa_info.get("is_oa"),
             "oa_status": oa_info.get("oa_status"),
-            # OpenAlex source field: cited_by_count
-            # Unified BioETL field: citations_received (standardized across all providers)
             "citations_received": rec.get("cited_by_count"),
-            # Topics (hierarchical classification - replaces deprecated concepts)
-            # Serialized to JSON string for schema compliance
             "subject_topics": (
                 self.serialize_json_list(subject_topics) if subject_topics else None
             ),
             "primary_topic": self.serialize_json(primary_topic)
             if primary_topic
             else None,
-            # Grants/funding information (serialized to JSON string)
             "grants": self.serialize_json_list(grants) if grants else None,
             "subject_mesh": self.serialize_json_list(subject_mesh),
             "subject_keywords": self.serialize_json_list(subject_keywords),
             "language": rec.get("language"),
-            # Bibliographic info (from biblio object)
             "volume": biblio_info.get("volume"),
             "issue": biblio_info.get("issue"),
             "page_first": biblio_info.get("page_first"),
             "page_last": biblio_info.get("page_last"),
-            # Additional metrics
             "fwci": rec.get("fwci"),
             "citations_made": rec.get("referenced_works_count"),
-            # Quality indicators
             "is_retracted": rec.get("is_retracted", False),
-            "_lookup_method": lookup_method,
-            "_original_id": original_id,
-            "_source": "openalex",
-            # DQ flags (default: no warnings or errors)
-            "_dq_warn": False,
-            "_dq_error": False,
+            **self._build_metadata_block("openalex", rec),
         }
 
     def _get_primary_id_field(self) -> str:
@@ -313,16 +281,11 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         """
         return OpenAlexPublicationEntity
 
-        # Any: generic domain entity; type varies by pipeline
-
     def entity_to_silver_record(
         self,
         entity: Any,  # Any: generic domain entity; type varies by pipeline
-    ) -> GoldRecord:  # Any: generic domain entity
+    ) -> GoldRecord:
         """Convert Domain Entity to SilverRecord.
-
-        OpenAlex doesn't provide pmc_id, so it will be None in the entity.
-        This None value satisfies the PublicationBaseSchema inheritance requirement.
 
         Args:
             entity: Domain entity (dataclass).
@@ -331,9 +294,4 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             SilverRecord dictionary with all PublicationBaseSchema fields.
 
         """
-        # Get base silver record (includes all fields with None values)
-        silver_record = super().entity_to_silver_record(entity)
-
-        # Note: pmc_id is kept (with None value) to satisfy PublicationBaseSchema
-
-        return silver_record
+        return super().entity_to_silver_record(entity)

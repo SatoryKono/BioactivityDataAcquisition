@@ -20,6 +20,15 @@ from abc import abstractmethod
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.application.pipelines.common.author_transform_mixin import (
+    AuthorTransformMixin,
+)
+from bioetl.application.pipelines.common.date_transform_mixin import (
+    DateTransformMixin,
+)
+from bioetl.application.pipelines.common.identifier_transform_mixin import (
+    IdentifierTransformMixin,
+)
 from bioetl.domain.mapping.publication_type_classification import (
     classify_publication_type,
 )
@@ -30,7 +39,12 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
-class BasePublicationTransformer(BaseTransformer):
+class BasePublicationTransformer(
+    AuthorTransformMixin,
+    DateTransformMixin,
+    IdentifierTransformMixin,
+    BaseTransformer,
+):
     """Abstract base class for publication transformers.
 
     Implements Template Method pattern for unified publication transformation:

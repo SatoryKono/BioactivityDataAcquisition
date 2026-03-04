@@ -138,9 +138,7 @@ class TestCrossRefDateBuilding:
         expected: str | None,
     ) -> None:
         """Test publication_date computation from print/online dates."""
-        result = transformer._compute_publication_date(
-            published_print, published_online
-        )
+        result = transformer._prefer_date(published_print, published_online)
         assert result == expected
 
     def test_print_priority_over_online(
@@ -149,13 +147,10 @@ class TestCrossRefDateBuilding:
     ) -> None:
         """Print date should always take priority over online date."""
         # Both present: use print
-        assert (
-            transformer._compute_publication_date("2024-01-15", "2024-02-15")
-            == "2024-01-15"
-        )
+        assert transformer._prefer_date("2024-01-15", "2024-02-15") == "2024-01-15"
 
         # Print is None: use online
-        assert transformer._compute_publication_date(None, "2024-02-15") == "2024-02-15"
+        assert transformer._prefer_date(None, "2024-02-15") == "2024-02-15"
 
 
 @pytest.mark.unit
@@ -223,7 +218,7 @@ class TestDateParsingEdgeCases:
         crossref_transformer: CrossRefPublicationTransformer,
     ) -> None:
         """Valid ISO dates should be preserved as-is."""
-        result = crossref_transformer._compute_publication_date("2024-12-31", None)
+        result = crossref_transformer._prefer_date("2024-12-31", None)
         assert result == "2024-12-31"
 
     def test_date_output_is_always_string_or_none(
@@ -237,14 +232,12 @@ class TestDateParsingEdgeCases:
         )
         assert isinstance(pubmed_result, str) or pubmed_result is None
 
-        crossref_result = crossref_transformer._compute_publication_date(
-            "2024-01-01", None
-        )
+        crossref_result = crossref_transformer._prefer_date("2024-01-01", None)
         assert isinstance(crossref_result, str) or crossref_result is None
 
         # None case
         pubmed_none = pubmed_transformer._compute_publication_date(None, None, None)
         assert pubmed_none is None
 
-        crossref_none = crossref_transformer._compute_publication_date(None, None)
+        crossref_none = crossref_transformer._prefer_date(None, None)
         assert crossref_none is None

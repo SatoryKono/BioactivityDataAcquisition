@@ -34,7 +34,6 @@ from bioetl.domain.mapping.publication_type_mapping import normalize_publication
 from bioetl.domain.normalization import normalize_pmc_id
 from bioetl.domain.services import IdentityService
 from bioetl.domain.types import GoldRecord, JsonDict
-from bioetl.domain.value_objects import DOI, PubMedId
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -69,14 +68,9 @@ class PubMedPublicationTransformer(
     _cached_xml_root: ET.Element | None
 
     # Date validation patterns for ISO date formats (YYYY, YYYY-MM, YYYY-MM-DD).
-    # Used to filter out invalid dates like "2024-13-99" or "n/a" before
-    # they propagate to _compute_publication_date.
     _VALID_DATE_PATTERNS: ClassVar[tuple[re.Pattern[str], ...]] = (
-        # Full date: YYYY-MM-DD (with valid month 01-12 and day 01-31)
         re.compile(r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$"),
-        # Partial month: YYYY-MM (with valid month 01-12)
         re.compile(r"^\d{4}-(0[1-9]|1[0-2])$"),
-        # Partial year: YYYY
         re.compile(r"^\d{4}$"),
     )
 
@@ -124,9 +118,7 @@ class PubMedPublicationTransformer(
             data_normalizer: Optional data normalization service for DOI normalization.
             contract_policy: Optional pipeline contract policy.
             author_extractor: Optional author extractor dependency.
-                If None, defaults to AuthorExtractor().
             date_extractor: Optional date extractor dependency.
-                If None, defaults to DateExtractor().
 
         """
         super().__init__(
@@ -163,7 +155,6 @@ class PubMedPublicationTransformer(
         try:
             self._cached_xml_root = ET.fromstring(raw_xml)
         except ET.ParseError as e:
-            # Log the parse error with context
             context.logger.warning(
                 "XML_parse_error",
                 error=str(e),
@@ -261,37 +252,28 @@ class PubMedPublicationTransformer(
     ) -> JsonDict:  # Any: untyped PubMed XML/JSON values
         """Extract and process author-related fields from article XML.
 
-        Uses unified normalization service for authors and affiliations.
+        Uses mixin for author normalization and unified service for affiliations.
         """
-        # Normalize author names using unified service
-        normalizer = self._data_normalizer
-
         # Extract author names
         author_names: list[str] = (
             self._author_extractor.normalize(raw_author_data) if raw_author_data else []
         )
 
-        # Use unified normalization (parse + serialize in one call)
-        authors_json = normalizer.normalize_author_list(author_names)
-        author_keys = normalizer.normalize_author_keys(author_names)
-
-        authors_with_affiliations = self._build_authors_with_affiliations(
-            raw_author_data
-        )
-
-        # Extract affiliations using unified service
+        # Use mixin for normalization
+        normalizer = self._data_normalizer
         affiliation_strings = normalizer.extract_affiliations_from_authors(
             cast(
                 "list[JsonDict]",  # Any: transformer record has heterogeneous values
                 raw_author_data,  # Any: transformer record has heterogeneous values
             )  # Any: RawAuthor is TypedDict-like
         )
+        author_block = self._normalize_author_block(
+            author_names,
+            raw_affiliations=affiliation_strings,
+        )
 
-        # Normalize affiliations using unified service (already deduplicated & sorted)
-        affiliation_list_json = (
-            normalizer.normalize_affiliations(affiliation_strings)
-            if affiliation_strings
-            else None
+        authors_with_affiliations = self._build_authors_with_affiliations(
+            raw_author_data
         )
 
         # Structured affiliations with identifiers (PubMed-specific)
@@ -301,17 +283,17 @@ class PubMedPublicationTransformer(
         # Count from parsed JSON
         import json
 
-        author_count = len(json.loads(authors_json)) if authors_json else 0
+        author_count = (
+            len(json.loads(author_block["authors"])) if author_block["authors"] else 0
+        )
 
         return {
-            "authors": authors_json,
-            "author_keys": author_keys,
+            **author_block,
             "authors_with_affiliations": (
                 self.serialize_json_list(authors_with_affiliations)
                 if authors_with_affiliations
                 else None
             ),
-            "affiliation_list": affiliation_list_json,
             "affiliation_structured": self.serialize_json_list(processed),
             "author_count": author_count,
         }
@@ -320,19 +302,14 @@ class PubMedPublicationTransformer(
         self, root: ET.Element
     ) -> JsonDict:  # Any: untyped PubMed XML/JSON values
         """Extract and normalize all identifier fields from PubMed XML root."""
-        # Optimized single-pass extraction for multiple identifiers
-        # Reduces XML traversals from ~7 to 2 (ELocationID + ArticleIdList)
         ids = IdentifierExtractor.extract_all_identifiers(root)
 
         raw_pmid = get_text(root.find(".//PMID"))
-        pmid_vo = PubMedId.from_raw(raw_pmid)
-
         raw_doi = ids["doi"]
-        doi_vo = DOI.from_raw(raw_doi)
 
         return {
-            "pmid": str(pmid_vo) if pmid_vo else None,
-            "doi": str(doi_vo) if doi_vo else None,
+            "pmid": self._validate_pmid(raw_pmid),
+            "doi": self._validate_doi(raw_doi),
             "pii": self._data_normalizer.normalize_to_string(ids["pii"]),
             "mid": self._data_normalizer.normalize_to_string(ids["mid"]),
             "publisher_id": self._data_normalizer.normalize_to_string(
@@ -382,33 +359,18 @@ class PubMedPublicationTransformer(
             **self._extract_medline_metadata(medline, pubmed_data),
             **self._extract_counts(article, pubmed_data),
             "language": get_text(article.find(".//Language")),
-            "_source": "pubmed",
             **self._build_pubmed_classification(
                 ClassificationExtractor.parse_publication_types(article),
             ),
             "citations_received": None,
             "is_oa": None,
-            "_lookup_method": record.get("_lookup_method", "pmid"),
-            "_original_id": record.get("_original_id"),
-            "_dq_warn": False,
-            "_dq_error": False,
+            **self._build_metadata_block("pubmed", record, default_lookup="pmid"),
         }
 
     def _build_pubmed_classification(
         self, pub_types: list[str]
     ) -> dict[str, str | None]:
-        """Build publication_type and classification fields for PubMed.
-
-        Joins raw types with ``|`` for the raw ``publication_type`` field,
-        then uses the unified classifier to pick the most specific match.
-
-        Args:
-            pub_types: List of raw publication type strings from XML.
-
-        Returns:
-            Dict with publication_type and the 3 classification fields.
-
-        """
+        """Build publication_type and classification fields for PubMed."""
         raw_type = "|".join(pub_types) if pub_types else None
         classification = self._classify_publication_type(
             "pubmed",
@@ -442,7 +404,6 @@ class PubMedPublicationTransformer(
                 "ror_id": aff.get("ror_id"),
                 "grid_id": aff.get("grid_id"),
             }
-            # Hash email if present (PII protection)
             email = aff.get("email")
             if email and self._pii_hasher:
                 processed_aff["email_hash"] = self._pii_hasher.hash_value(email)
@@ -459,23 +420,15 @@ class PubMedPublicationTransformer(
 
         Links each author to their specific affiliations with identifiers.
         Author names are hashed for PII compliance (RULES.md §5.4).
-
-        Args:
-            raw_authors: List of raw author dicts from AuthorExtractor.
-
-        Returns:
-            List of author objects with hashed names and affiliations.
         """
         result: list[JsonDict] = []  # Any: untyped PubMed XML/JSON values
 
         for author in raw_authors:
-            # Build author name for hashing
             last_name = author.get("last_name")
             initials = author.get("initials")
             fore_name = author.get("fore_name")
             collective = author.get("collective_name")
 
-            # Determine display name
             if last_name:
                 if initials:
                     name = f"{last_name}, {initials}"
@@ -486,12 +439,10 @@ class PubMedPublicationTransformer(
             elif collective:
                 name = collective
             else:
-                continue  # Skip authors without any name
+                continue
 
-            # Hash the name for PII compliance
             name_hash = self._pii_hasher.hash_value(name) if self._pii_hasher else None
 
-            # Process affiliations for this author (use pre-computed ror_id/grid_id)
             affiliations: list[
                 JsonDict  # Any: transformer record has heterogeneous values
             ] = []  # Any: untyped PubMed XML/JSON values
@@ -518,57 +469,24 @@ class PubMedPublicationTransformer(
         return result
 
     def _get_primary_id_field(self) -> str:
-        """Return the primary ID field name for PubMed publications.
-
-        Returns:
-            'pmid' - the PubMed-specific identifier field.
-
-        """
+        """Return the primary ID field name for PubMed publications."""
         return "pmid"
 
     def _get_entity_class(self) -> type[BaseEntity]:
-        """Return the domain entity class for PubMed publications.
-
-        Returns:
-            PubMedPublicationEntity class.
-
-        """
+        """Return the domain entity class for PubMed publications."""
         return cast("type[BaseEntity]", PubMedPublicationEntity)
 
     def _should_log_fallback_lookup(self) -> bool:
-        """Enable fallback lookup logging for PubMed.
-
-        PubMed supports title-based fallback when PMID lookup fails.
-        Adapter uses TitleFallbackHandler for three-phase lookup:
-        1. PMID batch fetch
-        2. Title fallback for unresolved PMIDs
-        3. Title-only lookup for entries without PMIDs
-
-        Returns:
-            True - log fallback lookups for observability.
-
-        """
+        """Enable fallback lookup logging for PubMed."""
         return True
 
     def entity_to_silver_record(
         self,
         entity: Any,  # Any: generic domain entity; type varies by pipeline
-    ) -> GoldRecord:  # Any: generic domain entity
-        """Convert Domain Entity to SilverRecord, excluding certain fields.
-
-        Overrides base implementation to remove fields not needed for PubMed.
-
-        Args:
-            entity: Domain entity (dataclass).
-
-        Returns:
-            SilverRecord dictionary without excluded fields.
-
-        """
-        # Get base silver record
+    ) -> GoldRecord:
+        """Convert Domain Entity to SilverRecord, excluding certain fields."""
         silver_record = super().entity_to_silver_record(entity)
 
-        # Remove excluded fields (API deprecated or not available)
         silver_record.pop("vernacular_title", None)
         silver_record.pop("epub_date", None)
         silver_record.pop("received_date", None)

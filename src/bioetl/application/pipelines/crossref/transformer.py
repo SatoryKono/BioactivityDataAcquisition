@@ -39,8 +39,8 @@ from bioetl.domain.entities.crossref import CrossRefPublicationEntity
 from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
 from bioetl.domain.normalization import extract_first_string
 from bioetl.domain.services import IdentityService
-from bioetl.domain.types import GoldRecord, JsonDict
-from bioetl.domain.value_objects import DOI, PublicationYear
+from bioetl.domain.types import GoldRecord
+from bioetl.domain.value_objects import DOI
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -128,9 +128,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         rec = record
 
         # Normalize DOI using Value Object for consistent lowercase format.
-        # DOI validity is guaranteed by _pre_extract_validation, so we assert non-None.
-        # If DOI were somehow invalid here, it indicates a logic error.
-        doi = self.validate_value_object(DOI, rec.get("DOI"))
+        doi = self._validate_doi(rec.get("DOI"))
         assert doi is not None, "DOI should be validated in _pre_extract_validation"
 
         # Use extractors for structured field extraction
@@ -141,39 +139,32 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         issn_by_type = extract_issn_by_type(rec)
         published_date = extract_published_date(rec)
 
-        # Extract and normalize authors using unified service (RULES.md §5.4)
-        normalizer = self._data_normalizer
-
-        # Extract author names and normalize (parse + serialize)
+        # Extract and normalize authors using mixin (RULES.md §5.4)
         raw_authors = extract_authors(rec)
-        authors_json = normalizer.normalize_author_list(raw_authors)
-        author_keys = normalizer.normalize_author_keys(raw_authors)
+        author_block = self._normalize_author_block(
+            raw_authors,
+            raw_affiliations=[
+                aff
+                for author in extract_author_details(rec)
+                for aff in author.get("affiliations", [])
+            ],
+        )
 
         # Extract author ORCID identifiers (not PII - designed for public identification)
         author_orcids = extract_author_orcids(rec)
         serialized_orcids = self.serialize_json_list(author_orcids)
 
-        # Extract full author details with ORCID, sequence, and affiliations
-        # Hash PII fields (given name, family name) while preserving non-PII data
+        # Hash PII in author details using mixin
         raw_author_details = extract_author_details(rec)
-        hashed_author_details = self._hash_author_details(raw_author_details)
+        hashed_author_details = self._hash_author_pii_details(raw_author_details)
         serialized_author_details = self.serialize_json(hashed_author_details)
-
-        # Extract and normalize affiliations using unified service
-        affiliations_json = normalizer.normalize_affiliations(
-            [
-                aff
-                for author in raw_author_details
-                for aff in author.get("affiliations", [])
-            ]
-        )
 
         # Extract bibliographic references (not PII - public citation data)
         raw_references = extract_references(rec)
         serialized_references = self.serialize_json(raw_references)
 
-        # Compute unified publication_date (prefer print over online)
-        publication_date = self._compute_publication_date(
+        # Compute unified publication_date using mixin (prefer print over online)
+        publication_date = self._prefer_date(
             dates.get("published_print"),
             dates.get("published_online"),
         )
@@ -189,21 +180,17 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
 
         return {
             "doi": doi,
-            # Fields from PublicationBaseSchema that CrossRef doesn't provide
-            # (set to None to satisfy schema inheritance requirement)
             "pmid": None,
             "pmc_id": None,
             "abstract": None,
-            "affiliation_list": affiliations_json,
+            "affiliation_list": author_block.get("affiliation_list"),
             "title": extract_first_string(rec.get("title", [])),
-            "authors": authors_json,
-            "author_keys": author_keys,
+            "authors": author_block["authors"],
+            "author_keys": author_block["author_keys"],
             **journal_info,
             **page_info,
             **dates,
-            "publication_year": self.validate_value_object(
-                PublicationYear, raw_year, as_string=False
-            ),
+            "publication_year": self._validate_publication_year(raw_year),
             "publication_date": publication_date,
             "publication_type": normalize_publication_type(rec.get("type")),
             **self._classify_publication_type("crossref", raw_type=rec.get("type")),
@@ -212,13 +199,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             "language": rec.get("language"),
             "license_url": extract_license_url(rec),
             "subject_keywords": self.serialize_json_list(rec.get("subject", []) or []),
-            "_source": "crossref",
-            # is_oa: CrossRef doesn't provide Open Access info
             "is_oa": None,
-            # Lookup metadata (from adapter fallback handler)
-            "_lookup_method": rec.get("_lookup_method", "doi"),
-            "_original_id": rec.get("_original_id"),
-            # Additional CrossRef fields
             "alternative_id": self.serialize_json_list(
                 rec.get("alternative-id", []) or []
             ),
@@ -233,13 +214,10 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
                 "content_domain_crossmark_restriction"
             ),
             **issn_by_type,
-            # Author and reference data
             "author_orcids": serialized_orcids,
             "author_details": serialized_author_details,
             "references": serialized_references,
-            # DQ flags (MUST be last, per RULES.md §2.4)
-            "_dq_warn": False,
-            "_dq_error": False,
+            **self._build_metadata_block("crossref", rec, default_lookup="doi"),
         }
 
     def _get_primary_id_field(self) -> str:
@@ -287,96 +265,22 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         if not raw_doi:
             raise ValueError("DOI is required for CrossRef Publication")
 
-        # Cast to str for type safety (API always returns string DOIs)
         raw_doi_str = str(raw_doi) if raw_doi else None
 
-        # Validate DOI format using Value Object
-        # This catches malformed DOIs like "invalid", "10.1234", etc.
         doi_vo = DOI.from_raw(raw_doi_str)
         if doi_vo is None:
             raise ValueError(f"Invalid DOI format: {raw_doi}")
-
-    def _hash_author_details(
-        self,
-        author_details: list[
-            JsonDict  # Any: transformer record has heterogeneous values
-        ],  # Any: transformer record has heterogeneous values
-    ) -> list[JsonDict]:  # Any: transformer record has heterogeneous values
-        """Hash PII fields in author details while preserving non-PII data.
-
-        Author names (given, family, name) are PII and should be hashed.
-        Other fields (orcid, sequence, affiliations) are not PII.
-
-        Args:
-            author_details: List of author detail dictionaries.
-
-        Returns:
-            List of author details with hashed PII fields.
-
-        """
-        hashed_details: list[
-            JsonDict  # Any: transformer record has heterogeneous values
-        ] = []  # Any: transformer record has heterogeneous values
-
-        for author in author_details:
-            hashed_author: dict[
-                str, Any  # Any: transformer record has heterogeneous values
-            ] = {}  # Any: transformer record has heterogeneous values
-
-            # Hash PII fields (author names)
-            for pii_field in ("given", "family", "name"):
-                value = author.get(pii_field)
-                if value and isinstance(value, str):
-                    hashed_author[pii_field] = self.hash_pii_value(value)
-                else:
-                    hashed_author[pii_field] = None
-
-            # Preserve non-PII fields (orcid, sequence, authenticated_orcid, affiliations)
-            # ORCID is a public persistent identifier, not PII
-            hashed_author["orcid"] = author.get("orcid")
-            hashed_author["authenticated_orcid"] = author.get("authenticated_orcid")
-            hashed_author["sequence"] = author.get("sequence")
-            hashed_author["affiliations"] = author.get("affiliations", [])
-
-            hashed_details.append(hashed_author)
-
-        return hashed_details
-
-    def _compute_publication_date(
-        self,
-        published_print: str | None,
-        published_online: str | None,
-    ) -> str | None:
-        """Build unified publication_date (YYYY-MM-DD), preferring print.
-
-        Input dates from format_date_parts() are already in YYYY-MM-DD format
-        (with end-of-period normalization for partial dates).
-
-        Args:
-            published_print: Print publication date (YYYY-MM-DD).
-            published_online: Online publication date (YYYY-MM-DD).
-
-        Returns:
-            ISO date string (YYYY-MM-DD) or None.
-        """
-        return published_print or published_online
 
     def _should_log_fallback_lookup(self) -> bool:
         """Enable fallback lookup logging for CrossRef.
 
         CrossRef supports title-based fallback when DOI lookup fails (404).
-        Adapter uses TitleFallbackHandler for three-phase lookup:
-        1. DOI batch fetch
-        2. Title fallback for unresolved DOIs
-        3. Title-only lookup for entries without DOIs
 
         Returns:
             True - log fallback lookups for observability.
 
         """
         return True
-
-        # Any: generic domain entity; type varies by pipeline
 
     def entity_to_silver_record(
         self,
@@ -385,8 +289,6 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         """Convert Domain Entity to SilverRecord, preserving base schema fields.
 
         Overrides base implementation to handle ISSN list conversion.
-        Note: Fields like pmid, pmc_id, abstract, affiliation_list are kept
-        with None values to satisfy PublicationBaseSchema inheritance requirement.
 
         Args:
             entity: Domain entity (dataclass).
@@ -395,12 +297,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             SilverRecord dictionary with all base schema fields.
 
         """
-        # Get base silver record
         silver_record = super().entity_to_silver_record(entity)
-
-        # Note: Do NOT remove pmid, pmc_id, abstract, affiliation_list
-        # These fields inherit from PublicationBaseSchema and must exist in DataFrame
-        # even if set to None (Pandera requires columns to exist, not just be nullable)
 
         # Convert ISSN list to scalar + JSON array (unification with other providers)
         issn_raw = silver_record.get("issn")

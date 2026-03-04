@@ -52,13 +52,6 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
-    src/bioetl/application/pipelines/pubmed/transformer.py:
-      value: 920
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (file_size_limits).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
     src/bioetl/application/pipelines/uniprot/extractors/comments.py:
       value: 640
       owner: '@bioetl-architecture'
@@ -878,13 +871,6 @@ registries:
         entry.
     CrossRefExtractor:
       value: 386
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (class_size).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
-    CrossRefPublicationTransformer:
-      value: 360
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (class_size).
       expires_on: '2026-04-30'
