@@ -23,11 +23,6 @@ from typing import TYPE_CHECKING
 from bioetl.domain.resilience import CircuitBreakerConfig
 
 if TYPE_CHECKING:
-    from bioetl.application.core.protocols import (
-        GoldFilterCallback,
-        GoldTransformCallback,
-        TransformCallback,
-    )
     from bioetl.domain.ports import (
         BronzeDQConfigPort,
         GoldDQConfigPort,
@@ -62,9 +57,9 @@ class PipelineCallbacksContext:
             Implements GoldTransformCallback protocol.
     """
 
-    transform: TransformCallback
-    gold_filter: GoldFilterCallback
-    gold_transform: GoldTransformCallback
+    transform: object
+    gold_filter: object
+    gold_transform: object
 
 
 @dataclass(frozen=True)

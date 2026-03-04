@@ -10,6 +10,7 @@ import pytest
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.record_processor import RecordProcessor
+from bioetl.composition.factories.services_factory import ServicesBuilder
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier, ErrorType
 from bioetl.domain.ports import MetricsPort
@@ -61,6 +62,37 @@ def mock_gold_validator():
     return validator
 
 
+def _create_record_processor(
+    *,
+    services,
+    context,
+    config,
+    error_classifier,
+    transform_callback,
+    gold_filter_callback,
+    gold_transform_callback,
+    gold_validator,
+) -> RecordProcessor:
+    """Build RecordProcessor with composition-level dependency wiring."""
+    components = ServicesBuilder.create_batch_processing_components(
+        services=services,
+        context=context,
+        config=config,
+        error_classifier=error_classifier,
+        transform_callback=transform_callback,
+        gold_filter_callback=gold_filter_callback,
+        gold_transform_callback=gold_transform_callback,
+        gold_validator=gold_validator,
+    )
+    return RecordProcessor(
+        context=context,
+        batch_metrics=components.batch_metrics,
+        transformer=components.transformer,
+        writer=components.writer,
+        config=config,
+    )
+
+
 @pytest.fixture
 def record_processor(
     mock_services,
@@ -76,11 +108,11 @@ def record_processor(
         silver_schema=MagicMock(),
         gold_schema=MagicMock(),
     )
-    return RecordProcessor(
+    return _create_record_processor(
         services=mock_services,
-        error_classifier=mock_error_classifier,
         context=mock_context,
         config=config,
+        error_classifier=mock_error_classifier,
         transform_callback=AsyncMock(return_value={"id": 1}),
         gold_filter_callback=MagicMock(return_value=True),
         gold_transform_callback=MagicMock(side_effect=lambda c, r: r),
@@ -161,11 +193,11 @@ class TestRecordProcessorMetrics:
             silver_schema=MagicMock(),
             gold_schema=MagicMock(),
         )
-        processor = RecordProcessor(
+        processor = _create_record_processor(
             services=mock_services,
-            error_classifier=mock_error_classifier,
             context=mock_context,
             config=config,
+            error_classifier=mock_error_classifier,
             transform_callback=failing_transform,
             gold_filter_callback=MagicMock(return_value=True),
             gold_transform_callback=MagicMock(side_effect=lambda c, r: r),

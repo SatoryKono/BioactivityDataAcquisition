@@ -16,7 +16,15 @@ from __future__ import annotations
 import dataclasses
 import time
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, ClassVar, Protocol, TypeVar, runtime_checkable
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    ClassVar,
+    Protocol,
+    TypeVar,
+    cast,
+    runtime_checkable,
+)
 
 from bioetl.application.core.base_transformer_helpers_mixin import (
     _BaseTransformerRecordHelpersMixin,
@@ -367,7 +375,7 @@ class BaseTransformer(_BaseTransformerRecordHelpersMixin, ABC):
             result = await self._transform_impl(context, record, index)
             if result is not None and not self.should_write_silver(
                 context,
-                result,  # type: ignore[arg-type]  # SilverRecord is dict at runtime
+                cast("GoldRecord", result),
             ):
                 context.logger.debug(
                     "silver_filter_excluded",

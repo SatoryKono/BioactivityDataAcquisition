@@ -4,14 +4,9 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.batch_executor import BatchExecutor
-from bioetl.application.core.protocols import (
-    GoldFilterCallback,
-    GoldTransformCallback,
-    TransformCallback,
-)
 from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
 from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
 from bioetl.application.core.batch_tracing import BatchTracingManagerService
@@ -19,6 +14,11 @@ from bioetl.application.core.batch_transformer import BatchTransformer
 from bioetl.application.core.batch_writer import BatchWriter
 from bioetl.application.core.checkpoint_manager import CheckpointManagerService
 from bioetl.application.core.config import RecordProcessorConfig
+from bioetl.application.core.protocols import (
+    GoldFilterCallback,
+    GoldTransformCallback,
+    TransformCallback,
+)
 from bioetl.application.core.quarantine_manager import QuarantineManagerService
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
@@ -26,17 +26,19 @@ from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.infrastructure.validation import PanderaGoldValidator
 
 if TYPE_CHECKING:
+    import pandera
     import pyarrow as pa
 
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.application.core.record_processor import RecordProcessor
     from bioetl.application.core.shutdown import ShutdownSignal
-    from bioetl.domain.config import MemoryConfig
+    from bioetl.domain.config import DQConfig, MemoryConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.medallion import LoadingStrategy
     from bioetl.domain.ports import (
         CheckpointPort,
+        GoldValidatorPort,
         LoggerPort,
         MemoryMonitorPort,
         TracingPort,
@@ -63,7 +65,7 @@ def create_batch_processing_components(
     transform_callback: TransformCallback,
     gold_filter_callback: GoldFilterCallback,
     gold_transform_callback: GoldTransformCallback,
-    gold_validator: object,
+    gold_validator: GoldValidatorPort,
     tracer: TracingPort | None = None,
     lock_validator: Callable[[], Awaitable[bool]] | None = None,
 ) -> BatchProcessingComponents:
@@ -129,7 +131,7 @@ def create_record_processor_from_pipeline(
     *,
     pipeline: BasePipeline,
     silver_schema: pa.Schema | None,
-    gold_schema: object,
+    gold_schema: type[pandera.DataFrameModel],
     callbacks: PipelineCallbacksContext,
     create_record_processor_fn: Callable[..., RecordProcessor],
     strict_gold_validation: bool = True,
@@ -166,7 +168,7 @@ def create_batch_executor_from_pipeline(
     pipeline: BasePipeline,
     callbacks: PipelineCallbacksContext,
     silver_schema: pa.Schema | None,
-    gold_schema: object,
+    gold_schema: type[pandera.DataFrameModel],
     checkpoint_manager: CheckpointManagerService,
     shutdown_signal: ShutdownSignal,
     create_batch_processing_components_fn: Callable[..., BatchProcessingComponents],
@@ -191,7 +193,7 @@ def create_batch_executor_from_pipeline(
         entity_type=pipeline.config.entity_type,
         silver_schema=silver_schema,
         gold_schema=gold_schema,
-        dq_config=pipeline.config.dq,
+        dq_config=cast("DQConfig | None", pipeline.config.dq),
         table_config=pipeline.config.table,
         bronze_output_path=bronze_output_path,
         silver_output_path=silver_output_path,
@@ -201,7 +203,10 @@ def create_batch_executor_from_pipeline(
         scd_config=pipeline.config.scd_config,
     )
 
-    gold_validator = PanderaGoldValidator(gold_schema, strict=strict_gold_validation)
+    typed_gold_schema = cast("pa.DataFrameSchema | None", gold_schema)
+    gold_validator = PanderaGoldValidator(
+        typed_gold_schema, strict=strict_gold_validation
+    )
     components = create_batch_processing_components_fn(
         services=pipeline.services,
         context=pipeline.context,

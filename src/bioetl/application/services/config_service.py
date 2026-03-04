@@ -8,6 +8,7 @@ Implements RULES.md §1.1 - Application layer depends only on Domain.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
@@ -313,9 +314,12 @@ class ConfigService:
         # Convert to dict using protocol method if available, fallback to dict()
         if hasattr(yaml_config, "model_dump"):
             config_dict = yaml_config.model_dump()
+        elif isinstance(yaml_config, Mapping):
+            config_dict = dict(yaml_config)
         else:
-            # Fallback for plain dicts (used in some tests)
-            config_dict = dict(yaml_config)  # type: ignore
+            raise TypeError(
+                "Pipeline YAML config must provide model_dump() or be a mapping"
+            )
 
         self.logger.info("Got pipeline YAML config", pipeline=pipeline_name)
         return config_dict

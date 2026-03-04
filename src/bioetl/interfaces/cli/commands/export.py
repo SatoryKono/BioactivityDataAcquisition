@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
+from typing import Literal, cast
 
 import click
 
@@ -155,8 +156,12 @@ def export_command(
         column_list = [c.strip() for c in columns.split(",")]
 
     # Build export options
+    export_format: Literal["csv", "xlsx", "tsv"] = "csv"
+    if output_format in {"csv", "xlsx", "tsv"}:
+        export_format = cast("Literal['csv', 'xlsx', 'tsv']", output_format)
+
     options = ExportOptions(
-        format=output_format,  # type: ignore[arg-type]
+        format=export_format,
         output_path=output,
         limit=limit,
         columns=column_list,

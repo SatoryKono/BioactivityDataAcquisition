@@ -105,7 +105,7 @@ class BaseFilterConfig:
         values: frozenset[str] | None,  # Any: YAML config has heterogeneous values
     ) -> bool:  # Any: val varies
         """Check the IN operator."""
-        return str(val) in values  # type: ignore[operator]
+        return values is not None and str(val) in values
 
     def _check_op_not_in(
         self,
@@ -113,7 +113,7 @@ class BaseFilterConfig:
         values: frozenset[str] | None,  # Any: YAML config has heterogeneous values
     ) -> bool:  # Any: val varies
         """Check the NOT_IN operator."""
-        return str(val) not in values  # type: ignore[operator]
+        return values is not None and str(val) not in values
 
     def _check_op_is_null(
         self,

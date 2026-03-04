@@ -12,7 +12,7 @@ This is pure domain logic (no I/O) per RULES.md §1.1.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Literal
 
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics, SchemaDriftInfo
 
@@ -104,7 +104,7 @@ class DQMetricsCalculator:
         self,
         new_fields: set[str],
         missing_fields: set[str],
-    ) -> str:
+    ) -> Literal["info", "warn", "critical"]:
         """Determine drift severity status.
 
         Drift severity levels:

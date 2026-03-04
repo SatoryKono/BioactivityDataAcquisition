@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable, Sequence
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 from bioetl.application.core.batch_executor import BatchExecutor
 from bioetl.application.core.checkpoint_manager import CheckpointManagerService
@@ -30,6 +30,8 @@ from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
 from bioetl.composition.factories.dq_factory import DQServicesFactory
 from bioetl.composition.factories.services_factory_pipeline_builder import (
     BatchProcessingComponents,
+)
+from bioetl.composition.factories.services_factory_pipeline_builder import (
     create_batch_executor_from_pipeline as _create_batch_executor_from_pipeline,
 )
 from bioetl.composition.factories.services_factory_pipeline_builder import (
@@ -54,23 +56,26 @@ from bioetl.infrastructure.quarantine import UnifiedQuarantine
 from bioetl.infrastructure.validation import PanderaGoldValidator
 
 if TYPE_CHECKING:
+    import pandera
     import pyarrow as pa
 
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.shutdown import ShutdownSignal
     from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
-    from bioetl.domain.config import MemoryConfig
+    from bioetl.domain.config import DQConfig, MemoryConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import (
         CheckpointPort,
         DataNormalizationPort,
         DataSourcePort,
         DQMonitorPort,
+        GoldValidatorPort,
         LockPort,
         LoggerPort,
         MemoryMonitorPort,
         MetricsPort,
         QuarantinePort,
+        SilverValidatorPort,
         TracingPort,
     )
     from bioetl.domain.services import DataNormalizationConfig
@@ -158,7 +163,7 @@ class BaseServicesFactory:
         tracer: TracingPort | None = None,
         dq_monitor: DQMonitorPort | None = None,
         metadata_coordinator: MetadataCoordinator | None = None,
-        silver_validator: Any = None,  # Any: SilverValidatorPort (optional lazy import)
+        silver_validator: SilverValidatorPort | None = None,
     ) -> PipelineServices:
         """Create services with injected data source.
 
@@ -423,7 +428,7 @@ class ServicesBuilder:
         transform_callback: TransformCallback,
         gold_filter_callback: GoldFilterCallback,
         gold_transform_callback: GoldTransformCallback,
-        gold_validator: object,
+        gold_validator: GoldValidatorPort,
         tracer: TracingPort | None = None,
         lock_validator: Callable[[], Awaitable[bool]] | None = None,
     ) -> BatchProcessingComponents:
@@ -469,8 +474,8 @@ class ServicesBuilder:
         provider: str,
         entity_type: str,
         silver_schema: pa.Schema | None,
-        gold_schema: Any,  # Any: Pandera DataFrameModel (no common base type)
-        dq_config: object,
+        gold_schema: type[pandera.DataFrameModel],
+        dq_config: DQConfig | None,
         primary_keys: Sequence[str],
         silver_table: str,
         gold_table: str | None,
@@ -540,8 +545,9 @@ class ServicesBuilder:
 
         # Create Gold validator from schema (DI pattern)
         # strict mode requires schema to be provided
+        typed_gold_schema = cast("pa.DataFrameSchema | None", gold_schema)
         gold_validator = PanderaGoldValidator(
-            gold_schema, strict=strict_gold_validation
+            typed_gold_schema, strict=strict_gold_validation
         )
 
         components = ServicesBuilder.create_batch_processing_components(
@@ -568,7 +574,7 @@ class ServicesBuilder:
     def create_record_processor_from_pipeline(
         pipeline: BasePipeline,
         silver_schema: pa.Schema | None,
-        gold_schema: Any,  # Any: Pandera DataFrameModel (no common base type)
+        gold_schema: type[pandera.DataFrameModel],
         *,
         strict_gold_validation: bool = True,
         lock_validator: Callable[[], Awaitable[bool]] | None = None,
@@ -589,7 +595,7 @@ class ServicesBuilder:
     def create_batch_executor_from_pipeline(
         pipeline: BasePipeline,
         silver_schema: pa.Schema | None,
-        gold_schema: Any,  # Any: Pandera DataFrameModel (no common base type)
+        gold_schema: type[pandera.DataFrameModel],
         checkpoint_manager: CheckpointManagerService,
         shutdown_signal: ShutdownSignal,
         *,

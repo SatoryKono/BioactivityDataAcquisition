@@ -8,10 +8,13 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.batch_executor import BatchExecutor
+from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
+from bioetl.application.core.batch_tracing import BatchTracingManagerService
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.shutdown import ShutdownSignal
+from bioetl.composition.factories.services_factory import ServicesBuilder
 from bioetl.domain.config import MemoryConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
@@ -111,6 +114,67 @@ def memory_config():
     )
 
 
+def _create_batch_executor(
+    *,
+    services: PipelineServices,
+    context: PipelineContext,
+    config: RecordProcessorConfig,
+    callbacks: dict,
+    gold_validator,
+    checkpoint_manager,
+    shutdown_signal: ShutdownSignal | None = None,
+    batch_size: int | None = None,
+    checkpoint_interval: int | None = None,
+    memory_monitor: MemoryMonitorPort | None = None,
+    memory_config: MemoryConfig | None = None,
+) -> BatchExecutor:
+    """Build BatchExecutor with composition-level dependency wiring."""
+    if shutdown_signal is None:
+        shutdown_signal = ShutdownSignal()
+
+    error_classifier = ErrorClassifier()
+    components = ServicesBuilder.create_batch_processing_components(
+        services=services,
+        context=context,
+        config=config,
+        error_classifier=error_classifier,
+        transform_callback=callbacks["transform"],
+        gold_filter_callback=callbacks["gold_filter"],
+        gold_transform_callback=callbacks["gold_transform"],
+        gold_validator=gold_validator,
+    )
+
+    initial_batch_size = batch_size or BatchExecutor.DEFAULT_BATCH_SIZE
+    mem_manager = BatchMemoryManagerService(
+        initial_batch_size=initial_batch_size,
+        memory_monitor=memory_monitor,
+        memory_config=memory_config,
+        logger=services.logger,
+    )
+    tracing_manager = BatchTracingManagerService(
+        tracer=None,
+        context=context,
+        config=config,
+        initial_batch_size=initial_batch_size,
+        adaptive_sizing_enabled=mem_manager.enabled,
+    )
+
+    return BatchExecutor(
+        services=services,
+        context=context,
+        config=config,
+        checkpoint_manager=checkpoint_manager,
+        shutdown_signal=shutdown_signal,
+        batch_metrics=components.batch_metrics,
+        transformer=components.transformer,
+        writer=components.writer,
+        tracing_manager=tracing_manager,
+        memory_manager=mem_manager,
+        batch_size=batch_size,
+        checkpoint_interval=checkpoint_interval,
+    )
+
+
 class TestBatchExecutorMemory:
     """Tests for BatchExecutor memory management."""
 
@@ -125,17 +189,13 @@ class TestBatchExecutorMemory:
         memory_monitor,
     ):
         """Test that adaptive sizing is enabled when monitor provided."""
-        executor = BatchExecutor(
+        executor = _create_batch_executor(
             services=mock_services,
             context=mock_context,
             config=processor_config,
-            error_classifier=ErrorClassifier(),
-            transform_callback=callbacks["transform"],
-            gold_filter_callback=callbacks["gold_filter"],
-            gold_transform_callback=callbacks["gold_transform"],
+            callbacks=callbacks,
             gold_validator=mock_gold_validator,
             checkpoint_manager=mock_checkpoint_manager,
-            shutdown_signal=ShutdownSignal(),
             memory_monitor=memory_monitor,
         )
         assert executor._memory.enabled is True
@@ -154,17 +214,13 @@ class TestBatchExecutorMemory:
         """Test that batch size is reduced under memory pressure."""
         memory_monitor.get_recommended_batch_size.return_value = 50
 
-        executor = BatchExecutor(
+        executor = _create_batch_executor(
             services=mock_services,
             context=mock_context,
             config=processor_config,
-            error_classifier=ErrorClassifier(),
-            transform_callback=callbacks["transform"],
-            gold_filter_callback=callbacks["gold_filter"],
-            gold_transform_callback=callbacks["gold_transform"],
+            callbacks=callbacks,
             gold_validator=mock_gold_validator,
             checkpoint_manager=mock_checkpoint_manager,
-            shutdown_signal=ShutdownSignal(),
             batch_size=100,
             memory_monitor=memory_monitor,
             memory_config=MemoryConfig(
@@ -202,17 +258,13 @@ class TestBatchExecutorMemory:
         # 20 records, check every 1 record -> ~20 checks
         memory_monitor.get_recommended_batch_size.side_effect = [50] * 10 + [100] * 20
 
-        executor = BatchExecutor(
+        executor = _create_batch_executor(
             services=mock_services,
             context=mock_context,
             config=processor_config,
-            error_classifier=ErrorClassifier(),
-            transform_callback=callbacks["transform"],
-            gold_filter_callback=callbacks["gold_filter"],
-            gold_transform_callback=callbacks["gold_transform"],
+            callbacks=callbacks,
             gold_validator=mock_gold_validator,
             checkpoint_manager=mock_checkpoint_manager,
-            shutdown_signal=ShutdownSignal(),
             batch_size=100,
             memory_monitor=memory_monitor,
             memory_config=MemoryConfig(
@@ -243,17 +295,13 @@ class TestBatchExecutorMemory:
         memory_config,
     ):
         """Test estimation from config without monitor."""
-        executor = BatchExecutor(
+        executor = _create_batch_executor(
             services=mock_services,
             context=mock_context,
             config=processor_config,
-            error_classifier=ErrorClassifier(),
-            transform_callback=callbacks["transform"],
-            gold_filter_callback=callbacks["gold_filter"],
-            gold_transform_callback=callbacks["gold_transform"],
+            callbacks=callbacks,
             gold_validator=mock_gold_validator,
             checkpoint_manager=mock_checkpoint_manager,
-            shutdown_signal=ShutdownSignal(),
             batch_size=20000,  # Large initial size
             memory_config=memory_config,  # Max 10MB -> ~10000 records
         )
@@ -276,17 +324,13 @@ class TestBatchExecutorMemory:
         mock_dq_service = MagicMock()
         mock_services.dq_report_service = mock_dq_service
 
-        executor = BatchExecutor(
+        executor = _create_batch_executor(
             services=mock_services,
             context=mock_context,
             config=processor_config,
-            error_classifier=ErrorClassifier(),
-            transform_callback=callbacks["transform"],
-            gold_filter_callback=callbacks["gold_filter"],
-            gold_transform_callback=callbacks["gold_transform"],
+            callbacks=callbacks,
             gold_validator=mock_gold_validator,
             checkpoint_manager=mock_checkpoint_manager,
-            shutdown_signal=ShutdownSignal(),
             batch_size=10,
         )
 
@@ -321,17 +365,13 @@ class TestBatchExecutorMemory:
         """Test get_dq_context returns None when service not available."""
         mock_services.dq_report_service = None  # explicit None
 
-        executor = BatchExecutor(
+        executor = _create_batch_executor(
             services=mock_services,
             context=mock_context,
             config=processor_config,
-            error_classifier=ErrorClassifier(),
-            transform_callback=callbacks["transform"],
-            gold_filter_callback=callbacks["gold_filter"],
-            gold_transform_callback=callbacks["gold_transform"],
+            callbacks=callbacks,
             gold_validator=mock_gold_validator,
             checkpoint_manager=mock_checkpoint_manager,
-            shutdown_signal=ShutdownSignal(),
         )
 
         assert executor.get_dq_context() is None
@@ -347,17 +387,13 @@ class TestBatchExecutorMemory:
         mock_gold_validator,
     ):
         """Test public process() method."""
-        executor = BatchExecutor(
+        executor = _create_batch_executor(
             services=mock_services,
             context=mock_context,
             config=processor_config,
-            error_classifier=ErrorClassifier(),
-            transform_callback=callbacks["transform"],
-            gold_filter_callback=callbacks["gold_filter"],
-            gold_transform_callback=callbacks["gold_transform"],
+            callbacks=callbacks,
             gold_validator=mock_gold_validator,
             checkpoint_manager=mock_checkpoint_manager,
-            shutdown_signal=ShutdownSignal(),
         )
 
         records = [{"id": 1}, {"id": 2}]

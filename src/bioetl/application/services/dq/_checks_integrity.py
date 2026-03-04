@@ -5,7 +5,7 @@ Extracted from GoldDQAnalyzer per audit-package-structure-2026-02-07.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 
 import polars as pl
 import pyarrow as pa
@@ -64,7 +64,7 @@ def check_referential_integrity(
             continue
 
         if isinstance(ref_table, pa.Table):
-            ref_df: pl.DataFrame = pl.from_arrow(ref_table)  # type: ignore[assignment]
+            ref_df = cast("pl.DataFrame", pl.from_arrow(ref_table))
         else:
             ref_df = ref_table
 

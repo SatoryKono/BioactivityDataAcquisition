@@ -50,6 +50,11 @@ _ENRICHER_EXECUTION_ERRORS = (
 __all__ = ["EnrichmentCoordinator", "EnrichmentCoordinatorService"]
 
 
+def _create_enricher_semaphore(max_concurrency: int) -> asyncio.Semaphore:
+    """Build semaphore for enricher concurrency limiting."""
+    return asyncio.Semaphore(max_concurrency)
+
+
 class EnrichmentCoordinatorService:
     """Coordinates parallel enrichment pipeline execution.
 
@@ -85,6 +90,7 @@ class EnrichmentCoordinatorService:
         logger: LoggerPort,
         dq_config: CompositeDQConfig,
         max_concurrency: int = 4,
+        semaphore_factory: Callable[[int], asyncio.Semaphore] | None = None,
     ) -> None:
         """Initialize enrichment coordinator.
 
@@ -92,11 +98,13 @@ class EnrichmentCoordinatorService:
             logger: Structured logger.
             dq_config: DQ thresholds configuration.
             max_concurrency: Maximum concurrent enrichers.
+            semaphore_factory: Optional factory for semaphore creation.
         """
         self._logger = logger
         self._dq_config = dq_config
         self._max_concurrency = max_concurrency
-        self._semaphore = asyncio.Semaphore(max_concurrency)
+        self._semaphore_factory = semaphore_factory or _create_enricher_semaphore
+        self._semaphore = self._semaphore_factory(max_concurrency)
 
     async def run_enrichers(
         self,

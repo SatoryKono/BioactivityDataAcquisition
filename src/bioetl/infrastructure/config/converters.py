@@ -18,9 +18,11 @@ from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 def _extract_source_fields(yaml_config: PipelineYamlConfig) -> list[str]:
     """Extract field names from source config."""
     source_fields = yaml_config.source.fields
-    if source_fields and isinstance(source_fields[0], dict):
+    if not source_fields:
+        return []
+    if isinstance(source_fields[0], dict):
         return [field["name"] for field in source_fields if "name" in field]
-    return source_fields  # type: ignore[return-value]
+    return [str(field) for field in source_fields]
 
 
 def _extract_write_modes(

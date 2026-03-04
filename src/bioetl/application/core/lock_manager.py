@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.config import LockConfig
@@ -48,6 +49,7 @@ class LockManager:
         shutdown_signal: ShutdownSignal,
         checkpoint_manager: CheckpointManagerService | None = None,
         context_holder: LockContextHolder | None = None,
+        heartbeat_factory: Callable[..., HeartbeatTask] | None = None,
     ) -> None:
         """Initialize LockManager with explicit dependencies.
 
@@ -59,6 +61,8 @@ class LockManager:
             shutdown_signal: Signal for graceful shutdown.
             checkpoint_manager: Optional checkpoint manager (unused, kept for compatibility).
             context_holder: Optional holder for lock context (for writers).
+            heartbeat_factory: Factory for HeartbeatTask construction.
+                Allows constructor injection for heartbeat strategy/tests.
 
         """
         self._lock = lock_port
@@ -70,6 +74,7 @@ class LockManager:
             checkpoint_manager  # Kept for interface compatibility
         )
         self._context_holder = context_holder
+        self._heartbeat_factory = heartbeat_factory or HeartbeatTask
         self._heartbeat: HeartbeatTask | None = None
         self._acquired_at: float | None = None  # monotonic timestamp when lock acquired
         self._fencing_token: FencingToken | None = None
@@ -90,6 +95,7 @@ class LockManager:
         shutdown_signal: ShutdownSignal,
         checkpoint_manager: CheckpointManagerService | None = None,
         context_holder: LockContextHolder | None = None,
+        heartbeat_factory: Callable[..., HeartbeatTask] | None = None,
     ) -> LockManager:
         """Create a LockManager instance.
 
@@ -110,6 +116,7 @@ class LockManager:
             shutdown_signal: Signal for graceful shutdown.
             checkpoint_manager: Optional checkpoint manager.
             context_holder: Optional holder for lock context.
+            heartbeat_factory: Optional factory for HeartbeatTask creation.
 
         Returns:
             A configured LockManager instance.
@@ -133,6 +140,7 @@ class LockManager:
             shutdown_signal=shutdown_signal,
             checkpoint_manager=checkpoint_manager,
             context_holder=context_holder,
+            heartbeat_factory=heartbeat_factory,
         )
 
     async def acquire(self) -> FencingToken | None:
@@ -157,7 +165,9 @@ class LockManager:
             self._fencing_token = token
             # Update shared context holder for writers
             if self._context_holder is not None:
-                self._context_holder.set(self.get_context())  # type: ignore[arg-type]
+                context = self.get_context()
+                if context is not None:
+                    self._context_holder.set(context)
             self._logger.info(
                 "lock_acquired",
                 lock_key=self._config.lock_key,
@@ -217,7 +227,7 @@ class LockManager:
             PipelineShutdownError: If initial heartbeat fails.
 
         """
-        self._heartbeat = HeartbeatTask(
+        self._heartbeat = self._heartbeat_factory(
             lock_port=self._lock,
             lock_key=self._config.lock_key,
             owner_id=self._run_id,
@@ -265,11 +275,15 @@ class LockManager:
                 await storage.write_silver(...)
         """
         if self._fencing_token is None:
-            return await self._lock.validate_owner(self._config.lock_key, self._run_id)
+            result = await self._lock.validate_owner(
+                self._config.lock_key, self._run_id
+            )
+            return bool(result)
 
-        return await self._lock.validate_fencing_token(
+        result = await self._lock.validate_fencing_token(
             self._config.lock_key, self._fencing_token
         )
+        return bool(result)
 
     async def __aexit__(
         self,
