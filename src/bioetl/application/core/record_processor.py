@@ -9,7 +9,6 @@ Safety Guard (RULES.md §4.6):
 
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.batch_executor import BatchResult
@@ -19,7 +18,10 @@ if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
-    from bioetl.application.core.batch_transformer import BatchTransformer, TransformResult
+    from bioetl.application.core.batch_transformer import (
+        BatchTransformer,
+        TransformResult,
+    )
     from bioetl.application.core.batch_writer import BatchWriter
     from bioetl.application.core.config import RecordProcessorConfig
     from bioetl.domain.context import PipelineContext
