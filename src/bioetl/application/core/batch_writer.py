@@ -15,14 +15,13 @@ from collections.abc import Awaitable, Callable, Sequence
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Literal, cast
 
-from bioetl.domain.types import BronzeRecord, GoldRecord
-
 import orjson
 
 from bioetl.application.composite.column_orderer import ColumnOrdererService
 from bioetl.domain.composite.config import DataSchemaConfig
 from bioetl.domain.exceptions import BioETLError, SchemaViolationError
 from bioetl.domain.locking import LockNotHeldError
+from bioetl.domain.types import BronzeRecord, GoldRecord
 
 if TYPE_CHECKING:
     from typing import Any as SpanType

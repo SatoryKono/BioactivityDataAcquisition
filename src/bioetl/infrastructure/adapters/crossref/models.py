@@ -352,7 +352,9 @@ class CrossRefMessage(BaseModel):
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
 
     # Facets
-    facets: dict[str, Any] | None = Field(default=None, description="Search facets")  # Any: nested Crossref JSON with provider-specific schema
+    facets: dict[str, Any] | None = Field(
+        default=None, description="Search facets"
+    )  # Any: nested Crossref JSON with provider-specific schema
 
     # Pagination
     total_results: int | None = Field(
@@ -361,7 +363,9 @@ class CrossRefMessage(BaseModel):
     items_per_page: int | None = Field(
         default=None, alias="items-per-page", description="Items per page"
     )
-    query: dict[str, Any] | None = Field(default=None, description="Query information")  # Any: nested Crossref JSON with provider-specific schema
+    query: dict[str, Any] | None = Field(
+        default=None, description="Query information"
+    )  # Any: nested Crossref JSON with provider-specific schema
 
     # Cursor
     next_cursor: str | None = Field(

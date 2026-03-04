@@ -86,7 +86,9 @@ class _BoundedIntVO(ValueObject[int]):
     _MAX: int
     _LABEL: str
 
-    def _validate(self, value: Any) -> int:  # Any: raw input from API (str|int|float|None)
+    def _validate(
+        self, value: Any
+    ) -> int:  # Any: raw input from API (str|int|float|None)
         n = _coerce_int(value)
         if not self._MIN <= n <= self._MAX:
             raise ValueError(f"{self._LABEL} {n} outside [{self._MIN}, {self._MAX}]")
@@ -198,4 +200,6 @@ __all__ = [
     "HeavyAtomCount",
     "HydrogenBondCount",
     "LogP",
-    "Po
+    "PolarSurfaceArea",
+    "RotatableBondCount",
+]
