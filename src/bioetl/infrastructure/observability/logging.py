@@ -25,14 +25,15 @@ from uuid import UUID
 
 import structlog
 
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.observability.logging_config import configure_logging
 
 _EVENT_KWARG = "event"
 
 
 def _sanitize_event_kwargs(
-    kwargs: dict[str, Any],  # Any: structlog-compatible API
-) -> dict[str, Any]:  # Any: structlog-compatible API
+    kwargs: JsonDict,  # Any: structlog-compatible API
+) -> JsonDict:  # Any: structlog-compatible API
     """Drop kwargs that collide with structlog positional event parameter."""
     if _EVENT_KWARG in kwargs:
         sanitized = dict(kwargs)

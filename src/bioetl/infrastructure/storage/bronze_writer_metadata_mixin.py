@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, cast
 
-from bioetl.domain.types import BatchID, RunID, RunType
+from bioetl.domain.types import BatchID, JsonDict, RunID, RunType
 
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import BronzeMetadata, SourceMetadata
@@ -80,7 +80,7 @@ class BronzeWriterMetadataMixin:
         completed_at: datetime,
         duration_seconds: float,
         source_metadata: SourceMetadata | None,
-    ) -> dict[str, Any]:  # Any: bronze metadata model fields are heterogeneous
+    ) -> JsonDict:  # Any: bronze metadata model fields are heterogeneous
         """Build Bronze metadata constructor payload."""
         import platform
         import socket

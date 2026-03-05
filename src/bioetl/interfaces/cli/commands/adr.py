@@ -11,6 +11,7 @@ from typing import Any
 import click
 
 from bioetl.composition.entrypoints import get_adr_service
+from bioetl.domain.types import JsonDict
 from bioetl.interfaces.cli.formatters import echo_error, echo_info
 
 __all__ = [
@@ -39,7 +40,7 @@ def list_command(as_json: bool) -> None:
     items = service.list_adrs()
     if as_json:
         payload: list[
-            dict[str, Any]  # Any: CLI/HTTP response values are heterogeneous
+            JsonDict  # Any: CLI/HTTP response values are heterogeneous
         ] = [  # Any: CLI/HTTP response values are heterogeneous
             {"number": i.number, "title": i.title, "path": i.path} for i in items
         ]

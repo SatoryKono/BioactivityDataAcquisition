@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar
 
+from bioetl.domain.types import JsonDict
+
 if TYPE_CHECKING:
     from pathlib import Path
 
@@ -19,7 +21,7 @@ class StorageAdapterMergedMixin:
     silver: SilverWriter
     gold: GoldWriter
     _COMPOSITE_GOLD_SCHEMAS: ClassVar[
-        dict[str, Any]  # Any: record/metadata values are heterogeneous
+        JsonDict  # Any: record/metadata values are heterogeneous
     ]
 
     def get_table_path(self, table_name: str) -> Path:
@@ -40,7 +42,7 @@ class StorageAdapterMergedMixin:
         table_name: str,
         columns: list[str] | None = None,
     ) -> list[
-        dict[str, Any]  # Any: record/metadata values are heterogeneous
+        JsonDict  # Any: record/metadata values are heterogeneous
     ]:
         """Read records from a Silver layer Delta table.
 
@@ -60,7 +62,7 @@ class StorageAdapterMergedMixin:
         self,
         table_name: str,
         records: list[
-            dict[str, Any]  # Any: record/metadata values are heterogeneous
+            JsonDict  # Any: record/metadata values are heterogeneous
         ],
         primary_keys: list[str] | None = None,
         *,
@@ -93,7 +95,7 @@ class StorageAdapterMergedMixin:
         self,
         table_name: str,
         records: list[
-            dict[str, Any]  # Any: record/metadata values are heterogeneous
+            JsonDict  # Any: record/metadata values are heterogeneous
         ],
         primary_keys: list[str] | None = None,
         *,

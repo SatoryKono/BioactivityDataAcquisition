@@ -12,13 +12,14 @@ from typing import Any
 
 import yaml
 
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.legacy_normalizers.source import normalize_source_config
 from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
 
 def read_source_config_payload(
     provider: str,
-) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
+) -> JsonDict:  # Any: YAML config has heterogeneous values
     """Read provider YAML and map to source-loader input payload."""
     unified_path = Path(f"configs/providers/{provider}.yaml")
     if not unified_path.exists():
@@ -32,7 +33,7 @@ def read_source_config_payload(
 
     source_section = unified_raw.get("source")
     if isinstance(source_section, dict):
-        payload: dict[str, Any] = {  # Any: dynamic payload or structural mixin boundary
+        payload: JsonDict = {  # Any: dynamic payload or structural mixin boundary
             "source": source_section
         }  # Any: heterogeneous YAML values
         for key in ("entities", "entity_notes"):
@@ -46,14 +47,14 @@ def read_source_config_payload(
 
 
 def normalize_source_config_payload(
-    payload: dict[str, Any],  # Any: YAML config has heterogeneous values
-) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
+    payload: JsonDict,  # Any: YAML config has heterogeneous values
+) -> JsonDict:  # Any: YAML config has heterogeneous values
     """Normalize source payload (legacy/new) to canonical schema."""
     return normalize_source_config(payload)
 
 
 def validate_source_config_payload(
-    payload: dict[str, Any],  # Any: YAML config has heterogeneous values
+    payload: JsonDict,  # Any: YAML config has heterogeneous values
 ) -> SourceYamlConfig:
     """Validate canonical source payload with pydantic schema."""
     return SourceYamlConfig.model_validate(payload)

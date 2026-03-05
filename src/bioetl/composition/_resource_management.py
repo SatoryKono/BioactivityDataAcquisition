@@ -21,6 +21,7 @@ from bioetl.composition.bootstrap import (
     bootstrap_quarantine_manager,
     load_pipeline_config,
 )
+from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from bioetl.application.core.checkpoint_manager import CheckpointManagerService
@@ -177,7 +178,7 @@ async def preview_cleanup(pipeline: str) -> CleanupPreview:
 
 async def inspect_quarantine(
     pipeline: str, limit: int = 100
-) -> list[dict[str, Any]]:  # Any: quarantine record has heterogeneous values
+) -> list[JsonDict]:  # Any: quarantine record has heterogeneous values
     """Inspect quarantined records for a pipeline.
 
     Convenience function for quick quarantine inspection.
@@ -196,7 +197,7 @@ async def inspect_quarantine(
     """
     manager = get_quarantine_manager(pipeline)
     records: list[
-        dict[str, Any]  # Any: factory wiring; concrete types resolved at runtime
+        JsonDict  # Any: factory wiring; concrete types resolved at runtime
     ] = await manager.inspect(  # Any: factory wiring; concrete types resolved at runtime
         limit=limit
     )  # Any: factory wiring; concrete types resolved at runtime

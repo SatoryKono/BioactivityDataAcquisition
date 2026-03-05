@@ -13,6 +13,7 @@ from typing import Any, cast
 import polars as pl
 import pyarrow as pa
 
+from bioetl.domain.types import JsonDict
 from bioetl.domain.value_objects.dq_report import (
     DQCheckStatus,
     ForeignKeyResult,
@@ -186,7 +187,7 @@ def check_referential_integrity(
 
 def check_scd_integrity(
     df: pl.DataFrame,
-    scd_config: dict[str, Any] | None,  # Any: SCD config has heterogeneous values
+    scd_config: JsonDict | None,  # Any: SCD config has heterogeneous values
 ) -> SCDIntegrityResult:
     """Check Slowly Changing Dimension (SCD) integrity metrics."""
     scd_type = 2 if not scd_config else scd_config.get("type", 2)

@@ -172,7 +172,7 @@ class BaseChemblTransformer(BaseTransformer):
         self,
         record: BronzeRecord,
         primary_id: PrimaryId,
-    ) -> dict[str, Any]:  # Any: transformer record has heterogeneous values
+    ) -> JsonDict:  # Any: transformer record has heterogeneous values
         """Extract business data from the bronze record.
 
         Subclasses MUST implement this method to extract entity-specific fields.

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from bioetl.domain.types import JsonDict
+
 __all__ = [
     "compute_composite_key",
     "is_duplicate_record",
@@ -17,7 +19,7 @@ if TYPE_CHECKING:
 
 
 def compute_composite_key(
-    record: dict[str, Any],  # Any: untyped API JSON record
+    record: JsonDict,  # Any: untyped API JSON record
     pk_fields: tuple[str, ...],
 ) -> str:
     """Compute composite key string from multiple fields.
@@ -38,7 +40,7 @@ def compute_composite_key(
 
 
 def is_duplicate_record_composite(
-    record: dict[str, Any],  # Any: untyped API JSON record
+    record: JsonDict,  # Any: untyped API JSON record
     pk_fields: tuple[str, ...],
     seen_keys: set[str],
     entity_type: str,
@@ -76,7 +78,7 @@ def is_duplicate_record_composite(
 
 
 def is_duplicate_record(
-    record: dict[str, Any],  # Any: untyped API JSON record
+    record: JsonDict,  # Any: untyped API JSON record
     pk_field: str,
     seen_ids: set[str],
     entity_type: str,

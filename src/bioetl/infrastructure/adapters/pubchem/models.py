@@ -24,6 +24,8 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from bioetl.domain.types import JsonDict
+
 
 class PubchemMoleculeApiRecord(BaseModel):
     """Normalized molecule record from PubChem API (infrastructure model).
@@ -131,7 +133,7 @@ class PubChemAssayRecord(BaseModel):
     name: str | None = Field(default=None, description="Assay name")
     description: str | None = Field(default=None, description="Assay description")
     protocol: str | None = Field(default=None, description="Assay protocol")
-    target: dict[str, Any] | None = (  # Any: untyped API JSON record
+    target: JsonDict | None = (  # Any: untyped API JSON record
         Field(  # Any: nested API JSON has heterogeneous values
             default=None, description="Target information"
         )
@@ -234,7 +236,7 @@ class PubChemBioactivityRecord(BaseModel):
     target_name: str | None = Field(default=None, description="Target name")
 
     # Activity Values
-    activity_values: list[dict[str, Any]] | None = (  # Any: untyped API JSON record
+    activity_values: list[JsonDict] | None = (  # Any: untyped API JSON record
         Field(  # Any: nested API JSON has heterogeneous values
             default_factory=list, description="List of activity measurements"
         )

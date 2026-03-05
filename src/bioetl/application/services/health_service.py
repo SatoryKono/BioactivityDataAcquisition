@@ -25,7 +25,7 @@ from bioetl.domain.ports import HealthCheckPort, HealthCheckResult
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
-
+from bioetl.domain.types import JsonDict
 
 _HEALTH_SERVICE_ERRORS = (
     NetworkError,
@@ -54,7 +54,9 @@ class DataSourceFactoryPort(Protocol):
         ...
 
     @staticmethod
-    def create(provider: str) -> Any:  # Any: polymorphic adapter
+    def create(
+        provider: str,
+    ) -> Any:  # Any: returns different adapter types per provider
         """Create a data source adapter for the given provider.
 
         Args:
@@ -101,13 +103,13 @@ class HealthResult:
         """Return True if status is unhealthy or unknown."""
         return self.status in ("unhealthy", "unknown")
 
-    def to_dict(self) -> dict[str, Any]:  # Any: heterogeneous health metric values
+    def to_dict(self) -> JsonDict:  # Any: heterogeneous health metric values
         """Convert to dictionary for serialization.
 
         Returns:
             Dictionary representation.
         """
-        result: dict[str, Any] = {  # Any: heterogeneous health metric values
+        result: JsonDict = {  # Any: heterogeneous health metric values
             "status": self.status,
         }
         if self.latency_ms is not None:
@@ -143,7 +145,7 @@ class HealthCheckSummary:
         """Number of unhealthy providers."""
         return sum(1 for r in self.results.values() if r.is_unhealthy)
 
-    def to_dict(self) -> dict[str, dict[str, Any]]:  # Any: heterogeneous health m...
+    def to_dict(self) -> dict[str, JsonDict]:  # Any: heterogeneous health m...
         """Convert to dictionary for serialization.
 
         Returns:

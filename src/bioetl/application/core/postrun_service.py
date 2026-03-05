@@ -364,12 +364,16 @@ class PostrunService:
         if not self._metadata_coordinator or not self._metadata_writer:
             return
 
-        # 1. Write final Silver metadata
+        # Prepare Silver and Gold metadata writes, then run concurrently.
+        import asyncio
+
+        write_coros: list[object] = []
+
+        # 1. Prepare Silver metadata
         silver_table = self._config.table.silver_table
         if silver_table:
             silver_path = self._storage.get_table_path(silver_table)
 
-            # Get Delta version for lineage (REQ-LINEAGE-002)
             version_after = self._resolve_delta_version(
                 table_path=str(silver_path),
                 layer="silver",
@@ -391,19 +395,20 @@ class PostrunService:
             silver_metadata = self._metadata_coordinator.create_silver_metadata(
                 silver_input
             )
-            await self._metadata_writer.write_silver_metadata(
-                str(silver_path),
-                silver_metadata,
-                provider=self._config.provider,
-                entity=self._config.entity_type,
+            write_coros.append(
+                self._metadata_writer.write_silver_metadata(
+                    str(silver_path),
+                    silver_metadata,
+                    provider=self._config.provider,
+                    entity=self._config.entity_type,
+                )
             )
 
-        # 2. Write final Gold metadata
+        # 2. Prepare Gold metadata
         gold_table = self._config.table.gold_table
         if gold_table:
             gold_path = self._storage.get_table_path(gold_table)
 
-            # Get Delta version
             version_after = self._resolve_delta_version(
                 table_path=str(gold_path),
                 layer="gold",
@@ -421,12 +426,18 @@ class PostrunService:
                 gold_schema=self._config.gold_schema,
             )
             gold_metadata = self._metadata_coordinator.create_gold_metadata(gold_input)
-            await self._metadata_writer.write_gold_metadata(
-                str(gold_path),
-                gold_metadata,
-                provider=self._config.provider,
-                entity=self._config.entity_type,
+            write_coros.append(
+                self._metadata_writer.write_gold_metadata(
+                    str(gold_path),
+                    gold_metadata,
+                    provider=self._config.provider,
+                    entity=self._config.entity_type,
+                )
             )
+
+        # Fire both metadata writes concurrently
+        if write_coros:
+            await asyncio.gather(*write_coros)
 
     def _collect_batch_metrics(self, executor: ExecutorMetricsPort) -> dict[str, float]:
         """Collect batch metrics from executor.

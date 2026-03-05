@@ -13,10 +13,10 @@ __all__ = ["load_pipeline_config", "load_source_config"]
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
-from typing import Any
 
 import yaml
 
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config_merge import config_merge
 from bioetl.infrastructure.legacy_normalizers import (
     pipeline as legacy_pipeline_normalizers,
@@ -29,16 +29,16 @@ from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
 
 def _deep_merge(
-    base: dict[str, Any],  # Any: YAML config has heterogeneous values
-    override: dict[str, Any],  # Any: YAML config has heterogeneous values
-) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
+    base: JsonDict,  # Any: YAML config has heterogeneous values
+    override: JsonDict,  # Any: YAML config has heterogeneous values
+) -> JsonDict:  # Any: YAML config has heterogeneous values
     """Deep merge two dictionaries, with override taking precedence."""
     return config_merge(base, override)
 
 
 def _load_base_config(
     config_path: Path,
-) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
+) -> JsonDict:  # Any: YAML config has heterogeneous values
     """Load pipeline base configuration from consolidated base path.
 
     Resolution order:
@@ -61,7 +61,7 @@ def _load_base_config(
 
 
 def _apply_file_reference_defaults(
-    config: dict[str, Any],  # Any: YAML config has heterogeneous values
+    config: JsonDict,  # Any: YAML config has heterogeneous values
     provider: str,
     entity_type: str,
 ) -> None:
@@ -86,7 +86,7 @@ def _apply_file_reference_defaults(
 
 
 def _apply_layer_defaults(
-    layer: dict[str, Any],  # Any: YAML config has heterogeneous values
+    layer: JsonDict,  # Any: YAML config has heterogeneous values
     provider: str,
     entity_type: str,
     layer_name: str,
@@ -106,8 +106,8 @@ def _apply_layer_defaults(
 
 
 def _apply_convention_defaults(
-    config: dict[str, Any],  # Any: YAML config has heterogeneous values
-) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
+    config: JsonDict,  # Any: YAML config has heterogeneous values
+) -> JsonDict:  # Any: YAML config has heterogeneous values
     """Apply convention-based defaults for paths, references, and table names.
 
     Auto-computes from provider/entity_type when not explicitly specified.
@@ -143,7 +143,7 @@ def _apply_convention_defaults(
 
 def _load_data_schema_config(
     config_path: Path, schema_file: str
-) -> dict[str, Any] | None:  # Any: YAML config has heterogeneous values
+) -> JsonDict | None:  # Any: YAML config has heterogeneous values
     """Compatibility wrapper for legacy schema loader tests/importers."""
     return legacy_pipeline_normalizers._load_data_schema_config(
         config_path=config_path,
@@ -152,7 +152,7 @@ def _load_data_schema_config(
 
 
 def _validate_schema_config(
-    data_schema: dict[str, Any],  # Any: YAML config has heterogeneous values
+    data_schema: JsonDict,  # Any: YAML config has heterogeneous values
     schema_file: str,
 ) -> None:
     """Compatibility wrapper for legacy schema validation tests/importers."""
@@ -181,8 +181,8 @@ _FILTER_SECTIONS: tuple[str, ...] = (
 
 
 def _apply_hierarchical_filter_config(
-    config: dict[str, Any],  # Any: YAML config has heterogeneous values
-    entity_config: dict[str, Any],  # Any: YAML config has heterogeneous values
+    config: JsonDict,  # Any: YAML config has heterogeneous values
+    entity_config: JsonDict,  # Any: YAML config has heterogeneous values
 ) -> None:
     """Apply filter config from the hierarchical filter system (ADR-028).
 
@@ -209,7 +209,7 @@ def _apply_hierarchical_filter_config(
         return
 
     # Collect inline filter overrides from pipeline YAML
-    inline_overrides: dict[str, Any] = {}  # Any: YAML config has heterogeneous values
+    inline_overrides: JsonDict = {}  # Any: YAML config has heterogeneous values
     for section in _FILTER_SECTIONS:
         if section in entity_config:
             inline_overrides[section] = entity_config[section]
@@ -233,7 +233,7 @@ def _apply_hierarchical_filter_config(
 
 def _load_unified_entity_raw(
     path: Path,
-) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
+) -> JsonDict:  # Any: YAML config has heterogeneous values
     """Load unified entity YAML file, returning empty dict when absent."""
     if not path.exists():
         return {}
@@ -244,16 +244,16 @@ def _load_unified_entity_raw(
 
 
 def _get_unified_section(
-    unified_raw: dict[str, Any],  # Any: YAML config has heterogeneous values
+    unified_raw: JsonDict,  # Any: YAML config has heterogeneous values
     section: str,
-) -> dict[str, Any] | None:  # Any: YAML config has heterogeneous values
+) -> JsonDict | None:  # Any: YAML config has heterogeneous values
     """Get a dict section from unified entity config if present."""
     value = unified_raw.get(section)
     return value if isinstance(value, dict) else None
 
 
 def _load_source_section(
-    config: dict[str, Any],  # Any: YAML config has heterogeneous values
+    config: JsonDict,  # Any: YAML config has heterogeneous values
     config_path: Path,
 ) -> None:
     """Load source config from external file and merge with entity overrides.
@@ -277,10 +277,10 @@ def _load_source_section(
 class PipelineConfigReadPayload:
     """Raw payload + context produced by pipeline-config read stage."""
 
-    config: dict[str, Any]  # Any: YAML config has heterogeneous values
-    entity_config: dict[str, Any]  # Any: YAML config has heterogeneous values
+    config: JsonDict  # Any: YAML config has heterogeneous values
+    entity_config: JsonDict  # Any: YAML config has heterogeneous values
     config_path: Path
-    unified_schema: dict[str, Any] | None = None  # Any: YAML values are heterogeneous
+    unified_schema: JsonDict | None = None  # Any: YAML values are heterogeneous
 
 
 def read_pipeline_config_payload(
@@ -318,7 +318,7 @@ def read_pipeline_config_payload(
 
 def normalize_pipeline_config_payload(
     payload: PipelineConfigReadPayload,
-) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
+) -> JsonDict:  # Any: YAML config has heterogeneous values
     """Normalize pipeline payload (new + legacy shapes) before validation."""
     config = _apply_convention_defaults(payload.config.copy())
     _apply_hierarchical_filter_config(config, payload.entity_config)
@@ -336,7 +336,7 @@ def normalize_pipeline_config_payload(
 
 
 def validate_pipeline_config_payload(
-    config: dict[str, Any],  # Any: YAML config has heterogeneous values
+    config: JsonDict,  # Any: YAML config has heterogeneous values
 ) -> PipelineYamlConfig:
     """Validate normalized pipeline payload with pydantic schema."""
     return PipelineYamlConfig.model_validate(config)

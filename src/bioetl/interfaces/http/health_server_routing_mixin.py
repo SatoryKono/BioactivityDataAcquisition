@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, Protocol, cast
 
-from bioetl.domain.types import HealthStatus
+from bioetl.domain.types import HealthStatus, JsonDict
 from bioetl.interfaces.http.types import HealthResponse
 
 if TYPE_CHECKING:
@@ -38,7 +38,7 @@ class _HealthStateSupport(Protocol):
 
     def _get_provider_statuses(
         self,
-    ) -> dict[str, dict[str, Any]]: ...  # Any: provider-specific status fields
+    ) -> dict[str, JsonDict]: ...  # Any: provider-specific status fields
 
 
 class HealthServerRoutingMixin:
@@ -74,7 +74,7 @@ class HealthServerRoutingMixin:
         """Handle /health endpoint - overall health status."""
         state_support = cast(_HealthStateSupport, self)
         status = state_support._get_overall_status()
-        checks: dict[str, Any] = {  # Any: response payload values are heterogeneous
+        checks: JsonDict = {  # Any: response payload values are heterogeneous
             "server": {
                 "status": "healthy",
                 "uptime_seconds": round(self.uptime_seconds, 2),

@@ -1,5 +1,5 @@
 ---
-name: conducting-deep-research
+name: deep-research
 description: Use when asked for "deep research", "thorough analysis", "comprehensive report", "investigate", "due diligence", or when multiple sources are needed to answer complex questions. Produces well-sourced research reports through iterative refinement.
 context: fork
 agent: general-purpose

@@ -28,6 +28,8 @@ from typing import Any
 
 import structlog
 
+from bioetl.domain.types import JsonDict
+
 # Thread-safe configuration state
 _config_lock = threading.Lock()
 _configured = False
@@ -72,9 +74,18 @@ _SECRET_PATTERNS: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"(?<![a-zA-Z0-9])[a-zA-Z0-9]{32,}(?![a-zA-Z0-9])"), "[REDACTED_KEY]"),
 ]
 
+# UUID pattern used to avoid redacting identifiers like run_id, batch_id
+_UUID_PATTERN = re.compile(
+    r"^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$",
+    re.IGNORECASE,
+)
+
 
 def _mask_secrets(value: Any) -> Any:  # Any: structlog context values of arbitrary type
     """Mask potential secrets in log values.
+
+    Preserves UUID-format strings (used as run_id, batch_id, etc.)
+    while redacting actual secrets like API keys and tokens.
 
     Args:
         value: Value to check and potentially mask
@@ -83,6 +94,10 @@ def _mask_secrets(value: Any) -> Any:  # Any: structlog context values of arbitr
         Original value or masked version if secrets detected
     """
     if not isinstance(value, str):
+        return value
+
+    # Preserve UUID-format identifiers (run_id, batch_id, content_hash)
+    if _UUID_PATTERN.match(value):
         return value
 
     result = value
@@ -95,8 +110,8 @@ def _mask_secrets(value: Any) -> Any:  # Any: structlog context values of arbitr
 def secret_filter_processor(
     logger: Any,  # Any: structlog wrapped logger instance
     _method_name: str,
-    event_dict: dict[str, Any],  # Any: OTel span attributes are heterogeneous
-) -> dict[str, Any]:  # Any: OTel span attributes are heterogeneous
+    event_dict: JsonDict,  # Any: OTel span attributes are heterogeneous
+) -> JsonDict:  # Any: OTel span attributes are heterogeneous
     """Structlog processor that filters secrets from log entries.
 
     Scans all string values in the event dict and masks potential secrets

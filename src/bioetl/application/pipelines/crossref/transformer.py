@@ -39,7 +39,7 @@ from bioetl.domain.entities.crossref import CrossRefPublicationEntity
 from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
 from bioetl.domain.normalization import extract_first_string
 from bioetl.domain.services import IdentityService
-from bioetl.domain.types import GoldRecord
+from bioetl.domain.types import GoldRecord, JsonDict
 from bioetl.domain.value_objects import DOI, PublicationYear
 
 if TYPE_CHECKING:
@@ -124,7 +124,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             Dictionary of Publication business fields.
 
         """
-        # BronzeRecord is already a dict[str, Any]
+        # BronzeRecord is already a JsonDict
         rec = record
 
         # Normalize DOI using Value Object for consistent lowercase format.
@@ -299,9 +299,9 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
     def _hash_author_details(
         self,
         author_details: list[
-            dict[str, Any]  # Any: transformer record has heterogeneous values
+            JsonDict  # Any: transformer record has heterogeneous values
         ],  # Any: transformer record has heterogeneous values
-    ) -> list[dict[str, Any]]:  # Any: transformer record has heterogeneous values
+    ) -> list[JsonDict]:  # Any: transformer record has heterogeneous values
         """Hash PII fields in author details while preserving non-PII data.
 
         Author names (given, family, name) are PII and should be hashed.
@@ -315,7 +315,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
 
         """
         hashed_details: list[
-            dict[str, Any]  # Any: transformer record has heterogeneous values
+            JsonDict  # Any: transformer record has heterogeneous values
         ] = []  # Any: transformer record has heterogeneous values
 
         for author in author_details:
@@ -380,8 +380,8 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
 
     def entity_to_silver_record(
         self,
-        entity: Any,  # Any: generic domain entity; type varies by pipeline
-    ) -> GoldRecord:  # Any: generic domain entity
+        entity: Any,  # Any: domain entity dataclass; concrete type varies by pipeline subclass
+    ) -> GoldRecord:
         """Convert Domain Entity to SilverRecord, preserving base schema fields.
 
         Overrides base implementation to handle ISSN list conversion.

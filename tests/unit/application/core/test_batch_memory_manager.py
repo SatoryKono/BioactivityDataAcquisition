@@ -1,0 +1,353 @@
+"""Unit tests for BatchMemoryManagerService.
+
+Tests memory budget enforcement, adaptive batch-size adjustment,
+GC/recovery after pressure relief, and config-based estimation.
+"""
+
+from __future__ import annotations
+
+from unittest.mock import MagicMock
+
+import pytest
+
+from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
+from bioetl.domain.config import MemoryConfig
+
+
+# ---------------------------------------------------------------------------
+# Shared helpers
+# ---------------------------------------------------------------------------
+
+
+def _make_monitor(recommended: int = 100) -> MagicMock:
+    monitor = MagicMock()
+    monitor.get_recommended_batch_size = MagicMock(return_value=recommended)
+    return monitor
+
+
+def _make_config(
+    *,
+    max_batch_memory_mb: int = 512,
+    min_batch_size: int = 10,
+    check_interval_records: int = 100,
+    enable_adaptive_sizing: bool = True,
+) -> MemoryConfig:
+    return MemoryConfig(
+        max_batch_memory_mb=max_batch_memory_mb,
+        min_batch_size=min_batch_size,
+        check_interval_records=check_interval_records,
+        enable_adaptive_sizing=enable_adaptive_sizing,
+    )
+
+
+# ---------------------------------------------------------------------------
+# __init__ / enabled flag
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+class TestBatchMemoryManagerInit:
+    """Tests for BatchMemoryManagerService initialisation."""
+
+    def test_enabled_when_monitor_provided(self):
+        """enabled=True when a memory_monitor is supplied."""
+        manager = BatchMemoryManagerService(
+            initial_batch_size=500,
+            memory_monitor=_make_monitor(),
+        )
+        assert manager.enabled is True
+
+    def test_enabled_when_memory_config_adaptive(self):
+        """enabled=True when config.enable_adaptive_sizing=True."""
+        manager = BatchMemoryManagerService(
+            initial_batch_size=500,
+            memory_config=_make_config(enable_adaptive_sizing=True),
+        )
+        assert manager.enabled is True
+
+    def test_disabled_when_no_monitor_and_no_config(self):
+        """enabled=False when neither monitor nor config supplied."""
+        manager = BatchMemoryManagerService(initial_batch_size=500)
+        assert manager.enabled is False
+
+    def test_disabled_when_adaptive_sizing_off(self):
+        """enabled=False when config has enable_adaptive_sizing=False and no monitor."""
+        manager = BatchMemoryManagerService(
+            initial_batch_size=500,
+            memory_config=_make_config(enable_adaptive_sizing=False),
+        )
+        assert manager.enabled is False
+
+    def test_initial_min_batch_size_equals_initial_batch_size(self):
+        """min_batch_size_used starts at initial_batch_size."""
+        manager = BatchMemoryManagerService(initial_batch_size=200)
+        assert manager.min_batch_size_used == 200
+
+    def test_initial_reduction_count_is_zero(self):
+        """batch_size_reductions starts at 0."""
+        manager = BatchMemoryManagerService(initial_batch_size=100)
+        assert manager.batch_size_reductions == 0
+
+    def test_monitor_and_adaptive_config_both_enable(self):
+        """Monitor takes priority; enabled regardless of config flag."""
+        manager = BatchMemoryManagerService(
+            initial_batch_size=100,
+            memory_monitor=_make_monitor(),
+            memory_config=_make_config(enable_adaptive_sizing=False),
+        )
+        # monitor is present so enabled must be True
+        assert manager.enabled is True
+
+
+# ---------------------------------------------------------------------------
+# get_check_interval
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+class TestGetCheckInterval:
+    """Tests for BatchMemoryManagerService.get_check_interval."""
+
+    def test_returns_config_interval_when_config_present(self):
+        """Returns check_interval_records from memory_config."""
+        manager = BatchMemoryManagerService(
+            initial_batch_size=100,
+            memory_config=_make_config(check_interval_records=50),
+        )
+        assert manager.get_check_interval() == 50
+
+    def test_returns_default_100_when_no_config(self):
+        """Returns 100 when no memory_config is set."""
+        manager = BatchMemoryManagerService(initial_batch_size=100)
+        assert manager.get_check_interval() == 100
+
+    def test_returns_default_100_with_monitor_but_no_config(self):
+        """Returns 100 when monitor present but no config."""
+        manager = BatchMemoryManagerService(
+            initial_batch_size=100,
+            memory_monitor=_make_monitor(),
+        )
+        assert manager.get_check_interval() == 100
+
+
+# ---------------------------------------------------------------------------
+# check_pressure
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+class TestCheckPressure:
+    """Tests for BatchMemoryManagerService.check_pressure."""
+
+    def test_returns_current_size_when_disabled(self):
+        """Returns current_size unchanged when adaptive sizing is disabled."""
+        manager = BatchMemoryManagerService(initial_batch_size=500)
+        result = manager.check_pressure(
+            current_size=500, check_interval=100, records_fetched=100
+        )
+        assert result == 500
+
+    def test_returns_current_size_before_interval(self):
+        """Returns current_size when records_fetched % interval != 0."""
+        manager = BatchMemoryManagerService(
+            initial_batch_size=500,
+            memory_monitor=_make_monitor(recommended=200),
+        )
+        result = manager.check_pressure(
+            current_size=500, check_interval=100, records_fetched=50
+        )
+        assert result == 500
+
+    def test_calls_adjust_at_interval_boundary(self):
+        """Calls _adjust when records_fetched % check_interval == 0."""
+        monitor = _make_monitor(recommended=300)
+        manager = BatchMemoryManagerService(
+            initial_batch_size=500,
+            memory_monitor=monitor,
+        )
+        result = manager.check_pressure(
+            current_size=500, check_interval=100, records_fetched=100
+        )
+        monitor.get_recommended_batch_size.assert_called_once_with(500)
+        assert result == 300
+
+    def test_reduces_batch_size_under_pressure(self):
+        """Returns smaller batch size when monitor recommends reduction."""
+        monitor = _make_monitor(recommended=50)
+        manager = BatchMemoryManagerService(
+            initial_batch_size=500,
+            memory_monitor=monitor,
+        )
+        result = manager.check_pressure(
+            current_size=500, check_interval=100, records_fetched=100
+        )
+        assert result == 50
+        assert manager.batch_size_reductions == 1
+
+    def test_tracks_min_batch_size_used(self):
+        """min_batch_size_used is updated when size is reduced."""
+        monitor = _make_monitor(recommended=25)
+        manager = BatchMemoryManagerService(
+            initial_batch_size=500,
+            memory_monitor=monitor,
+        )
+        manager.check_pressure(
+            current_size=500, check_interval=100, records_fetched=100
+        )
+        assert manager.min_batch_size_used == 25
+
+    def test_logs_size_reduction(self):
+        """Logger.info is called when batch size is reduced."""
+        monitor = _make_monitor(recommended=10)
+        mock_logger = MagicMock()
+        manager = BatchMemoryManagerService(
+            initial_batch_size=500,
+            memory_monitor=monitor,
+            logger=mock_logger,
+        )
+        manager.check_pressure(
+            current_size=500, check_interval=100, records_fetched=100
+        )
+        mock_logger.info.assert_called_once()
+
+    def test_does_not_log_when_no_reduction(self):
+        """Logger.info is NOT called when batch size is not reduced."""
+        monitor = _make_monitor(recommended=500)  # Same size — no reduction
+        mock_logger = MagicMock()
+        manager = BatchMemoryManagerService(
+            initial_batch_size=500,
+            memory_monitor=monitor,
+            logger=mock_logger,
+        )
+        manager.check_pressure(
+            current_size=500, check_interval=100, records_fetched=100
+        )
+        mock_logger.info.assert_not_called()
+
+    def test_accumulates_reduction_count_across_calls(self):
+        """batch_size_reductions increments on each pressure event."""
+        monitor = MagicMock()
+        monitor.get_recommended_batch_size.side_effect = [400, 300, 200]
+        manager = BatchMemoryManagerService(
+            initial_batch_size=500,
+            memory_monitor=monitor,
+        )
+        for fetched in [100, 200, 300]:
+            manager.check_pressure(
+                current_size=500, check_interval=100, records_fetched=fetched
+            )
+
+        assert manager.batch_size_reductions == 3
+
+
+# ---------------------------------------------------------------------------
+# maybe_recover
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+class TestMaybeRecover:
+    """Tests for BatchMemoryManagerService.maybe_recover."""
+
+    def test_returns_current_size_when_disabled(self):
+        """Returns current_size unchanged when adaptive sizing is disabled."""
+        manager = BatchMemoryManagerService(initial_batch_size=500)
+        result = manager.maybe_recover(current_size=100)
+        assert result == 100
+
+    def test_delegates_to_monitor_when_present(self):
+        """Uses monitor.get_recommended_batch_size for recovery."""
+        monitor = _make_monitor(recommended=150)
+        manager = BatchMemoryManagerService(
+            initial_batch_size=500,
+            memory_monitor=monitor,
+        )
+        result = manager.maybe_recover(current_size=100)
+        monitor.get_recommended_batch_size.assert_called_once_with(100)
+        assert result == 150
+
+    def test_recovers_toward_initial_size_without_monitor(self):
+        """Without monitor, batch size grows toward initial_batch_size at 10%/step."""
+        manager = BatchMemoryManagerService(
+            initial_batch_size=500,
+            memory_config=_make_config(enable_adaptive_sizing=True),
+        )
+        result = manager.maybe_recover(current_size=100)
+        # 10% growth: int(100 * 1.1) = 110
+        assert result == 110
+
+    def test_does_not_exceed_initial_size_on_recovery(self):
+        """Recovery never overshoots initial_batch_size."""
+        manager = BatchMemoryManagerService(
+            initial_batch_size=500,
+            memory_config=_make_config(enable_adaptive_sizing=True),
+        )
+        result = manager.maybe_recover(current_size=490)
+        assert result == 500
+
+    def test_no_change_when_already_at_initial_size(self):
+        """Returns current_size unchanged when already at initial_batch_size."""
+        manager = BatchMemoryManagerService(
+            initial_batch_size=500,
+            memory_config=_make_config(enable_adaptive_sizing=True),
+        )
+        result = manager.maybe_recover(current_size=500)
+        assert result == 500
+
+
+# ---------------------------------------------------------------------------
+# _estimate_from_config
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+class TestEstimateFromConfig:
+    """Tests for BatchMemoryManagerService._estimate_from_config."""
+
+    def test_returns_current_size_when_no_config(self):
+        """Returns current_size when no memory_config set."""
+        manager = BatchMemoryManagerService(initial_batch_size=100)
+        result = manager._estimate_from_config(100)
+        assert result == 100
+
+    def test_caps_at_max_batch_memory_limit(self):
+        """Returns max_records limit when current_size exceeds budget."""
+        # max_batch_memory_mb=10 -> max_records = 10 * 1000 = 10000
+        manager = BatchMemoryManagerService(
+            initial_batch_size=20000,
+            memory_config=_make_config(max_batch_memory_mb=10, min_batch_size=5),
+        )
+        result = manager._estimate_from_config(20000)
+        assert result == 10000
+
+    def test_respects_min_batch_size_floor(self):
+        """Returns at least min_batch_size even when memory budget is very small."""
+        manager = BatchMemoryManagerService(
+            initial_batch_size=20000,
+            memory_config=_make_config(
+                max_batch_memory_mb=0,  # 0 * 1000 = 0 records budget
+                min_batch_size=50,
+            ),
+        )
+        result = manager._estimate_from_config(20000)
+        assert result == 50
+
+    def test_returns_current_size_when_within_budget(self):
+        """Returns current_size unchanged when it fits within memory budget."""
+        # max_batch_memory_mb=512 -> 512000 records
+        manager = BatchMemoryManagerService(
+            initial_batch_size=1000,
+            memory_config=_make_config(max_batch_memory_mb=512),
+        )
+        result = manager._estimate_from_config(1000)
+        assert result == 1000
+
+    def test_boundary_exactly_at_max_records(self):
+        """Returns current_size when it exactly equals max_records."""
+        manager = BatchMemoryManagerService(
+            initial_batch_size=10000,
+            memory_config=_make_config(max_batch_memory_mb=10, min_batch_size=5),
+        )
+        # 10 * 1000 = 10000 exactly
+        result = manager._estimate_from_config(10000)
+        assert result == 10000

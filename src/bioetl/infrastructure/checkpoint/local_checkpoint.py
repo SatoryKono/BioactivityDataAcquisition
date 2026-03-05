@@ -28,7 +28,7 @@ from typing import Any
 from uuid import UUID
 
 from bioetl.domain.serialization import deserialize_from_json, serialize_to_json
-from bioetl.domain.types import RunID
+from bioetl.domain.types import JsonDict, RunID
 
 
 class LocalCheckpoint:
@@ -56,7 +56,7 @@ class LocalCheckpoint:
         self,
         pipeline: str,
         run_id: RunID,
-        metadata: dict[str, Any]  # Any: checkpoint state has heterogeneous values
+        metadata: JsonDict  # Any: checkpoint state has heterogeneous values
         | None = None,  # Any: checkpoint metadata values are heterogeneous
     ) -> None:
         """Save checkpoint atomically using temp file + rename.
@@ -75,7 +75,7 @@ class LocalCheckpoint:
         self,
         pipeline: str,
         run_id: RunID,
-        metadata: dict[str, Any]  # Any: checkpoint state has heterogeneous values
+        metadata: JsonDict  # Any: checkpoint state has heterogeneous values
         | None,  # Any: checkpoint metadata values are heterogeneous
     ) -> None:
         """Synchronous save implementation."""
@@ -112,7 +112,7 @@ class LocalCheckpoint:
     async def load(
         self, pipeline: str
     ) -> (
-        tuple[RunID, dict[str, Any]]  # Any: checkpoint state has heterogeneous values
+        tuple[RunID, JsonDict]  # Any: checkpoint state has heterogeneous values
         | None  # Any: checkpoint state has heterogeneous values
     ):  # Any: checkpoint state has heterogeneous values
         """Load last checkpoint.
@@ -123,7 +123,7 @@ class LocalCheckpoint:
             pipeline: Pipeline.
 
         Returns:
-            Loaded tuple[RunID, dict[str, Any]] | None.
+            Loaded tuple[RunID, JsonDict] | None.
         """
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(None, self._load_sync, pipeline)
@@ -131,7 +131,7 @@ class LocalCheckpoint:
     def _load_sync(
         self, pipeline: str
     ) -> (
-        tuple[RunID, dict[str, Any]]  # Any: checkpoint state has heterogeneous values
+        tuple[RunID, JsonDict]  # Any: checkpoint state has heterogeneous values
         | None  # Any: checkpoint state has heterogeneous values
     ):  # Any: checkpoint state has heterogeneous values
         """Synchronous load implementation."""

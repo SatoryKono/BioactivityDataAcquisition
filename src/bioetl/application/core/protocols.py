@@ -14,7 +14,7 @@ __all__ = [
 ]
 
 
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable
@@ -29,9 +29,9 @@ class TransformCallback(Protocol):
     def __call__(
         self,
         context: PipelineContext,
-        record: dict[str, Any],  # Any: values are heterogeneous
+        record: JsonDict,  # Any: values are heterogeneous
         index: int,  # Any: values are heterogeneous
-    ) -> Awaitable[dict[str, Any] | None]:  # Any: values are heterogeneous
+    ) -> Awaitable[JsonDict | None]:  # Any: values are heterogeneous
         """Execute transformation."""
         ...
 
@@ -42,7 +42,7 @@ class GoldFilterCallback(Protocol):
     def __call__(
         self,
         context: PipelineContext,
-        record: dict[str, Any],  # Any: values are heterogeneous
+        record: JsonDict,  # Any: values are heterogeneous
     ) -> bool:  # Any: values are heterogeneous
         """Evaluate if record should be included in Gold layer."""
         ...
@@ -57,8 +57,8 @@ class GoldTransformCallback(Protocol):
     def __call__(
         self,
         context: PipelineContext,
-        record: dict[str, Any],  # Any: values are heterogeneous
-    ) -> dict[str, Any]:  # Any: values are heterogeneous
+        record: JsonDict,  # Any: values are heterogeneous
+    ) -> JsonDict:  # Any: values are heterogeneous
         """Execute transformation."""
         ...
 

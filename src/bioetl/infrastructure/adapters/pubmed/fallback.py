@@ -11,7 +11,7 @@ from __future__ import annotations
 __all__ = ["PUBMED_FALLBACK_ERRORS", "TitleFallbackHandler"]
 
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from httpx import RequestError
 
@@ -19,9 +19,10 @@ from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.infrastructure.adapters.common import BaseTitleFallbackHandler, titles_match
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Coroutine
+    from collections.abc import Awaitable, Callable
 
     from bioetl.domain.ports import LoggerPort
+from bioetl.domain.types import JsonDict
 
 PUBMED_FALLBACK_ERRORS = (
     BioETLError,
@@ -48,8 +49,8 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
         logger: LoggerPort,
         search_fn: Callable[
             [str, int],
-            Coroutine[Any, Any, list[dict[str, Any]]],  # Any: untyped API JSON record
-        ],  # Any: untyped API JSON record
+            Awaitable[list[JsonDict]],
+        ],
     ) -> None:
         """Initialize fallback handler.
 
@@ -63,7 +64,7 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
 
     async def _search_by_title(
         self, title: str
-    ) -> dict[str, Any] | None:  # Any: untyped API JSON record
+    ) -> JsonDict | None:  # Any: untyped API JSON record
         """Search for publication by title using PubMed esearch.
 
         Validates results using title matching to reduce false positives.
@@ -101,7 +102,7 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
 
     def _get_result_identifier(
         self,
-        result: dict[str, Any],  # Any: untyped API JSON record
+        result: JsonDict,  # Any: untyped API JSON record
     ) -> tuple[str, str]:  # Any: untyped API JSON record
         """Return PubMed PMID for logging."""
         return ("found_pmid", str(result.get("pmid", "unknown")))

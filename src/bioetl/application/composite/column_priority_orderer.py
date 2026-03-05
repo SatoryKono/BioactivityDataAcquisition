@@ -78,7 +78,11 @@ class ColumnPriorityOrdererService:
             try:
                 seed_provider, seed_entity = self._parse_pipeline_name(seed_pipeline)
             except ValueError:
-                pass
+                self._logger.debug(
+                    "Could not parse seed pipeline for priority ordering",
+                    seed_pipeline=seed_pipeline,
+                    field=field,
+                )
 
         for source in priorities:
             qualified = self._resolve_priority_column(

@@ -16,7 +16,9 @@ import hashlib
 import math
 from datetime import date, datetime
 from functools import singledispatch
-from typing import Any
+from typing import Any  # Any: required for singledispatch base case signature
+
+from bioetl.domain.types import JsonDict
 
 from .constants import META_FIELDS
 from .serialization import serialize_to_json_canonical
@@ -43,7 +45,9 @@ __all__ = [
 
 
 @singledispatch
-def _normalize_value(value: Any) -> Any:  # Any: record field type varies
+def _normalize_value(
+    value: Any,
+) -> Any:  # Any: singledispatch requires Any for dispatch
     """Normalize a single value using singledispatch."""
     return value
 
@@ -75,13 +79,13 @@ def _normalize_str(value: str) -> str:
 
 
 @_normalize_value.register(dict)
-def _normalize_dict(value: dict[str, Any]) -> dict[str, Any]:  # Any: record vals vary
+def _normalize_dict(value: JsonDict) -> JsonDict:
     """Normalize dict by recursively normalizing values."""
     return {k: _normalize_value(v) for k, v in value.items()}
 
 
 @_normalize_value.register(list)
-def _normalize_list(value: list[Any]) -> list[Any]:  # Any: heterogeneous record values
+def _normalize_list(value: list[object]) -> list[object]:
     """Normalize list by recursively normalizing elements."""
     return [_normalize_value(v) for v in value]
 
@@ -109,7 +113,7 @@ def _is_excluded_key(
 
 def _should_include_field(
     key: str,
-    value: Any,  # Any: record field type varies
+    value: object,
     exclude_none: bool,
     include_fields: set[str] | None = None,
     exclude_fields: set[str] | None = None,
@@ -125,11 +129,11 @@ def _should_include_field(
 
 
 def normalize_for_hash(
-    record: dict[str, Any],  # Any: record vals vary
+    record: JsonDict,
     exclude_none: bool = False,
     include_fields: set[str] | None = None,
     exclude_fields: set[str] | None = None,
-) -> dict[str, Any]:  # Any: heterogeneous record values
+) -> JsonDict:
     """Normalize record before hashing to ensure consistency.
 
     Args:
@@ -150,7 +154,7 @@ def normalize_for_hash(
     }
 
 
-def canonical_json_dumps(obj: dict[str, Any]) -> str:  # Any: JSON-serializable value
+def canonical_json_dumps(obj: JsonDict) -> str:
     """Convert object to canonical JSON representation.
 
     Delegates to domain.serialization.serialize_to_json_canonical()
@@ -166,7 +170,7 @@ def canonical_json_dumps(obj: dict[str, Any]) -> str:  # Any: JSON-serializable 
 
 
 def generate_content_hash(
-    record: dict[str, Any],  # Any: record vals vary
+    record: JsonDict,
     provider: str,
     exclude_none: bool = False,
     include_fields: set[str] | None = None,
@@ -197,7 +201,7 @@ def generate_content_hash(
 
 
 def generate_entity_id(
-    record: dict[str, Any],  # Any: heterogeneous record values
+    record: JsonDict,
     provider: str,
     id_field: str | None = None,
 ) -> EntityID:
@@ -227,7 +231,7 @@ def detect_schema_drift(
     old_schema: set[str],
     new_schema: set[str],
     required_fields: set[str] | None = None,
-) -> tuple[DriftLevel, dict[str, Any]]:  # Any: JSON-serializable value
+) -> tuple[DriftLevel, JsonDict]:
     """Detect schema drift between two schemas.
 
     Args:
@@ -319,7 +323,7 @@ def detect_hash_collision(
 
 
 def safe_float(
-    value: Any,  # Any: accepts any input type
+    value: object,
     default: float | None = None,
 ) -> float | None:
     """Safely convert value to float.
@@ -340,7 +344,7 @@ def safe_float(
 
 
 def safe_int(
-    value: Any,  # Any: accepts any input type
+    value: object,
     default: int | None = None,
 ) -> int | None:
     """Safely convert value to int.
@@ -361,7 +365,7 @@ def safe_int(
 
 
 def safe_str(
-    value: Any,  # Any: accepts any input type
+    value: object,
     default: str | None = None,
 ) -> str | None:
     """Safely convert value to string.

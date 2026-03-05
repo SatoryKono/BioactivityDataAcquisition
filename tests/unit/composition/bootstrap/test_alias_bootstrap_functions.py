@@ -17,10 +17,10 @@ import pytest
 class TestBootstrapAliases:
     @patch("bioetl.composition.bootstrap.assembly.checkpoint.get_settings")
     def test_bootstrap_quarantine_alias_delegates(
-        self, mock_get_settings: MagicMock
+        self, mock_get_settings: MagicMock, tmp_path: Path
     ) -> None:
         mock_get_settings.return_value = MagicMock(
-            quarantine_path=Path("/tmp/quarantine")
+            quarantine_path=tmp_path / "quarantine"
         )
         from bioetl.composition.bootstrap.assembly.checkpoint import (
             bootstrap_quarantine,
@@ -30,10 +30,10 @@ class TestBootstrapAliases:
 
     @patch("bioetl.composition.bootstrap.assembly.checkpoint.get_settings")
     def test_bootstrap_checkpoint_alias_delegates(
-        self, mock_get_settings: MagicMock
+        self, mock_get_settings: MagicMock, tmp_path: Path
     ) -> None:
         mock_get_settings.return_value = MagicMock(
-            checkpoint_path=Path("/tmp/checkpoints")
+            checkpoint_path=tmp_path / "checkpoints"
         )
         from bioetl.composition.bootstrap.assembly.checkpoint import (
             bootstrap_checkpoint,
@@ -43,18 +43,18 @@ class TestBootstrapAliases:
 
     @patch("bioetl.composition.bootstrap.assembly.storage.get_settings")
     def test_bootstrap_storage_alias_delegates(
-        self, mock_get_settings: MagicMock
+        self, mock_get_settings: MagicMock, tmp_path: Path
     ) -> None:
-        mock_get_settings.return_value = MagicMock(data_dir="/tmp/data")
+        mock_get_settings.return_value = MagicMock(data_dir=str(tmp_path / "data"))
         from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage
 
         assert bootstrap_storage() is not None
 
     @patch("bioetl.composition.bootstrap.assembly.storage.get_settings")
     def test_bootstrap_cleanup_alias_delegates(
-        self, mock_get_settings: MagicMock
+        self, mock_get_settings: MagicMock, tmp_path: Path
     ) -> None:
-        mock_get_settings.return_value = MagicMock(data_dir="/tmp/data")
+        mock_get_settings.return_value = MagicMock(data_dir=str(tmp_path / "data"))
         from bioetl.composition.bootstrap.cli.storage import bootstrap_cleanup
 
         assert bootstrap_cleanup() is not None

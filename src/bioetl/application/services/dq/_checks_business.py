@@ -12,6 +12,7 @@ from typing import Any
 
 import polars as pl
 
+from bioetl.domain.types import JsonDict
 from bioetl.domain.value_objects.dq_report import (
     BusinessRuleResult,
     BusinessRulesResult,
@@ -72,7 +73,7 @@ def _check_regex_rule(
 
 def _evaluate_single_rule(
     df: pl.DataFrame,
-    rule: dict[str, Any],  # Any: heterogeneous DQ rule config values
+    rule: JsonDict,  # Any: heterogeneous DQ rule config values
 ) -> tuple[bool, int | None]:
     """Evaluate a single business rule."""
     column = rule.get("column")
@@ -94,7 +95,7 @@ def _evaluate_single_rule(
 
 def check_business_rules(
     df: pl.DataFrame,
-    rules: list[dict[str, Any]],  # Any: heterogeneous DQ rule ...
+    rules: list[JsonDict],  # Any: heterogeneous DQ rule ...
 ) -> BusinessRulesResult:
     """Validate business rules.
 

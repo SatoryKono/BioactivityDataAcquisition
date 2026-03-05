@@ -22,10 +22,11 @@ from bioetl.composition.providers.provider_registry import (
     DataSourceCreator,
     ProviderRegistry,
 )
+from bioetl.domain.ports import DataSourcePort
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import InputFilterConfig
-    from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -78,13 +79,18 @@ class DataSourceFactory:
         # Remove filter_config from kwargs - it's handled by FilteredDataSource wrapper
         adapter_kwargs = {k: v for k, v in kwargs.items() if k != "filter_config"}
 
-        return ProviderRegistry.create_adapter(
+        adapter = ProviderRegistry.create_adapter(
             provider,
             http_client=http_client,
             logger=logger,
             settings=settings,
             **adapter_kwargs,
         )
+        assert isinstance(adapter, DataSourcePort), (
+            f"Adapter for provider '{provider}' must implement DataSourcePort, "
+            f"got {type(adapter)}"
+        )
+        return adapter
 
     @classmethod
     def list_providers(cls) -> list[str]:

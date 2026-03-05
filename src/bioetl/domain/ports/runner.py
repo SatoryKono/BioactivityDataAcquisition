@@ -5,7 +5,7 @@ Defines protocols for pipeline runner creation and execution.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
@@ -29,7 +29,7 @@ class RunnablePort(Protocol):
         ...
 
     @property
-    def shutdown_signal(self) -> Any | None:  # Any: signal type varies per...
+    def shutdown_signal(self) -> object | None:
         """Optional shutdown signal for graceful termination.
 
         Returns:

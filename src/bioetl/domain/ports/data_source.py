@@ -10,7 +10,7 @@ from collections.abc import AsyncIterator
 from types import TracebackType
 from typing import Any, Protocol, Self, runtime_checkable
 
-from bioetl.domain.types import HealthStatus
+from bioetl.domain.types import HealthStatus, JsonDict
 
 __all__ = [
     "DataSourcePort",
@@ -54,7 +54,7 @@ class DataSourcePort(Protocol):
         filter_field: str | None = None,
         offset: int | None = None,
     ) -> AsyncIterator[
-        dict[str, Any]  # Any: port contract allows heterogeneous record values
+        JsonDict  # Any: port contract allows heterogeneous record values
     ]:  # Any: port contract allows heterogeneous record values
         """Fetch records from the data source (async generator).
 
@@ -118,7 +118,7 @@ class FilterableDataSourcePort(DataSourcePort, Protocol):
         filter_field: str,
         limit: int | None = None,
     ) -> AsyncIterator[
-        dict[str, Any]  # Any: port contract allows heterogeneous record values
+        JsonDict  # Any: port contract allows heterogeneous record values
     ]:  # Any: port contract allows heterogeneous record values
         """Fetch records filtered by specific IDs at the source level.
 
@@ -145,7 +145,7 @@ class FilterableDataSourcePort(DataSourcePort, Protocol):
         filters: dict[str, list[str]],
         limit: int | None = None,
     ) -> AsyncIterator[
-        dict[str, Any]  # Any: port contract allows heterogeneous record values
+        JsonDict  # Any: port contract allows heterogeneous record values
     ]:  # Any: port contract allows heterogeneous record values
         """Fetch records filtered by multiple fields (AND logic).
 
@@ -175,7 +175,7 @@ class FilterableDataSourcePort(DataSourcePort, Protocol):
         fallback_mapping: dict[str, str],
         limit: int | None = None,
     ) -> AsyncIterator[
-        dict[str, Any]  # Any: port contract allows heterogeneous record values
+        JsonDict  # Any: port contract allows heterogeneous record values
     ]:  # Any: port contract allows heterogeneous record values
         """Fetch records with fallback search when primary lookup fails.
 

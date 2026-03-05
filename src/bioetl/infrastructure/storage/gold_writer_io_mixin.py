@@ -271,7 +271,7 @@ class GoldWriterIOMixin:
     async def _run_in_executor(
         self,
         func: Callable[..., T],
-        *args: Any,  # Any: variadic executor args
+        *args: object,
     ) -> T:
         """Run a function in the executor."""
         loop = asyncio.get_running_loop()
@@ -449,7 +449,7 @@ class GoldWriterIOMixin:
     async def get_history(
         self,
         table_name: str,
-        business_key_values: dict[str, Any] | None = None,  # Any: heterogeneous values
+        business_key_values: JsonDict | None = None,  # Any: heterogeneous values
         limit: int = 10,
     ) -> list[GoldRecord]:
         """Get history of records in Gold table (for SCD2 tracking)."""

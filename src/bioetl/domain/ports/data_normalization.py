@@ -16,7 +16,7 @@ All ports follow the Ports & Adapters pattern per RULES.md §1.1.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -30,14 +30,15 @@ __all__ = [
 class DataNormalizationPort(Protocol):
     """Port for text and data normalization operations.
 
-    Provides a unified interface for normalizing publication metadata,
-    identifiers, and text content from various data sources.
+        Provides a unified interface for normalizing publication metadata,
+        identifiers, and text content from various data sources.
 
-    Example:
-        >>> from bioetl.domain.services import DataNormalizationService
-        >>> normalizer = DataNormalizationService()
-        >>> normalizer.normalize_doi("10.1038/NATURE12373")
-        '10.1038/nature12373'
+        Example:
+            >>> from bioetl.domain.services import DataNormalizationService
+    from bioetl.domain.types import JsonDict
+            >>> normalizer = DataNormalizationService()
+            >>> normalizer.normalize_doi("10.1038/NATURE12373")
+            '10.1038/nature12373'
     """
 
     def normalize_doi(self, doi: str | None) -> str | None:
@@ -128,8 +129,8 @@ class DataNormalizationPort(Protocol):
 
     def normalize_to_string(
         self,
-        value: Any,  # Any: port contract accepts any attribute value
-    ) -> str | None:  # Any: port contract accepts any attribute value
+        value: object,
+    ) -> str | None:
         """Convert value to string, strip whitespace, return None if empty.
 
         Args:
@@ -207,10 +208,7 @@ class DataNormalizationPort(Protocol):
 
     def normalize_author_list(
         self,
-        authors: list[str]
-        | list[dict[str, Any]]  # Any: port contract allows heterogeneous record values
-        | str
-        | None,  # Any: port contract allows heterogeneous record values
+        authors: list[str] | list[JsonDict] | str | None,
     ) -> str | None:
         """Parse and normalize author names to JSON string.
 
@@ -224,10 +222,7 @@ class DataNormalizationPort(Protocol):
 
     def normalize_author_keys(
         self,
-        authors: list[str]
-        | list[dict[str, Any]]  # Any: port contract allows heterogeneous record values
-        | str
-        | None,  # Any: port contract allows heterogeneous record values
+        authors: list[str] | list[JsonDict] | str | None,
     ) -> str | None:
         """Normalize author names to short Surname_F keys (pipe-delimited).
 
@@ -241,9 +236,7 @@ class DataNormalizationPort(Protocol):
 
     def normalize_affiliations(
         self,
-        affiliations: list[str]
-        | list[dict[str, Any]]  # Any: port contract allows heterogeneous record values
-        | None,  # Any: port contract allows heterogeneous record values
+        affiliations: list[str] | list[JsonDict] | None,
     ) -> str | None:
         """Extract, normalize, deduplicate affiliations to JSON string.
 
@@ -257,9 +250,7 @@ class DataNormalizationPort(Protocol):
 
     def extract_affiliations_from_authors(
         self,
-        authors: list[
-            dict[str, Any]  # Any: port contract allows heterogeneous record values
-        ],  # Any: port contract allows heterogeneous record values
+        authors: list[JsonDict],
     ) -> list[str]:
         """Extract unique affiliations from author objects.
 

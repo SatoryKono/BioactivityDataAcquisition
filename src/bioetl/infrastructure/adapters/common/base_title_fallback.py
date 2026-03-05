@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Callable
 
     from bioetl.domain.ports import LoggerPort
+from bioetl.domain.types import JsonDict
 
 
 class BaseTitleFallbackHandler(ABC):
@@ -133,7 +134,7 @@ class BaseTitleFallbackHandler(ABC):
     @abstractmethod
     async def _search_by_title(
         self, title: str
-    ) -> dict[str, Any] | None:  # Any: untyped API response data
+    ) -> JsonDict | None:  # Any: untyped API response data
         """Search for publication by title.
 
         Args:
@@ -146,7 +147,7 @@ class BaseTitleFallbackHandler(ABC):
 
     def _get_result_identifier(
         self,
-        result: dict[str, Any],  # Any: untyped API response
+        result: JsonDict,  # Any: untyped API response
     ) -> tuple[str, str]:
         """Return (field_name, value) for logging the found result.
 
@@ -160,9 +161,9 @@ class BaseTitleFallbackHandler(ABC):
 
     def _process_found_result(
         self,
-        result: dict[str, Any],  # Any: untyped API response
+        result: JsonDict,  # Any: untyped API response
         original_doi: str,
-    ) -> dict[str, Any]:  # Any: untyped API response
+    ) -> JsonDict:  # Any: untyped API response
         """Process found result before yielding.
 
         Default implementation adds standard metadata fields:
@@ -219,7 +220,7 @@ class BaseTitleFallbackHandler(ABC):
         normalize_fn: Callable[[str], str | None],
         limit: int | None,
         fetched: int,
-    ) -> AsyncIterator[dict[str, Any]]:  # Any: untyped API response data
+    ) -> AsyncIterator[JsonDict]:  # Any: untyped API response data
         """Resolve unfetched DOIs via title fallback search."""
         for doi in dois:
             if limit and fetched >= limit:
@@ -260,8 +261,8 @@ class BaseTitleFallbackHandler(ABC):
 
     def _process_title_only_result(
         self,
-        result: dict[str, Any],  # Any: untyped API response
-    ) -> dict[str, Any]:  # Any: untyped API response
+        result: JsonDict,  # Any: untyped API response
+    ) -> JsonDict:  # Any: untyped API response
         """Process title-only result before yielding.
 
         Override to add metadata like _lookup_method.
@@ -282,7 +283,7 @@ class BaseTitleFallbackHandler(ABC):
         fallback_mapping: dict[str, str],
         limit: int | None,
         fetched: int,
-    ) -> AsyncIterator[dict[str, Any]]:  # Any: untyped API response data
+    ) -> AsyncIterator[JsonDict]:  # Any: untyped API response data
         """Process entries without primary ID (title-only lookup).
 
         Phase 3 of the three-phase fallback strategy. Handles entries

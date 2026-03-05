@@ -19,22 +19,25 @@ __all__ = ["traced_async_operation"]
 
 import sys
 from contextlib import asynccontextmanager, contextmanager
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator, Generator
 
+    from opentelemetry.trace import Span
+
     from bioetl.domain.ports import TracingPort
+from bioetl.domain.types import JsonDict
 
 
 @contextmanager
 def _span_context(
     tracer: TracingPort,
     name: str,
-    attributes: dict[str, Any]  # Any: OTel span attributes are heterogeneous
+    attributes: JsonDict  # Any: OTel span attributes are heterogeneous
     | None = None,  # Any: OTel span attributes are heterogeneous
     tracer_name: str = "bioetl",
-) -> Generator[Any, None, None]:  # Any: OTel span context manager yield type
+) -> Generator[Span, None, None]:
     """Internal helper to manage span lifecycle."""
     otel_tracer = tracer.get_tracer(tracer_name)
     span = otel_tracer.start_as_current_span(name, attributes=attributes or {})
@@ -60,10 +63,10 @@ traced_operation = _span_context
 async def traced_async_operation(
     tracer: TracingPort,
     name: str,
-    attributes: dict[str, Any]  # Any: OTel span attributes are heterogeneous
+    attributes: JsonDict  # Any: OTel span attributes are heterogeneous
     | None = None,  # Any: OTel span attributes are heterogeneous
     tracer_name: str = "bioetl",
-) -> AsyncGenerator[Any, None]:  # Any: OTel span context manager yield type
+) -> AsyncGenerator[Span, None]:
     """Async context manager for tracing spans.
 
     Args:

@@ -18,6 +18,7 @@ from typing import Any, Generic, TypeVar
 
 import yaml
 
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config_merge import config_merge
 
 T = TypeVar("T")
@@ -25,7 +26,7 @@ T = TypeVar("T")
 
 def _load_yaml_file(
     path: Path,
-) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
+) -> JsonDict:  # Any: YAML config has heterogeneous values
     """Load YAML file, returning empty dict if missing or empty."""
     if not path.exists():
         return {}
@@ -66,7 +67,7 @@ class BaseConfigLoader(ABC, Generic[T]):
         self,
         provider: str,
         entity: str,
-        inline_overrides: dict[str, Any]  # Any: YAML config heterogeneous
+        inline_overrides: JsonDict  # Any: YAML config heterogeneous
         | None = None,
     ) -> T:
         """Load merged config for provider/entity.
@@ -83,7 +84,7 @@ class BaseConfigLoader(ABC, Generic[T]):
 
     def _load_yaml(
         self, path: Path
-    ) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
+    ) -> JsonDict:  # Any: YAML config has heterogeneous values
         """Load YAML file, return empty dict if not exists.
 
         Args:
@@ -96,10 +97,10 @@ class BaseConfigLoader(ABC, Generic[T]):
 
     def _deep_merge_base(
         self,
-        base: dict[str, Any],  # Any: YAML config has heterogeneous values
-        override: dict[str, Any],  # Any: YAML config has heterogeneous values
+        base: JsonDict,  # Any: YAML config has heterogeneous values
+        override: JsonDict,  # Any: YAML config has heterogeneous values
         list_concat_keys: frozenset[str],
-    ) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
+    ) -> JsonDict:  # Any: YAML config has heterogeneous values
         """Deep merge two dicts with configurable list handling.
 
         Args:

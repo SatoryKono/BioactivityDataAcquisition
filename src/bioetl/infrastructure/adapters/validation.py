@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from bioetl.domain.ports import LoggerPort
-
+from bioetl.domain.types import JsonDict
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -40,7 +40,7 @@ class ValidationResult:
     Contains either a validated record or validation error details.
     """
 
-    record: dict[str, Any] | None = None  # Any: validation input types vary
+    record: JsonDict | None = None  # Any: validation input types vary
     """The original record data (always present)."""
 
     validated: BaseModel | None = None
@@ -53,13 +53,13 @@ class ValidationResult:
     """Error message if validation failed."""
 
     error_details: list[
-        dict[str, Any]  # Any: validated records have heterogeneous field types
+        JsonDict  # Any: validated records have heterogeneous field types
     ] = field(default_factory=list)
     """Detailed error information from Pydantic validation."""
 
 
 def validate_record(
-    record: dict[str, Any],  # Any: validated records have heterogeneous field types
+    record: JsonDict,  # Any: validated records have heterogeneous field types
     model_class: type[T],
     logger: LoggerPort | None = None,
     context: str = "",
@@ -102,7 +102,7 @@ def validate_record(
 
 def validate_records(
     records: list[
-        dict[str, Any]  # Any: validated records have heterogeneous field types
+        JsonDict  # Any: validated records have heterogeneous field types
     ],  # Any: validated records have heterogeneous field types
     model_class: type[T],
     logger: LoggerPort | None = None,
@@ -136,12 +136,12 @@ def validate_records(
 
 
 def parse_with_validation(
-    record: dict[str, Any],  # Any: validated records have heterogeneous field types
+    record: JsonDict,  # Any: validated records have heterogeneous field types
     model_class: type[T],
     strict: bool = False,
     logger: LoggerPort | None = None,
     context: str = "",
-) -> dict[str, Any]:  # Any: validated records have heterogeneous field types
+) -> JsonDict:  # Any: validated records have heterogeneous field types
     """Parse a record with optional validation.
 
     If validation is enabled (strict=True) and fails, raises ValueError.

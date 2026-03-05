@@ -11,6 +11,8 @@ from typing import TYPE_CHECKING, Any
 
 import click
 
+from bioetl.domain.types import JsonDict
+
 if TYPE_CHECKING:
     from bioetl.application.core.cleanup_service import CleanupPreview
     from bioetl.application.services import (
@@ -112,7 +114,7 @@ def echo_vacuum_all_summary(result: VacuumAllResult) -> None:
 
 
 def echo_quarantine_record(
-    record: dict[str, Any],  # Any: CLI/HTTP response values are heterogeneous
+    record: JsonDict,  # Any: CLI/HTTP response values are heterogeneous
 ) -> None:  # Any: quarantine record has heterogeneous values
     """Output a single quarantine record.
 

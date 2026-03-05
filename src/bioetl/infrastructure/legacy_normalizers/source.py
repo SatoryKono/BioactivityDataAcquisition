@@ -6,8 +6,7 @@ before pydantic validation.
 
 from __future__ import annotations
 
-from typing import Any
-
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config_merge import config_merge
 
 _ENDPOINT_KEYS: tuple[str, ...] = ("base_url", "api_version")
@@ -16,16 +15,16 @@ _BATCH_KEYS: tuple[str, ...] = ("batch_size", "page_size", "max_url_length")
 
 
 def _deep_merge(
-    base: dict[str, Any],  # Any: normalizer; input types vary
-    override: dict[str, Any],  # Any: normalizer; input types vary
-) -> dict[str, Any]:  # Any: normalizer; input types vary
+    base: JsonDict,  # Any: normalizer; input types vary
+    override: JsonDict,  # Any: normalizer; input types vary
+) -> JsonDict:  # Any: normalizer; input types vary
     """Deep merge two dictionaries with override precedence."""
     return config_merge(base, override)
 
 
 def _sync_timeout_aliases(
-    data: dict[str, Any],  # Any: normalizer; input types vary
-) -> dict[str, Any]:  # Any: normalizer; input types vary
+    data: JsonDict,  # Any: normalizer; input types vary
+) -> JsonDict:  # Any: normalizer; input types vary
     """Ensure ``timeout`` and ``timeout_sec`` are kept in sync."""
     result = data.copy()
     if "timeout" in result and "timeout_sec" not in result:
@@ -36,7 +35,7 @@ def _sync_timeout_aliases(
 
 
 def _normalize_rate_limit(
-    source: dict[str, Any],  # Any: normalizer; input types vary
+    source: JsonDict,  # Any: normalizer; input types vary
 ) -> None:
     """Reconcile ``with_api_key`` ↔ ``authenticated`` aliases in-place."""
     rate_limit = source.get("rate_limit")
@@ -51,7 +50,7 @@ def _normalize_rate_limit(
 
 
 def _normalize_health_check(
-    source: dict[str, Any],  # Any: normalizer; input types vary
+    source: JsonDict,  # Any: normalizer; input types vary
 ) -> None:
     """Reconcile ``timeout`` ↔ ``timeout_sec`` in health_check in-place."""
     hc = source.get("health_check")
@@ -60,17 +59,17 @@ def _normalize_health_check(
 
 
 def _get_dict_or_empty(
-    container: dict[str, Any],  # Any: normalizer; input types vary
+    container: JsonDict,  # Any: normalizer; input types vary
     key: str,
-) -> dict[str, Any]:  # Any: normalizer; input types vary
+) -> JsonDict:  # Any: normalizer; input types vary
     """Return *container[key]* if it is a dict, otherwise an empty dict."""
     val = container.get(key)
     return val if isinstance(val, dict) else {}
 
 
 def _copy_keys(
-    src: dict[str, Any],  # Any: normalizer; input types vary
-    dst: dict[str, Any],  # Any: normalizer; input types vary
+    src: JsonDict,  # Any: normalizer; input types vary
+    dst: JsonDict,  # Any: normalizer; input types vary
     keys: tuple[str, ...],
 ) -> None:
     """Copy *keys* from *src* to *dst* via ``setdefault``."""
@@ -80,7 +79,7 @@ def _copy_keys(
 
 
 def _normalize_source_rate_limits(
-    source: dict[str, Any],  # Any: normalizer; input types vary
+    source: JsonDict,  # Any: normalizer; input types vary
 ) -> None:
     """Normalize rate limiting aliases and health check timeouts."""
     _normalize_rate_limit(source)
@@ -88,9 +87,9 @@ def _normalize_source_rate_limits(
 
 
 def _normalize_source_endpoints(
-    source: dict[str, Any],  # Any: normalizer; input types vary
-    provider_config: dict[str, Any],  # Any: normalizer; input types vary
-    api: dict[str, Any],  # Any: normalizer; input types vary
+    source: JsonDict,  # Any: normalizer; input types vary
+    provider_config: JsonDict,  # Any: normalizer; input types vary
+    api: JsonDict,  # Any: normalizer; input types vary
 ) -> None:
     """Normalize endpoint/URL and client configuration."""
     _copy_keys(api, provider_config, _ENDPOINT_KEYS)
@@ -108,17 +107,17 @@ def _normalize_source_endpoints(
 
 
 def _normalize_source_auth(
-    provider_config: dict[str, Any],  # Any: normalizer; input types vary
-    api: dict[str, Any],  # Any: normalizer; input types vary
+    provider_config: JsonDict,  # Any: normalizer; input types vary
+    api: JsonDict,  # Any: normalizer; input types vary
 ) -> None:
     """Normalize authentication configuration."""
     _copy_keys(api, provider_config, _AUTH_KEYS)
 
 
 def _apply_batch_to_pagination(
-    batch: dict[str, Any] | int | None,  # Any: normalizer; input types vary
-    provider_config: dict[str, Any],  # Any: normalizer; input types vary
-    pagination: dict[str, Any],  # Any: normalizer; input types vary
+    batch: JsonDict | int | None,  # Any: normalizer; input types vary
+    provider_config: JsonDict,  # Any: normalizer; input types vary
+    pagination: JsonDict,  # Any: normalizer; input types vary
 ) -> None:
     """Extract batch_size, page_size, max_url_length from legacy batch config."""
     if isinstance(batch, dict):
@@ -142,11 +141,11 @@ def _apply_batch_to_pagination(
 
 
 def _normalize_source_pagination(
-    source: dict[str, Any],  # Any: normalizer; input types vary
-    provider_config: dict[str, Any],  # Any: normalizer; input types vary
+    source: JsonDict,  # Any: normalizer; input types vary
+    provider_config: JsonDict,  # Any: normalizer; input types vary
 ) -> None:
     """Normalize pagination and batch configuration."""
-    pagination: dict[str, Any] = _get_dict_or_empty(  # Any: values are heterogeneous
+    pagination: JsonDict = _get_dict_or_empty(  # Any: values are heterogeneous
         provider_config, "pagination"
     )  # Any: normalizer; input types vary
 
@@ -174,8 +173,8 @@ def _normalize_source_pagination(
 
 
 def _promote_top_level_source_sections(
-    raw: dict[str, Any],  # Any: normalizer; input types vary
-) -> dict[str, Any]:  # Any: normalizer; input types vary
+    raw: JsonDict,  # Any: normalizer; input types vary
+) -> JsonDict:  # Any: normalizer; input types vary
     """Promote top-level source sections into ``source`` when missing."""
     if "source" in raw and isinstance(raw.get("source"), dict):
         return raw
@@ -183,7 +182,7 @@ def _promote_top_level_source_sections(
     if not isinstance(raw.get("api"), dict):
         return raw
 
-    source: dict[str, Any] = {  # Any: normalizer; input types vary
+    source: JsonDict = {  # Any: normalizer; input types vary
         "type": "api",
         "load_strategy": "full",
         "api": raw["api"],
@@ -199,8 +198,8 @@ def _promote_top_level_source_sections(
 
 
 def normalize_source_config(
-    raw: dict[str, Any],  # Any: normalizer; input types vary
-) -> dict[str, Any]:  # Any: normalizer; input types vary
+    raw: JsonDict,  # Any: normalizer; input types vary
+) -> JsonDict:  # Any: normalizer; input types vary
     """Normalize source config across legacy/new schemas before validation."""
     config = _promote_top_level_source_sections(raw).copy()
     source = config.get("source")

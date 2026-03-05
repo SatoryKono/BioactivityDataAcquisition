@@ -9,7 +9,7 @@ from datetime import datetime
 from typing import Any
 
 from bioetl.domain.ports import MetricsPort, QuarantinePort
-from bioetl.domain.types import BatchID, ErrorType
+from bioetl.domain.types import BatchID, ErrorType, JsonDict
 
 
 class QuarantineManagerService:
@@ -38,7 +38,7 @@ class QuarantineManagerService:
 
     async def quarantine_record(
         self,
-        record: dict[str, Any],  # Any: quarantine record has heterogeneous values
+        record: JsonDict,  # Any: quarantine record has heterogeneous values
         error_type: ErrorType,
         batch_id: BatchID,
         error_details: str,
@@ -72,7 +72,7 @@ class QuarantineManagerService:
 
     async def quarantine_filtered_record(
         self,
-        record: dict[str, Any],  # Any: quarantine record has heterogeneous values
+        record: JsonDict,  # Any: quarantine record has heterogeneous values
         batch_id: BatchID,
         error_details: str,
         *,
@@ -112,7 +112,7 @@ class QuarantineManagerService:
         self,
         limit: int = 100,
         error_code: str | None = None,
-    ) -> list[dict[str, Any]]:  # Any: quarantine record has heterogeneous values
+    ) -> list[JsonDict]:  # Any: quarantine record has heterogeneous values
         """Inspect quarantined records for this pipeline.
 
         Delegates to QuarantinePort.inspect() for CLI inspection commands.
@@ -133,7 +133,7 @@ class QuarantineManagerService:
 
     async def get_stats(
         self,
-    ) -> dict[str, Any]:  # Any: quarantine record has heterogeneous values
+    ) -> JsonDict:  # Any: quarantine record has heterogeneous values
         """Get statistics about quarantined records for this pipeline.
 
         Delegates to QuarantinePort.get_stats() for CLI reporting.

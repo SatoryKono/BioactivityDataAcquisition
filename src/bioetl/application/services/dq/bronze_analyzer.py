@@ -26,6 +26,7 @@ from bioetl.application.services.dq.dq_report_builders import (
 )
 from bioetl.domain.ports import BronzeDQConfigPort
 from bioetl.domain.services.dq_serializer import to_dict
+from bioetl.domain.types import JsonDict
 from bioetl.domain.value_objects.dq_report import (
     BronzeDQCheckType,
     BronzeDQReport,
@@ -74,7 +75,7 @@ class BronzeDQAnalyzer:
         record_list = list(records)
         enabled_checks = set(config.get_checks_enums())
 
-        checks: dict[str, Any] = {}  # Any: DQ check values vary by check type
+        checks: JsonDict = {}  # Any: DQ check values vary by check type
         passed = 0
         failed = 0
         warnings = 0

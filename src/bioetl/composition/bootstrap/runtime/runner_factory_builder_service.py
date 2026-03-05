@@ -73,6 +73,7 @@ class RunnerFactoryBuilderService(Generic[_RunOptionsT]):
         """Build seed phase runner factory."""
 
         def seed_runner_factory() -> PipelineRunner:
+            """Create a PipelineRunner configured for the seed phase."""
             options = self._run_options_cls(
                 run_type="incremental",
                 limit=seed_limit,
@@ -97,6 +98,7 @@ class RunnerFactoryBuilderService(Generic[_RunOptionsT]):
             pipeline_name: str,
             keys: pl.DataFrame,
         ) -> PipelineRunner:
+            """Create a PipelineRunner configured for the given enricher."""
             enricher_cfg = enricher_configs.get(pipeline_name)
             filter_ids: tuple[str, ...] | None = None
             filter_field: str | None = None
@@ -156,6 +158,7 @@ class RunnerFactoryBuilderService(Generic[_RunOptionsT]):
             pipeline_name: str,
             keys: pl.DataFrame,
         ) -> PipelineRunner:
+            """Create a PipelineRunner configured for the given dependency."""
             dep_cfg = dependency_configs.get(pipeline_name)
             filter_ids, filter_field, multi_filter_ids = (
                 self._filter_extraction_service.resolve_dependency_filter_inputs(

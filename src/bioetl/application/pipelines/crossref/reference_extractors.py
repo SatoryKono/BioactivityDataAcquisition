@@ -14,14 +14,13 @@ from __future__ import annotations
 __all__ = ["extract_references"]
 
 
-from typing import Any
+from bioetl.domain.types import JsonDict
 
 
-# Any: untyped JSON
 def _clean_string(
-    value: Any,  # Any: untyped API JSON
-    lowercase: bool = False,  # Any: untyped API JSON
-) -> str | None:  # Any: untyped API JSON
+    value: object,
+    lowercase: bool = False,
+) -> str | None:
     """Clean and optionally lowercase a string value."""
     if not value or not isinstance(value, str):
         return None
@@ -31,7 +30,7 @@ def _clean_string(
     return cleaned.lower() if lowercase else cleaned
 
 
-def _parse_year(year_raw: Any) -> int | None:  # Any: untyped API JSON
+def _parse_year(year_raw: object) -> int | None:
     """Parse year from string or int value."""
     if not year_raw:
         return None
@@ -46,8 +45,8 @@ def _parse_year(year_raw: Any) -> int | None:  # Any: untyped API JSON
 
 # Any: raw API JSON
 def extract_references(
-    publication: dict[str, Any],  # Any: untyped API JSON record
-) -> list[dict[str, Any]]:  # Any: untyped API JSON record
+    publication: JsonDict,  # Any: untyped API JSON record
+) -> list[JsonDict]:  # Any: untyped API JSON record
     """Extract bibliographic references from CrossRef publication.
 
     Parses the 'reference' array containing citations to other works.
@@ -61,7 +60,7 @@ def extract_references(
         Each reference contains available bibliographic metadata.
 
     """
-    references: list[dict[str, Any]] = []  # Any: heterogeneous reference field values
+    references: list[JsonDict] = []  # Any: heterogeneous reference field values
     for ref in publication.get("reference", []):
         if not isinstance(ref, dict):
             continue

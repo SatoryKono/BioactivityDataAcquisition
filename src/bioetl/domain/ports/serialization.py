@@ -16,6 +16,8 @@ from __future__ import annotations
 
 from typing import Any, Protocol, runtime_checkable
 
+from bioetl.domain.types import JsonDict
+
 
 @runtime_checkable
 class JsonEncoderPort(Protocol):
@@ -34,7 +36,7 @@ class JsonEncoderPort(Protocol):
 
     def dumps(
         self,
-        obj: dict[str, Any] | list[Any],  # Any: JSON values are heterogeneous
+        obj: JsonDict | list[Any],  # Any: JSON values are heterogeneous
         *,
         sort_keys: bool = True,
         ensure_ascii: bool = False,
@@ -56,7 +58,7 @@ class JsonEncoderPort(Protocol):
 
     def dumps_canonical(
         self,
-        obj: dict[str, Any],  # Any: port contract allows heterogeneous record values
+        obj: JsonDict,  # Any: port contract allows heterogeneous record values
     ) -> str:  # Any: JSON values are heterogeneous
         """Serialize object to canonical JSON for hashing.
 
@@ -77,7 +79,7 @@ class JsonEncoderPort(Protocol):
 
     def loads(
         self, data: str | bytes
-    ) -> dict[str, Any] | list[Any]:  # Any: JSON values are heterogeneous
+    ) -> JsonDict | list[Any]:  # Any: JSON values are heterogeneous
         """Deserialize JSON string to Python object.
 
         Args:

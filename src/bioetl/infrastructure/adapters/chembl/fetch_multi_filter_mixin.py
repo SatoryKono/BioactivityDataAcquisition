@@ -6,7 +6,7 @@ __all__ = ["ChemblFetchMultiFilterMixin"]
 
 
 import itertools
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BronzeRecord
 
@@ -18,7 +18,7 @@ class ChemblFetchMultiFilterMixin:
     """Provides multi-field filter fetch implementation for ChEMBL."""
 
     def _determine_multi_filter_batch_size(
-        self: Any,  # Any: mixin self type
+        self,
         url: str,
         filters: dict[str, list[str]],
         entity_type: str,
@@ -41,7 +41,7 @@ class ChemblFetchMultiFilterMixin:
         return batch_size
 
     async def fetch_multi_filtered(
-        self: Any,  # Any: mixin self type
+        self,
         entity_type: str,
         filters: dict[str, list[str]],
         limit: int | None = None,

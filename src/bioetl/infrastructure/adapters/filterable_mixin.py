@@ -23,6 +23,8 @@ __all__ = [
 
 from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
+from bioetl.domain.types import JsonDict
+
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
@@ -38,7 +40,7 @@ class HasFetchFiltered(Protocol):
         filter_field: str,
         limit: int | None = None,
     ) -> AsyncIterator[
-        dict[str, Any]  # Any: filter record values vary (str|int|float|list)
+        JsonDict  # Any: filter record values vary (str|int|float|list)
     ]:  # Any: filter record values vary (str|int|float|list)
         """Fetch records filtered by specific IDs.
 
@@ -78,7 +80,7 @@ class NotSupportedMultiFilterMixin:
         filters: dict[str, list[str]],
         limit: int | None = None,
     ) -> AsyncIterator[
-        dict[str, Any]  # Any: filter record values vary (str|int|float|list)
+        JsonDict  # Any: filter record values vary (str|int|float|list)
     ]:  # Any: filter record values vary (str|int|float|list)
         """Multi-field filtering not supported - raises NotImplementedError.
 
@@ -128,7 +130,7 @@ class DelegatingFallbackMixin:
         fallback_mapping: dict[str, str],
         limit: int | None = None,
     ) -> AsyncIterator[
-        dict[str, Any]  # Any: filter record values vary (str|int|float|list)
+        JsonDict  # Any: filter record values vary (str|int|float|list)
     ]:  # Any: filter record values vary (str|int|float|list)
         """Fallback not needed - delegates to fetch_filtered().
 
