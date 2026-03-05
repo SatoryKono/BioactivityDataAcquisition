@@ -18,12 +18,6 @@ import yaml
 
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config_merge import config_merge
-from bioetl.infrastructure.legacy_normalizers import (
-    pipeline as legacy_pipeline_normalizers,
-)
-from bioetl.infrastructure.legacy_normalizers.pipeline import (
-    apply_pipeline_schema_normalization,
-)
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
@@ -144,8 +138,10 @@ def _apply_convention_defaults(
 def _load_data_schema_config(
     config_path: Path, schema_file: str
 ) -> JsonDict | None:  # Any: YAML config has heterogeneous values
-    """Compatibility wrapper for legacy schema loader tests/importers."""
-    return legacy_pipeline_normalizers._load_data_schema_config(
+    """Compatibility wrapper for schema loader tests/importers."""
+    from bioetl.infrastructure.config import pipeline_normalizers
+
+    return pipeline_normalizers._load_data_schema_config(
         config_path=config_path,
         schema_file=schema_file,
     )
@@ -155,8 +151,10 @@ def _validate_schema_config(
     data_schema: JsonDict,  # Any: YAML config has heterogeneous values
     schema_file: str,
 ) -> None:
-    """Compatibility wrapper for legacy schema validation tests/importers."""
-    legacy_pipeline_normalizers._validate_schema_config(
+    """Compatibility wrapper for schema validation tests/importers."""
+    from bioetl.infrastructure.config import pipeline_normalizers
+
+    pipeline_normalizers._validate_schema_config(
         data_schema=data_schema,
         schema_file=schema_file,
     )
@@ -320,6 +318,10 @@ def normalize_pipeline_config_payload(
     payload: PipelineConfigReadPayload,
 ) -> JsonDict:  # Any: YAML config has heterogeneous values
     """Normalize pipeline payload (new + legacy shapes) before validation."""
+    from bioetl.infrastructure.config.pipeline_normalizers import (
+        apply_pipeline_schema_normalization,
+    )
+
     config = _apply_convention_defaults(payload.config.copy())
     _apply_hierarchical_filter_config(config, payload.entity_config)
     apply_pipeline_schema_normalization(

@@ -10,7 +10,9 @@ import pytest
 from bioetl.infrastructure.config.source_config_loader import (
     load_source_config_uncached,
 )
-from bioetl.infrastructure.legacy_normalizers.source import normalize_source_config
+from bioetl.infrastructure.config.source_normalizers.source import (
+    normalize_source_config,
+)
 from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
 SNAPSHOT_FILE = Path("tests/snapshots/source_config_legacy_normalization.json")

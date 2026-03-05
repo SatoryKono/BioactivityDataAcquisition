@@ -11,7 +11,7 @@ from bioetl.infrastructure.config_loader import (
     PipelineConfigReadPayload,
     load_pipeline_config,
 )
-from bioetl.infrastructure.legacy_normalizers.pipeline import (
+from bioetl.infrastructure.config.pipeline_normalizers import (
     apply_pipeline_schema_normalization,
 )
 

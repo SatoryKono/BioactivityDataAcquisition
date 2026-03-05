@@ -1,0 +1,118 @@
+"""Observability/data-source wiring helpers for service bundle factory."""
+
+from __future__ import annotations
+
+from pathlib import Path
+from typing import TYPE_CHECKING
+
+from bioetl.domain.ports import NoOpMetrics
+from bioetl.infrastructure.adapters import CachedBronzeDataSource
+from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+
+from .data_source_factory import DataSourceCreator
+
+if TYPE_CHECKING:
+    from bioetl.domain.context import CachedBronzeContext
+    from bioetl.domain.filtering import InputFilterConfig
+    from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
+    from bioetl.infrastructure.config import Settings
+    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+
+
+def create_shared_metrics(
+    *,
+    settings: Settings,
+    base_services_factory: object,
+) -> MetricsPort:
+    """Create shared pipeline metrics via base services factory."""
+    return base_services_factory._create_metrics(settings)
+
+
+def _create_data_source(
+    *,
+    create_data_source_fn: DataSourceCreator,
+    settings: Settings,
+    pipeline_config: PipelineYamlConfig,
+    logger: LoggerPort,
+    filter_config: InputFilterConfig | None,
+    metrics: MetricsPort | None,
+    pipeline_name: str,
+) -> DataSourcePort:
+    """Create provider data source through factory callback."""
+    return create_data_source_fn(
+        settings,
+        pipeline_config,
+        logger,
+        filter_config,
+        metrics=metrics,
+        pipeline_name=pipeline_name,
+    )
+
+
+def _create_cached_bronze_data_source(
+    *,
+    settings: Settings,
+    pipeline_config: PipelineYamlConfig,
+    logger: LoggerPort,
+    cached_bronze: CachedBronzeContext,
+) -> DataSourcePort:
+    """Create CachedBronzeDataSource for reading from Bronze cache."""
+    provider = pipeline_config.provider
+    entity_type = pipeline_config.entity_type
+
+    if cached_bronze.bronze_path:
+        bronze_path = Path(cached_bronze.bronze_path)
+    else:
+        bronze_path = settings.bronze_path / provider / entity_type
+
+    bronze_reader = BronzeWriter(
+        base_path=bronze_path,
+        logger=logger,
+        metrics=NoOpMetrics(),
+        flat_structure=True,
+    )
+    return CachedBronzeDataSource(
+        bronze_reader=bronze_reader,
+        provider=provider,
+        entity_type=entity_type,
+        logger=logger,
+        bronze_date=cached_bronze.bronze_date,
+    )
+
+
+def create_data_source_with_observability(
+    *,
+    create_data_source_fn: DataSourceCreator,
+    settings: Settings,
+    pipeline_config: PipelineYamlConfig,
+    logger: LoggerPort,
+    filter_config: InputFilterConfig | None,
+    shared_metrics: MetricsPort,
+    pipeline_name: str,
+    cached_bronze: CachedBronzeContext | None,
+) -> DataSourcePort:
+    """Create data source and emit cached-bronze observability logs."""
+    if cached_bronze is not None and cached_bronze.enabled:
+        data_source = _create_cached_bronze_data_source(
+            settings=settings,
+            pipeline_config=pipeline_config,
+            logger=logger,
+            cached_bronze=cached_bronze,
+        )
+        logger.info(
+            "using_cached_bronze_mode",
+            pipeline=pipeline_name,
+            bronze_path=cached_bronze.bronze_path,
+            bronze_date=cached_bronze.bronze_date,
+        )
+        return data_source
+
+    return _create_data_source(
+        create_data_source_fn=create_data_source_fn,
+        settings=settings,
+        pipeline_config=pipeline_config,
+        logger=logger,
+        filter_config=filter_config,
+        metrics=shared_metrics,
+        pipeline_name=pipeline_name,
+    )

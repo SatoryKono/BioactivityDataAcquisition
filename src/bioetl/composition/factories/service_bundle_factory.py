@@ -10,6 +10,15 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable, Protocol, cast
 
+from bioetl.composition.factories._observability_wiring import (
+    _create_cached_bronze_data_source as _create_cached_bronze_data_source_impl,
+)
+from bioetl.composition.factories._observability_wiring import (
+    _create_data_source as _create_data_source_impl,
+)
+from bioetl.composition.factories._observability_wiring import (
+    create_shared_metrics,
+)
 from bioetl.composition.factories.data_source_factory import DataSourceCreator
 from bioetl.composition.factories.pipeline_factory_construction import (
     DomainConfigResolver,
@@ -68,6 +77,8 @@ class _SchemaBuilder(Protocol):
 
 
 __all__ = [
+    "_create_cached_bronze_data_source",
+    "_create_data_source",
     "build_pipeline_services",
     "create_pipeline_with_services",
 ]
@@ -136,25 +147,13 @@ def _create_data_source(
     metrics: MetricsPort | None = None,
     pipeline_name: str = "unknown",
 ) -> DataSourcePort:
-    """Create data source using the provided creator function.
-
-    Args:
-        create_data_source_fn: Data source creator function
-        settings: Application settings
-        pipeline_config: Pipeline configuration
-        logger: Structured logger
-        filter_config: Optional filter configuration
-        metrics: Optional metrics port for provider-level observability.
-        pipeline_name: Pipeline name for logging context
-
-    Returns:
-        Configured DataSourcePort
-    """
-    return create_data_source_fn(
-        settings,
-        pipeline_config,
-        logger,
-        filter_config,
+    """Compatibility wrapper around observability data-source wiring."""
+    return _create_data_source_impl(
+        create_data_source_fn=create_data_source_fn,
+        settings=settings,
+        pipeline_config=pipeline_config,
+        logger=logger,
+        filter_config=filter_config,
         metrics=metrics,
         pipeline_name=pipeline_name,
     )
@@ -166,49 +165,12 @@ def _create_cached_bronze_data_source(
     logger: LoggerPort,
     cached_bronze: CachedBronzeContext,
 ) -> DataSourcePort:
-    """Create CachedBronzeDataSource for reading from Bronze cache.
-
-    Creates a data source that reads from existing Bronze layer files
-    instead of making API calls. Used when cached_bronze mode is enabled.
-
-    Args:
-        settings: Application settings (for resolving base paths).
-        pipeline_config: Pipeline configuration (for provider/entity).
-        logger: Structured logger.
-        cached_bronze: CachedBronzeContext with path/date settings.
-
-    Returns:
-        CachedBronzeDataSource implementing DataSourcePort.
-    """
-    from bioetl.domain.ports import NoOpMetrics
-    from bioetl.infrastructure.adapters import CachedBronzeDataSource
-    from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
-
-    provider = pipeline_config.provider
-    entity_type = pipeline_config.entity_type
-
-    # Resolve Bronze path: explicit or convention-based
-    if cached_bronze.bronze_path:
-        bronze_path = Path(cached_bronze.bronze_path)
-    else:
-        # Convention: data/output/bronze/{provider}/{entity_type}
-        bronze_path = settings.bronze_path / provider / entity_type
-
-    # Create BronzeWriter as reader (reusing read_bronze/list_batches methods)
-    # flat_structure=True because convention path already includes provider/entity
-    bronze_reader = BronzeWriter(
-        base_path=bronze_path,
+    """Compatibility wrapper for cached Bronze data-source factory."""
+    return _create_cached_bronze_data_source_impl(
+        settings=settings,
+        pipeline_config=pipeline_config,
         logger=logger,
-        metrics=NoOpMetrics(),
-        flat_structure=True,
-    )
-
-    return CachedBronzeDataSource(
-        bronze_reader=bronze_reader,
-        provider=provider,
-        entity_type=entity_type,
-        logger=logger,
-        bronze_date=cached_bronze.bronze_date,
+        cached_bronze=cached_bronze,
     )
 
 
@@ -251,9 +213,10 @@ def build_pipeline_services(
     deps = _resolve_service_bundle_dependencies(_deps)
     pipeline_config = config or deps.load_pipeline_config(pipeline_name)
     base_services_factory = deps.base_services_factory
-    shared_metrics = base_services_factory._create_metrics(settings)
-
-    # Choose data source based on cached_bronze mode
+    shared_metrics = create_shared_metrics(
+        settings=settings,
+        base_services_factory=base_services_factory,
+    )
     if cached_bronze is not None and cached_bronze.enabled:
         data_source = _create_cached_bronze_data_source(
             settings=settings,
@@ -269,11 +232,11 @@ def build_pipeline_services(
         )
     else:
         data_source = _create_data_source(
-            create_data_source_fn,
-            settings,
-            pipeline_config,
-            logger,
-            filter_config,
+            create_data_source_fn=create_data_source_fn,
+            settings=settings,
+            pipeline_config=pipeline_config,
+            logger=logger,
+            filter_config=filter_config,
             metrics=shared_metrics,
             pipeline_name=pipeline_name,
         )
