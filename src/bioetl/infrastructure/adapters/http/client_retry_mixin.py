@@ -130,7 +130,7 @@ class HTTPClientRetryMixin:
             attempt=attempt + 1,
             max_attempts=self.retry_config.max_attempts,
             wait_seconds=round(wait_seconds, 3),
-            reason=reason or f"HTTP {status_code}" if status_code else "unknown",
+            reason=reason or (f"HTTP {status_code}" if status_code else "unknown"),
             url=url,
             method=method,
             provider=self.provider,

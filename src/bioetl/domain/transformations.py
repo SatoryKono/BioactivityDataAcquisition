@@ -46,7 +46,7 @@ __all__ = [
 
 @singledispatch
 def _normalize_value(
-    value: Any,
+    value: Any,  # Any: singledispatch requires Any for dispatch
 ) -> Any:  # Any: singledispatch requires Any for dispatch
     """Normalize a single value using singledispatch."""
     return value

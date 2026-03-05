@@ -14,8 +14,6 @@ from __future__ import annotations
 import re
 from typing import Any, Literal
 
-from bioetl.domain.types import JsonDict
-
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -24,6 +22,7 @@ from pydantic import (
     model_validator,
 )
 
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.schemas.base_schemas import (
     BaseFilterColumnSchema,
     BaseGoldColumnFilterConfig,

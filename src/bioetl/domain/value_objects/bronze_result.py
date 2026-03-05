@@ -99,3 +99,24 @@ class BronzeWriteResult:
         if self.uncompressed_size == 0:
             return 1.0
         return self.uncompressed_size / self.compressed_size
+
+    @property
+    def table_name(self) -> str:
+        """Compatibility table name derived from relative path.
+
+        Returns:
+            Table name in ``provider.entity`` format.
+        """
+        provider, entity = self.provider_entity
+        return f"{provider}.{entity}"
+
+    @property
+    def provider_entity(self) -> tuple[str, str]:
+        """Extract provider/entity from Bronze relative path."""
+        parts = [
+            part for part in self.relative_path.replace("\\", "/").split("/") if part
+        ]
+        offset = 1 if parts and parts[0] == "v1" else 0
+        if len(parts) - offset >= 2:
+            return parts[offset], parts[offset + 1]
+        raise ValueError("relative_path must include provider/entity segments")

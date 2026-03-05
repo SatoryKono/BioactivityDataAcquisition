@@ -14,7 +14,12 @@ from types import TracebackType
 
 import pytest
 
-from bioetl.domain.ports.adr import AdrServicePort, AdrDocument, AdrInfo, AdrValidationReport
+from bioetl.domain.ports.adr import (
+    AdrServicePort,
+    AdrDocument,
+    AdrInfo,
+    AdrValidationReport,
+)
 from bioetl.domain.ports.audit import AuditPort, AuditEntry, AuditLayer, AuditOperation
 from bioetl.domain.ports.batch_id import BatchIdGeneratorPort
 from bioetl.domain.ports.checkpoint import CheckpointPort
@@ -66,7 +71,11 @@ from bioetl.domain.ports.pii import PiiHasherPort
 from bioetl.domain.ports.quarantine import QuarantinePort
 from bioetl.domain.ports.registry_port import PipelineRegistryPort, RegistryAccessorPort
 from bioetl.domain.ports.resilience import CircuitBreakerPort, RateLimiterPort
-from bioetl.domain.ports.runner import MetricsExtractorPort, RunnablePort, RunnerFactoryPort
+from bioetl.domain.ports.runner import (
+    MetricsExtractorPort,
+    RunnablePort,
+    RunnerFactoryPort,
+)
 from bioetl.domain.ports.serialization import JsonEncoderPort
 from bioetl.domain.ports.shutdown import ShutdownPort
 from bioetl.domain.ports.storage import StoragePort

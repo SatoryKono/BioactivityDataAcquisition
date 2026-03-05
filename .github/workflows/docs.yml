@@ -41,6 +41,18 @@ jobs:
       - name: Check architecture dependency docs drift
         run: uv run python scripts/generate_architecture_dependency_map.py --check
 
+      - name: Regenerate architecture dependency docs (PR preflight)
+        if: github.event_name == 'pull_request'
+        run: uv run python scripts/generate_architecture_dependency_map.py --update
+
+      - name: Assert regenerated dependency docs are committed
+        if: github.event_name == 'pull_request'
+        run: |
+          git diff --exit-code -- \
+            docs/02-architecture/generated/module-dependency-map.md \
+            docs/02-architecture/generated/module-dependency-map.json || \
+            (echo "::error::Dependency map docs were regenerated. Commit updated generated files before merge." && exit 1)
+
       - name: Build docs in strict mode
         run: uv run bash scripts/build_docs_site.sh --strict
 

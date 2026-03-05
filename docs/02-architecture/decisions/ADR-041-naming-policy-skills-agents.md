@@ -1,6 +1,6 @@
 # ADR-041: Naming Policy for Skills, Agents, and Commands
 
-**Status:** Proposed
+**Status:** accepted
 **Date:** 2026-03-04
 **Authors:** Claude (audit), project team (review)
 **Supersedes:** —

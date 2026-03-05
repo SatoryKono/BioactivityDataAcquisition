@@ -15,6 +15,7 @@ from bioetl.domain.types import ArrowSchema
 if TYPE_CHECKING:
     import pandera
 
+    from bioetl.domain.composite.config import DataSchemaConfig
     from bioetl.domain.types import RunType
 
 
@@ -31,6 +32,8 @@ class RecordProcessorConfig:
     table_config: TableConfig = field(default_factory=TableConfig)
     memory_config: MemoryConfig = field(default_factory=MemoryConfig)
     column_groups: tuple[ColumnGroupConfig, ...] = ()
+    # Backward-compat for tests/callers still passing data_schema directly.
+    data_schema: DataSchemaConfig | None = None
     # SCD Type 2 configuration (Gold layer)
     scd_config: dict[str, str] | None = None
     # DQ report output paths (for flat_structure support)

@@ -28,6 +28,7 @@ from bioetl.domain.composite.result import (
     MergeResult,
 )
 from bioetl.domain.composite.state import CompositePipelineState
+from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.locking import FencingToken
 
 if TYPE_CHECKING:
@@ -361,7 +362,9 @@ class TestEnrichmentFSMFailure:
             run_id="00000000-0000-0000-0000-000000000123",
         )
 
-        with pytest.raises(RuntimeError, match="Required enricher 'crossref' failed"):
+        with pytest.raises(
+            InvalidStateError, match="Required enricher 'crossref' failed"
+        ):
             await runner.run()
 
         # Check FAILED state was saved
@@ -383,7 +386,7 @@ class TestEnrichmentFSMFailure:
         mock_logger,
         mock_lock,
     ):
-        """Test FAILED state is saved before RuntimeError is raised."""
+        """Test FAILED state is saved before InvalidStateError is raised."""
         mock_coordinator = AsyncMock()
         mock_coordinator.run_enrichers = AsyncMock(
             return_value={
@@ -410,7 +413,7 @@ class TestEnrichmentFSMFailure:
             run_id="00000000-0000-0000-0000-000000000123",
         )
 
-        with pytest.raises(RuntimeError):
+        with pytest.raises(InvalidStateError):
             await runner.run()
 
         # Verify checkpoint.save was called with FAILED state
@@ -458,7 +461,7 @@ class TestEnrichmentFSMFailure:
             run_id="00000000-0000-0000-0000-000000000123",
         )
 
-        with pytest.raises(RuntimeError):
+        with pytest.raises(InvalidStateError):
             await runner.run()
 
         # Verify error was logged with FAILED state

@@ -1,7 +1,7 @@
 {
   "summary": {
     "scanned_modules": 710,
-    "total_internal_imports": 2713,
+    "total_internal_imports": 2722,
     "layer_edges": 14,
     "cross_layer_group_edges": 60,
     "violations": 0
@@ -16,7 +16,7 @@
     {
       "source": "application",
       "target": "domain",
-      "imports": 479,
+      "imports": 481,
       "allowed": true
     },
     {
@@ -28,7 +28,7 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 177,
+      "imports": 176,
       "allowed": true
     },
     {
@@ -40,19 +40,19 @@
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 144,
+      "imports": 146,
       "allowed": true
     },
     {
       "source": "domain",
       "target": "domain",
-      "imports": 425,
+      "imports": 421,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 369,
+      "imports": 379,
       "allowed": true
     },
     {
@@ -96,7 +96,7 @@
     {
       "source": "infrastructure.adapters",
       "target": "domain.types",
-      "imports": 66
+      "imports": 67
     },
     {
       "source": "application.composite",
@@ -126,7 +126,7 @@
     {
       "source": "application.core",
       "target": "domain.ports",
-      "imports": 41
+      "imports": 42
     },
     {
       "source": "application.core",
@@ -179,9 +179,24 @@
       "imports": 19
     },
     {
+      "source": "infrastructure.storage",
+      "target": "domain.models",
+      "imports": 19
+    },
+    {
       "source": "composition.factories",
       "target": "domain.ports",
       "imports": 18
+    },
+    {
+      "source": "composition.factories",
+      "target": "infrastructure.config",
+      "imports": 17
+    },
+    {
+      "source": "infrastructure.storage",
+      "target": "domain.types",
+      "imports": 17
     },
     {
       "source": "interfaces.cli",
@@ -194,18 +209,8 @@
       "imports": 16
     },
     {
-      "source": "infrastructure.storage",
-      "target": "domain.types",
-      "imports": 16
-    },
-    {
       "source": "application.pipelines",
       "target": "domain.context",
-      "imports": 15
-    },
-    {
-      "source": "composition.factories",
-      "target": "infrastructure.config",
       "imports": 15
     },
     {
@@ -246,11 +251,6 @@
     {
       "source": "infrastructure.storage",
       "target": "domain.medallion",
-      "imports": 12
-    },
-    {
-      "source": "infrastructure.storage",
-      "target": "domain.models",
       "imports": 12
     },
     {

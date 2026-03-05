@@ -173,11 +173,16 @@ class StoragePort(Protocol):
         """
         ...
 
-    def get_table_path(self, table_name: str) -> Path:
+    def get_table_path(
+        self,
+        table_name: str,
+        layer: Literal["silver", "gold"] = "silver",
+    ) -> Path:
         """Resolve the full path to a Delta table.
 
         Args:
             table_name: Table name (e.g., 'chembl.activity').
+            layer: Target layer path resolver. Defaults to ``"silver"``.
 
         Returns:
             Path object pointing to the table directory.

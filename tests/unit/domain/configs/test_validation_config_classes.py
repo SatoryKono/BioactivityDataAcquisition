@@ -133,7 +133,13 @@ class TestCrossFieldValidation:
 
     @pytest.mark.parametrize(
         "condition",
-        ["all_present", "any_present", "mutually_exclusive", "conditional_required", "custom"],
+        [
+            "all_present",
+            "any_present",
+            "mutually_exclusive",
+            "conditional_required",
+            "custom",
+        ],
     )
     def test_all_condition_types(self, condition: str) -> None:
         cfv = CrossFieldValidation(

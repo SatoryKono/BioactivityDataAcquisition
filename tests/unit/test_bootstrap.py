@@ -304,8 +304,8 @@ class TestChemblActivityFactory:
         # Restore after test
         chembl_activity_factory._create_data_source = original_creator
 
-    @patch("bioetl.composition.factories.pipeline_factory.BaseServicesFactory")
-    @patch("bioetl.composition.factories.pipeline_factory.load_pipeline_config")
+    @patch("bioetl.composition.factories.service_bundle_factory.BaseServicesFactory")
+    @patch("bioetl.composition.factories.service_bundle_factory.load_pipeline_config")
     def test_build_services_creates_data_source(
         self,
         mock_load_config,
@@ -337,8 +337,8 @@ class TestChemblActivityFactory:
         assert services is not None
         chembl_activity_factory._create_data_source.assert_called_once()
 
-    @patch("bioetl.composition.factories.pipeline_factory.BaseServicesFactory")
-    @patch("bioetl.composition.factories.pipeline_factory.load_pipeline_config")
+    @patch("bioetl.composition.factories.service_bundle_factory.BaseServicesFactory")
+    @patch("bioetl.composition.factories.service_bundle_factory.load_pipeline_config")
     def test_build_services_calls_base_services_factory(
         self,
         mock_load_config,
@@ -369,8 +369,8 @@ class TestChemblActivityFactory:
 
         mock_base_services.create_common_services.assert_called_once()
 
-    @patch("bioetl.composition.factories.pipeline_factory.BaseServicesFactory")
-    @patch("bioetl.composition.factories.pipeline_factory.load_pipeline_config")
+    @patch("bioetl.composition.factories.service_bundle_factory.BaseServicesFactory")
+    @patch("bioetl.composition.factories.service_bundle_factory.load_pipeline_config")
     def test_build_services_uses_provided_config(
         self,
         mock_load_config,
@@ -402,10 +402,10 @@ class TestChemblActivityFactory:
         # Should NOT call load_pipeline_config when config is provided
         mock_load_config.assert_not_called()
 
-    @patch("bioetl.composition.factories.pipeline_factory.compute_config_hash")
-    @patch("bioetl.composition.factories.pipeline_factory.yaml_config_to_domain")
-    @patch("bioetl.composition.factories.pipeline_factory.load_pipeline_config")
-    @patch("bioetl.composition.factories.pipeline_factory.BaseServicesFactory")
+    @patch("bioetl.composition.factories.service_bundle_factory.compute_config_hash")
+    @patch("bioetl.composition.factories.service_bundle_factory.yaml_config_to_domain")
+    @patch("bioetl.composition.factories.service_bundle_factory.load_pipeline_config")
+    @patch("bioetl.composition.factories.service_bundle_factory.BaseServicesFactory")
     def test_create_with_services(
         self,
         mock_base_services,

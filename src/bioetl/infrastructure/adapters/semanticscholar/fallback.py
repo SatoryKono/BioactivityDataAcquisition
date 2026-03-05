@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING, Any, cast
 from httpx import RequestError
 
 from bioetl.domain.exceptions import BioETLError, NetworkError
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.adapters.common import BaseTitleFallbackHandler, titles_match
 from bioetl.infrastructure.adapters.semanticscholar.constants import (
     SEMANTICSCHOLAR_BASE_URL,

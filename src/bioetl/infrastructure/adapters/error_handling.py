@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import StrEnum
 from typing import TYPE_CHECKING
 
 from bioetl.domain.error_classifier import ErrorClassifier
@@ -15,38 +14,17 @@ from bioetl.domain.exceptions import (
 )
 from bioetl.domain.ports import NoOpMetrics
 from bioetl.domain.types import ErrorType, JsonDict
+from bioetl.infrastructure.adapters._error_classifier import (
+    ErrorCategory,
+    classify_exception,
+    classify_http_error,
+)
 
 if TYPE_CHECKING:
     from httpx import Response
 
     from bioetl.domain.ports import LoggerPort, MetricsPort
 
-
-class ErrorCategory(StrEnum):
-    """Error categories driving pipeline failure/retry/skip policy."""
-
-    CRITICAL = "CRITICAL"
-    RECOVERABLE = "RECOVERABLE"
-    DATA_QUALITY = "DATA_QUALITY"
-
-
-# HTTP status code to error category mapping
-_HTTP_STATUS_CATEGORIES: dict[int, ErrorCategory] = {
-    # Authentication errors - CRITICAL
-    401: ErrorCategory.CRITICAL,
-    403: ErrorCategory.CRITICAL,
-    # Rate limit - RECOVERABLE
-    429: ErrorCategory.RECOVERABLE,
-    # Server errors - RECOVERABLE
-    500: ErrorCategory.RECOVERABLE,
-    502: ErrorCategory.RECOVERABLE,
-    503: ErrorCategory.RECOVERABLE,
-    504: ErrorCategory.RECOVERABLE,
-    # Client errors (except auth) - DATA_QUALITY
-    400: ErrorCategory.DATA_QUALITY,
-    404: ErrorCategory.DATA_QUALITY,
-    422: ErrorCategory.DATA_QUALITY,
-}
 
 _ERROR_CONTEXT_RESERVED_KEYS = frozenset(
     {
@@ -93,35 +71,8 @@ class ErrorService:
         response: Response | None = None,
     ) -> ErrorCategory:
         """Classify HTTP error status code into retryability categories."""
-        if status_code in _HTTP_STATUS_CATEGORIES:
-            return _HTTP_STATUS_CATEGORIES[status_code]
-
-        # Default classification based on status code ranges
-        if 400 <= status_code < 500:
-            self._logger.debug(
-                "http_error_classified_by_range",
-                status_code=status_code,
-                category=ErrorCategory.DATA_QUALITY.value,
-                reason="4xx client error (not in explicit mapping)",
-            )
-            return ErrorCategory.DATA_QUALITY
-        if status_code >= 500:
-            self._logger.debug(
-                "http_error_classified_by_range",
-                status_code=status_code,
-                category=ErrorCategory.RECOVERABLE.value,
-                reason="5xx server error (not in explicit mapping)",
-            )
-            return ErrorCategory.RECOVERABLE
-
-        # Unknown status code - treat as recoverable
-        self._logger.warning(
-            "http_error_unknown_status_code",
-            status_code=status_code,
-            category=ErrorCategory.RECOVERABLE.value,
-            reason="unknown status code, defaulting to recoverable",
-        )
-        return ErrorCategory.RECOVERABLE
+        _ = response
+        return classify_http_error(status_code, logger=self._logger)
 
     def classify_exception(self, error: Exception) -> ErrorCategory:
         """Classify exception into error category.
@@ -134,42 +85,11 @@ class ErrorService:
         Returns:
             ErrorCategory based on exception type.
         """
-        error_type = self._classifier.classify(error)
-
-        if error_type.is_critical():
-            self._logger.debug(
-                "exception_classified",
-                error_type=error_type.value,
-                category=ErrorCategory.CRITICAL.value,
-                error_class=type(error).__name__,
-            )
-            return ErrorCategory.CRITICAL
-        if error_type.is_recoverable():
-            self._logger.debug(
-                "exception_classified",
-                error_type=error_type.value,
-                category=ErrorCategory.RECOVERABLE.value,
-                error_class=type(error).__name__,
-            )
-            return ErrorCategory.RECOVERABLE
-        if error_type.is_data_quality():
-            self._logger.debug(
-                "exception_classified",
-                error_type=error_type.value,
-                category=ErrorCategory.DATA_QUALITY.value,
-                error_class=type(error).__name__,
-            )
-            return ErrorCategory.DATA_QUALITY
-
-        # Default to recoverable for unknown types
-        self._logger.warning(
-            "exception_classification_fallback",
-            error_type=error_type.value,
-            category=ErrorCategory.RECOVERABLE.value,
-            error_class=type(error).__name__,
-            reason="unknown error type, defaulting to recoverable",
+        return classify_exception(
+            error,
+            classifier=self._classifier,
+            logger=self._logger,
         )
-        return ErrorCategory.RECOVERABLE
 
     def get_error_type(self, error: Exception) -> ErrorType:
         """Get ErrorType for an exception.

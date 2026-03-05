@@ -21,7 +21,7 @@ from bioetl.domain.composite.result import (
 )
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.events import PipelineEvent
-from bioetl.domain.exceptions import BioETLError
+from bioetl.domain.exceptions import BioETLError, InvalidStateError
 
 if TYPE_CHECKING:
     import polars as pl
@@ -386,7 +386,7 @@ class CompositeRunnerStageMixin(_CompositeRunnerStageSupportMixin):
 
         try:
             self._call_check_required_enrichers(enrichment_results)
-        except RuntimeError as error:
+        except InvalidStateError as error:
             previous_state = state.state
             state = state.with_state(CompositePipelineState.FAILED)
             self._fsm.log_fsm_transition(

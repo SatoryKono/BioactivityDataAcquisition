@@ -178,29 +178,42 @@ class CachedBronzeDataSource:
         filter_field: str | None = None,
         offset: int | None = None,
     ) -> AsyncIterator[JsonDict]:  # Any: untyped API JSON record
-        """Fetch records from cached Bronze files.
+        """Fetch records from cached Bronze files."""
+        _ = entity_type, filter_field, offset
+        self._log_unsupported_fetch_params(query=query, filter_ids=filter_ids)
+        batches = await self._list_batches_sorted()
+        self._logger.info(
+            "cached_bronze_fetch_start",
+            batch_count=len(batches),
+            date_filter=self._bronze_date,
+            limit=limit,
+        )
+        self._raise_if_empty_batches(batches)
 
-        Reads JSONL+zstd files from Bronze storage and yields records.
-        Batches are processed in deterministic order (ADR-014).
+        count = 0
+        async for record in self._iter_batch_records(batches):
+            yield record
+            count += 1
+            if limit is not None and count >= limit:
+                self._logger.info(
+                    "cached_bronze_fetch_limit_reached",
+                    records_yielded=count,
+                    limit=limit,
+                )
+                return
+        self._logger.info(
+            "cached_bronze_fetch_complete",
+            records_yielded=count,
+            batches_processed=len(batches),
+        )
 
-        Args:
-            entity_type: Entity type (validated against configured type).
-            limit: Maximum number of records to yield. None = unlimited.
-            query: Ignored (not applicable for cached data).
-            filter_ids: Ignored (filtering not supported for cached Bronze).
-            filter_field: Ignored (filtering not supported for cached Bronze).
-
-        Yields:
-            Dictionary records from Bronze files.
-
-        Raises:
-            CachedBronzeEmptyError: If no Bronze files found for the
-                specified provider/entity combination.
-
-        Returns:
-            Async iterator yielding fetched records.
-        """
-        # Log warnings for unsupported parameters
+    def _log_unsupported_fetch_params(
+        self,
+        *,
+        query: str | None,
+        filter_ids: list[str] | None,
+    ) -> None:
+        """Log ignored fetch parameters for cached Bronze source."""
         if query:
             self._logger.warning(
                 "cached_bronze_query_ignored",
@@ -214,55 +227,33 @@ class CachedBronzeDataSource:
                 reason="filter_ids not supported for cached Bronze",
             )
 
-        # List and sort batches
-        batches = await self._list_batches_sorted()
+    def _resolve_bronze_path(self) -> str:
+        """Resolve effective Bronze path for empty-cache errors."""
+        bronze_path = str(self._reader.base_path)
+        if getattr(self._reader, "_flat_structure", False):
+            return bronze_path
+        return str(Path(bronze_path) / self._provider / self._entity_type)
 
-        self._logger.info(
-            "cached_bronze_fetch_start",
-            batch_count=len(batches),
+    def _raise_if_empty_batches(self, batches: list[str]) -> None:
+        """Raise domain error when no cached Bronze batches are available."""
+        if batches:
+            return
+        raise CachedBronzeEmptyError(
+            provider=self._provider,
+            entity_type=self._entity_type,
+            bronze_path=self._resolve_bronze_path(),
             date_filter=self._bronze_date,
-            limit=limit,
         )
 
-        if not batches:
-            # Determine the actual path that was searched
-            bronze_path = str(self._reader.base_path)
-            if not getattr(self._reader, "_flat_structure", False):
-                bronze_path = str(
-                    Path(bronze_path) / self._provider / self._entity_type
-                )
-
-            raise CachedBronzeEmptyError(
-                provider=self._provider,
-                entity_type=self._entity_type,
-                bronze_path=bronze_path,
-                date_filter=self._bronze_date,
-            )
-
-        count = 0
+    async def _iter_batch_records(
+        self,
+        batches: list[str],
+    ) -> AsyncIterator[JsonDict]:  # Any: untyped API JSON record
+        """Iterate records from sorted batch paths."""
         for batch_path in batches:
-            self._logger.debug(
-                "cached_bronze_reading_batch",
-                batch_path=batch_path,
-            )
-
+            self._logger.debug("cached_bronze_reading_batch", batch_path=batch_path)
             async for record in self._reader.read_bronze(batch_path):
                 yield record
-                count += 1
-
-                if limit is not None and count >= limit:
-                    self._logger.info(
-                        "cached_bronze_fetch_limit_reached",
-                        records_yielded=count,
-                        limit=limit,
-                    )
-                    return
-
-        self._logger.info(
-            "cached_bronze_fetch_complete",
-            records_yielded=count,
-            batches_processed=len(batches),
-        )
 
     async def get_total_records(self) -> int:
         """Get total number of records across all cached batches.

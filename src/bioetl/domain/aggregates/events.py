@@ -52,7 +52,7 @@ class DomainEvent:
     """
 
     occurred_at: datetime
-    event_id: str = field(default_factory=lambda: str(uuid4()))
+    event_id: str = field(default_factory=lambda: str(uuid4()), kw_only=True)
 
 
 # ──────────────────────────────────────────────────────────────────────────────

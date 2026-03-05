@@ -12,13 +12,6 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 COMPOSITES_DIR = PROJECT_ROOT / "configs" / "composites"
 COMPOSITE_QUALITY_DIR = PROJECT_ROOT / "configs" / "quality" / "entities" / "composite"
 
-EXTERNALIZED_COMPOSITE_ENTITIES = (
-    "activity",
-    "assay",
-    "molecule",
-    "publication",
-    "target",
-)
 ALLOWED_INLINE_DQ_KEYS = frozenset({"dq_config_file", "enricher_overrides"})
 
 
@@ -27,6 +20,22 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     if not isinstance(data, dict):
         return {}
     return data
+
+
+def _externalized_composite_entities() -> tuple[str, ...]:
+    """Discover composite entities that declare ``composite.dq_overrides``."""
+    entities: list[str] = []
+    for config_path in sorted(COMPOSITES_DIR.glob("*.yaml")):
+        payload = _load_yaml(config_path)
+        composite = payload.get("composite")
+        if not isinstance(composite, dict):
+            continue
+        if isinstance(composite.get("dq_overrides"), dict):
+            entities.append(config_path.stem)
+    return tuple(entities)
+
+
+EXTERNALIZED_COMPOSITE_ENTITIES = _externalized_composite_entities()
 
 
 def _load_composite_dq_overrides(entity: str) -> dict[str, Any]:
@@ -41,6 +50,11 @@ def _load_composite_dq_overrides(entity: str) -> dict[str, Any]:
 
 class TestCompositeDQExternalization:
     """Enforce consistent DQ externalization for composite entities."""
+
+    def test_externalized_entity_list_is_not_empty(self) -> None:
+        assert EXTERNALIZED_COMPOSITE_ENTITIES, (
+            "No composite entities with dq_overrides found under configs/composites/"
+        )
 
     @pytest.mark.parametrize("entity", EXTERNALIZED_COMPOSITE_ENTITIES)
     def test_composite_uses_standard_dq_config_pointer(self, entity: str) -> None:

@@ -26,6 +26,7 @@ __all__ = [
 
 import os
 import tempfile
+import time
 from collections.abc import Iterator
 from contextlib import contextmanager, suppress
 from pathlib import Path
@@ -49,6 +50,36 @@ ATOMIC_WRITE_EXCEPTIONS = (
     TypeError,
     RuntimeError,
 )
+
+
+_REPLACE_RETRYABLE_WINERRORS = {5, 32}
+_REPLACE_RETRYABLE_ERRNOS = {13, 16}
+_REPLACE_RETRY_ATTEMPTS = 8
+_REPLACE_RETRY_SLEEP_SECONDS = 0.01
+
+
+def _is_retryable_replace_error(error: OSError) -> bool:
+    """Return True when Path.replace failure is transient on Windows-like FS."""
+    winerror = getattr(error, "winerror", None)
+    if isinstance(winerror, int) and winerror in _REPLACE_RETRYABLE_WINERRORS:
+        return True
+    errno_value = getattr(error, "errno", None)
+    if isinstance(errno_value, int) and errno_value in _REPLACE_RETRYABLE_ERRNOS:
+        return True
+    return False
+
+
+def _replace_with_retry(temp_path: Path, target: Path) -> None:
+    """Replace target path with bounded retry for transient file-lock errors."""
+    for attempt in range(_REPLACE_RETRY_ATTEMPTS):
+        try:
+            temp_path.replace(target)
+            return
+        except OSError as error:
+            is_last_attempt = attempt >= _REPLACE_RETRY_ATTEMPTS - 1
+            if is_last_attempt or not _is_retryable_replace_error(error):
+                raise
+            time.sleep(_REPLACE_RETRY_SLEEP_SECONDS * (attempt + 1))
 
 
 @contextmanager
@@ -77,8 +108,8 @@ def atomic_write(
         with os.fdopen(fd, mode, encoding=encoding) as f:
             yield f
 
-        # Atomic replace (works on both Unix and Windows)
-        temp_path.replace(target)
+        # Atomic replace with retry for transient Windows sharing violations.
+        _replace_with_retry(temp_path, target)
 
     except ATOMIC_WRITE_EXCEPTIONS as e:
         # Clean up temp file on any error
@@ -182,7 +213,7 @@ class AtomicWriteGroup:
 
         try:
             for target, temp_path, _ in self._pending:
-                temp_path.replace(target)
+                _replace_with_retry(temp_path, target)
                 committed.append((target, temp_path))
         except (OSError, ValueError, TypeError, RuntimeError) as e:
             # Rollback: remove any committed files (best effort)

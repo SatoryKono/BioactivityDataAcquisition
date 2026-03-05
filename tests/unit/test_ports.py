@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
 import pytest
 
@@ -177,9 +177,14 @@ class TestStoragePortProtocol:
             ) -> None:
                 pass
 
-            def get_table_path(self, table_name: str) -> Any:
+            def get_table_path(
+                self,
+                table_name: str,
+                layer: Literal["silver", "gold"] = "silver",
+            ) -> Any:
                 from pathlib import Path
 
+                del layer
                 return Path("/tmp") / table_name
 
             async def read_silver(

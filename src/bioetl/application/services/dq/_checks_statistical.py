@@ -138,7 +138,7 @@ def _build_anomaly_metric(
 
 def _build_null_rate_anomaly_metric(
     df: pl.DataFrame,
-    baseline_stats: dict[str, Any],  # Any: heterogeneous baseline map
+    baseline_stats: JsonDict,
 ) -> AnomalyMetric:
     """Build null-rate anomaly metric."""
     total_nulls = sum(df[col].null_count() for col in df.columns)
@@ -160,7 +160,7 @@ def _build_null_rate_anomaly_metric(
 
 def _build_record_count_anomaly_metric(
     df: pl.DataFrame,
-    baseline_stats: dict[str, Any],  # Any: heterogeneous baseline map
+    baseline_stats: JsonDict,
 ) -> AnomalyMetric:
     """Build record-count anomaly metric."""
     current_count = float(len(df))

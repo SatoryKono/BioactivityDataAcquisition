@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import TYPE_CHECKING, Callable, Protocol, cast
 
 from bioetl.composition.factories.data_source_factory import DataSourceCreator
 from bioetl.composition.factories.pipeline_factory_construction import (
@@ -19,11 +19,20 @@ from bioetl.composition.factories.pipeline_factory_construction import (
 from bioetl.composition.factories.services_factory import BaseServicesFactory
 from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
 from bioetl.composition.services.versioning import (
+    compute_config_hash as _compute_config_hash_direct,
+)
+from bioetl.composition.services.versioning import (
     get_git_commit,
     get_pipeline_version,
 )
 from bioetl.infrastructure.config import (
+    load_pipeline_config as _load_pipeline_config_direct,
+)
+from bioetl.infrastructure.config import (
     load_pipeline_contract_policy,
+)
+from bioetl.infrastructure.config import (
+    yaml_config_to_domain as _yaml_config_to_domain_direct,
 )
 from bioetl.infrastructure.config.pipeline_config_loader import PipelineConfigLoader
 
@@ -65,37 +74,43 @@ __all__ = [
 
 
 def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
-    """Load pipeline config via pipeline_factory facade for patch compatibility."""
-    from bioetl.composition.factories import pipeline_factory
-
-    return pipeline_factory.load_pipeline_config(pipeline_name)
+    """Load pipeline config via direct infrastructure dependency."""
+    return _load_pipeline_config_direct(pipeline_name)
 
 
 def yaml_config_to_domain(*args: object, **kwargs: object) -> PipelineConfig:
-    """Map YAML config via pipeline_factory facade for patch compatibility."""
-    from bioetl.composition.factories import pipeline_factory
-
-    return pipeline_factory.yaml_config_to_domain(*args, **kwargs)
+    """Map YAML config via direct infrastructure dependency."""
+    return _yaml_config_to_domain_direct(*args, **kwargs)
 
 
 def compute_config_hash(*args: object, **kwargs: object) -> str:
-    """Compute config hash via pipeline_factory facade for patch compatibility."""
-    from bioetl.composition.factories import pipeline_factory
-
-    return pipeline_factory.compute_config_hash(*args, **kwargs)
+    """Compute config hash via direct versioning dependency."""
+    return _compute_config_hash_direct(*args, **kwargs)
 
 
-_DEFAULT_BASE_SERVICES_FACTORY = BaseServicesFactory
+@dataclass(frozen=True, slots=True)
+class ServiceBundleDependencies:
+    """Explicit dependencies for service bundle runtime wiring."""
+
+    load_pipeline_config: Callable[[str], PipelineYamlConfig]
+    yaml_config_to_domain: Callable[..., PipelineConfig]
+    compute_config_hash: Callable[..., str]
+    base_services_factory: type[BaseServicesFactory]
 
 
-def _resolve_base_services_factory() -> type[BaseServicesFactory]:
-    """Resolve BaseServicesFactory with dual-path patch compatibility."""
-    if BaseServicesFactory is not _DEFAULT_BASE_SERVICES_FACTORY:
-        return BaseServicesFactory
+def _resolve_service_bundle_dependencies(
+    override: ServiceBundleDependencies | None = None,
+) -> ServiceBundleDependencies:
+    """Resolve runtime dependencies with optional explicit override."""
+    if override is not None:
+        return override
 
-    from bioetl.composition.factories import pipeline_factory
-
-    return pipeline_factory.BaseServicesFactory
+    return ServiceBundleDependencies(
+        load_pipeline_config=load_pipeline_config,
+        yaml_config_to_domain=yaml_config_to_domain,
+        compute_config_hash=compute_config_hash,
+        base_services_factory=BaseServicesFactory,
+    )
 
 
 def _extract_entity_type(pipeline_name: str) -> str | None:
@@ -209,6 +224,7 @@ def build_pipeline_services(
     metadata_coordinator: MetadataCoordinator | None = None,
     cached_bronze: CachedBronzeContext | None = None,
     silver_validator: SilverValidatorPort | None = None,
+    _deps: ServiceBundleDependencies | None = None,
 ) -> PipelineService:
     """Build shared pipeline services using DI container.
 
@@ -232,8 +248,9 @@ def build_pipeline_services(
     Returns:
         Configured PipelineService instance
     """
-    pipeline_config = config or load_pipeline_config(pipeline_name)
-    base_services_factory = _resolve_base_services_factory()
+    deps = _resolve_service_bundle_dependencies(_deps)
+    pipeline_config = config or deps.load_pipeline_config(pipeline_name)
+    base_services_factory = deps.base_services_factory
     shared_metrics = base_services_factory._create_metrics(settings)
 
     # Choose data source based on cached_bronze mode
@@ -291,6 +308,7 @@ def create_pipeline_with_services(
     metrics: MetricsPort | None = None,
     cached_bronze: CachedBronzeContext | None = None,
     pandera_silver_schema: object | None = None,
+    _deps: ServiceBundleDependencies | None = None,
 ) -> BasePipeline:
     """Create pipeline instance with services and optional transformer."""
     return _create_pipeline_with_services_impl(
@@ -311,7 +329,8 @@ def create_pipeline_with_services(
             metrics=metrics,
             cached_bronze=cached_bronze,
             pandera_silver_schema=pandera_silver_schema,
-        )
+        ),
+        deps=_resolve_service_bundle_dependencies(_deps),
     )
 
 
@@ -337,16 +356,18 @@ class _PipelineCreationInputs:
 
 def _create_pipeline_with_services_impl(
     inputs: _PipelineCreationInputs,
+    *,
+    deps: ServiceBundleDependencies,
 ) -> BasePipeline:
     """Implement pipeline construction for ``create_pipeline_with_services``."""
-    yaml_config = inputs.config or load_pipeline_config(inputs.pipeline_name)
+    yaml_config = inputs.config or deps.load_pipeline_config(inputs.pipeline_name)
     run_context_factory = RunContextFactory(
         pipeline_name=inputs.pipeline_name,
         provider=inputs.provider,
         entity_type_extractor=_extract_entity_type,
         pipeline_version_getter=get_pipeline_version,
         git_commit_getter=get_git_commit,
-        config_hash_getter=compute_config_hash,
+        config_hash_getter=deps.compute_config_hash,
     )
     metadata_coordinator = MetadataCoordinator(
         run_context_factory.create(
@@ -372,7 +393,7 @@ def _create_pipeline_with_services_impl(
     domain_config = DomainConfigResolver(
         configs_root=Path("configs"),
         loader_class=PipelineConfigLoader,
-        domain_mapper=yaml_config_to_domain,
+        domain_mapper=deps.yaml_config_to_domain,
     ).resolve(
         yaml_config,
         relaxed_dq=inputs.settings.pipeline.relaxed_dq,

@@ -54,7 +54,9 @@ class BatchWriter(BatchWriterIOMixin, BatchWriterColumnsMixin, BatchWriterTracin
         self._table_config = config.table_config
         self._gold_schema = config.gold_schema
         self._column_groups = config.column_groups
-        self._data_schema = data_schema_config
+        self._data_schema = (
+            data_schema_config if data_schema_config is not None else config.data_schema
+        )
         self._column_orderer = (
             ColumnOrdererService(
                 self._context.logger, column_groups=self._column_groups
