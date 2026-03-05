@@ -25,8 +25,10 @@ from typing import Any, Protocol, Self, runtime_checkable
 
 __all__ = [
     "DQMonitorPort",
+    "ExecutorMetricsPort",
     "LoggerPort",
     "MetricsPort",
+    "MetricsServerPort",
     "TracingPort",
 ]
 
