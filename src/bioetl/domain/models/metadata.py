@@ -31,8 +31,8 @@ from bioetl.domain.models._metadata_common import (
     GovernanceMetadata,
     PipelineMetadata,
     QualityExpectations,
-    RunTypeEnum,
     RuntimeMetadata,
+    RunTypeEnum,
 )
 from bioetl.domain.models._metadata_gold import (
     CompositeOutputExt,
@@ -45,8 +45,8 @@ from bioetl.domain.models._metadata_gold import (
 )
 from bioetl.domain.models._metadata_silver import (
     ColumnMetrics,
-    DQSummary,
     DeltaMetrics,
+    DQSummary,
     LineageMetadata,
     SchemaDrift,
     SilverMetadata,

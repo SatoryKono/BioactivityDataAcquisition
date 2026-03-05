@@ -251,11 +251,16 @@ class TestRegistryFactoryProtocol:
         """PipelineFactoryPort must define pipeline_name and silver_schema."""
         from bioetl.composition.registry import PipelineFactoryPort
 
-        # Check annotations or attributes
-        hints = typing.get_type_hints(PipelineFactoryPort)
+        # Use __annotations__ instead of get_type_hints() to avoid
+        # resolving forward references (pa.Schema) at runtime.
+        annotations = PipelineFactoryPort.__annotations__
 
-        assert "pipeline_name" in hints, "PipelineFactoryPort MUST have pipeline_name"
-        assert "silver_schema" in hints, "PipelineFactoryPort MUST have silver_schema"
+        assert "pipeline_name" in annotations, (
+            "PipelineFactoryPort MUST have pipeline_name"
+        )
+        assert "silver_schema" in annotations, (
+            "PipelineFactoryPort MUST have silver_schema"
+        )
 
     def test_pipeline_factory_protocol_has_create_methods(self) -> None:
         """PipelineFactoryPort must have create_with_services and create_runner."""

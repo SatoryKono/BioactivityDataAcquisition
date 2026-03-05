@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, TypeVar
 
 from bioetl.domain.composite.config_parsing import (
     optional_bool,
@@ -24,8 +24,12 @@ __all__ = [
     "composite_to_dict",
 ]
 
+_ConfigT = TypeVar("_ConfigT")
 
-def _build_seed_config(seed_data: dict[str, object], seed_cls: type[Any]) -> Any:
+
+def _build_seed_config(
+    seed_data: dict[str, object], seed_cls: type[_ConfigT]
+) -> _ConfigT:
     """Build seed config from parsed seed mapping."""
     return seed_cls(
         pipeline=require_str(seed_data.get("pipeline"), "seed.pipeline"),
@@ -37,8 +41,8 @@ def _build_seed_config(seed_data: dict[str, object], seed_cls: type[Any]) -> Any
 
 def _build_dependency_config(
     dep: dict[str, object],
-    dependency_cls: type[Any],
-) -> Any:
+    dependency_cls: type[_ConfigT],
+) -> _ConfigT:
     """Build one dependency config from serialized mapping."""
     return dependency_cls(
         pipeline=require_str(dep.get("pipeline"), "dependencies[].pipeline"),
@@ -50,7 +54,9 @@ def _build_dependency_config(
             600,
         )
         or 600,
-        silver_table=optional_str(dep.get("silver_table"), "dependencies[].silver_table"),
+        silver_table=optional_str(
+            dep.get("silver_table"), "dependencies[].silver_table"
+        ),
         filter_fields=optional_str_tuple(
             dep.get("filter_fields"), "dependencies[].filter_fields"
         ),
@@ -59,25 +65,22 @@ def _build_dependency_config(
 
 def _build_dependency_configs(
     dependency_data: list[dict[str, object]],
-    dependency_cls: type[Any],
-) -> tuple[Any, ...]:
+    dependency_cls: type[_ConfigT],
+) -> tuple[_ConfigT, ...]:
     """Build dependency config tuple."""
     return tuple(
-        _build_dependency_config(dep, dependency_cls)
-        for dep in dependency_data
+        _build_dependency_config(dep, dependency_cls) for dep in dependency_data
     )
 
 
 def _build_enricher_config(
     enricher: dict[str, object],
-    enricher_cls: type[Any],
-) -> Any:
+    enricher_cls: type[_ConfigT],
+) -> _ConfigT:
     """Build one enricher config from serialized mapping."""
     return enricher_cls(
         pipeline=require_str(enricher.get("pipeline"), "enrichers[].pipeline"),
-        join_keys=require_str_tuple(
-            enricher.get("join_keys"), "enrichers[].join_keys"
-        ),
+        join_keys=require_str_tuple(enricher.get("join_keys"), "enrichers[].join_keys"),
         required=optional_bool(enricher.get("required"), False, "enrichers[].required"),
         timeout_seconds=optional_int(
             enricher.get("timeout_seconds"),
@@ -90,23 +93,26 @@ def _build_enricher_config(
 
 def _build_enricher_configs(
     enricher_data: list[dict[str, object]],
-    enricher_cls: type[Any],
-) -> tuple[Any, ...]:
+    enricher_cls: type[_ConfigT],
+) -> tuple[_ConfigT, ...]:
     """Build enricher config tuple."""
     return tuple(
-        _build_enricher_config(enricher, enricher_cls)
-        for enricher in enricher_data
+        _build_enricher_config(enricher, enricher_cls) for enricher in enricher_data
     )
 
 
-def _build_merge_config(merge_data: dict[str, object], merge_cls: type[Any]) -> Any:
+def _build_merge_config(
+    merge_data: dict[str, object], merge_cls: type[_ConfigT]
+) -> _ConfigT:
     """Build merge config from serialized mapping."""
     return merge_cls(
         strategy=MergeStrategy.from_string(
             require_str(merge_data.get("strategy"), "merge.strategy")
         ),
         conflict_resolution=ConflictResolution.from_string(
-            require_str(merge_data.get("conflict_resolution"), "merge.conflict_resolution")
+            require_str(
+                merge_data.get("conflict_resolution"), "merge.conflict_resolution"
+            )
         ),
         output_silver_path=require_str(
             merge_data.get("output_silver_path"), "merge.output_silver_path"

@@ -21,7 +21,11 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from bioetl.domain.exceptions import BioETLError, NetworkError
-from bioetl.domain.ports import DataSourceFactoryPort, HealthCheckPort, HealthCheckResult
+from bioetl.domain.ports import (
+    DataSourceFactoryPort,
+    HealthCheckPort,
+    HealthCheckResult,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort

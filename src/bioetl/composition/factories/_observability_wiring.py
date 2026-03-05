@@ -5,10 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.domain.ports import NoOpMetrics
-from bioetl.infrastructure.adapters import CachedBronzeDataSource
-from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
-
 from .data_source_factory import DataSourceCreator
 
 if TYPE_CHECKING:
@@ -57,6 +53,10 @@ def _create_cached_bronze_data_source(
     cached_bronze: CachedBronzeContext,
 ) -> DataSourcePort:
     """Create CachedBronzeDataSource for reading from Bronze cache."""
+    from bioetl.domain.ports import NoOpMetrics
+    from bioetl.infrastructure.adapters import CachedBronzeDataSource
+    from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+
     provider = pipeline_config.provider
     entity_type = pipeline_config.entity_type
 
