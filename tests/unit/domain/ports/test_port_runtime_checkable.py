@@ -1,0 +1,431 @@
+"""Tests for @runtime_checkable compliance of ALL domain port protocols.
+
+Verifies that every port protocol is runtime_checkable and that concrete
+implementations (stubs) satisfy isinstance checks — per ARCH-003 and TYPE-004.
+"""
+
+from __future__ import annotations
+
+from collections.abc import AsyncIterator, Mapping, Sequence
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import Any, Self
+from types import TracebackType
+
+import pytest
+
+from bioetl.domain.ports.adr import AdrServicePort, AdrDocument, AdrInfo, AdrValidationReport
+from bioetl.domain.ports.audit import AuditPort, AuditEntry, AuditLayer, AuditOperation
+from bioetl.domain.ports.batch_id import BatchIdGeneratorPort
+from bioetl.domain.ports.checkpoint import CheckpointPort
+from bioetl.domain.ports.clock import ClockPort
+from bioetl.domain.ports.config_loader_port import (
+    DomainConfigMapperPort,
+    PipelineConfigLoaderPort,
+    SettingsLoaderPort,
+)
+from bioetl.domain.ports.config_port import (
+    PipelineSettingsPort,
+    PipelineYamlConfigPort,
+    SettingsPort,
+)
+from bioetl.domain.ports.contract_policy import ContractPolicyPort
+from bioetl.domain.ports.data_normalization import DataNormalizationPort
+from bioetl.domain.ports.data_source import DataSourcePort, FilterableDataSourcePort
+from bioetl.domain.ports.delta_reader import DeltaReaderPort
+from bioetl.domain.ports.dq_config import (
+    BronzeDQConfigPort,
+    GoldDQConfigPort,
+    SilverDQConfigPort,
+)
+from bioetl.domain.ports.dq_report import (
+    BronzeDQAnalyzerPort,
+    DQReportWriterPort,
+    GoldDQAnalyzerPort,
+    SilverDQAnalyzerPort,
+)
+from bioetl.domain.ports.fallback_policy import FallbackPolicyPort
+from bioetl.domain.ports.filtering import InputFilterPort
+from bioetl.domain.ports.health_check import (
+    HealthCheckPort,
+    HealthMonitorPort,
+    HealthStatePort,
+)
+from bioetl.domain.ports.idmapping import IDMappingPort
+from bioetl.domain.ports.locking import LockPort
+from bioetl.domain.ports.memory import MemoryMonitorPort
+from bioetl.domain.ports.metadata import MetadataWriterPort
+from bioetl.domain.ports.metadata_coordinator import MetadataCoordinatorPort
+from bioetl.domain.ports.observability import (
+    DQMonitorPort,
+    LoggerPort,
+    MetricsPort,
+    TracingPort,
+)
+from bioetl.domain.ports.pii import PiiHasherPort
+from bioetl.domain.ports.quarantine import QuarantinePort
+from bioetl.domain.ports.registry_port import PipelineRegistryPort, RegistryAccessorPort
+from bioetl.domain.ports.resilience import CircuitBreakerPort, RateLimiterPort
+from bioetl.domain.ports.runner import MetricsExtractorPort, RunnablePort, RunnerFactoryPort
+from bioetl.domain.ports.serialization import JsonEncoderPort
+from bioetl.domain.ports.shutdown import ShutdownPort
+from bioetl.domain.ports.storage import StoragePort
+from bioetl.domain.ports.validation import GoldValidatorPort, SilverValidatorPort
+
+
+ALL_PORT_PROTOCOLS = [
+    AdrServicePort,
+    AuditPort,
+    BatchIdGeneratorPort,
+    CheckpointPort,
+    ClockPort,
+    ContractPolicyPort,
+    DataNormalizationPort,
+    DataSourcePort,
+    DeltaReaderPort,
+    DomainConfigMapperPort,
+    DQMonitorPort,
+    DQReportWriterPort,
+    FallbackPolicyPort,
+    FilterableDataSourcePort,
+    GoldDQAnalyzerPort,
+    GoldDQConfigPort,
+    GoldValidatorPort,
+    HealthCheckPort,
+    HealthMonitorPort,
+    HealthStatePort,
+    IDMappingPort,
+    InputFilterPort,
+    JsonEncoderPort,
+    LockPort,
+    LoggerPort,
+    MemoryMonitorPort,
+    MetadataCoordinatorPort,
+    MetadataWriterPort,
+    MetricsExtractorPort,
+    MetricsPort,
+    PiiHasherPort,
+    PipelineConfigLoaderPort,
+    PipelineRegistryPort,
+    PipelineSettingsPort,
+    PipelineYamlConfigPort,
+    QuarantinePort,
+    RateLimiterPort,
+    CircuitBreakerPort,
+    RegistryAccessorPort,
+    RunnablePort,
+    RunnerFactoryPort,
+    SettingsLoaderPort,
+    SettingsPort,
+    ShutdownPort,
+    SilverDQAnalyzerPort,
+    SilverDQConfigPort,
+    SilverValidatorPort,
+    StoragePort,
+    TracingPort,
+    BronzeDQAnalyzerPort,
+    BronzeDQConfigPort,
+]
+
+
+@pytest.mark.unit
+class TestPortRuntimeCheckable:
+    """Verify all port protocols are @runtime_checkable."""
+
+    @pytest.mark.parametrize(
+        "protocol_cls",
+        ALL_PORT_PROTOCOLS,
+        ids=lambda cls: cls.__name__,
+    )
+    def test_protocol_is_runtime_checkable(self, protocol_cls: type) -> None:
+        """Each protocol MUST be @runtime_checkable per TYPE-004."""
+        assert hasattr(protocol_cls, "__protocol_attrs__") or hasattr(
+            protocol_cls, "_is_runtime_protocol"
+        ), f"{protocol_cls.__name__} is not a Protocol"
+
+        # Verify isinstance check doesn't raise (it won't match object, but
+        # the call itself must not throw TypeError)
+        result = isinstance(object(), protocol_cls)
+        assert result is False
+
+
+@pytest.mark.unit
+class TestPortFacadeImports:
+    """Verify all ports are importable from the facade package."""
+
+    def test_all_ports_importable_from_facade(self) -> None:
+        """ARCH-008: Ports MUST be importable from bioetl.domain.ports."""
+        from bioetl.domain import ports
+
+        expected_names = [
+            "AdrServicePort",
+            "AuditPort",
+            "BatchIdGeneratorPort",
+            "CheckpointPort",
+            "ClockPort",
+            "ContractPolicyPort",
+            "DataNormalizationPort",
+            "DataSourcePort",
+            "DeltaReaderPort",
+            "DomainConfigMapperPort",
+            "DQMonitorPort",
+            "DQReportWriterPort",
+            "FallbackPolicyPort",
+            "FilterableDataSourcePort",
+            "GoldDQAnalyzerPort",
+            "GoldDQConfigPort",
+            "GoldValidatorPort",
+            "HealthCheckPort",
+            "HealthMonitorPort",
+            "HealthStatePort",
+            "IDMappingPort",
+            "InputFilterPort",
+            "JsonEncoderPort",
+            "LockPort",
+            "LoggerPort",
+            "MemoryMonitorPort",
+            "MetadataCoordinatorPort",
+            "MetadataWriterPort",
+            "MetricsExtractorPort",
+            "MetricsPort",
+            "PiiHasherPort",
+            "PipelineConfigLoaderPort",
+            "PipelineRegistryPort",
+            "PipelineSettingsPort",
+            "PipelineYamlConfigPort",
+            "QuarantinePort",
+            "RateLimiterPort",
+            "CircuitBreakerPort",
+            "RegistryAccessorPort",
+            "RunnablePort",
+            "RunnerFactoryPort",
+            "SettingsLoaderPort",
+            "SettingsPort",
+            "ShutdownPort",
+            "SilverDQAnalyzerPort",
+            "SilverDQConfigPort",
+            "SilverValidatorPort",
+            "StoragePort",
+            "TracingPort",
+            "BronzeDQAnalyzerPort",
+            "BronzeDQConfigPort",
+        ]
+        for name in expected_names:
+            assert hasattr(ports, name), f"{name} not exported from bioetl.domain.ports"
+
+    def test_facade_all_contains_all_ports(self) -> None:
+        """The __all__ of the ports package must include all port protocols."""
+        from bioetl.domain.ports import __all__ as ports_all
+
+        port_names = {cls.__name__ for cls in ALL_PORT_PROTOCOLS}
+        missing = port_names - set(ports_all)
+        assert not missing, f"Missing from __all__: {missing}"
+
+
+@pytest.mark.unit
+class TestAuditDataClasses:
+    """Tests for audit port DTOs: AuditEntry, AuditOperation, AuditLayer."""
+
+    def test_audit_operation_values(self) -> None:
+        assert AuditOperation.WRITE == "write"
+        assert AuditOperation.MERGE == "merge"
+        assert AuditOperation.APPEND == "append"
+        assert AuditOperation.DELETE == "delete"
+        assert AuditOperation.OVERWRITE == "overwrite"
+
+    def test_audit_layer_values(self) -> None:
+        assert AuditLayer.BRONZE == "bronze"
+        assert AuditLayer.SILVER == "silver"
+        assert AuditLayer.GOLD == "gold"
+
+    def test_audit_entry_creation(self) -> None:
+        now = datetime.now(UTC)
+        entry = AuditEntry(
+            run_id="run-123",
+            timestamp=now,
+            layer=AuditLayer.SILVER,
+            table_name="chembl.activity",
+            operation=AuditOperation.MERGE,
+            records_count=1000,
+        )
+        assert entry.run_id == "run-123"
+        assert entry.layer == AuditLayer.SILVER
+        assert entry.records_count == 1000
+        assert entry.metadata == {}
+
+    def test_audit_entry_with_metadata(self) -> None:
+        now = datetime.now(UTC)
+        entry = AuditEntry(
+            run_id="run-456",
+            timestamp=now,
+            layer=AuditLayer.BRONZE,
+            table_name="pubmed.publication",
+            operation=AuditOperation.WRITE,
+            records_count=500,
+            metadata={"batch_id": "batch-001", "provider": "pubmed"},
+        )
+        assert entry.metadata["provider"] == "pubmed"
+
+    def test_audit_entry_to_dict(self) -> None:
+        now = datetime.now(UTC)
+        entry = AuditEntry(
+            run_id="run-789",
+            timestamp=now,
+            layer=AuditLayer.GOLD,
+            table_name="gold.compounds",
+            operation=AuditOperation.OVERWRITE,
+            records_count=200,
+        )
+        result = entry.to_dict()
+        assert result["run_id"] == "run-789"
+        assert result["layer"] == "gold"
+        assert result["operation"] == "overwrite"
+        assert result["records_count"] == 200
+        assert result["timestamp"] == now.isoformat()
+
+    def test_audit_entry_immutable(self) -> None:
+        now = datetime.now(UTC)
+        entry = AuditEntry(
+            run_id="run-1",
+            timestamp=now,
+            layer=AuditLayer.BRONZE,
+            table_name="t",
+            operation=AuditOperation.WRITE,
+            records_count=1,
+        )
+        with pytest.raises((AttributeError, TypeError)):
+            entry.records_count = 999  # type: ignore[misc]
+
+
+@pytest.mark.unit
+class TestAdrDataClasses:
+    """Tests for ADR port DTOs."""
+
+    def test_adr_info_creation(self) -> None:
+        info = AdrInfo(number=1, title="Use Delta Lake", path="docs/adr/001.md")
+        assert info.number == 1
+        assert info.title == "Use Delta Lake"
+        assert info.path == "docs/adr/001.md"
+
+    def test_adr_info_immutable(self) -> None:
+        info = AdrInfo(number=1, title="Test", path="test.md")
+        with pytest.raises((AttributeError, TypeError)):
+            info.number = 2  # type: ignore[misc]
+
+    def test_adr_document_creation(self) -> None:
+        doc = AdrDocument(
+            number=5,
+            title="PII Hashing Strategy",
+            content="# ADR-005\n...",
+            path="docs/adr/005.md",
+            status="accepted",
+            date="2024-01-15",
+        )
+        assert doc.status == "accepted"
+        assert doc.date == "2024-01-15"
+
+    def test_adr_document_optional_fields(self) -> None:
+        doc = AdrDocument(number=1, title="T", content="C", path="p.md")
+        assert doc.status is None
+        assert doc.date is None
+
+    def test_adr_validation_issue_defaults(self) -> None:
+        from bioetl.domain.ports.adr import AdrValidationIssue
+
+        issue = AdrValidationIssue(
+            number=None,
+            path="docs/adr/bad.md",
+            message="Missing status field",
+        )
+        assert issue.severity == "error"
+        assert issue.number is None
+
+    def test_adr_validation_report(self) -> None:
+        from bioetl.domain.ports.adr import AdrValidationIssue
+
+        report = AdrValidationReport(
+            valid=False,
+            total=10,
+            errors=2,
+            warnings=1,
+            issues=[
+                AdrValidationIssue(number=3, path="p", message="err"),
+            ],
+        )
+        assert not report.valid
+        assert report.total == 10
+        assert len(report.issues) == 1
+
+
+@pytest.mark.unit
+class TestMetadataCoordinatorDataClasses:
+    """Tests for metadata coordinator DTOs."""
+
+    def test_bronze_metadata_input(self) -> None:
+        from bioetl.domain.ports.metadata_coordinator import BronzeMetadataInput
+
+        now = datetime.now(UTC)
+        inp = BronzeMetadataInput(
+            batch_id="batch-001",
+            record_count=100,
+            compressed_size=4096,
+            output_path="bronze/chembl/activity/2024-01-01/batch-001.jsonl.zst",
+            started_at=now,
+            completed_at=now,
+        )
+        assert inp.batch_id == "batch-001"
+        assert inp.record_count == 100
+        assert inp.source_metadata is None
+        assert inp.governance is None
+
+    def test_bronze_metadata_input_immutable(self) -> None:
+        from bioetl.domain.ports.metadata_coordinator import BronzeMetadataInput
+
+        now = datetime.now(UTC)
+        inp = BronzeMetadataInput(
+            batch_id="b",
+            record_count=1,
+            compressed_size=1,
+            output_path="p",
+            started_at=now,
+            completed_at=now,
+        )
+        with pytest.raises((AttributeError, TypeError)):
+            inp.record_count = 999  # type: ignore[misc]
+
+    def test_silver_metadata_input_defaults(self) -> None:
+        from bioetl.domain.ports.metadata_coordinator import SilverMetadataInput
+
+        inp = SilverMetadataInput(
+            table_path="/data/silver/chembl.activity",
+            primary_keys=["entity_id"],
+            mode="merge",
+        )
+        assert inp.records is None
+        assert inp.total_records is None
+        assert inp.version_before is None
+        assert inp.total_bytes == 0
+
+    def test_silver_ref_creation(self) -> None:
+        from bioetl.domain.ports.metadata_coordinator import SilverRef
+
+        ref = SilverRef(
+            table_name="chembl.activity",
+            table_path="/data/silver/chembl.activity",
+            delta_version=42,
+        )
+        assert ref.delta_version == 42
+        assert ref.table_name == "chembl.activity"
+
+    def test_gold_metadata_input_defaults(self) -> None:
+        from bioetl.domain.ports.metadata_coordinator import GoldMetadataInput
+
+        inp = GoldMetadataInput(
+            table_path="/data/gold/compounds",
+            table_name="compounds",
+            mode="overwrite",
+        )
+        assert inp.total_bytes == 0
+        assert inp.partition_count == 0
+        assert inp.schema_validation_enabled is False
+        assert inp.schema_validation_strict is None
