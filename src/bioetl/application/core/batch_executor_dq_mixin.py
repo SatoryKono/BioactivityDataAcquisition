@@ -89,7 +89,7 @@ class _BatchExecutorDQMixin:
         if len(reservoir) < _DQ_MAX_SAMPLE_SIZE:
             reservoir.append(item)
         else:
-            idx = random.randrange(self._dq_total_seen)  # noqa: S311
+            idx = random.randrange(self._dq_total_seen)
             if idx < _DQ_MAX_SAMPLE_SIZE:
                 reservoir[idx] = item
 
@@ -104,7 +104,19 @@ class _BatchExecutorDQMixin:
             import polars as pl
 
             return pl.DataFrame(records)
-        except _DQ_DATAFRAME_ERRORS as dataframe_error:
+        except Exception as dataframe_error:
+            if not self._is_dataframe_build_error(dataframe_error):
+                raise
+            normalized_records = self._normalize_records_for_polars(records)
+            if normalized_records is not None:
+                try:
+                    import polars as pl
+
+                    return pl.DataFrame(normalized_records)
+                except Exception as normalized_error:
+                    if not self._is_dataframe_build_error(normalized_error):
+                        raise
+                    pass
             self._logger.warning(
                 "Failed to build dataframe for DQ context",
                 records_count=len(records),
@@ -112,6 +124,54 @@ class _BatchExecutorDQMixin:
                 reason="dq_dataframe_build_failed",
             )
             return None
+
+    @staticmethod
+    def _is_dataframe_build_error(error: Exception) -> bool:
+        """Return True for known dataframe construction errors."""
+        return isinstance(
+            error, _DQ_DATAFRAME_ERRORS
+        ) or error.__class__.__module__.startswith("polars.")
+
+    @staticmethod
+    def _normalize_records_for_polars(
+        records: list[BronzeRecord] | list[GoldRecord],
+    ) -> list[dict[str, object]] | None:
+        """Normalize mixed nested/string columns to stable string representation.
+
+        Polars may fail when one column mixes nested values (dict/list/tuple) with
+        plain scalars/strings across rows. For such columns we stringify values so
+        the dataframe builder sees a single consistent type.
+        """
+        nested_keys: set[str] = set()
+        non_nested_keys: set[str] = set()
+
+        for record in records:
+            for key, value in record.items():
+                if value is None:
+                    continue
+                if isinstance(value, (dict, list, tuple)):
+                    nested_keys.add(key)
+                else:
+                    non_nested_keys.add(key)
+
+        keys_to_stringify = nested_keys & non_nested_keys
+        if not keys_to_stringify:
+            return None
+
+        normalized: list[dict[str, object]] = []
+        for record in records:
+            normalized_record: dict[str, object] = {}
+            for key, value in record.items():
+                if key not in keys_to_stringify or value is None:
+                    normalized_record[key] = value
+                elif isinstance(value, (dict, list, tuple)):
+                    normalized_record[key] = json.dumps(
+                        value, default=str, sort_keys=True
+                    )
+                else:
+                    normalized_record[key] = str(value)
+            normalized.append(normalized_record)
+        return normalized
 
     def _get_dq_thresholds(self) -> tuple[float, float]:
         """Resolve DQ thresholds from config, falling back to defaults."""

@@ -28,6 +28,39 @@ __all__ = [
 T = TypeVar("T", bound="DataSourcePort")
 
 
+def _register_provider_class(
+    *,
+    cls: type[T],
+    name: str,
+    http_rate: float,
+    http_capacity: int,
+    requires_http_client: bool,
+    requires_logger: bool,
+    rate_overrides: dict[str, float] | None,
+    custom_creator: AdapterCreator | None,
+    default_kwargs: dict[str, object],
+) -> None:
+    """Register decorated adapter class in provider registry."""
+    http_config: HttpConfig | None = None
+    if requires_http_client:
+        http_config = HttpConfig(
+            rate=http_rate,
+            capacity=http_capacity,
+            rate_overrides=rate_overrides or {},
+        )
+
+    config = ProviderConfig(
+        adapter_class=cls,
+        http_config=http_config,
+        requires_http_client=requires_http_client,
+        requires_logger=requires_logger,
+        default_kwargs=default_kwargs,
+        custom_creator=custom_creator,
+    )
+    ProviderRegistry.register(name, config)
+    cls.__provider_name__ = name  # type: ignore[attr-defined]
+
+
 def register_provider(
     name: str,
     *,
@@ -39,92 +72,22 @@ def register_provider(
     custom_creator: AdapterCreator | None = None,
     **default_kwargs: object,
 ) -> Callable[[type[T]], type[T]]:
-    """Decorator for registering a data provider.
-
-    Registers the adapter class in ProviderRegistry at module import time.
-
-    Args:
-        name: Unique provider name (e.g., "chembl", "pubchem").
-        http_rate: Rate limit for the HTTP client (requests/second).
-        http_capacity: Token bucket capacity.
-        requires_http_client: Whether an HTTP client is needed for initialization.
-        requires_logger: Whether a logger is needed for initialization.
-        rate_overrides: Conditional rate limit overrides.
-            Key is a Settings attribute name, value is the new rate.
-        custom_creator: Custom adapter creation function.
-            If specified, used instead of the standard logic.
-        **default_kwargs: Default kwargs for the adapter constructor.
-
-    Returns:
-        Class decorator.
-
-    Example:
-        >>> @register_provider(
-        ...     "chembl",
-        ...     http_rate=10.0,
-        ...     http_capacity=20,
-        ... )
-        ... class ChemblAdapter:
-        ...     def __init__(self, http_client, logger=None):
-        ...         ...
-
-        >>> # For providers with complex initialization logic:
-        >>> def create_pubmed(http_client, logger, settings, **kwargs):
-        ...     api_key = kwargs.get("api_key") or settings.pubmed_api_key
-        ...     return PubMedAdapter(http_client, logger, api_key=api_key)
-        >>>
-        >>> @register_provider(
-        ...     "pubmed",
-        ...     http_rate=3.0,
-        ...     rate_overrides={"pubmed_api_key": 10.0},
-        ...     custom_creator=create_pubmed,
-        ... )
-        ... class PubMedAdapter:
-        ...     ...
-    """
+    """Decorator for registering a provider adapter class."""
+    resolved_defaults = dict(default_kwargs)
 
     def decorator(cls: type[T]) -> type[T]:
-        """Inner decorator that performs provider registration.
-
-        Captures configuration from the outer scope and registers the
-        decorated class with ProviderRegistry. Also injects __provider_name__
-        attribute for runtime introspection.
-
-        Args:
-            cls: The adapter class being decorated.
-
-        Returns:
-            The original class unchanged (registration is a side effect).
-
-        Side effects:
-            - Registers provider in ProviderRegistry with captured config
-            - Adds __provider_name__ attribute to the class
-        """
-        # Create HTTP configuration
-        http_config: HttpConfig | None = None
-        if requires_http_client:
-            http_config = HttpConfig(
-                rate=http_rate,
-                capacity=http_capacity,
-                rate_overrides=rate_overrides or {},
-            )
-
-        # Create provider configuration
-        config = ProviderConfig(
-            adapter_class=cls,
-            http_config=http_config,
+        """Register class and return it unchanged."""
+        _register_provider_class(
+            cls=cls,
+            name=name,
+            http_rate=http_rate,
+            http_capacity=http_capacity,
             requires_http_client=requires_http_client,
             requires_logger=requires_logger,
-            default_kwargs=dict(default_kwargs),
+            rate_overrides=rate_overrides,
             custom_creator=custom_creator,
+            default_kwargs=dict(resolved_defaults),
         )
-
-        # Register the provider
-        ProviderRegistry.register(name, config)
-
-        # Store the provider name on the class for introspection
-        cls.__provider_name__ = name  # type: ignore[attr-defined]
-
         return cls
 
     return decorator
