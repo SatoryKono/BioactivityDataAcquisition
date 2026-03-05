@@ -13,6 +13,7 @@ from typing import Any, Protocol, Self, runtime_checkable
 from bioetl.domain.types import HealthStatus, JsonDict
 
 __all__ = [
+    "DataSourceFactoryPort",
     "DataSourcePort",
     "FilterableDataSourcePort",
 ]
@@ -194,5 +195,36 @@ class FilterableDataSourcePort(DataSourcePort, Protocol):
 
         Returns:
             Async iterator yielding fetched records.
+        """
+        ...
+
+
+@runtime_checkable
+class DataSourceFactoryPort(Protocol):
+    """Protocol for data source factory operations.
+
+    Abstracts data source creation for health checking.
+    """
+
+    @staticmethod
+    def list_providers() -> list[str]:
+        """List available provider names.
+
+        Returns:
+            Collection of providers.
+        """
+        ...
+
+    @staticmethod
+    def create(
+        provider: str,
+    ) -> Any:  # Any: returns different adapter types per provider
+        """Create a data source adapter for the given provider.
+
+        Args:
+            provider: Data provider name.
+
+        Returns:
+            Newly created data source instance.
         """
         ...

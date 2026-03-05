@@ -49,6 +49,7 @@ from bioetl.domain.ports.config_port import (
 from bioetl.domain.ports.contract_policy import ContractPolicyPort
 from bioetl.domain.ports.data_normalization import DataNormalizationPort
 from bioetl.domain.ports.data_source import (
+    DataSourceFactoryPort,
     DataSourcePort,
     FilterableDataSourcePort,
 )
@@ -94,8 +95,10 @@ from bioetl.domain.ports.noop import (
 )
 from bioetl.domain.ports.observability import (
     DQMonitorPort,
+    ExecutorMetricsPort,
     LoggerPort,
     MetricsPort,
+    MetricsServerPort,
     TracingPort,
 )
 from bioetl.domain.ports.pii import PiiHasherPort
@@ -107,6 +110,7 @@ from bioetl.domain.ports.registry_port import (
 from bioetl.domain.ports.resilience import CircuitBreakerPort, RateLimiterPort
 from bioetl.domain.ports.runner import (
     MetricsExtractorPort,
+    PipelineFactoryPort,
     RunnablePort,
     RunnerFactoryPort,
 )
@@ -135,8 +139,10 @@ __all__ = [
     "ContractPolicyPort",
     "DQMonitorPort",
     "DQReportWriterPort",
+    "ExecutorMetricsPort",
     "DomainConfigMapperPort",
     "DataNormalizationPort",
+    "DataSourceFactoryPort",
     "DataSourcePort",
     "DeltaReaderPort",
     "FallbackPolicyPort",
@@ -162,6 +168,7 @@ __all__ = [
     "MetadataWriterPort",
     "MetricsExtractorPort",
     "MetricsPort",
+    "MetricsServerPort",
     "NoOpAudit",
     "NoOpMemoryMonitor",
     "NoOpMetadataWriter",
@@ -170,6 +177,7 @@ __all__ = [
     "NoOpTracing",
     "PiiHasherPort",
     "PipelineConfigLoaderPort",
+    "PipelineFactoryPort",
     "PipelineRegistryPort",
     "PipelineSettingsPort",
     "PipelineYamlConfigPort",

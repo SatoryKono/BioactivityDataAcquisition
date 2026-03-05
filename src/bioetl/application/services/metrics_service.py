@@ -14,9 +14,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Protocol, runtime_checkable
+from typing import TYPE_CHECKING
 
 from bioetl.domain.exceptions import BioETLError, MetricsServerError
+from bioetl.domain.ports import MetricsServerPort
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -37,47 +38,6 @@ _METRICS_START_ERRORS = (
     ValueError,
     TypeError,
 )
-
-
-@runtime_checkable
-class MetricsServerPort(Protocol):
-    """Protocol for metrics server operations.
-
-    Abstracts the metrics server infrastructure for application layer.
-    """
-
-    def start(
-        self,
-        port: int,
-        *,
-        fail_fast: bool = False,
-        retry_count: int = 3,
-        retry_delay: float = 1.0,
-    ) -> bool:
-        """Start the metrics server.
-
-        Args:
-            port: Port to bind the HTTP server.
-            fail_fast: If True, raise on failure.
-            retry_count: Number of retries for transient errors.
-            retry_delay: Delay between retries in seconds.
-
-        Returns:
-            True if server started successfully, False otherwise.
-        """
-        ...
-
-    def is_running(self) -> bool:
-        """Check if the server is currently running.
-
-        Returns:
-            True if the condition is met, False otherwise.
-        """
-        ...
-
-    def reset(self) -> None:
-        """Reset server state (for testing purposes)."""
-        ...
 
 
 @dataclass(frozen=True, slots=True)

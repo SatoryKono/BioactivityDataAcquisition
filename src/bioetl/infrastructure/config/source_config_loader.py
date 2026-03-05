@@ -8,7 +8,6 @@ Compatibility migration details are delegated to source normalizers.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
 
 import yaml
 

@@ -196,12 +196,6 @@ registries:
       reason: Baseline exemption migrated from architecture tests (file_size_limits).
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-    src/bioetl/domain/models/metadata.py:
-      value: 880
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (file_size_limits).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption entry.
     src/bioetl/domain/normalization.py:
       value: 390
       owner: '@bioetl-architecture'
