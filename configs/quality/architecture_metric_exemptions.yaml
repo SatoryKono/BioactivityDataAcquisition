@@ -211,11 +211,11 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption entry.
     src/bioetl/domain/ports/storage.py:
-      value: 450
+      value: 530
       owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (file_size_limits).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption entry.
+      reason: ISP decomposition into 6 narrow ports + aggregate facade (P1 anti-fat-port).
+      expires_on: '2026-06-30'
+      removal_step: Move narrow ports to separate files if further growth occurs.
     src/bioetl/domain/registry/publication.py:
       value: 341
       owner: '@bioetl-architecture'
@@ -422,12 +422,6 @@ registries:
       reason: Baseline exemption migrated from architecture tests (function_length).
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-    bootstrap_composite_runner:
-      value: 95
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (function_length).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption entry.
     merge:
       value: 120
       owner: '@bioetl-architecture'
@@ -436,12 +430,6 @@ registries:
       removal_step: Refactor target to satisfy default metric and remove this exemption entry.
     process_batch:
       value: 70
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (function_length).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-    register_provider:
-      value: 100
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (function_length).
       expires_on: '2026-04-30'
@@ -695,12 +683,6 @@ registries:
       removal_step: Refactor target to satisfy default metric and remove this exemption entry.
     QuarantineEntry:
       value: 430
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (class_size).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-    StoragePort:
-      value: 410
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (class_size).
       expires_on: '2026-04-30'

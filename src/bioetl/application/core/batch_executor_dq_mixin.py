@@ -133,6 +133,15 @@ class _BatchExecutorDQMixin:
         ) or error.__class__.__module__.startswith("polars.")
 
     @staticmethod
+    def _stringify_value(value: object, keys_to_stringify: set[str], key: str) -> object:
+        """Stringify a value if its key requires normalization."""
+        if key not in keys_to_stringify or value is None:
+            return value
+        if isinstance(value, (dict, list, tuple)):
+            return json.dumps(value, default=str, sort_keys=True)
+        return str(value)
+
+    @staticmethod
     def _normalize_records_for_polars(
         records: list[BronzeRecord] | list[GoldRecord],
     ) -> list[dict[str, object]] | None:
@@ -158,20 +167,11 @@ class _BatchExecutorDQMixin:
         if not keys_to_stringify:
             return None
 
-        normalized: list[dict[str, object]] = []
-        for record in records:
-            normalized_record: dict[str, object] = {}
-            for key, value in record.items():
-                if key not in keys_to_stringify or value is None:
-                    normalized_record[key] = value
-                elif isinstance(value, (dict, list, tuple)):
-                    normalized_record[key] = json.dumps(
-                        value, default=str, sort_keys=True
-                    )
-                else:
-                    normalized_record[key] = str(value)
-            normalized.append(normalized_record)
-        return normalized
+        _sv = BatchExecutorDQMixin._stringify_value
+        return [
+            {key: _sv(value, keys_to_stringify, key) for key, value in record.items()}
+            for record in records
+        ]
 
     def _get_dq_thresholds(self) -> tuple[float, float]:
         """Resolve DQ thresholds from config, falling back to defaults."""

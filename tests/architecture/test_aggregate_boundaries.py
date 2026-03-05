@@ -20,6 +20,32 @@ from pathlib import Path
 import pytest
 
 
+def _read_aggregate_content(aggregates_dir: Path, filename: str) -> str:
+    """Read aggregate content including sub-module facades.
+
+    If a file is a re-export facade (e.g., batch.py), also reads the
+    corresponding private sub-modules (_batch_*.py) and concatenates
+    their content for architecture checks.
+    """
+    file_path = aggregates_dir / filename
+    if not file_path.exists():
+        return ""
+    content = file_path.read_text(encoding="utf-8")
+    # If the file is a facade (contains 'Re-export facade'), also read sub-modules
+    if "Re-export facade" in content:
+        stem = file_path.stem  # e.g., "batch" or "quarantine_entry"
+        for sub_module in sorted(aggregates_dir.glob(f"_{stem}*.py")):
+            content += "\n" + sub_module.read_text(encoding="utf-8")
+        # Also check for alternate naming pattern (e.g., _quarantine_value_objects)
+        alt_stem = stem.split("_")[0] if "_" in stem else stem
+        if alt_stem != stem:
+            for sub_module in sorted(aggregates_dir.glob(f"_{alt_stem}*.py")):
+                sub_content = sub_module.read_text(encoding="utf-8")
+                if sub_content not in content:
+                    content += "\n" + sub_content
+    return content
+
+
 class TestAggregateBoundaryIsolation:
     """Tests ensuring aggregates don't reference each other directly."""
 
@@ -57,6 +83,9 @@ class TestAggregateBoundaryIsolation:
 
         for py_file in aggregates_dir.glob("*.py"):
             if py_file.name in ("__init__.py", "events.py"):
+                continue
+            # Skip private sub-modules (part of their parent aggregate)
+            if py_file.name.startswith("_"):
                 continue
 
             other_aggregates = set()
@@ -108,12 +137,18 @@ class TestAggregateBoundaryIsolation:
         for py_file in aggregates_dir.glob("*.py"):
             if py_file.name in ("__init__.py", "events.py"):
                 continue
+            # Skip private sub-modules (part of their parent aggregate)
+            if py_file.name.startswith("_"):
+                continue
 
-            with py_file.open(encoding="utf-8") as f:
-                try:
-                    tree = ast.parse(f.read(), filename=str(py_file))
-                except SyntaxError:
-                    continue
+            # Read full content including sub-modules for AST parsing
+            full_content = _read_aggregate_content(
+                aggregates_dir, py_file.name
+            )
+            try:
+                tree = ast.parse(full_content, filename=str(py_file))
+            except SyntaxError:
+                continue
 
             current_file_class = None
             if py_file.name == "batch.py":
@@ -203,18 +238,16 @@ class TestAggregateInvariantProtection:
         }
 
         # Check that value objects inside aggregates validate in __post_init__
-        for py_file in aggregates_dir.glob("*.py"):
-            if py_file.name not in expected_validators:
+        for filename in expected_validators:
+            content = _read_aggregate_content(aggregates_dir, filename)
+            if not content:
                 continue
 
-            with py_file.open(encoding="utf-8") as f:
-                content = f.read()
-
             # Check for __post_init__ in value objects
-            for class_name in expected_validators[py_file.name]:
+            for class_name in expected_validators[filename]:
                 if class_name in content:
                     assert "__post_init__" in content or "def _validate" in content, (
-                        f"{py_file.name}: {class_name} should validate "
+                        f"{filename}: {class_name} should validate "
                         "invariants in __post_init__ or _validate_invariants()"
                     )
 
@@ -234,12 +267,17 @@ class TestAggregateInvariantProtection:
         for py_file in aggregates_dir.glob("*.py"):
             if py_file.name in ("__init__.py", "events.py"):
                 continue
+            # Skip private sub-modules (part of their parent aggregate)
+            if py_file.name.startswith("_"):
+                continue
 
-            with py_file.open(encoding="utf-8") as f:
-                try:
-                    tree = ast.parse(f.read(), filename=str(py_file))
-                except SyntaxError:
-                    continue
+            full_content = _read_aggregate_content(
+                aggregates_dir, py_file.name
+            )
+            try:
+                tree = ast.parse(full_content, filename=str(py_file))
+            except SyntaxError:
+                continue
 
             for node in ast.walk(tree):
                 if isinstance(node, ast.ClassDef):
@@ -292,12 +330,9 @@ class TestDomainEventsForCoordination:
         }
 
         for py_file, events in required_patterns.items():
-            file_path = aggregates_dir / py_file
-            if not file_path.exists():
+            content = _read_aggregate_content(aggregates_dir, py_file)
+            if not content:
                 continue
-
-            with file_path.open(encoding="utf-8") as f:
-                content = f.read()
 
             for event in events:
                 assert event in content, (
@@ -317,12 +352,9 @@ class TestDomainEventsForCoordination:
         aggregate_files = ["batch.py", "pipeline_run.py", "quarantine_entry.py"]
 
         for filename in aggregate_files:
-            file_path = aggregates_dir / filename
-            if not file_path.exists():
+            content = _read_aggregate_content(aggregates_dir, filename)
+            if not content:
                 continue
-
-            with file_path.open(encoding="utf-8") as f:
-                content = f.read()
 
             assert "def collect_events(self)" in content, (
                 f"{filename} should have collect_events() method "
@@ -350,12 +382,9 @@ class TestAggregateConsistencyBoundary:
         }
 
         for filename, class_name in expected_slots.items():
-            file_path = aggregates_dir / filename
-            if not file_path.exists():
+            content = _read_aggregate_content(aggregates_dir, filename)
+            if not content:
                 continue
-
-            with file_path.open(encoding="utf-8") as f:
-                content = f.read()
 
             # Check for __slots__ in the aggregate class
             assert "__slots__" in content, (
@@ -380,12 +409,9 @@ class TestAggregateConsistencyBoundary:
         }
 
         for filename, properties in id_properties.items():
-            file_path = aggregates_dir / filename
-            if not file_path.exists():
+            content = _read_aggregate_content(aggregates_dir, filename)
+            if not content:
                 continue
-
-            with file_path.open(encoding="utf-8") as f:
-                content = f.read()
 
             for prop in properties:
                 # Should have @property but not setter

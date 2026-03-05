@@ -19,7 +19,7 @@ __all__ = ["DateExtractor", "MedlineDateParser", "NormalizedDate", "RawDate"]
 
 import calendar
 import re
-from typing import ClassVar, TypedDict
+from typing import ClassVar, TypedDict, cast
 from xml.etree.ElementTree import Element
 
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
@@ -234,7 +234,7 @@ class DateExtractor(BaseFieldExtractor):
 
         return None
 
-    def normalize(self, raw_value: RawDate) -> NormalizedDate:
+    def normalize(self, raw_value: object) -> NormalizedDate:
         """Normalize date components into ISO format.
 
         Args:
@@ -243,9 +243,10 @@ class DateExtractor(BaseFieldExtractor):
         Returns:
             Dict with formatted date_str and year_int.
         """
-        year = raw_value.get("year")
-        month = raw_value.get("month")
-        day = raw_value.get("day")
+        raw_date = cast("RawDate", raw_value)
+        year = raw_date.get("year")
+        month = raw_date.get("month")
+        day = raw_date.get("day")
 
         date_str = self._format_date(year, month, day)
         year_int = int(year) if year and year.isdigit() else None

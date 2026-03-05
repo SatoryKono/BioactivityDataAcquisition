@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
     from bioetl.domain.composite.config import MergeConfig
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
-    from bioetl.domain.ports import LoggerPort, StoragePort
+    from bioetl.domain.ports import LoggerPort, MergedStoragePort
 
 
 class MergeOutputWriterMixin:
@@ -17,7 +17,7 @@ class MergeOutputWriterMixin:
 
     _config: MergeConfig
     _logger: LoggerPort
-    _storage: StoragePort
+    _storage: MergedStoragePort
     _field_group_registry: FieldGroupRegistry | None
     _gold_schema: Any | None  # Any: Pandera DataFrameModel class or instance
 

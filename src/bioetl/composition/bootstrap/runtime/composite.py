@@ -31,6 +31,7 @@ from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service im
     CompositeFilterExtractionService,
 )
 from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
+    CompositeSupportServices,
     CompositeSupportServicesFactory,
 )
 from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger_port
@@ -233,9 +234,42 @@ def bootstrap_composite_runner(
     Returns:
         CompositePipelineRunnerService ready for execution.
     """
-    # CIRCULAR-DEPENDENCY: kept local to avoid entrypoints bootstrap cycle.
-    from bioetl.composition.entrypoints import RunOptions, build_pipeline_context
+    effective_run_id, settings, logger, storage, lock = _bootstrap_runtime_basics(
+        config=config,
+        run_id=run_id,
+    )
+    seed_factory, dependency_factory, enricher_factory = _build_runner_factories(
+        config=config,
+        runtime=runtime,
+        logger=logger,
+    )
+    support_services = _build_support_services(
+        config=config,
+        runtime=runtime,
+        settings=settings,
+        logger=logger,
+        storage=storage,
+        run_id=effective_run_id,
+    )
+    return _create_composite_runner(
+        config=config,
+        runtime=runtime,
+        run_id=effective_run_id,
+        logger=logger,
+        lock=lock,
+        seed_runner_factory=seed_factory,
+        dependencies_runner_factory=dependency_factory,
+        enricher_runner_factory=enricher_factory,
+        support_services=support_services,
+    )
 
+
+def _bootstrap_runtime_basics(
+    *,
+    config: CompositeConfig,
+    run_id: str | None,
+) -> tuple[str, Settings, LoggerPort, object, MemoryLock]:
+    """Build base runtime dependencies shared across composite bootstrap."""
     effective_run_id = run_id or str(uuid4())
     settings = get_settings()
     logger = bootstrap_logger_port(
@@ -245,6 +279,22 @@ def bootstrap_composite_runner(
     )
     storage = bootstrap_storage_adapter(enable_csv_export=True)
     lock = MemoryLock()
+    return effective_run_id, settings, logger, storage, lock
+
+
+def _build_runner_factories(
+    *,
+    config: CompositeConfig,
+    runtime: CompositeRuntimeConfig,
+    logger: LoggerPort,
+) -> tuple[
+    Callable[[], PipelineRunner],
+    Callable[[str, pl.DataFrame], PipelineRunner],
+    Callable[[str, pl.DataFrame], PipelineRunner],
+]:
+    """Build seed/dependency/enricher runner factories for composite phases."""
+    # CIRCULAR-DEPENDENCY: kept local to avoid entrypoints bootstrap cycle.
+    from bioetl.composition.entrypoints import RunOptions, build_pipeline_context
 
     filter_extraction_service = CompositeFilterExtractionService(logger=logger)
     runner_factory_builder = RunnerFactoryBuilderService(
@@ -254,40 +304,65 @@ def bootstrap_composite_runner(
         pipeline_runner_builder=bootstrap_pipeline_runner,
         filter_extraction_service=filter_extraction_service,
     )
-
-    seed_runner_factory = runner_factory_builder.build_seed_factory(
+    seed_factory = runner_factory_builder.build_seed_factory(
         seed_pipeline=config.seed.pipeline,
         seed_limit=runtime.seed_limit,
         bronze_opts=resolve_bronze_opts(runtime, phase_override=None),
     )
-    enricher_runner_factory = runner_factory_builder.build_enricher_factory(
+    enricher_factory = runner_factory_builder.build_enricher_factory(
         enrichers=list(config.enrichers),
         bronze_opts=resolve_bronze_opts(
             runtime,
             phase_override=runtime.cached_bronze_enrichers,
         ),
     )
-    dependencies_runner_factory = runner_factory_builder.build_dependency_factory(
+    dependency_factory = runner_factory_builder.build_dependency_factory(
         dependencies=list(config.dependencies),
         bronze_opts=resolve_bronze_opts(
             runtime,
             phase_override=runtime.cached_bronze_dependencies,
         ),
     )
+    return seed_factory, dependency_factory, enricher_factory
 
-    support_services = CompositeSupportServicesFactory(
+
+def _build_support_services(
+    *,
+    config: CompositeConfig,
+    runtime: CompositeRuntimeConfig,
+    settings: Settings,
+    logger: LoggerPort,
+    storage: object,
+    run_id: str,
+) -> CompositeSupportServices:
+    """Build composite support service bundle consumed by runner facade."""
+    return CompositeSupportServicesFactory(
         config=config,
         runtime=runtime,
         settings=settings,
         logger=logger,
         storage=storage,
-        run_id=effective_run_id,
+        run_id=run_id,
         resolve_gold_schema=_resolve_composite_gold_schema,
         load_field_group_registry=_load_field_group_registry,
         create_dq_report_service=_create_dq_report_service,
         checkpoint_manager_cls=CompositeCheckpointService,
     ).build()
 
+
+def _create_composite_runner(
+    *,
+    config: CompositeConfig,
+    runtime: CompositeRuntimeConfig,
+    run_id: str,
+    logger: LoggerPort,
+    lock: MemoryLock,
+    seed_runner_factory: Callable[[], PipelineRunner],
+    dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
+    enricher_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
+    support_services: CompositeSupportServices,
+) -> CompositePipelineRunnerService:
+    """Create fully wired CompositePipelineRunner service."""
     return CompositePipelineRunner(
         config=config,
         runtime=runtime,
@@ -302,7 +377,7 @@ def bootstrap_composite_runner(
         fsm_state_helper=support_services.fsm_state_helper,
         logger=logger,
         lock=lock,
-        run_id=effective_run_id,
+        run_id=run_id,
         dq_report_service=support_services.dq_report_service,
         quarantine_port=support_services.quarantine_port,
     )

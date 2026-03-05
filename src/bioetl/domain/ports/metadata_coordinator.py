@@ -12,6 +12,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
+from bioetl.domain.types import JsonDict
+
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import (
         BronzeMetadata,

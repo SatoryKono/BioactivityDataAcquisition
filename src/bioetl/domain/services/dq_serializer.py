@@ -1,8 +1,4 @@
-"""DQ report serializer.
-
-Provides serialization of DQ reports to JSON, YAML, and HTML formats.
-This is a domain service that handles format conversion without I/O.
-"""
+"""DQ report serializer: JSON, YAML, HTML format conversion without I/O."""
 
 from __future__ import annotations
 
@@ -40,7 +36,9 @@ def to_dict(obj: object) -> JsonDict:
     return {"value": _serialize_value(obj)}
 
 
-def _serialize_dataclass(value: object) -> JsonDict:
+def _serialize_dataclass(
+    value: Any,  # Any: guarded by _is_dataclass_instance() before calling fields()
+) -> JsonDict:
     """Serialize a dataclass instance to dict."""
     return {
         field.name: _serialize_value(getattr(value, field.name))

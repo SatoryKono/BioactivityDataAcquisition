@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import TYPE_CHECKING, TypeVar
 
 from bioetl.domain.composite.config_parsing import (
@@ -28,7 +29,8 @@ _ConfigT = TypeVar("_ConfigT")
 
 
 def _build_seed_config(
-    seed_data: dict[str, object], seed_cls: type[_ConfigT]
+    seed_data: dict[str, object],
+    seed_cls: Callable[..., _ConfigT],
 ) -> _ConfigT:
     """Build seed config from parsed seed mapping."""
     return seed_cls(
@@ -41,7 +43,7 @@ def _build_seed_config(
 
 def _build_dependency_config(
     dep: dict[str, object],
-    dependency_cls: type[_ConfigT],
+    dependency_cls: Callable[..., _ConfigT],
 ) -> _ConfigT:
     """Build one dependency config from serialized mapping."""
     return dependency_cls(
@@ -65,7 +67,7 @@ def _build_dependency_config(
 
 def _build_dependency_configs(
     dependency_data: list[dict[str, object]],
-    dependency_cls: type[_ConfigT],
+    dependency_cls: Callable[..., _ConfigT],
 ) -> tuple[_ConfigT, ...]:
     """Build dependency config tuple."""
     return tuple(
@@ -75,7 +77,7 @@ def _build_dependency_configs(
 
 def _build_enricher_config(
     enricher: dict[str, object],
-    enricher_cls: type[_ConfigT],
+    enricher_cls: Callable[..., _ConfigT],
 ) -> _ConfigT:
     """Build one enricher config from serialized mapping."""
     return enricher_cls(
@@ -93,7 +95,7 @@ def _build_enricher_config(
 
 def _build_enricher_configs(
     enricher_data: list[dict[str, object]],
-    enricher_cls: type[_ConfigT],
+    enricher_cls: Callable[..., _ConfigT],
 ) -> tuple[_ConfigT, ...]:
     """Build enricher config tuple."""
     return tuple(
@@ -102,7 +104,8 @@ def _build_enricher_configs(
 
 
 def _build_merge_config(
-    merge_data: dict[str, object], merge_cls: type[_ConfigT]
+    merge_data: dict[str, object],
+    merge_cls: Callable[..., _ConfigT],
 ) -> _ConfigT:
     """Build merge config from serialized mapping."""
     return merge_cls(

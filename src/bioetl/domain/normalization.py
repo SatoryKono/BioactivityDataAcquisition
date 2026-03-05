@@ -6,6 +6,7 @@ REFACTOR-004: Domain logic separation from use-case layer.
 from __future__ import annotations
 
 import re
+from collections.abc import Sequence
 from datetime import date
 from html import unescape
 from typing import Any  # Any: used for list[Any] in JSON parsing results
@@ -325,7 +326,7 @@ def _filter_valid_strings(items: list[object]) -> list[str]:
     return [str(a).strip() for a in items if a is not None and str(a).strip()]
 
 
-def _parse_authors_from_list(authors: list[object]) -> list[str]:
+def _parse_authors_from_list(authors: Sequence[object]) -> list[str]:
     """Parse author list, filtering non-strings and empty values."""
     return [a.strip() for a in authors if isinstance(a, str) and a.strip()]
 
