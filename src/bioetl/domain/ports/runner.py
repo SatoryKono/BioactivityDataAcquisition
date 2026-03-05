@@ -8,10 +8,27 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
-    from bioetl.domain.context import PipelineRunContext
+    import pyarrow as pa
+
+    from bioetl.application.core.base import BasePipeline
+    from bioetl.application.core.runner import PipelineRunner
+    from bioetl.composition.observability import ObservabilityBundle
+    from bioetl.domain.config import RuntimeConfig
+    from bioetl.domain.context import CachedBronzeContext, PipelineRunContext
+    from bioetl.domain.filtering import InputFilterConfig
+    from bioetl.domain.ports.observability import (
+        DQMonitorPort,
+        LoggerPort,
+        MetricsPort,
+        TracingPort,
+    )
+    from bioetl.domain.types import RunID
+    from bioetl.infrastructure.config import Settings
+    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 __all__ = [
     "MetricsExtractorPort",
+    "PipelineFactoryPort",
     "RunnablePort",
     "RunnerFactoryPort",
 ]
@@ -107,5 +124,72 @@ class MetricsExtractorPort(Protocol):
             - records_silver: Records written to Silver
             - records_gold: Records written to Gold
             - records_quarantined: Records sent to quarantine
+        """
+        ...
+
+
+@runtime_checkable
+class PipelineFactoryPort(Protocol):
+    """Protocol for pipeline factories."""
+
+    pipeline_name: str
+    silver_schema: pa.Schema | None
+    pandera_silver_schema: object | None
+
+    def create_with_services(
+        self,
+        run_id: RunID,
+        runtime: RuntimeConfig,
+        settings: Settings,
+        logger: LoggerPort,
+        config: PipelineYamlConfig | None = ...,
+        filter_config: InputFilterConfig | None = ...,
+        tracer: TracingPort | None = ...,
+        dq_monitor: DQMonitorPort | None = ...,
+        metrics: MetricsPort | None = ...,
+        cached_bronze: CachedBronzeContext | None = ...,
+    ) -> BasePipeline:
+        """Create pipeline with services.
+
+        Args:
+            run_id: Pipeline run identifier.
+            runtime: Runtime configuration.
+            settings: Settings object.
+            logger: Logger instance.
+            config: Configuration object.
+            filter_config: Configuration for filter.
+            tracer: Tracing instance.
+            dq_monitor: Dq monitor.
+            metrics: Metrics collector instance.
+            cached_bronze: Cached bronze.
+
+        Returns:
+            Newly created BasePipeline instance.
+        """
+        ...
+
+    def create_runner(
+        self,
+        run_id: RunID,
+        runtime: RuntimeConfig,
+        settings: Settings,
+        observability: ObservabilityBundle,
+        filter_config: InputFilterConfig | None = None,
+        config: PipelineYamlConfig | None = None,
+        cached_bronze: CachedBronzeContext | None = None,
+    ) -> PipelineRunner:
+        """Create pipeline runner.
+
+        Args:
+            run_id: Pipeline run identifier.
+            runtime: Runtime configuration.
+            settings: Settings object.
+            observability: Observability.
+            filter_config: Configuration for filter.
+            config: Configuration object.
+            cached_bronze: Cached bronze.
+
+        Returns:
+            Newly created PipelineRunner instance.
         """
         ...

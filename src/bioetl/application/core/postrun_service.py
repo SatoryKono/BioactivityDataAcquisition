@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import TYPE_CHECKING, Protocol, runtime_checkable
+from typing import TYPE_CHECKING
 
 from bioetl.application.core.postrun_cleanup_orchestrator import (
     PostrunCleanupService,
@@ -29,6 +29,7 @@ from bioetl.application.core.postrun_metadata_version_resolver import (
 from bioetl.application.services.data_quality_service import DataQualityService
 from bioetl.application.services.medallion_types import VacuumResult
 from bioetl.domain.exceptions import BioETLError
+from bioetl.domain.ports import ExecutorMetricsPort
 from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 
 if TYPE_CHECKING:
@@ -53,20 +54,6 @@ if TYPE_CHECKING:
         StoragePort,
         TracingPort,
     )
-
-
-@runtime_checkable
-class ExecutorMetricsPort(Protocol):
-    """Protocol for executors providing batch metrics.
-
-    Both PipelineExecutor and BatchExecutor implement this protocol.
-    """
-
-    records_fetched: int
-    records_bronze: int
-    records_silver: int
-    records_gold: int
-    records_quarantined: int
 
 
 def _create_postrun_cleanup_service(

@@ -18,10 +18,10 @@ __all__ = [
 
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
+from typing import TYPE_CHECKING
 
 from bioetl.domain.exceptions import BioETLError, NetworkError
-from bioetl.domain.ports import HealthCheckPort, HealthCheckResult
+from bioetl.domain.ports import DataSourceFactoryPort, HealthCheckPort, HealthCheckResult
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -35,37 +35,6 @@ _HEALTH_SERVICE_ERRORS = (
     ValueError,
     TypeError,
 )
-
-
-@runtime_checkable
-class DataSourceFactoryPort(Protocol):
-    """Protocol for data source factory operations.
-
-    Abstracts data source creation for health checking.
-    """
-
-    @staticmethod
-    def list_providers() -> list[str]:
-        """List available provider names.
-
-        Returns:
-            Collection of providers.
-        """
-        ...
-
-    @staticmethod
-    def create(
-        provider: str,
-    ) -> Any:  # Any: returns different adapter types per provider
-        """Create a data source adapter for the given provider.
-
-        Args:
-            provider: Data provider name.
-
-        Returns:
-            Newly created Any instance.
-        """
-        ...
 
 
 @dataclass(frozen=True, slots=True)

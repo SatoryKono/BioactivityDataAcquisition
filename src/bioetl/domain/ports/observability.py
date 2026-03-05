@@ -479,3 +479,58 @@ class DQMonitorPort(Protocol):
             metric_name: Name of the metric.
         """
         ...
+
+
+@runtime_checkable
+class ExecutorMetricsPort(Protocol):
+    """Protocol for executors providing batch metrics.
+
+    Both PipelineExecutor and BatchExecutor implement this protocol.
+    """
+
+    records_fetched: int
+    records_bronze: int
+    records_silver: int
+    records_gold: int
+    records_quarantined: int
+
+
+@runtime_checkable
+class MetricsServerPort(Protocol):
+    """Protocol for metrics server operations.
+
+    Abstracts the metrics server infrastructure for application layer.
+    """
+
+    def start(
+        self,
+        port: int,
+        *,
+        fail_fast: bool = False,
+        retry_count: int = 3,
+        retry_delay: float = 1.0,
+    ) -> bool:
+        """Start the metrics server.
+
+        Args:
+            port: Port to bind the HTTP server.
+            fail_fast: If True, raise on failure.
+            retry_count: Number of retries for transient errors.
+            retry_delay: Delay between retries in seconds.
+
+        Returns:
+            True if server started successfully, False otherwise.
+        """
+        ...
+
+    def is_running(self) -> bool:
+        """Check if the server is currently running.
+
+        Returns:
+            True if the condition is met, False otherwise.
+        """
+        ...
+
+    def reset(self) -> None:
+        """Reset server state (for testing purposes)."""
+        ...
