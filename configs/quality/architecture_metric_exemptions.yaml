@@ -76,12 +76,6 @@ registries:
       reason: Baseline exemption migrated from architecture tests (file_size_limits).
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-    src/bioetl/composition/factories/storage_factory.py:
-      value: 700
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (file_size_limits).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption entry.
     src/bioetl/domain/aggregates/batch.py:
       value: 553
       owner: '@bioetl-architecture'
@@ -533,12 +527,6 @@ registries:
       reason: Baseline exemption migrated from architecture tests (function_complexity).
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-    src/bioetl/domain/services/schema_metadata_extractor.py::_extract_schema_columns:
-      value: 7
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (function_complexity).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption entry.
     '253:0: ''validate_molecular_weight''':
       owner: '@bioetl-architecture'
       expires_on: '2026-04-30'
@@ -546,12 +534,6 @@ registries:
       value: 7
       reason: Restored exemption after governance cleanup (CC=6 > 5).
     '92:4: ''NormalizationService.normalize_activity''':
-      owner: '@bioetl-architecture'
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-      value: 8
-      reason: Restored exemption after governance cleanup (CC=7 > 5).
-    '87:0: ''_extract_schema_columns''':
       owner: '@bioetl-architecture'
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption entry.
@@ -1076,12 +1058,6 @@ registries:
       removal_step: Refactor target to satisfy default metric and remove this exemption entry.
     _extract_name_from_item:
       value: 7
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (domain_complexity).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-    _extract_schema_columns:
-      value: 8
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (domain_complexity).
       expires_on: '2026-04-30'

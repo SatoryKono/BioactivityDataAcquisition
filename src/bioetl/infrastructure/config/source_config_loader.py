@@ -2,7 +2,7 @@
 
 This module keeps source loading flow explicit and narrow:
 read -> normalize -> validate -> map.
-Legacy migration details are delegated to ``legacy_normalizers``.
+Compatibility migration details are delegated to source normalizers.
 """
 
 from __future__ import annotations
@@ -13,7 +13,9 @@ from typing import Any
 import yaml
 
 from bioetl.domain.types import JsonDict
-from bioetl.infrastructure.legacy_normalizers.source import normalize_source_config
+from bioetl.infrastructure.config.source_normalizers.source import (
+    normalize_source_config,
+)
 from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
 

@@ -21,10 +21,11 @@ __all__ = ["FileAuditAdapter"]
 import asyncio
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.domain.ports import AuditEntry, AuditLayer, AuditOperation
 from bioetl.domain.serialization import deserialize_from_json, serialize_to_json
+from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -108,8 +109,7 @@ class FileAuditAdapter:
         if self._closed:
             raise RuntimeError("FileAuditAdapter has been closed")
 
-        loop = asyncio.get_running_loop()
-        await loop.run_in_executor(None, self._write_entry_sync, entry)
+        await asyncio.to_thread(self._write_entry_sync, entry)
 
         self.logger.debug(
             "audit_entry_logged",
@@ -340,9 +340,7 @@ class FileAuditAdapter:
         if self._closed:
             raise RuntimeError("FileAuditAdapter has been closed")
 
-        loop = asyncio.get_running_loop()
-        return await loop.run_in_executor(
-            None,
+        return await asyncio.to_thread(
             self._read_entries_sync,
             run_id,
             layer,

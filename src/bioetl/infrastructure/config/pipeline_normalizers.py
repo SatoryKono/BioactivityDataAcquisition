@@ -1,7 +1,7 @@
-"""Legacy pipeline-configuration normalization utilities.
+"""Pipeline-configuration normalization utilities.
 
-This module encapsulates legacy schema-reference migration concerns so
-pipeline loaders can stay focused on read -> normalize -> validate -> map.
+Encapsulates schema-reference migration concerns so pipeline loaders can keep
+read -> normalize -> validate -> map orchestration explicit.
 """
 
 from __future__ import annotations
@@ -120,15 +120,7 @@ def apply_pipeline_schema_normalization(
     config_path: Path,
     unified_schema: JsonDict | None = None,  # Any: YAML values are heterogeneous
 ) -> None:
-    """Normalize schema references across new and legacy pipeline formats.
-
-    Priority:
-    1. explicit inline column_groups
-    2. unified schema section
-    3. data_schema_file (legacy alias, explicit value)
-    4. schema_file
-    5. column_groups_file (legacy fallback)
-    """
+    """Normalize schema references across new and legacy pipeline formats."""
     if "column_groups" in entity_config:
         return
 
