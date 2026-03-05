@@ -70,22 +70,24 @@ registries:
       reason: Baseline exemption migrated from architecture tests (file_size_limits).
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-    src/bioetl/domain/aggregates/batch.py:
-      value: 553
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (file_size_limits).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption entry.
     src/bioetl/domain/aggregates/pipeline_run.py:
       value: 600
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (file_size_limits).
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-    src/bioetl/domain/aggregates/quarantine_entry.py:
-      value: 531
+    src/bioetl/domain/aggregates/_batch_aggregate.py:
+      value: 475
       owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (file_size_limits).
+      reason: DDD aggregate root class (Batch) — single class, cannot split further.
+        RF-046 reduced from 553 LOC (batch.py) to 472 LOC via sub-module extraction.
+      expires_on: '2026-04-30'
+      removal_step: Refactor target to satisfy default metric and remove this exemption entry.
+    src/bioetl/domain/aggregates/_quarantine_aggregate.py:
+      value: 450
+      owner: '@bioetl-architecture'
+      reason: DDD aggregate root class (QuarantineEntry) — single class, cannot split further.
+        RF-047 reduced from 531 LOC (quarantine_entry.py) to 446 LOC via sub-module extraction.
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption entry.
     src/bioetl/domain/composite/field_groups.py:
@@ -292,12 +294,6 @@ registries:
       reason: Baseline exemption migrated from architecture tests (file_size_limits).
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-    src/bioetl/domain/value_objects/chemical.py:
-      value: 600
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (file_size_limits).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption entry.
     src/bioetl/domain/value_objects/dq_metrics.py:
       value: 427
       owner: '@bioetl-architecture'
@@ -476,12 +472,6 @@ registries:
       removal_step: Refactor target to satisfy default metric and remove this exemption entry.
     validate:
       value: 95
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (function_length).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-    wrap_error:
-      value: 90
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (function_length).
       expires_on: '2026-04-30'

@@ -1,7 +1,17 @@
 """Storage port for Medallion layer operations.
 
-This port abstracts the underlying storage mechanism (file system, data lake)
-allowing the application to write data to Bronze/Silver/Gold layers.
+This module defines narrow, layer-specific storage ports following the
+Interface Segregation Principle (ISP). Each port covers a single concern:
+
+- BronzeStoragePort: Bronze layer write and cleanup
+- SilverStoragePort: Silver layer write, read, and clear
+- GoldStoragePort: Gold layer write and clear
+- MergedStoragePort: Composite pipeline merged writes
+- StorageMaintenancePort: Cross-layer maintenance (vacuum, optimize, archive, path)
+- StorageLifecyclePort: Resource lifecycle (aclose, health_check)
+
+StoragePort is an aggregate facade inheriting all narrow ports for backward
+compatibility. New consumers SHOULD depend on the narrowest port they need.
 
 Note:
     Lock validation is performed at Application layer (BatchWriter)
@@ -36,17 +46,26 @@ if TYPE_CHECKING:
     from bioetl.domain.models.metadata import SourceMetadata
 
 __all__ = [
+    "BronzeStoragePort",
+    "GoldStoragePort",
+    "MergedStoragePort",
+    "SilverStoragePort",
+    "StorageLifecyclePort",
+    "StorageMaintenancePort",
     "StoragePort",
 ]
 
 
-@runtime_checkable
-class StoragePort(Protocol):
-    """Port for data storage (Bronze, Silver, Gold layers).
+# ---------------------------------------------------------------------------
+# Narrow layer-specific ports
+# ---------------------------------------------------------------------------
 
-    This interface abstracts the underlying storage mechanism (e.g., file system,
-    data lake, data warehouse), allowing the application to write data to
-    different layers without knowing the implementation details.
+
+@runtime_checkable
+class BronzeStoragePort(Protocol):
+    """Port for Bronze layer storage operations.
+
+    Covers raw data ingestion and Bronze retention cleanup.
     """
 
     async def write_bronze(
@@ -80,12 +99,32 @@ class StoragePort(Protocol):
         Returns:
             BronzeWriteResult: Result containing path, record count, sizes,
                 and checksum for downstream lineage tracking.
-
-        Note:
-            Lock validation is performed at Application layer (BatchWriter)
-            per RULES.md §4.6 Safety Guard.
         """
         ...
+
+    async def cleanup_bronze(
+        self,
+        cutoff_date: datetime,
+        dry_run: bool = False,
+    ) -> dict[str, int]:
+        """Remove Bronze files older than cutoff date (RULES.md §2.1 retention).
+
+        Args:
+            cutoff_date: Files older than this date will be removed.
+            dry_run: If True, only count what would be removed.
+
+        Returns:
+            Dict with cleanup stats (files_removed, bytes_freed, directories_removed).
+        """
+        ...
+
+
+@runtime_checkable
+class SilverStoragePort(Protocol):
+    """Port for Silver layer storage operations.
+
+    Covers Silver write (with schema), read-back, and layer clear.
+    """
 
     async def write_silver(
         self,
@@ -119,6 +158,7 @@ class StoragePort(Protocol):
             bronze_refs: Optional list of BronzeWriteResult from Bronze writes.
                 If provided, bronze_paths will be populated in Silver metadata
                 for complete lineage tracking (REQ-LINEAGE-001).
+            key_nullability_rules: Optional rules for key nullability handling.
 
         Returns:
             SilverWriteResult with table info and Delta version for Gold lineage tracking
@@ -126,12 +166,52 @@ class StoragePort(Protocol):
 
         Raises:
             SchemaEvolutionError: If schema drift detected and on_schema_mismatch='error'
-
-        Note:
-            Lock validation is performed at Application layer (BatchWriter)
-            per RULES.md §4.6 Safety Guard.
         """
         ...
+
+    async def read_silver(
+        self,
+        table_name: str,
+        columns: list[str] | None = None,
+    ) -> list[
+        BronzeRecord
+    ]:  # BronzeRecord: read-back Silver records share the same shape
+        """Read records from a Silver layer Delta table.
+
+        Args:
+            table_name: The name of the table to read (e.g., 'chembl/activity').
+            columns: Optional list of columns to select. If None, reads all columns.
+
+        Returns:
+            List of dictionaries, where each dictionary represents a record.
+
+        Raises:
+            FileNotFoundError: If the table does not exist.
+        """
+        ...
+
+    async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
+        """Clear Silver layer data for a specific table.
+
+        Clears both Delta tables and CSV exports (if configured).
+        Should only be called for rebuild/backfill runs, NOT for incremental.
+
+        Args:
+            table_name: The name of the table to clear.
+            dry_run: If True, only count what would be deleted.
+
+        Returns:
+            Count of cleared items (tables + files).
+        """
+        ...
+
+
+@runtime_checkable
+class GoldStoragePort(Protocol):
+    """Port for Gold layer storage operations.
+
+    Covers Gold write (with Pandera validation) and layer clear.
+    """
 
     async def write_gold(
         self,
@@ -156,6 +236,7 @@ class StoragePort(Protocol):
             schema: Pandera DataFrameSchema for strict validation (required).
             primary_keys: Optional list of column names for sorting/deduplication.
             mode: The write mode (e.g., 'overwrite', 'append', 'scd2').
+            scd_config: Optional SCD2 configuration.
             column_order: Optional explicit column order to apply.
             ingestion_ts: Ingestion timestamp from application layer
                          (single source of time per ADR-014). Required for audit.
@@ -166,49 +247,32 @@ class StoragePort(Protocol):
 
         Raises:
             ValueError: If schema validation fails (strict=True required).
-
-        Note:
-            Lock validation is performed at Application layer (BatchWriter)
-            per RULES.md §4.6 Safety Guard.
         """
         ...
 
-    def get_table_path(
-        self,
-        table_name: str,
-        layer: Literal["silver", "gold"] = "silver",
-    ) -> Path:
-        """Resolve the full path to a Delta table.
+    async def clear_gold(self, table_name: str, dry_run: bool = False) -> int:
+        """Clear Gold layer data for a specific table.
+
+        Clears both Delta tables and CSV exports (if configured).
+        Should only be called for rebuild/backfill runs, NOT for incremental.
 
         Args:
-            table_name: Table name (e.g., 'chembl.activity').
-            layer: Target layer path resolver. Defaults to ``"silver"``.
+            table_name: The name of the table to clear.
+            dry_run: If True, only count what would be deleted.
 
         Returns:
-            Path object pointing to the table directory.
+            Count of cleared items (tables + files).
         """
         ...
 
-    async def read_silver(
-        self,
-        table_name: str,
-        columns: list[str] | None = None,
-    ) -> list[
-        BronzeRecord
-    ]:  # BronzeRecord: read-back Silver records share the same shape
-        """Read records from a Silver layer Delta table.
 
-        Args:
-            table_name: The name of the table to read (e.g., 'chembl/activity').
-            columns: Optional list of columns to select. If None, reads all columns.
+@runtime_checkable
+class MergedStoragePort(Protocol):
+    """Port for composite pipeline merged writes.
 
-        Returns:
-            List of dictionaries, where each dictionary represents a record.
-
-        Raises:
-            FileNotFoundError: If the table does not exist.
-        """
-        ...
+    Used by composite pipelines where schema is dynamically determined
+    by the merge operation, bypassing strict schema validation.
+    """
 
     async def write_silver_merged(
         self,
@@ -234,10 +298,6 @@ class StoragePort(Protocol):
             preserve_column_order: If True, skip canonical_column_order()
                 and preserve the column order from records (e.g. semantic
                 ordering applied by ColumnOrderer in composite pipelines).
-
-        Note:
-            This method bypasses strict schema validation since merged data
-            has a dynamically determined schema from multiple sources.
         """
         ...
 
@@ -268,88 +328,30 @@ class StoragePort(Protocol):
                 and preserve the column order from records (e.g. semantic
                 ordering applied by ColumnOrderer in composite pipelines).
             schema: Optional Pandera schema used for strict contract validation.
-
-        Note:
-            When schema is None, this method bypasses Pandera validation.
         """
         ...
 
-    async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
-        """Clear Silver layer data for a specific table.
 
-        Clears both Delta tables and CSV exports (if configured).
-        Should only be called for rebuild/backfill runs, NOT for incremental.
+@runtime_checkable
+class StorageMaintenancePort(Protocol):
+    """Port for cross-layer storage maintenance operations.
+
+    Covers path resolution, vacuum, optimize, archive, and bulk clear.
+    """
+
+    def get_table_path(
+        self,
+        table_name: str,
+        layer: Literal["silver", "gold"] = "silver",
+    ) -> Path:
+        """Resolve the full path to a Delta table.
 
         Args:
-            table_name: The name of the table to clear.
-            dry_run: If True, only count what would be deleted.
+            table_name: Table name (e.g., 'chembl.activity').
+            layer: Target layer path resolver. Defaults to ``"silver"``.
 
         Returns:
-            Count of cleared items (tables + files).
-        """
-        ...
-
-    async def clear_gold(self, table_name: str, dry_run: bool = False) -> int:
-        """Clear Gold layer data for a specific table.
-
-        Clears both Delta tables and CSV exports (if configured).
-        Should only be called for rebuild/backfill runs, NOT for incremental.
-
-        Args:
-            table_name: The name of the table to clear.
-            dry_run: If True, only count what would be deleted.
-
-        Returns:
-            Count of cleared items (tables + files).
-        """
-        ...
-
-    async def aclose(self) -> None:
-        """Gracefully close the storage connection and release resources."""
-        ...
-
-    async def health_check(self) -> HealthStatus:
-        """Check storage accessibility and basic write capability.
-
-        Validates:
-        - Bronze, Silver, Gold directories exist or can be created
-        - Directories are writable
-
-        Returns:
-            HealthStatus indicating storage health:
-            - HEALTHY: All layers accessible and writable
-            - DEGRADED: Partial access (some layers unavailable)
-            - UNHEALTHY: Storage completely unavailable
-        """
-        ...
-
-    async def clear_csv(self, table_name: str | None = None) -> int:
-        """Clear CSV export files for Silver and Gold layers.
-
-        Should be called at the start of a pipeline run to ensure
-        fresh CSV exports without duplicates from previous runs.
-
-        Args:
-            table_name: If provided, only clear CSV for this table.
-                       If None, clear all CSV files.
-
-        Returns:
-            Total number of files deleted.
-        """
-        ...
-
-    async def clear_delta(self, table_name: str | None = None) -> int:
-        """Clear Delta tables for Silver and Gold layers.
-
-        Should be called at the start of a pipeline run to ensure
-        fresh data without duplicates from previous runs.
-
-        Args:
-            table_name: If provided, only clear Delta table for this table.
-                       If None, clear all Delta tables.
-
-        Returns:
-            Total number of tables cleared.
+            Path object pointing to the table directory.
         """
         ...
 
@@ -374,6 +376,23 @@ class StoragePort(Protocol):
 
         Raises:
             StorageError: If vacuum operation fails
+        """
+        ...
+
+    async def optimize(
+        self,
+        table_name: str,
+        retention_hours: int = 168,
+        dry_run: bool = False,
+    ) -> None:
+        """Optimize storage for a specific table/entity.
+
+        Unifies Vacuum (Delta) and file cleanup (Bronze).
+
+        Args:
+            table_name: Target identifier (e.g., 'provider.entity').
+            retention_hours: Retention period in hours.
+            dry_run: If True, only log what would be done.
         """
         ...
 
@@ -407,43 +426,97 @@ class StoragePort(Protocol):
     ) -> MetaDict:
         """Preview what would be cleared without actual deletion.
 
-        Returns:
-            Dict with layer info (path, file_count, exists) and total_files.
         Args:
             silver_table: Silver table.
             gold_table: Gold table.
-        """
-        ...
-
-    async def optimize(
-        self,
-        table_name: str,
-        retention_hours: int = 168,
-        dry_run: bool = False,
-    ) -> None:
-        """Optimize storage for a specific table/entity.
-
-        Unifies Vacuum (Delta) and file cleanup (Bronze).
-
-        Args:
-            table_name: Target identifier (e.g., 'provider.entity').
-            retention_hours: Retention period in hours.
-            dry_run: If True, only log what would be done.
-        """
-        ...
-
-    async def cleanup_bronze(
-        self,
-        cutoff_date: datetime,
-        dry_run: bool = False,
-    ) -> dict[str, int]:
-        """Remove Bronze files older than cutoff date (RULES.md §2.1 retention).
-
-        Args:
-            cutoff_date: Files older than this date will be removed.
-            dry_run: If True, only count what would be removed.
 
         Returns:
-            Dict with cleanup stats (files_removed, bytes_freed, directories_removed).
+            Dict with layer info (path, file_count, exists) and total_files.
         """
         ...
+
+    async def clear_csv(self, table_name: str | None = None) -> int:
+        """Clear CSV export files for Silver and Gold layers.
+
+        Should be called at the start of a pipeline run to ensure
+        fresh CSV exports without duplicates from previous runs.
+
+        Args:
+            table_name: If provided, only clear CSV for this table.
+                       If None, clear all CSV files.
+
+        Returns:
+            Total number of files deleted.
+        """
+        ...
+
+    async def clear_delta(self, table_name: str | None = None) -> int:
+        """Clear Delta tables for Silver and Gold layers.
+
+        Should be called at the start of a pipeline run to ensure
+        fresh data without duplicates from previous runs.
+
+        Args:
+            table_name: If provided, only clear Delta table for this table.
+                       If None, clear all Delta tables.
+
+        Returns:
+            Total number of tables cleared.
+        """
+        ...
+
+
+@runtime_checkable
+class StorageLifecyclePort(Protocol):
+    """Port for storage resource lifecycle management.
+
+    Covers graceful shutdown and health checking.
+    """
+
+    async def aclose(self) -> None:
+        """Gracefully close the storage connection and release resources."""
+        ...
+
+    async def health_check(self) -> HealthStatus:
+        """Check storage accessibility and basic write capability.
+
+        Validates:
+        - Bronze, Silver, Gold directories exist or can be created
+        - Directories are writable
+
+        Returns:
+            HealthStatus indicating storage health:
+            - HEALTHY: All layers accessible and writable
+            - DEGRADED: Partial access (some layers unavailable)
+            - UNHEALTHY: Storage completely unavailable
+        """
+        ...
+
+
+# ---------------------------------------------------------------------------
+# Aggregate facade (backward compatibility)
+# ---------------------------------------------------------------------------
+
+
+@runtime_checkable
+class StoragePort(
+    BronzeStoragePort,
+    SilverStoragePort,
+    GoldStoragePort,
+    MergedStoragePort,
+    StorageMaintenancePort,
+    StorageLifecyclePort,
+    Protocol,
+):
+    """Aggregate storage port — union of all narrow layer-specific ports.
+
+    Exists for backward compatibility. New consumers SHOULD depend on the
+    narrowest port they need (e.g., ``SilverStoragePort`` instead of
+    ``StoragePort``).
+
+    See Also:
+        BronzeStoragePort, SilverStoragePort, GoldStoragePort,
+        MergedStoragePort, StorageMaintenancePort, StorageLifecyclePort.
+    """
+
+    ...

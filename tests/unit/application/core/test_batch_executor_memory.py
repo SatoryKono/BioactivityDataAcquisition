@@ -389,6 +389,56 @@ class TestBatchExecutorMemory:
         assert context.bronze_records is not None
         assert context.provider == "test_provider"
 
+    def test_build_dataframe_from_records_normalizes_mixed_nested_and_string_columns(
+        self,
+        mock_services,
+        mock_context,
+        processor_config,
+        mock_checkpoint_manager,
+        callbacks,
+        mock_gold_validator,
+    ) -> None:
+        """Mixed dict/string values in one column should not crash Polars build."""
+        try:
+            import polars as pl
+        except ImportError:
+            pytest.skip("polars not installed")
+
+        mock_services.dq_report_service = MagicMock()
+        executor = _create_batch_executor(
+            services=mock_services,
+            context=mock_context,
+            config=processor_config,
+            callbacks=callbacks,
+            gold_validator=mock_gold_validator,
+            checkpoint_manager=mock_checkpoint_manager,
+            batch_size=10,
+        )
+
+        records = [
+            {
+                "entity_id": "1",
+                "assay_classifications": {
+                    "assay_class_id": 322,
+                    "bao_id": None,
+                    "class_type": "In vivo efficacy",
+                    "l1": "NERVOUS SYSTEM",
+                    "l2": "Anti-Depressant Activity",
+                    "l3": "General Hypothermia",
+                    "source": "phenotype",
+                },
+            },
+            {
+                "entity_id": "2",
+                "assay_classifications": '{"assay_class_id":322,"source":"phenotype"}',
+            },
+        ]
+
+        df = executor._build_dataframe_from_records(records)
+        assert df is not None
+        assert isinstance(df, pl.DataFrame)
+        assert df["assay_classifications"].dtype == pl.Utf8
+
     def test_get_dq_context_no_service(
         self,
         mock_services,

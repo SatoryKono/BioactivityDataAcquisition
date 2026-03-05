@@ -116,7 +116,15 @@ from bioetl.domain.ports.runner import (
 )
 from bioetl.domain.ports.serialization import JsonEncoderPort
 from bioetl.domain.ports.shutdown import ShutdownPort
-from bioetl.domain.ports.storage import StoragePort
+from bioetl.domain.ports.storage import (
+    BronzeStoragePort,
+    GoldStoragePort,
+    MergedStoragePort,
+    SilverStoragePort,
+    StorageLifecyclePort,
+    StorageMaintenancePort,
+    StoragePort,
+)
 from bioetl.domain.ports.validation import GoldValidatorPort, SilverValidatorPort
 
 __all__ = [
@@ -133,6 +141,7 @@ __all__ = [
     "BronzeDQAnalyzerPort",
     "BronzeDQConfigPort",
     "BronzeMetadataInput",
+    "BronzeStoragePort",
     "CheckpointPort",
     "CircuitBreakerPort",
     "ClockPort",
@@ -150,6 +159,7 @@ __all__ = [
     "GoldDQAnalyzerPort",
     "GoldDQConfigPort",
     "GoldMetadataInput",
+    "GoldStoragePort",
     "GoldValidatorPort",
     "HealthCheckPort",
     "HealthCheckResult",
@@ -167,6 +177,7 @@ __all__ = [
     "MetadataCoordinatorPort",
     "MetadataWriterPort",
     "MetricsExtractorPort",
+    "MergedStoragePort",
     "MetricsPort",
     "MetricsServerPort",
     "NoOpAudit",
@@ -193,7 +204,10 @@ __all__ = [
     "SilverDQConfigPort",
     "SilverMetadataInput",
     "SilverRef",
+    "SilverStoragePort",
     "SilverValidatorPort",
+    "StorageLifecyclePort",
+    "StorageMaintenancePort",
     "StoragePort",
     "TracingPort",
 ]
