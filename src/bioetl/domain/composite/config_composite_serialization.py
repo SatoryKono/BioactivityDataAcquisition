@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.composite.config_parsing import (
     optional_bool,
@@ -23,6 +23,106 @@ __all__ = [
     "composite_from_dict",
     "composite_to_dict",
 ]
+
+
+def _build_seed_config(seed_data: dict[str, object], seed_cls: type[Any]) -> Any:
+    """Build seed config from parsed seed mapping."""
+    return seed_cls(
+        pipeline=require_str(seed_data.get("pipeline"), "seed.pipeline"),
+        output_keys=require_str_tuple(seed_data.get("output_keys"), "seed.output_keys"),
+        silver_table=require_str(seed_data.get("silver_table"), "seed.silver_table"),
+        limit=optional_int(seed_data.get("limit"), "seed.limit"),
+    )
+
+
+def _build_dependency_config(
+    dep: dict[str, object],
+    dependency_cls: type[Any],
+) -> Any:
+    """Build one dependency config from serialized mapping."""
+    return dependency_cls(
+        pipeline=require_str(dep.get("pipeline"), "dependencies[].pipeline"),
+        join_keys=require_str_tuple(dep.get("join_keys"), "dependencies[].join_keys"),
+        required=optional_bool(dep.get("required"), False, "dependencies[].required"),
+        timeout_seconds=optional_int(
+            dep.get("timeout_seconds"),
+            "dependencies[].timeout_seconds",
+            600,
+        )
+        or 600,
+        silver_table=optional_str(dep.get("silver_table"), "dependencies[].silver_table"),
+        filter_fields=optional_str_tuple(
+            dep.get("filter_fields"), "dependencies[].filter_fields"
+        ),
+    )
+
+
+def _build_dependency_configs(
+    dependency_data: list[dict[str, object]],
+    dependency_cls: type[Any],
+) -> tuple[Any, ...]:
+    """Build dependency config tuple."""
+    return tuple(
+        _build_dependency_config(dep, dependency_cls)
+        for dep in dependency_data
+    )
+
+
+def _build_enricher_config(
+    enricher: dict[str, object],
+    enricher_cls: type[Any],
+) -> Any:
+    """Build one enricher config from serialized mapping."""
+    return enricher_cls(
+        pipeline=require_str(enricher.get("pipeline"), "enrichers[].pipeline"),
+        join_keys=require_str_tuple(
+            enricher.get("join_keys"), "enrichers[].join_keys"
+        ),
+        required=optional_bool(enricher.get("required"), False, "enrichers[].required"),
+        timeout_seconds=optional_int(
+            enricher.get("timeout_seconds"),
+            "enrichers[].timeout_seconds",
+            600,
+        )
+        or 600,
+    )
+
+
+def _build_enricher_configs(
+    enricher_data: list[dict[str, object]],
+    enricher_cls: type[Any],
+) -> tuple[Any, ...]:
+    """Build enricher config tuple."""
+    return tuple(
+        _build_enricher_config(enricher, enricher_cls)
+        for enricher in enricher_data
+    )
+
+
+def _build_merge_config(merge_data: dict[str, object], merge_cls: type[Any]) -> Any:
+    """Build merge config from serialized mapping."""
+    return merge_cls(
+        strategy=MergeStrategy.from_string(
+            require_str(merge_data.get("strategy"), "merge.strategy")
+        ),
+        conflict_resolution=ConflictResolution.from_string(
+            require_str(merge_data.get("conflict_resolution"), "merge.conflict_resolution")
+        ),
+        output_silver_path=require_str(
+            merge_data.get("output_silver_path"), "merge.output_silver_path"
+        ),
+        output_gold_path=require_str(
+            merge_data.get("output_gold_path"), "merge.output_gold_path"
+        ),
+        sort_by_silver=optional_str_tuple(
+            merge_data.get("sort_by_silver"), "merge.sort_by_silver"
+        )
+        or (),
+        sort_by_gold=optional_str_tuple(
+            merge_data.get("sort_by_gold"), "merge.sort_by_gold"
+        )
+        or (),
+    )
 
 
 def composite_to_dict(config: CompositeConfig) -> dict[str, object]:
@@ -88,78 +188,16 @@ def composite_from_dict(data: dict[str, object]) -> CompositeConfig:
     enricher_data = require_object_dict_sequence(data.get("enrichers", []), "enrichers")
     merge_data = require_object_dict(data.get("merge"), "merge")
 
-    seed = SeedConfig(
-        pipeline=require_str(seed_data.get("pipeline"), "seed.pipeline"),
-        output_keys=require_str_tuple(seed_data.get("output_keys"), "seed.output_keys"),
-        silver_table=require_str(seed_data.get("silver_table"), "seed.silver_table"),
-        limit=optional_int(seed_data.get("limit"), "seed.limit"),
+    seed = _build_seed_config(seed_data, SeedConfig)
+    dependencies = _build_dependency_configs(
+        dependency_data=list(dependency_data),
+        dependency_cls=DependencyConfig,
     )
-
-    dependencies = tuple(
-        DependencyConfig(
-            pipeline=require_str(dep.get("pipeline"), "dependencies[].pipeline"),
-            join_keys=require_str_tuple(
-                dep.get("join_keys"), "dependencies[].join_keys"
-            ),
-            required=optional_bool(
-                dep.get("required"), False, "dependencies[].required"
-            ),
-            timeout_seconds=optional_int(
-                dep.get("timeout_seconds"), "dependencies[].timeout_seconds", 600
-            )
-            or 600,
-            silver_table=optional_str(
-                dep.get("silver_table"), "dependencies[].silver_table"
-            ),
-            filter_fields=optional_str_tuple(
-                dep.get("filter_fields"), "dependencies[].filter_fields"
-            ),
-        )
-        for dep in dependency_data
+    enrichers = _build_enricher_configs(
+        enricher_data=list(enricher_data),
+        enricher_cls=EnricherConfig,
     )
-
-    enrichers = tuple(
-        EnricherConfig(
-            pipeline=require_str(enricher.get("pipeline"), "enrichers[].pipeline"),
-            join_keys=require_str_tuple(
-                enricher.get("join_keys"), "enrichers[].join_keys"
-            ),
-            required=optional_bool(
-                enricher.get("required"), False, "enrichers[].required"
-            ),
-            timeout_seconds=optional_int(
-                enricher.get("timeout_seconds"), "enrichers[].timeout_seconds", 600
-            )
-            or 600,
-        )
-        for enricher in enricher_data
-    )
-
-    merge = MergeConfig(
-        strategy=MergeStrategy.from_string(
-            require_str(merge_data.get("strategy"), "merge.strategy")
-        ),
-        conflict_resolution=ConflictResolution.from_string(
-            require_str(
-                merge_data.get("conflict_resolution"),
-                "merge.conflict_resolution",
-            )
-        ),
-        output_silver_path=require_str(
-            merge_data.get("output_silver_path"), "merge.output_silver_path"
-        ),
-        output_gold_path=require_str(
-            merge_data.get("output_gold_path"), "merge.output_gold_path"
-        ),
-        sort_by_silver=optional_str_tuple(
-            merge_data.get("sort_by_silver"), "merge.sort_by_silver"
-        )
-        or (),
-        sort_by_gold=optional_str_tuple(
-            merge_data.get("sort_by_gold"), "merge.sort_by_gold"
-        )
-        or (),
-    )
+    merge = _build_merge_config(merge_data, MergeConfig)
 
     return CompositeConfig(
         name=require_str(data.get("name"), "name"),
