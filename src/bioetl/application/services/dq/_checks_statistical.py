@@ -32,6 +32,7 @@ NULL_RATE_WARNING_MULTIPLIER = 2.0
 NULL_RATE_CRITICAL_MULTIPLIER = 5.0
 RECORD_COUNT_WARNING_THRESHOLD = 0.70
 RECORD_COUNT_CRITICAL_THRESHOLD = 0.50
+ANOMALY_ZSCORE_THRESHOLD = 3.0
 
 
 def _null_rate_status(ratio: float) -> DQCheckStatus:
@@ -103,6 +104,79 @@ def _aggregate_profile_status(metrics: dict[str, StatisticalMetric]) -> DQCheckS
     return DQCheckStatus.PASS
 
 
+def _build_cold_start_anomaly_result(
+    *,
+    cold_start_days: int,
+    current_day: int,
+) -> AnomalyDetectionResult:
+    """Return default PASS anomaly result for cold-start mode."""
+    return AnomalyDetectionResult(
+        cold_start_days=cold_start_days,
+        current_day=current_day,
+        cold_start_mode=True,
+        anomalies_detected=(),
+        metrics_monitored=(),
+        status=DQCheckStatus.PASS,
+    )
+
+
+def _build_anomaly_metric(
+    *,
+    metric: str,
+    current_value: float,
+    baseline_value: float,
+    zscore: float,
+) -> AnomalyMetric:
+    """Build anomaly metric with normalized status from absolute z-score."""
+    return AnomalyMetric(
+        metric=metric,
+        current_value=current_value,
+        baseline_value=baseline_value,
+        zscore=round(zscore, 2),
+        status="anomaly" if abs(zscore) > ANOMALY_ZSCORE_THRESHOLD else "normal",
+    )
+
+
+def _build_null_rate_anomaly_metric(
+    df: pl.DataFrame,
+    baseline_stats: dict[str, Any],  # Any: heterogeneous baseline map
+) -> AnomalyMetric:
+    """Build null-rate anomaly metric."""
+    total_nulls = sum(df[col].null_count() for col in df.columns)
+    total_cells = len(df) * len(df.columns)
+    current_null_rate = total_nulls / total_cells if total_cells > 0 else 0.0
+    baseline_null_rate = baseline_stats.get("null_rate_ma30", current_null_rate)
+    zscore = (
+        (current_null_rate - baseline_null_rate) / baseline_null_rate
+        if baseline_null_rate > 0
+        else 0.0
+    )
+    return _build_anomaly_metric(
+        metric="null_rate",
+        current_value=round(current_null_rate, 4),
+        baseline_value=round(baseline_null_rate, 4),
+        zscore=zscore,
+    )
+
+
+def _build_record_count_anomaly_metric(
+    df: pl.DataFrame,
+    baseline_stats: dict[str, Any],  # Any: heterogeneous baseline map
+) -> AnomalyMetric:
+    """Build record-count anomaly metric."""
+    current_count = float(len(df))
+    baseline_count = float(baseline_stats.get("record_count_ma30", current_count))
+    zscore = (
+        (current_count - baseline_count) / baseline_count if baseline_count > 0 else 0.0
+    )
+    return _build_anomaly_metric(
+        metric="record_count",
+        current_value=current_count,
+        baseline_value=baseline_count,
+        zscore=zscore,
+    )
+
+
 def check_statistical_profile(
     df: pl.DataFrame,
     baseline_stats: dict[str, Any]  # Any: DQ check values vary by check type
@@ -145,90 +219,30 @@ def check_anomaly_detection(
     baseline_stats: dict[str, Any]  # Any: DQ check values vary by check type
     | None,  # Any: DQ baseline statistics have heterogeneous values
 ) -> AnomalyDetectionResult:
-    """Detect anomalies using baseline comparison.
-
-    Args:
-        df: Input DataFrame.
-        baseline_stats: Baseline stats.
-
-    Returns:
-        Check result as AnomalyDetectionResult.
-    """
+    """Detect anomalies using baseline comparison."""
     cold_start_days = 30
     current_day = baseline_stats.get("days_since_start", 0) if baseline_stats else 0
     cold_start_mode = current_day < cold_start_days
 
     if cold_start_mode or not baseline_stats:
-        return AnomalyDetectionResult(
+        return _build_cold_start_anomaly_result(
             cold_start_days=cold_start_days,
             current_day=current_day,
-            cold_start_mode=True,
-            anomalies_detected=(),
-            metrics_monitored=(),
-            status=DQCheckStatus.PASS,
         )
 
-    anomalies: list[str] = []
-    metrics_monitored: list[AnomalyMetric] = []
-
-    # Null rate anomaly
-    total_nulls = sum(df[col].null_count() for col in df.columns)
-    total_cells = len(df) * len(df.columns)
-    current_null_rate = total_nulls / total_cells if total_cells > 0 else 0.0
-    baseline_null_rate = baseline_stats.get("null_rate_ma30", current_null_rate)
-
-    null_zscore = (
-        (current_null_rate - baseline_null_rate) / baseline_null_rate
-        if baseline_null_rate > 0
-        else 0.0
+    metrics_monitored = [
+        _build_null_rate_anomaly_metric(df, baseline_stats),
+        _build_record_count_anomaly_metric(df, baseline_stats),
+    ]
+    anomalies = tuple(
+        metric.metric for metric in metrics_monitored if metric.status == "anomaly"
     )
-
-    if abs(null_zscore) > 3:
-        anomalies.append("null_rate")
-        null_status = "anomaly"
-    else:
-        null_status = "normal"
-
-    metrics_monitored.append(
-        AnomalyMetric(
-            metric="null_rate",
-            current_value=round(current_null_rate, 4),
-            baseline_value=round(baseline_null_rate, 4),
-            zscore=round(null_zscore, 2),
-            status=null_status,
-        )
-    )
-
-    # Record count anomaly
-    current_count = float(len(df))
-    baseline_count = baseline_stats.get("record_count_ma30", current_count)
-    count_zscore = (
-        (current_count - baseline_count) / baseline_count if baseline_count > 0 else 0.0
-    )
-
-    if abs(count_zscore) > 3:
-        anomalies.append("record_count")
-        count_status = "anomaly"
-    else:
-        count_status = "normal"
-
-    metrics_monitored.append(
-        AnomalyMetric(
-            metric="record_count",
-            current_value=current_count,
-            baseline_value=baseline_count,
-            zscore=round(count_zscore, 2),
-            status=count_status,
-        )
-    )
-
-    status = DQCheckStatus.WARN if anomalies else DQCheckStatus.PASS
 
     return AnomalyDetectionResult(
         cold_start_days=cold_start_days,
         current_day=current_day,
         cold_start_mode=False,
-        anomalies_detected=tuple(anomalies),
+        anomalies_detected=anomalies,
         metrics_monitored=tuple(metrics_monitored),
-        status=status,
+        status=DQCheckStatus.WARN if anomalies else DQCheckStatus.PASS,
     )
