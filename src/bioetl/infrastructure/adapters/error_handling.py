@@ -279,26 +279,8 @@ class ErrorService:
         status_code: int | None = None,
         retry_after: float | None = None,
     ) -> ExternalServiceError:
-        """Wrap exception in appropriate ExternalServiceError.
-
-        Translates provider-specific or HTTP errors into domain-level
-        ExternalServiceError hierarchy for consistent handling.
-
-        Args:
-            error: The original exception.
-            provider: Name of the data provider.
-            status_code: HTTP status code if applicable.
-            retry_after: Retry-After value in seconds.
-
-        Returns:
-            Appropriate ExternalServiceError subclass.
-
-        Raises:
-            CriticalError: For authentication failures (no return).
-        """
+        """Wrap exception in appropriate ExternalServiceError."""
         message = str(error)
-
-        # Handle based on status code if available
         if status_code is not None:
             return self._wrap_by_status_code(
                 message=message,
@@ -308,51 +290,121 @@ class ErrorService:
                 original_error=error,
             )
 
-        # Handle based on exception type
         error_type = self._classifier.classify(error)
+        return self._wrap_by_error_type(
+            error=error,
+            message=message,
+            provider=provider,
+            error_type=error_type,
+            retry_after=retry_after,
+            status_code=status_code,
+        )
 
+    def _wrap_by_error_type(
+        self,
+        *,
+        error: Exception,
+        message: str,
+        provider: str,
+        error_type: ErrorType,
+        retry_after: float | None,
+        status_code: int | None,
+    ) -> ExternalServiceError:
+        """Wrap exception using classifier-derived error type."""
         if error_type.is_critical():
             raise CriticalError(
                 f"Critical {provider} error ({error_type.value}): {message}"
             ) from error
-
         if error_type == ErrorType.RATE_LIMIT:
-            effective_retry_after = retry_after or 60.0
-            self._logger.info(
-                "error_wrapped_rate_limit",
-                provider=provider,
-                error_type=error_type.value,
-                retry_after=effective_retry_after,
-                original_error=type(error).__name__,
-            )
-            return RateLimitExceededError(
+            return self._build_rate_limit_error(
                 message=message,
-                service_name=provider,
-                retry_after=effective_retry_after,
+                provider=provider,
+                error_type=error_type,
+                retry_after=retry_after,
+                original_error=error,
             )
-
         if error_type == ErrorType.TIMEOUT:
-            self._logger.info(
-                "error_wrapped_timeout",
-                provider=provider,
-                error_type=error_type.value,
-                retry_after=retry_after,
-                original_error=type(error).__name__,
-            )
-            return ServiceUnavailableError(
+            return self._build_timeout_error(
                 message=message,
-                service_name=provider,
+                provider=provider,
+                error_type=error_type,
                 retry_after=retry_after,
+                original_error=error,
             )
+        return self._build_generic_wrapped_error(
+            message=message,
+            provider=provider,
+            error_type=error_type,
+            retry_after=retry_after,
+            status_code=status_code,
+            original_error=error,
+        )
 
-        # Default to generic ExternalServiceError
+    def _build_rate_limit_error(
+        self,
+        *,
+        message: str,
+        provider: str,
+        error_type: ErrorType,
+        retry_after: float | None,
+        original_error: Exception,
+    ) -> RateLimitExceededError:
+        """Build rate-limit wrapped error from classifier decision."""
+        effective_retry_after = retry_after or 60.0
+        self._logger.info(
+            "error_wrapped_rate_limit",
+            provider=provider,
+            error_type=error_type.value,
+            retry_after=effective_retry_after,
+            original_error=type(original_error).__name__,
+        )
+        return RateLimitExceededError(
+            message=message,
+            service_name=provider,
+            retry_after=effective_retry_after,
+        )
+
+    def _build_timeout_error(
+        self,
+        *,
+        message: str,
+        provider: str,
+        error_type: ErrorType,
+        retry_after: float | None,
+        original_error: Exception,
+    ) -> ServiceUnavailableError:
+        """Build timeout wrapped error from classifier decision."""
+        self._logger.info(
+            "error_wrapped_timeout",
+            provider=provider,
+            error_type=error_type.value,
+            retry_after=retry_after,
+            original_error=type(original_error).__name__,
+        )
+        return ServiceUnavailableError(
+            message=message,
+            service_name=provider,
+            retry_after=retry_after,
+        )
+
+    def _build_generic_wrapped_error(
+        self,
+        *,
+        message: str,
+        provider: str,
+        error_type: ErrorType,
+        retry_after: float | None,
+        status_code: int | None,
+        original_error: Exception,
+    ) -> ExternalServiceError:
+        """Build generic wrapped external-service error."""
         self._logger.debug(
             "error_wrapped_generic",
             provider=provider,
             error_type=error_type.value,
             status_code=status_code,
             retry_after=retry_after,
-            original_error=type(error).__name__,
+            original_error=type(original_error).__name__,
         )
         return ExternalServiceError(
             message=message,

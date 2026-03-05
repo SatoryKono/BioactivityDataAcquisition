@@ -8,11 +8,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
-    import pyarrow as pa
-
-    from bioetl.application.core.base import BasePipeline
-    from bioetl.application.core.runner import PipelineRunner
-    from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.context import CachedBronzeContext, PipelineRunContext
     from bioetl.domain.filtering import InputFilterConfig
@@ -23,8 +18,6 @@ if TYPE_CHECKING:
         TracingPort,
     )
     from bioetl.domain.types import RunID
-    from bioetl.infrastructure.config import Settings
-    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 __all__ = [
     "MetricsExtractorPort",
@@ -133,30 +126,30 @@ class PipelineFactoryPort(Protocol):
     """Protocol for pipeline factories."""
 
     pipeline_name: str
-    silver_schema: pa.Schema | None
+    silver_schema: object | None
     pandera_silver_schema: object | None
 
     def create_with_services(
         self,
         run_id: RunID,
         runtime: RuntimeConfig,
-        settings: Settings,
+        settings: object,
         logger: LoggerPort,
-        config: PipelineYamlConfig | None = ...,
+        config: object | None = ...,
         filter_config: InputFilterConfig | None = ...,
         tracer: TracingPort | None = ...,
         dq_monitor: DQMonitorPort | None = ...,
         metrics: MetricsPort | None = ...,
         cached_bronze: CachedBronzeContext | None = ...,
-    ) -> BasePipeline:
+    ) -> object:
         """Create pipeline with services.
 
         Args:
             run_id: Pipeline run identifier.
             runtime: Runtime configuration.
-            settings: Settings object.
+            settings: Settings object (infrastructure.config.Settings).
             logger: Logger instance.
-            config: Configuration object.
+            config: Configuration object (PipelineYamlConfig).
             filter_config: Configuration for filter.
             tracer: Tracing instance.
             dq_monitor: Dq monitor.
@@ -172,21 +165,21 @@ class PipelineFactoryPort(Protocol):
         self,
         run_id: RunID,
         runtime: RuntimeConfig,
-        settings: Settings,
-        observability: ObservabilityBundle,
+        settings: object,
+        observability: object,
         filter_config: InputFilterConfig | None = None,
-        config: PipelineYamlConfig | None = None,
+        config: object | None = None,
         cached_bronze: CachedBronzeContext | None = None,
-    ) -> PipelineRunner:
+    ) -> object:
         """Create pipeline runner.
 
         Args:
             run_id: Pipeline run identifier.
             runtime: Runtime configuration.
-            settings: Settings object.
-            observability: Observability.
+            settings: Settings object (infrastructure.config.Settings).
+            observability: ObservabilityBundle from composition layer.
             filter_config: Configuration for filter.
-            config: Configuration object.
+            config: Configuration object (PipelineYamlConfig).
             cached_bronze: Cached bronze.
 
         Returns:
