@@ -301,9 +301,7 @@ class BronzeWriter(
         if self._metadata_coordinator is not None:
             from bioetl.domain.ports import BronzeMetadataInput
 
-            query_string = (
-                source_metadata.query_string if source_metadata else None
-            )
+            query_string = source_metadata.query_string if source_metadata else None
             bronze_input = BronzeMetadataInput(
                 batch_id=batch_id,
                 record_count=record_count,

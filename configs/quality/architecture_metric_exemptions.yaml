@@ -729,13 +729,6 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
-    check_anomaly_detection:
-      value: 90
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (function_length).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption
-        entry.
     create:
       value: 115
       owner: '@bioetl-architecture'
@@ -835,6 +828,12 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
+    BronzeWriter:
+      value: 305
+      owner: '@bioetl-architecture'
+      reason: Class grew from extracted helpers during RF-039 function length reduction.
+      expires_on: '2026-06-30'
+      removal_step: Extract more helpers to mixin or reduce class scope.
     BaseTransformer:
       value: 770
       owner: '@bioetl-architecture'
