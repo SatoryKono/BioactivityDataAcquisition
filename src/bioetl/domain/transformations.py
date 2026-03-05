@@ -17,6 +17,7 @@ import math
 from datetime import date, datetime
 from functools import singledispatch
 from typing import Any  # Any: required for singledispatch base case signature
+
 from bioetl.domain.types import JsonDict
 
 from .constants import META_FIELDS
@@ -44,7 +45,9 @@ __all__ = [
 
 
 @singledispatch
-def _normalize_value(value: Any) -> Any:  # Any: singledispatch requires Any for dispatch
+def _normalize_value(
+    value: Any,  # Any: singledispatch requires Any for dispatch
+) -> Any:  # Any: singledispatch requires Any for dispatch
     """Normalize a single value using singledispatch."""
     return value
 

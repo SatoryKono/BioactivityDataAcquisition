@@ -8,10 +8,10 @@ from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 from typing import Any
-from bioetl.domain.types import JsonDict
 
 import yaml
 
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.quality.debt_scorecard_validation import (
     _parse_iso_date,
     validate_debt_scorecard_raw,

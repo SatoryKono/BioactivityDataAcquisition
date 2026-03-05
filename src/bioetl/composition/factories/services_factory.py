@@ -13,7 +13,6 @@ from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.composition.factories.dq_context_resolver import (
     create_dq_services as _create_dq_services_impl,
 )
-from bioetl.domain.types import JsonDict
 from bioetl.composition.factories.dq_context_resolver import (
     get_flat_structure as _get_flat_structure_impl,
 )
@@ -31,6 +30,7 @@ from bioetl.composition.factories.services_builder import (
 )
 from bioetl.composition.factories.storage import StorageContext, StorageFactory
 from bioetl.domain.ports import NoOpMetrics
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics

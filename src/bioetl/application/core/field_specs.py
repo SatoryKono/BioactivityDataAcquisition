@@ -30,12 +30,18 @@ if TYPE_CHECKING:
 
 
 # Type aliases for common converters
-INT: Callable[[object], int | None] = safe_int  # object: raw field value from Bronze record
-FLOAT: Callable[[object], float | None] = safe_float  # object: raw field value from Bronze record
+INT: Callable[[object], int | None] = (
+    safe_int  # object: raw field value from Bronze record
+)
+FLOAT: Callable[[object], float | None] = (
+    safe_float  # object: raw field value from Bronze record
+)
 STR: Callable[[object], str] = str  # object: raw field value from Bronze record
 
 
-def normalize_pmid(value: object) -> str | None:  # object: raw PMID value (int, str, or None)
+def normalize_pmid(
+    value: object,
+) -> str | None:  # object: raw PMID value (int, str, or None)
     """Normalize PubMed ID to string format.
 
     Delegates to PubMedId.from_raw() Value Object for validation
@@ -67,7 +73,9 @@ def normalize_pmid(value: object) -> str | None:  # object: raw PMID value (int,
     return str(vo) if vo else None
 
 
-PMID: Callable[[object], str | None] = normalize_pmid  # object: raw PMID value from Bronze record
+PMID: Callable[[object], str | None] = (
+    normalize_pmid  # object: raw PMID value from Bronze record
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -89,9 +97,13 @@ class FieldSpec:
 
     source: str
     target: str | None = None
-    converter: Callable[[object], object] | None = None  # object: generic field converter
+    converter: Callable[[object], object] | None = (
+        None  # object: generic field converter
+    )
     required: bool = False
-    default: object = None  # object: heterogeneous default values depending on field type
+    default: object = (
+        None  # object: heterogeneous default values depending on field type
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -121,7 +133,8 @@ class FieldGroup:
 
 
 def map_field(
-    record: BronzeRecord, spec: FieldSpec,
+    record: BronzeRecord,
+    spec: FieldSpec,
 ) -> tuple[str, object]:  # object: field value type varies (str | int | float | None)
     """Map a single field from record according to specification.
 

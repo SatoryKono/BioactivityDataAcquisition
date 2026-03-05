@@ -218,7 +218,7 @@ class TestCrossRefDateNormalization:
 class TestCrossRefDateEdgeCases:
     """Edge case tests for CrossRef date handling.
 
-    Note: _compute_publication_date is a passthrough selector that chooses
+    Note: _prefer_date is a passthrough selector that chooses
     between print and online dates. It does NOT normalize dates - normalization
     happens upstream in format_date_parts(). These tests verify the selection
     logic, not normalization.
@@ -254,13 +254,11 @@ class TestCrossRefDateEdgeCases:
     ) -> None:
         """Test date selection with already-normalized input dates.
 
-        Note: _compute_publication_date receives dates that are already
+        Note: _prefer_date receives dates that are already
         normalized by format_date_parts() in the extractors. It simply
         selects print over online, not performing additional normalization.
         """
-        result = transformer._compute_publication_date(
-            published_print, published_online
-        )
+        result = transformer._prefer_date(published_print, published_online)
         assert result == expected, (
             f"Expected {expected}, got {result} for print={published_print}, "
             f"online={published_online}"
@@ -272,7 +270,7 @@ class TestCrossRefDateEdgeCases:
             # Full ISO date - passes through unchanged
             ("2024-12-31", "2024-12-31"),
             ("2024-03-15", "2024-03-15"),
-            # _compute_publication_date is a pass-through selector
+            # _prefer_date is a pass-through selector
             ("2024-06-30", "2024-06-30"),
         ],
     )
@@ -282,11 +280,11 @@ class TestCrossRefDateEdgeCases:
         date_str: str,
         expected: str,
     ) -> None:
-        """Test that _compute_publication_date passes dates through unchanged.
+        """Test that _prefer_date passes dates through unchanged.
 
         Normalization is done by format_date_parts() in extractors, not here.
         """
-        result = transformer._compute_publication_date(date_str, None)
+        result = transformer._prefer_date(date_str, None)
         assert result == expected
 
 

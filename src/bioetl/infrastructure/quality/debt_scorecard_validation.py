@@ -10,7 +10,6 @@ existing call-sites continue to work without changes.
 from __future__ import annotations
 
 from bioetl.domain.types import JsonDict
-
 from bioetl.infrastructure.quality._baseline_validation import (
     _validate_baseline_section,
     _validate_registry_groups_section,

@@ -25,9 +25,10 @@ import re
 import sys
 import threading
 from typing import Any
-from bioetl.domain.types import JsonDict
 
 import structlog
+
+from bioetl.domain.types import JsonDict
 
 # Thread-safe configuration state
 _config_lock = threading.Lock()

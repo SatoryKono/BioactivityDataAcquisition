@@ -26,9 +26,9 @@ __all__ = [
 ]
 
 
-from bioetl.domain.types import JsonDict
-
 from pydantic import BaseModel, ConfigDict, Field
+
+from bioetl.domain.types import JsonDict
 
 # === Shared Models ===
 

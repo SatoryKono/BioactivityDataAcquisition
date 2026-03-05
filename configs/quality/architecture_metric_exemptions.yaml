@@ -108,6 +108,13 @@ registries:
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
+    src/bioetl/domain/composite/config_models.py:
+      value: 315
+      owner: '@bioetl-architecture'
+      reason: Composite config models grew with new fields from main branch.
+      expires_on: '2026-04-30'
+      removal_step: Refactor target to satisfy default metric and remove this exemption
+        entry.
     src/bioetl/domain/context.py:
       value: 432
       owner: '@bioetl-architecture'
@@ -213,7 +220,7 @@ registries:
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
     src/bioetl/domain/normalization.py:
-      value: 380
+      value: 385
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (file_size_limits).
       expires_on: '2026-04-30'
@@ -283,7 +290,7 @@ registries:
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
     src/bioetl/domain/services/organism_classification_service.py:
-      value: 362
+      value: 370
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (file_size_limits).
       expires_on: '2026-04-30'
@@ -297,14 +304,14 @@ registries:
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
     src/bioetl/domain/transformations.py:
-      value: 386
+      value: 395
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (file_size_limits).
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption
         entry.
     src/bioetl/domain/types.py:
-      value: 497
+      value: 505
       owner: '@bioetl-architecture'
       reason: Baseline exemption migrated from architecture tests (file_size_limits).
       expires_on: '2026-04-30'

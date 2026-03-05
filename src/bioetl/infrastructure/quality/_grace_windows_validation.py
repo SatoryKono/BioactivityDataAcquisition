@@ -6,7 +6,6 @@ from datetime import date
 from typing import Any
 
 from bioetl.domain.types import JsonDict
-
 from bioetl.infrastructure.quality._primitives import (
     _parse_iso_date,
     _validate_non_negative_int,

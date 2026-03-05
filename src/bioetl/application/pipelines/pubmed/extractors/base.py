@@ -29,7 +29,9 @@ class BaseFieldExtractor(ABC):
     """
 
     @abstractmethod
-    def extract(self, element: Element | None) -> object:  # object: XML-derived values (str, list, dict, None)
+    def extract(
+        self, element: Element | None
+    ) -> object:  # object: XML-derived values (str, list, dict, None)
         """Extract raw data from an XML element.
 
         Args:

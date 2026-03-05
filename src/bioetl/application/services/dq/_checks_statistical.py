@@ -17,6 +17,7 @@ __all__ = [
 
 import polars as pl
 
+from bioetl.domain.types import JsonDict
 from bioetl.domain.value_objects.dq_report import (
     AnomalyDetectionResult,
     AnomalyMetric,
@@ -24,7 +25,6 @@ from bioetl.domain.value_objects.dq_report import (
     StatisticalMetric,
     StatisticalProfileResult,
 )
-from bioetl.domain.types import JsonDict
 
 # Thresholds from RULES.md §3.4.1
 NULL_RATE_WARNING_MULTIPLIER = 2.0

@@ -22,6 +22,7 @@ from pydantic import (
     model_validator,
 )
 
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.schemas.base_schemas import (
     BaseFilterColumnSchema,
     BaseGoldColumnFilterConfig,
