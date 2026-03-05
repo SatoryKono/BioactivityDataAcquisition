@@ -15,7 +15,7 @@ Extracted from SilverDQAnalyzer (RF-010).
 
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import cast
 
 import polars as pl
 

@@ -6,6 +6,8 @@ Implements RULES.md §1 (Domain Layer - Ports).
 
 from __future__ import annotations
 
+from bioetl.domain.types import JsonDict
+
 __all__ = [
     "GoldFilterCallback",
     "GoldTransformCallback",

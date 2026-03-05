@@ -94,8 +94,15 @@ class GoldWriterMetadataMixin:
 
         try:
             dt = await self._run_in_executor(lambda: module.DeltaTable(table_path))
-            version: int = dt.version()  # type: ignore[union-attr]
-            return version
+            version_fn = getattr(dt, "version", None)
+            if not callable(version_fn):
+                return None
+            version_value = version_fn()
+            if isinstance(version_value, int):
+                return version_value
+            if isinstance(version_value, str) and version_value.strip().isdigit():
+                return int(version_value.strip())
+            return None
         except module.TableNotFoundError:
             return None
 

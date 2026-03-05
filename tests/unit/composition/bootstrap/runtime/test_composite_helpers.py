@@ -663,7 +663,7 @@ class TestLoadFieldGroupRegistry:
         mock_logger = MagicMock()
 
         with patch(
-            "bioetl.composition.bootstrap.runtime.composite.FIELD_GROUP_CONFIG_DIR",
+            "bioetl.composition.bootstrap.runtime.composite_support_helpers.FIELD_GROUP_CONFIG_DIR",
             tmp_path / "field_groups",
         ):
             result = _load_field_group_registry("composite_publication", mock_logger)
@@ -687,11 +687,11 @@ class TestLoadFieldGroupRegistry:
 
         with (
             patch(
-                "bioetl.composition.bootstrap.runtime.composite.FIELD_GROUP_CONFIG_DIR",
+                "bioetl.composition.bootstrap.runtime.composite_support_helpers.FIELD_GROUP_CONFIG_DIR",
                 field_group_dir,
             ),
             patch(
-                "bioetl.composition.bootstrap.runtime.composite.load_field_groups",
+                "bioetl.composition.bootstrap.runtime.composite_support_helpers.load_field_groups",
                 side_effect=FieldGroupLoadError("Test error"),
             ),
         ):
@@ -719,11 +719,11 @@ class TestLoadFieldGroupRegistry:
 
         with (
             patch(
-                "bioetl.composition.bootstrap.runtime.composite.FIELD_GROUP_CONFIG_DIR",
+                "bioetl.composition.bootstrap.runtime.composite_support_helpers.FIELD_GROUP_CONFIG_DIR",
                 field_group_dir,
             ),
             patch(
-                "bioetl.composition.bootstrap.runtime.composite.load_field_groups",
+                "bioetl.composition.bootstrap.runtime.composite_support_helpers.load_field_groups",
                 return_value=mock_registry,
             ) as mock_load,
         ):

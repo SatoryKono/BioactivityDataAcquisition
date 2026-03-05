@@ -24,7 +24,6 @@ import asyncio
 import os
 import tempfile
 from pathlib import Path
-from typing import Any
 from uuid import UUID
 
 from bioetl.domain.serialization import deserialize_from_json, serialize_to_json

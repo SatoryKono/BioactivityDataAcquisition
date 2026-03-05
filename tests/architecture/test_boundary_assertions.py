@@ -10,7 +10,6 @@ catching DI wiring mistakes early at assembly time rather than at runtime.
 from __future__ import annotations
 
 import ast
-import inspect
 from pathlib import Path
 
 import pytest
@@ -92,12 +91,12 @@ class TestBoundaryAssertionsSufficiency:
     def test_minimum_assertion_count(self) -> None:
         """At least 5 factory methods must have boundary assertions."""
         count = 0
-        for module_path, func_name, port_name in EXPECTED_ASSERTIONS:
+        for module_path, _func_name, port_name in EXPECTED_ASSERTIONS:
             source_file = SRC_ROOT / module_path
             if not source_file.exists():
                 continue
             source = source_file.read_text()
-            if f"isinstance(" in source and port_name in source:
+            if "isinstance(" in source and port_name in source:
                 count += 1
 
         assert count >= 5, (

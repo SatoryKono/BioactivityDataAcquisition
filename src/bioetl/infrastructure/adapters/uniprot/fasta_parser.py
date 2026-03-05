@@ -9,8 +9,6 @@ from __future__ import annotations
 __all__ = ["FastaParser"]
 
 
-from typing import Any
-
 from bioetl.domain.types import JsonDict
 
 

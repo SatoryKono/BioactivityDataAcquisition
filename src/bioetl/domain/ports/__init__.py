@@ -65,6 +65,7 @@ from bioetl.domain.ports.dq_report import (
     GoldDQAnalyzerPort,
     SilverDQAnalyzerPort,
 )
+from bioetl.domain.ports.error_classifier import ErrorClassifierPort
 from bioetl.domain.ports.fallback_policy import FallbackPolicyPort
 from bioetl.domain.ports.filtering import InputFilterPort
 from bioetl.domain.ports.health_check import (
@@ -148,12 +149,13 @@ __all__ = [
     "ContractPolicyPort",
     "DQMonitorPort",
     "DQReportWriterPort",
-    "ExecutorMetricsPort",
-    "DomainConfigMapperPort",
     "DataNormalizationPort",
     "DataSourceFactoryPort",
     "DataSourcePort",
     "DeltaReaderPort",
+    "DomainConfigMapperPort",
+    "ErrorClassifierPort",
+    "ExecutorMetricsPort",
     "FallbackPolicyPort",
     "FilterableDataSourcePort",
     "GoldDQAnalyzerPort",
@@ -174,10 +176,10 @@ __all__ = [
     "LoggerPort",
     "MemoryMonitorPort",
     "MemoryStats",
+    "MergedStoragePort",
     "MetadataCoordinatorPort",
     "MetadataWriterPort",
     "MetricsExtractorPort",
-    "MergedStoragePort",
     "MetricsPort",
     "MetricsServerPort",
     "NoOpAudit",

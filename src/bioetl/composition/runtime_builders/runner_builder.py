@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.composition.builders import FilterConfigBuilder
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
@@ -361,12 +361,15 @@ def build_pipeline_runner(
     pipeline_def = effective_registry.get(ctx.pipeline_name)
     factory = pipeline_def.factory
 
-    return factory.create_runner(
-        run_id=ctx.run_id,
-        runtime=runtime_config,
-        settings=settings,
-        observability=observability,
-        filter_config=filter_config,
-        config=yaml_config,
-        cached_bronze=cached_bronze,
+    return cast(
+        "PipelineRunner",
+        factory.create_runner(
+            run_id=ctx.run_id,
+            runtime=runtime_config,
+            settings=settings,
+            observability=observability,
+            filter_config=filter_config,
+            config=yaml_config,
+            cached_bronze=cached_bronze,
+        ),
     )

@@ -7,7 +7,7 @@ Migrated from application/services/config_service.py per RF-040 (ARCH-008).
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Protocol, runtime_checkable
+from typing import Protocol, runtime_checkable
 
 from bioetl.domain.types import JsonDict
 

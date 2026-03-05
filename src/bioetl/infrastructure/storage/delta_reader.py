@@ -13,7 +13,7 @@ __all__ = ["DeltaReader"]
 
 import asyncio
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 import pyarrow as pa
 from deltalake import DeltaTable
@@ -163,10 +163,17 @@ class DeltaReader:
             # Sum row counts from Parquet file metadata (add actions)
             # to avoid loading the entire table into memory.
             try:
-                add_actions = dt.get_add_actions(flatten=True).to_pydict()
+                add_actions_obj = dt.get_add_actions(flatten=True)
+                to_pydict = getattr(add_actions_obj, "to_pydict", None)
+                if not callable(to_pydict):
+                    raise AttributeError(
+                        "get_add_actions result does not support to_pydict"
+                    )
+                add_actions = cast("dict[str, list[int | None]]", to_pydict())
                 num_records = add_actions.get("num_records")
                 if num_records and all(v is not None for v in num_records):
-                    return int(sum(num_records))
+                    typed_num_records = [v for v in num_records if v is not None]
+                    return int(sum(typed_num_records))
             except (KeyError, AttributeError, TypeError):
                 pass
             except BaseException:
@@ -179,7 +186,9 @@ class DeltaReader:
             # Fallback: read only row count via PyArrow dataset
             # (reads footer metadata, not full data)
             dataset = dt.to_pyarrow_dataset()
-            return dataset.count_rows()
+            return int(
+                cast("Any", dataset).count_rows()
+            )  # Any: pyarrow dataset protocol is partially typed
 
         return await loop.run_in_executor(None, _count_rows)
 

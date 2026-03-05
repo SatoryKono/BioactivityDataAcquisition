@@ -10,7 +10,6 @@ __all__ = ["PubMedXmlProcessor"]
 
 
 import xml.etree.ElementTree as ET
-from typing import Any
 
 from bioetl.domain.types import JsonDict
 

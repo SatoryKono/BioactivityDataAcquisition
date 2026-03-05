@@ -152,9 +152,9 @@ def split_growth_violations_by_severity(
 
 
 __all__ = [
-    "split_growth_violations_by_severity",
     "_collect_allowances",
     "_extract_growth_violation_section",
     "_is_active_grace_window",
     "_resolve_rollout_mode_for_section",
+    "split_growth_violations_by_severity",
 ]

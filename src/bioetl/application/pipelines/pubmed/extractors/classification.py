@@ -8,7 +8,7 @@ from __future__ import annotations
 __all__ = ["ClassificationExtractor", "NormalizedClassification", "RawClassification"]
 
 
-from typing import Any, TypedDict
+from typing import TypedDict, cast
 from xml.etree.ElementTree import Element
 
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
@@ -61,7 +61,7 @@ class ClassificationExtractor(BaseFieldExtractor):
             publication_types=self._extract_pub_types_raw(article),
         )
 
-    def normalize(self, raw_value: RawClassification) -> NormalizedClassification:
+    def normalize(self, raw_value: object) -> NormalizedClassification:
         """Normalize classification data.
 
         Args:
@@ -70,10 +70,13 @@ class ClassificationExtractor(BaseFieldExtractor):
         Returns:
             Normalized classification dict with cleaned lists.
         """
+        raw_classification = cast("RawClassification", raw_value)
         return NormalizedClassification(
-            keywords=self._normalize_list(raw_value["keywords"]),
-            mesh_terms=self._normalize_list(raw_value["mesh_terms"]),
-            publication_types=self._normalize_list(raw_value["publication_types"]),
+            keywords=self._normalize_list(raw_classification["keywords"]),
+            mesh_terms=self._normalize_list(raw_classification["mesh_terms"]),
+            publication_types=self._normalize_list(
+                raw_classification["publication_types"]
+            ),
         )
 
     def _extract_keywords_raw(self, medline: Element | None) -> list[str | None]:

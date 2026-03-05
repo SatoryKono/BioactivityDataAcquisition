@@ -144,13 +144,14 @@ class EnrichmentCrossValidationService:
         total = len(df)
 
         mismatch_count, _, field_mismatches, field_mismatch_bools = (
-            self._count_mismatches_vectorized(
+            _count_mismatches_vectorized(
                 df,
                 pairing,
                 seed_provider,
                 seed_entity,
                 enricher_provider,
                 enricher_entity,
+                logger=self._logger,
             )
         )
 
@@ -279,86 +280,6 @@ class EnrichmentCrossValidationService:
         )
         return df, stats
 
-    def _count_mismatches_vectorized(
-        self,
-        df: pl.DataFrame,
-        pairing: EnricherFieldPairing,
-        seed_provider: str,
-        seed_entity: str,
-        enricher_provider: str,
-        enricher_entity: str,
-    ) -> tuple[pl.Series, pl.Series, dict[str, int], dict[str, pl.Series]]:
-        """Count field mismatches per row using vectorized Polars operations.
-
-        Returns:
-            Tuple of (mismatch_count Series, compared_count Series,
-            per-field mismatch counts dict, per-field boolean mismatch Series).
-        """
-        import polars as pl
-
-        n = len(df)
-        mismatch_total = pl.Series("_mm", [0] * n, dtype=pl.Int32)
-        compared_total = pl.Series("_cmp", [0] * n, dtype=pl.Int32)
-        field_mismatch_counts: dict[str, int] = {}
-        field_mismatch_bools: dict[str, pl.Series] = {}
-
-        for spec in pairing.fields:
-            if spec.method == ComparisonMethod.SKIP:
-                continue
-
-            seed_col = f"{seed_provider}.{seed_entity}.{spec.field_name}"
-            enricher_col = f"{enricher_provider}.{enricher_entity}.{spec.field_name}"
-
-            if seed_col not in df.columns or enricher_col not in df.columns:
-                self._logger.debug(
-                    "Skipping CV field - column not found",
-                    field=spec.field_name,
-                    seed_col=seed_col,
-                    enricher_col=enricher_col,
-                )
-                continue
-
-            both_present = _both_non_empty_mask(df, seed_col, enricher_col)
-            compared_total = compared_total + both_present.cast(pl.Int32)
-
-            match_result = self._compare_field(
-                df, seed_col, enricher_col, spec.method, spec.threshold
-            )
-            is_mismatch = both_present & ~match_result
-            mismatch_total = mismatch_total + is_mismatch.cast(pl.Int32)
-            field_mismatch_counts[spec.field_name] = int(is_mismatch.sum())
-            field_mismatch_bools[spec.field_name] = is_mismatch
-
-        return (
-            mismatch_total,
-            compared_total,
-            field_mismatch_counts,
-            field_mismatch_bools,
-        )
-
-    def _compare_field(
-        self,
-        df: pl.DataFrame,
-        seed_col: str,
-        enricher_col: str,
-        method: ComparisonMethod,
-        threshold: float,
-    ) -> pl.Series:
-        """Compare a single field between seed and enricher.
-
-        Returns a boolean Series where True = match, False = mismatch.
-        """
-        import polars as pl
-
-        if method == ComparisonMethod.EXACT:
-            return _compare_exact(df, seed_col, enricher_col)
-        elif method == ComparisonMethod.FUZZY:
-            return _compare_fuzzy(df, seed_col, enricher_col, threshold)
-        elif method == ComparisonMethod.NUMERIC_TOLERANCE:
-            return _compare_numeric(df, seed_col, enricher_col, threshold)
-        else:
-            return pl.Series([True] * len(df))
-
     @staticmethod
     def _parse_pipeline(pipeline: str) -> tuple[str, str]:
         """Parse 'provider_entity' into (provider, entity)."""
@@ -371,6 +292,82 @@ class EnrichmentCrossValidationService:
 
 
 # --- Module-level helpers (extracted to reduce class size) ---
+
+
+def _count_mismatches_vectorized(
+    df: pl.DataFrame,
+    pairing: EnricherFieldPairing,
+    seed_provider: str,
+    seed_entity: str,
+    enricher_provider: str,
+    enricher_entity: str,
+    *,
+    logger: LoggerPort,
+) -> tuple[pl.Series, pl.Series, dict[str, int], dict[str, pl.Series]]:
+    """Count field mismatches per row using vectorized Polars operations."""
+    import polars as pl
+
+    n = len(df)
+    mismatch_total = pl.Series("_mm", [0] * n, dtype=pl.Int32)
+    compared_total = pl.Series("_cmp", [0] * n, dtype=pl.Int32)
+    field_mismatch_counts: dict[str, int] = {}
+    field_mismatch_bools: dict[str, pl.Series] = {}
+
+    for spec in pairing.fields:
+        if spec.method == ComparisonMethod.SKIP:
+            continue
+
+        seed_col = f"{seed_provider}.{seed_entity}.{spec.field_name}"
+        enricher_col = f"{enricher_provider}.{enricher_entity}.{spec.field_name}"
+
+        if seed_col not in df.columns or enricher_col not in df.columns:
+            logger.debug(
+                "Skipping CV field - column not found",
+                field=spec.field_name,
+                seed_col=seed_col,
+                enricher_col=enricher_col,
+            )
+            continue
+
+        both_present = _both_non_empty_mask(df, seed_col, enricher_col)
+        compared_total = compared_total + both_present.cast(pl.Int32)
+        match_result = _compare_field(
+            df,
+            seed_col,
+            enricher_col,
+            spec.method,
+            spec.threshold,
+        )
+        is_mismatch = both_present & ~match_result
+        mismatch_total = mismatch_total + is_mismatch.cast(pl.Int32)
+        field_mismatch_counts[spec.field_name] = int(is_mismatch.sum())
+        field_mismatch_bools[spec.field_name] = is_mismatch
+
+    return (
+        mismatch_total,
+        compared_total,
+        field_mismatch_counts,
+        field_mismatch_bools,
+    )
+
+
+def _compare_field(
+    df: pl.DataFrame,
+    seed_col: str,
+    enricher_col: str,
+    method: ComparisonMethod,
+    threshold: float,
+) -> pl.Series:
+    """Compare a single field between seed and enricher."""
+    import polars as pl
+
+    if method == ComparisonMethod.EXACT:
+        return _compare_exact(df, seed_col, enricher_col)
+    if method == ComparisonMethod.FUZZY:
+        return _compare_fuzzy(df, seed_col, enricher_col, threshold)
+    if method == ComparisonMethod.NUMERIC_TOLERANCE:
+        return _compare_numeric(df, seed_col, enricher_col, threshold)
+    return pl.Series([True] * len(df))
 
 
 def _build_enricher_detail(

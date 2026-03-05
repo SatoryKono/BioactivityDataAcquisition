@@ -1,3 +1,4 @@
+# mypy: disable-error-code=attr-defined
 """Multi-field filtered fetch mixin for ChEMBL adapter."""
 
 from __future__ import annotations

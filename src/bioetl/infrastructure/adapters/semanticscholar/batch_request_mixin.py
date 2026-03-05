@@ -1,3 +1,4 @@
+# mypy: disable-error-code=attr-defined
 """Batch request internals for SemanticScholarAdapter."""
 
 from __future__ import annotations

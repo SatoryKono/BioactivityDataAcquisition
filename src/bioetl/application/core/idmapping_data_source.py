@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Self
 from bioetl.domain.types import HealthStatus, JsonDict
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator
+    from collections.abc import AsyncIterator, Mapping
     from types import TracebackType
 
     from bioetl.domain.ports import (
@@ -186,7 +186,9 @@ class IDMappingDataSource:
     @staticmethod
     def _build_mapping_record(
         chembl_id: str,
-        mapping_results: JsonDict,  # Any: mapping payload values vary by provider
+        mapping_results: Mapping[
+            str, JsonDict | None
+        ],  # Any: mapping payload values vary by provider
     ) -> tuple[JsonDict, bool]:
         """Build output record and mapped flag for one ChEMBL ID."""
         entry_data = mapping_results.get(chembl_id)

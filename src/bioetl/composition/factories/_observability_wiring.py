@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from .data_source_factory import DataSourceCreator
+from .services_factory import BaseServicesFactory
 
 if TYPE_CHECKING:
     from bioetl.domain.context import CachedBronzeContext
@@ -18,7 +19,7 @@ if TYPE_CHECKING:
 def create_shared_metrics(
     *,
     settings: Settings,
-    base_services_factory: object,
+    base_services_factory: type[BaseServicesFactory],
 ) -> MetricsPort:
     """Create shared pipeline metrics via base services factory."""
     return base_services_factory._create_metrics(settings)

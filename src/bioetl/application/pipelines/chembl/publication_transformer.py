@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import TransformationError
 from bioetl.application.core.field_specs import (
+    INT,
     PMID,
     FieldGroup,
     FieldSpec,
@@ -84,7 +85,7 @@ _JOURNAL_INFO = FieldGroup(
         FieldSpec("first_page", target="page_first"),
         FieldSpec("last_page", target="page_last"),
         # Unified temporal field
-        FieldSpec("year", target="publication_year", converter=int),
+        FieldSpec("year", target="publication_year", converter=INT),
     ),
 )
 

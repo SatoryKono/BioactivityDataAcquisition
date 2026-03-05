@@ -15,7 +15,7 @@ __all__ = ["UnifiedQuarantine"]
 
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake

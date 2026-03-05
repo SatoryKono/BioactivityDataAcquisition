@@ -151,7 +151,7 @@ class TestCliMaintenanceArchivePathValidation:
         self,
         cli_runner: CliRunner,
         mock_lifecycle_service: MagicMock,
-        tmp_path: "Path",
+        tmp_path: Path,
     ):
         """Test archive with absolute target path."""
         with patch(

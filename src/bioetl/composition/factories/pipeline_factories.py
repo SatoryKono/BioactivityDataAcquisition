@@ -27,6 +27,7 @@ Usage:
 from __future__ import annotations
 
 import threading
+from typing import cast
 
 from bioetl.application.pipelines.generic import GenericPipeline
 from bioetl.composition.factories.pipeline_configs import (
@@ -36,6 +37,7 @@ from bioetl.composition.factories.pipeline_configs import (
 from bioetl.composition.factories.pipeline_contract_validator import create_factory
 from bioetl.composition.factories.pipeline_factory import GenericPipelineFactory
 from bioetl.composition.registry import PipelineRegistry, get_default_registry
+from bioetl.domain.ports import PipelineFactoryPort
 
 # =============================================================================
 # Factory Instances (created from PIPELINE_CONFIGS)
@@ -131,7 +133,7 @@ def _register_factories_to(registry: PipelineRegistry) -> None:
         registry: Target registry instance.
     """
     for factory in _factories.values():
-        registry.register_factory(factory)
+        registry.register_factory(cast("PipelineFactoryPort", factory))
 
 
 def is_registered() -> bool:

@@ -437,10 +437,10 @@ class TestBronzeWriterMetadataSidecar:
             (RunType.REBUILD, "rebuild"),
         ]
 
-        for run_type, expected_value in run_type_mappings:
+        for run_type_value, expected_value in run_type_mappings:
             metadata = writer._build_full_bronze_metadata(
                 run_id=run_id,
-                run_type=run_type,
+                run_type=run_type_value,
                 provider="chembl",
                 entity="activity",
                 batch_id=batch_id,

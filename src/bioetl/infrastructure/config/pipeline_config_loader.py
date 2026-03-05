@@ -18,22 +18,22 @@ Example:
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
 
-from bioetl.domain.config import DQConfig
-
-if TYPE_CHECKING:
-    from bioetl.infrastructure.schemas.pipeline_config_common import (
-        ConditionalValidationConfig,
-        CrossFieldValidationConfig,
-        FieldValidationConfig,
-    )
+from bioetl.domain.config import DQConfig as DomainDQConfig
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config.converters import dq_overrides_to_domain
 from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
 from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
 from bioetl.infrastructure.config_loader import load_pipeline_config as load_yaml_config
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+from bioetl.infrastructure.schemas.pipeline_config_dq import (
+    ConditionalValidationConfig,
+    CrossFieldValidationConfig,
+    FieldValidationConfig,
+)
+from bioetl.infrastructure.schemas.pipeline_config_dq import (
+    DQConfig as InlineDQConfig,
+)
 
 
 class PipelineConfigLoader:
@@ -98,7 +98,7 @@ class PipelineConfigLoader:
     def resolve_dq_config(
         self,
         yaml_config: PipelineYamlConfig,
-    ) -> DQConfig:
+    ) -> DomainDQConfig:
         """Resolve DQ config from hierarchy with optional inline overrides."""
         provider = yaml_config.provider
         entity = yaml_config.entity_type
@@ -161,7 +161,7 @@ class PipelineConfigLoader:
 
     def _normalize_inline_dq_overrides(
         self,
-        dq_overrides: DQConfig,
+        dq_overrides: InlineDQConfig,
     ) -> JsonDict:  # Any: dynamic YAML config values
         """Convert inline Pydantic DQ overrides into mergeable file-shape dict."""
         result: JsonDict = {}  # Any: dynamic YAML config values

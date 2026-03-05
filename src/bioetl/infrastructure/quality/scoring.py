@@ -206,7 +206,6 @@ def _evaluate_program_done_criteria(
 
 
 __all__ = [
-    "compute_integral_debt_score",
     "_compute_group_counts",
     "_evaluate_expiry_cap",
     "_evaluate_group_budgets",
@@ -215,4 +214,5 @@ __all__ = [
     "_evaluate_registry_budgets",
     "_expiry_cap_for_quarter",
     "_owner_allocations_for_quarter",
+    "compute_integral_debt_score",
 ]

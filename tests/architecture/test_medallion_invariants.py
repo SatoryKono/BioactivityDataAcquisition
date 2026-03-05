@@ -152,9 +152,12 @@ class TestSilverLayerInvariants:
         Parquet files without Delta log are strictly prohibited in Silver.
         """
         assert (
-            "from deltalake import DeltaTable, write_deltalake" in silver_writer_source
+            "from deltalake import DeltaTable" in silver_writer_source
+            and "from deltalake import write_deltalake" in silver_writer_source
+            or "from deltalake import DeltaTable, write_deltalake"
+            in silver_writer_source
         ), (
-            "SilverWriter must import DeltaTable and write_deltalake.\n"
+            "SilverWriter must import DeltaTable and write_deltalake from deltalake.\n"
             "This confirms compliance with Delta Lake requirement."
         )
 

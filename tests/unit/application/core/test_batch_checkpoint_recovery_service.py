@@ -6,7 +6,7 @@ saves on shutdown, immediate saves, and the total-processed calculation.
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock, call
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 

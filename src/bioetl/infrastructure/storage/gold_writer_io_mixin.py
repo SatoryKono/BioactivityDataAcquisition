@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any, Protocol, TypeVar, cast
 import pyarrow as pa
 
 from bioetl.domain.medallion import GoldWriteMode
+from bioetl.domain.types import JsonDict
 
 T = TypeVar("T")
 

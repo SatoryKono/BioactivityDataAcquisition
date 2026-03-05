@@ -6,6 +6,10 @@ Loads filter IDs from external sources (CSV) and passes them to the adapter.
 
 from __future__ import annotations
 
+from typing import Any
+
+from bioetl.domain.types import JsonDict
+
 __all__ = ["FilteredDataSource"]
 
 

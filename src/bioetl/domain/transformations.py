@@ -1,13 +1,7 @@
-"""Pure domain transformations (no I/O).
+"""Pure domain transformations (no I/O, deterministic, side-effect free).
 
-Implements RULES.md §2.8 - Entity ID Generation and Content Hashing.
-
-Requirements:
-- REQ-ARCH-003: No I/O in domain layer
-- REQ-ID-001 to REQ-ID-008: Content hash algorithm
-- REQ-SCHEMA-001 to REQ-SCHEMA-004: Schema drift detection
-
-All functions are pure (deterministic, side-effect free).
+Implements RULES.md §2.8 — Entity ID Generation and Content Hashing.
+REQ-ARCH-003, REQ-ID-001..008, REQ-SCHEMA-001..004.
 """
 
 from __future__ import annotations
@@ -322,23 +316,35 @@ def detect_hash_collision(
     return existing_source_id is not None and source_record_id != existing_source_id
 
 
+_SAFE_CONVERT_SKIP: tuple[type, ...] = (type(None), bool)
+
+
+def _coerce_to_float(value: object) -> float:
+    """Coerce non-None/non-bool value to float; raises on failure."""
+    if isinstance(value, (int, float)):
+        return float(value)
+    return float(str(value).strip())
+
+
+def _coerce_to_int(value: object) -> int | None:
+    """Coerce non-None/non-bool value to int; returns None for non-finite floats."""
+    if isinstance(value, float):
+        return int(value) if math.isfinite(value) else None
+    if isinstance(value, int):
+        return value
+    return int(str(value).strip())
+
+
 def safe_float(
     value: object,
     default: float | None = None,
 ) -> float | None:
-    """Safely convert value to float.
-
-    Args:
-        value: Input value to convert
-        default: Default value if conversion fails (default: None)
-
-    Returns:
-        Converted float or default value
-    """
-    if value is None:
+    """Safely convert *value* to float, returning *default* on failure."""
+    if isinstance(value, _SAFE_CONVERT_SKIP):
         return default
     try:
-        return float(value)
+        converted = _coerce_to_float(value)
+        return converted if math.isfinite(converted) else default
     except (ValueError, TypeError):
         return default
 
@@ -347,19 +353,12 @@ def safe_int(
     value: object,
     default: int | None = None,
 ) -> int | None:
-    """Safely convert value to int.
-
-    Args:
-        value: Input value to convert
-        default: Default value if conversion fails (default: None)
-
-    Returns:
-        Converted int or default value
-    """
-    if value is None:
+    """Safely convert *value* to int, returning *default* on failure."""
+    if isinstance(value, _SAFE_CONVERT_SKIP):
         return default
     try:
-        return int(value)
+        result = _coerce_to_int(value)
+        return result if result is not None else default
     except (ValueError, TypeError):
         return default
 

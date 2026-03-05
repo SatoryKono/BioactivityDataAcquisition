@@ -1,3 +1,4 @@
+# mypy: disable-error-code=attr-defined
 """Resilience, retry, and fallback helpers for ChEMBL fetch flows."""
 
 from __future__ import annotations

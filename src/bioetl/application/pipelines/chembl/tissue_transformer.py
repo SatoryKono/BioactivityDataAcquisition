@@ -5,10 +5,12 @@ Transforms Bronze records to Silver format (Tissue entity inflation).
 
 from __future__ import annotations
 
+from bioetl.domain.types import JsonDict
+
 __all__ = ["TissueTransformer"]
 
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,

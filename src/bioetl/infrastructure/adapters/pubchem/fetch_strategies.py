@@ -114,6 +114,15 @@ class PubChemFetchStrategies:
             status_code=status_code,
         )
 
+    @staticmethod
+    def _normalize_results(results: object) -> list[object]:
+        """Normalize pubchempy responses to a concrete list."""
+        if isinstance(results, list):
+            return results
+        if isinstance(results, tuple):
+            return list(results)
+        return []
+
     async def fetch_by_query(
         self, query: str, limit: int | None
     ) -> AsyncIterator[BronzeRecord]:
@@ -131,12 +140,13 @@ class PubChemFetchStrategies:
         compounds = await self._circuit_breaker.call(
             self._run_in_executor, pcp.get_compounds, query, "name"
         )
+        normalized_compounds = self._normalize_results(compounds)
         duration_ms = (time.perf_counter() - start_time) * 1000
-        result_count = len(compounds) if compounds else 0
+        result_count = len(normalized_compounds)
         self._record_request(
             f"/compound/name/{query}/JSON", duration_ms, result_count=result_count
         )
-        for i, compound in enumerate(compounds or []):
+        for i, compound in enumerate(normalized_compounds):
             if limit and i >= limit:
                 break
             yield self._mapper.compound_to_dict(compound)
@@ -148,12 +158,13 @@ class PubChemFetchStrategies:
         compounds = await self._circuit_breaker.call(
             self._run_in_executor, pcp.get_compounds, smiles.strip(), "smiles"
         )
+        normalized_compounds = self._normalize_results(compounds)
         duration_ms = (time.perf_counter() - start_time) * 1000
-        result_count = len(compounds) if compounds else 0
+        result_count = len(normalized_compounds)
         self._record_request(
             "/compound/smiles/JSON", duration_ms, result_count=result_count
         )
-        return [self._mapper.compound_to_dict(c) for c in (compounds or [])]
+        return [self._mapper.compound_to_dict(c) for c in normalized_compounds]
 
     async def fetch_by_smiles(
         self, smiles_list: list[str], limit: int | None = None
@@ -212,14 +223,15 @@ class PubChemFetchStrategies:
         compounds = await self._circuit_breaker.call(
             self._run_in_executor, pcp.get_compounds, batch, "cid"
         )
+        normalized_compounds = self._normalize_results(compounds)
         duration_ms = (time.perf_counter() - start_time) * 1000
-        result_count = len(compounds) if compounds else 0
+        result_count = len(normalized_compounds)
         self._record_request(
             f"/compound/cid/{','.join(map(str, batch[:3]))},.../JSON",
             duration_ms,
             result_count=result_count,
         )
-        return [self._mapper.compound_to_dict(c) for c in (compounds or [])]
+        return [self._mapper.compound_to_dict(c) for c in normalized_compounds]
 
     async def fetch_by_cids(
         self, cid_list: list[str], limit: int | None = None, batch_size: int = 50
@@ -296,12 +308,13 @@ class PubChemFetchStrategies:
         compounds = await self._circuit_breaker.call(
             self._run_in_executor, pcp.get_compounds, inchikey.strip(), "inchikey"
         )
+        normalized_compounds = self._normalize_results(compounds)
         duration_ms = (time.perf_counter() - start_time) * 1000
-        result_count = len(compounds) if compounds else 0
+        result_count = len(normalized_compounds)
         self._record_request(
             "/compound/inchikey/JSON", duration_ms, result_count=result_count
         )
-        return [self._mapper.compound_to_dict(c) for c in (compounds or [])]
+        return [self._mapper.compound_to_dict(c) for c in normalized_compounds]
 
     async def fetch_by_inchikey(
         self, inchikey_list: list[str], limit: int | None = None
@@ -374,14 +387,15 @@ class PubChemFetchStrategies:
         substances = await self._circuit_breaker.call(
             self._run_in_executor, pcp.get_substances, query, "name"
         )
+        normalized_substances = self._normalize_results(substances)
         duration_ms = (time.perf_counter() - start_time) * 1000
-        result_count = len(substances) if substances else 0
+        result_count = len(normalized_substances)
         self._record_request(
             f"/substance/name/{query}/JSON", duration_ms, result_count=result_count
         )
 
         fetched = 0
-        for substance in substances or []:
+        for substance in normalized_substances:
             if limit and fetched >= limit:
                 break
             yield self._mapper.substance_to_dict(substance)
@@ -407,14 +421,15 @@ class PubChemFetchStrategies:
         assays = await self._circuit_breaker.call(
             self._run_in_executor, pcp.get_assays, query
         )
+        normalized_assays = self._normalize_results(assays)
         duration_ms = (time.perf_counter() - start_time) * 1000
-        result_count = len(assays) if assays else 0
+        result_count = len(normalized_assays)
         self._record_request(
             f"/assay/aid/{query}/JSON", duration_ms, result_count=result_count
         )
 
         fetched = 0
-        for assay in assays or []:
+        for assay in normalized_assays:
             if limit and fetched >= limit:
                 break
             yield self._mapper.assay_to_dict(assay)

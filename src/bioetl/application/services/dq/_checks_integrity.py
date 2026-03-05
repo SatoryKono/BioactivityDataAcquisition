@@ -8,7 +8,7 @@ from __future__ import annotations
 __all__ = ["check_referential_integrity", "check_scd_integrity"]
 
 
-from typing import Any, cast
+from typing import cast
 
 import polars as pl
 import pyarrow as pa

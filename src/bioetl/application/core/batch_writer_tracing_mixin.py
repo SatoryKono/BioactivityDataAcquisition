@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.domain.locking import LockNotHeldError
 from bioetl.domain.types import JsonDict

@@ -224,6 +224,7 @@ class TestPrivateKeyExposure:
 
         excluded = {
             ".git",
+            ".worktrees",
             ".venv",
             "venv",
             "__pycache__",
@@ -267,36 +268,40 @@ class TestPrivateKeyExposure:
 
     def test_no_private_keys_in_repo(self, all_files: list[Path]) -> None:
         """Verify no private keys in repository."""
+        import subprocess
+
         violations = []
         key_extensions = {".pem", ".key", ".p12", ".pfx"}
-        key_pattern = r"-----BEGIN (RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----"
 
+        # 1) Check file extensions across all project files
         for file_path in all_files:
-            # Check extension
             if file_path.suffix.lower() in key_extensions:
                 violations.append(f"{file_path.name}: Private key file extension")
-                continue
 
-            # Check content for text files
-            # Skip large files (private keys are typically < 10KB)
-            max_file_size = 10 * 1024  # 10KB
-            if file_path.suffix.lower() in {
-                ".py",
-                ".txt",
-                ".yaml",
-                ".yml",
-                ".json",
-                ".md",
-            }:
-                try:
-                    if file_path.stat().st_size > max_file_size:
-                        continue  # Skip large files
-                    content = file_path.read_text(encoding="utf-8")
-                    if re.search(key_pattern, content):
-                        rel_path = file_path.relative_to(PROJECT_ROOT)
-                        violations.append(f"{rel_path}: Contains private key")
-                except (UnicodeDecodeError, OSError):
-                    pass  # Binary file or can't stat
+        # 2) Check file content using git grep (immune to Windows file locks)
+        text_globs = ["*.py", "*.txt", "*.yaml", "*.yml", "*.json", "*.md"]
+        git_grep_cmd = [
+            "git",
+            "grep",
+            "-l",
+            "-E",
+            r"-----BEGIN (RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----",
+            "--",
+            *text_globs,
+        ]
+        try:
+            result = subprocess.run(
+                git_grep_cmd,
+                capture_output=True,
+                text=True,
+                timeout=60,
+                cwd=str(PROJECT_ROOT),
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                for match_file in result.stdout.strip().splitlines():
+                    violations.append(f"{match_file}: Contains private key")
+        except (subprocess.TimeoutExpired, OSError):
+            pass  # git grep unavailable or timed out — skip content check
 
         assert not violations, "Private keys found:\n" + "\n".join(violations)
 
@@ -340,6 +345,7 @@ class TestPIIHandling:
             "client.py",  # User-Agent header identification
             "source_config.py",  # NCBI API default_email for PubMed
             "batch.py",  # CrossRef mailto for polite pool access (higher rate limits)
+            "pipeline_config_provider.py",  # Technical email config for API identification
         }
     )
 

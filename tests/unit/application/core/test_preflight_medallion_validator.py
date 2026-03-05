@@ -14,7 +14,7 @@ import pytest
 from bioetl.application.core.preflight_medallion_validator import (
     _MedallionConfigValidator,
 )
-from bioetl.domain.types import ConfigValidationError, RunType
+from bioetl.domain.types import RunType
 
 
 # ---------------------------------------------------------------------------

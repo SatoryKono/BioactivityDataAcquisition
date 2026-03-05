@@ -113,10 +113,11 @@ class LockContext:
         Returns:
             LockContext with properly formatted key.
         """
-        if exclusive:
-            key = f"lock:{provider}_{entity}:exclusive"
-        else:
-            key = f"lock:{provider}_{entity}"
+        key = (
+            f"lock:{provider}_{entity}:exclusive"
+            if exclusive
+            else f"lock:{provider}_{entity}"
+        )
 
         return cls(
             key=key,

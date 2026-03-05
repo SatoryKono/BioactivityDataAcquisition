@@ -62,6 +62,9 @@ jobs:
       - name: Ruff (lint)
         run: uv run ruff check src tests
 
+      - name: Ruff (strict noise profile)
+        run: uv run ruff check src tests --select F401,F821,RUF022
+
       - name: Detect changed Python files
         id: changed-python
         shell: bash

@@ -7,11 +7,12 @@ import tempfile
 from collections.abc import AsyncIterator, Callable, Iterator
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import orjson
 import zstandard as zstd
 
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.storage._atomic import atomic_write_bytes
 
 if TYPE_CHECKING:
@@ -155,10 +156,9 @@ class BronzeWriterIOMixin:
     ) -> list[str]:
         """List all batch files for a given provider/entity."""
         if self._flat_structure and not provider and not entity:
-            if date:
-                search_path = self.base_path / date.strftime("%Y-%m-%d")
-            else:
-                search_path = self.base_path
+            search_path = (
+                self.base_path / date.strftime("%Y-%m-%d") if date else self.base_path
+            )
         else:
             prefix = f"{provider}/{entity}/"
             if date:

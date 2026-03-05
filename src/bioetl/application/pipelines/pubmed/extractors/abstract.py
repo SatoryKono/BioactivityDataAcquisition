@@ -97,8 +97,7 @@ class AbstractExtractor(BaseFieldExtractor):
         if abstract_node is None:
             return False
 
-        # Check if any AbstractText has a Label attribute
-        for abstract_text in abstract_node.findall("AbstractText"):
-            if abstract_text.get("Label"):
-                return True
-        return False
+        return any(
+            abstract_text.get("Label")
+            for abstract_text in abstract_node.findall("AbstractText")
+        )

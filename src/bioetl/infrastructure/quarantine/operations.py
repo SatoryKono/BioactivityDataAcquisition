@@ -9,7 +9,7 @@ __all__ = ["get_statistics", "inspect_records", "purge_records", "replay_records
 
 
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import pyarrow.compute as pc
 from deltalake import DeltaTable

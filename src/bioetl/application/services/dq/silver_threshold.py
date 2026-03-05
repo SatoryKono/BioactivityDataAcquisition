@@ -9,8 +9,6 @@ Extracted from SilverDQAnalyzer (RF-010).
 
 from __future__ import annotations
 
-from typing import Any
-
 import polars as pl
 
 from bioetl.domain.types import JsonDict

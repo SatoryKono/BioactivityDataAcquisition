@@ -12,7 +12,7 @@ Note:
 
 from __future__ import annotations
 
-from typing import Any, ClassVar
+from typing import ClassVar
 
 from bioetl.composition.factories.storage_adapter_clear_mixin import (
     StorageAdapterClearMixin,

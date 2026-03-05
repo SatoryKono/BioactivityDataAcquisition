@@ -7,7 +7,7 @@ ServicesBuilder and helpers have been extracted to services_builder.py.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.composition.factories.dq_context_resolver import (
@@ -207,10 +207,9 @@ class BaseServicesFactory:
 
     @staticmethod
     def _create_metrics(settings: Settings) -> MetricsPort:
-        if settings.metrics_enabled:
-            metrics = PrometheusMetrics()
-        else:
-            metrics = NoOpMetrics()
+        metrics: object = (
+            PrometheusMetrics() if settings.metrics_enabled else NoOpMetrics()
+        )
 
         if isinstance(metrics, MetricsPort):
             assert isinstance(metrics, MetricsPort), (

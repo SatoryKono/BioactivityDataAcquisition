@@ -146,7 +146,7 @@ class UniProtAdapter(
 def _create_uniprot_adapter(
     http_client: UnifiedHTTPClient | None,
     logger: LoggerPort | None,
-    _settings: object | None,  # noqa: ARG001
+    _settings: object | None,
     **kwargs: Any,  # Any: forwarding arbitrary kwargs to HTTP client
 ) -> UniProtAdapter:
     """Factory helper for registry-based adapter construction."""

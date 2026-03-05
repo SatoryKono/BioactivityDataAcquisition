@@ -12,7 +12,7 @@ __all__ = ["CheckpointInfo", "CheckpointService"]
 
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import CheckpointPort, LoggerPort

@@ -6,7 +6,6 @@ Refactored per ADR-005 to accept explicit dependencies instead of full pipeline.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
 
 from bioetl.domain.ports import MetricsPort, QuarantinePort
 from bioetl.domain.types import BatchID, ErrorType, JsonDict

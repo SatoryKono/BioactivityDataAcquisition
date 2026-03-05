@@ -22,6 +22,7 @@ import platform
 import socket
 from datetime import datetime
 from functools import cached_property
+from typing import ClassVar, Final
 
 from bioetl.composition.services.metadata_assemblers import (
     GoldMetadataAssembler,
@@ -43,6 +44,7 @@ from bioetl.domain.models.metadata import (
 from bioetl.domain.ports import (
     BronzeMetadataInput,
     GoldMetadataInput,
+    MetadataCoordinatorPort,
     SilverMetadataInput,
 )
 from bioetl.domain.types import RunType
@@ -53,8 +55,14 @@ __all__ = [
     "MetadataCoordinator",
 ]
 
+_RUN_TYPE_TO_ENUM: Final[dict[RunType, RunTypeEnum]] = {
+    RunType.INCREMENTAL: RunTypeEnum.INCREMENTAL,
+    RunType.BACKFILL: RunTypeEnum.BACKFILL,
+    RunType.REBUILD: RunTypeEnum.REBUILD,
+}
 
-class MetadataCoordinator:
+
+class MetadataCoordinator(MetadataCoordinatorPort):
     """Centralized coordinator for metadata creation across Medallion layers.
 
     Creates consistent metadata with shared run_id, timestamps, and pipeline
@@ -76,7 +84,7 @@ class MetadataCoordinator:
     """
 
     # Class-level cache for environment metadata (shared across instances)
-    _cached_environment: EnvironmentMetadata | None = None
+    _cached_environment: ClassVar[EnvironmentMetadata | None] = None
 
     def __init__(self, run_context: RunContext) -> None:
         """Initialize coordinator with run context.
@@ -94,12 +102,7 @@ class MetadataCoordinator:
     @cached_property
     def _run_type_enum(self) -> RunTypeEnum:
         """Map domain RunType to metadata RunTypeEnum."""
-        mapping = {
-            RunType.INCREMENTAL: RunTypeEnum.INCREMENTAL,
-            RunType.BACKFILL: RunTypeEnum.BACKFILL,
-            RunType.REBUILD: RunTypeEnum.REBUILD,
-        }
-        return mapping.get(self._context.run_type, RunTypeEnum.INCREMENTAL)
+        return _RUN_TYPE_TO_ENUM[self._context.run_type]
 
     @classmethod
     def _get_environment_metadata(cls) -> EnvironmentMetadata:

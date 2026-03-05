@@ -19,6 +19,8 @@ from bioetl.domain.composite.result import (
 )
 
 if TYPE_CHECKING:
+    import polars as pl
+
     from bioetl.application.composite.aggregator import EnricherAggregatorService
     from bioetl.application.composite.coalesce_policy import CoalescePolicyService
     from bioetl.application.composite.column_orderer import ColumnOrdererService
@@ -37,6 +39,7 @@ if TYPE_CHECKING:
         EnricherConfig,
         MergeConfig,
     )
+    from bioetl.domain.composite.cross_validation import CrossValidationStats
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.ports import DeltaReaderPort, LoggerPort, StoragePort
 
@@ -104,28 +107,21 @@ class MergeService(MergeIOMixin, MergeCompatibilityMixin, MergeMetricsRecorderMi
     ) -> MergeResult:
         """Merge seed, dependency, and enricher data into unified output."""
         started_at = datetime.now(tz=UTC)
-
         (
             seed_df,
             records_from_seed,
             effective_seed_pipeline,
-        ) = await self._prepare_seed_dataframe(
-            seed_table,
-            seed_pipeline,
+            sources_used,
+            enricher_dfs,
+            dependency_dfs,
+        ) = await self._load_merge_inputs(
+            seed_table=seed_table,
+            seed_pipeline=seed_pipeline,
+            enrichers=enrichers,
+            enrichment_results=enrichment_results,
+            dependencies=dependencies,
+            dependency_results=dependency_results,
         )
-
-        sources_used = ["seed"]
-        enricher_dfs, enricher_sources = await self._load_enricher_dataframes(
-            enrichers,
-            enrichment_results,
-        )
-        sources_used.extend(enricher_sources)
-
-        dependency_dfs, dependency_sources = await self._load_dependency_dataframes(
-            dependencies,
-            dependency_results,
-        )
-        sources_used.extend(dependency_sources)
 
         merged_df = await self._join_planner.apply_joins(
             seed_df=seed_df,
@@ -148,13 +144,99 @@ class MergeService(MergeIOMixin, MergeCompatibilityMixin, MergeMetricsRecorderMi
             effective_seed_pipeline=effective_seed_pipeline,
         )
 
+        merged_df = self._finalize_merged_dataframe(
+            merged_df=merged_df,
+            enrichers=enrichers,
+            enrichment_results=enrichment_results,
+            effective_seed_pipeline=effective_seed_pipeline,
+            run_id=run_id,
+            sources_used=sources_used,
+            dependency_results=dependency_results,
+            enricher_dfs=enricher_dfs,
+        )
+        records_merged = len(merged_df)
+        records_enriched = self._count_enriched_records(
+            merged_df,
+            enrichers,
+            effective_seed_pipeline,
+        )
+        return await self._persist_and_build_result(
+            merged_df=merged_df,
+            enrichers=enrichers,
+            records_merged=records_merged,
+            records_from_seed=records_from_seed,
+            records_enriched=records_enriched,
+            sources_used=sources_used,
+            cv_stats=cv_stats,
+            quarantine_payloads=quarantine_payloads,
+            run_id=run_id,
+            started_at=started_at,
+        )
+
+    async def _load_merge_inputs(
+        self,
+        *,
+        seed_table: str,
+        seed_pipeline: str | None,
+        enrichers: Sequence[EnricherConfig],
+        enrichment_results: dict[str, EnrichmentResult],
+        dependencies: Sequence[DependencyConfig] | None,
+        dependency_results: dict[str, DependencyResult] | None,
+    ) -> tuple[
+        pl.DataFrame,
+        int,
+        str | None,
+        list[str],
+        dict[str, pl.DataFrame],
+        dict[str, pl.DataFrame],
+    ]:
+        """Load seed, enricher and dependency frames for merge orchestration."""
+        (
+            seed_df,
+            records_from_seed,
+            effective_seed_pipeline,
+        ) = await self._prepare_seed_dataframe(seed_table, seed_pipeline)
+        sources_used = ["seed"]
+
+        enricher_dfs, enricher_sources = await self._load_enricher_dataframes(
+            enrichers,
+            enrichment_results,
+        )
+        sources_used.extend(enricher_sources)
+
+        dependency_dfs, dependency_sources = await self._load_dependency_dataframes(
+            dependencies,
+            dependency_results,
+        )
+        sources_used.extend(dependency_sources)
+        return (
+            seed_df,
+            records_from_seed,
+            effective_seed_pipeline,
+            sources_used,
+            enricher_dfs,
+            dependency_dfs,
+        )
+
+    def _finalize_merged_dataframe(
+        self,
+        *,
+        merged_df: pl.DataFrame,
+        enrichers: Sequence[EnricherConfig],
+        enrichment_results: dict[str, EnrichmentResult],
+        effective_seed_pipeline: str | None,
+        run_id: str,
+        sources_used: list[str],
+        dependency_results: dict[str, DependencyResult] | None,
+        enricher_dfs: dict[str, pl.DataFrame],
+    ) -> pl.DataFrame:
+        """Apply conflict resolution, lineage and final column ordering."""
         merged_df = self._conflict_resolver.resolve_conflicts(
             df=merged_df,
             _enricher_dfs=enricher_dfs,
             enrichers=enrichers,
             seed_pipeline=effective_seed_pipeline,
         )
-
         merged_df = self._add_lineage(
             df=merged_df,
             enrichment_results=enrichment_results,
@@ -164,21 +246,28 @@ class MergeService(MergeIOMixin, MergeCompatibilityMixin, MergeMetricsRecorderMi
         )
         merged_df = self._drop_excluded_fields(merged_df)
         merged_df = self._orderer.order_columns(merged_df)
-
         self._logger.info(
             "Ordered columns by semantic groups",
             total_columns=len(merged_df.columns),
         )
+        return merged_df
 
-        records_merged = len(merged_df)
-        records_enriched = self._count_enriched_records(
-            merged_df,
-            enrichers,
-            effective_seed_pipeline,
-        )
-
+    async def _persist_and_build_result(
+        self,
+        *,
+        merged_df: pl.DataFrame,
+        enrichers: Sequence[EnricherConfig],
+        records_merged: int,
+        records_from_seed: int,
+        records_enriched: int,
+        sources_used: list[str],
+        cv_stats: CrossValidationStats | None,
+        quarantine_payloads: list[dict[str, object]],
+        run_id: str,
+        started_at: datetime,
+    ) -> MergeResult:
+        """Persist merge outputs and construct final domain result."""
         await self._write_outputs(merged_df, run_id=run_id, sources_used=sources_used)
-
         completed_at = datetime.now(tz=UTC)
         duration = (completed_at - started_at).total_seconds()
 
@@ -188,7 +277,6 @@ class MergeService(MergeIOMixin, MergeCompatibilityMixin, MergeMetricsRecorderMi
             sources_used=sources_used,
             duration_seconds=duration,
         )
-
         return self._build_merge_result(
             merged_df=merged_df,
             enrichers=enrichers,

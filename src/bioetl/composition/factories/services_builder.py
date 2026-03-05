@@ -7,7 +7,7 @@ CheckpointManager. Extracted from services_factory.py for LOC compliance.
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable, Sequence
-from typing import TYPE_CHECKING, Any, Literal, cast
+from typing import TYPE_CHECKING, Literal, cast
 
 from bioetl.application.core.batch_executor import BatchExecutor
 from bioetl.application.core.checkpoint_manager import CheckpointManagerService

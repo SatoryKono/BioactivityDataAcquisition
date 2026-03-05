@@ -10,7 +10,7 @@ Usage:
 
 from __future__ import annotations
 
-from typing import Any, Literal, Self
+from typing import Literal, Self
 
 from pydantic import BaseModel, Field, ValidationError, field_validator, model_validator
 
@@ -632,8 +632,8 @@ __all__ = [
     "FieldComparisonSpecSchema",
     "LineageSchema",
     "MergeOutputSchema",
-    "MergeSortBySchema",
     "MergeSchema",
+    "MergeSortBySchema",
     "RetrySchema",
     "SeedSchema",
     "validate_composite_config_payload",

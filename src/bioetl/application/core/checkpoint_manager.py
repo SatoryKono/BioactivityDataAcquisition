@@ -9,8 +9,6 @@ for entities where API offset pagination is unreliable (e.g., publications).
 
 from __future__ import annotations
 
-from typing import Any
-
 from bioetl.domain.medallion import LoadingStrategy
 from bioetl.domain.ports import CheckpointPort, LoggerPort
 from bioetl.domain.types import JsonDict, RunID

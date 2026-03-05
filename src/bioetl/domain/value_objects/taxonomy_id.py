@@ -110,7 +110,7 @@ class TaxonomyId(ValueObject[int]):
         )
 
     @classmethod
-    def from_raw(cls, raw: str | int | None) -> TaxonomyId | None:
+    def from_raw(cls, raw: object) -> TaxonomyId | None:
         """Create TaxonomyId from raw value with normalization.
 
         Handles common formats:
@@ -126,10 +126,30 @@ class TaxonomyId(ValueObject[int]):
         """
         if raw is None:
             return None
-        if isinstance(raw, str) and not raw.strip():
+        if isinstance(raw, bool):
             return None
+
+        normalized = cls._normalize_raw(raw)
+        if normalized is None:
+            return None
+        return cls._build_or_none(normalized)
+
+    @classmethod
+    def _normalize_raw(cls, raw: object) -> str | int | None:
+        """Normalize raw input into canonical str/int candidate."""
+        if isinstance(raw, int):
+            return raw
+        if isinstance(raw, str):
+            stripped = raw.strip()
+            if stripped:
+                return stripped
+        return None
+
+    @classmethod
+    def _build_or_none(cls, candidate: str | int) -> TaxonomyId | None:
+        """Create value object and convert validation failures to ``None``."""
         try:
-            return cls(raw)
+            return cls(candidate)
         except ValueError:
             return None
 
@@ -139,7 +159,7 @@ class TaxonomyId(ValueObject[int]):
 # ============================================================================
 
 
-def validate_taxonomy_id(value: str | int | None) -> int | None:
+def validate_taxonomy_id(value: object) -> int | None:
     """Validate and convert raw value to taxonomy ID integer.
 
     Convenience function for use in field_specs converters where

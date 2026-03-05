@@ -1,8 +1,4 @@
-"""Identifier extraction from PubMed XML elements.
-
-Handles extraction of DOI, PMC ID, PII, MID, and other article identifiers.
-Supports complete ArticleIdList and ELocationID extraction for cross-referencing.
-"""
+"""Identifier extraction from PubMed XML elements."""
 
 from __future__ import annotations
 
@@ -28,24 +24,39 @@ __all__ = [
 ]
 
 
-class IdentifierExtractor(BaseFieldExtractor):
-    """Extractor for article identifiers from PubMed XML.
+def _assign_known_article_id(
+    result: AllArticleIds,
+    *,
+    id_type: str,
+    value: str,
+) -> bool:
+    """Assign a mapped ArticleId and return whether assignment was handled."""
+    if id_type == "pubmed":
+        result["pubmed"] = value
+    elif id_type == "doi":
+        result["doi"] = value
+    elif id_type == "pmc":
+        result["pmc"] = value
+    elif id_type == "pii":
+        result["pii"] = value
+    elif id_type == "mid":
+        result["mid"] = value
+    elif id_type == "publisher-id":
+        result["publisher_id"] = value
+    elif id_type == "pmcid":
+        result["pmcid"] = value
+    elif id_type == "medline":
+        result["medline"] = value
+    else:
+        return False
+    return True
 
-    Handles:
-    - DOI from ELocationID or ArticleIdList
-    - PMC ID from ArticleIdList
-    - PMID (via get_text utility)
-    """
+
+class IdentifierExtractor(BaseFieldExtractor):
+    """Extractor for article identifiers from PubMed XML."""
 
     def extract(self, element: Element | None) -> RawIdentifiers | None:
-        """Extract identifiers from XML using the optimized single-pass method.
-
-        Args:
-            element: Root PubmedArticle element.
-
-        Returns:
-            Dict with raw doi and pmc_id, or None.
-        """
+        """Extract raw doi/pmc_id from XML."""
         if element is None:
             return None
 
@@ -57,14 +68,7 @@ class IdentifierExtractor(BaseFieldExtractor):
         )
 
     def normalize(self, raw_value: object) -> NormalizedIdentifiers:
-        """Normalize identifiers.
-
-        Args:
-            raw_value: Raw identifiers dict.
-
-        Returns:
-            Normalized identifiers dict.
-        """
+        """Normalize extracted identifiers."""
         raw_identifiers = cast("RawIdentifiers", raw_value)
         return NormalizedIdentifiers(
             doi=self._normalize_text(raw_identifiers.get("doi")),
@@ -77,46 +81,17 @@ class IdentifierExtractor(BaseFieldExtractor):
 
     @classmethod
     def extract_doi(cls, root: Element) -> str | None:
-        """Extract DOI from ArticleIdList or ELocationID.
-
-        Delegates to extract_all_identifiers for efficient extraction.
-
-        Args:
-            root: Root PubmedArticle element.
-
-        Returns:
-            DOI string or None.
-        """
+        """Extract DOI from ArticleIdList or ELocationID."""
         return cls.extract_all_identifiers(root)["doi"]
 
     @classmethod
     def extract_pmc_id(cls, root: Element) -> str | None:
-        """Extract PubMed Central ID from ArticleIdList.
-
-        Delegates to extract_all_identifiers.
-
-        Args:
-            root: Root PubmedArticle element.
-
-        Returns:
-            PMC ID string or None.
-        """
+        """Extract PMC ID from ArticleIdList."""
         return cls.extract_all_identifiers(root)["pmc_id"]
 
     @classmethod
     def extract_all_identifiers(cls, root: Element) -> dict[str, str | None]:
-        """Extract all relevant identifiers in a single pass.
-
-        Optimized to scan ELocationID (for DOI/PII) and ArticleIdList (for others)
-        only once each, reducing XML traversal overhead compared to individual calls.
-
-        Returns:
-            Dictionary with keys: doi, pii, pmc_id, mid, publisher_id.
-            Values are normalized strings (stripped) or None.
-
-        Args:
-            root: Root.
-        """
+        """Extract doi/pii/pmc_id/mid/publisher_id in a single pass."""
         extractor = cls()
         result: dict[str, str | None] = {
             "doi": None,
@@ -137,10 +112,7 @@ class IdentifierExtractor(BaseFieldExtractor):
     def _scan_elocation_ids(
         self, article: Element | None, result: dict[str, str | None]
     ) -> None:
-        """Scan ELocationID elements for identifiers.
-
-        Updates result dict in-place.
-        """
+        """Scan ELocationID elements for identifiers."""
         if article is None:
             return
 
@@ -193,19 +165,7 @@ class IdentifierExtractor(BaseFieldExtractor):
 
     @classmethod
     def parse_all_article_ids(cls, root: Element) -> AllArticleIds:
-        """Extract complete set of article identifiers from ArticleIdList.
-
-        This method extracts all available identifiers from PubmedData/ArticleIdList,
-        including less common ones like PII, MID, and publisher-specific IDs that
-        are useful for cross-referencing with publisher databases.
-
-        Args:
-            root: Root PubmedArticle element.
-
-        Returns:
-            AllArticleIds dict with all available identifiers.
-            The 'other_ids' field contains any ID types not explicitly mapped.
-        """
+        """Extract all identifiers from ArticleIdList, preserving unknown keys."""
         extractor = cls()
         result: AllArticleIds = {
             "pubmed": None,
@@ -223,18 +183,6 @@ class IdentifierExtractor(BaseFieldExtractor):
         if article_id_list is None:
             return result
 
-        # Map IdType values to our field names
-        type_mapping = {
-            "pubmed": "pubmed",
-            "doi": "doi",
-            "pmc": "pmc",
-            "pii": "pii",
-            "mid": "mid",
-            "publisher-id": "publisher_id",
-            "pmcid": "pmcid",
-            "medline": "medline",
-        }
-
         for aid in article_id_list.findall("ArticleId"):
             id_type = aid.get("IdType")
             if not id_type or not aid.text:
@@ -244,27 +192,18 @@ class IdentifierExtractor(BaseFieldExtractor):
             if not normalized_value:
                 continue
 
-            if id_type in type_mapping:
-                result[type_mapping[id_type]] = normalized_value  # type: ignore[literal-required]
-            else:
-                # Store unknown ID types in other_ids
+            if not _assign_known_article_id(
+                result,
+                id_type=id_type,
+                value=normalized_value,
+            ):
                 result["other_ids"][id_type] = normalized_value
 
         return result
 
     @classmethod
     def extract_elocation_ids(cls, root: Element) -> ELocationIds:
-        """Extract electronic location identifiers from ELocationID elements.
-
-        ELocationID elements appear in Article and can contain DOI, PII,
-        and other electronic identifiers used by publishers.
-
-        Args:
-            root: Root PubmedArticle element.
-
-        Returns:
-            ELocationIds dict with doi and pii if available.
-        """
+        """Extract doi/pii from ELocationID elements."""
         extractor = cls()
         result: ELocationIds = {
             "doi": None,
@@ -293,36 +232,15 @@ class IdentifierExtractor(BaseFieldExtractor):
 
     @classmethod
     def extract_pii(cls, root: Element) -> str | None:
-        """Extract Publisher Item Identifier (PII).
-
-        Args:
-            root: Root PubmedArticle element.
-
-        Returns:
-            PII string or None.
-        """
+        """Extract Publisher Item Identifier (PII)."""
         return cls.extract_all_identifiers(root)["pii"]
 
     @classmethod
     def extract_mid(cls, root: Element) -> str | None:
-        """Extract Manuscript ID (MID) used in PMC submission.
-
-        Args:
-            root: Root PubmedArticle element.
-
-        Returns:
-            MID string or None.
-        """
+        """Extract Manuscript ID (MID)."""
         return cls.extract_all_identifiers(root)["mid"]
 
     @classmethod
     def extract_publisher_id(cls, root: Element) -> str | None:
-        """Extract publisher-specific identifier.
-
-        Args:
-            root: Root PubmedArticle element.
-
-        Returns:
-            Publisher ID string or None.
-        """
+        """Extract publisher-specific identifier."""
         return cls.extract_all_identifiers(root)["publisher_id"]

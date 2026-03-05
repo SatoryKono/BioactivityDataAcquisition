@@ -33,7 +33,7 @@ __all__ = ["RetryConfig", "UnifiedHTTPClient"]
 
 @dataclass
 class UnifiedHTTPClient(
-    HTTPClientRequestMethodsMixin, HTTPClientRetryMixin, HTTPClientContextMixin
+    HTTPClientContextMixin, HTTPClientRetryMixin, HTTPClientRequestMethodsMixin
 ):
     """Async HTTP client facade with resilience and observability ports."""
 

@@ -152,7 +152,7 @@ class TestCliRunDryRun:
         self,
         cli_runner: CliRunner,
         temp_env: dict[str, str],
-        tmp_path: "Path",
+        tmp_path: Path,
     ):
         """Test that --dry-run handles non-existent tables gracefully."""
         mock_preview = MagicMock()
@@ -192,7 +192,7 @@ class TestCliRunDryRun:
         self,
         cli_runner: CliRunner,
         temp_env: dict[str, str],
-        tmp_path: "Path",
+        tmp_path: Path,
     ):
         """Test that --dry-run shows file counts for existing tables."""
         mock_preview = MagicMock()

@@ -12,7 +12,9 @@ TESTS_ROOT = Path("tests")
 
 def _iter_test_files() -> list[Path]:
     return sorted(
-        path for path in TESTS_ROOT.rglob("*.py") if "__pycache__" not in path.parts
+        path
+        for path in TESTS_ROOT.rglob("*.py")
+        if "__pycache__" not in path.parts and ".worktrees" not in path.parts
     )
 
 

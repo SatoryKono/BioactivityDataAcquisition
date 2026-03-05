@@ -226,8 +226,10 @@ def validate_non_negative(value: object) -> float | None:
     """
     if value is None:
         return None
+    if isinstance(value, bool):
+        return None
     try:
-        float_value = float(value)
+        float_value = float(str(value).strip())
         if float_value < 0:
             return None
         return float_value
@@ -255,24 +257,31 @@ def validate_molecular_weight(
     config: ValidationConfig | None = None,
 ) -> float | None:
     """Convert molecular weight to float and enforce configured bounds."""
-    if value is None:
+    if value is None or isinstance(value, bool):
         return None
+
     try:
-        mw = float(value)
-        # Use config bounds if provided, otherwise legacy bounds
-        if config is not None:
-            min_mw = config.min_molecular_weight
-            max_mw = config.max_molecular_weight
-            precision = config.molecular_weight_precision
-        else:
-            min_mw = MIN_MOLECULAR_WEIGHT
-            max_mw = MAX_MOLECULAR_WEIGHT
-            precision = 10
-        if min_mw < mw < max_mw:
-            return round(mw, precision)
-        return None
+        mw = float(str(value).strip())
     except (ValueError, TypeError):
         return None
+
+    min_mw, max_mw, precision = _molecular_weight_bounds(config)
+    if not (min_mw < mw < max_mw):
+        return None
+    return round(mw, precision)
+
+
+def _molecular_weight_bounds(
+    config: ValidationConfig | None,
+) -> tuple[float, float, int]:
+    """Resolve molecular-weight validation bounds and precision."""
+    if config is None:
+        return MIN_MOLECULAR_WEIGHT, MAX_MOLECULAR_WEIGHT, 10
+    return (
+        config.min_molecular_weight,
+        config.max_molecular_weight,
+        config.molecular_weight_precision,
+    )
 
 
 # =============================================================================

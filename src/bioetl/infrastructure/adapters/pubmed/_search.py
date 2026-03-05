@@ -12,7 +12,7 @@ __all__ = ["PUBMED_SEARCH_ERRORS", "PubMedSearchMixin"]
 
 import contextlib
 import time
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from httpx import RequestError
 

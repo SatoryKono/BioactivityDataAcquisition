@@ -14,7 +14,6 @@ from bioetl.application.core.publication_term_data_source import (
 )
 from bioetl.composition.providers._config_helpers import (
     _get_adapter_config,
-    _get_batch_size_from_config,
     _get_circuit_breaker_from_config,
     _get_factories,
     _get_rate_limit_from_config,
@@ -30,7 +29,6 @@ from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 from bioetl.infrastructure.adapters.input import IDMappingCsvReaderAdapter
 from bioetl.infrastructure.adapters.pubchem.client import PubChemAdapter
-from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
 from bioetl.infrastructure.adapters.uniprot.constants import UNIPROT_API_BASE
 from bioetl.infrastructure.adapters.uniprot.idmapping_client import (
     UniProtIDMappingClient,

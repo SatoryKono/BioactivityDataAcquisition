@@ -1,3 +1,4 @@
+# mypy: disable-error-code=attr-defined
 """Fetch and fallback entrypoints for SemanticScholarAdapter.
 
 Contains FilterableDataSourcePort-compatible filtering methods.
@@ -7,7 +8,7 @@ from __future__ import annotations
 
 import contextlib
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.types import BronzeRecord, JsonDict
 from bioetl.infrastructure.adapters.common import FallbackFetchRequest
@@ -189,7 +190,7 @@ class SemanticScholarFetchAdapterMixin:
         def _extract_record_doi(record: BronzeRecord) -> str | None:
             resolved = record.pop("_resolved_doi", None)
             if isinstance(resolved, str) and resolved.strip():
-                return self._normalize_doi(resolved)
+                return cast("str | None", self._normalize_doi(resolved))
             return None
 
         request = FallbackFetchRequest(

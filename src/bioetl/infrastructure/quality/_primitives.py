@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 from datetime import date
-from typing import Any, TypedDict
+from typing import TypedDict
 
 _QUARTER_RE = re.compile(r"^(20\d{2})-Q([1-4])$")
 

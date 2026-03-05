@@ -12,11 +12,13 @@ Implements Template Method pattern to eliminate duplication across:
 
 from __future__ import annotations
 
+from bioetl.domain.types import JsonDict
+
 __all__ = ["BaseChemblTransformer"]
 
 
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Any, ClassVar, cast
+from typing import TYPE_CHECKING, ClassVar, cast
 
 from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.domain.services import IdentityService

@@ -10,7 +10,7 @@ __all__ = ["CleanupPreview", "CleanupResult", "CleanupService", "LayerInfo"]
 
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, StoragePort

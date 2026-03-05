@@ -21,7 +21,7 @@ __all__ = [
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Literal
 
 from bioetl.domain.exceptions import BioETLError, StorageError
 

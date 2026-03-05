@@ -10,7 +10,6 @@ from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.field_specs import (
     FieldGroup,
-    FieldSpec,
     float_fields,
     map_field_groups,
     simple_fields,
@@ -19,6 +18,7 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
 from bioetl.domain.entities.chembl_assay_parameters import AssayParameters
+from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, PrimaryId
@@ -67,9 +67,7 @@ _STANDARD_VALUES = FieldGroup(
             "standard_units",
             "standard_text_value",
         ),
-        FieldSpec(
-            "standard_value", converter=lambda v: float(v) if v is not None else None
-        ),
+        *float_fields("standard_value"),
     ),
 )
 

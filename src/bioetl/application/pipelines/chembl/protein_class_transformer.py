@@ -6,10 +6,12 @@ Uses declarative field_specs DSL for mapping.
 
 from __future__ import annotations
 
+from bioetl.domain.types import JsonDict
+
 __all__ = ["ProteinClassTransformer"]
 
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.application.core.field_specs import (
     FieldGroup,

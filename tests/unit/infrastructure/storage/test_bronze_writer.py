@@ -14,7 +14,6 @@ import zstandard as zstd
 
 from bioetl.domain.ports import MetricsPort
 from bioetl.domain.types import BatchID, RunID, RunType
-from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.domain.ports import NoOpMetrics
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter

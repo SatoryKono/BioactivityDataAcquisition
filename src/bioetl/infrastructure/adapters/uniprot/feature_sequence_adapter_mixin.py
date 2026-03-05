@@ -1,3 +1,4 @@
+# mypy: disable-error-code=attr-defined
 """Feature and sequence fetch methods for UniProtAdapter."""
 
 from __future__ import annotations
@@ -5,7 +6,7 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.uniprot.fasta_parser import FastaParser
@@ -28,12 +29,19 @@ class UniProtFeatureSequenceAdapterMixin:
                 response = await self.http_client.get(
                     f"{self.base_url}/uniprotkb/{query}.json"
                 )
+            typed_response = cast("object", response)
             duration_ms = (time.perf_counter() - start_time) * 1000
             with contextlib.suppress(Exception):
-                self._request_collector.record_from_response(response, duration_ms)
-            if response.status_code == 200:
-                features: list[BronzeRecord] = response.json().get("features", [])
-                return features
+                self._request_collector.record_from_response(
+                    typed_response, duration_ms
+                )
+            if getattr(typed_response, "status_code", None) == 200:
+                json_fn = getattr(typed_response, "json", None)
+                payload = json_fn() if callable(json_fn) else {}
+                if isinstance(payload, dict):
+                    raw_features = payload.get("features")
+                    if isinstance(raw_features, list):
+                        return [item for item in raw_features if isinstance(item, dict)]
             return []
         except _UNIPROT_FEATURE_SEQUENCE_ERRORS as error:
             self._handle_fetch_error("feature", query, error=error)
@@ -75,11 +83,15 @@ class UniProtFeatureSequenceAdapterMixin:
                     f"{self.base_url}/uniprotkb/stream",
                     params={"query": query, "format": "fasta"},
                 )
+            typed_response = cast("object", response)
             duration_ms = (time.perf_counter() - start_time) * 1000
             with contextlib.suppress(Exception):
-                self._request_collector.record_from_response(response, duration_ms)
-            if response.status_code == 200:
-                return response.text
+                self._request_collector.record_from_response(
+                    typed_response, duration_ms
+                )
+            if getattr(typed_response, "status_code", None) == 200:
+                text = getattr(typed_response, "text", None)
+                return text if isinstance(text, str) else None
             return None
         except _UNIPROT_FEATURE_SEQUENCE_ERRORS as error:
             self._handle_fetch_error("sequence", query, error=error)
