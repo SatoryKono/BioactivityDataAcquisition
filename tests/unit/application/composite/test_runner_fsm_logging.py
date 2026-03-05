@@ -27,6 +27,7 @@ from bioetl.domain.composite.result import (
     MergeResult,
 )
 from bioetl.domain.composite.state import CompositePipelineState
+from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.events import PipelineEvent
 from bioetl.domain.locking import FencingToken
 
@@ -558,7 +559,7 @@ class TestFSMFailureLogging:
             run_id="00000000-0000-0000-0000-000000000123",
         )
 
-        with pytest.raises(RuntimeError, match="Required enricher"):
+        with pytest.raises(InvalidStateError, match="Required enricher"):
             await runner.run()
 
         # Check for FSM transition to FAILED

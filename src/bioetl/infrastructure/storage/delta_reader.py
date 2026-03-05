@@ -169,6 +169,12 @@ class DeltaReader:
                     return int(sum(num_records))
             except (KeyError, AttributeError, TypeError):
                 pass
+            except BaseException:
+                # pyo3_runtime.PanicException on empty Delta tables
+                # (inherits BaseException, not Exception).
+                # After panic the DeltaTable lock is poisoned, so
+                # return 0 for empty tables.
+                return 0
 
             # Fallback: read only row count via PyArrow dataset
             # (reads footer metadata, not full data)

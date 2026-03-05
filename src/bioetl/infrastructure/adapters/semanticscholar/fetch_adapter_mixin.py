@@ -34,51 +34,87 @@ class SemanticScholarFetchAdapterMixin:
         """Fetch records via search endpoint or delegated filtered path."""
         del offset
         if filter_ids:
-            effective_filter_field = filter_field or "doi"
-            async for record in self.fetch_filtered(
-                entity_type, filter_ids, effective_filter_field, limit
+            async for record in self._fetch_from_filter_ids(
+                entity_type=entity_type,
+                filter_ids=filter_ids,
+                filter_field=filter_field,
+                limit=limit,
             ):
                 yield record
             return
 
-        if entity_type not in ("publication", "paper"):
-            raise ValueError(
-                f"SemanticScholarAdapter supports 'publication' or 'paper', got: {entity_type}"
-            )
-
+        self._validate_entity_type(entity_type)
         current_offset = 0
         page_size = min(100, limit or 100)
         fetched = 0
-
         while True:
-            params: JsonDict = {
-                "query": query or "*",
-                "fields": self.fields,
-                "offset": current_offset,
-                "limit": page_size,
-            }
-
-            url = f"{SEMANTICSCHOLAR_BASE_URL}/paper/search"
-            start_time = time.perf_counter()
-            with self._adapter_metrics.measure_request("/paper/search"):
-                response = await self.http_client.get_once(
-                    url, params=params, headers=self._build_headers()
-                )
-            duration_ms = (time.perf_counter() - start_time) * 1000
-            with contextlib.suppress(Exception):
-                self._request_collector.record_from_response(response, duration_ms)
-
-            data = response.json()
-            for record in data.get("data", []):
+            records, next_offset = await self._fetch_search_page(
+                query=query,
+                page_size=page_size,
+                current_offset=current_offset,
+            )
+            for record in records:
                 if limit and fetched >= limit:
                     return
                 yield record
                 fetched += 1
-
-            next_offset = data.get("next")
             if next_offset is None or (limit and fetched >= limit):
                 return
             current_offset = next_offset
+
+    async def _fetch_from_filter_ids(
+        self,
+        *,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str | None,
+        limit: int | None,
+    ) -> AsyncIterator[BronzeRecord]:
+        """Delegate filtered fetch path."""
+        effective_filter_field = filter_field or "doi"
+        async for record in self.fetch_filtered(
+            entity_type=entity_type,
+            filter_ids=filter_ids,
+            filter_field=effective_filter_field,
+            limit=limit,
+        ):
+            yield record
+
+    @staticmethod
+    def _validate_entity_type(entity_type: str) -> None:
+        """Validate supported Semantic Scholar entity types."""
+        if entity_type in ("publication", "paper"):
+            return
+        raise ValueError(
+            "SemanticScholarAdapter supports 'publication' or 'paper', "
+            f"got: {entity_type}"
+        )
+
+    async def _fetch_search_page(
+        self,
+        *,
+        query: str | None,
+        page_size: int,
+        current_offset: int,
+    ) -> tuple[list[BronzeRecord], int | None]:
+        """Fetch one search page and emit request telemetry."""
+        params: JsonDict = {
+            "query": query or "*",
+            "fields": self.fields,
+            "offset": current_offset,
+            "limit": page_size,
+        }
+        url = f"{SEMANTICSCHOLAR_BASE_URL}/paper/search"
+        start_time = time.perf_counter()
+        with self._adapter_metrics.measure_request("/paper/search"):
+            response = await self.http_client.get_once(
+                url, params=params, headers=self._build_headers()
+            )
+        duration_ms = (time.perf_counter() - start_time) * 1000
+        with contextlib.suppress(Exception):
+            self._request_collector.record_from_response(response, duration_ms)
+        data = response.json()
+        return list(data.get("data", [])), data.get("next")
 
     async def fetch_filtered(
         self,

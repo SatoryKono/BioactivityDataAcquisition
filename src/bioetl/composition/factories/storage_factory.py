@@ -41,6 +41,406 @@ __all__ = ["StorageContext", "StorageFactory"]
 
 
 @dataclass(frozen=True)
+class _StorageBuildInputs:
+    """Resolved inputs required to build a storage context."""
+
+    bronze_config: SinkLayerConfig | None
+    silver_config: SinkLayerConfig | None
+    gold_config: SinkLayerConfig | None
+    bronze_path: Path
+    silver_path: Path
+    gold_path: Path
+    transform_version: str | None
+    transform_steps: tuple[str, ...]
+    bronze_flat_structure: bool
+    silver_flat_structure: bool
+    gold_flat_structure: bool
+    silver_csv_exporter: CsvExporter | None
+    gold_csv_exporter: CsvExporter | None
+
+
+def _resolve_layer_configs(
+    config: PipelineYamlConfig,
+) -> tuple[SinkLayerConfig | None, SinkLayerConfig | None, SinkLayerConfig | None]:
+    """Resolve Bronze/Silver/Gold sink layer configs from pipeline config."""
+    bronze_config = config.sink.get("bronze")
+    silver_config = config.sink.get("silver")
+    gold_config = config.sink.get("gold")
+    return bronze_config, silver_config, gold_config
+
+
+def _resolve_storage_paths(
+    *,
+    settings: Settings,
+    bronze_config: SinkLayerConfig | None,
+    silver_config: SinkLayerConfig | None,
+    gold_config: SinkLayerConfig | None,
+) -> tuple[Path, Path, Path, bool]:
+    """Resolve effective layer paths and whether YAML paths are enabled."""
+    use_yaml_paths = not settings.test_mode
+    bronze_path = StorageFactory._resolve_layer_path(
+        bronze_config,
+        settings.bronze_path,
+        use_yaml_paths,
+    )
+    silver_path = StorageFactory._resolve_layer_path(
+        silver_config,
+        settings.silver_path,
+        use_yaml_paths,
+    )
+    gold_path = StorageFactory._resolve_layer_path(
+        gold_config,
+        settings.gold_path,
+        use_yaml_paths,
+    )
+    return bronze_path, silver_path, gold_path, use_yaml_paths
+
+
+def _create_csv_exporters(
+    *,
+    settings: Settings,
+    silver_config: SinkLayerConfig | None,
+    gold_config: SinkLayerConfig | None,
+    logger: LoggerPort,
+    silver_path: Path,
+    gold_path: Path,
+) -> tuple[CsvExporter | None, CsvExporter | None]:
+    """Create optional CSV exporters for Silver and Gold layers."""
+    silver_csv_exporter = StorageFactory._create_csv_exporter_from_config(
+        silver_config.csv_export if silver_config else None,
+        logger,
+        override_path=silver_path if settings.test_mode else None,
+    )
+    gold_csv_exporter = StorageFactory._create_csv_exporter_from_config(
+        gold_config.csv_export if gold_config else None,
+        logger,
+        override_path=gold_path if settings.test_mode else None,
+    )
+    return silver_csv_exporter, gold_csv_exporter
+
+
+def _resolve_metadata_flags(
+    *,
+    bronze_config: SinkLayerConfig | None,
+    silver_config: SinkLayerConfig | None,
+    gold_config: SinkLayerConfig | None,
+) -> tuple[bool, bool, bool, bool]:
+    """Resolve JSON/metadata export flags from sink-layer configs."""
+    save_json = bronze_config.save_json if bronze_config else False
+    bronze_save_metadata = bronze_config.save_metadata if bronze_config else False
+    silver_save_metadata = silver_config.save_metadata if silver_config else False
+    gold_save_metadata = gold_config.save_metadata if gold_config else False
+    return save_json, bronze_save_metadata, silver_save_metadata, gold_save_metadata
+
+
+def _resolve_flat_structure_flags(
+    *,
+    bronze_config: SinkLayerConfig | None,
+    silver_config: SinkLayerConfig | None,
+    gold_config: SinkLayerConfig | None,
+    use_yaml_paths: bool,
+) -> tuple[bool, bool, bool]:
+    """Resolve flat-structure flags with test-mode safety."""
+    bronze_flat_structure = (
+        bronze_config.flat_structure if bronze_config else False
+    ) and use_yaml_paths
+    silver_flat_structure = (
+        silver_config.flat_structure if silver_config else False
+    ) and use_yaml_paths
+    gold_flat_structure = (gold_config.flat_structure if gold_config else False) and (
+        use_yaml_paths
+    )
+    return bronze_flat_structure, silver_flat_structure, gold_flat_structure
+
+
+def _log_storage_paths(
+    *,
+    logger: LoggerPort,
+    bronze_path: Path,
+    silver_path: Path,
+    gold_path: Path,
+) -> None:
+    """Log resolved Bronze/Silver/Gold storage paths."""
+    logger.info(
+        "Using local storage",
+        bronze_path=str(bronze_path),
+        silver_path=str(silver_path),
+        gold_path=str(gold_path),
+    )
+
+
+def _resolve_exporters_with_logging(
+    *,
+    settings: Settings,
+    bronze_config: SinkLayerConfig | None,
+    silver_config: SinkLayerConfig | None,
+    gold_config: SinkLayerConfig | None,
+    logger: LoggerPort,
+    silver_path: Path,
+    gold_path: Path,
+) -> tuple[CsvExporter | None, CsvExporter | None]:
+    """Create exporters and emit export-status telemetry."""
+    silver_csv_exporter, gold_csv_exporter = _create_csv_exporters(
+        settings=settings,
+        silver_config=silver_config,
+        gold_config=gold_config,
+        logger=logger,
+        silver_path=silver_path,
+        gold_path=gold_path,
+    )
+    save_json, bronze_save_metadata, silver_save_metadata, gold_save_metadata = (
+        _resolve_metadata_flags(
+            bronze_config=bronze_config,
+            silver_config=silver_config,
+            gold_config=gold_config,
+        )
+    )
+    StorageFactory._log_export_status(
+        logger,
+        save_json,
+        silver_csv_exporter,
+        gold_csv_exporter,
+        bronze_save_metadata,
+        silver_save_metadata,
+        gold_save_metadata,
+    )
+    return silver_csv_exporter, gold_csv_exporter
+
+
+def _resolve_transform_and_flat(
+    *,
+    config: PipelineYamlConfig,
+    bronze_config: SinkLayerConfig | None,
+    silver_config: SinkLayerConfig | None,
+    gold_config: SinkLayerConfig | None,
+    use_yaml_paths: bool,
+) -> tuple[str | None, tuple[str, ...], bool, bool, bool]:
+    """Resolve transform lineage info and flat-structure flags."""
+    bronze_flat_structure, silver_flat_structure, gold_flat_structure = (
+        _resolve_flat_structure_flags(
+            bronze_config=bronze_config,
+            silver_config=silver_config,
+            gold_config=gold_config,
+            use_yaml_paths=use_yaml_paths,
+        )
+    )
+    return (
+        config.transform.version,
+        tuple(config.transform.steps),
+        bronze_flat_structure,
+        silver_flat_structure,
+        gold_flat_structure,
+    )
+
+
+def _pack_storage_build_inputs(
+    *,
+    bronze_config: SinkLayerConfig | None,
+    silver_config: SinkLayerConfig | None,
+    gold_config: SinkLayerConfig | None,
+    bronze_path: Path,
+    silver_path: Path,
+    gold_path: Path,
+    transform_version: str | None,
+    transform_steps: tuple[str, ...],
+    bronze_flat_structure: bool,
+    silver_flat_structure: bool,
+    gold_flat_structure: bool,
+    silver_csv_exporter: CsvExporter | None,
+    gold_csv_exporter: CsvExporter | None,
+) -> _StorageBuildInputs:
+    """Pack resolved storage inputs into immutable transfer object."""
+    return _StorageBuildInputs(
+        bronze_config=bronze_config,
+        silver_config=silver_config,
+        gold_config=gold_config,
+        bronze_path=bronze_path,
+        silver_path=silver_path,
+        gold_path=gold_path,
+        transform_version=transform_version,
+        transform_steps=transform_steps,
+        bronze_flat_structure=bronze_flat_structure,
+        silver_flat_structure=silver_flat_structure,
+        gold_flat_structure=gold_flat_structure,
+        silver_csv_exporter=silver_csv_exporter,
+        gold_csv_exporter=gold_csv_exporter,
+    )
+
+
+def _assemble_storage_build_inputs(
+    *,
+    config: PipelineYamlConfig,
+    bronze_config: SinkLayerConfig | None,
+    silver_config: SinkLayerConfig | None,
+    gold_config: SinkLayerConfig | None,
+    bronze_path: Path,
+    silver_path: Path,
+    gold_path: Path,
+    use_yaml_paths: bool,
+    silver_csv_exporter: CsvExporter | None,
+    gold_csv_exporter: CsvExporter | None,
+) -> _StorageBuildInputs:
+    """Assemble full immutable build input payload."""
+    (
+        transform_version,
+        transform_steps,
+        bronze_flat_structure,
+        silver_flat_structure,
+        gold_flat_structure,
+    ) = _resolve_transform_and_flat(
+        config=config,
+        bronze_config=bronze_config,
+        silver_config=silver_config,
+        gold_config=gold_config,
+        use_yaml_paths=use_yaml_paths,
+    )
+    return _pack_storage_build_inputs(
+        bronze_config=bronze_config,
+        silver_config=silver_config,
+        gold_config=gold_config,
+        bronze_path=bronze_path,
+        silver_path=silver_path,
+        gold_path=gold_path,
+        transform_version=transform_version,
+        transform_steps=transform_steps,
+        bronze_flat_structure=bronze_flat_structure,
+        silver_flat_structure=silver_flat_structure,
+        gold_flat_structure=gold_flat_structure,
+        silver_csv_exporter=silver_csv_exporter,
+        gold_csv_exporter=gold_csv_exporter,
+    )
+
+
+def _build_storage_context(
+    *,
+    settings: Settings,
+    bronze_path: Path,
+    silver_path: Path,
+    gold_path: Path,
+    bronze_config: SinkLayerConfig | None,
+    silver_config: SinkLayerConfig | None,
+    gold_config: SinkLayerConfig | None,
+    silver_csv_exporter: CsvExporter | None,
+    gold_csv_exporter: CsvExporter | None,
+    logger: LoggerPort,
+    metrics: MetricsPort,
+    tracing: TracingPort | None,
+    metadata_coordinator: MetadataCoordinator | None,
+    transform_version: str | None,
+    transform_steps: tuple[str, ...],
+    bronze_flat_structure: bool,
+    silver_flat_structure: bool,
+    gold_flat_structure: bool,
+    silver_validator: SilverValidatorPort | None,
+) -> StorageContext:
+    """Build storage adapter and wrap it with resolved storage paths."""
+    adapter = StorageFactory._create_storage_adapter(
+        bronze_path=bronze_path,
+        silver_path=silver_path,
+        gold_path=gold_path,
+        bronze_config=bronze_config,
+        silver_config=silver_config,
+        gold_config=gold_config,
+        silver_csv_exporter=silver_csv_exporter,
+        gold_csv_exporter=gold_csv_exporter,
+        logger=logger,
+        metrics=metrics,
+        tracing=tracing,
+        metadata_coordinator=metadata_coordinator,
+        transform_version=transform_version,
+        transform_steps=transform_steps,
+        bronze_flat_structure=bronze_flat_structure,
+        silver_flat_structure=silver_flat_structure,
+        gold_flat_structure=gold_flat_structure,
+        silver_validator=silver_validator,
+    )
+    return StorageContext(
+        adapter=adapter,
+        bronze_path=bronze_path,
+        silver_path=silver_path,
+        gold_path=gold_path,
+        checkpoints_path=settings.checkpoint_path,
+    )
+
+
+def _resolve_storage_build_inputs(
+    *,
+    settings: Settings,
+    config: PipelineYamlConfig,
+    logger: LoggerPort,
+) -> _StorageBuildInputs:
+    """Resolve storage paths/export options required for adapter creation."""
+    bronze_config, silver_config, gold_config = _resolve_layer_configs(config)
+    bronze_path, silver_path, gold_path, use_yaml_paths = _resolve_storage_paths(
+        settings=settings,
+        bronze_config=bronze_config,
+        silver_config=silver_config,
+        gold_config=gold_config,
+    )
+    _log_storage_paths(
+        logger=logger,
+        bronze_path=bronze_path,
+        silver_path=silver_path,
+        gold_path=gold_path,
+    )
+    silver_csv_exporter, gold_csv_exporter = _resolve_exporters_with_logging(
+        settings=settings,
+        bronze_config=bronze_config,
+        silver_config=silver_config,
+        gold_config=gold_config,
+        logger=logger,
+        silver_path=silver_path,
+        gold_path=gold_path,
+    )
+    return _assemble_storage_build_inputs(
+        config=config,
+        bronze_config=bronze_config,
+        silver_config=silver_config,
+        gold_config=gold_config,
+        bronze_path=bronze_path,
+        silver_path=silver_path,
+        gold_path=gold_path,
+        use_yaml_paths=use_yaml_paths,
+        silver_csv_exporter=silver_csv_exporter,
+        gold_csv_exporter=gold_csv_exporter,
+    )
+
+
+def _create_context_with_resolved_inputs(
+    *,
+    settings: Settings,
+    logger: LoggerPort,
+    metrics: MetricsPort,
+    tracing: TracingPort | None,
+    metadata_coordinator: MetadataCoordinator | None,
+    silver_validator: SilverValidatorPort | None,
+    build_inputs: _StorageBuildInputs,
+) -> StorageContext:
+    """Create storage context from pre-resolved build inputs."""
+    return _build_storage_context(
+        settings=settings,
+        bronze_path=build_inputs.bronze_path,
+        silver_path=build_inputs.silver_path,
+        gold_path=build_inputs.gold_path,
+        bronze_config=build_inputs.bronze_config,
+        silver_config=build_inputs.silver_config,
+        gold_config=build_inputs.gold_config,
+        silver_csv_exporter=build_inputs.silver_csv_exporter,
+        gold_csv_exporter=build_inputs.gold_csv_exporter,
+        logger=logger,
+        metrics=metrics,
+        tracing=tracing,
+        metadata_coordinator=metadata_coordinator,
+        transform_version=build_inputs.transform_version,
+        transform_steps=build_inputs.transform_steps,
+        bronze_flat_structure=build_inputs.bronze_flat_structure,
+        silver_flat_structure=build_inputs.silver_flat_structure,
+        gold_flat_structure=build_inputs.gold_flat_structure,
+        silver_validator=silver_validator,
+    )
+
+
+@dataclass(frozen=True)
 class StorageContext:
     """Context object returned by StorageFactory containing adapter and paths."""
 
@@ -238,123 +638,20 @@ class StorageFactory:
         metadata_coordinator: MetadataCoordinator | None = None,
         silver_validator: SilverValidatorPort | None = None,
     ) -> StorageContext:
-        """Create a StorageAdapter for local deployment.
-
-        Args:
-            settings: Application settings with data_dir
-            config: Pipeline YAML configuration
-            logger: Structured logger
-            metrics: Metrics port for Bronze observability (MUST be injected).
-            tracing: Optional TracingPort for distributed tracing.
-            metadata_coordinator: Optional MetadataCoordinator for centralized
-                                metadata creation. If provided, ensures consistent
-                                run_id and timestamps across Bronze, Silver, Gold.
-            silver_validator: Optional SilverValidatorPort for Pandera validation
-                in SilverWriter. If None, validation is skipped by storage layer.
-
-        Returns:
-            StorageContext with adapter and paths
-        """
-        bronze_config = config.sink.get("bronze")
-        silver_config = config.sink.get("silver")
-        gold_config = config.sink.get("gold")
-
-        # In test mode, always use settings to respect test isolation
-        use_yaml_paths = not settings.test_mode
-
-        bronze_path = StorageFactory._resolve_layer_path(
-            bronze_config, settings.bronze_path, use_yaml_paths
+        """Create local storage context with configured layer writers."""
+        build_inputs = _resolve_storage_build_inputs(
+            settings=settings,
+            config=config,
+            logger=logger,
         )
-        silver_path = StorageFactory._resolve_layer_path(
-            silver_config, settings.silver_path, use_yaml_paths
-        )
-        gold_path = StorageFactory._resolve_layer_path(
-            gold_config, settings.gold_path, use_yaml_paths
-        )
-
-        logger.info(
-            "Using local storage",
-            bronze_path=str(bronze_path),
-            silver_path=str(silver_path),
-            gold_path=str(gold_path),
-        )
-
-        # In test mode, override CSV export paths to use resolved layer paths
-        # This ensures test isolation by writing to temp directories
-        silver_csv_exporter = StorageFactory._create_csv_exporter_from_config(
-            silver_config.csv_export if silver_config else None,
-            logger,
-            override_path=silver_path if settings.test_mode else None,
-        )
-        gold_csv_exporter = StorageFactory._create_csv_exporter_from_config(
-            gold_config.csv_export if gold_config else None,
-            logger,
-            override_path=gold_path if settings.test_mode else None,
-        )
-
-        # JSON files are now written alongside zst files (same directory)
-        save_json = bronze_config.save_json if bronze_config else False
-
-        bronze_save_metadata = bronze_config.save_metadata if bronze_config else False
-        silver_save_metadata = silver_config.save_metadata if silver_config else False
-        gold_save_metadata = gold_config.save_metadata if gold_config else False
-        StorageFactory._log_export_status(
-            logger,
-            save_json,
-            silver_csv_exporter,
-            gold_csv_exporter,
-            bronze_save_metadata,
-            silver_save_metadata,
-            gold_save_metadata,
-        )
-
-        # Extract transform info for lineage tracking
-        transform_version = config.transform.version
-        transform_steps = tuple(config.transform.steps)
-
-        # Extract flat_structure settings
-        # In test mode (use_yaml_paths=False), settings paths don't include
-        # provider/entity segments, so flat_structure must be False to ensure
-        # each pipeline writes to its own subdirectory (base_path/table_name).
-        # In production, YAML paths already include provider/entity per ADR-029,
-        # so flat_structure=true correctly writes directly to the configured path.
-        bronze_flat_structure = (
-            bronze_config.flat_structure if bronze_config else False
-        ) and use_yaml_paths
-        silver_flat_structure = (
-            silver_config.flat_structure if silver_config else False
-        ) and use_yaml_paths
-        gold_flat_structure = (
-            gold_config.flat_structure if gold_config else False
-        ) and use_yaml_paths
-
-        adapter = StorageFactory._create_storage_adapter(
-            bronze_path=bronze_path,
-            silver_path=silver_path,
-            gold_path=gold_path,
-            bronze_config=bronze_config,
-            silver_config=silver_config,
-            gold_config=gold_config,
-            silver_csv_exporter=silver_csv_exporter,
-            gold_csv_exporter=gold_csv_exporter,
+        return _create_context_with_resolved_inputs(
+            settings=settings,
             logger=logger,
             metrics=metrics,
             tracing=tracing,
             metadata_coordinator=metadata_coordinator,
-            transform_version=transform_version,
-            transform_steps=transform_steps,
-            bronze_flat_structure=bronze_flat_structure,
-            silver_flat_structure=silver_flat_structure,
-            gold_flat_structure=gold_flat_structure,
             silver_validator=silver_validator,
-        )
-
-        return StorageContext(
-            adapter=adapter,
-            bronze_path=bronze_path,
-            silver_path=silver_path,
-            gold_path=gold_path,
-            checkpoints_path=settings.checkpoint_path,
+            build_inputs=build_inputs,
         )
 
     @staticmethod

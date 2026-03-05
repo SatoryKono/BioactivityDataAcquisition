@@ -181,10 +181,7 @@ class BatchProcessingService:
                 write_coros.append(
                     self._execute_with_span(
                         "write_gold",
-                        self._writer.write_gold(
-                            transform_result.gold_records,
-                            silver_refs=bronze_refs,
-                        ),
+                        self._writer.write_gold(transform_result.gold_records),
                         batch_id,
                         len(transform_result.gold_records),
                         on_error=lambda error: self._writer.log_and_track_write_error(

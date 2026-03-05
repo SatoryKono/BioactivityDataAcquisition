@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 from bioetl.domain.types import JsonDict
 
@@ -24,17 +24,24 @@ class StorageAdapterMergedMixin:
         JsonDict  # Any: record/metadata values are heterogeneous
     ]
 
-    def get_table_path(self, table_name: str) -> Path:
+    def get_table_path(
+        self,
+        table_name: str,
+        layer: Literal["silver", "gold"] = "silver",
+    ) -> Path:
         """Resolve the full path to a Delta table.
 
         Delegates to the underlying writer implementation.
 
         Args:
             table_name: Database table name.
+            layer: Storage layer path resolver (``"silver"`` or ``"gold"``).
 
         Returns:
             Table path.
         """
+        if layer == "gold":
+            return self.gold.get_table_path(table_name)
         return self.silver.get_table_path(table_name)
 
     async def read_silver(

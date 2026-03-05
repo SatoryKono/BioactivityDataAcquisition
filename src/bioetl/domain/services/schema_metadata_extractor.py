@@ -88,24 +88,40 @@ def _extract_schema_columns(
     gold_schema: object,
 ) -> list[SchemaColumnMetadata]:
     """Extract columns from schema via to_schema() when available."""
-    columns: list[SchemaColumnMetadata] = []
     try:
-        if hasattr(gold_schema, "to_schema"):
-            schema_instance = gold_schema.to_schema()
-            if hasattr(schema_instance, "columns"):
-                for col_name, col_schema in schema_instance.columns.items():
-                    dtype_str = str(col_schema.dtype) if col_schema.dtype else "object"
-                    if "." in dtype_str:
-                        dtype_str = dtype_str.split(".")[-1]
-
-                    nullable = getattr(col_schema, "nullable", True)
-                    columns.append(
-                        SchemaColumnMetadata(
-                            name=col_name,
-                            type=dtype_str,
-                            nullable=nullable,
-                        )
-                    )
+        schema_instance = _safe_to_schema(gold_schema)
     except (AttributeError, TypeError, ValueError):
-        columns = []
-    return columns
+        return []
+
+    raw_columns = getattr(schema_instance, "columns", None)
+    if not isinstance(raw_columns, dict):
+        return []
+
+    return [
+        _build_schema_column_metadata(col_name, col_schema)
+        for col_name, col_schema in raw_columns.items()
+    ]
+
+
+def _safe_to_schema(gold_schema: object) -> object:
+    """Return schema object via to_schema when available."""
+    to_schema = getattr(gold_schema, "to_schema", None)
+    if callable(to_schema):
+        return to_schema()
+    return object()
+
+
+def _build_schema_column_metadata(
+    col_name: str,
+    col_schema: object,
+) -> SchemaColumnMetadata:
+    """Build normalized metadata DTO for one schema column."""
+    raw_dtype = getattr(col_schema, "dtype", None)
+    dtype_str = str(raw_dtype) if raw_dtype is not None else "object"
+    if "." in dtype_str:
+        dtype_str = dtype_str.split(".")[-1]
+    return SchemaColumnMetadata(
+        name=col_name,
+        type=dtype_str,
+        nullable=getattr(col_schema, "nullable", True),
+    )

@@ -24,10 +24,23 @@ def test_docs_workflow_checks_dependency_map_drift() -> None:
     assert "scripts/generate_architecture_dependency_map.py --check" in workflow
 
 
+def test_docs_workflow_autogen_dependency_map_on_pr() -> None:
+    workflow = Path(".github/workflows/docs.yml").read_text(encoding="utf-8")
+    assert "Regenerate architecture dependency docs (PR preflight)" in workflow
+    assert "scripts/generate_architecture_dependency_map.py --update" in workflow
+    assert "Assert regenerated dependency docs are committed" in workflow
+
+
 def test_tests_workflow_checks_dependency_map_drift() -> None:
     workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")
     assert "Check architecture dependency docs drift" in workflow
     assert "scripts/generate_architecture_dependency_map.py --check" in workflow
+
+
+def test_pre_commit_checks_dependency_map_drift() -> None:
+    pre_commit = Path(".pre-commit-config.yaml").read_text(encoding="utf-8")
+    assert "check-architecture-dependency-map-drift" in pre_commit
+    assert "scripts/generate_architecture_dependency_map.py --check" in pre_commit
 
 
 def test_nightly_workflow_regenerates_dependency_map() -> None:

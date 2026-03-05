@@ -63,7 +63,7 @@ def _is_dataclass_instance(value: object) -> bool:
 
 
 def _serialize_value(
-    value: Any,
+    value: Any,  # Any: recursive serializer handles heterogeneous types
 ) -> Any:  # Any: recursive serializer handles heterogeneous types
     """Serialize a value with dataclass/enum/datetime/collection support."""
     if _is_dataclass_instance(value):

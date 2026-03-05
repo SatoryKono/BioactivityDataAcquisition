@@ -7,7 +7,7 @@ ServicesBuilder and helpers have been extracted to services_builder.py.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.composition.factories.dq_context_resolver import (
@@ -211,10 +211,33 @@ class BaseServicesFactory:
             metrics = PrometheusMetrics()
         else:
             metrics = NoOpMetrics()
-        assert isinstance(metrics, MetricsPort), (
+
+        if isinstance(metrics, MetricsPort):
+            assert isinstance(metrics, MetricsPort), (
+                f"Metrics adapter must implement MetricsPort, got {type(metrics)}"
+            )
+            return metrics
+        if BaseServicesFactory._is_metrics_port_like(metrics):
+            return cast("MetricsPort", metrics)
+        raise TypeError(
             f"Metrics adapter must implement MetricsPort, got {type(metrics)}"
         )
-        return metrics
+
+    @staticmethod
+    def _is_metrics_port_like(candidate: object) -> bool:
+        """Duck-typed fallback for patched test doubles."""
+        required_methods = (
+            "observe_histogram",
+            "increment_counter",
+            "set_gauge",
+            "inc_quarantine_records",
+            "inc_dq_validation_failures",
+            "close",
+        )
+        return all(
+            callable(getattr(candidate, method_name, None))
+            for method_name in required_methods
+        )
 
     @staticmethod
     def _get_output_root(

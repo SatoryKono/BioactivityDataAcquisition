@@ -25,7 +25,7 @@ from bioetl.domain.types import JsonDict
 
 
 def _filter_string_items(
-    items: list[Any],
+    items: list[Any],  # Any: input items heterogeneous
 ) -> list[str]:  # Any: input items heterogeneous
     """Filter list to non-empty stripped strings."""
     return [a.strip() for a in items if isinstance(a, str) and a.strip()]

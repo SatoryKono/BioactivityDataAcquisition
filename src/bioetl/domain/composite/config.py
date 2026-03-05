@@ -38,19 +38,11 @@ from bioetl.domain.composite.config_models import (
 )
 from bioetl.domain.composite.config_runtime import ExecutionConfig, LineageConfig
 from bioetl.domain.composite.config_validators import (
-    _require_non_empty as _require_non_empty_impl,
-)
-from bioetl.domain.composite.config_validators import (
-    _validate_optional_threshold as _validate_optional_threshold_impl,
-)
-from bioetl.domain.composite.config_validators import (
-    _validate_positive as _validate_positive_impl,
-)
-from bioetl.domain.composite.config_validators import (
-    _validate_positive_limit as _validate_positive_limit_impl,
-)
-from bioetl.domain.composite.config_validators import (
-    _validate_threshold_order as _validate_threshold_order_impl,
+    _require_non_empty,
+    _validate_optional_threshold,
+    _validate_positive,
+    _validate_positive_limit,
+    _validate_threshold_order,
 )
 from bioetl.domain.composite.cross_validation import EnricherFieldPairing
 
@@ -168,26 +160,11 @@ class CompositeConfig:
         return _composite_from_dict(data)
 
 
-def _require_non_empty(value: object, field_name: str) -> None:
-    """Compatibility wrapper for validation helper re-export."""
-    _require_non_empty_impl(value, field_name)
-
-
-def _validate_positive(value: int, field_name: str) -> None:
-    """Compatibility wrapper for validation helper re-export."""
-    _validate_positive_impl(value, field_name)
-
-
-def _validate_positive_limit(value: int | None, context: str) -> None:
-    """Compatibility wrapper for validation helper re-export."""
-    _validate_positive_limit_impl(value, context)
-
-
-def _validate_optional_threshold(value: float | None, name: str) -> None:
-    """Compatibility wrapper for validation helper re-export."""
-    _validate_optional_threshold_impl(value, name)
-
-
-def _validate_threshold_order(soft: float | None, hard: float | None) -> None:
-    """Compatibility wrapper for validation helper re-export."""
-    _validate_threshold_order_impl(soft, hard)
+# Keep explicit references so static analyzers treat compatibility re-exports as used.
+_COMPAT_VALIDATOR_EXPORTS = (
+    _require_non_empty,
+    _validate_positive,
+    _validate_positive_limit,
+    _validate_optional_threshold,
+    _validate_threshold_order,
+)

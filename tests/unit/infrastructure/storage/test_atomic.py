@@ -101,6 +101,44 @@ class TestAtomicWrite:
         # Original content should be preserved
         assert target.read_text() == "original content"
 
+    def test_atomic_write_retries_transient_replace_error(self, tmp_path: Path) -> None:
+        """Transient EACCES during replace should be retried and eventually succeed."""
+        target = tmp_path / "retry_target.txt"
+        original_replace = Path.replace
+        call_count = {"count": 0}
+
+        def flaky_replace(self: Path, target_path: Path) -> Path:
+            call_count["count"] += 1
+            if call_count["count"] < 3:
+                raise OSError(13, "Permission denied")
+            return original_replace(self, target_path)
+
+        with patch.object(Path, "replace", flaky_replace):
+            with patch("bioetl.infrastructure.storage._atomic.time.sleep"):
+                atomic_write_text(target, "ok")
+
+        assert target.read_text() == "ok"
+        assert call_count["count"] == 3
+
+    def test_atomic_write_no_retry_for_non_retryable_replace_error(
+        self, tmp_path: Path
+    ) -> None:
+        """Non-retryable replace failures should surface immediately."""
+        target = tmp_path / "no_retry.txt"
+        call_count = {"count": 0}
+
+        def non_retryable_replace(self: Path, target_path: Path) -> Path:
+            del self, target_path
+            call_count["count"] += 1
+            raise OSError(2, "No such file or directory")
+
+        with patch.object(Path, "replace", non_retryable_replace):
+            with patch("bioetl.infrastructure.storage._atomic.time.sleep"):
+                with pytest.raises(AtomicWriteError):
+                    atomic_write_text(target, "x")
+
+        assert call_count["count"] == 1
+
 
 @pytest.mark.unit
 class TestAtomicWriteHelpers:

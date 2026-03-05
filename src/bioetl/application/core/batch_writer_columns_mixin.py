@@ -88,7 +88,7 @@ class BatchWriterColumnsMixin:
                     [c for c in layer_config.columns if c in available_columns],
                     layer_config.rename_fields,
                 )
-            return None, {}
+            return None, layer_config.rename_fields
 
         ordered_columns = self._column_orderer.filter_by_layer_config(
             available_columns, layer_config

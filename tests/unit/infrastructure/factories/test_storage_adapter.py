@@ -363,6 +363,24 @@ class TestStorageAdapterWriteGoldMerged:
 class TestStorageAdapterAdditionalPaths:
     """Additional tests to cover maintenance and utility branches."""
 
+    def test_get_table_path_defaults_to_silver_layer(
+        self, storage_adapter: StorageAdapter, mock_silver_writer: MagicMock
+    ) -> None:
+        """get_table_path should resolve via Silver writer by default."""
+        result = storage_adapter.get_table_path("chembl.activity")
+
+        assert result == Path("/tmp/silver/table")
+        mock_silver_writer.get_table_path.assert_called_once_with("chembl.activity")
+
+    def test_get_table_path_gold_layer_uses_gold_writer(
+        self, storage_adapter: StorageAdapter, mock_gold_writer: MagicMock
+    ) -> None:
+        """get_table_path(layer='gold') should resolve via Gold writer."""
+        result = storage_adapter.get_table_path("chembl.activity", layer="gold")
+
+        assert result == Path("/tmp/gold/table")
+        mock_gold_writer.get_table_path.assert_called_once_with("chembl.activity")
+
     @pytest.mark.asyncio
     async def test_read_silver_delegates(
         self, storage_adapter: StorageAdapter, mock_silver_writer: MagicMock

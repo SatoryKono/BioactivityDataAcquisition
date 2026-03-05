@@ -81,7 +81,13 @@ async def test_process_missing_dois_yields_records_for_unresolved_ids() -> None:
         for uid in ids:
             yield {"accession": uid, "source": "search"}
 
-    handler = _make_handler(search_fallback=search_fallback)
+    def resolve(ids: list[str], found: set[str], mapping: dict[str, str]) -> list[str]:
+        return [uid for uid in ids if uid.lower() not in found]
+
+    handler = _make_handler(
+        resolve_missing_ids=resolve,
+        search_fallback=search_fallback,
+    )
 
     async for record in handler.process_missing_dois(
         dois=["P12345", "Q98765"],

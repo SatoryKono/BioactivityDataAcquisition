@@ -28,7 +28,7 @@ from bioetl.infrastructure.storage.bronze_writer_validation_mixin import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.domain.models.metadata import SourceMetadata
+    from bioetl.domain.models.metadata import BronzeMetadata, SourceMetadata
     from bioetl.domain.ports import (
         AuditPort,
         LoggerPort,
@@ -296,27 +296,53 @@ class BronzeWriter(
         source_metadata: SourceMetadata | None,
     ) -> None:
         """Create and persist bronze metadata via coordinator or fallback."""
+        bronze_metadata = self._create_bronze_metadata_payload(
+            run_id=run_id,
+            run_type=run_type,
+            provider=provider,
+            entity=entity,
+            batch_id=batch_id,
+            record_count=record_count,
+            compressed_size=compressed_size,
+            relative_path=relative_path,
+            ingestion_ts=ingestion_ts,
+            duration=duration,
+            source_metadata=source_metadata,
+        )
+        metadata_base_path = self._resolve_bronze_metadata_base_path(provider, entity)
+        await self._metadata_writer.write_bronze_metadata(
+            base_path=metadata_base_path,
+            metadata=bronze_metadata,
+            provider=provider,
+            entity=entity,
+        )
+        self.logger.debug(
+            "bronze_metadata_written",
+            metadata_path=str(
+                metadata_base_path / f"{provider}_{entity}_metadata.yaml"
+            ),
+            run_id=str(run_id),
+        )
+
+    def _create_bronze_metadata_payload(
+        self,
+        *,
+        run_id: RunID,
+        run_type: RunType,
+        provider: str,
+        entity: str,
+        batch_id: BatchID,
+        record_count: int,
+        compressed_size: int,
+        relative_path: str,
+        ingestion_ts: datetime,
+        duration: float,
+        source_metadata: SourceMetadata | None,
+    ) -> BronzeMetadata:
+        """Build bronze metadata via coordinator when configured, else fallback."""
         completed_at = ingestion_ts + timedelta(seconds=duration)
-
-        if self._metadata_coordinator is not None:
-            from bioetl.domain.ports import BronzeMetadataInput
-
-            query_string = source_metadata.query_string if source_metadata else None
-            bronze_input = BronzeMetadataInput(
-                batch_id=batch_id,
-                record_count=record_count,
-                compressed_size=compressed_size,
-                output_path=relative_path,
-                started_at=ingestion_ts,
-                completed_at=completed_at,
-                source_metadata=source_metadata,
-                query_string=query_string,
-            )
-            bronze_metadata = self._metadata_coordinator.create_bronze_metadata(
-                bronze_input
-            )
-        else:
-            bronze_metadata = self._build_full_bronze_metadata(
+        if self._metadata_coordinator is None:
+            return self._build_full_bronze_metadata(
                 run_id=run_id,
                 run_type=run_type,
                 provider=provider,
@@ -331,20 +357,22 @@ class BronzeWriter(
                 source_metadata=source_metadata,
             )
 
+        from bioetl.domain.ports import BronzeMetadataInput
+
+        bronze_input = BronzeMetadataInput(
+            batch_id=batch_id,
+            record_count=record_count,
+            compressed_size=compressed_size,
+            output_path=relative_path,
+            started_at=ingestion_ts,
+            completed_at=completed_at,
+            source_metadata=source_metadata,
+            query_string=source_metadata.query_string if source_metadata else None,
+        )
+        return self._metadata_coordinator.create_bronze_metadata(bronze_input)
+
+    def _resolve_bronze_metadata_base_path(self, provider: str, entity: str) -> Path:
+        """Resolve base path for bronze metadata sidecar output."""
         if self._flat_structure:
-            metadata_base_path = self.base_path
-        else:
-            metadata_base_path = self.base_path / provider / entity
-        await self._metadata_writer.write_bronze_metadata(
-            base_path=metadata_base_path,
-            metadata=bronze_metadata,
-            provider=provider,
-            entity=entity,
-        )
-        self.logger.debug(
-            "bronze_metadata_written",
-            metadata_path=str(
-                metadata_base_path / f"{provider}_{entity}_metadata.yaml"
-            ),
-            run_id=str(run_id),
-        )
+            return self.base_path
+        return self.base_path / provider / entity

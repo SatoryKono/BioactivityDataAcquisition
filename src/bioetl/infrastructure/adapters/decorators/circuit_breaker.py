@@ -156,34 +156,30 @@ class CircuitBreakerDataSourceDecorator:
         filter_field: str | None = None,
         offset: int | None = None,
     ) -> AsyncIterator[JsonDict]:  # Any: untyped API JSON record
-        """Fetch records with circuit breaker protection.
-
-        Fails fast if circuit is open. On success, the circuit remains closed.
-        On failure, the circuit may transition to OPEN after threshold failures.
-
-        Args:
-            entity_type: Type of entity to fetch.
-            limit: Maximum number of records to fetch.
-            query: Optional search query.
-            filter_ids: Optional IDs to filter by.
-            filter_field: Optional field to filter on.
-            offset: Optional starting offset for checkpoint resume.
-
-        Yields:
-            Dictionary records from the data source.
-
-        Raises:
-            CircuitBreakerOpenError: If circuit is OPEN.
-
-        Returns:
-            Async iterator yielding fetched records.
-        """
-        # Check circuit state before starting
+        """Fetch records with circuit breaker protection."""
         self._check_circuit_state()
+        async for record in self._iterate_with_error_recording(
+            entity_type=entity_type,
+            limit=limit,
+            query=query,
+            filter_ids=filter_ids,
+            filter_field=filter_field,
+            offset=offset,
+        ):
+            yield record
 
+    async def _iterate_with_error_recording(
+        self,
+        *,
+        entity_type: str,
+        limit: int | None,
+        query: str | None,
+        filter_ids: list[str] | None,
+        filter_field: str | None,
+        offset: int | None,
+    ) -> AsyncIterator[JsonDict]:  # Any: untyped API JSON record
+        """Iterate protected fetch and record non-circuit errors."""
         try:
-            # Wrap the fetch operation with circuit breaker protection
-            # We use a helper coroutine to work with circuit_breaker.call()
             async for record in self._fetch_with_protection(
                 entity_type=entity_type,
                 limit=limit,
@@ -193,9 +189,7 @@ class CircuitBreakerDataSourceDecorator:
                 offset=offset,
             ):
                 yield record
-
         except CircuitBreakerOpenError:
-            # Re-raise CB errors
             raise
         except BioETLError as exc:
             self._record_failure(exc)

@@ -208,37 +208,13 @@ class RetryingDataSourceDecorator:
         filter_field: str | None = None,
         offset: int | None = None,
     ) -> AsyncIterator[JsonDict]:  # Any: untyped API JSON record
-        """Fetch records with retry logic.
-
-        Retries the entire fetch operation on recoverable errors.
-        If a failure occurs during iteration, the fetch restarts from the beginning.
-
-        Args:
-            entity_type: Type of entity to fetch.
-            limit: Maximum number of records to fetch.
-            query: Optional search query.
-            filter_ids: Optional IDs to filter by.
-            filter_field: Optional field to filter on.
-            offset: Optional starting offset for checkpoint resume.
-
-        Yields:
-            Dictionary records from the data source.
-
-        Raises:
-            RetryExhaustedError: If all retry attempts fail.
-            CircuitBreakerOpenError: If circuit breaker is open (propagates immediately).
-
-        Returns:
-            Async iterator yielding fetched records.
-        """
+        """Fetch records with retry logic."""
         last_error: Exception | None = None
         retries = 0
 
         for attempt in range(self.retry_config.max_attempts):
             try:
-                # Collect records from the async generator
-                # We need to materialize to detect errors during iteration
-                async for record in self.data_source.fetch(
+                async for record in self._fetch_once(
                     entity_type=entity_type,
                     limit=limit,
                     query=query,
@@ -247,8 +223,6 @@ class RetryingDataSourceDecorator:
                     offset=offset,
                 ):
                     yield record
-
-                # Success - record metrics and return
                 self._record_retry_metrics("fetch", retries)
                 return
 
@@ -256,18 +230,14 @@ class RetryingDataSourceDecorator:
                 raise
             except self._retryable_exception_types() as exc:
                 last_error = exc
-
                 if self.retry_config.is_last_attempt(attempt):
                     break
-
-                # Calculate delay and wait
                 wait_seconds = await self._calculate_and_wait(
                     attempt, f"fetch:{entity_type}"
                 )
                 self._log_retry("fetch", attempt, wait_seconds, exc)
                 retries += 1
 
-        # All retries exhausted
         self._record_retry_metrics("fetch", retries)
         self._record_exhaustion_metrics("fetch")
         raise RetryExhaustedError(
@@ -275,6 +245,27 @@ class RetryingDataSourceDecorator:
             attempts=self.retry_config.max_attempts,
             last_error=last_error,
         )
+
+    async def _fetch_once(
+        self,
+        *,
+        entity_type: str,
+        limit: int | None,
+        query: str | None,
+        filter_ids: list[str] | None,
+        filter_field: str | None,
+        offset: int | None,
+    ) -> AsyncIterator[JsonDict]:  # Any: untyped API JSON record
+        """Run one fetch attempt against the wrapped data source."""
+        async for record in self.data_source.fetch(
+            entity_type=entity_type,
+            limit=limit,
+            query=query,
+            filter_ids=filter_ids,
+            filter_field=filter_field,
+            offset=offset,
+        ):
+            yield record
 
     async def health_check(self) -> HealthStatus:
         """Check health with retry logic.

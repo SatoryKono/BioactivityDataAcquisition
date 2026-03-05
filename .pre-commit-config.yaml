@@ -139,3 +139,10 @@ repos:
         entry: python scripts/check_vcr_filename_policy.py
         language: system
         pass_filenames: false
+
+      - id: check-architecture-dependency-map-drift
+        name: Check architecture dependency-map docs drift
+        entry: python scripts/generate_architecture_dependency_map.py --check
+        language: python
+        pass_filenames: false
+        files: ^(src/bioetl/.*\.py|docs/02-architecture/generated/module-dependency-map\.(md|json)|scripts/generate_architecture_dependency_map\.py)$

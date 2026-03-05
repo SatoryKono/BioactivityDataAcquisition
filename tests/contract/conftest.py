@@ -21,6 +21,7 @@ _NETWORK_PROBE_HOSTS = (
 )
 _NETWORK_PROBE_PORT = 443
 _NETWORK_PROBE_TIMEOUT_SECONDS = 2.0
+_TRUTHY_ENV_VALUES = frozenset({"1", "true", "yes", "on"})
 
 
 def _is_contract_test_path(path_str: str) -> bool:
@@ -71,7 +72,9 @@ def pytest_collection_modifyitems(
     Tests marked with 'no_api' are exempt from this requirement as they don't
     require live API access (e.g., schema introspection tests).
     """
-    live_tests_enabled = os.environ.get("BIOETL_LIVE_API_TESTS", "").lower() == "true"
+    raw_live_value = os.environ.get("BIOETL_LIVE_API_TESTS", "")
+    normalized_live_value = raw_live_value.strip().strip("\"'").lower()
+    live_tests_enabled = normalized_live_value in _TRUTHY_ENV_VALUES
 
     if not live_tests_enabled:
         skip_marker = pytest.mark.skip(
@@ -135,21 +138,21 @@ def uniprot_api_key() -> str | None:
 CHEMBL_ACTIVITY_REQUIRED_FIELDS = frozenset(
     {
         "activity_id",
-        "assay_id",
-        "molecule_id",
+        "assay_chembl_id",
+        "molecule_chembl_id",
     }
 )
 
 CHEMBL_MOLECULE_REQUIRED_FIELDS = frozenset(
     {
-        "molecule_id",
+        "molecule_chembl_id",
         "molecule_type",
     }
 )
 
 CHEMBL_TARGET_REQUIRED_FIELDS = frozenset(
     {
-        "target_id",
+        "target_chembl_id",
         "target_type",
     }
 )

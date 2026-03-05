@@ -46,6 +46,7 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-038](ADR-038-enum-externalization.md)              | ChEMBL Enum Values Externalization to YAML | Accepted           | Configuration   | 2026-02-16 |
 | [ADR-039](ADR-039-unified-entity-config-format.md)      | Unified Entity Config Format               | Accepted           | Configuration   | 2026-02-24 |
 | [ADR-040](ADR-040-diagram-governance.md)                | Diagram Governance and Layout Policy       | Accepted           | Documentation   | 2026-02-25 |
+| [ADR-041](ADR-041-naming-policy-skills-agents.md)       | Naming Policy for Skills, Agents, Commands | Accepted           | Architecture    | 2026-03-04 |
 
 ## ADRs by Category
 
@@ -58,6 +59,7 @@ This directory contains Architecture Decision Records documenting significant ar
 - [ADR-026](ADR-026-composite-pipeline-pattern.md): Composite Pipeline Pattern
 - [ADR-034](ADR-034-schema-domain-pairs.md): Schema↔Domain Configuration Pairs — Domain frozen dataclasses vs Infrastructure Pydantic models
 - [ADR-040](ADR-040-diagram-governance.md): Diagram Governance and Layout Policy
+- [ADR-041](ADR-041-naming-policy-skills-agents.md): Naming Policy for Skills, Agents, and Commands
 
 ### Storage
 

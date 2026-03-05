@@ -187,34 +187,62 @@ class PubMedAdapter(
         filter_field: str | None = None,
         offset: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch PubMed records.
-
-        Supports checkpoint resume via ``offset`` by skipping the already
-        processed PMID segment before article fetch, which avoids refetching
-        records from completed part of the previous run.
-
-        Args:
-            entity_type: Entity type identifier.
-            limit: Maximum number of records to process.
-            query: Search query string.
-            filter_ids: List of identifiers to filter by.
-            filter_field: Field name to apply filter on.
-            offset: Offset.
-
-        Returns:
-            Async iterator yielding fetched records.
-        """
+        """Fetch PubMed records."""
         if filter_ids:
-            effective_filter_field = filter_field or "pmid"
-            async for record in self.fetch_filtered(
-                entity_type, filter_ids, effective_filter_field, limit
+            async for record in self._fetch_from_filter_ids(
+                entity_type=entity_type,
+                filter_ids=filter_ids,
+                filter_field=filter_field,
+                limit=limit,
             ):
                 yield record
             return
 
+        self._validate_publication_entity(entity_type)
+        resume_offset = self._resolve_resume_offset(limit=limit, offset=offset)
+        if resume_offset is None:
+            return
+
+        pmids = await self._resolve_pmids_for_fetch(query=query, limit=limit)
+        if not pmids:
+            return
+
+        pmids = self._apply_resume_offset(pmids=pmids, resume_offset=resume_offset)
+        remaining_limit = None if limit is None else max(0, limit - resume_offset)
+        async for record in self._yield_articles_from_pmids(pmids, remaining_limit):
+            yield record
+
+    async def _fetch_from_filter_ids(
+        self,
+        *,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str | None,
+        limit: int | None,
+    ) -> AsyncIterator[BronzeRecord]:
+        """Fetch records from explicit PMID filters."""
+        effective_filter_field = filter_field or "pmid"
+        async for record in self.fetch_filtered(
+            entity_type=entity_type,
+            filter_ids=filter_ids,
+            filter_field=effective_filter_field,
+            limit=limit,
+        ):
+            yield record
+
+    @staticmethod
+    def _validate_publication_entity(entity_type: str) -> None:
+        """Validate supported PubMed entity type."""
         if entity_type != "publication":
             raise ValueError("PubMedAdapter only supports 'publication'")
 
+    def _resolve_resume_offset(
+        self,
+        *,
+        limit: int | None,
+        offset: int | None,
+    ) -> int | None:
+        """Resolve and validate resume offset against limit."""
         resume_offset = max(0, offset or 0)
         if limit is not None and resume_offset >= limit:
             self.logger.info(
@@ -222,26 +250,34 @@ class PubMedAdapter(
                 offset=resume_offset,
                 limit=limit,
             )
-            return
+            return None
+        return resume_offset
 
+    async def _resolve_pmids_for_fetch(
+        self,
+        *,
+        query: str | None,
+        limit: int | None,
+    ) -> list[str]:
+        """Fetch PMID list for current query/limit settings."""
         search_term = query or "pharmacogenomics[Title/Abstract]"
-        pmids = await self._get_pmids(search_term, limit or 10000)
+        return await self._get_pmids(search_term, limit or 10000)
 
-        if not pmids:
-            return
-
-        if resume_offset:
-            self.logger.info(
-                "pubmed_resume_skip_processed",
-                offset=resume_offset,
-                pmids_found=len(pmids),
-            )
-            pmids = pmids[resume_offset:]
-
-        remaining_limit = None if limit is None else max(0, limit - resume_offset)
-
-        async for record in self._yield_articles_from_pmids(pmids, remaining_limit):
-            yield record
+    def _apply_resume_offset(
+        self,
+        *,
+        pmids: list[str],
+        resume_offset: int,
+    ) -> list[str]:
+        """Skip already processed PMIDs when resuming."""
+        if resume_offset == 0:
+            return pmids
+        self.logger.info(
+            "pubmed_resume_skip_processed",
+            offset=resume_offset,
+            pmids_found=len(pmids),
+        )
+        return pmids[resume_offset:]
 
     async def fetch_as_models(
         self,

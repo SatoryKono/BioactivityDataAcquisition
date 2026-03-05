@@ -124,12 +124,8 @@ class EnricherDeduplicatorService:
             agg_exprs.append(
                 pl.col(col).drop_nulls().n_unique().alias(f"{col}__n_unique")
             )
-            agg_exprs.append(
-                pl.col(col).is_null().any().alias(f"{col}__has_null")
-            )
-            agg_exprs.append(
-                pl.col(col).is_null().all().alias(f"{col}__all_null")
-            )
+            agg_exprs.append(pl.col(col).is_null().any().alias(f"{col}__has_null"))
+            agg_exprs.append(pl.col(col).is_null().all().alias(f"{col}__all_null"))
 
         aggregated = df.group_by(key_columns).agg(agg_exprs)
 
@@ -141,10 +137,13 @@ class EnricherDeduplicatorService:
             has_null_col = f"{col}__has_null"
             all_null_col = f"{col}__all_null"
 
-            has_conflict = aggregated.filter(
-                (pl.col(n_unique_col) > 1)
-                | (pl.col(has_null_col) & ~pl.col(all_null_col))
-            ).height > 0
+            has_conflict = (
+                aggregated.filter(
+                    (pl.col(n_unique_col) > 1)
+                    | (pl.col(has_null_col) & ~pl.col(all_null_col))
+                ).height
+                > 0
+            )
 
             if has_conflict:
                 columns_with_conflicts.append(col)

@@ -26,6 +26,7 @@ from bioetl.domain.composite.result import (
     EnrichmentStatus,
     MergeResult,
 )
+from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.locking import FencingToken
 
 _MOCK_TOKEN = FencingToken(
@@ -318,7 +319,7 @@ class TestOptionalEnricherFailure:
 
         runner = create_runner(coordinator=coordinator)
 
-        with pytest.raises(RuntimeError, match="crossref"):
+        with pytest.raises(InvalidStateError, match="crossref"):
             await runner.run()
 
     @pytest.mark.asyncio
