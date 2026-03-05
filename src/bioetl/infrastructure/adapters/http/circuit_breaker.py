@@ -11,9 +11,9 @@ State machine:
 from __future__ import annotations
 
 __all__ = [
-    "CircuitBreaker",
     "METRIC_CIRCUIT_BREAKER_STATE",
     "METRIC_CIRCUIT_BREAKER_TRIPS",
+    "CircuitBreaker",
     "P",
     "T",
     "is_circuit_breaker_error",

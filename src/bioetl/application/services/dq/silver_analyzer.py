@@ -202,10 +202,11 @@ class SilverDQAnalyzer:
             SilverDQReport: Complete DQ report for Silver layer.
         """
         # Convert PyArrow to Polars for consistent processing
-        if isinstance(data, pa.Table):
-            df = cast("pl.DataFrame", pl.from_arrow(data))
-        else:
-            df = data
+        df = (
+            cast("pl.DataFrame", pl.from_arrow(data))
+            if isinstance(data, pa.Table)
+            else data
+        )
 
         enabled_checks = set(config.get_checks_enums())
 

@@ -27,7 +27,7 @@ __all__ = [
 import time
 from abc import abstractmethod
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from httpx import HTTPStatusError, RequestError
 

@@ -6,10 +6,12 @@ Uses declarative field_specs DSL for mapping where applicable.
 
 from __future__ import annotations
 
+from bioetl.domain.types import JsonDict
+
 __all__ = ["AssayTransformer"]
 
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.dict_transformers import flatten_nested_dict
 from bioetl.application.core.field_specs import (

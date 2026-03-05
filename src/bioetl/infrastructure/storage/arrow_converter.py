@@ -8,9 +8,11 @@ Implements RULES.md §2.4 and ADR-014 for deterministic writes.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import pyarrow as pa
+
+from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort

@@ -46,7 +46,7 @@ def _span_context(
     try:
         yield span
     finally:
-        exc_type, exc, exc_tb = sys.exc_info()
+        _, exc, _ = sys.exc_info()
         if exc is not None:
             span.set_attribute("error", True)
             span.set_attribute("error.type", type(exc).__name__)

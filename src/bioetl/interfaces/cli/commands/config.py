@@ -27,7 +27,8 @@ __all__ = [
 def _config_to_dict(config: object) -> JsonDict:
     """Convert a Pydantic model or dataclass to a JSON-serializable dict."""
     if hasattr(config, "model_dump"):
-        result: JsonDict = config.model_dump()  # type: ignore[union-attr]
+        model_dump = config.model_dump
+        result: JsonDict = model_dump()
         return result
     if hasattr(config, "__dict__"):
         converted: JsonDict = {  # Any: YAML config has heterogeneous values

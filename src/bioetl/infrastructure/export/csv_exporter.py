@@ -30,12 +30,57 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
+def _is_complex_type(field_type: pa.DataType) -> bool:
+    """Check if a PyArrow type is complex (list or struct)."""
+    return bool(
+        pa.types.is_list(field_type)
+        or pa.types.is_large_list(field_type)
+        or pa.types.is_struct(field_type)
+    )
+
+
+def _serialize_column_to_json(col: pa.ChunkedArray) -> pa.Array:
+    """Serialize a column of complex values to JSON strings."""
+    vals = [
+        serialize_to_json(v.as_py()) if v.as_py() is not None else None for v in col
+    ]
+    return pa.array(vals, type=pa.string())
+
+
+def _flatten_table_for_csv(table: pa.Table) -> pa.Table:
+    """Convert complex types (list, struct) to JSON strings for CSV export."""
+    new_columns = []
+    for i, field in enumerate(table.schema):
+        col = table.column(i)
+        if _is_complex_type(field.type):
+            new_columns.append(_serialize_column_to_json(col))
+        else:
+            new_columns.append(col)
+
+    new_schema = pa.schema(
+        [
+            pa.field(
+                f.name,
+                pa.string() if _is_complex_type(f.type) else f.type,
+                f.nullable,
+            )
+            for f in table.schema
+        ]
+    )
+    return pa.Table.from_arrays(new_columns, schema=new_schema)
+
+
 class CsvExporter:
     """Exporter for CSV format with atomic writes.
 
     Handles conversion of complex PyArrow types to CSV-compatible format
     and provides atomic file writes to avoid locking issues.
     """
+
+    # Backward-compatible static aliases used in tests and legacy callers.
+    _is_complex_type = staticmethod(_is_complex_type)
+    _serialize_column_to_json = staticmethod(_serialize_column_to_json)
+    _flatten_for_csv = staticmethod(_flatten_table_for_csv)
 
     def __init__(
         self,
@@ -102,46 +147,6 @@ class CsvExporter:
                 )
 
         return deleted
-
-    @staticmethod
-    def _is_complex_type(field_type: pa.DataType) -> bool:
-        """Check if a PyArrow type is complex (list or struct)."""
-        return bool(
-            pa.types.is_list(field_type)
-            or pa.types.is_large_list(field_type)
-            or pa.types.is_struct(field_type)
-        )
-
-    @staticmethod
-    def _serialize_column_to_json(col: pa.ChunkedArray) -> pa.Array:
-        """Serialize a column of complex values to JSON strings."""
-        vals = [
-            serialize_to_json(v.as_py()) if v.as_py() is not None else None for v in col
-        ]
-        return pa.array(vals, type=pa.string())
-
-    @staticmethod
-    def _flatten_for_csv(table: pa.Table) -> pa.Table:
-        """Convert complex types (list, struct) to JSON strings for CSV export."""
-        new_columns = []
-        for i, field in enumerate(table.schema):
-            col = table.column(i)
-            if CsvExporter._is_complex_type(field.type):
-                new_columns.append(CsvExporter._serialize_column_to_json(col))
-            else:
-                new_columns.append(col)
-
-        new_schema = pa.schema(
-            [
-                pa.field(
-                    f.name,
-                    pa.string() if CsvExporter._is_complex_type(f.type) else f.type,
-                    f.nullable,
-                )
-                for f in table.schema
-            ]
-        )
-        return pa.Table.from_arrays(new_columns, schema=new_schema)
 
     def _sort_table(self, table: pa.Table, sort_columns: list[str]) -> pa.Table:
         """Sort table by specified columns for deterministic output.

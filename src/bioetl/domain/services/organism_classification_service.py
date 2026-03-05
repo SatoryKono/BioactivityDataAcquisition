@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Final
+from typing import Final
 
 from bioetl.domain.mapping.organism_classification import (
     OrganismClassificationResult,

@@ -13,7 +13,7 @@ __all__ = ["BaseTitleFallbackHandler"]
 
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Callable
@@ -61,75 +61,42 @@ class BaseTitleFallbackHandler(ABC):
         self._logger = logger
         self._provider_prefix = provider_prefix
 
+    def _event_name(self, suffix: str, default: str) -> str:
+        """Return provider-scoped event name or default."""
+        if self._provider_prefix:
+            return f"{self._provider_prefix}_{suffix}"
+        return default
+
     @property
     def _event_no_fallback_title(self) -> str:
-        """Return log event name for missing fallback title.
-
-        Default: '{provider}_no_fallback_title' if provider_prefix is set.
-        """
-        if self._provider_prefix:
-            return f"{self._provider_prefix}_no_fallback_title"
-        return "no_fallback_title"
+        return self._event_name("no_fallback_title", "no_fallback_title")
 
     @property
     def _event_fallback_attempt(self) -> str:
-        """Return log event name for fallback attempt.
-
-        Default: '{provider}_title_fallback_attempt' if provider_prefix is set.
-        """
-        if self._provider_prefix:
-            return f"{self._provider_prefix}_title_fallback_attempt"
-        return "title_fallback_attempt"
+        return self._event_name("title_fallback_attempt", "title_fallback_attempt")
 
     @property
     def _event_fallback_success(self) -> str:
-        """Return log event name for successful fallback.
-
-        Default: '{provider}_title_fallback_success' if provider_prefix is set.
-        """
-        if self._provider_prefix:
-            return f"{self._provider_prefix}_title_fallback_success"
-        return "title_fallback_success"
+        return self._event_name("title_fallback_success", "title_fallback_success")
 
     @property
     def _event_fallback_not_found(self) -> str:
-        """Return log event name for failed fallback.
-
-        Default: '{provider}_title_fallback_not_found' if provider_prefix is set.
-        """
-        if self._provider_prefix:
-            return f"{self._provider_prefix}_title_fallback_not_found"
-        return "title_fallback_not_found"
+        return self._event_name(
+            "title_fallback_not_found",
+            "title_fallback_not_found",
+        )
 
     @property
     def _event_title_only_attempt(self) -> str:
-        """Return log event name for title-only lookup attempt.
-
-        Default: '{provider}_title_only_attempt' if provider_prefix is set.
-        """
-        if self._provider_prefix:
-            return f"{self._provider_prefix}_title_only_attempt"
-        return "title_only_attempt"
+        return self._event_name("title_only_attempt", "title_only_attempt")
 
     @property
     def _event_title_only_success(self) -> str:
-        """Return log event name for successful title-only lookup.
-
-        Default: '{provider}_title_only_success' if provider_prefix is set.
-        """
-        if self._provider_prefix:
-            return f"{self._provider_prefix}_title_only_success"
-        return "title_only_success"
+        return self._event_name("title_only_success", "title_only_success")
 
     @property
     def _event_title_only_not_found(self) -> str:
-        """Return log event name for failed title-only lookup.
-
-        Default: '{provider}_title_only_not_found' if provider_prefix is set.
-        """
-        if self._provider_prefix:
-            return f"{self._provider_prefix}_title_only_not_found"
-        return "title_only_not_found"
+        return self._event_name("title_only_not_found", "title_only_not_found")
 
     @abstractmethod
     async def _search_by_title(

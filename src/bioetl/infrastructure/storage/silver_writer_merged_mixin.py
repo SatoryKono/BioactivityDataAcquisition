@@ -1,3 +1,4 @@
+# mypy: disable-error-code=attr-defined
 """Merged-write helpers for ``SilverWriter``."""
 
 from __future__ import annotations

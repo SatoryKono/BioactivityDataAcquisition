@@ -13,8 +13,6 @@ Note: Uses domain normalization functions and Value Objects per REFACTOR-004.
 
 from __future__ import annotations
 
-from typing import Any
-
 from bioetl.application.pipelines.crossref.author_extractors import (
     extract_author_details,
     extract_author_orcids,

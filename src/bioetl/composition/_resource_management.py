@@ -7,7 +7,7 @@ Split from entrypoints.py per audit-package-structure-2026-02-07.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.composition._pipeline_execution import (
     ArchiveOptions,

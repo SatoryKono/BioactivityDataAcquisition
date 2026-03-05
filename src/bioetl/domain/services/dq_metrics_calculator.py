@@ -12,7 +12,7 @@ This is pure domain logic (no I/O) per RULES.md §1.1.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Literal
+from typing import Literal
 
 from bioetl.domain.types import JsonDict
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics, SchemaDriftInfo

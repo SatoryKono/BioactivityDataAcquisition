@@ -399,6 +399,10 @@ class TestSilverWriterDQMetrics:
                 "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
                 side_effect=DeltaTableNotFoundError("Not found"),
             ),
+            patch(
+                "bioetl.infrastructure.storage.silver_writer.DeltaTable",
+                side_effect=DeltaTableNotFoundError("Not found"),
+            ),
             patch("bioetl.infrastructure.storage.silver_writer.write_deltalake"),
         ):
             writer = SilverWriter(

@@ -9,7 +9,7 @@ from __future__ import annotations
 import ast
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Literal, Protocol
+from typing import TYPE_CHECKING, Literal, Protocol, cast
 
 from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
 from bioetl.domain.models.metadata import (
@@ -31,6 +31,10 @@ from bioetl.domain.models.metadata import (
 from bioetl.domain.ports import GoldMetadataInput, SilverMetadataInput
 from bioetl.domain.services.schema_metadata_extractor import extract_schema_metadata
 from bioetl.domain.value_objects.run_context import RunContext
+
+if TYPE_CHECKING:
+    from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+    from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 
 __all__ = ["GoldMetadataAssembler", "SilverMetadataAssembler"]
 
@@ -152,7 +156,8 @@ class SilverMetadataAssembler:
 
         bronze_paths: list[str] = []
         if input_data.bronze_refs:
-            bronze_paths = [ref.relative_path for ref in input_data.bronze_refs]
+            bronze_refs = cast("list[BronzeWriteResult]", input_data.bronze_refs)
+            bronze_paths = [ref.relative_path for ref in bronze_refs]
 
         transform_version = (
             input_data.transform_version
@@ -183,9 +188,10 @@ class SilverMetadataAssembler:
             if input_data.total_records is not None
             else len(input_data.records or [])
         )
+        mode = cast("SilverWriteMode", input_data.mode)
         delta = DeltaMetrics(
             table_path=input_data.table_path,
-            operation=operation_map[input_data.mode],
+            operation=operation_map[mode],
             primary_key=input_data.primary_keys,
             partition_by=input_data.partition_by or [],
             version_after=input_data.version_after,
@@ -197,11 +203,10 @@ class SilverMetadataAssembler:
             if input_data.total_records is not None
             else len(input_data.records or [])
         )
-        dq_summary = (
-            input_data.dq_metrics.to_dq_summary()
-            if input_data.dq_metrics
-            else DQSummary(total_records=record_count, valid_records=record_count)
-        )
+        dq_summary = DQSummary(total_records=record_count, valid_records=record_count)
+        if input_data.dq_metrics:
+            dq_metrics = cast("BatchDQMetrics", input_data.dq_metrics)
+            dq_summary = dq_metrics.to_dq_summary()
         if input_data.dq_rule_provenance:
             dq_summary = dq_summary.model_copy(
                 update={"rule_provenance": input_data.dq_rule_provenance}

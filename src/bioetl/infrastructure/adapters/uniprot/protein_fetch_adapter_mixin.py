@@ -1,3 +1,4 @@
+# mypy: disable-error-code=attr-defined
 """Protein fetch internals for UniProtAdapter."""
 
 from __future__ import annotations

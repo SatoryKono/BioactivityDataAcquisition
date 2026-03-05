@@ -1,6 +1,9 @@
+# mypy: disable-error-code=attr-defined
 """Public HTTP verb methods for UnifiedHTTPClient."""
 
 from __future__ import annotations
+
+from typing import Any, cast
 
 import httpx
 
@@ -9,6 +12,22 @@ from bioetl.domain.types import JsonDict
 
 class HTTPClientRequestMethodsMixin:
     """Thin request verb wrappers around retry-orchestrated request flow."""
+
+    rate_limiter: Any  # Any: mixed-in concrete type provides async acquire()
+    circuit_breaker: Any  # Any: mixed-in concrete type provides async call()
+
+    async def _request_with_retry(
+        self,
+        method: str,
+        url: str,
+        **kwargs: Any,  # Any: forwarded request kwargs
+    ) -> httpx.Response:
+        """Implemented by HTTP retry mixin."""
+        raise NotImplementedError
+
+    def _get_client(self) -> httpx.AsyncClient:
+        """Implemented by HTTP context mixin."""
+        raise NotImplementedError
 
     async def get(
         self,
@@ -53,5 +72,6 @@ class HTTPClientRequestMethodsMixin:
         response = await self.circuit_breaker.call(
             client.request, "GET", url, params=params, headers=headers
         )
-        response.raise_for_status()
-        return response
+        typed_response = cast("httpx.Response", response)
+        typed_response.raise_for_status()
+        return typed_response

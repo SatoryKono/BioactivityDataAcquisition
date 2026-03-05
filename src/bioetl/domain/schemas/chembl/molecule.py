@@ -128,7 +128,7 @@ class MoleculeSchema(ETLRecordSchema):
         isin=[-1, 0, 1, 2],
         description="Chirality flag: -1=unknown, 0=achiral, 1=single, 2=racemic.",
     )
-    dosed_ingredient: Series[int] | None = pa.Field(
+    dosed_ingredient: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, isin=[0, 1], description="Dosed ingredient flag."
     )
     availability_type: Series[float] | None = pa.Field(

@@ -1,14 +1,11 @@
-"""Service Bundle Factory.
-
-Creates PipelineService and pipeline instances with services.
-Extracted from pipeline_factory.py for composition layer LOC compliance.
-"""
+"""Service bundle wiring for pipeline instances."""
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, Protocol, cast
+from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.composition.factories._observability_wiring import (
     _create_cached_bronze_data_source as _create_cached_bronze_data_source_impl,
@@ -51,7 +48,10 @@ if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.base_transformer import BaseTransformer
     from bioetl.application.core.pipeline_services import PipelineService
-    from bioetl.domain.config import PipelineConfig, RuntimeConfig
+    from bioetl.composition.factories.pipeline_factory_construction import (
+        DomainConfigMapper,
+    )
+    from bioetl.domain.config import DQConfig, PipelineConfig, RuntimeConfig
     from bioetl.domain.context import CachedBronzeContext
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import (
@@ -89,14 +89,22 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
     return _load_pipeline_config_direct(pipeline_name)
 
 
-def yaml_config_to_domain(*args: object, **kwargs: object) -> PipelineConfig:
+def yaml_config_to_domain(
+    yaml_config: PipelineYamlConfig,
+    resolved_dq_config: DQConfig | None = None,
+) -> PipelineConfig:
     """Map YAML config via direct infrastructure dependency."""
-    return _yaml_config_to_domain_direct(*args, **kwargs)
+    return _yaml_config_to_domain_direct(
+        yaml_config=yaml_config,
+        resolved_dq_config=resolved_dq_config,
+    )
 
 
-def compute_config_hash(*args: object, **kwargs: object) -> str:
+def compute_config_hash(
+    config: PipelineYamlConfig | dict[str, object],
+) -> str:
     """Compute config hash via direct versioning dependency."""
-    return _compute_config_hash_direct(*args, **kwargs)
+    return _compute_config_hash_direct(config)
 
 
 @dataclass(frozen=True, slots=True)
@@ -104,8 +112,10 @@ class ServiceBundleDependencies:
     """Explicit dependencies for service bundle runtime wiring."""
 
     load_pipeline_config: Callable[[str], PipelineYamlConfig]
-    yaml_config_to_domain: Callable[..., PipelineConfig]
-    compute_config_hash: Callable[..., str]
+    yaml_config_to_domain: Callable[
+        [PipelineYamlConfig, DQConfig | None], PipelineConfig
+    ]
+    compute_config_hash: Callable[[PipelineYamlConfig | dict[str, object]], str]
     base_services_factory: type[BaseServicesFactory]
 
 
@@ -125,16 +135,7 @@ def _resolve_service_bundle_dependencies(
 
 
 def _extract_entity_type(pipeline_name: str) -> str | None:
-    """Extract entity_type from pipeline_name.
-
-    Example: "chembl_activity" -> "activity"
-
-    Args:
-        pipeline_name: Full pipeline name with provider prefix.
-
-    Returns:
-        Entity type suffix, or None if no underscore in name.
-    """
+    """Extract trailing entity from `<provider>_<entity>` pipeline names."""
     return pipeline_name.split("_")[-1] if "_" in pipeline_name else None
 
 
@@ -188,28 +189,7 @@ def build_pipeline_services(
     silver_validator: SilverValidatorPort | None = None,
     _deps: ServiceBundleDependencies | None = None,
 ) -> PipelineService:
-    """Build shared pipeline services using DI container.
-
-    Args:
-        pipeline_name: Name of the pipeline
-        create_data_source_fn: Data source creator function
-        settings: Application settings
-        logger: Structured logger
-        config: Pre-loaded pipeline config (avoids duplicate I/O)
-        filter_config: Optional input filter configuration
-        tracer: Optional tracer (created via bootstrap_tracer_port())
-        dq_monitor: Optional data quality monitor for anomaly detection
-        metadata_coordinator: Optional MetadataCoordinator for centralized
-                            metadata creation across Bronze, Silver, Gold.
-        cached_bronze: Optional CachedBronzeContext for reading from Bronze
-                      cache instead of API. When enabled, creates
-                      CachedBronzeDataSource instead of the normal data source.
-        silver_validator: Optional SilverValidatorPort for Pandera validation
-            in SilverWriter. Created from Pandera Silver schema.
-
-    Returns:
-        Configured PipelineService instance
-    """
+    """Build shared pipeline services with optional cached-bronze mode."""
     deps = _resolve_service_bundle_dependencies(_deps)
     pipeline_config = config or deps.load_pipeline_config(pipeline_name)
     base_services_factory = deps.base_services_factory
@@ -356,7 +336,7 @@ def _create_pipeline_with_services_impl(
     domain_config = DomainConfigResolver(
         configs_root=Path("configs"),
         loader_class=PipelineConfigLoader,
-        domain_mapper=deps.yaml_config_to_domain,
+        domain_mapper=cast("DomainConfigMapper", deps.yaml_config_to_domain),
     ).resolve(
         yaml_config,
         relaxed_dq=inputs.settings.pipeline.relaxed_dq,

@@ -16,6 +16,7 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
 from bioetl.domain.entities.chembl_subcellular_fraction import SubcellularFraction
+from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -80,10 +81,11 @@ class SubcellularFractionTransformer(BaseChemblTransformer):
         # 3. Compute entity_id
         # Priority: pre-computed entity_id from record > computed from subcellular_fraction
         pre_computed_id = record.get("entity_id")
-        if pre_computed_id:
-            entity_id = str(pre_computed_id)
-        else:
-            entity_id = self.compute_fraction_entity_id(str(primary_id))
+        entity_id = (
+            str(pre_computed_id)
+            if pre_computed_id
+            else self.compute_fraction_entity_id(str(primary_id))
+        )
 
         # 4. Compute content hash
         content_hash = self.compute_content_hash(business_data, exclude_none=True)

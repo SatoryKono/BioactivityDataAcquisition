@@ -9,6 +9,7 @@ All implementation has been extracted to:
 from __future__ import annotations
 
 import warnings
+from typing import TYPE_CHECKING
 
 from bioetl.composition.factories.dq_context_resolver import (
     extract_dq_configs as _extract_dq_configs,
@@ -45,6 +46,26 @@ from bioetl.composition.factories.services_factory import BaseServicesFactory
 from bioetl.composition.services.versioning import compute_config_hash
 from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_domain
 
+if TYPE_CHECKING:
+    from bioetl.application.core.base import BasePipeline
+    from bioetl.application.core.base_transformer import BaseTransformer
+    from bioetl.application.core.pipeline_services import PipelineService
+    from bioetl.composition.factories.data_source_factory import DataSourceCreator
+    from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
+    from bioetl.domain.config import RuntimeConfig
+    from bioetl.domain.context import CachedBronzeContext
+    from bioetl.domain.filtering import InputFilterConfig
+    from bioetl.domain.ports import (
+        DQMonitorPort,
+        LoggerPort,
+        MetricsPort,
+        SilverValidatorPort,
+        TracingPort,
+    )
+    from bioetl.domain.types import RunID
+    from bioetl.infrastructure.config import Settings
+    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+
 # Keep explicit references so static analyzers treat legacy re-exports as used.
 _LEGACY_REEXPORTS = (
     _extract_dq_configs,
@@ -67,7 +88,20 @@ def _compat_service_bundle_dependencies() -> ServiceBundleDependencies:
     )
 
 
-def build_pipeline_services(*args: object, **kwargs: object) -> object:
+def build_pipeline_services(
+    pipeline_name: str,
+    create_data_source_fn: DataSourceCreator,
+    settings: Settings,
+    logger: LoggerPort,
+    config: PipelineYamlConfig | None = None,
+    filter_config: InputFilterConfig | None = None,
+    tracer: TracingPort | None = None,
+    dq_monitor: DQMonitorPort | None = None,
+    metadata_coordinator: MetadataCoordinator | None = None,
+    cached_bronze: CachedBronzeContext | None = None,
+    silver_validator: SilverValidatorPort | None = None,
+    _deps: ServiceBundleDependencies | None = None,
+) -> PipelineService:
     """Compatibility facade delegating to service_bundle_factory implementation."""
     warnings.warn(
         "Use bioetl.composition.factories.service_bundle_factory.build_pipeline_services "
@@ -75,11 +109,41 @@ def build_pipeline_services(*args: object, **kwargs: object) -> object:
         DeprecationWarning,
         stacklevel=2,
     )
-    kwargs.setdefault("_deps", _compat_service_bundle_dependencies())
-    return _build_pipeline_services(*args, **kwargs)
+    return _build_pipeline_services(
+        pipeline_name=pipeline_name,
+        create_data_source_fn=create_data_source_fn,
+        settings=settings,
+        logger=logger,
+        config=config,
+        filter_config=filter_config,
+        tracer=tracer,
+        dq_monitor=dq_monitor,
+        metadata_coordinator=metadata_coordinator,
+        cached_bronze=cached_bronze,
+        silver_validator=silver_validator,
+        _deps=_deps or _compat_service_bundle_dependencies(),
+    )
 
 
-def create_pipeline_with_services(*args: object, **kwargs: object) -> object:
+def create_pipeline_with_services(
+    pipeline_name: str,
+    pipeline_class: type[BasePipeline],
+    provider: str,
+    create_data_source_fn: DataSourceCreator,
+    transformer_class: type[BaseTransformer] | None,
+    run_id: RunID,
+    runtime: RuntimeConfig,
+    settings: Settings,
+    logger: LoggerPort,
+    config: PipelineYamlConfig | None = None,
+    filter_config: InputFilterConfig | None = None,
+    tracer: TracingPort | None = None,
+    dq_monitor: DQMonitorPort | None = None,
+    metrics: MetricsPort | None = None,
+    cached_bronze: CachedBronzeContext | None = None,
+    pandera_silver_schema: object | None = None,
+    _deps: ServiceBundleDependencies | None = None,
+) -> BasePipeline:
     """Compatibility facade delegating to service_bundle_factory implementation."""
     warnings.warn(
         "Use bioetl.composition.factories.service_bundle_factory.create_pipeline_with_services "
@@ -87,8 +151,25 @@ def create_pipeline_with_services(*args: object, **kwargs: object) -> object:
         DeprecationWarning,
         stacklevel=2,
     )
-    kwargs.setdefault("_deps", _compat_service_bundle_dependencies())
-    return _create_pipeline_with_services(*args, **kwargs)
+    return _create_pipeline_with_services(
+        pipeline_name=pipeline_name,
+        pipeline_class=pipeline_class,
+        provider=provider,
+        create_data_source_fn=create_data_source_fn,
+        transformer_class=transformer_class,
+        run_id=run_id,
+        runtime=runtime,
+        settings=settings,
+        logger=logger,
+        config=config,
+        filter_config=filter_config,
+        tracer=tracer,
+        dq_monitor=dq_monitor,
+        metrics=metrics,
+        cached_bronze=cached_bronze,
+        pandera_silver_schema=pandera_silver_schema,
+        _deps=_deps or _compat_service_bundle_dependencies(),
+    )
 
 
 __all__ = [

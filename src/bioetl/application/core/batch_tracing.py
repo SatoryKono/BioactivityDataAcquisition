@@ -13,7 +13,7 @@ Responsibilities:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.ports import NoOpTracing
 
@@ -70,16 +70,19 @@ class BatchTracingManagerService:
 
         """
         otel_tracer = self._tracer.get_tracer(self.TRACER_NAME)
-        span = otel_tracer.start_as_current_span(
-            "pipeline_execution",
-            attributes={
-                "bioetl.pipeline": self._config.pipeline_name or "unknown",
-                "bioetl.run_id": str(self._context.run_id),
-                "bioetl.entity_type": self._config.entity_type,
-                "bioetl.run_type": self._context.run_type.value,
-                "bioetl.adaptive_batch_sizing": self._adaptive_sizing_enabled,
-                "bioetl.initial_batch_size": self._initial_batch_size,
-            },
+        span = cast(
+            "Span",
+            otel_tracer.start_as_current_span(
+                "pipeline_execution",
+                attributes={
+                    "bioetl.pipeline": self._config.pipeline_name or "unknown",
+                    "bioetl.run_id": str(self._context.run_id),
+                    "bioetl.entity_type": self._config.entity_type,
+                    "bioetl.run_type": self._context.run_type.value,
+                    "bioetl.adaptive_batch_sizing": self._adaptive_sizing_enabled,
+                    "bioetl.initial_batch_size": self._initial_batch_size,
+                },
+            ),
         )
         span.__enter__()
         return span
@@ -99,15 +102,18 @@ class BatchTracingManagerService:
 
         """
         otel_tracer = self._tracer.get_tracer(self.TRACER_NAME)
-        span = otel_tracer.start_as_current_span(
-            f"batch_{batch_id}",
-            attributes={
-                "bioetl.batch_id": str(batch_id),
-                "bioetl.record_count": record_count,
-                "bioetl.run_type": self._context.run_type.value,
-                "bioetl.entity_type": self._config.entity_type,
-                "bioetl.start_index": start_index,
-            },
+        span = cast(
+            "Span",
+            otel_tracer.start_as_current_span(
+                f"batch_{batch_id}",
+                attributes={
+                    "bioetl.batch_id": str(batch_id),
+                    "bioetl.record_count": record_count,
+                    "bioetl.run_type": self._context.run_type.value,
+                    "bioetl.entity_type": self._config.entity_type,
+                    "bioetl.start_index": start_index,
+                },
+            ),
         )
         span.__enter__()
         return span
@@ -133,8 +139,11 @@ class BatchTracingManagerService:
         """
         count_key = "bioetl.input_count" if input_count else "bioetl.record_count"
         attrs = {"bioetl.batch_id": str(batch_id), count_key: count}
-        span = self._tracer.get_tracer(self.TRACER_NAME).start_as_current_span(
-            name, attributes=attrs
+        span = cast(
+            "Span",
+            self._tracer.get_tracer(self.TRACER_NAME).start_as_current_span(
+                name, attributes=attrs
+            ),
         )
         span.__enter__()
         return span

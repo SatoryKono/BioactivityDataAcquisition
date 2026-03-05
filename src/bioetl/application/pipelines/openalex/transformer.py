@@ -44,7 +44,7 @@ from bioetl.application.pipelines.openalex.extractors import (
 from bioetl.domain.entities.openalex import OpenAlexPublicationEntity
 from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
 from bioetl.domain.services import IdentityService
-from bioetl.domain.types import GoldRecord, JsonDict
+from bioetl.domain.types import GoldRecord
 from bioetl.domain.value_objects import DOI, PublicationYear
 
 if TYPE_CHECKING:

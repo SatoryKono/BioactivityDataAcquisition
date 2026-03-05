@@ -6,7 +6,6 @@ Provides commands to list, show, and validate ADR documents.
 from __future__ import annotations
 
 import json
-from typing import Any
 
 import click
 

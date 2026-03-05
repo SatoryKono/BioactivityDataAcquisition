@@ -30,6 +30,10 @@ from bioetl.composition.bootstrap.runtime.composite_dq_loader import (
 from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
     CompositeFilterExtractionService,
 )
+from bioetl.composition.bootstrap.runtime.composite_support_helpers import (
+    _create_dq_report_service,
+    _load_field_group_registry,
+)
 from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
     CompositeSupportServices,
     CompositeSupportServicesFactory,
@@ -50,10 +54,6 @@ from bioetl.domain.contracts import (
 )
 from bioetl.domain.ports import LoggerPort
 from bioetl.infrastructure.config import get_settings
-from bioetl.infrastructure.config.field_group_loader import (
-    FieldGroupLoadError,
-    load_field_groups,
-)
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
 from bioetl.infrastructure.schemas.composite_config import (
     validate_composite_config_payload,
@@ -70,7 +70,6 @@ if TYPE_CHECKING:
     )
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.application.services.dq_report_service import DQReportService
-    from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.ports import LockPort, MetricsPort, QuarantinePort
     from bioetl.infrastructure.config import Settings
 
@@ -83,7 +82,6 @@ __all__ = [
 
 # Default composite config path (RF-CFG-036)
 COMPOSITE_CONFIG_DIR = Path("configs/composites")
-FIELD_GROUP_CONFIG_DIR = Path("configs/composites/field_groups")
 
 COMPOSITE_GOLD_SCHEMA_REGISTRY: dict[str, type] = {
     "activity": CompositeActivityGoldSchema,
@@ -390,74 +388,3 @@ def bootstrap_composite_pipeline(
 ) -> CompositePipelineRunnerService:
     """Bootstrap a CompositePipelineRunnerService with all dependencies."""
     return bootstrap_composite_runner(config=config, runtime=runtime, run_id=run_id)
-
-
-def _load_field_group_registry(
-    composite_name: str,
-    logger: LoggerPort,
-) -> FieldGroupRegistry | None:
-    """Load field group registry for a composite pipeline.
-
-    Attempts to load field group configuration from YAML. Returns None
-    if no configuration is found (graceful degradation).
-
-    Args:
-        composite_name: Composite pipeline name (e.g., "composite_publication").
-        logger: Structured logger.
-
-    Returns:
-        FieldGroupRegistry if config found, None otherwise.
-    """
-    # Extract entity from composite name (e.g., "composite_publication" -> "publication")
-    entity = (
-        composite_name.replace("composite_", "")
-        if "_" in composite_name
-        else composite_name
-    )
-    config_path = FIELD_GROUP_CONFIG_DIR / f"{entity}.yaml"
-
-    if not config_path.exists():
-        logger.debug(
-            "No field group config found, skipping",
-            config_path=str(config_path),
-        )
-        return None
-
-    try:
-        registry = load_field_groups(config_path)
-        logger.info(
-            "Loaded field group registry",
-            config_path=str(config_path),
-            groups=len(registry.groups),
-            fields=registry.field_count,
-            columns=registry.column_count,
-        )
-        return registry
-    except (FieldGroupLoadError, FileNotFoundError) as e:
-        logger.warning(
-            "Failed to load field group config, continuing without it",
-            error=str(e),
-            config_path=str(config_path),
-        )
-        return None
-
-
-def _create_dq_report_service(
-    logger: LoggerPort,
-    settings: Settings,
-) -> DQReportService:
-    """Create DQ report service for composite pipelines."""
-    from bioetl.application.services.dq_report_service import DQReportService
-    from bioetl.infrastructure.export.dq_report_writer import DQReportWriter
-
-    # Create DQ report writer
-    reports_base_path = Path(settings.data_dir) / "output" / "reports" / "dq"
-    report_writer = DQReportWriter(
-        base_path=reports_base_path,
-        logger=logger,
-    )
-
-    return DQReportService(
-        logger=logger,
-        report_writer=report_writer,
-    )

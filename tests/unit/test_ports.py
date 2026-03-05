@@ -120,7 +120,6 @@ class TestStoragePortProtocol:
     def test_write_silver_signature(self) -> None:
         """StoragePort should require a specific write_silver signature."""
         from collections.abc import Iterator
-        from typing import Literal
 
         from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
         from bioetl.domain.value_objects.silver_result import SilverWriteResult

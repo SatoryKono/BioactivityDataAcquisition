@@ -8,7 +8,6 @@ from bioetl.domain.config.validation import (
     ConditionalValidation,
     CrossFieldValidation,
     FieldValidation,
-    ValidationConfig,
 )
 
 

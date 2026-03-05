@@ -9,11 +9,13 @@ Safety Guard (RULES.md §4.6):
 
 from __future__ import annotations
 
+from bioetl.domain.types import JsonDict
+
 __all__ = ["RecordProcessor"]
 
 
 from collections.abc import Awaitable, Callable
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.batch_executor import BatchResult
 from bioetl.domain.exceptions import BioETLError
@@ -31,6 +33,7 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import TracingPort
     from bioetl.domain.types import BatchID
+    from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 
 
 _PROCESSING_SPAN_ERRORS = (
@@ -114,7 +117,10 @@ class RecordProcessor:
         self._batch_metrics.track_processed_records("gold", len(result.gold_records))
 
         # Write to Silver with bronze_refs for lineage tracking (REQ-LINEAGE-001)
-        bronze_refs = [bronze_result] if bronze_result else None
+        typed_bronze_result = cast("BronzeWriteResult | None", bronze_result)
+        bronze_refs: list[BronzeWriteResult] | None = (
+            [typed_bronze_result] if typed_bronze_result else None
+        )
         if result.silver_records:
             await self._execute_with_span(
                 "write_silver",
@@ -205,10 +211,11 @@ class RecordProcessor:
         span = self._tracer.get_tracer("bioetl.processor").start_as_current_span(
             name, attributes=attrs
         )
-        span.__enter__()
-        return span
+        typed_span = cast("Span", span)
+        typed_span.__enter__()
+        return typed_span
 
-    def _end_span(self, span: Span, error: Exception | None = None) -> None:
+    def _end_span(self, span: Span | None, error: Exception | None = None) -> None:
         """End a tracing span."""
         if not span:
             return

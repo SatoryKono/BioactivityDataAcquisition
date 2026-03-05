@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import random
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypeVar
 
 from bioetl.domain.types import BatchID, BronzeRecord, GoldRecord
 
@@ -27,6 +27,7 @@ _DQ_DATAFRAME_ERRORS: tuple[type[Exception], ...] = (
 # Maximum DQ sample size to prevent OOM on large pipeline runs.
 # Uses reservoir sampling to maintain a statistically representative subset.
 _DQ_MAX_SAMPLE_SIZE = 50_000
+_ReservoirT = TypeVar("_ReservoirT")
 
 
 class _BatchExecutorDQMixin:
@@ -80,7 +81,11 @@ class _BatchExecutorDQMixin:
         for rec in gold_records:
             self._reservoir_add(self._gold_records_for_dq, rec)
 
-    def _reservoir_add(self, reservoir: list[object], item: object) -> None:
+    def _reservoir_add(
+        self,
+        reservoir: list[_ReservoirT],
+        item: _ReservoirT,
+    ) -> None:
         """Add item to a bounded reservoir using Algorithm R."""
         if not hasattr(self, "_dq_total_seen"):
             self._dq_total_seen = 0
@@ -104,19 +109,15 @@ class _BatchExecutorDQMixin:
             import polars as pl
 
             return pl.DataFrame(records)
-        except Exception as dataframe_error:
-            if not self._is_dataframe_build_error(dataframe_error):
-                raise
+        except self._dataframe_error_types() as dataframe_error:
             normalized_records = self._normalize_records_for_polars(records)
             if normalized_records is not None:
                 try:
                     import polars as pl
 
                     return pl.DataFrame(normalized_records)
-                except Exception as normalized_error:
-                    if not self._is_dataframe_build_error(normalized_error):
-                        raise
-                    pass
+                except self._dataframe_error_types() as normalized_error:
+                    _ = normalized_error
             self._logger.warning(
                 "Failed to build dataframe for DQ context",
                 records_count=len(records),
@@ -126,14 +127,20 @@ class _BatchExecutorDQMixin:
             return None
 
     @staticmethod
-    def _is_dataframe_build_error(error: Exception) -> bool:
-        """Return True for known dataframe construction errors."""
-        return isinstance(
-            error, _DQ_DATAFRAME_ERRORS
-        ) or error.__class__.__module__.startswith("polars.")
+    def _dataframe_error_types() -> tuple[type[Exception], ...]:
+        """Resolve exception types raised while building Polars dataframes."""
+        try:
+            import polars as pl
+        except (ImportError, ModuleNotFoundError):
+            return _DQ_DATAFRAME_ERRORS
+        except AttributeError:
+            return _DQ_DATAFRAME_ERRORS
+        return (*_DQ_DATAFRAME_ERRORS, pl.exceptions.PolarsError)
 
     @staticmethod
-    def _stringify_value(value: object, keys_to_stringify: set[str], key: str) -> object:
+    def _stringify_value(
+        value: object, keys_to_stringify: set[str], key: str
+    ) -> object:
         """Stringify a value if its key requires normalization."""
         if key not in keys_to_stringify or value is None:
             return value
@@ -167,7 +174,7 @@ class _BatchExecutorDQMixin:
         if not keys_to_stringify:
             return None
 
-        _sv = BatchExecutorDQMixin._stringify_value
+        _sv = _BatchExecutorDQMixin._stringify_value
         return [
             {key: _sv(value, keys_to_stringify, key) for key, value in record.items()}
             for record in records

@@ -9,10 +9,12 @@ Computes derived Tanimoto metrics (avg_tani, max_tani).
 
 from __future__ import annotations
 
+from bioetl.domain.types import JsonDict
+
 __all__ = ["PublicationSimilarityTransformer"]
 
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.application.core.field_specs import normalize_pmid
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (

@@ -14,9 +14,7 @@ import httpx
 import pytest
 
 from bioetl.domain.exceptions import (
-    CircuitBreakerOpenError,
     RecoverableError,
-    RetryExhaustedError,
 )
 from bioetl.domain.resilience import RetryConfig
 from bioetl.infrastructure.adapters.http.client_retry_mixin import HTTPClientRetryMixin

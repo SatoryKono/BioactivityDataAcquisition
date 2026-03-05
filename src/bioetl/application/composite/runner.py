@@ -35,9 +35,9 @@ if TYPE_CHECKING:
     import polars as pl
 
     from bioetl.application.composite.checkpoint import CompositeCheckpointManager
-    from bioetl.application.composite.coordinator import EnrichmentCoordinator
+    from bioetl.application.composite.coordinator import EnrichmentCoordinatorService
     from bioetl.application.composite.dependency_coordinator import (
-        DependencyCoordinator,
+        DependencyCoordinatorService,
     )
     from bioetl.application.composite.fsm_helper import FSMStateHelperService
     from bioetl.application.composite.key_extractor import KeyExtractorService
@@ -95,7 +95,7 @@ class CompositePipelineRunner(
         seed_runner_factory: Callable[[], PipelineRunner],
         enricher_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
         key_extractor: KeyExtractorService,
-        coordinator: EnrichmentCoordinator,
+        coordinator: EnrichmentCoordinatorService,
         merger: MergeService,
         checkpoint_manager: CompositeCheckpointManager,
         logger: LoggerPort,
@@ -106,7 +106,7 @@ class CompositePipelineRunner(
         preflight_validator: CompositePreflightValidator | None = None,
         dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner]
         | None = None,
-        dependency_coordinator: DependencyCoordinator | None = None,
+        dependency_coordinator: DependencyCoordinatorService | None = None,
         quarantine_port: QuarantinePort | None = None,
         metrics: MetricsPort | None = None,
     ) -> None:

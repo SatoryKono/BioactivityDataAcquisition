@@ -142,9 +142,7 @@ class TestAggregateBoundaryIsolation:
                 continue
 
             # Read full content including sub-modules for AST parsing
-            full_content = _read_aggregate_content(
-                aggregates_dir, py_file.name
-            )
+            full_content = _read_aggregate_content(aggregates_dir, py_file.name)
             try:
                 tree = ast.parse(full_content, filename=str(py_file))
             except SyntaxError:
@@ -271,9 +269,7 @@ class TestAggregateInvariantProtection:
             if py_file.name.startswith("_"):
                 continue
 
-            full_content = _read_aggregate_content(
-                aggregates_dir, py_file.name
-            )
+            full_content = _read_aggregate_content(aggregates_dir, py_file.name)
             try:
                 tree = ast.parse(full_content, filename=str(py_file))
             except SyntaxError:

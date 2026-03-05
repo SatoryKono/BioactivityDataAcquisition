@@ -8,7 +8,6 @@ Updated for instance-level PipelineRegistry (2025-12).
 
 from __future__ import annotations
 
-import typing
 
 import pytest
 

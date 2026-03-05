@@ -21,8 +21,10 @@ def _safe_int(val: object) -> int | None:
     """Convert value to int, returning None if conversion fails."""
     if val is None:
         return None
+    if isinstance(val, bool):
+        return None
     try:
-        return int(val)
+        return int(str(val).strip())
     except (ValueError, TypeError):
         return None
 
@@ -31,8 +33,10 @@ def _safe_float(val: object) -> float | None:
     """Convert value to float, returning None if conversion fails."""
     if val is None:
         return None
+    if isinstance(val, bool):
+        return None
     try:
-        return float(val)
+        return float(str(val).strip())
     except (ValueError, TypeError):
         return None
 
@@ -57,7 +61,13 @@ def _safe_json(val: object) -> str | None:
     """Convert to JSON string if not None/empty."""
     from bioetl.domain.serialization import serialize_to_json
 
-    return serialize_to_json(val) if val else None
+    if val is None or val == "":
+        return None
+    if isinstance(val, dict):
+        return serialize_to_json(val)
+    if isinstance(val, list | tuple):
+        return serialize_to_json(val)
+    return serialize_to_json({"value": val})
 
 
 class BioactivityState(StrEnum):
@@ -219,28 +229,7 @@ class Bioactivity(BaseEntity):
         index: int = 0,
         source_batch_id: UUID | None = None,
     ) -> Bioactivity:
-        """Create a Bioactivity entity from raw ChEMBL API response data.
-
-        Extracts and type-converts fields from the raw API dict, computing
-        a content hash for deduplication. The returned entity is in RAW state.
-
-        Args:
-            raw_data: Dict of ChEMBL API response fields. Required keys:
-                ``activity_id`` and ``molecule_id``; all other fields are
-                optional and safely coerced via ``_safe_*`` helpers.
-            run_id: Pipeline run identifier.
-            run_type: Type of pipeline run (default INCREMENTAL).
-            ingestion_ts: Timestamp of ingestion.
-            index: Record index within the batch (default 0).
-            source_batch_id: Optional upstream batch identifier.
-
-        Returns:
-            Bioactivity entity in ``BioactivityState.RAW`` state.
-
-        Raises:
-            ValueError: If ``activity_id`` or ``molecule_id`` is missing
-                from *raw_data*.
-        """
+        """Create RAW bioactivity entity from source payload."""
         import hashlib
 
         from bioetl.domain.serialization import serialize_to_json_canonical

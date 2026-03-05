@@ -27,7 +27,7 @@ __all__ = ["PUBCHEM_HEALTH_ERRORS", "PubChemAdapter"]
 
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import pubchempy as pcp
 from pydantic import BaseModel

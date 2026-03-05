@@ -25,7 +25,7 @@ __all__ = [
 
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.domain.config import PipelineConfig
 from bioetl.domain.ports import (

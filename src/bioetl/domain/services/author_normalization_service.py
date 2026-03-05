@@ -19,7 +19,6 @@ from bioetl.domain.services._author_helpers import (
     normalize_to_surname_initial,
     parse_author_names,
     parse_author_string,
-    parse_delimited_authors,
 )
 from bioetl.domain.types import JsonDict
 

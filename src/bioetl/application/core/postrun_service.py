@@ -13,9 +13,10 @@ DQ report generation added for detailed data quality analysis.
 
 from __future__ import annotations
 
+from collections.abc import Awaitable
 from dataclasses import dataclass
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.postrun_cleanup_orchestrator import (
     PostrunCleanupService,
@@ -402,7 +403,7 @@ class PostrunService:
         stats: dict[str, object],
         dq_reports: DQReportResult | None,
         completed_at: datetime,
-    ) -> object | None:
+    ) -> Awaitable[object] | None:
         """Build coroutine for writing final Silver metadata."""
         from bioetl.domain.ports import SilverMetadataInput
 
@@ -421,8 +422,8 @@ class PostrunService:
             table_path=str(silver_path),
             primary_keys=list(self._config.table.primary_keys),
             mode=self._config.table.silver_write_mode,
-            total_records=stats.get("records_silver"),
-            source_batch_ids=stats.get("source_batch_ids"),
+            total_records=cast("int | None", stats.get("records_silver")),
+            source_batch_ids=cast("list[str] | None", stats.get("source_batch_ids")),
             version_after=version_after,
             dq_report_path=self._resolve_report_path(dq_reports, layer="silver"),
             started_at=self._context.started_at,
@@ -444,7 +445,7 @@ class PostrunService:
         stats: dict[str, object],
         dq_reports: DQReportResult | None,
         completed_at: datetime,
-    ) -> object | None:
+    ) -> Awaitable[object] | None:
         """Build coroutine for writing final Gold metadata."""
         from bioetl.domain.ports import GoldMetadataInput
 
@@ -455,15 +456,11 @@ class PostrunService:
             return None
 
         gold_path = self._storage.get_table_path(gold_table, layer="gold")
-        version_after = self._resolve_delta_version(
-            table_path=str(gold_path),
-            layer="gold",
-        )
         gold_input = GoldMetadataInput(
             table_path=str(gold_path),
             table_name=gold_table,
             mode=self._config.table.gold_write_mode,
-            total_records=stats.get("records_gold"),
+            total_records=cast("int | None", stats.get("records_gold")),
             dq_report_path=self._resolve_report_path(dq_reports, layer="gold"),
             completed_at=completed_at,
             gold_schema=self._config.gold_schema,

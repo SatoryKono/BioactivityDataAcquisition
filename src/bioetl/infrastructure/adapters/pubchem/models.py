@@ -20,8 +20,6 @@ __all__ = [
 ]
 
 
-from typing import Any
-
 from pydantic import BaseModel, ConfigDict, Field
 
 from bioetl.domain.types import JsonDict

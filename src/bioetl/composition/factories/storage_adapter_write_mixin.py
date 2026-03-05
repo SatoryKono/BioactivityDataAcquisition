@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal, cast
 
+from bioetl.domain.types import JsonDict
+
 if TYPE_CHECKING:
     from collections.abc import Iterator
     from datetime import datetime

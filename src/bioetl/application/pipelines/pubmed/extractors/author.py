@@ -14,7 +14,7 @@ PII Safety (RULES.md §5.4):
 
 from __future__ import annotations
 
-__all__ = ["AuthorExtractor", "EMAIL_PATTERN", "RawAuthor", "StructuredAffiliation"]
+__all__ = ["EMAIL_PATTERN", "AuthorExtractor", "RawAuthor", "StructuredAffiliation"]
 
 
 import re

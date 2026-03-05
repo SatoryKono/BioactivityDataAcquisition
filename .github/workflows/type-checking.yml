@@ -27,6 +27,7 @@ on:
 jobs:
   type-check:
     runs-on: ubuntu-latest
+    timeout-minutes: 40
 
     steps:
       - name: Checkout
@@ -53,17 +54,32 @@ jobs:
       - name: Install dependencies (frozen lock)
         run: uv sync --frozen --extra dev --extra tracing
 
-      - name: Run mypy (strict mode)
+      - name: Run mypy (strict mode, full gate)
         run: |
-          echo "Running mypy with strict mode on all source code..."
-          if [ "${{ github.event_name }}" = "schedule" ]; then
-            echo "Weekly cold mypy run (--no-incremental)"
-            rm -rf .mypy_cache
-            uv run mypy --config-file pyproject.toml --no-incremental src/bioetl
-          else
-            echo "Fast mypy run (incremental)"
-            uv run mypy --config-file pyproject.toml src/bioetl
+          set -o pipefail
+          mkdir -p reports
+
+          echo "Running full mypy strict gate on src/bioetl..."
+          echo "Event: ${{ github.event_name }}" | tee reports/mypy_strict.log
+
+          # Always run full strict gate without incremental cache for deterministic CI.
+          rm -rf .mypy_cache
+
+          set +e
+          timeout --signal=TERM --kill-after=30s 30m \
+            uv run mypy --config-file pyproject.toml --strict --no-incremental src/bioetl \
+            2>&1 | tee -a reports/mypy_strict.log
+          status=${PIPESTATUS[0]}
+          set -e
+
+          echo "$status" > reports/mypy_strict.exit_code
+
+          if [ "$status" -eq 124 ]; then
+            echo "mypy strict gate timed out after 30 minutes" | tee -a reports/mypy_strict.log
+            exit 1
           fi
+
+          exit "$status"
 
       - name: Verify NewType and Protocol usage in domain layer
         run: |
@@ -171,12 +187,10 @@ jobs:
       - name: Generate type coverage report
         run: |
           mkdir -p reports
-          MYPY_INCREMENTAL_FLAG=""
-          if [ "${{ github.event_name }}" = "schedule" ]; then
-            rm -rf .mypy_cache
-            MYPY_INCREMENTAL_FLAG="--no-incremental"
-          fi
-          uv run mypy --config-file pyproject.toml ${MYPY_INCREMENTAL_FLAG} src/bioetl --txt-report reports/mypy_report || true
+          rm -rf .mypy_cache
+          timeout --signal=TERM --kill-after=30s 20m \
+            uv run mypy --config-file pyproject.toml --strict --no-incremental src/bioetl \
+            --txt-report reports/mypy_report || true
           echo "Type checking report generated"
 
       - name: Upload type checking reports
@@ -184,5 +198,7 @@ jobs:
         if: always()
         with:
           name: type-checking-reports
-          path: reports/
+          path: |
+            reports/
+            .mypy_cache/
           if-no-files-found: warn

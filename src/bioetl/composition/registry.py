@@ -13,9 +13,12 @@ A default global instance is provided for backward compatibility.
 from __future__ import annotations
 
 import threading
-from typing import NamedTuple
+from typing import TYPE_CHECKING, NamedTuple
 
 from bioetl.domain.ports import PipelineFactoryPort
+
+if TYPE_CHECKING:
+    import pyarrow as pa
 
 __all__ = [
     "PipelineDefinition",

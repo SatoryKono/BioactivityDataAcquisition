@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import threading
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Literal
 from urllib.parse import urlparse
 
 if TYPE_CHECKING:
@@ -189,12 +189,11 @@ class APIRequestCollector:
         total_requests = len(requests_copy)
         total_response_bytes = sum(r.response_size_bytes for r in requests_copy)
 
-        if total_requests > 0:
-            avg_duration = (
-                sum(r.request_duration_ms for r in requests_copy) / total_requests
-            )
-        else:
-            avg_duration = 0.0
+        avg_duration = (
+            sum(r.request_duration_ms for r in requests_copy) / total_requests
+            if total_requests > 0
+            else 0.0
+        )
 
         return SourceMetadata(
             type=source_type,

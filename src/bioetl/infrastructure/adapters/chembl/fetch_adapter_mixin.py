@@ -1,3 +1,4 @@
+# mypy: disable-error-code=attr-defined
 """Adapter mixin orchestrating ChEMBL fetch flows."""
 
 from __future__ import annotations

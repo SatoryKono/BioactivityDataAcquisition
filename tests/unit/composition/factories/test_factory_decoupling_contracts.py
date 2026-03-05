@@ -64,7 +64,17 @@ def test_pipeline_factory_create_with_services_injects_compat_dependencies(
     mock_create_pipeline_with_services.return_value = "pipeline"
 
     with pytest.warns(DeprecationWarning):
-        result = pipeline_factory.create_pipeline_with_services("chembl_activity")
+        result = pipeline_factory.create_pipeline_with_services(
+            "chembl_activity",
+            object(),  # pipeline_class
+            "chembl",  # provider
+            object(),  # create_data_source_fn
+            None,  # transformer_class
+            "run-test",  # run_id
+            object(),  # runtime
+            object(),  # settings
+            object(),  # logger
+        )
 
     assert result == "pipeline"
     deps = mock_create_pipeline_with_services.call_args.kwargs["_deps"]

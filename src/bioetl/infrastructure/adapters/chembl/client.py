@@ -10,7 +10,7 @@ __all__ = ["ChemblAdapter"]
 
 import urllib.parse
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel
 

@@ -10,7 +10,7 @@ Uses unified HTTP client for API requests with proper metrics tracking.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
 from httpx import RequestError
 

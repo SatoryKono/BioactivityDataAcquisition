@@ -1,385 +1,73 @@
-"""Schema validation for pipeline configuration.
-
-Implements strict validation for pipeline YAML configurations using Pydantic.
-Enforces Medallion Architecture constraints and operational limits.
-
-Consolidation Pattern:
-Each Pydantic model has a `to_domain()` method that converts to the corresponding
-domain dataclass. This eliminates duplicate conversion logic and provides a clean
-boundary between infrastructure (YAML parsing) and domain (business logic).
-"""
+"""Schema validation facade for pipeline configuration."""
 
 from __future__ import annotations
 
-import re
-from typing import Any, Literal
+from typing import Literal
 
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    field_validator,
-    model_validator,
-)
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from bioetl.domain.types import JsonDict
-from bioetl.infrastructure.schemas.base_schemas import (
-    BaseFilterColumnSchema,
-    BaseGoldColumnFilterConfig,
-    BaseGoldFiltersConfig,
-    BaseGoldListContainsFilterConfig,
-    BaseGoldListLengthFilterConfig,
-    BaseGoldRangeFilterConfig,
-    BaseInputFilterConfig,
-)
 from bioetl.infrastructure.schemas.composite_config import ColumnGroupSchema
-from bioetl.infrastructure.schemas.pipeline_config_common import (
-    CircuitBreakerConfig,
+from bioetl.infrastructure.schemas.pipeline_config_common import CircuitBreakerConfig
+from bioetl.infrastructure.schemas.pipeline_config_common_schemas import (
+    ContentHashConfig,
+    FilterColumnSchema,
+    GoldColumnFilterConfig,
+    GoldFiltersConfig,
+    GoldListContainsFilterConfig,
+    GoldListLengthFilterConfig,
+    GoldRangeFilterConfig,
+    InputFilterConfig,
+    MaintenanceConfig,
+    SinkDQReportConfig,
+    SinkLayerConfig,
+    TransformConfig,
+)
+from bioetl.infrastructure.schemas.pipeline_config_dq import (
     ConditionalValidationConfig,
     CrossFieldValidationConfig,
-    CsvExportConfig,
     DQConfig,
     DQReportConfig,
     FieldValidationConfig,
 )
+from bioetl.infrastructure.schemas.pipeline_config_provider import (
+    ApiConfig,
+    ClientSourceConfig,
+    ProviderSourceConfig,
+    RateLimitSourceConfig,
+    SourceConfig,
+)
 
 __all__ = [
+    "ApiConfig",
+    "CircuitBreakerConfig",
+    "ClientSourceConfig",
     "ConditionalValidationConfig",
+    "ContentHashConfig",
     "CrossFieldValidationConfig",
+    "DQConfig",
     "DQReportConfig",
     "FieldValidationConfig",
+    "FilterColumnSchema",
+    "GoldColumnFilterConfig",
+    "GoldFiltersConfig",
+    "GoldListContainsFilterConfig",
+    "GoldListLengthFilterConfig",
+    "GoldRangeFilterConfig",
+    "InputFilterConfig",
+    "MaintenanceConfig",
+    "PipelineYamlConfig",
+    "ProviderSourceConfig",
+    "RateLimitSourceConfig",
+    "SinkDQReportConfig",
+    "SinkLayerConfig",
+    "SourceConfig",
+    "TransformConfig",
 ]
 
 
-class FilterColumnSchema(BaseFilterColumnSchema):
-    """Schema for a single filter column configuration."""
-
-
-class InputFilterConfig(BaseInputFilterConfig):
-    """Configuration for input ID filtering from CSV.
-
-    Inherits to_domain() and validate_column_config from BaseInputFilterConfig.
-
-    Supports both single-column and multi-column filtering modes:
-    - Single-column: Use column_name and filter_field directly
-    - Multi-column: Use columns list for AND-logic filtering
-
-    Pydantic model for YAML parsing. Use `to_domain()` to convert to domain dataclass.
-    """
-
-    # Inherits columns from BaseInputFilterConfig.
-    # FilterColumnSchema extends BaseFilterColumnSchema with no additional fields.
-
-
-class MaintenanceConfig(BaseModel):
-    """Configuration for automated maintenance operations.
-
-    Controls automatic VACUUM and other maintenance tasks after pipeline runs.
-
-    Attributes:
-        auto_vacuum: Enable automatic VACUUM after successful run.
-        vacuum_retention_days: Minimum age of files to remove (days).
-    """
-
-    auto_vacuum: bool = Field(
-        default=False,
-        description="Enable automatic VACUUM after successful pipeline run",
-    )
-    vacuum_retention_days: int = Field(
-        default=7,
-        ge=1,
-        le=365,
-        description="Minimum age of files to remove during VACUUM (days)",
-    )
-
-
-class ApiConfig(BaseModel):
-    """Configuration for API connection details."""
-
-    base_url: str | None = None
-    from_db: str | None = Field(
-        default=None, description="Source database for ID mapping (e.g., ChEMBL)"
-    )
-    to_db: str | None = Field(
-        default=None, description="Target database for ID mapping (e.g., UniProtKB)"
-    )
-
-
-class RateLimitSourceConfig(BaseModel):
-    """Rate limit configuration from source YAML.
-
-    Pydantic model for parsing rate_limit section from configs/providers/*.yaml.
-    """
-
-    requests_per_second: float = Field(default=5.0, ge=0.1, le=100.0)
-    burst: int = Field(default=10, ge=1, le=200)
-
-
-class ClientSourceConfig(BaseModel):
-    """HTTP client configuration from source YAML."""
-
-    timeout_sec: float = Field(default=30.0, ge=1.0, le=300.0)
-    max_retries: int = Field(default=3, ge=0, le=10)
-
-
-class ProviderSourceConfig(BaseModel):
-    """Provider-specific configuration from source YAML.
-
-    Pydantic model for parsing provider_config section from configs/providers/*.yaml.
-    """
-
-    provider: str | None = None
-    base_url: str | None = None
-    client: ClientSourceConfig = Field(default_factory=ClientSourceConfig)
-    max_url_length: int = Field(default=2000, ge=500, le=8000)
-    batch_size: int = Field(default=100, ge=1, le=5000)
-    page_size: int = Field(default=1000, ge=100, le=10000)
-    api_version: str | None = None
-    default_email: str | None = None
-
-
-class SourceConfig(BaseModel):
-    """Configuration for the data source.
-
-    Parses both pipeline source settings and configs/providers/*.yaml structure.
-    The `rate_limit`, `circuit_breaker`, and `provider_config` fields capture
-    settings from source configuration files.
-    """
-
-    model_config = ConfigDict(extra="ignore")
-
-    # Common fields
-    email: str | None = None
-    api_key: str | None = None
-    fields: list[dict[str, str]] = Field(default_factory=list)
-    api: ApiConfig = Field(default_factory=ApiConfig)
-
-    # Source file fields (from configs/providers/*.yaml)
-    batch_size: int = Field(default=100, ge=1, le=5000)
-    rate_limit: RateLimitSourceConfig = Field(default_factory=RateLimitSourceConfig)
-    circuit_breaker: CircuitBreakerConfig = Field(default_factory=CircuitBreakerConfig)
-    provider_config: ProviderSourceConfig = Field(default_factory=ProviderSourceConfig)
-
-
-class SinkDQReportConfig(BaseModel):
-    """DQ report configuration for sink layers."""
-
-    enabled: bool = Field(
-        default=False,
-        description="Enable DQ report generation for this layer",
-    )
-    output_path: str | None = Field(
-        default=None,
-        description="Output path for report. None = alongside data files.",
-    )
-    format: Literal["json", "yaml", "html"] = Field(
-        default="json",
-        description="Report output format",
-    )
-
-
-class SinkLayerConfig(BaseModel):
-    """Configuration for a specific data layer (Bronze, Silver, Gold)."""
-
-    model_config = ConfigDict(extra="forbid")
-
-    enabled: bool = True
-    path: str | None = None
-    format: Literal["jsonl", "delta", "parquet"] = "delta"
-    mode: str | None = None
-    save_json: bool = False
-    save_metadata: bool = Field(
-        default=False,
-        description="Save _metadata.yaml sidecar file with lineage and QC info",
-    )
-    csv_export: CsvExportConfig = Field(default_factory=CsvExportConfig)
-    # Schema drift handling
-    on_schema_mismatch: Literal["error", "evolve", "ignore"] = Field(
-        default="error", description="How to handle schema drift"
-    )
-    # DQ report generation
-    dq_report: SinkDQReportConfig = Field(
-        default_factory=SinkDQReportConfig,
-        description="DQ report generation settings for this layer",
-    )
-    # Deterministic write order (Gold layer)
-    deterministic: bool = Field(
-        default=True,
-        description="Enable deterministic write order for Gold layer output",
-    )
-    sort_by: list[str] = Field(
-        default_factory=list,
-        description="Deterministic sort policy for layer output ordering.",
-    )
-    # Partitioning (Silver layer)
-    partition_by: list[str] = Field(
-        default_factory=list,
-        description="Columns to partition Delta tables by (Silver layer)",
-    )
-    # SCD Type 2 configuration (Gold layer)
-    scd_config: dict[str, str] | None = Field(
-        default=None,
-        description="SCD Type 2 column mapping (valid_from, valid_to, is_current, version)",
-    )
-    # Flat structure mode
-    flat_structure: bool = Field(
-        default=False,
-        description="If True, Delta data written directly to path without table_name subdirectory. "
-        "CSV, metadata, and DQ reports use {table_name}_* naming pattern.",
-    )
-
-    @field_validator("sort_by")
-    @classmethod
-    def validate_sort_by(cls, value: list[str]) -> list[str]:
-        """Validate deterministic sort policy column names."""
-        normalized = [column.strip() for column in value]
-        if any(not column for column in normalized):
-            raise ValueError("sort_by must not contain empty column names")
-        if len(normalized) != len(set(normalized)):
-            raise ValueError("sort_by must not contain duplicate columns")
-        return normalized
-
-
-class GoldRangeFilterConfig(BaseGoldRangeFilterConfig):
-    """Schema for range filters in YAML."""
-
-
-class GoldListLengthFilterConfig(BaseGoldListLengthFilterConfig):
-    """Schema for list length filters in YAML."""
-
-
-class GoldListContainsFilterConfig(BaseGoldListContainsFilterConfig):
-    """Schema for list contains filters in YAML."""
-
-
-class GoldColumnFilterConfig(BaseGoldColumnFilterConfig):
-    """Column filter config with operator support.
-
-    Inherits operator, values fields and validate_operator_values() from base.
-
-    Example YAML:
-        columns:
-          standard_type:
-            operator: in
-            values: ["IC50", "Ki"]
-          pchembl_value:
-            operator: is_not_null
-    """
-
-
-class GoldFiltersConfig(BaseGoldFiltersConfig):
-    """Schema for gold_filters in YAML.
-
-    Inherits to_domain() from BaseGoldFiltersConfig.
-
-    Supports two formats for columns:
-    - Legacy format: {"column_name": ["value1", "value2"]} (IN operator)
-    - New format: {"column_name": {"operator": "in", "values": ["value1", "value2"]}}
-
-    Example YAML (legacy format):
-        gold_filters:
-          columns:
-            standard_type: [IC50, Ki]
-
-    Example YAML (new format):
-        gold_filters:
-          columns:
-            standard_type:
-              operator: in
-              values: [IC50, Ki]
-            pchembl_value:
-              operator: is_not_null
-    """
-
-    # Inherits columns, ranges, list_lengths, list_contains from BaseGoldFiltersConfig.
-    # Child filter types (GoldColumnFilterConfig etc.) extend the base types with no
-    # additional fields, so the base field definitions are sufficient.
-
-
-# Regex for semver validation (allows optional 'v' prefix)
-# Matches: 1.0.0, v1.0.0, 1.2.3-beta, 1.2.3+build, etc.
-SEMVER_PATTERN = re.compile(
-    r"^v?"  # Optional 'v' prefix
-    r"(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)"  # Major.Minor.Patch
-    r"(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)"  # Pre-release
-    r"(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?"
-    r"(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$"  # Build metadata
-)
-
-
-class TransformConfig(BaseModel):
-    """Configuration for transform versioning and steps.
-
-    Tracks the version and steps of the transformation applied to data,
-    enabling full lineage tracking in Silver/Gold metadata.
-
-    Attributes:
-        version: Semver-formatted version string (e.g., "1.0.0", "v2.1.0").
-        steps: List of transformation step names applied in order.
-
-    Example YAML:
-        transform:
-          version: "1.0.0"
-          steps:
-            - normalize_values
-            - add_metadata
-            - calculate_content_hash
-    """
-
-    version: str | None = Field(
-        default=None,
-        description="Transform version in semver format (e.g., '1.0.0')",
-    )
-    steps: list[str] = Field(
-        default_factory=list,
-        description="List of transformation steps applied",
-    )
-
-    @field_validator("version")
-    @classmethod
-    def validate_semver(cls, v: str | None) -> str | None:
-        """Validate that version follows semver format.
-
-        Args:
-            v: V.
-
-        Returns:
-            Validated str | None.
-        """
-        if v is None:
-            return v
-        if not SEMVER_PATTERN.match(v):
-            raise ValueError(
-                f"Invalid semver format '{v}'. "
-                "Expected format: MAJOR.MINOR.PATCH (e.g., '1.0.0', 'v2.1.0')"
-            )
-        return v
-
-
-class ContentHashConfig(BaseModel):
-    """Configures include/exclude field policy for content hash generation."""
-
-    include: list[str] = Field(
-        default_factory=list,
-        description="Optional allowlist of fields included in content hash.",
-    )
-    exclude: list[str] = Field(
-        default_factory=list,
-        description="Optional denylist of fields excluded from content hash.",
-    )
-
-
 class PipelineYamlConfig(BaseModel):
-    """Strict schema for pipeline YAML configuration.
-
-    Pydantic model for YAML parsing.
-
-    DQ Config Resolution:
-        The dq_config_file field references an external DQ configuration file
-        that is loaded through the DQConfigLoader hierarchy. If both dq_config_file
-        and dq_overrides are present, dq_overrides acts as inline overrides on top of
-        the file-based configuration.
-    """
+    """Strict schema for pipeline YAML configuration."""
 
     model_config = ConfigDict(populate_by_name=True, extra="forbid")
 
@@ -390,7 +78,6 @@ class PipelineYamlConfig(BaseModel):
     description: str | None = Field(
         default=None, description="Human-readable pipeline description"
     )
-
     batch_size: int = Field(default=100, ge=1, le=5000)
     filter_batch_size: int | None = Field(
         default=None,
@@ -408,40 +95,25 @@ class PipelineYamlConfig(BaseModel):
         "Source config defines pagination strategy and defaults.",
     )
     checkpoint_interval: int = Field(default=1000, ge=100)
-
-    # DQ Configuration
-    # - dq_config_file: Reference to external DQ config file (hierarchical loading)
-    # - dq_overrides: Inline DQ rules (used as overrides if dq_config_file present)
     dq_config_file: str | None = Field(
         default=None,
         description="Path to DQ config file relative to pipeline config. "
         "When set, DQ config is loaded from the hierarchical DQ system. "
         "Example: ../../entities/chembl/activity.yaml",
     )
-    dq_overrides: DQConfig = Field(
-        default_factory=DQConfig,
-    )
+    dq_overrides: DQConfig = Field(default_factory=DQConfig)
     circuit_breaker: CircuitBreakerConfig = Field(default_factory=CircuitBreakerConfig)
-
-    # Filter Configuration (ADR-028)
-    # - filter_config_file: Reference to external filter config file (hierarchical)
-    # - filter_rules: Inline filter overrides (used as overrides if file present)
-    # - input_filter/gold_filters: Legacy inline fields (backward compatibility)
     filter_config_file: str | None = Field(
         default=None,
         description="Path to filter config file relative to pipeline config. "
         "When set, filter config is loaded from the hierarchical filter system. "
         "Example: ../../entities/chembl/activity.yaml",
     )
-    filter_rules: JsonDict | None = (  # Any: YAML config has heterogeneous values
-        Field(  # Any: YAML config has heterogeneous values
-            default=None,
-            description="Inline filter overrides. Applied on top of filter_config_file. "
-            "Format: {input_filter: {...}, gold_filters: {...}}",
-        )
+    filter_rules: JsonDict | None = Field(
+        default=None,
+        description="Inline filter overrides. Applied on top of filter_config_file. "
+        "Format: {input_filter: {...}, gold_filters: {...}}",
     )
-
-    # Column ordering configuration (external file)
     column_groups_file: str | None = Field(
         default=None,
         description="Path to column group config file relative to pipeline config.",
@@ -456,7 +128,6 @@ class PipelineYamlConfig(BaseModel):
         default=None,
         description="Deprecated alias for schema_file. Kept for backward compatibility.",
     )
-
     business_primary_keys: list[str] | None = Field(default=None, min_length=1)
     technical_primary_key: str = Field(
         default="entity_id",
@@ -474,7 +145,6 @@ class PipelineYamlConfig(BaseModel):
     gold_table: str | None = Field(default=None, min_length=1)
     silver_filters: GoldFiltersConfig = Field(default_factory=GoldFiltersConfig)
     gold_filters: GoldFiltersConfig = Field(default_factory=GoldFiltersConfig)
-
     sink: dict[str, SinkLayerConfig] = Field(default_factory=dict)
     source: SourceConfig = Field(default_factory=SourceConfig)
     input_filter: InputFilterConfig = Field(default_factory=InputFilterConfig)
@@ -484,19 +154,15 @@ class PipelineYamlConfig(BaseModel):
         default_factory=list,
         description="Optional column ordering groups for Silver/Gold output",
     )
-
     content_hash: ContentHashConfig = Field(
         default_factory=ContentHashConfig,
         description="Content-hash include/exclude rules loaded from schema config.",
     )
-
     extraction_params: dict[str, str | int | bool] = Field(
         default_factory=dict,
         description="Server-side API query parameters for Bronze extraction (ADR-028 §3). "
         "Merged from filter config file. Keys are provider-specific query params.",
     )
-
-    # Loading strategy (ADR-031)
     loading_strategy: Literal["full_scan_only"] | None = Field(
         default=None,
         description="Explicit loading strategy for the pipeline. "
@@ -506,46 +172,23 @@ class PipelineYamlConfig(BaseModel):
 
     @field_validator("batch_size")
     @classmethod
-    def validate_batch_size(cls, v: int) -> int:
-        """Validate batch size limit.
-
-        Args:
-            v: V.
-
-        Returns:
-            Validated int.
-        """
-        if v > 5000:
+    def validate_batch_size(cls, value: int) -> int:
+        """Validate batch size limit."""
+        if value > 5000:
             raise ValueError("batch_size cannot exceed 5000 records")
-        return v
+        return value
 
     @field_validator("provider")
     @classmethod
-    def validate_provider(cls, v: str) -> str:
-        """Validate provider name format.
-
-        Args:
-            v: V.
-
-        Returns:
-            Validated str.
-        """
-        if not v.islower():
+    def validate_provider(cls, value: str) -> str:
+        """Validate provider name format."""
+        if not value.islower():
             raise ValueError("provider must be lowercase")
-        return v
+        return value
 
     @model_validator(mode="after")
     def validate_primary_key_split(self) -> PipelineYamlConfig:
-        """Validate explicit separation between business and technical PKs.
-
-        Migration rules:
-        - business_primary_keys is canonical.
-        - primary_keys is accepted as legacy alias.
-        - If both are provided, values MUST match exactly.
-
-        Returns:
-            Validated PipelineYamlConfig.
-        """
+        """Validate explicit separation between business and technical PKs."""
         if self.business_primary_keys is None and self.primary_keys is None:
             raise ValueError(
                 "business_primary_keys is required (or legacy primary_keys during migration)"
@@ -586,20 +229,7 @@ class PipelineYamlConfig(BaseModel):
 
     @model_validator(mode="after")
     def validate_entity_type_canonical(self) -> PipelineYamlConfig:
-        """Validate that publication entities use canonical names.
-
-        YAML configs MUST use canonical names (publication*) instead of
-        ChEMBL API-level names (document*). This ensures consistency
-        across all pipeline configurations.
-
-        See ADR-024 for entity naming unification details.
-
-        Raises:
-            ValueError: If document* is used instead of publication*.
-
-        Returns:
-            Validated PipelineYamlConfig.
-        """
+        """Validate that publication entities use canonical names."""
         from bioetl.domain.registry.publication import validate_publication_entity_type
 
         error_msg = validate_publication_entity_type(self.entity_type, self.provider)
@@ -609,44 +239,16 @@ class PipelineYamlConfig(BaseModel):
 
     @model_validator(mode="after")
     def validate_medallion_formats(self) -> PipelineYamlConfig:
-        """Validate Medallion Architecture format constraints.
-
-        RULES.md §2.1:
-        - Bronze MUST use JSONL + zstd format (not parquet, not delta)
-        - Silver MUST use Delta Lake format (not parquet)
-        - Gold MAY use Delta Lake or Parquet
-
-        Note:
-            Bronze format is auto-defaulted to 'jsonl' since that's the only
-            allowed format per RULES.md. This allows pipeline configs to omit
-            the format field for Bronze layer.
-
-        Raises:
-            ValueError: If layer format violates Medallion Architecture constraints.
-
-        Returns:
-            Validated PipelineYamlConfig.
-        """
+        """Validate Medallion Architecture format constraints."""
         bronze_config = self.sink.get("bronze")
         silver_config = self.sink.get("silver")
 
-        # Bronze MUST use JSONL only (RULES.md §2.1)
-        # Auto-default to jsonl since it's the only allowed format
         if bronze_config:
-            # Since SinkLayerConfig defaults to "delta", we auto-correct to "jsonl"
-            # This allows pipeline configs to omit format for Bronze
             bronze_config.format = "jsonl"
 
-        # Silver MUST use Delta Lake (RULES.md §2.1)
-        # Strict positive check: only "delta" is allowed. This prevents bypass
-        # with formats like "jsonl" or "csv" that the previous negative check
-        # (format == "parquet") would not catch.
         if silver_config and silver_config.format != "delta":
             raise ValueError(
                 f"Silver layer MUST use 'delta' format (RULES.md §2.1). "
                 f"Got '{silver_config.format}'. Only Delta Lake is allowed for Silver layer."
             )
-
-        # Gold MAY use delta or parquet (RULES.md §2.1) - no validation needed
-
         return self

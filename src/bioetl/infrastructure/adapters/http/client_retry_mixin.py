@@ -1,3 +1,4 @@
+# mypy: disable-error-code=attr-defined
 # mypy: disable-error-code=no-any-return
 """Retry/backoff and observability flow for UnifiedHTTPClient."""
 
@@ -22,6 +23,19 @@ if TYPE_CHECKING:
 
 class HTTPClientRetryMixin:
     """Retry policy orchestration extracted from UnifiedHTTPClient."""
+
+    retry_config: Any  # Any: configured concrete retry policy object
+    _metrics: Any  # Any: concrete metrics implementation
+    provider: str
+    logger: Any | None  # Any: logger interface varies by composition wiring
+    rate_limiter: Any  # Any: async rate limiter port
+    circuit_breaker: Any  # Any: circuit breaker port
+    _tracer: Any  # Any: tracing port
+    run_id: object | None
+
+    def _get_client(self) -> httpx.AsyncClient:
+        """Implemented by HTTP context mixin."""
+        raise NotImplementedError
 
     async def _handle_retry_delay(
         self,

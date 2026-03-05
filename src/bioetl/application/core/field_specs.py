@@ -24,6 +24,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.domain.transformations import safe_float, safe_int
+from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
@@ -69,7 +70,12 @@ def normalize_pmid(
     """
     from bioetl.domain.value_objects.publications import PubMedId
 
-    vo = PubMedId.from_raw(value)
+    normalized_input: str | int | None = None
+    if (isinstance(value, int) and not isinstance(value, bool)) or isinstance(
+        value, str
+    ):
+        normalized_input = value
+    vo = PubMedId.from_raw(normalized_input)
     return str(vo) if vo else None
 
 

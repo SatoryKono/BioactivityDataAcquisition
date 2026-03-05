@@ -11,7 +11,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable, Sequence
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.domain.composite.result import EnrichmentResult, EnrichmentStatus
 from bioetl.domain.exceptions import (
@@ -268,93 +268,25 @@ class EnrichmentCoordinatorService:
         async with self._semaphore:
             started_at = datetime.now(tz=UTC)
             records_input = len(keys)
-
-            self._logger.info(
-                "Starting enricher",
-                enricher=enricher.pipeline,
-                records_input=records_input,
-                timeout_seconds=enricher.timeout_seconds,
-            )
+            self._log_enricher_start(enricher, records_input)
 
             try:
-                # Apply timeout
-                async with asyncio.timeout(enricher.timeout_seconds):
-                    runner = runner_factory(enricher.pipeline, keys)
-                    await runner.run()
-
-                completed_at = datetime.now(tz=UTC)
-                duration = (completed_at - started_at).total_seconds()
-
-                records_enriched, records_errored, dq_error_rate = (
-                    self._extract_runner_stats(runner, records_input)
+                runner, completed_at, duration = await self._run_with_timeout(
+                    enricher=enricher,
+                    keys=keys,
+                    runner_factory=runner_factory,
+                    started_at=started_at,
                 )
-
-                # Check against thresholds
-                hard_threshold = self._dq_config.get_enricher_hard_threshold(
-                    enricher.pipeline
-                )
-
-                if dq_error_rate > hard_threshold:
-                    self._logger.warning(
-                        "Enricher exceeded hard DQ threshold",
-                        enricher=enricher.pipeline,
-                        dq_error_rate=dq_error_rate,
-                        threshold=hard_threshold,
-                    )
-                    return EnrichmentResult(
-                        enricher_name=enricher.pipeline,
-                        status=EnrichmentStatus.FAILED,
-                        records_input=records_input,
-                        records_enriched=records_enriched,
-                        records_errored=records_errored,
-                        dq_error_rate=dq_error_rate,
-                        duration_seconds=duration,
-                        started_at=started_at,
-                        completed_at=completed_at,
-                        error_message=f"DQ error rate {dq_error_rate:.2%} exceeds threshold {hard_threshold:.2%}",
-                    )
-
-                # Determine success vs partial
-                status = EnrichmentStatus.SUCCESS
-                if records_enriched < records_input:
-                    status = EnrichmentStatus.PARTIAL
-
-                self._logger.info(
-                    "Enricher completed",
-                    enricher=enricher.pipeline,
-                    status=status.value,
-                    records_enriched=records_enriched,
-                    duration_seconds=duration,
-                )
-
-                return EnrichmentResult(
-                    enricher_name=enricher.pipeline,
-                    status=status,
+                return self._build_enricher_result(
+                    enricher=enricher,
+                    runner=runner,
                     records_input=records_input,
-                    records_enriched=records_enriched,
-                    records_not_found=records_input
-                    - records_enriched
-                    - records_errored,
-                    records_errored=records_errored,
-                    dq_error_rate=dq_error_rate,
-                    duration_seconds=duration,
                     started_at=started_at,
                     completed_at=completed_at,
+                    duration=duration,
                 )
-
             except TimeoutError:
-                duration = (datetime.now(tz=UTC) - started_at).total_seconds()
-                self._logger.warning(
-                    "Enricher timed out",
-                    enricher=enricher.pipeline,
-                    timeout_seconds=enricher.timeout_seconds,
-                )
-                return EnrichmentResult.timeout(
-                    enricher_name=enricher.pipeline,
-                    timeout_seconds=enricher.timeout_seconds,
-                    records_input=records_input,
-                )
-
+                return self._build_timeout_result(enricher, records_input, started_at)
             except _ENRICHER_EXECUTION_ERRORS as e:
                 return self._handle_enricher_error(
                     e,
@@ -370,6 +302,135 @@ class EnrichmentCoordinatorService:
                     started_at,
                     reason_code="unexpected_bioetl_error",
                 )
+
+    def _log_enricher_start(self, enricher: EnricherConfig, records_input: int) -> None:
+        self._logger.info(
+            "Starting enricher",
+            enricher=enricher.pipeline,
+            records_input=records_input,
+            timeout_seconds=enricher.timeout_seconds,
+        )
+
+    async def _run_with_timeout(
+        self,
+        *,
+        enricher: EnricherConfig,
+        keys: pl.DataFrame,
+        runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
+        started_at: datetime,
+    ) -> tuple[PipelineRunner, datetime, float]:
+        async with asyncio.timeout(enricher.timeout_seconds):
+            runner = runner_factory(enricher.pipeline, keys)
+            await runner.run()
+        completed_at = datetime.now(tz=UTC)
+        duration = (completed_at - started_at).total_seconds()
+        return runner, completed_at, duration
+
+    def _build_enricher_result(
+        self,
+        *,
+        enricher: EnricherConfig,
+        runner: PipelineRunner,
+        records_input: int,
+        started_at: datetime,
+        completed_at: datetime,
+        duration: float,
+    ) -> EnrichmentResult:
+        records_enriched, records_errored, dq_error_rate = self._extract_runner_stats(
+            runner, records_input
+        )
+        hard_threshold = self._dq_config.get_enricher_hard_threshold(enricher.pipeline)
+        if dq_error_rate > hard_threshold:
+            return self._build_threshold_failure_result(
+                enricher=enricher,
+                records_input=records_input,
+                records_enriched=records_enriched,
+                records_errored=records_errored,
+                dq_error_rate=dq_error_rate,
+                hard_threshold=hard_threshold,
+                started_at=started_at,
+                completed_at=completed_at,
+                duration=duration,
+            )
+
+        status = (
+            EnrichmentStatus.PARTIAL
+            if records_enriched < records_input
+            else EnrichmentStatus.SUCCESS
+        )
+        self._logger.info(
+            "Enricher completed",
+            enricher=enricher.pipeline,
+            status=status.value,
+            records_enriched=records_enriched,
+            duration_seconds=duration,
+        )
+        return EnrichmentResult(
+            enricher_name=enricher.pipeline,
+            status=status,
+            records_input=records_input,
+            records_enriched=records_enriched,
+            records_not_found=records_input - records_enriched - records_errored,
+            records_errored=records_errored,
+            dq_error_rate=dq_error_rate,
+            duration_seconds=duration,
+            started_at=started_at,
+            completed_at=completed_at,
+        )
+
+    def _build_threshold_failure_result(
+        self,
+        *,
+        enricher: EnricherConfig,
+        records_input: int,
+        records_enriched: int,
+        records_errored: int,
+        dq_error_rate: float,
+        hard_threshold: float,
+        started_at: datetime,
+        completed_at: datetime,
+        duration: float,
+    ) -> EnrichmentResult:
+        self._logger.warning(
+            "Enricher exceeded hard DQ threshold",
+            enricher=enricher.pipeline,
+            dq_error_rate=dq_error_rate,
+            threshold=hard_threshold,
+        )
+        return EnrichmentResult(
+            enricher_name=enricher.pipeline,
+            status=EnrichmentStatus.FAILED,
+            records_input=records_input,
+            records_enriched=records_enriched,
+            records_errored=records_errored,
+            dq_error_rate=dq_error_rate,
+            duration_seconds=duration,
+            started_at=started_at,
+            completed_at=completed_at,
+            error_message=(
+                f"DQ error rate {dq_error_rate:.2%} "
+                f"exceeds threshold {hard_threshold:.2%}"
+            ),
+        )
+
+    def _build_timeout_result(
+        self,
+        enricher: EnricherConfig,
+        records_input: int,
+        started_at: datetime,
+    ) -> EnrichmentResult:
+        duration = (datetime.now(tz=UTC) - started_at).total_seconds()
+        self._logger.warning(
+            "Enricher timed out",
+            enricher=enricher.pipeline,
+            timeout_seconds=enricher.timeout_seconds,
+            duration_seconds=duration,
+        )
+        return EnrichmentResult.timeout(
+            enricher_name=enricher.pipeline,
+            timeout_seconds=enricher.timeout_seconds,
+            records_input=records_input,
+        )
 
     @staticmethod
     def _extract_runner_stats(

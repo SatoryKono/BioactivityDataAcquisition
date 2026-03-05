@@ -9,7 +9,7 @@ from __future__ import annotations
 __all__ = ["PubChemEntityMapper"]
 
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.domain.types import JsonDict
 
@@ -154,20 +154,29 @@ class PubChemEntityMapper:
 
     @staticmethod
     def assay_to_dict(
-        assay: JsonDict,  # Any: untyped API JSON record
+        assay: object,
     ) -> JsonDict:  # Any: untyped API JSON record
         """Convert assay data to standardized dictionary.
 
         Args:
-            assay: Raw assay data dictionary from PubChem.
+            assay: Raw assay data object from PubChem.
 
         Returns:
             Dictionary with normalized assay fields.
         """
+        if isinstance(assay, dict):
+            return {
+                "aid": assay.get("aid"),
+                "name": assay.get("name"),
+                "description": assay.get("description"),
+                "protocol": assay.get("protocol"),
+                "target": assay.get("target"),
+            }
+
         return {
-            "aid": assay.get("aid"),
-            "name": assay.get("name"),
-            "description": assay.get("description"),
-            "protocol": assay.get("protocol"),
-            "target": assay.get("target"),
+            "aid": getattr(assay, "aid", None),
+            "name": getattr(assay, "name", None),
+            "description": getattr(assay, "description", None),
+            "protocol": getattr(assay, "protocol", None),
+            "target": getattr(assay, "target", None),
         }

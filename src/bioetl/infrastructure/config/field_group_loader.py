@@ -9,7 +9,6 @@ See ADR-026 for Composite Publication Pipeline rationale.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
 
 import yaml
 

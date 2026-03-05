@@ -604,6 +604,8 @@ class BaseTransformer(_BaseTransformerRecordHelpersMixin, ABC):
         Returns:
             Result dictionary.
         """
+        if not dataclasses.is_dataclass(entity) or isinstance(entity, type):
+            raise TypeError(f"Expected dataclass entity, got {type(entity).__name__}")
         silver_record = dataclasses.asdict(entity)
 
         rename_map = self._contract_policy.rename_map

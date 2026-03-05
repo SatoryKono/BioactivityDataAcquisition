@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from datetime import date
-from typing import Any
 
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.quality._primitives import (

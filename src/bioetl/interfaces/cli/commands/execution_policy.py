@@ -18,8 +18,8 @@ from bioetl.interfaces.cli.exit_codes import ExitCode, get_exit_code_for_excepti
 from bioetl.interfaces.cli.formatters import echo_error, echo_warning
 
 __all__ = [
-    "BatchRunResultProtocol",
     "CLI_ENTRYPOINT_TYPED_ERRORS",
+    "BatchRunResultProtocol",
     "build_failure_context",
     "handle_cli_failure",
     "map_batch_run_result_to_exit_code",

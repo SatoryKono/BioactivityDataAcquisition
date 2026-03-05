@@ -1,3 +1,4 @@
+# mypy: disable-error-code=attr-defined
 """Context-manager helpers for UnifiedHTTPClient."""
 
 from __future__ import annotations
@@ -12,6 +13,12 @@ class HTTPClientContextMixin:
     """Async context lifecycle and client-access helpers."""
 
     _client: httpx.AsyncClient | None
+    user_agent: str
+    contact_email: str | None
+    run_id: object | None
+    timeout: float
+    max_connections: int
+    max_keepalive_connections: int
 
     async def __aenter__(
         self,

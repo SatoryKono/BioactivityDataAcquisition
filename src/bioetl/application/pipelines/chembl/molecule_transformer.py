@@ -9,7 +9,7 @@ from __future__ import annotations
 __all__ = ["MoleculeTransformer"]
 
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.dict_transformers import flatten_nested_dict
 from bioetl.application.core.field_specs import (

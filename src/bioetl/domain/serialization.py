@@ -24,6 +24,7 @@ from bioetl.domain.types import JsonDict
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from functools import lru_cache
 from typing import TYPE_CHECKING
 
@@ -43,7 +44,7 @@ except ImportError:
 
 
 def serialize_to_json(
-    data: JsonDict | list[object],  # Any: JSON arrays contain heterogeneous values
+    data: JsonDict | Sequence[object],  # Any: JSON arrays contain heterogeneous values
     *,
     sort_keys: bool = True,
     ensure_ascii: bool = True,
@@ -155,7 +156,7 @@ def _get_orjson_options(sort_keys: bool) -> int:
 
 
 def _serialize_with_orjson(
-    data: JsonDict | list[object],  # Any: JSON arrays contain heterogeneous values
+    data: JsonDict | Sequence[object],  # Any: JSON arrays contain heterogeneous values
     *,
     sort_keys: bool = True,
     ensure_ascii: bool = True,
@@ -170,7 +171,7 @@ def _serialize_with_orjson(
 
 
 def _serialize_with_stdlib(
-    data: JsonDict | list[object],  # Any: JSON arrays contain heterogeneous values
+    data: JsonDict | Sequence[object],  # Any: JSON arrays contain heterogeneous values
     *,
     sort_keys: bool = True,
     ensure_ascii: bool = True,

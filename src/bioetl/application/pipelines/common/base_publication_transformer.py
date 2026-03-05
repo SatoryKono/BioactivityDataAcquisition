@@ -13,6 +13,8 @@ Reduces code duplication by extracting shared logic:
 
 from __future__ import annotations
 
+from bioetl.domain.types import JsonDict
+
 __all__ = ["BasePublicationTransformer"]
 
 

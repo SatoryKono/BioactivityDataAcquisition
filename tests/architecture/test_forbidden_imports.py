@@ -5,10 +5,12 @@ in appropriate layers:
 - External orchestration frameworks are not imported in application layer
 - Metrics server initialization only in composition
 - Ports imported only from facade module
+- Legacy normalizers module must not be re-introduced (RF-043)
 
 REQ-ARCH-APP-001: External orchestration frameworks must not be used in application layer.
 REQ-ARCH-OBS-001: Observability initialization only in composition root.
 REQ-ARCH-027: Ports must be imported from facade only.
+RF-043: legacy_normalizers path is permanently forbidden.
 
 See CLAUDE.md §2.1 Matrix of Imports and §11 Anti-Patterns.
 """
@@ -358,5 +360,48 @@ class TestInterfacesBootstrapIsolation:
             "  from bioetl.composition.entrypoints import create_pipeline_runner\n\n"
             "Wrong:\n"
             "  from bioetl.composition.bootstrap import bootstrap_pipeline_runner\n\n"
+            "Violations:\n" + "\n".join(f"  - {v}" for v in violations)
+        )
+
+
+class TestLegacyNormalizersGuardrail:
+    """RF-043: legacy_normalizers module must not be re-introduced.
+
+    The legacy_normalizers path was removed; all normalisation now lives in
+    ``infrastructure.config.source_normalizers``.  This guardrail prevents
+    accidental re-introduction of the deleted module.
+    """
+
+    FORBIDDEN_PATTERNS: tuple[re.Pattern[str], ...] = (
+        re.compile(r"legacy_normalizers"),
+    )
+
+    def test_no_legacy_normalizers_directory(self, src_dir: Path) -> None:
+        """The legacy_normalizers directory must not exist."""
+        forbidden = src_dir / "bioetl" / "infrastructure" / "legacy_normalizers"
+        assert not forbidden.exists(), (
+            f"RF-043 violation: {forbidden} must not exist.\n"
+            "All normalisation belongs in infrastructure.config.source_normalizers."
+        )
+
+    def test_no_legacy_normalizers_imports(self, src_dir: Path) -> None:
+        """No production code may reference legacy_normalizers."""
+        violations: list[str] = []
+        source_path = src_dir / "bioetl"
+
+        for py_file in source_path.rglob("*.py"):
+            try:
+                content = py_file.read_text(encoding="utf-8")
+            except (OSError, UnicodeDecodeError):
+                continue
+            for pattern in self.FORBIDDEN_PATTERNS:
+                if pattern.search(content):
+                    relative_path = py_file.relative_to(src_dir)
+                    violations.append(str(relative_path))
+                    break
+
+        assert not violations, (
+            "RF-043 violation: legacy_normalizers references found in production code.\n"
+            "Use bioetl.infrastructure.config.source_normalizers instead.\n\n"
             "Violations:\n" + "\n".join(f"  - {v}" for v in violations)
         )

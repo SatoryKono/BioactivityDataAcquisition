@@ -21,7 +21,7 @@ __all__ = ["CachedBronzeDataSource"]
 from datetime import UTC, datetime
 from pathlib import Path
 from types import TracebackType
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Self
 
 from bioetl.domain.exceptions import CachedBronzeEmptyError
 from bioetl.domain.ports import LoggerPort

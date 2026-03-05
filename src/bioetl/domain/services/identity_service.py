@@ -16,8 +16,6 @@ Requirements:
 
 from __future__ import annotations
 
-from typing import Any
-
 from bioetl.domain.constants import META_FIELDS as META_FIELDS  # re-export for tests
 from bioetl.domain.transformations import (
     generate_content_hash,

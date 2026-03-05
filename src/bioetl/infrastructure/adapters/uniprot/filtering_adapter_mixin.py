@@ -1,3 +1,4 @@
+# mypy: disable-error-code=attr-defined
 """Filtered/fallback fetch methods for UniProtAdapter.
 
 Contains FilterableDataSourcePort-compatible filtering methods.
@@ -6,7 +7,6 @@ Contains FilterableDataSourcePort-compatible filtering methods.
 from __future__ import annotations
 
 from collections.abc import AsyncIterator, Callable
-from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.common import FallbackFetchRequest

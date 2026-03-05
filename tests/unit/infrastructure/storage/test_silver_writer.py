@@ -686,7 +686,6 @@ class TestSilverWriterErrorHandling:
                 pa.field("_ingestion_ts", pa.string()),
             ]
         )
-
         mock_table = MagicMock()
         mock_merge = MagicMock()
         mock_table.merge.return_value = mock_merge
@@ -702,7 +701,6 @@ class TestSilverWriterErrorHandling:
                 mock_table,  # Write attempt
             ]
         )
-
         # Patch both modules: base_delta_writer for _get_table_schema, silver_writer for _write_merge
         with (
             patch(
@@ -748,7 +746,6 @@ class TestSilverWriterErrorHandling:
                 pa.field("_ingestion_ts", pa.string()),
             ]
         )
-
         mock_table = MagicMock()
         mock_merge = MagicMock()
         mock_table.merge.return_value = mock_merge
@@ -763,7 +760,6 @@ class TestSilverWriterErrorHandling:
                 mock_table,
             ]
         )
-
         with (
             patch(
                 "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
@@ -1771,7 +1767,9 @@ class TestSilverWriterLineage:
     """Tests for SilverWriter lineage tracking (REQ-LINEAGE-001)."""
 
     @pytest.mark.asyncio
-    async def test_write_silver_without_bronze_refs(self, noop_logger, valid_records):
+    async def test_write_silver_without_bronze_refs(
+        self, noop_logger, valid_records, tmp_path
+    ):
         """Test write_silver works without bronze_refs (backward compatibility)."""
         import pyarrow as pa
         from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
@@ -1794,9 +1792,15 @@ class TestSilverWriterLineage:
                 "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
                 side_effect=DeltaTableNotFoundError("Not found"),
             ),
+            patch(
+                "bioetl.infrastructure.storage.silver_writer.DeltaTable",
+                side_effect=DeltaTableNotFoundError("Not found"),
+            ),
             patch("bioetl.infrastructure.storage.silver_writer.write_deltalake"),
         ):
-            writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+            writer = SilverWriter(
+                base_path=str(tmp_path / "silver"), logger=noop_logger
+            )
 
             # Should not raise when bronze_refs not provided
             await writer.write_silver(
@@ -1808,7 +1812,9 @@ class TestSilverWriterLineage:
             )
 
     @pytest.mark.asyncio
-    async def test_write_silver_with_bronze_refs(self, noop_logger, valid_records):
+    async def test_write_silver_with_bronze_refs(
+        self, noop_logger, valid_records, tmp_path
+    ):
         """Test write_silver accepts bronze_refs parameter."""
         from uuid import uuid4
 
@@ -1845,9 +1851,15 @@ class TestSilverWriterLineage:
                 "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
                 side_effect=DeltaTableNotFoundError("Not found"),
             ),
+            patch(
+                "bioetl.infrastructure.storage.silver_writer.DeltaTable",
+                side_effect=DeltaTableNotFoundError("Not found"),
+            ),
             patch("bioetl.infrastructure.storage.silver_writer.write_deltalake"),
         ):
-            writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+            writer = SilverWriter(
+                base_path=str(tmp_path / "silver"), logger=noop_logger
+            )
 
             # Should not raise with bronze_refs
             await writer.write_silver(

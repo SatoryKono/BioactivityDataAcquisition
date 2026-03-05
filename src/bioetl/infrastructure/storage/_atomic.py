@@ -64,9 +64,9 @@ def _is_retryable_replace_error(error: OSError) -> bool:
     if isinstance(winerror, int) and winerror in _REPLACE_RETRYABLE_WINERRORS:
         return True
     errno_value = getattr(error, "errno", None)
-    if isinstance(errno_value, int) and errno_value in _REPLACE_RETRYABLE_ERRNOS:
-        return True
-    return False
+    return bool(
+        isinstance(errno_value, int) and errno_value in _REPLACE_RETRYABLE_ERRNOS
+    )
 
 
 def _replace_with_retry(temp_path: Path, target: Path) -> None:

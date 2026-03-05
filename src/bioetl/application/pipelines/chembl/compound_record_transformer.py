@@ -7,10 +7,12 @@ Note: Business logic functions are delegated to domain layer per REFACTOR-004.
 
 from __future__ import annotations
 
+from bioetl.domain.types import JsonDict
+
 __all__ = ["CompoundRecordTransformer"]
 
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,

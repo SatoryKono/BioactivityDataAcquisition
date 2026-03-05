@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections import Counter
-from typing import Any
 
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.quality._primitives import _validate_non_negative_int

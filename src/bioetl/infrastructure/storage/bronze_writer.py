@@ -8,15 +8,16 @@ __all__ = ["BRONZE_WRITE_ERRORS", "BronzeWriter"]
 import asyncio
 import time
 from collections.abc import Iterator
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import orjson
 import zstandard as zstd
 
 from bioetl.domain.ports import AuditEntry, AuditLayer, AuditOperation
-from bioetl.domain.types import BatchID, RunID, RunType
+from bioetl.domain.types import BatchID, JsonDict, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.infrastructure.storage._atomic import atomic_write_bytes
 from bioetl.infrastructure.storage.bronze_writer_io_mixin import BronzeWriterIOMixin
@@ -45,6 +46,17 @@ BRONZE_WRITE_ERRORS = (
     TypeError,
     zstd.ZstdError,
 )
+
+
+@dataclass(frozen=True, slots=True)
+class _BronzeWritePrepared:
+    records_iter: Iterator[bytes]
+    record_list: list[bytes]
+    date_str: str
+    relative_path: str
+    metadata: JsonDict  # Any: lightweight write-side metadata sidecar payload
+    full_path: Path
+    meta_path: Path
 
 
 class BronzeWriter(
@@ -114,6 +126,31 @@ class BronzeWriter(
         source_metadata: SourceMetadata | None = None,
     ) -> BronzeWriteResult:
         """Write raw records to Bronze layer (JSONL + zstd)."""
+        return await self._write_bronze_with_tracing(
+            records=records,
+            provider=provider,
+            entity=entity,
+            date=date,
+            batch_id=batch_id,
+            run_id=run_id,
+            run_type=run_type,
+            ingestion_ts=ingestion_ts,
+            source_metadata=source_metadata,
+        )
+
+    async def _write_bronze_with_tracing(
+        self,
+        *,
+        records: Iterator[bytes],
+        provider: str,
+        entity: str,
+        date: datetime,
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+        ingestion_ts: datetime,
+        source_metadata: SourceMetadata | None,
+    ) -> BronzeWriteResult:
         tracer = self._tracing.get_tracer(__name__)
         with tracer.start_as_current_span("write_bronze") as span:
             span.set_attribute("provider", provider)
@@ -122,116 +159,230 @@ class BronzeWriter(
             span.set_attribute("run_id", str(run_id))
 
             start_time = time.perf_counter()
-
-            self._validate_bronze_names(provider, entity)
-            self._validate_records_iterator(records)
-            self._validate_utc_datetime(date, "date")
-            self._validate_utc_datetime(ingestion_ts, "ingestion_ts")
-
-            records = iter(records)
-            if self.validate_json:
-                records = self._validate_json_records(records)
-
-            date_str = date.strftime("%Y-%m-%d")
-            filename = f"batch_{date_str}_{batch_id}.jsonl.zst"
-            relative_path = self._resolve_bronze_path(
-                provider, entity, date_str, filename
-            )
-            metadata = self._build_bronze_metadata(
-                run_id, run_type, ingestion_ts, provider, entity, batch_id
-            )
-
-            loop = asyncio.get_running_loop()
-
-            if self.save_json:
-                record_list = list(records)
-                records_iter = iter(record_list)
-            else:
-                record_list = cast(list[bytes], [])
-                records_iter = records
-
-            full_path = self.base_path / relative_path
-            meta_path = full_path.with_suffix(".zst.meta.json")
-
-            def _write_task() -> tuple[int, int]:
-                count, size = self._write_atomic_stream(records_iter, full_path)
-                meta_bytes = orjson.dumps(metadata, option=orjson.OPT_SORT_KEYS)
-                atomic_write_bytes(meta_path, meta_bytes)
-                return count, size
-
-            record_count, uncompressed_size = await loop.run_in_executor(
-                None, _write_task
-            )
-            compressed_size = full_path.stat().st_size
-
-            duration = time.perf_counter() - start_time
-
-            self._emit_bronze_write_metrics(
-                duration=duration,
+            prepared = self._prepare_bronze_write(
+                records=records,
                 provider=provider,
                 entity=entity,
-                record_count=record_count,
-                compressed_size=compressed_size,
-                uncompressed_size=uncompressed_size,
-                relative_path=relative_path,
+                date=date,
                 batch_id=batch_id,
                 run_id=run_id,
                 run_type=run_type,
+                ingestion_ts=ingestion_ts,
+            )
+            (
+                record_count,
+                uncompressed_size,
+                compressed_size,
+            ) = await self._write_bronze_data_and_sidecar(prepared)
+            duration = time.perf_counter() - start_time
+            await self._run_bronze_post_write_actions(
+                prepared=prepared,
+                provider=provider,
+                entity=entity,
+                batch_id=batch_id,
+                run_id=run_id,
+                run_type=run_type,
+                ingestion_ts=ingestion_ts,
+                record_count=record_count,
+                uncompressed_size=uncompressed_size,
+                compressed_size=compressed_size,
+                duration=duration,
+                source_metadata=source_metadata,
+            )
+            return await self._build_bronze_write_result(
+                prepared=prepared,
+                batch_id=batch_id,
+                record_count=record_count,
+                uncompressed_size=uncompressed_size,
+                compressed_size=compressed_size,
+                span=span,
             )
 
-            if self.save_json:
-                await self._write_json_copy(
-                    record_list, provider, entity, date_str, batch_id
-                )
+    def _prepare_bronze_write(
+        self,
+        *,
+        records: Iterator[bytes],
+        provider: str,
+        entity: str,
+        date: datetime,
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+        ingestion_ts: datetime,
+    ) -> _BronzeWritePrepared:
+        self._validate_bronze_names(provider, entity)
+        self._validate_records_iterator(records)
+        self._validate_utc_datetime(date, "date")
+        self._validate_utc_datetime(ingestion_ts, "ingestion_ts")
 
-            if self._audit:
-                audit_entry = AuditEntry(
-                    run_id=run_id,
-                    timestamp=ingestion_ts,
-                    layer=AuditLayer.BRONZE,
-                    table_name=relative_path,
-                    operation=AuditOperation.WRITE,
-                    records_count=record_count,
-                    metadata={
-                        "provider": provider,
-                        "entity": entity,
-                        "batch_id": str(batch_id),
-                        "run_type": run_type.value,
-                        "compressed_bytes": compressed_size,
-                        "uncompressed_bytes": uncompressed_size,
-                    },
-                )
-                await self._audit.log_write(audit_entry)
+        validated_records = iter(records)
+        if self.validate_json:
+            validated_records = self._validate_json_records(validated_records)
 
-            if self._save_metadata:
-                await self._maybe_write_bronze_metadata(
-                    run_id=run_id,
-                    run_type=run_type,
-                    provider=provider,
-                    entity=entity,
-                    batch_id=batch_id,
-                    record_count=record_count,
-                    compressed_size=compressed_size,
-                    relative_path=relative_path,
-                    ingestion_ts=ingestion_ts,
-                    duration=duration,
-                    source_metadata=source_metadata,
-                )
+        date_str = date.strftime("%Y-%m-%d")
+        filename = f"batch_{date_str}_{batch_id}.jsonl.zst"
+        relative_path = self._resolve_bronze_path(provider, entity, date_str, filename)
+        metadata = self._build_bronze_metadata(
+            run_id, run_type, ingestion_ts, provider, entity, batch_id
+        )
+        if self.save_json:
+            record_list = list(validated_records)
+            records_iter = iter(record_list)
+        else:
+            record_list = cast(list[bytes], [])
+            records_iter = validated_records
 
-            span.set_attribute("record_count", record_count)
-            span.set_attribute("compressed_size", compressed_size)
+        full_path = self.base_path / relative_path
+        meta_path = full_path.with_suffix(".zst.meta.json")
+        return _BronzeWritePrepared(
+            records_iter=records_iter,
+            record_list=record_list,
+            date_str=date_str,
+            relative_path=relative_path,
+            metadata=metadata,
+            full_path=full_path,
+            meta_path=meta_path,
+        )
 
-            checksum = await self._calculate_checksum(full_path)
+    async def _write_bronze_data_and_sidecar(
+        self,
+        prepared: _BronzeWritePrepared,
+    ) -> tuple[int, int, int]:
+        loop = asyncio.get_running_loop()
 
-            return BronzeWriteResult(
+        def _write_task() -> tuple[int, int]:
+            count, size = self._write_atomic_stream(
+                prepared.records_iter,
+                prepared.full_path,
+            )
+            meta_bytes = orjson.dumps(prepared.metadata, option=orjson.OPT_SORT_KEYS)
+            atomic_write_bytes(prepared.meta_path, meta_bytes)
+            return count, size
+
+        record_count, uncompressed_size = await loop.run_in_executor(None, _write_task)
+        compressed_size = prepared.full_path.stat().st_size
+        return record_count, uncompressed_size, compressed_size
+
+    async def _run_bronze_post_write_actions(
+        self,
+        *,
+        prepared: _BronzeWritePrepared,
+        provider: str,
+        entity: str,
+        batch_id: BatchID,
+        run_id: RunID,
+        run_type: RunType,
+        ingestion_ts: datetime,
+        record_count: int,
+        uncompressed_size: int,
+        compressed_size: int,
+        duration: float,
+        source_metadata: SourceMetadata | None,
+    ) -> None:
+        self._emit_bronze_write_metrics(
+            duration=duration,
+            provider=provider,
+            entity=entity,
+            record_count=record_count,
+            compressed_size=compressed_size,
+            uncompressed_size=uncompressed_size,
+            relative_path=prepared.relative_path,
+            batch_id=batch_id,
+            run_id=run_id,
+            run_type=run_type,
+        )
+        if self.save_json:
+            await self._write_json_copy(
+                prepared.record_list,
+                provider,
+                entity,
+                prepared.date_str,
+                batch_id,
+            )
+        if self._audit:
+            await self._log_bronze_audit(
+                run_id=run_id,
+                ingestion_ts=ingestion_ts,
+                relative_path=prepared.relative_path,
                 batch_id=batch_id,
-                relative_path=relative_path,
-                absolute_path=str(full_path),
+                run_type=run_type,
                 record_count=record_count,
                 compressed_size=compressed_size,
                 uncompressed_size=uncompressed_size,
-                checksum_blake2=checksum,
+                provider=provider,
+                entity=entity,
             )
+        if self._save_metadata:
+            await self._maybe_write_bronze_metadata(
+                run_id=run_id,
+                run_type=run_type,
+                provider=provider,
+                entity=entity,
+                batch_id=batch_id,
+                record_count=record_count,
+                compressed_size=compressed_size,
+                relative_path=prepared.relative_path,
+                ingestion_ts=ingestion_ts,
+                duration=duration,
+                source_metadata=source_metadata,
+            )
+
+    async def _log_bronze_audit(
+        self,
+        *,
+        run_id: RunID,
+        ingestion_ts: datetime,
+        relative_path: str,
+        batch_id: BatchID,
+        run_type: RunType,
+        record_count: int,
+        compressed_size: int,
+        uncompressed_size: int,
+        provider: str,
+        entity: str,
+    ) -> None:
+        if not self._audit:
+            return
+        audit_entry = AuditEntry(
+            run_id=run_id,
+            timestamp=ingestion_ts,
+            layer=AuditLayer.BRONZE,
+            table_name=relative_path,
+            operation=AuditOperation.WRITE,
+            records_count=record_count,
+            metadata={
+                "provider": provider,
+                "entity": entity,
+                "batch_id": str(batch_id),
+                "run_type": run_type.value,
+                "compressed_bytes": compressed_size,
+                "uncompressed_bytes": uncompressed_size,
+            },
+        )
+        await self._audit.log_write(audit_entry)
+
+    async def _build_bronze_write_result(
+        self,
+        *,
+        prepared: _BronzeWritePrepared,
+        batch_id: BatchID,
+        record_count: int,
+        uncompressed_size: int,
+        compressed_size: int,
+        span: Any,  # Any: OpenTelemetry span interface is runtime-dependent
+    ) -> BronzeWriteResult:
+        span.set_attribute("record_count", record_count)
+        span.set_attribute("compressed_size", compressed_size)
+        checksum = await self._calculate_checksum(prepared.full_path)
+        return BronzeWriteResult(
+            batch_id=batch_id,
+            relative_path=prepared.relative_path,
+            absolute_path=str(prepared.full_path),
+            record_count=record_count,
+            compressed_size=compressed_size,
+            uncompressed_size=uncompressed_size,
+            checksum_blake2=checksum,
+        )
 
     def _emit_bronze_write_metrics(
         self,
