@@ -9,7 +9,7 @@ Implements REQ-DQ-001: DQ metrics in Silver metadata.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, TypeGuard
 
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import ColumnMetrics, DQSummary, SchemaDrift
@@ -387,7 +387,7 @@ def _compute_numeric_stats(
     )
 
 
-def _is_valid_numeric(v: object) -> bool:
+def _is_valid_numeric(v: object) -> TypeGuard[int | float]:
     """Check if value is a valid numeric (not bool, NaN, or Inf).
 
     Args:

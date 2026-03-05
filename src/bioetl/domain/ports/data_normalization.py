@@ -18,6 +18,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
+from bioetl.domain.types import JsonDict
+
 if TYPE_CHECKING:
     from collections.abc import Sequence
 

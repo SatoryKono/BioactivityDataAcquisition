@@ -51,7 +51,7 @@ if TYPE_CHECKING:
         MetadataWriterPort,
         MetricsPort,
         SilverDQConfigPort,
-        StoragePort,
+        StorageMaintenancePort,
         TracingPort,
     )
 
@@ -151,7 +151,7 @@ class PostrunService:
         context: PipelineContext,
         dq_service: DataQualityService,
         lifecycle_service: MedallionLifecycleService,
-        storage: StoragePort,
+        storage: StorageMaintenancePort,
         metrics: MetricsPort | None,
         logger: LoggerPort,
         metadata_coordinator: MetadataCoordinatorPort | None = None,

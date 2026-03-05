@@ -54,7 +54,7 @@ class AbstractExtractor(BaseFieldExtractor):
 
         return texts if texts else None
 
-    def normalize(self, raw_value: list[str]) -> str:
+    def normalize(self, raw_value: object) -> str:
         """Normalize extracted abstract text.
 
         Args:
@@ -63,7 +63,7 @@ class AbstractExtractor(BaseFieldExtractor):
         Returns:
             Combined abstract text.
         """
-        return " ".join(raw_value)
+        return " ".join(cast("list[str]", raw_value))
 
     @classmethod
     def extract_abstract(cls, article_node: Element | None) -> str | None:

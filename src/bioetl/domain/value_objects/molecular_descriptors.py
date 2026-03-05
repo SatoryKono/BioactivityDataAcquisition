@@ -64,7 +64,7 @@ def _coerce_float(value: object) -> float:
     if isinstance(value, bool):
         raise ValueError(f"Expected float, got {type(value).__name__}")
     try:
-        f = float(value)
+        f = float(str(value).strip())
     except (ValueError, TypeError) as exc:
         raise ValueError(f"Cannot convert {value!r} to float") from exc
     if math.isnan(f) or math.isinf(f):
@@ -113,7 +113,7 @@ class _BoundedIntVO(ValueObject[int]):
         if raw is None:
             return None
         try:
-            return cls(raw)
+            return cls(_coerce_int(raw))
         except ValueError:
             return None
 
@@ -187,7 +187,7 @@ class _BoundedFloatVO(ValueObject[float]):
         if raw is None:
             return None
         try:
-            return cls(raw)
+            return cls(_coerce_float(raw))
         except ValueError:
             return None
 

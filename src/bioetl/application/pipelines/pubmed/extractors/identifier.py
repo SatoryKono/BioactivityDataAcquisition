@@ -6,6 +6,7 @@ Supports complete ArticleIdList and ELocationID extraction for cross-referencing
 
 from __future__ import annotations
 
+from typing import cast
 from xml.etree.ElementTree import Element
 
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
@@ -55,7 +56,7 @@ class IdentifierExtractor(BaseFieldExtractor):
             pmc_id=all_ids["pmc_id"],
         )
 
-    def normalize(self, raw_value: RawIdentifiers) -> NormalizedIdentifiers:
+    def normalize(self, raw_value: object) -> NormalizedIdentifiers:
         """Normalize identifiers.
 
         Args:
@@ -64,9 +65,10 @@ class IdentifierExtractor(BaseFieldExtractor):
         Returns:
             Normalized identifiers dict.
         """
+        raw_identifiers = cast("RawIdentifiers", raw_value)
         return NormalizedIdentifiers(
-            doi=self._normalize_text(raw_value.get("doi")),
-            pmc_id=self._normalize_text(raw_value.get("pmc_id")),
+            doi=self._normalize_text(raw_identifiers.get("doi")),
+            pmc_id=self._normalize_text(raw_identifiers.get("pmc_id")),
         )
 
     def _normalize_text(self, text: str | None) -> str | None:

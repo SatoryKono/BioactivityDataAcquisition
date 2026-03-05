@@ -21,16 +21,18 @@ class TaxonomyExtractor:
     SUPERKINGDOMS = frozenset(("Bacteria", "Archaea", "Eukaryota", "Viruses"))
 
     @staticmethod
-    def _is_valid_lineage(lineage: object) -> bool:
-        """Check if lineage is a valid non-empty list.
+    def _as_lineage(lineage: object) -> list[object] | None:
+        """Return lineage as list when valid, otherwise None.
 
         Args:
             lineage: Value to validate.
 
         Returns:
-            True if lineage is a non-empty list, False otherwise.
+            Non-empty lineage list or None.
         """
-        return isinstance(lineage, list) and len(lineage) > 0
+        if not isinstance(lineage, list) or len(lineage) == 0:
+            return None
+        return lineage
 
     @staticmethod
     def extract_superkingdom(lineage: object) -> str | None:
@@ -44,10 +46,11 @@ class TaxonomyExtractor:
         Returns:
             Superkingdom name (Bacteria, Archaea, Eukaryota, Viruses) or None.
         """
-        if not TaxonomyExtractor._is_valid_lineage(lineage):
+        lineage_values = TaxonomyExtractor._as_lineage(lineage)
+        if lineage_values is None:
             return None
 
-        superkingdom = lineage[0]
+        superkingdom = lineage_values[0]
         if not isinstance(superkingdom, str) or not superkingdom.strip():
             return None
 
@@ -65,13 +68,14 @@ class TaxonomyExtractor:
         Returns:
             Phylum name or None if not available.
         """
-        if not TaxonomyExtractor._is_valid_lineage(lineage):
+        lineage_values = TaxonomyExtractor._as_lineage(lineage)
+        if lineage_values is None:
             return None
 
-        if len(lineage) < 2:
+        if len(lineage_values) < 2:
             return None
 
-        phylum = lineage[1]
+        phylum = lineage_values[1]
         if not isinstance(phylum, str) or not phylum.strip():
             return None
 
@@ -90,13 +94,14 @@ class TaxonomyExtractor:
         Returns:
             Genus name or None if lineage is too short.
         """
-        if not TaxonomyExtractor._is_valid_lineage(lineage):
+        lineage_values = TaxonomyExtractor._as_lineage(lineage)
+        if lineage_values is None:
             return None
 
-        if len(lineage) < 2:
+        if len(lineage_values) < 2:
             return None
 
-        genus = lineage[-2]
+        genus = lineage_values[-2]
         if not isinstance(genus, str) or not genus.strip():
             return None
 

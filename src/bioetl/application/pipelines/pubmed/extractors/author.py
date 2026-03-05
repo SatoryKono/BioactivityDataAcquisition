@@ -18,7 +18,7 @@ __all__ = ["AuthorExtractor", "EMAIL_PATTERN", "RawAuthor", "StructuredAffiliati
 
 
 import re
-from typing import TypedDict
+from typing import TypedDict, cast
 from xml.etree.ElementTree import Element
 
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
@@ -194,7 +194,7 @@ class AuthorExtractor(BaseFieldExtractor):
         match = EMAIL_PATTERN.search(text)
         return match.group(0) if match else None
 
-    def normalize(self, raw_value: list[RawAuthor]) -> list[str]:
+    def normalize(self, raw_value: object) -> list[str]:
         """Normalize author list into 'LastName, Initials' format.
 
         Args:
@@ -208,8 +208,9 @@ class AuthorExtractor(BaseFieldExtractor):
             backwards compatibility. New code should use the unified service.
         """
 
+        raw_authors = cast("list[RawAuthor]", raw_value)
         authors = []
-        for raw in raw_value:
+        for raw in raw_authors:
             last_name = raw.get("last_name")
             initials = raw.get("initials")
             fore_name = raw.get("fore_name")

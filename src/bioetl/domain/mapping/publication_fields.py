@@ -24,6 +24,8 @@ from __future__ import annotations
 
 from typing import Final, Literal
 
+from bioetl.domain.types import JsonDict
+
 __all__ = [
     "ProviderName",
     "apply_field_mapping",
