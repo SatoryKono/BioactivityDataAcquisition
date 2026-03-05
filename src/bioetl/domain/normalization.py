@@ -132,7 +132,19 @@ def parse_date_field(value: str | None, fmt: str = "%Y-%m-%d") -> date | None:
     from datetime import datetime
 
     try:
-        return datetime.strptime(value.strip(), fmt).date()
+        val_str = value.strip()
+        # Fast-path for ISO-8601 strings (YYYY-MM-DD) which avoids strptime overhead
+        if (
+            fmt == "%Y-%m-%d"
+            and len(val_str) == 10
+            and val_str[4] == "-"
+            and val_str[7] == "-"
+        ):
+            try:
+                return date(int(val_str[0:4]), int(val_str[5:7]), int(val_str[8:10]))
+            except ValueError:
+                pass  # Fallback to strptime for complex validation (e.g., leap years)
+        return datetime.strptime(val_str, fmt).date()
     except (ValueError, AttributeError):
         return None
 
