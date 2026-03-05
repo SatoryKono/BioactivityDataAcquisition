@@ -24,7 +24,7 @@ class HTTPClientRetryMixin:
     """Retry policy orchestration extracted from UnifiedHTTPClient."""
 
     async def _handle_retry_delay(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         attempt: int,
         url: str = "",
         response: httpx.Response | None = None,
@@ -42,24 +42,20 @@ class HTTPClientRetryMixin:
         return delay
 
     def _can_retry(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         attempt: int,
-        retries_used: int,  # Any: mixin self type is provided structurally by composed adapter class
-    ) -> (
-        bool
-    ):  # Any: mixin self type is provided structurally by composed adapter class
+        retries_used: int,
+    ) -> bool:
         """Return True when another retry attempt is allowed."""
         if self.retry_config.is_last_attempt(attempt):
             return False
         return retries_used < self.retry_config.effective_retry_budget()
 
     def _record_retry_budget_exhausted(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         method: str,
-        url: str,  # Any: mixin self type is provided structurally by composed adapter class
-    ) -> (
-        None
-    ):  # Any: mixin self type is provided structurally by composed adapter class
+        url: str,
+    ) -> None:
         """Emit retry-budget exhaustion metrics and warning log."""
         self._metrics.increment_counter(
             "http_retry_budget_exhausted_total",
@@ -77,7 +73,7 @@ class HTTPClientRetryMixin:
             )
 
     def _record_request_metrics(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         method: str,
         duration: float,
         status_code: int,
@@ -116,7 +112,7 @@ class HTTPClientRetryMixin:
             )
 
     def _log_retry(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         url: str,
         method: str,
         attempt: int,
@@ -141,7 +137,7 @@ class HTTPClientRetryMixin:
         )
 
     async def _execute_single_attempt(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         client: httpx.AsyncClient,
         method: str,
         url: str,
@@ -152,7 +148,7 @@ class HTTPClientRetryMixin:
         return await self.circuit_breaker.call(client.request, method, url, **kwargs)
 
     async def _request_with_retry(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         method: str,
         url: str,
         **kwargs: Any,  # Any: forwarding arbitrary request kwargs to underlying HTTP client
@@ -207,11 +203,9 @@ class HTTPClientRetryMixin:
             )
 
     def _is_retryable_error(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
-        exc: Exception,  # Any: mixin self type is provided structurally by composed adapter class
-    ) -> (
-        bool
-    ):  # Any: mixin self type is provided structurally by composed adapter class
+        self,
+        exc: Exception,
+    ) -> bool:
         """Return True when exception is retryable by policy."""
         if isinstance(
             exc,
@@ -231,7 +225,7 @@ class HTTPClientRetryMixin:
         return self.retry_config.is_retryable_exception(exc)
 
     async def _attempt_request(
-        self: Any,  # Any: mixin self type is provided structurally by composed adapter class
+        self,
         client: httpx.AsyncClient,
         method: str,
         url: str,

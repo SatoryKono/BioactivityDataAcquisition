@@ -13,6 +13,7 @@ from typing import Any
 
 import polars as pl
 
+from bioetl.domain.types import JsonDict
 from bioetl.domain.value_objects.dq_report import (
     DQCheckStatus,
     DQThresholds,
@@ -63,11 +64,11 @@ class SilverThresholdChecker:
         self,
         df: pl.DataFrame,
         key_nullability_rules: list[
-            dict[str, Any]  # Any: DQ check values vary by check type
+            JsonDict  # Any: DQ check values vary by check type
         ],  # Any: DQ check values vary by check type
-    ) -> dict[str, Any]:  # Any: DQ check values vary by check type
+    ) -> JsonDict:  # Any: DQ check values vary by check type
         """Check nullability for configured merge/partition keys."""
-        violations: list[dict[str, Any]] = []  # Any: DQ check values vary by check type
+        violations: list[JsonDict] = []  # Any: DQ check values vary by check type
 
         for rule in key_nullability_rules:
             if rule.get("nullable", False):

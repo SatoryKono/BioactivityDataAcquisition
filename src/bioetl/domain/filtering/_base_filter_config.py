@@ -4,17 +4,15 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Self
+from typing import Self
 
-# Any: Record values are heterogeneous (str | int | float | list | None).
-# Filter methods accept ``dict[str, Any]`` because record schemas vary
-# across pipelines and cannot be statically typed.
 from bioetl.domain.filtering.column_filter import FilterOperator, GoldColumnFilter
 from bioetl.domain.filtering.list_filters import (
     GoldListContainsFilter,
     GoldListLengthFilter,
 )
 from bioetl.domain.filtering.range_filter import GoldRangeFilter
+from bioetl.domain.types import JsonDict
 
 __all__ = [
     "BaseFilterConfig",
@@ -51,7 +49,7 @@ class BaseFilterConfig:
             exclude_if_present=other.exclude_if_present,
         )
 
-    def should_include(self, record: dict[str, Any]) -> bool:  # Any: record vals vary
+    def should_include(self, record: JsonDict) -> bool:
         """Check all filtering rules against a record.
 
         Args:
@@ -72,30 +70,30 @@ class BaseFilterConfig:
 
     def _check_required_fields(
         self,
-        record: dict[str, Any],  # Any: YAML config has heterogeneous values
-    ) -> bool:  # Any: record vals vary
+        record: JsonDict,
+    ) -> bool:
         """Check that all required fields are present and non-empty."""
         return all(record.get(fld) not in (None, "") for fld in self.required_fields)
 
     def _check_exclude_if_present(
         self,
-        record: dict[str, Any],  # Any: YAML config has heterogeneous values
-    ) -> bool:  # Any: record vals vary
+        record: JsonDict,
+    ) -> bool:
         """Check that exclusion fields are absent or empty."""
         return all(record.get(fld) in (None, "") for fld in self.exclude_if_present)
 
     def _check_column_filters(
         self,
-        record: dict[str, Any],  # Any: YAML config has heterogeneous values
-    ) -> bool:  # Any: record vals vary
+        record: JsonDict,
+    ) -> bool:
         """Check that column values match the configured filters."""
         return all(self._check_single_column(record, f) for f in self.column_filters)
 
     def _check_single_column(
         self,
-        record: dict[str, Any],  # Any: YAML config has heterogeneous values
-        f: GoldColumnFilter,  # Any: YAML config has heterogeneous values
-    ) -> bool:  # Any: record vals vary
+        record: JsonDict,
+        f: GoldColumnFilter,
+    ) -> bool:
         """Check a single column value against its filter operator."""
         val = record.get(f.column)
         checker = _OPERATOR_CHECKERS.get(f.operator)
@@ -105,54 +103,54 @@ class BaseFilterConfig:
 
     def _check_op_in(
         self,
-        val: Any,  # Any: YAML config has heterogeneous values
-        values: frozenset[str] | None,  # Any: YAML config has heterogeneous values
-    ) -> bool:  # Any: val varies
+        val: object,
+        values: frozenset[str] | None,
+    ) -> bool:
         """Check the IN operator."""
         return values is not None and str(val) in values
 
     def _check_op_not_in(
         self,
-        val: Any,  # Any: YAML config has heterogeneous values
-        values: frozenset[str] | None,  # Any: YAML config has heterogeneous values
-    ) -> bool:  # Any: val varies
+        val: object,
+        values: frozenset[str] | None,
+    ) -> bool:
         """Check the NOT_IN operator."""
         return values is not None and str(val) not in values
 
     def _check_op_is_null(
         self,
-        val: Any,  # Any: YAML config has heterogeneous values
-        _values: frozenset[str] | None,  # Any: YAML config has heterogeneous values
-    ) -> bool:  # Any: val varies
+        val: object,
+        _values: frozenset[str] | None,
+    ) -> bool:
         """Check the IS_NULL operator."""
         return val is None or val == ""
 
     def _check_op_is_not_null(
         self,
-        val: Any,  # Any: YAML config has heterogeneous values
-        _values: frozenset[str] | None,  # Any: YAML config has heterogeneous values
-    ) -> bool:  # Any: val varies
+        val: object,
+        _values: frozenset[str] | None,
+    ) -> bool:
         """Check the IS_NOT_NULL operator."""
         return val is not None and val != ""
 
     def _check_op_is_empty(
         self,
-        val: Any,  # Any: YAML config has heterogeneous values
-        _values: frozenset[str] | None,  # Any: YAML config has heterogeneous values
-    ) -> bool:  # Any: val varies
+        val: object,
+        _values: frozenset[str] | None,
+    ) -> bool:
         """Check the IS_EMPTY operator."""
         return self._is_empty_value(val)
 
     def _check_op_is_not_empty(
         self,
-        val: Any,  # Any: YAML config has heterogeneous values
-        _values: frozenset[str] | None,  # Any: YAML config has heterogeneous values
-    ) -> bool:  # Any: val varies
+        val: object,
+        _values: frozenset[str] | None,
+    ) -> bool:
         """Check the IS_NOT_EMPTY operator."""
         return not self._is_empty_value(val)
 
     @staticmethod
-    def _is_empty_value(val: Any) -> bool:  # Any: record value type varies
+    def _is_empty_value(val: object) -> bool:
         """Check whether a value is considered 'empty'."""
         if val is None:
             return True
@@ -162,15 +160,15 @@ class BaseFilterConfig:
 
     def _check_range_filters(
         self,
-        record: dict[str, Any],  # Any: YAML config has heterogeneous values
-    ) -> bool:  # Any: record vals vary
+        record: JsonDict,
+    ) -> bool:
         """Check that values fall within the configured ranges."""
         return all(self._check_single_range(record, f) for f in self.range_filters)
 
     def _check_list_length_filters(
         self,
-        record: dict[str, Any],  # Any: YAML config has heterogeneous values
-    ) -> bool:  # Any: record vals vary
+        record: JsonDict,
+    ) -> bool:
         """Check list lengths in columns against configured bounds."""
         return all(
             self._check_single_list_length(record, f) for f in self.list_length_filters
@@ -178,15 +176,15 @@ class BaseFilterConfig:
 
     def _check_single_list_length(
         self,
-        record: dict[str, Any],  # Any: YAML config has heterogeneous values
-        f: GoldListLengthFilter,  # Any: record vals vary
+        record: JsonDict,
+        f: GoldListLengthFilter,
     ) -> bool:
         """Check the length of a single list column."""
         length = self._get_list_length(record.get(f.column))
         return self._length_in_bounds(length, f.min_length, f.max_length)
 
     @staticmethod
-    def _get_list_length(val: Any) -> int:  # Any: record value type varies
+    def _get_list_length(val: object) -> int:
         """Compute the length of a value treated as a list."""
         if val is None:
             return 0
@@ -205,8 +203,8 @@ class BaseFilterConfig:
 
     def _check_list_contains_filters(
         self,
-        record: dict[str, Any],  # Any: YAML config has heterogeneous values
-    ) -> bool:  # Any: record vals vary
+        record: JsonDict,
+    ) -> bool:
         """Check list-contains filters against record values."""
         return all(
             self._check_single_list_contains(record, f)
@@ -215,8 +213,8 @@ class BaseFilterConfig:
 
     def _check_single_list_contains(
         self,
-        record: dict[str, Any],  # Any: YAML config has heterogeneous values
-        f: GoldListContainsFilter,  # Any: record vals vary
+        record: JsonDict,
+        f: GoldListContainsFilter,
     ) -> bool:
         """Check a single list-contains filter against a record value."""
         val = record.get(f.column)
@@ -227,7 +225,7 @@ class BaseFilterConfig:
         return self._matches_contains_mode(val_set, f.values, f.mode)
 
     @staticmethod
-    def _to_string_set(val: Any) -> set[str]:  # Any: record value type varies
+    def _to_string_set(val: object) -> set[str]:
         """Convert a value to a set of strings."""
         if not isinstance(val, list):
             val = [val]
@@ -244,9 +242,9 @@ class BaseFilterConfig:
 
     def _check_single_range(
         self,
-        record: dict[str, Any],  # Any: YAML config has heterogeneous values
-        f: GoldRangeFilter,  # Any: YAML config has heterogeneous values
-    ) -> bool:  # Any: record vals vary
+        record: JsonDict,
+        f: GoldRangeFilter,
+    ) -> bool:
         """Check a single value against a range filter."""
         val = record.get(f.column)
         if val is None or val == "":
@@ -296,12 +294,12 @@ class BaseFilterConfig:
         return not any(all_filters)
 
 
-_OPERATOR_CHECKERS: dict[  # Any: record value type varies per column
+_OPERATOR_CHECKERS: dict[
     FilterOperator,
     Callable[
         [
             BaseFilterConfig,
-            Any,  # Any: filter value type varies (str|int|float|list)
+            object,
             frozenset[str] | None,
         ],
         bool,

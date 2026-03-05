@@ -17,6 +17,7 @@ __all__ = [
 
 import contextlib
 import time
+from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
 from httpx import RequestError
@@ -66,7 +67,7 @@ class DoiBatchProcessor:
         metrics: BaseMetrics,
         mailto: str,
         api_base: str,
-        headers_fn: Any,  # Any: Callable returning dict[str, str]
+        headers_fn: Callable[[], dict[str, str]],
         request_collector: APIRequestCollector | None = None,
     ) -> None:
         """Initialize batch processor.
@@ -240,7 +241,7 @@ class SearchPaginator:
         metrics: BaseMetrics,
         mailto: str,
         api_base: str,
-        headers_fn: Any,  # Any: Callable returning dict[str, str]
+        headers_fn: Callable[[], dict[str, str]],
         request_collector: APIRequestCollector | None = None,
     ) -> None:
         """Initialize search paginator."""

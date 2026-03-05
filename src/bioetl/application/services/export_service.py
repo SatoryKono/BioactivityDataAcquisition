@@ -6,6 +6,8 @@ to CSV, XLSX, and TSV formats.
 
 from __future__ import annotations
 
+from bioetl.domain.types import JsonDict
+
 __all__ = [
     "ColumnInfo",
     "ExportFormat",
@@ -76,7 +78,7 @@ class TablePreview:
     row_count: int
     columns: tuple[ColumnInfo, ...]
     sample_rows: tuple[
-        dict[str, Any], ...  # Any: port contract allows heterogeneous record values
+        JsonDict, ...  # Any: port contract allows heterogeneous record values
     ]  # Any: port contract allows heterogeneous record values
 
 

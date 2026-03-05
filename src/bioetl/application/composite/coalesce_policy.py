@@ -178,6 +178,7 @@ class CoalescePolicyService:
         """Sort columns with either seed-first or enricher-first strategy."""
 
         def sort_key(col: str) -> int:
+            """Return 0 for preferred-origin columns and 1 for others."""
             is_seed = bool(seed_prefix and col.startswith(seed_prefix))
             if prefer_seed:
                 return 0 if is_seed else 1

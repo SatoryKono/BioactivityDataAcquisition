@@ -11,6 +11,8 @@ __all__ = ["PubChemEntityMapper"]
 
 from typing import TYPE_CHECKING, Any
 
+from bioetl.domain.types import JsonDict
+
 if TYPE_CHECKING:
     import pubchempy as pcp
 
@@ -25,7 +27,7 @@ class PubChemEntityMapper:
     @staticmethod
     def compound_to_dict(
         compound: pcp.Compound,
-    ) -> dict[str, Any]:  # Any: untyped API JSON record
+    ) -> JsonDict:  # Any: untyped API JSON record
         """Convert pubchempy Compound to dictionary.
 
         Uses connectivity_smiles/smiles (replaces deprecated canonical/isomeric_smiles).
@@ -133,7 +135,7 @@ class PubChemEntityMapper:
     @staticmethod
     def substance_to_dict(
         substance: pcp.Substance,
-    ) -> dict[str, Any]:  # Any: untyped API JSON record
+    ) -> JsonDict:  # Any: untyped API JSON record
         """Convert pubchempy Substance to dictionary.
 
         Args:
@@ -152,8 +154,8 @@ class PubChemEntityMapper:
 
     @staticmethod
     def assay_to_dict(
-        assay: dict[str, Any],  # Any: untyped API JSON record
-    ) -> dict[str, Any]:  # Any: untyped API JSON record
+        assay: JsonDict,  # Any: untyped API JSON record
+    ) -> JsonDict:  # Any: untyped API JSON record
         """Convert assay data to standardized dictionary.
 
         Args:

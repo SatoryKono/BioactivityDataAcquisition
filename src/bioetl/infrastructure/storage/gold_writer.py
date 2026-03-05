@@ -11,7 +11,7 @@ from deltalake import DeltaTable, write_deltalake  # noqa: F401
 from deltalake.exceptions import TableNotFoundError  # noqa: F401
 
 from bioetl.domain.medallion import GoldWriteMode
-from bioetl.domain.types import GoldRecord, RunID, ScdConfig
+from bioetl.domain.types import GoldRecord, JsonDict, RunID, ScdConfig
 from bioetl.infrastructure.storage.base_delta_writer import (
     BaseDeltaWriter,
     coerce_null_types_for_delta,  # noqa: F401
@@ -36,6 +36,7 @@ if TYPE_CHECKING:
         MetadataWriterPort,
         TracingPort,
     )
+    from bioetl.domain.value_objects.silver_result import SilverWriteResult
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 __all__ = ["GoldWriteMode", "GoldWriter"]
@@ -62,7 +63,7 @@ def _normalize_scd_config(
     primary_keys: list[str] | None,
 ) -> ScdConfig:
     """Normalize YAML scd_config keys to gold_writer expected format."""
-    out: dict[str, Any] = dict(scd_config)  # Any: ScdConfig is heterogeneous
+    out: JsonDict = dict(scd_config)  # Any: ScdConfig is heterogeneous
     if "business_key" not in out and primary_keys:
         out["business_key"] = (
             primary_keys[0] if len(primary_keys) == 1 else primary_keys
@@ -131,7 +132,7 @@ class GoldWriter(
         column_order: list[str] | None = None,
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
-        silver_refs: list[Any] | None = None,  # Any: SilverRef heterogeneous
+        silver_refs: list[SilverWriteResult] | None = None,
     ) -> None:
         """Write validated records to Gold layer."""
         tracer = self._tracing.get_tracer(__name__)
@@ -197,7 +198,7 @@ class GoldWriter(
         ingestion_ts: datetime | None,
         run_id: RunID | None,
         scd_config: ScdConfig | None,
-        silver_refs: list[Any] | None,  # Any: SilverRef heterogeneous
+        silver_refs: list[SilverWriteResult] | None,
         schema: DataFrameSchema,
     ) -> None:
         """Emit audit and metadata after successful Gold write."""

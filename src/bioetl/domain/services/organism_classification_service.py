@@ -22,7 +22,7 @@ from bioetl.domain.mapping.organism_classification import (
     classify_organism,
     normalize_organism_name,
 )
-from bioetl.domain.types import CellularityType
+from bioetl.domain.types import CellularityType, JsonDict
 
 __all__ = [
     "ClassificationStats",
@@ -158,10 +158,10 @@ class OrganismClassificationService:
 
     def classify_records(
         self,
-        records: list[dict[str, Any]],  # Any: untyped organism taxonomy data
+        records: list[JsonDict],  # Any: untyped organism taxonomy data
     ) -> list[
         tuple[
-            dict[str, Any],  # Any: record values are heterogeneous
+            JsonDict,  # Any: record values are heterogeneous
             OrganismClassificationResult,
         ]
     ]:
@@ -177,8 +177,8 @@ class OrganismClassificationService:
 
     def enrich_records(
         self,
-        records: list[dict[str, Any]],  # Any: untyped organism taxonomy data
-    ) -> list[dict[str, Any]]:  # Any: untyped organism taxonomy data
+        records: list[JsonDict],  # Any: untyped organism taxonomy data
+    ) -> list[JsonDict]:  # Any: untyped organism taxonomy data
         """Enrich records with classification fields.
 
         Adds ``organism_class``, ``normalized_organism``, and
@@ -196,8 +196,8 @@ class OrganismClassificationService:
 
     def _enrich_single(
         self,
-        record: dict[str, Any],  # Any: record values are heterogeneous
-    ) -> dict[str, Any]:  # Any: untyped organism taxonomy data
+        record: JsonDict,  # Any: record values are heterogeneous
+    ) -> JsonDict:  # Any: untyped organism taxonomy data
         """Enrich a single record with classification fields."""
         result = self._classify_record(record)
         enriched = {**record}
@@ -214,12 +214,12 @@ class OrganismClassificationService:
 
     def filter_by_cellularity(
         self,
-        records: list[dict[str, Any]],  # Any: untyped organism taxonomy data
+        records: list[JsonDict],  # Any: untyped organism taxonomy data
         *,
         include: set[CellularityType] | None = None,
         exclude: set[CellularityType] | None = None,
         keep_unresolved: bool = True,
-    ) -> list[dict[str, Any]]:  # Any: untyped organism taxonomy data
+    ) -> list[JsonDict]:  # Any: untyped organism taxonomy data
         """Filter records by organism cellularity type.
 
         Exactly one of ``include`` or ``exclude`` should be provided.
@@ -250,7 +250,7 @@ class OrganismClassificationService:
             exclude=exclude,
             keep_unresolved=keep_unresolved,
         )
-        filtered: list[dict[str, Any]] = []  # Any: untyped organism taxonomy data
+        filtered: list[JsonDict] = []  # Any: untyped organism taxonomy data
         for record in records:
             result = self._classify_record(record)
             if strategy(result.organism_class):
@@ -279,6 +279,7 @@ class OrganismClassificationService:
         """Return include-only filter strategy."""
 
         def strategy(cellularity: CellularityType | None) -> bool:
+            """Accept cellularity if it is in the include set."""
             if cellularity is None:
                 return keep_unresolved
             return cellularity in include
@@ -293,6 +294,7 @@ class OrganismClassificationService:
         """Return exclusion filter strategy."""
 
         def strategy(cellularity: CellularityType | None) -> bool:
+            """Reject cellularity if it is in the exclude set."""
             if cellularity is None:
                 return keep_unresolved
             return cellularity not in exclude
@@ -304,6 +306,7 @@ class OrganismClassificationService:
         """Return strategy when neither include nor exclude is provided."""
 
         def strategy(cellularity: CellularityType | None) -> bool:
+            """Accept all resolved cellularity values."""
             if cellularity is None:
                 return keep_unresolved
             return True
@@ -354,7 +357,7 @@ class OrganismClassificationService:
 
     def _classify_record(
         self,
-        record: dict[str, Any],  # Any: record values are heterogeneous
+        record: JsonDict,  # Any: record values are heterogeneous
     ) -> OrganismClassificationResult:  # Any: untyped organism taxonomy data
         """Extract fields and classify a single record."""
         organism = record.get(self.organism_field)

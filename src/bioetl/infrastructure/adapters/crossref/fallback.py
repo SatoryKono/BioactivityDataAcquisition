@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Callable
 
     from bioetl.domain.ports import LoggerPort
+from bioetl.domain.types import JsonDict
 
 CROSSREF_FALLBACK_ERRORS = (
     BioETLError,
@@ -47,7 +48,7 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
         self,
         logger: LoggerPort,
         search_fn: Callable[
-            [str, int], AsyncIterator[dict[str, Any]]  # Any: untyped API JSON record
+            [str, int], AsyncIterator[JsonDict]  # Any: untyped API JSON record
         ],  # Any: untyped API JSON record
     ) -> None:
         """Initialize fallback handler.
@@ -61,14 +62,14 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
 
     def _get_result_identifier(
         self,
-        result: dict[str, Any],  # Any: untyped API JSON record
+        result: JsonDict,  # Any: untyped API JSON record
     ) -> tuple[str, str]:  # Any: untyped API JSON record
         """Return CrossRef DOI for logging."""
         return ("found_doi", str(result.get("DOI", "unknown")))
 
     async def _search_by_title(
         self, title: str
-    ) -> dict[str, Any] | None:  # Any: untyped API JSON record
+    ) -> JsonDict | None:  # Any: untyped API JSON record
         """Search for a publication by title.
 
         Args:
@@ -83,7 +84,7 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
         self,
         title: str,
         limit: int = 3,
-    ) -> dict[str, Any] | None:  # Any: untyped API JSON record
+    ) -> JsonDict | None:  # Any: untyped API JSON record
         """Search for a publication by title.
 
         Args:

@@ -15,7 +15,7 @@ See also:
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from .transformations import safe_int
 
@@ -107,7 +107,7 @@ MAX_PUBLICATION_YEAR: int = 2050
 # =============================================================================
 
 
-def validate_positive_int(value: Any) -> int | None:  # Any: record field value typ...
+def validate_positive_int(value: object) -> int | None:
     """Validate integer is positive (>= 1) or return None.
 
     Used for validating IDs, counts, and other positive integer fields.
@@ -202,7 +202,7 @@ def validate_year_range(
     return min_year <= year <= max_year
 
 
-def validate_non_negative(value: Any) -> float | None:  # Any: record field value typ...
+def validate_non_negative(value: object) -> float | None:
     """Validate numeric value is non-negative (>= 0) or return None.
 
     Used for validating concentrations, counts, and other non-negative fields.
@@ -251,7 +251,7 @@ MAX_MOLECULAR_WEIGHT: float = 100000.0  # Legacy: 100000.0 (exclusive bound)
 
 
 def validate_molecular_weight(
-    value: Any,  # Any: record field value type varies
+    value: object,
     config: ValidationConfig | None = None,
 ) -> float | None:
     """Convert molecular weight to float and enforce configured bounds."""

@@ -7,11 +7,11 @@ Uses ConfigService from composition entrypoints for clean layering.
 from __future__ import annotations
 
 import json
-from typing import Any
 
 import click
 
 from bioetl.composition.entrypoints import get_config_service
+from bioetl.domain.types import JsonDict
 from bioetl.interfaces.cli.formatters import echo_error, echo_info
 
 __all__ = [
@@ -24,15 +24,13 @@ __all__ = [
 ]
 
 
-def _config_to_dict(config: Any) -> dict[str, Any]:  # Any: accepts Pydantic model...
+def _config_to_dict(config: object) -> JsonDict:
     """Convert a Pydantic model or dataclass to a JSON-serializable dict."""
     if hasattr(config, "model_dump"):
-        result: dict[
-            str, Any  # Any: CLI/HTTP response values are heterogeneous
-        ] = config.model_dump()
+        result: JsonDict = config.model_dump()  # type: ignore[union-attr]
         return result
     if hasattr(config, "__dict__"):
-        converted: dict[str, Any] = {  # Any: YAML config has heterogeneous values
+        converted: JsonDict = {  # Any: YAML config has heterogeneous values
             k: _config_to_dict(v) if hasattr(v, "__dict__") else v
             for k, v in config.__dict__.items()
             if not k.startswith("_")
@@ -145,7 +143,7 @@ def show_settings_command(output_format: str) -> None:
     settings_info = service.get_settings()
 
     # Convert SettingsInfo to dict for output
-    settings_dict: dict[str, Any] = {  # Any: YAML config has heterogeneous values
+    settings_dict: JsonDict = {  # Any: YAML config has heterogeneous values
         "env": settings_info.env,
         "data_dir": settings_info.data_dir,
         "bronze_path": settings_info.bronze_path,

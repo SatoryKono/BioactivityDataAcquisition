@@ -6,12 +6,12 @@ __all__ = ["CommentExtractor"]
 
 
 from collections.abc import Callable
-from typing import Any
 
 from bioetl.domain.serialization import serialize_to_json
+from bioetl.domain.types import JsonDict
 
 
-def _is_comment_of_type(comment: Any, comment_type: str) -> bool:  # Any: JSON
+def _is_comment_of_type(comment: object, comment_type: str) -> bool:
     """Check if comment matches the specified type.
 
     Args:
@@ -25,8 +25,8 @@ def _is_comment_of_type(comment: Any, comment_type: str) -> bool:  # Any: JSON
 
 
 def _extract_reaction_data(
-    reaction: dict[str, Any],  # Any: untyped JSON fragment from UniProt API
-) -> dict[str, Any]:  # Any: untyped JSON fragment from UniProt API
+    reaction: JsonDict,  # Any: untyped JSON fragment from UniProt API
+) -> JsonDict:  # Any: untyped JSON fragment from UniProt API
     """Extract reaction data from catalytic activity.
 
     Args:
@@ -35,7 +35,7 @@ def _extract_reaction_data(
     Returns:
         Activity dict with reaction and ec_number fields.
     """
-    activity: dict[str, Any] = {}  # Any: JSON values
+    activity: JsonDict = {}  # Any: JSON values
     if reaction.get("name"):
         activity["reaction"] = reaction.get("name")
     if reaction.get("ecNumber"):
@@ -43,7 +43,7 @@ def _extract_reaction_data(
     return activity
 
 
-def _extract_location_value(loc: dict[str, Any]) -> str | None:  # Any: JSON values
+def _extract_location_value(loc: JsonDict) -> str | None:  # Any: JSON values
     """Extract location value from subcellular location entry.
 
     Args:
@@ -60,7 +60,7 @@ def _extract_location_value(loc: dict[str, Any]) -> str | None:  # Any: JSON val
     return None
 
 
-def _build_isoform_data(iso: dict[str, Any]) -> dict[str, Any]:  # Any: JSON values
+def _build_isoform_data(iso: JsonDict) -> JsonDict:  # Any: JSON values
     """Build isoform data from isoform entry.
 
     Args:
@@ -69,7 +69,7 @@ def _build_isoform_data(iso: dict[str, Any]) -> dict[str, Any]:  # Any: JSON val
     Returns:
         Isoform data dict with ids and name.
     """
-    isoform_data: dict[str, Any] = {}  # Any: JSON values
+    isoform_data: JsonDict = {}  # Any: JSON values
     isoform_ids = iso.get("isoformIds", [])
     if isoform_ids:
         isoform_data["ids"] = isoform_ids
@@ -80,7 +80,7 @@ def _build_isoform_data(iso: dict[str, Any]) -> dict[str, Any]:  # Any: JSON val
 
 
 def _extract_isoform_id_values(
-    isoform: dict[str, Any],  # Any: untyped JSON fragment from UniProt API
+    isoform: JsonDict,  # Any: untyped JSON fragment from UniProt API
 ) -> list[str]:
     """Extract normalized isoform IDs."""
     raw_ids = isoform.get("isoformIds", [])
@@ -90,7 +90,7 @@ def _extract_isoform_id_values(
 
 
 def _extract_isoform_name_values(
-    isoform: dict[str, Any],  # Any: untyped JSON fragment from UniProt API
+    isoform: JsonDict,  # Any: untyped JSON fragment from UniProt API
 ) -> list[str]:
     """Extract normalized isoform primary name."""
     name = isoform.get("name", {})
@@ -100,7 +100,7 @@ def _extract_isoform_name_values(
 
 
 def _extract_isoform_synonym_values(
-    isoform: dict[str, Any],  # Any: untyped JSON fragment from UniProt API
+    isoform: JsonDict,  # Any: untyped JSON fragment from UniProt API
 ) -> list[str]:
     """Extract normalized isoform synonyms."""
     raw_synonyms = isoform.get("synonyms", [])
@@ -114,13 +114,13 @@ def _extract_isoform_synonym_values(
 
 
 def _iter_alternative_product_isoforms(
-    comments: Any,  # Any: untyped UniProt API JSON
-) -> list[dict[str, Any]]:  # Any: untyped UniProt JSON
+    comments: list[JsonDict] | None,
+) -> list[JsonDict]:
     """Collect ALTERNATIVE PRODUCTS isoform dicts."""
     if not comments or not isinstance(comments, list):
         return []
 
-    isoforms: list[dict[str, Any]] = []  # Any: untyped UniProt API JSON objects
+    isoforms: list[JsonDict] = []  # Any: untyped UniProt API JSON objects
     for comment in comments:
         if not _is_comment_of_type(comment, "ALTERNATIVE PRODUCTS"):
             continue
@@ -131,7 +131,7 @@ def _iter_alternative_product_isoforms(
     return isoforms
 
 
-_IsoformPayload = dict[str, Any]  # Any: untyped UniProt API JSON objects
+_IsoformPayload = JsonDict  # Any: untyped UniProt API JSON objects
 _IsoformExtractor = Callable[[_IsoformPayload], list[str]]
 _ISOFORM_SECTION_NORMALIZERS: tuple[tuple[str, _IsoformExtractor], ...] = (
     ("isoform_names", _extract_isoform_name_values),
@@ -141,7 +141,7 @@ _ISOFORM_SECTION_NORMALIZERS: tuple[tuple[str, _IsoformExtractor], ...] = (
 
 
 def _extract_texts_from_dict(
-    data: dict[str, Any] | None,  # Any: untyped JSON fragment from UniProt API
+    data: JsonDict | None,  # Any: untyped JSON fragment from UniProt API
 ) -> list[str]:
     """Extract text values from a dict with 'texts' key.
 
@@ -162,8 +162,8 @@ def _extract_texts_from_dict(
 
 
 def _extract_cofactor_entry(
-    cofactor: dict[str, Any],  # Any: untyped JSON fragment from UniProt API
-) -> dict[str, Any]:  # Any: untyped JSON fragment from UniProt API
+    cofactor: JsonDict,  # Any: untyped JSON fragment from UniProt API
+) -> JsonDict:  # Any: untyped JSON fragment from UniProt API
     """Extract data from a single cofactor entry.
 
     Args:
@@ -172,7 +172,7 @@ def _extract_cofactor_entry(
     Returns:
         Cofactor data dict with name, chebi_id, and optional note.
     """
-    cofactor_data: dict[str, Any] = {}  # Any: JSON values
+    cofactor_data: JsonDict = {}  # Any: JSON values
 
     name = cofactor.get("name")
     if name:
@@ -192,9 +192,9 @@ def _extract_cofactor_entry(
     return cofactor_data
 
 
-def _extract_km_entry(km: dict[str, Any]) -> dict[str, Any]:  # Any: JSON values
+def _extract_km_entry(km: JsonDict) -> JsonDict:  # Any: JSON values
     """Extract Michaelis constant entry."""
-    km_entry: dict[str, Any] = {}  # Any: JSON values
+    km_entry: JsonDict = {}  # Any: JSON values
     if km.get("constant"):
         km_entry["value"] = km["constant"]
     if km.get("unit"):
@@ -204,9 +204,9 @@ def _extract_km_entry(km: dict[str, Any]) -> dict[str, Any]:  # Any: JSON values
     return km_entry
 
 
-def _extract_vmax_entry(vmax: dict[str, Any]) -> dict[str, Any]:  # Any: JSON values
+def _extract_vmax_entry(vmax: JsonDict) -> JsonDict:  # Any: JSON values
     """Extract maximum velocity entry."""
-    vmax_entry: dict[str, Any] = {}  # Any: JSON values
+    vmax_entry: JsonDict = {}  # Any: JSON values
     if vmax.get("velocity"):
         vmax_entry["value"] = vmax["velocity"]
     if vmax.get("unit"):
@@ -217,9 +217,9 @@ def _extract_vmax_entry(vmax: dict[str, Any]) -> dict[str, Any]:  # Any: JSON va
 
 
 def _extract_list_entries(
-    data_list: Any,  # Any: untyped UniProt JSON list
-    extractor: Any,  # Any: dynamic extractor callable
-) -> list[dict[str, Any]]:  # Any: JSON
+    data_list: list[JsonDict] | None,
+    extractor: Callable[[JsonDict], JsonDict],
+) -> list[JsonDict]:
     """Extract entries from a list using the provided extractor function."""
     if not isinstance(data_list, list) or not data_list:
         return []
@@ -231,10 +231,10 @@ def _extract_list_entries(
 
 
 def _extract_kinetic_parameters(
-    kinetics: dict[str, Any],  # Any: untyped JSON fragment from UniProt API
-) -> dict[str, Any]:  # Any: untyped JSON fragment from UniProt API
+    kinetics: JsonDict,  # Any: untyped JSON fragment from UniProt API
+) -> JsonDict:  # Any: untyped JSON fragment from UniProt API
     """Extract kinetic parameters (Km, Vmax) from kineticParameters dict."""
-    kinetic_data: dict[str, Any] = {}  # Any: JSON values
+    kinetic_data: JsonDict = {}  # Any: JSON values
 
     km_values = _extract_list_entries(
         kinetics.get("michaelisConstants"), _extract_km_entry
@@ -256,10 +256,10 @@ def _extract_kinetic_parameters(
 
 
 def _extract_absorption_data(
-    absorption: dict[str, Any],  # Any: untyped JSON fragment from UniProt API
-) -> dict[str, Any]:  # Any: untyped JSON fragment from UniProt API
+    absorption: JsonDict,  # Any: untyped JSON fragment from UniProt API
+) -> JsonDict:  # Any: untyped JSON fragment from UniProt API
     """Extract absorption (spectroscopic) data."""
-    abs_data: dict[str, Any] = {}  # Any: JSON values
+    abs_data: JsonDict = {}  # Any: JSON values
     if absorption.get("max"):
         abs_data["max"] = absorption["max"]
     notes = _extract_texts_from_dict(absorption.get("note"))
@@ -269,8 +269,8 @@ def _extract_absorption_data(
 
 
 def _extract_biophys_from_comment(
-    comment: dict[str, Any],  # Any: untyped JSON fragment from UniProt API
-) -> dict[str, Any]:  # Any: untyped JSON fragment from UniProt API
+    comment: JsonDict,  # Any: untyped JSON fragment from UniProt API
+) -> JsonDict:  # Any: untyped JSON fragment from UniProt API
     """Extract biophysicochemical data from a single comment.
 
     Args:
@@ -279,7 +279,7 @@ def _extract_biophys_from_comment(
     Returns:
         Dict with extracted properties.
     """
-    result: dict[str, Any] = {}  # Any: JSON values
+    result: JsonDict = {}  # Any: JSON values
 
     # Simple text extractions
     ph_values = _extract_texts_from_dict(comment.get("phDependence"))
@@ -319,7 +319,7 @@ class CommentExtractor:
 
     @staticmethod
     def extract_text_values(
-        comments: list[Any],  # Any: untyped JSON fragment from UniProt API
+        comments: list[JsonDict],
         comment_type: str,
     ) -> list[str]:
         """Extract text values from comments of specific type.
@@ -348,9 +348,9 @@ class CommentExtractor:
     @classmethod
     def extract_by_type(
         cls,
-        comments: Any,  # Any: untyped API JSON
-        comment_type: str,  # Any: untyped UniProt API JSON
-    ) -> str | None:  # Any: untyped UniProt JSON
+        comments: list[JsonDict] | None,
+        comment_type: str,
+    ) -> str | None:
         """Extract comments of specific type as JSON string.
 
         Args:
@@ -367,7 +367,7 @@ class CommentExtractor:
         return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
 
     @staticmethod
-    def extract_catalytic_activity(comments: Any) -> str | None:  # Any: untyped JSON
+    def extract_catalytic_activity(comments: list[JsonDict] | None) -> str | None:
         """Extract catalytic activity information.
 
         Args:
@@ -379,7 +379,7 @@ class CommentExtractor:
         if not comments or not isinstance(comments, list):
             return None
 
-        extracted: list[dict[str, Any]] = []  # Any: JSON values
+        extracted: list[JsonDict] = []  # Any: JSON values
         for comment in comments:
             if not _is_comment_of_type(comment, "CATALYTIC ACTIVITY"):
                 continue
@@ -393,7 +393,7 @@ class CommentExtractor:
         return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
 
     @staticmethod
-    def extract_subcellular_locations(comments: Any) -> str | None:  # Any: untyped JSON
+    def extract_subcellular_locations(comments: list[JsonDict] | None) -> str | None:
         """Extract subcellular location information.
 
         Args:
@@ -421,7 +421,7 @@ class CommentExtractor:
         return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
 
     @staticmethod
-    def extract_alternative_products(comments: Any) -> str | None:  # Any: untyped JSON
+    def extract_alternative_products(comments: list[JsonDict] | None) -> str | None:
         """Extract alternative products (isoforms) information.
 
         Args:
@@ -433,7 +433,7 @@ class CommentExtractor:
         if not comments or not isinstance(comments, list):
             return None
 
-        extracted: list[dict[str, Any]] = []  # Any: JSON values
+        extracted: list[JsonDict] = []  # Any: JSON values
         for comment in comments:
             if not _is_comment_of_type(comment, "ALTERNATIVE PRODUCTS"):
                 continue
@@ -449,7 +449,7 @@ class CommentExtractor:
         return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
 
     @staticmethod
-    def count_isoforms(comments: Any) -> int | None:  # Any: untyped API JSON
+    def count_isoforms(comments: list[JsonDict] | None) -> int | None:
         """Count the number of isoforms.
 
         Args:
@@ -473,7 +473,7 @@ class CommentExtractor:
         return count if count > 0 else None
 
     @staticmethod
-    def extract_cofactors(comments: Any) -> str | None:  # Any: untyped API JSON
+    def extract_cofactors(comments: list[JsonDict] | None) -> str | None:
         """Extract cofactor information from COFACTOR comments.
 
         Cofactors are metal ions or organic molecules required for protein function.
@@ -488,7 +488,7 @@ class CommentExtractor:
         if not comments or not isinstance(comments, list):
             return None
 
-        extracted: list[dict[str, Any]] = []  # Any: JSON values
+        extracted: list[JsonDict] = []  # Any: JSON values
         for comment in comments:
             if not _is_comment_of_type(comment, "COFACTOR"):
                 continue
@@ -508,8 +508,8 @@ class CommentExtractor:
 
     @staticmethod
     def extract_biophysicochemical_properties(
-        comments: Any,  # Any: untyped UniProt API JSON
-    ) -> str | None:  # Any: untyped UniProt JSON
+        comments: list[JsonDict] | None,
+    ) -> str | None:
         """Extract biophysicochemical properties from comments.
 
         Includes pH optima, temperature optima, kinetic parameters (Km, Vmax),
@@ -524,7 +524,7 @@ class CommentExtractor:
         if not comments or not isinstance(comments, list):
             return None
 
-        extracted: dict[str, Any] = {}  # Any: JSON values
+        extracted: JsonDict = {}  # Any: JSON values
         for comment in comments:
             if not _is_comment_of_type(comment, "BIOPHYSICOCHEMICAL PROPERTIES"):
                 continue
@@ -533,7 +533,7 @@ class CommentExtractor:
         return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
 
     @classmethod
-    def extract_induction(cls, comments: Any) -> str | None:  # Any: untyped API JSON
+    def extract_induction(cls, comments: list[JsonDict] | None) -> str | None:
         """Extract induction information from INDUCTION comments.
 
         Describes conditions under which gene expression is induced.
@@ -548,8 +548,8 @@ class CommentExtractor:
 
     @staticmethod
     def extract_isoform_details(
-        comments: Any,  # Any: untyped UniProt API JSON
-    ) -> dict[str, str | None]:  # Any: untyped UniProt JSON
+        comments: list[JsonDict] | None,
+    ) -> dict[str, str | None]:
         """Extract detailed isoform information from ALTERNATIVE PRODUCTS.
 
         Parses isoform data to extract names, IDs, and synonyms separately.
@@ -580,7 +580,7 @@ class CommentExtractor:
         return result
 
     @staticmethod
-    def extract_reactions(comments: Any) -> str | None:  # Any: untyped API JSON
+    def extract_reactions(comments: list[JsonDict] | None) -> str | None:
         """Extract reaction names from CATALYTIC ACTIVITY comments.
 
         Args:
@@ -606,7 +606,7 @@ class CommentExtractor:
         return serialize_to_json(reactions, ensure_ascii=False) if reactions else None
 
     @staticmethod
-    def extract_reaction_ec_numbers(comments: Any) -> str | None:  # Any: untyped JSON
+    def extract_reaction_ec_numbers(comments: list[JsonDict] | None) -> str | None:
         """Extract EC numbers from CATALYTIC ACTIVITY comments.
 
         Args:

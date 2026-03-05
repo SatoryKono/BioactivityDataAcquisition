@@ -68,6 +68,9 @@ class TokenBucket:
     async def acquire(self, tokens: int = 1) -> None:
         """Acquire tokens, waiting if necessary.
 
+        Releases the lock before sleeping so other coroutines can
+        check/acquire tokens concurrently.
+
         Args:
             tokens: Number of tokens to acquire (default: 1)
 
@@ -80,8 +83,8 @@ class TokenBucket:
             raise ValueError(msg)
 
         total_wait_time = 0.0
-        async with self._lock:
-            while True:
+        while True:
+            async with self._lock:
                 self._refill()
 
                 if self._tokens >= tokens:
@@ -89,11 +92,12 @@ class TokenBucket:
                     self._record_metrics(total_wait_time)
                     return
 
-                # Calculate wait time for needed tokens
+                # Calculate wait time — lock is released before sleep
                 deficit = tokens - self._tokens
                 wait_time = deficit / self.rate
-                total_wait_time += wait_time
-                await asyncio.sleep(wait_time)
+
+            total_wait_time += wait_time
+            await asyncio.sleep(wait_time)
 
     def _record_metrics(self, wait_time: float) -> None:
         """Record rate limiter metrics.

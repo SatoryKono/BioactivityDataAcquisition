@@ -15,10 +15,9 @@ __all__ = [
 ]
 
 
-from typing import Any
-
 import polars as pl
 
+from bioetl.domain.types import JsonDict
 from bioetl.domain.value_objects.dq_report import (
     AnomalyDetectionResult,
     AnomalyMetric,
@@ -53,7 +52,7 @@ def _record_count_status(ratio: float) -> DQCheckStatus:
 
 def _build_null_rate_metric(
     df: pl.DataFrame,
-    baseline_stats: dict[str, Any],  # Any: heterogeneous baseline map
+    baseline_stats: JsonDict,  # Any: heterogeneous baseline map
 ) -> StatisticalMetric | None:
     baseline_null_rate = baseline_stats.get("null_rate_ma30")
     if baseline_null_rate is None:
@@ -76,7 +75,7 @@ def _build_null_rate_metric(
 
 def _build_record_count_metric(
     df: pl.DataFrame,
-    baseline_stats: dict[str, Any],  # Any: heterogeneous baseline map
+    baseline_stats: JsonDict,  # Any: heterogeneous baseline map
 ) -> StatisticalMetric | None:
     baseline_count = baseline_stats.get("record_count_ma30")
     if baseline_count is None:
@@ -179,7 +178,7 @@ def _build_record_count_anomaly_metric(
 
 def check_statistical_profile(
     df: pl.DataFrame,
-    baseline_stats: dict[str, Any]  # Any: DQ check values vary by check type
+    baseline_stats: JsonDict  # Any: DQ check values vary by check type
     | None,  # Any: DQ baseline statistics have heterogeneous values
 ) -> StatisticalProfileResult:
     """Compare statistics against baseline (MA30).
@@ -216,7 +215,7 @@ def check_statistical_profile(
 
 def check_anomaly_detection(
     df: pl.DataFrame,
-    baseline_stats: dict[str, Any]  # Any: DQ check values vary by check type
+    baseline_stats: JsonDict  # Any: DQ check values vary by check type
     | None,  # Any: DQ baseline statistics have heterogeneous values
 ) -> AnomalyDetectionResult:
     """Detect anomalies using baseline comparison."""

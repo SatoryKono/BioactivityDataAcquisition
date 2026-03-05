@@ -21,7 +21,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.domain.transformations import safe_float, safe_int
 
@@ -30,12 +30,18 @@ if TYPE_CHECKING:
 
 
 # Type aliases for common converters
-INT: Callable[[Any], int | None] = safe_int  # Any: raw field value from Bronze record
-FLOAT: Callable[[Any], float | None] = safe_float  # Any: raw field value from B...
-STR: Callable[[Any], str] = str  # Any: raw field value from Bronze record
+INT: Callable[[object], int | None] = (
+    safe_int  # object: raw field value from Bronze record
+)
+FLOAT: Callable[[object], float | None] = (
+    safe_float  # object: raw field value from Bronze record
+)
+STR: Callable[[object], str] = str  # object: raw field value from Bronze record
 
 
-def normalize_pmid(value: Any) -> str | None:  # Any: raw PMID value (int, str, or None)
+def normalize_pmid(
+    value: object,
+) -> str | None:  # object: raw PMID value (int, str, or None)
     """Normalize PubMed ID to string format.
 
     Delegates to PubMedId.from_raw() Value Object for validation
@@ -67,7 +73,9 @@ def normalize_pmid(value: Any) -> str | None:  # Any: raw PMID value (int, str, 
     return str(vo) if vo else None
 
 
-PMID: Callable[[Any], str | None] = normalize_pmid  # Any: raw PMID value from Br...
+PMID: Callable[[object], str | None] = (
+    normalize_pmid  # object: raw PMID value from Bronze record
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -89,9 +97,13 @@ class FieldSpec:
 
     source: str
     target: str | None = None
-    converter: Callable[[Any], Any] | None = None  # Any: generic field converte...
+    converter: Callable[[object], object] | None = (
+        None  # object: generic field converter
+    )
     required: bool = False
-    default: Any = None  # Any: heterogeneous default values depending on field type
+    default: object = (
+        None  # object: heterogeneous default values depending on field type
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -120,8 +132,10 @@ class FieldGroup:
     prefix: str = ""
 
 
-# Any: record vals vary
-def map_field(record: BronzeRecord, spec: FieldSpec) -> tuple[str, Any]:
+def map_field(
+    record: BronzeRecord,
+    spec: FieldSpec,
+) -> tuple[str, object]:  # object: field value type varies (str | int | float | None)
     """Map a single field from record according to specification.
 
     Args:
@@ -153,7 +167,7 @@ def map_field(record: BronzeRecord, spec: FieldSpec) -> tuple[str, Any]:
 def map_fields(
     record: BronzeRecord,
     specs: Sequence[FieldSpec],
-) -> dict[str, Any]:  # Any: heterogeneous record values
+) -> JsonDict:  # Any: heterogeneous record values
     """Map multiple fields from record according to specifications.
 
     Args:
@@ -175,7 +189,7 @@ def map_fields(
         >>> map_fields({"activity_id": 123, "value": "5.5", "type": "IC50"}, specs)
         {'activity_id': '123', 'value': 5.5, 'type': 'IC50'}
     """
-    result: dict[str, Any] = {}  # Any: heterogeneous record values
+    result: JsonDict = {}  # Any: heterogeneous record values
 
     for spec in specs:
         target, value = map_field(record, spec)
@@ -187,7 +201,7 @@ def map_fields(
 def map_field_group(
     record: BronzeRecord,
     group: FieldGroup,
-) -> dict[str, Any]:  # Any: heterogeneous record values
+) -> JsonDict:  # Any: heterogeneous record values
     """Map a group of fields with optional prefix.
 
     Args:
@@ -219,7 +233,7 @@ def map_field_group(
 def map_field_groups(
     record: BronzeRecord,
     groups: Sequence[FieldGroup],
-) -> dict[str, Any]:  # Any: heterogeneous record values
+) -> JsonDict:  # Any: heterogeneous record values
     """Map multiple field groups, merging results.
 
     Args:
@@ -229,7 +243,7 @@ def map_field_groups(
     Returns:
         Merged dictionary with all mapped fields.
     """
-    result: dict[str, Any] = {}  # Any: heterogeneous record values
+    result: JsonDict = {}  # Any: heterogeneous record values
 
     for group in groups:
         result.update(map_field_group(record, group))

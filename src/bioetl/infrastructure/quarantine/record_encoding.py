@@ -9,10 +9,9 @@ __all__ = ["MAX_PAYLOAD_SIZE", "calculate_hash", "quote_literal"]
 
 
 import hashlib
-from typing import Any
 
 
-def quote_literal(value: Any) -> str:  # Any: accepts str, int, floa...
+def quote_literal(value: object) -> str:
     """Safely quote a literal value for a Delta Lake predicate.
 
     Args:

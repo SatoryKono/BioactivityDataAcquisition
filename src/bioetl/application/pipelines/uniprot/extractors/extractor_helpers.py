@@ -6,9 +6,11 @@ __all__ = ["ExtractorHelper"]
 
 
 from datetime import date
-from typing import Any, ClassVar
+from typing import ClassVar
 
 import orjson
+
+from bioetl.domain.types import JsonDict
 
 
 class ExtractorHelper:
@@ -24,7 +26,7 @@ class ExtractorHelper:
     }
 
     @staticmethod
-    def serialize_list(value: Any) -> str | None:  # Any: untyped API JSON
+    def serialize_list(value: object) -> str | None:
         """Serialize a list to JSON string.
 
         Args:
@@ -39,7 +41,7 @@ class ExtractorHelper:
         return result
 
     @staticmethod
-    def count_list(value: Any) -> int | None:  # Any: untyped API JSON
+    def count_list(value: object) -> int | None:
         """Count items in a list.
 
         Args:
@@ -55,7 +57,7 @@ class ExtractorHelper:
         return None
 
     @staticmethod
-    def is_reviewed(entry_type: Any) -> bool:  # Any: untyped API JSON
+    def is_reviewed(entry_type: object) -> bool:
         """Check if entry is Swiss-Prot (reviewed).
 
         Args:
@@ -67,11 +69,10 @@ class ExtractorHelper:
         return "Swiss-Prot" in str(entry_type or "")
 
     @classmethod
-    # Any: untyped JSON
     def extract_protein_existence(
         cls,
-        existence: Any,  # Any: untyped API JSON
-    ) -> str | None:  # Any: untyped API JSON
+        existence: object,
+    ) -> str | None:
         """Extract and normalize protein existence level.
 
         Args:
@@ -87,7 +88,7 @@ class ExtractorHelper:
 
     @staticmethod
     def _extract_values_from_list(
-        data: list[dict[str, Any]],  # Any: untyped API JSON record
+        data: list[JsonDict],  # Any: untyped API JSON record
         key: str = "value",  # Any: record vals vary
     ) -> list[str]:
         """Extract values from a list of dictionaries.
@@ -105,7 +106,7 @@ class ExtractorHelper:
     @staticmethod
     # Any: JSON vals
     def extract_short_names(
-        recommended_name: dict[str, Any] | None,  # Any: untyped API JSON record
+        recommended_name: JsonDict | None,  # Any: untyped API JSON record
     ) -> str | None:  # Any: untyped API JSON record
         """Extract short names from recommended name.
 
@@ -124,7 +125,7 @@ class ExtractorHelper:
         return orjson.dumps(values).decode("utf-8") if values else None
 
     @staticmethod
-    def extract_alternative_names(protein_desc: Any) -> str | None:  # Any: untyped JSON
+    def extract_alternative_names(protein_desc: object) -> str | None:
         """Extract alternative protein names.
 
         Args:
@@ -153,7 +154,7 @@ class ExtractorHelper:
     @staticmethod
     # Any: JSON vals
     def extract_ec_numbers(
-        recommended_name: dict[str, Any] | None,  # Any: untyped API JSON record
+        recommended_name: JsonDict | None,  # Any: untyped API JSON record
     ) -> str | None:  # Any: untyped API JSON record
         """Extract EC numbers from recommended name.
 
@@ -172,7 +173,7 @@ class ExtractorHelper:
         return orjson.dumps(values).decode("utf-8") if values else None
 
     @staticmethod
-    def parse_uniprot_date(date_str: Any) -> date | None:  # Any: untyped API JSON
+    def parse_uniprot_date(date_str: object) -> date | None:
         """Parse UniProt date string to datetime.date.
 
         UniProt API returns dates in ISO 8601 format (YYYY-MM-DD).

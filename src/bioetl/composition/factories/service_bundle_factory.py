@@ -33,7 +33,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.base_transformer import BaseTransformer
     from bioetl.application.core.pipeline_services import PipelineService
-    from bioetl.domain.config import RuntimeConfig
+    from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import CachedBronzeContext
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import (
@@ -64,21 +64,21 @@ __all__ = [
 ]
 
 
-def load_pipeline_config(pipeline_name: str):
+def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
     """Load pipeline config via pipeline_factory facade for patch compatibility."""
     from bioetl.composition.factories import pipeline_factory
 
     return pipeline_factory.load_pipeline_config(pipeline_name)
 
 
-def yaml_config_to_domain(*args, **kwargs):
+def yaml_config_to_domain(*args: object, **kwargs: object) -> PipelineConfig:
     """Map YAML config via pipeline_factory facade for patch compatibility."""
     from bioetl.composition.factories import pipeline_factory
 
     return pipeline_factory.yaml_config_to_domain(*args, **kwargs)
 
 
-def compute_config_hash(*args, **kwargs):
+def compute_config_hash(*args: object, **kwargs: object) -> str:
     """Compute config hash via pipeline_factory facade for patch compatibility."""
     from bioetl.composition.factories import pipeline_factory
 
@@ -88,7 +88,7 @@ def compute_config_hash(*args, **kwargs):
 _DEFAULT_BASE_SERVICES_FACTORY = BaseServicesFactory
 
 
-def _resolve_base_services_factory():
+def _resolve_base_services_factory() -> type[BaseServicesFactory]:
     """Resolve BaseServicesFactory with dual-path patch compatibility."""
     if BaseServicesFactory is not _DEFAULT_BASE_SERVICES_FACTORY:
         return BaseServicesFactory

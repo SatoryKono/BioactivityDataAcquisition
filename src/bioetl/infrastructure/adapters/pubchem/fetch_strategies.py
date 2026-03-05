@@ -10,7 +10,7 @@ __all__ = ["PubChemFetchStrategies"]
 
 
 import time
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import pubchempy as pcp
 
@@ -19,7 +19,7 @@ from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.pubchem.constants import PUBCHEM_API_BASE
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator, Callable
+    from collections.abc import AsyncIterator, Awaitable, Callable
 
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.adapters.common.api_request_collector import (
@@ -56,9 +56,7 @@ class PubChemFetchStrategies:
         rate_limiter: TokenBucket,
         circuit_breaker: CircuitBreaker,
         mapper: PubChemEntityMapper,
-        run_in_executor: Callable[
-            ..., Any  # Any: executor wraps sync calls with varying return types
-        ],
+        run_in_executor: Callable[..., Awaitable[object]],
         provider_name: str = "pubchem",
         request_collector: APIRequestCollector | None = None,
     ) -> None:

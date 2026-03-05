@@ -5,8 +5,6 @@ from __future__ import annotations
 __all__ = ["GeneExtractor"]
 
 
-from typing import Any
-
 from bioetl.domain.serialization import serialize_to_json
 
 
@@ -14,7 +12,7 @@ class GeneExtractor:
     """Extracts gene-related data from UniProt records."""
 
     @staticmethod
-    def extract_gene_names(genes: Any) -> list[str]:  # Any: untyped API JSON
+    def extract_gene_names(genes: object) -> list[str]:
         """Extract gene names from genes list.
 
         Args:
@@ -38,7 +36,7 @@ class GeneExtractor:
         return names
 
     @staticmethod
-    def extract_primary_gene(genes: Any) -> str | None:  # Any: untyped API JSON
+    def extract_primary_gene(genes: object) -> str | None:
         """Extract primary gene name.
 
         Args:
@@ -60,7 +58,7 @@ class GeneExtractor:
         return None
 
     @staticmethod
-    def extract_gene_synonyms(genes: Any) -> str | None:  # Any: untyped API JSON
+    def extract_gene_synonyms(genes: object) -> str | None:
         """Extract gene synonyms.
 
         Args:
@@ -90,7 +88,7 @@ class GeneExtractor:
         )
 
     @staticmethod
-    def extract_gene_orf_names(genes: Any) -> str | None:  # Any: untyped API JSON
+    def extract_gene_orf_names(genes: object) -> str | None:
         """Extract ORF names from genes.
 
         Args:

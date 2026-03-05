@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any
 import httpx
 
 from bioetl.domain.exceptions import CriticalError
-from bioetl.domain.types import HealthStatus
+from bioetl.domain.types import HealthStatus, JsonDict
 from bioetl.infrastructure.adapters.chembl.constants import CHEMBL_STATUS_URL
 from bioetl.infrastructure.adapters.http.health import (
     assess_health_from_circuit_breaker,
@@ -178,7 +178,7 @@ class ChemblHealthMixin:
         status_code = getattr(response, "status_code", None)
         return int(status_code) if isinstance(status_code, int) else None
 
-    def get_error_stats(self) -> dict[str, Any]:  # Any: untyped API JSON record
+    def get_error_stats(self) -> JsonDict:  # Any: untyped API JSON record
         """Get error statistics from circuit breaker for monitoring.
 
         Returns:

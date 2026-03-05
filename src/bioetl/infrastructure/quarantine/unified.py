@@ -22,7 +22,7 @@ from deltalake import DeltaTable, write_deltalake
 from deltalake.exceptions import TableNotFoundError
 
 from bioetl.domain.serialization import serialize_to_json
-from bioetl.domain.types import BatchID, QuarantineRecordStatus, RunID
+from bioetl.domain.types import BatchID, JsonDict, QuarantineRecordStatus, RunID
 from bioetl.infrastructure.quarantine.operations import (
     get_statistics,
     inspect_records,
@@ -61,10 +61,10 @@ class UnifiedQuarantine:
         self,
         pipeline: str,
         error_code: str,
-        payload: dict[str, Any],  # Any: quarantine payload has heterogeneous values
+        payload: JsonDict,  # Any: quarantine payload has heterogeneous values
         bronze_batch_id: BatchID,
         run_id: RunID | None = None,
-        metadata: dict[str, Any]  # Any: metadata values are heterogeneous
+        metadata: JsonDict  # Any: metadata values are heterogeneous
         | None = None,
         *,
         ingestion_ts: datetime,
@@ -111,7 +111,7 @@ class UnifiedQuarantine:
 
     def _write_to_delta(
         self,
-        record: dict[str, Any],  # Any: quarantine record has heterogeneous values
+        record: JsonDict,  # Any: quarantine record has heterogeneous values
     ) -> None:  # Any: quarantine record has heterogeneous values
         """Write record to Delta table."""
         arrow_table = pa.Table.from_pylist([record])
@@ -142,7 +142,7 @@ class UnifiedQuarantine:
         limit: int = 100,
         error_code: str | None = None,
         dq_status: QuarantineRecordStatus | None = None,
-    ) -> list[dict[str, Any]]:  # Any: quarantine record has heterogeneous values
+    ) -> list[JsonDict]:  # Any: quarantine record has heterogeneous values
         """Inspect quarantine records.
 
         Args:
@@ -165,7 +165,7 @@ class UnifiedQuarantine:
         max_age_days: int = 7,
         *,
         now: datetime,
-    ) -> Iterator[dict[str, Any]]:  # Any: quarantine record has heterogeneous values
+    ) -> Iterator[JsonDict]:  # Any: quarantine record has heterogeneous values
         """Replay quarantine records for reprocessing.
 
         Args:
@@ -233,7 +233,7 @@ class UnifiedQuarantine:
 
     async def get_stats(
         self, pipeline: str
-    ) -> dict[str, Any]:  # Any: quarantine record has heterogeneous values
+    ) -> JsonDict:  # Any: quarantine record has heterogeneous values
         """Get quarantine statistics for a pipeline.
 
         Args:

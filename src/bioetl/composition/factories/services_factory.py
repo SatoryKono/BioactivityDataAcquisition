@@ -29,7 +29,14 @@ from bioetl.composition.factories.services_builder import (
     extract_pipeline_callbacks,
 )
 from bioetl.composition.factories.storage import StorageContext, StorageFactory
-from bioetl.domain.ports import NoOpMetrics
+from bioetl.domain.ports import (
+    CheckpointPort,
+    LockPort,
+    MetricsPort,
+    NoOpMetrics,
+    QuarantinePort,
+)
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
@@ -38,13 +45,9 @@ from bioetl.infrastructure.quarantine import UnifiedQuarantine
 if TYPE_CHECKING:
     from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
     from bioetl.domain.ports import (
-        CheckpointPort,
         DataSourcePort,
         DQMonitorPort,
-        LockPort,
         LoggerPort,
-        MetricsPort,
-        QuarantinePort,
         SilverValidatorPort,
         TracingPort,
     )
@@ -150,7 +153,7 @@ class BaseServicesFactory:
         logger: LoggerPort,
         dq_monitor: DQMonitorPort | None,
         metadata_coordinator: MetadataCoordinator | None,
-        dq_services: dict[str, Any],  # Any: heterogeneous DQ service instances
+        dq_services: JsonDict,  # Any: heterogeneous DQ service instances
     ) -> PipelineService:
         """Assemble PipelineService from pre-built dependencies."""
         from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
@@ -178,23 +181,40 @@ class BaseServicesFactory:
     @staticmethod
     def _create_lock() -> LockPort:
         """Create in-memory lock for local deployment."""
-        return MemoryLock()
+        lock = MemoryLock()
+        assert isinstance(lock, LockPort), (
+            f"MemoryLock must implement LockPort, got {type(lock)}"
+        )
+        return lock
 
     @staticmethod
     def _create_checkpoint(storage_ctx: StorageContext) -> CheckpointPort:
         """Create local filesystem checkpoint."""
-        return LocalCheckpoint(base_path=storage_ctx.checkpoints_path)
+        checkpoint = LocalCheckpoint(base_path=storage_ctx.checkpoints_path)
+        assert isinstance(checkpoint, CheckpointPort), (
+            f"LocalCheckpoint must implement CheckpointPort, got {type(checkpoint)}"
+        )
+        return checkpoint
 
     @staticmethod
     def _create_quarantine(settings: Settings) -> QuarantinePort:
         """Create unified quarantine storage."""
-        return UnifiedQuarantine(base_path=str(settings.quarantine_path))
+        quarantine = UnifiedQuarantine(base_path=str(settings.quarantine_path))
+        assert isinstance(quarantine, QuarantinePort), (
+            f"UnifiedQuarantine must implement QuarantinePort, got {type(quarantine)}"
+        )
+        return quarantine
 
     @staticmethod
     def _create_metrics(settings: Settings) -> MetricsPort:
         if settings.metrics_enabled:
-            return PrometheusMetrics()
-        return NoOpMetrics()
+            metrics = PrometheusMetrics()
+        else:
+            metrics = NoOpMetrics()
+        assert isinstance(metrics, MetricsPort), (
+            f"Metrics adapter must implement MetricsPort, got {type(metrics)}"
+        )
+        return metrics
 
     @staticmethod
     def _get_output_root(
@@ -210,7 +230,7 @@ class BaseServicesFactory:
         settings: Settings,
         pipeline_config: PipelineYamlConfig,
         logger: LoggerPort,
-    ) -> dict[str, Any]:  # Any: heterogeneous DQ service instances
+    ) -> JsonDict:  # Any: heterogeneous DQ service instances
         """Create DQ analyzers/writer/services when DQ reporting is enabled."""
         return _create_dq_services_impl(settings, pipeline_config, logger)
 

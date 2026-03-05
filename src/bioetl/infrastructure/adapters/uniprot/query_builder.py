@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from bioetl.domain.types import JsonDict
+
 
 def build_uniprot_protein_search_params(
     *,
@@ -13,9 +15,9 @@ def build_uniprot_protein_search_params(
     cursor: str | None,
     size: int,
     fields: tuple[str, ...],
-) -> dict[str, Any]:  # Any: mixed query values (str|int)
+) -> JsonDict:  # Any: mixed query values (str|int)
     """Build UniProt protein search parameters."""
-    params: dict[str, Any] = {  # Any: dynamic payload or structural mixin boundary
+    params: JsonDict = {  # Any: dynamic payload or structural mixin boundary
         "query": query,
         "size": min(size, (limit - fetched) if limit else size),
         "format": "json",

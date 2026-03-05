@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.chembl.fetch_multi_filter_mixin import (
@@ -27,7 +27,7 @@ class ChemblFetchAdapterMixin(
     """Provides ChEMBL pagination, filtering, and retry fetch flows."""
 
     async def _fetch_filtered(
-        self: Any,  # Any: mixin self type
+        self,
         entity_type: str,
         limit: int | None,
         filter_ids: list[str],
@@ -55,7 +55,7 @@ class ChemblFetchAdapterMixin(
                     return
 
     async def _fetch_standard(
-        self: Any,  # Any: mixin self type
+        self,
         entity_type: str,
         limit: int | None,
         offset: int = 0,
@@ -103,7 +103,7 @@ class ChemblFetchAdapterMixin(
                     return
 
     async def fetch(
-        self: Any,  # Any: mixin self type
+        self,
         entity_type: str,
         limit: int | None = None,
         query: str | None = None,
@@ -127,7 +127,7 @@ class ChemblFetchAdapterMixin(
             yield record
 
     async def fetch_filtered(
-        self: Any,  # Any: mixin self type
+        self,
         entity_type: str,
         filter_ids: list[str],
         filter_field: str,
@@ -143,7 +143,7 @@ class ChemblFetchAdapterMixin(
             yield record
 
     async def fetch_filtered_with_fallback(
-        self: Any,  # Any: mixin self type
+        self,
         entity_type: str,
         filter_ids: list[str],
         filter_field: str,

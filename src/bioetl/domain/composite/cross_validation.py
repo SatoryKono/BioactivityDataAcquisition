@@ -12,7 +12,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Any
 
 __all__ = [
     "ComparisonMethod",
@@ -112,8 +111,8 @@ class FieldMismatch:
     """
 
     field_name: str
-    seed_value: Any  # Any: heterogeneous record values (str, int, float, None, etc.)
-    enricher_value: Any  # Any: record vals vary
+    seed_value: object
+    enricher_value: object
     method: ComparisonMethod
 
 

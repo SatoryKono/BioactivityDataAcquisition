@@ -246,8 +246,10 @@ class DataQualityService:
 
     def _process_anomalies(
         self,
-        anomalies: list[Any],  # Any: DQ values vary by check type
-    ) -> bool:  # Any: DQ anomaly type varies by check
+        anomalies: list[
+            Any
+        ],  # Any: DQ anomaly objects with .severity and .anomaly_type attrs
+    ) -> bool:
         """Process detected anomalies and check for critical ones.
 
         Args:
@@ -263,11 +265,10 @@ class DataQualityService:
                 has_critical = True
         return has_critical
 
-    # Any: DQMonitorPort returns ...
     def _process_single_anomaly(
         self,
-        anomaly: Any,  # Any: DQ anomaly type varies by check
-    ) -> None:  # Any: DQ anomaly type varies by check
+        anomaly: Any,  # Any: DQ anomaly object with .severity and .anomaly_type attrs
+    ) -> None:
         """Log and track a single anomaly.
 
         Args:

@@ -10,6 +10,8 @@ import pandera as pandera_pa
 from bioetl.domain.medallion import GoldWriteMode
 
 if TYPE_CHECKING:
+    from datetime import datetime
+
     from pandera.polars import DataFrameSchema
 
     from bioetl.domain.types import GoldRecord, ScdConfig
@@ -49,7 +51,7 @@ class GoldWriterValidationMixin:
         self,
         mode: GoldWriteMode,
         scd_config: ScdConfig | None,
-        ingestion_ts: Any,  # Any: datetime or None at validation
+        ingestion_ts: datetime | None,
     ) -> None:
         """Validate SCD2-specific requirements."""
         if mode != GoldWriteMode.SCD2:

@@ -17,11 +17,11 @@ __all__ = [
 ]
 
 
-from typing import Any
+from bioetl.domain.types import JsonDict
 
 
 def extract_authors(
-    authors: list[dict[str, Any]] | None,  # Any: untyped API JSON record
+    authors: list[JsonDict] | None,  # Any: untyped API JSON record
 ) -> list[str]:  # Any: untyped API JSON record
     """Extract author display names from authors list.
 
@@ -54,7 +54,7 @@ def extract_authors(
 
 
 def extract_author_ids(
-    authors: list[dict[str, Any]] | None,  # Any: untyped API JSON record
+    authors: list[JsonDict] | None,  # Any: untyped API JSON record
 ) -> list[str]:  # Any: untyped API JSON record
     """Extract author IDs from authors list.
 
@@ -81,7 +81,7 @@ def extract_author_ids(
 
 
 def extract_author_s2_ids(
-    authors: list[dict[str, Any]] | None,  # Any: untyped API JSON record
+    authors: list[JsonDict] | None,  # Any: untyped API JSON record
 ) -> list[str]:  # Any: untyped API JSON record
     """Extract Semantic Scholar author IDs from authors list.
 
@@ -116,7 +116,7 @@ def extract_author_s2_ids(
 
 
 def extract_author_orcids(
-    authors: list[dict[str, Any]] | None,  # Any: untyped API JSON record
+    authors: list[JsonDict] | None,  # Any: untyped API JSON record
 ) -> list[str]:  # Any: untyped API JSON record
     """Extract ORCID identifiers from authors list.
 
@@ -157,7 +157,7 @@ def extract_author_orcids(
 
 
 def extract_author_h_indices(
-    authors: list[dict[str, Any]] | None,  # Any: untyped API JSON record
+    authors: list[JsonDict] | None,  # Any: untyped API JSON record
 ) -> list[int | None]:  # Any: untyped API JSON record
     """Extract h-index values from authors list.
 
@@ -194,7 +194,7 @@ def extract_author_h_indices(
 
 
 def extract_affiliations(
-    authors: list[dict[str, Any]] | None,  # Any: untyped API JSON record
+    authors: list[JsonDict] | None,  # Any: untyped API JSON record
 ) -> list[str]:  # Any: untyped API JSON record
     """Extract affiliations from authors list.
 

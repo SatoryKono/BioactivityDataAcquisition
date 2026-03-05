@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any, cast
 
 from bioetl.domain.config import DQConfig
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config_merge import ListMergeFn, config_merge
 from bioetl.infrastructure.schemas.dq_config import DQConfigFile
 
@@ -46,7 +47,7 @@ class DQConfigLoader:
 
     def _load_provider_layer(
         self, provider: str
-    ) -> dict[str, Any]:  # Any: YAML DQ config has heterogeneous values
+    ) -> JsonDict:  # Any: YAML DQ config has heterogeneous values
         """Load provider DQ layer from unified provider config."""
         unified_provider_path = self._configs_root / "providers" / f"{provider}.yaml"
         if unified_provider_path.exists():
@@ -71,7 +72,7 @@ class DQConfigLoader:
 
     def _load_entity_layer(
         self, provider: str, entity: str
-    ) -> dict[str, Any]:  # Any: YAML DQ config has heterogeneous values
+    ) -> JsonDict:  # Any: YAML DQ config has heterogeneous values
         """Load entity DQ layer from unified entity config."""
         unified_entity_path = (
             self._configs_root / "entities" / provider / f"{entity}.yaml"
@@ -100,9 +101,9 @@ class DQConfigLoader:
         self,
         provider: str,
         entity: str,
-        inline_overrides: dict[str, Any]  # Any: YAML config has heterogeneous values
+        inline_overrides: JsonDict  # Any: YAML config has heterogeneous values
         | None,  # Any: YAML DQ config has heterogeneous values
-    ) -> dict[str, Any]:  # Any: YAML DQ config has heterogeneous values
+    ) -> JsonDict:  # Any: YAML DQ config has heterogeneous values
         """Build merged config from defaults → provider → entity → inline."""
         merged = self._load_defaults_layer()
         if not merged:
@@ -128,7 +129,7 @@ class DQConfigLoader:
 
     def _load_defaults_layer(
         self,
-    ) -> dict[str, Any]:  # Any: YAML DQ config has heterogeneous values
+    ) -> JsonDict:  # Any: YAML DQ config has heterogeneous values
         """Load DQ defaults from consolidated base path."""
         base_defaults_path = self._base_root / "quality.yaml"
         if base_defaults_path.exists():
@@ -140,7 +141,7 @@ class DQConfigLoader:
         self,
         provider: str,
         entity: str,
-        inline_overrides: dict[str, Any]  # Any: YAML config has heterogeneous values
+        inline_overrides: JsonDict  # Any: YAML config has heterogeneous values
         | None = None,  # Any: YAML DQ config has heterogeneous values
     ) -> DQConfig:
         """Load merged DQ config for provider/entity.
@@ -188,7 +189,7 @@ class DQConfigLoader:
 
     def _load_yaml(
         self, path: Path
-    ) -> dict[str, Any]:  # Any: YAML DQ config has heterogeneous values
+    ) -> JsonDict:  # Any: YAML DQ config has heterogeneous values
         """Load YAML file, return empty dict if not exists.
 
         Args:
@@ -201,9 +202,9 @@ class DQConfigLoader:
 
     def _deep_merge(
         self,
-        base: dict[str, Any],  # Any: YAML DQ config has heterogeneous values
-        override: dict[str, Any],  # Any: YAML DQ config has heterogeneous values
-    ) -> dict[str, Any]:  # Any: YAML DQ config has heterogeneous values
+        base: JsonDict,  # Any: YAML DQ config has heterogeneous values
+        override: JsonDict,  # Any: YAML DQ config has heterogeneous values
+    ) -> JsonDict:  # Any: YAML DQ config has heterogeneous values
         """Deep merge two dicts.
 
         Rules:
@@ -245,20 +246,20 @@ class DQConfigLoader:
 
         return self._merge_validation_lists(
             cast(
-                list[dict[str, Any]],  # Any: DQ check values vary by check type
+                list[JsonDict],  # Any: DQ check values vary by check type
                 base,  # Any: DQ check values vary by check type
             ),  # Any: YAML config has heterogeneous values
             cast(
-                list[dict[str, Any]],  # Any: DQ check values vary by check type
+                list[JsonDict],  # Any: DQ check values vary by check type
                 override,  # Any: DQ check values vary by check type
             ),  # Any: YAML config has heterogeneous values
         )
 
     def _merge_validation_lists(
         self,
-        base: list[dict[str, Any]],  # Any: YAML DQ config has heterogeneous values
-        override: list[dict[str, Any]],  # Any: YAML DQ config has heterogeneous values
-    ) -> list[dict[str, Any]]:  # Any: YAML DQ config has heterogeneous values
+        base: list[JsonDict],  # Any: YAML DQ config has heterogeneous values
+        override: list[JsonDict],  # Any: YAML DQ config has heterogeneous values
+    ) -> list[JsonDict]:  # Any: YAML DQ config has heterogeneous values
         """Merge validation lists, avoiding duplicates by name/field.
 
         Override entries with same name/field replace base entries.
@@ -272,7 +273,7 @@ class DQConfigLoader:
         """
 
         def get_key(
-            item: dict[str, Any],  # Any: YAML config has heterogeneous values
+            item: JsonDict,  # Any: YAML config has heterogeneous values
         ) -> str:  # Any: YAML DQ config has heterogeneous values
             """Get unique key for validation item.
 
@@ -295,7 +296,7 @@ class DQConfigLoader:
 
         # Build result map, override entries replace base entries with same key
         result_map: dict[
-            str, dict[str, Any]  # Any: YAML config has heterogeneous values
+            str, JsonDict  # Any: YAML config has heterogeneous values
         ] = {}  # Any: YAML DQ config has heterogeneous values
         for item in base:
             key = get_key(item)
@@ -309,8 +310,8 @@ class DQConfigLoader:
 
     def _normalize_to_file_format(
         self,
-        merged: dict[str, Any],  # Any: YAML DQ config has heterogeneous values
-    ) -> dict[str, Any]:  # Any: YAML DQ config has heterogeneous values
+        merged: JsonDict,  # Any: YAML DQ config has heterogeneous values
+    ) -> JsonDict:  # Any: YAML DQ config has heterogeneous values
         """Normalize merged config to DQConfigFile-compatible shape."""
         result = copy.deepcopy(merged)
 

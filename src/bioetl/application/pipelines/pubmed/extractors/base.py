@@ -9,7 +9,6 @@ __all__ = ["BaseFieldExtractor"]
 
 
 from abc import ABC, abstractmethod
-from typing import Any
 from xml.etree.ElementTree import Element
 
 
@@ -30,7 +29,9 @@ class BaseFieldExtractor(ABC):
     """
 
     @abstractmethod
-    def extract(self, element: Element | None) -> Any:  # Any: XML-derived dict values
+    def extract(
+        self, element: Element | None
+    ) -> object:  # object: XML-derived values (str, list, dict, None)
         """Extract raw data from an XML element.
 
         Args:
@@ -42,7 +43,7 @@ class BaseFieldExtractor(ABC):
         ...
 
     @abstractmethod
-    def normalize(self, raw_value: Any) -> Any:  # Any: XML-derived dict values
+    def normalize(self, raw_value: object) -> object:  # object: XML-derived values
         """Normalize an extracted value.
 
         Args:
@@ -53,7 +54,7 @@ class BaseFieldExtractor(ABC):
         """
         ...
 
-    def process(self, element: Element | None) -> Any:  # Any: XML-derived dict values
+    def process(self, element: Element | None) -> object:  # object: XML-derived values
         """Template method: extract → normalize.
 
         Performs the full extraction and normalization cycle.

@@ -1,7 +1,7 @@
 # BioETL Makefile
 # Production-ready ETL system for bioactivity data
 
-.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-local-artifacts sanitize-local clean-preflight clean-all diagram-preflight lint-diagrams report-diagrams-policy validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png render-diagrams-descriptions-docx render-diagrams-descriptions-pdf run-diagram-docs-agent check-diagrams-visibility check-diagrams-pdf-bounds diagrams-all report-diagram-padding docs-lint
+.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-local-artifacts sanitize-local clean-preflight clean-all diagram-preflight lint-diagrams report-diagrams-policy validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png render-diagrams-descriptions-docx render-diagrams-descriptions-pdf run-diagram-docs-agent check-diagrams-visibility check-diagrams-pdf-bounds diagrams-all report-diagram-padding docs-lint docs-quality docs-docstrings docs-drift
 .DEFAULT_GOAL := help
 
 # Detect uv availability (preferred package manager)
@@ -485,6 +485,19 @@ docs-lint: ## Run documentation guardrails (links + config conventions + drift c
 	$(PY_RUN) scripts/check_doc_links.py --links
 	$(PY_RUN) scripts/check_doc_links.py --configs
 	$(PY_RUN) scripts/check_doc_links.py --legacy-paths
+
+docs-docstrings: ## Check docstring coverage (modules ≥100%, classes ≥95%, functions ≥90%)
+	@echo "$(BLUE)Checking docstring coverage...$(NC)"
+	$(PY_RUN) scripts/check_docstring_coverage.py
+	@echo "$(GREEN)Docstring coverage check complete!$(NC)"
+
+docs-drift: ## Detect documentation drift (code ↔ docs synchronization)
+	@echo "$(BLUE)Running documentation drift detection...$(NC)"
+	$(PY_RUN) scripts/check_doc_drift.py
+	@echo "$(GREEN)Drift detection complete!$(NC)"
+
+docs-quality: docs-lint docs-docstrings docs-drift ## Run all documentation quality checks
+	@echo "$(GREEN)All documentation quality checks passed!$(NC)"
 
 schema-artifacts: ## Generate canonical schema artifacts (registry + contracts)
 	@echo "$(BLUE)Generating schema artifacts...$(NC)"

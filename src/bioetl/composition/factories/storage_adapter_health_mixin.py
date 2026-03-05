@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
-from bioetl.domain.types import HealthStatus
+from bioetl.domain.types import HealthStatus, JsonDict
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
@@ -72,7 +72,7 @@ class StorageAdapterHealthMixin:
         self,
         silver_table: str,
         gold_table: str | None = None,
-    ) -> dict[str, Any]:  # Any: factory wiring; concrete types resolved at runtime
+    ) -> JsonDict:  # Any: factory wiring; concrete types resolved at runtime
         """Preview what would be cleared without actual deletion.
 
         Implements StoragePort.preview_cleanup().
@@ -85,9 +85,7 @@ class StorageAdapterHealthMixin:
         Returns:
             Dict with layer info including paths and file counts.
         """
-        result: dict[
-            str, Any  # Any: record/metadata values are heterogeneous
-        ] = {
+        result: JsonDict = {  # preview payload values are heterogeneous
             "silver": self._preview_layer(self.silver, silver_table),
             "gold": None,
             "total_files": 0,
@@ -105,7 +103,7 @@ class StorageAdapterHealthMixin:
         self,
         writer: SilverWriter | GoldWriter,
         table_name: str,
-    ) -> dict[str, Any]:  # Any: factory wiring; concrete types resolved at runtime
+    ) -> JsonDict:  # Any: factory wiring; concrete types resolved at runtime
         """Count files in a layer without deletion.
 
         Args:

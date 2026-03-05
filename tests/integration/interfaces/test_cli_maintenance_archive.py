@@ -13,6 +13,8 @@ import pytest
 from bioetl.interfaces.cli import cli
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from click.testing import CliRunner
 
 
@@ -149,6 +151,7 @@ class TestCliMaintenanceArchivePathValidation:
         self,
         cli_runner: CliRunner,
         mock_lifecycle_service: MagicMock,
+        tmp_path: "Path",
     ):
         """Test archive with absolute target path."""
         with patch(
@@ -157,7 +160,12 @@ class TestCliMaintenanceArchivePathValidation:
         ):
             result = cli_runner.invoke(
                 cli,
-                ["maintenance", "archive", "chembl.activity", "/var/archive/delta"],
+                [
+                    "maintenance",
+                    "archive",
+                    "chembl.activity",
+                    str(tmp_path / "archive" / "delta"),
+                ],
             )
 
         assert result.exit_code == 0

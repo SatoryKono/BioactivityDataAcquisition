@@ -32,10 +32,11 @@ from __future__ import annotations
 
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Self
+from types import TracebackType
+from typing import TYPE_CHECKING, Self
 
 from bioetl.domain.exceptions import BioETLError, CircuitBreakerOpenError
-from bioetl.domain.types import CircuitBreakerState, HealthStatus
+from bioetl.domain.types import CircuitBreakerState, HealthStatus, JsonDict
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
@@ -99,7 +100,7 @@ class CircuitBreakerDataSourceDecorator:
         self,
         exc_type: type[BaseException] | None,
         exc_val: BaseException | None,
-        exc_tb: Any,  # Any: traceback type from __aexit__ protocol
+        exc_tb: TracebackType | None,
     ) -> None:
         """Exit async context by delegating to wrapped data source."""
         await self.data_source.__aexit__(exc_type, exc_val, exc_tb)
@@ -154,7 +155,7 @@ class CircuitBreakerDataSourceDecorator:
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
         offset: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:  # Any: untyped API JSON record
+    ) -> AsyncIterator[JsonDict]:  # Any: untyped API JSON record
         """Fetch records with circuit breaker protection.
 
         Fails fast if circuit is open. On success, the circuit remains closed.
@@ -208,7 +209,7 @@ class CircuitBreakerDataSourceDecorator:
         filter_ids: list[str] | None,
         filter_field: str | None,
         offset: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:  # Any: untyped API JSON record
+    ) -> AsyncIterator[JsonDict]:  # Any: untyped API JSON record
         """Internal fetch implementation with circuit breaker protection.
 
         The circuit breaker's call() method expects an awaitable function,

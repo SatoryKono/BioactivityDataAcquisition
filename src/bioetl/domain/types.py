@@ -33,6 +33,7 @@ __all__ = [
     "ExecutionContext",
     "HealthReport",
     "HealthStatus",
+    "JsonDict",
     "PreflightReport",
     "PublicationType",
     "QuarantineRecordStatus",
@@ -59,17 +60,21 @@ BatchID = NewType("BatchID", UUID)
 ArrowSchema: TypeAlias = "pyarrow.Schema"
 """PyArrow schema type alias (runtime: pyarrow.Schema, import-time: string)."""
 
-BronzeRecord: TypeAlias = dict[str, Any]  # Any: raw API JSON has heterogeneous values
+JsonDict: TypeAlias = dict[str, Any]  # Any: JSON payloads have heterogeneous values
+"""Type alias for JSON-like dictionaries with string keys and heterogeneous values.
+
+Use instead of ``dict[str, Any]`` for data originating from external APIs,
+configuration files (YAML/JSON), or any other untyped key-value mapping.
+Reduces visual type-debt while preserving semantic clarity.
+"""
+
+BronzeRecord: TypeAlias = JsonDict  # raw API JSON has heterogeneous values
 """Untyped dictionary representing a raw record from the source."""
 
-GoldRecord: TypeAlias = dict[
-    str, Any  # Any: heterogeneous scalar types before Pandera coercion
-]
+GoldRecord: TypeAlias = JsonDict  # heterogeneous scalar types before Pandera coercion
 """Record after Silver→Gold transform, before schema validation."""
 
-MetaDict: TypeAlias = dict[
-    str, Any  # Any: values are heterogeneous
-]  # Any: freeform metadata (str|int|float|datetime|None)
+MetaDict: TypeAlias = JsonDict  # freeform metadata (str|int|float|datetime|None)
 """Freeform metadata bag used in aggregates, audit entries, events."""
 
 ScdConfig: TypeAlias = dict[str, str]

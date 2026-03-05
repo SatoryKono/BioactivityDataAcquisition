@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Literal, cast
+from typing import TYPE_CHECKING, Literal, cast
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -81,7 +81,7 @@ class StorageAdapterWriteMixin:
         self,
         table_name: str,
         records: list[
-            dict[str, Any]  # Any: record/metadata values are heterogeneous
+            JsonDict  # Any: record/metadata values are heterogeneous
         ],
         primary_keys: list[str],
         schema: ArrowSchema,
@@ -132,19 +132,18 @@ class StorageAdapterWriteMixin:
         self,
         table_name: str,
         records: list[
-            dict[str, Any]  # Any: record/metadata values are heterogeneous
+            JsonDict  # Any: record/metadata values are heterogeneous
         ],
         schema: object,
         primary_keys: list[str] | None = None,
         mode: Literal["overwrite", "append", "scd2"] = "overwrite",
         *,
-        scd_config: dict[str, Any]  # Any: record/metadata values are heterogeneous
+        scd_config: JsonDict  # Any: record/metadata values are heterogeneous
         | None = None,
         column_order: list[str] | None = None,
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
-        silver_refs: list[Any]  # Any: Delta Lake reference types vary
-        | None = None,
+        silver_refs: list[SilverWriteResult] | None = None,
     ) -> None:
         """Write aggregated records to Gold layer.
 

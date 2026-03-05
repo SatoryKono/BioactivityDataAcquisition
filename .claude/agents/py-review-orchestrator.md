@@ -1,7 +1,7 @@
 ---
 name: py-review-orchestrator
 description: "Hierarchical Code Review Agent for BioETL"
-model: claude-3-5-sonnet-20241022
+model: sonnet
 ---
 
 # py-review-orchestrator — Hierarchical Code Review Agent

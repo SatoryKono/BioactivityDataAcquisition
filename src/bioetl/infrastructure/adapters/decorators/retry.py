@@ -32,7 +32,8 @@ from __future__ import annotations
 import asyncio
 from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Self
+from types import TracebackType
+from typing import TYPE_CHECKING, Self
 
 from bioetl.domain.exceptions import (
     CircuitBreakerOpenError,
@@ -40,7 +41,7 @@ from bioetl.domain.exceptions import (
     RetryExhaustedError,
 )
 from bioetl.domain.resilience import RetryConfig
-from bioetl.domain.types import HealthStatus
+from bioetl.domain.types import HealthStatus, JsonDict
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
@@ -99,7 +100,7 @@ class RetryingDataSourceDecorator:
         self,
         exc_type: type[BaseException] | None,
         exc_val: BaseException | None,
-        exc_tb: Any,  # Any: traceback type from __aexit__ protocol
+        exc_tb: TracebackType | None,
     ) -> None:
         """Exit async context by delegating to wrapped data source."""
         await self.data_source.__aexit__(exc_type, exc_val, exc_tb)
@@ -206,7 +207,7 @@ class RetryingDataSourceDecorator:
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
         offset: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:  # Any: untyped API JSON record
+    ) -> AsyncIterator[JsonDict]:  # Any: untyped API JSON record
         """Fetch records with retry logic.
 
         Retries the entire fetch operation on recoverable errors.

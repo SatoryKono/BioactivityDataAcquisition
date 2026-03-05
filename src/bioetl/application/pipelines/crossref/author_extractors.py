@@ -14,7 +14,7 @@ from __future__ import annotations
 __all__ = ["extract_author_details", "extract_author_orcids"]
 
 
-from typing import Any
+from bioetl.domain.types import JsonDict
 
 
 def _normalize_orcid(orcid_value: str | None) -> str | None:
@@ -41,7 +41,7 @@ def _normalize_orcid(orcid_value: str | None) -> str | None:
 
 
 def _extract_author_sequence(
-    author: dict[str, Any],  # Any: raw Crossref API JSON
+    author: JsonDict,  # Any: raw Crossref API JSON
 ) -> str | None:
     """Extract and validate author sequence field."""
     sequence = author.get("sequence")
@@ -52,7 +52,7 @@ def _extract_author_sequence(
 
 
 def _extract_author_affiliations_list(
-    author: dict[str, Any],  # Any: raw Crossref API JSON
+    author: JsonDict,  # Any: raw Crossref API JSON
 ) -> list[str]:
     """Extract affiliations list from author object."""
     affiliations: list[str] = []
@@ -69,8 +69,8 @@ def _extract_author_affiliations_list(
 
 
 def _build_author_detail(
-    author: dict[str, Any],  # Any: raw Crossref API JSON
-) -> dict[str, Any] | None:  # Any: raw Crossref API JSON
+    author: JsonDict,  # Any: raw Crossref API JSON
+) -> JsonDict | None:  # Any: raw Crossref API JSON
     """Build author detail dict from raw author object."""
     given = author.get("given", "").strip() or None
     family = author.get("family", "").strip() or None
@@ -100,8 +100,8 @@ def _build_author_detail(
 
 
 def extract_author_details(
-    publication: dict[str, Any],  # Any: raw Crossref API JSON
-) -> list[dict[str, Any]]:  # Any: raw Crossref API JSON
+    publication: JsonDict,  # Any: raw Crossref API JSON
+) -> list[JsonDict]:  # Any: raw Crossref API JSON
     """Extract full author details from CrossRef publication.
 
     Args:
@@ -113,7 +113,7 @@ def extract_author_details(
 
     """
     author_details: list[
-        dict[str, Any]  # Any: raw Crossref API JSON
+        JsonDict  # Any: raw Crossref API JSON
     ] = []
     for author in publication.get("author", []):
         if not isinstance(author, dict):
@@ -125,7 +125,7 @@ def extract_author_details(
 
 
 def extract_author_orcids(
-    publication: dict[str, Any],  # Any: raw Crossref API JSON
+    publication: JsonDict,  # Any: raw Crossref API JSON
 ) -> list[str]:
     """Extract list of ORCID identifiers from CrossRef publication.
 

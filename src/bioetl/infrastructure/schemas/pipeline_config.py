@@ -14,6 +14,8 @@ from __future__ import annotations
 import re
 from typing import Any, Literal
 
+from bioetl.domain.types import JsonDict
+
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -432,7 +434,7 @@ class PipelineYamlConfig(BaseModel):
         "When set, filter config is loaded from the hierarchical filter system. "
         "Example: ../../entities/chembl/activity.yaml",
     )
-    filter_rules: dict[str, Any] | None = (  # Any: YAML config has heterogeneous values
+    filter_rules: JsonDict | None = (  # Any: YAML config has heterogeneous values
         Field(  # Any: YAML config has heterogeneous values
             default=None,
             description="Inline filter overrides. Applied on top of filter_config_file. "

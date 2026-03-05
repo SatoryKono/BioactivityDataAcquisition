@@ -16,12 +16,12 @@ Provider-specific fields (pmc_id, journal_name_short, etc.) are defined here.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 from pydantic import Field as PydanticField
 
 from bioetl.domain.entities.publication_base import PublicationEntityBase
+from bioetl.domain.types import JsonDict
 
 # === Pydantic DTO Model ===
 
@@ -108,11 +108,9 @@ class ArticleRecord(BaseModel):
     gene_symbols: list[str] = PydanticField(
         default_factory=list, description="Gene symbols from GeneSymbolList"
     )
-    databanks: list[dict[str, Any]] = (  # Any: nested API JSON has heterogeneous values
-        PydanticField(  # Any: nested API JSON has heterogeneous values
-            default_factory=list,
-            description="Data bank references (list of {databank_name, accession_numbers})",
-        )
+    databanks: list[JsonDict] = PydanticField(
+        default_factory=list,
+        description="Data bank references (list of {databank_name, accession_numbers})",
     )
 
     # Additional metadata
@@ -198,11 +196,7 @@ class PubMedPublicationEntity(PublicationEntityBase):
     # PubMed-specific chemical and genetic data
     chemicals: list[str] = field(default_factory=list)  # ChemicalList/NameOfSubstance
     gene_symbols: list[str] = field(default_factory=list)  # GeneSymbolList
-    databanks: list[dict[str, Any]] = (  # Any: nested API JSON has heterogeneous values
-        field(  # Any: nested API JSON has heterogeneous values
-            default_factory=list
-        )
-    )  # DataBankList  # Any: nested API JSON has heterogeneous values
+    databanks: list[JsonDict] = field(default_factory=list)  # DataBankList
 
     # PubMed-specific metadata
     country: str | None = None

@@ -7,10 +7,10 @@ Topics provide a 4-level hierarchy: domain -> field -> subfield -> topic.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
 
 from bioetl.domain.entities.publication_base import PublicationEntityBase
 from bioetl.domain.schemas.common.publication_base import LOOKUP_METHODS
+from bioetl.domain.types import JsonDict
 
 # === Dataclass Domain Entity ===
 
@@ -37,24 +37,15 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
 
     # Topics (hierarchical classification - replaces deprecated concepts)
     # Each topic dict has: id, display_name, score, subfield, field, domain
-    subject_topics: list[
-        dict[str, Any]  # Any: nested API JSON has heterogeneous values
-    ] = field(default_factory=list)
+    subject_topics: list[JsonDict] = field(default_factory=list)
 
     # Primary topic (single most relevant topic for quick categorization)
     # Dict with: id, display_name, score, subfield, field, domain
-    primary_topic: (
-        dict[
-            str, Any  # Any: nested API JSON has heterogeneous values
-        ]
-        | None
-    ) = None
+    primary_topic: JsonDict | None = None
 
     # Grants/funding information
     # Each grant dict has: funder, funder_display_name, award_id
-    grants: list[
-        dict[str, Any]  # Any: nested API JSON has heterogeneous values
-    ] = field(default_factory=list)
+    grants: list[JsonDict] = field(default_factory=list)
 
     # MeSH terms (Medical Subject Headings)
     subject_mesh: list[str] = field(default_factory=list)

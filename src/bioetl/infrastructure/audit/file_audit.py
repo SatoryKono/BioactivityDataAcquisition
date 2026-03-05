@@ -248,7 +248,7 @@ class FileAuditAdapter:
 
     def _parse_entry(
         self,
-        data: dict[str, Any],  # Any: audit entry fields have heterogeneous values
+        data: JsonDict,  # Any: audit entry fields have heterogeneous values
     ) -> AuditEntry:  # Any: audit entry fields have heterogeneous values
         """Parse a dictionary into an AuditEntry.
 

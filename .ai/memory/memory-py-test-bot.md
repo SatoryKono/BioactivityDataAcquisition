@@ -181,7 +181,7 @@ pytest tests/integration/ --vcr-record=none -v
 |-------|--------|
 | Plan ready (py-plan-bot) | -> test-bot (phase=baseline) |
 | Baseline FAIL | -> py-debug-bot with FAIL-* report |
-| Code complete (py-code-bot/direct) | -> test-bot (phase=final) |
+| Code complete (orchestrator/direct) | -> test-bot (phase=final) |
 | Final FAIL | -> py-debug-bot with FAIL-* report |
 | Fix applied (py-debug-bot) | -> test-bot (phase=retest) |
 | All tests pass | -> py-doc-bot + py-audit-bot (final) |

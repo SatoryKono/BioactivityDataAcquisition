@@ -25,6 +25,7 @@ from deltalake import DeltaTable
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
 from bioetl.domain.exceptions import TableNotFoundError
+from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -101,7 +102,7 @@ class RetentionManager:
             tuple[str, str, Any]  # Any: Delta Lake partition filter values vary
         ]  # Any: Delta Lake partition filter values vary
         | None = None,  # Any: Delta Lake filter value type varies
-    ) -> dict[str, Any]:  # Any: compaction result metrics
+    ) -> JsonDict:  # Any: compaction result metrics
         """Optimize table layout through file compaction.
 
         Compacts small files into larger ones for better query performance.
@@ -137,7 +138,7 @@ class RetentionManager:
 
     async def get_table_info(
         self, table_name: str
-    ) -> dict[str, Any]:  # Any: record/metadata values are heterogeneous
+    ) -> JsonDict:  # Any: record/metadata values are heterogeneous
         """Get metadata about a Delta table.
 
         Args:
