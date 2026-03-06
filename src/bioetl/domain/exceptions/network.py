@@ -16,6 +16,8 @@ retry with exponential backoff is appropriate (per RULES.md §3.1.3).
 
 from __future__ import annotations
 
+from typing import Any, cast
+
 from bioetl.domain.exceptions.base import RecoverableError
 from bioetl.domain.types import ErrorType
 
@@ -91,58 +93,6 @@ class TimeoutError(RecoverableError):
         if timeout_seconds:
             msg += f" (timeout: {timeout_seconds}s)"
         super().__init__(msg)
-
-
-class RateLimitError(RecoverableError):
-    """Raised when API rate limit is exceeded.
-
-    The request should be retried after the specified delay.
-
-    Attributes:
-        provider: Name of the provider that imposed the rate limit.
-        retry_after: Seconds to wait before retrying.
-
-    Example:
-        >>> raise RateLimitError("chembl", retry_after=60.0)
-    """
-
-    error_type = ErrorType.RATE_LIMIT
-
-    def __init__(
-        self,
-        provider: str | None = None,
-        retry_after: float = 60.0,
-        *,
-        message: str | None = None,
-        service_name: str | None = None,
-    ) -> None:
-        """Initialize RateLimitError.
-
-        Args:
-            provider: Name of the provider that imposed the rate limit.
-            retry_after: Seconds to wait before retrying.
-        """
-        if message is None and service_name is None:
-            if provider is None:
-                raise ValueError("provider is required for RateLimitError")
-            self.provider = provider
-            self.retry_after = retry_after
-            super().__init__(
-                f"Rate limit exceeded for {provider}. Retry after {retry_after}s"
-            )
-            return
-
-        resolved_service = service_name if service_name is not None else provider
-        resolved_message = (
-            message
-            if message is not None
-            else (provider if provider is not None else "Rate limit exceeded")
-        )
-        self.provider = resolved_service
-        self.service_name = resolved_service
-        self.status_code = 429
-        self.retry_after = retry_after
-        super().__init__(resolved_message)
 
 
 class CircuitBreakerOpenError(RecoverableError):
@@ -345,6 +295,47 @@ class ServiceUnavailableError(ExternalServiceError):
         )
 
 
+class RateLimitError(ExternalServiceError):
+    """Raised when provider-side rate limit is exceeded."""
+
+    error_type = ErrorType.RATE_LIMIT
+
+    def __init__(
+        self,
+        provider: str | None = None,
+        retry_after: float = 60.0,
+        *,
+        message: str | None = None,
+        service_name: str | None = None,
+    ) -> None:
+        """Initialize unified RateLimitError."""
+        if message is None and service_name is None:
+            if provider is None:
+                raise ValueError("provider is required for RateLimitError")
+            self.provider = provider
+            self.retry_after = retry_after
+            RecoverableError.__init__(
+                self,
+                f"Rate limit exceeded for {provider}. Retry after {retry_after}s",
+            )
+            return
+
+        resolved_service = service_name if service_name is not None else provider
+        resolved_message = (
+            message
+            if message is not None
+            else (provider if provider is not None else "Rate limit exceeded")
+        )
+        provider_name = resolved_service if resolved_service is not None else "unknown"
+        self.provider = provider_name
+        super().__init__(
+            resolved_message,
+            service_name=resolved_service,
+            status_code=429,
+            retry_after=retry_after,
+        )
+
+
 RateLimitExceededError = RateLimitError
 
 
@@ -396,7 +387,12 @@ def DataValidationError(
 ) -> ExternalServiceError:
     """Compatibility constructor for legacy DataValidationError."""
     error = ExternalServiceError(message, service_name=service_name)
-    error.field = field
-    error.value = value
-    error.error_type = ErrorType.INVALID_DATA
+    error = cast(
+        ExternalServiceError,
+        error.with_context(
+            field=field,
+            value=value,
+        ),
+    )
+    cast(Any, error).error_type = ErrorType.INVALID_DATA
     return error

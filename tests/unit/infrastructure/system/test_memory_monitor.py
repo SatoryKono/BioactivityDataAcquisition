@@ -11,8 +11,8 @@ from unittest.mock import MagicMock, mock_open, patch
 
 import pytest
 
-from bioetl.domain.config.memory import MemoryConfig
-from bioetl.domain.ports.memory import MemoryStats
+from bioetl.domain.config import MemoryConfig
+from bioetl.domain.ports import MemoryStats
 from bioetl.infrastructure.system.memory_monitor import (
     MemoryMonitor,
     _check_psutil_available,

@@ -388,6 +388,8 @@ class TestMetadataCoordinatorDataClasses:
             inp.record_count = 999  # type: ignore[misc]
 
     def test_silver_metadata_input_defaults(self) -> None:
+        from bioetl.domain.ports import SilverMetadataInput
+
         inp = SilverMetadataInput(
             table_path="/data/silver/chembl.activity",
             primary_keys=["entity_id"],
@@ -399,6 +401,8 @@ class TestMetadataCoordinatorDataClasses:
         assert inp.total_bytes == 0
 
     def test_silver_ref_creation(self) -> None:
+        from bioetl.domain.ports import SilverRef
+
         ref = SilverRef(
             table_name="chembl.activity",
             table_path="/data/silver/chembl.activity",

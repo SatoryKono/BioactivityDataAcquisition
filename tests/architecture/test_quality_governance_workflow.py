@@ -26,6 +26,12 @@ def test_tests_workflow_enforces_budget_only_temp_windows() -> None:
     assert "--max-grace-window-days" in workflow
 
 
+def test_tests_workflow_prints_quality_exemption_trend_report() -> None:
+    """CI should emit burn-down trend report for ratchet-only registries."""
+    workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")
+    assert "--trend-report on" in workflow
+
+
 def test_tests_workflow_has_fail_fast_quality_ratchet_profile() -> None:
     """CI must run staged architecture debt ratchet in strict layer order."""
     workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")

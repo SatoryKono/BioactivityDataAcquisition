@@ -90,6 +90,7 @@ jobs:
                       --scorecard "${QUALITY_EXEMPTIONS_SCORECARD}" \
                       --mode "${QUALITY_EXEMPTIONS_GATE_MODE}" \
                       --growth-mode "${QUALITY_EXEMPTIONS_GROWTH_MODE}" \
+                      --trend-report on \
                       --temp-window-mode "${QUALITY_EXEMPTIONS_TEMP_WINDOW_MODE}" \
                       --max-grace-window-days "${QUALITY_EXEMPTIONS_MAX_GRACE_WINDOW_DAYS}"
 

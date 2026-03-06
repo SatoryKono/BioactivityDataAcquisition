@@ -7,6 +7,7 @@ from bioetl.infrastructure.observability.metrics_export_names import (
 )
 
 __all__ = list(METRICS_DEFINITION_EXPORT_NAMES)
+
 from prometheus_client import Counter, Gauge, Histogram
 
 from bioetl.infrastructure.observability.circuit_breaker_mapping import (
@@ -189,10 +190,23 @@ HEALTH_CHECK_STATUS = Gauge(
     ["component"],
 )
 
+HEALTH_CHECK_MODE_STATUS = Gauge(
+    "bioetl_health_check_mode_status",
+    "Health check status by mode and component (0=unknown, 1=healthy, 2=degraded)",
+    ["component", "mode"],
+)
+
 HEALTH_CHECK_LATENCY_MS = Histogram(
     "bioetl_health_check_latency_ms",
     "Health check latency in milliseconds",
     ["provider"],
+    buckets=[1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000],
+)
+
+HEALTH_CHECK_MODE_LATENCY_MS = Histogram(
+    "bioetl_health_check_mode_latency_ms",
+    "Health check latency in milliseconds by health-check mode",
+    ["provider", "mode"],
     buckets=[1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000],
 )
 
@@ -206,6 +220,12 @@ HEALTH_CHECK_FAILURES_TOTAL = Counter(
     "bioetl_health_check_failures_total",
     "Total failed health checks",
     ["provider"],
+)
+
+PROBE_MODE_FALLBACK_TOTAL = Counter(
+    "bioetl_probe_mode_fallback_total",
+    "Total probe-mode fallbacks that downgraded data-source health to degraded",
+    ["pipeline", "component", "reason"],
 )
 
 HEALTH_CHECK_LATENCY_SECONDS = Histogram(

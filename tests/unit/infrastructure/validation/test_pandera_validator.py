@@ -250,14 +250,14 @@ class TestSilverValidatorPortProtocol:
 
     def test_pandera_silver_validator_is_runtime_checkable(self):
         """Test that PanderaSilverValidator can be runtime checked."""
-        from bioetl.domain.ports.validation import SilverValidatorPort
+        from bioetl.domain.ports import SilverValidatorPort
 
         validator = PanderaSilverValidator()
         assert isinstance(validator, SilverValidatorPort)
 
     def test_noop_silver_validator_is_runtime_checkable(self):
         """Test that NoOpSilverValidator can be runtime checked."""
-        from bioetl.domain.ports.validation import SilverValidatorPort
+        from bioetl.domain.ports import SilverValidatorPort
 
         validator = NoOpSilverValidator()
         assert isinstance(validator, SilverValidatorPort)
@@ -269,14 +269,14 @@ class TestGoldValidatorPortProtocol:
 
     def test_pandera_gold_validator_is_runtime_checkable(self):
         """Test that PanderaGoldValidator can be runtime checked."""
-        from bioetl.domain.ports.validation import GoldValidatorPort
+        from bioetl.domain.ports import GoldValidatorPort
 
         validator = PanderaGoldValidator()
         assert isinstance(validator, GoldValidatorPort)
 
     def test_noop_gold_validator_is_runtime_checkable(self):
         """Test that NoOpGoldValidator can be runtime checked."""
-        from bioetl.domain.ports.validation import GoldValidatorPort
+        from bioetl.domain.ports import GoldValidatorPort
 
         validator = NoOpGoldValidator()
         assert isinstance(validator, GoldValidatorPort)

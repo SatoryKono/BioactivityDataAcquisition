@@ -10,6 +10,8 @@ missing fields, etc.).
 
 from __future__ import annotations
 
+from typing import Any, cast
+
 from bioetl.domain.exceptions.base import DataQualityError
 from bioetl.domain.types import ErrorType
 
@@ -37,6 +39,25 @@ class ValidationError(DataQualityError):
 
     error_type = ErrorType.INVALID_DATA
 
+    def __init__(
+        self,
+        message: str,
+        record_id: str | None = None,
+        field: str | None = None,
+    ) -> None:
+        """Initialize ValidationError.
+
+        Args:
+            message: Human-readable error message.
+            record_id: Optional ID of the affected record.
+            field: Optional name of the field with validation error.
+        """
+        super().__init__(message)
+        if record_id is not None:
+            self.record_id = record_id
+        if field is not None:
+            self.field = field
+
 
 class SchemaViolationError(ValidationError):
     """Raised when data does not match expected schema.
@@ -53,16 +74,25 @@ class SchemaViolationError(ValidationError):
 
     error_type = ErrorType.SCHEMA_VIOLATION
 
-    def __init__(self, table: str, errors: list[str]) -> None:
+    def __init__(
+        self,
+        table: str,
+        errors: list[str],
+        record_id: str | None = None,
+    ) -> None:
         """Initialize SchemaViolationError.
 
         Args:
             table: Name of the table or entity with schema violation.
             errors: List of specific validation error messages.
+            record_id: Optional ID of the affected record.
         """
         self.table = table
         self.errors = errors
-        super().__init__(f"Schema validation failed for '{table}': {errors}")
+        super().__init__(
+            f"Schema validation failed for '{table}': {errors}",
+            record_id=record_id,
+        )
 
 
 def MissingRequiredFieldError(
@@ -73,24 +103,25 @@ def MissingRequiredFieldError(
     msg = f"Missing required field: {field}"
     if record_id:
         msg += f" (record_id={record_id})"
-    error = ValidationError(msg)
-    error.field = field
-    error.record_id = record_id
-    error.error_type = ErrorType.MISSING_REQUIRED_FIELD
-    return error
+    error = ValidationError(msg, field=field).with_context(record_id=record_id)
+    cast(Any, error).error_type = ErrorType.MISSING_REQUIRED_FIELD
+    return cast(ValidationError, error)
 
 
 def InvalidDataFormatError(
     field: str,
     value: str,
     expected_format: str,
+    record_id: str | None = None,
 ) -> ValidationError:
     """Compatibility constructor for legacy InvalidDataFormatError."""
     error = ValidationError(
-        f"Invalid format for '{field}': got '{value}', expected {expected_format}"
+        f"Invalid format for '{field}': got '{value}', expected {expected_format}",
+        record_id=record_id,
+        field=field,
+    ).with_context(
+        value=value,
+        expected_format=expected_format,
     )
-    error.field = field
-    error.value = value
-    error.expected_format = expected_format
-    error.error_type = ErrorType.INVALID_DATA
-    return error
+    cast(Any, error).error_type = ErrorType.INVALID_DATA
+    return cast(ValidationError, error)

@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.models.filter import ExtractionParams
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
+    from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
 
@@ -51,14 +52,12 @@ def _get_source_config(provider: str) -> SourceYamlConfig | None:
         SourceYamlConfig if found, None if config file does not exist.
 
     Raises:
-        ValueError: If config file exists but is invalid.
+        yaml.YAMLError, pydantic.ValidationError: If config file exists but is invalid.
     """
-    from pathlib import Path
-
-    config_path = Path(f"configs/providers/{provider}.yaml")
-    if not config_path.exists():
+    try:
+        return load_source_config(provider)
+    except ValueError:
         return None
-    return load_source_config(provider)
 
 
 def _get_batch_size_from_config(provider: str, default: int = 100) -> int:
@@ -192,6 +191,60 @@ def _wire_composable_fallback(data_source: DataSourcePort) -> None:
     policy = source_config.provider_config.fallback
     if callable(configure) and policy is not None:
         configure(policy)
+
+
+def _create_http_data_source(
+    provider: str,
+    settings: Settings,
+    logger: LoggerPort,
+    filter_config: InputFilterConfig | None,
+    metrics: MetricsPort | None,
+    pipeline_name: str,
+    *,
+    adapter_factory: Callable[..., DataSourcePort],
+    extra_kwargs: dict[str, object] | None = None,
+) -> DataSourcePort:
+    """Generic HTTP data source: http_client + helpers + adapter + filter wrap.
+
+    Encapsulates the shared skeleton of biblio provider creators
+    (PubMed, CrossRef, OpenAlex, SemanticScholar).
+
+    Args:
+        provider: Provider name for HTTP client creation.
+        settings: Application settings.
+        logger: Logger port.
+        filter_config: Optional input filter configuration.
+        metrics: Optional metrics port.
+        pipeline_name: Pipeline name for filter wrapping.
+        adapter_factory: Callable that constructs the concrete adapter.
+        extra_kwargs: Provider-specific kwargs merged into adapter construction.
+
+    Returns:
+        DataSourcePort, optionally wrapped with FilteredDataSource.
+    """
+    from bioetl.composition.factories.adapter_helpers_factory import (
+        AdapterHelpersFactory,
+    )
+    from bioetl.composition.providers.factory_loader import get_http_client_factory
+
+    HttpClientFactory = get_http_client_factory()
+    http_client = HttpClientFactory.create_for_provider(
+        provider, settings, metrics=metrics
+    )
+    helper_services = AdapterHelpersFactory.create_http_helpers(
+        provider=provider,
+        logger=logger,
+        metrics=metrics,
+    )
+    kwargs: dict[str, object] = {
+        "http_client": http_client,
+        "logger": logger,
+        "metrics": metrics,
+        **helper_services.as_injection_kwargs(),
+        **(extra_kwargs or {}),
+    }
+    data_source = adapter_factory(**kwargs)
+    return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)
 
 
 def _normalize_optional_override(value: str | None) -> str | None:

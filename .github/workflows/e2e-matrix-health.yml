@@ -34,6 +34,9 @@ jobs:
         if: github.event_name != 'schedule'
         runs-on: ubuntu-latest
         timeout-minutes: 25
+        env:
+            BIOETL_TEST_MODE: "true"
+            BIOETL_PIPELINE__HEALTH_CHECK_MODE: "probe"
 
         steps:
             -   name: Checkout code
@@ -115,6 +118,9 @@ jobs:
         if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.run_live == 'true')
         runs-on: ubuntu-latest
         timeout-minutes: 30
+        env:
+            BIOETL_TEST_MODE: "false"
+            BIOETL_PIPELINE__HEALTH_CHECK_MODE: "strict"
 
         steps:
             -   name: Checkout code
@@ -140,6 +146,20 @@ jobs:
 
             -   name: Install dependencies (frozen lock)
                 run: uv sync --frozen --extra dev --extra tracing
+
+            -   name: Enforce strict health-check policy
+                run: |
+                    mode="${BIOETL_PIPELINE__HEALTH_CHECK_MODE:-}"
+                    if [ "$mode" != "strict" ]; then
+                      echo "Strict job requires BIOETL_PIPELINE__HEALTH_CHECK_MODE=strict, got '$mode'"
+                      exit 1
+                    fi
+
+                    test_mode="$(printf '%s' "${BIOETL_TEST_MODE:-}" | tr '[:upper:]' '[:lower:]')"
+                    if [ "$test_mode" = "true" ] || [ "$test_mode" = "1" ] || [ "$test_mode" = "yes" ]; then
+                      echo "Strict job forbids probe/test-mode fallback (BIOETL_TEST_MODE=$test_mode)"
+                      exit 1
+                    fi
 
             -   name: Run matrix smoke live-check (nightly)
                 run: |

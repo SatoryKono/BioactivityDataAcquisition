@@ -14,6 +14,7 @@ import os
 from datetime import date
 from pathlib import Path
 
+from bioetl.infrastructure.quality._primitives import _parse_quarter_label
 from bioetl.infrastructure.quality.debt_scorecard import (
     evaluate_debt_scorecard,
     load_debt_scorecard,
@@ -74,6 +75,12 @@ def _parse_args() -> argparse.Namespace:
             "Fallback max duration for active grace windows when temp-window "
             "policy is budget-only."
         ),
+    )
+    parser.add_argument(
+        "--trend-report",
+        choices=("on", "off"),
+        default=os.getenv("QUALITY_EXEMPTIONS_TREND_REPORT", "on").strip().lower(),
+        help=("Print burn-down trend report for priority registries (default: on)."),
     )
     return parser.parse_args()
 
@@ -265,6 +272,106 @@ def _validate_budget_only_grace_windows(
     return governance_errors
 
 
+def _print_priority_registry_trend(
+    *,
+    scorecard_raw: dict[str, object],
+    summary_quarter: str,
+    summary_by_registry: dict[str, int],
+) -> None:
+    governance = scorecard_raw.get("governance", {})
+    if not isinstance(governance, dict):
+        return
+    burn_down = governance.get("burn_down_priorities", {})
+    if not isinstance(burn_down, dict):
+        return
+    raw_registries = burn_down.get("registries", [])
+    if not isinstance(raw_registries, list):
+        return
+    priority_registries = [
+        item.strip()
+        for item in raw_registries
+        if isinstance(item, str) and item.strip()
+    ]
+    if not priority_registries:
+        return
+
+    raw_targets = scorecard_raw.get("quarterly_targets", [])
+    if not isinstance(raw_targets, list):
+        return
+
+    ordered_targets: list[tuple[str, dict[str, int]]] = []
+    for item in raw_targets:
+        if not isinstance(item, dict):
+            continue
+        quarter = item.get("quarter")
+        registry_budgets = item.get("registry_budgets")
+        if not isinstance(quarter, str) or not isinstance(registry_budgets, dict):
+            continue
+        parsed_quarter = _parse_quarter_label(quarter)
+        if parsed_quarter is None:
+            continue
+        parsed_budgets: dict[str, int] = {}
+        for registry_name, value in registry_budgets.items():
+            if isinstance(registry_name, str) and isinstance(value, int):
+                parsed_budgets[registry_name] = value
+        ordered_targets.append((quarter, parsed_budgets))
+
+    if not ordered_targets:
+        return
+    ordered_targets.sort(key=lambda item: _parse_quarter_label(item[0]) or (0, 0))
+    quarter_to_index = {
+        quarter: index for index, (quarter, _) in enumerate(ordered_targets)
+    }
+    current_index = quarter_to_index.get(summary_quarter)
+    current_budget_by_registry = (
+        ordered_targets[current_index][1] if current_index is not None else {}
+    )
+    next_budget_by_registry = (
+        ordered_targets[current_index + 1][1]
+        if current_index is not None and current_index + 1 < len(ordered_targets)
+        else {}
+    )
+
+    baseline = scorecard_raw.get("baseline", {})
+    baseline_by_registry = (
+        baseline.get("by_registry", {}) if isinstance(baseline, dict) else {}
+    )
+    if not isinstance(baseline_by_registry, dict):
+        baseline_by_registry = {}
+
+    print("[quality-exemptions] burn-down trend (ratchet-only registries):")
+    for registry_name in priority_registries:
+        current_count = int(summary_by_registry.get(registry_name, 0))
+        baseline_count_raw = baseline_by_registry.get(registry_name, current_count)
+        baseline_count = (
+            int(baseline_count_raw)
+            if isinstance(baseline_count_raw, int)
+            else current_count
+        )
+        current_budget = int(current_budget_by_registry.get(registry_name, 0))
+        next_budget = (
+            int(next_budget_by_registry[registry_name])
+            if registry_name in next_budget_by_registry
+            else None
+        )
+        delta_from_baseline = current_count - baseline_count
+        headroom = current_budget - current_count
+        if headroom < 0:
+            status = "over_budget"
+        elif next_budget is not None and current_count > next_budget:
+            status = "at_risk_next_quarter"
+        else:
+            status = "on_track"
+        next_budget_label = "-" if next_budget is None else str(next_budget)
+        print(
+            "  - "
+            f"{registry_name}: current={current_count}, "
+            f"baseline={baseline_count}, delta_baseline={delta_from_baseline:+d}, "
+            f"budget[{summary_quarter}]={current_budget}, headroom={headroom}, "
+            f"next_budget={next_budget_label}, status={status}"
+        )
+
+
 def main() -> int:
     args = _parse_args()
     today = date.today()
@@ -362,6 +469,12 @@ def main() -> int:
         print(
             "[quality-exemptions] active grace windows: "
             + ", ".join(summary.active_grace_windows)
+        )
+    if args.trend_report == "on":
+        _print_priority_registry_trend(
+            scorecard_raw=scorecard_raw,
+            summary_quarter=summary.quarter,
+            summary_by_registry=summary.by_registry,
         )
 
     if expired_entries:

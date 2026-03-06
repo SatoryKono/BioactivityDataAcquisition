@@ -42,6 +42,7 @@ class BioETLError(Exception):
         {
             "args",
             "error_type",
+            "error_type_override",
             "with_traceback",
         }
     )

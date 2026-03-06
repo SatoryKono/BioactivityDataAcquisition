@@ -16,6 +16,7 @@ SRP Compliance:
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.composition.providers.loader import ensure_providers_loaded
@@ -31,10 +32,31 @@ if TYPE_CHECKING:
     from bioetl.domain.types import RunID
     from bioetl.infrastructure.config import Settings
 
-
 __all__ = [
     "HttpClientFactory",
+    "ResolvedHttpConfig",
 ]
+
+
+@dataclass(frozen=True)
+class ResolvedHttpConfig:
+    """Pure config resolution result — no infrastructure objects.
+
+    Extracted from ``HttpClientFactory._create_from_registry`` so that config
+    resolution logic can be tested in isolation without constructing real
+    TokenBucket / CircuitBreaker / UnifiedHTTPClient instances.
+    """
+
+    rate: float
+    capacity: int
+    failure_threshold: int
+    recovery_timeout: int
+    timeout: float
+    max_retries: int
+    base_delay: float
+    max_delay: float
+    max_connections: int
+    max_keepalive: int
 
 
 class HttpClientFactory:
@@ -91,31 +113,22 @@ class HttpClientFactory:
         )
 
     @classmethod
-    def _create_from_registry(
+    def _resolve_config(
         cls,
         provider: str,
         settings: Settings | None,
-        *,
-        run_id: RunID | None = None,
-        tracer: TracingPort | None = None,
-        metrics: MetricsPort | None = None,
-        logger: LoggerPort | None = None,
-    ) -> UnifiedHTTPClient:
-        """Create HTTP client using provider YAML configuration.
+    ) -> ResolvedHttpConfig:
+        """Pure config resolution — no infrastructure objects created.
 
-        Configuration is loaded from configs/providers/{provider}.yaml.
-        Falls back to ProviderRegistry defaults if source config not found.
+        Priority: source YAML > ProviderRegistry > safe defaults.
+        API-key rate overrides applied last.
 
         Args:
             provider: Provider name
-            settings: Application settings
-            run_id: Optional run ID for correlation headers
-            tracer: Optional TracingPort for distributed tracing
-            metrics: Optional MetricsPort for metrics collection
-            logger: Optional LoggerPort for structured logging
+            settings: Application settings (used for API-key rate overrides)
 
         Returns:
-            Configured UnifiedHTTPClient with observability
+            ResolvedHttpConfig with all scalar values resolved.
         """
         # Load source config from provider YAML (primary source) if exists.
         try:
@@ -123,43 +136,29 @@ class HttpClientFactory:
         except ValueError:
             source_config = None
 
-        # Get rate limit, circuit breaker, and client settings
         if source_config is not None:
-            # Use source YAML config (primary)
             rate = source_config.rate_limit.requests_per_second
             capacity = source_config.rate_limit.burst
             failure_threshold = source_config.circuit_breaker.failure_threshold
             recovery_timeout = source_config.circuit_breaker.recovery_timeout
-            # Client settings (timeout and retries)
             timeout = source_config.timeout_sec
             max_retries = source_config.max_retries
             base_delay = source_config.retry_base_delay
             max_delay = source_config.retry_max_delay
-            # Connection pool limits
             max_connections = source_config.max_connections
             max_keepalive = source_config.max_keepalive_connections
         else:
-            # Fallback to ProviderRegistry
             http_config = ProviderRegistry.get_http_config(provider)
             if http_config is None:
-                # Provider doesn't use shared HTTP client - use safe defaults
-                rate = 5.0
-                capacity = 10
-                failure_threshold = 5
-                recovery_timeout = 300
-                timeout = 30.0
-                max_retries = 3
+                rate, capacity = 5.0, 10
+                failure_threshold, recovery_timeout = 5, 300
+                timeout, max_retries = 30.0, 3
             else:
-                rate = http_config.rate
-                capacity = http_config.capacity
-                failure_threshold = 5  # Default
-                recovery_timeout = 300  # Default
-                timeout = 30.0  # Default
-                max_retries = 3  # Default
-            base_delay = 1.0  # RetryConfig default
-            max_delay = 60.0  # RetryConfig default
-            max_connections = 50  # httpx default
-            max_keepalive = 10  # httpx default
+                rate, capacity = http_config.rate, http_config.capacity
+                failure_threshold, recovery_timeout = 5, 300
+                timeout, max_retries = 30.0, 3
+            base_delay, max_delay = 1.0, 60.0
+            max_connections, max_keepalive = 50, 10
 
         # Apply rate overrides based on settings (API key boosts)
         http_config = ProviderRegistry.get_http_config(provider)
@@ -170,24 +169,53 @@ class HttpClientFactory:
                     capacity = int(override_rate * 2)
                     break
 
+        return ResolvedHttpConfig(
+            rate=rate,
+            capacity=capacity,
+            failure_threshold=failure_threshold,
+            recovery_timeout=recovery_timeout,
+            timeout=timeout,
+            max_retries=max_retries,
+            base_delay=base_delay,
+            max_delay=max_delay,
+            max_connections=max_connections,
+            max_keepalive=max_keepalive,
+        )
+
+    @classmethod
+    def _create_from_registry(
+        cls,
+        provider: str,
+        settings: Settings | None,
+        *,
+        run_id: RunID | None = None,
+        tracer: TracingPort | None = None,
+        metrics: MetricsPort | None = None,
+        logger: LoggerPort | None = None,
+    ) -> UnifiedHTTPClient:
+        """Thin assembler: resolves config, then constructs infrastructure objects."""
+        cfg = cls._resolve_config(provider, settings)
+
         return UnifiedHTTPClient(
-            rate_limiter=TokenBucket(rate=rate, capacity=capacity, provider=provider),
+            rate_limiter=TokenBucket(
+                rate=cfg.rate, capacity=cfg.capacity, provider=provider
+            ),
             circuit_breaker=CircuitBreaker(
                 provider=provider,
-                failure_threshold=failure_threshold,
-                recovery_timeout=recovery_timeout,
+                failure_threshold=cfg.failure_threshold,
+                recovery_timeout=cfg.recovery_timeout,
                 metrics=metrics,
             ),
             retry_config=RetryConfig(
-                max_attempts=max_retries,
-                base_delay=base_delay,
-                max_delay=max_delay,
+                max_attempts=cfg.max_retries,
+                base_delay=cfg.base_delay,
+                max_delay=cfg.max_delay,
             ),
-            timeout=timeout,
+            timeout=cfg.timeout,
             provider=provider,
             run_id=run_id,
-            max_connections=max_connections,
-            max_keepalive_connections=max_keepalive,
+            max_connections=cfg.max_connections,
+            max_keepalive_connections=cfg.max_keepalive,
             tracer=tracer,
             metrics=metrics,
             logger=logger,
