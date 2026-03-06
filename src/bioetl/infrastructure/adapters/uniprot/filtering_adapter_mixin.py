@@ -9,7 +9,6 @@ from __future__ import annotations
 from collections.abc import AsyncIterator, Callable
 
 from bioetl.domain.types import BronzeRecord
-from bioetl.infrastructure.adapters.common import FallbackFetchRequest
 from bioetl.infrastructure.adapters.uniprot.fallback_policy import (
     UniProtFallbackPolicyHandler,
 )
@@ -56,7 +55,7 @@ class UniProtFilteringAdapterMixin:
             if limit and fetched >= limit:
                 break
 
-            batch = filter_ids[batch_start : batch_start + _UNIPROT_FILTER_BATCH_SIZE]
+            batch = filter_ids[batch_start: batch_start + _UNIPROT_FILTER_BATCH_SIZE]
             or_query = " OR ".join(f"{filter_field}:{acc}" for acc in batch)
             batch_limit = (limit - fetched) if limit else None
             async for record in strategy(query=or_query, limit=batch_limit):
@@ -225,14 +224,13 @@ class UniProtFilteringAdapterMixin:
             normalized = accession.strip()
             return normalized if normalized else None
 
-        request = FallbackFetchRequest(
+        async for record in self._fallback_decorator.execute(
             filter_ids=requested_ids,
             fallback_mapping=fallback_mapping,
             primary_record_fetcher=_primary_records,
-            normalize_id=lambda value: value.strip(),
+            limit=limit,
+            filter_field=filter_field,
             extract_record_id=_extract_accession,
             fallback_handler=fallback_handler,
-            limit=limit,
-        )
-        async for record in self._fallback_fetch_service.execute(request):
+        ):
             yield record

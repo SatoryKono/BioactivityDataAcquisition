@@ -1,10 +1,4 @@
-"""Enrichment Coordinator.
-
-Application Service that coordinates parallel enrichment pipeline execution.
-Implements fan-out pattern with async gather for concurrent enrichers.
-
-See ADR-026 for architectural decisions.
-"""
+"""Enrichment Coordinator."""
 
 from __future__ import annotations
 
@@ -45,7 +39,6 @@ _ENRICHER_EXECUTION_ERRORS = (
     TypeError,
     OSError,
 )
-
 
 __all__ = ["EnrichmentCoordinatorService"]
 
@@ -96,34 +89,7 @@ def _build_enricher_task(
 
 
 class EnrichmentCoordinatorService:
-    """Coordinates parallel enrichment pipeline execution.
-
-    Implements fan-out pattern with async gather for concurrent enrichers.
-    Handles timeouts, failures, and partial completion.
-
-    This service is responsible for:
-    - Filtering keys based on enricher conditions
-    - Running enrichers in parallel (up to max_concurrency)
-    - Handling per-enricher timeouts
-    - Aggregating results
-
-    Attributes:
-        logger: Structured logger.
-        dq_config: DQ thresholds for enricher evaluation.
-        max_concurrency: Maximum concurrent enrichers.
-
-    Example:
-        >>> coordinator = EnrichmentCoordinator(
-        ...     logger=logger,
-        ...     dq_config=dq_config,
-        ...     max_concurrency=4,
-        ... )
-        >>> results = await coordinator.run_enrichers(
-        ...     keys=keys_df,
-        ...     enrichers=enricher_configs,
-        ...     runner_factory=factory,
-        ... )
-    """
+    """Coordinates parallel enrichment pipeline execution."""
 
     def __init__(
         self,
@@ -132,14 +98,7 @@ class EnrichmentCoordinatorService:
         max_concurrency: int = 4,
         semaphore_factory: Callable[[int], asyncio.Semaphore] | None = None,
     ) -> None:
-        """Initialize enrichment coordinator.
-
-        Args:
-            logger: Structured logger.
-            dq_config: DQ thresholds configuration.
-            max_concurrency: Maximum concurrent enrichers.
-            semaphore_factory: Optional factory for semaphore creation.
-        """
+        """Initialize enrichment coordinator."""
         self._logger = logger
         self._dq_config = dq_config
         self._max_concurrency = max_concurrency
@@ -158,15 +117,15 @@ class EnrichmentCoordinatorService:
             task_spec
             for enricher in enrichers
             if (
-                task_spec := _build_enricher_task(
-                    self,
-                    keys=keys,
-                    enricher=enricher,
-                    completed=completed,
-                    runner_factory=runner_factory,
-                )
-            )
-            is not None
+                   task_spec := _build_enricher_task(
+                       self,
+                       keys=keys,
+                       enricher=enricher,
+                       completed=completed,
+                       runner_factory=runner_factory,
+                   )
+               )
+               is not None
         ]
         if not task_specs:
             return {}
@@ -250,21 +209,7 @@ class EnrichmentCoordinatorService:
         keys: pl.DataFrame,
         runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
     ) -> EnrichmentResult:
-        """Run a single enricher with timeout and error handling.
-
-        Uses semaphore to limit concurrency and handles:
-        - Timeout per enricher
-        - Critical errors (re-raised for required enrichers)
-        - Recoverable errors (logged, returned as failed)
-
-        Args:
-            enricher: Enricher configuration.
-            keys: Filtered keys DataFrame.
-            runner_factory: Factory to create PipelineRunner.
-
-        Returns:
-            EnrichmentResult with execution outcome.
-        """
+        """Run a single enricher with timeout and error handling."""
         async with self._semaphore:
             started_at = datetime.now(tz=UTC)
             records_input = len(keys)
@@ -453,11 +398,7 @@ class EnrichmentCoordinatorService:
         *,
         reason_code: str | None = None,
     ) -> EnrichmentResult:
-        """Handle enricher execution error.
-
-        Required enrichers: log as error and re-raise.
-        Optional enrichers: log as warning and return failed result.
-        """
+        """Handle enricher execution error."""
         duration = (datetime.now(tz=UTC) - started_at).total_seconds()
         log_kwargs: JsonDict = {
             "enricher": enricher.pipeline,
@@ -485,19 +426,7 @@ class EnrichmentCoordinatorService:
         enricher_names: list[str],
         results: list[EnrichmentResult | BaseException],
     ) -> dict[str, EnrichmentResult]:
-        """Process gathered results, handling exceptions.
-
-        Converts exceptions to failed results for optional enrichers.
-        Re-raises exceptions for required enrichers (should not happen
-        as they're raised in _run_single_enricher).
-
-        Args:
-            enricher_names: Names of enrichers in order.
-            results: Results from asyncio.gather.
-
-        Returns:
-            Mapping of enricher name to result.
-        """
+        """Process gathered results, handling exceptions."""
         processed: dict[str, EnrichmentResult] = {}
 
         for name, result in zip(enricher_names, results, strict=True):

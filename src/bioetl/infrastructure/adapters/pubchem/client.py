@@ -24,7 +24,6 @@ from __future__ import annotations
 
 __all__ = ["PUBCHEM_HEALTH_ERRORS", "PubChemAdapter"]
 
-
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING
@@ -47,10 +46,9 @@ if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
     from bioetl.domain.models.metadata import SourceMetadata
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import ErrorHandlerPort, LoggerPort
     from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
     from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
-
 
 # Mapping from entity_type to DTO model class
 PUBCHEM_DTO_MODELS: dict[str, type[BaseModel]] = {
@@ -107,6 +105,9 @@ class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
         circuit_breaker: CircuitBreaker,
         thread_pool: ThreadPoolExecutor,
         strict_error_handling: bool = False,
+        *,
+        error_handler: ErrorHandlerPort | None = None,
+        request_collector: APIRequestCollector | None = None,
     ) -> None:
         """Initialize PubChem client.
 
@@ -118,6 +119,10 @@ class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
             circuit_breaker: Pre-configured circuit breaker.
             thread_pool: Pre-configured thread pool executor.
             strict_error_handling: Whether to raise exceptions or log warnings.
+            error_handler: Pre-built error handler (optional, injected by
+                    AdapterHelpersFactory). Falls back to inline ErrorService.
+            request_collector: Pre-built request collector (optional, injected by
+                    AdapterHelpersFactory). Falls back to inline APIRequestCollector.
 
         """
         super().__init__(
@@ -126,9 +131,14 @@ class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
             circuit_breaker=circuit_breaker,
             thread_pool=thread_pool,
             strict_error_handling=strict_error_handling,
+            error_handler=error_handler,
         )
         self._mapper = PubChemEntityMapper()
-        self._request_collector = APIRequestCollector()
+        self._request_collector = (
+            request_collector
+            if request_collector is not None
+            else APIRequestCollector()
+        )
         from bioetl.infrastructure.adapters.pubchem.fetch_strategies import (
             PubChemFetchStrategies,
         )

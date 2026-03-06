@@ -1,8 +1,4 @@
-"""Pipeline Assembler.
-
-Contains GenericPipelineFactory and runner assembly entry points.
-Extracted from pipeline_factory.py for composition layer LOC compliance.
-"""
+"""Generic pipeline assembly facade."""
 
 from __future__ import annotations
 
@@ -54,7 +50,6 @@ if TYPE_CHECKING:
 
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
 
-
 __all__ = [
     "GenericPipelineFactory",
     "assemble_runner",
@@ -77,15 +72,7 @@ def _extract_entity_type(pipeline_name: str) -> str | None:
 
 
 class GenericPipelineFactory(Generic[TPipeline]):
-    """Configurable factory for creating pipelines via constructor parameters.
-
-    Attributes:
-        pipeline_name: Unique name for the pipeline
-        pipeline_class: The pipeline class to instantiate
-        silver_schema: PyArrow schema for Silver layer
-        gold_schema: Pandera schema for Gold layer
-        pandera_silver_schema: Pandera DataFrameModel class for Silver validation
-    """
+    """Configurable factory for creating pipeline instances."""
 
     def __init__(
         self,
@@ -98,25 +85,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         data_source_creator: DataSourceCreator | None = None,
         transformer_class: type[BaseTransformer] | None = None,
     ) -> None:
-        """Initialize the factory.
-
-        Args:
-            pipeline_name: Unique name for the pipeline (e.g., "chembl_activity").
-            pipeline_class: The pipeline class to instantiate.
-            provider: Data provider name (e.g., "chembl", "pubmed").
-            silver_schema: Optional PyArrow schema for Silver layer validation.
-            gold_schema: Pandera DataFrameModel class for Gold layer validation.
-            pandera_silver_schema: Optional Pandera DataFrameModel class for Silver
-                validation. If provided, PanderaSilverValidator is created and
-                injected into SilverWriter.
-            data_source_creator: Optional custom data source creator function.
-                If None, looked up from DataSourceRegistry by provider.
-            transformer_class: Optional transformer class for Bronze-to-Silver
-                and Silver-to-Gold transformations.
-
-        Raises:
-            ValueError: If gold_schema is not provided.
-        """
+        """Initialize factory dependencies and schema contracts."""
         if gold_schema is None:
             raise ValueError(
                 f"gold_schema is required for pipeline '{pipeline_name}'. "
@@ -144,19 +113,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
     ) -> BaseTransformer | None:
-        """Create transformer instance if transformer_class is configured.
-
-        Args:
-            tracer: Optional tracing port for distributed tracing.
-            metrics: Optional metrics port for duration/error tracking.
-            silver_filters: Optional domain-level filter configuration for Silver layer.
-            gold_filters: Optional filter configuration for Gold layer.
-            identity_service: Service for computing entity IDs and content hashes.
-            pii_hasher: Optional PII hasher for hashing author names.
-
-        Returns:
-            Configured transformer instance, or None if no transformer_class.
-        """
+        """Create transformer when a transformer class is configured."""
         if self.transformer_class is None:
             return None
 
@@ -178,18 +135,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         logger: LoggerPort,
         filter_config: InputFilterConfig | None = None,
     ) -> DataSourcePort:
-        """Create data source using the configured creator.
-
-        Args:
-            settings: Application settings with provider credentials and paths.
-            pipeline_config: Pipeline YAML configuration with source settings.
-            logger: Structured logger for observability.
-            filter_config: Optional input filter configuration for restricting
-                which records are fetched from the data source.
-
-        Returns:
-            Configured DataSourcePort implementation for the pipeline's provider.
-        """
+        """Create provider data source via injected data-source creator."""
         return self._create_data_source(
             settings,
             pipeline_config,
@@ -207,19 +153,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         tracer: TracingPort | None = None,
         dq_monitor: DQMonitorPort | None = None,
     ) -> PipelineService:
-        """Build PipelineService from settings.
-
-        Args:
-            settings: Application settings with data paths and credentials.
-            logger: Structured logger for observability.
-            config: Pre-loaded pipeline YAML config. If None, loaded from disk.
-            filter_config: Optional input filter configuration for the data source.
-            tracer: Optional TracingPort for distributed tracing.
-            dq_monitor: Optional data quality monitor for anomaly detection.
-
-        Returns:
-            Configured PipelineService instance.
-        """
+        """Build shared pipeline services for the configured pipeline."""
         return build_pipeline_services(
             pipeline_name=self.pipeline_name,
             create_data_source_fn=self._create_data_source,
@@ -244,24 +178,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         metrics: MetricsPort | None = None,
         cached_bronze: CachedBronzeContext | None = None,
     ) -> TPipeline:
-        """Create pipeline instance with services and optional transformer.
-
-        Args:
-            run_id: Unique identifier for this pipeline run.
-            runtime: Pipeline runtime configuration (run_type, resume, limits).
-            settings: Application settings with data paths and credentials.
-            logger: Structured logger for observability.
-            config: Pre-loaded pipeline YAML config. If None, loaded from disk.
-            filter_config: Optional input filter configuration for the data source.
-            tracer: Optional TracingPort for distributed tracing.
-            dq_monitor: Optional data quality monitor for anomaly detection.
-            metrics: Optional MetricsPort for transformer observability.
-            cached_bronze: Optional CachedBronzeContext for reading from Bronze
-                cache instead of making API calls.
-
-        Returns:
-            Fully configured pipeline instance of type TPipeline.
-        """
+        """Create pipeline instance with wired services and optional transformer."""
         return cast(
             TPipeline,
             create_pipeline_with_services(
@@ -336,20 +253,7 @@ def create_pipeline_factory(
     pandera_silver_schema: object | None = None,
     transformer_class: type[BaseTransformer] | None = None,
 ) -> GenericPipelineFactory[TPipeline]:
-    """Convenience function for creating pipeline factories.
-
-    Args:
-        pipeline_name: Pipeline identifier.
-        pipeline_class: Pipeline class.
-        provider: Data provider name.
-        silver_schema: Silver schema.
-        gold_schema: Gold schema.
-        pandera_silver_schema: Pandera silver schema.
-        transformer_class: Transformer class.
-
-    Returns:
-        Newly created GenericPipelineFactory[TPipeline] instance.
-    """
+    """Create a configured :class:`GenericPipelineFactory`."""
     return GenericPipelineFactory(
         pipeline_name=pipeline_name,
         pipeline_class=pipeline_class,

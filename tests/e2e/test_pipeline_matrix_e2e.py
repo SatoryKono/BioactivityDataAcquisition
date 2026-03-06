@@ -31,6 +31,7 @@ from .conftest import (
     assert_silver_table_has_records,
     build_e2e_skip_reason,
     create_test_context,
+    is_external_healthcheck_playback_failure,
     run_pipeline_or_skip_transient,
 )
 
@@ -301,13 +302,6 @@ def _is_vcr_mismatch_error(exc: Exception) -> bool:
     return any(marker in message for marker in VCR_MISS_MARKERS)
 
 
-def _is_external_healthcheck_playback_failure(exc: Exception) -> bool:
-    if not isinstance(exc, InfrastructureError):
-        return False
-    message = str(exc).lower()
-    return "health check failed for: data_source" in message
-
-
 def _is_rate_limited_http_error(exc: Exception) -> bool:
     """Return True when upstream API returned transient HTTP 429."""
     if isinstance(exc, ExternalServiceError):
@@ -407,7 +401,7 @@ async def test_pipeline_matrix_smoke(
                     detail=str(exc),
                 )
             )
-        if _is_external_healthcheck_playback_failure(exc):
+        if is_external_healthcheck_playback_failure(exc):
             pytest.skip(
                 build_e2e_skip_reason(
                     "INFRA_FLAKY_CASSETTE_HEALTHCHECK_MISMATCH",

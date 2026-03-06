@@ -4,7 +4,6 @@ from __future__ import annotations
 
 __all__ = ["SilverWriterDeltaMixin"]
 
-
 import asyncio
 from typing import TYPE_CHECKING, Any
 
@@ -14,20 +13,31 @@ from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
 from bioetl.domain.exceptions import DeltaTransactionError
 from bioetl.domain.medallion import SilverWriteMode
+from bioetl.infrastructure.storage.write_resilience import (
+    DEFAULT_SILVER_MERGE_POLICY,
+    SilverMergeResiliencePolicy,
+)
 
 if TYPE_CHECKING:
     from deltalake import DeltaTable as DeltaTableType
 
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort
+
+
+class _MergeExecutionTimeoutError(RuntimeError):
+    """Internal timeout marker used for merge retry orchestration."""
+
+    def __init__(self, timeout_seconds: float) -> None:
+        self.timeout_seconds = timeout_seconds
+        super().__init__(f"Merge execution timed out after {timeout_seconds}s")
 
 
 class SilverWriterDeltaMixin:
     """Mixin with Delta write/merge operations."""
 
-    _MERGE_MAX_RETRIES = 3
-    _MERGE_RETRY_DELAY = 0.5
-    _MERGE_EXEC_TIMEOUT_SECONDS = 45.0
     logger: LoggerPort
+    _metrics: MetricsPort | None
+    _merge_resilience_policy: SilverMergeResiliencePolicy
 
     @staticmethod
     def _load_silver_writer_module() -> Any:  # Any: return type varies at runtime
@@ -81,31 +91,83 @@ class SilverWriterDeltaMixin:
         partition_cols: list[str] | None,
     ) -> None:
         """Write data using merge/upsert strategy with conflict retry."""
+        policy = getattr(
+            self,
+            "_merge_resilience_policy",
+            DEFAULT_SILVER_MERGE_POLICY,
+        )
         loop = asyncio.get_running_loop()
-        for attempt in range(self._MERGE_MAX_RETRIES + 1):
+        commit_retry_count = 0
+        timeout_retry_count = 0
+
+        while True:
             try:
                 table = await loop.run_in_executor(
                     None,
                     lambda: self._load_silver_writer_module().DeltaTable(table_path),
                 )
-                await self._merge_records(table, data, primary_keys, table_path)
+                await self._merge_records(
+                    table,
+                    data,
+                    primary_keys,
+                    table_path,
+                    timeout_seconds=policy.execution_timeout_seconds,
+                )
+                if commit_retry_count > 0 or timeout_retry_count > 0:
+                    self.logger.info(
+                        "silver_merge_recovered_after_retry",
+                        table_path=table_path,
+                        commit_retry_count=commit_retry_count,
+                        timeout_retry_count=timeout_retry_count,
+                        final_reason="success_after_retry",
+                    )
                 return
             except DeltaTableNotFoundError:
                 await self._write_append(table_path, data, partition_cols)
                 return
             except CommitFailedError:
-                if attempt == self._MERGE_MAX_RETRIES:
-                    raise
-                delay = self._MERGE_RETRY_DELAY * (2**attempt)
-                if self.logger:
-                    self.logger.warning(
-                        "silver_merge_conflict_retry",
-                        attempt=attempt + 1,
-                        max_retries=self._MERGE_MAX_RETRIES,
-                        delay=delay,
+                if not policy.commit_retry.should_retry(commit_retry_count):
+                    self._emit_merge_final_telemetry(
                         table_path=table_path,
+                        final_reason="commit_conflict_retries_exhausted",
                     )
-                await asyncio.sleep(delay)
+                    raise
+                delay = policy.commit_retry.calculate_delay(commit_retry_count)
+                commit_retry_count += 1
+                self._emit_merge_retry_telemetry(
+                    table_path=table_path,
+                    retry_type="commit_conflict",
+                    attempt=commit_retry_count,
+                    max_retries=policy.commit_retry.max_retries,
+                    delay_seconds=delay,
+                )
+                if delay > 0.0:
+                    await asyncio.sleep(delay)
+            except _MergeExecutionTimeoutError as exc:
+                if not policy.timeout_retry.should_retry(timeout_retry_count):
+                    self._emit_merge_final_telemetry(
+                        table_path=table_path,
+                        final_reason="timeout_retries_exhausted",
+                    )
+                    raise DeltaTransactionError(
+                        table_path=table_path,
+                        reason=(
+                            "Delta merge_execute timed out after "
+                            f"{exc.timeout_seconds} seconds "
+                            f"(timeout_retries={timeout_retry_count})"
+                        ),
+                    ) from exc
+                delay = policy.timeout_retry.calculate_delay(timeout_retry_count)
+                timeout_retry_count += 1
+                self._emit_merge_retry_telemetry(
+                    table_path=table_path,
+                    retry_type="timeout",
+                    attempt=timeout_retry_count,
+                    max_retries=policy.timeout_retry.max_retries,
+                    delay_seconds=delay,
+                )
+                if delay > 0.0:
+                    await asyncio.sleep(delay)
 
     async def _dispatch_write(
         self,
@@ -131,6 +193,8 @@ class SilverWriterDeltaMixin:
         records: pa.Table | pa.RecordBatchReader,
         primary_keys: list[str],
         table_path: str,
+        *,
+        timeout_seconds: float,
     ) -> None:
         """Merge records into an existing Delta table."""
         merge_condition = " AND ".join(
@@ -165,19 +229,64 @@ class SilverWriterDeltaMixin:
         try:
             await asyncio.wait_for(
                 merge_future,
-                timeout=self._MERGE_EXEC_TIMEOUT_SECONDS,
+                timeout=timeout_seconds,
             )
         except TimeoutError as exc:
-            self.logger.error(
+            self.logger.warning(
                 "silver_merge_timeout",
                 table_path=table_path,
-                timeout_seconds=self._MERGE_EXEC_TIMEOUT_SECONDS,
+                timeout_seconds=timeout_seconds,
                 primary_keys=primary_keys,
             )
-            raise DeltaTransactionError(
-                table_path=table_path,
-                reason=(
-                    "Delta merge_execute timed out after "
-                    f"{self._MERGE_EXEC_TIMEOUT_SECONDS} seconds"
-                ),
-            ) from exc
+            raise _MergeExecutionTimeoutError(timeout_seconds) from exc
+
+    def _emit_merge_retry_telemetry(
+        self,
+        *,
+        table_path: str,
+        retry_type: str,
+        attempt: int,
+        max_retries: int,
+        delay_seconds: float,
+    ) -> None:
+        self.logger.warning(
+            "silver_merge_retry",
+            table_path=table_path,
+            retry_type=retry_type,
+            attempt=attempt,
+            max_retries=max_retries,
+            delay_seconds=delay_seconds,
+        )
+        if self._metrics is not None:
+            self._metrics.increment_counter(
+                "observability_events_total",
+                1,
+                {
+                    "event": "silver_merge_retry",
+                    "provider": "storage",
+                    "pipeline": table_path,
+                    "severity": "warning",
+                    "error_type": retry_type,
+                },
+            )
+
+    def _emit_merge_final_telemetry(
+        self, *, table_path: str, final_reason: str
+    ) -> None:
+        self.logger.error(
+            "silver_merge_failed",
+            table_path=table_path,
+            final_reason=final_reason,
+        )
+        if self._metrics is not None:
+            self._metrics.increment_counter(
+                "observability_events_total",
+                1,
+                {
+                    "event": "silver_merge_final",
+                    "provider": "storage",
+                    "pipeline": table_path,
+                    "severity": "error",
+                    "error_type": final_reason,
+                },
+            )

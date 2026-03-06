@@ -11,7 +11,6 @@ import time
 from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.types import BronzeRecord, JsonDict
-from bioetl.infrastructure.adapters.common import FallbackFetchRequest
 from bioetl.infrastructure.adapters.semanticscholar.constants import (
     SEMANTICSCHOLAR_BASE_URL,
 )
@@ -136,7 +135,7 @@ class SemanticScholarFetchAdapterMixin:
         dois = filter_ids[:limit] if limit else filter_ids
         fetched = 0
         for idx in range(0, len(dois), self.batch_size):
-            batch = dois[idx : idx + self.batch_size]
+            batch = dois[idx: idx + self.batch_size]
             async for record in self._fetch_by_dois(batch):
                 record["_lookup_method"] = "doi"
                 yield record
@@ -157,7 +156,7 @@ class SemanticScholarFetchAdapterMixin:
             if limit and count >= limit:
                 return
 
-            batch = valid_dois[idx : idx + self.batch_size]
+            batch = valid_dois[idx: idx + self.batch_size]
             batch_results = await self._fetch_batch_with_nulls(batch)
             for doi, record in zip(batch, batch_results, strict=True):
                 if record is None:
@@ -179,7 +178,7 @@ class SemanticScholarFetchAdapterMixin:
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
         """Fetch by DOI and recover unresolved records through title fallback."""
-        del entity_type, filter_field
+        del entity_type
         resolved_dois: set[str] = set()
 
         def _primary_records(
@@ -193,17 +192,14 @@ class SemanticScholarFetchAdapterMixin:
                 return cast("str | None", self._normalize_doi(resolved))
             return None
 
-        request = FallbackFetchRequest(
+        async for record in self._fallback_decorator.execute(
             filter_ids=filter_ids,
             fallback_mapping=fallback_mapping,
             primary_record_fetcher=_primary_records,
-            normalize_id=self._normalize_doi,
-            extract_record_id=_extract_record_doi,
-            fallback_handler=self._fallback_handler,
             limit=limit,
-            primary_lookup_method="doi",
-        )
-        async for record in self._fallback_fetch_service.execute(request):
+            filter_field=filter_field,
+            extract_record_id=_extract_record_doi,
+        ):
             yield record
 
     async def fetch_multi_filtered(

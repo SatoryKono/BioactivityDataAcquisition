@@ -31,6 +31,13 @@ class TestPipelineSettings:
         assert settings.checkpoint_interval == 1000
         assert settings.max_concurrent_batches == 4
         assert settings.heartbeat_interval == 30
+        assert settings.silver_resilience_enabled is True
+        assert settings.silver_metadata_atomic_retry.max_retries == 20
+        assert settings.silver_merge_retry.max_retries == 3
+        assert settings.silver_merge_timeout.profile == "default"
+        assert settings.silver_merge_timeout.execution_timeout_seconds == 45.0
+        assert settings.silver_merge_timeout.unit_execution_timeout_seconds == 15.0
+        assert settings.silver_merge_timeout.e2e_execution_timeout_seconds == 90.0
 
     def test_custom_values(self) -> None:
         """Test custom pipeline settings."""
@@ -39,12 +46,29 @@ class TestPipelineSettings:
             checkpoint_interval=5000,
             max_concurrent_batches=8,
             heartbeat_interval=30,
+            silver_resilience_enabled=False,
+            silver_metadata_atomic_retry={"max_retries": 2, "adaptive_backoff": False},
+            silver_merge_retry={"max_retries": 1, "jitter_seconds": 0.0},
+            silver_merge_timeout={
+                "profile": "e2e",
+                "execution_timeout_seconds": 60.0,
+                "e2e_execution_timeout_seconds": 120.0,
+                "max_retries": 0,
+            },
         )
 
         assert settings.batch_size == 500
         assert settings.checkpoint_interval == 5000
         assert settings.max_concurrent_batches == 8
         assert settings.heartbeat_interval == 30
+        assert settings.silver_resilience_enabled is False
+        assert settings.silver_metadata_atomic_retry.max_retries == 2
+        assert settings.silver_metadata_atomic_retry.adaptive_backoff is False
+        assert settings.silver_merge_retry.max_retries == 1
+        assert settings.silver_merge_timeout.profile == "e2e"
+        assert settings.silver_merge_timeout.execution_timeout_seconds == 60.0
+        assert settings.silver_merge_timeout.e2e_execution_timeout_seconds == 120.0
+        assert settings.silver_merge_timeout.max_retries == 0
 
     def test_batch_size_validation(self) -> None:
         """Test batch_size validation."""

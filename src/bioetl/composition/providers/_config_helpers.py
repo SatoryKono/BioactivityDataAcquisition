@@ -164,6 +164,8 @@ def _wrap_with_filter(
     pipeline_name: str = "unknown",
 ) -> DataSourcePort:
     """Wrap data source with FilteredDataSource if filter is enabled."""
+    _wire_composable_fallback(data_source)
+
     if filter_config and filter_config.enabled:
         return FilteredDataSource(
             data_source=data_source,
@@ -174,6 +176,22 @@ def _wrap_with_filter(
             logger=logger,
         )
     return data_source
+
+
+def _wire_composable_fallback(data_source: DataSourcePort) -> None:
+    """Apply provider fallback policy once from composition root wiring."""
+    provider_name = getattr(data_source, "provider_name", None)
+    if not isinstance(provider_name, str) or not provider_name.strip():
+        return
+
+    source_config = _get_source_config(provider_name)
+    if source_config is None:
+        return
+
+    configure = getattr(data_source, "configure_fallback_policy", None)
+    policy = source_config.provider_config.fallback
+    if callable(configure) and policy is not None:
+        configure(policy)
 
 
 def _normalize_optional_override(value: str | None) -> str | None:

@@ -9,7 +9,10 @@ from pathlib import Path
 import yaml
 
 from bioetl.domain.types import JsonDict
-from bioetl.infrastructure.quality._primitives import _quarter_label
+from bioetl.infrastructure.quality._primitives import (
+    _parse_quarter_label,
+    _quarter_label,
+)
 from bioetl.infrastructure.quality.debt_scorecard_validation import (
     validate_debt_scorecard_raw,
 )
@@ -27,6 +30,7 @@ from bioetl.infrastructure.quality.scoring import (
     _evaluate_expiry_cap,
     _evaluate_group_budgets,
     _evaluate_owner_allocations,
+    _evaluate_owner_diversification,
     _evaluate_program_done_criteria,
     _evaluate_registry_budgets,
     _expiry_cap_for_quarter,
@@ -51,6 +55,31 @@ class DebtScorecardEvaluation:
     by_owner: dict[str, int]
     by_expiry_quarter: dict[str, int]
     expired_entries: int
+
+
+def _is_owner_decomposition_active(
+    *,
+    scorecard: JsonDict,  # Any: YAML scorecard sections are heterogeneous
+    quarter: str,
+) -> bool:
+    """Enable owner-allocation enforcement from owner_diversification.starts_quarter."""
+    governance = scorecard.get("governance", {})
+    if not isinstance(governance, dict):
+        return True
+
+    diversification = governance.get("owner_diversification", {})
+    if not isinstance(diversification, dict):
+        return True
+
+    starts_quarter = diversification.get("starts_quarter")
+    if not isinstance(starts_quarter, str):
+        return True
+
+    current = _parse_quarter_label(quarter)
+    starts = _parse_quarter_label(starts_quarter)
+    if current is None or starts is None:
+        return True
+    return current >= starts
 
 
 def _project_root() -> Path:
@@ -250,10 +279,18 @@ def evaluate_debt_scorecard(
         scorecard=scorecard,
         quarter=quarter,
     )
+    if _is_owner_decomposition_active(scorecard=scorecard, quarter=quarter):
+        violations.extend(
+            _evaluate_owner_allocations(
+                by_owner=inventory.by_owner,
+                allocations=owner_allocations,
+                quarter=quarter,
+            )
+        )
     violations.extend(
-        _evaluate_owner_allocations(
+        _evaluate_owner_diversification(
             by_owner=inventory.by_owner,
-            allocations=owner_allocations,
+            scorecard=scorecard,
             quarter=quarter,
         )
     )

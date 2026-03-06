@@ -3,171 +3,200 @@ governance:
   baseline_date: '2026-03-04'
   description: Architecture debt scorecard governance for exemption registry.
   growth_gate_default_mode: block
+  temporary_exemptions:
+    window_policy: budget-only
+    max_window_days: 45
   allow_grace_windows_only_for_rf: true
   owner_diversification:
-    starts_quarter: '2026-Q2'
-    min_distinct_owners: 3
-  burn_down_priorities:
-    registries:
-    - file_size_limits
-    - function_length
-    - class_size
-  growth_section_gate_rollout:
-    default_mode: block
-    warn_until_by_section:
-      registry:*: '2026-06-30'
-      group:*: '2026-03-03'
+        starts_quarter: '2026-Q2'
+        min_distinct_owners: 3
+    owner_registry_q2_subsystems:
+        architecture:
+            owner: '@bioetl-architecture'
+            scope:
+                - application
+                - interfaces
+                - cross-cutting-architecture
+        platform:
+            owner: '@bioetl-platform'
+            scope:
+                - infrastructure
+                - composition
+                - runtime-observability
+        data_model:
+            owner: '@bioetl-data-model'
+            scope:
+                - domain-model
+                - domain-schemas
+                - domain-mapping
+    review_policy:
+        new_exemption_requires:
+            - owner
+            - removal_step
+        reviewer_checks:
+            - owner maps to subsystem scope
+            - removal_step references concrete follow-up action
+    burn_down_priorities:
+        registries:
+            - file_size_limits
+            - function_length
+            - class_size
+    growth_section_gate_rollout:
+        default_mode: block
+        warn_until_by_section:
+            registry:*: '2026-06-30'
+            group:*: '2026-03-03'
 
 baseline:
-  total_exemptions: 207
-  by_registry:
-    file_size_limits: 58
-    function_complexity: 40
-    function_length: 16
-    class_size: 39
-    class_method_count: 1
-    god_object: 16
-    domain_complexity: 37
+    total_exemptions: 207
+    by_registry:
+        file_size_limits: 58
+        function_complexity: 40
+        function_length: 16
+        class_size: 39
+        class_method_count: 1
+        god_object: 16
+        domain_complexity: 37
 
 registry_groups:
-  size_shape:
-    registries:
-    - file_size_limits
-    - function_length
-    - class_size
-    - class_method_count
-    - god_object
-  complexity:
-    registries:
-    - function_complexity
-    - domain_complexity
+    size_shape:
+        registries:
+            - file_size_limits
+            - function_length
+            - class_size
+            - class_method_count
+            - god_object
+    complexity:
+        registries:
+            - function_complexity
+            - domain_complexity
 
 quarterly_targets:
-- quarter: '2026-Q1'
-  max_total_exemptions: 313
-  min_integral_score: 70
-  group_budgets:
-    size_shape: 240
-    complexity: 80
-  registry_budgets:
-    file_size_limits: 98
-    function_complexity: 42
-    function_length: 99
-    class_size: 55
-    class_method_count: 1
-    god_object: 24
-    domain_complexity: 38
-- quarter: '2026-Q2'
-  max_total_exemptions: 250
-  min_integral_score: 73
-  group_budgets:
-    size_shape: 197
-    complexity: 53
-  registry_budgets:
-    file_size_limits: 69
-    function_complexity: 23
-    function_length: 71
-    class_size: 39
-    class_method_count: 1
-    god_object: 17
-    domain_complexity: 30
-- quarter: '2026-Q3'
-  max_total_exemptions: 150
-  min_integral_score: 76
-  group_budgets:
-    size_shape: 118
-    complexity: 32
-  registry_budgets:
-    file_size_limits: 41
-    function_complexity: 14
-    function_length: 42
-    class_size: 24
-    class_method_count: 1
-    god_object: 10
-    domain_complexity: 18
-- quarter: '2026-Q4'
-  max_total_exemptions: 145
-  min_integral_score: 78
-  group_budgets:
-    size_shape: 114
-    complexity: 31
-  registry_budgets:
-    file_size_limits: 40
-    function_complexity: 13
-    function_length: 40
-    class_size: 23
-    class_method_count: 1
-    god_object: 10
-    domain_complexity: 18
-- quarter: '2027-Q1'
-  max_total_exemptions: 140
-  min_integral_score: 80
-  group_budgets:
-    size_shape: 109
-    complexity: 31
-  registry_budgets:
-    file_size_limits: 38
-    function_complexity: 13
-    function_length: 39
-    class_size: 22
-    class_method_count: 1
-    god_object: 9
-    domain_complexity: 18
+    -   quarter: '2026-Q1'
+        max_total_exemptions: 313
+        min_integral_score: 70
+        group_budgets:
+            size_shape: 240
+            complexity: 80
+        registry_budgets:
+            file_size_limits: 98
+            function_complexity: 42
+            function_length: 99
+            class_size: 55
+            class_method_count: 1
+            god_object: 24
+            domain_complexity: 38
+    -   quarter: '2026-Q2'
+        max_total_exemptions: 250
+        min_integral_score: 73
+        group_budgets:
+            size_shape: 197
+            complexity: 53
+        registry_budgets:
+            file_size_limits: 69
+            function_complexity: 23
+            function_length: 71
+            class_size: 39
+            class_method_count: 1
+            god_object: 17
+            domain_complexity: 30
+    -   quarter: '2026-Q3'
+        max_total_exemptions: 150
+        min_integral_score: 76
+        group_budgets:
+            size_shape: 118
+            complexity: 32
+        registry_budgets:
+            file_size_limits: 41
+            function_complexity: 14
+            function_length: 42
+            class_size: 24
+            class_method_count: 1
+            god_object: 10
+            domain_complexity: 18
+    -   quarter: '2026-Q4'
+        max_total_exemptions: 145
+        min_integral_score: 78
+        group_budgets:
+            size_shape: 114
+            complexity: 31
+        registry_budgets:
+            file_size_limits: 40
+            function_complexity: 13
+            function_length: 40
+            class_size: 23
+            class_method_count: 1
+            god_object: 10
+            domain_complexity: 18
+    -   quarter: '2027-Q1'
+        max_total_exemptions: 140
+        min_integral_score: 80
+        group_budgets:
+            size_shape: 109
+            complexity: 31
+        registry_budgets:
+            file_size_limits: 38
+            function_complexity: 13
+            function_length: 39
+            class_size: 22
+            class_method_count: 1
+            god_object: 9
+            domain_complexity: 18
 
 owner_decomposition_targets:
-- quarter: '2026-Q1'
-  allocations:
-    '@bioetl-architecture': 313
-- quarter: '2026-Q2'
-  allocations:
-    '@bioetl-architecture': 120
-    '@bioetl-platform': 80
-    '@bioetl-data-model': 50
-- quarter: '2026-Q3'
-  allocations:
-    '@bioetl-architecture': 70
-    '@bioetl-platform': 45
-    '@bioetl-data-model': 35
-- quarter: '2026-Q4'
-  allocations:
-    '@bioetl-architecture': 66
-    '@bioetl-platform': 44
-    '@bioetl-data-model': 35
-- quarter: '2027-Q1'
-  allocations:
-    '@bioetl-architecture': 63
-    '@bioetl-platform': 42
-    '@bioetl-data-model': 35
+    -   quarter: '2026-Q1'
+        allocations:
+            '@bioetl-architecture': 313
+    -   quarter: '2026-Q2'
+        allocations:
+            '@bioetl-architecture': 120
+            '@bioetl-platform': 80
+            '@bioetl-data-model': 50
+    -   quarter: '2026-Q3'
+        allocations:
+            '@bioetl-architecture': 70
+            '@bioetl-platform': 45
+            '@bioetl-data-model': 35
+    -   quarter: '2026-Q4'
+        allocations:
+            '@bioetl-architecture': 66
+            '@bioetl-platform': 44
+            '@bioetl-data-model': 35
+    -   quarter: '2027-Q1'
+        allocations:
+            '@bioetl-architecture': 63
+            '@bioetl-platform': 42
+            '@bioetl-data-model': 35
 
 expiry_decomposition_targets:
-- quarter: '2026-Q2'
-  max_entries_expiring_in_quarter: 313
-- quarter: '2026-Q3'
-  max_entries_expiring_in_quarter: 250
-- quarter: '2026-Q4'
-  max_entries_expiring_in_quarter: 150
-- quarter: '2027-Q1'
-  max_entries_expiring_in_quarter: 145
-- quarter: '2027-Q2'
-  max_entries_expiring_in_quarter: 140
+    -   quarter: '2026-Q2'
+        max_entries_expiring_in_quarter: 313
+    -   quarter: '2026-Q3'
+        max_entries_expiring_in_quarter: 250
+    -   quarter: '2026-Q4'
+        max_entries_expiring_in_quarter: 150
+    -   quarter: '2027-Q1'
+        max_entries_expiring_in_quarter: 145
+    -   quarter: '2027-Q2'
+        max_entries_expiring_in_quarter: 140
 
 program_done_criteria:
-  deadline_quarter: '2026-Q4'
-  max_total_exemptions: 220
-  min_integral_score: 78
-  max_expired_entries: 0
+    deadline_quarter: '2026-Q4'
+    max_total_exemptions: 220
+    min_integral_score: 78
+    max_expired_entries: 0
 
 grace_windows:
-- rf_id: RF-001
-  approved: true
-  starts_on: '2026-03-01'
-  ends_on: '2026-03-31'
-  allowances:
-    total_exemptions: 10
-    group_budgets:
-      size_shape: 8
-      complexity: 2
-    registry_budgets:
-      class_size: 5
-      file_size_limits: 3
-  note: Temporary headroom during approved mixin type-safety refactor wave.
+    -   rf_id: RF-001
+        approved: true
+        starts_on: '2026-03-01'
+        ends_on: '2026-03-31'
+        allowances:
+            total_exemptions: 10
+            group_budgets:
+                size_shape: 8
+                complexity: 2
+            registry_budgets:
+                class_size: 5
+                file_size_limits: 3
+        note: Temporary headroom during approved mixin type-safety refactor wave.

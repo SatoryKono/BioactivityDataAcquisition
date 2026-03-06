@@ -32,14 +32,7 @@ class BaseFilterConfig:
 
     @classmethod
     def from_base(cls, other: BaseFilterConfig) -> Self:
-        """Create same-type filter config from another base config.
-
-        Args:
-            other: Other.
-
-        Returns:
-            The Self result.
-        """
+        """Create same-type filter config from another base config."""
         return cls(
             column_filters=other.column_filters,
             range_filters=other.range_filters,
@@ -50,14 +43,7 @@ class BaseFilterConfig:
         )
 
     def should_include(self, record: JsonDict) -> bool:
-        """Check all filtering rules against a record.
-
-        Args:
-            record: Single data record.
-
-        Returns:
-            True if condition is met, False otherwise.
-        """
+        """Check all filtering rules against a record."""
         checks = [
             self._check_required_fields,
             self._check_exclude_if_present,
@@ -278,11 +264,7 @@ class BaseFilterConfig:
         return val <= max_val if inclusive else val < max_val
 
     def is_empty(self) -> bool:
-        """Check whether the filter configuration is empty.
-
-        Returns:
-            True if the condition is met, False otherwise.
-        """
+        """Check whether the filter configuration is empty."""
         all_filters = (
             self.column_filters,
             self.range_filters,

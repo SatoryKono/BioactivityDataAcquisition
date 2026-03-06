@@ -1,13 +1,16 @@
 # Reports Index
 
 *Status: Internal / Extended documentation (non-normative)*
-*Last updated: 2026-03-04*
+*Last updated: 2026-03-06*
 
 This section aggregates dated engineering reports. Use these reports as operational history, not as the primary source of architectural truth.
 
 ## Latest
 
 - [Architecture Debt Baseline (2026-03-04, Phase A freeze)](architecture-debt-baseline-2026-03-04.md)
+- [Debt Ownership Dashboard (2026-03-06)](debt-ownership-dashboard-2026-03-06.md)
+- [File-Size Decomposition Migration Notes (2026-03-06)](file-size-decomposition-migration-notes-2026-03-06.md)
+- [Domain DDD Consolidation P1 (2026-03-06)](domain-ddd-consolidation-p1-2026-03-06.md)
 - [Architecture Debt Baseline (2026-03-03)](architecture-debt-baseline-2026-03-03.md)
 - [Quality Debt Scorecard (2026-Q1)](quality-debt-scorecard-2026-Q1.md)
 - [Documentation Audit (2026-03-03, main)](documentation-audit-2026-03-03-main.md)

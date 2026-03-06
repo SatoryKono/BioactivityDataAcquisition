@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import argparse
 import re
-import sys
 import xml.etree.ElementTree as ET
 from collections import Counter
 from dataclasses import dataclass
@@ -31,6 +30,16 @@ class MatrixHealthSummary:
     skip_rate: float
     skip_labels: Counter[str]
     failure_labels: Counter[str]
+
+    @property
+    def infra_flaky_total(self) -> int:
+        return int(self.skip_labels.get("infra_flaky", 0)) + int(
+            self.failure_labels.get("infra_flaky", 0)
+        )
+
+    @property
+    def code_regression_total(self) -> int:
+        return int(self.failure_labels.get("code_regression", 0))
 
 
 def _parse_args() -> argparse.Namespace:
@@ -82,6 +91,11 @@ def _parse_args() -> argparse.Namespace:
         "--allow-unknown-labels",
         action="store_true",
         help="Do not fail when unknown skip/failure labels are found.",
+    )
+    parser.add_argument(
+        "--ignore-failures",
+        action="store_true",
+        help="Ignore failed testcases when used with rerun-stability gating.",
     )
     return parser.parse_args()
 
@@ -167,6 +181,8 @@ def _render_markdown(summary: MatrixHealthSummary, violations: list[str]) -> str
         f"- skip_rate: `{summary.skip_rate:.4f}`",
         f"- skip_labels: `{dict(summary.skip_labels)}`",
         f"- failure_labels: `{dict(summary.failure_labels)}`",
+        f"- infra_flaky_total: `{summary.infra_flaky_total}`",
+        f"- code_regression_total: `{summary.code_regression_total}`",
         "",
     ]
     if violations:
@@ -209,7 +225,7 @@ def main() -> int:
         violations.append(
             f"skip rate {summary.skip_rate:.4f} exceeds budget {args.max_skip_rate:.4f}"
         )
-    if summary.failed > 0:
+    if summary.failed > 0 and not args.ignore_failures:
         violations.append(f"matrix smoke has {summary.failed} failing test(s)")
 
     unknown_skip = summary.skip_labels.get("unknown", 0)
@@ -227,6 +243,8 @@ def main() -> int:
     print(f"  skip_rate={summary.skip_rate:.4f}")
     print(f"  skip_labels={dict(summary.skip_labels)}")
     print(f"  failure_labels={dict(summary.failure_labels)}")
+    print(f"  infra_flaky_total={summary.infra_flaky_total}")
+    print(f"  code_regression_total={summary.code_regression_total}")
 
     if args.markdown_out is not None:
         args.markdown_out.parent.mkdir(parents=True, exist_ok=True)

@@ -23,7 +23,9 @@ from bioetl.application.pipelines.pubmed.extractors import (
     DateExtractor,
     IdentifierExtractor,
     RawAuthor,
-    StructuredAffiliation,
+)
+from bioetl.application.pipelines.pubmed.transformer_authors_mixin import (
+    _PubMedTransformerAuthorsMixin,
 )
 from bioetl.application.pipelines.pubmed.transformer_dates_mixin import (
     _PubMedTransformerDatesMixin,
@@ -51,7 +53,9 @@ if TYPE_CHECKING:
 
 
 class PubMedPublicationTransformer(
-    _PubMedTransformerDatesMixin, BasePublicationTransformer
+    _PubMedTransformerAuthorsMixin,
+    _PubMedTransformerDatesMixin,
+    BasePublicationTransformer,
 ):
     """Transformer for PubMed publication records.
 
@@ -418,104 +422,6 @@ class PubMedPublicationTransformer(
             "publication_type": normalize_publication_type(raw_type),
             **classification,
         }
-
-    def _process_structured_affiliations(
-        self, affiliations: list[StructuredAffiliation]
-    ) -> list[JsonDict]:  # Any: untyped PubMed XML/JSON values
-        """Process structured affiliations with PII handling for emails.
-
-        Email addresses in affiliations are PII and must be hashed before
-        storing in Silver layer (RULES.md §5.4).
-
-        Args:
-            affiliations: List of structured affiliation dicts.
-
-        Returns:
-            List of processed affiliation dicts with hashed emails.
-        """
-        processed = []
-        for aff in affiliations:
-            processed_aff: JsonDict = {  # Any: untyped PubMed XML/JSON values
-                "text": aff.get("text"),
-                "identifier": aff.get("identifier"),
-                "identifier_source": aff.get("identifier_source"),
-                "ror_id": aff.get("ror_id"),
-                "grid_id": aff.get("grid_id"),
-            }
-            # Hash email if present (PII protection)
-            email = aff.get("email")
-            if email and self._pii_hasher:
-                processed_aff["email_hash"] = self._pii_hasher.hash_value(email)
-            else:
-                processed_aff["email_hash"] = None
-
-            processed.append(processed_aff)
-        return processed
-
-    def _build_authors_with_affiliations(
-        self, raw_authors: list[RawAuthor]
-    ) -> list[JsonDict]:  # Any: untyped PubMed XML/JSON values
-        """Build structured author-affiliation mapping.
-
-        Links each author to their specific affiliations with identifiers.
-        Author names are hashed for PII compliance (RULES.md §5.4).
-
-        Args:
-            raw_authors: List of raw author dicts from AuthorExtractor.
-
-        Returns:
-            List of author objects with hashed names and affiliations.
-        """
-        result: list[JsonDict] = []  # Any: untyped PubMed XML/JSON values
-
-        for author in raw_authors:
-            # Build author name for hashing
-            last_name = author.get("last_name")
-            initials = author.get("initials")
-            fore_name = author.get("fore_name")
-            collective = author.get("collective_name")
-
-            # Determine display name
-            if last_name:
-                if initials:
-                    name = f"{last_name}, {initials}"
-                elif fore_name:
-                    name = f"{last_name}, {fore_name}"
-                else:
-                    name = last_name
-            elif collective:
-                name = collective
-            else:
-                continue  # Skip authors without any name
-
-            # Hash the name for PII compliance
-            name_hash = self._pii_hasher.hash_value(name) if self._pii_hasher else None
-
-            # Process affiliations for this author (use pre-computed ror_id/grid_id)
-            affiliations: list[
-                JsonDict  # Any: transformer record has heterogeneous values
-            ] = []  # Any: untyped PubMed XML/JSON values
-            structured_affs = author.get("structured_affiliations") or []
-
-            for aff in structured_affs:
-                aff_entry: JsonDict = {  # Any: untyped PubMed XML/JSON values
-                    "text": aff.get("text"),
-                    "ror_id": aff.get("ror_id"),
-                    "grid_id": aff.get("grid_id"),
-                    "identifier": aff.get("identifier"),
-                    "identifier_source": aff.get("identifier_source"),
-                }
-                affiliations.append(aff_entry)
-
-            result.append(
-                {
-                    "name_hash": name_hash,
-                    "initials": initials,
-                    "affiliations": affiliations,
-                }
-            )
-
-        return result
 
     def _get_primary_id_field(self) -> str:
         """Return the primary ID field name for PubMed publications.

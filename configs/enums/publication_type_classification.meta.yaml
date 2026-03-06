@@ -9,6 +9,3 @@ artifact:
   path: configs/enums/publication_type_classification.asset.v1.json
   sha256: da2a216046a2b64c7aeb2604c5e39459f745d0b4677560a0a3043b856d0a6a33
   row_count: 214
-generated:
-  path: src/bioetl/domain/mapping/generated/publication_type_classification_data.py
-  sha256: 728373d2447340411733e1dec71a84b4def06698a13487aa893443fc21b148af

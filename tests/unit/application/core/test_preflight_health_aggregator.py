@@ -118,6 +118,17 @@ def health_aggregator_no_logger(mock_metrics: MagicMock) -> _HealthAggregator:
     return _HealthAggregator(metrics=mock_metrics, logger=None)
 
 
+@pytest.fixture
+def health_aggregator_probe(
+    mock_metrics: MagicMock, mock_logger: MagicMock
+) -> _HealthAggregator:
+    return _HealthAggregator(
+        metrics=mock_metrics,
+        logger=mock_logger,
+        health_check_mode="probe",
+    )
+
+
 # ---------------------------------------------------------------------------
 # Tests: check_all
 # ---------------------------------------------------------------------------
@@ -224,6 +235,40 @@ class TestHealthAggregatorCheckAll:
         ds_result = next(r for r in report.results if r.component == "data_source")
         assert ds_result.status == HealthStatus.UNHEALTHY
         assert "API down" in ds_result.error_message
+
+    @pytest.mark.asyncio
+    async def test_probe_mode_downgrades_data_source_exception_to_degraded(
+        self,
+        health_aggregator_probe: _HealthAggregator,
+        mock_services: MagicMock,
+        mock_data_source_legacy: MagicMock,
+    ) -> None:
+        """Probe mode should downgrade data-source network exceptions to DEGRADED."""
+        mock_data_source_legacy.health_check.side_effect = OSError("API down")
+
+        report = await health_aggregator_probe.check_all(mock_services)
+
+        ds_result = next(r for r in report.results if r.component == "data_source")
+        assert ds_result.status == HealthStatus.DEGRADED
+        assert ds_result.error_message is not None
+        assert ds_result.error_message.startswith("probe_mode_fallback:")
+
+    @pytest.mark.asyncio
+    async def test_probe_mode_downgrades_data_source_unhealthy_status(
+        self,
+        health_aggregator_probe: _HealthAggregator,
+        mock_services: MagicMock,
+        mock_data_source_legacy: MagicMock,
+    ) -> None:
+        """Probe mode should downgrade explicit UNHEALTHY data-source status to DEGRADED."""
+        mock_data_source_legacy.health_check.return_value = HealthStatus.UNHEALTHY
+
+        report = await health_aggregator_probe.check_all(mock_services)
+
+        ds_result = next(r for r in report.results if r.component == "data_source")
+        assert ds_result.status == HealthStatus.DEGRADED
+        assert ds_result.error_message is not None
+        assert ds_result.error_message.startswith("probe_mode_fallback:")
 
     @pytest.mark.asyncio
     async def test_unhealthy_storage_in_report(

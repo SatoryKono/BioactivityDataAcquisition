@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
 import pytest
@@ -35,6 +36,7 @@ from bioetl.infrastructure.storage.metadata_writer import (
     METADATA_FILENAME,
     MetadataWriter,
 )
+from bioetl.infrastructure.storage.write_resilience import AdaptiveRetryPolicy
 
 
 @pytest.fixture
@@ -361,6 +363,58 @@ class TestMetadataWriter:
         # Check no .tmp files remain
         tmp_files = list(base_path.glob("*.tmp"))
         assert len(tmp_files) == 0
+
+    @pytest.mark.asyncio
+    async def test_metadata_writer_emits_retry_telemetry(
+        self,
+        tmp_path: Path,
+        bronze_metadata: BronzeMetadata,
+    ) -> None:
+        """Metadata writer should emit retry telemetry for atomic replace retries."""
+        logger = MagicMock()
+        writer = MetadataWriter(
+            logger=logger,
+            atomic_replace_retry_policy=AdaptiveRetryPolicy(
+                enabled=True,
+                max_retries=2,
+                base_delay_seconds=0.01,
+                max_delay_seconds=0.1,
+                jitter_seconds=0.0,
+                adaptive=True,
+            ),
+        )
+        base_path = tmp_path / "bronze"
+        base_path.mkdir(parents=True)
+
+        original_replace = Path.replace
+        call_count = {"count": 0}
+
+        def flaky_replace(self: Path, target_path: Path) -> Path:
+            call_count["count"] += 1
+            if call_count["count"] == 1:
+                raise OSError(13, "Permission denied")
+            return original_replace(self, target_path)
+
+        with (
+            patch.object(Path, "replace", flaky_replace),
+            patch("bioetl.infrastructure.storage._atomic.time.sleep"),
+        ):
+            await writer.write_bronze_metadata(base_path, bronze_metadata)
+
+        retry_calls = [
+            call
+            for call in logger.warning.call_args_list
+            if call.args and call.args[0] == "metadata_atomic_replace_retry"
+        ]
+        assert retry_calls
+
+        completion_calls = [
+            call
+            for call in logger.info.call_args_list
+            if call.args and call.args[0] == "metadata_write_completed"
+        ]
+        assert completion_calls
+        assert completion_calls[-1].kwargs["final_reason"] == "success_after_retry"
 
     @pytest.mark.asyncio
     async def test_write_metadata_overwrites_existing(

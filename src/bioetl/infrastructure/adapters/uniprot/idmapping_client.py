@@ -16,10 +16,8 @@ __all__ = ["IDMappingJobError", "IDMappingTimeoutError", "UniProtIDMappingClient
 from collections.abc import AsyncIterator, Mapping
 from typing import TYPE_CHECKING
 
-from bioetl.domain.ports import NoOpMetrics
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
-from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
 from bioetl.infrastructure.adapters.uniprot._idmapping_errors import (
     IDMappingJobError,
     IDMappingTimeoutError,
@@ -38,6 +36,7 @@ from bioetl.infrastructure.adapters.uniprot.constants import UNIPROT_API_BASE
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 
@@ -62,11 +61,16 @@ class UniProtIDMappingClient(
         logger: LoggerPort,
         metrics: MetricsPort | None = None,
         base_url: str = BASE_URL,
+        *,
+        adapter_metrics: AdapterMetrics | None = None,
     ) -> None:
-        super().__init__(http_client, logger)
+        super().__init__(
+            http_client,
+            logger,
+            metrics=metrics,
+            adapter_metrics=adapter_metrics,
+        )
         self.base_url = base_url.rstrip("/")
-        metrics_port = metrics if metrics is not None else NoOpMetrics()
-        self._adapter_metrics = AdapterMetrics(metrics_port, self.provider_name)
 
     async def map_ids(
         self,
@@ -80,7 +84,7 @@ class UniProtIDMappingClient(
 
         results: dict[str, JsonDict | None] = dict.fromkeys(ids, None)
         for batch_start in range(0, len(ids), self.MAX_IDS_PER_BATCH):
-            batch = ids[batch_start : batch_start + self.MAX_IDS_PER_BATCH]
+            batch = ids[batch_start: batch_start + self.MAX_IDS_PER_BATCH]
             batch_results = await self._map_batch(from_db, to_db, batch)
             results.update(batch_results)
         return results

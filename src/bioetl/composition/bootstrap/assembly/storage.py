@@ -15,6 +15,10 @@ from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
+from bioetl.composition.factories._resilience_factory import (
+    create_silver_atomic_retry_policy,
+    create_silver_merge_resilience_policy,
+)
 from bioetl.composition.factories.storage import StorageAdapter
 from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
 from bioetl.domain.ports import NoOpMetrics, NoOpTracing
@@ -66,9 +70,15 @@ def bootstrap_storage_adapter(*, enable_csv_export: bool = False) -> StorageAdap
 
     # ADR-025: Use data/output/ hierarchy for consistency with pipeline configs
     output_dir = Path(settings.data_dir) / "output"
+    atomic_retry_policy = create_silver_atomic_retry_policy(settings)
+    merge_resilience_policy = create_silver_merge_resilience_policy(settings)
 
     # Create metadata services for composite pipelines
-    metadata_writer = MetadataWriter(logger=noop_logger)
+    metadata_writer = MetadataWriter(
+        logger=noop_logger,
+        atomic_replace_retry_policy=atomic_retry_policy,
+        metrics=noop_metrics,
+    )
     run_context = RunContext(
         run_id=RunID(uuid4()),
         run_type=RunType.INCREMENTAL,
@@ -108,6 +118,7 @@ def bootstrap_storage_adapter(*, enable_csv_export: bool = False) -> StorageAdap
             csv_exporter=silver_csv_exporter,
             metadata_writer=metadata_writer,
             metadata_coordinator=metadata_coordinator,
+            merge_resilience_policy=merge_resilience_policy,
         ),
         gold_writer=GoldWriter(
             base_path=output_dir / "gold",  # data/output/gold

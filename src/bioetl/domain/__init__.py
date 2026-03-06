@@ -18,12 +18,12 @@ import from the specific sub-facades for most symbols:
 
 from __future__ import annotations
 
+from bioetl.domain import composite, constants, contracts, version  # noqa: F401
 # Subpackage registrations (make them importable as bioetl.domain.<name>)
 from bioetl.domain import mapping  # noqa: F401
 from bioetl.domain import observability_contract
 from bioetl.domain import registry  # noqa: F401
-from bioetl.domain import composite, constants, contracts, version  # noqa: F401
-
+from bioetl.domain import types_config_validation
 # Events
 from bioetl.domain.events import PipelineEvent
 from bioetl.domain.version import get_version
@@ -33,6 +33,7 @@ __all__ = [
     "composite",
     "get_version",
     "observability_contract",
+    "types_config_validation",
     # Data contracts (subpackage)
     "contracts",
     # Constants

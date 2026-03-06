@@ -176,6 +176,130 @@ def test_build_pipeline_runner_uses_default_registry() -> None:
     assert fake_factory.kwargs["runtime"] == "runtime"
 
 
+def test_build_pipeline_runner_forces_probe_mode_in_test_mode() -> None:
+    """Builder must pass probe health mode when settings.test_mode is enabled."""
+    fake_factory = _FakeFactory()
+    fake_registry = _FakeRegistry(factory=fake_factory)
+    captured: dict[str, object] = {}
+
+    def get_settings_fn() -> SimpleNamespace:
+        return SimpleNamespace(
+            pipeline=SimpleNamespace(heartbeat_interval=30, health_check_mode="strict"),
+            test_mode=True,
+        )
+
+    def load_pipeline_config_fn(_: str) -> SimpleNamespace:
+        return SimpleNamespace(
+            maintenance=SimpleNamespace(auto_vacuum=False, vacuum_retention_days=7),
+            input_filter=SimpleNamespace(),
+            business_primary_keys=["activity_id"],
+            technical_primary_key="entity_id",
+            batch_size=100,
+            provider="chembl",
+        )
+
+    def assemble_runtime_config_fn(**kwargs: object) -> str:
+        captured.update(kwargs)
+        return "runtime"
+
+    context = SimpleNamespace(
+        pipeline_name="chembl_activity",
+        run_id=uuid4(),
+        log_level="INFO",
+        vacuum=SimpleNamespace(enabled=None, retention_days=7),
+        run_type="incremental",
+        resume=False,
+        limit=None,
+        query=None,
+        dry_run=False,
+        skip_gold=False,
+        input_filter=SimpleNamespace(enabled=False),
+    )
+
+    runner_builder.build_pipeline_runner(
+        context,
+        registry=fake_registry,
+        register_all_providers_fn=lambda: None,
+        register_all_pipelines_fn=lambda registry=None: None,
+        get_settings_fn=get_settings_fn,
+        load_pipeline_config_fn=load_pipeline_config_fn,
+        build_observability_bundle_fn=lambda **_: SimpleNamespace(
+            logger=SimpleNamespace(info=lambda *_, **__: None)
+        ),
+        assemble_vacuum_settings_fn=lambda **_: runner_builder.VacuumSettings(
+            enabled=False,
+            retention_days=7,
+        ),
+        assemble_runtime_config_fn=assemble_runtime_config_fn,
+        assemble_filter_config_fn=lambda **_: None,
+        assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
+    )
+
+    assert captured["health_check_mode"] == "probe"
+
+
+def test_build_pipeline_runner_uses_configured_mode_outside_test_mode() -> None:
+    """Builder must pass configured health mode when test_mode is disabled."""
+    fake_factory = _FakeFactory()
+    fake_registry = _FakeRegistry(factory=fake_factory)
+    captured: dict[str, object] = {}
+
+    def get_settings_fn() -> SimpleNamespace:
+        return SimpleNamespace(
+            pipeline=SimpleNamespace(heartbeat_interval=30, health_check_mode="probe"),
+            test_mode=False,
+        )
+
+    def load_pipeline_config_fn(_: str) -> SimpleNamespace:
+        return SimpleNamespace(
+            maintenance=SimpleNamespace(auto_vacuum=False, vacuum_retention_days=7),
+            input_filter=SimpleNamespace(),
+            business_primary_keys=["activity_id"],
+            technical_primary_key="entity_id",
+            batch_size=100,
+            provider="chembl",
+        )
+
+    def assemble_runtime_config_fn(**kwargs: object) -> str:
+        captured.update(kwargs)
+        return "runtime"
+
+    context = SimpleNamespace(
+        pipeline_name="chembl_activity",
+        run_id=uuid4(),
+        log_level="INFO",
+        vacuum=SimpleNamespace(enabled=None, retention_days=7),
+        run_type="incremental",
+        resume=False,
+        limit=None,
+        query=None,
+        dry_run=False,
+        skip_gold=False,
+        input_filter=SimpleNamespace(enabled=False),
+    )
+
+    runner_builder.build_pipeline_runner(
+        context,
+        registry=fake_registry,
+        register_all_providers_fn=lambda: None,
+        register_all_pipelines_fn=lambda registry=None: None,
+        get_settings_fn=get_settings_fn,
+        load_pipeline_config_fn=load_pipeline_config_fn,
+        build_observability_bundle_fn=lambda **_: SimpleNamespace(
+            logger=SimpleNamespace(info=lambda *_, **__: None)
+        ),
+        assemble_vacuum_settings_fn=lambda **_: runner_builder.VacuumSettings(
+            enabled=False,
+            retention_days=7,
+        ),
+        assemble_runtime_config_fn=assemble_runtime_config_fn,
+        assemble_filter_config_fn=lambda **_: None,
+        assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
+    )
+
+    assert captured["health_check_mode"] == "probe"
+
+
 def test_assemble_filter_config_passes_cli_overrides_when_enabled() -> None:
     ctx = SimpleNamespace(
         ignore_yaml_filter=False,

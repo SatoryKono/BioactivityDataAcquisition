@@ -14,6 +14,7 @@ Split from monolithic 761-LOC class per audit-package-structure-2026-02-07.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from datetime import datetime
 from typing import Any, cast
 
@@ -68,9 +69,9 @@ class GoldDQAnalyzer:
         business_rules: list[JsonDict],  # Any: DQ check values vary by check type
         reference_tables: dict[str, pl.DataFrame | pa.Table],
         baseline_stats: dict[
-            str, Any  # Any: DQ baseline statistics have heterogeneous values
-        ]
-        | None,
+                            str, Any  # Any: DQ baseline statistics have heterogeneous values
+                        ]
+                        | None,
         scd_config: JsonDict | None,  # Any: DQ check values vary by check type
     ) -> tuple[
         JsonDict, int, int, int  # Any: DQ check values vary by check type
@@ -79,54 +80,52 @@ class GoldDQAnalyzer:
         checks: JsonDict = {}  # Any: DQ check values vary by check type
         passed, failed, warnings = 0, 0, 0
 
-        if GoldDQCheckType.RECORD_COUNT in enabled_checks:
-            rc = check_record_count(df, baseline_stats)
-            checks["record_count"] = to_dict(rc)
-            passed, failed, warnings = update_counts(
-                rc.status, passed, failed, warnings
-            )
-
-        if GoldDQCheckType.COMPLETENESS in enabled_checks:
-            comp = check_completeness(df, required_fields, completeness_threshold)
-            checks["completeness"] = to_dict(comp)
-            passed, failed, warnings = update_counts(
-                comp.status, passed, failed, warnings
-            )
-
-        if GoldDQCheckType.BUSINESS_RULES in enabled_checks:
-            br = check_business_rules(df, business_rules)
-            checks["business_rules"] = to_dict(br)
-            passed, failed, warnings = update_counts(
-                br.status, passed, failed, warnings
-            )
-
-        if GoldDQCheckType.REFERENTIAL_INTEGRITY in enabled_checks:
-            ri = check_referential_integrity(df, reference_tables)
-            checks["referential_integrity"] = to_dict(ri)
-            passed, failed, warnings = update_counts(
-                ri.status, passed, failed, warnings
-            )
-
-        if GoldDQCheckType.STATISTICAL_PROFILE in enabled_checks:
-            sp = check_statistical_profile(df, baseline_stats)
-            checks["statistical_profile"] = to_dict(sp)
-            passed, failed, warnings = update_counts(
-                sp.status, passed, failed, warnings
-            )
-
-        if GoldDQCheckType.ANOMALY_DETECTION in enabled_checks:
-            ad = check_anomaly_detection(df, baseline_stats)
-            checks["anomaly_detection"] = to_dict(ad)
-            passed, failed, warnings = update_counts(
-                ad.status, passed, failed, warnings
-            )
-
-        if GoldDQCheckType.SCD_INTEGRITY in enabled_checks:
-            scd = check_scd_integrity(df, scd_config)
-            checks["scd_integrity"] = to_dict(scd)
-            passed, failed, warnings = update_counts(
-                scd.status, passed, failed, warnings
-            )
+        dispatch: list[
+            tuple[GoldDQCheckType, str, Callable[[], Any]]  # Any: check results vary
+        ] = [
+            (
+                GoldDQCheckType.RECORD_COUNT,
+                "record_count",
+                lambda: check_record_count(df, baseline_stats),
+            ),
+            (
+                GoldDQCheckType.COMPLETENESS,
+                "completeness",
+                lambda: check_completeness(df, required_fields, completeness_threshold),
+            ),
+            (
+                GoldDQCheckType.BUSINESS_RULES,
+                "business_rules",
+                lambda: check_business_rules(df, business_rules),
+            ),
+            (
+                GoldDQCheckType.REFERENTIAL_INTEGRITY,
+                "referential_integrity",
+                lambda: check_referential_integrity(df, reference_tables),
+            ),
+            (
+                GoldDQCheckType.STATISTICAL_PROFILE,
+                "statistical_profile",
+                lambda: check_statistical_profile(df, baseline_stats),
+            ),
+            (
+                GoldDQCheckType.ANOMALY_DETECTION,
+                "anomaly_detection",
+                lambda: check_anomaly_detection(df, baseline_stats),
+            ),
+            (
+                GoldDQCheckType.SCD_INTEGRITY,
+                "scd_integrity",
+                lambda: check_scd_integrity(df, scd_config),
+            ),
+        ]
+        for check_type, key, handler in dispatch:
+            if check_type in enabled_checks:
+                result = handler()
+                checks[key] = to_dict(result)
+                passed, failed, warnings = update_counts(
+                    result.status, passed, failed, warnings
+                )
 
         return checks, passed, failed, warnings
 
@@ -142,16 +141,16 @@ class GoldDQAnalyzer:
         required_fields: list[str] | None = None,
         completeness_threshold: float = 0.90,
         business_rules: list[
-            JsonDict  # Any: DQ check values vary by check type
-        ]  # Any: DQ rule definitions have heterogeneous values
-        | None = None,  # Any: DQ check values vary by check type
+                            JsonDict  # Any: DQ check values vary by check type
+                        ]  # Any: DQ rule definitions have heterogeneous values
+                        | None = None,  # Any: DQ check values vary by check type
         reference_tables: dict[str, pl.DataFrame | pa.Table] | None = None,
         baseline_stats: dict[
-            str, Any  # Any: DQ check values vary by check type
-        ]  # Any: DQ baseline statistics have heterogeneous values
-        | None = None,  # Any: DQ check values vary by check type
+                            str, Any  # Any: DQ check values vary by check type
+                        ]  # Any: DQ baseline statistics have heterogeneous values
+                        | None = None,  # Any: DQ check values vary by check type
         scd_config: JsonDict  # Any: SCD config has heterogeneous values
-        | None = None,  # Any: DQ check values vary by check type
+                    | None = None,  # Any: DQ check values vary by check type
     ) -> GoldDQReport:
         """Analyze Gold data and generate DQ report.
 

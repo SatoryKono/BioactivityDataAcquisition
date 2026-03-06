@@ -9,9 +9,13 @@ CLI commands should use this via composition/entrypoints.py.
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.composition.bootstrap.runtime.assembly import assemble_filter_config
+from bioetl.composition.bootstrap.runtime.classification_init import (
+    initialize_publication_type_classification,
+)
 from bioetl.composition.bootstrap.runtime.observability import (
     bootstrap_observability_bundle,
 )
@@ -38,6 +42,9 @@ def bootstrap_pipeline_runner(
     registry: PipelineRegistry | None = None,
 ) -> PipelineRunner:
     """Build a ready-to-run pipeline runner from runtime context and registry."""
+    # Classification data must be available before transformers run.
+    initialize_publication_type_classification(Path("configs"))
+
     # Explicit registration retained for deterministic bootstrap semantics.
     register_all_providers()
     register_all_pipelines(registry=registry)

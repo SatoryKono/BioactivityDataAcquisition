@@ -194,6 +194,46 @@ class PipelineSettings(BaseSettings):
 
     model_config = SettingsConfigDict(frozen=True)
 
+    class AtomicReplaceRetrySettings(BaseSettings):
+        """Atomic ``Path.replace`` retry policy for metadata sidecars."""
+
+        model_config = SettingsConfigDict(frozen=True)
+
+        enabled: bool = Field(default=True)
+        adaptive_backoff: bool = Field(default=True)
+        max_retries: int = Field(default=20, ge=0, le=30)
+        base_delay_seconds: float = Field(default=0.010, ge=0.0, le=5.0)
+        max_delay_seconds: float = Field(default=0.250, ge=0.0, le=10.0)
+        jitter_seconds: float = Field(default=0.010, ge=0.0, le=1.0)
+
+    class SilverMergeRetrySettings(BaseSettings):
+        """Retry policy for Delta commit conflict retries in Silver merge."""
+
+        model_config = SettingsConfigDict(frozen=True)
+
+        enabled: bool = Field(default=True)
+        adaptive_backoff: bool = Field(default=True)
+        max_retries: int = Field(default=3, ge=0, le=20)
+        base_delay_seconds: float = Field(default=0.250, ge=0.0, le=30.0)
+        max_delay_seconds: float = Field(default=2.0, ge=0.0, le=60.0)
+        jitter_seconds: float = Field(default=0.050, ge=0.0, le=5.0)
+
+    class SilverMergeTimeoutSettings(BaseSettings):
+        """Timeout and retry policy for Delta merge execution in Silver."""
+
+        model_config = SettingsConfigDict(frozen=True)
+
+        profile: Literal["default", "unit", "e2e"] = Field(default="default")
+        execution_timeout_seconds: float = Field(default=45.0, ge=1.0, le=600.0)
+        unit_execution_timeout_seconds: float = Field(default=15.0, ge=1.0, le=600.0)
+        e2e_execution_timeout_seconds: float = Field(default=90.0, ge=1.0, le=600.0)
+        retry_enabled: bool = Field(default=True)
+        adaptive_backoff: bool = Field(default=True)
+        max_retries: int = Field(default=1, ge=0, le=10)
+        base_delay_seconds: float = Field(default=0.200, ge=0.0, le=30.0)
+        max_delay_seconds: float = Field(default=2.0, ge=0.0, le=60.0)
+        jitter_seconds: float = Field(default=0.050, ge=0.0, le=5.0)
+
     batch_size: int = Field(default=100, ge=1, le=10000)
     """Number of records per batch write."""
 
@@ -208,6 +248,27 @@ class PipelineSettings(BaseSettings):
 
     heartbeat_interval: int = Field(default=30, ge=5, le=60)
     """Lock heartbeat interval in seconds (default: 30s, range: 5-60s)."""
+
+    silver_resilience_enabled: bool = Field(default=True)
+    """Feature flag for adaptive resilience in Silver merge and metadata writes."""
+
+    silver_metadata_atomic_retry: AtomicReplaceRetrySettings = Field(
+        default_factory=AtomicReplaceRetrySettings
+    )
+    """Atomic replace retry policy for Silver metadata sidecars."""
+
+    silver_merge_retry: SilverMergeRetrySettings = Field(
+        default_factory=SilverMergeRetrySettings
+    )
+    """Commit conflict retry policy for Delta merge operations."""
+
+    silver_merge_timeout: SilverMergeTimeoutSettings = Field(
+        default_factory=SilverMergeTimeoutSettings
+    )
+    """Delta merge execution timeout policy with dedicated retry controls."""
+
+    health_check_mode: Literal["strict", "probe"] = Field(default="strict")
+    """Preflight health-check gate mode: strict blocks on UNHEALTHY, probe degrades."""
 
 
 class Settings(BaseSettings):
@@ -232,13 +293,13 @@ class Settings(BaseSettings):
     strict_error_handling: bool = Field(
         default=False,
         description="When True, API client errors raise exceptions instead of being silently ignored. "
-        "Recommended for dev/staging environments.",
+                    "Recommended for dev/staging environments.",
     )
     strict_medallion: bool = Field(
         default=False,
         description="When True, schema drift in Silver layer raises SchemaEvolutionError. "
-        "When False (default), schema drift is handled per pipeline config. "
-        "Set via BIOETL_STRICT_MEDALLION=true for stricter validation.",
+                    "When False (default), schema drift is handled per pipeline config. "
+                    "Set via BIOETL_STRICT_MEDALLION=true for stricter validation.",
     )
 
     # Local storage paths

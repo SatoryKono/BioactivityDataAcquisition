@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from typing import Literal
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
@@ -29,6 +30,8 @@ def _build_preflight_dependencies(
     config: PipelineConfig,
     logger: MagicMock,
     metrics: MagicMock,
+    *,
+    health_check_mode: Literal["strict", "probe"] = "strict",
 ) -> dict[str, object]:
     """Build injected dependencies for PreflightService."""
     return {
@@ -36,6 +39,7 @@ def _build_preflight_dependencies(
             metrics=metrics,
             logger=logger,
             pipeline_name=config.pipeline_name,
+            health_check_mode=health_check_mode,
         ),
         "medallion_validator": _MedallionConfigValidator(
             config=config,
@@ -260,6 +264,45 @@ class TestPreflightServiceValidation:
         # Should not raise - degraded is acceptable
         report = await preflight_service.validate_infrastructure(degraded_services)
         assert report.is_healthy
+
+    @pytest.mark.asyncio
+    async def test_validate_infrastructure_probe_mode_does_not_block_on_data_source(
+        self,
+        pipeline_config,
+        mock_context,
+        mock_logger,
+        mock_metrics,
+    ) -> None:
+        """Probe mode should not block startup on data_source health exceptions."""
+        service = PreflightService(
+            config=pipeline_config,
+            context=mock_context,
+            logger=mock_logger,
+            metrics=mock_metrics,
+            **_build_preflight_dependencies(
+                pipeline_config,
+                mock_logger,
+                mock_metrics,
+                health_check_mode="probe",
+            ),
+        )
+
+        services = MagicMock()
+        services.storage = MagicMock()
+        services.storage.health_check = AsyncMock(return_value=HealthStatus.HEALTHY)
+        services.data_source = MagicMock()
+        del services.data_source.check_health
+        services.data_source.health_check = AsyncMock(
+            side_effect=RuntimeError("upstream unavailable")
+        )
+
+        report = await service.validate_infrastructure(services)
+
+        assert report.is_healthy
+        data_source_result = next(
+            r for r in report.results if r.component == "data_source"
+        )
+        assert data_source_result.status == HealthStatus.DEGRADED
 
 
 @pytest.mark.unit

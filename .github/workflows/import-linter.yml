@@ -1,353 +1,365 @@
 name: Lint, Type Check, and Tests
 
 permissions:
-  contents: read
+    contents: read
 
 on:
-  push:
-    branches:
-      - main
-      - master
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
-      - '.ai/**'
-      - '.claude/**'
-      - '.github/workflows/**'
-      - 'LICENSE'
-  pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
-      - '.ai/**'
-      - '.claude/**'
-      - '.github/workflows/**'
-      - 'LICENSE'
+    push:
+        branches:
+            - main
+            - master
+        paths-ignore:
+            - 'docs/**'
+            - '*.md'
+            - '.ai/**'
+            - '.claude/**'
+            - '.github/workflows/**'
+            - 'LICENSE'
+    pull_request:
+        paths-ignore:
+            - 'docs/**'
+            - '*.md'
+            - '.ai/**'
+            - '.claude/**'
+            - '.github/workflows/**'
+            - 'LICENSE'
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
+    lint:
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+        steps:
+            -   name: Checkout
+                uses: actions/checkout@v4
+                with:
+                    fetch-depth: 0
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+            -   name: Set up Python
+                uses: actions/setup-python@v5
+                with:
+                    python-version: "3.11"
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
+            -   name: Install uv
+                uses: astral-sh/setup-uv@v7
 
-      - name: Cache uv and virtualenv
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/uv
-            .venv
-          key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
-          restore-keys: |
-            uv-${{ runner.os }}-py311-
+            -   name: Cache uv and virtualenv
+                uses: actions/cache@v4
+                with:
+                    path: |
+                        ~/.cache/uv
+                        .venv
+                    key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
+                    restore-keys: |
+                        uv-${{ runner.os }}-py311-
 
-      - name: Install dependencies (frozen lock)
-        run: uv sync --frozen --extra dev --extra tracing
+            -   name: Install dependencies (frozen lock)
+                run: uv sync --frozen --extra dev --extra tracing
 
-      - name: Ruff (lint)
-        run: uv run ruff check src tests
+            -   name: Ruff (strict staged profile - domain)
+                run: uv run ruff check src/bioetl/domain --output-format=github
 
-      - name: Ruff (strict noise profile)
-        run: uv run ruff check src tests --select F401,F821,RUF022
+            -   name: Ruff (strict staged profile - application)
+                run: uv run ruff check src/bioetl/application --output-format=github
 
-      - name: Detect changed Python files
-        id: changed-python
-        shell: bash
-        run: |
-          set -euo pipefail
+            -   name: Ruff (strict staged profile - infrastructure)
+                run: uv run ruff check src/bioetl/infrastructure --output-format=github
 
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
-            diff_range="origin/${{ github.base_ref }}...HEAD"
-          else
-            before="${{ github.event.before }}"
-            if [[ -n "$before" && "$before" != "0000000000000000000000000000000000000000" ]]; then
-              diff_range="${before}...${{ github.sha }}"
-            else
-              diff_range="HEAD^...HEAD"
-            fi
-          fi
+            -   name: Ruff format (strict full gate - src + tests)
+                run: uv run ruff format --check src tests
 
-          mapfile -t changed_py < <(git diff --name-only --diff-filter=ACMR "$diff_range" -- "*.py")
+            -   name: Ruff isort (strict full gate - src + tests)
+                run: uv run ruff check --select I src tests --output-format=github
 
-          if [[ ${#changed_py[@]} -eq 0 ]]; then
-            echo "has_changes=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
+            -   name: Ruff (strict full gate - src + tests)
+                run: uv run ruff check src tests --output-format=github
 
-          {
-            echo "has_changes=true"
-            echo "files<<EOF"
-            printf "%s\n" "${changed_py[@]}"
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
+            -   name: Detect changed Python files
+                id: changed-python
+                shell: bash
+                run: |
+                    set -euo pipefail
 
-      - name: Ruff (autoformat changed Python files)
-        if: steps.changed-python.outputs.has_changes == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
+                    if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+                      git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+                      diff_range="origin/${{ github.base_ref }}...HEAD"
+                    else
+                      before="${{ github.event.before }}"
+                      if [[ -n "$before" && "$before" != "0000000000000000000000000000000000000000" ]]; then
+                        diff_range="${before}...${{ github.sha }}"
+                      else
+                        diff_range="HEAD^...HEAD"
+                      fi
+                    fi
 
-          changed_py=()
-          while IFS= read -r file; do
-            [[ -n "$file" ]] && changed_py+=("$file")
-          done <<< "${{ steps.changed-python.outputs.files }}"
+                    mapfile -t changed_py < <(git diff --name-only --diff-filter=ACMR "$diff_range" -- "*.py")
 
-          uv run ruff format "${changed_py[@]}"
+                    if [[ ${#changed_py[@]} -eq 0 ]]; then
+                      echo "has_changes=false" >> "$GITHUB_OUTPUT"
+                      exit 0
+                    fi
 
-          if ! git diff --quiet -- "${changed_py[@]}"; then
-            echo "::error::Ruff autoformat changed Python files. Run 'ruff format' locally and commit."
-            git --no-pager diff -- "${changed_py[@]}"
-            exit 1
-          fi
+                    {
+                      echo "has_changes=true"
+                      echo "files<<EOF"
+                      printf "%s\n" "${changed_py[@]}"
+                      echo "EOF"
+                    } >> "$GITHUB_OUTPUT"
 
-      - name: Mypy (strict-ish)
-        run: |
-          uv run mypy --config-file pyproject.toml src/bioetl
+            -   name: Ruff (autoformat changed Python files)
+                if: steps.changed-python.outputs.has_changes == 'true'
+                shell: bash
+                run: |
+                    set -euo pipefail
 
-  c901-governance:
-    name: C901 Governance (blocking)
-    runs-on: ubuntu-latest
+                    changed_py=()
+                    while IFS= read -r file; do
+                      [[ -n "$file" ]] && changed_py+=("$file")
+                    done <<< "${{ steps.changed-python.outputs.files }}"
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+                    uv run ruff format "${changed_py[@]}"
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+                    if ! git diff --quiet -- "${changed_py[@]}"; then
+                      echo "::error::Ruff autoformat changed Python files. Run 'ruff format' locally and commit."
+                      git --no-pager diff -- "${changed_py[@]}"
+                      exit 1
+                    fi
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
+            -   name: Mypy (strict-ish)
+                run: |
+                    uv run mypy --config-file pyproject.toml src/bioetl
 
-      - name: Cache uv and virtualenv
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/uv
-            .venv
-          key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
-          restore-keys: |
-            uv-${{ runner.os }}-py311-
+    c901-governance:
+        name: C901 Governance (blocking)
+        runs-on: ubuntu-latest
 
-      - name: Install dependencies (frozen lock)
-        run: uv sync --frozen --extra dev --extra tracing
+        steps:
+            -   name: Checkout
+                uses: actions/checkout@v4
 
-      - name: Ruff C901 snapshot (src/bioetl)
-        run: uv run ruff check src/bioetl --select C901 --output-format github --exit-zero
+            -   name: Set up Python
+                uses: actions/setup-python@v5
+                with:
+                    python-version: "3.11"
 
-      - name: Enforce C901 baseline policy (new violations forbidden)
-        env:
-          C901_GOVERNANCE_MODE: ${{ vars.C901_GOVERNANCE_MODE }}
-        run: |
-          mode="${C901_GOVERNANCE_MODE:-block}"
-          echo "C901 governance mode: ${mode}"
-          uv run python scripts/check_c901_baseline.py \
-            --target src/bioetl \
-            --baseline-file scripts/baselines/c901_baseline.json \
-            --mode "${mode}"
+            -   name: Install uv
+                uses: astral-sh/setup-uv@v7
 
-  arch-tests:
-    runs-on: ubuntu-latest
+            -   name: Cache uv and virtualenv
+                uses: actions/cache@v4
+                with:
+                    path: |
+                        ~/.cache/uv
+                        .venv
+                    key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
+                    restore-keys: |
+                        uv-${{ runner.os }}-py311-
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+            -   name: Install dependencies (frozen lock)
+                run: uv sync --frozen --extra dev --extra tracing
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+            -   name: Ruff C901 snapshot (src/bioetl)
+                run: uv run ruff check src/bioetl --select C901 --output-format github --exit-zero
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
+            -   name: Enforce C901 baseline policy (new violations forbidden)
+                env:
+                    C901_GOVERNANCE_MODE: ${{ vars.C901_GOVERNANCE_MODE }}
+                run: |
+                    mode="${C901_GOVERNANCE_MODE:-block}"
+                    echo "C901 governance mode: ${mode}"
+                    uv run python scripts/check_c901_baseline.py \
+                      --target src/bioetl \
+                      --baseline-file scripts/baselines/c901_baseline.json \
+                      --mode "${mode}"
 
-      - name: Cache uv and virtualenv
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/uv
-            .venv
-          key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
-          restore-keys: |
-            uv-${{ runner.os }}-py311-
+    arch-tests:
+        runs-on: ubuntu-latest
 
-      - name: Install dependencies (frozen lock)
-        run: uv sync --frozen --extra dev --extra tracing
+        steps:
+            -   name: Checkout
+                uses: actions/checkout@v4
 
-      - name: Architecture tests (all)
-        run: uv run pytest tests/architecture/ -v --tb=short
+            -   name: Set up Python
+                uses: actions/setup-python@v5
+                with:
+                    python-version: "3.11"
 
-      - name: Import Linter contract
-        run: uv run lint-imports --config .importlinter
+            -   name: Install uv
+                uses: astral-sh/setup-uv@v7
 
-      - name: Application layer dependency graph
-        run: uv run python src/tools/scripts/check_application_deps.py
+            -   name: Cache uv and virtualenv
+                uses: actions/cache@v4
+                with:
+                    path: |
+                        ~/.cache/uv
+                        .venv
+                    key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
+                    restore-keys: |
+                        uv-${{ runner.os }}-py311-
 
-      - name: Infrastructure layer architecture check
-        run: uv run python src/tools/scripts/check_architecture.py
+            -   name: Install dependencies (frozen lock)
+                run: uv sync --frozen --extra dev --extra tracing
 
-  unit-tests:
-    needs: lint
-    runs-on: ubuntu-latest
+            -   name: Architecture tests (all)
+                run: uv run pytest tests/architecture/ -v --tb=short
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+            -   name: Import Linter contract
+                run: uv run lint-imports --config .importlinter
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+            -   name: Application layer dependency graph
+                run: uv run python src/tools/scripts/check_application_deps.py
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
+            -   name: Infrastructure layer architecture check
+                run: uv run python src/tools/scripts/check_architecture.py
 
-      - name: Cache uv and virtualenv
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/uv
-            .venv
-          key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
-          restore-keys: |
-            uv-${{ runner.os }}-py311-
+    unit-tests:
+        needs: lint
+        runs-on: ubuntu-latest
 
-      - name: Restore pytest cache
-        uses: actions/cache@v4
-        with:
-          path: .pytest_cache
-          key: ${{ runner.os }}-pytest-unit-${{ hashFiles('pyproject.toml') }}
+        steps:
+            -   name: Checkout
+                uses: actions/checkout@v4
 
-      - name: Install dependencies (frozen lock)
-        run: uv sync --frozen --extra dev --extra tracing
+            -   name: Set up Python
+                uses: actions/setup-python@v5
+                with:
+                    python-version: "3.11"
 
-      - name: Unit tests with coverage
-        run: |
-          uv run pytest tests --ignore=tests/integration --ignore=tests/architecture \
-            --ignore=tests/e2e --ignore=tests/contract \
-            --cov=src/bioetl --cov-report=xml:coverage-unit.xml --cov-report=term-missing
+            -   name: Install uv
+                uses: astral-sh/setup-uv@v7
 
-      - name: Enforce coverage thresholds
-        run: |
-          uv run python - <<'PY'
-          import sys
-          import xml.etree.ElementTree as ET
+            -   name: Cache uv and virtualenv
+                uses: actions/cache@v4
+                with:
+                    path: |
+                        ~/.cache/uv
+                        .venv
+                    key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
+                    restore-keys: |
+                        uv-${{ runner.os }}-py311-
 
-          tree = ET.parse("coverage-unit.xml")
-          root = tree.getroot()
+            -   name: Restore pytest cache
+                uses: actions/cache@v4
+                with:
+                    path: .pytest_cache
+                    key: ${{ runner.os }}-pytest-unit-${{ hashFiles('pyproject.toml') }}
 
-          def overall_percent() -> float:
-            try:
-              covered = int(root.attrib["lines-covered"])
-              valid = int(root.attrib["lines-valid"])
-              return 100 * covered / valid if valid else 100.0
-            except KeyError:
-              return float(root.attrib.get("line-rate", 0)) * 100
+            -   name: Install dependencies (frozen lock)
+                run: uv sync --frozen --extra dev --extra tracing
 
-          def percent_for_prefix(prefixes: tuple[str, ...]) -> float:
-            covered = total = 0
-            for cls in root.iterfind(".//class"):
-              filename = cls.attrib.get("filename", "")
-              if not filename or not filename.startswith(prefixes):
-                continue
-              for line in cls.iterfind(".//line"):
-                total += 1
-                if int(line.attrib.get("hits", "0")) > 0:
-                  covered += 1
-            if total == 0:
-              return 100.0
-            return 100 * covered / total
+            -   name: Unit tests with coverage
+                run: |
+                    uv run pytest tests --ignore=tests/integration --ignore=tests/architecture \
+                      --ignore=tests/e2e --ignore=tests/contract \
+                      --cov=src/bioetl --cov-report=xml:coverage-unit.xml --cov-report=term-missing
 
-          overall = overall_percent()
-          domain_app = percent_for_prefix(("bioetl/application", "bioetl/domain"))
+            -   name: Enforce coverage thresholds
+                run: |
+                    uv run python - <<'PY'
+                    import sys
+                    import xml.etree.ElementTree as ET
 
-          print(f"Overall coverage: {overall:.2f}%")
-          print(f"Domain/Application coverage: {domain_app:.2f}%")
+                    tree = ET.parse("coverage-unit.xml")
+                    root = tree.getroot()
 
-          errors = []
-          if overall < 85:
-            errors.append(f"Overall coverage below 85%: {overall:.2f}%")
-          if domain_app < 90:
-            errors.append(
-              f"Domain/Application coverage below 90%: {domain_app:.2f}%"
-            )
+                    def overall_percent() -> float:
+                      try:
+                        covered = int(root.attrib["lines-covered"])
+                        valid = int(root.attrib["lines-valid"])
+                        return 100 * covered / valid if valid else 100.0
+                      except KeyError:
+                        return float(root.attrib.get("line-rate", 0)) * 100
 
-          if errors:
-            for error in errors:
-              print(error)
-            sys.exit(1)
-          PY
+                    def percent_for_prefix(prefixes: tuple[str, ...]) -> float:
+                      covered = total = 0
+                      for cls in root.iterfind(".//class"):
+                        filename = cls.attrib.get("filename", "")
+                        if not filename or not filename.startswith(prefixes):
+                          continue
+                        for line in cls.iterfind(".//line"):
+                          total += 1
+                          if int(line.attrib.get("hits", "0")) > 0:
+                            covered += 1
+                      if total == 0:
+                        return 100.0
+                      return 100 * covered / total
 
-  integration-tests:
-    needs: lint
-    runs-on: ubuntu-latest
+                    overall = overall_percent()
+                    domain_app = percent_for_prefix(("bioetl/application", "bioetl/domain"))
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+                    print(f"Overall coverage: {overall:.2f}%")
+                    print(f"Domain/Application coverage: {domain_app:.2f}%")
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+                    errors = []
+                    if overall < 85:
+                      errors.append(f"Overall coverage below 85%: {overall:.2f}%")
+                    if domain_app < 90:
+                      errors.append(
+                        f"Domain/Application coverage below 90%: {domain_app:.2f}%"
+                      )
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
+                    if errors:
+                      for error in errors:
+                        print(error)
+                      sys.exit(1)
+                    PY
 
-      - name: Cache uv and virtualenv
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/uv
-            .venv
-          key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
-          restore-keys: |
-            uv-${{ runner.os }}-py311-
+    integration-tests:
+        needs: lint
+        runs-on: ubuntu-latest
 
-      - name: Restore pytest cache
-        uses: actions/cache@v4
-        with:
-          path: .pytest_cache
-          key: ${{ runner.os }}-pytest-integration-${{ hashFiles('pyproject.toml') }}
+        steps:
+            -   name: Checkout
+                uses: actions/checkout@v4
 
-      - name: Install dependencies (frozen lock)
-        run: uv sync --frozen --extra dev --extra tracing
+            -   name: Set up Python
+                uses: actions/setup-python@v5
+                with:
+                    python-version: "3.11"
 
-      - name: Integration tests
-        run: |
-          uv run pytest tests/integration -v --tb=short
+            -   name: Install uv
+                uses: astral-sh/setup-uv@v7
 
-  checks-complete:
-    needs:
-      - lint
-      - c901-governance
-      - unit-tests
-      - integration-tests
-      - arch-tests
-    runs-on: ubuntu-latest
-    if: ${{ always() }}
-    steps:
-      - name: Final status
-        run: |
-          if [[ "${{ needs.lint.result }}" != "success" || "${{ needs['c901-governance'].result }}" != "success" || "${{ needs.unit-tests.result }}" != "success" || "${{ needs['integration-tests'].result }}" != "success" || "${{ needs['arch-tests'].result }}" != "success" ]]; then
-            echo "One or more checks failed"
-            exit 1
-          fi
-          echo "All checks completed successfully."
+            -   name: Cache uv and virtualenv
+                uses: actions/cache@v4
+                with:
+                    path: |
+                        ~/.cache/uv
+                        .venv
+                    key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
+                    restore-keys: |
+                        uv-${{ runner.os }}-py311-
+
+            -   name: Restore pytest cache
+                uses: actions/cache@v4
+                with:
+                    path: .pytest_cache
+                    key: ${{ runner.os }}-pytest-integration-${{ hashFiles('pyproject.toml') }}
+
+            -   name: Install dependencies (frozen lock)
+                run: uv sync --frozen --extra dev --extra tracing
+
+            -   name: Integration tests
+                run: |
+                    uv run pytest tests/integration -v --tb=short
+
+    checks-complete:
+        needs:
+            - lint
+            - c901-governance
+            - unit-tests
+            - integration-tests
+            - arch-tests
+        runs-on: ubuntu-latest
+        if: ${{ always() }}
+        steps:
+            -   name: Final status
+                run: |
+                    if [[ "${{ needs.lint.result }}" != "success" || "${{ needs['c901-governance'].result }}" != "success" || "${{ needs.unit-tests.result }}" != "success" || "${{ needs['integration-tests'].result }}" != "success" || "${{ needs['arch-tests'].result }}" != "success" ]]; then
+                      echo "One or more checks failed"
+                      exit 1
+                    fi
+                    echo "All checks completed successfully."

@@ -4,7 +4,14 @@ Provides DOI resolution and citation metadata from CrossRef API.
 """
 
 from bioetl.infrastructure.adapters.crossref.client import (
+    CROSSREF_API_BASE,
+    CROSSREF_HEALTH_ERRORS,
     CrossRefAdapter,
+    CrossRefFetchFlow,
+    CrossRefQueryBuilder,
+    CrossRefResponseMapper,
+)
+from bioetl.infrastructure.adapters.crossref.factory import (
     _create_crossref_adapter,
 )
 from bioetl.infrastructure.adapters.crossref.models import (
@@ -15,14 +22,19 @@ from bioetl.infrastructure.adapters.crossref.models import (
 )
 
 __all__ = [
+    "CROSSREF_API_BASE",
+    "CROSSREF_HEALTH_ERRORS",
     # Model Mappings
     "CROSSREF_RECORD_MODELS",
     # Adapter
     "CrossRefAdapter",
+    "CrossRefFetchFlow",
     # Record Models
     "CrossRefPublicationRecord",
     # Response Models
     "CrossRefPublicationResponse",
     "CrossRefPublicationsResponse",
+    "CrossRefQueryBuilder",
+    "CrossRefResponseMapper",
     "_create_crossref_adapter",
 ]

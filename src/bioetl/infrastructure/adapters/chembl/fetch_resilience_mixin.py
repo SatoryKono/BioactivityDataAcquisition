@@ -24,7 +24,7 @@ from bioetl.infrastructure.adapters.common import (
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import ErrorHandlerPort, LoggerPort
     from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
     from bioetl.infrastructure.adapters.chembl.entity_mapper import (
         ChemblEntityMapper,
@@ -32,7 +32,6 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.common.api_request_collector import (
         APIRequestCollector,
     )
-    from bioetl.infrastructure.adapters.error_handling import ErrorService
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 CHEMBL_ADAPTER_ERRORS = (
@@ -60,7 +59,7 @@ class ChemblFetchResilienceMixin:
     _adapter_metrics: AdapterMetrics
     http_client: UnifiedHTTPClient
     _request_collector: APIRequestCollector
-    _error_handler: ErrorService
+    _error_handler: ErrorHandlerPort
     _compute_composite_key: Callable[[BronzeRecord, tuple[str, ...]], str]
 
     def _handle_error(

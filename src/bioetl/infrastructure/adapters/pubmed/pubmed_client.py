@@ -9,24 +9,27 @@ from __future__ import annotations
 
 __all__ = ["ENTREZ_API_BASE", "PubMedAdapter"]
 
-
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 from pydantic import BaseModel
 
 from bioetl.domain.entities.pubmed import ArticleRecord
-from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.common import (
+    ComposableFallbackDecorator,
+    DefaultFallbackExecutionStrategy,
+    FallbackDecoratorConfig,
     FallbackFetchOrchestratorService,
-    FallbackFetchRequest,
+    resolve_fallback_policy,
 )
-from bioetl.infrastructure.adapters.error_handling import ErrorService
 from bioetl.infrastructure.adapters.filterable_mixin import NotSupportedMultiFilterMixin
 from bioetl.infrastructure.adapters.pubmed._fetch import PubMedFetchMixin
 from bioetl.infrastructure.adapters.pubmed._health import PubMedHealthMixin
 from bioetl.infrastructure.adapters.pubmed._search import PubMedSearchMixin
+from bioetl.infrastructure.adapters.pubmed.adapter_filter_fetch_mixin import (
+    PubMedAdapterFilterFetchMixin,
+)
 from bioetl.infrastructure.adapters.pubmed.constants import (
     ENTREZ_API_BASE as PUBMED_ENTREZ_API_BASE,
 )
@@ -35,7 +38,11 @@ from bioetl.infrastructure.adapters.pubmed.fallback import TitleFallbackHandler
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-    from bioetl.domain.ports import LoggerPort, MetricsPort
+    from bioetl.domain.ports import ErrorHandlerPort, LoggerPort, MetricsPort
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+    from bioetl.infrastructure.adapters.common.api_request_collector import (
+        APIRequestCollector,
+    )
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config import Settings
 
@@ -48,9 +55,40 @@ PUBMED_DTO_MODELS: dict[str, type[BaseModel]] = {
 ENTREZ_API_BASE = PUBMED_ENTREZ_API_BASE
 
 
+def _create_default_pubmed_error_handler(
+    *,
+    logger: LoggerPort,
+    metrics: MetricsPort | None,
+) -> ErrorHandlerPort:
+    """Create default adapter error handler for non-DI call sites."""
+    from bioetl.infrastructure.adapters.error_handling import ErrorService
+
+    return ErrorService(logger, metrics=metrics)
+
+
+def _create_default_pubmed_fallback_service(
+    *,
+    adapter_metrics: AdapterMetrics,
+) -> FallbackFetchOrchestratorService:
+    """Create fallback orchestrator service for non-DI call sites."""
+    return FallbackFetchOrchestratorService(adapter_metrics)
+
+
+_PUBMED_DEFAULT_FALLBACK_CONFIG = FallbackDecoratorConfig(
+    supported_filter_field=None,
+    unsupported_filter_event="unsupported_filter_field_for_fallback",
+    unsupported_filter_message="PubMed fallback accepts any field and resolves via PMID/title phases",
+    skip_on_unsupported_filter_field=False,
+    primary_lookup_method="pmid",
+    trim_primary_ids_to_limit=False,
+    fallback_operation="fetch_filtered_with_fallback",
+)
+
+
 @dataclass
 class PubMedAdapter(
     NotSupportedMultiFilterMixin,
+    PubMedAdapterFilterFetchMixin,
     PubMedFetchMixin,
     PubMedSearchMixin,
     PubMedHealthMixin,
@@ -71,6 +109,10 @@ class PubMedAdapter(
     api_key: str | None = None
     batch_size: int = 200
     metrics: MetricsPort | None = None
+    error_handler: ErrorHandlerPort | None = None
+    adapter_metrics: AdapterMetrics | None = None
+    request_collector: APIRequestCollector | None = None
+    fallback_fetch_service: FallbackFetchOrchestratorService | None = None
 
     provider_name: str = field(init=False, default="pubmed")
 
@@ -78,206 +120,57 @@ class PubMedAdapter(
         default=None, init=False, repr=False
     )
     _fallback_fetch_service: FallbackFetchOrchestratorService = field(
-        default_factory=FallbackFetchOrchestratorService,
-        init=False,
-        repr=False,
+        init=False, repr=False
     )
+    _fallback_decorator: ComposableFallbackDecorator = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
         """Initialize metrics, error handler and fallback handler."""
-        metrics_port = self.metrics if self.metrics is not None else None
-        self._error_handler = ErrorService(self.logger, metrics=metrics_port)
-        self._init_adapter_metrics()
-        self._fallback_fetch_service = FallbackFetchOrchestratorService(
-            self._adapter_metrics
+        if self.adapter_metrics is not None and self.request_collector is not None:
+            self._adapter_metrics = self.adapter_metrics
+            self._request_collector = self.request_collector
+        else:
+            self._init_adapter_metrics()
+        self._error_handler = (
+            self.error_handler
+            if self.error_handler is not None
+            else _create_default_pubmed_error_handler(
+                logger=self.logger,
+                metrics=self.metrics,
+            )
+        )
+        self._fallback_fetch_service = (
+            self.fallback_fetch_service
+            if self.fallback_fetch_service is not None
+            else _create_default_pubmed_fallback_service(
+                adapter_metrics=self._adapter_metrics,
+            )
         )
 
         self._fallback_handler = TitleFallbackHandler(
             logger=self.logger,
             search_fn=self._search_by_title,
         )
+        self.configure_fallback_policy(None)
 
-    async def fetch_filtered(
-        self,
-        entity_type: str,
-        filter_ids: list[str],
-        filter_field: str,
-        limit: int | None = None,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Fetch PubMed records by ID list (bypass search).
-
-        Args:
-            entity_type: Entity type identifier.
-            filter_ids: List of identifiers to filter by.
-            filter_field: Field name to apply filter on.
-            limit: Maximum number of records to process.
-
-        Returns:
-            Async iterator yielding fetched records.
-        """
-        if entity_type != "publication":
-            raise ValueError("PubMedAdapter only supports 'publication'")
-
-        if filter_field != "pmid":
-            self.logger.warning(
-                "unsupported_filter_field", field=filter_field, msg="Assuming PMIDs"
-            )
-
-        async for record in self._yield_articles_from_pmids(filter_ids, limit):
-            record["_lookup_method"] = "pmid"
-            yield record
-
-    async def fetch_filtered_with_fallback(
-        self,
-        entity_type: str,
-        filter_ids: list[str],
-        filter_field: str,
-        fallback_mapping: dict[str, str],
-        limit: int | None = None,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Fetch with fallback to title search when primary lookup fails.
-
-        Args:
-            entity_type: Entity type identifier.
-            filter_ids: List of identifiers to filter by.
-            filter_field: Field name to apply filter on.
-            fallback_mapping: Fallback mapping.
-            limit: Maximum number of records to process.
-
-        Returns:
-            Async iterator yielding fetched records.
-        """
-        if entity_type != "publication":
-            raise ValueError("PubMedAdapter only supports 'publication'")
-
-        async def _primary_records(
-            primary_ids: list[str],
-            request_limit: int | None,
-        ) -> AsyncIterator[BronzeRecord]:
-            if not primary_ids:
-                return
-            async for record in self.fetch_filtered(
-                entity_type=entity_type,
-                filter_ids=primary_ids,
-                filter_field=filter_field,
-                limit=request_limit,
-            ):
-                yield record
-
-        request = FallbackFetchRequest(
-            filter_ids=filter_ids,
-            fallback_mapping=fallback_mapping,
-            primary_record_fetcher=_primary_records,
-            normalize_id=lambda value: value.lower().strip(),
-            extract_record_id=lambda rec: str(rec.get("pmid", "")),
-            fallback_handler=self._fallback_handler,
-            limit=limit,
-            primary_lookup_method="pmid",
+    def configure_fallback_policy(self, policy: object | None) -> None:
+        """Configure fallback decorator behavior from provider YAML policy."""
+        enabled, config = resolve_fallback_policy(
+            policy,
+            defaults=_PUBMED_DEFAULT_FALLBACK_CONFIG,
+            default_enabled=True,
         )
-
-        async for record in self._fallback_fetch_service.execute(request):
-            yield record
-
-    async def fetch(
-        self,
-        entity_type: str,
-        limit: int | None = None,
-        query: str | None = None,
-        filter_ids: list[str] | None = None,
-        filter_field: str | None = None,
-        offset: int | None = None,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Fetch PubMed records."""
-        if filter_ids:
-            async for record in self._fetch_from_filter_ids(
-                entity_type=entity_type,
-                filter_ids=filter_ids,
-                filter_field=filter_field,
-                limit=limit,
-            ):
-                yield record
-            return
-
-        self._validate_publication_entity(entity_type)
-        resume_offset = self._resolve_resume_offset(limit=limit, offset=offset)
-        if resume_offset is None:
-            return
-
-        pmids = await self._resolve_pmids_for_fetch(query=query, limit=limit)
-        if not pmids:
-            return
-
-        pmids = self._apply_resume_offset(pmids=pmids, resume_offset=resume_offset)
-        remaining_limit = None if limit is None else max(0, limit - resume_offset)
-        async for record in self._yield_articles_from_pmids(pmids, remaining_limit):
-            yield record
-
-    async def _fetch_from_filter_ids(
-        self,
-        *,
-        entity_type: str,
-        filter_ids: list[str],
-        filter_field: str | None,
-        limit: int | None,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Fetch records from explicit PMID filters."""
-        effective_filter_field = filter_field or "pmid"
-        async for record in self.fetch_filtered(
-            entity_type=entity_type,
-            filter_ids=filter_ids,
-            filter_field=effective_filter_field,
-            limit=limit,
-        ):
-            yield record
-
-    @staticmethod
-    def _validate_publication_entity(entity_type: str) -> None:
-        """Validate supported PubMed entity type."""
-        if entity_type != "publication":
-            raise ValueError("PubMedAdapter only supports 'publication'")
-
-    def _resolve_resume_offset(
-        self,
-        *,
-        limit: int | None,
-        offset: int | None,
-    ) -> int | None:
-        """Resolve and validate resume offset against limit."""
-        resume_offset = max(0, offset or 0)
-        if limit is not None and resume_offset >= limit:
-            self.logger.info(
-                "pubmed_resume_offset_reached_limit",
-                offset=resume_offset,
-                limit=limit,
-            )
-            return None
-        return resume_offset
-
-    async def _resolve_pmids_for_fetch(
-        self,
-        *,
-        query: str | None,
-        limit: int | None,
-    ) -> list[str]:
-        """Fetch PMID list for current query/limit settings."""
-        search_term = query or "pharmacogenomics[Title/Abstract]"
-        return await self._get_pmids(search_term, limit or 10000)
-
-    def _apply_resume_offset(
-        self,
-        *,
-        pmids: list[str],
-        resume_offset: int,
-    ) -> list[str]:
-        """Skip already processed PMIDs when resuming."""
-        if resume_offset == 0:
-            return pmids
-        self.logger.info(
-            "pubmed_resume_skip_processed",
-            offset=resume_offset,
-            pmids_found=len(pmids),
+        strategy = DefaultFallbackExecutionStrategy(
+            normalize_id_hook=lambda value: value.lower().strip(),
+            extract_record_id_hook=lambda rec: str(rec.get("pmid", "")),
+            fallback_handler_hook=self._fallback_handler if enabled else None,
         )
-        return pmids[resume_offset:]
+        self._fallback_decorator = ComposableFallbackDecorator(
+            service=self._fallback_fetch_service,
+            strategy=strategy,
+            config=config,
+            logger=self.logger,
+        )
 
     async def fetch_as_models(
         self,
@@ -359,4 +252,8 @@ def _create_pubmed_adapter(
         api_key=api_key,
         batch_size=kwargs.get("batch_size", 200),
         metrics=kwargs.get("metrics"),
+        error_handler=kwargs.get("error_handler"),
+        adapter_metrics=kwargs.get("adapter_metrics"),
+        request_collector=kwargs.get("request_collector"),
+        fallback_fetch_service=kwargs.get("fallback_fetch_service"),
     )

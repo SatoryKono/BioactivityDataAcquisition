@@ -1,8 +1,4 @@
-"""Services Builder.
-
-Builder for pipeline infrastructure components: RecordProcessor, BatchExecutor,
-CheckpointManager. Extracted from services_factory.py for LOC compliance.
-"""
+"""Builder for pipeline infrastructure components."""
 
 from __future__ import annotations
 
@@ -61,7 +57,6 @@ if TYPE_CHECKING:
     from bioetl.domain.services import DataNormalizationConfig
     from bioetl.domain.types import RunID
 
-
 __all__ = [
     "ServicesBuilder",
     "create_data_normalization_service",
@@ -72,21 +67,7 @@ __all__ = [
 def extract_pipeline_callbacks(
     pipeline: BasePipeline,
 ) -> PipelineCallbacksContext:
-    """Extract transformation callbacks from pipeline.
-
-    Extracts callbacks from the pipeline's transformer if available,
-    otherwise falls back to pipeline methods (legacy support).
-
-    Args:
-        pipeline: Pipeline instance with transformer or legacy methods.
-
-    Returns:
-        PipelineCallbacksContext with transform, gold_filter, and gold_transform callbacks.
-
-    Raises:
-        AttributeError: If pipeline has no transformer and doesn't implement
-            transform_bronze_to_silver (enforces REQ-ARCH-REF-001).
-    """
+    """Extract transformation callbacks from transformer or legacy methods."""
     transformer = pipeline.transformer
     if transformer is not None:
         return PipelineCallbacksContext(
@@ -189,32 +170,7 @@ class ServicesBuilder:
         column_groups: tuple[ColumnGroupConfig, ...] = (),
         scd_config: dict[str, str] | None = None,
     ) -> RecordProcessor:
-        """Create configured RecordProcessor.
-
-        Args:
-            services: Pipeline services
-            context: Pipeline context
-            pipeline_name: Name of the pipeline
-            provider: Data provider name
-            entity_type: Entity type being processed
-            silver_schema: PyArrow schema for Silver layer
-            gold_schema: Pandera schema for Gold layer
-            dq_config: Data quality configuration
-            primary_keys: Primary key fields
-            silver_table: Silver table name
-            gold_table: Gold table name
-            silver_write_mode: Write mode for Silver
-            gold_write_mode: Write mode for Gold
-            on_schema_mismatch: Schema mismatch handling strategy
-            transform_callback: Bronze to Silver transformation callback
-            gold_filter_callback: Gold filtering callback
-            gold_transform_callback: Silver to Gold transformation callback
-            strict_gold_validation: If True, validation fails when gold_schema is None.
-            lock_validator: Async callable that validates lock ownership.
-
-        Returns:
-            Configured RecordProcessor instance
-        """
+        """Create configured ``RecordProcessor`` for pipeline execution."""
         effective_tracer = tracer or services.tracing
         error_classifier = ErrorClassifier()
         table_config = TableConfig(

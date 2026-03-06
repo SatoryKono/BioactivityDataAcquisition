@@ -1,14 +1,4 @@
-"""Enrichment cross-validator for composite pipelines.
-
-Compares paired fields between seed and each enricher after join but
-before conflict resolution. Detects mismatches and applies verdicts:
-- PASS: 0 mismatches
-- WARNING: 1 mismatch (configurable)
-- ENRICHER_ERROR: 2+ mismatches -> null all enricher columns
-- QUARANTINE: 2+ enrichers with ENRICHER_ERROR -> flag seed record
-
-See plan: Pre-Merge Cross-Validation for Composite Publication Pipeline.
-"""
+"""Enrichment cross-validator for composite pipelines."""
 
 from __future__ import annotations
 
@@ -46,16 +36,7 @@ class _EnricherValidationResult:
 
 
 class EnrichmentCrossValidationService:
-    """Validates enricher data consistency against seed before merge.
-
-    For each enricher with configured field pairings, compares shared fields
-    between seed and enricher columns in the merged DataFrame. Mismatches
-    are counted per record to determine verdicts.
-
-    Usage:
-        validator = EnrichmentCrossValidationService(config, logger)
-        df, stats = validator.validate(merged_df, enricher_pipelines, seed_pipeline)
-    """
+    """Validates enricher data consistency against seed before merge."""
 
     def __init__(
         self,
@@ -71,18 +52,7 @@ class EnrichmentCrossValidationService:
         enricher_pipelines: list[str],
         seed_pipeline: str,
     ) -> tuple[pl.DataFrame, CrossValidationStats]:
-        """Run cross-validation on merged DataFrame.
-
-        Args:
-            merged_df: DataFrame after joins (seed + enricher columns present).
-            enricher_pipelines: List of enricher pipeline names that were joined.
-            seed_pipeline: Seed pipeline name (e.g., "chembl_publication").
-
-        Returns:
-            Tuple of (modified DataFrame, CrossValidationStats).
-            DataFrame has enricher columns nullified where ENRICHER_ERROR,
-            and _cv_quarantine column added where applicable.
-        """
+        """Run cross-validation on merged DataFrame."""
         import polars as pl
 
         if not self._config.enabled:
@@ -134,11 +104,7 @@ class EnrichmentCrossValidationService:
         seed_entity: str,
         enricher_pipeline: str,
     ) -> _EnricherValidationResult:
-        """Validate a single enricher against seed fields.
-
-        Returns validation result with per-row verdicts and optionally
-        nullified enricher columns.
-        """
+        """Validate a single enricher against seed fields."""
 
         enricher_provider, enricher_entity = self._parse_pipeline(enricher_pipeline)
         total = len(df)
@@ -375,13 +341,7 @@ def _build_enricher_detail(
     field_mismatch_bools: dict[str, pl.Series],
     mismatch_count: pl.Series,
 ) -> pl.Series:
-    """Build per-row JSON detail string for one enricher.
-
-    For rows with mismatches, produces JSON like:
-    {"enricher": "crossref_publication", "field_mismatches": ["title", "volume"]}
-
-    Returns null for rows with no mismatches.
-    """
+    """Build per-row JSON detail string for one enricher."""
     import json
 
     import polars as pl
@@ -411,15 +371,7 @@ def _build_enricher_detail(
 def _combine_cv_details(
     enricher_details: list[pl.Series], total_records: int
 ) -> pl.Series:
-    """Combine per-enricher detail series into a single _cv_details column.
-
-    Merges non-null detail JSON objects from each enricher into a JSON array
-    per row. Returns null for rows with no mismatches across any enricher.
-
-    Example output per row:
-    [{"enricher": "crossref_publication", "field_mismatches": ["title"]},
-     {"enricher": "pubmed_publication", "field_mismatches": ["volume"]}]
-    """
+    """Combine per-enricher detail series into a single _cv_details column."""
     import json
 
     import polars as pl
@@ -503,10 +455,7 @@ def _compare_numeric(
     enricher_col: str,
     tolerance: float,
 ) -> pl.Series:
-    """Numeric comparison with relative tolerance.
-
-    |seed - enricher| / max(|seed|, 1) <= tolerance
-    """
+    """Numeric comparison with relative tolerance."""
     import polars as pl
 
     s = df[seed_col].cast(pl.Float64, strict=False)

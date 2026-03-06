@@ -4,7 +4,7 @@ from __future__ import annotations
 
 __all__ = ["FeatureExtractor"]
 
-
+from collections.abc import Iterator
 from typing import ClassVar
 
 from bioetl.domain.serialization import serialize_to_json
@@ -27,6 +27,24 @@ def _extract_feature_location(  # Any: JSON values
         feature_data["start"] = start.get("value")
     if isinstance(end, dict) and end.get("value"):
         feature_data["end"] = end.get("value")
+
+
+def _iter_matching_modified_residues(
+    features: list[JsonDict],  # Any: untyped API JSON records
+    target_type: str,
+    normalized_patterns: tuple[str, ...],
+) -> Iterator[JsonDict]:  # Any: JSON values
+    """Yield modified residue features whose description matches any pattern."""
+    for feature in features:
+        if not isinstance(feature, dict) or feature.get("type") != target_type:
+            continue
+        description = feature.get("description")
+        if not description or not isinstance(description, str):
+            continue
+        if any(pattern in description.lower() for pattern in normalized_patterns):
+            feature_data = _build_feature_dict(feature)
+            if feature_data:
+                yield feature_data
 
 
 def _build_feature_dict(feature: JsonDict) -> JsonDict:  # Any: JSON values
@@ -347,35 +365,17 @@ class FeatureExtractor:
         Returns:
             JSON array of matching modified residue features or None.
         """
-        if not features or not isinstance(features, list):
+        if not features or not isinstance(features, list) or not patterns:
             return None
 
-        if not patterns:
-            return None
-
-        mod_res_type = cls.FEATURE_TYPES["modified_residue"]
-        extracted: list[JsonDict] = []  # Any: JSON values
-
-        # Pre-normalize patterns once to avoid repeated lower() calls
-        normalized_patterns = tuple(p.lower() for p in patterns)
-
-        for feature in features:
-            if not isinstance(feature, dict):
-                continue
-            if feature.get("type") != mod_res_type:
-                continue
-
-            description = feature.get("description")
-            if not description or not isinstance(description, str):
-                continue
-
-            description_lower = description.lower()
-            if any(pattern in description_lower for pattern in normalized_patterns):
-                feature_data = _build_feature_dict(feature)
-                if feature_data:
-                    extracted.append(feature_data)
-
-        return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
+        matches = list(
+            _iter_matching_modified_residues(
+                features,
+                cls.FEATURE_TYPES["modified_residue"],
+                tuple(p.lower() for p in patterns),
+            )
+        )
+        return serialize_to_json(matches, ensure_ascii=False) if matches else None
 
     @classmethod
     def extract_phosphorylation(cls, features: list[JsonDict] | None) -> str | None:

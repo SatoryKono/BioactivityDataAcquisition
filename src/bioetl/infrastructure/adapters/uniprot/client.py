@@ -12,8 +12,17 @@ from typing_extensions import override
 from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
-from bioetl.infrastructure.adapters.common import FallbackFetchOrchestratorService
-from bioetl.infrastructure.adapters.error_handling import ErrorService
+from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+from bioetl.infrastructure.adapters.common import (
+    ComposableFallbackDecorator,
+    DefaultFallbackExecutionStrategy,
+    FallbackDecoratorConfig,
+    FallbackFetchOrchestratorService,
+    resolve_fallback_policy,
+)
+from bioetl.infrastructure.adapters.common.api_request_collector import (
+    APIRequestCollector,
+)
 from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
 from bioetl.infrastructure.adapters.uniprot.constants import UNIPROT_API_BASE
 from bioetl.infrastructure.adapters.uniprot.feature_sequence_adapter_mixin import (
@@ -33,9 +42,8 @@ from bioetl.infrastructure.adapters.uniprot.protein_fetch_adapter_mixin import (
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-    from bioetl.domain.ports import LoggerPort, MetricsPort
+    from bioetl.domain.ports import ErrorHandlerPort, LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-
 
 UNIPROT_BATCH_SIZE = 100
 
@@ -52,6 +60,26 @@ UNIPROT_FETCH_ERRORS = (
     RuntimeError,
     KeyError,
 )
+
+_UNIPROT_DEFAULT_FALLBACK_CONFIG = FallbackDecoratorConfig(
+    supported_filter_field=None,
+    unsupported_filter_event="unsupported_filter_field_for_fallback",
+    unsupported_filter_message=(
+        "UniProt fallback accepts any filter field with provider-specific hooks"
+    ),
+    skip_on_unsupported_filter_field=False,
+    primary_lookup_method=None,
+    trim_primary_ids_to_limit=False,
+    fallback_operation="fetch_filtered_with_fallback",
+)
+
+
+def _create_default_uniprot_fallback_service(
+    *,
+    adapter_metrics: AdapterMetrics,
+) -> FallbackFetchOrchestratorService:
+    """Create fallback orchestrator service for non-DI call sites."""
+    return FallbackFetchOrchestratorService(adapter_metrics)
 
 
 class UniProtAdapter(
@@ -74,19 +102,63 @@ class UniProtAdapter(
         base_url: str = UNIPROT_API_BASE,
         strict_error_handling: bool = False,
         metrics: MetricsPort | None = None,
+        error_handler: ErrorHandlerPort | None = None,
+        adapter_metrics: AdapterMetrics | None = None,
+        request_collector: APIRequestCollector | None = None,
+        fallback_fetch_service: FallbackFetchOrchestratorService | None = None,
     ) -> None:
         """Initialize UniProt adapter dependencies."""
-        super().__init__(http_client, logger, metrics=metrics)
+        super().__init__(
+            http_client,
+            logger,
+            metrics=metrics,
+            error_handler=error_handler,
+            adapter_metrics=adapter_metrics,
+            request_collector=request_collector,
+        )
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.strict_error_handling = strict_error_handling
-        self._error_handler = ErrorService(self.logger)
         self._fetch_strategies = {
             "protein": self._fetch_proteins,
             "feature": self._fetch_features,
             "sequence": self._fetch_sequences,
         }
-        self._fallback_fetch_service = FallbackFetchOrchestratorService()
+        self._fallback_fetch_service = (
+            fallback_fetch_service
+            if fallback_fetch_service is not None
+            else _create_default_uniprot_fallback_service(
+                adapter_metrics=self._adapter_metrics,
+            )
+        )
+        self.configure_fallback_policy(None)
+
+    def configure_fallback_policy(self, policy: object | None) -> None:
+        """Configure fallback decorator behavior from provider YAML policy."""
+        _enabled, config = resolve_fallback_policy(
+            policy,
+            defaults=_UNIPROT_DEFAULT_FALLBACK_CONFIG,
+            default_enabled=True,
+        )
+        strategy = DefaultFallbackExecutionStrategy(
+            normalize_id_hook=lambda value: value.strip(),
+            extract_record_id_hook=self._extract_accession_from_record,
+            fallback_handler_hook=None,
+        )
+        self._fallback_decorator = ComposableFallbackDecorator(
+            service=self._fallback_fetch_service,
+            strategy=strategy,
+            config=config,
+            logger=self.logger,
+        )
+
+    @staticmethod
+    def _extract_accession_from_record(record: BronzeRecord) -> str | None:
+        accession = record.get("accession")
+        if not isinstance(accession, str):
+            return None
+        cleaned = accession.strip()
+        return cleaned if cleaned else None
 
     @override
     async def fetch(
@@ -162,4 +234,8 @@ def _create_uniprot_adapter(
         base_url=kwargs.get("base_url", UNIPROT_API_BASE),
         strict_error_handling=kwargs.get("strict_error_handling", False),
         metrics=kwargs.get("metrics"),
+        error_handler=kwargs.get("error_handler"),
+        adapter_metrics=kwargs.get("adapter_metrics"),
+        request_collector=kwargs.get("request_collector"),
+        fallback_fetch_service=kwargs.get("fallback_fetch_service"),
     )

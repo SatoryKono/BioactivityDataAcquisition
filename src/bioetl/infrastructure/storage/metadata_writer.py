@@ -13,14 +13,17 @@ from __future__ import annotations
 
 __all__ = ["METADATA_FILENAME", "MetadataWriter"]
 
-
 import asyncio
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import yaml
 
-from bioetl.infrastructure.storage._atomic import atomic_write_text
+from bioetl.infrastructure.storage._atomic import AtomicWriteError, atomic_write_text
+from bioetl.infrastructure.storage.write_resilience import (
+    DEFAULT_ATOMIC_REPLACE_RETRY_POLICY,
+    AdaptiveRetryPolicy,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import (
@@ -28,7 +31,7 @@ if TYPE_CHECKING:
         GoldMetadata,
         SilverMetadata,
     )
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort
 
 # Default metadata sidecar filename (fallback)
 METADATA_FILENAME = "_metadata.yaml"
@@ -51,28 +54,96 @@ def _get_metadata_filename(provider: str | None, entity: str | None) -> str:
 
 
 class MetadataWriter:
-    """Writer for metadata sidecar files.
+    """Writer for metadata sidecar files across Bronze/Silver/Gold layers."""
 
-    Writes _metadata.yaml files alongside data artifacts in the
-    Medallion layers (Bronze, Silver, Gold).
-
-    Uses atomic write pattern (temp file + rename) to ensure
-    consistency even during crashes.
-
-    Attributes:
-        logger: Structured logger for observability.
-    """
-
-    def __init__(self, logger: LoggerPort) -> None:
-        """Initialize metadata writer.
-
-        Args:
-            logger: Structured logger for observability (MUST be injected).
-
-        Note:
-            LoggerPort is required per RULES.md DI requirements.
-        """
+    def __init__(
+        self,
+        logger: LoggerPort,
+        *,
+        atomic_replace_retry_policy: AdaptiveRetryPolicy | None = None,
+        metrics: MetricsPort | None = None,
+    ) -> None:
+        """Initialize metadata writer (logger is mandatory per DI rules)."""
         self._logger = logger
+        self._metrics = metrics
+        self._atomic_replace_retry_policy = (
+            atomic_replace_retry_policy or DEFAULT_ATOMIC_REPLACE_RETRY_POLICY
+        )
+
+    def _emit_retry_telemetry(
+        self,
+        *,
+        layer: str,
+        provider: str | None,
+        pipeline: str,
+        attempt: int,
+        delay_seconds: float,
+        reason: str,
+    ) -> None:
+        """Emit telemetry event for metadata atomic-write retry."""
+        self._logger.warning(
+            "metadata_atomic_replace_retry",
+            layer=layer,
+            provider=provider,
+            pipeline=pipeline,
+            attempt=attempt,
+            delay_seconds=delay_seconds,
+            reason=reason,
+        )
+        if self._metrics is not None:
+            self._metrics.increment_counter(
+                "observability_events_total",
+                1,
+                {
+                    "event": "metadata_atomic_replace_retry",
+                    "provider": provider or "storage",
+                    "pipeline": pipeline,
+                    "severity": "warning",
+                    "error_type": reason,
+                },
+            )
+
+    def _emit_final_telemetry(
+        self,
+        *,
+        layer: str,
+        provider: str | None,
+        pipeline: str,
+        retry_count: int,
+        status: str,
+        final_reason: str,
+    ) -> None:
+        """Emit telemetry for final metadata write outcome."""
+        if status == "failed":
+            self._logger.error(
+                "metadata_write_failed",
+                layer=layer,
+                provider=provider,
+                pipeline=pipeline,
+                retry_count=retry_count,
+                final_reason=final_reason,
+            )
+        else:
+            self._logger.info(
+                "metadata_write_completed",
+                layer=layer,
+                provider=provider,
+                pipeline=pipeline,
+                retry_count=retry_count,
+                final_reason=final_reason,
+            )
+        if self._metrics is not None:
+            self._metrics.increment_counter(
+                "observability_events_total",
+                1,
+                {
+                    "event": "metadata_write_final",
+                    "provider": provider or "storage",
+                    "pipeline": pipeline,
+                    "severity": "error" if status == "failed" else "info",
+                    "error_type": final_reason,
+                },
+            )
 
     async def write_bronze_metadata(
         self,
@@ -204,11 +275,55 @@ class MetadataWriter:
             sort_keys=False,
         )
 
+        pipeline_label = table_name or (
+            f"{provider}.{entity}" if provider and entity else f"{layer}_metadata"
+        )
+        retry_state = {"count": 0}
+
+        def on_retry(attempt: int, delay_seconds: float, error: OSError) -> None:
+            retry_state["count"] = attempt
+            self._emit_retry_telemetry(
+                layer=layer,
+                provider=provider,
+                pipeline=pipeline_label,
+                attempt=attempt,
+                delay_seconds=delay_seconds,
+                reason=str(getattr(error, "errno", "os_error")),
+            )
+
         # Write atomically in executor
         loop = asyncio.get_running_loop()
-        await loop.run_in_executor(
-            None,
-            lambda: atomic_write_text(metadata_path, yaml_content),
+        try:
+            await loop.run_in_executor(
+                None,
+                lambda: atomic_write_text(
+                    metadata_path,
+                    yaml_content,
+                    retry_policy=self._atomic_replace_retry_policy,
+                    on_retry=on_retry,
+                ),
+            )
+        except AtomicWriteError as exc:
+            self._emit_final_telemetry(
+                layer=layer,
+                provider=provider,
+                pipeline=pipeline_label,
+                retry_count=retry_state["count"],
+                status="failed",
+                final_reason=exc.reason or "atomic_write_error",
+            )
+            raise
+        self._emit_final_telemetry(
+            layer=layer,
+            provider=provider,
+            pipeline=pipeline_label,
+            retry_count=retry_state["count"],
+            status="succeeded",
+            final_reason=(
+                "success_after_retry"
+                if retry_state["count"] > 0
+                else "success_without_retry"
+            ),
         )
 
         self._logger.info(

@@ -12,12 +12,17 @@ if TYPE_CHECKING:
     from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
     from bioetl.domain.ports import (
         LoggerPort,
+        MetricsPort,
         SilverValidatorPort,
         TracingPort,
     )
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
     from bioetl.infrastructure.schemas.pipeline_config import SinkLayerConfig
     from bioetl.infrastructure.storage.silver_writer import SilverWriter
+    from bioetl.infrastructure.storage.write_resilience import (
+        AdaptiveRetryPolicy,
+        SilverMergeResiliencePolicy,
+    )
 
 
 def create_silver_writer(
@@ -33,11 +38,20 @@ def create_silver_writer(
     transform_steps: tuple[str, ...] | None,
     flat_structure: bool,
     silver_validator: SilverValidatorPort | None,
+    metrics: MetricsPort | None = None,
+    metadata_atomic_retry_policy: AdaptiveRetryPolicy | None = None,
+    merge_resilience_policy: SilverMergeResiliencePolicy | None = None,
 ) -> SilverWriter:
     """Create configured Silver writer."""
     save_metadata = config.save_metadata if config else False
     metadata_writer = (
-        MetadataWriter(logger=logger) if save_metadata else NoOpMetadataWriter()
+        MetadataWriter(
+            logger=logger,
+            atomic_replace_retry_policy=metadata_atomic_retry_policy,
+            metrics=metrics,
+        )
+        if save_metadata
+        else NoOpMetadataWriter()
     )
     effective_tracing: TracingPort = tracing or NoOpTracing()
     return writer_cls(
@@ -51,4 +65,5 @@ def create_silver_writer(
         transform_version=transform_version,
         transform_steps=transform_steps,
         flat_structure=flat_structure,
+        merge_resilience_policy=merge_resilience_policy,
     )

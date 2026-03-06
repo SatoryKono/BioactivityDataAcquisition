@@ -122,6 +122,23 @@ class PaginationConfig(BaseModel):
     max_url_length: int | None = Field(default=None, ge=100, le=10000)
 
 
+class FallbackPolicyYamlConfig(BaseModel):
+    """Provider fallback orchestration policy from YAML."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    enabled: bool = Field(default=False)
+    supported_filter_field: str | None = None
+    unsupported_filter_event: str = "unsupported_filter_field_for_fallback"
+    unsupported_filter_message: str = (
+        "Fallback only supports '{expected}' filtering, skipping"
+    )
+    skip_on_unsupported_filter_field: bool = True
+    primary_lookup_method: str | None = None
+    trim_primary_ids_to_limit: bool = False
+    fallback_operation: str = "fetch_filtered_with_fallback"
+
+
 class ProviderConfigYaml(BaseModel):
     """Provider-specific configuration from YAML.
 
@@ -149,6 +166,7 @@ class ProviderConfigYaml(BaseModel):
     max_url_length: int | None = Field(default=None, ge=100, le=10000)
     api_version: str | None = None
     default_email: str | None = None
+    fallback: FallbackPolicyYamlConfig | None = None
 
     @model_validator(mode="before")
     @classmethod
@@ -333,6 +351,11 @@ class SourceYamlConfig(BaseModel):
         """Get base URL."""
         return self.source.provider_config.base_url
 
+    @property
+    def fallback(self) -> FallbackPolicyYamlConfig | None:
+        """Get fallback execution policy from provider config."""
+        return self.source.provider_config.fallback
+
     def to_adapter_config(
         self,
         default_page_size: int = 1000,
@@ -374,6 +397,7 @@ class SourceYamlConfig(BaseModel):
 __all__ = [
     "CircuitBreakerYamlConfig",
     "ClientYamlConfig",
+    "FallbackPolicyYamlConfig",
     "PaginationConfig",
     "ProviderConfigYaml",
     "RateLimitYamlConfig",

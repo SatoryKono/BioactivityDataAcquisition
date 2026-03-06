@@ -8,8 +8,8 @@ See docs/02-architecture/decisions/ADR-014-deterministic-writes.md
 
 from __future__ import annotations
 
-from pathlib import Path
 import re
+from pathlib import Path
 
 import pytest
 
@@ -152,8 +152,10 @@ class TestSilverLayerInvariants:
         Parquet files without Delta log are strictly prohibited in Silver.
         """
         assert (
-            "from deltalake import DeltaTable" in silver_writer_source
-            and "from deltalake import write_deltalake" in silver_writer_source
+            (
+                "from deltalake import DeltaTable" in silver_writer_source
+                and "from deltalake import write_deltalake" in silver_writer_source
+            )
             or "from deltalake import DeltaTable, write_deltalake"
             in silver_writer_source
         ), (

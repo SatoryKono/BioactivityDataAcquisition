@@ -23,15 +23,19 @@ __all__ = [
     "atomic_write_text",
 ]
 
-
 import os
 import tempfile
 import time
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager, suppress
 from pathlib import Path
 from types import TracebackType
 from typing import IO, Any
+
+from bioetl.infrastructure.storage.write_resilience import (
+    DEFAULT_ATOMIC_REPLACE_RETRY_POLICY,
+    AdaptiveRetryPolicy,
+)
 
 
 class AtomicWriteError(Exception):
@@ -51,35 +55,51 @@ ATOMIC_WRITE_EXCEPTIONS = (
     RuntimeError,
 )
 
-
-_REPLACE_RETRYABLE_WINERRORS = {5, 32}
-_REPLACE_RETRYABLE_ERRNOS = {13, 16}
-_REPLACE_RETRY_ATTEMPTS = 8
-_REPLACE_RETRY_SLEEP_SECONDS = 0.01
+_REPLACE_RETRYABLE_WINERRORS = {5, 32, 33}
+_REPLACE_RETRYABLE_ERRNOS_WINDOWS = {13, 16}
+_REPLACE_RETRYABLE_ERRNOS_NON_WINDOWS = {16}
+_IS_WINDOWS = os.name == "nt"
+ReplaceRetryHook = Callable[[int, float, OSError], None]
 
 
 def _is_retryable_replace_error(error: OSError) -> bool:
     """Return True when Path.replace failure is transient on Windows-like FS."""
     winerror = getattr(error, "winerror", None)
-    if isinstance(winerror, int) and winerror in _REPLACE_RETRYABLE_WINERRORS:
-        return True
+    if isinstance(winerror, int):
+        return bool(_IS_WINDOWS and winerror in _REPLACE_RETRYABLE_WINERRORS)
     errno_value = getattr(error, "errno", None)
-    return bool(
-        isinstance(errno_value, int) and errno_value in _REPLACE_RETRYABLE_ERRNOS
+    retryable_errnos = (
+        _REPLACE_RETRYABLE_ERRNOS_WINDOWS
+        if _IS_WINDOWS
+        else _REPLACE_RETRYABLE_ERRNOS_NON_WINDOWS
     )
+    return bool(isinstance(errno_value, int) and errno_value in retryable_errnos)
 
 
-def _replace_with_retry(temp_path: Path, target: Path) -> None:
+def _replace_with_retry(
+    temp_path: Path,
+    target: Path,
+    *,
+    retry_policy: AdaptiveRetryPolicy,
+    on_retry: ReplaceRetryHook | None = None,
+) -> None:
     """Replace target path with bounded retry for transient file-lock errors."""
-    for attempt in range(_REPLACE_RETRY_ATTEMPTS):
+    retry_count = 0
+    while True:
         try:
             temp_path.replace(target)
             return
         except OSError as error:
-            is_last_attempt = attempt >= _REPLACE_RETRY_ATTEMPTS - 1
-            if is_last_attempt or not _is_retryable_replace_error(error):
+            if not _is_retryable_replace_error(error):
                 raise
-            time.sleep(_REPLACE_RETRY_SLEEP_SECONDS * (attempt + 1))
+            if not retry_policy.should_retry(retry_count):
+                raise
+            delay_seconds = retry_policy.calculate_delay(retry_count)
+            if on_retry is not None:
+                on_retry(retry_count + 1, delay_seconds, error)
+            if delay_seconds > 0.0:
+                time.sleep(delay_seconds)
+            retry_count += 1
 
 
 @contextmanager
@@ -89,6 +109,8 @@ def atomic_write(
     suffix: str = ".tmp",
     prefix: str = ".",
     encoding: str | None = None,
+    retry_policy: AdaptiveRetryPolicy | None = None,
+    on_retry: ReplaceRetryHook | None = None,
 ) -> Iterator[IO[Any]]:  # Any: IO stream type varies (text/binary)
     """Write through temp file and atomically replace target on success."""
     # Ensure parent directory exists
@@ -109,7 +131,12 @@ def atomic_write(
             yield f
 
         # Atomic replace with retry for transient Windows sharing violations.
-        _replace_with_retry(temp_path, target)
+        _replace_with_retry(
+            temp_path,
+            target,
+            retry_policy=retry_policy or DEFAULT_ATOMIC_REPLACE_RETRY_POLICY,
+            on_retry=on_retry,
+        )
 
     except ATOMIC_WRITE_EXCEPTIONS as e:
         # Clean up temp file on any error
@@ -124,7 +151,13 @@ def atomic_write(
         raise AtomicWriteError(target, str(e)) from e
 
 
-def atomic_write_bytes(target: Path, data: bytes) -> None:
+def atomic_write_bytes(
+    target: Path,
+    data: bytes,
+    *,
+    retry_policy: AdaptiveRetryPolicy | None = None,
+    on_retry: ReplaceRetryHook | None = None,
+) -> None:
     """Write bytes atomically to target file.
 
     Args:
@@ -135,11 +168,23 @@ def atomic_write_bytes(target: Path, data: bytes) -> None:
         AtomicWriteError: If write fails
 
     """
-    with atomic_write(target, mode="wb") as f:
+    with atomic_write(
+        target,
+        mode="wb",
+        retry_policy=retry_policy,
+        on_retry=on_retry,
+    ) as f:
         f.write(data)
 
 
-def atomic_write_text(target: Path, text: str, encoding: str = "utf-8") -> None:
+def atomic_write_text(
+    target: Path,
+    text: str,
+    encoding: str = "utf-8",
+    *,
+    retry_policy: AdaptiveRetryPolicy | None = None,
+    on_retry: ReplaceRetryHook | None = None,
+) -> None:
     """Write text atomically to target file.
 
     Args:
@@ -151,7 +196,13 @@ def atomic_write_text(target: Path, text: str, encoding: str = "utf-8") -> None:
         AtomicWriteError: If write fails
 
     """
-    with atomic_write(target, mode="w", encoding=encoding) as f:
+    with atomic_write(
+        target,
+        mode="w",
+        encoding=encoding,
+        retry_policy=retry_policy,
+        on_retry=on_retry,
+    ) as f:
         f.write(text)
 
 
@@ -171,6 +222,7 @@ class AtomicWriteGroup:
 
     def __init__(self) -> None:
         self._pending: list[tuple[Path, Path, bytes]] = []  # (target, temp, data)
+        self._retry_policy = DEFAULT_ATOMIC_REPLACE_RETRY_POLICY
 
     def add(self, target: Path, data: bytes) -> None:
         """Add a file to the atomic write group.
@@ -213,7 +265,11 @@ class AtomicWriteGroup:
 
         try:
             for target, temp_path, _ in self._pending:
-                _replace_with_retry(temp_path, target)
+                _replace_with_retry(
+                    temp_path,
+                    target,
+                    retry_policy=self._retry_policy,
+                )
                 committed.append((target, temp_path))
         except (OSError, ValueError, TypeError, RuntimeError) as e:
             # Rollback: remove any committed files (best effort)

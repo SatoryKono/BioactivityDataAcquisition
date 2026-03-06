@@ -27,11 +27,12 @@ from bioetl.composition.providers.registration_bio import (
     _create_uniprot_data_source,
     _create_uniprot_idmapping_data_source,
 )
-
 # Import adapter classes for ProviderConfig (allowed direction)
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 from bioetl.infrastructure.adapters.crossref.client import (
     CrossRefAdapter,
+)
+from bioetl.infrastructure.adapters.crossref.factory import (
     _create_crossref_adapter,
 )
 from bioetl.infrastructure.adapters.openalex.client import (

@@ -15,6 +15,8 @@ from enum import StrEnum
 from typing import TYPE_CHECKING, Any, NewType, TypeAlias, TypedDict
 from uuid import UUID
 
+from bioetl.domain.types_config_validation import ConfigValidationError
+
 if TYPE_CHECKING:
     import pandera as _pa
     import pyarrow
@@ -395,25 +397,6 @@ class ValidationResult:
 
     valid: bool
     errors: list[str] = field(default_factory=list)
-
-
-@dataclass(frozen=True, slots=True)
-class ConfigValidationError:
-    """Single configuration validation error.
-
-    Used by PreflightService to report Medallion invariant violations.
-
-    Attributes:
-        field: Configuration field path that failed validation.
-        expected: Expected value or constraint description.
-        actual: Actual value found in configuration.
-        rule: Reference to RULES.md section defining this constraint.
-    """
-
-    field: str
-    expected: str
-    actual: str
-    rule: str
 
 
 @dataclass(frozen=True, slots=True)

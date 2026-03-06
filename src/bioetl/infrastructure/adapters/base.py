@@ -22,11 +22,16 @@ from __future__ import annotations
 
 __all__ = ["BaseHttpAdapter"]
 
-
 from types import TracebackType
 from typing import TYPE_CHECKING, Self
 
-from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort, NoOpMetrics
+from bioetl.domain.ports import (
+    DataSourcePort,
+    ErrorHandlerPort,
+    LoggerPort,
+    MetricsPort,
+    NoOpMetrics,
+)
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
@@ -68,7 +73,7 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
     provider_name: str
     logger: LoggerPort
     metrics: MetricsPort | None  # Runtime-resolved to NoOpMetrics if None
-    _error_handler: ErrorService
+    _error_handler: ErrorHandlerPort
     _adapter_metrics: AdapterMetrics
     _request_collector: APIRequestCollector
 
@@ -77,6 +82,10 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
         http_client: UnifiedHTTPClient,
         logger: LoggerPort,
         metrics: MetricsPort | None = None,
+        *,
+        error_handler: ErrorHandlerPort | None = None,
+        adapter_metrics: AdapterMetrics | None = None,
+        request_collector: APIRequestCollector | None = None,
     ) -> None:
         """Initialize BaseAdapter.
 
@@ -85,13 +94,27 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
             logger: LoggerPort instance for structured logging (required).
             metrics: MetricsPort instance for metrics collection (optional).
                     Defaults to NoOpMetrics if not provided.
+            error_handler: Pre-built error handler (optional, injected by
+                    AdapterHelpersFactory). Falls back to inline ErrorService.
+            adapter_metrics: Pre-built adapter metrics (optional, injected by
+                    AdapterHelpersFactory). Falls back to inline AdapterMetrics.
+            request_collector: Pre-built request collector (optional, injected by
+                    AdapterHelpersFactory). Falls back to inline APIRequestCollector.
 
         """
         self.http_client = http_client
         self.logger = logger
         self.metrics = metrics if metrics is not None else NoOpMetrics()
-        self._error_handler = ErrorService(logger, metrics=self.metrics)
-        self._init_adapter_metrics()
+        self._error_handler = (
+            error_handler
+            if error_handler is not None
+            else ErrorService(logger, metrics=self.metrics)
+        )
+        if adapter_metrics is not None and request_collector is not None:
+            self._adapter_metrics = adapter_metrics
+            self._request_collector = request_collector
+        else:
+            self._init_adapter_metrics()
 
     def _init_adapter_metrics(self) -> None:
         """Initialize adapter metrics and request collector.

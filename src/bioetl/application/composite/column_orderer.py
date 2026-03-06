@@ -1,8 +1,4 @@
-"""Column orderer service for composite pipelines.
-
-Orders columns by semantic groups for consistent output.
-See ADR-026 for rationale.
-"""
+"""Column orderer service for composite pipelines."""
 
 from __future__ import annotations
 
@@ -42,18 +38,7 @@ def _collect_pattern_columns(
     sort_fn: _SortFn,
     logger: LoggerPort,
 ) -> list[str]:
-    """Collect columns matching a group regex pattern.
-
-    Args:
-        available: Set of available column names.
-        used: Set of already-matched column names (mutated in-place).
-        group: Column group configuration with optional pattern.
-        sort_fn: Provider-sorting callable.
-        logger: Logger for warnings on invalid patterns.
-
-    Returns:
-        Sorted list of pattern-matched columns not already in *used*.
-    """
+    """Collect columns matching a group regex pattern."""
     if not group.pattern:
         return []
     try:
@@ -76,31 +61,7 @@ def _collect_pattern_columns(
 
 
 class ColumnOrdererService:
-    """Service for ordering columns by semantic groups.
-
-    Orders DataFrame columns in a consistent, semantically meaningful way:
-    1. System fields (entity_id, _run_id, ...)
-    2. Identifiers (doi, pmid, ...)
-    3. Title fields
-    4. Abstract fields
-    5. Authors fields
-    6. Journal/Source fields
-    7. Date fields
-    8. Metrics fields
-    9. Classification fields
-    10. URL fields
-    11. Other fields
-
-    Within each group, columns are ordered by:
-    - Provider priority (chembl first, then crossref, etc.)
-    - Alphabetically for same provider
-
-    Example:
-        >>> orderer = ColumnOrdererService(logger)
-        >>> result = orderer.order_columns(df)
-        >>> result.columns[:5]
-        ['entity_id', '_run_id', 'doi', 'pmid', 'chembl.publication.title']
-    """
+    """Service for ordering columns by semantic groups."""
 
     def __init__(
         self,
@@ -108,31 +69,14 @@ class ColumnOrdererService:
         config: ColumnOrderConfig | None = None,
         column_groups: Sequence[ColumnGroupConfig] | None = None,
     ) -> None:
-        """Initialize orderer.
-
-        Args:
-            logger: Logger port for diagnostics.
-            config: Column order configuration. Uses DEFAULT_COLUMN_ORDER if None.
-            column_groups: Optional YAML-based column group configuration.
-                If provided, takes precedence over config.
-        """
+        """Initialize orderer."""
         self._logger = logger
         self._config = config or DEFAULT_COLUMN_ORDER
         self._column_groups = tuple(column_groups) if column_groups else None
         self._warned_legacy_aliases: set[str] = set()
 
     def order_columns(self, df: pl.DataFrame) -> pl.DataFrame:
-        """Order DataFrame columns by semantic groups.
-
-        If column_groups were provided in constructor, uses YAML-based ordering.
-        Otherwise falls back to hardcoded ColumnOrderConfig.
-
-        Args:
-            df: DataFrame to reorder.
-
-        Returns:
-            DataFrame with columns in semantic order.
-        """
+        """Order DataFrame columns by semantic groups."""
         if not df.columns:
             return df
 
@@ -155,17 +99,7 @@ class ColumnOrdererService:
         return df.select(ordered)
 
     def order_column_names(self, columns: Sequence[str]) -> list[str]:
-        """Order column names by semantic groups.
-
-        Uses YAML-based column groups when configured, otherwise falls back
-        to the default semantic ordering.
-
-        Args:
-            columns: List of column names.
-
-        Returns:
-            Ordered result.
-        """
+        """Order column names by semantic groups."""
         if not columns:
             return []
 
@@ -175,25 +109,11 @@ class ColumnOrdererService:
         return self.get_ordered_columns(columns)
 
     def get_ordered_columns(self, columns: Sequence[str]) -> list[str]:
-        """Get columns in semantic order.
-
-        Args:
-            columns: Column names to order.
-
-        Returns:
-            Ordered list of column names.
-        """
+        """Get columns in semantic order."""
 
         # Create sort key for each column
         def sort_key(col: str) -> tuple[int, int, str]:
-            """Sort by (group, provider_rank, column_name).
-
-            Args:
-                col: Col.
-
-            Returns:
-                Sort key value for ordering.
-            """
+            """Sort by (group, provider_rank, column_name)."""
             group = self._config.get_group(col)
             provider_rank = self._config.get_provider_rank(col)
             # For alphabetical sort, use field name (not full qualified name)
@@ -203,14 +123,7 @@ class ColumnOrdererService:
         return sorted(columns, key=sort_key)
 
     def _count_groups(self, columns: Sequence[str]) -> dict[str, int]:
-        """Count columns per semantic group.
-
-        Args:
-            columns: Ordered column names.
-
-        Returns:
-            Dict mapping group name to column count.
-        """
+        """Count columns per semantic group."""
         counts: dict[str, int] = {}
         for col in columns:
             group = self._config.get_group(col)
@@ -219,16 +132,7 @@ class ColumnOrdererService:
         return counts
 
     def group_columns(self, columns: Sequence[str]) -> dict[SemanticGroup, list[str]]:
-        """Group columns by semantic type.
-
-        Useful for debugging and documentation.
-
-        Args:
-            columns: Column names to group.
-
-        Returns:
-            Dict mapping SemanticGroup to list of columns.
-        """
+        """Group columns by semantic type."""
         groups: dict[SemanticGroup, list[str]] = {}
 
         for col in columns:
@@ -252,14 +156,7 @@ class ColumnOrdererService:
     # === YAML-based column ordering methods ===
 
     def _order_by_yaml_groups(self, columns: Sequence[str]) -> list[str]:
-        """Order columns using YAML-configured groups.
-
-        Args:
-            columns: Column names to order.
-
-        Returns:
-            Ordered list of column names.
-        """
+        """Order columns using YAML-configured groups."""
         if not self._column_groups:
             return list(columns)
 
@@ -305,20 +202,7 @@ class ColumnOrdererService:
         available: set[str],
         group: ColumnGroupConfig,
     ) -> list[str]:
-        """Collect columns for a group, preserving field order from config.
-
-        Fields are emitted in the order they appear in ``group.fields``.
-        Within each field, provider-qualified columns are sorted by
-        ``group.provider_order``.  Pattern-matched columns that were not
-        already captured by explicit field names are appended at the end.
-
-        Args:
-            available: Set of available column names.
-            group: Column group configuration.
-
-        Returns:
-            Ordered list of columns for this group.
-        """
+        """Collect columns for a group, preserving field order from config."""
         ordered: list[str] = []
         used: set[str] = set()
 
@@ -349,27 +233,10 @@ class ColumnOrdererService:
         columns: list[str],
         provider_order: tuple[str, ...],
     ) -> list[str]:
-        """Sort columns by provider prefix order.
-
-        Seed columns (no dots) come first, then by provider order.
-
-        Args:
-            columns: List of column names.
-            provider_order: Tuple of provider names in desired order.
-
-        Returns:
-            Sorted list of columns.
-        """
+        """Sort columns by provider prefix order."""
 
         def sort_key(col: str) -> tuple[int, str]:
-            """Return (provider_index, name) placing seed columns first.
-
-            Args:
-                col: Col.
-
-            Returns:
-                Sort key value for ordering.
-            """
+            """Return (provider_index, name) placing seed columns first."""
             # Seed columns (no dot or single dot like 'field.A') come first
             parts = col.split(".")
             if len(parts) < 3:
@@ -387,14 +254,7 @@ class ColumnOrdererService:
         return sorted(columns, key=sort_key)
 
     def _extract_field_from_qualified(self, column: str) -> str:
-        """Extract field name from qualified column name.
-
-        Args:
-            column: Column name (qualified or unqualified).
-
-        Returns:
-            Field name (last part of qualified name, or full name if unqualified).
-        """
+        """Extract field name from qualified column name."""
         parts = column.split(".")
         if len(parts) == 3:
             return parts[2]  # provider.entity.field -> field
@@ -430,22 +290,7 @@ class ColumnOrdererService:
         columns: Sequence[str],
         layer_config: LayerColumnConfig,
     ) -> list[str]:
-        """Filter columns by layer-specific configuration.
-
-        Supports three filtering modes:
-        1. Explicit column list (layer_config.columns)
-        2. Group-based filtering (layer_config.include_groups + exclude_fields)
-        3. Layer-specific groups (layer_config.column_groups)
-
-        Also applies rename_fields mapping if specified.
-
-        Args:
-            columns: Available columns to filter.
-            layer_config: Layer-specific column configuration.
-
-        Returns:
-            Filtered list of columns in semantic order (with renames applied).
-        """
+        """Filter columns by layer-specific configuration."""
         from fnmatch import fnmatch
 
         # Mode 1: Explicit column list
@@ -496,15 +341,7 @@ class ColumnOrdererService:
     def _apply_renames(
         self, columns: list[str], rename_map: dict[str, str]
     ) -> list[str]:
-        """Apply column renames from rename_fields mapping.
-
-        Args:
-            columns: List of column names to rename.
-            rename_map: Mapping of old_name -> new_name.
-
-        Returns:
-            List of columns with renames applied.
-        """
+        """Apply column renames from rename_fields mapping."""
         if not rename_map:
             return columns
 

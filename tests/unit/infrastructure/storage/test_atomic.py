@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import errno
+import sys
 from pathlib import Path
 from unittest.mock import patch
 
@@ -14,6 +16,25 @@ from bioetl.infrastructure.storage._atomic import (
     atomic_write_bytes,
     atomic_write_text,
 )
+from bioetl.infrastructure.storage.write_resilience import AdaptiveRetryPolicy
+
+
+class _WindowsLockError(OSError):
+    """Synthetic Windows sharing violation used in lock-stress tests."""
+
+    winerror = 32
+
+
+class _WindowsAccessDeniedError(OSError):
+    """Synthetic Windows access-denied error for retry classification tests."""
+
+    winerror = 5
+
+
+class _WindowsLockViolationError(OSError):
+    """Synthetic Windows lock-violation error for retry classification tests."""
+
+    winerror = 33
 
 
 @pytest.mark.unit
@@ -138,6 +159,201 @@ class TestAtomicWrite:
                     atomic_write_text(target, "x")
 
         assert call_count["count"] == 1
+
+    def test_atomic_write_retry_hook_reports_attempts(self, tmp_path: Path) -> None:
+        """Retry callback should receive attempt number and delay."""
+        target = tmp_path / "hook_retry.txt"
+        original_replace = Path.replace
+        call_count = {"count": 0}
+        hook_events: list[tuple[int, float]] = []
+
+        def flaky_replace(self: Path, target_path: Path) -> Path:
+            call_count["count"] += 1
+            if call_count["count"] == 1:
+                raise OSError(13, "Permission denied")
+            return original_replace(self, target_path)
+
+        policy = AdaptiveRetryPolicy(
+            enabled=True,
+            max_retries=2,
+            base_delay_seconds=0.01,
+            max_delay_seconds=0.1,
+            jitter_seconds=0.0,
+            adaptive=True,
+        )
+
+        with patch.object(Path, "replace", flaky_replace):
+            with patch("bioetl.infrastructure.storage._atomic.time.sleep"):
+                atomic_write_text(
+                    target,
+                    "ok",
+                    retry_policy=policy,
+                    on_retry=lambda attempt, delay, _error: hook_events.append(
+                        (attempt, delay)
+                    ),
+                )
+
+        assert target.read_text() == "ok"
+        assert hook_events == [(1, 0.01)]
+
+
+@pytest.mark.unit
+class TestAtomicRetryableErrors:
+    """Tests for platform-specific retryable replace error classification."""
+
+    def test_non_windows_eacces_is_not_retryable(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Non-Windows EACCES should not be treated as transient lock contention."""
+        import bioetl.infrastructure.storage._atomic as atomic_module
+
+        monkeypatch.setattr(atomic_module, "_IS_WINDOWS", False)
+        error = OSError(errno.EACCES, "Permission denied")
+        assert atomic_module._is_retryable_replace_error(error) is False
+
+    def test_non_windows_ebusy_is_retryable(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Non-Windows EBUSY should be treated as transient lock contention."""
+        import bioetl.infrastructure.storage._atomic as atomic_module
+
+        monkeypatch.setattr(atomic_module, "_IS_WINDOWS", False)
+        error = OSError(errno.EBUSY, "Device or resource busy")
+        assert atomic_module._is_retryable_replace_error(error) is True
+
+    def test_windows_eacces_is_retryable(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Windows EACCES should remain retryable for transient sharing violations."""
+        import bioetl.infrastructure.storage._atomic as atomic_module
+
+        monkeypatch.setattr(atomic_module, "_IS_WINDOWS", True)
+        error = OSError(errno.EACCES, "Permission denied")
+        assert atomic_module._is_retryable_replace_error(error) is True
+
+    def test_windows_winerror_5_is_retryable(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """WinError=5 should be treated as retryable on Windows."""
+        import bioetl.infrastructure.storage._atomic as atomic_module
+
+        monkeypatch.setattr(atomic_module, "_IS_WINDOWS", True)
+        error = _WindowsAccessDeniedError(
+            errno.EACCES,
+            "Access is denied",
+        )
+        assert atomic_module._is_retryable_replace_error(error) is True
+
+    def test_windows_winerror_33_is_retryable(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """WinError=33 should be treated as retryable on Windows."""
+        import bioetl.infrastructure.storage._atomic as atomic_module
+
+        monkeypatch.setattr(atomic_module, "_IS_WINDOWS", True)
+        error = _WindowsLockViolationError(
+            errno.EACCES,
+            "Lock violation",
+        )
+        assert atomic_module._is_retryable_replace_error(error) is True
+
+
+@pytest.mark.unit
+class TestAtomicWriteWindowsLockStress:
+    """Windows-only stress tests for atomic replace lock handling."""
+
+    @pytest.mark.slow
+    @pytest.mark.serial
+    @pytest.mark.skipif(
+        sys.platform != "win32",
+        reason="Windows-only lock semantics",
+    )
+    def test_windows_lock_stress_repeated_recovery(self, tmp_path: Path) -> None:
+        """Repeated transient lock errors should still converge to last payload."""
+        target = tmp_path / "windows_lock_stress.txt"
+        original_replace = Path.replace
+        writes = 30
+        transient_failures_per_write = 2
+        call_counts = {"attempts": 0, "failures": 0, "remaining_failures": 0}
+        policy = AdaptiveRetryPolicy(
+            enabled=True,
+            max_retries=5,
+            base_delay_seconds=0.0,
+            max_delay_seconds=0.0,
+            jitter_seconds=0.0,
+            adaptive=True,
+        )
+
+        def flaky_replace(self: Path, target_path: Path) -> Path:
+            call_counts["attempts"] += 1
+            if target_path == target and call_counts["remaining_failures"] > 0:
+                call_counts["remaining_failures"] -= 1
+                call_counts["failures"] += 1
+                raise _WindowsLockError(
+                    errno.EACCES,
+                    "The process cannot access the file because it is being used",
+                )
+            return original_replace(self, target_path)
+
+        with patch.object(Path, "replace", flaky_replace):
+            with patch("bioetl.infrastructure.storage._atomic.time.sleep"):
+                for idx in range(writes):
+                    call_counts["remaining_failures"] = transient_failures_per_write
+                    atomic_write_text(
+                        target,
+                        f"payload-{idx}",
+                        retry_policy=policy,
+                    )
+
+        assert target.read_text() == f"payload-{writes - 1}"
+        assert call_counts["failures"] == writes * transient_failures_per_write
+
+    @pytest.mark.slow
+    @pytest.mark.serial
+    @pytest.mark.skipif(
+        sys.platform != "win32",
+        reason="Windows-only lock semantics",
+    )
+    def test_windows_lock_stress_parallel_writers(self, tmp_path: Path) -> None:
+        """Parallel writes should recover from one transient lock per target."""
+        import concurrent.futures
+        import threading
+
+        file_count = 20
+        targets = [
+            tmp_path / f"parallel_windows_{idx}.txt" for idx in range(file_count)
+        ]
+        original_replace = Path.replace
+        lock_state = dict.fromkeys(targets, 1)
+        lock_state_guard = threading.Lock()
+        policy = AdaptiveRetryPolicy(
+            enabled=True,
+            max_retries=3,
+            base_delay_seconds=0.0,
+            max_delay_seconds=0.0,
+            jitter_seconds=0.0,
+            adaptive=True,
+        )
+
+        def flaky_replace(self: Path, target_path: Path) -> Path:
+            with lock_state_guard:
+                remaining_failures = lock_state.get(target_path, 0)
+                if remaining_failures > 0:
+                    lock_state[target_path] = remaining_failures - 1
+                    raise _WindowsLockError(
+                        errno.EACCES,
+                        "The process cannot access the file because it is being used",
+                    )
+            return original_replace(self, target_path)
+
+        def write_target(idx: int) -> None:
+            atomic_write_text(targets[idx], f"value-{idx}", retry_policy=policy)
+
+        with patch.object(Path, "replace", flaky_replace):
+            with patch("bioetl.infrastructure.storage._atomic.time.sleep"):
+                with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
+                    list(pool.map(write_target, range(file_count)))
+
+        for idx, target in enumerate(targets):
+            assert target.read_text() == f"value-{idx}"
 
 
 @pytest.mark.unit

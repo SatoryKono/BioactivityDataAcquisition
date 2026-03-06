@@ -6,6 +6,9 @@ import time
 from typing import TYPE_CHECKING
 
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.health_status_policy import (
+    classify_health_probe_status,
+)
 from bioetl.infrastructure.adapters.openalex.query_builder import (
     build_openalex_health_probe_params,
 )
@@ -35,11 +38,17 @@ async def probe_openalex_health(
     elapsed = time.monotonic() - start_time
 
     if response.status_code != 200:
+        status = classify_health_probe_status(response.status_code)
         logger.warning(
-            "openalex_health_check_failed",
+            (
+                "openalex_health_check_degraded"
+                if status == HealthStatus.DEGRADED
+                else "openalex_health_check_failed"
+            ),
             status_code=response.status_code,
+            classified_status=status.value,
         )
-        return HealthStatus.UNHEALTHY
+        return status
 
     if elapsed > 5.0:
         logger.warning(

@@ -66,6 +66,7 @@ from bioetl.domain.ports.dq_report import (
     SilverDQAnalyzerPort,
 )
 from bioetl.domain.ports.error_classifier import ErrorClassifierPort
+from bioetl.domain.ports.error_handler import ErrorHandlerPort
 from bioetl.domain.ports.fallback_policy import FallbackPolicyPort
 from bioetl.domain.ports.filtering import InputFilterPort
 from bioetl.domain.ports.health_check import (
@@ -155,6 +156,7 @@ __all__ = [
     "DeltaReaderPort",
     "DomainConfigMapperPort",
     "ErrorClassifierPort",
+    "ErrorHandlerPort",
     "ExecutorMetricsPort",
     "FallbackPolicyPort",
     "FilterableDataSourcePort",

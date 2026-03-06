@@ -19,14 +19,12 @@ from __future__ import annotations
 
 __all__ = ["OPENALEX_API_BASE", "OPENALEX_RUNTIME_ERRORS", "OpenAlexAdapter"]
 
-
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 from httpx import HTTPStatusError, RequestError
 
 from bioetl.domain.exceptions import BioETLError, NetworkError
-from bioetl.domain.types import BronzeRecord, HealthStatus, JsonDict
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.common import FallbackFetchOrchestratorService
 from bioetl.infrastructure.adapters.openalex.client_helpers_adapter_mixin import (
@@ -39,7 +37,12 @@ from bioetl.infrastructure.adapters.openalex.fallback import TitleFallbackHandle
 from bioetl.infrastructure.adapters.openalex.fallback_orchestrator import (
     OpenAlexFallbackOrchestrator,
 )
-from bioetl.infrastructure.adapters.openalex.health_probe import probe_openalex_health
+from bioetl.infrastructure.adapters.openalex.filter_fetch_adapter_mixin import (
+    OpenAlexAdapterFilterFetchMixin,
+)
+from bioetl.infrastructure.adapters.openalex.health_adapter_mixin import (
+    OpenAlexAdapterHealthMixin,
+)
 from bioetl.infrastructure.adapters.openalex.query_execution import (
     OpenAlexQueryExecutor,
 )
@@ -48,9 +51,11 @@ from bioetl.infrastructure.adapters.openalex.response_mapping import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator
-
-    from bioetl.domain.ports import LoggerPort, MetricsPort
+    from bioetl.domain.ports import ErrorHandlerPort, LoggerPort, MetricsPort
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+    from bioetl.infrastructure.adapters.common.api_request_collector import (
+        APIRequestCollector,
+    )
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config import Settings
 
@@ -70,8 +75,32 @@ OPENALEX_RUNTIME_ERRORS = (
 )
 
 
+def _create_default_openalex_error_handler(
+    *,
+    logger: LoggerPort,
+    metrics: MetricsPort | None,
+) -> ErrorHandlerPort:
+    """Create default adapter error handler for non-DI call sites."""
+    from bioetl.infrastructure.adapters.error_handling import ErrorService
+
+    return ErrorService(logger, metrics=metrics)
+
+
+def _create_default_openalex_fallback_service(
+    *,
+    adapter_metrics: AdapterMetrics,
+) -> FallbackFetchOrchestratorService:
+    """Create fallback orchestrator service for non-DI call sites."""
+    return FallbackFetchOrchestratorService(adapter_metrics)
+
+
 @dataclass
-class OpenAlexAdapter(OpenAlexAdapterHelpersMixin, BaseHttpAdapter):
+class OpenAlexAdapter(
+    OpenAlexAdapterFilterFetchMixin,
+    OpenAlexAdapterHealthMixin,
+    OpenAlexAdapterHelpersMixin,
+    BaseHttpAdapter,
+):
     """OpenAlex data source adapter.
 
     Inherits from BaseHttpAdapter for standardized lifecycle management
@@ -97,6 +126,10 @@ class OpenAlexAdapter(OpenAlexAdapterHelpersMixin, BaseHttpAdapter):
     batch_size: int = 50
     metrics: MetricsPort | None = None
     title_search_cache_size: int = 256
+    error_handler: ErrorHandlerPort | None = None
+    adapter_metrics: AdapterMetrics | None = None
+    request_collector: APIRequestCollector | None = None
+    fallback_fetch_service: FallbackFetchOrchestratorService | None = None
 
     provider_name: str = field(init=False, default="openalex")
     """Provider identifier (required by DataSourcePort)."""
@@ -110,9 +143,25 @@ class OpenAlexAdapter(OpenAlexAdapterHelpersMixin, BaseHttpAdapter):
 
     def __post_init__(self) -> None:
         """Initialize adapter metrics and decomposed OpenAlex components."""
-        self._init_adapter_metrics()
-        self._fallback_fetch_service = FallbackFetchOrchestratorService(
-            self._adapter_metrics
+        if self.adapter_metrics is not None and self.request_collector is not None:
+            self._adapter_metrics = self.adapter_metrics
+            self._request_collector = self.request_collector
+        else:
+            self._init_adapter_metrics()
+        self._error_handler = (
+            self.error_handler
+            if self.error_handler is not None
+            else _create_default_openalex_error_handler(
+                logger=self.logger,
+                metrics=self.metrics,
+            )
+        )
+        self._fallback_fetch_service = (
+            self.fallback_fetch_service
+            if self.fallback_fetch_service is not None
+            else _create_default_openalex_fallback_service(
+                adapter_metrics=self._adapter_metrics,
+            )
         )
         self._query_executor = OpenAlexQueryExecutor(
             http_client=self.http_client,
@@ -145,223 +194,11 @@ class OpenAlexAdapter(OpenAlexAdapterHelpersMixin, BaseHttpAdapter):
             extract_record_id=self._extract_doi_from_record,
             logger=self.logger,
         )
+        self.configure_fallback_policy(None)
 
-    @staticmethod
-    def _is_supported_entity_type(entity_type: str) -> bool:
-        return entity_type in ("work", "publication")
-
-    def _validate_entity_type(self, entity_type: str) -> None:
-        if self._is_supported_entity_type(entity_type):
-            return
-        raise ValueError(
-            f"OpenAlexAdapter supports 'work' or 'publication', got: {entity_type}"
-        )
-
-    async def _request_works_payload(
-        self,
-        params: dict[str, str],
-    ) -> JsonDict:  # Any: untyped OpenAlex API payload
-        """Backward-compatible wrapper around query-execution component."""
-        return await self._query_executor.request_works_payload(params)
-
-    async def fetch_filtered(
-        self,
-        entity_type: str,
-        filter_ids: list[str],
-        filter_field: str,
-        limit: int | None = None,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Fetch OpenAlex records by DOI or title."""
-        self._validate_entity_type(entity_type)
-
-        if filter_field == "doi":
-            async for work in self._fetch_filtered_by_doi(filter_ids, limit):
-                yield work
-            return
-        if filter_field == "title":
-            async for work in self._fetch_filtered_by_title(filter_ids, limit):
-                yield work
-            return
-
-        self.logger.warning(
-            "unsupported_filter_field",
-            field=filter_field,
-            msg="OpenAlex only supports 'doi' or 'title' filtering, skipping",
-        )
-
-    async def _fetch_filtered_by_doi(
-        self,
-        filter_ids: list[str],
-        limit: int | None = None,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Fetch OpenAlex works by DOI list via cursor-flow component."""
-        async for work in self._cursor_flow.iter_filtered_by_doi(filter_ids, limit):
-            yield work
-
-    async def _fetch_filtered_by_title(
-        self,
-        titles: list[str],
-        limit: int | None = None,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Fetch works by title via cursor-flow component."""
-        async for work in self._cursor_flow.iter_filtered_by_title(titles, limit):
-            yield work
-
-    async def fetch_multi_filtered(
-        self,
-        entity_type: str,
-        filters: dict[str, list[str]],
-        limit: int | None = None,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Multi-field filtering not supported by OpenAlex.
-
-        OpenAlex supports DOI filtering via fetch_filtered().
-        For other filters, use the general search API.
-
-        Raises:
-            NotImplementedError: Always, as OpenAlex doesn't support multi-field filtering.
-
-        Args:
-            entity_type: Entity type identifier.
-            filters: Filters.
-            limit: Maximum number of records to process.
-
-        Returns:
-            Async iterator yielding fetched records.
-        """
-        raise NotImplementedError(
-            "OpenAlex adapter does not support multi-field filtering. "
-            "Use fetch_filtered() with filter_field='doi' instead."
-        )
-        yield {}  # pragma: no cover - keeps AsyncIterator contract
-
-    async def _batch_doi_lookup(
-        self,
-        valid_dois: list[str],
-        limit: int | None,
-        start_count: int = 0,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Phase-1 DOI lookup via cursor-flow component."""
-        async for work in self._cursor_flow.iter_doi_batches_for_fallback(
-            primary_ids=valid_dois,
-            limit=limit,
-            start_count=start_count,
-        ):
-            yield work
-
-    async def fetch_filtered_with_fallback(
-        self,
-        entity_type: str,
-        filter_ids: list[str],
-        filter_field: str,
-        fallback_mapping: dict[str, str],
-        limit: int | None = None,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Fetch DOI-first records with title fallback resolution."""
-        if not self._is_supported_entity_type(entity_type):
-            raise ValueError(
-                f"OpenAlexAdapter supports 'work'/'publication', got: {entity_type}"
-            )
-        if filter_field != "doi":
-            self.logger.warning(
-                "unsupported_filter_field_for_fallback",
-                field=filter_field,
-                msg="OpenAlex fallback only supports 'doi' filtering, skipping",
-            )
-            return
-
-        def _primary_records(
-            primary_ids: list[str], request_limit: int | None
-        ) -> AsyncIterator[BronzeRecord]:
-            return self._batch_doi_lookup(primary_ids, request_limit)
-
-        async for work in self._fallback_orchestrator.execute(
-            filter_ids=filter_ids,
-            fallback_mapping=fallback_mapping,
-            primary_record_fetcher=_primary_records,
-            limit=limit,
-        ):
-            yield work
-
-    async def fetch(
-        self,
-        entity_type: str,
-        limit: int | None = None,
-        query: str | None = None,
-        filter_ids: list[str] | None = None,
-        filter_field: str | None = None,
-        offset: int | None = None,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Fetch OpenAlex works by filters or free-text query."""
-        if filter_ids:
-            effective_filter_field = filter_field or "doi"
-            async for work in self.fetch_filtered(
-                entity_type, filter_ids, effective_filter_field, limit
-            ):
-                yield work
-            return
-
-        self._validate_entity_type(entity_type)
-        if not query:
-            raise ValueError(
-                "OpenAlex requires either filter_ids (DOIs) or query parameter"
-            )
-
-        async for work in self._fetch_by_query(query=query, limit=limit):
-            yield work
-
-    # =========================================================================
-    # Internal methods
-    # =========================================================================
-
-    async def _fetch_by_query(
-        self,
-        *,
-        query: str,
-        limit: int | None,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Fetch works with cursor pagination via cursor-flow component."""
-        async for work in self._cursor_flow.iter_query_results(
-            query=query, limit=limit
-        ):
-            yield work
-
-    async def _fetch_by_dois(self, dois: list[str]) -> AsyncIterator[BronzeRecord]:
-        """Fetch works by DOI via cursor-flow component."""
-        async for work in self._cursor_flow.iter_by_dois(dois):
-            yield work
-
-    async def _search_by_title(self, title: str, limit: int = 3) -> list[BronzeRecord]:
-        """Search works by title via cursor-flow component."""
-        return await self._cursor_flow.search_by_title(title, limit)
-
-    async def _probe_health(self) -> HealthStatus:
-        """Probe OpenAlex API health."""
-        try:
-            return await probe_openalex_health(
-                api_base=OPENALEX_API_BASE,
-                mailto=self.mailto,
-                http_client=self.http_client,
-                logger=self.logger,
-                adapter_metrics=self._adapter_metrics,
-                headers=self._build_headers(),
-            )
-        except OPENALEX_RUNTIME_ERRORS as e:
-            self.logger.warning(
-                "openalex_health_check_failed",
-                error=str(e),
-            )
-            raise  # Let health_check() return _fallback_health_status()
-
-    async def aclose(self) -> None:
-        """Close adapter resources.
-
-        Overrides BaseHttpAdapter.aclose() to properly close the HTTP client.
-        Safely closes via the public context manager interface.
-        Idempotent - safe to call multiple times.
-        """
-        if self.http_client:
-            await self.http_client.__aexit__(None, None, None)
+    def configure_fallback_policy(self, policy: object | None) -> None:
+        """Configure fallback orchestrator behavior from provider YAML policy."""
+        self._fallback_orchestrator.configure_policy(policy)
 
 
 def _create_openalex_adapter(
@@ -408,4 +245,8 @@ def _create_openalex_adapter(
         mailto=mailto,
         batch_size=kwargs.get("batch_size", 50),
         metrics=kwargs.get("metrics"),
+        error_handler=kwargs.get("error_handler"),
+        adapter_metrics=kwargs.get("adapter_metrics"),
+        request_collector=kwargs.get("request_collector"),
+        fallback_fetch_service=kwargs.get("fallback_fetch_service"),
     )

@@ -79,12 +79,27 @@ async def test_health_check_returns_healthy_on_success(adapter, mock_http_client
 
 
 @pytest.mark.asyncio
-async def test_health_check_returns_unhealthy_on_non_200(
+async def test_health_check_returns_degraded_on_transient_non_200(
     adapter, mock_http_client, mock_logger
 ):
-    """Test health_check returns UNHEALTHY on non-200 response."""
+    """Test health_check returns DEGRADED on transient non-200 response."""
     mock_response = MagicMock()
     mock_response.status_code = 503
+    mock_http_client.get_once = AsyncMock(return_value=mock_response)
+
+    result = await adapter.health_check()
+
+    assert result == HealthStatus.DEGRADED
+    mock_logger.warning.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_health_check_returns_unhealthy_on_auth_non_200(
+    adapter, mock_http_client, mock_logger
+):
+    """Test health_check returns UNHEALTHY on auth-related response codes."""
+    mock_response = MagicMock()
+    mock_response.status_code = 401
     mock_http_client.get_once = AsyncMock(return_value=mock_response)
 
     result = await adapter.health_check()

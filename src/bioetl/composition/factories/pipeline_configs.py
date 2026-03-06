@@ -1,15 +1,7 @@
-"""Pipeline configuration registry - data definitions.
-
-Contains PipelineFactoryConfig NamedTuple and PIPELINE_CONFIGS tuple
-with all pipeline definitions. Extracted from pipeline_factories.py
-for LOC compliance.
-"""
+"""Pipeline configuration registry and factory data definitions."""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, NamedTuple
-
-# Transformers (all DI-injected)
 from bioetl.application.pipelines.chembl.activity_transformer import ActivityTransformer
 from bioetl.application.pipelines.chembl.assay_parameters_transformer import (
     AssayParametersTransformer,
@@ -57,8 +49,7 @@ from bioetl.application.pipelines.uniprot.idmapping_transformer import (
     IDMappingTransformer,
 )
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
-
-# Gold schemas (required for all pipelines)
+from bioetl.composition.factories.pipeline_factory_config import PipelineFactoryConfig
 from bioetl.domain.contracts import (
     ChEMBLActivityGoldSchema,
     ChEMBLAssayGoldSchema,
@@ -82,8 +73,6 @@ from bioetl.domain.contracts import (
     UniProtIDMappingGoldSchema,
     UniProtProteinGoldSchema,
 )
-
-# Pandera Silver schemas (DataFrameModel classes for validation)
 from bioetl.domain.schemas.chembl.activity import ActivitySchema
 from bioetl.domain.schemas.chembl.assay import AssaySchema
 from bioetl.domain.schemas.chembl.assay_parameters import AssayParametersSchema
@@ -109,8 +98,6 @@ from bioetl.domain.schemas.semanticscholar.publication import (
 )
 from bioetl.domain.schemas.uniprot.idmapping import IDMappingSchema
 from bioetl.domain.schemas.uniprot.protein import UniprotTargetSchema
-
-# Silver schemas (optional PyArrow schemas)
 from bioetl.infrastructure.schemas.silver import (
     CHEMBL_ACTIVITY_SCHEMA,
     CHEMBL_ASSAY_PARAMETERS_SCHEMA,
@@ -135,26 +122,6 @@ from bioetl.infrastructure.schemas.silver import (
     UNIPROT_PROTEIN_SCHEMA,
 )
 
-if TYPE_CHECKING:
-    import pyarrow as pa
-
-    from bioetl.application.core.base_transformer import BaseTransformer
-
-
-class PipelineFactoryConfig(NamedTuple):
-    """Value object describing one pipeline factory registration."""
-
-    pipeline_name: str
-    provider: str
-    entity_type: str
-    transformer_class: type[BaseTransformer]
-    silver_schema: pa.Schema | None
-    gold_schema: object
-    pandera_silver_schema: object | None = None
-    data_source_provider: str | None = None
-
-
-# Consolidated pipeline definitions - single source of truth
 PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
     # ChEMBL pipelines
     PipelineFactoryConfig(
