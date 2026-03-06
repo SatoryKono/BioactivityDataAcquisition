@@ -17,7 +17,6 @@ __all__ = [
     "PanderaSilverValidator",
 ]
 
-
 from typing import TYPE_CHECKING, ClassVar
 
 from bioetl.domain.types import JsonDict, ValidationResult
@@ -94,6 +93,9 @@ class BasePanderaValidator:
 
         Preserves extra columns at the end so strict=True still catches them.
         Skips reordering for DataFrameModel classes that lack .columns.
+
+        Returns:
+            DataFrame with schema-defined columns first, followed by extra columns.
         """
         assert self._schema is not None
         if not hasattr(self._schema, "columns"):

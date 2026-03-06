@@ -122,7 +122,7 @@ class PubMedFetchMixin:
         """Yield article records from a list of PMIDs."""
         total_fetched = 0
         for i in range(0, len(pmids), self.batch_size):
-            records = await self._fetch_batch(pmids[i: i + self.batch_size])
+            records = await self._fetch_batch(pmids[i : i + self.batch_size])
             for record in records:
                 yield record
                 total_fetched += 1

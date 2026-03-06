@@ -28,7 +28,9 @@ class GoldWriterReadCleanupMixin:
     """Reusable read/history and cleanup-preview helpers."""
 
     _resolve_table_path: Callable[[str], str]
-    _run_in_executor: Callable[..., Awaitable[Any]]
+    _run_in_executor: Callable[
+        ..., Awaitable[Any]  # Any: executor returns untyped Delta/Arrow runtime objects
+    ]
 
     async def read_gold(
         self,
@@ -44,9 +46,13 @@ class GoldWriterReadCleanupMixin:
         table_path = self._resolve_table_path(table_name)
         module = _load_gold_writer_module()
         dt = cast(
-            Any, await self._run_in_executor(lambda: module.DeltaTable(table_path))
+            Any,  # Any: DeltaTable runtime type has no complete type stubs
+            await self._run_in_executor(lambda: module.DeltaTable(table_path)),
         )
-        arrow_table = cast(Any, await self._run_in_executor(dt.to_pyarrow_table))
+        arrow_table = cast(
+            Any,  # Any: pyarrow.Table returned via executor is untyped to mypy
+            await self._run_in_executor(dt.to_pyarrow_table),
+        )
         if current_only and "is_current" in arrow_table.column_names:
             import pyarrow.compute as pc
 
@@ -70,9 +76,13 @@ class GoldWriterReadCleanupMixin:
         table_path = self._resolve_table_path(table_name)
         module = _load_gold_writer_module()
         dt = cast(
-            Any, await self._run_in_executor(lambda: module.DeltaTable(table_path))
+            Any,  # Any: DeltaTable runtime type has no complete type stubs
+            await self._run_in_executor(lambda: module.DeltaTable(table_path)),
         )
-        arrow_table = cast(Any, await self._run_in_executor(dt.to_pyarrow_table))
+        arrow_table = cast(
+            Any,  # Any: pyarrow.Table returned via executor is untyped to mypy
+            await self._run_in_executor(dt.to_pyarrow_table),
+        )
 
         if business_key_values:
             import pyarrow.compute as pc

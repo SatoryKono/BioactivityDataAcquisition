@@ -42,7 +42,7 @@ def validate_observability_preflight_impl(
             "noop_tracing_in_production",
             message="NoOpTracing in production - traces will be lost",
             recommendation="Set BIOETL_OBSERVABILITY__TRACING_ENABLED=true "
-                           "and configure OpenTelemetry endpoint",
+            "and configure OpenTelemetry endpoint",
         )
 
     if isinstance(metrics, NoOpMetrics):
@@ -50,7 +50,7 @@ def validate_observability_preflight_impl(
             "noop_metrics_in_production",
             message="NoOpMetrics in production - metrics will be lost",
             recommendation="Set BIOETL_OBSERVABILITY__METRICS_ENABLED=true "
-                           "to enable Prometheus metrics collection",
+            "to enable Prometheus metrics collection",
         )
 
 

@@ -19,7 +19,6 @@ __all__ = [
     "is_circuit_breaker_error",
 ]
 
-
 import asyncio
 import time
 from dataclasses import dataclass, field
@@ -140,7 +139,11 @@ class CircuitBreaker:
             )
 
     def _should_attempt(self) -> bool:
-        """Check if request should be attempted based on state."""
+        """Check if request should be attempted based on state.
+
+        Returns:
+            True if the circuit allows a request attempt, False if the circuit is open.
+        """
         if self._state == CircuitBreakerState.CLOSED:
             return True
 
@@ -197,7 +200,11 @@ class CircuitBreaker:
             self._emit_trip_metric()
 
     def _time_until_retry(self) -> float:
-        """Calculate time until next retry is allowed."""
+        """Calculate time until next retry is allowed.
+
+        Returns:
+            Seconds until retry is permitted, or 0.0 if the circuit is not open.
+        """
         if self._state != CircuitBreakerState.OPEN:
             return 0.0
         elapsed = time.monotonic() - self._last_failure_time

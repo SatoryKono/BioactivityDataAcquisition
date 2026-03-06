@@ -134,7 +134,7 @@ def start_metrics_server(
                 if e.errno == errno.EADDRINUSE:
                     return _handle_port_in_use(port, e, fail_fast, logger)
                 if attempt < retry_count - 1:
-                    time.sleep(retry_delay * (2 ** attempt))
+                    time.sleep(retry_delay * (2**attempt))
                     continue
                 return _handle_os_error(port, e, retry_count, fail_fast, logger)
             except (RuntimeError, ValueError, TypeError, AttributeError) as e:
@@ -188,12 +188,12 @@ def push_metrics_to_gateway(
         )
         return True
     except (
-            OSError,
-            ConnectionError,
-            TimeoutError,
-            RuntimeError,
-            ValueError,
-            TypeError,
+        OSError,
+        ConnectionError,
+        TimeoutError,
+        RuntimeError,
+        ValueError,
+        TypeError,
     ) as e:
         logger.warning(
             "Failed to push metrics to gateway",
