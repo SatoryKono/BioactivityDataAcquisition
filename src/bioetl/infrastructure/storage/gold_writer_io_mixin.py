@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Awaitable, Callable
+from pathlib import Path
 from types import ModuleType
 from typing import TYPE_CHECKING, Any, Protocol, TypeVar, cast
 
@@ -333,7 +334,7 @@ class GoldWriterIOMixin:
             except module.GOLD_WRITE_RETRY_ERRORS as error:
                 if attempt == 2:
                     raise error
-                delay = 0.5 * (2**attempt) + 0.05
+                delay = 0.5 * (2 ** attempt) + 0.05
                 await module.asyncio.sleep(delay)
         if self.csv_exporter:
             await self.csv_exporter.export(
@@ -378,7 +379,7 @@ class GoldWriterIOMixin:
             except module.GOLD_WRITE_RETRY_ERRORS as error:
                 if attempt == 2:
                     raise error
-                delay = 0.5 * (2**attempt) + 0.05
+                delay = 0.5 * (2 ** attempt) + 0.05
                 await module.asyncio.sleep(delay)
 
     async def _merge_scd2(
@@ -474,6 +475,24 @@ class GoldWriterIOMixin:
             arrow_table = arrow_table.sort_by([("valid_from", "ascending")])
         result: list[GoldRecord] = arrow_table.to_pylist()
         return result[:limit] if limit > 0 else result
+
+    def preview_cleanup(
+        self,
+        table_name: str,
+    ) -> JsonDict:  # Any: preview payload has heterogeneous values
+        """Preview Gold cleanup scope without deleting files."""
+        table_path = Path(self._resolve_table_path(table_name))
+        exists = table_path.exists()
+        file_count = (
+            sum(1 for file_path in table_path.rglob("*") if file_path.is_file())
+            if exists
+            else 0
+        )
+        return {
+            "path": str(table_path),
+            "file_count": file_count,
+            "exists": exists,
+        }
 
 
 __all__ = ["GoldWriterIOMixin"]

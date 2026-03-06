@@ -48,7 +48,7 @@ governance:
       group:*: '2026-03-03'
 
 baseline:
-    total_exemptions: 207
+    total_exemptions: 170
     by_registry:
         file_size_limits: 58
         function_complexity: 40
@@ -56,7 +56,6 @@ baseline:
         class_size: 39
         class_method_count: 1
         god_object: 16
-        domain_complexity: 37
 
 registry_groups:
     size_shape:
@@ -69,7 +68,6 @@ registry_groups:
     complexity:
         registries:
             - function_complexity
-            - domain_complexity
 
 quarterly_targets:
     -   quarter: '2026-Q1'
@@ -85,7 +83,6 @@ quarterly_targets:
             class_size: 55
             class_method_count: 1
             god_object: 24
-            domain_complexity: 38
     -   quarter: '2026-Q2'
         max_total_exemptions: 250
         min_integral_score: 73
@@ -99,7 +96,6 @@ quarterly_targets:
             class_size: 39
             class_method_count: 1
             god_object: 17
-            domain_complexity: 30
     -   quarter: '2026-Q3'
         max_total_exemptions: 150
         min_integral_score: 76
@@ -113,7 +109,6 @@ quarterly_targets:
             class_size: 24
             class_method_count: 1
             god_object: 10
-            domain_complexity: 18
     -   quarter: '2026-Q4'
         max_total_exemptions: 145
         min_integral_score: 78
@@ -127,7 +122,6 @@ quarterly_targets:
             class_size: 23
             class_method_count: 1
             god_object: 10
-            domain_complexity: 18
     -   quarter: '2027-Q1'
         max_total_exemptions: 140
         min_integral_score: 80
@@ -141,7 +135,6 @@ quarterly_targets:
             class_size: 22
             class_method_count: 1
             god_object: 9
-            domain_complexity: 18
 
 owner_decomposition_targets:
     -   quarter: '2026-Q1'

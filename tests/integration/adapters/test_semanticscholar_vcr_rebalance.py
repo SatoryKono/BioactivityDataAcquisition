@@ -25,7 +25,7 @@ from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 CASSETTE_DIR = (
     Path(__file__).parent.parent.parent / "fixtures" / "vcr" / "semanticscholar"
 )
-REBALANCE_CASES = tuple(f"case_{index:02d}" for index in range(1, 11))
+REBALANCE_CASES = tuple(f"case_{index:02d}" for index in range(1, 16))
 
 
 @pytest.fixture(scope="module")

@@ -13,6 +13,7 @@ from bioetl.domain.medallion import SilverWriteMode
 
 if TYPE_CHECKING:
     from datetime import datetime
+    from pathlib import Path
 
     from deltalake import DeltaTable
 
@@ -28,6 +29,7 @@ class SilverWriterMaintenanceMixin:
     logger: LoggerPort
     csv_exporter: CsvExporter | None
     _retention_manager: RetentionManager
+    get_table_path: Callable[[str], Path]
     read_table: Callable[..., Awaitable[list[BronzeRecord]]]
 
     async def _maybe_export_csv(
@@ -108,3 +110,21 @@ class SilverWriterMaintenanceMixin:
     ) -> list[BronzeRecord]:
         """Read records from a Silver layer Delta table."""
         return await self.read_table(table_name, columns=columns)
+
+    def preview_cleanup(
+        self,
+        table_name: str,
+    ) -> MetaDict:  # Any: preview payload has heterogeneous values
+        """Preview Silver cleanup scope without deleting files."""
+        table_path = self.get_table_path(table_name)
+        exists = table_path.exists()
+        file_count = (
+            sum(1 for file_path in table_path.rglob("*") if file_path.is_file())
+            if exists
+            else 0
+        )
+        return {
+            "path": str(table_path),
+            "file_count": file_count,
+            "exists": exists,
+        }

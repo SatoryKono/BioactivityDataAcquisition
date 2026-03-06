@@ -63,13 +63,12 @@ def test_exemption_registry_policy_requires_owner_removal_step_and_due_date() ->
 
 def test_exemption_registries_are_not_empty() -> None:
     for registry_name in (
-        "file_size_limits",
-        "function_complexity",
-        "function_length",
-        "class_size",
-        "class_method_count",
-        "god_object",
-        "domain_complexity",
+            "file_size_limits",
+            "function_complexity",
+            "function_length",
+            "class_size",
+            "class_method_count",
+            "god_object",
     ):
         values = get_registry_values(registry_name)
         assert values, f"Registry '{registry_name}' must not be empty"

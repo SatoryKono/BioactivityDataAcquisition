@@ -61,29 +61,29 @@ jobs:
                 run: uv sync --frozen --extra dev --extra tracing
 
             -   name: Run matrix smoke in cassette playback mode (3x rerun)
-            run: |
-                mkdir -p reports/e2e
-                  for run in 1 2 3; do
-                    set +e
-                    VCR_RECORD_MODE=none uv run pytest \
-                      tests/e2e/test_pipeline_matrix_e2e.py \
-                      -k "test_pipeline_matrix_smoke" \
-                      --vcr-record=none \
-                      -q --tb=short \
-                      --junitxml="reports/e2e/matrix-smoke-run${run}.xml"
-                    echo $? > "reports/e2e/pytest_exit_code_run${run}.txt"
-                  done
+                run: |
+                    mkdir -p reports/e2e
+                    for run in 1 2 3; do
+                      set +e
+                      VCR_RECORD_MODE=none uv run pytest \
+                        tests/e2e/test_pipeline_matrix_e2e.py \
+                        -k "test_pipeline_matrix_smoke" \
+                        --vcr-record=none \
+                        -q --tb=short \
+                        --junitxml="reports/e2e/matrix-smoke-run${run}.xml"
+                      echo $? > "reports/e2e/pytest_exit_code_run${run}.txt"
+                    done
 
             -   name: Enforce matrix smoke skip-rate SLO (run3)
-            run: |
-                uv run python scripts/ci/check_e2e_matrix_skip_rate.py \
-                    --junit reports/e2e/matrix-smoke-run3.xml \
-                  --expected-total-from-configs \
-                  --configs-root configs/entities \
-                  --max-skips 1 \
-                  --max-skip-rate 0.0455 \
-                    --ignore-failures \
-                  --markdown-out reports/e2e/matrix-smoke-summary.md
+                run: |
+                    uv run python scripts/ci/check_e2e_matrix_skip_rate.py \
+                      --junit reports/e2e/matrix-smoke-run3.xml \
+                      --expected-total-from-configs \
+                      --configs-root configs/entities \
+                      --max-skips 1 \
+                      --max-skip-rate 0.0455 \
+                      --ignore-failures \
+                      --markdown-out reports/e2e/matrix-smoke-summary.md
 
             -   name: Enforce rerun stability gate (3x)
                 run: |

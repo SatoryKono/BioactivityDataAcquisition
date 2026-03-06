@@ -1,0 +1,50 @@
+interactions:
+    -   request:
+            body: ''
+            headers:
+                Accept:
+                    - application/json
+                Accept-Encoding:
+                    - gzip, deflate, zstd
+                Connection:
+                    - keep-alive
+                Content-Type:
+                    - application/json
+                Host:
+                    - api.semanticscholar.org
+                User-Agent:
+                    - BioETL/1.0
+            method: GET
+            uri: https://api.semanticscholar.org/graph/v1/paper/search?query=test&limit=1&fields=paperId
+        response:
+            body:
+                string: '{"message": "Too Many Requests. Please wait and try again or apply
+        for a key for higher rate limits. https://www.semanticscholar.org/product/api#api-key-form",
+        "code": "429"}'
+            headers:
+                Connection:
+                    - keep-alive
+                Content-Length:
+                    - '174'
+                Content-Type:
+                    - application/json
+                Date:
+                    - Fri, 06 Mar 2026 13:10:12 GMT
+                Via:
+                    - 1.1 6e35182a400ff77728e9029f7e2501ee.cloudfront.net (CloudFront)
+                X-Amz-Cf-Id:
+                    - 68jKSjOq7o-__ox5_EpBaO-zhkyMvypQtJnruaBguI7pGtI6FQMNUQ==
+                X-Amz-Cf-Pop:
+                    - VIE50-P4
+                X-Cache:
+                    - Error from cloudfront
+                x-amz-apigw-id:
+                    - ZzXISGd4PHcEd1A=
+                x-amzn-ErrorType:
+                    - TooManyRequestsException
+                x-amzn-RequestId:
+                    - b5b34180-481c-4a1c-a562-9ed5d142a10d
+            status:
+                code: 429
+                message: ''
+version: 1

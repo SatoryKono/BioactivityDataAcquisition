@@ -48,42 +48,42 @@ jobs:
             github.event_name == 'push' ||
             github.event_name == 'pull_request' ||
             (github.event_name == 'workflow_dispatch' && github.event.inputs.run_heavy != 'true')
-    runs-on: ubuntu-latest
+        runs-on: ubuntu-latest
         timeout-minutes: 10
-    steps:
-        -   uses: actions/checkout@v4
-        -   name: Set up Python
-            uses: actions/setup-python@v5
-            with:
-                python-version: '3.11'
+        steps:
+            -   uses: actions/checkout@v4
+            -   name: Set up Python
+                uses: actions/setup-python@v5
+                with:
+                    python-version: '3.11'
 
-        -   name: Install uv
-            uses: astral-sh/setup-uv@v7
+            -   name: Install uv
+                uses: astral-sh/setup-uv@v7
 
-        -   name: Cache pytest and hypothesis
-            uses: actions/cache@v4
-            with:
-                path: |
-                    .pytest_cache
-                    .hypothesis
-                key: arch-metrics-${{ runner.os }}-${{ hashFiles('tests/**/*.py') }}
-                restore-keys: |
-                    arch-metrics-${{ runner.os }}-
+            -   name: Cache pytest and hypothesis
+                uses: actions/cache@v4
+                with:
+                    path: |
+                        .pytest_cache
+                        .hypothesis
+                    key: arch-metrics-${{ runner.os }}-${{ hashFiles('tests/**/*.py') }}
+                    restore-keys: |
+                        arch-metrics-${{ runner.os }}-
 
-        -   name: Install dependencies (frozen lock)
-            run: uv sync --frozen --extra dev --extra tracing
+            -   name: Install dependencies (frozen lock)
+                run: uv sync --frozen --extra dev --extra tracing
 
-        -   name: Run fast architecture baseline
-            run: |
-                uv run pytest tests/architecture/ \
-                  -m "not slow and not serial" \
-                  -q --tb=short
+            -   name: Run fast architecture baseline
+                run: |
+                    uv run pytest tests/architecture/ \
+                      -m "not slow and not serial" \
+                      -q --tb=short
 
-        -   name: Infrastructure layer architecture check
-            run: uv run python src/tools/scripts/check_architecture.py
+            -   name: Infrastructure layer architecture check
+                run: uv run python src/tools/scripts/check_architecture.py
 
-        -   name: Check architecture dependency docs drift
-            run: uv run python scripts/generate_architecture_dependency_map.py --check
+            -   name: Check architecture dependency docs drift
+                run: uv run python scripts/generate_architecture_dependency_map.py --check
 
     architecture-heavy-nightly:
         if: >
@@ -112,19 +112,19 @@ jobs:
                         arch-metrics-nightly-${{ runner.os }}-
 
             -   name: Install dependencies (frozen lock)
-        run: uv sync --frozen --extra dev --extra tracing --extra performance
+                run: uv sync --frozen --extra dev --extra tracing --extra performance
 
             -   name: Cyclomatic complexity check
                 run: uv run radon cc src/bioetl --min C --show-closures
 
             -   name: Run heavy scan with coverage
-        run: |
-            uv run pytest tests/ -m "not e2e and not benchmark and not serial" \
-              --ignore=tests/e2e --ignore=tests/contract \
-              -n auto --dist loadscope --max-worker-restart=0 \
-              --cov=src/bioetl \
-              --cov-report=term-missing \
-              --cov-fail-under=85
+                run: |
+                    uv run pytest tests/ -m "not e2e and not benchmark and not serial" \
+                      --ignore=tests/e2e --ignore=tests/contract \
+                      -n auto --dist loadscope --max-worker-restart=0 \
+                      --cov=src/bioetl \
+                      --cov-report=term-missing \
+                      --cov-fail-under=85
 
     windows-atomic-write-stress-nightly:
         if: >
