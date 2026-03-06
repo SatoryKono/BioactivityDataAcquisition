@@ -28,6 +28,8 @@ class HotspotBudget:
     baseline_latency_ms: float
     baseline_throughput_rps: float
     max_regression_pct: float
+    p95_latency_ms: float
+    max_p95_regression_pct: float
 
 
 @dataclass(frozen=True)
@@ -35,6 +37,7 @@ class HotspotObservation:
     """Single benchmark observation captured from runtime execution."""
 
     latency_ms: float
+    p95_latency_ms: float
     throughput_rps: float
     timestamp_unix: float
 
@@ -47,11 +50,13 @@ class BenchmarkDegradation:
     samples: int
     window_size: int
     window_latency_ms: float
+    window_p95_latency_ms: float
     window_throughput_rps: float
     baseline_latency_ms: float
     baseline_throughput_rps: float
     max_regression_pct: float
     latency_regression_pct: float
+    p95_regression_pct: float
     throughput_regression_pct: float
     within_budget: bool
 
@@ -65,6 +70,8 @@ def _load_budgets(path: Path) -> dict[str, HotspotBudget]:
             baseline_latency_ms=float(raw["baseline_latency_ms"]),
             baseline_throughput_rps=float(raw["baseline_throughput_rps"]),
             max_regression_pct=float(raw["max_regression_pct"]),
+            p95_latency_ms=float(raw.get("p95_latency_ms", 0.0)),
+            max_p95_regression_pct=float(raw.get("max_p95_regression_pct", 0.35)),
         )
         for key, raw in raw_map.items()
     }
@@ -86,6 +93,7 @@ def _load_observations(path: Path) -> dict[str, list[HotspotObservation]]:
         grouped.setdefault(key, []).append(
             HotspotObservation(
                 latency_ms=float(record["latency_ms"]),
+                p95_latency_ms=float(record.get("p95_latency_ms", 0.0)),
                 throughput_rps=float(record["throughput_rps"]),
                 timestamp_unix=float(record.get("timestamp_unix", 0.0)),
             )
@@ -113,13 +121,20 @@ def _compute_degradation(
             continue
 
         latency_series = [item.latency_ms for item in records]
+        p95_series = [item.p95_latency_ms for item in records]
         throughput_series = [item.throughput_rps for item in records]
         window_latency = _median_window(latency_series, window_size)
+        window_p95 = _median_window(p95_series, window_size)
         window_throughput = _median_window(throughput_series, window_size)
 
         latency_regression = (
             (window_latency - budget.baseline_latency_ms) / budget.baseline_latency_ms
             if budget.baseline_latency_ms > 0
+            else 0.0
+        )
+        p95_regression = (
+            (window_p95 - budget.p95_latency_ms) / budget.p95_latency_ms
+            if budget.p95_latency_ms > 0
             else 0.0
         )
         throughput_regression = (
@@ -131,6 +146,7 @@ def _compute_degradation(
         within_budget = (
             latency_regression <= budget.max_regression_pct
             and throughput_regression <= budget.max_regression_pct
+            and (budget.p95_latency_ms <= 0 or p95_regression <= budget.max_p95_regression_pct)
         )
 
         results.append(
@@ -139,11 +155,13 @@ def _compute_degradation(
                 samples=len(records),
                 window_size=min(window_size, len(records)),
                 window_latency_ms=window_latency,
+                window_p95_latency_ms=window_p95,
                 window_throughput_rps=window_throughput,
                 baseline_latency_ms=budget.baseline_latency_ms,
                 baseline_throughput_rps=budget.baseline_throughput_rps,
                 max_regression_pct=budget.max_regression_pct,
                 latency_regression_pct=latency_regression,
+                p95_regression_pct=p95_regression,
                 throughput_regression_pct=throughput_regression,
                 within_budget=within_budget,
             )
@@ -186,20 +204,26 @@ def _render_markdown(
 
     lines.extend(
         [
-            "| Benchmark | Samples | Lat(ms) | Thr(r/s) | Lat Reg | Thr Reg | Budget | Status | Trend |",
-            "| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |",
+            "| Benchmark | Samples | Lat(ms) | P95(ms) | Thr(r/s) | Lat Reg | P95 Reg | Thr Reg | Budget | Status | Trend |",
+            "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |",
         ]
     )
     for item in report:
-        worst = max(item.latency_regression_pct, item.throughput_regression_pct)
+        worst = max(
+            item.latency_regression_pct,
+            item.p95_regression_pct,
+            item.throughput_regression_pct,
+        )
         status = "PASS" if item.within_budget else "FAIL"
         lines.append(
             "| "
             f"{item.benchmark_key} | "
             f"{item.samples} | "
             f"{item.window_latency_ms:.2f} | "
+            f"{item.window_p95_latency_ms:.2f} | "
             f"{item.window_throughput_rps:.2f} | "
             f"{item.latency_regression_pct * 100:.1f}% | "
+            f"{item.p95_regression_pct * 100:.1f}% | "
             f"{item.throughput_regression_pct * 100:.1f}% | "
             f"{item.max_regression_pct * 100:.1f}% | "
             f"{status} | "

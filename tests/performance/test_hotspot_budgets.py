@@ -5,15 +5,19 @@ Targets:
 - Silver append write path
 - Silver merge write path
 - Adapter batch path (CrossRef DOI batch fetch)
+- Atomic write group path (`AtomicWriteGroup.commit`)
 
 These tests intentionally use synthetic deterministic datasets and relative
-thresholds to reduce CI timing flakiness.
+thresholds to reduce CI timing flakiness.  Both median and P95 latency are
+tracked; P95 uses a wider regression budget (0.35 vs 0.25) because tail
+latency is inherently noisier on shared CI runners.
 """
 
 from __future__ import annotations
 
 import asyncio
 import json
+import math
 import os
 import time
 from contextlib import contextmanager
@@ -27,14 +31,15 @@ import pytest
 
 from bioetl.infrastructure.adapters.crossref.batch import DoiBatchProcessor
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from bioetl.infrastructure.storage._atomic import AtomicWriteGroup
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
 pytestmark = [pytest.mark.benchmark, pytest.mark.performance, pytest.mark.serial]
 
 _BUDGETS_PATH = Path(__file__).with_name("hotspot_budgets.json")
 _WARMUP_ROUNDS = 1
-_REPEATS_FAST = 5
-_REPEATS_IO = 3
+_REPEATS_FAST = 7
+_REPEATS_IO = 5
 _OBS_OUT_ENV = "BIOETL_PERF_OBS_OUT"
 
 
@@ -45,6 +50,8 @@ class HotspotBudget:
     baseline_latency_ms: float
     baseline_throughput_rps: float
     max_regression_pct: float
+    p95_latency_ms: float
+    max_p95_regression_pct: float
 
 
 class _FakeResponse:
@@ -85,6 +92,8 @@ def _load_budgets() -> dict[str, HotspotBudget]:
             baseline_latency_ms=float(value["baseline_latency_ms"]),
             baseline_throughput_rps=float(value["baseline_throughput_rps"]),
             max_regression_pct=float(value["max_regression_pct"]),
+            p95_latency_ms=float(value.get("p95_latency_ms", 0.0)),
+            max_p95_regression_pct=float(value.get("max_p95_regression_pct", 0.35)),
         )
         for key, value in budgets.items()
     }
@@ -98,7 +107,32 @@ def _median(values: list[float]) -> float:
     return (ordered[mid - 1] + ordered[mid]) / 2.0
 
 
-def _run_sync_benchmark(op: Any, repeats: int) -> float:
+def _percentile(values: list[float], q: float) -> float:
+    """Return percentile with linear interpolation (same as calibrate script)."""
+    if not values:
+        return 0.0
+    if len(values) == 1:
+        return values[0]
+    xs = sorted(values)
+    pos = (len(xs) - 1) * q
+    lo = math.floor(pos)
+    hi = math.ceil(pos)
+    if lo == hi:
+        return xs[lo]
+    weight = pos - lo
+    return xs[lo] * (1.0 - weight) + xs[hi] * weight
+
+
+@dataclass(frozen=True)
+class BenchmarkResult:
+    """Aggregated benchmark measurement."""
+
+    median_latency_s: float
+    p95_latency_s: float
+    all_durations: list[float]
+
+
+def _run_sync_benchmark(op: Any, repeats: int) -> BenchmarkResult:  # Any: callable
     for _ in range(_WARMUP_ROUNDS):
         op()
 
@@ -107,7 +141,11 @@ def _run_sync_benchmark(op: Any, repeats: int) -> float:
         started = time.perf_counter()
         op()
         durations.append(time.perf_counter() - started)
-    return _median(durations)
+    return BenchmarkResult(
+        median_latency_s=_median(durations),
+        p95_latency_s=_percentile(durations, 0.95),
+        all_durations=durations,
+    )
 
 
 def _build_silver_schema() -> pa.Schema:
@@ -157,11 +195,11 @@ def _merge_payloads(
 def _assert_budget(
     benchmark_key: str,
     budget: HotspotBudget,
-    median_latency_s: float,
+    result: BenchmarkResult,
     processed_records: int,
 ) -> None:
-    latency_ms = median_latency_s * 1000.0
-    throughput_rps = processed_records / median_latency_s
+    latency_ms = result.median_latency_s * 1000.0
+    throughput_rps = processed_records / result.median_latency_s
 
     max_latency_ms = budget.baseline_latency_ms * (1.0 + budget.max_regression_pct)
     min_throughput_rps = budget.baseline_throughput_rps * (
@@ -169,7 +207,7 @@ def _assert_budget(
     )
 
     assert latency_ms <= max_latency_ms, (
-        f"{benchmark_key}: latency regression "
+        f"{benchmark_key}: median latency regression "
         f"(actual={latency_ms:.2f}ms, allowed<={max_latency_ms:.2f}ms; "
         f"baseline={budget.baseline_latency_ms:.2f}ms, budget={budget.max_regression_pct:.0%})"
     )
@@ -179,10 +217,19 @@ def _assert_budget(
         f"baseline={budget.baseline_throughput_rps:.2f}r/s, budget={budget.max_regression_pct:.0%})"
     )
 
+    if budget.p95_latency_ms > 0:
+        p95_ms = result.p95_latency_s * 1000.0
+        max_p95_ms = budget.p95_latency_ms * (1.0 + budget.max_p95_regression_pct)
+        assert p95_ms <= max_p95_ms, (
+            f"{benchmark_key}: P95 latency regression "
+            f"(actual={p95_ms:.2f}ms, allowed<={max_p95_ms:.2f}ms; "
+            f"baseline={budget.p95_latency_ms:.2f}ms, budget={budget.max_p95_regression_pct:.0%})"
+        )
+
 
 def _record_observation(
     benchmark_key: str,
-    median_latency_s: float,
+    result: BenchmarkResult,
     processed_records: int,
     obs_out_path: Path | None,
 ) -> None:
@@ -195,11 +242,13 @@ def _record_observation(
 
     out_path = Path(out_path_raw)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    latency_ms = median_latency_s * 1000.0
-    throughput_rps = processed_records / median_latency_s
+    latency_ms = result.median_latency_s * 1000.0
+    throughput_rps = processed_records / result.median_latency_s
+    p95_latency_ms = result.p95_latency_s * 1000.0
     payload = {
         "benchmark_key": benchmark_key,
         "latency_ms": latency_ms,
+        "p95_latency_ms": p95_latency_ms,
         "throughput_rps": throughput_rps,
         "records": processed_records,
         "timestamp_unix": time.time(),
@@ -213,6 +262,11 @@ def _obs_out_from_config(pytestconfig: pytest.Config) -> Path | None:
     """Resolve observation file path from pytest option."""
     raw = pytestconfig.getoption("perf_obs_out")
     return Path(raw) if raw else None
+
+
+# ---------------------------------------------------------------------------
+# Hotspot benchmarks
+# ---------------------------------------------------------------------------
 
 
 def test_silver_prepare_arrow_data_budget(
@@ -232,16 +286,16 @@ def test_silver_prepare_arrow_data_budget(
             records=records, schema=schema, primary_keys=["entity_id"]
         )
 
-    median_latency = _run_sync_benchmark(op, repeats=_REPEATS_FAST)
+    result = _run_sync_benchmark(op, repeats=_REPEATS_FAST)
     _assert_budget(
         benchmark_key="silver_prepare_arrow_2000",
         budget=budget,
-        median_latency_s=median_latency,
+        result=result,
         processed_records=len(records),
     )
     _record_observation(
         benchmark_key="silver_prepare_arrow_2000",
-        median_latency_s=median_latency,
+        result=result,
         processed_records=len(records),
         obs_out_path=_obs_out_from_config(pytestconfig),
     )
@@ -273,22 +327,26 @@ def test_silver_write_append_budget(
         )
         return time.perf_counter() - started
 
-    async def run() -> float:
+    async def run() -> BenchmarkResult:
         for _ in range(_WARMUP_ROUNDS):
             await op()
         durations = [await op() for _ in range(_REPEATS_IO)]
-        return _median(durations)
+        return BenchmarkResult(
+            median_latency_s=_median(durations),
+            p95_latency_s=_percentile(durations, 0.95),
+            all_durations=durations,
+        )
 
-    median_latency = asyncio.run(run())
+    result = asyncio.run(run())
     _assert_budget(
         benchmark_key="silver_write_append_600",
         budget=budget,
-        median_latency_s=median_latency,
+        result=result,
         processed_records=600,
     )
     _record_observation(
         benchmark_key="silver_write_append_600",
-        median_latency_s=median_latency,
+        result=result,
         processed_records=600,
         obs_out_path=_obs_out_from_config(pytestconfig),
     )
@@ -327,22 +385,26 @@ def test_silver_write_merge_budget(
         )
         return time.perf_counter() - started
 
-    async def run() -> float:
+    async def run() -> BenchmarkResult:
         for _ in range(_WARMUP_ROUNDS):
             await op()
         durations = [await op() for _ in range(_REPEATS_IO)]
-        return _median(durations)
+        return BenchmarkResult(
+            median_latency_s=_median(durations),
+            p95_latency_s=_percentile(durations, 0.95),
+            all_durations=durations,
+        )
 
-    median_latency = asyncio.run(run())
+    result = asyncio.run(run())
     _assert_budget(
         benchmark_key="silver_write_merge_600",
         budget=budget,
-        median_latency_s=median_latency,
+        result=result,
         processed_records=600,
     )
     _record_observation(
         benchmark_key="silver_write_merge_600",
-        median_latency_s=median_latency,
+        result=result,
         processed_records=600,
         obs_out_path=_obs_out_from_config(pytestconfig),
     )
@@ -374,22 +436,67 @@ def test_crossref_batch_adapter_budget(pytestconfig: pytest.Config) -> None:
             )
         return elapsed
 
-    async def run() -> float:
+    async def run() -> BenchmarkResult:
         for _ in range(_WARMUP_ROUNDS):
             await op()
         durations = [await op() for _ in range(_REPEATS_FAST)]
-        return _median(durations)
+        return BenchmarkResult(
+            median_latency_s=_median(durations),
+            p95_latency_s=_percentile(durations, 0.95),
+            all_durations=durations,
+        )
 
-    median_latency = asyncio.run(run())
+    result = asyncio.run(run())
     _assert_budget(
         benchmark_key="crossref_batch_fetch_200",
         budget=budget,
-        median_latency_s=median_latency,
+        result=result,
         processed_records=len(dois),
     )
     _record_observation(
         benchmark_key="crossref_batch_fetch_200",
-        median_latency_s=median_latency,
+        result=result,
         processed_records=len(dois),
+        obs_out_path=_obs_out_from_config(pytestconfig),
+    )
+
+
+def test_atomic_write_group_budget(
+    tmp_path: Path,
+    pytestconfig: pytest.Config,
+) -> None:
+    """Budget gate for AtomicWriteGroup multi-file commit path.
+
+    Measures the atomic rename phase (commit) separately from data writes.
+    The add() phase writes to temp files; commit() does 50 atomic renames.
+    """
+    budgets = _load_budgets()
+    budget = budgets["atomic_write_group_50"]
+
+    file_count = 50
+    file_size = 4096
+    payload = os.urandom(file_size)
+
+    def op() -> None:
+        subdir = tmp_path / f"atomic_{uuid4().hex[:12]}"
+        group = AtomicWriteGroup()
+        for i in range(file_count):
+            group.add(subdir / f"file_{i:04d}.dat", payload)
+        # Only benchmark the commit (atomic rename) phase
+        group.commit()
+
+    # Full add+commit is benchmarked because add() is also part of the hot path.
+    # The baseline accounts for both temp-file writes and atomic renames.
+    result = _run_sync_benchmark(op, repeats=_REPEATS_FAST)
+    _assert_budget(
+        benchmark_key="atomic_write_group_50",
+        budget=budget,
+        result=result,
+        processed_records=file_count,
+    )
+    _record_observation(
+        benchmark_key="atomic_write_group_50",
+        result=result,
+        processed_records=file_count,
         obs_out_path=_obs_out_from_config(pytestconfig),
     )
