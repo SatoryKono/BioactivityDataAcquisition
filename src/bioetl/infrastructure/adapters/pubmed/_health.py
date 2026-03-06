@@ -7,7 +7,6 @@ from __future__ import annotations
 
 __all__ = ["PUBMED_HEALTH_ERRORS", "PubMedHealthMixin"]
 
-
 import time
 from typing import TYPE_CHECKING
 
@@ -16,14 +15,16 @@ from httpx import RequestError
 from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.health_status_policy import (
+    classify_health_probe_status,
+)
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import ErrorHandlerPort, LoggerPort
     from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
     from bioetl.infrastructure.adapters.common.api_request_collector import (
         APIRequestCollector,
     )
-    from bioetl.infrastructure.adapters.error_handling import ErrorService
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 from .constants import ENTREZ_API_BASE
@@ -49,7 +50,7 @@ class PubMedHealthMixin:
     _adapter_metrics: AdapterMetrics
     _request_collector: APIRequestCollector
     provider_name: str
-    _error_handler: ErrorService
+    _error_handler: ErrorHandlerPort
 
     async def _probe_health(self) -> HealthStatus:
         """Perform PubMed-specific health probe.
@@ -74,11 +75,17 @@ class PubMedHealthMixin:
             elapsed = time.monotonic() - start_time
 
             if response.status_code != 200:
+                status = classify_health_probe_status(response.status_code)
                 self.logger.warning(
-                    "pubmed_health_check_failed",
+                    (
+                        "pubmed_health_check_degraded"
+                        if status == HealthStatus.DEGRADED
+                        else "pubmed_health_check_failed"
+                    ),
                     status_code=response.status_code,
+                    classified_status=status.value,
                 )
-                return HealthStatus.UNHEALTHY
+                return status
 
             if elapsed > 5.0:
                 self.logger.warning(

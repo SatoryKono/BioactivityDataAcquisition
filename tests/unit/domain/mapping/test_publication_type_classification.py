@@ -5,13 +5,10 @@ from __future__ import annotations
 import pytest
 
 from bioetl.domain.mapping.publication_type_classification import (
-    CLASSIFICATION_TABLE_SIZE,
-    _CLASSIFICATION_TABLE,
-    _CROSSREF_LOOKUP,
-    _OPENALEX_LOOKUP,
-    _PUBMED_LOOKUP,
-    _S2_LOOKUP,
+    _ENTRY_BY_SPECIFICITY,
+    _PROVIDER_LOOKUPS,
     classify_publication_type,
+    get_classification_table_size,
 )
 
 
@@ -19,15 +16,17 @@ class TestClassificationTableIntegrity:
     """Verify the classification table is well-formed."""
 
     def test_table_has_214_entries(self) -> None:
-        assert CLASSIFICATION_TABLE_SIZE == 214
+        assert get_classification_table_size() == 214
 
     def test_all_entries_have_valid_class_codes(self) -> None:
         valid_codes = {"EXP", "REV", "PEER"}
-        for row in _CLASSIFICATION_TABLE:
-            assert row[2] in valid_codes, f"Invalid class_code in row: {row[0]}"
+        for entry in _ENTRY_BY_SPECIFICITY:
+            assert entry.class_code in valid_codes, (
+                f"Invalid class_code for: {entry.unified_type}"
+            )
 
     def test_unified_types_are_unique(self) -> None:
-        types = [row[0] for row in _CLASSIFICATION_TABLE]
+        types = [entry.unified_type for entry in _ENTRY_BY_SPECIFICITY]
         assert len(types) == len(set(types)), "Duplicate unified_type found"
 
 
@@ -86,7 +85,8 @@ class TestOpenAlexClassification:
         the primary mapping wins. Conference Paper is only via 'article*' which
         doesn't override.
         """
-        entry = _OPENALEX_LOOKUP.get("article")
+        openalex_lookup = _PROVIDER_LOOKUPS.get("openalex", {})
+        entry = openalex_lookup.get("article")
         assert entry is not None
         assert entry.unified_type == "Journal Article"
 
@@ -261,14 +261,14 @@ class TestEdgeCases:
 
     def test_all_lookups_built(self) -> None:
         """Verify all four lookup dicts are non-empty."""
-        assert len(_OPENALEX_LOOKUP) > 0
-        assert len(_CROSSREF_LOOKUP) > 0
-        assert len(_PUBMED_LOOKUP) > 0
-        assert len(_S2_LOOKUP) > 0
+        assert len(_PROVIDER_LOOKUPS.get("openalex", {})) > 0
+        assert len(_PROVIDER_LOOKUPS.get("crossref", {})) > 0
+        assert len(_PROVIDER_LOOKUPS.get("pubmed", {})) > 0
+        assert len(_PROVIDER_LOOKUPS.get("s2", {})) > 0
 
     def test_pubmed_lookup_has_all_mapped_types(self) -> None:
         """PubMed has the most mappings — verify count is reasonable."""
-        assert len(_PUBMED_LOOKUP) >= 150  # Most of 214 types have PubMed mappings
+        assert len(_PROVIDER_LOOKUPS.get("pubmed", {})) >= 150
 
     def test_s2_lettesandcomments_maps_to_letter(self) -> None:
         """LettersAndComments appears in both Letter and Comment rows.
@@ -276,6 +276,7 @@ class TestEdgeCases:
         Letter (row 46) has lower specificity than Comment (row 47).
         The first mapping wins, so 'lettersandcomments' maps to Letter.
         """
-        entry = _S2_LOOKUP.get("lettersandcomments")
+        s2_lookup = _PROVIDER_LOOKUPS.get("s2", {})
+        entry = s2_lookup.get("lettersandcomments")
         assert entry is not None
         assert entry.unified_type == "Letter"

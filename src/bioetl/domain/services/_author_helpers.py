@@ -1,15 +1,12 @@
-"""Author and affiliation normalization helpers.
-
-Pure functions extracted from AuthorNormalizationService to keep class under
-LOC and CC limits. No I/O per RULES.md §1.1.
-"""
+"""Author and affiliation normalization helpers."""
 
 from __future__ import annotations
 
 import hashlib
 import re
-import unicodedata
 from html import unescape
+
+import unicodedata
 
 from bioetl.domain.serialization import deserialize_from_json
 from bioetl.domain.types import JsonDict
@@ -27,7 +24,6 @@ __all__ = [
     "try_parse_json_authors",
 ]
 
-
 # Regex patterns
 _HTML_TAG_PATTERN = re.compile(r"<[^>]+>")
 _WHITESPACE_PATTERN = re.compile(r"\s+")
@@ -38,15 +34,7 @@ _AFFILIATION_KEYS = ("name", "display_name", "affiliation")
 
 
 def hash_author_name(name: str, salt: str) -> str:
-    """Hash author name with SHA-256: sha256(lowercase(name) + salt).
-
-    Args:
-        name: Author name to hash.
-        salt: Cryptographic salt for hashing.
-
-    Returns:
-        Hexadecimal SHA-256 hash of the normalized author name.
-    """
+    """Hash author name with SHA-256: sha256(lowercase(name) + salt)."""
     normalized = name.strip().lower()
     return hashlib.sha256(f"{normalized}{salt}".encode()).hexdigest()
 
@@ -54,14 +42,7 @@ def hash_author_name(name: str, salt: str) -> str:
 def parse_author_names(
     authors: list[str] | list[JsonDict] | str,
 ) -> list[str]:
-    """Parse various author formats to list of name strings.
-
-    Args:
-        authors: Authors.
-
-    Returns:
-        Parsed result.
-    """
+    """Parse various author formats to list of name strings."""
     if isinstance(authors, list):
         return [n for a in authors if (n := _extract_name_from_item(a))]
     if isinstance(authors, str):
@@ -84,14 +65,7 @@ def _extract_name_from_item(item: object) -> str | None:
 
 
 def parse_author_string(text: str) -> list[str]:
-    """Parse author string (JSON or delimited format).
-
-    Args:
-        text: Input text string.
-
-    Returns:
-        Parsed result.
-    """
+    """Parse author string (JSON or delimited format)."""
     text = text.strip()
     if not text:
         return []
@@ -103,14 +77,7 @@ def parse_author_string(text: str) -> list[str]:
 
 
 def try_parse_json_authors(text: str) -> list[str] | None:
-    """Try to parse JSON array of authors. Returns None on parse failure.
-
-    Args:
-        text: Input text string.
-
-    Returns:
-        Result list.
-    """
+    """Try to parse JSON array of authors. Returns None on parse failure."""
     try:
         parsed = deserialize_from_json(text)
     except (ValueError, TypeError):
@@ -121,14 +88,7 @@ def try_parse_json_authors(text: str) -> list[str] | None:
 
 
 def parse_delimited_authors(text: str) -> list[str]:
-    """Parse semicolon- or comma-delimited author string.
-
-    Args:
-        text: Input text string.
-
-    Returns:
-        Parsed result.
-    """
+    """Parse semicolon- or comma-delimited author string."""
     delimiter = ";" if ";" in text else ","
     parts = text.split(delimiter) if delimiter in text else [text]
     return [part.strip() for part in parts if part.strip()]
@@ -137,14 +97,7 @@ def parse_delimited_authors(text: str) -> list[str]:
 def extract_affiliation_strings(
     affiliations: list[str] | list[JsonDict],
 ) -> list[str]:
-    """Extract affiliation strings from a mixed list of strings and dicts.
-
-    Args:
-        affiliations: Affiliations.
-
-    Returns:
-        Extracted value.
-    """
+    """Extract affiliation strings from a mixed list of strings and dicts."""
     strings: list[str] = []
     for aff in affiliations:
         extracted = _extract_single_affiliation(aff)
@@ -174,14 +127,7 @@ def _extract_single_affiliation(aff: object) -> str | None:
 
 
 def normalize_affiliation_string(text: str) -> str | None:
-    """Normalize affiliation: HTML → whitespace → control chars → NFC → trim.
-
-    Args:
-        text: Input text string.
-
-    Returns:
-        Normalized value.
-    """
+    """Normalize affiliation: HTML → whitespace → control chars → NFC → trim."""
     if not text:
         return None
     normalized = _HTML_TAG_PATTERN.sub("", text)
@@ -194,14 +140,7 @@ def normalize_affiliation_string(text: str) -> str | None:
 
 
 def deduplicate_case_insensitive(strings: list[str]) -> list[str]:
-    """Deduplicate strings case-insensitively, keeping first occurrence.
-
-    Args:
-        strings: Strings.
-
-    Returns:
-        Result list.
-    """
+    """Deduplicate strings case-insensitively, keeping first occurrence."""
     seen: dict[str, str] = {}
     for s in strings:
         key = s.lower()
@@ -229,13 +168,7 @@ def _surname_initial_from_comma(name: str) -> str | None:
 
 
 def _surname_initial_from_tokens(tokens: list[str]) -> str:
-    """Parse space-separated tokens into ``Surname_F`` key.
-
-    Detects three patterns:
-    - Trailing initials (ChEMBL): ``["Smith", "JA"]`` → ``"Smith_J"``
-    - Leading initials: ``["X.", "Zhou"]`` → ``"Zhou_X"``
-    - Standard order: ``["John", "Doe"]`` → ``"Doe_J"``
-    """
+    """Parse space-separated tokens into ``Surname_F`` key."""
     # Format: "LastName Initials" (ChEMBL: "Smith JA", "Zhou X")
     if _is_initials(tokens[-1]):
         surname = " ".join(tokens[:-1])
@@ -253,24 +186,7 @@ def _surname_initial_from_tokens(tokens: list[str]) -> str:
 
 
 def normalize_to_surname_initial(name: str) -> str | None:
-    """Convert author name to ``Surname_F`` short key.
-
-    Handles multiple input formats:
-    - ``"Doe, John"`` → ``"Doe_J"``    (LastName, FirstName)
-    - ``"Doe, J"``    → ``"Doe_J"``    (LastName, Initial)
-    - ``"Doe, JA"``   → ``"Doe_J"``    (LastName, Initials)
-    - ``"John Doe"``  → ``"Doe_J"``    (FirstName LastName)
-    - ``"Smith JA"``  → ``"Smith_J"``  (LastName Initials — ChEMBL)
-    - ``"X. Zhou"``   → ``"Zhou_X"``   (Initial. LastName)
-    - ``"Madonna"``   → ``"Madonna"``  (single name — no initial)
-    - ``"WHO"``       → ``"WHO"``      (organization — no underscore)
-
-    Returns:
-        Short key string, or None if name is empty.
-
-    Args:
-        name: Identifier name.
-    """
+    """Convert author name to ``Surname_F`` short key."""
     if not name or not name.strip():
         return None
     name = name.strip()
@@ -299,14 +215,7 @@ def _collect_affiliation_values(aff_data: object) -> list[str]:
 def collect_affiliations_from_authors(
     authors: list[JsonDict],
 ) -> list[str]:
-    """Collect raw affiliation strings from author dicts.
-
-    Args:
-        authors: Authors.
-
-    Returns:
-        Collected results.
-    """
+    """Collect raw affiliation strings from author dicts."""
     result: list[str] = []
     for author in authors:
         if isinstance(author, dict) and author.get("affiliations"):

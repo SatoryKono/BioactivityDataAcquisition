@@ -41,6 +41,10 @@ from bioetl.domain.exceptions.base import (
     DataQualityError,
     RecoverableError,
 )
+from bioetl.domain.exceptions.bounded_context import (
+    DomainExceptionContext,
+    get_domain_exception_context,
+)
 
 # =============================================================================
 # DataQualityErrors - Batch-level data quality issues
@@ -129,6 +133,7 @@ __all__ = [
     "DeltaSchemaValidationError",
     "DeltaTransactionError",
     "DeltaWriteConflictError",
+    "DomainExceptionContext",
     # External service errors (NetworkErrors subcategory)
     "ExternalServiceError",
     # InfrastructureErrors
@@ -159,4 +164,5 @@ __all__ = [
     "UploadError",
     # ValidationErrors
     "ValidationError",
+    "get_domain_exception_context",
 ]

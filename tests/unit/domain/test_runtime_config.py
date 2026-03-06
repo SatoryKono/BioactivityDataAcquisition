@@ -29,6 +29,7 @@ class TestRuntimeConfig:
         assert config.vacuum_retention_days == 7
         assert config.strict_validation is False
         assert config.strict_gold_validation is True
+        assert config.health_check_mode == "strict"
 
     def test_custom_values(self) -> None:
         """Test custom configuration values."""
@@ -46,6 +47,7 @@ class TestRuntimeConfig:
             vacuum_retention_days=14,
             strict_validation=True,
             strict_gold_validation=True,
+            health_check_mode="probe",
         )
 
         assert config.run_type == RunType.BACKFILL
@@ -61,6 +63,7 @@ class TestRuntimeConfig:
         assert config.vacuum_retention_days == 14
         assert config.strict_validation is True
         assert config.strict_gold_validation is True
+        assert config.health_check_mode == "probe"
 
     def test_immutability(self) -> None:
         """Test that RuntimeConfig is frozen (immutable)."""
@@ -149,3 +152,11 @@ class TestRuntimeConfig:
         """Test that negative vacuum_retention_days raises ValueError."""
         with pytest.raises(ValueError, match="vacuum_retention_days must be positive"):
             RuntimeConfig(run_type=RunType.INCREMENTAL, vacuum_retention_days=-7)
+
+    def test_invalid_health_check_mode_raises(self) -> None:
+        """Test that invalid health_check_mode raises ValueError."""
+        with pytest.raises(ValueError, match="health_check_mode must be"):
+            RuntimeConfig(
+                run_type=RunType.INCREMENTAL,
+                health_check_mode="unsupported",  # type: ignore[arg-type]
+            )

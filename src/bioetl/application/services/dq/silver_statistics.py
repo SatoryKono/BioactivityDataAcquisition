@@ -44,6 +44,17 @@ _SILVER_PROFILE_ERRORS = (
 )
 
 
+def _detect_type_changes(
+    current: dict[str, str], previous: dict[str, str]
+) -> list[dict[str, str]]:
+    """Find fields whose types differ between current and previous schema."""
+    return [
+        {"field": f, "from": previous[f], "to": current[f]}
+        for f in current
+        if f in previous and current[f] != previous[f]
+    ]
+
+
 def _check_deduplication_stats(
     df: pl.DataFrame,
     input_count: int,
@@ -344,38 +355,15 @@ class SilverStatisticsCalculator:
 
         new_fields = [f for f in current_schema if f not in previous_schema]
         missing_fields = [f for f in previous_schema if f not in current_schema]
-        type_changes = []
+        type_changes = _detect_type_changes(current_schema, previous_schema)
 
-        for field in current_schema:
-            if (
-                field in previous_schema
-                and current_schema[field] != previous_schema[field]
-            ):
-                type_changes.append(
-                    {
-                        "field": field,
-                        "from": previous_schema[field],
-                        "to": current_schema[field],
-                    }
-                )
-
-        # Determine drift level
-        if missing_fields or type_changes:
-            drift_level = DriftLevel.CRITICAL
-            status = DQCheckStatus.WARN
-        elif new_fields:
-            drift_level = DriftLevel.INFO
-            status = DQCheckStatus.PASS
-        else:
-            drift_level = DriftLevel.INFO
-            status = DQCheckStatus.PASS
-
+        is_critical = bool(missing_fields or type_changes)
         return SchemaDriftResult(
-            drift_level=drift_level,
+            drift_level=DriftLevel.CRITICAL if is_critical else DriftLevel.INFO,
             new_fields=tuple(new_fields),
             missing_fields=tuple(missing_fields),
             type_changes=tuple(type_changes),
-            status=status,
+            status=DQCheckStatus.WARN if is_critical else DQCheckStatus.PASS,
         )
 
     def check_deduplication(

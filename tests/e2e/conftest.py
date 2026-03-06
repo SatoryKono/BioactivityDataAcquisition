@@ -15,8 +15,8 @@ from __future__ import annotations
 
 import asyncio
 import os
-from dataclasses import replace
 from collections.abc import Generator
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
@@ -26,6 +26,7 @@ import pytest
 from deltalake import DeltaTable
 
 from bioetl.domain.context import PipelineRunContext
+from bioetl.domain.exceptions.infrastructure import InfrastructureError
 from bioetl.domain.exceptions.network import ExternalServiceError
 from bioetl.domain.resilience import RetryConfig
 from bioetl.domain.types import RunType
@@ -53,14 +54,15 @@ _E2E_RETRY_CONFIG = RetryConfig(
     jitter_seed=20260304,
 )
 _E2E_SKIP_PREFIX = "E2E_SKIP"
-
+_E2E_HEALTHCHECK_PLAYBACK_FAILURE_MARKERS: tuple[str, ...] = (
+    "health check failed for: data_source",
+)
 
 _E2E_VCR_CASSETTE_DIR_BY_TEST: dict[str, str] = {
     "test_pubchem_compound_pipeline": "pubchem",
     "test_health_check": "pubmed",
     "test_chembl_and_uniprot_sequential_run": "multi_provider",
 }
-
 
 _E2E_VCR_CASSETTE_NAME_OVERRIDES: dict[str, str] = {
     "TestChEMBLPipelineE2E.test_chembl_activity_full_run": (
@@ -117,7 +119,9 @@ def e2e_environment():
     """Настройка окружения для E2E тестов (Local-Only)."""
     os.environ["BIOETL_ENV"] = "dev"
     os.environ["BIOETL_TEST_MODE"] = "true"
+    os.environ["BIOETL_PIPELINE__HEALTH_CHECK_MODE"] = "probe"
     os.environ["BIOETL_TEST_RELAXED_DQ"] = "1"  # Relax DQ thresholds for VCR cassettes
+    os.environ["BIOETL_PIPELINE__SILVER_MERGE_TIMEOUT__PROFILE"] = "e2e"
     # Prevent shutil.get_terminal_size hangs in CI/Test environments
     os.environ["COLUMNS"] = "80"
     os.environ["LINES"] = "24"
@@ -298,6 +302,16 @@ def _is_transient_external_error(exc: ExternalServiceError) -> bool:
 def _is_transient_http_status_error(exc: httpx.HTTPStatusError) -> bool:
     """Return True when HTTPStatusError is likely upstream/transient."""
     return exc.response.status_code in _TRANSIENT_HTTP_STATUS_CODES
+
+
+def is_external_healthcheck_playback_failure(exc: Exception) -> bool:
+    """Return True when playback fails due to external health-check mismatch."""
+    if not isinstance(exc, InfrastructureError):
+        return False
+    message = str(exc).lower()
+    return any(
+        marker in message for marker in _E2E_HEALTHCHECK_PLAYBACK_FAILURE_MARKERS
+    )
 
 
 def build_e2e_skip_reason(

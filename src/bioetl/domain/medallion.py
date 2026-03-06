@@ -1,8 +1,4 @@
-"""Medallion layer policies (Domain layer - pure logic, no I/O).
-
-Implements medallion architecture lifecycle policies per RULES.md §2.1-2.3.
-These are pure domain objects with no dependencies on infrastructure.
-"""
+"""Medallion layer policies (Domain layer - pure logic, no I/O)."""
 
 from __future__ import annotations
 
@@ -17,13 +13,7 @@ if TYPE_CHECKING:
 
 
 class Layer(StrEnum):
-    """Medallion architecture layers.
-
-    Attributes:
-        BRONZE: Raw data layer (immutable, append-only).
-        SILVER: Normalized and validated data layer.
-        GOLD: Business-ready aggregated data layer.
-    """
+    """Medallion architecture layers."""
 
     BRONZE = "bronze"
     SILVER = "silver"
@@ -31,13 +21,7 @@ class Layer(StrEnum):
 
 
 class WriteMode(StrEnum):
-    """Write mode for data operations.
-
-    Attributes:
-        APPEND: Add new records without modifying existing.
-        MERGE: Upsert records based on key (Delta Lake merge).
-        OVERWRITE: Replace entire dataset.
-    """
+    """Write mode for data operations."""
 
     APPEND = "append"
     MERGE = "merge"
@@ -45,16 +29,7 @@ class WriteMode(StrEnum):
 
 
 class SilverWriteMode(StrEnum):
-    """Allowed write modes for Silver layer.
-
-    Domain enum consolidating Silver layer write semantics.
-    Used by domain/config.py and infrastructure storage adapters.
-
-    Values:
-        MERGE: Upsert records based on primary keys (default, idempotent)
-        APPEND: Add records without deduplication
-        DELETE: Delete and replace all data in the table (rebuild only)
-    """
+    """Allowed write modes for Silver layer."""
 
     MERGE = "merge"
     APPEND = "append"
@@ -62,17 +37,7 @@ class SilverWriteMode(StrEnum):
 
     @classmethod
     def from_string(cls, value: str) -> SilverWriteMode:
-        """Convert string to SilverWriteMode with validation.
-
-        Args:
-            value: String value (e.g., "merge", "append", "delete")
-
-        Returns:
-            Corresponding SilverWriteMode enum value
-
-        Raises:
-            ValueError: If value is not a valid Silver write mode
-        """
+        """Convert string to SilverWriteMode with validation."""
         try:
             return cls(value.lower())
         except ValueError:
@@ -83,16 +48,7 @@ class SilverWriteMode(StrEnum):
 
 
 class GoldWriteMode(StrEnum):
-    """Allowed write modes for Gold layer.
-
-    Domain enum consolidating Gold layer write semantics.
-    Used by domain/config.py and infrastructure storage adapters.
-
-    Values:
-        APPEND: Add records without deduplication (default, incremental)
-        SCD2: Slowly Changing Dimension Type 2 (history tracking)
-        OVERWRITE: Replace all data in the table (rebuild only, requires confirmation)
-    """
+    """Allowed write modes for Gold layer."""
 
     APPEND = "append"
     SCD2 = "scd2"
@@ -100,17 +56,7 @@ class GoldWriteMode(StrEnum):
 
     @classmethod
     def from_string(cls, value: str) -> GoldWriteMode:
-        """Convert string to GoldWriteMode with validation.
-
-        Args:
-            value: String value (e.g., "append", "scd2", "overwrite")
-
-        Returns:
-            Corresponding GoldWriteMode enum value
-
-        Raises:
-            ValueError: If value is not a valid Gold write mode
-        """
+        """Convert string to GoldWriteMode with validation."""
         try:
             return cls(value.lower())
         except ValueError:
@@ -121,21 +67,7 @@ class GoldWriteMode(StrEnum):
 
 
 class WriteModePolicy:
-    """Validates write mode compliance with medallion layer policies.
-
-    Enforces medallion architecture invariants:
-    - Bronze: APPEND only (raw data immutability)
-    - Silver: APPEND or MERGE (idempotent upserts)
-    - Gold: MERGE, OVERWRITE, or APPEND (derived data)
-
-    Example:
-        >>> policy = WriteModePolicy()
-        >>> policy.validate(Layer.BRONZE, WriteMode.APPEND)  # OK
-        >>> policy.validate(Layer.BRONZE, WriteMode.OVERWRITE)  # Raises
-        Traceback (most recent call last):
-            ...
-        PolicyViolationError: bronze does not allow overwrite. Allowed: {append}
-    """
+    """Validates write mode compliance with medallion layer policies."""
 
     ALLOWED_MODES: ClassVar[dict[Layer, set[WriteMode]]] = {
         Layer.BRONZE: {WriteMode.APPEND},
@@ -144,15 +76,7 @@ class WriteModePolicy:
     }
 
     def validate(self, layer: Layer, mode: WriteMode) -> None:
-        """Validate that write mode is allowed for the layer.
-
-        Args:
-            layer: Target medallion layer.
-            mode: Requested write mode.
-
-        Raises:
-            PolicyViolationError: If mode is not allowed for the layer.
-        """
+        """Validate that write mode is allowed for the layer."""
         allowed = self.ALLOWED_MODES[layer]
         if mode not in allowed:
             allowed_names = (
@@ -166,50 +90,19 @@ class WriteModePolicy:
 
 
 class LoadingStrategy(StrEnum):
-    """Loading strategy for pipeline data extraction.
-
-    Determines how the pipeline handles incremental vs full data loading.
-
-    Attributes:
-        FULL_SCAN_ONLY: Each run performs a full scan of the data source.
-            Checkpoint-based resume is disabled. Deduplication is handled
-            on Silver layer via content_hash. Required for entities with
-            unstable API pagination (e.g., publications).
-
-    Example:
-        >>> strategy = LoadingStrategy.FULL_SCAN_ONLY
-        >>> strategy.allows_checkpoint_resume
-        False
-
-    See Also:
-        ADR-031: Loading strategy formalization
-    """
+    """Loading strategy for pipeline data extraction."""
 
     FULL_SCAN_ONLY = "full_scan_only"
     """Full scan on each run. No checkpoint resume. Deduplication via content_hash."""
 
     @property
     def allows_checkpoint_resume(self) -> bool:
-        """Check if this strategy allows checkpoint-based resume.
-
-        Returns:
-            True if checkpoint resume is allowed, False otherwise.
-        """
+        """Check if this strategy allows checkpoint-based resume."""
         return False
 
     @classmethod
     def from_string(cls, value: str) -> LoadingStrategy:
-        """Convert string to LoadingStrategy with validation.
-
-        Args:
-            value: String value (e.g., "full_scan_only")
-
-        Returns:
-            Corresponding LoadingStrategy enum value
-
-        Raises:
-            ValueError: If value is not a valid loading strategy
-        """
+        """Convert string to LoadingStrategy with validation."""
         try:
             return cls(value.lower())
         except ValueError:
@@ -220,15 +113,7 @@ class LoadingStrategy(StrEnum):
 
 
 class ClearPolicy(StrEnum):
-    """Policy for clearing medallion layers.
-
-    Determines which layers should be cleared before a pipeline run.
-
-    Attributes:
-        NEVER: Never clear (incremental runs) - merge/upsert behavior.
-        SILVER_ONLY: Clear Silver, preserve Gold.
-        SILVER_AND_GOLD: Clear both layers (rebuild/backfill runs).
-    """
+    """Policy for clearing medallion layers."""
 
     NEVER = "never"
     """Incremental runs - merge/upsert without clearing."""
@@ -242,24 +127,7 @@ class ClearPolicy(StrEnum):
 
 @dataclass(frozen=True, slots=True)
 class MedallionPolicy:
-    """Encapsulates medallion layer lifecycle policies.
-
-    Pure domain object that determines lifecycle behavior based on run type.
-    No I/O operations - only policy decisions.
-
-    Attributes:
-        clear_policy: Which layers to clear before run.
-        vacuum_enabled: Whether vacuum is enabled for this run.
-        vacuum_retention_days: Days to retain for vacuum operation.
-
-    Example:
-        >>> from bioetl.domain.types import RunType
-        >>> policy = MedallionPolicy.for_run_type(RunType.REBUILD)
-        >>> policy.should_clear_silver
-        True
-        >>> policy.should_clear_gold
-        True
-    """
+    """Encapsulates medallion layer lifecycle policies."""
 
     clear_policy: ClearPolicy = ClearPolicy.NEVER
     vacuum_enabled: bool = False
@@ -267,21 +135,7 @@ class MedallionPolicy:
 
     @classmethod
     def for_run_type(cls, run_type: RunType) -> MedallionPolicy:
-        """Create policy based on run type.
-
-        Factory method that maps run types to appropriate policies.
-
-        Args:
-            run_type: The type of pipeline run.
-
-        Returns:
-            MedallionPolicy configured for the run type.
-
-        Medallion invariants:
-            - REBUILD: Clear both Silver and Gold (full refresh)
-            - BACKFILL: Clear both Silver and Gold (historical load)
-            - INCREMENTAL: Never clear (merge/upsert)
-        """
+        """Create policy based on run type."""
         from bioetl.domain.types import RunType
 
         if run_type in (RunType.REBUILD, RunType.BACKFILL):
@@ -290,11 +144,7 @@ class MedallionPolicy:
 
     @property
     def should_clear_silver(self) -> bool:
-        """Check if Silver layer should be cleared.
-
-        Returns:
-            True if Silver should be cleared before run.
-        """
+        """Check if Silver layer should be cleared."""
         return self.clear_policy in (
             ClearPolicy.SILVER_ONLY,
             ClearPolicy.SILVER_AND_GOLD,
@@ -302,11 +152,7 @@ class MedallionPolicy:
 
     @property
     def should_clear_gold(self) -> bool:
-        """Check if Gold layer should be cleared.
-
-        Returns:
-            True if Gold should be cleared before run.
-        """
+        """Check if Gold layer should be cleared."""
         return self.clear_policy == ClearPolicy.SILVER_AND_GOLD
 
 

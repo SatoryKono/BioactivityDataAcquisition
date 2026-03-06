@@ -1,15 +1,4 @@
-"""Postrun Service for post-execution operations.
-
-Application Service that handles post-pipeline execution tasks:
-- Data quality checks (delegated to DataQualityService)
-- DQ report generation (delegated to DQReportService)
-- VACUUM operations (delegated to MedallionLifecycleService)
-- Tracer cleanup
-
-Extracted from PipelineRunner to follow Single Responsibility Principle.
-DQ logic further extracted to DataQualityService (SRP refactoring).
-DQ report generation added for detailed data quality analysis.
-"""
+"""Postrun Service for post-execution operations."""
 
 from __future__ import annotations
 
@@ -103,13 +92,7 @@ def _create_postrun_metadata_version_resolver(
 
 @dataclass(frozen=True, slots=True)
 class PostrunResult:
-    """Combined result of all post-run operations.
-
-    Attributes:
-        dq: Data quality evaluation result.
-        dq_reports: DQ report generation result (optional).
-        vacuum: VACUUM operation result.
-    """
+    """Combined result of all post-run operations."""
 
     dq: DQResult
     dq_reports: DQReportResult | None
@@ -117,33 +100,7 @@ class PostrunResult:
 
 
 class PostrunService:
-    """Handles post-execution operations.
-
-    Responsibilities:
-    - Orchestrating DQ checks via DataQualityService
-    - DQ report generation via DQReportService (optional)
-    - VACUUM operations via MedallionLifecycleService
-    - Tracer cleanup
-
-    Attributes:
-        _config: Pipeline configuration.
-        _runtime: Runtime configuration.
-        _context: Pipeline execution context.
-        _dq_service: Data quality service for DQ checks.
-        _lifecycle_service: Medallion lifecycle service for VACUUM.
-        _storage: Storage port for path resolution.
-        _metrics: Optional metrics port.
-        _logger: Structured logger.
-        _cleanup_orchestrator: Tracer cleanup orchestration helper.
-        _dq_report_orchestrator: DQ report generation orchestration helper.
-        _metadata_version_resolver: Delta version resolution helper.
-        _dq_report_service: Optional DQ report service for report generation.
-        _bronze_dq_config: Optional Bronze DQ report configuration.
-        _silver_dq_config: Optional Silver DQ report configuration.
-        _gold_dq_config: Optional Gold DQ report configuration.
-        _metadata_coordinator: Centralized metadata coordinator.
-        _metadata_writer: Metadata sidecar file writer.
-    """
+    """Handles post-execution operations."""
 
     def __init__(
         self,
@@ -163,24 +120,7 @@ class PostrunService:
         silver_dq_config: SilverDQConfigPort | None = None,
         gold_dq_config: GoldDQConfigPort | None = None,
     ) -> None:
-        """Initialize postrun service.
-
-        Args:
-            config: Pipeline configuration.
-            runtime: Runtime configuration.
-            context: Pipeline execution context.
-            dq_service: Data quality service for DQ checks.
-            lifecycle_service: Medallion lifecycle service for VACUUM.
-            storage: Storage port for path resolution.
-            metrics: Optional metrics port.
-            logger: Structured logger.
-            metadata_coordinator: Centralized metadata coordinator.
-            metadata_writer: Metadata sidecar file writer.
-            dq_report_service: Optional DQ report service for report generation.
-            bronze_dq_config: Optional Bronze DQ report configuration.
-            silver_dq_config: Optional Silver DQ report configuration.
-            gold_dq_config: Optional Gold DQ report configuration.
-        """
+        """Initialize postrun service."""
         self._config = config
         self._runtime = runtime
         self._context = context
@@ -237,20 +177,7 @@ class PostrunService:
         executor: ExecutorMetricsPort,
         dq_context: DQReportContext | None = None,
     ) -> PostrunResult:
-        """Run all post-execution operations.
-
-        Performs DQ checks, DQ report generation, and VACUUM in sequence.
-
-        Args:
-            executor: Pipeline executor with batch metrics.
-            dq_context: Optional DQ report context with data and metadata.
-
-        Returns:
-            PostrunResult with DQ, DQ reports, and VACUUM results.
-
-        Raises:
-            DataQualityThresholdError: If error rate exceeds hard threshold.
-        """
+        """Run all post-execution operations."""
         dq_result = await self.run_dq_checks(executor)
         dq_reports = await self._generate_dq_reports(dq_context)
         vacuum_result = await self.run_vacuum_if_enabled()
@@ -262,34 +189,12 @@ class PostrunService:
         return PostrunResult(dq=dq_result, dq_reports=dq_reports, vacuum=vacuum_result)
 
     async def run_dq_checks(self, executor: ExecutorMetricsPort) -> DQResult:
-        """Check data quality metrics and report anomalies.
-
-        Delegates to DataQualityService for threshold checks and anomaly detection.
-
-        Args:
-            executor: Pipeline executor with batch metrics.
-
-        Returns:
-            DQResult with evaluation results.
-
-        Raises:
-            DataQualityThresholdError: If error rate exceeds hard threshold.
-        """
+        """Check data quality metrics and report anomalies."""
         batch_metrics = self._collect_batch_metrics(executor)
         return await self._dq_service.evaluate(batch_metrics)
 
     async def run_vacuum_if_enabled(self) -> VacuumResult:
-        """Run VACUUM on Silver and Gold tables if enabled.
-
-        Delegates to MedallionLifecycleService.finalize_run() which handles:
-        - Checking if vacuum is enabled
-        - Skipping in dry-run mode
-        - Vacuuming both Silver and Gold tables
-        - Metrics emission
-
-        Returns:
-            VacuumResult with operation details.
-        """
+        """Run VACUUM on Silver and Gold tables if enabled."""
         return await self._lifecycle_service.finalize_run(
             config=self._config,
             runtime=self._runtime,
@@ -297,34 +202,14 @@ class PostrunService:
         )
 
     async def cleanup(self, tracer: TracingPort | None) -> None:
-        """Cleanup all resources including observability.
-
-        Ensures tracer spans are flushed before shutdown (O3).
-        Handles errors gracefully to avoid masking pipeline exceptions.
-
-        Args:
-            tracer: Optional tracing port to close.
-        """
+        """Cleanup all resources including observability."""
         await self._cleanup_orchestrator.cleanup_tracer(tracer)
 
     async def _generate_dq_reports(
         self,
         context: DQReportContext | None,
     ) -> DQReportResult | None:
-        """Generate DQ reports if enabled.
-
-        Delegates to DQReportService for generating Bronze, Silver, and Gold
-        DQ reports based on configuration.
-
-        Args:
-            context: DQ report context with data and metadata.
-
-        Returns:
-            DQReportResult with paths to generated reports, or None if:
-            - DQ report service is not available
-            - No context provided
-            - No reports are enabled in configuration
-        """
+        """Generate DQ reports if enabled."""
         return await self._dq_report_orchestrator.generate_reports(context)
 
     async def _write_final_metadata(
@@ -332,15 +217,7 @@ class PostrunService:
         executor: ExecutorMetricsPort,
         dq_reports: DQReportResult | None,
     ) -> None:
-        """Write final aggregated metadata for Silver and Gold layers.
-
-        Aggregates statistics from all batches processed by the executor
-        and writes a final run-level metadata sidecar file.
-
-        Args:
-            executor: Pipeline executor with accumulated metrics.
-            dq_reports: Results from DQ report generation (for cross-links).
-        """
+        """Write final aggregated metadata for Silver and Gold layers."""
         from datetime import UTC, datetime
 
         if not self._metadata_coordinator or not self._metadata_writer:
@@ -474,14 +351,7 @@ class PostrunService:
         )
 
     def _collect_batch_metrics(self, executor: ExecutorMetricsPort) -> dict[str, float]:
-        """Collect batch metrics from executor.
-
-        Args:
-            executor: Pipeline executor with batch metrics.
-
-        Returns:
-            Dictionary of metric names to values.
-        """
+        """Collect batch metrics from executor."""
         total_records = max(1, executor.records_fetched)
         return {
             "record_count": float(executor.records_fetched),

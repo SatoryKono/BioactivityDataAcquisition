@@ -4,7 +4,6 @@ from __future__ import annotations
 
 __all__ = ["BRONZE_WRITE_ERRORS", "BronzeWriter"]
 
-
 import asyncio
 import time
 from collections.abc import Iterator
@@ -23,6 +22,9 @@ from bioetl.infrastructure.storage._atomic import atomic_write_bytes
 from bioetl.infrastructure.storage.bronze_writer_io_mixin import BronzeWriterIOMixin
 from bioetl.infrastructure.storage.bronze_writer_metadata_mixin import (
     BronzeWriterMetadataMixin,
+)
+from bioetl.infrastructure.storage.bronze_writer_metrics_mixin import (
+    BronzeWriterMetricsMixin,
 )
 from bioetl.infrastructure.storage.bronze_writer_validation_mixin import (
     BronzeWriterValidationMixin,
@@ -63,6 +65,7 @@ class BronzeWriter(
     BronzeWriterValidationMixin,
     BronzeWriterMetadataMixin,
     BronzeWriterIOMixin,
+    BronzeWriterMetricsMixin,
 ):
     """Writer for Bronze layer (raw data in JSONL + zstd)."""
 
@@ -382,53 +385,6 @@ class BronzeWriter(
             compressed_size=compressed_size,
             uncompressed_size=uncompressed_size,
             checksum_blake2=checksum,
-        )
-
-    def _emit_bronze_write_metrics(
-        self,
-        *,
-        duration: float,
-        provider: str,
-        entity: str,
-        record_count: int,
-        compressed_size: int,
-        uncompressed_size: int,
-        relative_path: str,
-        batch_id: BatchID,
-        run_id: RunID,
-        run_type: RunType,
-    ) -> None:
-        """Emit metrics counters and structured log for a bronze write."""
-        labels = {"provider": provider, "entity": entity}
-
-        self._metrics.observe_histogram(
-            "bronze_write_duration_seconds",
-            duration,
-            labels,
-        )
-        self._metrics.increment_counter(
-            "bronze_records_written_total",
-            record_count,
-            labels,
-        )
-        self._metrics.increment_counter(
-            "bronze_bytes_written_total",
-            compressed_size,
-            labels,
-        )
-
-        self.logger.info(
-            "bronze_write_complete",
-            path=relative_path,
-            provider=provider,
-            entity=entity,
-            batch_id=str(batch_id),
-            run_id=str(run_id),
-            run_type=run_type.value,
-            record_count=record_count,
-            compressed_bytes=compressed_size,
-            uncompressed_bytes=uncompressed_size,
-            duration_seconds=round(duration, 3),
         )
 
     async def _maybe_write_bronze_metadata(

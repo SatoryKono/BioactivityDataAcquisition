@@ -1,5 +1,5 @@
-import os
 import enum
+import os
 from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qsl, urlparse
@@ -63,6 +63,16 @@ try:
     import vcr as vcrpy
 except ImportError:  # pragma: no cover
     vcrpy = None  # type: ignore[assignment]
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _init_publication_type_classification() -> None:
+    """Initialize publication type classification data for all tests."""
+    from bioetl.composition.bootstrap.runtime.classification_init import (
+        initialize_publication_type_classification,
+    )
+
+    initialize_publication_type_classification(Path("configs"))
 
 
 @pytest.fixture(scope="session", autouse=True)

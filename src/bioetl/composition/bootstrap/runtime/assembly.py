@@ -13,7 +13,7 @@ extracting configuration assembly logic into discrete, testable units.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from bioetl.composition.builders import FilterConfigBuilder
 from bioetl.domain.config import RuntimeConfig
@@ -119,6 +119,7 @@ def assemble_runtime_config(
     heartbeat_interval: int,
     vacuum: VacuumSettings,
     skip_gold: bool = False,
+    health_check_mode: Literal["strict", "probe"] = "strict",
 ) -> RuntimeConfig:
     """Assemble RuntimeConfig from resolved parameters.
 
@@ -164,6 +165,7 @@ def assemble_runtime_config(
         vacuum_after_run=vacuum.enabled,
         vacuum_retention_days=vacuum.retention_days,
         skip_gold=skip_gold,
+        health_check_mode=health_check_mode,
     )
 
 
@@ -208,9 +210,9 @@ def assemble_filter_config(
         cli_csv=ctx.input_filter.source_path if ctx.input_filter.enabled else None,
         cli_column=ctx.input_filter.column_name if ctx.input_filter.enabled else None,
         cli_field=ctx.input_filter.filter_field if ctx.input_filter.enabled else None,
-        cli_fallback_column=ctx.input_filter.fallback_column
-        if ctx.input_filter.enabled
-        else None,
+        cli_fallback_column=(
+            ctx.input_filter.fallback_column if ctx.input_filter.enabled else None
+        ),
         test_mode=effective_test_mode,
         direct_filter_ids=ctx.input_filter.filter_ids,
         direct_fallback_mapping=ctx.input_filter.fallback_mapping,

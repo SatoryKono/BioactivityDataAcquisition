@@ -195,16 +195,14 @@ async def test_health_check_healthy(uniprot_adapter):
 async def test_health_check_on_server_error(uniprot_adapter):
     """Test health check behavior on server error (500).
 
-    When http_client raises HTTPStatusError on 500, it's caught and
-    falls back to circuit breaker state (HEALTHY if no failures).
+    Non-200 probe responses are classified as transient degraded status.
     """
     respx.get("https://rest.uniprot.org/uniprotkb/search").mock(
         return_value=Response(500)
     )
     async with uniprot_adapter:
         status = await uniprot_adapter.health_check()
-    # 500 causes exception in http_client, falls back to CB check (HEALTHY if no failures)
-    assert status == HealthStatus.HEALTHY
+    assert status == HealthStatus.DEGRADED
 
 
 @respx.mock

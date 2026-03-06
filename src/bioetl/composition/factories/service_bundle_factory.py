@@ -55,7 +55,6 @@ if TYPE_CHECKING:
     from bioetl.domain.context import CachedBronzeContext
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import (
-        DataSourcePort,
         DQMonitorPort,
         LoggerPort,
         MetricsPort,
@@ -71,9 +70,7 @@ class _SchemaBuilder(Protocol):
     """Protocol for schema classes exposing ``to_schema``."""
 
     @classmethod
-    def to_schema(cls) -> object:
-        """Materialize schema representation."""
-        ...
+    def to_schema(cls) -> object: ...
 
 
 __all__ = [
@@ -85,7 +82,7 @@ __all__ = [
 
 
 def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
-    """Load pipeline config via direct infrastructure dependency."""
+    """Load pipeline config."""
     return _load_pipeline_config_direct(pipeline_name)
 
 
@@ -93,7 +90,7 @@ def yaml_config_to_domain(
     yaml_config: PipelineYamlConfig,
     resolved_dq_config: DQConfig | None = None,
 ) -> PipelineConfig:
-    """Map YAML config via direct infrastructure dependency."""
+    """Map YAML config to domain model."""
     return _yaml_config_to_domain_direct(
         yaml_config=yaml_config,
         resolved_dq_config=resolved_dq_config,
@@ -103,13 +100,13 @@ def yaml_config_to_domain(
 def compute_config_hash(
     config: PipelineYamlConfig | dict[str, object],
 ) -> str:
-    """Compute config hash via direct versioning dependency."""
+    """Compute config hash."""
     return _compute_config_hash_direct(config)
 
 
 @dataclass(frozen=True, slots=True)
 class ServiceBundleDependencies:
-    """Explicit dependencies for service bundle runtime wiring."""
+    """Explicit dependencies for service bundle wiring."""
 
     load_pipeline_config: Callable[[str], PipelineYamlConfig]
     yaml_config_to_domain: Callable[
@@ -122,7 +119,7 @@ class ServiceBundleDependencies:
 def _resolve_service_bundle_dependencies(
     override: ServiceBundleDependencies | None = None,
 ) -> ServiceBundleDependencies:
-    """Resolve runtime dependencies with optional explicit override."""
+    """Resolve runtime dependencies with optional override."""
     if override is not None:
         return override
 
@@ -139,40 +136,8 @@ def _extract_entity_type(pipeline_name: str) -> str | None:
     return pipeline_name.split("_")[-1] if "_" in pipeline_name else None
 
 
-def _create_data_source(
-    create_data_source_fn: DataSourceCreator,
-    settings: Settings,
-    pipeline_config: PipelineYamlConfig,
-    logger: LoggerPort,
-    filter_config: InputFilterConfig | None = None,
-    metrics: MetricsPort | None = None,
-    pipeline_name: str = "unknown",
-) -> DataSourcePort:
-    """Compatibility wrapper around observability data-source wiring."""
-    return _create_data_source_impl(
-        create_data_source_fn=create_data_source_fn,
-        settings=settings,
-        pipeline_config=pipeline_config,
-        logger=logger,
-        filter_config=filter_config,
-        metrics=metrics,
-        pipeline_name=pipeline_name,
-    )
-
-
-def _create_cached_bronze_data_source(
-    settings: Settings,
-    pipeline_config: PipelineYamlConfig,
-    logger: LoggerPort,
-    cached_bronze: CachedBronzeContext,
-) -> DataSourcePort:
-    """Compatibility wrapper for cached Bronze data-source factory."""
-    return _create_cached_bronze_data_source_impl(
-        settings=settings,
-        pipeline_config=pipeline_config,
-        logger=logger,
-        cached_bronze=cached_bronze,
-    )
+_create_data_source = _create_data_source_impl
+_create_cached_bronze_data_source = _create_cached_bronze_data_source_impl
 
 
 def build_pipeline_services(
@@ -189,7 +154,7 @@ def build_pipeline_services(
     silver_validator: SilverValidatorPort | None = None,
     _deps: ServiceBundleDependencies | None = None,
 ) -> PipelineService:
-    """Build shared pipeline services with optional cached-bronze mode."""
+    """Build shared pipeline services."""
     deps = _resolve_service_bundle_dependencies(_deps)
     pipeline_config = config or deps.load_pipeline_config(pipeline_name)
     base_services_factory = deps.base_services_factory
@@ -302,7 +267,7 @@ def _create_pipeline_with_services_impl(
     *,
     deps: ServiceBundleDependencies,
 ) -> BasePipeline:
-    """Implement pipeline construction for ``create_pipeline_with_services``."""
+    """Implement ``create_pipeline_with_services``."""
     yaml_config = inputs.config or deps.load_pipeline_config(inputs.pipeline_name)
     run_context_factory = RunContextFactory(
         pipeline_name=inputs.pipeline_name,

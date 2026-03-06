@@ -29,8 +29,6 @@ __all__ = [
 
 @dataclass(frozen=True, slots=True)
 class SeedConfig:
-    """Configuration for the seed phase of a composite pipeline."""
-
     pipeline: str
     output_keys: tuple[str, ...]
     silver_table: str
@@ -50,8 +48,6 @@ class SeedConfig:
 
 @dataclass(frozen=True, slots=True)
 class DependencyConfig:
-    """Configuration for a dependency pipeline in a composite run."""
-
     pipeline: str
     join_keys: tuple[str, ...]
     required: bool = False
@@ -83,17 +79,14 @@ class DependencyConfig:
 
     @property
     def primary_join_key(self) -> str:
-        """Return the first join key used for primary matching."""
         return self.join_keys[0]
 
     @property
     def uses_seed_keys(self) -> bool:
-        """Check whether this dependency resolves keys from the seed phase."""
         return self.key_source is None or self.key_source == "seed"
 
     @property
     def effective_filter_fields(self) -> tuple[str, ...]:
-        """Return the resolved filter fields, falling back to the primary join key."""
         if self.filter_fields:
             return self.filter_fields
         if self.filter_field:
@@ -102,14 +95,11 @@ class DependencyConfig:
 
     @property
     def is_multi_field_filter(self) -> bool:
-        """Check whether filtering uses more than one field."""
         return len(self.effective_filter_fields) > 1
 
 
 @dataclass(frozen=True, slots=True)
 class EnricherConfig:
-    """Configuration for an enricher pipeline in a composite run."""
-
     pipeline: str
     join_keys: tuple[str, ...]
     required: bool = False
@@ -161,7 +151,6 @@ class EnricherConfig:
 
     @property
     def primary_join_key(self) -> str:
-        """Return the first join key used for primary matching."""
         return self.join_keys[0]
 
     @property

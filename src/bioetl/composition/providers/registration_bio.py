@@ -12,6 +12,7 @@ from bioetl.application.core.idmapping_data_source import IDMappingDataSource
 from bioetl.application.core.publication_term_data_source import (
     PublicationTermDataSource,
 )
+from bioetl.composition.factories.adapter_helpers_factory import AdapterHelpersFactory
 from bioetl.composition.providers._config_helpers import (
     _get_adapter_config,
     _get_circuit_breaker_from_config,
@@ -177,12 +178,19 @@ def _create_uniprot_data_source(
     http_client = HttpClientFactory.create_for_provider(
         "uniprot", settings, metrics=metrics
     )
+    helper_services = AdapterHelpersFactory.create_http_helpers(
+        provider="uniprot",
+        logger=logger,
+        metrics=metrics,
+    )
     data_source = DataSourceFactory.create(
         "uniprot",
         http_client=http_client,
         logger=logger,
         base_url=pipeline_config.source.api.base_url or UNIPROT_API_BASE,
         strict_error_handling=settings.strict_error_handling,
+        metrics=metrics,
+        **helper_services.as_injection_kwargs(),
     )
     return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)
 

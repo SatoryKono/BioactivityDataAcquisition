@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -39,6 +40,34 @@ def mock_settings(tmp_path):
     settings.checkpoint_path = tmp_path / "checkpoints"
     settings.data_dir = tmp_path
     settings.test_mode = True  # Default to test mode
+    settings.pipeline = SimpleNamespace(
+        silver_resilience_enabled=True,
+        silver_metadata_atomic_retry=SimpleNamespace(
+            enabled=True,
+            adaptive_backoff=True,
+            max_retries=7,
+            base_delay_seconds=0.005,
+            max_delay_seconds=0.1,
+            jitter_seconds=0.005,
+        ),
+        silver_merge_retry=SimpleNamespace(
+            enabled=True,
+            adaptive_backoff=True,
+            max_retries=3,
+            base_delay_seconds=0.25,
+            max_delay_seconds=2.0,
+            jitter_seconds=0.05,
+        ),
+        silver_merge_timeout=SimpleNamespace(
+            execution_timeout_seconds=45.0,
+            retry_enabled=True,
+            adaptive_backoff=True,
+            max_retries=1,
+            base_delay_seconds=0.2,
+            max_delay_seconds=2.0,
+            jitter_seconds=0.05,
+        ),
+    )
     return settings
 
 

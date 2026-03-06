@@ -10,8 +10,9 @@ Implements SilverDQAnalyzerPort. Follows RULES.md §3.1 DQ strategy.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from datetime import datetime
-from typing import cast
+from typing import Any, cast
 
 import polars as pl
 import pyarrow as pa
@@ -57,10 +58,12 @@ class SilverDQAnalyzer:
         input_record_count: int | None,
         quarantined_count: int,
         previous_schema: dict[str, str] | None,
-        key_nullability_rules: list[
-            JsonDict  # Any: DQ check values vary by check type
-        ]  # Any: DQ rule definitions have heterogeneous values
-        | None,  # Any: DQ check values vary by check type
+        key_nullability_rules: (
+            list[
+                JsonDict  # Any: DQ check values vary by check type
+            ]  # Any: DQ rule definitions have heterogeneous values
+            | None
+        ),  # Any: DQ check values vary by check type
     ) -> tuple[
         JsonDict, int, int, int  # Any: DQ check values vary by check type
     ]:  # Any: DQ check values vary by check type
@@ -82,15 +85,54 @@ class SilverDQAnalyzer:
         passed, failed, warnings = 0, 0, 0
         stats = self._statistics
 
-        if SilverDQCheckType.RECORD_COUNT in enabled_checks:
-            record_count_result = stats.check_record_count(
-                df, input_record_count, quarantined_count
-            )
-            checks["record_count"] = to_dict(record_count_result)
-            passed, failed, warnings = update_counts(
-                record_count_result.status, passed, failed, warnings
-            )
+        # Standard checks: to_dict(result) + update_counts(result.status)
+        standard_checks: list[
+            tuple[SilverDQCheckType, str, Callable[[], Any]]  # Any: check results vary
+        ] = [
+            (
+                SilverDQCheckType.RECORD_COUNT,
+                "record_count",
+                lambda: stats.check_record_count(
+                    df, input_record_count, quarantined_count
+                ),
+            ),
+            (
+                SilverDQCheckType.UNIQUENESS,
+                "uniqueness",
+                lambda: stats.check_uniqueness(df, primary_keys),
+            ),
+            (
+                SilverDQCheckType.TYPE_CONFORMANCE,
+                "type_conformance",
+                lambda: stats.check_type_conformance(df),
+            ),
+            (
+                SilverDQCheckType.SCHEMA_DRIFT,
+                "schema_drift",
+                lambda: stats.check_schema_drift(df, previous_schema),
+            ),
+            (
+                SilverDQCheckType.DEDUPLICATION_STATS,
+                "deduplication_stats",
+                lambda: stats.check_deduplication(
+                    df, primary_keys, input_record_count or len(df)
+                ),
+            ),
+            (
+                SilverDQCheckType.CONTENT_HASH_INTEGRITY,
+                "content_hash_integrity",
+                lambda: stats.check_content_hash_integrity(df),
+            ),
+        ]
+        for check_type, key, handler in standard_checks:
+            if check_type in enabled_checks:
+                result = handler()
+                checks[key] = to_dict(result)
+                passed, failed, warnings = update_counts(
+                    result.status, passed, failed, warnings
+                )
 
+        # Special: null_rate (always PASS, custom dict)
         if SilverDQCheckType.NULL_RATE in enabled_checks:
             null_results, overall_rate = stats.check_null_rates(df)
             checks["null_rate"] = {
@@ -100,20 +142,7 @@ class SilverDQAnalyzer:
             }
             passed += 1
 
-        if SilverDQCheckType.UNIQUENESS in enabled_checks:
-            uniqueness_result = stats.check_uniqueness(df, primary_keys)
-            checks["uniqueness"] = to_dict(uniqueness_result)
-            passed, failed, warnings = update_counts(
-                uniqueness_result.status, passed, failed, warnings
-            )
-
-        if SilverDQCheckType.TYPE_CONFORMANCE in enabled_checks:
-            conformance_result = stats.check_type_conformance(df)
-            checks["type_conformance"] = to_dict(conformance_result)
-            passed, failed, warnings = update_counts(
-                conformance_result.status, passed, failed, warnings
-            )
-
+        # Special: value_distribution (always PASS, custom serializer)
         if SilverDQCheckType.VALUE_DISTRIBUTION in enabled_checks:
             distribution_result = stats.check_value_distribution(df)
             checks["value_distribution"] = stats.distribution_to_dict(
@@ -121,29 +150,7 @@ class SilverDQAnalyzer:
             )
             passed += 1
 
-        if SilverDQCheckType.SCHEMA_DRIFT in enabled_checks:
-            drift_result = stats.check_schema_drift(df, previous_schema)
-            checks["schema_drift"] = to_dict(drift_result)
-            passed, failed, warnings = update_counts(
-                drift_result.status, passed, failed, warnings
-            )
-
-        if SilverDQCheckType.DEDUPLICATION_STATS in enabled_checks:
-            dedup_result = stats.check_deduplication(
-                df, primary_keys, input_record_count or len(df)
-            )
-            checks["deduplication_stats"] = to_dict(dedup_result)
-            passed, failed, warnings = update_counts(
-                dedup_result.status, passed, failed, warnings
-            )
-
-        if SilverDQCheckType.CONTENT_HASH_INTEGRITY in enabled_checks:
-            hash_result = stats.check_content_hash_integrity(df)
-            checks["content_hash_integrity"] = to_dict(hash_result)
-            passed, failed, warnings = update_counts(
-                hash_result.status, passed, failed, warnings
-            )
-
+        # Special: key_nullability (delegates to threshold checker)
         if SilverDQCheckType.KEY_NULLABILITY in enabled_checks:
             key_nullability_result = self._threshold.check_key_nullability(
                 df,
@@ -175,10 +182,12 @@ class SilverDQAnalyzer:
         input_record_count: int | None = None,
         quarantined_count: int = 0,
         previous_schema: dict[str, str] | None = None,
-        key_nullability_rules: list[
-            JsonDict  # Any: DQ check values vary by check type
-        ]  # Any: DQ rule definitions have heterogeneous values
-        | None = None,  # Any: DQ check values vary by check type
+        key_nullability_rules: (
+            list[
+                JsonDict  # Any: DQ check values vary by check type
+            ]  # Any: DQ rule definitions have heterogeneous values
+            | None
+        ) = None,  # Any: DQ check values vary by check type
     ) -> SilverDQReport:
         """Analyze Silver data and generate DQ report.
 

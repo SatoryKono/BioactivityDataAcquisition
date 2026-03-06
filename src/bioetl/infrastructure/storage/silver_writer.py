@@ -35,6 +35,10 @@ from bioetl.infrastructure.storage.silver_writer_metadata_mixin import (
 from bioetl.infrastructure.storage.silver_writer_validation_mixin import (
     SilverWriterValidationMixin,
 )
+from bioetl.infrastructure.storage.write_resilience import (
+    DEFAULT_SILVER_MERGE_POLICY,
+    SilverMergeResiliencePolicy,
+)
 
 # Backward-compatible module aliases for tests patching historical symbols.
 asyncio = _asyncio
@@ -102,22 +106,23 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         transform_steps: tuple[str, ...] | None = None,
         flat_structure: bool = False,
         dq_calculator: DQMetricsCalculator | None = None,
+        merge_resilience_policy: SilverMergeResiliencePolicy | None = None,
     ) -> None:
         """Initialize Silver writer."""
         super().__init__(base_path, logger, flat_structure=flat_structure)
         self._dq_calculator = dq_calculator or DQMetricsCalculator()
-
+        self._merge_resilience_policy = (
+            merge_resilience_policy or DEFAULT_SILVER_MERGE_POLICY
+        )
         if tracing is None:
             from bioetl.domain.ports import NoOpTracing
 
             tracing = NoOpTracing()
-
         self.csv_exporter = csv_exporter
         self._write_policy = write_policy or WriteModePolicy()
         self._metrics = metrics
         self._audit = audit
         self._tracing: TracingPort = tracing
-
         if silver_validator is None:
             from bioetl.infrastructure.validation.pandera_validator import (
                 NoOpSilverValidator,
@@ -125,7 +130,6 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
 
             silver_validator = NoOpSilverValidator()
         self._silver_validator: SilverValidatorPort = silver_validator
-
         if metadata_writer is None:
             from bioetl.domain.ports import NoOpMetadataWriter
 
@@ -433,9 +437,9 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         table_name: str,
         target_size: int | None = None,
         partition_filters: list[
-            tuple[str, str, Any]  # Any: Delta Lake partition filter values vary
-        ]  # Any: Delta Lake partition filter values vary
-        | None = None,  # Any: Delta Lake partition filter values vary
+                               tuple[str, str, Any]  # Any: Delta Lake partition filter values vary
+                           ]  # Any: Delta Lake partition filter values vary
+                           | None = None,  # Any: Delta Lake partition filter values vary
     ) -> MetaDict:
         """Optimize table layout (compaction)."""
         return await self._retention_manager.optimize(

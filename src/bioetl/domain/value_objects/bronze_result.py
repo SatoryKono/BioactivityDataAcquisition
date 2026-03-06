@@ -22,6 +22,19 @@ __all__ = [
 ]
 
 
+def _parse_provider_entity(relative_path: str) -> tuple[str, str]:
+    """Parse provider and entity from a Bronze relative path."""
+    normalized = relative_path.replace("\\", "/").strip("/")
+    if not normalized:
+        raise ValueError("relative_path must include provider/entity segments")
+    parts = normalized.split("/")
+    if parts[0] == "v1":
+        parts = parts[1:]
+    if len(parts) >= 2:
+        return parts[0], parts[1]
+    raise ValueError("relative_path must include provider/entity segments")
+
+
 @dataclass(frozen=True, slots=True)
 class BronzeWriteResult:
     """Result of a Bronze layer write operation.
@@ -113,10 +126,4 @@ class BronzeWriteResult:
     @property
     def provider_entity(self) -> tuple[str, str]:
         """Extract provider/entity from Bronze relative path."""
-        parts = [
-            part for part in self.relative_path.replace("\\", "/").split("/") if part
-        ]
-        offset = 1 if parts and parts[0] == "v1" else 0
-        if len(parts) - offset >= 2:
-            return parts[offset], parts[offset + 1]
-        raise ValueError("relative_path must include provider/entity segments")
+        return _parse_provider_entity(self.relative_path)

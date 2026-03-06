@@ -1,28 +1,19 @@
-"""CrossRef data source adapter.
-
-Implements DataSourcePort for CrossRef API.
-See RULES.md Appendix A for rate limits and retry strategy.
-
-Uses httpx directly for REST/JSON API access.
-
-Error Handling (RULES.md §3.1):
-- Critical errors: Fail immediately (401, 403)
-- Recoverable errors: Handled by UnifiedHTTPClient retry
-- Data quality errors: Log and skip record
-
-Polite Pool:
-- CrossRef provides higher rate limits (50 req/sec) when `mailto` is provided
-- Always send mailto in User-Agent or query parameters
-"""
+"""CrossRef adapter facade for DataSourcePort and FilterableDataSourcePort."""
 
 from __future__ import annotations
 
-__all__ = ["CROSSREF_API_BASE", "CROSSREF_HEALTH_ERRORS", "CrossRefAdapter"]
-
+__all__ = [
+    "CROSSREF_API_BASE",
+    "CROSSREF_HEALTH_ERRORS",
+    "CrossRefAdapter",
+    "CrossRefFetchFlow",
+    "CrossRefQueryBuilder",
+    "CrossRefResponseMapper",
+]
 
 import time
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from httpx import HTTPStatusError, RequestError
 
@@ -32,21 +23,40 @@ from bioetl.domain.normalization import normalize_doi
 from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.common import (
+    ComposableFallbackDecorator,
+    DefaultFallbackExecutionStrategy,
     FallbackFetchOrchestratorService,
-    FallbackFetchRequest,
+    resolve_fallback_policy,
+)
+from bioetl.infrastructure.adapters.crossref._defaults import (
+    CROSSREF_DEFAULT_FALLBACK_CONFIG as _CROSSREF_DEFAULT_FALLBACK_CONFIG,
+)
+from bioetl.infrastructure.adapters.crossref._defaults import (
+    create_default_crossref_error_handler as _create_default_crossref_error_handler,
+)
+from bioetl.infrastructure.adapters.crossref._defaults import (
+    create_default_crossref_fallback_service as _create_default_crossref_fallback_service,
 )
 from bioetl.infrastructure.adapters.crossref.batch import (
     DoiBatchProcessor,
     SearchPaginator,
 )
 from bioetl.infrastructure.adapters.crossref.fallback import TitleFallbackHandler
+from bioetl.infrastructure.adapters.crossref.fetch_flow import CrossRefFetchFlow
+from bioetl.infrastructure.adapters.crossref.query_builder import CrossRefQueryBuilder
+from bioetl.infrastructure.adapters.crossref.response_mapper import (
+    CrossRefResponseMapper,
+)
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-    from bioetl.domain.ports import LoggerPort, MetricsPort
+    from bioetl.domain.ports import ErrorHandlerPort, LoggerPort, MetricsPort
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+    from bioetl.infrastructure.adapters.common.api_request_collector import (
+        APIRequestCollector,
+    )
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-    from bioetl.infrastructure.config import Settings
 
 CROSSREF_API_BASE = "https://api.crossref.org"
 
@@ -65,45 +75,58 @@ CROSSREF_HEALTH_ERRORS = (
 
 @dataclass
 class CrossRefAdapter(BaseHttpAdapter):
-    """CrossRef data source adapter.
-
-    Inherits from BaseHttpAdapter for standardized lifecycle management
-    and Template Method pattern for health checks.
-
-    Implements DataSourcePort and FilterableDataSourcePort for CrossRef
-    metadata extraction with batch DOI resolution support.
-
-    Args:
-        http_client: UnifiedHTTPClient instance for making HTTP requests.
-        logger: LoggerPort instance for structured logging.
-        mailto: Technical email for polite pool access (required).
-            CrossRef provides higher rate limits (50 req/sec) with mailto.
-            See: https://github.com/CrossRef/rest-api-doc#good-manners--more-reliable-service
-        batch_size: Number of DOIs per batch request (max 100).
-        metrics: Optional MetricsPort for recording adapter metrics.
-
-    """
+    """CrossRef adapter with thin-facade delegation to flow components."""
 
     http_client: UnifiedHTTPClient
     logger: LoggerPort
     mailto: str
     batch_size: int = 50
     metrics: MetricsPort | None = None
+    error_handler: ErrorHandlerPort | None = None
+    adapter_metrics: AdapterMetrics | None = None
+    request_collector: APIRequestCollector | None = None
+    fallback_fetch_service: FallbackFetchOrchestratorService | None = None
 
     provider_name: str = field(init=False, default="crossref")
     """Provider identifier (required by DataSourcePort)."""
     _fallback_fetch_service: FallbackFetchOrchestratorService = field(
         init=False, repr=False
     )
+    _fallback_decorator: ComposableFallbackDecorator = field(init=False, repr=False)
+    _query_builder: CrossRefQueryBuilder = field(init=False, repr=False)
+    _response_mapper: CrossRefResponseMapper = field(init=False, repr=False)
+    _fetch_flow: CrossRefFetchFlow = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
-        """Initialize adapter metrics and helper components."""
-        self._init_adapter_metrics()
-        self._fallback_fetch_service = FallbackFetchOrchestratorService(
-            self._adapter_metrics
+        """Initialize helper services and decomposed CrossRef flow components."""
+        if self.adapter_metrics is not None and self.request_collector is not None:
+            self._adapter_metrics = self.adapter_metrics
+            self._request_collector = self.request_collector
+        else:
+            self._init_adapter_metrics()
+
+        self._error_handler = (
+            self.error_handler
+            if self.error_handler is not None
+            else _create_default_crossref_error_handler(
+                logger=self.logger,
+                metrics=self.metrics,
+            )
+        )
+        self._fallback_fetch_service = (
+            self.fallback_fetch_service
+            if self.fallback_fetch_service is not None
+            else _create_default_crossref_fallback_service(
+                adapter_metrics=self._adapter_metrics,
+            )
         )
 
-        # Initialize helper components for batch fetching and search
+        self._query_builder = CrossRefQueryBuilder(
+            api_base=CROSSREF_API_BASE,
+            mailto=self.mailto,
+        )
+        self._response_mapper = CrossRefResponseMapper()
+
         self._batch_fetcher = DoiBatchProcessor(
             http=self.http_client,
             logger=self.logger,
@@ -126,13 +149,41 @@ class CrossRefAdapter(BaseHttpAdapter):
             logger=self.logger,
             search_fn=self._search_paginator.search,
         )
+        self.configure_fallback_policy(None)
+
+        self._fetch_flow = CrossRefFetchFlow(
+            logger=self.logger,
+            batch_fetcher=self._batch_fetcher,
+            search_paginator=self._search_paginator,
+            fallback_decorator=self._fallback_decorator,
+            batch_size=self.batch_size,
+            response_mapper=self._response_mapper,
+        )
+
+    def configure_fallback_policy(self, policy: object | None) -> None:
+        """Configure fallback decorator behavior from provider YAML policy."""
+        enabled, config = resolve_fallback_policy(
+            policy,
+            defaults=_CROSSREF_DEFAULT_FALLBACK_CONFIG,
+            default_enabled=True,
+        )
+        strategy = DefaultFallbackExecutionStrategy(
+            normalize_id_hook=normalize_doi,
+            extract_record_id_hook=lambda rec: str(rec.get("DOI", "")),
+            fallback_handler_hook=self._fallback_handler if enabled else None,
+        )
+        self._fallback_decorator = ComposableFallbackDecorator(
+            service=self._fallback_fetch_service,
+            strategy=strategy,
+            config=config,
+            logger=self.logger,
+        )
+        if hasattr(self, "_fetch_flow"):
+            self._fetch_flow.fallback_decorator = self._fallback_decorator
 
     def _build_headers(self) -> dict[str, str]:
         """Build request headers with polite pool identification."""
-        return {
-            "User-Agent": f"BioETL/1.0 (mailto:{self.mailto})",
-            "Accept": "application/json",
-        }
+        return self._query_builder.build_headers()
 
     async def fetch_filtered(
         self,
@@ -141,49 +192,14 @@ class CrossRefAdapter(BaseHttpAdapter):
         filter_field: str,
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch CrossRef publications by DOI list (batch resolution).
-
-        Implements FilterableDataSourcePort.fetch_filtered().
-
-        Args:
-            entity_type: Must be 'work' or 'publication'.
-            filter_ids: List of DOIs to resolve.
-            filter_field: Field name (expected 'doi').
-            limit: Maximum number of records to fetch.
-
-        Yields:
-            Dictionary records for each resolved publication.
-
-        Raises:
-            ValueError: If entity_type is not 'work' or 'publication'.
-
-        Returns:
-            Async iterator yielding fetched records.
-        """
-        if entity_type not in ("work", "publication"):
-            raise ValueError(
-                f"CrossRefAdapter supports 'work' or 'publication', got: {entity_type}"
-            )
-
-        if filter_field != "doi":
-            self.logger.warning(
-                "unsupported_filter_field",
-                field=filter_field,
-                msg="CrossRef only supports DOI filtering, assuming DOIs",
-            )
-
-        dois = filter_ids[:limit] if limit else filter_ids
-        fetched = 0
-
-        # Process DOIs in batches (max 100 per request)
-        for i in range(0, len(dois), self.batch_size):
-            batch = dois[i : i + self.batch_size]
-            async for publication in self._batch_fetcher.fetch_batch(batch):
-                publication["_lookup_method"] = "doi"
-                yield publication
-                fetched += 1
-                if limit and fetched >= limit:
-                    return
+        """Fetch CrossRef publications by DOI list (FilterableDataSourcePort)."""
+        async for publication in self._fetch_flow.fetch_filtered(
+            entity_type=entity_type,
+            filter_ids=filter_ids,
+            filter_field=filter_field,
+            limit=limit,
+        ):
+            yield publication
 
     async def fetch_multi_filtered(
         self,
@@ -191,22 +207,7 @@ class CrossRefAdapter(BaseHttpAdapter):
         filters: dict[str, list[str]],
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Multi-field filtering not supported by CrossRef API.
-
-        CrossRef only supports single-field filtering by DOI.
-        Use fetch_filtered() for DOI-based filtering instead.
-
-        Raises:
-            NotImplementedError: Always, as CrossRef doesn't support multi-field filtering.
-
-        Args:
-            entity_type: Entity type identifier.
-            filters: Filters.
-            limit: Maximum number of records to process.
-
-        Returns:
-            Async iterator yielding fetched records.
-        """
+        """Multi-field filtering is not supported by CrossRef API."""
         raise NotImplementedError(
             "CrossRef API does not support multi-field filtering. "
             "Use fetch_filtered() with filter_field='doi' instead."
@@ -222,39 +223,13 @@ class CrossRefAdapter(BaseHttpAdapter):
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
         """Fetch publications by DOI with title-search fallback for misses."""
-        if entity_type not in ("work", "publication"):
-            raise ValueError(
-                f"CrossRefAdapter supports 'work'/'publication', got: {entity_type}"
-            )
-        if filter_field != "doi":
-            self.logger.warning(
-                "unsupported_filter_field_for_fallback",
-                field=filter_field,
-                msg="CrossRef fallback only supports 'doi' filtering, proceeding with DOI semantics",
-            )
-
-        async def _primary_records(
-            primary_ids: list[str], request_limit: int | None
-        ) -> AsyncIterator[BronzeRecord]:
-            for i in range(0, len(primary_ids), self.batch_size):
-                if request_limit is not None and request_limit <= 0:
-                    return
-                batch = primary_ids[i : i + self.batch_size]
-                async for publication in self._batch_fetcher.fetch_batch(batch):
-                    yield publication
-
-        request = FallbackFetchRequest(
+        async for publication in self._fetch_flow.fetch_filtered_with_fallback(
+            entity_type=entity_type,
             filter_ids=filter_ids,
+            filter_field=filter_field,
             fallback_mapping=fallback_mapping,
-            primary_record_fetcher=_primary_records,
-            normalize_id=normalize_doi,
-            extract_record_id=lambda rec: str(rec.get("DOI", "")),
-            fallback_handler=self._fallback_handler,
             limit=limit,
-            primary_lookup_method="doi",
-            trim_primary_ids_to_limit=True,
-        )
-        async for publication in self._fallback_fetch_service.execute(request):
+        ):
             yield publication
 
     async def fetch(
@@ -266,122 +241,70 @@ class CrossRefAdapter(BaseHttpAdapter):
         filter_field: str | None = None,
         offset: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch CrossRef publications.
-
-        Implements DataSourcePort.fetch().
-
-        Args:
-            entity_type: Must be 'work' or 'publication'.
-            limit: Maximum number of records to fetch.
-            query: Search query for CrossRef (optional).
-            filter_ids: List of DOIs to resolve (optional).
-            filter_field: Field name for filtering (expected 'doi').
-
-        Yields:
-            Dictionary records from CrossRef API.
-
-        Raises:
-            ValueError: If entity_type is invalid.
-            CrossRefApiError: On API errors.
-
-        Returns:
-            Async iterator yielding fetched records.
-        """
-        if filter_ids:
-            effective_filter_field = filter_field or "doi"
-            async for publication in self.fetch_filtered(
-                entity_type, filter_ids, effective_filter_field, limit
-            ):
-                yield publication
-            return
-
-        if entity_type not in ("work", "publication"):
-            raise ValueError(
-                f"CrossRefAdapter supports 'work' or 'publication', got: {entity_type}"
-            )
-
-        if not query:
-            raise ValueError(
-                "CrossRef requires either filter_ids (DOIs) or query parameter"
-            )
-
-        async for publication in self._search_paginator.search(query, limit):
+        """Fetch CrossRef publications via DOI filters or free-text query."""
+        del offset
+        async for publication in self._fetch_flow.fetch(
+            entity_type=entity_type,
+            limit=limit,
+            query=query,
+            filter_ids=filter_ids,
+            filter_field=filter_field,
+        ):
             yield publication
 
     async def _probe_health(self) -> HealthStatus:
-        """Probe CrossRef API health. Returns DEGRADED if response >5 sec."""
+        """Probe CrossRef API health with response-status classification."""
         try:
-            url = f"{CROSSREF_API_BASE}/works"
-            params = {
-                "rows": "1",
-                "mailto": self.mailto,
-            }
+            url = self._query_builder.build_health_probe_url()
+            params = self._query_builder.build_health_probe_params()
 
             start_time = time.monotonic()
             with self._adapter_metrics.measure_request("/health"):
                 response = await self.http_client.get_once(
-                    url, params=params, headers=self._build_headers()
+                    url,
+                    params=params,
+                    headers=self._build_headers(),
                 )
             elapsed = time.monotonic() - start_time
 
-            if response.status_code != 200:
+            probe_mapping = self._response_mapper.map_health_probe(
+                status_code=response.status_code,
+                elapsed_seconds=elapsed,
+            )
+            if probe_mapping.event_name == "crossref_health_check_slow":
                 self.logger.warning(
-                    "crossref_health_check_failed",
-                    status_code=response.status_code,
-                )
-                return HealthStatus.UNHEALTHY
-
-            # Slow response = degraded
-            if elapsed > 5.0:
-                self.logger.warning(
-                    "crossref_health_check_slow",
+                    probe_mapping.event_name,
                     elapsed_seconds=round(elapsed, 2),
                 )
-                return HealthStatus.DEGRADED
+            elif probe_mapping.event_name is not None:
+                self.logger.warning(
+                    probe_mapping.event_name,
+                    status_code=response.status_code,
+                    classified_status=probe_mapping.status.value,
+                )
+            return probe_mapping.status
 
-            return HealthStatus.HEALTHY
-
-        except CROSSREF_HEALTH_ERRORS as e:
+        except CROSSREF_HEALTH_ERRORS as error:
             self.logger.warning(
                 "crossref_health_check_failed",
-                error=str(e),
+                error=str(error),
             )
-            raise  # Let health_check() return _fallback_health_status()
+            raise
 
     def _fallback_health_status(self) -> HealthStatus:
-        """Get fallback health status on probe failure.
-
-        Overrides BaseHttpAdapter._fallback_health_status().
-
-        Returns:
-            HealthStatus.UNHEALTHY
-
-        """
+        """Return fallback status used when probe execution fails."""
         return HealthStatus.UNHEALTHY
 
     def _get_health_endpoint(self) -> str:
-        """Get the health check endpoint for CrossRef.
-
-        Returns:
-            CrossRef works endpoint used for health probe.
-
-        """
+        """Return endpoint path used for CrossRef health checks."""
         return "/works"
 
     def get_source_metadata(self, api_version: str | None = None) -> SourceMetadata:
-        """Get API request metadata and clear collector.
-
-        Returns aggregated metadata from all API requests made since last clear.
-        Used by BatchExecutor to enrich Bronze layer metadata.
-
-        Args:
-            api_version: Optional API version string.
-
-        Returns:
-            SourceMetadata with request details and statistics.
-        """
+        """Return and clear aggregated API request metadata."""
         metadata = self._request_collector.to_source_metadata(
-            source_type="api", url=CROSSREF_API_BASE, api_version=api_version
+            source_type="api",
+            url=CROSSREF_API_BASE,
+            api_version=api_version,
         )
         self._request_collector.clear()
         return metadata
@@ -396,58 +319,6 @@ class CrossRefAdapter(BaseHttpAdapter):
         return self._request_collector.request_count
 
     async def aclose(self) -> None:
-        """Close adapter resources.
-
-        Overrides BaseHttpAdapter.aclose() to properly close the HTTP client.
-        Safely closes via the public context manager interface.
-        Idempotent - safe to call multiple times.
-        """
+        """Close adapter resources via underlying HTTP client context manager."""
         if self.http_client:
             await self.http_client.__aexit__(None, None, None)
-
-
-def _create_crossref_adapter(
-    http_client: UnifiedHTTPClient | None,
-    logger: LoggerPort | None,
-    settings: Settings | None,
-    **kwargs: Any,  # Any: forward arbitrary adap...
-) -> CrossRefAdapter:
-    """Custom creator for CrossRef adapter.
-
-    Handles logic for obtaining mailto from settings.
-
-    Args:
-        http_client: HTTP client
-        logger: Logger
-        settings: Application settings
-        **kwargs: Additional parameters (mailto, batch_size, metrics)
-
-    Returns:
-        Initialized CrossRefAdapter
-
-    Raises:
-        ValueError: If mailto is not provided and not found in settings
-
-    """
-    # Mailto: from kwargs or settings
-    mailto = kwargs.get("mailto")
-    if not mailto and settings:
-        mailto = getattr(settings, "default_email", None)
-    if not mailto:
-        raise ValueError(
-            "CrossRef adapter requires mailto. "
-            "Provide via 'mailto' kwarg or settings.default_email"
-        )
-
-    if http_client is None:
-        raise ValueError("CrossRef adapter requires http_client")
-    if logger is None:
-        raise ValueError("CrossRef adapter requires logger")
-
-    return CrossRefAdapter(
-        http_client=http_client,
-        logger=logger,
-        mailto=mailto,
-        batch_size=kwargs.get("batch_size", 50),
-        metrics=kwargs.get("metrics"),
-    )

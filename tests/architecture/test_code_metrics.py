@@ -25,7 +25,7 @@ class TestFileSizeLimits:
     LAYER_LIMITS = {
         "domain": 305,  # Domain should be small and focused
         "application": 500,  # Application can be larger
-        "composition": 400,  # Composition is wiring only
+        "composition": 350,  # Composition is wiring only (buffer below hard cap)
         "infrastructure": 650,  # Infrastructure adapters may be complex (bumped from 600)
         "interfaces": 400,  # CLI and entry points
     }

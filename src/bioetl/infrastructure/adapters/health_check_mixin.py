@@ -23,7 +23,6 @@ __all__ = [
     "HealthCheckProviderMixin",
 ]
 
-
 import time
 from abc import abstractmethod
 from dataclasses import dataclass, field
@@ -33,6 +32,9 @@ from httpx import HTTPStatusError, RequestError
 
 from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.types import HealthStatus, JsonDict
+from bioetl.infrastructure.adapters.health_status_policy import (
+    TRANSIENT_DEGRADED_STATUS_CODES,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
@@ -299,7 +301,35 @@ class HealthCheckProviderMixin(HealthCheckMixin):
             fallback_status = self._fallback_health_status()
             # Log and record metrics for the failure
             self._handle_health_check_failure(ctx, e)
-            return fallback_status
+            return self._resolve_failure_health_status(
+                error=e,
+                fallback_status=fallback_status,
+            )
+
+    def _resolve_failure_health_status(
+        self,
+        *,
+        error: Exception,
+        fallback_status: HealthStatus,
+    ) -> HealthStatus:
+        """Resolve final health status for failed probe without masking issues.
+
+        Guardrail:
+        - Probe exceptions never return ``HEALTHY``.
+        - Transient transport/upstream failures downgrade to ``DEGRADED``
+          unless circuit breaker already reports ``UNHEALTHY``.
+        """
+        if fallback_status == HealthStatus.UNHEALTHY:
+            return HealthStatus.UNHEALTHY
+        if fallback_status == HealthStatus.HEALTHY:
+            return HealthStatus.DEGRADED
+        if isinstance(error, (TimeoutError, ConnectionError, RequestError)):
+            return HealthStatus.DEGRADED
+        if isinstance(error, HTTPStatusError):
+            status_code = error.response.status_code
+            if status_code in TRANSIENT_DEGRADED_STATUS_CODES:
+                return HealthStatus.DEGRADED
+        return fallback_status
 
     async def check_health(self) -> HealthCheckResult:
         """Run probe health check and return status, latency, and failure context."""

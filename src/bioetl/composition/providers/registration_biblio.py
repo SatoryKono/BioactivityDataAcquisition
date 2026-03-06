@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.composition.factories.adapter_helpers_factory import AdapterHelpersFactory
 from bioetl.composition.providers._config_helpers import (
     _get_batch_size_from_config,
     _get_factories,
@@ -17,7 +18,7 @@ from bioetl.composition.providers.factory_loader import (
     get_data_source_factory,
     get_http_client_factory,
 )
-from bioetl.infrastructure.adapters.crossref.client import _create_crossref_adapter
+from bioetl.infrastructure.adapters.crossref.factory import _create_crossref_adapter
 from bioetl.infrastructure.adapters.openalex.client import _create_openalex_adapter
 from bioetl.infrastructure.adapters.pubmed.pubmed_client import PubMedAdapter
 from bioetl.infrastructure.adapters.semanticscholar.adapter import (
@@ -69,12 +70,22 @@ def _create_pubmed_data_source(
 
     configured_email = _normalize_optional_override(pipeline_config.source.email)
     email = configured_email or settings.default_email
+    helper_services = AdapterHelpersFactory.create_http_helpers(
+        provider="pubmed",
+        logger=logger,
+        metrics=metrics,
+    )
 
     data_source = PubMedAdapter(
         http_client=http_client,
         logger=logger,
         email=email,
         api_key=api_key,
+        metrics=metrics,
+        error_handler=helper_services.error_handler,
+        adapter_metrics=helper_services.adapter_metrics,
+        request_collector=helper_services.request_collector,
+        fallback_fetch_service=helper_services.fallback_fetch_service,
     )
     return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)
 
@@ -101,6 +112,11 @@ def _create_crossref_data_source(
     configured_email = _normalize_optional_override(pipeline_config.source.email)
     mailto = configured_email or settings.default_email
     batch_size = _get_batch_size_from_config("crossref", default=50)
+    helper_services = AdapterHelpersFactory.create_http_helpers(
+        provider="crossref",
+        logger=logger,
+        metrics=metrics,
+    )
 
     data_source = _create_crossref_adapter(
         http_client=http_client,
@@ -109,6 +125,10 @@ def _create_crossref_data_source(
         mailto=mailto,
         batch_size=batch_size,
         metrics=metrics,
+        error_handler=helper_services.error_handler,
+        adapter_metrics=helper_services.adapter_metrics,
+        request_collector=helper_services.request_collector,
+        fallback_fetch_service=helper_services.fallback_fetch_service,
     )
     return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)
 
@@ -135,6 +155,11 @@ def _create_openalex_data_source(
     configured_email = _normalize_optional_override(pipeline_config.source.email)
     mailto = configured_email or settings.default_email
     batch_size = _get_batch_size_from_config("openalex", default=50)
+    helper_services = AdapterHelpersFactory.create_http_helpers(
+        provider="openalex",
+        logger=logger,
+        metrics=metrics,
+    )
 
     data_source = _create_openalex_adapter(
         http_client=http_client,
@@ -143,6 +168,10 @@ def _create_openalex_data_source(
         mailto=mailto,
         batch_size=batch_size,
         metrics=metrics,
+        error_handler=helper_services.error_handler,
+        adapter_metrics=helper_services.adapter_metrics,
+        request_collector=helper_services.request_collector,
+        fallback_fetch_service=helper_services.fallback_fetch_service,
     )
     return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)
 
@@ -174,6 +203,11 @@ def _create_semanticscholar_data_source(
         )
 
     batch_size = _get_batch_size_from_config("semanticscholar", default=100)
+    helper_services = AdapterHelpersFactory.create_http_helpers(
+        provider="semanticscholar",
+        logger=logger,
+        metrics=metrics,
+    )
 
     data_source = SemanticScholarAdapter(
         http_client=http_client,
@@ -181,6 +215,10 @@ def _create_semanticscholar_data_source(
         api_key=api_key,
         batch_size=batch_size,
         metrics=metrics,
+        error_handler=helper_services.error_handler,
+        adapter_metrics=helper_services.adapter_metrics,
+        request_collector=helper_services.request_collector,
+        fallback_fetch_service=helper_services.fallback_fetch_service,
     )
 
     return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)

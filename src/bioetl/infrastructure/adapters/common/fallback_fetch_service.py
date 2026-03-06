@@ -47,6 +47,36 @@ class Phase1SummaryLoggerHook(Protocol):
     def __call__(self, total: int, found: int, /) -> None: ...
 
 
+class FallbackExecutionStrategy(Protocol):
+    """Generic strategy interface for fallback execution hooks."""
+
+    def normalize_id(self, value: str, /) -> str | None: ...
+
+    def extract_record_id(self, record: BronzeRecord, /) -> str | None: ...
+
+    @property
+    def fallback_handler(self) -> FallbackPolicyHandler | None: ...
+
+
+@dataclass(frozen=True, slots=True)
+class DefaultFallbackExecutionStrategy:
+    """Concrete strategy wrapper for fallback hook callables."""
+
+    normalize_id_hook: NormalizeIdHook
+    extract_record_id_hook: ExtractRecordIdHook
+    fallback_handler_hook: FallbackPolicyHandler | None = None
+
+    def normalize_id(self, value: str, /) -> str | None:
+        return self.normalize_id_hook(value)
+
+    def extract_record_id(self, record: BronzeRecord, /) -> str | None:
+        return self.extract_record_id_hook(record)
+
+    @property
+    def fallback_handler(self) -> FallbackPolicyHandler | None:
+        return self.fallback_handler_hook
+
+
 @dataclass(slots=True)
 class FallbackFetchRequest:
     """Input contract for fallback fetch orchestration."""
@@ -54,14 +84,44 @@ class FallbackFetchRequest:
     filter_ids: list[str]
     fallback_mapping: dict[str, str]
     primary_record_fetcher: PrimaryRecordFetchHook
-    normalize_id: NormalizeIdHook
-    extract_record_id: ExtractRecordIdHook
-    fallback_handler: FallbackPolicyHandler | None
+    normalize_id: NormalizeIdHook | None = None
+    extract_record_id: ExtractRecordIdHook | None = None
+    fallback_handler: FallbackPolicyHandler | None = None
+    strategy: FallbackExecutionStrategy | None = None
     limit: int | None = None
     primary_lookup_method: str | None = None
     phase1_summary_logger: Phase1SummaryLoggerHook | None = None
     trim_primary_ids_to_limit: bool = False
     fallback_operation: str = "fetch_filtered_with_fallback"
+
+    def resolve_normalize_id(self) -> NormalizeIdHook:
+        """Return normalize-id hook from explicit request or strategy."""
+        if self.normalize_id is not None:
+            return self.normalize_id
+        if self.strategy is not None:
+            return self.strategy.normalize_id
+        raise ValueError(
+            "FallbackFetchRequest must define normalize_id or strategy.normalize_id"
+        )
+
+    def resolve_extract_record_id(self) -> ExtractRecordIdHook:
+        """Return record-id extractor from explicit request or strategy."""
+        if self.extract_record_id is not None:
+            return self.extract_record_id
+        if self.strategy is not None:
+            return self.strategy.extract_record_id
+        raise ValueError(
+            "FallbackFetchRequest must define extract_record_id or "
+            "strategy.extract_record_id"
+        )
+
+    def resolve_fallback_handler(self) -> FallbackPolicyHandler | None:
+        """Return fallback handler from request override or strategy."""
+        if self.fallback_handler is not None:
+            return self.fallback_handler
+        if self.strategy is not None:
+            return self.strategy.fallback_handler
+        return None
 
 
 class FallbackFetchOrchestratorService:
@@ -81,6 +141,10 @@ class FallbackFetchOrchestratorService:
             safe_limit = max(request.limit, 0)
             primary_ids = primary_ids[:safe_limit]
 
+        normalize_id = request.resolve_normalize_id()
+        extract_record_id = request.resolve_extract_record_id()
+        fallback_handler = request.resolve_fallback_handler()
+
         primary_resolved = 0
         fallback_hits = 0
         async for record in run_fetch_with_fallback_policy(
@@ -88,9 +152,9 @@ class FallbackFetchOrchestratorService:
             primary_ids=primary_ids,
             title_only_entries=title_only_entries,
             fallback_mapping=request.fallback_mapping,
-            normalize_id=request.normalize_id,
-            extract_record_id=request.extract_record_id,
-            fallback_handler=request.fallback_handler,
+            normalize_id=normalize_id,
+            extract_record_id=extract_record_id,
+            fallback_handler=fallback_handler,
             limit=request.limit,
             primary_lookup_method=request.primary_lookup_method,
             phase1_summary_logger=request.phase1_summary_logger,
@@ -111,6 +175,7 @@ class FallbackFetchOrchestratorService:
             title_only_entries=title_only_entries,
             primary_resolved=primary_resolved,
             fallback_hits=fallback_hits,
+            fallback_handler=fallback_handler,
         )
 
     def _record_fallback_metrics(
@@ -121,9 +186,10 @@ class FallbackFetchOrchestratorService:
         title_only_entries: list[str],
         primary_resolved: int,
         fallback_hits: int,
+        fallback_handler: FallbackPolicyHandler | None,
     ) -> None:
         """Record unified fallback metrics when adapter metrics are configured."""
-        if self._adapter_metrics is None or request.fallback_handler is None:
+        if self._adapter_metrics is None or fallback_handler is None:
             return
 
         unresolved_primary = max(0, len(primary_ids) - primary_resolved)

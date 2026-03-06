@@ -10,6 +10,7 @@ from bioetl.infrastructure.quality import (
     build_exemption_inventory,
     evaluate_debt_scorecard,
     load_debt_scorecard,
+    load_exemptions_registry,
     split_growth_violations_by_severity,
     validate_debt_scorecard,
     validate_scorecard_registry_sync,
@@ -22,6 +23,49 @@ def test_debt_scorecard_schema_is_valid() -> None:
     assert not errors, "Debt scorecard validation errors:\n" + "\n".join(
         f"  - {item}" for item in errors
     )
+
+
+def test_debt_scorecard_governance_review_policy_requires_owner_and_removal_step() -> (
+    None
+):
+    """Scorecard governance must require owner/removal-step for new exemptions."""
+    scorecard = load_debt_scorecard()
+    governance = scorecard.get("governance", {})
+    assert isinstance(governance, dict)
+
+    review_policy = governance.get("review_policy", {})
+    assert isinstance(review_policy, dict)
+    required_fields = review_policy.get("new_exemption_requires", [])
+    assert isinstance(required_fields, list)
+    assert "owner" in required_fields
+    assert "removal_step" in required_fields
+
+    subsystem_map = governance.get("owner_registry_q2_subsystems", {})
+    assert isinstance(subsystem_map, dict)
+    assert len(subsystem_map) >= 3
+    owners = {
+        owner
+        for cfg in subsystem_map.values()
+        if isinstance(cfg, dict)
+        for owner in [cfg.get("owner")]
+        if isinstance(owner, str) and owner.strip()
+    }
+    assert len(owners) >= 3
+
+
+def test_debt_scorecard_enforces_budget_only_temporary_windows() -> None:
+    """Grace windows policy must be budget-only and explicitly timeboxed."""
+    scorecard = load_debt_scorecard()
+    governance = scorecard.get("governance", {})
+    assert isinstance(governance, dict)
+
+    temporary = governance.get("temporary_exemptions", {})
+    assert isinstance(temporary, dict)
+    assert temporary.get("window_policy") == "budget-only"
+
+    max_window_days = temporary.get("max_window_days")
+    assert isinstance(max_window_days, int)
+    assert 1 <= max_window_days <= 45
 
 
 def test_debt_scorecard_current_quarter_within_budget() -> None:
@@ -38,6 +82,14 @@ def test_debt_scorecard_inventory_has_owner_and_expiry_decomposition() -> None:
     inventory = build_exemption_inventory()
     assert inventory.total_exemptions > 0
     assert inventory.by_owner, "Owner decomposition must not be empty"
+    active_owners = [
+        owner
+        for owner, count in inventory.by_owner.items()
+        if owner != "<missing>" and count
+    ]
+    assert len(active_owners) >= 3, (
+        "Debt registry must keep at least 3 active owners to avoid single-owner risk"
+    )
     assert inventory.by_expiry_quarter, "Expiry-quarter decomposition must not be empty"
 
 
@@ -86,6 +138,40 @@ def test_owner_diversification_policy_requires_multi_owner_allocations_after_sta
     assert any("expected at least" in error for error in errors), (
         "Expected owner diversification policy violation"
     )
+
+
+def test_owner_diversification_policy_blocks_single_owner_inventory_after_start(
+    tmp_path: Path,
+) -> None:
+    """Inventory with one active owner should fail once diversification policy starts."""
+    registry = load_exemptions_registry()
+    registries = registry.get("registries", {})
+    assert isinstance(registries, dict)
+    for entries in registries.values():
+        if not isinstance(entries, dict):
+            continue
+        for entry in entries.values():
+            if isinstance(entry, dict):
+                entry["owner"] = "@bioetl-architecture"
+
+    tmp_registry = tmp_path / "architecture_metric_exemptions.single_owner.yaml"
+    tmp_registry.write_text(yaml.safe_dump(registry), encoding="utf-8")
+
+    violations, summary = evaluate_debt_scorecard(
+        registry_path=tmp_registry,
+        today=date(2026, 4, 15),  # 2026-Q2
+    )
+    assert summary is not None
+    assert any(
+        "owner diversification violated" in violation for violation in violations
+    ), "Expected runtime owner diversification violation for single-owner registry"
+
+
+def test_owner_allocations_are_not_enforced_before_diversification_start() -> None:
+    """Owner allocation limits should activate from starts_quarter, not earlier."""
+    violations, summary = evaluate_debt_scorecard(today=date(2026, 3, 6))  # 2026-Q1
+    assert summary is not None
+    assert not any("exceeds allocation" in violation for violation in violations)
 
 
 def test_program_done_criteria_applies_after_deadline(tmp_path: Path) -> None:

@@ -15,10 +15,16 @@ See CLAUDE.md §7 Technology Stack and §14 Creating Components.
 from __future__ import annotations
 
 import ast
+import inspect
 import re
+from concurrent.futures import ThreadPoolExecutor
+from importlib import import_module
 from pathlib import Path
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+
+from bioetl.domain.ports import FilterableDataSourcePort
 
 ADAPTER_MIXIN_CANONICAL_FILES = frozenset(
     {
@@ -259,9 +265,10 @@ class TestAdapterMixinPolicy:
                                 f"{rel_path}:{node.lineno} imports legacy module '{alias.name}'"
                             )
 
-        assert not violations, (
-            "Legacy adapter-mixin module imports are forbidden in src.\n"
-            + "\n".join(f"  - {v}" for v in violations)
+        assert (
+            not violations
+        ), "Legacy adapter-mixin module imports are forbidden in src.\n" + "\n".join(
+            f"  - {v}" for v in violations
         )
 
     def test_src_does_not_use_legacy_adapter_mixin_symbols(self, src_dir: Path) -> None:
@@ -288,9 +295,10 @@ class TestAdapterMixinPolicy:
                         f"{rel_path}: references legacy symbol '{symbol}'"
                     )
 
-        assert not violations, (
-            "Legacy adapter-mixin symbols are forbidden in src.\n"
-            + "\n".join(f"  - {v}" for v in violations)
+        assert (
+            not violations
+        ), "Legacy adapter-mixin symbols are forbidden in src.\n" + "\n".join(
+            f"  - {v}" for v in violations
         )
 
 
@@ -362,6 +370,57 @@ class TestAdapterPortCompliance:
             + "\n".join(f"  - {v}" for v in violations)
         )
 
+    @pytest.mark.parametrize(
+        ("module_path", "class_name"),
+        [
+            (
+                    "bioetl.infrastructure.adapters.chembl.client",
+                    "ChemblAdapter",
+            ),
+            (
+                    "bioetl.infrastructure.adapters.crossref.client",
+                    "CrossRefAdapter",
+            ),
+            (
+                    "bioetl.infrastructure.adapters.openalex.client",
+                    "OpenAlexAdapter",
+            ),
+            (
+                    "bioetl.infrastructure.adapters.pubmed.pubmed_client",
+                    "PubMedAdapter",
+            ),
+            (
+                    "bioetl.infrastructure.adapters.pubchem.client",
+                    "PubChemAdapter",
+            ),
+            (
+                    "bioetl.infrastructure.adapters.semanticscholar.adapter",
+                    "SemanticScholarAdapter",
+            ),
+            (
+                    "bioetl.infrastructure.adapters.uniprot.client",
+                    "UniProtAdapter",
+            ),
+        ],
+    )
+    def test_filterable_adapters_runtime_isinstance_protocol(
+        self,
+        module_path: str,
+        class_name: str,
+    ) -> None:
+        """Filterable adapters MUST satisfy runtime isinstance() Protocol checks."""
+        adapter_cls = getattr(import_module(module_path), class_name)
+        init_kwargs, thread_pool = _build_runtime_init_kwargs(adapter_cls)
+        adapter = adapter_cls(**init_kwargs)
+        try:
+            assert isinstance(adapter, FilterableDataSourcePort), (
+                f"{module_path}.{class_name} must satisfy "
+                "runtime FilterableDataSourcePort contract"
+            )
+        finally:
+            if thread_pool is not None:
+                thread_pool.shutdown(wait=False)
+
     def test_filtered_data_source_uses_isinstance(self, src_dir: Path) -> None:
         """FilteredDataSource MUST use isinstance() for Protocol check.
 
@@ -392,6 +451,62 @@ class TestAdapterPortCompliance:
             "FilteredDataSource must use isinstance(adapter, FilterableDataSourcePort) "
             "for type-safe Protocol check."
         )
+
+
+def _build_runtime_init_kwargs(
+    adapter_cls: type,
+) -> tuple[dict[str, object], ThreadPoolExecutor | None]:
+    """Create minimal constructor kwargs for runtime Protocol checks."""
+    signature = inspect.signature(adapter_cls)
+    kwargs: dict[str, object] = {}
+    thread_pool: ThreadPoolExecutor | None = None
+    http_client = _create_http_client_mock()
+    logger = MagicMock()
+    rate_limiter = MagicMock()
+    circuit_breaker = MagicMock()
+    circuit_breaker.get_state.return_value = "closed"
+    circuit_breaker.get_failure_count.return_value = 0
+
+    value_by_name: dict[str, object] = {
+        "http_client": http_client,
+        "logger": logger,
+        "mailto": "bioetl-tests@example.org",
+        "email": "bioetl-tests@example.org",
+        "rate_limiter": rate_limiter,
+        "circuit_breaker": circuit_breaker,
+    }
+
+    for parameter in signature.parameters.values():
+        if parameter.name == "self":
+            continue
+        if parameter.default is not inspect._empty:
+            continue
+
+        if parameter.name == "thread_pool":
+            thread_pool = ThreadPoolExecutor(max_workers=1)
+            kwargs["thread_pool"] = thread_pool
+            continue
+
+        value = value_by_name.get(parameter.name)
+        if value is None:
+            raise AssertionError(
+                "Unhandled required constructor parameter for runtime protocol test: "
+                f"{adapter_cls.__module__}.{adapter_cls.__name__}.{parameter.name}"
+            )
+        kwargs[parameter.name] = value
+
+    return kwargs, thread_pool
+
+
+def _create_http_client_mock() -> AsyncMock:
+    """Create minimal HTTP client mock satisfying adapter constructor contracts."""
+    http_client = AsyncMock()
+    http_client.__aenter__.return_value = http_client
+    http_client.__aexit__.return_value = None
+    http_client.circuit_breaker = MagicMock()
+    http_client.circuit_breaker.get_state.return_value = "closed"
+    http_client.circuit_breaker.get_failure_count.return_value = 0
+    return http_client
 
 
 class TestStorageWriterContracts:

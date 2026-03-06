@@ -15,6 +15,9 @@ from bioetl.domain.exceptions import (
 from bioetl.domain.resilience import AdapterConfig
 from bioetl.domain.types import CircuitBreakerState, ErrorType, HealthStatus
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
+from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
+    FallbackFetchOrchestratorService,
+)
 
 
 @pytest.fixture
@@ -1035,6 +1038,20 @@ class TestChemblAdapterExtractionParams:
             if c.args and c.args[0] == "chembl_extraction_params_configured"
         ]
         assert len(info_calls) == 0
+
+    def test_init_accepts_fallback_fetch_service(
+        self, mock_http_client, mock_logger
+    ) -> None:
+        """Test constructor compatibility with helper-service DI wiring."""
+        fallback_fetch_service = MagicMock(spec=FallbackFetchOrchestratorService)
+
+        adapter = ChemblAdapter(
+            http_client=mock_http_client,
+            logger=mock_logger,
+            fallback_fetch_service=fallback_fetch_service,
+        )
+
+        assert adapter.fallback_fetch_service is fallback_fetch_service
 
     def test_get_source_metadata_includes_query_string(
         self, mock_http_client, mock_logger

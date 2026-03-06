@@ -1,14 +1,10 @@
-"""Leaf builder for runtime pipeline runner construction.
-
-This module contains the concrete assembly logic for creating a configured
-PipelineRunner without importing from ``bioetl.composition.bootstrap``.
-"""
+"""Leaf builder for runtime pipeline runner construction."""
 
 from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Literal, cast
 
 from bioetl.composition.builders import FilterConfigBuilder
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
@@ -61,19 +57,7 @@ def _assemble_vacuum_settings(
     cli_vacuum: VacuumConfig,
     yaml_maintenance: MaintenanceConfig,
 ) -> VacuumSettings:
-    """Merge CLI and YAML vacuum configuration into resolved settings.
-
-    CLI flags take precedence when explicitly provided; otherwise the
-    values fall back to the YAML maintenance section.
-
-    Args:
-        cli_vacuum: Vacuum options supplied via CLI flags.
-        yaml_maintenance: Maintenance block from the pipeline YAML config.
-
-    Returns:
-        Resolved ``VacuumSettings`` with ``enabled`` flag and
-        ``retention_days``.
-    """
+    """Merge CLI and YAML vacuum settings."""
     if cli_vacuum.enabled is not None:
         return VacuumSettings(
             enabled=cli_vacuum.enabled,
@@ -91,24 +75,9 @@ def _assemble_runtime_config(
     ctx: PipelineRunContext,
     heartbeat_interval: int,
     vacuum: VacuumSettings,
+    health_check_mode: Literal["strict", "probe"],
 ) -> RuntimeConfig:
-    """Build a ``RuntimeConfig`` from the pipeline run context.
-
-    Extracts execution parameters (run type, resume, limits, dry-run,
-    etc.) from ``ctx`` and combines them with the heartbeat interval
-    from global settings and the resolved vacuum settings.
-
-    Args:
-        ctx: Current pipeline run context carrying CLI/API inputs.
-        heartbeat_interval: Seconds between heartbeat log entries,
-            sourced from global ``Settings``.
-        vacuum: Pre-resolved vacuum settings produced by
-            ``_assemble_vacuum_settings``.
-
-    Returns:
-        A fully populated ``RuntimeConfig`` ready for the pipeline
-        runner.
-    """
+    """Build ``RuntimeConfig`` from run context and resolved vacuum settings."""
     return RuntimeConfig(
         run_type=ctx.run_type,
         resume=ctx.resume,
@@ -120,6 +89,7 @@ def _assemble_runtime_config(
         vacuum_after_run=vacuum.enabled,
         vacuum_retention_days=vacuum.retention_days,
         skip_gold=ctx.skip_gold,
+        health_check_mode=health_check_mode,
     )
 
 
@@ -129,25 +99,7 @@ def _assemble_filter_config(
     ctx: PipelineRunContext,
     test_mode: bool,
 ) -> InputFilterConfig | None:
-    """Build an ``InputFilterConfig`` from YAML and CLI filter sources.
-
-    Delegates to ``FilterConfigBuilder.build``, forwarding the YAML
-    filter block, any CLI-supplied CSV path / column / field overrides,
-    direct filter ID lists, and the effective test-mode flag (which
-    also accounts for ``ctx.ignore_yaml_filter``).
-
-    Args:
-        yaml_filter: Input-filter section from the pipeline YAML config.
-        ctx: Current pipeline run context carrying CLI filter overrides
-            and direct filter ID collections.
-        test_mode: Global test-mode flag from ``Settings``; combined
-            with ``ctx.ignore_yaml_filter`` to decide whether to skip
-            the YAML filter.
-
-    Returns:
-        A populated ``InputFilterConfig`` when filtering is active,
-        or ``None`` when no filter applies.
-    """
+    """Build ``InputFilterConfig`` from YAML and CLI filter inputs."""
     return FilterConfigBuilder.build(
         yaml_filter=yaml_filter,
         cli_csv=ctx.input_filter.source_path if ctx.input_filter.enabled else None,
@@ -268,25 +220,7 @@ def build_pipeline_runner(
         [PipelineRunContext], CachedBronzeContext
     ] = _assemble_cached_bronze_context,
 ) -> PipelineRunner:
-    """Assemble and return a fully configured PipelineRunner.
-
-    Args:
-        ctx: Ctx.
-        registry: Registry.
-        get_default_registry_fn: Get default registry fn.
-        register_all_providers_fn: Register all providers fn.
-        register_all_pipelines_fn: Register all pipelines fn.
-        get_settings_fn: Get settings fn.
-        load_pipeline_config_fn: Load pipeline config fn.
-        build_observability_bundle_fn: Build observability bundle fn.
-        assemble_vacuum_settings_fn: Assemble vacuum settings fn.
-        assemble_runtime_config_fn: Assemble runtime config fn.
-        assemble_filter_config_fn: Assemble filter config fn.
-        assemble_cached_bronze_context_fn: Assemble cached bronze context fn.
-
-    Returns:
-        Newly created PipelineRunner instance.
-    """
+    """Assemble and return a fully configured ``PipelineRunner``."""
     effective_registry = registry if registry is not None else get_default_registry_fn()
 
     register_all_providers_fn()
@@ -312,6 +246,11 @@ def build_pipeline_runner(
         ctx=ctx,
         heartbeat_interval=settings.pipeline.heartbeat_interval,
         vacuum=vacuum,
+        health_check_mode=(
+            "probe"
+            if settings.test_mode
+            else getattr(settings.pipeline, "health_check_mode", "strict")
+        ),
     )
 
     filter_config = assemble_filter_config_fn(
@@ -329,10 +268,9 @@ def build_pipeline_runner(
             source="cli" if ctx.input_filter.enabled else "config",
         )
 
-    # Auto-adjust batch_size based on filter presence.
-    # Resolution order for filter batch size:
-    #   1. pipeline filter_batch_size (deprecated, legacy support)
-    #   2. source pagination.id_batch_size (canonical)
+    # Resolution order:
+    # 1. pipeline filter_batch_size (legacy)
+    # 2. source pagination.id_batch_size (canonical)
     filter_batch_size = getattr(yaml_config, "filter_batch_size", None)
     if filter_batch_size is None:
         try:

@@ -22,7 +22,6 @@ from __future__ import annotations
 
 __all__ = ["BaseSyncAdapter"]
 
-
 import asyncio
 import weakref
 from collections.abc import Callable
@@ -30,7 +29,13 @@ from concurrent.futures import ThreadPoolExecutor
 from types import TracebackType
 from typing import TYPE_CHECKING, Self
 
-from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort, NoOpMetrics
+from bioetl.domain.ports import (
+    DataSourcePort,
+    ErrorHandlerPort,
+    LoggerPort,
+    MetricsPort,
+    NoOpMetrics,
+)
 from bioetl.infrastructure.adapters.error_handling import ErrorService
 from bioetl.infrastructure.adapters.health_check_mixin import HealthCheckProviderMixin
 
@@ -74,7 +79,7 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
     rate_limiter: TokenBucket
     circuit_breaker: CircuitBreaker
     thread_pool: ThreadPoolExecutor
-    _error_handler: ErrorService
+    _error_handler: ErrorHandlerPort
 
     def __init__(
         self,
@@ -84,6 +89,8 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
         thread_pool: ThreadPoolExecutor,
         strict_error_handling: bool = False,
         metrics: MetricsPort | None = None,
+        *,
+        error_handler: ErrorHandlerPort | None = None,
     ) -> None:
         """Initialize Sync Adapter resources.
 
@@ -96,6 +103,8 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
             thread_pool: Pre-configured thread pool executor.
             strict_error_handling: Whether to raise exceptions or log warnings.
             metrics: MetricsPort instance for metrics collection.
+            error_handler: Pre-built error handler (optional, injected by
+                    AdapterHelpersFactory). Falls back to inline ErrorService.
 
         """
         self.logger = logger
@@ -104,7 +113,11 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
         self.circuit_breaker = circuit_breaker
         self.thread_pool = thread_pool
         self.strict_error_handling = strict_error_handling
-        self._error_handler = ErrorService(logger, metrics=self.metrics)
+        self._error_handler = (
+            error_handler
+            if error_handler is not None
+            else ErrorService(logger, metrics=self.metrics)
+        )
 
         # Safety: ensure shutdown if aclose/context manager is misused
         self._finalizer = weakref.finalize(self, self.thread_pool.shutdown, wait=False)

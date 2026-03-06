@@ -11,14 +11,10 @@ from uuid import UUID
 from bioetl.domain.entities.base import BaseEntity
 from bioetl.domain.types import BatchID, ContentHash, EntityID, JsonDict, RunID, RunType
 
-__all__ = [
-    "Bioactivity",
-    "BioactivityState",
-]
+__all__ = ["Bioactivity", "BioactivityState"]
 
 
 def _safe_int(val: object) -> int | None:
-    """Convert value to int, returning None if conversion fails."""
     if val is None:
         return None
     if isinstance(val, bool):
@@ -30,7 +26,6 @@ def _safe_int(val: object) -> int | None:
 
 
 def _safe_float(val: object) -> float | None:
-    """Convert value to float, returning None if conversion fails."""
     if val is None:
         return None
     if isinstance(val, bool):
@@ -42,7 +37,6 @@ def _safe_float(val: object) -> float | None:
 
 
 def _safe_str(val: object) -> str | None:
-    """Convert value to str, returning None if val is None."""
     return None if val is None else str(val)
 
 
@@ -50,7 +44,6 @@ def _require_field(
     raw_data: JsonDict,
     field: str,
 ) -> Any:  # Any: JsonDict values are heterogeneous (str|int|float|None)
-    """Extract required field, raise ValueError if missing."""
     value = raw_data.get(field)
     if value is None:
         raise ValueError(f"raw_data must contain '{field}'")
@@ -78,19 +71,11 @@ class BioactivityState(StrEnum):
     VALIDATED = "validated"
 
     def is_ready_for_silver(self) -> bool:
-        """True if NORMALIZED or VALIDATED.
-
-        Returns:
-            True if the condition is met, False otherwise.
-        """
+        """True if NORMALIZED or VALIDATED."""
         return self in (BioactivityState.NORMALIZED, BioactivityState.VALIDATED)
 
     def is_fully_validated(self) -> bool:
-        """True if VALIDATED.
-
-        Returns:
-            True if the condition is met, False otherwise.
-        """
+        """True if VALIDATED."""
         return self == BioactivityState.VALIDATED
 
 
@@ -191,11 +176,7 @@ class Bioactivity(BaseEntity):
         self._validate_invariants()
 
     def _validate_invariants(self) -> None:
-        """Validate business invariants.
-
-        Raises:
-            ValueError: If required fields are missing or invalid.
-        """
+        """Validate business invariants."""
         if not self.activity_id:
             raise ValueError("Activity ID is required")
         if not self.molecule_id:
@@ -203,11 +184,7 @@ class Bioactivity(BaseEntity):
         self._validate_pchembl_value()
 
     def _validate_pchembl_value(self) -> None:
-        """Validate pchembl_value is non-negative if present.
-
-        Raises:
-            ValueError: If pchembl_value is negative.
-        """
+        """Validate pchembl_value is non-negative if present."""
         if self.pchembl_value is not None and self.pchembl_value < 0:
             raise ValueError(
                 f"pChemBL value must be non-negative, got {self.pchembl_value}"
@@ -320,14 +297,7 @@ class Bioactivity(BaseEntity):
         )
 
     def with_state(self, new_state: BioactivityState) -> Bioactivity:
-        """Create copy with new state (immutable pattern).
-
-        Args:
-            new_state: New state.
-
-        Returns:
-            New instance with the applied change.
-        """
+        """Create copy with new state (immutable pattern)."""
         from dataclasses import asdict
 
         data = asdict(self)

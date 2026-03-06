@@ -6,12 +6,15 @@ Defines the RuntimeConfig value object for CLI / runtime execution parameters.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Literal
 
 from bioetl.domain.types import RunType
 
 __all__ = [
     "RuntimeConfig",
 ]
+
+HealthCheckMode = Literal["strict", "probe"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -55,6 +58,11 @@ class RuntimeConfig:
     # Default True to enforce strict Gold validation (override only in non-prod)
     strict_gold_validation: bool = True
 
+    # Health-check enforcement mode for preflight.
+    # strict: UNHEALTHY data_source blocks startup.
+    # probe: network-related data_source health failures degrade to warning-level.
+    health_check_mode: HealthCheckMode = "strict"
+
     # Skip Gold layer writing (composite sub-pipelines)
     # When True, Gold filter returns False for all records,
     # preventing individual Gold writes during composite execution
@@ -68,6 +76,7 @@ class RuntimeConfig:
     def __post_init__(self) -> None:
         """Validate runtime config."""
         self._validate_positive_values()
+        self._validate_health_check_mode()
 
     def _validate_positive_values(self) -> None:
         """Validate that numeric fields have positive values."""
@@ -96,6 +105,14 @@ class RuntimeConfig:
         for condition, message in validations:
             if condition:
                 raise ValueError(message)
+
+    def _validate_health_check_mode(self) -> None:
+        """Validate health-check mode literal."""
+        if self.health_check_mode not in {"strict", "probe"}:
+            raise ValueError(
+                "health_check_mode must be 'strict' or 'probe', "
+                f"got {self.health_check_mode!r}"
+            )
 
     @property
     def effective_lock_ttl(self) -> int:

@@ -15,9 +15,9 @@ After the registry unification, both classes delegate to ProviderRegistry.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, cast
 
-from bioetl.composition.providers.loader import ensure_providers_loaded
+from bioetl.composition.factories.adapter_helpers_factory import AdapterHelpersFactory
 from bioetl.composition.providers.provider_registry import (
     DataSourceCreator,
     ProviderRegistry,
@@ -31,9 +31,15 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
-
 # Re-export DataSourceCreator for backward compatibility
 __all__ = ["DataSourceCreator", "DataSourceFactory", "DataSourceRegistry"]
+
+
+def _ensure_providers_loaded() -> None:
+    """Lazily load provider registrations to avoid import-time cycles."""
+    from bioetl.composition.providers.loader import ensure_providers_loaded
+
+    ensure_providers_loaded()
 
 
 class DataSourceFactory:
@@ -69,7 +75,7 @@ class DataSourceFactory:
             ValueError: If the provider is unknown.
         """
         # Ensure providers are loaded
-        ensure_providers_loaded()
+        _ensure_providers_loaded()
 
         # Validate provider is registered
         if not ProviderRegistry.is_registered(provider):
@@ -78,6 +84,11 @@ class DataSourceFactory:
 
         # Remove filter_config from kwargs - it's handled by FilteredDataSource wrapper
         adapter_kwargs = {k: v for k, v in kwargs.items() if k != "filter_config"}
+        cls._inject_adapter_helpers(
+            provider=provider,
+            logger=logger,
+            adapter_kwargs=adapter_kwargs,
+        )
 
         adapter = ProviderRegistry.create_adapter(
             provider,
@@ -92,6 +103,43 @@ class DataSourceFactory:
         )
         return adapter
 
+    @staticmethod
+    def _inject_adapter_helpers(
+        *,
+        provider: str,
+        logger: LoggerPort | None,
+        adapter_kwargs: dict[str, object],
+    ) -> None:
+        """Inject helper-service bundle for DI-target providers.
+
+        Keeps DataSourceFactory.create() backward compatible for call sites that
+        instantiate adapters directly via provider registry paths.
+        """
+        if not AdapterHelpersFactory.supports_provider(provider):
+            return
+        if logger is None:
+            return
+
+        required_keys = frozenset(
+            {
+                "error_handler",
+                "adapter_metrics",
+                "request_collector",
+                "fallback_fetch_service",
+            }
+        )
+        if required_keys.issubset(adapter_kwargs.keys()):
+            return
+
+        metrics = cast("MetricsPort | None", adapter_kwargs.get("metrics"))
+        helpers = AdapterHelpersFactory.create_http_helpers(
+            provider=provider,
+            logger=logger,
+            metrics=metrics,
+        )
+        for key, value in helpers.as_injection_kwargs().items():
+            adapter_kwargs.setdefault(key, value)
+
     @classmethod
     def list_providers(cls) -> list[str]:
         """List all available providers.
@@ -99,7 +147,7 @@ class DataSourceFactory:
         Returns:
             Sorted list of registered provider names.
         """
-        ensure_providers_loaded()
+        _ensure_providers_loaded()
         return ProviderRegistry.list_providers()
 
 
@@ -142,7 +190,7 @@ class DataSourceRegistry:
         Raises:
             KeyError: If provider is not registered
         """
-        ensure_providers_loaded()
+        _ensure_providers_loaded()
 
         # Check if provider exists in ProviderRegistry
         if not ProviderRegistry.is_registered(provider):
@@ -206,7 +254,7 @@ class DataSourceRegistry:
         Returns:
             Collection of providers.
         """
-        ensure_providers_loaded()
+        _ensure_providers_loaded()
         # Return all providers from ProviderRegistry
         # (they all have data_source_creator after unification)
         return ProviderRegistry.list_providers()
@@ -232,7 +280,7 @@ class DataSourceRegistry:
         Returns:
             True if provider is registered and has data_source_creator
         """
-        ensure_providers_loaded()
+        _ensure_providers_loaded()
         return ProviderRegistry.has_data_source_creator(key)
 
     @classmethod

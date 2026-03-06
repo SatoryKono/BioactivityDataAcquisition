@@ -121,6 +121,45 @@ def _evaluate_owner_allocations(
     return violations
 
 
+def _evaluate_owner_diversification(
+    *,
+    by_owner: dict[str, int],
+    scorecard: JsonDict,  # Any: YAML scorecard sections are heterogeneous
+    quarter: str,
+) -> list[str]:
+    """Validate active owner count against diversification policy."""
+    governance = scorecard.get("governance", {})
+    if not isinstance(governance, dict):
+        return []
+
+    policy = governance.get("owner_diversification", {})
+    if not isinstance(policy, dict):
+        return []
+
+    starts_quarter = policy.get("starts_quarter")
+    min_distinct_owners = policy.get("min_distinct_owners")
+    if not isinstance(starts_quarter, str) or not isinstance(min_distinct_owners, int):
+        return []
+    if min_distinct_owners < 1:
+        return []
+
+    current = _parse_quarter_label(quarter)
+    starts_at = _parse_quarter_label(starts_quarter)
+    if current is None or starts_at is None or current < starts_at:
+        return []
+
+    active_owner_count = sum(
+        1 for owner, count in by_owner.items() if owner != "<missing>" and count > 0
+    )
+    if active_owner_count >= min_distinct_owners:
+        return []
+    return [
+        "owner diversification violated: "
+        f"active owners {active_owner_count} < required {min_distinct_owners} "
+        f"for quarter {quarter} (starts={starts_quarter})"
+    ]
+
+
 def _expiry_cap_for_quarter(
     *,
     scorecard: JsonDict,  # Any: YAML scorecard sections are heterogeneous
@@ -210,6 +249,7 @@ __all__ = [
     "_evaluate_expiry_cap",
     "_evaluate_group_budgets",
     "_evaluate_owner_allocations",
+    "_evaluate_owner_diversification",
     "_evaluate_program_done_criteria",
     "_evaluate_registry_budgets",
     "_expiry_cap_for_quarter",

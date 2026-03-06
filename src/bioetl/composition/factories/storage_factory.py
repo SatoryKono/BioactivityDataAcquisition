@@ -10,9 +10,12 @@ from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
-
 from ._bronze_factory import create_bronze_writer
 from ._gold_factory import create_gold_writer
+from ._resilience_factory import (
+    create_silver_atomic_retry_policy,
+    create_silver_merge_resilience_policy,
+)
 from ._silver_factory import create_silver_writer
 from .storage_adapter import StorageAdapter
 
@@ -29,7 +32,10 @@ if TYPE_CHECKING:
         PipelineYamlConfig,
         SinkLayerConfig,
     )
-
+    from bioetl.infrastructure.storage.write_resilience import (
+        AdaptiveRetryPolicy,
+        SilverMergeResiliencePolicy,
+    )
 
 __all__ = ["StorageContext", "StorageFactory"]
 
@@ -132,6 +138,8 @@ class StorageFactory:
         silver_flat_structure: bool,
         gold_flat_structure: bool,
         silver_validator: SilverValidatorPort | None,
+        metadata_atomic_retry_policy: AdaptiveRetryPolicy | None = None,
+        merge_resilience_policy: SilverMergeResiliencePolicy | None = None,
     ) -> StorageAdapter:
         """Create StorageAdapter with Bronze/Silver/Gold writers."""
         bronze_writer = create_bronze_writer(
@@ -156,6 +164,9 @@ class StorageFactory:
             transform_steps=transform_steps,
             flat_structure=silver_flat_structure,
             silver_validator=silver_validator,
+            metrics=metrics,
+            metadata_atomic_retry_policy=metadata_atomic_retry_policy,
+            merge_resilience_policy=merge_resilience_policy,
         )
         gold_writer = create_gold_writer(
             writer_cls=GoldWriter,
@@ -234,14 +245,16 @@ class StorageFactory:
         )
 
         bronze_flat_structure = (
-            bronze_config.flat_structure if bronze_config else False
-        ) and use_yaml_paths
+                                    bronze_config.flat_structure if bronze_config else False
+                                ) and use_yaml_paths
         silver_flat_structure = (
-            silver_config.flat_structure if silver_config else False
-        ) and use_yaml_paths
+                                    silver_config.flat_structure if silver_config else False
+                                ) and use_yaml_paths
         gold_flat_structure = (
-            gold_config.flat_structure if gold_config else False
-        ) and use_yaml_paths
+                                  gold_config.flat_structure if gold_config else False
+                              ) and use_yaml_paths
+        metadata_atomic_retry_policy = create_silver_atomic_retry_policy(settings)
+        merge_resilience_policy = create_silver_merge_resilience_policy(settings)
 
         adapter = StorageFactory._create_storage_adapter(
             bronze_path=bronze_path,
@@ -262,6 +275,8 @@ class StorageFactory:
             silver_flat_structure=silver_flat_structure,
             gold_flat_structure=gold_flat_structure,
             silver_validator=silver_validator,
+            metadata_atomic_retry_policy=metadata_atomic_retry_policy,
+            merge_resilience_policy=merge_resilience_policy,
         )
         return StorageContext(
             adapter=adapter,

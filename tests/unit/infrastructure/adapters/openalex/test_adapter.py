@@ -470,12 +470,25 @@ class TestHealthCheck:
         assert result == HealthStatus.HEALTHY
 
     @pytest.mark.asyncio
-    async def test_health_check_unhealthy_on_error(
+    async def test_health_check_degraded_on_transient_error(
         self, adapter: OpenAlexAdapter, mock_http_client: MagicMock
     ) -> None:
-        """Should return UNHEALTHY for non-200 response."""
+        """Should return DEGRADED for transient non-200 response."""
         mock_response = MagicMock()
         mock_response.status_code = 500
+        mock_http_client.get_once.return_value = mock_response
+
+        result = await adapter._probe_health()
+
+        assert result == HealthStatus.DEGRADED
+
+    @pytest.mark.asyncio
+    async def test_health_check_unhealthy_on_auth_error(
+        self, adapter: OpenAlexAdapter, mock_http_client: MagicMock
+    ) -> None:
+        """Should return UNHEALTHY for auth-related response codes."""
+        mock_response = MagicMock()
+        mock_response.status_code = 401
         mock_http_client.get_once.return_value = mock_response
 
         result = await adapter._probe_health()

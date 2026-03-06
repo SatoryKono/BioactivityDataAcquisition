@@ -18,7 +18,6 @@ __all__ = [
     "validate_exemptions_registry",
 ]
 
-
 import re
 from datetime import date
 from pathlib import Path
@@ -275,6 +274,9 @@ def _get_policy_required_fields(
 
     if "owner" not in required_fields:
         metadata_errors.append("policy.required_fields must include 'owner'")
+
+    if "removal_step" not in required_fields:
+        metadata_errors.append("policy.required_fields must include 'removal_step'")
 
     if not any(field in required_fields for field in _DUE_DATE_FIELDS):
         metadata_errors.append(

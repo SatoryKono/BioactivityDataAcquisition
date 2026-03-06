@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from bioetl.domain.exceptions import BioETLError, InfrastructureError
 from bioetl.domain.types import ComponentHealthResult, HealthReport, HealthStatus
@@ -41,11 +41,18 @@ class _HealthAggregator:
         logger: LoggerPort | None = None,
         health_monitor: HealthMonitorPort | None = None,
         pipeline_name: str | None = None,
+        health_check_mode: Literal["strict", "probe"] = "strict",
     ) -> None:
+        if health_check_mode not in {"strict", "probe"}:
+            raise ValueError(
+                "health_check_mode must be 'strict' or 'probe', "
+                f"got {health_check_mode!r}"
+            )
         self._metrics = metrics
         self._logger = logger
         self._health_monitor = health_monitor
         self._pipeline_name = pipeline_name
+        self._health_check_mode = health_check_mode
 
     async def check_all(self, services: PipelineService) -> HealthReport:
         """Check storage and data source health in parallel."""
@@ -118,29 +125,63 @@ class _HealthAggregator:
 
                 result = ComponentHealthResult(
                     component=component,
-                    status=status,
+                    status=self._normalize_data_source_status(status),
                     duration_seconds=duration,
-                    error_message=health_result.last_error,
+                    error_message=self._normalize_data_source_error(
+                        status=status,
+                        error_message=health_result.last_error,
+                    ),
                 )
             else:
                 status = await services.data_source.health_check()
                 duration = time.perf_counter() - start_time
                 result = ComponentHealthResult(
                     component=component,
-                    status=status,
+                    status=self._normalize_data_source_status(status),
                     duration_seconds=duration,
+                    error_message=self._normalize_data_source_error(
+                        status=status,
+                        error_message=None,
+                    ),
                 )
         except _HEALTH_CHECK_ERRORS as exc:
             duration = time.perf_counter() - start_time
+            exception_message = str(exc)
             result = ComponentHealthResult(
                 component=component,
-                status=HealthStatus.UNHEALTHY,
+                status=(
+                    HealthStatus.DEGRADED
+                    if self._health_check_mode == "probe"
+                    else HealthStatus.UNHEALTHY
+                ),
                 duration_seconds=duration,
-                error_message=str(exc),
+                error_message=(
+                    f"probe_mode_fallback: {exception_message}"
+                    if self._health_check_mode == "probe"
+                    else exception_message
+                ),
             )
 
         self._record_metrics(component, result, health_result)
         return result
+
+    def _normalize_data_source_status(self, status: HealthStatus) -> HealthStatus:
+        """Downgrade data-source UNHEALTHY to DEGRADED in probe mode."""
+        if self._health_check_mode == "probe" and status == HealthStatus.UNHEALTHY:
+            return HealthStatus.DEGRADED
+        return status
+
+    def _normalize_data_source_error(
+        self,
+        *,
+        status: HealthStatus,
+        error_message: str | None,
+    ) -> str | None:
+        """Attach deterministic probe fallback marker when UNHEALTHY is downgraded."""
+        if self._health_check_mode != "probe" or status != HealthStatus.UNHEALTHY:
+            return error_message
+        detail = error_message or "data_source reported UNHEALTHY in health probe"
+        return f"probe_mode_fallback: {detail}"
 
     def _record_metrics(
         self,

@@ -35,6 +35,9 @@ from bioetl.infrastructure.config.contract_policy_loader import (
 from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
 from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
 from bioetl.infrastructure.config.pipeline_config_loader import PipelineConfigLoader
+from bioetl.infrastructure.config.publication_type_classification_loader import (
+    PublicationTypeClassificationLoader,
+)
 from bioetl.infrastructure.config_load_api import (
     load_pipeline_config,
     load_source_config,
@@ -52,6 +55,7 @@ __all__ = [
     "get_pipeline_config",
     "get_settings",
     "load_pipeline_config",
+    "PublicationTypeClassificationLoader",
     "load_pipeline_contract_policy",
     "load_source_config",
     "yaml_config_to_domain",

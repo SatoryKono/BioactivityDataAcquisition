@@ -44,8 +44,8 @@ def test_exemption_registry_file_size_keys_are_normalized() -> None:
     )
 
 
-def test_exemption_registry_policy_requires_owner_and_due_date() -> None:
-    """Registry policy must enforce owner + due-date metadata for each entry."""
+def test_exemption_registry_policy_requires_owner_removal_step_and_due_date() -> None:
+    """Registry policy must enforce owner/removal-step/due-date metadata."""
     raw = load_exemptions_registry()
     policy = raw.get("policy", {})
     assert isinstance(policy, dict), "policy section must be a mapping"
@@ -53,6 +53,9 @@ def test_exemption_registry_policy_requires_owner_and_due_date() -> None:
     required_fields = policy.get("required_fields", [])
     assert isinstance(required_fields, list), "policy.required_fields must be a list"
     assert "owner" in required_fields, "policy.required_fields must include 'owner'"
+    assert "removal_step" in required_fields, (
+        "policy.required_fields must include 'removal_step'"
+    )
     assert any(field in required_fields for field in ("expires_on", "due_on")), (
         "policy.required_fields must include due-date field ('expires_on' or 'due_on')"
     )

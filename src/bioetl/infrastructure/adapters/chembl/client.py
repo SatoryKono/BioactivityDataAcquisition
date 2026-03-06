@@ -7,7 +7,6 @@ from __future__ import annotations
 
 __all__ = ["ChemblAdapter"]
 
-
 import urllib.parse
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
@@ -44,7 +43,14 @@ if TYPE_CHECKING:
 
     from httpx import Response
 
-    from bioetl.domain.ports import LoggerPort, MetricsPort
+    from bioetl.domain.ports import ErrorHandlerPort, LoggerPort, MetricsPort
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+    from bioetl.infrastructure.adapters.common.api_request_collector import (
+        APIRequestCollector,
+    )
+    from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
+        FallbackFetchOrchestratorService,
+    )
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 
@@ -91,6 +97,10 @@ class ChemblAdapter(
     thread_pool: ThreadPoolExecutor | None = None
     metrics: MetricsPort | None = None
     extraction_params: ExtractionParams | None = None
+    error_handler: ErrorHandlerPort | None = None
+    adapter_metrics: AdapterMetrics | None = None
+    request_collector: APIRequestCollector | None = None
+    fallback_fetch_service: FallbackFetchOrchestratorService | None = None
 
     provider_name: str = field(init=False, default="chembl")
 
@@ -103,9 +113,12 @@ class ChemblAdapter(
 
     def __post_init__(self) -> None:
         """Initialize adapter with config values and metrics."""
-        # Initialize error handler from base class
-        metrics_port = self.metrics if self.metrics is not None else None
-        self._error_handler = ErrorService(self.logger, metrics=metrics_port)
+        # Initialize error handler: use injected or create fallback
+        if self.error_handler is not None:
+            self._error_handler = self.error_handler
+        else:
+            metrics_port = self.metrics if self.metrics is not None else None
+            self._error_handler = ErrorService(self.logger, metrics=metrics_port)
         # Resolve configuration: use provided config or domain defaults
         config = (
             self.adapter_config if self.adapter_config is not None else AdapterConfig()
@@ -113,7 +126,11 @@ class ChemblAdapter(
         self._page_size = config.page_size
         self._filter_batch_size = config.batch_size
 
-        self._init_adapter_metrics()
+        if self.adapter_metrics is not None and self.request_collector is not None:
+            self._adapter_metrics = self.adapter_metrics
+            self._request_collector = self.request_collector
+        else:
+            self._init_adapter_metrics()
 
         # Resolve extraction params
         self._extraction_params = self.extraction_params or ExtractionParams.empty()
@@ -177,7 +194,7 @@ class ChemblAdapter(
     def _batch_ids(self, ids: list[str], batch_size: int) -> Iterator[list[str]]:
         """Split IDs into batches for API requests."""
         for i in range(0, len(ids), batch_size):
-            yield ids[i : i + batch_size]
+            yield ids[i: i + batch_size]
 
     def _build_filter_in_params(self, filters: dict[str, list[str]]) -> dict[str, str]:
         """Build __in filter parameters for multi-field filtering."""

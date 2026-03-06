@@ -5,13 +5,16 @@ from __future__ import annotations
 __all__ = ["OpenAlexFallbackOrchestrator"]
 
 from collections.abc import AsyncIterator, Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.common import (
+    ComposableFallbackDecorator,
+    DefaultFallbackExecutionStrategy,
+    FallbackDecoratorConfig,
     FallbackFetchOrchestratorService,
-    FallbackFetchRequest,
+    resolve_fallback_policy,
 )
 from bioetl.infrastructure.adapters.openalex.fallback import TitleFallbackHandler
 
@@ -28,6 +31,48 @@ class OpenAlexFallbackOrchestrator:
     normalize_id: Callable[[str], str | None]
     extract_record_id: Callable[[BronzeRecord], str | None]
     logger: LoggerPort
+    fallback_enabled: bool = True
+    config: FallbackDecoratorConfig = field(
+        default_factory=lambda: FallbackDecoratorConfig(
+            supported_filter_field="doi",
+            unsupported_filter_event="unsupported_filter_field_for_fallback",
+            unsupported_filter_message=(
+                "OpenAlex fallback only supports 'doi' filtering, skipping"
+            ),
+            skip_on_unsupported_filter_field=True,
+            primary_lookup_method="doi",
+            trim_primary_ids_to_limit=False,
+            fallback_operation="fetch_filtered_with_fallback",
+        )
+    )
+    _decorator: ComposableFallbackDecorator = field(init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        """Build reusable decorator from provider hooks + policy config."""
+        strategy = DefaultFallbackExecutionStrategy(
+            normalize_id_hook=self.normalize_id,
+            extract_record_id_hook=self.extract_record_id,
+            fallback_handler_hook=(
+                self.fallback_handler if self.fallback_enabled else None
+            ),
+        )
+        self._decorator = ComposableFallbackDecorator(
+            service=self.fallback_fetch_service,
+            strategy=strategy,
+            config=self.config,
+            logger=self.logger,
+        )
+
+    def configure_policy(self, policy: object | None) -> None:
+        """Reconfigure fallback policy from provider YAML settings."""
+        enabled, config = resolve_fallback_policy(
+            policy,
+            defaults=self.config,
+            default_enabled=True,
+        )
+        self.fallback_enabled = enabled
+        self.config = config
+        self.__post_init__()
 
     async def execute(
         self,
@@ -39,6 +84,7 @@ class OpenAlexFallbackOrchestrator:
             AsyncIterator[BronzeRecord],
         ],
         limit: int | None,
+        filter_field: str | None = "doi",
     ) -> AsyncIterator[BronzeRecord]:
         """Run fallback request through shared policy service."""
 
@@ -51,16 +97,12 @@ class OpenAlexFallbackOrchestrator:
                 hit_rate_pct=round(found / total * 100, 1) if total else 0.0,
             )
 
-        request = FallbackFetchRequest(
+        async for work in self._decorator.execute(
             filter_ids=filter_ids,
             fallback_mapping=fallback_mapping,
             primary_record_fetcher=primary_record_fetcher,
-            normalize_id=self.normalize_id,
-            extract_record_id=self.extract_record_id,
-            fallback_handler=self.fallback_handler,
             limit=limit,
-            primary_lookup_method="doi",
             phase1_summary_logger=_log_phase1_summary,
-        )
-        async for work in self.fallback_fetch_service.execute(request):
+            filter_field=filter_field,
+        ):
             yield work

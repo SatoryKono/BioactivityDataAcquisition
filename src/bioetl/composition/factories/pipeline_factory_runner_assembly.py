@@ -32,7 +32,6 @@ if TYPE_CHECKING:
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
-
 __all__ = [
     "assemble_runner_impl",
 ]
@@ -46,10 +45,10 @@ def assemble_runner_impl(
     strict_gold_validation: bool,
     yaml_config: PipelineYamlConfig | None = None,
     dq_configs_extractor: Callable[
-        [PipelineYamlConfig | None],
-        DQConfigsContext,
-    ]
-    | None = None,
+                              [PipelineYamlConfig | None],
+                              DQConfigsContext,
+                          ]
+                          | None = None,
 ) -> PipelineRunner:
     """Assemble a PipelineRunner from a configured pipeline instance."""
     logger_port = observability.logger
@@ -90,6 +89,7 @@ def assemble_runner_impl(
         metrics=pipeline.services.metrics,
         logger=logger_port,
         pipeline_name=pipeline.config.pipeline_name,
+        health_check_mode=pipeline.runtime.health_check_mode,
     )
     medallion_validator = _MedallionConfigValidator(
         config=pipeline.config,

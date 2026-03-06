@@ -14,15 +14,6 @@ CSV_PATH = PROJECT_ROOT / "configs" / "enums" / "publication_type_classification
 MANIFEST_PATH = (
     PROJECT_ROOT / "configs" / "enums" / "publication_type_classification.meta.yaml"
 )
-GENERATED_PATH = (
-    PROJECT_ROOT
-    / "src"
-    / "bioetl"
-    / "domain"
-    / "mapping"
-    / "generated"
-    / "publication_type_classification_data.py"
-)
 GEN_SCRIPT = (
     PROJECT_ROOT / "scripts" / "generate_publication_type_classification_artifacts.py"
 )
@@ -33,7 +24,7 @@ def _sha256(path: Path) -> str:
 
 
 def test_publication_type_codegen_manifest_hashes() -> None:
-    """Manifest hashes must match source CSV, JSON asset and generated module."""
+    """Manifest hashes must match source CSV and JSON asset."""
 
     assert MANIFEST_PATH.exists(), f"Missing manifest: {MANIFEST_PATH}"
     payload = yaml.safe_load(MANIFEST_PATH.read_text(encoding="utf-8")) or {}
@@ -42,14 +33,9 @@ def test_publication_type_codegen_manifest_hashes() -> None:
 
     source_info = payload.get("source", {})
     artifact_info = payload.get("artifact", {})
-    generated_info = payload.get("generated", {})
 
     assert (
         source_info.get("path") == "configs/enums/publication_type_classification.csv"
-    )
-    assert (
-        generated_info.get("path")
-        == "src/bioetl/domain/mapping/generated/publication_type_classification_data.py"
     )
     artifact_path = artifact_info.get("path")
     assert isinstance(artifact_path, str)
@@ -60,7 +46,6 @@ def test_publication_type_codegen_manifest_hashes() -> None:
 
     assert source_info.get("sha256") == _sha256(CSV_PATH)
     assert artifact_info.get("sha256") == _sha256(PROJECT_ROOT / artifact_path)
-    assert generated_info.get("sha256") == _sha256(GENERATED_PATH)
 
 
 def test_publication_type_codegen_is_deterministic() -> None:

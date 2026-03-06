@@ -1,34 +1,27 @@
 """Unified publication type classification for cross-provider harmonization.
 
 This module provides runtime lookup/classification logic for publication types.
-The giant static table is stored in a generated domain data-asset module:
-`bioetl.domain.mapping.generated.publication_type_classification_data`.
+Classification data is loaded from a JSON asset at startup via
+``initialize_classification()``.
 
 Source of truth:
 - configs/enums/publication_type_classification.csv
-- Generated via: scripts/generate_publication_type_classification_artifacts.py
+- Generated JSON: configs/enums/publication_type_classification.asset.v1.json
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Final
+from typing import TYPE_CHECKING
 
-from bioetl.domain.mapping.generated.publication_type_classification_data import (
-    _CLASSIFICATION_TABLE,
-    _CROSSREF_ROW_INDEX,
-    _ENTRY_CORE,
-    _OPENALEX_ROW_INDEX,
-    _PUBMED_ROW_INDEX,
-    _S2_ROW_INDEX,
-    CLASSIFICATION_TABLE_SIZE,
-)
+if TYPE_CHECKING:
+    from bioetl.domain.mapping.classification_data import ClassificationData
 
 __all__ = [
-    "CLASSIFICATION_TABLE_SIZE",
-    "_CLASSIFICATION_TABLE",
     "PublicationTypeEntry",
     "classify_publication_type",
+    "get_classification_table_size",
+    "initialize_classification",
 ]
 
 
@@ -49,50 +42,68 @@ class PublicationTypeEntry:
     specificity: int
 
 
-_ENTRY_BY_SPECIFICITY: Final[tuple[PublicationTypeEntry, ...]] = tuple(
-    PublicationTypeEntry(
-        unified_type=unified_type,
-        subclass=subclass,
-        class_code=class_code,
-        specificity=row_idx,
-    )
-    for row_idx, (unified_type, subclass, class_code) in enumerate(_ENTRY_CORE, start=1)
-)
+# Module-level state, populated by initialize_classification().
+# These containers are mutated in-place so that imports at collection time
+# see the updated data after initialization.
+_data: ClassificationData | None = None
+_ENTRY_BY_SPECIFICITY: list[PublicationTypeEntry] = []
+_PROVIDER_LOOKUPS: dict[str, dict[str, PublicationTypeEntry]] = {}
 
 
-def _build_lookup_from_row_index(
+def get_classification_table_size() -> int:
+    """Return the number of entries in the classification table."""
+    return len(_ENTRY_BY_SPECIFICITY)
+
+
+def _build_lookup(
+    entries: tuple[PublicationTypeEntry, ...],
     row_index: dict[str, int],
 ) -> dict[str, PublicationTypeEntry]:
     """Build provider lookup using precomputed row-index mapping."""
-    max_idx = len(_ENTRY_BY_SPECIFICITY)
+    max_idx = len(entries)
     return {
-        raw_key: _ENTRY_BY_SPECIFICITY[idx - 1]
+        raw_key: entries[idx - 1]
         for raw_key, idx in row_index.items()
         if 0 < idx <= max_idx
     }
 
 
-_OPENALEX_LOOKUP: Final[dict[str, PublicationTypeEntry]] = _build_lookup_from_row_index(
-    _OPENALEX_ROW_INDEX
-)
-_CROSSREF_LOOKUP: Final[dict[str, PublicationTypeEntry]] = _build_lookup_from_row_index(
-    _CROSSREF_ROW_INDEX
-)
-_PUBMED_LOOKUP: Final[dict[str, PublicationTypeEntry]] = _build_lookup_from_row_index(
-    _PUBMED_ROW_INDEX
-)
-_S2_LOOKUP: Final[dict[str, PublicationTypeEntry]] = _build_lookup_from_row_index(
-    _S2_ROW_INDEX
-)
+def initialize_classification(data: ClassificationData) -> None:
+    """Initialize classification lookups from loaded data.
 
-_PROVIDER_LOOKUPS: Final[dict[str, dict[str, PublicationTypeEntry]]] = {
-    "openalex": _OPENALEX_LOOKUP,
-    "crossref": _CROSSREF_LOOKUP,
-    "pubmed": _PUBMED_LOOKUP,
-    "semanticscholar": _S2_LOOKUP,
-    "semantic_scholar": _S2_LOOKUP,
-    "s2": _S2_LOOKUP,
-}
+    Must be called once at application startup before any calls to
+    ``classify_publication_type()``.  Containers are mutated in-place so
+    that references obtained via ``from … import _PROVIDER_LOOKUPS`` at
+    module collection time see the populated data.
+    """
+    global _data  # noqa: PLW0603
+
+    _data = data
+
+    entries = [
+        PublicationTypeEntry(
+            unified_type=ut,
+            subclass=sc,
+            class_code=cc,
+            specificity=idx,
+        )
+        for idx, (ut, sc, cc) in enumerate(data.entry_cores, start=1)
+    ]
+    _ENTRY_BY_SPECIFICITY.clear()
+    _ENTRY_BY_SPECIFICITY.extend(entries)
+
+    entries_tuple = tuple(entries)
+    _PROVIDER_LOOKUPS.clear()
+    _PROVIDER_LOOKUPS.update(
+        {
+            "openalex": _build_lookup(entries_tuple, data.openalex_row_index),
+            "crossref": _build_lookup(entries_tuple, data.crossref_row_index),
+            "pubmed": _build_lookup(entries_tuple, data.pubmed_row_index),
+            "semanticscholar": _build_lookup(entries_tuple, data.s2_row_index),
+            "semantic_scholar": _build_lookup(entries_tuple, data.s2_row_index),
+            "s2": _build_lookup(entries_tuple, data.s2_row_index),
+        }
+    )
 
 
 def classify_publication_type(
@@ -105,7 +116,16 @@ def classify_publication_type(
     For single-value providers (OpenAlex, CrossRef), ``raw_type`` is used.
     For multi-value providers (PubMed, Semantic Scholar), the most specific
     match from ``raw_types_list`` is returned.
+
+    Raises:
+        RuntimeError: If ``initialize_classification()`` has not been called.
     """
+    if not _PROVIDER_LOOKUPS:
+        msg = (
+            "Classification data not initialized. "
+            "Call initialize_classification() at startup."
+        )
+        raise RuntimeError(msg)
 
     lookup = _get_lookup(provider)
     if lookup is None:
@@ -125,7 +145,6 @@ def _best_match(
     raw_types: list[str],
 ) -> PublicationTypeEntry | None:
     """Return the most specific entry among matching raw types."""
-
     matches = [
         entry
         for raw in raw_types
@@ -136,5 +155,4 @@ def _best_match(
 
 def _get_lookup(provider: str) -> dict[str, PublicationTypeEntry] | None:
     """Return provider lookup dict, if provider is supported."""
-
     return _PROVIDER_LOOKUPS.get(provider.lower())

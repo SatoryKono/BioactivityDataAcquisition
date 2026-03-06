@@ -8,7 +8,6 @@ Implements RULES.md §2.3 and ADR-026 for metadata creation.
 
 from __future__ import annotations
 
-import ast
 from datetime import UTC, datetime
 from platform import node as hostname
 from platform import python_version
@@ -17,6 +16,9 @@ from typing import TYPE_CHECKING
 from bioetl.domain.services.schema_metadata_extractor import extract_schema_metadata
 from bioetl.domain.types import JsonDict
 from bioetl.domain.version import get_version as _get_bioetl_version
+from bioetl.infrastructure.storage.metadata_builder_composite_helpers import (
+    build_composite_output_ext,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.medallion import GoldWriteMode
@@ -32,81 +34,6 @@ if TYPE_CHECKING:
         RuntimeMetadata,
         SCDMetadata,
         SilverMetadata,
-    )
-
-
-def _parse_composite_list(
-    value: object,
-) -> list[str]:
-    """Parse composite list metadata stored as list or stringified list."""
-    if isinstance(value, list):
-        return [str(item) for item in value]
-    if isinstance(value, str):
-        try:
-            parsed = ast.literal_eval(value)
-        except (ValueError, SyntaxError):
-            return []
-        if isinstance(parsed, list):
-            return [str(item) for item in parsed]
-    return []
-
-
-def _parse_composite_status(
-    value: object,
-) -> dict[str, str]:
-    """Parse enrichment status stored as dict or stringified dict."""
-    if isinstance(value, dict):
-        return {str(k): str(v) for k, v in value.items()}
-    if isinstance(value, str):
-        try:
-            parsed = ast.literal_eval(value)
-        except (ValueError, SyntaxError):
-            return {}
-        if isinstance(parsed, dict):
-            return {str(k): str(v) for k, v in parsed.items()}
-    return {}
-
-
-def _build_composite_output_ext(
-    records: list[JsonDict],  # Any: record/metadata values are heterogeneous
-) -> CompositeOutputExt | None:
-    """Build CompositeOutputExt when composite lineage columns are present."""
-    from bioetl.domain.models.metadata import (
-        CompositeOutputExt,
-        CompositeSchemaValidationMetadata,
-    )
-
-    if not records:
-        return None
-
-    sample = records[0]
-    has_composite_fields = any(key.startswith("_composite_") for key in sample)
-    has_lineage_fields = "_source_providers" in sample or "_enrichment_status" in sample
-    if not has_composite_fields and not has_lineage_fields:
-        return None
-
-    lineage_raw = sample.get("_lineage_created_at")
-    lineage_created_at: datetime | None = None
-    if isinstance(lineage_raw, str):
-        try:
-            lineage_created_at = datetime.fromisoformat(lineage_raw)
-        except ValueError:
-            lineage_created_at = None
-
-    return CompositeOutputExt(
-        composite_run_id=(
-            str(sample.get("_composite_run_id"))
-            if sample.get("_composite_run_id") is not None
-            else None
-        ),
-        source_providers=_parse_composite_list(sample.get("_source_providers")),
-        enrichment_status=_parse_composite_status(sample.get("_enrichment_status")),
-        lineage_created_at=lineage_created_at,
-        schema_validation=CompositeSchemaValidationMetadata(
-            enabled=False,
-            strict=None,
-            status="not_run",
-        ),
     )
 
 
@@ -369,7 +296,7 @@ class GoldMetadataBuilder(_MetadataBuilderBase):
             total_records=len(records),
             valid_records=len(records),
         )
-        composite_ext = _build_composite_output_ext(records)
+        composite_ext = build_composite_output_ext(records)
         output = BaseOutputMetadata(
             record_count=len(records),
             write_started_at=now,
@@ -450,7 +377,7 @@ class GoldMetadataBuilder(_MetadataBuilderBase):
         """Build unified output metadata for merged Gold records."""
         from bioetl.domain.models.metadata import BaseOutputMetadata, GoldOutputExt
 
-        composite_ext = _build_composite_output_ext(records)
+        composite_ext = build_composite_output_ext(records)
         output = BaseOutputMetadata(
             record_count=len(records),
             write_started_at=now,

@@ -78,6 +78,60 @@ def _validate_owner_diversification_policy(
     return parsed_starts, min_distinct
 
 
+def _validate_target_quarter(
+    item: JsonDict,  # Any: YAML values are heterogeneous
+    prefix: str,
+    seen_quarters: set[str],
+    quarter_budget_map: dict[str, int],
+    errors: list[str],
+) -> tuple[str, tuple[int, int]] | None:
+    """Validate quarter field of a single target entry."""
+    quarter = item.get("quarter")
+    if not isinstance(quarter, str):
+        errors.append(f"{prefix}.quarter: expected string")
+        return None
+    parsed_quarter = _parse_quarter_label(quarter)
+    if parsed_quarter is None:
+        errors.append(f"{prefix}.quarter: expected 'YYYY-QN' format")
+        return None
+    if quarter in seen_quarters:
+        errors.append(f"{prefix}.quarter: duplicate quarter '{quarter}'")
+        return None
+    if quarter not in quarter_budget_map:
+        errors.append(
+            f"{prefix}.quarter: unknown quarter '{quarter}' (not in quarterly_targets)"
+        )
+        return None
+    seen_quarters.add(quarter)
+    return quarter, parsed_quarter
+
+
+def _parse_owner_allocations(
+    item: JsonDict,  # Any: YAML values are heterogeneous
+    prefix: str,
+    errors: list[str],
+) -> dict[str, int] | None:
+    """Parse and validate allocations mapping from a target entry."""
+    allocations = item.get("allocations")
+    if not isinstance(allocations, dict) or not allocations:
+        errors.append(f"{prefix}.allocations: expected non-empty mapping")
+        return None
+
+    parsed: dict[str, int] = {}
+    for owner, value in allocations.items():
+        if not isinstance(owner, str) or not owner.strip():
+            errors.append(f"{prefix}.allocations: owner must be non-empty string")
+            continue
+        parsed_value = _validate_non_negative_int(
+            value,
+            field_name=f"{prefix}.allocations.{owner}",
+            errors=errors,
+        )
+        if parsed_value is not None:
+            parsed[owner] = parsed_value
+    return parsed
+
+
 def _validate_owner_decomposition_targets_section(
     raw: JsonDict,  # Any: YAML values are heterogeneous
     *,
@@ -99,42 +153,16 @@ def _validate_owner_decomposition_targets_section(
             errors.append(f"{prefix}: expected mapping")
             continue
 
-        quarter = item.get("quarter")
-        if not isinstance(quarter, str):
-            errors.append(f"{prefix}.quarter: expected string")
+        result = _validate_target_quarter(
+            item, prefix, seen_quarters, quarter_budget_map, errors
+        )
+        if result is None:
             continue
-        parsed_quarter = _parse_quarter_label(quarter)
-        if parsed_quarter is None:
-            errors.append(f"{prefix}.quarter: expected 'YYYY-QN' format")
-            continue
-        if quarter in seen_quarters:
-            errors.append(f"{prefix}.quarter: duplicate quarter '{quarter}'")
-            continue
-        seen_quarters.add(quarter)
+        quarter, parsed_quarter = result
 
-        if quarter not in quarter_budget_map:
-            errors.append(
-                f"{prefix}.quarter: unknown quarter '{quarter}' (not in quarterly_targets)"
-            )
+        parsed_allocations = _parse_owner_allocations(item, prefix, errors)
+        if parsed_allocations is None:
             continue
-
-        allocations = item.get("allocations")
-        if not isinstance(allocations, dict) or not allocations:
-            errors.append(f"{prefix}.allocations: expected non-empty mapping")
-            continue
-
-        parsed_allocations: dict[str, int] = {}
-        for owner, value in allocations.items():
-            if not isinstance(owner, str) or not owner.strip():
-                errors.append(f"{prefix}.allocations: owner must be non-empty string")
-                continue
-            parsed_value = _validate_non_negative_int(
-                value,
-                field_name=f"{prefix}.allocations.{owner}",
-                errors=errors,
-            )
-            if parsed_value is not None:
-                parsed_allocations[owner] = parsed_value
 
         if sum(parsed_allocations.values()) != quarter_budget_map[quarter]:
             errors.append(
@@ -202,6 +230,37 @@ def _validate_expiry_decomposition_targets_section(
             )
 
 
+def _validate_burndown_registries(
+    registries_raw: object,
+    baseline_registry_names: set[str],
+    errors: list[str],
+) -> list[str]:
+    """Parse and validate the burn-down registries list."""
+    if not isinstance(registries_raw, list) or not registries_raw:
+        errors.append(
+            "governance.burn_down_priorities.registries: expected non-empty list"
+        )
+        return []
+
+    result: list[str] = []
+    for item in registries_raw:
+        if not isinstance(item, str) or not item.strip():
+            errors.append(
+                "governance.burn_down_priorities.registries: "
+                "registry names must be non-empty strings"
+            )
+            continue
+        registry_name = item.strip()
+        if registry_name not in baseline_registry_names:
+            errors.append(
+                "governance.burn_down_priorities.registries: "
+                f"unknown registry '{registry_name}'"
+            )
+            continue
+        result.append(registry_name)
+    return result
+
+
 def _validate_priority_registry_burndown(
     raw: JsonDict,  # Any: YAML values are heterogeneous
     *,
@@ -218,35 +277,13 @@ def _validate_priority_registry_burndown(
         errors.append("governance.burn_down_priorities: expected mapping")
         return
 
-    registries = burn_down.get("registries")
-    if not isinstance(registries, list) or not registries:
-        errors.append(
-            "governance.burn_down_priorities.registries: expected non-empty list"
-        )
-        return
-
-    priority_registries: list[str] = []
-    for item in registries:
-        if not isinstance(item, str) or not item.strip():
-            errors.append(
-                "governance.burn_down_priorities.registries: registry names must be non-empty strings"
-            )
-            continue
-        registry_name = item.strip()
-        if registry_name not in baseline_registry_names:
-            errors.append(
-                "governance.burn_down_priorities.registries: "
-                f"unknown registry '{registry_name}'"
-            )
-            continue
-        priority_registries.append(registry_name)
+    priority_registries = _validate_burndown_registries(
+        burn_down.get("registries"), baseline_registry_names, errors
+    )
 
     by_quarter_registry_budgets = _collect_quarterly_registry_budgets(raw)
     ordered_quarters = sorted(
-        (
-            quarter,
-            _parse_quarter_label(quarter),
-        )
+        (quarter, _parse_quarter_label(quarter))
         for quarter in by_quarter_registry_budgets
         if _parse_quarter_label(quarter) is not None
     )

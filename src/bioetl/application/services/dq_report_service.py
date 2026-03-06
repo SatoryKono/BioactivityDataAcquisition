@@ -9,12 +9,14 @@ DQ analysis reports separate from the threshold-based DQ checks.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from bioetl.domain.exceptions import BioETLError, DataQualityError, StorageError
+from bioetl.application.services.dq_report_models import (
+    _DQ_REPORT_ERRORS,
+    DQReportContext,
+    DQReportResult,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
@@ -27,144 +29,6 @@ if TYPE_CHECKING:
         SilverDQAnalyzerPort,
         SilverDQConfigPort,
     )
-from bioetl.domain.types import JsonDict
-
-_DQ_REPORT_ERRORS = (
-    DataQualityError,
-    StorageError,
-    BioETLError,
-    OSError,
-    RuntimeError,
-    ValueError,
-    TypeError,
-    Exception,
-)
-
-
-@dataclass(frozen=True, slots=True)
-class DQReportResult:
-    """Result of DQ report generation for all layers.
-
-    Attributes:
-        bronze_report_path: Path to Bronze DQ report (if generated).
-        silver_report_path: Path to Silver DQ report (if generated).
-        gold_report_path: Path to Gold DQ report (if generated).
-        bronze_enabled: Whether Bronze DQ report was enabled.
-        silver_enabled: Whether Silver DQ report was enabled.
-        gold_enabled: Whether Gold DQ report was enabled.
-    """
-
-    bronze_report_path: Path | None = None
-    silver_report_path: Path | None = None
-    gold_report_path: Path | None = None
-    bronze_enabled: bool = False
-    silver_enabled: bool = False
-    gold_enabled: bool = False
-
-    @property
-    def any_generated(self) -> bool:
-        """Check if any report was generated."""
-        return any(
-            [
-                self.bronze_report_path is not None,
-                self.silver_report_path is not None,
-                self.gold_report_path is not None,
-            ]
-        )
-
-    @property
-    def reports_count(self) -> int:
-        """Count of generated reports."""
-        return sum(
-            [
-                self.bronze_report_path is not None,
-                self.silver_report_path is not None,
-                self.gold_report_path is not None,
-            ]
-        )
-
-
-@dataclass(frozen=True, slots=True)
-class DQReportContext:
-    """Context for DQ report generation.
-
-    Contains all metadata and data needed for generating DQ reports.
-
-    Attributes:
-        run_id: Pipeline run identifier.
-        pipeline_name: Name of the pipeline.
-        timestamp: Report generation timestamp (UTC).
-        provider: Data provider name (e.g., 'chembl').
-        entity: Entity type name (e.g., 'activity').
-        bronze_source_file: Path to Bronze source file (for Bronze report).
-        bronze_batch_id: Bronze batch identifier.
-        bronze_records: Raw Bronze records (bytes iterator, consumed only once).
-        bronze_output_path: Base path for Bronze DQ reports (optional).
-        silver_data: Silver layer DataFrame (Polars).
-        silver_target_table: Silver target table path.
-        silver_source_batch_ids: List of Bronze batch IDs processed.
-        silver_primary_keys: Primary key columns.
-        silver_input_count: Total records before transformation.
-        silver_quarantined_count: Quarantined records count.
-        silver_output_path: Base path for Silver DQ reports (optional).
-        gold_data: Gold layer DataFrame (Polars).
-        gold_target_table: Gold target table path.
-        gold_required_fields: Required fields for completeness check.
-        gold_business_rules: Business rules for Gold validation.
-        gold_baseline_stats: Baseline statistics for drift detection.
-        gold_output_path: Base path for Gold DQ reports (optional).
-        dq_soft_threshold: Soft fail threshold for DQ checks.
-        dq_hard_threshold: Hard fail threshold for DQ checks.
-        flat_structure: Whether to use flat file structure for DQ reports.
-    """
-
-    run_id: str
-    pipeline_name: str
-    timestamp: datetime
-
-    # Provider and entity for filename generation
-    provider: str | None = None
-    entity: str | None = None
-
-    # Bronze context
-    bronze_source_file: str | None = None
-    bronze_batch_id: str | None = None
-    bronze_records: list[bytes] | None = None
-    bronze_output_path: str | None = None
-    bronze_date_str: str | None = None  # Date string (YYYY-MM-DD) for filename
-
-    # Silver context
-    silver_data: Any | None = None  # Any: pl.DataFrame (avoids polars import)
-    silver_target_table: str | None = None
-    silver_source_batch_ids: list[str] | None = None
-    silver_primary_keys: list[str] | None = None
-    silver_input_count: int | None = None
-    silver_quarantined_count: int = 0
-    silver_previous_schema: dict[str, str] | None = None
-    silver_output_path: str | None = None
-    silver_key_nullability_rules: (
-        list[JsonDict]  # Any: DQ rule definitions have heterogeneous values
-        | None
-    ) = None
-
-    # Gold context
-    gold_data: Any | None = None  # Any: pl.DataFrame (avoids polars import)
-    gold_target_table: str | None = None
-    gold_required_fields: list[str] | None = None
-    # Any: heterogeneous DQ metri...
-    gold_business_rules: (
-        list[JsonDict]  # Any: DQ rule definitions have heterogeneous values
-        | None
-    ) = None
-    gold_baseline_stats: JsonDict | None = None  # Any: heterogeneous DQ metri...
-    gold_output_path: str | None = None
-
-    # DQ thresholds
-    dq_soft_threshold: float = 0.05
-    dq_hard_threshold: float = 0.20
-
-    # Flat structure flag for DQ reports
-    flat_structure: bool = False
 
 
 class DQReportService:
