@@ -1,7 +1,7 @@
 {
   "summary": {
-    "scanned_modules": 840,
-    "total_internal_imports": 3188,
+    "scanned_modules": 851,
+    "total_internal_imports": 3184,
     "layer_edges": 14,
     "cross_layer_group_edges": 60,
     "violations": 0
@@ -10,13 +10,13 @@
     {
       "source": "application",
       "target": "application",
-      "imports": 340,
+      "imports": 341,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 521,
+      "imports": 520,
       "allowed": true
     },
     {
@@ -46,7 +46,7 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 539,
+      "imports": 533,
       "allowed": true
     },
     {
@@ -76,7 +76,7 @@
     {
       "source": "interfaces",
       "target": "domain",
-      "imports": 26,
+      "imports": 25,
       "allowed": true
     },
     {
@@ -88,7 +88,7 @@
     {
       "source": "interfaces",
       "target": "interfaces",
-      "imports": 85,
+      "imports": 88,
       "allowed": true
     }
   ],
@@ -284,11 +284,6 @@
       "imports": 12
     },
     {
-      "source": "interfaces.cli",
-      "target": "domain.exceptions",
-      "imports": 12
-    },
-    {
       "source": "application.core",
       "target": "domain.exceptions",
       "imports": 11
@@ -296,6 +291,11 @@
     {
       "source": "application.services",
       "target": "domain.value_objects",
+      "imports": 11
+    },
+    {
+      "source": "interfaces.cli",
+      "target": "domain.exceptions",
       "imports": 11
     },
     {
@@ -329,11 +329,6 @@
       "imports": 9
     },
     {
-      "source": "application.services",
-      "target": "domain.exceptions",
-      "imports": 9
-    },
-    {
       "source": "composition.bootstrap",
       "target": "application.core",
       "imports": 9
@@ -347,6 +342,11 @@
       "source": "interfaces.cli",
       "target": "application.services",
       "imports": 9
+    },
+    {
+      "source": "application.services",
+      "target": "domain.exceptions",
+      "imports": 8
     },
     {
       "source": "composition.factories",

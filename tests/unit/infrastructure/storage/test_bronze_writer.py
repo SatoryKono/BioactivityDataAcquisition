@@ -1566,7 +1566,7 @@ class TestBronzeWriterJsonValidation:
         self, tmp_path: Path, noop_logger: NoOpLogger
     ) -> None:
         """Test _validate_json_records raises BronzeValidationError on invalid JSON."""
-        from bioetl.domain.exceptions import BronzeValidationError
+        from bioetl.domain.exceptions import StorageError
 
         writer = BronzeWriter(
             base_path=tmp_path,
@@ -1580,7 +1580,7 @@ class TestBronzeWriterJsonValidation:
             b'{"id": 3}\n',
         ]
 
-        with pytest.raises(BronzeValidationError) as exc_info:
+        with pytest.raises(StorageError) as exc_info:
             list(writer._validate_json_records(iter(invalid_records)))
 
         assert exc_info.value.record_index == 1
@@ -1591,7 +1591,7 @@ class TestBronzeWriterJsonValidation:
         self, tmp_path: Path, noop_logger: NoOpLogger
     ) -> None:
         """Test _validate_json_records raises on empty string."""
-        from bioetl.domain.exceptions import BronzeValidationError
+        from bioetl.domain.exceptions import StorageError
 
         writer = BronzeWriter(
             base_path=tmp_path,
@@ -1599,7 +1599,7 @@ class TestBronzeWriterJsonValidation:
             metrics=NoOpMetrics(),
         )
 
-        with pytest.raises(BronzeValidationError) as exc_info:
+        with pytest.raises(StorageError) as exc_info:
             list(writer._validate_json_records(iter([b""])))
 
         assert exc_info.value.record_index == 0
@@ -1608,7 +1608,7 @@ class TestBronzeWriterJsonValidation:
         self, tmp_path: Path, noop_logger: NoOpLogger
     ) -> None:
         """Test _validate_json_records raises on truncated JSON."""
-        from bioetl.domain.exceptions import BronzeValidationError
+        from bioetl.domain.exceptions import StorageError
 
         writer = BronzeWriter(
             base_path=tmp_path,
@@ -1620,7 +1620,7 @@ class TestBronzeWriterJsonValidation:
             b'{"id": 1, "name": "incomplete',  # Missing closing brace and quote
         ]
 
-        with pytest.raises(BronzeValidationError) as exc_info:
+        with pytest.raises(StorageError) as exc_info:
             list(writer._validate_json_records(iter(truncated_records)))
 
         assert exc_info.value.record_index == 0
@@ -1659,7 +1659,7 @@ class TestBronzeWriterJsonValidation:
         ingestion_ts: datetime,
     ) -> None:
         """Test write_bronze validates JSON when validate_json=True (default)."""
-        from bioetl.domain.exceptions import BronzeValidationError
+        from bioetl.domain.exceptions import StorageError
 
         writer = BronzeWriter(
             base_path=tmp_path,
@@ -1673,7 +1673,7 @@ class TestBronzeWriterJsonValidation:
             b"invalid json here\n",
         ]
 
-        with pytest.raises(BronzeValidationError) as exc_info:
+        with pytest.raises(StorageError) as exc_info:
             await writer.write_bronze(
                 records=iter(invalid_records),
                 provider="chembl",

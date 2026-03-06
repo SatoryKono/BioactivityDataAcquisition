@@ -133,8 +133,10 @@ class RateLimitError(RecoverableError):
             return
 
         resolved_service = service_name if service_name is not None else provider
-        resolved_message = message if message is not None else (
-            provider if provider is not None else "Rate limit exceeded"
+        resolved_message = (
+            message
+            if message is not None
+            else (provider if provider is not None else "Rate limit exceeded")
         )
         self.provider = resolved_service
         self.service_name = resolved_service

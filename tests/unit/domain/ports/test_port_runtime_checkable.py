@@ -10,73 +10,66 @@ from datetime import UTC, datetime
 
 import pytest
 
-from bioetl.domain.ports.adr import (
-    AdrServicePort,
-    AdrDocument,
-    AdrInfo,
-    AdrValidationReport,
-)
-from bioetl.domain.ports.audit import AuditPort, AuditEntry, AuditLayer, AuditOperation
-from bioetl.domain.ports.batch_id import BatchIdGeneratorPort
-from bioetl.domain.ports.checkpoint import CheckpointPort
-from bioetl.domain.ports.clock import ClockPort
-from bioetl.domain.ports.config_loader_port import (
-    DomainConfigMapperPort,
-    PipelineConfigLoaderPort,
-    SettingsLoaderPort,
-)
-from bioetl.domain.ports.config_port import (
-    PipelineSettingsPort,
-    PipelineYamlConfigPort,
-    SettingsPort,
-)
-from bioetl.domain.ports.contract_policy import ContractPolicyPort
-from bioetl.domain.ports.data_normalization import DataNormalizationPort
-from bioetl.domain.ports.data_source import DataSourcePort, FilterableDataSourcePort
-from bioetl.domain.ports.delta_reader import DeltaReaderPort
-from bioetl.domain.ports.dq_config import (
+from bioetl.domain.ports import (
+    IDMappingPort,
+    LockPort,
+    MemoryMonitorPort,
+    MetadataWriterPort,
+    MetadataCoordinatorPort,
+    GoldValidatorPort,
+    SilverValidatorPort,
+    ContractPolicyPort,
     BronzeDQConfigPort,
     GoldDQConfigPort,
     SilverDQConfigPort,
-)
-from bioetl.domain.ports.dq_report import (
     BronzeDQAnalyzerPort,
     DQReportWriterPort,
     GoldDQAnalyzerPort,
     SilverDQAnalyzerPort,
-)
-from bioetl.domain.ports.fallback_policy import FallbackPolicyPort
-from bioetl.domain.ports.filtering import InputFilterPort
-from bioetl.domain.ports.health_check import (
+    FallbackPolicyPort,
+    QuarantinePort,
+    AdrServicePort,
+    AdrDocument,
+    AdrInfo,
+    AdrValidationReport,
+    AuditPort,
+    AuditEntry,
+    AuditLayer,
+    AuditOperation,
+    BatchIdGeneratorPort,
+    CheckpointPort,
+    ClockPort,
+    DomainConfigMapperPort,
+    PipelineConfigLoaderPort,
+    SettingsLoaderPort,
+    PipelineSettingsPort,
+    PipelineYamlConfigPort,
+    SettingsPort,
+    DataNormalizationPort,
+    DataSourcePort,
+    FilterableDataSourcePort,
+    DeltaReaderPort,
+    InputFilterPort,
     HealthCheckPort,
     HealthMonitorPort,
     HealthStatePort,
-)
-from bioetl.domain.ports.idmapping import IDMappingPort
-from bioetl.domain.ports.locking import LockPort
-from bioetl.domain.ports.memory import MemoryMonitorPort
-from bioetl.domain.ports.metadata import MetadataWriterPort
-from bioetl.domain.ports.metadata_coordinator import MetadataCoordinatorPort
-from bioetl.domain.ports.observability import (
     DQMonitorPort,
     LoggerPort,
     MetricsPort,
     TracingPort,
-)
-from bioetl.domain.ports.pii import PiiHasherPort
-from bioetl.domain.ports.quarantine import QuarantinePort
-from bioetl.domain.ports.registry_port import PipelineRegistryPort, RegistryAccessorPort
-from bioetl.domain.ports.resilience import CircuitBreakerPort, RateLimiterPort
-from bioetl.domain.ports.runner import (
+    PiiHasherPort,
+    PipelineRegistryPort,
+    RegistryAccessorPort,
+    CircuitBreakerPort,
+    RateLimiterPort,
     MetricsExtractorPort,
     RunnablePort,
     RunnerFactoryPort,
+    JsonEncoderPort,
+    ShutdownPort,
+    StoragePort,
+    BronzeMetadataInput,
 )
-from bioetl.domain.ports.serialization import JsonEncoderPort
-from bioetl.domain.ports.shutdown import ShutdownPort
-from bioetl.domain.ports.storage import StoragePort
-from bioetl.domain.ports.validation import GoldValidatorPort, SilverValidatorPort
-
 
 ALL_PORT_PROTOCOLS = [
     AdrServicePort,
@@ -367,8 +360,6 @@ class TestMetadataCoordinatorDataClasses:
     """Tests for metadata coordinator DTOs."""
 
     def test_bronze_metadata_input(self) -> None:
-        from bioetl.domain.ports.metadata_coordinator import BronzeMetadataInput
-
         now = datetime.now(UTC)
         inp = BronzeMetadataInput(
             batch_id="batch-001",
@@ -384,8 +375,6 @@ class TestMetadataCoordinatorDataClasses:
         assert inp.governance is None
 
     def test_bronze_metadata_input_immutable(self) -> None:
-        from bioetl.domain.ports.metadata_coordinator import BronzeMetadataInput
-
         now = datetime.now(UTC)
         inp = BronzeMetadataInput(
             batch_id="b",
@@ -399,8 +388,6 @@ class TestMetadataCoordinatorDataClasses:
             inp.record_count = 999  # type: ignore[misc]
 
     def test_silver_metadata_input_defaults(self) -> None:
-        from bioetl.domain.ports.metadata_coordinator import SilverMetadataInput
-
         inp = SilverMetadataInput(
             table_path="/data/silver/chembl.activity",
             primary_keys=["entity_id"],
@@ -412,8 +399,6 @@ class TestMetadataCoordinatorDataClasses:
         assert inp.total_bytes == 0
 
     def test_silver_ref_creation(self) -> None:
-        from bioetl.domain.ports.metadata_coordinator import SilverRef
-
         ref = SilverRef(
             table_name="chembl.activity",
             table_path="/data/silver/chembl.activity",
