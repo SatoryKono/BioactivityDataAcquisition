@@ -73,6 +73,89 @@ CROSSREF_HEALTH_ERRORS = (
 )
 
 
+def _create_default_crossref_query_builder(
+    *, api_base: str, mailto: str
+) -> CrossRefQueryBuilder:
+    """Create default query builder for non-DI call sites."""
+    return CrossRefQueryBuilder(api_base=api_base, mailto=mailto)
+
+
+def _create_default_crossref_response_mapper() -> CrossRefResponseMapper:
+    """Create default response mapper for non-DI call sites."""
+    return CrossRefResponseMapper()
+
+
+def _create_default_crossref_batch_fetcher(
+    *,
+    http: UnifiedHTTPClient,
+    logger: LoggerPort,
+    metrics: AdapterMetrics,
+    mailto: str,
+    api_base: str,
+    headers_fn: object,
+    request_collector: APIRequestCollector,
+) -> DoiBatchProcessor:
+    """Create default DOI batch processor for non-DI call sites."""
+    return DoiBatchProcessor(
+        http=http,
+        logger=logger,
+        metrics=metrics,
+        mailto=mailto,
+        api_base=api_base,
+        headers_fn=headers_fn,
+        request_collector=request_collector,
+    )
+
+
+def _create_default_crossref_search_paginator(
+    *,
+    http: UnifiedHTTPClient,
+    logger: LoggerPort,
+    metrics: AdapterMetrics,
+    mailto: str,
+    api_base: str,
+    headers_fn: object,
+    request_collector: APIRequestCollector,
+) -> SearchPaginator:
+    """Create default search paginator for non-DI call sites."""
+    return SearchPaginator(
+        http=http,
+        logger=logger,
+        metrics=metrics,
+        mailto=mailto,
+        api_base=api_base,
+        headers_fn=headers_fn,
+        request_collector=request_collector,
+    )
+
+
+def _create_default_crossref_title_fallback_handler(
+    *, logger: LoggerPort, search_fn: object
+) -> TitleFallbackHandler:
+    """Create default title fallback handler for non-DI call sites."""
+    return TitleFallbackHandler(logger=logger, search_fn=search_fn)
+
+
+def _create_default_crossref_fetch_flow(
+    *,
+    logger: LoggerPort,
+    batch_fetcher: DoiBatchProcessor,
+    search_paginator: SearchPaginator,
+    fallback_decorator: ComposableFallbackDecorator,
+    batch_size: int,
+    response_mapper: CrossRefResponseMapper,
+) -> CrossRefFetchFlow:
+    """Create default fetch flow for non-DI call sites."""
+    return CrossRefFetchFlow(
+        logger=logger,
+        batch_fetcher=batch_fetcher,
+        search_paginator=search_paginator,
+        fallback_decorator=fallback_decorator,
+        batch_size=batch_size,
+        response_mapper=response_mapper,
+    )
+
+
 @dataclass
 class CrossRefAdapter(BaseHttpAdapter):
     """CrossRef adapter with thin-facade delegation to flow components."""
@@ -86,6 +169,12 @@ class CrossRefAdapter(BaseHttpAdapter):
     adapter_metrics: AdapterMetrics | None = None
     request_collector: APIRequestCollector | None = None
     fallback_fetch_service: FallbackFetchOrchestratorService | None = None
+    query_builder: CrossRefQueryBuilder | None = None
+    response_mapper: CrossRefResponseMapper | None = None
+    batch_fetcher: DoiBatchProcessor | None = None
+    search_paginator: SearchPaginator | None = None
+    title_fallback_handler: TitleFallbackHandler | None = None
+    fetch_flow: CrossRefFetchFlow | None = None
 
     provider_name: str = field(init=False, default="crossref")
     """Provider identifier (required by DataSourcePort)."""
@@ -121,43 +210,67 @@ class CrossRefAdapter(BaseHttpAdapter):
             )
         )
 
-        self._query_builder = CrossRefQueryBuilder(
-            api_base=CROSSREF_API_BASE,
-            mailto=self.mailto,
+        self._query_builder = (
+            self.query_builder
+            if self.query_builder is not None
+            else _create_default_crossref_query_builder(
+                api_base=CROSSREF_API_BASE,
+                mailto=self.mailto,
+            )
         )
-        self._response_mapper = CrossRefResponseMapper()
+        self._response_mapper = (
+            self.response_mapper
+            if self.response_mapper is not None
+            else _create_default_crossref_response_mapper()
+        )
 
-        self._batch_fetcher = DoiBatchProcessor(
-            http=self.http_client,
-            logger=self.logger,
-            metrics=self._adapter_metrics,
-            mailto=self.mailto,
-            api_base=CROSSREF_API_BASE,
-            headers_fn=self._build_headers,
-            request_collector=self._request_collector,
+        self._batch_fetcher = (
+            self.batch_fetcher
+            if self.batch_fetcher is not None
+            else _create_default_crossref_batch_fetcher(
+                http=self.http_client,
+                logger=self.logger,
+                metrics=self._adapter_metrics,
+                mailto=self.mailto,
+                api_base=CROSSREF_API_BASE,
+                headers_fn=self._build_headers,
+                request_collector=self._request_collector,
+            )
         )
-        self._search_paginator = SearchPaginator(
-            http=self.http_client,
-            logger=self.logger,
-            metrics=self._adapter_metrics,
-            mailto=self.mailto,
-            api_base=CROSSREF_API_BASE,
-            headers_fn=self._build_headers,
-            request_collector=self._request_collector,
+        self._search_paginator = (
+            self.search_paginator
+            if self.search_paginator is not None
+            else _create_default_crossref_search_paginator(
+                http=self.http_client,
+                logger=self.logger,
+                metrics=self._adapter_metrics,
+                mailto=self.mailto,
+                api_base=CROSSREF_API_BASE,
+                headers_fn=self._build_headers,
+                request_collector=self._request_collector,
+            )
         )
-        self._fallback_handler = TitleFallbackHandler(
-            logger=self.logger,
-            search_fn=self._search_paginator.search,
+        self._fallback_handler = (
+            self.title_fallback_handler
+            if self.title_fallback_handler is not None
+            else _create_default_crossref_title_fallback_handler(
+                logger=self.logger,
+                search_fn=self._search_paginator.search,
+            )
         )
         self.configure_fallback_policy(None)
 
-        self._fetch_flow = CrossRefFetchFlow(
-            logger=self.logger,
-            batch_fetcher=self._batch_fetcher,
-            search_paginator=self._search_paginator,
-            fallback_decorator=self._fallback_decorator,
-            batch_size=self.batch_size,
-            response_mapper=self._response_mapper,
+        self._fetch_flow = (
+            self.fetch_flow
+            if self.fetch_flow is not None
+            else _create_default_crossref_fetch_flow(
+                logger=self.logger,
+                batch_fetcher=self._batch_fetcher,
+                search_paginator=self._search_paginator,
+                fallback_decorator=self._fallback_decorator,
+                batch_size=self.batch_size,
+                response_mapper=self._response_mapper,
+            )
         )
 
     def configure_fallback_policy(self, policy: object | None) -> None:

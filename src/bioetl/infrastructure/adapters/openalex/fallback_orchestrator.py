@@ -22,6 +22,36 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
+def _create_default_fallback_strategy(
+    *,
+    normalize_id: Callable[[str], str | None],
+    extract_record_id: Callable[[BronzeRecord], str | None],
+    fallback_handler: TitleFallbackHandler | None,
+) -> DefaultFallbackExecutionStrategy:
+    """Create default fallback execution strategy for non-DI call sites."""
+    return DefaultFallbackExecutionStrategy(
+        normalize_id_hook=normalize_id,
+        extract_record_id_hook=extract_record_id,
+        fallback_handler_hook=fallback_handler,
+    )
+
+
+def _create_default_fallback_decorator(
+    *,
+    service: FallbackFetchOrchestratorService,
+    strategy: DefaultFallbackExecutionStrategy,
+    config: FallbackDecoratorConfig,
+    logger: LoggerPort,
+) -> ComposableFallbackDecorator:
+    """Create default fallback decorator for non-DI call sites."""
+    return ComposableFallbackDecorator(
+        service=service,
+        strategy=strategy,
+        config=config,
+        logger=logger,
+    )
+
+
 @dataclass(slots=True)
 class OpenAlexFallbackOrchestrator:
     """Coordinates DOI-first fetch + title fallback flow for OpenAlex."""
@@ -49,14 +79,12 @@ class OpenAlexFallbackOrchestrator:
 
     def __post_init__(self) -> None:
         """Build reusable decorator from provider hooks + policy config."""
-        strategy = DefaultFallbackExecutionStrategy(
-            normalize_id_hook=self.normalize_id,
-            extract_record_id_hook=self.extract_record_id,
-            fallback_handler_hook=(
-                self.fallback_handler if self.fallback_enabled else None
-            ),
+        strategy = _create_default_fallback_strategy(
+            normalize_id=self.normalize_id,
+            extract_record_id=self.extract_record_id,
+            fallback_handler=(self.fallback_handler if self.fallback_enabled else None),
         )
-        self._decorator = ComposableFallbackDecorator(
+        self._decorator = _create_default_fallback_decorator(
             service=self.fallback_fetch_service,
             strategy=strategy,
             config=self.config,

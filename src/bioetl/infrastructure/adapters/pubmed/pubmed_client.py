@@ -74,6 +74,15 @@ def _create_default_pubmed_fallback_service(
     return FallbackFetchOrchestratorService(adapter_metrics)
 
 
+def _create_default_pubmed_title_fallback_handler(
+    *,
+    logger: LoggerPort,
+    search_fn: Any,
+) -> TitleFallbackHandler:
+    """Create default title fallback handler for non-DI call sites."""
+    return TitleFallbackHandler(logger=logger, search_fn=search_fn)
+
+
 _PUBMED_DEFAULT_FALLBACK_CONFIG = FallbackDecoratorConfig(
     supported_filter_field=None,
     unsupported_filter_event="unsupported_filter_field_for_fallback",
@@ -113,12 +122,9 @@ class PubMedAdapter(
     adapter_metrics: AdapterMetrics | None = None
     request_collector: APIRequestCollector | None = None
     fallback_fetch_service: FallbackFetchOrchestratorService | None = None
+    title_fallback_handler: TitleFallbackHandler | None = None
 
     provider_name: str = field(init=False, default="pubmed")
-
-    _fallback_handler: TitleFallbackHandler | None = field(
-        default=None, init=False, repr=False
-    )
     _fallback_fetch_service: FallbackFetchOrchestratorService = field(
         init=False, repr=False
     )
@@ -147,9 +153,13 @@ class PubMedAdapter(
             )
         )
 
-        self._fallback_handler = TitleFallbackHandler(
-            logger=self.logger,
-            search_fn=self._search_by_title,
+        self._fallback_handler = (
+            self.title_fallback_handler
+            if self.title_fallback_handler is not None
+            else _create_default_pubmed_title_fallback_handler(
+                logger=self.logger,
+                search_fn=self._search_by_title,
+            )
         )
         self.configure_fallback_policy(None)
 

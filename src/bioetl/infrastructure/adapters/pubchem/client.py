@@ -55,6 +55,43 @@ PUBCHEM_DTO_MODELS: dict[str, type[BaseModel]] = {
     "compound": PubchemMoleculeRecord,
 }
 
+
+def _create_default_pubchem_entity_mapper() -> PubChemEntityMapper:
+    """Create default entity mapper for non-DI call sites."""
+    return PubChemEntityMapper()
+
+
+def _create_default_pubchem_request_collector() -> APIRequestCollector:
+    """Create default request collector for non-DI call sites."""
+    return APIRequestCollector()
+
+
+def _create_default_pubchem_fetch_strategies(
+    *,
+    logger: LoggerPort,
+    rate_limiter: TokenBucket,
+    circuit_breaker: CircuitBreaker,
+    mapper: PubChemEntityMapper,
+    run_in_executor: object,
+    provider_name: str,
+    request_collector: APIRequestCollector,
+) -> object:
+    """Create default fetch strategies for non-DI call sites."""
+    from bioetl.infrastructure.adapters.pubchem.fetch_strategies import (
+        PubChemFetchStrategies,
+    )
+
+    return PubChemFetchStrategies(
+        logger=logger,
+        rate_limiter=rate_limiter,
+        circuit_breaker=circuit_breaker,
+        mapper=mapper,
+        run_in_executor=run_in_executor,
+        provider_name=provider_name,
+        request_collector=request_collector,
+    )
+
+
 PUBCHEM_HEALTH_ERRORS = (
     BioETLError,
     NetworkError,
@@ -108,6 +145,8 @@ class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
         *,
         error_handler: ErrorHandlerPort | None = None,
         request_collector: APIRequestCollector | None = None,
+        entity_mapper: PubChemEntityMapper | None = None,
+        fetch_strategies: object | None = None,
     ) -> None:
         """Initialize PubChem client.
 
@@ -123,6 +162,8 @@ class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
                     AdapterHelpersFactory). Falls back to inline ErrorService.
             request_collector: Pre-built request collector (optional, injected by
                     AdapterHelpersFactory). Falls back to inline APIRequestCollector.
+            entity_mapper: Pre-built entity mapper (optional).
+            fetch_strategies: Pre-built fetch strategies (optional).
 
         """
         super().__init__(
@@ -133,24 +174,28 @@ class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
             strict_error_handling=strict_error_handling,
             error_handler=error_handler,
         )
-        self._mapper = PubChemEntityMapper()
+        self._mapper = (
+            entity_mapper
+            if entity_mapper is not None
+            else _create_default_pubchem_entity_mapper()
+        )
         self._request_collector = (
             request_collector
             if request_collector is not None
-            else APIRequestCollector()
+            else _create_default_pubchem_request_collector()
         )
-        from bioetl.infrastructure.adapters.pubchem.fetch_strategies import (
-            PubChemFetchStrategies,
-        )
-
-        self._strategies = PubChemFetchStrategies(
-            logger=logger,
-            rate_limiter=rate_limiter,
-            circuit_breaker=circuit_breaker,
-            mapper=self._mapper,
-            run_in_executor=self._run_in_executor,
-            provider_name=self.provider_name,
-            request_collector=self._request_collector,
+        self._strategies = (
+            fetch_strategies
+            if fetch_strategies is not None
+            else _create_default_pubchem_fetch_strategies(
+                logger=logger,
+                rate_limiter=rate_limiter,
+                circuit_breaker=circuit_breaker,
+                mapper=self._mapper,
+                run_in_executor=self._run_in_executor,
+                provider_name=self.provider_name,
+                request_collector=self._request_collector,
+            )
         )
 
     async def _fetch_compound(

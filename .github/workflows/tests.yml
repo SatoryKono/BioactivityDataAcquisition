@@ -94,25 +94,25 @@ jobs:
                       --max-grace-window-days "${QUALITY_EXEMPTIONS_MAX_GRACE_WINDOW_DAYS}"
 
             -   name: "Quality ratchet (fail-fast: domain)"
-            run: |
-                uv run pytest \
-                  tests/architecture/test_code_metrics.py::TestFileSizeLimits::test_domain_files_under_limit \
-                  tests/architecture/test_code_metrics.py::TestFunctionComplexity::test_domain_complexity \
-                  -q --tb=short
+                run: |
+                    uv run pytest \
+                      tests/architecture/test_code_metrics.py::TestFileSizeLimits::test_domain_files_under_limit \
+                      tests/architecture/test_code_metrics.py::TestFunctionComplexity::test_domain_complexity \
+                      -q --tb=short
 
             -   name: "Quality ratchet (fail-fast: application)"
-            run: |
-                uv run pytest \
-                  tests/architecture/test_code_metrics.py::TestFileSizeLimits::test_application_files_under_limit \
-                  tests/architecture/test_code_metrics.py::TestFunctionComplexity::test_application_complexity \
-                  -q --tb=short
+                run: |
+                    uv run pytest \
+                      tests/architecture/test_code_metrics.py::TestFileSizeLimits::test_application_files_under_limit \
+                      tests/architecture/test_code_metrics.py::TestFunctionComplexity::test_application_complexity \
+                      -q --tb=short
 
             -   name: "Quality ratchet (fail-fast: infrastructure)"
-            run: |
-                uv run pytest \
-                  tests/architecture/test_code_metrics.py::TestFileSizeLimits::test_infrastructure_files_under_limit \
-                  tests/architecture/test_code_metrics.py::TestFunctionComplexity::test_infrastructure_complexity \
-                  -q --tb=short
+                run: |
+                    uv run pytest \
+                      tests/architecture/test_code_metrics.py::TestFileSizeLimits::test_infrastructure_files_under_limit \
+                      tests/architecture/test_code_metrics.py::TestFunctionComplexity::test_infrastructure_complexity \
+                      -q --tb=short
 
             -   name: Validate pipeline configs + schema links (blocking)
                 run: uv run python scripts/validate_pipeline_configs.py
