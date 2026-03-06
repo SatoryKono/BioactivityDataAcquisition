@@ -2,49 +2,31 @@
 
 from __future__ import annotations
 
-from bioetl.domain.exceptions.base import CriticalError
-from bioetl.domain.exceptions.infrastructure._storage import StorageError
+from bioetl.domain.exceptions.infrastructure._storage import (
+    StorageError,
+    StorageQuotaExceededError,
+)
 from bioetl.domain.types import ErrorType
 
 
-class DeltaWriteConflictError(StorageError):
-    """Raised when Delta Lake detects a concurrent write conflict."""
-
-    error_type = ErrorType.NETWORK_ERROR
-
-    def __init__(
-        self,
-        table_path: str,
-        operation: str = "write",
-        conflicting_version: int | None = None,
-    ) -> None:
-        self.table_path = table_path
-        self.operation = operation
-        self.conflicting_version = conflicting_version
-        msg = f"Delta write conflict on '{table_path}' during {operation}"
-        if conflicting_version is not None:
-            msg += f" (conflicting version: {conflicting_version})"
-        super().__init__(msg)
+def DeltaWriteConflictError(
+    table_path: str,
+    operation: str = "write",
+    conflicting_version: int | None = None,
+) -> StorageError:
+    """Compatibility constructor for legacy DeltaWriteConflictError."""
+    msg = f"Delta write conflict on '{table_path}' during {operation}"
+    if conflicting_version is not None:
+        msg += f" (conflicting version: {conflicting_version})"
+    error = StorageError(msg)
+    error.table_path = table_path
+    error.operation = operation
+    error.conflicting_version = conflicting_version
+    error.error_type = ErrorType.NETWORK_ERROR
+    return error
 
 
-class DeltaTransactionError(CriticalError):
-    """Raised when Delta Lake transaction fails to commit."""
-
-    error_type = ErrorType.DB_UNAVAILABLE
-
-    def __init__(
-        self,
-        table_path: str,
-        reason: str,
-        version: int | None = None,
-    ) -> None:
-        self.table_path = table_path
-        self.reason = reason
-        self.version = version
-        msg = f"Delta transaction failed on '{table_path}': {reason}"
-        if version is not None:
-            msg += f" (version: {version})"
-        super().__init__(msg)
+DeltaTransactionError = StorageQuotaExceededError
 
 
 def _format_column_diff(
@@ -91,45 +73,42 @@ def _build_schema_validation_message(
     return ", ".join(parts)
 
 
-class DeltaSchemaValidationError(CriticalError):
-    """Raised when schema validation fails during Delta write."""
+def DeltaSchemaValidationError(
+    table_path: str,
+    expected_columns: list[str] | None = None,
+    actual_columns: list[str] | None = None,
+    type_mismatches: dict[str, tuple[str, str]] | None = None,
+) -> StorageQuotaExceededError:
+    """Compatibility constructor for legacy DeltaSchemaValidationError."""
+    expected = expected_columns or []
+    actual = actual_columns or []
+    mismatches = type_mismatches or {}
+    error = StorageQuotaExceededError(path=table_path)
+    error.table_path = table_path
+    error.expected_columns = expected
+    error.actual_columns = actual
+    error.type_mismatches = mismatches
+    error.error_type = ErrorType.SCHEMA_MISMATCH_GOLD
+    error.args = (
+        _build_schema_validation_message(
+            table_path=table_path,
+            expected_columns=expected,
+            actual_columns=actual,
+            type_mismatches=mismatches,
+        ),
+    )
+    return error
 
-    error_type = ErrorType.SCHEMA_MISMATCH_GOLD
 
-    def __init__(
-        self,
-        table_path: str,
-        expected_columns: list[str] | None = None,
-        actual_columns: list[str] | None = None,
-        type_mismatches: dict[str, tuple[str, str]] | None = None,
-    ) -> None:
-        self.table_path = table_path
-        self.expected_columns = expected_columns or []
-        self.actual_columns = actual_columns or []
-        self.type_mismatches = type_mismatches or {}
-
-        super().__init__(
-            _build_schema_validation_message(
-                table_path,
-                self.expected_columns,
-                self.actual_columns,
-                self.type_mismatches,
-            )
-        )
-
-
-class DeltaOptimizeError(StorageError):
-    """Raised when Delta VACUUM or OPTIMIZE operation fails."""
-
-    error_type = ErrorType.NETWORK_ERROR
-
-    def __init__(
-        self,
-        table_path: str,
-        operation: str,
-        reason: str,
-    ) -> None:
-        self.table_path = table_path
-        self.operation = operation
-        self.reason = reason
-        super().__init__(f"Delta {operation} failed on '{table_path}': {reason}")
+def DeltaOptimizeError(
+    table_path: str,
+    operation: str,
+    reason: str,
+) -> StorageError:
+    """Compatibility constructor for legacy DeltaOptimizeError."""
+    error = StorageError(f"Delta {operation} failed on '{table_path}': {reason}")
+    error.table_path = table_path
+    error.operation = operation
+    error.reason = reason
+    error.error_type = ErrorType.NETWORK_ERROR
+    return error

@@ -108,18 +108,39 @@ class RateLimitError(RecoverableError):
 
     error_type = ErrorType.RATE_LIMIT
 
-    def __init__(self, provider: str, retry_after: float) -> None:
+    def __init__(
+        self,
+        provider: str | None = None,
+        retry_after: float = 60.0,
+        *,
+        message: str | None = None,
+        service_name: str | None = None,
+    ) -> None:
         """Initialize RateLimitError.
 
         Args:
             provider: Name of the provider that imposed the rate limit.
             retry_after: Seconds to wait before retrying.
         """
-        self.provider = provider
-        self.retry_after = retry_after
-        super().__init__(
-            f"Rate limit exceeded for {provider}. Retry after {retry_after}s"
+        if message is None and service_name is None:
+            if provider is None:
+                raise ValueError("provider is required for RateLimitError")
+            self.provider = provider
+            self.retry_after = retry_after
+            super().__init__(
+                f"Rate limit exceeded for {provider}. Retry after {retry_after}s"
+            )
+            return
+
+        resolved_service = service_name if service_name is not None else provider
+        resolved_message = message if message is not None else (
+            provider if provider is not None else "Rate limit exceeded"
         )
+        self.provider = resolved_service
+        self.service_name = resolved_service
+        self.status_code = 429
+        self.retry_after = retry_after
+        super().__init__(resolved_message)
 
 
 class CircuitBreakerOpenError(RecoverableError):
@@ -322,45 +343,7 @@ class ServiceUnavailableError(ExternalServiceError):
         )
 
 
-class RateLimitExceededError(ExternalServiceError):
-    """Raised when external service rate limit is exceeded.
-
-    Caused by HTTP 429 Too Many Requests.
-    The request MUST be retried after the specified delay.
-
-    Note:
-        This is distinct from RateLimitError which is for internal rate limiting.
-        This exception is for rate limits imposed by external services.
-
-    Example:
-        >>> raise RateLimitExceededError(
-        ...     "PubChem rate limit exceeded",
-        ...     service_name="pubchem",
-        ...     retry_after=30.0
-        ... )
-    """
-
-    error_type = ErrorType.RATE_LIMIT
-
-    def __init__(
-        self,
-        message: str,
-        service_name: str | None = None,
-        retry_after: float = 60.0,
-    ) -> None:
-        """Initialize RateLimitExceededError.
-
-        Args:
-            message: Error description.
-            service_name: Name of the service imposing rate limit.
-            retry_after: Seconds to wait before retry (from Retry-After header).
-        """
-        super().__init__(
-            message,
-            service_name=service_name,
-            status_code=429,
-            retry_after=retry_after,
-        )
+RateLimitExceededError = RateLimitError
 
 
 class ServiceAuthenticationError(ExternalServiceError):
@@ -403,47 +386,15 @@ class ServiceAuthenticationError(ExternalServiceError):
         )
 
 
-class DataValidationError(ExternalServiceError):
-    """Raised when external service returns invalid data.
-
-    Used when data from an external source fails validation but the
-    service itself is healthy. This is distinct from DataQualityError
-    which is for internal data quality issues.
-
-    Examples:
-        - Invalid JSON response
-        - Missing required fields in response
-        - Unexpected data format
-
-    Attributes:
-        field: Optional name of the invalid field.
-        value: Optional invalid value (if safe to log).
-
-    Example:
-        >>> raise DataValidationError(
-        ...     "Missing 'molecule_chembl_id' in response",
-        ...     service_name="chembl",
-        ...     field="molecule_chembl_id"
-        ... )
-    """
-
-    error_type = ErrorType.INVALID_DATA
-
-    def __init__(
-        self,
-        message: str,
-        service_name: str | None = None,
-        field: str | None = None,
-        value: str | None = None,
-    ) -> None:
-        """Initialize DataValidationError.
-
-        Args:
-            message: Error description.
-            service_name: Name of the service that returned invalid data.
-            field: Name of the invalid field if applicable.
-            value: The invalid value if safe to log.
-        """
-        self.field = field
-        self.value = value
-        super().__init__(message, service_name=service_name)
+def DataValidationError(
+    message: str,
+    service_name: str | None = None,
+    field: str | None = None,
+    value: str | None = None,
+) -> ExternalServiceError:
+    """Compatibility constructor for legacy DataValidationError."""
+    error = ExternalServiceError(message, service_name=service_name)
+    error.field = field
+    error.value = value
+    error.error_type = ErrorType.INVALID_DATA
+    return error

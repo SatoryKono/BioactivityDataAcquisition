@@ -65,62 +65,32 @@ class SchemaViolationError(ValidationError):
         super().__init__(f"Schema validation failed for '{table}': {errors}")
 
 
-class MissingRequiredFieldError(ValidationError):
-    """Raised when a required field is missing from a data record.
-
-    Attributes:
-        field: Name of the missing required field.
-        record_id: Optional identifier of the affected record.
-
-    Example:
-        >>> raise MissingRequiredFieldError("molecule_chembl_id", record_id="CHEMBL25")
-    """
-
-    error_type = ErrorType.MISSING_REQUIRED_FIELD
-
-    def __init__(self, field: str, record_id: str | None = None) -> None:
-        """Initialize MissingRequiredFieldError.
-
-        Args:
-            field: Name of the missing required field.
-            record_id: Optional identifier of the affected record.
-        """
-        self.field = field
-        self.record_id = record_id
-        msg = f"Missing required field: {field}"
-        if record_id:
-            msg += f" (record_id={record_id})"
-        super().__init__(msg)
+def MissingRequiredFieldError(
+    field: str,
+    record_id: str | None = None,
+) -> ValidationError:
+    """Compatibility constructor for legacy MissingRequiredFieldError."""
+    msg = f"Missing required field: {field}"
+    if record_id:
+        msg += f" (record_id={record_id})"
+    error = ValidationError(msg)
+    error.field = field
+    error.record_id = record_id
+    error.error_type = ErrorType.MISSING_REQUIRED_FIELD
+    return error
 
 
-class InvalidDataFormatError(ValidationError):
-    """Raised when data format is invalid.
-
-    Indicates that a field value does not match its expected format,
-    such as an invalid date string or malformed identifier.
-
-    Attributes:
-        field: Name of the field with invalid format.
-        value: The actual invalid value.
-        expected_format: Description of the expected format.
-
-    Example:
-        >>> raise InvalidDataFormatError("date", "2024/01/01", "ISO 8601 (YYYY-MM-DD)")
-    """
-
-    error_type = ErrorType.INVALID_DATA
-
-    def __init__(self, field: str, value: str, expected_format: str) -> None:
-        """Initialize InvalidDataFormatError.
-
-        Args:
-            field: Name of the field with invalid format.
-            value: The actual invalid value.
-            expected_format: Description of the expected format.
-        """
-        self.field = field
-        self.value = value
-        self.expected_format = expected_format
-        super().__init__(
-            f"Invalid format for '{field}': got '{value}', expected {expected_format}"
-        )
+def InvalidDataFormatError(
+    field: str,
+    value: str,
+    expected_format: str,
+) -> ValidationError:
+    """Compatibility constructor for legacy InvalidDataFormatError."""
+    error = ValidationError(
+        f"Invalid format for '{field}': got '{value}', expected {expected_format}"
+    )
+    error.field = field
+    error.value = value
+    error.expected_format = expected_format
+    error.error_type = ErrorType.INVALID_DATA
+    return error

@@ -5,19 +5,13 @@ Implements RULES.md §1.1 - Ports & Adapters architecture.
 This package contains all port definitions organized by domain:
 - storage: StoragePort for Medallion layer operations
 - data_source: DataSourcePort, FilterableDataSourcePort for fetching
-- locking: LockPort for distributed locking
-- checkpoint: CheckpointPort for pipeline state
-- quarantine: QuarantinePort for failed records
 - observability: TracingPort, MetricsPort, LoggerPort, DQMonitorPort
-- validation: GoldValidatorPort for Gold layer validation
-- filtering: InputFilterPort for CSV filter loading
-- resilience: RateLimiterPort, CircuitBreakerPort for fault tolerance
-- serialization: JsonEncoderPort for JSON encoding
+- config: PipelineSettingsPort, SettingsPort, ConfigLoaderPort
+- metadata: MetadataWriterPort, MetadataCoordinatorPort
+- quality: DQ analysis, validation, quarantine, error handling
+- runtime: Runner, checkpoint, locking, shutdown, memory, registry
 - audit: AuditPort for write operation traceability
-- shutdown: ShutdownPort for graceful termination coordination
-- memory: MemoryMonitorPort for adaptive batch sizing
-- data_normalization: DataNormalizationPort for text/data normalization
-- delta_reader: DeltaReaderPort for read-only Delta table access
+- resilience: RateLimiterPort, CircuitBreakerPort for fault tolerance
 """
 
 from bioetl.domain.ports.adr import (
@@ -33,20 +27,14 @@ from bioetl.domain.ports.audit import (
     AuditOperation,
     AuditPort,
 )
-from bioetl.domain.ports.batch_id import BatchIdGeneratorPort
-from bioetl.domain.ports.checkpoint import CheckpointPort
-from bioetl.domain.ports.clock import ClockPort
-from bioetl.domain.ports.config_loader_port import (
+from bioetl.domain.ports.config import (
     DomainConfigMapperPort,
     PipelineConfigLoaderPort,
-    SettingsLoaderPort,
-)
-from bioetl.domain.ports.config_port import (
     PipelineSettingsPort,
     PipelineYamlConfigPort,
+    SettingsLoaderPort,
     SettingsPort,
 )
-from bioetl.domain.ports.contract_policy import ContractPolicyPort
 from bioetl.domain.ports.data_normalization import DataNormalizationPort
 from bioetl.domain.ports.data_source import (
     DataSourceFactoryPort,
@@ -54,20 +42,6 @@ from bioetl.domain.ports.data_source import (
     FilterableDataSourcePort,
 )
 from bioetl.domain.ports.delta_reader import DeltaReaderPort
-from bioetl.domain.ports.dq_config import (
-    BronzeDQConfigPort,
-    GoldDQConfigPort,
-    SilverDQConfigPort,
-)
-from bioetl.domain.ports.dq_report import (
-    BronzeDQAnalyzerPort,
-    DQReportWriterPort,
-    GoldDQAnalyzerPort,
-    SilverDQAnalyzerPort,
-)
-from bioetl.domain.ports.error_classifier import ErrorClassifierPort
-from bioetl.domain.ports.error_handler import ErrorHandlerPort
-from bioetl.domain.ports.fallback_policy import FallbackPolicyPort
 from bioetl.domain.ports.filtering import InputFilterPort
 from bioetl.domain.ports.health_check import (
     HealthCheckPort,
@@ -77,13 +51,11 @@ from bioetl.domain.ports.health_check import (
     HealthStatusLiteral,
 )
 from bioetl.domain.ports.idmapping import IDMappingPort, IDMappingSourceReaderPort
-from bioetl.domain.ports.locking import LockPort
-from bioetl.domain.ports.memory import MemoryMonitorPort, MemoryStats
-from bioetl.domain.ports.metadata import MetadataWriterPort
-from bioetl.domain.ports.metadata_coordinator import (
+from bioetl.domain.ports.metadata import (
     BronzeMetadataInput,
     GoldMetadataInput,
     MetadataCoordinatorPort,
+    MetadataWriterPort,
     SilverMetadataInput,
     SilverRef,
 )
@@ -104,20 +76,39 @@ from bioetl.domain.ports.observability import (
     TracingPort,
 )
 from bioetl.domain.ports.pii import PiiHasherPort
-from bioetl.domain.ports.quarantine import QuarantinePort
-from bioetl.domain.ports.registry_port import (
-    PipelineRegistryPort,
-    RegistryAccessorPort,
+from bioetl.domain.ports.quality import (
+    BronzeDQAnalyzerPort,
+    BronzeDQConfigPort,
+    ContractPolicyPort,
+    DQReportWriterPort,
+    ErrorClassifierPort,
+    ErrorHandlerPort,
+    FallbackPolicyPort,
+    GoldDQAnalyzerPort,
+    GoldDQConfigPort,
+    GoldValidatorPort,
+    QuarantinePort,
+    SilverDQAnalyzerPort,
+    SilverDQConfigPort,
+    SilverValidatorPort,
 )
 from bioetl.domain.ports.resilience import CircuitBreakerPort, RateLimiterPort
-from bioetl.domain.ports.runner import (
+from bioetl.domain.ports.runtime import (
+    BatchIdGeneratorPort,
+    CheckpointPort,
+    ClockPort,
+    LockPort,
+    MemoryMonitorPort,
+    MemoryStats,
     MetricsExtractorPort,
     PipelineFactoryPort,
+    PipelineRegistryPort,
+    RegistryAccessorPort,
     RunnablePort,
     RunnerFactoryPort,
+    ShutdownPort,
 )
 from bioetl.domain.ports.serialization import JsonEncoderPort
-from bioetl.domain.ports.shutdown import ShutdownPort
 from bioetl.domain.ports.storage import (
     BronzeStoragePort,
     GoldStoragePort,
@@ -127,7 +118,6 @@ from bioetl.domain.ports.storage import (
     StorageMaintenancePort,
     StoragePort,
 )
-from bioetl.domain.ports.validation import GoldValidatorPort, SilverValidatorPort
 
 __all__ = [
     "AdrDocument",

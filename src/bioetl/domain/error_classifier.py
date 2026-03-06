@@ -139,6 +139,10 @@ class ErrorClassifier:
         Returns:
             ErrorType from the exception's error_type class attribute
         """
+        instance_error_type = getattr(error, "error_type", None)
+        if isinstance(instance_error_type, ErrorType):
+            return instance_error_type
+
         # Use the explicit error_type attribute (deterministic)
         return error.get_error_type()
 

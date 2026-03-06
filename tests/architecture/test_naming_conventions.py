@@ -82,6 +82,7 @@ def test_class_naming_suffixes() -> None:
                     "Author",
                     "Raw",
                     "Output",
+                    "Outcome",
                 )
             ):
                 continue
