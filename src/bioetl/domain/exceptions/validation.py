@@ -104,7 +104,11 @@ def MissingRequiredFieldError(
     if record_id:
         msg += f" (record_id={record_id})"
     error = ValidationError(msg, field=field).with_context(record_id=record_id)
-    cast(Any, error).error_type = ErrorType.MISSING_REQUIRED_FIELD
+    cast(
+        Any, error
+    ).error_type = (
+        ErrorType.MISSING_REQUIRED_FIELD
+    )  # Any: legacy exception compatibility shim
     return cast(ValidationError, error)
 
 
@@ -123,5 +127,7 @@ def InvalidDataFormatError(
         value=value,
         expected_format=expected_format,
     )
-    cast(Any, error).error_type = ErrorType.INVALID_DATA
+    cast(
+        Any, error
+    ).error_type = ErrorType.INVALID_DATA  # Any: legacy exception compatibility shim
     return cast(ValidationError, error)

@@ -7,20 +7,26 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.composition.factories.adapter_helpers_factory import AdapterHelpersFactory
 from bioetl.composition.providers._config_helpers import (
+    _create_http_data_source,
     _get_batch_size_from_config,
-    _get_factories,
+    _get_rate_limit_from_config,
     _normalize_optional_override,
-    _wrap_with_filter,
 )
-from bioetl.composition.providers.factory_loader import (
-    get_data_source_factory,
-    get_http_client_factory,
+from bioetl.composition.providers.provider_registry import (
+    HttpConfig,
+    ProviderConfig,
 )
+from bioetl.infrastructure.adapters.crossref.client import CrossRefAdapter
 from bioetl.infrastructure.adapters.crossref.factory import _create_crossref_adapter
-from bioetl.infrastructure.adapters.openalex.client import _create_openalex_adapter
-from bioetl.infrastructure.adapters.pubmed.pubmed_client import PubMedAdapter
+from bioetl.infrastructure.adapters.openalex.client import (
+    OpenAlexAdapter,
+    _create_openalex_adapter,
+)
+from bioetl.infrastructure.adapters.pubmed.pubmed_client import (
+    PubMedAdapter,
+    _create_pubmed_adapter,
+)
 from bioetl.infrastructure.adapters.semanticscholar.adapter import (
     SemanticScholarAdapter,
 )
@@ -54,14 +60,6 @@ def _create_pubmed_data_source(
     Email follows a similar resolution: ``pipeline_config.source.email`` takes
     precedence over ``settings.default_email``.
     """
-    _, HttpClientFactory = _get_factories(
-        get_data_source_factory, get_http_client_factory
-    )
-    http_client = HttpClientFactory.create_for_provider(
-        "pubmed", settings, metrics=metrics
-    )
-
-    # Determine API key: config takes precedence over settings
     configured_api_key = _normalize_optional_override(pipeline_config.source.api_key)
     settings_api_key = (
         settings.pubmed_api_key.get_secret_value() if settings.pubmed_api_key else None
@@ -70,24 +68,17 @@ def _create_pubmed_data_source(
 
     configured_email = _normalize_optional_override(pipeline_config.source.email)
     email = configured_email or settings.default_email
-    helper_services = AdapterHelpersFactory.create_http_helpers(
-        provider="pubmed",
-        logger=logger,
-        metrics=metrics,
-    )
 
-    data_source = PubMedAdapter(
-        http_client=http_client,
+    return _create_http_data_source(
+        provider="pubmed",
+        settings=settings,
         logger=logger,
-        email=email,
-        api_key=api_key,
+        filter_config=filter_config,
         metrics=metrics,
-        error_handler=helper_services.error_handler,
-        adapter_metrics=helper_services.adapter_metrics,
-        request_collector=helper_services.request_collector,
-        fallback_fetch_service=helper_services.fallback_fetch_service,
+        pipeline_name=pipeline_name,
+        adapter_factory=PubMedAdapter,
+        extra_kwargs={"email": email, "api_key": api_key},
     )
-    return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)
 
 
 def _create_crossref_data_source(
@@ -103,34 +94,20 @@ def _create_crossref_data_source(
     CrossRef requires mailto for polite pool access (50 req/sec vs 1 req/sec).
     Email is obtained from pipeline config or settings.default_email.
     """
-    _, HttpClientFactory = _get_factories(
-        get_data_source_factory, get_http_client_factory
-    )
-    http_client = HttpClientFactory.create_for_provider("crossref", settings)
-
-    # Get mailto from pipeline config or settings
     configured_email = _normalize_optional_override(pipeline_config.source.email)
     mailto = configured_email or settings.default_email
     batch_size = _get_batch_size_from_config("crossref", default=50)
-    helper_services = AdapterHelpersFactory.create_http_helpers(
-        provider="crossref",
-        logger=logger,
-        metrics=metrics,
-    )
 
-    data_source = _create_crossref_adapter(
-        http_client=http_client,
-        logger=logger,
+    return _create_http_data_source(
+        provider="crossref",
         settings=settings,
-        mailto=mailto,
-        batch_size=batch_size,
+        logger=logger,
+        filter_config=filter_config,
         metrics=metrics,
-        error_handler=helper_services.error_handler,
-        adapter_metrics=helper_services.adapter_metrics,
-        request_collector=helper_services.request_collector,
-        fallback_fetch_service=helper_services.fallback_fetch_service,
+        pipeline_name=pipeline_name,
+        adapter_factory=_create_crossref_adapter,
+        extra_kwargs={"settings": settings, "mailto": mailto, "batch_size": batch_size},
     )
-    return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)
 
 
 def _create_openalex_data_source(
@@ -146,34 +123,20 @@ def _create_openalex_data_source(
     OpenAlex requires mailto for polite pool access (10 req/sec).
     Email is obtained from pipeline config or settings.default_email.
     """
-    _, HttpClientFactory = _get_factories(
-        get_data_source_factory, get_http_client_factory
-    )
-    http_client = HttpClientFactory.create_for_provider("openalex", settings)
-
-    # Get mailto from pipeline config or settings
     configured_email = _normalize_optional_override(pipeline_config.source.email)
     mailto = configured_email or settings.default_email
     batch_size = _get_batch_size_from_config("openalex", default=50)
-    helper_services = AdapterHelpersFactory.create_http_helpers(
-        provider="openalex",
-        logger=logger,
-        metrics=metrics,
-    )
 
-    data_source = _create_openalex_adapter(
-        http_client=http_client,
-        logger=logger,
+    return _create_http_data_source(
+        provider="openalex",
         settings=settings,
-        mailto=mailto,
-        batch_size=batch_size,
+        logger=logger,
+        filter_config=filter_config,
         metrics=metrics,
-        error_handler=helper_services.error_handler,
-        adapter_metrics=helper_services.adapter_metrics,
-        request_collector=helper_services.request_collector,
-        fallback_fetch_service=helper_services.fallback_fetch_service,
+        pipeline_name=pipeline_name,
+        adapter_factory=_create_openalex_adapter,
+        extra_kwargs={"settings": settings, "mailto": mailto, "batch_size": batch_size},
     )
-    return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)
 
 
 def _create_semanticscholar_data_source(
@@ -185,12 +148,6 @@ def _create_semanticscholar_data_source(
     pipeline_name: str = "unknown",
 ) -> DataSourcePort:
     """Create Semantic Scholar adapter and optionally wrap it with input filtering."""
-    _, HttpClientFactory = _get_factories(
-        get_data_source_factory, get_http_client_factory
-    )
-    http_client = HttpClientFactory.create_for_provider("semanticscholar", settings)
-
-    # Get API key from settings (configured via BIOETL_SEMANTICSCHOLAR_API_KEY env var)
     api_key = (
         settings.semanticscholar_api_key.get_secret_value()
         if settings.semanticscholar_api_key
@@ -203,22 +160,63 @@ def _create_semanticscholar_data_source(
         )
 
     batch_size = _get_batch_size_from_config("semanticscholar", default=100)
-    helper_services = AdapterHelpersFactory.create_http_helpers(
+
+    return _create_http_data_source(
         provider="semanticscholar",
+        settings=settings,
         logger=logger,
+        filter_config=filter_config,
         metrics=metrics,
+        pipeline_name=pipeline_name,
+        adapter_factory=SemanticScholarAdapter,
+        extra_kwargs={"api_key": api_key, "batch_size": batch_size},
     )
 
-    data_source = SemanticScholarAdapter(
-        http_client=http_client,
-        logger=logger,
-        api_key=api_key,
-        batch_size=batch_size,
-        metrics=metrics,
-        error_handler=helper_services.error_handler,
-        adapter_metrics=helper_services.adapter_metrics,
-        request_collector=helper_services.request_collector,
-        fallback_fetch_service=helper_services.fallback_fetch_service,
-    )
 
-    return _wrap_with_filter(data_source, filter_config, logger, metrics, pipeline_name)
+def _get_biblio_provider_configs() -> dict[str, ProviderConfig]:
+    """Build ProviderConfig entries for bibliographic providers."""
+    pubmed = _get_rate_limit_from_config("pubmed")
+    crossref = _get_rate_limit_from_config("crossref")
+    openalex = _get_rate_limit_from_config("openalex")
+    semanticscholar = _get_rate_limit_from_config("semanticscholar")
+
+    return {
+        "pubmed": ProviderConfig(
+            adapter_class=PubMedAdapter,
+            http_config=HttpConfig(
+                rate=pubmed.rate,
+                capacity=pubmed.capacity,
+                rate_overrides={"pubmed_api_key": 10.0},
+            ),
+            requires_http_client=True,
+            requires_logger=True,
+            custom_creator=_create_pubmed_adapter,
+            data_source_creator=_create_pubmed_data_source,
+        ),
+        "crossref": ProviderConfig(
+            adapter_class=CrossRefAdapter,
+            http_config=HttpConfig(rate=crossref.rate, capacity=crossref.capacity),
+            requires_http_client=True,
+            requires_logger=True,
+            custom_creator=_create_crossref_adapter,
+            data_source_creator=_create_crossref_data_source,
+        ),
+        "openalex": ProviderConfig(
+            adapter_class=OpenAlexAdapter,
+            http_config=HttpConfig(rate=openalex.rate, capacity=openalex.capacity),
+            requires_http_client=True,
+            requires_logger=True,
+            custom_creator=_create_openalex_adapter,
+            data_source_creator=_create_openalex_data_source,
+        ),
+        "semanticscholar": ProviderConfig(
+            adapter_class=SemanticScholarAdapter,
+            http_config=HttpConfig(
+                rate=semanticscholar.rate,
+                capacity=semanticscholar.capacity,
+            ),
+            requires_http_client=True,
+            requires_logger=True,
+            data_source_creator=_create_semanticscholar_data_source,
+        ),
+    }

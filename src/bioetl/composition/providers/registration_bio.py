@@ -25,11 +25,17 @@ from bioetl.composition.providers.factory_loader import (
     get_data_source_factory,
     get_http_client_factory,
 )
+from bioetl.composition.providers.provider_registry import (
+    HttpConfig,
+    ProviderConfig,
+)
 from bioetl.domain.models.filter import ExtractionParams
+from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
 from bioetl.infrastructure.adapters.input import IDMappingCsvReaderAdapter
 from bioetl.infrastructure.adapters.pubchem.client import PubChemAdapter
+from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
 from bioetl.infrastructure.adapters.uniprot.constants import UNIPROT_API_BASE
 from bioetl.infrastructure.adapters.uniprot.idmapping_client import (
     UniProtIDMappingClient,
@@ -263,3 +269,46 @@ def _extract_uniprot_mapping_seed_ids(
     if filter_config and filter_config.direct_filter_ids:
         return list(filter_config.direct_filter_ids)
     return None
+
+
+def _get_bio_provider_configs() -> dict[str, ProviderConfig]:
+    """Build ProviderConfig entries for bio providers."""
+    chembl = _get_rate_limit_from_config("chembl")
+    pubchem = _get_rate_limit_from_config("pubchem")
+    uniprot = _get_rate_limit_from_config("uniprot")
+
+    return {
+        "chembl": ProviderConfig(
+            adapter_class=ChemblAdapter,
+            http_config=HttpConfig(rate=chembl.rate, capacity=chembl.capacity),
+            requires_http_client=True,
+            requires_logger=True,
+            data_source_creator=_create_chembl_data_source,
+        ),
+        "pubchem": ProviderConfig(
+            adapter_class=PubChemAdapter,
+            http_config=HttpConfig(rate=pubchem.rate, capacity=pubchem.capacity),
+            requires_http_client=False,
+            requires_logger=True,
+            custom_creator=_create_pubchem_adapter,
+            data_source_creator=_create_pubchem_data_source,
+        ),
+        "uniprot": ProviderConfig(
+            adapter_class=UniProtAdapter,
+            http_config=HttpConfig(
+                rate=uniprot.rate,
+                capacity=uniprot.capacity,
+                rate_overrides={"uniprot_api_key": 100.0},
+            ),
+            requires_http_client=True,
+            requires_logger=True,
+            data_source_creator=_create_uniprot_data_source,
+        ),
+        "uniprot_idmapping": ProviderConfig(
+            adapter_class=IDMappingDataSource,
+            http_config=HttpConfig(rate=uniprot.rate, capacity=uniprot.capacity),
+            requires_http_client=True,
+            requires_logger=True,
+            data_source_creator=_create_uniprot_idmapping_data_source,
+        ),
+    }

@@ -214,7 +214,7 @@ class TestConfigValuesNotHardcoded:
 
     def test_chembl_rate_limit_from_config(self) -> None:
         """ChEMBL rate limit should match configs/providers/chembl.yaml."""
-        from bioetl.composition.providers.registration import (
+        from bioetl.composition.providers._config_helpers import (
             _get_rate_limit_from_config,
         )
 

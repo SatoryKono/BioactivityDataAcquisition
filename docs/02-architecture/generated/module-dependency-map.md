@@ -5,7 +5,7 @@
 ## Summary
 
 - Scanned modules: `861`
-- Internal import edges (raw): `3197`
+- Internal import edges (raw): `3190`
 - Aggregated layer edges: `14`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (top 60): `60`
@@ -21,10 +21,10 @@ flowchart LR
     interfaces[interfaces]
     application -->|342 OK| application
     application -->|532 OK| domain
-    composition -->|169 OK| application
-    composition -->|234 OK| composition
+    composition -->|168 OK| application
+    composition -->|233 OK| composition
     composition -->|182 OK| domain
-    composition -->|182 OK| infrastructure
+    composition -->|177 OK| infrastructure
     domain -->|541 OK| domain
     infrastructure -->|418 OK| domain
     infrastructure -->|448 OK| infrastructure
@@ -41,10 +41,10 @@ flowchart LR
 |---|---|---:|---|
 | `application` | `application` | 342 | allowed |
 | `application` | `domain` | 532 | allowed |
-| `composition` | `application` | 169 | allowed |
-| `composition` | `composition` | 234 | allowed |
+| `composition` | `application` | 168 | allowed |
+| `composition` | `composition` | 233 | allowed |
 | `composition` | `domain` | 182 | allowed |
-| `composition` | `infrastructure` | 182 | allowed |
+| `composition` | `infrastructure` | 177 | allowed |
 | `domain` | `domain` | 541 | allowed |
 | `infrastructure` | `domain` | 418 | allowed |
 | `infrastructure` | `infrastructure` | 448 | allowed |
@@ -77,12 +77,12 @@ flowchart LR
 | `infrastructure.storage` | `domain.types` | 23 |
 | `composition.bootstrap` | `domain.ports` | 22 |
 | `composition.bootstrap` | `infrastructure.config` | 21 |
-| `composition.providers` | `infrastructure.adapters` | 21 |
 | `composition.factories` | `infrastructure.config` | 20 |
 | `infrastructure.storage` | `domain.models` | 20 |
 | `application.services` | `domain.types` | 19 |
 | `composition.factories` | `domain.schemas` | 19 |
 | `interfaces.cli` | `composition.entrypoints` | 18 |
+| `composition.providers` | `infrastructure.adapters` | 16 |
 | `application.pipelines` | `domain.context` | 15 |
 | `application.services` | `domain.value_objects` | 15 |
 | `composition.factories` | `domain.types` | 15 |

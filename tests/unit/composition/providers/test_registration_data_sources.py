@@ -19,6 +19,14 @@ from bioetl.composition.providers.registration_bio import (
     _create_uniprot_idmapping_data_source,
 )
 
+# Common mock target for the generic biblio helper
+_BIBLIO_HTTP_DS = (
+    "bioetl.composition.providers.registration_biblio._create_http_data_source"
+)
+_BIBLIO_BATCH = (
+    "bioetl.composition.providers.registration_biblio._get_batch_size_from_config"
+)
+
 
 @pytest.mark.unit
 class TestChemblPublicationTermBranch:
@@ -74,27 +82,16 @@ class TestPubChemCreatorGuard:
 class TestCrossRefAndOpenAlexCreators:
     """Covers helper branches for CrossRef/OpenAlex providers."""
 
-    @patch("bioetl.composition.providers.registration_biblio._wrap_with_filter")
-    @patch(
-        "bioetl.composition.providers.registration_biblio._get_batch_size_from_config"
-    )
-    @patch("bioetl.composition.providers.registration_biblio._create_crossref_adapter")
-    @patch("bioetl.composition.providers.registration_biblio._get_factories")
+    @patch(_BIBLIO_BATCH)
+    @patch(_BIBLIO_HTTP_DS)
     def test_crossref_creator_uses_pipeline_email_and_batch_size(
         self,
-        mock_get_factories: MagicMock,
-        mock_create_crossref_adapter: MagicMock,
-        mock_get_batch_size_from_config: MagicMock,
-        mock_wrap_with_filter: MagicMock,
+        mock_create_http_ds: MagicMock,
+        mock_get_batch_size: MagicMock,
     ) -> None:
-        mock_http_factory = MagicMock()
-        mock_get_factories.return_value = (MagicMock(), mock_http_factory)
-        mock_http_client = MagicMock()
-        mock_http_factory.create_for_provider.return_value = mock_http_client
-        mock_get_batch_size_from_config.return_value = 77
+        mock_get_batch_size.return_value = 77
         mock_adapter = MagicMock()
-        mock_create_crossref_adapter.return_value = mock_adapter
-        mock_wrap_with_filter.return_value = mock_adapter
+        mock_create_http_ds.return_value = mock_adapter
 
         settings = MagicMock()
         settings.default_email = "default@example.org"
@@ -109,35 +106,22 @@ class TestCrossRefAndOpenAlexCreators:
             pipeline_name="crossref_publication",
         )
 
-        mock_http_factory.create_for_provider.assert_called_once_with(
-            "crossref", settings
-        )
-        call_kwargs = mock_create_crossref_adapter.call_args.kwargs
-        assert call_kwargs["mailto"] == "pipeline@example.org"
-        assert call_kwargs["batch_size"] == 77
+        call_kwargs = mock_create_http_ds.call_args.kwargs
+        assert call_kwargs["extra_kwargs"]["mailto"] == "pipeline@example.org"
+        assert call_kwargs["extra_kwargs"]["batch_size"] == 77
+        assert call_kwargs["provider"] == "crossref"
         assert result is mock_adapter
 
-    @patch("bioetl.composition.providers.registration_biblio._wrap_with_filter")
-    @patch(
-        "bioetl.composition.providers.registration_biblio._get_batch_size_from_config"
-    )
-    @patch("bioetl.composition.providers.registration_biblio._create_openalex_adapter")
-    @patch("bioetl.composition.providers.registration_biblio._get_factories")
+    @patch(_BIBLIO_BATCH)
+    @patch(_BIBLIO_HTTP_DS)
     def test_openalex_creator_uses_settings_email_fallback(
         self,
-        mock_get_factories: MagicMock,
-        mock_create_openalex_adapter: MagicMock,
-        mock_get_batch_size_from_config: MagicMock,
-        mock_wrap_with_filter: MagicMock,
+        mock_create_http_ds: MagicMock,
+        mock_get_batch_size: MagicMock,
     ) -> None:
-        mock_http_factory = MagicMock()
-        mock_get_factories.return_value = (MagicMock(), mock_http_factory)
-        mock_http_client = MagicMock()
-        mock_http_factory.create_for_provider.return_value = mock_http_client
-        mock_get_batch_size_from_config.return_value = 55
+        mock_get_batch_size.return_value = 55
         mock_adapter = MagicMock()
-        mock_create_openalex_adapter.return_value = mock_adapter
-        mock_wrap_with_filter.return_value = mock_adapter
+        mock_create_http_ds.return_value = mock_adapter
 
         settings = MagicMock()
         settings.default_email = "default@example.org"
@@ -152,9 +136,9 @@ class TestCrossRefAndOpenAlexCreators:
             pipeline_name="openalex_publication",
         )
 
-        call_kwargs = mock_create_openalex_adapter.call_args.kwargs
-        assert call_kwargs["mailto"] == "default@example.org"
-        assert call_kwargs["batch_size"] == 55
+        call_kwargs = mock_create_http_ds.call_args.kwargs
+        assert call_kwargs["extra_kwargs"]["mailto"] == "default@example.org"
+        assert call_kwargs["extra_kwargs"]["batch_size"] == 55
         assert result is mock_adapter
 
 
@@ -162,26 +146,15 @@ class TestCrossRefAndOpenAlexCreators:
 class TestPlaceholderResolution:
     """Covers ${ENV_VAR} placeholder resolution in source config overrides."""
 
-    @patch("bioetl.composition.providers.registration_biblio._wrap_with_filter")
-    @patch(
-        "bioetl.composition.providers.registration_biblio._get_batch_size_from_config"
-    )
-    @patch("bioetl.composition.providers.registration_biblio._create_crossref_adapter")
-    @patch("bioetl.composition.providers.registration_biblio._get_factories")
+    @patch(_BIBLIO_BATCH)
+    @patch(_BIBLIO_HTTP_DS)
     def test_crossref_mailto_placeholder_falls_back_to_settings(
         self,
-        mock_get_factories: MagicMock,
-        mock_create_crossref_adapter: MagicMock,
-        mock_get_batch_size_from_config: MagicMock,
-        mock_wrap_with_filter: MagicMock,
+        mock_create_http_ds: MagicMock,
+        mock_get_batch_size: MagicMock,
     ) -> None:
-        mock_http_factory = MagicMock()
-        mock_get_factories.return_value = (MagicMock(), mock_http_factory)
-        mock_http_factory.create_for_provider.return_value = MagicMock()
-        mock_get_batch_size_from_config.return_value = 50
-        mock_adapter = MagicMock()
-        mock_create_crossref_adapter.return_value = mock_adapter
-        mock_wrap_with_filter.return_value = mock_adapter
+        mock_get_batch_size.return_value = 50
+        mock_create_http_ds.return_value = MagicMock()
 
         settings = MagicMock()
         settings.default_email = "default@example.org"
@@ -194,24 +167,15 @@ class TestPlaceholderResolution:
             logger=MagicMock(),
         )
 
-        call_kwargs = mock_create_crossref_adapter.call_args.kwargs
-        assert call_kwargs["mailto"] == "default@example.org"
+        call_kwargs = mock_create_http_ds.call_args.kwargs
+        assert call_kwargs["extra_kwargs"]["mailto"] == "default@example.org"
 
-    @patch("bioetl.composition.providers.registration_biblio._wrap_with_filter")
-    @patch("bioetl.composition.providers.registration_biblio.PubMedAdapter")
-    @patch("bioetl.composition.providers.registration_biblio._get_factories")
+    @patch(_BIBLIO_HTTP_DS)
     def test_pubmed_placeholders_fallback_to_settings_when_env_missing(
         self,
-        mock_get_factories: MagicMock,
-        mock_pubmed_adapter: MagicMock,
-        mock_wrap_with_filter: MagicMock,
+        mock_create_http_ds: MagicMock,
     ) -> None:
-        mock_http_factory = MagicMock()
-        mock_get_factories.return_value = (MagicMock(), mock_http_factory)
-        mock_http_factory.create_for_provider.return_value = MagicMock()
-        mock_adapter = MagicMock()
-        mock_pubmed_adapter.return_value = mock_adapter
-        mock_wrap_with_filter.return_value = mock_adapter
+        mock_create_http_ds.return_value = MagicMock()
 
         settings = MagicMock()
         settings.default_email = "default@example.org"
@@ -229,35 +193,25 @@ class TestPlaceholderResolution:
                 logger=MagicMock(),
             )
 
-        call_kwargs = mock_pubmed_adapter.call_args.kwargs
-        assert call_kwargs["email"] == "default@example.org"
-        assert call_kwargs["api_key"] == "settings-key"
+        call_kwargs = mock_create_http_ds.call_args.kwargs
+        assert call_kwargs["extra_kwargs"]["email"] == "default@example.org"
+        assert call_kwargs["extra_kwargs"]["api_key"] == "settings-key"
 
 
 @pytest.mark.unit
 class TestSemanticScholarCreatorBranches:
     """Covers API key warning / non-warning branches."""
 
-    @patch("bioetl.composition.providers.registration_biblio._wrap_with_filter")
-    @patch(
-        "bioetl.composition.providers.registration_biblio._get_batch_size_from_config"
-    )
-    @patch("bioetl.composition.providers.registration_biblio.SemanticScholarAdapter")
-    @patch("bioetl.composition.providers.registration_biblio._get_factories")
+    @patch(_BIBLIO_BATCH)
+    @patch(_BIBLIO_HTTP_DS)
     def test_warns_when_api_key_missing(
         self,
-        mock_get_factories: MagicMock,
-        mock_semanticscholar_adapter: MagicMock,
-        mock_get_batch_size_from_config: MagicMock,
-        mock_wrap_with_filter: MagicMock,
+        mock_create_http_ds: MagicMock,
+        mock_get_batch_size: MagicMock,
     ) -> None:
-        mock_http_factory = MagicMock()
-        mock_get_factories.return_value = (MagicMock(), mock_http_factory)
-        mock_http_factory.create_for_provider.return_value = MagicMock()
-        mock_get_batch_size_from_config.return_value = 120
+        mock_get_batch_size.return_value = 120
         mock_adapter = MagicMock()
-        mock_semanticscholar_adapter.return_value = mock_adapter
-        mock_wrap_with_filter.return_value = mock_adapter
+        mock_create_http_ds.return_value = mock_adapter
 
         logger = MagicMock()
         settings = MagicMock()
@@ -270,29 +224,19 @@ class TestSemanticScholarCreatorBranches:
         )
 
         logger.warning.assert_called_once()
-        assert mock_semanticscholar_adapter.call_args.kwargs["api_key"] == ""
+        call_kwargs = mock_create_http_ds.call_args.kwargs
+        assert call_kwargs["extra_kwargs"]["api_key"] == ""
         assert result is mock_adapter
 
-    @patch("bioetl.composition.providers.registration_biblio._wrap_with_filter")
-    @patch(
-        "bioetl.composition.providers.registration_biblio._get_batch_size_from_config"
-    )
-    @patch("bioetl.composition.providers.registration_biblio.SemanticScholarAdapter")
-    @patch("bioetl.composition.providers.registration_biblio._get_factories")
+    @patch(_BIBLIO_BATCH)
+    @patch(_BIBLIO_HTTP_DS)
     def test_does_not_warn_when_api_key_present(
         self,
-        mock_get_factories: MagicMock,
-        mock_semanticscholar_adapter: MagicMock,
-        mock_get_batch_size_from_config: MagicMock,
-        mock_wrap_with_filter: MagicMock,
+        mock_create_http_ds: MagicMock,
+        mock_get_batch_size: MagicMock,
     ) -> None:
-        mock_http_factory = MagicMock()
-        mock_get_factories.return_value = (MagicMock(), mock_http_factory)
-        mock_http_factory.create_for_provider.return_value = MagicMock()
-        mock_get_batch_size_from_config.return_value = 100
-        mock_adapter = MagicMock()
-        mock_semanticscholar_adapter.return_value = mock_adapter
-        mock_wrap_with_filter.return_value = mock_adapter
+        mock_get_batch_size.return_value = 100
+        mock_create_http_ds.return_value = MagicMock()
 
         logger = MagicMock()
         settings = MagicMock()
@@ -306,7 +250,8 @@ class TestSemanticScholarCreatorBranches:
         )
 
         logger.warning.assert_not_called()
-        assert mock_semanticscholar_adapter.call_args.kwargs["api_key"] == "secret"
+        call_kwargs = mock_create_http_ds.call_args.kwargs
+        assert call_kwargs["extra_kwargs"]["api_key"] == "secret"
 
 
 @pytest.mark.unit
