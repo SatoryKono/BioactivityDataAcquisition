@@ -221,10 +221,10 @@ class FilterConfigLoader(
             if any(
                 key in unified_raw
                 for key in (
-                        "input_filter",
-                        "silver_filters",
-                        "gold_filters",
-                        "extraction_params",
+                    "input_filter",
+                    "silver_filters",
+                    "gold_filters",
+                    "extraction_params",
                 )
             ):
                 return unified_raw
@@ -252,10 +252,10 @@ class FilterConfigLoader(
             if any(
                 key in unified_raw
                 for key in (
-                        "input_filter",
-                        "silver_filters",
-                        "gold_filters",
-                        "extraction_params",
+                    "input_filter",
+                    "silver_filters",
+                    "gold_filters",
+                    "extraction_params",
                 )
             ):
                 return unified_raw

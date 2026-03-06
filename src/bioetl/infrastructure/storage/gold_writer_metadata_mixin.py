@@ -135,9 +135,9 @@ class GoldWriterMetadataMixin(_GoldWriterMergedMetadataInputMixin):
             records_count=len(records),
             metadata={"write_mode": mode.value},
         )
-        assert (
-            self._audit is not None
-        ), "_log_gold_audit called without audit configured"
+        assert self._audit is not None, (
+            "_log_gold_audit called without audit configured"
+        )
         await self._audit.log_write(audit_entry)
 
     async def _get_delta_version(self, table_path: str) -> int | None:
