@@ -116,7 +116,11 @@ class _MetadataBuilderBase:
         run_id: str | None,
         sources_used: list[str] | None,
     ) -> tuple[RuntimeMetadata, PipelineMetadata, LineageMetadata]:
-        """Build runtime/pipeline/lineage metadata for composite merged outputs."""
+        """Build runtime/pipeline/lineage metadata for composite merged outputs.
+
+        Returns:
+            Tuple of (RuntimeMetadata, PipelineMetadata, LineageMetadata) for the composite pipeline.
+        """
         from bioetl.domain.models.metadata import (
             LineageMetadata,
             PipelineMetadata,
@@ -152,7 +156,11 @@ class _MetadataBuilderBase:
     def _build_merged_dq_summary(
         records: list[JsonDict],  # Any: heterogeneous metadata values
     ) -> DQSummary:
-        """Build DQ summary for merged records."""
+        """Build DQ summary for merged records.
+
+        Returns:
+            DQSummary with total and valid record counts equal to input length, zero errors.
+        """
         from bioetl.domain.models.metadata import DQSummary
 
         return DQSummary(
@@ -164,7 +172,11 @@ class _MetadataBuilderBase:
 
     @staticmethod
     def _build_environment_metadata() -> EnvironmentMetadata:
-        """Build environment metadata for current process."""
+        """Build environment metadata for current process.
+
+        Returns:
+            EnvironmentMetadata with current hostname, Python version, and BioETL version.
+        """
         from bioetl.domain.models.metadata import EnvironmentMetadata
 
         return EnvironmentMetadata(
@@ -196,7 +208,11 @@ class SilverMetadataBuilder(_MetadataBuilderBase):
         version_after: int | None = None,
         partition_by: list[str] | None = None,
     ) -> SilverMetadata:
-        """Build Silver metadata for merged composite data."""
+        """Build Silver metadata for merged composite data.
+
+        Returns:
+            SilverMetadata instance populated with composite runtime, pipeline, lineage, and DQ info.
+        """
         from bioetl.domain.models.metadata import (
             BaseOutputMetadata,
             DeltaMetrics,
@@ -256,7 +272,11 @@ class GoldMetadataBuilder(_MetadataBuilderBase):
         now: datetime,
         run_id: object | None,
     ) -> tuple[RuntimeMetadata, PipelineMetadata]:
-        """Build runtime and pipeline metadata for fallback mode."""
+        """Build runtime and pipeline metadata for fallback mode.
+
+        Returns:
+            Tuple of (RuntimeMetadata, PipelineMetadata) built from parsed table name components.
+        """
         from bioetl.domain.models.metadata import (
             PipelineMetadata,
             RuntimeMetadata,
@@ -285,7 +305,11 @@ class GoldMetadataBuilder(_MetadataBuilderBase):
         records: list[JsonDict],  # Any: heterogeneous metadata values
         now: datetime,
     ) -> tuple[DQSummary, BaseOutputMetadata, GoldOutputExt | CompositeOutputExt]:
-        """Build DQ summary and unified output structures for fallback mode."""
+        """Build DQ summary and unified output structures for fallback mode.
+
+        Returns:
+            Tuple of (DQSummary, BaseOutputMetadata, GoldOutputExt or CompositeOutputExt).
+        """
         from bioetl.domain.models.metadata import (
             BaseOutputMetadata,
             DQSummary,
@@ -312,7 +336,11 @@ class GoldMetadataBuilder(_MetadataBuilderBase):
         mode: GoldWriteMode,
         scd_config: JsonDict | None,  # Any: dynamic layer config
     ) -> SCDMetadata | None:
-        """Build SCD metadata only for SCD2 mode with config present."""
+        """Build SCD metadata only for SCD2 mode with config present.
+
+        Returns:
+            SCDMetadata instance if mode is SCD2 and config is provided, None otherwise.
+        """
         from bioetl.domain.medallion import GoldWriteMode
         from bioetl.domain.models.metadata import SCDMetadata
 
@@ -335,7 +363,11 @@ class GoldMetadataBuilder(_MetadataBuilderBase):
         run_id: object | None = None,
         gold_schema: object | None = None,
     ) -> GoldMetadata:
-        """Build Gold metadata using fallback logic (no coordinator)."""
+        """Build Gold metadata using fallback logic (no coordinator).
+
+        Returns:
+            GoldMetadata instance with runtime, pipeline, DQ, SCD, and environment info.
+        """
         from bioetl.domain.models.metadata import (
             GoldMetadata,
             LineageMetadata,
@@ -374,7 +406,11 @@ class GoldMetadataBuilder(_MetadataBuilderBase):
         records: list[JsonDict],  # Any: heterogeneous metadata values
         now: datetime,
     ) -> tuple[BaseOutputMetadata, GoldOutputExt | CompositeOutputExt]:
-        """Build unified output metadata for merged Gold records."""
+        """Build unified output metadata for merged Gold records.
+
+        Returns:
+            Tuple of (BaseOutputMetadata, GoldOutputExt or CompositeOutputExt) for the merged Gold output.
+        """
         from bioetl.domain.models.metadata import BaseOutputMetadata, GoldOutputExt
 
         composite_ext = build_composite_output_ext(records)
@@ -396,7 +432,11 @@ class GoldMetadataBuilder(_MetadataBuilderBase):
         sources_used: list[str] | None = None,
         gold_schema: object | None = None,
     ) -> GoldMetadata:
-        """Build Gold metadata for merged composite data."""
+        """Build Gold metadata for merged composite data.
+
+        Returns:
+            GoldMetadata instance populated with composite runtime, pipeline, lineage, and schema info.
+        """
         from bioetl.domain.models.metadata import (
             GoldMetadata,
         )

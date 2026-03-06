@@ -1,0 +1,117 @@
+"""Read/history and cleanup-preview helpers for Gold storage."""
+
+from __future__ import annotations
+
+from importlib import import_module
+from pathlib import Path
+from types import ModuleType
+from typing import TYPE_CHECKING, Any, cast
+
+from bioetl.domain.types import JsonDict
+
+if TYPE_CHECKING:
+    from collections.abc import Awaitable, Callable
+
+    from bioetl.domain.types import GoldRecord
+
+
+def _load_gold_writer_module() -> ModuleType:
+    """Load canonical gold_writer module for DeltaTable integration.
+
+    Returns:
+        Loaded gold_writer ModuleType with DeltaTable access.
+    """
+    return import_module("bioetl.infrastructure.storage.gold_writer")
+
+
+class GoldWriterReadCleanupMixin:
+    """Reusable read/history and cleanup-preview helpers."""
+
+    _resolve_table_path: Callable[[str], str]
+    _run_in_executor: Callable[..., Awaitable[Any]]
+
+    async def read_gold(
+        self,
+        table_name: str,
+        columns: list[str] | None = None,
+        current_only: bool = True,
+    ) -> list[GoldRecord]:
+        """Read data from Gold table.
+
+        Returns:
+            List of Gold record dicts, filtered to current records if current_only is True.
+        """
+        table_path = self._resolve_table_path(table_name)
+        module = _load_gold_writer_module()
+        dt = cast(
+            Any, await self._run_in_executor(lambda: module.DeltaTable(table_path))
+        )
+        arrow_table = cast(Any, await self._run_in_executor(dt.to_pyarrow_table))
+        if current_only and "is_current" in arrow_table.column_names:
+            import pyarrow.compute as pc
+
+            arrow_table = arrow_table.filter(pc.equal(arrow_table["is_current"], True))
+        result: list[GoldRecord] = arrow_table.to_pylist()
+        if columns:
+            return [{key: record.get(key) for key in columns} for record in result]
+        return result
+
+    async def get_history(
+        self,
+        table_name: str,
+        business_key_values: JsonDict | None = None,
+        limit: int = 10,
+    ) -> list[GoldRecord]:
+        """Get history of records in Gold table (for SCD2 tracking).
+
+        Returns:
+            List of Gold record dicts sorted by valid_from, truncated to limit.
+        """
+        table_path = self._resolve_table_path(table_name)
+        module = _load_gold_writer_module()
+        dt = cast(
+            Any, await self._run_in_executor(lambda: module.DeltaTable(table_path))
+        )
+        arrow_table = cast(Any, await self._run_in_executor(dt.to_pyarrow_table))
+
+        if business_key_values:
+            import pyarrow.compute as pc
+
+            mask = None
+            for key, value in business_key_values.items():
+                condition = pc.equal(arrow_table[key], value)
+                mask = condition if mask is None else pc.and_(mask, condition)
+            if mask is not None:
+                arrow_table = arrow_table.filter(mask)
+
+        if "valid_from" in arrow_table.column_names:
+            arrow_table = arrow_table.sort_by([("valid_from", "ascending")])
+        result: list[GoldRecord] = arrow_table.to_pylist()
+        return result[:limit] if limit > 0 else result
+
+    def preview_cleanup(
+        self,
+        table_name: str,
+    ) -> JsonDict:
+        """Preview Gold cleanup scope without deleting files.
+
+        Returns:
+            Dictionary with table path, existence flag, file count, layer name, and table name.
+        """
+        table_path = Path(self._resolve_table_path(table_name))
+        exists = table_path.exists()
+        file_count = (
+            sum(1 for file_path in table_path.rglob("*") if file_path.is_file())
+            if exists
+            else 0
+        )
+        return {
+            "path": str(table_path),
+            "exists": exists,
+            "file_count": file_count,
+            "layer": "gold",
+            "table_name": table_name,
+        }
+
+
+__all__ = ["GoldWriterReadCleanupMixin"]

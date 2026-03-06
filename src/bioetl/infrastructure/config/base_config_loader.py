@@ -71,8 +71,7 @@ class BaseConfigLoader(ABC, Generic[T]):
         self,
         provider: str,
         entity: str,
-        inline_overrides: JsonDict  # Any: YAML config heterogeneous
-                          | None = None,
+        inline_overrides: JsonDict | None = None,  # Any: YAML config heterogeneous
     ) -> T:
         """Load merged config for provider/entity.
 

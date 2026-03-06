@@ -119,9 +119,11 @@ class OpenAlexCursorFlowService:
             "openalex_title_lookup_summary",
             total_titles=len(effective_titles),
             found_by_title=found,
-            hit_rate_pct=round(found / len(effective_titles) * 100, 1)
-            if effective_titles
-            else 0.0,
+            hit_rate_pct=(
+                round(found / len(effective_titles) * 100, 1)
+                if effective_titles
+                else 0.0
+            ),
         )
 
     async def iter_doi_batches_for_fallback(

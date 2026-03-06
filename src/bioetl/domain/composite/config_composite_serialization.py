@@ -55,7 +55,7 @@ def _build_dependency_config(
             "dependencies[].timeout_seconds",
             600,
         )
-                        or 600,
+        or 600,
         silver_table=optional_str(
             dep.get("silver_table"), "dependencies[].silver_table"
         ),
@@ -89,7 +89,7 @@ def _build_enricher_config(
             "enrichers[].timeout_seconds",
             600,
         )
-                        or 600,
+        or 600,
     )
 
 
@@ -126,11 +126,11 @@ def _build_merge_config(
         sort_by_silver=optional_str_tuple(
             merge_data.get("sort_by_silver"), "merge.sort_by_silver"
         )
-                       or (),
+        or (),
         sort_by_gold=optional_str_tuple(
             merge_data.get("sort_by_gold"), "merge.sort_by_gold"
         )
-                     or (),
+        or (),
     )
 
 

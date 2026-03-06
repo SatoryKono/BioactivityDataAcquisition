@@ -76,7 +76,7 @@ class AnomalyDetector:
         baseline.extend(values)
 
         if len(baseline) > self.baseline_window:
-            self._baselines[metric_name] = baseline[-self.baseline_window:]
+            self._baselines[metric_name] = baseline[-self.baseline_window :]
 
     def add_baseline_value(self, metric_name: str, value: float) -> None:
         """Add single value to baseline.

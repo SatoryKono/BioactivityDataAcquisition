@@ -44,7 +44,11 @@ class DQOverrideSchema(BaseModel):
         return self
 
     def to_domain(self) -> DQOverrideConfig:
-        """Convert to immutable domain DQOverrideConfig."""
+        """Convert to immutable domain DQOverrideConfig.
+
+        Returns:
+            DQOverrideConfig instance with soft and hard fail threshold overrides.
+        """
         return DQOverrideConfig(
             soft_fail_threshold=self.soft_fail_threshold,
             hard_fail_threshold=self.hard_fail_threshold,
@@ -78,7 +82,11 @@ class CompositeDQSchema(BaseModel):
         return self
 
     def to_domain(self) -> CompositeDQConfig:
-        """Convert to immutable domain CompositeDQConfig."""
+        """Convert to immutable domain CompositeDQConfig.
+
+        Returns:
+            CompositeDQConfig instance with thresholds, enricher overrides, and required fields.
+        """
         overrides = {
             name: override.to_domain()
             for name, override in self.enricher_overrides.items()
@@ -116,7 +124,11 @@ class ExecutionSchema(BaseModel):
     )
 
     def to_domain(self) -> ExecutionConfig:
-        """Convert to immutable domain ExecutionConfig."""
+        """Convert to immutable domain ExecutionConfig.
+
+        Returns:
+            ExecutionConfig instance with concurrency, checkpoint, and retry settings.
+        """
         return ExecutionConfig(
             max_concurrency=self.max_concurrency,
             checkpoint_enabled=self.checkpoint_enabled,
@@ -147,7 +159,11 @@ class LineageSchema(BaseModel):
     )
 
     def to_domain(self) -> LineageConfig:
-        """Convert to immutable domain LineageConfig."""
+        """Convert to immutable domain LineageConfig.
+
+        Returns:
+            LineageConfig instance with field source, timestamp, and status tracking settings.
+        """
         return LineageConfig(
             track_field_sources=self.track_field_sources,
             track_timestamps=self.track_timestamps,
@@ -169,7 +185,11 @@ class FieldComparisonSpecSchema(BaseModel):
     )
 
     def to_domain(self) -> FieldComparisonSpec:
-        """Convert to domain FieldComparisonSpec."""
+        """Convert to domain FieldComparisonSpec.
+
+        Returns:
+            FieldComparisonSpec instance with field name, comparison method, and threshold.
+        """
         return FieldComparisonSpec(
             field_name=self.field,
             method=ComparisonMethod(self.method),
@@ -188,7 +208,11 @@ class EnricherFieldPairingSchema(BaseModel):
     )
 
     def to_domain(self) -> EnricherFieldPairing:
-        """Convert to domain EnricherFieldPairing."""
+        """Convert to domain EnricherFieldPairing.
+
+        Returns:
+            EnricherFieldPairing instance with enricher pipeline name and field comparison specs.
+        """
         return EnricherFieldPairing(
             enricher_pipeline=self.enricher_pipeline,
             fields=tuple(f.to_domain() for f in self.fields),
@@ -226,7 +250,11 @@ class CrossValidationSchema(BaseModel):
         return self
 
     def to_domain(self) -> CrossValidationConfig:
-        """Convert to domain CrossValidationConfig."""
+        """Convert to domain CrossValidationConfig.
+
+        Returns:
+            CrossValidationConfig instance with thresholds, tolerances, and enricher pairings.
+        """
         return CrossValidationConfig(
             enabled=self.enabled,
             warning_threshold=self.warning_threshold,

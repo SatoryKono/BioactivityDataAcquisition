@@ -27,7 +27,11 @@ def build_exemption_inventory(
     *,
     today: date | None = None,
 ) -> ExemptionInventory:
-    """Build aggregated inventory from the exemptions registry."""
+    """Build aggregated inventory from the exemptions registry.
+
+    Returns:
+        ExemptionInventory with aggregated counts by registry, owner, expiry quarter, and expired entries.
+    """
     now = today or date.today()
     raw = load_exemptions_registry(registry_path)
     registries = raw.get("registries", {})

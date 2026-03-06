@@ -47,7 +47,11 @@ _LEGACY_PAGINATION_FIELD_MAP: dict[str, str] = {
 def _collect_legacy_pagination_values(
     data: JsonDict,  # Any: YAML config has heterogeneous values
 ) -> dict[str, object]:
-    """Collect legacy pagination-like fields into pagination keys."""
+    """Collect legacy pagination-like fields into pagination keys.
+
+    Returns:
+        Dictionary mapping canonical pagination keys to values found in legacy fields.
+    """
     promoted: dict[str, object] = {}
     for legacy_key, pagination_key in _LEGACY_PAGINATION_FIELD_MAP.items():
         value = data.get(legacy_key)
@@ -68,7 +72,11 @@ def _merge_legacy_into_pagination(
 def _build_pagination_from_legacy(
     data: JsonDict,  # Any: YAML config has heterogeneous values
 ) -> dict[str, object]:
-    """Build pagination dict from legacy fields when section is absent."""
+    """Build pagination dict from legacy fields when section is absent.
+
+    Returns:
+        Dictionary with pagination keys derived from legacy fields, including strategy if cursor_pagination is set.
+    """
     pagination = _collect_legacy_pagination_values(data)
     if data.get("cursor_pagination"):
         pagination["strategy"] = "cursor"
@@ -179,6 +187,9 @@ class ProviderConfigYaml(BaseModel):
         When the ``pagination`` section is absent but legacy fields are set,
         this validator builds the ``pagination`` dict from them.
         Explicit ``pagination`` values always take precedence.
+
+        Returns:
+            Input data dict with pagination section populated from legacy fields.
         """
         if not isinstance(data, dict):
             return data
