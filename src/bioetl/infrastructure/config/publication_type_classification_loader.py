@@ -15,6 +15,9 @@ def _build_row_index(rows: list[list[str]], *, col: int) -> dict[str, int]:
 
     Replicates the codegen script logic: skip dash sentinels,
     strip trailing ``*``, lowercase keys, first-occurrence wins.
+
+    Returns:
+        Dictionary mapping normalized provider key strings to 1-based row indices.
     """
     mapping: dict[str, int] = {}
     for row_idx, row in enumerate(rows, start=1):
@@ -36,7 +39,11 @@ class PublicationTypeClassificationLoader:
         )
 
     def load(self) -> ClassificationData:
-        """Read and parse the JSON asset into a domain value object."""
+        """Read and parse the JSON asset into a domain value object.
+
+        Returns:
+            ClassificationData instance with all provider row indices populated.
+        """
         raw = json.loads(self._asset_path.read_text("utf-8"))
         rows: list[list[str]] = raw["rows"]
 

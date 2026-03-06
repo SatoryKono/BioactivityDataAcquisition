@@ -44,7 +44,11 @@ class BronzeWriterIOMixin:
         records: Iterator[bytes],
         target_path: Path,
     ) -> tuple[int, int]:
-        """Stream compress records directly to a temp file, then rename atomically."""
+        """Stream compress records directly to a temp file, then rename atomically.
+
+        Returns:
+            Tuple of (record count written, uncompressed size in bytes).
+        """
         target_path.parent.mkdir(parents=True, exist_ok=True)
         fd, temp_path_str = tempfile.mkstemp(
             suffix=".tmp",
@@ -90,7 +94,11 @@ class BronzeWriterIOMixin:
         return record_count, uncompressed_size
 
     async def _calculate_checksum(self, file_path: Path) -> str:
-        """Calculate BLAKE2b checksum of a file asynchronously."""
+        """Calculate BLAKE2b checksum of a file asynchronously.
+
+        Returns:
+            BLAKE2b hex digest string of the file contents.
+        """
         import hashlib
 
         def _compute() -> str:
@@ -130,7 +138,11 @@ class BronzeWriterIOMixin:
     async def read_bronze(
         self, path: str
     ) -> AsyncIterator[JsonDict]:  # Any: record/metadata values are heterogeneous
-        """Read and decompress Bronze file (for testing/debugging)."""
+        """Read and decompress Bronze file (for testing/debugging).
+
+        Returns:
+            Async iterator of JSON dicts, one per JSONL line in the decompressed Bronze file.
+        """
         full_path = self.base_path / path
 
         def _read_and_decompress() -> bytes:
@@ -154,7 +166,11 @@ class BronzeWriterIOMixin:
         entity: str,
         date: datetime | None = None,
     ) -> list[str]:
-        """List all batch files for a given provider/entity."""
+        """List all batch files for a given provider/entity.
+
+        Returns:
+            Sorted list of relative file path strings for all batch files found.
+        """
         if self._flat_structure and not provider and not entity:
             search_path = (
                 self.base_path / date.strftime("%Y-%m-%d") if date else self.base_path
@@ -178,7 +194,11 @@ class BronzeWriterIOMixin:
         provider: str | None = None,
         entity: str | None = None,
     ) -> list[Path]:
-        """Find date directories older than cutoff."""
+        """Find date directories older than cutoff.
+
+        Returns:
+            List of Path objects for date directories with names earlier than the cutoff string.
+        """
         if not self.base_path.exists():
             return []
 
@@ -196,7 +216,11 @@ class BronzeWriterIOMixin:
         return old_dirs
 
     def _is_old_date_dir(self, path: Path, cutoff_str: str) -> bool:
-        """Check if path is a date directory older than cutoff."""
+        """Check if path is a date directory older than cutoff.
+
+        Returns:
+            True if the path is a 10-character directory name earlier than cutoff_str, False otherwise.
+        """
         return path.is_dir() and len(path.name) == 10 and path.name < cutoff_str
 
     async def cleanup_old_files(
@@ -206,7 +230,11 @@ class BronzeWriterIOMixin:
         provider: str | None = None,
         entity: str | None = None,
     ) -> dict[str, int]:
-        """Remove Bronze files older than cutoff date (RULES.md §2.1 retention)."""
+        """Remove Bronze files older than cutoff date (RULES.md §2.1 retention).
+
+        Returns:
+            Dictionary with files_removed, bytes_freed, and directories_removed counts.
+        """
         cutoff_str = cutoff_date.strftime("%Y-%m-%d")
         files, bytes_total, dirs = 0, 0, 0
 
@@ -269,7 +297,11 @@ class BronzeWriterIOMixin:
         provider: str | None,
         entity: str | None,
     ) -> Path:
-        """Resolve Bronze preview root path for optional provider/entity filters."""
+        """Resolve Bronze preview root path for optional provider/entity filters.
+
+        Returns:
+            Path to the directory root for the given provider/entity scope.
+        """
         if self._flat_structure:
             return self.base_path
         if provider and entity:

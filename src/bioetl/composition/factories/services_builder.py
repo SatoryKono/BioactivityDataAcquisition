@@ -67,7 +67,11 @@ __all__ = [
 def extract_pipeline_callbacks(
     pipeline: BasePipeline,
 ) -> PipelineCallbacksContext:
-    """Extract transformation callbacks from transformer or legacy methods."""
+    """Extract transformation callbacks from transformer or legacy methods.
+
+    Returns:
+        PipelineCallbacksContext with transform, gold filter, and gold transform callbacks.
+    """
     transformer = pipeline.transformer
     if transformer is not None:
         return PipelineCallbacksContext(
@@ -110,7 +114,11 @@ class ServicesBuilder:
         tracer: TracingPort | None = None,
         lock_validator: Callable[[], Awaitable[bool]] | None = None,
     ) -> BatchProcessingComponents:
-        """Create batch metrics/transformer/writer stack via composition DI."""
+        """Create batch metrics/transformer/writer stack via composition DI.
+
+        Returns:
+            BatchProcessingComponents with batch metrics, transformer, and writer.
+        """
         return _create_batch_processing_components(
             services=services,
             context=context,
@@ -134,7 +142,11 @@ class ServicesBuilder:
         *,
         loading_strategy: LoadingStrategy | None = None,
     ) -> CheckpointManagerService:
-        """Create configured CheckpointManagerService."""
+        """Create configured CheckpointManagerService.
+
+        Returns:
+            CheckpointManagerService configured for the pipeline run.
+        """
         return _create_checkpoint_manager(
             checkpoint_port=checkpoint_port,
             logger=logger,
@@ -170,7 +182,11 @@ class ServicesBuilder:
         column_groups: tuple[ColumnGroupConfig, ...] = (),
         scd_config: dict[str, str] | None = None,
     ) -> RecordProcessor:
-        """Create configured ``RecordProcessor`` for pipeline execution."""
+        """Create configured ``RecordProcessor`` for pipeline execution.
+
+        Returns:
+            RecordProcessor wired with transformer, writer, and batch metrics.
+        """
         effective_tracer = tracer or services.tracing
         error_classifier = ErrorClassifier()
         table_config = TableConfig(
@@ -230,7 +246,11 @@ class ServicesBuilder:
         strict_gold_validation: bool = True,
         lock_validator: Callable[[], Awaitable[bool]] | None = None,
     ) -> RecordProcessor:
-        """Create RecordProcessor from pipeline instance."""
+        """Create RecordProcessor from pipeline instance.
+
+        Returns:
+            RecordProcessor configured from the pipeline's services and context.
+        """
         callbacks = extract_pipeline_callbacks(pipeline)
         return _create_record_processor_from_pipeline(
             pipeline=pipeline,
@@ -262,7 +282,11 @@ class ServicesBuilder:
         flat_structure: bool = False,
         batch_id_factory: BatchIdGeneratorPort | None = None,
     ) -> BatchExecutor:
-        """Create BatchExecutor from pipeline instance."""
+        """Create BatchExecutor from pipeline instance.
+
+        Returns:
+            BatchExecutor configured from the pipeline's services, context, and config.
+        """
         callbacks = extract_pipeline_callbacks(pipeline)
         return _create_batch_executor_from_pipeline(
             pipeline=pipeline,

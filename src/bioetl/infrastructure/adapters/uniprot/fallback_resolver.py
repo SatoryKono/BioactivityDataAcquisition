@@ -15,7 +15,11 @@ def resolve_uniprot_missing_ids(
     found_ids: set[str],
     fallback_mapping: Mapping[str, str],
 ) -> list[str]:
-    """Resolve missing IDs that are eligible for fallback lookup."""
+    """Resolve missing IDs that are eligible for fallback lookup.
+
+    Returns:
+        List of IDs that were not found and have a fallback mapping entry.
+    """
     if not fallback_mapping:
         return []
 

@@ -47,7 +47,11 @@ class IDMappingTransportMixin:
     base_url: str
 
     def _transport_deps(self) -> IDMappingTransportDependencies:
-        """Return typed dependency view of the host client."""
+        """Return typed dependency view of the host client.
+
+        Returns:
+            IDMappingTransportDependencies cast of the current client instance.
+        """
         return cast("IDMappingTransportDependencies", self)
 
     async def _map_batch(
@@ -56,7 +60,11 @@ class IDMappingTransportMixin:
         to_db: str,
         ids: list[str],
     ) -> dict[str, JsonDict | None]:  # Any: untyped API JSON
-        """Map a batch of IDs."""
+        """Map a batch of IDs.
+
+        Returns:
+            Dictionary mapping each source ID to its UniProt entry dict, or None if not found.
+        """
         deps = self._transport_deps()
         job_id = await self._submit_job(from_db, to_db, ids)
         results_url = await deps._poll_until_ready(job_id)
@@ -68,7 +76,11 @@ class IDMappingTransportMixin:
         to_db: str,
         ids: list[str],
     ) -> str:
-        """Submit ID mapping job to UniProt."""
+        """Submit ID mapping job to UniProt.
+
+        Returns:
+            Job ID string assigned by UniProt for polling.
+        """
         deps = self._transport_deps()
         url = f"{deps.base_url}/idmapping/run"
         data = {"from": from_db, "to": to_db, "ids": ",".join(ids)}
@@ -102,7 +114,11 @@ class IDMappingTransportMixin:
         original_ids: list[str],
         results_url: str | None = None,
     ) -> dict[str, JsonDict | None]:  # Any: untyped API JSON
-        """Fetch mapping results with full entry metadata."""
+        """Fetch mapping results with full entry metadata.
+
+        Returns:
+            Dictionary mapping each source ID to its resolved UniProt entry dict, or None if not found.
+        """
         deps = self._transport_deps()
         entries_by_id: dict[str, list[JsonDict]] = {id_: [] for id_ in original_ids}
         url: str | None = results_url or f"{deps.base_url}/idmapping/results/{job_id}"

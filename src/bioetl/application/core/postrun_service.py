@@ -177,7 +177,11 @@ class PostrunService:
         executor: ExecutorMetricsPort,
         dq_context: DQReportContext | None = None,
     ) -> PostrunResult:
-        """Run all post-execution operations."""
+        """Run all post-execution operations.
+
+        Returns:
+            PostrunResult with DQ check results, DQ report paths, and vacuum stats.
+        """
         dq_result = await self.run_dq_checks(executor)
         dq_reports = await self._generate_dq_reports(dq_context)
         vacuum_result = await self.run_vacuum_if_enabled()
@@ -189,12 +193,20 @@ class PostrunService:
         return PostrunResult(dq=dq_result, dq_reports=dq_reports, vacuum=vacuum_result)
 
     async def run_dq_checks(self, executor: ExecutorMetricsPort) -> DQResult:
-        """Check data quality metrics and report anomalies."""
+        """Check data quality metrics and report anomalies.
+
+        Returns:
+            DQResult with overall DQ status and per-check results.
+        """
         batch_metrics = self._collect_batch_metrics(executor)
         return await self._dq_service.evaluate(batch_metrics)
 
     async def run_vacuum_if_enabled(self) -> VacuumResult:
-        """Run VACUUM on Silver and Gold tables if enabled."""
+        """Run VACUUM on Silver and Gold tables if enabled.
+
+        Returns:
+            VacuumResult with file removal counts, or skipped=True if vacuum disabled.
+        """
         return await self._lifecycle_service.finalize_run(
             config=self._config,
             runtime=self._runtime,

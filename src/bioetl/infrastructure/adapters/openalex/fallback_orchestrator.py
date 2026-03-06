@@ -28,7 +28,11 @@ def _create_default_fallback_strategy(
     extract_record_id: Callable[[BronzeRecord], str | None],
     fallback_handler: TitleFallbackHandler | None,
 ) -> DefaultFallbackExecutionStrategy:
-    """Create default fallback execution strategy for non-DI call sites."""
+    """Create default fallback execution strategy for non-DI call sites.
+
+    Returns:
+        DefaultFallbackExecutionStrategy configured with the given normalize and extract hooks.
+    """
     return DefaultFallbackExecutionStrategy(
         normalize_id_hook=normalize_id,
         extract_record_id_hook=extract_record_id,
@@ -43,7 +47,11 @@ def _create_default_fallback_decorator(
     config: FallbackDecoratorConfig,
     logger: LoggerPort,
 ) -> ComposableFallbackDecorator:
-    """Create default fallback decorator for non-DI call sites."""
+    """Create default fallback decorator for non-DI call sites.
+
+    Returns:
+        ComposableFallbackDecorator wired with the given service, strategy, and config.
+    """
     return ComposableFallbackDecorator(
         service=service,
         strategy=strategy,

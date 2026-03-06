@@ -14,7 +14,11 @@ def build_uniprot_protein_search_params(
     size: int,
     fields: tuple[str, ...],
 ) -> JsonDict:  # Any: mixed query values (str|int)
-    """Build UniProt protein search parameters."""
+    """Build UniProt protein search parameters.
+
+    Returns:
+        Dictionary of query parameters for the UniProt protein search request.
+    """
     params: JsonDict = {  # Any: dynamic payload or structural mixin boundary
         "query": query,
         "size": min(size, (limit - fetched) if limit else size),
@@ -27,7 +31,11 @@ def build_uniprot_protein_search_params(
 
 
 def build_uniprot_health_probe_params() -> dict[str, int | str]:
-    """Build parameters for UniProt health probe search."""
+    """Build parameters for UniProt health probe search.
+
+    Returns:
+        Dictionary of query parameters for the UniProt health probe request.
+    """
     return {"query": "accession:P62988", "size": 1, "format": "json"}
 
 

@@ -233,7 +233,11 @@ def is_orjson_available() -> bool:
 
 
 def flatten_arrow_table_for_export(table: pa.Table) -> pa.Table:
-    """Convert list/struct Arrow columns to JSON strings for export-safe flattening."""
+    """Convert list/struct Arrow columns to JSON strings for export-safe flattening.
+
+    Returns:
+        PyArrow Table with complex columns serialized as JSON strings.
+    """
     import pyarrow as pa
 
     def is_complex_type(field_type: pa.DataType) -> bool:

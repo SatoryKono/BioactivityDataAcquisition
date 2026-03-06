@@ -9,7 +9,6 @@ from bioetl.domain.types import JsonDict
 
 __all__ = ["PUBMED_FETCH_ERRORS", "PubMedFetchMixin"]
 
-
 import contextlib
 import time
 from typing import TYPE_CHECKING
@@ -57,7 +56,11 @@ class PubMedFetchMixin:
     metrics: MetricsPort | None
 
     def _build_fetch_params(self, id_batch: list[str]) -> dict[str, str]:
-        """Build parameters for efetch API call."""
+        """Build parameters for efetch API call.
+
+        Returns:
+            Dictionary of query parameters for the efetch API request.
+        """
         params = {
             "db": "pubmed",
             "id": ",".join(id_batch),
@@ -72,7 +75,11 @@ class PubMedFetchMixin:
     async def _fetch_batch(
         self, id_batch: list[str]
     ) -> list[JsonDict]:  # Any: untyped API JSON record
-        """Fetch a batch of articles and return parsed records."""
+        """Fetch a batch of articles and return parsed records.
+
+        Returns:
+            List of parsed article record dictionaries from the efetch response.
+        """
         params = self._build_fetch_params(id_batch)
         try:
             start_time = time.perf_counter()
@@ -115,7 +122,7 @@ class PubMedFetchMixin:
         """Yield article records from a list of PMIDs."""
         total_fetched = 0
         for i in range(0, len(pmids), self.batch_size):
-            records = await self._fetch_batch(pmids[i : i + self.batch_size])
+            records = await self._fetch_batch(pmids[i: i + self.batch_size])
             for record in records:
                 yield record
                 total_fetched += 1

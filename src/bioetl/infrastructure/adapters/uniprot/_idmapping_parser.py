@@ -16,7 +16,11 @@ class IDMappingParserMixin:
     def _select_primary_entry(
         entries: list[JsonDict],  # Any: untyped API JSON
     ) -> JsonDict | None:  # Any: untyped API JSON
-        """Select primary entry from list, handling multiple mappings."""
+        """Select primary entry from list, handling multiple mappings.
+
+        Returns:
+            Best-ranked entry dict if found, None if entries is empty.
+        """
         if not entries:
             return None
         if len(entries) == 1:
@@ -36,7 +40,11 @@ class IDMappingParserMixin:
 
     @staticmethod
     def _get_next_page_url(headers: Mapping[str, str]) -> str | None:
-        """Extract next page URL from Link header."""
+        """Extract next page URL from Link header.
+
+        Returns:
+            Next page URL string if a rel="next" link is present, None otherwise.
+        """
         link_header = headers.get("Link", headers.get("link", ""))
         if not link_header:
             return None
@@ -48,7 +56,11 @@ class IDMappingParserMixin:
     def _extract_organism_info(
         organism: object,
     ) -> tuple[str | None, str | None, int | None]:
-        """Extract organism metadata from entry."""
+        """Extract organism metadata from entry.
+
+        Returns:
+            Tuple of (scientific name, common name, taxonomy ID) or all-None if invalid.
+        """
         if not isinstance(organism, dict):
             return None, None, None
         return (
@@ -59,7 +71,11 @@ class IDMappingParserMixin:
 
     @staticmethod
     def _extract_protein_name(protein_desc: object) -> str | None:
-        """Extract recommended protein name from description."""
+        """Extract recommended protein name from description.
+
+        Returns:
+            Recommended full protein name string if found, None otherwise.
+        """
         if not isinstance(protein_desc, dict):
             return None
         recommended = protein_desc.get("recommendedName", {})
@@ -72,7 +88,11 @@ class IDMappingParserMixin:
 
     @staticmethod
     def _extract_gene_primary(genes: object) -> str | None:
-        """Extract primary gene name from genes list."""
+        """Extract primary gene name from genes list.
+
+        Returns:
+            Primary gene name string if found, None otherwise.
+        """
         if not isinstance(genes, list) or not genes:
             return None
         first_gene = genes[0]
@@ -87,7 +107,11 @@ class IDMappingParserMixin:
     def _extract_sequence_info(
         sequence: object,
     ) -> tuple[int | None, int | None]:
-        """Extract sequence length and mass from entry."""
+        """Extract sequence length and mass from entry.
+
+        Returns:
+            Tuple of (sequence length, molecular weight) or (None, None) if invalid.
+        """
         if not isinstance(sequence, dict):
             return None, None
         return sequence.get("length"), sequence.get("molWeight")
@@ -97,7 +121,11 @@ class IDMappingParserMixin:
         cls,
         mapping: JsonDict,  # Any: untyped API JSON
     ) -> tuple[str | None, JsonDict | None]:  # Any: untyped API JSON
-        """Parse a single mapping entry from API response."""
+        """Parse a single mapping entry from API response.
+
+        Returns:
+            Tuple of (source ID string, mapped entry dict) or (None, None) if unparseable.
+        """
         from_id = mapping.get("from")
         to_entry = mapping.get("to", {})
 

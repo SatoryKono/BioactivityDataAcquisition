@@ -55,7 +55,7 @@ def _build_dependency_config(
             "dependencies[].timeout_seconds",
             600,
         )
-        or 600,
+                        or 600,
         silver_table=optional_str(
             dep.get("silver_table"), "dependencies[].silver_table"
         ),
@@ -89,7 +89,7 @@ def _build_enricher_config(
             "enrichers[].timeout_seconds",
             600,
         )
-        or 600,
+                        or 600,
     )
 
 
@@ -126,16 +126,20 @@ def _build_merge_config(
         sort_by_silver=optional_str_tuple(
             merge_data.get("sort_by_silver"), "merge.sort_by_silver"
         )
-        or (),
+                       or (),
         sort_by_gold=optional_str_tuple(
             merge_data.get("sort_by_gold"), "merge.sort_by_gold"
         )
-        or (),
+                     or (),
     )
 
 
 def composite_to_dict(config: CompositeConfig) -> dict[str, object]:
-    """Convert CompositeConfig to serializable dictionary."""
+    """Convert CompositeConfig to serializable dictionary.
+
+    Returns:
+        Dictionary representation of the CompositeConfig suitable for serialization.
+    """
     return {
         "name": config.name,
         "version": config.version,
@@ -180,7 +184,11 @@ def composite_to_dict(config: CompositeConfig) -> dict[str, object]:
 
 
 def composite_from_dict(data: dict[str, object]) -> CompositeConfig:
-    """Construct CompositeConfig from serialized dictionary."""
+    """Construct CompositeConfig from serialized dictionary.
+
+    Returns:
+        CompositeConfig instance reconstructed from the input dictionary.
+    """
     # Local imports avoid runtime circular dependency with config.py facade.
     from bioetl.domain.composite.config import (
         CompositeConfig,

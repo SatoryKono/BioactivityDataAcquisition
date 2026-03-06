@@ -39,11 +39,19 @@ class IDMappingRetryMixin:
     base_url: str
 
     def _retry_deps(self) -> IDMappingRetryDependencies:
-        """Return typed dependency view of the host client."""
+        """Return typed dependency view of the host client.
+
+        Returns:
+            IDMappingRetryDependencies cast of the current client instance.
+        """
         return cast("IDMappingRetryDependencies", self)
 
     async def _poll_until_ready(self, job_id: str) -> str | None:
-        """Poll job status until complete."""
+        """Poll job status until complete.
+
+        Returns:
+            Results URL string if available from redirect, None if polling succeeded without redirect.
+        """
         deps = self._retry_deps()
         url = f"{deps.base_url}/idmapping/status/{job_id}"
 

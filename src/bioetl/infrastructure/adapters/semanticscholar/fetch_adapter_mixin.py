@@ -97,7 +97,11 @@ class SemanticScholarFetchAdapterMixin:
         page_size: int,
         current_offset: int,
     ) -> tuple[list[BronzeRecord], int | None]:
-        """Fetch one search page and emit request telemetry."""
+        """Fetch one search page and emit request telemetry.
+
+        Returns:
+            Tuple of (list of publication records for the page, next offset integer or None if last page).
+        """
         params: JsonDict = {
             "query": query or "*",
             "fields": self.fields,
@@ -135,7 +139,7 @@ class SemanticScholarFetchAdapterMixin:
         dois = filter_ids[:limit] if limit else filter_ids
         fetched = 0
         for idx in range(0, len(dois), self.batch_size):
-            batch = dois[idx : idx + self.batch_size]
+            batch = dois[idx: idx + self.batch_size]
             async for record in self._fetch_by_dois(batch):
                 record["_lookup_method"] = "doi"
                 yield record
@@ -156,7 +160,7 @@ class SemanticScholarFetchAdapterMixin:
             if limit and count >= limit:
                 return
 
-            batch = valid_dois[idx : idx + self.batch_size]
+            batch = valid_dois[idx: idx + self.batch_size]
             batch_results = await self._fetch_batch_with_nulls(batch)
             for doi, record in zip(batch, batch_results, strict=True):
                 if record is None:

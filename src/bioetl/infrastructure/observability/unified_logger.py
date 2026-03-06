@@ -34,7 +34,6 @@ from __future__ import annotations
 
 __all__ = ["StageType", "UnifiedLogger", "create_unified_logger"]
 
-
 from typing import TYPE_CHECKING, Any, Literal, Self
 
 import structlog
@@ -146,7 +145,11 @@ class UnifiedLogger:
     def _sanitize_kwargs(
         kwargs: JsonDict,  # Any: structlog-compatible API
     ) -> JsonDict:  # Any: structlog-compatible API
-        """Drop kwargs that conflict with structlog positional parameters."""
+        """Drop kwargs that conflict with structlog positional parameters.
+
+        Returns:
+            Dictionary with 'event' key removed if present, original dict otherwise.
+        """
         if _EVENT_KWARG in kwargs:
             sanitized = dict(kwargs)
             sanitized.pop(_EVENT_KWARG, None)

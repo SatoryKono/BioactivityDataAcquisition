@@ -21,7 +21,11 @@ from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 def read_source_config_payload(
     provider: str,
 ) -> JsonDict:  # Any: YAML config has heterogeneous values
-    """Read provider YAML and map to source-loader input payload."""
+    """Read provider YAML and map to source-loader input payload.
+
+    Returns:
+        Dictionary of raw source configuration payload from the provider YAML.
+    """
     unified_path = Path(f"configs/providers/{provider}.yaml")
     if not unified_path.exists():
         raise ValueError(
@@ -50,24 +54,40 @@ def read_source_config_payload(
 def normalize_source_config_payload(
     payload: JsonDict,  # Any: YAML config has heterogeneous values
 ) -> JsonDict:  # Any: YAML config has heterogeneous values
-    """Normalize source payload (legacy/new) to canonical schema."""
+    """Normalize source payload (legacy/new) to canonical schema.
+
+    Returns:
+        Normalized source configuration dictionary in canonical format.
+    """
     return normalize_source_config(payload)
 
 
 def validate_source_config_payload(
     payload: JsonDict,  # Any: YAML config has heterogeneous values
 ) -> SourceYamlConfig:
-    """Validate canonical source payload with pydantic schema."""
+    """Validate canonical source payload with pydantic schema.
+
+    Returns:
+        SourceYamlConfig instance validated from the canonical payload.
+    """
     return SourceYamlConfig.model_validate(payload)
 
 
 def map_source_config(validated_config: SourceYamlConfig) -> SourceYamlConfig:
-    """Map validated source config to loader return type."""
+    """Map validated source config to loader return type.
+
+    Returns:
+        SourceYamlConfig instance (identity mapping for type clarity).
+    """
     return validated_config
 
 
 def load_source_config_uncached(provider: str) -> SourceYamlConfig:
-    """Load source configuration using read -> normalize -> validate -> map."""
+    """Load source configuration using read -> normalize -> validate -> map.
+
+    Returns:
+        SourceYamlConfig instance with fully resolved provider configuration.
+    """
     raw_payload = read_source_config_payload(provider)
     normalized_payload = normalize_source_config_payload(raw_payload)
     validated_payload = validate_source_config_payload(normalized_payload)

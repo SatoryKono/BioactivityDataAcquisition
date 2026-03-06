@@ -53,13 +53,16 @@ class FilterConfigLoader(
         provider: str,
         entity: str,
         inline_overrides: JsonDict  # Any: YAML config has heterogeneous values
-        | None = None,  # Any: YAML filter config has heterogeneous values
+                          | None = None,  # Any: YAML filter config has heterogeneous values
     ) -> tuple[
         InputFilterConfig, SilverFilterConfig, GoldFilterConfig, ExtractionParams
     ]:
         """Load merged filter config for provider/entity.
 
         Returns validated domain configs from defaults -> provider -> entity -> inline.
+
+        Returns:
+            Tuple of (InputFilterConfig, SilverFilterConfig, GoldFilterConfig, ExtractionParams).
         """
         cache_key = f"{provider}:{entity}"
 
@@ -97,7 +100,7 @@ class FilterConfigLoader(
         provider: str,
         entity: str,
         inline_overrides: JsonDict  # Any: YAML config has heterogeneous values
-        | None = None,  # Any: YAML filter config has heterogeneous values
+                          | None = None,  # Any: YAML filter config has heterogeneous values
     ) -> JsonDict:  # Any: YAML filter config has heterogeneous values
         """Load merged filter config hierarchy as raw dict.
 
@@ -129,9 +132,9 @@ class FilterConfigLoader(
         provider: str,
         entity: str,
         inline_overrides: JsonDict  # Any: YAML config has heterogeneous values
-        | None = None,  # Any: YAML filter config has heterogeneous values
+                          | None = None,  # Any: YAML filter config has heterogeneous values
         defaults: JsonDict  # Any: YAML config has heterogeneous values
-        | None = None,  # Any: YAML filter config has heterogeneous values
+                  | None = None,  # Any: YAML filter config has heterogeneous values
     ) -> JsonDict:  # Any: YAML filter config has heterogeneous values
         """Merge the 4-level filter config hierarchy into a single dict.
 
@@ -168,7 +171,11 @@ class FilterConfigLoader(
     def _load_defaults_layer(
         self,
     ) -> JsonDict:  # Any: YAML filter config has heterogeneous values
-        """Load filter defaults from configs/base/pipeline.yaml."""
+        """Load filter defaults from configs/base/pipeline.yaml.
+
+        Returns:
+            Dictionary with filter default configuration, or empty dict if absent.
+        """
         base_pipeline_path = self._base_root / "pipeline.yaml"
         if base_pipeline_path.exists():
             base_pipeline = self._load_yaml(base_pipeline_path)
@@ -194,7 +201,11 @@ class FilterConfigLoader(
     def _load_provider_layer(
         self, provider: str
     ) -> JsonDict:  # Any: YAML filter config has heterogeneous values
-        """Load provider filter layer from unified provider config."""
+        """Load provider filter layer from unified provider config.
+
+        Returns:
+            Dictionary with provider filter section, or empty dict if absent.
+        """
         unified_provider_path = self._configs_root / "providers" / f"{provider}.yaml"
         if unified_provider_path.exists():
             unified_raw = self._load_yaml(unified_provider_path)
@@ -206,10 +217,10 @@ class FilterConfigLoader(
             if any(
                 key in unified_raw
                 for key in (
-                    "input_filter",
-                    "silver_filters",
-                    "gold_filters",
-                    "extraction_params",
+                        "input_filter",
+                        "silver_filters",
+                        "gold_filters",
+                        "extraction_params",
                 )
             ):
                 return unified_raw
@@ -219,7 +230,11 @@ class FilterConfigLoader(
     def _load_entity_layer(
         self, provider: str, entity: str
     ) -> JsonDict:  # Any: YAML filter config has heterogeneous values
-        """Load entity filter layer from unified entity config."""
+        """Load entity filter layer from unified entity config.
+
+        Returns:
+            Dictionary with entity filter section, or empty dict if absent.
+        """
         unified_entity_path = (
             self._configs_root / "entities" / provider / f"{entity}.yaml"
         )
@@ -233,10 +248,10 @@ class FilterConfigLoader(
             if any(
                 key in unified_raw
                 for key in (
-                    "input_filter",
-                    "silver_filters",
-                    "gold_filters",
-                    "extraction_params",
+                        "input_filter",
+                        "silver_filters",
+                        "gold_filters",
+                        "extraction_params",
                 )
             ):
                 return unified_raw

@@ -23,7 +23,11 @@ class BronzeWriterMetadataMixin:
         entity: str,
         batch_id: BatchID,
     ) -> dict[str, str]:
-        """Build metadata dict for lineage tracking."""
+        """Build metadata dict for lineage tracking.
+
+        Returns:
+            Dictionary of string metadata fields for Bronze lineage tracking.
+        """
         return {
             "run_id": str(run_id),
             "run_type": run_type.value,
@@ -48,7 +52,11 @@ class BronzeWriterMetadataMixin:
         duration_seconds: float,
         source_metadata: SourceMetadata | None = None,
     ) -> BronzeMetadata:
-        """Build rich BronzeMetadata for sidecar file."""
+        """Build rich BronzeMetadata for sidecar file.
+
+        Returns:
+            BronzeMetadata instance populated with runtime, pipeline, source, and output fields.
+        """
         from bioetl.domain.models.metadata import BronzeMetadata
 
         payload = self._build_bronze_metadata_payload(
@@ -81,7 +89,11 @@ class BronzeWriterMetadataMixin:
         duration_seconds: float,
         source_metadata: SourceMetadata | None,
     ) -> JsonDict:  # Any: bronze metadata model fields are heterogeneous
-        """Build Bronze metadata constructor payload."""
+        """Build Bronze metadata constructor payload.
+
+        Returns:
+            Dictionary of constructor keyword arguments for BronzeMetadata.
+        """
         import platform
         import socket
 

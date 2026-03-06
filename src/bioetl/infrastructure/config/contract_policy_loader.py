@@ -4,7 +4,6 @@ from __future__ import annotations
 
 __all__ = ["load_pipeline_contract_policy"]
 
-
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -22,7 +21,11 @@ _CONFIGS_ROOT = Path("configs")
 def _load_base_contract_defaults() -> dict[
     str, Any  # Any: YAML config has heterogeneous values
 ]:  # Any: YAML config has heterogeneous values
-    """Load contract defaults from consolidated base config if present."""
+    """Load contract defaults from consolidated base config if present.
+
+    Returns:
+        Dictionary with contract default values, or empty dict if base config is absent.
+    """
     base_path = _CONFIGS_ROOT / "base" / "pipeline.yaml"
     if not base_path.exists():
         return {}

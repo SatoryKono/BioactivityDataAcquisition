@@ -12,7 +12,11 @@ class SystemClock(ClockPort):
     """Clock adapter backed by the system UTC time."""
 
     def now(self) -> datetime:
-        """Return current UTC datetime."""
+        """Return current UTC datetime.
+
+        Returns:
+            Current UTC datetime with timezone info.
+        """
         return datetime.fromtimestamp(time.time(), UTC)
 
 

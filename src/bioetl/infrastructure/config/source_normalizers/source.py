@@ -18,14 +18,22 @@ def _deep_merge(
     base: JsonDict,  # Any: normalizer; input types vary
     override: JsonDict,  # Any: normalizer; input types vary
 ) -> JsonDict:  # Any: normalizer; input types vary
-    """Deep merge two dictionaries with override precedence."""
+    """Deep merge two dictionaries with override precedence.
+
+    Returns:
+        Merged dictionary with override values taking precedence over base values.
+    """
     return config_merge(base, override)
 
 
 def _sync_timeout_aliases(
     data: JsonDict,  # Any: normalizer; input types vary
 ) -> JsonDict:  # Any: normalizer; input types vary
-    """Ensure ``timeout`` and ``timeout_sec`` are kept in sync."""
+    """Ensure ``timeout`` and ``timeout_sec`` are kept in sync.
+
+    Returns:
+        Dictionary copy with both timeout aliases present and synchronized.
+    """
     result = data.copy()
     if "timeout" in result and "timeout_sec" not in result:
         result["timeout_sec"] = result["timeout"]
@@ -62,7 +70,11 @@ def _get_dict_or_empty(
     container: JsonDict,  # Any: normalizer; input types vary
     key: str,
 ) -> JsonDict:  # Any: normalizer; input types vary
-    """Return *container[key]* if it is a dict, otherwise an empty dict."""
+    """Return *container[key]* if it is a dict, otherwise an empty dict.
+
+    Returns:
+        Dictionary at container[key] if it is a dict, otherwise empty dict.
+    """
     val = container.get(key)
     return val if isinstance(val, dict) else {}
 
@@ -175,7 +187,11 @@ def _normalize_source_pagination(
 def _promote_top_level_source_sections(
     raw: JsonDict,  # Any: normalizer; input types vary
 ) -> JsonDict:  # Any: normalizer; input types vary
-    """Promote top-level source sections into ``source`` when missing."""
+    """Promote top-level source sections into ``source`` when missing.
+
+    Returns:
+        Dictionary with top-level api/client/batch/rate_limit sections promoted under 'source'.
+    """
     if "source" in raw and isinstance(raw.get("source"), dict):
         return raw
 
@@ -200,7 +216,11 @@ def _promote_top_level_source_sections(
 def normalize_source_config(
     raw: JsonDict,  # Any: normalizer; input types vary
 ) -> JsonDict:  # Any: normalizer; input types vary
-    """Normalize source config across legacy/new schemas before validation."""
+    """Normalize source config across legacy/new schemas before validation.
+
+    Returns:
+        Normalized source configuration dictionary ready for Pydantic validation.
+    """
     config = _promote_top_level_source_sections(raw).copy()
     source = config.get("source")
     if not isinstance(source, dict):

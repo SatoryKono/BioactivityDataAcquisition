@@ -9,7 +9,11 @@ from bioetl.domain.types import JsonDict
 
 
 def extract_doi(doi_url: str | None) -> str | None:
-    """Extract bare DOI from OpenAlex DOI URL."""
+    """Extract bare DOI from OpenAlex DOI URL.
+
+    Returns:
+        Bare DOI string without URL prefix, or None if input is empty.
+    """
     if not doi_url:
         return None
     if doi_url.startswith("https://doi.org/"):
@@ -22,7 +26,11 @@ def extract_doi(doi_url: str | None) -> str | None:
 
 
 def extract_openalex_id(openalex_url: str | None) -> str | None:
-    """Extract OpenAlex ID from OpenAlex URL."""
+    """Extract OpenAlex ID from OpenAlex URL.
+
+    Returns:
+        Last path segment of the URL as ID string, or None if input is empty.
+    """
     if not openalex_url:
         return None
     if "/" in openalex_url:
@@ -32,9 +40,13 @@ def extract_openalex_id(openalex_url: str | None) -> str | None:
 
 def extract_journal_info(
     primary_location: JsonDict  # Any: untyped API JSON record
-    | None,  # Any: untyped JSON fragment from OpenAlex API
+                      | None,  # Any: untyped JSON fragment from OpenAlex API
 ) -> JsonDict:  # Any: untyped JSON fragment from OpenAlex API
-    """Extract journal info (journal, issn, publisher) from primary_location."""
+    """Extract journal info (journal, issn, publisher) from primary_location.
+
+    Returns:
+        Dictionary with journal, issn, and publisher keys (None values if unavailable).
+    """
     if not primary_location or not isinstance(primary_location, dict):
         return {"journal": None, "issn": None, "publisher": None}
 
@@ -50,7 +62,11 @@ def extract_journal_info(
 
 
 def reconstruct_abstract(inverted_index: dict[str, list[int]] | None) -> str | None:
-    """Reconstruct abstract from OpenAlex inverted index format."""
+    """Reconstruct abstract from OpenAlex inverted index format.
+
+    Returns:
+        Reconstructed abstract text with words in position order, or None if empty.
+    """
     if not inverted_index or not isinstance(inverted_index, dict):
         return None
 
@@ -72,7 +88,11 @@ def reconstruct_abstract(inverted_index: dict[str, list[int]] | None) -> str | N
 def extract_open_access_info(
     open_access: JsonDict | None,  # Any: untyped JSON fragment from OpenAlex API
 ) -> JsonDict:  # Any: untyped JSON fragment from OpenAlex API
-    """Extract Open Access info (is_oa, oa_status)."""
+    """Extract Open Access info (is_oa, oa_status).
+
+    Returns:
+        Dictionary with is_oa and oa_status keys (None values if unavailable).
+    """
     if not open_access or not isinstance(open_access, dict):
         return {"is_oa": None, "oa_status": None}
 
@@ -85,7 +105,11 @@ def extract_open_access_info(
 def extract_external_ids(
     ids: JsonDict | None,  # Any: untyped JSON fragment from OpenAlex API
 ) -> JsonDict:  # Any: untyped JSON fragment from OpenAlex API
-    """Extract external identifiers (pmid, pmcid, mag_id) from ids object."""
+    """Extract external identifiers (pmid, pmcid, mag_id) from ids object.
+
+    Returns:
+        Dictionary with pmid, pmmolecule_id, and mag_id keys (None if unavailable).
+    """
     if not ids or not isinstance(ids, dict):
         return {"pmid": None, "pmmolecule_id": None, "mag_id": None}
 
@@ -108,7 +132,11 @@ def extract_external_ids(
 def extract_mesh_terms(
     mesh: list[JsonDict] | None,  # Any: untyped JSON fragment from OpenAlex API
 ) -> list[str]:
-    """Extract unique MeSH descriptor names from mesh array."""
+    """Extract unique MeSH descriptor names from mesh array.
+
+    Returns:
+        Ordered list of unique MeSH descriptor name strings.
+    """
     if not mesh or not isinstance(mesh, list):
         return []
 
@@ -128,9 +156,13 @@ def extract_mesh_terms(
 
 def extract_keywords(
     keywords: list[JsonDict]  # Any: untyped API JSON record
-    | None,  # Any: untyped JSON fragment from OpenAlex API
+              | None,  # Any: untyped JSON fragment from OpenAlex API
 ) -> list[str]:
-    """Extract keyword display names from keywords array."""
+    """Extract keyword display names from keywords array.
+
+    Returns:
+        List of stripped keyword display name strings.
+    """
     if not keywords or not isinstance(keywords, list):
         return []
 
@@ -148,7 +180,11 @@ def extract_keywords(
 def extract_biblio_info(
     biblio: JsonDict | None,  # Any: untyped JSON fragment from OpenAlex API
 ) -> JsonDict:  # Any: untyped JSON fragment from OpenAlex API
-    """Extract bibliographic info (volume, issue, page_first, page_last)."""
+    """Extract bibliographic info (volume, issue, page_first, page_last).
+
+    Returns:
+        Dictionary with volume, issue, page_first, and page_last keys.
+    """
     if not biblio or not isinstance(biblio, dict):
         return {
             "volume": None,

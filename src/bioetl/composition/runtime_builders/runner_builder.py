@@ -220,7 +220,11 @@ def build_pipeline_runner(
         [PipelineRunContext], CachedBronzeContext
     ] = _assemble_cached_bronze_context,
 ) -> PipelineRunner:
-    """Assemble and return a fully configured ``PipelineRunner``."""
+    """Assemble and return a fully configured ``PipelineRunner``.
+
+    Returns:
+        Fully wired PipelineRunner for the pipeline specified in the run context.
+    """
     effective_registry = registry if registry is not None else get_default_registry_fn()
 
     register_all_providers_fn()

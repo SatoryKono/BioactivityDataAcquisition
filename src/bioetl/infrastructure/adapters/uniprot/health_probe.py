@@ -25,7 +25,11 @@ async def probe_uniprot_health(
     adapter_metrics: AdapterMetrics,
     healthy_status_provider: Callable[[], HealthStatus],
 ) -> HealthStatus:
-    """Probe UniProt API health endpoint."""
+    """Probe UniProt API health endpoint.
+
+    Returns:
+        HealthStatus reflecting the current UniProt API availability and response status.
+    """
     params = build_uniprot_health_probe_params()
     with adapter_metrics.measure_request("/health"):
         response = await http_client.get_once(

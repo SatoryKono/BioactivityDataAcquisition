@@ -7,7 +7,6 @@ from __future__ import annotations
 
 __all__ = ["AnomalyDetector"]
 
-
 import statistics
 from datetime import datetime
 from typing import TYPE_CHECKING
@@ -77,7 +76,7 @@ class AnomalyDetector:
         baseline.extend(values)
 
         if len(baseline) > self.baseline_window:
-            self._baselines[metric_name] = baseline[-self.baseline_window :]
+            self._baselines[metric_name] = baseline[-self.baseline_window:]
 
     def add_baseline_value(self, metric_name: str, value: float) -> None:
         """Add single value to baseline.
@@ -139,7 +138,11 @@ class AnomalyDetector:
     def _check_thresholds(
         self, metric_name: str, current_value: float, timestamp: datetime | None = None
     ) -> Anomaly | None:
-        """Check if the current value exceeds configured thresholds."""
+        """Check if the current value exceeds configured thresholds.
+
+        Returns:
+            Anomaly if a configured threshold is exceeded, None otherwise.
+        """
         if metric_name not in self._thresholds:
             return None
         if timestamp is None:
@@ -161,7 +164,11 @@ class AnomalyDetector:
         max_val: float,
         timestamp: datetime,
     ) -> Anomaly:
-        """Create anomaly for threshold breach."""
+        """Create anomaly for threshold breach.
+
+        Returns:
+            Anomaly instance with THRESHOLD_EXCEEDED type and CRITICAL severity.
+        """
         baseline_mean = (min_val + max_val) / 2
         baseline_stddev = (max_val - min_val) / 4
 

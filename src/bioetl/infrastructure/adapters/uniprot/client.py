@@ -78,7 +78,11 @@ def _create_default_uniprot_fallback_service(
     *,
     adapter_metrics: AdapterMetrics,
 ) -> FallbackFetchOrchestratorService:
-    """Create fallback orchestrator service for non-DI call sites."""
+    """Create fallback orchestrator service for non-DI call sites.
+
+    Returns:
+        FallbackFetchOrchestratorService instance wired to the given adapter metrics.
+    """
     return FallbackFetchOrchestratorService(adapter_metrics)
 
 
@@ -194,7 +198,11 @@ class UniProtAdapter(
 
     @override
     async def _probe_health(self) -> HealthStatus:
-        """Perform health probe using Ubiquitin P62988 query."""
+        """Perform health probe using Ubiquitin P62988 query.
+
+        Returns:
+            HealthStatus reflecting the current UniProt API availability.
+        """
         try:
             return await probe_uniprot_health(
                 base_url=self.base_url,
@@ -221,7 +229,11 @@ def _create_uniprot_adapter(
     _settings: object | None,
     **kwargs: Any,  # Any: forwarding arbitrary kwargs to HTTP client
 ) -> UniProtAdapter:
-    """Factory helper for registry-based adapter construction."""
+    """Factory helper for registry-based adapter construction.
+
+    Returns:
+        UniProtAdapter instance configured with the given HTTP client and logger.
+    """
     if http_client is None:
         raise ValueError("UniProt adapter requires http_client")
     if logger is None:

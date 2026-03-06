@@ -42,7 +42,11 @@ def create_silver_writer(
     metadata_atomic_retry_policy: AdaptiveRetryPolicy | None = None,
     merge_resilience_policy: SilverMergeResiliencePolicy | None = None,
 ) -> SilverWriter:
-    """Create configured Silver writer."""
+    """Create configured Silver writer.
+
+    Returns:
+        Configured SilverWriter instance for the Silver storage layer.
+    """
     save_metadata = config.save_metadata if config else False
     metadata_writer = (
         MetadataWriter(

@@ -14,7 +14,6 @@ from bioetl.infrastructure.adapters.uniprot.fasta_parser import FastaParser
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-
 _UNIPROT_FEATURE_SEQUENCE_ERRORS = (Exception,)
 
 
@@ -22,7 +21,11 @@ class UniProtFeatureSequenceAdapterMixin:
     """Feature/sequence endpoint helpers."""
 
     async def _get_features_json(self, query: str) -> list[BronzeRecord]:
-        """Retrieve feature payload from UniProt JSON endpoint."""
+        """Retrieve feature payload from UniProt JSON endpoint.
+
+        Returns:
+            List of feature record dicts from the UniProt entry, empty list on error.
+        """
         try:
             start_time = time.perf_counter()
             with self._adapter_metrics.measure_request("/uniprotkb/features"):
@@ -63,7 +66,11 @@ class UniProtFeatureSequenceAdapterMixin:
             yield self._format_feature(query, feature)
 
     def _format_feature(self, query: str, feature: BronzeRecord) -> BronzeRecord:
-        """Normalize feature payload to record contract."""
+        """Normalize feature payload to record contract.
+
+        Returns:
+            Dictionary with accession, type, location, and description keys.
+        """
         return {
             "accession": query,
             "type": feature.get("type"),
@@ -75,7 +82,11 @@ class UniProtFeatureSequenceAdapterMixin:
         self,
         query: str,
     ) -> str | None:
-        """Retrieve FASTA sequence text."""
+        """Retrieve FASTA sequence text.
+
+        Returns:
+            FASTA format text string if request succeeds, None on error or non-200 response.
+        """
         try:
             start_time = time.perf_counter()
             with self._adapter_metrics.measure_request("/uniprotkb/stream"):

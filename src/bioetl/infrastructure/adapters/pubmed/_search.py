@@ -9,7 +9,6 @@ from bioetl.domain.types import JsonDict
 
 __all__ = ["PUBMED_SEARCH_ERRORS", "PubMedSearchMixin"]
 
-
 import contextlib
 import time
 from typing import TYPE_CHECKING
@@ -62,7 +61,11 @@ class PubMedSearchMixin:
         raise NotImplementedError  # mixin stub; overridden by PubMedFetchMixin
 
     async def _get_pmids(self, search_term: str, max_count: int) -> list[str]:
-        """Get PMIDs for a search term."""
+        """Get PMIDs for a search term.
+
+        Returns:
+            List of PMID strings matching the search term, up to max_count results.
+        """
         search_url = f"{ENTREZ_API_BASE}esearch.fcgi"
         params = {
             "db": "pubmed",
@@ -102,7 +105,11 @@ class PubMedSearchMixin:
     async def _search_by_title(
         self, title: str, limit: int = 3
     ) -> list[JsonDict]:  # Any: untyped API JSON record
-        """Search PubMed by title using esearch + efetch."""
+        """Search PubMed by title using esearch + efetch.
+
+        Returns:
+            List of article record dictionaries matching the title search, up to limit results.
+        """
         clean_title = title.replace('"', "'").strip()[:200]
         search_term = f'"{clean_title}"[Title]'
 

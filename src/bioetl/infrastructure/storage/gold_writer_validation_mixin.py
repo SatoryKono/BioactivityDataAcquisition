@@ -33,7 +33,11 @@ class GoldWriterValidationMixin:
     """Mixin with mode/record/schema validation helpers for Gold writes."""
 
     def _validate_write_mode(self, mode: str) -> GoldWriteMode:
-        """Validate and return the write mode enum."""
+        """Validate and return the write mode enum.
+
+        Returns:
+            GoldWriteMode enum value corresponding to the given mode string.
+        """
         try:
             return GoldWriteMode(mode)
         except ValueError:

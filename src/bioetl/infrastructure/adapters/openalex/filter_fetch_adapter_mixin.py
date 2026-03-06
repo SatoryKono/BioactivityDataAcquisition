@@ -120,7 +120,11 @@ class OpenAlexAdapterFilterFetchMixin:
         self: _OpenAlexFilterFetchHost,
         params: dict[str, str],
     ) -> JsonDict:  # Any: untyped OpenAlex API payload
-        """Backward-compatible wrapper around query-execution component."""
+        """Backward-compatible wrapper around query-execution component.
+
+        Returns:
+            Dictionary containing the decoded JSON payload from the API response.
+        """
         return await self._query_executor.request_works_payload(params)
 
     async def fetch_filtered(
@@ -273,7 +277,11 @@ class OpenAlexAdapterFilterFetchMixin:
         title: str,
         limit: int = 3,
     ) -> list[BronzeRecord]:
-        """Search works by title via cursor-flow component."""
+        """Search works by title via cursor-flow component.
+
+        Returns:
+            List of matching BronzeRecord dictionaries from the title search.
+        """
         return await self._cursor_flow.search_by_title(title, limit)
 
 

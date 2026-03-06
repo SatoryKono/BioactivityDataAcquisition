@@ -31,7 +31,11 @@ __all__ = [
 def _handle_port_in_use(
     port: int, e: OSError, fail_fast: bool, logger: LoggerPort
 ) -> bool:
-    """Handle port already in use error."""
+    """Handle port already in use error.
+
+    Returns:
+        False to indicate the server was not started on a new port.
+    """
     global _SERVER_STARTED
     logger.warning(
         "Metrics port already in use",
@@ -52,7 +56,11 @@ def _handle_port_in_use(
 def _handle_os_error(
     port: int, e: OSError, retry_count: int, fail_fast: bool, logger: LoggerPort
 ) -> bool:
-    """Handle transient OS error after all retries exhausted."""
+    """Handle transient OS error after all retries exhausted.
+
+    Returns:
+        False to indicate server startup failed.
+    """
     logger.error(
         "Failed to start metrics server",
         port=port,
@@ -67,7 +75,11 @@ def _handle_os_error(
 def _handle_unexpected_error(
     port: int, e: Exception, fail_fast: bool, logger: LoggerPort
 ) -> bool:
-    """Handle unexpected errors during server startup."""
+    """Handle unexpected errors during server startup.
+
+    Returns:
+        False to indicate server startup failed.
+    """
     logger.error(
         "Unexpected error starting metrics server",
         port=port,
@@ -89,7 +101,11 @@ def start_metrics_server(
     retry_delay: float = 1.0,
     logger: LoggerPort | None = None,
 ) -> bool:
-    """Start Prometheus metrics server once with retry and optional fail-fast."""
+    """Start Prometheus metrics server once with retry and optional fail-fast.
+
+    Returns:
+        True if server started successfully or was already running, False otherwise.
+    """
     global _SERVER_STARTED
 
     if logger is None:
@@ -118,7 +134,7 @@ def start_metrics_server(
                 if e.errno == errno.EADDRINUSE:
                     return _handle_port_in_use(port, e, fail_fast, logger)
                 if attempt < retry_count - 1:
-                    time.sleep(retry_delay * (2**attempt))
+                    time.sleep(retry_delay * (2 ** attempt))
                     continue
                 return _handle_os_error(port, e, retry_count, fail_fast, logger)
             except (RuntimeError, ValueError, TypeError, AttributeError) as e:
@@ -172,12 +188,12 @@ def push_metrics_to_gateway(
         )
         return True
     except (
-        OSError,
-        ConnectionError,
-        TimeoutError,
-        RuntimeError,
-        ValueError,
-        TypeError,
+            OSError,
+            ConnectionError,
+            TimeoutError,
+            RuntimeError,
+            ValueError,
+            TypeError,
     ) as e:
         logger.warning(
             "Failed to push metrics to gateway",

@@ -21,7 +21,11 @@ class UniProtAdapterMetadataMixin:
     _request_collector: APIRequestCollector
 
     def _get_health_endpoint(self) -> str:
-        """Return health check endpoint."""
+        """Return health check endpoint.
+
+        Returns:
+            Endpoint path string used for UniProt health probe requests.
+        """
         return "/uniprotkb/search"
 
     def __repr__(self) -> str:
@@ -32,7 +36,11 @@ class UniProtAdapterMetadataMixin:
         self,
         api_version: str | None = None,
     ) -> SourceMetadata:
-        """Get API request metadata and clear collector."""
+        """Get API request metadata and clear collector.
+
+        Returns:
+            SourceMetadata aggregated from all recorded API requests since last clear.
+        """
         metadata = self._request_collector.to_source_metadata(
             source_type="api", url=self.base_url, api_version=api_version
         )

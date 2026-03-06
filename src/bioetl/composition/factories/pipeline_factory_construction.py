@@ -79,7 +79,11 @@ class RunContextFactory:
         runtime: RuntimeConfig,
         yaml_config: PipelineYamlConfig,
     ) -> RunContext:
-        """Create metadata ``RunContext`` from runtime and resolved YAML."""
+        """Create metadata ``RunContext`` from runtime and resolved YAML.
+
+        Returns:
+            RunContext populated with run ID, type, provider, entity, and versioning.
+        """
         entity = self.entity_type_extractor(self.pipeline_name) or self.pipeline_name
         return RunContext.create(
             run_id=run_id,
@@ -107,7 +111,11 @@ class DomainConfigResolver:
         *,
         relaxed_dq: bool,
     ) -> PipelineConfig:
-        """Resolve domain config from YAML with DQ loader composition."""
+        """Resolve domain config from YAML with DQ loader composition.
+
+        Returns:
+            Resolved domain PipelineConfig with integrated DQ configuration.
+        """
         config_loader = self.loader_class(self.configs_root, relaxed_dq=relaxed_dq)
         resolved_dq = config_loader.resolve_dq_config(yaml_config)
         return self.domain_mapper(yaml_config, resolved_dq_config=resolved_dq)
@@ -131,7 +139,11 @@ class TransformerBuilder:
         tracer: TracingPort | None,
         metrics: MetricsPort | None,
     ) -> BaseTransformer | None:
-        """Build transformer instance or return ``None`` when class is absent."""
+        """Build transformer instance or return ``None`` when class is absent.
+
+        Returns:
+            Configured BaseTransformer with identity and contract policy, or None.
+        """
         if transformer_class is None:
             return None
 

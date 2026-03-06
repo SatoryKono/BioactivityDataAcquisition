@@ -4,7 +4,6 @@ from __future__ import annotations
 
 __all__ = ["SilverWriterValidationMixin"]
 
-
 from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -37,7 +36,11 @@ class SilverWriterValidationMixin:
     _prepare_arrow_data: Callable[..., pa.Table]
 
     def _validate_write_mode(self, mode: str) -> SilverWriteMode:
-        """Validate and convert write mode string to enum."""
+        """Validate and convert write mode string to enum.
+
+        Returns:
+            SilverWriteMode enum value corresponding to the given mode string.
+        """
         try:
             return SilverWriteMode(mode)
         except ValueError:
@@ -51,7 +54,11 @@ class SilverWriterValidationMixin:
         records: list[BronzeRecord],
         primary_keys: list[str],
     ) -> list[BronzeRecord]:
-        """Deduplicate records based on primary keys in the current batch."""
+        """Deduplicate records based on primary keys in the current batch.
+
+        Returns:
+            List of records with duplicates removed, keeping the last occurrence per primary key.
+        """
         if not primary_keys or not records:
             return records
 
@@ -62,7 +69,11 @@ class SilverWriterValidationMixin:
         return list(unique_records.values())
 
     def _to_policy_write_mode(self, mode: SilverWriteMode) -> WriteMode:
-        """Map SilverWriteMode to WriteMode for policy validation."""
+        """Map SilverWriteMode to WriteMode for policy validation.
+
+        Returns:
+            WriteMode enum value corresponding to the given SilverWriteMode.
+        """
         mapping = {
             SilverWriteMode.MERGE: WriteMode.MERGE,
             SilverWriteMode.APPEND: WriteMode.APPEND,
@@ -230,7 +241,11 @@ class SilverWriterValidationMixin:
         table_name: str,
         records: list[BronzeRecord],
     ) -> SchemaDriftInfo | None:
-        """Detect schema drift between existing table and incoming records."""
+        """Detect schema drift between existing table and incoming records.
+
+        Returns:
+            SchemaDriftInfo instance if drift is detected, None if schemas match or no existing table.
+        """
         from bioetl.domain.value_objects.dq_metrics import SchemaDriftInfo
 
         existing_schema = await self._get_table_schema(table_name)
@@ -276,7 +291,11 @@ class SilverWriterValidationMixin:
         partition_cols: list[str] | None,
         key_nullability_rules: list[KeyNullabilityRule] | None,
     ) -> tuple[list[BronzeRecord], SilverWriteMode, str, pa.Table]:
-        """Run full validation chain and prepare Arrow data for write."""
+        """Run full validation chain and prepare Arrow data for write.
+
+        Returns:
+            Tuple of (deduplicated records, validated write mode, table path, prepared Arrow table).
+        """
         records = self._deduplicate_by_primary_keys(records, primary_keys)
         validated_mode = self._validate_write_mode(mode)
         self._enforce_write_policy(validated_mode, table_name)

@@ -43,7 +43,11 @@ class PreflightService:
         self._medallion_validator = medallion_validator
 
     async def validate_infrastructure(self, services: PipelineService) -> HealthReport:
-        """Validate storage and data source health."""
+        """Validate storage and data source health.
+
+        Returns:
+            HealthReport with per-component status and overall health assessment.
+        """
         self._logger.info(
             "Validating infrastructure health",
             extra={"stage": "health_check"},
@@ -106,7 +110,11 @@ class PreflightService:
         silver_format: str | None = None,
         gold_format: str | None = None,
     ) -> list[ConfigValidationError]:
-        """Validate Medallion architecture invariants."""
+        """Validate Medallion architecture invariants.
+
+        Returns:
+            List of ConfigValidationError for any detected violations (empty if valid).
+        """
         return self._medallion_validator.validate_medallion_config(
             runtime=runtime,
             bronze_path=bronze_path,
@@ -117,7 +125,11 @@ class PreflightService:
         )
 
     def validate_write_modes(self) -> list[ConfigValidationError]:
-        """Validate that config write modes are allowed by Medallion policy."""
+        """Validate that config write modes are allowed by Medallion policy.
+
+        Returns:
+            List of ConfigValidationError for any invalid write mode combinations.
+        """
         return self._medallion_validator.validate_write_modes()
 
     async def validate_preflight(
@@ -130,7 +142,11 @@ class PreflightService:
         silver_format: str | None = None,
         gold_format: str | None = None,
     ) -> PreflightReport:
-        """Execute all preflight checks and return aggregated report."""
+        """Execute all preflight checks and return aggregated report.
+
+        Returns:
+            PreflightReport aggregating infrastructure health and config validation results.
+        """
         self._log_preflight_started(runtime)
 
         health_report = await self.validate_infrastructure(services)

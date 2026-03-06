@@ -8,7 +8,6 @@ from __future__ import annotations
 
 __all__ = ["dq_overrides_to_domain", "yaml_config_to_domain"]
 
-
 from typing import Literal
 
 from bioetl.domain.composite.config import ColumnGroupConfig
@@ -19,7 +18,11 @@ from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
 def _extract_source_fields(yaml_config: PipelineYamlConfig) -> list[str]:
-    """Extract field names from source config."""
+    """Extract field names from source config.
+
+    Returns:
+        List of field name strings extracted from the source configuration.
+    """
     source_fields = yaml_config.source.fields
     if not source_fields:
         return []
@@ -31,7 +34,11 @@ def _extract_source_fields(yaml_config: PipelineYamlConfig) -> list[str]:
 def _extract_write_modes(
     yaml_config: PipelineYamlConfig,
 ) -> tuple[SilverWriteMode, GoldWriteMode]:
-    """Extract and convert write modes from sink config to domain enums."""
+    """Extract and convert write modes from sink config to domain enums.
+
+    Returns:
+        Tuple of (SilverWriteMode enum, GoldWriteMode enum) from the sink config.
+    """
     silver_config = yaml_config.sink.get("silver")
     gold_config = yaml_config.sink.get("gold")
 
@@ -47,13 +54,21 @@ def _extract_write_modes(
 
 
 def _build_silver_filters(yaml_config: PipelineYamlConfig) -> SilverFilterConfig:
-    """Build Silver layer filter config from YAML config."""
+    """Build Silver layer filter config from YAML config.
+
+    Returns:
+        SilverFilterConfig instance built from the YAML filter configuration.
+    """
     base_filters = yaml_config.silver_filters.to_domain()
     return SilverFilterConfig.from_base(base_filters)
 
 
 def _build_gold_filters(yaml_config: PipelineYamlConfig) -> GoldFilterConfig:
-    """Build GoldFilterConfig from YAML config."""
+    """Build GoldFilterConfig from YAML config.
+
+    Returns:
+        GoldFilterConfig instance built from the YAML filter configuration.
+    """
     return yaml_config.gold_filters.to_domain()
 
 
@@ -73,7 +88,11 @@ def yaml_config_to_domain(
     yaml_config: PipelineYamlConfig,
     resolved_dq_config: DQConfig | None = None,
 ) -> PipelineConfig:
-    """Map validated YAML schema config to immutable domain PipelineConfig."""
+    """Map validated YAML schema config to immutable domain PipelineConfig.
+
+    Returns:
+        PipelineConfig instance with fully resolved domain configuration.
+    """
     source_fields = _extract_source_fields(yaml_config)
     write_mode, gold_write_mode = _extract_write_modes(yaml_config)
     silver_filters = _build_silver_filters(yaml_config)

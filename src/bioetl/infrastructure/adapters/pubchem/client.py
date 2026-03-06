@@ -60,12 +60,20 @@ PUBCHEM_DTO_MODELS: dict[str, type[BaseModel]] = {
 
 
 def _create_default_pubchem_entity_mapper() -> PubChemEntityMapper:
-    """Create default entity mapper for non-DI call sites."""
+    """Create default entity mapper for non-DI call sites.
+
+    Returns:
+        PubChemEntityMapper instance with default configuration.
+    """
     return PubChemEntityMapper()
 
 
 def _create_default_pubchem_request_collector() -> APIRequestCollector:
-    """Create default request collector for non-DI call sites."""
+    """Create default request collector for non-DI call sites.
+
+    Returns:
+        APIRequestCollector instance ready for tracking API requests.
+    """
     return APIRequestCollector()
 
 
@@ -79,7 +87,11 @@ def _create_default_pubchem_fetch_strategies(
     provider_name: str,
     request_collector: APIRequestCollector,
 ) -> PubChemFetchStrategies:
-    """Create default fetch strategies for non-DI call sites."""
+    """Create default fetch strategies for non-DI call sites.
+
+    Returns:
+        PubChemFetchStrategies instance wired with the given rate limiter, circuit breaker, and mapper.
+    """
     from bioetl.infrastructure.adapters.pubchem.fetch_strategies import (
         PubChemFetchStrategies,
     )
@@ -354,7 +366,11 @@ class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
                 yield model_class.model_construct(**record)
 
     async def _probe_health(self) -> HealthStatus:
-        """Perform PubChem health probe using lightweight water query (CID 962)."""
+        """Perform PubChem health probe using lightweight water query (CID 962).
+
+        Returns:
+            HealthStatus reflecting the current PubChem API availability via circuit breaker state.
+        """
         try:
             # Lightweight query: fetch water (CID 962)
             await self.rate_limiter.acquire()
@@ -395,7 +411,11 @@ class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
             raise  # Let base class handle via _fallback_health_status()
 
     def _get_health_endpoint(self) -> str:
-        """Get the PubChem health check endpoint."""
+        """Get the PubChem health check endpoint.
+
+        Returns:
+            Endpoint path string used for PubChem health probe requests.
+        """
         return "/rest/pug/compound/cid/962/property/MolecularFormula/JSON"
 
     def __repr__(self) -> str:

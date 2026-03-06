@@ -14,7 +14,6 @@ from bioetl.infrastructure.storage.write_resilience import (
 if TYPE_CHECKING:
     from bioetl.infrastructure.config import Settings
 
-
 __all__ = [
     "create_silver_atomic_retry_policy",
     "create_silver_merge_resilience_policy",
@@ -37,7 +36,11 @@ def _resolve_merge_execution_timeout_seconds(timeout_cfg: object) -> float:
 
 
 def create_silver_atomic_retry_policy(settings: Settings) -> AdaptiveRetryPolicy:
-    """Create atomic replace retry policy for Silver metadata writes."""
+    """Create atomic replace retry policy for Silver metadata writes.
+
+    Returns:
+        AdaptiveRetryPolicy configured for Silver metadata atomic replace operations.
+    """
     if not settings.pipeline.silver_resilience_enabled:
         return DEFAULT_ATOMIC_REPLACE_RETRY_POLICY
 
@@ -55,7 +58,11 @@ def create_silver_atomic_retry_policy(settings: Settings) -> AdaptiveRetryPolicy
 def create_silver_merge_resilience_policy(
     settings: Settings,
 ) -> SilverMergeResiliencePolicy:
-    """Create merge timeout/retry policy bundle for Silver Delta writes."""
+    """Create merge timeout/retry policy bundle for Silver Delta writes.
+
+    Returns:
+        SilverMergeResiliencePolicy with timeout and commit retry configuration.
+    """
     if not settings.pipeline.silver_resilience_enabled:
         return DEFAULT_SILVER_MERGE_POLICY
 

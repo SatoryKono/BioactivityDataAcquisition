@@ -49,7 +49,11 @@ class SilverWriterDeltaMixin:
 
     @staticmethod
     def _load_silver_writer_module() -> Any:  # Any: return type varies at runtime
-        """Load silver_writer module for backward-compatible patch points."""
+        """Load silver_writer module for backward-compatible patch points.
+
+        Returns:
+            Silver writer module with write_deltalake and DeltaTable references.
+        """
         from bioetl.infrastructure.storage import silver_writer as silver_writer_module
 
         return silver_writer_module

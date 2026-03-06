@@ -104,5 +104,9 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
         self,
         result: JsonDict,  # Any: untyped API JSON record
     ) -> tuple[str, str]:  # Any: untyped API JSON record
-        """Return PubMed PMID for logging."""
+        """Return PubMed PMID for logging.
+
+        Returns:
+            Tuple of (field name string, PMID value string) for structured log output.
+        """
         return ("found_pmid", str(result.get("pmid", "unknown")))

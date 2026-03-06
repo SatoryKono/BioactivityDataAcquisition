@@ -29,7 +29,11 @@ def create_gold_writer(
     transform_steps: tuple[str, ...] | None,
     flat_structure: bool,
 ) -> GoldWriter:
-    """Create configured Gold writer."""
+    """Create configured Gold writer.
+
+    Returns:
+        Configured GoldWriter instance for the Gold storage layer.
+    """
     save_metadata = config.save_metadata if config else False
     metadata_writer = (
         MetadataWriter(logger=logger) if save_metadata else NoOpMetadataWriter()

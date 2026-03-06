@@ -8,7 +8,6 @@ from __future__ import annotations
 
 __all__ = ["PubChemFetchStrategies"]
 
-
 import time
 from typing import TYPE_CHECKING
 
@@ -31,12 +30,7 @@ if TYPE_CHECKING:
 
 
 class PubChemFetchStrategies:
-    """Helper class for PubChem fetch operations.
-
-    Provides fetch methods for different entity types and fetch modes.
-    Delegates entity conversion to PubChemEntityMapper.
-    Records API request metadata for Bronze layer enrichment.
-    """
+    """Helper class for PubChem fetch operations."""
 
     FETCH_STRATEGY_ERRORS = (
         BioETLError,
@@ -60,18 +54,7 @@ class PubChemFetchStrategies:
         provider_name: str = "pubchem",
         request_collector: APIRequestCollector | None = None,
     ) -> None:
-        """Initialize fetch strategies.
-
-        Args:
-            logger: LoggerPort instance for structured logging.
-            rate_limiter: Token bucket rate limiter.
-            circuit_breaker: Circuit breaker for resilience.
-            mapper: Entity mapper for PubChem responses.
-            run_in_executor: Callable to run sync code in executor.
-            provider_name: Provider identifier.
-            request_collector: Optional collector for API request metadata.
-
-        """
+        """Initialize fetch strategies."""
         self._logger = logger
         self._rate_limiter = rate_limiter
         self._circuit_breaker = circuit_breaker
@@ -87,18 +70,7 @@ class PubChemFetchStrategies:
         status_code: int = 200,
         result_count: int = 0,
     ) -> None:
-        """Record a PubChem API request for metadata enrichment.
-
-        Since pubchempy doesn't expose raw HTTP response objects,
-        we record requests with estimated metadata based on the call.
-
-        Args:
-            endpoint: The API endpoint path (e.g., /compound/name/aspirin/JSON).
-            duration_ms: Request duration in milliseconds.
-            status_code: HTTP status code (200 for success, estimated).
-            result_count: Number of results returned (used for size estimation).
-
-        """
+        """Record a PubChem API request for metadata enrichment."""
         if self._request_collector is None:
             return
 
@@ -116,7 +88,11 @@ class PubChemFetchStrategies:
 
     @staticmethod
     def _normalize_results(results: object) -> list[object]:
-        """Normalize pubchempy responses to a concrete list."""
+        """Normalize pubchempy responses to a concrete list.
+
+        Returns:
+            List of result objects, converting tuples to lists or returning empty list for other types.
+        """
         if isinstance(results, list):
             return results
         if isinstance(results, tuple):
@@ -126,15 +102,7 @@ class PubChemFetchStrategies:
     async def fetch_by_query(
         self, query: str, limit: int | None
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch compounds by query (name search).
-
-        Args:
-            query: Search query string.
-            limit: Maximum number of records to process.
-
-        Returns:
-            Async iterator yielding fetched records.
-        """
+        """Fetch compounds by query (name search)."""
         await self._rate_limiter.acquire()
         start_time = time.perf_counter()
         compounds = await self._circuit_breaker.call(
@@ -152,7 +120,11 @@ class PubChemFetchStrategies:
             yield self._mapper.compound_to_dict(compound)
 
     async def _fetch_single_smiles(self, smiles: str) -> list[BronzeRecord]:
-        """Fetch compounds for a single SMILES string."""
+        """Fetch compounds for a single SMILES string.
+
+        Returns:
+            List of compound record dictionaries matching the given SMILES structure.
+        """
         await self._rate_limiter.acquire()
         start_time = time.perf_counter()
         compounds = await self._circuit_breaker.call(
@@ -169,15 +141,7 @@ class PubChemFetchStrategies:
     async def fetch_by_smiles(
         self, smiles_list: list[str], limit: int | None = None
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch compounds by SMILES strings.
-
-        Args:
-            smiles_list: Smiles list.
-            limit: Maximum number of records to process.
-
-        Returns:
-            Async iterator yielding fetched records.
-        """
+        """Fetch compounds by SMILES strings."""
         fetched = 0
         for smiles in smiles_list:
             if limit and fetched >= limit:
@@ -201,7 +165,11 @@ class PubChemFetchStrategies:
                 )
 
     def _parse_valid_cids(self, cid_list: list[str]) -> list[int]:
-        """Parse and validate CID list, returning only valid integers."""
+        """Parse and validate CID list, returning only valid integers.
+
+        Returns:
+            List of integer CIDs parsed from the input strings, skipping invalid values.
+        """
         valid_cids: list[int] = []
         for cid in cid_list:
             try:
@@ -213,11 +181,19 @@ class PubChemFetchStrategies:
         return valid_cids
 
     def _parse_valid_molecule_ids(self, molecule_id_list: list[str]) -> list[int]:
-        """Backward-compatible alias for CID parser."""
+        """Backward-compatible alias for CID parser.
+
+        Returns:
+            List of integer CIDs parsed from the input strings, skipping invalid values.
+        """
         return self._parse_valid_cids(molecule_id_list)
 
     async def _fetch_cid_batch(self, batch: list[int]) -> list[BronzeRecord]:
-        """Fetch a batch of compounds by CID."""
+        """Fetch a batch of compounds by CID.
+
+        Returns:
+            List of compound record dictionaries for the given CID batch.
+        """
         await self._rate_limiter.acquire()
         start_time = time.perf_counter()
         compounds = await self._circuit_breaker.call(
@@ -236,23 +212,14 @@ class PubChemFetchStrategies:
     async def fetch_by_cids(
         self, cid_list: list[str], limit: int | None = None, batch_size: int = 50
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch compounds by CID list.
-
-        Args:
-            cid_list: Cid list.
-            limit: Maximum number of records to process.
-            batch_size: Number of records per batch.
-
-        Returns:
-            Async iterator yielding fetched records.
-        """
+        """Fetch compounds by CID list."""
         fetched = 0
         valid_cids = self._parse_valid_cids(cid_list)
 
         for i in range(0, len(valid_cids), batch_size):
             if limit and fetched >= limit:
                 return
-            batch = valid_cids[i : i + batch_size]
+            batch = valid_cids[i: i + batch_size]
 
             try:
                 records = await self._fetch_cid_batch(batch)
@@ -276,16 +243,7 @@ class PubChemFetchStrategies:
         limit: int | None = None,
         batch_size: int = 50,
     ) -> AsyncIterator[BronzeRecord]:
-        """Backward-compatible alias for CID-based fetch.
-
-        Args:
-            molecule_id_list: Molecule id list.
-            limit: Maximum number of records to process.
-            batch_size: Number of records per batch.
-
-        Returns:
-            Async iterator yielding fetched records.
-        """
+        """Backward-compatible alias for CID-based fetch."""
         async for record in self.fetch_by_cids(
             molecule_id_list, limit=limit, batch_size=batch_size
         ):
@@ -294,14 +252,8 @@ class PubChemFetchStrategies:
     async def _fetch_single_inchikey(self, inchikey: str) -> list[BronzeRecord]:
         """Fetch compounds for a single InChIKey.
 
-        PubChem supports InChIKey lookup via the 'inchikey' namespace.
-        InChIKey format: AAAAAAAAAAAAAA-BBBBBBBBBB-Z (27 characters).
-
-        Args:
-            inchikey: Standard InChIKey string.
-
         Returns:
-            List of compound dicts (usually 0 or 1 result per InChIKey).
+            List of compound record dictionaries matching the given InChIKey (usually 0 or 1 result).
         """
         await self._rate_limiter.acquire()
         start_time = time.perf_counter()
@@ -319,21 +271,7 @@ class PubChemFetchStrategies:
     async def fetch_by_inchikey(
         self, inchikey_list: list[str], limit: int | None = None
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch compounds by InChIKey list.
-
-        InChIKey is the IUPAC standard chemical identifier (27 characters).
-        Each InChIKey maps to at most one compound in PubChem.
-
-        Args:
-            inchikey_list: List of InChIKey strings.
-            limit: Maximum number of records to return.
-
-        Yields:
-            Compound dicts with CID, SMILES, properties, etc.
-
-        Returns:
-            Async iterator yielding fetched records.
-        """
+        """Fetch compounds by InChIKey list."""
         fetched = 0
         for inchikey in inchikey_list:
             if limit and fetched >= limit:
@@ -370,15 +308,7 @@ class PubChemFetchStrategies:
     async def fetch_substances(
         self, query: str | None, limit: int | None
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch substances from PubChem.
-
-        Args:
-            query: Search query string.
-            limit: Maximum number of records to process.
-
-        Returns:
-            Async iterator yielding fetched records.
-        """
+        """Fetch substances from PubChem."""
         if not query:
             raise ValueError("Query is required for substance search")
 
@@ -404,15 +334,7 @@ class PubChemFetchStrategies:
     async def fetch_assays(
         self, query: str | None, limit: int | None
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch assays from PubChem.
-
-        Args:
-            query: Search query string.
-            limit: Maximum number of records to process.
-
-        Returns:
-            Async iterator yielding fetched records.
-        """
+        """Fetch assays from PubChem."""
         if not query:
             raise ValueError("Query is required for assay search")
 

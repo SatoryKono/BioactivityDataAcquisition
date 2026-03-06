@@ -25,7 +25,6 @@ from bioetl.application.core.protocols import (
     TransformCallback,
 )
 from bioetl.application.core.quarantine_manager import QuarantineManagerService
-from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
 from bioetl.composition.factories.batch_id_generator import UuidBatchIdGenerator
 from bioetl.domain.error_classifier import ErrorClassifier
@@ -75,7 +74,11 @@ def create_batch_processing_components(
     tracer: TracingPort | None = None,
     lock_validator: Callable[[], Awaitable[bool]] | None = None,
 ) -> BatchProcessingComponents:
-    """Create batch metrics/transformer/writer stack via composition DI."""
+    """Create batch metrics/transformer/writer stack via composition DI.
+
+    Returns:
+        BatchProcessingComponents with batch metrics, transformer, and writer.
+    """
     pipeline_label = f"{config.provider}_{config.entity_type}"
     batch_metrics = BatchMetricsRecorderService(
         services.metrics,
@@ -122,7 +125,11 @@ def create_checkpoint_manager(
     *,
     loading_strategy: LoadingStrategy | None = None,
 ) -> CheckpointManagerService:
-    """Create configured CheckpointManagerService."""
+    """Create configured CheckpointManagerService.
+
+    Returns:
+        CheckpointManagerService configured for the pipeline run.
+    """
     return CheckpointManagerService(
         checkpoint_port=checkpoint_port,
         logger=logger,
@@ -144,7 +151,11 @@ def create_record_processor_from_pipeline(
     lock_validator: Callable[[], Awaitable[bool]] | None = None,
     tracer: TracingPort | None = None,
 ) -> RecordProcessor:
-    """Create RecordProcessor from pipeline using delegated builder."""
+    """Create RecordProcessor from pipeline using delegated builder.
+
+    Returns:
+        RecordProcessor configured from the pipeline's services and context.
+    """
     return create_record_processor_fn(
         services=pipeline.services,
         context=pipeline.context,
@@ -191,7 +202,11 @@ def create_batch_executor_from_pipeline(
     flat_structure: bool = False,
     batch_id_factory: BatchIdGeneratorPort | None = None,
 ) -> BatchExecutor:
-    """Create BatchExecutor from pipeline using delegated component factories."""
+    """Create BatchExecutor from pipeline using delegated component factories.
+
+    Returns:
+        BatchExecutor configured from the pipeline's services, context, and config.
+    """
     skip = pipeline.runtime.skip_gold
     gold_filter = (lambda _c, _r: False) if skip else callbacks.gold_filter
 

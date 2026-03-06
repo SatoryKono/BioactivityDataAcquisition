@@ -33,11 +33,19 @@ class IDMappingHealthMixin:
     base_url: str
 
     def _health_deps(self) -> IDMappingHealthDependencies:
-        """Return typed dependency view of the host client."""
+        """Return typed dependency view of the host client.
+
+        Returns:
+            IDMappingHealthDependencies cast of the current client instance.
+        """
         return cast("IDMappingHealthDependencies", self)
 
     async def _probe_health(self) -> HealthStatus:
-        """Perform health probe for ID Mapping API."""
+        """Perform health probe for ID Mapping API.
+
+        Returns:
+            HealthStatus reflecting the current UniProt ID Mapping API availability.
+        """
         deps = self._health_deps()
         url = f"{deps.base_url}/configure/idmapping/fields"
         with deps._adapter_metrics.measure_request("/health"):
@@ -55,5 +63,9 @@ class IDMappingHealthMixin:
         return HealthStatus.HEALTHY
 
     def _get_health_endpoint(self) -> str:
-        """Get health check endpoint for ID Mapping API."""
+        """Get health check endpoint for ID Mapping API.
+
+        Returns:
+            Endpoint path string used for UniProt ID Mapping health probe requests.
+        """
         return "/configure/idmapping/fields"
