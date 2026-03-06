@@ -128,7 +128,7 @@ class FsAdrService(AdrServicePort):
         """Return all ADR documents sorted by number.
 
         Returns:
-            Collection of adrs.
+            List of AdrInfo objects sorted ascending by ADR number.
         """
         items: list[AdrInfo] = []
         for p in _iter_adr_files(self._base):
@@ -151,10 +151,10 @@ class FsAdrService(AdrServicePort):
         """Read and parse a single ADR by its number.
 
         Args:
-            number: Number.
+            number: ADR number to look up.
 
         Returns:
-            Adr.
+            AdrDocument with content, title, status, and date parsed from the ADR file.
         """
         pattern = f"ADR-{number:03d}-*.md"
         matches = list(self._base.glob(pattern))
@@ -178,7 +178,7 @@ class FsAdrService(AdrServicePort):
         """Validate all ADR files for naming, numbering and metadata consistency.
 
         Returns:
-            Validated AdrValidationReport.
+            AdrValidationReport with valid flag, counts, and list of issues found.
         """
         issues: list[AdrValidationIssue] = []
         files = list(_iter_adr_files(self._base))

@@ -28,6 +28,9 @@ def _default_concat_list_merger(
 
     - String lists: concatenate with deduplication, preserving order.
     - Other lists: plain concatenation.
+
+    Returns:
+        Merged list with string deduplication for string lists, or plain concatenation otherwise.
     """
     if all(isinstance(item, str) for item in base) and all(
         isinstance(item, str) for item in override
@@ -52,7 +55,11 @@ def config_merge(
     concat_list_merger: ListMergeFn | None = None,
     list_merger_resolver: ListMergeResolver | None = None,
 ) -> JsonDict:  # Any: YAML config values are heterogeneous
-    """Deep-merge two config mappings with optional key-specific list strategies."""
+    """Deep-merge two config mappings with optional key-specific list strategies.
+
+    Returns:
+        Deep-merged dictionary with override values taking precedence over base values.
+    """
     result = copy.deepcopy(dict(base))
     concat_merger = concat_list_merger or _default_concat_list_merger
 

@@ -14,7 +14,11 @@ def compute_integral_debt_score(
     expired_entries: int,
     baseline_total: int,
 ) -> float:
-    """Compute integral debt score (0..100), higher is better."""
+    """Compute integral debt score (0..100), higher is better.
+
+    Returns:
+        Float score in range 0..100 representing debt health, higher is better.
+    """
     if baseline_total <= 0:
         return 0.0
 
@@ -127,7 +131,11 @@ def _evaluate_owner_diversification(
     scorecard: JsonDict,  # Any: YAML scorecard sections are heterogeneous
     quarter: str,
 ) -> list[str]:
-    """Validate active owner count against diversification policy."""
+    """Validate active owner count against diversification policy.
+
+    Returns:
+        List of violation message strings, empty if policy is satisfied.
+    """
     governance = scorecard.get("governance", {})
     if not isinstance(governance, dict):
         return []

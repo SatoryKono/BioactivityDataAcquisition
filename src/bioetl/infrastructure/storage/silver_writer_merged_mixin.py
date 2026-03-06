@@ -47,7 +47,11 @@ class SilverWriterMergedMixin:
         primary_keys: list[str] | None,
         preserve_column_order: bool,
     ) -> pa.Table:
-        """Prepare normalized Arrow table for merged silver writes."""
+        """Prepare normalized Arrow table for merged silver writes.
+
+        Returns:
+            PyArrow Table with coerced null types, canonical column order, and primary key sorting applied.
+        """
         from bioetl.domain.schemas.column_order import canonical_column_order
 
         arrow_table = pa.Table.from_pylist(records)

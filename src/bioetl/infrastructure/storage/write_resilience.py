@@ -33,6 +33,9 @@ def _deterministic_jitter_seconds(
 
     Uses a small repeating phase cycle to avoid random-dependent behavior
     while still providing bounded per-attempt perturbation.
+
+    Returns:
+        Jitter float in seconds, bounded by max_jitter_seconds, or 0.0 if max is non-positive.
     """
     if max_jitter_seconds <= 0.0:
         return 0.0
@@ -52,7 +55,11 @@ class AdaptiveRetryPolicy:
     adaptive: bool = True
 
     def should_retry(self, retry_count: int) -> bool:
-        """Return ``True`` when another retry is allowed."""
+        """Return ``True`` when another retry is allowed.
+
+        Returns:
+            True if retries are enabled and retry_count is below max_retries, False otherwise.
+        """
         return self.enabled and retry_count < self.max_retries
 
     def calculate_delay(
@@ -61,7 +68,11 @@ class AdaptiveRetryPolicy:
         *,
         jitter_fn: JitterFn | None = None,
     ) -> float:
-        """Calculate bounded delay for the given 0-indexed retry number."""
+        """Calculate bounded delay for the given 0-indexed retry number.
+
+        Returns:
+            Delay float in seconds, bounded by max_delay_seconds, including optional jitter.
+        """
         if self.base_delay_seconds <= 0.0 or self.max_delay_seconds <= 0.0:
             return 0.0
 
@@ -114,7 +125,11 @@ NON_WINDOWS_ATOMIC_REPLACE_RETRY_POLICY = AdaptiveRetryPolicy(
 
 
 def build_default_atomic_replace_retry_policy() -> AdaptiveRetryPolicy:
-    """Return OS-specific default policy for atomic Path.replace retries."""
+    """Return OS-specific default policy for atomic Path.replace retries.
+
+    Returns:
+        AdaptiveRetryPolicy configured for Windows (20 retries) or non-Windows (3 retries).
+    """
     if os.name == "nt":
         return WINDOWS_ATOMIC_REPLACE_RETRY_POLICY
     return NON_WINDOWS_ATOMIC_REPLACE_RETRY_POLICY
@@ -124,7 +139,11 @@ DEFAULT_ATOMIC_REPLACE_RETRY_POLICY = build_default_atomic_replace_retry_policy(
 
 
 def build_default_silver_merge_policy() -> SilverMergeResiliencePolicy:
-    """Build default Silver merge policy aligned with PipelineSettings defaults."""
+    """Build default Silver merge policy aligned with PipelineSettings defaults.
+
+    Returns:
+        SilverMergeResiliencePolicy with 45s execution timeout, commit retry, and timeout retry.
+    """
     return SilverMergeResiliencePolicy(
         execution_timeout_seconds=45.0,
         commit_retry=AdaptiveRetryPolicy(

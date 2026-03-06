@@ -133,7 +133,11 @@ class LocalCheckpoint:
         tuple[RunID, JsonDict]  # Any: checkpoint state has heterogeneous values
         | None  # Any: checkpoint state has heterogeneous values
     ):  # Any: checkpoint state has heterogeneous values
-        """Synchronous load implementation."""
+        """Synchronous load implementation.
+
+        Returns:
+            Tuple of (RunID, metadata dict) if checkpoint exists, None otherwise.
+        """
         key = self._get_key(pipeline)
         full_path = self.base_path / key
 
@@ -185,6 +189,9 @@ class LocalCheckpoint:
 
         Lists all pipelines with checkpoints by scanning for .json files
         directly in the base path (flat structure).
+
+        Returns:
+            Sorted list of pipeline name strings with existing checkpoint files.
         """
         pipelines: set[str] = set()
 
@@ -211,7 +218,11 @@ class LocalCheckpoint:
         return await loop.run_in_executor(None, self._exists_sync, pipeline)
 
     def _exists_sync(self, pipeline: str) -> bool:
-        """Synchronous exists implementation."""
+        """Synchronous exists implementation.
+
+        Returns:
+            True if the checkpoint file for the given pipeline exists, False otherwise.
+        """
         key = self._get_key(pipeline)
         return (self.base_path / key).exists()
 
@@ -220,6 +231,9 @@ class LocalCheckpoint:
 
         Returns flat path: {pipeline}.json (e.g., chembl_activity.json)
         The base_path already points to data/output/checkpoints/.
+
+        Returns:
+            Filename string for the checkpoint file (e.g., 'chembl_activity.json').
         """
         return f"{pipeline}.json"
 

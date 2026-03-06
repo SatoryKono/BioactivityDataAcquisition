@@ -69,7 +69,11 @@ class DQReportWriter:
         entity: str | None = None,
         date_str: str | None = None,  # Deprecated: no longer used in path/filename
     ) -> Path:
-        """Write Bronze DQ report using unified Bronze/Silver/Gold path conventions."""
+        """Write Bronze DQ report using unified Bronze/Silver/Gold path conventions.
+
+        Returns:
+            Path to the written Bronze DQ report file.
+        """
         format = format or DQReportFormat.JSON
         extension = self._get_extension(format)
 
@@ -143,7 +147,11 @@ class DQReportWriter:
         target_table: str,
         run_id: str,
     ) -> Path:
-        """Resolve final report file path for Silver/Gold DQ outputs."""
+        """Resolve final report file path for Silver/Gold DQ outputs.
+
+        Returns:
+            Resolved Path for the DQ report file following the layer directory convention.
+        """
         filename = self._build_layer_filename(
             layer, extension, provider, entity, target_table, run_id
         )
@@ -275,7 +283,11 @@ class DQReportWriter:
         return output_path
 
     def _get_extension(self, format: DQReportFormat) -> str:
-        """Get file extension for format."""
+        """Get file extension for format.
+
+        Returns:
+            File extension string (e.g., '.json', '.yaml', '.html') for the given format.
+        """
         extensions = {
             DQReportFormat.JSON: ".json",
             DQReportFormat.YAML: ".yaml",

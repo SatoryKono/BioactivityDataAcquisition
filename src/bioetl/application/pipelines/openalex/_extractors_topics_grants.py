@@ -33,8 +33,9 @@ def extract_topics(
 
 
 def extract_primary_topic(
-    primary_topic: JsonDict  # Any: untyped API JSON record
-                   | None,  # Any: untyped JSON fragment from OpenAlex API
+    primary_topic: (
+        JsonDict | None  # Any: untyped API JSON record
+    ),  # Any: untyped JSON fragment from OpenAlex API
 ) -> JsonDict | None:  # Any: untyped JSON fragment from OpenAlex API
     """Extract single most relevant topic for a work.
 

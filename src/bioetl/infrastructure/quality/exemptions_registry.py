@@ -71,6 +71,9 @@ def build_module_path_key(
 
     Canonical format is repository-relative POSIX path:
     ``src/bioetl/<layer>/.../<module>.py``.
+
+    Returns:
+        Canonical registry key string in format 'src/bioetl/.../module.py'.
     """
     text = _normalize_path_text(str(module_path))
     if _is_module_path_key(text):
@@ -98,7 +101,11 @@ def build_module_path_key(
 def load_exemptions_registry(
     path: Path | str | None = None,
 ) -> JsonDict:  # Any: DQ check values vary by check type
-    """Load YAML exemptions registry as dictionary."""
+    """Load YAML exemptions registry as dictionary.
+
+    Returns:
+        Dictionary with the parsed registry YAML content.
+    """
     registry_path = _resolve_registry_path(path)
     if not registry_path.exists():
         raise FileNotFoundError(f"Exemptions registry not found: {registry_path}")
@@ -113,7 +120,11 @@ def get_registry_values(
     registry_name: str,
     path: Path | str | None = None,
 ) -> JsonDict:  # Any: DQ check values vary by check type
-    """Return value-only mapping for a concrete registry section."""
+    """Return value-only mapping for a concrete registry section.
+
+    Returns:
+        Dictionary mapping exemption names to their 'value' fields for the given registry section.
+    """
     raw = load_exemptions_registry(path)
     registries = raw.get("registries", {})
     if not isinstance(registries, dict):
@@ -151,6 +162,9 @@ def resolve_registry_value(
 
     This keeps one-release compatibility during key migration from basename/symbol
     to path-aware identifiers.
+
+    Returns:
+        Exemption value from the registry if found using any candidate key, None otherwise.
     """
     module_key = build_module_path_key(module_path)
     candidates: list[str] = []
@@ -176,6 +190,9 @@ def validate_exemption_key_normalization(
 
     During transition, other registries may still use symbol-only keys. This
     validator focuses on collision-prone ``file_size_limits`` entries.
+
+    Returns:
+        List of error message strings describing normalization violations, empty if all valid.
     """
     raw = load_exemptions_registry(path)
     registries = raw.get("registries", {})
@@ -378,7 +395,11 @@ def validate_exemptions_registry(
     *,
     today: date | None = None,
 ) -> tuple[list[str], list[str]]:
-    """Validate registry metadata and return (metadata_errors, expired_entries)."""
+    """Validate registry metadata and return (metadata_errors, expired_entries).
+
+    Returns:
+        Tuple of (metadata_errors list, expired_entries list) with issue descriptions.
+    """
     raw = load_exemptions_registry(path)
     now = today or date.today()
     metadata_errors: list[str] = []

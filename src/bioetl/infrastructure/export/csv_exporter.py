@@ -31,7 +31,11 @@ if TYPE_CHECKING:
 
 
 def _is_complex_type(field_type: pa.DataType) -> bool:
-    """Check if a PyArrow type is complex (list or struct)."""
+    """Check if a PyArrow type is complex (list or struct).
+
+    Returns:
+        True if the type is a list, large list, or struct, False otherwise.
+    """
     return bool(
         pa.types.is_list(field_type)
         or pa.types.is_large_list(field_type)
@@ -40,7 +44,11 @@ def _is_complex_type(field_type: pa.DataType) -> bool:
 
 
 def _serialize_column_to_json(col: pa.ChunkedArray) -> pa.Array:
-    """Serialize a column of complex values to JSON strings."""
+    """Serialize a column of complex values to JSON strings.
+
+    Returns:
+        PyArrow string array with each value serialized as a JSON string.
+    """
     vals = [
         serialize_to_json(v.as_py()) if v.as_py() is not None else None for v in col
     ]
@@ -48,7 +56,11 @@ def _serialize_column_to_json(col: pa.ChunkedArray) -> pa.Array:
 
 
 def _flatten_table_for_csv(table: pa.Table) -> pa.Table:
-    """Convert complex types (list, struct) to JSON strings for CSV export."""
+    """Convert complex types (list, struct) to JSON strings for CSV export.
+
+    Returns:
+        New PyArrow table with complex columns replaced by JSON string columns.
+    """
     new_columns = []
     for i, field in enumerate(table.schema):
         col = table.column(i)
@@ -281,7 +293,11 @@ class CsvExporter:
         sort_by: list[str] | None = None,
         primary_keys: list[str] | None = None,
     ) -> Path:
-        """Export PyArrow table to CSV file."""
+        """Export PyArrow table to CSV file.
+
+        Returns:
+            Path to the written CSV file.
+        """
         csv_full_path = self.base_path / f"{table_name}.csv"
         csv_full_path.parent.mkdir(parents=True, exist_ok=True)
         csv_data = self._flatten_for_csv(data)
@@ -312,7 +328,11 @@ class CsvExporter:
         append: bool,
         primary_keys: list[str] | None,
     ) -> pa.Table:
-        """Read/concat and optional deduplication for append workflow."""
+        """Read/concat and optional deduplication for append workflow.
+
+        Returns:
+            Merged PyArrow table combining existing CSV data with new data, deduplicated if keys provided.
+        """
         if not append or not csv_full_path.exists():
             return csv_data
         merged = await loop.run_in_executor(
@@ -327,7 +347,11 @@ class CsvExporter:
         )
 
     def _build_write_options(self) -> pv.WriteOptions:
-        """Build CSV writer options from exporter configuration."""
+        """Build CSV writer options from exporter configuration.
+
+        Returns:
+            WriteOptions instance configured with the exporter's delimiter and header settings.
+        """
         return pv.WriteOptions(
             include_header=self.header,
             delimiter=self.delimiter,

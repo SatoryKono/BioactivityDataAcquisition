@@ -63,7 +63,11 @@ def _collect_allowances(
 
 
 def _extract_growth_violation_section(violation: str) -> str:
-    """Map a human-readable growth violation to section key."""
+    """Map a human-readable growth violation to section key.
+
+    Returns:
+        Section key string such as 'registry:name', 'group:name', 'total_exemptions', or 'unknown'.
+    """
     registry_match = _REGISTRY_VIOLATION_RE.match(violation)
     if registry_match is not None:
         return f"registry:{registry_match.group(1)}"
@@ -86,7 +90,11 @@ def _resolve_rollout_mode_for_section(
     today: date,
     fallback_mode: str,
 ) -> str:
-    """Resolve warn/block mode for section with staged rollout overrides."""
+    """Resolve warn/block mode for section with staged rollout overrides.
+
+    Returns:
+        Mode string 'warn' or 'block' based on staged rollout policy for the given section.
+    """
     governance = scorecard.get("governance", {})
     if not isinstance(governance, dict):
         return fallback_mode
@@ -128,7 +136,11 @@ def split_growth_violations_by_severity(
     today: date | None = None,
     fallback_mode: str = "block",
 ) -> tuple[list[str], list[str]]:
-    """Split growth violations into (blocking, warning) using staged rollout policy."""
+    """Split growth violations into (blocking, warning) using staged rollout policy.
+
+    Returns:
+        Tuple of (blocking violations, warning violations) lists.
+    """
     now = today or date.today()
     default_mode = fallback_mode.strip().lower()
     if default_mode not in {"warn", "block"}:

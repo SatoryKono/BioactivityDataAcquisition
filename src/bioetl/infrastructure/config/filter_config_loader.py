@@ -52,8 +52,9 @@ class FilterConfigLoader(
         self,
         provider: str,
         entity: str,
-        inline_overrides: JsonDict  # Any: YAML config has heterogeneous values
-                          | None = None,  # Any: YAML filter config has heterogeneous values
+        inline_overrides: (
+            JsonDict | None  # Any: YAML config has heterogeneous values
+        ) = None,  # Any: YAML filter config has heterogeneous values
     ) -> tuple[
         InputFilterConfig, SilverFilterConfig, GoldFilterConfig, ExtractionParams
     ]:
@@ -99,8 +100,9 @@ class FilterConfigLoader(
         self,
         provider: str,
         entity: str,
-        inline_overrides: JsonDict  # Any: YAML config has heterogeneous values
-                          | None = None,  # Any: YAML filter config has heterogeneous values
+        inline_overrides: (
+            JsonDict | None  # Any: YAML config has heterogeneous values
+        ) = None,  # Any: YAML filter config has heterogeneous values
     ) -> JsonDict:  # Any: YAML filter config has heterogeneous values
         """Load merged filter config hierarchy as raw dict.
 
@@ -131,10 +133,12 @@ class FilterConfigLoader(
         self,
         provider: str,
         entity: str,
-        inline_overrides: JsonDict  # Any: YAML config has heterogeneous values
-                          | None = None,  # Any: YAML filter config has heterogeneous values
-        defaults: JsonDict  # Any: YAML config has heterogeneous values
-                  | None = None,  # Any: YAML filter config has heterogeneous values
+        inline_overrides: (
+            JsonDict | None  # Any: YAML config has heterogeneous values
+        ) = None,  # Any: YAML filter config has heterogeneous values
+        defaults: (
+            JsonDict | None  # Any: YAML config has heterogeneous values
+        ) = None,  # Any: YAML filter config has heterogeneous values
     ) -> JsonDict:  # Any: YAML filter config has heterogeneous values
         """Merge the 4-level filter config hierarchy into a single dict.
 
@@ -179,9 +183,9 @@ class FilterConfigLoader(
         base_pipeline_path = self._base_root / "pipeline.yaml"
         if base_pipeline_path.exists():
             base_pipeline = self._load_yaml(base_pipeline_path)
-            defaults: dict[
-                str, Any  # Any: YAML config has heterogeneous values
-            ] = {}  # Any: YAML filter config has heterogeneous values
+            defaults: dict[str, Any] = (  # Any: YAML config has heterogeneous values
+                {}
+            )  # Any: YAML filter config has heterogeneous values
 
             # input_filter defaults are still a top-level pipeline concern.
             input_filter = base_pipeline.get("input_filter")

@@ -40,7 +40,11 @@ class AggregationFieldSchema(BaseModel):
     )
 
     def to_domain(self, output_field: str) -> AggregationFieldSpec:
-        """Convert to domain AggregationFieldSpec."""
+        """Convert to domain AggregationFieldSpec.
+
+        Returns:
+            AggregationFieldSpec instance with source field, aggregation function, and filter.
+        """
         return AggregationFieldSpec(
             source_field=self.source,
             agg_function=AggregationFunction.from_string(self.agg),
@@ -58,7 +62,11 @@ class AggregationSchema(BaseModel):
     )
 
     def to_domain(self) -> AggregationConfig:
-        """Convert to domain AggregationConfig."""
+        """Convert to domain AggregationConfig.
+
+        Returns:
+            AggregationConfig instance with group_by field and aggregation field specs.
+        """
         return AggregationConfig(
             group_by=self.group_by,
             fields=tuple(
@@ -93,7 +101,11 @@ class SeedSchema(BaseModel):
         return value
 
     def to_domain(self) -> SeedConfig:
-        """Convert to immutable domain SeedConfig."""
+        """Convert to immutable domain SeedConfig.
+
+        Returns:
+            SeedConfig instance with pipeline name, output keys, silver table, and limit.
+        """
         return SeedConfig(
             pipeline=self.pipeline,
             output_keys=tuple(self.output_keys),
@@ -177,7 +189,11 @@ class DependencySchema(BaseModel):
         return self
 
     def to_domain(self) -> DependencyConfig:
-        """Convert to immutable domain DependencyConfig."""
+        """Convert to immutable domain DependencyConfig.
+
+        Returns:
+            DependencyConfig instance with pipeline, join keys, timeout, and filter settings.
+        """
         return DependencyConfig(
             pipeline=self.pipeline,
             join_keys=tuple(self.join_keys),
@@ -249,7 +265,11 @@ class EnricherSchema(BaseModel):
         return self
 
     def to_domain(self) -> EnricherConfig:
-        """Convert to immutable domain EnricherConfig."""
+        """Convert to immutable domain EnricherConfig.
+
+        Returns:
+            EnricherConfig instance with pipeline, join keys, cardinality, and aggregation settings.
+        """
         return EnricherConfig(
             pipeline=self.pipeline,
             join_keys=tuple(self.join_keys),

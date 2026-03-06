@@ -142,7 +142,11 @@ class DQConfig(BaseModel):
         return self
 
     def to_domain(self) -> DomainDQConfig:
-        """Convert to immutable domain DQ configuration."""
+        """Convert to immutable domain DQ configuration.
+
+        Returns:
+            DomainDQConfig instance with merged field, cross-field, and conditional validations.
+        """
         from bioetl.domain.config import (
             ConditionalValidation as DomainConditionalValidation,
         )
@@ -241,7 +245,11 @@ class CircuitBreakerConfig(BaseModel):
     recovery_timeout: int = Field(default=300, ge=60)
 
     def to_domain(self) -> DomainCircuitBreakerConfig:
-        """Convert to immutable domain circuit-breaker config."""
+        """Convert to immutable domain circuit-breaker config.
+
+        Returns:
+            DomainCircuitBreakerConfig instance with failure threshold and recovery timeout.
+        """
         return DomainCircuitBreakerConfig(
             failure_threshold=self.failure_threshold,
             recovery_timeout=self.recovery_timeout,

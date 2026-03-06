@@ -108,7 +108,11 @@ def _current_quarter_target(
 def load_debt_scorecard(
     path: Path | str | None = None,
 ) -> JsonDict:  # Any: scorecard sections are heterogeneous
-    """Load debt scorecard YAML as dictionary."""
+    """Load debt scorecard YAML as dictionary.
+
+    Returns:
+        Dictionary with the parsed debt scorecard YAML content.
+    """
     scorecard_path = _resolve_scorecard_path(path)
     if not scorecard_path.exists():
         raise FileNotFoundError(f"Debt scorecard not found: {scorecard_path}")
@@ -122,7 +126,11 @@ def load_debt_scorecard(
 def validate_debt_scorecard(
     path: Path | str | None = None,
 ) -> list[str]:
-    """Validate debt scorecard schema and monotonic governance targets."""
+    """Validate debt scorecard schema and monotonic governance targets.
+
+    Returns:
+        List of validation error message strings, empty if scorecard is valid.
+    """
     raw = load_debt_scorecard(path)
     return validate_debt_scorecard_raw(raw)
 
@@ -142,6 +150,9 @@ def validate_scorecard_registry_sync(
 
     The check prevents silent drift where scorecard budgets lag behind the real
     exemption registry and CI gates become misleading.
+
+    Returns:
+        List of sync error message strings, empty if scorecard and registry are consistent.
     """
     now = today or date.today()
     inventory = build_exemption_inventory(registry_path, today=now)
@@ -210,7 +221,11 @@ def evaluate_debt_scorecard(
     scorecard_path: Path | str | None = None,
     today: date | None = None,
 ) -> tuple[list[str], DebtScorecardEvaluation | None]:
-    """Evaluate scorecard budgets and return (violations, summary)."""
+    """Evaluate scorecard budgets and return (violations, summary).
+
+    Returns:
+        Tuple of (violation message list, DebtScorecardEvaluation summary or None if validation failed).
+    """
     now = today or date.today()
     inventory = build_exemption_inventory(registry_path, today=now)
     scorecard = load_debt_scorecard(scorecard_path)

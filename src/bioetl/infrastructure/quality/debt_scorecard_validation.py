@@ -38,7 +38,11 @@ from bioetl.infrastructure.quality._quarterly_targets_validation import (
 def validate_debt_scorecard_structure(
     raw: JsonDict,
 ) -> list[str]:
-    """Validate debt scorecard schema and monotonic governance targets."""
+    """Validate debt scorecard schema and monotonic governance targets.
+
+    Returns:
+        List of validation error message strings, empty if the scorecard structure is valid.
+    """
     errors: list[str] = []
 
     schema_version = raw.get("schema_version")

@@ -18,9 +18,9 @@ from bioetl.infrastructure.schemas.pipeline_contract_policy import (
 _CONFIGS_ROOT = Path("configs")
 
 
-def _load_base_contract_defaults() -> dict[
-    str, Any  # Any: YAML config has heterogeneous values
-]:  # Any: YAML config has heterogeneous values
+def _load_base_contract_defaults() -> (
+    dict[str, Any]  # Any: YAML config has heterogeneous values
+):  # Any: YAML config has heterogeneous values
     """Load contract defaults from consolidated base config if present.
 
     Returns:

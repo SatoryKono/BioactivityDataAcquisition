@@ -39,8 +39,9 @@ def extract_openalex_id(openalex_url: str | None) -> str | None:
 
 
 def extract_journal_info(
-    primary_location: JsonDict  # Any: untyped API JSON record
-                      | None,  # Any: untyped JSON fragment from OpenAlex API
+    primary_location: (
+        JsonDict | None  # Any: untyped API JSON record
+    ),  # Any: untyped JSON fragment from OpenAlex API
 ) -> JsonDict:  # Any: untyped JSON fragment from OpenAlex API
     """Extract journal info (journal, issn, publisher) from primary_location.
 
@@ -155,8 +156,9 @@ def extract_mesh_terms(
 
 
 def extract_keywords(
-    keywords: list[JsonDict]  # Any: untyped API JSON record
-              | None,  # Any: untyped JSON fragment from OpenAlex API
+    keywords: (
+        list[JsonDict] | None  # Any: untyped API JSON record
+    ),  # Any: untyped JSON fragment from OpenAlex API
 ) -> list[str]:
     """Extract keyword display names from keywords array.
 

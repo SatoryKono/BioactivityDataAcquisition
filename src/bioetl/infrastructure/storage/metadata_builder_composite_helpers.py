@@ -13,7 +13,11 @@ if TYPE_CHECKING:
 
 
 def parse_composite_list(value: object) -> list[str]:
-    """Parse composite list metadata stored as list or stringified list."""
+    """Parse composite list metadata stored as list or stringified list.
+
+    Returns:
+        List of string items parsed from the input value, or empty list if unparseable.
+    """
     if isinstance(value, list):
         return [str(item) for item in value]
     if isinstance(value, str):
@@ -27,7 +31,11 @@ def parse_composite_list(value: object) -> list[str]:
 
 
 def parse_composite_status(value: object) -> dict[str, str]:
-    """Parse enrichment status stored as dict or stringified dict."""
+    """Parse enrichment status stored as dict or stringified dict.
+
+    Returns:
+        Dictionary mapping string keys to string values, or empty dict if unparseable.
+    """
     if isinstance(value, dict):
         return {str(k): str(v) for k, v in value.items()}
     if isinstance(value, str):
@@ -43,7 +51,12 @@ def parse_composite_status(value: object) -> dict[str, str]:
 def build_composite_output_ext(
     records: list[JsonDict],  # Any: record/metadata values are heterogeneous
 ) -> CompositeOutputExt | None:
-    """Build CompositeOutputExt when composite lineage columns are present."""
+    """Build CompositeOutputExt when composite lineage columns are present.
+
+    Returns:
+        CompositeOutputExt populated from record lineage columns, or None if records are empty
+        or lack composite lineage fields.
+    """
     from bioetl.domain.models.metadata import (
         CompositeOutputExt,
         CompositeSchemaValidationMetadata,

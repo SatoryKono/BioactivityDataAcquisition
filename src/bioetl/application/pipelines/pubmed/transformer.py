@@ -21,6 +21,7 @@ from bioetl.application.pipelines.pubmed.extractors import (
     PubMedAuthorBlockExtractor,
     PubMedBusinessDataExtractor,
     RawAuthor,
+    StructuredAffiliation,
 )
 from bioetl.application.pipelines.pubmed.transformer_authors_mixin import (
     _PubMedTransformerAuthorsMixin,
@@ -188,8 +189,7 @@ class PubMedPublicationTransformer(
             build_authors_with_affiliations=self._build_authors_with_affiliations,
             process_structured_affiliations=lambda affiliations: (
                 self._process_structured_affiliations(
-                    affiliations
-                    # type: ignore[arg-type]  # JsonDict is structurally compatible with StructuredAffiliation
+                    cast(list[StructuredAffiliation], affiliations)
                 )
             ),
         )

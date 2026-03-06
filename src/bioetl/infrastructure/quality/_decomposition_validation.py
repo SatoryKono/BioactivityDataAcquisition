@@ -14,7 +14,11 @@ from bioetl.infrastructure.quality._primitives import (
 def _collect_quarterly_registry_budgets(
     raw: JsonDict,  # Any: YAML values are heterogeneous
 ) -> dict[str, dict[str, int]]:
-    """Collect validated-looking quarterly registry budgets for monotonic checks."""
+    """Collect validated-looking quarterly registry budgets for monotonic checks.
+
+    Returns:
+        Dictionary mapping quarter label strings to their registry budget mappings.
+    """
     quarterly_targets = raw.get("quarterly_targets", [])
     if not isinstance(quarterly_targets, list):
         return {}
@@ -39,7 +43,11 @@ def _validate_owner_diversification_policy(
     raw: JsonDict,  # Any: YAML values are heterogeneous
     errors: list[str],
 ) -> tuple[tuple[int, int] | None, int]:
-    """Validate governance.owner_diversification and return normalized settings."""
+    """Validate governance.owner_diversification and return normalized settings.
+
+    Returns:
+        Tuple of (parsed starts_quarter as (year, quarter_num) or None, min_distinct_owners int).
+    """
     governance = raw.get("governance", {})
     if not isinstance(governance, dict):
         return None, 1
@@ -85,7 +93,11 @@ def _validate_target_quarter(
     quarter_budget_map: dict[str, int],
     errors: list[str],
 ) -> tuple[str, tuple[int, int]] | None:
-    """Validate quarter field of a single target entry."""
+    """Validate quarter field of a single target entry.
+
+    Returns:
+        Tuple of (quarter label string, parsed (year, quarter_num)) if valid, None otherwise.
+    """
     quarter = item.get("quarter")
     if not isinstance(quarter, str):
         errors.append(f"{prefix}.quarter: expected string")
@@ -111,7 +123,11 @@ def _parse_owner_allocations(
     prefix: str,
     errors: list[str],
 ) -> dict[str, int] | None:
-    """Parse and validate allocations mapping from a target entry."""
+    """Parse and validate allocations mapping from a target entry.
+
+    Returns:
+        Dictionary mapping owner name strings to non-negative integer allocations, or None if invalid.
+    """
     allocations = item.get("allocations")
     if not isinstance(allocations, dict) or not allocations:
         errors.append(f"{prefix}.allocations: expected non-empty mapping")
@@ -235,7 +251,11 @@ def _validate_burndown_registries(
     baseline_registry_names: set[str],
     errors: list[str],
 ) -> list[str]:
-    """Parse and validate the burn-down registries list."""
+    """Parse and validate the burn-down registries list.
+
+    Returns:
+        List of valid registry name strings from the burn-down priorities configuration.
+    """
     if not isinstance(registries_raw, list) or not registries_raw:
         errors.append(
             "governance.burn_down_priorities.registries: expected non-empty list"

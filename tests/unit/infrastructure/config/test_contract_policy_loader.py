@@ -88,3 +88,115 @@ def test_missing_contracts_section_raises(
 
     with pytest.raises(ValueError, match="section 'contracts' not found"):
         load_pipeline_contract_policy("test_provider", "test_entity")
+
+
+@pytest.mark.unit
+def test_no_base_defaults_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Loader should work when base pipeline config is absent (no defaults)."""
+    load_pipeline_contract_policy.cache_clear()
+    monkeypatch.chdir(tmp_path)
+
+    entity_dir = tmp_path / "configs" / "entities" / "test_provider"
+    entity_dir.mkdir(parents=True)
+    (entity_dir / "test_entity.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "contracts": {
+                    "primary_key": ["id"],
+                    "merge_keys": ["id"],
+                }
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+
+    policy = load_pipeline_contract_policy("test_provider", "test_entity")
+    assert policy.primary_key == ["id"]
+
+
+@pytest.mark.unit
+def test_base_defaults_no_contract_defaults_key(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Loader should work when base pipeline config has no contract_defaults key."""
+    load_pipeline_contract_policy.cache_clear()
+    monkeypatch.chdir(tmp_path)
+
+    base_dir = tmp_path / "configs" / "base"
+    base_dir.mkdir(parents=True)
+    (base_dir / "pipeline.yaml").write_text(
+        yaml.safe_dump({"other_key": "value"}),
+        encoding="utf-8",
+    )
+
+    entity_dir = tmp_path / "configs" / "entities" / "test_provider"
+    entity_dir.mkdir(parents=True)
+    (entity_dir / "entity2.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "contracts": {
+                    "primary_key": ["pk"],
+                    "merge_keys": ["pk"],
+                }
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+
+    policy = load_pipeline_contract_policy("test_provider", "entity2")
+    assert policy.primary_key == ["pk"]
+
+
+@pytest.mark.unit
+def test_base_defaults_contract_defaults_not_dict(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Loader should handle contract_defaults being null."""
+    load_pipeline_contract_policy.cache_clear()
+    monkeypatch.chdir(tmp_path)
+
+    base_dir = tmp_path / "configs" / "base"
+    base_dir.mkdir(parents=True)
+    (base_dir / "pipeline.yaml").write_text(
+        "contract_defaults: null\n",
+        encoding="utf-8",
+    )
+
+    entity_dir = tmp_path / "configs" / "entities" / "test_provider"
+    entity_dir.mkdir(parents=True)
+    (entity_dir / "entity3.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "contracts": {
+                    "primary_key": ["pk"],
+                    "merge_keys": ["pk"],
+                }
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+
+    policy = load_pipeline_contract_policy("test_provider", "entity3")
+    assert policy.primary_key == ["pk"]
+
+
+@pytest.mark.unit
+def test_contracts_section_is_not_dict(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Loader should fail when contracts is a non-dict value."""
+    load_pipeline_contract_policy.cache_clear()
+    monkeypatch.chdir(tmp_path)
+
+    entity_dir = tmp_path / "configs" / "entities" / "test_provider"
+    entity_dir.mkdir(parents=True)
+    (entity_dir / "entity4.yaml").write_text(
+        "contracts: not_a_dict\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="section 'contracts' not found"):
+        load_pipeline_contract_policy("test_provider", "entity4")
