@@ -52,7 +52,12 @@ class EnrichmentCrossValidationService:
         enricher_pipelines: list[str],
         seed_pipeline: str,
     ) -> tuple[pl.DataFrame, CrossValidationStats]:
-        """Run cross-validation on merged DataFrame."""
+        """Run cross-validation on merged DataFrame.
+
+        Returns:
+            Tuple of (merged_df, CrossValidationStats) where merged_df may have enricher
+            columns nullified for error records and CV metadata columns added.
+        """
         import polars as pl
 
         if not self._config.enabled:

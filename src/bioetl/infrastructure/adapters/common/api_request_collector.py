@@ -1,10 +1,4 @@
-"""API Request Collector for capturing detailed request metadata.
-
-Accumulates API request details for Bronze layer metadata enrichment.
-Supports audit, debugging, and rate limit monitoring use cases.
-
-Thread-safe for concurrent request recording within a single pipeline run.
-"""
+"""API request collector for Bronze metadata enrichment."""
 
 from __future__ import annotations
 
@@ -26,23 +20,7 @@ from bioetl.domain.types import JsonDict
 
 
 class APIRequestCollector:
-    """Collects API request metadata for Bronze layer enrichment.
-
-    Thread-safe collector that accumulates request details and produces
-    a SourceMetadata instance with aggregate statistics.
-
-    Example:
-        >>> collector = APIRequestCollector()
-        >>> collector.record_request(
-        ...     url="https://api.example.com/data?limit=100",
-        ...     method="GET",
-        ...     response_size=1024,
-        ...     duration_ms=150.5,
-        ...     status_code=200,
-        ... )
-        >>> source_metadata = collector.to_source_metadata()
-
-    """
+    """Collect API request metadata and build SourceMetadata snapshots."""
 
     def __init__(self) -> None:
         """Initialize an empty request collector."""
@@ -101,7 +79,7 @@ class APIRequestCollector:
         rate_limit_reset: datetime | None,
         retry_after_seconds: float | None,
     ) -> RateLimitInfo | None:
-        """Build RateLimitInfo if at least one rate-limit attribute is present."""
+        """Build RateLimitInfo when at least one rate-limit attribute is present."""
         if not any(
             (
                 rate_limit_remaining,
@@ -124,15 +102,7 @@ class APIRequestCollector:
         duration_ms: float,
         timestamp: datetime | None = None,
     ) -> None:
-        """Record request details from an httpx Response object.
-
-        Extracts URL, status, size, and rate limit headers automatically.
-
-        Args:
-            response: httpx.Response object after request completion.
-            duration_ms: Request duration in milliseconds.
-            timestamp: UTC timestamp when request was made. Defaults to now.
-        """
+        """Record request details from an ``httpx.Response`` object."""
         # Extract rate limit headers
         rate_limit_remaining = self._parse_int_header(
             response.headers.get("X-RateLimit-Remaining")
@@ -171,18 +141,7 @@ class APIRequestCollector:
         api_version: str | None = None,
         query_string: str | None = None,
     ) -> SourceMetadata:
-        """Build SourceMetadata with collected request details and aggregates.
-
-        Args:
-            source_type: Source type for metadata ("api", "csv", "parquet").
-            url: Optional base API URL to include.
-            api_version: Optional API version string.
-            query_string: Optional query string for audit trail
-                (e.g., extraction-level filtering params from ADR-028 §3).
-
-        Returns:
-            SourceMetadata instance with all collected requests and statistics.
-        """
+        """Build SourceMetadata with collected request details and aggregates."""
         with self._lock:
             requests_copy = list(self._requests)
 
@@ -220,7 +179,11 @@ class APIRequestCollector:
     def _parse_query_params(
         self, query_string: str
     ) -> dict[str, str | int | float | bool | None]:
-        """Parse query string into dict."""
+        """Parse query string into dict.
+
+        Returns:
+            Dictionary mapping query parameter names to their string values.
+        """
         if not query_string:
             return {}
         params: dict[str, str | int | float | bool | None] = {}
@@ -237,6 +200,9 @@ class APIRequestCollector:
         """Sanitize query parameters to exclude sensitive data.
 
         Removes API keys, tokens, and other sensitive parameter names.
+
+        Returns:
+            Dictionary with sensitive values replaced by '[REDACTED]'.
         """
         sensitive_keys = {
             "api_key",
@@ -263,7 +229,11 @@ class APIRequestCollector:
         return result
 
     def _normalize_method(self, method: str) -> Literal["GET", "POST", "HEAD"]:
-        """Normalize HTTP method to SourceMetadata-compatible literal."""
+        """Normalize HTTP method to SourceMetadata-compatible literal.
+
+        Returns:
+            Normalized HTTP method string ("GET", "POST", or "HEAD").
+        """
         normalized = method.upper()
         if normalized == "GET":
             return "GET"
@@ -274,7 +244,11 @@ class APIRequestCollector:
         return "GET"
 
     def _parse_int_header(self, value: str | None) -> int | None:
-        """Parse integer header value."""
+        """Parse integer header value.
+
+        Returns:
+            Parsed integer if value is a valid integer string, None otherwise.
+        """
         if value is None:
             return None
         try:
@@ -283,7 +257,11 @@ class APIRequestCollector:
             return None
 
     def _parse_float_header(self, value: str | None) -> float | None:
-        """Parse float header value."""
+        """Parse float header value.
+
+        Returns:
+            Parsed float if value is a valid float string, None otherwise.
+        """
         if value is None:
             return None
         try:
@@ -292,7 +270,11 @@ class APIRequestCollector:
             return None
 
     def _parse_reset_header(self, value: str | None) -> datetime | None:
-        """Parse X-RateLimit-Reset header (Unix timestamp or HTTP date)."""
+        """Parse X-RateLimit-Reset header (Unix timestamp or HTTP date).
+
+        Returns:
+            datetime from Unix timestamp if parseable, None otherwise.
+        """
         if value is None:
             return None
         try:

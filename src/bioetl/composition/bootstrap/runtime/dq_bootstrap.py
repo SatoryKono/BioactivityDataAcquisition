@@ -24,7 +24,11 @@ def bootstrap_dq_monitor_port(
     monitor_cls: type[DataQualityMonitor] = DataQualityMonitor,
     noop_logger_cls: type[NoOpLogger] = NoOpLogger,
 ) -> DQMonitorPort | None:
-    """Create a data quality monitor port implementation."""
+    """Create a data quality monitor port implementation.
+
+    Returns:
+        DQMonitorPort if DQ monitoring is enabled, None otherwise.
+    """
     obs_settings = settings.observability
 
     if not obs_settings.dq_monitor_enabled:
@@ -58,7 +62,11 @@ def bootstrap_dq_monitor(
     monitor_cls: type[DataQualityMonitor] = DataQualityMonitor,
     noop_logger_cls: type[NoOpLogger] = NoOpLogger,
 ) -> DQMonitorPort | None:
-    """Deprecated alias for :func:`bootstrap_dq_monitor_port`."""
+    """Deprecated alias for :func:`bootstrap_dq_monitor_port`.
+
+    Returns:
+        DQMonitorPort if DQ monitoring is enabled, None otherwise.
+    """
     return bootstrap_dq_monitor_port(
         settings=settings,
         logger=logger,

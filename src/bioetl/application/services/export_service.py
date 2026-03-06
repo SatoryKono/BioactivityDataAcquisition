@@ -319,7 +319,11 @@ class ExportService:
         layer: str = "silver",
         options: ExportOptions | None = None,
     ) -> ExportResult:
-        """Export a Delta table to the specified format."""
+        """Export a Delta table to the specified format.
+
+        Returns:
+            ExportResult with output path, row count, and error details if applicable.
+        """
         options = options or ExportOptions()
         table_path = self._get_table_path(table_name, layer)
 

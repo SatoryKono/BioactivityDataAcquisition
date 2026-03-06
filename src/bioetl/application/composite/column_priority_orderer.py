@@ -28,7 +28,12 @@ class ColumnPriorityOrdererService:
         available_columns: set[str],
         seed_pipeline: str | None = None,
     ) -> list[str]:
-        """Collect all qualified/legacy columns for a field from all sources."""
+        """Collect all qualified/legacy columns for a field from all sources.
+
+        Returns:
+            List of qualified column names (e.g. ``provider.entity.field``) present in
+            the DataFrame for the given field across seed and all enrichers.
+        """
         columns: list[str] = []
 
         if seed_pipeline:
@@ -68,7 +73,12 @@ class ColumnPriorityOrdererService:
         priorities: Sequence[str],
         seed_pipeline: str | None = None,
     ) -> list[str]:
-        """Order columns by configured source priority."""
+        """Order columns by configured source priority.
+
+        Returns:
+            List of column names reordered so that highest-priority sources appear first,
+            with any unmatched columns appended at the end.
+        """
         ordered_cols: list[str] = []
         columns_set = set(columns)
 
@@ -108,7 +118,12 @@ class ColumnPriorityOrdererService:
         ordered_cols: list[str],
         can_coalesce: Callable[[pl.DataFrame, str, str], bool],
     ) -> tuple[list[str], list[str]]:
-        """Filter columns to those compatible for coalescing."""
+        """Filter columns to those compatible for coalescing.
+
+        Returns:
+            Tuple of (compatible_cols, incompatible_cols) where compatible_cols are
+            type-compatible with the leading column and incompatible_cols are not.
+        """
         if not ordered_cols:
             return [], []
 
@@ -133,7 +148,12 @@ class ColumnPriorityOrdererService:
 
     @staticmethod
     def get_enricher_prefix(enricher_pipeline: str) -> str:
-        """Get enricher prefix with trailing separator."""
+        """Get enricher prefix with trailing separator.
+
+        Returns:
+            Qualified prefix string in the form ``"provider.entity."`` or legacy
+            ``"pipeline_"`` when pipeline name cannot be parsed.
+        """
         try:
             provider, entity = ColumnPriorityOrdererService._parse_pipeline_name(
                 enricher_pipeline

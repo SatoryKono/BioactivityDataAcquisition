@@ -63,7 +63,11 @@ class ChemblFetchPagingMixin:
         params: JsonDict,
         entity_type: str,
     ) -> tuple[list[BronzeRecord], bool]:
-        """Fetch a single page and handle errors."""
+        """Fetch a single page and handle errors.
+
+        Returns:
+            Tuple of (list of records for the page, whether there is a next page).
+        """
         try:
             start_time = time.perf_counter()
             with self._adapter_metrics.measure_request(f"/{entity_type}"):

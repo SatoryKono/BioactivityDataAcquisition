@@ -200,7 +200,12 @@ class _BatchExecutorDQMixin:
         return silver_table or entity_type
 
     def get_dq_context(self) -> DQReportContext | None:
-        """Build report context from DQ data accumulated during execution."""
+        """Build report context from DQ data accumulated during execution.
+
+        Returns:
+            Populated DQReportContext for post-run DQ report generation, or None if
+            no DQ report service is configured.
+        """
         if not self._should_collect_dq_data():
             return None
 

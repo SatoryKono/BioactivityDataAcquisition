@@ -93,7 +93,11 @@ def map_status_to_exit_code(
     status: PipelineRunResult,
     error_type: str | None,
 ) -> ExitCode:
-    """Map pipeline status and error type to CLI exit code."""
+    """Map pipeline status and error type to CLI exit code.
+
+    Returns:
+        ExitCode corresponding to the pipeline run status and optional error type.
+    """
     return map_run_status_to_exit_code(status, error_type)
 
 
@@ -104,7 +108,12 @@ def handle_destructive_step(
     dry_run: bool,
     yes: bool,
 ) -> bool:
-    """Run destructive confirmation/preview step with CLI error policy."""
+    """Run destructive confirmation/preview step with CLI error policy.
+
+    Returns:
+        True if pipeline execution should continue, False if cancelled or dry-run
+        preview was shown.
+    """
     try:
         return handle_destructive_run_confirmation(pipeline, run_type, dry_run, yes)
     except click.Abort:
@@ -140,7 +149,11 @@ def execute_run_step(
     health_port: int,
     execute_run: RunExecutorCallable,
 ) -> RunResult:
-    """Run pipeline execution step with CLI failure mapping."""
+    """Run pipeline execution step with CLI failure mapping.
+
+    Returns:
+        RunResult with pipeline execution status and metrics.
+    """
     try:
         return execute_run(
             pipeline=pipeline,

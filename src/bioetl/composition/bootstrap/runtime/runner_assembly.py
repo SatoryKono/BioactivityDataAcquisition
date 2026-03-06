@@ -73,7 +73,11 @@ def create_composite_runner_with_legacy_fsm_adapter(
     quarantine_port: QuarantinePort | None = None,
     metrics: MetricsPort | None = None,
 ) -> CompositePipelineRunnerService:
-    """Create composite runner with temporary legacy FSM injection in composition."""
+    """Create composite runner with temporary legacy FSM injection in composition.
+
+    Returns:
+        CompositePipelineRunnerService wired with the provided dependencies.
+    """
     effective_run_id = run_id or str(uuid4())
     effective_fsm_state_helper = fsm_state_helper
 
@@ -131,7 +135,11 @@ def create_composite_runner(
     support_services: CompositeSupportServices,
     runner_factory: CompositeRunnerFactory = CompositePipelineRunner,
 ) -> CompositePipelineRunnerService:
-    """Create fully wired CompositePipelineRunner service."""
+    """Create fully wired CompositePipelineRunner service.
+
+    Returns:
+        Fully wired CompositePipelineRunnerService ready for execution.
+    """
     return runner_factory(
         config=config,
         runtime=runtime,
@@ -171,7 +179,11 @@ def bootstrap_composite_runner(
     build_support_services_fn: Callable[..., CompositeSupportServices],
     create_composite_runner_fn: Callable[..., CompositePipelineRunnerService],
 ) -> CompositePipelineRunnerService:
-    """Assemble and create composite runner with injected dependency builders."""
+    """Assemble and create composite runner with injected dependency builders.
+
+    Returns:
+        Fully wired CompositePipelineRunnerService ready for execution.
+    """
     effective_run_id, settings, logger, storage, lock = bootstrap_runtime_basics_fn(
         config=config,
         run_id=run_id,
@@ -211,5 +223,9 @@ def bootstrap_composite_pipeline(
         CompositePipelineRunnerService,
     ],
 ) -> CompositePipelineRunnerService:
-    """Alias wrapper for composite runner bootstrap entry point."""
+    """Alias wrapper for composite runner bootstrap entry point.
+
+    Returns:
+        Fully wired CompositePipelineRunnerService ready for execution.
+    """
     return bootstrap_runner_fn(config, runtime, run_id)

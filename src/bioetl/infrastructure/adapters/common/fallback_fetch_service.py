@@ -95,7 +95,11 @@ class FallbackFetchRequest:
     fallback_operation: str = "fetch_filtered_with_fallback"
 
     def resolve_normalize_id(self) -> NormalizeIdHook:
-        """Return normalize-id hook from explicit request or strategy."""
+        """Return normalize-id hook from explicit request or strategy.
+
+        Returns:
+            NormalizeIdHook callable from the request or strategy.
+        """
         if self.normalize_id is not None:
             return self.normalize_id
         if self.strategy is not None:
@@ -105,7 +109,11 @@ class FallbackFetchRequest:
         )
 
     def resolve_extract_record_id(self) -> ExtractRecordIdHook:
-        """Return record-id extractor from explicit request or strategy."""
+        """Return record-id extractor from explicit request or strategy.
+
+        Returns:
+            ExtractRecordIdHook callable from the request or strategy.
+        """
         if self.extract_record_id is not None:
             return self.extract_record_id
         if self.strategy is not None:
@@ -116,7 +124,11 @@ class FallbackFetchRequest:
         )
 
     def resolve_fallback_handler(self) -> FallbackPolicyHandler | None:
-        """Return fallback handler from request override or strategy."""
+        """Return fallback handler from request override or strategy.
+
+        Returns:
+            FallbackPolicyHandler if configured on request or strategy, None otherwise.
+        """
         if self.fallback_handler is not None:
             return self.fallback_handler
         if self.strategy is not None:

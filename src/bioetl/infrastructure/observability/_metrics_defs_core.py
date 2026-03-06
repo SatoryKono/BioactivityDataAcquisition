@@ -1,0 +1,175 @@
+"""Core pipeline, DQ, lifecycle-adjacent Prometheus metrics."""
+
+from __future__ import annotations
+
+from prometheus_client import Counter, Gauge, Histogram
+
+from bioetl.infrastructure.observability.circuit_breaker_mapping import (
+    CIRCUIT_BREAKER_STATE_DESCRIPTION,
+)
+
+__all__ = [
+    "ARCHIVE_DURATION_SECONDS",
+    "ARCHIVE_FILES_TOTAL",
+    "BATCH_SIZE_RECORDS",
+    "CIRCUIT_BREAKER_FAILURE_TOTAL",
+    "CIRCUIT_BREAKER_STATE",
+    "CIRCUIT_BREAKER_SUCCESS_TOTAL",
+    "CIRCUIT_BREAKER_TRIPS_TOTAL",
+    "DATA_FRESHNESS_SECONDS",
+    "DQ_ANOMALY_DETECTED",
+    "DQ_BASELINE_SAMPLES",
+    "DQ_BASELINE_UPDATED",
+    "DQ_CHECK_DURATION_MS",
+    "DQ_RECORDS_QUARANTINED_TOTAL",
+    "DQ_VALIDATION_FAILURES_TOTAL",
+    "DQ_VALIDATION_SCORE",
+    "ERRORS_TOTAL",
+    "FILTER_IDS_DUPLICATES_TOTAL",
+    "FILTER_IDS_LOADED_TOTAL",
+    "PIPELINE_DURATION_SECONDS",
+    "QUARANTINE_RECORDS_TOTAL",
+    "RECORDS_PROCESSED_TOTAL",
+    "VACUUM_DURATION_SECONDS",
+    "VACUUM_FILES_REMOVED_TOTAL",
+]
+
+PIPELINE_DURATION_SECONDS = Histogram(
+    "bioetl_pipeline_duration_seconds",
+    "Duration of pipeline runs in seconds",
+    ["pipeline", "stage", "status", "run_type"],
+)
+
+RECORDS_PROCESSED_TOTAL = Counter(
+    "bioetl_records_processed_total",
+    "Total number of records processed by the pipeline",
+    ["pipeline", "stage", "run_type"],
+)
+
+ERRORS_TOTAL = Counter(
+    "bioetl_errors_total",
+    "Total number of errors encountered",
+    ["pipeline", "stage", "error_code"],
+)
+
+BATCH_SIZE_RECORDS = Histogram(
+    "bioetl_batch_size_records",
+    "Distribution of batch sizes (number of records)",
+    ["pipeline", "stage"],
+    buckets=[100, 500, 1000, 5000, 10000, 50000],
+)
+
+FILTER_IDS_LOADED_TOTAL = Counter(
+    "bioetl_filter_ids_loaded_total",
+    "Total unique IDs loaded from input filter source",
+    ["pipeline", "source_file"],
+)
+
+FILTER_IDS_DUPLICATES_TOTAL = Counter(
+    "bioetl_filter_ids_duplicates_total",
+    "Total duplicate IDs found in input filter source",
+    ["pipeline", "source_file"],
+)
+
+DQ_RECORDS_QUARANTINED_TOTAL = Counter(
+    "bioetl_dq_records_quarantined_total",
+    "Total number of records quarantined due to data quality issues",
+    ["pipeline", "error_type", "run_type"],
+)
+
+QUARANTINE_RECORDS_TOTAL = Counter(
+    "bioetl_quarantine_records_total",
+    "Total number of records written to quarantine",
+    ["pipeline", "reason"],
+)
+
+DQ_VALIDATION_FAILURES_TOTAL = Counter(
+    "bioetl_dq_validation_failures_total",
+    "Total number of DQ validation threshold failures",
+    ["pipeline", "stage", "severity"],
+)
+
+CIRCUIT_BREAKER_STATE = Gauge(
+    "bioetl_circuit_breaker_state",
+    CIRCUIT_BREAKER_STATE_DESCRIPTION,
+    ["adapter"],
+)
+
+CIRCUIT_BREAKER_TRIPS_TOTAL = Counter(
+    "bioetl_circuit_breaker_trips_total",
+    "Total number of times the circuit breaker has tripped (opened)",
+    ["adapter"],
+)
+
+CIRCUIT_BREAKER_SUCCESS_TOTAL = Counter(
+    "bioetl_circuit_breaker_success_total",
+    "Total successful calls through the circuit breaker",
+    ["adapter"],
+)
+
+CIRCUIT_BREAKER_FAILURE_TOTAL = Counter(
+    "bioetl_circuit_breaker_failure_total",
+    "Total failed calls through the circuit breaker",
+    ["adapter"],
+)
+
+VACUUM_FILES_REMOVED_TOTAL = Counter(
+    "bioetl_vacuum_files_removed_total",
+    "Total files removed by vacuum operations",
+    ["table", "layer"],
+)
+
+VACUUM_DURATION_SECONDS = Histogram(
+    "bioetl_vacuum_duration_seconds",
+    "Duration of vacuum operations",
+    ["table"],
+)
+
+ARCHIVE_FILES_TOTAL = Counter(
+    "bioetl_archive_files_total",
+    "Total files archived",
+    ["table", "target"],
+)
+
+ARCHIVE_DURATION_SECONDS = Histogram(
+    "bioetl_archive_duration_seconds",
+    "Duration of archive operations",
+    ["table"],
+)
+
+DQ_VALIDATION_SCORE = Gauge(
+    "bioetl_dq_validation_score",
+    "Data quality validation score (0.0-1.0, where 1.0 = all records valid)",
+    ["pipeline", "entity"],
+)
+
+DATA_FRESHNESS_SECONDS = Gauge(
+    "bioetl_data_freshness_seconds",
+    "Seconds since last successful data ingestion for pipeline/entity",
+    ["pipeline", "entity"],
+)
+
+DQ_ANOMALY_DETECTED = Counter(
+    "bioetl_dq_anomaly_detected",
+    "Total number of data quality anomalies detected",
+    ["pipeline", "metric", "severity", "anomaly_type"],
+)
+
+DQ_CHECK_DURATION_MS = Histogram(
+    "bioetl_dq_check_duration_ms",
+    "Duration of data quality check in milliseconds",
+    ["pipeline"],
+    buckets=[1, 5, 10, 25, 50, 100, 250, 500, 1000],
+)
+
+DQ_BASELINE_UPDATED = Counter(
+    "bioetl_dq_baseline_updated",
+    "Number of times DQ monitor baseline was updated",
+    ["pipeline", "metric"],
+)
+
+DQ_BASELINE_SAMPLES = Gauge(
+    "bioetl_dq_baseline_samples",
+    "Current number of samples in DQ baseline",
+    ["pipeline", "metric"],
+)

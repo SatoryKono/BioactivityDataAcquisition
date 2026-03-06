@@ -102,7 +102,11 @@ def build_run_options(
     cached_bronze_date: str | None,
     cached_bronze_path: str | None,
 ) -> RunOptions:
-    """Build RunOptions from CLI parameters."""
+    """Build RunOptions from CLI parameters.
+
+    Returns:
+        RunOptions instance configured with the provided CLI parameter values.
+    """
     return _CLI_RUN_ORCHESTRATION_SERVICE.build_options(
         run_type=run_type,
         resume=resume,
@@ -127,7 +131,11 @@ def execute_run(
     health_server: bool,
     health_port: int,
 ) -> RunResult:
-    """Execute run and always flush metrics at command boundary."""
+    """Execute run and always flush metrics at command boundary.
+
+    Returns:
+        RunResult with pipeline execution status and record counts.
+    """
     return _CLI_RUN_ORCHESTRATION_SERVICE.execute_pipeline(
         pipeline=pipeline,
         options=options,

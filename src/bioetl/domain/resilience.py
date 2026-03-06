@@ -133,14 +133,22 @@ class RetryConfig:
         return attempt >= self.max_attempts - 1
 
     def effective_retry_budget(self) -> int:
-        """Get effective retry budget (number of retries, not attempts)."""
+        """Get effective retry budget (number of retries, not attempts).
+
+        Returns:
+            Number of retries allowed, capped by retry_budget_per_request if set.
+        """
         max_retries = max(0, self.max_attempts - 1)
         if self.retry_budget_per_request is None:
             return max_retries
         return max(0, min(self.retry_budget_per_request, max_retries))
 
     def clamp_retry_after(self, retry_after_seconds: float) -> float:
-        """Clamp Retry-After delay to configured upper bound."""
+        """Clamp Retry-After delay to configured upper bound.
+
+        Returns:
+            Clamped delay in seconds, between 0.0 and the configured upper bound.
+        """
         upper_bound = (
             self.max_retry_after_seconds
             if self.max_retry_after_seconds is not None

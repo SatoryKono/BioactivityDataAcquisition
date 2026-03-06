@@ -77,7 +77,11 @@ class ErrorService:
         status_code: int,
         response: Response | None = None,
     ) -> ErrorCategory:
-        """Classify HTTP error status code into retryability categories."""
+        """Classify HTTP error status code into retryability categories.
+
+        Returns:
+            ErrorCategory indicating whether the HTTP error is critical, recoverable, or a data quality issue.
+        """
         _ = response
         return self._adapter_classifier.classify_http_status(status_code)
 
@@ -112,7 +116,11 @@ class ErrorService:
         error: Exception,
         context: JsonDict | None = None,  # Any: untyped API JSON record
     ) -> AdapterErrorContext:
-        """Log error with unified structured context."""
+        """Log error with unified structured context.
+
+        Returns:
+            AdapterErrorContext with classified error details and telemetry data.
+        """
         context = context or {}
         error_type = self.get_error_type(error)
         status_code = context.get("status_code")
@@ -283,7 +291,11 @@ class ErrorService:
         status_code: int | None = None,
         retry_after: float | None = None,
     ) -> ExternalServiceError:
-        """Wrap exception in appropriate ExternalServiceError."""
+        """Wrap exception in appropriate ExternalServiceError.
+
+        Returns:
+            ExternalServiceError wrapping the original exception with provider context.
+        """
         error_type = self.get_error_type(error)
         return self._error_mapper.map_to_domain_error(
             DomainErrorMappingInput(

@@ -152,7 +152,11 @@ class MedallionLifecycleService:
         retention_days: int = 7,
         dry_run: bool = False,
     ) -> int:
-        """Vacuum a Delta table and return removed file count."""
+        """Vacuum a Delta table and return removed file count.
+
+        Returns:
+            Number of files removed during vacuum.
+        """
         retention_hours = retention_days * 24
 
         self.logger.info(
@@ -192,7 +196,11 @@ class MedallionLifecycleService:
         target_path: str,
         remove_source: bool = False,
     ) -> int:
-        """Archive table data to target path and optionally remove source."""
+        """Archive table data to target path and optionally remove source.
+
+        Returns:
+            Number of files archived to the target path.
+        """
         self.logger.info(
             "Starting archive operation",
             table=table,

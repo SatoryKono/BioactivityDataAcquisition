@@ -64,7 +64,11 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
         self,
         result: JsonDict,  # Any: untyped API JSON record
     ) -> tuple[str, str]:  # Any: untyped API JSON record
-        """Return CrossRef DOI for logging."""
+        """Return CrossRef DOI for logging.
+
+        Returns:
+            Tuple of (field name string, DOI value string) for structured log output.
+        """
         return ("found_doi", str(result.get("DOI", "unknown")))
 
     async def _search_by_title(

@@ -117,7 +117,7 @@ class CompositePipelineState(StrEnum):
             target: Target destination.
 
         Returns:
-            True if the condition is met, False otherwise.
+            True if this state allows transitioning to target, False otherwise.
         """
         return target in self.allowed_transitions
 
@@ -144,7 +144,7 @@ class CompositePipelineState(StrEnum):
             value: Input value.
 
         Returns:
-            The CompositePipelineState result.
+            Matching CompositePipelineState enum member.
         """
         try:
             return cls(value.lower())
@@ -155,10 +155,10 @@ class CompositePipelineState(StrEnum):
             ) from None
 
     def to_metric_value(self) -> int:
-        """Convert state to numeric value (0-7) for Prometheus metrics.
+        """Convert state to numeric value (0-9) for Prometheus metrics.
 
         Returns:
-            Computed integer value.
+            Integer in range 0-9 representing the current pipeline state.
         """
         return _STATE_METRIC_VALUES[self]
 
@@ -205,7 +205,7 @@ def can_transition(
         target: Target destination.
 
     Returns:
-        True if the condition is met, False otherwise.
+        True if current state allows transitioning to target, False otherwise.
     """
     return current.can_transition_to(target)
 

@@ -49,6 +49,51 @@ CHEMBL_ADAPTER_ERRORS = (
 )
 
 
+def _log_single_id_failure(
+    logger: LoggerPort,
+    provider_name: str,
+    entity_type: str,
+    filter_field: str,
+    id_batch: list[str],
+    error: Exception,
+) -> None:
+    """Log single ID fetch failure for graceful degradation."""
+    failed_id = id_batch[0] if id_batch else "unknown"
+    logger.error(
+        "single_id_fetch_failed",
+        provider=provider_name,
+        entity_type=entity_type,
+        filter_field=filter_field,
+        failed_id=failed_id,
+        error=str(error),
+        error_class=type(error).__name__,
+    )
+
+
+def _log_batch_reduction_retry(
+    logger: LoggerPort,
+    provider_name: str,
+    *,
+    entity_type: str,
+    filter_field: str,
+    id_batch: list[str],
+    first_half: list[str],
+    second_half: list[str],
+    error: Exception,
+) -> None:
+    """Log split-batch retry decision for retry-exhausted failures."""
+    logger.warning(
+        "batch_reduction_retry",
+        provider=provider_name,
+        entity_type=entity_type,
+        original_batch_size=len(id_batch),
+        first_half_size=len(first_half),
+        second_half_size=len(second_half),
+        filter_field=filter_field,
+        error=str(error),
+    )
+
+
 class ChemblFetchResilienceMixin:
     """Provides retry, split-batch recovery, and single-ID fallback helpers."""
 
@@ -88,50 +133,21 @@ class ChemblFetchResilienceMixin:
         self,
         error: Exception,
     ) -> bool:
-        """Check if exception is a retry exhausted error (direct or wrapped)."""
+        """Check if exception is a retry exhausted error (direct or wrapped).
+
+        Returns:
+            True if the exception is or wraps a RetryExhaustedError, False otherwise.
+        """
         return is_retry_exhausted_error(error)
-
-    def _log_single_id_failure(
-        self, entity_type: str, filter_field: str, id_batch: list[str], error: Exception
-    ) -> None:
-        """Log single ID fetch failure for graceful degradation."""
-        failed_id = id_batch[0] if id_batch else "unknown"
-        self.logger.error(
-            "single_id_fetch_failed",
-            provider=self.provider_name,
-            entity_type=entity_type,
-            filter_field=filter_field,
-            failed_id=failed_id,
-            error=str(error),
-            error_class=type(error).__name__,
-        )
-
-    def _log_batch_reduction_retry(
-        self,
-        *,
-        entity_type: str,
-        filter_field: str,
-        id_batch: list[str],
-        first_half: list[str],
-        second_half: list[str],
-        error: Exception,
-    ) -> None:
-        """Log split-batch retry decision for retry-exhausted failures."""
-        self.logger.warning(
-            "batch_reduction_retry",
-            provider=self.provider_name,
-            entity_type=entity_type,
-            original_batch_size=len(id_batch),
-            first_half_size=len(first_half),
-            second_half_size=len(second_half),
-            filter_field=filter_field,
-            error=str(error),
-        )
 
     async def _fetch_single_record_direct(
         self, entity_type: str, record_id: str
     ) -> BronzeRecord | None:
-        """Fetch a single record using direct endpoint as fallback."""
+        """Fetch a single record using direct endpoint as fallback.
+
+        Returns:
+            Record dictionary if found via direct endpoint, None if not found or on error.
+        """
         direct_url = self._mapper.get_direct_record_url(entity_type, record_id)
         params = {"format": "json"}
 
@@ -206,7 +222,9 @@ class ChemblFetchResilienceMixin:
             id_batch=id_batch,
             retry_error=error,
             on_split=lambda first_half, second_half, retry_error: (
-                self._log_batch_reduction_retry(
+                _log_batch_reduction_retry(
+                    self.logger,
+                    self.provider_name,
                     entity_type=entity_type,
                     filter_field=filter_field,
                     id_batch=id_batch,
@@ -227,7 +245,11 @@ class ChemblFetchResilienceMixin:
         pk_field: str,
         pk_fields: tuple[str, ...] | None = None,
     ) -> bool:
-        """Return True when record is new and register its dedup key."""
+        """Return True when record is new and register its dedup key.
+
+        Returns:
+            True if the record is new and was registered, False if it was already seen.
+        """
         use_composite = pk_fields is not None and len(pk_fields) > 1
         if use_composite:
             assert pk_fields is not None
@@ -274,7 +296,14 @@ class ChemblFetchResilienceMixin:
         single_id = id_batch[0]
         direct_record = await self._fetch_single_record_direct(entity_type, single_id)
         if direct_record is None:
-            self._log_single_id_failure(entity_type, filter_field, id_batch, error)
+            _log_single_id_failure(
+                self.logger,
+                self.provider_name,
+                entity_type,
+                filter_field,
+                id_batch,
+                error,
+            )
             return
 
         if self._mark_record_as_seen(direct_record, seen_ids, pk_field, pk_fields):

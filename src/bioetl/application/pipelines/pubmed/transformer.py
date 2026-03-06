@@ -189,10 +189,7 @@ class PubMedPublicationTransformer(
             build_authors_with_affiliations=self._build_authors_with_affiliations,
             process_structured_affiliations=lambda affiliations: (
                 self._process_structured_affiliations(
-                    cast(
-                        "list[JsonDict]",  # Any: structured affiliation payloads
-                        affiliations,
-                    )
+                    affiliations  # type: ignore[arg-type]  # JsonDict is structurally compatible with StructuredAffiliation
                 )
             ),
         )

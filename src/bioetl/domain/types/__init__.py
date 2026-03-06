@@ -48,7 +48,9 @@ from bioetl.domain.types.identifiers import (
 from bioetl.domain.types_config_validation import ConfigValidationError
 
 __all__ = [
+    "ArrowSchema",
     "BatchID",
+    "BronzeRecord",
     "CellularityType",
     "CircuitBreakerState",
     "ComponentHealthResult",
@@ -59,14 +61,19 @@ __all__ = [
     "EntityID",
     "ErrorType",
     "ExecutionContext",
+    "GoldRecord",
+    "GoldSchemaType",
     "HealthReport",
     "HealthStatus",
     "JsonDict",
+    "MetaDict",
     "PreflightReport",
+    "PrimaryId",
     "PublicationType",
     "QuarantineRecordStatus",
     "RunID",
     "RunType",
+    "ScdConfig",
     "SilverRecord",
     "ValidationResult",
 ]

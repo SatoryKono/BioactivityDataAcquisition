@@ -28,7 +28,11 @@ async def probe_openalex_health(
     adapter_metrics: AdapterMetrics,
     headers: dict[str, str],
 ) -> HealthStatus:
-    """Probe OpenAlex API health with latency-based degradation threshold."""
+    """Probe OpenAlex API health with latency-based degradation threshold.
+
+    Returns:
+        HealthStatus reflecting the current OpenAlex API availability and response latency.
+    """
     url = f"{api_base}/works"
     params = build_openalex_health_probe_params(mailto)
 

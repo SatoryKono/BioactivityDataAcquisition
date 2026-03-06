@@ -50,7 +50,12 @@ class JoinPlannerCompatibilityMixin:
         columns: list[str],
         pipeline: str | None = None,
     ) -> str | None:
-        """Find key column name (qualified preferred, fallback unqualified)."""
+        """Find key column name (qualified preferred, fallback unqualified).
+
+        Returns:
+            Qualified column name if found, unqualified name as fallback,
+            or None if no matching column exists.
+        """
         return self._join_key_resolver.find_join_key_column(key, columns, pipeline)
 
     def normalize_join_key_columns(
@@ -59,7 +64,11 @@ class JoinPlannerCompatibilityMixin:
         join_keys: list[str],
         pipeline: str | None = None,
     ) -> pl.DataFrame:
-        """Normalize selected identifier join key columns to lowercase."""
+        """Normalize selected identifier join key columns to lowercase.
+
+        Returns:
+            DataFrame with qualifying identifier columns (doi, pmid, pmc_id) lowercased.
+        """
         return self._join_key_resolver.normalize_join_key_columns(
             df,
             join_keys,
@@ -67,7 +76,11 @@ class JoinPlannerCompatibilityMixin:
         )
 
     def drop_system_columns(self, df: pl.DataFrame) -> pl.DataFrame:
-        """Drop system columns that must come only from seed."""
+        """Drop system columns that must come only from seed.
+
+        Returns:
+            DataFrame with system columns (``_run_id``, ``_source``, etc.) removed.
+        """
         return self._dependency_joiner.drop_system_columns(df)
 
     def execute_polars_join(
@@ -78,7 +91,11 @@ class JoinPlannerCompatibilityMixin:
         right_key: str,
         pipeline_name: str,
     ) -> pl.DataFrame:
-        """Execute single-key join while preserving right join key as data column."""
+        """Execute single-key join while preserving right join key as data column.
+
+        Returns:
+            Joined DataFrame; returns left_df unchanged if a required join key is missing.
+        """
         return self._join_executor.execute_polars_join(
             left_df,
             right_df,
@@ -94,7 +111,11 @@ class JoinPlannerCompatibilityMixin:
         enricher_pipeline: str,
         merged_columns: list[str],
     ) -> tuple[str, str, str | None]:
-        """Resolve qualified join key names for seed/enricher join."""
+        """Resolve qualified join key names for seed/enricher join.
+
+        Returns:
+            Tuple of (seed_join_key, enricher_join_key, seed_join_key_qualified).
+        """
         return self._join_key_resolver.resolve_join_key_names(
             primary_key,
             seed_pipeline,
@@ -110,7 +131,11 @@ class JoinPlannerCompatibilityMixin:
         right_pipeline: str,
         merged_columns: list[str],
     ) -> tuple[str, str, str | None]:
-        """Resolve qualified join key names when left/right key names differ."""
+        """Resolve qualified join key names when left/right key names differ.
+
+        Returns:
+            Tuple of (left_join_key, right_join_key, left_join_key_qualified).
+        """
         return self._join_key_resolver.resolve_join_key_names_asymmetric(
             left_key,
             right_key,
@@ -126,7 +151,11 @@ class JoinPlannerCompatibilityMixin:
         right_pipeline: str,
         merged_columns: list[str],
     ) -> tuple[list[str], list[str], set[str]]:
-        """Resolve all join keys for composite-key dependency join."""
+        """Resolve all join keys for composite-key dependency join.
+
+        Returns:
+            Tuple of (left_keys, right_keys, all_join_key_set).
+        """
         return self._join_key_resolver.resolve_composite_join_keys(
             join_keys_list,
             left_pipeline,
@@ -142,7 +171,11 @@ class JoinPlannerCompatibilityMixin:
         right_keys: list[str],
         pipeline_name: str,
     ) -> pl.DataFrame:
-        """Execute multi-key join preserving right-side key columns."""
+        """Execute multi-key join preserving right-side key columns.
+
+        Returns:
+            Joined DataFrame using all provided composite key columns.
+        """
         return self._join_executor.execute_composite_key_join(
             left_df,
             right_df,
@@ -269,7 +302,11 @@ class JoinPlannerService(JoinPlannerCompatibilityMixin):
         enrichers: Sequence[EnricherConfig],
         seed_pipeline: str | None = None,
     ) -> pl.DataFrame:
-        """Join successful enrichers to seed DataFrame."""
+        """Join successful enrichers to seed DataFrame.
+
+        Returns:
+            Merged DataFrame with all available enricher data joined to the seed frame.
+        """
         merged = seed_df
         for enricher in enrichers:
             if enricher.pipeline not in enricher_dfs:
@@ -396,7 +433,11 @@ class JoinPlannerService(JoinPlannerCompatibilityMixin):
         dependencies: Sequence[DependencyConfig],
         seed_pipeline: str | None = None,
     ) -> pl.DataFrame:
-        """Apply configured dependency joins to merged DataFrame."""
+        """Apply configured dependency joins to merged DataFrame.
+
+        Returns:
+            DataFrame with all configured dependency tables joined to the merged frame.
+        """
         return self._dependency_joiner.apply_dependency_joins(
             merged_df=merged_df,
             dependency_dfs=dependency_dfs,
@@ -411,7 +452,11 @@ class JoinPlannerService(JoinPlannerCompatibilityMixin):
         dep: DependencyConfig,
         seed_pipeline: str | None = None,
     ) -> pl.DataFrame:
-        """Join dependency using all configured composite join keys."""
+        """Join dependency using all configured composite join keys.
+
+        Returns:
+            DataFrame with the dependency table joined using all configured join keys.
+        """
         return self._dependency_joiner.apply_composite_key_dependency_join(
             merged_df=merged_df,
             dep_df=dep_df,

@@ -262,7 +262,11 @@ class BatchExecutor(_BatchExecutorDQMixin):
         records: list[BronzeRecord],
         start_index: int = 0,
     ) -> BatchResult:
-        """Public API for processing one explicit batch."""
+        """Public API for processing one explicit batch.
+
+        Returns:
+            BatchResult with cumulative bronze, silver, gold, and quarantined counts.
+        """
         await self._process_batch_and_update_state(records, start_index)
         return BatchResult(
             bronze_count=self.records_bronze,
@@ -301,7 +305,12 @@ class BatchExecutor(_BatchExecutorDQMixin):
             )
 
     def get_run_statistics(self) -> dict[str, int | list[str]]:
-        """Get aggregated statistics for the entire pipeline run."""
+        """Get aggregated statistics for the entire pipeline run.
+
+        Returns:
+            Dictionary with fetched, bronze, silver, gold, quarantined, filtered_out
+            record counts and the deduplicated list of source batch IDs.
+        """
         return {
             "records_fetched": self.records_fetched,
             "records_bronze": self.records_bronze,

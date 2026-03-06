@@ -1,12 +1,4 @@
-"""Batch Aggregate Root.
-
-Invariants:
-    1. All records in a batch have the same batch_id
-    2. Records cannot be added after the batch is sealed
-    3. batch_id is unique and immutable
-    4. Record indices are sequential starting from start_index
-    5. Quarantined records are tracked separately from valid records
-"""
+"""Batch aggregate root."""
 
 from __future__ import annotations
 
@@ -35,11 +27,7 @@ __all__ = [
 
 
 class Batch:
-    """Aggregate Root for a collection of records.
-
-    Lifecycle: OPEN -> SEALED -> WRITING -> COMMITTED | FAILED.
-    State transitions and event emission delegated to ``_batch_lifecycle``.
-    """
+    """Aggregate root for batch records."""
 
     __slots__ = (
         "_batch_id",
@@ -62,25 +50,7 @@ class Batch:
         created_at: datetime | None = None,
         metadata: MetaDict | None = None,
     ) -> None:
-        """Initialise a new Batch aggregate in OPEN status.
-
-        Prefer the ``Batch.create`` factory classmethod for normal production use;
-        this constructor is available for reconstitution from storage or for test
-        scenarios where a pre-determined ``batch_id`` is required.
-
-        Args:
-            batch_id: Immutable unique identifier for this batch.
-            run_id: Identifier of the pipeline run that owns this batch.
-            start_index: Sequential offset of the first record in this batch
-                relative to the overall run; must be non-negative.
-            created_at: Optional explicit creation timestamp (UTC); defaults to
-                ``datetime.now(UTC)`` when ``None``.
-            metadata: Optional free-form key/value metadata attached to the batch
-                for observability and lineage purposes.
-
-        Raises:
-            ValueError: If ``start_index`` is negative.
-        """
+        """Initialise a new OPEN batch aggregate."""
         if start_index < 0:
             raise ValueError(f"start_index cannot be negative: {start_index}")
 
@@ -102,7 +72,7 @@ class Batch:
         start_index: int = 0,
         metadata: MetaDict | None = None,
     ) -> Batch:
-        """Factory method to create a new batch with generated ID."""
+        """Create a new batch with a generated ID."""
         from uuid import uuid4
 
         batch_id = BatchID(uuid4())
@@ -177,11 +147,7 @@ class Batch:
         entity_id: EntityID | None = None,
         content_hash: ContentHash | None = None,
     ) -> BatchRecord:
-        """Add a record to the batch.
-
-        Raises:
-            InvalidStateError: If batch is not OPEN.
-        """
+        """Add a single record to the batch."""
         self._assert_open("add_record")
 
         record = BatchRecord(
@@ -198,11 +164,7 @@ class Batch:
         self,
         records: list[BronzeRecord],
     ) -> list[BatchRecord]:
-        """Add multiple records to the batch.
-
-        Raises:
-            InvalidStateError: If batch is not OPEN.
-        """
+        """Add multiple records to the batch."""
         self._assert_open("add_records")
         return [self.add_record(data) for data in records]
 
@@ -212,12 +174,7 @@ class Batch:
         error: str,
         error_code: str | None = None,
     ) -> BatchRecord:
-        """Mark a record as quarantined.
-
-        Raises:
-            InvalidStateError: If batch is not OPEN.
-            ValueError: If record is not in this batch.
-        """
+        """Mark a record as quarantined."""
         self._assert_open("quarantine_record")
 
         if record not in self._records:
@@ -286,7 +243,11 @@ class Batch:
     # ── Domain events ─────────────────────────────────────────────────────
 
     def collect_events(self) -> list[DomainEvent]:
-        """Collect and clear accumulated domain events."""
+        """Collect and clear accumulated domain events.
+
+        Returns:
+            List of accumulated domain events since last collection.
+        """
         events = self._events.copy()
         self._events.clear()
         return events

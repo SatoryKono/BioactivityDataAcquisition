@@ -19,7 +19,11 @@ class PaginatedFetcherMixin:
 
     @staticmethod
     def _should_stop_fetching(fetched: int, limit: int | None) -> bool:
-        """Check if we've reached the global fetch limit."""
+        """Check if we've reached the global fetch limit.
+
+        Returns:
+            True if the limit is set and the fetched count has reached or exceeded it.
+        """
         return limit is not None and fetched >= limit
 
     async def paginated_fetch(

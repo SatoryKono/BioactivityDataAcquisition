@@ -215,11 +215,17 @@ class TestBootstrapLayerBoundaries:
         """Legacy modules must re-export from new bootstrap package.
 
         REQ-ARCH-BOOT-007: Maintain backward compatibility through re-exports.
+        If the legacy _bootstrap package has been fully removed, the migration
+        to bootstrap/ is complete and this test passes.
         """
-        # Check _bootstrap/__init__.py re-exports from bootstrap/
         legacy_init = src_dir / "bioetl" / "composition" / "_bootstrap" / "__init__.py"
         if not legacy_init.exists():
-            pytest.skip("Legacy _bootstrap package not found")
+            # Legacy package fully removed -- migration to bootstrap/ complete
+            new_bootstrap = src_dir / "bioetl" / "composition" / "bootstrap"
+            assert new_bootstrap.is_dir(), (
+                "Neither legacy _bootstrap nor new bootstrap package found"
+            )
+            return
 
         content = legacy_init.read_text(encoding="utf-8")
 

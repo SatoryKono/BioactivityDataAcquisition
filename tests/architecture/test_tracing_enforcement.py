@@ -276,11 +276,19 @@ class TestObservabilityBootstrap:
     def test_bootstrap_creates_observability(self):
         """Bootstrap should create observability components."""
         bootstrap_path = Path("src/bioetl/composition/bootstrap.py")
+        bootstrap_pkg = Path("src/bioetl/composition/bootstrap")
 
-        if not bootstrap_path.exists():
+        if bootstrap_pkg.is_dir():
+            # Read all .py files in the package
+            parts = [
+                p.read_text(encoding="utf-8")
+                for p in sorted(bootstrap_pkg.rglob("*.py"))
+            ]
+            source = "\n".join(parts)
+        elif bootstrap_path.exists():
+            source = bootstrap_path.read_text(encoding="utf-8")
+        else:
             pytest.skip("Bootstrap not found")
-
-        source = bootstrap_path.read_text(encoding="utf-8")
 
         # Bootstrap should set up observability
         has_observability_setup = any(

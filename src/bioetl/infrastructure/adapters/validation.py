@@ -64,7 +64,11 @@ def validate_record(
     logger: LoggerPort | None = None,
     context: str = "",
 ) -> ValidationResult:
-    """Validate one record against a Pydantic model and capture error details."""
+    """Validate one record against a Pydantic model and capture error details.
+
+    Returns:
+        ValidationResult with the validated model or error details.
+    """
     try:
         validated = model_class.model_validate(record)
         return ValidationResult(

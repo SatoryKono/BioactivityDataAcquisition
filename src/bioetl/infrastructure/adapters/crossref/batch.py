@@ -256,7 +256,11 @@ class SearchPaginator:
     async def _fetch_page(
         self, query: str, rows: int, cursor: str
     ) -> tuple[list[BronzeRecord], str | None]:
-        """Fetch a single page of search results."""
+        """Fetch a single page of search results.
+
+        Returns:
+            Tuple of (list of publication records for the page, next cursor string or None if last page).
+        """
         url = f"{self._api_base}/works"
         params = {
             "query": query,

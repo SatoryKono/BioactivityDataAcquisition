@@ -135,7 +135,11 @@ class SilverStatisticsCalculator:
         input_count: int | None,
         quarantined_count: int,
     ) -> RecordCountResult:
-        """Check record count statistics."""
+        """Check record count statistics.
+
+        Returns:
+            RecordCountResult with input, output, and quarantined counts and DQ status.
+        """
         output_count = len(df)
         input_records = input_count or (output_count + quarantined_count)
         quarantine_rate = (
@@ -157,7 +161,11 @@ class SilverStatisticsCalculator:
         )
 
     def check_null_rates(self, df: pl.DataFrame) -> tuple[list[NullRateResult], float]:
-        """Calculate null rates per column."""
+        """Calculate null rates per column.
+
+        Returns:
+            Tuple of (per-column NullRateResult list, overall null rate as float).
+        """
         results = []
         total_nulls = 0
         total_cells = 0
@@ -187,7 +195,11 @@ class SilverStatisticsCalculator:
     def check_uniqueness(
         self, df: pl.DataFrame, primary_keys: list[str]
     ) -> UniquenessResult:
-        """Check uniqueness of primary keys."""
+        """Check uniqueness of primary keys.
+
+        Returns:
+            UniquenessResult with duplicate rate and per-column cardinality stats.
+        """
         if not primary_keys:
             return UniquenessResult(
                 primary_key="",
@@ -243,7 +255,11 @@ class SilverStatisticsCalculator:
         )
 
     def check_type_conformance(self, df: pl.DataFrame) -> TypeConformanceResult:
-        """Check type conformance against expected schema."""
+        """Check type conformance against expected schema.
+
+        Returns:
+            TypeConformanceResult indicating whether any mixed-type columns were found.
+        """
         errors = []
         type_coercions: dict[
             str, JsonDict  # Any: DQ check values vary by check type
@@ -266,7 +282,12 @@ class SilverStatisticsCalculator:
         )
 
     def check_value_distribution(self, df: pl.DataFrame) -> ValueDistributionResult:
-        """Calculate value distributions for columns."""
+        """Calculate value distributions for columns.
+
+        Returns:
+            ValueDistributionResult with numeric and categorical distributions
+            for the first 20 columns.
+        """
         numeric_cols: dict[str, NumericDistribution] = {}
         categorical_cols: dict[str, CategoricalDistribution] = {}
 
@@ -344,7 +365,12 @@ class SilverStatisticsCalculator:
     def check_schema_drift(
         self, df: pl.DataFrame, previous_schema: dict[str, str] | None
     ) -> SchemaDriftResult:
-        """Detect schema drift from previous run."""
+        """Detect schema drift from previous run.
+
+        Returns:
+            SchemaDriftResult with new fields, missing fields, and type changes
+            relative to the previous schema.
+        """
         current_schema = {col: str(df[col].dtype) for col in df.columns}
 
         if previous_schema is None:
@@ -372,14 +398,22 @@ class SilverStatisticsCalculator:
         primary_keys: list[str],
         input_count: int,
     ) -> DeduplicationStatsResult:
-        """Calculate deduplication statistics."""
+        """Calculate deduplication statistics.
+
+        Returns:
+            DeduplicationStatsResult with duplicate and unique record counts.
+        """
         del primary_keys
         return _check_deduplication_stats(df, input_count)
 
     def check_content_hash_integrity(
         self, df: pl.DataFrame
     ) -> ContentHashIntegrityResult:
-        """Check content hash integrity."""
+        """Check content hash integrity.
+
+        Returns:
+            ContentHashIntegrityResult with hash column presence and uniqueness stats.
+        """
         return _check_content_hash_integrity_stats(df)
 
     def distribution_to_dict(

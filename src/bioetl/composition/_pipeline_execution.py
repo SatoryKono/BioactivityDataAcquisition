@@ -221,7 +221,11 @@ def create_pipeline_runner(name: str, options: RunOptions) -> PipelineRunner:
 
 
 async def run_pipeline(name: str, options: RunOptions) -> RunResult:
-    """Run pipeline end-to-end and return structured execution result."""
+    """Run pipeline end-to-end and return structured execution result.
+
+    Returns:
+        RunResult with execution status, record counts, and timing information.
+    """
     # Start metrics server if enabled (side-effect in entrypoint, not bootstrap)
     settings = get_settings()
     maybe_start_metrics_server(settings)

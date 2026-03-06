@@ -56,7 +56,11 @@ def seal(
     quarantined_count: int,
     sealed_at: datetime | None = None,
 ) -> tuple[BatchStatus, datetime]:
-    """Validate and perform OPEN -> SEALED transition."""
+    """Validate and perform OPEN -> SEALED transition.
+
+    Returns:
+        Tuple of (BatchStatus.SEALED, sealed_at timestamp).
+    """
     if not status.is_modifiable():
         raise InvalidStateError(
             f"Cannot seal: batch is in status {status.value}",
@@ -78,7 +82,11 @@ def seal(
 
 
 def mark_writing(status: BatchStatus) -> BatchStatus:
-    """Validate and perform SEALED -> WRITING transition."""
+    """Validate and perform SEALED -> WRITING transition.
+
+    Returns:
+        BatchStatus.WRITING after successful transition.
+    """
     if status != BatchStatus.SEALED:
         raise InvalidStateError(
             f"Cannot mark as writing: batch is in status {status.value}",
@@ -96,7 +104,11 @@ def mark_committed(
     valid_count: int,
     layer: str,
 ) -> BatchStatus:
-    """Validate and perform WRITING -> COMMITTED transition."""
+    """Validate and perform WRITING -> COMMITTED transition.
+
+    Returns:
+        BatchStatus.COMMITTED after successful transition.
+    """
     if status != BatchStatus.WRITING:
         raise InvalidStateError(
             f"Cannot commit: batch is in status {status.value}",
@@ -124,7 +136,11 @@ def mark_failed(
     error: str,
     error_type: str | None = None,
 ) -> BatchStatus:
-    """Validate and perform WRITING -> FAILED transition."""
+    """Validate and perform WRITING -> FAILED transition.
+
+    Returns:
+        BatchStatus.FAILED after recording the failure event.
+    """
     if status != BatchStatus.WRITING:
         raise InvalidStateError(
             f"Cannot fail: batch is in status {status.value}",

@@ -49,6 +49,9 @@ def split_filter_ids_for_fallback(
 
     Empty/whitespace values and ``__title_only_*`` markers are treated as
     title-only entries for phase-3 fallback.
+
+    Returns:
+        Tuple of (primary_ids, title_only_entries) lists.
     """
     primary_ids: list[str] = []
     title_only_entries: list[str] = []
@@ -62,7 +65,11 @@ def split_filter_ids_for_fallback(
 
 
 def is_retry_exhausted_error(error: Exception) -> bool:
-    """Return True when ``error`` or its cause/context chain is retry-exhausted."""
+    """Return True when ``error`` or its cause/context chain is retry-exhausted.
+
+    Returns:
+        True if RetryExhaustedError is found anywhere in the exception chain, False otherwise.
+    """
     seen: set[int] = set()
     current: Exception | None = error
     while current is not None and id(current) not in seen:

@@ -290,7 +290,12 @@ class ColumnOrdererService:
         columns: Sequence[str],
         layer_config: LayerColumnConfig,
     ) -> list[str]:
-        """Filter columns by layer-specific configuration."""
+        """Filter columns by layer-specific configuration.
+
+        Returns:
+            Filtered and optionally renamed list of column names according to the
+            layer config's explicit columns, include_groups, or pass-through mode.
+        """
         from fnmatch import fnmatch
 
         # Mode 1: Explicit column list

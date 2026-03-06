@@ -37,7 +37,11 @@ class SilverWriteMode(StrEnum):
 
     @classmethod
     def from_string(cls, value: str) -> SilverWriteMode:
-        """Convert string to SilverWriteMode with validation."""
+        """Convert string to SilverWriteMode with validation.
+
+        Returns:
+            Matching SilverWriteMode enum member.
+        """
         try:
             return cls(value.lower())
         except ValueError:
@@ -56,7 +60,11 @@ class GoldWriteMode(StrEnum):
 
     @classmethod
     def from_string(cls, value: str) -> GoldWriteMode:
-        """Convert string to GoldWriteMode with validation."""
+        """Convert string to GoldWriteMode with validation.
+
+        Returns:
+            Matching GoldWriteMode enum member.
+        """
         try:
             return cls(value.lower())
         except ValueError:
@@ -102,7 +110,11 @@ class LoadingStrategy(StrEnum):
 
     @classmethod
     def from_string(cls, value: str) -> LoadingStrategy:
-        """Convert string to LoadingStrategy with validation."""
+        """Convert string to LoadingStrategy with validation.
+
+        Returns:
+            Matching LoadingStrategy enum member.
+        """
         try:
             return cls(value.lower())
         except ValueError:
@@ -135,7 +147,11 @@ class MedallionPolicy:
 
     @classmethod
     def for_run_type(cls, run_type: RunType) -> MedallionPolicy:
-        """Create policy based on run type."""
+        """Create policy based on run type.
+
+        Returns:
+            MedallionPolicy with SILVER_AND_GOLD clear for rebuild/backfill, NEVER otherwise.
+        """
         from bioetl.domain.types import RunType
 
         if run_type in (RunType.REBUILD, RunType.BACKFILL):

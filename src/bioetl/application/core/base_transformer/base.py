@@ -39,6 +39,29 @@ if TYPE_CHECKING:
 __all__ = ["BaseTransformer", "T"]
 
 
+def _apply_hash_policy(
+    contract_policy: ContractPolicyPort,
+    business_data: GoldRecord,
+) -> GoldRecord:
+    """Apply include/exclude hash policy from contract config."""
+    include_fields = contract_policy.hash_include
+    exclude_fields = set(contract_policy.hash_exclude)
+
+    if include_fields:
+        scoped = {
+            key: business_data.get(key)
+            for key in include_fields
+            if key in business_data
+        }
+    else:
+        scoped = dict(business_data)
+
+    for field in exclude_fields:
+        scoped.pop(field, None)
+
+    return scoped
+
+
 class BaseTransformer(_BaseTransformerRecordHelpersMixin, ABC):
     """Abstract base class for Bronze -> Silver transformers."""
 
@@ -57,36 +80,7 @@ class BaseTransformer(_BaseTransformerRecordHelpersMixin, ABC):
         data_normalizer: DataNormalizationPort | None = None,
         contract_policy: ContractPolicyPort | None = None,
     ) -> None:
-        """Initialise the transformer with provider context and optional service overrides.
-
-        All optional parameters default to no-op or pure-Python implementations so
-        that concrete subclasses can be constructed with minimal arguments in unit
-        tests while still receiving full instrumentation in production. Service
-        defaults follow the Null Object Pattern (EXC-003) and are resolved at
-        construction time to avoid conditional checks in hot paths.
-
-        Args:
-            provider: Data-source provider identifier (e.g. ``"chembl"``); embedded
-                in entity IDs, content hashes, and metric labels.
-            entity_type: Entity type being transformed (e.g. ``"activity"``);
-                defaults to ``"unknown"`` when ``None``.
-            tracer: Optional ``TracingPort`` for OpenTelemetry span creation;
-                defaults to ``NoOpTracing``.
-            metrics: Optional ``MetricsPort`` for counter and histogram emission;
-                defaults to ``NoOpMetrics``.
-            silver_filters: Optional Silver-layer filter configuration; when ``None``
-                or empty, all records are passed through.
-            gold_filters: Optional Gold-layer filter configuration; when ``None``
-                or empty, all records are passed through.
-            identity_service: Optional service for computing entity IDs and content
-                hashes; defaults to a plain ``IdentityService`` instance.
-            pii_hasher: Optional ``PiiHasherPort`` for hashing personally identifiable
-                field values; defaults to ``NoOpPiiHasher``.
-            data_normalizer: Optional ``DataNormalizationPort`` for string and date
-                normalisation; defaults to ``DataNormalizationService``.
-            contract_policy: Optional ``ContractPolicyPort`` carrying the rename map
-                and hash-scope policy; defaults to ``_DefaultContractPolicy``.
-        """
+        """Initialize transformer with provider context and overridable services."""
         self.provider = provider
         self.entity_type = entity_type or "unknown"
         self._tracer: TracingPort = tracer if tracer is not None else NoOpTracing()
@@ -274,7 +268,7 @@ class BaseTransformer(_BaseTransformerRecordHelpersMixin, ABC):
         exclude_none: bool = True,
     ) -> ContentHash:
         """Generate canonical content hash for record versioning."""
-        hash_input = self._apply_hash_policy(business_data)
+        hash_input = _apply_hash_policy(self._contract_policy, business_data)
         return self._identity.compute_content_hash(
             self.provider,
             hash_input,
@@ -313,20 +307,3 @@ class BaseTransformer(_BaseTransformerRecordHelpersMixin, ABC):
                 )
 
         return silver_record
-
-    def _apply_hash_policy(self, business_data: GoldRecord) -> GoldRecord:
-        """Apply include/exclude hash policy from contract config."""
-        include_fields = self._contract_policy.hash_include
-        exclude_fields = set(self._contract_policy.hash_exclude)
-
-        if include_fields:
-            scoped = {
-                k: business_data.get(k) for k in include_fields if k in business_data
-            }
-        else:
-            scoped = dict(business_data)
-
-        for field in exclude_fields:
-            scoped.pop(field, None)
-
-        return scoped

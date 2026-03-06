@@ -80,7 +80,11 @@ def _create_default_openalex_error_handler(
     logger: LoggerPort,
     metrics: MetricsPort | None,
 ) -> ErrorHandlerPort:
-    """Create default adapter error handler for non-DI call sites."""
+    """Create default adapter error handler for non-DI call sites.
+
+    Returns:
+        ErrorHandlerPort implementation configured with the given logger and metrics.
+    """
     from bioetl.infrastructure.adapters.error_handling import ErrorService
 
     return ErrorService(logger, metrics=metrics)
@@ -90,7 +94,11 @@ def _create_default_openalex_fallback_service(
     *,
     adapter_metrics: AdapterMetrics,
 ) -> FallbackFetchOrchestratorService:
-    """Create fallback orchestrator service for non-DI call sites."""
+    """Create fallback orchestrator service for non-DI call sites.
+
+    Returns:
+        FallbackFetchOrchestratorService instance wired to the given adapter metrics.
+    """
     return FallbackFetchOrchestratorService(adapter_metrics)
 
 
@@ -102,7 +110,11 @@ def _create_default_openalex_query_executor(
     headers_provider: Any,  # Any: callable returning dict[str, str]
     api_base: str,
 ) -> OpenAlexQueryExecutor:
-    """Create default query executor for non-DI call sites."""
+    """Create default query executor for non-DI call sites.
+
+    Returns:
+        OpenAlexQueryExecutor instance configured with HTTP client and telemetry components.
+    """
     return OpenAlexQueryExecutor(
         http_client=http_client,
         adapter_metrics=adapter_metrics,
@@ -113,7 +125,11 @@ def _create_default_openalex_query_executor(
 
 
 def _create_default_openalex_response_mapper() -> OpenAlexResponseMapper:
-    """Create default response mapper for non-DI call sites."""
+    """Create default response mapper for non-DI call sites.
+
+    Returns:
+        OpenAlexResponseMapper instance with default configuration.
+    """
     return OpenAlexResponseMapper()
 
 
@@ -129,7 +145,11 @@ def _create_default_openalex_cursor_flow(
     logger: LoggerPort,
     runtime_errors: tuple[type[Exception], ...],
 ) -> OpenAlexCursorFlowService:
-    """Create default cursor flow service for non-DI call sites."""
+    """Create default cursor flow service for non-DI call sites.
+
+    Returns:
+        OpenAlexCursorFlowService instance configured with the given query executor and response mapper.
+    """
     return OpenAlexCursorFlowService(
         mailto=mailto,
         batch_size=batch_size,
@@ -148,7 +168,11 @@ def _create_default_openalex_title_fallback_handler(
     logger: LoggerPort,
     search_fn: Any,  # Any: async callable for title search
 ) -> TitleFallbackHandler:
-    """Create default title fallback handler for non-DI call sites."""
+    """Create default title fallback handler for non-DI call sites.
+
+    Returns:
+        TitleFallbackHandler instance configured with the given logger and search function.
+    """
     return TitleFallbackHandler(logger=logger, search_fn=search_fn)
 
 
@@ -160,7 +184,11 @@ def _create_default_openalex_fallback_orchestrator(
     extract_record_id: Any,  # Any: callable (dict) -> str for record ID extraction
     logger: LoggerPort,
 ) -> OpenAlexFallbackOrchestrator:
-    """Create default fallback orchestrator for non-DI call sites."""
+    """Create default fallback orchestrator for non-DI call sites.
+
+    Returns:
+        OpenAlexFallbackOrchestrator instance wired with the given fallback service and handler.
+    """
     return OpenAlexFallbackOrchestrator(
         fallback_fetch_service=fallback_fetch_service,
         fallback_handler=fallback_handler,

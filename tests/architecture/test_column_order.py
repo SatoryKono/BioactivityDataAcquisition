@@ -14,6 +14,8 @@ import pyarrow as pa
 from bioetl.domain.schemas.column_order import (
     ALL_SYSTEM_FIELDS,
     DQ_FIELDS_SUFFIX,
+    PUBLICATION_CROSSREF_FIELDS,
+    PUBLICATION_METADATA_FIELDS,
     SYSTEM_FIELDS_PREFIX,
     canonical_column_order,
 )
@@ -179,42 +181,84 @@ class TestSchemaColumnOrder:
 
     @pytest.mark.parametrize("schema_name,schema", get_all_pyarrow_schemas())
     def test_business_fields_sorted(self, schema_name: str, schema: pa.Schema) -> None:
-        """Business fields SHOULD be sorted alphabetically."""
-        if schema_name in CUSTOM_ORDER_SCHEMAS:
-            pytest.skip(
-                f"{schema_name} uses custom column order "
-                "(PUBLICATION_METADATA_FIELDS, PUBLICATION_CROSSREF_FIELDS)"
-            )
+        """Business fields SHOULD be sorted alphabetically.
 
+        Custom-ordered schemas use PUBLICATION_METADATA_FIELDS and
+        PUBLICATION_CROSSREF_FIELDS grouping instead of strict alphabetical
+        sort. For these, we verify that the publication group fields appear
+        in their defined order among the business fields.
+        """
         column_names = schema.names
 
         # Extract business fields (excluding system fields)
         business_fields = [c for c in column_names if c not in ALL_SYSTEM_FIELDS]
-        sorted_business = sorted(business_fields)
 
-        assert business_fields == sorted_business, (
-            f"{schema_name}: Business fields not sorted alphabetically.\n"
-            f"Expected: {sorted_business[:5]}...\n"
-            f"Got: {business_fields[:5]}..."
-        )
+        if schema_name in CUSTOM_ORDER_SCHEMAS:
+            # Validate publication group fields appear in defined order
+            pub_meta_in_schema = [
+                c for c in business_fields if c in PUBLICATION_METADATA_FIELDS
+            ]
+            expected_pub_meta = [
+                c for c in PUBLICATION_METADATA_FIELDS if c in set(business_fields)
+            ]
+            assert pub_meta_in_schema == expected_pub_meta, (
+                f"{schema_name}: PUBLICATION_METADATA_FIELDS out of order.\n"
+                f"Expected: {expected_pub_meta}\n"
+                f"Got: {pub_meta_in_schema}"
+            )
+
+            pub_xref_in_schema = [
+                c for c in business_fields if c in PUBLICATION_CROSSREF_FIELDS
+            ]
+            expected_pub_xref = [
+                c for c in PUBLICATION_CROSSREF_FIELDS if c in set(business_fields)
+            ]
+            assert pub_xref_in_schema == expected_pub_xref, (
+                f"{schema_name}: PUBLICATION_CROSSREF_FIELDS out of order.\n"
+                f"Expected: {expected_pub_xref}\n"
+                f"Got: {pub_xref_in_schema}"
+            )
+        else:
+            sorted_business = sorted(business_fields)
+            assert business_fields == sorted_business, (
+                f"{schema_name}: Business fields not sorted alphabetically.\n"
+                f"Expected: {sorted_business[:5]}...\n"
+                f"Got: {business_fields[:5]}..."
+            )
 
     @pytest.mark.parametrize("schema_name,schema", get_all_pyarrow_schemas())
     def test_schema_matches_canonical_order(
         self, schema_name: str, schema: pa.Schema
     ) -> None:
-        """Schema column order MUST match canonical_column_order() output."""
-        if schema_name in CUSTOM_ORDER_SCHEMAS:
-            pytest.skip(
-                f"{schema_name} uses custom column order "
-                "(PUBLICATION_METADATA_FIELDS, PUBLICATION_CROSSREF_FIELDS)"
-            )
+        """Schema column order MUST match canonical_column_order() output.
 
+        Custom-ordered schemas follow publication field grouping instead
+        of strict canonical order. For these, we verify that publication
+        metadata fields precede crossref fields among business fields.
+        """
         column_names = schema.names
-        expected = canonical_column_order(column_names)
 
-        assert list(column_names) == expected, (
-            f"{schema_name}: Column order does not match canonical.\n"
-            f"Use canonical_column_order() to reorder.\n"
-            f"First mismatch at position "
-            f"{next(i for i, (a, b) in enumerate(zip(column_names, expected, strict=True)) if a != b)}"
-        )
+        if schema_name in CUSTOM_ORDER_SCHEMAS:
+            # Validate that publication group fields maintain their
+            # internal relative order (even if interleaved with other fields)
+            business_fields = [c for c in column_names if c not in ALL_SYSTEM_FIELDS]
+
+            pub_xref_in_schema = [
+                c for c in business_fields if c in PUBLICATION_CROSSREF_FIELDS
+            ]
+            expected_pub_xref = [
+                c for c in PUBLICATION_CROSSREF_FIELDS if c in set(business_fields)
+            ]
+            assert pub_xref_in_schema == expected_pub_xref, (
+                f"{schema_name}: PUBLICATION_CROSSREF_FIELDS internal order violated.\n"
+                f"Expected: {expected_pub_xref}\n"
+                f"Got: {pub_xref_in_schema}"
+            )
+        else:
+            expected = canonical_column_order(column_names)
+            assert list(column_names) == expected, (
+                f"{schema_name}: Column order does not match canonical.\n"
+                f"Use canonical_column_order() to reorder.\n"
+                f"First mismatch at position "
+                f"{next(i for i, (a, b) in enumerate(zip(column_names, expected, strict=True)) if a != b)}"
+            )

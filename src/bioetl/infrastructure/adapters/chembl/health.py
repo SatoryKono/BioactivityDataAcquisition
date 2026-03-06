@@ -64,7 +64,11 @@ class ChemblHealthMixin:
     _adapter_metrics: AdapterMetrics
 
     async def _probe_health(self) -> HealthStatus:
-        """Perform ChEMBL-specific health probe."""
+        """Perform ChEMBL-specific health probe.
+
+        Returns:
+            HealthStatus from the ChEMBL status endpoint or DEGRADED on transient failures.
+        """
         try:
             with self._adapter_metrics.measure_request("/status"):
                 response = await self.http_client.get_once(CHEMBL_STATUS_URL)
@@ -101,7 +105,11 @@ class ChemblHealthMixin:
             raise
 
     def _get_health_status(self) -> HealthStatus:
-        """Get health status from circuit breaker state."""
+        """Get health status from circuit breaker state.
+
+        Returns:
+            HealthStatus derived from the circuit breaker's current state.
+        """
         return assess_health_from_circuit_breaker(self.http_client.circuit_breaker)
 
     def _get_effective_batch_size(self) -> int:
@@ -139,15 +147,27 @@ class ChemblHealthMixin:
         return self._page_size
 
     def _fallback_health_status(self) -> HealthStatus:
-        """Return health status based on circuit breaker state."""
+        """Return health status based on circuit breaker state.
+
+        Returns:
+            HealthStatus based on the circuit breaker's current state.
+        """
         return self._get_health_status()
 
     def _get_health_endpoint(self) -> str:
-        """Get the health check endpoint for ChEMBL."""
+        """Get the health check endpoint for ChEMBL.
+
+        Returns:
+            Health check endpoint path string for ChEMBL.
+        """
         return "/chembl/api/data/status.json"
 
     def _handle_health_response(self, response: Response) -> HealthStatus:
-        """Process health check response."""
+        """Process health check response.
+
+        Returns:
+            HealthStatus.HEALTHY for a 200 UP response, DEGRADED otherwise.
+        """
         if response.status_code == 200:
             data = response.json()
             if data.get("status") == "UP":
@@ -171,7 +191,11 @@ class ChemblHealthMixin:
 
     @staticmethod
     def _extract_http_status_code(error: Exception) -> int | None:
-        """Extract HTTP status code from exception response if available."""
+        """Extract HTTP status code from exception response if available.
+
+        Returns:
+            HTTP status code as int if present in the exception, None otherwise.
+        """
         response = getattr(error, "response", None)
         if response is None:
             return None

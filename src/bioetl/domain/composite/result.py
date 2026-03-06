@@ -99,7 +99,7 @@ class DependencyResult:
             completed_at: Completed at.
 
         Returns:
-            The DependencyResult result.
+            DependencyResult with SUCCESS status.
         """
         return cls(
             pipeline_name=pipeline_name,
@@ -126,7 +126,7 @@ class DependencyResult:
             duration_seconds: Duration seconds.
 
         Returns:
-            The DependencyResult result.
+            DependencyResult with FAILED status and the given error message.
         """
         return cls(
             pipeline_name=pipeline_name,
@@ -148,7 +148,7 @@ class DependencyResult:
             reason: Reason description.
 
         Returns:
-            The DependencyResult result.
+            DependencyResult with SKIPPED status and the given reason.
         """
         return cls(
             pipeline_name=pipeline_name,
@@ -169,7 +169,7 @@ class DependencyResult:
             timeout_seconds: Timeout seconds.
 
         Returns:
-            The DependencyResult result.
+            DependencyResult with TIMEOUT status and timeout duration message.
         """
         return cls(
             pipeline_name=pipeline_name,

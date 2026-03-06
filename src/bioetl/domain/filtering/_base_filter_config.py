@@ -14,9 +14,7 @@ from bioetl.domain.filtering.list_filters import (
 from bioetl.domain.filtering.range_filter import GoldRangeFilter
 from bioetl.domain.types import JsonDict
 
-__all__ = [
-    "BaseFilterConfig",
-]
+__all__ = ["BaseFilterConfig"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -32,7 +30,11 @@ class BaseFilterConfig:
 
     @classmethod
     def from_base(cls, other: BaseFilterConfig) -> Self:
-        """Create same-type filter config from another base config."""
+        """Create same-type filter config from another base config.
+
+        Returns:
+            New instance of the same type with fields copied from other.
+        """
         return cls(
             column_filters=other.column_filters,
             range_filters=other.range_filters,
@@ -43,7 +45,11 @@ class BaseFilterConfig:
         )
 
     def should_include(self, record: JsonDict) -> bool:
-        """Check all filtering rules against a record."""
+        """Check all filtering rules against a record.
+
+        Returns:
+            True if the record passes all configured filter rules, False otherwise.
+        """
         checks = [
             self._check_required_fields,
             self._check_exclude_if_present,

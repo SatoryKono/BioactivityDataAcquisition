@@ -107,12 +107,6 @@ registries:
       reason: Baseline exemption migrated from architecture tests (file_size_limits).
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-    src/bioetl/domain/services/dq_serializer.py:
-      value: 470
-      owner: '@bioetl-data-model'
-      reason: Baseline exemption migrated from architecture tests (file_size_limits).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption entry.
     src/bioetl/domain/services/normalization_service.py:
       value: 420
       owner: '@bioetl-data-model'
@@ -157,12 +151,6 @@ registries:
       removal_step: Refactor target to satisfy default metric and remove this exemption entry.
     src/bioetl/domain/value_objects/dq_metrics.py:
       value: 427
-      owner: '@bioetl-data-model'
-      reason: Baseline exemption migrated from architecture tests (file_size_limits).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-    src/bioetl/domain/value_objects/publication_field_groups.py:
-      value: 455
       owner: '@bioetl-data-model'
       reason: Baseline exemption migrated from architecture tests (file_size_limits).
       expires_on: '2026-04-30'
@@ -320,12 +308,6 @@ registries:
       reason: Baseline exemption migrated from architecture tests (class_size).
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-    DQReportSerializer:
-      value: 410
-      owner: '@bioetl-data-model'
-      reason: Baseline exemption migrated from architecture tests (class_size).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption entry.
     DQReportService:
       value: 410
       owner: '@bioetl-architecture'
@@ -442,12 +424,6 @@ registries:
       reason: Cohesive extractor - all methods relate to UniProt comment/annotation extraction
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-    CompositeCheckpointState:
-      value: Immutable dataclass - state transitions via with_* methods, serialization helpers are cohesive
-      owner: '@bioetl-architecture'
-      reason: Immutable dataclass - state transitions via with_* methods, serialization helpers are cohesive
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption entry.
     CrossRefExtractor:
       value: Cohesive extractor - all methods relate to UniProt cross-reference extraction
       owner: '@bioetl-architecture'
@@ -460,22 +436,10 @@ registries:
       reason: Transformer with field extraction - single responsibility
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-    CsvExporter:
-      value: Cohesive exporter - all methods relate to CSV export with Arrow table serialization
-      owner: '@bioetl-platform'
-      reason: Cohesive exporter - all methods relate to CSV export with Arrow table serialization
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption entry.
     DQConfigLoader:
       value: Cohesive resolver - layered precedence merge (base/provider/entity/pipeline) for DQ configs
       owner: '@bioetl-platform'
       reason: Cohesive resolver - layered precedence merge (base/provider/entity/pipeline) for DQ configs
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-    DQReportSerializer:
-      value: Cohesive serializer - all methods relate to DQ report serialization formats
-      owner: '@bioetl-architecture'
-      reason: Cohesive serializer - all methods relate to DQ report serialization formats
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption entry.
     FeatureExtractor:
@@ -512,12 +476,6 @@ registries:
       value: Pandera schema - declarative field definitions, no behavior to delegate
       owner: '@bioetl-data-model'
       reason: Pandera schema - declarative field definitions, no behavior to delegate
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-    StoragePort:
-      value: Protocol definition - interfaces define contracts, no behavior to delegate
-      owner: '@bioetl-data-model'
-      reason: Protocol definition - interfaces define contracts, no behavior to delegate
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption entry.
     UniProtProteinTransformer:

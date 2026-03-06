@@ -25,7 +25,11 @@ def bootstrap_metrics_port(
     settings: Settings,
     metrics_factory: MetricsFactory | None = None,
 ) -> MetricsPort:
-    """Create a metrics port implementation."""
+    """Create a metrics port implementation.
+
+    Returns:
+        Configured MetricsPort, or NoOpMetrics if metrics are disabled.
+    """
     if not settings.observability.metrics_enabled:
         return NoOpMetrics(warn_on_use=False)
 
@@ -37,7 +41,11 @@ def maybe_start_metrics_server(
     settings: Settings,
     start_server: MetricsServerStarter | None = None,
 ) -> bool:
-    """Start metrics server if enabled in settings."""
+    """Start metrics server if enabled in settings.
+
+    Returns:
+        True if the metrics server was started, False otherwise.
+    """
     if not settings.observability.metrics_enabled:
         return False
 
@@ -59,5 +67,9 @@ def bootstrap_metrics(
     settings: Settings,
     metrics_factory: MetricsFactory | None = None,
 ) -> MetricsPort:
-    """Deprecated alias for :func:`bootstrap_metrics_port`."""
+    """Deprecated alias for :func:`bootstrap_metrics_port`.
+
+    Returns:
+        Configured MetricsPort, or NoOpMetrics if metrics are disabled.
+    """
     return bootstrap_metrics_port(settings=settings, metrics_factory=metrics_factory)

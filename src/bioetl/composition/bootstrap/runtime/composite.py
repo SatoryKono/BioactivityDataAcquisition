@@ -113,6 +113,9 @@ def load_composite_config(name: str) -> CompositeConfig:
     - ``_resolve_composite_config_path``
     - ``validate_composite_config_payload``
     - ``ValidationError``
+
+    Returns:
+        Validated and parsed CompositeConfig domain object.
     """
     config_path = _resolve_composite_config_path(name)
     try:
@@ -226,7 +229,11 @@ def bootstrap_composite_runner(
     runtime: CompositeRuntimeConfig,
     run_id: str | None = None,
 ) -> CompositePipelineRunnerService:
-    """Create a ``CompositePipelineRunnerService`` with all dependencies."""
+    """Create a ``CompositePipelineRunnerService`` with all dependencies.
+
+    Returns:
+        Fully wired CompositePipelineRunnerService ready for execution.
+    """
     return _bootstrap_composite_runner_impl(
         config=config,
         runtime=runtime,
@@ -243,7 +250,11 @@ def bootstrap_composite_pipeline(
     runtime: CompositeRuntimeConfig,
     run_id: str | None = None,
 ) -> CompositePipelineRunnerService:
-    """Bootstrap alias for :func:`bootstrap_composite_runner`."""
+    """Bootstrap alias for :func:`bootstrap_composite_runner`.
+
+    Returns:
+        Fully wired CompositePipelineRunnerService ready for execution.
+    """
     return bootstrap_composite_runner(config=config, runtime=runtime, run_id=run_id)
 
 

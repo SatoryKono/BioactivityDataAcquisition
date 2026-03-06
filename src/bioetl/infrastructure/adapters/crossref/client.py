@@ -20,7 +20,7 @@ from httpx import HTTPStatusError, RequestError
 from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.normalization import normalize_doi
-from bioetl.domain.types import BronzeRecord, HealthStatus
+from bioetl.domain.types import BronzeRecord, HealthStatus, JsonDict
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.common import (
     ComposableFallbackDecorator,
@@ -49,7 +49,7 @@ from bioetl.infrastructure.adapters.crossref.response_mapper import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator
+    from collections.abc import AsyncIterator, Callable
 
     from bioetl.domain.ports import ErrorHandlerPort, LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
@@ -76,12 +76,20 @@ CROSSREF_HEALTH_ERRORS = (
 def _create_default_crossref_query_builder(
     *, api_base: str, mailto: str
 ) -> CrossRefQueryBuilder:
-    """Create default query builder for non-DI call sites."""
+    """Create default query builder for non-DI call sites.
+
+    Returns:
+        CrossRefQueryBuilder instance configured with the given API base and mailto.
+    """
     return CrossRefQueryBuilder(api_base=api_base, mailto=mailto)
 
 
 def _create_default_crossref_response_mapper() -> CrossRefResponseMapper:
-    """Create default response mapper for non-DI call sites."""
+    """Create default response mapper for non-DI call sites.
+
+    Returns:
+        CrossRefResponseMapper instance with default configuration.
+    """
     return CrossRefResponseMapper()
 
 
@@ -92,10 +100,14 @@ def _create_default_crossref_batch_fetcher(
     metrics: AdapterMetrics,
     mailto: str,
     api_base: str,
-    headers_fn: object,
+    headers_fn: Callable[[], dict[str, str]],
     request_collector: APIRequestCollector,
 ) -> DoiBatchProcessor:
-    """Create default DOI batch processor for non-DI call sites."""
+    """Create default DOI batch processor for non-DI call sites.
+
+    Returns:
+        DoiBatchProcessor instance configured with the given HTTP and logging dependencies.
+    """
     return DoiBatchProcessor(
         http=http,
         logger=logger,
@@ -114,10 +126,14 @@ def _create_default_crossref_search_paginator(
     metrics: AdapterMetrics,
     mailto: str,
     api_base: str,
-    headers_fn: object,
+    headers_fn: Callable[[], dict[str, str]],
     request_collector: APIRequestCollector,
 ) -> SearchPaginator:
-    """Create default search paginator for non-DI call sites."""
+    """Create default search paginator for non-DI call sites.
+
+    Returns:
+        SearchPaginator instance configured with the given HTTP and logging dependencies.
+    """
     return SearchPaginator(
         http=http,
         logger=logger,
@@ -130,9 +146,13 @@ def _create_default_crossref_search_paginator(
 
 
 def _create_default_crossref_title_fallback_handler(
-    *, logger: LoggerPort, search_fn: object
+    *, logger: LoggerPort, search_fn: Callable[[str, int], AsyncIterator[JsonDict]]
 ) -> TitleFallbackHandler:
-    """Create default title fallback handler for non-DI call sites."""
+    """Create default title fallback handler for non-DI call sites.
+
+    Returns:
+        TitleFallbackHandler instance configured with the given logger and search function.
+    """
     return TitleFallbackHandler(logger=logger, search_fn=search_fn)
 
 
@@ -145,7 +165,11 @@ def _create_default_crossref_fetch_flow(
     batch_size: int,
     response_mapper: CrossRefResponseMapper,
 ) -> CrossRefFetchFlow:
-    """Create default fetch flow for non-DI call sites."""
+    """Create default fetch flow for non-DI call sites.
+
+    Returns:
+        CrossRefFetchFlow instance wired with the given batch fetcher, paginator, and fallback decorator.
+    """
     return CrossRefFetchFlow(
         logger=logger,
         batch_fetcher=batch_fetcher,
@@ -295,7 +319,11 @@ class CrossRefAdapter(BaseHttpAdapter):
             self._fetch_flow.fallback_decorator = self._fallback_decorator
 
     def _build_headers(self) -> dict[str, str]:
-        """Build request headers with polite pool identification."""
+        """Build request headers with polite pool identification.
+
+        Returns:
+            Dictionary of HTTP request headers including the polite pool mailto identifier.
+        """
         return self._query_builder.build_headers()
 
     async def fetch_filtered(
@@ -366,7 +394,11 @@ class CrossRefAdapter(BaseHttpAdapter):
             yield publication
 
     async def _probe_health(self) -> HealthStatus:
-        """Probe CrossRef API health with response-status classification."""
+        """Probe CrossRef API health with response-status classification.
+
+        Returns:
+            HealthStatus reflecting the current CrossRef API availability.
+        """
         try:
             url = self._query_builder.build_health_probe_url()
             params = self._query_builder.build_health_probe_params()
@@ -405,15 +437,27 @@ class CrossRefAdapter(BaseHttpAdapter):
             raise
 
     def _fallback_health_status(self) -> HealthStatus:
-        """Return fallback status used when probe execution fails."""
+        """Return fallback status used when probe execution fails.
+
+        Returns:
+            HealthStatus.UNHEALTHY as the safe default when health probe cannot execute.
+        """
         return HealthStatus.UNHEALTHY
 
     def _get_health_endpoint(self) -> str:
-        """Return endpoint path used for CrossRef health checks."""
+        """Return endpoint path used for CrossRef health checks.
+
+        Returns:
+            Endpoint path string used for health probe requests.
+        """
         return "/works"
 
     def get_source_metadata(self, api_version: str | None = None) -> SourceMetadata:
-        """Return and clear aggregated API request metadata."""
+        """Return and clear aggregated API request metadata.
+
+        Returns:
+            SourceMetadata aggregated from all recorded API requests since last clear.
+        """
         metadata = self._request_collector.to_source_metadata(
             source_type="api",
             url=CROSSREF_API_BASE,

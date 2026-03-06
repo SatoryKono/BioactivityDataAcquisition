@@ -29,7 +29,7 @@ def DeltaWriteConflictError(
             conflicting_version=conflicting_version,
         ),
     )
-    error.error_type = ErrorType.NETWORK_ERROR
+    error.error_type = ErrorType.NETWORK_ERROR  # type: ignore[misc]  # instance override of ClassVar
     return error
 
 
@@ -107,7 +107,7 @@ def DeltaSchemaValidationError(
             type_mismatches=mismatches,
         ),
     )
-    error.error_type = ErrorType.SCHEMA_MISMATCH_GOLD
+    error.error_type = ErrorType.SCHEMA_MISMATCH_GOLD  # type: ignore[misc]  # instance override of ClassVar
     return error
 
 
@@ -126,5 +126,5 @@ def DeltaOptimizeError(
             reason=reason,
         ),
     )
-    error.error_type = ErrorType.NETWORK_ERROR
+    error.error_type = ErrorType.NETWORK_ERROR  # type: ignore[misc]  # instance override of ClassVar
     return error

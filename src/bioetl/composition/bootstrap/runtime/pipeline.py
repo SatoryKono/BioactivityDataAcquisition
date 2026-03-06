@@ -41,7 +41,11 @@ def bootstrap_pipeline_runner(
     ctx: PipelineRunContext,
     registry: PipelineRegistry | None = None,
 ) -> PipelineRunner:
-    """Build a ready-to-run pipeline runner from runtime context and registry."""
+    """Build a ready-to-run pipeline runner from runtime context and registry.
+
+    Returns:
+        Fully configured PipelineRunner ready for execution.
+    """
     # Classification data must be available before transformers run.
     initialize_publication_type_classification(Path("configs"))
 

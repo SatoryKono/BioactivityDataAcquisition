@@ -10,20 +10,18 @@ Usage:
 
 from __future__ import annotations
 
-from typing import Literal, Self
+from typing import Self
 
-from pydantic import BaseModel, Field, ValidationError, field_validator, model_validator
+from pydantic import BaseModel, Field, ValidationError, model_validator
 
-from bioetl.domain.composite.config import (
-    ColumnGroupConfig,
-    CompositeConfig,
-    MergeConfig,
-)
-from bioetl.domain.composite.strategy import (
-    ConflictResolution,
-    MergeStrategy,
-)
+from bioetl.domain.composite.config import CompositeConfig
 from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.schemas._composite_config_merge_schema import (
+    ColumnGroupSchema,
+    MergeOutputSchema,
+    MergeSchema,
+    MergeSortBySchema,
+)
 from bioetl.infrastructure.schemas.composite_config_base import (
     AggregationFieldSchema,
     AggregationSchema,
@@ -41,164 +39,6 @@ from bioetl.infrastructure.schemas.composite_validation import (
     LineageSchema,
     RetrySchema,
 )
-
-
-class MergeOutputSchema(BaseModel):
-    """Pydantic schema for merge output paths."""
-
-    silver: str = Field(..., min_length=1, description="Path for merged Silver table")
-    gold: str = Field(..., min_length=1, description="Path for merged Gold table")
-
-
-class MergeSortBySchema(BaseModel):
-    """Deterministic sort policy for merged Silver/Gold outputs."""
-
-    silver: list[str] = Field(
-        ..., min_length=1, description="Sort columns for merged Silver output"
-    )
-    gold: list[str] = Field(
-        ..., min_length=1, description="Sort columns for merged Gold output"
-    )
-
-    @field_validator("silver", "gold")
-    @classmethod
-    def validate_non_empty_unique_columns(cls, value: list[str]) -> list[str]:
-        """Normalize and validate deterministic sort columns."""
-        normalized = [column.strip() for column in value]
-        if any(not column for column in normalized):
-            raise ValueError("sort_by must not contain empty column names")
-        if len(normalized) != len(set(normalized)):
-            raise ValueError("sort_by must not contain duplicate columns")
-        return normalized
-
-
-class ColumnGroupSchema(BaseModel):
-    """Pydantic schema for column group configuration.
-
-    Defines how columns are grouped and ordered in merged output.
-    """
-
-    name: str = Field(..., min_length=1, description="Group name for logging")
-    fields: list[str] = Field(
-        default_factory=list, description="Explicit field names to include"
-    )
-    pattern: str | None = Field(
-        default=None, description="Regex pattern to match field names"
-    )
-    provider_order: list[str] = Field(
-        default_factory=lambda: [
-            "chembl",
-            "crossref",
-            "openalex",
-            "pubmed",
-            "semanticscholar",
-        ],
-        description="Order of providers within this group",
-    )
-
-    @model_validator(mode="after")
-    def validate_fields_or_pattern(self) -> ColumnGroupSchema:
-        """Ensure at least one of fields or pattern is provided.
-
-        Returns:
-            Validated ColumnGroupSchema.
-        """
-        if not self.fields and not self.pattern:
-            raise ValueError(
-                f"Column group '{self.name}' must have either fields or pattern"
-            )
-        return self
-
-
-class MergeSchema(BaseModel):
-    """Pydantic schema for merge step configuration."""
-
-    strategy: Literal["left_outer", "inner", "union"] = Field(
-        default="left_outer", description="Join strategy for merging"
-    )
-    conflict_resolution: Literal[
-        "seed_priority",
-        "enricher_priority",
-        "latest_timestamp",
-        "explicit_rules",
-        "coalesce",
-    ] = Field(default="seed_priority", description="Strategy for field conflicts")
-    field_priorities: dict[str, list[str]] = Field(
-        default_factory=dict, description="Mapping of field to source priority list"
-    )
-    field_mappings: dict[str, str] = Field(
-        default_factory=dict, description="Mapping to rename fields during merge"
-    )
-    output: MergeOutputSchema = Field(
-        ..., description="Output paths for Silver and Gold tables"
-    )
-    sort_by: MergeSortBySchema = Field(
-        ..., description="Deterministic row ordering policy for merged outputs"
-    )
-    preserve_all_sources: bool = Field(
-        default=False,
-        description="Keep all provider-qualified columns instead of coalescing",
-    )
-    column_groups: list[ColumnGroupSchema] = Field(
-        default_factory=list,
-        description="Column ordering by semantic groups",
-    )
-    column_groups_file: str | None = Field(
-        default=None,
-        description="Path to column group config file relative to composite config",
-    )
-    exclude_fields: list[str] = Field(
-        default_factory=list,
-        description="Columns to drop from merged output (supports glob patterns)",
-    )
-
-    @model_validator(mode="after")
-    def validate_explicit_rules_requires_priorities(self) -> MergeSchema:
-        """Ensure field_priorities is provided when using explicit_rules.
-
-        Returns:
-            Validated MergeSchema.
-        """
-        if self.conflict_resolution == "explicit_rules" and not self.field_priorities:
-            raise ValueError(
-                "field_priorities required when using explicit_rules conflict resolution"
-            )
-        return self
-
-    def to_domain(self) -> MergeConfig:
-        """Convert to immutable domain MergeConfig.
-
-        Returns:
-            The MergeConfig result.
-        """
-        field_priorities_tuples = {
-            k: tuple(v) for k, v in self.field_priorities.items()
-        }
-        # Convert column groups to domain objects
-        column_groups_domain = tuple(
-            ColumnGroupConfig(
-                name=g.name,
-                fields=tuple(g.fields),
-                pattern=g.pattern,
-                provider_order=tuple(g.provider_order),
-            )
-            for g in self.column_groups
-        )
-        return MergeConfig(
-            strategy=MergeStrategy.from_string(self.strategy),
-            conflict_resolution=ConflictResolution.from_string(
-                self.conflict_resolution
-            ),
-            output_silver_path=self.output.silver,
-            output_gold_path=self.output.gold,
-            sort_by_silver=tuple(self.sort_by.silver),
-            sort_by_gold=tuple(self.sort_by.gold),
-            field_priorities=field_priorities_tuples,
-            field_mappings=self.field_mappings,
-            preserve_all_sources=self.preserve_all_sources,
-            column_groups=column_groups_domain,
-            exclude_fields=tuple(self.exclude_fields),
-        )
 
 
 class CompositeConfigSchema(BaseModel):

@@ -61,14 +61,22 @@ def resolve_composite_gold_schema(
     *,
     schema_registry: Mapping[str, type] | None = None,
 ) -> type | None:
-    """Resolve composite Gold contract by composite pipeline name."""
+    """Resolve composite Gold contract by composite pipeline name.
+
+    Returns:
+        Pandera DataFrameModel class for the composite pipeline, or None if not registered.
+    """
     registry = schema_registry or DEFAULT_COMPOSITE_GOLD_SCHEMA_REGISTRY
     key = composite_name.removeprefix("composite_")
     return registry.get(key)
 
 
 def resolve_composite_config_path(name: str, *, config_dir: Path) -> Path:
-    """Resolve composite config path from canonical composites directory."""
+    """Resolve composite config path from canonical composites directory.
+
+    Returns:
+        Path to the composite YAML configuration file.
+    """
     config_path = config_dir / f"{name}.yaml"
     if config_path.exists():
         return config_path
@@ -116,7 +124,11 @@ def load_composite_config(
     validate_payload: ConfigPayloadValidator = validate_composite_config_payload,
     dq_override_merger: DQOverrideMerger = merge_external_dq_overrides,
 ) -> CompositeConfig:
-    """Load and validate composite pipeline configuration from YAML."""
+    """Load and validate composite pipeline configuration from YAML.
+
+    Returns:
+        Validated and parsed CompositeConfig domain object.
+    """
     config_path = resolve_composite_config_path(name, config_dir=config_dir)
 
     with config_path.open(encoding="utf-8") as config_file:

@@ -159,7 +159,7 @@ def _resolve_transform_metadata(
     transform_steps: tuple[str, ...] | None,
 ) -> tuple[str, list[str]]:
     """Resolve transform metadata using input override or run context defaults."""
-    resolved_version = transform_version or run_context.transform_version
+    resolved_version = transform_version or run_context.transform_version or ""
     resolved_steps = list(transform_steps or run_context.transform_steps)
     return resolved_version, resolved_steps
 
@@ -300,7 +300,12 @@ class SilverMetadataService:
     environment_metadata: EnvironmentMetadata
 
     def assemble(self, input_data: SilverMetadataInput) -> SilverMetadata:
-        """Build complete Silver metadata payload."""
+        """Build complete Silver metadata payload.
+
+        Returns:
+            SilverMetadata with runtime, pipeline, lineage, delta, DQ summary,
+            output, and environment fields populated from the input data.
+        """
         if not input_data.records and input_data.total_records is None:
             raise ValueError("Cannot create Silver metadata without records")
 
@@ -369,7 +374,12 @@ class GoldMetadataService:
     environment_metadata: EnvironmentMetadata
 
     def assemble(self, input_data: GoldMetadataInput) -> GoldMetadata:
-        """Build complete Gold metadata payload."""
+        """Build complete Gold metadata payload.
+
+        Returns:
+            GoldMetadata with runtime, pipeline, lineage, delta, DQ summary,
+            output, and environment fields populated from the input data.
+        """
         if not input_data.records and input_data.total_records is None:
             raise ValueError("Cannot create Gold metadata without records")
 

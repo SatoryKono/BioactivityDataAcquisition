@@ -112,7 +112,12 @@ class EnrichmentCoordinatorService:
         completed: frozenset[str],
         runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
     ) -> dict[str, EnrichmentResult]:
-        """Run all enrichers concurrently and collect typed enrichment results."""
+        """Run all enrichers concurrently and collect typed enrichment results.
+
+        Returns:
+            Mapping from enricher pipeline name to its EnrichmentResult, including
+            skipped, failed, partial, and successful outcomes.
+        """
         task_specs = [
             task_spec
             for enricher in enrichers

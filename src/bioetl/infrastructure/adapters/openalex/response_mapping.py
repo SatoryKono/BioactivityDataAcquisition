@@ -15,7 +15,11 @@ class OpenAlexResponseMapper:
     """Maps raw OpenAlex payloads/records to adapter-facing records."""
 
     def extract_results(self, payload: dict[str, object]) -> list[BronzeRecord]:
-        """Extract API `results` array as BronzeRecord list."""
+        """Extract API `results` array as BronzeRecord list.
+
+        Returns:
+            List of BronzeRecord dictionaries from the results array, or empty list if absent.
+        """
         raw_results = payload.get("results")
         if not isinstance(raw_results, list):
             return []
@@ -24,7 +28,11 @@ class OpenAlexResponseMapper:
         ]
 
     def extract_next_cursor(self, payload: dict[str, object]) -> str | None:
-        """Extract cursor from `meta.next_cursor`."""
+        """Extract cursor from `meta.next_cursor`.
+
+        Returns:
+            Next cursor string if present, None if last page or meta is missing.
+        """
         raw_meta = payload.get("meta")
         if not isinstance(raw_meta, dict):
             return None
@@ -41,7 +49,11 @@ class OpenAlexResponseMapper:
         original_id: str | None = None,
         search_title: str | None = None,
     ) -> BronzeRecord:
-        """Return copied record with standardized lookup metadata fields."""
+        """Return copied record with standardized lookup metadata fields.
+
+        Returns:
+            Copy of the record with _lookup_method and optional _original_id and _search_title fields set.
+        """
         mapped = dict(record)
         mapped["_lookup_method"] = lookup_method
         if original_id is not None:

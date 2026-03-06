@@ -24,7 +24,11 @@ class ChemblFetchMultiFilterMixin:
         filters: dict[str, list[str]],
         entity_type: str,
     ) -> int:
-        """Halve batch_size until projected URL fits the 1000-char limit."""
+        """Halve batch_size until projected URL fits the 1000-char limit.
+
+        Returns:
+            Maximum batch size that keeps the URL within the 1000-character limit.
+        """
         batch_size: int = self._filter_batch_size
         while batch_size > 1:
             test_filters = {k: v[:batch_size] for k, v in filters.items()}

@@ -23,19 +23,31 @@ class OpenAlexAdapterHelpersMixin:
     _request_collector: APIRequestCollector
 
     def _build_headers(self) -> dict[str, str]:
-        """Build request headers for OpenAlex API."""
+        """Build request headers for OpenAlex API.
+
+        Returns:
+            Dictionary of HTTP headers with User-Agent and Accept fields.
+        """
         return {
             "User-Agent": f"BioETL/1.0 (mailto:{self.mailto})",
             "Accept": "application/json",
         }
 
     def _build_base_params(self) -> dict[str, str]:
-        """Build base query parameters with mailto for polite pool."""
+        """Build base query parameters with mailto for polite pool.
+
+        Returns:
+            Dictionary containing the mailto parameter for polite pool access.
+        """
         return {"mailto": self.mailto}
 
     @staticmethod
     def _normalize_doi(doi: str) -> str | None:
-        """Normalize DOI by removing URL prefix."""
+        """Normalize DOI by removing URL prefix.
+
+        Returns:
+            Normalized DOI string without URL prefix, or None if input is empty.
+        """
         if not doi:
             return None
         doi = doi.strip()
@@ -49,13 +61,21 @@ class OpenAlexAdapterHelpersMixin:
 
     @staticmethod
     def _escape_title_for_search(title: str) -> str:
-        """Escape title for OpenAlex title.search filter."""
+        """Escape title for OpenAlex title.search filter.
+
+        Returns:
+            Plus-separated token string with special characters removed for API compatibility.
+        """
         cleaned = title.replace(":", " ").replace("|", " ").replace(",", " ")
         return "+".join(cleaned.split())
 
     @staticmethod
     def _extract_doi_from_record(record: BronzeRecord) -> str | None:
-        """Extract normalized DOI from OpenAlex record."""
+        """Extract normalized DOI from OpenAlex record.
+
+        Returns:
+            Lowercased DOI string without URL prefix, or None if absent.
+        """
         doi_url: str = record.get("doi", "") or ""
         if not doi_url:
             return None
@@ -66,18 +86,30 @@ class OpenAlexAdapterHelpersMixin:
         return lowered
 
     def _fallback_health_status(self) -> HealthStatus:
-        """Fallback health status on probe failure."""
+        """Fallback health status on probe failure.
+
+        Returns:
+            HealthStatus.UNHEALTHY as the safe default when health probe cannot execute.
+        """
         return HealthStatus.UNHEALTHY
 
     def _get_health_endpoint(self) -> str:
-        """Health endpoint path for OpenAlex probes."""
+        """Health endpoint path for OpenAlex probes.
+
+        Returns:
+            Endpoint path string used for health probe requests.
+        """
         return "/works"
 
     def get_source_metadata(
         self,
         api_version: str | None = None,
     ) -> SourceMetadata:
-        """Get API request metadata and clear collector."""
+        """Get API request metadata and clear collector.
+
+        Returns:
+            SourceMetadata aggregated from all recorded API requests since last clear.
+        """
         metadata = self._request_collector.to_source_metadata(
             source_type="api", url=_OPENALEX_BASE_URL, api_version=api_version
         )
