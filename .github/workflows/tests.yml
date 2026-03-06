@@ -136,6 +136,50 @@ jobs:
             -   name: Smoke check (dependencies + core imports)
                 run: uv run pytest tests/smoke/ -v --tb=short
 
+    quality-metrics-gate:
+        runs-on: ubuntu-latest
+        timeout-minutes: 20
+        needs: smoke-check
+
+        steps:
+            -   name: Checkout code
+                uses: actions/checkout@v4
+
+            -   name: Set up Python 3.11
+                uses: actions/setup-python@v5
+                with:
+                    python-version: "3.11"
+
+            -   name: Install uv
+                uses: astral-sh/setup-uv@v7
+
+            -   name: Cache uv and virtualenv
+                uses: actions/cache@v4
+                with:
+                    path: |
+                        ~/.cache/uv
+                        .venv
+                    key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
+                    restore-keys: |
+                        uv-${{ runner.os }}-py311-
+
+            -   name: Install dependencies (frozen lock)
+                run: uv sync --frozen --extra dev --extra tracing
+
+            -   name: Compute quality metrics and enforce integral score gate
+                run: |
+                    uv run python scripts/ci/quality_integral_gate.py \
+                      --registry "${QUALITY_EXEMPTIONS_REGISTRY}" \
+                      --scorecard "${QUALITY_EXEMPTIONS_SCORECARD}" \
+                      --output reports/quality/ci-quality-metrics.json
+
+            -   name: Upload quality metrics artifact
+                if: always()
+                uses: actions/upload-artifact@v4
+                with:
+                    name: ci-quality-metrics
+                    path: reports/quality/ci-quality-metrics.json
+
     # Fast tests run first for quick feedback
     test-fast:
         runs-on: ubuntu-latest

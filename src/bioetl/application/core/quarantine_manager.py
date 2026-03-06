@@ -29,6 +29,8 @@ class QuarantineManagerService:
         Args:
             quarantine_port: Port for writing to quarantine storage.
             pipeline_name: Name of the pipeline for identification.
+            metrics: Optional metrics port for incrementing quarantine record
+                counters per pipeline and error reason.
 
         """
         self._quarantine = quarantine_port

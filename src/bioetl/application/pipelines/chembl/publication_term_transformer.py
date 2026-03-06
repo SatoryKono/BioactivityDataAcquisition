@@ -296,7 +296,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
         Delegates to shared ``compute_publication_term_entity_id``.
 
         Args:
-            document_chembl_id: Document ChEMBL ID.
+            publication_id: Document ChEMBL ID (canonical name per ADR-024).
             term_type: Term type classification.
             term: Term text (will be normalized).
 

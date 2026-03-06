@@ -244,6 +244,36 @@ def create_pipeline_with_services(
 
 @dataclass(frozen=True, slots=True)
 class _PipelineCreationInputs:
+    """Immutable value object bundling all inputs for pipeline instantiation.
+
+    Aggregates the pipeline class, provider context, run parameters, and optional
+    service overrides into a single frozen dataclass. Passed to
+    ``_create_pipeline_with_services_impl`` to avoid a long flat argument list
+    and to enable safe partial construction in tests. Part of the composition
+    layer (ADR-025, ADR-029).
+
+    Attributes:
+        pipeline_name: Logical pipeline identifier (``<provider>_<entity>``).
+        pipeline_class: Concrete ``BasePipeline`` subclass to instantiate.
+        provider: Data-source provider name (e.g. ``"chembl"``).
+        create_data_source_fn: Factory callable that produces a ``DataSourcePort``
+            adapter for the given provider.
+        transformer_class: Optional ``BaseTransformer`` subclass; ``None`` means
+            no transformation step is wired.
+        run_id: Unique identifier for this pipeline run.
+        runtime: Immutable runtime configuration (batch size, run type, etc.).
+        settings: Global infrastructure settings (paths, feature flags).
+        logger: Structured logger injected from composition root.
+        config: Pre-loaded YAML pipeline config; loaded from disk when ``None``.
+        filter_config: Optional input-side filter rules for Bronze records.
+        tracer: Optional OpenTelemetry tracing provider.
+        dq_monitor: Optional DQ monitoring port for Silver-layer quality checks.
+        metrics: Optional metrics port for instrumentation.
+        cached_bronze: Optional context enabling Bronze-cache replay mode.
+        pandera_silver_schema: Optional Pandera ``DataFrameModel`` class used to
+            construct the ``SilverValidatorPort`` for schema enforcement.
+    """
+
     pipeline_name: str
     pipeline_class: type[BasePipeline]
     provider: str

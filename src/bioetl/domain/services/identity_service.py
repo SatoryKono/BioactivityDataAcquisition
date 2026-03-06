@@ -16,7 +16,6 @@ Requirements:
 
 from __future__ import annotations
 
-from bioetl.domain.constants import META_FIELDS as META_FIELDS  # re-export for tests
 from bioetl.domain.transformations import (
     generate_content_hash,
     normalize_for_hash,
@@ -126,6 +125,10 @@ class IdentityService:
             provider: Data provider identifier (e.g., 'chembl', 'pubchem').
             record: Business data dictionary (meta fields auto-excluded).
             exclude_none: Whether to exclude None values from hash.
+            include_fields: Optional explicit set of fields to include in the
+                hash, overriding the instance-level default include policy.
+            exclude_fields: Optional additional set of fields to exclude from
+                the hash, merged with the instance-level exclude policy.
 
         Returns:
             ContentHash (SHA256 hex digest, 64 characters).

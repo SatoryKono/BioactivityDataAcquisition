@@ -43,3 +43,11 @@ def test_tests_workflow_has_fail_fast_quality_ratchet_profile() -> None:
     app_pos = workflow.index("Quality ratchet (fail-fast: application)")
     infra_pos = workflow.index("Quality ratchet (fail-fast: infrastructure)")
     assert domain_pos < app_pos < infra_pos
+
+
+def test_tests_workflow_runs_ci_quality_integral_gate() -> None:
+    """Merge pipeline must run CI quality integral metrics gate and publish JSON."""
+    workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")
+    assert "quality-metrics-gate" in workflow
+    assert "scripts/ci/quality_integral_gate.py" in workflow
+    assert "reports/quality/ci-quality-metrics.json" in workflow

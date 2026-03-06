@@ -198,6 +198,22 @@ class FieldGroupRegistry:
         provider_order: tuple[str, ...] = DEFAULT_PROVIDER_ORDER,
         default_group: FieldGroupId = FieldGroupId.TRASH,
     ) -> None:
+        """Build the registry and pre-compute lookup indices for fast field resolution.
+
+        Iterates over ``groups`` once at construction time to build four internal
+        dictionaries: field-name to group, qualified-column to group, field-name to
+        ``FieldMapping``, and group-id to ``FieldGroupDefinition``. All public
+        methods then operate in O(1) average time. See ADR-026 for the composite
+        pipeline design that relies on this registry.
+
+        Args:
+            groups: Tuple of ``FieldGroupDefinition`` objects defining all semantic
+                field groups and their provider-qualified columns.
+            provider_order: Provider priority order used when sorting columns within
+                the same semantic group; defaults to ``DEFAULT_PROVIDER_ORDER``.
+            default_group: ``FieldGroupId`` assigned to any column not found in the
+                registry; defaults to ``FieldGroupId.TRASH`` (excluded from Gold layer).
+        """
         self._groups = groups
         self._provider_order = provider_order
         self._default_group = default_group

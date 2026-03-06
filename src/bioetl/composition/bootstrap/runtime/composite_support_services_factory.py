@@ -99,6 +99,39 @@ class CompositeSupportServicesFactory:
             CompositeCheckpointService
         ] = CompositeCheckpointService,
     ) -> None:
+        """Initialise the factory with composite run context and injectable callables.
+
+        Stores all dependencies as private attributes so that ``build()`` can
+        construct the full ``CompositeSupportServices`` bundle without requiring
+        additional arguments. Injectable callables (``resolve_gold_schema``,
+        ``load_field_group_registry``, ``create_dq_report_service``) allow the
+        factory to remain testable without importing concrete infrastructure types
+        at class level. Part of the composition layer for ADR-026.
+
+        Args:
+            config: Parsed domain ``CompositeConfig`` containing merge, enricher,
+                dependency, DQ, and cross-validation settings.
+            runtime: Immutable composite runtime options (resume flag,
+                concurrency settings).
+            settings: Global infrastructure settings supplying paths and feature
+                flags (e.g. ``data_dir``).
+            logger: Structured logger forwarded to all constructed services.
+            storage: Storage adapter implementing ``StoragePort``; typed as ``Any``
+                because it is a concrete infrastructure object injected from the
+                composition root.
+            run_id: Unique string identifier for this composite pipeline run;
+                embedded in checkpoint paths and FSM state.
+            resolve_gold_schema: Callable that accepts a composite pipeline name and
+                returns the corresponding Pandera ``DataFrameModel`` class or ``None``.
+            load_field_group_registry: Callable that accepts a composite pipeline name
+                and a ``LoggerPort`` and returns a configured ``FieldGroupRegistry``
+                or ``None``.
+            create_dq_report_service: Callable that accepts a ``LoggerPort`` and
+                ``Settings`` and returns a ``DQReportService`` instance.
+            checkpoint_manager_cls: ``CompositeCheckpointService`` class (or
+                compatible subclass) used to create the checkpoint manager; allows
+                injection of a test double.
+        """
         self._config = config
         self._runtime = runtime
         self._settings = settings

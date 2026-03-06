@@ -163,6 +163,11 @@ def atomic_write_bytes(
     Args:
         target: Path to the final destination file
         data: Bytes to write
+        retry_policy: Optional retry policy controlling maximum attempts and
+            delay for transient file-lock errors during the atomic replace step.
+            Defaults to DEFAULT_ATOMIC_REPLACE_RETRY_POLICY.
+        on_retry: Optional callback invoked before each retry attempt, receiving
+            the attempt number, delay in seconds, and the triggering OSError.
 
     Raises:
         AtomicWriteError: If write fails

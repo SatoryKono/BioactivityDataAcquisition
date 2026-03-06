@@ -10,7 +10,6 @@ from __future__ import annotations
 
 __all__ = ["PUBMED_FALLBACK_ERRORS", "TitleFallbackHandler"]
 
-
 from typing import TYPE_CHECKING
 
 from httpx import RequestError
@@ -57,7 +56,8 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
         Args:
             logger: Logger port for structured logging.
             search_fn: Async function to search publications by title.
-                       Signature: search_fn(title: str, limit: int) -> list[dict]
+                Callable[[str, int], Awaitable[list[JsonDict]]] with signature
+                search_fn(title: str, limit: int) -> list[dict].
         """
         super().__init__(logger, provider_prefix="pubmed")
         self._search_fn = search_fn

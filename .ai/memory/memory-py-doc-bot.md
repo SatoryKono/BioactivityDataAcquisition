@@ -35,7 +35,7 @@ docs/
 ├── 04-reference/                   # API documentation
 ├── 05-operations/
 │   └── runbooks/                   # Operational runbooks
-└── 06-providers/                   # Provider-specific docs
+└── 04-reference/pipelines/          # Provider-specific pipeline docs
 ```
 
 ### Root-level Docs
@@ -270,7 +270,7 @@ Always declare mode at the start of response.
 
 ## 12. Provider Documentation
 
-Location: `docs/06-providers/`
+Location: `docs/04-reference/pipelines/{provider}/`
 
 Each provider doc should cover:
 - API overview and base URL

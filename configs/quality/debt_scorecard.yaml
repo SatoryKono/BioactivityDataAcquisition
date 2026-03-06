@@ -139,6 +139,15 @@ quarterly_targets:
             class_method_count: 1
             god_object: 10
             domain_complexity: 7
+ci_quality_targets:
+    -   quarter: 2026-Q4
+        architecture_test_failures_max: 0
+        total_exemptions_max: 145
+        max_class_loc_max: 300
+        domain_cc_gt5_exemptions_max: 18
+        vcr_cassettes_min_per_provider: 20
+        ruff_formatting_violations_max: 0
+        coverage_threshold_percent: 85.0
 owner_decomposition_targets:
     -   quarter: 2026-Q1
         allocations:

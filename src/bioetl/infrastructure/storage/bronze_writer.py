@@ -52,6 +52,28 @@ BRONZE_WRITE_ERRORS = (
 
 @dataclass(frozen=True, slots=True)
 class _BronzeWritePrepared:
+    """Intermediate write context assembled during Bronze write preparation.
+
+    Holds all validated and resolved artefacts produced by
+    ``BronzeWriter._prepare_bronze_write`` before the actual I/O operations begin.
+    Passing this object between private methods removes the need for long parameter
+    lists and makes each write stage independently testable.
+
+    Attributes:
+        records_iter: Lazy iterator over serialised (and optionally validated) JSONL
+            bytes ready to stream into the compressor.
+        record_list: Materialised copy of serialised records retained only when
+            ``save_json=True``; otherwise an empty list.
+        date_str: Formatted date string (``YYYY-MM-DD``) derived from the ingestion
+            datetime, used in the file-path template.
+        relative_path: Path of the output file relative to ``BronzeWriter.base_path``,
+            following the ``{provider}/{entity}/{date}/{filename}`` convention.
+        metadata: Lightweight sidecar payload dict written alongside the compressed
+            data file as a ``.meta.json`` file.
+        full_path: Absolute ``Path`` of the ``.jsonl.zst`` output file.
+        meta_path: Absolute ``Path`` of the companion metadata sidecar file.
+    """
+
     records_iter: Iterator[bytes]
     record_list: list[bytes]
     date_str: str

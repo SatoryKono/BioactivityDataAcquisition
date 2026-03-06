@@ -19,7 +19,6 @@ if TYPE_CHECKING:
     from bioetl.domain.composite.config import DependencyConfig
     from bioetl.domain.ports import LoggerPort
 
-
 __all__ = ["DependencyJoinerService"]
 
 
@@ -82,6 +81,26 @@ class DependencyJoinerService:
         join_executor: JoinExecutorProtocol,
         system_columns_to_drop: frozenset[str],
     ) -> None:
+        """Initialise the dependency joiner with all required collaborator services.
+
+        Args:
+            logger: Structured logger for debug and warning output.
+            deduplicator: Service that removes duplicate rows from a dependency
+                DataFrame before joining.
+            renamer: Service that qualifies dependency column names to the
+                ``{provider}.{entity}.{field}`` convention.
+            conflict_resolver: Service that detects and resolves column-name conflicts
+                between the merged frame and the dependency frame prior to joining.
+            field_alias_resolver: Callable that returns a field-alias mapping for a
+                given pipeline name, or ``None`` when no aliases are configured.
+            join_key_resolver: Protocol implementation that resolves qualified join key
+                names from unqualified base names and pipeline identifiers.
+            join_executor: Protocol implementation that executes single-key or
+                composite-key Polars join operations.
+            system_columns_to_drop: Frozen set of system column names (e.g.
+                ``"_run_id"``) that must be removed from dependency frames before
+                joining to prevent duplicates from overwriting seed provenance.
+        """
         self._logger = logger
         self._deduplicator = deduplicator
         self._renamer = renamer

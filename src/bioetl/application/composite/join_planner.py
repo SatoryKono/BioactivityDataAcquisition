@@ -33,7 +33,6 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.ports import LoggerPort
 
-
 __all__ = ["JoinHow", "JoinPlannerService"]
 
 
@@ -202,6 +201,39 @@ class JoinPlannerService(JoinPlannerCompatibilityMixin):
         join_executor: JoinExecutorProtocol | None = None,
         dependency_joiner: DependencyJoinerProtocol | None = None,
     ) -> None:
+        """Initialise the join planner and construct default collaborator services.
+
+        Required collaborators (``deduplicator``, ``aggregator``, ``renamer``,
+        ``conflict_resolver``) must be provided explicitly. Optional collaborators
+        (``join_key_resolver``, ``join_executor``, ``dependency_joiner``) are
+        instantiated with production defaults when ``None``, enabling lightweight
+        construction in tests via explicit overrides. See ADR-026 for the composite
+        join workflow design.
+
+        Args:
+            merge_config: Domain merge configuration containing join strategy,
+                enricher list, and column-conflict policy.
+            logger: Structured logger forwarded to all collaborator services.
+            deduplicator: Service that removes duplicate rows from enricher DataFrames
+                before joining.
+            aggregator: Service that performs many-to-one aggregation on enricher
+                DataFrames when ``EnricherConfig.cardinality == MANY_TO_ONE``.
+            renamer: Service that qualifies enricher column names to the
+                ``{provider}.{entity}.{field}`` convention.
+            conflict_resolver: Service that detects and resolves column-name conflicts
+                between the seed/merged frame and an enricher frame.
+            field_alias_resolver: Optional callable returning a field-alias mapping
+                for a given pipeline name; defaults to
+                ``resolve_field_aliases_from_registry`` when ``None``.
+            join_key_resolver: Optional ``JoinKeyResolverProtocol`` implementation;
+                defaults to ``JoinKeyResolverService`` with production normalisation
+                keys when ``None``.
+            join_executor: Optional ``JoinExecutorProtocol`` implementation; defaults
+                to ``JoinExecutorService`` wired with this planner's join type resolver
+                when ``None``.
+            dependency_joiner: Optional ``DependencyJoinerProtocol`` implementation;
+                defaults to a fully wired ``DependencyJoinerService`` when ``None``.
+        """
         self._config = merge_config
         self._logger = logger
         self._deduplicator = deduplicator
