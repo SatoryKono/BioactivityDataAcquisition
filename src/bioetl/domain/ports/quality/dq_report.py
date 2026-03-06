@@ -154,10 +154,9 @@ class GoldDQAnalyzerPort(Protocol):
         completeness_threshold: float = 0.90,
         business_rules: list[JsonDict] | None = None,
         reference_tables: DataContainerDict | None = None,
-        baseline_stats: dict[
-            str, Any  # Any: baseline stat values are float|int|str|None
-        ]
-        | None = None,
+        baseline_stats: (
+            dict[str, Any] | None  # Any: baseline stat values are float|int|str|None
+        ) = None,
         scd_config: JsonDict | None = None,
     ) -> GoldDQReport:
         """Analyze Gold data and generate DQ report.

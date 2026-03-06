@@ -21,7 +21,6 @@ if TYPE_CHECKING:
         SilverMetadata,
     )
 
-
 __all__ = [
     "MetadataWriterPort",
 ]
