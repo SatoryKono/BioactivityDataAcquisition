@@ -18,7 +18,9 @@ def BucketNotFoundError(bucket: str) -> StorageError:
     """Compatibility constructor for legacy BucketNotFoundError."""
     error = StorageError(f"Bucket '{bucket}' not found")
     error = cast(StorageError, error.with_context(bucket=bucket))
-    cast(Any, error).error_type = ErrorType.DB_UNAVAILABLE
+    cast(
+        Any, error
+    ).error_type = ErrorType.DB_UNAVAILABLE  # Any: legacy exception compatibility shim
     return error
 
 
@@ -36,7 +38,9 @@ def UploadError(key: str, reason: str) -> StorageError:
     """Compatibility constructor for legacy UploadError."""
     error = StorageError(f"Failed to upload '{key}': {reason}")
     error = cast(StorageError, error.with_context(key=key, reason=reason))
-    cast(Any, error).error_type = ErrorType.NETWORK_ERROR
+    cast(
+        Any, error
+    ).error_type = ErrorType.NETWORK_ERROR  # Any: legacy exception compatibility shim
     return error
 
 
@@ -139,7 +143,9 @@ def BronzeValidationError(
             original_error=original_error,
         ),
     )
-    cast(Any, error).error_type = ErrorType.INVALID_DATA
+    cast(
+        Any, error
+    ).error_type = ErrorType.INVALID_DATA  # Any: legacy exception compatibility shim
     return error
 
 
@@ -165,5 +171,7 @@ def CachedBronzeEmptyError(
             date_filter=date_filter,
         ),
     )
-    cast(Any, error).error_type = ErrorType.INVALID_DATA
+    cast(
+        Any, error
+    ).error_type = ErrorType.INVALID_DATA  # Any: legacy exception compatibility shim
     return error

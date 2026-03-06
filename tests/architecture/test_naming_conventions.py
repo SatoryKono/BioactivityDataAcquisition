@@ -54,6 +54,7 @@ def test_class_naming_suffixes() -> None:
         "Checker",
         "Mixin",
         "Callable",
+        "Assembler",
     )
     violations: list[str] = []
     for path in (SRC / "application").rglob("*.py"):
@@ -65,24 +66,24 @@ def test_class_naming_suffixes() -> None:
             if any(
                 node.name.endswith(s)
                 for s in (
-                    "Info",
-                    "Record",
-                    "Status",
-                    "Options",
-                    "State",
-                    "Preview",
-                    "Phase",
-                    "Issue",
-                    "Ids",
-                    "Date",
-                    "Identifiers",
-                    "Classification",
-                    "Signal",
-                    "Affiliation",
-                    "Author",
-                    "Raw",
-                    "Output",
-                    "Outcome",
+                        "Info",
+                        "Record",
+                        "Status",
+                        "Options",
+                        "State",
+                        "Preview",
+                        "Phase",
+                        "Issue",
+                        "Ids",
+                        "Date",
+                        "Identifiers",
+                        "Classification",
+                        "Signal",
+                        "Affiliation",
+                        "Author",
+                        "Raw",
+                        "Output",
+                        "Outcome",
                 )
             ):
                 continue

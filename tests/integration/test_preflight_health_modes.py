@@ -1,0 +1,210 @@
+"""Integration tests for strict/probe preflight health behavior."""
+
+from __future__ import annotations
+
+from types import SimpleNamespace
+from unittest.mock import MagicMock
+from uuid import uuid4
+
+import pytest
+
+from bioetl.application.core.preflight_health_aggregator import _HealthAggregator
+from bioetl.application.core.preflight_medallion_validator import (
+    _MedallionConfigValidator,
+)
+from bioetl.application.core.preflight_service import PreflightService
+from bioetl.domain.config import PipelineConfig, TableConfig
+from bioetl.domain.context import PipelineContext
+from bioetl.domain.exceptions import InfrastructureError
+from bioetl.domain.medallion import WriteModePolicy
+from bioetl.domain.ports.health_check import HealthCheckResult
+from bioetl.domain.types import HealthStatus, RunType
+
+
+class _HealthyStorage:
+    async def health_check(self) -> HealthStatus:
+        return HealthStatus.HEALTHY
+
+
+class _FailingLegacyDataSource:
+    async def health_check(self) -> HealthStatus:
+        raise OSError("upstream timeout")
+
+
+class _UnhealthyEnhancedDataSource:
+    async def check_health(self) -> HealthCheckResult:
+        return HealthCheckResult(
+            status=HealthStatus.UNHEALTHY,
+            latency_ms=42.0,
+            provider="stub_provider",
+            endpoint="/health",
+            last_error="stub provider unhealthy",
+            consecutive_failures=3,
+        )
+
+
+def _build_preflight_service(
+    *,
+    health_check_mode: str,
+    metrics: MagicMock,
+    logger: MagicMock,
+    pipeline_name: str,
+) -> PreflightService:
+    config = PipelineConfig(
+        pipeline_name=pipeline_name,
+        provider="stub_provider",
+        entity_type="publication",
+        table=TableConfig(
+            primary_keys=["entity_id"],
+            silver_table="stub_silver",
+            gold_write_mode="scd2",
+        ),
+    )
+    context = PipelineContext(
+        run_id=uuid4(),
+        run_type=RunType.INCREMENTAL,
+        logger=logger,
+    )
+    health_aggregator = _HealthAggregator(
+        metrics=metrics,
+        logger=logger,
+        pipeline_name=pipeline_name,
+        health_check_mode=health_check_mode,
+    )
+    medallion_validator = _MedallionConfigValidator(
+        config=config,
+        logger=logger,
+        write_mode_policy=WriteModePolicy(),
+    )
+    return PreflightService(
+        config=config,
+        context=context,
+        logger=logger,
+        metrics=metrics,
+        health_aggregator=health_aggregator,
+        medallion_validator=medallion_validator,
+    )
+
+
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_strict_mode_blocks_on_data_source_health_exception() -> None:
+    logger = MagicMock()
+    metrics = MagicMock()
+    service = _build_preflight_service(
+        health_check_mode="strict",
+        metrics=metrics,
+        logger=logger,
+        pipeline_name="strict_health_pipeline",
+    )
+    services = SimpleNamespace(
+        storage=_HealthyStorage(),
+        data_source=_FailingLegacyDataSource(),
+    )
+
+    with pytest.raises(InfrastructureError, match="data_source"):
+        await service.validate_infrastructure(services)
+
+    fallback_calls = [
+        call
+        for call in metrics.increment_counter.call_args_list
+        if call[0][0] == "probe_mode_fallback_total"
+    ]
+    assert fallback_calls == []
+
+    mode_status_calls = [
+        call
+        for call in metrics.set_gauge.call_args_list
+        if call[0][0] == "health_check_mode_status"
+    ]
+    assert mode_status_calls
+    assert all(call[0][2]["mode"] == "strict" for call in mode_status_calls)
+
+
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_probe_mode_downgrades_exception_and_counts_fallback() -> None:
+    logger = MagicMock()
+    metrics = MagicMock()
+    service = _build_preflight_service(
+        health_check_mode="probe",
+        metrics=metrics,
+        logger=logger,
+        pipeline_name="probe_health_pipeline",
+    )
+    services = SimpleNamespace(
+        storage=_HealthyStorage(),
+        data_source=_FailingLegacyDataSource(),
+    )
+
+    report = await service.validate_infrastructure(services)
+    data_source_result = next(
+        result for result in report.results if result.component == "data_source"
+    )
+    assert report.is_healthy
+    assert data_source_result.status == HealthStatus.DEGRADED
+    assert data_source_result.error_message == "probe_mode_fallback: upstream timeout"
+
+    fallback_calls = [
+        call
+        for call in metrics.increment_counter.call_args_list
+        if call[0][0] == "probe_mode_fallback_total"
+    ]
+    assert len(fallback_calls) == 1
+    assert fallback_calls[0][0][2] == {
+        "pipeline": "probe_health_pipeline",
+        "component": "data_source",
+        "reason": "exception",
+    }
+
+
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_probe_mode_downgrades_unhealthy_status_with_deterministic_reason() -> (
+    None
+):
+    logger = MagicMock()
+    metrics = MagicMock()
+    service = _build_preflight_service(
+        health_check_mode="probe",
+        metrics=metrics,
+        logger=logger,
+        pipeline_name="probe_status_pipeline",
+    )
+    services = SimpleNamespace(
+        storage=_HealthyStorage(),
+        data_source=_UnhealthyEnhancedDataSource(),
+    )
+
+    report = await service.validate_infrastructure(services)
+    data_source_result = next(
+        result for result in report.results if result.component == "data_source"
+    )
+    assert report.is_healthy
+    assert data_source_result.status == HealthStatus.DEGRADED
+    assert data_source_result.error_message == (
+        "probe_mode_fallback: stub provider unhealthy"
+    )
+
+    fallback_calls = [
+        call
+        for call in metrics.increment_counter.call_args_list
+        if call[0][0] == "probe_mode_fallback_total"
+    ]
+    assert len(fallback_calls) == 1
+    assert fallback_calls[0][0][2] == {
+        "pipeline": "probe_status_pipeline",
+        "component": "data_source",
+        "reason": "status_downgrade",
+    }
+
+    mode_latency_calls = [
+        call
+        for call in metrics.observe_histogram.call_args_list
+        if call[0][0] == "health_check_mode_latency_ms"
+    ]
+    assert len(mode_latency_calls) == 1
+    assert mode_latency_calls[0][0][2] == {
+        "provider": "stub_provider",
+        "mode": "probe",
+    }

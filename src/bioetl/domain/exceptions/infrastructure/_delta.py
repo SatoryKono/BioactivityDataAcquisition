@@ -29,7 +29,9 @@ def DeltaWriteConflictError(
             conflicting_version=conflicting_version,
         ),
     )
-    cast(Any, error).error_type = ErrorType.NETWORK_ERROR
+    cast(
+        Any, error
+    ).error_type = ErrorType.NETWORK_ERROR  # Any: legacy exception compatibility shim
     return error
 
 
@@ -107,7 +109,11 @@ def DeltaSchemaValidationError(
             type_mismatches=mismatches,
         ),
     )
-    cast(Any, error).error_type = ErrorType.SCHEMA_MISMATCH_GOLD
+    cast(
+        Any, error
+    ).error_type = (
+        ErrorType.SCHEMA_MISMATCH_GOLD
+    )  # Any: legacy exception compatibility shim
     return error
 
 
@@ -126,5 +132,7 @@ def DeltaOptimizeError(
             reason=reason,
         ),
     )
-    cast(Any, error).error_type = ErrorType.NETWORK_ERROR
+    cast(
+        Any, error
+    ).error_type = ErrorType.NETWORK_ERROR  # Any: legacy exception compatibility shim
     return error

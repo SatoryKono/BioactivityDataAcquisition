@@ -394,5 +394,7 @@ def DataValidationError(
             value=value,
         ),
     )
-    cast(Any, error).error_type = ErrorType.INVALID_DATA
+    cast(
+        Any, error
+    ).error_type = ErrorType.INVALID_DATA  # Any: legacy exception compatibility shim
     return error

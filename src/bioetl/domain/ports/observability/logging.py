@@ -19,7 +19,7 @@ class LoggerPort(Protocol):
         self,
         _event: str,
         **kwargs: Any,  # Any: structlog-compatible API
-    ) -> Any: ...
+    ) -> Any: ...  # Any: structlog-compatible API
 
     def error(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
         ...
@@ -31,4 +31,4 @@ class LoggerPort(Protocol):
         self,
         _event: str,
         **kwargs: Any,  # Any: structlog-compatible API
-    ) -> Any: ...
+    ) -> Any: ...  # Any: structlog-compatible API

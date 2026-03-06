@@ -42,7 +42,7 @@ class _NoOpOtelTracer:
     def start_as_current_span(
         self,
         *_args: Any,  # Any: OTel signature is intentionally flexible
-        **_kwargs: Any,
+        **_kwargs: Any,  # Any: OTel signature is intentionally flexible
     ) -> _NoOpSpan:
         return _NoOpSpan()
 

@@ -1,7 +1,7 @@
 {
   "summary": {
     "scanned_modules": 861,
-    "total_internal_imports": 3197,
+    "total_internal_imports": 3190,
     "layer_edges": 14,
     "cross_layer_group_edges": 60,
     "violations": 0
@@ -22,13 +22,13 @@
     {
       "source": "composition",
       "target": "application",
-      "imports": 169,
+      "imports": 168,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "composition",
-      "imports": 234,
+      "imports": 233,
       "allowed": true
     },
     {
@@ -40,7 +40,7 @@
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 182,
+      "imports": 177,
       "allowed": true
     },
     {
@@ -189,11 +189,6 @@
       "imports": 21
     },
     {
-      "source": "composition.providers",
-      "target": "infrastructure.adapters",
-      "imports": 21
-    },
-    {
       "source": "composition.factories",
       "target": "infrastructure.config",
       "imports": 20
@@ -217,6 +212,11 @@
       "source": "interfaces.cli",
       "target": "composition.entrypoints",
       "imports": 18
+    },
+    {
+      "source": "composition.providers",
+      "target": "infrastructure.adapters",
+      "imports": 16
     },
     {
       "source": "application.pipelines",
