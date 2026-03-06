@@ -24,7 +24,11 @@ class CompositeFilterExtractionService:
 
     @staticmethod
     def to_id_str(value: object) -> str:
-        """Convert value to stable ID string (e.g. 4044.0 -> 4044)."""
+        """Convert value to stable ID string (e.g. 4044.0 -> 4044).
+
+        Returns:
+            String representation of value, with float integers converted to ints.
+        """
         if value is None:
             return ""
         if isinstance(value, float) and value.is_integer():
@@ -37,7 +41,11 @@ class CompositeFilterExtractionService:
         filter_key: str,
         join_keys: tuple[str, ...],
     ) -> dict[str, str] | None:
-        """Build ID -> title mapping when title is present in join keys."""
+        """Build ID -> title mapping when title is present in join keys.
+
+        Returns:
+            Dict mapping filter key values to titles, or None if title is not a join key.
+        """
         if "title" not in join_keys or "title" not in keys.columns:
             return None
         pairs = (
@@ -53,7 +61,11 @@ class CompositeFilterExtractionService:
         join_keys: tuple[str, ...],
         columns: list[str],
     ) -> str | None:
-        """Find first usable join key, skipping title if alternatives exist."""
+        """Find first usable join key, skipping title if alternatives exist.
+
+        Returns:
+            First join key present in columns, or None if none found.
+        """
         for key in join_keys:
             if key == "title" and len(join_keys) > 1:
                 continue
@@ -66,7 +78,11 @@ class CompositeFilterExtractionService:
         enricher_cfg: EnricherConfig,
         keys: pl.DataFrame | None,
     ) -> tuple[tuple[str, ...] | None, str | None, dict[str, str] | None]:
-        """Extract single-field filters and fallback mapping for enricher."""
+        """Extract single-field filters and fallback mapping for enricher.
+
+        Returns:
+            Tuple of (filter_ids, filter_field, fallback_mapping) for the enricher.
+        """
         if keys is None or len(keys) == 0:
             self._debug(
                 "No keys available for enricher", pipeline=enricher_cfg.pipeline
@@ -100,7 +116,11 @@ class CompositeFilterExtractionService:
         keys: pl.DataFrame,
         field: str,
     ) -> tuple[str, ...] | None:
-        """Extract unique non-null values for field from keys DataFrame."""
+        """Extract unique non-null values for field from keys DataFrame.
+
+        Returns:
+            Tuple of unique string values, or None if field is absent or empty.
+        """
         if field not in keys.columns:
             return None
         values = keys.select(field).drop_nulls().unique().to_series().to_list()
@@ -113,7 +133,11 @@ class CompositeFilterExtractionService:
         dep_cfg: DependencyConfig,
         keys: pl.DataFrame | None,
     ) -> dict[str, tuple[str, ...]] | None:
-        """Extract multi-field filter IDs for dependency pipeline."""
+        """Extract multi-field filter IDs for dependency pipeline.
+
+        Returns:
+            Dict mapping field names to tuples of IDs, or None if extraction fails.
+        """
         if keys is None or len(keys) == 0:
             return None
 
@@ -143,7 +167,11 @@ class CompositeFilterExtractionService:
         dep_cfg: DependencyConfig | None,
         keys: pl.DataFrame | None,
     ) -> tuple[tuple[str, ...] | None, str | None, dict[str, tuple[str, ...]] | None]:
-        """Resolve single-field or multi-field dependency filter inputs."""
+        """Resolve single-field or multi-field dependency filter inputs.
+
+        Returns:
+            Tuple of (filter_ids, filter_field, multi_filter_ids) for the dependency.
+        """
         filter_ids: tuple[str, ...] | None = None
         filter_field: str | None = None
         multi_filter_ids: dict[str, tuple[str, ...]] | None = None

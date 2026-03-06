@@ -35,7 +35,6 @@ _config_lock = threading.Lock()
 _configured = False
 _current_format: bool | None = None  # True = JSON, False = Console
 
-
 # Patterns for secret detection in log values
 _SECRET_PATTERNS: list[tuple[re.Pattern[str], str]] = [
     (
@@ -144,7 +143,11 @@ def configure_logging(
     *,
     force: bool = False,
 ) -> bool:
-    """Configure global structlog/stdlib logging; optionally force reconfiguration."""
+    """Configure global structlog/stdlib logging; optionally force reconfiguration.
+
+    Returns:
+        True if logging was configured, False if already configured and force=False.
+    """
     global _configured, _current_format
 
     with _config_lock:

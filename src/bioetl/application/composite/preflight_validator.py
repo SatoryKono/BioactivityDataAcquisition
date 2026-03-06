@@ -57,7 +57,12 @@ class CompositePreflightValidationService(
         *,
         fail_on_error: bool = True,
     ) -> PreflightValidationResult:
-        """Validate composite configuration field_priorities."""
+        """Validate composite configuration field_priorities.
+
+        Returns:
+            PreflightValidationResult with validation status, issues, and
+            resolved field source mappings.
+        """
         issues: list[ValidationIssue] = []
         resolved_fields: dict[str, str] = {}
 

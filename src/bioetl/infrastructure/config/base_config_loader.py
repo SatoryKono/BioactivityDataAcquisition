@@ -27,7 +27,11 @@ T = TypeVar("T")
 def _load_yaml_file(
     path: Path,
 ) -> JsonDict:  # Any: YAML config has heterogeneous values
-    """Load YAML file, returning empty dict if missing or empty."""
+    """Load YAML file, returning empty dict if missing or empty.
+
+    Returns:
+        Dictionary of YAML config content, or empty dict if file missing or empty.
+    """
     if not path.exists():
         return {}
 
@@ -68,7 +72,7 @@ class BaseConfigLoader(ABC, Generic[T]):
         provider: str,
         entity: str,
         inline_overrides: JsonDict  # Any: YAML config heterogeneous
-        | None = None,
+                          | None = None,
     ) -> T:
         """Load merged config for provider/entity.
 

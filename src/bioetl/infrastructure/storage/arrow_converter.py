@@ -78,7 +78,11 @@ class ArrowDataConverter:
         arrow_data: pa.Table,
         column_order: list[str] | None,
     ) -> pa.Table:
-        """Apply explicit or canonical column order to an Arrow table."""
+        """Apply explicit or canonical column order to an Arrow table.
+
+        Returns:
+            Arrow table with columns reordered per explicit or canonical order.
+        """
         from bioetl.domain.schemas.column_order import canonical_column_order
 
         if column_order:
@@ -94,7 +98,11 @@ class ArrowDataConverter:
         arrow_data: pa.Table,
         primary_keys: list[str] | None,
     ) -> pa.Table:
-        """Sort Arrow table by primary keys for deterministic writes."""
+        """Sort Arrow table by primary keys for deterministic writes.
+
+        Returns:
+            Arrow table sorted ascending by the provided primary keys, unsorted if none provided.
+        """
         if not primary_keys:
             return arrow_data
         valid_keys = [pk for pk in primary_keys if pk in arrow_data.schema.names]

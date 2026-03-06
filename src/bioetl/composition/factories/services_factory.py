@@ -54,7 +54,6 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
-
 __all__ = [
     "BaseServicesFactory",
     "DQServicesFactory",
@@ -80,7 +79,11 @@ class BaseServicesFactory:
         metadata_coordinator: MetadataCoordinator | None = None,
         silver_validator: SilverValidatorPort | None = None,
     ) -> PipelineService:
-        """Create a fully wired `PipelineService` bundle for one pipeline run."""
+        """Create a fully wired `PipelineService` bundle for one pipeline run.
+
+        Returns:
+            PipelineService with storage, checkpoint, observability, and DQ wired.
+        """
         metrics_port = metrics if metrics is not None else cls._create_metrics(settings)
         cls._ensure_prod_silver_validator(settings, pipeline_config, silver_validator)
         storage_ctx = StorageFactory.create(

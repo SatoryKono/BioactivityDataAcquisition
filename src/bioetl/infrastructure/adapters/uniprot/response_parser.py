@@ -13,7 +13,11 @@ if TYPE_CHECKING:
 def parse_uniprot_protein_response(
     response: httpx.Response,
 ) -> tuple[list[BronzeRecord], str | None]:
-    """Parse UniProt protein search response."""
+    """Parse UniProt protein search response.
+
+    Returns:
+        Tuple of (list of protein records, next cursor string or None if last page).
+    """
     if response.status_code != 200:
         return [], None
     data = response.json()

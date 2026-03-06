@@ -26,7 +26,6 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
-
 __all__ = [
     "create_dq_services",
     "extract_dq_configs",
@@ -56,7 +55,11 @@ def extract_single_dq_config(
     layer_name: str,
     config_class: type[BaseModel],
 ) -> BronzeDQConfigPort | SilverDQConfigPort | GoldDQConfigPort | None:
-    """Extract DQ config for a single layer."""
+    """Extract DQ config for a single layer.
+
+    Returns:
+        Enabled DQ config for the layer, or None if absent or disabled.
+    """
     sink_config = sink.get(layer_name)
     if not sink_config:
         return None
@@ -79,7 +82,11 @@ def extract_single_dq_config(
 
 
 def extract_dq_configs(yaml_config: PipelineYamlConfig | None) -> DQConfigsContext:
-    """Extract DQ report configs from YAML."""
+    """Extract DQ report configs from YAML.
+
+    Returns:
+        DQConfigsContext with bronze, silver, and gold DQ configs.
+    """
     from bioetl.infrastructure.schemas.dq_report_config import (
         BronzeSinkConfig,
         GoldSinkConfig,
@@ -118,19 +125,31 @@ def extract_dq_configs(yaml_config: PipelineYamlConfig | None) -> DQConfigsConte
 
 
 def get_layer_path(config: object) -> str | None:
-    """Extract path from layer config if available."""
+    """Extract path from layer config if available.
+
+    Returns:
+        Path string from config, or None if config is absent or has no path.
+    """
     return getattr(config, "path", None) if config else None
 
 
 def has_flat_structure(config: object) -> bool:
-    """Check if layer config has flat_structure enabled."""
+    """Check if layer config has flat_structure enabled.
+
+    Returns:
+        True if flat_structure is set on the config, False otherwise.
+    """
     return bool(config and getattr(config, "flat_structure", False))
 
 
 def extract_dq_output_paths(
     yaml_config: PipelineYamlConfig | None,
 ) -> DQOutputPathsContext:
-    """Extract DQ output paths and flat_structure from YAML config."""
+    """Extract DQ output paths and flat_structure from YAML config.
+
+    Returns:
+        DQOutputPathsContext with per-layer paths and flat_structure flag.
+    """
     if yaml_config is None:
         return DQOutputPathsContext(
             bronze_path=None,
@@ -237,7 +256,11 @@ def create_dq_services(
     pipeline_config: PipelineYamlConfig,
     logger: LoggerPort,
 ) -> JsonDict:  # Any: heterogeneous DQ service instances
-    """Create DQ analyzers/writer/services when DQ reporting is enabled."""
+    """Create DQ analyzers/writer/services when DQ reporting is enabled.
+
+    Returns:
+        Dict of DQ service instances keyed by role, or empty dict if DQ disabled.
+    """
     dq_enabled = is_dq_report_enabled(pipeline_config)
 
     if not dq_enabled:

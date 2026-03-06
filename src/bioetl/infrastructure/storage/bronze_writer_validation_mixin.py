@@ -21,7 +21,11 @@ class BronzeWriterValidationMixin:
     def _resolve_bronze_path(
         self, provider: str, entity: str, date_str: str, filename: str
     ) -> str:
-        """Resolve Bronze file path based on flat_structure setting."""
+        """Resolve Bronze file path based on flat_structure setting.
+
+        Returns:
+            Relative file path string using flat or nested directory structure.
+        """
         if self._flat_structure:
             return f"{date_str}/{filename}"
         return f"{provider}/{entity}/{date_str}/{filename}"
@@ -52,7 +56,11 @@ class BronzeWriterValidationMixin:
             raise ValueError(f"{param_name} must be UTC (offset 0).")
 
     def _validate_json_records(self, records: Iterator[bytes]) -> Iterator[bytes]:
-        """Validate that each record is valid JSON bytes (lazy generator)."""
+        """Validate that each record is valid JSON bytes (lazy generator).
+
+        Returns:
+            Iterator of validated JSON bytes, raising BronzeValidationError on invalid JSON.
+        """
         from bioetl.domain.exceptions import BronzeValidationError
 
         for index, record in enumerate(records):

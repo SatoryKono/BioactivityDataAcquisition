@@ -115,13 +115,21 @@ class SemanticScholarHealthMetadataMixin(SemanticScholarHealthMetadataMixinABC):
     def _health_metadata_dependencies(
         self,
     ) -> SemanticScholarHealthMetadataDependencies:
-        """Resolve dependency contract from the host adapter instance."""
+        """Resolve dependency contract from the host adapter instance.
+
+        Returns:
+            SemanticScholarHealthMetadataDependencies cast of the current adapter instance.
+        """
         return cast("SemanticScholarHealthMetadataDependencies", self)
 
     async def _probe_health(
         self,
     ) -> HealthStatus:
-        """Probe Semantic Scholar health endpoint."""
+        """Probe Semantic Scholar health endpoint.
+
+        Returns:
+            HealthStatus reflecting the current Semantic Scholar API availability and response latency.
+        """
         deps = self._health_metadata_dependencies()
         try:
             url = f"{SEMANTICSCHOLAR_BASE_URL}/paper/search"
@@ -172,18 +180,30 @@ class SemanticScholarHealthMetadataMixin(SemanticScholarHealthMetadataMixinABC):
             raise
 
     def _fallback_health_status(self) -> HealthStatus:
-        """Fallback health status when probe fails."""
+        """Fallback health status when probe fails.
+
+        Returns:
+            HealthStatus.UNHEALTHY as the safe default when health probe cannot execute.
+        """
         return HealthStatus.UNHEALTHY
 
     def _get_health_endpoint(self) -> str:
-        """Health endpoint path used by probes."""
+        """Health endpoint path used by probes.
+
+        Returns:
+            Endpoint path string used for Semantic Scholar health probe requests.
+        """
         return "/paper/search"
 
     def get_source_metadata(
         self,
         api_version: str | None = None,
     ) -> SourceMetadata:
-        """Return and clear request metadata collector state."""
+        """Return and clear request metadata collector state.
+
+        Returns:
+            SourceMetadata aggregated from all recorded API requests since last clear.
+        """
         deps = self._health_metadata_dependencies()
         metadata = deps._request_collector.to_source_metadata(
             source_type="api",

@@ -61,7 +61,11 @@ class SilverWriterMaintenanceMixin:
         retention_hours: int | None = None,
         dry_run: bool = False,
     ) -> list[str]:
-        """Remove old files not referenced by the Delta log."""
+        """Remove old files not referenced by the Delta log.
+
+        Returns:
+            List of file path strings that were removed (or would be removed in dry_run mode).
+        """
         return await self._retention_manager.vacuum(
             table_name,
             retention_hours=retention_hours,
@@ -79,7 +83,11 @@ class SilverWriterMaintenanceMixin:
             | None
         ) = None,  # Any: Delta Lake partition filter values vary
     ) -> MetaDict:
-        """Optimize table layout (compaction)."""
+        """Optimize table layout (compaction).
+
+        Returns:
+            Dictionary with compaction metrics and file statistics.
+        """
         return await self._retention_manager.optimize(
             table_name,
             target_size=target_size,
@@ -87,7 +95,11 @@ class SilverWriterMaintenanceMixin:
         )
 
     async def get_table_info(self, table_name: str) -> MetaDict:
-        """Get metadata about a Delta table."""
+        """Get metadata about a Delta table.
+
+        Returns:
+            Dictionary with table metadata including version, schema, and file counts.
+        """
         return await self._retention_manager.get_table_info(table_name)
 
     async def time_travel(
@@ -96,7 +108,11 @@ class SilverWriterMaintenanceMixin:
         version: int | None = None,
         timestamp: datetime | None = None,
     ) -> DeltaTable:
-        """Read a previous version of a table."""
+        """Read a previous version of a table.
+
+        Returns:
+            DeltaTable instance loaded at the specified version or timestamp.
+        """
         return await self._retention_manager.time_travel(
             table_name,
             version=version,
@@ -108,14 +124,22 @@ class SilverWriterMaintenanceMixin:
         table_name: str,
         columns: list[str] | None = None,
     ) -> list[BronzeRecord]:
-        """Read records from a Silver layer Delta table."""
+        """Read records from a Silver layer Delta table.
+
+        Returns:
+            List of record dictionaries from the Silver Delta table.
+        """
         return await self.read_table(table_name, columns=columns)
 
     def preview_cleanup(
         self,
         table_name: str,
     ) -> MetaDict:  # Any: preview payload has heterogeneous values
-        """Preview Silver cleanup scope without deleting files."""
+        """Preview Silver cleanup scope without deleting files.
+
+        Returns:
+            Dictionary with path, existence flag, and file count for the Silver table directory.
+        """
         table_path = self.get_table_path(table_name)
         exists = table_path.exists()
         file_count = (

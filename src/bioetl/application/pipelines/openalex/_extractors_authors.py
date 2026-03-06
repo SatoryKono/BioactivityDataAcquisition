@@ -12,7 +12,11 @@ from bioetl.domain.types import JsonDict
 def extract_authors(
     authorships: list[JsonDict],  # Any: untyped JSON fragment from OpenAlex API
 ) -> list[str]:
-    """Extract author display names from authorships array."""
+    """Extract author display names from authorships array.
+
+    Returns:
+        List of author display names in authorship order.
+    """
     authors: list[str] = []
     for authorship in authorships:
         author = authorship.get("author", {})
@@ -27,7 +31,11 @@ def extract_authors(
 def extract_author_ids(
     authorships: list[JsonDict],  # Any: untyped JSON fragment from OpenAlex API
 ) -> list[str]:
-    """Extract OpenAlex author IDs from authorships preserving order."""
+    """Extract OpenAlex author IDs from authorships preserving order.
+
+    Returns:
+        List of extracted author ID strings (empty string for missing IDs).
+    """
     author_ids: list[str] = []
     for authorship in authorships:
         author = authorship.get("author", {})
@@ -43,7 +51,11 @@ def extract_author_ids(
 def extract_author_orcids(
     authorships: list[JsonDict],  # Any: untyped JSON fragment from OpenAlex API
 ) -> list[str]:
-    """Extract ORCID identifiers from authorships preserving order."""
+    """Extract ORCID identifiers from authorships preserving order.
+
+    Returns:
+        List of ORCID identifier strings (empty string for missing ORCIDs).
+    """
     orcids: list[str] = []
     for authorship in authorships:
         author = authorship.get("author", {})
@@ -60,7 +72,11 @@ def extract_author_orcids(
 def extract_affiliations(
     authorships: list[JsonDict],  # Any: untyped JSON fragment from OpenAlex API
 ) -> list[str]:
-    """Extract unique affiliations from authorships (sorted)."""
+    """Extract unique affiliations from authorships (sorted).
+
+    Returns:
+        Sorted list of unique institution display names.
+    """
     affiliations: set[str] = set()
     for authorship in authorships:
         institutions = authorship.get("institutions", [])
@@ -79,7 +95,11 @@ def extract_affiliations(
 def extract_institution_ids(
     authorships: list[JsonDict],  # Any: untyped JSON fragment from OpenAlex API
 ) -> list[str]:
-    """Extract unique OpenAlex institution IDs from authorships."""
+    """Extract unique OpenAlex institution IDs from authorships.
+
+    Returns:
+        Sorted list of unique institution ID strings.
+    """
     ids: set[str] = set()
     for authorship in authorships:
         institutions = authorship.get("institutions", [])
@@ -98,7 +118,11 @@ def extract_institution_ids(
 def extract_institution_country_codes(
     authorships: list[JsonDict],  # Any: untyped JSON fragment from OpenAlex API
 ) -> list[str]:
-    """Extract unique institution country codes from authorships."""
+    """Extract unique institution country codes from authorships.
+
+    Returns:
+        Sorted list of unique uppercased country code strings.
+    """
     codes: set[str] = set()
     for authorship in authorships:
         institutions = authorship.get("institutions", [])
@@ -116,7 +140,11 @@ def extract_institution_country_codes(
 def extract_institution_ror_ids(
     authorships: list[JsonDict],  # Any: untyped JSON fragment from OpenAlex API
 ) -> list[str]:
-    """Extract unique ROR IDs from authorships institutions."""
+    """Extract unique ROR IDs from authorships institutions.
+
+    Returns:
+        Sorted list of unique ROR ID URLs (https://ror.org/...).
+    """
     ror_ids: set[str] = set()
     for authorship in authorships:
         institutions = authorship.get("institutions", [])

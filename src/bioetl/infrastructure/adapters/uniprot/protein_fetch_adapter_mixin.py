@@ -20,7 +20,6 @@ if TYPE_CHECKING:
 
     import httpx
 
-
 _UNIPROT_FETCH_ERRORS = (Exception,)
 
 _PROTEIN_FETCH_FIELDS: tuple[str, ...] = (
@@ -87,7 +86,11 @@ class UniProtProteinFetchAdapterMixin:
         limit: int | None,
         cursor: str | None,
     ) -> JsonDict:
-        """Build protein search parameters."""
+        """Build protein search parameters.
+
+        Returns:
+            Dictionary of query parameters for the UniProt protein search request.
+        """
         return build_uniprot_protein_search_params(
             query=query,
             fetched=fetched,
@@ -101,7 +104,11 @@ class UniProtProteinFetchAdapterMixin:
         self,
         response: httpx.Response,
     ) -> tuple[list[BronzeRecord], str | None]:
-        """Parse UniProt protein response payload."""
+        """Parse UniProt protein response payload.
+
+        Returns:
+            Tuple of (list of protein records, next cursor string or None if last page).
+        """
         return parse_uniprot_protein_response(response)
 
     async def _fetch_proteins(

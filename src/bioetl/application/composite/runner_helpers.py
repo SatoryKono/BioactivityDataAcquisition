@@ -14,7 +14,6 @@ __all__ = [
     "log_enrichment_summary",
 ]
 
-
 from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
@@ -130,7 +129,12 @@ def add_not_run_results(
     composite_name: str,
     logger: LoggerPort,
 ) -> dict[str, EnrichmentResult]:
-    """Mark optional enrichers skipped in required-only mode as NOT_RUN."""
+    """Mark optional enrichers skipped in required-only mode as NOT_RUN.
+
+    Returns:
+        Updated enrichment_results dict with NOT_RUN entries added for skipped
+        optional enrichers.
+    """
     if not required_only:
         return enrichment_results
 

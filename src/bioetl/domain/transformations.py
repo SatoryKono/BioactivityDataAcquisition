@@ -339,7 +339,11 @@ def safe_float(
     value: object,
     default: float | None = None,
 ) -> float | None:
-    """Safely convert *value* to float, returning *default* on failure."""
+    """Safely convert *value* to float, returning *default* on failure.
+
+    Returns:
+        Converted float value, or default if conversion fails or value is non-finite.
+    """
     if isinstance(value, _SAFE_CONVERT_SKIP):
         return default
     try:
@@ -353,7 +357,11 @@ def safe_int(
     value: object,
     default: int | None = None,
 ) -> int | None:
-    """Safely convert *value* to int, returning *default* on failure."""
+    """Safely convert *value* to int, returning *default* on failure.
+
+    Returns:
+        Converted integer value, or default if conversion fails or value is non-finite.
+    """
     if isinstance(value, _SAFE_CONVERT_SKIP):
         return default
     try:

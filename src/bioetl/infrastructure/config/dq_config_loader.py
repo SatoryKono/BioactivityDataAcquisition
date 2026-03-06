@@ -19,27 +19,14 @@ from bioetl.domain.config import DQConfig
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config_merge import ListMergeFn, config_merge
 from bioetl.infrastructure.schemas.dq_config import DQConfigFile
-
 from .base_config_loader import _load_yaml_file
 
 
 class DQConfigLoader:
-    """Loads and merges DQ configurations from hierarchical files.
-
-    Thread-safe with internal caching for performance.
-
-    Attributes:
-        _configs_root: Root path to configs/ directory.
-        _cache: Cache of loaded configs keyed by "provider:entity".
-    """
+    """Load and merge DQ configurations from hierarchical files."""
 
     def __init__(self, configs_root: Path, relaxed_dq: bool = False) -> None:
-        """Initialize loader with configs root directory.
-
-        Args:
-            configs_root: Path to configs/ directory.
-            relaxed_dq: Whether to relax DQ thresholds (default: False).
-        """
+        """Initialize loader with configs root directory."""
         self._configs_root = configs_root
         self._base_root = configs_root / "base"
         self._relaxed_dq = relaxed_dq
@@ -48,7 +35,11 @@ class DQConfigLoader:
     def _load_provider_layer(
         self, provider: str
     ) -> JsonDict:  # Any: YAML DQ config has heterogeneous values
-        """Load provider DQ layer from unified provider config."""
+        """Load provider DQ layer from unified provider config.
+
+        Returns:
+            Dictionary with the provider DQ quality section, or empty dict if absent.
+        """
         unified_provider_path = self._configs_root / "providers" / f"{provider}.yaml"
         if unified_provider_path.exists():
             unified_raw = self._load_yaml(unified_provider_path)
@@ -60,10 +51,10 @@ class DQConfigLoader:
             if any(
                 key in unified_raw
                 for key in (
-                    "thresholds",
-                    "field_validations",
-                    "provider_field_validations",
-                    "cross_field_validations",
+                        "thresholds",
+                        "field_validations",
+                        "provider_field_validations",
+                        "cross_field_validations",
                 )
             ):
                 return unified_raw
@@ -73,7 +64,11 @@ class DQConfigLoader:
     def _load_entity_layer(
         self, provider: str, entity: str
     ) -> JsonDict:  # Any: YAML DQ config has heterogeneous values
-        """Load entity DQ layer from unified entity config."""
+        """Load entity DQ layer from unified entity config.
+
+        Returns:
+            Dictionary with the entity DQ quality section, or empty dict if absent.
+        """
         unified_entity_path = (
             self._configs_root / "entities" / provider / f"{entity}.yaml"
         )
@@ -87,10 +82,10 @@ class DQConfigLoader:
             if any(
                 key in unified_raw
                 for key in (
-                    "thresholds",
-                    "field_validations",
-                    "entity_field_validations",
-                    "cross_field_validations",
+                        "thresholds",
+                        "field_validations",
+                        "entity_field_validations",
+                        "cross_field_validations",
                 )
             ):
                 return unified_raw
@@ -101,10 +96,15 @@ class DQConfigLoader:
         self,
         provider: str,
         entity: str,
-        inline_overrides: JsonDict  # Any: YAML config has heterogeneous values
-        | None,  # Any: YAML DQ config has heterogeneous values
+        inline_overrides: (
+            JsonDict | None  # Any: YAML config has heterogeneous values
+        ),  # Any: YAML DQ config has heterogeneous values
     ) -> JsonDict:  # Any: YAML DQ config has heterogeneous values
-        """Build merged config from defaults → provider → entity → inline."""
+        """Build merged config from defaults → provider → entity → inline.
+
+        Returns:
+            Merged DQ configuration dictionary with all hierarchy layers applied.
+        """
         merged = self._load_defaults_layer()
         if not merged:
             raise FileNotFoundError(
@@ -113,9 +113,9 @@ class DQConfigLoader:
             )
 
         for layer in (
-            self._load_provider_layer(provider),
-            self._load_entity_layer(provider, entity),
-            inline_overrides or {},
+                self._load_provider_layer(provider),
+                self._load_entity_layer(provider, entity),
+                inline_overrides or {},
         ):
             if layer:
                 merged = self._deep_merge(merged, layer)
@@ -130,7 +130,11 @@ class DQConfigLoader:
     def _load_defaults_layer(
         self,
     ) -> JsonDict:  # Any: YAML DQ config has heterogeneous values
-        """Load DQ defaults from consolidated base path."""
+        """Load DQ defaults from consolidated base path.
+
+        Returns:
+            Dictionary with DQ default configuration, or empty dict if absent.
+        """
         base_defaults_path = self._base_root / "quality.yaml"
         if base_defaults_path.exists():
             return self._load_yaml(base_defaults_path)
@@ -141,28 +145,14 @@ class DQConfigLoader:
         self,
         provider: str,
         entity: str,
-        inline_overrides: JsonDict  # Any: YAML config has heterogeneous values
-        | None = None,  # Any: YAML DQ config has heterogeneous values
+        inline_overrides: (
+            JsonDict | None  # Any: YAML config has heterogeneous values
+        ) = None,  # Any: YAML DQ config has heterogeneous values
     ) -> DQConfig:
         """Load merged DQ config for provider/entity.
 
-        Merge order (later wins for scalars, concatenate for lists):
-        1. base/quality.yaml
-        2. providers/{provider}.yaml
-        3. entities/{provider}/{entity}.yaml
-        4. inline_overrides (from pipeline config)
-
-        Args:
-            provider: Provider name (e.g., "chembl").
-            entity: Entity name (e.g., "activity").
-            inline_overrides: Optional inline overrides from pipeline config.
-
         Returns:
             Merged DQConfig domain object.
-
-        Raises:
-            FileNotFoundError: If no DQ defaults file exists.
-            ValidationError: If merged config fails validation.
         """
         cache_key = f"{provider}:{entity}:relaxed={self._relaxed_dq}"
 
@@ -207,18 +197,8 @@ class DQConfigLoader:
     ) -> JsonDict:  # Any: YAML DQ config has heterogeneous values
         """Deep merge two dicts.
 
-        Rules:
-        - Scalars: override wins
-        - Lists ending with '_validations': concatenate with deduplication
-        - Other lists: override wins
-        - Nested dicts: recursive merge
-
-        Args:
-            base: Base configuration dict.
-            override: Override configuration dict.
-
         Returns:
-            Merged dict (new object, inputs unchanged).
+            Merged dict with override values taking precedence, inputs unchanged.
         """
         return config_merge(
             base,
@@ -227,7 +207,11 @@ class DQConfigLoader:
         )
 
     def _resolve_list_merger(self, key: str) -> ListMergeFn | None:
-        """Resolve list merge strategy for a given key."""
+        """Resolve list merge strategy for a given key.
+
+        Returns:
+            ListMergeFn callback if key ends with '_validations', None otherwise.
+        """
         if key.endswith("_validations"):
             return self._merge_validation_lists_for_key
         return None
@@ -238,7 +222,11 @@ class DQConfigLoader:
         override: list[Any],  # Any: YAML DQ validation items have heterogeneous types
         _key: str,
     ) -> list[Any]:  # Any: YAML DQ validation items have heterogeneous types
-        """Adapter for config_merge list strategy callback."""
+        """Adapter for config_merge list strategy callback.
+
+        Returns:
+            Merged list of validation items with override entries replacing base by key.
+        """
         if not all(isinstance(item, dict) for item in base) or not all(
             isinstance(item, dict) for item in override
         ):
@@ -295,9 +283,9 @@ class DQConfigLoader:
             return f"{field}:{vtype}:{severity}"
 
         # Build result map, override entries replace base entries with same key
-        result_map: dict[
-            str, JsonDict  # Any: YAML config has heterogeneous values
-        ] = {}  # Any: YAML DQ config has heterogeneous values
+        result_map: dict[str, JsonDict] = (  # Any: YAML config has heterogeneous values
+            {}
+        )  # Any: YAML DQ config has heterogeneous values
         for item in base:
             key = get_key(item)
             result_map[key] = copy.deepcopy(item)
@@ -312,7 +300,11 @@ class DQConfigLoader:
         self,
         merged: JsonDict,  # Any: YAML DQ config has heterogeneous values
     ) -> JsonDict:  # Any: YAML DQ config has heterogeneous values
-        """Normalize merged config to DQConfigFile-compatible shape."""
+        """Normalize merged config to DQConfigFile-compatible shape.
+
+        Returns:
+            Dictionary normalized to DQConfigFile-compatible structure with canonical key names.
+        """
         result = copy.deepcopy(merged)
 
         if "soft_fail_threshold" in result or "hard_fail_threshold" in result:

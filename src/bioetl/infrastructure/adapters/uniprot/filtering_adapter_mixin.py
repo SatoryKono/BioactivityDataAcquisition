@@ -55,7 +55,7 @@ class UniProtFilteringAdapterMixin:
             if limit and fetched >= limit:
                 break
 
-            batch = filter_ids[batch_start : batch_start + _UNIPROT_FILTER_BATCH_SIZE]
+            batch = filter_ids[batch_start: batch_start + _UNIPROT_FILTER_BATCH_SIZE]
             or_query = " OR ".join(f"{filter_field}:{acc}" for acc in batch)
             batch_limit = (limit - fetched) if limit else None
             async for record in strategy(query=or_query, limit=batch_limit):
@@ -168,7 +168,11 @@ class UniProtFilteringAdapterMixin:
         found_ids: set[str],
         fallback_mapping: dict[str, str],
     ) -> list[str]:
-        """Resolve missing IDs that qualify for fallback search."""
+        """Resolve missing IDs that qualify for fallback search.
+
+        Returns:
+            List of IDs that were not found in primary fetch and have a fallback mapping entry.
+        """
         return resolve_uniprot_missing_ids(
             filter_ids=filter_ids,
             found_ids=found_ids,
@@ -177,7 +181,11 @@ class UniProtFilteringAdapterMixin:
 
     @staticmethod
     def _deduplicate_filter_ids(filter_ids: list[str]) -> list[str]:
-        """Deduplicate IDs while preserving original order."""
+        """Deduplicate IDs while preserving original order.
+
+        Returns:
+            List of unique IDs with original order preserved.
+        """
         unique_ids: list[str] = []
         seen_ids: set[str] = set()
         for filter_id in filter_ids:

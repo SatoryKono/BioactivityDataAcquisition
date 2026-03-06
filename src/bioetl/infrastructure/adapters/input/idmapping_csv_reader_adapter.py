@@ -4,7 +4,6 @@ from __future__ import annotations
 
 __all__ = ["IDMappingCsvReaderAdapter"]
 
-
 import asyncio
 import csv
 from pathlib import Path
@@ -24,19 +23,35 @@ class IDMappingCsvReaderAdapter:
         self._logger = logger
 
     async def read_ids(self, source_path: str, id_column: str) -> list[str]:
-        """Load ordered non-empty IDs from CSV source."""
+        """Load ordered non-empty IDs from CSV source.
+
+        Returns:
+            List of non-empty stripped ID strings from the specified column.
+        """
         return await asyncio.to_thread(self._read_ids_sync, source_path, id_column)
 
     async def source_exists(self, source_path: str) -> bool:
-        """Check source file existence in a worker thread."""
+        """Check source file existence in a worker thread.
+
+        Returns:
+            True if the source file exists, False otherwise.
+        """
         return await asyncio.to_thread(Path(source_path).exists)
 
     async def health_check(self) -> HealthStatus:
-        """Return health status for local CSV reader adapter."""
+        """Return health status for local CSV reader adapter.
+
+        Returns:
+            HealthStatus.HEALTHY as local CSV reader is always available.
+        """
         return HealthStatus.HEALTHY
 
     def _read_ids_sync(self, source_path: str, id_column: str) -> list[str]:
-        """Synchronous CSV parsing implementation."""
+        """Synchronous CSV parsing implementation.
+
+        Returns:
+            List of non-empty stripped ID strings from the specified column.
+        """
         path = Path(source_path)
         if not path.exists():
             raise FileNotFoundError(f"Input file not found: {source_path}")

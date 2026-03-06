@@ -21,7 +21,11 @@ def create_shared_metrics(
     settings: Settings,
     base_services_factory: type[BaseServicesFactory],
 ) -> MetricsPort:
-    """Create shared pipeline metrics via base services factory."""
+    """Create shared pipeline metrics via base services factory.
+
+    Returns:
+        Configured MetricsPort for shared use across pipeline components.
+    """
     return base_services_factory._create_metrics(settings)
 
 
@@ -92,7 +96,11 @@ def create_data_source_with_observability(
     pipeline_name: str,
     cached_bronze: CachedBronzeContext | None,
 ) -> DataSourcePort:
-    """Create data source and emit cached-bronze observability logs."""
+    """Create data source and emit cached-bronze observability logs.
+
+    Returns:
+        DataSourcePort configured for live API or cached Bronze data.
+    """
     if cached_bronze is not None and cached_bronze.enabled:
         data_source = _create_cached_bronze_data_source(
             settings=settings,

@@ -26,7 +26,11 @@ def create_bronze_writer(
     metadata_coordinator: MetadataCoordinator | None,
     flat_structure: bool,
 ) -> BronzeWriter:
-    """Create configured Bronze writer."""
+    """Create configured Bronze writer.
+
+    Returns:
+        Configured BronzeWriter instance for the Bronze storage layer.
+    """
     save_json = config.save_json if config else False
     save_metadata = config.save_metadata if config else False
     metadata_writer = (

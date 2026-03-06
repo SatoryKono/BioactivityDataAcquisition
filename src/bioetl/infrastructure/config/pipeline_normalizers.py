@@ -16,7 +16,11 @@ from bioetl.domain.types import JsonDict
 def _load_column_groups_config(
     config_path: Path, column_groups_file: str
 ) -> list[JsonDict] | None:  # Any: YAML config has heterogeneous values
-    """Load column group configuration from column_groups_file."""
+    """Load column group configuration from column_groups_file.
+
+    Returns:
+        List of column group dicts if found, None if file is missing or has no valid groups.
+    """
     column_groups_path = config_path.parent / column_groups_file
     if not column_groups_path.exists():
         return None
@@ -38,7 +42,11 @@ def _load_column_groups_config(
 def _load_data_schema_config(
     config_path: Path, schema_file: str
 ) -> JsonDict | None:  # Any: YAML config has heterogeneous values
-    """Load data schema configuration with layer-specific column definitions."""
+    """Load data schema configuration with layer-specific column definitions.
+
+    Returns:
+        Dictionary with column_groups, silver, and gold schema sections if present, None if empty.
+    """
     schema_path = (config_path.parent / schema_file).resolve()
     if not schema_path.exists():
         raise FileNotFoundError(

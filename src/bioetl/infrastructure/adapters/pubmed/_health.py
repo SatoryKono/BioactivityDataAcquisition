@@ -57,6 +57,9 @@ class PubMedHealthMixin:
 
         Uses einfo.fcgi (database info) instead of esearch.fcgi (search)
         for a lightweight connectivity check without running a query.
+
+        Returns:
+            HealthStatus reflecting the current PubMed API availability and response latency.
         """
         try:
             params: dict[str, str] = {
@@ -106,11 +109,19 @@ class PubMedHealthMixin:
             raise
 
     def _fallback_health_status(self) -> HealthStatus:
-        """Get fallback health status on probe failure."""
+        """Get fallback health status on probe failure.
+
+        Returns:
+            HealthStatus.UNHEALTHY as the safe default when health probe cannot execute.
+        """
         return HealthStatus.UNHEALTHY
 
     def _get_health_endpoint(self) -> str:
-        """Get the health check endpoint for PubMed."""
+        """Get the health check endpoint for PubMed.
+
+        Returns:
+            Endpoint path string used for PubMed health probe requests.
+        """
         return "/entrez/eutils/einfo.fcgi"
 
     def get_source_metadata(self, api_version: str | None = None) -> SourceMetadata:

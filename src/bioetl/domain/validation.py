@@ -22,7 +22,6 @@ from .transformations import safe_int
 if TYPE_CHECKING:
     from bioetl.domain.config import ValidationConfig
 
-
 __all__ = [
     "validate_doi",
     "validate_inchi_key",
@@ -256,7 +255,12 @@ def validate_molecular_weight(
     value: object,
     config: ValidationConfig | None = None,
 ) -> float | None:
-    """Convert molecular weight to float and enforce configured bounds."""
+    """Convert molecular weight to float and enforce configured bounds.
+
+    Returns:
+        Validated molecular weight as float, or None if value is invalid or
+        outside configured bounds.
+    """
     if value is None or isinstance(value, bool):
         return None
 

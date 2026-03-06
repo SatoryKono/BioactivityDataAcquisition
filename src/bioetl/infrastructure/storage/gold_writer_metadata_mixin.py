@@ -26,7 +26,59 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 
-class GoldWriterMetadataMixin:
+class _GoldWriterMergedMetadataInputMixin:
+    """Helpers for constructing merged Gold metadata input payloads."""
+
+    _transform_version: str | None
+    _transform_steps: tuple[str, ...]
+
+    def _build_gold_merged_metadata_input(
+        self,
+        *,
+        table_path: str,
+        table_name: str,
+        records: list[GoldRecord],
+        schema: DataFrameSchema | None,
+    ) -> GoldMetadataInput:
+        """Build metadata input payload for merged Gold writes.
+
+        Returns:
+            GoldMetadataInput instance configured for overwrite mode with composite lineage fields.
+        """
+        from bioetl.domain.ports import GoldMetadataInput
+
+        return GoldMetadataInput(
+            table_path=table_path,
+            table_name=table_name,
+            records=records,
+            mode=GoldWriteMode.OVERWRITE,
+            completed_at=self._extract_completed_at(records[0]),
+            transform_version=self._transform_version,
+            transform_steps=self._transform_steps,
+            total_bytes=0,
+            partition_count=0,
+            schema_validation_enabled=schema is not None,
+            schema_validation_strict=True if schema is not None else None,
+        )
+
+    @staticmethod
+    def _extract_completed_at(first_record: GoldRecord) -> datetime | None:
+        """Extract completed-at timestamp from merged lineage metadata.
+
+        Returns:
+            Datetime parsed from lineage or ingestion timestamp fields, or None if absent.
+        """
+        completed_at_raw = first_record.get("_lineage_created_at") or first_record.get(
+            "_ingestion_ts"
+        )
+        if isinstance(completed_at_raw, str):
+            return datetime.fromisoformat(completed_at_raw)
+        if isinstance(completed_at_raw, datetime):
+            return completed_at_raw
+        return None
+
+
+class GoldWriterMetadataMixin(_GoldWriterMergedMetadataInputMixin):
     """Mixin containing audit and metadata sidecar write helpers."""
 
     logger: LoggerPort
@@ -89,7 +141,11 @@ class GoldWriterMetadataMixin:
         await self._audit.log_write(audit_entry)
 
     async def _get_delta_version(self, table_path: str) -> int | None:
-        """Get current Delta table version."""
+        """Get current Delta table version.
+
+        Returns:
+            Integer Delta table version if the table exists, None otherwise.
+        """
         module = self._load_gold_writer_module()
 
         try:
@@ -142,7 +198,11 @@ class GoldWriterMetadataMixin:
         )
 
     def _resolve_provider_entity(self, table_name: str) -> tuple[str, str]:
-        """Parse provider/entity pair from physical Gold table name."""
+        """Parse provider/entity pair from physical Gold table name.
+
+        Returns:
+            Tuple of (provider name, entity name) parsed from the table name.
+        """
         from bioetl.infrastructure.storage.metadata_builder import _parse_table_name
 
         return _parse_table_name(table_name)
@@ -160,7 +220,11 @@ class GoldWriterMetadataMixin:
         silver_refs: list[SilverWriteResult] | None,
         gold_schema: object | None,
     ) -> GoldMetadata:
-        """Create metadata via coordinator when configured, else fallback builder."""
+        """Create metadata via coordinator when configured, else fallback builder.
+
+        Returns:
+            GoldMetadata instance built via coordinator or fallback builder.
+        """
         if self._metadata_coordinator is not None:
             return self._create_gold_metadata_via_coordinator(
                 table_path=table_path,
@@ -194,7 +258,11 @@ class GoldWriterMetadataMixin:
         silver_refs: list[SilverWriteResult] | None,
         gold_schema: object | None,
     ) -> GoldMetadata:
-        """Build Gold metadata using MetadataCoordinator."""
+        """Build Gold metadata using MetadataCoordinator.
+
+        Returns:
+            GoldMetadata instance created via the configured MetadataCoordinator.
+        """
         from bioetl.domain.ports import GoldMetadataInput, SilverRef
 
         converted_refs = (
@@ -235,7 +303,11 @@ class GoldWriterMetadataMixin:
         run_id: RunID | None,
         gold_schema: object | None,
     ) -> GoldMetadata:
-        """Build Gold metadata through fallback builder."""
+        """Build Gold metadata through fallback builder.
+
+        Returns:
+            GoldMetadata instance created via the GoldMetadataBuilder fallback.
+        """
         from bioetl.infrastructure.storage.metadata_builder import GoldMetadataBuilder
 
         builder = GoldMetadataBuilder(
@@ -310,43 +382,6 @@ class GoldWriterMetadataMixin:
             provider=provider_name,
             entity=entity_name,
         )
-
-    def _build_gold_merged_metadata_input(
-        self,
-        *,
-        table_path: str,
-        table_name: str,
-        records: list[GoldRecord],
-        schema: DataFrameSchema | None,
-    ) -> GoldMetadataInput:
-        """Build metadata input payload for merged Gold writes."""
-        from bioetl.domain.ports import GoldMetadataInput
-
-        return GoldMetadataInput(
-            table_path=table_path,
-            table_name=table_name,
-            records=records,
-            mode=GoldWriteMode.OVERWRITE,
-            completed_at=self._extract_completed_at(records[0]),
-            transform_version=self._transform_version,
-            transform_steps=self._transform_steps,
-            total_bytes=0,
-            partition_count=0,
-            schema_validation_enabled=schema is not None,
-            schema_validation_strict=True if schema is not None else None,
-        )
-
-    @staticmethod
-    def _extract_completed_at(first_record: GoldRecord) -> datetime | None:
-        """Extract completed-at timestamp from merged lineage metadata."""
-        completed_at_raw = first_record.get("_lineage_created_at") or first_record.get(
-            "_ingestion_ts"
-        )
-        if isinstance(completed_at_raw, str):
-            return datetime.fromisoformat(completed_at_raw)
-        if isinstance(completed_at_raw, datetime):
-            return completed_at_raw
-        return None
 
 
 __all__ = ["GoldWriterMetadataMixin"]

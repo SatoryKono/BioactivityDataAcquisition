@@ -215,7 +215,11 @@ class PubMedAdapterFilterFetchMixin:
         limit: int | None,
         offset: int | None,
     ) -> int | None:
-        """Resolve and validate resume offset against limit."""
+        """Resolve and validate resume offset against limit.
+
+        Returns:
+            Validated resume offset integer, or None if offset has already reached the limit.
+        """
         resume_offset = max(0, offset or 0)
         if limit is not None and resume_offset >= limit:
             self.logger.info(
@@ -232,7 +236,11 @@ class PubMedAdapterFilterFetchMixin:
         query: str | None,
         limit: int | None,
     ) -> list[str]:
-        """Fetch PMID list for current query/limit settings."""
+        """Fetch PMID list for current query/limit settings.
+
+        Returns:
+            List of PMID strings resolved from the search query or default term.
+        """
         search_term = query or "pharmacogenomics[Title/Abstract]"
         return await self._get_pmids(search_term, limit or 10000)
 
@@ -242,7 +250,11 @@ class PubMedAdapterFilterFetchMixin:
         pmids: list[str],
         resume_offset: int,
     ) -> list[str]:
-        """Skip already processed PMIDs when resuming."""
+        """Skip already processed PMIDs when resuming.
+
+        Returns:
+            PMID list with the first resume_offset entries removed.
+        """
         if resume_offset == 0:
             return pmids
         self.logger.info(

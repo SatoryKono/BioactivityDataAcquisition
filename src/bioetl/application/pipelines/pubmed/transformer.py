@@ -10,7 +10,6 @@ from __future__ import annotations
 
 __all__ = ["PubMedPublicationTransformer"]
 
-
 import re
 import xml.etree.ElementTree as ET
 from typing import TYPE_CHECKING, Any, ClassVar, cast
@@ -189,7 +188,8 @@ class PubMedPublicationTransformer(
             build_authors_with_affiliations=self._build_authors_with_affiliations,
             process_structured_affiliations=lambda affiliations: (
                 self._process_structured_affiliations(
-                    affiliations  # type: ignore[arg-type]  # JsonDict is structurally compatible with StructuredAffiliation
+                    affiliations
+                    # type: ignore[arg-type]  # JsonDict is structurally compatible with StructuredAffiliation
                 )
             ),
         )
@@ -270,7 +270,11 @@ class PubMedPublicationTransformer(
         self,
         entity: Any,  # Any: generic domain entity; type varies by pipeline
     ) -> GoldRecord:  # Any: generic domain entity
-        """Convert Domain Entity to SilverRecord, excluding PubMed-unsupported fields."""
+        """Convert Domain Entity to SilverRecord, excluding PubMed-unsupported fields.
+
+        Returns:
+            SilverRecord dictionary with PubMed-unsupported fields removed.
+        """
         silver_record = super().entity_to_silver_record(entity)
         for field in PUBMED_SILVER_EXCLUDED_FIELDS:
             silver_record.pop(field, None)

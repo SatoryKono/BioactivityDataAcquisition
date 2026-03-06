@@ -113,7 +113,11 @@ class GenericPipelineFactory(Generic[TPipeline]):
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
     ) -> BaseTransformer | None:
-        """Create transformer when a transformer class is configured."""
+        """Create transformer when a transformer class is configured.
+
+        Returns:
+            Configured BaseTransformer instance, or None if no transformer class set.
+        """
         if self.transformer_class is None:
             return None
 
@@ -135,7 +139,11 @@ class GenericPipelineFactory(Generic[TPipeline]):
         logger: LoggerPort,
         filter_config: InputFilterConfig | None = None,
     ) -> DataSourcePort:
-        """Create provider data source via injected data-source creator."""
+        """Create provider data source via injected data-source creator.
+
+        Returns:
+            DataSourcePort for the configured provider.
+        """
         return self._create_data_source(
             settings,
             pipeline_config,
@@ -153,7 +161,11 @@ class GenericPipelineFactory(Generic[TPipeline]):
         tracer: TracingPort | None = None,
         dq_monitor: DQMonitorPort | None = None,
     ) -> PipelineService:
-        """Build shared pipeline services for the configured pipeline."""
+        """Build shared pipeline services for the configured pipeline.
+
+        Returns:
+            Fully wired PipelineService bundle for the configured pipeline.
+        """
         return build_pipeline_services(
             pipeline_name=self.pipeline_name,
             create_data_source_fn=self._create_data_source,
@@ -178,7 +190,11 @@ class GenericPipelineFactory(Generic[TPipeline]):
         metrics: MetricsPort | None = None,
         cached_bronze: CachedBronzeContext | None = None,
     ) -> TPipeline:
-        """Create pipeline instance with wired services and optional transformer."""
+        """Create pipeline instance with wired services and optional transformer.
+
+        Returns:
+            Configured pipeline instance of type TPipeline ready for execution.
+        """
         return cast(
             TPipeline,
             create_pipeline_with_services(
@@ -211,7 +227,11 @@ class GenericPipelineFactory(Generic[TPipeline]):
         config: PipelineYamlConfig | None = None,
         cached_bronze: CachedBronzeContext | None = None,
     ) -> PipelineRunner:
-        """Create and assemble a fully configured PipelineRunner instance."""
+        """Create and assemble a fully configured PipelineRunner instance.
+
+        Returns:
+            Fully wired PipelineRunner ready for execution.
+        """
         # Load config once if not provided
         yaml_config = config or load_pipeline_config(self.pipeline_name)
 
@@ -253,7 +273,11 @@ def create_pipeline_factory(
     pandera_silver_schema: object | None = None,
     transformer_class: type[BaseTransformer] | None = None,
 ) -> GenericPipelineFactory[TPipeline]:
-    """Create a configured :class:`GenericPipelineFactory`."""
+    """Create a configured :class:`GenericPipelineFactory`.
+
+    Returns:
+        GenericPipelineFactory instance wired with the provided schemas and classes.
+    """
     return GenericPipelineFactory(
         pipeline_name=pipeline_name,
         pipeline_class=pipeline_class,
@@ -273,7 +297,11 @@ def assemble_runner(
     strict_gold_validation: bool,
     yaml_config: PipelineYamlConfig | None = None,
 ) -> PipelineRunner:
-    """Assemble a PipelineRunner from a pipeline instance."""
+    """Assemble a PipelineRunner from a pipeline instance.
+
+    Returns:
+        Fully wired PipelineRunner ready for execution.
+    """
     return _assemble_runner_impl(
         pipeline=pipeline,
         observability=observability,

@@ -78,7 +78,7 @@ class OpenAlexCursorFlowService:
         dois = filter_ids[:limit] if limit is not None else filter_ids
         fetched = 0
         for batch_start in range(0, len(dois), self.batch_size):
-            batch = dois[batch_start : batch_start + self.batch_size]
+            batch = dois[batch_start: batch_start + self.batch_size]
             async for work in self.iter_by_dois(batch):
                 if limit is not None and fetched >= limit:
                     return
@@ -135,7 +135,7 @@ class OpenAlexCursorFlowService:
         for batch_start in range(0, len(primary_ids), self.batch_size):
             if limit is not None and count >= limit:
                 return
-            batch = primary_ids[batch_start : batch_start + self.batch_size]
+            batch = primary_ids[batch_start: batch_start + self.batch_size]
             async for work in self.iter_by_dois(batch):
                 if limit is not None and count >= limit:
                     return
@@ -149,7 +149,11 @@ class OpenAlexCursorFlowService:
             yield work
 
     async def fetch_by_dois(self, dois: list[str]) -> list[BronzeRecord]:
-        """Resolve DOI batch and return records list."""
+        """Resolve DOI batch and return records list.
+
+        Returns:
+            List of BronzeRecord dictionaries resolved from the DOI batch.
+        """
         normalized = self._normalize_dois(dois)
         if not normalized:
             return []
@@ -168,7 +172,11 @@ class OpenAlexCursorFlowService:
         return results
 
     async def search_by_title(self, title: str, limit: int = 3) -> list[BronzeRecord]:
-        """Search by title with in-memory cache and graceful runtime fallback."""
+        """Search by title with in-memory cache and graceful runtime fallback.
+
+        Returns:
+            List of BronzeRecord dictionaries matching the title search, up to limit results.
+        """
         normalized_title = title.strip()
         cache_key = (normalized_title.casefold(), limit)
         cached = self._title_search_cache.get(cache_key)

@@ -42,7 +42,7 @@ def validate_observability_preflight_impl(
             "noop_tracing_in_production",
             message="NoOpTracing in production - traces will be lost",
             recommendation="Set BIOETL_OBSERVABILITY__TRACING_ENABLED=true "
-            "and configure OpenTelemetry endpoint",
+                           "and configure OpenTelemetry endpoint",
         )
 
     if isinstance(metrics, NoOpMetrics):
@@ -50,7 +50,7 @@ def validate_observability_preflight_impl(
             "noop_metrics_in_production",
             message="NoOpMetrics in production - metrics will be lost",
             recommendation="Set BIOETL_OBSERVABILITY__METRICS_ENABLED=true "
-            "to enable Prometheus metrics collection",
+                           "to enable Prometheus metrics collection",
         )
 
 
@@ -68,7 +68,11 @@ def bootstrap_observability_bundle_impl(
     ],
     preflight_validator: Callable[[TracingPort, MetricsPort, str, LoggerPort], None],
 ) -> ObservabilityBundle:
-    """Build validated logger/metrics/tracer/DQ-monitor bundle for a pipeline run."""
+    """Build validated logger/metrics/tracer/DQ-monitor bundle for a pipeline run.
+
+    Returns:
+        Validated ObservabilityBundle with logger, metrics, tracer, and DQ monitor.
+    """
     logger = logger_bootstrapper(pipeline, run_id, log_level)
     tracer = tracer_bootstrapper(settings)
     metrics = metrics_bootstrapper(settings)

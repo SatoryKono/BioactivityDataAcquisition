@@ -4,7 +4,6 @@ from __future__ import annotations
 
 __all__ = ["SilverWriterArrowMixin"]
 
-
 from typing import TYPE_CHECKING
 
 import orjson
@@ -24,7 +23,11 @@ class SilverWriterArrowMixin:
         primary_keys: list[str],
         column_order: list[str] | None = None,
     ) -> pa.Table:
-        """Prepare Arrow table from records with schema filtering and sorting."""
+        """Prepare Arrow table from records with schema filtering and sorting.
+
+        Returns:
+            PyArrow Table filtered to schema columns, ordered, and sorted by primary keys.
+        """
         schema_names = schema.names
         string_fields = self._collect_string_fields(schema)
         filtered_records = [

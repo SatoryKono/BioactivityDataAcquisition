@@ -8,7 +8,6 @@ from __future__ import annotations
 
 __all__ = ["CsvFilterReader"]
 
-
 import asyncio
 from collections import Counter
 from pathlib import Path
@@ -35,7 +34,11 @@ class CsvFilterReader:
         self._logger = logger
 
     def _read_csv_dataframe(self, source_path: str) -> pl.DataFrame:
-        """Read CSV file and return DataFrame."""
+        """Read CSV file and return DataFrame.
+
+        Returns:
+            Polars DataFrame loaded from the given CSV file path.
+        """
         path = Path(source_path)
         if not path.exists():
             raise FileNotFoundError(f"CSV filter file not found: {source_path}")
@@ -46,7 +49,11 @@ class CsvFilterReader:
             raise ValueError(f"Failed to read CSV file: {e}") from e
 
     def _extract_column_ids(self, df: pl.DataFrame, column_name: str) -> list[str]:
-        """Extract and clean IDs from specified column."""
+        """Extract and clean IDs from specified column.
+
+        Returns:
+            List of non-empty stripped string values from the specified column.
+        """
         if column_name not in df.columns:
             available = ", ".join(df.columns)
             raise ValueError(
@@ -65,7 +72,11 @@ class CsvFilterReader:
     def _compute_duplicate_stats(
         self, all_ids: list[str]
     ) -> tuple[tuple[str, ...], int, int, frozenset[str]]:
-        """Compute unique IDs and duplicate statistics."""
+        """Compute unique IDs and duplicate statistics.
+
+        Returns:
+            Tuple of (unique IDs sorted tuple, unique count, duplicate count, frozenset of duplicated values).
+        """
         total_count = len(all_ids)
         id_counts = Counter(all_ids)
         duplicates = frozenset(
@@ -79,7 +90,11 @@ class CsvFilterReader:
     def _extract_column_ids_map(
         self, df: pl.DataFrame, columns: list[FilterColumn]
     ) -> dict[str, tuple[str, ...]]:
-        """Extract unique IDs per column for server-side filtering."""
+        """Extract unique IDs per column for server-side filtering.
+
+        Returns:
+            Dictionary mapping each filter_field name to its sorted tuple of unique IDs.
+        """
         return {
             col.filter_field: tuple(
                 sorted(set(self._extract_column_ids(df, col.column_name)))
@@ -90,7 +105,11 @@ class CsvFilterReader:
     def _build_valid_combinations(
         self, df: pl.DataFrame, column_names: list[str]
     ) -> set[tuple[str, ...]]:
-        """Build valid row-wise combinations for client-side filtering."""
+        """Build valid row-wise combinations for client-side filtering.
+
+        Returns:
+            Set of row-wise value tuples with all columns non-empty.
+        """
         combinations: set[tuple[str, ...]] = set()
         for row in df.select(column_names).iter_rows():
             combo = tuple(

@@ -89,7 +89,11 @@ class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):
         self._fields = fields
 
     def _build_headers(self) -> dict[str, str]:
-        """Build request headers with API key if available."""
+        """Build request headers with API key if available.
+
+        Returns:
+            Dictionary of HTTP headers including optional x-api-key if configured.
+        """
         headers = {
             "User-Agent": "BioETL/1.0",
             "Accept": "application/json",
@@ -136,7 +140,11 @@ class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):
     async def _search_by_title(
         self, title: str
     ) -> JsonDict | None:  # Any: untyped API JSON record
-        """Search Semantic Scholar by title and return best matching record."""
+        """Search Semantic Scholar by title and return best matching record.
+
+        Returns:
+            Matching publication record dict if a title match is found, None otherwise.
+        """
         try:
             cleaned_title = self._escape_title_for_search(title)
 
@@ -213,7 +221,11 @@ class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):
         self,
         result: JsonDict,  # Any: untyped API JSON record
     ) -> tuple[str, str]:  # Any: untyped API JSON record
-        """Return Semantic Scholar paper ID for logging."""
+        """Return Semantic Scholar paper ID for logging.
+
+        Returns:
+            Tuple of (identifier key name, paper ID string) for structured log output.
+        """
         return ("found_paper_id", str(result.get("paperId", "unknown")))
 
 

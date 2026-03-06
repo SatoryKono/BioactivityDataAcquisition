@@ -11,7 +11,11 @@ class UuidBatchIdGenerator:
     """Default batch ID generator based on ``uuid4``."""
 
     def create(self) -> BatchID:
-        """Create a UUID-backed batch identifier."""
+        """Create a UUID-backed batch identifier.
+
+        Returns:
+            New BatchID wrapping a freshly generated UUID4.
+        """
         return BatchID(uuid4())
 
 

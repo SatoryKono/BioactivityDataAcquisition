@@ -28,7 +28,11 @@ class AdapterHelperServices:
     fallback_fetch_service: FallbackFetchOrchestratorService
 
     def as_injection_kwargs(self) -> dict[str, object]:
-        """Return kwargs payload for adapter constructor injection."""
+        """Return kwargs payload for adapter constructor injection.
+
+        Returns:
+            Dict of kwargs for injecting adapter helpers into constructor.
+        """
         return {
             "error_handler": self.error_handler,
             "adapter_metrics": self.adapter_metrics,
@@ -46,7 +50,11 @@ class AdapterHelpersFactory:
 
     @classmethod
     def supports_provider(cls, provider: str) -> bool:
-        """Return True if provider uses helper-service DI profile."""
+        """Return True if provider uses helper-service DI profile.
+
+        Returns:
+            True if the provider is in the DI target set, False otherwise.
+        """
         return provider in cls._DI_TARGET_PROVIDERS
 
     @classmethod
@@ -57,7 +65,12 @@ class AdapterHelpersFactory:
         logger: LoggerPort,
         metrics: MetricsPort | None = None,
     ) -> AdapterHelperServices:
-        """Create helper services for one HTTP-backed provider adapter."""
+        """Create helper services for one HTTP-backed provider adapter.
+
+        Returns:
+            AdapterHelperServices bundle with error handler, metrics, request
+            collector, and fallback fetch service.
+        """
         metrics_port = metrics if metrics is not None else NoOpMetrics()
         adapter_metrics = AdapterMetrics(metrics_port, provider)
         request_collector = APIRequestCollector()

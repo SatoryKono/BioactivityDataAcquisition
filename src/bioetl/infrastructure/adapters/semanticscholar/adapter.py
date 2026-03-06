@@ -76,7 +76,11 @@ def _create_default_semanticscholar_error_handler(
     logger: LoggerPort,
     metrics: MetricsPort | None,
 ) -> ErrorHandlerPort:
-    """Create default adapter error handler for non-DI call sites."""
+    """Create default adapter error handler for non-DI call sites.
+
+    Returns:
+        ErrorHandlerPort implementation configured with the given logger and metrics.
+    """
     from bioetl.infrastructure.adapters.error_handling import ErrorService
 
     return ErrorService(logger, metrics=metrics)
@@ -86,7 +90,11 @@ def _create_default_semanticscholar_fallback_service(
     *,
     adapter_metrics: AdapterMetrics,
 ) -> FallbackFetchOrchestratorService:
-    """Create fallback orchestrator service for non-DI call sites."""
+    """Create fallback orchestrator service for non-DI call sites.
+
+    Returns:
+        FallbackFetchOrchestratorService instance wired to the given adapter metrics.
+    """
     return FallbackFetchOrchestratorService(adapter_metrics)
 
 
@@ -98,7 +106,11 @@ def _create_default_semanticscholar_title_fallback_handler(
     api_key: str,
     fields: str,
 ) -> SemanticScholarTitleFallbackHandler:
-    """Create default title fallback handler for non-DI call sites."""
+    """Create default title fallback handler for non-DI call sites.
+
+    Returns:
+        SemanticScholarTitleFallbackHandler instance configured with HTTP client and API key.
+    """
     return SemanticScholarTitleFallbackHandler(
         http_client=http_client,
         logger=logger,
@@ -190,7 +202,11 @@ class SemanticScholarAdapter(
         )
 
     def _build_headers(self) -> dict[str, str]:
-        """Build request headers with optional API key."""
+        """Build request headers with optional API key.
+
+        Returns:
+            Dictionary of HTTP headers including optional x-api-key if configured.
+        """
         headers = {
             "User-Agent": "BioETL/1.0",
             "Accept": "application/json",

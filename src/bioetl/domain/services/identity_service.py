@@ -16,6 +16,7 @@ Requirements:
 
 from __future__ import annotations
 
+from bioetl.domain.constants import META_FIELDS
 from bioetl.domain.transformations import (
     generate_content_hash,
     normalize_for_hash,
@@ -23,6 +24,7 @@ from bioetl.domain.transformations import (
 from bioetl.domain.types import ContentHash, EntityID, JsonDict
 
 __all__ = [
+    "META_FIELDS",
     "IdentityService",
 ]
 

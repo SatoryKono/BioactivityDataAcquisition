@@ -32,7 +32,6 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LockPort, LoggerPort
     from bioetl.infrastructure.config import Settings
 
-
 __all__ = [
     "bootstrap_runtime_basics",
     "build_runner_factories",
@@ -50,7 +49,11 @@ def bootstrap_runtime_basics(
     lock_factory: Callable[[], LockPort],
     uuid_factory: Callable[[], UUID],
 ) -> tuple[str, Settings, LoggerPort, object, LockPort]:
-    """Build base runtime dependencies shared across composite bootstrap."""
+    """Build base runtime dependencies shared across composite bootstrap.
+
+    Returns:
+        Tuple of (run_id, settings, logger, storage, lock) for the composite run.
+    """
     effective_run_id = run_id or str(uuid_factory())
     settings = settings_provider()
     logger = logger_bootstrapper(config.name, UUID(effective_run_id), "INFO")
@@ -75,7 +78,11 @@ def build_runner_factories(
     Callable[[str, pl.DataFrame], PipelineRunner],
     Callable[[str, pl.DataFrame], PipelineRunner],
 ]:
-    """Build seed/dependency/enricher runner factories for composite phases."""
+    """Build seed/dependency/enricher runner factories for composite phases.
+
+    Returns:
+        Tuple of (seed_factory, dependency_factory, enricher_factory) callables.
+    """
     # CIRCULAR-DEPENDENCY: kept local to avoid entrypoints bootstrap cycle.
     from bioetl.composition.entrypoints import RunOptions, build_pipeline_context
 
@@ -124,7 +131,11 @@ def build_support_services(
     ],
     create_dq_report_service_fn: Callable[[LoggerPort, Settings], DQReportService],
 ) -> CompositeSupportServices:
-    """Build composite support service bundle consumed by runner facade."""
+    """Build composite support service bundle consumed by runner facade.
+
+    Returns:
+        CompositeSupportServices bundle with all services required by the runner.
+    """
     return support_services_factory_cls(
         config=config,
         runtime=runtime,

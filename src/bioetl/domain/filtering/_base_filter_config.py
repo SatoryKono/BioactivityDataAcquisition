@@ -30,11 +30,7 @@ class BaseFilterConfig:
 
     @classmethod
     def from_base(cls, other: BaseFilterConfig) -> Self:
-        """Create same-type filter config from another base config.
-
-        Returns:
-            New instance of the same type with fields copied from other.
-        """
+        """Create same-type filter config from another base config."""
         return cls(
             column_filters=other.column_filters,
             range_filters=other.range_filters,
@@ -270,7 +266,11 @@ class BaseFilterConfig:
         return val <= max_val if inclusive else val < max_val
 
     def is_empty(self) -> bool:
-        """Check whether the filter configuration is empty."""
+        """Check whether the filter configuration is empty.
+
+        Returns:
+            True if no filters are configured, False if at least one filter is set.
+        """
         all_filters = (
             self.column_filters,
             self.range_filters,

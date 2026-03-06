@@ -30,7 +30,11 @@ class OpenAlexAdapterHealthMixin:
     """Health probe and lifecycle helpers for OpenAlex adapter."""
 
     async def _probe_health(self: _OpenAlexHealthHost) -> HealthStatus:
-        """Probe OpenAlex API health."""
+        """Probe OpenAlex API health.
+
+        Returns:
+            HealthStatus reflecting the current OpenAlex API availability.
+        """
         return await probe_openalex_health(
             api_base="https://api.openalex.org",
             mailto=self.mailto,

@@ -72,7 +72,11 @@ class Batch:
         start_index: int = 0,
         metadata: MetaDict | None = None,
     ) -> Batch:
-        """Create a new batch with a generated ID."""
+        """Create a new batch with a generated ID.
+
+        Returns:
+            New Batch instance with generated BatchID and CREATED status.
+        """
         from uuid import uuid4
 
         batch_id = BatchID(uuid4())
@@ -147,7 +151,11 @@ class Batch:
         entity_id: EntityID | None = None,
         content_hash: ContentHash | None = None,
     ) -> BatchRecord:
-        """Add a single record to the batch."""
+        """Add a single record to the batch.
+
+        Returns:
+            The BatchRecord added to this batch.
+        """
         self._assert_open("add_record")
 
         record = BatchRecord(
@@ -164,7 +172,11 @@ class Batch:
         self,
         records: list[BronzeRecord],
     ) -> list[BatchRecord]:
-        """Add multiple records to the batch."""
+        """Add multiple records to the batch.
+
+        Returns:
+            List of BatchRecord instances added to this batch.
+        """
         self._assert_open("add_records")
         return [self.add_record(data) for data in records]
 
@@ -174,7 +186,11 @@ class Batch:
         error: str,
         error_code: str | None = None,
     ) -> BatchRecord:
-        """Mark a record as quarantined."""
+        """Mark a record as quarantined.
+
+        Returns:
+            The quarantined BatchRecord with the validation error attached.
+        """
         self._assert_open("quarantine_record")
 
         if record not in self._records:

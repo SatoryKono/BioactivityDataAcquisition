@@ -19,7 +19,6 @@ from __future__ import annotations
 
 __all__ = ["StructlogLogger", "create_logger"]
 
-
 from typing import Any, Self
 from uuid import UUID
 
@@ -34,7 +33,11 @@ _EVENT_KWARG = "event"
 def _sanitize_event_kwargs(
     kwargs: JsonDict,  # Any: structlog-compatible API
 ) -> JsonDict:  # Any: structlog-compatible API
-    """Drop kwargs that collide with structlog positional event parameter."""
+    """Drop kwargs that collide with structlog positional event parameter.
+
+    Returns:
+        Dictionary with 'event' key removed if present, original dict otherwise.
+    """
     if _EVENT_KWARG in kwargs:
         sanitized = dict(kwargs)
         sanitized.pop(_EVENT_KWARG, None)

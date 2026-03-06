@@ -4,14 +4,15 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Awaitable, Callable
-from pathlib import Path
 from types import ModuleType
 from typing import TYPE_CHECKING, Any, Protocol, TypeVar, cast
 
 import pyarrow as pa
 
 from bioetl.domain.medallion import GoldWriteMode
-from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.storage.gold_writer_read_cleanup_mixin import (
+    GoldWriterReadCleanupMixin,
+)
 
 T = TypeVar("T")
 
@@ -26,7 +27,11 @@ if TYPE_CHECKING:
 
 
 def _load_gold_writer_module() -> ModuleType:
-    """Load canonical gold_writer module to preserve monkeypatch points."""
+    """Load canonical gold_writer module to preserve monkeypatch points.
+
+    Returns:
+        Gold writer module with write_deltalake, DeltaTable, and related references.
+    """
     from importlib import import_module
 
     return import_module("bioetl.infrastructure.storage.gold_writer")
@@ -102,8 +107,8 @@ class _GoldMergedMetadataWriterProtocol(Protocol):
     ) -> None: ...
 
 
-class GoldWriterIOMixin:
-    """Mixin with write dispatch, SCD2 merge, and read helpers."""
+class GoldWriterIOMixin(GoldWriterReadCleanupMixin):
+    """Mixin with write dispatch and SCD2 merge helpers."""
 
     logger: LoggerPort
     csv_exporter: CsvExporter | None
@@ -159,7 +164,11 @@ class GoldWriterIOMixin:
         primary_keys: list[str] | None,
         preserve_column_order: bool,
     ) -> pa.Table:
-        """Build deterministic arrow table for merged Gold output."""
+        """Build deterministic arrow table for merged Gold output.
+
+        Returns:
+            PyArrow Table ordered canonically and sorted by primary keys.
+        """
         from bioetl.domain.schemas.column_order import canonical_column_order
 
         module = _load_gold_writer_module()
@@ -275,14 +284,22 @@ class GoldWriterIOMixin:
         func: Callable[..., T],
         *args: object,
     ) -> T:
-        """Run a function in the executor."""
+        """Run a function in the executor.
+
+        Returns:
+            Return value of the function executed in the default thread pool executor.
+        """
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(None, func, *args)
 
     def _to_arrow_table(
         self, records: list[GoldRecord], column_order: list[str] | None = None
     ) -> pa.Table:
-        """Convert records to PyArrow table, handling null types."""
+        """Convert records to PyArrow table, handling null types.
+
+        Returns:
+            PyArrow Table with null types sanitized for Delta Lake compatibility.
+        """
         from bioetl.infrastructure.storage.arrow_converter import ArrowDataConverter
 
         converter = ArrowDataConverter(logger=self.logger)
@@ -334,7 +351,7 @@ class GoldWriterIOMixin:
             except module.GOLD_WRITE_RETRY_ERRORS as error:
                 if attempt == 2:
                     raise error
-                delay = 0.5 * (2**attempt) + 0.05
+                delay = 0.5 * (2 ** attempt) + 0.05
                 await module.asyncio.sleep(delay)
         if self.csv_exporter:
             await self.csv_exporter.export(
@@ -379,7 +396,7 @@ class GoldWriterIOMixin:
             except module.GOLD_WRITE_RETRY_ERRORS as error:
                 if attempt == 2:
                     raise error
-                delay = 0.5 * (2**attempt) + 0.05
+                delay = 0.5 * (2 ** attempt) + 0.05
                 await module.asyncio.sleep(delay)
 
     async def _merge_scd2(
@@ -425,74 +442,6 @@ class GoldWriterIOMixin:
                 .execute()
             )
         )
-
-    async def read_gold(
-        self,
-        table_name: str,
-        columns: list[str] | None = None,
-        current_only: bool = True,
-    ) -> list[GoldRecord]:
-        """Read data from Gold table."""
-        table_path = self._resolve_table_path(table_name)
-        module = _load_gold_writer_module()
-
-        dt = await self._run_in_executor(lambda: module.DeltaTable(table_path))
-        arrow_table = await self._run_in_executor(dt.to_pyarrow_table)
-        if current_only and "is_current" in arrow_table.column_names:
-            import pyarrow.compute as pc
-
-            arrow_table = arrow_table.filter(pc.equal(arrow_table["is_current"], True))
-        result: list[GoldRecord] = arrow_table.to_pylist()
-        if columns:
-            selected = [{k: rec.get(k) for k in columns} for rec in result]
-            return selected
-        return result
-
-    async def get_history(
-        self,
-        table_name: str,
-        business_key_values: JsonDict | None = None,  # Any: heterogeneous values
-        limit: int = 10,
-    ) -> list[GoldRecord]:
-        """Get history of records in Gold table (for SCD2 tracking)."""
-        table_path = self._resolve_table_path(table_name)
-        module = _load_gold_writer_module()
-
-        dt = await self._run_in_executor(lambda: module.DeltaTable(table_path))
-        arrow_table = await self._run_in_executor(dt.to_pyarrow_table)
-
-        if business_key_values:
-            import pyarrow.compute as pc
-
-            mask = None
-            for key, value in business_key_values.items():
-                condition = pc.equal(arrow_table[key], value)
-                mask = condition if mask is None else pc.and_(mask, condition)
-            if mask is not None:
-                arrow_table = arrow_table.filter(mask)
-
-        if "valid_from" in arrow_table.column_names:
-            arrow_table = arrow_table.sort_by([("valid_from", "ascending")])
-        result: list[GoldRecord] = arrow_table.to_pylist()
-        return result[:limit] if limit > 0 else result
-
-    def preview_cleanup(
-        self,
-        table_name: str,
-    ) -> JsonDict:  # Any: preview payload has heterogeneous values
-        """Preview Gold cleanup scope without deleting files."""
-        table_path = Path(self._resolve_table_path(table_name))
-        exists = table_path.exists()
-        file_count = (
-            sum(1 for file_path in table_path.rglob("*") if file_path.is_file())
-            if exists
-            else 0
-        )
-        return {
-            "path": str(table_path),
-            "file_count": file_count,
-            "exists": exists,
-        }
 
 
 __all__ = ["GoldWriterIOMixin"]

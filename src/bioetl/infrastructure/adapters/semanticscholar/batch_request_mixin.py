@@ -35,7 +35,11 @@ class SemanticScholarBatchRequestMixin:
         self,
         dois: list[str],
     ) -> list[BronzeRecord | None]:
-        """Fetch batch preserving null slots for not-found IDs."""
+        """Fetch batch preserving null slots for not-found IDs.
+
+        Returns:
+            List of BronzeRecord or None values preserving position of not-found DOIs.
+        """
         if not dois:
             return []
 
@@ -46,7 +50,11 @@ class SemanticScholarBatchRequestMixin:
         self,
         paper_ids: list[str],
     ) -> list[BronzeRecord | None]:
-        """Execute raw batch request and return response array."""
+        """Execute raw batch request and return response array.
+
+        Returns:
+            List of BronzeRecord or None values from the batch API response array.
+        """
         self.logger.debug(
             "semanticscholar_batch_request",
             paper_count=len(paper_ids),
@@ -70,7 +78,11 @@ class SemanticScholarBatchRequestMixin:
 
     @staticmethod
     def _normalize_doi(doi: str) -> str:
-        """Normalize DOI by removing URL-style prefixes."""
+        """Normalize DOI by removing URL-style prefixes.
+
+        Returns:
+            DOI string with URL prefix (https://doi.org/, doi:, DOI:) removed.
+        """
         if doi.startswith("https://doi.org/"):
             return doi[16:]
         if doi.startswith("http://doi.org/"):

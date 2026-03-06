@@ -7,7 +7,6 @@ from __future__ import annotations
 
 __all__ = ["ZScoreDetector"]
 
-
 import statistics
 from datetime import datetime
 from typing import TYPE_CHECKING
@@ -74,7 +73,11 @@ class ZScoreDetector(DetectorStrategy):
     def _calculate_z_score(
         self, value: float, mean: float, stddev: float
     ) -> float | None:
-        """Calculate Z-score for a value."""
+        """Calculate Z-score for a value.
+
+        Returns:
+            Z-score float if calculable, None if standard deviation is zero and deviation is below threshold.
+        """
         if stddev == 0:
             if mean == 0:
                 return None
@@ -91,7 +94,11 @@ class ZScoreDetector(DetectorStrategy):
         z_score: float,
         timestamp: datetime,
     ) -> Anomaly:
-        """Create Anomaly object from detection results."""
+        """Create Anomaly object from detection results.
+
+        Returns:
+            Anomaly instance with SPIKE or DROP type based on deviation direction.
+        """
         anomaly_type = AnomalyType.SPIKE if current_value > mean else AnomalyType.DROP
         severity = self.get_severity(z_score)
         message = (

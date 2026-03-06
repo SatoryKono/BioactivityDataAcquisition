@@ -37,7 +37,11 @@ _PSUTIL_MODULE: Any = None  # Any: lazy-loaded psutil module reference
 
 
 def _check_psutil_available() -> bool:
-    """Check psutil availability once and cache the result."""
+    """Check psutil availability once and cache the result.
+
+    Returns:
+        True if psutil is available and importable, False otherwise.
+    """
     global _PSUTIL_AVAILABLE, _PSUTIL_MODULE
     if _PSUTIL_AVAILABLE is None:
         try:
@@ -112,6 +116,9 @@ class MemoryMonitor:
 
         Performance optimization: reuses cached psutil module and Process instance
         to avoid repeated imports and process lookups (~40ms savings per init).
+
+        Returns:
+            MemoryStats populated with system and process memory usage from psutil.
         """
         psutil = _PSUTIL_MODULE
 
@@ -131,7 +138,11 @@ class MemoryMonitor:
         )
 
     def _get_stats_fallback(self) -> MemoryStats:
-        """Get memory stats using fallback methods."""
+        """Get memory stats using fallback methods.
+
+        Returns:
+            MemoryStats from resource module on Unix or conservative estimates on Windows.
+        """
         if sys.platform != "win32":
             return self._get_stats_resource()
         return self._get_stats_estimate()
@@ -142,6 +153,9 @@ class MemoryMonitor:
         Note:
             This method is only called on Unix platforms (guarded by
             sys.platform check in _get_stats_fallback).
+
+        Returns:
+            MemoryStats populated from /proc/meminfo and resource module data.
         """
         import resource
 
@@ -178,7 +192,11 @@ class MemoryMonitor:
             return self._get_stats_estimate()
 
     def _get_stats_estimate(self) -> MemoryStats:
-        """Provide conservative estimates when actual stats unavailable."""
+        """Provide conservative estimates when actual stats unavailable.
+
+        Returns:
+            MemoryStats with conservative fixed estimates (4GB used, 4GB available, 8GB total).
+        """
         # Conservative estimate: assume 50% memory used
         # This is safer than assuming low usage
         return MemoryStats(
@@ -203,7 +221,11 @@ class MemoryMonitor:
         return stats.percent_used >= self.config.memory_pressure_threshold
 
     def get_recommended_batch_size(self, current_batch_size: int) -> int:
-        """Return adaptive batch size recommendation based on current memory pressure."""
+        """Return adaptive batch size recommendation based on current memory pressure.
+
+        Returns:
+            Adjusted batch size integer, reduced under pressure or gradually recovered.
+        """
         if not self.config.enable_adaptive_sizing:
             return current_batch_size
 
