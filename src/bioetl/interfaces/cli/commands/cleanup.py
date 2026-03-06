@@ -11,6 +11,8 @@ import click
 
 from bioetl.composition.entrypoints import (
     get_bronze_cleanup_service,
+)
+from bioetl.composition.entrypoints import (
     preview_cleanup as preview_pipeline_cleanup,
 )
 from bioetl.domain.exceptions import BioETLError

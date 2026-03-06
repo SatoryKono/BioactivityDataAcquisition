@@ -12,11 +12,28 @@ from bioetl.infrastructure.errors import (
 __all__ = ["AdapterErrorMapper", "DomainErrorMappingInput"]
 
 
+def _create_default_domain_infra_exception_mapper(
+    *,
+    logger: LoggerPort,
+) -> DomainInfraExceptionMapper:
+    """Create default exception mapper for non-DI call sites."""
+    return DomainInfraExceptionMapper(logger=logger)
+
+
 class AdapterErrorMapper:
     """Backward-compatible facade over the unified domain/infra exception mapper."""
 
-    def __init__(self, *, logger: LoggerPort) -> None:
-        self._mapper = DomainInfraExceptionMapper(logger=logger)
+    def __init__(
+        self,
+        *,
+        logger: LoggerPort,
+        mapper: DomainInfraExceptionMapper | None = None,
+    ) -> None:
+        self._mapper = (
+            mapper
+            if mapper is not None
+            else _create_default_domain_infra_exception_mapper(logger=logger)
+        )
 
     def map_to_domain_error(
         self,

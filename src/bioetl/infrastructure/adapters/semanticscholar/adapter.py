@@ -90,6 +90,24 @@ def _create_default_semanticscholar_fallback_service(
     return FallbackFetchOrchestratorService(adapter_metrics)
 
 
+def _create_default_semanticscholar_title_fallback_handler(
+    *,
+    http_client: UnifiedHTTPClient,
+    logger: LoggerPort,
+    metrics: AdapterMetrics,
+    api_key: str,
+    fields: str,
+) -> SemanticScholarTitleFallbackHandler:
+    """Create default title fallback handler for non-DI call sites."""
+    return SemanticScholarTitleFallbackHandler(
+        http_client=http_client,
+        logger=logger,
+        metrics=metrics,
+        api_key=api_key,
+        fields=fields,
+    )
+
+
 @dataclass
 class SemanticScholarAdapter(
     SemanticScholarHealthMetadataMixin,
@@ -109,6 +127,7 @@ class SemanticScholarAdapter(
     adapter_metrics: AdapterMetrics | None = None
     request_collector: APIRequestCollector | None = None
     fallback_fetch_service: FallbackFetchOrchestratorService | None = None
+    title_fallback_handler: SemanticScholarTitleFallbackHandler | None = None
 
     provider_name: str = field(init=False, default="semanticscholar")
     _fallback_fetch_service: FallbackFetchOrchestratorService = field(
@@ -138,12 +157,16 @@ class SemanticScholarAdapter(
                 adapter_metrics=self._adapter_metrics,
             )
         )
-        self._fallback_handler = SemanticScholarTitleFallbackHandler(
-            http_client=self.http_client,
-            logger=self.logger,
-            metrics=self._adapter_metrics,
-            api_key=self.api_key,
-            fields=self.fields,
+        self._fallback_handler = (
+            self.title_fallback_handler
+            if self.title_fallback_handler is not None
+            else _create_default_semanticscholar_title_fallback_handler(
+                http_client=self.http_client,
+                logger=self.logger,
+                metrics=self._adapter_metrics,
+                api_key=self.api_key,
+                fields=self.fields,
+            )
         )
         self.configure_fallback_policy(None)
 

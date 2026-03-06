@@ -16,12 +16,43 @@ TARGET_ADAPTERS: dict[str, Path] = {
         "src/bioetl/infrastructure/adapters/semanticscholar/adapter.py"
     ),
     "UniProtAdapter": Path("src/bioetl/infrastructure/adapters/uniprot/client.py"),
+    "PubChemAdapter": Path("src/bioetl/infrastructure/adapters/pubchem/client.py"),
+    "AdapterErrorMapper": Path(
+        "src/bioetl/infrastructure/adapters/adapter_error_mapper.py"
+    ),
+    "OpenAlexFallbackOrchestrator": Path(
+        "src/bioetl/infrastructure/adapters/openalex/fallback_orchestrator.py"
+    ),
 }
 
 FORBIDDEN_HELPER_CONSTRUCTORS = {
+    # Cross-cutting services (existing guard)
     "FallbackFetchOrchestratorService",
     "ErrorService",
     "AdapterMetrics",
+    "APIRequestCollector",
+    # OpenAlex provider-specific helpers
+    "OpenAlexQueryExecutor",
+    "OpenAlexResponseMapper",
+    "OpenAlexCursorFlowService",
+    "TitleFallbackHandler",
+    "OpenAlexFallbackOrchestrator",
+    # CrossRef provider-specific helpers
+    "CrossRefQueryBuilder",
+    "CrossRefResponseMapper",
+    "DoiBatchProcessor",
+    "SearchPaginator",
+    "CrossRefFetchFlow",
+    # SemanticScholar provider-specific helpers
+    "SemanticScholarTitleFallbackHandler",
+    # PubChem provider-specific helpers
+    "PubChemEntityMapper",
+    "PubChemFetchStrategies",
+    # Shared fallback infrastructure
+    "DefaultFallbackExecutionStrategy",
+    "ComposableFallbackDecorator",
+    # Error mapping
+    "DomainInfraExceptionMapper",
 }
 
 
@@ -96,9 +127,9 @@ def test_no_inline_helper_construction_in_provider_adapters() -> None:
         "Inline helper construction detected in provider adapter constructors. "
         "Move helper creation to composition/factory and inject via constructor.\n"
         + "\n".join(
-            "  - "
-            f"{item.file_path}:{item.line_number} "
-            f"{item.class_name}.{item.function_name} -> {item.constructor_name}(...)"
-            for item in violations
-        )
+        "  - "
+        f"{item.file_path}:{item.line_number} "
+        f"{item.class_name}.{item.function_name} -> {item.constructor_name}(...)"
+        for item in violations
+    )
     )

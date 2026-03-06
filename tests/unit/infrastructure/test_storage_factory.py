@@ -621,6 +621,40 @@ class TestStorageAdapterPreviewCleanup:
         assert result["gold"] is None
         assert result["total_files"] == 2
 
+    def test_preview_cleanup_delegates_to_writer_preview(self):
+        """Test preview_cleanup delegates to writer-level preview methods."""
+        from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+        from bioetl.infrastructure.storage.gold_writer import GoldWriter
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        silver = MagicMock(spec=SilverWriter)
+        silver.preview_cleanup.return_value = {
+            "path": "/tmp/silver/chembl/activity",
+            "file_count": 4,
+            "exists": True,
+        }
+        gold = MagicMock(spec=GoldWriter)
+        gold.preview_cleanup.return_value = {
+            "path": "/tmp/gold/chembl/activity",
+            "file_count": 2,
+            "exists": True,
+        }
+
+        adapter = StorageAdapter(
+            bronze_writer=MagicMock(spec=BronzeWriter),
+            silver_writer=silver,
+            gold_writer=gold,
+        )
+
+        result = adapter.preview_cleanup(
+            silver_table="chembl.activity",
+            gold_table="chembl.activity",
+        )
+
+        silver.preview_cleanup.assert_called_once_with("chembl.activity")
+        gold.preview_cleanup.assert_called_once_with("chembl.activity")
+        assert result["total_files"] == 6
+
 
 @pytest.mark.unit
 class TestStorageAdapterVacuum:

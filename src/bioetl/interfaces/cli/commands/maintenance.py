@@ -9,7 +9,10 @@ from __future__ import annotations
 import click
 
 from bioetl.interfaces.cli.commands.archive import archive_command
-from bioetl.interfaces.cli.commands.cleanup import bronze_cleanup_command
+from bioetl.interfaces.cli.commands.cleanup import (
+    bronze_cleanup_command,
+    cleanup_preview_command,
+)
 from bioetl.interfaces.cli.commands.vacuum import vacuum_all_command, vacuum_command
 
 __all__ = [
@@ -27,3 +30,4 @@ maintenance.add_command(vacuum_command)
 maintenance.add_command(vacuum_all_command)
 maintenance.add_command(archive_command)
 maintenance.add_command(bronze_cleanup_command)
+maintenance.add_command(cleanup_preview_command)

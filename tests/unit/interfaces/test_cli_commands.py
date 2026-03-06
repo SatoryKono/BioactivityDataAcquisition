@@ -17,6 +17,7 @@ from uuid import uuid4
 import pytest
 from click.testing import CliRunner
 
+from bioetl.application.core.cleanup_service import CleanupPreview, LayerInfo
 from bioetl.interfaces.cli.main import cli
 
 
@@ -131,6 +132,74 @@ class TestBronzeCleanupCommand:
         assert result.exit_code == 0
         # 100 MB should be formatted
         assert "MB" in result.output or "100" in result.output
+
+
+@pytest.mark.unit
+class TestCleanupPreviewCommand:
+    """Tests for maintenance cleanup-preview command."""
+
+    def test_cleanup_preview_help(self, cli_runner):
+        """Test cleanup-preview --help shows required options."""
+        result = cli_runner.invoke(cli, ["maintenance", "cleanup-preview", "--help"])
+
+        assert result.exit_code == 0
+        assert "--pipeline" in result.output
+
+    def test_cleanup_preview_success(self, cli_runner):
+        """Test cleanup-preview renders dry-run layer preview."""
+        preview = CleanupPreview(
+            silver=LayerInfo(
+                path="/tmp/silver/chembl/activity",
+                file_count=3,
+                exists=True,
+            ),
+            gold=LayerInfo(
+                path="/tmp/gold/chembl/activity",
+                file_count=1,
+                exists=True,
+            ),
+            total_files=4,
+        )
+
+        with patch(
+            "bioetl.interfaces.cli.commands.cleanup.preview_pipeline_cleanup",
+            new=AsyncMock(return_value=preview),
+        ) as mock_preview:
+            result = cli_runner.invoke(
+                cli,
+                [
+                    "maintenance",
+                    "cleanup-preview",
+                    "--pipeline",
+                    "chembl_activity",
+                ],
+            )
+
+        assert result.exit_code == 0
+        assert "[DRY-RUN]" in result.output
+        assert "Silver:" in result.output
+        assert "Gold:" in result.output
+        assert "Total items that would be cleared: ~4" in result.output
+        mock_preview.assert_awaited_once_with("chembl_activity")
+
+    def test_cleanup_preview_handles_exception(self, cli_runner):
+        """Test cleanup-preview returns non-zero exit code on failures."""
+        with patch(
+            "bioetl.interfaces.cli.commands.cleanup.preview_pipeline_cleanup",
+            new=AsyncMock(side_effect=RuntimeError("preview failed")),
+        ):
+            result = cli_runner.invoke(
+                cli,
+                [
+                    "maintenance",
+                    "cleanup-preview",
+                    "--pipeline",
+                    "chembl_activity",
+                ],
+            )
+
+        assert result.exit_code == 1
+        assert "cleanup-preview" in result.output
 
 
 # =============================================================================
