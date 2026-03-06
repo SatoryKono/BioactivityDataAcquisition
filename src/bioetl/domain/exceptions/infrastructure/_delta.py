@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import cast
 
 from bioetl.domain.exceptions.infrastructure._storage import (
     StorageError,
@@ -29,9 +29,7 @@ def DeltaWriteConflictError(
             conflicting_version=conflicting_version,
         ),
     )
-    cast(
-        Any, error  # Any: legacy exception compatibility shim
-    ).error_type = ErrorType.NETWORK_ERROR
+    error.error_type = ErrorType.NETWORK_ERROR
     return error
 
 
@@ -109,9 +107,7 @@ def DeltaSchemaValidationError(
             type_mismatches=mismatches,
         ),
     )
-    cast(
-        Any, error  # Any: legacy exception compatibility shim
-    ).error_type = ErrorType.SCHEMA_MISMATCH_GOLD
+    error.error_type = ErrorType.SCHEMA_MISMATCH_GOLD
     return error
 
 
@@ -130,7 +126,5 @@ def DeltaOptimizeError(
             reason=reason,
         ),
     )
-    cast(
-        Any, error  # Any: legacy exception compatibility shim
-    ).error_type = ErrorType.NETWORK_ERROR
+    error.error_type = ErrorType.NETWORK_ERROR
     return error

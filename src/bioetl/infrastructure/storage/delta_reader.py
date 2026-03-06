@@ -13,7 +13,7 @@ __all__ = ["DeltaReader"]
 
 import asyncio
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
 import pyarrow as pa
 from deltalake import DeltaTable
@@ -186,9 +186,10 @@ class DeltaReader:
             # Fallback: read only row count via PyArrow dataset
             # (reads footer metadata, not full data)
             dataset = dt.to_pyarrow_dataset()
-            return int(
-                cast("Any", dataset).count_rows()
-            )  # Any: pyarrow dataset protocol is partially typed
+            count_rows = getattr(dataset, "count_rows", None)
+            if not callable(count_rows):
+                raise TypeError("PyArrow dataset object does not expose count_rows()")
+            return int(count_rows())
 
         return await loop.run_in_executor(None, _count_rows)
 

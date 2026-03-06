@@ -10,7 +10,7 @@ missing fields, etc.).
 
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import cast
 
 from bioetl.domain.exceptions.base import DataQualityError
 from bioetl.domain.types import ErrorType
@@ -104,9 +104,7 @@ def MissingRequiredFieldError(
     if record_id:
         msg += f" (record_id={record_id})"
     error = ValidationError(msg, field=field).with_context(record_id=record_id)
-    cast(Any, error).error_type = (
-        ErrorType.MISSING_REQUIRED_FIELD
-    )  # Any: legacy exception compatibility shim
+    error.error_type = ErrorType.MISSING_REQUIRED_FIELD
     return cast(ValidationError, error)
 
 
@@ -125,7 +123,5 @@ def InvalidDataFormatError(
         value=value,
         expected_format=expected_format,
     )
-    cast(Any, error).error_type = (
-        ErrorType.INVALID_DATA
-    )  # Any: legacy exception compatibility shim
+    error.error_type = ErrorType.INVALID_DATA
     return cast(ValidationError, error)
