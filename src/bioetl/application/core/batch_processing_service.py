@@ -4,7 +4,6 @@ from __future__ import annotations
 
 __all__ = ["BatchProcessingOutput", "BatchProcessingService"]
 
-
 import asyncio
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
@@ -74,6 +73,33 @@ class BatchProcessingService:
         tracing_manager: BatchTracingManagerService,
         batch_id_factory: BatchIdGeneratorPort,
     ) -> None:
+        """Initialise the batch processing service with all required collaborators.
+
+        All parameters are keyword-only to prevent positional argument confusion
+        given the large number of injected dependencies. Each collaborator covers
+        a distinct concern — extraction, transformation, writing, metrics, and
+        tracing — following the single-responsibility principle of the application
+        layer.
+
+        Args:
+            services: Bundle of shared pipeline services (data source, writers,
+                config) assembled by the composition root.
+            context: Immutable pipeline run context carrying run ID, timestamps,
+                provider, entity type, and logger.
+            config: Record-processor configuration (batch size, entity type,
+                filter settings).
+            logger: Structured logger for per-batch diagnostic output.
+            batch_metrics: Service that tracks Bronze/Silver/Gold record counts and
+                emits batch-level metrics.
+            transformer: Service that transforms a list of Bronze records into Silver
+                and Gold records, quarantining invalid entries.
+            writer: Service that persists Bronze, Silver, and Gold records to their
+                respective storage layers.
+            tracing_manager: Service that manages OpenTelemetry spans at the batch
+                and per-layer granularity.
+            batch_id_factory: Port that generates unique ``BatchID`` values for each
+                processed batch.
+        """
         self._services = services
         self._context = context
         self._config = config

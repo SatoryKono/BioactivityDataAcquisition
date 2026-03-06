@@ -68,6 +68,36 @@ __all__ = ["SilverWriteMode", "SilverWriter"]
 
 @dataclass(frozen=True, slots=True)
 class _SilverWriteExecutionContext:
+    """Immutable execution context carried through the Silver write pipeline.
+
+    Bundles the write parameters and per-call timing artefacts created at the start
+    of ``SilverWriter._write_silver_with_tracing``. Passing a single context object
+    between the private pipeline stages avoids wide parameter lists and keeps each
+    stage's interface stable as new cross-cutting concerns are added.
+
+    Attributes:
+        table_name: Logical Delta table name (e.g. ``"chembl/activity"``).
+        primary_keys: List of field names that uniquely identify a record; used for
+            MERGE/upsert predicate construction.
+        schema: PyArrow schema applied when creating or evolving the Delta table.
+        mode: Write mode string (``"merge"``, ``"append"``, ``"overwrite"``).
+        partition_cols: Optional list of column names for Delta table partitioning.
+        on_schema_mismatch: Policy when incoming schema differs from the stored table
+            schema; one of ``"error"``, ``"evolve"``, or ``"ignore"``.
+        column_order: Optional explicit column ordering applied to the Arrow table
+            before writing.
+        bronze_refs: Optional list of ``BronzeWriteResult`` objects written to the
+            Silver metadata as lineage references (ADR-014).
+        key_nullability_rules: Optional per-key nullability override rules applied
+            before the MERGE predicate is evaluated.
+        started_at: Wall-clock UTC datetime at the start of the write call; stored in
+            result metadata.
+        start_perf: High-resolution ``time.perf_counter()`` snapshot for duration
+            measurement.
+        span: Active OpenTelemetry span passed through pipeline stages for attribute
+            updates; type is ``Any`` because the OTel interface is runtime-dependent.
+    """
+
     table_name: str
     primary_keys: list[str]
     schema: pa.Schema

@@ -6,6 +6,17 @@ from typing import Any, Protocol
 
 
 class _HasWrappedDataSource(Protocol):
+    """Structural protocol for application classes that wrap a data source adapter.
+
+    Used as a self-type constraint in mixin methods that need to access
+    the wrapped ``_data_source`` attribute without inheriting from a concrete class.
+    Conforms to the Ports and Adapters pattern (Hexagonal Architecture) where the
+    application layer delegates to an injected infrastructure adapter.
+
+    Attributes:
+        _data_source: The wrapped data source adapter instance.
+    """
+
     _data_source: object
 
 

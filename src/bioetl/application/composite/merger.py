@@ -4,7 +4,6 @@ from __future__ import annotations
 
 __all__ = ["MergeService"]
 
-
 from collections.abc import Sequence
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
@@ -51,7 +50,7 @@ def _path_to_table_name(path: str) -> str:
     for layer in ("silver/", "gold/", "bronze/"):
         if layer in normalized:
             idx = normalized.find(layer)
-            return normalized[idx + len(layer) :]
+            return normalized[idx + len(layer):]
 
     return path
 
@@ -78,6 +77,45 @@ class MergeService(MergeIOMixin, MergeCompatibilityMixin, MergeMetricsRecorderMi
         conflict_resolver: ConflictResolverService,
         join_planner: JoinPlannerService,
     ) -> None:
+        """Initialise the MergeService with all required and optional collaborators.
+
+        The ``MergeService`` acts as the central facade for the seed + enricher +
+        dependency merge workflow described in ADR-026. All data-access and processing
+        concerns are delegated to the injected collaborator services; this class is
+        responsible only for orchestration and sequencing.
+
+        Args:
+            merge_config: Domain merge configuration (strategy, enricher list, column
+                conflict policy, cross-validation settings).
+            storage: ``StoragePort`` adapter used to persist merged Silver/Gold output.
+            logger: Structured logger for progress and diagnostic output.
+            delta_reader: Optional ``DeltaReaderPort`` for reading seed and enricher
+                Silver tables; when ``None`` the service falls back to
+                storage-based reads.
+            field_group_registry: Optional registry mapping publication field names to
+                semantic groups; enables Gold-layer column filtering and ordering.
+            cross_validator: Optional service that validates consistency across
+                enricher data sources after joining; ``None`` disables cross-validation.
+            gold_schema: Optional Pandera ``DataFrameModel`` class used to validate
+                the Gold-layer output schema; type is ``Any`` because it is a class
+                reference rather than an instance.
+            deduplicator: Service that removes duplicate rows from enricher DataFrames
+                keyed on join fields.
+            aggregator: Service that aggregates many-to-one enricher DataFrames before
+                joining.
+            renamer: Service that qualifies column names to the
+                ``{provider}.{entity}.{field}`` convention.
+            orderer: Service that applies semantic group-based column ordering to the
+                merged output.
+            priority_orderer: Service that resolves provider priority ordering for
+                coalesced columns.
+            coalesce_policy: Service that selects the winning value for columns
+                present in multiple enrichers.
+            conflict_resolver: Service that detects and resolves column-name conflicts
+                between the seed frame and enricher frames.
+            join_planner: Pre-wired service that executes enricher and dependency
+                joins against the seed DataFrame.
+        """
         self._config = merge_config
         self._storage = storage
         self._logger = logger

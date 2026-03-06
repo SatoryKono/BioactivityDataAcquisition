@@ -54,9 +54,9 @@ _ERROR_KEYWORDS: list[tuple[tuple[str, ...], ErrorType]] = [
         ErrorType.NETWORK_ERROR,
     ),
     # Data quality errors (skip record)
-    (("Schema", "SchemaValidation"), ErrorType.SCHEMA_VIOLATION),
+    (("Schema", "SchemaValidation", "Validation"), ErrorType.SCHEMA_VIOLATION),
     (("Missing", "Required", "MissingRequired"), ErrorType.MISSING_REQUIRED_FIELD),
-    (("Invalid", "Malformed", "Validation"), ErrorType.INVALID_DATA),
+    (("Invalid", "Malformed"), ErrorType.INVALID_DATA),
     (("DataQualityThreshold",), ErrorType.DATA_QUALITY),
 ]
 

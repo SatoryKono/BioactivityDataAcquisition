@@ -62,6 +62,25 @@ class Batch:
         created_at: datetime | None = None,
         metadata: MetaDict | None = None,
     ) -> None:
+        """Initialise a new Batch aggregate in OPEN status.
+
+        Prefer the ``Batch.create`` factory classmethod for normal production use;
+        this constructor is available for reconstitution from storage or for test
+        scenarios where a pre-determined ``batch_id`` is required.
+
+        Args:
+            batch_id: Immutable unique identifier for this batch.
+            run_id: Identifier of the pipeline run that owns this batch.
+            start_index: Sequential offset of the first record in this batch
+                relative to the overall run; must be non-negative.
+            created_at: Optional explicit creation timestamp (UTC); defaults to
+                ``datetime.now(UTC)`` when ``None``.
+            metadata: Optional free-form key/value metadata attached to the batch
+                for observability and lineage purposes.
+
+        Raises:
+            ValueError: If ``start_index`` is negative.
+        """
         if start_index < 0:
             raise ValueError(f"start_index cannot be negative: {start_index}")
 

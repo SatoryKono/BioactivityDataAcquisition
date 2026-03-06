@@ -55,6 +55,36 @@ class StorageQuotaExceededError(CriticalError):
         reason: str | None = None,
         version: int | None = None,
     ) -> None:
+        """Initialise a ``StorageQuotaExceededError`` or Delta transaction failure.
+
+        The constructor handles two distinct usage modes via backward-compatible
+        argument overloading:
+
+        1. **Quota exceeded** — provide ``path``/``table_path``, ``quota_bytes`` and
+           ``used_bytes`` to report a disk/quota limit breach.
+        2. **Delta transaction failure** — provide ``table_path`` and ``reason``
+           (e.g. a concurrent-write conflict message) plus an optional ``version``.
+
+        A legacy positional-argument form (``quota_bytes`` as string, ``used_bytes``
+        as version integer) is detected at runtime and re-mapped transparently.
+
+        Args:
+            path: File-system path of the affected storage location. Used when
+                ``table_path`` is not provided.
+            quota_bytes: Storage quota limit in bytes; ``None`` when reporting a
+                Delta transaction failure rather than a quota breach.
+            used_bytes: Bytes consumed at the time of the error; ``None`` when
+                reporting a Delta transaction failure.
+            table_path: Keyword-only alternative to ``path``; takes precedence over
+                ``path`` when both are supplied.
+            reason: Human-readable description of a Delta transaction failure;
+                mutually exclusive with quota-breach mode.
+            version: Optional Delta table version number included in the error message
+                when ``reason`` is provided.
+
+        Raises:
+            ValueError: If neither ``path`` nor ``table_path`` is provided.
+        """
         if isinstance(quota_bytes, str) and reason is None:
             reason = quota_bytes
             quota_bytes = None

@@ -57,6 +57,36 @@ class BaseTransformer(_BaseTransformerRecordHelpersMixin, ABC):
         data_normalizer: DataNormalizationPort | None = None,
         contract_policy: ContractPolicyPort | None = None,
     ) -> None:
+        """Initialise the transformer with provider context and optional service overrides.
+
+        All optional parameters default to no-op or pure-Python implementations so
+        that concrete subclasses can be constructed with minimal arguments in unit
+        tests while still receiving full instrumentation in production. Service
+        defaults follow the Null Object Pattern (EXC-003) and are resolved at
+        construction time to avoid conditional checks in hot paths.
+
+        Args:
+            provider: Data-source provider identifier (e.g. ``"chembl"``); embedded
+                in entity IDs, content hashes, and metric labels.
+            entity_type: Entity type being transformed (e.g. ``"activity"``);
+                defaults to ``"unknown"`` when ``None``.
+            tracer: Optional ``TracingPort`` for OpenTelemetry span creation;
+                defaults to ``NoOpTracing``.
+            metrics: Optional ``MetricsPort`` for counter and histogram emission;
+                defaults to ``NoOpMetrics``.
+            silver_filters: Optional Silver-layer filter configuration; when ``None``
+                or empty, all records are passed through.
+            gold_filters: Optional Gold-layer filter configuration; when ``None``
+                or empty, all records are passed through.
+            identity_service: Optional service for computing entity IDs and content
+                hashes; defaults to a plain ``IdentityService`` instance.
+            pii_hasher: Optional ``PiiHasherPort`` for hashing personally identifiable
+                field values; defaults to ``NoOpPiiHasher``.
+            data_normalizer: Optional ``DataNormalizationPort`` for string and date
+                normalisation; defaults to ``DataNormalizationService``.
+            contract_policy: Optional ``ContractPolicyPort`` carrying the rename map
+                and hash-scope policy; defaults to ``_DefaultContractPolicy``.
+        """
         self.provider = provider
         self.entity_type = entity_type or "unknown"
         self._tracer: TracingPort = tracer if tracer is not None else NoOpTracing()

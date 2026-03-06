@@ -134,6 +134,9 @@ def assemble_runtime_config(
         dry_run: Whether this is a dry run (no writes).
         heartbeat_interval: Interval in seconds for lock heartbeat.
         vacuum: Resolved vacuum settings.
+        skip_gold: If True, Gold layer writes are skipped for this run.
+        health_check_mode: Health check enforcement mode; 'strict' raises on
+            failure, 'probe' logs and continues.
 
     Returns:
         Immutable RuntimeConfig instance.

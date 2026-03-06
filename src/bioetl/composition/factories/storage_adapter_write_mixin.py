@@ -108,6 +108,8 @@ class StorageAdapterWriteMixin:
             bronze_refs: Optional list of BronzeWriteResult from Bronze writes.
                 If provided, bronze_paths will be populated in Silver metadata
                 for complete lineage tracking (REQ-LINEAGE-001).
+            key_nullability_rules: Optional per-column nullability override rules
+                applied during Silver write to relax or tighten key constraints.
 
         Returns:
             SilverWriteResult with table info and Delta version for Gold lineage tracking
@@ -141,7 +143,7 @@ class StorageAdapterWriteMixin:
         mode: Literal["overwrite", "append", "scd2"] = "overwrite",
         *,
         scd_config: JsonDict  # Any: record/metadata values are heterogeneous
-        | None = None,
+                    | None = None,
         column_order: list[str] | None = None,
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
@@ -155,6 +157,8 @@ class StorageAdapterWriteMixin:
             schema: Pandera schema for validation
             primary_keys: Optional primary key columns
             mode: Write mode
+            scd_config: Optional SCD2 configuration dict specifying track_columns
+                and related settings when mode is 'scd2'.
             column_order: Optional explicit column order to apply.
             ingestion_ts: Ingestion timestamp for audit (ADR-014)
             run_id: Run identifier for audit correlation

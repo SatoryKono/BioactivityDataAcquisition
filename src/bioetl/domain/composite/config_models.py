@@ -29,6 +29,22 @@ __all__ = [
 
 @dataclass(frozen=True, slots=True)
 class SeedConfig:
+    """Configuration for the seed pipeline in a composite ETL workflow.
+
+    Defines the primary data source pipeline whose records serve as the left-hand
+    side of all enricher and dependency joins in the Composite Publication Pipeline
+    pattern (ADR-026). The seed provides the authoritative set of entity keys that
+    drive downstream enrichment.
+
+    Attributes:
+        pipeline: Logical name of the seed pipeline (``<provider>_<entity>``).
+        output_keys: Tuple of field names exposed as join keys to enrichers and
+            dependencies (e.g. ``("doi", "pmid")``).
+        silver_table: Delta Lake Silver table name to read seed records from.
+        limit: Optional row cap applied when loading seed data; ``None`` means
+            no limit.
+    """
+
     pipeline: str
     output_keys: tuple[str, ...]
     silver_table: str
@@ -48,6 +64,30 @@ class SeedConfig:
 
 @dataclass(frozen=True, slots=True)
 class DependencyConfig:
+    """Configuration for a dependency pipeline joined after enrichment in a composite workflow.
+
+    A dependency is a secondary data source whose records are left-joined to the
+    merged seed+enricher DataFrame. Unlike enrichers, dependencies typically provide
+    cross-referencing or lineage data rather than content enrichment. Part of the
+    Composite Publication Pipeline pattern (ADR-026).
+
+    Attributes:
+        pipeline: Logical name of the dependency pipeline (``<provider>_<entity>``).
+        join_keys: Tuple of field names used to join the dependency to the merged frame.
+        required: If ``True``, pipeline execution fails when this dependency is absent.
+        timeout_seconds: Maximum seconds to wait for the dependency pipeline before
+            treating it as failed.
+        silver_table: Optional explicit Silver table override; derived from pipeline
+            name when ``None``.
+        key_source: Pipeline whose keys are used on the left side of the join; defaults
+            to the seed pipeline when ``None`` or ``"seed"``.
+        filter_field: Single field name on the dependency side used for filtering;
+            mutually exclusive with ``filter_fields``.
+        filter_fields: Multi-field tuple for composite-key filtering; mutually exclusive
+            with ``filter_field``.
+        key_filter: Optional additional key filter expression applied before joining.
+    """
+
     pipeline: str
     join_keys: tuple[str, ...]
     required: bool = False
@@ -100,6 +140,32 @@ class DependencyConfig:
 
 @dataclass(frozen=True, slots=True)
 class EnricherConfig:
+    """Configuration for an enricher pipeline that augments seed records in a composite workflow.
+
+    An enricher provides supplementary data (metadata, citations, abstracts, etc.) that
+    is joined to seed records by shared key fields. Supports one-to-one and many-to-one
+    cardinalities, optional aggregation for many-to-one cases, and fallback strategies
+    when the enricher produces no results. Part of the Composite Publication Pipeline
+    pattern (ADR-026).
+
+    Attributes:
+        pipeline: Logical name of the enricher pipeline (``<provider>_<entity>``).
+        join_keys: Tuple of field names used to join the enricher to the seed frame.
+            The first key is the primary join key; additional keys are fallback keys.
+        required: If ``True``, pipeline execution fails when this enricher is absent.
+        filter_condition: Optional SQL-like expression applied to enricher records
+            before joining.
+        timeout_seconds: Maximum seconds to wait for this enricher before treating it
+            as failed.
+        fallback_strategy: Behaviour when the enricher fails or returns no data;
+            defaults to ``FallbackStrategy.SKIP``.
+        silver_table: Optional explicit Silver table override; derived from pipeline
+            name when ``None``.
+        limit: Optional row cap on enricher records loaded; ``None`` means no limit.
+        cardinality: Join cardinality — ``ONE_TO_ONE`` or ``MANY_TO_ONE``.
+        aggregation: Required aggregation config when ``cardinality=MANY_TO_ONE``.
+    """
+
     pipeline: str
     join_keys: tuple[str, ...]
     required: bool = False

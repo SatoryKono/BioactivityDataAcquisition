@@ -151,6 +151,7 @@ nav:
                     -   "ADR-038 Enum Externalization": 02-architecture/decisions/ADR-038-enum-externalization.md
                     -   "ADR-039 Unified Entity Config": 02-architecture/decisions/ADR-039-unified-entity-config-format.md
                     -   "ADR-040 Diagram Governance": 02-architecture/decisions/ADR-040-diagram-governance.md
+                    -   "ADR-041 Naming Policy Skills Agents": 02-architecture/decisions/ADR-041-naming-policy-skills-agents.md
     -   Guides:
             -   "Getting Started": 03-guides/getting-started.md
             -   "Quick Start": 03-guides/quick-start.md

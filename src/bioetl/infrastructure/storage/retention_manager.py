@@ -17,7 +17,6 @@ from __future__ import annotations
 
 __all__ = ["RetentionManager"]
 
-
 import asyncio
 from typing import TYPE_CHECKING, Any
 
@@ -99,9 +98,9 @@ class RetentionManager:
         table_name: str,
         target_size: int | None = None,
         partition_filters: list[
-            tuple[str, str, Any]  # Any: Delta Lake partition filter values vary
-        ]  # Any: Delta Lake partition filter values vary
-        | None = None,  # Any: Delta Lake filter value type varies
+                               tuple[str, str, Any]  # Any: Delta Lake partition filter values vary
+                           ]  # Any: Delta Lake partition filter values vary
+                           | None = None,  # Any: Delta Lake filter value type varies
     ) -> JsonDict:  # Any: compaction result metrics
         """Optimize table layout through file compaction.
 
@@ -112,7 +111,8 @@ class RetentionManager:
             target_size: Target file size in bytes (currently unused, reserved for future
                         delta-rs API support).
             partition_filters: Optional filters to limit optimization to specific partitions.
-                              Format: [(column, op, value), ...] e.g., [("date", "=", "2024-01-01")]
+                List of tuples with format [(column, op, value), ...],
+                e.g., [("date", "=", "2024-01-01")].
 
         Returns:
             Optimization metrics dictionary with details about files processed.

@@ -126,6 +126,9 @@ class SilverDQAnalyzerPort(Protocol):
             input_record_count: Original record count before transforms.
             quarantined_count: Number of quarantined records.
             previous_schema: Previous schema for drift detection.
+            key_nullability_rules: Optional per-column nullability override rules
+                used to adjust DQ checks for columns that permit null primary keys
+                under specific conditions.
 
         Returns:
             SilverDQReport: Complete DQ report for Silver layer.

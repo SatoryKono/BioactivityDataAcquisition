@@ -146,7 +146,10 @@ def _compute_degradation(
         within_budget = (
             latency_regression <= budget.max_regression_pct
             and throughput_regression <= budget.max_regression_pct
-            and (budget.p95_latency_ms <= 0 or p95_regression <= budget.max_p95_regression_pct)
+            and (
+                budget.p95_latency_ms <= 0
+                or p95_regression <= budget.max_p95_regression_pct
+            )
         )
 
         results.append(
@@ -202,12 +205,14 @@ def _render_markdown(
         lines.append("No observations found for configured hotspot benchmarks.")
         return "\n".join(lines) + "\n"
 
-    lines.extend(
-        [
-            "| Benchmark | Samples | Lat(ms) | P95(ms) | Thr(r/s) | Lat Reg | P95 Reg | Thr Reg | Budget | Status | Trend |",
-            "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |",
-        ]
+    header = (
+        "| Benchmark | Samples | Lat(ms) | P95(ms) | Thr(r/s)"
+        " | Lat Reg | P95 Reg | Thr Reg | Budget | Status | Trend |"
     )
+    separator = (
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |"
+    )
+    lines.extend([header, separator])
     for item in report:
         worst = max(
             item.latency_regression_pct,
