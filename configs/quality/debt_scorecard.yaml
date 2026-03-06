@@ -79,9 +79,9 @@ quarterly_targets:
             file_size_limits: 30
             function_complexity: 42
             function_length: 99
-                class_size: 27
+            class_size: 27
             class_method_count: 1
-                god_object: 18
+            god_object: 18
             domain_complexity: 7
     -   quarter: 2026-Q2
         max_total_exemptions: 250
@@ -93,9 +93,9 @@ quarterly_targets:
             file_size_limits: 28
             function_complexity: 23
             function_length: 71
-                class_size: 25
+            class_size: 25
             class_method_count: 1
-                god_object: 16
+            god_object: 16
             domain_complexity: 7
     -   quarter: 2026-Q3
         max_total_exemptions: 150
@@ -107,9 +107,9 @@ quarterly_targets:
             file_size_limits: 24
             function_complexity: 14
             function_length: 42
-                class_size: 22
+            class_size: 22
             class_method_count: 1
-                god_object: 14
+            god_object: 14
             domain_complexity: 7
     -   quarter: 2026-Q4
         max_total_exemptions: 145
@@ -121,9 +121,9 @@ quarterly_targets:
             file_size_limits: 22
             function_complexity: 13
             function_length: 40
-                class_size: 20
+            class_size: 20
             class_method_count: 1
-                god_object: 12
+            god_object: 12
             domain_complexity: 7
     -   quarter: 2027-Q1
         max_total_exemptions: 140
@@ -135,9 +135,9 @@ quarterly_targets:
             file_size_limits: 20
             function_complexity: 13
             function_length: 39
-                class_size: 18
+            class_size: 18
             class_method_count: 1
-                god_object: 10
+            god_object: 10
             domain_complexity: 7
 owner_decomposition_targets:
     -   quarter: 2026-Q1

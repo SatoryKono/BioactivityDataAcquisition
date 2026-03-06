@@ -16,7 +16,7 @@ retry with exponential backoff is appropriate (per RULES.md §3.1.3).
 
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import cast
 
 from bioetl.domain.exceptions.base import RecoverableError
 from bioetl.domain.types import ErrorType
@@ -394,7 +394,5 @@ def DataValidationError(
             value=value,
         ),
     )
-    cast(
-        Any, error
-    ).error_type = ErrorType.INVALID_DATA  # Any: legacy exception compatibility shim
+    error.error_type = ErrorType.INVALID_DATA
     return error
