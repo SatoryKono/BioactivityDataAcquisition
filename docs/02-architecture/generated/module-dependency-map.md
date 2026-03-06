@@ -4,8 +4,8 @@
 
 ## Summary
 
-- Scanned modules: `861`
-- Internal import edges (raw): `3190`
+- Scanned modules: `874`
+- Internal import edges (raw): `3210`
 - Aggregated layer edges: `14`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (top 60): `60`
@@ -25,9 +25,9 @@ flowchart LR
     composition -->|233 OK| composition
     composition -->|182 OK| domain
     composition -->|177 OK| infrastructure
-    domain -->|541 OK| domain
-    infrastructure -->|418 OK| domain
-    infrastructure -->|448 OK| infrastructure
+    domain -->|546 OK| domain
+    infrastructure -->|420 OK| domain
+    infrastructure -->|461 OK| infrastructure
     interfaces -->|12 OK| application
     interfaces -->|23 OK| composition
     interfaces -->|25 OK| domain
@@ -45,9 +45,9 @@ flowchart LR
 | `composition` | `composition` | 233 | allowed |
 | `composition` | `domain` | 182 | allowed |
 | `composition` | `infrastructure` | 177 | allowed |
-| `domain` | `domain` | 541 | allowed |
-| `infrastructure` | `domain` | 418 | allowed |
-| `infrastructure` | `infrastructure` | 448 | allowed |
+| `domain` | `domain` | 546 | allowed |
+| `infrastructure` | `domain` | 420 | allowed |
+| `infrastructure` | `infrastructure` | 461 | allowed |
 | `interfaces` | `application` | 12 | allowed |
 | `interfaces` | `composition` | 23 | allowed |
 | `interfaces` | `domain` | 25 | allowed |
@@ -58,7 +58,7 @@ flowchart LR
 
 | From Group | To Group | Imports |
 |---|---|---:|
-| `infrastructure.adapters` | `domain.types` | 76 |
+| `infrastructure.adapters` | `domain.types` | 77 |
 | `application.pipelines` | `domain.types` | 63 |
 | `infrastructure.adapters` | `domain.ports` | 63 |
 | `application.composite` | `domain.composite` | 58 |
@@ -110,10 +110,10 @@ flowchart LR
 | `interfaces.cli` | `application.services` | 9 |
 | `application.services` | `domain.exceptions` | 8 |
 | `composition.factories` | `domain.config` | 8 |
+| `infrastructure.schemas` | `domain.composite` | 8 |
 | `application.core` | `domain.config` | 7 |
 | `application.pipelines` | `domain.mapping` | 7 |
 | `composition.factories` | `domain.context` | 7 |
-| `infrastructure.schemas` | `domain.composite` | 7 |
 | `infrastructure.schemas` | `domain.filtering` | 7 |
 | `application.composite` | `domain.schemas` | 6 |
 | `application.services` | `domain.services` | 6 |

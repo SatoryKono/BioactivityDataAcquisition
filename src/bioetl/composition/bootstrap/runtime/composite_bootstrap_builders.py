@@ -69,7 +69,11 @@ def bootstrap_runtime_basics(
     lock_factory: Callable[[], LockPort],
     uuid_factory: Callable[[], UUID],
 ) -> tuple[str, Settings, LoggerPort, object, LockPort]:
-    """Build base runtime dependencies shared across composite bootstrap."""
+    """Build base runtime dependencies shared across composite bootstrap.
+
+    Returns:
+        Tuple of (run_id, settings, logger, storage, lock) for the composite run.
+    """
     return _bootstrap_runtime_basics_impl(
         config=config,
         run_id=run_id,
@@ -98,7 +102,11 @@ def build_runner_factories(
     Callable[[str, pl.DataFrame], PipelineRunner],
     Callable[[str, pl.DataFrame], PipelineRunner],
 ]:
-    """Build seed/dependency/enricher runner factories for composite phases."""
+    """Build seed/dependency/enricher runner factories for composite phases.
+
+    Returns:
+        Tuple of (seed_factory, dependency_factory, enricher_factory) callables.
+    """
     return _build_runner_factories_impl(
         config=config,
         runtime=runtime,
@@ -125,7 +133,11 @@ def build_support_services(
     ],
     create_dq_report_service_fn: Callable[[LoggerPort, Settings], DQReportService],
 ) -> CompositeSupportServices:
-    """Build composite support service bundle consumed by runner facade."""
+    """Build composite support service bundle consumed by runner facade.
+
+    Returns:
+        CompositeSupportServices bundle with all services required by the runner.
+    """
     return _build_support_services_impl(
         config=config,
         runtime=runtime,
@@ -153,7 +165,11 @@ def create_composite_runner(
     support_services: CompositeSupportServices,
     runner_factory: Callable[..., CompositePipelineRunnerService],
 ) -> CompositePipelineRunnerService:
-    """Create fully wired CompositePipelineRunner service."""
+    """Create fully wired CompositePipelineRunner service.
+
+    Returns:
+        Fully wired CompositePipelineRunnerService ready for execution.
+    """
     return _create_composite_runner_impl(
         config=config,
         runtime=runtime,

@@ -32,7 +32,11 @@ class ConflictResolverService:
         self._coalesce_policy = coalesce_policy
 
     def find_next_suffix(self, base_col: str, existing_cols: set[str]) -> str:
-        """Find next available A/B/C/... suffix for conflicting columns."""
+        """Find next available A/B/C/... suffix for conflicting columns.
+
+        Returns:
+            Single or double letter suffix string (e.g. ``"A"``, ``"B"``, ``"AA"``).
+        """
         suffix_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
         for char in suffix_chars:
@@ -55,7 +59,12 @@ class ConflictResolverService:
         enricher_df: pl.DataFrame,
         join_keys: set[str],
     ) -> tuple[pl.DataFrame, pl.DataFrame]:
-        """Rename conflicting enricher columns while preserving seed columns."""
+        """Rename conflicting enricher columns while preserving seed columns.
+
+        Returns:
+            Tuple of (seed_df, enricher_df) where conflicting enricher columns have been
+            renamed with letter suffixes to avoid overwriting seed values.
+        """
         seed_cols = set(seed_df.columns)
         enricher_cols = set(enricher_df.columns)
         conflicts = (seed_cols & enricher_cols) - join_keys
@@ -83,7 +92,12 @@ class ConflictResolverService:
         enrichers: Sequence[EnricherConfig],
         seed_pipeline: str | None = None,
     ) -> pl.DataFrame:
-        """Apply configured conflict-resolution policy to merged DataFrame."""
+        """Apply configured conflict-resolution policy to merged DataFrame.
+
+        Returns:
+            DataFrame after applying the configured ConflictResolution policy (coalescing,
+            seed-priority, enricher-priority, or explicit rules).
+        """
         if self._config.preserve_all_sources:
             qualified_cols = [
                 col for col in df.columns if "." in col and not col.startswith("_")

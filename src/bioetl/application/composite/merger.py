@@ -50,7 +50,7 @@ def _path_to_table_name(path: str) -> str:
     for layer in ("silver/", "gold/", "bronze/"):
         if layer in normalized:
             idx = normalized.find(layer)
-            return normalized[idx + len(layer):]
+            return normalized[idx + len(layer) :]
 
     return path
 
@@ -143,7 +143,12 @@ class MergeService(MergeIOMixin, MergeCompatibilityMixin, MergeMetricsRecorderMi
         dependencies: Sequence[DependencyConfig] | None = None,
         dependency_results: dict[str, DependencyResult] | None = None,
     ) -> MergeResult:
-        """Merge seed, dependency, and enricher data into unified output."""
+        """Merge seed, dependency, and enricher data into unified output.
+
+        Returns:
+            MergeResult with merged record counts, source provenance, cross-validation
+            stats, quarantine payloads, and duration metrics.
+        """
         started_at = datetime.now(tz=UTC)
         (
             seed_df,

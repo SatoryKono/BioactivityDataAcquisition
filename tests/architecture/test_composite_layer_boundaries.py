@@ -323,13 +323,22 @@ class TestCheckpointFSMIntegration:
 
         REQ-ARCH-FSM-011: Checkpoint must persist FSM state for resume.
         """
+        # checkpoint may be a single file or a package
+        checkpoint_pkg = src_dir / "bioetl" / "application" / "composite" / "checkpoint"
         checkpoint_file = (
             src_dir / "bioetl" / "application" / "composite" / "checkpoint.py"
         )
-        if not checkpoint_file.exists():
-            pytest.skip("application/composite/checkpoint.py not found")
-
-        content = checkpoint_file.read_text(encoding="utf-8")
+        if checkpoint_pkg.is_dir():
+            # Read all .py files in the package
+            parts = [
+                p.read_text(encoding="utf-8")
+                for p in sorted(checkpoint_pkg.rglob("*.py"))
+            ]
+            content = "\n".join(parts)
+        elif checkpoint_file.exists():
+            content = checkpoint_file.read_text(encoding="utf-8")
+        else:
+            pytest.skip("application/composite/checkpoint not found")
 
         # Must import FSM state from domain
         has_fsm_import = (
@@ -351,13 +360,21 @@ class TestCheckpointFSMIntegration:
 
         REQ-ARCH-FSM-012: Application imports domain, not vice versa.
         """
+        # checkpoint may be a single file or a package
+        checkpoint_pkg = src_dir / "bioetl" / "application" / "composite" / "checkpoint"
         checkpoint_file = (
             src_dir / "bioetl" / "application" / "composite" / "checkpoint.py"
         )
-        if not checkpoint_file.exists():
-            pytest.skip("application/composite/checkpoint.py not found")
-
-        content = checkpoint_file.read_text(encoding="utf-8")
+        if checkpoint_pkg.is_dir():
+            parts = [
+                p.read_text(encoding="utf-8")
+                for p in sorted(checkpoint_pkg.rglob("*.py"))
+            ]
+            content = "\n".join(parts)
+        elif checkpoint_file.exists():
+            content = checkpoint_file.read_text(encoding="utf-8")
+        else:
+            pytest.skip("application/composite/checkpoint not found")
 
         # Check for correct import direction
         correct_import = (

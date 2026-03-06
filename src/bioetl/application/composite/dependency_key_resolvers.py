@@ -43,7 +43,11 @@ class SeedKeyResolver:
         dep_config_lookup: dict[str, DependencyConfig],
         delta_reader: DeltaReaderPort | None,
     ) -> pl.DataFrame:
-        """Resolve keys by passing through the seed keys unchanged."""
+        """Resolve keys by passing through the seed keys unchanged.
+
+        Returns:
+            The seed_keys DataFrame unmodified.
+        """
         del dep_config_lookup, delta_reader
         self._logger.debug(
             "Using seed keys for dependency",
@@ -66,7 +70,12 @@ class ChainedKeyResolver:
         dep_config_lookup: dict[str, DependencyConfig],
         delta_reader: DeltaReaderPort | None,
     ) -> pl.DataFrame:
-        """Resolve keys by reading them from the source dependency's Silver table."""
+        """Resolve keys by reading them from the source dependency's Silver table.
+
+        Returns:
+            DataFrame of keys from the chained source's Silver table, filtered by
+            key_filter if configured; falls back to seed_keys on read failures.
+        """
         reader = self._require_delta_reader(dependency, delta_reader)
         source_config = self._resolve_source_config(dependency, dep_config_lookup)
         source_table = source_config.silver_table
@@ -210,12 +219,20 @@ class ChainedKeyResolver:
 
 
 def create_seed_key_resolver(logger: LoggerPort) -> SeedKeyResolver:
-    """Create default seed-key resolver."""
+    """Create default seed-key resolver.
+
+    Returns:
+        New SeedKeyResolver instance wired with the provided logger.
+    """
     return SeedKeyResolver(logger)
 
 
 def create_chained_key_resolver(logger: LoggerPort) -> ChainedKeyResolver:
-    """Create default chained-key resolver."""
+    """Create default chained-key resolver.
+
+    Returns:
+        New ChainedKeyResolver instance wired with the provided logger.
+    """
     return ChainedKeyResolver(logger)
 
 

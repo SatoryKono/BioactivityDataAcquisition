@@ -142,7 +142,12 @@ class CompositeCheckpointService:
         return None
 
     async def load(self) -> CompositeCheckpointState:
-        """Load checkpoint state or create a fresh one."""
+        """Load checkpoint state or create a fresh one.
+
+        Returns:
+            Existing checkpoint state if resume mode and a valid checkpoint file exists,
+            otherwise a fresh CompositeCheckpointState with NOT_STARTED status.
+        """
         if self._resume:
             checkpoint_path = self._resolve_resume_checkpoint_path()
             if checkpoint_path is not None and checkpoint_path.exists():
@@ -206,7 +211,11 @@ class CompositeCheckpointService:
             )
 
     async def list_all(self) -> list[Path]:
-        """List all checkpoints for this composite pipeline."""
+        """List all checkpoints for this composite pipeline.
+
+        Returns:
+            List of Path objects for all checkpoint JSON files matching this composite name.
+        """
         pattern = f"composite_{self._composite_name}_*.json"
         return list(self._checkpoint_dir.glob(pattern))
 

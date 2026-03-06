@@ -51,7 +51,11 @@ _PROVIDER_LOOKUPS: dict[str, dict[str, PublicationTypeEntry]] = {}
 
 
 def get_classification_table_size() -> int:
-    """Return the number of entries in the classification table."""
+    """Return the number of entries in the classification table.
+
+    Returns:
+        Number of entries currently loaded in the classification table.
+    """
     return len(_ENTRY_BY_SPECIFICITY)
 
 
@@ -116,6 +120,10 @@ def classify_publication_type(
     For single-value providers (OpenAlex, CrossRef), ``raw_type`` is used.
     For multi-value providers (PubMed, Semantic Scholar), the most specific
     match from ``raw_types_list`` is returned.
+
+    Returns:
+        PublicationTypeEntry if a match is found, None if provider is unknown
+        or no match is found.
 
     Raises:
         RuntimeError: If ``initialize_classification()`` has not been called.

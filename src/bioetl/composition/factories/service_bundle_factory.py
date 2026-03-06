@@ -82,7 +82,11 @@ __all__ = [
 
 
 def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
-    """Load pipeline config."""
+    """Load pipeline config.
+
+    Returns:
+        Parsed PipelineYamlConfig for the given pipeline name.
+    """
     return _load_pipeline_config_direct(pipeline_name)
 
 
@@ -90,7 +94,11 @@ def yaml_config_to_domain(
     yaml_config: PipelineYamlConfig,
     resolved_dq_config: DQConfig | None = None,
 ) -> PipelineConfig:
-    """Map YAML config to domain model."""
+    """Map YAML config to domain model.
+
+    Returns:
+        Domain PipelineConfig mapped from the provided YAML configuration.
+    """
     return _yaml_config_to_domain_direct(
         yaml_config=yaml_config,
         resolved_dq_config=resolved_dq_config,
@@ -100,7 +108,11 @@ def yaml_config_to_domain(
 def compute_config_hash(
     config: PipelineYamlConfig | dict[str, object],
 ) -> str:
-    """Compute config hash."""
+    """Compute config hash.
+
+    Returns:
+        SHA256 hash string of the normalized pipeline configuration.
+    """
     return _compute_config_hash_direct(config)
 
 
@@ -154,7 +166,11 @@ def build_pipeline_services(
     silver_validator: SilverValidatorPort | None = None,
     _deps: ServiceBundleDependencies | None = None,
 ) -> PipelineService:
-    """Build shared pipeline services."""
+    """Build shared pipeline services.
+
+    Returns:
+        Fully wired PipelineService bundle for the given pipeline run.
+    """
     deps = _resolve_service_bundle_dependencies(_deps)
     pipeline_config = config or deps.load_pipeline_config(pipeline_name)
     base_services_factory = deps.base_services_factory
@@ -218,7 +234,11 @@ def create_pipeline_with_services(
     pandera_silver_schema: object | None = None,
     _deps: ServiceBundleDependencies | None = None,
 ) -> BasePipeline:
-    """Create pipeline instance with services and optional transformer."""
+    """Create pipeline instance with services and optional transformer.
+
+    Returns:
+        Configured BasePipeline instance ready for execution.
+    """
     return _create_pipeline_with_services_impl(
         _PipelineCreationInputs(
             pipeline_name=pipeline_name,
@@ -244,35 +264,7 @@ def create_pipeline_with_services(
 
 @dataclass(frozen=True, slots=True)
 class _PipelineCreationInputs:
-    """Immutable value object bundling all inputs for pipeline instantiation.
-
-    Aggregates the pipeline class, provider context, run parameters, and optional
-    service overrides into a single frozen dataclass. Passed to
-    ``_create_pipeline_with_services_impl`` to avoid a long flat argument list
-    and to enable safe partial construction in tests. Part of the composition
-    layer (ADR-025, ADR-029).
-
-    Attributes:
-        pipeline_name: Logical pipeline identifier (``<provider>_<entity>``).
-        pipeline_class: Concrete ``BasePipeline`` subclass to instantiate.
-        provider: Data-source provider name (e.g. ``"chembl"``).
-        create_data_source_fn: Factory callable that produces a ``DataSourcePort``
-            adapter for the given provider.
-        transformer_class: Optional ``BaseTransformer`` subclass; ``None`` means
-            no transformation step is wired.
-        run_id: Unique identifier for this pipeline run.
-        runtime: Immutable runtime configuration (batch size, run type, etc.).
-        settings: Global infrastructure settings (paths, feature flags).
-        logger: Structured logger injected from composition root.
-        config: Pre-loaded YAML pipeline config; loaded from disk when ``None``.
-        filter_config: Optional input-side filter rules for Bronze records.
-        tracer: Optional OpenTelemetry tracing provider.
-        dq_monitor: Optional DQ monitoring port for Silver-layer quality checks.
-        metrics: Optional metrics port for instrumentation.
-        cached_bronze: Optional context enabling Bronze-cache replay mode.
-        pandera_silver_schema: Optional Pandera ``DataFrameModel`` class used to
-            construct the ``SilverValidatorPort`` for schema enforcement.
-    """
+    """Immutable input bundle for pipeline construction."""
 
     pipeline_name: str
     pipeline_class: type[BasePipeline]

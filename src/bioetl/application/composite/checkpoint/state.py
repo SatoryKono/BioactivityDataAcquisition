@@ -33,7 +33,11 @@ class CompositeCheckpointState:
     updated_at: datetime | None = None
 
     def with_seed_completed(self, result: SeedResult) -> CompositeCheckpointState:
-        """Create new state with seed marked as completed."""
+        """Create new state with seed marked as completed.
+
+        Returns:
+            New immutable checkpoint state with seed_completed=True and SEED_COMPLETED FSM state.
+        """
         return CompositeCheckpointState(
             composite_name=self.composite_name,
             run_id=self.run_id,
@@ -53,7 +57,11 @@ class CompositeCheckpointState:
         dependency_name: str,
         result: DependencyResult,
     ) -> CompositeCheckpointState:
-        """Create new state with dependency marked as completed."""
+        """Create new state with dependency marked as completed.
+
+        Returns:
+            New immutable checkpoint state with the dependency added to completed_dependencies.
+        """
         new_completed = self.completed_dependencies | {dependency_name}
         new_results = {**self.dependency_results, dependency_name: result}
         return CompositeCheckpointState(
@@ -75,7 +83,11 @@ class CompositeCheckpointState:
         enricher_name: str,
         result: EnrichmentResult,
     ) -> CompositeCheckpointState:
-        """Create new state with enricher marked as completed."""
+        """Create new state with enricher marked as completed.
+
+        Returns:
+            New immutable checkpoint state with the enricher added to completed_enrichers.
+        """
         new_completed = self.completed_enrichers | {enricher_name}
         new_results = {**self.enrichment_results, enricher_name: result}
         return CompositeCheckpointState(
@@ -93,7 +105,11 @@ class CompositeCheckpointState:
         )
 
     def with_state(self, new_state: CompositePipelineState) -> CompositeCheckpointState:
-        """Create new state with updated FSM state."""
+        """Create new state with updated FSM state.
+
+        Returns:
+            New immutable checkpoint state with the FSM state field replaced.
+        """
         return CompositeCheckpointState(
             composite_name=self.composite_name,
             run_id=self.run_id,
@@ -116,7 +132,11 @@ class CompositeCheckpointState:
         return self.seed_completed or bool(self.completed_enrichers)
 
     def to_dict(self) -> dict[str, object]:
-        """Convert state to dictionary for JSON serialization."""
+        """Convert state to dictionary for JSON serialization.
+
+        Returns:
+            Dictionary with all checkpoint fields serialized to JSON-compatible types.
+        """
         return {
             "composite_name": self.composite_name,
             "run_id": self.run_id,
@@ -178,7 +198,11 @@ class CompositeCheckpointState:
         cls,
         data: JsonDict,  # Any: checkpoint state has heterogeneous values
     ) -> CompositeCheckpointState:
-        """Create state from dictionary with backward-compatibility handling."""
+        """Create state from dictionary with backward-compatibility handling.
+
+        Returns:
+            Reconstructed CompositeCheckpointState instance from the serialized data.
+        """
         seed_result = None
         if data.get("seed_result"):
             sr = data["seed_result"]

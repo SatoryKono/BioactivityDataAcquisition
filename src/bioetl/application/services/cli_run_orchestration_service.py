@@ -70,7 +70,11 @@ class CliRunOrchestrationService:
         run_type: str,
         resume: bool,
     ) -> StartOffsetValidationResult:
-        """Validate start offset constraints for run command options."""
+        """Validate start offset constraints for run command options.
+
+        Returns:
+            StartOffsetValidationResult with is_valid flag and optional error_message.
+        """
         if start_offset is None:
             return StartOffsetValidationResult(is_valid=True)
         if start_offset < 0:
@@ -108,7 +112,11 @@ class CliRunOrchestrationService:
         cached_bronze_date: str | None,
         cached_bronze_path: str | None,
     ) -> RunOptions:
-        """Build RunOptions from CLI input."""
+        """Build RunOptions from CLI input.
+
+        Returns:
+            RunOptions populated from the provided CLI parameters.
+        """
         return RunOptions(
             run_type=run_type,
             resume=resume,
@@ -137,7 +145,11 @@ class CliRunOrchestrationService:
         run_coroutine: RunCoroutineCallable,
         flush_metrics: MetricsFlushCallable,
     ) -> RunResult:
-        """Execute pipeline with deterministic metrics flush."""
+        """Execute pipeline with deterministic metrics flush.
+
+        Returns:
+            RunResult from the completed pipeline execution.
+        """
         coro = run_pipeline_async(
             pipeline,
             options,

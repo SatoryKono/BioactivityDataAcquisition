@@ -76,7 +76,11 @@ def map_run_status_to_exit_code(
     status: PipelineRunResult,
     error_type: str | None,
 ) -> ExitCode:
-    """Map single pipeline status to CLI exit code."""
+    """Map single pipeline status to CLI exit code.
+
+    Returns:
+        ExitCode corresponding to the pipeline run status and error type.
+    """
     if status in (PipelineRunResult.SUCCESS, PipelineRunResult.DRY_RUN):
         return ExitCode.OK
     if status == PipelineRunResult.SHUTDOWN:
@@ -87,7 +91,11 @@ def map_run_status_to_exit_code(
 
 
 def map_batch_run_result_to_exit_code(batch_result: BatchRunResultProtocol) -> ExitCode:
-    """Map batched pipeline result to CLI exit code."""
+    """Map batched pipeline result to CLI exit code.
+
+    Returns:
+        ExitCode based on the number of failures and shutdown signals in the batch.
+    """
     if batch_result.failed > 0:
         return ExitCode.PIPELINE_ERROR
     if any(
@@ -105,7 +113,11 @@ def map_success_flag_to_exit_code(
     *,
     failure_exit_code: ExitCode = ExitCode.PIPELINE_ERROR,
 ) -> ExitCode:
-    """Map boolean command outcome to CLI exit code."""
+    """Map boolean command outcome to CLI exit code.
+
+    Returns:
+        ExitCode.OK if success is True, otherwise the specified failure_exit_code.
+    """
     if success:
         return ExitCode.OK
     return failure_exit_code
@@ -118,7 +130,12 @@ def build_failure_context(
     subject_key: str,
     subject_value: str,
 ) -> dict[str, object]:
-    """Build structured context for CLI failure diagnostics."""
+    """Build structured context for CLI failure diagnostics.
+
+    Returns:
+        Dictionary with structured error context including message, reason_code,
+        subject key/value, and error type.
+    """
     if isinstance(exc, BioETLError):
         return exc.to_structured_context(
             reason_code=reason_code,
@@ -134,7 +151,11 @@ def build_failure_context(
 
 
 def render_failure_context(context: Mapping[str, object]) -> str:
-    """Render a structured failure context as stable human-readable text."""
+    """Render a structured failure context as stable human-readable text.
+
+    Returns:
+        Human-readable string combining the message and sorted metadata fields.
+    """
     message = str(context.get("message", ""))
     keys = [key for key in context if key != "message"]
     keys.sort()

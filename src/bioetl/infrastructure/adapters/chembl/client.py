@@ -58,38 +58,7 @@ if TYPE_CHECKING:
 class ChemblAdapter(
     ChemblFetchAdapterMixin, ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter
 ):
-    """ChEMBL REST API adapter implementing DataSourcePort.
-
-    Fetches bioactivity data from the EBI ChEMBL API at
-    ``https://www.ebi.ac.uk/chembl/api/data``.
-
-    Rate limiting:
-        Token-bucket algorithm (3 req/s, burst 10) enforced by the
-        injected ``UnifiedHTTPClient`` and its ``RateLimiterPort``.
-
-    Pagination:
-        Offset-based (``limit``/``offset`` query params, default page size
-        1000). Entities listed in ``_NO_PAGINATION_ENTITIES``
-        (target_component, protein_class) are fetched in a single request.
-        For filtered queries, IDs are batched (default batch size 20) with
-        ``__in`` filter syntax; URL length is capped at 1000 characters.
-
-    Health-aware batch sizing (see ``ChemblHealthMixin``):
-        * HEALTHY -- full ``page_size`` (default 1000).
-        * DEGRADED -- ``max(100, page_size // 2)`` (halved, floor 100).
-        * UNHEALTHY -- raises ``CriticalError`` immediately (fail-fast).
-
-    Resilience:
-        On ``RetryExhaustedError`` during filtered fetches the adapter
-        splits the failing batch in half and retries each part recursively.
-        Single-ID failures fall back to the direct-record endpoint
-        (``/entity/CHEMBLID``) before logging a skip.
-
-    Configuration (``configs/providers/chembl.yaml`` via ``AdapterConfig``):
-        ``page_size`` (1000), ``batch_size`` (20), ``timeout_sec`` (60),
-        ``max_retries`` (3), ``circuit_breaker.failure_threshold`` (5),
-        ``circuit_breaker.recovery_timeout`` (300 s).
-    """
+    """ChEMBL REST adapter with pagination, filtering, and resilience helpers."""
 
     http_client: UnifiedHTTPClient
     logger: LoggerPort
@@ -153,13 +122,8 @@ class ChemblAdapter(
     ) -> JsonDict:  # Any: HTTP query params (str|int|bool values)
         """Build API request parameters with health-aware batch size.
 
-        Args:
-            offset: Pagination offset.
-            entity_type: Entity type for determining pagination support.
-                        If in _NO_PAGINATION_ENTITIES, limit/offset are excluded.
-
         Returns:
-            Dictionary of query parameters.
+            Dictionary of query parameters for the API request.
         """
         params: JsonDict = {  # Any: untyped API JSON record
             "format": "json"
@@ -179,7 +143,11 @@ class ChemblAdapter(
     def _process_response(
         self, response: Response, entity_type: str
     ) -> tuple[list[BronzeRecord], bool]:
-        """Process API response, extract records and pagination info."""
+        """Process API response and return records with pagination flag.
+
+        Returns:
+            Tuple of (list of extracted records, whether there is a next page).
+        """
         data = response.json()  # Any: untyped ChEMBL API JSON response
         plural_key = self._mapper.get_plural_key(entity_type)
         records = data.get(plural_key, [])
@@ -192,12 +160,20 @@ class ChemblAdapter(
         return records, has_next
 
     def _batch_ids(self, ids: list[str], batch_size: int) -> Iterator[list[str]]:
-        """Split IDs into batches for API requests."""
+        """Split IDs into batches for API requests.
+
+        Returns:
+            Iterator yielding successive sub-lists of size batch_size.
+        """
         for i in range(0, len(ids), batch_size):
             yield ids[i : i + batch_size]
 
     def _build_filter_in_params(self, filters: dict[str, list[str]]) -> dict[str, str]:
-        """Build __in filter parameters for multi-field filtering."""
+        """Build ``__in`` filter parameters for multi-field filtering.
+
+        Returns:
+            Dictionary mapping field__in keys to comma-joined ID strings.
+        """
         return {
             f"{filter_field}__in": ",".join(ids)
             for filter_field, ids in filters.items()
@@ -205,23 +181,39 @@ class ChemblAdapter(
         }
 
     def _normalize_filter_field(self, entity_type: str, filter_field: str) -> str:
-        """Map Silver field names to ChEMBL API field names."""
+        """Map Silver field names to ChEMBL API field names.
+
+        Returns:
+            ChEMBL API field name corresponding to the Silver layer field name.
+        """
         return _SILVER_TO_CHEMBL_API_FIELD.get(filter_field, filter_field)
 
     def _get_api_pk_field(self, entity_type: str) -> str:
-        """Get primary key field name as it appears in raw API responses."""
+        """Get primary key field name as it appears in raw API responses.
+
+        Returns:
+            API-level primary key field name string.
+        """
         pk = self._mapper.get_primary_key_field(entity_type)
         return _SILVER_TO_CHEMBL_API_FIELD.get(pk, pk)
 
     def _get_api_dedup_fields(self, entity_type: str) -> tuple[str, ...]:
-        """Get dedup key fields as they appear in raw API responses."""
+        """Get dedup key fields as they appear in raw API responses.
+
+        Returns:
+            Tuple of API-level field name strings used for deduplication.
+        """
         fields = self._mapper.get_dedup_key_fields(entity_type)
         return tuple(_SILVER_TO_CHEMBL_API_FIELD.get(f, f) for f in fields)
 
     def _build_filter_params(
         self, entity_type: str, filter_field: str, id_batch: list[str]
     ) -> dict[str, str]:
-        """Build filter params using API-specific field names."""
+        """Build filter params using API-specific field names.
+
+        Returns:
+            Dictionary with the __in filter parameter for the API request.
+        """
         joined_ids = ",".join(id_batch)
         api_filter_field = self._normalize_filter_field(entity_type, filter_field)
         return {f"{api_filter_field}__in": joined_ids}
@@ -231,7 +223,11 @@ class ChemblAdapter(
         url: str,
         params: JsonDict,  # Any: untyped API JSON record
     ) -> int:  # Any: HTTP query params (str|int|bool values)
-        """Estimate the length of the final URL with parameters."""
+        """Estimate length of the final URL with parameters.
+
+        Returns:
+            Number of characters in the URL-encoded request URL including query string.
+        """
         # URL-encode parameters to get accurate length (including escaping)
         query_str = urllib.parse.urlencode(params, doseq=True)
         return len(url) + 1 + len(query_str)
@@ -241,7 +237,11 @@ class ChemblAdapter(
         record: BronzeRecord,
         pk_fields: tuple[str, ...],
     ) -> str:
-        """Compute composite key string from multiple fields."""
+        """Compute composite key string from multiple fields.
+
+        Returns:
+            Composite key string with field values joined by '|'.
+        """
         return compute_composite_key(record, pk_fields)
 
     def _is_duplicate_record(
@@ -251,7 +251,11 @@ class ChemblAdapter(
         seen_ids: set[str],
         entity_type: str,
     ) -> bool:
-        """Check if record is duplicate and add to seen set if not."""
+        """Check if record is duplicate and add to seen set if not.
+
+        Returns:
+            True if the record is a duplicate, False if it is new.
+        """
         return is_duplicate_record(
             record, pk_field, seen_ids, entity_type, self.logger, self._adapter_metrics
         )
@@ -263,7 +267,11 @@ class ChemblAdapter(
         seen_keys: set[str],
         entity_type: str,
     ) -> bool:
-        """Check if record is duplicate using composite key."""
+        """Check if record is duplicate using composite key.
+
+        Returns:
+            True if the composite key has been seen before, False if it is new.
+        """
         return is_duplicate_record_composite(
             record,
             pk_fields,
@@ -283,34 +291,7 @@ class ChemblAdapter(
         *,
         validate: bool = True,
     ) -> AsyncIterator[BaseModel]:
-        """Fetch records from ChEMBL as typed DTO models.
-
-        Returns Pydantic DTO models instead of raw dicts for type safety.
-        Uses domain DTOs with extra='forbid' to detect API changes.
-
-        Args:
-            entity_type: Type of entity (activity, assay, molecule, target, etc.)
-            limit: Maximum number of records to fetch
-            query: Unused for ChEMBL
-            filter_ids: List of IDs to filter by
-            filter_field: Field name to filter on
-            validate: If True, validate with model_validate (strict).
-                     If False, use model_construct (skip validation, faster).
-
-        Yields:
-            Typed DTO models (ActivityRecord, AssayRecord, etc.)
-
-        Raises:
-            ValueError: If entity_type is not supported for DTO conversion
-            ValidationError: If validate=True and API response has unexpected fields
-
-        Example:
-            >>> async for activity in adapter.fetch_as_models("activity", limit=100):
-            ...     logger.debug("activity_fetched", activity_id=activity.activity_id, pchembl=activity.pchembl_value)
-
-        Returns:
-            Async iterator yielding fetched records.
-        """
+        """Fetch ChEMBL records as typed DTO models."""
         model_class = CHEMBL_DTO_MODELS.get(entity_type)
         if model_class is None:
             raise ValueError(
@@ -335,11 +316,8 @@ class ChemblAdapter(
     async def get_entity_count(self, entity_type: str) -> int:
         """Get total count of entities.
 
-        Args:
-            entity_type: Entity type identifier.
-
         Returns:
-            Entity count.
+            Number of entities of the specified type in the ChEMBL database.
         """
         url = self._mapper.get_resource_url(entity_type)
         params = {"limit": 1, "format": "json"}

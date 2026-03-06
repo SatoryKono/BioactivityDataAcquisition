@@ -54,17 +54,29 @@ class AdapterErrorClassifier:
         error: Exception,
         status_code: int | None = None,
     ) -> ErrorCategory:
-        """Classify adapter error context using status code precedence."""
+        """Classify adapter error context using status code precedence.
+
+        Returns:
+            ErrorCategory based on status code (if provided) or exception type.
+        """
         if status_code is not None:
             return self.classify_http_status(status_code)
         return self.classify_exception(error)
 
     def classify_http_status(self, status_code: int) -> ErrorCategory:
-        """Classify HTTP status code into retryability categories."""
+        """Classify HTTP status code into retryability categories.
+
+        Returns:
+            ErrorCategory indicating whether the HTTP error is critical, recoverable, or a data quality issue.
+        """
         return _classify_http_status(status_code=status_code, logger=self._logger)
 
     def classify_exception(self, error: Exception) -> ErrorCategory:
-        """Classify exception into adapter error category."""
+        """Classify exception into adapter error category.
+
+        Returns:
+            ErrorCategory based on the exception type (critical, recoverable, or data quality).
+        """
         error_type = self._classifier.classify(error)
 
         if error_type.is_critical():
@@ -145,7 +157,11 @@ def classify_http_error(
     *,
     logger: LoggerPort,
 ) -> ErrorCategory:
-    """Compatibility wrapper for status-code classification."""
+    """Compatibility wrapper for status-code classification.
+
+    Returns:
+        ErrorCategory for the given HTTP status code.
+    """
     return _classify_http_status(status_code=status_code, logger=logger)
 
 
@@ -155,6 +171,10 @@ def classify_exception(
     classifier: ErrorClassifierPort,
     logger: LoggerPort,
 ) -> ErrorCategory:
-    """Compatibility wrapper for exception classification."""
+    """Compatibility wrapper for exception classification.
+
+    Returns:
+        ErrorCategory based on the exception type.
+    """
     adapter_classifier = AdapterErrorClassifier(classifier=classifier, logger=logger)
     return adapter_classifier.classify_exception(error)

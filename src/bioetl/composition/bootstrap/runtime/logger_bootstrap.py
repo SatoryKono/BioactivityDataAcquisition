@@ -35,7 +35,11 @@ def bootstrap_logger_port(
     log_level: str = "INFO",
     logger_factory: LoggerFactory | None = None,
 ) -> LoggerPort:
-    """Create a logger port implementation for pipeline execution."""
+    """Create a logger port implementation for pipeline execution.
+
+    Returns:
+        Configured LoggerPort for structured pipeline logging.
+    """
     effective_run_id = run_id if run_id is not None else uuid4()
     factory = logger_factory or _default_logger_factory
     return factory(pipeline, effective_run_id, log_level)
@@ -47,7 +51,11 @@ def bootstrap_logger(
     log_level: str = "INFO",
     logger_factory: LoggerFactory | None = None,
 ) -> LoggerPort:
-    """Deprecated alias for :func:`bootstrap_logger_port`."""
+    """Deprecated alias for :func:`bootstrap_logger_port`.
+
+    Returns:
+        Configured LoggerPort for structured pipeline logging.
+    """
     return bootstrap_logger_port(
         pipeline=pipeline,
         run_id=run_id,

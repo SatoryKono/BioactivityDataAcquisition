@@ -132,14 +132,22 @@ class CompositeConfig:
         return tuple(dependency.pipeline for dependency in self.dependencies)
 
     def get_dependency(self, pipeline_name: str) -> DependencyConfig | None:
-        """Look up a dependency config by pipeline name."""
+        """Look up a dependency config by pipeline name.
+
+        Returns:
+            DependencyConfig if found, None otherwise.
+        """
         for dependency in self.dependencies:
             if dependency.pipeline == pipeline_name:
                 return dependency
         return None
 
     def get_enricher(self, pipeline_name: str) -> EnricherConfig | None:
-        """Look up an enricher config by pipeline name."""
+        """Look up an enricher config by pipeline name.
+
+        Returns:
+            EnricherConfig if found, None otherwise.
+        """
         for enricher in self.enrichers:
             if enricher.pipeline == pipeline_name:
                 return enricher
@@ -151,12 +159,20 @@ class CompositeConfig:
         return f"composite:{self.name}"
 
     def to_dict(self) -> dict[str, object]:
-        """Serialize this config to a plain dictionary."""
+        """Serialize this config to a plain dictionary.
+
+        Returns:
+            Dictionary representation of this CompositeConfig.
+        """
         return _composite_to_dict(self)
 
     @classmethod
     def from_dict(cls, data: dict[str, object]) -> CompositeConfig:
-        """Deserialize a CompositeConfig from a plain dictionary."""
+        """Deserialize a CompositeConfig from a plain dictionary.
+
+        Returns:
+            CompositeConfig instance reconstructed from the given dict.
+        """
         return _composite_from_dict(data)
 
 

@@ -394,5 +394,5 @@ def DataValidationError(
             value=value,
         ),
     )
-    error.error_type = ErrorType.INVALID_DATA
+    error.error_type = ErrorType.INVALID_DATA  # type: ignore[misc]  # instance override of ClassVar
     return error

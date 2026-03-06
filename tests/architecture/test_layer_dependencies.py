@@ -759,11 +759,19 @@ def test_observability_ports_have_close_method(src_dir: Path) -> None:
     REQ-ARCH-021: Proper lifecycle management for observability resources.
     """
     observability_file = src_dir / "bioetl" / "domain" / "ports" / "observability.py"
-    if not observability_file.exists():
+    observability_pkg = src_dir / "bioetl" / "domain" / "ports" / "observability"
+    if observability_pkg.is_dir():
+        # Read all .py files in the package
+        parts = [
+            p.read_text(encoding="utf-8")
+            for p in sorted(observability_pkg.rglob("*.py"))
+        ]
+        content = "\n".join(parts)
+    elif observability_file.exists():
+        with observability_file.open(encoding="utf-8") as f:
+            content = f.read()
+    else:
         pytest.skip("Domain ports observability file not found")
-
-    with observability_file.open(encoding="utf-8") as f:
-        content = f.read()
 
     import ast
 

@@ -30,7 +30,11 @@ class JoinExecutorService:
         self._join_type_resolver = join_type_resolver
 
     def get_polars_join_type(self) -> JoinHow:
-        """Resolve current join type from strategy resolver."""
+        """Resolve current join type from strategy resolver.
+
+        Returns:
+            Polars join type literal (e.g. ``"left"``, ``"inner"``, ``"full"``).
+        """
         return self._join_type_resolver()
 
     def execute_polars_join(
@@ -41,7 +45,11 @@ class JoinExecutorService:
         right_key: str,
         pipeline_name: str,
     ) -> pl.DataFrame:
-        """Execute single-key join while preserving right join key as data column."""
+        """Execute single-key join while preserving right join key as data column.
+
+        Returns:
+            Joined DataFrame; returns left_df unchanged if a required join key is missing.
+        """
         import polars as pl
 
         how = self.get_polars_join_type()
@@ -108,7 +116,11 @@ class JoinExecutorService:
         right_keys: list[str],
         pipeline_name: str,
     ) -> pl.DataFrame:
-        """Execute multi-key join preserving right-side key columns."""
+        """Execute multi-key join preserving right-side key columns.
+
+        Returns:
+            Joined DataFrame using all provided composite key columns.
+        """
         import polars as pl
 
         how = self.get_polars_join_type()

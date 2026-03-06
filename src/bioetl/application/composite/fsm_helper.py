@@ -132,7 +132,12 @@ class FSMStateHelperService:
     def handle_resume_from_failed(
         self, state: CompositeCheckpointState
     ) -> CompositeCheckpointState:
-        """Map FAILED checkpoint state to the correct resume FSM phase."""
+        """Map FAILED checkpoint state to the correct resume FSM phase.
+
+        Returns:
+            Updated CompositeCheckpointState with the appropriate resume FSM phase
+            (NOT_STARTED, ENRICHING, or ENRICHMENT_COMPLETED) based on prior progress.
+        """
         from bioetl.domain.composite.state import CompositePipelineState
 
         total_enrichers = len(self._config.enrichers)

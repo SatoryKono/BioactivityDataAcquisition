@@ -39,5 +39,9 @@ class AdapterErrorMapper:
         self,
         payload: DomainErrorMappingInput,
     ) -> ExternalServiceError:
-        """Map adapter error context to a domain external-service exception."""
+        """Map adapter error context to a domain external-service exception.
+
+        Returns:
+            ExternalServiceError wrapping the original exception with domain context.
+        """
         return self._mapper.map_to_domain_error(payload)

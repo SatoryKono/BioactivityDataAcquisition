@@ -32,7 +32,11 @@ class CoalescePolicyService:
 
     @staticmethod
     def extract_field_from_qualified(column: str) -> str:
-        """Extract field name from qualified column (x.y.z -> z)."""
+        """Extract field name from qualified column (x.y.z -> z).
+
+        Returns:
+            Unqualified field name string.
+        """
         parts = column.split(".")
         if len(parts) == 3:
             return parts[2]
@@ -40,7 +44,11 @@ class CoalescePolicyService:
 
     @staticmethod
     def can_coalesce(df: pl.DataFrame, col1: str, col2: str) -> bool:
-        """Check if two columns can be coalesced without type breakage."""
+        """Check if two columns can be coalesced without type breakage.
+
+        Returns:
+            True if the columns are type-compatible for coalescing, False otherwise.
+        """
         import polars as pl
 
         type1 = df[col1].dtype
@@ -60,7 +68,11 @@ class CoalescePolicyService:
         _enrichers: Sequence[EnricherConfig],
         seed_pipeline: str | None = None,
     ) -> pl.DataFrame:
-        """Coalesce grouped columns while preferring seed columns first."""
+        """Coalesce grouped columns while preferring seed columns first.
+
+        Returns:
+            DataFrame with duplicate field columns coalesced, seed values preferred.
+        """
 
         result = df
         seed_prefix = self._seed_prefix(seed_pipeline)
@@ -82,7 +94,11 @@ class CoalescePolicyService:
         _enrichers: Sequence[EnricherConfig],
         seed_pipeline: str | None = None,
     ) -> pl.DataFrame:
-        """Coalesce grouped columns while preferring enricher columns first."""
+        """Coalesce grouped columns while preferring enricher columns first.
+
+        Returns:
+            DataFrame with duplicate field columns coalesced, enricher values preferred.
+        """
         result = df
         seed_prefix = self._seed_prefix(seed_pipeline)
         field_groups = self._build_field_groups(result)
@@ -103,7 +119,11 @@ class CoalescePolicyService:
         enrichers: Sequence[EnricherConfig],
         seed_pipeline: str | None = None,
     ) -> pl.DataFrame:
-        """Currently equivalent to seed-priority coalescing."""
+        """Currently equivalent to seed-priority coalescing.
+
+        Returns:
+            DataFrame with duplicate field columns coalesced using seed-priority order.
+        """
         return self.coalesce_prefer_seed(df, enrichers, seed_pipeline)
 
     def apply_explicit_rules(
@@ -113,7 +133,11 @@ class CoalescePolicyService:
         field_priorities: dict[str, tuple[str, ...]],
         seed_pipeline: str | None = None,
     ) -> pl.DataFrame:
-        """Apply explicit source priority rules from config.field_priorities."""
+        """Apply explicit source priority rules from config.field_priorities.
+
+        Returns:
+            DataFrame with field columns coalesced according to the explicit priority rules.
+        """
         import polars as pl
 
         result = df

@@ -104,7 +104,7 @@ def MissingRequiredFieldError(
     if record_id:
         msg += f" (record_id={record_id})"
     error = ValidationError(msg, field=field).with_context(record_id=record_id)
-    error.error_type = ErrorType.MISSING_REQUIRED_FIELD
+    error.error_type = ErrorType.MISSING_REQUIRED_FIELD  # type: ignore[misc]  # instance override of ClassVar
     return cast(ValidationError, error)
 
 
@@ -123,5 +123,5 @@ def InvalidDataFormatError(
         value=value,
         expected_format=expected_format,
     )
-    error.error_type = ErrorType.INVALID_DATA
+    error.error_type = ErrorType.INVALID_DATA  # type: ignore[misc]  # instance override of ClassVar
     return cast(ValidationError, error)

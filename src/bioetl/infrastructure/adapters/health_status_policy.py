@@ -9,7 +9,11 @@ AUTH_FAILURE_STATUS_CODES = frozenset({401, 403})
 
 
 def classify_health_probe_status(status_code: int) -> HealthStatus:
-    """Classify non-200 health probe status into DEGRADED/UNHEALTHY."""
+    """Classify non-200 health probe status into DEGRADED/UNHEALTHY.
+
+    Returns:
+        HealthStatus.DEGRADED for transient errors, HealthStatus.UNHEALTHY otherwise.
+    """
     if status_code in TRANSIENT_DEGRADED_STATUS_CODES:
         return HealthStatus.DEGRADED
     if status_code in AUTH_FAILURE_STATUS_CODES:

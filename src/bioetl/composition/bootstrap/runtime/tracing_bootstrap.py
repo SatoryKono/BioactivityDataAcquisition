@@ -29,7 +29,11 @@ def bootstrap_tracer_port(
     service_name: str = "bioetl",
     tracer_factory: TracerFactory | None = None,
 ) -> TracingPort:
-    """Create a tracing port implementation for distributed tracing."""
+    """Create a tracing port implementation for distributed tracing.
+
+    Returns:
+        Configured TracingPort, or NoOpTracing if tracing is disabled.
+    """
     if settings.observability.tracing_enabled:
         factory = tracer_factory or _default_tracer_factory
         return factory(service_name)
@@ -41,7 +45,11 @@ def bootstrap_tracer(
     service_name: str = "bioetl",
     tracer_factory: TracerFactory | None = None,
 ) -> TracingPort:
-    """Deprecated alias for :func:`bootstrap_tracer_port`."""
+    """Deprecated alias for :func:`bootstrap_tracer_port`.
+
+    Returns:
+        Configured TracingPort, or NoOpTracing if tracing is disabled.
+    """
     return bootstrap_tracer_port(
         settings=settings,
         service_name=service_name,

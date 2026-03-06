@@ -83,7 +83,11 @@ def bootstrap_logger_port(
     run_id: UUID | None = None,
     log_level: str = "INFO",
 ) -> LoggerPort:
-    """Create a logger port implementation for pipeline execution."""
+    """Create a logger port implementation for pipeline execution.
+
+    Returns:
+        Configured LoggerPort for structured pipeline logging.
+    """
 
     def _logger_factory(
         logger_pipeline: str,
@@ -110,7 +114,11 @@ def bootstrap_logger(
     run_id: UUID | None = None,
     log_level: str = "INFO",
 ) -> LoggerPort:
-    """Deprecated alias for :func:`bootstrap_logger_port`."""
+    """Deprecated alias for :func:`bootstrap_logger_port`.
+
+    Returns:
+        Configured LoggerPort for structured pipeline logging.
+    """
     return _bootstrap_logger_impl(
         pipeline=pipeline,
         run_id=run_id,
@@ -130,7 +138,11 @@ def bootstrap_tracer_port(
     settings: Settings,
     service_name: str = "bioetl",
 ) -> TracingPort:
-    """Create a tracing port implementation for distributed tracing."""
+    """Create a tracing port implementation for distributed tracing.
+
+    Returns:
+        Configured TracingPort for distributed tracing.
+    """
     return _bootstrap_tracer_port_impl(
         settings=settings,
         service_name=service_name,
@@ -144,7 +156,11 @@ def bootstrap_tracer(
     settings: Settings,
     service_name: str = "bioetl",
 ) -> TracingPort:
-    """Deprecated alias for :func:`bootstrap_tracer_port`."""
+    """Deprecated alias for :func:`bootstrap_tracer_port`.
+
+    Returns:
+        Configured TracingPort for distributed tracing.
+    """
     return _bootstrap_tracer_impl(
         settings=settings,
         service_name=service_name,
@@ -155,7 +171,11 @@ def bootstrap_tracer(
 
 
 def bootstrap_metrics_port(settings: Settings) -> MetricsPort:
-    """Create a metrics port implementation."""
+    """Create a metrics port implementation.
+
+    Returns:
+        Configured MetricsPort for pipeline metrics collection.
+    """
     return _bootstrap_metrics_port_impl(
         settings=settings,
         metrics_factory=PrometheusMetrics,
@@ -163,7 +183,11 @@ def bootstrap_metrics_port(settings: Settings) -> MetricsPort:
 
 
 def maybe_start_metrics_server(settings: Settings) -> bool:
-    """Start metrics server if enabled in settings."""
+    """Start metrics server if enabled in settings.
+
+    Returns:
+        True if the metrics server was started, False otherwise.
+    """
     return _maybe_start_metrics_server_impl(
         settings=settings,
         start_server=start_metrics_server,
@@ -171,7 +195,11 @@ def maybe_start_metrics_server(settings: Settings) -> bool:
 
 
 def bootstrap_metrics(settings: Settings) -> MetricsPort:
-    """Deprecated alias for :func:`bootstrap_metrics_port`."""
+    """Deprecated alias for :func:`bootstrap_metrics_port`.
+
+    Returns:
+        Configured MetricsPort for pipeline metrics collection.
+    """
     return _bootstrap_metrics_impl(settings=settings, metrics_factory=PrometheusMetrics)
 
 
@@ -179,7 +207,11 @@ def bootstrap_dq_monitor_port(
     settings: Settings,
     logger: LoggerPort | None = None,
 ) -> DQMonitorPort | None:
-    """Create a data quality monitor port implementation."""
+    """Create a data quality monitor port implementation.
+
+    Returns:
+        DQMonitorPort if DQ monitoring is enabled, None otherwise.
+    """
     return _bootstrap_dq_monitor_port_impl(
         settings=settings,
         logger=logger,
@@ -192,7 +224,11 @@ def bootstrap_dq_monitor(
     settings: Settings,
     logger: LoggerPort | None = None,
 ) -> DQMonitorPort | None:
-    """Deprecated alias for :func:`bootstrap_dq_monitor_port`."""
+    """Deprecated alias for :func:`bootstrap_dq_monitor_port`.
+
+    Returns:
+        DQMonitorPort if DQ monitoring is enabled, None otherwise.
+    """
     return _bootstrap_dq_monitor_impl(
         settings=settings,
         logger=logger,
@@ -207,7 +243,11 @@ def bootstrap_observability_bundle(
     settings: Settings,
     log_level: str = "INFO",
 ) -> ObservabilityBundle:
-    """Build validated logger/metrics/tracer/DQ-monitor bundle for a pipeline run."""
+    """Build validated logger/metrics/tracer/DQ-monitor bundle for a pipeline run.
+
+    Returns:
+        Validated ObservabilityBundle with logger, metrics, tracer, and DQ monitor.
+    """
     return _bootstrap_observability_bundle_impl(
         pipeline=pipeline,
         run_id=run_id,
@@ -227,7 +267,11 @@ def bootstrap_observability(
     settings: Settings,
     log_level: str = "INFO",
 ) -> ObservabilityBundle:
-    """Deprecated alias for :func:`bootstrap_observability_bundle`."""
+    """Deprecated alias for :func:`bootstrap_observability_bundle`.
+
+    Returns:
+        Validated ObservabilityBundle with logger, metrics, tracer, and DQ monitor.
+    """
     return bootstrap_observability_bundle(
         pipeline=pipeline,
         run_id=run_id,

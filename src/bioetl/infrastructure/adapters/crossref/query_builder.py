@@ -24,7 +24,11 @@ def validate_crossref_entity_type(entity_type: str) -> None:
 
 
 def resolve_filter_field(filter_field: str | None) -> str:
-    """Return effective filter field value for CrossRef flow."""
+    """Return effective filter field value for CrossRef flow.
+
+    Returns:
+        Filter field string, defaulting to "doi" if None is provided.
+    """
     return filter_field or "doi"
 
 
@@ -36,18 +40,30 @@ class CrossRefQueryBuilder:
     mailto: str
 
     def build_headers(self) -> dict[str, str]:
-        """Build request headers with polite-pool mailto identification."""
+        """Build request headers with polite-pool mailto identification.
+
+        Returns:
+            Dictionary of HTTP headers with User-Agent and Accept fields.
+        """
         return {
             "User-Agent": f"BioETL/1.0 (mailto:{self.mailto})",
             "Accept": "application/json",
         }
 
     def build_health_probe_url(self) -> str:
-        """Build health probe URL."""
+        """Build health probe URL.
+
+        Returns:
+            Full URL string for the CrossRef health probe endpoint.
+        """
         return f"{self.api_base}/works"
 
     def build_health_probe_params(self) -> dict[str, str]:
-        """Build health probe query parameters."""
+        """Build health probe query parameters.
+
+        Returns:
+            Dictionary of query parameters for the health probe request.
+        """
         return {
             "rows": "1",
             "mailto": self.mailto,

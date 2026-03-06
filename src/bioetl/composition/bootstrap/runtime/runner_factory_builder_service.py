@@ -34,7 +34,11 @@ def resolve_bronze_opts(
     runtime: CompositeRuntimeConfig,
     phase_override: bool | None,
 ) -> BronzeRunOptions:
-    """Resolve per-phase cached bronze options using tri-state override."""
+    """Resolve per-phase cached bronze options using tri-state override.
+
+    Returns:
+        BronzeRunOptions with resolved cached bronze settings for the phase.
+    """
     effective = (
         phase_override if phase_override is not None else runtime.use_cached_bronze
     )
@@ -70,7 +74,11 @@ class RunnerFactoryBuilderService(Generic[_RunOptionsT]):
         seed_limit: int | None,
         bronze_opts: BronzeRunOptions,
     ) -> Callable[[], PipelineRunner]:
-        """Build seed phase runner factory."""
+        """Build seed phase runner factory.
+
+        Returns:
+            Callable that creates a configured PipelineRunner for the seed phase.
+        """
 
         def seed_runner_factory() -> PipelineRunner:
             """Create a PipelineRunner configured for the seed phase."""
@@ -91,7 +99,11 @@ class RunnerFactoryBuilderService(Generic[_RunOptionsT]):
         enrichers: list[EnricherConfig],
         bronze_opts: BronzeRunOptions,
     ) -> Callable[[str, pl.DataFrame], PipelineRunner]:
-        """Build enricher phase runner factory."""
+        """Build enricher phase runner factory.
+
+        Returns:
+            Callable that creates a configured PipelineRunner for a named enricher.
+        """
         enricher_configs = {enricher.pipeline: enricher for enricher in enrichers}
 
         def enricher_runner_factory(
@@ -149,7 +161,11 @@ class RunnerFactoryBuilderService(Generic[_RunOptionsT]):
         dependencies: list[DependencyConfig],
         bronze_opts: BronzeRunOptions,
     ) -> Callable[[str, pl.DataFrame], PipelineRunner]:
-        """Build dependency phase runner factory."""
+        """Build dependency phase runner factory.
+
+        Returns:
+            Callable that creates a configured PipelineRunner for a named dependency.
+        """
         dependency_configs = {
             dependency.pipeline: dependency for dependency in dependencies
         }

@@ -31,7 +31,11 @@ class CrossRefResponseMapper:
         publication: BronzeRecord,
         lookup_method: str,
     ) -> BronzeRecord:
-        """Annotate publication payload with lookup metadata."""
+        """Annotate publication payload with lookup metadata.
+
+        Returns:
+            Publication record with the _lookup_method field set to the given value.
+        """
         publication["_lookup_method"] = lookup_method
         return publication
 
@@ -42,7 +46,11 @@ class CrossRefResponseMapper:
         elapsed_seconds: float,
         slow_threshold_seconds: float = 5.0,
     ) -> CrossRefHealthProbeMapping:
-        """Map raw probe response to adapter health status and event metadata."""
+        """Map raw probe response to adapter health status and event metadata.
+
+        Returns:
+            CrossRefHealthProbeMapping with the classified HealthStatus and optional log event name.
+        """
         if status_code != 200:
             status = classify_health_probe_status(status_code)
             event_name = (

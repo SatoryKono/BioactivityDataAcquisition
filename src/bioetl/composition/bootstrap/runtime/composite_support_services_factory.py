@@ -144,7 +144,11 @@ class CompositeSupportServicesFactory:
         self._checkpoint_manager_cls = checkpoint_manager_cls
 
     def build(self) -> CompositeSupportServices:
-        """Build and return support service bundle."""
+        """Build and return support service bundle.
+
+        Returns:
+            CompositeSupportServices bundle with all services required by CompositePipelineRunner.
+        """
         delta_reader = self._create_delta_reader()
         key_extractor = KeyExtractorService(
             delta_reader=delta_reader,

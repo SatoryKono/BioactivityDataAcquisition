@@ -18,7 +18,7 @@ def BucketNotFoundError(bucket: str) -> StorageError:
     """Compatibility constructor for legacy BucketNotFoundError."""
     error = StorageError(f"Bucket '{bucket}' not found")
     error = cast(StorageError, error.with_context(bucket=bucket))
-    error.error_type = ErrorType.DB_UNAVAILABLE
+    error.error_type = ErrorType.DB_UNAVAILABLE  # type: ignore[misc]  # instance override of ClassVar
     return error
 
 
@@ -36,7 +36,7 @@ def UploadError(key: str, reason: str) -> StorageError:
     """Compatibility constructor for legacy UploadError."""
     error = StorageError(f"Failed to upload '{key}': {reason}")
     error = cast(StorageError, error.with_context(key=key, reason=reason))
-    error.error_type = ErrorType.NETWORK_ERROR
+    error.error_type = ErrorType.NETWORK_ERROR  # type: ignore[misc]  # instance override of ClassVar
     return error
 
 
@@ -169,7 +169,7 @@ def BronzeValidationError(
             original_error=original_error,
         ),
     )
-    error.error_type = ErrorType.INVALID_DATA
+    error.error_type = ErrorType.INVALID_DATA  # type: ignore[misc]  # instance override of ClassVar
     return error
 
 
@@ -195,5 +195,5 @@ def CachedBronzeEmptyError(
             date_filter=date_filter,
         ),
     )
-    error.error_type = ErrorType.INVALID_DATA
+    error.error_type = ErrorType.INVALID_DATA  # type: ignore[misc]  # instance override of ClassVar
     return error

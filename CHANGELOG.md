@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Ruff lint errors resolved (8 violations)**:
+  - Added missing `__all__` exports to `src/bioetl/domain/types/__init__.py` (ArrowSchema, BronzeRecord, GoldRecord, GoldSchemaType, MetaDict, PrimaryId, ScdConfig)
+  - Sorted `__all__` in `src/bioetl/infrastructure/observability/metrics.py` per isort rules
+  - Updated regression metrics budget: `MAX_RUFF_ERRORS = 0` (all errors eliminated)
+
 ### Added
 
 - **Unified Entity Configuration Format (ADR-039)**: All 21 standard pipeline configs consolidated from 5–6 separate files into one `configs/entities/{provider}/{entity}.yaml` per entity

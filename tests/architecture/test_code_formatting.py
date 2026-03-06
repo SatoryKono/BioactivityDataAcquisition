@@ -55,6 +55,29 @@ _LINE_ENDING_HINT = (
 )
 
 
+def _run_format_check(target: str) -> subprocess.CompletedProcess[str]:
+    """Run `ruff format --check` with Windows retry for line-ending churn."""
+    result = subprocess.run(
+        [*_RUFF_CMD, "format", "--check", target],  # type: ignore[arg-type]
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode == 0 or platform.system() != "Windows":
+        return result
+
+    # On Windows, normalize line endings and retry once to avoid flaky churn.
+    subprocess.run(
+        [*_RUFF_CMD, "format", target],  # type: ignore[arg-type]
+        capture_output=True,
+        text=True,
+    )
+    return subprocess.run(
+        [*_RUFF_CMD, "format", "--check", target],  # type: ignore[arg-type]
+        capture_output=True,
+        text=True,
+    )
+
+
 class TestCodeFormatting:
     """Tests ensuring code follows ruff formatting standards."""
 
@@ -65,11 +88,7 @@ class TestCodeFormatting:
 
         Run `ruff format src` to fix formatting issues.
         """
-        result = subprocess.run(
-            [*_RUFF_CMD, "format", "--check", "src"],  # type: ignore[arg-type]
-            capture_output=True,
-            text=True,
-        )
+        result = _run_format_check("src")
 
         assert result.returncode == 0, (
             "Code formatting issues found in src/:\n"
@@ -84,11 +103,7 @@ class TestCodeFormatting:
 
         Run `ruff format tests` to fix formatting issues.
         """
-        result = subprocess.run(
-            [*_RUFF_CMD, "format", "--check", "tests"],  # type: ignore[arg-type]
-            capture_output=True,
-            text=True,
-        )
+        result = _run_format_check("tests")
 
         assert result.returncode == 0, (
             "Code formatting issues found in tests/:\n"

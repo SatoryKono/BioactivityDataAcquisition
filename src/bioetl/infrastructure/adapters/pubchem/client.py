@@ -43,12 +43,15 @@ from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMa
 from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator
+    from collections.abc import AsyncIterator, Awaitable
 
     from bioetl.domain.models.metadata import SourceMetadata
     from bioetl.domain.ports import ErrorHandlerPort, LoggerPort
     from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
     from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+    from bioetl.infrastructure.adapters.pubchem.fetch_strategies import (
+        PubChemFetchStrategies,
+    )
 
 # Mapping from entity_type to DTO model class
 PUBCHEM_DTO_MODELS: dict[str, type[BaseModel]] = {
@@ -72,10 +75,10 @@ def _create_default_pubchem_fetch_strategies(
     rate_limiter: TokenBucket,
     circuit_breaker: CircuitBreaker,
     mapper: PubChemEntityMapper,
-    run_in_executor: object,
+    run_in_executor: Callable[..., Awaitable[object]],
     provider_name: str,
     request_collector: APIRequestCollector,
-) -> object:
+) -> PubChemFetchStrategies:
     """Create default fetch strategies for non-DI call sites."""
     from bioetl.infrastructure.adapters.pubchem.fetch_strategies import (
         PubChemFetchStrategies,
@@ -146,7 +149,7 @@ class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
         error_handler: ErrorHandlerPort | None = None,
         request_collector: APIRequestCollector | None = None,
         entity_mapper: PubChemEntityMapper | None = None,
-        fetch_strategies: object | None = None,
+        fetch_strategies: PubChemFetchStrategies | None = None,
     ) -> None:
         """Initialize PubChem client.
 

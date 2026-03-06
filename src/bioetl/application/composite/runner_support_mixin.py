@@ -166,7 +166,12 @@ class CompositeRunnerSupportMixin:
         state: CompositeCheckpointState,
         operation: str,
     ) -> bool:
-        """Save checkpoint with graceful error handling."""
+        """Save checkpoint with graceful error handling.
+
+        Returns:
+            True if the checkpoint was saved successfully, False if a non-fatal error
+            occurred (resume capability may be degraded).
+        """
         try:
             await self._checkpoint_manager.save(state)
             return True
@@ -228,7 +233,12 @@ class CompositeRunnerSupportMixin:
         self,
         state: CompositeCheckpointState,
     ) -> list[EnricherConfig]:
-        """Determine which enrichers should be run."""
+        """Determine which enrichers should be run.
+
+        Returns:
+            List of EnricherConfig entries that have not been completed and match
+            the current runtime filters (required_only, enrich_only, force_enricher).
+        """
         enrichers_to_run: list[EnricherConfig] = []
 
         for enricher in self._config.enrichers:

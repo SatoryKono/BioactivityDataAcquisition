@@ -20,7 +20,11 @@ def _create_crossref_adapter(
     settings: Settings | None,
     **kwargs: Any,  # Any: forward arbitrary adapter config kwargs
 ) -> CrossRefAdapter:
-    """Create CrossRefAdapter resolving mandatory `mailto` from kwargs/settings."""
+    """Create CrossRefAdapter resolving mandatory `mailto` from kwargs/settings.
+
+    Returns:
+        CrossRefAdapter instance configured with resolved mailto and provided dependencies.
+    """
     # Mailto: from kwargs or settings
     mailto = kwargs.get("mailto")
     if not mailto and settings:

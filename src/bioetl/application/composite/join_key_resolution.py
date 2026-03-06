@@ -30,7 +30,12 @@ class JoinKeyResolverService:
         columns: list[str],
         pipeline: str | None = None,
     ) -> str | None:
-        """Find key column name (qualified preferred, fallback unqualified)."""
+        """Find key column name (qualified preferred, fallback unqualified).
+
+        Returns:
+            Qualified column name if found, unqualified name as fallback,
+            or None if no matching column exists.
+        """
         if pipeline:
             try:
                 provider, entity = self._parse_pipeline_name(pipeline)
@@ -51,7 +56,11 @@ class JoinKeyResolverService:
         join_keys: list[str],
         pipeline: str | None = None,
     ) -> pl.DataFrame:
-        """Normalize selected identifier join key columns to lowercase."""
+        """Normalize selected identifier join key columns to lowercase.
+
+        Returns:
+            DataFrame with qualifying identifier columns (doi, pmid, pmc_id) lowercased.
+        """
         import polars as pl
 
         columns = df.columns
@@ -74,7 +83,12 @@ class JoinKeyResolverService:
         enricher_pipeline: str,
         merged_columns: list[str],
     ) -> tuple[str, str, str | None]:
-        """Resolve qualified join key names for seed/enricher join."""
+        """Resolve qualified join key names for seed/enricher join.
+
+        Returns:
+            Tuple of (seed_join_key, enricher_join_key, seed_join_key_qualified) where
+            seed_join_key_qualified is the fully-qualified seed key or None if unavailable.
+        """
         seed_join_key_qualified: str | None = None
         seed_join_key = primary_key
 
@@ -105,7 +119,12 @@ class JoinKeyResolverService:
         right_pipeline: str,
         merged_columns: list[str],
     ) -> tuple[str, str, str | None]:
-        """Resolve qualified join key names when left/right key names differ."""
+        """Resolve qualified join key names when left/right key names differ.
+
+        Returns:
+            Tuple of (left_join_key, right_join_key, left_join_key_qualified) where
+            left_join_key_qualified is the fully-qualified left key or None if unavailable.
+        """
         left_join_key_qualified: str | None = None
         left_join_key = left_key
 
@@ -133,7 +152,12 @@ class JoinKeyResolverService:
         right_pipeline: str,
         merged_columns: list[str],
     ) -> tuple[list[str], list[str], set[str]]:
-        """Resolve all join keys for composite-key dependency join."""
+        """Resolve all join keys for composite-key dependency join.
+
+        Returns:
+            Tuple of (left_keys, right_keys, all_join_key_set) with resolved qualified
+            key names for each side and the complete set of all key column names.
+        """
         left_keys: list[str] = []
         right_keys: list[str] = []
         all_join_key_set: set[str] = set()

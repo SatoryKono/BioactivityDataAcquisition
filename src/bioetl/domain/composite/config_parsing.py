@@ -15,7 +15,11 @@ __all__ = [
 
 
 def require_object_dict(value: object, field_name: str) -> dict[str, object]:
-    """Validate and normalize mapping-like values."""
+    """Validate and normalize mapping-like values.
+
+    Returns:
+        Dictionary with string keys validated from the input mapping.
+    """
     if not isinstance(value, dict):
         raise ValueError(f"{field_name} must be a dictionary")
     return {str(key): item for key, item in value.items()}
@@ -25,7 +29,11 @@ def require_object_dict_sequence(
     value: object,
     field_name: str,
 ) -> tuple[dict[str, object], ...]:
-    """Validate and normalize a sequence of dictionaries."""
+    """Validate and normalize a sequence of dictionaries.
+
+    Returns:
+        Tuple of dictionaries with string keys validated from the input sequence.
+    """
     if not isinstance(value, (list, tuple)):
         raise ValueError(f"{field_name} must be a list")
     result: list[dict[str, object]] = []
@@ -37,14 +45,22 @@ def require_object_dict_sequence(
 
 
 def require_str(value: object, field_name: str) -> str:
-    """Validate required string field."""
+    """Validate required string field.
+
+    Returns:
+        Validated non-empty string value.
+    """
     if not isinstance(value, str) or not value:
         raise ValueError(f"{field_name} must be a non-empty string")
     return value
 
 
 def optional_str(value: object, field_name: str) -> str | None:
-    """Validate optional string field."""
+    """Validate optional string field.
+
+    Returns:
+        Validated non-empty string if provided, None otherwise.
+    """
     if value is None:
         return None
     if not isinstance(value, str) or not value:
@@ -53,7 +69,11 @@ def optional_str(value: object, field_name: str) -> str | None:
 
 
 def optional_bool(value: object, default: bool, field_name: str) -> bool:
-    """Validate optional bool field."""
+    """Validate optional bool field.
+
+    Returns:
+        Validated boolean value, or default if not provided.
+    """
     if value is None:
         return default
     if not isinstance(value, bool):
@@ -66,7 +86,11 @@ def optional_int(
     field_name: str,
     default: int | None = None,
 ) -> int | None:
-    """Validate optional int field."""
+    """Validate optional int field.
+
+    Returns:
+        Validated integer if provided, or default (None) otherwise.
+    """
     if value is None:
         return default
     if isinstance(value, bool) or not isinstance(value, int):
@@ -75,7 +99,11 @@ def optional_int(
 
 
 def require_str_tuple(value: object, field_name: str) -> tuple[str, ...]:
-    """Validate required list/tuple of strings."""
+    """Validate required list/tuple of strings.
+
+    Returns:
+        Tuple of validated non-empty strings from the input sequence.
+    """
     if not isinstance(value, (list, tuple)):
         raise ValueError(f"{field_name} must be a list")
     if any(not isinstance(item, str) or not item for item in value):
@@ -84,7 +112,11 @@ def require_str_tuple(value: object, field_name: str) -> tuple[str, ...]:
 
 
 def optional_str_tuple(value: object, field_name: str) -> tuple[str, ...] | None:
-    """Validate optional list/tuple of strings."""
+    """Validate optional list/tuple of strings.
+
+    Returns:
+        Tuple of validated non-empty strings if provided, None otherwise.
+    """
     if value is None:
         return None
     return require_str_tuple(value, field_name)

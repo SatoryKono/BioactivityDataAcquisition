@@ -107,6 +107,11 @@ class ComposableFallbackDecorator:
             yield record
 
     def _is_supported_filter_field(self, filter_field: str | None) -> bool:
+        """Check whether the given filter field is supported by this fallback decorator.
+
+        Returns:
+            True if the filter field matches the configured supported field or no restriction is set.
+        """
         expected = self._config.supported_filter_field
         if expected is None:
             return True
@@ -130,7 +135,11 @@ def resolve_fallback_policy(
     defaults: FallbackDecoratorConfig,
     default_enabled: bool = True,
 ) -> tuple[bool, FallbackDecoratorConfig]:
-    """Resolve runtime fallback enabled flag + config from YAML policy object."""
+    """Resolve runtime fallback enabled flag + config from YAML policy object.
+
+    Returns:
+        Tuple of (enabled flag, resolved FallbackDecoratorConfig).
+    """
     if policy is None:
         return default_enabled, defaults
 

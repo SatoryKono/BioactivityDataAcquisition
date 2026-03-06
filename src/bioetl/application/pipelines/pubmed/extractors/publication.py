@@ -26,7 +26,7 @@ from bioetl.domain.types import GoldRecord, JsonDict
 from bioetl.domain.value_objects import DOI, PubMedId
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Sequence
 
     from bioetl.domain.ports import DataNormalizationPort
     from bioetl.domain.types import BronzeRecord
@@ -47,9 +47,13 @@ class PubMedAuthorBlockExtractor:
         raw_author_data: list[RawAuthor],
         data_normalizer: DataNormalizationPort,
         author_extractor: AuthorExtractor,
-        normalize_author_list: Callable[[list[str]], str],
-        normalize_author_keys: Callable[[list[str]], list[str]],
-        serialize_json_list: Callable[[object], str],
+        normalize_author_list: Callable[
+            [list[str] | list[JsonDict] | str | None], str | None
+        ],
+        normalize_author_keys: Callable[
+            [list[str] | list[JsonDict] | str | None], str | None
+        ],
+        serialize_json_list: Callable[[Sequence[object] | None], str | None],
         build_authors_with_affiliations: Callable[[list[RawAuthor]], list[JsonDict]],
         process_structured_affiliations: Callable[[list[JsonDict]], list[JsonDict]],
     ) -> JsonDict:  # Any: untyped PubMed XML/JSON values
@@ -185,7 +189,7 @@ class PubMedBusinessDataExtractor:
         *,
         article: ET.Element,
         medline: ET.Element | None,
-        serialize_json_list: Callable[[object], str],
+        serialize_json_list: Callable[[Sequence[object] | None], str | None],
     ) -> tuple[list[str], JsonDict]:  # Any: untyped PubMed XML/JSON values
         publication_types = ClassificationExtractor.parse_publication_types(article)
         subject_keywords = ClassificationExtractor.parse_keywords(medline)
@@ -217,7 +221,7 @@ class PubMedBusinessDataExtractor:
         root: ET.Element,
         data_normalizer: DataNormalizationPort,
         author_extractor: AuthorExtractor,
-        serialize_json_list: Callable[[object], str],
+        serialize_json_list: Callable[[Sequence[object] | None], str | None],
         extract_author_block: Callable[[ET.Element, list[RawAuthor]], JsonDict],
         extract_journal_data: Callable[[ET.Element], dict[str, object]],
         extract_date_data: Callable[

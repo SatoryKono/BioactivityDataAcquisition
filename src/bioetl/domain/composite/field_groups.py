@@ -1,17 +1,4 @@
-"""Field group domain models for Composite Publication Pipeline.
-
-Provides semantic grouping of publication fields across providers for:
-- Column ordering in merged output (groups appear in enum order)
-- Gold layer filtering (excluding trash group)
-- Provider-to-field mapping with qualified column tracking
-
-Domain models:
-- FieldMapping: Maps base field name to provider-qualified columns
-- FieldGroupDefinition: Defines a semantic group with its fields
-- FieldGroupRegistry: Central registry for field group operations
-
-See ADR-026 for Composite Publication Pipeline rationale.
-"""
+"""Field-group domain models for composite publication pipelines."""
 
 from __future__ import annotations
 
@@ -45,28 +32,7 @@ DEFAULT_PROVIDER_ORDER: Final[tuple[str, ...]] = (
 
 @dataclass(frozen=True, slots=True)
 class FieldMapping:
-    """Maps a base field name to its provider-qualified columns and group.
-
-    Each field can appear in multiple providers with qualified column names
-    following the ``{provider}.{entity}.{field}`` convention.
-
-    Attributes:
-        base_name: Base field name (e.g., "title", "doi").
-        provider_columns: Qualified column names from each provider
-            (e.g., ("chembl.publication.title", "crossref.publication.title")).
-        group: Semantic group this field belongs to.
-
-    Example:
-        >>> mapping = FieldMapping(
-        ...     base_name="title",
-        ...     provider_columns=("chembl.publication.title", "crossref.publication.title"),
-        ...     group=FieldGroupId.BIBLIOGRAPHY,
-        ... )
-        >>> mapping.providers
-        ('chembl', 'crossref')
-        >>> mapping.has_provider("crossref")
-        True
-    """
+    """Map a base field name to provider-qualified columns and semantic group."""
 
     base_name: str
     provider_columns: tuple[str, ...] = ()
@@ -124,26 +90,7 @@ class FieldMapping:
 
 @dataclass(frozen=True, slots=True)
 class FieldGroupDefinition:
-    """Defines a semantic group with its fields.
-
-    Attributes:
-        group_id: The semantic group identifier.
-        display_name: Human-readable name for the group.
-        include_in_gold: Whether fields in this group are included in Gold layer.
-        fields: Tuple of FieldMapping objects belonging to this group.
-
-    Example:
-        >>> group = FieldGroupDefinition(
-        ...     group_id=FieldGroupId.BIBLIOGRAPHY,
-        ...     display_name="Bibliography",
-        ...     include_in_gold=True,
-        ...     fields=(
-        ...         FieldMapping("title", ("chembl.publication.title",), FieldGroupId.BIBLIOGRAPHY),
-        ...     ),
-        ... )
-        >>> group.base_field_names
-        ('title',)
-    """
+    """Semantic field group with display metadata and mappings."""
 
     group_id: FieldGroupId
     display_name: str
@@ -175,22 +122,7 @@ class FieldGroupDefinition:
 
 
 class FieldGroupRegistry:
-    """Central registry for field group operations.
-
-    Provides efficient lookup, filtering, and ordering of publication
-    fields based on semantic groups and provider sources.
-
-    This registry is built from YAML configuration and injected into
-    services that need field group awareness (MergeService, GoldWriter).
-
-    Example:
-        >>> registry = FieldGroupRegistry(groups=(...), provider_order=(...))
-        >>> registry.get_group("title")
-        <PublicationFieldGroup.BIBLIOGRAPHY: 'bibliography'>
-        >>> gold_cols = registry.get_gold_columns(["chembl.publication.title", "content_hash"])
-        >>> gold_cols
-        ['chembl.publication.title']
-    """
+    """Registry for lookup, filtering and ordering by semantic field groups."""
 
     def __init__(
         self,
@@ -198,22 +130,7 @@ class FieldGroupRegistry:
         provider_order: tuple[str, ...] = DEFAULT_PROVIDER_ORDER,
         default_group: FieldGroupId = FieldGroupId.TRASH,
     ) -> None:
-        """Build the registry and pre-compute lookup indices for fast field resolution.
-
-        Iterates over ``groups`` once at construction time to build four internal
-        dictionaries: field-name to group, qualified-column to group, field-name to
-        ``FieldMapping``, and group-id to ``FieldGroupDefinition``. All public
-        methods then operate in O(1) average time. See ADR-026 for the composite
-        pipeline design that relies on this registry.
-
-        Args:
-            groups: Tuple of ``FieldGroupDefinition`` objects defining all semantic
-                field groups and their provider-qualified columns.
-            provider_order: Provider priority order used when sorting columns within
-                the same semantic group; defaults to ``DEFAULT_PROVIDER_ORDER``.
-            default_group: ``FieldGroupId`` assigned to any column not found in the
-                registry; defaults to ``FieldGroupId.TRASH`` (excluded from Gold layer).
-        """
+        """Build lookup indices for field-group operations."""
         self._groups = groups
         self._provider_order = provider_order
         self._default_group = default_group

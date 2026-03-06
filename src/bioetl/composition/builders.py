@@ -147,7 +147,11 @@ class FilterConfigBuilder:
         direct_multi_filter_ids: dict[str, tuple[str, ...]] | None = None,
         direct_valid_combinations: frozenset[tuple[str, ...]] | None = None,
     ) -> InputFilterConfig | None:
-        """Build `InputFilterConfig` from YAML settings and CLI overrides."""
+        """Build `InputFilterConfig` from YAML settings and CLI overrides.
+
+        Returns:
+            Configured InputFilterConfig, or None if filtering is disabled.
+        """
         if direct_multi_filter_ids is not None:
             return FilterConfigBuilder.from_direct_multi_ids(
                 multi_filter_ids=direct_multi_filter_ids,

@@ -47,14 +47,14 @@ governance:
             registry:*: '2026-06-30'
             group:*: '2026-03-03'
 baseline:
-    total_exemptions: 92
+    total_exemptions: 85
     by_registry:
-        file_size_limits: 26
+        file_size_limits: 24
         function_complexity: 11
         function_length: 8
-        class_size: 24
+        class_size: 23
         class_method_count: 1
-        god_object: 15
+        god_object: 11
         domain_complexity: 7
 registry_groups:
     size_shape:
