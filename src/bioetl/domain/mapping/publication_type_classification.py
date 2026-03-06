@@ -76,7 +76,7 @@ def initialize_classification(data: ClassificationData) -> None:
     that references obtained via ``from … import _PROVIDER_LOOKUPS`` at
     module collection time see the populated data.
     """
-    global _data  # noqa: PLW0603
+    global _data
 
     _data = data
 

@@ -85,17 +85,21 @@ class StorageAdapterHealthMixin:
         Returns:
             Dict with layer info including paths and file counts.
         """
+        silver_preview = self._preview_layer(self.silver, silver_table)
+        gold_preview = (
+            self._preview_layer(self.gold, gold_table) if gold_table else None
+        )
         result: JsonDict = {  # preview payload values are heterogeneous
-            "silver": self._preview_layer(self.silver, silver_table),
+            "silver": silver_preview,
             "gold": None,
             "total_files": 0,
         }
 
-        if gold_table:
-            result["gold"] = self._preview_layer(self.gold, gold_table)
+        if gold_preview is not None:
+            result["gold"] = gold_preview
 
-        result["total_files"] = result["silver"]["file_count"] + (
-            result["gold"]["file_count"] if result["gold"] else 0
+        result["total_files"] = silver_preview["file_count"] + (
+            gold_preview["file_count"] if gold_preview else 0
         )
         return result
 
@@ -113,6 +117,12 @@ class StorageAdapterHealthMixin:
         Returns:
             Dict with path, file_count, and exists status.
         """
+        preview_method = getattr(writer, "preview_cleanup", None)
+        if callable(preview_method):
+            preview_result = preview_method(table_name)
+            if self._is_layer_preview_payload(preview_result):
+                return preview_result
+
         path = writer.get_table_path(table_name)
         file_count = 0
         exists = path.exists()
@@ -125,6 +135,20 @@ class StorageAdapterHealthMixin:
             "file_count": file_count,
             "exists": exists,
         }
+
+    @staticmethod
+    def _is_layer_preview_payload(value: object) -> bool:
+        """Check whether a preview payload has the expected layer shape."""
+        if not isinstance(value, dict):
+            return False
+        path = value.get("path")
+        file_count = value.get("file_count")
+        exists = value.get("exists")
+        return (
+            isinstance(path, str)
+            and isinstance(file_count, int)
+            and isinstance(exists, bool)
+        )
 
     @staticmethod
     def _check_directory_writable(dir_path: Path | str) -> bool:

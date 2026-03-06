@@ -9,7 +9,10 @@ import asyncio
 
 import click
 
-from bioetl.composition.entrypoints import get_bronze_cleanup_service
+from bioetl.composition.entrypoints import (
+    get_bronze_cleanup_service,
+    preview_cleanup as preview_pipeline_cleanup,
+)
 from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,
@@ -19,6 +22,7 @@ from bioetl.interfaces.cli.commands.execution_policy import (
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import (
+    echo_cleanup_preview,
     echo_dry_run_prefix,
     echo_info,
     format_bytes,
@@ -26,6 +30,7 @@ from bioetl.interfaces.cli.formatters import (
 
 __all__ = [
     "bronze_cleanup_command",
+    "cleanup_preview_command",
 ]
 
 
@@ -33,16 +38,25 @@ def _handle_cleanup_failure(
     exc: BaseException,
     *,
     reason_code: str,
+    subject_key: str = "target",
+    subject_value: str = "bronze",
+    domain_error_title: str = "Maintenance bronze-cleanup failed with domain error",
+    unexpected_error_title: str = (
+        "Unexpected error during maintenance bronze-cleanup"
+    ),
+    interrupted_message: str = (
+        "Maintenance bronze-cleanup interrupted by user (Ctrl+C)"
+    ),
 ) -> None:
     """Handle cleanup command failures with shared CLI policy."""
     handle_cli_execution_failure(
         exc,
         reason_code=reason_code,
-        subject_key="target",
-        subject_value="bronze",
-        domain_error_title="Maintenance bronze-cleanup failed with domain error",
-        unexpected_error_title="Unexpected error during maintenance bronze-cleanup",
-        interrupted_message="Maintenance bronze-cleanup interrupted by user (Ctrl+C)",
+        subject_key=subject_key,
+        subject_value=subject_value,
+        domain_error_title=domain_error_title,
+        unexpected_error_title=unexpected_error_title,
+        interrupted_message=interrupted_message,
         default_exit_code=ExitCode.FAIL,
     )
 
@@ -105,6 +119,69 @@ def bronze_cleanup_command(retention_days: int, dry_run: bool) -> None:
         _handle_cleanup_failure(
             exc,
             reason_code="CLI_MAINTENANCE_BRONZE_CLEANUP_UNEXPECTED_ERROR",
+        )
+    finally:
+        if getattr(coro, "cr_frame", None) is not None:
+            coro.close()
+
+
+@click.command("cleanup-preview")
+@click.option(
+    "--pipeline",
+    required=True,
+    help="Pipeline name to preview (e.g., chembl_activity)",
+)
+def cleanup_preview_command(pipeline: str) -> None:
+    """Preview Silver/Gold cleanup scope for a pipeline (dry-run only).
+
+    Examples:
+
+        bioetl maintenance cleanup-preview --pipeline chembl_activity
+    """
+
+    async def _run() -> None:
+        preview_result = await preview_pipeline_cleanup(pipeline)
+        echo_dry_run_prefix(f"Cleanup preview for pipeline: {pipeline}")
+        echo_cleanup_preview(preview_result)
+
+    coro = _run()
+    try:
+        asyncio.run(coro)
+    except BioETLError as exc:
+        _handle_cleanup_failure(
+            exc,
+            reason_code="CLI_MAINTENANCE_CLEANUP_PREVIEW_DOMAIN_ERROR",
+            subject_key="pipeline",
+            subject_value=pipeline,
+            domain_error_title="Maintenance cleanup-preview failed with domain error",
+            unexpected_error_title="Unexpected error during maintenance cleanup-preview",
+            interrupted_message=(
+                "Maintenance cleanup-preview interrupted by user (Ctrl+C)"
+            ),
+        )
+    except KeyboardInterrupt as exc:
+        _handle_cleanup_failure(
+            exc,
+            reason_code="CLI_MAINTENANCE_CLEANUP_PREVIEW_SIGINT",
+            subject_key="pipeline",
+            subject_value=pipeline,
+            domain_error_title="Maintenance cleanup-preview failed with domain error",
+            unexpected_error_title="Unexpected error during maintenance cleanup-preview",
+            interrupted_message=(
+                "Maintenance cleanup-preview interrupted by user (Ctrl+C)"
+            ),
+        )
+    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
+        _handle_cleanup_failure(
+            exc,
+            reason_code="CLI_MAINTENANCE_CLEANUP_PREVIEW_UNEXPECTED_ERROR",
+            subject_key="pipeline",
+            subject_value=pipeline,
+            domain_error_title="Maintenance cleanup-preview failed with domain error",
+            unexpected_error_title="Unexpected error during maintenance cleanup-preview",
+            interrupted_message=(
+                "Maintenance cleanup-preview interrupted by user (Ctrl+C)"
+            ),
         )
     finally:
         if getattr(coro, "cr_frame", None) is not None:

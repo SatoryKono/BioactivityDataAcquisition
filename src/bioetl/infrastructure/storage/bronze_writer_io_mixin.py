@@ -236,5 +236,47 @@ class BronzeWriterIOMixin:
             "directories_removed": dirs,
         }
 
+    def preview_cleanup(
+        self,
+        provider: str | None = None,
+        entity: str | None = None,
+    ) -> JsonDict:  # Any: preview payload has heterogeneous values
+        """Preview Bronze cleanup scope without deleting files.
+
+        Args:
+            provider: Optional provider filter (e.g., ``"chembl"``).
+            entity: Optional entity filter (e.g., ``"activity"``).
+
+        Returns:
+            Dictionary with preview path, existence flag, and file count.
+        """
+        preview_root = self._resolve_bronze_preview_root(provider, entity)
+        exists = preview_root.exists()
+        file_count = (
+            sum(1 for file_path in preview_root.rglob("*") if file_path.is_file())
+            if exists
+            else 0
+        )
+
+        return {
+            "path": str(preview_root),
+            "file_count": file_count,
+            "exists": exists,
+        }
+
+    def _resolve_bronze_preview_root(
+        self,
+        provider: str | None,
+        entity: str | None,
+    ) -> Path:
+        """Resolve Bronze preview root path for optional provider/entity filters."""
+        if self._flat_structure:
+            return self.base_path
+        if provider and entity:
+            return self.base_path / provider / entity
+        if provider:
+            return self.base_path / provider
+        return self.base_path
+
 
 __all__ = ["BronzeWriterIOMixin"]
