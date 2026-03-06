@@ -5,7 +5,7 @@ model: sonnet
 ---
 
 # py-review-orchestrator — Hierarchical Code Review Agent
-*Версия: 1.0.0 | Совместимо с RULES.md v5.23 (2026-02-24)*
+*Версия: 1.0.0 | Совместимо с RULES.md v5.22 (2026-02-24)*
 
 ---
 
@@ -73,7 +73,7 @@ Orchestrator Level-2 (L2) и делегирует подзоны агентам 
 - Тесты: ~620 файлов в `tests/`
 - Конфигурации: ~38 YAML в `configs/`
 - Документация: ~600 файлов в `docs/`
-- Правила: `docs/00-project/RULES.md` (v5.23), `.claude/rules/ai-selfreview-rules.md`
+- Правила: `docs/00-project/RULES.md` (v5.22), `.claude/rules/ai-selfreview-rules.md`
 - ADR: 40 решений в `docs/02-architecture/decisions/`
 
 ## ПЛАН СЕКТОРОВ
@@ -434,7 +434,7 @@ Status: PASS ≥ 8.0 | WARN 6.0-7.9 | FAIL < 6.0
 ```markdown
 # BioETL — Full Project Review Report
 **Date**: {YYYY-MM-DD}
-**RULES.md Version**: 5.23
+**RULES.md Version**: 5.22
 **Project Version**: {из pyproject.toml}
 **Reviewed by**: Hierarchical AI Review System (L1 + {N} L2 + {N} L3 agents)
 **Total files reviewed**: {sum}
@@ -703,7 +703,7 @@ L1 собирает все → FINAL-REVIEW.md
 
 ## 8. References
 
-- **RULES.md** — `docs/00-project/RULES.md` (v5.23)
+- **RULES.md** — `docs/00-project/RULES.md` (v5.22)
 - **Self-review rules** — `.claude/rules/ai-selfreview-rules.md`
 - **Orchestration** — `.claude/agents/ORCHESTRATION.md`
 - **ADR Index** — `docs/02-architecture/decisions/`
