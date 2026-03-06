@@ -16,7 +16,6 @@ __all__ = [
     "ErrorClassifier",
 ]
 
-
 # Keyword to ErrorType mapping for legacy/external exceptions
 # Maps (keywords_tuple, error_type) - first match wins
 _ERROR_KEYWORDS: list[tuple[tuple[str, ...], ErrorType]] = [
@@ -55,9 +54,9 @@ _ERROR_KEYWORDS: list[tuple[tuple[str, ...], ErrorType]] = [
         ErrorType.NETWORK_ERROR,
     ),
     # Data quality errors (skip record)
-    (("Schema", "Validation", "SchemaValidation"), ErrorType.SCHEMA_VIOLATION),
+    (("Schema", "SchemaValidation"), ErrorType.SCHEMA_VIOLATION),
     (("Missing", "Required", "MissingRequired"), ErrorType.MISSING_REQUIRED_FIELD),
-    (("Invalid", "Malformed"), ErrorType.INVALID_DATA),
+    (("Invalid", "Malformed", "Validation"), ErrorType.INVALID_DATA),
     (("DataQualityThreshold",), ErrorType.DATA_QUALITY),
 ]
 
@@ -139,6 +138,10 @@ class ErrorClassifier:
         Returns:
             ErrorType from the exception's error_type class attribute
         """
+        override_error_type = getattr(error, "error_type_override", None)
+        if isinstance(override_error_type, ErrorType):
+            return override_error_type
+
         instance_error_type = getattr(error, "error_type", None)
         if isinstance(instance_error_type, ErrorType):
             return instance_error_type

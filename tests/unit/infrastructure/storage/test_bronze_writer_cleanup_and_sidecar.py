@@ -474,7 +474,7 @@ class TestBronzeWriterQueryString:
         from unittest.mock import AsyncMock, MagicMock
 
         from bioetl.domain.models.metadata import SourceMetadata
-        from bioetl.domain.ports.metadata_coordinator import BronzeMetadataInput
+        from bioetl.domain.ports import BronzeMetadataInput
 
         # Create mock metadata coordinator
         mock_coordinator = MagicMock()

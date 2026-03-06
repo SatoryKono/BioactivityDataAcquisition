@@ -10,6 +10,19 @@ from uuid import uuid4
 
 import pytest
 
+from bioetl.application.services.metadata_coordinator import MetadataCoordinator
+from bioetl.domain.medallion import GoldWriteMode, Layer, SilverWriteMode
+from bioetl.domain.models.metadata import (
+    BronzeMetadata,
+    CompositeOutputExt,
+    GoldMetadata,
+    GovernanceLineageConfig,
+    GovernanceMetadata,
+    QualityExpectations,
+    RunTypeEnum,
+    SilverMetadata,
+    SourceMetadata,
+)
 from bioetl.domain.ports import (
     BronzeMetadataInput,
     GoldMetadataInput,
@@ -1211,5 +1224,3 @@ class TestGovernanceMetadata:
         assert (
             governance.quality_expectations is not None
         )  # Default QualityExpectations
-
-

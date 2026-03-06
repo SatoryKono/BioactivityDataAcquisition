@@ -60,6 +60,7 @@ def mock_metrics() -> MagicMock:
     metrics = MagicMock()
     metrics.set_gauge = MagicMock()
     metrics.observe_histogram = MagicMock()
+    metrics.increment_counter = MagicMock()
     return metrics
 
 
@@ -328,9 +329,14 @@ class TestHealthAggregatorMetrics:
         mock_services: MagicMock,
         mock_metrics: MagicMock,
     ) -> None:
-        """Test that set_gauge is called once per component."""
+        """Test that base health status gauge is called once per component."""
         await health_aggregator.check_all(mock_services)
-        assert mock_metrics.set_gauge.call_count == 2
+        status_calls = [
+            call
+            for call in mock_metrics.set_gauge.call_args_list
+            if call[0][0] == "health_check_status"
+        ]
+        assert len(status_calls) == 2
 
     @pytest.mark.asyncio
     async def test_gauge_includes_component_label(
@@ -382,7 +388,7 @@ class TestHealthAggregatorMetrics:
         mock_storage: MagicMock,
         mock_data_source_enhanced: MagicMock,
     ) -> None:
-        """Test that latency histogram is only recorded for enhanced check_health."""
+        """Enhanced check_health records both base and mode latency histograms."""
         aggregator = _HealthAggregator(metrics=mock_metrics, logger=mock_logger)
         services = MagicMock()
         services.storage = mock_storage
@@ -390,7 +396,7 @@ class TestHealthAggregatorMetrics:
 
         await aggregator.check_all(services)
 
-        assert mock_metrics.observe_histogram.call_count == 1
+        assert mock_metrics.observe_histogram.call_count == 2
 
     @pytest.mark.asyncio
     async def test_observe_histogram_not_called_for_legacy_data_source(
@@ -409,6 +415,50 @@ class TestHealthAggregatorMetrics:
         await aggregator.check_all(services)
 
         mock_metrics.observe_histogram.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_probe_mode_exception_increments_probe_fallback_counter(
+        self,
+        health_aggregator_probe: _HealthAggregator,
+        mock_services: MagicMock,
+        mock_data_source_legacy: MagicMock,
+        mock_metrics: MagicMock,
+    ) -> None:
+        mock_data_source_legacy.health_check.side_effect = OSError("API down")
+
+        await health_aggregator_probe.check_all(mock_services)
+
+        mock_metrics.increment_counter.assert_any_call(
+            "probe_mode_fallback_total",
+            1,
+            {
+                "pipeline": "unknown",
+                "component": "data_source",
+                "reason": "exception",
+            },
+        )
+
+    @pytest.mark.asyncio
+    async def test_probe_mode_status_downgrade_increments_probe_fallback_counter(
+        self,
+        health_aggregator_probe: _HealthAggregator,
+        mock_services: MagicMock,
+        mock_data_source_legacy: MagicMock,
+        mock_metrics: MagicMock,
+    ) -> None:
+        mock_data_source_legacy.health_check.return_value = HealthStatus.UNHEALTHY
+
+        await health_aggregator_probe.check_all(mock_services)
+
+        mock_metrics.increment_counter.assert_any_call(
+            "probe_mode_fallback_total",
+            1,
+            {
+                "pipeline": "unknown",
+                "component": "data_source",
+                "reason": "status_downgrade",
+            },
+        )
 
 
 # ---------------------------------------------------------------------------

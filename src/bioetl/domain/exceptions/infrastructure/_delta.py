@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any, cast
+
 from bioetl.domain.exceptions.infrastructure._storage import (
     StorageError,
     StorageQuotaExceededError,
@@ -19,10 +21,15 @@ def DeltaWriteConflictError(
     if conflicting_version is not None:
         msg += f" (conflicting version: {conflicting_version})"
     error = StorageError(msg)
-    error.table_path = table_path
-    error.operation = operation
-    error.conflicting_version = conflicting_version
-    error.error_type = ErrorType.NETWORK_ERROR
+    error = cast(
+        StorageError,
+        error.with_context(
+            table_path=table_path,
+            operation=operation,
+            conflicting_version=conflicting_version,
+        ),
+    )
+    cast(Any, error).error_type = ErrorType.NETWORK_ERROR
     return error
 
 
@@ -83,20 +90,24 @@ def DeltaSchemaValidationError(
     expected = expected_columns or []
     actual = actual_columns or []
     mismatches = type_mismatches or {}
+    message = _build_schema_validation_message(
+        table_path=table_path,
+        expected_columns=expected,
+        actual_columns=actual,
+        type_mismatches=mismatches,
+    )
     error = StorageQuotaExceededError(path=table_path)
-    error.table_path = table_path
-    error.expected_columns = expected
-    error.actual_columns = actual
-    error.type_mismatches = mismatches
-    error.error_type = ErrorType.SCHEMA_MISMATCH_GOLD
-    error.args = (
-        _build_schema_validation_message(
+    error.args = (message,)
+    error = cast(
+        StorageQuotaExceededError,
+        error.with_context(
             table_path=table_path,
             expected_columns=expected,
             actual_columns=actual,
             type_mismatches=mismatches,
         ),
     )
+    cast(Any, error).error_type = ErrorType.SCHEMA_MISMATCH_GOLD
     return error
 
 
@@ -107,8 +118,13 @@ def DeltaOptimizeError(
 ) -> StorageError:
     """Compatibility constructor for legacy DeltaOptimizeError."""
     error = StorageError(f"Delta {operation} failed on '{table_path}': {reason}")
-    error.table_path = table_path
-    error.operation = operation
-    error.reason = reason
-    error.error_type = ErrorType.NETWORK_ERROR
+    error = cast(
+        StorageError,
+        error.with_context(
+            table_path=table_path,
+            operation=operation,
+            reason=reason,
+        ),
+    )
+    cast(Any, error).error_type = ErrorType.NETWORK_ERROR
     return error

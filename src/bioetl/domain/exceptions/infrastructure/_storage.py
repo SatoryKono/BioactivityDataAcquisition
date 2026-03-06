@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any, cast
+
 from bioetl.domain.exceptions.base import CriticalError, RecoverableError
 from bioetl.domain.types import ErrorType
 
@@ -15,8 +17,8 @@ class StorageError(RecoverableError):
 def BucketNotFoundError(bucket: str) -> StorageError:
     """Compatibility constructor for legacy BucketNotFoundError."""
     error = StorageError(f"Bucket '{bucket}' not found")
-    error.bucket = bucket
-    error.error_type = ErrorType.DB_UNAVAILABLE
+    error = cast(StorageError, error.with_context(bucket=bucket))
+    cast(Any, error).error_type = ErrorType.DB_UNAVAILABLE
     return error
 
 
@@ -33,9 +35,8 @@ class TableNotFoundError(StorageError):
 def UploadError(key: str, reason: str) -> StorageError:
     """Compatibility constructor for legacy UploadError."""
     error = StorageError(f"Failed to upload '{key}': {reason}")
-    error.key = key
-    error.reason = reason
-    error.error_type = ErrorType.NETWORK_ERROR
+    error = cast(StorageError, error.with_context(key=key, reason=reason))
+    cast(Any, error).error_type = ErrorType.NETWORK_ERROR
     return error
 
 
@@ -131,9 +132,14 @@ def BronzeValidationError(
     if original_error is not None:
         parts.append(f"error={original_error}")
     error = StorageError(", ".join(parts))
-    error.record_index = record_index
-    error.original_error = original_error
-    error.error_type = ErrorType.INVALID_DATA
+    error = cast(
+        StorageError,
+        error.with_context(
+            record_index=record_index,
+            original_error=original_error,
+        ),
+    )
+    cast(Any, error).error_type = ErrorType.INVALID_DATA
     return error
 
 
@@ -150,9 +156,14 @@ def CachedBronzeEmptyError(
         f"Searched path: {bronze_path}"
     )
     error = StorageError(message)
-    error.provider = provider
-    error.entity_type = entity_type
-    error.bronze_path = bronze_path
-    error.date_filter = date_filter
-    error.error_type = ErrorType.INVALID_DATA
+    error = cast(
+        StorageError,
+        error.with_context(
+            provider=provider,
+            entity_type=entity_type,
+            bronze_path=bronze_path,
+            date_filter=date_filter,
+        ),
+    )
+    cast(Any, error).error_type = ErrorType.INVALID_DATA
     return error

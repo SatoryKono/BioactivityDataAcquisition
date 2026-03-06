@@ -6,6 +6,7 @@ from datetime import date
 from pathlib import Path
 
 import yaml
+
 from bioetl.infrastructure.quality import (
     build_exemption_inventory,
     evaluate_debt_scorecard,
@@ -66,6 +67,23 @@ def test_debt_scorecard_enforces_budget_only_temporary_windows() -> None:
     max_window_days = temporary.get("max_window_days")
     assert isinstance(max_window_days, int)
     assert 1 <= max_window_days <= 45
+
+
+def test_debt_scorecard_priority_burndown_registries_cover_q2_program() -> None:
+    """Priority burn-down registries must include declared Q2 maintainability focus."""
+    scorecard = load_debt_scorecard()
+    governance = scorecard.get("governance", {})
+    assert isinstance(governance, dict)
+    burn_down = governance.get("burn_down_priorities", {})
+    assert isinstance(burn_down, dict)
+    registries = burn_down.get("registries", [])
+    assert isinstance(registries, list)
+
+    required = {"file_size_limits", "class_size", "god_object"}
+    assert required.issubset(set(registries)), (
+        "governance.burn_down_priorities.registries must include "
+        "file_size_limits, class_size, god_object"
+    )
 
 
 def test_debt_scorecard_current_quarter_within_budget() -> None:

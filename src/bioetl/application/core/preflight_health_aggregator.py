@@ -18,7 +18,6 @@ if TYPE_CHECKING:
         MetricsPort,
     )
 
-
 _HEALTH_CHECK_ERRORS = (
     BioETLError,
     OSError,
@@ -32,8 +31,11 @@ class _HealthAggregator:
     """Aggregates health checks for critical infrastructure components."""
 
     METRIC_HEALTH_STATUS = "health_check_status"
+    METRIC_HEALTH_MODE_STATUS = "health_check_mode_status"
     METRIC_HEALTH_DURATION = "health_check_duration_seconds"
     METRIC_HEALTH_LATENCY = "health_check_latency_ms"
+    METRIC_HEALTH_MODE_LATENCY = "health_check_mode_latency_ms"
+    METRIC_PROBE_MODE_FALLBACK_TOTAL = "probe_mode_fallback_total"
 
     def __init__(
         self,
@@ -51,7 +53,7 @@ class _HealthAggregator:
         self._metrics = metrics
         self._logger = logger
         self._health_monitor = health_monitor
-        self._pipeline_name = pipeline_name
+        self._pipeline_name = pipeline_name or "unknown"
         self._health_check_mode = health_check_mode
 
     async def check_all(self, services: PipelineService) -> HealthReport:
@@ -111,11 +113,13 @@ class _HealthAggregator:
         component = "data_source"
         start_time = time.perf_counter()
         health_result: HealthCheckResult | None = None
+        fallback_reason: str | None = None
 
         try:
             if hasattr(services.data_source, "check_health"):
                 health_result = await services.data_source.check_health()
                 status = health_result.status
+                fallback_reason = self._resolve_probe_fallback_reason(status)
                 duration = time.perf_counter() - start_time
 
                 if self._health_monitor is not None:
@@ -134,6 +138,7 @@ class _HealthAggregator:
                 )
             else:
                 status = await services.data_source.health_check()
+                fallback_reason = self._resolve_probe_fallback_reason(status)
                 duration = time.perf_counter() - start_time
                 result = ComponentHealthResult(
                     component=component,
@@ -161,8 +166,14 @@ class _HealthAggregator:
                     else exception_message
                 ),
             )
+            if self._health_check_mode == "probe":
+                fallback_reason = "exception"
 
         self._record_metrics(component, result, health_result)
+        if fallback_reason is not None:
+            self._record_probe_mode_fallback(
+                component=component, reason=fallback_reason
+            )
         return result
 
     def _normalize_data_source_status(self, status: HealthStatus) -> HealthStatus:
@@ -183,6 +194,11 @@ class _HealthAggregator:
         detail = error_message or "data_source reported UNHEALTHY in health probe"
         return f"probe_mode_fallback: {detail}"
 
+    def _resolve_probe_fallback_reason(self, status: HealthStatus) -> str | None:
+        if self._health_check_mode == "probe" and status == HealthStatus.UNHEALTHY:
+            return "status_downgrade"
+        return None
+
     def _record_metrics(
         self,
         component: str,
@@ -199,6 +215,11 @@ class _HealthAggregator:
             float(result.status.to_metric_value()),
             component_labels,
         )
+        self._metrics.set_gauge(
+            self.METRIC_HEALTH_MODE_STATUS,
+            float(result.status.to_metric_value()),
+            {"component": component, "mode": self._health_check_mode},
+        )
 
         if health_result is not None:
             provider_labels = {"provider": health_result.provider}
@@ -207,6 +228,27 @@ class _HealthAggregator:
                 health_result.latency_ms,
                 provider_labels,
             )
+            self._metrics.observe_histogram(
+                self.METRIC_HEALTH_MODE_LATENCY,
+                health_result.latency_ms,
+                {
+                    "provider": health_result.provider,
+                    "mode": self._health_check_mode,
+                },
+            )
+
+    def _record_probe_mode_fallback(self, *, component: str, reason: str) -> None:
+        if self._metrics is None:
+            return
+        self._metrics.increment_counter(
+            self.METRIC_PROBE_MODE_FALLBACK_TOTAL,
+            1,
+            {
+                "pipeline": self._pipeline_name,
+                "component": component,
+                "reason": reason,
+            },
+        )
 
     def _log_report(self, report: HealthReport) -> None:
         if self._logger is None:
