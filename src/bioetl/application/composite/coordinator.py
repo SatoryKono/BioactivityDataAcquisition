@@ -117,15 +117,15 @@ class EnrichmentCoordinatorService:
             task_spec
             for enricher in enrichers
             if (
-                   task_spec := _build_enricher_task(
-                       self,
-                       keys=keys,
-                       enricher=enricher,
-                       completed=completed,
-                       runner_factory=runner_factory,
-                   )
-               )
-               is not None
+                task_spec := _build_enricher_task(
+                    self,
+                    keys=keys,
+                    enricher=enricher,
+                    completed=completed,
+                    runner_factory=runner_factory,
+                )
+            )
+            is not None
         ]
         if not task_specs:
             return {}

@@ -1,0 +1,49 @@
+"""Tracing bootstrap helpers for runtime observability wiring."""
+
+from __future__ import annotations
+
+from collections.abc import Callable
+from typing import TYPE_CHECKING
+
+from bioetl.domain.ports import NoOpTracing, TracingPort
+from bioetl.infrastructure.observability import OpenTelemetryTracer
+
+if TYPE_CHECKING:
+    from bioetl.infrastructure.config import Settings
+
+TracerFactory = Callable[[str], TracingPort]
+
+__all__ = [
+    "bootstrap_tracer",
+    "bootstrap_tracer_port",
+]
+
+
+def _default_tracer_factory(service_name: str) -> TracingPort:
+    """Create OpenTelemetry tracer for the given service name."""
+    return OpenTelemetryTracer(service_name=service_name)
+
+
+def bootstrap_tracer_port(
+    settings: Settings,
+    service_name: str = "bioetl",
+    tracer_factory: TracerFactory | None = None,
+) -> TracingPort:
+    """Create a tracing port implementation for distributed tracing."""
+    if settings.observability.tracing_enabled:
+        factory = tracer_factory or _default_tracer_factory
+        return factory(service_name)
+    return NoOpTracing()
+
+
+def bootstrap_tracer(
+    settings: Settings,
+    service_name: str = "bioetl",
+    tracer_factory: TracerFactory | None = None,
+) -> TracingPort:
+    """Deprecated alias for :func:`bootstrap_tracer_port`."""
+    return bootstrap_tracer_port(
+        settings=settings,
+        service_name=service_name,
+        tracer_factory=tracer_factory,
+    )

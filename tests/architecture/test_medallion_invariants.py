@@ -139,11 +139,14 @@ class TestSilverLayerInvariants:
 
     @pytest.fixture
     def silver_writer_source(self) -> str:
-        """Get Silver writer source code."""
-        path = Path("src/bioetl/infrastructure/storage/silver_writer.py")
-        if not path.exists():
-            path = Path(__file__).parent.parent.parent / path
-        return path.read_text(encoding="utf-8")
+        """Get Silver writer source code (main module + all mixins)."""
+        base = Path("src/bioetl/infrastructure/storage")
+        if not base.exists():
+            base = Path(__file__).parent.parent.parent / base
+        parts: list[str] = []
+        for py_file in sorted(base.glob("silver_writer*.py")):
+            parts.append(py_file.read_text(encoding="utf-8"))
+        return "\n".join(parts)
 
     def test_silver_writer_uses_delta_lake(self, silver_writer_source: str) -> None:
         """Silver layer MUST use Delta Lake for storage.

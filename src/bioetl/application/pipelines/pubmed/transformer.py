@@ -17,11 +17,10 @@ from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.pubmed.extractors import (
-    AbstractExtractor,
     AuthorExtractor,
-    ClassificationExtractor,
     DateExtractor,
-    IdentifierExtractor,
+    PubMedAuthorBlockExtractor,
+    PubMedBusinessDataExtractor,
     RawAuthor,
 )
 from bioetl.application.pipelines.pubmed.transformer_authors_mixin import (
@@ -30,13 +29,13 @@ from bioetl.application.pipelines.pubmed.transformer_authors_mixin import (
 from bioetl.application.pipelines.pubmed.transformer_dates_mixin import (
     _PubMedTransformerDatesMixin,
 )
-from bioetl.application.pipelines.pubmed.xml_parser import get_text
 from bioetl.domain.entities.pubmed import PubMedPublicationEntity
-from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
-from bioetl.domain.normalization import normalize_pmc_id
+from bioetl.domain.mapping.pubmed_publication import (
+    PUBMED_SILVER_EXCLUDED_FIELDS,
+    build_pubmed_publication_type_fields,
+)
 from bioetl.domain.services import IdentityService
 from bioetl.domain.types import GoldRecord, JsonDict
-from bioetl.domain.value_objects import DOI, PubMedId
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -175,175 +174,28 @@ class PubMedPublicationTransformer(
             )
             raise ValueError(f"XML parse error: {e}") from e
 
-    def _extract_medline_metadata(
-        self,
-        medline: ET.Element | None,
-        pubmed_data: ET.Element | None,
-    ) -> JsonDict:  # Any: untyped PubMed XML/JSON values
-        """Extract MEDLINE-specific metadata."""
-        medline_info = medline.find("MedlineJournalInfo") if medline else None
-        citation_subsets = (
-            [get_text(cs) for cs in medline.findall("CitationSubset")]
-            if medline
-            else []
-        )
-
-        pub_status = self._extract_publication_status(pubmed_data)
-
-        return {
-            "nlm_unique_id": (
-                get_text(medline_info.find("NlmUniqueID"))
-                if medline_info is not None
-                else None
-            ),
-            "citation_subset": (
-                ",".join(cs for cs in citation_subsets if cs)
-                if citation_subsets
-                else None
-            ),
-            "publication_status": pub_status,
-            "country": (
-                get_text(medline.find(".//MedlineJournalInfo/Country"))
-                if medline
-                else None
-            ),
-        }
-
-    def _extract_publication_status(self, pubmed_data: ET.Element | None) -> str | None:
-        """Extract publication status from PubmedData."""
-        if pubmed_data is None:
-            return None
-        pub_status_elem = pubmed_data.find("PublicationStatus")
-        return get_text(pub_status_elem) if pub_status_elem is not None else None
-
-    def _extract_counts(
-        self,
-        article: ET.Element,
-        pubmed_data: ET.Element | None,
-    ) -> dict[str, int]:
-        """Extract grant and reference counts."""
-        grant_list = article.find(".//GrantList")
-        grant_count = len(grant_list.findall("Grant")) if grant_list is not None else 0
-
-        ref_list = (
-            pubmed_data.find("ReferenceList") if pubmed_data is not None else None
-        )
-        reference_count = (
-            len(ref_list.findall(".//Reference")) if ref_list is not None else 0
-        )
-
-        return {"grant_count": grant_count, "citations_made": reference_count}
-
-    def _extract_classification_data(
-        self, article: ET.Element, medline: ET.Element | None
-    ) -> JsonDict:  # Any: untyped PubMed XML/JSON values
-        """Extract classification-related fields."""
-        publication_types = ClassificationExtractor.parse_publication_types(article)
-        subject_keywords = ClassificationExtractor.parse_keywords(medline)
-        subject_mesh = ClassificationExtractor.parse_mesh_terms(medline)
-        chemicals = ClassificationExtractor.parse_chemicals(medline)
-
-        return {
-            "publication_types": self.serialize_json_list(publication_types),
-            "publication_type_list": self.serialize_json_list(publication_types),
-            "subject_keywords": self.serialize_json_list(subject_keywords),
-            "keyword_count": len(subject_keywords) if subject_keywords else 0,
-            "subject_mesh": self.serialize_json_list(subject_mesh),
-            "mesh_heading_count": len(subject_mesh) if subject_mesh else 0,
-            "chemicals": self.serialize_json_list(chemicals),
-            "chemical_count": len(chemicals) if chemicals else 0,
-            "gene_symbols": self.serialize_json_list(
-                ClassificationExtractor.parse_gene_symbols(medline)
-            ),
-            "databanks": self.serialize_json_list(
-                ClassificationExtractor.parse_databanks(medline)
-            ),
-        }
-
     def _extract_author_block(
         self, article: ET.Element, raw_author_data: list[RawAuthor]
     ) -> JsonDict:  # Any: untyped PubMed XML/JSON values
-        """Extract and process author-related fields from article XML.
-
-        Uses unified normalization service for authors and affiliations.
-        """
-        # Normalize author names using unified service
-        normalizer = self._data_normalizer
-
-        # Extract author names
-        author_names: list[str] = (
-            self._author_extractor.normalize(raw_author_data) if raw_author_data else []
-        )
-
-        # Use unified normalization (parse + serialize in one call)
-        authors_json = normalizer.normalize_author_list(author_names)
-        author_keys = normalizer.normalize_author_keys(author_names)
-
-        authors_with_affiliations = self._build_authors_with_affiliations(
-            raw_author_data
-        )
-
-        # Extract affiliations using unified service
-        affiliation_strings = normalizer.extract_affiliations_from_authors(
-            cast(
-                "list[JsonDict]",  # Any: transformer record has heterogeneous values
-                raw_author_data,  # Any: transformer record has heterogeneous values
-            )  # Any: RawAuthor is TypedDict-like
-        )
-
-        # Normalize affiliations using unified service (already deduplicated & sorted)
-        affiliation_list_json = (
-            normalizer.normalize_affiliations(affiliation_strings)
-            if affiliation_strings
-            else None
-        )
-
-        # Structured affiliations with identifiers (PubMed-specific)
-        structured_affs = self._author_extractor.parse_structured_affiliations(article)
-        processed = self._process_structured_affiliations(structured_affs)
-
-        # Count from parsed JSON
-        import json
-
-        author_count = len(json.loads(authors_json)) if authors_json else 0
-
-        return {
-            "authors": authors_json,
-            "author_keys": author_keys,
-            "authors_with_affiliations": (
-                self.serialize_json_list(authors_with_affiliations)
-                if authors_with_affiliations
-                else None
+        """Extract and process author-related fields from article XML."""
+        return PubMedAuthorBlockExtractor.extract(
+            article=article,
+            raw_author_data=raw_author_data,
+            data_normalizer=self._data_normalizer,
+            author_extractor=self._author_extractor,
+            normalize_author_list=self._data_normalizer.normalize_author_list,
+            normalize_author_keys=self._data_normalizer.normalize_author_keys,
+            serialize_json_list=self.serialize_json_list,
+            build_authors_with_affiliations=self._build_authors_with_affiliations,
+            process_structured_affiliations=lambda affiliations: (
+                self._process_structured_affiliations(
+                    cast(
+                        "list[JsonDict]",  # Any: structured affiliation payloads
+                        affiliations,
+                    )
+                )
             ),
-            "affiliation_list": affiliation_list_json,
-            "affiliation_structured": self.serialize_json_list(processed),
-            "author_count": author_count,
-        }
-
-    def _extract_identifiers(
-        self, root: ET.Element
-    ) -> JsonDict:  # Any: untyped PubMed XML/JSON values
-        """Extract and normalize all identifier fields from PubMed XML root."""
-        # Optimized single-pass extraction for multiple identifiers
-        # Reduces XML traversals from ~7 to 2 (ELocationID + ArticleIdList)
-        ids = IdentifierExtractor.extract_all_identifiers(root)
-
-        raw_pmid = get_text(root.find(".//PMID"))
-        pmid_vo = PubMedId.from_raw(raw_pmid)
-
-        raw_doi = ids["doi"]
-        doi_vo = DOI.from_raw(raw_doi)
-
-        return {
-            "pmid": str(pmid_vo) if pmid_vo else None,
-            "doi": str(doi_vo) if doi_vo else None,
-            "pii": self._data_normalizer.normalize_to_string(ids["pii"]),
-            "mid": self._data_normalizer.normalize_to_string(ids["mid"]),
-            "publisher_id": self._data_normalizer.normalize_to_string(
-                ids["publisher_id"]
-            ),
-            "pmc_id": normalize_pmc_id(ids["pmc_id"]),
-        }
+        )
 
     def _extract_business_data(self, record: BronzeRecord) -> GoldRecord:
         """Extract all business fields from PubMed XML.
@@ -360,68 +212,29 @@ class PubMedPublicationTransformer(
         root = self._cached_xml_root
         if root is None:
             return {"pmid": None}
-
-        identifiers = self._extract_identifiers(root)
-
-        article = root.find(".//Article")
-        if article is None:
-            return {"pmid": identifiers["pmid"]}
-
-        medline = root.find(".//MedlineCitation")
-        pubmed_data = root.find(".//PubmedData")
-
-        raw_author_data = self._author_extractor.extract(article) or []
-
-        return {
-            **identifiers,
-            "title": get_text(article.find(".//ArticleTitle")),
-            "abstract": self._data_normalizer.strip_html_tags(
-                AbstractExtractor.extract_abstract(article)
-            ),
-            "abstract_structured": AbstractExtractor.is_abstract_structured(article),
-            **self._extract_author_block(article, raw_author_data),
-            **self._extract_journal_data(article),
-            **self._extract_date_data(article, pubmed_data, medline),
-            **self._extract_classification_data(article, medline),
-            **self._extract_medline_metadata(medline, pubmed_data),
-            **self._extract_counts(article, pubmed_data),
-            "language": get_text(article.find(".//Language")),
-            "_source": "pubmed",
-            **self._build_pubmed_classification(
-                ClassificationExtractor.parse_publication_types(article),
-            ),
-            "citations_received": None,
-            "is_oa": None,
-            "_lookup_method": record.get("_lookup_method", "pmid"),
-            "_original_id": record.get("_original_id"),
-            "_dq_warn": False,
-            "_dq_error": False,
-        }
+        return PubMedBusinessDataExtractor.extract(
+            record=record,
+            root=root,
+            data_normalizer=self._data_normalizer,
+            author_extractor=self._author_extractor,
+            serialize_json_list=self.serialize_json_list,
+            extract_author_block=self._extract_author_block,
+            extract_journal_data=self._extract_journal_data,
+            extract_date_data=self._extract_date_data,
+            classify_publication_types=self._build_pubmed_classification,
+        )
 
     def _build_pubmed_classification(
         self, pub_types: list[str]
     ) -> dict[str, str | None]:
-        """Build publication_type and classification fields for PubMed.
-
-        Joins raw types with ``|`` for the raw ``publication_type`` field,
-        then uses the unified classifier to pick the most specific match.
-
-        Args:
-            pub_types: List of raw publication type strings from XML.
-
-        Returns:
-            Dict with publication_type and the 3 classification fields.
-
-        """
-        raw_type = "|".join(pub_types) if pub_types else None
-        classification = self._classify_publication_type(
-            "pubmed",
-            raw_types_list=pub_types,
+        """Build publication_type and classification fields for PubMed."""
+        return build_pubmed_publication_type_fields(
+            pub_types,
+            classification=self._classify_publication_type(
+                "pubmed",
+                raw_types_list=pub_types,
+            ),
         )
-        return {
-            "publication_type": normalize_publication_type(raw_type),
-            **classification,
-        }
 
     def _get_primary_id_field(self) -> str:
         """Return the primary ID field name for PubMed publications.
@@ -460,26 +273,8 @@ class PubMedPublicationTransformer(
         self,
         entity: Any,  # Any: generic domain entity; type varies by pipeline
     ) -> GoldRecord:  # Any: generic domain entity
-        """Convert Domain Entity to SilverRecord, excluding certain fields.
-
-        Overrides base implementation to remove fields not needed for PubMed.
-
-        Args:
-            entity: Domain entity (dataclass).
-
-        Returns:
-            SilverRecord dictionary without excluded fields.
-
-        """
-        # Get base silver record
+        """Convert Domain Entity to SilverRecord, excluding PubMed-unsupported fields."""
         silver_record = super().entity_to_silver_record(entity)
-
-        # Remove excluded fields (API deprecated or not available)
-        silver_record.pop("vernacular_title", None)
-        silver_record.pop("epub_date", None)
-        silver_record.pop("received_date", None)
-        silver_record.pop("revised_date", None)
-        silver_record.pop("accepted_date", None)
-        silver_record.pop("citations_received", None)
-
+        for field in PUBMED_SILVER_EXCLUDED_FIELDS:
+            silver_record.pop(field, None)
         return silver_record

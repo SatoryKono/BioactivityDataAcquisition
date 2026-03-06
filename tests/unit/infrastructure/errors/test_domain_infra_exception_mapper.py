@@ -1,0 +1,114 @@
+"""Contract tests for unified domain<->infrastructure exception mapper."""
+
+from __future__ import annotations
+
+from unittest.mock import MagicMock
+
+import pytest
+
+from bioetl.domain.exceptions import (
+    CriticalError,
+    DomainExceptionContext,
+    ExternalServiceError,
+    PolicyViolationError,
+    RateLimitExceededError,
+    ServiceUnavailableError,
+    StorageError,
+)
+from bioetl.domain.types import ErrorType
+from bioetl.infrastructure.errors import (
+    DomainErrorMappingInput,
+    DomainInfraExceptionMapper,
+)
+
+
+@pytest.fixture
+def mapper() -> DomainInfraExceptionMapper:
+    return DomainInfraExceptionMapper(logger=MagicMock())
+
+
+def test_map_to_domain_error_rate_limit(mapper: DomainInfraExceptionMapper) -> None:
+    mapped = mapper.map_to_domain_error(
+        DomainErrorMappingInput(
+            error=ValueError("limited"),
+            provider="chembl",
+            error_type=ErrorType.INVALID_DATA,
+            status_code=429,
+        )
+    )
+    assert isinstance(mapped, RateLimitExceededError)
+    assert mapped.retry_after == 60.0
+
+
+def test_map_to_domain_error_server_error(mapper: DomainInfraExceptionMapper) -> None:
+    mapped = mapper.map_to_domain_error(
+        DomainErrorMappingInput(
+            error=RuntimeError("down"),
+            provider="pubchem",
+            error_type=ErrorType.NETWORK_ERROR,
+            status_code=503,
+        )
+    )
+    assert isinstance(mapped, ServiceUnavailableError)
+    assert mapped.status_code == 503
+
+
+def test_map_to_domain_error_auth_raises_critical(
+    mapper: DomainInfraExceptionMapper,
+) -> None:
+    with pytest.raises(CriticalError):
+        mapper.map_to_domain_error(
+            DomainErrorMappingInput(
+                error=PermissionError("unauthorized"),
+                provider="uniprot",
+                error_type=ErrorType.INVALID_DATA,
+                status_code=401,
+            )
+        )
+
+
+def test_map_to_domain_error_timeout_without_status(
+    mapper: DomainInfraExceptionMapper,
+) -> None:
+    mapped = mapper.map_to_domain_error(
+        DomainErrorMappingInput(
+            error=TimeoutError("timeout"),
+            provider="openalex",
+            error_type=ErrorType.TIMEOUT,
+        )
+    )
+    assert isinstance(mapped, ServiceUnavailableError)
+    assert mapped.status_code is None
+
+
+def test_map_domain_to_infra_disposition_recoverable(
+    mapper: DomainInfraExceptionMapper,
+) -> None:
+    disposition = mapper.map_domain_to_infra_disposition(StorageError("temporary"))
+    assert disposition.context == DomainExceptionContext.STORAGE
+    assert disposition.severity == "recoverable"
+    assert disposition.retryable is True
+
+
+def test_map_domain_to_infra_disposition_critical(
+    mapper: DomainInfraExceptionMapper,
+) -> None:
+    disposition = mapper.map_domain_to_infra_disposition(
+        PolicyViolationError("invalid mode")
+    )
+    assert disposition.context == DomainExceptionContext.ORCHESTRATION
+    assert disposition.severity == "critical"
+    assert disposition.retryable is False
+
+
+def test_adapter_mapper_facade_uses_unified_mapper() -> None:
+    from bioetl.infrastructure.adapters.adapter_error_mapper import AdapterErrorMapper
+
+    mapped = AdapterErrorMapper(logger=MagicMock()).map_to_domain_error(
+        DomainErrorMappingInput(
+            error=RuntimeError("network"),
+            provider="crossref",
+            error_type=ErrorType.NETWORK_ERROR,
+        )
+    )
+    assert isinstance(mapped, ExternalServiceError)

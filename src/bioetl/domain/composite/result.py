@@ -347,8 +347,8 @@ class CompositeResult:
             "enrichers_skipped": len(self.skipped_enrichers),
             "enrichers_not_run": len(self.not_run_enrichers),
             "optional_failures": self.optional_failed_enrichers or None,
-            "records_merged": self.merge_result.records_merged
-            if self.merge_result
-            else 0,
+            "records_merged": (
+                self.merge_result.records_merged if self.merge_result else 0
+            ),
             "total_duration_seconds": self.total_duration_seconds,
         }

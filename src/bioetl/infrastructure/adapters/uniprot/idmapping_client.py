@@ -84,7 +84,7 @@ class UniProtIDMappingClient(
 
         results: dict[str, JsonDict | None] = dict.fromkeys(ids, None)
         for batch_start in range(0, len(ids), self.MAX_IDS_PER_BATCH):
-            batch = ids[batch_start: batch_start + self.MAX_IDS_PER_BATCH]
+            batch = ids[batch_start : batch_start + self.MAX_IDS_PER_BATCH]
             batch_results = await self._map_batch(from_db, to_db, batch)
             results.update(batch_results)
         return results

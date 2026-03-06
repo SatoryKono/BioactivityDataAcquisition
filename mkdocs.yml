@@ -285,6 +285,7 @@ nav:
             -   "Publication Field Mapping": 05-operations/verification/publication-field-mapping-report.md
             -   "PubMed Extraction": 05-operations/verification/pubmed-extraction-verification-report.md
             -   "SemanticScholar Publication": 05-operations/verification/semanticscholar-publication-pipeline-verification.md
+            -   "VCR Provider Rebalancing": 05-operations/verification/vcr-provider-rebalancing.md
     -   "Internal / Extended":
             -   Agents:
                     -   "Agents Overview": 00-project/agents/README.md

@@ -194,7 +194,7 @@ class ChemblAdapter(
     def _batch_ids(self, ids: list[str], batch_size: int) -> Iterator[list[str]]:
         """Split IDs into batches for API requests."""
         for i in range(0, len(ids), batch_size):
-            yield ids[i: i + batch_size]
+            yield ids[i : i + batch_size]
 
     def _build_filter_in_params(self, filters: dict[str, list[str]]) -> dict[str, str]:
         """Build __in filter parameters for multi-field filtering."""

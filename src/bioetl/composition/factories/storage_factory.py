@@ -10,6 +10,7 @@ from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
 from ._bronze_factory import create_bronze_writer
 from ._gold_factory import create_gold_writer
 from ._resilience_factory import (
@@ -245,14 +246,14 @@ class StorageFactory:
         )
 
         bronze_flat_structure = (
-                                    bronze_config.flat_structure if bronze_config else False
-                                ) and use_yaml_paths
+            bronze_config.flat_structure if bronze_config else False
+        ) and use_yaml_paths
         silver_flat_structure = (
-                                    silver_config.flat_structure if silver_config else False
-                                ) and use_yaml_paths
+            silver_config.flat_structure if silver_config else False
+        ) and use_yaml_paths
         gold_flat_structure = (
-                                  gold_config.flat_structure if gold_config else False
-                              ) and use_yaml_paths
+            gold_config.flat_structure if gold_config else False
+        ) and use_yaml_paths
         metadata_atomic_retry_policy = create_silver_atomic_retry_policy(settings)
         merge_resilience_policy = create_silver_merge_resilience_policy(settings)
 

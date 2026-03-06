@@ -293,13 +293,13 @@ class Settings(BaseSettings):
     strict_error_handling: bool = Field(
         default=False,
         description="When True, API client errors raise exceptions instead of being silently ignored. "
-                    "Recommended for dev/staging environments.",
+        "Recommended for dev/staging environments.",
     )
     strict_medallion: bool = Field(
         default=False,
         description="When True, schema drift in Silver layer raises SchemaEvolutionError. "
-                    "When False (default), schema drift is handled per pipeline config. "
-                    "Set via BIOETL_STRICT_MEDALLION=true for stricter validation.",
+        "When False (default), schema drift is handled per pipeline config. "
+        "Set via BIOETL_STRICT_MEDALLION=true for stricter validation.",
     )
 
     # Local storage paths

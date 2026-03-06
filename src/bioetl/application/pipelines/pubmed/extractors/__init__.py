@@ -25,6 +25,10 @@ from bioetl.application.pipelines.pubmed.extractors.identifier import (
     ELocationIds,
     IdentifierExtractor,
 )
+from bioetl.application.pipelines.pubmed.extractors.publication import (
+    PubMedAuthorBlockExtractor,
+    PubMedBusinessDataExtractor,
+)
 
 __all__ = [
     "AbstractExtractor",
@@ -35,6 +39,8 @@ __all__ = [
     "DateExtractor",
     "ELocationIds",
     "IdentifierExtractor",
+    "PubMedAuthorBlockExtractor",
+    "PubMedBusinessDataExtractor",
     "RawAuthor",
     "StructuredAffiliation",
 ]

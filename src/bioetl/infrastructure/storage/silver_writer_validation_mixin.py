@@ -33,6 +33,8 @@ class SilverWriterValidationMixin:
     _metrics: MetricsPort | None
     _silver_validator: SilverValidatorPort
     _get_table_schema: Callable[[str], Awaitable[pa.Schema | None]]
+    _resolve_table_path: Callable[[str], str]
+    _prepare_arrow_data: Callable[..., pa.Table]
 
     def _validate_write_mode(self, mode: str) -> SilverWriteMode:
         """Validate and convert write mode string to enum."""
@@ -260,3 +262,39 @@ class SilverWriterValidationMixin:
             new_fields=tuple(sorted(new_fields)),
             missing_fields=tuple(sorted(missing_fields)),
         )
+
+    async def _prepare_silver_write_payload(
+        self,
+        *,
+        table_name: str,
+        records: list[BronzeRecord],
+        primary_keys: list[str],
+        schema: pa.Schema,
+        mode: str,
+        on_schema_mismatch: Literal["error", "evolve", "ignore"],
+        column_order: list[str] | None,
+        partition_cols: list[str] | None,
+        key_nullability_rules: list[KeyNullabilityRule] | None,
+    ) -> tuple[list[BronzeRecord], SilverWriteMode, str, pa.Table]:
+        """Run full validation chain and prepare Arrow data for write."""
+        records = self._deduplicate_by_primary_keys(records, primary_keys)
+        validated_mode = self._validate_write_mode(mode)
+        self._enforce_write_policy(validated_mode, table_name)
+        self._validate_records(records, table_name, schema)
+        self._validate_key_nullability(
+            records,
+            primary_keys,
+            partition_cols,
+            key_nullability_rules,
+            table_name,
+        )
+        self._validate_silver_pandera(records, table_name)
+        await self._check_schema_drift(table_name, records, on_schema_mismatch)
+        table_path = self._resolve_table_path(table_name)
+        arrow_data = self._prepare_arrow_data(
+            records,
+            schema,
+            primary_keys,
+            column_order=column_order,
+        )
+        return records, validated_mode, table_path, arrow_data
