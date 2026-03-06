@@ -323,6 +323,21 @@ jobs:
                       cat reports/performance/hotspot-degradation.md >> "$GITHUB_STEP_SUMMARY"
                     fi
 
+            -   name: Gate on degradation report
+                if: always()
+                run: |
+                    if [ -f reports/performance/hotspot-degradation.json ]; then
+                      python3 -c "
+                    import json, sys
+                    data = json.load(open('reports/performance/hotspot-degradation.json'))
+                    failed = data.get('summary', {}).get('failed', 0)
+                    if failed > 0:
+                        print(f'FAIL: {failed} benchmark(s) over budget')
+                        sys.exit(1)
+                    print('PASS: all benchmarks within budget')
+                    "
+                    fi
+
             -   name: Upload performance budget report
                 uses: actions/upload-artifact@v4
                 if: always()
