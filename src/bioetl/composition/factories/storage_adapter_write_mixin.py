@@ -82,9 +82,7 @@ class StorageAdapterWriteMixin:
     async def write_silver(
         self,
         table_name: str,
-        records: list[
-            JsonDict  # Any: record/metadata values are heterogeneous
-        ],
+        records: list[JsonDict],  # Any: record/metadata values are heterogeneous
         primary_keys: list[str],
         schema: ArrowSchema,
         mode: Literal["merge", "append", "delete"] = "merge",
@@ -135,15 +133,14 @@ class StorageAdapterWriteMixin:
     async def write_gold(
         self,
         table_name: str,
-        records: list[
-            JsonDict  # Any: record/metadata values are heterogeneous
-        ],
+        records: list[JsonDict],  # Any: record/metadata values are heterogeneous
         schema: object,
         primary_keys: list[str] | None = None,
         mode: Literal["overwrite", "append", "scd2"] = "overwrite",
         *,
-        scd_config: JsonDict  # Any: record/metadata values are heterogeneous
-                    | None = None,
+        scd_config: (
+            JsonDict | None  # Any: record/metadata values are heterogeneous
+        ) = None,
         column_order: list[str] | None = None,
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,

@@ -97,10 +97,12 @@ class RetentionManager:
         self,
         table_name: str,
         target_size: int | None = None,
-        partition_filters: list[
-                               tuple[str, str, Any]  # Any: Delta Lake partition filter values vary
-                           ]  # Any: Delta Lake partition filter values vary
-                           | None = None,  # Any: Delta Lake filter value type varies
+        partition_filters: (
+            list[
+                tuple[str, str, Any]  # Any: Delta Lake partition filter values vary
+            ]  # Any: Delta Lake partition filter values vary
+            | None
+        ) = None,  # Any: Delta Lake filter value type varies
     ) -> JsonDict:  # Any: compaction result metrics
         """Optimize table layout through file compaction.
 
