@@ -7,11 +7,11 @@ from __future__ import annotations
 
 import asyncio
 import sys
+from typing import NoReturn
 
 import click
 
 from bioetl.application.services import (
-    PipelineNotFoundError,
     PipelineRunResult,
     RunOptions,
     RunResult,
@@ -23,14 +23,6 @@ from bioetl.composition.entrypoints import (
     get_pipeline_runner_service,
     push_metrics_to_gateway,
 )
-from bioetl.domain.exceptions import BioETLError
-from bioetl.interfaces.cli.commands.execution_policy import (
-    CLI_ENTRYPOINT_TYPED_ERRORS,
-    map_run_status_to_exit_code,
-)
-from bioetl.interfaces.cli.commands.execution_policy import (
-    handle_cli_failure as handle_cli_execution_failure,
-)
 from bioetl.interfaces.cli.commands.health_server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
     echo_health_server_info,
@@ -39,14 +31,24 @@ from bioetl.interfaces.cli.commands.health_server_integration import (
 from bioetl.interfaces.cli.commands.metrics_server_integration import (
     ensure_metrics_server_started,
 )
+from bioetl.interfaces.cli.commands.run_command_policy import (
+    execute_run_step as _execute_run_step_policy,
+    finalize_run_step as _finalize_run_step_policy,
+    handle_cli_failure,
+    handle_destructive_step as _handle_destructive_step_policy,
+    map_status_to_exit_code,
+)
 from bioetl.interfaces.cli.commands.run_helpers import (
     get_runner_logger,
     handle_destructive_run_confirmation,
     show_cleanup_preview,
     validate_pipeline_name,
 )
+from bioetl.interfaces.cli.commands.run_result_presenter import (
+    echo_run_result as _echo_run_result,
+)
 from bioetl.interfaces.cli.exit_codes import ExitCode
-from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning
+from bioetl.interfaces.cli.formatters import echo_error
 
 __all__ = [
     "build_run_options",
@@ -57,6 +59,11 @@ __all__ = [
 ]
 
 _CLI_RUN_ORCHESTRATION_SERVICE = CliRunOrchestrationService()
+
+
+def _exit_with_code(code: int | str | None = None) -> NoReturn:
+    """Typed wrapper around sys.exit for policy flow injection."""
+    sys.exit(code)
 
 
 def validate_options(start_offset: int | None, run_type: str, resume: bool) -> None:
@@ -126,52 +133,11 @@ def execute_run(
     )
 
 
-def handle_cli_failure(
-    exc: BaseException,
-    *,
-    pipeline: str,
-    reason_code: str,
-) -> None:
-    """Handle CLI failures with consistent reason_code semantics.
-
-    Cleanup preview errors stay non-fatal for dry-run UX compatibility.
-    """
-    if reason_code.startswith("CLI_CLEANUP_PREVIEW"):
-        echo_error(
-            "Error previewing cleanup",
-            (
-                f"{exc} "
-                f"(reason_code={reason_code}, pipeline={pipeline}, "
-                f"error_type={type(exc).__name__})"
-            ),
-        )
-        return
-
-    handle_cli_execution_failure(
-        exc,
-        reason_code=reason_code,
-        subject_key="pipeline",
-        subject_value=pipeline,
-        domain_error_title="Pipeline execution failed with domain error",
-        unexpected_error_title="Unexpected error during pipeline execution",
-        interrupted_message="Pipeline interrupted by user (Ctrl+C)",
-        default_exit_code=ExitCode.FAIL,
-    )
-
-
 def _map_status_to_exit_code(
     status: PipelineRunResult, error_type: str | None
 ) -> ExitCode:
-    """Map PipelineRunResult to CLI exit code.
-
-    Args:
-        status: Run status from service.
-        error_type: Exception type name if failed.
-
-    Returns:
-        Appropriate ExitCode for the status.
-    """
-    return map_run_status_to_exit_code(status, error_type)
+    """Map run status to CLI exit code."""
+    return map_status_to_exit_code(status, error_type)
 
 
 async def _run_pipeline_async(
@@ -202,44 +168,6 @@ async def _run_pipeline_async(
         return await service.run(pipeline, options=options)
 
 
-def _echo_run_result(result: RunResult) -> None:
-    """Output run result message based on status and display metrics.
-
-    Args:
-        result: RunResult object with execution outcome and metrics.
-    """
-    # Truncate run_id to first 8 chars for readability (like git short hash)
-    short_run_id = result.run_id[:8] if len(result.run_id) > 8 else result.run_id
-
-    if result.status == PipelineRunResult.SUCCESS:
-        echo_info(f"Pipeline completed successfully (run_id: {short_run_id})")
-        # Display statistics for SUCCESS
-        echo_info(f"  - Bronze records:      {result.records_fetched}")
-        echo_info(f"  - Silver records:      {result.records_silver}")
-        if result.records_gold > 0:
-            echo_info(f"  - Gold records:        {result.records_gold}")
-        if result.records_quarantined > 0:
-            echo_warning(f"  - Quarantined (DQ):    {result.records_quarantined}")
-        else:
-            echo_info("  - Quarantined (DQ):    0")
-
-    elif result.status == PipelineRunResult.DRY_RUN:
-        echo_info(f"Dry-run completed (no changes made) (run_id: {short_run_id})")
-
-    elif result.status == PipelineRunResult.SHUTDOWN:
-        echo_warning(f"Pipeline was gracefully shut down (run_id: {short_run_id})")
-        # Display partial statistics
-        echo_info(f"  - Processed so far:    {result.records_fetched}")
-
-    elif result.status == PipelineRunResult.FAILED:
-        echo_error(
-            f"Pipeline failed (run_id: {short_run_id})",
-            result.error_message or "Unknown error",
-        )
-        # Display statistics before failure
-        echo_info(f"  - Processed before failure: {result.records_fetched}")
-
-
 def _handle_destructive_step(
     *,
     pipeline: str,
@@ -248,24 +176,12 @@ def _handle_destructive_step(
     yes: bool,
 ) -> bool:
     """Run destructive confirmation/preview step with CLI error policy."""
-    try:
-        return handle_destructive_run_confirmation(pipeline, run_type, dry_run, yes)
-    except click.Abort:
-        raise
-    except BioETLError as exc:
-        handle_cli_failure(
-            exc,
-            pipeline=pipeline,
-            reason_code="CLI_CLEANUP_PREVIEW_ERROR",
-        )
-        return False
-    except Exception as exc:
-        handle_cli_failure(
-            exc,
-            pipeline=pipeline,
-            reason_code="CLI_CLEANUP_PREVIEW_UNEXPECTED_ERROR",
-        )
-        return False
+    return _handle_destructive_step_policy(
+        pipeline=pipeline,
+        run_type=run_type,
+        dry_run=dry_run,
+        yes=yes,
+    )
 
 
 def _execute_run_step(
@@ -276,37 +192,22 @@ def _execute_run_step(
     health_port: int,
 ) -> RunResult:
     """Run pipeline execution step with CLI failure mapping."""
-    try:
-        return execute_run(
-            pipeline=pipeline,
-            options=options,
-            health_server=health_server,
-            health_port=health_port,
-        )
-    except PipelineNotFoundError as exc:
-        handle_cli_failure(exc, pipeline=pipeline, reason_code="CLI_RUN_CONFIG_ERROR")
-    except BioETLError as exc:
-        handle_cli_failure(exc, pipeline=pipeline, reason_code="CLI_RUN_DOMAIN_ERROR")
-    except KeyboardInterrupt as exc:
-        handle_cli_failure(
-            exc,
-            pipeline=pipeline,
-            reason_code="CLI_RUN_SIGINT",
-        )
-    except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
-        handle_cli_failure(
-            exc,
-            pipeline=pipeline,
-            reason_code="CLI_RUN_UNEXPECTED_ERROR",
-        )
-    raise RuntimeError("unreachable: handle_cli_failure is expected to terminate")
+    return _execute_run_step_policy(
+        pipeline=pipeline,
+        options=options,
+        health_server=health_server,
+        health_port=health_port,
+        execute_run=execute_run,
+    )
 
 
 def _finalize_run_step(result: RunResult) -> None:
     """Echo result and terminate command with mapped exit code."""
-    exit_code = _map_status_to_exit_code(result.status, result.error_type)
-    _echo_run_result(result)
-    sys.exit(exit_code)
+    _finalize_run_step_policy(
+        result=result,
+        result_presenter=_echo_run_result,
+        exit_func=_exit_with_code,
+    )
 
 
 @click.command()

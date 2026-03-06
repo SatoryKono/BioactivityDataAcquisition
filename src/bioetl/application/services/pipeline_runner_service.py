@@ -23,14 +23,15 @@ from enum import StrEnum
 from typing import TYPE_CHECKING, cast
 from uuid import UUID, uuid4
 
-from bioetl.domain.context import (
-    CachedBronzeContext,
-    InputFilterContext,
-    PipelineRunContext,
-    VacuumConfig,
+from bioetl.application.services.pipeline_run_context_service import (
+    PipelineRunContextService,
 )
-from bioetl.domain.exceptions import BioETLError
-from bioetl.domain.types import RunID, RunType
+from bioetl.application.services.pipeline_run_execution_service import (
+    PipelineExecutionOutcome,
+    PipelineRunExecutionService,
+)
+from bioetl.domain.context import PipelineRunContext
+from bioetl.domain.types import RunID
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
@@ -39,15 +40,6 @@ if TYPE_CHECKING:
         RunnablePort,
         RunnerFactoryPort,
     )
-
-
-_PIPELINE_RUN_ERRORS = (
-    BioETLError,
-    OSError,
-    RuntimeError,
-    ValueError,
-    TypeError,
-)
 
 
 class PipelineRunResult(StrEnum):
@@ -223,6 +215,12 @@ class PipelineRunnerService:
     runner_factory: RunnerFactoryPort
     metrics_extractor: MetricsExtractorPort
     logger: LoggerPort
+    _context_service: PipelineRunContextService = field(
+        default_factory=PipelineRunContextService
+    )
+    _execution_service: PipelineRunExecutionService = field(
+        default_factory=PipelineRunExecutionService
+    )
 
     async def run(
         self,
@@ -336,19 +334,14 @@ class PipelineRunnerService:
         options: RunOptions | None,
         dry_run: bool,
     ) -> RunOptions:
-        """Merge individual parameters with RunOptions.
-
-        Args:
-            options: Optional RunOptions object.
-            dry_run: Dry-run flag (fallback if options not provided).
-
-        Returns:
-            RunOptions with merged values.
-        """
-        if options is not None:
-            return options
-
-        return RunOptions(dry_run=dry_run)
+        """Merge individual parameters with RunOptions."""
+        return self._context_service.merge_options(
+            options=options,
+            dry_run=dry_run,
+            default_options_factory=lambda dry_run_value: RunOptions(
+                dry_run=dry_run_value
+            ),
+        )
 
     def _build_context(
         self,
@@ -356,61 +349,11 @@ class PipelineRunnerService:
         run_id: RunID,
         options: RunOptions,
     ) -> PipelineRunContext:
-        """Build PipelineRunContext from options.
-
-        Args:
-            pipeline_name: Name of the pipeline.
-            run_id: Unique run identifier.
-            options: Run options.
-
-        Returns:
-            PipelineRunContext ready for runner creation.
-        """
-        # Build InputFilterContext
-        if options.input_csv:
-            input_filter = InputFilterContext.from_csv(
-                source_path=options.input_csv,
-                column_name=options.filter_column or "",
-                filter_field=options.filter_field or "",
-                fallback_column=options.fallback_column,
-            )
-        elif options.filter_ids:
-            # Direct IDs mode (composite pipelines)
-            input_filter = InputFilterContext.from_ids(
-                filter_ids=options.filter_ids,
-                filter_field=options.filter_field or "doi",
-                fallback_mapping=options.fallback_mapping,
-            )
-        else:
-            input_filter = InputFilterContext.disabled()
-
-        # Build VacuumConfig
-        vacuum = VacuumConfig(
-            enabled=options.vacuum_after_run,
-            retention_days=options.vacuum_retention_days or 7,
-        )
-
-        # Build CachedBronzeContext
-        if options.use_cached_bronze:
-            cached_bronze = CachedBronzeContext.from_options(
-                path=options.cached_bronze_path,
-                date=options.cached_bronze_date,
-            )
-        else:
-            cached_bronze = CachedBronzeContext.disabled()
-
-        return PipelineRunContext(
+        """Build PipelineRunContext from options."""
+        return self._context_service.build_context(
             pipeline_name=pipeline_name,
             run_id=run_id,
-            run_type=RunType(options.run_type),
-            resume=options.resume,
-            start_offset=options.start_offset,
-            limit=options.limit,
-            dry_run=options.dry_run,
-            input_filter=input_filter,
-            vacuum=vacuum,
-            log_level=options.log_level,
-            cached_bronze=cached_bronze,
+            options=options,
         )
 
     async def _execute_pipeline(
@@ -422,48 +365,32 @@ class PipelineRunnerService:
         run_type: str,
         started_at: datetime,
     ) -> RunResult:
-        """Execute pipeline and build result.
+        """Execute pipeline and build normalized RunResult."""
+        outcome = await self._execution_service.execute(
+            runner=runner,
+            run_logger=run_logger,
+            metrics_extractor=self.metrics_extractor,
+        )
+        return self._build_run_result(
+            outcome=outcome,
+            pipeline_name=pipeline_name,
+            run_id=run_id,
+            run_type=run_type,
+            started_at=started_at,
+        )
 
-        Args:
-            runner: Pipeline runner to execute.
-            run_logger: Logger with run_id and pipeline already bound.
-            pipeline_name: Name of the pipeline.
-            run_id: Run identifier.
-            run_type: Type of run.
-            started_at: Execution start time.
-
-        Returns:
-            RunResult with execution outcome.
-        """
-        # Import inside method to avoid circular import:
-        # application/services/__init__.py -> pipeline_runner_service.py
-        # -> application/core/shutdown.py -> application/services/shutdown_service.py
-        from bioetl.application.core.shutdown import PipelineShutdownError
-
-        status = PipelineRunResult.SUCCESS
-        error_message: str | None = None
-        error_type: str | None = None
-
-        try:
-            await runner.run()
-            run_logger.info("Pipeline completed successfully")
-        except PipelineShutdownError:
-            status = PipelineRunResult.SHUTDOWN
-            run_logger.warning("Pipeline was gracefully shut down")
-        except _PIPELINE_RUN_ERRORS as e:
-            status = PipelineRunResult.FAILED
-            error_message = str(e)
-            error_type = type(e).__name__
-            run_logger.exception(
-                "Pipeline failed with exception",
-                error_type=error_type,
-            )
-
-        completed_at = datetime.now(tz=UTC)
-
-        # Extract metrics from runner
-        metrics = self.metrics_extractor.extract_metrics(runner)
-
+    def _build_run_result(
+        self,
+        *,
+        outcome: PipelineExecutionOutcome,
+        pipeline_name: str,
+        run_id: RunID,
+        run_type: str,
+        started_at: datetime,
+    ) -> RunResult:
+        """Convert execution outcome to public RunResult contract."""
+        status = PipelineRunResult(outcome.status)
+        metrics = outcome.metrics
         return RunResult(
             status=status,
             pipeline_name=pipeline_name,
@@ -475,7 +402,7 @@ class PipelineRunnerService:
             records_gold=metrics.get("records_gold", 0),
             records_quarantined=metrics.get("records_quarantined", 0),
             started_at=started_at,
-            completed_at=completed_at,
-            error_message=error_message,
-            error_type=error_type,
+            completed_at=outcome.completed_at,
+            error_message=outcome.error_message,
+            error_type=outcome.error_type,
         )

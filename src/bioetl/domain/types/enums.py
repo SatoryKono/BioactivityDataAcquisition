@@ -287,18 +287,8 @@ class ErrorType(StrEnum):
 class QuarantineRecordStatus(StrEnum):
     """Status of a quarantine record in Delta Lake storage (RULES.md §2.6).
 
-    This enum represents the persisted status of quarantine records.
-    Values are uppercase for backward compatibility with existing data.
-
-    Note:
-        This is distinct from:
-        - QuarantineStatus in aggregates/quarantine_entry.py (domain lifecycle)
-        - DQEvaluationStatus in value_objects/dq_result.py (DQ threshold checks)
-
-    Attributes:
-        NEW: Newly quarantined record, needs triage.
-        IGNORED: Reviewed and marked as non-actionable.
-        REPROCESSED: Successfully reprocessed and moved to Silver.
+    Persisted status of quarantine records (uppercase for backward compat).
+    Distinct from QuarantineStatus (domain lifecycle) and DQEvaluationStatus.
     """
 
     NEW = "NEW"

@@ -12,14 +12,12 @@ class StorageError(RecoverableError):
     error_type = ErrorType.NETWORK_ERROR
 
 
-class BucketNotFoundError(StorageError):
-    """Raised when S3 bucket does not exist."""
-
-    error_type = ErrorType.DB_UNAVAILABLE
-
-    def __init__(self, bucket: str) -> None:
-        self.bucket = bucket
-        super().__init__(f"Bucket '{bucket}' not found")
+def BucketNotFoundError(bucket: str) -> StorageError:
+    """Compatibility constructor for legacy BucketNotFoundError."""
+    error = StorageError(f"Bucket '{bucket}' not found")
+    error.bucket = bucket
+    error.error_type = ErrorType.DB_UNAVAILABLE
+    return error
 
 
 class TableNotFoundError(StorageError):
@@ -32,15 +30,13 @@ class TableNotFoundError(StorageError):
         super().__init__(f"Table not found: '{table_path}'")
 
 
-class UploadError(StorageError):
-    """Raised when upload to storage fails."""
-
-    error_type = ErrorType.NETWORK_ERROR
-
-    def __init__(self, key: str, reason: str) -> None:
-        self.key = key
-        self.reason = reason
-        super().__init__(f"Failed to upload '{key}': {reason}")
+def UploadError(key: str, reason: str) -> StorageError:
+    """Compatibility constructor for legacy UploadError."""
+    error = StorageError(f"Failed to upload '{key}': {reason}")
+    error.key = key
+    error.reason = reason
+    error.error_type = ErrorType.NETWORK_ERROR
+    return error
 
 
 class StorageQuotaExceededError(CriticalError):
@@ -50,13 +46,39 @@ class StorageQuotaExceededError(CriticalError):
 
     def __init__(
         self,
-        path: str,
+        path: str | None = None,
         quota_bytes: int | None = None,
         used_bytes: int | None = None,
+        *,
+        table_path: str | None = None,
+        reason: str | None = None,
+        version: int | None = None,
     ) -> None:
+        if isinstance(quota_bytes, str) and reason is None:
+            reason = quota_bytes
+            quota_bytes = None
+            if isinstance(used_bytes, int):
+                version = used_bytes
+                used_bytes = None
+
+        resolved_path = table_path if table_path is not None else path
+        if resolved_path is None:
+            raise ValueError("path or table_path must be provided")
+        path = resolved_path
+
         self.path = path
+        self.table_path = path
         self.quota_bytes = quota_bytes
         self.used_bytes = used_bytes
+        self.reason = reason
+        self.version = version
+
+        if reason is not None:
+            msg = f"Delta transaction failed on '{path}': {reason}"
+            if version is not None:
+                msg += f" (version: {version})"
+            super().__init__(msg)
+            return
 
         msg = f"Storage quota exceeded for '{path}'"
         if quota_bytes is not None and used_bytes is not None:
@@ -97,47 +119,40 @@ class SchemaEvolutionError(StorageError):
         )
 
 
-class BronzeValidationError(StorageError):
-    """Raised when Bronze layer input validation fails."""
-
-    error_type = ErrorType.INVALID_DATA
-
-    def __init__(
-        self,
-        message: str,
-        record_index: int | None = None,
-        original_error: str | None = None,
-    ) -> None:
-        self.record_index = record_index
-        self.original_error = original_error
-        parts = [message]
-        if record_index is not None:
-            parts.append(f"record_index={record_index}")
-        if original_error is not None:
-            parts.append(f"error={original_error}")
-        super().__init__(", ".join(parts))
+def BronzeValidationError(
+    message: str,
+    record_index: int | None = None,
+    original_error: str | None = None,
+) -> StorageError:
+    """Compatibility constructor for legacy BronzeValidationError."""
+    parts = [message]
+    if record_index is not None:
+        parts.append(f"record_index={record_index}")
+    if original_error is not None:
+        parts.append(f"error={original_error}")
+    error = StorageError(", ".join(parts))
+    error.record_index = record_index
+    error.original_error = original_error
+    error.error_type = ErrorType.INVALID_DATA
+    return error
 
 
-class CachedBronzeEmptyError(StorageError):
-    """Raised when cached Bronze data is requested but not found."""
-
-    error_type = ErrorType.INVALID_DATA
-
-    def __init__(
-        self,
-        provider: str,
-        entity_type: str,
-        bronze_path: str,
-        date_filter: str | None = None,
-    ) -> None:
-        self.provider = provider
-        self.entity_type = entity_type
-        self.bronze_path = bronze_path
-        self.date_filter = date_filter
-
-        date_info = f" for date {date_filter}" if date_filter else ""
-        message = (
-            f"No Bronze data found for {provider}/{entity_type}{date_info}. "
-            f"Searched path: {bronze_path}"
-        )
-        super().__init__(message)
+def CachedBronzeEmptyError(
+    provider: str,
+    entity_type: str,
+    bronze_path: str,
+    date_filter: str | None = None,
+) -> StorageError:
+    """Compatibility constructor for legacy CachedBronzeEmptyError."""
+    date_info = f" for date {date_filter}" if date_filter else ""
+    message = (
+        f"No Bronze data found for {provider}/{entity_type}{date_info}. "
+        f"Searched path: {bronze_path}"
+    )
+    error = StorageError(message)
+    error.provider = provider
+    error.entity_type = entity_type
+    error.bronze_path = bronze_path
+    error.date_filter = date_filter
+    error.error_type = ErrorType.INVALID_DATA
+    return error

@@ -1,0 +1,96 @@
+"""Use-case service for building pipeline run options and execution context."""
+
+from __future__ import annotations
+
+from collections.abc import Callable
+from typing import TYPE_CHECKING, TypeVar
+
+from bioetl.domain.context import (
+    CachedBronzeContext,
+    InputFilterContext,
+    PipelineRunContext,
+    VacuumConfig,
+)
+from bioetl.domain.types import RunID, RunType
+
+__all__ = [
+    "PipelineRunContextService",
+]
+
+
+if TYPE_CHECKING:
+    from bioetl.application.services.pipeline_runner_service import RunOptions
+
+
+TOptions = TypeVar("TOptions")
+
+
+class PipelineRunContextService:
+    """Builds effective run options and PipelineRunContext for runner assembly."""
+
+    def merge_options(
+        self,
+        *,
+        options: TOptions | None,
+        dry_run: bool,
+        default_options_factory: Callable[[bool], TOptions],
+    ) -> TOptions:
+        """Merge explicit options with command-level flags."""
+        if options is not None:
+            return options
+        return default_options_factory(dry_run)
+
+    def build_context(
+        self,
+        *,
+        pipeline_name: str,
+        run_id: RunID,
+        options: RunOptions,
+    ) -> PipelineRunContext:
+        """Build PipelineRunContext from run options."""
+        input_filter = self._build_input_filter(options)
+        vacuum = VacuumConfig(
+            enabled=options.vacuum_after_run,
+            retention_days=options.vacuum_retention_days or 7,
+        )
+        cached_bronze = self._build_cached_bronze(options)
+
+        return PipelineRunContext(
+            pipeline_name=pipeline_name,
+            run_id=run_id,
+            run_type=RunType(options.run_type),
+            resume=options.resume,
+            start_offset=options.start_offset,
+            limit=options.limit,
+            dry_run=options.dry_run,
+            input_filter=input_filter,
+            vacuum=vacuum,
+            log_level=options.log_level,
+            cached_bronze=cached_bronze,
+        )
+
+    def _build_input_filter(self, options: RunOptions) -> InputFilterContext:
+        """Resolve input filter mode from options."""
+        if options.input_csv:
+            return InputFilterContext.from_csv(
+                source_path=options.input_csv,
+                column_name=options.filter_column or "",
+                filter_field=options.filter_field or "",
+                fallback_column=options.fallback_column,
+            )
+        if options.filter_ids:
+            return InputFilterContext.from_ids(
+                filter_ids=options.filter_ids,
+                filter_field=options.filter_field or "doi",
+                fallback_mapping=options.fallback_mapping,
+            )
+        return InputFilterContext.disabled()
+
+    def _build_cached_bronze(self, options: RunOptions) -> CachedBronzeContext:
+        """Resolve cached Bronze context from options."""
+        if options.use_cached_bronze:
+            return CachedBronzeContext.from_options(
+                path=options.cached_bronze_path,
+                date=options.cached_bronze_date,
+            )
+        return CachedBronzeContext.disabled()

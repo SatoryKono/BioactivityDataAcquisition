@@ -127,9 +127,9 @@ def test_no_inline_helper_construction_in_provider_adapters() -> None:
         "Inline helper construction detected in provider adapter constructors. "
         "Move helper creation to composition/factory and inject via constructor.\n"
         + "\n".join(
-        "  - "
-        f"{item.file_path}:{item.line_number} "
-        f"{item.class_name}.{item.function_name} -> {item.constructor_name}(...)"
-        for item in violations
-    )
+            "  - "
+            f"{item.file_path}:{item.line_number} "
+            f"{item.class_name}.{item.function_name} -> {item.constructor_name}(...)"
+            for item in violations
+        )
     )

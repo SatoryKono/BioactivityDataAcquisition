@@ -11,7 +11,10 @@ from typing import TYPE_CHECKING, Protocol, runtime_checkable
 from bioetl.domain.config import PipelineConfig
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports.config_port import PipelineYamlConfigPort, SettingsPort
+    from bioetl.domain.ports.config.config_port import (
+        PipelineYamlConfigPort,
+        SettingsPort,
+    )
 
 __all__ = [
     "DomainConfigMapperPort",

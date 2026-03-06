@@ -16,7 +16,10 @@ from bioetl.domain.ports.quality.error_classifier import ErrorClassifierPort
 from bioetl.domain.ports.quality.error_handler import ErrorHandlerPort
 from bioetl.domain.ports.quality.fallback_policy import FallbackPolicyPort
 from bioetl.domain.ports.quality.quarantine import QuarantinePort
-from bioetl.domain.ports.quality.validation import GoldValidatorPort, SilverValidatorPort
+from bioetl.domain.ports.quality.validation import (
+    GoldValidatorPort,
+    SilverValidatorPort,
+)
 
 __all__ = [
     "BronzeDQAnalyzerPort",

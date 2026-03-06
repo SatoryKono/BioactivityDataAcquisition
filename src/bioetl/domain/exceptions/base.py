@@ -41,6 +41,7 @@ class BioETLError(Exception):
     _CONTEXT_EXCLUDE: ClassVar[frozenset[str]] = frozenset(
         {
             "args",
+            "error_type",
             "with_traceback",
         }
     )

@@ -12,14 +12,14 @@ if TYPE_CHECKING:
         GoldMetadata,
         SilverMetadata,
     )
-    from bioetl.domain.ports.memory import MemoryStats
+    from bioetl.domain.ports.runtime import MemoryStats
 
 
 class NoOpMemoryMonitor:
     """No-op implementation of MemoryMonitorPort."""
 
     def get_memory_stats(self) -> MemoryStats:
-        from bioetl.domain.ports.memory import MemoryStats
+        from bioetl.domain.ports.runtime import MemoryStats
 
         return MemoryStats(
             used_mb=4096.0,

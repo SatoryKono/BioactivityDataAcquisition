@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from datetime import datetime
     from pathlib import Path
 
-    from bioetl.domain.ports.dq_config import (
+    from bioetl.domain.ports.quality.dq_config import (
         BronzeDQConfigPort,
         GoldDQConfigPort,
         SilverDQConfigPort,
