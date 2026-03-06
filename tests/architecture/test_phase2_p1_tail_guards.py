@@ -11,7 +11,7 @@ CRITICAL_MODULES = (
     "src/bioetl/infrastructure/adapters/uniprot/idmapping_client.py",
 )
 ALLOWED_BROAD_EXCEPTION_POLICIES = {
-    "src/bioetl/interfaces/cli/commands/run.py": frozenset(
+    "src/bioetl/interfaces/cli/commands/run_command_policy.py": frozenset(
         {"CLI_CLEANUP_PREVIEW_UNEXPECTED_ERROR"}
     ),
 }

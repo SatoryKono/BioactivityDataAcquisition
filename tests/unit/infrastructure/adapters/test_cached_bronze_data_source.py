@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.domain.exceptions import CachedBronzeEmptyError
+from bioetl.domain.exceptions import StorageError
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.cached_bronze_data_source import (
     CachedBronzeDataSource,
@@ -198,7 +198,7 @@ class TestCachedBronzeDataSourceFetch:
             logger=base_logger,
         )
 
-        with pytest.raises(CachedBronzeEmptyError) as exc_info:
+        with pytest.raises(StorageError) as exc_info:
             _ = [record async for record in source.fetch("activity")]
 
         error = exc_info.value
