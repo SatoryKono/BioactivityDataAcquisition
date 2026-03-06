@@ -1,0 +1,408 @@
+...........................................F........s................... [  4%]
+............FFF......................................................... [  8%]
+..........................s.sss.ss.s..s...s....s.sss.ss.s..s...s........ [ 13%]
+......................ss................................................ [ 17%]
+........................................................................ [ 22%]
+........................................................................ [ 26%]
+........................................................................ [ 31%]
+...s.................................................................... [ 35%]
+........................................................................ [ 40%]
+......................................s................................. [ 44%]
+........................................................................ [ 49%]
+........................................................................ [ 53%]
+........................................................................ [ 57%]
+........................................................................ [ 62%]
+........................................................................ [ 66%]
+................................................s....................... [ 71%]
+........................................................................ [ 75%]
+........................................................................ [ 80%]
+........................................................................ [ 84%]
+........................................................................ [ 89%]
+........................................................................ [ 93%]
+........................................................................ [ 98%]
+................................                                         [100%]
+================================== FAILURES ===================================
+_____________ test_dependency_map_drift_check_passes_current_repo _____________
+
+    def test_dependency_map_drift_check_passes_current_repo() -> None:
+        env = dict(os.environ)
+        env.pop("PYTEST_CURRENT_TEST", None)
+        result = subprocess.run(
+            [
+                sys.executable,
+                "scripts/generate_architecture_dependency_map.py",
+                "--check",
+            ],
+            capture_output=True,
+            env=env,
+            text=True,
+        )
+>       assert result.returncode == 0, (
+            "Dependency-map docs drift check failed.\n"
+            f"stdout:\n{result.stdout}\n"
+            f"stderr:\n{result.stderr}"
+        )
+E       AssertionError: Dependency-map docs drift check failed.
+E         stdout:
+E         [drift] mismatch: docs\02-architecture\generated\module-dependency-map.md
+E         [drift] mismatch: docs\02-architecture\generated\module-dependency-map.json
+E         [hint] run: python scripts/generate_architecture_dependency_map.py --update
+E         
+E         stderr:
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\.venv\\Scripts\\python.exe', 'scripts...\module-dependency-map.json\n[hint] run: python scripts/generate_architecture_dependency_map.py --update\n', stderr='').returncode
+
+tests\architecture\test_architecture_dependency_docs_drift.py:73: AssertionError
+_________________ TestCodeFormatting.test_ruff_formatting_src _________________
+
+self = <tests.architecture.test_code_formatting.TestCodeFormatting object at 0x000001DE788A56D0>
+
+    @pytest.mark.slow
+    @pytest.mark.skipif(not _ruff_available, reason="ruff not installed")
+    def test_ruff_formatting_src(self) -> None:
+        """Source code MUST be formatted with ruff.
+    
+        Run `ruff format src` to fix formatting issues.
+        """
+        result = subprocess.run(
+            [*_RUFF_CMD, "format", "--check", "src"],  # type: ignore[arg-type]
+            capture_output=True,
+            text=True,
+        )
+    
+>       assert result.returncode == 0, (
+            "Code formatting issues found in src/:\n"
+            f"{result.stdout}\n{result.stderr}\n\n"
+            f"Run `ruff format src` to fix formatting issues.{_LINE_ENDING_HINT}"
+        )
+E       AssertionError: Code formatting issues found in src/:
+E         Would reformat: src\bioetl\application\composite\coordinator.py
+E         Would reformat: src\bioetl\application\services\dq\gold_analyzer.py
+E         Would reformat: src\bioetl\composition\factories\__init__.py
+E         Would reformat: src\bioetl\composition\factories\pipeline_factory_runner_assembly.py
+E         Would reformat: src\bioetl\composition\factories\storage_factory.py
+E         Would reformat: src\bioetl\composition\providers\registration.py
+E         Would reformat: src\bioetl\domain\__init__.py
+E         Would reformat: src\bioetl\domain\ports\storage.py
+E         Would reformat: src\bioetl\infrastructure\adapters\chembl\client.py
+E         Would reformat: src\bioetl\infrastructure\adapters\semanticscholar\fetch_adapter_mixin.py
+E         Would reformat: src\bioetl\infrastructure\adapters\uniprot\filtering_adapter_mixin.py
+E         Would reformat: src\bioetl\infrastructure\adapters\uniprot\idmapping_client.py
+E         Would reformat: src\bioetl\infrastructure\config\_base.py
+E         Would reformat: src\bioetl\infrastructure\storage\silver_writer.py
+E         Would reformat: src\bioetl\infrastructure\storage\write_resilience.py
+E         15 files would be reformatted, 837 files already formatted
+E         
+E         
+E         
+E         Run `ruff format src` to fix formatting issues.
+E         
+E         On Windows, line ending issues may occur. Try:
+E           git add --renormalize .
+E           git checkout -- .
+E         Or run `ruff format` to fix formatting.
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\.venv\\Scripts\\ruff.exe', 'format', ...infrastructure\\storage\\write_resilience.py\n15 files would be reformatted, 837 files already formatted\n', stderr='').returncode
+
+tests\architecture\test_code_formatting.py:74: AssertionError
+________________ TestCodeFormatting.test_ruff_formatting_tests ________________
+
+self = <tests.architecture.test_code_formatting.TestCodeFormatting object at 0x000001DE788A5810>
+
+    @pytest.mark.slow
+    @pytest.mark.skipif(not _ruff_available, reason="ruff not installed")
+    def test_ruff_formatting_tests(self) -> None:
+        """Test code MUST be formatted with ruff.
+    
+        Run `ruff format tests` to fix formatting issues.
+        """
+        result = subprocess.run(
+            [*_RUFF_CMD, "format", "--check", "tests"],  # type: ignore[arg-type]
+            capture_output=True,
+            text=True,
+        )
+    
+>       assert result.returncode == 0, (
+            "Code formatting issues found in tests/:\n"
+            f"{result.stdout}\n{result.stderr}\n\n"
+            f"Run `ruff format tests` to fix formatting issues.{_LINE_ENDING_HINT}"
+        )
+E       AssertionError: Code formatting issues found in tests/:
+E         Would reformat: tests\architecture\test_adapter_contracts.py
+E         1 file would be reformatted, 787 files already formatted
+E         
+E         
+E         
+E         Run `ruff format tests` to fix formatting issues.
+E         
+E         On Windows, line ending issues may occur. Try:
+E           git add --renormalize .
+E           git checkout -- .
+E         Or run `ruff format` to fix formatting.
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\.venv\\Scripts\\ruff.exe', 'format', ...tests\\architecture\\test_adapter_contracts.py\n1 file would be reformatted, 787 files already formatted\n', stderr='').returncode
+
+tests\architecture\test_code_formatting.py:93: AssertionError
+__________________ TestCodeFormatting.test_ruff_isort_check ___________________
+
+self = <tests.architecture.test_code_formatting.TestCodeFormatting object at 0x000001DE7883A780>
+
+    @pytest.mark.slow
+    @pytest.mark.skipif(not _ruff_available, reason="ruff not installed")
+    def test_ruff_isort_check(self) -> None:
+        """Imports MUST be sorted according to ruff isort rules.
+    
+        Run `ruff check --select I --fix src tests` to fix import ordering issues.
+        """
+        result = subprocess.run(
+            [*_RUFF_CMD, "check", "--select", "I", "src", "tests"],  # type: ignore[arg-type]
+            capture_output=True,
+            text=True,
+        )
+    
+>       assert result.returncode == 0, (
+            "Import ordering issues found:\n"
+            f"{result.stdout}\n{result.stderr}\n\n"
+            "Run `ruff check --select I --fix src tests` to fix import ordering issues."
+        )
+E       AssertionError: Import ordering issues found:
+E         I001 [*] Import block is un-sorted or un-formatted
+E           --> src\bioetl\composition\bootstrap\runtime\observability.py:3:1
+E            |
+E          1 |   """Bootstrap functions for runtime observability components."""
+E          2 |
+E          3 | / from __future__ import annotations
+E          4 | |
+E          5 | | from typing import TYPE_CHECKING
+E          6 | | from uuid import UUID
+E          7 | |
+E          8 | | from bioetl.composition.observability import ObservabilityBundle
+E          9 | | from bioetl.domain.exceptions import MetricsServerError
+E         10 | | from bioetl.domain.ports import (
+E         11 | |     DQMonitorPort,
+E         12 | |     LoggerPort,
+E         13 | |     MetricsPort,
+E         14 | |     TracingPort,
+E         15 | | )
+E         16 | | from bioetl.infrastructure.observability import (
+E         17 | |     OpenTelemetryTracer,
+E         18 | |     PrometheusMetrics,
+E         19 | |     UnifiedLogger,
+E         20 | |     start_metrics_server,
+E         21 | | )
+E         22 | | from bioetl.infrastructure.observability.anomaly import DataQualityMonitor
+E         23 | | from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+E         24 | | from .dq_bootstrap import bootstrap_dq_monitor as _bootstrap_dq_monitor_impl
+E         25 | | from .dq_bootstrap import bootstrap_dq_monitor_port as _bootstrap_dq_monitor_port_impl
+E         26 | | from .logger_bootstrap import bootstrap_logger as _bootstrap_logger_impl
+E         27 | | from .logger_bootstrap import bootstrap_logger_port as _bootstrap_logger_port_impl
+E         28 | | from .metrics_bootstrap import bootstrap_metrics as _bootstrap_metrics_impl
+E         29 | | from .metrics_bootstrap import bootstrap_metrics_port as _bootstrap_metrics_port_impl
+E         30 | | from .metrics_bootstrap import (
+E         31 | |     maybe_start_metrics_server as _maybe_start_metrics_server_impl,
+E         32 | | )
+E         33 | | from .observability_bundle import (
+E         34 | |     bootstrap_observability_bundle_impl as _bootstrap_observability_bundle_impl,
+E         35 | | )
+E         36 | | from .observability_bundle import (
+E         37 | |     validate_observability_preflight_impl as _validate_observability_preflight_impl,
+E         38 | | )
+E         39 | | from .tracing_bootstrap import bootstrap_tracer as _bootstrap_tracer_impl
+E         40 | | from .tracing_bootstrap import bootstrap_tracer_port as _bootstrap_tracer_port_impl
+E            | |___________________________________________________________________________________^
+E         41 |
+E         42 |   if TYPE_CHECKING:
+E            |
+E         help: Organize imports
+E         
+E         I001 [*] Import block is un-sorted or un-formatted
+E           --> src\bioetl\composition\factories\__init__.py:20:1
+E            |
+E         18 |   """
+E         19 |
+E         20 | / from typing import TYPE_CHECKING
+E         21 | |
+E         22 | | # Data source factory and registry
+E         23 | | from bioetl.composition.factories.data_source_factory import (
+E         24 | |     DataSourceCreator,
+E         25 | |     DataSourceFactory,
+E         26 | |     DataSourceRegistry,
+E         27 | | )
+E         28 | | # DQ services factory
+E         29 | | from bioetl.composition.factories.dq_factory import DQServicesFactory
+E         30 | | # Pipeline factory and runner assembly
+E         31 | | from bioetl.composition.factories.pipeline_factory import (
+E         32 | |     GenericPipelineFactory,
+E         33 | |     assemble_runner,
+E         34 | |     build_pipeline_services,
+E         35 | |     create_pipeline_factory,
+E         36 | | )
+E         37 | | # Services factory (DI for PipelineRunner)
+E         38 | | from bioetl.composition.factories.services_factory import (
+E         39 | |     BaseServicesFactory,
+E         40 | |     ServicesBuilder,
+E         41 | |     create_data_normalization_service,
+E         42 | | )
+E         43 | | # Storage factory
+E         44 | | from bioetl.composition.factories.storage import (
+E         45 | |     StorageAdapter,
+E         46 | |     StorageContext,
+E         47 | |     StorageFactory,
+E         48 | | )
+E         49 | | # Transformer factory (DI for transformers)
+E         50 | | from bioetl.composition.factories.transformer_factory import (
+E         51 | |     create_transformer,
+E         52 | |     get_transformer_class,
+E         53 | |     register_all_transformers,
+E         54 | |     register_transformer,
+E         55 | | )
+E            | |_^
+E         56 |
+E         57 |   if TYPE_CHECKING:
+E            |
+E         help: Organize imports
+E         
+E         I001 [*] Import block is un-sorted or un-formatted
+E           --> src\bioetl\composition\factories\storage_factory.py:3:1
+E            |
+E          1 |   """StorageFactory - thin facade for creating StorageAdapters."""
+E          2 |
+E          3 | / from __future__ import annotations
+E          4 | |
+E          5 | | from dataclasses import dataclass
+E          6 | | from pathlib import Path
+E          7 | | from typing import TYPE_CHECKING
+E          8 | |
+E          9 | | from bioetl.infrastructure.export.csv_exporter import CsvExporter
+E         10 | | from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+E         11 | | from bioetl.infrastructure.storage.gold_writer import GoldWriter
+E         12 | | from bioetl.infrastructure.storage.silver_writer import SilverWriter
+E         13 | | from ._bronze_factory import create_bronze_writer
+E         14 | | from ._gold_factory import create_gold_writer
+E         15 | | from ._resilience_factory import (
+E         16 | |     create_silver_atomic_retry_policy,
+E         17 | |     create_silver_merge_resilience_policy,
+E         18 | | )
+E         19 | | from ._silver_factory import create_silver_writer
+E         20 | | from .storage_adapter import StorageAdapter
+E            | |___________________________________________^
+E         21 |
+E         22 |   if TYPE_CHECKING:
+E            |
+E         help: Organize imports
+E         
+E         I001 [*] Import block is un-sorted or un-formatted
+E           --> src\bioetl\composition\providers\registration.py:8:1
+E            |
+E          6 |   """
+E          7 |
+E          8 | / from __future__ import annotations
+E          9 | |
+E         10 | | from bioetl.application.core.idmapping_data_source import IDMappingDataSource
+E         11 | | from bioetl.composition.providers._config_helpers import _get_rate_limit_from_config
+E         12 | | from bioetl.composition.providers.provider_registry import (
+E         13 | |     HttpConfig,
+E         14 | |     ProviderConfig,
+E         15 | |     ProviderRegistry,
+E         16 | | )
+E         17 | | from bioetl.composition.providers.registration_biblio import (
+E         18 | |     _create_crossref_data_source,
+E         19 | |     _create_openalex_data_source,
+E         20 | |     _create_pubmed_data_source,
+E         21 | |     _create_semanticscholar_data_source,
+E         22 | | )
+E         23 | | from bioetl.composition.providers.registration_bio import (
+E         24 | |     _create_chembl_data_source,
+E         25 | |     _create_pubchem_adapter,
+E         26 | |     _create_pubchem_data_source,
+E         27 | |     _create_uniprot_data_source,
+E         28 | |     _create_uniprot_idmapping_data_source,
+E         29 | | )
+E         30 | | # Import adapter classes for ProviderConfig (allowed direction)
+E         31 | | from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
+E         32 | | from bioetl.infrastructure.adapters.crossref.client import (
+E         33 | |     CrossRefAdapter,
+E         34 | | )
+E         35 | | from bioetl.infrastructure.adapters.crossref.factory import (
+E         36 | |     _create_crossref_adapter,
+E         37 | | )
+E         38 | | from bioetl.infrastructure.adapters.openalex.client import (
+E         39 | |     OpenAlexAdapter,
+E         40 | |     _create_openalex_adapter,
+E         41 | | )
+E         42 | | from bioetl.infrastructure.adapters.pubchem.client import PubChemAdapter
+E         43 | | from bioetl.infrastructure.adapters.pubmed.pubmed_client import (
+E         44 | |     PubMedAdapter,
+E         45 | |     _create_pubmed_adapter,
+E         46 | | )
+E         47 | | from bioetl.infrastructure.adapters.semanticscholar.adapter import (
+E         48 | |     SemanticScholarAdapter,
+E         49 | | )
+E         50 | | from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
+E            | |________________________________________________________________________^
+E         51 |
+E         52 |   __all__ = [
+E            |
+E         help: Organize imports
+E         
+E         I001 [*] Import block is un-sorted or un-formatted
+E           --> src\bioetl\domain\services\_author_helpers.py:3:1
+E            |
+E          1 |   """Author and affiliation normalization helpers."""
+E          2 |
+E          3 | / from __future__ import annotations
+E          4 | |
+E          5 | | import hashlib
+E          6 | | import re
+E          7 | | from html import unescape
+E          8 | |
+E          9 | | import unicodedata
+E         10 | |
+E         11 | | from bioetl.domain.serialization import deserialize_from_json
+E         12 | | from bioetl.domain.types import JsonDict
+E            | |________________________________________^
+E         13 |
+E         14 |   __all__ = [
+E            |
+E         help: Organize imports
+E         
+E         Found 5 errors.
+E         [*] 5 fixable with the `--fix` option.
+E         
+E         
+E         
+E         Run `ruff check --select I --fix src tests` to fix import ordering issues.
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\.venv\\Scripts\\ruff.exe', 'check', '...|   __all__ = [\n   |\nhelp: Organize imports\n\nFound 5 errors.\n[*] 5 fixable with the `--fix` option.\n', stderr='').returncode
+
+tests\architecture\test_code_formatting.py:112: AssertionError
+=========================== short test summary info ===========================
+SKIPPED [1] tests\architecture\test_bootstrap_layer_boundaries.py:222: Legacy _bootstrap package not found
+SKIPPED [1] tests\architecture\test_column_order.py:184: CHEMBL_ACTIVITY_SCHEMA uses custom column order (PUBLICATION_METADATA_FIELDS, PUBLICATION_CROSSREF_FIELDS)
+SKIPPED [1] tests\architecture\test_column_order.py:184: CHEMBL_ASSAY_SCHEMA uses custom column order (PUBLICATION_METADATA_FIELDS, PUBLICATION_CROSSREF_FIELDS)
+SKIPPED [1] tests\architecture\test_column_order.py:184: CHEMBL_CELL_LINE_SCHEMA uses custom column order (PUBLICATION_METADATA_FIELDS, PUBLICATION_CROSSREF_FIELDS)
+SKIPPED [1] tests\architecture\test_column_order.py:184: CHEMBL_COMPOUND_RECORD_SCHEMA uses custom column order (PUBLICATION_METADATA_FIELDS, PUBLICATION_CROSSREF_FIELDS)
+SKIPPED [1] tests\architecture\test_column_order.py:184: CHEMBL_DOCUMENT_TERM_SCHEMA uses custom column order (PUBLICATION_METADATA_FIELDS, PUBLICATION_CROSSREF_FIELDS)
+SKIPPED [1] tests\architecture\test_column_order.py:184: CHEMBL_MOLECULE_SCHEMA uses custom column order (PUBLICATION_METADATA_FIELDS, PUBLICATION_CROSSREF_FIELDS)
+SKIPPED [1] tests\architecture\test_column_order.py:184: CHEMBL_PUBLICATION_SCHEMA uses custom column order (PUBLICATION_METADATA_FIELDS, PUBLICATION_CROSSREF_FIELDS)
+SKIPPED [1] tests\architecture\test_column_order.py:184: CHEMBL_TARGET_SCHEMA uses custom column order (PUBLICATION_METADATA_FIELDS, PUBLICATION_CROSSREF_FIELDS)
+SKIPPED [1] tests\architecture\test_column_order.py:184: PUBCHEM_COMPOUND_SCHEMA uses custom column order (PUBLICATION_METADATA_FIELDS, PUBLICATION_CROSSREF_FIELDS)
+SKIPPED [1] tests\architecture\test_column_order.py:207: CHEMBL_ACTIVITY_SCHEMA uses custom column order (PUBLICATION_METADATA_FIELDS, PUBLICATION_CROSSREF_FIELDS)
+SKIPPED [1] tests\architecture\test_column_order.py:207: CHEMBL_ASSAY_SCHEMA uses custom column order (PUBLICATION_METADATA_FIELDS, PUBLICATION_CROSSREF_FIELDS)
+SKIPPED [1] tests\architecture\test_column_order.py:207: CHEMBL_CELL_LINE_SCHEMA uses custom column order (PUBLICATION_METADATA_FIELDS, PUBLICATION_CROSSREF_FIELDS)
+SKIPPED [1] tests\architecture\test_column_order.py:207: CHEMBL_COMPOUND_RECORD_SCHEMA uses custom column order (PUBLICATION_METADATA_FIELDS, PUBLICATION_CROSSREF_FIELDS)
+SKIPPED [1] tests\architecture\test_column_order.py:207: CHEMBL_DOCUMENT_TERM_SCHEMA uses custom column order (PUBLICATION_METADATA_FIELDS, PUBLICATION_CROSSREF_FIELDS)
+SKIPPED [1] tests\architecture\test_column_order.py:207: CHEMBL_MOLECULE_SCHEMA uses custom column order (PUBLICATION_METADATA_FIELDS, PUBLICATION_CROSSREF_FIELDS)
+SKIPPED [1] tests\architecture\test_column_order.py:207: CHEMBL_PUBLICATION_SCHEMA uses custom column order (PUBLICATION_METADATA_FIELDS, PUBLICATION_CROSSREF_FIELDS)
+SKIPPED [1] tests\architecture\test_column_order.py:207: CHEMBL_TARGET_SCHEMA uses custom column order (PUBLICATION_METADATA_FIELDS, PUBLICATION_CROSSREF_FIELDS)
+SKIPPED [1] tests\architecture\test_column_order.py:207: PUBCHEM_COMPOUND_SCHEMA uses custom column order (PUBLICATION_METADATA_FIELDS, PUBLICATION_CROSSREF_FIELDS)
+SKIPPED [1] tests\architecture\test_composite_layer_boundaries.py:330: application/composite/checkpoint.py not found
+SKIPPED [1] tests\architecture\test_composite_layer_boundaries.py:358: application/composite/checkpoint.py not found
+SKIPPED [1] tests\architecture\test_env_var_centralization.py:172: No allowed files in composition layer (expected)
+SKIPPED [1] tests\architecture\test_layer_dependencies.py:763: Domain ports observability file not found
+SKIPPED [1] tests\architecture\test_tracing_enforcement.py:281: Bootstrap not found
+FAILED tests/architecture/test_architecture_dependency_docs_drift.py::test_dependency_map_drift_check_passes_current_repo
+FAILED tests/architecture/test_code_formatting.py::TestCodeFormatting::test_ruff_formatting_src
+FAILED tests/architecture/test_code_formatting.py::TestCodeFormatting::test_ruff_formatting_tests
+FAILED tests/architecture/test_code_formatting.py::TestCodeFormatting::test_ruff_isort_check

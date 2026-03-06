@@ -225,8 +225,9 @@ class GoldStoragePort(Protocol):
         column_order: list[str] | None = None,
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
-        silver_refs: list[Any]  # Any: port contract allows heterogeneous list items
-                     | None = None,  # Any: port contract allows heterogeneous list items
+        silver_refs: (
+            list[Any] | None  # Any: port contract allows heterogeneous list items
+        ) = None,  # Any: port contract allows heterogeneous list items
     ) -> None:
         """Write aggregated or validated records to the Gold layer.
 

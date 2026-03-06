@@ -16,6 +16,7 @@ This section contains operational documentation for managing BioETL in productio
 | [Performance Baselines](performance-baselines.md) | Expected performance metrics |
 | [VACUUM Retention](vacuum-retention.md) | Delta Lake vacuum retention policies |
 | [Release Checklist](RELEASE_CHECKLIST.md) | Pre-release verification checklist |
+| [VCR Provider Rebalancing](verification/vcr-provider-rebalancing.md) | Recording and validation workflow for provider cassette balance |
 
 ## Quick Links
 

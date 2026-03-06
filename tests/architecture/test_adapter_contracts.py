@@ -265,10 +265,9 @@ class TestAdapterMixinPolicy:
                                 f"{rel_path}:{node.lineno} imports legacy module '{alias.name}'"
                             )
 
-        assert (
-            not violations
-        ), "Legacy adapter-mixin module imports are forbidden in src.\n" + "\n".join(
-            f"  - {v}" for v in violations
+        assert not violations, (
+            "Legacy adapter-mixin module imports are forbidden in src.\n"
+            + "\n".join(f"  - {v}" for v in violations)
         )
 
     def test_src_does_not_use_legacy_adapter_mixin_symbols(self, src_dir: Path) -> None:
@@ -295,10 +294,9 @@ class TestAdapterMixinPolicy:
                         f"{rel_path}: references legacy symbol '{symbol}'"
                     )
 
-        assert (
-            not violations
-        ), "Legacy adapter-mixin symbols are forbidden in src.\n" + "\n".join(
-            f"  - {v}" for v in violations
+        assert not violations, (
+            "Legacy adapter-mixin symbols are forbidden in src.\n"
+            + "\n".join(f"  - {v}" for v in violations)
         )
 
 
@@ -374,32 +372,32 @@ class TestAdapterPortCompliance:
         ("module_path", "class_name"),
         [
             (
-                    "bioetl.infrastructure.adapters.chembl.client",
-                    "ChemblAdapter",
+                "bioetl.infrastructure.adapters.chembl.client",
+                "ChemblAdapter",
             ),
             (
-                    "bioetl.infrastructure.adapters.crossref.client",
-                    "CrossRefAdapter",
+                "bioetl.infrastructure.adapters.crossref.client",
+                "CrossRefAdapter",
             ),
             (
-                    "bioetl.infrastructure.adapters.openalex.client",
-                    "OpenAlexAdapter",
+                "bioetl.infrastructure.adapters.openalex.client",
+                "OpenAlexAdapter",
             ),
             (
-                    "bioetl.infrastructure.adapters.pubmed.pubmed_client",
-                    "PubMedAdapter",
+                "bioetl.infrastructure.adapters.pubmed.pubmed_client",
+                "PubMedAdapter",
             ),
             (
-                    "bioetl.infrastructure.adapters.pubchem.client",
-                    "PubChemAdapter",
+                "bioetl.infrastructure.adapters.pubchem.client",
+                "PubChemAdapter",
             ),
             (
-                    "bioetl.infrastructure.adapters.semanticscholar.adapter",
-                    "SemanticScholarAdapter",
+                "bioetl.infrastructure.adapters.semanticscholar.adapter",
+                "SemanticScholarAdapter",
             ),
             (
-                    "bioetl.infrastructure.adapters.uniprot.client",
-                    "UniProtAdapter",
+                "bioetl.infrastructure.adapters.uniprot.client",
+                "UniProtAdapter",
             ),
         ],
     )

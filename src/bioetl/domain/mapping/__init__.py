@@ -24,17 +24,23 @@ from bioetl.domain.mapping.publication_type_mapping import (
     PUBLICATION_TYPE_MAPPING,
     normalize_publication_type,
 )
+from bioetl.domain.mapping.pubmed_publication import (
+    PUBMED_SILVER_EXCLUDED_FIELDS,
+    build_pubmed_publication_type_fields,
+)
 
 __all__ = [
     "ACTIVITY_FIELD_MAPPING",
-    "ClassificationData",
     "MOLECULE_FIELD_MAPPING",
     "PUBLICATION_FIELD_MAPPING",
     "PUBLICATION_TYPE_MAPPING",
+    "PUBMED_SILVER_EXCLUDED_FIELDS",
     "UNIFIED_TO_PROVIDER",
+    "ClassificationData",
     "OrganismClassificationResult",
     "PublicationTypeEntry",
     "apply_field_mapping",
+    "build_pubmed_publication_type_fields",
     "classify_organism",
     "classify_publication_type",
     "get_provider_name",

@@ -105,9 +105,9 @@ def _assemble_filter_config(
         cli_csv=ctx.input_filter.source_path if ctx.input_filter.enabled else None,
         cli_column=ctx.input_filter.column_name if ctx.input_filter.enabled else None,
         cli_field=ctx.input_filter.filter_field if ctx.input_filter.enabled else None,
-        cli_fallback_column=ctx.input_filter.fallback_column
-        if ctx.input_filter.enabled
-        else None,
+        cli_fallback_column=(
+            ctx.input_filter.fallback_column if ctx.input_filter.enabled else None
+        ),
         test_mode=test_mode or ctx.ignore_yaml_filter,
         direct_filter_ids=ctx.input_filter.filter_ids,
         direct_fallback_mapping=ctx.input_filter.fallback_mapping,

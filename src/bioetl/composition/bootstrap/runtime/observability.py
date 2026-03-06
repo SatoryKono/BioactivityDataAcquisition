@@ -21,6 +21,7 @@ from bioetl.infrastructure.observability import (
 )
 from bioetl.infrastructure.observability.anomaly import DataQualityMonitor
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+
 from .dq_bootstrap import bootstrap_dq_monitor as _bootstrap_dq_monitor_impl
 from .dq_bootstrap import bootstrap_dq_monitor_port as _bootstrap_dq_monitor_port_impl
 from .logger_bootstrap import bootstrap_logger as _bootstrap_logger_impl

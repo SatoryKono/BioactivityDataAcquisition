@@ -55,6 +55,26 @@ def _parse_args() -> argparse.Namespace:
         default=os.getenv("QUALITY_EXEMPTIONS_GROWTH_MODE", "auto").strip().lower(),
         help="Growth/budget gate mode: warn (non-blocking) or block (blocking).",
     )
+    parser.add_argument(
+        "--temp-window-mode",
+        choices=("off", "budget-only", "auto"),
+        default=os.getenv("QUALITY_EXEMPTIONS_TEMP_WINDOW_MODE", "auto")
+        .strip()
+        .lower(),
+        help=(
+            "Temporary grace-window policy: off, budget-only, or auto "
+            "(resolved from scorecard governance)."
+        ),
+    )
+    parser.add_argument(
+        "--max-grace-window-days",
+        type=int,
+        default=int(os.getenv("QUALITY_EXEMPTIONS_MAX_GRACE_WINDOW_DAYS", "45")),
+        help=(
+            "Fallback max duration for active grace windows when temp-window "
+            "policy is budget-only."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -108,6 +128,143 @@ def _resolve_growth_mode(
     return "block"
 
 
+def _resolve_temp_window_mode(
+    *,
+    requested_mode: str,
+    scorecard_raw: dict[str, object],
+) -> str:
+    if requested_mode in {"off", "budget-only"}:
+        return requested_mode
+
+    governance = scorecard_raw.get("governance", {})
+    if not isinstance(governance, dict):
+        return "budget-only"
+
+    temporary = governance.get("temporary_exemptions", {})
+    if not isinstance(temporary, dict):
+        return "budget-only"
+
+    policy = temporary.get("window_policy", temporary.get("mode"))
+    if isinstance(policy, str):
+        normalized = policy.strip().lower()
+        if normalized in {"off", "budget-only"}:
+            return normalized
+    return "budget-only"
+
+
+def _resolve_max_grace_window_days(
+    *,
+    scorecard_raw: dict[str, object],
+    fallback_days: int,
+) -> int:
+    governance = scorecard_raw.get("governance", {})
+    if not isinstance(governance, dict):
+        return fallback_days
+
+    temporary = governance.get("temporary_exemptions", {})
+    if not isinstance(temporary, dict):
+        return fallback_days
+
+    configured = temporary.get("max_window_days")
+    if isinstance(configured, int) and configured > 0:
+        return configured
+    return fallback_days
+
+
+def _parse_iso_date(raw_value: object) -> date | None:
+    if not isinstance(raw_value, str):
+        return None
+    try:
+        return date.fromisoformat(raw_value)
+    except ValueError:
+        return None
+
+
+def _validate_budget_only_grace_windows(
+    *,
+    scorecard_raw: dict[str, object],
+    today: date,
+    max_window_days: int,
+) -> list[str]:
+    governance_errors: list[str] = []
+    grace_windows = scorecard_raw.get("grace_windows", [])
+    if not isinstance(grace_windows, list):
+        return ["grace_windows: expected list"]
+
+    allowed_window_keys = {
+        "rf_id",
+        "approved",
+        "starts_on",
+        "ends_on",
+        "allowances",
+        "note",
+    }
+    allowed_allowance_keys = {
+        "total_exemptions",
+        "registry_budgets",
+        "group_budgets",
+    }
+
+    for index, window in enumerate(grace_windows):
+        if not isinstance(window, dict):
+            continue
+        if not window.get("approved"):
+            continue
+
+        starts_on = _parse_iso_date(window.get("starts_on"))
+        ends_on = _parse_iso_date(window.get("ends_on"))
+        if starts_on is None or ends_on is None:
+            continue
+        if not (starts_on <= today <= ends_on):
+            continue
+
+        window_prefix = f"grace_windows[{index}]"
+        unknown_window_keys = sorted(set(window) - allowed_window_keys)
+        if unknown_window_keys:
+            governance_errors.append(
+                f"{window_prefix}: non-budget keys are not allowed in budget-only mode: "
+                f"{unknown_window_keys}"
+            )
+
+        duration_days = (ends_on - starts_on).days + 1
+        if duration_days > max_window_days:
+            governance_errors.append(
+                f"{window_prefix}: duration {duration_days}d exceeds max_window_days="
+                f"{max_window_days}"
+            )
+
+        allowances = window.get("allowances", {})
+        if not isinstance(allowances, dict):
+            governance_errors.append(f"{window_prefix}.allowances: expected mapping")
+            continue
+
+        unknown_allowance_keys = sorted(set(allowances) - allowed_allowance_keys)
+        if unknown_allowance_keys:
+            governance_errors.append(
+                f"{window_prefix}.allowances: unknown keys in budget-only mode: "
+                f"{unknown_allowance_keys}"
+            )
+
+        total_exemptions = allowances.get("total_exemptions", 0)
+        registry_budgets = allowances.get("registry_budgets", {})
+        group_budgets = allowances.get("group_budgets", {})
+
+        has_positive_total = isinstance(total_exemptions, int) and total_exemptions > 0
+        has_positive_registry = isinstance(registry_budgets, dict) and any(
+            isinstance(value, int) and value > 0 for value in registry_budgets.values()
+        )
+        has_positive_group = isinstance(group_budgets, dict) and any(
+            isinstance(value, int) and value > 0 for value in group_budgets.values()
+        )
+        if not (has_positive_total or has_positive_registry or has_positive_group):
+            governance_errors.append(
+                f"{window_prefix}.allowances: must define at least one positive budget "
+                "allowance in budget-only mode"
+            )
+
+    return governance_errors
+
+
 def main() -> int:
     args = _parse_args()
     today = date.today()
@@ -124,6 +281,14 @@ def main() -> int:
     growth_mode = _resolve_growth_mode(
         requested_mode=args.growth_mode,
         scorecard_raw=scorecard_raw,
+    )
+    temp_window_mode = _resolve_temp_window_mode(
+        requested_mode=args.temp_window_mode,
+        scorecard_raw=scorecard_raw,
+    )
+    max_grace_window_days = _resolve_max_grace_window_days(
+        scorecard_raw=scorecard_raw,
+        fallback_days=args.max_grace_window_days,
     )
 
     metadata_errors, expired_entries = validate_exemptions_registry(
@@ -159,6 +324,21 @@ def main() -> int:
         for item in sync_errors:
             print(f"  - {item}")
         return 1
+
+    if temp_window_mode == "budget-only":
+        grace_window_errors = _validate_budget_only_grace_windows(
+            scorecard_raw=scorecard_raw,
+            today=today,
+            max_window_days=max_grace_window_days,
+        )
+        if grace_window_errors:
+            print(
+                "[quality-exemptions] budget-only grace-window policy failed "
+                f"(max-window-days={max_grace_window_days}):"
+            )
+            for item in grace_window_errors:
+                print(f"  - {item}")
+            return 1
 
     if summary is None:
         print("[quality-exemptions] scorecard evaluation failed: no summary")
@@ -225,7 +405,9 @@ def main() -> int:
         "[quality-exemptions] registry validation passed "
         "(expiry-mode="
         f"{expiry_mode}, growth-mode={growth_mode}, expired={len(expired_entries)}, "
-        f"violations={len(growth_violations)})."
+        f"violations={len(growth_violations)}, "
+        f"temp-window-mode={temp_window_mode}, "
+        f"max-window-days={max_grace_window_days})."
     )
     return 0
 

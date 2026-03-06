@@ -222,9 +222,9 @@ class SilverStatisticsCalculator:
                 cardinality = df[col].n_unique()
                 column_stats[col] = {
                     "cardinality": cardinality,
-                    "uniqueness_ratio": round(cardinality / len(df), 4)
-                    if len(df) > 0
-                    else 0.0,
+                    "uniqueness_ratio": (
+                        round(cardinality / len(df), 4) if len(df) > 0 else 0.0
+                    ),
                 }
             except _SILVER_PROFILE_ERRORS:
                 # Catch all: cardinality calculation may fail for unhashable types

@@ -44,11 +44,13 @@ def assemble_runner_impl(
     gold_schema: object,
     strict_gold_validation: bool,
     yaml_config: PipelineYamlConfig | None = None,
-    dq_configs_extractor: Callable[
-                              [PipelineYamlConfig | None],
-                              DQConfigsContext,
-                          ]
-                          | None = None,
+    dq_configs_extractor: (
+        Callable[
+            [PipelineYamlConfig | None],
+            DQConfigsContext,
+        ]
+        | None
+    ) = None,
 ) -> PipelineRunner:
     """Assemble a PipelineRunner from a configured pipeline instance."""
     logger_port = observability.logger

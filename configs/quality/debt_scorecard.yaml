@@ -8,44 +8,44 @@ governance:
     max_window_days: 45
   allow_grace_windows_only_for_rf: true
   owner_diversification:
-        starts_quarter: '2026-Q2'
-        min_distinct_owners: 3
-    owner_registry_q2_subsystems:
-        architecture:
-            owner: '@bioetl-architecture'
-            scope:
-                - application
-                - interfaces
-                - cross-cutting-architecture
-        platform:
-            owner: '@bioetl-platform'
-            scope:
-                - infrastructure
-                - composition
-                - runtime-observability
-        data_model:
-            owner: '@bioetl-data-model'
-            scope:
-                - domain-model
-                - domain-schemas
-                - domain-mapping
-    review_policy:
-        new_exemption_requires:
-            - owner
-            - removal_step
-        reviewer_checks:
-            - owner maps to subsystem scope
-            - removal_step references concrete follow-up action
-    burn_down_priorities:
-        registries:
-            - file_size_limits
-            - function_length
-            - class_size
-    growth_section_gate_rollout:
-        default_mode: block
-        warn_until_by_section:
-            registry:*: '2026-06-30'
-            group:*: '2026-03-03'
+    starts_quarter: '2026-Q2'
+    min_distinct_owners: 3
+  owner_registry_q2_subsystems:
+    architecture:
+      owner: '@bioetl-architecture'
+      scope:
+      - application
+      - interfaces
+      - cross-cutting-architecture
+    platform:
+      owner: '@bioetl-platform'
+      scope:
+      - infrastructure
+      - composition
+      - runtime-observability
+    data_model:
+      owner: '@bioetl-data-model'
+      scope:
+      - domain-model
+      - domain-schemas
+      - domain-mapping
+  review_policy:
+    new_exemption_requires:
+    - owner
+    - removal_step
+    reviewer_checks:
+    - owner maps to subsystem scope
+    - removal_step references concrete follow-up action
+  burn_down_priorities:
+    registries:
+    - file_size_limits
+    - function_length
+    - class_size
+  growth_section_gate_rollout:
+    default_mode: block
+    warn_until_by_section:
+      registry:*: '2026-06-30'
+      group:*: '2026-03-03'
 
 baseline:
     total_exemptions: 207

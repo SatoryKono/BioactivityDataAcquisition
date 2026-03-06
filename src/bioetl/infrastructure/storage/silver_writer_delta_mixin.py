@@ -8,10 +8,18 @@ import asyncio
 from typing import TYPE_CHECKING, Any
 
 import pyarrow as pa
-from deltalake.exceptions import CommitFailedError
+from deltalake.exceptions import (
+    CommitFailedError,
+    DeltaError,
+    SchemaMismatchError,
+)
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
-from bioetl.domain.exceptions import DeltaTransactionError
+from bioetl.domain.exceptions import (
+    DeltaTransactionError,
+    MergeConflictError,
+    SchemaViolationError,
+)
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.infrastructure.storage.write_resilience import (
     DEFAULT_SILVER_MERGE_POLICY,
@@ -290,3 +298,29 @@ class SilverWriterDeltaMixin:
                     "error_type": final_reason,
                 },
             )
+
+    async def _dispatch_write_with_domain_errors(
+        self,
+        *,
+        table_name: str,
+        validated_mode: SilverWriteMode,
+        table_path: str,
+        arrow_data: pa.Table,
+        primary_keys: list[str],
+        partition_cols: list[str] | None,
+    ) -> None:
+        """Dispatch write and translate infrastructure errors to domain errors."""
+        try:
+            await self._dispatch_write(
+                validated_mode,
+                table_path,
+                arrow_data,
+                primary_keys,
+                partition_cols,
+            )
+        except (SchemaMismatchError, pa.ArrowTypeError) as exc:
+            raise SchemaViolationError(table_name, errors=[str(exc)]) from exc
+        except DeltaError as exc:
+            if "Merge-conflict" in str(exc):
+                raise MergeConflictError(table_name, conflicts=1) from exc
+            raise

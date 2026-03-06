@@ -6,8 +6,9 @@ __all__ = ["SilverWriterMetadataMixin"]
 
 
 import asyncio
+import time
 from collections.abc import Awaitable, Callable
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, ClassVar
 
 from deltalake import DeltaTable
@@ -35,6 +36,7 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
+    from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 
 class SilverWriterMetadataMixin:
@@ -233,4 +235,61 @@ class SilverWriterMetadataMixin:
             flat_structure=self._flat_structure,
             provider=provider_name,
             entity=entity_name,
+        )
+
+    async def _maybe_log_silver_audit(
+        self,
+        *,
+        table_name: str,
+        records: list[BronzeRecord],
+        mode: SilverWriteMode,
+    ) -> None:
+        """Guard for audit logging — only calls _log_silver_audit if enabled."""
+        if self._audit and records:
+            await self._log_silver_audit(
+                table_name=table_name,
+                records=records,
+                mode=mode,
+            )
+
+    async def _finalize_silver_write_result(
+        self,
+        *,
+        table_name: str,
+        records: list[BronzeRecord],
+        table_path: str,
+        primary_keys: list[str],
+        validated_mode: SilverWriteMode,
+        bronze_refs: list[BronzeWriteResult] | None,
+        partition_cols: list[str] | None,
+        started_at: datetime,
+        start_perf: float,
+    ) -> SilverWriteResult | None:
+        """Compute DQ metrics, write metadata, and build final result."""
+        dq_metrics = await self._compute_dq_metrics(table_name, records)
+        version_after = await self._get_delta_version(table_path)
+        completed_at = started_at + timedelta(seconds=time.perf_counter() - start_perf)
+
+        await self._write_silver_metadata(
+            table_path=table_path,
+            table_name=table_name,
+            records=records,
+            primary_keys=primary_keys,
+            mode=validated_mode,
+            bronze_refs=bronze_refs,
+            dq_metrics=dq_metrics,
+            partition_by=partition_cols,
+            started_at=started_at,
+            completed_at=completed_at,
+        )
+        if version_after is None:
+            return None
+
+        from bioetl.domain.value_objects.silver_result import SilverWriteResult
+
+        return SilverWriteResult(
+            table_name=table_name,
+            table_path=table_path,
+            delta_version=version_after,
+            record_count=len(records),
         )

@@ -16,13 +16,6 @@ registries:
       reason: Baseline exemption migrated from architecture tests (file_size_limits).
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-    src/bioetl/domain/aggregates/_batch_aggregate.py:
-      value: 475
-      owner: '@bioetl-data-model'
-      reason: DDD aggregate root class (Batch) — single class, cannot split further.
-        RF-046 reduced from 553 LOC (batch.py) to 472 LOC via sub-module extraction.
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption entry.
     src/bioetl/domain/aggregates/_quarantine_aggregate.py:
       value: 450
       owner: '@bioetl-data-model'
@@ -267,12 +260,6 @@ registries:
       reason: Class grew after write-path hardening and IO helper extraction in storage refactors.
       expires_on: '2026-06-30'
       removal_step: Extract more helpers to mixin or reduce class scope.
-    Batch:
-      value: 450
-      owner: '@bioetl-data-model'
-      reason: Baseline exemption migrated from architecture tests (class_size).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption entry.
     CommentExtractor:
       value: 357
       owner: '@bioetl-architecture'
@@ -399,24 +386,12 @@ registries:
       reason: Baseline exemption migrated from architecture tests (class_size).
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-    PubMedPublicationTransformer:
-      value: 711
-      owner: '@bioetl-architecture'
-      reason: Baseline exemption migrated from architecture tests (class_size).
-      expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption entry.
     QuarantineEntry:
       value: 430
       owner: '@bioetl-data-model'
       reason: Baseline exemption migrated from architecture tests (class_size).
       expires_on: '2026-04-30'
       removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-    SilverWriter:
-      value: 392
-      owner: '@bioetl-platform'
-      reason: Silver write lifecycle now spans validation, schema guards, and metadata instrumentation.
-      expires_on: '2026-04-30'
-      removal_step: Continue mixin decomposition to reduce class below default threshold.
     UniProtProteinTransformer:
       value: 800
       owner: '@bioetl-architecture'
@@ -425,11 +400,11 @@ registries:
       removal_step: Refactor target to satisfy default metric and remove this exemption entry.
   class_method_count:
     Batch:
-      value: 25
+      value: 22
       owner: '@bioetl-data-model'
-      reason: Baseline exemption migrated from architecture tests (class_method_count).
+      reason: RF-011 reduced from 25 to 22 public methods via lifecycle extraction.
       expires_on: '2026-04-30'
-      removal_step: Refactor target to satisfy default metric and remove this exemption entry.
+      removal_step: Reduce public method count to 20 (e.g. consolidate properties).
   god_object:
     CommentExtractor:
       value: Cohesive extractor - all methods relate to UniProt comment/annotation extraction
