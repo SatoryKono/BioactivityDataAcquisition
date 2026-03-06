@@ -30,8 +30,8 @@ def DeltaWriteConflictError(
         ),
     )
     cast(
-        Any, error
-    ).error_type = ErrorType.NETWORK_ERROR  # Any: legacy exception compatibility shim
+        Any, error  # Any: legacy exception compatibility shim
+    ).error_type = ErrorType.NETWORK_ERROR
     return error
 
 
@@ -110,10 +110,8 @@ def DeltaSchemaValidationError(
         ),
     )
     cast(
-        Any, error
-    ).error_type = (
-        ErrorType.SCHEMA_MISMATCH_GOLD
-    )  # Any: legacy exception compatibility shim
+        Any, error  # Any: legacy exception compatibility shim
+    ).error_type = ErrorType.SCHEMA_MISMATCH_GOLD
     return error
 
 
@@ -133,6 +131,6 @@ def DeltaOptimizeError(
         ),
     )
     cast(
-        Any, error
-    ).error_type = ErrorType.NETWORK_ERROR  # Any: legacy exception compatibility shim
+        Any, error  # Any: legacy exception compatibility shim
+    ).error_type = ErrorType.NETWORK_ERROR
     return error
