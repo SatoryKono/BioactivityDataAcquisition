@@ -99,7 +99,7 @@ def _create_default_openalex_query_executor(
     http_client: UnifiedHTTPClient,
     adapter_metrics: AdapterMetrics,
     request_collector: APIRequestCollector,
-    headers_provider: Any,
+    headers_provider: Any,  # Any: callable returning dict[str, str]
     api_base: str,
 ) -> OpenAlexQueryExecutor:
     """Create default query executor for non-DI call sites."""
@@ -122,8 +122,8 @@ def _create_default_openalex_cursor_flow(
     mailto: str,
     batch_size: int,
     title_search_cache_size: int,
-    normalize_doi: Any,
-    escape_title_for_search: Any,
+    normalize_doi: Any,  # Any: callable (str) -> str for DOI normalization
+    escape_title_for_search: Any,  # Any: callable (str) -> str for title escaping
     query_executor: OpenAlexQueryExecutor,
     response_mapper: OpenAlexResponseMapper,
     logger: LoggerPort,
@@ -144,7 +144,9 @@ def _create_default_openalex_cursor_flow(
 
 
 def _create_default_openalex_title_fallback_handler(
-    *, logger: LoggerPort, search_fn: Any
+    *,
+    logger: LoggerPort,
+    search_fn: Any,  # Any: async callable for title search
 ) -> TitleFallbackHandler:
     """Create default title fallback handler for non-DI call sites."""
     return TitleFallbackHandler(logger=logger, search_fn=search_fn)
@@ -154,8 +156,8 @@ def _create_default_openalex_fallback_orchestrator(
     *,
     fallback_fetch_service: FallbackFetchOrchestratorService,
     fallback_handler: TitleFallbackHandler,
-    normalize_id: Any,
-    extract_record_id: Any,
+    normalize_id: Any,  # Any: callable (str) -> str for ID normalization
+    extract_record_id: Any,  # Any: callable (dict) -> str for record ID extraction
     logger: LoggerPort,
 ) -> OpenAlexFallbackOrchestrator:
     """Create default fallback orchestrator for non-DI call sites."""

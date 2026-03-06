@@ -77,7 +77,7 @@ def _create_default_pubmed_fallback_service(
 def _create_default_pubmed_title_fallback_handler(
     *,
     logger: LoggerPort,
-    search_fn: Any,
+    search_fn: Any,  # Any: async callable for title search
 ) -> TitleFallbackHandler:
     """Create default title fallback handler for non-DI call sites."""
     return TitleFallbackHandler(logger=logger, search_fn=search_fn)

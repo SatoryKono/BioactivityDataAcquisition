@@ -58,6 +58,6 @@ def test_every_step_has_uses_or_run(wf: Path) -> None:
         for i, step in enumerate(job_def.get("steps", [])):
             if not isinstance(step, dict):
                 continue
-            assert (
-                "uses" in step or "run" in step
-            ), f"{wf.name}:{job_name} step[{i}] missing 'uses' or 'run'"
+            assert "uses" in step or "run" in step, (
+                f"{wf.name}:{job_name} step[{i}] missing 'uses' or 'run'"
+            )

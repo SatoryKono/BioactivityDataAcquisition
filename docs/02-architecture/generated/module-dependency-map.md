@@ -4,8 +4,8 @@
 
 ## Summary
 
-- Scanned modules: `829`
-- Internal import edges (raw): `3146`
+- Scanned modules: `832`
+- Internal import edges (raw): `3152`
 - Aggregated layer edges: `14`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (top 60): `60`
@@ -25,11 +25,11 @@ flowchart LR
     composition -->|233 OK| composition
     composition -->|194 OK| domain
     composition -->|181 OK| infrastructure
-    domain -->|514 OK| domain
+    domain -->|519 OK| domain
     infrastructure -->|418 OK| domain
     infrastructure -->|448 OK| infrastructure
     interfaces -->|10 OK| application
-    interfaces -->|22 OK| composition
+    interfaces -->|23 OK| composition
     interfaces -->|25 OK| domain
     interfaces -->|1 OK| infrastructure
     interfaces -->|79 OK| interfaces
@@ -45,11 +45,11 @@ flowchart LR
 | `composition` | `composition` | 233 | allowed |
 | `composition` | `domain` | 194 | allowed |
 | `composition` | `infrastructure` | 181 | allowed |
-| `domain` | `domain` | 514 | allowed |
+| `domain` | `domain` | 519 | allowed |
 | `infrastructure` | `domain` | 418 | allowed |
 | `infrastructure` | `infrastructure` | 448 | allowed |
 | `interfaces` | `application` | 10 | allowed |
-| `interfaces` | `composition` | 22 | allowed |
+| `interfaces` | `composition` | 23 | allowed |
 | `interfaces` | `domain` | 25 | allowed |
 | `interfaces` | `infrastructure` | 1 | allowed |
 | `interfaces` | `interfaces` | 79 | allowed |
@@ -81,7 +81,7 @@ flowchart LR
 | `composition.factories` | `infrastructure.config` | 20 |
 | `infrastructure.storage` | `domain.models` | 20 |
 | `composition.factories` | `domain.schemas` | 19 |
-| `interfaces.cli` | `composition.entrypoints` | 17 |
+| `interfaces.cli` | `composition.entrypoints` | 18 |
 | `application.services` | `domain.types` | 16 |
 | `application.pipelines` | `domain.context` | 15 |
 | `composition.factories` | `domain.types` | 15 |
