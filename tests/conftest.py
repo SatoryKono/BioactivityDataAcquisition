@@ -15,6 +15,12 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         default=False,
         help="Enable tests that require outbound network connectivity.",
     )
+    parser.addoption(
+        "--live-api",
+        action="store_true",
+        default=False,
+        help="Enable live API contract tests (equivalent to BIOETL_LIVE_API_TESTS=true).",
+    )
 
 
 def pytest_cmdline_main(config):

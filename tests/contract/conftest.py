@@ -31,6 +31,12 @@ def _is_contract_test_path(path_str: str) -> bool:
     )
 
 
+def _is_truthy_env_var(name: str) -> bool:
+    raw_value = os.environ.get(name, "")
+    normalized_value = raw_value.strip().strip("\"'").lower()
+    return normalized_value in _TRUTHY_ENV_VALUES
+
+
 @lru_cache(maxsize=1)
 def _has_outbound_connectivity() -> bool:
     """Best-effort outbound connectivity probe for contract tests."""
@@ -72,13 +78,16 @@ def pytest_collection_modifyitems(
     Tests marked with 'no_api' are exempt from this requirement as they don't
     require live API access (e.g., schema introspection tests).
     """
-    raw_live_value = os.environ.get("BIOETL_LIVE_API_TESTS", "")
-    normalized_live_value = raw_live_value.strip().strip("\"'").lower()
-    live_tests_enabled = normalized_live_value in _TRUTHY_ENV_VALUES
+    live_tests_enabled = bool(config.getoption("--live-api")) or _is_truthy_env_var(
+        "BIOETL_LIVE_API_TESTS"
+    )
 
     if not live_tests_enabled:
         skip_marker = pytest.mark.skip(
-            reason="Live API tests disabled. Set BIOETL_LIVE_API_TESTS=true to enable."
+            reason=(
+                "Live API tests disabled. Enable via --live-api "
+                "or BIOETL_LIVE_API_TESTS=true."
+            )
         )
         for item in items:
             fspath_str = str(item.fspath)
@@ -98,10 +107,12 @@ def no_network(pytestconfig: pytest.Config) -> bool:
     """Return True when network tests must be skipped.
 
     Network tests require both:
-    - explicit opt-in via `--network`
+    - explicit opt-in via `--network` or `BIOETL_NETWORK_TESTS=true`
     - successful outbound connectivity probe
     """
-    network_opt_in = bool(pytestconfig.getoption("--network"))
+    network_opt_in = bool(pytestconfig.getoption("--network")) or _is_truthy_env_var(
+        "BIOETL_NETWORK_TESTS"
+    )
     if not network_opt_in:
         return True
     return not _has_outbound_connectivity()
@@ -112,7 +123,7 @@ def _network_guard(request: pytest.FixtureRequest, no_network: bool) -> None:
     """Skip network-marked tests when connectivity guard is active."""
     if no_network and "network" in request.node.keywords:
         pytest.skip(
-            "Network tests disabled. Use --network with outbound connectivity to run."
+            "Network tests disabled. Enable --network or BIOETL_NETWORK_TESTS=true."
         )
 
 
