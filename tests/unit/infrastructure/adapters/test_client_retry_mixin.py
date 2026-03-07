@@ -17,7 +17,11 @@ from bioetl.domain.exceptions import (
     RecoverableError,
 )
 from bioetl.domain.resilience import RetryConfig
-from bioetl.infrastructure.adapters.http.client_retry_mixin import HTTPClientRetryMixin
+from bioetl.infrastructure.adapters.http.client_retry_mixin import (
+    HTTPClientRetryMixin,
+    _can_retry,
+    _record_request_metrics,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -180,13 +184,13 @@ async def test_handle_retry_delay_clamps_retry_after_to_max_delay(
 def test_can_retry_returns_true_within_budget(client: _ConcreteRetryClient) -> None:
     """Should return True when attempt is not the last and retries remain."""
     # max_attempts=3 → budget=2; attempt=0, retries_used=0 → can retry
-    assert client._can_retry(attempt=0, retries_used=0) is True
+    assert _can_retry(client.retry_config, attempt=0, retries_used=0) is True
 
 
 def test_can_retry_returns_false_on_last_attempt(client: _ConcreteRetryClient) -> None:
     """Should return False when attempt index is the final allowed."""
     # is_last_attempt(2) is True for max_attempts=3
-    assert client._can_retry(attempt=2, retries_used=0) is False
+    assert _can_retry(client.retry_config, attempt=2, retries_used=0) is False
 
 
 def test_can_retry_returns_false_when_budget_exhausted(
@@ -194,7 +198,7 @@ def test_can_retry_returns_false_when_budget_exhausted(
 ) -> None:
     """Should return False when retry budget is fully consumed."""
     # budget=2, retries_used=2 → exhausted
-    assert client._can_retry(attempt=0, retries_used=2) is False
+    assert _can_retry(client.retry_config, attempt=0, retries_used=2) is False
 
 
 def test_can_retry_with_explicit_budget_per_request() -> None:
@@ -205,8 +209,8 @@ def test_can_retry_with_explicit_budget_per_request() -> None:
     client = _ConcreteRetryClient(retry_config=config)
 
     # Budget of 1: first retry allowed, second is not
-    assert client._can_retry(attempt=0, retries_used=0) is True
-    assert client._can_retry(attempt=0, retries_used=1) is False
+    assert _can_retry(client.retry_config, attempt=0, retries_used=0) is True
+    assert _can_retry(client.retry_config, attempt=0, retries_used=1) is False
 
 
 # ---------------------------------------------------------------------------
@@ -259,8 +263,14 @@ def test_record_request_metrics_observes_histogram(
     client: _ConcreteRetryClient,
 ) -> None:
     """Should observe request duration in the histogram."""
-    client._record_request_metrics(
-        method="GET", duration=0.5, status_code=200, retries=0, last_error=None
+    _record_request_metrics(
+        metrics=client._metrics,
+        provider=client.provider,
+        method="GET",
+        duration=0.5,
+        status_code=200,
+        retries=0,
+        last_error=None,
     )
 
     client._metrics.observe_histogram.assert_called_once_with(
@@ -272,8 +282,14 @@ def test_record_request_metrics_observes_histogram(
 
 def test_record_request_metrics_records_retries(client: _ConcreteRetryClient) -> None:
     """Should increment retry counter when retries > 0."""
-    client._record_request_metrics(
-        method="GET", duration=1.0, status_code=200, retries=2, last_error=None
+    _record_request_metrics(
+        metrics=client._metrics,
+        provider=client.provider,
+        method="GET",
+        duration=1.0,
+        status_code=200,
+        retries=2,
+        last_error=None,
     )
 
     client._metrics.increment_counter.assert_called_with(
@@ -287,8 +303,14 @@ def test_record_request_metrics_records_error_on_4xx(
     client: _ConcreteRetryClient,
 ) -> None:
     """Should increment error counter for 4xx status codes."""
-    client._record_request_metrics(
-        method="GET", duration=0.3, status_code=404, retries=0, last_error=None
+    _record_request_metrics(
+        metrics=client._metrics,
+        provider=client.provider,
+        method="GET",
+        duration=0.3,
+        status_code=404,
+        retries=0,
+        last_error=None,
     )
 
     calls = [call[0][0] for call in client._metrics.increment_counter.call_args_list]
@@ -300,8 +322,14 @@ def test_record_request_metrics_uses_exception_type_for_error_label(
 ) -> None:
     """Error counter label should reflect the exception type name."""
     err = ConnectionError("timed out")
-    client._record_request_metrics(
-        method="GET", duration=0.1, status_code=0, retries=1, last_error=err
+    _record_request_metrics(
+        metrics=client._metrics,
+        provider=client.provider,
+        method="GET",
+        duration=0.1,
+        status_code=0,
+        retries=1,
+        last_error=err,
     )
 
     error_call = None
@@ -319,8 +347,14 @@ def test_record_request_metrics_skips_retry_counter_when_no_retries(
     client: _ConcreteRetryClient,
 ) -> None:
     """Should not emit the retries counter when retries == 0 and status is 200."""
-    client._record_request_metrics(
-        method="GET", duration=0.2, status_code=200, retries=0, last_error=None
+    _record_request_metrics(
+        metrics=client._metrics,
+        provider=client.provider,
+        method="GET",
+        duration=0.2,
+        status_code=200,
+        retries=0,
+        last_error=None,
     )
 
     called_metrics = [c[0][0] for c in client._metrics.increment_counter.call_args_list]
