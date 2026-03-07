@@ -17,7 +17,15 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
 
+from bioetl.domain.config import (
+    ConditionalValidation as DomainConditionalValidation,
+)
+from bioetl.domain.config import (
+    CrossFieldValidation as DomainCrossFieldValidation,
+)
 from bioetl.domain.config import DQConfig as DomainDQConfig
+from bioetl.domain.config import DQReportConfig as DomainDQReportConfig
+from bioetl.domain.config import FieldValidation as DomainFieldValidation
 from bioetl.domain.resilience import CircuitBreakerConfig as DomainCircuitBreakerConfig
 
 
@@ -141,91 +149,90 @@ class DQConfig(BaseModel):
         )
         return self
 
+    @staticmethod
+    def _to_domain_field_validation(
+        config: FieldValidationConfig,
+    ) -> DomainFieldValidation:
+        return DomainFieldValidation(
+            field=config.field,
+            validation_type=config.type,
+            nullable=config.nullable,
+            severity=config.severity,
+            severity_enricher=config.severity_enricher,
+            min_value=config.min,
+            max_value=config.max,
+            pattern=config.pattern,
+            allowed=tuple(config.allowed),
+            max_length=config.max_length,
+            validator=config.validator,
+            error_message=config.error_message,
+        )
+
+    @staticmethod
+    def _to_domain_cross_field_validation(
+        config: CrossFieldValidationConfig,
+    ) -> DomainCrossFieldValidation:
+        return DomainCrossFieldValidation(
+            name=config.name,
+            fields=tuple(config.fields),
+            condition=config.condition,
+            severity=config.severity,
+            trigger_field=config.trigger_field,
+            required_field=config.required_field,
+            validator=config.validator,
+            error_message=config.error_message,
+        )
+
+    @classmethod
+    def _to_domain_conditional_validation(
+        cls,
+        config: ConditionalValidationConfig,
+    ) -> DomainConditionalValidation:
+        condition_value = (
+            tuple(config.condition_value)
+            if isinstance(config.condition_value, list)
+            else config.condition_value
+        )
+        return DomainConditionalValidation(
+            name=config.name,
+            condition_field=config.condition_field,
+            condition_value=condition_value,
+            condition_operator=config.condition_operator,
+            then_validations=tuple(
+                cls._to_domain_field_validation(validation)
+                for validation in config.then_validations
+            ),
+        )
+
+    @staticmethod
+    def _to_domain_report_config(config: DQReportConfig) -> DomainDQReportConfig:
+        return DomainDQReportConfig(
+            enabled=config.enabled,
+            format=config.format,
+            include_sample_failures=config.include_sample_failures,
+            sample_size=config.sample_size,
+            output_path=config.output_path,
+        )
+
     def to_domain(self) -> DomainDQConfig:
         """Convert to immutable domain DQ configuration.
 
         Returns:
             DomainDQConfig instance with merged field, cross-field, and conditional validations.
         """
-        from bioetl.domain.config import (
-            ConditionalValidation as DomainConditionalValidation,
-        )
-        from bioetl.domain.config import (
-            CrossFieldValidation as DomainCrossFieldValidation,
-        )
-        from bioetl.domain.config import DQReportConfig as DomainDQReportConfig
-        from bioetl.domain.config import FieldValidation as DomainFieldValidation
-
         field_validations = tuple(
-            DomainFieldValidation(
-                field=fv.field,
-                validation_type=fv.type,
-                nullable=fv.nullable,
-                severity=fv.severity,
-                severity_enricher=fv.severity_enricher,
-                min_value=fv.min,
-                max_value=fv.max,
-                pattern=fv.pattern,
-                allowed=tuple(fv.allowed),
-                max_length=fv.max_length,
-                validator=fv.validator,
-                error_message=fv.error_message,
-            )
-            for fv in self.field_validations
+            self._to_domain_field_validation(config)
+            for config in self.field_validations
         )
-
         cross_field_validations = tuple(
-            DomainCrossFieldValidation(
-                name=cfv.name,
-                fields=tuple(cfv.fields),
-                condition=cfv.condition,
-                severity=cfv.severity,
-                trigger_field=cfv.trigger_field,
-                required_field=cfv.required_field,
-                validator=cfv.validator,
-                error_message=cfv.error_message,
-            )
-            for cfv in self.cross_field_validations
+            self._to_domain_cross_field_validation(config)
+            for config in self.cross_field_validations
         )
-
         conditional_validations = tuple(
-            DomainConditionalValidation(
-                name=cv.name,
-                condition_field=cv.condition_field,
-                condition_value=(
-                    tuple(cv.condition_value)
-                    if isinstance(cv.condition_value, list)
-                    else cv.condition_value
-                ),
-                condition_operator=cv.condition_operator,
-                then_validations=tuple(
-                    DomainFieldValidation(
-                        field=tv.field,
-                        validation_type=tv.type,
-                        nullable=tv.nullable,
-                        severity=tv.severity,
-                        severity_enricher=tv.severity_enricher,
-                        min_value=tv.min,
-                        max_value=tv.max,
-                        pattern=tv.pattern,
-                        allowed=tuple(tv.allowed),
-                        validator=tv.validator,
-                        error_message=tv.error_message,
-                    )
-                    for tv in cv.then_validations
-                ),
-            )
-            for cv in self.conditional_validations
+            self._to_domain_conditional_validation(config)
+            for config in self.conditional_validations
         )
-
-        report_config = DomainDQReportConfig(
-            enabled=self.report.enabled,
-            format=self.report.format,
-            include_sample_failures=self.report.include_sample_failures,
-            sample_size=self.report.sample_size,
-            output_path=self.report.output_path,
-        )
-
+        report_config = self._to_domain_report_config(self.report)
         return DomainDQConfig(
             soft_fail_threshold=self.soft_fail_threshold,
             hard_fail_threshold=self.hard_fail_threshold,

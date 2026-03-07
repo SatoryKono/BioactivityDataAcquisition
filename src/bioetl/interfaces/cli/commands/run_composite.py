@@ -27,6 +27,7 @@ from bioetl.interfaces.cli.commands.execution_policy import (
 )
 from bioetl.interfaces.cli.commands.health_server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
+    echo_health_server_info,
     health_server_context,
 )
 from bioetl.interfaces.cli.commands.metrics_server_integration import (
@@ -34,10 +35,9 @@ from bioetl.interfaces.cli.commands.metrics_server_integration import (
 )
 from bioetl.interfaces.cli.commands.run_composite_runtime import (
     build_runtime_config,
-    echo_composite_startup,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
-from bioetl.interfaces.cli.formatters import echo_error, echo_info
+from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning
 
 __all__ = [
     "run_composite",
@@ -180,6 +180,23 @@ def _run_composite_with_cli_policy(
         if getattr(coro, "cr_frame", None) is not None:
             coro.close()
     return success, error_message
+
+
+def _echo_composite_startup(
+    *,
+    composite: str,
+    dry_run: bool,
+    resume: bool,
+    health_server: bool,
+    health_port: int,
+) -> None:
+    """Emit startup information for composite run."""
+    echo_info(f"Starting composite pipeline: {composite}")
+    if dry_run:
+        echo_warning("Dry-run mode: no data will be written")
+    if resume:
+        echo_info("Resume mode: continuing from last checkpoint")
+    echo_health_server_info(health_server, health_port)
 
 
 def _exit_with_composite_result(success: bool, error_message: str | None) -> None:
@@ -335,7 +352,7 @@ def run_composite(
         cached_bronze_enrichers=cached_bronze_enrichers,
         cached_bronze_dependencies=cached_bronze_dependencies,
     )
-    echo_composite_startup(
+    _echo_composite_startup(
         composite=composite,
         dry_run=dry_run,
         resume=resume,

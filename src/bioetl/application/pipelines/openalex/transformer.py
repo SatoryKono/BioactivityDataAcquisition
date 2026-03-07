@@ -130,6 +130,99 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
     # Field Extraction Methods (Orchestration - delegates to extractors)
     # ========================================================================
 
+    def _extract_author_bundle(self, rec: BronzeRecord) -> GoldRecord:
+        """Extract and normalize author/affiliation related fields."""
+        normalizer = self._data_normalizer
+        authorships_raw = rec.get("authorships", [])
+        authorships = authorships_raw if isinstance(authorships_raw, list) else []
+
+        raw_authors = extract_authors(authorships)
+        raw_affiliations = extract_affiliations(authorships) if authorships else None
+        author_orcids = extract_author_orcids(authorships)
+        author_openalex_ids = extract_author_ids(authorships)
+        ror_ids = extract_institution_ror_ids(authorships)
+
+        return {
+            "authors": normalizer.normalize_author_list(raw_authors),
+            "author_keys": normalizer.normalize_author_keys(raw_authors),
+            "affiliation_list": (
+                normalizer.normalize_affiliations(raw_affiliations)
+                if raw_affiliations
+                else None
+            ),
+            "institution_ids": self.serialize_json_list(
+                extract_institution_ids(authorships)
+            ),
+            "institution_country_codes": self.serialize_json_list(
+                extract_institution_country_codes(authorships)
+            ),
+            "ror_ids": self.serialize_json_list(ror_ids) if ror_ids else None,
+            "author_orcids": self.serialize_json_list(author_orcids)
+            if any(author_orcids)
+            else None,
+            "author_openalex_ids": self.serialize_json_list(author_openalex_ids)
+            if any(author_openalex_ids)
+            else None,
+        }
+
+    def _extract_subject_bundle(self, rec: BronzeRecord) -> GoldRecord:
+        """Extract topic, keyword, and grant classification fields."""
+        subject_topics = extract_topics(rec.get("topics", []))
+        primary_topic = extract_primary_topic(rec.get("primary_topic"))
+        grants = extract_grants(rec.get("grants", []))
+        subject_mesh = extract_mesh_terms(rec.get("mesh", []))
+        subject_keywords = extract_keywords(rec.get("keywords", []))
+
+        return {
+            "subject_topics": (
+                self.serialize_json_list(subject_topics) if subject_topics else None
+            ),
+            "primary_topic": self.serialize_json(primary_topic)
+            if primary_topic
+            else None,
+            "grants": self.serialize_json_list(grants) if grants else None,
+            "subject_mesh": self.serialize_json_list(subject_mesh),
+            "subject_keywords": self.serialize_json_list(subject_keywords),
+        }
+
+    def _extract_publication_bundle(self, rec: BronzeRecord) -> GoldRecord:
+        """Extract publication metadata and quality indicator fields."""
+        external_ids = extract_external_ids(rec.get("ids", {}))
+        journal_info = extract_journal_info(rec.get("primary_location", {}))
+        biblio_info = extract_biblio_info(rec.get("biblio", {}))
+        oa_info = extract_open_access_info(rec.get("open_access", {}))
+        year = self.validate_value_object(
+            PublicationYear,
+            rec.get("publication_year"),
+            as_string=False,
+        )
+
+        return {
+            "pmid": external_ids.get("pmid"),
+            "pmc_id": None,
+            "mag_id": external_ids.get("mag_id"),
+            "journal": journal_info.get("journal"),
+            "issn": journal_info.get("issn"),
+            "publisher": journal_info.get("publisher"),
+            "publication_year": year,
+            "publication_date": self._data_normalizer.normalize_partial_date(
+                rec.get("publication_date")
+            ),
+            "publication_type": normalize_publication_type(rec.get("type")),
+            **self._classify_publication_type("openalex", raw_type=rec.get("type")),
+            "is_oa": oa_info.get("is_oa"),
+            "oa_status": oa_info.get("oa_status"),
+            "citations_received": rec.get("cited_by_count"),
+            "language": rec.get("language"),
+            "volume": biblio_info.get("volume"),
+            "issue": biblio_info.get("issue"),
+            "page_first": biblio_info.get("page_first"),
+            "page_last": biblio_info.get("page_last"),
+            "fwci": rec.get("fwci"),
+            "citations_made": rec.get("referenced_works_count"),
+            "is_retracted": rec.get("is_retracted", False),
+        }
+
     def _extract_business_data(self, record: BronzeRecord) -> GoldRecord:
         """Extract Publication business data from bronze record.
 
@@ -142,155 +235,25 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             Dictionary of Publication business fields.
 
         """
-        # BronzeRecord is already a JsonDict
         rec = record
-
-        # Extract OpenAlex ID from URL
-        openalex_id = extract_openalex_id(rec.get("id"))
-
-        # Validate DOI using Value Object (returns None for invalid/empty)
-        # OpenAlex stores DOIs as full URLs (e.g., "https://doi.org/10.1038/...")
-        doi = self.validate_value_object(DOI, rec.get("doi"))
-
-        # Reconstruct abstract from inverted index (then strip HTML for cleaning)
-        abstract_index = rec.get("abstract_inverted_index")
         abstract = self._data_normalizer.strip_html_tags(
-            reconstruct_abstract(abstract_index)
+            reconstruct_abstract(rec.get("abstract_inverted_index"))
         )
-
-        # Extract and normalize authors using unified service (PII)
-        normalizer = self._data_normalizer
-
-        raw_authors = extract_authors(rec.get("authorships", []))
-        authors_json = normalizer.normalize_author_list(raw_authors)
-        author_keys = normalizer.normalize_author_keys(raw_authors)
-
-        # Extract and normalize affiliations using unified service
-        authorships = rec.get("authorships")
-        raw_affiliations = (
-            extract_affiliations(authorships) if isinstance(authorships, list) else None
-        )
-        affiliations_json = (
-            normalizer.normalize_affiliations(raw_affiliations)
-            if raw_affiliations
-            else None
-        )
-
-        # Extract institution IDs and country codes (for cross-referencing and geographic analysis)
-        institution_ids = extract_institution_ids(rec.get("authorships", []))
-        institution_country_codes = extract_institution_country_codes(
-            rec.get("authorships", [])
-        )
-
-        # Extract ROR IDs (may be empty if not returned by Works API)
-        ror_ids = extract_institution_ror_ids(rec.get("authorships", []))
-
-        # Extract author identifiers (ORCID and OpenAlex IDs)
-        author_orcids = extract_author_orcids(rec.get("authorships", []))
-        author_openalex_ids = extract_author_ids(rec.get("authorships", []))
-
-        # Extract journal info
-        journal_info = extract_journal_info(rec.get("primary_location", {}))
-
-        # Extract topics (hierarchical classification - replaces deprecated concepts)
-        subject_topics = extract_topics(rec.get("topics", []))
-
-        # Extract primary topic (single most relevant topic)
-        primary_topic = extract_primary_topic(rec.get("primary_topic"))
-
-        # Extract grants/funding information
-        grants = extract_grants(rec.get("grants", []))
-
-        # Extract Open Access info
-        oa_info = extract_open_access_info(rec.get("open_access", {}))
-
-        # Extract external IDs (pmid, pmc_id, mag)
-        external_ids = extract_external_ids(rec.get("ids", {}))
-
-        # Extract MeSH terms
-        subject_mesh = extract_mesh_terms(rec.get("mesh", []))
-
-        # Extract keywords
-        subject_keywords = extract_keywords(rec.get("keywords", []))
-
-        # Extract bibliographic info (volume, issue, pages)
-        biblio_info = extract_biblio_info(rec.get("biblio", {}))
-
-        # Validate year using PublicationYear Value Object
-        year = self.validate_value_object(
-            PublicationYear, rec.get("publication_year"), as_string=False
-        )
-
-        # Lookup metadata (from adapter)
-        lookup_method = rec.get("_lookup_method", "unknown")
-        original_id = rec.get("_original_id")
+        author_bundle = self._extract_author_bundle(rec)
+        subject_bundle = self._extract_subject_bundle(rec)
+        publication_bundle = self._extract_publication_bundle(rec)
 
         return {
-            "openalex_id": openalex_id,
-            "doi": doi,
-            "pmid": external_ids.get("pmid"),
-            "pmc_id": None,  # Not available from OpenAlex API
-            "mag_id": external_ids.get("mag_id"),
+            "openalex_id": extract_openalex_id(rec.get("id")),
+            "doi": self.validate_value_object(DOI, rec.get("doi")),
             "title": rec.get("title"),
             "abstract": abstract,
-            "authors": authors_json,
-            "author_keys": author_keys,
-            "affiliation_list": affiliations_json,
-            "institution_ids": self.serialize_json_list(institution_ids),
-            "institution_country_codes": self.serialize_json_list(
-                institution_country_codes
-            ),
-            # ROR IDs (may be empty if not returned by Works API)
-            "ror_ids": self.serialize_json_list(ror_ids) if ror_ids else None,
-            "author_orcids": (
-                self.serialize_json_list(author_orcids) if any(author_orcids) else None
-            ),
-            "author_openalex_ids": (
-                self.serialize_json_list(author_openalex_ids)
-                if any(author_openalex_ids)
-                else None
-            ),
-            "journal": journal_info.get("journal"),
-            "issn": journal_info.get("issn"),
-            "publisher": journal_info.get("publisher"),
-            "publication_year": year,
-            "publication_date": self._data_normalizer.normalize_partial_date(
-                rec.get("publication_date")
-            ),
-            "publication_type": normalize_publication_type(rec.get("type")),
-            **self._classify_publication_type("openalex", raw_type=rec.get("type")),
-            "is_oa": oa_info.get("is_oa"),
-            "oa_status": oa_info.get("oa_status"),
-            # OpenAlex source field: cited_by_count
-            # Unified BioETL field: citations_received (standardized across all providers)
-            "citations_received": rec.get("cited_by_count"),
-            # Topics (hierarchical classification - replaces deprecated concepts)
-            # Serialized to JSON string for schema compliance
-            "subject_topics": (
-                self.serialize_json_list(subject_topics) if subject_topics else None
-            ),
-            "primary_topic": self.serialize_json(primary_topic)
-            if primary_topic
-            else None,
-            # Grants/funding information (serialized to JSON string)
-            "grants": self.serialize_json_list(grants) if grants else None,
-            "subject_mesh": self.serialize_json_list(subject_mesh),
-            "subject_keywords": self.serialize_json_list(subject_keywords),
-            "language": rec.get("language"),
-            # Bibliographic info (from biblio object)
-            "volume": biblio_info.get("volume"),
-            "issue": biblio_info.get("issue"),
-            "page_first": biblio_info.get("page_first"),
-            "page_last": biblio_info.get("page_last"),
-            # Additional metrics
-            "fwci": rec.get("fwci"),
-            "citations_made": rec.get("referenced_works_count"),
-            # Quality indicators
-            "is_retracted": rec.get("is_retracted", False),
-            "_lookup_method": lookup_method,
-            "_original_id": original_id,
+            **author_bundle,
+            **publication_bundle,
+            **subject_bundle,
+            "_lookup_method": rec.get("_lookup_method", "unknown"),
+            "_original_id": rec.get("_original_id"),
             "_source": "openalex",
-            # DQ flags (default: no warnings or errors)
             "_dq_warn": False,
             "_dq_error": False,
         }

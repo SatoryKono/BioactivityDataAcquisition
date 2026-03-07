@@ -43,7 +43,13 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
     def record_stage_start(
         self, stage: str, started_at: datetime | None = None
     ) -> None:
-        """Record the start of a pipeline stage."""
+        """Record the start of a pipeline stage.
+
+        Compatibility path (P2-9):
+            Prefer application.services.PipelineRunLifecycleService for orchestration
+            call-sites. Domain aggregate API remains temporarily stable through
+            2026-06-30 for migration safety.
+        """
         self._assert_running("record_stage_start")
         self._stages.append(
             StageResult(
@@ -61,7 +67,13 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
         started_at: datetime | None = None,
         completed_at: datetime | None = None,
     ) -> None:
-        """Record successful completion of a pipeline stage."""
+        """Record successful completion of a pipeline stage.
+
+        Compatibility path (P2-9):
+            Prefer application.services.PipelineRunLifecycleService for orchestration
+            call-sites. Domain aggregate API remains temporarily stable through
+            2026-06-30 for migration safety.
+        """
         self._assert_running("record_stage_success")
         now = datetime.now(UTC)
         self._stages.append(
@@ -83,7 +95,13 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
         started_at: datetime | None = None,
         completed_at: datetime | None = None,
     ) -> None:
-        """Record failure of a pipeline stage and fail the run."""
+        """Record failure of a pipeline stage and fail the run.
+
+        Compatibility path (P2-9):
+            Prefer application.services.PipelineRunLifecycleService for orchestration
+            call-sites. Domain aggregate API remains temporarily stable through
+            2026-06-30 for migration safety.
+        """
         self._assert_running("record_stage_failure")
         now = datetime.now(UTC)
         error_message = str(error) if isinstance(error, Exception) else error

@@ -391,6 +391,30 @@ class TestErrorService:
         assert isinstance(wrapped, ServiceUnavailableError)
         assert wrapped.service_name == "chembl"
 
+    def test_handle_error_propagates_mapping_context(
+        self, handler: ErrorService
+    ) -> None:
+        """Mapper should receive provider/entity/pipeline/operation context."""
+        error = TimeoutError("request timed out")
+
+        wrapped = handler.handle_error(
+            error=error,
+            provider="openalex",
+            operation="fetch",
+            context={
+                "pipeline": "openalex_publication",
+                "entity": "publication",
+            },
+        )
+
+        assert isinstance(wrapped, ServiceUnavailableError)
+        assert wrapped.get_reason_code() == "ADAPTER_TIMEOUT_ERROR"
+        assert wrapped.context.get("provider") == "openalex"
+        assert wrapped.context.get("pipeline") == "openalex_publication"
+        assert wrapped.context.get("entity") == "publication"
+        assert wrapped.context.get("operation") == "fetch"
+        assert wrapped.__cause__ is error
+
     def test_handle_error_raises_critical_for_auth(
         self, handler: ErrorService, mock_logger: MagicMock
     ) -> None:

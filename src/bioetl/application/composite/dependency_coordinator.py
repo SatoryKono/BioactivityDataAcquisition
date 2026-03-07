@@ -237,7 +237,60 @@ class DependencyCoordinatorService:
             DependencyResult with execution outcome.
         """
         started_at = datetime.now(tz=UTC)
+        self._log_dependency_start(dependency=dependency, keys=keys)
+        try:
+            runner = await self._execute_dependency_runner(
+                dependency=dependency,
+                keys=keys,
+                runner_factory=runner_factory,
+            )
+        except TimeoutError:
+            return self._build_timeout_result(
+                dependency=dependency,
+                started_at=started_at,
+            )
+        except _DEPENDENCY_EXECUTION_ERRORS as e:
+            return self._build_failed_result(
+                dependency=dependency,
+                error=e,
+                started_at=started_at,
+            )
 
+        completed_at = datetime.now(tz=UTC)
+        duration = self._duration_seconds(
+            started_at=started_at, completed_at=completed_at
+        )
+        records_extracted, records_silver = self._extract_runner_metrics(runner)
+        self._log_dependency_success(
+            dependency=dependency,
+            records_extracted=records_extracted,
+            records_silver=records_silver,
+            duration_seconds=duration,
+        )
+        return DependencyResult.success(
+            pipeline_name=dependency.pipeline,
+            records_extracted=records_extracted,
+            records_silver=records_silver,
+            duration_seconds=duration,
+            started_at=started_at,
+            completed_at=completed_at,
+        )
+
+    async def _execute_dependency_runner(
+        self,
+        dependency: DependencyConfig,
+        keys: pl.DataFrame,
+        runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
+    ) -> PipelineRunner:
+        """Execute dependency runner under timeout guard."""
+        async with asyncio.timeout(dependency.timeout_seconds):
+            runner = runner_factory(dependency.pipeline, keys)
+            await runner.run()
+        return runner
+
+    def _log_dependency_start(
+        self, dependency: DependencyConfig, keys: pl.DataFrame
+    ) -> None:
         self._logger.info(
             "Starting dependency",
             dependency=dependency.pipeline,
@@ -245,75 +298,77 @@ class DependencyCoordinatorService:
             timeout_seconds=dependency.timeout_seconds,
         )
 
-        try:
-            # Apply timeout
-            async with asyncio.timeout(dependency.timeout_seconds):
-                runner = runner_factory(dependency.pipeline, keys)
-                await runner.run()
+    def _log_dependency_success(
+        self,
+        dependency: DependencyConfig,
+        records_extracted: int,
+        records_silver: int,
+        duration_seconds: float,
+    ) -> None:
+        self._logger.info(
+            "Dependency completed",
+            dependency=dependency.pipeline,
+            records_extracted=records_extracted,
+            records_silver=records_silver,
+            duration_seconds=duration_seconds,
+        )
 
-            completed_at = datetime.now(tz=UTC)
-            duration = (completed_at - started_at).total_seconds()
+    def _extract_runner_metrics(self, runner: PipelineRunner) -> tuple[int, int]:
+        """Extract available row counters from runner executor."""
+        executor = getattr(runner, "_executor", None)
+        if executor is None:
+            return 0, 0
+        return (
+            getattr(executor, "records_fetched", 0),
+            getattr(executor, "records_silver", 0),
+        )
 
-            # Extract stats from runner
-            executor = getattr(runner, "_executor", None)
-            records_extracted = 0
-            records_silver = 0
+    def _duration_seconds(self, started_at: datetime, completed_at: datetime) -> float:
+        """Calculate wall-clock duration in seconds."""
+        return (completed_at - started_at).total_seconds()
 
-            if executor:
-                records_extracted = getattr(executor, "records_fetched", 0)
-                records_silver = getattr(executor, "records_silver", 0)
-
-            self._logger.info(
-                "Dependency completed",
-                dependency=dependency.pipeline,
-                records_extracted=records_extracted,
-                records_silver=records_silver,
-                duration_seconds=duration,
-            )
-
-            return DependencyResult.success(
-                pipeline_name=dependency.pipeline,
-                records_extracted=records_extracted,
-                records_silver=records_silver,
-                duration_seconds=duration,
+    def _build_timeout_result(
+        self, dependency: DependencyConfig, started_at: datetime
+    ) -> DependencyResult:
+        """Build timeout result and emit warning log."""
+        self._logger.warning(
+            "Dependency timed out",
+            dependency=dependency.pipeline,
+            timeout_seconds=dependency.timeout_seconds,
+            duration_seconds=self._duration_seconds(
                 started_at=started_at,
-                completed_at=completed_at,
-            )
+                completed_at=datetime.now(tz=UTC),
+            ),
+        )
+        return DependencyResult.timeout(
+            pipeline_name=dependency.pipeline,
+            timeout_seconds=dependency.timeout_seconds,
+        )
 
-        except TimeoutError:
-            duration = (datetime.now(tz=UTC) - started_at).total_seconds()
-            self._logger.warning(
-                "Dependency timed out",
-                dependency=dependency.pipeline,
-                timeout_seconds=dependency.timeout_seconds,
-            )
-            return DependencyResult.timeout(
-                pipeline_name=dependency.pipeline,
-                timeout_seconds=dependency.timeout_seconds,
-            )
-
-        except _DEPENDENCY_EXECUTION_ERRORS as e:
-            duration = (datetime.now(tz=UTC) - started_at).total_seconds()
-
-            if dependency.required:
-                self._logger.error(
-                    "Required dependency failed",
-                    dependency=dependency.pipeline,
-                    error=str(e),
-                    error_type=type(e).__name__,
-                    required=True,
-                )
-            else:
-                self._logger.warning(
-                    "Optional dependency failed",
-                    dependency=dependency.pipeline,
-                    error=str(e),
-                    error_type=type(e).__name__,
-                    required=False,
-                )
-
-            return DependencyResult.failed(
-                pipeline_name=dependency.pipeline,
-                error_message=str(e),
-                duration_seconds=duration,
-            )
+    def _build_failed_result(
+        self,
+        dependency: DependencyConfig,
+        error: Exception,
+        started_at: datetime,
+    ) -> DependencyResult:
+        """Build failed result and emit required/optional failure log."""
+        duration = self._duration_seconds(
+            started_at=started_at,
+            completed_at=datetime.now(tz=UTC),
+        )
+        log_method = self._logger.error if dependency.required else self._logger.warning
+        log_method(
+            "Required dependency failed"
+            if dependency.required
+            else "Optional dependency failed",
+            dependency=dependency.pipeline,
+            error=str(error),
+            error_type=type(error).__name__,
+            required=dependency.required,
+            duration_seconds=duration,
+        )
+        return DependencyResult.failed(
+            pipeline_name=dependency.pipeline,
+            error_message=str(error),
+            duration_seconds=duration,
+        )

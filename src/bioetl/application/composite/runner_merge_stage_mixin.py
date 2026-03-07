@@ -81,6 +81,54 @@ class CompositeRunnerMergeStageMixin:
         """Invoke support-layer quarantine write helper."""
         await self._write_cv_quarantine(merge_result)
 
+    async def _start_merge_phase(
+        self,
+        state: CompositeCheckpointState,
+    ) -> CompositeCheckpointState:
+        """Transition checkpoint/FSM to MERGING and persist checkpoint."""
+        previous_state = state.state
+        self._fsm.validate_fsm_transition(
+            previous_state,
+            CompositePipelineState.MERGING,
+        )
+        merging_state = state.with_state(CompositePipelineState.MERGING)
+        self._fsm.log_fsm_transition(
+            from_state=previous_state,
+            to_state=CompositePipelineState.MERGING,
+            stage="merge_start",
+        )
+        self._logger.info(
+            PipelineEvent.phase_started("merge"),
+            composite=self._config.name,
+            run_id=self._run_id_str,
+        )
+        await self._call_save_checkpoint_safe(merging_state, "merging")
+        return merging_state
+
+    async def _handle_merge_phase_exception(
+        self,
+        state: CompositeCheckpointState,
+        error: Exception,
+    ) -> None:
+        """Log merge-phase failure and persist FAILED checkpoint."""
+        log_kwargs: dict[str, object] = {
+            "composite": self._config.name,
+            "run_id": self._run_id_str,
+            "error": str(error),
+            "error_type": type(error).__name__,
+        }
+        if isinstance(error, BioETLError):
+            log_kwargs["reason_code"] = "unexpected_bioetl_error"
+        self._logger.error("Merge failed", **log_kwargs)
+        self._fsm.log_fsm_transition(
+            from_state=CompositePipelineState.MERGING,
+            to_state=CompositePipelineState.FAILED,
+            stage="merge_failed",
+            error=str(error),
+        )
+        failed_state = state.with_state(CompositePipelineState.FAILED)
+        await self._call_save_checkpoint_safe(failed_state, "merge_failed")
+
     async def _execute_merge_stage(
         self,
         state: CompositeCheckpointState,
@@ -91,24 +139,7 @@ class CompositeRunnerMergeStageMixin:
         merge_result: MergeResult | None = None
 
         if not self._runtime.dry_run:
-            previous_state = state.state
-            self._fsm.validate_fsm_transition(
-                previous_state,
-                CompositePipelineState.MERGING,
-            )
-            state = state.with_state(CompositePipelineState.MERGING)
-            await self._call_save_checkpoint_safe(state, "merging")
-
-            self._fsm.log_fsm_transition(
-                from_state=previous_state,
-                to_state=CompositePipelineState.MERGING,
-                stage="merge_start",
-            )
-            self._logger.info(
-                PipelineEvent.phase_started("merge"),
-                composite=self._config.name,
-                run_id=self._run_id_str,
-            )
+            state = await self._start_merge_phase(state)
 
             try:
                 mergeable_enrichers = get_mergeable_enrichers(
@@ -142,40 +173,8 @@ class CompositeRunnerMergeStageMixin:
                 await self._call_generate_dq_reports(merge_result)
                 await self._call_write_cv_quarantine(merge_result)
 
-            except PIPELINE_EXECUTION_ERRORS as merge_error:
-                self._fsm.log_fsm_transition(
-                    from_state=CompositePipelineState.MERGING,
-                    to_state=CompositePipelineState.FAILED,
-                    stage="merge_failed",
-                    error=str(merge_error),
-                )
-                self._logger.error(
-                    "Merge failed",
-                    composite=self._config.name,
-                    run_id=self._run_id_str,
-                    error=str(merge_error),
-                    error_type=type(merge_error).__name__,
-                )
-                state = state.with_state(CompositePipelineState.FAILED)
-                await self._call_save_checkpoint_safe(state, "merge_failed")
-                raise
-            except BioETLError as merge_error:
-                self._fsm.log_fsm_transition(
-                    from_state=CompositePipelineState.MERGING,
-                    to_state=CompositePipelineState.FAILED,
-                    stage="merge_failed",
-                    error=str(merge_error),
-                )
-                self._logger.error(
-                    "Merge failed",
-                    composite=self._config.name,
-                    run_id=self._run_id_str,
-                    error=str(merge_error),
-                    error_type=type(merge_error).__name__,
-                    reason_code="unexpected_bioetl_error",
-                )
-                state = state.with_state(CompositePipelineState.FAILED)
-                await self._call_save_checkpoint_safe(state, "merge_failed")
+            except (*PIPELINE_EXECUTION_ERRORS, BioETLError) as merge_error:
+                await self._handle_merge_phase_exception(state, merge_error)
                 raise
         else:
             self._fsm.log_fsm_transition(

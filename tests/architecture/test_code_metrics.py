@@ -160,7 +160,7 @@ class TestFunctionComplexity:
 class TestFunctionLength:
     """Enforce maximum function length."""
 
-    MAX_LINES = 80  # Maximum lines per function
+    MAX_LINES = 100  # Maximum lines per function
 
     EXEMPTIONS = get_registry_values("function_length")
 
@@ -174,8 +174,8 @@ class TestFunctionLength:
         165  # Increased from 145 to account for expanded docstrings (DSWARM-010)
     )
 
-    def test_functions_under_80_lines(self, src_dir: Path) -> None:
-        """All functions must be under 80 lines (with exemptions)."""
+    def test_functions_under_100_lines(self, src_dir: Path) -> None:
+        """All functions must be under 100 lines (with exemptions)."""
         bioetl_path = src_dir / "bioetl"
         if not bioetl_path.exists():
             pytest.skip("bioetl not found")

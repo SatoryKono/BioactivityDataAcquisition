@@ -58,6 +58,7 @@ def test_map_rate_limit_status_to_domain_error(
     assert isinstance(mapped, RateLimitExceededError)
     assert mapped.service_name == provider
     assert mapped.retry_after == 60.0
+    assert mapped.get_reason_code() == "ADAPTER_HTTP_RATE_LIMIT"
 
 
 @pytest.mark.parametrize("provider", _PROVIDERS)
@@ -76,6 +77,7 @@ def test_map_server_status_to_service_unavailable(
     assert isinstance(mapped, ServiceUnavailableError)
     assert mapped.service_name == provider
     assert mapped.status_code == 503
+    assert mapped.get_reason_code() == "ADAPTER_HTTP_SERVER_ERROR"
 
 
 @pytest.mark.parametrize("provider", _PROVIDERS)
@@ -93,6 +95,7 @@ def test_map_timeout_type_without_status(
     assert isinstance(mapped, ServiceUnavailableError)
     assert mapped.service_name == provider
     assert mapped.status_code is None
+    assert mapped.get_reason_code() == "ADAPTER_TIMEOUT_ERROR"
 
 
 @pytest.mark.parametrize("provider", _PROVIDERS)
@@ -110,3 +113,4 @@ def test_map_generic_type_without_status(
     assert isinstance(mapped, ExternalServiceError)
     assert not isinstance(mapped, ServiceUnavailableError | RateLimitExceededError)
     assert mapped.service_name == provider
+    assert mapped.get_reason_code() == "ADAPTER_EXTERNAL_ERROR"

@@ -49,6 +49,16 @@ class VacuumSettings:
     retention_days: int
 
 
+@dataclass(frozen=True, slots=True)
+class _RunnerInputs:
+    settings: Settings
+    yaml_config: PipelineYamlConfig
+    observability: ObservabilityBundle
+    runtime_config: RuntimeConfig
+    filter_config: InputFilterConfig | None
+    cached_bronze: CachedBronzeContext
+
+
 __all__ = ["build_pipeline_runner"]
 
 
@@ -197,6 +207,166 @@ def _validate_pk_contract(
         raise ValueError("technical_primary_key must be non-empty")
 
 
+def _initialize_registry(
+    *,
+    registry: PipelineRegistry | None,
+    get_default_registry_fn: Callable[[], PipelineRegistry],
+    register_all_providers_fn: Callable[[], None],
+    register_all_pipelines_fn: Callable[..., None],
+) -> PipelineRegistry:
+    effective_registry = registry if registry is not None else get_default_registry_fn()
+    register_all_providers_fn()
+    register_all_pipelines_fn(registry=registry)
+    return effective_registry
+
+
+def _resolve_health_check_mode(*, settings: Settings) -> Literal["strict", "probe"]:
+    if settings.test_mode:
+        return "probe"
+    return cast(
+        Literal["strict", "probe"],
+        getattr(settings.pipeline, "health_check_mode", "strict"),
+    )
+
+
+def _log_filter_config(
+    *,
+    observability: ObservabilityBundle,
+    filter_config: InputFilterConfig | None,
+    from_cli: bool,
+) -> None:
+    if not filter_config:
+        return
+    observability.logger.info(
+        "input_filter_enabled",
+        csv_path=filter_config.source_path,
+        column=filter_config.column_name,
+        filter_field=filter_config.filter_field,
+        source="cli" if from_cli else "config",
+    )
+
+
+def _resolve_filter_batch_size(yaml_config: PipelineYamlConfig) -> int | None:
+    filter_batch_size = getattr(yaml_config, "filter_batch_size", None)
+    if filter_batch_size is not None:
+        return filter_batch_size
+    try:
+        source_cfg = load_source_config(yaml_config.provider)
+        return source_cfg.pagination.id_batch_size
+    except (ValueError, AttributeError):
+        return None
+
+
+def _adjust_batch_size_for_filter(
+    *,
+    yaml_config: PipelineYamlConfig,
+    filter_config: InputFilterConfig | None,
+    observability: ObservabilityBundle,
+) -> None:
+    filter_batch_size = _resolve_filter_batch_size(yaml_config)
+    if filter_config and filter_batch_size is not None:
+        observability.logger.info(
+            "batch_size_auto_adjusted",
+            original=yaml_config.batch_size,
+            adjusted=filter_batch_size,
+            reason="input_filter_active",
+        )
+        yaml_config.batch_size = filter_batch_size
+
+
+def _log_cached_bronze(
+    *,
+    observability: ObservabilityBundle,
+    cached_bronze: CachedBronzeContext,
+) -> None:
+    if not cached_bronze.enabled:
+        return
+    observability.logger.info(
+        "cached_bronze_mode_enabled",
+        bronze_path=cached_bronze.bronze_path,
+        bronze_date=cached_bronze.bronze_date,
+    )
+
+
+def _prepare_runner_inputs(
+    *,
+    ctx: PipelineRunContext,
+    get_settings_fn: Callable[[], Settings],
+    load_pipeline_config_fn: Callable[[str], PipelineYamlConfig],
+    build_observability_bundle_fn: Callable[..., ObservabilityBundle],
+    assemble_vacuum_settings_fn: Callable[..., VacuumSettings],
+    assemble_runtime_config_fn: Callable[..., RuntimeConfig],
+    assemble_filter_config_fn: Callable[..., InputFilterConfig | None],
+    assemble_cached_bronze_context_fn: Callable[
+        [PipelineRunContext], CachedBronzeContext
+    ],
+) -> _RunnerInputs:
+    settings = get_settings_fn()
+    yaml_config = load_pipeline_config_fn(ctx.pipeline_name)
+    _validate_pk_contract(yaml_config)
+    observability = build_observability_bundle_fn(
+        pipeline=ctx.pipeline_name,
+        run_id=ctx.run_id,
+        settings=settings,
+        log_level=ctx.log_level,
+    )
+    vacuum = assemble_vacuum_settings_fn(
+        cli_vacuum=ctx.vacuum,
+        yaml_maintenance=yaml_config.maintenance,
+    )
+    runtime_config = assemble_runtime_config_fn(
+        ctx=ctx,
+        heartbeat_interval=settings.pipeline.heartbeat_interval,
+        vacuum=vacuum,
+        health_check_mode=_resolve_health_check_mode(settings=settings),
+    )
+    filter_config = assemble_filter_config_fn(
+        yaml_filter=yaml_config.input_filter,
+        ctx=ctx,
+        test_mode=settings.test_mode,
+    )
+    _log_filter_config(
+        observability=observability,
+        filter_config=filter_config,
+        from_cli=ctx.input_filter.enabled,
+    )
+    _adjust_batch_size_for_filter(
+        yaml_config=yaml_config,
+        filter_config=filter_config,
+        observability=observability,
+    )
+    cached_bronze = assemble_cached_bronze_context_fn(ctx)
+    _log_cached_bronze(observability=observability, cached_bronze=cached_bronze)
+    return _RunnerInputs(
+        settings=settings,
+        yaml_config=yaml_config,
+        observability=observability,
+        runtime_config=runtime_config,
+        filter_config=filter_config,
+        cached_bronze=cached_bronze,
+    )
+
+
+def _create_runner_from_factory(
+    *,
+    factory: object,
+    ctx: PipelineRunContext,
+    inputs: _RunnerInputs,
+) -> PipelineRunner:
+    return cast(
+        "PipelineRunner",
+        factory.create_runner(
+            run_id=ctx.run_id,
+            runtime=inputs.runtime_config,
+            settings=inputs.settings,
+            observability=inputs.observability,
+            filter_config=inputs.filter_config,
+            config=inputs.yaml_config,
+            cached_bronze=inputs.cached_bronze,
+        ),
+    )
+
+
 def build_pipeline_runner(
     ctx: PipelineRunContext,
     registry: PipelineRegistry | None = None,
@@ -225,93 +395,24 @@ def build_pipeline_runner(
     Returns:
         Fully wired PipelineRunner for the pipeline specified in the run context.
     """
-    effective_registry = registry if registry is not None else get_default_registry_fn()
-
-    register_all_providers_fn()
-    register_all_pipelines_fn(registry=registry)
-
-    settings = get_settings_fn()
-    yaml_config = load_pipeline_config_fn(ctx.pipeline_name)
-    _validate_pk_contract(yaml_config)
-
-    observability = build_observability_bundle_fn(
-        pipeline=ctx.pipeline_name,
-        run_id=ctx.run_id,
-        settings=settings,
-        log_level=ctx.log_level,
+    effective_registry = _initialize_registry(
+        registry=registry,
+        get_default_registry_fn=get_default_registry_fn,
+        register_all_providers_fn=register_all_providers_fn,
+        register_all_pipelines_fn=register_all_pipelines_fn,
     )
-
-    vacuum = assemble_vacuum_settings_fn(
-        cli_vacuum=ctx.vacuum,
-        yaml_maintenance=yaml_config.maintenance,
-    )
-
-    runtime_config = assemble_runtime_config_fn(
+    inputs = _prepare_runner_inputs(
         ctx=ctx,
-        heartbeat_interval=settings.pipeline.heartbeat_interval,
-        vacuum=vacuum,
-        health_check_mode=(
-            "probe"
-            if settings.test_mode
-            else getattr(settings.pipeline, "health_check_mode", "strict")
-        ),
+        get_settings_fn=get_settings_fn,
+        load_pipeline_config_fn=load_pipeline_config_fn,
+        build_observability_bundle_fn=build_observability_bundle_fn,
+        assemble_vacuum_settings_fn=assemble_vacuum_settings_fn,
+        assemble_runtime_config_fn=assemble_runtime_config_fn,
+        assemble_filter_config_fn=assemble_filter_config_fn,
+        assemble_cached_bronze_context_fn=assemble_cached_bronze_context_fn,
     )
-
-    filter_config = assemble_filter_config_fn(
-        yaml_filter=yaml_config.input_filter,
+    return _create_runner_from_factory(
+        factory=effective_registry.get(ctx.pipeline_name).factory,
         ctx=ctx,
-        test_mode=settings.test_mode,
-    )
-
-    if filter_config:
-        observability.logger.info(
-            "input_filter_enabled",
-            csv_path=filter_config.source_path,
-            column=filter_config.column_name,
-            filter_field=filter_config.filter_field,
-            source="cli" if ctx.input_filter.enabled else "config",
-        )
-
-    # Resolution order:
-    # 1. pipeline filter_batch_size (legacy)
-    # 2. source pagination.id_batch_size (canonical)
-    filter_batch_size = getattr(yaml_config, "filter_batch_size", None)
-    if filter_batch_size is None:
-        try:
-            source_cfg = load_source_config(yaml_config.provider)
-            filter_batch_size = source_cfg.pagination.id_batch_size
-        except (ValueError, AttributeError):
-            pass
-    if filter_config and filter_batch_size is not None:
-        observability.logger.info(
-            "batch_size_auto_adjusted",
-            original=yaml_config.batch_size,
-            adjusted=filter_batch_size,
-            reason="input_filter_active",
-        )
-        yaml_config.batch_size = filter_batch_size
-
-    cached_bronze = assemble_cached_bronze_context_fn(ctx)
-
-    if cached_bronze.enabled:
-        observability.logger.info(
-            "cached_bronze_mode_enabled",
-            bronze_path=cached_bronze.bronze_path,
-            bronze_date=cached_bronze.bronze_date,
-        )
-
-    pipeline_def = effective_registry.get(ctx.pipeline_name)
-    factory = pipeline_def.factory
-
-    return cast(
-        "PipelineRunner",
-        factory.create_runner(
-            run_id=ctx.run_id,
-            runtime=runtime_config,
-            settings=settings,
-            observability=observability,
-            filter_config=filter_config,
-            config=yaml_config,
-            cached_bronze=cached_bronze,
-        ),
+        inputs=inputs,
     )

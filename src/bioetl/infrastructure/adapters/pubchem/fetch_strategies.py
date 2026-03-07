@@ -1,14 +1,18 @@
-"""PubChem fetch strategy helpers.
+"""PubChem fetch strategy facade.
 
-Extracted from pubchem/client.py to reduce class size.
-Contains helper functions for different fetch modes.
+Thin compatibility facade (P1-5):
+- query building moved to ``query_builder``
+- response mapping moved to ``response_mapper``
+- execution flow moved to ``fetch_flow``
+- loop/policy helpers moved to ``policy_helper``
+
+Public API and import path remain stable.
 """
 
 from __future__ import annotations
 
 __all__ = ["PubChemFetchStrategies"]
 
-import time
 from typing import TYPE_CHECKING
 
 import pubchempy as pcp
@@ -16,6 +20,26 @@ import pubchempy as pcp
 from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.pubchem.constants import PUBCHEM_API_BASE
+from bioetl.infrastructure.adapters.pubchem.fetch_flow import PubChemFetchFlowService
+from bioetl.infrastructure.adapters.pubchem.policy_helper import (
+    is_blank_value,
+    is_limit_reached,
+    is_valid_inchikey,
+    iter_cid_batches,
+    parse_valid_cids,
+)
+from bioetl.infrastructure.adapters.pubchem.query_builder import (
+    build_assay_endpoint,
+    build_cid_batch_endpoint,
+    build_compound_name_endpoint,
+    build_inchikey_endpoint,
+    build_smiles_endpoint,
+    build_substance_name_endpoint,
+)
+from bioetl.infrastructure.adapters.pubchem.response_mapper import (
+    PubChemResponseMapper,
+    normalize_pubchem_results,
+)
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Awaitable, Callable
@@ -32,96 +56,65 @@ if TYPE_CHECKING:
 class _PubChemSearchFetchMixin:
     """Query-based PubChem fetch strategies (compound/substance/assay)."""
 
-    _rate_limiter: TokenBucket
-    _circuit_breaker: CircuitBreaker
-    _run_in_executor: Callable[..., Awaitable[object]]
-    _mapper: PubChemEntityMapper
-
-    def _record_request(
-        self,
-        endpoint: str,
-        duration_ms: float,
-        status_code: int = 200,
-        result_count: int = 0,
-    ) -> None:
-        """Record a PubChem API request."""
-        raise NotImplementedError
-
-    @staticmethod
-    def _normalize_results(results: object) -> list[object]:
-        """Normalize pubchempy responses to list."""
-        raise NotImplementedError
+    _fetch_flow: PubChemFetchFlowService
+    _response_mapper: PubChemResponseMapper
 
     async def fetch_by_query(
-        self, query: str, limit: int | None
+        self,
+        query: str,
+        limit: int | None,
     ) -> AsyncIterator[BronzeRecord]:
         """Fetch compounds by query (name search)."""
-        await self._rate_limiter.acquire()
-        start_time = time.perf_counter()
-        compounds = await self._circuit_breaker.call(
-            self._run_in_executor, pcp.get_compounds, query, "name"
+        compounds = await self._fetch_flow.execute(
+            endpoint=build_compound_name_endpoint(query),
+            pubchem_callable=pcp.get_compounds,
+            pubchem_args=(query, "name"),
         )
-        normalized_compounds = self._normalize_results(compounds)
-        duration_ms = (time.perf_counter() - start_time) * 1000
-        result_count = len(normalized_compounds)
-        self._record_request(
-            f"/compound/name/{query}/JSON", duration_ms, result_count=result_count
-        )
-        for i, compound in enumerate(normalized_compounds):
-            if limit and i >= limit:
+        for index, record in enumerate(self._response_mapper.map_compounds(compounds)):
+            if is_limit_reached(limit, index):
                 break
-            yield self._mapper.compound_to_dict(compound)
+            yield record
 
     async def fetch_substances(
-        self, query: str | None, limit: int | None
+        self,
+        query: str | None,
+        limit: int | None,
     ) -> AsyncIterator[BronzeRecord]:
         """Fetch substances from PubChem."""
         if not query:
             raise ValueError("Query is required for substance search")
 
-        await self._rate_limiter.acquire()
-        start_time = time.perf_counter()
-        substances = await self._circuit_breaker.call(
-            self._run_in_executor, pcp.get_substances, query, "name"
+        substances = await self._fetch_flow.execute(
+            endpoint=build_substance_name_endpoint(query),
+            pubchem_callable=pcp.get_substances,
+            pubchem_args=(query, "name"),
         )
-        normalized_substances = self._normalize_results(substances)
-        duration_ms = (time.perf_counter() - start_time) * 1000
-        result_count = len(normalized_substances)
-        self._record_request(
-            f"/substance/name/{query}/JSON", duration_ms, result_count=result_count
-        )
-
         fetched = 0
-        for substance in normalized_substances:
-            if limit and fetched >= limit:
+        for record in self._response_mapper.map_substances(substances):
+            if is_limit_reached(limit, fetched):
                 break
-            yield self._mapper.substance_to_dict(substance)
+            yield record
             fetched += 1
 
     async def fetch_assays(
-        self, query: str | None, limit: int | None
+        self,
+        query: str | None,
+        limit: int | None,
     ) -> AsyncIterator[BronzeRecord]:
         """Fetch assays from PubChem."""
         if not query:
             raise ValueError("Query is required for assay search")
 
-        await self._rate_limiter.acquire()
-        start_time = time.perf_counter()
-        assays = await self._circuit_breaker.call(
-            self._run_in_executor, pcp.get_assays, query
+        assays = await self._fetch_flow.execute(
+            endpoint=build_assay_endpoint(query),
+            pubchem_callable=pcp.get_assays,
+            pubchem_args=(query,),
         )
-        normalized_assays = self._normalize_results(assays)
-        duration_ms = (time.perf_counter() - start_time) * 1000
-        result_count = len(normalized_assays)
-        self._record_request(
-            f"/assay/aid/{query}/JSON", duration_ms, result_count=result_count
-        )
-
         fetched = 0
-        for assay in normalized_assays:
-            if limit and fetched >= limit:
+        for record in self._response_mapper.map_assays(assays):
+            if is_limit_reached(limit, fetched):
                 break
-            yield self._mapper.assay_to_dict(assay)
+            yield record
             fetched += 1
 
 
@@ -158,6 +151,14 @@ class PubChemFetchStrategies(_PubChemSearchFetchMixin):
         self._run_in_executor = run_in_executor
         self._provider_name = provider_name
         self._request_collector = request_collector
+        self._response_mapper = PubChemResponseMapper(mapper)
+        self._fetch_flow = PubChemFetchFlowService(
+            rate_limiter=rate_limiter,
+            circuit_breaker=circuit_breaker,
+            run_in_executor=run_in_executor,
+            record_request=self._record_request,
+            normalize_results=self._normalize_results,
+        )
 
     def _record_request(
         self,
@@ -170,10 +171,7 @@ class PubChemFetchStrategies(_PubChemSearchFetchMixin):
         if self._request_collector is None:
             return
 
-        # Estimate response size based on result count (rough approximation)
-        # Average compound JSON is ~2KB, substance ~1KB, assay ~3KB
         estimated_size = result_count * 2000
-
         self._request_collector.record_request(
             url=f"{PUBCHEM_API_BASE}{endpoint}",
             method="GET",
@@ -184,133 +182,99 @@ class PubChemFetchStrategies(_PubChemSearchFetchMixin):
 
     @staticmethod
     def _normalize_results(results: object) -> list[object]:
-        """Normalize pubchempy responses to a concrete list.
-
-        Returns:
-            List of result objects, converting tuples to lists or returning empty list for other types.
-        """
-        if isinstance(results, list):
-            return results
-        if isinstance(results, tuple):
-            return list(results)
-        return []
+        """Compatibility wrapper around normalized pubchempy responses."""
+        return normalize_pubchem_results(results)
 
     async def _fetch_single_smiles(self, smiles: str) -> list[BronzeRecord]:
-        """Fetch compounds for a single SMILES string.
-
-        Returns:
-            List of compound record dictionaries matching the given SMILES structure.
-        """
-        await self._rate_limiter.acquire()
-        start_time = time.perf_counter()
-        compounds = await self._circuit_breaker.call(
-            self._run_in_executor, pcp.get_compounds, smiles.strip(), "smiles"
+        """Fetch compounds for a single SMILES string."""
+        compounds = await self._fetch_flow.execute(
+            endpoint=build_smiles_endpoint(),
+            pubchem_callable=pcp.get_compounds,
+            pubchem_args=(smiles.strip(), "smiles"),
         )
-        normalized_compounds = self._normalize_results(compounds)
-        duration_ms = (time.perf_counter() - start_time) * 1000
-        result_count = len(normalized_compounds)
-        self._record_request(
-            "/compound/smiles/JSON", duration_ms, result_count=result_count
-        )
-        return [self._mapper.compound_to_dict(c) for c in normalized_compounds]
+        return self._response_mapper.map_compounds(compounds)
 
     async def fetch_by_smiles(
-        self, smiles_list: list[str], limit: int | None = None
+        self,
+        smiles_list: list[str],
+        limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
         """Fetch compounds by SMILES strings."""
         fetched = 0
         for smiles in smiles_list:
-            if limit and fetched >= limit:
+            if is_limit_reached(limit, fetched):
                 return
-            if not smiles or not smiles.strip():
+            if is_blank_value(smiles):
                 continue
 
             try:
                 records = await self._fetch_single_smiles(smiles)
                 for record in records:
-                    if limit and fetched >= limit:
+                    if is_limit_reached(limit, fetched):
                         return
                     yield record
                     fetched += 1
-            except self.FETCH_STRATEGY_ERRORS as e:
+            except self.FETCH_STRATEGY_ERRORS as error:
                 self._logger.warning(
                     "smiles_fetch_failed",
                     provider=self._provider_name,
                     smiles=smiles[:50],
-                    error=str(e),
+                    error=str(error),
                 )
 
     def _parse_valid_cids(self, cid_list: list[str]) -> list[int]:
-        """Parse and validate CID list, returning only valid integers.
-
-        Returns:
-            List of integer CIDs parsed from the input strings, skipping invalid values.
-        """
-        valid_cids: list[int] = []
-        for cid in cid_list:
-            try:
-                valid_cids.append(int(cid))
-            except (ValueError, TypeError):
-                self._logger.warning(
-                    "invalid_cid_skipped", provider=self._provider_name, cid=cid
-                )
-        return valid_cids
+        """Parse and validate CID list, returning only valid integers."""
+        return parse_valid_cids(
+            cid_list,
+            logger=self._logger,
+            provider_name=self._provider_name,
+        )
 
     def _parse_valid_molecule_ids(self, molecule_id_list: list[str]) -> list[int]:
         """Backward-compatible alias for CID parser.
 
-        Returns:
-            List of integer CIDs parsed from the input strings, skipping invalid values.
+        Deprecation note:
+            Use ``_parse_valid_cids`` for new code. Alias kept for staged rollout.
         """
         return self._parse_valid_cids(molecule_id_list)
 
     async def _fetch_cid_batch(self, batch: list[int]) -> list[BronzeRecord]:
-        """Fetch a batch of compounds by CID.
-
-        Returns:
-            List of compound record dictionaries for the given CID batch.
-        """
-        await self._rate_limiter.acquire()
-        start_time = time.perf_counter()
-        compounds = await self._circuit_breaker.call(
-            self._run_in_executor, pcp.get_compounds, batch, "cid"
+        """Fetch a batch of compounds by CID."""
+        compounds = await self._fetch_flow.execute(
+            endpoint=build_cid_batch_endpoint(batch),
+            pubchem_callable=pcp.get_compounds,
+            pubchem_args=(batch, "cid"),
         )
-        normalized_compounds = self._normalize_results(compounds)
-        duration_ms = (time.perf_counter() - start_time) * 1000
-        result_count = len(normalized_compounds)
-        self._record_request(
-            f"/compound/cid/{','.join(map(str, batch[:3]))},.../JSON",
-            duration_ms,
-            result_count=result_count,
-        )
-        return [self._mapper.compound_to_dict(c) for c in normalized_compounds]
+        return self._response_mapper.map_compounds(compounds)
 
     async def fetch_by_cids(
-        self, cid_list: list[str], limit: int | None = None, batch_size: int = 50
+        self,
+        cid_list: list[str],
+        limit: int | None = None,
+        batch_size: int = 50,
     ) -> AsyncIterator[BronzeRecord]:
         """Fetch compounds by CID list."""
         fetched = 0
         valid_cids = self._parse_valid_cids(cid_list)
 
-        for i in range(0, len(valid_cids), batch_size):
-            if limit and fetched >= limit:
+        for batch in iter_cid_batches(valid_cids, batch_size):
+            if is_limit_reached(limit, fetched):
                 return
-            batch = valid_cids[i : i + batch_size]
 
             try:
                 records = await self._fetch_cid_batch(batch)
                 for record in records:
-                    if limit and fetched >= limit:
+                    if is_limit_reached(limit, fetched):
                         return
                     yield record
                     fetched += 1
-            except self.FETCH_STRATEGY_ERRORS as e:
+            except self.FETCH_STRATEGY_ERRORS as error:
                 self._logger.warning(
                     "molecule_id_batch_fetch_failed",
                     provider=self._provider_name,
                     batch_start=batch[0] if batch else None,
                     batch_size=len(batch),
-                    error=str(e),
+                    error=str(error),
                 )
 
     async def fetch_by_molecule_ids(
@@ -319,45 +283,42 @@ class PubChemFetchStrategies(_PubChemSearchFetchMixin):
         limit: int | None = None,
         batch_size: int = 50,
     ) -> AsyncIterator[BronzeRecord]:
-        """Backward-compatible alias for CID-based fetch."""
+        """Backward-compatible alias for CID-based fetch.
+
+        Deprecation note:
+            Prefer ``fetch_by_cids`` in new call-sites.
+        """
         async for record in self.fetch_by_cids(
-            molecule_id_list, limit=limit, batch_size=batch_size
+            molecule_id_list,
+            limit=limit,
+            batch_size=batch_size,
         ):
             yield record
 
     async def _fetch_single_inchikey(self, inchikey: str) -> list[BronzeRecord]:
-        """Fetch compounds for a single InChIKey.
-
-        Returns:
-            List of compound record dictionaries matching the given InChIKey (usually 0 or 1 result).
-        """
-        await self._rate_limiter.acquire()
-        start_time = time.perf_counter()
-        compounds = await self._circuit_breaker.call(
-            self._run_in_executor, pcp.get_compounds, inchikey.strip(), "inchikey"
+        """Fetch compounds for a single InChIKey."""
+        compounds = await self._fetch_flow.execute(
+            endpoint=build_inchikey_endpoint(),
+            pubchem_callable=pcp.get_compounds,
+            pubchem_args=(inchikey.strip(), "inchikey"),
         )
-        normalized_compounds = self._normalize_results(compounds)
-        duration_ms = (time.perf_counter() - start_time) * 1000
-        result_count = len(normalized_compounds)
-        self._record_request(
-            "/compound/inchikey/JSON", duration_ms, result_count=result_count
-        )
-        return [self._mapper.compound_to_dict(c) for c in normalized_compounds]
+        return self._response_mapper.map_compounds(compounds)
 
     async def fetch_by_inchikey(
-        self, inchikey_list: list[str], limit: int | None = None
+        self,
+        inchikey_list: list[str],
+        limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
         """Fetch compounds by InChIKey list."""
         fetched = 0
         for inchikey in inchikey_list:
-            if limit and fetched >= limit:
+            if is_limit_reached(limit, fetched):
                 return
-            if not inchikey or not inchikey.strip():
+            if is_blank_value(inchikey):
                 continue
 
-            # Basic InChIKey format validation (27 chars, NNNN-YYYY-Z pattern)
             cleaned = inchikey.strip()
-            if len(cleaned) != 27 or cleaned.count("-") != 2:
+            if not is_valid_inchikey(cleaned):
                 self._logger.warning(
                     "invalid_inchikey_skipped",
                     provider=self._provider_name,
@@ -369,14 +330,14 @@ class PubChemFetchStrategies(_PubChemSearchFetchMixin):
             try:
                 records = await self._fetch_single_inchikey(cleaned)
                 for record in records:
-                    if limit and fetched >= limit:
+                    if is_limit_reached(limit, fetched):
                         return
                     yield record
                     fetched += 1
-            except self.FETCH_STRATEGY_ERRORS as e:
+            except self.FETCH_STRATEGY_ERRORS as error:
                 self._logger.warning(
                     "inchikey_fetch_failed",
                     provider=self._provider_name,
                     inchikey=cleaned,
-                    error=str(e),
+                    error=str(error),
                 )
