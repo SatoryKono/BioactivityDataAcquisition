@@ -2,27 +2,23 @@
 
 from __future__ import annotations
 
-import asyncio
 from collections.abc import Awaitable, Callable
-from typing import TYPE_CHECKING, Any, Protocol, TypeVar, cast
+from typing import TYPE_CHECKING, Protocol, cast
 
 import pyarrow as pa
 
 from bioetl.domain.medallion import GoldWriteMode
-from bioetl.infrastructure.storage.gold_writer_io_helpers import (
-    initialize_scd2_records as _initialize_scd2_records,
+from bioetl.infrastructure.storage.gold_writer_io_delta_mixins import (
+    _GoldWriterExecutorArrowMixin,
+    _GoldWriterScd2MergeMixin,
+    _GoldWriterSimpleDeltaMixin,
 )
 from bioetl.infrastructure.storage.gold_writer_io_helpers import (
     load_gold_writer_module as _load_gold_writer_module,
 )
-from bioetl.infrastructure.storage.gold_writer_io_helpers import (
-    write_scd2_once as _write_scd2_once,
-)
 from bioetl.infrastructure.storage.gold_writer_read_cleanup_mixin import (
     GoldWriterReadCleanupMixin,
 )
-
-T = TypeVar("T")
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -49,8 +45,34 @@ class _GoldMergedMetadataWriterProtocol(Protocol):
     ) -> None: ...
 
 
-class GoldWriterIOMixin(GoldWriterReadCleanupMixin):
-    """Mixin with write dispatch and SCD2 merge helpers."""
+class _GoldWriteDispatchTargetProtocol(Protocol):
+    """Protocol for dispatch targets implemented by concrete write mixins."""
+
+    async def _write_scd2(
+        self,
+        table_path: str,
+        records: list[GoldRecord],
+        scd_config: ScdConfig,
+        partition_cols: list[str] | None,
+        ingestion_ts: datetime,
+        column_order: list[str] | None = None,
+    ) -> None: ...
+
+    async def _write_simple(
+        self,
+        table_path: str,
+        table_name: str,
+        records: list[GoldRecord],
+        mode: str,
+        partition_cols: list[str] | None,
+        primary_keys: list[str] | None = None,
+        _schema: DataFrameSchema | None = None,
+        column_order: list[str] | None = None,
+    ) -> None: ...
+
+
+class _GoldWriterMergedDispatchMixin(_GoldWriterExecutorArrowMixin):
+    """Merged-write orchestration and mode dispatch."""
 
     logger: LoggerPort
     csv_exporter: CsvExporter | None
@@ -106,11 +128,7 @@ class GoldWriterIOMixin(GoldWriterReadCleanupMixin):
         primary_keys: list[str] | None,
         preserve_column_order: bool,
     ) -> pa.Table:
-        """Build deterministic arrow table for merged Gold output.
-
-        Returns:
-            PyArrow Table ordered canonically and sorted by primary keys.
-        """
+        """Build deterministic arrow table for merged Gold output."""
         from bioetl.domain.schemas.column_order import canonical_column_order
 
         module = _load_gold_writer_module()
@@ -201,7 +219,8 @@ class GoldWriterIOMixin(GoldWriterReadCleanupMixin):
             assert ingestion_ts is not None
             assert scd_config is not None
             normalized = module._normalize_scd_config(scd_config, primary_keys)
-            await self._write_scd2(
+            dispatch_target = cast(_GoldWriteDispatchTargetProtocol, self)
+            await dispatch_target._write_scd2(
                 table_path,
                 records,
                 normalized,
@@ -209,181 +228,27 @@ class GoldWriterIOMixin(GoldWriterReadCleanupMixin):
                 ingestion_ts,
                 column_order,
             )
-        else:
-            await self._write_simple(
-                table_path,
-                table_name,
-                records,
-                mode.value,
-                partition_cols,
-                primary_keys,
-                schema,
-                column_order,
-            )
-
-    async def _run_in_executor(
-        self,
-        func: Callable[..., T],
-        *args: object,
-    ) -> T:
-        """Run a function in the executor.
-
-        Returns:
-            Return value of the function executed in the default thread pool executor.
-        """
-        loop = asyncio.get_running_loop()
-        return await loop.run_in_executor(None, func, *args)
-
-    def _to_arrow_table(
-        self, records: list[GoldRecord], column_order: list[str] | None = None
-    ) -> pa.Table:
-        """Convert records to PyArrow table, handling null types.
-
-        Returns:
-            PyArrow Table with null types sanitized for Delta Lake compatibility.
-        """
-        from bioetl.infrastructure.storage.arrow_converter import ArrowDataConverter
-
-        converter = ArrowDataConverter(logger=self.logger)
-        return converter.convert_records_to_arrow(
+            return
+        dispatch_target = cast(_GoldWriteDispatchTargetProtocol, self)
+        await dispatch_target._write_simple(
+            table_path,
+            table_name,
             records,
-            column_order=column_order,
+            mode.value,
+            partition_cols,
+            primary_keys,
+            schema,
+            column_order,
         )
 
-    async def _write_simple(
-        self,
-        table_path: str,
-        table_name: str,
-        records: list[GoldRecord],
-        mode: str,
-        partition_cols: list[str] | None,
-        primary_keys: list[str] | None = None,
-        _schema: DataFrameSchema | None = None,
-        column_order: list[str] | None = None,
-    ) -> None:
-        """Write records using simple overwrite or append mode."""
-        arrow_data = self._to_arrow_table(records, column_order=column_order)
-        if primary_keys:
-            arrow_data = arrow_data.sort_by([(pk, "ascending") for pk in primary_keys])
 
-        schema_mode = "overwrite" if mode == "overwrite" else None
-        module = _load_gold_writer_module()
-        for attempt in range(3):
-            try:
-
-                def _write_delta_with_mode(
-                    table_or_uri: str = table_path,
-                    data: pa.Table = arrow_data,
-                    write_mode: str = mode,
-                    partition_by: list[str] | None = partition_cols,
-                    resolved_schema_mode: str | None = schema_mode,
-                ) -> None:
-                    module.write_deltalake(
-                        table_or_uri=table_or_uri,
-                        data=pa.RecordBatchReader.from_batches(
-                            data.schema, data.to_batches()
-                        ),
-                        mode=write_mode,
-                        partition_by=partition_by,
-                        schema_mode=resolved_schema_mode,
-                    )
-
-                await self._run_in_executor(_write_delta_with_mode)
-                break
-            except module.GOLD_WRITE_RETRY_ERRORS as error:
-                if attempt == 2:
-                    raise error
-                delay = 0.5 * (2**attempt) + 0.05
-                await module.asyncio.sleep(delay)
-        if self.csv_exporter:
-            await self.csv_exporter.export(
-                table_name,
-                arrow_data,
-                append=mode != "overwrite",
-                primary_keys=primary_keys if mode != "overwrite" else None,
-            )
-
-    async def _write_scd2(
-        self,
-        table_path: str,
-        records: list[GoldRecord],
-        scd_config: ScdConfig,
-        partition_cols: list[str] | None,
-        ingestion_ts: datetime,
-        column_order: list[str] | None = None,
-    ) -> None:
-        """Write records using SCD Type 2 (history tracking)."""
-        business_key = scd_config["business_key"]
-        sort_keys = [business_key] if isinstance(business_key, str) else business_key
-
-        records.sort(key=lambda record: tuple(record.get(key) for key in sort_keys))
-        _initialize_scd2_records(records, scd_config, ingestion_ts)
-
-        module = _load_gold_writer_module()
-
-        for attempt in range(3):
-            try:
-                await _write_scd2_once(
-                    self,
-                    module=module,
-                    table_path=table_path,
-                    records=records,
-                    business_key=business_key,
-                    scd_config=scd_config,
-                    ingestion_ts=ingestion_ts,
-                    partition_cols=partition_cols,
-                    column_order=column_order,
-                )
-                break
-            except module.GOLD_WRITE_RETRY_ERRORS as error:
-                if attempt == 2:
-                    raise error
-                delay = 0.5 * (2**attempt) + 0.05
-                await module.asyncio.sleep(delay)
-
-    async def _merge_scd2(
-        self,
-        dt: Any,  # Any: deltalake DeltaTable untyped
-        records: list[GoldRecord],
-        business_key: str | list[str],
-        scd_config: ScdConfig,
-        ingestion_ts: datetime,
-        column_order: list[str] | None = None,
-    ) -> None:
-        """Merge records using SCD Type 2 logic."""
-        business_keys = (
-            [business_key] if isinstance(business_key, str) else business_key
-        )
-
-        new_data = self._to_arrow_table(records, column_order=column_order)
-        valid_to_col = scd_config.get("valid_to_col", "valid_to")
-        current_flag_col = scd_config.get("current_flag_col", "is_current")
-        merge_condition = " AND ".join(
-            f"target.{key} = source.{key}" for key in business_keys
-        )
-        merge_condition += f" AND target.{current_flag_col} = true"
-        ts_iso = ingestion_ts.isoformat()
-
-        await self._run_in_executor(
-            lambda: (
-                dt.merge(
-                    source=pa.RecordBatchReader.from_batches(
-                        new_data.schema, new_data.to_batches()
-                    ),
-                    predicate=merge_condition,
-                    source_alias="source",
-                    target_alias="target",
-                )
-                .when_matched_update(
-                    updates={
-                        valid_to_col: f"'{ts_iso}'",
-                        current_flag_col: "false",
-                    }
-                )
-                .when_not_matched_insert_all()
-                .execute()
-            )
-        )
+class GoldWriterIOMixin(
+    _GoldWriterMergedDispatchMixin,
+    _GoldWriterSimpleDeltaMixin,
+    _GoldWriterScd2MergeMixin,
+    GoldWriterReadCleanupMixin,
+):
+    """Compose Gold writer IO responsibilities from focused mixins."""
 
 
 __all__ = ["GoldWriterIOMixin"]

@@ -85,36 +85,67 @@ class StorageQuotaExceededError(CriticalError):
         Raises:
             ValueError: If neither ``path`` nor ``table_path`` is provided.
         """
+        quota_bytes, used_bytes, reason, version = self._normalize_legacy_args(
+            quota_bytes,
+            used_bytes,
+            reason,
+            version,
+        )
+        resolved = self._resolve_path(path, table_path)
+
+        self.path = resolved
+        self.table_path = resolved
+        self.quota_bytes = quota_bytes
+        self.used_bytes = used_bytes
+        self.reason = reason
+        self.version = version
+
+        super().__init__(
+            self._build_message(resolved, reason, version, quota_bytes, used_bytes)
+        )
+
+    @staticmethod
+    def _normalize_legacy_args(
+        quota_bytes: int | str | None,
+        used_bytes: int | None,
+        reason: str | None,
+        version: int | None,
+    ) -> tuple[int | None, int | None, str | None, int | None]:
+        """Re-map legacy positional form where quota_bytes is a reason string."""
         if isinstance(quota_bytes, str) and reason is None:
             reason = quota_bytes
             quota_bytes = None
             if isinstance(used_bytes, int):
                 version = used_bytes
                 used_bytes = None
+        return quota_bytes, used_bytes, reason, version  # type: ignore[return-value]
 
-        resolved_path = table_path if table_path is not None else path
-        if resolved_path is None:
+    @staticmethod
+    def _resolve_path(path: str | None, table_path: str | None) -> str:
+        """Resolve effective path, preferring table_path over path."""
+        resolved = table_path if table_path is not None else path
+        if resolved is None:
             raise ValueError("path or table_path must be provided")
-        path = resolved_path
+        return resolved
 
-        self.path = path
-        self.table_path = path
-        self.quota_bytes = quota_bytes
-        self.used_bytes = used_bytes
-        self.reason = reason
-        self.version = version
-
+    @staticmethod
+    def _build_message(
+        path: str,
+        reason: str | None,
+        version: int | None,
+        quota_bytes: int | None,
+        used_bytes: int | None,
+    ) -> str:
+        """Build the human-readable error message."""
         if reason is not None:
             msg = f"Delta transaction failed on '{path}': {reason}"
             if version is not None:
                 msg += f" (version: {version})"
-            super().__init__(msg)
-            return
-
+            return msg
         msg = f"Storage quota exceeded for '{path}'"
         if quota_bytes is not None and used_bytes is not None:
             msg += f" (used: {used_bytes:,} bytes, quota: {quota_bytes:,} bytes)"
-        super().__init__(msg)
+        return msg
 
 
 def _build_schema_error_message(

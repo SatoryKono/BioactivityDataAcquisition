@@ -184,9 +184,11 @@ class ColumnPriorityOrdererService:
         source_lower = source.lower()
 
         if source_lower == "seed":
-            if seed_provider and seed_entity:
-                return f"{seed_provider}.{seed_entity}.{field}"
-            return None
+            return ColumnPriorityOrdererService._resolve_seed_column(
+                field,
+                seed_provider,
+                seed_entity,
+            )
 
         if "." in source:
             provider, entity = source.split(".", 1)
@@ -196,8 +198,31 @@ class ColumnPriorityOrdererService:
         if seed_provider and provider == seed_provider.lower() and seed_entity:
             return f"{provider}.{seed_entity}.{field}"
 
+        return ColumnPriorityOrdererService._resolve_by_column_scan(
+            provider,
+            field,
+            columns_set,
+        )
+
+    @staticmethod
+    def _resolve_seed_column(
+        field: str,
+        seed_provider: str | None,
+        seed_entity: str | None,
+    ) -> str | None:
+        """Resolve 'seed' token to the seed pipeline's qualified column."""
+        if seed_provider and seed_entity:
+            return f"{seed_provider}.{seed_entity}.{field}"
+        return None
+
+    @staticmethod
+    def _resolve_by_column_scan(
+        provider: str,
+        field: str,
+        columns_set: set[str],
+    ) -> str | None:
+        """Find a column matching provider prefix and field suffix by scanning."""
         for col in columns_set:
             if col.startswith(f"{provider}.") and col.endswith(f".{field}"):
                 return col
-
         return None

@@ -39,30 +39,8 @@ _LIFECYCLE_OPERATION_ERRORS = (
 )
 
 
-@dataclass
-class MedallionLifecycleService:
-    """Unified service for managing medallion layer lifecycle operations.
-
-    Consolidates all medallion lifecycle operations under one interface:
-    - Pre-run: prepare_for_run() clears layers based on run type policy
-    - Post-run: finalize_run() vacuums tables to reclaim storage
-    - Direct: clear(), vacuum(), archive() for fine-grained control
-
-    This service replaces the separate LifecycleOrchestrator and vacuum
-    logic previously scattered across PostrunService.
-
-    Attributes:
-        storage: StoragePort for data layer operations.
-        logger: Structured logger for observability.
-
-    Example:
-        >>> # Unified lifecycle for pipeline runs
-        >>> service = MedallionLifecycleService(storage=storage, logger=logger)
-        >>> # Pre-run: clear based on run type
-        >>> prepare_result = await service.prepare_for_run(config, runtime)
-        >>> # Post-run: vacuum if enabled
-        >>> vacuum_result = await service.finalize_run(config, runtime)
-    """
+class _MedallionClearMixin:
+    """Policy-driven clear operations for Silver/Gold layers."""
 
     storage: StoragePort
     logger: LoggerPort
@@ -106,11 +84,11 @@ class MedallionLifecycleService:
             dry_run=dry_run,
         )
 
-        self._log_result(policy, silver_table, gold_table, result)
+        self._log_clear_result(policy, silver_table, gold_table, result)
 
         return result
 
-    def _log_result(
+    def _log_clear_result(
         self,
         policy: MedallionPolicy,
         silver_table: str,
@@ -145,6 +123,13 @@ class MedallionLifecycleService:
                     "gold_cleared": result.gold_cleared,
                 },
             )
+
+
+class _MedallionMaintenanceMixin:
+    """Direct maintenance operations delegated to StoragePort."""
+
+    storage: StoragePort
+    logger: LoggerPort
 
     async def vacuum(
         self,
@@ -231,6 +216,13 @@ class MedallionLifecycleService:
             )
             raise
 
+
+class _MedallionRunLifecycleMixin(_MedallionClearMixin):
+    """High-level run orchestration for pre/post lifecycle operations."""
+
+    storage: StoragePort
+    logger: LoggerPort
+
     # =========================================================================
     # High-level pipeline lifecycle operations
     # =========================================================================
@@ -301,13 +293,14 @@ class MedallionLifecycleService:
         Returns:
             VacuumResult (counts are 0 as implementation details are hidden).
         """
-        # Support both new flag and legacy flag
-        enabled = runtime.optimize_storage or runtime.vacuum_after_run
-
-        if not enabled:
+        if not self._is_optimization_enabled(runtime):
             return VacuumResult(
                 silver_files_removed=0, gold_files_removed=0, skipped=True
             )
+
+        silver_table = config.effective_silver_table
+        gold_table = config.effective_gold_table
+        retention_hours = self._retention_hours(runtime.vacuum_retention_days)
 
         self.logger.info(
             "Starting storage optimization",
@@ -315,43 +308,22 @@ class MedallionLifecycleService:
                 "stage": "optimize",
                 "retention_days": runtime.vacuum_retention_days,
                 "dry_run": runtime.dry_run,
-                "target": config.effective_silver_table,
+                "target": silver_table,
             },
         )
 
         try:
-            # StoragePort.optimize unifies vacuum and file cleanup
-            # We call it for both Silver and Gold tables to ensure all layers are covered
-            # even if table names differ (custom Gold table).
-
-            # Optimize based on Silver table name (covers Silver layer + Bronze)
-            silver_table = config.effective_silver_table
-            await self.storage.optimize(
-                table_name=silver_table,
-                retention_hours=runtime.vacuum_retention_days * 24,
+            await self._optimize_tables(
+                silver_table=silver_table,
+                gold_table=gold_table,
+                retention_hours=retention_hours,
                 dry_run=runtime.dry_run,
             )
-
-            gold_table = config.effective_gold_table
-
-            # Optimize based on Gold table name if different (covers Gold layer)
-            if gold_table != config.effective_silver_table:
-                await self.storage.optimize(
-                    table_name=gold_table,
-                    retention_hours=runtime.vacuum_retention_days * 24,
-                    dry_run=runtime.dry_run,
-                )
-
-            # Metrics for success
-            if metrics:
-                metrics.increment_counter(
-                    "storage_optimization_total",
-                    1,
-                    {"pipeline": config.pipeline_name, "status": "success"},
-                )
-
-            # Implementation details are hidden, so we return 0 counts
-            # This is acceptable as the unification hides explicit layer operations
+            self._emit_optimization_metric(
+                metrics=metrics,
+                pipeline_name=config.pipeline_name,
+                status="success",
+            )
             return VacuumResult(
                 silver_files_removed=0,
                 gold_files_removed=0,
@@ -364,18 +336,70 @@ class MedallionLifecycleService:
                 pipeline=config.pipeline_name,
                 error=str(e),
             )
-            if metrics:
-                metrics.increment_counter(
-                    "storage_optimization_total",
-                    1,
-                    {"pipeline": config.pipeline_name, "status": "failed"},
-                )
-            # Don't fail the pipeline for maintenance tasks
+            self._emit_optimization_metric(
+                metrics=metrics,
+                pipeline_name=config.pipeline_name,
+                status="failed",
+            )
             return VacuumResult(
                 silver_files_removed=0,
                 gold_files_removed=0,
                 skipped=False,
             )
+
+    @staticmethod
+    def _is_optimization_enabled(runtime: RuntimeConfig) -> bool:
+        """Support both legacy and current optimization flags."""
+        return runtime.optimize_storage or runtime.vacuum_after_run
+
+    @staticmethod
+    def _retention_hours(retention_days: int) -> int:
+        """Convert retention policy from days to hours."""
+        return retention_days * 24
+
+    async def _optimize_tables(
+        self,
+        silver_table: str,
+        gold_table: str,
+        retention_hours: int,
+        dry_run: bool,
+    ) -> None:
+        """Optimize Silver and Gold tables while avoiding duplicate targets."""
+        await self.storage.optimize(
+            table_name=silver_table,
+            retention_hours=retention_hours,
+            dry_run=dry_run,
+        )
+        if gold_table != silver_table:
+            await self.storage.optimize(
+                table_name=gold_table,
+                retention_hours=retention_hours,
+                dry_run=dry_run,
+            )
+
+    @staticmethod
+    def _emit_optimization_metric(
+        metrics: MetricsPort | None,
+        pipeline_name: str,
+        status: str,
+    ) -> None:
+        """Emit optimization metric if metrics port is available."""
+        if metrics:
+            metrics.increment_counter(
+                "storage_optimization_total",
+                1,
+                {"pipeline": pipeline_name, "status": status},
+            )
+
+
+@dataclass
+class MedallionLifecycleService(
+    _MedallionRunLifecycleMixin, _MedallionMaintenanceMixin
+):
+    """Unified facade for managing medallion layer lifecycle operations."""
+
+    storage: StoragePort
+    logger: LoggerPort
 
 
 __all__ = [

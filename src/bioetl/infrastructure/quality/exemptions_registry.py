@@ -26,8 +26,23 @@ from typing import Any
 import yaml
 
 from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.quality.exemptions_registry_paths import (
+    _SRC_ROOT_PREFIX,
+    build_module_path_key,
+)
+from bioetl.infrastructure.quality.exemptions_registry_paths import (
+    is_module_path_key as _is_module_path_key,
+)
+from bioetl.infrastructure.quality.exemptions_registry_paths import (
+    normalize_path_text as _normalize_path_text,
+)
+from bioetl.infrastructure.quality.exemptions_registry_paths import (
+    project_root as _project_root,
+)
+from bioetl.infrastructure.quality.exemptions_registry_paths import (
+    resolve_registry_path as _resolve_registry_path,
+)
 
-_DEFAULT_REGISTRY_PATH = Path("configs/quality/architecture_metric_exemptions.yaml")
 _DEFAULT_REQUIRED_FIELDS = ("value", "owner", "reason", "expires_on", "removal_step")
 _DUE_DATE_FIELDS = ("expires_on", "due_on")
 _PLACEHOLDER_NAME_RE = re.compile(
@@ -38,64 +53,6 @@ _PLACEHOLDER_OWNER_RE = re.compile(
     r"^(todo|tbd|unknown|none|unassigned|team)$",
     re.IGNORECASE,
 )
-_SRC_ROOT_PREFIX = "src/bioetl/"
-
-
-def _project_root() -> Path:
-    return Path(__file__).resolve().parents[4]
-
-
-def _resolve_registry_path(path: Path | str | None = None) -> Path:
-    candidate = _DEFAULT_REGISTRY_PATH if path is None else Path(path)
-
-    if candidate.is_absolute():
-        return candidate
-    return _project_root() / candidate
-
-
-def _normalize_path_text(value: str) -> str:
-    return value.replace("\\", "/").lstrip("./")
-
-
-def _is_module_path_key(value: str) -> bool:
-    normalized = _normalize_path_text(value)
-    return normalized.startswith(_SRC_ROOT_PREFIX) and normalized.endswith(".py")
-
-
-def build_module_path_key(
-    module_path: Path | str,
-    *,
-    src_root: Path | str | None = None,
-) -> str:
-    """Build canonical registry key for a module path.
-
-    Canonical format is repository-relative POSIX path:
-    ``src/bioetl/<layer>/.../<module>.py``.
-
-    Returns:
-        Canonical registry key string in format 'src/bioetl/.../module.py'.
-    """
-    text = _normalize_path_text(str(module_path))
-    if _is_module_path_key(text):
-        return text
-
-    src_root_path = (
-        _project_root() / "src" if src_root is None else Path(src_root).resolve()
-    )
-    path_obj = Path(module_path)
-    if not path_obj.is_absolute():
-        path_obj = path_obj.resolve()
-
-    if path_obj.is_relative_to(src_root_path):
-        rel = path_obj.relative_to(src_root_path).as_posix()
-        return f"src/{rel}"
-
-    if text.startswith("bioetl/") and text.endswith(".py"):
-        return f"src/{text}"
-
-    raise ValueError(
-        f"module_path must resolve under src/ or already be canonical ({module_path!r})"
-    )
 
 
 def load_exemptions_registry(

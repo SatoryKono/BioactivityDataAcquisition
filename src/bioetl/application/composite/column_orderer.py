@@ -296,52 +296,58 @@ class ColumnOrdererService:
             Filtered and optionally renamed list of column names according to the
             layer config's explicit columns, include_groups, or pass-through mode.
         """
+        if layer_config.columns:
+            return self._filter_columns_by_explicit(columns, layer_config)
+
+        if layer_config.include_groups:
+            return self._filter_columns_by_groups(columns, layer_config)
+
+        return list(columns)
+
+    def _filter_columns_by_explicit(
+        self,
+        columns: Sequence[str],
+        layer_config: LayerColumnConfig,
+    ) -> list[str]:
+        """Apply explicit include list from layer config."""
+        explicit_columns = layer_config.columns or ()
+        filtered = [c for c in explicit_columns if c in columns]
+        return self._apply_renames(filtered, layer_config.rename_fields)
+
+    def _filter_columns_by_groups(
+        self,
+        columns: Sequence[str],
+        layer_config: LayerColumnConfig,
+    ) -> list[str]:
+        """Apply include_groups and exclude_fields filtering."""
         from fnmatch import fnmatch
 
-        # Mode 1: Explicit column list
-        if layer_config.columns:
-            # Return columns in specified order, keeping only those available
-            filtered = [c for c in layer_config.columns if c in columns]
-            return self._apply_renames(filtered, layer_config.rename_fields)
+        if not self._column_groups:
+            self._logger.warning(
+                "include_groups specified but no column_groups configured",
+                include_groups=layer_config.include_groups,
+            )
+            return list(columns)
 
-        # Mode 2: Group-based filtering
-        if layer_config.include_groups:
-            if not self._column_groups:
-                self._logger.warning(
-                    "include_groups specified but no column_groups configured",
-                    include_groups=layer_config.include_groups,
+        include_groups = layer_config.include_groups or ()
+        included_groups = [g for g in self._column_groups if g.name in include_groups]
+        all_cols = set(columns)
+        matched: set[str] = set()
+        for group in included_groups:
+            group_columns = self._collect_group_columns(all_cols - matched, group)
+            matched.update(group_columns)
+
+        if layer_config.exclude_fields:
+            matched = {
+                c
+                for c in matched
+                if not any(
+                    fnmatch(c, pattern) for pattern in layer_config.exclude_fields
                 )
-                return list(columns)
+            }
 
-            # Filter groups by include_groups
-            included_groups = [
-                g for g in self._column_groups if g.name in layer_config.include_groups
-            ]
-
-            # Match columns to included groups
-            all_cols = set(columns)
-            matched: set[str] = set()
-            for group in included_groups:
-                group_columns = self._collect_group_columns(all_cols - matched, group)
-                matched.update(group_columns)
-
-            # Apply exclude_fields filter
-            if layer_config.exclude_fields:
-                matched = {
-                    c
-                    for c in matched
-                    if not any(
-                        fnmatch(c, pattern) for pattern in layer_config.exclude_fields
-                    )
-                }
-
-            # Order by semantic groups
-            ordered = self._order_by_yaml_groups(list(matched))
-            return self._apply_renames(ordered, layer_config.rename_fields)
-
-        # Mode 3: Layer-specific groups (handled by caller via constructor)
-        # If we reach here, no filtering is needed
-        return list(columns)
+        ordered = self._order_by_yaml_groups(list(matched))
+        return self._apply_renames(ordered, layer_config.rename_fields)
 
     def _apply_renames(
         self, columns: list[str], rename_map: dict[str, str]
