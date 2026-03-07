@@ -16,6 +16,7 @@ from bioetl.infrastructure.quality._primitives import (
 from bioetl.infrastructure.quality.debt_scorecard_validation import (
     validate_debt_scorecard_raw,
 )
+from bioetl.infrastructure.quality.exemptions_registry import load_exemptions_registry
 from bioetl.infrastructure.quality.inventory import (
     ExemptionInventory,
     build_exemption_inventory,
@@ -156,6 +157,11 @@ def validate_scorecard_registry_sync(
     """
     now = today or date.today()
     inventory = build_exemption_inventory(registry_path, today=now)
+    raw_registry = load_exemptions_registry(registry_path)
+    raw_registries = raw_registry.get("registries", {})
+    if not isinstance(raw_registries, dict):
+        return ["exemptions.registries: expected mapping"]
+
     scorecard = load_debt_scorecard(scorecard_path)
 
     baseline = scorecard.get("baseline", {})
@@ -167,7 +173,9 @@ def validate_scorecard_registry_sync(
         return ["scorecard.baseline.by_registry: expected mapping"]
 
     errors: list[str] = []
-    inventory_registry_names = set(inventory.by_registry)
+    # Include empty registries (e.g. god_object: {}) so sync checks don't
+    # falsely treat them as missing when baseline budgets explicitly track them.
+    inventory_registry_names = set(raw_registries)
     baseline_registry_names = set(baseline_by_registry)
 
     missing_in_scorecard = sorted(inventory_registry_names - baseline_registry_names)

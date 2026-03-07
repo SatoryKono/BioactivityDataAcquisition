@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+import yaml
+
 from bioetl.infrastructure.quality import (
+    EXEMPTION_REGISTRIES_ALLOW_EMPTY,
+    REQUIRED_EXEMPTION_REGISTRIES,
     get_registry_values,
     load_exemptions_registry,
     validate_exemption_key_normalization,
@@ -13,16 +17,7 @@ from bioetl.infrastructure.quality import (
 def test_exemption_registry_has_required_sections() -> None:
     raw = load_exemptions_registry()
     registries = raw.get("registries", {})
-    required = {
-        "file_size_limits",
-        "function_complexity",
-        "function_length",
-        "class_size",
-        "class_method_count",
-        "god_object",
-        "domain_complexity",
-    }
-    missing = sorted(required - set(registries))
+    missing = sorted(set(REQUIRED_EXEMPTION_REGISTRIES) - set(registries))
     assert not missing, f"Missing exemption registries: {missing}"
 
 
@@ -61,14 +56,29 @@ def test_exemption_registry_policy_requires_owner_removal_step_and_due_date() ->
     )
 
 
-def test_exemption_registries_are_not_empty() -> None:
-    for registry_name in (
-        "file_size_limits",
-        "function_complexity",
-        "function_length",
-        "class_size",
-        "class_method_count",
-        "god_object",
-    ):
+def test_exemption_registries_non_empty_except_allowlist() -> None:
+    required_non_empty = set(REQUIRED_EXEMPTION_REGISTRIES) - set(
+        EXEMPTION_REGISTRIES_ALLOW_EMPTY
+    )
+    for registry_name in sorted(required_non_empty):
         values = get_registry_values(registry_name)
         assert values, f"Registry '{registry_name}' must not be empty"
+
+
+def test_allowlisted_empty_registry_remains_valid(tmp_path) -> None:
+    raw = load_exemptions_registry()
+    registries = raw.get("registries", {})
+    assert isinstance(registries, dict)
+    registries["god_object"] = {}
+
+    test_registry = tmp_path / "exemptions.yaml"
+    test_registry.write_text(yaml.safe_dump(raw), encoding="utf-8")
+
+    metadata_errors, _expired_entries = validate_exemptions_registry(test_registry)
+    assert not any(
+        error.startswith("god_object: registry must not be empty")
+        for error in metadata_errors
+    )
+
+    values = get_registry_values("god_object", test_registry)
+    assert values == {}

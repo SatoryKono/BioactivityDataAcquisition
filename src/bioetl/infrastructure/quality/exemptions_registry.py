@@ -10,6 +10,8 @@ Exemptions are stored in a YAML registry with mandatory metadata:
 from __future__ import annotations
 
 __all__ = [
+    "EXEMPTION_REGISTRIES_ALLOW_EMPTY",
+    "REQUIRED_EXEMPTION_REGISTRIES",
     "build_module_path_key",
     "get_registry_values",
     "load_exemptions_registry",
@@ -53,6 +55,16 @@ _PLACEHOLDER_OWNER_RE = re.compile(
     r"^(todo|tbd|unknown|none|unassigned|team)$",
     re.IGNORECASE,
 )
+REQUIRED_EXEMPTION_REGISTRIES = (
+    "file_size_limits",
+    "function_complexity",
+    "function_length",
+    "class_size",
+    "class_method_count",
+    "god_object",
+    "domain_complexity",
+)
+EXEMPTION_REGISTRIES_ALLOW_EMPTY = frozenset({"god_object"})
 
 
 def load_exemptions_registry(
@@ -366,6 +378,24 @@ def validate_exemptions_registry(
     registries = raw.get("registries")
     if not isinstance(registries, dict):
         return (["Missing or invalid top-level 'registries' mapping"], [])
+
+    missing_required = sorted(set(REQUIRED_EXEMPTION_REGISTRIES) - set(registries))
+    if missing_required:
+        metadata_errors.append(
+            "Missing required exemption registries: " + ", ".join(missing_required)
+        )
+
+    for registry_name in REQUIRED_EXEMPTION_REGISTRIES:
+        if registry_name in missing_required:
+            continue
+        entries = registries.get(registry_name)
+        if not isinstance(entries, dict):
+            metadata_errors.append(
+                f"{registry_name}: expected mapping of exemptions, got {type(entries).__name__}"
+            )
+            continue
+        if not entries and registry_name not in EXEMPTION_REGISTRIES_ALLOW_EMPTY:
+            metadata_errors.append(f"{registry_name}: registry must not be empty")
 
     for registry_name, entries in sorted(registries.items()):
         if not isinstance(entries, dict):

@@ -15,8 +15,6 @@ Extracted from SilverDQAnalyzer (RF-010).
 
 from __future__ import annotations
 
-from typing import cast
-
 import polars as pl
 
 from bioetl.application.services.dq.silver_statistics_helpers import (
@@ -26,7 +24,22 @@ from bioetl.application.services.dq.silver_statistics_helpers import (
     check_deduplication_stats as _check_deduplication_stats,
 )
 from bioetl.application.services.dq.silver_statistics_helpers import (
-    detect_type_changes as _detect_type_changes,
+    check_null_rates_stats as _check_null_rates_stats,
+)
+from bioetl.application.services.dq.silver_statistics_helpers import (
+    check_schema_drift_stats as _check_schema_drift_stats,
+)
+from bioetl.application.services.dq.silver_statistics_helpers import (
+    check_type_conformance_stats as _check_type_conformance_stats,
+)
+from bioetl.application.services.dq.silver_statistics_helpers import (
+    check_uniqueness_stats as _check_uniqueness_stats,
+)
+from bioetl.application.services.dq.silver_statistics_helpers import (
+    profile_categorical_column as _profile_categorical_column,
+)
+from bioetl.application.services.dq.silver_statistics_helpers import (
+    profile_numeric_column as _profile_numeric_column,
 )
 from bioetl.application.services.dq.silver_statistics_helpers import (
     value_distribution_to_dict as _value_distribution_to_dict,
@@ -37,7 +50,6 @@ from bioetl.domain.value_objects.dq_report import (
     ContentHashIntegrityResult,
     DeduplicationStatsResult,
     DQCheckStatus,
-    DriftLevel,
     NullRateResult,
     NumericDistribution,
     RecordCountResult,
@@ -98,31 +110,7 @@ class SilverStatisticsCalculator:
         Returns:
             Tuple of (per-column NullRateResult list, overall null rate as float).
         """
-        results = []
-        total_nulls = 0
-        total_cells = 0
-
-        for col in df.columns:
-            null_count = df[col].null_count()
-            total = len(df)
-            null_rate = null_count / total if total > 0 else 0.0
-
-            total_nulls += null_count
-            total_cells += total
-
-            # Status based on null rate
-            status = DQCheckStatus.WARN if null_rate > 0.5 else DQCheckStatus.PASS
-
-            results.append(
-                NullRateResult(
-                    column_name=col,
-                    null_rate=round(null_rate, 4),
-                    status=status,
-                )
-            )
-
-        overall_null_rate = total_nulls / total_cells if total_cells > 0 else 0.0
-        return results, round(overall_null_rate, 4)
+        return _check_null_rates_stats(df)
 
     def check_uniqueness(
         self, df: pl.DataFrame, primary_keys: list[str]
@@ -132,59 +120,7 @@ class SilverStatisticsCalculator:
         Returns:
             UniquenessResult with duplicate rate and per-column cardinality stats.
         """
-        if not primary_keys:
-            return UniquenessResult(
-                primary_key="",
-                unique_count=len(df),
-                total_count=len(df),
-                duplicate_rate=0.0,
-                status=DQCheckStatus.PASS,
-            )
-
-        # Check which primary keys exist in dataframe
-        existing_keys = [k for k in primary_keys if k in df.columns]
-        if not existing_keys:
-            return UniquenessResult(
-                primary_key=",".join(primary_keys),
-                unique_count=len(df),
-                total_count=len(df),
-                duplicate_rate=0.0,
-                status=DQCheckStatus.WARN,
-                column_stats={"_note": {"message": "Primary key columns not found"}},
-            )
-
-        pk_name = ",".join(existing_keys)
-        unique_count = df.select(existing_keys).unique().height
-        total_count = len(df)
-        duplicate_count = total_count - unique_count
-        duplicate_rate = duplicate_count / total_count if total_count > 0 else 0.0
-
-        # Calculate column cardinality
-        column_stats = {}
-        for col in df.columns[:10]:  # Limit to first 10 columns
-            try:
-                cardinality = df[col].n_unique()
-                column_stats[col] = {
-                    "cardinality": cardinality,
-                    "uniqueness_ratio": (
-                        round(cardinality / len(df), 4) if len(df) > 0 else 0.0
-                    ),
-                }
-            except _SILVER_PROFILE_ERRORS:
-                # Catch all: cardinality calculation may fail for unhashable types
-                # or invalid column access. Skip column from cardinality metrics.
-                pass
-
-        status = DQCheckStatus.PASS if duplicate_rate == 0 else DQCheckStatus.WARN
-
-        return UniquenessResult(
-            primary_key=pk_name,
-            unique_count=unique_count,
-            total_count=total_count,
-            duplicate_rate=round(duplicate_rate, 4),
-            column_stats=column_stats,
-            status=status,
-        )
+        return _check_uniqueness_stats(df, primary_keys, _SILVER_PROFILE_ERRORS)
 
     def check_type_conformance(self, df: pl.DataFrame) -> TypeConformanceResult:
         """Check type conformance against expected schema.
@@ -192,26 +128,7 @@ class SilverStatisticsCalculator:
         Returns:
             TypeConformanceResult indicating whether any mixed-type columns were found.
         """
-        errors = []
-        type_coercions: dict[
-            str, JsonDict  # Any: DQ check values vary by check type
-        ] = {}  # Any: DQ check values vary by check type
-
-        for col in df.columns:
-            dtype = df[col].dtype
-            # Check for object/mixed types that indicate inconsistency
-            if dtype == pl.Object:
-                errors.append(f"Column {col} has mixed types (Object)")
-
-        status = DQCheckStatus.PASS if not errors else DQCheckStatus.WARN
-
-        return TypeConformanceResult(
-            schema_version=None,
-            pandera_passed=len(errors) == 0,
-            errors=tuple(errors),
-            type_coercions=type_coercions,
-            status=status,
-        )
+        return _check_type_conformance_stats(df)
 
     def check_value_distribution(self, df: pl.DataFrame) -> ValueDistributionResult:
         """Calculate value distributions for columns.
@@ -227,12 +144,14 @@ class SilverStatisticsCalculator:
             dtype = df[col].dtype
 
             if dtype in (pl.Float64, pl.Float32, pl.Int64, pl.Int32, pl.Int16, pl.Int8):
-                numeric_dist = self._profile_numeric_column(df, col)
+                numeric_dist = _profile_numeric_column(df, col, _SILVER_PROFILE_ERRORS)
                 if numeric_dist is not None:
                     numeric_cols[col] = numeric_dist
 
             elif dtype in (pl.Utf8, pl.Categorical):
-                categorical_dist = self._profile_categorical_column(df, col)
+                categorical_dist = _profile_categorical_column(
+                    df, col, _SILVER_PROFILE_ERRORS
+                )
                 if categorical_dist is not None:
                     categorical_cols[col] = categorical_dist
 
@@ -241,58 +160,6 @@ class SilverStatisticsCalculator:
             categorical_columns=categorical_cols,
             status=DQCheckStatus.PASS,
         )
-
-    def _profile_numeric_column(
-        self,
-        df: pl.DataFrame,
-        col: str,
-    ) -> NumericDistribution | None:
-        """Build numeric distribution for one column."""
-        try:
-            stats = df[col].drop_nulls()
-            if len(stats) == 0:
-                return None
-            min_num = cast("int | float | None", stats.min())
-            max_num = cast("int | float | None", stats.max())
-            mean_num = cast("int | float | None", stats.mean())
-            std_num = cast("int | float | None", stats.std())
-            median_num = cast("int | float | None", stats.median())
-            return NumericDistribution(
-                min=float(min_num) if min_num is not None else None,
-                max=float(max_num) if max_num is not None else None,
-                mean=float(mean_num) if mean_num is not None else None,
-                std=float(std_num) if std_num is not None else None,
-                median=float(median_num) if median_num is not None else None,
-            )
-        except _SILVER_PROFILE_ERRORS:
-            return None
-
-    def _profile_categorical_column(
-        self,
-        df: pl.DataFrame,
-        col: str,
-    ) -> CategoricalDistribution | None:
-        """Build categorical distribution for one column."""
-        try:
-            value_counts = df[col].value_counts().head(5)
-            cardinality = df[col].n_unique()
-            top_values = []
-            for row in value_counts.iter_rows(named=True):
-                val = row.get(col) or row.get("value")
-                count = row.get("count") or row.get("counts", 0)
-                top_values.append(
-                    {
-                        "value": str(val) if val is not None else None,
-                        "count": count,
-                        "pct": round(count / len(df), 4) if len(df) > 0 else 0,
-                    }
-                )
-            return CategoricalDistribution(
-                top_values=tuple(top_values),
-                cardinality=cardinality,
-            )
-        except _SILVER_PROFILE_ERRORS:
-            return None
 
     def check_schema_drift(
         self, df: pl.DataFrame, previous_schema: dict[str, str] | None
@@ -303,26 +170,7 @@ class SilverStatisticsCalculator:
             SchemaDriftResult with new fields, missing fields, and type changes
             relative to the previous schema.
         """
-        current_schema = {col: str(df[col].dtype) for col in df.columns}
-
-        if previous_schema is None:
-            return SchemaDriftResult(
-                drift_level=DriftLevel.INFO,
-                status=DQCheckStatus.PASS,
-            )
-
-        new_fields = [f for f in current_schema if f not in previous_schema]
-        missing_fields = [f for f in previous_schema if f not in current_schema]
-        type_changes = _detect_type_changes(current_schema, previous_schema)
-
-        is_critical = bool(missing_fields or type_changes)
-        return SchemaDriftResult(
-            drift_level=DriftLevel.CRITICAL if is_critical else DriftLevel.INFO,
-            new_fields=tuple(new_fields),
-            missing_fields=tuple(missing_fields),
-            type_changes=tuple(type_changes),
-            status=DQCheckStatus.WARN if is_critical else DQCheckStatus.PASS,
-        )
+        return _check_schema_drift_stats(df, previous_schema)
 
     def check_deduplication(
         self,

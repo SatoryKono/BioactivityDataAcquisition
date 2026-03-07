@@ -119,6 +119,24 @@ def test_debt_scorecard_registry_sync_is_valid() -> None:
     )
 
 
+def test_debt_scorecard_registry_sync_allows_empty_god_object_registry(
+    tmp_path: Path,
+) -> None:
+    """Empty god_object registry must still be treated as present in sync checks."""
+    registry = load_exemptions_registry()
+    registries = registry.get("registries", {})
+    assert isinstance(registries, dict)
+    registries["god_object"] = {}
+
+    tmp_registry = tmp_path / "architecture_metric_exemptions.empty_god_object.yaml"
+    tmp_registry.write_text(yaml.safe_dump(registry), encoding="utf-8")
+
+    sync_errors = validate_scorecard_registry_sync(registry_path=tmp_registry)
+    assert not sync_errors, "Debt scorecard sync violations:\n" + "\n".join(
+        f"  - {item}" for item in sync_errors
+    )
+
+
 def test_debt_scorecard_owner_targets_sum_to_quarter_budget() -> None:
     """Owner decomposition targets must reconcile with quarter max budget."""
     scorecard = load_debt_scorecard()

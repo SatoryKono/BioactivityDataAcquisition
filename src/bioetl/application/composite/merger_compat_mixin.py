@@ -36,15 +36,10 @@ def _path_to_table_name_local(path: str) -> str:
     return path
 
 
-class MergeCompatibilityMixin:
-    """Mixin preserving legacy MergeService helper API."""
+class _MergeCompatibilityParsingMixin:
+    """Legacy parsing/name helpers for merge compatibility surface."""
 
-    # -- Host-class attributes (set by MergeService.__init__) --
     _config: MergeConfig
-    _join_planner: JoinPlannerService
-    _conflict_resolver: ConflictResolverService
-    _coalesce_policy: CoalescePolicyService
-    _priority_orderer: ColumnPriorityOrdererService
 
     def _infer_silver_table(self, pipeline_name: str) -> str:
         """Infer Silver table path from pipeline name."""
@@ -87,9 +82,18 @@ class MergeCompatibilityMixin:
         alias_map = get_alias_map_for_provider(provider)
         return alias_map if alias_map else None
 
-    def _extract_field_from_qualified(self, column: str) -> str:
-        """Extract field name from qualified column (x.y.z -> z)."""
-        return self._coalesce_policy.extract_field_from_qualified(column)
+    def _extract_base_column(self, column: str, prefix: str) -> str | None:
+        """Extract base column name from prefixed column name."""
+        if column.startswith(prefix):
+            return column[len(prefix) :]
+        return None
+
+
+class _MergeCompatibilityJoinPlannerMixin:
+    """Join-planner delegation wrappers preserved for compatibility."""
+
+    _join_planner: JoinPlannerService
+    _conflict_resolver: ConflictResolverService
 
     def _find_join_key_column(
         self,
@@ -260,6 +264,19 @@ class MergeCompatibilityMixin:
             merged_columns,
         )
 
+
+class _MergeCompatibilityConflictPolicyMixin:
+    """Conflict/coalesce/priority delegation wrappers."""
+
+    _config: MergeConfig
+    _conflict_resolver: ConflictResolverService
+    _coalesce_policy: CoalescePolicyService
+    _priority_orderer: ColumnPriorityOrdererService
+
+    def _extract_field_from_qualified(self, column: str) -> str:
+        """Extract field name from qualified column (x.y.z -> z)."""
+        return self._coalesce_policy.extract_field_from_qualified(column)
+
     def _get_enricher_prefix(
         self,
         enricher_pipeline: str,
@@ -268,12 +285,6 @@ class MergeCompatibilityMixin:
         """Compatibility helper for enricher prefix resolution."""
         _ = seed_pipeline
         return self._priority_orderer.get_enricher_prefix(enricher_pipeline)
-
-    def _extract_base_column(self, column: str, prefix: str) -> str | None:
-        """Extract base column name from prefixed column name."""
-        if column.startswith(prefix):
-            return column[len(prefix) :]
-        return None
 
     def _resolve_conflicts(
         self,
@@ -386,6 +397,14 @@ class MergeCompatibilityMixin:
             self._config.field_priorities,
             seed_pipeline,
         )
+
+
+class MergeCompatibilityMixin(
+    _MergeCompatibilityParsingMixin,
+    _MergeCompatibilityJoinPlannerMixin,
+    _MergeCompatibilityConflictPolicyMixin,
+):
+    """Mixin preserving legacy MergeService helper API."""
 
 
 __all__ = ["MergeCompatibilityMixin"]
