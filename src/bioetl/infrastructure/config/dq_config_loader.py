@@ -51,10 +51,10 @@ class DQConfigLoader:
             if any(
                 key in unified_raw
                 for key in (
-                        "thresholds",
-                        "field_validations",
-                        "provider_field_validations",
-                        "cross_field_validations",
+                    "thresholds",
+                    "field_validations",
+                    "provider_field_validations",
+                    "cross_field_validations",
                 )
             ):
                 return unified_raw
@@ -82,10 +82,10 @@ class DQConfigLoader:
             if any(
                 key in unified_raw
                 for key in (
-                        "thresholds",
-                        "field_validations",
-                        "entity_field_validations",
-                        "cross_field_validations",
+                    "thresholds",
+                    "field_validations",
+                    "entity_field_validations",
+                    "cross_field_validations",
                 )
             ):
                 return unified_raw
@@ -113,9 +113,9 @@ class DQConfigLoader:
             )
 
         for layer in (
-                self._load_provider_layer(provider),
-                self._load_entity_layer(provider, entity),
-                inline_overrides or {},
+            self._load_provider_layer(provider),
+            self._load_entity_layer(provider, entity),
+            inline_overrides or {},
         ):
             if layer:
                 merged = self._deep_merge(merged, layer)

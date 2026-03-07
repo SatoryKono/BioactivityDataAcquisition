@@ -76,10 +76,10 @@ def test_ruff_error_count() -> None:
     assert error_count <= MAX_RUFF_ERRORS, (
         f"ruff_error_count={error_count} exceeds budget {MAX_RUFF_ERRORS}\n"
         + "\n".join(
-        f"  - {e.get('filename', '?')}:{e.get('location', {}).get('row', '?')}: "
-        f"{e.get('code', '?')} {e.get('message', '')}"
-        for e in errors[:20]
-    )
+            f"  - {e.get('filename', '?')}:{e.get('location', {}).get('row', '?')}: "
+            f"{e.get('code', '?')} {e.get('message', '')}"
+            for e in errors[:20]
+        )
     )
 
 
@@ -403,9 +403,9 @@ def test_dependency_map_violations_zero() -> None:
     assert len(snapshot.violations) == 0, (
         f"dependency_map_violations={len(snapshot.violations)} (target: 0)\n"
         + "\n".join(
-        f"  - {v.source} -> {v.target} ({v.imports} imports)"
-        for v in snapshot.violations
-    )
+            f"  - {v.source} -> {v.target} ({v.imports} imports)"
+            for v in snapshot.violations
+        )
     )
 
 
