@@ -23,6 +23,7 @@ __all__ = [
     "HealthCheckProviderMixin",
 ]
 
+import time
 from abc import abstractmethod
 from typing import TYPE_CHECKING
 

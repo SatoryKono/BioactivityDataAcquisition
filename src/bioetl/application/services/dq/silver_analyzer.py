@@ -28,6 +28,8 @@ from bioetl.domain.services.dq_serializer import to_dict
 from bioetl.domain.types import JsonDict
 from bioetl.domain.value_objects.dq_report import (
     DQCheckStatus,
+    DQReportSummary,
+    DQThresholds,
     MedallionLayer,
     SilverDQCheckType,
     SilverDQReport,
@@ -221,6 +223,65 @@ class SilverDQAnalyzer:
             )
         return passed, failed, warnings
 
+    def _to_polars_dataframe(self, data: pl.DataFrame | pa.Table) -> pl.DataFrame:
+        """Normalize input to Polars DataFrame."""
+        if isinstance(data, pa.Table):
+            return cast("pl.DataFrame", pl.from_arrow(data))
+        return data
+
+    def _build_report(
+        self,
+        *,
+        timestamp: datetime,
+        run_id: str,
+        pipeline: str,
+        source_batch_ids: list[str],
+        target_table: str,
+        checks: JsonDict,
+        thresholds: DQThresholds,
+        summary: DQReportSummary,
+    ) -> SilverDQReport:
+        """Build immutable SilverDQReport from computed parts."""
+        return SilverDQReport(
+            layer=MedallionLayer.SILVER,
+            timestamp=timestamp,
+            run_id=run_id,
+            pipeline=pipeline,
+            source_batch_ids=tuple(source_batch_ids),
+            target_table=target_table,
+            checks=checks,
+            thresholds=thresholds,
+            summary=summary,
+        )
+
+    def _calculate_thresholds_and_summary(
+        self,
+        *,
+        df: pl.DataFrame,
+        input_record_count: int | None,
+        quarantined_count: int,
+        soft_fail_threshold: float,
+        hard_fail_threshold: float,
+        passed: int,
+        failed: int,
+        warnings: int,
+    ) -> tuple[DQThresholds, DQReportSummary]:
+        """Calculate thresholds and derive aggregate summary."""
+        thresholds = self._threshold.calculate_thresholds(
+            df_len=len(df),
+            input_record_count=input_record_count,
+            quarantined_count=quarantined_count,
+            soft_fail_threshold=soft_fail_threshold,
+            hard_fail_threshold=hard_fail_threshold,
+        )
+        summary = build_summary(
+            passed=passed,
+            failed=failed,
+            warnings=warnings,
+            threshold_status=thresholds.threshold_status,
+        )
+        return thresholds, summary
+
     def analyze(
         self,
         data: pl.DataFrame | pa.Table,
@@ -244,37 +305,9 @@ class SilverDQAnalyzer:
             | None
         ) = None,  # Any: DQ check values vary by check type
     ) -> SilverDQReport:
-        """Analyze Silver data and generate DQ report.
-
-        Args:
-            data: Polars DataFrame or PyArrow Table with Silver data.
-            run_id: Pipeline run identifier.
-            pipeline: Pipeline name.
-            target_table: Silver table path.
-            source_batch_ids: List of Bronze batch IDs processed.
-            config: DQ report configuration.
-            timestamp: Report generation timestamp (UTC).
-            primary_keys: List of primary key columns.
-            soft_fail_threshold: Warning threshold for error rate.
-            hard_fail_threshold: Failure threshold for error rate.
-            input_record_count: Original record count before transforms.
-            quarantined_count: Number of quarantined records.
-            previous_schema: Previous schema for drift detection.
-            key_nullability_rules: Key nullability constraint rules.
-
-        Returns:
-            SilverDQReport: Complete DQ report for Silver layer.
-        """
-        # Convert PyArrow to Polars for consistent processing
-        df = (
-            cast("pl.DataFrame", pl.from_arrow(data))
-            if isinstance(data, pa.Table)
-            else data
-        )
-
+        """Analyze Silver data and generate DQ report."""
+        df = self._to_polars_dataframe(data)
         enabled_checks = set(config.get_checks_enums())
-
-        # Execute all enabled checks
         checks, passed, failed, warnings = self._execute_checks(
             df=df,
             enabled_checks=enabled_checks,
@@ -284,30 +317,21 @@ class SilverDQAnalyzer:
             previous_schema=previous_schema,
             key_nullability_rules=key_nullability_rules,
         )
-
-        # Calculate thresholds
-        thresholds = self._threshold.calculate_thresholds(
-            df_len=len(df),
+        thresholds, summary = self._calculate_thresholds_and_summary(
+            df=df,
             input_record_count=input_record_count,
             quarantined_count=quarantined_count,
             soft_fail_threshold=soft_fail_threshold,
             hard_fail_threshold=hard_fail_threshold,
-        )
-
-        # Build summary
-        summary = build_summary(
             passed=passed,
             failed=failed,
             warnings=warnings,
-            threshold_status=thresholds.threshold_status,
         )
-
-        return SilverDQReport(
-            layer=MedallionLayer.SILVER,
+        return self._build_report(
             timestamp=timestamp,
             run_id=run_id,
             pipeline=pipeline,
-            source_batch_ids=tuple(source_batch_ids),
+            source_batch_ids=source_batch_ids,
             target_table=target_table,
             checks=checks,
             thresholds=thresholds,

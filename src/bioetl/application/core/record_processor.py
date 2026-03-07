@@ -15,6 +15,7 @@ __all__ = ["RecordProcessor"]
 
 
 from collections.abc import Awaitable, Callable
+from datetime import datetime
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.batch_executor import BatchResult
@@ -81,19 +82,8 @@ class RecordProcessor:
         batch_id: BatchID,
         start_index: int = 0,
     ) -> BatchResult:
-        """Process batch through Bronze -> Silver -> Gold with tracing.
-
-        Args:
-            records: Collection of data records.
-            batch_id: Batch identifier.
-            start_index: Start index.
-
-        Returns:
-            Processed result.
-        """
+        """Process batch through Bronze -> Silver -> Gold with tracing."""
         ingestion_ts = self._context.started_at
-
-        # Write to Bronze and capture result for lineage tracking (REQ-LINEAGE-001)
         bronze_result = await self._execute_with_span(
             "write_bronze",
             self._writer.write_bronze(records, batch_id, ingestion_ts),
@@ -105,9 +95,25 @@ class RecordProcessor:
         )
         self._batch_metrics.track_batch_size("bronze", len(records))
         self._batch_metrics.track_processed_records("bronze", len(records))
-
-        # Transform records
         result = await self._execute_transform_with_span(records, batch_id, start_index)
+        self._track_transform_metrics(result)
+        bronze_refs = self._build_bronze_refs(bronze_result)
+        await self._write_silver_if_present(
+            result=result,
+            batch_id=batch_id,
+            ingestion_ts=ingestion_ts,
+            bronze_refs=bronze_refs,
+        )
+        await self._write_gold_if_present(result=result, batch_id=batch_id)
+
+        return BatchResult(
+            bronze_count=len(records),
+            silver_count=len(result.silver_records),
+            gold_count=len(result.gold_records),
+            quarantined_count=result.quarantined_count,
+        )
+
+    def _track_transform_metrics(self, result: TransformResult) -> None:
         self._batch_metrics.track_processed_records(
             "quarantined", result.quarantined_count
         )
@@ -116,44 +122,53 @@ class RecordProcessor:
         )
         self._batch_metrics.track_processed_records("gold", len(result.gold_records))
 
-        # Write to Silver with bronze_refs for lineage tracking (REQ-LINEAGE-001)
+    def _build_bronze_refs(
+        self, bronze_result: object
+    ) -> list[BronzeWriteResult] | None:
         typed_bronze_result = cast("BronzeWriteResult | None", bronze_result)
-        bronze_refs: list[BronzeWriteResult] | None = (
-            [typed_bronze_result] if typed_bronze_result else None
+        return [typed_bronze_result] if typed_bronze_result else None
+
+    async def _write_silver_if_present(
+        self,
+        *,
+        result: TransformResult,
+        batch_id: BatchID,
+        ingestion_ts: datetime,
+        bronze_refs: list[BronzeWriteResult] | None,
+    ) -> None:
+        if not result.silver_records:
+            return
+        await self._execute_with_span(
+            "write_silver",
+            self._writer.write_silver(
+                result.silver_records,
+                batch_id,
+                ingestion_ts,
+                bronze_refs=bronze_refs,
+            ),
+            batch_id,
+            len(result.silver_records),
+            on_error=lambda e: self._writer.log_and_track_write_error(
+                "silver", e, batch_id
+            ),
         )
-        if result.silver_records:
-            await self._execute_with_span(
-                "write_silver",
-                self._writer.write_silver(
-                    result.silver_records,
-                    batch_id,
-                    ingestion_ts,
-                    bronze_refs=bronze_refs,
-                ),
-                batch_id,
-                len(result.silver_records),
-                on_error=lambda e: self._writer.log_and_track_write_error(
-                    "silver", e, batch_id
-                ),
-            )
 
-        # Write to Gold
-        if result.gold_records:
-            await self._execute_with_span(
-                "write_gold",
-                self._writer.write_gold(result.gold_records),
-                batch_id,
-                len(result.gold_records),
-                on_error=lambda e: self._writer.log_and_track_write_error(
-                    "gold", e, batch_id
-                ),
-            )
-
-        return BatchResult(
-            bronze_count=len(records),
-            silver_count=len(result.silver_records),
-            gold_count=len(result.gold_records),
-            quarantined_count=result.quarantined_count,
+    async def _write_gold_if_present(
+        self,
+        *,
+        result: TransformResult,
+        batch_id: BatchID,
+    ) -> None:
+        if not result.gold_records:
+            return
+        await self._execute_with_span(
+            "write_gold",
+            self._writer.write_gold(result.gold_records),
+            batch_id,
+            len(result.gold_records),
+            on_error=lambda e: self._writer.log_and_track_write_error(
+                "gold", e, batch_id
+            ),
         )
 
     async def _execute_with_span(

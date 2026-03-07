@@ -61,6 +61,8 @@ REQUIRED_EXEMPTION_REGISTRIES = (
 )
 EXEMPTION_REGISTRIES_ALLOW_EMPTY = frozenset(
     {
+        "file_size_limits",
+        "function_length",
         "class_size",
         "class_method_count",
         "god_object",

@@ -16,6 +16,10 @@ from pathlib import Path
 import yaml
 
 from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.config_loader_filtering import (
+    FILTER_SECTIONS,
+    apply_hierarchical_filter_config,
+)
 from bioetl.infrastructure.config_merge import config_merge
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
@@ -187,63 +191,8 @@ def load_source_config(provider: str) -> SourceYamlConfig:
     return load_source_config_uncached(provider)
 
 
-_FILTER_SECTIONS: tuple[str, ...] = (
-    "input_filter",
-    "silver_filters",
-    "gold_filters",
-    "extraction_params",
-)
-
-
-def _apply_hierarchical_filter_config(
-    config: JsonDict,  # Any: YAML config has heterogeneous values
-    entity_config: JsonDict,  # Any: YAML config has heterogeneous values
-) -> None:
-    """Apply filter config from the hierarchical filter system (ADR-028).
-
-    Uses FilterConfigLoader to merge the 4-level hierarchy:
-    1. defaults layer from configs/base/pipeline.yaml.filter_defaults
-    2. providers/{provider}.yaml — provider-specific
-    3. entities/{provider}/{entity}.yaml — entity-specific
-    4. Inline overrides from pipeline config — highest priority
-
-    Replaces the legacy _load_filter_config + _merge_filter_config functions
-    that only loaded the entity file without the full hierarchy.
-
-    Args:
-        config: Pipeline config dict (modified in place).
-        entity_config: Original entity config dict (before base merge).
-            Used to extract inline filter overrides.
-    """
-    from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
-
-    provider = config.get("provider", "")
-    entity_type = config.get("entity_type", "")
-
-    if not provider or not entity_type:
-        return
-
-    # Collect inline filter overrides from pipeline YAML
-    inline_overrides: JsonDict = {}  # Any: YAML config has heterogeneous values
-    for section in _FILTER_SECTIONS:
-        if section in entity_config:
-            inline_overrides[section] = entity_config[section]
-
-    # Also handle filter_rules key (ADR-028 inline override field)
-    filter_rules = entity_config.get("filter_rules")
-    if isinstance(filter_rules, dict):
-        inline_overrides = _deep_merge(inline_overrides, filter_rules)
-
-    # Use FilterConfigLoader for hierarchical merge
-    loader = FilterConfigLoader(Path("configs"))
-    merged_filters = loader.load_as_dict(
-        provider, entity_type, inline_overrides or None
-    )
-
-    # Apply merged filter sections to pipeline config
-    for section in _FILTER_SECTIONS:
-        if section in merged_filters:
-            config[section] = merged_filters[section]
+_FILTER_SECTIONS = FILTER_SECTIONS
+_apply_hierarchical_filter_config = apply_hierarchical_filter_config
 
 
 def _load_unified_entity_raw(
