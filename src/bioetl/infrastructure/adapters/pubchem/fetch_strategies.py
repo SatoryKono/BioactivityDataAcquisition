@@ -219,7 +219,7 @@ class PubChemFetchStrategies:
         for i in range(0, len(valid_cids), batch_size):
             if limit and fetched >= limit:
                 return
-            batch = valid_cids[i: i + batch_size]
+            batch = valid_cids[i : i + batch_size]
 
             try:
                 records = await self._fetch_cid_batch(batch)
