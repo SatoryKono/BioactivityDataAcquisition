@@ -29,7 +29,10 @@ if TYPE_CHECKING:
     import pyarrow as pa
 
     from bioetl.application.core.base import BasePipeline
+    from bioetl.application.core.batch_executor import BatchExecutor
+    from bioetl.application.core.checkpoint_manager import CheckpointManagerService
     from bioetl.composition.observability import ObservabilityBundle
+    from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 __all__ = [
@@ -40,8 +43,8 @@ __all__ = [
 def _build_checkpoint_manager(
     *,
     pipeline: BasePipeline,
-    logger_port: object,
-) -> object:
+    logger_port: LoggerPort,
+) -> CheckpointManagerService:
     return ServicesBuilder.create_checkpoint_manager(
         checkpoint_port=pipeline.services.checkpoint,
         logger=logger_port,
@@ -55,10 +58,10 @@ def _build_checkpoint_manager(
 def _build_lock_manager(
     *,
     pipeline: BasePipeline,
-    logger_port: object,
-    checkpoint_manager: object,
+    logger_port: LoggerPort,
+    checkpoint_manager: CheckpointManagerService,
     context_holder: LockContextHolder,
-) -> object:
+) -> LockCoordinator:
     return LockCoordinator.create(
         lock_port=pipeline.services.lock,
         run_id=pipeline.context.run_id,
@@ -79,7 +82,7 @@ def _build_lock_manager(
 def _build_preflight_service(
     *,
     pipeline: BasePipeline,
-    logger_port: object,
+    logger_port: LoggerPort,
 ) -> PreflightService:
     health_aggregator = _HealthAggregator(
         metrics=pipeline.services.metrics,
@@ -118,7 +121,7 @@ def _resolve_dq_configs(
 def _build_postrun_service(
     *,
     pipeline: BasePipeline,
-    logger_port: object,
+    logger_port: LoggerPort,
     lifecycle_service: MedallionLifecycleService,
     dq_configs: DQConfigsContext,
 ) -> PostrunService:
@@ -152,7 +155,7 @@ def _build_observer(
     *,
     pipeline: BasePipeline,
     observability: ObservabilityBundle,
-    logger_port: object,
+    logger_port: LoggerPort,
 ) -> PipelineObserver:
     return PipelineObserver(
         pipeline_name=pipeline.config.pipeline_name,
@@ -169,17 +172,17 @@ def _build_batch_executor(
     pipeline: BasePipeline,
     yaml_config: PipelineYamlConfig | None,
     silver_schema: pa.Schema | None,
-    gold_schema: object,
+    gold_schema: type[pandera.DataFrameModel],
     strict_gold_validation: bool,
-    checkpoint_manager: object,
-    lock_manager: object,
+    checkpoint_manager: CheckpointManagerService,
+    lock_manager: LockCoordinator,
     observability: ObservabilityBundle,
-) -> object:
+) -> BatchExecutor:
     dq_output_paths = extract_dq_output_paths(yaml_config)
     return ServicesBuilder.create_batch_executor_from_pipeline(
         pipeline=pipeline,
         silver_schema=silver_schema,
-        gold_schema=cast("type[pandera.DataFrameModel]", gold_schema),
+        gold_schema=gold_schema,
         checkpoint_manager=checkpoint_manager,
         shutdown_signal=pipeline.shutdown_signal,
         strict_gold_validation=strict_gold_validation,
@@ -196,9 +199,9 @@ def _create_pipeline_runner(
     *,
     pipeline: BasePipeline,
     observability: ObservabilityBundle,
-    executor: object,
-    checkpoint_manager: object,
-    lock_manager: object,
+    executor: BatchExecutor,
+    checkpoint_manager: CheckpointManagerService,
+    lock_manager: LockCoordinator,
     preflight_service: PreflightService,
     postrun_service: PostrunService,
     lifecycle_service: MedallionLifecycleService,
@@ -227,7 +230,7 @@ def assemble_runner_impl(
     pipeline: BasePipeline,
     observability: ObservabilityBundle,
     silver_schema: pa.Schema | None,
-    gold_schema: object,
+    gold_schema: type[pandera.DataFrameModel],
     strict_gold_validation: bool,
     yaml_config: PipelineYamlConfig | None = None,
     dq_configs_extractor: (

@@ -23,6 +23,7 @@ from bioetl.domain.services import IdentityService
 from bioetl.infrastructure.config import load_pipeline_config
 
 if TYPE_CHECKING:
+    import pandera
     import pyarrow as pa
 
     from bioetl.application.core.base import BasePipeline
@@ -80,7 +81,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         pipeline_class: type[TPipeline],
         provider: str,
         silver_schema: pa.Schema | None = None,
-        gold_schema: object | None = None,
+        gold_schema: type[pandera.DataFrameModel] | None = None,
         pandera_silver_schema: object | None = None,
         data_source_creator: DataSourceCreator | None = None,
         transformer_class: type[BaseTransformer] | None = None,
@@ -269,7 +270,7 @@ def create_pipeline_factory(
     pipeline_class: type[TPipeline],
     provider: str,
     silver_schema: pa.Schema | None = None,
-    gold_schema: object | None = None,
+    gold_schema: type[pandera.DataFrameModel] | None = None,
     pandera_silver_schema: object | None = None,
     transformer_class: type[BaseTransformer] | None = None,
 ) -> GenericPipelineFactory[TPipeline]:
@@ -293,7 +294,7 @@ def assemble_runner(
     pipeline: BasePipeline,
     observability: ObservabilityBundle,
     silver_schema: pa.Schema | None,
-    gold_schema: object,
+    gold_schema: type[pandera.DataFrameModel],
     strict_gold_validation: bool,
     yaml_config: PipelineYamlConfig | None = None,
 ) -> PipelineRunner:

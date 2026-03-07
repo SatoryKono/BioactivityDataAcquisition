@@ -5,7 +5,7 @@
 ## Summary
 
 - Scanned modules: `1004`
-- Internal import edges (raw): `3606`
+- Internal import edges (raw): `3611`
 - Aggregated layer edges: `14`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (top 60): `60`
@@ -21,9 +21,9 @@ flowchart LR
     interfaces[interfaces]
     application -->|417 OK| application
     application -->|579 OK| domain
-    composition -->|154 OK| application
+    composition -->|157 OK| application
     composition -->|243 OK| composition
-    composition -->|191 OK| domain
+    composition -->|193 OK| domain
     composition -->|186 OK| infrastructure
     domain -->|701 OK| domain
     infrastructure -->|449 OK| domain
@@ -41,9 +41,9 @@ flowchart LR
 |---|---|---:|---|
 | `application` | `application` | 417 | allowed |
 | `application` | `domain` | 579 | allowed |
-| `composition` | `application` | 154 | allowed |
+| `composition` | `application` | 157 | allowed |
 | `composition` | `composition` | 243 | allowed |
-| `composition` | `domain` | 191 | allowed |
+| `composition` | `domain` | 193 | allowed |
 | `composition` | `infrastructure` | 186 | allowed |
 | `domain` | `domain` | 701 | allowed |
 | `infrastructure` | `domain` | 449 | allowed |
@@ -62,13 +62,13 @@ flowchart LR
 | `application.pipelines` | `domain.types` | 70 |
 | `application.composite` | `domain.composite` | 68 |
 | `infrastructure.adapters` | `domain.ports` | 66 |
-| `composition.factories` | `application.core` | 53 |
+| `composition.factories` | `application.core` | 55 |
 | `application.core` | `domain.ports` | 45 |
 | `application.core` | `domain.types` | 45 |
 | `composition.factories` | `infrastructure.storage` | 35 |
 | `composition.bootstrap` | `application.composite` | 34 |
 | `application.composite` | `domain.ports` | 32 |
-| `composition.factories` | `domain.ports` | 31 |
+| `composition.factories` | `domain.ports` | 32 |
 | `infrastructure.storage` | `domain.ports` | 31 |
 | `infrastructure.storage` | `domain.types` | 28 |
 | `infrastructure.adapters` | `domain.exceptions` | 27 |

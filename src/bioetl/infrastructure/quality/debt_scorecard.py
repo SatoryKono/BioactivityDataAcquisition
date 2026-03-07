@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
@@ -238,7 +239,12 @@ def _resolve_grace_allowances(
     allowance_total, allowance_by_registry, allowance_by_group = _collect_allowances(
         typed_active_windows
     )
-    return active_windows, allowance_total, allowance_by_registry, allowance_by_group
+    return (
+        active_windows,
+        allowance_total,
+        dict(allowance_by_registry),
+        dict(allowance_by_group),
+    )
 
 
 def _evaluate_budget_violations(
@@ -257,13 +263,13 @@ def _evaluate_budget_violations(
     violations = _evaluate_registry_budgets(
         by_registry=inventory.by_registry,
         target_registry_budgets=target["registry_budgets"],
-        allowance_by_registry=allowance_by_registry,
+        allowance_by_registry=Counter(allowance_by_registry),
     )
     violations.extend(
         _evaluate_group_budgets(
             by_group=by_group,
             target_group_budgets=target["group_budgets"],
-            allowance_by_group=allowance_by_group,
+            allowance_by_group=Counter(allowance_by_group),
         )
     )
 

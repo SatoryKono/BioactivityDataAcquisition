@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Literal
+from typing import Literal, TypeVar
 
 from bioetl.domain.exceptions import (
     BioETLError,
@@ -27,6 +27,10 @@ __all__ = [
 _AUTH_STATUS_CODES = frozenset({401, 403})
 _RATE_LIMIT_STATUS_CODE = 429
 _DEFAULT_RETRY_AFTER_SECONDS = 60.0
+_MappedExternalError = TypeVar(
+    "_MappedExternalError",
+    bound=ExternalServiceError,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -118,13 +122,13 @@ class DomainInfraExceptionMapper:
                 retry_after=retry_after,
                 recovery_action="retry_after_delay",
             )
-            mapped = RateLimitExceededError(
+            mapped_rate_limit = RateLimitExceededError(
                 message=message,
                 service_name=payload.provider,
                 retry_after=retry_after,
             )
             return self._decorate_mapped_error(
-                error=mapped,
+                error=mapped_rate_limit,
                 reason_code="ADAPTER_HTTP_RATE_LIMIT",
                 payload=payload,
             )
@@ -137,14 +141,14 @@ class DomainInfraExceptionMapper:
                 retry_after=payload.retry_after,
                 recovery_action="retry_with_backoff",
             )
-            mapped = ServiceUnavailableError(
+            mapped_server_error = ServiceUnavailableError(
                 message=message,
                 service_name=payload.provider,
                 status_code=status_code,
                 retry_after=payload.retry_after,
             )
             return self._decorate_mapped_error(
-                error=mapped,
+                error=mapped_server_error,
                 reason_code="ADAPTER_HTTP_SERVER_ERROR",
                 payload=payload,
             )
@@ -156,14 +160,14 @@ class DomainInfraExceptionMapper:
             retry_after=payload.retry_after,
             recovery_action="no_retry",
         )
-        mapped = ExternalServiceError(
+        mapped_external = ExternalServiceError(
             message=message,
             service_name=payload.provider,
             status_code=status_code,
             retry_after=payload.retry_after,
         )
         return self._decorate_mapped_error(
-            error=mapped,
+            error=mapped_external,
             reason_code="ADAPTER_HTTP_ERROR",
             payload=payload,
         )
@@ -193,13 +197,13 @@ class DomainInfraExceptionMapper:
                 retry_after=retry_after,
                 original_error=type(payload.error).__name__,
             )
-            mapped = RateLimitExceededError(
+            mapped_rate_limit = RateLimitExceededError(
                 message=message,
                 service_name=payload.provider,
                 retry_after=retry_after,
             )
             return self._decorate_mapped_error(
-                error=mapped,
+                error=mapped_rate_limit,
                 reason_code="ADAPTER_RATE_LIMIT_ERROR",
                 payload=payload,
             )
@@ -212,13 +216,13 @@ class DomainInfraExceptionMapper:
                 retry_after=payload.retry_after,
                 original_error=type(payload.error).__name__,
             )
-            mapped = ServiceUnavailableError(
+            mapped_timeout = ServiceUnavailableError(
                 message=message,
                 service_name=payload.provider,
                 retry_after=payload.retry_after,
             )
             return self._decorate_mapped_error(
-                error=mapped,
+                error=mapped_timeout,
                 reason_code="ADAPTER_TIMEOUT_ERROR",
                 payload=payload,
             )
@@ -231,14 +235,14 @@ class DomainInfraExceptionMapper:
             retry_after=payload.retry_after,
             original_error=type(payload.error).__name__,
         )
-        mapped = ExternalServiceError(
+        mapped_external = ExternalServiceError(
             message=message,
             service_name=payload.provider,
             status_code=payload.status_code,
             retry_after=payload.retry_after,
         )
         return self._decorate_mapped_error(
-            error=mapped,
+            error=mapped_external,
             reason_code="ADAPTER_EXTERNAL_ERROR",
             payload=payload,
         )
@@ -246,13 +250,13 @@ class DomainInfraExceptionMapper:
     def _decorate_mapped_error(
         self,
         *,
-        error: ExternalServiceError,
+        error: _MappedExternalError,
         reason_code: str,
         payload: DomainErrorMappingInput,
-    ) -> ExternalServiceError:
+    ) -> _MappedExternalError:
         """Attach standardized reason code, context, and root cause metadata."""
-        error.reason_code = reason_code
         error.with_context(
+            reason_code=reason_code,
             provider=payload.provider,
             entity=payload.entity,
             pipeline=payload.pipeline,
@@ -270,8 +274,8 @@ class DomainInfraExceptionMapper:
     ) -> None:
         """Raise critical error with taxonomy reason code and contextual payload."""
         critical = CriticalError(message)
-        critical.reason_code = reason_code
         critical.with_context(
+            reason_code=reason_code,
             provider=payload.provider,
             entity=payload.entity,
             pipeline=payload.pipeline,

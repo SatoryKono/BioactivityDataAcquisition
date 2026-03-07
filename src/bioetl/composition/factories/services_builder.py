@@ -75,9 +75,9 @@ def extract_pipeline_callbacks(
     transformer = pipeline.transformer
     if transformer is not None:
         return PipelineCallbacksContext(
-            transform=transformer.transform,
-            gold_filter=transformer.should_write_gold,
-            gold_transform=transformer.transform_for_gold,
+            transform=cast(TransformCallback, transformer.transform),
+            gold_filter=cast(GoldFilterCallback, transformer.should_write_gold),
+            gold_transform=cast(GoldTransformCallback, transformer.transform_for_gold),
         )
 
     # Fallback for pipelines without explicit transformer (legacy)
@@ -91,9 +91,9 @@ def extract_pipeline_callbacks(
         lambda _context, silver_record: silver_record,
     )
     return PipelineCallbacksContext(
-        transform=transform_cb,
-        gold_filter=gold_filter_cb,
-        gold_transform=gold_transform_cb,
+        transform=cast(TransformCallback, transform_cb),
+        gold_filter=cast(GoldFilterCallback, gold_filter_cb),
+        gold_transform=cast(GoldTransformCallback, gold_transform_cb),
     )
 
 
