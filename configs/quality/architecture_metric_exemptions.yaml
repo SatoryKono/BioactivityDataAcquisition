@@ -76,20 +76,8 @@ registries:
             reason: Baseline exemption migrated from architecture tests (file_size_limits).
             expires_on: '2026-04-30'
             removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        src/bioetl/domain/schemas/pubchem/compound.py:
-            value: 415
-            owner: '@bioetl-data-model'
-            reason: Baseline exemption migrated from architecture tests (file_size_limits).
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
         src/bioetl/domain/services/activity_aggregator.py:
             value: 400
-            owner: '@bioetl-data-model'
-            reason: Baseline exemption migrated from architecture tests (file_size_limits).
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        src/bioetl/domain/services/normalization_service.py:
-            value: 420
             owner: '@bioetl-data-model'
             reason: Baseline exemption migrated from architecture tests (file_size_limits).
             expires_on: '2026-04-30'
@@ -124,35 +112,17 @@ registries:
             reason: Baseline exemption migrated from architecture tests (file_size_limits).
             expires_on: '2026-04-30'
             removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        src/bioetl/domain/value_objects/dq_metrics.py:
-            value: 427
-            owner: '@bioetl-data-model'
-            reason: Baseline exemption migrated from architecture tests (file_size_limits).
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
     function_complexity:
-        _execute_dependencies_phase:
-            value: 12
-            owner: '@bioetl-architecture'
-            reason: Baseline exemption migrated from architecture tests (function_complexity).
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
         _resolve_priority_column:
-            value: 12
+            value: 11
             owner: '@bioetl-architecture'
-            reason: Baseline exemption migrated from architecture tests (function_complexity).
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        _validate_schema_config:
-            value: 17
-            owner: '@bioetl-platform'
             reason: Baseline exemption migrated from architecture tests (function_complexity).
             expires_on: '2026-04-30'
             removal_step: Refactor target to satisfy default metric and remove this exemption entry.
         filter_by_layer_config:
-            value: 15
+            value: 13
             owner: '@bioetl-architecture'
-            reason: Baseline exemption migrated from architecture tests (function_complexity).
+            reason: Phase-ordering guards and fallback policy branches increased CC during hardening.
             expires_on: '2026-04-30'
             removal_step: Refactor target to satisfy default metric and remove this exemption entry.
         src/bioetl/domain/exceptions/network.py::ExternalServiceError: &id001
@@ -247,50 +217,14 @@ registries:
             expires_on: '2026-04-30'
             removal_step: Refactor target to satisfy default metric and remove this exemption entry.
     class_size:
-        CompositeRunnerStageMixin:
-            value: 375
-            owner: '@bioetl-architecture'
-            reason: Synced to current helper decomposition after RF-001/P0-1 refactors.
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
         FilteredDataSource:
             value: 361
             owner: '@bioetl-architecture'
             reason: Baseline exemption migrated from architecture tests (class_size).
             expires_on: '2026-04-30'
             removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        GoldWriterMetadataMixin:
-            value: 321
-            owner: '@bioetl-platform'
-            reason: Minor helper addition bumped class by one line beyond existing exemption.
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        GoldWriterIOMixin:
-            value: 395
-            owner: '@bioetl-platform'
-            reason: Synced to current helper decomposition after RF-001/P0-1 refactors (391 LOC).
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        MedallionLifecycleService:
-            value: 385
-            owner: '@bioetl-architecture'
-            reason: Baseline exemption migrated from architecture tests (class_size).
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
         MergeCompatibilityMixin:
             value: 355
-            owner: '@bioetl-architecture'
-            reason: Baseline exemption migrated from architecture tests (class_size).
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        NormalizationService:
-            value: 370
-            owner: '@bioetl-data-model'
-            reason: Baseline exemption migrated from architecture tests (class_size).
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        PipelineObserver:
-            value: 480
             owner: '@bioetl-architecture'
             reason: Baseline exemption migrated from architecture tests (class_size).
             expires_on: '2026-04-30'
@@ -307,18 +241,6 @@ registries:
             reason: Fetch strategy now includes CID and InChIKey helper flows with shared request accounting.
             expires_on: '2026-04-30'
             removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        PubchemMoleculeSchema:
-            value: 395
-            owner: '@bioetl-data-model'
-            reason: Baseline exemption migrated from architecture tests (class_size).
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        UniProtProteinTransformer:
-            value: 800
-            owner: '@bioetl-architecture'
-            reason: Baseline exemption migrated from architecture tests (class_size).
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
     class_method_count:
         Batch:
             value: 22
@@ -327,36 +249,12 @@ registries:
             expires_on: '2026-04-30'
             removal_step: Reduce public method count to 20 (e.g. consolidate properties).
     god_object:
-        GoldWriterIOMixin:
-            value: Cohesive IO mixin - isolated Delta write/retry helpers; integration boundary to storage backend
-            owner: '@bioetl-platform'
-            reason: Cohesive IO mixin - isolated Delta write/retry helpers; integration boundary to storage backend
-            expires_on: '2026-04-30'
-            removal_step: Extract remaining IO helpers into dedicated writer services and remove this exemption entry.
-        MedallionLifecycleService:
-            value: Lifecycle orchestrator - coordinates Bronze/Silver/Gold operations
+        MergeCompatibilityMixin:
+            value: Compatibility orchestration mixin - coordinates merge fallback strategies and schema-resilience branches
             owner: '@bioetl-architecture'
-            reason: Lifecycle orchestrator - coordinates Bronze/Silver/Gold operations
+            reason: Compatibility orchestration mixin - coordinates merge fallback strategies and schema-resilience branches
             expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        NormalizationService:
-            value: Cohesive service - all methods relate to value normalization
-            owner: '@bioetl-data-model'
-            reason: Cohesive service - all methods relate to value normalization
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        PubchemMoleculeSchema:
-            value: Pandera schema - declarative field definitions, no behavior to delegate
-            owner: '@bioetl-data-model'
-            reason: Pandera schema - declarative field definitions, no behavior to delegate
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        UniProtProteinTransformer:
-            value: Transformer with comprehensive UniProt field extraction - single responsibility
-            owner: '@bioetl-architecture'
-            reason: Transformer with comprehensive UniProt field extraction - single responsibility
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
+            removal_step: Extract compatibility policy branches into dedicated merge strategy services and remove this exemption entry.
     domain_complexity:
         src/bioetl/domain/exceptions/network.py::ExternalServiceError: *id001
         src/bioetl/domain/exceptions/network.py::__init__: *id002

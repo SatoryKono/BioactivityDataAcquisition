@@ -78,7 +78,145 @@ class _GoldWriterMergedMetadataInputMixin:
         return None
 
 
-class GoldWriterMetadataMixin(_GoldWriterMergedMetadataInputMixin):
+class _GoldWriterMetadataPayloadMixin:
+    """Helpers for building Gold metadata payloads from write inputs."""
+
+    _metadata_coordinator: MetadataCoordinatorPort | None
+    _transform_version: str | None
+    _transform_steps: tuple[str, ...]
+
+    def _resolve_provider_entity(self, table_name: str) -> tuple[str, str]:
+        """Parse provider/entity pair from physical Gold table name.
+
+        Returns:
+            Tuple of (provider name, entity name) parsed from the table name.
+        """
+        from bioetl.infrastructure.storage.metadata_builder import _parse_table_name
+
+        return _parse_table_name(table_name)
+
+    def _create_gold_metadata_payload(
+        self,
+        *,
+        table_path: str,
+        table_name: str,
+        records: list[GoldRecord],
+        mode: GoldWriteMode,
+        scd_config: ScdConfig | None,
+        ingestion_ts: datetime | None,
+        run_id: RunID | None,
+        silver_refs: list[SilverWriteResult] | None = None,
+        gold_schema: object | None = None,
+    ) -> GoldMetadata:
+        """Create metadata via coordinator when configured, else fallback builder.
+
+        Returns:
+            GoldMetadata instance built via coordinator or fallback builder.
+        """
+        if self._metadata_coordinator is not None:
+            return self._create_gold_metadata_via_coordinator(
+                table_path=table_path,
+                table_name=table_name,
+                records=records,
+                mode=mode,
+                scd_config=scd_config,
+                ingestion_ts=ingestion_ts,
+                silver_refs=silver_refs,
+                gold_schema=gold_schema,
+            )
+        return self._create_gold_metadata_via_fallback(
+            table_name=table_name,
+            records=records,
+            mode=mode,
+            scd_config=scd_config,
+            ingestion_ts=ingestion_ts,
+            run_id=run_id,
+            gold_schema=gold_schema,
+        )
+
+    def _create_gold_metadata_via_coordinator(
+        self,
+        *,
+        table_path: str,
+        table_name: str,
+        records: list[GoldRecord],
+        mode: GoldWriteMode,
+        scd_config: ScdConfig | None,
+        ingestion_ts: datetime | None,
+        silver_refs: list[SilverWriteResult] | None,
+        gold_schema: object | None,
+    ) -> GoldMetadata:
+        """Build Gold metadata using MetadataCoordinator.
+
+        Returns:
+            GoldMetadata instance created via the configured MetadataCoordinator.
+        """
+        from bioetl.domain.ports import GoldMetadataInput, SilverRef
+
+        converted_refs = (
+            [
+                SilverRef(
+                    table_name=ref.table_name,
+                    table_path=ref.table_path,
+                    delta_version=ref.delta_version,
+                )
+                for ref in silver_refs
+            ]
+            if silver_refs
+            else None
+        )
+        gold_input = GoldMetadataInput(
+            table_path=table_path,
+            table_name=table_name,
+            records=records,
+            mode=mode,
+            scd_config=scd_config,
+            completed_at=ingestion_ts,
+            silver_refs=converted_refs,
+            transform_version=self._transform_version,
+            transform_steps=self._transform_steps,
+            gold_schema=gold_schema,
+        )
+        assert self._metadata_coordinator is not None
+        return self._metadata_coordinator.create_gold_metadata(gold_input)
+
+    def _create_gold_metadata_via_fallback(
+        self,
+        *,
+        table_name: str,
+        records: list[GoldRecord],
+        mode: GoldWriteMode,
+        scd_config: ScdConfig | None,
+        ingestion_ts: datetime | None,
+        run_id: RunID | None,
+        gold_schema: object | None,
+    ) -> GoldMetadata:
+        """Build Gold metadata through fallback builder.
+
+        Returns:
+            GoldMetadata instance created via the GoldMetadataBuilder fallback.
+        """
+        from bioetl.infrastructure.storage.metadata_builder import GoldMetadataBuilder
+
+        builder = GoldMetadataBuilder(
+            transform_version=self._transform_version,
+            transform_steps=self._transform_steps,
+        )
+        return builder.build_fallback_metadata(
+            table_name=table_name,
+            records=records,
+            mode=mode,
+            scd_config=scd_config,
+            ingestion_ts=ingestion_ts,
+            run_id=run_id,
+            gold_schema=gold_schema,
+        )
+
+
+class GoldWriterMetadataMixin(
+    _GoldWriterMetadataPayloadMixin,
+    _GoldWriterMergedMetadataInputMixin,
+):
     """Mixin containing audit and metadata sidecar write helpers."""
 
     logger: LoggerPort
@@ -195,133 +333,6 @@ class GoldWriterMetadataMixin(_GoldWriterMergedMetadataInputMixin):
             table_name=table_name,
             provider_name=provider_name,
             entity_name=entity_name,
-        )
-
-    def _resolve_provider_entity(self, table_name: str) -> tuple[str, str]:
-        """Parse provider/entity pair from physical Gold table name.
-
-        Returns:
-            Tuple of (provider name, entity name) parsed from the table name.
-        """
-        from bioetl.infrastructure.storage.metadata_builder import _parse_table_name
-
-        return _parse_table_name(table_name)
-
-    def _create_gold_metadata_payload(
-        self,
-        *,
-        table_path: str,
-        table_name: str,
-        records: list[GoldRecord],
-        mode: GoldWriteMode,
-        scd_config: ScdConfig | None,
-        ingestion_ts: datetime | None,
-        run_id: RunID | None,
-        silver_refs: list[SilverWriteResult] | None,
-        gold_schema: object | None,
-    ) -> GoldMetadata:
-        """Create metadata via coordinator when configured, else fallback builder.
-
-        Returns:
-            GoldMetadata instance built via coordinator or fallback builder.
-        """
-        if self._metadata_coordinator is not None:
-            return self._create_gold_metadata_via_coordinator(
-                table_path=table_path,
-                table_name=table_name,
-                records=records,
-                mode=mode,
-                scd_config=scd_config,
-                ingestion_ts=ingestion_ts,
-                silver_refs=silver_refs,
-                gold_schema=gold_schema,
-            )
-        return self._create_gold_metadata_via_fallback(
-            table_name=table_name,
-            records=records,
-            mode=mode,
-            scd_config=scd_config,
-            ingestion_ts=ingestion_ts,
-            run_id=run_id,
-            gold_schema=gold_schema,
-        )
-
-    def _create_gold_metadata_via_coordinator(
-        self,
-        *,
-        table_path: str,
-        table_name: str,
-        records: list[GoldRecord],
-        mode: GoldWriteMode,
-        scd_config: ScdConfig | None,
-        ingestion_ts: datetime | None,
-        silver_refs: list[SilverWriteResult] | None,
-        gold_schema: object | None,
-    ) -> GoldMetadata:
-        """Build Gold metadata using MetadataCoordinator.
-
-        Returns:
-            GoldMetadata instance created via the configured MetadataCoordinator.
-        """
-        from bioetl.domain.ports import GoldMetadataInput, SilverRef
-
-        converted_refs = (
-            [
-                SilverRef(
-                    table_name=ref.table_name,
-                    table_path=ref.table_path,
-                    delta_version=ref.delta_version,
-                )
-                for ref in silver_refs
-            ]
-            if silver_refs
-            else None
-        )
-        gold_input = GoldMetadataInput(
-            table_path=table_path,
-            table_name=table_name,
-            records=records,
-            mode=mode,
-            scd_config=scd_config,
-            completed_at=ingestion_ts,
-            silver_refs=converted_refs,
-            transform_version=self._transform_version,
-            transform_steps=self._transform_steps,
-            gold_schema=gold_schema,
-        )
-        assert self._metadata_coordinator is not None
-        return self._metadata_coordinator.create_gold_metadata(gold_input)
-
-    def _create_gold_metadata_via_fallback(
-        self,
-        *,
-        table_name: str,
-        records: list[GoldRecord],
-        mode: GoldWriteMode,
-        scd_config: ScdConfig | None,
-        ingestion_ts: datetime | None,
-        run_id: RunID | None,
-        gold_schema: object | None,
-    ) -> GoldMetadata:
-        """Build Gold metadata through fallback builder.
-
-        Returns:
-            GoldMetadata instance created via the GoldMetadataBuilder fallback.
-        """
-        from bioetl.infrastructure.storage.metadata_builder import GoldMetadataBuilder
-
-        builder = GoldMetadataBuilder(
-            transform_version=self._transform_version,
-            transform_steps=self._transform_steps,
-        )
-        return builder.build_fallback_metadata(
-            table_name=table_name,
-            records=records,
-            mode=mode,
-            scd_config=scd_config,
-            ingestion_ts=ingestion_ts,
-            run_id=run_id,
-            gold_schema=gold_schema,
         )
 
     async def _write_gold_metadata_file(

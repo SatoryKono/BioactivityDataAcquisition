@@ -9,11 +9,26 @@ Implements REQ-DQ-001: DQ metrics in Silver metadata.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Literal, TypeGuard
+from typing import TYPE_CHECKING, Literal
+
+from bioetl.domain.value_objects import dq_metrics_calculations as _calc
 
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import ColumnMetrics, DQSummary, SchemaDrift
     from bioetl.domain.types import JsonDict
+
+
+# Compatibility: keep legacy helper symbols available from this module.
+_compute_column_stats = _calc.compute_column_stats
+_collect_all_columns = _calc.collect_all_columns
+_compute_single_column_stats = _calc.compute_single_column_stats
+_filter_non_null = _calc.filter_non_null
+_calculate_null_rate = _calc.calculate_null_rate
+_make_hashable = _calc.make_hashable
+_calculate_unique_count = _calc.calculate_unique_count
+_compute_numeric_stats = _calc.compute_numeric_stats
+_is_valid_numeric = _calc.is_valid_numeric
+_extract_numeric_values = _calc.extract_numeric_values
 
 
 @dataclass(frozen=True, slots=True)
@@ -225,198 +240,6 @@ class BatchDQMetrics:
             schema_drift=schema_drift,
             validation_errors=tuple(validation_errors or []),
         )
-
-
-def _compute_column_stats(
-    records: list[JsonDict],
-) -> dict[str, ColumnStats]:
-    """Compute column statistics from records.
-
-    Args:
-        records: List of record dictionaries.
-
-    Returns:
-        Dictionary mapping column names to ColumnStats.
-    """
-    if not records:
-        return {}
-
-    all_columns = _collect_all_columns(records)
-    public_columns = [col for col in all_columns if not col.startswith("_")]
-
-    return {
-        col_name: _compute_single_column_stats(records, col_name)
-        for col_name in public_columns
-    }
-
-
-def _collect_all_columns(
-    records: list[JsonDict],
-) -> set[str]:
-    """Collect all unique column names from records.
-
-    Args:
-        records: List of record dictionaries.
-
-    Returns:
-        Set of column names.
-    """
-    all_columns: set[str] = set()
-    for record in records:
-        all_columns.update(record.keys())
-    return all_columns
-
-
-def _compute_single_column_stats(
-    records: list[JsonDict],
-    col_name: str,
-) -> ColumnStats:
-    """Compute statistics for a single column.
-
-    Args:
-        records: List of record dictionaries.
-        col_name: Name of the column to analyze.
-
-    Returns:
-        ColumnStats for the column.
-    """
-    values = [record.get(col_name) for record in records]
-    non_null_values = _filter_non_null(values)
-
-    null_rate = _calculate_null_rate(values, len(records))
-    unique_count = _calculate_unique_count(non_null_values)
-    min_val, max_val, mean_val = _compute_numeric_stats(non_null_values)
-
-    return ColumnStats(
-        null_rate=null_rate,
-        unique_count=unique_count,
-        min_value=min_val,
-        max_value=max_val,
-        mean_value=mean_val,
-    )
-
-
-def _filter_non_null(
-    values: list[object],
-) -> list[object]:
-    """Filter out None values from a list.
-
-    Args:
-        values: List of values.
-
-    Returns:
-        List of non-None values.
-    """
-    return [v for v in values if v is not None]
-
-
-def _calculate_null_rate(
-    values: list[object],
-    total: int,
-) -> float:
-    """Calculate the null rate for a list of values.
-
-    Args:
-        values: List of values.
-        total: Total number of records.
-
-    Returns:
-        Null rate rounded to 4 decimal places.
-    """
-    null_count = sum(1 for v in values if v is None)
-    return round(null_count / total, 4)
-
-
-def _make_hashable(value: object) -> object:
-    """Convert a value to a hashable representation.
-
-    Args:
-        value: Value to convert.
-
-    Returns:
-        Hashable representation of the value.
-    """
-    if isinstance(value, dict):
-        # Convert dict to a frozenset of key-value tuples (recursively)
-        return frozenset((k, _make_hashable(v)) for k, v in value.items())
-    if isinstance(value, list):
-        # Convert list to tuple (recursively)
-        return tuple(_make_hashable(item) for item in value)
-    return value
-
-
-def _calculate_unique_count(
-    values: list[object],
-) -> int:
-    """Calculate the count of unique values.
-
-    Args:
-        values: List of non-null values.
-
-    Returns:
-        Number of unique values, or 0 if empty.
-    """
-    if not values:
-        return 0
-    try:
-        return len(set(values))
-    except TypeError:
-        # Handle unhashable types (lists, dicts) by converting to hashable
-        return len({_make_hashable(v) for v in values})
-
-
-def _compute_numeric_stats(
-    values: list[object],
-) -> tuple[float | None, float | None, float | None]:
-    """Compute numeric statistics (min, max, mean) for values.
-
-    Args:
-        values: List of values (may contain non-numeric).
-
-    Returns:
-        Tuple of (min, max, mean), all None if no numeric values.
-    """
-    numeric_values = _extract_numeric_values(values)
-    if not numeric_values:
-        return None, None, None
-
-    return (
-        round(min(numeric_values), 6),
-        round(max(numeric_values), 6),
-        round(sum(numeric_values) / len(numeric_values), 6),
-    )
-
-
-def _is_valid_numeric(v: object) -> TypeGuard[int | float]:
-    """Check if value is a valid numeric (not bool, NaN, or Inf).
-
-    Args:
-        v: Value to check.
-
-    Returns:
-        True if value is a valid finite number.
-    """
-    if not isinstance(v, (int, float)):
-        return False
-    if isinstance(v, bool):
-        return False
-    if v != v:  # NaN check: NaN != NaN
-        return False
-    return abs(v) != float("inf")
-
-
-def _extract_numeric_values(
-    values: list[object],
-) -> list[float]:
-    """Extract numeric values from a list of mixed values.
-
-    Args:
-        values: List of values (may contain non-numeric).
-
-    Returns:
-        List of float values.
-    """
-    return [float(v) for v in values if _is_valid_numeric(v)]
 
 
 __all__ = [

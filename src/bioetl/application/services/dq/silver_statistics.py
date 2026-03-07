@@ -19,7 +19,18 @@ from typing import cast
 
 import polars as pl
 
-from bioetl.domain.services.dq_serializer import to_dict
+from bioetl.application.services.dq.silver_statistics_helpers import (
+    check_content_hash_integrity_stats as _check_content_hash_integrity_stats,
+)
+from bioetl.application.services.dq.silver_statistics_helpers import (
+    check_deduplication_stats as _check_deduplication_stats,
+)
+from bioetl.application.services.dq.silver_statistics_helpers import (
+    detect_type_changes as _detect_type_changes,
+)
+from bioetl.application.services.dq.silver_statistics_helpers import (
+    value_distribution_to_dict as _value_distribution_to_dict,
+)
 from bioetl.domain.types import JsonDict
 from bioetl.domain.value_objects.dq_report import (
     CategoricalDistribution,
@@ -42,85 +53,6 @@ _SILVER_PROFILE_ERRORS = (
     TypeError,
     RuntimeError,
 )
-
-
-def _detect_type_changes(
-    current: dict[str, str], previous: dict[str, str]
-) -> list[dict[str, str]]:
-    """Find fields whose types differ between current and previous schema."""
-    return [
-        {"field": f, "from": previous[f], "to": current[f]}
-        for f in current
-        if f in previous and current[f] != previous[f]
-    ]
-
-
-def _check_deduplication_stats(
-    df: pl.DataFrame,
-    input_count: int,
-) -> DeduplicationStatsResult:
-    """Calculate deduplication statistics from input/output counts."""
-    output_count = len(df)
-    dedupe_count = input_count - output_count
-
-    content_hash_dupes = 0
-    if "_content_hash" in df.columns:
-        unique_hashes = df["_content_hash"].n_unique()
-        content_hash_dupes = output_count - unique_hashes
-
-    return DeduplicationStatsResult(
-        input_before_dedupe=input_count,
-        duplicates_by_content_hash=content_hash_dupes,
-        duplicates_by_business_key=dedupe_count - content_hash_dupes,
-        output_after_dedupe=output_count,
-        status=DQCheckStatus.PASS,
-    )
-
-
-def _check_content_hash_integrity_stats(df: pl.DataFrame) -> ContentHashIntegrityResult:
-    """Calculate content-hash collision metrics."""
-    if "_content_hash" not in df.columns:
-        return ContentHashIntegrityResult(
-            records_checked=0,
-            hash_collisions=0,
-            rehash_mismatches=0,
-            status=DQCheckStatus.PASS,
-        )
-
-    records_checked = len(df)
-    hash_counts = df["_content_hash"].value_counts()
-    duplicates = hash_counts.filter(pl.col("count") > 1)
-    hash_collisions = len(duplicates)
-    status = DQCheckStatus.PASS if hash_collisions == 0 else DQCheckStatus.WARN
-
-    return ContentHashIntegrityResult(
-        records_checked=records_checked,
-        hash_collisions=hash_collisions,
-        rehash_mismatches=0,  # Would need to recalculate hashes to check
-        status=status,
-    )
-
-
-def _value_distribution_to_dict(
-    result: ValueDistributionResult,
-) -> JsonDict:  # Any: DQ check values vary by check type
-    """Convert value-distribution result to serializable dictionary."""
-    output: JsonDict = {  # Any: DQ check values vary by check type
-        "numeric_columns": {},
-        "categorical_columns": {},
-        "status": result.status.value,
-    }
-
-    for col, numeric_dist in result.numeric_columns.items():
-        output["numeric_columns"][col] = to_dict(numeric_dist)
-
-    for col, categorical_dist in result.categorical_columns.items():
-        output["categorical_columns"][col] = {
-            "top_values": list(categorical_dist.top_values),
-            "cardinality": categorical_dist.cardinality,
-        }
-
-    return output
 
 
 class SilverStatisticsCalculator:
@@ -404,7 +336,12 @@ class SilverStatisticsCalculator:
             DeduplicationStatsResult with duplicate and unique record counts.
         """
         del primary_keys
-        return _check_deduplication_stats(df, input_count)
+        content_hash_unique_count: int | None = None
+        if "_content_hash" in df.columns:
+            content_hash_unique_count = df["_content_hash"].n_unique()
+        return _check_deduplication_stats(
+            len(df), input_count, content_hash_unique_count
+        )
 
     def check_content_hash_integrity(
         self, df: pl.DataFrame
@@ -414,7 +351,12 @@ class SilverStatisticsCalculator:
         Returns:
             ContentHashIntegrityResult with hash column presence and uniqueness stats.
         """
-        return _check_content_hash_integrity_stats(df)
+        hash_collision_count: int | None = None
+        if "_content_hash" in df.columns:
+            hash_counts = df["_content_hash"].value_counts()
+            duplicates = hash_counts.filter(pl.col("count") > 1)
+            hash_collision_count = len(duplicates)
+        return _check_content_hash_integrity_stats(len(df), hash_collision_count)
 
     def distribution_to_dict(
         self, result: ValueDistributionResult

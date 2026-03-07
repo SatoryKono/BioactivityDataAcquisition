@@ -22,7 +22,9 @@ from contextlib import AbstractContextManager
 from enum import StrEnum
 from typing import TYPE_CHECKING, Any
 
-from bioetl.application.core.shutdown import PipelineShutdownError
+from bioetl.application.observability.observer_context_mixin import (
+    _ObserverContextManagerMixin,
+)
 from bioetl.application.observability.observer_event_mixin import _ObserverEventMixin
 from bioetl.domain.events import PipelineEvent
 from bioetl.domain.observability_contract import (
@@ -30,8 +32,6 @@ from bioetl.domain.observability_contract import (
 )
 
 if TYPE_CHECKING:
-    from types import TracebackType
-
     from opentelemetry.trace import Span
 
     from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
@@ -56,143 +56,12 @@ class LifecyclePhase(StrEnum):
     CLEANUP = "cleanup"
 
 
-class PipelineObserver(_ObserverEventMixin, AbstractContextManager["PipelineObserver"]):
-    """Observability wrapper for pipeline execution."""
+class _ObserverLifecycleEmissionMixin(_ObserverEventMixin):
+    """Structured lifecycle/domain event emission helpers."""
 
-    def __init__(
-        self,
-        pipeline_name: str,
-        run_id: RunID,
-        run_type: RunType,
-        metrics: MetricsPort,
-        logger: LoggerPort,
-        tracer: TracingPort | None = None,
-    ) -> None:
-        """Initialize observer."""
-        self.pipeline_name = pipeline_name
-        self.run_id = str(run_id)
-        self.run_type = run_type.value
-        self.provider_name = self._derive_provider_name(pipeline_name)
-        self._metrics = metrics
-        self._logger = logger
-        self._tracer = tracer
-
-        self.start_time: float | None = None
-        self.span: Span | None = None
-
-    def __enter__(self) -> PipelineObserver:
-        """Start observation (Span + Log + Metric)."""
-        self.start_time = time.monotonic()
-
-        # 1. Start Trace Span
-        if self._tracer:
-            otel_tracer = self._tracer.get_tracer("bioetl.pipeline")
-            self.span = otel_tracer.start_as_current_span(
-                f"pipeline.{self.pipeline_name}",
-                attributes={
-                    "bioetl.pipeline": self.pipeline_name,
-                    "bioetl.run_id": self.run_id,
-                    "bioetl.run_type": self.run_type,
-                },
-            )
-            self.span.__enter__()
-
-        # 2. Log Start
-        self._emit_contract_event(
-            PipelineEvent.START,
-            severity="info",
-            run_type=self.run_type,
-            phase=LifecyclePhase.STARTUP.value,
-        )
-
-        return self
-
-    def __exit__(
-        self,
-        exc_type: type[BaseException] | None,
-        exc_val: BaseException | None,
-        exc_tb: TracebackType | None,
-    ) -> bool | None:
-        """End observation (Span + Log + Metric)."""
-        duration = time.monotonic() - (self.start_time or 0)
-        status = "success"
-        suppress_exception = False
-
-        if exc_val:
-            if isinstance(exc_val, PipelineShutdownError):
-                status = "shutdown"
-                suppress_exception = (
-                    True  # We suppress the shutdown signal to allow clean exit
-                )
-            else:
-                status = "failed"
-
-        # 1. Metrics (Histogram)
-        self._metrics.observe_histogram(
-            "pipeline_duration_seconds",
-            duration,
-            labels={
-                "pipeline": self.pipeline_name,
-                "stage": "pipeline",
-                "run_type": self.run_type,
-                "status": status,
-            },
-        )
-        self._metrics.increment_counter(
-            "bioetl_pipeline_runs_total",
-            1,
-            labels={
-                "pipeline": self.pipeline_name,
-                "run_type": self.run_type,
-                "status": status,
-            },
-        )
-
-        # 2. Log Result
-        log_ctx = {
-            "duration_seconds": duration,
-            "status": status,
-            "phase": LifecyclePhase.CLEANUP.value,
-        }
-        if status == "failed":
-            self._emit_contract_event(
-                PipelineEvent.FAILED,
-                severity="error",
-                **log_ctx,
-                error=str(exc_val),
-                error_type=type(exc_val).__name__,
-            )
-        elif status == "shutdown":
-            self._emit_contract_event(
-                PipelineEvent.SHUTDOWN,
-                severity="warning",
-                **log_ctx,
-                error_type="pipeline_shutdown",
-            )
-        else:
-            self._emit_contract_event(
-                PipelineEvent.COMPLETE,
-                severity="info",
-                **log_ctx,
-            )
-
-        # 3. End Trace Span (O3: handle close errors gracefully)
-        if self.span:
-            try:
-                self.span.set_attribute("bioetl.status", status)
-                self.span.set_attribute("bioetl.duration_ms", duration * 1000)
-                if status == "failed":
-                    if exc_val is not None:
-                        self.span.record_exception(exc_val)
-                    self.span.set_attribute("error", True)
-                self.span.__exit__(exc_type, exc_val, exc_tb)
-            except (AttributeError, RuntimeError, TypeError, ValueError):
-                # Best effort - don't fail the pipeline on tracing cleanup
-                pass
-
-        return suppress_exception
-
-    # --- Unified Lifecycle Event Emission ---
+    span: Span | None
+    pipeline_name: str
+    _metrics: MetricsPort
 
     def emit_event(
         self,
@@ -400,3 +269,31 @@ class PipelineObserver(_ObserverEventMixin, AbstractContextManager["PipelineObse
             return pipeline_name
         provider, _entity = pipeline_name.split("_", 1)
         return provider or pipeline_name
+
+
+class PipelineObserver(
+    _ObserverContextManagerMixin,
+    _ObserverLifecycleEmissionMixin,
+    AbstractContextManager["PipelineObserver"],
+):
+    """Observability wrapper for pipeline execution."""
+
+    def __init__(
+        self,
+        pipeline_name: str,
+        run_id: RunID,
+        run_type: RunType,
+        metrics: MetricsPort,
+        logger: LoggerPort,
+        tracer: TracingPort | None = None,
+    ) -> None:
+        """Initialize observer."""
+        self.pipeline_name = pipeline_name
+        self.run_id = str(run_id)
+        self.run_type = run_type.value
+        self.provider_name = self._derive_provider_name(pipeline_name)
+        self._metrics = metrics
+        self._logger = logger
+        self._tracer = tracer
+        self.start_time: float | None = None
+        self.span: Span | None = None
