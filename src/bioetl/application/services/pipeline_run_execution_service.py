@@ -48,7 +48,17 @@ class PipelineRunExecutionService:
         run_logger: LoggerPort,
         metrics_extractor: MetricsExtractorPort,
     ) -> PipelineExecutionResult:
-        """Execute runner and return normalized status/metrics outcome."""
+        """Execute runner and return normalized status/metrics outcome.
+
+        Args:
+            runner: RunnablePort implementation containing the pipeline to run.
+            run_logger: Logger port for recording completion, shutdown, or failure.
+            metrics_extractor: Port for extracting pipeline metrics after execution.
+
+        Returns:
+            PipelineExecutionResult with status ('success', 'shutdown', or 'failed'),
+            optional error details, extracted metrics, and completion timestamp.
+        """
         # Import inside method to avoid circular import at module import time.
         from bioetl.application.core.shutdown import PipelineShutdownError
 

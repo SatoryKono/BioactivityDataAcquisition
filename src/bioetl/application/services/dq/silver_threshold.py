@@ -65,7 +65,17 @@ class SilverThresholdChecker:
             JsonDict  # Any: DQ check values vary by check type
         ],  # Any: DQ check values vary by check type
     ) -> JsonDict:  # Any: DQ check values vary by check type
-        """Check nullability for configured merge/partition keys."""
+        """Check nullability for configured merge/partition keys.
+
+        Args:
+            df: Input Polars DataFrame to check key column null counts on.
+            key_nullability_rules: List of rule dicts with 'field', 'key_type',
+                and 'nullable' keys. Rules with nullable=True are skipped.
+
+        Returns:
+            Dict with 'status' (PASS or FAIL), 'violations' list, and
+            'rules_checked' count.
+        """
         violations: list[JsonDict] = []  # Any: DQ check values vary by check type
 
         for rule in key_nullability_rules:

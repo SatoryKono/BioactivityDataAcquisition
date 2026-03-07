@@ -40,7 +40,24 @@ class SilverCheckExecutor:
         previous_schema: dict[str, str] | None,
         key_nullability_rules: list[JsonDict] | None,
     ) -> tuple[JsonDict, int, int, int]:
-        """Execute all enabled checks and return checks + status counters."""
+        """Execute all enabled checks and return checks + status counters.
+
+        Args:
+            df: Input Polars DataFrame to run DQ checks on.
+            enabled_checks: Set of SilverDQCheckType values controlling which
+                checks are executed.
+            primary_keys: List of column names forming the entity primary key.
+            input_record_count: Optional upstream Bronze record count for
+                error rate calculation.
+            quarantined_count: Number of records quarantined during transformation.
+            previous_schema: Optional prior-run schema snapshot for drift detection.
+            key_nullability_rules: Optional list of nullability rule dicts for
+                business-key null rate checks.
+
+        Returns:
+            Tuple of (checks dict, passed count, failed count, warnings count).
+            The checks dict maps check name strings to serialized check result dicts.
+        """
         checks: JsonDict = {}  # Any: DQ check values vary by check type
         passed, failed, warnings = 0, 0, 0
 

@@ -26,7 +26,15 @@ from bioetl.domain.value_objects.dq_report import (
 def detect_type_changes(
     current: dict[str, str], previous: dict[str, str]
 ) -> list[dict[str, str]]:
-    """Find fields whose types differ between current and previous schema."""
+    """Find fields whose types differ between current and previous schema.
+
+    Args:
+        current: Mapping of column name to current type string.
+        previous: Mapping of column name to previous type string.
+
+    Returns:
+        List of dicts with 'field', 'from', and 'to' keys for each changed column.
+    """
     return [
         {"field": f, "from": previous[f], "to": current[f]}
         for f in current
@@ -35,7 +43,15 @@ def detect_type_changes(
 
 
 def check_null_rates_stats(df: pl.DataFrame) -> tuple[list[NullRateResult], float]:
-    """Calculate per-column and overall null rates."""
+    """Calculate per-column and overall null rates.
+
+    Args:
+        df: Input Polars DataFrame to compute null rates for.
+
+    Returns:
+        Tuple of (per-column NullRateResult list, overall null rate as float).
+        Columns with null rate above 50% receive WARN status.
+    """
     results: list[NullRateResult] = []
     total_nulls = 0
     total_cells = 0
@@ -64,7 +80,18 @@ def check_uniqueness_stats(
     primary_keys: list[str],
     profile_errors: tuple[type[BaseException], ...],
 ) -> UniquenessResult:
-    """Calculate uniqueness and per-column cardinality statistics."""
+    """Calculate uniqueness and per-column cardinality statistics.
+
+    Args:
+        df: Input Polars DataFrame to compute uniqueness on.
+        primary_keys: List of column names forming the entity primary key.
+        profile_errors: Exception types to catch during per-column cardinality
+            profiling (e.g. Polars errors for unsupported dtypes).
+
+    Returns:
+        UniquenessResult with duplicate count, rate, and per-column cardinality.
+        Returns WARN status if any primary key columns are missing.
+    """
     if not primary_keys:
         return UniquenessResult(
             primary_key="",
@@ -116,7 +143,15 @@ def check_uniqueness_stats(
 
 
 def check_type_conformance_stats(df: pl.DataFrame) -> TypeConformanceResult:
-    """Check for mixed/object columns and build conformance result."""
+    """Check for mixed/object columns and build conformance result.
+
+    Args:
+        df: Input Polars DataFrame to scan for Object-type columns.
+
+    Returns:
+        TypeConformanceResult with PASS status if no Object columns are found,
+        or WARN status if mixed-type columns are detected.
+    """
     errors = []
     type_coercions: dict[str, JsonDict] = {}
 
@@ -137,7 +172,17 @@ def check_type_conformance_stats(df: pl.DataFrame) -> TypeConformanceResult:
 def check_schema_drift_stats(
     df: pl.DataFrame, previous_schema: dict[str, str] | None
 ) -> SchemaDriftResult:
-    """Detect schema drift compared with previous schema snapshot."""
+    """Detect schema drift compared with previous schema snapshot.
+
+    Args:
+        df: Input Polars DataFrame with the current schema.
+        previous_schema: Optional mapping of column name to type string from the
+            prior run. If None, returns INFO drift level with PASS status.
+
+    Returns:
+        SchemaDriftResult with new fields, missing fields, and type changes.
+        Returns WARN/CRITICAL if missing fields or type changes are found.
+    """
     current_schema = {col: str(df[col].dtype) for col in df.columns}
 
     if previous_schema is None:
@@ -164,7 +209,17 @@ def check_deduplication_stats(
     input_count: int,
     content_hash_unique_count: int | None,
 ) -> DeduplicationStatsResult:
-    """Calculate deduplication statistics from input/output counts."""
+    """Calculate deduplication statistics from input/output counts.
+
+    Args:
+        df_len: Output record count after deduplication.
+        input_count: Input record count before deduplication.
+        content_hash_unique_count: Optional count of unique content hash values.
+            If None, content-hash-based duplicates are reported as zero.
+
+    Returns:
+        DeduplicationStatsResult with input, output, and duplicate breakdown.
+    """
     output_count = df_len
     dedupe_count = input_count - output_count
 
@@ -185,7 +240,16 @@ def check_content_hash_integrity_stats(
     df_len: int,
     hash_collision_count: int | None,
 ) -> ContentHashIntegrityResult:
-    """Calculate content-hash collision metrics."""
+    """Calculate content-hash collision metrics.
+
+    Args:
+        df_len: Total number of records in the DataFrame.
+        hash_collision_count: Number of duplicate content hash values, or None
+            if the '_content_hash' column is absent (returns zero-collision result).
+
+    Returns:
+        ContentHashIntegrityResult with collision count and PASS or WARN status.
+    """
     if hash_collision_count is None:
         return ContentHashIntegrityResult(
             records_checked=0,
@@ -206,7 +270,15 @@ def check_content_hash_integrity_stats(
 def value_distribution_to_dict(
     result: ValueDistributionResult,
 ) -> JsonDict:  # Any: DQ check values vary by check type
-    """Convert value-distribution result to serializable dictionary."""
+    """Convert value-distribution result to serializable dictionary.
+
+    Args:
+        result: ValueDistributionResult with numeric and categorical column data.
+
+    Returns:
+        Dict with 'numeric_columns', 'categorical_columns', and 'status' keys,
+        suitable for DQ report JSON serialization.
+    """
     output: JsonDict = {  # Any: DQ check values vary by check type
         "numeric_columns": {},
         "categorical_columns": {},
@@ -230,7 +302,18 @@ def profile_numeric_column(
     col: str,
     profile_errors: tuple[type[BaseException], ...],
 ) -> NumericDistribution | None:
-    """Build numeric distribution for one column."""
+    """Build numeric distribution for one column.
+
+    Args:
+        df: Input Polars DataFrame containing the column to profile.
+        col: Name of the numeric column to compute statistics for.
+        profile_errors: Exception types to catch if profiling fails
+            (e.g. Polars errors for unsupported numeric ops).
+
+    Returns:
+        NumericDistribution with min, max, mean, std, and median, or None if
+        the column is empty or profiling raises a handled error.
+    """
     try:
         stats = df[col].drop_nulls()
         if len(stats) == 0:
@@ -256,7 +339,18 @@ def profile_categorical_column(
     col: str,
     profile_errors: tuple[type[BaseException], ...],
 ) -> CategoricalDistribution | None:
-    """Build categorical distribution for one column."""
+    """Build categorical distribution for one column.
+
+    Args:
+        df: Input Polars DataFrame containing the column to profile.
+        col: Name of the string or categorical column to profile.
+        profile_errors: Exception types to catch if profiling fails
+            (e.g. Polars errors for unsupported string ops).
+
+    Returns:
+        CategoricalDistribution with top-5 value counts and cardinality, or None
+        if profiling raises a handled error.
+    """
     try:
         value_counts = df[col].value_counts().head(5)
         cardinality = df[col].n_unique()

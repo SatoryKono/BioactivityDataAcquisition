@@ -81,6 +81,12 @@ class SilverStatisticsCalculator:
     ) -> RecordCountResult:
         """Check record count statistics.
 
+        Args:
+            df: Input Polars DataFrame to count output records from.
+            input_count: Optional upstream record count. If None, derived from
+                output + quarantined.
+            quarantined_count: Number of records quarantined during transformation.
+
         Returns:
             RecordCountResult with input, output, and quarantined counts and DQ status.
         """
@@ -107,6 +113,9 @@ class SilverStatisticsCalculator:
     def check_null_rates(self, df: pl.DataFrame) -> tuple[list[NullRateResult], float]:
         """Calculate null rates per column.
 
+        Args:
+            df: Input Polars DataFrame to compute null rates for.
+
         Returns:
             Tuple of (per-column NullRateResult list, overall null rate as float).
         """
@@ -117,6 +126,10 @@ class SilverStatisticsCalculator:
     ) -> UniquenessResult:
         """Check uniqueness of primary keys.
 
+        Args:
+            df: Input Polars DataFrame to check uniqueness on.
+            primary_keys: List of column names forming the entity primary key.
+
         Returns:
             UniquenessResult with duplicate rate and per-column cardinality stats.
         """
@@ -125,6 +138,9 @@ class SilverStatisticsCalculator:
     def check_type_conformance(self, df: pl.DataFrame) -> TypeConformanceResult:
         """Check type conformance against expected schema.
 
+        Args:
+            df: Input Polars DataFrame to check for mixed-type columns.
+
         Returns:
             TypeConformanceResult indicating whether any mixed-type columns were found.
         """
@@ -132,6 +148,9 @@ class SilverStatisticsCalculator:
 
     def check_value_distribution(self, df: pl.DataFrame) -> ValueDistributionResult:
         """Calculate value distributions for columns.
+
+        Args:
+            df: Input Polars DataFrame to profile distributions for.
 
         Returns:
             ValueDistributionResult with numeric and categorical distributions
@@ -166,6 +185,11 @@ class SilverStatisticsCalculator:
     ) -> SchemaDriftResult:
         """Detect schema drift from previous run.
 
+        Args:
+            df: Input Polars DataFrame with the current schema.
+            previous_schema: Optional mapping of column name to type string from the
+                prior run. If None, drift detection is skipped.
+
         Returns:
             SchemaDriftResult with new fields, missing fields, and type changes
             relative to the previous schema.
@@ -179,6 +203,12 @@ class SilverStatisticsCalculator:
         input_count: int,
     ) -> DeduplicationStatsResult:
         """Calculate deduplication statistics.
+
+        Args:
+            df: Input Polars DataFrame to compute deduplication stats for.
+            primary_keys: List of primary key column names (currently unused,
+                content hash is used instead when available).
+            input_count: Upstream record count used to compute the deduplication rate.
 
         Returns:
             DeduplicationStatsResult with duplicate and unique record counts.
@@ -196,6 +226,9 @@ class SilverStatisticsCalculator:
     ) -> ContentHashIntegrityResult:
         """Check content hash integrity.
 
+        Args:
+            df: Input Polars DataFrame to check the '_content_hash' column on.
+
         Returns:
             ContentHashIntegrityResult with hash column presence and uniqueness stats.
         """
@@ -209,7 +242,15 @@ class SilverStatisticsCalculator:
     def distribution_to_dict(
         self, result: ValueDistributionResult
     ) -> JsonDict:  # Any: DQ check values vary by check type
-        """Convert distribution result to dict."""
+        """Convert distribution result to dict.
+
+        Args:
+            result: ValueDistributionResult to serialize to a plain dict.
+
+        Returns:
+            Dict with 'numeric_columns' and 'categorical_columns' sub-dicts and
+            'status' string, compatible with DQ report serialization.
+        """
         return _value_distribution_to_dict(result)
 
 

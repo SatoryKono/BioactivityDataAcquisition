@@ -56,7 +56,20 @@ class DQReportService(DQReportGenerationMixin):
         silver_config: SilverDQConfigPort | None = None,
         gold_config: GoldDQConfigPort | None = None,
     ) -> DQReportResult:
-        """Generate DQ reports for all enabled layers."""
+        """Generate DQ reports for all enabled layers.
+
+        Args:
+            context: DQ report context with run_id, provider, and entity metadata.
+            bronze_config: Optional Bronze layer DQ config port. If None or
+                config.enabled is False, Bronze report is skipped.
+            silver_config: Optional Silver layer DQ config port. If None or
+                config.enabled is False, Silver report is skipped.
+            gold_config: Optional Gold layer DQ config port. If None or
+                config.enabled is False, Gold report is skipped.
+
+        Returns:
+            DQReportResult with paths of generated reports and per-layer enabled flags.
+        """
         bronze_enabled = self._is_config_enabled(bronze_config)
         silver_enabled = self._is_config_enabled(silver_config)
         gold_enabled = self._is_config_enabled(gold_config)
@@ -134,7 +147,16 @@ class DQReportService(DQReportGenerationMixin):
         silver_config: SilverDQConfigPort | None = None,
         gold_config: GoldDQConfigPort | None = None,
     ) -> bool:
-        """Check whether at least one layer has DQ report generation enabled."""
+        """Check whether at least one layer has DQ report generation enabled.
+
+        Args:
+            bronze_config: Optional Bronze layer DQ config port.
+            silver_config: Optional Silver layer DQ config port.
+            gold_config: Optional Gold layer DQ config port.
+
+        Returns:
+            True if at least one non-None config has enabled=True, False otherwise.
+        """
         return (
             (bronze_config is not None and bronze_config.enabled)
             or (silver_config is not None and silver_config.enabled)

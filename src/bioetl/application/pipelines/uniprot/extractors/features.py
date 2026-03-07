@@ -118,7 +118,15 @@ class FeatureExtractor(FeatureExtractionWrappersMixin):
 
     @staticmethod
     def extract_features(features: list[JsonDict] | None) -> str | None:
-        """Extract all sequence features as JSON."""
+        """Extract all sequence features as JSON.
+
+        Args:
+            features: List of UniProt feature dicts from the API response, or None.
+
+        Returns:
+            JSON-serialized list of feature dicts (type, description, feature_id,
+            start, end), or None if no features are present.
+        """
         if not features or not isinstance(features, list):
             return None
 
@@ -134,7 +142,15 @@ class FeatureExtractor(FeatureExtractionWrappersMixin):
 
     @staticmethod
     def extract_keywords(keywords: list[JsonDict] | None) -> str | None:
-        """Extract UniProt keywords as JSON."""
+        """Extract UniProt keywords as JSON.
+
+        Args:
+            keywords: List of UniProt keyword dicts from the API response, or None.
+
+        Returns:
+            JSON-serialized list of keyword dicts (id, name, category),
+            or None if no keywords are present.
+        """
         if not keywords or not isinstance(keywords, list):
             return None
 
@@ -154,7 +170,16 @@ class FeatureExtractor(FeatureExtractionWrappersMixin):
         features: list[JsonDict] | None,
         feature_type: str,
     ) -> str | None:
-        """Extract sequence features matching the requested type."""
+        """Extract sequence features matching the requested type.
+
+        Args:
+            features: List of UniProt feature dicts from the API response, or None.
+            feature_type: UniProt feature type string to filter on
+                (e.g. 'Transmembrane', 'Signal peptide').
+
+        Returns:
+            JSON-serialized list of matching feature dicts, or None if no matches.
+        """
         if not features or not isinstance(features, list):
             return None
 
@@ -175,7 +200,17 @@ class FeatureExtractor(FeatureExtractionWrappersMixin):
         features: list[JsonDict] | None,
         patterns: tuple[str, ...],
     ) -> str | None:
-        """Extract modified residues whose descriptions match PTM patterns."""
+        """Extract modified residues whose descriptions match PTM patterns.
+
+        Args:
+            features: List of UniProt feature dicts from the API response, or None.
+            patterns: Tuple of lowercase substring patterns to match against
+                the modified residue description (e.g. ('phospho', 'phosphoryl')).
+
+        Returns:
+            JSON-serialized list of matching modified residue feature dicts,
+            or None if no matches are found.
+        """
         if not features or not isinstance(features, list) or not patterns:
             return None
 

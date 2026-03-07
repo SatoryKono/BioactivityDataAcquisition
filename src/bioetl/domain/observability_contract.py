@@ -92,6 +92,14 @@ def normalize_observability_context(
 ) -> dict[str, object]:
     """Normalize event context to canonical keys.
 
+    Args:
+        event_name: Canonical event name (e.g., 'pipeline_started').
+        context: Raw event context mapping with arbitrary keys.
+        default_provider: Fallback provider name if not present in context.
+        default_pipeline: Fallback pipeline name if not present in context.
+        default_run_id: Fallback run identifier if not present in context.
+        default_severity: Fallback severity level if not present in context.
+
     Returns:
         Dictionary with canonical observability keys and fallback values applied.
     """
@@ -145,6 +153,14 @@ def enforce_observability_contract_context(
 ) -> dict[str, object]:
     """Normalize and enforce required observability contract fields.
 
+    Args:
+        event_name: Canonical event name (e.g., 'pipeline_started').
+        context: Raw event context mapping with arbitrary keys.
+        default_provider: Fallback provider name if not present in context.
+        default_pipeline: Fallback pipeline name if not present in context.
+        default_run_id: Fallback run identifier if not present in context.
+        default_severity: Fallback severity level if not present in context.
+
     Returns:
         Dictionary with all required observability contract fields populated.
     """
@@ -196,6 +212,9 @@ def enforce_observability_contract_context(
 def is_observability_contract_valid(context: Mapping[str, object]) -> bool:
     """Return ``True`` when all required observability contract fields are present.
 
+    Args:
+        context: Event context mapping to validate against the contract.
+
     Returns:
         True if all required contract fields are present and non-empty, False otherwise.
     """
@@ -208,6 +227,9 @@ def normalize_observability_metric_labels(
     """Return canonical labels for ``observability_events_total``.
 
     Uses the same contract-enforcement path as log-event context validation.
+
+    Args:
+        labels: Raw metric label mapping with observability fields.
 
     Returns:
         Dictionary of canonical string metric labels for Prometheus counters.
@@ -237,6 +259,9 @@ def normalize_observability_metric_labels(
 def missing_observability_fields(context: Mapping[str, object]) -> tuple[str, ...]:
     """Return required contract fields missing from context.
 
+    Args:
+        context: Event context mapping to check for required observability fields.
+
     Returns:
         Tuple of field names that are missing or empty in the given context.
     """
@@ -257,6 +282,14 @@ def build_observability_contract_payload(
     default_severity: str,
 ) -> ObservabilityContractPayload:
     """Validate event context once and derive canonical metric labels.
+
+    Args:
+        event_name: Canonical event name (e.g., 'pipeline_started').
+        context: Raw event context mapping with arbitrary keys.
+        default_provider: Fallback provider name if not present in context.
+        default_pipeline: Fallback pipeline name if not present in context.
+        default_run_id: Fallback run identifier if not present in context.
+        default_severity: Fallback severity level if not present in context.
 
     Returns:
         ObservabilityContractPayload with normalized context and metric labels.

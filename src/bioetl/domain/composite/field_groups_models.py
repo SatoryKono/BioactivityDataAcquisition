@@ -56,11 +56,25 @@ class FieldMapping:
         return len(self.providers)
 
     def has_provider(self, provider: str) -> bool:
-        """Check if a specific provider has this field."""
+        """Check if a specific provider has this field.
+
+        Args:
+            provider: Provider name to check (case-insensitive).
+
+        Returns:
+            True if this field is available from the specified provider.
+        """
         return provider.lower() in (p.lower() for p in self.providers)
 
     def get_column(self, provider: str) -> str | None:
-        """Get qualified column name for a specific provider."""
+        """Get qualified column name for a specific provider.
+
+        Args:
+            provider: Provider name to look up (case-insensitive).
+
+        Returns:
+            Qualified column name (e.g. 'chembl.publication.doi'), or None if provider has no mapping.
+        """
         provider_lower = provider.lower()
         for col in self.provider_columns:
             parts = col.split(".")

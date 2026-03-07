@@ -89,7 +89,22 @@ class PipelineRunnerService:
         run_id: UUID | None = None,
         options: RunOptions | None = None,
     ) -> RunResult:
-        """Run a pipeline and return normalized execution result."""
+        """Run a pipeline and return normalized execution result.
+
+        Args:
+            pipeline_name: Registered pipeline identifier to execute.
+            dry_run: If True, validate and plan but skip storage writes.
+                Overridden by options.dry_run if options is provided.
+            run_id: Optional explicit UUID for the run. Auto-generated if None.
+            options: Optional RunOptions controlling run type, limit, filters, etc.
+                If None, a default RunOptions instance is created using dry_run.
+
+        Returns:
+            RunResult with status, record counts, duration, and error details.
+
+        Raises:
+            PipelineNotFoundError: If pipeline_name is not registered in the factory.
+        """
         started_at = datetime.now(tz=UTC)
         effective_options = self._merge_options(options, dry_run)
         self._ensure_pipeline_exists(pipeline_name)
