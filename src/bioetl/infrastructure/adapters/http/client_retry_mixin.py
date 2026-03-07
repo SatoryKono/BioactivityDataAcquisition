@@ -104,6 +104,14 @@ class HTTPClientRetryMixin:
         await asyncio.sleep(delay)
         return delay
 
+    def _can_retry(
+        self,
+        attempt: int,
+        retries_used: int,
+    ) -> bool:
+        """Backward-compatible wrapper for retry-budget decision logic."""
+        return _can_retry(self.retry_config, attempt, retries_used)
+
     def _record_retry_budget_exhausted(
         self,
         method: str,
@@ -124,6 +132,25 @@ class HTTPClientRetryMixin:
                 retry_budget=self.retry_config.effective_retry_budget(),
                 max_attempts=self.retry_config.max_attempts,
             )
+
+    def _record_request_metrics(
+        self,
+        method: str,
+        duration: float,
+        status_code: int,
+        retries: int,
+        last_error: Exception | None,
+    ) -> None:
+        """Backward-compatible wrapper for HTTP metrics emission."""
+        _record_request_metrics(
+            self._metrics,
+            self.provider,
+            method,
+            duration,
+            status_code,
+            retries,
+            last_error,
+        )
 
     def _log_retry(
         self,
