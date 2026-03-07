@@ -33,6 +33,11 @@ SCHEMAS = {
 }
 
 
+def _normalize_newlines(content: str) -> str:
+    """Normalize line endings for cross-platform stable comparisons."""
+    return content.replace("\r\n", "\n").replace("\r", "\n")
+
+
 def generate_schema(model_cls: type) -> dict:
     """Generate JSON Schema dict from a Pydantic model class."""
     schema = model_cls.model_json_schema()
@@ -68,7 +73,7 @@ def main() -> int:
         if args.check:
             if out_path.exists():
                 existing = out_path.read_text(encoding="utf-8")
-                if existing == new_content:
+                if _normalize_newlines(existing) == _normalize_newlines(new_content):
                     sys.stdout.write(f"  OK   {out_path}\n")
                     continue
             sys.stderr.write(f"  STALE {out_path}\n")
