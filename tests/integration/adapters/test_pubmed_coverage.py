@@ -307,23 +307,35 @@ async def test_probe_health_degraded(pubmed_adapter: PubMedAdapter):
         },
     }
 
-    # We want to test the timing branch.
-    # BaseHttpAdapter or the mixin might use time.monotonic()
+    # Simulate slow response by advancing time.monotonic() by 5.1s
+    # instead of actually sleeping, to keep the test fast.
+    import time
+    from unittest.mock import patch
+
+    call_count = 0
+    real_monotonic = time.monotonic
+
+    def fake_monotonic() -> float:
+        nonlocal call_count
+        call_count += 1
+        base = real_monotonic()
+        # After the first call (start_time), advance by 5.1s
+        if call_count >= 2:
+            return base + 5.1
+        return base
 
     with respx.mock(base_url=ENTREZ_API_BASE) as respx_mock:
+        respx_mock.get("einfo.fcgi").mock(
+            return_value=Response(200, json=mock_health_json)
+        )
 
-        async def slow_response(request):
-            await anyio.sleep(5.1)
-            return Response(200, json=mock_health_json)
-
-        # respx can take a callback
-        import anyio
-
-        respx_mock.get("einfo.fcgi").mock(side_effect=slow_response)
-
-        async with pubmed_adapter.http_client:
-            status = await pubmed_adapter._probe_health()
-            assert status == HealthStatus.DEGRADED
+        with patch(
+            "bioetl.infrastructure.adapters.pubmed._health.time.monotonic",
+            side_effect=fake_monotonic,
+        ):
+            async with pubmed_adapter.http_client:
+                status = await pubmed_adapter._probe_health()
+                assert status == HealthStatus.DEGRADED
 
 
 @pytest.mark.integration

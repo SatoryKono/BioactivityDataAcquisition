@@ -235,6 +235,9 @@ def is_orjson_available() -> bool:
 def flatten_arrow_table_for_export(table: pa.Table) -> pa.Table:
     """Convert list/struct Arrow columns to JSON strings for export-safe flattening.
 
+    Args:
+        table: PyArrow Table potentially containing list, large_list, or struct columns.
+
     Returns:
         PyArrow Table with complex columns serialized as JSON strings.
     """

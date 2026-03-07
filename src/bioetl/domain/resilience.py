@@ -146,6 +146,9 @@ class RetryConfig:
     def clamp_retry_after(self, retry_after_seconds: float) -> float:
         """Clamp Retry-After delay to configured upper bound.
 
+        Args:
+            retry_after_seconds: Delay in seconds suggested by the provider's Retry-After header.
+
         Returns:
             Clamped delay in seconds, between 0.0 and the configured upper bound.
         """

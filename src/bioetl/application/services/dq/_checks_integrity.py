@@ -189,7 +189,18 @@ def check_scd_integrity(
     df: pl.DataFrame,
     scd_config: JsonDict | None,  # Any: SCD config has heterogeneous values
 ) -> SCDIntegrityResult:
-    """Check Slowly Changing Dimension (SCD) integrity metrics."""
+    """Check Slowly Changing Dimension (SCD) integrity metrics.
+
+    Args:
+        df: Input Polars DataFrame to check SCD validity on.
+        scd_config: SCD configuration dict with keys 'type', 'entity_key',
+            'valid_from_col', and 'valid_to_col'. Pass None to return a
+            default PASS result without checking.
+
+    Returns:
+        SCDIntegrityResult with entity counts, version statistics, and
+        overlapping validity period count with a PASS or WARN status.
+    """
     scd_type = 2 if not scd_config else scd_config.get("type", 2)
     if not scd_config:
         return _build_default_scd_result(

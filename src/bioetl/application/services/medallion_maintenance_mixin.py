@@ -32,7 +32,17 @@ class _MedallionMaintenanceMixin:
         retention_days: int = 7,
         dry_run: bool = False,
     ) -> int:
-        """Vacuum a Delta table and return removed file count."""
+        """Vacuum a Delta table and return removed file count.
+
+        Args:
+            table: Delta table name to vacuum.
+            retention_days: Minimum file age in days before files are eligible
+                for removal. Converted internally to hours for the storage call.
+            dry_run: If True, report removable files without deleting them.
+
+        Returns:
+            Number of files removed (or that would be removed in dry_run mode).
+        """
         retention_hours = retention_days * 24
         self.logger.info(
             "Starting vacuum operation",
@@ -64,7 +74,16 @@ class _MedallionMaintenanceMixin:
         target_path: str,
         remove_source: bool = False,
     ) -> int:
-        """Archive table data to target path and optionally remove source."""
+        """Archive table data to target path and optionally remove source.
+
+        Args:
+            table: Delta table name to archive.
+            target_path: Destination path string for the archived data.
+            remove_source: If True, remove source data after successful archiving.
+
+        Returns:
+            Number of files archived.
+        """
         self.logger.info(
             "Starting archive operation",
             table=table,

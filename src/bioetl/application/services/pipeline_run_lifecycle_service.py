@@ -23,7 +23,12 @@ class PipelineRunLifecycleService:
     """Coordinate PipelineRun lifecycle transitions in application layer."""
 
     def start_run(self, run: PipelineRun, started_at: datetime | None = None) -> None:
-        """Start pipeline run."""
+        """Start pipeline run.
+
+        Args:
+            run: PipelineRun aggregate to transition to the running state.
+            started_at: Optional explicit start timestamp. Defaults to now (UTC).
+        """
         run.start(started_at or datetime.now(UTC))
 
     def stage_started(
@@ -32,7 +37,13 @@ class PipelineRunLifecycleService:
         stage: str,
         started_at: datetime | None = None,
     ) -> None:
-        """Record stage start transition."""
+        """Record stage start transition.
+
+        Args:
+            run: PipelineRun aggregate to record the stage start on.
+            stage: Stage name identifier (e.g. 'bronze', 'silver', 'gold').
+            started_at: Optional explicit start timestamp. Defaults to now (UTC).
+        """
         run.record_stage_start(stage=stage, started_at=started_at or datetime.now(UTC))
 
     def stage_succeeded(
@@ -45,7 +56,16 @@ class PipelineRunLifecycleService:
         started_at: datetime | None = None,
         completed_at: datetime | None = None,
     ) -> None:
-        """Record successful stage completion."""
+        """Record successful stage completion.
+
+        Args:
+            run: PipelineRun aggregate to record the stage success on.
+            stage: Stage name identifier (e.g. 'bronze', 'silver', 'gold').
+            result: Optional dict of stage output metadata or statistics.
+            records_processed: Number of records written in this stage.
+            started_at: Optional stage start timestamp. Defaults to now (UTC).
+            completed_at: Optional stage completion timestamp. Defaults to now (UTC).
+        """
         now = datetime.now(UTC)
         run.record_stage_success(
             stage=stage,
@@ -65,7 +85,16 @@ class PipelineRunLifecycleService:
         started_at: datetime | None = None,
         completed_at: datetime | None = None,
     ) -> None:
-        """Record failed stage transition."""
+        """Record failed stage transition.
+
+        Args:
+            run: PipelineRun aggregate to record the stage failure on.
+            stage: Stage name identifier (e.g. 'bronze', 'silver', 'gold').
+            error: Error message string or Exception that caused the failure.
+            error_type: Optional error class name string for categorization.
+            started_at: Optional stage start timestamp. Defaults to now (UTC).
+            completed_at: Optional stage failure timestamp. Defaults to now (UTC).
+        """
         now = datetime.now(UTC)
         run.record_stage_failure(
             stage=stage,
@@ -80,7 +109,12 @@ class PipelineRunLifecycleService:
         run: PipelineRun,
         completed_at: datetime | None = None,
     ) -> None:
-        """Complete run when all stage invariants are satisfied."""
+        """Complete run when all stage invariants are satisfied.
+
+        Args:
+            run: PipelineRun aggregate to transition to the completed state.
+            completed_at: Optional explicit completion timestamp. Defaults to now (UTC).
+        """
         run.complete(completed_at=completed_at or datetime.now(UTC))
 
     def fail_run(
@@ -91,7 +125,14 @@ class PipelineRunLifecycleService:
         error_type: str | None = None,
         failed_at: datetime | None = None,
     ) -> None:
-        """Fail run with pipeline-level failure details."""
+        """Fail run with pipeline-level failure details.
+
+        Args:
+            run: PipelineRun aggregate to transition to the failed state.
+            error: Human-readable error description for the pipeline failure.
+            error_type: Optional error class name string for categorization.
+            failed_at: Optional explicit failure timestamp. Defaults to now (UTC).
+        """
         run.fail(
             error=error,
             error_type=error_type,
@@ -103,7 +144,12 @@ class PipelineRunLifecycleService:
         run: PipelineRun,
         shutdown_at: datetime | None = None,
     ) -> None:
-        """Mark run as gracefully shut down."""
+        """Mark run as gracefully shut down.
+
+        Args:
+            run: PipelineRun aggregate to transition to the shutdown state.
+            shutdown_at: Optional explicit shutdown timestamp. Defaults to now (UTC).
+        """
         run.shutdown(shutdown_at=shutdown_at or datetime.now(UTC))
 
 

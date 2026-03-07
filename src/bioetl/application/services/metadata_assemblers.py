@@ -45,7 +45,18 @@ class SilverMetadataService:
     environment_metadata: EnvironmentMetadata
 
     def assemble(self, input_data: SilverMetadataInput) -> SilverMetadata:
-        """Build complete Silver metadata payload."""
+        """Build complete Silver metadata payload.
+
+        Args:
+            input_data: SilverMetadataInput with records, lineage sources, timing,
+                and DQ summary data needed to assemble the metadata sidecar.
+
+        Returns:
+            SilverMetadata assembled from the provided input and service context.
+
+        Raises:
+            ValueError: If records is empty and total_records is None.
+        """
         if not input_data.records and input_data.total_records is None:
             raise ValueError("Cannot create Silver metadata without records")
 
@@ -114,7 +125,18 @@ class GoldMetadataService:
     environment_metadata: EnvironmentMetadata
 
     def assemble(self, input_data: GoldMetadataInput) -> GoldMetadata:
-        """Build complete Gold metadata payload."""
+        """Build complete Gold metadata payload.
+
+        Args:
+            input_data: GoldMetadataInput with records, schema, lineage sources,
+                partition info, and SCD data needed to assemble the metadata sidecar.
+
+        Returns:
+            GoldMetadata assembled from the provided input and service context.
+
+        Raises:
+            ValueError: If records is empty and total_records is None.
+        """
         if not input_data.records and input_data.total_records is None:
             raise ValueError("Cannot create Gold metadata without records")
 

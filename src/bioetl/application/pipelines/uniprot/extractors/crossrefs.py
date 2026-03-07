@@ -32,7 +32,15 @@ class CrossRefExtractor:
 
     @classmethod
     def extract_go_terms(cls, xrefs: list[JsonDict] | None) -> str | None:
-        """Extract GO terms with structured data."""
+        """Extract GO terms with structured data.
+
+        Args:
+            xrefs: List of UniProt cross-reference dicts from the API response, or None.
+
+        Returns:
+            JSON-serialized list of GO term dicts (id, term, aspect, evidence),
+            or None if no GO cross-references are present.
+        """
         return extract_go_terms(xrefs)
 
     @staticmethod
@@ -50,7 +58,15 @@ class CrossRefExtractor:
 
     @staticmethod
     def extract_xref_ids(xrefs: list[JsonDict] | None, database: str) -> str | None:
-        """Extract cross-reference IDs for the requested database."""
+        """Extract cross-reference IDs for the requested database.
+
+        Args:
+            xrefs: List of UniProt cross-reference dicts from the API response, or None.
+            database: Database name string to filter on.
+
+        Returns:
+            JSON-serialized list of ID strings for the database, or None if empty.
+        """
         return extract_xref_ids(xrefs, database)
 
     @classmethod
@@ -63,7 +79,15 @@ class CrossRefExtractor:
 
     @classmethod
     def extract_pdb_xrefs(cls, xrefs: list[JsonDict] | None) -> str | None:
-        """Extract PDB cross-references with structural details."""
+        """Extract PDB cross-references with structural details.
+
+        Args:
+            xrefs: List of UniProt cross-reference dicts from the API response, or None.
+
+        Returns:
+            JSON-serialized list of PDB entry dicts (id, method, resolution, chains),
+            or None if no PDB cross-references are present.
+        """
         return extract_structured_xrefs(
             xrefs,
             database="PDB",
@@ -80,7 +104,15 @@ class CrossRefExtractor:
 
     @classmethod
     def extract_interpro_xrefs(cls, xrefs: list[JsonDict] | None) -> str | None:
-        """Extract InterPro cross-references with domain family information."""
+        """Extract InterPro cross-references with domain family information.
+
+        Args:
+            xrefs: List of UniProt cross-reference dicts from the API response, or None.
+
+        Returns:
+            JSON-serialized list of InterPro entry dicts (id, name),
+            or None if no InterPro cross-references are present.
+        """
         return extract_structured_xrefs(
             xrefs,
             database="InterPro",
@@ -97,7 +129,15 @@ class CrossRefExtractor:
 
     @classmethod
     def extract_pfam_xrefs(cls, xrefs: list[JsonDict] | None) -> str | None:
-        """Extract Pfam cross-references with protein family information."""
+        """Extract Pfam cross-references with protein family information.
+
+        Args:
+            xrefs: List of UniProt cross-reference dicts from the API response, or None.
+
+        Returns:
+            JSON-serialized list of Pfam entry dicts (id, name, match_status),
+            or None if no Pfam cross-references are present.
+        """
         return extract_structured_xrefs(
             xrefs,
             database="Pfam",
@@ -114,7 +154,15 @@ class CrossRefExtractor:
 
     @classmethod
     def extract_reactome_xrefs(cls, xrefs: list[JsonDict] | None) -> str | None:
-        """Extract Reactome cross-references with pathway information."""
+        """Extract Reactome cross-references with pathway information.
+
+        Args:
+            xrefs: List of UniProt cross-reference dicts from the API response, or None.
+
+        Returns:
+            JSON-serialized list of Reactome entry dicts (id, pathway_name),
+            or None if no Reactome cross-references are present.
+        """
         return extract_structured_xrefs(
             xrefs,
             database="Reactome",
@@ -127,15 +175,38 @@ class CrossRefExtractor:
         xrefs: list[JsonDict] | None,
         aspect: str,
     ) -> str | None:
-        """Extract GO terms filtered by aspect."""
+        """Extract GO terms filtered by aspect.
+
+        Args:
+            xrefs: List of UniProt cross-reference dicts from the API response, or None.
+            aspect: GO aspect character to filter on ('F', 'P', or 'C').
+
+        Returns:
+            JSON-serialized list of GO term dicts for the given aspect, or None if
+            no matching terms are found or aspect is invalid.
+        """
         return extract_go_by_aspect(xrefs, aspect)
 
     @classmethod
     def extract_molecular_function(cls, xrefs: list[JsonDict] | None) -> str | None:
-        """Extract GO terms for molecular function (F aspect)."""
+        """Extract GO terms for molecular function (F aspect).
+
+        Args:
+            xrefs: List of UniProt cross-reference dicts from the API response, or None.
+
+        Returns:
+            JSON-serialized list of molecular function GO term dicts, or None if absent.
+        """
         return extract_go_by_aspect(xrefs, "F")
 
     @classmethod
     def extract_cellular_component(cls, xrefs: list[JsonDict] | None) -> str | None:
-        """Extract GO terms for cellular component (C aspect)."""
+        """Extract GO terms for cellular component (C aspect).
+
+        Args:
+            xrefs: List of UniProt cross-reference dicts from the API response, or None.
+
+        Returns:
+            JSON-serialized list of cellular component GO term dicts, or None if absent.
+        """
         return extract_go_by_aspect(xrefs, "C")

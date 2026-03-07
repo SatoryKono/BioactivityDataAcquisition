@@ -72,6 +72,13 @@ class CliRunOrchestrationService:
     ) -> StartOffsetValidationResult:
         """Validate start offset constraints for run command options.
 
+        Args:
+            start_offset: Optional record offset to start processing from.
+                Must be non-negative and only valid for incremental runs.
+            run_type: Pipeline run type string (e.g. 'incremental', 'backfill').
+            resume: Whether the run resumes a previously interrupted pipeline.
+                Mutually exclusive with start_offset.
+
         Returns:
             StartOffsetValidationResult with is_valid flag and optional error_message.
         """
@@ -114,6 +121,22 @@ class CliRunOrchestrationService:
     ) -> RunOptions:
         """Build RunOptions from CLI input.
 
+        Args:
+            run_type: Pipeline run type ('incremental', 'backfill', 'rebuild').
+            resume: Whether to resume from a previously interrupted run.
+            start_offset: Optional record offset for incremental runs.
+            limit: Optional maximum number of records to process.
+            input_csv: Optional path to CSV file with input IDs.
+            filter_column: Optional column name to apply ID filtering.
+            filter_field: Optional field name for API-side filtering.
+            dry_run: If True, validate and plan but do not write to storage.
+            vacuum_after_run: If True, vacuum Delta tables after the run.
+            vacuum_retention_days: Number of days for Delta vacuum retention.
+            debug: If True, sets log level to DEBUG.
+            use_cached_bronze: If True, use a previously cached Bronze extract.
+            cached_bronze_date: Date string for the cached Bronze snapshot.
+            cached_bronze_path: File system path to the cached Bronze snapshot.
+
         Returns:
             RunOptions populated from the provided CLI parameters.
         """
@@ -146,6 +169,15 @@ class CliRunOrchestrationService:
         flush_metrics: MetricsFlushCallable,
     ) -> RunResult:
         """Execute pipeline with deterministic metrics flush.
+
+        Args:
+            pipeline: Pipeline name identifier to execute.
+            options: RunOptions controlling run behaviour (type, limit, etc.).
+            health_server: Whether to enable the HTTP health-check server.
+            health_port: Port number for the health-check server.
+            run_pipeline_async: Callable that creates the async pipeline coroutine.
+            run_coroutine: Callable that runs the coroutine in a sync context.
+            flush_metrics: Callable to flush metrics after the pipeline finishes.
 
         Returns:
             RunResult from the completed pipeline execution.

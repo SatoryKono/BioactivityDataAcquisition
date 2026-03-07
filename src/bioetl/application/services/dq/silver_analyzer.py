@@ -133,7 +133,30 @@ class SilverDQAnalyzer:
             | None
         ) = None,  # Any: DQ check values vary by check type
     ) -> SilverDQReport:
-        """Analyze Silver data and generate DQ report."""
+        """Analyze Silver data and generate DQ report.
+
+        Args:
+            data: Input DataFrame or PyArrow Table to run DQ checks on.
+            run_id: Unique run identifier for the report header.
+            pipeline: Pipeline name string for the report header.
+            target_table: Target Silver table name for the report header.
+            source_batch_ids: List of upstream Bronze batch IDs for lineage.
+            config: Silver DQ config port controlling which checks are enabled.
+            timestamp: Report timestamp (usually the run completion time).
+            primary_keys: List of column names that form the entity primary key.
+            soft_fail_threshold: Error rate threshold for WARN status (default 5%).
+            hard_fail_threshold: Error rate threshold for FAIL status (default 20%).
+            input_record_count: Optional count of Bronze input records for
+                error rate calculation.
+            quarantined_count: Number of records quarantined during transformation.
+            previous_schema: Optional schema snapshot from the prior run for
+                drift detection.
+            key_nullability_rules: Optional list of nullability rule dicts for
+                business-key null rate checks.
+
+        Returns:
+            SilverDQReport with per-check results, thresholds, and aggregate summary.
+        """
         df = self._to_polars_dataframe(data)
         enabled_checks = set(config.get_checks_enums())
         checks, passed, failed, warnings = self._check_executor.execute_checks(

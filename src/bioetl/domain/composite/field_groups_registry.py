@@ -62,7 +62,14 @@ class FieldGroupRegistry:
         return len(self._column_to_group)
 
     def get_group(self, column: str) -> FieldGroupId:
-        """Get semantic group for a column or field name."""
+        """Get semantic group for a column or field name.
+
+        Args:
+            column: Column name (qualified as 'provider.entity.field' or unqualified).
+
+        Returns:
+            FieldGroupId for the column, or the default group if unmapped.
+        """
         col_lower = column.lower()
         if col_lower in self._column_to_group:
             return self._column_to_group[col_lower]
@@ -70,25 +77,60 @@ class FieldGroupRegistry:
         return self._field_to_group.get(field_name, self._default_group)
 
     def get_field_mapping(self, base_name: str) -> FieldMapping | None:
-        """Get FieldMapping for a base field name."""
+        """Get FieldMapping for a base field name.
+
+        Args:
+            base_name: Unqualified base field name to look up.
+
+        Returns:
+            FieldMapping for the field, or None if the field is not registered.
+        """
         return self._field_to_mapping.get(base_name.lower())
 
     def get_group_definition(
         self, group_id: FieldGroupId
     ) -> FieldGroupDefinition | None:
-        """Get FieldGroupDefinition for a group ID."""
+        """Get FieldGroupDefinition for a group ID.
+
+        Args:
+            group_id: Semantic group identifier to look up.
+
+        Returns:
+            FieldGroupDefinition for the group, or None if not registered.
+        """
         return self._group_to_def.get(group_id)
 
     def is_gold_field(self, column: str) -> bool:
-        """Check if a column should be included in Gold layer."""
+        """Check if a column should be included in Gold layer.
+
+        Args:
+            column: Column name (qualified or unqualified) to check.
+
+        Returns:
+            True if the column's semantic group is marked for Gold inclusion.
+        """
         return self.get_group(column).include_in_gold
 
     def get_gold_columns(self, columns: list[str]) -> list[str]:
-        """Filter columns to only those included in Gold layer."""
+        """Filter columns to only those included in Gold layer.
+
+        Args:
+            columns: List of column names to filter.
+
+        Returns:
+            Subset of columns that belong to Gold-eligible groups or are system columns.
+        """
         return [c for c in columns if c.startswith("_") or self.is_gold_field(c)]
 
     def get_trash_columns(self, columns: list[str]) -> list[str]:
-        """Get columns that would be excluded from Gold layer."""
+        """Get columns that would be excluded from Gold layer.
+
+        Args:
+            columns: List of column names to filter.
+
+        Returns:
+            Subset of columns that are not Gold-eligible and not system columns.
+        """
         return [
             c for c in columns if not c.startswith("_") and not self.is_gold_field(c)
         ]
@@ -96,11 +138,26 @@ class FieldGroupRegistry:
     def get_columns_by_group(
         self, columns: list[str], group: FieldGroupId
     ) -> list[str]:
-        """Get columns belonging to a specific group."""
+        """Get columns belonging to a specific group.
+
+        Args:
+            columns: List of column names to filter.
+            group: Semantic group ID to filter by.
+
+        Returns:
+            List of columns whose semantic group matches the given group ID.
+        """
         return [c for c in columns if self.get_group(c) == group]
 
     def get_ordered_columns(self, columns: list[str]) -> list[str]:
-        """Sort columns by semantic group and provider priority."""
+        """Sort columns by semantic group and provider priority.
+
+        Args:
+            columns: List of column names to sort.
+
+        Returns:
+            Columns sorted by group order then provider priority, with system columns appended last.
+        """
         system_cols = [c for c in columns if c.startswith("_")]
         data_cols = [c for c in columns if not c.startswith("_")]
         group_order = list(FieldGroupId)
@@ -119,7 +176,14 @@ class FieldGroupRegistry:
         return sorted_data + sorted(system_cols)
 
     def validate_columns(self, columns: list[str]) -> dict[str, list[str]]:
-        """Validate columns against the registry."""
+        """Validate columns against the registry.
+
+        Args:
+            columns: List of column names to classify against the registry.
+
+        Returns:
+            Dictionary with keys 'mapped', 'unmapped', and 'system' listing columns by classification.
+        """
         mapped: list[str] = []
         unmapped: list[str] = []
         system: list[str] = []
@@ -162,7 +226,16 @@ def build_field_group_registry(
     provider_order: tuple[str, ...] = DEFAULT_PROVIDER_ORDER,
     default_group: FieldGroupId = FieldGroupId.TRASH,
 ) -> FieldGroupRegistry:
-    """Factory function to create a FieldGroupRegistry."""
+    """Factory function to create a FieldGroupRegistry.
+
+    Args:
+        groups: Tuple of FieldGroupDefinition instances defining the semantic groups.
+        provider_order: Ordered tuple of provider names for column priority. Defaults to DEFAULT_PROVIDER_ORDER.
+        default_group: Fallback group for unregistered columns. Defaults to TRASH.
+
+    Returns:
+        Configured FieldGroupRegistry instance.
+    """
     return FieldGroupRegistry(
         groups=groups,
         provider_order=provider_order,

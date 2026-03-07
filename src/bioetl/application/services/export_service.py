@@ -52,7 +52,14 @@ class ExportService:
     export_path: Path = field(default_factory=lambda: Path("data/exports"))
 
     def list_tables(self, layer: str = "all") -> list[TableInfo]:
-        """Discover available Delta tables."""
+        """Discover available Delta tables.
+
+        Args:
+            layer: Layer scope to scan — 'silver', 'gold', or 'all' to scan both.
+
+        Returns:
+            Sorted list of TableInfo objects for all discovered Delta tables.
+        """
         tables: list[TableInfo] = []
         if layer in ("all", "silver"):
             tables.extend(_scan_layer_for_tables(self.silver_path, "silver"))
@@ -66,7 +73,16 @@ class ExportService:
         layer: str = "silver",
         sample_rows: int = 5,
     ) -> TablePreview:
-        """Get preview of a table's schema and sample data."""
+        """Get preview of a table's schema and sample data.
+
+        Args:
+            table_name: Delta table name to preview.
+            layer: Medallion layer to search in ('silver' or 'gold').
+            sample_rows: Number of sample rows to include in the preview.
+
+        Returns:
+            TablePreview with schema columns, row count, and sample row data.
+        """
         table_path = self._get_table_path(table_name, layer)
 
         schema = await self.reader.get_schema(str(table_path))
@@ -93,7 +109,17 @@ class ExportService:
         layer: str = "silver",
         options: ExportOptions | None = None,
     ) -> ExportResult:
-        """Export a Delta table to the specified format."""
+        """Export a Delta table to the specified format.
+
+        Args:
+            table_name: Delta table name to export.
+            layer: Medallion layer to read from ('silver' or 'gold').
+            options: Optional export options controlling format, columns, limit,
+                and output path. Defaults to ExportOptions() if not provided.
+
+        Returns:
+            ExportResult with output path, row count, and any error message.
+        """
         options = options or ExportOptions()
         table_path = self._get_table_path(table_name, layer)
 

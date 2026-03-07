@@ -225,7 +225,14 @@ WHITESPACE_RE: Final[re.Pattern[str]] = re.compile(r"\s+")
 
 
 def classify_by_taxonomy_id(taxonomy_id: int) -> CellularityType | None:
-    """Classify by taxonomy ID using frozenset membership."""
+    """Classify by taxonomy ID using frozenset membership.
+
+    Args:
+        taxonomy_id: NCBI taxonomy ID to classify.
+
+    Returns:
+        CellularityType if the taxonomy ID is in a known frozenset, None if unclassified.
+    """
     if taxonomy_id in ACELLULAR_TAX_IDS:
         return CellularityType.ACELLULAR
     if taxonomy_id in UNICELLULAR_TAX_IDS:

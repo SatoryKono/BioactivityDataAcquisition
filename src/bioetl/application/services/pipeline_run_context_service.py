@@ -35,7 +35,18 @@ class PipelineRunContextService:
         dry_run: bool,
         default_options_factory: Callable[[bool], TOptions],
     ) -> TOptions:
-        """Merge explicit options with command-level flags."""
+        """Merge explicit options with command-level flags.
+
+        Args:
+            options: Pre-built options object to use as-is, or None to use defaults.
+            dry_run: CLI-level dry_run flag passed to the default options factory
+                when options is None.
+            default_options_factory: Callable that produces a default options instance
+                from the dry_run flag.
+
+        Returns:
+            The provided options if not None, otherwise a default options instance.
+        """
         if options is not None:
             return options
         return default_options_factory(dry_run)
@@ -47,7 +58,16 @@ class PipelineRunContextService:
         run_id: RunID,
         options: RunOptions,
     ) -> PipelineRunContext:
-        """Build PipelineRunContext from run options."""
+        """Build PipelineRunContext from run options.
+
+        Args:
+            pipeline_name: Identifier string for the pipeline being executed.
+            run_id: Unique run identifier for this execution.
+            options: RunOptions controlling run behaviour (type, filters, vacuum, etc.).
+
+        Returns:
+            PipelineRunContext assembled from the provided options and context fields.
+        """
         input_filter = self._build_input_filter(options)
         vacuum = VacuumConfig(
             enabled=options.vacuum_after_run,
