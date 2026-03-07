@@ -18,7 +18,7 @@
 - Root-level tracked директории MUST ограничиваться: `.ai`, `.aiassistant`, `.claude`, `.codex`, `.gemini`, `.github`, `.jules`, `.junie`, `assets`, `configs`, `data`, `docs`, `grafana`, `reports`, `scripts`, `src`, `tests`.
 - Служебные локальные деревья (`.worktrees/`, `.rollback/`) MUST NOT попадать в git-index.
 - Локальные tooling-каталоги (например, `.idea/`, `.vscode/`, `.cursor/`, `.trae/`, `.windsurf/`) MAY существовать в рабочем дереве, но MUST оставаться untracked и игнорироваться `.gitignore`.
-
+  
 Проверка:
 
 ```bash

@@ -57,19 +57,56 @@ def _load_allowed_root_files(repo_root: Path) -> frozenset[str]:
     return frozenset(entries)
 
 
+def _discover_repo_root(script_root: Path) -> Path:
+    """Best-effort repository root discovery that works in mixed Windows/WSL runs."""
+
+    def _find_from(start: Path) -> Path | None:
+        current = start if start.is_dir() else start.parent
+        for candidate in (current, *current.parents):
+            if (candidate / ".git").exists():
+                return candidate
+        return None
+
+    for base in (Path.cwd(), script_root):
+        resolved = _find_from(base)
+        if resolved is not None:
+            return resolved
+    return script_root
+
+
+def _run_git(repo_root: Path, *git_args: str) -> subprocess.CompletedProcess[bytes]:
+    """Run git with fallbacks for path/cwd interoperability issues."""
+    attempts: tuple[tuple[list[str], Path | None], ...] = (
+        (["git", "-C", str(repo_root), *git_args], None),
+        (["git", *git_args], repo_root),
+        (["git", *git_args], Path.cwd()),
+    )
+    last_error: subprocess.CalledProcessError | None = None
+    for command, cwd in attempts:
+        try:
+            return subprocess.run(  # nosec
+                command,
+                check=True,
+                capture_output=True,
+                text=False,
+                cwd=str(cwd) if cwd is not None else None,
+            )
+        except subprocess.CalledProcessError as exc:
+            last_error = exc
+    assert last_error is not None
+    raise last_error
+
+
 def _get_tracked_paths(repo_root: Path) -> list[str]:
     """Return tracked paths from git index, excluding staged deletions."""
-    completed = subprocess.run(  # nosec
-        ["git", "-C", str(repo_root), "ls-files", "-z"],
-        check=True,
-        capture_output=True,
-        text=False,
-    )
-    staged_deleted = subprocess.run(  # nosec
-        ["git", "-C", str(repo_root), "diff", "--cached", "--name-only", "--diff-filter=D", "-z"],
-        check=True,
-        capture_output=True,
-        text=False,
+    completed = _run_git(repo_root, "ls-files", "-z")
+    staged_deleted = _run_git(
+        repo_root,
+        "diff",
+        "--cached",
+        "--name-only",
+        "--diff-filter=D",
+        "-z",
     )
     decoded = completed.stdout.decode("utf-8", errors="replace")
     deleted = {
@@ -92,12 +129,7 @@ def _collect_tracked_root_entries(paths: list[str]) -> tuple[set[str], set[str]]
 
 def _get_untracked_paths(repo_root: Path) -> list[str]:
     """Return untracked (non-ignored) paths from git working tree."""
-    completed = subprocess.run(  # nosec
-        ["git", "-C", str(repo_root), "ls-files", "--others", "--exclude-standard", "-z"],
-        check=True,
-        capture_output=True,
-        text=False,
-    )
+    completed = _run_git(repo_root, "ls-files", "--others", "--exclude-standard", "-z")
     decoded = completed.stdout.decode("utf-8", errors="replace")
     return [path for path in decoded.split("\0") if path]
 
@@ -126,7 +158,8 @@ def _parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = _parse_args()
-    repo_root = Path(__file__).resolve().parents[1]
+    script_root = Path(__file__).resolve().parents[1]
+    repo_root = _discover_repo_root(script_root)
 
     try:
         allowed_root_files = _load_allowed_root_files(repo_root)
