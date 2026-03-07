@@ -492,9 +492,10 @@ class TestUnifiedHTTPClientRequestMethods:
         """Test RetryExhaustedError after all retries."""
         mock_circuit_breaker.call.side_effect = httpx.ConnectError("Connection failed")
 
-        async with http_client:
-            with pytest.raises(RetryExhaustedError):
-                await http_client.get("https://api.example.com/data")
+        with patch("asyncio.sleep", new_callable=AsyncMock):
+            async with http_client:
+                with pytest.raises(RetryExhaustedError):
+                    await http_client.get("https://api.example.com/data")
 
         # Should have tried max_attempts times
         assert mock_circuit_breaker.call.call_count == 2
@@ -516,9 +517,10 @@ class TestUnifiedHTTPClientRequestMethods:
         )
         mock_circuit_breaker.call.side_effect = httpx.ConnectError("Connection failed")
 
-        async with client:
-            with pytest.raises(RetryExhaustedError):
-                await client.get("https://api.example.com/data")
+        with patch("asyncio.sleep", new_callable=AsyncMock):
+            async with client:
+                with pytest.raises(RetryExhaustedError):
+                    await client.get("https://api.example.com/data")
 
         # 1 initial attempt + 1 retry (budgeted)
         assert mock_circuit_breaker.call.call_count == 2

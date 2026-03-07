@@ -64,12 +64,24 @@ ALLOWED_PATTERNS = [
 class TestVCRCassetteSanitization:
     """Tests that VCR cassettes don't contain secrets."""
 
-    @pytest.fixture
+    @pytest.fixture(scope="class")
     def cassette_files(self) -> list[Path]:
-        """Get all VCR cassette files."""
+        """Get all VCR cassette files (class-scoped to avoid repeated glob)."""
         if not VCR_DIR.exists():
             pytest.skip("VCR directory not found")
         return list(VCR_DIR.rglob("*.yaml"))
+
+    @pytest.fixture(scope="class")
+    def cassette_contents(self, cassette_files: list[Path]) -> list[tuple[str, str]]:
+        """Pre-load all cassette contents once for the entire class.
+
+        Returns list of (filename, content) tuples. Reading 182 YAML files
+        (~169MB) once instead of per-test avoids ~7x redundant I/O.
+        """
+        return [
+            (cassette.name, cassette.read_text(encoding="utf-8"))
+            for cassette in cassette_files
+        ]
 
     def test_vcr_cassettes_exist(self, cassette_files: list[Path]) -> None:
         """Verify VCR cassettes exist."""
@@ -80,31 +92,29 @@ class TestVCRCassetteSanitization:
         ["Authorization", "X-API-Key", "X-Api-Key", "Api-Key", "Apikey"],
     )
     def test_no_authorization_headers_with_real_values(
-        self, cassette_files: list[Path], header_name: str
+        self, cassette_contents: list[tuple[str, str]], header_name: str
     ) -> None:
         """Verify cassettes don't contain real authorization headers."""
         violations = []
-        for cassette in cassette_files:
-            content = cassette.read_text(encoding="utf-8")
+        for name, content in cassette_contents:
             # Look for headers with actual values (not empty or placeholder)
             pattern = rf"{header_name}:\s*['\"]?[A-Za-z0-9+/=\-_.]{(20,)}['\"]?"
             if re.search(pattern, content, re.IGNORECASE):
-                violations.append(f"{cassette.name}: Contains {header_name} header")
+                violations.append(f"{name}: Contains {header_name} header")
 
         assert not violations, "Cassettes with secrets:\n" + "\n".join(violations)
 
-    def test_no_bearer_tokens(self, cassette_files: list[Path]) -> None:
+    def test_no_bearer_tokens(self, cassette_contents: list[tuple[str, str]]) -> None:
         """Verify no Bearer tokens in cassettes."""
         violations = []
-        for cassette in cassette_files:
-            content = cassette.read_text(encoding="utf-8")
+        for name, content in cassette_contents:
             # Real Bearer tokens are typically 20+ chars
             if re.search(r"Bearer\s+[A-Za-z0-9\-_.]{20,}", content):
-                violations.append(f"{cassette.name}: Contains Bearer token")
+                violations.append(f"{name}: Contains Bearer token")
 
         assert not violations, "Cassettes with Bearer tokens:\n" + "\n".join(violations)
 
-    def test_no_aws_credentials(self, cassette_files: list[Path]) -> None:
+    def test_no_aws_credentials(self, cassette_contents: list[tuple[str, str]]) -> None:
         """Verify no AWS credentials in cassettes.
 
         Note: AKIA patterns in protein sequences are excluded as false positives.
@@ -120,15 +130,14 @@ class TestVCRCassetteSanitization:
         ]
         aws_secret_pattern = r'["\']?aws[_-]?secret[_-]?access[_-]?key["\']?\s*[:=]\s*["\'][^"\']{20,}["\']'
 
-        for cassette in cassette_files:
-            content = cassette.read_text(encoding="utf-8")
+        for name, content in cassette_contents:
             # Look for AWS keys in header/config context (not in protein sequences)
             for pattern in aws_key_patterns:
                 if re.search(pattern, content, re.IGNORECASE):
-                    violations.append(f"{cassette.name}: Contains AWS Access Key")
+                    violations.append(f"{name}: Contains AWS Access Key")
                     break
             if re.search(aws_secret_pattern, content, re.IGNORECASE):
-                violations.append(f"{cassette.name}: Contains AWS Secret")
+                violations.append(f"{name}: Contains AWS Secret")
 
         assert not violations, "Cassettes with AWS credentials:\n" + "\n".join(
             violations

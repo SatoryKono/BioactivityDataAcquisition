@@ -28,6 +28,11 @@ def _can_retry(
 ) -> bool:
     """Return True when another retry attempt is allowed.
 
+    Args:
+        retry_config: Retry policy object with attempt and budget methods.
+        attempt: Current attempt index (0-based).
+        retries_used: Number of retries already consumed in this request.
+
     Returns:
         True if another attempt is permitted by attempt count and retry budget, False otherwise.
     """
@@ -45,7 +50,17 @@ def _record_request_metrics(
     retries: int,
     last_error: Exception | None,
 ) -> None:
-    """Record request duration, retry, and error metrics."""
+    """Record request duration, retry, and error metrics.
+
+    Args:
+        metrics: Metrics port for emitting counters and histograms.
+        provider: Provider name used as label in metrics.
+        method: HTTP method (GET, POST, etc.) used as label.
+        duration: Total request duration in seconds.
+        status_code: HTTP response status code (0 if connection-level error).
+        retries: Number of retry attempts made.
+        last_error: Final exception if the request failed, or None on success.
+    """
     labels = {
         "provider": provider,
         "method": method.upper(),
@@ -89,6 +104,11 @@ class HTTPClientRetryMixin:
         response: httpx.Response | None = None,
     ) -> float:
         """Calculate and sleep for retry delay, honoring Retry-After.
+
+        Args:
+            attempt: Current attempt index (0-based) used to compute backoff.
+            url: Request URL used for delay calculation (may affect jitter seed).
+            response: Optional HTTP response whose Retry-After header is honored.
 
         Returns:
             Actual delay in seconds that was slept, after clamping Retry-After if present.

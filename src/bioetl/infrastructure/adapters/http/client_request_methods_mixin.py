@@ -37,6 +37,11 @@ class HTTPClientRequestMethodsMixin:
     ) -> httpx.Response:
         """Send GET request with retry policy.
 
+        Args:
+            url: Target URL for the request.
+            params: Optional query parameters to append to the URL.
+            headers: Optional additional HTTP headers.
+
         Returns:
             httpx.Response from the server after applying retry policy.
         """
@@ -53,6 +58,12 @@ class HTTPClientRequestMethodsMixin:
     ) -> httpx.Response:
         """Send POST request with retry policy.
 
+        Args:
+            url: Target URL for the request.
+            json: Optional JSON payload to send as request body.
+            data: Optional form data to send as request body.
+            headers: Optional additional HTTP headers.
+
         Returns:
             httpx.Response from the server after applying retry policy.
         """
@@ -67,6 +78,10 @@ class HTTPClientRequestMethodsMixin:
     ) -> httpx.Response:
         """Send HEAD request with retry policy.
 
+        Args:
+            url: Target URL for the request.
+            headers: Optional additional HTTP headers.
+
         Returns:
             httpx.Response from the server after applying retry policy.
         """
@@ -79,6 +94,11 @@ class HTTPClientRequestMethodsMixin:
         headers: dict[str, str] | None = None,
     ) -> httpx.Response:
         """Send single GET request without retry loop.
+
+        Args:
+            url: Target URL for the request.
+            params: Optional query parameters to append to the URL.
+            headers: Optional additional HTTP headers.
 
         Returns:
             httpx.Response from the server, raises on non-2xx status.
