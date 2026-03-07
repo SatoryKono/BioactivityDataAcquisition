@@ -44,36 +44,36 @@ tests/contract/silver_schemas/
 
 ```bash
 # Run all Silver schema contract tests
-pytest tests/contract/silver_schemas/ -v
+BIOETL_LIVE_API_TESTS=true BIOETL_NETWORK_TESTS=true pytest tests/contract/silver_schemas/ --network -v
 
 # Run with coverage
-pytest tests/contract/silver_schemas/ --cov=src/bioetl/domain/schemas
+BIOETL_LIVE_API_TESTS=true BIOETL_NETWORK_TESTS=true pytest tests/contract/silver_schemas/ --network --cov=src/bioetl/domain/schemas
 
 # Run for specific schema
-pytest tests/contract/silver_schemas/ -k chembl_activity
+BIOETL_LIVE_API_TESTS=true BIOETL_NETWORK_TESTS=true pytest tests/contract/silver_schemas/ --network -k chembl_activity
 ```
 
 ### By Test Category
 
 ```bash
 # Schema stability (snapshot tests)
-pytest tests/contract/silver_schemas/test_schema_stability.py -v
+BIOETL_LIVE_API_TESTS=true BIOETL_NETWORK_TESTS=true pytest tests/contract/silver_schemas/test_schema_stability.py --network -v
 
 # Type safety
-pytest tests/contract/silver_schemas/test_field_types.py -v
+BIOETL_LIVE_API_TESTS=true BIOETL_NETWORK_TESTS=true pytest tests/contract/silver_schemas/test_field_types.py --network -v
 
 # Validation rules
-pytest tests/contract/silver_schemas/test_validations.py -v
+BIOETL_LIVE_API_TESTS=true BIOETL_NETWORK_TESTS=true pytest tests/contract/silver_schemas/test_validations.py --network -v
 
 # Naming conventions
-pytest tests/contract/silver_schemas/test_naming_conventions.py -v
+BIOETL_LIVE_API_TESTS=true BIOETL_NETWORK_TESTS=true pytest tests/contract/silver_schemas/test_naming_conventions.py --network -v
 ```
 
 ### Continuous Integration
 
 ```bash
 # Run as part of contract test suite
-pytest tests/contract/ -m contracts -v
+BIOETL_LIVE_API_TESTS=true BIOETL_NETWORK_TESTS=true pytest tests/contract/ --network -m contracts -v
 ```
 
 ---

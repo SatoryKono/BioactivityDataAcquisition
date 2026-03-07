@@ -29,6 +29,7 @@ Commands:
   arch          Architecture tests (tests/architecture/)
   integration   Integration tests (tests/integration/)
   contract      Contract tests (tests/contract/)
+  contract-live Contract tests with live APIs + network enabled
   smoke         Smoke tests (tests/smoke/)
   security      Security tests (tests/security/)
   cov           All tests with coverage report (fail-under=85%)
@@ -85,6 +86,18 @@ switch ($Command) {
     }
     "contract" {
         Invoke-Pytest "Contract Tests" (@("tests/contract/", "-v") + $ExtraArgs)
+    }
+    "contract-live" {
+        $prevLive = $env:BIOETL_LIVE_API_TESTS
+        $prevNetwork = $env:BIOETL_NETWORK_TESTS
+        try {
+            $env:BIOETL_LIVE_API_TESTS = "true"
+            $env:BIOETL_NETWORK_TESTS = "true"
+            Invoke-Pytest "Contract Tests (live)" (@("tests/contract/", "--network", "-v") + $ExtraArgs)
+        } finally {
+            $env:BIOETL_LIVE_API_TESTS = $prevLive
+            $env:BIOETL_NETWORK_TESTS = $prevNetwork
+        }
     }
     "smoke" {
         Invoke-Pytest "Smoke Tests" (@("tests/smoke/", "-v") + $ExtraArgs)
