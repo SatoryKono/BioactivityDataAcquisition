@@ -51,6 +51,7 @@ Commands:
   arch          Architecture tests (tests/architecture/)
   integration   Integration tests (tests/integration/)
   contract      Contract tests (tests/contract/)
+  contract-live Contract tests with live APIs + network enabled
   smoke         Smoke tests (tests/smoke/)
   security      Security tests (tests/security/)
   cov           All tests with coverage report (fail-under=85%)
@@ -95,6 +96,19 @@ cmd_unit()        { run_pytest "Unit Tests"         tests/unit/ -x -q "$@"; }
 cmd_arch()        { run_pytest "Architecture Tests" tests/architecture/ -v "$@"; }
 cmd_integration() { run_pytest "Integration Tests"  tests/integration/ -x -q "$@"; }
 cmd_contract()    { run_pytest "Contract Tests"     tests/contract/ -v "$@"; }
+cmd_contract_live() {
+    info "Running: Contract Tests (live APIs + network)"
+    info "Command: BIOETL_LIVE_API_TESTS=true BIOETL_NETWORK_TESTS=true ${PYTHON} -m pytest tests/contract/ --network -v $*"
+    echo ""
+    if BIOETL_LIVE_API_TESTS=true BIOETL_NETWORK_TESTS=true "$PYTHON" -m pytest tests/contract/ --network -v "$@"; then
+        echo ""
+        ok "Contract Tests (live) passed"
+    else
+        echo ""
+        err "Contract Tests (live) failed"
+        exit 1
+    fi
+}
 cmd_smoke()       { run_pytest "Smoke Tests"        tests/smoke/ -v "$@"; }
 cmd_security()    { run_pytest "Security Tests"     tests/security/ -v "$@"; }
 
@@ -154,6 +168,7 @@ case "$command" in
     arch)        cmd_arch "$@" ;;
     integration) cmd_integration "$@" ;;
     contract)    cmd_contract "$@" ;;
+    contract-live) cmd_contract_live "$@" ;;
     smoke)       cmd_smoke "$@" ;;
     security)    cmd_security "$@" ;;
     cov)         cmd_cov "$@" ;;
