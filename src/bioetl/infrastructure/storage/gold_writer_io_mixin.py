@@ -351,7 +351,7 @@ class GoldWriterIOMixin(GoldWriterReadCleanupMixin):
             except module.GOLD_WRITE_RETRY_ERRORS as error:
                 if attempt == 2:
                     raise error
-                delay = 0.5 * (2**attempt) + 0.05
+                delay = 0.5 * (2 ** attempt) + 0.05
                 await module.asyncio.sleep(delay)
         if self.csv_exporter:
             await self.csv_exporter.export(
@@ -396,7 +396,7 @@ class GoldWriterIOMixin(GoldWriterReadCleanupMixin):
             except module.GOLD_WRITE_RETRY_ERRORS as error:
                 if attempt == 2:
                     raise error
-                delay = 0.5 * (2**attempt) + 0.05
+                delay = 0.5 * (2 ** attempt) + 0.05
                 await module.asyncio.sleep(delay)
 
     async def _merge_scd2(
