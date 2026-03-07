@@ -166,6 +166,11 @@ docs/02-architecture/mmd-diagrams/**/svg/*.svg
 /run_extract.bat
 /test_author_quick.py
 /temp_batch_executor.txt
+/.tmp_*
+/.tmp_mypy_*.log
+/mypy_*.log
+/bash.exe.stackdump
+/NUL
 
 # Codex CLI temp files
 .setup_wsl_codex.sh
@@ -193,4 +198,3 @@ docs/reports/branch-full-diff-matrix-2026-03-01.csv
 .claude/marketplace.json
 /docs/.claude/settings*
 /data/миграция
-
