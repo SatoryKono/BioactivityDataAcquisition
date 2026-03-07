@@ -1,35 +1,33 @@
-"""Export service for Delta Lake tables.
-
-Provides high-level export operations for Silver/Gold Delta tables
-to CSV, XLSX, and TSV formats.
-"""
+"""Export service for Delta Lake tables."""
 
 from __future__ import annotations
 
-from bioetl.domain.types import JsonDict
-
-__all__ = [
-    "ColumnInfo",
-    "ExportFormat",
-    "ExportOptions",
-    "ExportResult",
-    "ExportService",
-    "TableInfo",
-    "TablePreview",
-]
-
-
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING
 
+from bioetl.application.services.export_discovery import (
+    _scan_layer_for_tables,
+    _scan_provider_for_tables,
+)
+from bioetl.application.services.export_models import (
+    ColumnInfo,
+    ExportFormat,
+    ExportOptions,
+    ExportResult,
+    TableInfo,
+    TablePreview,
+)
+from bioetl.application.services.export_writers import (
+    _write_delimited_file,
+    _write_xlsx_file,
+)
 from bioetl.domain.exceptions import BioETLError, StorageError
 
 if TYPE_CHECKING:
     import pyarrow as pa
 
     from bioetl.domain.ports import DeltaReaderPort, LoggerPort
-
 
 _EXPORT_OPERATION_ERRORS = (
     StorageError,
@@ -43,214 +41,9 @@ _EXPORT_OPERATION_ERRORS = (
 )
 
 
-ExportFormat = Literal["csv", "xlsx", "tsv"]
-
-
-@dataclass(frozen=True, slots=True)
-class ColumnInfo:
-    """Information about a table column.
-
-    Attributes:
-        name: Column name.
-        type: Column data type as string.
-        nullable: Whether the column allows nulls.
-    """
-
-    name: str
-    type: str
-    nullable: bool
-
-
-@dataclass(frozen=True, slots=True)
-class TablePreview:
-    """Preview of a Delta table for display.
-
-    Attributes:
-        table_name: Full table name (e.g., chembl.activity).
-        layer: Medallion layer (silver/gold).
-        row_count: Total number of rows.
-        columns: List of column information.
-        sample_rows: First few rows as dictionaries.
-    """
-
-    table_name: str
-    layer: str
-    row_count: int
-    columns: tuple[ColumnInfo, ...]
-    sample_rows: tuple[
-        JsonDict, ...  # Any: port contract allows heterogeneous record values
-    ]  # Any: port contract allows heterogeneous record values
-
-
-@dataclass(frozen=True, slots=True)
-class TableInfo:
-    """Information about a discovered table.
-
-    Attributes:
-        name: Table name in format "provider.entity".
-        layer: Medallion layer (silver/gold).
-        path: Full path to the table directory.
-    """
-
-    name: str
-    layer: str
-    path: Path
-
-
-@dataclass(frozen=True, slots=True)
-class ExportOptions:
-    """Options for export operation.
-
-    Attributes:
-        format: Output format (csv, xlsx, tsv).
-        output_path: Directory to write output file.
-        limit: Maximum rows to export (None for all).
-        columns: Columns to include (None for all).
-    """
-
-    format: ExportFormat = "csv"
-    output_path: Path | None = None
-    limit: int | None = None
-    columns: list[str] | None = None
-
-
-@dataclass(frozen=True, slots=True)
-class ExportResult:
-    """Result of an export operation.
-
-    Attributes:
-        table_name: Name of exported table.
-        layer: Medallion layer.
-        format: Output format used.
-        output_path: Path to the exported file.
-        row_count: Number of rows exported.
-        error: Error message if export failed.
-    """
-
-    table_name: str
-    layer: str
-    format: ExportFormat
-    output_path: Path | None
-    row_count: int
-    error: str | None = None
-
-    @property
-    def success(self) -> bool:
-        """Check if export succeeded."""
-        return self.error is None
-
-
-def _scan_layer_for_tables(base_path: Path, layer_name: str) -> list[TableInfo]:
-    """Scan a layer directory for Delta tables.
-
-    Args:
-        base_path: Root path of the layer.
-        layer_name: Name of the layer (silver/gold).
-
-    Returns:
-        List of TableInfo for discovered tables.
-    """
-    tables: list[TableInfo] = []
-    if not base_path.exists():
-        return tables
-
-    for provider_dir in base_path.iterdir():
-        if not provider_dir.is_dir():
-            continue
-        tables.extend(_scan_provider_for_tables(provider_dir, layer_name))
-
-    return tables
-
-
-def _scan_provider_for_tables(provider_dir: Path, layer_name: str) -> list[TableInfo]:
-    """Scan a provider directory for Delta tables.
-
-    Args:
-        provider_dir: Provider directory path.
-        layer_name: Name of the layer.
-
-    Returns:
-        List of TableInfo for discovered tables.
-    """
-    tables: list[TableInfo] = []
-    for entity_dir in provider_dir.iterdir():
-        if not entity_dir.is_dir():
-            continue
-        for table_dir in entity_dir.iterdir():
-            if table_dir.is_dir() and (table_dir / "_delta_log").exists():
-                tables.append(
-                    TableInfo(name=table_dir.name, layer=layer_name, path=table_dir)
-                )
-    return tables
-
-
-def _write_delimited_file(
-    table: pa.Table, output_path: Path, delimiter: str = ","
-) -> Path:
-    """Write Arrow table to delimited file (CSV or TSV).
-
-    Args:
-        table: PyArrow table to write.
-        output_path: Path to output file.
-        delimiter: Field delimiter character.
-
-    Returns:
-        Path to written file.
-    """
-    import pyarrow.csv as pv
-
-    from bioetl.domain.serialization import flatten_arrow_table_for_export
-
-    flattened = flatten_arrow_table_for_export(table)
-    write_options = pv.WriteOptions(delimiter=delimiter)
-    pv.write_csv(flattened, output_path, write_options=write_options)
-    return output_path
-
-
-def _write_xlsx_file(table: pa.Table, output_path: Path) -> Path:
-    """Write Arrow table to XLSX file.
-
-    Args:
-        table: PyArrow table to write.
-        output_path: Path to output file.
-
-    Returns:
-        Path to written file.
-
-    Raises:
-        ImportError: If openpyxl is not installed.
-    """
-    from bioetl.domain.serialization import flatten_arrow_table_for_export
-
-    flattened = flatten_arrow_table_for_export(table)
-    df = flattened.to_pandas()
-
-    try:
-        df.to_excel(output_path, index=False, engine="openpyxl")
-    except ImportError as e:
-        raise ImportError(
-            "openpyxl is required for XLSX export. Install with: pip install openpyxl"
-        ) from e
-
-    return output_path
-
-
 @dataclass
 class ExportService:
-    """Service for exporting Delta Lake tables to various formats.
-
-    Responsibilities:
-    - Discover tables in Silver/Gold layers
-    - Preview table schema and sample data
-    - Export tables to CSV, XLSX, TSV formats
-
-    Attributes:
-        reader: Delta reader for accessing tables.
-        logger: Structured logger for observability.
-        silver_path: Base path for Silver layer.
-        gold_path: Base path for Gold layer.
-        export_path: Default export output directory.
-    """
+    """Service for exporting Delta Lake tables to various formats."""
 
     reader: DeltaReaderPort
     logger: LoggerPort
@@ -259,14 +52,7 @@ class ExportService:
     export_path: Path = field(default_factory=lambda: Path("data/exports"))
 
     def list_tables(self, layer: str = "all") -> list[TableInfo]:
-        """Discover available Delta tables.
-
-        Args:
-            layer: Which layer to scan - "all", "silver", or "gold".
-
-        Returns:
-            List of discovered tables, sorted alphabetically.
-        """
+        """Discover available Delta tables."""
         tables: list[TableInfo] = []
         if layer in ("all", "silver"):
             tables.extend(_scan_layer_for_tables(self.silver_path, "silver"))
@@ -280,19 +66,7 @@ class ExportService:
         layer: str = "silver",
         sample_rows: int = 5,
     ) -> TablePreview:
-        """Get preview of a table's schema and sample data.
-
-        Args:
-            table_name: Table name in format "provider.entity".
-            layer: Medallion layer to read from.
-            sample_rows: Number of sample rows to include.
-
-        Returns:
-            TablePreview with schema and sample data.
-
-        Raises:
-            FileNotFoundError: If table does not exist.
-        """
+        """Get preview of a table's schema and sample data."""
         table_path = self._get_table_path(table_name, layer)
 
         schema = await self.reader.get_schema(str(table_path))
@@ -319,11 +93,7 @@ class ExportService:
         layer: str = "silver",
         options: ExportOptions | None = None,
     ) -> ExportResult:
-        """Export a Delta table to the specified format.
-
-        Returns:
-            ExportResult with output path, row count, and error details if applicable.
-        """
+        """Export a Delta table to the specified format."""
         options = options or ExportOptions()
         table_path = self._get_table_path(table_name, layer)
 
@@ -455,15 +225,13 @@ class ExportService:
     ) -> Path:
         """Write table to export file using appropriate format."""
         safe_name = f"{layer}_{table_name.replace('.', '_')}"
-
         if fmt == "csv":
             return _write_delimited_file(table, output_dir / f"{safe_name}.csv", ",")
-        elif fmt == "tsv":
+        if fmt == "tsv":
             return _write_delimited_file(table, output_dir / f"{safe_name}.tsv", "\t")
-        elif fmt == "xlsx":
+        if fmt == "xlsx":
             return _write_xlsx_file(table, output_dir / f"{safe_name}.xlsx")
-        else:
-            raise ValueError(f"Unsupported format: {fmt}")
+        raise ValueError(f"Unsupported format: {fmt}")
 
     def _get_table_path(self, table_name: str, layer: str) -> Path:
         """Get the filesystem path for a table."""
@@ -490,3 +258,18 @@ class ExportService:
         raise FileNotFoundError(
             f"Table '{table_name}' not found in {layer} layer at {base_path}"
         )
+
+
+__all__ = [
+    "ColumnInfo",
+    "ExportFormat",
+    "ExportOptions",
+    "ExportResult",
+    "ExportService",
+    "TableInfo",
+    "TablePreview",
+    "_scan_layer_for_tables",
+    "_scan_provider_for_tables",
+    "_write_delimited_file",
+    "_write_xlsx_file",
+]

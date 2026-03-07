@@ -37,10 +37,9 @@ def test_workflow_yaml_validity() -> None:
         except yaml.YAMLError as exc:
             violations.append(f"{yml_file.name}: {exc}")
 
-    assert (
-        not violations
-    ), f"workflow_yaml_invalid_count={len(violations)} (target: 0)\n" + "\n".join(
-        f"  - {v}" for v in violations
+    assert not violations, (
+        f"workflow_yaml_invalid_count={len(violations)} (target: 0)\n"
+        + "\n".join(f"  - {v}" for v in violations)
     )
 
 
@@ -279,17 +278,17 @@ def _count_registry_entries(registry_name: str) -> int:
 def test_file_size_exemption_count() -> None:
     """File size exemption count must not exceed ratchet budget."""
     count = _count_registry_entries("file_size_limits")
-    assert (
-        count <= MAX_FILE_SIZE_EXEMPTIONS
-    ), f"files_over_loc_threshold={count} exceeds budget {MAX_FILE_SIZE_EXEMPTIONS}"
+    assert count <= MAX_FILE_SIZE_EXEMPTIONS, (
+        f"files_over_loc_threshold={count} exceeds budget {MAX_FILE_SIZE_EXEMPTIONS}"
+    )
 
 
 def test_class_size_exemption_count() -> None:
     """Class size exemption count must not exceed ratchet budget."""
     count = _count_registry_entries("class_size")
-    assert (
-        count <= MAX_CLASS_SIZE_EXEMPTIONS
-    ), f"class_size_exemption_count={count} exceeds budget {MAX_CLASS_SIZE_EXEMPTIONS}"
+    assert count <= MAX_CLASS_SIZE_EXEMPTIONS, (
+        f"class_size_exemption_count={count} exceeds budget {MAX_CLASS_SIZE_EXEMPTIONS}"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -320,9 +319,9 @@ def test_e2e_workflow_slo_configured() -> None:
     content = workflow.read_text(encoding="utf-8")
 
     assert "--max-skip-rate" in content, "Workflow must enforce max-skip-rate SLO"
-    assert (
-        "--max-recurrent-code-regression 0" in content
-    ), "Workflow must enforce zero recurrent code regressions"
+    assert "--max-recurrent-code-regression 0" in content, (
+        "Workflow must enforce zero recurrent code regressions"
+    )
     assert "check_e2e_matrix_skip_rate.py" in content
     assert "check_e2e_rerun_stability.py" in content
 
@@ -343,14 +342,14 @@ def test_probe_mode_fallback_counter_exists() -> None:
     assert aggregator.exists(), "preflight_health_aggregator.py not found"
 
     defs_content = metrics_defs.read_text(encoding="utf-8")
-    assert (
-        "PROBE_MODE_FALLBACK_TOTAL" in defs_content
-    ), "PROBE_MODE_FALLBACK_TOTAL counter not defined in metrics_definitions.py"
+    assert "PROBE_MODE_FALLBACK_TOTAL" in defs_content, (
+        "PROBE_MODE_FALLBACK_TOTAL counter not defined in metrics_definitions.py"
+    )
 
     agg_content = aggregator.read_text(encoding="utf-8")
-    assert (
-        "probe_mode_fallback_total" in agg_content
-    ), "probe_mode_fallback_total not instrumented in preflight_health_aggregator.py"
+    assert "probe_mode_fallback_total" in agg_content, (
+        "probe_mode_fallback_total not instrumented in preflight_health_aggregator.py"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -422,9 +421,9 @@ def test_cross_layer_group_edges_budget() -> None:
     snapshot = mod.collect_dependency_snapshot(src_root)
     edge_count = len(snapshot.cross_layer_group_edges)
 
-    assert (
-        edge_count <= GROUP_EDGE_LIMIT
-    ), f"cross_layer_group_edges={edge_count} exceeds budget {GROUP_EDGE_LIMIT}"
+    assert edge_count <= GROUP_EDGE_LIMIT, (
+        f"cross_layer_group_edges={edge_count} exceeds budget {GROUP_EDGE_LIMIT}"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -441,20 +440,20 @@ def test_silver_merge_resilience_instrumented() -> None:
     assert delta_mixin.exists(), "silver_writer_delta_mixin.py not found"
 
     res_content = resilience.read_text(encoding="utf-8")
-    assert (
-        "SilverMergeResiliencePolicy" in res_content
-    ), "SilverMergeResiliencePolicy not defined in write_resilience.py"
-    assert (
-        "max_retries" in res_content
-    ), "Retry configuration missing in SilverMergeResiliencePolicy"
+    assert "SilverMergeResiliencePolicy" in res_content, (
+        "SilverMergeResiliencePolicy not defined in write_resilience.py"
+    )
+    assert "max_retries" in res_content, (
+        "Retry configuration missing in SilverMergeResiliencePolicy"
+    )
 
     delta_content = delta_mixin.read_text(encoding="utf-8")
-    assert (
-        "silver_merge_retry" in delta_content
-    ), "silver_merge_retry observability event missing in delta mixin"
-    assert (
-        "silver_merge_timeout" in delta_content
-    ), "silver_merge_timeout observability event missing in delta mixin"
+    assert "silver_merge_retry" in delta_content, (
+        "silver_merge_retry observability event missing in delta mixin"
+    )
+    assert "silver_merge_timeout" in delta_content, (
+        "silver_merge_timeout observability event missing in delta mixin"
+    )
 
 
 def test_retry_exhausted_counter_exists() -> None:
@@ -465,6 +464,6 @@ def test_retry_exhausted_counter_exists() -> None:
     assert metrics_defs.exists(), "metrics_definitions.py not found"
 
     content = metrics_defs.read_text(encoding="utf-8")
-    assert (
-        "retry_exhausted" in content
-    ), "retry_exhausted counter not defined in metrics_definitions.py"
+    assert "retry_exhausted" in content, (
+        "retry_exhausted counter not defined in metrics_definitions.py"
+    )
