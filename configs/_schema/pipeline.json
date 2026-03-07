@@ -46,7 +46,7 @@
       "type": "object"
     },
     "BaseFilterColumnSchema": {
-      "description": "Base class for filter column configuration.\n\nRepresents a single column mapping for input filtering.\n\nAttributes:\n    column_name: Column name in CSV containing filter IDs.\n    filter_field: API field name to filter by.",
+      "description": "Base class for filter column configuration.",
       "properties": {
         "column_name": {
           "description": "Column name in CSV containing filter IDs",
@@ -67,7 +67,7 @@
       "type": "object"
     },
     "BaseGoldColumnFilterConfig": {
-      "description": "Base class for Gold column filter configuration.\n\nSupports extended operators for column filtering:\n- in: value must be in the allowed list (default)\n- not_in: value must not be in the excluded list\n- is_null: value must be None or empty string\n- is_not_null: value must not be None or empty string\n- is_empty: value must be \"empty\" (None, \"\", [], {})\n- is_not_empty: value must not be \"empty\"\n\nAttributes:\n    operator: Filter operator.\n    values: Allowed/excluded values (for in/not_in operators).",
+      "description": "Base class for Gold column filter configuration.",
       "properties": {
         "operator": {
           "default": "in",
@@ -104,7 +104,7 @@
       "type": "object"
     },
     "BaseGoldListContainsFilterConfig": {
-      "description": "Base class for Gold list contains filter configuration.\n\nAttributes:\n    values: Values that must be present in the list.\n    mode: Match mode ('all' or 'any').",
+      "description": "Base class for Gold list contains filter configuration.",
       "properties": {
         "values": {
           "description": "Values that must be present in the list",
@@ -132,7 +132,7 @@
       "type": "object"
     },
     "BaseGoldListLengthFilterConfig": {
-      "description": "Base class for Gold list length filter configuration.\n\nAttributes:\n    min: Minimum list length.\n    max: Maximum list length.",
+      "description": "Base class for Gold list length filter configuration.",
       "properties": {
         "min": {
           "anyOf": [
@@ -165,7 +165,7 @@
       "type": "object"
     },
     "BaseGoldRangeFilterConfig": {
-      "description": "Base class for Gold range filter configuration.\n\nAttributes:\n    min: Minimum value (inclusive by default).\n    max: Maximum value (inclusive by default).\n    include_min: Whether to include minimum value.\n    include_max: Whether to include maximum value.",
+      "description": "Base class for Gold range filter configuration.",
       "properties": {
         "min": {
           "anyOf": [
@@ -195,13 +195,13 @@
         },
         "include_min": {
           "default": true,
-          "description": "Whether to include minimum value",
+          "description": "Whether to include minimum",
           "title": "Include Min",
           "type": "boolean"
         },
         "include_max": {
           "default": true,
-          "description": "Whether to include maximum value",
+          "description": "Whether to include maximum",
           "title": "Include Max",
           "type": "boolean"
         }
@@ -210,7 +210,7 @@
       "type": "object"
     },
     "CircuitBreakerConfig": {
-      "description": "Circuit Breaker configuration.\n\nPydantic model for YAML parsing. Use `to_domain()` to convert to domain dataclass.",
+      "description": "Circuit Breaker configuration.",
       "properties": {
         "failure_threshold": {
           "default": 5,
@@ -250,7 +250,7 @@
       "type": "object"
     },
     "ColumnGroupSchema": {
-      "description": "Pydantic schema for column group configuration.\n\nDefines how columns are grouped and ordered in merged output.",
+      "description": "Pydantic schema for column group configuration.",
       "properties": {
         "name": {
           "description": "Group name for logging",
@@ -513,7 +513,7 @@
       "type": "object"
     },
     "DQConfig": {
-      "description": "Data Quality configuration.\n\nPydantic model for YAML parsing. Use `to_domain()` to convert to domain dataclass.\n\nAttributes:\n    soft_fail_threshold: Error rate threshold for warnings (0.0-1.0).\n    hard_fail_threshold: Error rate threshold for failures (0.0-1.0).\n    strict_validation: If True, apply stricter validation rules.\n        Use with caution as it may reject more records.\n    field_validations: Field-level validation rules.\n    cross_field_validations: Cross-field validation rules.\n    conditional_validations: Conditional validation rules.\n    invalid_record_policy: Policy for invalid records (quarantine/skip/fail).\n    report: DQ report configuration.",
+      "description": "Data Quality configuration.",
       "properties": {
         "soft_fail_threshold": {
           "default": 0.05,
@@ -626,7 +626,7 @@
       "type": "object"
     },
     "FieldValidationConfig": {
-      "description": "Configuration for a single field validation rule.\n\nSupports: required, not_null, range, pattern, enum, max_length,\nnot_empty_list, custom validation types.",
+      "description": "Configuration for a single field validation rule.",
       "properties": {
         "field": {
           "description": "Field name to validate",
@@ -776,7 +776,7 @@
       "type": "object"
     },
     "GoldFiltersConfig": {
-      "description": "Schema for gold_filters in YAML.\n\nInherits to_domain() from BaseGoldFiltersConfig.\n\nSupports two formats for columns:\n- Legacy format: {\"column_name\": [\"value1\", \"value2\"]} (IN operator)\n- New format: {\"column_name\": {\"operator\": \"in\", \"values\": [\"value1\", \"value2\"]}}\n\nExample YAML (legacy format):\n    gold_filters:\n      columns:\n        standard_type: [IC50, Ki]\n\nExample YAML (new format):\n    gold_filters:\n      columns:\n        standard_type:\n          operator: in\n          values: [IC50, Ki]\n        pchembl_value:\n          operator: is_not_null",
+      "description": "Schema for gold_filters in YAML.",
       "properties": {
         "columns": {
           "additionalProperties": {
@@ -841,7 +841,7 @@
       "type": "object"
     },
     "InputFilterConfig": {
-      "description": "Configuration for input ID filtering from CSV.\n\nInherits to_domain() and validate_column_config from BaseInputFilterConfig.\n\nSupports both single-column and multi-column filtering modes:\n- Single-column: Use column_name and filter_field directly\n- Multi-column: Use columns list for AND-logic filtering\n\nPydantic model for YAML parsing. Use `to_domain()` to convert to domain dataclass.",
+      "description": "Configuration for input ID filtering from CSV.",
       "properties": {
         "enabled": {
           "default": false,
@@ -930,7 +930,7 @@
       "type": "object"
     },
     "MaintenanceConfig": {
-      "description": "Configuration for automated maintenance operations.\n\nControls automatic VACUUM and other maintenance tasks after pipeline runs.\n\nAttributes:\n    auto_vacuum: Enable automatic VACUUM after successful run.\n    vacuum_retention_days: Minimum age of files to remove (days).",
+      "description": "Configuration for automated maintenance operations.",
       "properties": {
         "auto_vacuum": {
           "default": false,
@@ -951,7 +951,7 @@
       "type": "object"
     },
     "ProviderSourceConfig": {
-      "description": "Provider-specific configuration from source YAML.\n\nPydantic model for parsing provider_config section from configs/providers/*.yaml.",
+      "description": "Provider-specific configuration from source YAML.",
       "properties": {
         "provider": {
           "anyOf": [
@@ -1030,7 +1030,7 @@
       "type": "object"
     },
     "RateLimitSourceConfig": {
-      "description": "Rate limit configuration from source YAML.\n\nPydantic model for parsing rate_limit section from configs/providers/*.yaml.",
+      "description": "Rate limit configuration from source YAML.",
       "properties": {
         "requests_per_second": {
           "default": 5.0,
@@ -1165,6 +1165,14 @@
           "title": "Deterministic",
           "type": "boolean"
         },
+        "sort_by": {
+          "description": "Deterministic sort policy for layer output ordering.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Sort By",
+          "type": "array"
+        },
         "partition_by": {
           "description": "Columns to partition Delta tables by (Silver layer)",
           "items": {
@@ -1200,7 +1208,7 @@
       "type": "object"
     },
     "SourceConfig": {
-      "description": "Configuration for the data source.\n\nParses both pipeline source settings and configs/providers/*.yaml structure.\nThe `rate_limit`, `circuit_breaker`, and `provider_config` fields capture\nsettings from source configuration files.",
+      "description": "Configuration for the data source.",
       "properties": {
         "email": {
           "anyOf": [
@@ -1260,7 +1268,7 @@
       "type": "object"
     },
     "TransformConfig": {
-      "description": "Configuration for transform versioning and steps.\n\nTracks the version and steps of the transformation applied to data,\nenabling full lineage tracking in Silver/Gold metadata.\n\nAttributes:\n    version: Semver-formatted version string (e.g., \"1.0.0\", \"v2.1.0\").\n    steps: List of transformation step names applied in order.\n\nExample YAML:\n    transform:\n      version: \"1.0.0\"\n      steps:\n        - normalize_values\n        - add_metadata\n        - calculate_content_hash",
+      "description": "Configuration for transform versioning and steps.",
       "properties": {
         "version": {
           "anyOf": [
@@ -1289,7 +1297,7 @@
     }
   },
   "additionalProperties": false,
-  "description": "Strict schema for pipeline YAML configuration.\n\nPydantic model for YAML parsing.\n\nDQ Config Resolution:\n    The dq_config_file field references an external DQ configuration file\n    that is loaded through the DQConfigLoader hierarchy. If both dq_config_file\n    and dq_overrides are present, dq_overrides acts as inline overrides on top of\n    the file-based configuration.",
+  "description": "Strict schema for pipeline YAML configuration.",
   "properties": {
     "pipeline_name": {
       "title": "Pipeline Name",

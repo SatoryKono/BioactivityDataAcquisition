@@ -1,7 +1,7 @@
 {
   "$defs": {
     "AggregationFieldSchema": {
-      "description": "Pydantic schema for aggregation field specification.\n\nDefines how to aggregate a single field from a 1:M enricher.",
+      "description": "Pydantic schema for aggregation field specification.",
       "properties": {
         "source": {
           "description": "Source column name to aggregate",
@@ -43,7 +43,7 @@
       "type": "object"
     },
     "AggregationSchema": {
-      "description": "Pydantic schema for 1:M enricher aggregation config.\n\nDefines how to aggregate multiple rows per join key into a single row.",
+      "description": "Pydantic schema for 1:M enricher aggregation config.",
       "properties": {
         "group_by": {
           "description": "Join key to group by",
@@ -69,7 +69,7 @@
       "type": "object"
     },
     "ColumnGroupSchema": {
-      "description": "Pydantic schema for column group configuration.\n\nDefines how columns are grouped and ordered in merged output.",
+      "description": "Pydantic schema for column group configuration.",
       "properties": {
         "name": {
           "description": "Group name for logging",
@@ -114,7 +114,7 @@
       "type": "object"
     },
     "CompositeConfigSchema": {
-      "description": "Pydantic schema for complete composite pipeline configuration.\n\nValidates the 'composite' section of YAML files and converts to\ndomain CompositeConfig. Includes cross-field validation for join keys\nand enricher/dependency uniqueness.",
+      "description": "Pydantic schema for complete composite pipeline configuration.\n\nValidates structural/types contract for the 'composite' YAML section and\nconverts to domain CompositeConfig.\n\nBusiness invariants (join-key compatibility, uniqueness, etc.) are owned by\nthe domain layer and enforced via delegated validation.",
       "properties": {
         "name": {
           "description": "Composite pipeline name",
@@ -313,7 +313,7 @@
       "type": "object"
     },
     "DependencySchema": {
-      "description": "Pydantic schema for dependency pipeline configuration.\n\nDependencies run after seed but before enrichers to populate Silver tables.\n\nSupports chained dependencies via `key_source`:\n- None or \"seed\": Extract join_keys from seed output (default behavior)\n- \"<pipeline_name>\": Extract join_keys from that pipeline's Silver table\n  (useful when join keys come from enrichers, not seed)",
+      "description": "Pydantic schema for dependency pipeline configuration.",
       "properties": {
         "pipeline": {
           "description": "Name of the dependency pipeline",
@@ -734,6 +734,10 @@
           "$ref": "#/$defs/MergeOutputSchema",
           "description": "Output paths for Silver and Gold tables"
         },
+        "sort_by": {
+          "$ref": "#/$defs/MergeSortBySchema",
+          "description": "Deterministic row ordering policy for merged outputs"
+        },
         "preserve_all_sources": {
           "default": false,
           "description": "Keep all provider-qualified columns instead of coalescing",
@@ -771,9 +775,39 @@
         }
       },
       "required": [
-        "output"
+        "output",
+        "sort_by"
       ],
       "title": "MergeSchema",
+      "type": "object"
+    },
+    "MergeSortBySchema": {
+      "description": "Deterministic sort policy for merged Silver/Gold outputs.",
+      "properties": {
+        "silver": {
+          "description": "Sort columns for merged Silver output",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Silver",
+          "type": "array"
+        },
+        "gold": {
+          "description": "Sort columns for merged Gold output",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Gold",
+          "type": "array"
+        }
+      },
+      "required": [
+        "silver",
+        "gold"
+      ],
+      "title": "MergeSortBySchema",
       "type": "object"
     },
     "RetrySchema": {
