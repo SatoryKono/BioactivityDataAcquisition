@@ -15,6 +15,8 @@ from bioetl.composition.factories.pipeline_factory import GenericPipelineFactory
 from bioetl.infrastructure.config import load_pipeline_contract_policy
 
 if TYPE_CHECKING:
+    import pandera
+
     from bioetl.composition.factories.data_source_factory import DataSourceCreator
 
 
@@ -110,7 +112,7 @@ def create_factory(
         pipeline_class=GenericPipeline,
         provider=config.provider,
         silver_schema=config.silver_schema,
-        gold_schema=config.gold_schema,
+        gold_schema=cast("type[pandera.DataFrameModel]", config.gold_schema),
         pandera_silver_schema=config.pandera_silver_schema,
         transformer_class=config.transformer_class,
         data_source_creator=data_source_creator,

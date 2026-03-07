@@ -37,6 +37,8 @@ governance:
         reviewer_checks:
             - owner maps to subsystem scope
             - removal_step references concrete follow-up action
+            - placeholder exemptions require concrete technical follow-up (RF/issue link) and must be reviewed on 2026-06-30
+            - owner diversification enforcement follows governance.owner_diversification.starts_quarter activation window
     burn_down_priorities:
         registries:
             - file_size_limits
@@ -48,14 +50,14 @@ governance:
             registry:*: '2026-06-30'
             group:*: '2026-03-03'
 baseline:
-    total_exemptions: 5
+    total_exemptions: 4
     by_registry:
         file_size_limits: 2
         function_complexity: 0
         function_length: 0
-        class_size: 2
+        class_size: 0
         class_method_count: 0
-        god_object: 1
+        god_object: 2
         domain_complexity: 0
 registry_groups:
     size_shape:

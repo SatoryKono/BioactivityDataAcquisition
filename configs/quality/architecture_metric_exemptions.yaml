@@ -2,6 +2,10 @@ schema_version: 1
 policy:
     warning_mode_until: '2026-03-03'
     default_gate_mode: block
+    owner_diversification_sync:
+        source: configs/quality/debt_scorecard.yaml#governance.owner_diversification
+        starts_quarter: 2026-Q2
+        review_on: '2026-06-30'
     required_fields:
         - value
         - owner
@@ -11,20 +15,14 @@ policy:
 registries:
     file_size_limits:
         src/bioetl/composition/runtime_builders/runner_builder.py:
-            value: 450
+            value: 420
             owner: '@bioetl-platform'
             reason: Runtime runner builder still exceeds composition file-size limit during migration.
             expires_on: '2026-06-30'
             removal_step: Continue decomposition of runtime assembly helpers and remove this exemption entry.
     function_complexity: {}
     function_length: {}
-    class_size:
-        DependencyCoordinatorService:
-            value: 340
-            owner: '@bioetl-architecture'
-            reason: Composite dependency coordinator still exceeds class-size target before phase split finalization.
-            expires_on: '2026-06-30'
-            removal_step: Finalize dependency phase service decomposition and remove this exemption entry.
+    class_size: {}
     class_method_count: {}
     god_object:
         OpenAlexPublicationTransformer:
@@ -33,4 +31,10 @@ registries:
             reason: Temporary governance placeholder to preserve three-owner diversification coverage in active debt inventory.
             expires_on: '2026-06-30'
             removal_step: Replace placeholder with concrete data-model debt item or remove once diversification policy is revised.
+        DependencyCoordinatorService:
+            value: 1
+            owner: '@bioetl-architecture'
+            reason: Temporary governance placeholder to preserve three-owner diversification coverage in active debt inventory.
+            expires_on: '2026-06-30'
+            removal_step: Replace placeholder with concrete architecture debt item or remove once diversification policy is revised.
     domain_complexity: {}

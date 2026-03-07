@@ -51,7 +51,15 @@ if TYPE_CHECKING:
         MemoryMonitorPort,
         TracingPort,
     )
-    from bioetl.domain.types import RunID
+    from bioetl.domain.types import JsonDict, RunID
+
+
+def _skip_gold_filter_callback(
+    _context: PipelineContext,
+    _record: JsonDict,
+) -> bool:
+    """No-op Gold filter used when runtime.skip_gold is enabled."""
+    return False
 
 
 @dataclass(frozen=True, slots=True)
@@ -274,9 +282,10 @@ def create_batch_executor_from_pipeline(
     batch_id_factory: BatchIdGeneratorPort | None = None,
 ) -> BatchExecutor:
     """Create BatchExecutor from pipeline using delegated component factories."""
-    gold_filter = (
-        (lambda _c, _r: False) if pipeline.runtime.skip_gold else callbacks.gold_filter
-    )
+    if pipeline.runtime.skip_gold:
+        gold_filter = cast(GoldFilterCallback, _skip_gold_filter_callback)
+    else:
+        gold_filter = callbacks.gold_filter
 
     processor_config, gold_validator = _build_record_processor_config(
         pipeline=pipeline,

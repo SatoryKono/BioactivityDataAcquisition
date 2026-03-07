@@ -30,6 +30,7 @@ if TYPE_CHECKING:
         VacuumConfig,
     )
     from bioetl.domain.filtering import InputFilterConfig
+    from bioetl.domain.ports import PipelineFactoryPort
     from bioetl.domain.types import RunID
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import (
@@ -248,11 +249,12 @@ def _log_filter_config(
 
 def _resolve_filter_batch_size(yaml_config: PipelineYamlConfig) -> int | None:
     filter_batch_size = getattr(yaml_config, "filter_batch_size", None)
-    if filter_batch_size is not None:
+    if isinstance(filter_batch_size, int):
         return filter_batch_size
     try:
         source_cfg = load_source_config(yaml_config.provider)
-        return source_cfg.pagination.id_batch_size
+        batch_size = source_cfg.pagination.id_batch_size
+        return batch_size if isinstance(batch_size, int) else None
     except (ValueError, AttributeError):
         return None
 
@@ -349,7 +351,7 @@ def _prepare_runner_inputs(
 
 def _create_runner_from_factory(
     *,
-    factory: object,
+    factory: PipelineFactoryPort,
     ctx: PipelineRunContext,
     inputs: _RunnerInputs,
 ) -> PipelineRunner:
