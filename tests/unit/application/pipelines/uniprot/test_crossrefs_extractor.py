@@ -181,3 +181,41 @@ class TestCrossRefExtractor:
         """Test extract_go_by_aspect with invalid aspect."""
         assert CrossRefExtractor.extract_go_by_aspect([], "X") is None
         assert CrossRefExtractor.extract_go_by_aspect(None, "F") is None
+
+    def test_build_pdb_entry_missing_id(self):
+        """_build_pdb_entry should return None when ID is missing."""
+        assert CrossRefExtractor._build_pdb_entry({"database": "PDB"}) is None
+
+    def test_build_interpro_entry_without_name(self):
+        """_build_interpro_entry should keep ID when name is absent."""
+        result = CrossRefExtractor._build_interpro_entry(
+            {"database": "InterPro", "id": "IPR123", "properties": []}
+        )
+        assert result == {"id": "IPR123"}
+
+    def test_build_pfam_entry_without_optional_fields(self):
+        """_build_pfam_entry should emit only ID when optional props absent."""
+        result = CrossRefExtractor._build_pfam_entry(
+            {"database": "Pfam", "id": "PF001", "properties": []}
+        )
+        assert result == {"id": "PF001"}
+
+    def test_build_reactome_entry_without_pathway_name(self):
+        """_build_reactome_entry should emit only ID when name is absent."""
+        result = CrossRefExtractor._build_reactome_entry(
+            {"database": "Reactome", "id": "R-HSA-123", "properties": []}
+        )
+        assert result == {"id": "R-HSA-123"}
+
+    def test_extract_xref_ids_ignores_invalid_entries(self):
+        """extract_xref_ids should ignore malformed xref elements."""
+        xrefs = [
+            {"database": "DrugBank", "id": "DB001"},
+            {"database": "DrugBank", "id": None},
+            {"database": "PDB", "id": "1ABC"},
+            "invalid",
+            {"database": "DrugBank"},
+        ]
+        result = CrossRefExtractor.extract_xref_ids(xrefs, "DrugBank")
+        assert result is not None
+        assert json.loads(result) == ["DB001"]

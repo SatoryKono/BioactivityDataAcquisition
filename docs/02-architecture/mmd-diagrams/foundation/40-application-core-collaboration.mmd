@@ -26,7 +26,7 @@ flowchart TB
     end
 
     subgraph Lifecycle["Lifecycle Services"]
-        LM["LockManager<br/>• acquire(key, owner, ttl=90s)<br/>• release(key, owner)<br/>• validate_ownership()"]
+        LM["LockCoordinator<br/>• acquire(key, owner, ttl=90s)<br/>• release(key, owner)<br/>• validate_ownership()"]
         HB["HeartbeatService<br/>• start()<br/>• stop()"]
         CM["CheckpointManager<br/>• read_checkpoint()<br/>• save_checkpoint()"]
         SD["ShutdownService<br/>• should_shutdown()<br/>• request_shutdown()"]

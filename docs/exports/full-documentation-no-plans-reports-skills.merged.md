@@ -4606,7 +4606,7 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | **Transformer** | Converts Bronze records to Silver/Gold format | `Converter`, `Mapper` (as class names) |
 | **Pipeline Runner** | Orchestrates pipeline execution | `Executor`, `Controller` |
 | **Service** | Cross-cutting concern handler (e.g., `PreflightService`) | `Helper`, `Utility` |
-| **Manager** | Resource-specific handler (e.g., `LockManager`) | `Controller` |
+| **Manager** | Resource-specific handler (e.g., `LockCoordinator`) | `Controller` |
 
 ### Infrastructure Layer
 
@@ -4625,7 +4625,7 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | `{Provider}{Entity}Transformer` | `PubChemCompoundTransformer` | Cross-provider distinction |
 | `{Layer}Writer` | `BronzeWriter`, `GoldWriter` | Data persistence |
 | `{Provider}Adapter` | `ChemblAdapter`, `UniProtAdapter` | External API access |
-| `{Resource}Manager` | `LockManager`, `CheckpointManager` | Resource lifecycle |
+| `{Resource}Manager` | `LockCoordinator`, `CheckpointManager` | Resource lifecycle |
 | `{Concern}Service` | `PreflightService`, `PostrunService` | Cross-cutting operations |
 
 ### CLI Conventions
@@ -7795,7 +7795,7 @@ Domain содержит 11 дополнительных поддиректори
 **Сервисы ядра:**
 
 - **`PipelineServices`** (`pipeline_services.py`) — DI bundle портов для пайплайна
-- **`LockManager`** (`lock_manager.py`) — Координация блокировок
+- **`LockCoordinator`** (`lock_manager.py`) — Координация блокировок
 - **`PreflightService`** (`preflight_service.py`) — Pre-run health checks
 - **`PostrunService`** (`postrun_service.py`) — Post-run операции (DQ, VACUUM, cleanup)
 - **`CheckpointManager`** (`checkpoint_manager.py`) — Checkpoint I/O
@@ -7884,7 +7884,7 @@ factory = GenericPipelineFactory(
 
 **`PipelineRunner`** — координатор исполнения:
 
-- Делегирует блокировку через `LockManager`
+- Делегирует блокировку через `LockCoordinator`
 - Запускает preflight-валидацию через `PreflightService`
 - Исполняет пайплайн через `BatchExecutor`
 - Управляет postrun-операциями через `PostrunService`
@@ -9040,7 +9040,7 @@ Delta merge by content-hash — критическая операция для i
 
 **Supporting Managers:**
 
-- LockManager, CheckpointManager, QuarantineManager, MemoryMonitor
+- LockCoordinator, CheckpointManager, QuarantineManager, MemoryMonitor
 
 **Services:**
 
@@ -15516,7 +15516,7 @@ class CompositePipelineRunner:
         merger: MergeService,
         checkpoint-manager: CompositeCheckpointManager,
         logger: LoggerPort,
-        lock-manager: CompositeLockManager,
+        lock-manager: CompositeLockCoordinator,
     ) -> None:
         ...
 
@@ -19917,7 +19917,7 @@ _Автогенерация: 2026-02-27_
 - Исходная диаграмма: `mmd-diagrams/architecture/04-pipeline-execution-flow.mmd`
 
 ## Описание
-Диаграмма Pipeline Execution Lifecycle показывает архитектурный срез BioETL на уровне System / Component и использует нотацию sequenceDiagram. Материал помогает понять границы ответственности модулей, точки интеграции и зависимости между компонентами в рамках сценария 04-pipeline-execution-flow. В исходном файле прямо зафиксирован контекст: Sequence of phases in a single pipeline run.. Это описание задает ожидаемую интерпретацию схемы при техническом ревью и синхронизации документации с кодовой базой. Важные участники взаимодействий: CLI / Interfaces, Bootstrap, PipelineRunner, PreflightService, LockManager. Их последовательность полезна для анализа порядка вызовов, мест возможных ошибок и проверки архитектурных контрактов. В метаданных указана оценка плотности (@nodes=12), что полезно для контроля читаемости, декомпозиции view-слоев и стабильного рендеринга в CI-пайплайне.
+Диаграмма Pipeline Execution Lifecycle показывает архитектурный срез BioETL на уровне System / Component и использует нотацию sequenceDiagram. Материал помогает понять границы ответственности модулей, точки интеграции и зависимости между компонентами в рамках сценария 04-pipeline-execution-flow. В исходном файле прямо зафиксирован контекст: Sequence of phases in a single pipeline run.. Это описание задает ожидаемую интерпретацию схемы при техническом ревью и синхронизации документации с кодовой базой. Важные участники взаимодействий: CLI / Interfaces, Bootstrap, PipelineRunner, PreflightService, LockCoordinator. Их последовательность полезна для анализа порядка вызовов, мест возможных ошибок и проверки архитектурных контрактов. В метаданных указана оценка плотности (@nodes=12), что полезно для контроля читаемости, декомпозиции view-слоев и стабильного рендеринга в CI-пайплайне.
 
 ## Метаданные
 - Тип: `sequenceDiagram`
@@ -20614,7 +20614,7 @@ _Автогенерация: 2026-02-27_
 - Исходная диаграмма: `mmd-diagrams/architecture/18-lock-checkpoint-shutdown.mmd`
 
 ## Описание
-Диаграмма Locking, Checkpoint, and Graceful Shutdown показывает архитектурный срез BioETL на уровне System / Component и использует нотацию flowchart. Материал помогает понять границы ответственности модулей, точки интеграции и зависимости между компонентами в рамках сценария 18-lock-checkpoint-shutdown. В исходном файле прямо зафиксирован контекст: Shows distributed safety mechanisms.. Это описание задает ожидаемую интерпретацию схемы при техническом ревью и синхронизации документации с кодовой базой. Ключевые контейнеры/подграфы включают: Domain Ports, Domain Lock Types, Application: LockManager, Application: CheckpointManager, Application: Shutdown. Именно через эти блоки визуализированы границы слоев и маршруты передачи управления или данных. Примеры узлов, отражающих доменную модель и инфраструктуру: Domain Ports, LockPort (Protocol) ━━━━━━━━━━━━━━━━━ + acquire(key, owner, ttl) + release(key, owner) + heartbeat(key, owner) + validate_owner(key, owner) + validate_fencing_token(token), CheckpointPort (Protocol) ━━━━━━━━━━━━━━━━━ + save(key, data) + load(key) → dict | None + list_all() → list + delete(key), ShutdownPort (Protocol), Domain Lock Types, FencingToken (frozen dataclass) ━━━━━━━━━━━━━━━━━ sequence: int key: str owner_id: RunID issued_at: float. По этим сущностям можно проверить согласованность терминов, портов и адаптеров между диаграммой и реализацией. В метаданных указана оценка плотности (@nodes=22), что полезно для контроля читаемости, декомпозиции view-слоев и стабильного рендеринга в CI-пайплайне.
+Диаграмма Locking, Checkpoint, and Graceful Shutdown показывает архитектурный срез BioETL на уровне System / Component и использует нотацию flowchart. Материал помогает понять границы ответственности модулей, точки интеграции и зависимости между компонентами в рамках сценария 18-lock-checkpoint-shutdown. В исходном файле прямо зафиксирован контекст: Shows distributed safety mechanisms.. Это описание задает ожидаемую интерпретацию схемы при техническом ревью и синхронизации документации с кодовой базой. Ключевые контейнеры/подграфы включают: Domain Ports, Domain Lock Types, Application: LockCoordinator, Application: CheckpointManager, Application: Shutdown. Именно через эти блоки визуализированы границы слоев и маршруты передачи управления или данных. Примеры узлов, отражающих доменную модель и инфраструктуру: Domain Ports, LockPort (Protocol) ━━━━━━━━━━━━━━━━━ + acquire(key, owner, ttl) + release(key, owner) + heartbeat(key, owner) + validate_owner(key, owner) + validate_fencing_token(token), CheckpointPort (Protocol) ━━━━━━━━━━━━━━━━━ + save(key, data) + load(key) → dict | None + list_all() → list + delete(key), ShutdownPort (Protocol), Domain Lock Types, FencingToken (frozen dataclass) ━━━━━━━━━━━━━━━━━ sequence: int key: str owner_id: RunID issued_at: float. По этим сущностям можно проверить согласованность терминов, портов и адаптеров между диаграммой и реализацией. В метаданных указана оценка плотности (@nodes=22), что полезно для контроля читаемости, декомпозиции view-слоев и стабильного рендеринга в CI-пайплайне.
 
 ## Метаданные
 - Тип: `flowchart`
@@ -20631,7 +20631,7 @@ _Автогенерация: 2026-02-27_
 - Исходная диаграмма: `mmd-diagrams/architecture/18a-lock-system.mmd`
 
 ## Описание
-Диаграмма Lock System показывает архитектурный срез BioETL на уровне System / Component и использует нотацию flowchart. Материал помогает понять границы ответственности модулей, точки интеграции и зависимости между компонентами в рамках сценария 18a-lock-system. В исходном файле прямо зафиксирован контекст: Lock ports, domain types, application manager, infrastructure implementation, and safety guard.. Это описание задает ожидаемую интерпретацию схемы при техническом ревью и синхронизации документации с кодовой базой. Ключевые контейнеры/подграфы включают: Domain Port, Domain Lock Types, Application: LockManager, Infrastructure: MemoryLock, Safety Guard. Именно через эти блоки визуализированы границы слоев и маршруты передачи управления или данных. Примеры узлов, отражающих доменную модель и инфраструктуру: Domain Port, fa:fa-lock LockPort, Domain Lock Types, FencingToken, LockNotHeldError, Application: LockManager. По этим сущностям можно проверить согласованность терминов, портов и адаптеров между диаграммой и реализацией. В метаданных указана оценка плотности (@nodes=8), что полезно для контроля читаемости, декомпозиции view-слоев и стабильного рендеринга в CI-пайплайне.
+Диаграмма Lock System показывает архитектурный срез BioETL на уровне System / Component и использует нотацию flowchart. Материал помогает понять границы ответственности модулей, точки интеграции и зависимости между компонентами в рамках сценария 18a-lock-system. В исходном файле прямо зафиксирован контекст: Lock ports, domain types, application manager, infrastructure implementation, and safety guard.. Это описание задает ожидаемую интерпретацию схемы при техническом ревью и синхронизации документации с кодовой базой. Ключевые контейнеры/подграфы включают: Domain Port, Domain Lock Types, Application: LockCoordinator, Infrastructure: MemoryLock, Safety Guard. Именно через эти блоки визуализированы границы слоев и маршруты передачи управления или данных. Примеры узлов, отражающих доменную модель и инфраструктуру: Domain Port, fa:fa-lock LockPort, Domain Lock Types, FencingToken, LockNotHeldError, Application: LockCoordinator. По этим сущностям можно проверить согласованность терминов, портов и адаптеров между диаграммой и реализацией. В метаданных указана оценка плотности (@nodes=8), что полезно для контроля читаемости, декомпозиции view-слоев и стабильного рендеринга в CI-пайплайне.
 
 ## Метаданные
 - Тип: `flowchart`
@@ -21014,7 +21014,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Исходная диаграмма: `mmd-diagrams/foundation/03-pipeline-execution-happy-path.mmd`
 
 ## Описание
-Диаграмма Title: Pipeline Execution — Happy Path из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате sequenceDiagram и служит базовым ориентиром для инженерного анализа, ревью изменений и обсуждения технических решений. Уровень детализации обозначен как Mixed (System / Component / Class), поэтому схема подходит одновременно для быстрой навигации по контексту и для проверки корректности зависимостей, контрактов и потоков обработки данных в рамках сценария 03-pipeline-execution-happy-path. В комментариях исходника зафиксирован фокус диаграммы: Covers: RULES.md §3 (Pipeline Execution), §3.3 (Locking), §3.4 (Postrun). Это снижает неоднозначность интерпретации и помогает поддерживать консистентность между визуальной документацией, ADR-решениями и реальным кодом. Значимые участники последовательностей: CLI, bootstrap_pipeline(), PipelineRunner, LockManager, PreflightService. По этим участникам удобно валидировать порядок вызовов, точки отказа и стратегию обработки ошибок. Дополнительно в метаданных указан показатель плотности (@nodes=n/a), что полезно при контроле читаемости и планировании декомпозиции диаграмм на более узкие представления.
+Диаграмма Title: Pipeline Execution — Happy Path из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате sequenceDiagram и служит базовым ориентиром для инженерного анализа, ревью изменений и обсуждения технических решений. Уровень детализации обозначен как Mixed (System / Component / Class), поэтому схема подходит одновременно для быстрой навигации по контексту и для проверки корректности зависимостей, контрактов и потоков обработки данных в рамках сценария 03-pipeline-execution-happy-path. В комментариях исходника зафиксирован фокус диаграммы: Covers: RULES.md §3 (Pipeline Execution), §3.3 (Locking), §3.4 (Postrun). Это снижает неоднозначность интерпретации и помогает поддерживать консистентность между визуальной документацией, ADR-решениями и реальным кодом. Значимые участники последовательностей: CLI, bootstrap_pipeline(), PipelineRunner, LockCoordinator, PreflightService. По этим участникам удобно валидировать порядок вызовов, точки отказа и стратегию обработки ошибок. Дополнительно в метаданных указан показатель плотности (@nodes=n/a), что полезно при контроле читаемости и планировании декомпозиции диаграмм на более узкие представления.
 
 ## Метаданные
 - Тип: `sequenceDiagram`
@@ -21711,7 +21711,7 @@ _Обновлено: 2026-03-02T15:21:56.693282+03:00_
 - Исходная диаграмма: `mmd-diagrams/foundation/40-application-core-collaboration.mmd`
 
 ## Описание
-Диаграмма Title: Application Core Component Collaboration из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате flowchart и служит базовым ориентиром для инженерного анализа, ревью изменений и обсуждения технических решений. Уровень детализации обозначен как Mixed (System / Component / Class), поэтому схема подходит одновременно для быстрой навигации по контексту и для проверки корректности зависимостей, контрактов и потоков обработки данных в рамках сценария 40-application-core-collaboration. В комментариях исходника зафиксирован фокус диаграммы: Covers: RULES.md §1.1 (Application Layer), application/core/. Это снижает неоднозначность интерпретации и помогает поддерживать консистентность между визуальной документацией, ADR-решениями и реальным кодом. Ключевые блоки/подграфы включают: PipelineRunner (application/core/runner.py), Lifecycle Services, Pre/Post Services, Batch Execution, Observability. Их состав отражает главные границы ответственности и маршруты взаимодействия между подсистемами или слоями. Показательные узлы диаграммы: PipelineRunner (application/core/runner.py), run() — main orchestrator, Lifecycle Services, LockManager • acquire(key, owner, ttl=90s) • release(key, owner) • validate_ownership(), HeartbeatService • start() • stop(), CheckpointManager • read_checkpoint() • save_checkpoint(). Они позволяют быстро сопоставлять термины, роли сервисов и артефакты данных между моделью и реализацией. Дополнительно в метаданных указан показатель плотности (@nodes=n/a), что полезно при контроле читаемости и планировании декомпозиции диаграмм на более узкие представления.
+Диаграмма Title: Application Core Component Collaboration из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате flowchart и служит базовым ориентиром для инженерного анализа, ревью изменений и обсуждения технических решений. Уровень детализации обозначен как Mixed (System / Component / Class), поэтому схема подходит одновременно для быстрой навигации по контексту и для проверки корректности зависимостей, контрактов и потоков обработки данных в рамках сценария 40-application-core-collaboration. В комментариях исходника зафиксирован фокус диаграммы: Covers: RULES.md §1.1 (Application Layer), application/core/. Это снижает неоднозначность интерпретации и помогает поддерживать консистентность между визуальной документацией, ADR-решениями и реальным кодом. Ключевые блоки/подграфы включают: PipelineRunner (application/core/runner.py), Lifecycle Services, Pre/Post Services, Batch Execution, Observability. Их состав отражает главные границы ответственности и маршруты взаимодействия между подсистемами или слоями. Показательные узлы диаграммы: PipelineRunner (application/core/runner.py), run() — main orchestrator, Lifecycle Services, LockCoordinator • acquire(key, owner, ttl=90s) • release(key, owner) • validate_ownership(), HeartbeatService • start() • stop(), CheckpointManager • read_checkpoint() • save_checkpoint(). Они позволяют быстро сопоставлять термины, роли сервисов и артефакты данных между моделью и реализацией. Дополнительно в метаданных указан показатель плотности (@nodes=n/a), что полезно при контроле читаемости и планировании декомпозиции диаграмм на более узкие представления.
 
 ## Метаданные
 - Тип: `flowchart`
@@ -24744,7 +24744,7 @@ Parent diagrams remain canonical references. Sub-files provide focused, low-dens
 | 5 | Types & Enums | `class-diagrams/04-types-enums.mmd` | RunType, PublicationType, HealthStatus, NewTypes |
 | 6 | Exceptions | `class-diagrams/05-exceptions.mmd` | BioETLError hierarchy: Critical, Recoverable, DataQuality |
 | 7 | Configuration | `class-diagrams/06-config-classes.mmd` | PipelineConfig, RuntimeConfig, CompositeConfig |
-| 8 | Application Core | `class-diagrams/07-application-core-services.mmd` | PipelineRunner, BatchExecutor, LockManager |
+| 8 | Application Core | `class-diagrams/07-application-core-services.mmd` | PipelineRunner, BatchExecutor, LockCoordinator |
 | 9 | Application Services | `class-diagrams/08-application-services.mmd` | DQ, Health, Export, Vacuum, Quarantine services |
 | 10 | Application Services (L2 Ops) | `class-diagrams/08a-application-services-operation-catalog.mmd` | Operation-level catalog for application services |
 | 11 | Transformers | `class-diagrams/09-transformers.mmd` | BaseTransformer → ChEMBL/Publication/UniProt/PubChem |
@@ -27913,7 +27913,7 @@ ShutdownPort, SerializationPort, DQConfigLoaderPort, FilterConfigLoaderPort
 156. **Lock Acquisition Flow** - Sequence - acquire() → heartbeat → release()
 157. **Lock States** - State - Unlocked → Locked → Released
 158. **Heartbeat Mechanism** - Sequence - Periodic TTL refresh
-159. **Lock Manager** - Component - LockManager orchestration
+159. **Lock Manager** - Component - LockCoordinator orchestration
 160. **MemoryLock Implementation** - Class - In-memory locking
 161. **Exclusive Lock Flow** - Sequence - Rebuild/backfill locking
 162. **Lock Validation** - Activity - Owner validation
@@ -27983,7 +27983,7 @@ ShutdownPort, SerializationPort, DQConfigLoaderPort, FilterConfigLoaderPort
 216. **BatchMetricsRecorder** - Class - Metrics recording
 217. **BaseTransformer** - Class - Abstract transformer
 218. **BasePipeline** - Class - Abstract pipeline
-219. **LockManager** - Class - Lock orchestration
+219. **LockCoordinator** - Class - Lock orchestration
 220. **CheckpointManager** - Class - Checkpoint handling
 221. **PipelineServices** - Class - Services bundle
 222. **QuarantineManager** - Class - Quarantine management
@@ -28092,7 +28092,7 @@ ShutdownPort, SerializationPort, DQConfigLoaderPort, FilterConfigLoaderPort
 311. **Adapter ↔ HTTPClient** - Sequence - API request
 312. **HTTPClient ↔ RateLimiter** - Sequence - Rate limiting
 313. **HTTPClient ↔ CircuitBreaker** - Sequence - Fault tolerance
-314. **LockManager ↔ LockPort** - Sequence - Lock lifecycle
+314. **LockCoordinator ↔ LockPort** - Sequence - Lock lifecycle
 315. **CheckpointManager ↔ CheckpointPort** - Sequence - State persistence
 316. **QuarantineManager ↔ QuarantinePort** - Sequence - Quarantine ops
 317. **Observer ↔ Services** - Sequence - Observability integration
@@ -28100,7 +28100,7 @@ ShutdownPort, SerializationPort, DQConfigLoaderPort, FilterConfigLoaderPort
 319. **Postrun ↔ DQAnalyzers** - Sequence - DQ analysis
 320. **Postrun ↔ VacuumService** - Sequence - Cleanup
 321. **MemoryMonitor ↔ BatchExecutor** - Sequence - Adaptive sizing
-322. **Heartbeat ↔ LockManager** - Sequence - TTL refresh
+322. **Heartbeat ↔ LockCoordinator** - Sequence - TTL refresh
 323. **Shutdown ↔ Runner** - Sequence - Graceful stop
 324. **Factory ↔ Registry** - Sequence - Component creation
 325. **CLI ↔ Entrypoints** - Sequence - Command execution
@@ -29667,7 +29667,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 - Исходная диаграмма: `mmd-diagrams/foundation/03-pipeline-execution-happy-path.mmd`
 
 ## Описание
-Диаграмма Title: Pipeline Execution — Happy Path из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате sequenceDiagram и служит базовым ориентиром для инженерного анализа, ревью изменений и обсуждения технических решений. Уровень детализации обозначен как Mixed (System / Component / Class), поэтому схема подходит одновременно для быстрой навигации по контексту и для проверки корректности зависимостей, контрактов и потоков обработки данных в рамках сценария 03-pipeline-execution-happy-path. В комментариях исходника зафиксирован фокус диаграммы: Covers: RULES.md §3 (Pipeline Execution), §3.3 (Locking), §3.4 (Postrun). Это снижает неоднозначность интерпретации и помогает поддерживать консистентность между визуальной документацией, ADR-решениями и реальным кодом. Значимые участники последовательностей: CLI, bootstrap_pipeline(), PipelineRunner, LockManager, PreflightService. По этим участникам удобно валидировать порядок вызовов, точки отказа и стратегию обработки ошибок. Дополнительно в метаданных указан показатель плотности (@nodes=n/a), что полезно при контроле читаемости и планировании декомпозиции диаграмм на более узкие представления.
+Диаграмма Title: Pipeline Execution — Happy Path из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате sequenceDiagram и служит базовым ориентиром для инженерного анализа, ревью изменений и обсуждения технических решений. Уровень детализации обозначен как Mixed (System / Component / Class), поэтому схема подходит одновременно для быстрой навигации по контексту и для проверки корректности зависимостей, контрактов и потоков обработки данных в рамках сценария 03-pipeline-execution-happy-path. В комментариях исходника зафиксирован фокус диаграммы: Covers: RULES.md §3 (Pipeline Execution), §3.3 (Locking), §3.4 (Postrun). Это снижает неоднозначность интерпретации и помогает поддерживать консистентность между визуальной документацией, ADR-решениями и реальным кодом. Значимые участники последовательностей: CLI, bootstrap_pipeline(), PipelineRunner, LockCoordinator, PreflightService. По этим участникам удобно валидировать порядок вызовов, точки отказа и стратегию обработки ошибок. Дополнительно в метаданных указан показатель плотности (@nodes=n/a), что полезно при контроле читаемости и планировании декомпозиции диаграмм на более узкие представления.
 
 ## Метаданные
 - Тип: `sequenceDiagram`
@@ -30405,7 +30405,7 @@ _Generated: 2026-03-03T16:39:24+03:00_
 - Исходная диаграмма: `mmd-diagrams/foundation/40-application-core-collaboration.mmd`
 
 ## Описание
-Диаграмма Title: Application Core Component Collaboration из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате flowchart и служит базовым ориентиром для инженерного анализа, ревью изменений и обсуждения технических решений. Уровень детализации обозначен как Mixed (System / Component / Class), поэтому схема подходит одновременно для быстрой навигации по контексту и для проверки корректности зависимостей, контрактов и потоков обработки данных в рамках сценария 40-application-core-collaboration. В комментариях исходника зафиксирован фокус диаграммы: Covers: RULES.md §1.1 (Application Layer), application/core/. Это снижает неоднозначность интерпретации и помогает поддерживать консистентность между визуальной документацией, ADR-решениями и реальным кодом. Ключевые блоки/подграфы включают: PipelineRunner (application/core/runner.py), Lifecycle Services, Pre/Post Services, Batch Execution, Observability. Их состав отражает главные границы ответственности и маршруты взаимодействия между подсистемами или слоями. Показательные узлы диаграммы: PipelineRunner (application/core/runner.py), run() — main orchestrator, Lifecycle Services, LockManager • acquire(key, owner, ttl=90s) • release(key, owner) • validate_ownership(), HeartbeatService • start() • stop(), CheckpointManager • read_checkpoint() • save_checkpoint(). Они позволяют быстро сопоставлять термины, роли сервисов и артефакты данных между моделью и реализацией. Дополнительно в метаданных указан показатель плотности (@nodes=n/a), что полезно при контроле читаемости и планировании декомпозиции диаграмм на более узкие представления.
+Диаграмма Title: Application Core Component Collaboration из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате flowchart и служит базовым ориентиром для инженерного анализа, ревью изменений и обсуждения технических решений. Уровень детализации обозначен как Mixed (System / Component / Class), поэтому схема подходит одновременно для быстрой навигации по контексту и для проверки корректности зависимостей, контрактов и потоков обработки данных в рамках сценария 40-application-core-collaboration. В комментариях исходника зафиксирован фокус диаграммы: Covers: RULES.md §1.1 (Application Layer), application/core/. Это снижает неоднозначность интерпретации и помогает поддерживать консистентность между визуальной документацией, ADR-решениями и реальным кодом. Ключевые блоки/подграфы включают: PipelineRunner (application/core/runner.py), Lifecycle Services, Pre/Post Services, Batch Execution, Observability. Их состав отражает главные границы ответственности и маршруты взаимодействия между подсистемами или слоями. Показательные узлы диаграммы: PipelineRunner (application/core/runner.py), run() — main orchestrator, Lifecycle Services, LockCoordinator • acquire(key, owner, ttl=90s) • release(key, owner) • validate_ownership(), HeartbeatService • start() • stop(), CheckpointManager • read_checkpoint() • save_checkpoint(). Они позволяют быстро сопоставлять термины, роли сервисов и артефакты данных между моделью и реализацией. Дополнительно в метаданных указан показатель плотности (@nodes=n/a), что полезно при контроле читаемости и планировании декомпозиции диаграмм на более узкие представления.
 
 ## Метаданные
 - Тип: `flowchart`
@@ -37422,7 +37422,7 @@ Medallion архитектура требует идемпотентности �
 
 ## Инварианты блокировки
 
-Блокировка (`LockManager`) гарантирует:
+Блокировка (`LockCoordinator`) гарантирует:
 
 1. **Эксклюзивный доступ**: Только один процесс выполняет пайплайн
 2. **Heartbeat**: Периодическое продление TTL блокировки

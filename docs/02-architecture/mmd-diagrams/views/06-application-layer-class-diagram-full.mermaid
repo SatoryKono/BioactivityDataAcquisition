@@ -4,7 +4,7 @@
 %% Title: Application Layer Class Diagram
 %% Covers: RULES.md §1.1 (Application Layer), §3 (Pipeline Execution)
 %% Updated: 2026-02-17
-%% Components: PipelineRunner, PipelineExecutor, RecordProcessor, BatchTransformer, LockManager, CheckpointManager
+%% Components: PipelineRunner, PipelineExecutor, RecordProcessor, BatchTransformer, LockCoordinator, CheckpointManager
 
 %% @version 1.0.0
 %% @date    2026-02-24
@@ -115,7 +115,7 @@ classDiagram
 
         class RunnerServices {
             <<frozen dataclass>>
-            +lock_manager: LockManager
+            +lock_manager: LockCoordinator
             +preflight: PreflightService
             +postrun: PostrunService
             +lifecycle_orch: LifecycleOrchestrator
@@ -131,7 +131,7 @@ classDiagram
     }
 
     namespace Services {
-        class LockManager {
+        class LockCoordinator {
             -_lock: LockPort
             -_logger: LoggerPort
             -_ttl: int = 90
@@ -392,7 +392,7 @@ classDiagram
     BatchTransformer --> BaseTransformer
 
     BasePipeline --> PipelineServices
-    RunnerServices --> LockManager
+    RunnerServices --> LockCoordinator
     RunnerServices --> PreflightService
     RunnerServices --> PostrunService
     RunnerServices --> LifecycleOrchestrator

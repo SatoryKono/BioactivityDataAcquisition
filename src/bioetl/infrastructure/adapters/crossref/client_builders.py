@@ -5,11 +5,16 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.infrastructure.adapters.common import ComposableFallbackDecorator
-from bioetl.infrastructure.adapters.crossref.batch import DoiBatchProcessor, SearchPaginator
+from bioetl.infrastructure.adapters.crossref.batch import (
+    DoiBatchProcessor,
+    SearchPaginator,
+)
 from bioetl.infrastructure.adapters.crossref.fallback import TitleFallbackHandler
 from bioetl.infrastructure.adapters.crossref.fetch_flow import CrossRefFetchFlow
 from bioetl.infrastructure.adapters.crossref.query_builder import CrossRefQueryBuilder
-from bioetl.infrastructure.adapters.crossref.response_mapper import CrossRefResponseMapper
+from bioetl.infrastructure.adapters.crossref.response_mapper import (
+    CrossRefResponseMapper,
+)
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Callable

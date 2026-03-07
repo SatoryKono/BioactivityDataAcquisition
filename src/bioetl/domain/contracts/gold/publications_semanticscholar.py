@@ -5,7 +5,10 @@ from __future__ import annotations
 import pandera.pandas as pa
 from pandera.typing import Series
 
-from bioetl.domain.schemas.common.publication_base import LOOKUP_METHODS, OA_STATUS_VALUES
+from bioetl.domain.schemas.common.publication_base import (
+    LOOKUP_METHODS,
+    OA_STATUS_VALUES,
+)
 from bioetl.domain.validation import DOI_REGEX_PATTERN
 
 

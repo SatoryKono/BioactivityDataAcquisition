@@ -227,6 +227,7 @@ class BatchProcessingService:
                 quarantined_count=transform_result.quarantined_count,
             )
 
+            self._tracing.end_span(span)
             return BatchProcessingOutput(
                 batch_id=batch_id,
                 bronze_result=bronze_result,
@@ -238,8 +239,6 @@ class BatchProcessingService:
         except self._PIPELINE_EXECUTION_ERRORS as error:
             self._tracing.end_span(span, error)
             raise
-        else:
-            self._tracing.end_span(span)
 
     def _get_source_metadata(self, query_string: str | None) -> SourceMetadata | None:
         """Get source metadata and enrich it with query string when available."""

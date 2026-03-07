@@ -28,7 +28,7 @@ APPLICATION_DIR = Path("src/bioetl/application")
 # Format: class names that should never appear as `self.x = ClassName(...)` in __init__
 FORBIDDEN_SERVICE_INSTANTIATIONS: set[str] = {
     # Core services (application layer - must be injected)
-    "LockManager",
+    "LockCoordinator",
     "PreflightService",
     "PostrunService",
     "CleanupService",
@@ -75,7 +75,7 @@ class InitInstantiationFinder(ast.NodeVisitor):
     Detects patterns like:
         def __init__(self, ...):
             self._service = ForbiddenService(...)  # Violation!
-            self.manager = LockManager(...)        # Violation!
+            self.manager = LockCoordinator(...)        # Violation!
     """
 
     def __init__(self, forbidden_classes: set[str]) -> None:
@@ -208,18 +208,18 @@ class TestDIConstructors:
     ) -> None:
         """Application layer __init__ methods MUST NOT instantiate services.
 
-        REQ-ARCH-DI-011: Services like LockManager, PreflightService,
+        REQ-ARCH-DI-011: Services like LockCoordinator, PreflightService,
         MedallionLifecycleService, etc. must be injected via constructor
         parameters, not created inside __init__.
 
         Anti-pattern:
             class SomeClass:
                 def __init__(self):
-                    self._lock_manager = LockManager(...)  # BAD!
+                    self._lock_manager = LockCoordinator(...)  # BAD!
 
         Correct pattern:
             class SomeClass:
-                def __init__(self, lock_manager: LockManager):
+                def __init__(self, lock_manager: LockCoordinator):
                     self._lock_manager = lock_manager  # GOOD!
 
         See CLAUDE.md §2.2 and §11 Anti-Patterns.
@@ -324,15 +324,15 @@ class TestDIConstructorsRegression:
         code = """
 class BadClass:
     def __init__(self):
-        self._manager = LockManager()
+        self._manager = LockCoordinator()
 """
         tree = ast.parse(code)
-        finder = InitInstantiationFinder({"LockManager"})
+        finder = InitInstantiationFinder({"LockCoordinator"})
         finder.visit(tree)
 
         assert len(finder.violations) == 1
         _lineno, class_name, containing, target = finder.violations[0]
-        assert class_name == "LockManager"
+        assert class_name == "LockCoordinator"
         assert containing == "BadClass"
         assert "manager" in target.lower()
 
@@ -354,11 +354,11 @@ class BadClass:
         """Verify no violation for self.x = injected_param pattern."""
         code = """
 class GoodClass:
-    def __init__(self, lock_manager: LockManager):
+    def __init__(self, lock_manager: LockCoordinator):
         self._lock_manager = lock_manager  # This is injection, not creation!
 """
         tree = ast.parse(code)
-        finder = InitInstantiationFinder({"LockManager"})
+        finder = InitInstantiationFinder({"LockCoordinator"})
         finder.visit(tree)
 
         assert len(finder.violations) == 0
@@ -372,10 +372,10 @@ class SomeClass:
 
     def create_manager(self):
         # This is a factory method, not __init__ - different concern
-        return LockManager()
+        return LockCoordinator()
 """
         tree = ast.parse(code)
-        finder = InitInstantiationFinder({"LockManager"})
+        finder = InitInstantiationFinder({"LockCoordinator"})
         finder.visit(tree)
 
         assert len(finder.violations) == 0

@@ -23,6 +23,12 @@ from bioetl.infrastructure.adapters.common import (
     FallbackFetchOrchestratorService,
     resolve_fallback_policy,
 )
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_error_handler as _create_default_pubmed_error_handler,
+)
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_fallback_service as _create_default_pubmed_fallback_service,
+)
 from bioetl.infrastructure.adapters.filterable_mixin import NotSupportedMultiFilterMixin
 from bioetl.infrastructure.adapters.pubmed._fetch import PubMedFetchMixin
 from bioetl.infrastructure.adapters.pubmed._health import PubMedHealthMixin
@@ -53,33 +59,6 @@ PUBMED_DTO_MODELS: dict[str, type[BaseModel]] = {
 
 # Re-export for tests/importers expecting this symbol on the client module.
 ENTREZ_API_BASE = PUBMED_ENTREZ_API_BASE
-
-
-def _create_default_pubmed_error_handler(
-    *,
-    logger: LoggerPort,
-    metrics: MetricsPort | None,
-) -> ErrorHandlerPort:
-    """Create default adapter error handler for non-DI call sites.
-
-    Returns:
-        ErrorHandlerPort implementation configured with the given logger and metrics.
-    """
-    from bioetl.infrastructure.adapters.error_handling import ErrorService
-
-    return ErrorService(logger, metrics=metrics)
-
-
-def _create_default_pubmed_fallback_service(
-    *,
-    adapter_metrics: AdapterMetrics,
-) -> FallbackFetchOrchestratorService:
-    """Create fallback orchestrator service for non-DI call sites.
-
-    Returns:
-        FallbackFetchOrchestratorService instance wired to the given adapter metrics.
-    """
-    return FallbackFetchOrchestratorService(adapter_metrics)
 
 
 def _create_default_pubmed_title_fallback_handler(

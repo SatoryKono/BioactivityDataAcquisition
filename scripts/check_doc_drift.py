@@ -209,7 +209,7 @@ def check_classes(report: DriftReport) -> None:
             [
                 "BasePipeline", "BaseTransformer", "RecordProcessor",
                 "BatchExecutor", "PipelineRunner", "PipelineService",
-                "LockManager", "PreflightService", "BatchMetricsRecorderService",
+                "LockCoordinator", "PreflightService", "BatchMetricsRecorderService",
                 "FilteredDataSource", "CompositePipelineRunner",
                 "EnrichmentCoordinatorService",
             ],

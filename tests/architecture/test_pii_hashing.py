@@ -151,16 +151,27 @@ class TestPiiFieldsInTransformers:
     """Tests that PII fields are actually hashed in transformer code."""
 
     def test_crossref_transformer_hashes_authors(self) -> None:
-        """CrossRefPublicationTransformer MUST hash authors field."""
+        """CrossRefPublicationTransformer MUST hash authors field.
+
+        CrossRef delegates author normalization to _business_data_builder,
+        so we check both the transformer and its delegate module.
+        """
         transformer_path = Path(
             "src/bioetl/application/pipelines/crossref/transformer.py"
         )
-        content = transformer_path.read_text(encoding="utf-8")
+        builder_path = Path(
+            "src/bioetl/application/pipelines/crossref/_business_data_builder.py"
+        )
+        transformer_content = transformer_path.read_text(encoding="utf-8")
+        builder_content = builder_path.read_text(encoding="utf-8")
 
         # Unified normalization: normalize_author_list() handles parse+hash+serialize
-        assert "normalize_author_list" in content, (
+        # CrossRef delegates to _business_data_builder via build_crossref_business_data()
+        has_in_transformer = "normalize_author_list" in transformer_content
+        has_in_builder = "normalize_author_list" in builder_content
+        assert has_in_transformer or has_in_builder, (
             "CrossRefPublicationTransformer MUST use normalize_author_list() "
-            "for authors field"
+            "for authors field (directly or via _business_data_builder)"
         )
 
     def test_pubmed_transformer_hashes_authors(self) -> None:

@@ -7,6 +7,9 @@ __all__ = ["FeatureExtractor"]
 from collections.abc import Iterator
 from typing import ClassVar
 
+from bioetl.application.pipelines.uniprot.extractors._feature_wrappers_mixin import (
+    FeatureExtractionWrappersMixin,
+)
 from bioetl.domain.serialization import serialize_to_json
 from bioetl.domain.types import JsonDict
 
@@ -90,8 +93,8 @@ def _build_keyword_dict(kw: JsonDict) -> JsonDict:  # Any: JSON values
     return kw_data
 
 
-class FeatureExtractor:
-    """Extracts sequence features and keywords from UniProt records."""
+class FeatureExtractor(FeatureExtractionWrappersMixin):
+    """Extract sequence features and keywords from UniProt records."""
 
     # Mapping of feature names to UniProt feature types
     FEATURE_TYPES: ClassVar[dict[str, str]] = {
@@ -115,14 +118,7 @@ class FeatureExtractor:
 
     @staticmethod
     def extract_features(features: list[JsonDict] | None) -> str | None:
-        """Extract sequence features.
-
-        Args:
-            features: List of feature objects.
-
-        Returns:
-            JSON array of features or None.
-        """
+        """Extract all sequence features as JSON."""
         if not features or not isinstance(features, list):
             return None
 
@@ -138,14 +134,7 @@ class FeatureExtractor:
 
     @staticmethod
     def extract_keywords(keywords: list[JsonDict] | None) -> str | None:
-        """Extract UniProt keywords.
-
-        Args:
-            keywords: List of keyword objects.
-
-        Returns:
-            JSON array of keywords.
-        """
+        """Extract UniProt keywords as JSON."""
         if not keywords or not isinstance(keywords, list):
             return None
 
@@ -165,15 +154,7 @@ class FeatureExtractor:
         features: list[JsonDict] | None,
         feature_type: str,
     ) -> str | None:
-        """Extract sequence features by type.
-
-        Args:
-            features: List of feature objects.
-            feature_type: Type of features to extract (e.g., "Domain", "Active site").
-
-        Returns:
-            JSON array of matching features or None.
-        """
+        """Extract sequence features matching the requested type."""
         if not features or not isinstance(features, list):
             return None
 
@@ -189,182 +170,12 @@ class FeatureExtractor:
         return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
 
     @classmethod
-    def extract_domains(cls, features: list[JsonDict] | None) -> str | None:
-        """Extract protein domain features.
-
-        Args:
-            features: List of feature objects.
-
-        Returns:
-            JSON array of domain features or None.
-        """
-        return cls.extract_features_by_type(features, "Domain")
-
-    @classmethod
-    def extract_binding_sites(cls, features: list[JsonDict] | None) -> str | None:
-        """Extract binding site features.
-
-        Args:
-            features: List of feature objects.
-
-        Returns:
-            JSON array of binding site features or None.
-        """
-        return cls.extract_features_by_type(features, "Binding site")
-
-    @classmethod
-    def extract_active_sites(cls, features: list[JsonDict] | None) -> str | None:
-        """Extract active site features.
-
-        Args:
-            features: List of feature objects.
-
-        Returns:
-            JSON array of active site features or None.
-        """
-        return cls.extract_features_by_type(features, "Active site")
-
-    @classmethod
-    def extract_topology(cls, features: list[JsonDict] | None) -> str | None:
-        """Extract topological domain features.
-
-        Args:
-            features: List of feature objects.
-
-        Returns:
-            JSON array of topological domain features or None.
-        """
-        return cls.extract_features_by_type(features, cls.FEATURE_TYPES["topology"])
-
-    @classmethod
-    def extract_transmembrane(cls, features: list[JsonDict] | None) -> str | None:
-        """Extract transmembrane region features.
-
-        Args:
-            features: List of feature objects.
-
-        Returns:
-            JSON array of transmembrane features or None.
-        """
-        return cls.extract_features_by_type(
-            features, cls.FEATURE_TYPES["transmembrane"]
-        )
-
-    @classmethod
-    def extract_intramembrane(cls, features: list[JsonDict] | None) -> str | None:
-        """Extract intramembrane region features.
-
-        Args:
-            features: List of feature objects.
-
-        Returns:
-            JSON array of intramembrane features or None.
-        """
-        return cls.extract_features_by_type(
-            features, cls.FEATURE_TYPES["intramembrane"]
-        )
-
-    @classmethod
-    def extract_glycosylation(cls, features: list[JsonDict] | None) -> str | None:
-        """Extract glycosylation site features.
-
-        Args:
-            features: List of feature objects.
-
-        Returns:
-            JSON array of glycosylation features or None.
-        """
-        return cls.extract_features_by_type(
-            features, cls.FEATURE_TYPES["glycosylation"]
-        )
-
-    @classmethod
-    def extract_lipidation(cls, features: list[JsonDict] | None) -> str | None:
-        """Extract lipidation site features.
-
-        Args:
-            features: List of feature objects.
-
-        Returns:
-            JSON array of lipidation features or None.
-        """
-        return cls.extract_features_by_type(features, cls.FEATURE_TYPES["lipidation"])
-
-    @classmethod
-    def extract_disulfide_bonds(cls, features: list[JsonDict] | None) -> str | None:
-        """Extract disulfide bond features.
-
-        Args:
-            features: List of feature objects.
-
-        Returns:
-            JSON array of disulfide bond features or None.
-        """
-        return cls.extract_features_by_type(
-            features, cls.FEATURE_TYPES["disulfide_bond"]
-        )
-
-    @classmethod
-    def extract_modified_residues(
-        cls,
-        features: list[JsonDict] | None,
-    ) -> str | None:
-        """Extract modified residue features.
-
-        Args:
-            features: List of feature objects.
-
-        Returns:
-            JSON array of modified residue features or None.
-        """
-        return cls.extract_features_by_type(
-            features, cls.FEATURE_TYPES["modified_residue"]
-        )
-
-    @classmethod
-    def extract_signal_peptide(cls, features: list[JsonDict] | None) -> str | None:
-        """Extract signal peptide features.
-
-        Args:
-            features: List of feature objects.
-
-        Returns:
-            JSON array of signal peptide features or None.
-        """
-        return cls.extract_features_by_type(
-            features, cls.FEATURE_TYPES["signal_peptide"]
-        )
-
-    @classmethod
-    def extract_propeptide(cls, features: list[JsonDict] | None) -> str | None:
-        """Extract propeptide features.
-
-        Args:
-            features: List of feature objects.
-
-        Returns:
-            JSON array of propeptide features or None.
-        """
-        return cls.extract_features_by_type(features, cls.FEATURE_TYPES["propeptide"])
-
-    @classmethod
     def extract_ptm_by_pattern(  # Any: untyped JSON
         cls,
         features: list[JsonDict] | None,
         patterns: tuple[str, ...],
     ) -> str | None:
-        """Extract modified residue features matching PTM patterns.
-
-        Filters modified residues by checking if description contains
-        any of the given patterns (case-insensitive).
-
-        Args:
-            features: List of feature objects.
-            patterns: Tuple of pattern strings to match in description.
-
-        Returns:
-            JSON array of matching modified residue features or None.
-        """
+        """Extract modified residues whose descriptions match PTM patterns."""
         if not features or not isinstance(features, list) or not patterns:
             return None
 
@@ -376,39 +187,3 @@ class FeatureExtractor:
             )
         )
         return serialize_to_json(matches, ensure_ascii=False) if matches else None
-
-    @classmethod
-    def extract_phosphorylation(cls, features: list[JsonDict] | None) -> str | None:
-        """Extract phosphorylation site features.
-
-        Args:
-            features: List of feature objects.
-
-        Returns:
-            JSON array of phosphorylation features or None.
-        """
-        return cls.extract_ptm_by_pattern(features, cls.PTM_PATTERNS["phosphorylation"])
-
-    @classmethod
-    def extract_acetylation(cls, features: list[JsonDict] | None) -> str | None:
-        """Extract acetylation site features.
-
-        Args:
-            features: List of feature objects.
-
-        Returns:
-            JSON array of acetylation features or None.
-        """
-        return cls.extract_ptm_by_pattern(features, cls.PTM_PATTERNS["acetylation"])
-
-    @classmethod
-    def extract_ubiquitination(cls, features: list[JsonDict] | None) -> str | None:
-        """Extract ubiquitination site features.
-
-        Args:
-            features: List of feature objects.
-
-        Returns:
-            JSON array of ubiquitination features or None.
-        """
-        return cls.extract_ptm_by_pattern(features, cls.PTM_PATTERNS["ubiquitination"])

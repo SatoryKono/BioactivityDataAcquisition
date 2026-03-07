@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite.runner_constants import (
@@ -12,6 +11,9 @@ from bioetl.application.composite.runner_constants import (
 from bioetl.application.composite.runner_helpers import (
     add_not_run_results,
     log_enrichment_summary,
+)
+from bioetl.application.composite.runner_stage_support_mixin import (
+    _CompositeRunnerStageSupportMixin,
 )
 from bioetl.domain.composite.result import (
     DependencyResult,
@@ -26,106 +28,9 @@ from bioetl.domain.exceptions import BioETLError, InvalidStateError
 if TYPE_CHECKING:
     import polars as pl
 
-    from bioetl.application.composite.checkpoint import (
-        CompositeCheckpointService,
-        CompositeCheckpointState,
-    )
-    from bioetl.application.composite.coordinator import EnrichmentCoordinatorService
-    from bioetl.application.composite.dependency_coordinator import (
-        DependencyCoordinatorService,
-    )
-    from bioetl.application.composite.fsm_helper import FSMStateHelperService
-    from bioetl.application.composite.runner import CompositeRuntimeConfig
-    from bioetl.application.core.runner import PipelineRunner
-    from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.application.composite.checkpoint import CompositeCheckpointState
 
 __all__ = ["CompositeRunnerStageMixin"]
-
-
-class _CompositeRunnerStageSupportMixin:
-    """Shared helper calls and small guards for stage orchestration."""
-
-    _config: CompositeConfig
-    _runtime: CompositeRuntimeConfig
-    _logger: LoggerPort
-    _run_id_str: str
-    _fsm: FSMStateHelperService
-    _checkpoint_manager: CompositeCheckpointService
-    _dependency_coordinator: DependencyCoordinatorService | None
-    _dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner] | None
-    _coordinator: EnrichmentCoordinatorService
-    _enricher_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner]
-
-    async def _save_checkpoint_safe(
-        self,
-        state: CompositeCheckpointState,
-        operation: str,
-    ) -> bool:  # pragma: no cover - implemented by support mixin
-        raise NotImplementedError
-
-    async def _run_seed(self) -> SeedResult:  # pragma: no cover - support mixin
-        raise NotImplementedError
-
-    def _get_enrichers_to_run(
-        self,
-        state: CompositeCheckpointState,
-    ) -> list[EnricherConfig]:  # pragma: no cover - implemented by support mixin
-        raise NotImplementedError
-
-    def _check_required_enrichers(
-        self,
-        enrichment_results: dict[str, EnrichmentResult],
-    ) -> None:  # pragma: no cover - implemented by support mixin
-        raise NotImplementedError
-
-    async def _call_save_checkpoint_safe(
-        self,
-        state: CompositeCheckpointState,
-        operation: str,
-    ) -> bool:
-        """Invoke support-layer checkpoint save helper."""
-        return await self._save_checkpoint_safe(state, operation)
-
-    async def _call_run_seed(self) -> SeedResult:
-        """Invoke support-layer seed runner helper."""
-        return await self._run_seed()
-
-    def _call_get_enrichers_to_run(
-        self,
-        state: CompositeCheckpointState,
-    ) -> list[EnricherConfig]:
-        """Invoke support-layer enricher selection helper."""
-        return self._get_enrichers_to_run(state)
-
-    def _call_check_required_enrichers(
-        self,
-        enrichment_results: dict[str, EnrichmentResult],
-    ) -> None:
-        """Invoke support-layer required-enricher validation helper."""
-        self._check_required_enrichers(enrichment_results)
-
-    def _has_dependencies_configured(self) -> bool:
-        """Check if dependencies phase is configured and ready."""
-        return bool(
-            self._config.dependencies
-            and self._dependency_coordinator
-            and self._dependencies_runner_factory
-        )
-
-    def _find_required_failures(
-        self,
-        results: dict[str, DependencyResult],
-    ) -> list[str]:
-        """Find required dependencies that failed."""
-        failed: list[str] = []
-        for name, result in results.items():
-            if result.is_success:
-                continue
-            dep_cfg = self._config.get_dependency(name)
-            if dep_cfg and dep_cfg.required:
-                failed.append(name)
-        return failed
 
 
 class CompositeRunnerStageMixin(_CompositeRunnerStageSupportMixin):

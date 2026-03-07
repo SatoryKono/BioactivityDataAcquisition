@@ -5,8 +5,10 @@ from __future__ import annotations
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from bioetl.domain.config import DQConfig as DomainDQConfig
-from bioetl.domain.configs.base import BaseClientConfig as DomainBaseClientConfig
-from bioetl.domain.configs.base import RateLimitConfig
+from bioetl.domain.config.base_provider import (
+    BaseClientConfig as DomainBaseClientConfig,
+)
+from bioetl.domain.config.base_provider import RateLimitConfig
 from bioetl.domain.resilience import CircuitBreakerConfig as DomainCircuitBreakerConfig
 
 

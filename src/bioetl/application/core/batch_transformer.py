@@ -18,12 +18,12 @@ __all__ = [
 ]
 
 
-from collections.abc import AsyncIterator, Iterator
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.base_transformer import FilteredOutError
 from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
+from bioetl.application.core.batch_transformer_streaming import StreamingBatchProcessor
 from bioetl.application.core.quarantine_manager import QuarantineManagerService
 from bioetl.domain.exceptions import BioETLError, DataQualityThresholdError
 from bioetl.domain.types import BronzeRecord, GoldRecord
@@ -37,7 +37,6 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
-    from bioetl.domain.ports import MemoryMonitorPort
     from bioetl.domain.types import BatchID
 
 
@@ -373,95 +372,3 @@ class BatchTransformer:
             quarantined_count=records_quarantined,
             filtered_out_count=records_filtered_out,
         )
-
-
-class StreamingBatchProcessor:
-    """Memory-efficient streaming processor for large batches.
-
-    This class provides generator-based iteration over records,
-    enabling processing of datasets that don't fit in memory.
-
-    Usage:
-        >>> processor = StreamingBatchProcessor(transformer, memory_monitor)
-        >>> async for sub_batch in processor.process_in_chunks(records, batch_id, chunk_size=100):
-        ...     await writer.write_silver(sub_batch.silver_records, batch_id, ts)
-        ...     await writer.write_gold(sub_batch.gold_records)
-
-    """
-
-    def __init__(
-        self,
-        transformer: BatchTransformer,
-        memory_monitor: MemoryMonitorPort | None = None,
-    ) -> None:
-        """Initialize streaming processor.
-
-        Args:
-            transformer: The batch transformer to use.
-            memory_monitor: Optional memory monitor for adaptive sizing.
-
-        """
-        self._transformer = transformer
-        self._memory_monitor = memory_monitor
-
-    async def process_in_chunks(
-        self,
-        records: list[BronzeRecord],
-        batch_id: BatchID,
-        chunk_size: int = 100,
-        start_index: int = 0,
-    ) -> AsyncIterator[TransformResult]:
-        """Process records in memory-efficient sub-batches.
-
-        Yields TransformResult for each sub-batch, allowing incremental
-        writes and garbage collection between sub-batches.
-
-        Args:
-            records: All records to process.
-            batch_id: Batch identifier.
-            chunk_size: Initial sub-batch size (may be reduced under memory pressure).
-            start_index: Starting index for the entire batch.
-
-        Yields:
-            TransformResult for each processed sub-batch.
-
-        Returns:
-            Processed result.
-        """
-        current_chunk_size = chunk_size
-        i = 0
-        total_records = len(records)
-
-        while i < total_records:
-            # Adjust sub-batch size based on memory pressure
-            if self._memory_monitor:
-                current_chunk_size = self._memory_monitor.get_recommended_batch_size(
-                    current_chunk_size
-                )
-
-            chunk = records[i : i + current_chunk_size]
-            result = await self._transformer.transform_stream(
-                chunk, batch_id, start_index + i
-            )
-
-            yield result
-
-            # Advance by actual sub-batch size processed
-            i += len(chunk)
-
-    def iter_records(self, records: list[BronzeRecord]) -> Iterator[BronzeRecord]:
-        """Iterate over records without loading all into memory.
-
-        This is a simple generator wrapper that can be extended
-        to read from streaming sources.
-
-        Args:
-            records: List of records (could be lazy-loaded).
-
-        Yields:
-            Individual records one at a time.
-
-        Returns:
-            Result dictionary.
-        """
-        yield from records

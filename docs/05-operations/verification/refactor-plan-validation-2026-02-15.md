@@ -118,9 +118,9 @@
   - `src/bioetl/composition/types.py`
   - все импорты старого имени.
 - **Rules**:
-  - не менять `domain/configs/base.py` и доменные re-export’ы.
+  - не менять `domain/configs/base.py` и доменные re-export’ы. *(Superseded by RF-005: canonical location moved to `domain/config/base_provider.py`; `domain/configs/` is now a backward-compat shim.)*
 - **DoD**:
-  - `class RateLimitConfig` остаётся только в domain/configs/base.py.
+  - `class RateLimitConfig` остаётся только в domain/configs/base.py. *(Superseded by RF-005: canonical location is now `domain/config/base_provider.py`.)*
 
 ### TASK A3 — RF-NAME-003 CompositeLineageMetadata rename
 

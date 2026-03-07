@@ -4,12 +4,20 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Awaitable, Callable
-from types import ModuleType
 from typing import TYPE_CHECKING, Any, Protocol, TypeVar, cast
 
 import pyarrow as pa
 
 from bioetl.domain.medallion import GoldWriteMode
+from bioetl.infrastructure.storage.gold_writer_io_helpers import (
+    initialize_scd2_records as _initialize_scd2_records,
+)
+from bioetl.infrastructure.storage.gold_writer_io_helpers import (
+    load_gold_writer_module as _load_gold_writer_module,
+)
+from bioetl.infrastructure.storage.gold_writer_io_helpers import (
+    write_scd2_once as _write_scd2_once,
+)
 from bioetl.infrastructure.storage.gold_writer_read_cleanup_mixin import (
     GoldWriterReadCleanupMixin,
 )
@@ -24,72 +32,6 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.types import GoldRecord, ScdConfig
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
-
-
-def _load_gold_writer_module() -> ModuleType:
-    """Load canonical gold_writer module to preserve monkeypatch points.
-
-    Returns:
-        Gold writer module with write_deltalake, DeltaTable, and related references.
-    """
-    from importlib import import_module
-
-    return import_module("bioetl.infrastructure.storage.gold_writer")
-
-
-def _initialize_scd2_records(
-    records: list[GoldRecord],
-    scd_config: ScdConfig,
-    ingestion_ts: datetime,
-) -> None:
-    """Populate SCD2 metadata fields before writing."""
-    version_col = scd_config.get("version_col", "version")
-    valid_from_col = scd_config.get("valid_from_col", "valid_from")
-    valid_to_col = scd_config.get("valid_to_col", "valid_to")
-    current_flag_col = scd_config.get("current_flag_col", "is_current")
-    ts_iso = ingestion_ts.isoformat()
-    for record in records:
-        record[valid_from_col] = ts_iso
-        record[valid_to_col] = None
-        record[current_flag_col] = True
-        record[version_col] = record.get(version_col, 1)
-
-
-async def _write_scd2_once(
-    writer: GoldWriterIOMixin,
-    *,
-    module: ModuleType,
-    table_path: str,
-    records: list[GoldRecord],
-    business_key: str | list[str],
-    scd_config: ScdConfig,
-    ingestion_ts: datetime,
-    partition_cols: list[str] | None,
-    column_order: list[str] | None,
-) -> None:
-    """Execute one SCD2 write attempt with merge-or-create flow."""
-    try:
-        dt = await writer._run_in_executor(lambda: module.DeltaTable(table_path))
-        await writer._merge_scd2(
-            dt,
-            records,
-            business_key,
-            scd_config,
-            ingestion_ts,
-            column_order,
-        )
-    except module.TableNotFoundError:
-        arrow_data = writer._to_arrow_table(records, column_order=column_order)
-        await writer._run_in_executor(
-            lambda: module.write_deltalake(
-                table_or_uri=table_path,
-                data=pa.RecordBatchReader.from_batches(
-                    arrow_data.schema, arrow_data.to_batches()
-                ),
-                mode="append",
-                partition_by=partition_cols,
-            )
-        )
 
 
 class _GoldMergedMetadataWriterProtocol(Protocol):

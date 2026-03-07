@@ -744,7 +744,7 @@ class CompositePipelineRunner:
         merger: MergeService,
         checkpoint-manager: CompositeCheckpointManager,
         logger: LoggerPort,
-        lock-manager: CompositeLockManager,
+        lock-manager: CompositeLockCoordinator,
     ) -> None:
         ...
 

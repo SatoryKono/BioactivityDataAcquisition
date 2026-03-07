@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.core.lock_manager import LockManager
+from bioetl.application.core.lock_manager import LockCoordinator
 from bioetl.application.core.postrun_service import PostrunService
 from bioetl.application.core.preflight_health_aggregator import _HealthAggregator
 from bioetl.application.core.preflight_medallion_validator import (
@@ -71,7 +71,7 @@ def assemble_runner_impl(
 
     context_holder = LockContextHolder()
 
-    lock_manager = LockManager.create(
+    lock_manager = LockCoordinator.create(
         lock_port=pipeline.services.lock,
         run_id=pipeline.context.run_id,
         provider=pipeline.config.provider,

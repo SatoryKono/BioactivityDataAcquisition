@@ -124,7 +124,7 @@ MANIFEST: dict[str, dict] = {
                 "Core Classes",
                 [
                     (
-                        "Application Core Services (PipelineRunner, BatchExecutor, LockManager)",
+                        "Application Core Services (PipelineRunner, BatchExecutor, LockCoordinator)",
                         C / "07-application-core-services.png",
                     ),
                     (

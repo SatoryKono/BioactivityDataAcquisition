@@ -18,6 +18,12 @@ from bioetl.infrastructure.adapters.common import (
     FallbackFetchOrchestratorService,
     resolve_fallback_policy,
 )
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_error_handler as _create_default_semanticscholar_error_handler,
+)
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_fallback_service as _create_default_semanticscholar_fallback_service,
+)
 from bioetl.infrastructure.adapters.semanticscholar.batch_request_mixin import (
     SemanticScholarBatchRequestMixin,
 )
@@ -69,33 +75,6 @@ _SEMANTICSCHOLAR_DEFAULT_FALLBACK_CONFIG = FallbackDecoratorConfig(
     trim_primary_ids_to_limit=False,
     fallback_operation="fetch_filtered_with_fallback",
 )
-
-
-def _create_default_semanticscholar_error_handler(
-    *,
-    logger: LoggerPort,
-    metrics: MetricsPort | None,
-) -> ErrorHandlerPort:
-    """Create default adapter error handler for non-DI call sites.
-
-    Returns:
-        ErrorHandlerPort implementation configured with the given logger and metrics.
-    """
-    from bioetl.infrastructure.adapters.error_handling import ErrorService
-
-    return ErrorService(logger, metrics=metrics)
-
-
-def _create_default_semanticscholar_fallback_service(
-    *,
-    adapter_metrics: AdapterMetrics,
-) -> FallbackFetchOrchestratorService:
-    """Create fallback orchestrator service for non-DI call sites.
-
-    Returns:
-        FallbackFetchOrchestratorService instance wired to the given adapter metrics.
-    """
-    return FallbackFetchOrchestratorService(adapter_metrics)
 
 
 def _create_default_semanticscholar_title_fallback_handler(

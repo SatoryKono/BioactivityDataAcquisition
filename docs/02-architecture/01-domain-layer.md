@@ -185,6 +185,9 @@ events = batch.collect_events()  # [BatchCreated, BatchSealed, BatchWritten]
 - `RuntimeConfig` — параметры выполнения
 - `DQConfig` — пороги Data Quality
 - `TableConfig` — настройки таблиц
+- `base_provider.py` — базовые конфиги провайдеров: `BaseClientConfig`, `BaseProviderConfig`, `RateLimitConfig`
+
+> **Backward compatibility:** `src/bioetl/domain/configs/` (с `s`) является shim-пакетом, который re-export'ит классы из `domain.config.base_provider`. Новый код должен импортировать из `bioetl.domain.config.base_provider`.
 
 ### 2.6. `error_classifier.py` — Классификатор Ошибок
 

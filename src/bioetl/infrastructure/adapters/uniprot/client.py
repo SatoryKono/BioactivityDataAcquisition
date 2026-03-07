@@ -20,6 +20,9 @@ from bioetl.infrastructure.adapters.common import (
     FallbackFetchOrchestratorService,
     resolve_fallback_policy,
 )
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_fallback_service as _create_default_uniprot_fallback_service,
+)
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
@@ -72,18 +75,6 @@ _UNIPROT_DEFAULT_FALLBACK_CONFIG = FallbackDecoratorConfig(
     trim_primary_ids_to_limit=False,
     fallback_operation="fetch_filtered_with_fallback",
 )
-
-
-def _create_default_uniprot_fallback_service(
-    *,
-    adapter_metrics: AdapterMetrics,
-) -> FallbackFetchOrchestratorService:
-    """Create fallback orchestrator service for non-DI call sites.
-
-    Returns:
-        FallbackFetchOrchestratorService instance wired to the given adapter metrics.
-    """
-    return FallbackFetchOrchestratorService(adapter_metrics)
 
 
 class UniProtAdapter(

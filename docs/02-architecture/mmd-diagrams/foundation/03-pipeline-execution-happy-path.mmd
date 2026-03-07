@@ -1,7 +1,7 @@
 %% Title: Pipeline Execution — Happy Path
 %% Covers: RULES.md §3 (Pipeline Execution), §3.3 (Locking), §3.4 (Postrun)
 %% Updated: 2026-02-17
-%% Components: CLI, bootstrap_pipeline, PipelineRunner, LockManager, PreflightService, PipelineExecutor, PostrunService
+%% Components: CLI, bootstrap_pipeline, PipelineRunner, LockCoordinator, PreflightService, PipelineExecutor, PostrunService
 
 %% @version 1.1.0
 %% @date    2026-02-24
@@ -25,7 +25,7 @@ sequenceDiagram
     participant CLI as CLI
     participant Bootstrap as bootstrap_pipeline()
     participant Runner as PipelineRunner
-    participant LockMgr as LockManager
+    participant LockMgr as LockCoordinator
     participant Preflight as PreflightService
     participant Executor as PipelineExecutor
     participant Adapter as DataSourceAdapter

@@ -20,7 +20,7 @@ from httpx import HTTPStatusError, RequestError
 from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.normalization import normalize_doi
-from bioetl.domain.types import BronzeRecord, HealthStatus, JsonDict
+from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.common import (
     ComposableFallbackDecorator,
@@ -28,18 +28,26 @@ from bioetl.infrastructure.adapters.common import (
     FallbackFetchOrchestratorService,
     resolve_fallback_policy,
 )
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_error_handler as _create_default_crossref_error_handler,
+)
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_fallback_service as _create_default_crossref_fallback_service,
+)
 from bioetl.infrastructure.adapters.crossref._defaults import (
     CROSSREF_DEFAULT_FALLBACK_CONFIG as _CROSSREF_DEFAULT_FALLBACK_CONFIG,
-)
-from bioetl.infrastructure.adapters.crossref._defaults import (
-    create_default_crossref_error_handler as _create_default_crossref_error_handler,
-)
-from bioetl.infrastructure.adapters.crossref._defaults import (
-    create_default_crossref_fallback_service as _create_default_crossref_fallback_service,
 )
 from bioetl.infrastructure.adapters.crossref.batch import (
     DoiBatchProcessor,
     SearchPaginator,
+)
+from bioetl.infrastructure.adapters.crossref.client_builders import (
+    _create_default_crossref_batch_fetcher,
+    _create_default_crossref_fetch_flow,
+    _create_default_crossref_query_builder,
+    _create_default_crossref_response_mapper,
+    _create_default_crossref_search_paginator,
+    _create_default_crossref_title_fallback_handler,
 )
 from bioetl.infrastructure.adapters.crossref.fallback import TitleFallbackHandler
 from bioetl.infrastructure.adapters.crossref.fetch_flow import CrossRefFetchFlow
@@ -49,7 +57,7 @@ from bioetl.infrastructure.adapters.crossref.response_mapper import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator, Callable
+    from collections.abc import AsyncIterator
 
     from bioetl.domain.ports import ErrorHandlerPort, LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
@@ -71,113 +79,6 @@ CROSSREF_HEALTH_ERRORS = (
     RuntimeError,
     Exception,
 )
-
-
-def _create_default_crossref_query_builder(
-    *, api_base: str, mailto: str
-) -> CrossRefQueryBuilder:
-    """Create default query builder for non-DI call sites.
-
-    Returns:
-        CrossRefQueryBuilder instance configured with the given API base and mailto.
-    """
-    return CrossRefQueryBuilder(api_base=api_base, mailto=mailto)
-
-
-def _create_default_crossref_response_mapper() -> CrossRefResponseMapper:
-    """Create default response mapper for non-DI call sites.
-
-    Returns:
-        CrossRefResponseMapper instance with default configuration.
-    """
-    return CrossRefResponseMapper()
-
-
-def _create_default_crossref_batch_fetcher(
-    *,
-    http: UnifiedHTTPClient,
-    logger: LoggerPort,
-    metrics: AdapterMetrics,
-    mailto: str,
-    api_base: str,
-    headers_fn: Callable[[], dict[str, str]],
-    request_collector: APIRequestCollector,
-) -> DoiBatchProcessor:
-    """Create default DOI batch processor for non-DI call sites.
-
-    Returns:
-        DoiBatchProcessor instance configured with the given HTTP and logging dependencies.
-    """
-    return DoiBatchProcessor(
-        http=http,
-        logger=logger,
-        metrics=metrics,
-        mailto=mailto,
-        api_base=api_base,
-        headers_fn=headers_fn,
-        request_collector=request_collector,
-    )
-
-
-def _create_default_crossref_search_paginator(
-    *,
-    http: UnifiedHTTPClient,
-    logger: LoggerPort,
-    metrics: AdapterMetrics,
-    mailto: str,
-    api_base: str,
-    headers_fn: Callable[[], dict[str, str]],
-    request_collector: APIRequestCollector,
-) -> SearchPaginator:
-    """Create default search paginator for non-DI call sites.
-
-    Returns:
-        SearchPaginator instance configured with the given HTTP and logging dependencies.
-    """
-    return SearchPaginator(
-        http=http,
-        logger=logger,
-        metrics=metrics,
-        mailto=mailto,
-        api_base=api_base,
-        headers_fn=headers_fn,
-        request_collector=request_collector,
-    )
-
-
-def _create_default_crossref_title_fallback_handler(
-    *, logger: LoggerPort, search_fn: Callable[[str, int], AsyncIterator[JsonDict]]
-) -> TitleFallbackHandler:
-    """Create default title fallback handler for non-DI call sites.
-
-    Returns:
-        TitleFallbackHandler instance configured with the given logger and search function.
-    """
-    return TitleFallbackHandler(logger=logger, search_fn=search_fn)
-
-
-def _create_default_crossref_fetch_flow(
-    *,
-    logger: LoggerPort,
-    batch_fetcher: DoiBatchProcessor,
-    search_paginator: SearchPaginator,
-    fallback_decorator: ComposableFallbackDecorator,
-    batch_size: int,
-    response_mapper: CrossRefResponseMapper,
-) -> CrossRefFetchFlow:
-    """Create default fetch flow for non-DI call sites.
-
-    Returns:
-        CrossRefFetchFlow instance wired with the given batch fetcher, paginator, and fallback decorator.
-    """
-    return CrossRefFetchFlow(
-        logger=logger,
-        batch_fetcher=batch_fetcher,
-        search_paginator=search_paginator,
-        fallback_decorator=fallback_decorator,
-        batch_size=batch_size,
-        response_mapper=response_mapper,
-    )
 
 
 @dataclass

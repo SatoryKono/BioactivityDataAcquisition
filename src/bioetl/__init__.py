@@ -32,6 +32,35 @@ try:
 
     _orig_dispatcher_call = Dispatcher.__call__
 
+    def _find_fn_by_subclass_or_union(
+        registry: dict[
+            typing.Any, typing.Any  # Any: multipledispatch requires erased types
+        ],  # Any: multipledispatch requires erased types
+        input_data_type: type,
+    ) -> typing.Any:  # Any: multipledispatch requires erased types
+        """Search registry for a function matching input_data_type via subclass or union args.
+
+        Returns:
+            Registered function if a matching type or union member is found, None otherwise.
+        """
+        for registered_type, registered_fn in registry.items():
+            if (
+                registered_type
+                is typing.Any  # Any: multipledispatch requires erased types
+            ):  # Any: multipledispatch requires erased types
+                continue
+            if isinstance(registered_type, type) and issubclass(
+                input_data_type, registered_type
+            ):
+                return registered_fn
+            union_args = typing_inspect.get_args(registered_type)
+            if union_args and any(
+                isinstance(arg, type) and issubclass(input_data_type, arg)
+                for arg in union_args
+            ):
+                return registered_fn
+        return None
+
     def _dispatcher_call_with_any_fallback(
         self: typing.Any,  # Any: multipledispatch requires erased types
         *args: typing.Any,  # Any: multipledispatch requires erased types
@@ -43,24 +72,7 @@ try:
         # Python 3.14 can leave Union-annotated registrations as single keys
         # (e.g., pandas.Series | pandas.DataFrame) in Pandera's registry.
         if fn is None:
-            for registered_type, registered_fn in self._function_registry.items():
-                if (
-                    registered_type
-                    is typing.Any  # Any: multipledispatch requires erased types
-                ):  # Any: multipledispatch requires erased types
-                    continue
-                if isinstance(registered_type, type) and issubclass(
-                    input_data_type, registered_type
-                ):
-                    fn = registered_fn
-                    break
-                union_args = typing_inspect.get_args(registered_type)
-                if union_args and any(
-                    isinstance(arg, type) and issubclass(input_data_type, arg)
-                    for arg in union_args
-                ):
-                    fn = registered_fn
-                    break
+            fn = _find_fn_by_subclass_or_union(self._function_registry, input_data_type)
 
         if (
             fn is None

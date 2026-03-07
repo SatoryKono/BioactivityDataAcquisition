@@ -45,7 +45,7 @@ class RecordProcessorConfig:
 
 @dataclass(frozen=True, slots=True)
 class LockConfig:
-    """Configuration for LockManager.
+    """Configuration for LockCoordinator.
 
     Bundles locking configuration to reduce __init__ parameters.
 

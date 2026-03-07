@@ -9,7 +9,7 @@
 %% @uniform-group core    nodes=PipelineRunner,PipelineServices,BatchExecutor
 %% @uniform-group batch   nodes=BatchTransformer,BatchWriter
 %% @uniform-group infra   nodes=BatchMemoryManager,BatchMetricsRecorder,BatchTracingManager
-%% @uniform-group manager nodes=CheckpointManager,LockManager
+%% @uniform-group manager nodes=CheckpointManager,LockCoordinator
 %% @uniform-group support nodes=PreflightService,PostrunService,QuarantineManager,ShutdownSignal,HeartbeatTask,ErrorClassifier
 
 %% @uniform-width group
@@ -136,7 +136,7 @@ classDiagram
             +delete_checkpoint()
         }
 
-        class LockManager {
+        class LockCoordinator {
             -_lock
             -_run_id
             -_config
@@ -182,7 +182,7 @@ classDiagram
     }
 
     PipelineRunner *-- BatchExecutor
-    PipelineRunner *-- LockManager
+    PipelineRunner *-- LockCoordinator
     PipelineRunner *-- CheckpointManager
     PipelineRunner *-- PreflightService
     PipelineRunner *-- PostrunService
@@ -200,7 +200,7 @@ classDiagram
     BatchTransformer --> ErrorClassifier
     BatchWriter --> ErrorClassifier
 
-    LockManager *-- HeartbeatTask
+    LockCoordinator *-- HeartbeatTask
 
     style PipelineRunner fill:#eff6ff,stroke:#2563eb,stroke-width:2px
     style PipelineServices fill:#eff6ff,stroke:#2563eb,stroke-width:2px
@@ -211,7 +211,7 @@ classDiagram
     style BatchMetricsRecorder fill:#eff6ff,stroke:#2563eb,stroke-width:2px
     style BatchTracingManager fill:#eff6ff,stroke:#2563eb,stroke-width:2px
     style CheckpointManager fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style LockManager fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style LockCoordinator fill:#eff6ff,stroke:#2563eb,stroke-width:2px
     style PreflightService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
     style PostrunService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
     style QuarantineManager fill:#eff6ff,stroke:#2563eb,stroke-width:2px

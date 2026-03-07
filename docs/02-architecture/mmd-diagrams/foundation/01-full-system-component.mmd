@@ -14,7 +14,7 @@
 %% @adr     ADR-040
 %% @uniform-group ports      nodes=DataSourcePort,StoragePort,LockPort,CheckpointPort,QuarantinePort,MetricsPort,TracingPort,LoggerPort
 %% @uniform-group adapters   nodes=ChemblAdapter,PubchemAdapter,UniprotAdapter,PubmedAdapter,CrossRefAdapter,OpenAlexAdapter,S2Adapter,BronzeWriter,SilverWriter,GoldWriter,MemoryLock
-%% @uniform-group app        nodes=PipelineRunner,PipelineExecutor,RecordProcessor,BatchTransformer,LockManager,CheckpointManager,PreflightService,PostrunService,LifecycleOrchestrator,ActivityTransformer,MoleculeTransformer,AssayTransformer,TargetTransformer
+%% @uniform-group app        nodes=PipelineRunner,PipelineExecutor,RecordProcessor,BatchTransformer,LockCoordinator,CheckpointManager,PreflightService,PostrunService,LifecycleOrchestrator,ActivityTransformer,MoleculeTransformer,AssayTransformer,TargetTransformer
 %% @uniform-group entities   nodes=Activity,Molecule,Assay,Target,Publication,PipelineConfig,RuntimeConfig,DQConfig
 %% @uniform-group stores     nodes=Bronze,Silver,Gold,Quarantine,Checkpoints
 %% @uniform-group infra_http nodes=HTTPBus,UnifiedHTTPClient,CircuitBreaker,TokenBucket
@@ -76,7 +76,7 @@ flowchart TB
         end
         subgraph Services["Services"]
             direction TB
-            LockManager["LockManager"]
+            LockCoordinator["LockCoordinator"]
             CheckpointManager["CheckpointManager"]
             PreflightService["PreflightService"]
             PostrunService["PostrunService"]
@@ -202,7 +202,7 @@ flowchart TB
 
     %% Application critical path
     PipelineRunner ==> PipelineExecutor
-    PipelineRunner --> LockManager
+    PipelineRunner --> LockCoordinator
     PipelineRunner --> PreflightService
     PipelineRunner --> PostrunService
     PipelineExecutor ==> RecordProcessor
@@ -273,7 +273,7 @@ flowchart TB
     class DataSourcePort,StoragePort,LockPort,CheckpointPort,QuarantinePort,MetricsPort,TracingPort,LoggerPort port;
     class ChemblAdapter,PubchemAdapter,UniprotAdapter,PubmedAdapter,CrossRefAdapter,OpenAlexAdapter,S2Adapter,BronzeWriter,SilverWriter,GoldWriter,MemoryLock adapter;
     class Activity,Molecule,Assay,Target,Publication,PipelineConfig,RuntimeConfig,DQConfig entity;
-    class PipelineRunner,PipelineExecutor,RecordProcessor,BatchTransformer,LockManager,CheckpointManager,PreflightService,PostrunService,LifecycleOrchestrator,ActivityTransformer,MoleculeTransformer,AssayTransformer,TargetTransformer app;
+    class PipelineRunner,PipelineExecutor,RecordProcessor,BatchTransformer,LockCoordinator,CheckpointManager,PreflightService,PostrunService,LifecycleOrchestrator,ActivityTransformer,MoleculeTransformer,AssayTransformer,TargetTransformer app;
     class Bronze,Silver,Gold,Quarantine,Checkpoints store;
     class HTTPBus proxy;
 
