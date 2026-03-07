@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+from bioetl.domain.ports.observability.metrics import (
+    MetricLabels,
+    resolve_metric_labels,
+)
+
 
 class NoOpMetrics:
     """No-op implementation of MetricsPort."""
@@ -29,27 +34,51 @@ class NoOpMetrics:
         self,
         name: str,
         value: float,
-        labels: dict[str, str],
+        labels: MetricLabels | None = None,
+        *,
+        _labels: MetricLabels | None = None,
+        tags: MetricLabels | None = None,
     ) -> None:
-        del name, value, labels
+        resolved_labels = resolve_metric_labels(
+            labels,
+            _labels=_labels,
+            tags=tags,
+        )
+        del name, value, resolved_labels
         return None
 
     def increment_counter(
         self,
         name: str,
         value: int,
-        labels: dict[str, str],
+        labels: MetricLabels | None = None,
+        *,
+        _labels: MetricLabels | None = None,
+        tags: MetricLabels | None = None,
     ) -> None:
-        del name, value, labels
+        resolved_labels = resolve_metric_labels(
+            labels,
+            _labels=_labels,
+            tags=tags,
+        )
+        del name, value, resolved_labels
         return None
 
     def set_gauge(
         self,
         name: str,
         value: float,
-        labels: dict[str, str],
+        labels: MetricLabels | None = None,
+        *,
+        _labels: MetricLabels | None = None,
+        tags: MetricLabels | None = None,
     ) -> None:
-        del name, value, labels
+        resolved_labels = resolve_metric_labels(
+            labels,
+            _labels=_labels,
+            tags=tags,
+        )
+        del name, value, resolved_labels
         return None
 
     def inc_quarantine_records(

@@ -11,6 +11,10 @@ __all__ = ["COUNTERS", "GAUGES", "HISTOGRAMS", "PrometheusMetrics"]
 
 from bioetl.domain.observability_contract import normalize_observability_metric_labels
 from bioetl.domain.ports import MetricsPort
+from bioetl.domain.ports.observability.metrics import (
+    MetricLabels,
+    resolve_metric_labels,
+)
 from bioetl.infrastructure.observability.metrics import (
     ADAPTER_BATCH_SIZE,
     ADAPTER_DROPPED_DUPLICATES_TOTAL,
@@ -210,7 +214,13 @@ class PrometheusMetrics(MetricsPort):
         self._closed = False
 
     def observe_histogram(
-        self, name: str, value: float, labels: dict[str, str]
+        self,
+        name: str,
+        value: float,
+        labels: MetricLabels | None = None,
+        *,
+        _labels: MetricLabels | None = None,
+        tags: MetricLabels | None = None,
     ) -> None:
         """Record a histogram observation for the named metric.
 
@@ -219,10 +229,23 @@ class PrometheusMetrics(MetricsPort):
             value: Input value.
             labels: Labels.
         """
+        resolved_labels = resolve_metric_labels(
+            labels,
+            _labels=_labels,
+            tags=tags,
+        )
         if name in HISTOGRAMS:
-            HISTOGRAMS[name].labels(**labels).observe(value)
+            HISTOGRAMS[name].labels(**resolved_labels).observe(value)
 
-    def increment_counter(self, name: str, value: int, labels: dict[str, str]) -> None:
+    def increment_counter(
+        self,
+        name: str,
+        value: int,
+        labels: MetricLabels | None = None,
+        *,
+        _labels: MetricLabels | None = None,
+        tags: MetricLabels | None = None,
+    ) -> None:
         """Increment a counter metric by the given value.
 
         Args:
@@ -230,14 +253,29 @@ class PrometheusMetrics(MetricsPort):
             value: Input value.
             labels: Labels.
         """
+        resolved_labels = resolve_metric_labels(
+            labels,
+            _labels=_labels,
+            tags=tags,
+        )
         if name in COUNTERS:
             if name == "observability_events_total":
-                normalized_labels = normalize_observability_metric_labels(labels)
+                normalized_labels = normalize_observability_metric_labels(
+                    resolved_labels
+                )
                 COUNTERS[name].labels(**normalized_labels).inc(value)
                 return
-            COUNTERS[name].labels(**labels).inc(value)
+            COUNTERS[name].labels(**resolved_labels).inc(value)
 
-    def set_gauge(self, name: str, value: float, labels: dict[str, str]) -> None:
+    def set_gauge(
+        self,
+        name: str,
+        value: float,
+        labels: MetricLabels | None = None,
+        *,
+        _labels: MetricLabels | None = None,
+        tags: MetricLabels | None = None,
+    ) -> None:
         """Set a gauge metric to the given value.
 
         Args:
@@ -245,8 +283,13 @@ class PrometheusMetrics(MetricsPort):
             value: Input value.
             labels: Labels.
         """
+        resolved_labels = resolve_metric_labels(
+            labels,
+            _labels=_labels,
+            tags=tags,
+        )
         if name in GAUGES:
-            GAUGES[name].labels(**labels).set(value)
+            GAUGES[name].labels(**resolved_labels).set(value)
 
     def inc_quarantine_records(
         self, pipeline: str, reason: str, count: int = 1

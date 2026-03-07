@@ -207,24 +207,13 @@ class DQConfigFile(BaseModel):
         description="Conditional validations from entity config",
     )
 
-    def to_domain(self) -> DomainDQConfig:
-        """Convert to immutable domain DQConfig.
-
-        Merges all validation lists in hierarchical order:
-        - Field validations: common + provider + entity
-        - Cross-field validations: common + entity
-        - Conditional validations: entity only
-
-        Returns:
-            DomainDQConfig: Immutable domain configuration.
-        """
-        # Merge field validations (common + provider + entity)
+    def _to_domain_field_validations(self) -> tuple[DomainFieldValidation, ...]:
         all_field_validations = (
             self.common_field_validations
             + self.provider_field_validations
             + self.entity_field_validations
         )
-        field_validations = tuple(
+        return tuple(
             DomainFieldValidation(
                 field=fv.field,
                 validation_type=fv.type,
@@ -242,11 +231,13 @@ class DQConfigFile(BaseModel):
             for fv in all_field_validations
         )
 
-        # Merge cross-field validations (common + entity)
+    def _to_domain_cross_field_validations(
+        self,
+    ) -> tuple[DomainCrossFieldValidation, ...]:
         all_cross_field_validations = (
             self.common_cross_field_validations + self.entity_cross_field_validations
         )
-        cross_field_validations = tuple(
+        return tuple(
             DomainCrossFieldValidation(
                 name=cfv.name,
                 fields=tuple(cfv.fields),
@@ -260,8 +251,10 @@ class DQConfigFile(BaseModel):
             for cfv in all_cross_field_validations
         )
 
-        # Convert conditional validations (entity only)
-        conditional_validations = tuple(
+    def _to_domain_conditional_validations(
+        self,
+    ) -> tuple[DomainConditionalValidation, ...]:
+        return tuple(
             DomainConditionalValidation(
                 name=cv.name,
                 condition_field=cv.condition_field,
@@ -291,8 +284,8 @@ class DQConfigFile(BaseModel):
             for cv in self.entity_conditional_validations
         )
 
-        # Convert report config
-        report_config = DomainDQReportConfig(
+    def _to_domain_report_config(self) -> DomainDQReportConfig:
+        return DomainDQReportConfig(
             enabled=self.report.enabled,
             format=self.report.format,
             include_sample_failures=self.report.include_sample_failures,
@@ -300,23 +293,37 @@ class DQConfigFile(BaseModel):
             output_path=self.report.output_path,
         )
 
+    def _to_domain_key_nullability_rules(self) -> tuple[DomainKeyNullabilityRule, ...]:
+        return tuple(
+            DomainKeyNullabilityRule(
+                field=rule.field,
+                key_type=rule.key_type,
+                nullable=rule.nullable,
+            )
+            for rule in self.key_nullability
+        )
+
+    def to_domain(self) -> DomainDQConfig:
+        """Convert to immutable domain DQConfig.
+
+        Merges all validation lists in hierarchical order:
+        - Field validations: common + provider + entity
+        - Cross-field validations: common + entity
+        - Conditional validations: entity only
+
+        Returns:
+            DomainDQConfig: Immutable domain configuration.
+        """
         return DomainDQConfig(
             soft_fail_threshold=self.thresholds.soft_fail,
             hard_fail_threshold=self.thresholds.hard_fail,
             strict_validation=self.strict_validation,
-            field_validations=field_validations,
-            cross_field_validations=cross_field_validations,
-            conditional_validations=conditional_validations,
+            field_validations=self._to_domain_field_validations(),
+            cross_field_validations=self._to_domain_cross_field_validations(),
+            conditional_validations=self._to_domain_conditional_validations(),
             invalid_record_policy=self.invalid_record_policy,
-            report=report_config,
-            key_nullability_rules=tuple(
-                DomainKeyNullabilityRule(
-                    field=rule.field,
-                    key_type=rule.key_type,
-                    nullable=rule.nullable,
-                )
-                for rule in self.key_nullability
-            ),
+            report=self._to_domain_report_config(),
+            key_nullability_rules=self._to_domain_key_nullability_rules(),
         )
 
 

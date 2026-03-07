@@ -1,17 +1,17 @@
-"""Pure domain normalization functions (no I/O).
-
-REFACTOR-004: Domain logic separation from use-case layer.
-"""
+"""Pure domain normalization functions (no I/O)."""
 
 from __future__ import annotations
 
 import re
-from collections.abc import Sequence
-from datetime import date
 from html import unescape
-from typing import Any  # Any: used for list[Any] in JSON parsing results
 
-from bioetl.domain.serialization import deserialize_from_json
+from bioetl.domain.normalization_authors import (
+    extract_first_item,
+    extract_first_string,
+    parse_authors_to_list,
+)
+from bioetl.domain.normalization_dates import format_date_parts, parse_date_field
+from bioetl.domain.normalization_pages import parse_page_range
 
 __all__ = [
     "extract_first_item",
@@ -29,14 +29,7 @@ __all__ = [
 
 
 def normalize_string(value: str | None) -> str | None:
-    """Normalize string by stripping whitespace, return None for empty.
-
-    Args:
-        value: Input value.
-
-    Returns:
-        Normalized value.
-    """
+    """Normalize string by stripping whitespace, return None for empty."""
     if value is None:
         return None
     stripped = value.strip()
@@ -44,14 +37,7 @@ def normalize_string(value: str | None) -> str | None:
 
 
 def normalize_to_string(value: object) -> str | None:
-    """Convert value to string, strip whitespace, return None if empty.
-
-    Args:
-        value: Input value.
-
-    Returns:
-        Normalized value.
-    """
+    """Convert value to string, strip whitespace, return None if empty."""
     if value is None:
         return None
     str_value = str(value).strip()
@@ -59,225 +45,29 @@ def normalize_to_string(value: object) -> str | None:
 
 
 def normalize_doi(doi: str | None) -> str | None:
-    """Normalize DOI to lowercase, stripped format.
-
-    Args:
-        doi: Digital Object Identifier.
-
-    Returns:
-        Normalized value.
-    """
+    """Normalize DOI to lowercase, stripped format."""
     return doi.strip().lower() if doi else None
 
 
-# Date formatting helpers
-_DATE_FULL_FMT = "{0:04d}-{1:02d}-{2:02d}"
-
-
-def _get_last_day_of_month(year: int, month: int) -> int:
-    """Get the last day of the given month."""
-    from calendar import monthrange
-
-    return monthrange(year, month)[1]
-
-
-def _extract_date_parts(date_parts: list[list[int]] | None) -> list[int] | None:
-    """Extract first date-parts array if valid, else None."""
-    if not date_parts:
-        return None
-    parts = date_parts[0]
-    return parts if parts else None
-
-
-def format_date_parts(date_parts: list[list[int]] | None) -> str | None:
-    """Format CrossRef date-parts [[year, month?, day?]] to ISO YYYY-MM-DD.
-
-    Uses end-of-period normalization: month-only -> last day, year-only -> Dec 31.
-
-    Args:
-        date_parts: Date parts.
-
-    Returns:
-        The str | None result.
-    """
-    parts = _extract_date_parts(date_parts)
-    if not parts:
-        return None
-    return _format_parts_to_date(parts)
-
-
-def _format_parts_to_date(parts: list[int]) -> str:
-    """Format date parts to YYYY-MM-DD with end-of-period normalization."""
-    year = parts[0]
-    if len(parts) >= 3:
-        return _DATE_FULL_FMT.format(year, parts[1], parts[2])
-    if len(parts) == 2:
-        return _DATE_FULL_FMT.format(
-            year, parts[1], _get_last_day_of_month(year, parts[1])
-        )
-    return _DATE_FULL_FMT.format(year, 12, 31)
-
-
-def parse_date_field(value: str | None, fmt: str = "%Y-%m-%d") -> date | None:
-    """Parse date string to date object, return None on error.
-
-    Args:
-        value: Input value.
-        fmt: Fmt.
-
-    Returns:
-        Parsed result.
-    """
-    if value is None:
-        return None
-    from datetime import datetime
-
-    try:
-        return datetime.strptime(value.strip(), fmt).date()
-    except (ValueError, AttributeError):
-        return None
-
-
 _HTML_TAG_PATTERN = re.compile(r"<[^>]+>")
-_WHITESPACE_PATTERN = re.compile(r"\s+")
 
 
 def strip_html_tags(text: str | None) -> str | None:
-    """Remove HTML/JATS tags, decode entities, normalize whitespace.
-
-    Args:
-        text: Input text string.
-
-    Returns:
-        The str | None result.
-    """
+    """Remove HTML/JATS tags, decode entities, normalize whitespace."""
     if not text:
         return None
 
     clean = text
-
-    # Remove HTML tags (only run regex if < is present)
     if "<" in clean:
         clean = _HTML_TAG_PATTERN.sub("", clean)
-
-    # Decode HTML entities (only unescape if & is present)
     if "&" in clean:
         clean = unescape(clean)
-
-    # Normalize whitespace (split/join is ~3-4x faster than regex).
-    # Also handles empty/whitespace-only strings: "".split() -> [], " ".join([]) -> "".
     clean = " ".join(clean.split())
-
     return clean or None
 
 
-# Electronic page identifiers (e-123, E-456, e123) -- not page ranges.
-_ELECTRONIC_PAGE_PATTERN = re.compile(r"^[eE]-?\d+$")
-
-
-def _is_electronic_page(page: str) -> bool:
-    """Check if page is electronic article number (e.g., 'e-123', 'e123')."""
-    return bool(_ELECTRONIC_PAGE_PATTERN.match(page))
-
-
-def _extract_digits(s: str) -> str:
-    """Extract only digit characters from a string."""
-    return "".join(c for c in s if c.isdigit())
-
-
-def _extract_non_digits(s: str) -> str:
-    """Extract only non-digit characters from a string."""
-    return "".join(c for c in s if not c.isdigit())
-
-
-def _is_abbreviated(first_digits: str, last_digits: str) -> bool:
-    """Return True if last_digits is an abbreviated form of first_digits."""
-    return (
-        bool(first_digits)
-        and bool(last_digits)
-        and len(last_digits) < len(first_digits)
-    )
-
-
-def _compute_expanded_page(first_digits: str, last_digits: str) -> int:
-    """Compute expanded page number with rollover handling."""
-    first_num = int(first_digits)
-    divisor = 10 ** len(last_digits)
-    expanded = (first_num // divisor) * divisor + int(last_digits)
-    # Rollover: "199-3" -> 203, not 193
-    return int(expanded + divisor) if expanded < first_num else int(expanded)
-
-
-def _expand_abbreviated_page(first_page: str, last_page_raw: str) -> str:
-    """Expand abbreviated last page (e.g., 737-9 -> 739, 199-3 -> 203)."""
-    first_digits = _extract_digits(first_page)
-    last_digits = _extract_digits(last_page_raw)
-    if not _is_abbreviated(first_digits, last_digits):
-        return last_page_raw
-
-    expanded = _compute_expanded_page(first_digits, last_digits)
-    prefix = _extract_non_digits(last_page_raw)
-    return f"{prefix}{expanded}" if prefix else str(expanded)
-
-
-def _normalize_and_split_pages(page: str) -> tuple[str, str | None]:
-    """Normalize dashes and split page string on first hyphen.
-
-    Returns (first_page, raw_last_page_or_None). Caller must handle
-    empty first_page.
-    """
-    normalized = page.replace("\u2013", "-").replace("\u2014", "-")
-    parts = normalized.split("-", 1)
-    first = parts[0].strip()
-    last = parts[1].strip() if len(parts) > 1 else None
-    return first, last or None
-
-
-def _prepare_page_input(page: str | None) -> str | None:
-    """Strip and return page string, or None if empty."""
-    if not page:
-        return None
-    stripped = page.strip()
-    return stripped if stripped else None
-
-
-def parse_page_range(page: str | None) -> tuple[str | None, str | None]:
-    """Parse page range string to (first, last) tuple.
-
-    Handles standard ranges, abbreviated ranges (737-9 -> 739), electronic
-    pages (e-123), supplements (S1-S15), and en/em-dash normalization.
-
-    Args:
-        page: Page.
-
-    Returns:
-        Parsed result.
-    """
-    stripped = _prepare_page_input(page)
-    if stripped is None:
-        return None, None
-    if _is_electronic_page(stripped):
-        return stripped, None
-
-    first_page, last_page_raw = _normalize_and_split_pages(stripped)
-    if not first_page:
-        return None, None
-
-    last_page = (
-        _expand_abbreviated_page(first_page, last_page_raw) if last_page_raw else None
-    )
-    return first_page, last_page
-
-
 def normalize_pmc_id(pmc_id: str | None) -> str | None:
-    """Normalize PMC ID to uppercase with 'PMC' prefix.
-
-    Args:
-        pmc_id: Identifier for pmc.
-
-    Returns:
-        Normalized value.
-    """
+    """Normalize PMC ID to uppercase with 'PMC' prefix."""
     if not pmc_id:
         return None
     pmc_id = pmc_id.strip()
@@ -286,98 +76,3 @@ def normalize_pmc_id(pmc_id: str | None) -> str | None:
     if not pmc_id.upper().startswith("PMC"):
         return f"PMC{pmc_id}"
     return pmc_id.upper()
-
-
-def extract_first_item(items: list[object] | None) -> object | None:
-    """Extract first non-None item from list.
-
-    Args:
-        items: Items.
-
-    Returns:
-        Extracted value.
-    """
-    if not items or not isinstance(items, list):
-        return None
-    return next((item for item in items if item is not None), None)
-
-
-def _is_valid_string(item: object) -> str | None:
-    """Return stripped string if non-empty, else None."""
-    return str(item).strip() if item is not None else None
-
-
-def extract_first_string(items: list[str] | None) -> str | None:
-    """Extract first non-empty stripped string from list.
-
-    Args:
-        items: Items.
-
-    Returns:
-        Extracted value.
-    """
-    if not items or not isinstance(items, list):
-        return None
-    return next((s for item in items if (s := _is_valid_string(item))), None)
-
-
-def _filter_valid_strings(items: list[object]) -> list[str]:
-    """Filter list to valid non-empty strings."""
-    return [str(a).strip() for a in items if a is not None and str(a).strip()]
-
-
-def _parse_authors_from_list(authors: Sequence[object]) -> list[str]:
-    """Parse author list, filtering non-strings and empty values."""
-    return [a.strip() for a in authors if isinstance(a, str) and a.strip()]
-
-
-def _try_parse_json_array(
-    text: str,
-) -> list[Any] | None:  # Any: JSON parse result type varies
-    """Try to parse text as JSON array. Returns None if invalid."""
-    try:
-        parsed = deserialize_from_json(text)
-        return parsed if isinstance(parsed, list) else None
-    except ValueError:
-        return None
-
-
-def _parse_authors_from_json(text: str) -> list[str] | None:
-    """Try to parse JSON array of authors. Returns None if not valid JSON."""
-    if not text.startswith("["):
-        return None
-    parsed = _try_parse_json_array(text)
-    return _filter_valid_strings(parsed) if parsed is not None else None
-
-
-def _parse_authors_from_delimited(text: str) -> list[str]:
-    """Parse delimited string (semicolon or comma separated)."""
-    delimiter = ";" if ";" in text else ","
-    parts = text.split(delimiter) if delimiter in text else [text]
-    return [a.strip() for a in parts if a.strip()]
-
-
-def _parse_authors_string(text: str) -> list[str]:
-    """Parse string as JSON or delimited format."""
-    json_result = _parse_authors_from_json(text)
-    return (
-        json_result if json_result is not None else _parse_authors_from_delimited(text)
-    )
-
-
-def parse_authors_to_list(authors: list[str] | str | None) -> list[str]:
-    """Parse author input (list, JSON string, or delimited string) to list.
-
-    Args:
-        authors: Authors.
-
-    Returns:
-        Parsed result.
-    """
-    if authors is None:
-        return []
-    if isinstance(authors, list):
-        return _parse_authors_from_list(authors)
-    if isinstance(authors, str) and authors.strip():
-        return _parse_authors_string(authors.strip())
-    return []

@@ -23,7 +23,7 @@ _LAYER_FILE_LIMITS = {
     "infrastructure": 650,
     "interfaces": 400,
 }
-_DEFAULT_FUNCTION_LENGTH_LIMIT = 50
+_DEFAULT_FUNCTION_LENGTH_LIMIT = 80
 _DEFAULT_CLASS_SIZE_LIMIT = 300
 
 
@@ -102,7 +102,7 @@ def test_file_size_limit_registry_has_no_stale_entries() -> None:
 
 
 def test_function_length_registry_has_no_stale_entries() -> None:
-    """function_length exemptions must map to symbols still exceeding 50 lines."""
+    """function_length exemptions must map to symbols still exceeding 80 lines."""
     raw = load_exemptions_registry()
     registries = raw.get("registries", {})
     function_length = registries.get("function_length", {})

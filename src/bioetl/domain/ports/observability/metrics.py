@@ -4,6 +4,27 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
+MetricLabels = dict[str, str]
+
+
+def resolve_metric_labels(
+    labels: MetricLabels | None = None,
+    *,
+    _labels: MetricLabels | None = None,
+    tags: MetricLabels | None = None,
+) -> MetricLabels:
+    """Resolve canonical labels with legacy alias compatibility.
+
+    Precedence order is explicit ``labels`` > legacy ``_labels`` > legacy ``tags``.
+    """
+    if labels is not None:
+        return labels
+    if _labels is not None:
+        return _labels
+    if tags is not None:
+        return tags
+    return {}
+
 
 @runtime_checkable
 class MetricsPort(Protocol):
@@ -13,21 +34,30 @@ class MetricsPort(Protocol):
         self,
         name: str,
         value: float,
-        labels: dict[str, str],
+        labels: MetricLabels | None = None,
+        *,
+        _labels: MetricLabels | None = None,
+        tags: MetricLabels | None = None,
     ) -> None: ...
 
     def increment_counter(
         self,
         name: str,
         value: int,
-        labels: dict[str, str],
+        labels: MetricLabels | None = None,
+        *,
+        _labels: MetricLabels | None = None,
+        tags: MetricLabels | None = None,
     ) -> None: ...
 
     def set_gauge(
         self,
         name: str,
         value: float,
-        labels: dict[str, str],
+        labels: MetricLabels | None = None,
+        *,
+        _labels: MetricLabels | None = None,
+        tags: MetricLabels | None = None,
     ) -> None: ...
 
     def inc_quarantine_records(
