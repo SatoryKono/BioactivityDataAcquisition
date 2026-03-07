@@ -1,4 +1,4 @@
-"""CrossRef adapter factory function."""
+"""CrossRef adapter factory for composition-layer wiring only."""
 
 from __future__ import annotations
 
@@ -11,21 +11,16 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config import Settings
 
-__all__ = ["_create_crossref_adapter"]
+__all__ = ["create_crossref_adapter"]
 
 
-def _create_crossref_adapter(
+def create_crossref_adapter(
     http_client: UnifiedHTTPClient | None,
     logger: LoggerPort | None,
     settings: Settings | None,
     **kwargs: Any,  # Any: forward arbitrary adapter config kwargs
 ) -> CrossRefAdapter:
-    """Create CrossRefAdapter resolving mandatory `mailto` from kwargs/settings.
-
-    Returns:
-        CrossRefAdapter instance configured with resolved mailto and provided dependencies.
-    """
-    # Mailto: from kwargs or settings
+    """Create CrossRefAdapter resolving mandatory ``mailto`` from kwargs/settings."""
     mailto = kwargs.get("mailto")
     if not mailto and settings:
         mailto = getattr(settings, "default_email", None)
@@ -34,7 +29,6 @@ def _create_crossref_adapter(
             "CrossRef adapter requires mailto. "
             "Provide via 'mailto' kwarg or settings.default_email"
         )
-
     if http_client is None:
         raise ValueError("CrossRef adapter requires http_client")
     if logger is None:

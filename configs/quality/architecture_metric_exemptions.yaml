@@ -9,113 +9,16 @@ policy:
         - expires_on
         - removal_step
 registries:
-    file_size_limits:
-        src/bioetl/domain/aggregates/_pipeline_run_mixins.py:
-            value: 309
-            owner: '@bioetl-data-model'
-            reason: PipelineRun aggregate was split into mixins; temporary limit while follow-up shrink pass lands.
-            reason: PipelineRun aggregate was split into mixins; temporary limit while follow-up shrink pass lands.
-            expires_on: '2026-04-30'
-            removal_step: Reduce mixin file below default domain LOC limit and remove this exemption entry.
-        src/bioetl/domain/composite/field_groups.py:
-            value: 379
-            owner: '@bioetl-data-model'
-            reason: Baseline exemption migrated from architecture tests (file_size_limits).
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        src/bioetl/domain/composite/result.py:
-            value: 354
-            owner: '@bioetl-data-model'
-            reason: Baseline exemption migrated from architecture tests (file_size_limits).
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        src/bioetl/domain/context.py:
-            value: 350
-            owner: '@bioetl-data-model'
-            reason: Baseline exemption migrated from architecture tests (file_size_limits).
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        src/bioetl/domain/contracts/gold/composite.py:
-            value: 379
-            owner: '@bioetl-data-model'
-            reason: Domain gold contracts and composition bootstrap both named composite.py.
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        src/bioetl/domain/exceptions/internal.py:
-            value: 364
-            owner: '@bioetl-data-model'
-            reason: Baseline exemption migrated from architecture tests (file_size_limits).
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        src/bioetl/domain/exceptions/network.py:
-            value: 399
-            owner: '@bioetl-data-model'
-            reason: Baseline exemption migrated from architecture tests (file_size_limits).
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        src/bioetl/domain/normalization.py:
-            value: 383
-            owner: '@bioetl-data-model'
-            reason: Baseline exemption migrated from architecture tests (file_size_limits).
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        src/bioetl/domain/ports/storage.py:
-            value: 400
-            owner: '@bioetl-data-model'
-            reason: ISP decomposition into 6 narrow ports + aggregate facade (P1 anti-fat-port).
+    file_size_limits: {}
+    function_complexity: {}
+    function_length:
+        evaluate_debt_scorecard:
+            value: 131
+            owner: '@bioetl-platform'
+            reason: Scorecard evaluator currently combines multiple governance checks and allowance calculations.
             expires_on: '2026-06-30'
-            removal_step: Move narrow ports to separate files if further growth occurs.
-        src/bioetl/domain/registry/publication.py:
-            value: 341
-            owner: '@bioetl-data-model'
-            reason: Baseline exemption migrated from architecture tests (file_size_limits).
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        src/bioetl/domain/services/activity_aggregator/_aggregator.py:
-            value: 321
-            owner: '@bioetl-data-model'
-            reason: Activity aggregation logic decomposed from single file; exceeds domain 305 LOC limit.
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        src/bioetl/domain/services/activity_aggregator.py:
-            value: 392
-            owner: '@bioetl-data-model'
-            reason: Baseline exemption migrated from architecture tests (file_size_limits).
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        src/bioetl/domain/services/organism_classification_service.py:
-            value: 365
-            owner: '@bioetl-data-model'
-            reason: Baseline exemption migrated from architecture tests (file_size_limits).
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        src/bioetl/domain/services/value_validator.py:
-            value: 350
-            owner: '@bioetl-data-model'
-            reason: Baseline exemption migrated from architecture tests (file_size_limits).
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        src/bioetl/domain/transformations.py:
-            value: 397
-            owner: '@bioetl-data-model'
-            reason: Baseline exemption migrated from architecture tests (file_size_limits).
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        src/bioetl/domain/validation.py:
-            value: 402
-            owner: '@bioetl-data-model'
-            reason: Baseline exemption migrated from architecture tests (file_size_limits).
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        src/bioetl/domain/value_objects/activity.py:
-            value: 336
-            owner: '@bioetl-data-model'
-            reason: Baseline exemption migrated from architecture tests (file_size_limits).
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-    function_complexity: { }
-    function_length: { }
-    class_size: { }
-    class_method_count: { }
-    god_object: { }
-    domain_complexity: { }
+            removal_step: Split evaluator into smaller pure helpers and remove this exemption entry.
+    class_size: {}
+    class_method_count: {}
+    god_object: {}
+    domain_complexity: {}

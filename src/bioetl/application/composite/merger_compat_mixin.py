@@ -20,7 +20,6 @@ if TYPE_CHECKING:
     import polars as pl
 
     from bioetl.domain.composite.config import (
-        DependencyConfig,
         EnricherConfig,
         MergeConfig,
     )

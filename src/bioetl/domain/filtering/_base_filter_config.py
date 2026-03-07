@@ -266,11 +266,7 @@ class BaseFilterConfig:
         return val <= max_val if inclusive else val < max_val
 
     def is_empty(self) -> bool:
-        """Check whether the filter configuration is empty.
-
-        Returns:
-            True if no filters are configured, False if at least one filter is set.
-        """
+        """Check whether the filter configuration is empty."""
         all_filters = (
             self.column_filters,
             self.range_filters,

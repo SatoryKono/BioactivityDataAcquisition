@@ -7,6 +7,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.composition.factories.crossref_adapter_factory import (
+    create_crossref_adapter,
+)
 from bioetl.composition.providers._config_helpers import (
     _create_http_data_source,
     _get_batch_size_from_config,
@@ -18,7 +21,6 @@ from bioetl.composition.providers.provider_registry import (
     ProviderConfig,
 )
 from bioetl.infrastructure.adapters.crossref.client import CrossRefAdapter
-from bioetl.infrastructure.adapters.crossref.factory import _create_crossref_adapter
 from bioetl.infrastructure.adapters.openalex.client import (
     OpenAlexAdapter,
     _create_openalex_adapter,
@@ -105,7 +107,7 @@ def _create_crossref_data_source(
         filter_config=filter_config,
         metrics=metrics,
         pipeline_name=pipeline_name,
-        adapter_factory=_create_crossref_adapter,
+        adapter_factory=create_crossref_adapter,
         extra_kwargs={"settings": settings, "mailto": mailto, "batch_size": batch_size},
     )
 
@@ -198,7 +200,7 @@ def _get_biblio_provider_configs() -> dict[str, ProviderConfig]:
             http_config=HttpConfig(rate=crossref.rate, capacity=crossref.capacity),
             requires_http_client=True,
             requires_logger=True,
-            custom_creator=_create_crossref_adapter,
+            custom_creator=create_crossref_adapter,
             data_source_creator=_create_crossref_data_source,
         ),
         "openalex": ProviderConfig(

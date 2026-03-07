@@ -83,13 +83,10 @@ class BioactivityState(StrEnum):
 class Bioactivity(BaseEntity):
     """Bioactivity measurement from ChEMBL. Required: activity_id, molecule_id."""
 
-    # Processing state (informational, does not affect behavior)
     _state: BioactivityState = BioactivityState.VALIDATED
 
-    # REQUIRED: Primary identifier (validated in __post_init__)
     activity_id: str
 
-    # REQUIRED: Core identifiers (validated in __post_init__)
     molecule_id: str
     target_id: str | None = None
     assay_id: str | None = None
@@ -103,7 +100,6 @@ class Bioactivity(BaseEntity):
 
     target_pref_name: str | None = None
     target_organism: str | None = None
-    # Standardized to 'target_taxonomy_id' for NCBI consistency (was 'tax_id')
     target_taxonomy_id: int | None = None
 
     assay_type: str | None = None
@@ -111,7 +107,6 @@ class Bioactivity(BaseEntity):
     assay_variant_accession: str | None = None
     assay_variant_mutation: str | None = None
 
-    # BAO (BioAssay Ontology) annotations
     bao_endpoint: str | None = None
     bao_format: str | None = None
     bao_label: str | None = None
@@ -123,7 +118,6 @@ class Bioactivity(BaseEntity):
     upper_value: float | None = None
     text_value: str | None = None
 
-    # Standardized activity values
     standard_type: str | None = None
     standard_value: float | None = None
     standard_units: str | None = None
@@ -132,43 +126,34 @@ class Bioactivity(BaseEntity):
     standard_text_value: str | None = None
     standard_flag: int | None = None
 
-    # Derived metrics
     pchembl_value: float | None = None
 
-    # Ligand efficiency metrics (flattened from ChEMBL API dict)
-    ligand_efficiency_bei: float | None = None  # Binding Efficiency Index
-    ligand_efficiency_le: float | None = None  # Ligand Efficiency
-    ligand_efficiency_lle: float | None = None  # Lipophilic Ligand Efficiency
-    ligand_efficiency_sei: float | None = None  # Surface Efficiency Index
+    ligand_efficiency_bei: float | None = None
+    ligand_efficiency_le: float | None = None
+    ligand_efficiency_lle: float | None = None
+    ligand_efficiency_sei: float | None = None
 
-    # Units ontology
     qudt_units: str | None = None
     uo_units: str | None = None
 
-    # Document/Publication data
     journal: str | None = None
     publication_doi: str | None = None
     publication_pmid: str | None = None
     publication_pmc_id: str | None = None
     publication_year: int | None = None
 
-    # Quality annotations
     activity_comment: str | None = None
     data_validity_comment: str | None = None
     data_validity_description: str | None = None
     potential_duplicate: int | None = None
-    manual_curation_flag: int | None = (
-        None  # 0/1: Whether manually reviewed by curators
-    )
-    original_activity_id: int | None = None  # FK to original activity for traceability
+    manual_curation_flag: int | None = None
+    original_activity_id: int | None = None
 
-    # Action type (flattened from ChEMBL API nested structure)
-    action_type: str | None = None  # Type of action (INHIBITOR, AGONIST, etc.)
-    action_type_description: str | None = None  # Description of the action type
-    action_type_parent_type: str | None = None  # Higher-level grouping (nullable)
+    action_type: str | None = None
+    action_type_description: str | None = None
+    action_type_parent_type: str | None = None
 
-    # Activity properties
-    activity_properties: str | None = None  # JSON string of list
+    activity_properties: str | None = None
     toid: int | None = None
 
     def __post_init__(self) -> None:

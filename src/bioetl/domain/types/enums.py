@@ -1,8 +1,4 @@
-"""Domain enumerations for BioETL.
-
-All StrEnum classes with business logic methods.
-No I/O operations allowed (REQ-ARCH-003).
-"""
+"""Domain enumerations for BioETL (pure domain, no I/O)."""
 
 from __future__ import annotations
 

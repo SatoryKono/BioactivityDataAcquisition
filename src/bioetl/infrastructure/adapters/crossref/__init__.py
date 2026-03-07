@@ -11,9 +11,6 @@ from bioetl.infrastructure.adapters.crossref.client import (
     CrossRefQueryBuilder,
     CrossRefResponseMapper,
 )
-from bioetl.infrastructure.adapters.crossref.factory import (
-    _create_crossref_adapter,
-)
 from bioetl.infrastructure.adapters.crossref.models import (
     CROSSREF_RECORD_MODELS,
     CrossRefPublicationRecord,
@@ -36,5 +33,4 @@ __all__ = [
     "CrossRefPublicationsResponse",
     "CrossRefQueryBuilder",
     "CrossRefResponseMapper",
-    "_create_crossref_adapter",
 ]
