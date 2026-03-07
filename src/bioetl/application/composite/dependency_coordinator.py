@@ -62,6 +62,76 @@ def _extract_runner_metrics(runner: PipelineRunner) -> tuple[int, int]:
     )
 
 
+def _build_dependency_lookup(
+    *,
+    dependencies: Sequence[DependencyConfig],
+    dependency_configs: dict[str, DependencyConfig] | None,
+) -> dict[str, DependencyConfig]:
+    """Build dependency lookup map with optional explicit override."""
+    if dependency_configs is not None:
+        return dependency_configs
+    return {dependency.pipeline: dependency for dependency in dependencies}
+
+
+def _build_completed_skip_result(*, dependency: DependencyConfig) -> DependencyResult:
+    """Build skipped result payload for already completed dependencies."""
+    return DependencyResult.skipped(
+        pipeline_name=dependency.pipeline,
+        reason="Already completed (resumed from checkpoint)",
+    )
+
+
+def _log_dependencies_batch_start(
+    *,
+    logger: LoggerPort,
+    dependencies: Sequence[DependencyConfig],
+) -> None:
+    """Emit structured start log for dependency batch execution."""
+    logger.info(
+        "Running dependencies",
+        count=len(dependencies),
+        dependencies=[dependency.pipeline for dependency in dependencies],
+    )
+
+
+def _should_stop_after_result(
+    *,
+    logger: LoggerPort,
+    dependency: DependencyConfig,
+    result: DependencyResult,
+) -> bool:
+    """Return True when required dependency failure must stop execution."""
+    if not dependency.required or result.is_success:
+        return False
+    logger.error(
+        "Required dependency failed, stopping",
+        dependency=dependency.pipeline,
+        status=result.status.value,
+        error=result.error_message,
+    )
+    return True
+
+
+def _maybe_mark_completed_dependency(
+    *,
+    logger: LoggerPort,
+    dependency: DependencyConfig,
+    completed: frozenset[str],
+    results: dict[str, DependencyResult],
+) -> bool:
+    """Store skipped result for completed dependency and return handled flag."""
+    if dependency.pipeline not in completed:
+        return False
+    logger.debug(
+        "Skipping completed dependency",
+        dependency=dependency.pipeline,
+    )
+    results[dependency.pipeline] = _build_completed_skip_result(
+        dependency=dependency,
+    )
+    return True
+
+
 def _log_dependency_start(
     *,
     logger: LoggerPort,
@@ -204,38 +274,17 @@ class DependencyCoordinatorService:
         runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
         dependency_configs: dict[str, DependencyConfig] | None = None,
     ) -> dict[str, DependencyResult]:
-        """Run all dependencies sequentially.
+        """Run dependencies sequentially and return per-pipeline results.
 
-        Dependencies run after seed to have access to seed's keys for filtering.
-        They populate Silver tables before enrichers run.
-
-        Supports chained dependencies where key_source points to another
-        dependency. In this case, keys are read from the source dependency's
-        Silver table instead of using seed keys.
-
-        Args:
-            keys: DataFrame with join keys from seed.
-            dependencies: Dependency configurations.
-            completed: Set of already-completed dependencies (for resume).
-            runner_factory: Factory to create PipelineRunner for each dependency.
-            dependency_configs: All dependency configs for looking up key_source.
-
-        Returns:
-            Mapping of dependency name to result.
-
-        Example:
-            >>> results = await coordinator.run_dependencies(
-            ...     keys=keys_df,
-            ...     dependencies=[term_config],
-            ...     completed=frozenset(),
-            ...     runner_factory=factory,
-            ... )
-            >>> results["chembl_publication_term"].is_success
-            True
+        Uses seed keys for standard dependencies and source-table keys for
+        chained dependencies (`key_source`). Stops early when a required
+        dependency fails.
         """
         results: dict[str, DependencyResult] = {}
-        # Build lookup if not provided
-        dep_config_lookup = dependency_configs or {d.pipeline: d for d in dependencies}
+        dep_config_lookup = _build_dependency_lookup(
+            dependencies=dependencies,
+            dependency_configs=dependency_configs,
+        )
 
         if not dependencies:
             self._logger.debug(
@@ -243,25 +292,17 @@ class DependencyCoordinatorService:
             )
             return results
 
-        self._logger.info(
-            "Running dependencies",
-            count=len(dependencies),
-            dependencies=[d.pipeline for d in dependencies],
-        )
+        _log_dependencies_batch_start(logger=self._logger, dependencies=dependencies)
 
         for dependency in dependencies:
-            if dependency.pipeline in completed:
-                self._logger.debug(
-                    "Skipping completed dependency",
-                    dependency=dependency.pipeline,
-                )
-                results[dependency.pipeline] = DependencyResult.skipped(
-                    pipeline_name=dependency.pipeline,
-                    reason="Already completed (resumed from checkpoint)",
-                )
+            if _maybe_mark_completed_dependency(
+                logger=self._logger,
+                dependency=dependency,
+                completed=completed,
+                results=results,
+            ):
                 continue
 
-            # Determine effective keys for this dependency
             effective_keys = await self._get_effective_keys(
                 dependency=dependency,
                 seed_keys=keys,
@@ -275,14 +316,11 @@ class DependencyCoordinatorService:
             )
             results[dependency.pipeline] = result
 
-            # Stop on required dependency failure
-            if dependency.required and not result.is_success:
-                self._logger.error(
-                    "Required dependency failed, stopping",
-                    dependency=dependency.pipeline,
-                    status=result.status.value,
-                    error=result.error_message,
-                )
+            if _should_stop_after_result(
+                logger=self._logger,
+                dependency=dependency,
+                result=result,
+            ):
                 break
 
         return results
