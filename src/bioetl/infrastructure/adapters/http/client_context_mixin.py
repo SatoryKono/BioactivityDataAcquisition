@@ -60,7 +60,11 @@ class HTTPClientContextMixin:
     def _get_client(
         self,
     ) -> httpx.AsyncClient:
-        """Get httpx client, raising if client not entered."""
+        """Get httpx client, raising if client not entered.
+
+        Returns:
+            Active httpx.AsyncClient instance, raises RuntimeError if not in context manager.
+        """
         if self._client is None:
             raise RuntimeError(
                 "UnifiedHTTPClient must be used within async context manager"

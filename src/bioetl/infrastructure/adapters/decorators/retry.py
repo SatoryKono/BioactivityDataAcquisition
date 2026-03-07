@@ -117,6 +117,9 @@ class RetryingDataSourceDecorator:
         - CircuitBreakerOpenError (CB decorator handles this)
         - Critical errors (auth failures, schema errors)
         - Data quality errors (should skip record, not retry)
+
+        Returns:
+            True if the exception should trigger a retry attempt, False otherwise.
         """
         # Circuit breaker errors should propagate immediately
         if isinstance(exc, CircuitBreakerOpenError):
@@ -130,7 +133,11 @@ class RetryingDataSourceDecorator:
         return self.retry_config.is_retryable_exception(exc)
 
     def _retryable_exception_types(self) -> tuple[type[Exception], ...]:
-        """Build tuple of retryable exception types for `except` clauses."""
+        """Build tuple of retryable exception types for `except` clauses.
+
+        Returns:
+            Tuple of exception classes that should trigger retry logic.
+        """
         configured = tuple(
             exc_type
             for exc_type in self.retry_config.retryable_exceptions

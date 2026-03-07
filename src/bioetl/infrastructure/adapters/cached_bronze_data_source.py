@@ -17,7 +17,6 @@ from __future__ import annotations
 
 __all__ = ["CachedBronzeDataSource"]
 
-
 from datetime import UTC, datetime
 from pathlib import Path
 from types import TracebackType
@@ -122,7 +121,11 @@ class CachedBronzeDataSource:
         """Close the data source (no-op for file-based source)."""
 
     def _parse_date(self, date_str: str | None) -> datetime | None:
-        """Parse date string to datetime for list_batches filtering."""
+        """Parse date string to datetime for list_batches filtering.
+
+        Returns:
+            Datetime with UTC timezone parsed from the date string, or None if date_str is None.
+        """
         if date_str is None:
             return None
         return datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=UTC)
@@ -228,7 +231,11 @@ class CachedBronzeDataSource:
             )
 
     def _resolve_bronze_path(self) -> str:
-        """Resolve effective Bronze path for empty-cache errors."""
+        """Resolve effective Bronze path for empty-cache errors.
+
+        Returns:
+            Effective Bronze directory path string for the current provider and entity.
+        """
         bronze_path = str(self._reader.base_path)
         if getattr(self._reader, "_flat_structure", False):
             return bronze_path

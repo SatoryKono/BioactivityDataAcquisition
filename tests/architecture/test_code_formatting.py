@@ -11,8 +11,8 @@ from __future__ import annotations
 import platform
 import subprocess
 import sys
-from pathlib import Path
 from importlib.util import find_spec
+from pathlib import Path
 
 import pytest
 
@@ -78,6 +78,20 @@ def _run_format_check(target: str) -> subprocess.CompletedProcess[str]:
     )
 
 
+def _run_isort_check() -> subprocess.CompletedProcess[str]:
+    """Run import-order check with stable command resolution on Windows."""
+    check_cmd: list[str]
+    if platform.system() == "Windows" and find_spec("ruff") is not None:
+        check_cmd = [sys.executable, "-m", "ruff"]
+    else:
+        check_cmd = [*_RUFF_CMD]  # type: ignore[misc]
+    return subprocess.run(
+        [*check_cmd, "check", "--select", "I", "src", "tests"],
+        capture_output=True,
+        text=True,
+    )
+
+
 class TestCodeFormatting:
     """Tests ensuring code follows ruff formatting standards."""
 
@@ -118,11 +132,7 @@ class TestCodeFormatting:
 
         Run `ruff check --select I --fix src tests` to fix import ordering issues.
         """
-        result = subprocess.run(
-            [*_RUFF_CMD, "check", "--select", "I", "src", "tests"],  # type: ignore[arg-type]
-            capture_output=True,
-            text=True,
-        )
+        result = _run_isort_check()
 
         assert result.returncode == 0, (
             "Import ordering issues found:\n"

@@ -9,7 +9,6 @@ from __future__ import annotations
 
 __all__ = ["load_pipeline_config", "load_source_config"]
 
-
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
@@ -26,7 +25,11 @@ def _deep_merge(
     base: JsonDict,  # Any: YAML config has heterogeneous values
     override: JsonDict,  # Any: YAML config has heterogeneous values
 ) -> JsonDict:  # Any: YAML config has heterogeneous values
-    """Deep merge two dictionaries, with override taking precedence."""
+    """Deep merge two dictionaries, with override taking precedence.
+
+    Returns:
+        Deep-merged dictionary with override values taking precedence.
+    """
     return config_merge(base, override)
 
 
@@ -37,6 +40,9 @@ def _load_base_config(
 
     Resolution order:
     1. configs/base/pipeline.yaml (new consolidated base path)
+
+    Returns:
+        Dictionary with base pipeline configuration, or empty dict if no base file found.
     """
     candidate_paths = (
         config_path.parent.parent.parent / "base" / "pipeline.yaml",
@@ -105,6 +111,9 @@ def _apply_convention_defaults(
     """Apply convention-based defaults for paths, references, and table names.
 
     Auto-computes from provider/entity_type when not explicitly specified.
+
+    Returns:
+        The config dictionary with convention-based defaults applied in place.
     """
     provider = config.get("provider")
     entity_type = config.get("entity_type")
@@ -138,7 +147,11 @@ def _apply_convention_defaults(
 def _load_data_schema_config(
     config_path: Path, schema_file: str
 ) -> JsonDict | None:  # Any: YAML config has heterogeneous values
-    """Compatibility wrapper for schema loader tests/importers."""
+    """Compatibility wrapper for schema loader tests/importers.
+
+    Returns:
+        Dictionary with schema configuration data, or None if not found.
+    """
     from bioetl.infrastructure.config import pipeline_normalizers
 
     return pipeline_normalizers._load_data_schema_config(
@@ -162,7 +175,11 @@ def _validate_schema_config(
 
 @lru_cache(maxsize=10)
 def load_source_config(provider: str) -> SourceYamlConfig:
-    """Load source configuration using read -> normalize -> validate -> map."""
+    """Load source configuration using read -> normalize -> validate -> map.
+
+    Returns:
+        SourceYamlConfig instance for the given provider.
+    """
     from bioetl.infrastructure.config.source_config_loader import (
         load_source_config_uncached,
     )
@@ -232,7 +249,11 @@ def _apply_hierarchical_filter_config(
 def _load_unified_entity_raw(
     path: Path,
 ) -> JsonDict:  # Any: YAML config has heterogeneous values
-    """Load unified entity YAML file, returning empty dict when absent."""
+    """Load unified entity YAML file, returning empty dict when absent.
+
+    Returns:
+        Dictionary with the parsed YAML content, or empty dict if file absent or not a mapping.
+    """
     if not path.exists():
         return {}
 
@@ -245,7 +266,11 @@ def _get_unified_section(
     unified_raw: JsonDict,  # Any: YAML config has heterogeneous values
     section: str,
 ) -> JsonDict | None:  # Any: YAML config has heterogeneous values
-    """Get a dict section from unified entity config if present."""
+    """Get a dict section from unified entity config if present.
+
+    Returns:
+        Dictionary section value if present and is a dict, None otherwise.
+    """
     value = unified_raw.get(section)
     return value if isinstance(value, dict) else None
 
@@ -284,7 +309,11 @@ class PipelineConfigReadPayload:
 def read_pipeline_config_payload(
     pipeline_name: str,
 ) -> PipelineConfigReadPayload:
-    """Read pipeline config from unified entity YAML and merge base defaults."""
+    """Read pipeline config from unified entity YAML and merge base defaults.
+
+    Returns:
+        PipelineConfigReadPayload with merged config, entity config, path, and optional schema.
+    """
     if "_" not in pipeline_name:
         raise ValueError(
             f"Pipeline name must be in '<provider>_<entity>' format: {pipeline_name}"
@@ -317,7 +346,11 @@ def read_pipeline_config_payload(
 def normalize_pipeline_config_payload(
     payload: PipelineConfigReadPayload,
 ) -> JsonDict:  # Any: YAML config has heterogeneous values
-    """Normalize pipeline payload (new + legacy shapes) before validation."""
+    """Normalize pipeline payload (new + legacy shapes) before validation.
+
+    Returns:
+        Normalized pipeline config dictionary ready for Pydantic validation.
+    """
     from bioetl.infrastructure.config.pipeline_normalizers import (
         apply_pipeline_schema_normalization,
     )
@@ -340,18 +373,30 @@ def normalize_pipeline_config_payload(
 def validate_pipeline_config_payload(
     config: JsonDict,  # Any: YAML config has heterogeneous values
 ) -> PipelineYamlConfig:
-    """Validate normalized pipeline payload with pydantic schema."""
+    """Validate normalized pipeline payload with pydantic schema.
+
+    Returns:
+        PipelineYamlConfig instance validated from the config dictionary.
+    """
     return PipelineYamlConfig.model_validate(config)
 
 
 def map_pipeline_config(validated_config: PipelineYamlConfig) -> PipelineYamlConfig:
-    """Map validated payload to loader return type."""
+    """Map validated payload to loader return type.
+
+    Returns:
+        The validated PipelineYamlConfig instance unchanged.
+    """
     return validated_config
 
 
 @lru_cache(maxsize=10)
 def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
-    """Load pipeline configuration using read -> normalize -> validate -> map."""
+    """Load pipeline configuration using read -> normalize -> validate -> map.
+
+    Returns:
+        PipelineYamlConfig instance for the given pipeline name.
+    """
     raw_payload = read_pipeline_config_payload(pipeline_name)
     normalized_payload = normalize_pipeline_config_payload(raw_payload)
     validated_payload = validate_pipeline_config_payload(normalized_payload)
