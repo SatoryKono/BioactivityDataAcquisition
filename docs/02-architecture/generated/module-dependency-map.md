@@ -4,8 +4,8 @@
 
 ## Summary
 
-- Scanned modules: `998`
-- Internal import edges (raw): `3579`
+- Scanned modules: `1004`
+- Internal import edges (raw): `3606`
 - Aggregated layer edges: `14`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (top 60): `60`
@@ -21,13 +21,13 @@ flowchart LR
     interfaces[interfaces]
     application -->|417 OK| application
     application -->|579 OK| domain
-    composition -->|150 OK| application
-    composition -->|237 OK| composition
-    composition -->|188 OK| domain
-    composition -->|181 OK| infrastructure
+    composition -->|154 OK| application
+    composition -->|243 OK| composition
+    composition -->|191 OK| domain
+    composition -->|186 OK| infrastructure
     domain -->|701 OK| domain
-    infrastructure -->|447 OK| domain
-    infrastructure -->|526 OK| infrastructure
+    infrastructure -->|449 OK| domain
+    infrastructure -->|533 OK| infrastructure
     interfaces -->|13 OK| application
     interfaces -->|23 OK| composition
     interfaces -->|25 OK| domain
@@ -41,13 +41,13 @@ flowchart LR
 |---|---|---:|---|
 | `application` | `application` | 417 | allowed |
 | `application` | `domain` | 579 | allowed |
-| `composition` | `application` | 150 | allowed |
-| `composition` | `composition` | 237 | allowed |
-| `composition` | `domain` | 188 | allowed |
-| `composition` | `infrastructure` | 181 | allowed |
+| `composition` | `application` | 154 | allowed |
+| `composition` | `composition` | 243 | allowed |
+| `composition` | `domain` | 191 | allowed |
+| `composition` | `infrastructure` | 186 | allowed |
 | `domain` | `domain` | 701 | allowed |
-| `infrastructure` | `domain` | 447 | allowed |
-| `infrastructure` | `infrastructure` | 526 | allowed |
+| `infrastructure` | `domain` | 449 | allowed |
+| `infrastructure` | `infrastructure` | 533 | allowed |
 | `interfaces` | `application` | 13 | allowed |
 | `interfaces` | `composition` | 23 | allowed |
 | `interfaces` | `domain` | 25 | allowed |
@@ -58,33 +58,33 @@ flowchart LR
 
 | From Group | To Group | Imports |
 |---|---|---:|
-| `infrastructure.adapters` | `domain.types` | 81 |
+| `infrastructure.adapters` | `domain.types` | 82 |
 | `application.pipelines` | `domain.types` | 70 |
 | `application.composite` | `domain.composite` | 68 |
-| `infrastructure.adapters` | `domain.ports` | 65 |
-| `composition.factories` | `application.core` | 49 |
+| `infrastructure.adapters` | `domain.ports` | 66 |
+| `composition.factories` | `application.core` | 53 |
 | `application.core` | `domain.ports` | 45 |
 | `application.core` | `domain.types` | 45 |
+| `composition.factories` | `infrastructure.storage` | 35 |
 | `composition.bootstrap` | `application.composite` | 34 |
-| `composition.factories` | `infrastructure.storage` | 33 |
 | `application.composite` | `domain.ports` | 32 |
+| `composition.factories` | `domain.ports` | 31 |
 | `infrastructure.storage` | `domain.ports` | 31 |
-| `composition.factories` | `domain.ports` | 29 |
 | `infrastructure.storage` | `domain.types` | 28 |
 | `infrastructure.adapters` | `domain.exceptions` | 27 |
 | `application.services` | `domain.ports` | 26 |
 | `application.pipelines` | `domain.entities` | 24 |
 | `composition.factories` | `application.pipelines` | 23 |
+| `composition.factories` | `infrastructure.config` | 23 |
 | `application.services` | `domain.types` | 22 |
 | `composition.bootstrap` | `domain.ports` | 22 |
-| `composition.factories` | `infrastructure.config` | 22 |
 | `infrastructure.storage` | `domain.models` | 22 |
 | `composition.bootstrap` | `infrastructure.config` | 21 |
 | `composition.factories` | `domain.schemas` | 19 |
 | `application.services` | `domain.value_objects` | 18 |
 | `interfaces.cli` | `composition.entrypoints` | 18 |
+| `composition.factories` | `infrastructure.schemas` | 17 |
 | `composition.factories` | `domain.types` | 16 |
-| `composition.factories` | `infrastructure.schemas` | 16 |
 | `application.core` | `domain.context` | 15 |
 | `application.pipelines` | `domain.context` | 15 |
 | `composition.providers` | `infrastructure.adapters` | 15 |

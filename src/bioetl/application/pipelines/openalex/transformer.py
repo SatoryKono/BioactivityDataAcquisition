@@ -18,7 +18,7 @@ from __future__ import annotations
 __all__ = ["OpenAlexPublicationTransformer"]
 
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.openalex.extractors import (
@@ -275,28 +275,3 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
 
         """
         return OpenAlexPublicationEntity
-
-        # Any: generic domain entity; type varies by pipeline
-
-    def entity_to_silver_record(
-        self,
-        entity: Any,  # Any: generic domain entity; type varies by pipeline
-    ) -> GoldRecord:  # Any: generic domain entity
-        """Convert Domain Entity to SilverRecord.
-
-        OpenAlex doesn't provide pmc_id, so it will be None in the entity.
-        This None value satisfies the PublicationBaseSchema inheritance requirement.
-
-        Args:
-            entity: Domain entity (dataclass).
-
-        Returns:
-            SilverRecord dictionary with all PublicationBaseSchema fields.
-
-        """
-        # Get base silver record (includes all fields with None values)
-        silver_record = super().entity_to_silver_record(entity)
-
-        # Note: pmc_id is kept (with None value) to satisfy PublicationBaseSchema
-
-        return silver_record

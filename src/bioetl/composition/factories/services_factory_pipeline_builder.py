@@ -12,7 +12,6 @@ from bioetl.application.core.batch_checkpoint_recovery_service import (
 from bioetl.application.core.batch_executor import BatchExecutor
 from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
 from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
-from bioetl.application.core.batch_processing_service import BatchProcessingService
 from bioetl.application.core.batch_progress_service import BatchProgressService
 from bioetl.application.core.batch_tracing import BatchTracingManagerService
 from bioetl.application.core.batch_transformer import BatchTransformer
@@ -27,6 +26,9 @@ from bioetl.application.core.protocols import (
 from bioetl.application.core.quarantine_manager import QuarantineManagerService
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
 from bioetl.composition.factories.batch_id_generator import UuidBatchIdGenerator
+from bioetl.composition.factories.services_factory_pipeline_processing import (
+    build_components_and_processing_service,
+)
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.infrastructure.validation import PanderaGoldValidator
 
@@ -251,46 +253,6 @@ def _build_runtime_managers(
     )
 
 
-def _build_components_and_processing_service(
-    *,
-    pipeline: BasePipeline,
-    processor_config: RecordProcessorConfig,
-    error_classifier: ErrorClassifier,
-    callbacks: PipelineCallbacksContext,
-    gold_filter: GoldFilterCallback,
-    gold_validator: PanderaGoldValidator,
-    tracer: TracingPort | None,
-    lock_validator: Callable[[], Awaitable[bool]] | None,
-    tracing_manager: BatchTracingManagerService,
-    batch_id_factory: BatchIdGeneratorPort,
-    create_batch_processing_components_fn: Callable[..., BatchProcessingComponents],
-) -> tuple[BatchProcessingComponents, BatchProcessingService]:
-    components = create_batch_processing_components_fn(
-        services=pipeline.services,
-        context=pipeline.context,
-        config=processor_config,
-        error_classifier=error_classifier,
-        transform_callback=callbacks.transform,
-        gold_filter_callback=gold_filter,
-        gold_transform_callback=callbacks.gold_transform,
-        gold_validator=gold_validator,
-        tracer=tracer,
-        lock_validator=lock_validator,
-    )
-    batch_processing_service = BatchProcessingService(
-        services=pipeline.services,
-        context=pipeline.context,
-        config=processor_config,
-        logger=pipeline.services.logger,
-        batch_metrics=components.batch_metrics,
-        transformer=components.transformer,
-        writer=components.writer,
-        tracing_manager=tracing_manager,
-        batch_id_factory=batch_id_factory,
-    )
-    return components, batch_processing_service
-
-
 def create_batch_executor_from_pipeline(
     *,
     pipeline: BasePipeline,
@@ -341,7 +303,7 @@ def create_batch_executor_from_pipeline(
         tracer=tracer,
         batch_id_factory=batch_id_factory,
     )
-    components, batch_processing_service = _build_components_and_processing_service(
+    components, batch_processing_service = build_components_and_processing_service(
         pipeline=pipeline,
         processor_config=processor_config,
         error_classifier=ErrorClassifier(),

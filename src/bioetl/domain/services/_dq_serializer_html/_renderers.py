@@ -172,14 +172,14 @@ def _render_raw_data_card(data: JsonDict) -> str:
 
 
 __all__ = [
+    "_REPORT_STYLES",
+    "_render_check_results_card",
+    "_render_raw_data_card",
+    "_render_report_header",
+    "_render_summary_card",
     "format_detail_value",
     "render_check_details_html",
     "render_checks_html",
     "render_thresholds_html",
     "status_color_class",
-    "_render_check_results_card",
-    "_render_raw_data_card",
-    "_render_report_header",
-    "_render_summary_card",
-    "_REPORT_STYLES",
 ]
