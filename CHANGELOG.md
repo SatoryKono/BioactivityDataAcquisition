@@ -44,6 +44,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Governance scorecard/exemptions synchronized (2026-03-07)**:
+  - `configs/quality/debt_scorecard.yaml`: `governance.baseline_date` updated to `2026-03-07`
+  - `configs/quality/architecture_metric_exemptions.yaml`: retained single governance-anchor `god_object` exemption (`DependencyCoordinatorService`) with clarified `reason` and `removal_step` text aligned to owner-diversification tracking
+  - Purpose: keep debt inventory baseline and registry semantics consistent for quality-gate governance checks
+
 - **`PipelineExecutionOutcome` renamed to `PipelineExecutionResult` (RF-008)**: Applied NAME-001 convention — `*Result` suffix for value objects carrying execution outcome data.
   - `src/bioetl/application/services/pipeline_run_execution_service.py`: class renamed; `__all__` updated
   - `src/bioetl/application/services/pipeline_runner_service.py`: import and type annotation updated (`outcome: PipelineExecutionResult`)

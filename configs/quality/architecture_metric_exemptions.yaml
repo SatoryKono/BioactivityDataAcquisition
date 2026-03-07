@@ -13,16 +13,16 @@ policy:
         - expires_on
         - removal_step
 registries:
-    file_size_limits: {}
-    function_complexity: {}
-    function_length: {}
-    class_size: {}
-    class_method_count: {}
+    file_size_limits: { }
+    function_complexity: { }
+    function_length: { }
+    class_size: { }
+    class_method_count: { }
     god_object:
         DependencyCoordinatorService:
             value: 1
             owner: '@bioetl-architecture'
-            reason: Temporary governance placeholder to preserve active debt inventory until owner diversification becomes mandatory.
+            reason: Temporary governance anchor exemption while owner diversification policy activation is tracked from 2026-Q2.
             expires_on: '2026-06-30'
-            removal_step: Remove this placeholder exemption once owner diversification policy and debt scorecard tests are revised for zero-debt baseline.
-    domain_complexity: {}
+            removal_step: Remove after owner-diversification governance/tests support a zero-debt inventory baseline without anchor exemptions.
+    domain_complexity: { }

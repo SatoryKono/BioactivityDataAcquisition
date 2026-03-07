@@ -62,7 +62,7 @@ class ResolutionInfo:
     """Immutable value object with resolution details.
 
     Attributes:
-        resolution_type: Type of resolution (ignored, reprocessed).
+        resolution_type: Type of resolution (ignored, reprocessed, expired).
         resolved_at: Timestamp of resolution.
         resolved_by: User or system that resolved the entry.
         reason: Reason for the resolution.
@@ -77,10 +77,10 @@ class ResolutionInfo:
 
     def __post_init__(self) -> None:
         """Validate resolution info."""
-        if self.resolution_type not in {"ignored", "reprocessed"}:
+        if self.resolution_type not in {"ignored", "reprocessed", "expired"}:
             raise ValueError(
                 f"Invalid resolution_type: {self.resolution_type}. "
-                "Must be 'ignored' or 'reprocessed'."
+                "Must be 'ignored', 'reprocessed', or 'expired'."
             )
 
 
