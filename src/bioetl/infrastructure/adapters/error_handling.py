@@ -290,6 +290,9 @@ class ErrorService:
         provider: str,
         status_code: int | None = None,
         retry_after: float | None = None,
+        entity: str | None = None,
+        pipeline: str | None = None,
+        operation: str | None = None,
     ) -> ExternalServiceError:
         """Wrap exception in appropriate ExternalServiceError.
 
@@ -304,6 +307,9 @@ class ErrorService:
                 error_type=error_type,
                 status_code=status_code,
                 retry_after=retry_after,
+                entity=entity,
+                pipeline=pipeline,
+                operation=operation,
             )
         )
 
@@ -338,7 +344,18 @@ class ErrorService:
             provider=provider,
             status_code=error_context.status_code,
             retry_after=error_context.retry_after,
+            entity=_safe_optional_str(context.get("entity")),
+            pipeline=_safe_optional_str(context.get("pipeline")),
+            operation=operation,
         )
+
+
+def _safe_optional_str(value: object) -> str | None:
+    """Return a string value or None for non-string/blank values."""
+    if not isinstance(value, str):
+        return None
+    stripped = value.strip()
+    return stripped or None
 
 
 __all__ = [

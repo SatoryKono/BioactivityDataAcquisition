@@ -38,6 +38,9 @@ class DomainErrorMappingInput:
     error_type: ErrorType
     status_code: int | None = None
     retry_after: float | None = None
+    entity: str | None = None
+    pipeline: str | None = None
+    operation: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -97,9 +100,14 @@ class DomainInfraExceptionMapper:
         assert status_code is not None
 
         if status_code in _AUTH_STATUS_CODES:
-            raise CriticalError(
-                f"{payload.provider} authentication failed (HTTP {status_code}): {message}"
-            ) from payload.error
+            self._raise_critical(
+                message=(
+                    f"{payload.provider} authentication failed "
+                    f"(HTTP {status_code}): {message}"
+                ),
+                reason_code="ADAPTER_AUTH_FAILED",
+                payload=payload,
+            )
 
         if status_code == _RATE_LIMIT_STATUS_CODE:
             retry_after = payload.retry_after or _DEFAULT_RETRY_AFTER_SECONDS
@@ -110,10 +118,15 @@ class DomainInfraExceptionMapper:
                 retry_after=retry_after,
                 recovery_action="retry_after_delay",
             )
-            return RateLimitExceededError(
+            mapped = RateLimitExceededError(
                 message=message,
                 service_name=payload.provider,
                 retry_after=retry_after,
+            )
+            return self._decorate_mapped_error(
+                error=mapped,
+                reason_code="ADAPTER_HTTP_RATE_LIMIT",
+                payload=payload,
             )
 
         if status_code >= 500:
@@ -124,11 +137,16 @@ class DomainInfraExceptionMapper:
                 retry_after=payload.retry_after,
                 recovery_action="retry_with_backoff",
             )
-            return ServiceUnavailableError(
+            mapped = ServiceUnavailableError(
                 message=message,
                 service_name=payload.provider,
                 status_code=status_code,
                 retry_after=payload.retry_after,
+            )
+            return self._decorate_mapped_error(
+                error=mapped,
+                reason_code="ADAPTER_HTTP_SERVER_ERROR",
+                payload=payload,
             )
 
         self._logger.debug(
@@ -138,11 +156,16 @@ class DomainInfraExceptionMapper:
             retry_after=payload.retry_after,
             recovery_action="no_retry",
         )
-        return ExternalServiceError(
+        mapped = ExternalServiceError(
             message=message,
             service_name=payload.provider,
             status_code=status_code,
             retry_after=payload.retry_after,
+        )
+        return self._decorate_mapped_error(
+            error=mapped,
+            reason_code="ADAPTER_HTTP_ERROR",
+            payload=payload,
         )
 
     def _map_without_status_code(
@@ -152,9 +175,14 @@ class DomainInfraExceptionMapper:
         message = str(payload.error)
 
         if payload.error_type.is_critical():
-            raise CriticalError(
-                f"Critical {payload.provider} error ({payload.error_type.value}): {message}"
-            ) from payload.error
+            self._raise_critical(
+                message=(
+                    f"Critical {payload.provider} error "
+                    f"({payload.error_type.value}): {message}"
+                ),
+                reason_code="ADAPTER_CRITICAL_ERROR",
+                payload=payload,
+            )
 
         if payload.error_type == ErrorType.RATE_LIMIT:
             retry_after = payload.retry_after or _DEFAULT_RETRY_AFTER_SECONDS
@@ -165,10 +193,15 @@ class DomainInfraExceptionMapper:
                 retry_after=retry_after,
                 original_error=type(payload.error).__name__,
             )
-            return RateLimitExceededError(
+            mapped = RateLimitExceededError(
                 message=message,
                 service_name=payload.provider,
                 retry_after=retry_after,
+            )
+            return self._decorate_mapped_error(
+                error=mapped,
+                reason_code="ADAPTER_RATE_LIMIT_ERROR",
+                payload=payload,
             )
 
         if payload.error_type == ErrorType.TIMEOUT:
@@ -179,10 +212,15 @@ class DomainInfraExceptionMapper:
                 retry_after=payload.retry_after,
                 original_error=type(payload.error).__name__,
             )
-            return ServiceUnavailableError(
+            mapped = ServiceUnavailableError(
                 message=message,
                 service_name=payload.provider,
                 retry_after=payload.retry_after,
+            )
+            return self._decorate_mapped_error(
+                error=mapped,
+                reason_code="ADAPTER_TIMEOUT_ERROR",
+                payload=payload,
             )
 
         self._logger.debug(
@@ -193,9 +231,50 @@ class DomainInfraExceptionMapper:
             retry_after=payload.retry_after,
             original_error=type(payload.error).__name__,
         )
-        return ExternalServiceError(
+        mapped = ExternalServiceError(
             message=message,
             service_name=payload.provider,
             status_code=payload.status_code,
             retry_after=payload.retry_after,
         )
+        return self._decorate_mapped_error(
+            error=mapped,
+            reason_code="ADAPTER_EXTERNAL_ERROR",
+            payload=payload,
+        )
+
+    def _decorate_mapped_error(
+        self,
+        *,
+        error: ExternalServiceError,
+        reason_code: str,
+        payload: DomainErrorMappingInput,
+    ) -> ExternalServiceError:
+        """Attach standardized reason code, context, and root cause metadata."""
+        error.reason_code = reason_code
+        error.with_context(
+            provider=payload.provider,
+            entity=payload.entity,
+            pipeline=payload.pipeline,
+            operation=payload.operation,
+        )
+        error.__cause__ = payload.error
+        return error
+
+    def _raise_critical(
+        self,
+        *,
+        message: str,
+        reason_code: str,
+        payload: DomainErrorMappingInput,
+    ) -> None:
+        """Raise critical error with taxonomy reason code and contextual payload."""
+        critical = CriticalError(message)
+        critical.reason_code = reason_code
+        critical.with_context(
+            provider=payload.provider,
+            entity=payload.entity,
+            pipeline=payload.pipeline,
+            operation=payload.operation,
+        )
+        raise critical from payload.error

@@ -11,7 +11,8 @@ Usage:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from importlib import import_module
+from typing import TYPE_CHECKING, Final
 
 if TYPE_CHECKING:
     from bioetl.application.core.base_transformer import BaseTransformer
@@ -26,6 +27,129 @@ if TYPE_CHECKING:
 
 # Mapping of (provider, entity_type) to transformer class
 _TRANSFORMER_REGISTRY: dict[tuple[str, str], type[BaseTransformer]] = {}
+_TransformerSpec = tuple[str, str, str, str]
+_TRANSFORMER_SPECS: Final[tuple[_TransformerSpec, ...]] = (
+    (
+        "chembl",
+        "activity",
+        "bioetl.application.pipelines.chembl.activity_transformer",
+        "ActivityTransformer",
+    ),
+    (
+        "chembl",
+        "assay",
+        "bioetl.application.pipelines.chembl.assay_transformer",
+        "AssayTransformer",
+    ),
+    (
+        "chembl",
+        "assay_parameters",
+        "bioetl.application.pipelines.chembl.assay_parameters_transformer",
+        "AssayParametersTransformer",
+    ),
+    (
+        "chembl",
+        "cell_line",
+        "bioetl.application.pipelines.chembl.cell_line_transformer",
+        "CellLineTransformer",
+    ),
+    (
+        "chembl",
+        "compound_record",
+        "bioetl.application.pipelines.chembl.compound_record_transformer",
+        "CompoundRecordTransformer",
+    ),
+    (
+        "chembl",
+        "document",
+        "bioetl.application.pipelines.chembl.publication_transformer",
+        "PublicationTransformer",
+    ),
+    (
+        "chembl",
+        "document_similarity",
+        "bioetl.application.pipelines.chembl.publication_similarity_transformer",
+        "PublicationSimilarityTransformer",
+    ),
+    (
+        "chembl",
+        "document_term",
+        "bioetl.application.pipelines.chembl.publication_term_transformer",
+        "PublicationTermTransformer",
+    ),
+    (
+        "chembl",
+        "molecule",
+        "bioetl.application.pipelines.chembl.molecule_transformer",
+        "MoleculeTransformer",
+    ),
+    (
+        "chembl",
+        "subcellular_fraction",
+        "bioetl.application.pipelines.chembl.subcellular_fraction_transformer",
+        "SubcellularFractionTransformer",
+    ),
+    (
+        "chembl",
+        "protein_class",
+        "bioetl.application.pipelines.chembl.protein_class_transformer",
+        "ProteinClassTransformer",
+    ),
+    (
+        "chembl",
+        "target",
+        "bioetl.application.pipelines.chembl.target_transformer",
+        "TargetTransformer",
+    ),
+    (
+        "chembl",
+        "target_component",
+        "bioetl.application.pipelines.chembl.target_component_transformer",
+        "TargetComponentTransformer",
+    ),
+    (
+        "pubchem",
+        "compound",
+        "bioetl.application.pipelines.pubchem.transformer",
+        "PubChemCompoundTransformer",
+    ),
+    (
+        "uniprot",
+        "protein",
+        "bioetl.application.pipelines.uniprot.transformer",
+        "UniProtProteinTransformer",
+    ),
+    (
+        "uniprot",
+        "idmapping",
+        "bioetl.application.pipelines.uniprot.idmapping_transformer",
+        "IDMappingTransformer",
+    ),
+    (
+        "pubmed",
+        "publication",
+        "bioetl.application.pipelines.pubmed.transformer",
+        "PubMedPublicationTransformer",
+    ),
+    (
+        "crossref",
+        "publication",
+        "bioetl.application.pipelines.crossref.transformer",
+        "CrossRefPublicationTransformer",
+    ),
+    (
+        "openalex",
+        "publication",
+        "bioetl.application.pipelines.openalex.transformer",
+        "OpenAlexPublicationTransformer",
+    ),
+    (
+        "semanticscholar",
+        "publication",
+        "bioetl.application.pipelines.semanticscholar.transformer",
+        "SemanticScholarPublicationTransformer",
+    ),
+)
 
 
 def register_transformer(
@@ -125,109 +249,30 @@ def get_transformer_class(
     return _TRANSFORMER_REGISTRY.get((provider, entity_type))
 
 
+def _load_transformer_class(module_path: str, class_name: str) -> type:
+    """Load transformer class by dotted module path and class name."""
+    module = import_module(module_path)
+    transformer_class = getattr(module, class_name)
+    if not isinstance(transformer_class, type):
+        raise TypeError(
+            f"Expected class for {module_path}.{class_name}, "
+            f"got {type(transformer_class).__name__}"
+        )
+    return transformer_class
+
+
 def register_all_transformers() -> None:
     """Register all known transformers.
 
     Called during application startup to populate the registry.
     Idempotent - safe to call multiple times.
     """
-    # Import here to avoid circular imports
-    from bioetl.application.pipelines.chembl.activity_transformer import (
-        ActivityTransformer,
-    )
-    from bioetl.application.pipelines.chembl.assay_parameters_transformer import (
-        AssayParametersTransformer,
-    )
-    from bioetl.application.pipelines.chembl.assay_transformer import AssayTransformer
-    from bioetl.application.pipelines.chembl.cell_line_transformer import (
-        CellLineTransformer,
-    )
-    from bioetl.application.pipelines.chembl.compound_record_transformer import (
-        CompoundRecordTransformer,
-    )
-    from bioetl.application.pipelines.chembl.molecule_transformer import (
-        MoleculeTransformer,
-    )
-    from bioetl.application.pipelines.chembl.protein_class_transformer import (
-        ProteinClassTransformer,
-    )
-    from bioetl.application.pipelines.chembl.publication_similarity_transformer import (
-        PublicationSimilarityTransformer,
-    )
-    from bioetl.application.pipelines.chembl.publication_term_transformer import (
-        PublicationTermTransformer,
-    )
-    from bioetl.application.pipelines.chembl.publication_transformer import (
-        PublicationTransformer,
-    )
-    from bioetl.application.pipelines.chembl.subcellular_fraction_transformer import (
-        SubcellularFractionTransformer,
-    )
-    from bioetl.application.pipelines.chembl.target_component_transformer import (
-        TargetComponentTransformer,
-    )
-    from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
-    from bioetl.application.pipelines.crossref.transformer import (
-        CrossRefPublicationTransformer,
-    )
-    from bioetl.application.pipelines.openalex.transformer import (
-        OpenAlexPublicationTransformer,
-    )
-    from bioetl.application.pipelines.pubchem.transformer import (
-        PubChemCompoundTransformer,
-    )
-    from bioetl.application.pipelines.pubmed.transformer import (
-        PubMedPublicationTransformer,
-    )
-    from bioetl.application.pipelines.semanticscholar.transformer import (
-        SemanticScholarPublicationTransformer,
-    )
-    from bioetl.application.pipelines.uniprot.idmapping_transformer import (
-        IDMappingTransformer,
-    )
-    from bioetl.application.pipelines.uniprot.transformer import (
-        UniProtProteinTransformer,
-    )
-
-    # ChEMBL transformers
-    register_transformer("chembl", "activity", ActivityTransformer)
-    register_transformer("chembl", "assay", AssayTransformer)
-    register_transformer("chembl", "assay_parameters", AssayParametersTransformer)
-    register_transformer("chembl", "cell_line", CellLineTransformer)
-    register_transformer("chembl", "compound_record", CompoundRecordTransformer)
-    register_transformer("chembl", "document", PublicationTransformer)
-    register_transformer(
-        "chembl", "document_similarity", PublicationSimilarityTransformer
-    )
-    register_transformer("chembl", "document_term", PublicationTermTransformer)
-    register_transformer("chembl", "molecule", MoleculeTransformer)
-    register_transformer(
-        "chembl", "subcellular_fraction", SubcellularFractionTransformer
-    )
-    register_transformer("chembl", "protein_class", ProteinClassTransformer)
-    register_transformer("chembl", "target", TargetTransformer)
-    register_transformer("chembl", "target_component", TargetComponentTransformer)
-
-    # PubChem transformers
-    register_transformer("pubchem", "compound", PubChemCompoundTransformer)
-
-    # UniProt transformers
-    register_transformer("uniprot", "protein", UniProtProteinTransformer)
-    register_transformer("uniprot", "idmapping", IDMappingTransformer)
-
-    # PubMed transformers
-    register_transformer("pubmed", "publication", PubMedPublicationTransformer)
-
-    # CrossRef transformers
-    register_transformer("crossref", "publication", CrossRefPublicationTransformer)
-
-    # OpenAlex transformers
-    register_transformer("openalex", "publication", OpenAlexPublicationTransformer)
-
-    # Semantic Scholar transformers
-    register_transformer(
-        "semanticscholar", "publication", SemanticScholarPublicationTransformer
-    )
+    for provider, entity_type, module_path, class_name in _TRANSFORMER_SPECS:
+        register_transformer(
+            provider,
+            entity_type,
+            _load_transformer_class(module_path, class_name),
+        )
 
 
 __all__ = [

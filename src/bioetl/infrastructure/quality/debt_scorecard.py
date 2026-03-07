@@ -223,38 +223,14 @@ def validate_scorecard_registry_sync(
     return errors
 
 
-def evaluate_debt_scorecard(
-    *,
-    registry_path: Path | str | None = None,
-    scorecard_path: Path | str | None = None,
-    today: date | None = None,
-) -> tuple[list[str], DebtScorecardEvaluation | None]:
-    """Evaluate scorecard budgets and return (violations, summary).
-
-    Returns:
-        Tuple of (violation message list, DebtScorecardEvaluation summary or None if validation failed).
-    """
-    now = today or date.today()
-    inventory = build_exemption_inventory(registry_path, today=now)
-    scorecard = load_debt_scorecard(scorecard_path)
-
-    validation_errors = validate_debt_scorecard(scorecard_path)
-    if validation_errors:
-        return validation_errors, None
-
-    baseline = scorecard["baseline"]
-    baseline_total = int(baseline["total_exemptions"])
-
-    target = _current_quarter_target(scorecard, today=now)
-    if target is None:
-        return [
-            f"Missing quarterly target for current quarter '{_quarter_label(now)}'"
-        ], None
-
-    active_windows = [
+def _resolve_grace_allowances(
+    scorecard: JsonDict,
+    today: date,
+) -> tuple[list[JsonDict], int, dict[str, int], dict[str, int]]:
+    active_windows: list[JsonDict] = [
         window
         for window in scorecard.get("grace_windows", [])
-        if _is_active_grace_window(window, today=now)
+        if _is_active_grace_window(window, today=today)
     ]
     typed_active_windows = [
         window for window in active_windows if isinstance(window, dict)
@@ -262,22 +238,31 @@ def evaluate_debt_scorecard(
     allowance_total, allowance_by_registry, allowance_by_group = _collect_allowances(
         typed_active_windows
     )
+    return active_windows, allowance_total, allowance_by_registry, allowance_by_group
 
-    target_registry_budgets = target["registry_budgets"]
-    target_group_budgets = target["group_budgets"]
+
+def _evaluate_budget_violations(
+    inventory: ExemptionInventory,
+    scorecard: JsonDict,
+    target: JsonDict,
+    baseline_total: int,
+    allowance_total: int,
+    allowance_by_registry: dict[str, int],
+    allowance_by_group: dict[str, int],
+) -> tuple[list[str], dict[str, int], float]:
     by_group = _compute_group_counts(
         by_registry=inventory.by_registry,
         registry_groups=scorecard["registry_groups"],
     )
     violations = _evaluate_registry_budgets(
         by_registry=inventory.by_registry,
-        target_registry_budgets=target_registry_budgets,
+        target_registry_budgets=target["registry_budgets"],
         allowance_by_registry=allowance_by_registry,
     )
     violations.extend(
         _evaluate_group_budgets(
             by_group=by_group,
-            target_group_budgets=target_group_budgets,
+            target_group_budgets=target["group_budgets"],
             allowance_by_group=allowance_by_group,
         )
     )
@@ -296,7 +281,17 @@ def evaluate_debt_scorecard(
     min_score = float(target["min_integral_score"])
     if score < min_score:
         violations.append(f"integral debt score {score} is below target {min_score}")
-    quarter = str(target["quarter"])
+
+    return violations, by_group, score
+
+
+def _evaluate_governance_violations(
+    inventory: ExemptionInventory,
+    scorecard: JsonDict,
+    quarter: str,
+    integral_score: float,
+) -> list[str]:
+    violations: list[str] = []
 
     owner_allocations = _owner_allocations_for_quarter(
         scorecard=scorecard,
@@ -334,11 +329,61 @@ def evaluate_debt_scorecard(
             scorecard=scorecard,
             current_quarter=quarter,
             total_exemptions=inventory.total_exemptions,
-            integral_score=score,
+            integral_score=integral_score,
             expired_entries=inventory.expired_entries,
         )
     )
 
+    return violations
+
+
+def evaluate_debt_scorecard(
+    *,
+    registry_path: Path | str | None = None,
+    scorecard_path: Path | str | None = None,
+    today: date | None = None,
+) -> tuple[list[str], DebtScorecardEvaluation | None]:
+    """Evaluate scorecard budgets and return (violations, summary).
+
+    Returns:
+        Tuple of (violation message list, DebtScorecardEvaluation summary or None if validation failed).
+    """
+    now = today or date.today()
+    inventory = build_exemption_inventory(registry_path, today=now)
+    scorecard = load_debt_scorecard(scorecard_path)
+
+    validation_errors = validate_debt_scorecard(scorecard_path)
+    if validation_errors:
+        return validation_errors, None
+
+    baseline_total = int(scorecard["baseline"]["total_exemptions"])
+
+    target = _current_quarter_target(scorecard, today=now)
+    if target is None:
+        return [
+            f"Missing quarterly target for current quarter '{_quarter_label(now)}'"
+        ], None
+
+    active_windows, allowance_total, allowance_by_registry, allowance_by_group = (
+        _resolve_grace_allowances(scorecard, now)
+    )
+
+    violations, by_group, score = _evaluate_budget_violations(
+        inventory,
+        scorecard,
+        target,
+        baseline_total,
+        allowance_total,
+        allowance_by_registry,
+        allowance_by_group,
+    )
+
+    quarter = str(target["quarter"])
+    violations.extend(
+        _evaluate_governance_violations(inventory, scorecard, quarter, score)
+    )
+
+    total_budget = int(target["max_total_exemptions"]) + allowance_total
     summary = DebtScorecardEvaluation(
         quarter=quarter,
         integral_score=score,

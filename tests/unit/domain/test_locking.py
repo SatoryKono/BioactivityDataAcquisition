@@ -1,12 +1,13 @@
 """Tests for domain locking primitives (RULES.md §3.3).
 
-Verifies LockContext value object, LockNotHeldError exception,
-and LockCoordinator.get_context() method.
+Verifies LockContext value object and LockNotHeldError exception.
 
 Note:
     Lock validation during writes is now performed at Application layer
     (BatchWriter) per RULES.md §4.6 Safety Guard. See test_batch_writer.py
     for those tests.
+    Application orchestration checks for LockCoordinator are covered in
+    tests/unit/application/core/test_lock_manager_get_context.py.
 """
 
 from __future__ import annotations
@@ -17,7 +18,7 @@ from uuid import uuid4
 import pytest
 
 from bioetl.domain.locking import FencingToken, LockContext, LockNotHeldError
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types import RunID
 
 
 @pytest.fixture
@@ -209,158 +210,3 @@ class TestLockNotHeldError:
         assert "lock:chembl_activity" in str(error)
         assert error.operation == "write_silver"
         assert error.expected_key == "lock:chembl_activity"
-
-
-class TestLockCoordinatorGetContext:
-    """Tests for LockCoordinator.get_context() method."""
-
-    @pytest.fixture
-    def mock_lock_port(self, run_id: RunID) -> MagicMock:
-        """Create mock LockPort with async methods."""
-        from unittest.mock import AsyncMock
-
-        token = FencingToken(
-            sequence=1,
-            key="lock:chembl_activity",
-            owner_id=run_id,
-            issued_at=100.0,
-        )
-        mock = MagicMock()
-        mock.acquire = AsyncMock(return_value=token)
-        mock.release = AsyncMock(return_value=True)
-        mock.heartbeat = AsyncMock(return_value=True)
-        return mock
-
-    @pytest.fixture
-    def mock_shutdown_signal(self) -> MagicMock:
-        """Create mock ShutdownSignal."""
-        mock = MagicMock()
-        mock.is_requested = False
-        return mock
-
-    @pytest.mark.asyncio
-    async def test_get_context_before_acquire(
-        self,
-        mock_lock_port: MagicMock,
-        mock_shutdown_signal: MagicMock,
-        mock_logger: MagicMock,
-        run_id: RunID,
-    ) -> None:
-        """Test get_context returns None before lock is acquired."""
-        from bioetl.application.core.lock_manager import LockCoordinator
-
-        manager = LockCoordinator.create(
-            lock_port=mock_lock_port,
-            run_id=run_id,
-            provider="chembl",
-            entity_type="activity",
-            run_type=RunType.INCREMENTAL,
-            lock_ttl=3600,
-            wait_for_lock=False,
-            wait_timeout=300,
-            heartbeat_interval=60,
-            logger=mock_logger,
-            shutdown_signal=mock_shutdown_signal,
-        )
-
-        ctx = manager.get_context()
-        assert ctx is None
-
-    @pytest.mark.asyncio
-    async def test_get_context_after_acquire(
-        self,
-        mock_lock_port: MagicMock,
-        mock_shutdown_signal: MagicMock,
-        mock_logger: MagicMock,
-        run_id: RunID,
-    ) -> None:
-        """Test get_context returns valid context after lock acquired."""
-        from bioetl.application.core.lock_manager import LockCoordinator
-
-        manager = LockCoordinator.create(
-            lock_port=mock_lock_port,
-            run_id=run_id,
-            provider="chembl",
-            entity_type="activity",
-            run_type=RunType.INCREMENTAL,
-            lock_ttl=3600,
-            wait_for_lock=False,
-            wait_timeout=300,
-            heartbeat_interval=60,
-            logger=mock_logger,
-            shutdown_signal=mock_shutdown_signal,
-        )
-
-        await manager.acquire()
-        ctx = manager.get_context()
-
-        assert ctx is not None
-        assert ctx.key == "lock:chembl_activity"
-        assert ctx.owner_id == run_id
-        assert ctx.exclusive is False
-        assert ctx.is_valid() is True
-        assert ctx.fencing_token is not None
-        assert ctx.fencing_token.sequence == 1
-
-    @pytest.mark.asyncio
-    async def test_get_context_exclusive_lock(
-        self,
-        mock_lock_port: MagicMock,
-        mock_shutdown_signal: MagicMock,
-        mock_logger: MagicMock,
-        run_id: RunID,
-    ) -> None:
-        """Test get_context for exclusive (backfill) lock."""
-        from bioetl.application.core.lock_manager import LockCoordinator
-
-        manager = LockCoordinator.create(
-            lock_port=mock_lock_port,
-            run_id=run_id,
-            provider="chembl",
-            entity_type="activity",
-            run_type=RunType.BACKFILL,  # Triggers exclusive lock
-            lock_ttl=3600,
-            wait_for_lock=False,
-            wait_timeout=300,
-            heartbeat_interval=60,
-            logger=mock_logger,
-            shutdown_signal=mock_shutdown_signal,
-        )
-
-        await manager.acquire()
-        ctx = manager.get_context()
-
-        assert ctx is not None
-        assert ctx.key == "lock:chembl_activity:exclusive"
-        assert ctx.exclusive is True
-
-    @pytest.mark.asyncio
-    async def test_get_context_after_release(
-        self,
-        mock_lock_port: MagicMock,
-        mock_shutdown_signal: MagicMock,
-        mock_logger: MagicMock,
-        run_id: RunID,
-    ) -> None:
-        """Test get_context returns None after lock released."""
-        from bioetl.application.core.lock_manager import LockCoordinator
-
-        manager = LockCoordinator.create(
-            lock_port=mock_lock_port,
-            run_id=run_id,
-            provider="chembl",
-            entity_type="activity",
-            run_type=RunType.INCREMENTAL,
-            lock_ttl=3600,
-            wait_for_lock=False,
-            wait_timeout=300,
-            heartbeat_interval=60,
-            logger=mock_logger,
-            shutdown_signal=mock_shutdown_signal,
-        )
-
-        await manager.acquire()
-        assert manager.get_context() is not None
-
-        await manager.release()
-        assert manager.get_context() is None

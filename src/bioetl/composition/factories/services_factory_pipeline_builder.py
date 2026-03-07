@@ -74,11 +74,7 @@ def create_batch_processing_components(
     tracer: TracingPort | None = None,
     lock_validator: Callable[[], Awaitable[bool]] | None = None,
 ) -> BatchProcessingComponents:
-    """Create batch metrics/transformer/writer stack via composition DI.
-
-    Returns:
-        BatchProcessingComponents with batch metrics, transformer, and writer.
-    """
+    """Create batch metrics/transformer/writer stack via composition DI."""
     pipeline_label = f"{config.provider}_{config.entity_type}"
     batch_metrics = BatchMetricsRecorderService(
         services.metrics,
@@ -125,11 +121,7 @@ def create_checkpoint_manager(
     *,
     loading_strategy: LoadingStrategy | None = None,
 ) -> CheckpointManagerService:
-    """Create configured CheckpointManagerService.
-
-    Returns:
-        CheckpointManagerService configured for the pipeline run.
-    """
+    """Create configured CheckpointManagerService."""
     return CheckpointManagerService(
         checkpoint_port=checkpoint_port,
         logger=logger,
@@ -151,11 +143,7 @@ def create_record_processor_from_pipeline(
     lock_validator: Callable[[], Awaitable[bool]] | None = None,
     tracer: TracingPort | None = None,
 ) -> RecordProcessor:
-    """Create RecordProcessor from pipeline using delegated builder.
-
-    Returns:
-        RecordProcessor configured from the pipeline's services and context.
-    """
+    """Create RecordProcessor from pipeline using delegated builder."""
     return create_record_processor_fn(
         services=pipeline.services,
         context=pipeline.context,
@@ -182,35 +170,17 @@ def create_record_processor_from_pipeline(
     )
 
 
-def create_batch_executor_from_pipeline(
+def _build_record_processor_config(
     *,
     pipeline: BasePipeline,
-    callbacks: PipelineCallbacksContext,
     silver_schema: pa.Schema | None,
     gold_schema: type[pandera.DataFrameModel],
-    checkpoint_manager: CheckpointManagerService,
-    shutdown_signal: ShutdownSignal,
-    create_batch_processing_components_fn: Callable[..., BatchProcessingComponents],
-    strict_gold_validation: bool = True,
-    lock_validator: Callable[[], Awaitable[bool]] | None = None,
-    tracer: TracingPort | None = None,
-    memory_monitor: MemoryMonitorPort | None = None,
-    memory_config: MemoryConfig | None = None,
-    bronze_output_path: str | None = None,
-    silver_output_path: str | None = None,
-    gold_output_path: str | None = None,
-    flat_structure: bool = False,
-    batch_id_factory: BatchIdGeneratorPort | None = None,
-) -> BatchExecutor:
-    """Create BatchExecutor from pipeline using delegated component factories.
-
-    Returns:
-        BatchExecutor configured from the pipeline's services, context, and config.
-    """
-    skip = pipeline.runtime.skip_gold
-    gold_filter = (lambda _c, _r: False) if skip else callbacks.gold_filter
-
-    error_classifier = ErrorClassifier()
+    strict_gold_validation: bool,
+    bronze_output_path: str | None,
+    silver_output_path: str | None,
+    gold_output_path: str | None,
+    flat_structure: bool,
+) -> tuple[RecordProcessorConfig, PanderaGoldValidator]:
     processor_config = RecordProcessorConfig(
         pipeline_name=pipeline.config.pipeline_name,
         provider=pipeline.config.provider,
@@ -226,24 +196,29 @@ def create_batch_executor_from_pipeline(
         column_groups=pipeline.config.column_groups,
         scd_config=pipeline.config.scd_config,
     )
-
     typed_gold_schema = cast("pa.DataFrameSchema | None", gold_schema)
     gold_validator = PanderaGoldValidator(
         typed_gold_schema, strict=strict_gold_validation
     )
-    components = create_batch_processing_components_fn(
-        services=pipeline.services,
-        context=pipeline.context,
-        config=processor_config,
-        error_classifier=error_classifier,
-        transform_callback=callbacks.transform,
-        gold_filter_callback=gold_filter,
-        gold_transform_callback=callbacks.gold_transform,
-        gold_validator=gold_validator,
-        tracer=tracer,
-        lock_validator=lock_validator,
-    )
+    return processor_config, gold_validator
 
+
+def _build_runtime_managers(
+    *,
+    pipeline: BasePipeline,
+    processor_config: RecordProcessorConfig,
+    checkpoint_manager: CheckpointManagerService,
+    memory_monitor: MemoryMonitorPort | None,
+    memory_config: MemoryConfig | None,
+    tracer: TracingPort | None,
+    batch_id_factory: BatchIdGeneratorPort | None,
+) -> tuple[
+    BatchMemoryManagerService,
+    BatchTracingManagerService,
+    BatchIdGeneratorPort,
+    BatchProgressService,
+    BatchCheckpointRecoveryService,
+]:
     initial_batch_size = pipeline.config.batch_size or BatchExecutor.DEFAULT_BATCH_SIZE
     memory_manager = BatchMemoryManagerService(
         initial_batch_size=initial_batch_size,
@@ -267,6 +242,41 @@ def create_batch_executor_from_pipeline(
         checkpoint_manager=checkpoint_manager,
         logger=pipeline.services.logger,
     )
+    return (
+        memory_manager,
+        tracing_manager,
+        effective_batch_id_factory,
+        progress_service,
+        checkpoint_recovery_service,
+    )
+
+
+def _build_components_and_processing_service(
+    *,
+    pipeline: BasePipeline,
+    processor_config: RecordProcessorConfig,
+    error_classifier: ErrorClassifier,
+    callbacks: PipelineCallbacksContext,
+    gold_filter: GoldFilterCallback,
+    gold_validator: PanderaGoldValidator,
+    tracer: TracingPort | None,
+    lock_validator: Callable[[], Awaitable[bool]] | None,
+    tracing_manager: BatchTracingManagerService,
+    batch_id_factory: BatchIdGeneratorPort,
+    create_batch_processing_components_fn: Callable[..., BatchProcessingComponents],
+) -> tuple[BatchProcessingComponents, BatchProcessingService]:
+    components = create_batch_processing_components_fn(
+        services=pipeline.services,
+        context=pipeline.context,
+        config=processor_config,
+        error_classifier=error_classifier,
+        transform_callback=callbacks.transform,
+        gold_filter_callback=gold_filter,
+        gold_transform_callback=callbacks.gold_transform,
+        gold_validator=gold_validator,
+        tracer=tracer,
+        lock_validator=lock_validator,
+    )
     batch_processing_service = BatchProcessingService(
         services=pipeline.services,
         context=pipeline.context,
@@ -276,9 +286,74 @@ def create_batch_executor_from_pipeline(
         transformer=components.transformer,
         writer=components.writer,
         tracing_manager=tracing_manager,
-        batch_id_factory=effective_batch_id_factory,
+        batch_id_factory=batch_id_factory,
+    )
+    return components, batch_processing_service
+
+
+def create_batch_executor_from_pipeline(
+    *,
+    pipeline: BasePipeline,
+    callbacks: PipelineCallbacksContext,
+    silver_schema: pa.Schema | None,
+    gold_schema: type[pandera.DataFrameModel],
+    checkpoint_manager: CheckpointManagerService,
+    shutdown_signal: ShutdownSignal,
+    create_batch_processing_components_fn: Callable[..., BatchProcessingComponents],
+    strict_gold_validation: bool = True,
+    lock_validator: Callable[[], Awaitable[bool]] | None = None,
+    tracer: TracingPort | None = None,
+    memory_monitor: MemoryMonitorPort | None = None,
+    memory_config: MemoryConfig | None = None,
+    bronze_output_path: str | None = None,
+    silver_output_path: str | None = None,
+    gold_output_path: str | None = None,
+    flat_structure: bool = False,
+    batch_id_factory: BatchIdGeneratorPort | None = None,
+) -> BatchExecutor:
+    """Create BatchExecutor from pipeline using delegated component factories."""
+    gold_filter = (
+        (lambda _c, _r: False) if pipeline.runtime.skip_gold else callbacks.gold_filter
     )
 
+    processor_config, gold_validator = _build_record_processor_config(
+        pipeline=pipeline,
+        silver_schema=silver_schema,
+        gold_schema=gold_schema,
+        strict_gold_validation=strict_gold_validation,
+        bronze_output_path=bronze_output_path,
+        silver_output_path=silver_output_path,
+        gold_output_path=gold_output_path,
+        flat_structure=flat_structure,
+    )
+    (
+        memory_manager,
+        tracing_manager,
+        effective_batch_id_factory,
+        progress_service,
+        checkpoint_recovery_service,
+    ) = _build_runtime_managers(
+        pipeline=pipeline,
+        processor_config=processor_config,
+        checkpoint_manager=checkpoint_manager,
+        memory_monitor=memory_monitor,
+        memory_config=memory_config,
+        tracer=tracer,
+        batch_id_factory=batch_id_factory,
+    )
+    components, batch_processing_service = _build_components_and_processing_service(
+        pipeline=pipeline,
+        processor_config=processor_config,
+        error_classifier=ErrorClassifier(),
+        callbacks=callbacks,
+        gold_filter=gold_filter,
+        gold_validator=gold_validator,
+        tracer=tracer,
+        lock_validator=lock_validator,
+        tracing_manager=tracing_manager,
+        batch_id_factory=effective_batch_id_factory,
+        create_batch_processing_components_fn=create_batch_processing_components_fn,
+    )
     return BatchExecutor(
         services=pipeline.services,
         context=pipeline.context,

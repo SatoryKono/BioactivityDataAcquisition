@@ -47,6 +47,9 @@ from bioetl.application.services.health_service import (
 from bioetl.application.services.metrics_service import (
     MetricsService,
 )
+from bioetl.application.services.pipeline_run_lifecycle_service import (
+    PipelineRunLifecycleService,
+)
 from bioetl.application.services.pipeline_runner_service import (
     PipelineNotFoundError,
     PipelineRunnerService,
@@ -75,6 +78,7 @@ __all__ = [
     "HealthService",
     "MetricsService",
     "PipelineNotFoundError",
+    "PipelineRunLifecycleService",
     "PipelineRunResult",
     "PipelineRunnerService",
     "QuarantineService",

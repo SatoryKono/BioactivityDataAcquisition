@@ -37,6 +37,192 @@ __all__ = [
 ]
 
 
+def _build_checkpoint_manager(
+    *,
+    pipeline: BasePipeline,
+    logger_port: object,
+) -> object:
+    return ServicesBuilder.create_checkpoint_manager(
+        checkpoint_port=pipeline.services.checkpoint,
+        logger=logger_port,
+        pipeline_name=pipeline.config.pipeline_name,
+        run_id=pipeline.run_id,
+        resume=pipeline.runtime.resume,
+        loading_strategy=cast(LoadingStrategy | None, pipeline.config.loading_strategy),
+    )
+
+
+def _build_lock_manager(
+    *,
+    pipeline: BasePipeline,
+    logger_port: object,
+    checkpoint_manager: object,
+    context_holder: LockContextHolder,
+) -> object:
+    return LockCoordinator.create(
+        lock_port=pipeline.services.lock,
+        run_id=pipeline.context.run_id,
+        provider=pipeline.config.provider,
+        entity_type=pipeline.config.entity_type,
+        run_type=pipeline.runtime.run_type,
+        lock_ttl=pipeline.runtime.effective_lock_ttl,
+        wait_for_lock=pipeline.runtime.wait_for_lock,
+        wait_timeout=pipeline.runtime.lock_wait_timeout,
+        heartbeat_interval=pipeline.runtime.heartbeat_interval,
+        logger=logger_port,
+        shutdown_signal=pipeline.shutdown_signal,
+        checkpoint_manager=checkpoint_manager,
+        context_holder=context_holder,
+    )
+
+
+def _build_preflight_service(
+    *,
+    pipeline: BasePipeline,
+    logger_port: object,
+) -> PreflightService:
+    health_aggregator = _HealthAggregator(
+        metrics=pipeline.services.metrics,
+        logger=logger_port,
+        pipeline_name=pipeline.config.pipeline_name,
+        health_check_mode=pipeline.runtime.health_check_mode,
+    )
+    medallion_validator = _MedallionConfigValidator(
+        config=pipeline.config,
+        logger=logger_port,
+        write_mode_policy=WriteModePolicy(),
+    )
+    return PreflightService(
+        config=pipeline.config,
+        context=pipeline.context,
+        logger=logger_port,
+        metrics=pipeline.services.metrics,
+        health_aggregator=health_aggregator,
+        medallion_validator=medallion_validator,
+    )
+
+
+def _resolve_dq_configs(
+    *,
+    yaml_config: PipelineYamlConfig | None,
+    dq_configs_extractor: Callable[[PipelineYamlConfig | None], DQConfigsContext]
+    | None,
+) -> DQConfigsContext:
+    extractor: Callable[[PipelineYamlConfig | None], DQConfigsContext] = (
+        dq_configs_extractor
+        or (lambda cfg: DQConfigsContext(bronze=None, silver=None, gold=None))
+    )
+    return extractor(yaml_config)
+
+
+def _build_postrun_service(
+    *,
+    pipeline: BasePipeline,
+    logger_port: object,
+    lifecycle_service: MedallionLifecycleService,
+    dq_configs: DQConfigsContext,
+) -> PostrunService:
+    dq_service = DataQualityService(
+        dq_monitor=pipeline.services.dq_monitor,
+        config=pipeline.config.dq,
+        logger=logger_port,
+        metrics=pipeline.services.metrics,
+        pipeline_name=pipeline.config.pipeline_name,
+        entity_type=pipeline.config.entity_type,
+    )
+    return PostrunService(
+        config=pipeline.config,
+        runtime=pipeline.runtime,
+        context=pipeline.context,
+        dq_service=dq_service,
+        lifecycle_service=lifecycle_service,
+        storage=pipeline.services.storage,
+        metrics=pipeline.services.metrics,
+        logger=logger_port,
+        metadata_coordinator=pipeline.services.metadata_coordinator,
+        metadata_writer=pipeline.services.metadata_writer,
+        dq_report_service=pipeline.services.dq_report_service,
+        bronze_dq_config=dq_configs.bronze if dq_configs else None,
+        silver_dq_config=dq_configs.silver if dq_configs else None,
+        gold_dq_config=dq_configs.gold if dq_configs else None,
+    )
+
+
+def _build_observer(
+    *,
+    pipeline: BasePipeline,
+    observability: ObservabilityBundle,
+    logger_port: object,
+) -> PipelineObserver:
+    return PipelineObserver(
+        pipeline_name=pipeline.config.pipeline_name,
+        run_id=pipeline.context.run_id,
+        run_type=pipeline.runtime.run_type,
+        metrics=pipeline.services.metrics,
+        logger=logger_port,
+        tracer=observability.tracer,
+    )
+
+
+def _build_batch_executor(
+    *,
+    pipeline: BasePipeline,
+    yaml_config: PipelineYamlConfig | None,
+    silver_schema: pa.Schema | None,
+    gold_schema: object,
+    strict_gold_validation: bool,
+    checkpoint_manager: object,
+    lock_manager: object,
+    observability: ObservabilityBundle,
+) -> object:
+    dq_output_paths = extract_dq_output_paths(yaml_config)
+    return ServicesBuilder.create_batch_executor_from_pipeline(
+        pipeline=pipeline,
+        silver_schema=silver_schema,
+        gold_schema=cast("type[pandera.DataFrameModel]", gold_schema),
+        checkpoint_manager=checkpoint_manager,
+        shutdown_signal=pipeline.shutdown_signal,
+        strict_gold_validation=strict_gold_validation,
+        lock_validator=lock_manager.validate,
+        tracer=observability.tracer,
+        bronze_output_path=dq_output_paths.bronze_path,
+        silver_output_path=dq_output_paths.silver_path,
+        gold_output_path=dq_output_paths.gold_path,
+        flat_structure=dq_output_paths.flat_structure,
+    )
+
+
+def _create_pipeline_runner(
+    *,
+    pipeline: BasePipeline,
+    observability: ObservabilityBundle,
+    executor: object,
+    checkpoint_manager: object,
+    lock_manager: object,
+    preflight_service: PreflightService,
+    postrun_service: PostrunService,
+    lifecycle_service: MedallionLifecycleService,
+    observer: PipelineObserver,
+) -> PipelineRunner:
+    return PipelineRunner(
+        config=pipeline.config,
+        runtime=pipeline.runtime,
+        services=pipeline.services,
+        context=pipeline.context,
+        executor=executor,
+        checkpoint_manager=checkpoint_manager,
+        shutdown_signal=pipeline.shutdown_signal,
+        logger=observability.logger,
+        lock_manager=lock_manager,
+        preflight=preflight_service,
+        postrun=postrun_service,
+        lifecycle_service=lifecycle_service,
+        observer=observer,
+        pipeline=pipeline,
+        tracer=observability.tracer,
+    )
+
+
 def assemble_runner_impl(
     pipeline: BasePipeline,
     observability: ObservabilityBundle,
@@ -55,15 +241,10 @@ def assemble_runner_impl(
     """Assemble a PipelineRunner from a configured pipeline instance."""
     logger_port = observability.logger
 
-    checkpoint_manager = ServicesBuilder.create_checkpoint_manager(
-        checkpoint_port=pipeline.services.checkpoint,
-        logger=logger_port,
-        pipeline_name=pipeline.config.pipeline_name,
-        run_id=pipeline.run_id,
-        resume=pipeline.runtime.resume,
-        loading_strategy=cast(LoadingStrategy | None, pipeline.config.loading_strategy),
+    checkpoint_manager = _build_checkpoint_manager(
+        pipeline=pipeline,
+        logger_port=logger_port,
     )
-
     lifecycle_service = MedallionLifecycleService(
         storage=pipeline.services.storage,
         logger=logger_port,
@@ -71,115 +252,50 @@ def assemble_runner_impl(
 
     context_holder = LockContextHolder()
 
-    lock_manager = LockCoordinator.create(
-        lock_port=pipeline.services.lock,
-        run_id=pipeline.context.run_id,
-        provider=pipeline.config.provider,
-        entity_type=pipeline.config.entity_type,
-        run_type=pipeline.runtime.run_type,
-        lock_ttl=pipeline.runtime.effective_lock_ttl,
-        wait_for_lock=pipeline.runtime.wait_for_lock,
-        wait_timeout=pipeline.runtime.lock_wait_timeout,
-        heartbeat_interval=pipeline.runtime.heartbeat_interval,
-        logger=logger_port,
-        shutdown_signal=pipeline.shutdown_signal,
+    lock_manager = _build_lock_manager(
+        pipeline=pipeline,
+        logger_port=logger_port,
         checkpoint_manager=checkpoint_manager,
         context_holder=context_holder,
     )
-
-    health_aggregator = _HealthAggregator(
-        metrics=pipeline.services.metrics,
-        logger=logger_port,
-        pipeline_name=pipeline.config.pipeline_name,
-        health_check_mode=pipeline.runtime.health_check_mode,
-    )
-    medallion_validator = _MedallionConfigValidator(
-        config=pipeline.config,
-        logger=logger_port,
-        write_mode_policy=WriteModePolicy(),
-    )
-
-    preflight_service = PreflightService(
-        config=pipeline.config,
-        context=pipeline.context,
-        logger=logger_port,
-        metrics=pipeline.services.metrics,
-        health_aggregator=health_aggregator,
-        medallion_validator=medallion_validator,
-    )
-
-    dq_service = DataQualityService(
-        dq_monitor=pipeline.services.dq_monitor,
-        config=pipeline.config.dq,
-        logger=logger_port,
-        metrics=pipeline.services.metrics,
-        pipeline_name=pipeline.config.pipeline_name,
-        entity_type=pipeline.config.entity_type,
-    )
-
-    extractor: Callable[[PipelineYamlConfig | None], DQConfigsContext] = (
-        dq_configs_extractor
-        or (lambda cfg: DQConfigsContext(bronze=None, silver=None, gold=None))
-    )
-    dq_configs = extractor(yaml_config)
-
-    postrun_service = PostrunService(
-        config=pipeline.config,
-        runtime=pipeline.runtime,
-        context=pipeline.context,
-        dq_service=dq_service,
-        lifecycle_service=lifecycle_service,
-        storage=pipeline.services.storage,
-        metrics=pipeline.services.metrics,
-        logger=logger_port,
-        metadata_coordinator=pipeline.services.metadata_coordinator,
-        metadata_writer=pipeline.services.metadata_writer,
-        dq_report_service=pipeline.services.dq_report_service,
-        bronze_dq_config=dq_configs.bronze if dq_configs else None,
-        silver_dq_config=dq_configs.silver if dq_configs else None,
-        gold_dq_config=dq_configs.gold if dq_configs else None,
-    )
-
-    observer = PipelineObserver(
-        pipeline_name=pipeline.config.pipeline_name,
-        run_id=pipeline.context.run_id,
-        run_type=pipeline.runtime.run_type,
-        metrics=pipeline.services.metrics,
-        logger=logger_port,
-        tracer=observability.tracer,
-    )
-
-    dq_output_paths = extract_dq_output_paths(yaml_config)
-
-    batch_executor = ServicesBuilder.create_batch_executor_from_pipeline(
+    preflight_service = _build_preflight_service(
         pipeline=pipeline,
+        logger_port=logger_port,
+    )
+    dq_configs = _resolve_dq_configs(
+        yaml_config=yaml_config,
+        dq_configs_extractor=dq_configs_extractor,
+    )
+    postrun_service = _build_postrun_service(
+        pipeline=pipeline,
+        logger_port=logger_port,
+        lifecycle_service=lifecycle_service,
+        dq_configs=dq_configs,
+    )
+    observer = _build_observer(
+        pipeline=pipeline,
+        observability=observability,
+        logger_port=logger_port,
+    )
+    batch_executor = _build_batch_executor(
+        pipeline=pipeline,
+        yaml_config=yaml_config,
         silver_schema=silver_schema,
-        gold_schema=cast("type[pandera.DataFrameModel]", gold_schema),
-        checkpoint_manager=checkpoint_manager,
-        shutdown_signal=pipeline.shutdown_signal,
+        gold_schema=gold_schema,
         strict_gold_validation=strict_gold_validation,
-        lock_validator=lock_manager.validate,
-        tracer=observability.tracer,
-        bronze_output_path=dq_output_paths.bronze_path,
-        silver_output_path=dq_output_paths.silver_path,
-        gold_output_path=dq_output_paths.gold_path,
-        flat_structure=dq_output_paths.flat_structure,
+        checkpoint_manager=checkpoint_manager,
+        lock_manager=lock_manager,
+        observability=observability,
     )
 
-    return PipelineRunner(
-        config=pipeline.config,
-        runtime=pipeline.runtime,
-        services=pipeline.services,
-        context=pipeline.context,
+    return _create_pipeline_runner(
+        pipeline=pipeline,
+        observability=observability,
         executor=batch_executor,
         checkpoint_manager=checkpoint_manager,
-        shutdown_signal=pipeline.shutdown_signal,
-        logger=logger_port,
         lock_manager=lock_manager,
-        preflight=preflight_service,
-        postrun=postrun_service,
+        preflight_service=preflight_service,
+        postrun_service=postrun_service,
         lifecycle_service=lifecycle_service,
         observer=observer,
-        pipeline=pipeline,
-        tracer=observability.tracer,
     )
