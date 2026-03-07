@@ -24,15 +24,19 @@ from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.common import (
     ComposableFallbackDecorator,
-    DefaultFallbackExecutionStrategy,
+    FallbackDecoratorConfig,
     FallbackFetchOrchestratorService,
-    resolve_fallback_policy,
+    FallbackPolicyMixin,
 )
 from bioetl.infrastructure.adapters.common.adapter_defaults import (
     create_default_error_handler as _create_default_crossref_error_handler,
 )
 from bioetl.infrastructure.adapters.common.adapter_defaults import (
     create_default_fallback_service as _create_default_crossref_fallback_service,
+)
+from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
+    ExtractRecordIdHook,
+    NormalizeIdHook,
 )
 from bioetl.infrastructure.adapters.crossref._defaults import (
     CROSSREF_DEFAULT_FALLBACK_CONFIG as _CROSSREF_DEFAULT_FALLBACK_CONFIG,
@@ -82,7 +86,7 @@ CROSSREF_HEALTH_ERRORS = (
 
 
 @dataclass
-class CrossRefAdapter(BaseHttpAdapter):
+class CrossRefAdapter(FallbackPolicyMixin, BaseHttpAdapter):
     """CrossRef adapter with thin-facade delegation to flow components."""
 
     http_client: UnifiedHTTPClient
@@ -198,24 +202,24 @@ class CrossRefAdapter(BaseHttpAdapter):
             )
         )
 
-    def configure_fallback_policy(self, policy: object | None) -> None:
-        """Configure fallback decorator behavior from provider YAML policy."""
-        enabled, config = resolve_fallback_policy(
-            policy,
-            defaults=_CROSSREF_DEFAULT_FALLBACK_CONFIG,
-            default_enabled=True,
-        )
-        strategy = DefaultFallbackExecutionStrategy(
-            normalize_id_hook=normalize_doi,
-            extract_record_id_hook=lambda rec: str(rec.get("DOI", "")),
-            fallback_handler_hook=self._fallback_handler if enabled else None,
-        )
-        self._fallback_decorator = ComposableFallbackDecorator(
-            service=self._fallback_fetch_service,
-            strategy=strategy,
-            config=config,
-            logger=self.logger,
-        )
+    def _get_default_fallback_config(self) -> FallbackDecoratorConfig:
+        """Return CrossRef-specific default fallback config."""
+        return _CROSSREF_DEFAULT_FALLBACK_CONFIG
+
+    def _get_normalize_id_hook(self) -> NormalizeIdHook:
+        """Return DOI normalization hook."""
+        return normalize_doi
+
+    def _get_extract_record_id_hook(self) -> ExtractRecordIdHook:
+        """Return hook extracting DOI from a CrossRef record."""
+        return lambda rec: str(rec.get("DOI", ""))
+
+    def _get_fallback_handler(self, enabled: bool) -> TitleFallbackHandler | None:
+        """Return title fallback handler when enabled."""
+        return self._fallback_handler if enabled else None
+
+    def _on_fallback_decorator_updated(self) -> None:
+        """Propagate new decorator to the fetch-flow component."""
         if hasattr(self, "_fetch_flow"):
             self._fetch_flow.fallback_decorator = self._fallback_decorator
 

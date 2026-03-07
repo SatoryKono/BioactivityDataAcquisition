@@ -27,7 +27,7 @@ from bioetl.application.services.pipeline_run_context_service import (
     PipelineRunContextService,
 )
 from bioetl.application.services.pipeline_run_execution_service import (
-    PipelineExecutionOutcome,
+    PipelineExecutionResult,
     PipelineRunExecutionService,
 )
 from bioetl.domain.context import PipelineRunContext
@@ -382,7 +382,7 @@ class PipelineRunnerService:
     def _build_run_result(
         self,
         *,
-        outcome: PipelineExecutionOutcome,
+        outcome: PipelineExecutionResult,
         pipeline_name: str,
         run_id: RunID,
         run_type: str,

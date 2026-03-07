@@ -295,6 +295,22 @@ class ServiceUnavailableError(ExternalServiceError):
         )
 
 
+def _resolve_rate_limit_params(
+    provider: str | None,
+    message: str | None,
+    service_name: str | None,
+) -> tuple[str, str, str | None]:
+    """Resolve provider name, message text, and service name for RateLimitError."""
+    resolved_service = service_name if service_name is not None else provider
+    resolved_message = (
+        message
+        if message is not None
+        else (provider if provider is not None else "Rate limit exceeded")
+    )
+    provider_name = resolved_service if resolved_service is not None else "unknown"
+    return provider_name, resolved_message, resolved_service
+
+
 class RateLimitError(ExternalServiceError):
     """Raised when provider-side rate limit is exceeded."""
 
@@ -320,7 +336,7 @@ class RateLimitError(ExternalServiceError):
             )
             return
 
-        provider_name, resolved_message, resolved_service = self._resolve_params(
+        provider_name, resolved_message, resolved_service = _resolve_rate_limit_params(
             provider,
             message,
             service_name,
@@ -332,20 +348,6 @@ class RateLimitError(ExternalServiceError):
             status_code=429,
             retry_after=retry_after,
         )
-
-    @staticmethod
-    def _resolve_params(
-        provider: str | None,
-        message: str | None,
-        service_name: str | None,
-    ) -> tuple[str, str, str | None]:
-        """Resolve provider name, message text, and service name."""
-        resolved_service = service_name if service_name is not None else provider
-        resolved_message = (
-            message if message is not None else (provider or "Rate limit exceeded")
-        )
-        provider_name = resolved_service if resolved_service is not None else "unknown"
-        return provider_name, resolved_message, resolved_service
 
 
 RateLimitExceededError = RateLimitError

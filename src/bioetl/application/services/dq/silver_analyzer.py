@@ -64,28 +64,52 @@ class SilverDQAnalyzer:
             ]  # Any: DQ rule definitions have heterogeneous values
             | None
         ),  # Any: DQ check values vary by check type
-    ) -> tuple[
-        JsonDict, int, int, int  # Any: DQ check values vary by check type
-    ]:  # Any: DQ check values vary by check type
-        """Execute all enabled DQ checks and collect results.
-
-        Args:
-            df: Polars DataFrame with Silver data.
-            enabled_checks: Set of enabled check types.
-            primary_keys: List of primary key columns.
-            input_record_count: Original record count before transforms.
-            quarantined_count: Number of quarantined records.
-            previous_schema: Previous schema for drift detection.
-            key_nullability_rules: Key nullability constraint rules.
-
-        Returns:
-            Tuple of (checks dict, passed count, failed count, warnings count).
-        """
+    ) -> tuple[JsonDict, int, int, int]:
+        """Execute all enabled DQ checks and collect results."""
         checks: JsonDict = {}  # Any: DQ check values vary by check type
         passed, failed, warnings = 0, 0, 0
-        stats = self._statistics
 
-        # Standard checks: to_dict(result) + update_counts(result.status)
+        passed, failed, warnings = self._run_standard_checks(
+            df,
+            enabled_checks,
+            primary_keys,
+            input_record_count,
+            quarantined_count,
+            previous_schema,
+            checks,
+            passed,
+            failed,
+            warnings,
+        )
+        passed = self._run_null_rate_check(df, enabled_checks, checks, passed)
+        passed = self._run_value_distribution_check(df, enabled_checks, checks, passed)
+        passed, failed, warnings = self._run_key_nullability_check(
+            df,
+            enabled_checks,
+            key_nullability_rules,
+            checks,
+            passed,
+            failed,
+            warnings,
+        )
+
+        return checks, passed, failed, warnings
+
+    def _run_standard_checks(
+        self,
+        df: pl.DataFrame,
+        enabled_checks: set[SilverDQCheckType],
+        primary_keys: list[str],
+        input_record_count: int | None,
+        quarantined_count: int,
+        previous_schema: dict[str, str] | None,
+        checks: JsonDict,
+        passed: int,
+        failed: int,
+        warnings: int,
+    ) -> tuple[int, int, int]:
+        """Run standard DQ checks that follow the to_dict/update_counts pattern."""
+        stats = self._statistics
         standard_checks: list[
             tuple[SilverDQCheckType, str, Callable[[], Any]]  # Any: check results vary
         ] = [
@@ -131,26 +155,58 @@ class SilverDQAnalyzer:
                 passed, failed, warnings = update_counts(
                     result.status, passed, failed, warnings
                 )
+        return passed, failed, warnings
 
-        # Special: null_rate (always PASS, custom dict)
+    def _run_null_rate_check(
+        self,
+        df: pl.DataFrame,
+        enabled_checks: set[SilverDQCheckType],
+        checks: JsonDict,
+        passed: int,
+    ) -> int:
+        """Run null rate check (always PASS, custom dict format)."""
         if SilverDQCheckType.NULL_RATE in enabled_checks:
-            null_results, overall_rate = stats.check_null_rates(df)
+            null_results, overall_rate = self._statistics.check_null_rates(df)
             checks["null_rate"] = {
                 "columns": {r.column_name: to_dict(r) for r in null_results},
                 "overall_null_rate": overall_rate,
                 "status": DQCheckStatus.PASS.value,
             }
             passed += 1
+        return passed
 
-        # Special: value_distribution (always PASS, custom serializer)
+    def _run_value_distribution_check(
+        self,
+        df: pl.DataFrame,
+        enabled_checks: set[SilverDQCheckType],
+        checks: JsonDict,
+        passed: int,
+    ) -> int:
+        """Run value distribution check (always PASS, custom serializer)."""
         if SilverDQCheckType.VALUE_DISTRIBUTION in enabled_checks:
-            distribution_result = stats.check_value_distribution(df)
-            checks["value_distribution"] = stats.distribution_to_dict(
+            distribution_result = self._statistics.check_value_distribution(df)
+            checks["value_distribution"] = self._statistics.distribution_to_dict(
                 distribution_result
             )
             passed += 1
+        return passed
 
-        # Special: key_nullability (delegates to threshold checker)
+    def _run_key_nullability_check(
+        self,
+        df: pl.DataFrame,
+        enabled_checks: set[SilverDQCheckType],
+        key_nullability_rules: (
+            list[
+                JsonDict  # Any: DQ check values vary by check type
+            ]  # Any: DQ rule definitions have heterogeneous values
+            | None
+        ),
+        checks: JsonDict,
+        passed: int,
+        failed: int,
+        warnings: int,
+    ) -> tuple[int, int, int]:
+        """Run key nullability check (delegates to threshold checker)."""
         if SilverDQCheckType.KEY_NULLABILITY in enabled_checks:
             key_nullability_result = self._threshold.check_key_nullability(
                 df,
@@ -163,8 +219,7 @@ class SilverDQAnalyzer:
                 failed,
                 warnings,
             )
-
-        return checks, passed, failed, warnings
+        return passed, failed, warnings
 
     def analyze(
         self,

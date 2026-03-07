@@ -7,7 +7,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-SRC = Path("src/bioetl")
+REPO_ROOT = Path(__file__).resolve().parents[2]
+SRC = REPO_ROOT / "src" / "bioetl"
 
 
 def _py_files() -> list[Path]:
@@ -54,7 +55,7 @@ def test_no_sentinel_values() -> None:
 
 
 def test_no_hardcoded_secrets() -> None:
-    baseline_path = Path(".secrets.baseline")
+    baseline_path = REPO_ROOT / ".secrets.baseline"
     if not baseline_path.exists():
         raise AssertionError("Missing .secrets.baseline for detect-secrets scan")
 

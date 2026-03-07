@@ -14,17 +14,19 @@ from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
 from bioetl.infrastructure.adapters.common import (
-    ComposableFallbackDecorator,
-    DefaultFallbackExecutionStrategy,
     FallbackDecoratorConfig,
     FallbackFetchOrchestratorService,
-    resolve_fallback_policy,
+    FallbackPolicyMixin,
 )
 from bioetl.infrastructure.adapters.common.adapter_defaults import (
     create_default_fallback_service as _create_default_uniprot_fallback_service,
 )
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
+)
+from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
+    ExtractRecordIdHook,
+    NormalizeIdHook,
 )
 from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
 from bioetl.infrastructure.adapters.uniprot.constants import UNIPROT_API_BASE
@@ -82,6 +84,7 @@ class UniProtAdapter(
     UniProtFeatureSequenceAdapterMixin,
     UniProtProteinFetchAdapterMixin,
     UniProtAdapterMetadataMixin,
+    FallbackPolicyMixin,
     BaseHttpAdapter,
     PaginatedFetcherMixin,
 ):
@@ -128,24 +131,17 @@ class UniProtAdapter(
         )
         self.configure_fallback_policy(None)
 
-    def configure_fallback_policy(self, policy: object | None) -> None:
-        """Configure fallback decorator behavior from provider YAML policy."""
-        _enabled, config = resolve_fallback_policy(
-            policy,
-            defaults=_UNIPROT_DEFAULT_FALLBACK_CONFIG,
-            default_enabled=True,
-        )
-        strategy = DefaultFallbackExecutionStrategy(
-            normalize_id_hook=lambda value: value.strip(),
-            extract_record_id_hook=self._extract_accession_from_record,
-            fallback_handler_hook=None,
-        )
-        self._fallback_decorator = ComposableFallbackDecorator(
-            service=self._fallback_fetch_service,
-            strategy=strategy,
-            config=config,
-            logger=self.logger,
-        )
+    def _get_default_fallback_config(self) -> FallbackDecoratorConfig:
+        """Return UniProt-specific default fallback config."""
+        return _UNIPROT_DEFAULT_FALLBACK_CONFIG
+
+    def _get_normalize_id_hook(self) -> NormalizeIdHook:
+        """Return accession strip-normalization hook."""
+        return lambda value: value.strip()
+
+    def _get_extract_record_id_hook(self) -> ExtractRecordIdHook:
+        """Return hook extracting accession from a UniProt record."""
+        return self._extract_accession_from_record
 
     @staticmethod
     def _extract_accession_from_record(record: BronzeRecord) -> str | None:

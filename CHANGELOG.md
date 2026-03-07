@@ -44,6 +44,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **`PipelineExecutionOutcome` renamed to `PipelineExecutionResult` (RF-008)**: Applied NAME-001 convention — `*Result` suffix for value objects carrying execution outcome data.
+  - `src/bioetl/application/services/pipeline_run_execution_service.py`: class renamed; `__all__` updated
+  - `src/bioetl/application/services/pipeline_runner_service.py`: import and type annotation updated (`outcome: PipelineExecutionResult`)
+  - No behaviour change; purely a naming fix.
+
+- **Module-level docstrings updated for domain normalization services (RF-009)**:
+  - `src/bioetl/domain/services/normalization_service.py`: docstring now documents the mixin chain (`_NormalizationActivityMixin` -> `_NormalizationBatchMixin` -> `NormalizationService`), collaborators (NormalizationConfig, UnitConverter, ValueValidator, ActivityAggregator), and explicit scope boundary (ChEMBL bioactivity scalars only, not cross-provider metadata); cross-reference to `data_normalization_service` added.
+  - `src/bioetl/domain/services/data_normalization_service.py`: docstring now documents `DefaultDataNormalizationService` as the concrete `DataNormalizationPort` implementation, its inheritance from `AuthorNormalizationService`, delegated sub-services (DoiNormalizationService, PmidNormalizationService, DateNormalizationService, TextNormalizationService), and explicit scope boundary (cross-provider publication metadata only, not bioactivity scalars); cross-reference to `normalization_service` added.
+
+- **`FallbackPolicyMixin` extracted to shared infrastructure (RF-007)**:
+  - Created `src/bioetl/infrastructure/adapters/common/fallback_policy_mixin.py` with `FallbackPolicyMixin` class
+  - Consolidated duplicate `configure_fallback_policy()` implementations previously defined independently in CrossRef and UniProt adapters
+  - Implements Template Method pattern: mixin owns orchestration logic; concrete adapters supply five hookpoints: `_get_default_fallback_config`, `_get_normalize_id_hook`, `_get_extract_record_id_hook`, `_get_fallback_handler`, `_on_fallback_decorator_updated`
+  - OpenAlex retains its own `configure_fallback_policy()` override (delegates to `_fallback_orchestrator.configure_policy()`) — adapter-level override takes precedence over mixin via MRO
+  - CrossRef and UniProt adapters now inherit from `FallbackPolicyMixin` and remove their local method definitions
+  - No behaviour change; purely structural deduplication
+
 - **`domain/configs/` converted to backward-compat shim (RF-005)**:
   - Canonical location of `BaseClientConfig`, `BaseProviderConfig`, `RateLimitConfig` is now `src/bioetl/domain/config/base_provider.py`
   - `src/bioetl/domain/configs/base.py` is now a backward-compatibility shim; `domain/configs/__init__.py` re-exports the three classes from the canonical location

@@ -10,7 +10,7 @@ from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.types import JsonDict
 
 __all__ = [
-    "PipelineExecutionOutcome",
+    "PipelineExecutionResult",
     "PipelineRunExecutionService",
 ]
 
@@ -28,8 +28,8 @@ if TYPE_CHECKING:
 
 
 @dataclass(frozen=True, slots=True)
-class PipelineExecutionOutcome:
-    """Execution outcome normalized for PipelineRunnerService result assembly."""
+class PipelineExecutionResult:
+    """Execution result normalized for PipelineRunnerService result assembly."""
 
     status: str
     error_message: str | None = None
@@ -47,7 +47,7 @@ class PipelineRunExecutionService:
         runner: RunnablePort,
         run_logger: LoggerPort,
         metrics_extractor: MetricsExtractorPort,
-    ) -> PipelineExecutionOutcome:
+    ) -> PipelineExecutionResult:
         """Execute runner and return normalized status/metrics outcome."""
         # Import inside method to avoid circular import at module import time.
         from bioetl.application.core.shutdown import PipelineShutdownError
@@ -72,7 +72,7 @@ class PipelineRunExecutionService:
             )
 
         metrics = metrics_extractor.extract_metrics(runner)
-        return PipelineExecutionOutcome(
+        return PipelineExecutionResult(
             status=status,
             error_message=error_message,
             error_type=error_type,
