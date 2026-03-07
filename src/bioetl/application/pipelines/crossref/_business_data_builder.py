@@ -1,0 +1,217 @@
+"""Internal helpers for CrossRef business-data assembly."""
+
+from __future__ import annotations
+
+from collections.abc import Callable, Sequence
+from typing import TYPE_CHECKING
+
+from bioetl.application.core.base_transformer_helpers_mixin import ScalarValue
+from bioetl.application.pipelines.crossref.extractors import (
+    extract_author_details,
+    extract_author_orcids,
+    extract_authors,
+    extract_content_domain,
+    extract_dates,
+    extract_issn_by_type,
+    extract_journal_info,
+    extract_license_url,
+    extract_page_info,
+    extract_published_date,
+    extract_references,
+)
+from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
+from bioetl.domain.normalization import extract_first_string
+from bioetl.domain.types import GoldRecord, JsonDict
+
+if TYPE_CHECKING:
+    from bioetl.domain.ports import DataNormalizationPort
+
+
+def compute_publication_date(
+    published_print: str | None,
+    published_online: str | None,
+) -> str | None:
+    """Select unified publication date, preferring print."""
+    return published_print or published_online
+
+
+def hash_author_details(
+    author_details: list[JsonDict],  # Any: raw CrossRef API JSON fragments
+    *,
+    hash_pii_value: Callable[[str | None], str | None],
+) -> list[JsonDict]:
+    """Hash PII fields in author details while preserving non-PII fields."""
+    hashed_details: list[JsonDict] = []  # Any: raw CrossRef API JSON fragments
+
+    for author in author_details:
+        hashed_author: JsonDict = {}  # Any: heterogeneous JSON values
+        for pii_field in ("given", "family", "name"):
+            value = author.get(pii_field)
+            hashed_author[pii_field] = (
+                hash_pii_value(value) if isinstance(value, str) and value else None
+            )
+
+        # ORCID and affiliation data are not PII; preserve original values.
+        hashed_author["orcid"] = author.get("orcid")
+        hashed_author["authenticated_orcid"] = author.get("authenticated_orcid")
+        hashed_author["sequence"] = author.get("sequence")
+        hashed_author["affiliations"] = author.get("affiliations", [])
+        hashed_details.append(hashed_author)
+
+    return hashed_details
+
+
+def extract_publication_year_candidate(
+    record: JsonDict,  # Any: raw CrossRef API record
+) -> int | None:
+    """Extract first available publication year from CrossRef date-parts."""
+    for date_field in ("published-print", "published-online", "issued"):
+        date_info = record.get(date_field)
+        if not isinstance(date_info, dict):
+            continue
+
+        date_parts = date_info.get("date-parts")
+        if not isinstance(date_parts, list) or not date_parts:
+            continue
+
+        first_part = date_parts[0]
+        if not isinstance(first_part, list) or not first_part:
+            continue
+
+        year_raw = first_part[0]
+        if isinstance(year_raw, int):
+            return year_raw
+        if isinstance(year_raw, str) and year_raw.isdigit():
+            return int(year_raw)
+    return None
+
+
+def _extract_author_bundle(
+    record: JsonDict,  # Any: raw CrossRef API record
+    *,
+    data_normalizer: DataNormalizationPort,
+    hash_pii_value: Callable[[str | None], str | None],
+    serialize_json: Callable[[object], ScalarValue],
+    serialize_json_list: Callable[[Sequence[object] | None], str | None],
+) -> dict[str, str | None]:
+    """Extract and normalize all author-related fields in one orchestration block."""
+    raw_authors = extract_authors(record)
+    authors_json = data_normalizer.normalize_author_list(raw_authors)
+    author_keys = data_normalizer.normalize_author_keys(raw_authors)
+
+    raw_author_details = extract_author_details(record)
+    hashed_author_details = hash_author_details(
+        raw_author_details,
+        hash_pii_value=hash_pii_value,
+    )
+    author_details = serialize_json(hashed_author_details)
+
+    author_orcids = extract_author_orcids(record)
+    serialized_orcids = serialize_json_list(author_orcids)
+
+    affiliation_strings: list[str] = []
+    affiliation_dicts: list[JsonDict] = []
+    for author in raw_author_details:
+        raw_affiliations = author.get("affiliations", [])
+        if not isinstance(raw_affiliations, list):
+            continue
+        for affiliation in raw_affiliations:
+            if isinstance(affiliation, str):
+                affiliation_strings.append(affiliation)
+            elif isinstance(affiliation, dict):
+                affiliation_dicts.append(affiliation)
+
+    if affiliation_dicts:
+        affiliations_input: list[str] | list[JsonDict] | None = affiliation_dicts
+    elif affiliation_strings:
+        affiliations_input = affiliation_strings
+    else:
+        affiliations_input = None
+
+    affiliations_json = data_normalizer.normalize_affiliations(affiliations_input)
+
+    return {
+        "authors": authors_json,
+        "author_keys": author_keys,
+        "author_orcids": serialized_orcids,
+        "author_details": author_details if isinstance(author_details, str) else None,
+        "affiliation_list": affiliations_json,
+    }
+
+
+def build_crossref_business_data(
+    record: JsonDict,  # Any: raw CrossRef API record
+    *,
+    data_normalizer: DataNormalizationPort,
+    validate_doi: Callable[[object], str | None],
+    validate_publication_year: Callable[[object], int | None],
+    classify_publication_type: Callable[[str | None], dict[str, str | None]],
+    serialize_json: Callable[[object], ScalarValue],
+    serialize_json_list: Callable[[Sequence[object] | None], str | None],
+    hash_pii_value: Callable[[str | None], str | None],
+) -> GoldRecord:
+    """Build CrossRef publication business-data payload."""
+    doi = validate_doi(record.get("DOI"))
+    assert doi is not None, "DOI should be validated in _pre_extract_validation"
+
+    journal_info = extract_journal_info(record)
+    page_info = extract_page_info(record)
+    dates = extract_dates(record)
+    content_domain = extract_content_domain(record)
+    issn_by_type = extract_issn_by_type(record)
+    published_date = extract_published_date(record)
+    author_bundle = _extract_author_bundle(
+        record,
+        data_normalizer=data_normalizer,
+        hash_pii_value=hash_pii_value,
+        serialize_json=serialize_json,
+        serialize_json_list=serialize_json_list,
+    )
+
+    publication_date = compute_publication_date(
+        dates.get("published_print"),
+        dates.get("published_online"),
+    )
+    raw_year = extract_publication_year_candidate(record)
+    raw_references = extract_references(record)
+    references = serialize_json(raw_references)
+
+    return {
+        "doi": doi,
+        # Required PublicationBaseSchema fields unavailable in CrossRef payload.
+        "pmid": None,
+        "pmc_id": None,
+        "abstract": None,
+        "title": extract_first_string(record.get("title", [])),
+        **author_bundle,
+        **journal_info,
+        **page_info,
+        **dates,
+        "publication_year": validate_publication_year(raw_year),
+        "publication_date": publication_date,
+        "publication_type": normalize_publication_type(record.get("type")),
+        **classify_publication_type(record.get("type")),
+        "citations_received": record.get("is-referenced-by-count"),
+        "citations_made": record.get("references-count"),
+        "language": record.get("language"),
+        "license_url": extract_license_url(record),
+        "subject_keywords": serialize_json_list(record.get("subject", []) or []),
+        "_source": "crossref",
+        "is_oa": None,
+        "_lookup_method": record.get("_lookup_method", "doi"),
+        "_original_id": record.get("_original_id"),
+        "alternative_id": serialize_json_list(record.get("alternative-id", []) or []),
+        "journal_name_short": extract_first_string(record.get("short-container-title")),
+        "published": published_date,
+        "content_domain_domains": serialize_json_list(
+            content_domain.get("content_domain_domains", [])
+        ),
+        "content_domain_crossmark_restriction": content_domain.get(
+            "content_domain_crossmark_restriction"
+        ),
+        **issn_by_type,
+        "references": references if isinstance(references, str) else None,
+        # DQ flags (MUST be last, per RULES.md §2.4)
+        "_dq_warn": False,
+        "_dq_error": False,
+    }
