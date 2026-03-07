@@ -10,12 +10,6 @@ policy:
         - removal_step
 registries:
     file_size_limits:
-        src/bioetl/composition/factories/storage_factory.py:
-            value: 500
-            owner: '@bioetl-platform'
-            reason: Composition storage factory remains above layer LOC target during staged extraction.
-            expires_on: '2026-06-30'
-            removal_step: Split storage backend assembly into dedicated builder modules and remove this exemption entry.
         src/bioetl/composition/runtime_builders/runner_builder.py:
             value: 450
             owner: '@bioetl-platform'
@@ -25,12 +19,6 @@ registries:
     function_complexity: {}
     function_length: {}
     class_size:
-        StorageFactory:
-            value: 400
-            owner: '@bioetl-platform'
-            reason: StorageFactory remains large while provider-specific builders are extracted.
-            expires_on: '2026-06-30'
-            removal_step: Move backend-specific assembly flows into dedicated classes and remove this exemption entry.
         DependencyCoordinatorService:
             value: 340
             owner: '@bioetl-architecture'

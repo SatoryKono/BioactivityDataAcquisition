@@ -795,12 +795,21 @@ def test_storage_port_has_preview_cleanup(src_dir: Path) -> None:
 
     REQ-ARCH-022: CLI delegates all storage operations to port.
     """
-    storage_file = src_dir / "bioetl" / "domain" / "ports" / "storage.py"
+    storage_path = src_dir / "bioetl" / "domain" / "ports" / "storage"
+    if storage_path.is_dir():
+        storage_file = storage_path / "__init__.py"
+    else:
+        storage_file = src_dir / "bioetl" / "domain" / "ports" / "storage.py"
     if not storage_file.exists():
         pytest.skip("Domain ports storage file not found")
 
-    with storage_file.open(encoding="utf-8") as f:
-        content = f.read()
+    content = ""
+    if storage_path.is_dir():
+        for py_file in storage_path.rglob("*.py"):
+            content += py_file.read_text(encoding="utf-8") + "\n"
+    else:
+        with storage_file.open(encoding="utf-8") as f:
+            content = f.read()
 
     assert "def preview_cleanup(" in content, (
         "StoragePort must define preview_cleanup() method for CLI dry-run support"
