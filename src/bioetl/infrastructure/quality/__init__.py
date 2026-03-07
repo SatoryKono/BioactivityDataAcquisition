@@ -10,6 +10,8 @@ from bioetl.infrastructure.quality.debt_scorecard import (
     validate_scorecard_registry_sync,
 )
 from bioetl.infrastructure.quality.exemptions_registry import (
+    EXEMPTION_REGISTRIES_ALLOW_EMPTY,
+    REQUIRED_EXEMPTION_REGISTRIES,
     build_module_path_key,
     get_registry_values,
     load_exemptions_registry,
@@ -19,6 +21,8 @@ from bioetl.infrastructure.quality.exemptions_registry import (
 )
 
 __all__ = [
+    "EXEMPTION_REGISTRIES_ALLOW_EMPTY",
+    "REQUIRED_EXEMPTION_REGISTRIES",
     "build_exemption_inventory",
     "build_module_path_key",
     "compute_integral_debt_score",

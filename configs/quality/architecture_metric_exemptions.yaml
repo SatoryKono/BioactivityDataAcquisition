@@ -113,58 +113,10 @@ registries:
             expires_on: '2026-04-30'
             removal_step: Refactor target to satisfy default metric and remove this exemption entry.
     function_complexity:
-        _resolve_priority_column:
-            value: 11
-            owner: '@bioetl-architecture'
-            reason: Baseline exemption migrated from architecture tests (function_complexity).
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        filter_by_layer_config:
-            value: 13
-            owner: '@bioetl-architecture'
-            reason: Phase-ordering guards and fallback policy branches increased CC during hardening.
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        src/bioetl/domain/exceptions/network.py::ExternalServiceError: &id001
-            value: 8
-            owner: '@bioetl-architecture'
-            reason: Rich error context assembly with multiple optional fields.
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        src/bioetl/domain/exceptions/network.py::__init__: &id002
-            value: 9
-            owner: '@bioetl-architecture'
-            reason: Rich error context (ExternalServiceError CC=7, RateLimitError CC=9).
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        src/bioetl/domain/exceptions/network.py::RateLimitError: &id003
-            value: 10
-            owner: '@bioetl-architecture'
-            reason: Rate limit error with retry-after parsing logic.
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        src/bioetl/domain/exceptions/validation.py::ValidationError: &id004
-            value: 7
-            owner: '@bioetl-architecture'
-            reason: Validation error with flexible field/record context.
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        src/bioetl/domain/exceptions/validation.py::__init__: &id005
+        src/bioetl/domain/exceptions/network.py::RateLimitError: &id001
             value: 6
             owner: '@bioetl-architecture'
-            reason: Validation error __init__ with flexible field/record context.
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        src/bioetl/domain/exceptions/infrastructure/_storage.py::StorageQuotaExceededError: &id006
-            value: 11
-            owner: '@bioetl-architecture'
-            reason: Storage quota error with quota/usage/path context assembly.
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        src/bioetl/domain/exceptions/infrastructure/_storage.py::__init__: &id007
-            value: 10
-            owner: '@bioetl-architecture'
-            reason: Storage quota error __init__ with quota/usage/path context.
+            reason: Domain CC=6 exceeds strict domain threshold (5) due to legacy-compatible dual-path constructor.
             expires_on: '2026-04-30'
             removal_step: Refactor target to satisfy default metric and remove this exemption entry.
     function_length:
@@ -223,12 +175,6 @@ registries:
             reason: Baseline exemption migrated from architecture tests (class_size).
             expires_on: '2026-04-30'
             removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        MergeCompatibilityMixin:
-            value: 355
-            owner: '@bioetl-architecture'
-            reason: Baseline exemption migrated from architecture tests (class_size).
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
         PipelineRun:
             value: 420
             owner: '@bioetl-data-model'
@@ -248,18 +194,6 @@ registries:
             reason: RF-011 reduced from 25 to 22 public methods via lifecycle extraction.
             expires_on: '2026-04-30'
             removal_step: Reduce public method count to 20 (e.g. consolidate properties).
-    god_object:
-        MergeCompatibilityMixin:
-            value: Compatibility orchestration mixin - coordinates merge fallback strategies and schema-resilience branches
-            owner: '@bioetl-architecture'
-            reason: Compatibility orchestration mixin - coordinates merge fallback strategies and schema-resilience branches
-            expires_on: '2026-04-30'
-            removal_step: Extract compatibility policy branches into dedicated merge strategy services and remove this exemption entry.
+    god_object: { }
     domain_complexity:
-        src/bioetl/domain/exceptions/network.py::ExternalServiceError: *id001
-        src/bioetl/domain/exceptions/network.py::__init__: *id002
-        src/bioetl/domain/exceptions/network.py::RateLimitError: *id003
-        src/bioetl/domain/exceptions/validation.py::ValidationError: *id004
-        src/bioetl/domain/exceptions/validation.py::__init__: *id005
-        src/bioetl/domain/exceptions/infrastructure/_storage.py::StorageQuotaExceededError: *id006
-        src/bioetl/domain/exceptions/infrastructure/_storage.py::__init__: *id007
+        src/bioetl/domain/exceptions/network.py::RateLimitError: *id001
