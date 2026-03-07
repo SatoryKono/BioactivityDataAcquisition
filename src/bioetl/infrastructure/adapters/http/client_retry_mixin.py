@@ -307,13 +307,13 @@ class HTTPClientRetryMixin:
             raise
 
         except (
-            BioETLError,
-            ConnectionError,
-            OSError,
-            RuntimeError,
-            TimeoutError,
-            ValueError,
-            httpx.HTTPError,
+                BioETLError,
+                ConnectionError,
+                OSError,
+                RuntimeError,
+                TimeoutError,
+                ValueError,
+                httpx.HTTPError,
         ) as exc:
             if not self._is_retryable_error(exc):
                 span.set_attribute("error", True)
