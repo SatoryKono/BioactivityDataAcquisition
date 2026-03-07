@@ -404,16 +404,16 @@ def main() -> int:
         },
         "metric_comparison": {
             "architecture_test_failures_ok": arch_failures
-                                             <= int(ci_target["architecture_test_failures_max"]),
+            <= int(ci_target["architecture_test_failures_max"]),
             "total_exemptions_ok": total_exemptions
-                                   <= int(ci_target["total_exemptions_max"]),
+            <= int(ci_target["total_exemptions_max"]),
             "max_class_loc_ok": max_class_loc <= int(ci_target["max_class_loc_max"]),
             "domain_cc_gt5_exemptions_ok": domain_cc_exemptions
-                                           <= int(ci_target["domain_cc_gt5_exemptions_max"]),
+            <= int(ci_target["domain_cc_gt5_exemptions_max"]),
             "vcr_cassettes_min_per_provider_ok": min_provider_vcr
-                                                 >= int(ci_target["vcr_cassettes_min_per_provider"]),
+            >= int(ci_target["vcr_cassettes_min_per_provider"]),
             "ruff_formatting_violations_ok": ruff_violations
-                                             <= int(ci_target["ruff_formatting_violations_max"]),
+            <= int(ci_target["ruff_formatting_violations_max"]),
             "coverage_ok": (
                 coverage_percent is not None
                 and coverage_percent >= float(ci_target["coverage_threshold_percent"])
