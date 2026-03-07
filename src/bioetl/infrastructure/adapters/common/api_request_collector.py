@@ -85,10 +85,10 @@ class APIRequestCollector:
         """
         if not any(
             (
-                    rate_limit_remaining,
-                    rate_limit_limit,
-                    rate_limit_reset,
-                    retry_after_seconds,
+                rate_limit_remaining,
+                rate_limit_limit,
+                rate_limit_reset,
+                retry_after_seconds,
             )
         ):
             return None

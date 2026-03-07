@@ -78,7 +78,7 @@ class OpenAlexCursorFlowService:
         dois = filter_ids[:limit] if limit is not None else filter_ids
         fetched = 0
         for batch_start in range(0, len(dois), self.batch_size):
-            batch = dois[batch_start: batch_start + self.batch_size]
+            batch = dois[batch_start : batch_start + self.batch_size]
             async for work in self.iter_by_dois(batch):
                 if limit is not None and fetched >= limit:
                     return
@@ -137,7 +137,7 @@ class OpenAlexCursorFlowService:
         for batch_start in range(0, len(primary_ids), self.batch_size):
             if limit is not None and count >= limit:
                 return
-            batch = primary_ids[batch_start: batch_start + self.batch_size]
+            batch = primary_ids[batch_start : batch_start + self.batch_size]
             async for work in self.iter_by_dois(batch):
                 if limit is not None and count >= limit:
                     return

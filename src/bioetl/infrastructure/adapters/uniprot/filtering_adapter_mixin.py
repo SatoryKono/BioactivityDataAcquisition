@@ -55,7 +55,7 @@ class UniProtFilteringAdapterMixin:
             if limit and fetched >= limit:
                 break
 
-            batch = filter_ids[batch_start: batch_start + _UNIPROT_FILTER_BATCH_SIZE]
+            batch = filter_ids[batch_start : batch_start + _UNIPROT_FILTER_BATCH_SIZE]
             or_query = " OR ".join(f"{filter_field}:{acc}" for acc in batch)
             batch_limit = (limit - fetched) if limit else None
             async for record in strategy(query=or_query, limit=batch_limit):
