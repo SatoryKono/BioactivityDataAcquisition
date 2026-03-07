@@ -1,9 +1,8 @@
-"""Leaf builder for runtime pipeline runner construction."""
+"""Leaf builder facade for runtime pipeline runner construction."""
 
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal, cast
 
 from bioetl.composition.builders import FilterConfigBuilder
@@ -11,6 +10,23 @@ from bioetl.composition.factories.pipeline_factories import register_all_pipelin
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.providers.registration import register_all_providers
 from bioetl.composition.registry import PipelineRegistry, get_default_registry
+from bioetl.composition.runtime_builders.inputs_resolver import (
+    RunnerInputs as _RunnerInputs,
+)
+from bioetl.composition.runtime_builders.inputs_resolver import (
+    VacuumSettings,
+    assemble_cached_bronze_context,
+    assemble_filter_config,
+    assemble_runtime_config,
+    assemble_vacuum_settings,
+    prepare_runner_inputs,
+    resolve_filter_batch_size,
+    resolve_health_check_mode,
+    validate_pk_contract,
+)
+from bioetl.composition.runtime_builders.observability_builder import (
+    build_observability_bundle,
+)
 from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.ports import NoOpMetrics, NoOpTracing
 from bioetl.infrastructure.config import (
@@ -42,24 +58,6 @@ if TYPE_CHECKING:
     )
 
 
-@dataclass(frozen=True, slots=True)
-class VacuumSettings:
-    """Resolved vacuum settings after merging CLI and YAML config."""
-
-    enabled: bool
-    retention_days: int
-
-
-@dataclass(frozen=True, slots=True)
-class _RunnerInputs:
-    settings: Settings
-    yaml_config: PipelineYamlConfig
-    observability: ObservabilityBundle
-    runtime_config: RuntimeConfig
-    filter_config: InputFilterConfig | None
-    cached_bronze: CachedBronzeContext
-
-
 __all__ = ["build_pipeline_runner"]
 
 
@@ -68,16 +66,10 @@ def _assemble_vacuum_settings(
     cli_vacuum: VacuumConfig,
     yaml_maintenance: MaintenanceConfig,
 ) -> VacuumSettings:
-    """Merge CLI and YAML vacuum settings."""
-    if cli_vacuum.enabled is not None:
-        return VacuumSettings(
-            enabled=cli_vacuum.enabled,
-            retention_days=cli_vacuum.retention_days,
-        )
-
-    return VacuumSettings(
-        enabled=yaml_maintenance.auto_vacuum,
-        retention_days=yaml_maintenance.vacuum_retention_days,
+    """Compatibility wrapper for legacy tests/monkeypatching."""
+    return assemble_vacuum_settings(
+        cli_vacuum=cli_vacuum,
+        yaml_maintenance=yaml_maintenance,
     )
 
 
@@ -88,18 +80,11 @@ def _assemble_runtime_config(
     vacuum: VacuumSettings,
     health_check_mode: Literal["strict", "probe"],
 ) -> RuntimeConfig:
-    """Build ``RuntimeConfig`` from run context and resolved vacuum settings."""
-    return RuntimeConfig(
-        run_type=ctx.run_type,
-        resume=ctx.resume,
-        start_offset=ctx.start_offset,
-        limit=ctx.limit,
+    """Compatibility wrapper for legacy tests/monkeypatching."""
+    return assemble_runtime_config(
+        ctx=ctx,
         heartbeat_interval=heartbeat_interval,
-        query=ctx.query,
-        dry_run=ctx.dry_run,
-        vacuum_after_run=vacuum.enabled,
-        vacuum_retention_days=vacuum.retention_days,
-        skip_gold=ctx.skip_gold,
+        vacuum=vacuum,
         health_check_mode=health_check_mode,
     )
 
@@ -110,25 +95,18 @@ def _assemble_filter_config(
     ctx: PipelineRunContext,
     test_mode: bool,
 ) -> InputFilterConfig | None:
-    """Build ``InputFilterConfig`` from YAML and CLI filter inputs."""
-    return FilterConfigBuilder.build(
+    """Compatibility wrapper for legacy tests/monkeypatching."""
+    return assemble_filter_config(
         yaml_filter=yaml_filter,
-        cli_csv=ctx.input_filter.source_path if ctx.input_filter.enabled else None,
-        cli_column=ctx.input_filter.column_name if ctx.input_filter.enabled else None,
-        cli_field=ctx.input_filter.filter_field if ctx.input_filter.enabled else None,
-        cli_fallback_column=(
-            ctx.input_filter.fallback_column if ctx.input_filter.enabled else None
-        ),
-        test_mode=test_mode or ctx.ignore_yaml_filter,
-        direct_filter_ids=ctx.input_filter.filter_ids,
-        direct_fallback_mapping=ctx.input_filter.fallback_mapping,
-        direct_multi_filter_ids=ctx.input_filter.multi_filter_ids,
-        direct_valid_combinations=ctx.input_filter.valid_combinations,
+        ctx=ctx,
+        test_mode=test_mode,
+        filter_builder=FilterConfigBuilder,
     )
 
 
 def _assemble_cached_bronze_context(ctx: PipelineRunContext) -> CachedBronzeContext:
-    return ctx.cached_bronze
+    """Compatibility wrapper for legacy tests/monkeypatching."""
+    return assemble_cached_bronze_context(ctx)
 
 
 def _build_observability_bundle(
@@ -138,74 +116,37 @@ def _build_observability_bundle(
     settings: Settings,
     log_level: str = "INFO",
 ) -> ObservabilityBundle:
-    logger = UnifiedLogger(
+    """Compatibility wrapper keeping patch-points in this module."""
+    return build_observability_bundle(
         pipeline=pipeline,
         run_id=run_id,
+        settings=settings,
         log_level=log_level,
-        json_format=True,
-    )
-    tracer = (
-        OpenTelemetryTracer(service_name="bioetl")
-        if settings.observability.tracing_enabled
-        else NoOpTracing()
-    )
-    metrics = (
-        PrometheusMetrics()
-        if settings.observability.metrics_enabled
-        else NoOpMetrics(warn_on_use=False)
-    )
-
-    dq_monitor = None
-    if settings.observability.dq_monitor_enabled:
-        dq_monitor = DataQualityMonitor(
-            logger=logger,
-            baseline_window=settings.observability.dq_baseline_window,
-            z_score_threshold=settings.observability.dq_z_score_threshold,
-        )
-        dq_monitor.detector.min_baseline_samples = (
-            settings.observability.dq_min_baseline_samples
-        )
-        dq_monitor.detector.set_threshold(
-            "error_rate",
-            min_value=0.0,
-            max_value=settings.observability.dq_error_rate_max,
-        )
-        dq_monitor.detector.set_threshold(
-            "quality_score",
-            min_value=settings.observability.dq_quality_score_min,
-            max_value=1.0,
-        )
-
-    return ObservabilityBundle(
-        logger=logger,
-        metrics=metrics,
-        tracer=tracer,
-        dq_monitor=dq_monitor,
+        logger_factory=UnifiedLogger,
+        tracer_factory=OpenTelemetryTracer,
+        metrics_factory=PrometheusMetrics,
+        noop_tracing_factory=NoOpTracing,
+        noop_metrics_factory=NoOpMetrics,
+        dq_monitor_factory=DataQualityMonitor,
     )
 
 
-def _validate_pk_contract(
-    config: PipelineYamlConfig,
-) -> None:
-    """Fail-fast validation for PK configuration consistency."""
-    business_primary_keys = tuple(getattr(config, "business_primary_keys", ()) or ())
-    legacy_primary_keys = getattr(config, "primary_keys", None)
-    technical_primary_key = getattr(config, "technical_primary_key", "entity_id")
+def _validate_pk_contract(config: PipelineYamlConfig) -> None:
+    """Compatibility wrapper for legacy tests/monkeypatching."""
+    validate_pk_contract(config)
 
-    if not business_primary_keys:
-        raise ValueError("business_primary_keys must be non-empty")
 
-    if (
-        legacy_primary_keys is not None
-        and tuple(legacy_primary_keys) != business_primary_keys
-    ):
-        raise ValueError(
-            "PK mismatch: legacy primary_keys differs from business_primary_keys; "
-            "fix pipeline config naming"
-        )
+def _resolve_health_check_mode(*, settings: Settings) -> Literal["strict", "probe"]:
+    """Compatibility wrapper for legacy tests/monkeypatching."""
+    return resolve_health_check_mode(settings=settings)
 
-    if not technical_primary_key:
-        raise ValueError("technical_primary_key must be non-empty")
+
+def _resolve_filter_batch_size(yaml_config: PipelineYamlConfig) -> int | None:
+    """Compatibility wrapper for legacy tests/monkeypatching."""
+    return resolve_filter_batch_size(
+        yaml_config,
+        load_source_config_fn=load_source_config,
+    )
 
 
 def _initialize_registry(
@@ -215,79 +156,11 @@ def _initialize_registry(
     register_all_providers_fn: Callable[[], None],
     register_all_pipelines_fn: Callable[..., None],
 ) -> PipelineRegistry:
+    """Initialize provider/pipeline registry with optional explicit registry."""
     effective_registry = registry if registry is not None else get_default_registry_fn()
     register_all_providers_fn()
     register_all_pipelines_fn(registry=registry)
     return effective_registry
-
-
-def _resolve_health_check_mode(*, settings: Settings) -> Literal["strict", "probe"]:
-    if settings.test_mode:
-        return "probe"
-    return cast(
-        Literal["strict", "probe"],
-        getattr(settings.pipeline, "health_check_mode", "strict"),
-    )
-
-
-def _log_filter_config(
-    *,
-    observability: ObservabilityBundle,
-    filter_config: InputFilterConfig | None,
-    from_cli: bool,
-) -> None:
-    if not filter_config:
-        return
-    observability.logger.info(
-        "input_filter_enabled",
-        csv_path=filter_config.source_path,
-        column=filter_config.column_name,
-        filter_field=filter_config.filter_field,
-        source="cli" if from_cli else "config",
-    )
-
-
-def _resolve_filter_batch_size(yaml_config: PipelineYamlConfig) -> int | None:
-    filter_batch_size = getattr(yaml_config, "filter_batch_size", None)
-    if isinstance(filter_batch_size, int):
-        return filter_batch_size
-    try:
-        source_cfg = load_source_config(yaml_config.provider)
-        batch_size = source_cfg.pagination.id_batch_size
-        return batch_size if isinstance(batch_size, int) else None
-    except (ValueError, AttributeError):
-        return None
-
-
-def _adjust_batch_size_for_filter(
-    *,
-    yaml_config: PipelineYamlConfig,
-    filter_config: InputFilterConfig | None,
-    observability: ObservabilityBundle,
-) -> None:
-    filter_batch_size = _resolve_filter_batch_size(yaml_config)
-    if filter_config and filter_batch_size is not None:
-        observability.logger.info(
-            "batch_size_auto_adjusted",
-            original=yaml_config.batch_size,
-            adjusted=filter_batch_size,
-            reason="input_filter_active",
-        )
-        yaml_config.batch_size = filter_batch_size
-
-
-def _log_cached_bronze(
-    *,
-    observability: ObservabilityBundle,
-    cached_bronze: CachedBronzeContext,
-) -> None:
-    if not cached_bronze.enabled:
-        return
-    observability.logger.info(
-        "cached_bronze_mode_enabled",
-        bronze_path=cached_bronze.bronze_path,
-        bronze_date=cached_bronze.bronze_date,
-    )
 
 
 def _prepare_runner_inputs(
@@ -303,49 +176,17 @@ def _prepare_runner_inputs(
         [PipelineRunContext], CachedBronzeContext
     ],
 ) -> _RunnerInputs:
-    settings = get_settings_fn()
-    yaml_config = load_pipeline_config_fn(ctx.pipeline_name)
-    _validate_pk_contract(yaml_config)
-    observability = build_observability_bundle_fn(
-        pipeline=ctx.pipeline_name,
-        run_id=ctx.run_id,
-        settings=settings,
-        log_level=ctx.log_level,
-    )
-    vacuum = assemble_vacuum_settings_fn(
-        cli_vacuum=ctx.vacuum,
-        yaml_maintenance=yaml_config.maintenance,
-    )
-    runtime_config = assemble_runtime_config_fn(
+    """Compatibility wrapper delegating heavy input-resolution flow."""
+    return prepare_runner_inputs(
         ctx=ctx,
-        heartbeat_interval=settings.pipeline.heartbeat_interval,
-        vacuum=vacuum,
-        health_check_mode=_resolve_health_check_mode(settings=settings),
-    )
-    filter_config = assemble_filter_config_fn(
-        yaml_filter=yaml_config.input_filter,
-        ctx=ctx,
-        test_mode=settings.test_mode,
-    )
-    _log_filter_config(
-        observability=observability,
-        filter_config=filter_config,
-        from_cli=ctx.input_filter.enabled,
-    )
-    _adjust_batch_size_for_filter(
-        yaml_config=yaml_config,
-        filter_config=filter_config,
-        observability=observability,
-    )
-    cached_bronze = assemble_cached_bronze_context_fn(ctx)
-    _log_cached_bronze(observability=observability, cached_bronze=cached_bronze)
-    return _RunnerInputs(
-        settings=settings,
-        yaml_config=yaml_config,
-        observability=observability,
-        runtime_config=runtime_config,
-        filter_config=filter_config,
-        cached_bronze=cached_bronze,
+        get_settings_fn=get_settings_fn,
+        load_pipeline_config_fn=load_pipeline_config_fn,
+        build_observability_bundle_fn=build_observability_bundle_fn,
+        assemble_vacuum_settings_fn=assemble_vacuum_settings_fn,
+        assemble_runtime_config_fn=assemble_runtime_config_fn,
+        assemble_filter_config_fn=assemble_filter_config_fn,
+        assemble_cached_bronze_context_fn=assemble_cached_bronze_context_fn,
+        load_source_config_fn=load_source_config,
     )
 
 
@@ -392,11 +233,7 @@ def build_pipeline_runner(
         [PipelineRunContext], CachedBronzeContext
     ] = _assemble_cached_bronze_context,
 ) -> PipelineRunner:
-    """Assemble and return a fully configured ``PipelineRunner``.
-
-    Returns:
-        Fully wired PipelineRunner for the pipeline specified in the run context.
-    """
+    """Assemble and return a fully configured ``PipelineRunner``."""
     effective_registry = _initialize_registry(
         registry=registry,
         get_default_registry_fn=get_default_registry_fn,

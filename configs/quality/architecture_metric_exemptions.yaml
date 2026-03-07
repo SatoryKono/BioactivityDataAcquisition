@@ -13,28 +13,16 @@ policy:
         - expires_on
         - removal_step
 registries:
-    file_size_limits:
-        src/bioetl/composition/runtime_builders/runner_builder.py:
-            value: 420
-            owner: '@bioetl-platform'
-            reason: Runtime runner builder still exceeds composition file-size limit during migration.
-            expires_on: '2026-06-30'
-            removal_step: Continue decomposition of runtime assembly helpers and remove this exemption entry.
+    file_size_limits: {}
     function_complexity: {}
     function_length: {}
     class_size: {}
     class_method_count: {}
     god_object:
-        OpenAlexPublicationTransformer:
-            value: 1
-            owner: '@bioetl-data-model'
-            reason: Temporary governance placeholder to preserve three-owner diversification coverage in active debt inventory.
-            expires_on: '2026-06-30'
-            removal_step: Replace placeholder with concrete data-model debt item or remove once diversification policy is revised.
         DependencyCoordinatorService:
             value: 1
             owner: '@bioetl-architecture'
-            reason: Temporary governance placeholder to preserve three-owner diversification coverage in active debt inventory.
+            reason: Temporary governance placeholder to preserve active debt inventory until owner diversification becomes mandatory.
             expires_on: '2026-06-30'
-            removal_step: Replace placeholder with concrete architecture debt item or remove once diversification policy is revised.
+            removal_step: Remove this placeholder exemption once owner diversification policy and debt scorecard tests are revised for zero-debt baseline.
     domain_complexity: {}

@@ -18,6 +18,7 @@ from __future__ import annotations
 __all__ = ["OpenAlexPublicationTransformer"]
 
 
+from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
 from bioetl.application.pipelines.common import BasePublicationTransformer
@@ -130,11 +131,54 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
     # Field Extraction Methods (Orchestration - delegates to extractors)
     # ========================================================================
 
+    @staticmethod
+    def _ensure_dict_list(value: object) -> list[dict[str, object]]:
+        """Normalize untrusted JSON value to list[dict] for extractor contracts."""
+        if not isinstance(value, list):
+            return []
+        return [item for item in value if isinstance(item, dict)]
+
+    def _serialize_json_list_or_none(
+        self,
+        values: Sequence[object],
+        *,
+        require_non_empty: bool = False,
+        require_truthy_item: bool = False,
+    ) -> str | None:
+        """Serialize list to JSON string with configurable guard conditions."""
+        if require_non_empty and not values:
+            return None
+        if require_truthy_item and not any(values):
+            return None
+        return self.serialize_json_list(values)
+
+    def _extract_record_identity_bundle(self, rec: BronzeRecord) -> GoldRecord:
+        """Extract identity/core text fields shared by all OpenAlex records."""
+        abstract = self._data_normalizer.strip_html_tags(
+            reconstruct_abstract(rec.get("abstract_inverted_index"))
+        )
+        return {
+            "openalex_id": extract_openalex_id(rec.get("id")),
+            "doi": self.validate_value_object(DOI, rec.get("doi")),
+            "title": rec.get("title"),
+            "abstract": abstract,
+        }
+
+    @staticmethod
+    def _extract_lookup_metadata_bundle(rec: BronzeRecord) -> GoldRecord:
+        """Extract lookup metadata fields used by quality/debug workflows."""
+        return {
+            "_lookup_method": rec.get("_lookup_method", "unknown"),
+            "_original_id": rec.get("_original_id"),
+            "_source": "openalex",
+            "_dq_warn": False,
+            "_dq_error": False,
+        }
+
     def _extract_author_bundle(self, rec: BronzeRecord) -> GoldRecord:
         """Extract and normalize author/affiliation related fields."""
         normalizer = self._data_normalizer
-        authorships_raw = rec.get("authorships", [])
-        authorships = authorships_raw if isinstance(authorships_raw, list) else []
+        authorships = self._ensure_dict_list(rec.get("authorships", []))
 
         raw_authors = extract_authors(authorships)
         raw_affiliations = extract_affiliations(authorships) if authorships else None
@@ -150,39 +194,50 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
                 if raw_affiliations
                 else None
             ),
-            "institution_ids": self.serialize_json_list(
+            "institution_ids": self._serialize_json_list_or_none(
                 extract_institution_ids(authorships)
             ),
-            "institution_country_codes": self.serialize_json_list(
+            "institution_country_codes": self._serialize_json_list_or_none(
                 extract_institution_country_codes(authorships)
             ),
-            "ror_ids": self.serialize_json_list(ror_ids) if ror_ids else None,
-            "author_orcids": self.serialize_json_list(author_orcids)
-            if any(author_orcids)
-            else None,
-            "author_openalex_ids": self.serialize_json_list(author_openalex_ids)
-            if any(author_openalex_ids)
-            else None,
+            "ror_ids": self._serialize_json_list_or_none(
+                ror_ids,
+                require_non_empty=True,
+            ),
+            "author_orcids": self._serialize_json_list_or_none(
+                author_orcids,
+                require_truthy_item=True,
+            ),
+            "author_openalex_ids": self._serialize_json_list_or_none(
+                author_openalex_ids,
+                require_truthy_item=True,
+            ),
         }
 
     def _extract_subject_bundle(self, rec: BronzeRecord) -> GoldRecord:
         """Extract topic, keyword, and grant classification fields."""
-        subject_topics = extract_topics(rec.get("topics", []))
+        subject_topics = extract_topics(self._ensure_dict_list(rec.get("topics", [])))
         primary_topic = extract_primary_topic(rec.get("primary_topic"))
-        grants = extract_grants(rec.get("grants", []))
-        subject_mesh = extract_mesh_terms(rec.get("mesh", []))
-        subject_keywords = extract_keywords(rec.get("keywords", []))
+        grants = extract_grants(self._ensure_dict_list(rec.get("grants", [])))
+        subject_mesh = extract_mesh_terms(self._ensure_dict_list(rec.get("mesh", [])))
+        subject_keywords = extract_keywords(
+            self._ensure_dict_list(rec.get("keywords", []))
+        )
 
         return {
-            "subject_topics": (
-                self.serialize_json_list(subject_topics) if subject_topics else None
+            "subject_topics": self._serialize_json_list_or_none(
+                subject_topics,
+                require_non_empty=True,
             ),
             "primary_topic": self.serialize_json(primary_topic)
             if primary_topic
             else None,
-            "grants": self.serialize_json_list(grants) if grants else None,
-            "subject_mesh": self.serialize_json_list(subject_mesh),
-            "subject_keywords": self.serialize_json_list(subject_keywords),
+            "grants": self._serialize_json_list_or_none(
+                grants,
+                require_non_empty=True,
+            ),
+            "subject_mesh": self._serialize_json_list_or_none(subject_mesh),
+            "subject_keywords": self._serialize_json_list_or_none(subject_keywords),
         }
 
     def _extract_publication_bundle(self, rec: BronzeRecord) -> GoldRecord:
@@ -191,6 +246,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         journal_info = extract_journal_info(rec.get("primary_location", {}))
         biblio_info = extract_biblio_info(rec.get("biblio", {}))
         oa_info = extract_open_access_info(rec.get("open_access", {}))
+        raw_publication_type = rec.get("type")
         year = self.validate_value_object(
             PublicationYear,
             rec.get("publication_year"),
@@ -208,8 +264,11 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "publication_date": self._data_normalizer.normalize_partial_date(
                 rec.get("publication_date")
             ),
-            "publication_type": normalize_publication_type(rec.get("type")),
-            **self._classify_publication_type("openalex", raw_type=rec.get("type")),
+            "publication_type": normalize_publication_type(raw_publication_type),
+            **self._classify_publication_type(
+                "openalex",
+                raw_type=raw_publication_type,
+            ),
             "is_oa": oa_info.get("is_oa"),
             "oa_status": oa_info.get("oa_status"),
             "citations_received": rec.get("cited_by_count"),
@@ -236,26 +295,17 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
 
         """
         rec = record
-        abstract = self._data_normalizer.strip_html_tags(
-            reconstruct_abstract(rec.get("abstract_inverted_index"))
-        )
+        identity_bundle = self._extract_record_identity_bundle(rec)
         author_bundle = self._extract_author_bundle(rec)
         subject_bundle = self._extract_subject_bundle(rec)
         publication_bundle = self._extract_publication_bundle(rec)
 
         return {
-            "openalex_id": extract_openalex_id(rec.get("id")),
-            "doi": self.validate_value_object(DOI, rec.get("doi")),
-            "title": rec.get("title"),
-            "abstract": abstract,
+            **identity_bundle,
             **author_bundle,
             **publication_bundle,
             **subject_bundle,
-            "_lookup_method": rec.get("_lookup_method", "unknown"),
-            "_original_id": rec.get("_original_id"),
-            "_source": "openalex",
-            "_dq_warn": False,
-            "_dq_error": False,
+            **self._extract_lookup_metadata_bundle(rec),
         }
 
     def _get_primary_id_field(self) -> str:

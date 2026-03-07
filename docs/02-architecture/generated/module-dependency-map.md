@@ -4,8 +4,8 @@
 
 ## Summary
 
-- Scanned modules: `1004`
-- Internal import edges (raw): `3611`
+- Scanned modules: `1008`
+- Internal import edges (raw): `3639`
 - Aggregated layer edges: `14`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (top 60): `60`
@@ -22,12 +22,12 @@ flowchart LR
     application -->|417 OK| application
     application -->|579 OK| domain
     composition -->|157 OK| application
-    composition -->|243 OK| composition
-    composition -->|193 OK| domain
-    composition -->|186 OK| infrastructure
+    composition -->|249 OK| composition
+    composition -->|198 OK| domain
+    composition -->|194 OK| infrastructure
     domain -->|701 OK| domain
-    infrastructure -->|449 OK| domain
-    infrastructure -->|533 OK| infrastructure
+    infrastructure -->|451 OK| domain
+    infrastructure -->|540 OK| infrastructure
     interfaces -->|13 OK| application
     interfaces -->|23 OK| composition
     interfaces -->|25 OK| domain
@@ -42,12 +42,12 @@ flowchart LR
 | `application` | `application` | 417 | allowed |
 | `application` | `domain` | 579 | allowed |
 | `composition` | `application` | 157 | allowed |
-| `composition` | `composition` | 243 | allowed |
-| `composition` | `domain` | 193 | allowed |
-| `composition` | `infrastructure` | 186 | allowed |
+| `composition` | `composition` | 249 | allowed |
+| `composition` | `domain` | 198 | allowed |
+| `composition` | `infrastructure` | 194 | allowed |
 | `domain` | `domain` | 701 | allowed |
-| `infrastructure` | `domain` | 449 | allowed |
-| `infrastructure` | `infrastructure` | 533 | allowed |
+| `infrastructure` | `domain` | 451 | allowed |
+| `infrastructure` | `infrastructure` | 540 | allowed |
 | `interfaces` | `application` | 13 | allowed |
 | `interfaces` | `composition` | 23 | allowed |
 | `interfaces` | `domain` | 25 | allowed |
@@ -95,12 +95,12 @@ flowchart LR
 | `application.pipelines` | `domain.ports` | 13 |
 | `composition.bootstrap` | `domain.composite` | 13 |
 | `infrastructure.config` | `domain.types` | 13 |
+| `infrastructure.quality` | `domain.types` | 13 |
 | `infrastructure.storage` | `domain.medallion` | 13 |
 | `infrastructure.storage` | `domain.value_objects` | 13 |
 | `composition.bootstrap` | `infrastructure.observability` | 12 |
 | `application.core` | `domain.exceptions` | 11 |
 | `composition.factories` | `infrastructure.adapters` | 11 |
-| `infrastructure.quality` | `domain.types` | 11 |
 | `interfaces.cli` | `domain.exceptions` | 11 |
 | `application.pipelines` | `domain.services` | 10 |
 | `infrastructure.adapters` | `domain.models` | 10 |
