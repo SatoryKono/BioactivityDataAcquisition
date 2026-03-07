@@ -76,11 +76,20 @@ def _discover_repo_root(script_root: Path) -> Path:
 
 def _run_git(repo_root: Path, *git_args: str) -> subprocess.CompletedProcess[bytes]:
     """Run git with fallbacks for path/cwd interoperability issues."""
-    attempts: tuple[tuple[list[str], Path | None], ...] = (
+    attempts: list[tuple[list[str], Path | None]] = [
         (["git", "-C", str(repo_root), *git_args], None),
         (["git", *git_args], repo_root),
         (["git", *git_args], Path.cwd()),
-    )
+    ]
+    if sys.platform == "win32":
+        # Mixed WSL/Windows runs can fail to spawn native git reliably from
+        # Windows Python; route through wsl as a last-resort fallback.
+        attempts.extend(
+            (
+                (["wsl.exe", "git", *git_args], repo_root),
+                (["wsl", "git", *git_args], repo_root),
+            )
+        )
     last_error: subprocess.CalledProcessError | None = None
     for command, cwd in attempts:
         try:
