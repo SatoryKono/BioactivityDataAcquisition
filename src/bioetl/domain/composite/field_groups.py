@@ -21,4 +21,3 @@ __all__ = [
     "FieldMapping",
     "build_field_group_registry",
 ]
-

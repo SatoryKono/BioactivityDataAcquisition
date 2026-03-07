@@ -29,7 +29,7 @@ def test_debt_scorecard_schema_is_valid() -> None:
 def test_debt_scorecard_governance_review_policy_requires_owner_and_removal_step() -> (
     None
 ):
-    """Scorecard governance must require owner/removal-step for new exemptions."""
+    """Scorecard governance must require owner/expiry/removal-step for new exemptions."""
     scorecard = load_debt_scorecard()
     governance = scorecard.get("governance", {})
     assert isinstance(governance, dict)
@@ -39,6 +39,7 @@ def test_debt_scorecard_governance_review_policy_requires_owner_and_removal_step
     required_fields = review_policy.get("new_exemption_requires", [])
     assert isinstance(required_fields, list)
     assert "owner" in required_fields
+    assert "expires_on" in required_fields
     assert "removal_step" in required_fields
 
     subsystem_map = governance.get("owner_registry_q2_subsystems", {})

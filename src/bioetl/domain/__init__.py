@@ -22,7 +22,11 @@ from bioetl.domain import composite, constants, contracts, version  # noqa: F401
 
 # Subpackage registrations (make them importable as bioetl.domain.<name>)
 from bioetl.domain import context_cached_bronze
+from bioetl.domain import context_filtering
 from bioetl.domain import mapping  # noqa: F401
+from bioetl.domain import normalization_authors
+from bioetl.domain import normalization_dates
+from bioetl.domain import normalization_pages
 from bioetl.domain import observability_contract
 from bioetl.domain import registry  # noqa: F401
 from bioetl.domain import types_config_validation
@@ -35,7 +39,11 @@ __all__ = [
     "PipelineEvent",
     "composite",
     "context_cached_bronze",
+    "context_filtering",
     "get_version",
+    "normalization_authors",
+    "normalization_dates",
+    "normalization_pages",
     "observability_contract",
     "types_config_validation",
     # Data contracts (subpackage)

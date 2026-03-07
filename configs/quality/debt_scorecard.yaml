@@ -32,6 +32,7 @@ governance:
     review_policy:
         new_exemption_requires:
             - owner
+            - expires_on
             - removal_step
         reviewer_checks:
             - owner maps to subsystem scope

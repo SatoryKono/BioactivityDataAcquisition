@@ -1,0 +1,89 @@
+"""Parity contract tests for no-op and production observability adapters."""
+
+from __future__ import annotations
+
+from uuid import uuid4
+
+import pytest
+
+from bioetl.domain.ports import (
+    LoggerPort,
+    MetricsPort,
+    NoOpMetrics,
+    NoOpTracing,
+    TracingPort,
+)
+from bioetl.infrastructure.observability import tracing as tracing_module
+from bioetl.infrastructure.observability.logging import create_logger
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
+
+
+def _build_metrics_adapter(kind: str) -> MetricsPort:
+    if kind == "noop":
+        return NoOpMetrics()
+    if kind == "prometheus":
+        return PrometheusMetrics()
+    raise ValueError(f"Unknown metrics adapter kind: {kind}")
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("kind", ["noop", "prometheus"])
+def test_metrics_adapters_accept_canonical_and_legacy_labels(kind: str) -> None:
+    """No-op and production metrics adapters should accept the same call styles."""
+    metrics = _build_metrics_adapter(kind)
+    assert isinstance(metrics, MetricsPort)
+
+    call_variants = (
+        {"labels": {"provider": "chembl"}},
+        {"_labels": {"provider": "chembl"}},
+        {"tags": {"provider": "chembl"}},
+        {
+            "labels": {"provider": "canonical"},
+            "_labels": {"provider": "legacy_under"},
+            "tags": {"provider": "legacy_tags"},
+        },
+    )
+
+    for kwargs in call_variants:
+        metrics.observe_histogram("unknown_histogram", 1.0, **kwargs)
+        metrics.increment_counter("unknown_counter", 1, **kwargs)
+        metrics.set_gauge("unknown_gauge", 1.0, **kwargs)
+
+
+@pytest.mark.unit
+def test_logger_adapters_share_same_contract_surface() -> None:
+    """No-op and production logger adapters should support the same calls."""
+    production_logger = create_logger("test_pipeline", uuid4())
+    adapters: list[LoggerPort] = [NoOpLogger(), production_logger]
+
+    for logger in adapters:
+        assert isinstance(logger, LoggerPort)
+        bound = logger.bind(run_id="run-1", pipeline="test_pipeline")
+        bound.info("event_info", event="conflict_payload_event", stage="extract")
+        bound.warning("event_warning", event="conflict_payload_event", stage="extract")
+        bound.error("event_error", event="conflict_payload_event", stage="extract")
+        bound.debug("event_debug", event="conflict_payload_event", stage="extract")
+        bound.exception(
+            "event_exception",
+            event="conflict_payload_event",
+            stage="extract",
+        )
+
+
+@pytest.mark.unit
+def test_tracing_adapters_expose_otel_compatible_surface() -> None:
+    """No-op and production tracing adapters should expose compatible API."""
+    adapters: list[TracingPort] = [NoOpTracing()]
+    if tracing_module.OTEL_AVAILABLE:
+        adapters.append(tracing_module.OpenTelemetryTracer("bioetl-test"))
+
+    try:
+        for tracing_adapter in adapters:
+            assert isinstance(tracing_adapter, TracingPort)
+            tracer = tracing_adapter.get_tracer("test.component")
+            with tracer.start_as_current_span("test-span") as span:
+                span.set_attribute("key", "value")
+    finally:
+        for tracing_adapter in adapters:
+            tracing_adapter.close()
