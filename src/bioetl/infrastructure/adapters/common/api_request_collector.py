@@ -10,7 +10,6 @@ from urllib.parse import urlparse
 if TYPE_CHECKING:
     import httpx
 
-
 from bioetl.domain.models.metadata import (
     APIRequestDetails,
     RateLimitInfo,
@@ -79,13 +78,17 @@ class APIRequestCollector:
         rate_limit_reset: datetime | None,
         retry_after_seconds: float | None,
     ) -> RateLimitInfo | None:
-        """Build RateLimitInfo when at least one rate-limit attribute is present."""
+        """Build RateLimitInfo when at least one rate-limit attribute is present.
+
+        Returns:
+            RateLimitInfo instance if any rate-limit attribute is non-None, None otherwise.
+        """
         if not any(
             (
-                rate_limit_remaining,
-                rate_limit_limit,
-                rate_limit_reset,
-                retry_after_seconds,
+                    rate_limit_remaining,
+                    rate_limit_limit,
+                    rate_limit_reset,
+                    retry_after_seconds,
             )
         ):
             return None

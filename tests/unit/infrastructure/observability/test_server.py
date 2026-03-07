@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import errno
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
 from bioetl.infrastructure.observability.server import (
     MetricsServerError,
+    push_metrics_to_gateway,
     reset_server_state,
     start_metrics_server,
 )
@@ -147,6 +148,177 @@ class TestStartMetricsServer:
             assert result is False
             # Should only try once for EADDRINUSE
             mock_server.assert_called_once()
+
+    def test_lenient_mode_returns_false_on_os_error_after_retries(self):
+        """Test fail_fast=False returns False after exhausting all retries."""
+        with patch(
+            "bioetl.infrastructure.observability.server.start_http_server"
+        ) as mock_server:
+            error = OSError()
+            error.errno = errno.ECONNREFUSED
+            mock_server.side_effect = error
+
+            with patch("bioetl.infrastructure.observability.server.time.sleep"):
+                result = start_metrics_server(
+                    port=8000, fail_fast=False, retry_count=2, retry_delay=0.01
+                )
+
+            assert result is False
+
+    def test_with_custom_logger(self):
+        """Test server start with custom logger."""
+        logger = MagicMock()
+        with patch("bioetl.infrastructure.observability.server.start_http_server"):
+            result = start_metrics_server(port=9999, logger=logger)
+
+        assert result is True
+        logger.info.assert_called_once()
+
+    def test_already_started_with_logger_debug(self):
+        """Test debug log when server already started."""
+        logger = MagicMock()
+        with patch("bioetl.infrastructure.observability.server.start_http_server"):
+            start_metrics_server(port=9999)
+            # Second call should hit the debug path
+            result = start_metrics_server(port=9999, logger=logger)
+
+        assert result is True
+        logger.debug.assert_called_once_with("Metrics server already started")
+
+
+@pytest.mark.unit
+class TestPushMetricsToGateway:
+    """Tests for push_metrics_to_gateway function."""
+
+    def test_push_success(self):
+        """Should return True on successful push."""
+        with patch("bioetl.infrastructure.observability.server.pushadd_to_gateway"):
+            result = push_metrics_to_gateway(gateway="localhost:9091")
+
+        assert result is True
+
+    def test_push_success_with_logger(self):
+        """Should log info on successful push."""
+        logger = MagicMock()
+        with patch("bioetl.infrastructure.observability.server.pushadd_to_gateway"):
+            result = push_metrics_to_gateway(
+                gateway="localhost:9091",
+                job="test_job",
+                logger=logger,
+            )
+
+        assert result is True
+        logger.info.assert_called_once()
+
+    def test_push_success_with_grouping_key(self):
+        """Should pass grouping_key to pushadd_to_gateway."""
+        with patch(
+            "bioetl.infrastructure.observability.server.pushadd_to_gateway"
+        ) as mock_push:
+            push_metrics_to_gateway(
+                gateway="localhost:9091",
+                grouping_key={"pipeline": "chembl_activity"},
+            )
+
+        call_kwargs = mock_push.call_args[1]
+        assert call_kwargs["grouping_key"] == {"pipeline": "chembl_activity"}
+
+    def test_push_default_gateway(self):
+        """Should use localhost:9091 when gateway is None."""
+        with patch(
+            "bioetl.infrastructure.observability.server.pushadd_to_gateway"
+        ) as mock_push:
+            push_metrics_to_gateway()
+
+        mock_push.assert_called_once()
+        assert mock_push.call_args[0][0] == "localhost:9091"
+
+    def test_push_failure_oserror(self):
+        """Should return False on OSError."""
+        with patch(
+            "bioetl.infrastructure.observability.server.pushadd_to_gateway",
+            side_effect=OSError("Connection refused"),
+        ):
+            result = push_metrics_to_gateway()
+
+        assert result is False
+
+    def test_push_failure_connection_error(self):
+        """Should return False on ConnectionError."""
+        with patch(
+            "bioetl.infrastructure.observability.server.pushadd_to_gateway",
+            side_effect=ConnectionError("Failed"),
+        ):
+            result = push_metrics_to_gateway()
+
+        assert result is False
+
+    def test_push_failure_timeout_error(self):
+        """Should return False on TimeoutError."""
+        with patch(
+            "bioetl.infrastructure.observability.server.pushadd_to_gateway",
+            side_effect=TimeoutError("Timed out"),
+        ):
+            result = push_metrics_to_gateway()
+
+        assert result is False
+
+    def test_push_failure_runtime_error(self):
+        """Should return False on RuntimeError."""
+        with patch(
+            "bioetl.infrastructure.observability.server.pushadd_to_gateway",
+            side_effect=RuntimeError("Failed"),
+        ):
+            result = push_metrics_to_gateway()
+
+        assert result is False
+
+    def test_push_failure_logs_warning(self):
+        """Should log warning on push failure."""
+        logger = MagicMock()
+        with patch(
+            "bioetl.infrastructure.observability.server.pushadd_to_gateway",
+            side_effect=OSError("Connection refused"),
+        ):
+            push_metrics_to_gateway(logger=logger)
+
+        logger.warning.assert_called_once()
+
+    def test_push_default_job_label(self):
+        """Should use 'bioetl' as default job label."""
+        with patch(
+            "bioetl.infrastructure.observability.server.pushadd_to_gateway"
+        ) as mock_push:
+            push_metrics_to_gateway()
+
+        call_kwargs = mock_push.call_args[1]
+        assert call_kwargs["job"] == "bioetl"
+
+    def test_push_empty_grouping_key_default(self):
+        """Should pass empty dict when grouping_key is None."""
+        with patch(
+            "bioetl.infrastructure.observability.server.pushadd_to_gateway"
+        ) as mock_push:
+            push_metrics_to_gateway()
+
+        call_kwargs = mock_push.call_args[1]
+        assert call_kwargs["grouping_key"] == {}
+
+
+@pytest.mark.unit
+class TestResetServerState:
+    """Tests for reset_server_state function."""
+
+    def test_reset_allows_restart(self):
+        """Should allow starting server again after reset."""
+        with patch(
+            "bioetl.infrastructure.observability.server.start_http_server"
+        ) as mock_server:
+            start_metrics_server(port=9999)
+            reset_server_state()
+            start_metrics_server(port=9999)
+
+            assert mock_server.call_count == 2
 
 
 @pytest.mark.unit

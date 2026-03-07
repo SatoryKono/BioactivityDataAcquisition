@@ -35,7 +35,11 @@ class HTTPClientRequestMethodsMixin:
         params: JsonDict | None = None,
         headers: dict[str, str] | None = None,
     ) -> httpx.Response:
-        """Send GET request with retry policy."""
+        """Send GET request with retry policy.
+
+        Returns:
+            httpx.Response from the server after applying retry policy.
+        """
         return await self._request_with_retry(
             "GET", url, params=params, headers=headers
         )
@@ -47,7 +51,11 @@ class HTTPClientRequestMethodsMixin:
         data: JsonDict | None = None,
         headers: dict[str, str] | None = None,
     ) -> httpx.Response:
-        """Send POST request with retry policy."""
+        """Send POST request with retry policy.
+
+        Returns:
+            httpx.Response from the server after applying retry policy.
+        """
         return await self._request_with_retry(
             "POST", url, json=json, data=data, headers=headers
         )
@@ -57,7 +65,11 @@ class HTTPClientRequestMethodsMixin:
         url: str,
         headers: dict[str, str] | None = None,
     ) -> httpx.Response:
-        """Send HEAD request with retry policy."""
+        """Send HEAD request with retry policy.
+
+        Returns:
+            httpx.Response from the server after applying retry policy.
+        """
         return await self._request_with_retry("HEAD", url, headers=headers)
 
     async def get_once(
@@ -66,7 +78,11 @@ class HTTPClientRequestMethodsMixin:
         params: JsonDict | None = None,
         headers: dict[str, str] | None = None,
     ) -> httpx.Response:
-        """Send single GET request without retry loop."""
+        """Send single GET request without retry loop.
+
+        Returns:
+            httpx.Response from the server, raises on non-2xx status.
+        """
         client = self._get_client()
         await self.rate_limiter.acquire()
         response = await self.circuit_breaker.call(

@@ -121,7 +121,11 @@ def _classify_http_status(
     status_code: int,
     logger: LoggerPort,
 ) -> ErrorCategory:
-    """Classify HTTP status code into retryability categories."""
+    """Classify HTTP status code into retryability categories.
+
+    Returns:
+        ErrorCategory based on the HTTP status code value.
+    """
     if status_code in _HTTP_STATUS_CATEGORIES:
         return _HTTP_STATUS_CATEGORIES[status_code]
 
