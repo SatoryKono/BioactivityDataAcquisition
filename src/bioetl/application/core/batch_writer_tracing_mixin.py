@@ -71,7 +71,13 @@ class BatchWriterTracingMixin:
     def log_and_track_write_error(
         self, layer: str, error: Exception, batch_id: BatchID
     ) -> None:
-        """Log write-layer error and track metrics."""
+        """Log write-layer error and track metrics.
+
+        Args:
+            layer: Medallion layer name where the error occurred (e.g., ``'silver'``).
+            error: Exception that caused the write failure.
+            batch_id: Batch identifier for correlation in log output.
+        """
         error_type = self._error_classifier.classify(error)
         self._context.logger.error(
             "layer_write_failed",

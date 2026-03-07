@@ -103,7 +103,17 @@ class MetricsService:
     def _handle_start_error(
         self, port: int, e: Exception, fail_fast: bool
     ) -> StartResult:
-        """Handle error during server start."""
+        """Handle error during server start.
+
+        Args:
+            port: Port number that the server attempted to bind.
+            e: Exception raised during the start attempt.
+            fail_fast: When True, re-raises the error as MetricsServerError instead
+                of returning a failure result.
+
+        Returns:
+            StartResult with ``success=False`` and the error message, when fail_fast is False.
+        """
         error_msg = str(e)
         self.logger.error(
             "Metrics server error",

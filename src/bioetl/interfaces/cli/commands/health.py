@@ -34,7 +34,16 @@ def _handle_health_failure(
     unexpected_error_title: str,
     interrupted_message: str,
 ) -> None:
-    """Handle health command failures with shared CLI policy."""
+    """Handle health command failures with shared CLI policy.
+
+    Args:
+        exc: Exception caught at the CLI command boundary.
+        reason_code: Machine-readable code for the failure (e.g., 'CLI_HEALTH_CHECK_DOMAIN_ERROR').
+        target: Target identifier (e.g., provider name or host:port) used in error context.
+        domain_error_title: Human-readable title for BioETLError failures.
+        unexpected_error_title: Human-readable title for unexpected exception failures.
+        interrupted_message: Message displayed when KeyboardInterrupt is caught.
+    """
     handle_cli_execution_failure(
         exc,
         reason_code=reason_code,
@@ -48,12 +57,24 @@ def _handle_health_failure(
 
 
 def _provider_subject(provider: tuple[str, ...]) -> str:
-    """Build stable provider subject label for error handling."""
+    """Build stable provider subject label for error handling.
+
+    Args:
+        provider: Tuple of provider names selected via CLI. Empty tuple means all providers.
+
+    Returns:
+        Comma-joined provider names, or 'all' when the tuple is empty.
+    """
     return ",".join(provider) if provider else "all"
 
 
 def _echo_health_server_info(host: str, port: int) -> None:
-    """Print startup information for health server command."""
+    """Print startup information for health server command.
+
+    Args:
+        host: IP address the server will bind to.
+        port: TCP port the server will listen on.
+    """
     click.echo(f"Starting health server on http://{host}:{port}")
     click.echo("Endpoints:")
     click.echo(f"  - http://{host}:{port}/health")
@@ -64,7 +85,12 @@ def _echo_health_server_info(host: str, port: int) -> None:
 
 
 async def _run_health_server(host: str, port: int) -> None:
-    """Start and keep the health server alive until interrupted."""
+    """Start and keep the health server alive until interrupted.
+
+    Args:
+        host: IP address to bind the server to.
+        port: TCP port for the health server to listen on.
+    """
     from bioetl.interfaces.http.health_server import HealthServer
 
     deps = get_health_server_dependencies()
@@ -85,7 +111,12 @@ async def _run_health_server(host: str, port: int) -> None:
 
 
 def _execute_health_server(host: str, port: int) -> None:
-    """Execute health server coroutine with CLI error policy."""
+    """Execute health server coroutine with CLI error policy.
+
+    Args:
+        host: IP address the server will bind to.
+        port: TCP port the server will listen on.
+    """
     coro = _run_health_server(host=host, port=port)
     try:
         asyncio.run(coro)
@@ -116,7 +147,14 @@ def _execute_health_server(host: str, port: int) -> None:
 
 
 async def _run_health_checks(provider: tuple[str, ...]) -> dict[str, dict[str, str]]:
-    """Execute health checks and return results as serializable dictionary."""
+    """Execute health checks and return results as serializable dictionary.
+
+    Args:
+        provider: Tuple of provider names to check. Empty tuple checks all providers.
+
+    Returns:
+        Dict mapping provider names to their health check result dicts.
+    """
     service = get_health_service()
     providers_list = list(provider) if provider else None
     summary = await service.check_providers(providers=providers_list)
@@ -126,7 +164,15 @@ async def _run_health_checks(provider: tuple[str, ...]) -> dict[str, dict[str, s
 def _execute_health_checks(
     provider: tuple[str, ...],
 ) -> dict[str, dict[str, str]] | None:
-    """Execute health checks with CLI error policy and return results."""
+    """Execute health checks with CLI error policy and return results.
+
+    Args:
+        provider: Tuple of provider names to check. Empty tuple checks all providers.
+
+    Returns:
+        Dict mapping provider names to health check results, or None if an exception
+        was handled and the process will exit.
+    """
     providers_subject = _provider_subject(provider)
     coro = _run_health_checks(provider)
     try:
@@ -169,7 +215,13 @@ def _render_health_results(
     *,
     output_json: bool,
 ) -> None:
-    """Render health check output and exit with mapped status code."""
+    """Render health check output and exit with mapped status code.
+
+    Args:
+        results: Dict mapping provider names to health check result dicts.
+        output_json: When True, outputs results as JSON; otherwise uses a
+            human-readable text format.
+    """
     import json as json_module
 
     all_healthy = all(
@@ -237,8 +289,8 @@ def health_server_command(host: str, port: int) -> None:
         bioetl health server --port 8081
 
     Args:
-        host: Host.
-        port: Port.
+        host: IP address to bind the server to (e.g., '127.0.0.1' or '0.0.0.0').
+        port: TCP port for the health server to listen on.
     """
     _echo_health_server_info(host, port)
     _execute_health_server(host, port)
@@ -269,8 +321,9 @@ def health_check(provider: tuple[str, ...], output_json: bool) -> None:
         bioetl health check --json
 
     Args:
-        provider: Data provider name.
-        output_json: Whether to output json.
+        provider: Tuple of provider names to check (e.g., ('chembl', 'pubchem')).
+            Checks all configured providers when empty.
+        output_json: When True, outputs health check results as JSON.
     """
     click.echo("Running health checks...")
     results = _execute_health_checks(provider)

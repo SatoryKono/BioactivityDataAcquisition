@@ -26,6 +26,11 @@ class ChemblFetchMultiFilterMixin:
     ) -> int:
         """Halve batch_size until projected URL fits the 1000-char limit.
 
+        Args:
+            url: Base API resource URL used to estimate total request length.
+            filters: Mapping of API field names to lists of filter values.
+            entity_type: ChEMBL entity type (e.g., ``"activity"``).
+
         Returns:
             Maximum batch size that keeps the URL within the 1000-character limit.
         """
@@ -51,7 +56,17 @@ class ChemblFetchMultiFilterMixin:
         filters: dict[str, list[str]],
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch ChEMBL data with AND-logic multi-field filtering and batching."""
+        """Fetch ChEMBL data with AND-logic multi-field filtering and batching.
+
+        Args:
+            entity_type: ChEMBL entity type (e.g., ``"activity"``).
+            filters: Mapping of API field names to lists of allowed values;
+                all conditions are combined with AND logic.
+            limit: Maximum number of records to yield, or None for no limit.
+
+        Returns:
+            Async iterator of deduplicated BronzeRecord dicts matching all filters.
+        """
         if not filters:
             return
         url = self._mapper.get_resource_url(entity_type)

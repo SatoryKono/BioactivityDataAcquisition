@@ -1,6 +1,6 @@
 """Pandera schema for ChEMBL Publication Similarity entity.
 
-Aligned with RULES.md v5.12 and ChEMBL 34 schema.
+Aligned with RULES.md v5.23 and ChEMBL 34 schema.
 Renamed from DocumentSimilaritySchema per ADR-024 (Entity Naming Unification).
 """
 

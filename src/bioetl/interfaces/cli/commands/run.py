@@ -73,7 +73,15 @@ def _exit_with_code(code: int | str | None = None) -> NoReturn:
 
 
 def validate_options(start_offset: int | None, run_type: str, resume: bool) -> None:
-    """Validate --start-offset constraints; sys.exit on error."""
+    """Validate --start-offset constraints; sys.exit on error.
+
+    Args:
+        start_offset: Record offset to start extraction from; None when not provided.
+        run_type: Type of run (e.g., 'incremental', 'rebuild', 'backfill'); start_offset
+            is only valid for incremental runs.
+        resume: When True, indicates checkpoint-based resume; incompatible with
+            start_offset.
+    """
     validation = _CLI_RUN_ORCHESTRATION_SERVICE.validate_start_offset(
         start_offset=start_offset,
         run_type=run_type,
@@ -104,6 +112,25 @@ def build_run_options(
 ) -> RunOptions:
     """Build RunOptions from CLI parameters.
 
+    Args:
+        run_type: Type of run ('incremental', 'backfill', or 'rebuild').
+        resume: When True, resumes from the last saved checkpoint.
+        start_offset: Record offset to start extraction from; ignored when None.
+        limit: Maximum number of records to process; no limit when None.
+        input_csv: Path to CSV file containing filter IDs; disables CSV filtering when None.
+        filter_column: Column name in the CSV that holds filter IDs; uses 'id' when None.
+        filter_field: API field name to filter by; uses provider default when None.
+        dry_run: When True, previews cleanup without executing the pipeline.
+        vacuum_after_run: When True, runs VACUUM after a successful run; uses YAML config
+            when None.
+        vacuum_retention_days: Minimum file age for VACUUM removal in days; uses YAML
+            config when None.
+        debug: When True, sets log level to DEBUG for verbose output.
+        use_cached_bronze: When True, loads data from Bronze cache instead of the live API.
+        cached_bronze_date: Date filter for Bronze cache in 'YYYY-MM-DD' format; ignored
+            when None.
+        cached_bronze_path: Explicit path to Bronze cache directory; uses default when None.
+
     Returns:
         RunOptions instance configured with the provided CLI parameter values.
     """
@@ -132,6 +159,12 @@ def execute_run(
     health_port: int,
 ) -> RunResult:
     """Execute run and always flush metrics at command boundary.
+
+    Args:
+        pipeline: Pipeline name to execute.
+        options: RunOptions with run type, limits, and filter settings.
+        health_server: When True, enables the HTTP health server during execution.
+        health_port: TCP port the health server listens on.
 
     Returns:
         RunResult with pipeline execution status and record counts.

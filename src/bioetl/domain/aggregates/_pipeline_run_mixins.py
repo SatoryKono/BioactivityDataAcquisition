@@ -30,7 +30,11 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
     __slots__ = ()
 
     def start(self, started_at: datetime | None = None) -> None:
-        """Start the pipeline run."""
+        """Start the pipeline run.
+
+        Args:
+            started_at: Optional explicit start timestamp. Defaults to UTC now.
+        """
         if self._status != PipelineRunState.PENDING:
             raise InvalidStateError(
                 f"Cannot start run in status {self._status.value}",
@@ -49,6 +53,10 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
             Prefer application.services.PipelineRunLifecycleService for orchestration
             call-sites. Domain aggregate API remains temporarily stable through
             2026-06-30 for migration safety.
+
+        Args:
+            stage: Name of the pipeline stage being started (e.g., 'bronze', 'silver').
+            started_at: Optional explicit stage start timestamp. Defaults to UTC now.
         """
         self._assert_running("record_stage_start")
         self._stages.append(
@@ -73,6 +81,13 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
             Prefer application.services.PipelineRunLifecycleService for orchestration
             call-sites. Domain aggregate API remains temporarily stable through
             2026-06-30 for migration safety.
+
+        Args:
+            stage: Name of the pipeline stage that succeeded.
+            result: Optional stage result payload for audit/lineage purposes.
+            records_processed: Number of records processed during this stage. Defaults to 0.
+            started_at: Optional explicit stage start timestamp.
+            completed_at: Optional explicit stage completion timestamp. Defaults to UTC now.
         """
         self._assert_running("record_stage_success")
         now = datetime.now(UTC)
@@ -101,6 +116,13 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
             Prefer application.services.PipelineRunLifecycleService for orchestration
             call-sites. Domain aggregate API remains temporarily stable through
             2026-06-30 for migration safety.
+
+        Args:
+            stage: Name of the pipeline stage that failed.
+            error: Error message string or Exception instance describing the failure.
+            error_type: Optional error classification (e.g., exception class name).
+            started_at: Optional explicit stage start timestamp.
+            completed_at: Optional explicit failure timestamp. Defaults to UTC now.
         """
         self._assert_running("record_stage_failure")
         now = datetime.now(UTC)
@@ -131,7 +153,11 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
         )
 
     def complete(self, completed_at: datetime | None = None) -> None:
-        """Mark run as COMPLETED if all stages succeeded."""
+        """Mark run as COMPLETED if all stages succeeded.
+
+        Args:
+            completed_at: Optional explicit completion timestamp. Defaults to UTC now.
+        """
         self._assert_running("complete")
         self._assert_can_complete()
         ended_at = completed_at or datetime.now(UTC)
@@ -160,7 +186,13 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
         error_type: str | None = None,
         failed_at: datetime | None = None,
     ) -> None:
-        """Mark run as failed without stage-level details."""
+        """Mark run as failed without stage-level details.
+
+        Args:
+            error: Human-readable error description.
+            error_type: Optional error classification (e.g., exception class name).
+            failed_at: Optional explicit failure timestamp. Defaults to UTC now.
+        """
         self._assert_running("fail")
         ended_at = failed_at or datetime.now(UTC)
         self._status = PipelineRunState.FAILED
@@ -177,7 +209,11 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
         )
 
     def shutdown(self, shutdown_at: datetime | None = None) -> None:
-        """Mark the run as gracefully shutdown."""
+        """Mark the run as gracefully shutdown.
+
+        Args:
+            shutdown_at: Optional explicit shutdown timestamp. Defaults to UTC now.
+        """
         self._assert_running("shutdown")
         ended_at = shutdown_at or datetime.now(UTC)
         self._status = PipelineRunState.SHUTDOWN

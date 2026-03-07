@@ -57,7 +57,14 @@ class _HealthAggregator:
         self._health_check_mode = health_check_mode
 
     async def check_all(self, services: PipelineService) -> HealthReport:
-        """Check storage and data source health in parallel."""
+        """Check storage and data source health in parallel.
+
+        Args:
+            services: Pipeline service container providing storage and data source ports.
+
+        Returns:
+            HealthReport aggregating per-component health results.
+        """
         results = await asyncio.gather(
             self._check_storage(services),
             self._check_data_source(services),
@@ -272,7 +279,14 @@ class _HealthAggregator:
                 self._logger.error("Health check failed", **log_extra)
 
     def assert_healthy(self, report: HealthReport) -> None:
-        """Raise InfrastructureError when any component is UNHEALTHY."""
+        """Raise InfrastructureError when any component is UNHEALTHY.
+
+        Args:
+            report: HealthReport from a previous ``check_all()`` call.
+
+        Raises:
+            InfrastructureError: If any component in the report is UNHEALTHY.
+        """
         failures = report.get_failures()
         if not failures:
             return

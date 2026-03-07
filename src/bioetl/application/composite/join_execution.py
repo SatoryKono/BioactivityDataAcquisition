@@ -47,6 +47,13 @@ class JoinExecutorService:
     ) -> pl.DataFrame:
         """Execute single-key join while preserving right join key as data column.
 
+        Args:
+            left_df: Left-side DataFrame (typically the merged seed output).
+            right_df: Right-side DataFrame (typically the enricher or dependency output).
+            left_key: Column name to join on from left_df.
+            right_key: Column name to join on from right_df.
+            pipeline_name: Pipeline name used for column suffixing and log context.
+
         Returns:
             Joined DataFrame; returns left_df unchanged if a required join key is missing.
         """
@@ -117,6 +124,13 @@ class JoinExecutorService:
         pipeline_name: str,
     ) -> pl.DataFrame:
         """Execute multi-key join preserving right-side key columns.
+
+        Args:
+            left_df: Left-side DataFrame (typically the merged seed output).
+            right_df: Right-side DataFrame (typically the dependency output).
+            left_keys: List of column names to join on from left_df.
+            right_keys: List of column names to join on from right_df.
+            pipeline_name: Pipeline name used for column suffixing and log context.
 
         Returns:
             Joined DataFrame using all provided composite key columns.

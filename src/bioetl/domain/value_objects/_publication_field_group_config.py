@@ -35,6 +35,9 @@ class FieldGroupConfig:
     def get_group(self, column: str) -> PublicationFieldGroup:
         """Get semantic group for qualified or unqualified column name.
 
+        Args:
+            column: Column name (qualified as 'provider.entity.field' or unqualified).
+
         Returns:
             PublicationFieldGroup for the column, or default group if unmapped.
         """
@@ -44,6 +47,9 @@ class FieldGroupConfig:
     def is_gold_field(self, column: str) -> bool:
         """Check if a column should be included in Gold layer.
 
+        Args:
+            column: Column name to check.
+
         Returns:
             True if the column belongs to a Gold-included group, False otherwise.
         """
@@ -52,6 +58,9 @@ class FieldGroupConfig:
     def get_gold_columns(self, columns: list[str]) -> list[str]:
         """Filter columns to Gold-included fields.
 
+        Args:
+            columns: List of column names to filter.
+
         Returns:
             List of column names that belong to Gold-included groups.
         """
@@ -59,6 +68,9 @@ class FieldGroupConfig:
 
     def get_trash_columns(self, columns: list[str]) -> list[str]:
         """Return columns excluded from Gold layer.
+
+        Args:
+            columns: List of column names to filter.
 
         Returns:
             List of column names that are excluded from Gold-included groups.
@@ -70,6 +82,10 @@ class FieldGroupConfig:
     ) -> list[str]:
         """Return columns that belong to the given group.
 
+        Args:
+            columns: List of column names to filter.
+            group: Semantic group to filter by.
+
         Returns:
             List of column names belonging to the specified semantic group.
         """
@@ -79,6 +95,9 @@ class FieldGroupConfig:
         self, columns: list[str]
     ) -> dict[PublicationFieldGroup, list[str]]:
         """Group columns by semantic groups.
+
+        Args:
+            columns: List of column names to group.
 
         Returns:
             Dictionary mapping each PublicationFieldGroup to its list of columns.
@@ -92,6 +111,9 @@ class FieldGroupConfig:
 
     def get_provider_rank(self, column: str) -> int:
         """Return provider rank for ordering within semantic group.
+
+        Args:
+            column: Column name (qualified as 'provider.entity.field' or unqualified).
 
         Returns:
             Integer provider rank (-1 for unqualified columns, 999 for unknown providers).
@@ -107,6 +129,9 @@ class FieldGroupConfig:
 
     def sort_columns(self, columns: list[str]) -> list[str]:
         """Sort by semantic group, provider priority, then field name.
+
+        Args:
+            columns: List of column names to sort.
 
         Returns:
             Sorted list of column names by group, provider priority, and field name.
@@ -129,6 +154,9 @@ class FieldGroupConfig:
 
     def get_field_providers(self, field_name: str) -> list[str]:
         """Return providers expected to supply the given field.
+
+        Args:
+            field_name: Field name to look up (case-insensitive).
 
         Returns:
             List of provider names expected to supply the field, or empty list if unmapped.

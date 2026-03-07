@@ -15,6 +15,10 @@ def extract_topics(
 ) -> list[JsonDict]:  # Any: untyped JSON fragment from OpenAlex API
     """Extract topics with hierarchical classification.
 
+    Args:
+        topics: List of topic dicts from the OpenAlex API response, or None.
+        max_count: Maximum number of topics to include in the result.
+
     Returns:
         List of parsed topic dictionaries (up to max_count entries).
     """
@@ -39,6 +43,9 @@ def extract_primary_topic(
 ) -> JsonDict | None:  # Any: untyped JSON fragment from OpenAlex API
     """Extract single most relevant topic for a work.
 
+    Args:
+        primary_topic: OpenAlex primary_topic dict from the API response, or None.
+
     Returns:
         Parsed topic dictionary or None if primary_topic is absent or invalid.
     """
@@ -51,6 +58,9 @@ def extract_grants(
     grants: list[JsonDict] | None,  # Any: untyped JSON fragment from OpenAlex API
 ) -> list[JsonDict]:  # Any: untyped JSON fragment from OpenAlex API
     """Extract grant/funding information from grants array.
+
+    Args:
+        grants: List of grant dicts from the OpenAlex API response, or None.
 
     Returns:
         List of parsed grant dictionaries.

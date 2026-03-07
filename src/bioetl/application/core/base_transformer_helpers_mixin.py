@@ -47,7 +47,16 @@ class _BaseTransformerRecordHelpersMixin:
 
     @staticmethod
     def serialize_json(value: object) -> ScalarValue:
-        """Serialize dict/list to JSON string or native type for Silver layer."""
+        """Serialize dict/list to JSON string or native type for Silver layer.
+
+        Args:
+            value: Value to serialize. Dicts and lists are converted to JSON strings;
+                scalars and None are returned as-is.
+
+        Returns:
+            JSON string for composite types, the original scalar for primitives,
+            or None when the value is None or an empty composite.
+        """
         if value is None:
             return None
 
@@ -84,7 +93,15 @@ class _BaseTransformerRecordHelpersMixin:
 
     @staticmethod
     def serialize_json_list(value: Sequence[object] | None) -> str | None:
-        """Serialize list to JSON string without unwrapping single elements."""
+        """Serialize list to JSON string without unwrapping single elements.
+
+        Args:
+            value: Sequence to serialize. Single-element sequences are kept as arrays,
+                unlike ``serialize_json`` which unwraps them.
+
+        Returns:
+            JSON array string, or None when the sequence is None or empty.
+        """
         if value is None or len(value) == 0:
             return None
         json_bytes: bytes = orjson.dumps(list(value), option=orjson.OPT_SORT_KEYS)
@@ -96,7 +113,15 @@ class _BaseTransformerRecordHelpersMixin:
         record: GoldRecord,
         field_names: Sequence[str],
     ) -> dict[str, str | int | float | bool | None]:
-        """Serialize multiple JSON fields at once."""
+        """Serialize multiple JSON fields at once.
+
+        Args:
+            record: Source record from which field values are extracted.
+            field_names: Names of fields to serialize via ``serialize_json``.
+
+        Returns:
+            Dictionary mapping each field name to its serialized scalar value.
+        """
         return {name: cls.serialize_json(record.get(name)) for name in field_names}
 
     @staticmethod
@@ -122,7 +147,17 @@ class _BaseTransformerRecordHelpersMixin:
         *,
         allow_empty: bool = False,
     ) -> object:
-        """Extract and validate a required field from the record."""
+        """Extract and validate a required field from the record.
+
+        Args:
+            record: Bronze record to extract the field from.
+            field: Name of the required field.
+            allow_empty: When False (default), empty strings and empty
+                collections also raise TransformationError.
+
+        Returns:
+            The field value if present and non-empty (per ``allow_empty`` rules).
+        """
         from bioetl.application.core.base_transformer import TransformationError
 
         value = record.get(field)
@@ -147,7 +182,17 @@ class _BaseTransformerRecordHelpersMixin:
         keys: Sequence[str],
         default: object | None = None,
     ) -> object | None:
-        """Safely extract a value from nested dictionaries by key sequence."""
+        """Safely extract a value from nested dictionaries by key sequence.
+
+        Args:
+            record: Bronze record serving as the root of the traversal.
+            keys: Ordered sequence of keys representing the path to the target value.
+            default: Value to return when any key is missing or an intermediate
+                value is not a dict. Defaults to None.
+
+        Returns:
+            The extracted value at the end of the key path, or ``default`` if not found.
+        """
         current: object = record
         for key in keys:
             if not isinstance(current, dict):
@@ -164,7 +209,16 @@ class _BaseTransformerRecordHelpersMixin:
         path: str,
         default: object | None = None,
     ) -> object | None:
-        """Safely extract a value from nested dictionaries using dot path."""
+        """Safely extract a value from nested dictionaries using dot path.
+
+        Args:
+            record: Bronze record serving as the root of the traversal.
+            path: Dot-separated key path (e.g., ``'journal.issue.volume'``).
+            default: Value returned when the path cannot be fully resolved. Defaults to None.
+
+        Returns:
+            The value at the end of the dot path, or ``default`` if not found.
+        """
         keys = path.split(".")
         return _BaseTransformerRecordHelpersMixin._extract_by_path(
             record, keys, default
@@ -179,7 +233,19 @@ class _BaseTransformerRecordHelpersMixin:
         index: int,
         **business_data: object,
     ) -> T:
-        """Create a domain entity with lineage metadata."""
+        """Create a domain entity with lineage metadata.
+
+        Args:
+            entity_class: Concrete entity dataclass to instantiate.
+            context: Pipeline execution context providing run ID, run type, and ingestion timestamp.
+            entity_id: Stable identifier for the entity, wrapped as ``EntityID``.
+            content_hash: SHA-based hash of entity content for deduplication, wrapped as ``ContentHash``.
+            index: Zero-based position of the record within the current batch.
+            **business_data: Provider-specific field values passed as keyword arguments to the entity.
+
+        Returns:
+            Instantiated entity of type ``T`` with lineage fields populated.
+        """
         entity_factory = cast("_EntityConstructor[T]", entity_class)
         return entity_factory(
             entity_id=EntityID(entity_id),

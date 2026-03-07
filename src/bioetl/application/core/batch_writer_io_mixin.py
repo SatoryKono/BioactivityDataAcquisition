@@ -35,7 +35,17 @@ class BatchWriterIOMixin:
         ingestion_ts: datetime,
         source_metadata: object | None = None,
     ) -> BronzeWriteResult:
-        """Write deterministic JSONL batch to Bronze."""
+        """Write deterministic JSONL batch to Bronze.
+
+        Args:
+            records: Raw Bronze records to be serialized and written.
+            batch_id: Unique identifier for this batch, used for deterministic naming.
+            ingestion_ts: Timestamp marking when the batch was ingested.
+            source_metadata: Optional provider-specific metadata to attach to the batch.
+
+        Returns:
+            BronzeWriteResult with path and record count for the written batch.
+        """
         await self._validate_lock("write_bronze")
         span = self._start_span("write_bronze", "bronze", len(records), batch_id)
 
@@ -70,7 +80,17 @@ class BatchWriterIOMixin:
         ingestion_ts: datetime,
         bronze_refs: list[BronzeWriteResult] | None = None,
     ) -> SilverWriteResult | None:
-        """Write transformed records to Silver with metadata enrichment."""
+        """Write transformed records to Silver with metadata enrichment.
+
+        Args:
+            records: Transformed records ready for Silver layer storage.
+            batch_id: Batch identifier injected as ``_source_batch_id`` on each record.
+            ingestion_ts: Ingestion timestamp (unused at write time, kept for API symmetry).
+            bronze_refs: Optional Bronze write results used for lineage linking.
+
+        Returns:
+            SilverWriteResult with Delta table version and row counts, or None if skipped.
+        """
         del ingestion_ts
         await self._validate_lock("write_silver")
         span = self._start_span("write_silver", "silver", len(records), batch_id)
@@ -118,7 +138,12 @@ class BatchWriterIOMixin:
         records: list[GoldRecord],
         silver_refs: list[SilverWriteResult] | None = None,
     ) -> None:
-        """Write validated records to Gold."""
+        """Write validated records to Gold.
+
+        Args:
+            records: Validated Gold-layer records projected to schema columns.
+            silver_refs: Optional Silver write results used for lineage linking.
+        """
         await self._validate_lock("write_gold")
         span = self._start_span("write_gold", "gold", len(records))
 

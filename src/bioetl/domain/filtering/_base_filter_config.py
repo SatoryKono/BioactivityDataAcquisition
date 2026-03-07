@@ -30,7 +30,14 @@ class BaseFilterConfig:
 
     @classmethod
     def from_base(cls, other: BaseFilterConfig) -> Self:
-        """Create same-type filter config from another base config."""
+        """Create same-type filter config from another base config.
+
+        Args:
+            other: Source BaseFilterConfig whose fields will be copied.
+
+        Returns:
+            New instance of the calling class with all filter fields copied from other.
+        """
         return cls(
             column_filters=other.column_filters,
             range_filters=other.range_filters,
@@ -42,6 +49,9 @@ class BaseFilterConfig:
 
     def should_include(self, record: JsonDict) -> bool:
         """Check all filtering rules against a record.
+
+        Args:
+            record: Dictionary of record fields to evaluate against all configured filters.
 
         Returns:
             True if the record passes all configured filter rules, False otherwise.

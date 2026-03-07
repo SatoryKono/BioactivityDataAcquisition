@@ -59,7 +59,15 @@ __all__ = [
 
 
 def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
-    """Load pipeline config."""
+    """Load pipeline YAML configuration from disk.
+
+    Args:
+        pipeline_name: Pipeline identifier used to locate the YAML file
+            (e.g., 'chembl_activity' maps to configs/pipelines/chembl/activity.yaml).
+
+    Returns:
+        Parsed and validated PipelineYamlConfig instance.
+    """
     return _load_pipeline_config_direct(pipeline_name)
 
 
@@ -67,7 +75,16 @@ def yaml_config_to_domain(
     yaml_config: PipelineYamlConfig,
     resolved_dq_config: DQConfig | None = None,
 ) -> PipelineConfig:
-    """Map YAML config to domain model."""
+    """Map YAML configuration to the domain PipelineConfig model.
+
+    Args:
+        yaml_config: Validated YAML configuration loaded from disk.
+        resolved_dq_config: Optional pre-resolved DQ configuration; if None,
+            DQ settings are derived from the YAML config directly.
+
+    Returns:
+        Immutable PipelineConfig domain object.
+    """
     return _yaml_config_to_domain_direct(
         yaml_config=yaml_config,
         resolved_dq_config=resolved_dq_config,
@@ -75,7 +92,14 @@ def yaml_config_to_domain(
 
 
 def compute_config_hash(config: PipelineYamlConfig | dict[str, object]) -> str:
-    """Compute config hash."""
+    """Compute SHA256 hash of pipeline configuration for change detection.
+
+    Args:
+        config: Pipeline configuration as a PipelineYamlConfig instance or raw dict.
+
+    Returns:
+        SHA256 hex-digest string (64 characters).
+    """
     return _compute_config_hash_direct(config)
 
 
@@ -128,7 +152,28 @@ def build_pipeline_services(
     silver_validator: SilverValidatorPort | None = None,
     _deps: ServiceBundleDependencies | None = None,
 ) -> PipelineService:
-    """Build shared pipeline services."""
+    """Build shared pipeline services for one pipeline run.
+
+    Resolves data source (live API or cached Bronze), wires storage, metrics,
+    tracing, DQ monitoring, and checkpoint dependencies into a PipelineService.
+
+    Args:
+        pipeline_name: Name of the pipeline (e.g., 'chembl_activity').
+        create_data_source_fn: Callable that creates the provider data source.
+        settings: Application settings for infrastructure wiring.
+        logger: LoggerPort for structured logging.
+        config: Optional pre-loaded pipeline YAML config; loaded from disk if None.
+        filter_config: Optional input filter configuration; disables filtering if None.
+        tracer: Optional TracingPort for distributed tracing.
+        dq_monitor: Optional DQMonitorPort for data quality monitoring.
+        metadata_coordinator: Optional coordinator for pipeline metadata writes.
+        cached_bronze: Optional cached Bronze context; uses live API if None or disabled.
+        silver_validator: Optional Silver layer validator (required in production).
+        _deps: Optional dependency overrides for testing; resolved from defaults if None.
+
+    Returns:
+        Fully wired PipelineService bundle.
+    """
     deps = _resolve_service_bundle_dependencies(_deps)
     pipeline_config = config or deps.load_pipeline_config(pipeline_name)
     base_services_factory = deps.base_services_factory
@@ -192,7 +237,30 @@ def create_pipeline_with_services(
     pandera_silver_schema: object | None = None,
     _deps: ServiceBundleDependencies | None = None,
 ) -> BasePipeline:
-    """Create pipeline instance with services and optional transformer."""
+    """Create pipeline instance with services and optional transformer.
+
+    Args:
+        pipeline_name: Name of the pipeline (e.g., 'chembl_activity').
+        pipeline_class: Concrete pipeline class to instantiate.
+        provider: Provider name (e.g., 'chembl').
+        create_data_source_fn: Callable that creates the provider data source.
+        transformer_class: Optional transformer class; no transformer used if None.
+        run_id: Unique identifier for this pipeline run.
+        runtime: Runtime configuration (run type, limits, vacuum settings).
+        settings: Application settings for infrastructure wiring.
+        logger: LoggerPort for structured logging.
+        config: Optional pre-loaded pipeline YAML config; loaded from disk if None.
+        filter_config: Optional input filter configuration; disables filtering if None.
+        tracer: Optional TracingPort for distributed tracing.
+        dq_monitor: Optional DQMonitorPort for data quality monitoring.
+        metrics: Optional MetricsPort for metrics collection.
+        cached_bronze: Optional cached Bronze context; uses live API if None or disabled.
+        pandera_silver_schema: Optional Pandera DataFrameModel for Silver validation.
+        _deps: Optional dependency overrides for testing; resolved from defaults if None.
+
+    Returns:
+        Configured BasePipeline instance ready for execution.
+    """
     # Compatibility marker for architecture static checks: transformer=transformer
     return _create_pipeline_with_services_impl(
         _PipelineCreationInputs(

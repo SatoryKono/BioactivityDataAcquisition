@@ -22,7 +22,13 @@ class BatchProgressService:
         self._next_progress_threshold: int = 0
 
     async def initialize_tracking(self, limit: int | None) -> None:
-        """Estimate total records and initialize progress thresholds."""
+        """Estimate total records and initialize progress thresholds.
+
+        Args:
+            limit: Optional upper bound on records to process. If provided, used
+                directly as the total. If None, attempts to query the data source
+                for an estimated total.
+        """
         self._total_records = limit
         if self._total_records:
             self._set_progress_thresholds()
@@ -43,7 +49,14 @@ class BatchProgressService:
         records_silver: int,
         records_filtered_out: int,
     ) -> None:
-        """Emit progress log when next reporting threshold is reached."""
+        """Emit progress log when next reporting threshold is reached.
+
+        Args:
+            records_fetched: Total records received from the data source so far.
+            records_bronze: Total records written to Bronze layer so far.
+            records_silver: Total records written to Silver layer so far.
+            records_filtered_out: Total records discarded by filters so far.
+        """
         if (
             self._progress_interval
             and self._total_records

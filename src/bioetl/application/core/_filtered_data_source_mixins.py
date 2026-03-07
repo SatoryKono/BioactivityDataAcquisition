@@ -304,7 +304,16 @@ class _FilteredDataSourceFetchMixin(_FilteredDataSourceStateMixin):
     ) -> AsyncIterator[
         JsonDict  # Any: filter record values vary (str|int|float|list)
     ]:  # Any: filter record values vary (str|int|float|list)
-        """Fetch records with optional filtering from internal config."""
+        """Fetch records with optional filtering from internal config.
+
+        Args:
+            entity_type: Entity type string passed through to the underlying adapter.
+            limit: Maximum number of records to fetch, or None for all.
+            query: Optional query string passed through to the adapter.
+            filter_ids: Ignored; filtering is driven by internal config filter_ids.
+            filter_field: Ignored; filtering is driven by internal config filter_field.
+            offset: Optional pagination offset passed through to the adapter.
+        """
         _ = filter_ids, filter_field
 
         if self._filter_config.enabled and self._multi_filter_ids:

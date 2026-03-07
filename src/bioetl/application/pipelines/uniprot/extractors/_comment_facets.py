@@ -91,7 +91,15 @@ def extract_text_values(
     comments: list[JsonDict],
     comment_type: str,
 ) -> list[str]:
-    """Extract text values from comments of specific type."""
+    """Extract text values from comments of specific type.
+
+    Args:
+        comments: List of UniProt comment dicts from the API response.
+        comment_type: UniProt comment type string to filter on.
+
+    Returns:
+        List of extracted text strings for the given comment type.
+    """
     index = _build_comment_index(comments)
     if index is None:
         return []
@@ -113,7 +121,15 @@ def extract_by_type(
     comments: list[JsonDict] | None,
     comment_type: str,
 ) -> str | None:
-    """Extract comments by type as serialized JSON array."""
+    """Extract comments by type as serialized JSON array.
+
+    Args:
+        comments: List of UniProt comment dicts from the API response, or None.
+        comment_type: UniProt comment type string to filter on.
+
+    Returns:
+        JSON-serialized array of text values, or None if no matching comments.
+    """
     index = _build_comment_index(comments)
     if index is None:
         return None
@@ -123,7 +139,14 @@ def extract_by_type(
 
 
 def extract_catalytic_activity(comments: list[JsonDict] | None) -> str | None:
-    """Extract catalytic activity records."""
+    """Extract catalytic activity records.
+
+    Args:
+        comments: List of UniProt comment dicts from the API response, or None.
+
+    Returns:
+        JSON-serialized list of catalytic activity dicts, or None if absent.
+    """
     index = _build_comment_index(comments)
     if index is None:
         return None
@@ -147,7 +170,14 @@ def _extract_catalytic_activity_raw(
 
 
 def extract_subcellular_locations(comments: list[JsonDict] | None) -> str | None:
-    """Extract subcellular location labels."""
+    """Extract subcellular location labels.
+
+    Args:
+        comments: List of UniProt comment dicts from the API response, or None.
+
+    Returns:
+        JSON-serialized list of subcellular location strings, or None if absent.
+    """
     index = _build_comment_index(comments)
     if index is None:
         return None
@@ -175,7 +205,14 @@ def _extract_subcellular_locations_raw(
 
 
 def extract_alternative_products(comments: list[JsonDict] | None) -> str | None:
-    """Extract alternative products (isoforms) data."""
+    """Extract alternative products (isoforms) data.
+
+    Args:
+        comments: List of UniProt comment dicts from the API response, or None.
+
+    Returns:
+        JSON-serialized list of isoform dicts, or None if no alternative products.
+    """
     index = _build_comment_index(comments)
     if index is None:
         return None
@@ -212,7 +249,14 @@ def _extract_alternative_products_family_raw(
 
 
 def count_isoforms(comments: list[JsonDict] | None) -> int | None:
-    """Count isoforms from ALTERNATIVE PRODUCTS comments."""
+    """Count isoforms from ALTERNATIVE PRODUCTS comments.
+
+    Args:
+        comments: List of UniProt comment dicts from the API response, or None.
+
+    Returns:
+        Total isoform count, or None if no alternative products are present.
+    """
     index = _build_comment_index(comments)
     if index is None:
         return None
@@ -250,7 +294,14 @@ def _extract_cofactors_raw(index: dict[str, list[JsonDict]]) -> list[JsonDict]:
 def extract_biophysicochemical_properties(
     comments: list[JsonDict] | None,
 ) -> str | None:
-    """Extract biophysicochemical properties."""
+    """Extract biophysicochemical properties.
+
+    Args:
+        comments: List of UniProt comment dicts from the API response, or None.
+
+    Returns:
+        JSON-serialized dict of biophysicochemical property values, or None if absent.
+    """
     index = _build_comment_index(comments)
     if index is None:
         return None
@@ -272,7 +323,15 @@ def _extract_biophysicochemical_properties_raw(
 def extract_isoform_details(
     comments: list[JsonDict] | None,
 ) -> dict[str, str | None]:
-    """Extract normalized isoform names/ids/synonyms."""
+    """Extract normalized isoform names/ids/synonyms.
+
+    Args:
+        comments: List of UniProt comment dicts from the API response, or None.
+
+    Returns:
+        Dict mapping section names (isoform_names, isoform_ids, isoform_synonyms)
+        to JSON-serialized string values, or None if the section is empty.
+    """
     index = _build_comment_index(comments)
     section_values: dict[str, list[str]]
     if index is None:
@@ -284,7 +343,14 @@ def extract_isoform_details(
 
 
 def extract_reactions(comments: list[JsonDict] | None) -> str | None:
-    """Extract reaction names from catalytic activity comments."""
+    """Extract reaction names from catalytic activity comments.
+
+    Args:
+        comments: List of UniProt comment dicts from the API response, or None.
+
+    Returns:
+        JSON-serialized list of reaction name strings, or None if absent.
+    """
     index = _build_comment_index(comments)
     if index is None:
         return None
@@ -294,7 +360,14 @@ def extract_reactions(comments: list[JsonDict] | None) -> str | None:
 
 
 def extract_reaction_ec_numbers(comments: list[JsonDict] | None) -> str | None:
-    """Extract reaction EC numbers from catalytic activity comments."""
+    """Extract reaction EC numbers from catalytic activity comments.
+
+    Args:
+        comments: List of UniProt comment dicts from the API response, or None.
+
+    Returns:
+        JSON-serialized list of EC number strings, or None if absent.
+    """
     index = _build_comment_index(comments)
     if index is None:
         return None
@@ -325,7 +398,15 @@ def _extract_reaction_parts_raw(
 def extract_all_comments_raw(
     comments: list[JsonDict] | None,
 ) -> dict[str, object]:
-    """Extract all UniProt comment-related fields as raw Python values."""
+    """Extract all UniProt comment-related fields as raw Python values.
+
+    Args:
+        comments: List of UniProt comment dicts from the API response, or None.
+
+    Returns:
+        Dict mapping output field names to raw Python values (lists, dicts, int, or None).
+        Includes all comment output keys plus isoform_count.
+    """
     raw: dict[str, object] = {key: [] for key in _COMMENT_OUTPUT_KEYS}
     raw["biophysicochemical_properties"] = {}
     raw["isoform_count"] = None
@@ -372,7 +453,15 @@ def _serialize_isoform_sections(
 def extract_all_comments(
     comments: list[JsonDict] | None,
 ) -> dict[str, str | int | None]:
-    """Extract all UniProt comment-related fields in transformer output format."""
+    """Extract all UniProt comment-related fields in transformer output format.
+
+    Args:
+        comments: List of UniProt comment dicts from the API response, or None.
+
+    Returns:
+        Dict mapping output field names to JSON-serialized strings, integers, or None.
+        All list/dict values are serialized to JSON strings; isoform_count is int or None.
+    """
     raw = extract_all_comments_raw(comments)
     serialized: dict[str, str | int | None] = {}
 

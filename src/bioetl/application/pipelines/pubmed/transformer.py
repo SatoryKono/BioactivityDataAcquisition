@@ -272,6 +272,9 @@ class PubMedPublicationTransformer(
     ) -> GoldRecord:  # Any: generic domain entity
         """Convert Domain Entity to SilverRecord, excluding PubMed-unsupported fields.
 
+        Args:
+            entity: Dataclass domain entity to convert to a Silver record dict.
+
         Returns:
             SilverRecord dictionary with PubMed-unsupported fields removed.
         """

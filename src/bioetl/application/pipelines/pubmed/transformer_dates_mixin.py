@@ -27,7 +27,14 @@ class _PubMedTransformerDatesMixin:
     validate_value_object: Callable[..., str | int | None]
 
     def _is_valid_date_format(self, date_str: str | None) -> bool:
-        """Validate that date string matches YYYY, YYYY-MM, or YYYY-MM-DD format."""
+        """Validate that date string matches YYYY, YYYY-MM, or YYYY-MM-DD format.
+
+        Args:
+            date_str: Date string to validate. Returns False immediately when None or empty.
+
+        Returns:
+            True if the string matches at least one valid date pattern, False otherwise.
+        """
         if not date_str:
             return False
         return any(pattern.match(date_str) for pattern in self._VALID_DATE_PATTERNS)
@@ -36,7 +43,16 @@ class _PubMedTransformerDatesMixin:
         self,
         article: ET.Element,
     ) -> dict[str, object]:
-        """Extract journal-related data from article XML."""
+        """Extract journal-related data from article XML.
+
+        Args:
+            article: ``Article`` XML element containing Journal, Pagination, and ISSN sub-elements.
+
+        Returns:
+            Dictionary with journal metadata fields including ``journal``, ``issn``,
+            ``volume``, ``issue``, ``page_range``, ``page_first``, and ``page_last``.
+            All values are None when the Journal element is absent.
+        """
         journal_elem = article.find(".//Journal")
         pages = get_text(article.find(".//Pagination/MedlinePgn"))
         first_page, last_page = parse_page_range(pages)
@@ -83,7 +99,20 @@ class _PubMedTransformerDatesMixin:
         pub_date: str | None,
         year: int | None,
     ) -> str | None:
-        """Compute unified publication_date (YYYY-MM-DD)."""
+        """Compute unified publication_date (YYYY-MM-DD).
+
+        Args:
+            epub_date: Electronic publication date string; used first when at least
+                10 characters long (YYYY-MM-DD prefix).
+            pub_date: Print publication date string; normalized via the data normalizer
+                when epub_date is unavailable.
+            year: Publication year as integer fallback; produces ``YYYY-12-31`` when
+                neither epub_date nor pub_date is available.
+
+        Returns:
+            Resolved publication date string in YYYY-MM-DD format, or None when
+            no date information is available.
+        """
         if epub_date and len(epub_date) >= 10:
             return epub_date[:10]
 
@@ -99,7 +128,16 @@ class _PubMedTransformerDatesMixin:
         self,
         pub_date_node: ET.Element | None,
     ) -> tuple[int | None, int | None]:
-        """Extract month and day as integers from PubDate node."""
+        """Extract month and day as integers from PubDate node.
+
+        Args:
+            pub_date_node: Optional ``PubDate`` XML element to extract from.
+                Returns ``(None, None)`` immediately when None.
+
+        Returns:
+            Two-element tuple ``(month, day)`` as integers, or None for each
+            component that is absent or unparseable.
+        """
         if pub_date_node is None:
             return None, None
 
@@ -116,7 +154,15 @@ class _PubMedTransformerDatesMixin:
         return pub_month, pub_day
 
     def _parse_month(self, month_text: str | None) -> int | None:
-        """Convert month text (name or number) to integer."""
+        """Convert month text (name or number) to integer.
+
+        Args:
+            month_text: Month as a string, either an abbreviated name (e.g., ``'Jan'``)
+                or a numeric string (e.g., ``'1'``). Returns None when falsy.
+
+        Returns:
+            Integer month (1-12) or None if the text cannot be resolved.
+        """
         if not month_text:
             return None
 
@@ -132,7 +178,19 @@ class _PubMedTransformerDatesMixin:
         pubmed_data: ET.Element | None,
         medline: ET.Element | None,
     ) -> dict[str, object]:
-        """Extract normalized date fields from article and MedlineCitation XML."""
+        """Extract normalized date fields from article and MedlineCitation XML.
+
+        Args:
+            article: ``Article`` XML element containing JournalIssue and PubDate sub-elements.
+            pubmed_data: Optional ``PubmedData`` element (currently reserved for future use).
+            medline: Optional ``MedlineCitation`` element used to extract DateCompleted
+                and DateRevised fields.
+
+        Returns:
+            Dictionary with normalized date fields: ``pub_date``, ``pub_month``,
+            ``pub_day``, ``publication_date``, ``publication_year``,
+            ``date_completed``, and ``date_revised``.
+        """
         journal = article.find(".//Journal")
         journal_issue = journal.find("JournalIssue") if journal else None
         pub_date_node = journal_issue.find("PubDate") if journal_issue else None

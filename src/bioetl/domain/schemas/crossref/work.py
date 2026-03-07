@@ -1,6 +1,6 @@
 """Pandera schema for CrossRef Publication entity.
 
-Aligned with RULES.md v5.8 and CrossRef REST API.
+Aligned with RULES.md v5.23 and CrossRef REST API.
 Source: https://api.crossref.org/swagger-ui/index.html
 
 Terminology:

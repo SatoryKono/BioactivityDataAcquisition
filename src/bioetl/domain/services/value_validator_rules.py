@@ -32,7 +32,16 @@ PCHEMBL_TYPICAL_MAX = 12.0
 
 
 def normalize_unit_name(unit: str) -> str:
-    """Normalize unit string for lookup."""
+    """Normalize unit string for lookup in concentration ranges.
+
+    Resolves common aliases (e.g., 'uM' -> 'µM', 'nanomolar' -> 'nM').
+
+    Args:
+        unit: Raw unit string from API or user input.
+
+    Returns:
+        Canonical unit string ready for lookup in DEFAULT_CONCENTRATION_RANGES.
+    """
     normalized = unit.strip()
     unit_aliases = {
         "um": "µM",
@@ -53,7 +62,14 @@ def normalize_unit_name(unit: str) -> str:
 
 
 def is_percent_inhibition_type(parsed_type: ActivityType | str) -> bool:
-    """Check if activity type is percent inhibition."""
+    """Check if activity type is percent inhibition.
+
+    Args:
+        parsed_type: ActivityType enum value or raw string from API.
+
+    Returns:
+        True if the activity type is PERCENT_INHIBITION, False otherwise.
+    """
     return (
         isinstance(parsed_type, ActivityType)
         and parsed_type == ActivityType.PERCENT_INHIBITION
@@ -61,7 +77,14 @@ def is_percent_inhibition_type(parsed_type: ActivityType | str) -> bool:
 
 
 def validate_percent_value(value: float) -> tuple[bool, str | None]:
-    """Validate percentage value is within 0-100 range."""
+    """Validate percentage value is within 0-100 range.
+
+    Args:
+        value: Percentage value to validate (e.g., percent inhibition).
+
+    Returns:
+        Tuple of (is_valid, error_message). error_message is None if valid.
+    """
     if value < 0 or value > 100:
         return False, f"Percent inhibition must be 0-100, got {value}"
     return True, None

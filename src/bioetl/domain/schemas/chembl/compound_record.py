@@ -1,6 +1,6 @@
 """Pandera schema for ChEMBL Compound Record entity.
 
-Aligned with RULES.md v5.0 and ChEMBL 34 API schema.
+Aligned with RULES.md v5.23 and ChEMBL 34 API schema.
 Source: ChEMBL REST API /compound_record endpoint.
 """
 

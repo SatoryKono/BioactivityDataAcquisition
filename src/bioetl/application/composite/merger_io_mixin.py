@@ -87,7 +87,18 @@ class MergeIOMixin(MergeOutputWriterMixin):
         seed_table: str,
         seed_pipeline: str | None,
     ) -> tuple[pl.DataFrame, int, str | None]:
-        """Read and optionally qualify seed DataFrame."""
+        """Read and optionally qualify seed DataFrame.
+
+        Args:
+            seed_table: Silver table path for the seed pipeline.
+            seed_pipeline: Optional pipeline name used to qualify column names.
+                When None, the pipeline is inferred from ``seed_table``.
+
+        Returns:
+            Three-element tuple: the qualified seed DataFrame, the number of seed
+            records before qualification, and the effective pipeline name (or None
+            if it could not be determined).
+        """
         self._logger.info("Reading seed table", table=seed_table)
         seed_df = await self._read_silver_table(seed_table)
         records_from_seed = len(seed_df)
@@ -126,7 +137,17 @@ class MergeIOMixin(MergeOutputWriterMixin):
         enrichers: Sequence[EnricherConfig],
         enrichment_results: dict[str, EnrichmentResult],
     ) -> tuple[dict[str, pl.DataFrame], list[str]]:
-        """Load only successful enricher silver tables."""
+        """Load only successful enricher silver tables.
+
+        Args:
+            enrichers: Enricher configurations specifying pipeline names and Silver tables.
+            enrichment_results: Map of enricher pipeline name to its execution result;
+                only enrichers with successful results are loaded.
+
+        Returns:
+            Two-element tuple: a dict mapping pipeline name to its loaded DataFrame,
+            and a list of pipeline names that were successfully loaded.
+        """
         enricher_dfs: dict[str, pl.DataFrame] = {}
         sources: list[str] = []
 
@@ -174,7 +195,18 @@ class MergeIOMixin(MergeOutputWriterMixin):
         dependencies: Sequence[DependencyConfig] | None,
         dependency_results: dict[str, DependencyResult] | None,
     ) -> tuple[dict[str, pl.DataFrame], list[str]]:
-        """Load only successful dependency silver tables."""
+        """Load only successful dependency silver tables.
+
+        Args:
+            dependencies: Optional list of dependency configurations; returns empty
+                results immediately when None or empty.
+            dependency_results: Optional map of dependency pipeline name to its execution
+                result; only dependencies with successful results and a Silver table are loaded.
+
+        Returns:
+            Two-element tuple: a dict mapping dependency pipeline name to its loaded
+            DataFrame, and a list of pipeline names that were successfully loaded.
+        """
         if not dependencies or not dependency_results:
             return {}, []
 
@@ -224,7 +256,19 @@ class MergeIOMixin(MergeOutputWriterMixin):
         dependencies: Sequence[DependencyConfig] | None,
         seed_pipeline: str | None,
     ) -> pl.DataFrame:
-        """Join dependencies only when both config and data are present."""
+        """Join dependencies only when both config and data are present.
+
+        Args:
+            merged_df: Current merged DataFrame to join dependencies onto.
+            dependency_dfs: Map of dependency pipeline name to its loaded DataFrame.
+            dependencies: Dependency configurations defining join strategy and keys.
+                When None or empty, the original DataFrame is returned unchanged.
+            seed_pipeline: Effective seed pipeline name used to resolve join keys.
+
+        Returns:
+            DataFrame with all active dependency tables joined, or the original
+            ``merged_df`` when no dependencies are configured or available.
+        """
         if not dependencies or not dependency_dfs:
             return merged_df
 
@@ -254,7 +298,21 @@ class MergeIOMixin(MergeOutputWriterMixin):
         enricher_dfs: dict[str, pl.DataFrame],
         effective_seed_pipeline: str | None,
     ) -> tuple[pl.DataFrame, CrossValidationStats | None, list[dict[str, object]]]:
-        """Run optional seed-vs-enricher cross-validation and collect quarantine rows."""
+        """Run optional seed-vs-enricher cross-validation and collect quarantine rows.
+
+        Args:
+            merged_df: Fully merged DataFrame to validate.
+            enrichers: Enricher configurations used to identify joined pipeline columns.
+            enricher_dfs: Map of pipeline name to loaded enricher DataFrame, used to
+                determine which enrichers actually participated in the merge.
+            effective_seed_pipeline: Seed pipeline name required for cross-validation;
+                when None the validation is skipped.
+
+        Returns:
+            Three-element tuple: the validated (and possibly filtered) DataFrame,
+            CrossValidationStats summary (or None when validation was skipped),
+            and a list of quarantine-flagged row dicts.
+        """
         if self._cross_validator is None or not effective_seed_pipeline:
             return merged_df, None, []
 
@@ -321,7 +379,22 @@ class MergeIOMixin(MergeOutputWriterMixin):
         cv_stats: CrossValidationStats | None,
         quarantine_payloads: list[dict[str, object]],
     ) -> MergeResult:
-        """Build MergeResult summary object from finalized merged DataFrame."""
+        """Build MergeResult summary object from finalized merged DataFrame.
+
+        Args:
+            merged_df: Final merged DataFrame used to compute coverage and full-enrichment counts.
+            enrichers: Enricher configurations used for counting fully enriched records.
+            records_merged: Total number of rows in the merged output.
+            records_from_seed: Number of rows read from the seed Silver table.
+            records_enriched: Number of rows with at least one enrichment value.
+            sources_used: List of pipeline names that contributed to the merge.
+            duration_seconds: Wall-clock time taken for the merge stage.
+            cv_stats: Optional cross-validation statistics; None when CV was skipped.
+            quarantine_payloads: List of row dicts flagged for quarantine by cross-validation.
+
+        Returns:
+            MergeResult populated with counts, coverage, paths, and optional CV metadata.
+        """
         return MergeResult(
             records_merged=records_merged,
             records_from_seed=records_from_seed,
@@ -337,7 +410,15 @@ class MergeIOMixin(MergeOutputWriterMixin):
         )
 
     async def _read_silver_table(self, path: str) -> pl.DataFrame:
-        """Read a Silver table from DeltaReaderPort or StoragePort fallback."""
+        """Read a Silver table from DeltaReaderPort or StoragePort fallback.
+
+        Args:
+            path: Filesystem path or table name for the Silver Delta table.
+
+        Returns:
+            Polars DataFrame loaded from the Delta table, or an empty DataFrame
+            when no records are found via the StoragePort fallback.
+        """
         import polars as pl
 
         if self._delta_reader is not None:

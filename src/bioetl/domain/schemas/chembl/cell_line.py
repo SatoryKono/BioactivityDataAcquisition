@@ -1,6 +1,6 @@
 """Pandera schema for ChEMBL Cell Line entity.
 
-Aligned with RULES.md v5.0 and ChEMBL 34 schema.
+Aligned with RULES.md v5.23 and ChEMBL 34 schema.
 Source: ChEMBL REST API, table cell_dictionary.
 """
 

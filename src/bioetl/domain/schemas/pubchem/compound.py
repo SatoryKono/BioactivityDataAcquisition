@@ -1,6 +1,6 @@
 """Pandera schema for PubChem Molecule entity.
 
-Aligned with RULES.md v5.0 and PubChem PUG REST API.
+Aligned with RULES.md v5.23 and PubChem PUG REST API.
 Source: https://pubchem.ncbi.nlm.nih.gov/rest/pug/
 """
 

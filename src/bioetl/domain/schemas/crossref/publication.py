@@ -1,7 +1,7 @@
 """Pandera schema for CrossRef Publication (enriched) entity.
 
 Used for Silver layer validation of publications enriched via CrossRef API.
-Aligned with RULES.md v5.10 and Publication Schema Unification spec.
+Aligned with RULES.md v5.23 and Publication Schema Unification spec.
 """
 
 from __future__ import annotations

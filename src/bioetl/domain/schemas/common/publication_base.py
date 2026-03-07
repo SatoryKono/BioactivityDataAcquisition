@@ -1,6 +1,6 @@
 """Base schema for all publication entities across providers.
 
-Aligned with RULES.md v5.10 and Publication Schema Unification spec.
+Aligned with RULES.md v5.23 and Publication Schema Unification spec.
 Provides unified field set for cross-provider publication analysis.
 """
 

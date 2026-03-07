@@ -65,7 +65,16 @@ def handle_cli_failure(
     pipeline: str,
     reason_code: str,
 ) -> None:
-    """Handle CLI failures with consistent reason_code semantics."""
+    """Handle CLI failures with consistent reason_code semantics.
+
+    Routes cleanup-preview errors to a simplified formatter and delegates all
+    other exceptions to the shared execution_policy handler which calls sys.exit.
+
+    Args:
+        exc: Exception caught at the CLI command boundary.
+        pipeline: Pipeline name for structured error context.
+        reason_code: Machine-readable code for the failure (e.g., 'CLI_RUN_DOMAIN_ERROR').
+    """
     if reason_code.startswith("CLI_CLEANUP_PREVIEW"):
         echo_error(
             "Error previewing cleanup",
@@ -95,6 +104,11 @@ def map_status_to_exit_code(
 ) -> ExitCode:
     """Map pipeline status and error type to CLI exit code.
 
+    Args:
+        status: PipelineRunResult enum value (SUCCESS, FAILED, SHUTDOWN, DRY_RUN).
+        error_type: Exception class name from the failed run; used to select a
+            specific exit code when status is FAILED. None for non-failure statuses.
+
     Returns:
         ExitCode corresponding to the pipeline run status and optional error type.
     """
@@ -109,6 +123,13 @@ def handle_destructive_step(
     yes: bool,
 ) -> bool:
     """Run destructive confirmation/preview step with CLI error policy.
+
+    Args:
+        pipeline: Pipeline name for confirmation messages and error context.
+        run_type: Type of run (e.g., 'rebuild', 'backfill'); only those types trigger
+            the confirmation/preview flow.
+        dry_run: When True, shows a cleanup preview and returns False without running.
+        yes: When True, skips the interactive confirmation prompt.
 
     Returns:
         True if pipeline execution should continue, False if cancelled or dry-run
@@ -151,6 +172,16 @@ def execute_run_step(
 ) -> RunResult:
     """Run pipeline execution step with CLI failure mapping.
 
+    Delegates to the provided executor and maps all exception types to
+    structured CLI failure handling (which calls sys.exit on failure).
+
+    Args:
+        pipeline: Pipeline name for error context and executor call.
+        options: RunOptions with run type, limits, and filter settings.
+        health_server: Whether to enable the HTTP health server during execution.
+        health_port: Port the health server should listen on.
+        execute_run: Callable that synchronously runs the pipeline and returns RunResult.
+
     Returns:
         RunResult with pipeline execution status and metrics.
     """
@@ -186,7 +217,13 @@ def finalize_run_step(
     result_presenter: ResultPresenterCallable,
     exit_func: ExitCallable,
 ) -> None:
-    """Render result and terminate process with mapped exit code."""
+    """Render result and terminate process with mapped exit code.
+
+    Args:
+        result: RunResult from the completed pipeline execution.
+        result_presenter: Callable that formats and prints the result to the terminal.
+        exit_func: Callable that terminates the process with the given exit code.
+    """
     exit_code = map_status_to_exit_code(result.status, result.error_type)
     result_presenter(result)
     exit_func(exit_code)

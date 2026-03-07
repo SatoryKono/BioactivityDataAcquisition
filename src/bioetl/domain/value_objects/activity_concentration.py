@@ -32,7 +32,14 @@ class ConcentrationUnit(StrEnum):
 
     @classmethod
     def from_string(cls, unit_str: str) -> ConcentrationUnit:
-        """Parse concentration unit from string."""
+        """Parse concentration unit from string.
+
+        Args:
+            unit_str: Unit abbreviation such as 'nM', 'uM', 'μM', 'mM', 'M'.
+
+        Returns:
+            Corresponding ConcentrationUnit enum member.
+        """
         normalized = unit_str.strip().lower()
 
         unit_map = {
@@ -65,7 +72,14 @@ class Concentration:
             raise ValueError(f"Concentration cannot be negative: {self.value}")
 
     def to_unit(self, target_unit: ConcentrationUnit) -> Concentration:
-        """Convert to a different unit."""
+        """Convert to a different unit.
+
+        Args:
+            target_unit: The desired concentration unit to convert to.
+
+        Returns:
+            New Concentration instance with value expressed in target_unit.
+        """
         molar_value = self.value * self.unit.to_molar_factor
         target_value = molar_value / target_unit.to_molar_factor
         return Concentration(value=target_value, unit=target_unit)
@@ -85,7 +99,14 @@ class Concentration:
 
     @classmethod
     def from_string(cls, s: str) -> Concentration:
-        """Parse concentration from string."""
+        """Parse concentration from string.
+
+        Args:
+            s: Concentration string such as '100 nM', '1.5 uM', '50 mM'.
+
+        Returns:
+            Concentration instance with parsed numeric value and unit.
+        """
         match = re.match(
             r"([+-]?[\d.]+(?:[eE][+-]?\d+)?)\s*([a-zμ]+)", s.strip(), re.IGNORECASE
         )

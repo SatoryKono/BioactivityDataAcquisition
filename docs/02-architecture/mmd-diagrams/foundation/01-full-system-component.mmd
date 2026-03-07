@@ -21,17 +21,7 @@
 %% @uniform-width group
 %% @uniform width=272 groups=6 width_strategy=group
 
-%%{init: {
-  'flowchart': {
-    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
-  },
-  'layout': 'elk',
-  'elk': {
-    'mergeEdges': true,
-    'nodePlacementStrategy': 'BRANDES_KOEPF',
-    'edgeRouting': 'ORTHOGONAL'
-  }
-}}%% 
+%%{init: {'layout': 'elk', 'flowchart': {'subGraphTitleMargin': {'top': 12, 'bottom': 12}}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
 flowchart TB
 %% keep-orphan: DQConfig, PipelineConfig, Publication, RuntimeConfig
 

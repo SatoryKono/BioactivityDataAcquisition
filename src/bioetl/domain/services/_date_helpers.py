@@ -88,10 +88,11 @@ def format_date_parts(date_parts: Sequence[Sequence[int]] | None) -> str | None:
     - Year-only [[2024]]: returns "2024-12-31" (last day of year)
 
     Args:
-        date_parts: Date parts.
+        date_parts: CrossRef date-parts array in format [[year, month?, day?]].
 
     Returns:
-        The str | None result.
+        Full ISO date string (YYYY-MM-DD) with end-of-period normalization,
+        or None if date_parts is empty or contains no values.
     """
     if not date_parts:
         return None

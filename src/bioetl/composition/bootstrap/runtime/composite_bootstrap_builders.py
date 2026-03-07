@@ -71,6 +71,16 @@ def bootstrap_runtime_basics(
 ) -> tuple[str, Settings, LoggerPort, object, LockPort]:
     """Build base runtime dependencies shared across composite bootstrap.
 
+    Args:
+        config: Validated CompositeConfig used to derive the pipeline name.
+        run_id: Optional run UUID string; a new UUID is generated when None.
+        settings_provider: Callable returning global Settings.
+        logger_bootstrapper: Callable accepting (pipeline_name, run_uuid, log_level)
+            and returning a LoggerPort.
+        storage_bootstrapper: Callable returning a storage adapter (any type).
+        lock_factory: Callable returning a LockPort implementation.
+        uuid_factory: Callable returning a new UUID (injectable for testing).
+
     Returns:
         Tuple of (run_id, settings, logger, storage, lock) for the composite run.
     """
@@ -104,6 +114,16 @@ def build_runner_factories(
 ]:
     """Build seed/dependency/enricher runner factories for composite phases.
 
+    Args:
+        config: CompositeConfig describing seed, enrichers, and dependencies.
+        runtime: Runtime options used to resolve Bronze cache settings per phase.
+        logger: Structured logger forwarded to filter extraction and runner builder.
+        runner_factory_builder_cls: Class used to build per-phase runner factories.
+        filter_extraction_service_cls: Class used to extract filter IDs from keys DataFrames.
+        pipeline_runner_builder: Callable that accepts a PipelineRunContext and
+            returns a configured PipelineRunner.
+        resolve_bronze_opts_fn: Callable to resolve per-phase cached Bronze options.
+
     Returns:
         Tuple of (seed_factory, dependency_factory, enricher_factory) callables.
     """
@@ -134,6 +154,20 @@ def build_support_services(
     create_dq_report_service_fn: Callable[[LoggerPort, Settings], DQReportService],
 ) -> CompositeSupportServices:
     """Build composite support service bundle consumed by runner facade.
+
+    Args:
+        config: CompositeConfig for this composite run.
+        runtime: Runtime options (resume, concurrency, etc.).
+        settings: Global settings supplying data_dir and feature flags.
+        logger: Structured logger forwarded to all support services.
+        storage: Storage adapter injected from the composition root.
+        run_id: UUID string identifying this run for checkpoints.
+        support_services_factory_cls: Factory class used to build the bundle.
+        resolve_gold_schema_fn: Callable returning the Gold Pandera schema for
+            a composite pipeline name, or None.
+        load_field_group_registry_fn: Callable returning the FieldGroupRegistry
+            for a composite pipeline name, or None.
+        create_dq_report_service_fn: Callable returning a DQReportService.
 
     Returns:
         CompositeSupportServices bundle with all services required by the runner.
@@ -166,6 +200,21 @@ def create_composite_runner(
     runner_factory: Callable[..., CompositePipelineRunnerService],
 ) -> CompositePipelineRunnerService:
     """Create fully wired CompositePipelineRunner service.
+
+    Args:
+        config: CompositeConfig for this composite run.
+        runtime: Runtime options for the composite run.
+        run_id: UUID string identifying this run.
+        logger: Structured logger forwarded to the runner.
+        lock: LockPort used for distributed execution safety.
+        seed_runner_factory: Callable that creates a seed-phase PipelineRunner.
+        dependencies_runner_factory: Callable that creates a dependency-phase
+            PipelineRunner given a pipeline name and keys DataFrame.
+        enricher_runner_factory: Callable that creates an enricher-phase
+            PipelineRunner given a pipeline name and keys DataFrame.
+        support_services: Bundle of support services (checkpoint, merger, etc.).
+        runner_factory: Factory callable used to instantiate
+            CompositePipelineRunnerService with all wired dependencies.
 
     Returns:
         Fully wired CompositePipelineRunnerService ready for execution.

@@ -24,20 +24,38 @@ class PChemblValue:
             raise ValueError(f"pChEMBL value exceeds physical limit (14): {self.value}")
 
     def to_molar(self) -> float:
-        """Convert to molar concentration."""
+        """Convert to molar concentration.
+
+        Returns:
+            Molar concentration as 10^(-pChEMBL value) in molar (M) units.
+        """
         return 10 ** (-self.value)
 
     def to_concentration(
         self, unit: ConcentrationUnit = ConcentrationUnit.NANOMOLAR
     ) -> Concentration:
-        """Convert to Concentration value object."""
+        """Convert to Concentration value object.
+
+        Args:
+            unit: Target concentration unit. Defaults to nanomolar (nM).
+
+        Returns:
+            Concentration value object expressed in the requested unit.
+        """
         molar = self.to_molar()
         value_in_unit = molar / unit.to_molar_factor
         return Concentration(value=value_in_unit, unit=unit)
 
     @classmethod
     def from_molar(cls, molar_concentration: float) -> PChemblValue:
-        """Create from molar concentration."""
+        """Create from molar concentration.
+
+        Args:
+            molar_concentration: Concentration in molar (M) units. Must be positive.
+
+        Returns:
+            PChemblValue computed as -log10(molar_concentration).
+        """
         if molar_concentration <= 0:
             raise ValueError(
                 f"Molar concentration must be positive: {molar_concentration}"
@@ -50,7 +68,14 @@ class PChemblValue:
 
     @classmethod
     def from_concentration(cls, concentration: Concentration) -> PChemblValue:
-        """Create from Concentration value object."""
+        """Create from Concentration value object.
+
+        Args:
+            concentration: Concentration value object in any supported unit.
+
+        Returns:
+            PChemblValue derived from the concentration's molar equivalent.
+        """
         return cls.from_molar(concentration.molar_value)
 
     @property

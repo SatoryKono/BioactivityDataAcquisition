@@ -36,7 +36,14 @@ class MetricsCollector:
         count: int = 1,
         run_type: str = "incremental",
     ) -> None:
-        """Record processed records count."""
+        """Record processed records count.
+
+        Args:
+            layer: Pipeline stage label (e.g., "bronze", "silver", "gold").
+            count: Number of records processed (default: 1).
+            run_type: Type of run for metric labelling (default: "incremental").
+
+        """
         RECORDS_PROCESSED_TOTAL.labels(
             pipeline=self.pipeline_name,
             stage=layer,
@@ -44,7 +51,13 @@ class MetricsCollector:
         ).inc(count)
 
     def record_error(self, error_code: str, stage: str = "processing") -> None:
-        """Record an error."""
+        """Record an error occurrence.
+
+        Args:
+            error_code: Categorised error code identifying the failure type.
+            stage: Pipeline stage where the error occurred (default: "processing").
+
+        """
         ERRORS_TOTAL.labels(
             pipeline=self.pipeline_name,
             stage=stage,

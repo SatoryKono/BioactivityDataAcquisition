@@ -14,6 +14,9 @@ def extract_authors(
 ) -> list[str]:
     """Extract author display names from authorships array.
 
+    Args:
+        authorships: List of authorship dicts from the OpenAlex API response.
+
     Returns:
         List of author display names in authorship order.
     """
@@ -32,6 +35,9 @@ def extract_author_ids(
     authorships: list[JsonDict],  # Any: untyped JSON fragment from OpenAlex API
 ) -> list[str]:
     """Extract OpenAlex author IDs from authorships preserving order.
+
+    Args:
+        authorships: List of authorship dicts from the OpenAlex API response.
 
     Returns:
         List of extracted author ID strings (empty string for missing IDs).
@@ -53,6 +59,9 @@ def extract_author_orcids(
 ) -> list[str]:
     """Extract ORCID identifiers from authorships preserving order.
 
+    Args:
+        authorships: List of authorship dicts from the OpenAlex API response.
+
     Returns:
         List of ORCID identifier strings (empty string for missing ORCIDs).
     """
@@ -73,6 +82,9 @@ def extract_affiliations(
     authorships: list[JsonDict],  # Any: untyped JSON fragment from OpenAlex API
 ) -> list[str]:
     """Extract unique affiliations from authorships (sorted).
+
+    Args:
+        authorships: List of authorship dicts from the OpenAlex API response.
 
     Returns:
         Sorted list of unique institution display names.
@@ -97,6 +109,9 @@ def extract_institution_ids(
 ) -> list[str]:
     """Extract unique OpenAlex institution IDs from authorships.
 
+    Args:
+        authorships: List of authorship dicts from the OpenAlex API response.
+
     Returns:
         Sorted list of unique institution ID strings.
     """
@@ -120,6 +135,9 @@ def extract_institution_country_codes(
 ) -> list[str]:
     """Extract unique institution country codes from authorships.
 
+    Args:
+        authorships: List of authorship dicts from the OpenAlex API response.
+
     Returns:
         Sorted list of unique uppercased country code strings.
     """
@@ -141,6 +159,9 @@ def extract_institution_ror_ids(
     authorships: list[JsonDict],  # Any: untyped JSON fragment from OpenAlex API
 ) -> list[str]:
     """Extract unique ROR IDs from authorships institutions.
+
+    Args:
+        authorships: List of authorship dicts from the OpenAlex API response.
 
     Returns:
         Sorted list of unique ROR ID URLs (https://ror.org/...).

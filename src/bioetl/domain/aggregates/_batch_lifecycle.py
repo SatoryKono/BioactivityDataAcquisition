@@ -35,7 +35,14 @@ def emit_batch_created(
     run_id: RunID,
     batch_id: BatchID,
 ) -> None:
-    """Append a BatchCreated event."""
+    """Append a BatchCreated event.
+
+    Args:
+        events: Mutable event list on the aggregate to append the event to.
+        occurred_at: Timestamp when the batch was created.
+        run_id: Pipeline run identifier that owns the batch.
+        batch_id: Unique identifier assigned to the new batch.
+    """
     events.append(
         BatchCreated(
             occurred_at=occurred_at,
@@ -57,6 +64,16 @@ def seal(
     sealed_at: datetime | None = None,
 ) -> tuple[BatchStatus, datetime]:
     """Validate and perform OPEN -> SEALED transition.
+
+    Args:
+        status: Current batch status, must be OPEN.
+        events: Mutable event list to append the BatchSealed event to.
+        run_id: Pipeline run identifier.
+        batch_id: Batch identifier.
+        record_count: Total number of records in the batch.
+        valid_count: Number of valid (non-quarantined) records.
+        quarantined_count: Number of quarantined records.
+        sealed_at: Optional explicit seal timestamp. Defaults to UTC now.
 
     Returns:
         Tuple of (BatchStatus.SEALED, sealed_at timestamp).
@@ -84,6 +101,9 @@ def seal(
 def mark_writing(status: BatchStatus) -> BatchStatus:
     """Validate and perform SEALED -> WRITING transition.
 
+    Args:
+        status: Current batch status, must be SEALED.
+
     Returns:
         BatchStatus.WRITING after successful transition.
     """
@@ -105,6 +125,14 @@ def mark_committed(
     layer: str,
 ) -> BatchStatus:
     """Validate and perform WRITING -> COMMITTED transition.
+
+    Args:
+        status: Current batch status, must be WRITING.
+        events: Mutable event list to append the BatchWritten event to.
+        run_id: Pipeline run identifier.
+        batch_id: Batch identifier.
+        valid_count: Number of valid records successfully written.
+        layer: Medallion layer name (e.g., 'bronze', 'silver', 'gold').
 
     Returns:
         BatchStatus.COMMITTED after successful transition.
@@ -138,6 +166,15 @@ def mark_failed(
 ) -> BatchStatus:
     """Validate and perform WRITING -> FAILED transition.
 
+    Args:
+        status: Current batch status, must be WRITING.
+        events: Mutable event list to append the BatchFailed event to.
+        run_id: Pipeline run identifier.
+        batch_id: Batch identifier.
+        layer: Medallion layer where failure occurred (e.g., 'bronze').
+        error: Human-readable error message describing the failure.
+        error_type: Optional error classification (e.g., exception class name).
+
     Returns:
         BatchStatus.FAILED after recording the failure event.
     """
@@ -169,7 +206,17 @@ def emit_record_quarantined(
     error: str,
     content_hash: ContentHash | None,
 ) -> None:
-    """Append a RecordQuarantined event."""
+    """Append a RecordQuarantined event.
+
+    Args:
+        events: Mutable event list on the aggregate to append the event to.
+        run_id: Pipeline run identifier.
+        batch_id: Batch that contains the quarantined record.
+        entity_id: Optional entity identifier of the failed record.
+        error_code: Optional classification code for the error.
+        error: Human-readable error message.
+        content_hash: Optional content hash of the failed record for deduplication.
+    """
     events.append(
         RecordQuarantined(
             occurred_at=datetime.now(UTC),

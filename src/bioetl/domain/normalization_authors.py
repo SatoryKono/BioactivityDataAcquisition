@@ -15,7 +15,14 @@ __all__ = [
 
 
 def extract_first_item(items: list[object] | None) -> object | None:
-    """Extract first non-None item from list."""
+    """Extract first non-None item from list.
+
+    Args:
+        items: List of objects or None.
+
+    Returns:
+        First non-None element from the list, or None if list is empty or invalid.
+    """
     if not items or not isinstance(items, list):
         return None
     return next((item for item in items if item is not None), None)
@@ -27,7 +34,14 @@ def _is_valid_string(item: object) -> str | None:
 
 
 def extract_first_string(items: list[str] | None) -> str | None:
-    """Extract first non-empty stripped string from list."""
+    """Extract first non-empty stripped string from list.
+
+    Args:
+        items: List of strings or None.
+
+    Returns:
+        First non-empty stripped string, or None if no valid string is found.
+    """
     if not items or not isinstance(items, list):
         return None
     return next((s for item in items if (s := _is_valid_string(item))), None)
@@ -78,7 +92,16 @@ def _parse_authors_string(text: str) -> list[str]:
 
 
 def parse_authors_to_list(authors: list[str] | str | None) -> list[str]:
-    """Parse author input (list, JSON string, or delimited string) to list."""
+    """Parse author input (list, JSON string, or delimited string) to list.
+
+    Args:
+        authors: Author data as a list of strings, a JSON array string, a
+            semicolon/comma-delimited string, or None.
+
+    Returns:
+        List of non-empty stripped author name strings. Returns empty list if
+        input is None or contains no valid authors.
+    """
     if authors is None:
         return []
     if isinstance(authors, list):

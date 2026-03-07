@@ -30,6 +30,12 @@ class ColumnPriorityOrdererService:
     ) -> list[str]:
         """Collect all qualified/legacy columns for a field from all sources.
 
+        Args:
+            field: Unqualified field name to look up across sources.
+            enrichers: Enricher configurations whose pipelines are searched.
+            available_columns: Set of column names present in the current DataFrame.
+            seed_pipeline: Optional seed pipeline name used to generate the seed column.
+
         Returns:
             List of qualified column names (e.g. ``provider.entity.field``) present in
             the DataFrame for the given field across seed and all enrichers.
@@ -74,6 +80,12 @@ class ColumnPriorityOrdererService:
         seed_pipeline: str | None = None,
     ) -> list[str]:
         """Order columns by configured source priority.
+
+        Args:
+            field: Unqualified field name used for column resolution.
+            columns: List of qualified column names to reorder.
+            priorities: Ordered sequence of source names (e.g. ``["seed", "chembl"]``).
+            seed_pipeline: Optional seed pipeline name used to resolve the ``"seed"`` token.
 
         Returns:
             List of column names reordered so that highest-priority sources appear first,
@@ -120,6 +132,12 @@ class ColumnPriorityOrdererService:
     ) -> tuple[list[str], list[str]]:
         """Filter columns to those compatible for coalescing.
 
+        Args:
+            df: DataFrame containing the columns to evaluate.
+            field: Unqualified field name used for log context.
+            ordered_cols: Priority-ordered list of column names to check.
+            can_coalesce: Callable that returns True when two columns are type-compatible.
+
         Returns:
             Tuple of (compatible_cols, incompatible_cols) where compatible_cols are
             type-compatible with the leading column and incompatible_cols are not.
@@ -149,6 +167,9 @@ class ColumnPriorityOrdererService:
     @staticmethod
     def get_enricher_prefix(enricher_pipeline: str) -> str:
         """Get enricher prefix with trailing separator.
+
+        Args:
+            enricher_pipeline: Pipeline name in ``"provider_entity"`` format.
 
         Returns:
             Qualified prefix string in the form ``"provider.entity."`` or legacy

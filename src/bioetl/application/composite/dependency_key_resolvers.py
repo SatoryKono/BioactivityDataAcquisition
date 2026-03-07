@@ -45,6 +45,12 @@ class SeedKeyResolver:
     ) -> pl.DataFrame:
         """Resolve keys by passing through the seed keys unchanged.
 
+        Args:
+            dependency: Dependency configuration describing the target pipeline.
+            seed_keys: DataFrame of seed keys from the composite seed pipeline.
+            dep_config_lookup: Mapping of pipeline name to DependencyConfig (unused here).
+            delta_reader: Delta Lake reader port (unused here).
+
         Returns:
             The seed_keys DataFrame unmodified.
         """
@@ -72,9 +78,21 @@ class ChainedKeyResolver:
     ) -> pl.DataFrame:
         """Resolve keys by reading them from the source dependency's Silver table.
 
+        Args:
+            dependency: Dependency configuration with ``key_source`` specifying the
+                chained dependency pipeline name.
+            seed_keys: Fallback seed keys used when the Silver table is unavailable.
+            dep_config_lookup: Mapping of pipeline name to DependencyConfig used to
+                look up the chained source's Silver table path.
+            delta_reader: Delta Lake reader port for reading the chained Silver table.
+
         Returns:
             DataFrame of keys from the chained source's Silver table, filtered by
             key_filter if configured; falls back to seed_keys on read failures.
+
+        Raises:
+            ValueError: If the chained dependency has no silver_table configured or
+                if reading the Silver table fails.
         """
         reader = self._require_delta_reader(dependency, delta_reader)
         source_config = self._resolve_source_config(dependency, dep_config_lookup)
@@ -221,6 +239,9 @@ class ChainedKeyResolver:
 def create_seed_key_resolver(logger: LoggerPort) -> SeedKeyResolver:
     """Create default seed-key resolver.
 
+    Args:
+        logger: Logger instance for diagnostic messages.
+
     Returns:
         New SeedKeyResolver instance wired with the provided logger.
     """
@@ -229,6 +250,9 @@ def create_seed_key_resolver(logger: LoggerPort) -> SeedKeyResolver:
 
 def create_chained_key_resolver(logger: LoggerPort) -> ChainedKeyResolver:
     """Create default chained-key resolver.
+
+    Args:
+        logger: Logger instance for diagnostic messages.
 
     Returns:
         New ChainedKeyResolver instance wired with the provided logger.

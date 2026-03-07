@@ -42,7 +42,17 @@ class PipelineContext:
         logger: LoggerPort,
         started_at: datetime | None = None,
     ) -> PipelineContext:
-        """Create a new PipelineContext with optional automatic timestamp."""
+        """Create a new PipelineContext with optional automatic timestamp.
+
+        Args:
+            run_id: Unique identifier for the pipeline run.
+            run_type: Type of run (incremental, backfill, rebuild).
+            logger: Structured logger port for pipeline-level logging.
+            started_at: Optional UTC start timestamp. Defaults to the current UTC time.
+
+        Returns:
+            New PipelineContext instance with all fields set.
+        """
         return cls(
             run_id=run_id,
             run_type=run_type,
@@ -54,7 +64,14 @@ class PipelineContext:
         self,
         **kwargs: Any,  # Any: structlog-compatible key=value pairs
     ) -> PipelineContext:
-        """Bind additional context to the logger."""
+        """Bind additional context to the logger.
+
+        Args:
+            **kwargs: Key-value pairs to bind to the structured logger (structlog-compatible).
+
+        Returns:
+            New PipelineContext with the bound logger; all other fields unchanged.
+        """
         new_logger = self.logger.bind(**kwargs)
         return PipelineContext(
             run_id=self.run_id,

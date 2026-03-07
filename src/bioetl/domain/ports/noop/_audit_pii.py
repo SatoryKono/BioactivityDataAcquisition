@@ -14,6 +14,7 @@ class NoOpAudit:
     """No-op implementation of AuditPort."""
 
     async def log_write(self, _entry: AuditEntry) -> None:
+        """No-op implementation of log_write — discards the audit entry."""
         return None
 
     async def get_entries(
@@ -25,9 +26,23 @@ class NoOpAudit:
         end_time: datetime | None = None,  # noqa: ARG002
         limit: int = 100,  # noqa: ARG002
     ) -> list[AuditEntry]:
+        """No-op implementation of get_entries — always returns an empty list.
+
+        Args:
+            run_id: Optional run identifier filter (ignored).
+            layer: Optional Medallion layer filter (ignored).
+            table_name: Optional table name filter (ignored).
+            start_time: Optional start time filter (ignored).
+            end_time: Optional end time filter (ignored).
+            limit: Maximum number of entries to return (ignored).
+
+        Returns:
+            Empty list.
+        """
         return []
 
     async def aclose(self) -> None:
+        """No-op implementation of aclose — no resources to release."""
         return None
 
 
@@ -35,10 +50,27 @@ class NoOpPiiHasher:
     """No-op implementation of PiiHasherPort."""
 
     def hash_value(self, value: str | None) -> str | None:
+        """No-op implementation — returns the input value unchanged.
+
+        Args:
+            value: PII string to hash.
+
+        Returns:
+            The original value without hashing.
+        """
         return value
 
     def hash_list(self, values: list[str] | None) -> list[str] | None:
+        """No-op implementation — returns the input list unchanged.
+
+        Args:
+            values: List of PII strings to hash.
+
+        Returns:
+            The original list without hashing.
+        """
         return values
 
     def get_salt_id(self) -> str:
+        """Return the constant 'noop' salt identifier for this implementation."""
         return "noop"

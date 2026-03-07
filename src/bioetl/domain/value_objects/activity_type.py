@@ -27,7 +27,14 @@ class ActivityType(StrEnum):
 
     @classmethod
     def from_string(cls, s: str) -> ActivityType:
-        """Parse activity type from string."""
+        """Parse activity type from string.
+
+        Args:
+            s: Activity type label such as 'IC50', 'Ki', 'EC50'.
+
+        Returns:
+            Corresponding ActivityType enum member.
+        """
         normalized = s.strip().upper()
         type_map = {
             "IC50": cls.IC50,

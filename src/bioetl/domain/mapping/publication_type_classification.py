@@ -79,6 +79,9 @@ def initialize_classification(data: ClassificationData) -> None:
     ``classify_publication_type()``.  Containers are mutated in-place so
     that references obtained via ``from … import _PROVIDER_LOOKUPS`` at
     module collection time see the populated data.
+
+    Args:
+        data: ClassificationData loaded from the JSON asset file.
     """
     global _data
 
@@ -120,6 +123,11 @@ def classify_publication_type(
     For single-value providers (OpenAlex, CrossRef), ``raw_type`` is used.
     For multi-value providers (PubMed, Semantic Scholar), the most specific
     match from ``raw_types_list`` is returned.
+
+    Args:
+        provider: Provider name (e.g., 'openalex', 'pubmed', 'crossref', 'semanticscholar').
+        raw_type: Single raw type string for single-value providers. Defaults to None.
+        raw_types_list: List of raw type strings for multi-value providers. Defaults to None.
 
     Returns:
         PublicationTypeEntry if a match is found, None if provider is unknown

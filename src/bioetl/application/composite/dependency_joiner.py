@@ -118,7 +118,17 @@ class DependencyJoinerService:
         dependencies: Sequence[DependencyConfig],
         seed_pipeline: str | None = None,
     ) -> pl.DataFrame:
-        """Apply configured dependency joins to merged DataFrame."""
+        """Apply configured dependency joins to merged DataFrame.
+
+        Args:
+            merged_df: Current merged DataFrame to join dependencies into.
+            dependency_dfs: Mapping from pipeline name to its loaded DataFrame.
+            dependencies: Ordered dependency configurations defining join logic.
+            seed_pipeline: Optional seed pipeline name used for key resolution.
+
+        Returns:
+            DataFrame with all dependency tables joined in.
+        """
         result = merged_df
         for dep in dependencies:
             if dep.pipeline not in dependency_dfs:
@@ -151,7 +161,17 @@ class DependencyJoinerService:
         dep: DependencyConfig,
         seed_pipeline: str | None = None,
     ) -> pl.DataFrame:
-        """Join dependency using all configured composite join keys."""
+        """Join dependency using all configured composite join keys.
+
+        Args:
+            merged_df: Current merged DataFrame to join the dependency into.
+            dep_df: Dependency DataFrame to join.
+            dep: Dependency configuration specifying join keys and pipeline.
+            seed_pipeline: Optional seed pipeline name used for left-side key resolution.
+
+        Returns:
+            DataFrame with the dependency joined using composite join keys.
+        """
         join_keys_list = list(dep.join_keys)
         left_pipeline = _resolve_left_pipeline(dep, seed_pipeline)
         merged_df, dep_df = self._prepare_dependency_join_frames(
@@ -203,7 +223,14 @@ class DependencyJoinerService:
         return result
 
     def drop_system_columns(self, df: pl.DataFrame) -> pl.DataFrame:
-        """Drop system columns that must come only from seed."""
+        """Drop system columns that must come only from seed.
+
+        Args:
+            df: DataFrame from which to remove configured system columns.
+
+        Returns:
+            DataFrame with system columns removed.
+        """
         columns_to_drop = [
             column for column in df.columns if column in self._system_columns_to_drop
         ]

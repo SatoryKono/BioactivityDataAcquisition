@@ -21,7 +21,11 @@ class PostrunCleanupService:
         self._warning_allowlist = warning_allowlist
 
     async def cleanup_tracer(self, tracer: TracingPort | None) -> None:
-        """Close tracing resources with warning-mode fallback."""
+        """Close tracing resources with warning-mode fallback.
+
+        Args:
+            tracer: Optional tracing port to close. If None, the method returns immediately.
+        """
         if tracer is None:
             return
         try:

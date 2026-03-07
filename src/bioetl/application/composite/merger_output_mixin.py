@@ -47,7 +47,14 @@ class MergeOutputWriterMixin:
         run_id: str | None = None,
         sources_used: list[str] | None = None,
     ) -> None:
-        """Write merged data to Silver layer via StoragePort."""
+        """Write merged data to Silver layer via StoragePort.
+
+        Args:
+            df: Merged DataFrame to persist; Null-typed columns are coerced to String first.
+            run_id: Optional composite run identifier attached to the write for lineage.
+            sources_used: Optional list of pipeline names that contributed to the merge,
+                attached to the write for provenance tracking.
+        """
         df = self._coerce_null_columns(df)
 
         table_name = self._path_to_table_name(self._config.output_silver_path)
@@ -66,7 +73,15 @@ class MergeOutputWriterMixin:
         run_id: str | None = None,
         sources_used: list[str] | None = None,
     ) -> None:
-        """Write merged data to Gold layer via StoragePort."""
+        """Write merged data to Gold layer via StoragePort.
+
+        Args:
+            df: Merged DataFrame to persist; trash columns and Null-typed columns
+                are removed or coerced before writing.
+            run_id: Optional composite run identifier attached to the write for lineage.
+            sources_used: Optional list of pipeline names that contributed to the merge,
+                attached to the write for provenance tracking.
+        """
         if self._field_group_registry is not None:
             trash_cols = self._field_group_registry.get_trash_columns(df.columns)
             if trash_cols:

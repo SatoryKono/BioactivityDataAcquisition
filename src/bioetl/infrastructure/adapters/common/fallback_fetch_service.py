@@ -140,12 +140,26 @@ class FallbackFetchOrchestratorService:
     """Shared service for fallback-enabled filtered fetch flows."""
 
     def __init__(self, adapter_metrics: AdapterMetrics | None = None) -> None:
+        """Initialize the fallback orchestrator service.
+
+        Args:
+            adapter_metrics: Optional metrics recorder for tracking fallback
+                outcomes; disables metrics emission when None.
+        """
         self._adapter_metrics = adapter_metrics
 
     async def execute(
         self, request: FallbackFetchRequest
     ) -> AsyncIterator[BronzeRecord]:
-        """Run common 3-phase fetch/fallback flow with provider hooks."""
+        """Run common 3-phase fetch/fallback flow with provider hooks.
+
+        Args:
+            request: Fully configured fallback fetch request containing filter
+                IDs, the primary fetcher hook, fallback handler, and limits.
+
+        Returns:
+            Async iterator of BronzeRecord dicts from primary fetch and fallback phases.
+        """
         primary_ids, title_only_entries = split_filter_ids_for_fallback(
             request.filter_ids
         )

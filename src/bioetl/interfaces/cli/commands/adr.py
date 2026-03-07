@@ -33,7 +33,8 @@ def list_command(as_json: bool) -> None:
     """List all ADR documents.
 
     Args:
-        as_json: Whether to as json.
+        as_json: When True, outputs the ADR list as a JSON array instead of
+            a human-readable text list.
     """
     service = get_adr_service()
     items = service.list_adrs()
@@ -61,8 +62,9 @@ def show_command(number: int, raw: bool) -> None:
     """Show a specific ADR by number.
 
     Args:
-        number: Number.
-        raw: Raw input value.
+        number: ADR number to display (e.g., 26 for ADR-026).
+        raw: When True, prints the raw Markdown content instead of a
+            formatted summary.
     """
     service = get_adr_service()
     try:
@@ -90,7 +92,8 @@ def validate_command(as_json: bool) -> None:
     """Validate ADR repository and print a summary.
 
     Args:
-        as_json: Whether to as json.
+        as_json: When True, outputs the validation report as JSON instead of
+            a human-readable text summary.
     """
     service = get_adr_service()
     report = service.validate()

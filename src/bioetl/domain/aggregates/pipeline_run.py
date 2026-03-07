@@ -60,7 +60,14 @@ class PipelineRun(_PipelineRunReadModelMixin, _PipelineRunLifecycleMixin):
         pipeline_name: str = "",
         metadata: JsonDict | None = None,
     ) -> None:
-        """Initialize a new pipeline run."""
+        """Initialize a new pipeline run.
+
+        Args:
+            run_id: Unique identifier for this pipeline execution.
+            run_type: Type of run (incremental, backfill, rebuild).
+            pipeline_name: Human-readable pipeline name (e.g., 'chembl_activity'). Defaults to ''.
+            metadata: Optional key-value metadata to attach to the run.
+        """
         self._run_id = run_id
         self._run_type = run_type
         self._pipeline_name = pipeline_name

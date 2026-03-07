@@ -99,7 +99,15 @@ def MissingRequiredFieldError(
     field: str,
     record_id: str | None = None,
 ) -> ValidationError:
-    """Compatibility constructor for legacy MissingRequiredFieldError."""
+    """Compatibility constructor for legacy MissingRequiredFieldError.
+
+    Args:
+        field: Name of the missing required field.
+        record_id: Optional ID of the affected record.
+
+    Returns:
+        ValidationError configured with MISSING_REQUIRED_FIELD error type.
+    """
     msg = f"Missing required field: {field}"
     if record_id:
         msg += f" (record_id={record_id})"
@@ -114,7 +122,17 @@ def InvalidDataFormatError(
     expected_format: str,
     record_id: str | None = None,
 ) -> ValidationError:
-    """Compatibility constructor for legacy InvalidDataFormatError."""
+    """Compatibility constructor for legacy InvalidDataFormatError.
+
+    Args:
+        field: Name of the field with the invalid format.
+        value: The invalid value that was provided.
+        expected_format: Description of the expected format (e.g., 'YYYY-MM-DD').
+        record_id: Optional ID of the affected record.
+
+    Returns:
+        ValidationError configured with INVALID_DATA error type.
+    """
     error = ValidationError(
         f"Invalid format for '{field}': got '{value}', expected {expected_format}",
         record_id=record_id,

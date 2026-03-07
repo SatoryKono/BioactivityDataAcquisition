@@ -147,7 +147,19 @@ class Bioactivity(BaseEntity):
         index: int = 0,
         source_batch_id: UUID | None = None,
     ) -> Bioactivity:
-        """Create RAW bioactivity entity from source payload."""
+        """Create RAW bioactivity entity from source payload.
+
+        Args:
+            raw_data: Raw record dict from the ChEMBL bioactivity API.
+            run_id: Pipeline run correlation ID (RunID or UUID).
+            run_type: Type of pipeline run. Defaults to INCREMENTAL.
+            ingestion_ts: Timestamp of data ingestion.
+            index: Sequential record index within the pipeline run. Defaults to 0.
+            source_batch_id: Optional Bronze batch UUID for lineage tracking.
+
+        Returns:
+            Bioactivity entity in RAW state.
+        """
         activity_id = _require_field(raw_data, "activity_id")
         molecule_id = _require_field(raw_data, "molecule_id")
         base_fields = {
@@ -170,7 +182,14 @@ class Bioactivity(BaseEntity):
         )
 
     def with_state(self, new_state: BioactivityState) -> Bioactivity:
-        """Create copy with new state (immutable pattern)."""
+        """Create copy with new state (immutable pattern).
+
+        Args:
+            new_state: Target processing state to transition to.
+
+        Returns:
+            New Bioactivity instance with all fields copied and _state updated.
+        """
         from dataclasses import asdict
 
         data = asdict(self)

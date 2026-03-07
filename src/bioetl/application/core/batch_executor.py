@@ -48,7 +48,11 @@ class _BatchProcessingServicePort(Protocol):
     """Minimal contract required by BatchExecutor for batch processing service."""
 
     def set_batch_id_factory(self, batch_id_factory: BatchIdGeneratorPort) -> None:
-        """Inject batch ID factory implementation."""
+        """Inject batch ID factory implementation.
+
+        Args:
+            batch_id_factory: Factory used to generate batch identifiers.
+        """
 
     def extract_records(
         self,
@@ -57,7 +61,13 @@ class _BatchProcessingServicePort(Protocol):
         query: str | None = None,
         offset: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Yield raw Bronze records from data source."""
+        """Yield raw Bronze records from data source.
+
+        Args:
+            limit: Maximum number of records to yield, or None for all.
+            query: Optional query string forwarded to the data source.
+            offset: Optional pagination offset for resuming extraction.
+        """
 
     async def process_batch(
         self,
@@ -66,7 +76,13 @@ class _BatchProcessingServicePort(Protocol):
         start_index: int,
         query_string: str | None,
     ) -> BatchProcessingOutput:
-        """Process one batch and return structured output."""
+        """Process one batch and return structured output.
+
+        Args:
+            records: List of raw Bronze records to process.
+            start_index: Absolute record index of the first record in this batch.
+            query_string: Query string used to fetch these records, for logging context.
+        """
 
 
 class BatchExecutor(_BatchExecutorDQMixin):
@@ -160,7 +176,13 @@ class BatchExecutor(_BatchExecutorDQMixin):
         query: str | None = None,
         offset: int | None = None,
     ) -> None:
-        """Execute the pipeline: fetch -> transform -> write."""
+        """Execute the pipeline: fetch -> transform -> write.
+
+        Args:
+            limit: Maximum number of records to fetch, or None for all available.
+            query: Optional query string forwarded to the data source.
+            offset: Optional starting offset for resuming a previous run.
+        """
         self._resume_offset = offset or 0
         self._query_string = query
         await self._progress_service.initialize_tracking(limit)
@@ -263,6 +285,10 @@ class BatchExecutor(_BatchExecutorDQMixin):
         start_index: int = 0,
     ) -> BatchResult:
         """Public API for processing one explicit batch.
+
+        Args:
+            records: List of raw Bronze records to process.
+            start_index: Absolute record index of the first record in this batch.
 
         Returns:
             BatchResult with cumulative bronze, silver, gold, and quarantined counts.

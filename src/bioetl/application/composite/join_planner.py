@@ -145,6 +145,12 @@ class JoinPlannerService(JoinPlannerCompatibilityMixin):
     ) -> pl.DataFrame:
         """Join successful enrichers to seed DataFrame.
 
+        Args:
+            seed_df: Base seed DataFrame to join enrichers into.
+            enricher_dfs: Mapping from pipeline name to loaded enricher DataFrame.
+            enrichers: Ordered enricher configurations defining join logic.
+            seed_pipeline: Optional seed pipeline name for qualified key resolution.
+
         Returns:
             Merged DataFrame with all available enricher data joined to the seed frame.
         """
@@ -276,6 +282,12 @@ class JoinPlannerService(JoinPlannerCompatibilityMixin):
     ) -> pl.DataFrame:
         """Apply configured dependency joins to merged DataFrame.
 
+        Args:
+            merged_df: Current merged DataFrame to join dependencies into.
+            dependency_dfs: Mapping from pipeline name to loaded dependency DataFrame.
+            dependencies: Dependency configurations defining join logic.
+            seed_pipeline: Optional seed pipeline name for qualified key resolution.
+
         Returns:
             DataFrame with all configured dependency tables joined to the merged frame.
         """
@@ -294,6 +306,12 @@ class JoinPlannerService(JoinPlannerCompatibilityMixin):
         seed_pipeline: str | None = None,
     ) -> pl.DataFrame:
         """Join dependency using all configured composite join keys.
+
+        Args:
+            merged_df: Current merged DataFrame to join the dependency into.
+            dep_df: Dependency DataFrame to join.
+            dep: Dependency configuration specifying join keys and pipeline.
+            seed_pipeline: Optional seed pipeline name for left-side key resolution.
 
         Returns:
             DataFrame with the dependency table joined using all configured join keys.

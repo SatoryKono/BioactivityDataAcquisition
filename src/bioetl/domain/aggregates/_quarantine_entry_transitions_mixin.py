@@ -42,7 +42,13 @@ class QuarantineEntryTransitionsMixin:
         resolved_by: str | None = None,
         resolved_at: datetime | None = None,
     ) -> None:
-        """Mark entry as ignored (non-actionable)."""
+        """Mark entry as ignored (non-actionable).
+
+        Args:
+            reason: Optional human-readable explanation for ignoring the entry.
+            resolved_by: Optional identifier of the user or system that resolved it.
+            resolved_at: Optional explicit resolution timestamp. Defaults to UTC now.
+        """
         self._assert_can_resolve("mark_ignored")
 
         now = resolved_at or datetime.now(UTC)
@@ -72,7 +78,13 @@ class QuarantineEntryTransitionsMixin:
         resolved_by: str | None = None,
         resolved_at: datetime | None = None,
     ) -> None:
-        """Mark entry as successfully reprocessed."""
+        """Mark entry as successfully reprocessed.
+
+        Args:
+            new_record_id: Identifier of the replacement record created after reprocessing.
+            resolved_by: Optional identifier of the user or system that reprocessed it.
+            resolved_at: Optional explicit resolution timestamp. Defaults to UTC now.
+        """
         if not new_record_id:
             raise ValueError("new_record_id is required for reprocessing")
 
@@ -100,7 +112,11 @@ class QuarantineEntryTransitionsMixin:
         )
 
     def mark_expired(self, expired_at: datetime | None = None) -> None:
-        """Mark entry as expired due to retention policy."""
+        """Mark entry as expired due to retention policy.
+
+        Args:
+            expired_at: Optional explicit expiry timestamp. Defaults to UTC now.
+        """
         if self._status.is_terminal():
             raise InvalidStateError(
                 f"Cannot expire: entry is already in terminal status {self._status.value}",
@@ -117,7 +133,12 @@ class QuarantineEntryTransitionsMixin:
         )
 
     def add_metadata(self, key: str, value: object) -> None:
-        """Add metadata to the entry while entry is unresolved."""
+        """Add metadata to the entry while entry is unresolved.
+
+        Args:
+            key: Metadata key to add or update.
+            value: Metadata value to associate with the key.
+        """
         if self._status.is_terminal():
             raise InvalidStateError(
                 f"Cannot modify metadata: entry is in terminal status {self._status.value}",

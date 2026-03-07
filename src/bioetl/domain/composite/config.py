@@ -134,6 +134,9 @@ class CompositeConfig:
     def get_dependency(self, pipeline_name: str) -> DependencyConfig | None:
         """Look up a dependency config by pipeline name.
 
+        Args:
+            pipeline_name: Name of the dependency pipeline to look up.
+
         Returns:
             DependencyConfig if found, None otherwise.
         """
@@ -144,6 +147,9 @@ class CompositeConfig:
 
     def get_enricher(self, pipeline_name: str) -> EnricherConfig | None:
         """Look up an enricher config by pipeline name.
+
+        Args:
+            pipeline_name: Name of the enricher pipeline to look up.
 
         Returns:
             EnricherConfig if found, None otherwise.
@@ -169,6 +175,9 @@ class CompositeConfig:
     @classmethod
     def from_dict(cls, data: dict[str, object]) -> CompositeConfig:
         """Deserialize a CompositeConfig from a plain dictionary.
+
+        Args:
+            data: Dictionary previously produced by ``to_dict()``.
 
         Returns:
             CompositeConfig instance reconstructed from the given dict.

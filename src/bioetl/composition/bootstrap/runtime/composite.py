@@ -114,8 +114,16 @@ def load_composite_config(name: str) -> CompositeConfig:
     - ``validate_composite_config_payload``
     - ``ValidationError``
 
+    Args:
+        name: Composite pipeline name (e.g., 'composite_publication'). Used to
+            resolve the YAML file path from the canonical composites directory.
+
     Returns:
         Validated and parsed CompositeConfig domain object.
+
+    Raises:
+        FileNotFoundError: If no YAML config file exists for the given name.
+        ValueError: If the YAML file fails Pydantic schema validation.
     """
     config_path = _resolve_composite_config_path(name)
     try:
@@ -231,6 +239,14 @@ def bootstrap_composite_runner(
 ) -> CompositePipelineRunnerService:
     """Create a ``CompositePipelineRunnerService`` with all dependencies.
 
+    Args:
+        config: Parsed and validated CompositeConfig domain object describing
+            the composite pipeline (seed, enrichers, dependencies, merge config).
+        runtime: Immutable runtime options for this composite run (resume,
+            dry_run, cached bronze settings, etc.).
+        run_id: Optional UUID string identifying this run; a new UUID is
+            generated when None.
+
     Returns:
         Fully wired CompositePipelineRunnerService ready for execution.
     """
@@ -251,6 +267,11 @@ def bootstrap_composite_pipeline(
     run_id: str | None = None,
 ) -> CompositePipelineRunnerService:
     """Bootstrap alias for :func:`bootstrap_composite_runner`.
+
+    Args:
+        config: Parsed and validated CompositeConfig domain object.
+        runtime: Immutable runtime options for this composite run.
+        run_id: Optional UUID string identifying this run; generated when None.
 
     Returns:
         Fully wired CompositePipelineRunnerService ready for execution.

@@ -179,6 +179,10 @@ class PostrunService:
     ) -> PostrunResult:
         """Run all post-execution operations.
 
+        Args:
+            executor: Provides batch metrics and record counts for DQ evaluation.
+            dq_context: Optional context with table paths for DQ report generation.
+
         Returns:
             PostrunResult with DQ check results, DQ report paths, and vacuum stats.
         """
@@ -194,6 +198,9 @@ class PostrunService:
 
     async def run_dq_checks(self, executor: ExecutorMetricsPort) -> DQResult:
         """Check data quality metrics and report anomalies.
+
+        Args:
+            executor: Provides batch metrics and record counts for evaluation.
 
         Returns:
             DQResult with overall DQ status and per-check results.
@@ -214,7 +221,11 @@ class PostrunService:
         )
 
     async def cleanup(self, tracer: TracingPort | None) -> None:
-        """Cleanup all resources including observability."""
+        """Cleanup all resources including observability.
+
+        Args:
+            tracer: Optional tracing provider to flush and close.
+        """
         await self._cleanup_orchestrator.cleanup_tracer(tracer)
 
     async def _generate_dq_reports(

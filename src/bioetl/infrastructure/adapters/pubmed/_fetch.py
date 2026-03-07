@@ -58,6 +58,9 @@ class PubMedFetchMixin:
     def _build_fetch_params(self, id_batch: list[str]) -> dict[str, str]:
         """Build parameters for efetch API call.
 
+        Args:
+            id_batch: List of PubMed IDs (PMIDs) to fetch in a single request.
+
         Returns:
             Dictionary of query parameters for the efetch API request.
         """

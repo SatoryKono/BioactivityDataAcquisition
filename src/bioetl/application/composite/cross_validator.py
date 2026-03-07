@@ -57,6 +57,11 @@ class EnrichmentCrossValidationService:
     ) -> tuple[pl.DataFrame, CrossValidationStats]:
         """Run cross-validation on merged DataFrame.
 
+        Args:
+            merged_df: Merged DataFrame containing seed and enricher columns.
+            enricher_pipelines: List of enricher pipeline names whose columns are validated.
+            seed_pipeline: Pipeline name of the seed source used as the reference values.
+
         Returns:
             Tuple of (merged_df, CrossValidationStats) where merged_df may have enricher
             columns nullified for error records and CV metadata columns added.

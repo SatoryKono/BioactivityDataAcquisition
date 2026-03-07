@@ -141,7 +141,32 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         dq_calculator: DQMetricsCalculator | None = None,
         merge_resilience_policy: SilverMergeResiliencePolicy | None = None,
     ) -> None:
-        """Initialize Silver writer."""
+        """Initialize Silver writer.
+
+        Args:
+            base_path: Root directory for Silver layer Delta Lake tables.
+            logger: Structured logger for write events and errors.
+            tracing: Optional tracing port for span propagation; defaults to
+                NoOpTracing when None.
+            csv_exporter: Optional CSV exporter for post-write CSV snapshots;
+                disabled when None.
+            write_policy: Medallion write mode policy; uses default policy when None.
+            metrics: Optional metrics port for recording write telemetry; disabled
+                when None.
+            audit: Optional audit port for Silver lineage logging; disabled when None.
+            silver_validator: Optional Pandera schema validator; defaults to
+                NoOpSilverValidator when None.
+            metadata_writer: Optional sidecar metadata writer; defaults to
+                NoOpMetadataWriter when None.
+            metadata_coordinator: Optional coordinator for metadata orchestration;
+                disabled when None.
+            transform_version: Optional version string embedded in Silver metadata.
+            transform_steps: Optional tuple of transform step names for lineage.
+            flat_structure: When True, omit the table-based subdirectory hierarchy.
+            dq_calculator: Optional DQ metrics calculator; uses default instance when None.
+            merge_resilience_policy: Optional resilience policy for merge retries
+                and timeouts; uses default policy when None.
+        """
         super().__init__(base_path, logger, flat_structure=flat_structure)
         self._dq_calculator = dq_calculator or DQMetricsCalculator()
         self._merge_resilience_policy = (
@@ -188,7 +213,29 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         bronze_refs: list[BronzeWriteResult] | None = None,
         key_nullability_rules: list[KeyNullabilityRule] | None = None,
     ) -> SilverWriteResult | None:
-        """Write normalized records to Silver layer (Delta Lake merge/upsert)."""
+        """Write normalized records to Silver layer (Delta Lake merge/upsert).
+
+        Args:
+            table_name: Logical Delta table name (e.g., ``"chembl/activity"``).
+            records: Normalized Bronze records to upsert into the Silver table.
+            primary_keys: Field names used to construct the MERGE predicate.
+            schema: PyArrow schema for table creation or evolution.
+            mode: Write mode string (``"merge"``, ``"append"``, or ``"overwrite"``).
+            partition_cols: Optional column names for Delta table partitioning;
+                disables partitioning when None.
+            on_schema_mismatch: Policy when incoming schema differs from stored
+                table schema; one of ``"error"``, ``"evolve"``, or ``"ignore"``.
+            column_order: Optional explicit column ordering applied before writing;
+                uses schema order when None.
+            bronze_refs: Optional Bronze write results included as lineage
+                references in Silver metadata (ADR-014).
+            key_nullability_rules: Optional per-key nullability overrides applied
+                before MERGE predicate evaluation.
+
+        Returns:
+            SilverWriteResult with record count and write metadata, or None if
+            no records were provided.
+        """
         return await self._write_silver_with_tracing(
             table_name=table_name,
             records=records,

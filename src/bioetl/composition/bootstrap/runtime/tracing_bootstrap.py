@@ -31,6 +31,13 @@ def bootstrap_tracer_port(
 ) -> TracingPort:
     """Create a tracing port implementation for distributed tracing.
 
+    Args:
+        settings: Application settings used to check whether tracing is enabled.
+        service_name: OpenTelemetry service name used for span identification.
+            Defaults to 'bioetl'.
+        tracer_factory: Optional factory callable for DI/testing; uses
+            OpenTelemetryTracer when None and tracing is enabled.
+
     Returns:
         Configured TracingPort, or NoOpTracing if tracing is disabled.
     """
@@ -46,6 +53,11 @@ def bootstrap_tracer(
     tracer_factory: TracerFactory | None = None,
 ) -> TracingPort:
     """Deprecated alias for :func:`bootstrap_tracer_port`.
+
+    Args:
+        settings: Application settings used to check whether tracing is enabled.
+        service_name: OpenTelemetry service name used for span identification.
+        tracer_factory: Optional factory callable for DI/testing.
 
     Returns:
         Configured TracingPort, or NoOpTracing if tracing is disabled.

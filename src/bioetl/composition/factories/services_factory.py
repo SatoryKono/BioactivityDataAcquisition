@@ -123,7 +123,13 @@ class BaseServicesFactory:
         pipeline_config: PipelineYamlConfig,
         silver_validator: SilverValidatorPort | None,
     ) -> None:
-        """Enforce validator requirement in production mode."""
+        """Enforce validator requirement in production mode.
+
+        Args:
+            settings: Application settings used to detect production environment.
+            pipeline_config: Pipeline config providing the pipeline name for error messages.
+            silver_validator: Silver validator instance; raises if None in production.
+        """
         if (
             settings.env == "prod"
             and not settings.test_mode
@@ -136,7 +142,14 @@ class BaseServicesFactory:
 
     @staticmethod
     def _resolve_tracer(tracer: TracingPort | None) -> TracingPort:
-        """Return tracer or fallback to NoOpTracing."""
+        """Return tracer or fallback to NoOpTracing.
+
+        Args:
+            tracer: Optional TracingPort; if None, a NoOpTracing instance is returned.
+
+        Returns:
+            A non-None TracingPort (either the provided tracer or a NoOp fallback).
+        """
         if tracer is None:
             from bioetl.domain.ports import NoOpTracing
 
@@ -158,7 +171,24 @@ class BaseServicesFactory:
         metadata_coordinator: MetadataCoordinator | None,
         dq_services: JsonDict,  # Any: heterogeneous DQ service instances
     ) -> PipelineService:
-        """Assemble PipelineService from pre-built dependencies."""
+        """Assemble PipelineService from pre-built dependencies.
+
+        Args:
+            data_source: Configured data source adapter for the provider.
+            storage_ctx: Storage context containing adapter and derived paths.
+            lock: In-memory lock for concurrency control.
+            checkpoint: Checkpoint adapter for resume support.
+            quarantine: Quarantine store for failed records.
+            metrics_port: Metrics port for Prometheus counters and histograms.
+            tracer: Tracing port for distributed span propagation.
+            logger: LoggerPort for structured logging.
+            dq_monitor: Optional DQ monitor port; no DQ alerting if None.
+            metadata_coordinator: Optional coordinator for metadata persistence.
+            dq_services: Dict of optional DQ analyzers, writer, and report service.
+
+        Returns:
+            Fully assembled PipelineService instance.
+        """
         from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 
         metadata_writer = MetadataWriter(logger=logger)
@@ -183,7 +213,11 @@ class BaseServicesFactory:
 
     @staticmethod
     def _create_lock() -> LockPort:
-        """Create in-memory lock for local deployment."""
+        """Create in-memory lock for local deployment.
+
+        Returns:
+            MemoryLock instance implementing LockPort.
+        """
         lock = MemoryLock()
         assert isinstance(lock, LockPort), (
             f"MemoryLock must implement LockPort, got {type(lock)}"
@@ -192,7 +226,14 @@ class BaseServicesFactory:
 
     @staticmethod
     def _create_checkpoint(storage_ctx: StorageContext) -> CheckpointPort:
-        """Create local filesystem checkpoint."""
+        """Create local filesystem checkpoint.
+
+        Args:
+            storage_ctx: Storage context providing the checkpoints base path.
+
+        Returns:
+            LocalCheckpoint instance implementing CheckpointPort.
+        """
         checkpoint = LocalCheckpoint(base_path=storage_ctx.checkpoints_path)
         assert isinstance(checkpoint, CheckpointPort), (
             f"LocalCheckpoint must implement CheckpointPort, got {type(checkpoint)}"
@@ -201,7 +242,14 @@ class BaseServicesFactory:
 
     @staticmethod
     def _create_quarantine(settings: Settings) -> QuarantinePort:
-        """Create unified quarantine storage."""
+        """Create unified quarantine storage.
+
+        Args:
+            settings: Application settings providing the quarantine base path.
+
+        Returns:
+            UnifiedQuarantine instance implementing QuarantinePort.
+        """
         quarantine = UnifiedQuarantine(base_path=str(settings.quarantine_path))
         assert isinstance(quarantine, QuarantinePort), (
             f"UnifiedQuarantine must implement QuarantinePort, got {type(quarantine)}"
@@ -246,7 +294,15 @@ class BaseServicesFactory:
         settings: Settings,
         pipeline_config: PipelineYamlConfig,
     ) -> Path:
-        """Derive output root from pipeline config or fall back to settings."""
+        """Derive output root from pipeline config or fall back to settings.
+
+        Args:
+            settings: Application settings providing the default output root.
+            pipeline_config: Pipeline YAML config that may override the output root.
+
+        Returns:
+            Resolved output root Path for the pipeline.
+        """
         return _get_output_root_impl(settings, pipeline_config)
 
     @classmethod

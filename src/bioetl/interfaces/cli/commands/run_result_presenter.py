@@ -9,7 +9,14 @@ __all__ = ["echo_run_result"]
 
 
 def echo_run_result(result: RunResult) -> None:
-    """Output run result message and execution counters."""
+    """Output run result message and execution counters.
+
+    Prints a human-readable summary of the pipeline run to stdout (or stderr
+    for failures). Covers SUCCESS, DRY_RUN, SHUTDOWN, and FAILED statuses.
+
+    Args:
+        result: RunResult containing pipeline status, record counts, and run metadata.
+    """
     short_run_id = result.run_id[:8] if len(result.run_id) > 8 else result.run_id
 
     if result.status == PipelineRunResult.SUCCESS:

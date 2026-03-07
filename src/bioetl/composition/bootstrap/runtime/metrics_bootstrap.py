@@ -27,6 +27,11 @@ def bootstrap_metrics_port(
 ) -> MetricsPort:
     """Create a metrics port implementation.
 
+    Args:
+        settings: Application settings used to check whether metrics are enabled.
+        metrics_factory: Optional factory callable for DI/testing; uses PrometheusMetrics
+            when None and metrics are enabled.
+
     Returns:
         Configured MetricsPort, or NoOpMetrics if metrics are disabled.
     """
@@ -42,6 +47,11 @@ def maybe_start_metrics_server(
     start_server: MetricsServerStarter | None = None,
 ) -> bool:
     """Start metrics server if enabled in settings.
+
+    Args:
+        settings: Application settings providing metrics port, address, and flags.
+        start_server: Optional callable to start the metrics HTTP server; uses the
+            default infrastructure ``start_metrics_server`` when None.
 
     Returns:
         True if the metrics server was started, False otherwise.
@@ -68,6 +78,10 @@ def bootstrap_metrics(
     metrics_factory: MetricsFactory | None = None,
 ) -> MetricsPort:
     """Deprecated alias for :func:`bootstrap_metrics_port`.
+
+    Args:
+        settings: Application settings used to check whether metrics are enabled.
+        metrics_factory: Optional factory callable for DI/testing.
 
     Returns:
         Configured MetricsPort, or NoOpMetrics if metrics are disabled.

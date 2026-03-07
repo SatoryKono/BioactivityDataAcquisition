@@ -16,7 +16,7 @@ from bioetl.domain.schemas.semanticscholar.publication import (
     SemanticScholarPublicationSchema,
 )
 
-pytestmark = pytest.mark.network
+pytestmark = [pytest.mark.contracts, pytest.mark.no_api]
 
 
 @pytest.mark.architecture
@@ -235,6 +235,23 @@ class TestPrimaryKeyFields:
 class TestFieldCountConsistency:
     """Test field count matches expected values."""
 
+    SYSTEM_FIELDS = frozenset(
+        {
+            "entity_id",
+            "content_hash",
+            "run_id",
+            "run_type",
+            "source_batch_id",
+            "ingestion_ts",
+            "dq_warn",
+            "dq_error",
+            "index",
+            "_source",
+            "lookup_method",
+            "original_id",
+        }
+    )
+
     EXPECTED_FIELD_COUNTS = {
         "chembl": 28,
         "pubmed": 52,
@@ -272,7 +289,13 @@ class TestFieldCountConsistency:
             "__checks__",
         }
         field_count = len(
-            [f for f in all_fields if not f.startswith("__") and f not in exclude]
+            [
+                f
+                for f in all_fields
+                if not f.startswith("__")
+                and f not in exclude
+                and f not in self.SYSTEM_FIELDS
+            ]
         )
 
         # Note: Allow some tolerance due to ETL system fields

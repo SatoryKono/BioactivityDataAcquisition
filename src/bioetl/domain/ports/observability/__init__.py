@@ -4,8 +4,10 @@ from bioetl.domain.ports.observability.dq_monitor import DQMonitorPort
 from bioetl.domain.ports.observability.logging import LoggerPort
 from bioetl.domain.ports.observability.metrics import (
     ExecutorMetricsPort,
+    MetricLabels,
     MetricsPort,
     MetricsServerPort,
+    resolve_metric_labels,
 )
 from bioetl.domain.ports.observability.tracing import TracingPort
 
@@ -13,7 +15,9 @@ __all__ = [
     "DQMonitorPort",
     "ExecutorMetricsPort",
     "LoggerPort",
+    "MetricLabels",
     "MetricsPort",
     "MetricsServerPort",
     "TracingPort",
+    "resolve_metric_labels",
 ]

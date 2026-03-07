@@ -188,7 +188,25 @@ class BaseTitleFallbackHandler(ABC):
         limit: int | None,
         fetched: int,
     ) -> AsyncIterator[JsonDict]:  # Any: untyped API response data
-        """Resolve unfetched DOIs via title fallback search."""
+        """Resolve unfetched DOIs via title fallback search.
+
+        Phase 2 of the three-phase fallback strategy. For each DOI not already
+        present in ``found_dois``, looks up a candidate title in
+        ``fallback_mapping`` and calls ``_search_by_title`` to retrieve the
+        record from the provider.
+
+        Args:
+            dois: Ordered list of DOIs to attempt fallback resolution for.
+            found_dois: Set of already-resolved normalised DOIs to skip.
+            fallback_mapping: Mapping from DOI (or normalised DOI) to title string.
+            normalize_fn: Callable that normalises a DOI string; may return None.
+            limit: Maximum total records to yield (None means unlimited).
+            fetched: Count of records already yielded before this call.
+
+        Yields:
+            Publication records resolved via title search.
+
+        """
         for doi in dois:
             if limit and fetched >= limit:
                 return

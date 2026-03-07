@@ -72,7 +72,15 @@ def _handle_export_failure(
     domain_error_title: str,
     unexpected_error_title: str,
 ) -> None:
-    """Handle export command failures with shared CLI policy."""
+    """Handle export command failures with shared CLI policy.
+
+    Args:
+        exc: Exception caught at the CLI command boundary.
+        reason_code: Machine-readable code for the failure (e.g., 'CLI_EXPORT_RUN_DOMAIN_ERROR').
+        table: Table name used as subject value in the structured error context.
+        domain_error_title: Human-readable title for BioETLError failures.
+        unexpected_error_title: Human-readable title for unexpected exception failures.
+    """
     handle_cli_execution_failure(
         exc,
         reason_code=reason_code,
@@ -86,12 +94,26 @@ def _handle_export_failure(
 
 
 def _resolve_list_layer(layer: str) -> str:
-    """Map CLI layer value to service list scope."""
+    """Map CLI layer value to service list scope.
+
+    Args:
+        layer: CLI layer option value (e.g., 'silver', 'gold').
+
+    Returns:
+        Scope string accepted by the export service list method.
+    """
     return layer if layer != "silver" else "all"
 
 
 def _require_table_argument(table: str | None) -> str:
-    """Validate table argument for non-list operations."""
+    """Validate table argument for non-list operations.
+
+    Args:
+        table: Table name argument from CLI; None if the user did not provide it.
+
+    Returns:
+        Validated table name string.
+    """
     if table:
         return table
     echo_error("TABLE argument is required (or use --list to see available tables)")
@@ -99,14 +121,28 @@ def _require_table_argument(table: str | None) -> str:
 
 
 def _parse_columns(columns: str | None) -> list[str] | None:
-    """Parse comma-separated columns from CLI option."""
+    """Parse comma-separated columns from CLI option.
+
+    Args:
+        columns: Comma-separated column names string from CLI; None if not provided.
+
+    Returns:
+        List of stripped column name strings, or None if no columns were specified.
+    """
     if not columns:
         return None
     return [column.strip() for column in columns.split(",")]
 
 
 def _parse_export_format(output_format: str) -> ExportFormat:
-    """Parse output format value into strict ExportFormat literal."""
+    """Parse output format value into strict ExportFormat literal.
+
+    Args:
+        output_format: Format string from CLI (e.g., 'csv', 'xlsx', 'tsv').
+
+    Returns:
+        Validated ExportFormat literal; defaults to 'csv' for unrecognized values.
+    """
     if output_format in {"csv", "xlsx", "tsv"}:
         return cast("ExportFormat", output_format)
     return "csv"
@@ -118,7 +154,17 @@ def _build_export_options(
     limit: int | None,
     columns: str | None,
 ) -> ExportOptions:
-    """Build validated ExportOptions from CLI parameters."""
+    """Build validated ExportOptions from CLI parameters.
+
+    Args:
+        output_format: Format string from CLI (e.g., 'csv', 'xlsx', 'tsv').
+        output: Output directory path; uses the default export directory when None.
+        limit: Maximum number of rows to export; exports all rows when None.
+        columns: Comma-separated column names to include; exports all columns when None.
+
+    Returns:
+        Configured ExportOptions instance.
+    """
     return ExportOptions(
         format=_parse_export_format(output_format),
         output_path=output,
@@ -132,7 +178,13 @@ def _run_preview(
     table: str,
     layer: str,
 ) -> None:
-    """Execute async preview operation from sync CLI context."""
+    """Execute async preview operation from sync CLI context.
+
+    Args:
+        service: Export service used to fetch the table preview.
+        table: Table name in 'provider.entity' format (e.g., 'chembl.activity').
+        layer: Medallion layer to preview from ('silver' or 'gold').
+    """
 
     async def _preview() -> None:
         table_preview = await service.preview(table, layer=layer)
@@ -179,7 +231,14 @@ def _run_export(
     layer: str,
     options: ExportOptions,
 ) -> None:
-    """Execute async export operation from sync CLI context."""
+    """Execute async export operation from sync CLI context.
+
+    Args:
+        service: Export service used to perform the table export.
+        table: Table name in 'provider.entity' format (e.g., 'chembl.activity').
+        layer: Medallion layer to export from ('silver' or 'gold').
+        options: ExportOptions with format, output path, row limit, and column selection.
+    """
 
     async def _export() -> None:
         result = await service.export(table, layer=layer, options=options)
@@ -226,7 +285,12 @@ def _list_tables_or_exit(
 ) -> bool:
     """Handle table listing mode.
 
-    Returns True when list mode is handled and command should return.
+    Args:
+        service: Export service used to list available tables.
+        layer: Medallion layer scope for listing ('silver', 'gold', or 'all').
+
+    Returns:
+        True when list mode is handled and command should return.
     """
     try:
         tables = service.list_tables(layer=_resolve_list_layer(layer))

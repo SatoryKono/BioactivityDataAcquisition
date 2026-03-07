@@ -30,7 +30,7 @@ References:
     - RULES.md §5.4.1: Dual-Salt Rotation
     - SaltManager in src/bioetl/infrastructure/security/
 
-Aligned with RULES.md v5.10 (2026-01-06)
+Aligned with RULES.md v5.23 (2026-01-06)
 """
 
 from __future__ import annotations

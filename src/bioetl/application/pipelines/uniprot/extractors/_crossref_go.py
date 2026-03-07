@@ -13,7 +13,16 @@ GO_ASPECTS = frozenset(("F", "P", "C"))
 
 
 def parse_go_term_value(go_term_value: object) -> tuple[str | None, str | None]:
-    """Parse GO term value (for example, ``F:ATP binding``)."""
+    """Parse GO term value (for example, ``F:ATP binding``).
+
+    Args:
+        go_term_value: Raw GoTerm property value from a UniProt GO cross-reference.
+            Expected format is ``'<aspect>:<term>'`` (e.g. ``'F:ATP binding'``).
+
+    Returns:
+        Tuple of (aspect, term) strings, or (None, None) if the value is invalid
+        or the aspect character is not one of the valid GO aspects (F, P, C).
+    """
     if not isinstance(go_term_value, str) or ":" not in go_term_value:
         return None, None
 
@@ -29,7 +38,15 @@ def parse_go_term_value(go_term_value: object) -> tuple[str | None, str | None]:
 
 
 def extract_go_terms(xrefs: list[JsonDict] | None) -> str | None:
-    """Extract GO terms with aspect and evidence metadata."""
+    """Extract GO terms with aspect and evidence metadata.
+
+    Args:
+        xrefs: List of UniProt cross-reference dicts from the API response, or None.
+
+    Returns:
+        JSON-serialized list of GO term dicts (id, term, aspect, evidence),
+        or None if no GO cross-references are present.
+    """
     go_terms: list[JsonDict] = []  # Any: JSON values are heterogeneous
     for xref in filter_xrefs_by_database(xrefs, "GO"):
         go_id = xref.get("id")
@@ -51,7 +68,17 @@ def extract_go_terms(xrefs: list[JsonDict] | None) -> str | None:
 
 
 def extract_go_by_aspect(xrefs: list[JsonDict] | None, aspect: str) -> str | None:
-    """Extract GO terms filtered by aspect (F/P/C)."""
+    """Extract GO terms filtered by aspect (F/P/C).
+
+    Args:
+        xrefs: List of UniProt cross-reference dicts from the API response, or None.
+        aspect: GO aspect character to filter on. Must be one of 'F' (molecular
+            function), 'P' (biological process), or 'C' (cellular component).
+
+    Returns:
+        JSON-serialized list of GO term dicts (id, term, evidence) for the given
+        aspect, or None if no matching terms are found or aspect is invalid.
+    """
     if aspect not in GO_ASPECTS:
         return None
 

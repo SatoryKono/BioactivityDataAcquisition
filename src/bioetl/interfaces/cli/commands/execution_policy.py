@@ -194,7 +194,23 @@ def handle_cli_failure(
     interrupted_message: str,
     default_exit_code: ExitCode = ExitCode.FAIL,
 ) -> None:
-    """Handle command-level exceptions with a consistent policy."""
+    """Handle command-level exceptions with a consistent policy.
+
+    Maps the exception type to the appropriate exit code, formats a structured
+    error message, echoes it to stderr, and calls sys.exit() with the mapped code.
+
+    Args:
+        exc: Exception caught at the CLI command boundary.
+        reason_code: Machine-readable code attached to error context (e.g.,
+            'CLI_COMPOSITE_DOMAIN_ERROR').
+        subject_key: Key name for the structured context field (e.g., 'pipeline').
+        subject_value: Value for the structured context field (e.g., 'chembl_activity').
+        domain_error_title: Title shown for BioETLError exceptions.
+        unexpected_error_title: Title shown for non-domain exceptions.
+        interrupted_message: Message shown when KeyboardInterrupt is caught.
+        default_exit_code: Fallback exit code when no specific code is determined.
+            Defaults to ExitCode.FAIL.
+    """
     if isinstance(exc, PipelineNotFoundError):
         echo_error("Pipeline not found", str(exc))
         sys.exit(ExitCode.CONFIG_ERROR)

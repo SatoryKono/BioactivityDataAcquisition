@@ -63,6 +63,10 @@ class PubMedSearchMixin:
     async def _get_pmids(self, search_term: str, max_count: int) -> list[str]:
         """Get PMIDs for a search term.
 
+        Args:
+            search_term: Entrez search query string (e.g., ``"cancer AND 2023[dp]"``).
+            max_count: Maximum number of PMIDs to retrieve from the esearch endpoint.
+
         Returns:
             List of PMID strings matching the search term, up to max_count results.
         """

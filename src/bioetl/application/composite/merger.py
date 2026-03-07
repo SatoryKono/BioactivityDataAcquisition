@@ -145,6 +145,15 @@ class MergeService(MergeIOMixin, MergeCompatibilityMixin, MergeMetricsRecorderMi
     ) -> MergeResult:
         """Merge seed, dependency, and enricher data into unified output.
 
+        Args:
+            seed_table: Silver table name for the seed pipeline.
+            enrichers: Enricher configurations to join into the merged output.
+            enrichment_results: Mapping from pipeline name to EnrichmentResult.
+            run_id: Current run identifier used for tracing.
+            seed_pipeline: Optional seed pipeline name for qualified key resolution.
+            dependencies: Optional dependency configurations to join before enrichers.
+            dependency_results: Optional mapping from pipeline name to DependencyResult.
+
         Returns:
             MergeResult with merged record counts, source provenance, cross-validation
             stats, quarantine payloads, and duration metrics.

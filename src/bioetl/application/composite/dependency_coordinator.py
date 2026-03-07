@@ -279,6 +279,17 @@ class DependencyCoordinatorService:
         Uses seed keys for standard dependencies and source-table keys for
         chained dependencies (`key_source`). Stops early when a required
         dependency fails.
+
+        Args:
+            keys: DataFrame of seed keys passed to each dependency pipeline.
+            dependencies: Ordered sequence of dependency configurations to execute.
+            completed: Set of pipeline names already completed (skipped when resuming).
+            runner_factory: Callable that creates a PipelineRunner given a pipeline name
+                and key DataFrame.
+            dependency_configs: Optional full config mapping for resolving chained keys.
+
+        Returns:
+            Mapping from dependency pipeline name to its DependencyResult.
         """
         results: dict[str, DependencyResult] = {}
         dep_config_lookup = _build_dependency_lookup(

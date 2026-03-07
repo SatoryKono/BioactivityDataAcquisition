@@ -28,7 +28,17 @@ class FilterConfigBuilder:
     def _is_filter_enabled(
         yaml_filter: YamlInputFilter, cli_csv: str | None, test_mode: bool
     ) -> bool:
-        """Determine if filtering should be enabled."""
+        """Determine if filtering should be enabled.
+
+        Args:
+            yaml_filter: Filter configuration from pipeline YAML.
+            cli_csv: CLI-provided CSV path; non-empty value activates filtering.
+            test_mode: When True, YAML-based filters are ignored unless a CLI CSV
+                is explicitly provided.
+
+        Returns:
+            True if input filtering should be applied for this run.
+        """
         if test_mode:
             return bool(cli_csv)
         return bool(cli_csv) or yaml_filter.enabled
@@ -40,6 +50,14 @@ class FilterConfigBuilder:
         """Build config for multi-column filtering mode.
 
         Caller must ensure yaml_filter.columns is not None.
+
+        Args:
+            yaml_filter: Filter configuration from pipeline YAML providing column specs
+                and batch size.
+            effective_csv: Resolved path to the CSV file containing filter IDs.
+
+        Returns:
+            InputFilterConfig for multi-column filtering mode.
         """
         assert yaml_filter.columns is not None  # Guaranteed by caller check
         domain_columns = tuple(
@@ -64,7 +82,18 @@ class FilterConfigBuilder:
         cli_field: str | None,
         cli_fallback_column: str | None,
     ) -> InputFilterConfig:
-        """Build config for single-column filtering mode."""
+        """Build config for single-column filtering mode.
+
+        Args:
+            yaml_filter: Filter configuration from pipeline YAML providing defaults.
+            effective_csv: Resolved path to the CSV file containing filter IDs.
+            cli_column: CLI-provided column name; overrides YAML column if non-None.
+            cli_field: CLI-provided API filter field; overrides YAML field if non-None.
+            cli_fallback_column: CLI-provided fallback column; overrides YAML if non-None.
+
+        Returns:
+            InputFilterConfig for single-column filtering mode.
+        """
         effective_column = cli_column or yaml_filter.column_name
         effective_field = cli_field or yaml_filter.filter_field
         effective_fallback = cli_fallback_column or yaml_filter.fallback_column

@@ -69,7 +69,14 @@ def validate_observability_preflight(
     environment: str,
     logger: LoggerPort,
 ) -> None:
-    """Validate observability components for production readiness."""
+    """Validate observability components for production readiness.
+
+    Args:
+        tracer: TracingPort to validate; checked for NoOp in production.
+        metrics: MetricsPort to validate; checked for NoOp in production.
+        environment: Deployment environment name (e.g., 'prod', 'staging').
+        logger: LoggerPort used to emit preflight validation warnings.
+    """
     _validate_observability_preflight_impl(
         tracer=tracer,
         metrics=metrics,
@@ -84,6 +91,11 @@ def bootstrap_logger_port(
     log_level: str = "INFO",
 ) -> LoggerPort:
     """Create a logger port implementation for pipeline execution.
+
+    Args:
+        pipeline: Pipeline name used as a structured log field.
+        run_id: Run UUID for log correlation; a new UUID is generated if None.
+        log_level: Minimum log level string (e.g., 'INFO', 'DEBUG').
 
     Returns:
         Configured LoggerPort for structured pipeline logging.
@@ -116,6 +128,11 @@ def bootstrap_logger(
 ) -> LoggerPort:
     """Deprecated alias for :func:`bootstrap_logger_port`.
 
+    Args:
+        pipeline: Pipeline name used as a structured log field.
+        run_id: Run UUID for log correlation; a new UUID is generated if None.
+        log_level: Minimum log level string (e.g., 'INFO', 'DEBUG').
+
     Returns:
         Configured LoggerPort for structured pipeline logging.
     """
@@ -140,6 +157,11 @@ def bootstrap_tracer_port(
 ) -> TracingPort:
     """Create a tracing port implementation for distributed tracing.
 
+    Args:
+        settings: Application settings used to check whether tracing is enabled.
+        service_name: OpenTelemetry service name for span identification.
+            Defaults to 'bioetl'.
+
     Returns:
         Configured TracingPort for distributed tracing.
     """
@@ -158,6 +180,10 @@ def bootstrap_tracer(
 ) -> TracingPort:
     """Deprecated alias for :func:`bootstrap_tracer_port`.
 
+    Args:
+        settings: Application settings used to check whether tracing is enabled.
+        service_name: OpenTelemetry service name for span identification.
+
     Returns:
         Configured TracingPort for distributed tracing.
     """
@@ -173,6 +199,9 @@ def bootstrap_tracer(
 def bootstrap_metrics_port(settings: Settings) -> MetricsPort:
     """Create a metrics port implementation.
 
+    Args:
+        settings: Application settings used to determine if metrics are enabled.
+
     Returns:
         Configured MetricsPort for pipeline metrics collection.
     """
@@ -184,6 +213,9 @@ def bootstrap_metrics_port(settings: Settings) -> MetricsPort:
 
 def maybe_start_metrics_server(settings: Settings) -> bool:
     """Start metrics server if enabled in settings.
+
+    Args:
+        settings: Application settings providing metrics port, address, and feature flags.
 
     Returns:
         True if the metrics server was started, False otherwise.
@@ -197,6 +229,9 @@ def maybe_start_metrics_server(settings: Settings) -> bool:
 def bootstrap_metrics(settings: Settings) -> MetricsPort:
     """Deprecated alias for :func:`bootstrap_metrics_port`.
 
+    Args:
+        settings: Application settings used to determine if metrics are enabled.
+
     Returns:
         Configured MetricsPort for pipeline metrics collection.
     """
@@ -208,6 +243,11 @@ def bootstrap_dq_monitor_port(
     logger: LoggerPort | None = None,
 ) -> DQMonitorPort | None:
     """Create a data quality monitor port implementation.
+
+    Args:
+        settings: Application settings used to check whether DQ monitoring is enabled.
+        logger: Optional LoggerPort for structured DQ monitor logging; uses NoOpLogger
+            if None.
 
     Returns:
         DQMonitorPort if DQ monitoring is enabled, None otherwise.
@@ -225,6 +265,10 @@ def bootstrap_dq_monitor(
     logger: LoggerPort | None = None,
 ) -> DQMonitorPort | None:
     """Deprecated alias for :func:`bootstrap_dq_monitor_port`.
+
+    Args:
+        settings: Application settings used to check whether DQ monitoring is enabled.
+        logger: Optional LoggerPort for structured DQ monitor logging.
 
     Returns:
         DQMonitorPort if DQ monitoring is enabled, None otherwise.
@@ -244,6 +288,12 @@ def bootstrap_observability_bundle(
     log_level: str = "INFO",
 ) -> ObservabilityBundle:
     """Build validated logger/metrics/tracer/DQ-monitor bundle for a pipeline run.
+
+    Args:
+        pipeline: Pipeline name used for logger and tracer context.
+        run_id: Run UUID used for log correlation across all observability components.
+        settings: Application settings driving feature flags for each component.
+        log_level: Minimum log level string (e.g., 'INFO', 'DEBUG').
 
     Returns:
         Validated ObservabilityBundle with logger, metrics, tracer, and DQ monitor.
@@ -268,6 +318,12 @@ def bootstrap_observability(
     log_level: str = "INFO",
 ) -> ObservabilityBundle:
     """Deprecated alias for :func:`bootstrap_observability_bundle`.
+
+    Args:
+        pipeline: Pipeline name used for logger and tracer context.
+        run_id: Run UUID used for log correlation.
+        settings: Application settings driving feature flags for each component.
+        log_level: Minimum log level string (e.g., 'INFO', 'DEBUG').
 
     Returns:
         Validated ObservabilityBundle with logger, metrics, tracer, and DQ monitor.

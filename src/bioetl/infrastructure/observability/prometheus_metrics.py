@@ -10,11 +10,7 @@ __all__ = ["COUNTERS", "GAUGES", "HISTOGRAMS", "PrometheusMetrics"]
 
 
 from bioetl.domain.observability_contract import normalize_observability_metric_labels
-from bioetl.domain.ports import MetricsPort
-from bioetl.domain.ports.observability.metrics import (
-    MetricLabels,
-    resolve_metric_labels,
-)
+from bioetl.domain.ports import MetricLabels, MetricsPort, resolve_metric_labels
 from bioetl.infrastructure.observability.metrics import (
     ADAPTER_BATCH_SIZE,
     ADAPTER_DROPPED_DUPLICATES_TOTAL,

@@ -56,7 +56,16 @@ class IdentifierExtractor(BaseFieldExtractor):
     """Extractor for article identifiers from PubMed XML."""
 
     def extract(self, element: Element | None) -> RawIdentifiers | None:
-        """Extract raw doi/pmc_id from XML."""
+        """Extract raw doi/pmc_id from XML.
+
+        Args:
+            element: Root ``PubmedArticle`` element to extract identifiers from.
+                Returns None immediately when None.
+
+        Returns:
+            RawIdentifiers dict with ``doi`` and ``pmc_id`` fields, or None when
+            the element is absent.
+        """
         if element is None:
             return None
 
@@ -68,7 +77,14 @@ class IdentifierExtractor(BaseFieldExtractor):
         )
 
     def normalize(self, raw_value: object) -> NormalizedIdentifiers:
-        """Normalize extracted identifiers."""
+        """Normalize extracted identifiers.
+
+        Args:
+            raw_value: Raw identifier dict (``RawIdentifiers``) from the ``extract`` step.
+
+        Returns:
+            NormalizedIdentifiers with whitespace-stripped ``doi`` and ``pmc_id`` values.
+        """
         raw_identifiers = cast("RawIdentifiers", raw_value)
         return NormalizedIdentifiers(
             doi=self._normalize_text(raw_identifiers.get("doi")),
@@ -81,17 +97,39 @@ class IdentifierExtractor(BaseFieldExtractor):
 
     @classmethod
     def extract_doi(cls, root: Element) -> str | None:
-        """Extract DOI from ArticleIdList or ELocationID."""
+        """Extract DOI from ArticleIdList or ELocationID.
+
+        Args:
+            root: Root PubmedArticle XML element.
+
+        Returns:
+            DOI string with whitespace stripped, or None if not present.
+        """
         return cls.extract_all_identifiers(root)["doi"]
 
     @classmethod
     def extract_pmc_id(cls, root: Element) -> str | None:
-        """Extract PMC ID from ArticleIdList."""
+        """Extract PMC ID from ArticleIdList.
+
+        Args:
+            root: Root PubmedArticle XML element.
+
+        Returns:
+            PubMed Central identifier string with whitespace stripped, or None if absent.
+        """
         return cls.extract_all_identifiers(root)["pmc_id"]
 
     @classmethod
     def extract_all_identifiers(cls, root: Element) -> dict[str, str | None]:
-        """Extract doi/pii/pmc_id/mid/publisher_id in a single pass."""
+        """Extract doi/pii/pmc_id/mid/publisher_id in a single pass.
+
+        Args:
+            root: Root PubmedArticle XML element scanned for ELocationID and ArticleIdList.
+
+        Returns:
+            Dictionary with keys ``doi``, ``pii``, ``pmc_id``, ``mid``, ``publisher_id``,
+            each mapped to the normalized string value or None when absent.
+        """
         extractor = cls()
         result: dict[str, str | None] = {
             "doi": None,
@@ -165,7 +203,16 @@ class IdentifierExtractor(BaseFieldExtractor):
 
     @classmethod
     def parse_all_article_ids(cls, root: Element) -> AllArticleIds:
-        """Extract all identifiers from ArticleIdList, preserving unknown keys."""
+        """Extract all identifiers from ArticleIdList, preserving unknown keys.
+
+        Args:
+            root: Root PubmedArticle XML element containing the ArticleIdList section.
+
+        Returns:
+            AllArticleIds TypedDict with known identifier keys (``pubmed``, ``doi``,
+            ``pmc``, ``pii``, ``mid``, ``publisher_id``, ``pmcid``, ``medline``) and
+            an ``other_ids`` dict for unrecognized IdType values.
+        """
         extractor = cls()
         result: AllArticleIds = {
             "pubmed": None,
@@ -203,7 +250,14 @@ class IdentifierExtractor(BaseFieldExtractor):
 
     @classmethod
     def extract_elocation_ids(cls, root: Element) -> ELocationIds:
-        """Extract doi/pii from ELocationID elements."""
+        """Extract doi/pii from ELocationID elements.
+
+        Args:
+            root: Root PubmedArticle XML element scanned for ELocationID children.
+
+        Returns:
+            ELocationIds TypedDict with ``doi`` and ``pii`` fields, each None when absent.
+        """
         extractor = cls()
         result: ELocationIds = {
             "doi": None,
@@ -232,15 +286,36 @@ class IdentifierExtractor(BaseFieldExtractor):
 
     @classmethod
     def extract_pii(cls, root: Element) -> str | None:
-        """Extract Publisher Item Identifier (PII)."""
+        """Extract Publisher Item Identifier (PII).
+
+        Args:
+            root: Root PubmedArticle XML element.
+
+        Returns:
+            PII string with whitespace stripped, or None if not present.
+        """
         return cls.extract_all_identifiers(root)["pii"]
 
     @classmethod
     def extract_mid(cls, root: Element) -> str | None:
-        """Extract Manuscript ID (MID)."""
+        """Extract Manuscript ID (MID).
+
+        Args:
+            root: Root PubmedArticle XML element.
+
+        Returns:
+            Manuscript ID string with whitespace stripped, or None if not present.
+        """
         return cls.extract_all_identifiers(root)["mid"]
 
     @classmethod
     def extract_publisher_id(cls, root: Element) -> str | None:
-        """Extract publisher-specific identifier."""
+        """Extract publisher-specific identifier.
+
+        Args:
+            root: Root PubmedArticle XML element.
+
+        Returns:
+            Publisher-assigned identifier string with whitespace stripped, or None if absent.
+        """
         return cls.extract_all_identifiers(root)["publisher_id"]

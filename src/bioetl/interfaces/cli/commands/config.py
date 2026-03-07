@@ -25,7 +25,14 @@ __all__ = [
 
 
 def _config_to_dict(config: object) -> JsonDict:
-    """Convert a Pydantic model or dataclass to a JSON-serializable dict."""
+    """Convert a Pydantic model or dataclass to a JSON-serializable dict.
+
+    Args:
+        config: Pydantic model, dataclass, or primitive value to convert.
+
+    Returns:
+        JSON-serializable dict representation of the config object.
+    """
     if hasattr(config, "model_dump"):
         model_dump = config.model_dump
         result: JsonDict = model_dump()

@@ -28,17 +28,7 @@
 %% @uniform-stats merge        width=240 height=112 max_desc_lines=4
 %% @uniform-stats gold         width=240 height=112 max_desc_lines=4
 %% @uniform-stats ckp          width=264 height=112 max_desc_lines=4
-%%{init: {
-  'flowchart': {
-    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
-  },
-  'layout': 'elk',
-  'elk': {
-    'mergeEdges': true,
-    'nodePlacementStrategy': 'BRANDES_KOEPF',
-    'edgeRouting': 'ORTHOGONAL'
-  }
-}}%%
+%%{init: {'layout': 'elk', 'flowchart': {'subGraphTitleMargin': {'top': 12, 'bottom': 12}}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
 flowchart TB
     subgraph Init["Phase 1: Initialization"]
         CFG["[S] Load CompositeConfig<br/>from YAML<br/><br/>"]

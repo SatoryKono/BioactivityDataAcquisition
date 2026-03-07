@@ -30,7 +30,17 @@ async def health_server_context(
     host: str = "127.0.0.1",
     port: int = DEFAULT_HEALTH_SERVER_PORT,
 ) -> AsyncIterator[HealthServer | None]:
-    """Run health server for the context lifetime when enabled."""
+    """Run health server for the context lifetime when enabled.
+
+    Yields the running HealthServer for the duration of the async context,
+    then stops it on exit. If the server fails to bind (port in use), a
+    warning is printed and None is yielded so the pipeline continues.
+
+    Args:
+        enabled: When False, yields None immediately without starting a server.
+        host: IP address to bind to. Defaults to localhost.
+        port: TCP port to listen on. Defaults to DEFAULT_HEALTH_SERVER_PORT.
+    """
     if not enabled:
         yield None
         return

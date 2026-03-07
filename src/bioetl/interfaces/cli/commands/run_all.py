@@ -66,14 +66,28 @@ def _get_available_providers() -> list[str]:
 
 
 def _filter_pipelines_by_provider(provider: str) -> list[str]:
-    """Filter registered pipelines by provider prefix."""
+    """Filter registered pipelines by provider prefix.
+
+    Args:
+        provider: Provider name prefix used to filter pipeline names (e.g., 'chembl').
+
+    Returns:
+        Sorted list of pipeline names that start with the given provider prefix.
+    """
     registry = get_default_registry()
     all_pipelines = registry.list_pipelines()
     return sorted([name for name in all_pipelines if name.startswith(f"{provider}_")])
 
 
 def _validate_provider(provider: str) -> tuple[bool, str | None]:
-    """Validate that the provider has registered pipelines."""
+    """Validate that the provider has registered pipelines.
+
+    Args:
+        provider: Provider name to validate against the pipeline registry.
+
+    Returns:
+        Tuple of (is_valid, error_message). error_message is None when valid.
+    """
     available_providers = _get_available_providers()
     if not available_providers:
         return False, "No pipelines are registered."
@@ -89,14 +103,32 @@ def _validate_provider(provider: str) -> tuple[bool, str | None]:
 async def _run_pipeline_async(
     service: PipelineRunnerService, pipeline: str, options: RunOptions
 ) -> RunResult:
-    """Run a single pipeline asynchronously."""
+    """Run a single pipeline asynchronously.
+
+    Args:
+        service: PipelineRunnerService used to execute the pipeline run.
+        pipeline: Pipeline name to run.
+        options: RunOptions controlling run type, limits, and filter settings.
+
+    Returns:
+        RunResult with pipeline execution status and metrics.
+    """
     return await service.run(pipeline, options=options)
 
 
 async def _run_pipelines_batch(
     service: PipelineRunnerService, pipelines: list[str], options: RunOptions
 ) -> BatchRunResult:
-    """Run pipelines sequentially within a service context."""
+    """Run pipelines sequentially within a service context.
+
+    Args:
+        service: PipelineRunnerService used to execute each pipeline.
+        pipelines: Ordered list of pipeline names to run sequentially.
+        options: RunOptions controlling run type, limits, and filter settings.
+
+    Returns:
+        BatchRunResult with counts of succeeded, failed, and skipped pipelines.
+    """
     batch_result = BatchRunResult(total=len(pipelines))
 
     for pipeline in pipelines:
@@ -147,7 +179,19 @@ async def _run_all_pipelines_async(
     health_server_enabled: bool = True,
     health_port: int = DEFAULT_HEALTH_SERVER_PORT,
 ) -> BatchRunResult:
-    """Run all pipelines sequentially with optional health server."""
+    """Run all pipelines sequentially with optional health server.
+
+    Args:
+        pipelines: Ordered list of pipeline names to run sequentially.
+        options: RunOptions controlling run type, limits, and filter settings.
+        health_server_enabled: When True, starts the HTTP health server before
+            pipeline execution. Defaults to True.
+        health_port: TCP port the health server listens on. Defaults to
+            DEFAULT_HEALTH_SERVER_PORT.
+
+    Returns:
+        BatchRunResult aggregating results from all pipeline runs.
+    """
     # Start metrics server if enabled (side-effect in entrypoint, not bootstrap)
     ensure_metrics_server_started()
 
@@ -157,7 +201,12 @@ async def _run_all_pipelines_async(
 
 
 def _echo_batch_summary(result: BatchRunResult, dry_run: bool) -> None:
-    """Output batch run summary."""
+    """Output batch run summary.
+
+    Args:
+        result: BatchRunResult with aggregate counts for the completed batch.
+        dry_run: When True, prints a dry-run preview summary instead of execution stats.
+    """
     echo_info("")
     echo_info("=" * 50)
 
@@ -176,7 +225,12 @@ def _echo_batch_summary(result: BatchRunResult, dry_run: bool) -> None:
 
 
 def _handle_list_only(source: str, pipelines: list[str]) -> None:
-    """Handle --list-only mode and exit."""
+    """Handle --list-only mode and exit.
+
+    Args:
+        source: Provider name displayed in the list header.
+        pipelines: List of pipeline names to display.
+    """
     echo_info(f"Pipelines for provider '{source}':")
     for pipeline in pipelines:
         echo_info(f"  - {pipeline}")
@@ -188,6 +242,13 @@ def _handle_destructive_confirmation(
     run_type: str, pipelines: list[str], dry_run: bool, yes: bool
 ) -> bool:
     """Handle confirmation for destructive operations.
+
+    Args:
+        run_type: Type of run; only 'rebuild' and 'backfill' trigger the confirmation
+            prompt.
+        pipelines: List of pipeline names that will be affected by the operation.
+        dry_run: When True, skips the confirmation prompt.
+        yes: When True, bypasses the interactive confirmation prompt.
 
     Returns:
         True if should continue, False if cancelled.
@@ -207,7 +268,13 @@ def _handle_destructive_confirmation(
 
 
 def _show_run_preview(source: str, pipelines: list[str], dry_run: bool) -> None:
-    """Show what pipelines will be run."""
+    """Show what pipelines will be run.
+
+    Args:
+        source: Provider name shown in the preview header.
+        pipelines: List of pipeline names that will be (or would be) executed.
+        dry_run: When True, prefixes the output with a dry-run indicator.
+    """
     if dry_run:
         echo_info(f"[DRY-RUN] Would run {len(pipelines)} pipeline(s) for '{source}':")
     else:
@@ -219,14 +286,27 @@ def _show_run_preview(source: str, pipelines: list[str], dry_run: bool) -> None:
 
 
 def _determine_exit_code(batch_result: BatchRunResult) -> ExitCode:
-    """Determine exit code from batch result."""
+    """Determine exit code from batch result.
+
+    Args:
+        batch_result: BatchRunResult with aggregate counts from the completed batch run.
+
+    Returns:
+        ExitCode.OK when all pipelines succeeded, ExitCode.FAIL otherwise.
+    """
     return map_batch_run_result_to_exit_code(batch_result)
 
 
 def _handle_run_all_failure(
     exc: BaseException, *, source: str, reason_code: str
 ) -> None:
-    """Handle run-all CLI failures with consistent error policy."""
+    """Handle run-all CLI failures with consistent error policy.
+
+    Args:
+        exc: Exception caught at the CLI command boundary.
+        source: Provider name used as subject value in the structured error context.
+        reason_code: Machine-readable code for the failure (e.g., 'CLI_RUN_ALL_DOMAIN_ERROR').
+    """
     handle_cli_execution_failure(
         exc,
         reason_code=reason_code,
@@ -247,7 +327,18 @@ def _run_batch_with_policy(
     health_server: bool,
     health_port: int,
 ) -> BatchRunResult | None:
-    """Execute async batch run with typed exception policy."""
+    """Execute async batch run with typed exception policy.
+
+    Args:
+        source: Provider name used in error context for structured failure handling.
+        pipelines: Ordered list of pipeline names to run sequentially.
+        options: RunOptions controlling run type, limits, and filter settings.
+        health_server: When True, enables the HTTP health server during execution.
+        health_port: TCP port the health server listens on.
+
+    Returns:
+        BatchRunResult on success, None if an exception was handled and process will exit.
+    """
     coro = _run_all_pipelines_async(
         pipelines,
         options,

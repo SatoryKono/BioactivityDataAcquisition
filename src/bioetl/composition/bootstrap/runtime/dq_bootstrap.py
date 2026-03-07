@@ -26,6 +26,15 @@ def bootstrap_dq_monitor_port(
 ) -> DQMonitorPort | None:
     """Create a data quality monitor port implementation.
 
+    Args:
+        settings: Application settings providing DQ monitoring flags, baseline window,
+            Z-score threshold, error rate max, and quality score min.
+        logger: Optional LoggerPort for structured DQ monitor logging; uses NoOpLogger
+            when None.
+        monitor_cls: DataQualityMonitor class for DI/testing; uses DataQualityMonitor
+            by default.
+        noop_logger_cls: NoOpLogger class for DI/testing; used when no logger is provided.
+
     Returns:
         DQMonitorPort if DQ monitoring is enabled, None otherwise.
     """
@@ -63,6 +72,12 @@ def bootstrap_dq_monitor(
     noop_logger_cls: type[NoOpLogger] = NoOpLogger,
 ) -> DQMonitorPort | None:
     """Deprecated alias for :func:`bootstrap_dq_monitor_port`.
+
+    Args:
+        settings: Application settings providing DQ monitoring configuration.
+        logger: Optional LoggerPort for structured DQ monitor logging.
+        monitor_cls: DataQualityMonitor class for DI/testing.
+        noop_logger_cls: NoOpLogger class for DI/testing.
 
     Returns:
         DQMonitorPort if DQ monitoring is enabled, None otherwise.

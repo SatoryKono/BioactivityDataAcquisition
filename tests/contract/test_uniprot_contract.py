@@ -19,6 +19,23 @@ UNIPROT_API_BASE = "https://rest.uniprot.org"
 pytestmark = pytest.mark.network
 
 
+async def _request_or_skip(
+    client: httpx.AsyncClient,
+    method: str,
+    url: str,
+    **kwargs: object,
+) -> httpx.Response:
+    """Execute request and skip on transient network/provider outages."""
+    try:
+        response = await client.request(method, url, **kwargs)
+    except (httpx.ConnectError, httpx.ConnectTimeout, httpx.ReadTimeout) as exc:
+        pytest.skip(f"UniProt endpoint not reachable: {exc}")
+
+    if response.status_code >= 500:
+        pytest.skip(f"UniProt temporary server error: HTTP {response.status_code}")
+    return response
+
+
 @pytest.mark.uniprot
 class TestUniProtContract:
     """Contract tests for UniProt REST API."""
@@ -27,7 +44,9 @@ class TestUniProtContract:
     async def test_uniprotkb_search_endpoint(self) -> None:
         """Verify UniProtKB search endpoint works."""
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
+            response = await _request_or_skip(
+                client,
+                "GET",
                 f"{UNIPROT_API_BASE}/uniprotkb/search",
                 params={
                     "query": "ubiquitin",
@@ -54,7 +73,9 @@ class TestUniProtContract:
         accession = "P0DTD1"  # SARS-CoV-2 Replicase polyprotein
 
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
+            response = await _request_or_skip(
+                client,
+                "GET",
                 f"{UNIPROT_API_BASE}/uniprotkb/{accession}",
                 params={"format": "json"},
             )
@@ -71,7 +92,9 @@ class TestUniProtContract:
         accession = "P0DTD1"
 
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
+            response = await _request_or_skip(
+                client,
+                "GET",
                 f"{UNIPROT_API_BASE}/uniprotkb/{accession}.fasta",
             )
 
@@ -86,7 +109,9 @@ class TestUniProtContract:
     async def test_proteomes_endpoint(self) -> None:
         """Verify proteomes endpoint schema."""
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
+            response = await _request_or_skip(
+                client,
+                "GET",
                 f"{UNIPROT_API_BASE}/proteomes/search",
                 params={
                     "query": "human",
@@ -107,7 +132,9 @@ class TestUniProtContract:
         taxonomy_id = "9606"
 
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
+            response = await _request_or_skip(
+                client,
+                "GET",
                 f"{UNIPROT_API_BASE}/taxonomy/{taxonomy_id}",
                 params={"format": "json"},
             )
@@ -123,7 +150,9 @@ class TestUniProtContract:
     async def test_pagination_headers(self) -> None:
         """Verify pagination via Link headers."""
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
+            response = await _request_or_skip(
+                client,
+                "GET",
                 f"{UNIPROT_API_BASE}/uniprotkb/search",
                 params={
                     "query": "*",
@@ -146,7 +175,9 @@ class TestUniProtContract:
         """Verify ID mapping endpoint structure."""
         async with httpx.AsyncClient(timeout=60.0) as client:
             # Submit mapping job
-            response = await client.post(
+            response = await _request_or_skip(
+                client,
+                "POST",
                 f"{UNIPROT_API_BASE}/idmapping/run",
                 data={
                     "from": "UniProtKB_AC-ID",

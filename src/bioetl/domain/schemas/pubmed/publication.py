@@ -1,6 +1,6 @@
 """Pandera schema for PubMed Publication entity.
 
-Aligned with RULES.md v5.10 and MEDLINE DTD.
+Aligned with RULES.md v5.23 and MEDLINE DTD.
 Source: https://dtd.nlm.nih.gov/ncbi/pubmed/out/pubmed_230101.dtd
 
 Note: File renamed from article.py to publication.py per ADR-024 Entity Naming Unification.

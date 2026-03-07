@@ -35,7 +35,16 @@ class PublicationTermFilteringMixin:
         filter_field: str,
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch filtered records, extracting terms for publication_term target."""
+        """Fetch filtered records, extracting terms for publication_term target.
+
+        Args:
+            entity_type: Entity type to fetch. When equal to ``TARGET_ENTITY_TYPE``,
+                publication-term extraction is applied instead of direct delegation.
+            filter_ids: List of identifier values to filter by.
+            filter_field: Field name on which to apply the filter.
+            limit: Optional maximum number of records to yield. If None, all matching
+                records are returned.
+        """
         filterable = self._ensure_filterable("fetch_filtered")
 
         if entity_type == self.TARGET_ENTITY_TYPE:
@@ -59,7 +68,15 @@ class PublicationTermFilteringMixin:
         filters: dict[str, list[str]],
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch multi-filtered records with publication-term extraction support."""
+        """Fetch multi-filtered records with publication-term extraction support.
+
+        Args:
+            entity_type: Entity type to fetch. When equal to ``TARGET_ENTITY_TYPE``,
+                term extraction is applied to upstream publication records.
+            filters: Mapping of field names to lists of allowed values.
+            limit: Optional maximum number of term records to yield. When set,
+                the upstream publication fetch uses a multiplied limit.
+        """
         filterable = self._ensure_filterable("fetch_multi_filtered")
 
         if entity_type != self.TARGET_ENTITY_TYPE:
@@ -99,7 +116,17 @@ class PublicationTermFilteringMixin:
         fallback_mapping: dict[str, str],
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch with fallback and publication-term extraction support."""
+        """Fetch with fallback and publication-term extraction support.
+
+        Args:
+            entity_type: Entity type to fetch. When equal to ``TARGET_ENTITY_TYPE``,
+                term extraction is applied to upstream publication records.
+            filter_ids: List of identifier values to filter by.
+            filter_field: Field name on which to apply the primary filter.
+            fallback_mapping: Mapping from primary field to fallback field for retry logic.
+            limit: Optional maximum number of term records to yield. When set,
+                the upstream publication fetch uses a multiplied limit.
+        """
         filterable = self._ensure_filterable("fetch_filtered_with_fallback")
 
         if entity_type != self.TARGET_ENTITY_TYPE:

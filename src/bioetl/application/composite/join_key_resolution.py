@@ -32,6 +32,11 @@ class JoinKeyResolverService:
     ) -> str | None:
         """Find key column name (qualified preferred, fallback unqualified).
 
+        Args:
+            key: Unqualified join key name (e.g. ``"chembl_id"``).
+            columns: List of column names present in the current DataFrame.
+            pipeline: Optional pipeline name used to build qualified column candidate.
+
         Returns:
             Qualified column name if found, unqualified name as fallback,
             or None if no matching column exists.
@@ -57,6 +62,11 @@ class JoinKeyResolverService:
         pipeline: str | None = None,
     ) -> pl.DataFrame:
         """Normalize selected identifier join key columns to lowercase.
+
+        Args:
+            df: DataFrame containing the columns to normalize.
+            join_keys: List of unqualified key names to check for normalization.
+            pipeline: Optional pipeline name used to locate qualified column variants.
 
         Returns:
             DataFrame with qualifying identifier columns (doi, pmid, pmc_id) lowercased.
@@ -84,6 +94,12 @@ class JoinKeyResolverService:
         merged_columns: list[str],
     ) -> tuple[str, str, str | None]:
         """Resolve qualified join key names for seed/enricher join.
+
+        Args:
+            primary_key: Unqualified join key name shared by both sides.
+            seed_pipeline: Optional seed pipeline name for qualified column lookup.
+            enricher_pipeline: Enricher pipeline name for building qualified right key.
+            merged_columns: Columns available in the current merged DataFrame.
 
         Returns:
             Tuple of (seed_join_key, enricher_join_key, seed_join_key_qualified) where
@@ -121,6 +137,13 @@ class JoinKeyResolverService:
     ) -> tuple[str, str, str | None]:
         """Resolve qualified join key names when left/right key names differ.
 
+        Args:
+            left_key: Unqualified key name on the left (merged) side.
+            right_key: Unqualified key name on the right (dependency) side.
+            left_pipeline: Optional left-side pipeline name for qualified column lookup.
+            right_pipeline: Right-side pipeline name for building the qualified right key.
+            merged_columns: Columns available in the current merged DataFrame.
+
         Returns:
             Tuple of (left_join_key, right_join_key, left_join_key_qualified) where
             left_join_key_qualified is the fully-qualified left key or None if unavailable.
@@ -153,6 +176,12 @@ class JoinKeyResolverService:
         merged_columns: list[str],
     ) -> tuple[list[str], list[str], set[str]]:
         """Resolve all join keys for composite-key dependency join.
+
+        Args:
+            join_keys_list: Ordered list of unqualified key names to resolve.
+            left_pipeline: Optional left-side pipeline name for qualified column lookup.
+            right_pipeline: Right-side pipeline name for building qualified right keys.
+            merged_columns: Columns available in the current merged DataFrame.
 
         Returns:
             Tuple of (left_keys, right_keys, all_join_key_set) with resolved qualified

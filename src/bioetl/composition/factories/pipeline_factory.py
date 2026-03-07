@@ -102,7 +102,25 @@ def build_pipeline_services(
     silver_validator: SilverValidatorPort | None = None,
     _deps: ServiceBundleDependencies | None = None,
 ) -> PipelineService:
-    """Compatibility facade delegating to service_bundle_factory implementation."""
+    """Compatibility facade delegating to service_bundle_factory implementation.
+
+    Args:
+        pipeline_name: Name of the pipeline (e.g., 'chembl_activity').
+        create_data_source_fn: Callable that creates the provider data source.
+        settings: Application settings for infrastructure wiring.
+        logger: LoggerPort for structured logging.
+        config: Optional pre-loaded pipeline YAML config; loaded from disk if None.
+        filter_config: Optional input filter configuration; disables filtering if None.
+        tracer: Optional TracingPort for distributed tracing.
+        dq_monitor: Optional DQMonitorPort for data quality monitoring.
+        metadata_coordinator: Optional coordinator for pipeline metadata writes.
+        cached_bronze: Optional cached Bronze context; uses live API if None.
+        silver_validator: Optional Silver layer validator (required in production).
+        _deps: Optional dependency overrides for testing; resolved from defaults if None.
+
+    Returns:
+        Fully wired PipelineService bundle for the pipeline run.
+    """
     warnings.warn(
         "Use bioetl.composition.factories.service_bundle_factory.build_pipeline_services "
         "for direct wiring. pipeline_factory facade remains for compatibility.",
@@ -144,7 +162,30 @@ def create_pipeline_with_services(
     pandera_silver_schema: object | None = None,
     _deps: ServiceBundleDependencies | None = None,
 ) -> BasePipeline:
-    """Compatibility facade delegating to service_bundle_factory implementation."""
+    """Compatibility facade delegating to service_bundle_factory implementation.
+
+    Args:
+        pipeline_name: Name of the pipeline (e.g., 'chembl_activity').
+        pipeline_class: Concrete pipeline class to instantiate.
+        provider: Provider name (e.g., 'chembl').
+        create_data_source_fn: Callable that creates the provider data source.
+        transformer_class: Optional transformer class; no transformer used if None.
+        run_id: Unique identifier for this pipeline run.
+        runtime: Runtime configuration (run type, limits, vacuum settings).
+        settings: Application settings for infrastructure wiring.
+        logger: LoggerPort for structured logging.
+        config: Optional pre-loaded pipeline YAML config; loaded from disk if None.
+        filter_config: Optional input filter configuration; disables filtering if None.
+        tracer: Optional TracingPort for distributed tracing.
+        dq_monitor: Optional DQMonitorPort for data quality monitoring.
+        metrics: Optional MetricsPort for metrics collection.
+        cached_bronze: Optional cached Bronze context; uses live API if None.
+        pandera_silver_schema: Optional Pandera DataFrameModel for Silver validation.
+        _deps: Optional dependency overrides for testing; resolved from defaults if None.
+
+    Returns:
+        Configured BasePipeline instance ready for execution.
+    """
     warnings.warn(
         "Use bioetl.composition.factories.service_bundle_factory.create_pipeline_with_services "
         "for direct wiring. pipeline_factory facade remains for compatibility.",

@@ -54,7 +54,13 @@ class UnifiedQuarantine:
         self,
         base_path: str,
     ) -> None:
-        """Initialize unified quarantine for local filesystem."""
+        """Initialize unified quarantine for local filesystem.
+
+        Args:
+            base_path: Root directory path for the quarantine Delta table.
+                Trailing slashes are stripped automatically.
+
+        """
         self.base_path = base_path.rstrip("/")
 
     async def write(

@@ -29,7 +29,14 @@ __all__ = [
 
 
 def normalize_string(value: str | None) -> str | None:
-    """Normalize string by stripping whitespace, return None for empty."""
+    """Normalize string by stripping whitespace, return None for empty.
+
+    Args:
+        value: Input string or None.
+
+    Returns:
+        Stripped string, or None if input is None or whitespace-only.
+    """
     if value is None:
         return None
     stripped = value.strip()
@@ -37,7 +44,14 @@ def normalize_string(value: str | None) -> str | None:
 
 
 def normalize_to_string(value: object) -> str | None:
-    """Convert value to string, strip whitespace, return None if empty."""
+    """Convert value to string, strip whitespace, return None if empty.
+
+    Args:
+        value: Any value to coerce to string. None returns None.
+
+    Returns:
+        Stripped string representation, or None if result is empty.
+    """
     if value is None:
         return None
     str_value = str(value).strip()
@@ -45,7 +59,14 @@ def normalize_to_string(value: object) -> str | None:
 
 
 def normalize_doi(doi: str | None) -> str | None:
-    """Normalize DOI to lowercase, stripped format."""
+    """Normalize DOI to lowercase, stripped format.
+
+    Args:
+        doi: Raw DOI string or None.
+
+    Returns:
+        Lowercase, stripped DOI string, or None if input is falsy.
+    """
     return doi.strip().lower() if doi else None
 
 
@@ -53,7 +74,15 @@ _HTML_TAG_PATTERN = re.compile(r"<[^>]+>")
 
 
 def strip_html_tags(text: str | None) -> str | None:
-    """Remove HTML/JATS tags, decode entities, normalize whitespace."""
+    """Remove HTML/JATS tags, decode entities, normalize whitespace.
+
+    Args:
+        text: Raw text possibly containing HTML or JATS markup.
+
+    Returns:
+        Clean text with tags stripped, entities decoded, and whitespace collapsed.
+        Returns None if input is falsy or result is empty.
+    """
     if not text:
         return None
 
@@ -67,7 +96,14 @@ def strip_html_tags(text: str | None) -> str | None:
 
 
 def normalize_pmc_id(pmc_id: str | None) -> str | None:
-    """Normalize PMC ID to uppercase with 'PMC' prefix."""
+    """Normalize PMC ID to uppercase with 'PMC' prefix.
+
+    Args:
+        pmc_id: Raw PMC ID string, with or without the 'PMC' prefix.
+
+    Returns:
+        Uppercase PMC ID with 'PMC' prefix (e.g., 'PMC123456'), or None if empty.
+    """
     if not pmc_id:
         return None
     pmc_id = pmc_id.strip()

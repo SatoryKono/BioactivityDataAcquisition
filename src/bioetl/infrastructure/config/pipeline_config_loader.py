@@ -99,7 +99,23 @@ class PipelineConfigLoader:
         self,
         yaml_config: PipelineYamlConfig,
     ) -> DomainDQConfig:
-        """Resolve DQ config from hierarchy with optional inline overrides."""
+        """Resolve DQ config from hierarchy with optional inline overrides.
+
+        Applies the four-step resolution order documented in the class docstring:
+        DQ hierarchy file -> inline overrides -> merged result -> defaults.
+
+        Args:
+            yaml_config: Validated pipeline YAML configuration containing
+                provider, entity_type, and optional dq_overrides.
+
+        Returns:
+            Fully resolved DomainDQConfig with thresholds and validation rules.
+
+        Raises:
+            FileNotFoundError: Propagated only when no hierarchy file exists
+                and no inline overrides are present.
+
+        """
         provider = yaml_config.provider
         entity = yaml_config.entity_type
 

@@ -82,24 +82,25 @@ def pytest_collection_modifyitems(
         "BIOETL_LIVE_API_TESTS"
     )
 
-    if not live_tests_enabled:
-        skip_marker = pytest.mark.skip(
-            reason=(
-                "Live API tests disabled. Enable via --live-api "
-                "or BIOETL_LIVE_API_TESTS=true."
-            )
-        )
-        for item in items:
-            fspath_str = str(item.fspath)
-            if _is_contract_test_path(fspath_str):
-                item.add_marker(pytest.mark.network)
-                # Skip tests that require live API access (not marked with no_api)
-                if "no_api" not in item.keywords:
-                    item.add_marker(skip_marker)
-    else:
-        for item in items:
-            if _is_contract_test_path(str(item.fspath)):
-                item.add_marker(pytest.mark.network)
+    for item in items:
+        if not _is_contract_test_path(str(item.fspath)):
+            continue
+
+        # Contract tests explicitly marked no_api are pure schema/contract checks
+        # and must run without outbound connectivity.
+        requires_network = "no_api" not in item.keywords
+        if requires_network:
+            item.add_marker(pytest.mark.network)
+
+            if not live_tests_enabled:
+                item.add_marker(
+                    pytest.mark.skip(
+                        reason=(
+                            "Live API tests disabled. Enable via --live-api "
+                            "or BIOETL_LIVE_API_TESTS=true."
+                        )
+                    )
+                )
 
 
 @pytest.fixture(scope="session")

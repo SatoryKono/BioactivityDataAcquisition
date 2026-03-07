@@ -45,7 +45,20 @@ class CrossRefFetchFlow:
         filter_field: str,
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch publications by DOI list (FilterableDataSourcePort contract)."""
+        """Fetch publications by DOI list (FilterableDataSourcePort contract).
+
+        Args:
+            entity_type: Entity type to validate (CrossRef only supports
+                publication-type entities).
+            filter_ids: List of DOIs to fetch.
+            filter_field: Filter field name; only "doi" is supported.
+                A warning is logged for unsupported values.
+            limit: Maximum number of records to yield.
+
+        Yields:
+            Bronze records fetched from CrossRef by DOI batch.
+
+        """
         validate_crossref_entity_type(entity_type)
 
         if filter_field != "doi":
@@ -73,7 +86,19 @@ class CrossRefFetchFlow:
         fallback_mapping: dict[str, str],
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch publications by DOI with fallback search for misses."""
+        """Fetch publications by DOI with fallback search for misses.
+
+        Args:
+            entity_type: Entity type to validate against CrossRef-supported types.
+            filter_ids: List of primary IDs (DOIs) to fetch.
+            filter_field: Filter field name used to select fallback strategy.
+            fallback_mapping: Mapping from DOI to title for fallback title search.
+            limit: Maximum number of records to yield.
+
+        Yields:
+            Bronze records from primary DOI batch fetch and title-based fallback.
+
+        """
         validate_crossref_entity_type(entity_type)
 
         async def _primary_records(
@@ -103,7 +128,25 @@ class CrossRefFetchFlow:
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch publications via DOI filtering or free-text query search."""
+        """Fetch publications via DOI filtering or free-text query search.
+
+        If ``filter_ids`` are provided, delegates to ``fetch_filtered``.
+        Otherwise uses the search paginator with the ``query`` parameter.
+
+        Args:
+            entity_type: Entity type to fetch (must be a CrossRef-supported type).
+            limit: Maximum number of records to yield.
+            query: Free-text search query (required when ``filter_ids`` is empty).
+            filter_ids: Optional list of DOIs to fetch by ID.
+            filter_field: Filter field name (defaults to "doi" when filter_ids given).
+
+        Raises:
+            ValueError: If neither ``filter_ids`` nor ``query`` is provided.
+
+        Yields:
+            Bronze records from CrossRef API.
+
+        """
         if filter_ids:
             effective_filter_field = resolve_filter_field(filter_field)
             async for publication in self.fetch_filtered(

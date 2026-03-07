@@ -78,7 +78,17 @@ class _NormalizationActivityMixin:
         *,
         validate: bool = True,
     ) -> NormalizationResult:
-        """Normalize a single activity value."""
+        """Normalize a single activity value.
+
+        Args:
+            value: Raw activity measurement (e.g., IC50 in nM).
+            unit: Unit string of the raw measurement (e.g., 'nM', 'uM').
+            activity_type: Activity type label (e.g., 'IC50', 'Ki'). Reserved for future validation.
+            validate: Whether to validate the value against concentration rules. Defaults to True.
+
+        Returns:
+            NormalizationResult with converted value, unit, pChEMBL, and validity flag.
+        """
         if validate:
             is_valid, error = self.validator.validate_concentration(value, unit)
             if not is_valid:
@@ -123,7 +133,16 @@ class _NormalizationActivityMixin:
         *,
         validate: bool = True,
     ) -> PChemblValue | None:
-        """Normalize activity to pChEMBL value."""
+        """Normalize activity to pChEMBL value.
+
+        Args:
+            value: Raw activity measurement.
+            unit: Unit string of the measurement (e.g., 'nM').
+            validate: Whether to validate the resulting pChEMBL value. Defaults to True.
+
+        Returns:
+            PChemblValue if conversion succeeds and passes validation, otherwise None.
+        """
         try:
             pchembl = self.converter.value_to_pchembl(value, unit)
             if validate:
@@ -149,14 +168,28 @@ class _NormalizationActivityMixin:
             return None, False
 
     def is_potent(self, pchembl_value: float) -> bool:
-        """Check if pChEMBL value indicates potent activity."""
+        """Check if pChEMBL value indicates potent activity.
+
+        Args:
+            pchembl_value: pChEMBL value to evaluate.
+
+        Returns:
+            True if pchembl_value meets or exceeds the configured potency threshold.
+        """
         return self.validator.is_potent(
             pchembl_value,
             self.config.potency_threshold,
         )
 
     def is_highly_potent(self, pchembl_value: float) -> bool:
-        """Check if pChEMBL value indicates highly potent activity."""
+        """Check if pChEMBL value indicates highly potent activity.
+
+        Args:
+            pchembl_value: pChEMBL value to evaluate.
+
+        Returns:
+            True if pchembl_value meets or exceeds the configured high-potency threshold.
+        """
         return self.validator.is_highly_potent(
             pchembl_value,
             self.config.high_potency_threshold,
@@ -166,7 +199,14 @@ class _NormalizationActivityMixin:
         self,
         pchembl_value: float,
     ) -> str:
-        """Classify potency level based on pChEMBL value."""
+        """Classify potency level based on pChEMBL value.
+
+        Args:
+            pchembl_value: pChEMBL value to classify.
+
+        Returns:
+            Potency label: 'inactive', 'weak', 'moderate', 'potent', or 'highly_potent'.
+        """
         if pchembl_value < 4.0:
             return "inactive"
         if pchembl_value < self.config.potency_threshold:
@@ -193,7 +233,19 @@ class _NormalizationBatchMixin(_NormalizationActivityMixin):
         aggregate: bool = True,
         filter_invalid: bool = True,
     ) -> NormalizationResult | list[NormalizationResult]:
-        """Normalize multiple activity values."""
+        """Normalize multiple activity values.
+
+        Args:
+            values: Sequence of raw activity measurements to normalize.
+            unit: Unit string shared by all values (e.g., 'nM').
+            activity_type: Activity type label for each value (e.g., 'IC50').
+            aggregate: If True, aggregate results into a single value. Defaults to True.
+            filter_invalid: If True, exclude invalid results before aggregation. Defaults to True.
+
+        Returns:
+            Single aggregated NormalizationResult if aggregate is True, otherwise a list
+            of individual NormalizationResult objects for each input value.
+        """
         results = [
             self.normalize_activity(v, unit, activity_type, validate=True)
             for v in values
@@ -252,7 +304,16 @@ class _NormalizationBatchMixin(_NormalizationActivityMixin):
         concentrations: Sequence[Concentration],
         activity_type: str = "IC50",  # noqa: ARG002 - reserved for type-specific
     ) -> NormalizationResult:
-        """Normalize and aggregate Concentration objects."""
+        """Normalize and aggregate Concentration objects.
+
+        Args:
+            concentrations: Sequence of Concentration value objects to normalize and aggregate.
+            activity_type: Activity type label. Reserved for future type-specific logic. Defaults to 'IC50'.
+
+        Returns:
+            Single NormalizationResult with aggregated value. Returns an invalid result if
+            concentrations is empty.
+        """
         if not concentrations:
             return NormalizationResult(
                 value=0.0,

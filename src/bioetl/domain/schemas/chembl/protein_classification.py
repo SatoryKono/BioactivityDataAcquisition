@@ -1,6 +1,6 @@
 """Pandera schema for ChEMBL Protein Classification entity.
 
-Aligned with RULES.md v5.0 and ChEMBL 34 schema.
+Aligned with RULES.md v5.23 and ChEMBL 34 schema.
 """
 
 from __future__ import annotations
