@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Validate unified pipeline and composite configs against JSON schemas."""
+"""Validate unified pipeline and composite configs against JSON schemas.
+
+In addition to JSON Schema checks, this script performs normalized invariants
+checks for runtime-critical fields (e.g., deterministic ``sort_by``), using
+``configs/base/pipeline.yaml`` defaults merged with entity ``pipeline`` payload.
+"""
 
 from __future__ import annotations
 
@@ -46,6 +51,51 @@ def _validate_yaml_schema(
         return False, f"Schema validation: {exc.message}{suffix}"
 
 
+def _deep_merge_dicts(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
+    """Recursively merge dicts with override precedence."""
+    merged = dict(base)
+    for key, value in override.items():
+        current = merged.get(key)
+        if isinstance(current, dict) and isinstance(value, dict):
+            merged[key] = _deep_merge_dicts(current, value)
+            continue
+        merged[key] = value
+    return merged
+
+
+def _load_base_pipeline_defaults(configs_root: Path) -> dict[str, Any]:
+    """Load consolidated base pipeline defaults from configs/base/pipeline.yaml."""
+    base_path = configs_root / "base" / "pipeline.yaml"
+    if not base_path.exists():
+        return {}
+    payload = yaml.safe_load(base_path.read_text(encoding="utf-8")) or {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def _build_normalized_pipeline_payload(
+    entity_payload: dict[str, Any],
+    pipeline_payload: dict[str, Any],
+    base_pipeline_defaults: dict[str, Any],
+) -> dict[str, Any]:
+    """Build runtime-like normalized pipeline payload for invariants checks.
+
+    Merge order:
+    1. base defaults (configs/base/pipeline.yaml)
+    2. entity pipeline section (configs/entities/*/*.yaml::pipeline)
+    3. top-level provider/entity fallbacks from entity YAML (if missing)
+    """
+    normalized = _deep_merge_dicts(base_pipeline_defaults, pipeline_payload)
+
+    provider = entity_payload.get("provider")
+    entity = entity_payload.get("entity")
+    if provider and not normalized.get("provider"):
+        normalized["provider"] = provider
+    if entity and not normalized.get("entity_type"):
+        normalized["entity_type"] = entity
+
+    return normalized
+
+
 def _validate_pipeline_payload(pipeline_payload: dict[str, Any]) -> list[str]:
     errors: list[str] = []
     required = ("pipeline_name", "provider", "entity_type", "business_primary_keys")
@@ -56,6 +106,49 @@ def _validate_pipeline_payload(pipeline_payload: dict[str, Any]) -> list[str]:
     keys = pipeline_payload.get("business_primary_keys")
     if not isinstance(keys, list) or not keys:
         errors.append("pipeline.business_primary_keys must be a non-empty list")
+    return errors
+
+
+def _validate_runtime_normalized_invariants(
+    pipeline_payload: dict[str, Any],
+) -> list[str]:
+    """Validate runtime-critical invariants after base/default normalization."""
+    errors: list[str] = []
+
+    sink = pipeline_payload.get("sink", {})
+    if not isinstance(sink, dict):
+        errors.append("pipeline.sink must be a mapping after normalization")
+        return errors
+
+    silver_cfg = sink.get("silver")
+    if isinstance(silver_cfg, dict) and silver_cfg.get("enabled", True):
+        silver_format = silver_cfg.get("format")
+        if silver_format != "delta":
+            errors.append(
+                f"sink.silver.format must be 'delta' for runtime (got: {silver_format!r})"
+            )
+
+    for layer in ("silver", "gold"):
+        layer_cfg = sink.get(layer)
+        if not isinstance(layer_cfg, dict):
+            errors.append(f"sink.{layer} must be a mapping after normalization")
+            continue
+        if not layer_cfg.get("enabled", True):
+            continue
+
+        sort_by = layer_cfg.get("sort_by")
+        if not isinstance(sort_by, list) or not sort_by:
+            errors.append(
+                f"sink.{layer}.sort_by must be a non-empty list after normalization"
+            )
+            continue
+
+        normalized_columns = [str(col).strip() for col in sort_by]
+        if any(not col for col in normalized_columns):
+            errors.append(f"sink.{layer}.sort_by contains empty column names")
+        if len(normalized_columns) != len(set(normalized_columns)):
+            errors.append(f"sink.{layer}.sort_by contains duplicate columns")
+
     return errors
 
 
@@ -120,11 +213,18 @@ def main() -> int:
         action="store_true",
         help="Treat warnings as errors (path hierarchy checks)",
     )
+    parser.add_argument(
+        "--skip-runtime-normalized-check",
+        action="store_true",
+        help="Skip runtime-normalized invariants check (not recommended).",
+    )
     args = parser.parse_args()
 
+    configs_root = Path("configs")
     schema_dir = Path("configs/_schema")
     pipeline_schema = load_schema(schema_dir / "pipeline.json")
     composite_schema = load_schema(schema_dir / "composite.json")
+    base_pipeline_defaults = _load_base_pipeline_defaults(configs_root)
 
     entity_files = _find_entity_files(Path("configs/entities"))
     composite_files = _find_composite_files(Path("configs/composites"))
@@ -166,7 +266,16 @@ def main() -> int:
         for err in _validate_pipeline_payload(pipeline_payload):
             errors.append(f"{config_path}: {err}")
 
-        for warn in _validate_sink_paths_and_sort(pipeline_payload):
+        normalized_payload = _build_normalized_pipeline_payload(
+            payload,
+            pipeline_payload,
+            base_pipeline_defaults,
+        )
+        if not args.skip_runtime_normalized_check:
+            for err in _validate_runtime_normalized_invariants(normalized_payload):
+                errors.append(f"{config_path}: {err}")
+
+        for warn in _validate_sink_paths_and_sort(normalized_payload):
             warnings.append(f"{config_path}: {warn}")
 
     for config_path in composite_files:
