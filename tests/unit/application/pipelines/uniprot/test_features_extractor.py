@@ -180,6 +180,22 @@ class TestFeatureExtractor:
         result = FeatureExtractor.extract_ubiquitination(features)
         assert result is None
 
+    def test_extract_ptm_by_pattern_direct(self):
+        """Direct API test for extract_ptm_by_pattern."""
+        features = [
+            {"type": "Modified residue", "description": "Acetyllysine"},
+            {"type": "Modified residue", "description": "Phosphoserine"},
+            {"type": "Domain", "description": "Phospho-like name"},
+        ]
+
+        result = FeatureExtractor.extract_ptm_by_pattern(features, ("acetyl",))
+        assert result is not None
+        parsed = json.loads(result)
+        assert len(parsed) == 1
+        assert parsed[0]["description"] == "Acetyllysine"
+
+        assert FeatureExtractor.extract_ptm_by_pattern(features, ()) is None
+
     def test_feature_location_parsing(self):
         """Test parsing of different location formats."""
         features = [

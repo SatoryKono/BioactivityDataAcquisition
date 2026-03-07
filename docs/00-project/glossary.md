@@ -204,7 +204,7 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | **Transformer** | Converts Bronze records to Silver/Gold format | `Converter`, `Mapper` (as class names) |
 | **Pipeline Runner** | Orchestrates pipeline execution | `Executor`, `Controller` |
 | **Service** | Cross-cutting concern handler (e.g., `PreflightService`) | `Helper`, `Utility` |
-| **Manager** | Resource-specific handler (e.g., `LockManager`) | `Controller` |
+| **Manager** | Resource-specific handler (e.g., `CheckpointManager`) | `Controller` |
 
 ### Infrastructure Layer
 
@@ -223,7 +223,7 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | `{Provider}{Entity}Transformer` | `PubChemCompoundTransformer` | Cross-provider distinction |
 | `{Layer}Writer` | `BronzeWriter`, `GoldWriter` | Data persistence |
 | `{Provider}Adapter` | `ChemblAdapter`, `UniProtAdapter` | External API access |
-| `{Resource}Manager` | `LockManager`, `CheckpointManager` | Resource lifecycle |
+| `{Resource}Manager` | `CheckpointManager` | Resource lifecycle |
 | `{Concern}Service` | `PreflightService`, `PostrunService` | Cross-cutting operations |
 
 ### CLI Conventions

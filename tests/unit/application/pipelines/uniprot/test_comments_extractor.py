@@ -196,3 +196,71 @@ class TestCommentExtractor:
         """Test extract_by_type with empty input."""
         assert CommentExtractor.extract_by_type(None, "TYPE") is None
         assert CommentExtractor.extract_by_type([], "TYPE") is None
+
+    def test_extract_text_values_direct(self):
+        """Test direct text extraction helper method."""
+        comments = [
+            {"commentType": "FUNCTION", "texts": [{"value": "Function A"}]},
+            {"commentType": "FUNCTION", "texts": [{"value": "Function B"}]},
+            {"commentType": "PATHWAY", "texts": [{"value": "Pathway A"}]},
+        ]
+        result = CommentExtractor.extract_text_values(comments, "FUNCTION")
+        assert result == ["Function A", "Function B"]
+
+    def test_extract_catalytic_activity_ignores_invalid_reaction(self):
+        """Invalid reaction payload should not crash and should return None."""
+        comments = [{"commentType": "CATALYTIC ACTIVITY", "reaction": "invalid"}]
+        assert CommentExtractor.extract_catalytic_activity(comments) is None
+
+    def test_extract_isoform_details_returns_none_for_empty_payload(self):
+        """Isoform detail fields must remain None when no isoforms are present."""
+        result = CommentExtractor.extract_isoform_details(None)
+        assert result == {
+            "isoform_names": None,
+            "isoform_ids": None,
+            "isoform_synonyms": None,
+        }
+
+    def test_extract_all_comments_raw(self):
+        """Test aggregated raw extraction output."""
+        comments = [
+            {"commentType": "FUNCTION", "texts": [{"value": "Kinase activity"}]},
+            {
+                "commentType": "CATALYTIC ACTIVITY",
+                "reaction": {"name": "ATP + H2O = ADP + P", "ecNumber": "3.6.1.3"},
+            },
+            {
+                "commentType": "ALTERNATIVE PRODUCTS",
+                "isoforms": [
+                    {
+                        "name": {"value": "Isoform A"},
+                        "isoformIds": ["P12345-1"],
+                        "synonyms": [{"value": "Variant 1"}],
+                    }
+                ],
+            },
+        ]
+        raw = CommentExtractor.extract_all_comments_raw(comments)
+
+        assert raw["function_comment"] == ["Kinase activity"]
+        assert raw["isoform_count"] == 1
+        assert isinstance(raw["catalytic_activity"], list)
+        assert isinstance(raw["reactions"], list)
+        assert isinstance(raw["reaction_ec_numbers"], list)
+
+    def test_extract_all_comments(self):
+        """Test aggregated serialized extraction output."""
+        comments = [
+            {"commentType": "FUNCTION", "texts": [{"value": "Kinase activity"}]},
+            {
+                "commentType": "CATALYTIC ACTIVITY",
+                "reaction": {"name": "ATP + H2O = ADP + P", "ecNumber": "3.6.1.3"},
+            },
+        ]
+        result = CommentExtractor.extract_all_comments(comments)
+
+        assert result["function_comment"] == '["Kinase activity"]'
+        assert result["catalytic_activity"] is not None
+        assert result["reactions"] is not None
+        assert result["reaction_ec_numbers"] is not None
+        assert result["isoform_count"] is None

@@ -57,7 +57,7 @@
 **Сервисы ядра:**
 
 - **`PipelineServices`** (`pipeline_services.py`) — DI bundle портов для пайплайна
-- **`LockManager`** (`lock_manager.py`) — Координация блокировок
+- **`LockCoordinator`** (`lock_manager.py`) — Координация блокировок
 - **`PreflightService`** (`preflight_service.py`) — Pre-run health checks
 - **`PostrunService`** (`postrun_service.py`) — Post-run операции (DQ, VACUUM, cleanup)
 - **`CheckpointManager`** (`checkpoint_manager.py`) — Checkpoint I/O
@@ -146,7 +146,7 @@ factory = GenericPipelineFactory(
 
 **`PipelineRunner`** — координатор исполнения:
 
-- Делегирует блокировку через `LockManager`
+- Делегирует блокировку через `LockCoordinator`
 - Запускает preflight-валидацию через `PreflightService`
 - Исполняет пайплайн через `BatchExecutor`
 - Управляет postrun-операциями через `PostrunService`

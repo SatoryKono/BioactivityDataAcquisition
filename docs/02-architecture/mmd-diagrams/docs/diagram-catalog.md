@@ -201,7 +201,7 @@
 156. **Lock Acquisition Flow** - Sequence - acquire() → heartbeat → release()
 157. **Lock States** - State - Unlocked → Locked → Released
 158. **Heartbeat Mechanism** - Sequence - Periodic TTL refresh
-159. **Lock Manager** - Component - LockManager orchestration
+159. **Lock Manager** - Component - LockCoordinator orchestration
 160. **MemoryLock Implementation** - Class - In-memory locking
 161. **Exclusive Lock Flow** - Sequence - Rebuild/backfill locking
 162. **Lock Validation** - Activity - Owner validation
@@ -271,7 +271,7 @@
 216. **BatchMetricsRecorder** - Class - Metrics recording
 217. **BaseTransformer** - Class - Abstract transformer
 218. **BasePipeline** - Class - Abstract pipeline
-219. **LockManager** - Class - Lock orchestration
+219. **LockCoordinator** - Class - Lock orchestration
 220. **CheckpointManager** - Class - Checkpoint handling
 221. **PipelineServices** - Class - Services bundle
 222. **QuarantineManager** - Class - Quarantine management
@@ -380,7 +380,7 @@
 311. **Adapter ↔ HTTPClient** - Sequence - API request
 312. **HTTPClient ↔ RateLimiter** - Sequence - Rate limiting
 313. **HTTPClient ↔ CircuitBreaker** - Sequence - Fault tolerance
-314. **LockManager ↔ LockPort** - Sequence - Lock lifecycle
+314. **LockCoordinator ↔ LockPort** - Sequence - Lock lifecycle
 315. **CheckpointManager ↔ CheckpointPort** - Sequence - State persistence
 316. **QuarantineManager ↔ QuarantinePort** - Sequence - Quarantine ops
 317. **Observer ↔ Services** - Sequence - Observability integration
@@ -388,7 +388,7 @@
 319. **Postrun ↔ DQAnalyzers** - Sequence - DQ analysis
 320. **Postrun ↔ VacuumService** - Sequence - Cleanup
 321. **MemoryMonitor ↔ BatchExecutor** - Sequence - Adaptive sizing
-322. **Heartbeat ↔ LockManager** - Sequence - TTL refresh
+322. **Heartbeat ↔ LockCoordinator** - Sequence - TTL refresh
 323. **Shutdown ↔ Runner** - Sequence - Graceful stop
 324. **Factory ↔ Registry** - Sequence - Component creation
 325. **CLI ↔ Entrypoints** - Sequence - Command execution

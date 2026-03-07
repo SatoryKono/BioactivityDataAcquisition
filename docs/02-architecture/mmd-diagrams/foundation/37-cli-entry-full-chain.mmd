@@ -40,11 +40,11 @@ flowchart TB
     subgraph Execute["Application Core"]
         OBS_ENTER["PipelineObserver.__enter__()<br/>→ log started, inc counter"]
         RUNNER["PipelineRunner.run()"]
-        LOCK["LockManager.acquire()<br/>→ HeartbeatTask.start()"]
+        LOCK["LockCoordinator.acquire()<br/>→ HeartbeatTask.start()"]
         PRE["PreflightService.run()<br/>→ PreflightReport"]
         BATCH["BatchExecutor loop<br/>→ extract/transform/validate/write"]
         POST["PostrunService.run()<br/>→ vacuum, DQ report"]
-        UNLOCK["LockManager.release()<br/>→ HeartbeatTask.stop()"]
+        UNLOCK["LockCoordinator.release()<br/>→ HeartbeatTask.stop()"]
         OBS_EXIT["PipelineObserver.__exit__()<br/>→ observe duration"]
     end
 

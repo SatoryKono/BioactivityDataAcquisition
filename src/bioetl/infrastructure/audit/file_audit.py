@@ -19,13 +19,14 @@ __all__ = ["FileAuditAdapter"]
 
 
 import asyncio
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.domain.ports import AuditEntry, AuditLayer, AuditOperation
-from bioetl.domain.serialization import deserialize_from_json, serialize_to_json
-from bioetl.domain.types import JsonDict
+from bioetl.domain.ports import AuditEntry, AuditLayer
+from bioetl.domain.serialization import serialize_to_json
+
+from ._file_audit_readers import process_audit_file
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -120,85 +121,6 @@ class FileAuditAdapter:
             records_count=entry.records_count,
         )
 
-    def _process_audit_line(
-        self,
-        line: str,
-        run_id: RunID | None,
-        layer: AuditLayer | None,
-        table_name: str | None,
-        start_time: datetime | None,
-        end_time: datetime | None,
-    ) -> AuditEntry | None:
-        """Process a single audit log line and return entry if it matches filters.
-
-        Args:
-            line: Raw JSON line from audit file.
-            run_id: Filter by pipeline run ID.
-            layer: Filter by Medallion layer.
-            table_name: Filter by target table name.
-            start_time: Filter entries after this time.
-            end_time: Filter entries before this time.
-
-        Returns:
-            AuditEntry if line is valid and matches filters, None otherwise.
-        """
-        if not line.strip():
-            return None
-
-        try:
-            data = deserialize_from_json(line)
-            if not isinstance(data, dict):
-                return None
-            entry = self._parse_entry(data)
-            if self._matches_filters(
-                entry, run_id, layer, table_name, start_time, end_time
-            ):
-                return entry
-            return None
-        except (ValueError, KeyError):
-            return None
-
-    def _process_audit_file(
-        self,
-        file_path: Path,
-        run_id: RunID | None,
-        layer: AuditLayer | None,
-        table_name: str | None,
-        start_time: datetime | None,
-        end_time: datetime | None,
-        limit: int,
-        current_count: int,
-    ) -> list[AuditEntry]:
-        """Process a single audit file and return matching entries.
-
-        Args:
-            file_path: Path to the audit file.
-            run_id: Filter by pipeline run ID.
-            layer: Filter by Medallion layer.
-            table_name: Filter by target table name.
-            start_time: Filter entries after this time.
-            end_time: Filter entries before this time.
-            limit: Maximum total entries to collect.
-            current_count: Number of entries already collected.
-
-        Returns:
-            List of matching audit entries from this file.
-        """
-        entries: list[AuditEntry] = []
-        try:
-            with open(file_path, encoding="utf-8") as f:
-                for line in f:
-                    entry = self._process_audit_line(
-                        line, run_id, layer, table_name, start_time, end_time
-                    )
-                    if entry is not None:
-                        entries.append(entry)
-                        if current_count + len(entries) >= limit:
-                            break
-        except OSError:
-            pass
-        return entries
-
     def _read_entries_sync(
         self,
         run_id: RunID | None,
@@ -231,7 +153,7 @@ class FileAuditAdapter:
         for file_path in audit_files:
             if len(entries) >= limit:
                 break
-            file_entries = self._process_audit_file(
+            file_entries = process_audit_file(
                 file_path,
                 run_id,
                 layer,
@@ -245,72 +167,6 @@ class FileAuditAdapter:
 
         entries.sort(key=lambda e: e.timestamp, reverse=True)
         return entries[:limit]
-
-    def _parse_entry(
-        self,
-        data: JsonDict,  # Any: audit entry fields have heterogeneous values
-    ) -> AuditEntry:  # Any: audit entry fields have heterogeneous values
-        """Parse a dictionary into an AuditEntry.
-
-        Args:
-            data: Dictionary from JSON parsing.
-
-        Returns:
-            Parsed AuditEntry.
-
-        Raises:
-            KeyError: If required fields are missing.
-            ValueError: If field values are invalid.
-        """
-        from uuid import UUID
-
-        from bioetl.domain.types import RunID
-
-        timestamp = datetime.fromisoformat(data["timestamp"])
-        if timestamp.tzinfo is None:
-            timestamp = timestamp.replace(tzinfo=UTC)
-
-        return AuditEntry(
-            run_id=RunID(UUID(data["run_id"])),
-            timestamp=timestamp,
-            layer=AuditLayer(data["layer"]),
-            table_name=data["table_name"],
-            operation=AuditOperation(data["operation"]),
-            records_count=data["records_count"],
-            metadata=data.get("metadata", {}),
-        )
-
-    def _matches_filters(
-        self,
-        entry: AuditEntry,
-        run_id: RunID | None,
-        layer: AuditLayer | None,
-        table_name: str | None,
-        start_time: datetime | None,
-        end_time: datetime | None,
-    ) -> bool:
-        """Check if an entry matches the provided filters.
-
-        Args:
-            entry: The audit entry to check.
-            run_id: Filter by pipeline run ID.
-            layer: Filter by Medallion layer.
-            table_name: Filter by target table name.
-            start_time: Filter entries after this time.
-            end_time: Filter entries before this time.
-
-        Returns:
-            True if the entry matches all filters.
-        """
-        if run_id is not None and entry.run_id != run_id:
-            return False
-        if layer is not None and entry.layer != layer:
-            return False
-        if table_name is not None and entry.table_name != table_name:
-            return False
-        if start_time is not None and entry.timestamp < start_time:
-            return False
-        return not (end_time is not None and entry.timestamp > end_time)
 
     async def get_entries(
         self,

@@ -24,7 +24,7 @@ memory
 _converters
     Internal helpers: convert_write_mode, resolve_loading_strategy, freeze_sequences
 
-Re-exported from ``domain.configs``:
+base_provider
     BaseClientConfig, BaseProviderConfig, RateLimitConfig
 """
 
@@ -32,6 +32,11 @@ from bioetl.domain.config._converters import (
     convert_write_mode,
     freeze_sequences,
     resolve_loading_strategy,
+)
+from bioetl.domain.config.base_provider import (
+    BaseClientConfig,
+    BaseProviderConfig,
+    RateLimitConfig,
 )
 from bioetl.domain.config.dq import DQConfig, DQReportConfig, KeyNullabilityRule
 from bioetl.domain.config.memory import MemoryConfig
@@ -44,13 +49,6 @@ from bioetl.domain.config.validation import (
     CrossFieldValidation,
     FieldValidation,
     ValidationConfig,
-)
-
-# Re-export base provider/client configs from domain.configs for unified access.
-from bioetl.domain.configs.base import (
-    BaseClientConfig,
-    BaseProviderConfig,
-    RateLimitConfig,
 )
 
 __all__ = [

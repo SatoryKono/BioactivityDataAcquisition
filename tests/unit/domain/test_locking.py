@@ -1,7 +1,7 @@
 """Tests for domain locking primitives (RULES.md §3.3).
 
 Verifies LockContext value object, LockNotHeldError exception,
-and LockManager.get_context() method.
+and LockCoordinator.get_context() method.
 
 Note:
     Lock validation during writes is now performed at Application layer
@@ -211,8 +211,8 @@ class TestLockNotHeldError:
         assert error.expected_key == "lock:chembl_activity"
 
 
-class TestLockManagerGetContext:
-    """Tests for LockManager.get_context() method."""
+class TestLockCoordinatorGetContext:
+    """Tests for LockCoordinator.get_context() method."""
 
     @pytest.fixture
     def mock_lock_port(self, run_id: RunID) -> MagicMock:
@@ -247,9 +247,9 @@ class TestLockManagerGetContext:
         run_id: RunID,
     ) -> None:
         """Test get_context returns None before lock is acquired."""
-        from bioetl.application.core.lock_manager import LockManager
+        from bioetl.application.core.lock_manager import LockCoordinator
 
-        manager = LockManager.create(
+        manager = LockCoordinator.create(
             lock_port=mock_lock_port,
             run_id=run_id,
             provider="chembl",
@@ -275,9 +275,9 @@ class TestLockManagerGetContext:
         run_id: RunID,
     ) -> None:
         """Test get_context returns valid context after lock acquired."""
-        from bioetl.application.core.lock_manager import LockManager
+        from bioetl.application.core.lock_manager import LockCoordinator
 
-        manager = LockManager.create(
+        manager = LockCoordinator.create(
             lock_port=mock_lock_port,
             run_id=run_id,
             provider="chembl",
@@ -311,9 +311,9 @@ class TestLockManagerGetContext:
         run_id: RunID,
     ) -> None:
         """Test get_context for exclusive (backfill) lock."""
-        from bioetl.application.core.lock_manager import LockManager
+        from bioetl.application.core.lock_manager import LockCoordinator
 
-        manager = LockManager.create(
+        manager = LockCoordinator.create(
             lock_port=mock_lock_port,
             run_id=run_id,
             provider="chembl",
@@ -343,9 +343,9 @@ class TestLockManagerGetContext:
         run_id: RunID,
     ) -> None:
         """Test get_context returns None after lock released."""
-        from bioetl.application.core.lock_manager import LockManager
+        from bioetl.application.core.lock_manager import LockCoordinator
 
-        manager = LockManager.create(
+        manager = LockCoordinator.create(
             lock_port=mock_lock_port,
             run_id=run_id,
             provider="chembl",

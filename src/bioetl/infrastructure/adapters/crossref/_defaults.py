@@ -2,36 +2,19 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-from bioetl.infrastructure.adapters.common import (
-    FallbackDecoratorConfig,
-    FallbackFetchOrchestratorService,
+from bioetl.infrastructure.adapters.common import FallbackDecoratorConfig
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_error_handler as create_default_crossref_error_handler,
+)
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_fallback_service as create_default_crossref_fallback_service,
 )
 
-if TYPE_CHECKING:
-    from bioetl.domain.ports import ErrorHandlerPort, LoggerPort, MetricsPort
-    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
-
-
-def create_default_crossref_error_handler(
-    *,
-    logger: LoggerPort,
-    metrics: MetricsPort | None,
-) -> ErrorHandlerPort:
-    """Create default adapter error handler for non-DI call sites."""
-    from bioetl.infrastructure.adapters.error_handling import ErrorService
-
-    return ErrorService(logger, metrics=metrics)
-
-
-def create_default_crossref_fallback_service(
-    *,
-    adapter_metrics: AdapterMetrics,
-) -> FallbackFetchOrchestratorService:
-    """Create fallback orchestrator service for non-DI call sites."""
-    return FallbackFetchOrchestratorService(adapter_metrics)
-
+__all__ = [
+    "CROSSREF_DEFAULT_FALLBACK_CONFIG",
+    "create_default_crossref_error_handler",
+    "create_default_crossref_fallback_service",
+]
 
 CROSSREF_DEFAULT_FALLBACK_CONFIG = FallbackDecoratorConfig(
     supported_filter_field="doi",

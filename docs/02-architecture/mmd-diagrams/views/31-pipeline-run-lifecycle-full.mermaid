@@ -16,7 +16,7 @@ stateDiagram-v2
     [*] --> PENDING: PipelineRun created
 
     PENDING --> LOCKING: runner.run()
-    LOCKING --> LOCKED: LockManager.acquire()
+    LOCKING --> LOCKED: LockCoordinator.acquire()
     LOCKING --> FAILED: LockAcquisitionError
 
     LOCKED --> PREFLIGHT: PreflightService.run()
@@ -52,7 +52,7 @@ stateDiagram-v2
     COMPLETED --> RELEASING: success
     FAILED --> RELEASING: error path
     CANCELLED --> [*]
-    RELEASING ==> [*]: LockManager.release()\nHeartbeatTask.stop()
+    RELEASING ==> [*]: LockCoordinator.release()\nHeartbeatTask.stop()
 
     note right of LOCKED
         HeartbeatTask starts

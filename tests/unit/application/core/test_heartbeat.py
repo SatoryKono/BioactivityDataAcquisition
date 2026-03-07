@@ -1,6 +1,6 @@
 """Tests for HeartbeatTask component.
 
-Tests the extracted heartbeat management functionality from LockManager.
+Tests the extracted heartbeat management functionality from LockCoordinator.
 """
 
 from __future__ import annotations

@@ -27,6 +27,12 @@ from httpx import HTTPStatusError, RequestError
 from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.common import FallbackFetchOrchestratorService
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_error_handler as _create_default_openalex_error_handler,
+)
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_fallback_service as _create_default_openalex_fallback_service,
+)
 from bioetl.infrastructure.adapters.openalex.client_helpers_adapter_mixin import (
     OpenAlexAdapterHelpersMixin,
 )
@@ -73,33 +79,6 @@ OPENALEX_RUNTIME_ERRORS = (
     KeyError,
     Exception,
 )
-
-
-def _create_default_openalex_error_handler(
-    *,
-    logger: LoggerPort,
-    metrics: MetricsPort | None,
-) -> ErrorHandlerPort:
-    """Create default adapter error handler for non-DI call sites.
-
-    Returns:
-        ErrorHandlerPort implementation configured with the given logger and metrics.
-    """
-    from bioetl.infrastructure.adapters.error_handling import ErrorService
-
-    return ErrorService(logger, metrics=metrics)
-
-
-def _create_default_openalex_fallback_service(
-    *,
-    adapter_metrics: AdapterMetrics,
-) -> FallbackFetchOrchestratorService:
-    """Create fallback orchestrator service for non-DI call sites.
-
-    Returns:
-        FallbackFetchOrchestratorService instance wired to the given adapter metrics.
-    """
-    return FallbackFetchOrchestratorService(adapter_metrics)
 
 
 def _create_default_openalex_query_executor(

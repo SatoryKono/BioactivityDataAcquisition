@@ -8,7 +8,7 @@ from uuid import UUID, uuid4
 import pytest
 
 from bioetl.application.core.checkpoint_manager import CheckpointManager
-from bioetl.application.core.lock_manager import LockManager
+from bioetl.application.core.lock_manager import LockCoordinator
 from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.application.core.postrun_service import PostrunService
 from bioetl.application.core.preflight_service import PreflightService
@@ -144,8 +144,8 @@ def shutdown_signal():
 
 @pytest.fixture
 def mock_lock_manager():
-    """Create a mock LockManager instance (injected via DI)."""
-    lock_manager = MagicMock(spec=LockManager)
+    """Create a mock LockCoordinator instance (injected via DI)."""
+    lock_manager = MagicMock(spec=LockCoordinator)
     lock_manager.__aenter__ = AsyncMock(return_value=lock_manager)
     lock_manager.__aexit__ = AsyncMock(return_value=None)
     return lock_manager

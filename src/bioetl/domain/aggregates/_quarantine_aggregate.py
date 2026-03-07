@@ -19,12 +19,17 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
+from bioetl.domain.aggregates._quarantine_entry_properties_mixin import (
+    QuarantineEntryPropertiesMixin,
+)
+from bioetl.domain.aggregates._quarantine_entry_transitions_mixin import (
+    QuarantineEntryTransitionsMixin,
+)
 from bioetl.domain.aggregates._quarantine_value_objects import (
     QuarantineStatus,
     ResolutionInfo,
     _validate_quarantine_required_fields,
 )
-from bioetl.domain.exceptions import InvalidStateError
 
 if TYPE_CHECKING:
     from bioetl.domain.aggregates.events import DomainEvent
@@ -35,7 +40,7 @@ __all__ = [
 ]
 
 
-class QuarantineEntry:
+class QuarantineEntry(QuarantineEntryTransitionsMixin, QuarantineEntryPropertiesMixin):
     """Aggregate Root for a quarantined record.
 
     Invariants:
@@ -182,265 +187,3 @@ class QuarantineEntry:
         )
 
         return entry
-
-    # ──────────────────────────────────────────────────────────────────────────
-    # Read-only properties
-    # ──────────────────────────────────────────────────────────────────────────
-
-    @property
-    def entry_id(self) -> str:
-        """Unique entry identifier."""
-        return self._entry_id
-
-    @property
-    def pipeline_name(self) -> str:
-        """Pipeline where error occurred."""
-        return self._pipeline_name
-
-    @property
-    def error_code(self) -> str:
-        """Error classification code."""
-        return self._error_code
-
-    @property
-    def payload(self) -> BronzeRecord:
-        """Copy of the failed record payload (immutable access)."""
-        return dict(self._payload)
-
-    @property
-    def payload_hash(self) -> ContentHash:
-        """Hash of the payload for deduplication."""
-        return self._payload_hash
-
-    @property
-    def run_id(self) -> RunID:
-        """Pipeline run identifier."""
-        return self._run_id
-
-    @property
-    def batch_id(self) -> BatchID:
-        """Source batch identifier."""
-        return self._batch_id
-
-    @property
-    def status(self) -> QuarantineStatus:
-        """Current entry status."""
-        return self._status
-
-    @property
-    def created_at(self) -> datetime:
-        """Entry creation timestamp."""
-        return self._created_at
-
-    @property
-    def metadata(self) -> MetaDict:
-        """Copy of additional error context."""
-        return dict(self._metadata)
-
-    @property
-    def resolution_info(self) -> ResolutionInfo | None:
-        """Resolution details if entry has been resolved."""
-        return self._resolution_info
-
-    @property
-    def is_resolved(self) -> bool:
-        """Check if entry has been resolved."""
-        return self._status.is_terminal()
-
-    @property
-    def age_seconds(self) -> float:
-        """Age of the entry in seconds."""
-        return (datetime.now(UTC) - self._created_at).total_seconds()
-
-    # ──────────────────────────────────────────────────────────────────────────
-    # State transition methods
-    # ──────────────────────────────────────────────────────────────────────────
-
-    def start_review(self) -> None:
-        """Mark entry as under review.
-
-        Transitions: NEW -> UNDER_REVIEW
-
-        Raises:
-            InvalidStateError: If not in NEW status.
-        """
-        if self._status != QuarantineStatus.NEW:
-            raise InvalidStateError(
-                f"Cannot start review: entry is in status {self._status.value}",
-                current_state=self._status.value,
-                attempted_operation="start_review",
-            )
-        self._status = QuarantineStatus.UNDER_REVIEW
-
-    def mark_ignored(
-        self,
-        reason: str | None = None,
-        resolved_by: str | None = None,
-        resolved_at: datetime | None = None,
-    ) -> None:
-        """Mark entry as ignored (non-actionable).
-
-        Transitions: (NEW | UNDER_REVIEW) -> IGNORED
-
-        Args:
-            reason: Reason for ignoring.
-            resolved_by: User or system that made the decision.
-            resolved_at: Resolution timestamp.
-
-        Raises:
-            InvalidStateError: If entry cannot be resolved.
-        """
-        self._assert_can_resolve("mark_ignored")
-
-        now = resolved_at or datetime.now(UTC)
-        self._status = QuarantineStatus.IGNORED
-        self._resolution_info = ResolutionInfo(
-            resolution_type="ignored",
-            resolved_at=now,
-            resolved_by=resolved_by,
-            reason=reason,
-        )
-
-        # Emit event
-        from bioetl.domain.aggregates.events import QuarantineEntryResolved
-
-        self._events.append(
-            QuarantineEntryResolved(
-                occurred_at=now,
-                run_id=self._run_id,
-                entry_id=self._entry_id,
-                resolution="ignored",
-                resolved_by=resolved_by,
-            )
-        )
-
-    def mark_reprocessed(
-        self,
-        new_record_id: str,
-        resolved_by: str | None = None,
-        resolved_at: datetime | None = None,
-    ) -> None:
-        """Mark entry as successfully reprocessed.
-
-        Transitions: (NEW | UNDER_REVIEW) -> REPROCESSED
-
-        Args:
-            new_record_id: ID of the new Silver record created.
-            resolved_by: User or system that reprocessed.
-            resolved_at: Resolution timestamp.
-
-        Raises:
-            InvalidStateError: If entry cannot be resolved.
-            ValueError: If new_record_id is empty.
-        """
-        if not new_record_id:
-            raise ValueError("new_record_id is required for reprocessing")
-
-        self._assert_can_resolve("mark_reprocessed")
-
-        now = resolved_at or datetime.now(UTC)
-        self._status = QuarantineStatus.REPROCESSED
-        self._resolution_info = ResolutionInfo(
-            resolution_type="reprocessed",
-            resolved_at=now,
-            resolved_by=resolved_by,
-            new_record_id=new_record_id,
-        )
-
-        # Emit event
-        from bioetl.domain.aggregates.events import QuarantineEntryResolved
-
-        self._events.append(
-            QuarantineEntryResolved(
-                occurred_at=now,
-                run_id=self._run_id,
-                entry_id=self._entry_id,
-                resolution="reprocessed",
-                resolved_by=resolved_by,
-            )
-        )
-
-    def mark_expired(self, expired_at: datetime | None = None) -> None:
-        """Mark entry as expired due to retention policy.
-
-        Transitions: (NEW | UNDER_REVIEW) -> EXPIRED
-
-        Args:
-            expired_at: Expiration timestamp.
-
-        Raises:
-            InvalidStateError: If entry is already resolved.
-        """
-        if self._status.is_terminal():
-            raise InvalidStateError(
-                f"Cannot expire: entry is already in terminal status {self._status.value}",
-                current_state=self._status.value,
-                attempted_operation="mark_expired",
-            )
-
-        self._status = QuarantineStatus.EXPIRED
-        now = expired_at or datetime.now(UTC)
-        self._resolution_info = ResolutionInfo(
-            resolution_type="ignored",  # Expired is a form of ignored
-            resolved_at=now,
-            reason="Retention period exceeded",
-        )
-
-    def add_metadata(self, key: str, value: object) -> None:
-        """Add metadata to the entry.
-
-        Only allowed while entry is not resolved.
-
-        Args:
-            key: Metadata key.
-            value: Metadata value.
-
-        Raises:
-            InvalidStateError: If entry is resolved.
-        """
-        if self._status.is_terminal():
-            raise InvalidStateError(
-                f"Cannot modify metadata: entry is in terminal status {self._status.value}",
-                current_state=self._status.value,
-                attempted_operation="add_metadata",
-            )
-        self._metadata[key] = value
-
-    # ──────────────────────────────────────────────────────────────────────────
-    # Domain events
-    # ──────────────────────────────────────────────────────────────────────────
-
-    def collect_events(self) -> list[DomainEvent]:
-        """Collect and clear accumulated domain events.
-
-        Returns:
-            List of domain events.
-        """
-        events = self._events.copy()
-        self._events.clear()
-        return events
-
-    # ──────────────────────────────────────────────────────────────────────────
-    # Private helpers
-    # ──────────────────────────────────────────────────────────────────────────
-
-    def _assert_can_resolve(self, operation: str) -> None:
-        """Assert that entry can be resolved.
-
-        Raises:
-            InvalidStateError: If not in a resolvable status.
-        """
-        if not self._status.can_resolve():
-            raise InvalidStateError(
-                f"Cannot {operation}: entry is in status {self._status.value}",
-                current_state=self._status.value,
-                attempted_operation=operation,
-            )
-
-    def __repr__(self) -> str:
-        return (
-            f"QuarantineEntry(entry_id={self._entry_id!r}, "
-            f"pipeline={self._pipeline_name!r}, "
-            f"error_code={self._error_code!r}, "
-            f"status={self._status.value!r})"
-        )

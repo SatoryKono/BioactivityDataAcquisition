@@ -10,7 +10,7 @@ directly from their defining submodules:
 - ``bioetl.application.core.batch_writer``        — BatchWriter
 - ``bioetl.application.core.checkpoint_manager``  — CheckpointManager
 - ``bioetl.application.core.cleanup_service``     — CleanupService, CleanupResult
-- ``bioetl.application.core.lock_manager``        — LockManager
+- ``bioetl.application.core.lock_manager``        — LockCoordinator
 - ``bioetl.application.core.shutdown``            — ShutdownService, ShutdownSignal
 
 Configuration consolidation (all in bioetl.domain.config):

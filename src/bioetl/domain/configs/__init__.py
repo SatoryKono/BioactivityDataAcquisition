@@ -1,25 +1,11 @@
-"""Domain configuration base classes.
+"""Backward-compatibility shim — use ``bioetl.domain.config`` instead.
 
-This module provides base configuration classes for common configuration patterns.
-It consolidates duplicate DTOs per RULES.md §12.1.6 - "Duplicate DTOs with
-overlapping fields MUST NOT exist".
-
-Consolidated Classes:
-- RateLimitConfig: Rate limiting configuration (requests/second, burst)
-- BaseClientConfig: Base HTTP client configuration
-- BaseProviderConfig: Base provider configuration with common fields
-
-Usage:
-    from bioetl.domain.configs import RateLimitConfig, BaseProviderConfig
-
-    config = BaseProviderConfig(
-        base_url="https://api.example.com",
-        timeout=30,
-        rate_limit=RateLimitConfig(requests_per_second=5.0, burst=10),
-    )
+All classes have been moved to ``bioetl.domain.config.base_provider``.
+This re-export ensures existing ``from bioetl.domain.configs import ...``
+statements keep working.
 """
 
-from bioetl.domain.configs.base import (
+from bioetl.domain.config.base_provider import (
     BaseClientConfig,
     BaseProviderConfig,
     RateLimitConfig,

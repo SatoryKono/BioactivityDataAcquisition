@@ -8,14 +8,13 @@ import asyncio
 import time
 from collections.abc import Iterator
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
 import orjson
 import zstandard as zstd
 
-from bioetl.domain.ports import AuditEntry, AuditLayer, AuditOperation
 from bioetl.domain.types import BatchID, JsonDict, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.infrastructure.storage._atomic import atomic_write_bytes
@@ -26,12 +25,15 @@ from bioetl.infrastructure.storage.bronze_writer_metadata_mixin import (
 from bioetl.infrastructure.storage.bronze_writer_metrics_mixin import (
     BronzeWriterMetricsMixin,
 )
+from bioetl.infrastructure.storage.bronze_writer_side_effects_mixin import (
+    BronzeWriterSideEffectsMixin,
+)
 from bioetl.infrastructure.storage.bronze_writer_validation_mixin import (
     BronzeWriterValidationMixin,
 )
 
 if TYPE_CHECKING:
-    from bioetl.domain.models.metadata import BronzeMetadata, SourceMetadata
+    from bioetl.domain.models.metadata import SourceMetadata
     from bioetl.domain.ports import (
         AuditPort,
         LoggerPort,
@@ -47,6 +49,12 @@ BRONZE_WRITE_ERRORS = (
     ValueError,
     TypeError,
     zstd.ZstdError,
+)
+BRONZE_REQUIRED_METADATA_FIELDS = (
+    "ingestion_ts",
+    "run_id",
+    "run_type",
+    "batch_id",
 )
 
 
@@ -66,6 +74,7 @@ class _BronzeWritePrepared:
 class BronzeWriter(
     BronzeWriterValidationMixin,
     BronzeWriterMetadataMixin,
+    BronzeWriterSideEffectsMixin,
     BronzeWriterIOMixin,
     BronzeWriterMetricsMixin,
 ):
@@ -76,6 +85,14 @@ class BronzeWriter(
     COMPRESSION_THREADS = -1
     BRONZE_PATH_FORMAT = "{provider}/{entity}/{date}/{filename}"
     BRONZE_FILE_SUFFIX = ".jsonl.zst"
+    # Keep required Bronze lineage metadata keys explicit in this facade module
+    # for architecture invariant checks and maintainability.
+    BRONZE_REQUIRED_METADATA_FIELDS: tuple[str, ...] = (
+        "ingestion_ts",
+        "run_id",
+        "run_type",
+        "batch_id",
+    )
 
     def __init__(
         self,
@@ -331,157 +348,3 @@ class BronzeWriter(
                 duration=duration,
                 source_metadata=source_metadata,
             )
-
-    async def _log_bronze_audit(
-        self,
-        *,
-        run_id: RunID,
-        ingestion_ts: datetime,
-        relative_path: str,
-        batch_id: BatchID,
-        run_type: RunType,
-        record_count: int,
-        compressed_size: int,
-        uncompressed_size: int,
-        provider: str,
-        entity: str,
-    ) -> None:
-        if not self._audit:
-            return
-        audit_entry = AuditEntry(
-            run_id=run_id,
-            timestamp=ingestion_ts,
-            layer=AuditLayer.BRONZE,
-            table_name=relative_path,
-            operation=AuditOperation.WRITE,
-            records_count=record_count,
-            metadata={
-                "provider": provider,
-                "entity": entity,
-                "batch_id": str(batch_id),
-                "run_type": run_type.value,
-                "compressed_bytes": compressed_size,
-                "uncompressed_bytes": uncompressed_size,
-            },
-        )
-        await self._audit.log_write(audit_entry)
-
-    async def _build_bronze_write_result(
-        self,
-        *,
-        prepared: _BronzeWritePrepared,
-        batch_id: BatchID,
-        record_count: int,
-        uncompressed_size: int,
-        compressed_size: int,
-        span: Any,  # Any: OpenTelemetry span interface is runtime-dependent
-    ) -> BronzeWriteResult:
-        span.set_attribute("record_count", record_count)
-        span.set_attribute("compressed_size", compressed_size)
-        checksum = await self._calculate_checksum(prepared.full_path)
-        return BronzeWriteResult(
-            batch_id=batch_id,
-            relative_path=prepared.relative_path,
-            absolute_path=str(prepared.full_path),
-            record_count=record_count,
-            compressed_size=compressed_size,
-            uncompressed_size=uncompressed_size,
-            checksum_blake2=checksum,
-        )
-
-    async def _maybe_write_bronze_metadata(
-        self,
-        *,
-        run_id: RunID,
-        run_type: RunType,
-        provider: str,
-        entity: str,
-        batch_id: BatchID,
-        record_count: int,
-        compressed_size: int,
-        relative_path: str,
-        ingestion_ts: datetime,
-        duration: float,
-        source_metadata: SourceMetadata | None,
-    ) -> None:
-        """Create and persist bronze metadata via coordinator or fallback."""
-        bronze_metadata = self._create_bronze_metadata_payload(
-            run_id=run_id,
-            run_type=run_type,
-            provider=provider,
-            entity=entity,
-            batch_id=batch_id,
-            record_count=record_count,
-            compressed_size=compressed_size,
-            relative_path=relative_path,
-            ingestion_ts=ingestion_ts,
-            duration=duration,
-            source_metadata=source_metadata,
-        )
-        metadata_base_path = self._resolve_bronze_metadata_base_path(provider, entity)
-        await self._metadata_writer.write_bronze_metadata(
-            base_path=metadata_base_path,
-            metadata=bronze_metadata,
-            provider=provider,
-            entity=entity,
-        )
-        self.logger.debug(
-            "bronze_metadata_written",
-            metadata_path=str(
-                metadata_base_path / f"{provider}_{entity}_metadata.yaml"
-            ),
-            run_id=str(run_id),
-        )
-
-    def _create_bronze_metadata_payload(
-        self,
-        *,
-        run_id: RunID,
-        run_type: RunType,
-        provider: str,
-        entity: str,
-        batch_id: BatchID,
-        record_count: int,
-        compressed_size: int,
-        relative_path: str,
-        ingestion_ts: datetime,
-        duration: float,
-        source_metadata: SourceMetadata | None,
-    ) -> BronzeMetadata:
-        """Build bronze metadata via coordinator when configured, else fallback."""
-        completed_at = ingestion_ts + timedelta(seconds=duration)
-        if self._metadata_coordinator is None:
-            return self._build_full_bronze_metadata(
-                run_id=run_id,
-                run_type=run_type,
-                provider=provider,
-                entity=entity,
-                batch_id=batch_id,
-                record_count=record_count,
-                compressed_size=compressed_size,
-                output_path=relative_path,
-                started_at=ingestion_ts,
-                completed_at=completed_at,
-                duration_seconds=duration,
-                source_metadata=source_metadata,
-            )
-
-        from bioetl.domain.ports import BronzeMetadataInput
-
-        bronze_input = BronzeMetadataInput(
-            batch_id=batch_id,
-            record_count=record_count,
-            compressed_size=compressed_size,
-            output_path=relative_path,
-            started_at=ingestion_ts,
-            completed_at=completed_at,
-            source_metadata=source_metadata,
-            query_string=source_metadata.query_string if source_metadata else None,
-        )
-        return self._metadata_coordinator.create_bronze_metadata(bronze_input)
-
-    def _resolve_bronze_metadata_base_path(self, provider: str, entity: str) -> Path:
-        """Resolve base path for bronze metadata sidecar output."""
-        if self._flat_structure:
-            return self.base_path
-        return self.base_path / provider / entity

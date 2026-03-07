@@ -15,7 +15,7 @@ classDiagram
         -_services: PipelineServices
         -_data_source: DataSourcePort
         -_config: PipelineYamlConfig
-        -_lock_manager: LockManager
+        -_lock_manager: LockCoordinator
         -_preflight: PreflightService
         -_batch_executor: BatchExecutor
         -_postrun: PostrunService
@@ -45,7 +45,7 @@ classDiagram
         +memory_monitor: MemoryMonitorPort
     }
 
-    class LockManager {
+    class LockCoordinator {
         -_lock: LockPort
         -_logger: LoggerPort
         +acquire(key, owner_id, ttl) bool
@@ -165,7 +165,7 @@ classDiagram
     }
 
     PipelineRunner --> PipelineServices : uses
-    PipelineRunner --> LockManager : _lock_manager
+    PipelineRunner --> LockCoordinator : _lock_manager
     PipelineRunner --> PreflightService : _preflight
     PipelineRunner --> BatchExecutor : _batch_executor
     PipelineRunner --> PostrunService : _postrun

@@ -456,7 +456,7 @@ Delta merge by content-hash — критическая операция для i
 
 **Supporting Managers:**
 
-- LockManager, CheckpointManager, QuarantineManager, MemoryMonitor
+- LockCoordinator, CheckpointManager, QuarantineManager, MemoryMonitor
 
 **Services:**
 

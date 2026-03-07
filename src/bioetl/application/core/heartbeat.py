@@ -1,6 +1,6 @@
 """Heartbeat management for distributed locks.
 
-Extracted from LockManager to follow Single Responsibility Principle.
+Extracted from LockCoordinator to follow Single Responsibility Principle.
 Handles background heartbeat tasks that keep locks alive.
 """
 

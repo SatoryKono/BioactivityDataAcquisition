@@ -18,6 +18,7 @@ from bioetl.application.pipelines.crossref import (
     extract_license_url,
 )
 from bioetl.domain.context import PipelineContext
+from bioetl.domain.entities.crossref import CrossRefPublicationEntity
 from bioetl.domain.mapping.publication_type_classification import (
     classify_publication_type,
 )
@@ -258,6 +259,86 @@ def test_provider_is_crossref(transformer):
 def test_entity_type_is_publication(transformer):
     """Test entity type is set to publication (Ubiquitous Language, not CrossRef 'work')."""
     assert transformer.entity_type == "publication"
+
+
+def test_get_primary_id_field(transformer):
+    """Primary identifier field for CrossRef must be DOI."""
+    assert transformer._get_primary_id_field() == "doi"
+
+
+def test_get_entity_class(transformer):
+    """Transformer should map to CrossRefPublicationEntity."""
+    assert transformer._get_entity_class() is CrossRefPublicationEntity
+
+
+def test_pre_extract_validation_accepts_valid_doi(transformer, pipeline_context):
+    """Pre-extract validation should accept valid DOI values."""
+    transformer._pre_extract_validation(
+        pipeline_context,
+        {"DOI": "10.1234/valid.doi"},
+        index=0,
+    )
+
+
+@pytest.mark.parametrize(
+    "record,expected_error",
+    [
+        ({}, "DOI is required for CrossRef Publication"),
+        ({"DOI": ""}, "DOI is required for CrossRef Publication"),
+        ({"DOI": "invalid"}, "Invalid DOI format: invalid"),
+    ],
+)
+def test_pre_extract_validation_rejects_invalid_doi(
+    transformer,
+    pipeline_context,
+    record,
+    expected_error,
+):
+    """Pre-extract validation should reject missing or malformed DOI values."""
+    with pytest.raises(ValueError, match=expected_error):
+        transformer._pre_extract_validation(pipeline_context, record, index=0)
+
+
+def test_should_log_fallback_lookup(transformer):
+    """CrossRef should keep fallback logging enabled."""
+    assert transformer._should_log_fallback_lookup() is True
+
+
+def test_hash_author_details_hashes_pii():
+    """PII fields must be hashed while non-PII fields remain unchanged."""
+
+    class _TestHasher:
+        def hash_value(self, value: str | None) -> str | None:
+            return f"h::{value}" if value is not None else None
+
+        def hash_list(self, values: list[str] | None) -> list[str] | None:
+            return [f"h::{value}" for value in values] if values is not None else None
+
+        def get_salt_id(self) -> str:
+            return "test"
+
+    transformer = CrossRefPublicationTransformer(pii_hasher=_TestHasher())
+    author_details = [
+        {
+            "given": "John",
+            "family": "Doe",
+            "name": None,
+            "orcid": "0000-0001-2345-6789",
+            "authenticated_orcid": True,
+            "sequence": "first",
+            "affiliations": ["University A"],
+        }
+    ]
+
+    hashed = transformer._hash_author_details(author_details)
+    assert hashed[0]["given"] is not None
+    assert hashed[0]["family"] is not None
+    assert hashed[0]["given"] == "h::John"
+    assert hashed[0]["family"] == "h::Doe"
+    assert hashed[0]["orcid"] == "0000-0001-2345-6789"
+    assert hashed[0]["authenticated_orcid"] is True
+    assert hashed[0]["sequence"] == "first"
+    assert hashed[0]["affiliations"] == ["University A"]
 
 
 # =============================================================================

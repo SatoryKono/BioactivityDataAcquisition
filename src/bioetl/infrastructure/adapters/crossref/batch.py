@@ -157,6 +157,44 @@ class DoiBatchProcessor:
                     "crossref_individual_fetch_failed", doi=doi, error=str(e)
                 )
 
+    def _normalize_dois(self, dois: list[str]) -> list[str]:
+        """Normalize and filter DOI list, removing invalid entries.
+
+        Returns:
+            List of normalized DOI strings with empty/invalid entries removed.
+        """
+        return [normalize_doi(d) or "" for d in dois if normalize_doi(d)]
+
+    async def _execute_batch_request(
+        self, normalized_dois: list[str]
+    ) -> Any | None:  # Any: untyped HTTP response object
+        """Execute the batch DOI filter request.
+
+        Returns:
+            HTTP response object from the CrossRef API batch request, or None on transport failure.
+        """
+        filter_value = ",".join(f"doi:{doi}" for doi in normalized_dois)
+        url = f"{self._api_base}/works"
+        params = {
+            "filter": filter_value,
+            "rows": str(len(normalized_dois)),
+            "mailto": self._mailto,
+        }
+        response: Any | None = None  # Any: untyped HTTP response object
+
+        start_time = time.perf_counter()
+        with self._metrics.measure_request("/works?filter=doi"):
+            response = await self._http.get(
+                url, params=params, headers=self._headers_fn()
+            )
+        duration_ms = (time.perf_counter() - start_time) * 1000
+
+        if self._request_collector:
+            with contextlib.suppress(Exception):
+                self._request_collector.record_from_response(response, duration_ms)
+
+        return response
+
     async def fetch_batch(self, dois: list[str]) -> AsyncIterator[BronzeRecord]:
         """Fetch multiple publications by DOI batch.
 
@@ -174,33 +212,12 @@ class DoiBatchProcessor:
         if not dois:
             return
 
-        normalized_dois = [normalize_doi(d) or "" for d in dois if normalize_doi(d)]
+        normalized_dois = self._normalize_dois(dois)
         if not normalized_dois:
             return
 
-        # CrossRef filter format: doi:value1,doi:value2,doi:value3
-        # Each DOI needs the "doi:" prefix
-        filter_value = ",".join(f"doi:{doi}" for doi in normalized_dois)
-        url = f"{self._api_base}/works"
-        params = {
-            "filter": filter_value,
-            "rows": str(len(normalized_dois)),
-            "mailto": self._mailto,
-        }
-        response: Any | None = None  # Any: untyped HTTP response object
-
         try:
-            start_time = time.perf_counter()
-            with self._metrics.measure_request("/works?filter=doi"):
-                response = await self._http.get(
-                    url, params=params, headers=self._headers_fn()
-                )
-            duration_ms = (time.perf_counter() - start_time) * 1000
-
-            # Record request for metadata enrichment
-            if self._request_collector:
-                with contextlib.suppress(Exception):
-                    self._request_collector.record_from_response(response, duration_ms)
+            response = await self._execute_batch_request(normalized_dois)
 
             if response is None:
                 raise CrossRefApiError("CrossRef batch request returned no response")

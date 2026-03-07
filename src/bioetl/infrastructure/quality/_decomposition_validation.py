@@ -199,6 +199,32 @@ def _validate_owner_decomposition_targets_section(
             )
 
 
+def _validate_expiry_target_quarter(
+    item: JsonDict,  # Any: YAML values are heterogeneous
+    prefix: str,
+    seen_quarters: set[str],
+    errors: list[str],
+) -> tuple[int, int] | None:
+    """Validate quarter field of a single expiry target entry.
+
+    Returns:
+        Parsed (year, quarter_num) tuple if valid, None otherwise.
+    """
+    quarter = item.get("quarter")
+    if not isinstance(quarter, str):
+        errors.append(f"{prefix}.quarter: expected string")
+        return None
+    parsed_quarter = _parse_quarter_label(quarter)
+    if parsed_quarter is None:
+        errors.append(f"{prefix}.quarter: expected 'YYYY-QN' format")
+        return None
+    if quarter in seen_quarters:
+        errors.append(f"{prefix}.quarter: duplicate quarter '{quarter}'")
+        return None
+    seen_quarters.add(quarter)
+    return parsed_quarter
+
+
 def _validate_expiry_decomposition_targets_section(
     raw: JsonDict,  # Any: YAML values are heterogeneous
     errors: list[str],
@@ -216,18 +242,12 @@ def _validate_expiry_decomposition_targets_section(
         if not isinstance(item, dict):
             errors.append(f"{prefix}: expected mapping")
             continue
-        quarter = item.get("quarter")
-        if not isinstance(quarter, str):
-            errors.append(f"{prefix}.quarter: expected string")
-            continue
-        parsed_quarter = _parse_quarter_label(quarter)
+
+        parsed_quarter = _validate_expiry_target_quarter(
+            item, prefix, seen_quarters, errors
+        )
         if parsed_quarter is None:
-            errors.append(f"{prefix}.quarter: expected 'YYYY-QN' format")
             continue
-        if quarter in seen_quarters:
-            errors.append(f"{prefix}.quarter: duplicate quarter '{quarter}'")
-            continue
-        seen_quarters.add(quarter)
 
         max_entries = _validate_non_negative_int(
             item.get("max_entries_expiring_in_quarter"),

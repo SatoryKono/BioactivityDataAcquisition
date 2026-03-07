@@ -29,83 +29,33 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING
 
 import pubchempy as pcp
-from pydantic import BaseModel
 
-from bioetl.domain.entities.pubchem import PubchemMoleculeRecord
 from bioetl.domain.exceptions import BioETLError, CircuitBreakerOpenError, NetworkError
 from bioetl.domain.types import HealthStatus, JsonDict
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
 from bioetl.infrastructure.adapters.filterable_mixin import FilterableStubMixin
-from bioetl.infrastructure.adapters.pubchem.constants import PUBCHEM_API_BASE
+from bioetl.infrastructure.adapters.pubchem.client_builders import (
+    _create_default_pubchem_entity_mapper,
+    _create_default_pubchem_fetch_strategies,
+    _create_default_pubchem_request_collector,
+)
+from bioetl.infrastructure.adapters.pubchem.client_model_mixin import (
+    PubChemAdapterModelMixin,
+)
 from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMapper
 from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator, Awaitable
+    from collections.abc import AsyncIterator
 
-    from bioetl.domain.models.metadata import SourceMetadata
     from bioetl.domain.ports import ErrorHandlerPort, LoggerPort
     from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
     from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
     from bioetl.infrastructure.adapters.pubchem.fetch_strategies import (
         PubChemFetchStrategies,
     )
-
-# Mapping from entity_type to DTO model class
-PUBCHEM_DTO_MODELS: dict[str, type[BaseModel]] = {
-    "compound": PubchemMoleculeRecord,
-}
-
-
-def _create_default_pubchem_entity_mapper() -> PubChemEntityMapper:
-    """Create default entity mapper for non-DI call sites.
-
-    Returns:
-        PubChemEntityMapper instance with default configuration.
-    """
-    return PubChemEntityMapper()
-
-
-def _create_default_pubchem_request_collector() -> APIRequestCollector:
-    """Create default request collector for non-DI call sites.
-
-    Returns:
-        APIRequestCollector instance ready for tracking API requests.
-    """
-    return APIRequestCollector()
-
-
-def _create_default_pubchem_fetch_strategies(
-    *,
-    logger: LoggerPort,
-    rate_limiter: TokenBucket,
-    circuit_breaker: CircuitBreaker,
-    mapper: PubChemEntityMapper,
-    run_in_executor: Callable[..., Awaitable[object]],
-    provider_name: str,
-    request_collector: APIRequestCollector,
-) -> PubChemFetchStrategies:
-    """Create default fetch strategies for non-DI call sites.
-
-    Returns:
-        PubChemFetchStrategies instance wired with the given rate limiter, circuit breaker, and mapper.
-    """
-    from bioetl.infrastructure.adapters.pubchem.fetch_strategies import (
-        PubChemFetchStrategies,
-    )
-
-    return PubChemFetchStrategies(
-        logger=logger,
-        rate_limiter=rate_limiter,
-        circuit_breaker=circuit_breaker,
-        mapper=mapper,
-        run_in_executor=run_in_executor,
-        provider_name=provider_name,
-        request_collector=request_collector,
-    )
-
 
 PUBCHEM_HEALTH_ERRORS = (
     BioETLError,
@@ -118,7 +68,7 @@ PUBCHEM_HEALTH_ERRORS = (
 )
 
 
-class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
+class PubChemAdapter(PubChemAdapterModelMixin, FilterableStubMixin, BaseSyncAdapter):
     """PubChem API adapter implementing DataSourcePort.
 
     Provides access to chemical compound data from PubChem database.
@@ -305,66 +255,6 @@ class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
     # fetch_multi_filtered and fetch_filtered_with_fallback are provided
     # by FilterableStubMixin (see class inheritance)
 
-    async def fetch_as_models(
-        self,
-        entity_type: str,
-        limit: int | None = None,
-        query: str | None = None,
-        filter_ids: list[str] | None = None,
-        filter_field: str | None = None,
-        *,
-        validate: bool = True,
-    ) -> AsyncIterator[BaseModel]:
-        """Fetch records from PubChem as typed DTO models.
-
-        Returns Pydantic DTO models instead of raw dicts for type safety.
-        Uses domain DTOs with extra='forbid' to detect API changes.
-
-        Args:
-            entity_type: Type of entity (compound, substance, assay)
-            limit: Maximum number of records to fetch
-            query: Search query string
-            filter_ids: Unused for PubChem
-            filter_field: Unused for PubChem
-            validate: If True, validate with model_validate (strict).
-                     If False, use model_construct (skip validation, faster).
-
-        Yields:
-            Typed DTO models (PubchemMoleculeRecord for compound)
-
-        Raises:
-            ValueError: If entity_type is not supported for DTO conversion
-
-        Example:
-            >>> async for compound in adapter.fetch_as_models("compound", query="aspirin"):
-            ...     logger.debug("compound_fetched", cid=compound.cid, smiles=compound.canonical_smiles)
-
-        Returns:
-            Async iterator yielding fetched records.
-        """
-        model_class = PUBCHEM_DTO_MODELS.get(entity_type)
-        if model_class is None:
-            raise ValueError(
-                f"No DTO model for entity_type '{entity_type}'. "
-                f"Supported: {', '.join(PUBCHEM_DTO_MODELS.keys())}"
-            )
-
-        async for record in self.fetch(
-            entity_type=entity_type,
-            limit=limit,
-            query=query,
-            filter_ids=filter_ids,
-            filter_field=filter_field,
-        ):
-            # Convert CID to string for DTO (domain DTOs use str for IDs)
-            if "cid" in record and record["cid"] is not None:
-                record["cid"] = str(record["cid"])
-
-            if validate:
-                yield model_class.model_validate(record)
-            else:
-                yield model_class.model_construct(**record)
-
     async def _probe_health(self) -> HealthStatus:
         """Perform PubChem health probe using lightweight water query (CID 962).
 
@@ -417,49 +307,3 @@ class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
             Endpoint path string used for PubChem health probe requests.
         """
         return "/rest/pug/compound/cid/962/property/MolecularFormula/JSON"
-
-    def __repr__(self) -> str:
-        """Return string representation."""
-        return f"PubChemAdapter(rate={self.rate_limiter.rate})"
-
-    def get_source_metadata(self, api_version: str | None = None) -> SourceMetadata:
-        """Get accumulated API request metadata for Bronze layer enrichment.
-
-        Returns SourceMetadata with all recorded API requests and aggregated
-        statistics (total_requests, avg_duration, total_bytes).
-
-        The collector is cleared after calling this method to prepare for
-        the next batch.
-
-        Note:
-            Since pubchempy doesn't expose raw HTTP response objects,
-            metadata is based on estimated values (e.g., response sizes).
-
-        Args:
-            api_version: Optional API version to include in metadata.
-
-        Returns:
-            SourceMetadata with api_requests, total_requests, avg_request_duration_ms,
-            and total_response_bytes populated from collected requests.
-
-        """
-        metadata = self._request_collector.to_source_metadata(
-            source_type="api",
-            url=PUBCHEM_API_BASE,
-            api_version=api_version,
-        )
-        self._request_collector.clear()
-        return metadata
-
-    def clear_request_collector(self) -> None:
-        """Clear the API request collector without generating metadata.
-
-        Use this to reset the collector when metadata is not needed,
-        for example during health checks or error recovery.
-        """
-        self._request_collector.clear()
-
-    @property
-    def request_count(self) -> int:
-        """Get the number of recorded API requests since last clear."""
-        return self._request_collector.request_count

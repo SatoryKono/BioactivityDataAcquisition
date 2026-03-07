@@ -186,27 +186,29 @@ class PipelineYamlConfig(BaseModel):
             raise ValueError("provider must be lowercase")
         return value
 
-    @model_validator(mode="after")
-    def validate_primary_key_split(self) -> PipelineYamlConfig:
-        """Validate explicit separation between business and technical PKs."""
+    def _validate_primary_key_presence(self) -> None:
+        """Ensure at least one primary key source is specified."""
         if self.business_primary_keys is None and self.primary_keys is None:
             raise ValueError(
                 "business_primary_keys is required (or legacy primary_keys during migration)"
             )
 
+    def _validate_primary_key_consistency(self) -> None:
+        """Ensure legacy and canonical primary keys agree."""
         if self.business_primary_keys is None:
             self.business_primary_keys = self.primary_keys
+            return
 
-        if (
-            self.primary_keys is not None
-            and self.business_primary_keys is not None
-            and tuple(self.primary_keys) != tuple(self.business_primary_keys)
+        if self.primary_keys is not None and tuple(self.primary_keys) != tuple(
+            self.business_primary_keys
         ):
             raise ValueError(
                 "primary_keys and business_primary_keys mismatch; "
                 "use business_primary_keys as canonical naming"
             )
 
+    def _validate_technical_key_separation(self) -> None:
+        """Ensure technical PK is not in composite business PKs."""
         if (
             self.business_primary_keys is not None
             and self.technical_primary_key in self.business_primary_keys
@@ -216,6 +218,8 @@ class PipelineYamlConfig(BaseModel):
                 "technical_primary_key MUST NOT be part of composite business_primary_keys"
             )
 
+    def _validate_sink_sort_by(self) -> None:
+        """Ensure enabled sink layers have sort_by configured."""
         for layer_name in ("silver", "gold"):
             layer = self.sink.get(layer_name)
             if layer is None or not layer.enabled:
@@ -225,6 +229,13 @@ class PipelineYamlConfig(BaseModel):
                     f"sink.{layer_name}.sort_by must be configured for deterministic output"
                 )
 
+    @model_validator(mode="after")
+    def validate_primary_key_split(self) -> PipelineYamlConfig:
+        """Validate explicit separation between business and technical PKs."""
+        self._validate_primary_key_presence()
+        self._validate_primary_key_consistency()
+        self._validate_technical_key_separation()
+        self._validate_sink_sort_by()
         return self
 
     @model_validator(mode="after")

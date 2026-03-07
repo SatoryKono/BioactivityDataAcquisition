@@ -47,6 +47,27 @@ def _default_concat_list_merger(
     return [*base, *override]
 
 
+def _resolve_list_merger(
+    key: str,
+    *,
+    list_concat_keys: frozenset[str],
+    concat_merger: ListMergeFn,
+    list_merger_resolver: ListMergeResolver | None,
+) -> ListMergeFn | None:
+    """Resolve the list merge function for a given key.
+
+    Returns:
+        A ListMergeFn if a specific strategy is configured for this key, None for default override.
+    """
+    if list_merger_resolver is not None:
+        resolved = list_merger_resolver(key)
+        if resolved is not None:
+            return resolved
+    if key in list_concat_keys:
+        return concat_merger
+    return None
+
+
 def config_merge(
     base: Mapping[str, Any],  # Any: YAML config values are heterogeneous
     override: Mapping[str, Any],  # Any: YAML config values are heterogeneous
@@ -81,16 +102,14 @@ def config_merge(
             continue
 
         if isinstance(base_value, list) and isinstance(override_value, list):
-            list_merger: ListMergeFn | None = None
-
-            if list_merger_resolver is not None:
-                list_merger = list_merger_resolver(key)
-
-            if list_merger is None and key in list_concat_keys:
-                list_merger = concat_merger
-
-            if list_merger is not None:
-                result[key] = list_merger(base_value, override_value, key)
+            merger = _resolve_list_merger(
+                key,
+                list_concat_keys=list_concat_keys,
+                concat_merger=concat_merger,
+                list_merger_resolver=list_merger_resolver,
+            )
+            if merger is not None:
+                result[key] = merger(base_value, override_value, key)
             else:
                 result[key] = copy.deepcopy(override_value)
             continue

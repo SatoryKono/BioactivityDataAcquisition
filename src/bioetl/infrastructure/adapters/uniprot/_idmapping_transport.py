@@ -108,20 +108,15 @@ class IDMappingTransportMixin:
         deps.logger.debug("idmapping_job_submitted", job_id=job_id)
         return str(job_id)
 
-    async def _fetch_results(
+    async def _fetch_results_pages(
         self,
         job_id: str,
-        original_ids: list[str],
-        results_url: str | None = None,
-    ) -> dict[str, JsonDict | None]:  # Any: untyped API JSON
-        """Fetch mapping results with full entry metadata.
-
-        Returns:
-            Dictionary mapping each source ID to its resolved UniProt entry dict, or None if not found.
-        """
+        entries_by_id: dict[str, list[JsonDict]],
+        start_url: str,
+    ) -> None:
+        """Paginate through ID mapping results, populating entries_by_id in place."""
         deps = self._transport_deps()
-        entries_by_id: dict[str, list[JsonDict]] = {id_: [] for id_ in original_ids}
-        url: str | None = results_url or f"{deps.base_url}/idmapping/results/{job_id}"
+        url: str | None = start_url
 
         while url:
             with deps._adapter_metrics.measure_request("/idmapping/results"):
@@ -145,10 +140,29 @@ class IDMappingTransportMixin:
 
             url = deps._get_next_page_url(response.headers)
 
-        results: dict[str, JsonDict | None] = {}
-        for id_, entries in entries_by_id.items():
-            results[id_] = deps._select_primary_entry(entries)
+    def _resolve_entries(
+        self,
+        entries_by_id: dict[str, list[JsonDict]],
+    ) -> dict[str, JsonDict | None]:  # Any: untyped API JSON
+        """Select primary entry for each ID and return final results.
 
+        Returns:
+            Dictionary mapping each source ID to its resolved UniProt entry dict, or None if not found.
+        """
+        deps = self._transport_deps()
+        return {
+            id_: deps._select_primary_entry(entries)
+            for id_, entries in entries_by_id.items()
+        }
+
+    def _log_fetch_summary(
+        self,
+        job_id: str,
+        results: dict[str, JsonDict | None],
+        total: int,
+    ) -> None:
+        """Log summary statistics for fetched ID mapping results."""
+        deps = self._transport_deps()
         found_count = sum(1 for value in results.values() if value is not None)
         multiple_count = sum(
             1 for value in results.values() if value and value.get("all_mappings")
@@ -156,9 +170,28 @@ class IDMappingTransportMixin:
         deps.logger.info(
             "idmapping_results_fetched",
             job_id=job_id,
-            total=len(original_ids),
+            total=total,
             found=found_count,
-            not_found=len(original_ids) - found_count,
+            not_found=total - found_count,
             multiple_mappings=multiple_count,
         )
+
+    async def _fetch_results(
+        self,
+        job_id: str,
+        original_ids: list[str],
+        results_url: str | None = None,
+    ) -> dict[str, JsonDict | None]:  # Any: untyped API JSON
+        """Fetch mapping results with full entry metadata.
+
+        Returns:
+            Dictionary mapping each source ID to its resolved UniProt entry dict, or None if not found.
+        """
+        deps = self._transport_deps()
+        entries_by_id: dict[str, list[JsonDict]] = {id_: [] for id_ in original_ids}
+        start_url = results_url or f"{deps.base_url}/idmapping/results/{job_id}"
+
+        await self._fetch_results_pages(job_id, entries_by_id, start_url)
+        results = self._resolve_entries(entries_by_id)
+        self._log_fetch_summary(job_id, results, len(original_ids))
         return results

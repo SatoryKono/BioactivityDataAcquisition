@@ -1,8 +1,8 @@
-"""Lock Manager for ETL Pipelines."""
+"""Lock Coordinator for ETL Pipelines."""
 
 from __future__ import annotations
 
-__all__ = ["LockManager"]
+__all__ = ["LockCoordinator"]
 
 
 from collections.abc import Callable
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LockPort, LoggerPort
 
 
-class LockManager:
+class LockCoordinator:
     """Manages acquiring, releasing, and maintaining distributed locks.
 
     This is an Application Service that coordinates lock lifecycle:
@@ -54,7 +54,7 @@ class LockManager:
         context_holder: LockContextHolder | None = None,
         heartbeat_factory: Callable[..., HeartbeatTask] | None = None,
     ) -> None:
-        """Initialize LockManager with explicit dependencies.
+        """Initialize LockCoordinator with explicit dependencies.
 
         Args:
             lock_port: Port for lock operations.
@@ -99,8 +99,8 @@ class LockManager:
         checkpoint_manager: CheckpointManagerService | None = None,
         context_holder: LockContextHolder | None = None,
         heartbeat_factory: Callable[..., HeartbeatTask] | None = None,
-    ) -> LockManager:
-        """Create a LockManager instance.
+    ) -> LockCoordinator:
+        """Create a LockCoordinator instance.
 
         Factory method that creates LockConfig from pipeline parameters.
         Maintains backward compatibility with existing call sites.
@@ -122,7 +122,7 @@ class LockManager:
             heartbeat_factory: Optional factory for HeartbeatTask creation.
 
         Returns:
-            A configured LockManager instance.
+            A configured LockCoordinator instance.
 
         """
         config = LockConfig.for_pipeline(
@@ -241,7 +241,7 @@ class LockManager:
         )
         await self._heartbeat.start()
 
-    async def __aenter__(self) -> LockManager:
+    async def __aenter__(self) -> LockCoordinator:
         """Context manager entry: acquire lock.
 
         Returns:
@@ -260,7 +260,7 @@ class LockManager:
         return self
 
     async def validate(self) -> bool:
-        """Validate that this LockManager still holds the lock.
+        """Validate that this LockCoordinator still holds the lock.
 
         This is the Safety Guard: before critical operations (e.g., writes),
         call this method to verify lock ownership via fencing token validation.
@@ -271,9 +271,9 @@ class LockManager:
             True if this run_id still holds the lock, False otherwise.
 
         Example:
-            async with lock_manager:
+            async with lock_coordinator:
                 # Before writing to storage:
-                if not await lock_manager.validate():
+                if not await lock_coordinator.validate():
                     raise LockLostError(lock_key, run_id)
                 await storage.write_silver(...)
         """
