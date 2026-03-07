@@ -116,6 +116,14 @@ class GenericPipelineFactory(Generic[TPipeline]):
     ) -> BaseTransformer | None:
         """Create transformer when a transformer class is configured.
 
+        Args:
+            tracer: Optional TracingPort for span propagation inside the transformer.
+            metrics: Optional MetricsPort for transformer-level metrics.
+            silver_filters: Optional Silver layer filter rules applied during transform.
+            gold_filters: Optional Gold layer filter rules applied during transform.
+            identity_service: Optional service for entity identity resolution.
+            pii_hasher: Optional hasher for PII fields in transformed records.
+
         Returns:
             Configured BaseTransformer instance, or None if no transformer class set.
         """
@@ -142,6 +150,12 @@ class GenericPipelineFactory(Generic[TPipeline]):
     ) -> DataSourcePort:
         """Create provider data source via injected data-source creator.
 
+        Args:
+            settings: Application settings for HTTP client and API key configuration.
+            pipeline_config: Pipeline YAML configuration with source parameters.
+            logger: LoggerPort for structured logging inside the adapter.
+            filter_config: Optional input filter configuration; no filtering if None.
+
         Returns:
             DataSourcePort for the configured provider.
         """
@@ -163,6 +177,14 @@ class GenericPipelineFactory(Generic[TPipeline]):
         dq_monitor: DQMonitorPort | None = None,
     ) -> PipelineService:
         """Build shared pipeline services for the configured pipeline.
+
+        Args:
+            settings: Application settings for infrastructure wiring.
+            logger: LoggerPort for structured logging.
+            config: Optional pre-loaded pipeline YAML config; loaded from disk if None.
+            filter_config: Optional input filter configuration; disables filtering if None.
+            tracer: Optional TracingPort for distributed tracing.
+            dq_monitor: Optional DQMonitorPort for data quality monitoring.
 
         Returns:
             Fully wired PipelineService bundle for the configured pipeline.
@@ -192,6 +214,18 @@ class GenericPipelineFactory(Generic[TPipeline]):
         cached_bronze: CachedBronzeContext | None = None,
     ) -> TPipeline:
         """Create pipeline instance with wired services and optional transformer.
+
+        Args:
+            run_id: Unique identifier for this pipeline run.
+            runtime: Runtime configuration (run type, limits, vacuum settings).
+            settings: Application settings for infrastructure wiring.
+            logger: LoggerPort for structured logging.
+            config: Optional pre-loaded pipeline YAML config; loaded from disk if None.
+            filter_config: Optional input filter configuration; disables filtering if None.
+            tracer: Optional TracingPort for distributed tracing.
+            dq_monitor: Optional DQMonitorPort for data quality monitoring.
+            metrics: Optional MetricsPort for metrics collection.
+            cached_bronze: Optional cached Bronze context; uses live API if None or disabled.
 
         Returns:
             Configured pipeline instance of type TPipeline ready for execution.
@@ -229,6 +263,15 @@ class GenericPipelineFactory(Generic[TPipeline]):
         cached_bronze: CachedBronzeContext | None = None,
     ) -> PipelineRunner:
         """Create and assemble a fully configured PipelineRunner instance.
+
+        Args:
+            run_id: Unique identifier for this pipeline run.
+            runtime: Runtime configuration (run type, limits, vacuum settings).
+            settings: Application settings for infrastructure wiring.
+            observability: Bundle containing logger, tracer, metrics, and DQ monitor.
+            filter_config: Optional input filter configuration; disables filtering if None.
+            config: Optional pre-loaded pipeline YAML config; loaded from disk if None.
+            cached_bronze: Optional cached Bronze context; uses live API if None or disabled.
 
         Returns:
             Fully wired PipelineRunner ready for execution.

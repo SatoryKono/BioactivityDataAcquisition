@@ -218,7 +218,19 @@ def check_anomaly_detection(
     baseline_stats: JsonDict  # Any: DQ check values vary by check type
     | None,  # Any: DQ baseline statistics have heterogeneous values
 ) -> AnomalyDetectionResult:
-    """Detect anomalies using baseline comparison."""
+    """Detect anomalies using baseline comparison.
+
+    Args:
+        df: Input DataFrame whose null-rate and record count are compared to baseline.
+        baseline_stats: Baseline statistics dict with ``null_rate_ma30``,
+            ``record_count_ma30``, and ``days_since_start`` keys. Cold-start mode
+            is activated when fewer than 30 days have elapsed. Pass None to force
+            cold-start mode immediately.
+
+    Returns:
+        AnomalyDetectionResult with detected anomaly names, per-metric z-scores,
+        and overall PASS or WARN status.
+    """
     cold_start_days = 30
     current_day = baseline_stats.get("days_since_start", 0) if baseline_stats else 0
     cold_start_mode = current_day < cold_start_days

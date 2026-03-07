@@ -34,6 +34,9 @@ class CoalescePolicyService:
     def extract_field_from_qualified(column: str) -> str:
         """Extract field name from qualified column (x.y.z -> z).
 
+        Args:
+            column: Qualified column name, e.g. ``"provider.entity.field"``.
+
         Returns:
             Unqualified field name string.
         """
@@ -45,6 +48,11 @@ class CoalescePolicyService:
     @staticmethod
     def can_coalesce(df: pl.DataFrame, col1: str, col2: str) -> bool:
         """Check if two columns can be coalesced without type breakage.
+
+        Args:
+            df: DataFrame containing both columns.
+            col1: Name of the first column.
+            col2: Name of the second column.
 
         Returns:
             True if the columns are type-compatible for coalescing, False otherwise.
@@ -69,6 +77,11 @@ class CoalescePolicyService:
         seed_pipeline: str | None = None,
     ) -> pl.DataFrame:
         """Coalesce grouped columns while preferring seed columns first.
+
+        Args:
+            df: DataFrame with potentially duplicate qualified field columns.
+            _enrichers: Enricher configurations (unused, kept for API symmetry).
+            seed_pipeline: Pipeline name used to identify seed columns.
 
         Returns:
             DataFrame with duplicate field columns coalesced, seed values preferred.
@@ -96,6 +109,11 @@ class CoalescePolicyService:
     ) -> pl.DataFrame:
         """Coalesce grouped columns while preferring enricher columns first.
 
+        Args:
+            df: DataFrame with potentially duplicate qualified field columns.
+            _enrichers: Enricher configurations (unused, kept for API symmetry).
+            seed_pipeline: Pipeline name used to identify seed columns.
+
         Returns:
             DataFrame with duplicate field columns coalesced, enricher values preferred.
         """
@@ -121,6 +139,11 @@ class CoalescePolicyService:
     ) -> pl.DataFrame:
         """Currently equivalent to seed-priority coalescing.
 
+        Args:
+            df: DataFrame with potentially duplicate qualified field columns.
+            enrichers: Enricher configurations forwarded to the seed-priority implementation.
+            seed_pipeline: Pipeline name used to identify seed columns.
+
         Returns:
             DataFrame with duplicate field columns coalesced using seed-priority order.
         """
@@ -134,6 +157,12 @@ class CoalescePolicyService:
         seed_pipeline: str | None = None,
     ) -> pl.DataFrame:
         """Apply explicit source priority rules from config.field_priorities.
+
+        Args:
+            df: DataFrame with potentially duplicate qualified field columns.
+            enrichers: Enricher configurations used to locate per-source columns.
+            field_priorities: Mapping of field name to ordered tuple of source names.
+            seed_pipeline: Pipeline name used to identify seed columns.
 
         Returns:
             DataFrame with field columns coalesced according to the explicit priority rules.

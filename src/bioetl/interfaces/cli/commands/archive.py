@@ -31,7 +31,13 @@ def _handle_archive_failure(
     reason_code: str,
     table: str,
 ) -> None:
-    """Handle archive command failures with shared CLI policy."""
+    """Handle archive command failures with shared CLI policy.
+
+    Args:
+        exc: Exception caught at the CLI command boundary.
+        reason_code: Machine-readable code for the failure (e.g., 'CLI_MAINTENANCE_ARCHIVE_DOMAIN_ERROR').
+        table: Table name used as subject value in the structured error context.
+    """
     handle_cli_execution_failure(
         exc,
         reason_code=reason_code,

@@ -65,6 +65,12 @@ class ChemblFetchPagingMixin:
     ) -> tuple[list[BronzeRecord], bool]:
         """Fetch a single page and handle errors.
 
+        Args:
+            url: Full API endpoint URL to request.
+            params: Query parameters to include in the request.
+            entity_type: ChEMBL entity type (e.g., ``"activity"``); used
+                for metrics labeling and response parsing.
+
         Returns:
             Tuple of (list of records for the page, whether there is a next page).
         """
@@ -89,7 +95,16 @@ class ChemblFetchPagingMixin:
         limit: int | None = None,
         start_offset: int = 0,
     ) -> AsyncIterator[list[BronzeRecord]]:
-        """Yield pages of records."""
+        """Yield pages of records.
+
+        Args:
+            entity_type: ChEMBL entity type (e.g., ``"activity"``).
+            limit: Maximum total records to yield across all pages, or None for all.
+            start_offset: Initial pagination offset (default 0).
+
+        Returns:
+            Async iterator of record lists, one list per API page.
+        """
         url = self._mapper.get_resource_url(entity_type)
         offset = start_offset
         records_yielded = 0
@@ -120,7 +135,21 @@ class ChemblFetchPagingMixin:
         filter_field: str,
         pk_fields: tuple[str, ...] | None = None,
     ) -> Iterator[BronzeRecord]:
-        """Yield records while tracking seen IDs for deduplication."""
+        """Yield records while tracking seen IDs for deduplication.
+
+        Args:
+            records: Raw records from a single API page.
+            seen_ids: Mutable set of already-yielded record identifiers;
+                updated in place as new records are emitted.
+            pk_field: Primary key field name for single-key deduplication.
+            entity_type: ChEMBL entity type; used for metrics and logging.
+            filter_field: Filter field name included in duplicate-skip log events.
+            pk_fields: Optional tuple of field names for composite-key deduplication;
+                when None or length 1, single-key logic is used.
+
+        Returns:
+            Iterator of unique BronzeRecord dicts not yet seen.
+        """
         use_composite = pk_fields is not None and len(pk_fields) > 1
 
         for record in records:
@@ -171,7 +200,22 @@ class ChemblFetchPagingMixin:
         limit: int | None,
         pk_fields: tuple[str, ...] | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Continue pagination after first filtered page."""
+        """Continue pagination after first filtered page.
+
+        Args:
+            url: Full API endpoint URL to paginate.
+            id_batch: List of IDs already applied as the filter.
+            filter_field: API field name used for filtering.
+            entity_type: ChEMBL entity type (e.g., ``"activity"``).
+            pk_field: Primary key field for single-key deduplication.
+            seen_ids: Mutable set of already-yielded identifiers; shared across pages.
+            start_offset: Pagination offset to begin from (i.e., length of first page).
+            limit: Maximum total records already fetched, or None for no limit.
+            pk_fields: Optional composite-key tuple; None for single-key dedup.
+
+        Returns:
+            Async iterator of additional deduplicated BronzeRecord dicts.
+        """
         offset = start_offset
         while True:
             if limit and offset >= limit:
@@ -207,7 +251,17 @@ class ChemblFetchPagingMixin:
         filter_field: str,
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch records filtered by ID batch with client-side deduplication."""
+        """Fetch records filtered by ID batch with client-side deduplication.
+
+        Args:
+            entity_type: ChEMBL entity type (e.g., ``"activity"``).
+            id_batch: List of IDs to include in the filter query.
+            filter_field: API field name to filter on.
+            limit: Maximum records to fetch, or None for no limit.
+
+        Returns:
+            Async iterator of deduplicated BronzeRecord dicts for the given batch.
+        """
         url = self._mapper.get_resource_url(entity_type)
         seen_ids: set[str] = set()
         pk_field = self._get_api_pk_field(entity_type)

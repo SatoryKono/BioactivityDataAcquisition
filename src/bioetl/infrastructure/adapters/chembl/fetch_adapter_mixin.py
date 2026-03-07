@@ -34,7 +34,17 @@ class ChemblFetchAdapterMixin(
         filter_ids: list[str],
         filter_field: str,
     ) -> AsyncIterator[BronzeRecord]:
-        """Perform filtered fetch using ID batches with client-side deduplication."""
+        """Perform filtered fetch using ID batches with client-side deduplication.
+
+        Args:
+            entity_type: ChEMBL entity type (e.g., ``"activity"``).
+            limit: Maximum number of records to yield, or None for no limit.
+            filter_ids: List of IDs to filter by in the API query.
+            filter_field: API field name to apply the ID filter on.
+
+        Returns:
+            Async iterator of deduplicated BronzeRecord dicts.
+        """
         total_fetched = 0
         seen_ids: set[str] = set()
         pk_field = self._get_api_pk_field(entity_type)
@@ -61,7 +71,16 @@ class ChemblFetchAdapterMixin(
         limit: int | None,
         offset: int = 0,
     ) -> AsyncIterator[BronzeRecord]:
-        """Perform standard paginated fetch with client-side deduplication."""
+        """Perform standard paginated fetch with client-side deduplication.
+
+        Args:
+            entity_type: ChEMBL entity type (e.g., ``"activity"``).
+            limit: Maximum number of records to yield, or None for no limit.
+            offset: Starting offset for pagination (default 0).
+
+        Returns:
+            Async iterator of deduplicated BronzeRecord dicts.
+        """
         total_fetched = 0
         seen_keys: set[str] = set()
         pk_field = self._get_api_pk_field(entity_type)
@@ -112,7 +131,20 @@ class ChemblFetchAdapterMixin(
         filter_field: str | None = None,
         offset: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch records from ChEMBL."""
+        """Fetch records from ChEMBL.
+
+        Args:
+            entity_type: ChEMBL entity type (e.g., ``"activity"``).
+            limit: Maximum number of records to yield, or None for no limit.
+            query: Free-text query string (ignored by ChEMBL adapter).
+            filter_ids: List of IDs for filtered fetch, or None for all records.
+            filter_field: API field to apply the ID filter on; required when
+                filter_ids is provided.
+            offset: Starting pagination offset, or None to start from 0.
+
+        Returns:
+            Async iterator of BronzeRecord dicts.
+        """
         _ = query
 
         if filter_ids and filter_field:
@@ -137,6 +169,15 @@ class ChemblFetchAdapterMixin(
         """Fetch records from ChEMBL with ID filtering.
 
         Implements FilterableDataSourcePort.fetch_filtered().
+
+        Args:
+            entity_type: ChEMBL entity type (e.g., ``"activity"``).
+            filter_ids: List of IDs to filter by.
+            filter_field: API field name to apply the ID filter on.
+            limit: Maximum number of records to yield, or None for no limit.
+
+        Returns:
+            Async iterator of filtered BronzeRecord dicts.
         """
         async for record in self._fetch_filtered(
             entity_type, limit, filter_ids, filter_field
@@ -151,7 +192,19 @@ class ChemblFetchAdapterMixin(
         fallback_mapping: dict[str, str],
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch with fallback (ChEMBL IDs always resolvable, fallback ignored)."""
+        """Fetch with fallback (ChEMBL IDs always resolvable, fallback ignored).
+
+        Args:
+            entity_type: ChEMBL entity type (e.g., ``"activity"``).
+            filter_ids: List of IDs to filter by.
+            filter_field: API field name to apply the ID filter on.
+            fallback_mapping: Mapping of alternative lookup keys to IDs;
+                ignored for ChEMBL as all IDs are directly resolvable.
+            limit: Maximum number of records to yield, or None for no limit.
+
+        Returns:
+            Async iterator of filtered BronzeRecord dicts.
+        """
         _ = fallback_mapping
         async for record in self._fetch_filtered(
             entity_type, limit, filter_ids, filter_field

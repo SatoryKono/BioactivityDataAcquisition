@@ -35,6 +35,9 @@ class CompositeCheckpointState:
     def with_seed_completed(self, result: SeedResult) -> CompositeCheckpointState:
         """Create new state with seed marked as completed.
 
+        Args:
+            result: SeedResult from the completed seed pipeline run.
+
         Returns:
             New immutable checkpoint state with seed_completed=True and SEED_COMPLETED FSM state.
         """
@@ -58,6 +61,10 @@ class CompositeCheckpointState:
         result: DependencyResult,
     ) -> CompositeCheckpointState:
         """Create new state with dependency marked as completed.
+
+        Args:
+            dependency_name: Pipeline name of the completed dependency.
+            result: DependencyResult from the completed dependency run.
 
         Returns:
             New immutable checkpoint state with the dependency added to completed_dependencies.
@@ -85,6 +92,10 @@ class CompositeCheckpointState:
     ) -> CompositeCheckpointState:
         """Create new state with enricher marked as completed.
 
+        Args:
+            enricher_name: Pipeline name of the completed enricher.
+            result: EnrichmentResult from the completed enricher run.
+
         Returns:
             New immutable checkpoint state with the enricher added to completed_enrichers.
         """
@@ -106,6 +117,9 @@ class CompositeCheckpointState:
 
     def with_state(self, new_state: CompositePipelineState) -> CompositeCheckpointState:
         """Create new state with updated FSM state.
+
+        Args:
+            new_state: Target FSM state to transition to.
 
         Returns:
             New immutable checkpoint state with the FSM state field replaced.
@@ -199,6 +213,9 @@ class CompositeCheckpointState:
         data: JsonDict,  # Any: checkpoint state has heterogeneous values
     ) -> CompositeCheckpointState:
         """Create state from dictionary with backward-compatibility handling.
+
+        Args:
+            data: JSON-deserialized dictionary produced by ``to_dict()``.
 
         Returns:
             Reconstructed CompositeCheckpointState instance from the serialized data.

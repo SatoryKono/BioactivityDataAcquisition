@@ -1,7 +1,7 @@
 {
   "summary": {
     "scanned_modules": 1008,
-    "total_internal_imports": 3639,
+    "total_internal_imports": 3638,
     "layer_edges": 14,
     "cross_layer_group_edges": 60,
     "violations": 0
@@ -52,7 +52,7 @@
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 451,
+      "imports": 450,
       "allowed": true
     },
     {
@@ -384,14 +384,14 @@
       "imports": 7
     },
     {
-      "source": "infrastructure.observability",
-      "target": "domain.ports",
-      "imports": 7
-    },
-    {
       "source": "infrastructure.schemas",
       "target": "domain.filtering",
       "imports": 7
+    },
+    {
+      "source": "application.composite",
+      "target": "domain.events",
+      "imports": 6
     }
   ],
   "violations": []

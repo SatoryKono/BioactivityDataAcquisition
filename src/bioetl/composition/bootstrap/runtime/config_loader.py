@@ -63,6 +63,16 @@ def resolve_composite_gold_schema(
 ) -> type | None:
     """Resolve composite Gold contract by composite pipeline name.
 
+    Strips the 'composite_' prefix from the name before looking up in the
+    registry, so both 'publication' and 'composite_publication' resolve to
+    the same schema.
+
+    Args:
+        composite_name: Composite pipeline name (e.g., 'composite_publication'
+            or 'publication').
+        schema_registry: Optional mapping of entity name to Pandera
+            DataFrameModel class; uses the default registry when None.
+
     Returns:
         Pandera DataFrameModel class for the composite pipeline, or None if not registered.
     """
@@ -74,8 +84,15 @@ def resolve_composite_gold_schema(
 def resolve_composite_config_path(name: str, *, config_dir: Path) -> Path:
     """Resolve composite config path from canonical composites directory.
 
+    Args:
+        name: Composite pipeline name (e.g., 'composite_publication').
+        config_dir: Directory to search for composite YAML files.
+
     Returns:
         Path to the composite YAML configuration file.
+
+    Raises:
+        FileNotFoundError: If no YAML file for the given name exists in config_dir.
     """
     config_path = config_dir / f"{name}.yaml"
     if config_path.exists():
@@ -126,8 +143,23 @@ def load_composite_config(
 ) -> CompositeConfig:
     """Load and validate composite pipeline configuration from YAML.
 
+    Reads the YAML file, applies external DQ override merging, injects
+    column groups from an external file when configured, then validates and
+    converts the payload to a domain CompositeConfig object.
+
+    Args:
+        name: Composite pipeline name (e.g., 'composite_publication').
+        config_dir: Directory containing composite YAML config files.
+        validate_payload: Callable to validate and parse the raw YAML payload.
+        dq_override_merger: Callable to merge external DQ config into the
+            inline dq_overrides section.
+
     Returns:
         Validated and parsed CompositeConfig domain object.
+
+    Raises:
+        FileNotFoundError: If the YAML config file does not exist.
+        ValueError: If the YAML payload fails schema validation or is not a mapping.
     """
     config_path = resolve_composite_config_path(name, config_dir=config_dir)
 

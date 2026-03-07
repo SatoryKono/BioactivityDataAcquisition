@@ -145,7 +145,11 @@ class CompositePipelineRunner(
         return self._config
 
     async def run(self) -> CompositeResult:
-        """Execute full composite pipeline under distributed lock."""
+        """Execute full composite pipeline under distributed lock.
+
+        Returns:
+            CompositeResult summarising seed, enrichment, dependency, and merge outcomes.
+        """
         if self._finished:
             raise RunnerAlreadyExecutedError(
                 runner_type="CompositePipelineRunner",

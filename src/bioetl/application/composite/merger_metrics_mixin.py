@@ -31,7 +31,20 @@ class MergeMetricsRecorderMixin:
         sources_used: list[str],
         dependency_results: dict[str, DependencyResult] | None = None,
     ) -> pl.DataFrame:
-        """Add lineage metadata columns to DataFrame."""
+        """Add lineage metadata columns to DataFrame.
+
+        Args:
+            df: Merged DataFrame to annotate with lineage columns.
+            enrichment_results: Map of enricher pipeline name to its execution result.
+            run_id: Composite run identifier written to ``_composite_run_id``.
+            sources_used: List of pipeline names that contributed data to the merge.
+            dependency_results: Optional map of dependency pipeline name to its result,
+                included in enrichment status when provided.
+
+        Returns:
+            DataFrame with ``_composite_run_id``, ``_source_providers``,
+            ``_enrichment_status``, and ``_lineage_created_at`` columns appended.
+        """
         import polars as pl
 
         status_dict: dict[str, str] = {}
@@ -51,7 +64,15 @@ class MergeMetricsRecorderMixin:
         )
 
     def _drop_excluded_fields(self, df: pl.DataFrame) -> pl.DataFrame:
-        """Drop columns configured for exclusion in merge config."""
+        """Drop columns configured for exclusion in merge config.
+
+        Args:
+            df: DataFrame from which excluded columns should be removed.
+
+        Returns:
+            DataFrame with columns matching ``exclude_fields`` glob patterns removed.
+            Returns the original DataFrame unchanged when no patterns are configured.
+        """
         if not self._config.exclude_fields:
             return df
 
@@ -78,7 +99,16 @@ class MergeMetricsRecorderMixin:
         enrichers: Sequence[EnricherConfig],
         seed_pipeline: str | None = None,
     ) -> int:
-        """Count records with at least one enrichment value present."""
+        """Count records with at least one enrichment value present.
+
+        Args:
+            df: Merged DataFrame to inspect for enrichment coverage.
+            enrichers: Enricher configurations whose columns are checked for non-null values.
+            seed_pipeline: Optional seed pipeline name (currently unused, reserved for future use).
+
+        Returns:
+            Number of rows where at least one enricher column contains a non-null value.
+        """
         import polars as pl
 
         _ = seed_pipeline
@@ -106,12 +136,30 @@ class MergeMetricsRecorderMixin:
         df: pl.DataFrame,
         enrichers: Sequence[EnricherConfig],
     ) -> int:
-        """Count records with all required enrichments."""
+        """Count records with all required enrichments.
+
+        Args:
+            df: Merged DataFrame to evaluate.
+            enrichers: Enricher configurations defining required enrichment fields.
+
+        Returns:
+            Number of records fully enriched across all configured enrichers.
+            Currently returns 0 (placeholder for future full-coverage logic).
+        """
         _ = (df, enrichers)
         return 0
 
     def _calculate_field_coverage(self, df: pl.DataFrame) -> dict[str, float]:
-        """Calculate percentage of non-null values per field."""
+        """Calculate percentage of non-null values per field.
+
+        Args:
+            df: DataFrame for which field coverage is computed.
+
+        Returns:
+            Dictionary mapping each non-private column name (not starting with ``_``)
+            to its non-null ratio between 0.0 and 1.0. Returns an empty dict for
+            empty DataFrames.
+        """
         if len(df) == 0:
             return {}
 

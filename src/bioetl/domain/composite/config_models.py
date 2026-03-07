@@ -83,14 +83,20 @@ class DependencyConfig:
 
     @property
     def primary_join_key(self) -> str:
+        """Return the first join key used as the primary filter field."""
         return self.join_keys[0]
 
     @property
     def uses_seed_keys(self) -> bool:
+        """Return True if this dependency uses seed pipeline keys for filtering."""
         return self.key_source is None or self.key_source == "seed"
 
     @property
     def effective_filter_fields(self) -> tuple[str, ...]:
+        """Return the resolved set of filter fields for this dependency.
+
+        Resolves precedence: ``filter_fields`` > ``filter_field`` > first join key.
+        """
         if self.filter_fields:
             return self.filter_fields
         if self.filter_field:
@@ -99,6 +105,7 @@ class DependencyConfig:
 
     @property
     def is_multi_field_filter(self) -> bool:
+        """Return True if more than one effective filter field is active."""
         return len(self.effective_filter_fields) > 1
 
 
@@ -157,14 +164,17 @@ class EnricherConfig:
 
     @property
     def primary_join_key(self) -> str:
+        """Return the first join key used as the primary enrichment join field."""
         return self.join_keys[0]
 
     @property
     def has_fallback_keys(self) -> bool:
+        """Return True if secondary join keys are available for fallback matching."""
         return len(self.join_keys) > 1
 
     @property
     def is_many_to_one(self) -> bool:
+        """Return True if this enricher has many-to-one cardinality (requires aggregation)."""
         return self.cardinality == EnricherCardinality.MANY_TO_ONE
 
 
@@ -189,6 +199,13 @@ def _coerce_column_groups(obj: object, attr: str) -> None:
 
 @dataclass(frozen=True, slots=True)
 class LayerColumnConfig:
+    """Column selection configuration for a single Medallion layer.
+
+    Supports three mutually exclusive selection modes: explicit column list,
+    group inclusion, or full column group definitions. Exactly one mode
+    may be active; specifying more than one raises ``ValueError``.
+    """
+
     columns: tuple[str, ...] | None = None
     column_groups: tuple[ColumnGroupConfig, ...] | None = None
     include_groups: tuple[str, ...] | None = None
@@ -220,6 +237,12 @@ class LayerColumnConfig:
 
 @dataclass(frozen=True, slots=True)
 class DataSchemaConfig:
+    """Top-level schema configuration for composite pipeline column management.
+
+    Defines shared column groups and per-layer (Silver/Gold) column selection
+    rules used during the merge phase of composite pipelines.
+    """
+
     column_groups: tuple[ColumnGroupConfig, ...] = ()
     silver: LayerColumnConfig | None = None
     gold: LayerColumnConfig | None = None
@@ -232,14 +255,30 @@ class DataSchemaConfig:
             object.__setattr__(self, "gold", LayerColumnConfig(**self.gold))
 
     def get_layer_groups(self, layer: str) -> tuple[ColumnGroupConfig, ...]:
-        """Return layer-specific groups, falling back to top-level groups."""
+        """Return layer-specific column groups, falling back to top-level groups.
+
+        Args:
+            layer: Medallion layer name ('silver' or 'gold').
+
+        Returns:
+            Layer-specific column groups if configured, otherwise the top-level groups.
+        """
         layer_config: LayerColumnConfig | None = getattr(self, layer, None)
         if layer_config and layer_config.column_groups:
             return layer_config.column_groups
         return self.column_groups
 
     def should_include_group(self, layer: str, group_name: str) -> bool:
-        """Check whether a column group is included for the given layer."""
+        """Check whether a column group is included for the given layer.
+
+        Args:
+            layer: Medallion layer name ('silver' or 'gold').
+            group_name: Name of the column group to check for inclusion.
+
+        Returns:
+            True if the group should be included; False if the layer config
+            restricts inclusion and the group name is absent.
+        """
         layer_config = getattr(self, layer, None)
         if not layer_config or not layer_config.include_groups:
             return True
@@ -294,7 +333,14 @@ class CrossValidationConfig:
             )
 
     def get_pairing(self, enricher_pipeline: str) -> EnricherFieldPairing | None:
-        """Look up field pairing config for the given enricher pipeline."""
+        """Look up field pairing config for the given enricher pipeline.
+
+        Args:
+            enricher_pipeline: Pipeline name to look up in the enricher_pairings list.
+
+        Returns:
+            Matching EnricherFieldPairing if found, otherwise None.
+        """
         for pairing in self.enricher_pairings:
             if pairing.enricher_pipeline == enricher_pipeline:
                 return pairing

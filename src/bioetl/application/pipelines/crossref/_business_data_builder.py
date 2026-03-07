@@ -31,7 +31,15 @@ def compute_publication_date(
     published_print: str | None,
     published_online: str | None,
 ) -> str | None:
-    """Select unified publication date, preferring print."""
+    """Select unified publication date, preferring print.
+
+    Args:
+        published_print: Print publication date string, or None.
+        published_online: Online publication date string, or None.
+
+    Returns:
+        Print date if available, otherwise online date, or None if both are absent.
+    """
     return published_print or published_online
 
 
@@ -40,7 +48,15 @@ def hash_author_details(
     *,
     hash_pii_value: Callable[[str | None], str | None],
 ) -> list[JsonDict]:
-    """Hash PII fields in author details while preserving non-PII fields."""
+    """Hash PII fields in author details while preserving non-PII fields.
+
+    Args:
+        author_details: Raw CrossRef author detail dicts from the API response.
+        hash_pii_value: Callable that hashes a string PII value to its digest.
+
+    Returns:
+        List of author dicts with given, family, and name fields hashed.
+    """
     hashed_details: list[JsonDict] = []  # Any: raw CrossRef API JSON fragments
 
     for author in author_details:
@@ -64,7 +80,14 @@ def hash_author_details(
 def extract_publication_year_candidate(
     record: JsonDict,  # Any: raw CrossRef API record
 ) -> int | None:
-    """Extract first available publication year from CrossRef date-parts."""
+    """Extract first available publication year from CrossRef date-parts.
+
+    Args:
+        record: Raw CrossRef API record dict containing date fields.
+
+    Returns:
+        Integer year from the first available date field, or None if not found.
+    """
     for date_field in ("published-print", "published-online", "issued"):
         date_info = record.get(date_field)
         if not isinstance(date_info, dict):
@@ -150,7 +173,21 @@ def build_crossref_business_data(
     serialize_json_list: Callable[[Sequence[object] | None], str | None],
     hash_pii_value: Callable[[str | None], str | None],
 ) -> GoldRecord:
-    """Build CrossRef publication business-data payload."""
+    """Build CrossRef publication business-data payload.
+
+    Args:
+        record: Raw CrossRef API record dict.
+        data_normalizer: Port for author list and affiliation normalization.
+        validate_doi: Callable that validates and normalizes a DOI string.
+        validate_publication_year: Callable that validates a raw year value.
+        classify_publication_type: Callable returning publication type classification dict.
+        serialize_json: Callable that serializes a value to a JSON scalar string.
+        serialize_json_list: Callable that serializes a sequence to a JSON array string.
+        hash_pii_value: Callable that hashes a string PII value to its digest.
+
+    Returns:
+        GoldRecord dict with all CrossRef publication fields populated.
+    """
     doi = validate_doi(record.get("DOI"))
     assert doi is not None, "DOI should be validated in _pre_extract_validation"
 

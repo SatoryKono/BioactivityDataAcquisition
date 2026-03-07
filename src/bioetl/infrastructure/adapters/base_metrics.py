@@ -165,7 +165,21 @@ class AdapterMetrics:
         candidates: int,
         hits: int,
     ) -> None:
-        """Record fallback attempt/hit counters and hit-rate gauge."""
+        """Record fallback attempt/hit counters and hit-rate gauge.
+
+        Tracks how many fallback candidates were attempted and how many
+        resulted in a successful hit. Emits attempt/hit counters and a
+        derived hit-rate gauge clamped to [0.0, 1.0].
+
+        Args:
+            operation: Name of the fallback operation being tracked
+                (e.g., "title_fallback", "doi_resolution").
+            candidates: Total number of fallback candidates attempted.
+                Clamped to zero if negative.
+            hits: Number of successful fallback hits.
+                Clamped to [0, candidates].
+
+        """
         total_candidates = max(candidates, 0)
         total_hits = max(0, min(hits, total_candidates))
         labels = {"provider": self.provider, "operation": operation}

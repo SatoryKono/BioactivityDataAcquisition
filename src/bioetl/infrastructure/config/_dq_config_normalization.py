@@ -10,7 +10,15 @@ from bioetl.domain.types import JsonDict
 def normalize_to_file_format(
     merged: JsonDict,  # Any: YAML DQ config has heterogeneous values
 ) -> JsonDict:  # Any: YAML DQ config has heterogeneous values
-    """Normalize merged DQ config into ``DQConfigFile``-compatible shape."""
+    """Normalize merged DQ config into ``DQConfigFile``-compatible shape.
+
+    Args:
+        merged: Raw merged DQ config dictionary from the layered loader.
+
+    Returns:
+        Normalized copy with flat threshold keys nested, legacy list keys
+        promoted to their canonical names, and no mutation of the input.
+    """
     result = copy.deepcopy(merged)
     _normalize_thresholds(result)
 
@@ -40,7 +48,12 @@ def normalize_to_file_format(
 def _normalize_thresholds(
     result: JsonDict,  # Any: YAML DQ config has heterogeneous values
 ) -> None:
-    """Move flat threshold keys into nested ``thresholds`` object."""
+    """Move flat threshold keys into nested ``thresholds`` object.
+
+    Args:
+        result: Mutable DQ config dict; modified in place if flat threshold
+            keys ``soft_fail_threshold`` or ``hard_fail_threshold`` are present.
+    """
     if "soft_fail_threshold" not in result and "hard_fail_threshold" not in result:
         return
 
@@ -62,7 +75,14 @@ def _promote_list_key(
     legacy_key: str,
     target_key: str,
 ) -> None:
-    """Move list under ``legacy_key`` to ``target_key`` preserving existing entries."""
+    """Move list under ``legacy_key`` to ``target_key`` preserving existing entries.
+
+    Args:
+        result: Mutable DQ config dict; modified in place when legacy_key is present.
+        legacy_key: Old key name to migrate (e.g., ``"field_validations"``).
+        target_key: Canonical key name to extend with the legacy list
+            (e.g., ``"entity_field_validations"``).
+    """
     if legacy_key not in result:
         return
 

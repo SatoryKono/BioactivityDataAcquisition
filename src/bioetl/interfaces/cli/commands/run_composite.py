@@ -323,21 +323,27 @@ def run_composite(
         bioetl run-composite --composite publication --seed-limit 100
 
     Args:
-        composite: Composite.
-        resume: Whether to resume.
-        dry_run: Dry run mode flag.
-        seed_limit: Seed limit.
-        enrich_only: Enrich only.
-        required_only: Whether to required only.
-        force_enricher: Force enricher.
-        use_cached_bronze: Whether to use cached bronze.
-        cached_bronze_date: Cached bronze date.
-        cached_bronze_path: File path for cached bronze.
-        cached_bronze_enrichers: Whether to cached bronze enrichers.
-        cached_bronze_dependencies: Whether to cached bronze dependencies.
-        debug: Whether to debug.
-        health_server: Whether to health server.
-        health_port: Health port.
+        composite: Composite pipeline name (e.g., 'publication').
+        resume: When True, resumes from the last saved checkpoint.
+        dry_run: When True, runs the pipeline without writing data to storage.
+        seed_limit: Maximum number of seed records to fetch; no limit if None.
+        enrich_only: Comma-separated enricher names to run; all enrichers run
+            if None.
+        required_only: When True, optional enrichers are skipped.
+        force_enricher: Enricher name to force-rerun, ignoring its checkpoint.
+        use_cached_bronze: When True, loads data from the Bronze cache instead
+            of calling the external API.
+        cached_bronze_date: ISO date string (YYYY-MM-DD) used to filter cached
+            Bronze files; not applied if None.
+        cached_bronze_path: Explicit path to a Bronze cache directory; auto-
+            resolved from settings if None.
+        cached_bronze_enrichers: Override cached Bronze usage for enrichers only;
+            follows ``use_cached_bronze`` if None.
+        cached_bronze_dependencies: When True, dependency pipelines also load
+            from the Bronze cache.
+        debug: When True, sets log level to DEBUG for detailed output.
+        health_server: When True, starts an HTTP health server during execution.
+        health_port: TCP port for the HTTP health server.
     """
     runtime = build_runtime_config(
         resume=resume,

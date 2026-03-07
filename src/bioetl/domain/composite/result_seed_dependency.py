@@ -70,7 +70,19 @@ class DependencyResult:
         started_at: datetime | None = None,
         completed_at: datetime | None = None,
     ) -> DependencyResult:
-        """Factory for successful dependency result."""
+        """Factory for successful dependency result.
+
+        Args:
+            pipeline_name: Name of the dependency pipeline.
+            records_extracted: Number of records extracted from the source.
+            records_silver: Number of records written to the Silver layer.
+            duration_seconds: Execution duration in seconds. Defaults to 0.0.
+            started_at: UTC timestamp when execution started. Defaults to None.
+            completed_at: UTC timestamp when execution completed. Defaults to None.
+
+        Returns:
+            DependencyResult with SUCCESS status.
+        """
         return cls(
             pipeline_name=pipeline_name,
             status=DependencyStatus.SUCCESS,
@@ -88,7 +100,16 @@ class DependencyResult:
         error_message: str,
         duration_seconds: float = 0.0,
     ) -> DependencyResult:
-        """Factory for failed dependency result."""
+        """Factory for failed dependency result.
+
+        Args:
+            pipeline_name: Name of the dependency pipeline.
+            error_message: Human-readable description of the failure.
+            duration_seconds: Execution duration before failure. Defaults to 0.0.
+
+        Returns:
+            DependencyResult with FAILED status and error_message set.
+        """
         return cls(
             pipeline_name=pipeline_name,
             status=DependencyStatus.FAILED,
@@ -102,7 +123,15 @@ class DependencyResult:
         pipeline_name: str,
         reason: str = "Already completed",
     ) -> DependencyResult:
-        """Factory for skipped dependency result."""
+        """Factory for skipped dependency result.
+
+        Args:
+            pipeline_name: Name of the dependency pipeline.
+            reason: Human-readable reason why execution was skipped. Defaults to 'Already completed'.
+
+        Returns:
+            DependencyResult with SKIPPED status.
+        """
         return cls(
             pipeline_name=pipeline_name,
             status=DependencyStatus.SKIPPED,
@@ -115,7 +144,15 @@ class DependencyResult:
         pipeline_name: str,
         timeout_seconds: float,
     ) -> DependencyResult:
-        """Factory for timeout dependency result."""
+        """Factory for timeout dependency result.
+
+        Args:
+            pipeline_name: Name of the dependency pipeline.
+            timeout_seconds: Timeout threshold in seconds that was exceeded.
+
+        Returns:
+            DependencyResult with TIMEOUT status and duration set to timeout_seconds.
+        """
         return cls(
             pipeline_name=pipeline_name,
             status=DependencyStatus.TIMEOUT,

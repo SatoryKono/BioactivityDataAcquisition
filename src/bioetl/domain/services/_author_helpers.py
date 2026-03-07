@@ -35,6 +35,10 @@ _AFFILIATION_KEYS = ("name", "display_name", "affiliation")
 def hash_author_name(name: str, salt: str) -> str:
     """Hash author name with SHA-256: sha256(lowercase(name) + salt).
 
+    Args:
+        name: Author name string to hash (stripped and lowercased before hashing).
+        salt: Cryptographic salt appended before hashing for PII compliance.
+
     Returns:
         SHA-256 hex digest string of the normalized author name and salt.
     """
@@ -46,6 +50,10 @@ def parse_author_names(
     authors: list[str] | list[JsonDict] | str,
 ) -> list[str]:
     """Parse various author formats to list of name strings.
+
+    Args:
+        authors: Author data as a list of strings, list of dicts with 'name' key,
+            or a delimited/JSON string.
 
     Returns:
         List of author name strings extracted from the input.
@@ -74,6 +82,11 @@ def _extract_name_from_item(item: object) -> str | None:
 def parse_author_string(text: str) -> list[str]:
     """Parse author string (JSON or delimited format).
 
+    Tries JSON array parsing first; falls back to semicolon/comma delimiter.
+
+    Args:
+        text: Author string in JSON array format or delimited (';' or ',') format.
+
     Returns:
         List of author name strings parsed from the input text.
     """
@@ -90,6 +103,9 @@ def parse_author_string(text: str) -> list[str]:
 def try_parse_json_authors(text: str) -> list[str] | None:
     """Try to parse JSON array of authors. Returns None on parse failure.
 
+    Args:
+        text: String that may be a JSON array of author strings or dicts.
+
     Returns:
         List of author name strings if parsed successfully, None on parse failure.
     """
@@ -105,6 +121,9 @@ def try_parse_json_authors(text: str) -> list[str] | None:
 def parse_delimited_authors(text: str) -> list[str]:
     """Parse semicolon- or comma-delimited author string.
 
+    Args:
+        text: Author string delimited by semicolons (preferred) or commas.
+
     Returns:
         List of author name strings split by the detected delimiter.
     """
@@ -117,6 +136,10 @@ def extract_affiliation_strings(
     affiliations: list[str] | list[JsonDict],
 ) -> list[str]:
     """Extract affiliation strings from a mixed list of strings and dicts.
+
+    Args:
+        affiliations: List of affiliation items as plain strings or dicts
+            with known keys ('name', 'display_name', 'affiliation').
 
     Returns:
         List of extracted affiliation strings, with empty values excluded.
@@ -152,6 +175,10 @@ def _extract_single_affiliation(aff: object) -> str | None:
 def normalize_affiliation_string(text: str) -> str | None:
     """Normalize affiliation: HTML → whitespace → control chars → NFC → trim.
 
+    Args:
+        text: Raw affiliation string that may contain HTML, control characters,
+            or inconsistent whitespace.
+
     Returns:
         Normalized affiliation string, or None if result is empty.
     """
@@ -168,6 +195,9 @@ def normalize_affiliation_string(text: str) -> str | None:
 
 def deduplicate_case_insensitive(strings: list[str]) -> list[str]:
     """Deduplicate strings case-insensitively, keeping first occurrence.
+
+    Args:
+        strings: List of strings that may contain case-variant duplicates.
 
     Returns:
         List of deduplicated strings preserving original casing of first occurrence.
@@ -219,8 +249,15 @@ def _surname_initial_from_tokens(tokens: list[str]) -> str:
 def normalize_to_surname_initial(name: str) -> str | None:
     """Convert author name to ``Surname_F`` short key.
 
+    Handles multiple formats: inverted ('Last, First'), ChEMBL ('Last FI'),
+    and natural ('First [Middle] Last').
+
+    Args:
+        name: Author name string in any supported format.
+
     Returns:
-        Short key string in Surname_Initial format, or None for empty input.
+        Short key string in Surname_Initial format (e.g., 'Smith_J'),
+        or None for empty input.
     """
     if not name or not name.strip():
         return None
@@ -251,6 +288,10 @@ def collect_affiliations_from_authors(
     authors: list[JsonDict],
 ) -> list[str]:
     """Collect raw affiliation strings from author dicts.
+
+    Args:
+        authors: List of author dicts, each potentially containing an
+            'affiliations' key with string or list values.
 
     Returns:
         List of raw affiliation strings from all authors in the input.

@@ -40,7 +40,16 @@ def _handle_maintenance_failure(
     unexpected_error_title: str,
     interrupted_message: str,
 ) -> None:
-    """Handle maintenance command failures with shared CLI policy."""
+    """Handle maintenance command failures with shared CLI policy.
+
+    Args:
+        exc: Exception caught at the CLI command boundary.
+        reason_code: Machine-readable code for the failure (e.g., 'CLI_MAINTENANCE_VACUUM_DOMAIN_ERROR').
+        target: Target identifier (e.g., table name or layer) used in error context.
+        domain_error_title: Human-readable title for BioETLError failures.
+        unexpected_error_title: Human-readable title for unexpected exception failures.
+        interrupted_message: Message displayed when KeyboardInterrupt is caught.
+    """
     handle_cli_execution_failure(
         exc,
         reason_code=reason_code,

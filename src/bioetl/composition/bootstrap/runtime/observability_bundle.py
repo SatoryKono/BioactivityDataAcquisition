@@ -33,7 +33,17 @@ def validate_observability_preflight_impl(
     environment: str,
     logger: LoggerPort,
 ) -> None:
-    """Validate observability components for production readiness."""
+    """Validate observability components for production readiness.
+
+    Emits structured warnings when NoOp implementations are used in production.
+    No-ops in non-production environments are silently accepted.
+
+    Args:
+        tracer: TracingPort to validate; warns if NoOpTracing in production.
+        metrics: MetricsPort to validate; warns if NoOpMetrics in production.
+        environment: Deployment environment name (e.g., 'prod', 'staging').
+        logger: LoggerPort used to emit structured preflight warning events.
+    """
     if environment != "prod":
         return
 
@@ -70,6 +80,23 @@ def bootstrap_observability_bundle_impl(
 ) -> ObservabilityBundle:
     """Build validated logger/metrics/tracer/DQ-monitor bundle for a pipeline run.
 
+    Creates each observability component via the provided bootstrapper callables,
+    logs initialization details, and runs preflight validation.
+
+    Args:
+        pipeline: Pipeline name passed to the logger bootstrapper for context.
+        run_id: Run UUID used for log correlation across all components.
+        settings: Application settings forwarded to tracer, metrics, and DQ bootstrappers.
+        log_level: Minimum log level string forwarded to the logger bootstrapper.
+        logger_bootstrapper: Callable that creates a LoggerPort from pipeline, run_id,
+            and log_level.
+        tracer_bootstrapper: Callable that creates a TracingPort from settings.
+        metrics_bootstrapper: Callable that creates a MetricsPort from settings.
+        dq_monitor_bootstrapper: Callable that creates an optional DQMonitorPort
+            from settings and logger.
+        preflight_validator: Callable that validates the assembled components and
+            emits warnings for production misconfigurations.
+
     Returns:
         Validated ObservabilityBundle with logger, metrics, tracer, and DQ monitor.
     """
@@ -104,7 +131,14 @@ def _log_observability_initialized(
     tracer: TracingPort,
     dq_monitor: DQMonitorPort | None,
 ) -> None:
-    """Emit structured bootstrap observability event."""
+    """Emit structured bootstrap observability event.
+
+    Args:
+        logger: LoggerPort used to emit the initialization event.
+        metrics: MetricsPort whose type name is included in the event.
+        tracer: TracingPort whose type name is included in the event.
+        dq_monitor: Optional DQ monitor; presence is recorded in the event.
+    """
     logger.info(
         "observability_initialized",
         extra={

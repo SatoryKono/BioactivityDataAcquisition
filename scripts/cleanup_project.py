@@ -19,7 +19,7 @@ References:
     - 05-cleanup-policy.md §4.2: Cleanup procedures
     - RULES.md §7: Project maintenance
 
-Aligned with RULES.md v5.10 (2026-01-06)
+Aligned with RULES.md v5.23 (2026-01-06)
 """
 
 from __future__ import annotations

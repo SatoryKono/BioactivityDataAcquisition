@@ -46,6 +46,9 @@ class PublicationFieldGroup(StrEnum):
     def from_string(cls, value: str) -> PublicationFieldGroup:
         """Parse group from case-insensitive string value.
 
+        Args:
+            value: Group name string to parse (case-insensitive).
+
         Returns:
             Matching PublicationFieldGroup enum member.
         """

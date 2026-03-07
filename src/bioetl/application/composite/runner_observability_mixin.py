@@ -31,7 +31,12 @@ class CompositeRunnerObservabilityMixin:
     _metrics: MetricsPort | None
 
     async def _generate_dq_reports(self, merge_result: MergeResult) -> None:
-        """Generate DQ reports for composite pipeline."""
+        """Generate DQ reports for composite pipeline.
+
+        Args:
+            merge_result: Merge execution result providing table paths and record counts
+                used to populate the DQ report context.
+        """
         if self._dq_report_service is None:
             self._logger.debug(
                 "dq_reports_skipped",
@@ -78,7 +83,12 @@ class CompositeRunnerObservabilityMixin:
             )
 
     async def _write_cv_quarantine(self, merge_result: MergeResult) -> None:
-        """Write cross-validation quarantine records if any exist."""
+        """Write cross-validation quarantine records if any exist.
+
+        Args:
+            merge_result: Merge result containing ``quarantine_payloads`` from
+                cross-validation. When empty or quarantine port is absent, no writes occur.
+        """
         if self._quarantine_port is None or not merge_result.quarantine_payloads:
             return
 

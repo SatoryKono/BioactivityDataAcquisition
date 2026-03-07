@@ -116,6 +116,13 @@ class EnrichmentCoordinatorService(EnrichmentCoordinatorResultMixin):
     ) -> dict[str, EnrichmentResult]:
         """Run all enrichers concurrently and collect typed enrichment results.
 
+        Args:
+            keys: DataFrame of seed keys to pass to each enricher pipeline.
+            enrichers: Enricher configurations to execute.
+            completed: Set of pipeline names already completed (skipped when resuming).
+            runner_factory: Callable that creates a PipelineRunner for a given pipeline name
+                and key DataFrame.
+
         Returns:
             Mapping from enricher pipeline name to its EnrichmentResult, including
             skipped, failed, partial, and successful outcomes.

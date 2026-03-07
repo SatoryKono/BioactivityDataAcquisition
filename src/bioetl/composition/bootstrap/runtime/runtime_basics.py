@@ -51,6 +51,19 @@ def bootstrap_runtime_basics(
 ) -> tuple[str, Settings, LoggerPort, object, LockPort]:
     """Build base runtime dependencies shared across composite bootstrap.
 
+    Args:
+        config: CompositeConfig used to derive the pipeline name for logging.
+        run_id: Optional UUID string; a new UUID is generated from uuid_factory
+            when None.
+        settings_provider: Zero-argument callable that returns global Settings.
+        logger_bootstrapper: Callable accepting (pipeline_name, run_uuid, log_level)
+            and returning a LoggerPort.
+        storage_bootstrapper: Callable returning a storage adapter; called with
+            ``enable_csv_export=True`` for composite pipelines.
+        lock_factory: Zero-argument callable returning a LockPort.
+        uuid_factory: Zero-argument callable returning a new UUID; injectable
+            for deterministic testing.
+
     Returns:
         Tuple of (run_id, settings, logger, storage, lock) for the composite run.
     """
@@ -79,6 +92,19 @@ def build_runner_factories(
     Callable[[str, pl.DataFrame], PipelineRunner],
 ]:
     """Build seed/dependency/enricher runner factories for composite phases.
+
+    Args:
+        config: CompositeConfig describing seed, enrichers, and dependencies.
+        runtime: Runtime options used to resolve per-phase Bronze cache settings.
+        logger: Structured logger forwarded to the runner factory builder.
+        runner_factory_builder_cls: Class implementing per-phase runner factory
+            construction.
+        filter_extraction_service_cls: Class used to extract filter IDs from
+            keys DataFrames during enricher/dependency factory invocations.
+        pipeline_runner_builder: Callable that accepts a PipelineRunContext and
+            returns a configured PipelineRunner.
+        resolve_bronze_opts_fn: Callable returning BronzeRunOptions for a given
+            runtime config and optional phase-level override flag.
 
     Returns:
         Tuple of (seed_factory, dependency_factory, enricher_factory) callables.
@@ -132,6 +158,21 @@ def build_support_services(
     create_dq_report_service_fn: Callable[[LoggerPort, Settings], DQReportService],
 ) -> CompositeSupportServices:
     """Build composite support service bundle consumed by runner facade.
+
+    Args:
+        config: CompositeConfig for this composite run.
+        runtime: Runtime options (resume, concurrency, etc.).
+        settings: Global settings supplying data_dir and feature flags.
+        logger: Structured logger forwarded to all support services.
+        storage: Storage adapter injected from the composition root.
+        run_id: UUID string identifying this run for checkpoint scoping.
+        support_services_factory_cls: Factory class that assembles the bundle.
+        resolve_gold_schema_fn: Callable returning the Gold Pandera schema for
+            a composite pipeline name, or None if not registered.
+        load_field_group_registry_fn: Callable returning the FieldGroupRegistry
+            for a composite pipeline name, or None.
+        create_dq_report_service_fn: Callable returning a DQReportService
+            given a logger and settings.
 
     Returns:
         CompositeSupportServices bundle with all services required by the runner.

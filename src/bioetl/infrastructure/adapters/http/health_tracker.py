@@ -27,7 +27,16 @@ class ProviderHealthTracker:
     _base_batch_size: int = 1000
 
     def update(self, result: HealthCheckResult) -> HealthStatus:
-        """Update health state from HealthCheckResult."""
+        """Update health state from HealthCheckResult.
+
+        Args:
+            result: Result object from the most recent health check,
+                containing status and optional diagnostic details.
+
+        Returns:
+            Updated HealthStatus after applying the result.
+
+        """
         return self.monitor.update_from_health_check_result(result, self.logger)
 
     def record_success(self) -> HealthStatus:

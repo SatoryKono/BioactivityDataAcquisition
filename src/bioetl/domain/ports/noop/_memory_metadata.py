@@ -19,6 +19,7 @@ class NoOpMemoryMonitor:
     """No-op implementation of MemoryMonitorPort."""
 
     def get_memory_stats(self) -> MemoryStats:
+        """Return conservative fixed MemoryStats suitable for local-only deployment."""
         from bioetl.domain.ports.runtime import MemoryStats
 
         return MemoryStats(
@@ -30,9 +31,18 @@ class NoOpMemoryMonitor:
         )
 
     def is_under_pressure(self) -> bool:
+        """Return False — no-op monitor never reports memory pressure."""
         return False
 
     def get_recommended_batch_size(self, current_batch_size: int) -> int:
+        """Return the current batch size unchanged — no memory-based adjustment.
+
+        Args:
+            current_batch_size: The current batch size requested by the caller.
+
+        Returns:
+            The same batch size with no modification.
+        """
         return current_batch_size
 
     def estimate_batch_memory_mb(
@@ -40,10 +50,27 @@ class NoOpMemoryMonitor:
         record_count: int,
         avg_record_size_bytes: int = 1024,
     ) -> float:
+        """Estimate memory required for a batch using a fixed overhead factor.
+
+        Args:
+            record_count: Number of records in the batch.
+            avg_record_size_bytes: Average size of each record in bytes. Defaults to 1024.
+
+        Returns:
+            Estimated memory usage in megabytes.
+        """
         overhead_factor = 2.5
         return (record_count * avg_record_size_bytes * overhead_factor) / (1024 * 1024)
 
     def calculate_max_batch_size(self, _avg_record_size_bytes: int = 1024) -> int:
+        """Return a fixed maximum batch size of 10000 records.
+
+        Args:
+            _avg_record_size_bytes: Average record size in bytes (ignored).
+
+        Returns:
+            Fixed maximum batch size.
+        """
         return 10000
 
 
@@ -58,6 +85,17 @@ class NoOpMetadataWriter:
         provider: str | None = None,  # noqa: ARG002
         entity: str | None = None,  # noqa: ARG002
     ) -> str:
+        """No-op implementation — discards Bronze metadata and returns empty string.
+
+        Args:
+            base_path: Base directory path for metadata output (ignored).
+            metadata: Bronze layer metadata to write (ignored).
+            provider: Optional provider name qualifier (ignored).
+            entity: Optional entity type qualifier (ignored).
+
+        Returns:
+            Empty string.
+        """
         return ""
 
     async def write_silver_metadata(
@@ -70,6 +108,19 @@ class NoOpMetadataWriter:
         provider: str | None = None,  # noqa: ARG002
         entity: str | None = None,  # noqa: ARG002
     ) -> str:
+        """No-op implementation — discards Silver metadata and returns empty string.
+
+        Args:
+            base_path: Base directory path for metadata output (ignored).
+            metadata: Silver layer metadata to write (ignored).
+            table_name: Optional Delta table name qualifier (ignored).
+            flat_structure: Whether to use a flat directory structure (ignored).
+            provider: Optional provider name qualifier (ignored).
+            entity: Optional entity type qualifier (ignored).
+
+        Returns:
+            Empty string.
+        """
         return ""
 
     async def write_gold_metadata(
@@ -82,7 +133,21 @@ class NoOpMetadataWriter:
         provider: str | None = None,  # noqa: ARG002
         entity: str | None = None,  # noqa: ARG002
     ) -> str:
+        """No-op implementation — discards Gold metadata and returns empty string.
+
+        Args:
+            base_path: Base directory path for metadata output (ignored).
+            metadata: Gold layer metadata to write (ignored).
+            table_name: Optional Delta table name qualifier (ignored).
+            flat_structure: Whether to use a flat directory structure (ignored).
+            provider: Optional provider name qualifier (ignored).
+            entity: Optional entity type qualifier (ignored).
+
+        Returns:
+            Empty string.
+        """
         return ""
 
     async def aclose(self) -> None:
+        """No-op implementation of aclose — no resources to release."""
         return None

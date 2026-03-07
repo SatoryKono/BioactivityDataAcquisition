@@ -27,10 +27,12 @@ class ChemblMetadataMixin:
         """Get API request metadata and clear collector.
 
         Args:
-            api_version: Api version.
+            api_version: ChEMBL API version string to embed in metadata
+                (e.g., ``"34"``); omitted from metadata when None.
 
         Returns:
-            Source metadata.
+            SourceMetadata with aggregated request statistics and extraction params;
+            the internal request collector is cleared after construction.
         """
         extraction_qs = self._extraction_params.to_query_string() or None
         metadata = self._request_collector.to_source_metadata(

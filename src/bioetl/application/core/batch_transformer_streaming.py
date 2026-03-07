@@ -33,7 +33,14 @@ class StreamingBatchProcessor:
         chunk_size: int = 100,
         start_index: int = 0,
     ) -> AsyncIterator[TransformResult]:
-        """Process records in memory-efficient sub-batches."""
+        """Process records in memory-efficient sub-batches.
+
+        Args:
+            records: Full list of Bronze records to process in chunks.
+            batch_id: Batch identifier shared across all chunks.
+            chunk_size: Initial maximum number of records per sub-batch.
+            start_index: Absolute record index of the first record for accurate reporting.
+        """
         current_chunk_size = chunk_size
         i = 0
         total_records = len(records)
@@ -53,7 +60,14 @@ class StreamingBatchProcessor:
             i += len(chunk)
 
     def iter_records(self, records: list[BronzeRecord]) -> Iterator[BronzeRecord]:
-        """Iterate over records without loading all into memory."""
+        """Iterate over records without loading all into memory.
+
+        Args:
+            records: List of Bronze records to iterate.
+
+        Returns:
+            Iterator yielding each record in order.
+        """
         yield from records
 
 

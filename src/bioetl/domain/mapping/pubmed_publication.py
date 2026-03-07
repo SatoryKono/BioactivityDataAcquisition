@@ -19,7 +19,16 @@ def build_pubmed_publication_type_fields(
     *,
     classification: dict[str, str | None] | None = None,
 ) -> dict[str, str | None]:
-    """Build PubMed publication type fields from raw types and classification."""
+    """Build PubMed publication type fields from raw types and classification.
+
+    Args:
+        pub_types: List of raw PubMed publication type strings (e.g., ['Journal Article', 'Review']).
+        classification: Optional dict of pre-computed unified classification fields to merge in.
+
+    Returns:
+        Dictionary with 'publication_type' key set to the normalized type,
+        plus any additional fields from classification if provided.
+    """
     raw_type = "|".join(pub_types) if pub_types else None
     result: dict[str, str | None] = {
         "publication_type": normalize_publication_type(raw_type),

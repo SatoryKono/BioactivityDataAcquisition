@@ -86,22 +86,50 @@ ALL_PUBLICATION_ENTITY_TYPES: Final[frozenset[str]] = frozenset(
 
 
 def get_publication_mapping(entity_type: str) -> PublicationMapping | None:
-    """Get publication mapping for entity type."""
+    """Get publication mapping for entity type.
+
+    Args:
+        entity_type: Canonical or legacy publication entity type name.
+
+    Returns:
+        PublicationMapping if found, None if entity type is unregistered.
+    """
     return _PUBLICATION_MAPPING_INDEX.get(entity_type)
 
 
 def is_publication_entity(entity_type: str) -> bool:
-    """Check if entity type is a publication-related entity."""
+    """Check if entity type is a publication-related entity.
+
+    Args:
+        entity_type: Entity type name to check.
+
+    Returns:
+        True if entity type is registered in the publication mapping index.
+    """
     return entity_type in _PUBLICATION_MAPPING_INDEX
 
 
 def is_legacy_publication_alias(entity_type: str) -> bool:
-    """Check if entity type is a legacy publication alias."""
+    """Check if entity type is a legacy publication alias.
+
+    Args:
+        entity_type: Entity type name to check.
+
+    Returns:
+        True if entity type is a legacy alias (e.g., 'document' instead of 'publication').
+    """
     return entity_type in LEGACY_PUBLICATION_ALIASES
 
 
 def get_dedup_key_fields(entity_type: str) -> tuple[str, ...] | None:
-    """Get composite key fields for deduplication."""
+    """Get composite key fields for deduplication.
+
+    Args:
+        entity_type: Canonical or legacy publication entity type name.
+
+    Returns:
+        Tuple of field names for deduplication, or None if entity type is unregistered.
+    """
     mapping = get_publication_mapping(entity_type)
     if mapping is None:
         return None
@@ -109,13 +137,28 @@ def get_dedup_key_fields(entity_type: str) -> tuple[str, ...] | None:
 
 
 def has_composite_key(entity_type: str) -> bool:
-    """Check if entity type has a composite primary key."""
+    """Check if entity type has a composite primary key.
+
+    Args:
+        entity_type: Entity type name to check.
+
+    Returns:
+        True if entity type uses a multi-field composite key for deduplication.
+    """
     fields = get_dedup_key_fields(entity_type)
     return fields is not None and len(fields) > 1
 
 
 def validate_publication_entity_type(entity_type: str, provider: str) -> str | None:
-    """Validate publication entity type in YAML configs."""
+    """Validate publication entity type in YAML configs.
+
+    Args:
+        entity_type: Entity type name from YAML config.
+        provider: Provider name (only 'chembl' is subject to validation).
+
+    Returns:
+        Error message string if entity type is a disallowed legacy alias, None if valid.
+    """
     if provider != "chembl":
         return None
     if not is_legacy_publication_alias(entity_type):

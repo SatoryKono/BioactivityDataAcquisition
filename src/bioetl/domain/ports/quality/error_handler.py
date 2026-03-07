@@ -15,7 +15,14 @@ class ErrorHandlerPort(Protocol):
     """Classify, log, and wrap provider errors into domain exceptions."""
 
     def get_error_type(self, error: Exception) -> ErrorType:
-        """Return normalized domain error type for ``error``."""
+        """Return normalized domain error type for ``error``.
+
+        Args:
+            error: Exception to classify.
+
+        Returns:
+            Corresponding ErrorType enum value.
+        """
         ...
 
     def log_error(
@@ -25,7 +32,17 @@ class ErrorHandlerPort(Protocol):
         error: Exception,
         context: JsonDict | None = None,  # Any: untyped API JSON record
     ) -> object:
-        """Emit structured error log and return provider-specific context object."""
+        """Emit structured error log and return provider-specific context object.
+
+        Args:
+            provider: Provider identifier (e.g., 'chembl').
+            operation: Name of the operation that failed (e.g., 'fetch_activity').
+            error: The exception that occurred.
+            context: Optional additional key-value pairs for structured logging.
+
+        Returns:
+            Provider-specific context object (implementation-defined).
+        """
         ...
 
     def wrap_error(
@@ -35,7 +52,17 @@ class ErrorHandlerPort(Protocol):
         status_code: int | None = None,
         retry_after: float | None = None,
     ) -> ExternalServiceError:
-        """Wrap low-level exception into domain ``ExternalServiceError``."""
+        """Wrap low-level exception into domain ``ExternalServiceError``.
+
+        Args:
+            error: The low-level exception to wrap.
+            provider: Provider identifier (e.g., 'chembl').
+            status_code: Optional HTTP status code associated with the error.
+            retry_after: Optional retry delay in seconds suggested by the provider.
+
+        Returns:
+            Corresponding ExternalServiceError domain exception.
+        """
         ...
 
     def handle_error(
@@ -45,5 +72,15 @@ class ErrorHandlerPort(Protocol):
         operation: str,
         context: JsonDict | None = None,  # Any: untyped API JSON record
     ) -> ExternalServiceError:
-        """Log and wrap error in one step (convenience composition of log+wrap)."""
+        """Log and wrap error in one step (convenience composition of log+wrap).
+
+        Args:
+            error: The exception that occurred.
+            provider: Provider identifier (e.g., 'chembl').
+            operation: Name of the operation that failed.
+            context: Optional additional key-value pairs for structured logging.
+
+        Returns:
+            Corresponding ExternalServiceError with log emission as a side effect.
+        """
         ...

@@ -1,6 +1,6 @@
 """Pandera schema for ChEMBL Molecule entity.
 
-Aligned with RULES.md v5.0 and ChEMBL 34 schema.
+Aligned with RULES.md v5.23 and ChEMBL 34 schema.
 RF-NORM-06: Nullable int strategy — pd.Int64Dtype for physicochemical counts.
 """
 

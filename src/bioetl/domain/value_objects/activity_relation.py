@@ -19,7 +19,14 @@ class RelationOperator(StrEnum):
 
     @classmethod
     def from_string(cls, s: str | None) -> RelationOperator | None:
-        """Parse relation operator from string."""
+        """Parse relation operator from string.
+
+        Args:
+            s: Operator symbol such as '=', '<', '<=', '>', '>=', '~'. None is accepted.
+
+        Returns:
+            Corresponding RelationOperator, or None if input is None or empty.
+        """
         if s is None:
             return None
         normalized = s.strip()

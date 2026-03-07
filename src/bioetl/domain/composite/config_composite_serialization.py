@@ -137,6 +137,9 @@ def _build_merge_config(
 def composite_to_dict(config: CompositeConfig) -> dict[str, object]:
     """Convert CompositeConfig to serializable dictionary.
 
+    Args:
+        config: CompositeConfig instance to serialize.
+
     Returns:
         Dictionary representation of the CompositeConfig suitable for serialization.
     """
@@ -185,6 +188,9 @@ def composite_to_dict(config: CompositeConfig) -> dict[str, object]:
 
 def composite_from_dict(data: dict[str, object]) -> CompositeConfig:
     """Construct CompositeConfig from serialized dictionary.
+
+    Args:
+        data: Dictionary previously produced by ``composite_to_dict()``.
 
     Returns:
         CompositeConfig instance reconstructed from the input dictionary.

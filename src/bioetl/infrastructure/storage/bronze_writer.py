@@ -109,7 +109,29 @@ class BronzeWriter(
         metadata_coordinator: MetadataCoordinatorPort | None = None,
         flat_structure: bool = False,
     ) -> None:
-        """Initialize Bronze writer."""
+        """Initialize Bronze writer.
+
+        Args:
+            base_path: Root directory for Bronze layer storage.
+            logger: Structured logger for write events and errors.
+            metrics: Metrics port for recording write counters and histograms.
+            tracing: Optional tracing port for span propagation; defaults to
+                NoOpTracing when None.
+            save_json: When True, write an additional uncompressed JSONL copy
+                alongside the compressed file.
+            json_path: Override directory for uncompressed JSON copies; defaults
+                to ``<base_path>/json`` when None.
+            validate_json: When True, validate that each record is valid JSON
+                before writing.
+            audit: Optional audit port for lineage logging; disabled when None.
+            metadata_writer: Optional port for writing sidecar metadata files;
+                defaults to NoOpMetadataWriter when None.
+            save_metadata: When True, write full BronzeMetadata sidecar files.
+            metadata_coordinator: Optional coordinator for metadata orchestration;
+                disabled when None.
+            flat_structure: When True, omit the provider/entity subdirectory
+                hierarchy in output paths.
+        """
         if tracing is None:
             from bioetl.domain.ports import NoOpTracing
 
@@ -147,7 +169,23 @@ class BronzeWriter(
         ingestion_ts: datetime,
         source_metadata: SourceMetadata | None = None,
     ) -> BronzeWriteResult:
-        """Write raw records to Bronze layer (JSONL + zstd)."""
+        """Write raw records to Bronze layer (JSONL + zstd).
+
+        Args:
+            records: Iterator of JSON-encoded record bytes (one per line).
+            provider: Data provider name (e.g., ``"chembl"``).
+            entity: Entity type name (e.g., ``"activity"``).
+            date: UTC date of the batch, used to partition the output path.
+            batch_id: Unique identifier for this write batch.
+            run_id: Pipeline run identifier for lineage tracking.
+            run_type: Run classification (INCREMENTAL, BACKFILL, or REBUILD).
+            ingestion_ts: UTC timestamp when ingestion started.
+            source_metadata: Optional provider metadata included in the sidecar;
+                uses a minimal default when None.
+
+        Returns:
+            BronzeWriteResult with path, record count, and size information.
+        """
         return await self._write_bronze_with_tracing(
             records=records,
             provider=provider,

@@ -1,6 +1,6 @@
 """Pandera schema for UniProt Target entity.
 
-Aligned with RULES.md v5.0 and UniProt REST API.
+Aligned with RULES.md v5.23 and UniProt REST API.
 Split into sub-modules to comply with LOC limits.
 """
 

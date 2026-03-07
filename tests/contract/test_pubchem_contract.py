@@ -17,6 +17,23 @@ PUBCHEM_API_BASE = "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
 pytestmark = pytest.mark.network
 
 
+async def _request_or_skip(
+    client: httpx.AsyncClient,
+    method: str,
+    url: str,
+    **kwargs: object,
+) -> httpx.Response:
+    """Execute request and skip on transient network/provider outages."""
+    try:
+        response = await client.request(method, url, **kwargs)
+    except httpx.TransportError as exc:
+        pytest.skip(f"PubChem endpoint not reachable: {exc}")
+
+    if response.status_code >= 500:
+        pytest.skip(f"PubChem temporary server error: HTTP {response.status_code}")
+    return response
+
+
 @pytest.mark.pubchem
 class TestPubChemContract:
     """Contract tests for PubChem PUG REST API."""
@@ -24,11 +41,13 @@ class TestPubChemContract:
     @pytest.mark.asyncio
     async def test_compound_by_molecule_id(self) -> None:
         """Verify compound lookup by CID."""
-        molecule_id = 2244  # Aspirin
+        cid = 2244  # Aspirin
 
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
-                f"{PUBCHEM_API_BASE}/compound/molecule_id/{molecule_id}/JSON",
+            response = await _request_or_skip(
+                client,
+                "GET",
+                f"{PUBCHEM_API_BASE}/compound/cid/{cid}/JSON",
             )
 
         assert response.status_code == 200
@@ -40,15 +59,17 @@ class TestPubChemContract:
         assert len(compounds) >= 1
 
         compound = compounds[0]
-        # Compound should have id with molecule_id
+        # Compound should have id with CID
         assert "id" in compound
-        assert compound["id"]["id"]["molecule_id"] == molecule_id
+        assert compound["id"]["id"]["cid"] == cid
 
     @pytest.mark.asyncio
     async def test_compound_by_name(self) -> None:
         """Verify compound search by name."""
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
+            response = await _request_or_skip(
+                client,
+                "GET",
                 f"{PUBCHEM_API_BASE}/compound/name/aspirin/JSON",
             )
 
@@ -61,11 +82,13 @@ class TestPubChemContract:
     @pytest.mark.asyncio
     async def test_compound_property_endpoint(self) -> None:
         """Verify property retrieval endpoint."""
-        molecule_id = 2244  # Aspirin
+        cid = 2244  # Aspirin
 
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
-                f"{PUBCHEM_API_BASE}/compound/molecule_id/{molecule_id}/property/"
+            response = await _request_or_skip(
+                client,
+                "GET",
+                f"{PUBCHEM_API_BASE}/compound/cid/{cid}/property/"
                 "MolecularFormula,MolecularWeight,CanonicalSMILES/JSON",
             )
 
@@ -88,7 +111,9 @@ class TestPubChemContract:
         sid = 144204857  # Known stable substance ID
 
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
+            response = await _request_or_skip(
+                client,
+                "GET",
                 f"{PUBCHEM_API_BASE}/substance/sid/{sid}/JSON",
             )
 
@@ -103,7 +128,9 @@ class TestPubChemContract:
         aid = 504466  # Known stable bioassay (Tox21)
 
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
+            response = await _request_or_skip(
+                client,
+                "GET",
                 f"{PUBCHEM_API_BASE}/assay/aid/{aid}/JSON",
             )
 
@@ -118,12 +145,13 @@ class TestPubChemContract:
     @pytest.mark.asyncio
     async def test_molecule_id_list_endpoint(self) -> None:
         """Verify multiple CID retrieval."""
-        molecule_ids = [2244, 3672]  # Aspirin, Ibuprofen
+        cids = [2244, 3672]  # Aspirin, Ibuprofen
 
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.post(
-                f"{PUBCHEM_API_BASE}/compound/molecule_id/property/MolecularFormula/JSON",
-                data={"molecule_id": ",".join(map(str, molecule_ids))},
+            response = await _request_or_skip(
+                client,
+                "GET",
+                f"{PUBCHEM_API_BASE}/compound/cid/{','.join(map(str, cids))}/property/MolecularFormula/JSON",
             )
 
         assert response.status_code == 200
@@ -139,8 +167,10 @@ class TestPubChemContract:
         smiles = "CC(=O)OC1=CC=CC=C1C(=O)O"  # Aspirin
 
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
-                f"{PUBCHEM_API_BASE}/compound/smiles/{smiles}/molecule_ids/JSON",
+            response = await _request_or_skip(
+                client,
+                "GET",
+                f"{PUBCHEM_API_BASE}/compound/smiles/{smiles}/cids/JSON",
             )
 
         assert response.status_code == 200
@@ -155,11 +185,13 @@ class TestPubChemContract:
     @pytest.mark.slow
     async def test_similarity_search(self) -> None:
         """Verify similarity search endpoint."""
-        molecule_id = 2244  # Aspirin
+        cid = 2244  # Aspirin
 
         async with httpx.AsyncClient(timeout=60.0) as client:
-            response = await client.get(
-                f"{PUBCHEM_API_BASE}/compound/fastsimilarity_2d/molecule_id/{molecule_id}/molecule_ids/JSON",
+            response = await _request_or_skip(
+                client,
+                "GET",
+                f"{PUBCHEM_API_BASE}/compound/fastsimilarity_2d/cid/{cid}/cids/JSON",
                 params={"Threshold": 95},
             )
 

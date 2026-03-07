@@ -116,7 +116,11 @@ class PipelineService:
         # Runtime checks happen via Protocol structural typing
 
     async def __aenter__(self) -> Self:
-        """Enter the async context manager, initializing services."""
+        """Enter the async context manager, initializing services.
+
+        Returns:
+            Self reference for use in ``async with`` blocks.
+        """
         await self.data_source.__aenter__()
         return self
 
@@ -126,7 +130,13 @@ class PipelineService:
         exc_val: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> None:
-        """Exit the async context manager, closing services."""
+        """Exit the async context manager, closing services.
+
+        Args:
+            exc_type: Exception class if an error occurred, otherwise None.
+            exc_val: Exception instance if an error occurred, otherwise None.
+            exc_tb: Traceback if an error occurred, otherwise None.
+        """
         await self.aclose()
 
     async def aclose(self) -> None:

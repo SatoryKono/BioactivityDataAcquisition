@@ -38,7 +38,21 @@ class BatchWriter(BatchWriterIOMixin, BatchWriterColumnsMixin, BatchWriterTracin
         lock_validator: BatchWriterLockValidator = None,
         data_schema_config: DataSchemaConfig | None = None,
     ) -> None:
-        """Initialize writer dependencies and static write configuration."""
+        """Initialize writer dependencies and static write configuration.
+
+        Args:
+            storage: Port for writing to Bronze, Silver, and Gold layers.
+            context: Pipeline execution context carrying run ID, run type, and logger.
+            config: Per-pipeline record processor configuration including schemas and table settings.
+            gold_validator: Validator that enforces Gold schema contracts before writes.
+            error_classifier: Classifies write exceptions into structured error categories.
+            batch_metrics: Metrics recorder for tracking write-layer events and errors.
+            tracer: Optional distributed tracing port. If None, tracing is disabled.
+            lock_validator: Optional callable that checks whether the distributed lock is
+                still held before each write. If None, lock validation is skipped.
+            data_schema_config: Optional override for composite data-schema configuration.
+                Falls back to ``config.data_schema`` when None.
+        """
         self._storage = storage
         self._context = context
         self._config = config

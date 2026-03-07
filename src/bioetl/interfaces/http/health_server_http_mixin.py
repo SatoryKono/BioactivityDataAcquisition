@@ -33,7 +33,12 @@ class HealthServerHTTPMixin:
         reader: asyncio.StreamReader,
         writer: asyncio.StreamWriter,
     ) -> None:
-        """Handle incoming HTTP connection."""
+        """Handle incoming HTTP connection.
+
+        Args:
+            reader: Async stream reader for the incoming TCP connection.
+            writer: Async stream writer for sending the HTTP response.
+        """
         try:
             await self._process_request(reader, writer)
         except TimeoutError:
@@ -48,7 +53,16 @@ class HealthServerHTTPMixin:
         reader: asyncio.StreamReader,
         writer: asyncio.StreamWriter,
     ) -> None:
-        """Process incoming HTTP request."""
+        """Process incoming HTTP request.
+
+        Reads request line and headers, validates method, and dispatches to the
+        appropriate route handler. Sends error responses for bad requests (400)
+        and unsupported methods (405).
+
+        Args:
+            reader: Async stream reader providing the raw HTTP request bytes.
+            writer: Async stream writer for sending the HTTP response.
+        """
         request_line = await asyncio.wait_for(reader.readline(), timeout=5.0)
         if not request_line:
             return
@@ -68,7 +82,14 @@ class HealthServerHTTPMixin:
         await route_support._route_request(writer, path)
 
     def _parse_request_line(self, request_line: bytes) -> tuple[str | None, str | None]:
-        """Parse HTTP request line into method and path."""
+        """Parse HTTP request line into method and path.
+
+        Args:
+            request_line: Raw bytes of the HTTP request line (e.g., b'GET /health HTTP/1.1\r\n').
+
+        Returns:
+            Tuple of (method, path), or (None, None) if the line is malformed.
+        """
         request = request_line.decode("utf-8").strip()
         parts = request.split(" ")
         if len(parts) < 2:
@@ -76,7 +97,11 @@ class HealthServerHTTPMixin:
         return parts[0], parts[1]
 
     async def _consume_headers(self, reader: asyncio.StreamReader) -> None:
-        """Read and discard HTTP headers."""
+        """Read and discard HTTP headers.
+
+        Args:
+            reader: Async stream reader positioned after the request line.
+        """
         while True:
             line = await reader.readline()
             if line in (b"\r\n", b"\n", b""):
@@ -87,7 +112,15 @@ class HealthServerHTTPMixin:
         writer: asyncio.StreamWriter,
         error: BaseException,
     ) -> None:
-        """Handle request processing error."""
+        """Handle request processing error.
+
+        Logs the error with structured context and sends a 500 Internal Server Error
+        response to the client.
+
+        Args:
+            writer: Async stream writer for sending the error response.
+            error: Exception caught during request processing.
+        """
         if self._logger:
             self._logger.error(
                 "health_server_error",
@@ -99,7 +132,15 @@ class HealthServerHTTPMixin:
         await self._send_response(writer, 500, "Internal Server Error")
 
     async def _close_writer(self, writer: asyncio.StreamWriter) -> None:
-        """Close the stream writer safely."""
+        """Close the stream writer safely.
+
+        Attempts to close the writer and drain pending data. Connection-level
+        errors during close are logged at DEBUG level and suppressed to avoid
+        masking the original response.
+
+        Args:
+            writer: Async stream writer to close.
+        """
         try:
             writer.close()
             await writer.wait_closed()
@@ -118,7 +159,15 @@ class HealthServerHTTPMixin:
         writer: asyncio.StreamWriter,
         response: HealthResponse,
     ) -> None:
-        """Send JSON response."""
+        """Send JSON response.
+
+        Serializes the HealthResponse to JSON and writes a complete HTTP/1.1
+        response with Content-Type: application/json.
+
+        Args:
+            writer: Async stream writer for the outgoing response.
+            response: HealthResponse to serialize and send.
+        """
         body = response.to_json()
         status_code = response.http_status
         status_text = "OK" if status_code == 200 else "Service Unavailable"
@@ -139,7 +188,15 @@ class HealthServerHTTPMixin:
         status_code: int,
         message: str,
     ) -> None:
-        """Send plain-text JSON error response."""
+        """Send plain-text JSON error response.
+
+        Writes an HTTP/1.1 response with a JSON body containing the error message.
+
+        Args:
+            writer: Async stream writer for the outgoing response.
+            status_code: HTTP status code (e.g., 400, 404, 500).
+            message: Human-readable error message included in the JSON body.
+        """
         body = json.dumps({"error": message})
         http_response = (
             f"HTTP/1.1 {status_code} {message}\r\n"

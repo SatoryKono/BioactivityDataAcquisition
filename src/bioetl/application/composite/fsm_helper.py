@@ -134,6 +134,9 @@ class FSMStateHelperService:
     ) -> CompositeCheckpointState:
         """Map FAILED checkpoint state to the correct resume FSM phase.
 
+        Args:
+            state: Current checkpoint state loaded from the previous failed run.
+
         Returns:
             Updated CompositeCheckpointState with the appropriate resume FSM phase
             (NOT_STARTED, ENRICHING, or ENRICHMENT_COMPLETED) based on prior progress.

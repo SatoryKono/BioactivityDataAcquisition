@@ -30,7 +30,7 @@ References:
     - DQConfig in src/bioetl/domain/config.py
     - Anomaly detection in src/bioetl/infrastructure/observability/anomaly/
 
-Aligned with RULES.md v5.10 (2026-01-06)
+Aligned with RULES.md v5.23 (2026-01-06)
 """
 
 from __future__ import annotations

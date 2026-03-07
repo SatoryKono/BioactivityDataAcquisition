@@ -45,7 +45,16 @@ def _handle_quarantine_failure(
     unexpected_error_title: str,
     interrupted_message: str = "Quarantine command interrupted by user (Ctrl+C)",
 ) -> None:
-    """Handle quarantine command failures with shared CLI policy."""
+    """Handle quarantine command failures with shared CLI policy.
+
+    Args:
+        exc: Exception caught at the CLI command boundary.
+        reason_code: Machine-readable code for the failure (e.g., 'CLI_QUARANTINE_INSPECT_DOMAIN_ERROR').
+        pipeline: Pipeline name used as subject value in the structured error context.
+        domain_error_title: Human-readable title for BioETLError failures.
+        unexpected_error_title: Human-readable title for unexpected exception failures.
+        interrupted_message: Message displayed when KeyboardInterrupt is caught.
+    """
     handle_cli_execution_failure(
         exc,
         reason_code=reason_code,
@@ -66,6 +75,19 @@ def _run_quarantine_async(
     domain_error_title: str,
     unexpected_error_title: str,
 ) -> _T | None:
+    """Run an async quarantine coroutine with typed exception policy.
+
+    Args:
+        coro: Async coroutine to run via asyncio.run.
+        pipeline: Pipeline name used in error context for structured failure handling.
+        reason_prefix: Prefix for the reason_code (e.g., 'CLI_QUARANTINE_INSPECT');
+            suffixed with '_DOMAIN_ERROR', '_SIGINT', or '_UNEXPECTED_ERROR'.
+        domain_error_title: Human-readable title for BioETLError failures.
+        unexpected_error_title: Human-readable title for unexpected exception failures.
+
+    Returns:
+        Coroutine result on success, None if an exception was handled and process will exit.
+    """
     try:
         return asyncio.run(coro)
     except BioETLError as exc:
@@ -106,6 +128,19 @@ def _run_quarantine_sync(
     domain_error_title: str,
     unexpected_error_title: str,
 ) -> _T | None:
+    """Run a synchronous quarantine callable with typed exception policy.
+
+    Args:
+        fn: Callable to invoke synchronously; must take no arguments.
+        pipeline: Pipeline name used in error context for structured failure handling.
+        reason_prefix: Prefix for the reason_code (e.g., 'CLI_QUARANTINE_REPLAY');
+            suffixed with '_DOMAIN_ERROR', '_SIGINT', or '_UNEXPECTED_ERROR'.
+        domain_error_title: Human-readable title for BioETLError failures.
+        unexpected_error_title: Human-readable title for unexpected exception failures.
+
+    Returns:
+        Callable result on success, None if an exception was handled and process will exit.
+    """
     try:
         return fn()
     except BioETLError as exc:

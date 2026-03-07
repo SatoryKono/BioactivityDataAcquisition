@@ -63,7 +63,12 @@ class PreflightValidationReportingMixin:
     def log_resolved_field_sources(
         self, result: PreflightValidationResult, composite_name: str
     ) -> None:
-        """Log resolved field sources for debugging and auditability."""
+        """Log resolved field sources for debugging and auditability.
+
+        Args:
+            result: Preflight validation result containing resolved field sources.
+            composite_name: Name of the composite pipeline for log context.
+        """
         if not result.resolved_fields:
             return
 

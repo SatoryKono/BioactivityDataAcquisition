@@ -24,7 +24,14 @@ class ConfidenceScore:
 
     @classmethod
     def from_value(cls, value: int | str | None) -> ConfidenceScore | None:
-        """Create from raw value, returning None if input is None."""
+        """Create from raw value, returning None if input is None.
+
+        Args:
+            value: Raw confidence score as integer, string, or None.
+
+        Returns:
+            ConfidenceScore instance, or None if value is None.
+        """
         if value is None:
             return None
         if isinstance(value, str):

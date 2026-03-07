@@ -69,7 +69,17 @@ class PublicationTermDataSource(
         filter_field: str | None = None,
         offset: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch records; publication_term is derived from wrapped publication fetch."""
+        """Fetch records; publication_term is derived from wrapped publication fetch.
+
+        Args:
+            entity_type: If matching TARGET_ENTITY_TYPE, yields derived publication term
+                records; otherwise delegates to the wrapped data source.
+            limit: Maximum number of records to yield, or None for all.
+            query: Optional query string forwarded to the wrapped data source.
+            filter_ids: Optional list of IDs for filtered fetching.
+            filter_field: Optional field name for ID-based filtering.
+            offset: Optional pagination offset forwarded to the wrapped data source.
+        """
         if entity_type == self.TARGET_ENTITY_TYPE:
             async for term in self._fetch_publication_terms(
                 limit, filter_ids, filter_field

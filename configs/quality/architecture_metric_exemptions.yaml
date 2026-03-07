@@ -13,7 +13,19 @@ policy:
         - expires_on
         - removal_step
 registries:
-    file_size_limits: { }
+    file_size_limits:
+        src/bioetl/domain/composite/config_models.py:
+            value: 320
+            owner: '@bioetl-data-model'
+            reason: Transitional domain composite config model consolidation pending split into smaller mapping/value object modules.
+            expires_on: '2026-06-30'
+            removal_step: Split config model responsibilities into dedicated value-object modules and remove this exemption entry.
+        src/bioetl/domain/services/normalization_service.py:
+            value: 370
+            owner: '@bioetl-data-model'
+            reason: Transitional normalization service wrapper still hosts mixin composition and adapter-facing glue during staged decomposition.
+            expires_on: '2026-06-30'
+            removal_step: Move residual orchestration/helpers to dedicated services and remove this exemption entry.
     function_complexity: { }
     function_length: { }
     class_size: { }

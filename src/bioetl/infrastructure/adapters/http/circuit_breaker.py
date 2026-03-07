@@ -100,7 +100,7 @@ class CircuitBreaker:
         """Get current circuit breaker state.
 
         Returns:
-            State.
+            Current CircuitBreakerState enum value (CLOSED, OPEN, or HALF_OPEN).
         """
         return self._state
 
@@ -108,7 +108,7 @@ class CircuitBreaker:
         """Get current failure count.
 
         Returns:
-            Failure count.
+            Number of consecutive failures recorded since last successful request.
         """
         return self._failure_count
 
@@ -116,7 +116,7 @@ class CircuitBreaker:
         """Get total number of times circuit has opened.
 
         Returns:
-            Trips total.
+            Cumulative count of CLOSED-to-OPEN state transitions since initialization.
         """
         return self._trips_total
 

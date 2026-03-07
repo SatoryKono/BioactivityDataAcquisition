@@ -25,7 +25,15 @@ class CachedBronzeContext:
         path: str | None = None,
         date: str | None = None,
     ) -> CachedBronzeContext:
-        """Create an enabled context from CLI/config options."""
+        """Create an enabled context from CLI/config options.
+
+        Args:
+            path: Optional file system path to the cached Bronze layer directory.
+            date: Optional date string in YYYY-MM-DD format identifying the cache snapshot.
+
+        Returns:
+            CachedBronzeContext with enabled=True and the provided path and date.
+        """
         return cls(enabled=True, bronze_path=path, bronze_date=date)
 
     def __post_init__(self) -> None:

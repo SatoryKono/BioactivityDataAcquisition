@@ -63,6 +63,11 @@ class Batch(_BatchMutationMixin, _BatchLifecycleMixin):
     ) -> Batch:
         """Create a new batch with a generated ID.
 
+        Args:
+            run_id: Pipeline run identifier that owns this batch.
+            start_index: Index offset for the first record in the batch. Defaults to 0.
+            metadata: Optional key-value metadata to attach to the batch.
+
         Returns:
             New Batch instance with generated BatchID and CREATED status.
         """

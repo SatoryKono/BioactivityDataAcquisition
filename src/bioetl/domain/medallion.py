@@ -39,6 +39,9 @@ class SilverWriteMode(StrEnum):
     def from_string(cls, value: str) -> SilverWriteMode:
         """Convert string to SilverWriteMode with validation.
 
+        Args:
+            value: String value to convert (e.g., 'merge', 'append', 'delete').
+
         Returns:
             Matching SilverWriteMode enum member.
         """
@@ -62,6 +65,9 @@ class GoldWriteMode(StrEnum):
     def from_string(cls, value: str) -> GoldWriteMode:
         """Convert string to GoldWriteMode with validation.
 
+        Args:
+            value: String value to convert (e.g., 'append', 'scd2', 'overwrite').
+
         Returns:
             Matching GoldWriteMode enum member.
         """
@@ -84,7 +90,12 @@ class WriteModePolicy:
     }
 
     def validate(self, layer: Layer, mode: WriteMode) -> None:
-        """Validate that write mode is allowed for the layer."""
+        """Validate that write mode is allowed for the layer.
+
+        Args:
+            layer: Medallion layer to validate against (BRONZE, SILVER, or GOLD).
+            mode: Write mode to check for compliance with layer policy.
+        """
         allowed = self.ALLOWED_MODES[layer]
         if mode not in allowed:
             allowed_names = (
@@ -111,6 +122,9 @@ class LoadingStrategy(StrEnum):
     @classmethod
     def from_string(cls, value: str) -> LoadingStrategy:
         """Convert string to LoadingStrategy with validation.
+
+        Args:
+            value: String value to convert (e.g., 'full_scan_only').
 
         Returns:
             Matching LoadingStrategy enum member.
@@ -148,6 +162,9 @@ class MedallionPolicy:
     @classmethod
     def for_run_type(cls, run_type: RunType) -> MedallionPolicy:
         """Create policy based on run type.
+
+        Args:
+            run_type: Type of pipeline run (INCREMENTAL, BACKFILL, or REBUILD).
 
         Returns:
             MedallionPolicy with SILVER_AND_GOLD clear for rebuild/backfill, NEVER otherwise.

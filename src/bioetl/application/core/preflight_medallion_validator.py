@@ -35,7 +35,20 @@ class _MedallionConfigValidator:
         silver_format: str | None = None,
         gold_format: str | None = None,
     ) -> list[ConfigValidationError]:
-        """Validate layer formats, path uniqueness and policy consistency."""
+        """Validate layer formats, path uniqueness and policy consistency.
+
+        Args:
+            runtime: Runtime configuration supplying run type and strict validation flag.
+            bronze_path: Filesystem path configured for the Bronze layer.
+            silver_path: Filesystem path configured for the Silver layer.
+            gold_path: Filesystem path configured for the Gold layer.
+            silver_format: Storage format for Silver (must be ``'delta'`` when provided).
+            gold_format: Storage format for Gold (must be ``'delta'`` when provided).
+
+        Returns:
+            List of ConfigValidationError instances describing each violation found.
+            An empty list indicates the configuration is valid.
+        """
         errors: list[ConfigValidationError] = []
 
         errors.extend(self._validate_layer_formats(silver_format, gold_format))
@@ -53,7 +66,12 @@ class _MedallionConfigValidator:
         return errors
 
     def validate_write_modes(self) -> list[ConfigValidationError]:
-        """Validate that configured write modes are allowed by policy."""
+        """Validate that configured write modes are allowed by policy.
+
+        Returns:
+            List of ConfigValidationError instances for each disallowed write mode.
+            An empty list indicates both Silver and Gold modes are policy-compliant.
+        """
         silver_mode = self._config.table.silver_write_mode
         silver_mode_value = str(silver_mode)
         gold_mode = self._config.table.gold_write_mode

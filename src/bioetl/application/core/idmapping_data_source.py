@@ -114,7 +114,16 @@ class IDMappingDataSource:
         filter_field: str | None = None,
         offset: int | None = None,
     ) -> AsyncIterator[JsonDict]:  # Any: record values are heterogeneous
-        """Fetch ID mapping records."""
+        """Fetch ID mapping records.
+
+        Args:
+            entity_type: Entity type string; validated against configured entity type.
+            limit: Maximum number of records to yield, or None for all.
+            query: Unused; kept for interface compatibility.
+            filter_ids: Optional list of ChEMBL IDs to map; overrides CSV input.
+            filter_field: Unused; filtering uses internal config.
+            offset: Unused; all IDs are resolved upfront from CSV or filter_ids.
+        """
         _ = query, filter_field
         self._warn_unexpected_entity_type(entity_type)
         chembl_ids, source = await self._resolve_chembl_ids(filter_ids, limit)

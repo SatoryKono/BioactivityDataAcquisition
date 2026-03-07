@@ -20,17 +20,7 @@
 %% @uniform width=168 groups=2 width_strategy=group
 %% @uniform-stats root         width=144 height=112 max_desc_lines=4
 %% @uniform-stats actions      width=168 height=112 max_desc_lines=4
-%%{init: {
-  'flowchart': {
-    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
-  },
-  'layout': 'elk',
-  'elk': {
-    'mergeEdges': true,
-    'nodePlacementStrategy': 'BRANDES_KOEPF',
-    'edgeRouting': 'ORTHOGONAL'
-  }
-}}%%
+%%{init: {'layout': 'elk', 'flowchart': {'subGraphTitleMargin': {'top': 12, 'bottom': 12}}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
 flowchart TB
     ERROR["Error Occurred"]
 

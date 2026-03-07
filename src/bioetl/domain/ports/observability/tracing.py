@@ -13,7 +13,14 @@ class TracingPort(Protocol):
         self,
         name: str,
     ) -> Any:  # Any: OTel Tracer-compatible object
-        """Return OpenTelemetry-compatible tracer instance."""
+        """Return OpenTelemetry-compatible tracer instance.
+
+        Args:
+            name: Tracer name, typically the instrumented module or component name.
+
+        Returns:
+            OTel-compatible Tracer object for creating spans.
+        """
         ...
 
     def close(self) -> None:

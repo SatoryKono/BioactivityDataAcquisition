@@ -36,7 +36,13 @@ def log_enrichment_summary(
     composite_name: str,
     logger: LoggerPort,
 ) -> None:
-    """Log aggregated summary of enrichment results."""
+    """Log aggregated summary of enrichment results.
+
+    Args:
+        enrichment_results: Mapping from enricher pipeline name to its EnrichmentResult.
+        composite_name: Name of the composite pipeline for log context.
+        logger: Logger instance for structured output.
+    """
     if not enrichment_results:
         return
 
@@ -130,6 +136,15 @@ def add_not_run_results(
     logger: LoggerPort,
 ) -> dict[str, EnrichmentResult]:
     """Mark optional enrichers skipped in required-only mode as NOT_RUN.
+
+    Args:
+        enrichment_results: Current enrichment results to augment.
+        enrichers_to_run: Enrichers that were selected for execution in this run.
+        all_enrichers: Full set of enrichers configured for the composite pipeline.
+        completed_enrichers: Enrichers already completed from a previous checkpoint.
+        required_only: Whether the run was limited to required enrichers only.
+        composite_name: Name of the composite pipeline for log context.
+        logger: Logger instance for structured output.
 
     Returns:
         Updated enrichment_results dict with NOT_RUN entries added for skipped

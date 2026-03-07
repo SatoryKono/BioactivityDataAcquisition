@@ -70,7 +70,11 @@ class BatchProcessingService(
         self._batch_id_factory = batch_id_factory
 
     def set_batch_id_factory(self, batch_id_factory: BatchIdGeneratorPort) -> None:
-        """Replace batch ID generator used for subsequent processed batches."""
+        """Replace batch ID generator used for subsequent processed batches.
+
+        Args:
+            batch_id_factory: New factory to use for generating batch identifiers.
+        """
         self._batch_id_factory = batch_id_factory
 
     async def extract_records(
@@ -80,7 +84,13 @@ class BatchProcessingService(
         query: str | None = None,
         offset: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Extract records from source adapter for configured entity."""
+        """Extract records from source adapter for configured entity.
+
+        Args:
+            limit: Maximum number of records to yield, or None for all.
+            query: Optional query string forwarded to the data source.
+            offset: Optional pagination offset for resuming extraction.
+        """
         async for record in self._services.data_source.fetch(
             entity_type=self._config.entity_type,
             limit=limit,
@@ -96,7 +106,16 @@ class BatchProcessingService(
         start_index: int,
         query_string: str | None,
     ) -> BatchProcessingOutput:
-        """Process one batch through Bronze, Silver, and Gold writes."""
+        """Process one batch through Bronze, Silver, and Gold writes.
+
+        Args:
+            records: List of raw Bronze records to process.
+            start_index: Absolute record index of the first record in this batch.
+            query_string: Query string used to fetch these records, for logging context.
+
+        Returns:
+            BatchProcessingOutput with write counts and source batch ID.
+        """
         batch_id = self._batch_id_factory.create()
         ingestion_ts = self._context.started_at
         source_metadata = self._get_source_metadata(query_string)

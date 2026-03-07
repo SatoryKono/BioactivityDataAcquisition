@@ -181,6 +181,18 @@ def bootstrap_composite_runner(
 ) -> CompositePipelineRunnerService:
     """Assemble and create composite runner with injected dependency builders.
 
+    Args:
+        config: Validated CompositeConfig for this composite run.
+        runtime: Runtime options (resume, dry_run, cached bronze, etc.).
+        run_id: Optional UUID string for this run; generated when None.
+        bootstrap_runtime_basics_fn: Callable that provisions base dependencies
+            (run_id, settings, logger, storage, lock).
+        build_runner_factories_fn: Callable that returns (seed_factory,
+            dependency_factory, enricher_factory) tuples.
+        build_support_services_fn: Callable that returns CompositeSupportServices.
+        create_composite_runner_fn: Callable that assembles the final
+            CompositePipelineRunnerService from all dependencies.
+
     Returns:
         Fully wired CompositePipelineRunnerService ready for execution.
     """
@@ -224,6 +236,13 @@ def bootstrap_composite_pipeline(
     ],
 ) -> CompositePipelineRunnerService:
     """Alias wrapper for composite runner bootstrap entry point.
+
+    Args:
+        config: Validated CompositeConfig for this composite run.
+        runtime: Runtime options for the composite run.
+        run_id: Optional UUID string for this run; generated when None.
+        bootstrap_runner_fn: Callable implementing the actual bootstrap logic;
+            called with (config, runtime, run_id).
 
     Returns:
         Fully wired CompositePipelineRunnerService ready for execution.

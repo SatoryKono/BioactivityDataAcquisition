@@ -14,7 +14,19 @@ def _deep_merge_dicts(
     base: JsonDict,  # Any: YAML config has heterogeneous values
     override: JsonDict,  # Any: YAML config has heterogeneous values
 ) -> JsonDict:  # Any: YAML config has heterogeneous values
-    """Recursively merge two dictionaries with override precedence."""
+    """Recursively merge two dictionaries with override precedence.
+
+    Performs a deep merge: nested dicts are merged recursively while scalar
+    values in ``override`` always win over ``base``. The original dicts are
+    not mutated — a deep copy is returned.
+
+    Args:
+        base: Base dictionary providing default values.
+        override: Dictionary whose values take precedence over base.
+
+    Returns:
+        New merged dictionary combining base and override values.
+    """
     merged = deepcopy(base)
     for key, value in override.items():
         current = merged.get(key)
@@ -34,6 +46,19 @@ def merge_external_dq_overrides(
     Merge order:
     1. External dq_config_file payload
     2. Inline dq_overrides values (highest precedence)
+
+    Mutates ``raw`` in-place by replacing the ``composite.dq_overrides`` key
+    with the merged result. Returns immediately without error if the
+    ``composite``, ``dq_overrides``, or ``dq_config_file`` keys are absent.
+
+    Args:
+        raw: Mutable YAML payload dict as loaded from the composite config file.
+        config_path: Path to the composite YAML config file, used to resolve
+            the relative path of the external DQ config file.
+
+    Raises:
+        FileNotFoundError: If the referenced dq_config_file does not exist.
+        ValueError: If the external DQ config file is not a valid YAML mapping.
     """
     composite = raw.get("composite")
     if not isinstance(composite, dict):

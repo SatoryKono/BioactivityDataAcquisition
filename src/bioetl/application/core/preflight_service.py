@@ -45,6 +45,9 @@ class PreflightService:
     async def validate_infrastructure(self, services: PipelineService) -> HealthReport:
         """Validate storage and data source health.
 
+        Args:
+            services: Pipeline service container providing storage and data source ports.
+
         Returns:
             HealthReport with per-component status and overall health assessment.
         """
@@ -112,6 +115,14 @@ class PreflightService:
     ) -> list[ConfigValidationError]:
         """Validate Medallion architecture invariants.
 
+        Args:
+            runtime: Runtime configuration specifying run type and write modes.
+            bronze_path: Absolute path to the Bronze layer directory.
+            silver_path: Absolute path to the Silver layer directory.
+            gold_path: Absolute path to the Gold layer directory.
+            silver_format: Optional storage format override for Silver (e.g. ``"delta"``).
+            gold_format: Optional storage format override for Gold.
+
         Returns:
             List of ConfigValidationError for any detected violations (empty if valid).
         """
@@ -143,6 +154,15 @@ class PreflightService:
         gold_format: str | None = None,
     ) -> PreflightReport:
         """Execute all preflight checks and return aggregated report.
+
+        Args:
+            services: Pipeline service container for infrastructure health checks.
+            runtime: Runtime configuration used for Medallion invariant validation.
+            bronze_path: Absolute path to the Bronze layer directory.
+            silver_path: Absolute path to the Silver layer directory.
+            gold_path: Absolute path to the Gold layer directory.
+            silver_format: Optional storage format override for Silver.
+            gold_format: Optional storage format override for Gold.
 
         Returns:
             PreflightReport aggregating infrastructure health and config validation results.

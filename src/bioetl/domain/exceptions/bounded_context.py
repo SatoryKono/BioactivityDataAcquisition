@@ -53,7 +53,14 @@ _CONTEXT_CLASS_MAP: dict[DomainExceptionContext, tuple[type[BioETLError], ...]] 
 def get_domain_exception_context(
     error_or_type: BioETLError | type[BioETLError],
 ) -> DomainExceptionContext:
-    """Resolve domain exception into a bounded context."""
+    """Resolve domain exception into a bounded context.
+
+    Args:
+        error_or_type: A BioETLError instance or its class to classify.
+
+    Returns:
+        DomainExceptionContext enum value identifying the bounded context of the error.
+    """
     error_type = (
         error_or_type if isinstance(error_or_type, type) else type(error_or_type)
     )

@@ -34,7 +34,17 @@ class HealthServer(
         health_monitor: HealthMonitorPort | None = None,
         logger: LoggerPort | None = None,
     ) -> None:
-        """Initialize health server."""
+        """Initialize health server.
+
+        Args:
+            host: IP address to bind the server to. Defaults to localhost.
+            port: TCP port to listen on. Defaults to 8081.
+            health_monitor: Optional monitor providing provider health states for
+                /health/ready and /health/providers endpoints. Endpoints report
+                healthy with no provider data when None.
+            logger: Optional LoggerPort for structured server event logging.
+                Server events are silently dropped when None.
+        """
         self.host = host
         self.port = port
         self._health_monitor = health_monitor
@@ -108,7 +118,18 @@ async def run_health_server(
     health_monitor: HealthMonitorPort | None = None,
     logger: LoggerPort | None = None,
 ) -> None:
-    """Run the health server until interrupted."""
+    """Run the health server until interrupted.
+
+    Starts the HealthServer and keeps it alive until the coroutine is cancelled
+    (e.g., via asyncio.CancelledError from a task group or signal handler).
+
+    Args:
+        host: IP address to bind to. Defaults to all interfaces (0.0.0.0).
+        port: TCP port to listen on. Defaults to 8081.
+        health_monitor: Optional monitor providing provider health states.
+            Health endpoints report no provider data when None.
+        logger: Optional LoggerPort for structured server event logging.
+    """
     server = HealthServer(
         host=host,
         port=port,

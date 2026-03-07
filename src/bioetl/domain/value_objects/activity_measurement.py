@@ -35,7 +35,16 @@ class ActivityValue:
         unit: str | None,
         relation: str | None = None,
     ) -> ActivityValue | None:
-        """Create from raw values, returning None if value or unit is None."""
+        """Create from raw values, returning None if value or unit is None.
+
+        Args:
+            value: Numeric activity measurement. Returns None if None.
+            unit: Unit string (e.g., 'nM', 'uM'). Returns None if None.
+            relation: Optional comparison operator string (e.g., '=', '<'). Defaults to EQUAL.
+
+        Returns:
+            ActivityValue instance, or None if value or unit is absent.
+        """
         if value is None or unit is None:
             return None
         rel = RelationOperator.from_string(relation) or RelationOperator.EQUAL

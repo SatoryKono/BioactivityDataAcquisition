@@ -1,7 +1,7 @@
 # src/bioetl/domain/schemas/chembl/assay_parameters.py
 """Pandera schema for ChEMBL AssayParameters entity.
 
-Aligned with RULES.md v5.8 and ChEMBL 35 schema.
+Aligned with RULES.md v5.23 and ChEMBL 35 schema.
 """
 
 from __future__ import annotations

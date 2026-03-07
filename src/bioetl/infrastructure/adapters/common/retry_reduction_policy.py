@@ -23,6 +23,18 @@ async def run_retry_exhausted_recovery_policy(
     - Multi-ID batches are split into halves and each half is delegated to
       ``fetch_reduced_batch``.
     - Single-ID batches are delegated to ``fetch_single_fallback``.
+
+    Args:
+        id_batch: List of IDs that failed with a retry-exhausted error.
+        retry_error: The original RetryExhaustedError or wrapping exception.
+        on_split: Optional callback invoked before splitting, receives the two
+            halves and the retry error; used for structured logging.
+        fetch_reduced_batch: Async callable that retries a smaller ID batch.
+        fetch_single_fallback: Async callable for single-ID direct endpoint
+            fallback when the batch cannot be split further.
+
+    Returns:
+        Async iterator of recovered BronzeRecord dicts.
     """
     if not id_batch:
         return

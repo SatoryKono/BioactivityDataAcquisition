@@ -18,17 +18,7 @@
 %% @uniform-stats ports        width=240 height=168 max_desc_lines=7
 %% @uniform-stats adapters     width=400 height=168 max_desc_lines=7
 %% Tooltip: Nodes with aggregated adapter lists (e.g. A1/A21) are summarized; see provider docs for full breakdown.
-%%{init: {
-  'flowchart': {
-    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
-  },
-  'layout': 'elk',
-  'elk': {
-    'mergeEdges': true,
-    'nodePlacementStrategy': 'BRANDES_KOEPF',
-    'edgeRouting': 'ORTHOGONAL'
-  }
-}}%%
+%%{init: {'layout': 'elk', 'flowchart': {'subGraphTitleMargin': {'top': 12, 'bottom': 12}}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
 flowchart LR
     subgraph Ports["Domain Ports (domain/ports/)"]
         direction TB

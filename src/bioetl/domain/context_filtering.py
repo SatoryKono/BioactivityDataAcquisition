@@ -47,7 +47,17 @@ class InputFilterContext:
         filter_field: str,
         fallback_column: str | None = None,
     ) -> InputFilterContext:
-        """Create an enabled filter context from CSV parameters."""
+        """Create an enabled filter context from CSV parameters.
+
+        Args:
+            source_path: File system path to the CSV file containing filter IDs.
+            column_name: Column in the CSV that holds the ID values.
+            filter_field: Record field name to match against the CSV IDs.
+            fallback_column: Optional alternative CSV column used as a secondary lookup.
+
+        Returns:
+            InputFilterContext with enabled=True and CSV-based filter settings.
+        """
         return cls(
             enabled=True,
             source_path=source_path,
@@ -67,7 +77,17 @@ class InputFilterContext:
         filter_field: str,
         fallback_mapping: dict[str, str] | None = None,
     ) -> InputFilterContext:
-        """Create an enabled filter context from direct IDs."""
+        """Create an enabled filter context from direct IDs.
+
+        Args:
+            filter_ids: Tuple of ID strings to filter records by.
+            filter_field: Record field name to match against the provided IDs.
+            fallback_mapping: Optional dict mapping primary IDs to alternative IDs
+                for secondary lookup. Defaults to None.
+
+        Returns:
+            InputFilterContext with enabled=True and direct ID filter settings.
+        """
         return cls(
             enabled=True,
             source_path="",
@@ -86,7 +106,16 @@ class InputFilterContext:
         multi_filter_ids: dict[str, tuple[str, ...]],
         valid_combinations: frozenset[tuple[str, ...]] | None = None,
     ) -> InputFilterContext:
-        """Create an enabled filter context from multi-field IDs."""
+        """Create an enabled filter context from multi-field IDs.
+
+        Args:
+            multi_filter_ids: Mapping from field name to a tuple of allowed values for that field.
+            valid_combinations: Optional frozenset of allowed (field_value, ...) tuples restricting
+                multi-field matches. Defaults to None (all combinations allowed).
+
+        Returns:
+            InputFilterContext with enabled=True and multi-field ID filter settings.
+        """
         fields = list(multi_filter_ids.keys())
         return cls(
             enabled=True,

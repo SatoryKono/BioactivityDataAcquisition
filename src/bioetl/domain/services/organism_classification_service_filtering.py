@@ -55,7 +55,19 @@ def build_filter_strategy(
     exclude: set[CellularityType] | None,
     keep_unresolved: bool,
 ) -> CellularityFilterStrategy:
-    """Build filter strategy for include/exclude/unresolved policy."""
+    """Build filter strategy for include/exclude/unresolved policy.
+
+    Precedence: include > exclude > pass-all.
+
+    Args:
+        include: If provided, only records with cellularity in this set are kept.
+        exclude: If provided, records with cellularity in this set are removed.
+        keep_unresolved: Whether records with unknown cellularity are retained.
+
+    Returns:
+        Callable CellularityFilterStrategy that accepts a CellularityType or None
+        and returns True if the record should be kept.
+    """
     if include is not None:
         return _include_strategy(include, keep_unresolved)
     if exclude is not None:

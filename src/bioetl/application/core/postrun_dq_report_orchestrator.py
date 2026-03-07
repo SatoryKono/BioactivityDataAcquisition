@@ -46,7 +46,16 @@ class PostrunDQReportService:
         self,
         context: DQReportContext | None,
     ) -> DQReportResult | None:
-        """Generate DQ reports when service/config/context are available."""
+        """Generate DQ reports when service/config/context are available.
+
+        Args:
+            context: DQ report context with run metadata and table references.
+                If None, report generation is skipped and None is returned.
+
+        Returns:
+            DQReportResult with generation status for each layer, or None if
+            the DQ report service is not configured or context was not provided.
+        """
         if self._dq_report_service is None:
             return None
 

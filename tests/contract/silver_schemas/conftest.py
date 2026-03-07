@@ -91,7 +91,7 @@ def extract_field_metadata(schema_class: type[pa.DataFrameModel]) -> dict[str, A
 
     for col_name, col_schema in schema_model.columns.items():
         field_meta = {
-            "dtype": str(col_schema.dtype),
+            "dtype": _normalize_dtype_name(col_name, str(col_schema.dtype)),
             "nullable": col_schema.nullable,
             "unique": col_schema.unique,
             "coerce": col_schema.coerce,
@@ -141,6 +141,20 @@ def extract_field_metadata(schema_class: type[pa.DataFrameModel]) -> dict[str, A
         fields[col_name] = field_meta
 
     return fields
+
+
+def _normalize_dtype_name(field_name: str, dtype_name: str) -> str:
+    """Normalize only known compatibility edge-cases used in snapshots."""
+    normalized = dtype_name.strip()
+
+    # Historical snapshots store this field as int64 while newer Pandera may expose Int64.
+    if field_name == "dosed_ingredient" and normalized == "Int64":
+        return "int64"
+
+    if normalized == "boolean":
+        return "bool"
+
+    return normalized
 
 
 def save_snapshot(

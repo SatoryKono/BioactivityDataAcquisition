@@ -14,7 +14,11 @@ __all__ = [
 
 
 def coerce_composite_collections(config: CompositeConfig) -> None:
-    """Coerce mutable list inputs to tuples for immutable dataclass fields."""
+    """Coerce mutable list inputs to tuples for immutable dataclass fields.
+
+    Args:
+        config: CompositeConfig instance whose list fields will be coerced in-place.
+    """
     if isinstance(config.enrichers, list):
         object.__setattr__(config, "enrichers", tuple(config.enrichers))
     if isinstance(config.dependencies, list):
@@ -22,7 +26,11 @@ def coerce_composite_collections(config: CompositeConfig) -> None:
 
 
 def validate_composite_config(config: CompositeConfig) -> None:
-    """Validate all CompositeConfig invariants."""
+    """Validate all CompositeConfig invariants.
+
+    Args:
+        config: CompositeConfig instance to validate.
+    """
     if not config.name:
         raise ValueError("composite name cannot be empty")
     if not config.version:

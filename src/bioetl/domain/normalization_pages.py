@@ -72,7 +72,16 @@ def _prepare_page_input(page: str | None) -> str | None:
 
 
 def parse_page_range(page: str | None) -> tuple[str | None, str | None]:
-    """Parse page range string to (first, last) tuple."""
+    """Parse page range string to (first, last) tuple.
+
+    Args:
+        page: Raw page string such as '737-9', '199-203', 'e-123', or None.
+            Abbreviated last-page forms (e.g., '737-9') are expanded to full page numbers.
+
+    Returns:
+        Tuple of (first_page, last_page). Electronic article numbers return
+        (article_number, None). Returns (None, None) if input is empty or invalid.
+    """
     stripped = _prepare_page_input(page)
     if stripped is None:
         return None, None

@@ -132,7 +132,7 @@ class AggregationFieldSpec:
 
     @property
     def effective_output_field(self) -> str:
-        """Get the effective output field name."""
+        """Return the effective output field name, defaulting to source_field if not set."""
         return self.output_field or self.source_field
 
 

@@ -82,7 +82,16 @@ class RecordProcessor:
         batch_id: BatchID,
         start_index: int = 0,
     ) -> BatchResult:
-        """Process batch through Bronze -> Silver -> Gold with tracing."""
+        """Process batch through Bronze -> Silver -> Gold with tracing.
+
+        Args:
+            records: Raw Bronze records fetched from the data source.
+            batch_id: Unique identifier for this batch used in tracing and storage.
+            start_index: Absolute record index of the first record for accurate reporting.
+
+        Returns:
+            BatchResult with bronze, silver, gold, and quarantined record counts.
+        """
         ingestion_ts = self._context.started_at
         bronze_result = await self._execute_with_span(
             "write_bronze",

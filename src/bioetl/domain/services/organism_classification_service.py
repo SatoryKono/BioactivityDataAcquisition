@@ -40,7 +40,15 @@ class OrganismClassificationService:
         organism_name: str | None,
         taxonomy_id: int | str | None = None,
     ) -> OrganismClassificationResult:
-        """Classify a single organism by name and/or taxonomy ID."""
+        """Classify a single organism by name and/or taxonomy ID.
+
+        Args:
+            organism_name: Scientific or common organism name, or None.
+            taxonomy_id: NCBI taxonomy ID as integer or string. Defaults to None.
+
+        Returns:
+            OrganismClassificationResult with cellularity and classification details.
+        """
         return classify_organism(organism_name, taxonomy_id)
 
     def get_cellularity(
@@ -48,11 +56,26 @@ class OrganismClassificationService:
         organism_name: str | None,
         taxonomy_id: int | str | None = None,
     ) -> CellularityType | None:
-        """Get cellularity type for an organism (convenience shortcut)."""
+        """Get cellularity type for an organism (convenience shortcut).
+
+        Args:
+            organism_name: Scientific or common organism name, or None.
+            taxonomy_id: NCBI taxonomy ID as integer or string. Defaults to None.
+
+        Returns:
+            CellularityType enum value if classified, or None if unknown.
+        """
         return self.classify(organism_name, taxonomy_id).organism_class
 
     def normalize_name(self, organism_name: str | None) -> str | None:
-        """Normalize organism name for consistent lookup."""
+        """Normalize organism name for consistent lookup.
+
+        Args:
+            organism_name: Raw organism name string or None.
+
+        Returns:
+            Normalized organism name, or None if input is None or empty.
+        """
         return normalize_organism_name(organism_name)
 
     def classify_records(
@@ -64,14 +87,28 @@ class OrganismClassificationService:
             OrganismClassificationResult,
         ]
     ]:
-        """Classify a batch of records, pairing each with its result."""
+        """Classify a batch of records, pairing each with its result.
+
+        Args:
+            records: List of record dictionaries containing organism and taxonomy fields.
+
+        Returns:
+            List of (record, classification_result) tuples in input order.
+        """
         return [(record, self._classify_record(record)) for record in records]
 
     def enrich_records(
         self,
         records: list[JsonDict],  # Any: untyped organism taxonomy data
     ) -> list[JsonDict]:  # Any: untyped organism taxonomy data
-        """Enrich records with classification fields."""
+        """Enrich records with classification fields.
+
+        Args:
+            records: List of record dictionaries to enrich with organism classification.
+
+        Returns:
+            New list of record dictionaries with added cellularity and normalized-organism fields.
+        """
         return [self._enrich_single(record) for record in records]
 
     def _enrich_single(
@@ -95,7 +132,18 @@ class OrganismClassificationService:
         exclude: set[CellularityType] | None = None,
         keep_unresolved: bool = True,
     ) -> list[JsonDict]:  # Any: untyped organism taxonomy data
-        """Filter records by organism cellularity type."""
+        """Filter records by organism cellularity type.
+
+        Args:
+            records: List of record dicts containing organism and taxonomy fields.
+            include: If provided, only records whose cellularity is in this set are kept.
+            exclude: If provided, records whose cellularity is in this set are removed.
+            keep_unresolved: If True, records with unknown cellularity are retained.
+                Defaults to True.
+
+        Returns:
+            Filtered list of record dicts matching the cellularity criteria.
+        """
         strategy = build_filter_strategy(
             include=include,
             exclude=exclude,
@@ -112,7 +160,14 @@ class OrganismClassificationService:
         self,
         results: list[OrganismClassificationResult],
     ) -> ClassificationStats:
-        """Compute classification statistics from a batch of results."""
+        """Compute classification statistics from a batch of results.
+
+        Args:
+            results: List of OrganismClassificationResult objects from classify_records.
+
+        Returns:
+            ClassificationStats with counts by cellularity type and conflict count.
+        """
         counts: dict[CellularityType | None, int] = {
             CellularityType.ACELLULAR: 0,
             CellularityType.UNICELLULAR: 0,

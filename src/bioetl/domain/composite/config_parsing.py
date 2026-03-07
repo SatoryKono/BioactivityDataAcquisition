@@ -17,6 +17,10 @@ __all__ = [
 def require_object_dict(value: object, field_name: str) -> dict[str, object]:
     """Validate and normalize mapping-like values.
 
+    Args:
+        value: Input value to validate as a dictionary.
+        field_name: Name of the field, used in error messages.
+
     Returns:
         Dictionary with string keys validated from the input mapping.
     """
@@ -30,6 +34,10 @@ def require_object_dict_sequence(
     field_name: str,
 ) -> tuple[dict[str, object], ...]:
     """Validate and normalize a sequence of dictionaries.
+
+    Args:
+        value: Input value to validate as a list or tuple of dictionaries.
+        field_name: Name of the field, used in error messages.
 
     Returns:
         Tuple of dictionaries with string keys validated from the input sequence.
@@ -47,6 +55,10 @@ def require_object_dict_sequence(
 def require_str(value: object, field_name: str) -> str:
     """Validate required string field.
 
+    Args:
+        value: Input value to validate as a non-empty string.
+        field_name: Name of the field, used in error messages.
+
     Returns:
         Validated non-empty string value.
     """
@@ -57,6 +69,10 @@ def require_str(value: object, field_name: str) -> str:
 
 def optional_str(value: object, field_name: str) -> str | None:
     """Validate optional string field.
+
+    Args:
+        value: Input value to validate, or None to indicate absence.
+        field_name: Name of the field, used in error messages.
 
     Returns:
         Validated non-empty string if provided, None otherwise.
@@ -70,6 +86,11 @@ def optional_str(value: object, field_name: str) -> str | None:
 
 def optional_bool(value: object, default: bool, field_name: str) -> bool:
     """Validate optional bool field.
+
+    Args:
+        value: Input value to validate as a boolean, or None to use default.
+        default: Fallback value returned when value is None.
+        field_name: Name of the field, used in error messages.
 
     Returns:
         Validated boolean value, or default if not provided.
@@ -88,6 +109,11 @@ def optional_int(
 ) -> int | None:
     """Validate optional int field.
 
+    Args:
+        value: Input value to validate as an integer, or None to use default.
+        field_name: Name of the field, used in error messages.
+        default: Fallback value returned when value is None. Defaults to None.
+
     Returns:
         Validated integer if provided, or default (None) otherwise.
     """
@@ -101,6 +127,10 @@ def optional_int(
 def require_str_tuple(value: object, field_name: str) -> tuple[str, ...]:
     """Validate required list/tuple of strings.
 
+    Args:
+        value: Input value to validate as a list or tuple of non-empty strings.
+        field_name: Name of the field, used in error messages.
+
     Returns:
         Tuple of validated non-empty strings from the input sequence.
     """
@@ -113,6 +143,10 @@ def require_str_tuple(value: object, field_name: str) -> tuple[str, ...]:
 
 def optional_str_tuple(value: object, field_name: str) -> tuple[str, ...] | None:
     """Validate optional list/tuple of strings.
+
+    Args:
+        value: Input value to validate as a list or tuple of strings, or None.
+        field_name: Name of the field, used in error messages.
 
     Returns:
         Tuple of validated non-empty strings if provided, None otherwise.

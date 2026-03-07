@@ -88,6 +88,7 @@ nav:
                     -   "GitHub Policy": 00-project/governance/05-github-policy.md
                     -   "Docs Publication Policy": 00-project/governance/06-doc-publication-policy.md
                     -   "Docs Navigation Policy": 00-project/governance/07-doc-nav-policy.md
+                    -   "Debt Ownership Playbook": 00-project/governance/08-debt-ownership-playbook.md
     -   Architecture:
             -   "Overview": 02-architecture/00-overview.md
             -   Layers:
@@ -152,6 +153,7 @@ nav:
                     -   "ADR-039 Unified Entity Config": 02-architecture/decisions/ADR-039-unified-entity-config-format.md
                     -   "ADR-040 Diagram Governance": 02-architecture/decisions/ADR-040-diagram-governance.md
                     -   "ADR-041 Naming Policy Skills Agents": 02-architecture/decisions/ADR-041-naming-policy-skills-agents.md
+                    -   "Quality Gates Stabilization Notes": 02-architecture/decisions/notes/2026-03-04-quality-gates-stabilization.md
     -   Guides:
             -   "Getting Started": 03-guides/getting-started.md
             -   "Quick Start": 03-guides/quick-start.md
@@ -255,6 +257,29 @@ nav:
             -   CLI: 04-reference/cli.md
             -   API:
                     -   Overview: 04-reference/api/index.md
+                    -   Domain:
+                            -   "Domain API": 04-reference/api/domain.md
+                            -   "Entities": 04-reference/api/domain/entities.md
+                            -   "Ports": 04-reference/api/domain/ports.md
+                            -   "Types": 04-reference/api/domain/types.md
+                            -   "Exceptions": 04-reference/api/domain/exceptions.md
+                    -   Application:
+                            -   "Application API": 04-reference/api/application.md
+                            -   "Core": 04-reference/api/application/core.md
+                            -   "Pipelines": 04-reference/api/application/pipelines.md
+                            -   "Services": 04-reference/api/application/services.md
+                            -   "Transformers": 04-reference/api/application/transformers.md
+                    -   Infrastructure:
+                            -   "Infrastructure API": 04-reference/api/infrastructure.md
+                            -   "Adapters": 04-reference/api/infrastructure/adapters.md
+                            -   "Adapters Common": 04-reference/api/infrastructure/adapters-common.md
+                            -   "Observability": 04-reference/api/infrastructure/observability.md
+                            -   "Storage": 04-reference/api/infrastructure/storage.md
+                            -   "Unified HTTP Client": 04-reference/api/infrastructure/unified-http-client.md
+                    -   Composition:
+                            -   "Composition API": 04-reference/api/composition.md
+                            -   "Bootstrap": 04-reference/api/composition/bootstrap.md
+                            -   "Factories": 04-reference/api/composition/factories.md
             -   Schemas:
                     -   "Activity Schema": 04-reference/schemas/domain/chembl/activity-schema.md
                     -   "Assay Schema": 04-reference/schemas/domain/chembl/assay-schema.md
@@ -318,6 +343,7 @@ nav:
                     -   "Diagram Prompt Expansion": 02-architecture/mmd-diagrams/docs/PROMPT-diagram-expansion.md
                     -   "Module Consolidation Requirements": 02-architecture/module-consolidation-migration-requirements.md
                     -   "Content Hash Policy": 02-architecture/policies/content-hash-identity-policy.md
+                    -   "Architecture Review 2026-03-04": 02-architecture/architecture-review-2026-03-04.md
             -   "Guide Extras":
                     -   "Silver Schema Testing Guide": 03-guides/silver-schema-testing-guide.md
             -   "Reference Extras":
@@ -326,8 +352,6 @@ nav:
                     -   "Publication Fields Reference": 04-reference/publication-fields-reference.md
                     -   "Publication Validation Index": 04-reference/publication-validation-index.md
                     -   "Pipeline Review Checklist": 04-reference/templates/pipeline-review-checklist.md
-                    -   "API Infrastructure Adapters Common": 04-reference/api/infrastructure/adapters-common.md
-                    -   "API Unified HTTP Client": 04-reference/api/infrastructure/unified-http-client.md
                     -   "Pipeline Legacy: ChEMBL Activity": 04-reference/pipelines/chembl-activity.md
                     -   "Pipeline Legacy: ChEMBL Assay": 04-reference/pipelines/chembl-assay.md
                     -   "Pipeline Legacy: OpenAlex Publication": 04-reference/pipelines/openalex-publication.md

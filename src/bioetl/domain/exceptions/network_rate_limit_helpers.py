@@ -8,7 +8,16 @@ def resolve_rate_limit_params(
     message: str | None,
     service_name: str | None,
 ) -> tuple[str, str, str | None]:
-    """Resolve provider name, message text, and service name for RateLimitError."""
+    """Resolve provider name, message text, and service name for RateLimitError.
+
+    Args:
+        provider: Provider identifier (e.g., 'chembl'). Used as fallback for message and service_name.
+        message: Human-readable error message. Defaults to provider name or 'Rate limit exceeded'.
+        service_name: Explicit service name override. Defaults to provider if None.
+
+    Returns:
+        Tuple of (provider_name, resolved_message, resolved_service_name).
+    """
     resolved_service = service_name if service_name is not None else provider
     resolved_message = (
         message

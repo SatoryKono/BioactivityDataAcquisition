@@ -22,7 +22,16 @@ class PublicationTermExtractionMixin:
         filter_ids: list[str] | None,
         filter_field: str | None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch publications from wrapped source and yield extracted terms."""
+        """Fetch publications from wrapped source and yield extracted terms.
+
+        Args:
+            limit: Optional maximum number of term records to yield. The upstream
+                publication fetch uses a multiplied limit to account for term expansion.
+            filter_ids: Optional list of identifier values to pass to the upstream fetch.
+                When None, no ID filter is applied.
+            filter_field: Optional field name on which to filter upstream publications.
+                When None, no field filter is applied.
+        """
         term_count = 0
         publication_limit = limit * self.PUBLICATION_LIMIT_MULTIPLIER if limit else None
 
@@ -50,7 +59,15 @@ class PublicationTermExtractionMixin:
         record: BronzeRecord,
         publication_id: str,
     ) -> list[BronzeRecord]:
-        """Extract and flatten all terms from a publication record."""
+        """Extract and flatten all terms from a publication record.
+
+        Args:
+            record: Raw Bronze publication record containing ``mesh_terms`` and ``keywords`` fields.
+            publication_id: Identifier of the parent publication used to link each term record.
+
+        Returns:
+            List of Bronze term records, one per MeSH heading, MeSH qualifier, or keyword found.
+        """
         terms: list[BronzeRecord] = []
 
         raw_mesh_terms = record.get("mesh_terms")
@@ -113,7 +130,19 @@ class PublicationTermExtractionMixin:
         mesh_id: str | None,
         qualifier: str | None,
     ) -> BronzeRecord:
-        """Create a single publication-term record."""
+        """Create a single publication-term record.
+
+        Args:
+            publication_id: Identifier of the parent publication.
+            term: Text of the extracted term, stripped of surrounding whitespace.
+            term_type: Controlled vocabulary type (e.g., ``'MESH_HEADING'``, ``'KEYWORD'``).
+            mesh_id: Optional MeSH concept identifier associated with the term.
+            qualifier: Optional MeSH qualifier string. Pass None for non-qualified terms.
+
+        Returns:
+            Bronze record dict with ``entity_id``, ``publication_id``, ``term``,
+            ``term_type``, ``mesh_id``, and ``qualifier`` fields.
+        """
         normalized_term = term.strip() if term else term
         entity_id = self._compute_entity_id(
             publication_id, term_type, normalized_term or ""
@@ -133,7 +162,16 @@ class PublicationTermExtractionMixin:
         term_type: str,
         term: str,
     ) -> str:
-        """Compute deterministic term entity ID."""
+        """Compute deterministic term entity ID.
+
+        Args:
+            publication_id: Identifier of the parent publication.
+            term_type: Controlled vocabulary type (e.g., ``'MESH_HEADING'``).
+            term: Normalized term text used as part of the hash input.
+
+        Returns:
+            Deterministic string entity ID derived from the composite key.
+        """
         return compute_publication_term_entity_id(publication_id, term_type, term)
 
     async def _fetch_filtered_publication_terms(
@@ -143,7 +181,15 @@ class PublicationTermExtractionMixin:
         filter_field: str,
         limit: int | None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch filtered publications and yield extracted terms."""
+        """Fetch filtered publications and yield extracted terms.
+
+        Args:
+            filterable: Filterable data source port to delegate publication fetching to.
+            filter_ids: List of identifier values to filter upstream publications by.
+            filter_field: Field name on which to apply the filter.
+            limit: Optional maximum number of term records to yield. The upstream
+                publication fetch uses a multiplied limit to account for term expansion.
+        """
         term_count = 0
         publication_limit = limit * self.PUBLICATION_LIMIT_MULTIPLIER if limit else None
 

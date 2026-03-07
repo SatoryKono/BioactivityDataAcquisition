@@ -1,6 +1,6 @@
 """Pandera schema for ChEMBL Publication entity.
 
-Aligned with RULES.md v5.10, ChEMBL 34 schema, and Publication Schema Unification spec.
+Aligned with RULES.md v5.23, ChEMBL 34 schema, and Publication Schema Unification spec.
 """
 
 from __future__ import annotations

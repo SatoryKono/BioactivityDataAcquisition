@@ -23,7 +23,16 @@ class PostrunMetadataVersionResolver:
         self._warning_allowlist = warning_allowlist
 
     def resolve_delta_version(self, table_path: str, *, layer: str) -> int | None:
-        """Resolve Delta table version for lineage metadata."""
+        """Resolve Delta table version for lineage metadata.
+
+        Args:
+            table_path: Filesystem path to the Delta table directory.
+            layer: Medallion layer name (e.g., ``'silver'``, ``'gold'``) used in log messages.
+
+        Returns:
+            Integer Delta table version, or None if the table does not exist or
+            the dependency is unavailable and strict validation is disabled.
+        """
         try:
             from deltalake import DeltaTable
             from deltalake.exceptions import DeltaError, TableNotFoundError

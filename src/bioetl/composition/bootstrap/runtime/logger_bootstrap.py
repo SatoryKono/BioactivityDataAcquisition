@@ -37,6 +37,13 @@ def bootstrap_logger_port(
 ) -> LoggerPort:
     """Create a logger port implementation for pipeline execution.
 
+    Args:
+        pipeline: Pipeline name used as a structured log field (e.g., 'chembl_activity').
+        run_id: Run UUID for log correlation; a new UUID is generated if None.
+        log_level: Minimum log level string (e.g., 'INFO', 'DEBUG').
+        logger_factory: Optional factory callable for DI/testing; uses UnifiedLogger
+            with JSON format when None.
+
     Returns:
         Configured LoggerPort for structured pipeline logging.
     """
@@ -52,6 +59,12 @@ def bootstrap_logger(
     logger_factory: LoggerFactory | None = None,
 ) -> LoggerPort:
     """Deprecated alias for :func:`bootstrap_logger_port`.
+
+    Args:
+        pipeline: Pipeline name used as a structured log field.
+        run_id: Run UUID for log correlation; a new UUID is generated if None.
+        log_level: Minimum log level string (e.g., 'INFO', 'DEBUG').
+        logger_factory: Optional factory callable for DI/testing.
 
     Returns:
         Configured LoggerPort for structured pipeline logging.

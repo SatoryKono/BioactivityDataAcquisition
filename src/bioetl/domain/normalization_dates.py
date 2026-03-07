@@ -41,7 +41,15 @@ def _format_parts_to_date(parts: list[int]) -> str:
 
 
 def format_date_parts(date_parts: list[list[int]] | None) -> str | None:
-    """Format CrossRef date-parts [[year, month?, day?]] to ISO YYYY-MM-DD."""
+    """Format CrossRef date-parts [[year, month?, day?]] to ISO YYYY-MM-DD.
+
+    Args:
+        date_parts: CrossRef date-parts structure, e.g., [[2023, 5, 15]] or [[2023, 5]].
+            Partial dates (year-only, year-month) are normalized to end-of-period.
+
+    Returns:
+        ISO 8601 date string (YYYY-MM-DD), or None if input is empty or invalid.
+    """
     parts = _extract_date_parts(date_parts)
     if not parts:
         return None
@@ -49,7 +57,15 @@ def format_date_parts(date_parts: list[list[int]] | None) -> str | None:
 
 
 def parse_date_field(value: str | None, fmt: str = "%Y-%m-%d") -> date | None:
-    """Parse date string to date object, return None on error."""
+    """Parse date string to date object, return None on error.
+
+    Args:
+        value: Date string to parse, or None.
+        fmt: strptime format string. Defaults to '%Y-%m-%d'.
+
+    Returns:
+        Parsed date object, or None if input is None or does not match format.
+    """
     if value is None:
         return None
     from datetime import datetime

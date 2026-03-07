@@ -23,7 +23,20 @@ def _load_field_group_registry(
     composite_name: str,
     logger: LoggerPort,
 ) -> FieldGroupRegistry | None:
-    """Load field group registry for composite pipeline if config exists."""
+    """Load field group registry for composite pipeline if config exists.
+
+    Resolves the entity name from the composite pipeline name, looks for a
+    YAML config file in the canonical field groups directory, and loads the
+    registry. Returns None silently when no config is found so callers can
+    treat missing field group configs as an opt-out.
+
+    Args:
+        composite_name: Composite pipeline name (e.g., 'composite_publication').
+        logger: Structured logger used to emit debug/info/warning events.
+
+    Returns:
+        Populated FieldGroupRegistry if a config file exists, None otherwise.
+    """
     entity = (
         composite_name.replace("composite_", "")
         if "_" in composite_name
@@ -60,7 +73,18 @@ def _create_dq_report_service(
     logger: LoggerPort,
     settings: Settings,
 ) -> DQReportService:
-    """Create DQ report service for composite pipelines."""
+    """Create DQ report service for composite pipelines.
+
+    Builds a DQReportService wired with a DQReportWriter that writes reports
+    to the canonical DQ output path under data_dir.
+
+    Args:
+        logger: Structured logger forwarded to both the writer and service.
+        settings: Global settings providing data_dir for report output paths.
+
+    Returns:
+        DQReportService ready for composite pipeline DQ report generation.
+    """
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.infrastructure.export.dq_report_writer import DQReportWriter
 

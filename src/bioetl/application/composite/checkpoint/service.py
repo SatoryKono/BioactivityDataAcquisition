@@ -164,7 +164,11 @@ class CompositeCheckpointService:
         )
 
     async def save(self, state: CompositeCheckpointState) -> None:
-        """Save checkpoint state to JSON atomically."""
+        """Save checkpoint state to JSON atomically.
+
+        Args:
+            state: Current checkpoint state to persist to disk.
+        """
         self._checkpoint_dir.mkdir(parents=True, exist_ok=True)
         temp_path = self._checkpoint_path.with_suffix(".tmp")
         try:

@@ -156,7 +156,23 @@ class CircuitBreakerDataSourceDecorator:
         filter_field: str | None = None,
         offset: int | None = None,
     ) -> AsyncIterator[JsonDict]:  # Any: untyped API JSON record
-        """Fetch records with circuit breaker protection."""
+        """Fetch records with circuit breaker protection.
+
+        Delegates to the wrapped data source after checking circuit breaker state.
+        If the circuit is OPEN the call fails fast without contacting the upstream.
+
+        Args:
+            entity_type: Type of entity to fetch (e.g., "activity", "compound").
+            limit: Maximum number of records to return.
+            query: Optional search query string.
+            filter_ids: Optional list of IDs to filter by.
+            filter_field: Field name to apply the ID filter on.
+            offset: Number of records to skip before returning results.
+
+        Raises:
+            CircuitBreakerOpenError: If the circuit breaker is in OPEN state.
+
+        """
         self._check_circuit_state()
         async for record in self._iterate_with_error_recording(
             entity_type=entity_type,

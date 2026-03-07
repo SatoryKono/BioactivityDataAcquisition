@@ -57,7 +57,22 @@ class PubMedAuthorBlockExtractor:
         build_authors_with_affiliations: Callable[[list[RawAuthor]], list[JsonDict]],
         process_structured_affiliations: Callable[[list[JsonDict]], list[JsonDict]],
     ) -> JsonDict:  # Any: untyped PubMed XML/JSON values
-        """Extract author, affiliation, and structured-affiliation fields."""
+        """Extract author, affiliation, and structured-affiliation fields.
+
+        Args:
+            article: PubMed ``Article`` XML element containing author data.
+            raw_author_data: Pre-extracted list of raw author dicts.
+            data_normalizer: Port for author list and affiliation normalization.
+            author_extractor: Extractor for PubMed-specific author parsing.
+            normalize_author_list: Callable to serialize author list to JSON string.
+            normalize_author_keys: Callable to produce sortable author key string.
+            serialize_json_list: Callable to serialize a sequence to a JSON array string.
+            build_authors_with_affiliations: Callable building author-affiliation records.
+            process_structured_affiliations: Callable parsing structured affiliation dicts.
+
+        Returns:
+            Dictionary with author, affiliation, and ORCID fields.
+        """
         author_names = (
             author_extractor.normalize(raw_author_data) if raw_author_data else []
         )
@@ -229,7 +244,22 @@ class PubMedBusinessDataExtractor:
         ],
         classify_publication_types: Callable[[list[str]], dict[str, str | None]],
     ) -> GoldRecord:
-        """Extract full PubMed business payload from parsed XML."""
+        """Extract full PubMed business payload from parsed XML.
+
+        Args:
+            record: Raw Bronze record from the PubMed data source.
+            root: Root ``PubmedArticle`` XML element to extract data from.
+            data_normalizer: Port for HTML stripping and affiliation normalization.
+            author_extractor: Extractor for PubMed-specific author parsing.
+            serialize_json_list: Callable to serialize a sequence to a JSON array string.
+            extract_author_block: Callable extracting all author-related fields.
+            extract_journal_data: Callable extracting journal metadata from Article element.
+            extract_date_data: Callable extracting publication date fields.
+            classify_publication_types: Callable classifying publication type list.
+
+        Returns:
+            GoldRecord dict with all PubMed publication fields populated.
+        """
         identifiers = cls._extract_identifiers(
             root=root, data_normalizer=data_normalizer
         )

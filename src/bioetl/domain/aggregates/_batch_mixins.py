@@ -57,54 +57,67 @@ class _BatchReadModelMixin(_BatchAttrs):
 
     @property
     def batch_id(self) -> BatchID:
+        """Return the unique identifier for this batch."""
         return self._batch_id
 
     @property
     def run_id(self) -> RunID:
+        """Return the pipeline run identifier that owns this batch."""
         return self._run_id
 
     @property
     def status(self) -> BatchStatus:
+        """Return the current lifecycle status of this batch."""
         return self._status
 
     @property
     def records(self) -> tuple[BatchRecord, ...]:
+        """Return valid (non-quarantined) records in insertion order."""
         return tuple(record for record in self._records if record.is_valid)
 
     @property
     def all_records(self) -> tuple[BatchRecord, ...]:
+        """Return all records including quarantined ones in insertion order."""
         return tuple(self._records)
 
     @property
     def quarantined_records(self) -> tuple[BatchRecord, ...]:
+        """Return records that failed validation and were quarantined."""
         return tuple(self._quarantined)
 
     @property
     def record_count(self) -> int:
+        """Return the total number of records including quarantined."""
         return len(self._records)
 
     @property
     def valid_count(self) -> int:
+        """Return the number of records that passed validation."""
         return sum(1 for record in self._records if record.is_valid)
 
     @property
     def quarantined_count(self) -> int:
+        """Return the number of quarantined records."""
         return len(self._quarantined)
 
     @property
     def next_index(self) -> int:
+        """Return the next sequential index for appending a record."""
         return self._start_index + len(self._records)
 
     @property
     def created_at(self) -> datetime:
+        """Return the UTC timestamp when this batch was created."""
         return self._created_at
 
     @property
     def sealed_at(self) -> datetime | None:
+        """Return the UTC timestamp when the batch was sealed, or None if still open."""
         return self._sealed_at
 
     @property
     def metadata(self) -> MetaDict:
+        """Return a copy of the batch metadata dictionary."""
         return self._metadata.copy()
 
     def collect_events(self) -> list[DomainEvent]:
@@ -134,7 +147,16 @@ class _BatchMutationMixin(_BatchReadModelMixin):
         entity_id: EntityID | None = None,
         content_hash: ContentHash | None = None,
     ) -> BatchRecord:
-        """Add a single record to the batch."""
+        """Add a single record to the batch.
+
+        Args:
+            data: Raw Bronze layer record dictionary to store.
+            entity_id: Optional identifier for the entity represented by the record.
+            content_hash: Optional content hash for deduplication tracking.
+
+        Returns:
+            The newly created BatchRecord appended to this batch.
+        """
         self._assert_open("add_record")
         record = BatchRecord(
             index=self.next_index,
@@ -147,7 +169,14 @@ class _BatchMutationMixin(_BatchReadModelMixin):
         return record
 
     def add_records(self, records: list[BronzeRecord]) -> list[BatchRecord]:
-        """Add multiple records to the batch."""
+        """Add multiple records to the batch.
+
+        Args:
+            records: List of raw Bronze layer record dictionaries to add.
+
+        Returns:
+            List of newly created BatchRecord objects in insertion order.
+        """
         self._assert_open("add_records")
         return [self.add_record(data) for data in records]
 
@@ -157,7 +186,16 @@ class _BatchMutationMixin(_BatchReadModelMixin):
         error: str,
         error_code: str | None = None,
     ) -> BatchRecord:
-        """Mark an existing record as quarantined."""
+        """Mark an existing record as quarantined.
+
+        Args:
+            record: An existing BatchRecord that belongs to this batch.
+            error: Human-readable description of the validation or processing error.
+            error_code: Optional error classification code for downstream routing.
+
+        Returns:
+            Updated BatchRecord with quarantine status and error information.
+        """
         self._assert_open("quarantine_record")
         if record not in self._records:
             raise ValueError("Record does not belong to this batch")
@@ -193,7 +231,11 @@ class _BatchLifecycleMixin(_BatchReadModelMixin):
     __slots__ = ()
 
     def seal(self, sealed_at: datetime | None = None) -> None:
-        """Seal the batch (OPEN -> SEALED)."""
+        """Seal the batch (OPEN -> SEALED).
+
+        Args:
+            sealed_at: Optional explicit seal timestamp. Defaults to UTC now.
+        """
         self._status, self._sealed_at = lifecycle.seal(
             self._status,
             self._events,
@@ -210,7 +252,11 @@ class _BatchLifecycleMixin(_BatchReadModelMixin):
         self._status = lifecycle.mark_writing(self._status)
 
     def mark_committed(self, layer: str) -> None:
-        """Mark batch as committed (WRITING -> COMMITTED)."""
+        """Mark batch as committed (WRITING -> COMMITTED).
+
+        Args:
+            layer: Medallion layer that successfully received the batch (e.g., 'bronze').
+        """
         self._status = lifecycle.mark_committed(
             self._status,
             self._events,
@@ -223,7 +269,13 @@ class _BatchLifecycleMixin(_BatchReadModelMixin):
     def mark_failed(
         self, layer: str, error: str, error_type: str | None = None
     ) -> None:
-        """Mark batch write as failed (WRITING -> FAILED)."""
+        """Mark batch write as failed (WRITING -> FAILED).
+
+        Args:
+            layer: Medallion layer where the write failure occurred.
+            error: Human-readable error description.
+            error_type: Optional error classification (e.g., exception class name).
+        """
         self._status = lifecycle.mark_failed(
             self._status,
             self._events,

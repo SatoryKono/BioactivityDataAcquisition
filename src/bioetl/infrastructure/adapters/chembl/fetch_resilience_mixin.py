@@ -112,7 +112,13 @@ class ChemblFetchResilienceMixin:
         error: Exception,
         context: str = "fetch",
     ) -> None:
-        """Handle errors with unified classification."""
+        """Handle errors with unified classification.
+
+        Args:
+            error: The exception to classify, log, and wrap.
+            context: Operation name included in the wrapped error and logs
+                (default ``"fetch"``).
+        """
         failure_count = self.http_client.circuit_breaker.get_failure_count()
         health_status = self._get_health_status()
 
@@ -190,7 +196,21 @@ class ChemblFetchResilienceMixin:
         error: Exception,
         pk_fields: tuple[str, ...] | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Recover retry-exhausted batch via shared split-or-single policy."""
+        """Recover retry-exhausted batch via shared split-or-single policy.
+
+        Args:
+            entity_type: ChEMBL entity type (e.g., ``"activity"``).
+            id_batch: List of IDs that triggered the retry-exhausted error.
+            filter_field: API field name used for filtering.
+            limit: Maximum records to yield, or None for no limit.
+            seen_ids: Mutable set of already-yielded identifiers; shared state.
+            pk_field: Primary key field for single-key deduplication.
+            error: The RetryExhaustedError or wrapping exception that triggered recovery.
+            pk_fields: Optional composite-key tuple; None for single-key dedup.
+
+        Returns:
+            Async iterator of recovered BronzeRecord dicts.
+        """
 
         async def _fetch_reduced_batch(batch: list[str]) -> AsyncIterator[BronzeRecord]:
             async for record in self._fetch_batch_with_reduction(
@@ -275,7 +295,20 @@ class ChemblFetchResilienceMixin:
         pk_field: str,
         pk_fields: tuple[str, ...] | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Yield filtered records while deduplicating by configured keys."""
+        """Yield filtered records while deduplicating by configured keys.
+
+        Args:
+            entity_type: ChEMBL entity type (e.g., ``"activity"``).
+            id_batch: List of IDs to fetch in the filtered query.
+            filter_field: API field name used for filtering.
+            limit: Maximum records to yield, or None for no limit.
+            seen_ids: Mutable set of already-yielded identifiers; updated in place.
+            pk_field: Primary key field for single-key deduplication.
+            pk_fields: Optional composite-key tuple; None for single-key dedup.
+
+        Returns:
+            Async iterator of unique BronzeRecord dicts.
+        """
         async for record in self._fetch_with_filter(
             entity_type, id_batch, filter_field, limit
         ):
@@ -292,7 +325,20 @@ class ChemblFetchResilienceMixin:
         error: Exception,
         pk_fields: tuple[str, ...] | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Try direct endpoint fallback for a single failed filter ID."""
+        """Try direct endpoint fallback for a single failed filter ID.
+
+        Args:
+            entity_type: ChEMBL entity type (e.g., ``"activity"``).
+            id_batch: Single-element list containing the failed ID.
+            filter_field: API field name used for the original filter.
+            seen_ids: Mutable set of already-yielded identifiers; updated in place.
+            pk_field: Primary key field for single-key deduplication.
+            error: The original exception that caused the batch failure.
+            pk_fields: Optional composite-key tuple; None for single-key dedup.
+
+        Returns:
+            Async iterator of at most one BronzeRecord dict from the direct endpoint.
+        """
         single_id = id_batch[0]
         direct_record = await self._fetch_single_record_direct(entity_type, single_id)
         if direct_record is None:
@@ -320,7 +366,21 @@ class ChemblFetchResilienceMixin:
         error: Exception,
         pk_fields: tuple[str, ...] | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Recover from RetryExhaustedError using shared policy orchestrator."""
+        """Recover from RetryExhaustedError using shared policy orchestrator.
+
+        Args:
+            entity_type: ChEMBL entity type (e.g., ``"activity"``).
+            id_batch: List of IDs from the failed batch.
+            filter_field: API field name used for the original filter.
+            limit: Maximum records to yield, or None for no limit.
+            seen_ids: Mutable set of already-yielded identifiers; shared state.
+            pk_field: Primary key field for single-key deduplication.
+            error: The RetryExhaustedError that triggered recovery.
+            pk_fields: Optional composite-key tuple; None for single-key dedup.
+
+        Returns:
+            Async iterator of recovered BronzeRecord dicts.
+        """
         async for record in self._retry_with_split_batches(
             entity_type,
             id_batch,
@@ -343,7 +403,20 @@ class ChemblFetchResilienceMixin:
         pk_field: str,
         pk_fields: tuple[str, ...] | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch filtered batch and recover from retry-exhausted failures."""
+        """Fetch filtered batch and recover from retry-exhausted failures.
+
+        Args:
+            entity_type: ChEMBL entity type (e.g., ``"activity"``).
+            id_batch: List of IDs to fetch in the filtered batch.
+            filter_field: API field name used for filtering.
+            limit: Maximum records to yield, or None for no limit.
+            seen_ids: Mutable set of already-yielded identifiers; shared state.
+            pk_field: Primary key field for single-key deduplication.
+            pk_fields: Optional composite-key tuple; None for single-key dedup.
+
+        Returns:
+            Async iterator of BronzeRecord dicts, with retry-exhausted recovery applied.
+        """
         retry_error: Exception | None = None
         try:
             async for record in self._yield_deduplicated_filtered_records(

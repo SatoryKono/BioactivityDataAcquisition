@@ -71,9 +71,11 @@ from bioetl.domain.ports.observability import (
     DQMonitorPort,
     ExecutorMetricsPort,
     LoggerPort,
+    MetricLabels,
     MetricsPort,
     MetricsServerPort,
     TracingPort,
+    resolve_metric_labels,
 )
 from bioetl.domain.ports.pii import PiiHasherPort
 from bioetl.domain.ports.quality import (
@@ -172,6 +174,7 @@ __all__ = [
     "MetadataCoordinatorPort",
     "MetadataWriterPort",
     "MetricsExtractorPort",
+    "MetricLabels",
     "MetricsPort",
     "MetricsServerPort",
     "NoOpAudit",
@@ -204,4 +207,5 @@ __all__ = [
     "StorageMaintenancePort",
     "StoragePort",
     "TracingPort",
+    "resolve_metric_labels",
 ]

@@ -43,6 +43,16 @@ def bootstrap_pipeline_runner(
 ) -> PipelineRunner:
     """Build a ready-to-run pipeline runner from runtime context and registry.
 
+    Initializes publication type classification data, registers all providers
+    and pipelines, then delegates to the runtime builder to wire all
+    infrastructure dependencies.
+
+    Args:
+        ctx: Pipeline run context containing launch parameters such as pipeline
+            name, run type, limit, filter settings, and observability options.
+        registry: Optional PipelineRegistry to use instead of the default global
+            registry; useful for test isolation.
+
     Returns:
         Fully configured PipelineRunner ready for execution.
     """

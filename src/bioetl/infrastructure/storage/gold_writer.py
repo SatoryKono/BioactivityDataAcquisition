@@ -134,7 +134,28 @@ class GoldWriter(
         run_id: RunID | None = None,
         silver_refs: list[SilverWriteResult] | None = None,
     ) -> None:
-        """Write validated records to Gold layer."""
+        """Write validated records to Gold layer.
+
+        Args:
+            table_name: Logical Delta table name (e.g., ``"chembl_activity"``).
+            records: Fully transformed and validated Gold records to write.
+            schema: Pandera DataFrameSchema for strict validation before write.
+            primary_keys: Optional business key fields used for SCD2 merge;
+                unused for overwrite mode.
+            mode: Write mode string (``"overwrite"`` or ``"scd2"``).
+            partition_cols: Optional column names for Delta table partitioning;
+                disables partitioning when None.
+            scd_config: Optional SCD type-2 configuration including column
+                mappings and business key definitions; required for ``"scd2"`` mode.
+            column_order: Optional explicit column ordering applied before writing;
+                uses schema order when None.
+            ingestion_ts: Optional UTC timestamp embedded in Gold metadata;
+                uses current time when None.
+            run_id: Optional pipeline run ID for lineage; excluded from metadata
+                when None.
+            silver_refs: Optional Silver write results included as lineage
+                references in Gold metadata.
+        """
         tracer = self._tracing.get_tracer(__name__)
         with tracer.start_as_current_span("write_gold") as span:
             self._set_write_span_attributes(span, table_name, mode, len(records))
@@ -180,7 +201,19 @@ class GoldWriter(
         scd_config: ScdConfig | None,
         ingestion_ts: datetime | None,
     ) -> tuple[GoldWriteMode, str]:
-        """Run validation steps and resolve target path."""
+        """Run validation steps and resolve target path.
+
+        Args:
+            table_name: Logical Delta table name for path resolution.
+            records: Gold records to validate before writing.
+            mode: Write mode string passed through for validation.
+            schema: Pandera schema used for strict record validation.
+            scd_config: Optional SCD2 config; required for ``"scd2"`` mode.
+            ingestion_ts: Optional UTC timestamp required for SCD2 writes.
+
+        Returns:
+            Tuple of (validated GoldWriteMode enum, resolved filesystem path string).
+        """
         validated_mode = self._validate_write_mode(mode)
         self._validate_records(records)
         self._validate_scd2_requirements(validated_mode, scd_config, ingestion_ts)
@@ -201,7 +234,20 @@ class GoldWriter(
         silver_refs: list[SilverWriteResult] | None,
         schema: DataFrameSchema,
     ) -> None:
-        """Emit audit and metadata after successful Gold write."""
+        """Emit audit and metadata after successful Gold write.
+
+        Args:
+            table_path: Resolved filesystem path of the Gold Delta table.
+            table_name: Logical Delta table name for audit and metadata.
+            records: Gold records that were written; used for count reporting.
+            validated_mode: Resolved write mode enum from the preparation step.
+            ingestion_ts: UTC ingestion timestamp embedded in metadata; None
+                skips timestamp in audit output.
+            run_id: Pipeline run ID for lineage; None excludes it from audit.
+            scd_config: SCD2 configuration passed to metadata writers.
+            silver_refs: Silver write results for lineage metadata.
+            schema: Pandera schema passed to Gold metadata writers.
+        """
         if self._audit:
             await self._log_gold_audit(
                 table_name=table_name,
@@ -230,7 +276,14 @@ class GoldWriter(
         mode: str,
         record_count: int,
     ) -> None:
-        """Set standard tracing attributes for write_gold span."""
+        """Set standard tracing attributes for write_gold span.
+
+        Args:
+            span: Active OpenTelemetry span to annotate.
+            table_name: Logical Delta table name set as span attribute.
+            mode: Write mode string set as span attribute.
+            record_count: Number of records being written set as span attribute.
+        """
         span.set_attribute("table_name", table_name)
         span.set_attribute("mode", mode)
         span.set_attribute("record_count", record_count)
