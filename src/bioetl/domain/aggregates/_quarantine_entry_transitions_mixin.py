@@ -111,7 +111,7 @@ class QuarantineEntryTransitionsMixin:
         self._status = QuarantineStatus.EXPIRED
         now = expired_at or datetime.now(UTC)
         self._resolution_info = ResolutionInfo(
-            resolution_type="ignored",
+            resolution_type="expired",
             resolved_at=now,
             reason="Retention period exceeded",
         )
