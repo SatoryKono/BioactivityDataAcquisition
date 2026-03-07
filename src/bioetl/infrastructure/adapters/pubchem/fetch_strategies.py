@@ -29,7 +29,103 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMapper
 
 
-class PubChemFetchStrategies:
+class _PubChemSearchFetchMixin:
+    """Query-based PubChem fetch strategies (compound/substance/assay)."""
+
+    _rate_limiter: TokenBucket
+    _circuit_breaker: CircuitBreaker
+    _run_in_executor: Callable[..., Awaitable[object]]
+    _mapper: PubChemEntityMapper
+
+    def _record_request(
+        self,
+        endpoint: str,
+        duration_ms: float,
+        status_code: int = 200,
+        result_count: int = 0,
+    ) -> None:
+        """Record a PubChem API request."""
+        raise NotImplementedError
+
+    @staticmethod
+    def _normalize_results(results: object) -> list[object]:
+        """Normalize pubchempy responses to list."""
+        raise NotImplementedError
+
+    async def fetch_by_query(
+        self, query: str, limit: int | None
+    ) -> AsyncIterator[BronzeRecord]:
+        """Fetch compounds by query (name search)."""
+        await self._rate_limiter.acquire()
+        start_time = time.perf_counter()
+        compounds = await self._circuit_breaker.call(
+            self._run_in_executor, pcp.get_compounds, query, "name"
+        )
+        normalized_compounds = self._normalize_results(compounds)
+        duration_ms = (time.perf_counter() - start_time) * 1000
+        result_count = len(normalized_compounds)
+        self._record_request(
+            f"/compound/name/{query}/JSON", duration_ms, result_count=result_count
+        )
+        for i, compound in enumerate(normalized_compounds):
+            if limit and i >= limit:
+                break
+            yield self._mapper.compound_to_dict(compound)
+
+    async def fetch_substances(
+        self, query: str | None, limit: int | None
+    ) -> AsyncIterator[BronzeRecord]:
+        """Fetch substances from PubChem."""
+        if not query:
+            raise ValueError("Query is required for substance search")
+
+        await self._rate_limiter.acquire()
+        start_time = time.perf_counter()
+        substances = await self._circuit_breaker.call(
+            self._run_in_executor, pcp.get_substances, query, "name"
+        )
+        normalized_substances = self._normalize_results(substances)
+        duration_ms = (time.perf_counter() - start_time) * 1000
+        result_count = len(normalized_substances)
+        self._record_request(
+            f"/substance/name/{query}/JSON", duration_ms, result_count=result_count
+        )
+
+        fetched = 0
+        for substance in normalized_substances:
+            if limit and fetched >= limit:
+                break
+            yield self._mapper.substance_to_dict(substance)
+            fetched += 1
+
+    async def fetch_assays(
+        self, query: str | None, limit: int | None
+    ) -> AsyncIterator[BronzeRecord]:
+        """Fetch assays from PubChem."""
+        if not query:
+            raise ValueError("Query is required for assay search")
+
+        await self._rate_limiter.acquire()
+        start_time = time.perf_counter()
+        assays = await self._circuit_breaker.call(
+            self._run_in_executor, pcp.get_assays, query
+        )
+        normalized_assays = self._normalize_results(assays)
+        duration_ms = (time.perf_counter() - start_time) * 1000
+        result_count = len(normalized_assays)
+        self._record_request(
+            f"/assay/aid/{query}/JSON", duration_ms, result_count=result_count
+        )
+
+        fetched = 0
+        for assay in normalized_assays:
+            if limit and fetched >= limit:
+                break
+            yield self._mapper.assay_to_dict(assay)
+            fetched += 1
+
+
+class PubChemFetchStrategies(_PubChemSearchFetchMixin):
     """Helper class for PubChem fetch operations."""
 
     FETCH_STRATEGY_ERRORS = (
@@ -98,26 +194,6 @@ class PubChemFetchStrategies:
         if isinstance(results, tuple):
             return list(results)
         return []
-
-    async def fetch_by_query(
-        self, query: str, limit: int | None
-    ) -> AsyncIterator[BronzeRecord]:
-        """Fetch compounds by query (name search)."""
-        await self._rate_limiter.acquire()
-        start_time = time.perf_counter()
-        compounds = await self._circuit_breaker.call(
-            self._run_in_executor, pcp.get_compounds, query, "name"
-        )
-        normalized_compounds = self._normalize_results(compounds)
-        duration_ms = (time.perf_counter() - start_time) * 1000
-        result_count = len(normalized_compounds)
-        self._record_request(
-            f"/compound/name/{query}/JSON", duration_ms, result_count=result_count
-        )
-        for i, compound in enumerate(normalized_compounds):
-            if limit and i >= limit:
-                break
-            yield self._mapper.compound_to_dict(compound)
 
     async def _fetch_single_smiles(self, smiles: str) -> list[BronzeRecord]:
         """Fetch compounds for a single SMILES string.
@@ -304,55 +380,3 @@ class PubChemFetchStrategies:
                     inchikey=cleaned,
                     error=str(e),
                 )
-
-    async def fetch_substances(
-        self, query: str | None, limit: int | None
-    ) -> AsyncIterator[BronzeRecord]:
-        """Fetch substances from PubChem."""
-        if not query:
-            raise ValueError("Query is required for substance search")
-
-        await self._rate_limiter.acquire()
-        start_time = time.perf_counter()
-        substances = await self._circuit_breaker.call(
-            self._run_in_executor, pcp.get_substances, query, "name"
-        )
-        normalized_substances = self._normalize_results(substances)
-        duration_ms = (time.perf_counter() - start_time) * 1000
-        result_count = len(normalized_substances)
-        self._record_request(
-            f"/substance/name/{query}/JSON", duration_ms, result_count=result_count
-        )
-
-        fetched = 0
-        for substance in normalized_substances:
-            if limit and fetched >= limit:
-                break
-            yield self._mapper.substance_to_dict(substance)
-            fetched += 1
-
-    async def fetch_assays(
-        self, query: str | None, limit: int | None
-    ) -> AsyncIterator[BronzeRecord]:
-        """Fetch assays from PubChem."""
-        if not query:
-            raise ValueError("Query is required for assay search")
-
-        await self._rate_limiter.acquire()
-        start_time = time.perf_counter()
-        assays = await self._circuit_breaker.call(
-            self._run_in_executor, pcp.get_assays, query
-        )
-        normalized_assays = self._normalize_results(assays)
-        duration_ms = (time.perf_counter() - start_time) * 1000
-        result_count = len(normalized_assays)
-        self._record_request(
-            f"/assay/aid/{query}/JSON", duration_ms, result_count=result_count
-        )
-
-        fetched = 0
-        for assay in normalized_assays:
-            if limit and fetched >= limit:
-                break
-            yield self._mapper.assay_to_dict(assay)
-            fetched += 1

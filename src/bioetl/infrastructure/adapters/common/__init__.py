@@ -22,6 +22,9 @@ from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
     FallbackFetchOrchestratorService,
     FallbackFetchRequest,
 )
+from bioetl.infrastructure.adapters.common.fallback_policy_mixin import (
+    FallbackPolicyMixin,
+)
 from bioetl.infrastructure.adapters.common.fetch_retry_policy import (
     is_retry_exhausted_error,
     run_fetch_with_fallback_policy,
@@ -44,6 +47,7 @@ __all__ = [
     "FallbackExecutionStrategy",
     "FallbackFetchOrchestratorService",
     "FallbackFetchRequest",
+    "FallbackPolicyMixin",
     "is_retry_exhausted_error",
     "normalize_title",
     "resolve_fallback_policy",

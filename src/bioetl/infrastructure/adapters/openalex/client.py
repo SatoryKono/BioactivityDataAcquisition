@@ -26,7 +26,10 @@ from httpx import HTTPStatusError, RequestError
 
 from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
-from bioetl.infrastructure.adapters.common import FallbackFetchOrchestratorService
+from bioetl.infrastructure.adapters.common import (
+    FallbackFetchOrchestratorService,
+    FallbackPolicyMixin,
+)
 from bioetl.infrastructure.adapters.common.adapter_defaults import (
     create_default_error_handler as _create_default_openalex_error_handler,
 )
@@ -182,6 +185,7 @@ class OpenAlexAdapter(
     OpenAlexAdapterFilterFetchMixin,
     OpenAlexAdapterHealthMixin,
     OpenAlexAdapterHelpersMixin,
+    FallbackPolicyMixin,
     BaseHttpAdapter,
 ):
     """OpenAlex data source adapter.

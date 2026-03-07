@@ -1,7 +1,30 @@
-"""Normalization service facade for bioactivity data.
+"""Bioactivity normalization service for ChEMBL activity measurements.
 
-Orchestrates unit conversion, validation, and aggregation services
-to provide a unified interface for normalizing bioactivity measurements.
+Scope — batch and single-value normalization of bioactivity data (IC50, Ki,
+EC50, etc.): unit conversion to a canonical output unit (default: nM), pChEMBL
+calculation, potency classification, and multi-value aggregation.
+
+Internal design — mixin chain::
+
+    _NormalizationActivityMixin   (single-value: convert, validate, pChEMBL)
+        └── _NormalizationBatchMixin  (multi-value: aggregate, concentrations)
+                └── NormalizationService  (public facade, @dataclass)
+
+Collaborators (all injected via dataclass fields):
+- ``NormalizationConfig``  — thresholds, default unit, aggregation method
+- ``UnitConverter``        — concentration unit conversion + pChEMBL math
+- ``ValueValidator``       — range / format validation
+- ``ActivityAggregator``   — geometric-mean / median aggregation
+
+This service is **not** a DataNormalizationPort implementation.
+It handles ChEMBL-specific bioactivity scalars only, not cross-provider
+metadata fields (authors, DOIs, dates, text).
+
+Cross-reference
+---------------
+For cross-provider metadata normalization (author, DOI, PMID, date, text)
+see :mod:`bioetl.domain.services.data_normalization_service`
+(``DefaultDataNormalizationService``).
 
 Pure domain service (no I/O) per RULES.md §1.1.
 """

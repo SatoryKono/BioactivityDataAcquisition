@@ -141,16 +141,12 @@ class BaseTransformer(_BaseTransformerRecordHelpersMixin, ABC):
                 result.append(str(vo) if as_string else vo.value)
         return result if result else None
 
-    async def transform(
+    def _start_transform_span(
         self,
         context: PipelineContext,
-        record: BronzeRecord,
         index: int,
-    ) -> SilverRecord | None:
-        """Transform Bronze record to Silver format (Template Method)."""
-        start_time = time.perf_counter()
-        error_type: str | None = None
-
+    ) -> Any:  # Any: OTel Span type varies by tracing backend
+        """Create and enter an OpenTelemetry span for record transformation."""
         otel_tracer = self._tracer.get_tracer("bioetl.transformer")
         span = otel_tracer.start_as_current_span(
             "transform_record",
@@ -162,64 +158,114 @@ class BaseTransformer(_BaseTransformerRecordHelpersMixin, ABC):
             },
         )
         span.__enter__()
+        return span
 
-        try:
-            result = await self._transform_impl(context, record, index)
-            if result is not None and not self.should_write_silver(
-                context,
-                cast("GoldRecord", result),
-            ):
-                context.logger.debug(
-                    "silver_filter_excluded",
-                    provider=self.provider,
-                    entity_type=self.entity_type,
-                    record_index=index,
-                )
-                raise FilteredOutError()
-            return result
-        except TransformationError as e:
-            error_type = "transformation_error"
-            context.logger.warning(
-                "transformation_skipped",
-                reason=str(e),
-                field=e.field,
+    def _apply_silver_filter(
+        self,
+        context: PipelineContext,
+        result: SilverRecord | None,
+        index: int,
+    ) -> None:
+        """Check silver filter and raise FilteredOutError if excluded."""
+        if result is not None and not self.should_write_silver(
+            context,
+            cast("GoldRecord", result),
+        ):
+            context.logger.debug(
+                "silver_filter_excluded",
                 provider=self.provider,
+                entity_type=self.entity_type,
+                record_index=index,
             )
-            span.set_attribute("error", True)
-            span.set_attribute("error.type", error_type)
-            return None
-        except ValueError as e:
-            error_type = "validation_error"
-            context.logger.warning(
-                "entity_validation_failed",
-                error=str(e),
-                provider=self.provider,
-            )
-            span.set_attribute("error", True)
-            span.set_attribute("error.type", error_type)
-            return None
-        finally:
-            duration = time.perf_counter() - start_time
-            self._metrics.observe_histogram(
-                "transform_duration_seconds",
-                duration,
+            raise FilteredOutError()
+
+    def _handle_transformation_error(
+        self,
+        error: TransformationError,
+        context: PipelineContext,
+        span: Any,  # Any: OTel Span type varies by tracing backend
+    ) -> str:
+        """Log and annotate span for transformation errors."""
+        error_type = "transformation_error"
+        context.logger.warning(
+            "transformation_skipped",
+            reason=str(error),
+            field=error.field,
+            provider=self.provider,
+        )
+        span.set_attribute("error", True)
+        span.set_attribute("error.type", error_type)
+        return error_type
+
+    def _handle_validation_error(
+        self,
+        error: ValueError,
+        context: PipelineContext,
+        span: Any,  # Any: OTel Span type varies by tracing backend
+    ) -> str:
+        """Log and annotate span for validation errors."""
+        error_type = "validation_error"
+        context.logger.warning(
+            "entity_validation_failed",
+            error=str(error),
+            provider=self.provider,
+        )
+        span.set_attribute("error", True)
+        span.set_attribute("error.type", error_type)
+        return error_type
+
+    def _record_metrics_and_close_span(
+        self,
+        start_time: float,
+        error_type: str | None,
+        span: Any,  # Any: OTel Span type varies by tracing backend
+    ) -> None:
+        """Record transform duration/error metrics and close the OTEL span."""
+        duration = time.perf_counter() - start_time
+        self._metrics.observe_histogram(
+            "transform_duration_seconds",
+            duration,
+            labels={
+                "provider": self.provider,
+                "entity_type": self.entity_type,
+            },
+        )
+        if error_type:
+            self._metrics.increment_counter(
+                "transform_errors_total",
+                1,
                 labels={
                     "provider": self.provider,
                     "entity_type": self.entity_type,
+                    "error_type": error_type,
                 },
             )
-            if error_type:
-                self._metrics.increment_counter(
-                    "transform_errors_total",
-                    1,
-                    labels={
-                        "provider": self.provider,
-                        "entity_type": self.entity_type,
-                        "error_type": error_type,
-                    },
-                )
-            span.set_attribute("bioetl.duration_ms", duration * 1000)
-            span.__exit__(None, None, None)
+        span.set_attribute("bioetl.duration_ms", duration * 1000)
+        span.__exit__(None, None, None)
+
+    async def transform(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> SilverRecord | None:
+        """Transform Bronze record to Silver format (Template Method)."""
+        start_time = time.perf_counter()
+        error_type: str | None = None
+        span = self._start_transform_span(context, index)
+
+        try:
+            result = await self._transform_impl(context, record, index)
+            self._apply_silver_filter(context, result, index)
+            return result
+        except TransformationError as e:
+            error_type = self._handle_transformation_error(e, context, span)
+            return None
+        except ValueError as e:
+            error_type = self._handle_validation_error(e, context, span)
+            return None
+        finally:
+            self._record_metrics_and_close_span(start_time, error_type, span)
 
     @abstractmethod
     async def _transform_impl(

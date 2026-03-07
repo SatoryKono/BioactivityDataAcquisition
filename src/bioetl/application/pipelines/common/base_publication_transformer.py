@@ -169,44 +169,18 @@ class BasePublicationTransformer(BaseTransformer):
                 business_data[field] = self._data_normalizer.strip_html_tags(raw)
         return business_data
 
-    async def _transform_impl(
+    def _validate_primary_id(
         self,
         context: PipelineContext,
-        record: BronzeRecord,
+        business_data: JsonDict,
         index: int,
-    ) -> SilverRecord | None:
-        """Unified publication transformation flow (Template Method).
-
-        Orchestrates the transformation process:
-        1. Pre-extraction validation (optional hook)
-        2. Extract business data
-        2a. Normalize content fields (strip HTML — RF-NORM-04)
-        3. Validate primary ID exists
-        4. Log fallback usage if applicable
-        5. Generate entity ID
-        6. Compute content hash
-        7. Create domain entity
-        8. Convert to SilverRecord
-
-        Args:
-            context: Pipeline context with run_id, run_type, logger.
-            record: Raw Bronze record from provider API.
-            index: Sequential index of the record in the pipeline run.
+    ) -> tuple[str, Any] | None:
+        """Validate primary ID presence.
 
         Returns:
-            SilverRecord if transformation successful, None if skipped.
+            Tuple of (field_name, value) if valid, None if missing.
 
         """
-        # 1. Pre-extraction validation hook
-        self._pre_extract_validation(context, record, index)
-
-        # 2. Extract business data
-        business_data = self._extract_business_data(record)
-
-        # 2a. Uniform content normalization (RF-NORM-04)
-        self._normalize_content_fields(business_data)
-
-        # 3. Validate primary ID
         primary_id_field = self._get_primary_id_field()
         primary_id = business_data.get(primary_id_field)
         if not primary_id:
@@ -216,8 +190,16 @@ class BasePublicationTransformer(BaseTransformer):
                 lookup_method=business_data.get("_lookup_method"),
             )
             return None
+        return primary_id_field, primary_id
 
-        # 4. Log fallback usage if applicable
+    def _log_fallback_if_needed(
+        self,
+        context: PipelineContext,
+        business_data: JsonDict,
+        primary_id_field: str,
+        primary_id: Any,  # Any: heterogeneous ID types across providers
+    ) -> None:
+        """Log fallback lookup usage when applicable."""
         if self._should_log_fallback_lookup():
             lookup_method = business_data.get("_lookup_method", "unknown")
             if lookup_method in ("title_fallback", "title_only"):
@@ -228,17 +210,49 @@ class BasePublicationTransformer(BaseTransformer):
                     original_id=business_data.get("_original_id"),
                 )
 
-        # 5. Generate entity ID
+    def _compute_identifiers(
+        self,
+        primary_id_field: str,
+        primary_id: Any,  # Any: heterogeneous ID types across providers
+        business_data: JsonDict,
+    ) -> tuple[str, str]:
+        """Compute entity_id and content_hash.
+
+        Returns:
+            Tuple of (entity_id, content_hash).
+
+        """
         entity_id = self.compute_entity_id(
             source_id=primary_id,
             record={primary_id_field: primary_id},
         )
-
-        # 6. Compute content hash (exclude metadata fields)
         hash_data = {k: v for k, v in business_data.items() if not k.startswith("_")}
         content_hash = self.compute_content_hash(hash_data, exclude_none=True)
+        return entity_id, content_hash
 
-        # 7. Create domain entity
+    async def _transform_impl(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> SilverRecord | None:
+        """Unified publication transformation flow (Template Method)."""
+        self._pre_extract_validation(context, record, index)
+        business_data = self._extract_business_data(record)
+        self._normalize_content_fields(business_data)
+
+        id_result = self._validate_primary_id(context, business_data, index)
+        if id_result is None:
+            return None
+        primary_id_field, primary_id = id_result
+
+        self._log_fallback_if_needed(
+            context, business_data, primary_id_field, primary_id
+        )
+        entity_id, content_hash = self._compute_identifiers(
+            primary_id_field, primary_id, business_data
+        )
+
         entity = self._create_entity(
             self._get_entity_class(),
             context,
@@ -247,8 +261,6 @@ class BasePublicationTransformer(BaseTransformer):
             index=index,
             **business_data,
         )
-
-        # 8. Convert to SilverRecord
         return cast("SilverRecord", self.entity_to_silver_record(entity))
 
     def _classify_publication_type(

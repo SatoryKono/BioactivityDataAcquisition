@@ -23,15 +23,16 @@ __all__ = [
     "HealthCheckProviderMixin",
 ]
 
-import time
 from abc import abstractmethod
-from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from httpx import HTTPStatusError, RequestError
 
-from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.types import HealthStatus, JsonDict
+from bioetl.infrastructure.adapters.health_check_contract import (
+    HEALTH_CHECK_ERRORS,
+    HealthCheckContext,
+)
 from bioetl.infrastructure.adapters.health_status_policy import (
     TRANSIENT_DEGRADED_STATUS_CODES,
 )
@@ -43,44 +44,6 @@ if TYPE_CHECKING:
         LoggerPort,
         MetricsPort,
     )
-
-HEALTH_CHECK_ERRORS = (
-    BioETLError,
-    NetworkError,
-    RequestError,
-    HTTPStatusError,
-    ConnectionError,
-    TimeoutError,
-    OSError,
-    ValueError,
-    TypeError,
-    RuntimeError,
-    AttributeError,
-    Exception,
-)
-
-
-@dataclass
-class HealthCheckContext:
-    """Context for health check operations.
-
-    Holds timing and result data for observability purposes.
-
-    Attributes:
-        start_time: Monotonic timestamp when check started.
-        provider: Provider name for metric labels.
-        endpoint: Health check endpoint for logging.
-
-    """
-
-    start_time: float = field(default_factory=time.monotonic)
-    provider: str = ""
-    endpoint: str = ""
-
-    @property
-    def elapsed_seconds(self) -> float:
-        """Calculate elapsed time since start."""
-        return time.monotonic() - self.start_time
 
 
 class HealthCheckMixin:

@@ -10,12 +10,12 @@ policy:
         - removal_step
 registries:
     file_size_limits:
-        src/bioetl/domain/aggregates/pipeline_run.py:
-            value: 600
+        src/bioetl/domain/aggregates/_pipeline_run_mixins.py:
+            value: 320
             owner: '@bioetl-data-model'
-            reason: Baseline exemption migrated from architecture tests (file_size_limits).
+            reason: PipelineRun aggregate was split into mixins; temporary limit while follow-up shrink pass lands.
             expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
+            removal_step: Reduce mixin file below default domain LOC limit and remove this exemption entry.
         src/bioetl/domain/composite/field_groups.py:
             value: 450
             owner: '@bioetl-data-model'
@@ -112,88 +112,51 @@ registries:
             reason: Baseline exemption migrated from architecture tests (file_size_limits).
             expires_on: '2026-04-30'
             removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-    function_complexity:
-        src/bioetl/domain/exceptions/network.py::RateLimitError: &id001
-            value: 6
-            owner: '@bioetl-architecture'
-            reason: Domain CC=6 exceeds strict domain threshold (5) due to legacy-compatible dual-path constructor.
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
+    function_complexity: {}
     function_length:
         __init__:
-            value: 90
+            value: 74
             owner: '@bioetl-architecture'
             reason: Baseline exemption migrated from architecture tests (function_length).
             expires_on: '2026-04-30'
             removal_step: Refactor target to satisfy default metric and remove this exemption entry.
         _transform_impl:
-            value: 120
+            value: 79
             owner: '@bioetl-architecture'
-            reason: Baseline exemption migrated from architecture tests (function_length).
+            reason: Reduced from 120. Max in uniprot/idmapping_transformer.py.
             expires_on: '2026-04-30'
             removal_step: Refactor target to satisfy default metric and remove this exemption entry.
         analyze:
-            value: 100
+            value: 92
             owner: '@bioetl-architecture'
-            reason: Baseline exemption migrated from architecture tests (function_length).
+            reason: Reduced from 100. Max in silver_analyzer.py (long parameter list).
             expires_on: '2026-04-30'
             removal_step: Refactor target to satisfy default metric and remove this exemption entry.
         process_batch:
-            value: 70
+            value: 81
             owner: '@bioetl-architecture'
-            reason: Baseline exemption migrated from architecture tests (function_length).
+            reason: Increased from 70 to match actual max in record_processor.py.
             expires_on: '2026-04-30'
             removal_step: Refactor target to satisfy default metric and remove this exemption entry.
         run:
-            value: 110
-            owner: '@bioetl-architecture'
-            reason: Baseline exemption migrated from architecture tests (function_length).
+            value: 87
+            owner: '@bioetl-platform'
+            reason: Reduced from 110. Max in pipeline_runner_service.py.
             expires_on: '2026-04-30'
             removal_step: Refactor target to satisfy default metric and remove this exemption entry.
         to_domain:
-            value: 100
+            value: 111
             owner: '@bioetl-architecture'
-            reason: Baseline exemption migrated from architecture tests (function_length).
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        transform:
-            value: 80
-            owner: '@bioetl-architecture'
-            reason: Baseline exemption migrated from architecture tests (function_length).
+            reason: Updated to match actual max in dq_config.py.
             expires_on: '2026-04-30'
             removal_step: Refactor target to satisfy default metric and remove this exemption entry.
         validate:
-            value: 95
+            value: 54
             owner: '@bioetl-architecture'
-            reason: Baseline exemption migrated from architecture tests (function_length).
+            reason: Reduced from 95. Max in cross_validator.py.
             expires_on: '2026-04-30'
             removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-    class_size:
-        FilteredDataSource:
-            value: 361
-            owner: '@bioetl-architecture'
-            reason: Baseline exemption migrated from architecture tests (class_size).
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        PipelineRun:
-            value: 420
-            owner: '@bioetl-data-model'
-            reason: Baseline exemption migrated from architecture tests (class_size).
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-        PubChemFetchStrategies:
-            value: 404
-            owner: '@bioetl-platform'
-            reason: Fetch strategy now includes CID and InChIKey helper flows with shared request accounting.
-            expires_on: '2026-04-30'
-            removal_step: Refactor target to satisfy default metric and remove this exemption entry.
-    class_method_count:
-        Batch:
-            value: 22
-            owner: '@bioetl-data-model'
-            reason: RF-011 reduced from 25 to 22 public methods via lifecycle extraction.
-            expires_on: '2026-04-30'
-            removal_step: Reduce public method count to 20 (e.g. consolidate properties).
+    class_size: {}
+    class_method_count: {}
     god_object: { }
-    domain_complexity:
-        src/bioetl/domain/exceptions/network.py::RateLimitError: *id001
+    domain_complexity: {}

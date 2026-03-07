@@ -82,3 +82,22 @@ def test_allowlisted_empty_registry_remains_valid(tmp_path) -> None:
 
     values = get_registry_values("god_object", test_registry)
     assert values == {}
+
+
+def test_allowlisted_empty_class_method_count_registry_remains_valid(tmp_path) -> None:
+    raw = load_exemptions_registry()
+    registries = raw.get("registries", {})
+    assert isinstance(registries, dict)
+    registries["class_method_count"] = {}
+
+    test_registry = tmp_path / "exemptions.class_method_count.empty.yaml"
+    test_registry.write_text(yaml.safe_dump(raw), encoding="utf-8")
+
+    metadata_errors, _expired_entries = validate_exemptions_registry(test_registry)
+    assert not any(
+        error.startswith("class_method_count: registry must not be empty")
+        for error in metadata_errors
+    )
+
+    values = get_registry_values("class_method_count", test_registry)
+    assert values == {}

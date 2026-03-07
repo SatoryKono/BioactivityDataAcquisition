@@ -1,11 +1,34 @@
-"""Data normalization facade service.
+"""Cross-provider metadata normalization service (DataNormalizationPort implementation).
 
-Facade (SRP decomposition) delegating to specialized services:
-- DoiNormalizationService
-- PmidNormalizationService
-- DateNormalizationService
-- TextNormalizationService
-- AuthorNormalizationService (inherited)
+Scope — normalization of publication metadata fields that are shared across all
+literature/bioactivity providers: author names, affiliations, DOIs, PMIDs,
+publication dates, and free-text fields (titles, abstracts, OA status).
+
+``DefaultDataNormalizationService`` is the concrete implementation of
+``DataNormalizationPort`` used throughout the pipeline.  It is a pure facade:
+all work is delegated to single-responsibility sub-services.
+
+Inheritance chain::
+
+    AuthorNormalizationService          (author + affiliation logic)
+        └── DefaultDataNormalizationService  (adds DOI, PMID, date, text delegation)
+
+Delegated sub-services (all composed via dataclass fields):
+- ``DoiNormalizationService``  — bare-DOI extraction / lowercasing
+- ``PmidNormalizationService`` — PMID coercion to string
+- ``DateNormalizationService`` — year validation, partial-date expansion,
+                                  CrossRef date-parts formatting
+- ``TextNormalizationService`` — HTML stripping, whitespace normalization,
+                                  title / abstract cleaning
+
+This service does **not** handle bioactivity scalars (IC50, Ki, pChEMBL, etc.).
+
+Cross-reference
+---------------
+For ChEMBL-specific bioactivity scalar normalization (unit conversion,
+pChEMBL calculation, potency classification, batch aggregation) see
+:mod:`bioetl.domain.services.normalization_service`
+(``NormalizationService``).
 
 Pure domain service (no I/O) per RULES.md §1.1.
 """

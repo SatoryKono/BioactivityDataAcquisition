@@ -174,6 +174,116 @@ class FsAdrService(AdrServicePort):
             date=date,
         )
 
+    @staticmethod
+    def _validate_filename(
+        p: Path,
+        issues: list[AdrValidationIssue],
+    ) -> re.Match[str] | None:
+        """Validate ADR filename matches pattern. Returns match or None."""
+        m = ADR_FILENAME_RE.match(p.name)
+        if not m:
+            issues.append(
+                AdrValidationIssue(
+                    number=None,
+                    path=str(p),
+                    message="Filename does not match ADR-XXX-title.md",
+                    severity="error",
+                )
+            )
+        return m
+
+    @staticmethod
+    def _validate_duplicate_number(
+        number: int,
+        p: Path,
+        seen_numbers: set[int],
+        issues: list[AdrValidationIssue],
+    ) -> None:
+        """Check for duplicate ADR numbers."""
+        if number in seen_numbers:
+            issues.append(
+                AdrValidationIssue(
+                    number=number,
+                    path=str(p),
+                    message="Duplicate ADR number",
+                    severity="error",
+                )
+            )
+        else:
+            seen_numbers.add(number)
+
+    @staticmethod
+    def _read_adr_text(
+        p: Path,
+        number: int,
+        issues: list[AdrValidationIssue],
+    ) -> str | None:
+        """Read ADR file text. Returns None on IO errors."""
+        try:
+            return p.read_text(encoding="utf-8")
+        except (
+            OSError,
+            UnicodeError,
+        ) as exc:  # pragma: no cover - rare IO error path
+            issues.append(
+                AdrValidationIssue(
+                    number=number,
+                    path=str(p),
+                    message=f"Cannot read file: {exc}",
+                    severity="error",
+                )
+            )
+            return None
+
+    @staticmethod
+    def _validate_title(
+        text: str,
+        number: int,
+        p: Path,
+        issues: list[AdrValidationIssue],
+    ) -> None:
+        """Validate H1 title presence and ADR number consistency."""
+        title = _parse_h1_title(text)
+        if not title:
+            issues.append(
+                AdrValidationIssue(
+                    number=number,
+                    path=str(p),
+                    message="Missing H1 title ('# ...')",
+                    severity="error",
+                )
+            )
+        else:
+            m_h1 = re.search(r"ADR-(\d+)", title, flags=re.IGNORECASE)
+            if m_h1 and int(m_h1.group(1)) != number:
+                issues.append(
+                    AdrValidationIssue(
+                        number=number,
+                        path=str(p),
+                        message="ADR number mismatch between filename and H1",
+                        severity="warning",
+                    )
+                )
+
+    @staticmethod
+    def _validate_status(
+        text: str,
+        number: int,
+        p: Path,
+        issues: list[AdrValidationIssue],
+    ) -> None:
+        """Validate status metadata presence."""
+        status, _ = _extract_meta(text)
+        if status is None:
+            issues.append(
+                AdrValidationIssue(
+                    number=number,
+                    path=str(p),
+                    message="Missing status metadata (Status/Статус)",
+                    severity="warning",
+                )
+            )
+
     def validate(self) -> AdrValidationReport:
         """Validate all ADR files for naming, numbering and metadata consistency.
 
@@ -185,81 +295,19 @@ class FsAdrService(AdrServicePort):
         seen_numbers: set[int] = set()
 
         for p in files:
-            name = p.name
-            m = ADR_FILENAME_RE.match(name)
-            if not m:
-                issues.append(
-                    AdrValidationIssue(
-                        number=None,
-                        path=str(p),
-                        message="Filename does not match ADR-XXX-title.md",
-                        severity="error",
-                    )
-                )
+            m = self._validate_filename(p, issues)
+            if m is None:
                 continue
 
             number = int(m.group(1))
-            if number in seen_numbers:
-                issues.append(
-                    AdrValidationIssue(
-                        number=number,
-                        path=str(p),
-                        message="Duplicate ADR number",
-                        severity="error",
-                    )
-                )
-            else:
-                seen_numbers.add(number)
+            self._validate_duplicate_number(number, p, seen_numbers, issues)
 
-            try:
-                text = p.read_text(encoding="utf-8")
-            except (
-                OSError,
-                UnicodeError,
-            ) as exc:  # pragma: no cover - rare IO error path
-                issues.append(
-                    AdrValidationIssue(
-                        number=number,
-                        path=str(p),
-                        message=f"Cannot read file: {exc}",
-                        severity="error",
-                    )
-                )
+            text = self._read_adr_text(p, number, issues)
+            if text is None:
                 continue
 
-            title = _parse_h1_title(text)
-            if not title:
-                issues.append(
-                    AdrValidationIssue(
-                        number=number,
-                        path=str(p),
-                        message="Missing H1 title ('# ...')",
-                        severity="error",
-                    )
-                )
-            else:
-                # Optional: check number consistency if ADR-XXX appears in H1
-                m_h1 = re.search(r"ADR-(\d+)", title, flags=re.IGNORECASE)
-                if m_h1 and int(m_h1.group(1)) != number:
-                    issues.append(
-                        AdrValidationIssue(
-                            number=number,
-                            path=str(p),
-                            message="ADR number mismatch between filename and H1",
-                            severity="warning",
-                        )
-                    )
-
-            status, _ = _extract_meta(text)
-            if status is None:
-                issues.append(
-                    AdrValidationIssue(
-                        number=number,
-                        path=str(p),
-                        message="Missing status metadata (Status/Статус)",
-                        severity="warning",
-                    )
-                )
+            self._validate_title(text, number, p, issues)
+            self._validate_status(text, number, p, issues)
 
         total = len(files)
         errors = sum(1 for i in issues if i.severity == "error")
