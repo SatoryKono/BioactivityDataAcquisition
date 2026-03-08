@@ -18,10 +18,10 @@
 | --- | --- | --- |
 | Guides | [guides/AGENT.md](guides/AGENT.md) | Инструкции для конкретных ассистентов |
 | Runtime docs | [runtime/agent-memory.md](runtime/agent-memory.md) | Канонические docs-артефакты агентных prompt/workflow |
+| Agent scripts | [scripts/diagrams/run_diagram_docs_agent.sh](scripts/diagrams/run_diagram_docs_agent.sh) | Оркестратор диаграммного агентного цикла |
 | Policy | [policy/AGENT_NAMING_POLICY_AND_RENAME_PLAN_2026-03-08.md](policy/AGENT_NAMING_POLICY_AND_RENAME_PLAN_2026-03-08.md) | Политики именования и стандарты |
 | Audit | [audit/AUDIT_CONSOLIDATION_REPORT_2026-03-08.md](audit/AUDIT_CONSOLIDATION_REPORT_2026-03-08.md) | Отчёты аудита и консолидации |
 | Snapshots | [snapshots/COLLECTED_AGENTS_INDEX.md](snapshots/COLLECTED_AGENTS_INDEX.md) | Исторические/собранные снапшоты (non-SSOT) |
-| Aliases | [aliases/README.md](aliases/README.md) | Документация compatibility-слоя |
 
 ## Canonical Documents
 
@@ -51,18 +51,6 @@
 - [policy/AGENT_CONSOLIDATION_MATRIX_2026-03-08.md](policy/AGENT_CONSOLIDATION_MATRIX_2026-03-08.md)
 - [policy/SPECIALIST_PROFILE_TEMPLATE.md](policy/SPECIALIST_PROFILE_TEMPLATE.md)
 - [policy/CONSOLIDATION_VALIDATION.md](policy/CONSOLIDATION_VALIDATION.md)
-
-## Compatibility
-
-Legacy paths are retained as deprecated stubs:
-
-- `AGENT.md`, `CLAUDE.md`, `CODEX.md`, `GEMINI.md`
-- `agent-memory.md`, `memory.md`
-- `py-qa-orchestrator.md`, `qa_orchestrator.md`
-- `py-diagram-docs-orchestrator.md`, `diagram_docs_orchestrator.md`
-- `orchestration/ORCHESTRATION.md`, `orchestration/py-team-orchestration.md`
-
-See [aliases/README.md](aliases/README.md).
 
 ## Notes
 

@@ -9,25 +9,25 @@
 2. Рендер диаграмм.
 3. Обновление `*-with-descriptions.docx` и `*-with-descriptions.pdf`.
 
-## Канонические инструменты агента (`scripts/diagrams/*`)
+## Канонические инструменты агента
 
-1. `run_diagram_checks.sh` — единый quality gate (lint/syntax/render/smoke/quality).
-2. `generate_with_descriptions_docx.py` — генерация DOCX из `*-with-descriptions.md`.
-3. `generate_with_descriptions_pdf.py` — генерация PDF из `*-with-descriptions.md`.
-4. `run_diagram_docs_agent.sh` — единый orchestrator для полного цикла.
+1. `scripts/diagrams/run_diagram_checks.sh` — единый quality gate (lint/syntax/render/smoke/quality).
+2. `scripts/diagrams/generate_with_descriptions_docx.py` — генерация DOCX из `*-with-descriptions.md`.
+3. `scripts/diagrams/generate_with_descriptions_pdf.py` — генерация PDF из `*-with-descriptions.md`.
+4. `docs/00-project/ai/agents/scripts/diagrams/run_diagram_docs_agent.sh` — единый orchestrator для полного цикла.
 
 ## Базовые команды
 
 ```bash
 # Полный цикл (checks + docx + pdf)
-bash scripts/diagrams/run_diagram_docs_agent.sh
+bash docs/00-project/ai/agents/scripts/diagrams/run_diagram_docs_agent.sh
 
 # Полный цикл для одной диаграммы
-bash scripts/diagrams/run_diagram_docs_agent.sh \
+bash docs/00-project/ai/agents/scripts/diagrams/run_diagram_docs_agent.sh \
   --diagram docs/02-architecture/mmd-diagrams/foundation/30-port-adapter-mapping.mmd
 
 # Только пересборка бандлов без checks
-bash scripts/diagrams/run_diagram_docs_agent.sh --skip-checks
+bash docs/00-project/ai/agents/scripts/diagrams/run_diagram_docs_agent.sh --skip-checks
 ```
 
 ## Режимы
@@ -40,7 +40,7 @@ bash scripts/diagrams/run_diagram_docs_agent.sh --skip-checks
 
 ## Инварианты
 
-1. Использовать только канонические скрипты из `scripts/diagrams/`.
+1. Использовать orchestrator из `docs/00-project/ai/agents/scripts/diagrams/` и канонические диаграммные скрипты из `scripts/diagrams/`.
 2. Следовать ADR-040 (diagram governance).
 3. При ошибках окружения (`pandoc`, `wkhtmltopdf`, `mmdc`) завершать с явным сообщением.
 4. Не менять зоны вне диаграммного контура без явного запроса.

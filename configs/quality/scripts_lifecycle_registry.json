@@ -1,0 +1,336 @@
+{
+  "schema_version": "1.0",
+  "description": "Lifecycle decisions for non-active scripts (orphan/legacy).",
+  "entries": {
+    "scripts/close_duplicate_prs_wave2.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "deprecate",
+      "review_by": "2026-06-30",
+      "next_step": "Archive/remove after confirming no operational dependency on wave2 cleanup flow."
+    },
+    "scripts/close_duplicate_prs_wave3.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "deprecate",
+      "review_by": "2026-06-30",
+      "next_step": "Archive/remove after confirming no operational dependency on wave3 cleanup flow."
+    },
+    "scripts/close_superseded_prs.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "deprecate",
+      "review_by": "2026-06-30",
+      "next_step": "Archive/remove after validating duplicate functionality is covered elsewhere."
+    },
+    "scripts/migrate_exemption_keys_to_paths.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "deprecate",
+      "review_by": "2026-06-30",
+      "next_step": "Move to migration archive after confirming one-time migration completion."
+    },
+    "scripts/migrate_vcr_extensionless.py": {
+      "owner": "@bioetl-platform",
+      "decision": "deprecate",
+      "review_by": "2026-06-30",
+      "next_step": "Move to migration archive after confirming no extensionless cassettes remain."
+    },
+    "src/tools/__init__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as package marker until tool packaging strategy is finalized."
+    },
+    "src/tools/build_diagram_docs.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "deprecate",
+      "review_by": "2026-06-30",
+      "next_step": "Confirm replacement coverage in scripts/diagrams and archive/remove."
+    },
+    "src/tools/log_explorer.py": {
+      "owner": "@bioetl-platform",
+      "decision": "deprecate",
+      "review_by": "2026-06-30",
+      "next_step": "Confirm no consumers, then archive/remove."
+    },
+    "src/tools/scaffold_pipeline.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "deprecate",
+      "review_by": "2026-06-30",
+      "next_step": "Consolidate with create_pipeline.py and archive/remove duplicate entrypoint."
+    },
+    "src/tools/scripts/__init__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as package marker until module packaging is finalized."
+    },
+    "src/tools/scripts/migrations/__init__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as package marker while migration modules stay importable."
+    },
+    "scripts/_tmp_inspect_vcr.py": {
+      "owner": "@bioetl-platform",
+      "decision": "deprecate",
+      "review_by": "2026-04-30",
+      "next_step": "Delete after one sprint if no recovery/debug need is identified."
+    },
+    "scripts/ast_inventory.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Сохранить как manual tool; добавить подтвержденный operational playbook и периодический smoke-check."
+    },
+    "scripts/audit_structure.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Сохранить как manual tool; добавить подтвержденный operational playbook и периодический smoke-check."
+    },
+    "scripts/calibrate_hotspot_budgets.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Сохранить как manual tool; добавить явный smoke-вызов/операционный playbook или перевести в deprecate."
+    },
+    "scripts/check_delta_integrity.py": {
+      "owner": "@bioetl-platform",
+      "decision": "deprecate",
+      "review_by": "2026-05-31",
+      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site."
+    },
+    "scripts/cleanup_consolidate.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Сохранить как manual tool; добавить подтвержденный operational playbook и периодический smoke-check."
+    },
+    "scripts/cleanup_project.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Сохранить как manual tool; добавить подтвержденный operational playbook и периодический smoke-check."
+    },
+    "scripts/config_gap_analysis.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Сохранить как manual tool; добавить подтвержденный operational playbook и периодический smoke-check."
+    },
+    "scripts/debug_pandera.py": {
+      "owner": "@bioetl-platform",
+      "decision": "deprecate",
+      "review_by": "2026-04-30",
+      "next_step": "Удалить после одного спринта при отсутствии подтвержденного debug-use-case."
+    },
+    "scripts/debug_storage_health.py": {
+      "owner": "@bioetl-platform",
+      "decision": "deprecate",
+      "review_by": "2026-04-30",
+      "next_step": "Удалить после одного спринта при отсутствии подтвержденного debug-use-case."
+    },
+    "scripts/delete-stale-branches.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "deprecate",
+      "review_by": "2026-05-31",
+      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site."
+    },
+    "scripts/deploy-bioetl.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Сохранить как manual tool; добавить явный smoke-вызов/операционный playbook или перевести в deprecate."
+    },
+    "scripts/dev/metrics_mock_server.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Сохранить как manual tool; добавить подтвержденный operational playbook и периодический smoke-check."
+    },
+    "scripts/diagrams/fix_diagram_links.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "deprecate",
+      "review_by": "2026-05-31",
+      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site."
+    },
+    "scripts/diagrams/fix_sequence_nbsp.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "deprecate",
+      "review_by": "2026-05-31",
+      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site."
+    },
+    "scripts/diagrams/inject_svg_styles.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Сохранить как manual tool; добавить подтвержденный operational playbook и периодический smoke-check."
+    },
+    "scripts/diagrams/mermaid_prune_orphans.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "deprecate",
+      "review_by": "2026-05-31",
+      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site."
+    },
+    "scripts/diagrams/normalize_node_sizes.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "deprecate",
+      "review_by": "2026-05-31",
+      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site."
+    },
+    "scripts/dq_baseline_update.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Сохранить как manual tool; добавить явный smoke-вызов/операционный playbook или перевести в deprecate."
+    },
+    "scripts/extract_null_fields.py": {
+      "owner": "@bioetl-platform",
+      "decision": "deprecate",
+      "review_by": "2026-05-31",
+      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site."
+    },
+    "scripts/fix_doc_links_auto.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Сохранить как manual tool; добавить подтвержденный operational playbook и периодический smoke-check."
+    },
+    "scripts/fix_doc_links_explicit.py": {
+      "owner": "@bioetl-platform",
+      "decision": "deprecate",
+      "review_by": "2026-05-31",
+      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site."
+    },
+    "scripts/fix_grafana_dashboards.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Сохранить как manual tool; добавить подтвержденный operational playbook и периодический smoke-check."
+    },
+    "scripts/fix_link_warnings.py": {
+      "owner": "@bioetl-platform",
+      "decision": "deprecate",
+      "review_by": "2026-05-31",
+      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site."
+    },
+    "scripts/generate_content_hash_comparison_report.py": {
+      "owner": "@bioetl-platform",
+      "decision": "deprecate",
+      "review_by": "2026-05-31",
+      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site."
+    },
+    "scripts/install_deps.py": {
+      "owner": "@bioetl-platform",
+      "decision": "deprecate",
+      "review_by": "2026-05-31",
+      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site."
+    },
+    "scripts/lint_config_paths.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Сохранить как manual tool; добавить подтвержденный operational playbook и периодический smoke-check."
+    },
+    "scripts/run_pytest.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "deprecate",
+      "review_by": "2026-05-31",
+      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site."
+    },
+    "scripts/salt_rotate.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Сохранить как manual tool; добавить явный smoke-вызов/операционный playbook или перевести в deprecate."
+    },
+    "scripts/sentence_doc_audit.py": {
+      "owner": "@bioetl-platform",
+      "decision": "deprecate",
+      "review_by": "2026-05-31",
+      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site."
+    },
+    "scripts/vacuum_delta.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Сохранить как manual tool; добавить явный smoke-вызов/операционный playbook или перевести в deprecate."
+    },
+    "scripts/validate_data_dir.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Сохранить как manual tool; добавить явный smoke-вызов/операционный playbook или перевести в deprecate."
+    },
+    "scripts/verify_checksums.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Сохранить как manual tool; добавить явный smoke-вызов/операционный playbook или перевести в deprecate."
+    },
+    "src/tools/apply_elk_layout.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Сохранить как manual tool; добавить явный smoke-вызов/операционный playbook или перевести в deprecate."
+    },
+    "src/tools/create_pipeline.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Сохранить как manual tool; добавить явный smoke-вызов/операционный playbook или перевести в deprecate."
+    },
+    "src/tools/differentiate_linkstyle.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Сохранить как manual tool; добавить явный smoke-вызов/операционный playbook или перевести в deprecate."
+    },
+    "src/tools/scripts/cleanup_cache.py": {
+      "owner": "@bioetl-platform",
+      "decision": "deprecate",
+      "review_by": "2026-05-31",
+      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site."
+    },
+    "src/tools/scripts/config_matrix_generator.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Сохранить как manual tool; добавить подтвержденный operational playbook и периодический smoke-check."
+    },
+    "src/tools/scripts/migrate_openalex_citation_count.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "deprecate",
+      "review_by": "2026-06-30",
+      "next_step": "Перенести в migration archive и удалить после подтверждения завершения миграции."
+    },
+    "src/tools/scripts/migrations/migrate_pmid_to_string.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "deprecate",
+      "review_by": "2026-06-30",
+      "next_step": "Перенести в migration archive и удалить после подтверждения завершения миграции."
+    },
+    "src/tools/scripts/migrations/rename_structure_fields.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "deprecate",
+      "review_by": "2026-06-30",
+      "next_step": "Перенести в migration archive и удалить после подтверждения завершения миграции."
+    },
+    "src/tools/scripts/run-tests.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "deprecate",
+      "review_by": "2026-05-31",
+      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site."
+    },
+    "src/tools/scripts/test_changed.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Сохранить как manual tool; добавить подтвержденный operational playbook и периодический smoke-check."
+    },
+    "src/tools/scripts/validate_unified_configs.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Сохранить как manual tool; добавить явный smoke-вызов/операционный playbook или перевести в deprecate."
+    }
+  }
+}
