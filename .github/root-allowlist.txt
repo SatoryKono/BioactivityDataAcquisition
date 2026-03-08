@@ -18,7 +18,7 @@ Dockerfile
 LICENSE
 Makefile
 README.md
-commitlint.config.js
+commitlint.config.mjs
 docker-compose.monitoring.yml
 docker-compose.yml
 entrypoint.sh

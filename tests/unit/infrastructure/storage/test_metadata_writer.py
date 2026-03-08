@@ -392,7 +392,7 @@ class TestMetadataWriter:
         def flaky_replace(self: Path, target_path: Path) -> Path:
             call_count["count"] += 1
             if call_count["count"] == 1:
-                raise OSError(13, "Permission denied")
+                raise OSError(16, "Device or resource busy")
             return original_replace(self, target_path)
 
         with (
