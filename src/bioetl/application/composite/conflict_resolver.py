@@ -34,6 +34,10 @@ class ConflictResolverService:
     def find_next_suffix(self, base_col: str, existing_cols: set[str]) -> str:
         """Find next available A/B/C/... suffix for conflicting columns.
 
+        Args:
+            base_col: Base column name to find a suffix for.
+            existing_cols: Set of column names already in use.
+
         Returns:
             Single or double letter suffix string (e.g. ``"A"``, ``"B"``, ``"AA"``).
         """
@@ -60,6 +64,11 @@ class ConflictResolverService:
         join_keys: set[str],
     ) -> tuple[pl.DataFrame, pl.DataFrame]:
         """Rename conflicting enricher columns while preserving seed columns.
+
+        Args:
+            seed_df: Seed DataFrame whose column names take priority.
+            enricher_df: Enricher DataFrame with columns to rename on conflict.
+            join_keys: Set of join key column names to exclude from conflict detection.
 
         Returns:
             Tuple of (seed_df, enricher_df) where conflicting enricher columns have been
@@ -93,6 +102,12 @@ class ConflictResolverService:
         seed_pipeline: str | None = None,
     ) -> pl.DataFrame:
         """Apply configured conflict-resolution policy to merged DataFrame.
+
+        Args:
+            df: Merged DataFrame potentially containing duplicate qualified columns.
+            _enricher_dfs: Enricher DataFrames by name (unused, kept for API symmetry).
+            enrichers: Enricher configurations used by the coalesce policy.
+            seed_pipeline: Pipeline name used to identify seed columns; defaults to None.
 
         Returns:
             DataFrame after applying the configured ConflictResolution policy (coalescing,

@@ -32,6 +32,9 @@ class OpenAlexQueryExecutor:
     async def request_works_payload(self, params: dict[str, str]) -> dict[str, object]:
         """Execute OpenAlex `/works` request and return decoded payload mapping.
 
+        Args:
+            params: Query parameters dict to include in the GET request.
+
         Returns:
             Dictionary containing the decoded JSON payload from the API response.
         """

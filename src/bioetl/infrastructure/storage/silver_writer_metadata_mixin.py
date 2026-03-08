@@ -64,6 +64,11 @@ class SilverWriterMetadataMixin:
     ) -> BatchDQMetrics:
         """Compute DQ metrics using injected calculator.
 
+        Args:
+            table_name: Logical table name used for schema lookup.
+            records: List of record dicts to analyse.
+            quarantined_count: Number of records quarantined before this write.
+
         Returns:
             BatchDQMetrics instance with null rates, schema drift, and quarantine counts.
         """
@@ -87,7 +92,13 @@ class SilverWriterMetadataMixin:
         records: list[BronzeRecord],
         mode: SilverWriteMode,
     ) -> None:
-        """Log audit entry for Silver write operation."""
+        """Log audit entry for Silver write operation.
+
+        Args:
+            table_name: Logical table name for the audit entry.
+            records: List of records written; first record provides run_id and ingestion timestamp.
+            mode: Silver write mode used for this operation.
+        """
         if self._audit is None:
             return
         from uuid import UUID
@@ -133,6 +144,9 @@ class SilverWriterMetadataMixin:
     async def _get_delta_version(self, table_path: str) -> int | None:
         """Get current Delta table version, if table exists.
 
+        Args:
+            table_path: File system path to the Delta table.
+
         Returns:
             Integer Delta table version if the table exists, None otherwise.
         """
@@ -160,7 +174,21 @@ class SilverWriterMetadataMixin:
         started_at: datetime | None = None,
         completed_at: datetime | None = None,
     ) -> None:
-        """Write Silver layer metadata sidecar file."""
+        """Write Silver layer metadata sidecar file.
+
+        Args:
+            table_path: File system path to the Delta table.
+            table_name: Logical table name used to derive provider and entity.
+            records: List of records written; used to derive record count and run context.
+            primary_keys: List of primary key column names for lineage metadata.
+            mode: Silver write mode recorded in the metadata.
+            bronze_refs: Optional list of Bronze write results linked to this Silver write.
+            dq_metrics: Optional pre-computed DQ metrics to embed in metadata.
+            dq_report_path: Optional file path to the DQ report for this table.
+            partition_by: Optional list of partition column names.
+            started_at: Optional datetime when the write operation started.
+            completed_at: Optional datetime when the write operation completed.
+        """
         if not records:
             return
         provider_name, entity_name = _parse_table_name(table_name)
@@ -206,7 +234,16 @@ class SilverWriterMetadataMixin:
         run_id: str | None = None,
         sources_used: list[str] | None = None,
     ) -> None:
-        """Write Silver metadata sidecar for merged composite data."""
+        """Write Silver metadata sidecar for merged composite data.
+
+        Args:
+            table_path: File system path to the Delta table.
+            table_name: Logical table name used to derive provider and entity.
+            records: List of merged records; used for record count and context.
+            primary_keys: List of primary key column names for lineage metadata.
+            run_id: Optional run identifier to embed in the metadata.
+            sources_used: Optional list of source identifiers contributing to the merge.
+        """
         if not records:
             return
         from bioetl.infrastructure.storage.metadata_builder import (
@@ -251,7 +288,13 @@ class SilverWriterMetadataMixin:
         records: list[BronzeRecord],
         mode: SilverWriteMode,
     ) -> None:
-        """Guard for audit logging — only calls _log_silver_audit if enabled."""
+        """Guard for audit logging — only calls _log_silver_audit if enabled.
+
+        Args:
+            table_name: Logical table name for the audit entry.
+            records: List of records written; must be non-empty to trigger audit.
+            mode: Silver write mode to record in the audit entry.
+        """
         if self._audit and records:
             await self._log_silver_audit(
                 table_name=table_name,
@@ -273,6 +316,17 @@ class SilverWriterMetadataMixin:
         start_perf: float,
     ) -> SilverWriteResult | None:
         """Compute DQ metrics, write metadata, and build final result.
+
+        Args:
+            table_name: Logical table name for the Silver write.
+            records: List of records written; used for DQ metrics and metadata.
+            table_path: File system path to the Delta table.
+            primary_keys: List of primary key column names.
+            validated_mode: Silver write mode used for this operation.
+            bronze_refs: Optional list of Bronze write results linked to this write.
+            partition_cols: Optional list of partition column names.
+            started_at: Datetime when the write operation started.
+            start_perf: Performance counter value at write start for duration calculation.
 
         Returns:
             SilverWriteResult instance if Delta version is available, None otherwise.

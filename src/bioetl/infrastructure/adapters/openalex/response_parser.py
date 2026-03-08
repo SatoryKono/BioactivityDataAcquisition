@@ -10,6 +10,9 @@ def parse_openalex_results(
 ) -> list[BronzeRecord]:
     """Extract `results` list from OpenAlex payload.
 
+    Args:
+        payload: Raw OpenAlex API JSON response payload.
+
     Returns:
         List of BronzeRecord dictionaries from the results array, or empty list if absent.
     """
@@ -23,6 +26,9 @@ def parse_openalex_next_cursor(
     payload: JsonDict,  # Any: untyped OpenAlex API payload
 ) -> str | None:
     """Extract next cursor from OpenAlex payload meta.
+
+    Args:
+        payload: Raw OpenAlex API JSON response payload.
 
     Returns:
         Next cursor string if present in meta, None if last page or meta is absent.

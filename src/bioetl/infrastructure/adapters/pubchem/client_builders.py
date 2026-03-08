@@ -48,7 +48,20 @@ def _create_default_pubchem_fetch_strategies(
     provider_name: str,
     request_collector: APIRequestCollector,
 ) -> PubChemFetchStrategies:
-    """Create default fetch strategies for non-DI call sites."""
+    """Create default fetch strategies for non-DI call sites.
+
+    Args:
+        logger: Logger port for structured logging.
+        rate_limiter: Token bucket rate limiter for API throttling.
+        circuit_breaker: Circuit breaker for fault tolerance.
+        mapper: Entity mapper for converting API responses to domain records.
+        run_in_executor: Callable to run synchronous pubchempy calls in a thread pool.
+        provider_name: Provider identifier used in metrics labels.
+        request_collector: Collector for tracking API request metadata.
+
+    Returns:
+        Configured PubChemFetchStrategies instance.
+    """
     from bioetl.infrastructure.adapters.pubchem.fetch_strategies import (
         PubChemFetchStrategies,
     )

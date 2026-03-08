@@ -29,7 +29,19 @@ class _ActivityAggregatorExtensions:
         concentrations: Sequence[Concentration],
         method: str | AggregationMethod = "median",
     ) -> Concentration:
-        """Aggregate multiple concentration measurements."""
+        """Aggregate multiple concentration measurements.
+
+        Args:
+            concentrations: Sequence of Concentration values to aggregate;
+                must be non-empty.
+            method: Aggregation method (e.g., 'median', 'mean'); defaults to 'median'.
+
+        Returns:
+            Aggregated Concentration in nanomolar units.
+
+        Raises:
+            ValueError: If concentrations is empty.
+        """
         if not concentrations:
             raise ValueError("Cannot aggregate empty sequence of concentrations")
         nm_values = [c.to_nanomolar().value for c in concentrations]
@@ -42,7 +54,13 @@ class _ActivityAggregatorExtensions:
         concentrations: Sequence[Concentration],
         method: str | AggregationMethod = "median",
     ) -> tuple[Concentration, float]:
-        """Aggregate concentrations with uncertainty estimate."""
+        """Aggregate concentrations with uncertainty estimate.
+
+        Args:
+            concentrations: Sequence of Concentration values to aggregate;
+                must be non-empty.
+            method: Aggregation method (e.g., 'median', 'mean'); defaults to 'median'.
+        """
         if not concentrations:
             raise ValueError("Cannot aggregate empty sequence of concentrations")
         nm_values = [c.to_nanomolar().value for c in concentrations]
@@ -59,7 +77,13 @@ class _ActivityAggregatorExtensions:
         values: Sequence[float],
         weights: Sequence[float],
     ) -> float:
-        """Calculate weighted average of values."""
+        """Calculate weighted average of values.
+
+        Args:
+            values: Sequence of numeric values to weight and average.
+            weights: Sequence of weights corresponding to each value;
+                must be the same length as values and sum to a non-zero total.
+        """
         if len(values) != len(weights):
             raise ValueError("Values and weights must have same length")
         weight_sum = sum(weights)
@@ -76,7 +100,14 @@ class _ActivityAggregatorExtensions:
         min_value: float | None = None,
         max_value: float | None = None,
     ) -> float | None:
-        """Filter values by range and aggregate."""
+        """Filter values by range and aggregate.
+
+        Args:
+            values: Sequence of numeric values to filter and aggregate.
+            method: Aggregation method (e.g., 'median', 'mean'); defaults to 'median'.
+            min_value: Optional lower bound; values below this are excluded; defaults to None.
+            max_value: Optional upper bound; values above this are excluded; defaults to None.
+        """
         filtered = _filter_values_by_range(values, min_value, max_value)
         if not filtered:
             return None

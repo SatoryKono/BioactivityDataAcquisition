@@ -59,6 +59,20 @@ ALLOWED_PATTERNS = [
 ]
 
 
+# ---------------------------------------------------------------------------
+# Session-scoped fixture: read all source .py files once per test session.
+# Caches (path, content) tuples so that multiple test classes that scan
+# source files do not re-read the filesystem independently.
+# ---------------------------------------------------------------------------
+@pytest.fixture(scope="session")
+def _src_file_contents() -> list[tuple[Path, str]]:
+    """Read all Python source files under SRC_DIR once per session."""
+    return [
+        (py_file, py_file.read_text(encoding="utf-8"))
+        for py_file in sorted(SRC_DIR.rglob("*.py"))
+    ]
+
+
 @pytest.mark.slow
 @pytest.mark.timeout(300)  # VCR cassettes can be large
 class TestVCRCassetteSanitization:
@@ -96,10 +110,16 @@ class TestVCRCassetteSanitization:
     ) -> None:
         """Verify cassettes don't contain real authorization headers."""
         violations = []
+        header_lower = header_name.lower()
+        compiled = re.compile(
+            rf"{header_name}:\s*['\"]?[A-Za-z0-9+/=\-_.]{(20,)}['\"]?",
+            re.IGNORECASE,
+        )
         for name, content in cassette_contents:
-            # Look for headers with actual values (not empty or placeholder)
-            pattern = rf"{header_name}:\s*['\"]?[A-Za-z0-9+/=\-_.]{(20,)}['\"]?"
-            if re.search(pattern, content, re.IGNORECASE):
+            # Quick pre-filter: skip files that don't contain the header name
+            if header_lower not in content.lower():
+                continue
+            if compiled.search(content):
                 violations.append(f"{name}: Contains {header_name} header")
 
         assert not violations, "Cassettes with secrets:\n" + "\n".join(violations)
@@ -107,9 +127,12 @@ class TestVCRCassetteSanitization:
     def test_no_bearer_tokens(self, cassette_contents: list[tuple[str, str]]) -> None:
         """Verify no Bearer tokens in cassettes."""
         violations = []
+        bearer_re = re.compile(r"Bearer\s+[A-Za-z0-9\-_.]{20,}")
         for name, content in cassette_contents:
-            # Real Bearer tokens are typically 20+ chars
-            if re.search(r"Bearer\s+[A-Za-z0-9\-_.]{20,}", content):
+            # Quick pre-filter: skip files without "Bearer"
+            if "Bearer" not in content:
+                continue
+            if bearer_re.search(content):
                 violations.append(f"{name}: Contains Bearer token")
 
         assert not violations, "Cassettes with Bearer tokens:\n" + "\n".join(violations)
@@ -121,22 +144,29 @@ class TestVCRCassetteSanitization:
         We look for AWS keys in proper configuration context only.
         """
         violations = []
-        # AWS Access Key ID is exactly 20 chars: AKIA + 16 alphanumeric
-        # Look for keys in config/header context (quoted or with aws prefix)
-        aws_key_patterns = [
-            r'["\']?aws[_-]?access[_-]?key["\']?\s*[:=]\s*["\']?AKIA[0-9A-Z]{16}["\']?',
-            r'aws_access_key_id\s*[:=]\s*["\']?AKIA[0-9A-Z]{16}["\']?',
-            r'AccessKeyId["\']?\s*[:=]\s*["\']?AKIA[0-9A-Z]{16}["\']?',
-        ]
-        aws_secret_pattern = r'["\']?aws[_-]?secret[_-]?access[_-]?key["\']?\s*[:=]\s*["\'][^"\']{20,}["\']'
+        # Pre-compile combined pattern for all AWS key variants (single pass)
+        aws_key_combined = re.compile(
+            r"(?:"
+            r'["\']?aws[_-]?access[_-]?key["\']?\s*[:=]\s*["\']?AKIA[0-9A-Z]{16}["\']?'
+            r'|aws_access_key_id\s*[:=]\s*["\']?AKIA[0-9A-Z]{16}["\']?'
+            r'|AccessKeyId["\']?\s*[:=]\s*["\']?AKIA[0-9A-Z]{16}["\']?'
+            r")",
+            re.IGNORECASE,
+        )
+        aws_secret_re = re.compile(
+            r'["\']?aws[_-]?secret[_-]?access[_-]?key["\']?\s*[:=]\s*["\'][^"\']{20,}["\']',
+            re.IGNORECASE,
+        )
 
+        # Quick pre-filter: skip files that don't contain "aws" or "AKIA"
+        # (case-insensitive substring check is much faster than regex)
         for name, content in cassette_contents:
-            # Look for AWS keys in header/config context (not in protein sequences)
-            for pattern in aws_key_patterns:
-                if re.search(pattern, content, re.IGNORECASE):
-                    violations.append(f"{name}: Contains AWS Access Key")
-                    break
-            if re.search(aws_secret_pattern, content, re.IGNORECASE):
+            content_lower = content.lower()
+            if "aws" not in content_lower and "akia" not in content_lower:
+                continue
+            if aws_key_combined.search(content):
+                violations.append(f"{name}: Contains AWS Access Key")
+            if aws_secret_re.search(content):
                 violations.append(f"{name}: Contains AWS Secret")
 
         assert not violations, "Cassettes with AWS credentials:\n" + "\n".join(
@@ -148,22 +178,26 @@ class TestVCRCassetteSanitization:
 class TestNoHardcodedSecrets:
     """Tests that source code doesn't contain hardcoded secrets."""
 
-    @pytest.fixture
-    def python_files(self) -> list[Path]:
-        """Get all Python source files."""
-        return list(SRC_DIR.rglob("*.py"))
+    @pytest.fixture(scope="class")
+    def source_contents(
+        self, _src_file_contents: list[tuple[Path, str]]
+    ) -> list[tuple[Path, str]]:
+        """Class-scoped alias for session-cached source file contents."""
+        return _src_file_contents
 
-    def test_source_files_exist(self, python_files: list[Path]) -> None:
+    def test_source_files_exist(
+        self, source_contents: list[tuple[Path, str]]
+    ) -> None:
         """Verify source files exist."""
-        assert len(python_files) > 0, "No Python source files found"
+        assert len(source_contents) > 0, "No Python source files found"
 
-    def test_no_hardcoded_secrets(self, python_files: list[Path]) -> None:
+    def test_no_hardcoded_secrets(
+        self, source_contents: list[tuple[Path, str]]
+    ) -> None:
         """Verify no hardcoded secrets in source code."""
         violations = []
 
-        for py_file in python_files:
-            content = py_file.read_text(encoding="utf-8")
-
+        for py_file, content in source_contents:
             # Skip if content matches allowed patterns
             for pattern, secret_type in SECRET_PATTERNS:
                 matches = re.finditer(pattern, content, re.IGNORECASE)
@@ -181,7 +215,9 @@ class TestNoHardcodedSecrets:
 
         assert not violations, "Potential secrets found:\n" + "\n".join(violations)
 
-    def test_env_vars_use_correct_prefix(self, python_files: list[Path]) -> None:
+    def test_env_vars_use_correct_prefix(
+        self, source_contents: list[tuple[Path, str]]
+    ) -> None:
         """Verify environment variables use BIOETL_ prefix."""
         non_bioetl_env_vars = []
         # Pattern to find os.environ.get or os.getenv calls
@@ -200,8 +236,7 @@ class TestNoHardcodedSecrets:
             "GITHUB_",
         )
 
-        for py_file in python_files:
-            content = py_file.read_text(encoding="utf-8")
+        for py_file, content in source_contents:
             matches = re.findall(env_pattern, content)
 
             for var_name in matches:
@@ -223,7 +258,7 @@ class TestNoHardcodedSecrets:
 class TestPrivateKeyExposure:
     """Tests for private key exposure."""
 
-    @pytest.fixture
+    @pytest.fixture(scope="class")
     def all_files(self) -> list[Path]:
         """Get all files in project (excluding .git and venv).
 
@@ -310,7 +345,7 @@ class TestPrivateKeyExposure:
                 for match_file in result.stdout.strip().splitlines():
                     violations.append(f"{match_file}: Contains private key")
         except (subprocess.TimeoutExpired, OSError):
-            pass  # git grep unavailable or timed out — skip content check
+            pass  # git grep unavailable or timed out -- skip content check
 
         assert not violations, "Private keys found:\n" + "\n".join(violations)
 
@@ -337,7 +372,7 @@ class TestPIIHandling:
 
     - `address` in affiliation contexts: Refers to "email address" text in
       PubMed affiliation extraction, not physical/postal address PII.
-      Actual email values are hashed at the transformer level (RULES.md §5.4).
+      Actual email values are hashed at the transformer level (RULES.md S5.4).
     """
 
     # Files with known technical email usage (NOT user PII)
@@ -355,11 +390,14 @@ class TestPIIHandling:
             "source_config.py",  # NCBI API default_email for PubMed
             "batch.py",  # CrossRef mailto for polite pool access (higher rate limits)
             "pipeline_config_provider.py",  # Technical email config for API identification
+            "client_builders.py",  # CrossRef mailto for polite pool (EXC-010)
+            "health_probe.py",  # OpenAlex mailto for API identification (EXC-010)
+            "query_builder.py",  # OpenAlex mailto for API identification (EXC-010)
         }
     )
 
     # Files where "address" refers to non-PII context (email address text,
-    # network address, etc.) — not physical/postal address
+    # network address, etc.) -- not physical/postal address
     KNOWN_NON_PII_ADDRESS_FILES = frozenset(
         {
             "noop_logger.py",  # Logging infrastructure, no PII
@@ -373,7 +411,7 @@ class TestPIIHandling:
 
         ENFORCED: Files containing PII-related fields MUST reference
         hashing/anonymization or be in the known allowlist.
-        Violations indicate PII leakage risk (RULES.md §5.4).
+        Violations indicate PII leakage risk (RULES.md S5.4).
         """
         infrastructure_files = list((SRC_DIR / "infrastructure").rglob("*.py"))
         application_files = list((SRC_DIR / "application").rglob("*.py"))
@@ -399,12 +437,6 @@ class TestPIIHandling:
                 continue
             for regex_pattern, pattern_name in pii_patterns:
                 if re.search(regex_pattern, content, re.IGNORECASE):
-                    # Skip known technical email files (documented as NOT PII)
-                    if (
-                        pattern_name == "email"
-                        and py_file.name in self.KNOWN_TECHNICAL_EMAIL_FILES
-                    ):
-                        continue
 
                     # Skip known non-PII address files (email address text, network address)
                     if (
@@ -421,7 +453,7 @@ class TestPIIHandling:
                         )
 
         assert not files_with_pii, (
-            "PII fields found without hashing reference (RULES.md §5.4).\n"
+            "PII fields found without hashing reference (RULES.md S5.4).\n"
             "Each file with PII-related fields MUST either:\n"
             "  1. Reference hashing/anonymization (sha256, hash, anonymize), OR\n"
             "  2. Be added to the known allowlist with documented rationale.\n"
@@ -433,7 +465,16 @@ class TestPIIHandling:
 class TestInputValidation:
     """Tests for input validation and injection prevention."""
 
-    def test_no_eval_or_exec_in_source(self) -> None:
+    @pytest.fixture(scope="class")
+    def source_contents(
+        self, _src_file_contents: list[tuple[Path, str]]
+    ) -> list[tuple[Path, str]]:
+        """Class-scoped alias for session-cached source file contents."""
+        return _src_file_contents
+
+    def test_no_eval_or_exec_in_source(
+        self, source_contents: list[tuple[Path, str]]
+    ) -> None:
         """Verify no dangerous eval/exec calls in source code."""
         violations = []
         dangerous_patterns = [
@@ -442,8 +483,7 @@ class TestInputValidation:
             (r"\bcompile\s*\([^)]*\bexec\b", "compile() with exec mode"),
         ]
 
-        for py_file in SRC_DIR.rglob("*.py"):
-            content = py_file.read_text(encoding="utf-8")
+        for py_file, content in source_contents:
             for pattern, desc in dangerous_patterns:
                 if re.search(pattern, content):
                     rel_path = py_file.relative_to(PROJECT_ROOT)
@@ -453,21 +493,24 @@ class TestInputValidation:
             violations
         )
 
-    def test_no_shell_injection_patterns(self) -> None:
+    def test_no_shell_injection_patterns(
+        self, source_contents: list[tuple[Path, str]]
+    ) -> None:
         """Verify no shell injection vulnerabilities in subprocess calls."""
         violations = []
         # Dangerous: shell=True with variable input
         dangerous_pattern = r"subprocess\.(?:run|call|Popen)\s*\([^)]*shell\s*=\s*True"
 
-        for py_file in SRC_DIR.rglob("*.py"):
-            content = py_file.read_text(encoding="utf-8")
+        for py_file, content in source_contents:
             if re.search(dangerous_pattern, content):
                 rel_path = py_file.relative_to(PROJECT_ROOT)
                 violations.append(f"{rel_path}: subprocess with shell=True")
 
         assert not violations, "Shell injection risks found:\n" + "\n".join(violations)
 
-    def test_no_sql_string_formatting(self) -> None:
+    def test_no_sql_string_formatting(
+        self, source_contents: list[tuple[Path, str]]
+    ) -> None:
         """Verify no SQL injection via string formatting."""
         violations = []
         # Dangerous: f-string or % formatting in SQL queries
@@ -491,8 +534,7 @@ class TestInputValidation:
             r'["\'].*DELETE\s+FROM.*["\']\s*%',
         ]
 
-        for py_file in SRC_DIR.rglob("*.py"):
-            content = py_file.read_text(encoding="utf-8")
+        for py_file, content in source_contents:
             for pattern in sql_patterns:
                 if re.search(pattern, content, re.IGNORECASE):
                     rel_path = py_file.relative_to(PROJECT_ROOT)
@@ -501,14 +543,15 @@ class TestInputValidation:
 
         assert not violations, "SQL injection risks found:\n" + "\n".join(violations)
 
-    def test_no_pickle_with_untrusted_data(self) -> None:
+    def test_no_pickle_with_untrusted_data(
+        self, source_contents: list[tuple[Path, str]]
+    ) -> None:
         """Verify no pickle.loads on untrusted data."""
         violations = []
         # Check for pickle usage (which should be reviewed for untrusted input)
         pickle_pattern = r"pickle\.(?:loads?|Unpickler)"
 
-        for py_file in SRC_DIR.rglob("*.py"):
-            content = py_file.read_text(encoding="utf-8")
+        for py_file, content in source_contents:
             if re.search(pickle_pattern, content):
                 # Check if it's in a context that might be dangerous
                 # (loading from network, user input, etc.)
@@ -526,7 +569,16 @@ class TestInputValidation:
 class TestPathTraversal:
     """Tests for path traversal vulnerabilities."""
 
-    def test_no_unsanitized_path_joins(self) -> None:
+    @pytest.fixture(scope="class")
+    def source_contents(
+        self, _src_file_contents: list[tuple[Path, str]]
+    ) -> list[tuple[Path, str]]:
+        """Class-scoped alias for session-cached source file contents."""
+        return _src_file_contents
+
+    def test_no_unsanitized_path_joins(
+        self, source_contents: list[tuple[Path, str]]
+    ) -> None:
         """Verify path handling uses safe patterns."""
         violations = []
         # Looking for patterns where user input might be joined to paths
@@ -537,8 +589,7 @@ class TestPathTraversal:
             r"open\s*\([^)]*\+",  # String concatenation in open()
         ]
 
-        for py_file in SRC_DIR.rglob("*.py"):
-            content = py_file.read_text(encoding="utf-8")
+        for py_file, content in source_contents:
             for dangerous_pattern in dangerous_patterns:
                 if re.search(dangerous_pattern, content):
                     rel_path = py_file.relative_to(PROJECT_ROOT)
@@ -568,7 +619,16 @@ class TestPathTraversal:
 class TestSecurityHeaders:
     """Tests for security-related header handling."""
 
-    def test_sensitive_headers_sanitized_in_logs(self) -> None:
+    @pytest.fixture(scope="class")
+    def source_contents(
+        self, _src_file_contents: list[tuple[Path, str]]
+    ) -> list[tuple[Path, str]]:
+        """Class-scoped alias for session-cached source file contents."""
+        return _src_file_contents
+
+    def test_sensitive_headers_sanitized_in_logs(
+        self, source_contents: list[tuple[Path, str]]
+    ) -> None:
         """Verify sensitive headers are not logged."""
         violations = []
         sensitive_headers = [
@@ -581,8 +641,7 @@ class TestSecurityHeaders:
 
         log_pattern = r"(?:logger?\.(?:info|debug|warning|error)|print)\s*\("
 
-        for py_file in SRC_DIR.rglob("*.py"):
-            content = py_file.read_text(encoding="utf-8")
+        for py_file, content in source_contents:
             if re.search(log_pattern, content):
                 for header in sensitive_headers:
                     # Check if header name appears near logging statements
@@ -601,7 +660,16 @@ class TestSecurityHeaders:
 class TestCryptographyUsage:
     """Tests for proper cryptography usage."""
 
-    def test_uses_secure_hash_algorithms(self) -> None:
+    @pytest.fixture(scope="class")
+    def source_contents(
+        self, _src_file_contents: list[tuple[Path, str]]
+    ) -> list[tuple[Path, str]]:
+        """Class-scoped alias for session-cached source file contents."""
+        return _src_file_contents
+
+    def test_uses_secure_hash_algorithms(
+        self, source_contents: list[tuple[Path, str]]
+    ) -> None:
         """Verify secure hash algorithms are used.
 
         Note: MD5/SHA1 with usedforsecurity=False is allowed for non-cryptographic
@@ -610,8 +678,7 @@ class TestCryptographyUsage:
         weak_hashes = ["md5", "sha1"]
         violations = []
 
-        for py_file in SRC_DIR.rglob("*.py"):
-            content = py_file.read_text(encoding="utf-8")
+        for py_file, content in source_contents:
             for weak_hash in weak_hashes:
                 # Check for hashlib usage of weak algorithms
                 # Skip comments and multi-line strings for detection
@@ -630,14 +697,15 @@ class TestCryptographyUsage:
 
         assert not violations, "Weak hash algorithms:\n" + "\n".join(violations)
 
-    def test_random_uses_secrets_module(self) -> None:
+    def test_random_uses_secrets_module(
+        self, source_contents: list[tuple[Path, str]]
+    ) -> None:
         """Verify security-sensitive randomness uses secrets module."""
         # For tokens, keys, etc. - random module is not cryptographically secure
         violations = []
         random_pattern = r"random\.(?:choice|randint|random|sample)\s*\("
 
-        for py_file in SRC_DIR.rglob("*.py"):
-            content = py_file.read_text(encoding="utf-8")
+        for py_file, content in source_contents:
             if re.search(random_pattern, content):
                 # Check if it's for security-sensitive purposes
                 if re.search(

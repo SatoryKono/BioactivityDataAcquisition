@@ -76,7 +76,23 @@ def create_batch_processing_components(
     tracer: TracingPort | None = None,
     lock_validator: Callable[[], Awaitable[bool]] | None = None,
 ) -> BatchProcessingComponents:
-    """Create batch metrics/transformer/writer stack via composition DI."""
+    """Create batch metrics/transformer/writer stack via composition DI.
+
+    Args:
+        services: Wired PipelineService bundle with storage, checkpoint, and observability.
+        context: Pipeline execution context with run metadata.
+        config: Record processor configuration (table names, keys, schemas).
+        error_classifier: Classifier for categorizing processing errors.
+        transform_callback: Callback applied to each Bronze record during Silver transform.
+        gold_filter_callback: Predicate determining if a Silver record writes to Gold.
+        gold_transform_callback: Callback applied to each Silver record for Gold output.
+        gold_validator: Validator applied to Gold-layer DataFrames.
+        tracer: Optional TracingPort for distributed tracing.
+        lock_validator: Optional async callable for lock validation before writes.
+
+    Returns:
+        BatchProcessingComponents with batch metrics, transformer, and writer.
+    """
     pipeline_label = f"{config.provider}_{config.entity_type}"
     batch_metrics = BatchMetricsRecorderService(
         services.metrics,

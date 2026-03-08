@@ -23,6 +23,10 @@ def create_shared_metrics(
 ) -> MetricsPort:
     """Create shared pipeline metrics via base services factory.
 
+    Args:
+        settings: Application settings used to configure the metrics backend.
+        base_services_factory: Factory class providing the metrics creation method.
+
     Returns:
         Configured MetricsPort for shared use across pipeline components.
     """
@@ -97,6 +101,16 @@ def create_data_source_with_observability(
     cached_bronze: CachedBronzeContext | None,
 ) -> DataSourcePort:
     """Create data source and emit cached-bronze observability logs.
+
+    Args:
+        create_data_source_fn: Factory callable producing a live DataSourcePort.
+        settings: Application settings for data source configuration.
+        pipeline_config: Pipeline YAML config providing provider and entity type.
+        logger: LoggerPort for structured observability logging.
+        filter_config: Optional input filter configuration for data source.
+        shared_metrics: Shared MetricsPort passed to the live data source.
+        pipeline_name: Pipeline name used in log events.
+        cached_bronze: Optional cached Bronze context; if enabled, bypasses live API.
 
     Returns:
         DataSourcePort configured for live API or cached Bronze data.

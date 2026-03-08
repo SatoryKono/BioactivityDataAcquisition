@@ -49,7 +49,15 @@ class OpenAlexCursorFlowService:
         query: str,
         limit: int | None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Yield free-text query results using OpenAlex cursor pagination."""
+        """Yield free-text query results using OpenAlex cursor pagination.
+
+        Args:
+            query: Free-text search query string for the OpenAlex works endpoint.
+            limit: Optional maximum number of records to yield.
+
+        Yields:
+            BronzeRecord works from the OpenAlex search results.
+        """
         fetched = 0
         cursor: str | None = "*"
         per_page = min(self.batch_size, 200)
@@ -74,7 +82,15 @@ class OpenAlexCursorFlowService:
         filter_ids: list[str],
         limit: int | None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Yield DOI-filtered works with `_lookup_method='doi'` metadata."""
+        """Yield DOI-filtered works with `_lookup_method='doi'` metadata.
+
+        Args:
+            filter_ids: List of DOI strings to resolve via batch filter.
+            limit: Optional maximum number of records to yield.
+
+        Yields:
+            BronzeRecord works with _lookup_method set to "doi".
+        """
         dois = filter_ids[:limit] if limit is not None else filter_ids
         fetched = 0
         for batch_start in range(0, len(dois), self.batch_size):
@@ -90,7 +106,15 @@ class OpenAlexCursorFlowService:
         titles: list[str],
         limit: int | None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Yield title-filtered works with lookup metadata and summary logging."""
+        """Yield title-filtered works with lookup metadata and summary logging.
+
+        Args:
+            titles: List of publication title strings to search for.
+            limit: Optional maximum number of records to yield.
+
+        Yields:
+            BronzeRecord works with _lookup_method set to "title".
+        """
         self.logger.info(
             "openalex_title_search_start",
             total_titles=len(titles),
@@ -132,7 +156,16 @@ class OpenAlexCursorFlowService:
         limit: int | None,
         start_count: int = 0,
     ) -> AsyncIterator[BronzeRecord]:
-        """Yield DOI-batch phase used by fallback orchestrator."""
+        """Yield DOI-batch phase used by fallback orchestrator.
+
+        Args:
+            primary_ids: List of DOI strings for primary batch resolution.
+            limit: Optional maximum total records to yield.
+            start_count: Records already yielded before this phase, used to track against limit.
+
+        Yields:
+            BronzeRecord works with _lookup_method set to "doi".
+        """
         count = start_count
         for batch_start in range(0, len(primary_ids), self.batch_size):
             if limit is not None and count >= limit:
@@ -145,13 +178,23 @@ class OpenAlexCursorFlowService:
                 count += 1
 
     async def iter_by_dois(self, dois: list[str]) -> AsyncIterator[BronzeRecord]:
-        """Yield works resolved via batch DOI filter query."""
+        """Yield works resolved via batch DOI filter query.
+
+        Args:
+            dois: List of DOI strings to resolve in a single batch request.
+
+        Yields:
+            BronzeRecord works from the batch DOI filter response.
+        """
         results = await self.fetch_by_dois(dois)
         for work in results:
             yield work
 
     async def fetch_by_dois(self, dois: list[str]) -> list[BronzeRecord]:
         """Resolve DOI batch and return records list.
+
+        Args:
+            dois: List of DOI strings to resolve via filter query.
 
         Returns:
             List of BronzeRecord dictionaries resolved from the DOI batch.
@@ -175,6 +218,10 @@ class OpenAlexCursorFlowService:
 
     async def search_by_title(self, title: str, limit: int = 3) -> list[BronzeRecord]:
         """Search by title with in-memory cache and graceful runtime fallback.
+
+        Args:
+            title: Publication title string to search for.
+            limit: Maximum number of results to return per search.
 
         Returns:
             List of BronzeRecord dictionaries matching the title search, up to limit results.

@@ -1,8 +1,11 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.23 | Last updated: 2026-03-02*
+*Synced with RULES.md v5.23 | Last updated: 2026-03-08*
 
-> **Documentation Update:** 2026-03-02
+> **Documentation Update:** 2026-03-08
+> - Added Coverage Configuration Guide (coverage-configuration.md) with P3 exclude_lines patterns
+>
+> **Previous Update:** 2026-03-02
 > - Source Code Map rewritten to match actual codebase structure (v8.0)
 > - Codebase metrics (snapshot 2026-03-03): 581 src files + 868 test files
 > - ADR count: 40 ADRs (ADR-001 through ADR-040)
@@ -188,6 +191,7 @@ docs/
 | Adding Pipelines | [add-pipeline-existing-source.md](../03-guides/add-pipeline-existing-source.md)                    | App D    |
 | Pipeline Review  | [pipeline-review-checklist.md](../04-reference/templates/pipeline-review-checklist.md)                          | §4.2     |
 | Testing          | [testing.md](../03-guides/testing.md)                                                              | §4.2     |
+| Coverage Config  | [coverage-configuration.md](../03-guides/coverage-configuration.md)                                | §4.2     |
 | E2E Testing      | [ADR-010](../02-architecture/decisions/ADR-010-local-only-deployment.md)                           | §4.2.3   |
 | Date Handling    | [date-handling.md](../03-guides/date-handling.md)                                                  | §2.4     |
 | Code Style       | [RULES.md §4](RULES.md)                                          | §4       |

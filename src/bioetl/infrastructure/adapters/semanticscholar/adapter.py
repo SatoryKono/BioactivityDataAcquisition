@@ -87,6 +87,13 @@ def _create_default_semanticscholar_title_fallback_handler(
 ) -> SemanticScholarTitleFallbackHandler:
     """Create default title fallback handler for non-DI call sites.
 
+    Args:
+        http_client: HTTP client for API requests.
+        logger: Logger port for structured logging.
+        metrics: Adapter metrics for request tracking.
+        api_key: Optional Semantic Scholar API key for stable rate limits.
+        fields: Comma-separated list of fields to retrieve per paper.
+
     Returns:
         SemanticScholarTitleFallbackHandler instance configured with HTTP client and API key.
     """
@@ -162,7 +169,11 @@ class SemanticScholarAdapter(
         self.configure_fallback_policy(None)
 
     def configure_fallback_policy(self, policy: object | None) -> None:
-        """Configure fallback decorator behavior from provider YAML policy."""
+        """Configure fallback decorator behavior from provider YAML policy.
+
+        Args:
+            policy: Provider YAML fallback policy object, or None to use defaults.
+        """
         enabled, config = resolve_fallback_policy(
             policy,
             defaults=_SEMANTICSCHOLAR_DEFAULT_FALLBACK_CONFIG,

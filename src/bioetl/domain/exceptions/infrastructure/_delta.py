@@ -16,7 +16,17 @@ def DeltaWriteConflictError(
     operation: str = "write",
     conflicting_version: int | None = None,
 ) -> StorageError:
-    """Compatibility constructor for legacy DeltaWriteConflictError."""
+    """Compatibility constructor for legacy DeltaWriteConflictError.
+
+    Args:
+        table_path: Path to the Delta table where the conflict occurred.
+        operation: Operation that caused the conflict; defaults to 'write'.
+        conflicting_version: Optional Delta table version that conflicted;
+            defaults to None.
+
+    Returns:
+        StorageError with NETWORK_ERROR type and conflict context attached.
+    """
     msg = f"Delta write conflict on '{table_path}' during {operation}"
     if conflicting_version is not None:
         msg += f" (conflicting version: {conflicting_version})"
@@ -86,7 +96,18 @@ def DeltaSchemaValidationError(
     actual_columns: list[str] | None = None,
     type_mismatches: dict[str, tuple[str, str]] | None = None,
 ) -> StorageQuotaExceededError:
-    """Compatibility constructor for legacy DeltaSchemaValidationError."""
+    """Compatibility constructor for legacy DeltaSchemaValidationError.
+
+    Args:
+        table_path: Path to the Delta table with schema mismatch.
+        expected_columns: Expected column names; defaults to None.
+        actual_columns: Actual column names found in the table; defaults to None.
+        type_mismatches: Dict mapping column names to (expected_type, actual_type)
+            tuples; defaults to None.
+
+    Returns:
+        StorageQuotaExceededError with SCHEMA_MISMATCH_GOLD type and diff context.
+    """
     expected = expected_columns or []
     actual = actual_columns or []
     mismatches = type_mismatches or {}
@@ -116,7 +137,16 @@ def DeltaOptimizeError(
     operation: str,
     reason: str,
 ) -> StorageError:
-    """Compatibility constructor for legacy DeltaOptimizeError."""
+    """Compatibility constructor for legacy DeltaOptimizeError.
+
+    Args:
+        table_path: Path to the Delta table where the operation failed.
+        operation: Name of the failed Delta operation (e.g., 'optimize', 'vacuum').
+        reason: Human-readable description of why the operation failed.
+
+    Returns:
+        StorageError with NETWORK_ERROR type and operation context attached.
+    """
     error = StorageError(f"Delta {operation} failed on '{table_path}': {reason}")
     error = cast(
         StorageError,

@@ -319,6 +319,15 @@ def create_pipeline_factory(
 ) -> GenericPipelineFactory[TPipeline]:
     """Create a configured :class:`GenericPipelineFactory`.
 
+    Args:
+        pipeline_name: Name of the pipeline (e.g., 'chembl_activity').
+        pipeline_class: Concrete pipeline class to instantiate during factory creation.
+        provider: Provider name (e.g., 'chembl') used for data source registry lookup.
+        silver_schema: Optional PyArrow schema for Silver layer validation.
+        gold_schema: Optional Pandera DataFrameModel for Gold layer validation; required.
+        pandera_silver_schema: Optional Pandera schema for Silver-layer Pandera validation.
+        transformer_class: Optional transformer class; no transformer used if None.
+
     Returns:
         GenericPipelineFactory instance wired with the provided schemas and classes.
     """
@@ -342,6 +351,14 @@ def assemble_runner(
     yaml_config: PipelineYamlConfig | None = None,
 ) -> PipelineRunner:
     """Assemble a PipelineRunner from a pipeline instance.
+
+    Args:
+        pipeline: Configured pipeline instance with services and context.
+        observability: Bundle containing logger, tracer, metrics, and DQ monitor.
+        silver_schema: Optional PyArrow schema for Silver layer validation.
+        gold_schema: Pandera DataFrameModel class for Gold layer validation.
+        strict_gold_validation: If True, raises on Gold schema violations.
+        yaml_config: Optional pre-loaded pipeline YAML config used for DQ extraction.
 
     Returns:
         Fully wired PipelineRunner ready for execution.

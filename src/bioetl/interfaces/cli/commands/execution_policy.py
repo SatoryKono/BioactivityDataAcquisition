@@ -78,6 +78,11 @@ def map_run_status_to_exit_code(
 ) -> ExitCode:
     """Map single pipeline status to CLI exit code.
 
+    Args:
+        status: PipelineRunResult enum value (SUCCESS, DRY_RUN, SHUTDOWN, or FAILED).
+        error_type: Exception class name from the failed run; used to select a
+            specific exit code when status is FAILED. None for non-failure statuses.
+
     Returns:
         ExitCode corresponding to the pipeline run status and error type.
     """
@@ -92,6 +97,10 @@ def map_run_status_to_exit_code(
 
 def map_batch_run_result_to_exit_code(batch_result: BatchRunResultProtocol) -> ExitCode:
     """Map batched pipeline result to CLI exit code.
+
+    Args:
+        batch_result: BatchRunResultProtocol with failed count, total count, and
+            individual run result objects.
 
     Returns:
         ExitCode based on the number of failures and shutdown signals in the batch.
@@ -115,6 +124,11 @@ def map_success_flag_to_exit_code(
 ) -> ExitCode:
     """Map boolean command outcome to CLI exit code.
 
+    Args:
+        success: When True, returns ExitCode.OK; when False, returns failure_exit_code.
+        failure_exit_code: Exit code to return on failure; defaults to
+            ExitCode.PIPELINE_ERROR.
+
     Returns:
         ExitCode.OK if success is True, otherwise the specified failure_exit_code.
     """
@@ -131,6 +145,14 @@ def build_failure_context(
     subject_value: str,
 ) -> dict[str, object]:
     """Build structured context for CLI failure diagnostics.
+
+    Args:
+        exc: Exception to build context from; BioETLError instances use their
+            own structured context method.
+        reason_code: Machine-readable code attached to error context (e.g.,
+            'CLI_RUN_DOMAIN_ERROR').
+        subject_key: Key name for the structured context field (e.g., 'pipeline').
+        subject_value: Value for the structured context field (e.g., 'chembl_activity').
 
     Returns:
         Dictionary with structured error context including message, reason_code,
@@ -152,6 +174,10 @@ def build_failure_context(
 
 def render_failure_context(context: Mapping[str, object]) -> str:
     """Render a structured failure context as stable human-readable text.
+
+    Args:
+        context: Structured failure context mapping with at least a 'message' key
+            and optional metadata fields.
 
     Returns:
         Human-readable string combining the message and sorted metadata fields.

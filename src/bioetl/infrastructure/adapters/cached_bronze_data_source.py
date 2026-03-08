@@ -123,6 +123,9 @@ class CachedBronzeDataSource:
     def _parse_date(self, date_str: str | None) -> datetime | None:
         """Parse date string to datetime for list_batches filtering.
 
+        Args:
+            date_str: Date string in YYYY-MM-DD format, or None.
+
         Returns:
             Datetime with UTC timezone parsed from the date string, or None if date_str is None.
         """
@@ -181,7 +184,22 @@ class CachedBronzeDataSource:
         filter_field: str | None = None,
         offset: int | None = None,
     ) -> AsyncIterator[JsonDict]:  # Any: untyped API JSON record
-        """Fetch records from cached Bronze files."""
+        """Fetch records from cached Bronze files.
+
+        Args:
+            entity_type: Entity type identifier (ignored; source is fixed at construction time).
+            limit: Optional maximum number of records to yield before stopping.
+            query: Optional query string (not supported; logs a warning if provided).
+            filter_ids: Optional ID filter list (not supported; logs a warning if provided).
+            filter_field: Optional filter field name (ignored for file-based source).
+            offset: Optional record offset (ignored for file-based source).
+
+        Yields:
+            Bronze records read from cached JSONL+zstd batch files.
+
+        Raises:
+            CachedBronzeEmptyError: If no batch files are found in Bronze storage.
+        """
         _ = entity_type, filter_field, offset
         self._log_unsupported_fetch_params(query=query, filter_ids=filter_ids)
         batches = await self._list_batches_sorted()
@@ -216,7 +234,12 @@ class CachedBronzeDataSource:
         query: str | None,
         filter_ids: list[str] | None,
     ) -> None:
-        """Log ignored fetch parameters for cached Bronze source."""
+        """Log ignored fetch parameters for cached Bronze source.
+
+        Args:
+            query: Query string that was passed to fetch but is not supported.
+            filter_ids: Filter ID list that was passed to fetch but is not supported.
+        """
         if query:
             self._logger.warning(
                 "cached_bronze_query_ignored",
@@ -242,7 +265,14 @@ class CachedBronzeDataSource:
         return str(Path(bronze_path) / self._provider / self._entity_type)
 
     def _raise_if_empty_batches(self, batches: list[str]) -> None:
-        """Raise domain error when no cached Bronze batches are available."""
+        """Raise domain error when no cached Bronze batches are available.
+
+        Args:
+            batches: List of batch paths to check; raises if empty.
+
+        Raises:
+            CachedBronzeEmptyError: If the batches list is empty.
+        """
         if batches:
             return
         raise CachedBronzeEmptyError(
@@ -256,7 +286,14 @@ class CachedBronzeDataSource:
         self,
         batches: list[str],
     ) -> AsyncIterator[JsonDict]:  # Any: untyped API JSON record
-        """Iterate records from sorted batch paths."""
+        """Iterate records from sorted batch paths.
+
+        Args:
+            batches: Sorted list of relative batch file paths to read.
+
+        Yields:
+            Bronze records from each batch file in order.
+        """
         for batch_path in batches:
             self._logger.debug("cached_bronze_reading_batch", batch_path=batch_path)
             async for record in self._reader.read_bronze(batch_path):

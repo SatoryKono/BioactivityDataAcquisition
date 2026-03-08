@@ -44,6 +44,24 @@ def create_silver_writer(
 ) -> SilverWriter:
     """Create configured Silver writer.
 
+    Args:
+        writer_cls: SilverWriter class to instantiate.
+        base_path: Root directory for Silver layer storage.
+        config: Optional sink layer config providing save_metadata flag.
+        logger: LoggerPort for structured logging.
+        tracing: Optional TracingPort; defaults to NoOpTracing if None.
+        csv_exporter: Optional CSV exporter for parallel Silver CSV output.
+        metadata_coordinator: Optional coordinator for metadata side-effects.
+        transform_version: Transform version tag written to Silver metadata.
+        transform_steps: Ordered transform step labels for metadata.
+        flat_structure: If True, writes files without provider/entity subdirectories.
+        silver_validator: Optional PyArrow schema validator for Silver records.
+        metrics: Optional MetricsPort for metadata writer; defaults to None.
+        metadata_atomic_retry_policy: Optional retry policy for atomic metadata
+            replace operations; defaults to None.
+        merge_resilience_policy: Optional timeout/retry policy for Delta merge
+            operations; defaults to None.
+
     Returns:
         Configured SilverWriter instance for the Silver storage layer.
     """

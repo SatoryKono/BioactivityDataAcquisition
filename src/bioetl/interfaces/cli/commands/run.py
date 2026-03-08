@@ -56,13 +56,7 @@ from bioetl.interfaces.cli.commands.run_result_presenter import (
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error
 
-__all__ = [
-    "build_run_options",
-    "execute_run",
-    "handle_cli_failure",
-    "run",
-    "validate_options",
-]
+__all__ = ["build_run_options", "execute_run", "handle_cli_failure", "run", "validate_options"]
 
 _CLI_RUN_ORCHESTRATION_SERVICE = CliRunOrchestrationService()
 
@@ -70,7 +64,6 @@ _CLI_RUN_ORCHESTRATION_SERVICE = CliRunOrchestrationService()
 def _exit_with_code(code: int | str | None = None) -> NoReturn:
     """Typed wrapper around sys.exit for policy flow injection."""
     sys.exit(code)
-
 
 def validate_options(start_offset: int | None, run_type: str, resume: bool) -> None:
     """Validate --start-offset constraints; sys.exit on error.
@@ -83,16 +76,12 @@ def validate_options(start_offset: int | None, run_type: str, resume: bool) -> N
             start_offset.
     """
     validation = _CLI_RUN_ORCHESTRATION_SERVICE.validate_start_offset(
-        start_offset=start_offset,
-        run_type=run_type,
-        resume=resume,
+        start_offset=start_offset, run_type=run_type, resume=resume,
     )
-    if validation.is_valid:
-        return
+    if validation.is_valid: return
     if validation.error_message is not None:
         echo_error(validation.error_message)
         sys.exit(ExitCode.CONFIG_ERROR)
-
 
 def build_run_options(
     run_type: str,
@@ -151,7 +140,6 @@ def build_run_options(
         cached_bronze_path=cached_bronze_path,
     )
 
-
 def execute_run(
     pipeline: str,
     options: RunOptions,
@@ -179,13 +167,11 @@ def execute_run(
         flush_metrics=push_metrics_to_gateway,
     )
 
-
 def _map_status_to_exit_code(
-    status: PipelineRunResult, error_type: str | None
+    status: PipelineRunResult, error_type: str | None,
 ) -> ExitCode:
     """Map run status to CLI exit code."""
     return map_status_to_exit_code(status, error_type)
-
 
 async def _run_pipeline_async(
     pipeline: str,
@@ -204,16 +190,13 @@ async def _run_pipeline_async(
     Returns:
         RunResult object with status and metrics.
     """
-    # Start metrics server if enabled (side-effect in entrypoint, not bootstrap)
     ensure_metrics_server_started()
-
     async with health_server_context(
         enabled=health_server_enabled,
         port=health_port,
     ):
         service = get_pipeline_runner_service()
         return await service.run(pipeline, options=options)
-
 
 def _handle_destructive_step(
     *,
@@ -229,7 +212,6 @@ def _handle_destructive_step(
         dry_run=dry_run,
         yes=yes,
     )
-
 
 def _execute_run_step(
     *,
@@ -247,7 +229,6 @@ def _execute_run_step(
         execute_run=execute_run,
     )
 
-
 def _finalize_run_step(result: RunResult) -> None:
     """Echo result and terminate command with mapped exit code."""
     _finalize_run_step_policy(
@@ -255,7 +236,6 @@ def _finalize_run_step(result: RunResult) -> None:
         result_presenter=_echo_run_result,
         exit_func=_exit_with_code,
     )
-
 
 @click.command()
 @click.option(
@@ -409,9 +389,7 @@ def run(
     )
     _finalize_run_step(result)
 
-
 # Re-export helpers for backward compatibility with tests
-# These are imported by tests/unit/interfaces/test_cli.py
 _get_runner_logger = get_runner_logger
 _handle_destructive_run_confirmation = handle_destructive_run_confirmation
 _preview_cleanup = show_cleanup_preview

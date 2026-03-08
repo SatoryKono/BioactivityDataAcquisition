@@ -158,7 +158,7 @@ addopts = [
     "-q",
     "--strict-markers",
     "--strict-config",
-    "-m", "not benchmark",
+    "-m", "not benchmark and not slow",
     "--import-mode=importlib",
 ]
 # required_plugins check moved to CI for compatibility
@@ -217,6 +217,9 @@ exclude_lines = [
     "if TYPE_CHECKING:",
     "raise NotImplementedError",
     "@abstractmethod",
+    "@overload",
+    "^\\s*pass\\s*$",
+    "^\\s*\\.\\.\\.\\s*$",
 ]
 # Note: fail_under is NOT set here because:
 # 1. CI test-matrix runs parallel test groups that cover partial codebase

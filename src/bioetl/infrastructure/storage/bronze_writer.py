@@ -218,6 +218,10 @@ class BronzeWriter(
             span.set_attribute("batch_id", str(batch_id))
             span.set_attribute("run_id", str(run_id))
 
+            labels = {"provider": provider, "entity": entity}
+            self._metrics.increment_counter(
+                "bronze_write_attempts_total", 1, labels
+            )
             start_time = time.perf_counter()
             prepared = self._prepare_bronze_write(
                 records=records,
@@ -249,6 +253,12 @@ class BronzeWriter(
                 duration=duration,
                 source_metadata=source_metadata,
             )
+            total_duration = time.perf_counter() - start_time
+            self._metrics.observe_histogram(
+                "bronze_write_total_duration_seconds",
+                total_duration,
+                labels,
+            )
             return await self._build_bronze_write_result(
                 prepared=prepared,
                 batch_id=batch_id,
@@ -270,6 +280,21 @@ class BronzeWriter(
         run_type: RunType,
         ingestion_ts: datetime,
     ) -> _BronzeWritePrepared:
+        """Validate inputs and build the prepared write context.
+
+        Args:
+            records: Iterator of JSON-encoded record bytes.
+            provider: Data provider name (e.g., "chembl").
+            entity: Entity type name (e.g., "activity").
+            date: UTC date of the batch used for path partitioning.
+            batch_id: Unique identifier for this write batch.
+            run_id: Pipeline run identifier for lineage tracking.
+            run_type: Run classification (INCREMENTAL, BACKFILL, or REBUILD).
+            ingestion_ts: UTC timestamp when ingestion started.
+
+        Returns:
+            _BronzeWritePrepared context ready for the write stage.
+        """
         self._validate_bronze_names(provider, entity)
         self._validate_records_iterator(records)
         self._validate_utc_datetime(date, "date")
@@ -308,6 +333,14 @@ class BronzeWriter(
         self,
         prepared: _BronzeWritePrepared,
     ) -> tuple[int, int, int]:
+        """Write compressed JSONL data and metadata sidecar to disk.
+
+        Args:
+            prepared: Prepared write context with record iterator, paths, and metadata.
+
+        Returns:
+            Tuple of (record_count, uncompressed_size_bytes, compressed_size_bytes).
+        """
         loop = asyncio.get_running_loop()
 
         def _write_task() -> tuple[int, int]:
@@ -339,6 +372,22 @@ class BronzeWriter(
         duration: float,
         source_metadata: SourceMetadata | None,
     ) -> None:
+        """Emit metrics, optional JSON copy, audit log, and metadata sidecar.
+
+        Args:
+            prepared: Prepared write context with paths and metadata.
+            provider: Data provider name.
+            entity: Entity type name.
+            batch_id: Unique identifier for this write batch.
+            run_id: Pipeline run identifier.
+            run_type: Run classification (INCREMENTAL, BACKFILL, or REBUILD).
+            ingestion_ts: UTC timestamp when ingestion started.
+            record_count: Number of records written.
+            uncompressed_size: Total uncompressed byte size of all records.
+            compressed_size: Compressed byte size of the written file.
+            duration: Time taken for the write operation in seconds.
+            source_metadata: Optional provider metadata for the sidecar file.
+        """
         self._emit_bronze_write_metrics(
             duration=duration,
             provider=provider,

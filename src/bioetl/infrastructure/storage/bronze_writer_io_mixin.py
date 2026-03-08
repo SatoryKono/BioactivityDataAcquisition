@@ -46,6 +46,10 @@ class BronzeWriterIOMixin:
     ) -> tuple[int, int]:
         """Stream compress records directly to a temp file, then rename atomically.
 
+        Args:
+            records: Iterator of JSON-encoded record bytes, one per line.
+            target_path: Final destination path for the compressed file.
+
         Returns:
             Tuple of (record count written, uncompressed size in bytes).
         """
@@ -96,6 +100,9 @@ class BronzeWriterIOMixin:
     async def _calculate_checksum(self, file_path: Path) -> str:
         """Calculate BLAKE2b checksum of a file asynchronously.
 
+        Args:
+            file_path: Path to the file to compute the checksum for.
+
         Returns:
             BLAKE2b hex digest string of the file contents.
         """
@@ -118,7 +125,15 @@ class BronzeWriterIOMixin:
         date_str: str,
         batch_id: BatchID,
     ) -> None:
-        """Write uncompressed JSONL copy of records atomically."""
+        """Write uncompressed JSONL copy of records atomically.
+
+        Args:
+            records: List of JSON-encoded record bytes to write.
+            provider: Data provider name for path resolution.
+            entity: Entity type name for path resolution.
+            date_str: Date string (YYYY-MM-DD) for path partitioning.
+            batch_id: Unique batch identifier used in the output filename.
+        """
         json_filename = f"batch_{date_str}_{batch_id}.jsonl"
         json_relative_path = self._resolve_bronze_path(
             provider, entity, date_str, json_filename
@@ -139,6 +154,9 @@ class BronzeWriterIOMixin:
         self, path: str
     ) -> AsyncIterator[JsonDict]:  # Any: record/metadata values are heterogeneous
         """Read and decompress Bronze file (for testing/debugging).
+
+        Args:
+            path: Relative path to the Bronze .jsonl.zst file within base_path.
 
         Returns:
             Async iterator of JSON dicts, one per JSONL line in the decompressed Bronze file.
@@ -168,6 +186,11 @@ class BronzeWriterIOMixin:
     ) -> list[str]:
         """List all batch files for a given provider/entity.
 
+        Args:
+            provider: Data provider name to filter batch files by.
+            entity: Entity type name to filter batch files by.
+            date: Optional date to narrow the search to a specific day partition.
+
         Returns:
             Sorted list of relative file path strings for all batch files found.
         """
@@ -196,6 +219,11 @@ class BronzeWriterIOMixin:
     ) -> list[Path]:
         """Find date directories older than cutoff.
 
+        Args:
+            cutoff_str: Date string in YYYY-MM-DD format; directories older than this are returned.
+            provider: Optional provider filter; all providers searched if None.
+            entity: Optional entity filter; all entities searched if None.
+
         Returns:
             List of Path objects for date directories with names earlier than the cutoff string.
         """
@@ -218,6 +246,10 @@ class BronzeWriterIOMixin:
     def _is_old_date_dir(self, path: Path, cutoff_str: str) -> bool:
         """Check if path is a date directory older than cutoff.
 
+        Args:
+            path: Path to check for date-directory format and age.
+            cutoff_str: Date string in YYYY-MM-DD format to compare against.
+
         Returns:
             True if the path is a 10-character directory name earlier than cutoff_str, False otherwise.
         """
@@ -231,6 +263,12 @@ class BronzeWriterIOMixin:
         entity: str | None = None,
     ) -> dict[str, int]:
         """Remove Bronze files older than cutoff date (RULES.md §2.1 retention).
+
+        Args:
+            cutoff_date: UTC datetime; files in directories older than this date are removed.
+            dry_run: If True, count files without deleting them.
+            provider: Optional provider filter; all providers cleaned if None.
+            entity: Optional entity filter; all entities cleaned if None.
 
         Returns:
             Dictionary with files_removed, bytes_freed, and directories_removed counts.
@@ -298,6 +336,10 @@ class BronzeWriterIOMixin:
         entity: str | None,
     ) -> Path:
         """Resolve Bronze preview root path for optional provider/entity filters.
+
+        Args:
+            provider: Optional provider name to scope the preview root; base_path used if None.
+            entity: Optional entity name to scope the preview root; requires provider.
 
         Returns:
             Path to the directory root for the given provider/entity scope.

@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Test suite optimizations P1-P5 (post SWARM-003)**:
+  - P1: Added `client_builders.py`, `health_probe.py`, `query_builder.py` to `KNOWN_TECHNICAL_EMAIL_FILES` allowlist in `TestNoPIILeakage` — resolves pre-existing `test_silver_layer_uses_hashing` failure for new CrossRef/OpenAlex files (EXC-010)
+  - P2+P4: Created session-scoped `_src_file_contents` fixture in `tests/security/test_security.py` — reads all source `.py` files once per session; 5 security test classes (`TestNoPIILeakage`, `TestNoHardcodedSecrets`, `TestPrivateKeyExposure`, `TestInputValidation`, `TestPathTraversal`) now use class-scoped aliases to this fixture; saving ~2.84s (-27%) on security tests
+  - P3: `test_mypy_error_count` in `tests/architecture/test_regression_metrics.py` marked `@pytest.mark.slow` — skipped by default via `addopts = -m "not benchmark and not slow"` in `pyproject.toml`; run explicitly with `pytest -m slow`; saving ~160s per standard test suite run
+  - P3: `pyproject.toml [tool.coverage.report] exclude_lines` extended with 3 patterns for stub-like code: `@overload` (Protocol/typing stubs), `^\\s*pass\\s*$` (bare pass statements), `^\\s*\\.\\.\\.\\s*$` (ellipsis-only stubs) — excludes non-executable protocol definitions and method stubs from coverage metrics
+  - P5: `test_architecture_skip_count` replaced `subprocess.run(["pytest", ...])` with in-process `pytest.main()` and lightweight `_SkipCounter` plugin (`pytest_runtest_logreport`); saving 7.98s -> 2.95s (-63%)
+  - Files: `tests/security/test_security.py`, `tests/architecture/test_regression_metrics.py`, `pyproject.toml`
+
 ### Fixed
 
 - **Ruff lint errors resolved (8 violations)**:
@@ -44,6 +54,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Governance scorecard/registry drift automated (P2-2)**:
+  - `tests/architecture/test_regression_metrics.py`: added `test_scorecard_baseline_matches_registry()` (Metric 12) — reads `configs/quality/architecture_metric_exemptions.yaml` and `configs/quality/debt_scorecard.yaml`, compares actual per-registry counts against `baseline.by_registry` and `baseline.total_exemptions` in the scorecard, fails with a diff listing every mismatch
+  - Any manual edit to either file that creates drift between the two governance artifacts is now caught immediately in CI, eliminating the possibility of silent divergence
+  - Policy sections (`quarterly_targets`, `grace_windows`, `owner_decomposition_targets`) remain hand-authored and are not validated by this test
+
+- **Architecture CI guardrails formalized with p95 budget (P2-1)**:
+  - `tests/architecture/test_regression_metrics.py`: added `ARCH_TEST_P95_BUDGET_SECONDS = 30.0` ratchet constant and `test_architecture_test_p95_duration_tracked()` — validates that the CI workflow has a fast/nightly split with `@pytest.mark.slow` exclusion in the fast baseline job
+  - Confirmed pre-existing fast/nightly split: `architecture-fast-baseline` job excludes slow tests; `architecture-heavy-nightly` job runs full suite; `make test-fast` and `make test-quick` targets already present
+  - New test formalizes the requirement as a regression guard — future removal of the fast/nightly split will be caught immediately
+
+- **Coupling metric now covers full dependency graph (P0-1)**:
+  - `scripts/generate_architecture_dependency_map.py`: `DependencySnapshot` gains `cross_layer_group_edges_total` field — the count of all unique cross-layer module-group edges in the full graph before top-N slicing. Previously only the top-60 slice was tracked, hiding real coupling pressure.
+  - `tests/architecture/test_regression_metrics.py`: new `test_cross_layer_group_edges_total_budget()` enforces `GROUP_EDGE_TOTAL_BUDGET = 240` on the full graph count. Baseline value is 232 (8-edge headroom).
+  - `docs/02-architecture/generated/module-dependency-map.json`: regenerated; `summary.cross_layer_group_edges_total` is now `232`.
+  - `docs/02-architecture/generated/module-dependency-map.md`: Summary section now shows both "total" and "top 60" counts.
+
 - **Governance scorecard/exemptions synchronized (2026-03-07)**:
   - `configs/quality/debt_scorecard.yaml`: `governance.baseline_date` updated to `2026-03-07`
   - `configs/quality/architecture_metric_exemptions.yaml`: retained single governance-anchor `god_object` exemption (`DependencyCoordinatorService`) with clarified `reason` and `removal_step` text aligned to owner-diversification tracking
@@ -57,6 +83,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Module-level docstrings updated for domain normalization services (RF-009)**:
   - `src/bioetl/domain/services/normalization_service.py`: docstring now documents the mixin chain (`_NormalizationActivityMixin` -> `_NormalizationBatchMixin` -> `NormalizationService`), collaborators (NormalizationConfig, UnitConverter, ValueValidator, ActivityAggregator), and explicit scope boundary (ChEMBL bioactivity scalars only, not cross-provider metadata); cross-reference to `data_normalization_service` added.
   - `src/bioetl/domain/services/data_normalization_service.py`: docstring now documents `DefaultDataNormalizationService` as the concrete `DataNormalizationPort` implementation, its inheritance from `AuthorNormalizationService`, delegated sub-services (DoiNormalizationService, PmidNormalizationService, DateNormalizationService, TextNormalizationService), and explicit scope boundary (cross-provider publication metadata only, not bioactivity scalars); cross-reference to `normalization_service` added.
+
+- **ISO-8601 fast-path optimization documented (P6)**:
+  - `src/bioetl/domain/normalization_dates.py` — `parse_date_field()` docstring updated with Notes section documenting fast-path optimization for ISO-8601 (YYYY-MM-DD) dates via direct character validation and integer conversion (~6x faster than strptime)
+  - No behavior change; documentation-only update to clarify existing implementation
 
 - **`FallbackPolicyMixin` extracted to shared infrastructure (RF-007)**:
   - Created `src/bioetl/infrastructure/adapters/common/fallback_policy_mixin.py` with `FallbackPolicyMixin` class

@@ -81,7 +81,7 @@ BioETL uses **19 GitHub Actions workflows** organized by purpose.
 | **Contract Tests** | `contract-tests.yml` | Monthly (1st, 02:00 UTC) | Live API contract tests, creates GitHub issue on failure |
 | **Weekly VACUUM** | `vacuum.yml` | Weekly (Sun 02:00 UTC) | Delta Lake VACUUM on all layers |
 | **Release** | `release.yml` | On release publish | Build, test on 3 Python versions, publish to TestPyPI+PyPI |
-| **Project Automation** | `project-automation.yml` | Push + PR | Unified test+diagram+architecture check |
+| ~~Project Automation~~ | ~~`project-automation.yml`~~ | ~~Push + PR~~ | Removed: was a duplicate of `tests.yml` + `import-linter.yml` |
 
 ----------------------------------------------------------------------
 

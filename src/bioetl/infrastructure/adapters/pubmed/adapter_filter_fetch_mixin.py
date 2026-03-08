@@ -104,7 +104,20 @@ class PubMedAdapterFilterFetchMixin:
         filter_field: str,
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch PubMed records by ID list via FilterableDataSourcePort contract."""
+        """Fetch PubMed records by ID list via FilterableDataSourcePort contract.
+
+        Args:
+            entity_type: Entity type; must be "publication".
+            filter_ids: List of PMID strings to fetch.
+            filter_field: Filter field name; logs a warning if not "pmid".
+            limit: Optional maximum number of records to yield.
+
+        Yields:
+            BronzeRecord articles with _lookup_method set to "pmid".
+
+        Raises:
+            ValueError: If entity_type is not "publication".
+        """
         if entity_type != "publication":
             raise ValueError("PubMedAdapter only supports 'publication'")
 
@@ -125,7 +138,21 @@ class PubMedAdapterFilterFetchMixin:
         fallback_mapping: dict[str, str],
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch with fallback to title search when primary lookup fails."""
+        """Fetch with fallback to title search when primary lookup fails.
+
+        Args:
+            entity_type: Entity type; must be "publication".
+            filter_ids: List of PMID strings for primary batch resolution.
+            filter_field: Filter field name used for the primary lookup phase.
+            fallback_mapping: Mapping of PMID to title for title-based fallback.
+            limit: Optional maximum number of records to yield.
+
+        Yields:
+            BronzeRecord articles from primary PMID resolution and title fallback phases.
+
+        Raises:
+            ValueError: If entity_type is not "publication".
+        """
         if entity_type != "publication":
             raise ValueError("PubMedAdapter only supports 'publication'")
 
@@ -160,7 +187,22 @@ class PubMedAdapterFilterFetchMixin:
         filter_field: str | None = None,
         offset: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch PubMed records."""
+        """Fetch PubMed records.
+
+        Args:
+            entity_type: Entity type; must be "publication".
+            limit: Optional maximum number of records to yield.
+            query: Optional Entrez search query string.
+            filter_ids: Optional list of PMIDs to filter by.
+            filter_field: Optional filter field name; defaults to "pmid".
+            offset: Optional record offset for resuming a previous fetch.
+
+        Yields:
+            BronzeRecord articles from the PubMed API.
+
+        Raises:
+            ValueError: If entity_type is not "publication".
+        """
         if filter_ids:
             async for record in self._fetch_from_filter_ids(
                 entity_type=entity_type,
@@ -193,7 +235,17 @@ class PubMedAdapterFilterFetchMixin:
         filter_field: str | None,
         limit: int | None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch records from explicit PMID filters."""
+        """Fetch records from explicit PMID filters.
+
+        Args:
+            entity_type: Entity type identifier.
+            filter_ids: List of PMID strings to fetch.
+            filter_field: Filter field name; defaults to "pmid" if None.
+            limit: Optional maximum number of records to yield.
+
+        Yields:
+            BronzeRecord articles resolved from the filter IDs.
+        """
         effective_filter_field = filter_field or "pmid"
         async for record in self.fetch_filtered(
             entity_type=entity_type,
@@ -205,7 +257,14 @@ class PubMedAdapterFilterFetchMixin:
 
     @staticmethod
     def _validate_publication_entity(entity_type: str) -> None:
-        """Validate supported PubMed entity type."""
+        """Validate supported PubMed entity type.
+
+        Args:
+            entity_type: Entity type string to validate.
+
+        Raises:
+            ValueError: If entity_type is not "publication".
+        """
         if entity_type != "publication":
             raise ValueError("PubMedAdapter only supports 'publication'")
 
@@ -216,6 +275,10 @@ class PubMedAdapterFilterFetchMixin:
         offset: int | None,
     ) -> int | None:
         """Resolve and validate resume offset against limit.
+
+        Args:
+            limit: Optional total record limit for the fetch operation.
+            offset: Optional starting offset for resuming a previous fetch.
 
         Returns:
             Validated resume offset integer, or None if offset has already reached the limit.
@@ -238,6 +301,10 @@ class PubMedAdapterFilterFetchMixin:
     ) -> list[str]:
         """Fetch PMID list for current query/limit settings.
 
+        Args:
+            query: Optional Entrez search query string; defaults to pharmacogenomics query.
+            limit: Optional maximum number of PMIDs to retrieve.
+
         Returns:
             List of PMID strings resolved from the search query or default term.
         """
@@ -251,6 +318,10 @@ class PubMedAdapterFilterFetchMixin:
         resume_offset: int,
     ) -> list[str]:
         """Skip already processed PMIDs when resuming.
+
+        Args:
+            pmids: Full list of PMIDs resolved for the current fetch operation.
+            resume_offset: Number of leading entries to skip.
 
         Returns:
             PMID list with the first resume_offset entries removed.

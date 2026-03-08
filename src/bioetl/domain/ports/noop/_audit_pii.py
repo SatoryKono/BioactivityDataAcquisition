@@ -14,7 +14,11 @@ class NoOpAudit:
     """No-op implementation of AuditPort."""
 
     async def log_write(self, _entry: AuditEntry) -> None:
-        """No-op implementation of log_write — discards the audit entry."""
+        """No-op implementation of log_write — discards the audit entry.
+
+        Args:
+            _entry: Audit entry to log; intentionally ignored by this no-op.
+        """
         return None
 
     async def get_entries(

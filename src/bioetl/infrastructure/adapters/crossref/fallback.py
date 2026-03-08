@@ -66,6 +66,9 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
     ) -> tuple[str, str]:  # Any: untyped API JSON record
         """Return CrossRef DOI for logging.
 
+        Args:
+            result: BronzeRecord or raw API dict from the search response.
+
         Returns:
             Tuple of (field name string, DOI value string) for structured log output.
         """

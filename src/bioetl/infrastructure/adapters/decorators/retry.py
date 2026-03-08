@@ -118,6 +118,9 @@ class RetryingDataSourceDecorator:
         - Critical errors (auth failures, schema errors)
         - Data quality errors (should skip record, not retry)
 
+        Args:
+            exc: Exception instance to evaluate for retry eligibility.
+
         Returns:
             True if the exception should trigger a retry attempt, False otherwise.
         """
@@ -148,6 +151,10 @@ class RetryingDataSourceDecorator:
     async def _calculate_and_wait(self, attempt: int, url: str = "") -> float:
         """Calculate delay and wait before retry.
 
+        Args:
+            attempt: Zero-based attempt index used to compute exponential backoff.
+            url: Optional URL or operation label used for jitter calculation.
+
         Returns:
             The actual wait time in seconds.
         """
@@ -162,7 +169,14 @@ class RetryingDataSourceDecorator:
         wait_seconds: float,
         error: Exception,
     ) -> None:
-        """Log retry attempt with structured fields."""
+        """Log retry attempt with structured fields.
+
+        Args:
+            operation: Name of the operation being retried (e.g., "fetch", "health_check").
+            attempt: Zero-based attempt index for the current retry.
+            wait_seconds: Duration waited before this retry attempt.
+            error: Exception that triggered the retry.
+        """
         if not self.logger:
             return
 
@@ -179,7 +193,12 @@ class RetryingDataSourceDecorator:
         )
 
     def _record_retry_metrics(self, operation: str, retries: int) -> None:
-        """Record retry metrics."""
+        """Record retry metrics.
+
+        Args:
+            operation: Name of the operation that was retried.
+            retries: Total number of retry attempts made.
+        """
         if not self.metrics or retries == 0:
             return
 
@@ -193,7 +212,11 @@ class RetryingDataSourceDecorator:
         )
 
     def _record_exhaustion_metrics(self, operation: str) -> None:
-        """Record retry exhaustion metrics."""
+        """Record retry exhaustion metrics.
+
+        Args:
+            operation: Name of the operation that exhausted all retry attempts.
+        """
         if not self.metrics:
             return
 
@@ -215,7 +238,23 @@ class RetryingDataSourceDecorator:
         filter_field: str | None = None,
         offset: int | None = None,
     ) -> AsyncIterator[JsonDict]:  # Any: untyped API JSON record
-        """Fetch records with retry logic."""
+        """Fetch records with retry logic.
+
+        Args:
+            entity_type: Entity type to fetch (e.g., "activity", "compound").
+            limit: Optional maximum number of records to return.
+            query: Optional query string to filter records.
+            filter_ids: Optional list of IDs to filter by.
+            filter_field: Optional field name to filter on.
+            offset: Optional record offset for pagination.
+
+        Yields:
+            Bronze records from the wrapped data source.
+
+        Raises:
+            CircuitBreakerOpenError: If circuit breaker is open (not retried).
+            RetryExhaustedError: If all retry attempts are exhausted.
+        """
         last_error: Exception | None = None
         retries = 0
 
@@ -263,7 +302,19 @@ class RetryingDataSourceDecorator:
         filter_field: str | None,
         offset: int | None,
     ) -> AsyncIterator[JsonDict]:  # Any: untyped API JSON record
-        """Run one fetch attempt against the wrapped data source."""
+        """Run one fetch attempt against the wrapped data source.
+
+        Args:
+            entity_type: Entity type to fetch.
+            limit: Optional maximum number of records to return.
+            query: Optional query string to filter records.
+            filter_ids: Optional list of IDs to filter by.
+            filter_field: Optional field name to filter on.
+            offset: Optional record offset for pagination.
+
+        Yields:
+            Bronze records from the wrapped data source.
+        """
         async for record in self.data_source.fetch(
             entity_type=entity_type,
             limit=limit,

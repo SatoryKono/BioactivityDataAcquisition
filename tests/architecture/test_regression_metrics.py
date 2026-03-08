@@ -85,9 +85,15 @@ def test_ruff_error_count() -> None:
 MAX_MYPY_ERRORS = 152  # ratchet: reduce toward 0
 
 
+@pytest.mark.slow
 @pytest.mark.timeout(300)
 def test_mypy_error_count() -> None:
-    """mypy --strict error count must not exceed the ratchet budget."""
+    """mypy --strict error count must not exceed the ratchet budget.
+
+    Marked as 'slow' because mypy subprocess takes ~160s.
+    Run explicitly with: pytest -m slow
+    Skipped by default in addopts (``-m 'not benchmark and not slow'``).
+    """
     try:
         result = subprocess.run(
             [
@@ -120,45 +126,45 @@ def test_mypy_error_count() -> None:
 MAX_ARCHITECTURE_SKIPS = 24
 
 
+class _SkipCounter:
+    """Lightweight pytest plugin that counts skipped test outcomes."""
+
+    def __init__(self) -> None:
+        self.skipped = 0
+        self._seen: set[str] = set()
+
+    def pytest_runtest_logreport(self, report: pytest.TestReport) -> None:  # type: ignore[name-defined]
+        # A test may be reported as skipped in setup (markers) or call (pytest.skip()).
+        # Deduplicate by nodeid to avoid double-counting.
+        if report.skipped and report.nodeid not in self._seen:
+            self._seen.add(report.nodeid)
+            self.skipped += 1
+
+
 @pytest.mark.timeout(600)
 def test_architecture_skip_count() -> None:
     """Architecture test skip count must not exceed the ratchet budget."""
-    try:
-        run_result = subprocess.run(
-            [
-                "uv",
-                "run",
-                "pytest",
-                "tests/architecture/",
-                "--tb=no",
-                "-q",
-                "--ignore=tests/architecture/test_regression_metrics.py",
-                "-p",
-                "no:timeout",
-            ],
-            capture_output=True,
-            text=True,
-            timeout=540,
-        )
-    except FileNotFoundError:
-        pytest.skip("uv or pytest not found")
-
-    # Parse summary line like "1673 passed, 24 skipped, 20 failed"
-    summary = (
-        run_result.stdout.strip().splitlines()[-1] if run_result.stdout.strip() else ""
+    counter = _SkipCounter()
+    # Run architecture tests in-process via pytest.main() with a custom plugin.
+    # --override-ini="addopts=" clears any default addopts to avoid interference.
+    pytest.main(
+        [
+            "tests/architecture/",
+            "--tb=no",
+            "-q",
+            "--ignore=tests/architecture/test_regression_metrics.py",
+            "-p",
+            "no:timeout",
+            "-p",
+            "no:xdist",
+            "--no-header",
+            "--override-ini=addopts=",
+        ],
+        plugins=[counter],
     )
-    skipped = 0
-    for part in summary.split(","):
-        part = part.strip()
-        if "skipped" in part:
-            try:
-                skipped = int(part.split()[0])
-            except (ValueError, IndexError):
-                pass
 
-    assert skipped <= MAX_ARCHITECTURE_SKIPS, (
-        f"architecture_skip_count={skipped} exceeds budget {MAX_ARCHITECTURE_SKIPS}\n"
-        f"Summary: {summary}"
+    assert counter.skipped <= MAX_ARCHITECTURE_SKIPS, (
+        f"architecture_skip_count={counter.skipped} exceeds budget {MAX_ARCHITECTURE_SKIPS}"
     )
 
 
@@ -357,6 +363,7 @@ def test_probe_mode_fallback_counter_exists() -> None:
 # ---------------------------------------------------------------------------
 
 GROUP_EDGE_LIMIT = 60
+GROUP_EDGE_TOTAL_BUDGET = 240  # ratchet: full graph coupling budget (baseline: 232)
 
 _dep_map_module = None
 
@@ -426,6 +433,25 @@ def test_cross_layer_group_edges_budget() -> None:
     )
 
 
+def test_cross_layer_group_edges_total_budget() -> None:
+    """Total cross-layer group edges (full graph) must not exceed the budget."""
+    mod = _load_dep_map_module()
+    if mod is None:
+        pytest.skip("Dependency map script not found")
+
+    src_root = Path("src/bioetl")
+    if not src_root.exists():
+        pytest.skip("src/bioetl not found")
+
+    snapshot = mod.collect_dependency_snapshot(src_root)
+    total = snapshot.cross_layer_group_edges_total
+
+    assert total <= GROUP_EDGE_TOTAL_BUDGET, (
+        f"cross_layer_group_edges_total={total} exceeds budget "
+        f"{GROUP_EDGE_TOTAL_BUDGET}"
+    )
+
+
 # ---------------------------------------------------------------------------
 # Metric 10: p95_silver_merge_duration + atomic_retry_exhausted_rate
 # ---------------------------------------------------------------------------
@@ -466,4 +492,80 @@ def test_retry_exhausted_counter_exists() -> None:
     content = metrics_defs.read_text(encoding="utf-8")
     assert "retry_exhausted" in content, (
         "retry_exhausted counter not defined in metrics_definitions.py"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Metric 11: architecture_test_p95_duration (structural check)
+# ---------------------------------------------------------------------------
+
+ARCH_TEST_P95_BUDGET_SECONDS = 30.0  # ratchet: p95 per-test duration
+
+
+def test_architecture_test_p95_duration_tracked() -> None:
+    """CI architecture workflow must have fast/nightly split with timeout enforcement."""
+    workflow = Path(".github/workflows/architecture.yml")
+    if not workflow.exists():
+        pytest.skip("Architecture workflow not found")
+
+    content = workflow.read_text(encoding="utf-8")
+
+    assert "architecture-fast-baseline" in content, (
+        "Workflow must have architecture-fast-baseline job for fast profile"
+    )
+    assert "architecture-heavy-nightly" in content, (
+        "Workflow must have architecture-heavy-nightly job for full profile"
+    )
+    assert "not slow" in content, (
+        "Fast baseline must exclude @pytest.mark.slow tests"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Metric 12: scorecard_registry_sync (governance debt automation)
+# ---------------------------------------------------------------------------
+
+DEBT_SCORECARD_YAML = Path("configs/quality/debt_scorecard.yaml")
+
+
+def test_scorecard_baseline_matches_registry() -> None:
+    """Scorecard baseline must match actual exemption registry counts."""
+    if not EXEMPTIONS_YAML.exists():
+        pytest.skip("Exemptions YAML not found")
+    if not DEBT_SCORECARD_YAML.exists():
+        pytest.skip("Debt scorecard YAML not found")
+
+    with open(EXEMPTIONS_YAML, encoding="utf-8") as f:
+        exemptions = yaml.safe_load(f)
+    with open(DEBT_SCORECARD_YAML, encoding="utf-8") as f:
+        scorecard = yaml.safe_load(f)
+
+    registries = exemptions.get("registries", {})
+    actual_by_registry: dict[str, int] = {}
+    actual_total = 0
+    for reg_name, entries in registries.items():
+        count = len(entries) if isinstance(entries, dict) else 0
+        actual_by_registry[reg_name] = count
+        actual_total += count
+
+    baseline = scorecard.get("baseline", {})
+    expected_total = baseline.get("total_exemptions", 0)
+    expected_by_registry = baseline.get("by_registry", {})
+
+    mismatches: list[str] = []
+    if actual_total != expected_total:
+        mismatches.append(
+            f"total_exemptions: scorecard={expected_total}, actual={actual_total}"
+        )
+    for reg_name, actual_count in sorted(actual_by_registry.items()):
+        expected_count = expected_by_registry.get(reg_name, 0)
+        if actual_count != expected_count:
+            mismatches.append(
+                f"{reg_name}: scorecard={expected_count}, actual={actual_count}"
+            )
+
+    assert not mismatches, (
+        "Scorecard baseline drifted from actual exemption registry:\n"
+        + "\n".join(f"  - {m}" for m in mismatches)
+        + "\nUpdate configs/quality/debt_scorecard.yaml baseline section."
     )

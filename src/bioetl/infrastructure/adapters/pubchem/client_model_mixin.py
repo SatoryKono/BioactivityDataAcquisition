@@ -35,7 +35,19 @@ class PubChemAdapterModelMixin:
         filter_field: str | None = None,
         offset: int | None = None,
     ) -> AsyncIterator[JsonDict]:
-        """Fetch raw PubChem records."""
+        """Fetch raw PubChem records.
+
+        Args:
+            entity_type: Entity type to fetch (e.g., "compound").
+            limit: Optional maximum number of records to yield.
+            query: Optional search query string.
+            filter_ids: Optional list of IDs to filter by.
+            filter_field: Optional field name to filter on.
+            offset: Optional record offset (unused in PubChem).
+
+        Raises:
+            NotImplementedError: This is an abstract placeholder; implemented by PubChemAdapter.
+        """
         raise NotImplementedError
 
     async def fetch_as_models(
@@ -48,7 +60,22 @@ class PubChemAdapterModelMixin:
         *,
         validate: bool = True,
     ) -> AsyncIterator[BaseModel]:
-        """Fetch records from PubChem as typed DTO models."""
+        """Fetch records from PubChem as typed DTO models.
+
+        Args:
+            entity_type: Entity type to fetch; must map to a supported DTO model (e.g., "compound").
+            limit: Optional maximum number of records to yield.
+            query: Optional search query string passed to fetch.
+            filter_ids: Optional list of IDs to filter by.
+            filter_field: Optional field name to filter on.
+            validate: Whether to use model_validate (True) or model_construct (False).
+
+        Yields:
+            Typed Pydantic model instances for each fetched record.
+
+        Raises:
+            ValueError: If entity_type has no registered DTO model.
+        """
         model_class = PUBCHEM_DTO_MODELS.get(entity_type)
         if model_class is None:
             raise ValueError(
@@ -72,7 +99,14 @@ class PubChemAdapterModelMixin:
                 yield model_class.model_construct(**record)
 
     def get_source_metadata(self, api_version: str | None = None) -> SourceMetadata:
-        """Get accumulated API request metadata for Bronze layer enrichment."""
+        """Get accumulated API request metadata for Bronze layer enrichment.
+
+        Args:
+            api_version: Optional API version string to embed in the metadata.
+
+        Returns:
+            SourceMetadata aggregated from recorded API requests since last clear.
+        """
         metadata = self._request_collector.to_source_metadata(
             source_type="api",
             url=PUBCHEM_API_BASE,

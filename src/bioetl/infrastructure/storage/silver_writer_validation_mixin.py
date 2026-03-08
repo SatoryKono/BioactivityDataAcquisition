@@ -38,6 +38,9 @@ class SilverWriterValidationMixin:
     def _validate_write_mode(self, mode: str) -> SilverWriteMode:
         """Validate and convert write mode string to enum.
 
+        Args:
+            mode: Write mode string to validate (e.g., "merge", "append", "delete").
+
         Returns:
             SilverWriteMode enum value corresponding to the given mode string.
         """
@@ -56,6 +59,10 @@ class SilverWriterValidationMixin:
     ) -> list[BronzeRecord]:
         """Deduplicate records based on primary keys in the current batch.
 
+        Args:
+            records: List of Bronze record dicts to deduplicate.
+            primary_keys: List of column names forming the composite deduplication key.
+
         Returns:
             List of records with duplicates removed, keeping the last occurrence per primary key.
         """
@@ -70,6 +77,9 @@ class SilverWriterValidationMixin:
 
     def _to_policy_write_mode(self, mode: SilverWriteMode) -> WriteMode:
         """Map SilverWriteMode to WriteMode for policy validation.
+
+        Args:
+            mode: SilverWriteMode enum value to map.
 
         Returns:
             WriteMode enum value corresponding to the given SilverWriteMode.
@@ -86,7 +96,12 @@ class SilverWriterValidationMixin:
         mode: SilverWriteMode,
         table_name: str,
     ) -> None:
-        """Enforce write mode policy for Silver layer."""
+        """Enforce write mode policy for Silver layer.
+
+        Args:
+            mode: Silver write mode to validate against the configured policy.
+            table_name: Logical table name included in error and metrics context.
+        """
         policy_mode = self._to_policy_write_mode(mode)
         try:
             self._write_policy.validate(Layer.SILVER, policy_mode)
@@ -112,7 +127,13 @@ class SilverWriterValidationMixin:
         table_name: str,
         schema: pa.Schema,
     ) -> None:
-        """Validate records have required metadata fields."""
+        """Validate records have required metadata fields.
+
+        Args:
+            records: List of Bronze record dicts to validate; must be non-empty.
+            table_name: Logical table name for debug log context.
+            schema: Target PyArrow schema used to identify optional missing fields.
+        """
         if not records:
             raise ValueError("No records to write")
 
@@ -140,7 +161,15 @@ class SilverWriterValidationMixin:
         key_nullability_rules: list[KeyNullabilityRule] | None,
         table_name: str,
     ) -> None:
-        """Validate nullability policy for merge and partition keys."""
+        """Validate nullability policy for merge and partition keys.
+
+        Args:
+            records: List of records to check for null key values.
+            primary_keys: List of merge key column names to validate.
+            partition_cols: Optional list of partition column names to validate.
+            key_nullability_rules: Optional list of nullability rules per key field.
+            table_name: Logical table name included in validation error messages.
+        """
         if not records or not key_nullability_rules:
             return
 
@@ -180,7 +209,12 @@ class SilverWriterValidationMixin:
         records: list[BronzeRecord],
         table_name: str,
     ) -> None:
-        """Validate records using Pandera schema before writing to Silver."""
+        """Validate records using Pandera schema before writing to Silver.
+
+        Args:
+            records: List of Bronze record dicts to validate.
+            table_name: Logical table name used in error logs and metrics.
+        """
         cleaned_records = [
             {key: value for key, value in record.items() if key != "_state"}
             for record in records

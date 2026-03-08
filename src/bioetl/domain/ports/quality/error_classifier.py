@@ -14,5 +14,12 @@ class ErrorClassifierPort(Protocol):
     """Classify exceptions into domain ``ErrorType`` values."""
 
     def classify(self, error: Exception) -> ErrorType:
-        """Return normalized error type for ``error``."""
+        """Return normalized error type for ``error``.
+
+        Args:
+            error: Exception to classify into a domain ErrorType.
+
+        Returns:
+            Normalized ErrorType value for the exception.
+        """
         ...
