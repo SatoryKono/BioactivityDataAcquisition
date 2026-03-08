@@ -220,7 +220,11 @@ def _check_done_threshold(
     threshold = criteria.get(key)
     if comparator == "max" and isinstance(threshold, int) and actual > threshold:
         return f"program done criteria violated: {key} {actual} exceeds {threshold}"
-    if comparator == "min" and isinstance(threshold, (int, float)) and actual < float(threshold):
+    if (
+        comparator == "min"
+        and isinstance(threshold, (int, float))
+        and actual < float(threshold)
+    ):
         return f"program done criteria violated: {key} {actual} is below {float(threshold)}"
     return None
 
@@ -244,11 +248,17 @@ def _evaluate_program_done_criteria(
         if isinstance(deadline_quarter, str)
         else None
     )
-    if current_tuple is None or deadline_tuple is None or current_tuple < deadline_tuple:
+    if (
+        current_tuple is None
+        or deadline_tuple is None
+        or current_tuple < deadline_tuple
+    ):
         return []
 
     checks = [
-        _check_done_threshold(criteria, "max_total_exemptions", total_exemptions, "max"),
+        _check_done_threshold(
+            criteria, "max_total_exemptions", total_exemptions, "max"
+        ),
         _check_done_threshold(criteria, "min_integral_score", integral_score, "min"),
         _check_done_threshold(criteria, "max_expired_entries", expired_entries, "max"),
     ]

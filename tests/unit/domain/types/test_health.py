@@ -5,8 +5,6 @@ Tests for ValidationResult, ComponentHealthResult, HealthReport, PreflightReport
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
-
 import pytest
 
 from bioetl.domain.types.enums import HealthStatus

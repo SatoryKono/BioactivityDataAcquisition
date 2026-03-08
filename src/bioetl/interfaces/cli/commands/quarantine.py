@@ -66,6 +66,7 @@ def _handle_quarantine_failure(
         default_exit_code=ExitCode.FAIL,
     )
 
+
 def _run_quarantine_async(
     coro: Coroutine[Any, Any, _T],  # Any: standard Coroutine type params
     *,
@@ -118,6 +119,7 @@ def _run_quarantine_async(
             coro.close()
     return None
 
+
 def _run_quarantine_sync(
     fn: Callable[[], _T],
     *,
@@ -167,9 +169,11 @@ def _run_quarantine_sync(
         )
     return None
 
+
 @click.group()
 def quarantine() -> None:
     """Manage quarantine (failed records)."""
+
 
 @quarantine.command("inspect")
 @click.option("--pipeline", required=True, help="Pipeline name")
@@ -197,6 +201,7 @@ def quarantine_inspect(pipeline: str, limit: int, error_code: str | None) -> Non
         domain_error_title="Failed to inspect quarantine with domain error",
         unexpected_error_title="Unexpected error during quarantine inspect",
     )
+
 
 @quarantine.command("stats")
 @click.option("--pipeline", required=True, help="Pipeline name")
@@ -242,6 +247,7 @@ def quarantine_stats(pipeline: str, output_json: bool) -> None:
                 click.echo(f"    - {status}: {count} ({pct:.1f}%)")
 
         click.echo(f"\n{'=' * 50}\n")
+
 
 @quarantine.command("replay")
 @click.option("--pipeline", required=True, help="Pipeline name")
@@ -297,6 +303,7 @@ def quarantine_replay(
             return
         click.echo(f"Marked {marked_count} record(s) as REPROCESSED.")
         echo_info("Records are ready for reprocessing by the pipeline.")
+
 
 @quarantine.command("purge")
 @click.option("--pipeline", required=True, help="Pipeline name")

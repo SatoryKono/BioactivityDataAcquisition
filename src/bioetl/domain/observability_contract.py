@@ -65,14 +65,17 @@ def _coerce_non_empty(value: object | None, *, fallback: str) -> str:
     text = str(value).strip()
     return text if text else fallback
 
+
 def _normalize_severity(value: object | None, *, fallback: str) -> str:
     normalized = _coerce_non_empty(value, fallback=fallback).lower()
     return normalized if normalized in _ALLOWED_SEVERITY_VALUES else "info"
+
 
 def _strip_legacy_keys(normalized: dict[str, object]) -> None:
     """Drop legacy aliases from output context after canonicalization."""
     for legacy_key in OBSERVABILITY_LEGACY_TO_CANONICAL:
         normalized.pop(legacy_key, None)
+
 
 def _has_required_context_value(context: Mapping[str, object], field: str) -> bool:
     return _coerce_non_empty(context.get(field), fallback="") != ""

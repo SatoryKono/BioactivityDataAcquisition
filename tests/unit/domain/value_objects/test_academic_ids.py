@@ -7,7 +7,12 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.domain.value_objects.academic_ids import ISSN, ORCID, OpenAlexId, SemanticScholarId
+from bioetl.domain.value_objects.academic_ids import (
+    ISSN,
+    ORCID,
+    OpenAlexId,
+    SemanticScholarId,
+)
 
 
 # ===========================================================================

@@ -4,6 +4,7 @@
 .editorconfig
 .setup_wsl_codex.sh
 .env.example
+.wsl-vpn-fix.ps1
 .gitattributes
 .gitignore
 .gitleaks.toml

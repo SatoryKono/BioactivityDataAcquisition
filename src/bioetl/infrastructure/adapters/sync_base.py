@@ -108,6 +108,7 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
 
         """
         self.logger = logger
+        self._logger = logger  # Private alias required by HealthCheckMixin
         self.metrics = metrics if metrics is not None else NoOpMetrics()
         self.rate_limiter = rate_limiter
         self.circuit_breaker = circuit_breaker

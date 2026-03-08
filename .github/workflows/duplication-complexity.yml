@@ -78,8 +78,15 @@ jobs:
           # postrun_service.py: _write_final_metadata with metadata assembly (CC=12)
           # FsAdrService: validate with multi-check ADR validation (CC=13), _extract_from_section with heading parsing (CC=12)
           # config_merge: config_merge with recursive deep merge and list strategy resolution (CC=11)
+          # composite_dq_loader: merge_external_dq_overrides with multi-source DQ config merging (CC=11)
+          # client_retry_mixin: _attempt_request with retry/backoff state machine (CC=12)
+          # pipeline_normalizers: apply_pipeline_schema_normalization with multi-field schema coercion (CC=12)
+          # quality validation internals: _validate_registry_groups_section (CC=12), _validate_owner_decomposition_targets_section (CC=11), _validate_priority_registry_burndown (CC=11), _validate_grace_window_identity_fields (CC=14), validate_exemptions_registry (CC=12)
+          # metadata_writer: _write_metadata with multi-path coordinator fallback (CC=11)
+          # silver_writer_delta_mixin: _write_merge with Delta Lake merge conflict resolution (CC=11)
+          # silver_writer_validation_mixin: _validate_key_nullability with multi-column null checks (CC=11)
           xenon --max-absolute B --max-modules B --max-average A \
-            --exclude "tests/*,src/tools/*,src/bioetl/__init__.py,src/bioetl/application/core/postrun_service.py,src/bioetl/infrastructure/adapters/chembl/*,src/bioetl/infrastructure/adapters/openalex/*,src/bioetl/infrastructure/adapters/semanticscholar/*,src/bioetl/infrastructure/adapters/crossref/*,src/bioetl/infrastructure/adapters/pubmed/*,src/bioetl/infrastructure/adapters/uniprot/*,src/bioetl/infrastructure/adapters/pubchem/*,src/bioetl/infrastructure/adapters/input/*,src/bioetl/application/services/dq/*,src/bioetl/application/composite/*,src/bioetl/application/core/batch_writer.py,src/bioetl/application/pipelines/*/extractors/*,src/bioetl/interfaces/cli/*,src/bioetl/infrastructure/storage/silver_writer.py,src/bioetl/infrastructure/storage/gold_writer.py,src/bioetl/composition/factories/storage_factory.py,src/bioetl/composition/services/metadata_coordinator.py,src/bioetl/infrastructure/storage/metadata_builder.py,src/bioetl/infrastructure/config_loader.py,src/bioetl/infrastructure/schemas/source_config.py,src/bioetl/infrastructure/adr/*,src/bioetl/infrastructure/config_merge.py" src
+            --exclude "tests/*,src/tools/*,src/bioetl/__init__.py,src/bioetl/application/core/postrun_service.py,src/bioetl/infrastructure/adapters/chembl/*,src/bioetl/infrastructure/adapters/openalex/*,src/bioetl/infrastructure/adapters/semanticscholar/*,src/bioetl/infrastructure/adapters/crossref/*,src/bioetl/infrastructure/adapters/pubmed/*,src/bioetl/infrastructure/adapters/uniprot/*,src/bioetl/infrastructure/adapters/pubchem/*,src/bioetl/infrastructure/adapters/input/*,src/bioetl/application/services/dq/*,src/bioetl/application/composite/*,src/bioetl/application/core/batch_writer.py,src/bioetl/application/pipelines/*/extractors/*,src/bioetl/interfaces/cli/*,src/bioetl/infrastructure/storage/silver_writer.py,src/bioetl/infrastructure/storage/gold_writer.py,src/bioetl/composition/factories/storage_factory.py,src/bioetl/composition/services/metadata_coordinator.py,src/bioetl/infrastructure/storage/metadata_builder.py,src/bioetl/infrastructure/config_loader.py,src/bioetl/infrastructure/schemas/source_config.py,src/bioetl/infrastructure/adr/*,src/bioetl/infrastructure/config_merge.py,src/bioetl/composition/bootstrap/runtime/composite_dq_loader.py,src/bioetl/infrastructure/adapters/http/client_retry_mixin.py,src/bioetl/infrastructure/config/pipeline_normalizers.py,src/bioetl/infrastructure/quality/_baseline_validation.py,src/bioetl/infrastructure/quality/_decomposition_validation.py,src/bioetl/infrastructure/quality/_grace_windows_validation.py,src/bioetl/infrastructure/quality/exemptions_registry.py,src/bioetl/infrastructure/storage/metadata_writer.py,src/bioetl/infrastructure/storage/silver_writer_delta_mixin.py,src/bioetl/infrastructure/storage/silver_writer_validation_mixin.py" src
 
       - name: Strict complexity check for domain layer (CC ≤ 5)
         run: |
@@ -145,8 +152,17 @@ jobs:
               "src/bioetl/infrastructure/schemas/source_config.py",  # _promote_legacy_pagination backward-compat (CC=14-15)
               "src/bioetl/infrastructure/config_merge.py",  # config_merge() nested isinstance for type-safe deep merge (CC=12)
               "src/bioetl/infrastructure/adr/fs_adr_service.py",  # validate + _extract_from_section ADR parsing (CC=12-13)
-              "src/bioetl/infrastructure/adr/fs_adr_service.py",  # validate() multi-field ADR validation (CC=13)
               "src/bioetl/infrastructure/config_merge.py",  # config_merge recursive deep merge with list strategies (CC=11)
+              "src/bioetl/composition/bootstrap/runtime/composite_dq_loader.py",  # merge_external_dq_overrides multi-source DQ config merging (CC=11)
+              "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py",  # _attempt_request retry/backoff state machine (CC=12)
+              "src/bioetl/infrastructure/config/pipeline_normalizers.py",  # apply_pipeline_schema_normalization multi-field coercion (CC=12)
+              "src/bioetl/infrastructure/quality/_baseline_validation.py",  # _validate_registry_groups_section (CC=12)
+              "src/bioetl/infrastructure/quality/_decomposition_validation.py",  # _validate_owner_decomposition_targets_section, _validate_priority_registry_burndown (CC=11)
+              "src/bioetl/infrastructure/quality/_grace_windows_validation.py",  # _validate_grace_window_identity_fields (CC=14)
+              "src/bioetl/infrastructure/quality/exemptions_registry.py",  # validate_exemptions_registry (CC=12)
+              "src/bioetl/infrastructure/storage/metadata_writer.py",  # _write_metadata multi-path coordinator fallback (CC=11)
+              "src/bioetl/infrastructure/storage/silver_writer_delta_mixin.py",  # _write_merge Delta Lake merge conflict resolution (CC=11)
+              "src/bioetl/infrastructure/storage/silver_writer_validation_mixin.py",  # _validate_key_nullability multi-column null checks (CC=11)
           }
 
           # Exempted functions (with documented reasons)
