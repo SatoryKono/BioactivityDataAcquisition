@@ -148,6 +148,7 @@ def push_metrics_to_gateway(
     run_label: str = "bioetl",
     logger: LoggerPort | None = None,
     grouping_key: dict[str, str] | None = None,
+    job: str | None = None,
 ) -> bool:
     """Push current metrics to Prometheus Pushgateway.
 
@@ -163,6 +164,7 @@ def push_metrics_to_gateway(
         run_label: Run label for pushed metrics.
         logger: Structured logger.
         grouping_key: Additional grouping labels (e.g. {"pipeline": "chembl_molecule"}).
+        job: Backward-compatible alias for run_label.
 
     Returns:
         True if push succeeded, False otherwise.
@@ -172,18 +174,19 @@ def push_metrics_to_gateway(
         logger = NoOpLogger()
 
     gateway = gateway or "localhost:9091"
+    effective_run_label = job if job is not None else run_label
 
     try:
         pushadd_to_gateway(
             gateway,
-            job=run_label,
+            job=effective_run_label,
             registry=REGISTRY,
             grouping_key=grouping_key or {},
         )
         logger.info(
             "Metrics pushed to gateway",
             gateway=gateway,
-            run_label=run_label,
+            run_label=effective_run_label,
             grouping_key=grouping_key,
         )
         return True
