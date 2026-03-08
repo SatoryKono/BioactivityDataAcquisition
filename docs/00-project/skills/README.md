@@ -1,3 +1,11 @@
+# Legacy Skills Mirror (Deprecated)
+
+This directory is a legacy mirror kept for transitional compatibility only.
+
+- Canonical published location: `docs/00-project/ai/skills/`
+- Do not add or edit files here for ongoing work.
+- Planned action: remove this legacy mirror after migration of reference overlays and guardrails.
+
 # Skills Mirror in docs/
 
 This directory stores documentation mirrors for Codex skills.

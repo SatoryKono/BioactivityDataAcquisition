@@ -34,3 +34,16 @@ For new automation, use canonical paths only:
 - `scripts/diagrams/run_diagram_docs_agent.sh`
 
 Do not add new references to legacy wrapper paths under `scripts/`.
+
+## Scripts Inventory Governance
+
+Use the dedicated drift checker to keep script call-sites and status inventory
+in sync:
+
+- Check: `python scripts/check_scripts_inventory.py --check --manifest reports/quality/scripts_inventory_manifest.json`
+- Update: `python scripts/check_scripts_inventory.py --update --manifest reports/quality/scripts_inventory_manifest.json`
+
+Make targets:
+
+- `make scripts-inventory-check`
+- `make scripts-inventory-update`

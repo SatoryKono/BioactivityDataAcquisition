@@ -16,37 +16,37 @@ Use these subagents when you need to:
 
 ## Available Subagents
 
-### [**research-analyst**](research-analyst.md) - Comprehensive research specialist
+### [**sp-research-analyst**](sp-research-analyst.md) - Comprehensive research specialist
 Research expert conducting thorough investigations across domains. Masters research methodologies, source validation, and insight synthesis. Delivers comprehensive research reports on any topic.
 
 **Use when:** Conducting deep research, investigating complex topics, validating information, creating research reports, or synthesizing multiple sources.
 
-### [**search-specialist**](search-specialist.md) - Advanced information retrieval expert
+### [**sp-search-specialist**](sp-search-specialist.md) - Advanced information retrieval expert
 Search optimization expert finding needles in information haystacks. Masters advanced search techniques, query optimization, and source discovery. Locates hard-to-find information efficiently.
 
 **Use when:** Finding specific information, optimizing search queries, discovering new sources, conducting systematic searches, or retrieving obscure data.
 
-### [**trend-analyst**](trend-analyst.md) - Emerging trends and forecasting expert
+### [**sp-trend-analyst**](sp-trend-analyst.md) - Emerging trends and forecasting expert
 Trend identification specialist spotting patterns before they become obvious. Expert in trend analysis, future forecasting, and weak signal detection. Helps organizations stay ahead of change.
 
 **Use when:** Identifying emerging trends, forecasting future developments, analyzing pattern changes, monitoring industry evolution, or planning strategic responses.
 
-### [**competitive-analyst**](competitive-analyst.md) - Competitive intelligence specialist
+### [**sp-competitive-analyst**](sp-competitive-analyst.md) - Competitive intelligence specialist
 Competitive intelligence expert analyzing competitor strategies and market positioning. Masters competitive benchmarking, SWOT analysis, and strategic recommendations. Provides actionable competitive insights.
 
 **Use when:** Analyzing competitors, benchmarking performance, identifying competitive advantages, monitoring competitor moves, or developing competitive strategies.
 
-### [**market-researcher**](market-researcher.md) - Market analysis and consumer insights
+### [**sp-market-researcher**](sp-market-researcher.md) - Market analysis and consumer insights
 Market analysis specialist understanding market dynamics and consumer behavior. Expert in market sizing, segmentation, and opportunity identification. Reveals market opportunities and risks.
 
 **Use when:** Analyzing market opportunities, understanding consumer behavior, sizing markets, identifying segments, or evaluating market entry strategies.
 
-### [**data-researcher**](data-researcher.md) - Data discovery and analysis expert
+### [**sp-data-researcher**](sp-data-researcher.md) - Data discovery and analysis expert
 Data investigation specialist extracting insights from complex datasets. Masters data mining, statistical analysis, and pattern recognition. Transforms raw data into meaningful findings.
 
 **Use when:** Analyzing datasets, discovering data patterns, performing statistical analysis, mining for insights, or investigating data anomalies.
 
-### [**scientific-literature-researcher**](scientific-literature-researcher.md) - Scientific paper search and evidence synthesis
+### [**sp-scientific-literature-researcher**](sp-scientific-literature-researcher.md) - Scientific paper search and evidence synthesis
 Scientific literature specialist using [BGPT MCP](https://github.com/connerlambden/bgpt-mcp) to search a database of papers with structured experimental data extracted from full-text studies. Retrieves methods, results, sample sizes, and quality scores to deliver evidence-grounded analysis.
 
 **Use when:** Searching scientific literature, conducting systematic reviews, synthesizing experimental evidence, fact-checking claims against published data, or building evidence-grounded research reports.
@@ -55,39 +55,39 @@ Scientific literature specialist using [BGPT MCP](https://github.com/connerlambd
 
 | If you need to... | Use this subagent |
 |-------------------|-------------------|
-| Deep topic research | **research-analyst** |
-| Find specific information | **search-specialist** |
-| Identify future trends | **trend-analyst** |
-| Analyze competitors | **competitive-analyst** |
-| Understand markets | **market-researcher** |
-| Analyze data patterns | **data-researcher** |
-| Search scientific papers | **scientific-literature-researcher** |
+| Deep topic research | **sp-research-analyst** |
+| Find specific information | **sp-search-specialist** |
+| Identify future trends | **sp-trend-analyst** |
+| Analyze competitors | **sp-competitive-analyst** |
+| Understand markets | **sp-market-researcher** |
+| Analyze data patterns | **sp-data-researcher** |
+| Search scientific papers | **sp-scientific-literature-researcher** |
 
 ## Common Research Patterns
 
 **Market Intelligence:**
-- **market-researcher** for market analysis
-- **competitive-analyst** for competitor insights
-- **trend-analyst** for future directions
-- **data-researcher** for data validation
+- **sp-market-researcher** for market analysis
+- **sp-competitive-analyst** for competitor insights
+- **sp-trend-analyst** for future directions
+- **sp-data-researcher** for data validation
 
 **Strategic Research:**
-- **research-analyst** for comprehensive analysis
-- **search-specialist** for information gathering
-- **trend-analyst** for future planning
-- **competitive-analyst** for positioning
+- **sp-research-analyst** for comprehensive analysis
+- **sp-search-specialist** for information gathering
+- **sp-trend-analyst** for future planning
+- **sp-competitive-analyst** for positioning
 
 **Data-Driven Insights:**
-- **data-researcher** for data analysis
-- **market-researcher** for market data
-- **trend-analyst** for pattern identification
-- **research-analyst** for synthesis
+- **sp-data-researcher** for data analysis
+- **sp-market-researcher** for market data
+- **sp-trend-analyst** for pattern identification
+- **sp-research-analyst** for synthesis
 
 **Competitive Intelligence:**
-- **competitive-analyst** for competitor analysis
-- **market-researcher** for market context
-- **search-specialist** for information discovery
-- **trend-analyst** for industry evolution
+- **sp-competitive-analyst** for competitor analysis
+- **sp-market-researcher** for market context
+- **sp-search-specialist** for information discovery
+- **sp-trend-analyst** for industry evolution
 
 ## Getting Started
 

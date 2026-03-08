@@ -1,7 +1,7 @@
 # BioETL Makefile
 # Production-ready ETL system for bioactivity data
 
-.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-local-artifacts sanitize-local clean-preflight clean-all diagram-preflight lint-diagrams report-diagrams-policy validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png render-diagrams-descriptions-docx render-diagrams-descriptions-pdf run-diagram-docs-agent check-diagrams-visibility check-diagrams-pdf-bounds diagrams-all report-diagram-padding docs-lint docs-quality docs-docstrings docs-drift
+.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-local-artifacts sanitize-local clean-preflight clean-all diagram-preflight lint-diagrams report-diagrams-policy validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png render-diagrams-descriptions-docx render-diagrams-descriptions-pdf run-diagram-docs-agent check-diagrams-visibility check-diagrams-pdf-bounds diagrams-all report-diagram-padding docs-lint docs-quality docs-docstrings docs-drift scripts-inventory-check scripts-inventory-update
 .DEFAULT_GOAL := help
 
 # Detect uv availability (preferred package manager)
@@ -496,7 +496,17 @@ docs-drift: ## Detect documentation drift (code ↔ docs synchronization)
 	$(PY_RUN) scripts/check_doc_drift.py
 	@echo "$(GREEN)Drift detection complete!$(NC)"
 
-docs-quality: docs-lint docs-docstrings docs-drift ## Run all documentation quality checks
+scripts-inventory-check: ## Check scripts inventory manifest drift
+	@echo "$(BLUE)Checking scripts inventory drift...$(NC)"
+	$(PY_RUN) scripts/check_scripts_inventory.py --check --manifest reports/quality/scripts_inventory_manifest.json
+	@echo "$(GREEN)Scripts inventory is in sync!$(NC)"
+
+scripts-inventory-update: ## Update scripts inventory manifest
+	@echo "$(BLUE)Updating scripts inventory manifest...$(NC)"
+	$(PY_RUN) scripts/check_scripts_inventory.py --update --manifest reports/quality/scripts_inventory_manifest.json
+	@echo "$(GREEN)Scripts inventory manifest updated!$(NC)"
+
+docs-quality: docs-lint docs-docstrings docs-drift scripts-inventory-check ## Run all documentation quality checks
 	@echo "$(GREEN)All documentation quality checks passed!$(NC)"
 
 schema-artifacts: ## Generate canonical schema artifacts (registry + contracts)
