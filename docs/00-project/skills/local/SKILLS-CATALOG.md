@@ -1,5 +1,7 @@
 # Local Skills Catalog (BioETL Core)
 
+> Deprecated mirror. Active catalog is `docs/00-project/ai/skills/SKILLS-CATALOG.md`.
+
 Consolidated registry of BioETL-focused local skills under `.codex/skills/`.
 
 ## Canonical Rules

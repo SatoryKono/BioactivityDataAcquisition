@@ -4,7 +4,7 @@
 
 > **Назначение**: Полный контекст для быстрого онбординга нового чата Claude Code.
 > При старте новой сессии — попроси Claude прочитать этот файл:
-> `Прочитай .ai/memory/agent-memory.md и следуй его инструкциям.`
+> `Прочитай docs/00-project/ai/memory/agent-memory.md и следуй его инструкциям.`
 
 ---
 
@@ -132,12 +132,12 @@ make run-local     # Запуск на фикстурах
 **Специализированная память (фокус на области работы агента):**
 
 ```
-.ai/memory/memory-py-audit-bot.md   — import matrix, anti-patterns, naming, scoring, valid exceptions
-.ai/memory/memory-py-plan-bot.md    — RF-* routing, DAG, composite design, parallelization, ADR
-.ai/memory/memory-py-test-bot.md    — test structure, thresholds, VCR, failure classification
-.ai/memory/memory-py-config-bot.md  — config hierarchy, templates, ADR compliance, composite rules
-.ai/memory/memory-py-debug-bot.md   — error classification, debugging methodology, fix patterns
-.ai/memory/memory-py-doc-bot.md     — doc structure, ADR management, CHANGELOG, docstrings, diagrams
+docs/00-project/ai/memory/memory-py-audit-bot.md   — import matrix, anti-patterns, naming, scoring, valid exceptions
+docs/00-project/ai/memory/memory-py-plan-bot.md    — RF-* routing, DAG, composite design, parallelization, ADR
+docs/00-project/ai/memory/memory-py-test-bot.md    — test structure, thresholds, VCR, failure classification
+docs/00-project/ai/memory/memory-py-config-bot.md  — config hierarchy, templates, ADR compliance, composite rules
+docs/00-project/ai/memory/memory-py-debug-bot.md   — error classification, debugging methodology, fix patterns
+docs/00-project/ai/memory/memory-py-doc-bot.md     — doc structure, ADR management, CHANGELOG, docstrings, diagrams
 ```
 
 ### 3.3 Входы субагентов (обязательные параметры)
@@ -341,7 +341,7 @@ BioETL-специфичные навыки инлайнированы в `.claud
 
 ```
 Прочитай следующие файлы и следуй их инструкциям:
-1. .ai/memory/agent-memory.md
+1. docs/00-project/ai/memory/agent-memory.md
 2. .claude/PROJECT_CONTEXT.md
 3. .claude/rules/ai-selfreview-rules.md
 4. .claude/agents/ORCHESTRATION.md
