@@ -9,6 +9,7 @@ canonical_roots:
   - scripts/repo
   - scripts/ops
   - scripts/diagnostics
+  - scripts/migrations/active
   - scripts/migrations/oneoff
   - scripts/diagrams
 
@@ -46,6 +47,9 @@ groups:
   diagnostics:
     path: scripts/diagnostics
     purpose: Manual diagnostics and investigation helpers
+  migrations_active:
+    path: scripts/migrations/active
+    purpose: Active repeatable migration scripts
   migrations_oneoff:
     path: scripts/migrations/oneoff
     purpose: One-time migration scripts with explicit sunset

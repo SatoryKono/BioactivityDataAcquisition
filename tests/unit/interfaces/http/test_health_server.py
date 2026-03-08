@@ -525,79 +525,59 @@ class TestHealthServerWithMonitor:
         monitor.get_all_states.return_value = {}
         return monitor
 
-    @pytest.fixture
-    async def running_server_with_monitor(
-        self, mock_health_monitor: MagicMock
-    ) -> HealthServer:
-        """Create and start a health server with monitor."""
-        server = HealthServer(
-            host="127.0.0.1", port=0, health_monitor=mock_health_monitor
-        )
-        await server.start()
-        yield server
-        await server.stop()
-
-    def _get_server_port(self, server: HealthServer) -> int:
-        """Get the actual port of the running server."""
-        assert server._server is not None
-        sockets = server._server.sockets
-        assert sockets is not None
-        return int(sockets[0].getsockname()[1])
-
-    async def _send_request(
-        self, port: int, method: str = "GET", path: str = "/health"
-    ) -> tuple[int, str, str]:
-        """Send HTTP request and return status code, status text, and body."""
-        reader, writer = await asyncio.open_connection("127.0.0.1", port)
-        try:
-            request = f"{method} {path} HTTP/1.1\r\nHost: localhost\r\n\r\n"
-            writer.write(request.encode())
-            await writer.drain()
-
-            response_line = await reader.readline()
-            response_str = response_line.decode("utf-8").strip()
-            parts = response_str.split(" ", 2)
-            status_code = int(parts[1])
-            status_text = parts[2] if len(parts) > 2 else ""
-
-            headers = {}
-            while True:
-                line = await reader.readline()
-                if line in (b"\r\n", b"\n", b""):
-                    break
-                header_line = line.decode("utf-8").strip()
-                if ":" in header_line:
-                    key, value = header_line.split(":", 1)
-                    headers[key.strip().lower()] = value.strip()
-
-            content_length = int(headers.get("content-length", 0))
-            body = await reader.read(content_length)
-            return status_code, status_text, body.decode("utf-8")
-        finally:
-            writer.close()
-            await writer.wait_closed()
-
     @pytest.mark.asyncio
     async def test_unhealthy_response_503(
         self,
-        running_server_with_monitor: HealthServer,
         mock_health_monitor: MagicMock,
     ) -> None:
-        """Test that unhealthy status returns 503."""
+        """Test that unhealthy status returns 503 via real HTTP connection."""
         mock_state = MagicMock()
         mock_state.status = HealthStatus.UNHEALTHY
         mock_state.consecutive_errors = 5
         mock_health_monitor.get_all_states.return_value = {"chembl": mock_state}
 
-        port = self._get_server_port(running_server_with_monitor)
-        status_code, status_text, body = await self._send_request(
-            port, "GET", "/health/ready"
+        server = HealthServer(
+            host="127.0.0.1", port=0, health_monitor=mock_health_monitor
         )
+        await server.start()
+        try:
+            assert server._server is not None
+            sockets = server._server.sockets
+            assert sockets is not None
+            port = int(sockets[0].getsockname()[1])
 
-        assert status_code == 503
-        assert status_text == "Service Unavailable"
-        data = json.loads(body)
-        assert data["status"] == "unhealthy"
+            reader, writer = await asyncio.open_connection("127.0.0.1", port)
+            try:
+                writer.write(b"GET /health/ready HTTP/1.1\r\nHost: localhost\r\n\r\n")
+                await writer.drain()
+
+                response_line = await reader.readline()
+                parts = response_line.decode("utf-8").strip().split(" ", 2)
+                status_code = int(parts[1])
+                status_text = parts[2] if len(parts) > 2 else ""
+
+                headers: dict[str, str] = {}
+                while True:
+                    line = await reader.readline()
+                    if line in (b"\r\n", b"\n", b""):
+                        break
+                    header_line = line.decode("utf-8").strip()
+                    if ":" in header_line:
+                        key, value = header_line.split(":", 1)
+                        headers[key.strip().lower()] = value.strip()
+
+                content_length = int(headers.get("content-length", 0))
+                body = (await reader.read(content_length)).decode("utf-8")
+            finally:
+                writer.close()
+                await writer.wait_closed()
+
+            assert status_code == 503
+            assert status_text == "Service Unavailable"
+            data = json.loads(body)
+            assert data["status"] == "unhealthy"
+        finally:
+            await server.stop()
 
 
 class TestHealthServerErrorHandling:

@@ -2,7 +2,7 @@
 """Compatibility wrapper for canonical contracts generator.
 
 Canonical script:
-- src/tools/scripts/generate_contracts.py
+- scripts/schema/generate_contracts.py
 """
 
 from __future__ import annotations
@@ -14,7 +14,7 @@ from pathlib import Path
 
 def _canonical_script() -> Path:
     repo_root = Path(__file__).resolve().parents[1]
-    return repo_root / "src" / "tools" / "scripts" / "generate_contracts.py"
+    return repo_root / "scripts" / "schema" / "generate_contracts.py"
 
 
 if __name__ == "__main__":

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Compatibility wrapper for agent-canonical config gap analysis.
+"""Compatibility wrapper for canonical config gap analysis.
 
 Canonical script:
-- docs/00-project/ai/agents/scripts/py-config-bot-1.py
+- scripts/schema/config_gap_analysis.py
 """
 
 from __future__ import annotations
@@ -14,15 +14,7 @@ from pathlib import Path
 
 def _canonical_script() -> Path:
     repo_root = Path(__file__).resolve().parents[1]
-    return (
-        repo_root
-        / "docs"
-        / "00-project"
-        / "ai"
-        / "agents"
-        / "scripts"
-        / "py-config-bot-1.py"
-    )
+    return repo_root / "scripts" / "schema" / "config_gap_analysis.py"
 
 
 if __name__ == "__main__":

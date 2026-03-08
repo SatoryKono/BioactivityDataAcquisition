@@ -155,7 +155,7 @@ test-quick: ## Run quickest possible tests (fast profile, parallel, no slow test
 
 test-changed: ## Run tests for changed files (compared to main branch)
 	@echo "$(BLUE)Running tests for changed files...$(NC)"
-	./scripts/test_changed.sh
+	./scripts/dev/test_changed.sh
 
 test-architecture: ## Run architecture enforcement tests
 	@echo "$(BLUE)Running architecture tests...$(NC)"
@@ -527,9 +527,9 @@ schema-artifacts: ## Generate canonical schema artifacts (registry + contracts)
 contracts-check: ## Generate and check data contracts
 	@echo "$(BLUE)Generating data contracts...$(NC)"
 ifdef UV_EXISTS
-	uv run python scripts/generate_contracts.py
+	uv run python scripts/schema/generate_contracts.py
 else
-	$(VENV_PYTHON) scripts/generate_contracts.py
+	$(VENV_PYTHON) scripts/schema/generate_contracts.py
 endif
 	@echo "$(GREEN)Contracts generated!$(NC)"
 

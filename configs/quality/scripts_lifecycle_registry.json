@@ -284,11 +284,11 @@
       "review_by": "2026-06-30",
       "next_step": "\u0420\u040e\u0420\u0455\u0421\u2026\u0421\u0402\u0420\u00b0\u0420\u0405\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0454\u0420\u00b0\u0420\u0454 manual tool; \u0420\u0491\u0420\u0455\u0420\u00b1\u0420\u00b0\u0420\u0406\u0420\u0451\u0421\u201a\u0421\u040a \u0421\u040f\u0420\u0406\u0420\u0405\u0421\u2039\u0420\u2116 smoke-\u0420\u0406\u0421\u2039\u0420\u00b7\u0420\u0455\u0420\u0406/\u0420\u0455\u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u00b0\u0421\u2020\u0420\u0451\u0420\u0455\u0420\u0405\u0420\u0405\u0421\u2039\u0420\u2116 playbook \u0420\u0451\u0420\u00bb\u0420\u0451 \u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u00b5\u0420\u0406\u0420\u00b5\u0421\u0403\u0421\u201a\u0420\u0451 \u0420\u0406 deprecate."
     },
-    "scripts/diagrams/check_class_method_render_integrity.py": {
+    "scripts/generate_contracts.py": {
       "owner": "@bioetl-architecture",
-      "decision": "keep_manual",
+      "decision": "evaluate",
       "review_by": "2026-06-30",
-      "next_step": "\u0420\u040e\u0420\u0455\u0421\u2026\u0421\u0402\u0420\u00b0\u0420\u0405\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0454\u0420\u00b0\u0420\u0454 manual diagram QA tool; \u0420\u0457\u0421\u0402\u0420\u0451 \u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u00b5\u0420\u0405\u0420\u0455\u0421\u0403\u0420\u00b5 run_diagram_checks \u0420\u0406 canonical scripts \u0420\u0406\u0420\u0454\u0420\u00bb\u0421\u040b\u0421\u2021\u0420\u0451\u0421\u201a\u0421\u040a \u0421\u040f\u0420\u0406\u0420\u0405\u0421\u2039\u0420\u2116 scripts-callsite."
+      "next_step": "Evaluate if actively used in CI/CD or can be archived."
     },
     "scripts/config_gap_analysis.py": {
       "owner": "@bioetl-architecture",
@@ -301,6 +301,12 @@
       "decision": "deprecate",
       "review_by": "2026-04-30",
       "next_step": "PowerShell CI optimization script with no active consumers. Delete after confirming no operational need."
+    },
+    "scripts/generate_schema_artifacts.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "evaluate",
+      "review_by": "2026-06-30",
+      "next_step": "Evaluate utility and decide on keep/deprecate."
     }
   }
 }

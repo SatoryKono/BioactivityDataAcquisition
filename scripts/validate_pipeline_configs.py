@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Compatibility wrapper for agent-canonical pipeline config validator.
+"""Compatibility wrapper for canonical pipeline config validator.
 
 Canonical script:
-- docs/00-project/ai/agents/scripts/py-config-bot-2.py
+- scripts/schema/validate_pipeline_configs.py
 """
 
 from __future__ import annotations
@@ -14,15 +14,7 @@ from pathlib import Path
 
 def _canonical_script() -> Path:
     repo_root = Path(__file__).resolve().parents[1]
-    return (
-        repo_root
-        / "docs"
-        / "00-project"
-        / "ai"
-        / "agents"
-        / "scripts"
-        / "py-config-bot-2.py"
-    )
+    return repo_root / "scripts" / "schema" / "validate_pipeline_configs.py"
 
 
 if __name__ == "__main__":
