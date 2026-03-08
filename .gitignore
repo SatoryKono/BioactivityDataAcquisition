@@ -198,3 +198,8 @@ docs/reports/branch-full-diff-matrix-2026-03-01.csv
 .claude/marketplace.json
 /docs/.claude/settings*
 /data/миграция
+
+
+mypy_report.json
+ruff_report.json
+architecture_tests.txt
