@@ -12,7 +12,7 @@ from uuid import uuid4
 import pytest
 
 from bioetl.composition.bootstrap.runtime.assembly import (
-    VacuumSettings,
+    VacuumSettings as AssemblyVacuumSettings,
     assemble_filter_config,
     assemble_runtime_config,
     assemble_vacuum_settings,
@@ -80,19 +80,19 @@ def base_context() -> PipelineRunContext:
 
 @pytest.mark.unit
 class TestVacuumSettings:
-    """Tests for VacuumSettings dataclass."""
+    """Tests for assembly VacuumSettings dataclass."""
 
     def test_vacuum_settings_is_frozen(self):
         """Test that VacuumSettings is immutable."""
-        settings = VacuumSettings(enabled=True, retention_days=7)
+        settings = AssemblyVacuumSettings(enabled=True, retention_days=7)
         with pytest.raises(AttributeError):
             settings.enabled = False  # type: ignore[misc]
 
     def test_vacuum_settings_equality(self):
         """Test that VacuumSettings supports equality comparison."""
-        s1 = VacuumSettings(enabled=True, retention_days=7)
-        s2 = VacuumSettings(enabled=True, retention_days=7)
-        s3 = VacuumSettings(enabled=False, retention_days=7)
+        s1 = AssemblyVacuumSettings(enabled=True, retention_days=7)
+        s2 = AssemblyVacuumSettings(enabled=True, retention_days=7)
+        s3 = AssemblyVacuumSettings(enabled=False, retention_days=7)
 
         assert s1 == s2
         assert s1 != s3
@@ -189,7 +189,7 @@ class TestAssembleVacuumSettings:
             yaml_maintenance=yaml_maintenance_default,
         )
 
-        assert isinstance(result, VacuumSettings)
+        assert isinstance(result, AssemblyVacuumSettings)
 
 
 # =============================================================================

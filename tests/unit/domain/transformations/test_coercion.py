@@ -5,8 +5,6 @@ Tests for safe_float, safe_int, safe_str.
 
 from __future__ import annotations
 
-import math
-
 import pytest
 
 from bioetl.domain.transformations.coercion import safe_float, safe_int, safe_str
