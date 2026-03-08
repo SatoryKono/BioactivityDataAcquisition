@@ -8,7 +8,7 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.runner import PipelineRunner
-from bioetl.domain.context import PipelineRunContext, VacuumConfig
+from bioetl.domain.context import PipelineRunContext, VacuumSettings
 from bioetl.domain.types import RunType
 
 
@@ -689,12 +689,12 @@ class TestBootstrapVacuumConfig:
         mock_registry.get.return_value.factory = mock_factory
         mock_get_registry.return_value = mock_registry
 
-        # Context without CLI vacuum options (disabled VacuumConfig)
+        # Context without CLI vacuum options (disabled VacuumSettings)
         ctx = PipelineRunContext(
             pipeline_name="chembl_activity",
             run_id=uuid4(),
             run_type=RunType.INCREMENTAL,
-            # vacuum defaults to VacuumConfig(enabled=False)
+            # vacuum defaults to VacuumSettings(enabled=False)
         )
 
         bootstrap_pipeline_runner(ctx)
@@ -765,7 +765,7 @@ class TestBootstrapVacuumConfig:
             pipeline_name="chembl_activity",
             run_id=uuid4(),
             run_type=RunType.INCREMENTAL,
-            vacuum=VacuumConfig(enabled=True, retention_days=30),  # CLI override
+            vacuum=VacuumSettings(enabled=True, retention_days=30),  # CLI override
         )
 
         bootstrap_pipeline_runner(ctx)
