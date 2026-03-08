@@ -193,7 +193,7 @@ sink:
 | high-volume facts (chembl: activity)                                                                                                  | `overwrite` (implicit)                  | `append`               | No (if consumers read latest partitions) | Set explicit `mode: append`, keep Silver merge for idempotency                            |
 | recomputed derived outputs (chembl: publication-similarity, publication-term)                                                         | `overwrite` (implicit)                  | `overwrite` (explicit) | No                                       | Keep overwrite, but configure explicitly in pipeline YAML                                 |
 
-### 7. Политика типов JSON-полей (дополнение)
+### 9. Политика типов JSON-полей (дополнение)
 
 С 2026-02-17 strict validation в Gold синхронизирована с единой политикой типизации JSON-like полей:
 

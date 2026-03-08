@@ -157,7 +157,7 @@ Ratified baseline for residual non-nav backlog:
 3. Any deviation requires explicit governance revision.
 
 Decision record:
-- `docs/plans/wave-8-policy-decisions-2026-03-03.md`
+- `docs/99-archive/plans/wave-8-policy-decisions-2026-03-03.md` *(archived)*
 
 ----------------------------------------------------------------------
 

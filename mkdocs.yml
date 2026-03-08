@@ -178,10 +178,10 @@ nav:
                     -   "v5.14 → v6.0": 03-guides/migration-5.14-to-6.0.md
             -   Dashboards:
                     -   "Overview": 03-guides/dashboards/README.md
-                    -   "V2 Updates": 03-guides/dashboards/DASHBOARD_V2_UPDATES.md
-                    -   "V2 Usage": 03-guides/dashboards/DASHBOARD_V2_USAGE.md
-                    -   "Monitoring Index": 03-guides/dashboards/MONITORING_INDEX.md
-                    -   "Variables Guide": 03-guides/dashboards/VARIABLES_GUIDE.md
+                    -   "V2 Updates": 03-guides/dashboards/dashboard-v2-updates.md
+                    -   "V2 Usage": 03-guides/dashboards/dashboard-v2-usage.md
+                    -   "Monitoring Index": 03-guides/dashboards/monitoring-index.md
+                    -   "Variables Guide": 03-guides/dashboards/variables-guide.md
             -   "File Path Audit Report": 03-guides/file-path-audit-report.md
     -   Providers:
             -   "Overview": 04-reference/providers/README.md
@@ -304,13 +304,10 @@ nav:
                     -   "Observability Checklist": 05-operations/runbooks/observability-checklist.md
                     -   "Scaling": 05-operations/runbooks/scaling.md
                     -   "Publication Validation": 05-operations/runbooks/publication-validation-runbook.md
-            -   "Release Checklist": 05-operations/RELEASE_CHECKLIST.md
+            -   "Release Checklist": 05-operations/release-checklist.md
             -   "Performance Baselines": 05-operations/performance-baselines.md
             -   "VACUUM & Retention": 05-operations/vacuum-retention.md
     -   Verification:
-            -   "Publication Field Mapping": 05-operations/verification/publication-field-mapping-report.md
-            -   "PubMed Extraction": 05-operations/verification/pubmed-extraction-verification-report.md
-            -   "SemanticScholar Publication": 05-operations/verification/semanticscholar-publication-pipeline-verification.md
             -   "VCR Provider Rebalancing": 05-operations/verification/vcr-provider-rebalancing.md
     -   "Internal / Extended":
             -   Agents:
@@ -343,12 +340,11 @@ nav:
                     -   "Diagram Prompt Expansion": 02-architecture/mmd-diagrams/docs/PROMPT-diagram-expansion.md
                     -   "Module Consolidation Requirements": 02-architecture/module-consolidation-migration-requirements.md
                     -   "Content Hash Policy": 02-architecture/policies/content-hash-identity-policy.md
-                    -   "Architecture Review 2026-03-04": 02-architecture/architecture-review-2026-03-04.md
             -   "Guide Extras":
                     -   "Silver Schema Testing Guide": 03-guides/silver-schema-testing-guide.md
             -   "Reference Extras":
                     -   "Contracts README": 04-reference/contracts/README.md
-                    -   "Hash Policy": 04-reference/hash_policy.md
+                    -   "Hash Policy": 04-reference/hash-policy.md
                     -   "Publication Fields Reference": 04-reference/publication-fields-reference.md
                     -   "Publication Validation Index": 04-reference/publication-validation-index.md
                     -   "Pipeline Review Checklist": 04-reference/templates/pipeline-review-checklist.md
@@ -358,16 +354,12 @@ nav:
                     -   "Pipeline Legacy: SemanticScholar Publication": 04-reference/pipelines/semanticscholar-publication.md
             -   "Operations Extras":
                     -   "Monitoring Guide": 05-operations/01-monitoring-guide.md
-                    -   "Kubernetes Guide (Experimental)": 05-operations/deployment/DEPLOYMENT_GUIDE.md
-                    -   "K8S Summary (Experimental)": 05-operations/deployment/K8S_SUMMARY.md
-                    -   "MCP Neo4j Memory Setup": 05-operations/deployment/NEO4J_MEMORY_SETUP.md
-                    -   "MCP Neo4j Memory Summary": 05-operations/deployment/MCP_NEO4J_MEMORY_SUMMARY.md
-                    -   "MCP Neo4j Memory Final Summary": 05-operations/deployment/MCP_NEO4J_MEMORY_FINAL_SUMMARY.md
+                    -   "Kubernetes Guide (Experimental)": 05-operations/deployment/deployment-guide.md
+                    -   "K8S Summary (Experimental)": 05-operations/deployment/k8s-summary.md
+                    -   "MCP Neo4j Memory Setup": 05-operations/deployment/neo4j-memory-setup.md
+                    -   "MCP Neo4j Memory Summary": 05-operations/deployment/mcp-neo4j-memory-summary.md
+                    -   "MCP Neo4j Memory Final Summary": 05-operations/deployment/mcp-neo4j-memory-final-summary.md
                     -   "Endpoint Validation Checklist": 05-operations/verification/endpoint-validation-checklist.md
-                    -   "Git Preflight Status 2026-02-24": 05-operations/verification/git-preflight-status-2026-02-24.md
-                    -   "Refactor Plan Validation 2026-02-15": 05-operations/verification/refactor-plan-validation-2026-02-15.md
-                    -   "Schema Review 2026-02-17": 05-operations/verification/schema-review-2026-02-17.md
-                    -   "Sync Report 2026-02-17": 05-operations/verification/sync-report-2026-02-17.md
                     -   "VCR Test Tasks": 05-operations/verification/vcr-test-tasks.md
             -   "Diagram Descriptions":
                 -   "Index": 02-architecture/diagram-descriptions/INDEX.md
@@ -672,16 +664,10 @@ nav:
                 -   "Diagram Regression Test Plan": 02-architecture/mmd-diagrams/docs/diagram-regression-test-plan.md
             -   "Plans":
                 -   "Plans Overview": plans/README.md
-                -   "Branch Consolidation Plan": plans/branch-consolidation-plan.md
-                -   "Codex 7 Branches Consolidation Plan": plans/codex-7-branches-consolidation-plan.md
-                -   "Config Unification Plan": plans/config-unification-plan.md
                 -   "Diagrams Docs Scripts Refactor Plan": plans/DIAGRAMS_DOCS_SCRIPTS_REFACTOR_PLAN.md
-                -   "Diagram Optimization Prompts V3": plans/diagram-optimization-prompts-v3.md
                 -   "Diagram Views Improvement Plan": plans/diagram-views-improvement-plan.md
-                -   "Diagram Rendering Improvement Plan 2026 02 26": plans/diagram-rendering-improvement-plan-2026-02-26.md
                 -   "Diagram Workflow Corrective Master Plan 2026 02 27": plans/diagram-workflow-corrective-master-plan-2026-02-27.md
                 -   "MkDocs Material Migration Track 2026 03 03": plans/mkdocs-material-migration-track-2026-03-03.md
-                -   "Wave 8 Policy Decisions 2026 03 03": plans/wave-8-policy-decisions-2026-03-03.md
             -   "Prompts":
                 -   "Diagram Docs Orchestrator Agent": 00-project/ai/agents/runtime/py-diagram-docs-orchestrator.md
             -   "Reports":

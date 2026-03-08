@@ -209,6 +209,23 @@ DOC_EXCEPTIONS = {
     "LICENSE.md",
     "CLAUDE.md",
     "AGENT.md",
+    "SKILL.md",
+    "INDEX.md",
+    "ORCHESTRATION.md",
+    "TOOLS.md",
+    "CODEX.md",
+    "GEMINI.md",
+}
+
+# Directories excluded from doc naming audit (archives, plans, AI content)
+_DOC_EXCLUDED_DIRS = {
+    "99-archive",
+    "plans",
+}
+
+# Sub-paths excluded from doc naming audit (relative to docs root)
+_DOC_EXCLUDED_SUBPATHS = {
+    "00-project/ai",
 }
 
 
@@ -317,6 +334,21 @@ def check_documentation(docs_path: Path) -> Iterator[Violation]:
 
         # Исключения для конвенционных файлов
         if filename in DOC_EXCEPTIONS:
+            continue
+
+        # Пропуск исключённых директорий (архивы, планы, AI)
+        try:
+            rel = md_file.relative_to(docs_path)
+            rel_parts = rel.parts
+        except ValueError:
+            rel_parts = ()
+            rel = None
+        if rel_parts and rel_parts[0] in _DOC_EXCLUDED_DIRS:
+            continue
+        if rel is not None and any(
+            str(rel).replace("\\", "/").startswith(sp)
+            for sp in _DOC_EXCLUDED_SUBPATHS
+        ):
             continue
 
         basename = md_file.stem
