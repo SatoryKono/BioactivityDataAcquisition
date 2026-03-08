@@ -131,7 +131,7 @@ class TestAtomicWrite:
         def flaky_replace(self: Path, target_path: Path) -> Path:
             call_count["count"] += 1
             if call_count["count"] < 3:
-                raise OSError(16, "Device or resource busy")
+                raise OSError(errno.EBUSY, "Device or resource busy")
             return original_replace(self, target_path)
 
         with patch.object(Path, "replace", flaky_replace):
@@ -170,7 +170,7 @@ class TestAtomicWrite:
         def flaky_replace(self: Path, target_path: Path) -> Path:
             call_count["count"] += 1
             if call_count["count"] == 1:
-                raise OSError(16, "Device or resource busy")
+                raise OSError(errno.EBUSY, "Device or resource busy")
             return original_replace(self, target_path)
 
         policy = AdaptiveRetryPolicy(
