@@ -19,6 +19,8 @@ class _OpenAlexHealthHost(Protocol):
     mailto: str
     http_client: UnifiedHTTPClient
     logger: LoggerPort
+    _http_client: UnifiedHTTPClient
+    _logger: LoggerPort
     _adapter_metrics: AdapterMetrics
 
     def _build_headers(self) -> dict[str, str]:
