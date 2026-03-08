@@ -23,7 +23,7 @@ from bioetl.domain.context import (
     CachedBronzeContext,
     InputFilterContext,
     PipelineRunContext,
-    VacuumConfig,
+    VacuumSettings,
 )
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.types import ExecutionContext, RunID, RunType
@@ -157,16 +157,16 @@ def _build_input_filter_context(options: RunOptions) -> InputFilterContext:
     return InputFilterContext.disabled()
 
 
-def _build_vacuum_config(options: RunOptions) -> VacuumConfig:
+def _build_vacuum_config(options: RunOptions) -> VacuumSettings:
     """Build vacuum config from CLI overrides (preserving tri-state).
 
     Args:
         options: User-facing run options containing vacuum configuration.
 
     Returns:
-        VacuumConfig with enabled flag and retention_days.
+        VacuumSettings with enabled flag and retention_days.
     """
-    return VacuumConfig(
+    return VacuumSettings(
         enabled=options.vacuum_after_run,
         retention_days=options.vacuum_retention_days or 7,
     )
