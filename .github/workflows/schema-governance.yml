@@ -7,8 +7,8 @@ on:
       - 'src/bioetl/domain/contracts/**'
       - 'src/bioetl/domain/entities/**'
       - 'src/bioetl/infrastructure/schemas/**'
-      - 'src/tools/scripts/generate_contracts.py'
-      - 'scripts/generate_schema_artifacts.py'
+      - 'scripts/schema/generate_contracts.py'
+      - 'scripts/schema/generate_schema_artifacts.py'
       - 'src/tools/verify_schema_parity.py'
       - 'src/tools/generate_json_field_typing_inventory.py'
       - 'docs/03-data-model/json-field-typing-inventory.md'
@@ -18,8 +18,8 @@ on:
       - 'src/bioetl/domain/contracts/**'
       - 'src/bioetl/domain/entities/**'
       - 'src/bioetl/infrastructure/schemas/**'
-      - 'src/tools/scripts/generate_contracts.py'
-      - 'scripts/generate_schema_artifacts.py'
+      - 'scripts/schema/generate_contracts.py'
+      - 'scripts/schema/generate_schema_artifacts.py'
       - 'src/tools/verify_schema_parity.py'
       - 'src/tools/generate_json_field_typing_inventory.py'
       - 'docs/03-data-model/json-field-typing-inventory.md'
@@ -59,7 +59,7 @@ jobs:
         run: uv sync --frozen --extra dev
 
       - name: Verify generated schema artifacts are up-to-date
-        run: uv run python scripts/generate_schema_artifacts.py --check
+        run: uv run python scripts/schema/generate_schema_artifacts.py --check
 
   contracts-export:
     name: Contracts Export (blocking)

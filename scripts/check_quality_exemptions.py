@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Compatibility wrapper for agent-canonical quality exemptions checker.
+"""Compatibility wrapper for canonical quality exemptions checker.
 
 Canonical script:
-- docs/00-project/ai/agents/scripts/architecture-techdebt-automation.py
+- scripts/qa/check_quality_exemptions.py
 """
 
 from __future__ import annotations
@@ -14,15 +14,7 @@ from pathlib import Path
 
 def _canonical_script() -> Path:
     repo_root = Path(__file__).resolve().parents[1]
-    return (
-        repo_root
-        / "docs"
-        / "00-project"
-        / "ai"
-        / "agents"
-        / "scripts"
-        / "architecture-techdebt-automation.py"
-    )
+    return repo_root / "scripts" / "qa" / "check_quality_exemptions.py"
 
 
 if __name__ == "__main__":

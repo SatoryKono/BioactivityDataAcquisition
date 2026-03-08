@@ -18,6 +18,7 @@ CANONICAL_GROUPS: tuple[str, ...] = (
     "repo",
     "ops",
     "diagnostics",
+    "migrations",
     "diagrams",
 )
 

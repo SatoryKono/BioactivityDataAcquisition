@@ -13,6 +13,7 @@ This directory uses a **canonical-by-domain** structure.
 - `scripts/repo/` — repository hygiene and governance inventory.
 - `scripts/ops/` — operational and platform support scripts.
 - `scripts/diagnostics/` — manual probes, debug, one-off diagnostics.
+- `scripts/migrations/active/` — active/repeatable migrations.
 - `scripts/migrations/oneoff/` — one-time migration scripts.
 - `scripts/diagrams/` — diagram quality/render tooling.
 

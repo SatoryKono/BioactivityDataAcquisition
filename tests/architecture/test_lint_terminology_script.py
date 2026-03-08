@@ -37,6 +37,5 @@ def test_lint_terminology_wrapper_delegates_to_canonical() -> None:
     assert wrapper_path.exists(), "scripts/lint_terminology.py must exist"
     content = wrapper_path.read_text(encoding="utf-8")
     assert "runpy.run_path" in content
-    assert "docs" in content
-    assert "agents" in content
+    assert "qa" in content
     assert "lint_terminology.py" in content

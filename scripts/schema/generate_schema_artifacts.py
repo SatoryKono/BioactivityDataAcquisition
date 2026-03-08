@@ -6,8 +6,8 @@ Artifacts:
 - Gold JSON contracts: docs/04-reference/contracts/gold/*.json
 
 Usage:
-    python scripts/generate_schema_artifacts.py
-    python scripts/generate_schema_artifacts.py --check
+    python scripts/schema/generate_schema_artifacts.py
+    python scripts/schema/generate_schema_artifacts.py --check
 """
 
 from __future__ import annotations
@@ -72,7 +72,7 @@ def _build_registry(entries: list[CanonicalSchemaEntry]) -> str:
     lines.append('"""Auto-generated registry from configs/entities schema sections.')
     lines.append("")
     lines.append(
-        "DO NOT EDIT MANUALLY. Run: python scripts/generate_schema_artifacts.py"
+        "DO NOT EDIT MANUALLY. Run: python scripts/schema/generate_schema_artifacts.py"
     )
     lines.append('"""')
     lines.append("")
@@ -157,7 +157,7 @@ def _write_if_changed(path: Path, content: str, check: bool) -> bool:
 def _run_gold_contract_generation(check: bool) -> bool:
     before = _snapshot_generated_contracts()
     subprocess.run(
-        [sys.executable, "src/tools/scripts/generate_contracts.py"],
+        [sys.executable, "scripts/schema/generate_contracts.py"],
         cwd=PROJECT_ROOT,
         check=True,
     )
@@ -193,7 +193,7 @@ def main() -> int:
 
     if args.check and (stale_registry or stale_contracts):
         _emit(
-            "\nGenerated artifacts are stale. Run: python scripts/generate_schema_artifacts.py",
+            "\nGenerated artifacts are stale. Run: python scripts/schema/generate_schema_artifacts.py",
             err=True,
         )
         return 1

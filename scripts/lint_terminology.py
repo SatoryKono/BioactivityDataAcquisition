@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Compatibility wrapper for agent-canonical terminology linter wrapper.
+"""Compatibility wrapper for canonical terminology linter.
 
 Canonical script:
-- docs/00-project/ai/agents/scripts/lint_terminology.py
+- scripts/qa/lint_terminology.py
 """
 
 from __future__ import annotations
@@ -14,15 +14,7 @@ from pathlib import Path
 
 def _canonical_script() -> Path:
     repo_root = Path(__file__).resolve().parents[1]
-    return (
-        repo_root
-        / "docs"
-        / "00-project"
-        / "ai"
-        / "agents"
-        / "scripts"
-        / "lint_terminology.py"
-    )
+    return repo_root / "scripts" / "qa" / "lint_terminology.py"
 
 
 if __name__ == "__main__":
