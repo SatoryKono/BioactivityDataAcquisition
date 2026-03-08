@@ -174,7 +174,7 @@ class HTTPClientRetryMixin:
         retries: int,
         last_error: Exception | None,
     ) -> None:
-        """Backward-compatible wrapper for HTTP metrics emission.
+        """Record request duration, retry, and error metrics via _metrics port.
 
         Args:
             method: HTTP method (GET, POST, etc.) used as metric label.
@@ -183,15 +183,33 @@ class HTTPClientRetryMixin:
             retries: Number of retry attempts made.
             last_error: Final exception if the request failed, or None on success.
         """
-        _record_request_metrics(
-            self._metrics,
-            self.provider,
-            method,
-            duration,
-            status_code,
-            retries,
-            last_error,
+        labels = {
+            "provider": self.provider,
+            "method": method.upper(),
+            "status": str(status_code) if status_code else "error",
+        }
+        self._metrics.observe_histogram(
+            "http_request_duration_seconds", duration, labels
         )
+        if retries > 0:
+            self._metrics.increment_counter(
+                "http_retries_total",
+                retries,
+                {"provider": self.provider, "method": method.upper()},
+            )
+        if last_error is not None or status_code >= 400:
+            error_type = (
+                type(last_error).__name__ if last_error else f"http_{status_code}"
+            )
+            self._metrics.increment_counter(
+                "http_request_errors_total",
+                1,
+                {
+                    "provider": self.provider,
+                    "method": method.upper(),
+                    "error_type": error_type,
+                },
+            )
 
     def _log_retry(
         self,
@@ -312,9 +330,7 @@ class HTTPClientRetryMixin:
             span.set_attribute("http.retries", retries)
             span.set_attribute("bioetl.duration_ms", duration * 1000)
             span.__exit__(None, None, None)
-            _record_request_metrics(
-                self._metrics,
-                self.provider,
+            self._record_request_metrics(
                 method,
                 duration,
                 status_code,

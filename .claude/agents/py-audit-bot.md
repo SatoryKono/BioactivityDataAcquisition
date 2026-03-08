@@ -25,8 +25,8 @@ model: opus
 ## Memory
 
 > **При старте** прочитай специализированную память:
-> `.ai/memory/memory-py-audit-bot.md` — import matrix, anti-patterns, naming, scoring, valid exceptions.
-> Общий контекст: `.ai/memory/agent-memory.md`
+> `docs/00-project/ai/memory/memory-py-audit-bot.md` — import matrix, anti-patterns, naming, scoring, valid exceptions.
+> Общий контекст: `docs/00-project/ai/memory/agent-memory.md`
 
 ---
 

@@ -63,6 +63,8 @@ composition/bootstrap/
 
 Также в корне `composition/` находятся: `bootstrap_contexts.py`, `bootstrap_logger.py`, `builders.py`, `entrypoints.py`, `observability.py`, `registry.py`, `types.py`.
 
+Дополнительные пакеты: `runtime_builders/`, `providers/`, `services/`.
+
 ### 2.3. Реестр провайдеров и DataSourceRegistry
 
 **Расположение:** `src/bioetl/composition/factories/data_source_factory.py:100` (DataSourceRegistry) и `src/bioetl/composition/providers/` (ProviderRegistry).

@@ -368,14 +368,14 @@ docs/05-operations/verification/gold-contracts-export-diff-2026-02-17.json,M +26
 docs/reports/diagram-audit-consolidated-2026-02-28.md,-,-,A +171/-0,-
 docs/reports/diagram-refactoring-plan-2026-02-28.md,-,-,A +241/-0,-
 docs/reports/documentation-cascade-audit-2026-02-27.md,A +106/-0,-,A +106/-0,A +106/-0
-docs/skills/global/documentation-audit/SKILL.md,M +3/-3,-,M +3/-3,M +3/-3
-docs/skills/global/documentation-audit/agents/openai.yaml,M +2/-2,-,M +2/-2,M +2/-2
-docs/skills/global/documentation-audit/references/audit-checklist.md,M +2/-2,-,M +2/-2,M +2/-2
-docs/skills/global/documentation-audit/references/report-template.md,M +1/-1,-,M +1/-1,M +1/-1
-docs/skills/local/documentation-audit/SKILL.md,M +3/-3,-,M +3/-3,M +3/-3
-docs/skills/local/documentation-audit/agents/openai.yaml,M +2/-2,-,M +2/-2,M +2/-2
-docs/skills/local/documentation-audit/references/audit-checklist.md,M +2/-2,-,M +2/-2,M +2/-2
-docs/skills/local/documentation-audit/references/report-template.md,M +1/-1,-,M +1/-1,M +1/-1
+docs/00-project/skills/global/documentation-audit/SKILL.md,M +3/-3,-,M +3/-3,M +3/-3
+docs/00-project/skills/global/documentation-audit/agents/openai.yaml,M +2/-2,-,M +2/-2,M +2/-2
+docs/00-project/skills/global/documentation-audit/references/audit-checklist.md,M +2/-2,-,M +2/-2,M +2/-2
+docs/00-project/skills/global/documentation-audit/references/report-template.md,M +1/-1,-,M +1/-1,M +1/-1
+docs/00-project/skills/local/documentation-audit/SKILL.md,M +3/-3,-,M +3/-3,M +3/-3
+docs/00-project/skills/local/documentation-audit/agents/openai.yaml,M +2/-2,-,M +2/-2,M +2/-2
+docs/00-project/skills/local/documentation-audit/references/audit-checklist.md,M +2/-2,-,M +2/-2,M +2/-2
+docs/00-project/skills/local/documentation-audit/references/report-template.md,M +1/-1,-,M +1/-1,M +1/-1
 mkdocs.yml,M +18/-8,-,M +0/-8,M +0/-8
 pyproject.toml,M +2/-0,-,M +2/-0,M +2/-0
 reports/review/FINAL-REVIEW.md,A +339/-0,-,A +339/-0,A +339/-0

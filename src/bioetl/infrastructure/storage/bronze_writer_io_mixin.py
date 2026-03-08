@@ -16,7 +16,7 @@ from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.storage._atomic import atomic_write_bytes
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort
     from bioetl.domain.types import BatchID
 
 BRONZE_WRITE_ERRORS = (
@@ -33,6 +33,8 @@ class BronzeWriterIOMixin:
 
     base_path: Path
     logger: LoggerPort
+    _logger: LoggerPort
+    _metrics: MetricsPort
     COMPRESSION_LEVEL: int
     COMPRESSION_THREADS: int
     COMPRESSION_CHUNK_SIZE: int
@@ -209,7 +211,14 @@ class BronzeWriterIOMixin:
 
         pattern = "batch_*.jsonl.zst" if date else "**/*.jsonl.zst"
         files = list(search_path.glob(pattern))
-        return sorted(str(p.relative_to(self.base_path)) for p in files)
+        result = sorted(str(p.relative_to(self.base_path)) for p in files)
+        self._logger.debug(
+            "bronze_list_batches",
+            provider=provider,
+            entity=entity,
+            batch_count=len(result),
+        )
+        return result
 
     def _find_old_date_dirs(
         self,
@@ -288,7 +297,7 @@ class BronzeWriterIOMixin:
                 if not dry_run:
                     date_dir.rmdir()
 
-        self.logger.info(
+        self._logger.info(
             "bronze_cleanup_complete",
             cutoff=cutoff_str,
             dry_run=dry_run,
@@ -296,6 +305,18 @@ class BronzeWriterIOMixin:
             bytes_freed=bytes_total,
             dirs_removed=dirs,
         )
+        if not dry_run and files > 0:
+            cleanup_labels = {"operation": "cleanup"}
+            self._metrics.increment_counter(
+                "bronze_files_removed_total",
+                files,
+                cleanup_labels,
+            )
+            self._metrics.increment_counter(
+                "bronze_bytes_freed_total",
+                bytes_total,
+                cleanup_labels,
+            )
         return {
             "files_removed": files,
             "bytes_freed": bytes_total,

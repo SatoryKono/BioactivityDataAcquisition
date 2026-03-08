@@ -37,8 +37,7 @@ class SeedConfig:
     limit: int | None = None
 
     def __post_init__(self) -> None:
-        if isinstance(self.output_keys, list):
-            object.__setattr__(self, "output_keys", tuple(self.output_keys))
+        _coerce_to_tuple(self, "output_keys")
         self._validate()
 
     def _validate(self) -> None:
@@ -63,10 +62,8 @@ class DependencyConfig:
     key_filter: str | None = None
 
     def __post_init__(self) -> None:
-        if isinstance(self.join_keys, list):
-            object.__setattr__(self, "join_keys", tuple(self.join_keys))
-        if isinstance(self.filter_fields, list):
-            object.__setattr__(self, "filter_fields", tuple(self.filter_fields))
+        _coerce_to_tuple(self, "join_keys")
+        _coerce_to_tuple(self, "filter_fields")
         self._validate()
 
     def _validate(self) -> None:
@@ -125,24 +122,20 @@ class EnricherConfig:
     aggregation: AggregationConfig | None = None
 
     def __post_init__(self) -> None:
-        if isinstance(self.join_keys, list):
-            object.__setattr__(self, "join_keys", tuple(self.join_keys))
+        _coerce_to_tuple(self, "join_keys")
         if isinstance(self.fallback_strategy, str):
             object.__setattr__(
-                self,
-                "fallback_strategy",
+                self, "fallback_strategy",
                 FallbackStrategy.from_string(self.fallback_strategy),
             )
         if isinstance(self.cardinality, str):
             object.__setattr__(
-                self,
-                "cardinality",
+                self, "cardinality",
                 EnricherCardinality.from_string(self.cardinality),
             )
         if isinstance(self.aggregation, dict):
             object.__setattr__(
-                self,
-                "aggregation",
+                self, "aggregation",
                 AggregationConfig(**self.aggregation),
             )
         self._validate()
@@ -178,23 +171,15 @@ class EnricherConfig:
         return self.cardinality == EnricherCardinality.MANY_TO_ONE
 
 
-def _coerce_to_tuple(obj: object, attr: str) -> None:
+def _coerce_to_tuple(obj: object, attr: str, convert_dicts: type | None = None) -> None:
+    """Convert list to tuple, optionally converting dict elements to specified type."""
     val = getattr(obj, attr, None)
     if val is not None and isinstance(val, list):
-        object.__setattr__(obj, attr, tuple(val))
-
-
-def _coerce_column_groups(obj: object, attr: str) -> None:
-    val = getattr(obj, attr, None)
-    if val is not None and isinstance(val, list):
-        object.__setattr__(
-            obj,
-            attr,
-            tuple(
-                ColumnGroupConfig(**group) if isinstance(group, dict) else group
-                for group in val
-            ),
-        )
+        if convert_dicts:
+            val = tuple(convert_dicts(**item) if isinstance(item, dict) else item for item in val)
+        else:
+            val = tuple(val)
+        object.__setattr__(obj, attr, val)
 
 
 @dataclass(frozen=True, slots=True)
@@ -216,7 +201,7 @@ class LayerColumnConfig:
         _coerce_to_tuple(self, "columns")
         _coerce_to_tuple(self, "include_groups")
         _coerce_to_tuple(self, "exclude_fields")
-        _coerce_column_groups(self, "column_groups")
+        _coerce_to_tuple(self, "column_groups", ColumnGroupConfig)
         if not isinstance(self.rename_fields, dict):
             object.__setattr__(self, "rename_fields", dict(self.rename_fields))
         self._validate()
@@ -248,7 +233,7 @@ class DataSchemaConfig:
     gold: LayerColumnConfig | None = None
 
     def __post_init__(self) -> None:
-        _coerce_column_groups(self, "column_groups")
+        _coerce_to_tuple(self, "column_groups", ColumnGroupConfig)
         if isinstance(self.silver, dict):
             object.__setattr__(self, "silver", LayerColumnConfig(**self.silver))
         if isinstance(self.gold, dict):
@@ -298,39 +283,22 @@ class CrossValidationConfig:
     enricher_pairings: tuple[EnricherFieldPairing, ...] = ()
 
     def __post_init__(self) -> None:
-        if isinstance(self.enricher_pairings, list):
-            object.__setattr__(self, "enricher_pairings", tuple(self.enricher_pairings))
+        _coerce_to_tuple(self, "enricher_pairings")
         self._validate()
 
     def _validate(self) -> None:
-        self._validate_thresholds()
-        self._validate_tolerances()
-
-    def _validate_thresholds(self) -> None:
         if self.warning_threshold < 1:
-            raise ValueError(
-                f"warning_threshold must be >= 1, got {self.warning_threshold}"
-            )
+            raise ValueError(f"warning_threshold must be >= 1, got {self.warning_threshold}")
         if self.error_threshold < 2:
-            raise ValueError(
-                f"error_threshold must be >= 2, got {self.error_threshold}"
-            )
+            raise ValueError(f"error_threshold must be >= 2, got {self.error_threshold}")
         if self.warning_threshold >= self.error_threshold:
             raise ValueError("warning_threshold must be < error_threshold")
         if self.quarantine_threshold < 1:
-            raise ValueError(
-                f"quarantine_threshold must be >= 1, got {self.quarantine_threshold}"
-            )
-
-    def _validate_tolerances(self) -> None:
+            raise ValueError(f"quarantine_threshold must be >= 1, got {self.quarantine_threshold}")
         if not 0.0 < self.fuzzy_threshold <= 1.0:
-            raise ValueError(
-                f"fuzzy_threshold must be in (0.0, 1.0], got {self.fuzzy_threshold}"
-            )
+            raise ValueError(f"fuzzy_threshold must be in (0.0, 1.0], got {self.fuzzy_threshold}")
         if not 0.0 < self.numeric_tolerance <= 1.0:
-            raise ValueError(
-                f"numeric_tolerance must be in (0.0, 1.0], got {self.numeric_tolerance}"
-            )
+            raise ValueError(f"numeric_tolerance must be in (0.0, 1.0], got {self.numeric_tolerance}")
 
     def get_pairing(self, enricher_pipeline: str) -> EnricherFieldPairing | None:
         """Look up field pairing config for the given enricher pipeline.

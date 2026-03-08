@@ -1,8 +1,8 @@
 %% BioETL — Class Diagram: Infrastructure Adapters
 %% HTTP adapter class hierarchy with mixins.
 
-%% @version 1.1.0
-%% @date    2026-02-26
+%% @version 1.2.0
+%% @date    2026-03-08
 %% @type    classDiagram
 %% @level   Class / Interface
 %% @nodes   18
@@ -167,7 +167,13 @@ classDiagram
 
     class RetryingDataSourceDecorator {
         <<Decorator>>
-        wraps DataSourcePort
+        data_source: DataSourcePort
+        retry_config: RetryConfig
+        logger: LoggerPort | None
+        metrics: MetricsPort | None
+        __post_init__()
+        fetch(entity_type, ...)
+        health_check()
     }
 
     class CachedBronzeDataSource {

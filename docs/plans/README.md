@@ -35,4 +35,4 @@ Plans in this folder must not override normative documents.
 
 ## Related Prompt
 
-- [qa_orchestrator.md](../00-project/agents/qa_orchestrator.md)
+- [qa_orchestrator.md](../00-project/ai/agents/qa_orchestrator.md)

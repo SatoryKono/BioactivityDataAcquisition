@@ -64,9 +64,7 @@ __all__ = [
 ]
 
 
-def extract_pipeline_callbacks(
-    pipeline: BasePipeline,
-) -> PipelineCallbacksContext:
+def extract_pipeline_callbacks(pipeline: BasePipeline) -> PipelineCallbacksContext:
     """Extract transformation callbacks from transformer or legacy methods.
 
     Args:
@@ -84,19 +82,16 @@ def extract_pipeline_callbacks(
         )
 
     # Fallback for pipelines without explicit transformer (legacy)
-    transform_cb = pipeline.transform_bronze_to_silver
-    gold_filter_cb = getattr(
-        pipeline, "should_write_gold", lambda _context, record: True
-    )
-    gold_transform_cb = getattr(
-        pipeline,
-        "transform_for_gold",
-        lambda _context, silver_record: silver_record,
-    )
     return PipelineCallbacksContext(
-        transform=cast(TransformCallback, transform_cb),
-        gold_filter=cast(GoldFilterCallback, gold_filter_cb),
-        gold_transform=cast(GoldTransformCallback, gold_transform_cb),
+        transform=cast(TransformCallback, pipeline.transform_bronze_to_silver),
+        gold_filter=cast(
+            GoldFilterCallback,
+            getattr(pipeline, "should_write_gold", lambda _context, record: True),
+        ),
+        gold_transform=cast(
+            GoldTransformCallback,
+            getattr(pipeline, "transform_for_gold", lambda _context, silver_record: silver_record),
+        ),
     )
 
 
@@ -235,16 +230,6 @@ class ServicesBuilder:
             RecordProcessor wired with transformer, writer, and batch metrics.
         """
         effective_tracer = tracer or services.tracing
-        error_classifier = ErrorClassifier()
-        table_config = TableConfig(
-            primary_keys=tuple(primary_keys),
-            silver_table=silver_table,
-            gold_table=gold_table,
-            silver_write_mode=silver_write_mode,
-            gold_write_mode=gold_write_mode,
-            on_schema_mismatch=on_schema_mismatch,
-        )
-
         processor_config = RecordProcessorConfig(
             pipeline_name=pipeline_name,
             provider=provider,
@@ -252,25 +237,30 @@ class ServicesBuilder:
             silver_schema=silver_schema,
             gold_schema=gold_schema,
             dq_config=dq_config,
-            table_config=table_config,
+            table_config=TableConfig(
+                primary_keys=tuple(primary_keys),
+                silver_table=silver_table,
+                gold_table=gold_table,
+                silver_write_mode=silver_write_mode,
+                gold_write_mode=gold_write_mode,
+                on_schema_mismatch=on_schema_mismatch,
+            ),
             column_groups=column_groups,
             scd_config=scd_config,
-        )
-
-        typed_gold_schema = cast("pa.DataFrameSchema | None", gold_schema)
-        gold_validator = PanderaGoldValidator(
-            typed_gold_schema, strict=strict_gold_validation
         )
 
         components = ServicesBuilder.create_batch_processing_components(
             services=services,
             context=context,
             config=processor_config,
-            error_classifier=error_classifier,
+            error_classifier=ErrorClassifier(),
             transform_callback=transform_callback,
             gold_filter_callback=gold_filter_callback,
             gold_transform_callback=gold_transform_callback,
-            gold_validator=gold_validator,
+            gold_validator=PanderaGoldValidator(
+                cast("pa.DataFrameSchema | None", gold_schema),
+                strict=strict_gold_validation,
+            ),
             tracer=effective_tracer,
             lock_validator=lock_validator,
         )
@@ -398,6 +388,6 @@ def create_data_normalization_service(
         DefaultDataNormalizationService,
     )
 
-    if config is None:
-        config = DataNormalizationConfig()
-    return DefaultDataNormalizationService(config=config)
+    return DefaultDataNormalizationService(
+        config=config or DataNormalizationConfig()
+    )

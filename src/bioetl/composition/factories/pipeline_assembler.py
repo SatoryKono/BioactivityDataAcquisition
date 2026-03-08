@@ -51,12 +51,7 @@ if TYPE_CHECKING:
 
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
 
-__all__ = [
-    "GenericPipelineFactory",
-    "assemble_runner",
-    "create_pipeline_factory",
-]
-
+__all__ = ["GenericPipelineFactory", "assemble_runner", "create_pipeline_factory"]
 
 def _extract_entity_type(pipeline_name: str) -> str | None:
     """Extract entity_type from pipeline_name.
@@ -99,11 +94,8 @@ class GenericPipelineFactory(Generic[TPipeline]):
         self.gold_schema = gold_schema
         self.pandera_silver_schema = pandera_silver_schema
         self.transformer_class = transformer_class
-
         # Use custom creator or look up from registry
-        self._create_data_source = data_source_creator or DataSourceRegistry.get(
-            provider
-        )
+        self._create_data_source = data_source_creator or DataSourceRegistry.get(provider)
 
     def create_transformer(
         self,
@@ -129,7 +121,6 @@ class GenericPipelineFactory(Generic[TPipeline]):
         """
         if self.transformer_class is None:
             return None
-
         return self.transformer_class(
             provider=self.provider,
             entity_type=_extract_entity_type(self.pipeline_name),
@@ -292,18 +283,14 @@ class GenericPipelineFactory(Generic[TPipeline]):
             metrics=observability.metrics,
             cached_bronze=cached_bronze,
         )
-
         # Delegate runner assembly to dedicated function
         return assemble_runner(
             pipeline=pipeline,
             observability=observability,
             silver_schema=self.silver_schema,
             gold_schema=self.gold_schema,
-            strict_gold_validation=(
-                runtime.strict_gold_validation
-                if settings.env != "prod" or settings.test_mode
-                else True
-            ),
+            strict_gold_validation=(runtime.strict_gold_validation
+                                   if settings.env != "prod" or settings.test_mode else True),
             yaml_config=yaml_config,
         )
 

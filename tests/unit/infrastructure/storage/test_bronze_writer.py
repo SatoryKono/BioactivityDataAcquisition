@@ -1433,7 +1433,7 @@ class TestBronzeWriterMetrics:
         run_type: RunType,
         ingestion_ts: datetime,
     ) -> None:
-        """Test that all 3 metrics are recorded on write."""
+        """Test that all write metrics are recorded on write."""
         mock_metrics = MagicMock()
         writer = BronzeWriter(
             base_path=tmp_path,
@@ -1453,11 +1453,11 @@ class TestBronzeWriterMetrics:
             ingestion_ts=ingestion_ts,
         )
 
-        # Verify histogram was called once (duration)
-        assert mock_metrics.observe_histogram.call_count == 1
-
-        # Verify counter was called twice (records + bytes)
-        assert mock_metrics.increment_counter.call_count == 2
+        # Verify histogram/counter families were emitted.
+        # The writer now records both operation duration and total duration, and
+        # includes a write-attempt counter in addition to records/bytes counters.
+        assert mock_metrics.observe_histogram.call_count >= 2
+        assert mock_metrics.increment_counter.call_count >= 3
 
         # Verify all expected metrics were recorded
         histogram_names = [
@@ -1468,6 +1468,8 @@ class TestBronzeWriterMetrics:
         ]
 
         assert "bronze_write_duration_seconds" in histogram_names
+        assert "bronze_write_total_duration_seconds" in histogram_names
+        assert "bronze_write_attempts_total" in counter_names
         assert "bronze_records_written_total" in counter_names
         assert "bronze_bytes_written_total" in counter_names
 

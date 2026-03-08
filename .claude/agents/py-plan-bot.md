@@ -21,8 +21,8 @@ model: opus
 ## Memory
 
 > **При старте** прочитай специализированную память:
-> `.ai/memory/memory-py-plan-bot.md` — RF-* routing, DAG, composite design, parallelization, ADR reference.
-> Общий контекст: `.ai/memory/agent-memory.md`
+> `docs/00-project/ai/memory/memory-py-plan-bot.md` — RF-* routing, DAG, composite design, parallelization, ADR reference.
+> Общий контекст: `docs/00-project/ai/memory/agent-memory.md`
 
 ---
 

@@ -3,6 +3,7 @@ set -euo pipefail
 
 TMP_SITE_DIR=".mkdocs-site-tmp"
 OUT_SITE_DIR="docs/site"
+LEGACY_SITE_DIR="site"
 
 STRICT_FLAG=""
 if [[ "${1:-}" == "--strict" ]]; then
@@ -18,20 +19,27 @@ cleanup_tmp() {
 trap cleanup_tmp EXIT
 
 if command -v mkdocs >/dev/null 2>&1; then
-  MKDOCS_CMD=(mkdocs)
-elif [[ -x "./.venv/Scripts/python.exe" ]]; then
-  MKDOCS_CMD=("./.venv/Scripts/python.exe" -m mkdocs)
+  mkdocs build $STRICT_FLAG --clean --site-dir "$TMP_SITE_DIR"
 elif [[ -x "./.venv/bin/python" ]]; then
-  MKDOCS_CMD=("./.venv/bin/python" -m mkdocs)
+  ./.venv/bin/python -m mkdocs build $STRICT_FLAG --clean --site-dir "$TMP_SITE_DIR"
+elif [[ -x "./.venv/Scripts/python.exe" ]]; then
+  # WSL can fail executing Windows binaries directly depending on interop policy.
+  if command -v cmd.exe >/dev/null 2>&1 && command -v wslpath >/dev/null 2>&1; then
+    WIN_REPO_ROOT="$(wslpath -w "$PWD")"
+    cmd.exe /c "cd /d \"$WIN_REPO_ROOT\" && .venv\\Scripts\\python.exe -m mkdocs build $STRICT_FLAG --clean --site-dir \"$TMP_SITE_DIR\""
+  else
+    ./.venv/Scripts/python.exe -m mkdocs build $STRICT_FLAG --clean --site-dir "$TMP_SITE_DIR"
+  fi
 else
-  MKDOCS_CMD=(python -m mkdocs)
+  python -m mkdocs build $STRICT_FLAG --clean --site-dir "$TMP_SITE_DIR"
 fi
-
-"${MKDOCS_CMD[@]}" build $STRICT_FLAG --clean --site-dir "$TMP_SITE_DIR"
 
 rm -rf "$OUT_SITE_DIR"
 mkdir -p "$(dirname "$OUT_SITE_DIR")"
 mv "$TMP_SITE_DIR" "$OUT_SITE_DIR"
+
+# Normalize generated artifacts to a single location.
+rm -rf "$LEGACY_SITE_DIR"
 
 trap - EXIT
 echo "MkDocs site generated at $OUT_SITE_DIR"
