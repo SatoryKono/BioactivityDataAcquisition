@@ -285,7 +285,7 @@ cat /var/log/bioetl/pipeline.log | \
 ### Внутренние
 
 - **RULES.md** — `docs/00-project/RULES.md` (§8 Testing, §9 Anti-Patterns)
-- **CLAUDE.md** — `docs/00-project/agents/CLAUDE.md` (§7.5 Type Annotations, §9 Anti-Patterns)
+- **CLAUDE.md** — `docs/00-project/ai/agents/guides/CLAUDE.md` (§7.5 Type Annotations, §9 Anti-Patterns)
 - **Project Wiki** — `https://wiki.company.com/bioetl/validation`
 - **CI/CD Pipeline** — `.github/workflows/tests.yml`
 

@@ -1,0 +1,407 @@
+{
+  "schema_version": "1.0",
+  "description": "Lifecycle decisions for non-active scripts (orphan/legacy).",
+  "entries": {
+    "scripts/archive/build_diagram_docs.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "archived",
+      "review_by": "2026-06-30",
+      "next_step": "Confirm replacement coverage in scripts/diagrams and archive/remove.",
+      "sunset_date": "2026-06-30",
+      "replacement": "TBD_MANUAL_REPLACEMENT",
+      "archived_from": "src/tools/build_diagram_docs.py"
+    },
+    "scripts/archive/ci/apply-ci-optimizations.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "archived",
+      "review_by": "2026-04-30",
+      "next_step": "PowerShell CI optimization script with no active consumers. Delete after confirming no operational need.",
+      "sunset_date": "2026-04-30",
+      "replacement": "scripts/ci/apply-ci-optimizations.ps1",
+      "archived_from": "scripts/apply-ci-optimizations.ps1"
+    },
+    "scripts/archive/cleanup_cache.py": {
+      "owner": "@bioetl-platform",
+      "decision": "archived",
+      "review_by": "2026-05-31",
+      "next_step": "РџРµСЂРµРІРµСЃС‚Рё РІ Р°СЂС…РёРІ/СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ freeze-window РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅРѕРіРѕ Р°РєС‚РёРІРЅРѕРіРѕ call-site.",
+      "sunset_date": "2026-05-31",
+      "replacement": "TBD_MANUAL_REPLACEMENT",
+      "archived_from": "src/tools/scripts/cleanup_cache.py"
+    },
+    "scripts/archive/data/check_delta_integrity.py": {
+      "owner": "@bioetl-platform",
+      "decision": "archived",
+      "review_by": "2026-05-31",
+      "next_step": "РџРµСЂРµРІРµСЃС‚Рё РІ Р°СЂС…РёРІ/СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ freeze-window РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅРѕРіРѕ Р°РєС‚РёРІРЅРѕРіРѕ call-site.",
+      "sunset_date": "2026-05-31",
+      "replacement": "scripts/data/check_delta_integrity.py",
+      "archived_from": "scripts/check_delta_integrity.py"
+    },
+    "scripts/archive/data/extract_null_fields.py": {
+      "owner": "@bioetl-platform",
+      "decision": "archived",
+      "review_by": "2026-05-31",
+      "next_step": "РџРµСЂРµРІРµСЃС‚Рё РІ Р°СЂС…РёРІ/СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ freeze-window РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅРѕРіРѕ Р°РєС‚РёРІРЅРѕРіРѕ call-site.",
+      "sunset_date": "2026-05-31",
+      "replacement": "scripts/data/extract_null_fields.py",
+      "archived_from": "scripts/extract_null_fields.py"
+    },
+    "scripts/archive/data/generate_content_hash_comparison_report.py": {
+      "owner": "@bioetl-platform",
+      "decision": "archived",
+      "review_by": "2026-05-31",
+      "next_step": "РџРµСЂРµРІРµСЃС‚Рё РІ Р°СЂС…РёРІ/СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ freeze-window РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅРѕРіРѕ Р°РєС‚РёРІРЅРѕРіРѕ call-site.",
+      "sunset_date": "2026-05-31",
+      "replacement": "scripts/data/generate_content_hash_comparison_report.py",
+      "archived_from": "scripts/generate_content_hash_comparison_report.py"
+    },
+    "scripts/archive/debug/_tmp_inspect_vcr.py": {
+      "owner": "@bioetl-platform",
+      "decision": "archived",
+      "review_by": "2026-04-30",
+      "next_step": "Delete after one sprint if no recovery/debug need is identified.",
+      "sunset_date": "2026-04-30",
+      "replacement": "scripts/diagnostics/_tmp_inspect_vcr.py",
+      "archived_from": "scripts/_tmp_inspect_vcr.py"
+    },
+    "scripts/archive/debug/debug_pandera.py": {
+      "owner": "@bioetl-platform",
+      "decision": "archived",
+      "review_by": "2026-04-30",
+      "next_step": "РЈРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ РѕРґРЅРѕРіРѕ СЃРїСЂРёРЅС‚Р° РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅРѕРіРѕ debug-use-case.",
+      "sunset_date": "2026-04-30",
+      "replacement": "scripts/diagnostics/debug_pandera.py",
+      "archived_from": "scripts/debug_pandera.py"
+    },
+    "scripts/archive/debug/debug_storage_health.py": {
+      "owner": "@bioetl-platform",
+      "decision": "archived",
+      "review_by": "2026-04-30",
+      "next_step": "РЈРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ РѕРґРЅРѕРіРѕ СЃРїСЂРёРЅС‚Р° РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅРѕРіРѕ debug-use-case.",
+      "sunset_date": "2026-04-30",
+      "replacement": "scripts/diagnostics/debug_storage_health.py",
+      "archived_from": "scripts/debug_storage_health.py"
+    },
+    "scripts/archive/dev/install_deps.py": {
+      "owner": "@bioetl-platform",
+      "decision": "archived",
+      "review_by": "2026-05-31",
+      "next_step": "РџРµСЂРµРІРµСЃС‚Рё РІ Р°СЂС…РёРІ/СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ freeze-window РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅРѕРіРѕ Р°РєС‚РёРІРЅРѕРіРѕ call-site.",
+      "sunset_date": "2026-05-31",
+      "replacement": "scripts/dev/install_deps.py",
+      "archived_from": "scripts/install_deps.py"
+    },
+    "scripts/archive/dev/run-tests.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "archived",
+      "review_by": "2026-05-31",
+      "next_step": "РџРµСЂРµРІРµСЃС‚Рё РІ Р°СЂС…РёРІ/СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ freeze-window РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅРѕРіРѕ Р°РєС‚РёРІРЅРѕРіРѕ call-site.",
+      "sunset_date": "2026-05-31",
+      "replacement": "TBD_MANUAL_REPLACEMENT",
+      "archived_from": "src/tools/scripts/run-tests.sh"
+    },
+    "scripts/archive/diagrams/fix_diagram_links.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "archived",
+      "review_by": "2026-05-31",
+      "next_step": "РџРµСЂРµРІРµСЃС‚Рё РІ Р°СЂС…РёРІ/СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ freeze-window РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅРѕРіРѕ Р°РєС‚РёРІРЅРѕРіРѕ call-site.",
+      "sunset_date": "2026-05-31",
+      "replacement": "TBD_MANUAL_REPLACEMENT",
+      "archived_from": "scripts/diagrams/fix_diagram_links.py"
+    },
+    "scripts/archive/diagrams/fix_sequence_nbsp.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "archived",
+      "review_by": "2026-05-31",
+      "next_step": "РџРµСЂРµРІРµСЃС‚Рё РІ Р°СЂС…РёРІ/СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ freeze-window РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅРѕРіРѕ Р°РєС‚РёРІРЅРѕРіРѕ call-site.",
+      "sunset_date": "2026-05-31",
+      "replacement": "TBD_MANUAL_REPLACEMENT",
+      "archived_from": "scripts/diagrams/fix_sequence_nbsp.py"
+    },
+    "scripts/archive/diagrams/mermaid_prune_orphans.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "archived",
+      "review_by": "2026-05-31",
+      "next_step": "РџРµСЂРµРІРµСЃС‚Рё РІ Р°СЂС…РёРІ/СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ freeze-window РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅРѕРіРѕ Р°РєС‚РёРІРЅРѕРіРѕ call-site.",
+      "sunset_date": "2026-05-31",
+      "replacement": "TBD_MANUAL_REPLACEMENT",
+      "archived_from": "scripts/diagrams/mermaid_prune_orphans.py"
+    },
+    "scripts/archive/diagrams/normalize_node_sizes.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "archived",
+      "review_by": "2026-05-31",
+      "next_step": "РџРµСЂРµРІРµСЃС‚Рё РІ Р°СЂС…РёРІ/СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ freeze-window РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅРѕРіРѕ Р°РєС‚РёРІРЅРѕРіРѕ call-site.",
+      "sunset_date": "2026-05-31",
+      "replacement": "TBD_MANUAL_REPLACEMENT",
+      "archived_from": "scripts/diagrams/normalize_node_sizes.py"
+    },
+    "scripts/archive/docs/fix_doc_links_explicit.py": {
+      "owner": "@bioetl-platform",
+      "decision": "archived",
+      "review_by": "2026-05-31",
+      "next_step": "РџРµСЂРµРІРµСЃС‚Рё РІ Р°СЂС…РёРІ/СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ freeze-window РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅРѕРіРѕ Р°РєС‚РёРІРЅРѕРіРѕ call-site.",
+      "sunset_date": "2026-05-31",
+      "replacement": "scripts/docs/fix_doc_links_explicit.py",
+      "archived_from": "scripts/fix_doc_links_explicit.py"
+    },
+    "scripts/archive/docs/fix_link_warnings.py": {
+      "owner": "@bioetl-platform",
+      "decision": "archived",
+      "review_by": "2026-05-31",
+      "next_step": "РџРµСЂРµРІРµСЃС‚Рё РІ Р°СЂС…РёРІ/СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ freeze-window РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅРѕРіРѕ Р°РєС‚РёРІРЅРѕРіРѕ call-site.",
+      "sunset_date": "2026-05-31",
+      "replacement": "scripts/docs/fix_link_warnings.py",
+      "archived_from": "scripts/fix_link_warnings.py"
+    },
+    "scripts/archive/docs/sentence_doc_audit.py": {
+      "owner": "@bioetl-platform",
+      "decision": "archived",
+      "review_by": "2026-05-31",
+      "next_step": "РџРµСЂРµРІРµСЃС‚Рё РІ Р°СЂС…РёРІ/СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ freeze-window РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅРѕРіРѕ Р°РєС‚РёРІРЅРѕРіРѕ call-site.",
+      "sunset_date": "2026-05-31",
+      "replacement": "scripts/docs/sentence_doc_audit.py",
+      "archived_from": "scripts/sentence_doc_audit.py"
+    },
+    "scripts/archive/log_explorer.py": {
+      "owner": "@bioetl-platform",
+      "decision": "archived",
+      "review_by": "2026-06-30",
+      "next_step": "Confirm no consumers, then archive/remove.",
+      "sunset_date": "2026-06-30",
+      "replacement": "TBD_MANUAL_REPLACEMENT",
+      "archived_from": "src/tools/log_explorer.py"
+    },
+    "scripts/archive/migrations/migrate_exemption_keys_to_paths.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "archived",
+      "review_by": "2026-06-30",
+      "next_step": "Move to migration archive after confirming one-time migration completion.",
+      "sunset_date": "2026-06-30",
+      "replacement": "TBD_MANUAL_REPLACEMENT",
+      "archived_from": "scripts/migrate_exemption_keys_to_paths.py"
+    },
+    "scripts/archive/migrations/migrate_openalex_citation_count.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "archived",
+      "review_by": "2026-06-30",
+      "next_step": "РџРµСЂРµРЅРµСЃС‚Рё РІ migration archive Рё СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ Р·Р°РІРµСЂС€РµРЅРёСЏ РјРёРіСЂР°С†РёРё.",
+      "sunset_date": "2026-06-30",
+      "replacement": "TBD_MANUAL_REPLACEMENT",
+      "archived_from": "src/tools/scripts/migrate_openalex_citation_count.py"
+    },
+    "scripts/archive/migrations/migrate_pmid_to_string.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "archived",
+      "review_by": "2026-06-30",
+      "next_step": "РџРµСЂРµРЅРµСЃС‚Рё РІ migration archive Рё СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ Р·Р°РІРµСЂС€РµРЅРёСЏ РјРёРіСЂР°С†РёРё.",
+      "sunset_date": "2026-06-30",
+      "replacement": "TBD_MANUAL_REPLACEMENT",
+      "archived_from": "src/tools/scripts/migrations/migrate_pmid_to_string.py"
+    },
+    "scripts/archive/migrations/migrate_vcr_extensionless.py": {
+      "owner": "@bioetl-platform",
+      "decision": "archived",
+      "review_by": "2026-06-30",
+      "next_step": "Move to migration archive after confirming no extensionless cassettes remain.",
+      "sunset_date": "2026-06-30",
+      "replacement": "TBD_MANUAL_REPLACEMENT",
+      "archived_from": "scripts/migrate_vcr_extensionless.py"
+    },
+    "scripts/archive/migrations/rename_structure_fields.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "archived",
+      "review_by": "2026-06-30",
+      "next_step": "РџРµСЂРµРЅРµСЃС‚Рё РІ migration archive Рё СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ Р·Р°РІРµСЂС€РµРЅРёСЏ РјРёРіСЂР°С†РёРё.",
+      "sunset_date": "2026-06-30",
+      "replacement": "TBD_MANUAL_REPLACEMENT",
+      "archived_from": "src/tools/scripts/migrations/rename_structure_fields.py"
+    },
+    "scripts/archive/scaffold_pipeline.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "archived",
+      "review_by": "2026-06-30",
+      "next_step": "Consolidate with create_pipeline.py and archive/remove duplicate entrypoint.",
+      "sunset_date": "2026-06-30",
+      "replacement": "TBD_MANUAL_REPLACEMENT",
+      "archived_from": "src/tools/scaffold_pipeline.py"
+    },
+    "scripts/ast_inventory.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅС‹Р№ operational playbook Рё РїРµСЂРёРѕРґРёС‡РµСЃРєРёР№ smoke-check."
+    },
+    "scripts/calibrate_hotspot_budgets.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ СЏРІРЅС‹Р№ smoke-РІС‹Р·РѕРІ/РѕРїРµСЂР°С†РёРѕРЅРЅС‹Р№ playbook РёР»Рё РїРµСЂРµРІРµСЃС‚Рё РІ deprecate."
+    },
+    "scripts/ci/apply-ci-optimizations-fixed.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Archive inventory entry accepted; confirm keep/deprecate/remove decision during next governance review."
+    },
+    "scripts/cleanup_consolidate.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅС‹Р№ operational playbook Рё РїРµСЂРёРѕРґРёС‡РµСЃРєРёР№ smoke-check."
+    },
+    "scripts/cleanup_project.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅС‹Р№ operational playbook Рё РїРµСЂРёРѕРґРёС‡РµСЃРєРёР№ smoke-check."
+    },
+    "scripts/config_gap_analysis.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "evaluate",
+      "review_by": "2026-06-30",
+      "next_step": "Evaluate utility and integrate into CI or archive."
+    },
+    "scripts/deploy-bioetl.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ СЏРІРЅС‹Р№ smoke-РІС‹Р·РѕРІ/РѕРїРµСЂР°С†РёРѕРЅРЅС‹Р№ playbook РёР»Рё РїРµСЂРµРІРµСЃС‚Рё РІ deprecate."
+    },
+    "scripts/dev/metrics_mock_server.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅС‹Р№ operational playbook Рё РїРµСЂРёРѕРґРёС‡РµСЃРєРёР№ smoke-check."
+    },
+    "scripts/diagrams/check_class_method_render_integrity.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Diagram render integrity checker. Keep as manual QA tool."
+    },
+    "scripts/diagrams/inject_svg_styles.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅС‹Р№ operational playbook Рё РїРµСЂРёРѕРґРёС‡РµСЃРєРёР№ smoke-check."
+    },
+    "scripts/dq_baseline_update.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ СЏРІРЅС‹Р№ smoke-РІС‹Р·РѕРІ/РѕРїРµСЂР°С†РёРѕРЅРЅС‹Р№ playbook РёР»Рё РїРµСЂРµРІРµСЃС‚Рё РІ deprecate."
+    },
+    "scripts/fix_doc_links_auto.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅС‹Р№ operational playbook Рё РїРµСЂРёРѕРґРёС‡РµСЃРєРёР№ smoke-check."
+    },
+    "scripts/fix_grafana_dashboards.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅС‹Р№ operational playbook Рё РїРµСЂРёРѕРґРёС‡РµСЃРєРёР№ smoke-check."
+    },
+    "scripts/generate_contracts.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "evaluate",
+      "review_by": "2026-06-30",
+      "next_step": "Evaluate if actively used in CI/CD or can be archived."
+    },
+    "scripts/generate_schema_artifacts.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "evaluate",
+      "review_by": "2026-06-30",
+      "next_step": "Evaluate utility and decide on keep/deprecate."
+    },
+    "scripts/run_pytest.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "deprecate",
+      "review_by": "2026-05-31",
+      "next_step": "РџРµСЂРµРІРµСЃС‚Рё РІ Р°СЂС…РёРІ/СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ freeze-window РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅРѕРіРѕ Р°РєС‚РёРІРЅРѕРіРѕ call-site.",
+      "sunset_date": "2026-05-31",
+      "replacement": "scripts/dev/run_pytest.sh"
+    },
+    "scripts/salt_rotate.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ СЏРІРЅС‹Р№ smoke-РІС‹Р·РѕРІ/РѕРїРµСЂР°С†РёРѕРЅРЅС‹Р№ playbook РёР»Рё РїРµСЂРµРІРµСЃС‚Рё РІ deprecate."
+    },
+    "scripts/vacuum_delta.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ СЏРІРЅС‹Р№ smoke-РІС‹Р·РѕРІ/РѕРїРµСЂР°С†РёРѕРЅРЅС‹Р№ playbook РёР»Рё РїРµСЂРµРІРµСЃС‚Рё РІ deprecate."
+    },
+    "scripts/validate_data_dir.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ СЏРІРЅС‹Р№ smoke-РІС‹Р·РѕРІ/РѕРїРµСЂР°С†РёРѕРЅРЅС‹Р№ playbook РёР»Рё РїРµСЂРµРІРµСЃС‚Рё РІ deprecate."
+    },
+    "scripts/verify_checksums.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ СЏРІРЅС‹Р№ smoke-РІС‹Р·РѕРІ/РѕРїРµСЂР°С†РёРѕРЅРЅС‹Р№ playbook РёР»Рё РїРµСЂРµРІРµСЃС‚Рё РІ deprecate."
+    },
+    "src/tools/__init__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as package marker until tool packaging strategy is finalized."
+    },
+    "src/tools/apply_elk_layout.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ СЏРІРЅС‹Р№ smoke-РІС‹Р·РѕРІ/РѕРїРµСЂР°С†РёРѕРЅРЅС‹Р№ playbook РёР»Рё РїРµСЂРµРІРµСЃС‚Рё РІ deprecate."
+    },
+    "src/tools/create_pipeline.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ СЏРІРЅС‹Р№ smoke-РІС‹Р·РѕРІ/РѕРїРµСЂР°С†РёРѕРЅРЅС‹Р№ playbook РёР»Рё РїРµСЂРµРІРµСЃС‚Рё РІ deprecate."
+    },
+    "src/tools/differentiate_linkstyle.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ СЏРІРЅС‹Р№ smoke-РІС‹Р·РѕРІ/РѕРїРµСЂР°С†РёРѕРЅРЅС‹Р№ playbook РёР»Рё РїРµСЂРµРІРµСЃС‚Рё РІ deprecate."
+    },
+    "src/tools/scripts/__init__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as package marker until module packaging is finalized."
+    },
+    "src/tools/scripts/config_matrix_generator.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅС‹Р№ operational playbook Рё РїРµСЂРёРѕРґРёС‡РµСЃРєРёР№ smoke-check."
+    },
+    "src/tools/scripts/migrations/__init__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as package marker while migration modules stay importable."
+    },
+    "src/tools/scripts/test_changed.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "evaluate",
+      "review_by": "2026-06-30",
+      "next_step": "Evaluate if used in CI or local dev workflow. Keep or deprecate."
+    },
+    "src/tools/scripts/validate_unified_configs.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ СЏРІРЅС‹Р№ smoke-РІС‹Р·РѕРІ/РѕРїРµСЂР°С†РёРѕРЅРЅС‹Р№ playbook РёР»Рё РїРµСЂРµРІРµСЃС‚Рё РІ deprecate."
+    }
+  }
+}

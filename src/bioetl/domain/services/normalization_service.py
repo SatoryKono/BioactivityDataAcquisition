@@ -92,32 +92,15 @@ class _NormalizationActivityMixin:
         if validate:
             is_valid, error = self.validator.validate_concentration(value, unit)
             if not is_valid:
-                return NormalizationResult(
-                    value=value,
-                    unit=unit,
-                    is_valid=False,
-                    validation_message=error,
-                )
+                return NormalizationResult(value=value, unit=unit, is_valid=False, validation_message=error)
 
         target_unit = self.config.default_output_unit
         try:
             normalized_value = self.converter.convert(value, unit, target_unit)
         except ValueError as error:
-            return NormalizationResult(
-                value=value,
-                unit=unit,
-                is_valid=False,
-                validation_message=str(error),
-            )
+            return NormalizationResult(value=value, unit=unit, is_valid=False, validation_message=str(error))
 
-        pchembl = None
-        is_potent = False
-        try:
-            pchembl = self.converter.value_to_pchembl(normalized_value, target_unit)
-            is_potent = pchembl.value >= self.config.potency_threshold
-        except ValueError:
-            pass
-
+        pchembl, is_potent = self._compute_pchembl_for_value(normalized_value)
         return NormalizationResult(
             value=normalized_value,
             unit=target_unit,
@@ -153,17 +136,11 @@ class _NormalizationActivityMixin:
         except ValueError:
             return None
 
-    def _compute_pchembl_for_value(
-        self,
-        value: float,
-    ) -> tuple[PChemblValue | None, bool]:
+    def _compute_pchembl_for_value(self, value: float) -> tuple[PChemblValue | None, bool]:
         """Compute pChEMBL value and potency for a normalized value."""
         try:
-            pchembl = self.converter.value_to_pchembl(
-                value, self.config.default_output_unit
-            )
-            is_potent = pchembl.value >= self.config.potency_threshold
-            return pchembl, is_potent
+            pchembl = self.converter.value_to_pchembl(value, self.config.default_output_unit)
+            return pchembl, pchembl.value >= self.config.potency_threshold
         except ValueError:
             return None, False
 
@@ -176,10 +153,7 @@ class _NormalizationActivityMixin:
         Returns:
             True if pchembl_value meets or exceeds the configured potency threshold.
         """
-        return self.validator.is_potent(
-            pchembl_value,
-            self.config.potency_threshold,
-        )
+        return self.validator.is_potent(pchembl_value, self.config.potency_threshold)
 
     def is_highly_potent(self, pchembl_value: float) -> bool:
         """Check if pChEMBL value indicates highly potent activity.
@@ -190,15 +164,9 @@ class _NormalizationActivityMixin:
         Returns:
             True if pchembl_value meets or exceeds the configured high-potency threshold.
         """
-        return self.validator.is_highly_potent(
-            pchembl_value,
-            self.config.high_potency_threshold,
-        )
+        return self.validator.is_highly_potent(pchembl_value, self.config.high_potency_threshold)
 
-    def classify_potency(
-        self,
-        pchembl_value: float,
-    ) -> str:
+    def classify_potency(self, pchembl_value: float) -> str:
         """Classify potency level based on pChEMBL value.
 
         Args:
@@ -246,13 +214,8 @@ class _NormalizationBatchMixin(_NormalizationActivityMixin):
             Single aggregated NormalizationResult if aggregate is True, otherwise a list
             of individual NormalizationResult objects for each input value.
         """
-        results = [
-            self.normalize_activity(v, unit, activity_type, validate=True)
-            for v in values
-        ]
-        if not aggregate:
-            return results
-        return self._aggregate_results(results, filter_invalid)
+        results = [self.normalize_activity(v, unit, activity_type, validate=True) for v in values]
+        return self._aggregate_results(results, filter_invalid) if aggregate else results
 
     def _aggregate_results(
         self,
@@ -260,43 +223,23 @@ class _NormalizationBatchMixin(_NormalizationActivityMixin):
         filter_invalid: bool,
     ) -> NormalizationResult:
         """Aggregate multiple normalization results into one."""
-        valid_results = self._filter_valid_results(results, filter_invalid)
+        valid_results = [r for r in results if r.is_valid] if filter_invalid else results
         if not valid_results:
             return NormalizationResult(
-                value=0.0,
-                unit=self.config.default_output_unit,
-                is_valid=False,
-                validation_message="No valid values to aggregate",
+                value=0.0, unit=self.config.default_output_unit,
+                is_valid=False, validation_message="No valid values to aggregate",
             )
         return self._build_aggregated_result(valid_results)
 
-    @staticmethod
-    def _filter_valid_results(
-        results: list[NormalizationResult],
-        filter_invalid: bool,
-    ) -> list[NormalizationResult]:
-        """Filter results to valid ones if requested."""
-        if filter_invalid:
-            return [result for result in results if result.is_valid]
-        return results
-
-    def _build_aggregated_result(
-        self,
-        valid_results: list[NormalizationResult],
-    ) -> NormalizationResult:
+    def _build_aggregated_result(self, valid_results: list[NormalizationResult]) -> NormalizationResult:
         """Build aggregated result from valid results."""
-        valid_values = [result.value for result in valid_results]
         aggregated = self.aggregator.aggregate_values(
-            valid_values,
-            self.config.default_aggregation_method,
+            [result.value for result in valid_results], self.config.default_aggregation_method
         )
         pchembl, is_potent = self._compute_pchembl_for_value(aggregated)
         return NormalizationResult(
-            value=aggregated,
-            unit=self.config.default_output_unit,
-            pchembl=pchembl,
-            is_valid=True,
-            is_potent=is_potent,
+            value=aggregated, unit=self.config.default_output_unit,
+            pchembl=pchembl, is_valid=True, is_potent=is_potent,
         )
 
     def normalize_concentrations(
@@ -316,19 +259,15 @@ class _NormalizationBatchMixin(_NormalizationActivityMixin):
         """
         if not concentrations:
             return NormalizationResult(
-                value=0.0,
-                unit=self.config.default_output_unit,
-                is_valid=False,
-                validation_message="No concentrations to normalize",
+                value=0.0, unit=self.config.default_output_unit,
+                is_valid=False, validation_message="No concentrations to normalize",
             )
 
         aggregated = self.aggregator.aggregate_concentrations(
-            concentrations,
-            self.config.default_aggregation_method,
+            concentrations, self.config.default_aggregation_method
         )
 
-        pchembl = None
-        is_potent = False
+        pchembl, is_potent = None, False
         try:
             pchembl = self.converter.to_pchembl(aggregated)
             is_potent = pchembl.value >= self.config.potency_threshold
@@ -336,11 +275,8 @@ class _NormalizationBatchMixin(_NormalizationActivityMixin):
             pass
 
         return NormalizationResult(
-            value=aggregated.value,
-            unit=aggregated.unit.value,
-            pchembl=pchembl,
-            is_valid=True,
-            is_potent=is_potent,
+            value=aggregated.value, unit=aggregated.unit.value,
+            pchembl=pchembl, is_valid=True, is_potent=is_potent,
         )
 
 

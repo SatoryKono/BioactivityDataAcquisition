@@ -1,8 +1,25 @@
-name: Root Hygiene
+﻿name: Root Hygiene
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 on:
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.ai/**'
+      - '.claude/**'
+      - '.github/workflows/**'
+      - 'LICENSE'
   push:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.ai/**'
+      - '.claude/**'
+      - '.github/workflows/**'
+      - 'LICENSE'
 
 jobs:
   root-hygiene:
@@ -19,3 +36,4 @@ jobs:
 
       - name: Validate repository root allowlist
         run: python scripts/audit_root_cleanliness.py
+

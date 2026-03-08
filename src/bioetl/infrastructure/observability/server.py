@@ -145,7 +145,7 @@ def start_metrics_server(
 
 def push_metrics_to_gateway(
     gateway: str | None = None,
-    job: str = "bioetl",
+    run_label: str = "bioetl",
     logger: LoggerPort | None = None,
     grouping_key: dict[str, str] | None = None,
 ) -> bool:
@@ -160,7 +160,7 @@ def push_metrics_to_gateway(
     Args:
         gateway: Pushgateway URL (default: from BIOETL_PUSHGATEWAY_URL
                  env var, or 'localhost:9091').
-        job: Job label for pushed metrics.
+        run_label: Run label for pushed metrics.
         logger: Structured logger.
         grouping_key: Additional grouping labels (e.g. {"pipeline": "chembl_molecule"}).
 
@@ -176,14 +176,14 @@ def push_metrics_to_gateway(
     try:
         pushadd_to_gateway(
             gateway,
-            job=job,
+            job=run_label,
             registry=REGISTRY,
             grouping_key=grouping_key or {},
         )
         logger.info(
             "Metrics pushed to gateway",
             gateway=gateway,
-            job=job,
+            run_label=run_label,
             grouping_key=grouping_key,
         )
         return True

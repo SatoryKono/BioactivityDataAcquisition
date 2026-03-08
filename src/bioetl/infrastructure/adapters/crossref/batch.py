@@ -146,7 +146,14 @@ class DoiBatchProcessor:
     async def _fallback_individual_fetch(
         self, dois: list[str]
     ) -> AsyncIterator[BronzeRecord]:
-        """Fall back to individual DOI fetches."""
+        """Fall back to individual DOI fetches.
+
+        Args:
+            dois: List of DOI strings to fetch individually.
+
+        Yields:
+            BronzeRecord publications for each successfully resolved DOI.
+        """
         for doi in dois:
             try:
                 publication = await self.fetch_single(doi)
@@ -160,6 +167,9 @@ class DoiBatchProcessor:
     def _normalize_dois(self, dois: list[str]) -> list[str]:
         """Normalize and filter DOI list, removing invalid entries.
 
+        Args:
+            dois: Raw list of DOI strings to normalize.
+
         Returns:
             List of normalized DOI strings with empty/invalid entries removed.
         """
@@ -169,6 +179,9 @@ class DoiBatchProcessor:
         self, normalized_dois: list[str]
     ) -> Any | None:  # Any: untyped HTTP response object
         """Execute the batch DOI filter request.
+
+        Args:
+            normalized_dois: List of normalized DOI strings to include in the filter query.
 
         Returns:
             HTTP response object from the CrossRef API batch request, or None on transport failure.
@@ -261,7 +274,17 @@ class SearchPaginator:
         headers_fn: Callable[[], dict[str, str]],
         request_collector: APIRequestCollector | None = None,
     ) -> None:
-        """Initialize search paginator."""
+        """Initialize search paginator.
+
+        Args:
+            http: HTTP transport for making requests.
+            logger: Logger port for structured logging.
+            metrics: Metrics for request timing.
+            mailto: Email for polite pool access.
+            api_base: CrossRef API base URL.
+            headers_fn: Function to build request headers.
+            request_collector: Optional collector for API request metadata.
+        """
         self._http = http
         self._logger = logger
         self._metrics = metrics
@@ -274,6 +297,11 @@ class SearchPaginator:
         self, query: str, rows: int, cursor: str
     ) -> tuple[list[BronzeRecord], str | None]:
         """Fetch a single page of search results.
+
+        Args:
+            query: CrossRef search query string.
+            rows: Number of rows to request per page.
+            cursor: Pagination cursor ("*" for first page).
 
         Returns:
             Tuple of (list of publication records for the page, next cursor string or None if last page).

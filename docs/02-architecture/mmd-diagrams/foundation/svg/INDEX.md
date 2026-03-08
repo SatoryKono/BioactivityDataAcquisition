@@ -1,6 +1,6 @@
 # BioETL Diagrams — SVG Index
 
-_Generated: 2026-03-03T19:01:44+03:00_
+_Generated: 2026-03-08T19:28:50+03:00_
 
 ## Full System Component
 
@@ -239,6 +239,12 @@ _Generated: 2026-03-03T19:01:44+03:00_
 ## Batch Processing Flow
 
 ![34-batch-processing-flow](./34-batch-processing-flow.svg)
+
+---
+
+## Bootstrap Sequence
+
+![35-bootstrap-sequence](./35-bootstrap-sequence.svg)
 
 ---
 

@@ -78,11 +78,7 @@ class APIRequestCollector:
         rate_limit_reset: datetime | None,
         retry_after_seconds: float | None,
     ) -> RateLimitInfo | None:
-        """Build RateLimitInfo when at least one rate-limit attribute is present.
-
-        Returns:
-            RateLimitInfo instance if any rate-limit attribute is non-None, None otherwise.
-        """
+        """Build RateLimitInfo when at least one rate-limit attribute is present."""
         if not any(
             (
                 rate_limit_remaining,
@@ -146,7 +142,7 @@ class APIRequestCollector:
     ) -> SourceMetadata:
         """Build SourceMetadata with collected request details and aggregates."""
         with self._lock:
-            requests_copy = list(self._requests)
+            requests_copy = self._requests.copy()
 
         total_requests = len(requests_copy)
         total_response_bytes = sum(r.response_size_bytes for r in requests_copy)
@@ -182,11 +178,7 @@ class APIRequestCollector:
     def _parse_query_params(
         self, query_string: str
     ) -> dict[str, str | int | float | bool | None]:
-        """Parse query string into dict.
-
-        Returns:
-            Dictionary mapping query parameter names to their string values.
-        """
+        """Parse query string into dict."""
         if not query_string:
             return {}
         params: dict[str, str | int | float | bool | None] = {}
@@ -200,13 +192,7 @@ class APIRequestCollector:
         self,
         params: JsonDict,  # Any: untyped API JSON record
     ) -> dict[str, str | int | float | bool | None]:
-        """Sanitize query parameters to exclude sensitive data.
-
-        Removes API keys, tokens, and other sensitive parameter names.
-
-        Returns:
-            Dictionary with sensitive values replaced by '[REDACTED]'.
-        """
+        """Sanitize query parameters to exclude sensitive data."""
         sensitive_keys = {
             "api_key",
             "apikey",
@@ -232,11 +218,7 @@ class APIRequestCollector:
         return result
 
     def _normalize_method(self, method: str) -> Literal["GET", "POST", "HEAD"]:
-        """Normalize HTTP method to SourceMetadata-compatible literal.
-
-        Returns:
-            Normalized HTTP method string ("GET", "POST", or "HEAD").
-        """
+        """Normalize HTTP method to SourceMetadata-compatible literal."""
         normalized = method.upper()
         if normalized == "GET":
             return "GET"
@@ -247,11 +229,7 @@ class APIRequestCollector:
         return "GET"
 
     def _parse_int_header(self, value: str | None) -> int | None:
-        """Parse integer header value.
-
-        Returns:
-            Parsed integer if value is a valid integer string, None otherwise.
-        """
+        """Parse integer header value."""
         if value is None:
             return None
         try:
@@ -260,11 +238,7 @@ class APIRequestCollector:
             return None
 
     def _parse_float_header(self, value: str | None) -> float | None:
-        """Parse float header value.
-
-        Returns:
-            Parsed float if value is a valid float string, None otherwise.
-        """
+        """Parse float header value."""
         if value is None:
             return None
         try:
@@ -273,11 +247,7 @@ class APIRequestCollector:
             return None
 
     def _parse_reset_header(self, value: str | None) -> datetime | None:
-        """Parse X-RateLimit-Reset header (Unix timestamp or HTTP date).
-
-        Returns:
-            datetime from Unix timestamp if parseable, None otherwise.
-        """
+        """Parse X-RateLimit-Reset header (Unix timestamp or HTTP date)."""
         if value is None:
             return None
         try:

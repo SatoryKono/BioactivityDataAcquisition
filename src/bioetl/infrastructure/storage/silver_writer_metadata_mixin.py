@@ -62,11 +62,7 @@ class SilverWriterMetadataMixin:
         records: list[BronzeRecord],
         quarantined_count: int = 0,
     ) -> BatchDQMetrics:
-        """Compute DQ metrics using injected calculator.
-
-        Returns:
-            BatchDQMetrics instance with null rates, schema drift, and quarantine counts.
-        """
+        """Compute DQ metrics using injected calculator."""
         from bioetl.domain.services.dq_metrics_calculator import DQMetricsInput
 
         existing_schema = await self._get_table_schema(table_name)
@@ -131,11 +127,7 @@ class SilverWriterMetadataMixin:
         await self._audit.log_write(audit_entry)
 
     async def _get_delta_version(self, table_path: str) -> int | None:
-        """Get current Delta table version, if table exists.
-
-        Returns:
-            Integer Delta table version if the table exists, None otherwise.
-        """
+        """Get current Delta table version, if table exists."""
         loop = asyncio.get_running_loop()
         try:
             delta_table = await loop.run_in_executor(
@@ -272,11 +264,7 @@ class SilverWriterMetadataMixin:
         started_at: datetime,
         start_perf: float,
     ) -> SilverWriteResult | None:
-        """Compute DQ metrics, write metadata, and build final result.
-
-        Returns:
-            SilverWriteResult instance if Delta version is available, None otherwise.
-        """
+        """Compute DQ metrics, write metadata, and build final result."""
         dq_metrics = await self._compute_dq_metrics(table_name, records)
         version_after = await self._get_delta_version(table_path)
         completed_at = started_at + timedelta(seconds=time.perf_counter() - start_perf)

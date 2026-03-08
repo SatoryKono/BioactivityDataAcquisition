@@ -41,7 +41,15 @@ class SilverWriterMaintenanceMixin:
         validated_mode: SilverWriteMode,
         primary_keys: list[str],
     ) -> None:
-        """Export data to CSV if exporter is configured."""
+        """Export data to CSV if exporter is configured.
+
+        Args:
+            table_name: Logical table name for the export target.
+            arrow_data: PyArrow table containing the records to export.
+            mode: Write mode string (e.g., "delete", "merge", "append").
+            validated_mode: Silver write mode enum for determining CSV append behavior.
+            primary_keys: List of primary key columns for deduplication in merge exports.
+        """
         if not self.csv_exporter:
             return
         csv_append = mode != "delete"
@@ -62,6 +70,11 @@ class SilverWriterMaintenanceMixin:
         dry_run: bool = False,
     ) -> list[str]:
         """Remove old files not referenced by the Delta log.
+
+        Args:
+            table_name: Logical table name to vacuum.
+            retention_hours: Optional retention period in hours; defaults to Delta table setting.
+            dry_run: If True, list files without removing them.
 
         Returns:
             List of file path strings that were removed (or would be removed in dry_run mode).
@@ -85,6 +98,11 @@ class SilverWriterMaintenanceMixin:
     ) -> MetaDict:
         """Optimize table layout (compaction).
 
+        Args:
+            table_name: Logical table name to optimize.
+            target_size: Optional target file size in bytes for compaction.
+            partition_filters: Optional list of partition filter tuples to restrict compaction scope.
+
         Returns:
             Dictionary with compaction metrics and file statistics.
         """
@@ -96,6 +114,9 @@ class SilverWriterMaintenanceMixin:
 
     async def get_table_info(self, table_name: str) -> MetaDict:
         """Get metadata about a Delta table.
+
+        Args:
+            table_name: Logical table name to retrieve metadata for.
 
         Returns:
             Dictionary with table metadata including version, schema, and file counts.
@@ -109,6 +130,11 @@ class SilverWriterMaintenanceMixin:
         timestamp: datetime | None = None,
     ) -> DeltaTable:
         """Read a previous version of a table.
+
+        Args:
+            table_name: Logical table name to time-travel on.
+            version: Optional Delta table version number to load.
+            timestamp: Optional point-in-time timestamp to load the table at.
 
         Returns:
             DeltaTable instance loaded at the specified version or timestamp.
@@ -126,6 +152,10 @@ class SilverWriterMaintenanceMixin:
     ) -> list[BronzeRecord]:
         """Read records from a Silver layer Delta table.
 
+        Args:
+            table_name: Logical table name to read from.
+            columns: Optional list of column names to select; reads all columns if None.
+
         Returns:
             List of record dictionaries from the Silver Delta table.
         """
@@ -136,6 +166,9 @@ class SilverWriterMaintenanceMixin:
         table_name: str,
     ) -> MetaDict:  # Any: preview payload has heterogeneous values
         """Preview Silver cleanup scope without deleting files.
+
+        Args:
+            table_name: Logical table name to inspect.
 
         Returns:
             Dictionary with path, existence flag, and file count for the Silver table directory.

@@ -64,10 +64,11 @@ __all__ = [
 ]
 
 
-def extract_pipeline_callbacks(
-    pipeline: BasePipeline,
-) -> PipelineCallbacksContext:
+def extract_pipeline_callbacks(pipeline: BasePipeline) -> PipelineCallbacksContext:
     """Extract transformation callbacks from transformer or legacy methods.
+
+    Args:
+        pipeline: Pipeline instance from which to extract transform callbacks.
 
     Returns:
         PipelineCallbacksContext with transform, gold filter, and gold transform callbacks.
@@ -81,19 +82,16 @@ def extract_pipeline_callbacks(
         )
 
     # Fallback for pipelines without explicit transformer (legacy)
-    transform_cb = pipeline.transform_bronze_to_silver
-    gold_filter_cb = getattr(
-        pipeline, "should_write_gold", lambda _context, record: True
-    )
-    gold_transform_cb = getattr(
-        pipeline,
-        "transform_for_gold",
-        lambda _context, silver_record: silver_record,
-    )
     return PipelineCallbacksContext(
-        transform=cast(TransformCallback, transform_cb),
-        gold_filter=cast(GoldFilterCallback, gold_filter_cb),
-        gold_transform=cast(GoldTransformCallback, gold_transform_cb),
+        transform=cast(TransformCallback, pipeline.transform_bronze_to_silver),
+        gold_filter=cast(
+            GoldFilterCallback,
+            getattr(pipeline, "should_write_gold", lambda _context, record: True),
+        ),
+        gold_transform=cast(
+            GoldTransformCallback,
+            getattr(pipeline, "transform_for_gold", lambda _context, silver_record: silver_record),
+        ),
     )
 
 
@@ -114,11 +112,7 @@ class ServicesBuilder:
         tracer: TracingPort | None = None,
         lock_validator: Callable[[], Awaitable[bool]] | None = None,
     ) -> BatchProcessingComponents:
-        """Create batch metrics/transformer/writer stack via composition DI.
-
-        Returns:
-            BatchProcessingComponents with batch metrics, transformer, and writer.
-        """
+        """Create batch metrics/transformer/writer stack via composition DI."""
         return _create_batch_processing_components(
             services=services,
             context=context,
@@ -143,6 +137,14 @@ class ServicesBuilder:
         loading_strategy: LoadingStrategy | None = None,
     ) -> CheckpointManagerService:
         """Create configured CheckpointManagerService.
+
+        Args:
+            checkpoint_port: CheckpointPort for reading and writing checkpoint state.
+            logger: LoggerPort for structured checkpoint event logging.
+            pipeline_name: Pipeline identifier used for checkpoint scoping.
+            run_id: Unique run identifier embedded in checkpoint records.
+            resume: If True, resumes from existing checkpoint instead of starting fresh.
+            loading_strategy: Optional strategy controlling checkpoint loading behavior.
 
         Returns:
             CheckpointManagerService configured for the pipeline run.
@@ -182,22 +184,8 @@ class ServicesBuilder:
         column_groups: tuple[ColumnGroupConfig, ...] = (),
         scd_config: dict[str, str] | None = None,
     ) -> RecordProcessor:
-        """Create configured ``RecordProcessor`` for pipeline execution.
-
-        Returns:
-            RecordProcessor wired with transformer, writer, and batch metrics.
-        """
+        """Create configured ``RecordProcessor`` for pipeline execution."""
         effective_tracer = tracer or services.tracing
-        error_classifier = ErrorClassifier()
-        table_config = TableConfig(
-            primary_keys=tuple(primary_keys),
-            silver_table=silver_table,
-            gold_table=gold_table,
-            silver_write_mode=silver_write_mode,
-            gold_write_mode=gold_write_mode,
-            on_schema_mismatch=on_schema_mismatch,
-        )
-
         processor_config = RecordProcessorConfig(
             pipeline_name=pipeline_name,
             provider=provider,
@@ -205,25 +193,30 @@ class ServicesBuilder:
             silver_schema=silver_schema,
             gold_schema=gold_schema,
             dq_config=dq_config,
-            table_config=table_config,
+            table_config=TableConfig(
+                primary_keys=tuple(primary_keys),
+                silver_table=silver_table,
+                gold_table=gold_table,
+                silver_write_mode=silver_write_mode,
+                gold_write_mode=gold_write_mode,
+                on_schema_mismatch=on_schema_mismatch,
+            ),
             column_groups=column_groups,
             scd_config=scd_config,
-        )
-
-        typed_gold_schema = cast("pa.DataFrameSchema | None", gold_schema)
-        gold_validator = PanderaGoldValidator(
-            typed_gold_schema, strict=strict_gold_validation
         )
 
         components = ServicesBuilder.create_batch_processing_components(
             services=services,
             context=context,
             config=processor_config,
-            error_classifier=error_classifier,
+            error_classifier=ErrorClassifier(),
             transform_callback=transform_callback,
             gold_filter_callback=gold_filter_callback,
             gold_transform_callback=gold_transform_callback,
-            gold_validator=gold_validator,
+            gold_validator=PanderaGoldValidator(
+                cast("pa.DataFrameSchema | None", gold_schema),
+                strict=strict_gold_validation,
+            ),
             tracer=effective_tracer,
             lock_validator=lock_validator,
         )
@@ -247,6 +240,13 @@ class ServicesBuilder:
         lock_validator: Callable[[], Awaitable[bool]] | None = None,
     ) -> RecordProcessor:
         """Create RecordProcessor from pipeline instance.
+
+        Args:
+            pipeline: Configured pipeline instance providing services, context, and callbacks.
+            silver_schema: Optional PyArrow schema for Silver layer validation.
+            gold_schema: Pandera DataFrameModel class for Gold layer validation.
+            strict_gold_validation: If True, raises on Gold schema violations. Defaults to True.
+            lock_validator: Optional async callable for lock validation before writes.
 
         Returns:
             RecordProcessor configured from the pipeline's services and context.
@@ -283,6 +283,23 @@ class ServicesBuilder:
         batch_id_factory: BatchIdGeneratorPort | None = None,
     ) -> BatchExecutor:
         """Create BatchExecutor from pipeline instance.
+
+        Args:
+            pipeline: Configured pipeline instance providing services, context, and callbacks.
+            silver_schema: Optional PyArrow schema for Silver layer validation.
+            gold_schema: Pandera DataFrameModel class for Gold layer validation.
+            checkpoint_manager: CheckpointManagerService for batch-level checkpointing.
+            shutdown_signal: Signal used to gracefully terminate batch execution.
+            strict_gold_validation: If True, raises on Gold schema violations. Defaults to True.
+            lock_validator: Optional async callable for lock validation before writes.
+            tracer: Optional TracingPort for distributed tracing.
+            memory_monitor: Optional monitor for memory pressure tracking.
+            memory_config: Optional memory configuration for batch sizing.
+            bronze_output_path: Optional path override for Bronze output.
+            silver_output_path: Optional path override for Silver output.
+            gold_output_path: Optional path override for Gold output.
+            flat_structure: If True, writes use flat directory structure. Defaults to False.
+            batch_id_factory: Optional custom batch ID generator.
 
         Returns:
             BatchExecutor configured from the pipeline's services, context, and config.
@@ -327,6 +344,6 @@ def create_data_normalization_service(
         DefaultDataNormalizationService,
     )
 
-    if config is None:
-        config = DataNormalizationConfig()
-    return DefaultDataNormalizationService(config=config)
+    return DefaultDataNormalizationService(
+        config=config or DataNormalizationConfig()
+    )

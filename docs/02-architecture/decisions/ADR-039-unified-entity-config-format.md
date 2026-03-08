@@ -357,7 +357,7 @@ contracts:
 - [ADR-029: Convention-based Config](ADR-029-output-metadata-unification.md) — convention defaults
 - [ADR-037: config_merge() unification](ADR-037-canonical-schema-generation.md) — deep-merge делегирование
 - [ADR-038: Enum Externalization](ADR-038-enum-externalization.md) — enum values в YAML
-- [Config Unification Plan](../../plans/config-unification-plan.md) — полный план рефакторинга
+- [Config Unification Plan](../../99-archive/plans/config-unification-plan.md) — полный план рефакторинга *(archived)*
 
 ## Changelog
 

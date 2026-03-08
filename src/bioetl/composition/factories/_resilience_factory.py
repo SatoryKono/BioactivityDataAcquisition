@@ -38,6 +38,10 @@ def _resolve_merge_execution_timeout_seconds(timeout_cfg: object) -> float:
 def create_silver_atomic_retry_policy(settings: Settings) -> AdaptiveRetryPolicy:
     """Create atomic replace retry policy for Silver metadata writes.
 
+    Args:
+        settings: Application settings providing silver_resilience_enabled flag
+            and silver_metadata_atomic_retry configuration.
+
     Returns:
         AdaptiveRetryPolicy configured for Silver metadata atomic replace operations.
     """
@@ -59,6 +63,10 @@ def create_silver_merge_resilience_policy(
     settings: Settings,
 ) -> SilverMergeResiliencePolicy:
     """Create merge timeout/retry policy bundle for Silver Delta writes.
+
+    Args:
+        settings: Application settings providing silver_resilience_enabled flag
+            and silver_merge_retry / silver_merge_timeout configuration.
 
     Returns:
         SilverMergeResiliencePolicy with timeout and commit retry configuration.

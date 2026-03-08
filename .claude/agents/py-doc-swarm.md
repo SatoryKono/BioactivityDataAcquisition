@@ -39,8 +39,8 @@ model: opus
 ## Memory
 
 > **При старте** прочитай:
-> 1. `.ai/memory/agent-memory.md` — полный контекст проекта
-> 2. `.ai/memory/memory-py-doc-bot.md` — doc structure, ADR, docstring conventions
+> 1. `docs/00-project/ai/memory/agent-memory.md` — полный контекст проекта
+> 2. `docs/00-project/ai/memory/memory-py-doc-bot.md` — doc structure, ADR, docstring conventions
 > 3. `.claude/PROJECT_CONTEXT.md` — компактный контекст
 > 4. `.claude/agents/ORCHESTRATION.md` — протокол оркестрации
 

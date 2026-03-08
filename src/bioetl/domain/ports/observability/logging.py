@@ -36,7 +36,7 @@ class LoggerPort(Protocol):
         self,
         _event: str,
         **kwargs: Any,  # Any: structlog-compatible API
-    ) -> Any:
+    ) -> Any:  # Any: structlog-compatible API
         """Emit a warning log event.
 
         Args:
@@ -46,7 +46,7 @@ class LoggerPort(Protocol):
         Returns:
             Implementation-defined return value (structlog-compatible).
         """
-        ...  # Any: structlog-compatible API
+        ...
 
     def error(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
         """Emit an error log event.
@@ -76,7 +76,7 @@ class LoggerPort(Protocol):
         self,
         _event: str,
         **kwargs: Any,  # Any: structlog-compatible API
-    ) -> Any:
+    ) -> Any:  # Any: structlog-compatible API
         """Emit an error log event with current exception information attached.
 
         Args:
@@ -86,4 +86,4 @@ class LoggerPort(Protocol):
         Returns:
             Implementation-defined return value (structlog-compatible).
         """
-        ...  # Any: structlog-compatible API
+        ...

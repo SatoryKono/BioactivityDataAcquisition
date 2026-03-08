@@ -26,7 +26,16 @@ class FallbackPolicyPort(Protocol):
         limit: int | None,
         fetched: int,
     ) -> AsyncIterator[BronzeRecord]:
-        """Yield records for unresolved primary IDs."""
+        """Yield records for unresolved primary IDs.
+
+        Args:
+            dois: All DOIs requested in the current fetch batch.
+            found_dois: Set of DOIs already resolved in the primary fetch.
+            fallback_mapping: Mapping from DOI to title for fallback title lookup.
+            normalize_fn: Callable that normalizes a DOI string or returns None.
+            limit: Optional maximum number of total records to yield; None means unlimited.
+            fetched: Number of records already fetched before this fallback call.
+        """
         ...
 
     def process_title_only_entries(
@@ -37,5 +46,12 @@ class FallbackPolicyPort(Protocol):
         limit: int | None,
         fetched: int,
     ) -> AsyncIterator[BronzeRecord]:
-        """Yield records for title-only marker entries."""
+        """Yield records for title-only marker entries.
+
+        Args:
+            entries: List of title-only marker strings to process.
+            fallback_mapping: Mapping from marker to title string.
+            limit: Optional maximum number of total records to yield; None means unlimited.
+            fetched: Number of records already fetched before this fallback call.
+        """
         ...

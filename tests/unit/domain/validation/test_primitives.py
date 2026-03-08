@@ -1,0 +1,102 @@
+"""Tests for primitive value validation functions.
+
+Tests for validate_positive_int, validate_non_negative, validate_non_empty_string.
+"""
+
+from __future__ import annotations
+
+import pytest
+
+from bioetl.domain.validation.primitives import (
+    validate_non_empty_string,
+    validate_non_negative,
+    validate_positive_int,
+)
+
+
+@pytest.mark.unit
+class TestValidatePositiveInt:
+    """Tests for validate_positive_int function."""
+
+    def test_valid_positive_int(self) -> None:
+        assert validate_positive_int(42) == 42
+
+    def test_valid_string_int(self) -> None:
+        assert validate_positive_int("123") == 123
+
+    def test_one_is_valid(self) -> None:
+        assert validate_positive_int(1) == 1
+
+    def test_zero_returns_none(self) -> None:
+        assert validate_positive_int(0) is None
+
+    def test_negative_returns_none(self) -> None:
+        assert validate_positive_int(-1) is None
+
+    def test_invalid_string_returns_none(self) -> None:
+        assert validate_positive_int("invalid") is None
+
+    def test_none_returns_none(self) -> None:
+        assert validate_positive_int(None) is None
+
+    def test_bool_returns_none(self) -> None:
+        # bool is skipped by safe_int
+        assert validate_positive_int(True) is None
+
+    def test_float_value(self) -> None:
+        result = validate_positive_int(42.9)
+        assert result == 42
+
+
+@pytest.mark.unit
+class TestValidateNonNegative:
+    """Tests for validate_non_negative function."""
+
+    def test_zero_is_valid(self) -> None:
+        assert validate_non_negative(0.0) == 0.0
+
+    def test_positive_float(self) -> None:
+        assert validate_non_negative(42.5) == 42.5
+
+    def test_positive_int(self) -> None:
+        result = validate_non_negative(10)
+        assert result == 10.0
+
+    def test_negative_returns_none(self) -> None:
+        assert validate_non_negative(-1.0) is None
+
+    def test_none_returns_none(self) -> None:
+        assert validate_non_negative(None) is None
+
+    def test_bool_returns_none(self) -> None:
+        assert validate_non_negative(True) is None
+        assert validate_non_negative(False) is None
+
+    def test_invalid_string_returns_none(self) -> None:
+        assert validate_non_negative("invalid") is None
+
+    def test_valid_string_number(self) -> None:
+        assert validate_non_negative("42.5") == 42.5
+
+    def test_whitespace_string(self) -> None:
+        assert validate_non_negative("  42  ") == 42.0
+
+
+@pytest.mark.unit
+class TestValidateNonEmptyString:
+    """Tests for validate_non_empty_string function."""
+
+    def test_valid_string(self) -> None:
+        assert validate_non_empty_string("hello") == "hello"
+
+    def test_strips_whitespace(self) -> None:
+        assert validate_non_empty_string("  hello  ") == "hello"
+
+    def test_whitespace_only_returns_none(self) -> None:
+        assert validate_non_empty_string("   ") is None
+
+    def test_empty_string_returns_none(self) -> None:
+        assert validate_non_empty_string("") is None
+
+    def test_none_returns_none(self) -> None:
+        assert validate_non_empty_string(None) is None

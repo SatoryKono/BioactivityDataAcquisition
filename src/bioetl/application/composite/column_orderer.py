@@ -76,14 +76,7 @@ class ColumnOrdererService:
         self._warned_legacy_aliases: set[str] = set()
 
     def order_columns(self, df: pl.DataFrame) -> pl.DataFrame:
-        """Order DataFrame columns by semantic groups.
-
-        Args:
-            df: DataFrame whose columns should be reordered.
-
-        Returns:
-            DataFrame with columns in semantic group order.
-        """
+        """Order DataFrame columns by semantic groups."""
         if not df.columns:
             return df
 
@@ -106,14 +99,7 @@ class ColumnOrdererService:
         return df.select(ordered)
 
     def order_column_names(self, columns: Sequence[str]) -> list[str]:
-        """Order column names by semantic groups.
-
-        Args:
-            columns: Sequence of column name strings to order.
-
-        Returns:
-            List of column names in semantic group order.
-        """
+        """Order column names by semantic groups."""
         if not columns:
             return []
 
@@ -123,14 +109,7 @@ class ColumnOrdererService:
         return self.get_ordered_columns(columns)
 
     def get_ordered_columns(self, columns: Sequence[str]) -> list[str]:
-        """Get columns in semantic order.
-
-        Args:
-            columns: Sequence of column name strings to sort.
-
-        Returns:
-            Sorted list of column names by (group, provider_rank, field_name).
-        """
+        """Get columns in semantic order."""
 
         # Create sort key for each column
         def sort_key(col: str) -> tuple[int, int, str]:
@@ -153,14 +132,7 @@ class ColumnOrdererService:
         return counts
 
     def group_columns(self, columns: Sequence[str]) -> dict[SemanticGroup, list[str]]:
-        """Group columns by semantic type.
-
-        Args:
-            columns: Sequence of column name strings to classify.
-
-        Returns:
-            Mapping from SemanticGroup to sorted list of column names within that group.
-        """
+        """Group columns by semantic type."""
         groups: dict[SemanticGroup, list[str]] = {}
 
         for col in columns:
@@ -318,17 +290,7 @@ class ColumnOrdererService:
         columns: Sequence[str],
         layer_config: LayerColumnConfig,
     ) -> list[str]:
-        """Filter columns by layer-specific configuration.
-
-        Args:
-            columns: Sequence of available column name strings.
-            layer_config: Layer-level column configuration specifying explicit columns,
-                include_groups, exclude_fields, and rename_fields rules.
-
-        Returns:
-            Filtered and optionally renamed list of column names according to the
-            layer config's explicit columns, include_groups, or pass-through mode.
-        """
+        """Filter columns by layer-specific configuration."""
         if layer_config.columns:
             return self._filter_columns_by_explicit(columns, layer_config)
 

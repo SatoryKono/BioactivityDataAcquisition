@@ -63,7 +63,7 @@ BioETL documentation is **mature and comprehensive** with strong governance foun
 
 **C-03. ORCHESTRATION.md — два конфликтующих файла**
 - `.claude/agents/ORCHESTRATION.md` — v3.0 (2026-02-08, canonical)
-- `docs/00-project/agents/orchestration/ORCHESTRATION.md` — v3.1 Adapted
+- `docs/00-project/ai/agents/orchestration/ORCHESTRATION.md` — v3.1 Adapted
 - Различия: naming (kebab vs PascalCase), ADR count (33 vs 39), artifact names
 - **Impact:** Субагенты могут получить конфликтующие инструкции
 
@@ -96,7 +96,7 @@ BioETL documentation is **mature and comprehensive** with strong governance foun
 **H-01. Glossary staleness** — v2.5 (2026-02-06), 19 дней отставание от RULES.md
 **H-02. ADR-030 naming collision** — 2 разных ADR-030 (Pagination vs Field Unification) + 4 archived variants
 **H-03. ADR-033 status unclear** — "Added" status, не "Accepted"; implementation roadmap отсутствует
-**H-04. Subagent specs duplication** — `.claude/agents/py-*.md` + `.claude/agents/subagents/*/SUBAGENT.md` + `docs/00-project/agents/orchestration/subagents/`
+**H-04. Subagent specs duplication** — `.claude/agents/py-*.md` + `.claude/agents/subagents/*/SUBAGENT.md` + `docs/00-project/ai/agents/orchestration/subagents/`
 **H-05. Memory file version skew** — `agent-memory.md` claims v5.23, actual RULES is v5.21
 **H-06. Troubleshooting underdeveloped** — 5.6 KB, covers only 5 scenarios (should be 15+)
 **H-07. migration-5.14-to-6.0.md minimal** — only 32 lines for a major version jump
@@ -182,7 +182,7 @@ BioETL documentation is **mature and comprehensive** with strong governance foun
 | # | Action | Scope | Effort |
 |---|--------|-------|--------|
 | 4.1 | Establish `.claude/agents/` as SSOT for agent specs; deprecate docs/ copies | agent docs | 1h |
-| 4.2 | Remove duplicate subagent specs from `docs/00-project/agents/orchestration/subagents/` | 2 files | 15m |
+| 4.2 | Remove duplicate subagent specs from `docs/00-project/ai/agents/orchestration/subagents/` | 2 files | 15m |
 | 4.3 | Standardize naming convention (kebab-case for files, PascalCase in prompts) | all agent docs | 1h |
 | 4.4 | Sync agent-memory.md version to actual RULES.md version | agent-memory.md | 15m |
 | 4.5 | Add README to .claude/prompts/ explaining purpose/status | 1 file | 30m |

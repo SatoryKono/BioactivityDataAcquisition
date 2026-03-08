@@ -113,7 +113,17 @@ def _create_pipeline_with_services_impl(
     extract_entity_type: EntityTypeExtractor,
     build_pipeline_services_fn: _BuildPipelineServicesFn,
 ) -> BasePipeline:
-    """Implement pipeline creation while keeping facade thin."""
+    """Implement pipeline creation while keeping facade thin.
+
+    Args:
+        inputs: Immutable bundle of pipeline creation parameters.
+        deps: Service bundle dependencies providing config loading and domain mapping.
+        extract_entity_type: Callable deriving entity type from pipeline name.
+        build_pipeline_services_fn: Callable assembling the PipelineService bundle.
+
+    Returns:
+        Configured BasePipeline instance ready for execution.
+    """
     yaml_config = inputs.config or deps.load_pipeline_config(inputs.pipeline_name)
     run_context_factory = RunContextFactory(
         pipeline_name=inputs.pipeline_name,
@@ -177,7 +187,15 @@ def _create_pipeline_with_services_impl(
 def _create_silver_validator(
     pandera_silver_schema: object | None,
 ) -> SilverValidatorPort | None:
-    """Create Pandera silver validator when schema is configured."""
+    """Create Pandera silver validator when schema is configured.
+
+    Args:
+        pandera_silver_schema: Optional Pandera DataFrameModel class with a
+            to_schema() method; returns None when not provided.
+
+    Returns:
+        PanderaSilverValidator wrapping the schema, or None if schema is absent.
+    """
     if pandera_silver_schema is None:
         return None
 

@@ -109,29 +109,7 @@ class BronzeWriter(
         metadata_coordinator: MetadataCoordinatorPort | None = None,
         flat_structure: bool = False,
     ) -> None:
-        """Initialize Bronze writer.
-
-        Args:
-            base_path: Root directory for Bronze layer storage.
-            logger: Structured logger for write events and errors.
-            metrics: Metrics port for recording write counters and histograms.
-            tracing: Optional tracing port for span propagation; defaults to
-                NoOpTracing when None.
-            save_json: When True, write an additional uncompressed JSONL copy
-                alongside the compressed file.
-            json_path: Override directory for uncompressed JSON copies; defaults
-                to ``<base_path>/json`` when None.
-            validate_json: When True, validate that each record is valid JSON
-                before writing.
-            audit: Optional audit port for lineage logging; disabled when None.
-            metadata_writer: Optional port for writing sidecar metadata files;
-                defaults to NoOpMetadataWriter when None.
-            save_metadata: When True, write full BronzeMetadata sidecar files.
-            metadata_coordinator: Optional coordinator for metadata orchestration;
-                disabled when None.
-            flat_structure: When True, omit the provider/entity subdirectory
-                hierarchy in output paths.
-        """
+        """Initialize Bronze writer."""
         if tracing is None:
             from bioetl.domain.ports import NoOpTracing
 
@@ -144,6 +122,7 @@ class BronzeWriter(
 
         self.base_path = Path(base_path)
         self.logger = logger
+        self._logger: LoggerPort = logger
         self._metrics = metrics
         self.save_json = save_json
         self.json_path = json_path or str(self.base_path / "json")
@@ -169,23 +148,7 @@ class BronzeWriter(
         ingestion_ts: datetime,
         source_metadata: SourceMetadata | None = None,
     ) -> BronzeWriteResult:
-        """Write raw records to Bronze layer (JSONL + zstd).
-
-        Args:
-            records: Iterator of JSON-encoded record bytes (one per line).
-            provider: Data provider name (e.g., ``"chembl"``).
-            entity: Entity type name (e.g., ``"activity"``).
-            date: UTC date of the batch, used to partition the output path.
-            batch_id: Unique identifier for this write batch.
-            run_id: Pipeline run identifier for lineage tracking.
-            run_type: Run classification (INCREMENTAL, BACKFILL, or REBUILD).
-            ingestion_ts: UTC timestamp when ingestion started.
-            source_metadata: Optional provider metadata included in the sidecar;
-                uses a minimal default when None.
-
-        Returns:
-            BronzeWriteResult with path, record count, and size information.
-        """
+        """Write raw records to Bronze layer (JSONL + zstd)."""
         return await self._write_bronze_with_tracing(
             records=records,
             provider=provider,
@@ -218,6 +181,10 @@ class BronzeWriter(
             span.set_attribute("batch_id", str(batch_id))
             span.set_attribute("run_id", str(run_id))
 
+            labels = {"provider": provider, "entity": entity}
+            self._metrics.increment_counter(
+                "bronze_write_attempts_total", 1, labels
+            )
             start_time = time.perf_counter()
             prepared = self._prepare_bronze_write(
                 records=records,
@@ -249,6 +216,12 @@ class BronzeWriter(
                 duration=duration,
                 source_metadata=source_metadata,
             )
+            total_duration = time.perf_counter() - start_time
+            self._metrics.observe_histogram(
+                "bronze_write_total_duration_seconds",
+                total_duration,
+                labels,
+            )
             return await self._build_bronze_write_result(
                 prepared=prepared,
                 batch_id=batch_id,
@@ -270,6 +243,7 @@ class BronzeWriter(
         run_type: RunType,
         ingestion_ts: datetime,
     ) -> _BronzeWritePrepared:
+        """Validate inputs and build the prepared write context."""
         self._validate_bronze_names(provider, entity)
         self._validate_records_iterator(records)
         self._validate_utc_datetime(date, "date")
@@ -308,6 +282,7 @@ class BronzeWriter(
         self,
         prepared: _BronzeWritePrepared,
     ) -> tuple[int, int, int]:
+        """Write compressed JSONL data and metadata sidecar to disk."""
         loop = asyncio.get_running_loop()
 
         def _write_task() -> tuple[int, int]:
@@ -339,6 +314,7 @@ class BronzeWriter(
         duration: float,
         source_metadata: SourceMetadata | None,
     ) -> None:
+        """Emit metrics, optional JSON copy, audit log, and metadata sidecar."""
         self._emit_bronze_write_metrics(
             duration=duration,
             provider=provider,

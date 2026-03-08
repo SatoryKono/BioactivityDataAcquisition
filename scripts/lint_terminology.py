@@ -1,37 +1,25 @@
 #!/usr/bin/env python3
-"""Entry point for the BioETL terminology linter.
+"""Compatibility wrapper for canonical terminology linter.
 
-This script delegates to the canonical implementation in
-``src/tools/scripts/lint_terminology.py`` so existing command aliases remain stable.
+Canonical script:
+- scripts/qa/lint_terminology.py
 """
 
 from __future__ import annotations
 
-import importlib
+import runpy
 import sys
 from pathlib import Path
-from types import ModuleType
-from typing import Callable, cast
 
 
-def _load_impl() -> ModuleType:
+def _canonical_script() -> Path:
     repo_root = Path(__file__).resolve().parents[1]
-    sys.path.insert(0, str(repo_root / "src"))
-    return importlib.import_module("tools.scripts.lint_terminology")
-
-
-def main() -> int:
-    impl = _load_impl()
-    filtered_args = [arg for arg in sys.argv[1:] if arg != "--check"]
-    sys.argv = [sys.argv[0], *filtered_args]
-
-    impl_main_obj = getattr(impl, "main")
-    if not callable(impl_main_obj):
-        raise RuntimeError("tools.scripts.lint_terminology.main is not callable")
-
-    impl_main = cast(Callable[[], int], impl_main_obj)
-    return impl_main()
+    return repo_root / "scripts" / "qa" / "lint_terminology.py"
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    script = _canonical_script()
+    if not script.exists():
+        sys.stderr.write(f"ERROR: canonical script not found: {script}\n")
+        raise SystemExit(2)
+    runpy.run_path(str(script), run_name="__main__")

@@ -34,7 +34,20 @@ class BronzeWriterMetricsMixin:
         run_id: RunID,
         run_type: RunType,
     ) -> None:
-        """Emit metrics counters and structured log for a bronze write."""
+        """Emit metrics counters and structured log for a bronze write.
+
+        Args:
+            duration: Total write duration in seconds.
+            provider: Data provider name used as metric label.
+            entity: Entity type name used as metric label.
+            record_count: Number of records written.
+            compressed_size: Compressed byte size of the written file.
+            uncompressed_size: Uncompressed byte size of all records.
+            relative_path: Relative path of the written file for logging.
+            batch_id: Unique batch identifier for the log entry.
+            run_id: Pipeline run identifier for the log entry.
+            run_type: Run classification for the log entry.
+        """
         labels = {"provider": provider, "entity": entity}
 
         self._metrics.observe_histogram(

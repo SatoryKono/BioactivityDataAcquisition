@@ -17,6 +17,9 @@ class OpenAlexResponseMapper:
     def extract_results(self, payload: dict[str, object]) -> list[BronzeRecord]:
         """Extract API `results` array as BronzeRecord list.
 
+        Args:
+            payload: Decoded JSON payload dict from the OpenAlex API response.
+
         Returns:
             List of BronzeRecord dictionaries from the results array, or empty list if absent.
         """
@@ -29,6 +32,9 @@ class OpenAlexResponseMapper:
 
     def extract_next_cursor(self, payload: dict[str, object]) -> str | None:
         """Extract cursor from `meta.next_cursor`.
+
+        Args:
+            payload: Decoded JSON payload dict from the OpenAlex API response.
 
         Returns:
             Next cursor string if present, None if last page or meta is missing.
@@ -50,6 +56,12 @@ class OpenAlexResponseMapper:
         search_title: str | None = None,
     ) -> BronzeRecord:
         """Return copied record with standardized lookup metadata fields.
+
+        Args:
+            record: Source BronzeRecord to copy and annotate.
+            lookup_method: Lookup method label to set in _lookup_method field (e.g., "doi", "title").
+            original_id: Optional original ID string to embed in _original_id field.
+            search_title: Optional search title string to embed in _search_title field.
 
         Returns:
             Copy of the record with _lookup_method and optional _original_id and _search_title fields set.

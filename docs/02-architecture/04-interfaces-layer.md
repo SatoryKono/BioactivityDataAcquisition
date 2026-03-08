@@ -37,10 +37,10 @@
 | `lock`          | `lock.py`          | Управление блокировками                 |
 | `vacuum`        | `vacuum.py`        | VACUUM операции для Delta Lake          |
 | `cleanup`       | `cleanup.py`       | Очистка Bronze данных                   |
+| `maintenance`   | `maintenance.py`   | Maintenance операции                    |
+| `archive`       | `archive.py`       | Архивирование данных                    |
 
 Дополнительно в слое `interfaces/cli/` используются модули: `health_server_integration.py`, `metrics_server_integration.py`, `run_helpers.py`.
-| `maintenance` | `maintenance.py` | Maintenance операции |
-| `archive` | `archive.py` | Архивирование данных |
 
 **Примеры использования:**
 

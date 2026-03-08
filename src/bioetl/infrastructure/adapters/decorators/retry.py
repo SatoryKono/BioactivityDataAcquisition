@@ -86,14 +86,21 @@ class RetryingDataSourceDecorator:
     logger: LoggerPort | None = None
     metrics: MetricsPort | None = None
 
+    def __post_init__(self) -> None:
+        """Create private aliases for delegation pattern compliance."""
+        self._data_source = self.data_source
+        self._retry_config = self.retry_config
+        self._logger = self.logger
+        self._metrics = self.metrics
+
     @property
     def provider_name(self) -> str:
         """Delegate to wrapped data source."""
-        return self.data_source.provider_name
+        return self._data_source.provider_name
 
     async def __aenter__(self) -> Self:
         """Enter async context by delegating to wrapped data source."""
-        await self.data_source.__aenter__()
+        await self._data_source.__aenter__()
         return self
 
     async def __aexit__(
@@ -103,24 +110,10 @@ class RetryingDataSourceDecorator:
         exc_tb: TracebackType | None,
     ) -> None:
         """Exit async context by delegating to wrapped data source."""
-        await self.data_source.__aexit__(exc_type, exc_val, exc_tb)
+        await self._data_source.__aexit__(exc_type, exc_val, exc_tb)
 
     def _is_retryable(self, exc: Exception) -> bool:
-        """Check if exception should trigger a retry.
-
-        Retryable conditions:
-        - RecoverableError (except CircuitBreakerOpenError which should propagate)
-        - Connection/timeout errors
-        - Configured retryable exceptions
-
-        Non-retryable:
-        - CircuitBreakerOpenError (CB decorator handles this)
-        - Critical errors (auth failures, schema errors)
-        - Data quality errors (should skip record, not retry)
-
-        Returns:
-            True if the exception should trigger a retry attempt, False otherwise.
-        """
+        """Check if exception should trigger a retry."""
         # Circuit breaker errors should propagate immediately
         if isinstance(exc, CircuitBreakerOpenError):
             return False
@@ -130,28 +123,20 @@ class RetryingDataSourceDecorator:
             return True
 
         # Check configured retryable exceptions
-        return self.retry_config.is_retryable_exception(exc)
+        return self._retry_config.is_retryable_exception(exc)
 
     def _retryable_exception_types(self) -> tuple[type[Exception], ...]:
-        """Build tuple of retryable exception types for `except` clauses.
-
-        Returns:
-            Tuple of exception classes that should trigger retry logic.
-        """
+        """Build tuple of retryable exception types for `except` clauses."""
         configured = tuple(
             exc_type
-            for exc_type in self.retry_config.retryable_exceptions
+            for exc_type in self._retry_config.retryable_exceptions
             if exc_type is not Exception
         )
         return (RecoverableError, *configured)
 
     async def _calculate_and_wait(self, attempt: int, url: str = "") -> float:
-        """Calculate delay and wait before retry.
-
-        Returns:
-            The actual wait time in seconds.
-        """
-        delay = self.retry_config.calculate_delay(attempt, url)
+        """Calculate delay and wait before retry."""
+        delay = self._retry_config.calculate_delay(attempt, url)
         await asyncio.sleep(delay)
         return delay
 
@@ -163,15 +148,15 @@ class RetryingDataSourceDecorator:
         error: Exception,
     ) -> None:
         """Log retry attempt with structured fields."""
-        if not self.logger:
+        if not self._logger:
             return
 
-        self.logger.warning(
+        self._logger.warning(
             "data_source_retry",
             stage="fetch",
             operation=operation,
             attempt=attempt + 1,
-            max_attempts=self.retry_config.max_attempts,
+            max_attempts=self._retry_config.max_attempts,
             wait_seconds=round(wait_seconds, 3),
             error_type=type(error).__name__,
             error_message=str(error),
@@ -180,10 +165,10 @@ class RetryingDataSourceDecorator:
 
     def _record_retry_metrics(self, operation: str, retries: int) -> None:
         """Record retry metrics."""
-        if not self.metrics or retries == 0:
+        if not self._metrics or retries == 0:
             return
 
-        self.metrics.increment_counter(
+        self._metrics.increment_counter(
             "data_source_retries_total",
             retries,
             {
@@ -194,10 +179,10 @@ class RetryingDataSourceDecorator:
 
     def _record_exhaustion_metrics(self, operation: str) -> None:
         """Record retry exhaustion metrics."""
-        if not self.metrics:
+        if not self._metrics:
             return
 
-        self.metrics.increment_counter(
+        self._metrics.increment_counter(
             "data_source_retry_exhausted_total",
             1,
             {
@@ -219,7 +204,7 @@ class RetryingDataSourceDecorator:
         last_error: Exception | None = None
         retries = 0
 
-        for attempt in range(self.retry_config.max_attempts):
+        for attempt in range(self._retry_config.max_attempts):
             try:
                 async for record in self._fetch_once(
                     entity_type=entity_type,
@@ -237,7 +222,7 @@ class RetryingDataSourceDecorator:
                 raise
             except self._retryable_exception_types() as exc:
                 last_error = exc
-                if self.retry_config.is_last_attempt(attempt):
+                if self._retry_config.is_last_attempt(attempt):
                     break
                 wait_seconds = await self._calculate_and_wait(
                     attempt, f"fetch:{entity_type}"
@@ -249,7 +234,7 @@ class RetryingDataSourceDecorator:
         self._record_exhaustion_metrics("fetch")
         raise RetryExhaustedError(
             url=f"{self.provider_name}:{entity_type}",
-            attempts=self.retry_config.max_attempts,
+            attempts=self._retry_config.max_attempts,
             last_error=last_error,
         )
 
@@ -264,7 +249,7 @@ class RetryingDataSourceDecorator:
         offset: int | None,
     ) -> AsyncIterator[JsonDict]:  # Any: untyped API JSON record
         """Run one fetch attempt against the wrapped data source."""
-        async for record in self.data_source.fetch(
+        async for record in self._data_source.fetch(
             entity_type=entity_type,
             limit=limit,
             query=query,
@@ -275,22 +260,13 @@ class RetryingDataSourceDecorator:
             yield record
 
     async def health_check(self) -> HealthStatus:
-        """Check health with retry logic.
-
-        Retries health check on transient failures.
-
-        Returns:
-            Health status from the wrapped data source.
-
-        Raises:
-            RetryExhaustedError: If all retry attempts fail.
-        """
+        """Check health with retry logic."""
         last_error: Exception | None = None
         retries = 0
 
-        for attempt in range(self.retry_config.max_attempts):
+        for attempt in range(self._retry_config.max_attempts):
             try:
-                result = await self.data_source.health_check()
+                result = await self._data_source.health_check()
                 self._record_retry_metrics("health_check", retries)
                 return result
 
@@ -299,7 +275,7 @@ class RetryingDataSourceDecorator:
             except self._retryable_exception_types() as exc:
                 last_error = exc
 
-                if self.retry_config.is_last_attempt(attempt):
+                if self._retry_config.is_last_attempt(attempt):
                     break
 
                 wait_seconds = await self._calculate_and_wait(attempt, "health_check")
@@ -311,10 +287,10 @@ class RetryingDataSourceDecorator:
         self._record_exhaustion_metrics("health_check")
         raise RetryExhaustedError(
             url=f"{self.provider_name}:health_check",
-            attempts=self.retry_config.max_attempts,
+            attempts=self._retry_config.max_attempts,
             last_error=last_error,
         )
 
     async def aclose(self) -> None:
         """Close the wrapped data source."""
-        await self.data_source.aclose()
+        await self._data_source.aclose()

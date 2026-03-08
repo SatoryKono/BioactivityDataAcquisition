@@ -1,6 +1,6 @@
 # BioETL Diagrams — PNG Index
 
-_Generated: 2026-03-03T19:01:45+03:00_
+_Generated: 2026-03-08T19:28:54+03:00_
 
 ## Full System Component
 
@@ -239,6 +239,12 @@ _Generated: 2026-03-03T19:01:45+03:00_
 ## Batch Processing Flow
 
 ![34-batch-processing-flow](./34-batch-processing-flow.png)
+
+---
+
+## Bootstrap Sequence
+
+![35-bootstrap-sequence](./35-bootstrap-sequence.png)
 
 ---
 

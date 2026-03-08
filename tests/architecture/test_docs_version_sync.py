@@ -31,7 +31,7 @@ DOC_VERSION_PATTERNS = [
 # Исключаем: archived/, audits/ (исторические), __-prompts/ (шаблоны)
 # Note: docs restructured to 00-project, 01-requirements, etc.
 REQUIRED_SYNC_DOCS = [
-    "docs/00-project/agents/CLAUDE.md",
+    "docs/00-project/ai/agents/guides/CLAUDE.md",
     "docs/00-project/00-map.md",
     "docs/01-requirements/REQUIREMENTS.md",
     "docs/00-project/rules-summary.md",
@@ -103,7 +103,15 @@ class TestDocsVersionSync:
 
         REQ-DOC-010: CLAUDE.md является основным справочником для агента.
         """
-        claude_md = project_root / "docs" / "00-project" / "agents" / "CLAUDE.md"
+        claude_md = (
+            project_root
+            / "docs"
+            / "00-project"
+            / "ai"
+            / "agents"
+            / "guides"
+            / "CLAUDE.md"
+        )
         assert claude_md.exists(), "CLAUDE.md not found"
 
         content = claude_md.read_text(encoding="utf-8")

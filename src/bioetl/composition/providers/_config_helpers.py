@@ -41,12 +41,24 @@ def _get_factories(
 
     Keeps this helper module decoupled from factory modules to avoid
     cross-import dependency chains.
+
+    Args:
+        data_source_factory_getter: Zero-argument callable returning the data
+            source factory class.
+        http_client_factory_getter: Zero-argument callable returning the HTTP
+            client factory class.
+
+    Returns:
+        Tuple of (data_source_factory, http_client_factory).
     """
     return data_source_factory_getter(), http_client_factory_getter()
 
 
 def _get_source_config(provider: str) -> SourceYamlConfig | None:
     """Load config from configs/providers/{provider}.yaml or return None.
+
+    Args:
+        provider: Provider name used to locate the YAML source config file.
 
     Returns:
         SourceYamlConfig if found, None if config file does not exist.
@@ -61,7 +73,15 @@ def _get_source_config(provider: str) -> SourceYamlConfig | None:
 
 
 def _get_batch_size_from_config(provider: str, default: int = 100) -> int:
-    """Get batch size from source config or return default."""
+    """Get batch size from source config or return default.
+
+    Args:
+        provider: Provider name used to locate the source config.
+        default: Batch size to use when source config is absent; defaults to 100.
+
+    Returns:
+        Configured batch size from source YAML, or default.
+    """
     source_config = _get_source_config(provider)
     return source_config.batch_size if source_config else default
 
@@ -131,7 +151,13 @@ def _validate_extraction_input_filter_overlap(
     input_filter: InputFilterConfig,
     logger: LoggerPort,
 ) -> None:
-    """Warn if input_filter field overlaps extraction_params keys."""
+    """Warn if input_filter field overlaps extraction_params keys.
+
+    Args:
+        extraction_params: Extraction parameters that may overlap with filter fields.
+        input_filter: Input filter configuration specifying filter fields.
+        logger: LoggerPort used to emit overlap warnings.
+    """
     if not input_filter.enabled or extraction_params.is_empty:
         return
 
@@ -162,7 +188,18 @@ def _wrap_with_filter(
     metrics: MetricsPort | None = None,
     pipeline_name: str = "unknown",
 ) -> DataSourcePort:
-    """Wrap data source with FilteredDataSource if filter is enabled."""
+    """Wrap data source with FilteredDataSource if filter is enabled.
+
+    Args:
+        data_source: Base data source to conditionally wrap.
+        filter_config: Optional filter configuration; wraps only if enabled.
+        logger: Optional LoggerPort for FilteredDataSource; defaults to None.
+        metrics: Optional MetricsPort for filter statistics; defaults to None.
+        pipeline_name: Pipeline name for metrics labels; defaults to 'unknown'.
+
+    Returns:
+        FilteredDataSource wrapping data_source, or data_source unchanged.
+    """
     _wire_composable_fallback(data_source)
 
     if filter_config and filter_config.enabled:
@@ -178,7 +215,12 @@ def _wrap_with_filter(
 
 
 def _wire_composable_fallback(data_source: DataSourcePort) -> None:
-    """Apply provider fallback policy once from composition root wiring."""
+    """Apply provider fallback policy once from composition root wiring.
+
+    Args:
+        data_source: Data source adapter to configure with fallback policy if
+            it exposes a configure_fallback_policy method and a provider_name.
+    """
     provider_name = getattr(data_source, "provider_name", None)
     if not isinstance(provider_name, str) or not provider_name.strip():
         return
@@ -252,6 +294,13 @@ def _normalize_optional_override(value: str | None) -> str | None:
 
     Empty strings and `${ENV_VAR}` placeholders are treated as unset to allow
     fallback to centralized settings/config providers.
+
+    Args:
+        value: Optional string value potentially containing empty strings or
+            unresolved environment variable placeholders.
+
+    Returns:
+        Cleaned string value, or None if absent, empty, or an unresolved placeholder.
     """
     if value is None:
         return None

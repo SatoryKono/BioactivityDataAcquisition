@@ -142,6 +142,9 @@ class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):
     ) -> JsonDict | None:  # Any: untyped API JSON record
         """Search Semantic Scholar by title and return best matching record.
 
+        Args:
+            title: Publication title to search for.
+
         Returns:
             Matching publication record dict if a title match is found, None otherwise.
         """
@@ -222,6 +225,9 @@ class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):
         result: JsonDict,  # Any: untyped API JSON record
     ) -> tuple[str, str]:  # Any: untyped API JSON record
         """Return Semantic Scholar paper ID for logging.
+
+        Args:
+            result: BronzeRecord or raw API dict from the search response.
 
         Returns:
             Tuple of (identifier key name, paper ID string) for structured log output.

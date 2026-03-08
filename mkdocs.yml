@@ -178,10 +178,10 @@ nav:
                     -   "v5.14 → v6.0": 03-guides/migration-5.14-to-6.0.md
             -   Dashboards:
                     -   "Overview": 03-guides/dashboards/README.md
-                    -   "V2 Updates": 03-guides/dashboards/DASHBOARD_V2_UPDATES.md
-                    -   "V2 Usage": 03-guides/dashboards/DASHBOARD_V2_USAGE.md
-                    -   "Monitoring Index": 03-guides/dashboards/MONITORING_INDEX.md
-                    -   "Variables Guide": 03-guides/dashboards/VARIABLES_GUIDE.md
+                    -   "V2 Updates": 03-guides/dashboards/dashboard-v2-updates.md
+                    -   "V2 Usage": 03-guides/dashboards/dashboard-v2-usage.md
+                    -   "Monitoring Index": 03-guides/dashboards/monitoring-index.md
+                    -   "Variables Guide": 03-guides/dashboards/variables-guide.md
             -   "File Path Audit Report": 03-guides/file-path-audit-report.md
     -   Providers:
             -   "Overview": 04-reference/providers/README.md
@@ -304,24 +304,21 @@ nav:
                     -   "Observability Checklist": 05-operations/runbooks/observability-checklist.md
                     -   "Scaling": 05-operations/runbooks/scaling.md
                     -   "Publication Validation": 05-operations/runbooks/publication-validation-runbook.md
-            -   "Release Checklist": 05-operations/RELEASE_CHECKLIST.md
+            -   "Release Checklist": 05-operations/release-checklist.md
             -   "Performance Baselines": 05-operations/performance-baselines.md
             -   "VACUUM & Retention": 05-operations/vacuum-retention.md
     -   Verification:
-            -   "Publication Field Mapping": 05-operations/verification/publication-field-mapping-report.md
-            -   "PubMed Extraction": 05-operations/verification/pubmed-extraction-verification-report.md
-            -   "SemanticScholar Publication": 05-operations/verification/semanticscholar-publication-pipeline-verification.md
             -   "VCR Provider Rebalancing": 05-operations/verification/vcr-provider-rebalancing.md
     -   "Internal / Extended":
             -   Agents:
-                    -   "Agents Overview": 00-project/agents/README.md
-                    -   "AGENT": 00-project/agents/AGENT.md
-                    -   "CLAUDE": 00-project/agents/CLAUDE.md
-                    -   "CODEX": 00-project/agents/CODEX.md
-                    -   "GEMINI": 00-project/agents/GEMINI.md
-                    -   "Agent Memory": 00-project/agents/memory.md
-                    -   "QA Orchestrator Prompt": 00-project/agents/qa_orchestrator.md
-                    -   "Orchestration": 00-project/agents/orchestration/ORCHESTRATION.md
+                    -   "Agents Overview": 00-project/ai/agents/README.md
+                    -   "AGENT": 00-project/ai/agents/guides/AGENT.md
+                    -   "CLAUDE": 00-project/ai/agents/guides/CLAUDE.md
+                    -   "CODEX": 00-project/ai/agents/guides/CODEX.md
+                    -   "GEMINI": 00-project/ai/agents/guides/GEMINI.md
+                    -   "Agent Memory": 00-project/ai/agents/runtime/agent-memory.md
+                    -   "QA Orchestrator Prompt": 00-project/ai/agents/runtime/py-qa-orchestrator.md
+                    -   "Orchestration": 00-project/ai/agents/runtime/orchestration/py-team-orchestration.md
             -   "Project Architecture Index": 00-project/architecture-index.md
             -   "Architecture Extras":
                     -   "Diagram Policy (Canonical)": 02-architecture/06-diagram-policy.md
@@ -343,12 +340,11 @@ nav:
                     -   "Diagram Prompt Expansion": 02-architecture/mmd-diagrams/docs/PROMPT-diagram-expansion.md
                     -   "Module Consolidation Requirements": 02-architecture/module-consolidation-migration-requirements.md
                     -   "Content Hash Policy": 02-architecture/policies/content-hash-identity-policy.md
-                    -   "Architecture Review 2026-03-04": 02-architecture/architecture-review-2026-03-04.md
             -   "Guide Extras":
                     -   "Silver Schema Testing Guide": 03-guides/silver-schema-testing-guide.md
             -   "Reference Extras":
                     -   "Contracts README": 04-reference/contracts/README.md
-                    -   "Hash Policy": 04-reference/hash_policy.md
+                    -   "Hash Policy": 04-reference/hash-policy.md
                     -   "Publication Fields Reference": 04-reference/publication-fields-reference.md
                     -   "Publication Validation Index": 04-reference/publication-validation-index.md
                     -   "Pipeline Review Checklist": 04-reference/templates/pipeline-review-checklist.md
@@ -358,16 +354,12 @@ nav:
                     -   "Pipeline Legacy: SemanticScholar Publication": 04-reference/pipelines/semanticscholar-publication.md
             -   "Operations Extras":
                     -   "Monitoring Guide": 05-operations/01-monitoring-guide.md
-                    -   "Kubernetes Guide (Experimental)": 05-operations/deployment/DEPLOYMENT_GUIDE.md
-                    -   "K8S Summary (Experimental)": 05-operations/deployment/K8S_SUMMARY.md
-                    -   "MCP Neo4j Memory Setup": 05-operations/deployment/NEO4J_MEMORY_SETUP.md
-                    -   "MCP Neo4j Memory Summary": 05-operations/deployment/MCP_NEO4J_MEMORY_SUMMARY.md
-                    -   "MCP Neo4j Memory Final Summary": 05-operations/deployment/MCP_NEO4J_MEMORY_FINAL_SUMMARY.md
+                    -   "Kubernetes Guide (Experimental)": 05-operations/deployment/deployment-guide.md
+                    -   "K8S Summary (Experimental)": 05-operations/deployment/k8s-summary.md
+                    -   "MCP Neo4j Memory Setup": 05-operations/deployment/neo4j-memory-setup.md
+                    -   "MCP Neo4j Memory Summary": 05-operations/deployment/mcp-neo4j-memory-summary.md
+                    -   "MCP Neo4j Memory Final Summary": 05-operations/deployment/mcp-neo4j-memory-final-summary.md
                     -   "Endpoint Validation Checklist": 05-operations/verification/endpoint-validation-checklist.md
-                    -   "Git Preflight Status 2026-02-24": 05-operations/verification/git-preflight-status-2026-02-24.md
-                    -   "Refactor Plan Validation 2026-02-15": 05-operations/verification/refactor-plan-validation-2026-02-15.md
-                    -   "Schema Review 2026-02-17": 05-operations/verification/schema-review-2026-02-17.md
-                    -   "Sync Report 2026-02-17": 05-operations/verification/sync-report-2026-02-17.md
                     -   "VCR Test Tasks": 05-operations/verification/vcr-test-tasks.md
             -   "Diagram Descriptions":
                 -   "Index": 02-architecture/diagram-descriptions/INDEX.md
@@ -672,19 +664,12 @@ nav:
                 -   "Diagram Regression Test Plan": 02-architecture/mmd-diagrams/docs/diagram-regression-test-plan.md
             -   "Plans":
                 -   "Plans Overview": plans/README.md
-                -   "Branch Consolidation Plan": plans/branch-consolidation-plan.md
-                -   "Codex 7 Branches Consolidation Plan": plans/codex-7-branches-consolidation-plan.md
-                -   "Config Unification Plan": plans/config-unification-plan.md
                 -   "Diagrams Docs Scripts Refactor Plan": plans/DIAGRAMS_DOCS_SCRIPTS_REFACTOR_PLAN.md
-                -   "Diagram Optimization Prompts V3": plans/diagram-optimization-prompts-v3.md
                 -   "Diagram Views Improvement Plan": plans/diagram-views-improvement-plan.md
-                -   "Diagram Rendering Improvement Plan 2026 02 26": plans/diagram-rendering-improvement-plan-2026-02-26.md
                 -   "Diagram Workflow Corrective Master Plan 2026 02 27": plans/diagram-workflow-corrective-master-plan-2026-02-27.md
                 -   "MkDocs Material Migration Track 2026 03 03": plans/mkdocs-material-migration-track-2026-03-03.md
-                -   "Wave 8 Policy Decisions 2026 03 03": plans/wave-8-policy-decisions-2026-03-03.md
             -   "Prompts":
-                -   "QA Orchestrator Prompt": 00-project/agents/qa_orchestrator.md
-                -   "Diagram Docs Orchestrator Agent": 00-project/agents/diagram_docs_orchestrator.md
+                -   "Diagram Docs Orchestrator Agent": 00-project/ai/agents/runtime/py-diagram-docs-orchestrator.md
             -   "Reports":
                 -   "Overview": reports/index.md
                 -   "Documentation Cascade Audit 2026 02 27": reports/documentation-cascade-audit-2026-02-27.md
@@ -697,81 +682,81 @@ nav:
                 -   "Branch Full Diff Matrix Diagram Scope 2026 03 01": reports/branch-full-diff-matrix-diagram-scope-2026-03-01.md
                 -   "Branch Render Settings Diff Matrix 2026 03 01": reports/branch-render-settings-diff-matrix-2026-03-01.md
             -   "Skills":
-                -   "Overview": skills/README.md
+                -   "Overview": 00-project/ai/skills/README.md
                 -   "Global Skills":
-                    -   "Skill": skills/global/agent-orchestration/SKILL.md
-                    -   "Skill": skills/global/documentation-audit/SKILL.md
-                    -   "Audit Checklist": skills/global/documentation-audit/references/audit-checklist.md
-                    -   "Report Template": skills/global/documentation-audit/references/report-template.md
-                    -   "Skill": skills/global/gh-address-comments/SKILL.md
-                    -   "Skill": skills/global/gh-fix-ci/SKILL.md
-                    -   "Skill": skills/global/new-pipeline/SKILL.md
-                    -   "Skill": skills/global/openai-docs/SKILL.md
-                    -   "Skill": skills/global/public/architecture-guardian/SKILL.md
-                    -   "Skill": skills/global/py-audit-bot/SKILL.md
-                    -   "Skill": skills/global/py-code-bot/SKILL.md
-                    -   "Skill": skills/global/py-config-bot/SKILL.md
-                    -   "Skill": skills/global/py-debug-bot/SKILL.md
-                    -   "Skill": skills/global/py-doc-bot/SKILL.md
-                    -   "Skill": skills/global/py-plan-bot/SKILL.md
-                    -   "Skill": skills/global/py-review-orchestrator/SKILL.md
-                    -   "Skill": skills/global/py-test-bot/SKILL.md
-                    -   "Skill": skills/global/vcr-record/SKILL.md
-                    -   "Skill": skills/global/verify-architecture/SKILL.md
+                    -   "Skill": 00-project/ai/skills/global/agent-orchestration/SKILL.md
+                    -   "Skill": 00-project/ai/skills/global/documentation-audit/SKILL.md
+                    -   "Audit Checklist": 00-project/ai/skills/global/documentation-audit/references/audit-checklist.md
+                    -   "Report Template": 00-project/ai/skills/global/documentation-audit/references/report-template.md
+                    -   "Skill": 00-project/ai/skills/global/gh-address-comments/SKILL.md
+                    -   "Skill": 00-project/ai/skills/global/gh-fix-ci/SKILL.md
+                    -   "Skill": 00-project/ai/skills/global/new-pipeline/SKILL.md
+                    -   "Skill": 00-project/ai/skills/global/openai-docs/SKILL.md
+                    -   "Skill": 00-project/ai/skills/global/public/architecture-guardian/SKILL.md
+                    -   "Skill": 00-project/ai/skills/global/py-audit-bot/SKILL.md
+                    -   "Skill": 00-project/ai/skills/global/py-code-bot/SKILL.md
+                    -   "Skill": 00-project/ai/skills/global/py-config-bot/SKILL.md
+                    -   "Skill": 00-project/ai/skills/global/py-debug-bot/SKILL.md
+                    -   "Skill": 00-project/ai/skills/global/py-doc-bot/SKILL.md
+                    -   "Skill": 00-project/ai/skills/global/py-plan-bot/SKILL.md
+                    -   "Skill": 00-project/ai/skills/global/py-review-orchestrator/SKILL.md
+                    -   "Skill": 00-project/ai/skills/global/py-test-bot/SKILL.md
+                    -   "Skill": 00-project/ai/skills/global/vcr-record/SKILL.md
+                    -   "Skill": 00-project/ai/skills/global/verify-architecture/SKILL.md
                 -   "Local Skills":
-                    -   "Skills Catalog": skills/local/SKILLS-CATALOG.md
-                    -   "Skill": skills/local/agent-orchestration/SKILL.md
-                    -   "Capability Discovery": skills/local/capability-discovery/SKILL.md
-                    -   "Collecting Evidence": skills/local/collecting-evidence/SKILL.md
-                    -   "Evidence Object Schema": skills/local/collecting-evidence/references/evidence-object-schema.md
-                    -   "ID Generation Rules": skills/local/collecting-evidence/references/id-generation-rules.md
-                    -   "Research Protocols": skills/local/collecting-evidence/references/research-protocols.md
-                    -   "Create PR": skills/local/create-pr/SKILL.md
-                    -   "Deep Research": skills/local/deep-research/SKILL.md
-                    -   "Deep Research Critique Framework": skills/local/deep-research/references/critique-framework.md
-                    -   "Deep Research Report Templates": skills/local/deep-research/references/report-templates.md
-                    -   "Deep Research Search Patterns": skills/local/deep-research/references/search-patterns.md
-                    -   "Deep Research Source Evaluation": skills/local/deep-research/references/source-evaluation.md
-                    -   "Skill": skills/local/documentation-audit/SKILL.md
-                    -   "Audit Checklist": skills/local/documentation-audit/references/audit-checklist.md
-                    -   "Report Template": skills/local/documentation-audit/references/report-template.md
-                    -   "Skill": skills/local/documentation-cascade-audit/SKILL.md
-                    -   "Generating Constrained Specs": skills/local/generating-constrained-specs/SKILL.md
-                    -   "Constrained Specs PRD Template": skills/local/generating-constrained-specs/references/prd-template.md
-                    -   "Constrained Specs Architecture Template": skills/local/generating-constrained-specs/references/architecture-template.md
-                    -   "Constrained Specs Rules": skills/local/generating-constrained-specs/references/constraint-rules.md
-                    -   "Initializing Ledger": skills/local/initializing-ledger/SKILL.md
-                    -   "Ledger Brief Template": skills/local/initializing-ledger/references/brief-template.md
-                    -   "Ledger Pillar Definitions": skills/local/initializing-ledger/references/pillar-definitions.md
-                    -   "Making Decisions": skills/local/making-decisions/SKILL.md
-                    -   "Decision Ledger Schema": skills/local/making-decisions/references/decision-ledger-schema.md
-                    -   "Risk Ledger Schema": skills/local/making-decisions/references/risk-ledger-schema.md
-                    -   "NCI Analysis": skills/local/nci-analysis/SKILL.md
-                    -   "NCI Categories": skills/local/nci-analysis/references/categories.md
-                    -   "NCI Examples": skills/local/nci-analysis/references/examples.md
-                    -   "NCI Guidance": skills/local/nci-analysis/references/guidance.md
-                    -   "NCI Scoring": skills/local/nci-analysis/references/scoring.md
-                    -   "NCI Vocabulary": skills/local/nci-analysis/references/vocabulary.md
-                    -   "Skill": skills/local/new-pipeline/SKILL.md
-                    -   "Skill": skills/local/public/architecture-guardian/SKILL.md
-                    -   "Skill": skills/local/py-audit-bot/SKILL.md
-                    -   "Skill": skills/local/py-code-bot/SKILL.md
-                    -   "Skill": skills/local/py-config-bot/SKILL.md
-                    -   "Skill": skills/local/py-debug-bot/SKILL.md
-                    -   "Skill": skills/local/py-doc-bot/SKILL.md
-                    -   "Skill": skills/local/py-plan-bot/SKILL.md
-                    -   "Skill": skills/local/py-review-orchestrator/SKILL.md
-                    -   "Skill": skills/local/py-test-bot/SKILL.md
-                    -   "Skill": skills/local/py-test-swarm/SKILL.md
-                    -   "Repo Config": skills/local/repo-config/SKILL.md
-                    -   "Suggest Users": skills/local/suggest-users/SKILL.md
-                    -   "Synthesizing Pillars": skills/local/synthesizing-pillars/SKILL.md
-                    -   "Synthesis Template": skills/local/synthesizing-pillars/references/synthesis-template.md
-                    -   "L1 Playbook": skills/local/py-test-swarm/references/l1-playbook.md
-                    -   "L2 L3 Task Brief": skills/local/py-test-swarm/references/l2-l3-task-brief.md
-                    -   "Report Templates": skills/local/py-test-swarm/references/report-templates.md
-                    -   "Telemetry And Flaky Db": skills/local/py-test-swarm/references/telemetry-and-flaky-db.md
-                    -   "Skill": skills/local/technical-designer-mermaid/SKILL.md
-                    -   "Patterns": skills/local/technical-designer-mermaid/references/patterns.md
-                    -   "Skill": skills/local/vcr-record/SKILL.md
-                    -   "Skill": skills/local/verify-architecture/SKILL.md
+                    -   "Skills Catalog": 00-project/ai/skills/local/SKILLS-CATALOG.md
+                    -   "Skill": 00-project/ai/skills/local/agent-orchestration/SKILL.md
+                    -   "Capability Discovery": 00-project/ai/skills/local/capability-discovery/SKILL.md
+                    -   "Collecting Evidence": 00-project/ai/skills/local/collecting-evidence/SKILL.md
+                    -   "Evidence Object Schema": 00-project/ai/skills/local/collecting-evidence/references/evidence-object-schema.md
+                    -   "ID Generation Rules": 00-project/ai/skills/local/collecting-evidence/references/id-generation-rules.md
+                    -   "Research Protocols": 00-project/ai/skills/local/collecting-evidence/references/research-protocols.md
+                    -   "Create PR": 00-project/ai/skills/local/create-pr/SKILL.md
+                    -   "Deep Research": 00-project/ai/skills/local/deep-research/SKILL.md
+                    -   "Deep Research Critique Framework": 00-project/ai/skills/local/deep-research/references/critique-framework.md
+                    -   "Deep Research Report Templates": 00-project/ai/skills/local/deep-research/references/report-templates.md
+                    -   "Deep Research Search Patterns": 00-project/ai/skills/local/deep-research/references/search-patterns.md
+                    -   "Deep Research Source Evaluation": 00-project/ai/skills/local/deep-research/references/source-evaluation.md
+                    -   "Skill": 00-project/ai/skills/local/documentation-audit/SKILL.md
+                    -   "Audit Checklist": 00-project/ai/skills/local/documentation-audit/references/audit-checklist.md
+                    -   "Report Template": 00-project/ai/skills/local/documentation-audit/references/report-template.md
+                    -   "Skill": 00-project/ai/skills/local/documentation-cascade-audit/SKILL.md
+                    -   "Generating Constrained Specs": 00-project/ai/skills/local/generating-constrained-specs/SKILL.md
+                    -   "Constrained Specs PRD Template": 00-project/ai/skills/local/generating-constrained-specs/references/prd-template.md
+                    -   "Constrained Specs Architecture Template": 00-project/ai/skills/local/generating-constrained-specs/references/architecture-template.md
+                    -   "Constrained Specs Rules": 00-project/ai/skills/local/generating-constrained-specs/references/constraint-rules.md
+                    -   "Initializing Ledger": 00-project/ai/skills/local/initializing-ledger/SKILL.md
+                    -   "Ledger Brief Template": 00-project/ai/skills/local/initializing-ledger/references/brief-template.md
+                    -   "Ledger Pillar Definitions": 00-project/ai/skills/local/initializing-ledger/references/pillar-definitions.md
+                    -   "Making Decisions": 00-project/ai/skills/local/making-decisions/SKILL.md
+                    -   "Decision Ledger Schema": 00-project/ai/skills/local/making-decisions/references/decision-ledger-schema.md
+                    -   "Risk Ledger Schema": 00-project/ai/skills/local/making-decisions/references/risk-ledger-schema.md
+                    -   "NCI Analysis": 00-project/ai/skills/local/nci-analysis/SKILL.md
+                    -   "NCI Categories": 00-project/ai/skills/local/nci-analysis/references/categories.md
+                    -   "NCI Examples": 00-project/ai/skills/local/nci-analysis/references/examples.md
+                    -   "NCI Guidance": 00-project/ai/skills/local/nci-analysis/references/guidance.md
+                    -   "NCI Scoring": 00-project/ai/skills/local/nci-analysis/references/scoring.md
+                    -   "NCI Vocabulary": 00-project/ai/skills/local/nci-analysis/references/vocabulary.md
+                    -   "Skill": 00-project/ai/skills/local/new-pipeline/SKILL.md
+                    -   "Skill": 00-project/ai/skills/local/public/architecture-guardian/SKILL.md
+                    -   "Skill": 00-project/ai/skills/local/py-audit-bot/SKILL.md
+                    -   "Skill": 00-project/ai/skills/local/py-code-bot/SKILL.md
+                    -   "Skill": 00-project/ai/skills/local/py-config-bot/SKILL.md
+                    -   "Skill": 00-project/ai/skills/local/py-debug-bot/SKILL.md
+                    -   "Skill": 00-project/ai/skills/local/py-doc-bot/SKILL.md
+                    -   "Skill": 00-project/ai/skills/local/py-plan-bot/SKILL.md
+                    -   "Skill": 00-project/ai/skills/local/py-review-orchestrator/SKILL.md
+                    -   "Skill": 00-project/ai/skills/local/py-test-bot/SKILL.md
+                    -   "Skill": 00-project/ai/skills/local/py-test-swarm/SKILL.md
+                    -   "Repo Config": 00-project/ai/skills/local/repo-config/SKILL.md
+                    -   "Suggest Users": 00-project/ai/skills/local/suggest-users/SKILL.md
+                    -   "Synthesizing Pillars": 00-project/ai/skills/local/synthesizing-pillars/SKILL.md
+                    -   "Synthesis Template": 00-project/ai/skills/local/synthesizing-pillars/references/synthesis-template.md
+                    -   "L1 Playbook": 00-project/ai/skills/local/py-test-swarm/references/l1-playbook.md
+                    -   "L2 L3 Task Brief": 00-project/ai/skills/local/py-test-swarm/references/l2-l3-task-brief.md
+                    -   "Report Templates": 00-project/ai/skills/local/py-test-swarm/references/report-templates.md
+                    -   "Telemetry And Flaky Db": 00-project/ai/skills/local/py-test-swarm/references/telemetry-and-flaky-db.md
+                    -   "Skill": 00-project/ai/skills/local/technical-designer-mermaid/SKILL.md
+                    -   "Patterns": 00-project/ai/skills/local/technical-designer-mermaid/references/patterns.md
+                    -   "Skill": 00-project/ai/skills/local/vcr-record/SKILL.md
+                    -   "Skill": 00-project/ai/skills/local/verify-architecture/SKILL.md
