@@ -45,7 +45,7 @@ __all__ = [
 
 
 def push_metrics_to_gateway(
-    job: str = "bioetl",
+    run_label: str = "bioetl",
     pipeline_name: str | None = None,
 ) -> bool:
     """Push current metrics to Prometheus Pushgateway.
@@ -55,7 +55,7 @@ def push_metrics_to_gateway(
     successive pipeline runs don't overwrite each other's metrics.
 
     Args:
-        job: Job label for pushed metrics.
+        run_label: Run label for pushed metrics.
         pipeline_name: Pipeline name for grouping (e.g. "chembl_molecule").
 
     Returns:
@@ -68,7 +68,11 @@ def push_metrics_to_gateway(
     settings = get_settings()
     gateway = getattr(settings, "pushgateway_url", None) or "localhost:9091"
     grouping_key = {"pipeline": pipeline_name} if pipeline_name else {}
-    return _push(gateway=gateway, job=job, grouping_key=grouping_key)
+    return _push(
+        gateway=gateway,
+        run_label=run_label,
+        grouping_key=grouping_key,
+    )
 
 
 def ensure_metrics_server_started() -> bool:

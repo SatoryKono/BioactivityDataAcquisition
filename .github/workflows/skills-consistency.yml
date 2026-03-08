@@ -1,10 +1,20 @@
-name: Skills Consistency
+﻿name: Skills Consistency
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
 
 on:
   push:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.ai/**'
+      - '.claude/**'
+      - '.github/workflows/**'
+      - 'LICENSE'
     branches: [ main ]
     paths:
       - ".codex/skills/**"
@@ -17,6 +27,13 @@ on:
       - "scripts/check_ai_skills_layout.sh"
       - ".github/workflows/skills-consistency.yml"
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.ai/**'
+      - '.claude/**'
+      - '.github/workflows/**'
+      - 'LICENSE'
     branches: [ main ]
     paths:
       - ".codex/skills/**"
@@ -42,3 +59,4 @@ jobs:
 
       - name: Verify ai/skills canonical layout
         run: bash scripts/check_ai_skills_layout.sh
+

@@ -51,13 +51,13 @@ class StreamingBatchProcessor:
                     current_chunk_size
                 )
 
-            chunk = records[i : i + current_chunk_size]
+            batch_slice = records[i : i + current_chunk_size]
             result = await self._transformer.transform_stream(
-                chunk, batch_id, start_index + i
+                batch_slice, batch_id, start_index + i
             )
 
             yield result
-            i += len(chunk)
+            i += len(batch_slice)
 
     def iter_records(self, records: list[BronzeRecord]) -> Iterator[BronzeRecord]:
         """Iterate over records without loading all into memory.

@@ -18,11 +18,5 @@ registries:
     function_length: { }
     class_size: { }
     class_method_count: { }
-    god_object:
-        DependencyCoordinatorService:
-            value: 1
-            owner: '@bioetl-architecture'
-            reason: Temporary governance anchor exemption while owner diversification policy activation is tracked from 2026-Q2.
-            expires_on: '2026-06-30'
-            removal_step: Remove after owner-diversification governance/tests support a zero-debt inventory baseline without anchor exemptions.
+    god_object: { }
     domain_complexity: { }

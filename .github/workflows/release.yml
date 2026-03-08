@@ -1,4 +1,7 @@
-name: Release
+﻿name: Release
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 on:
   release:
@@ -160,3 +163,4 @@ jobs:
           files: |
             dist/*.whl
             dist/*.tar.gz
+

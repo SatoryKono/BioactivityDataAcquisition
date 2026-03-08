@@ -1,4 +1,7 @@
-name: Architecture Docs Nightly
+﻿name: Architecture Docs Nightly
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 on:
   schedule:
@@ -48,3 +51,4 @@ jobs:
             docs/02-architecture/generated/module-dependency-map.json
             /tmp/architecture-docs-status.txt
             /tmp/architecture-docs-summary.txt
+

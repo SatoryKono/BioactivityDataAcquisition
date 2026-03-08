@@ -1,4 +1,7 @@
-name: Quality Debt Weekly
+﻿name: Quality Debt Weekly
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 on:
   schedule:
@@ -43,3 +46,4 @@ jobs:
           path: |
             reports/quality/debt-weekly.json
             reports/quality/debt-weekly.md
+

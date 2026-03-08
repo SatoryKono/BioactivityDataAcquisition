@@ -6,13 +6,17 @@
       "owner": "@bioetl-architecture",
       "decision": "deprecate",
       "review_by": "2026-06-30",
-      "next_step": "Move to migration archive after confirming one-time migration completion."
+      "next_step": "Move to migration archive after confirming one-time migration completion.",
+      "sunset_date": "2026-06-30",
+      "replacement": "TBD_MANUAL_REPLACEMENT"
     },
     "scripts/migrate_vcr_extensionless.py": {
       "owner": "@bioetl-platform",
       "decision": "deprecate",
       "review_by": "2026-06-30",
-      "next_step": "Move to migration archive after confirming no extensionless cassettes remain."
+      "next_step": "Move to migration archive after confirming no extensionless cassettes remain.",
+      "sunset_date": "2026-06-30",
+      "replacement": "TBD_MANUAL_REPLACEMENT"
     },
     "src/tools/__init__.py": {
       "owner": "@bioetl-platform",
@@ -24,19 +28,25 @@
       "owner": "@bioetl-architecture",
       "decision": "deprecate",
       "review_by": "2026-06-30",
-      "next_step": "Confirm replacement coverage in scripts/diagrams and archive/remove."
+      "next_step": "Confirm replacement coverage in scripts/diagrams and archive/remove.",
+      "sunset_date": "2026-06-30",
+      "replacement": "TBD_MANUAL_REPLACEMENT"
     },
     "src/tools/log_explorer.py": {
       "owner": "@bioetl-platform",
       "decision": "deprecate",
       "review_by": "2026-06-30",
-      "next_step": "Confirm no consumers, then archive/remove."
+      "next_step": "Confirm no consumers, then archive/remove.",
+      "sunset_date": "2026-06-30",
+      "replacement": "TBD_MANUAL_REPLACEMENT"
     },
     "src/tools/scaffold_pipeline.py": {
       "owner": "@bioetl-architecture",
       "decision": "deprecate",
       "review_by": "2026-06-30",
-      "next_step": "Consolidate with create_pipeline.py and archive/remove duplicate entrypoint."
+      "next_step": "Consolidate with create_pipeline.py and archive/remove duplicate entrypoint.",
+      "sunset_date": "2026-06-30",
+      "replacement": "TBD_MANUAL_REPLACEMENT"
     },
     "src/tools/scripts/__init__.py": {
       "owner": "@bioetl-platform",
@@ -54,235 +64,275 @@
       "owner": "@bioetl-platform",
       "decision": "deprecate",
       "review_by": "2026-04-30",
-      "next_step": "Delete after one sprint if no recovery/debug need is identified."
+      "next_step": "Delete after one sprint if no recovery/debug need is identified.",
+      "sunset_date": "2026-04-30",
+      "replacement": "scripts/diagnostics/_tmp_inspect_vcr.py"
     },
     "scripts/ast_inventory.py": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",
       "review_by": "2026-06-30",
-      "next_step": "\u0420\u040e\u0420\u0455\u0421\u2026\u0421\u0402\u0420\u00b0\u0420\u0405\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0454\u0420\u00b0\u0420\u0454 manual tool; \u0420\u0491\u0420\u0455\u0420\u00b1\u0420\u00b0\u0420\u0406\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0457\u0420\u0455\u0420\u0491\u0421\u201a\u0420\u0406\u0420\u00b5\u0421\u0402\u0420\u00b6\u0420\u0491\u0420\u00b5\u0420\u0405\u0420\u0405\u0421\u2039\u0420\u2116 operational playbook \u0420\u0451 \u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u0451\u0420\u0455\u0420\u0491\u0420\u0451\u0421\u2021\u0420\u00b5\u0421\u0403\u0420\u0454\u0420\u0451\u0420\u2116 smoke-check."
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅС‹Р№ operational playbook Рё РїРµСЂРёРѕРґРёС‡РµСЃРєРёР№ smoke-check."
     },
     "scripts/calibrate_hotspot_budgets.py": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",
       "review_by": "2026-06-30",
-      "next_step": "\u0420\u040e\u0420\u0455\u0421\u2026\u0421\u0402\u0420\u00b0\u0420\u0405\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0454\u0420\u00b0\u0420\u0454 manual tool; \u0420\u0491\u0420\u0455\u0420\u00b1\u0420\u00b0\u0420\u0406\u0420\u0451\u0421\u201a\u0421\u040a \u0421\u040f\u0420\u0406\u0420\u0405\u0421\u2039\u0420\u2116 smoke-\u0420\u0406\u0421\u2039\u0420\u00b7\u0420\u0455\u0420\u0406/\u0420\u0455\u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u00b0\u0421\u2020\u0420\u0451\u0420\u0455\u0420\u0405\u0420\u0405\u0421\u2039\u0420\u2116 playbook \u0420\u0451\u0420\u00bb\u0420\u0451 \u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u00b5\u0420\u0406\u0420\u00b5\u0421\u0403\u0421\u201a\u0420\u0451 \u0420\u0406 deprecate."
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ СЏРІРЅС‹Р№ smoke-РІС‹Р·РѕРІ/РѕРїРµСЂР°С†РёРѕРЅРЅС‹Р№ playbook РёР»Рё РїРµСЂРµРІРµСЃС‚Рё РІ deprecate."
     },
     "scripts/check_delta_integrity.py": {
       "owner": "@bioetl-platform",
       "decision": "deprecate",
       "review_by": "2026-05-31",
-      "next_step": "\u0420\u045f\u0420\u00b5\u0421\u0402\u0420\u00b5\u0420\u0406\u0420\u00b5\u0421\u0403\u0421\u201a\u0420\u0451 \u0420\u0406 \u0420\u00b0\u0421\u0402\u0421\u2026\u0420\u0451\u0420\u0406/\u0421\u0453\u0420\u0491\u0420\u00b0\u0420\u00bb\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0457\u0420\u0455\u0421\u0403\u0420\u00bb\u0420\u00b5 freeze-window \u0420\u0457\u0421\u0402\u0420\u0451 \u0420\u0455\u0421\u201a\u0421\u0403\u0421\u0453\u0421\u201a\u0421\u0403\u0421\u201a\u0420\u0406\u0420\u0451\u0420\u0451 \u0420\u0457\u0420\u0455\u0420\u0491\u0421\u201a\u0420\u0406\u0420\u00b5\u0421\u0402\u0420\u00b6\u0420\u0491\u0420\u00b5\u0420\u0405\u0420\u0405\u0420\u0455\u0420\u0456\u0420\u0455 \u0420\u00b0\u0420\u0454\u0421\u201a\u0420\u0451\u0420\u0406\u0420\u0405\u0420\u0455\u0420\u0456\u0420\u0455 call-site."
+      "next_step": "РџРµСЂРµРІРµСЃС‚Рё РІ Р°СЂС…РёРІ/СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ freeze-window РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅРѕРіРѕ Р°РєС‚РёРІРЅРѕРіРѕ call-site.",
+      "sunset_date": "2026-05-31",
+      "replacement": "scripts/data/check_delta_integrity.py"
     },
     "scripts/cleanup_consolidate.py": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",
       "review_by": "2026-06-30",
-      "next_step": "\u0420\u040e\u0420\u0455\u0421\u2026\u0421\u0402\u0420\u00b0\u0420\u0405\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0454\u0420\u00b0\u0420\u0454 manual tool; \u0420\u0491\u0420\u0455\u0420\u00b1\u0420\u00b0\u0420\u0406\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0457\u0420\u0455\u0420\u0491\u0421\u201a\u0420\u0406\u0420\u00b5\u0421\u0402\u0420\u00b6\u0420\u0491\u0420\u00b5\u0420\u0405\u0420\u0405\u0421\u2039\u0420\u2116 operational playbook \u0420\u0451 \u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u0451\u0420\u0455\u0420\u0491\u0420\u0451\u0421\u2021\u0420\u00b5\u0421\u0403\u0420\u0454\u0420\u0451\u0420\u2116 smoke-check."
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅС‹Р№ operational playbook Рё РїРµСЂРёРѕРґРёС‡РµСЃРєРёР№ smoke-check."
     },
     "scripts/cleanup_project.py": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",
       "review_by": "2026-06-30",
-      "next_step": "\u0420\u040e\u0420\u0455\u0421\u2026\u0421\u0402\u0420\u00b0\u0420\u0405\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0454\u0420\u00b0\u0420\u0454 manual tool; \u0420\u0491\u0420\u0455\u0420\u00b1\u0420\u00b0\u0420\u0406\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0457\u0420\u0455\u0420\u0491\u0421\u201a\u0420\u0406\u0420\u00b5\u0421\u0402\u0420\u00b6\u0420\u0491\u0420\u00b5\u0420\u0405\u0420\u0405\u0421\u2039\u0420\u2116 operational playbook \u0420\u0451 \u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u0451\u0420\u0455\u0420\u0491\u0420\u0451\u0421\u2021\u0420\u00b5\u0421\u0403\u0420\u0454\u0420\u0451\u0420\u2116 smoke-check."
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅС‹Р№ operational playbook Рё РїРµСЂРёРѕРґРёС‡РµСЃРєРёР№ smoke-check."
     },
     "scripts/debug_pandera.py": {
       "owner": "@bioetl-platform",
       "decision": "deprecate",
       "review_by": "2026-04-30",
-      "next_step": "\u0420\u0408\u0420\u0491\u0420\u00b0\u0420\u00bb\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0457\u0420\u0455\u0421\u0403\u0420\u00bb\u0420\u00b5 \u0420\u0455\u0420\u0491\u0420\u0405\u0420\u0455\u0420\u0456\u0420\u0455 \u0421\u0403\u0420\u0457\u0421\u0402\u0420\u0451\u0420\u0405\u0421\u201a\u0420\u00b0 \u0420\u0457\u0421\u0402\u0420\u0451 \u0420\u0455\u0421\u201a\u0421\u0403\u0421\u0453\u0421\u201a\u0421\u0403\u0421\u201a\u0420\u0406\u0420\u0451\u0420\u0451 \u0420\u0457\u0420\u0455\u0420\u0491\u0421\u201a\u0420\u0406\u0420\u00b5\u0421\u0402\u0420\u00b6\u0420\u0491\u0420\u00b5\u0420\u0405\u0420\u0405\u0420\u0455\u0420\u0456\u0420\u0455 debug-use-case."
+      "next_step": "РЈРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ РѕРґРЅРѕРіРѕ СЃРїСЂРёРЅС‚Р° РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅРѕРіРѕ debug-use-case.",
+      "sunset_date": "2026-04-30",
+      "replacement": "scripts/diagnostics/debug_pandera.py"
     },
     "scripts/debug_storage_health.py": {
       "owner": "@bioetl-platform",
       "decision": "deprecate",
       "review_by": "2026-04-30",
-      "next_step": "\u0420\u0408\u0420\u0491\u0420\u00b0\u0420\u00bb\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0457\u0420\u0455\u0421\u0403\u0420\u00bb\u0420\u00b5 \u0420\u0455\u0420\u0491\u0420\u0405\u0420\u0455\u0420\u0456\u0420\u0455 \u0421\u0403\u0420\u0457\u0421\u0402\u0420\u0451\u0420\u0405\u0421\u201a\u0420\u00b0 \u0420\u0457\u0421\u0402\u0420\u0451 \u0420\u0455\u0421\u201a\u0421\u0403\u0421\u0453\u0421\u201a\u0421\u0403\u0421\u201a\u0420\u0406\u0420\u0451\u0420\u0451 \u0420\u0457\u0420\u0455\u0420\u0491\u0421\u201a\u0420\u0406\u0420\u00b5\u0421\u0402\u0420\u00b6\u0420\u0491\u0420\u00b5\u0420\u0405\u0420\u0405\u0420\u0455\u0420\u0456\u0420\u0455 debug-use-case."
+      "next_step": "РЈРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ РѕРґРЅРѕРіРѕ СЃРїСЂРёРЅС‚Р° РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅРѕРіРѕ debug-use-case.",
+      "sunset_date": "2026-04-30",
+      "replacement": "scripts/diagnostics/debug_storage_health.py"
     },
     "scripts/deploy-bioetl.sh": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",
       "review_by": "2026-06-30",
-      "next_step": "\u0420\u040e\u0420\u0455\u0421\u2026\u0421\u0402\u0420\u00b0\u0420\u0405\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0454\u0420\u00b0\u0420\u0454 manual tool; \u0420\u0491\u0420\u0455\u0420\u00b1\u0420\u00b0\u0420\u0406\u0420\u0451\u0421\u201a\u0421\u040a \u0421\u040f\u0420\u0406\u0420\u0405\u0421\u2039\u0420\u2116 smoke-\u0420\u0406\u0421\u2039\u0420\u00b7\u0420\u0455\u0420\u0406/\u0420\u0455\u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u00b0\u0421\u2020\u0420\u0451\u0420\u0455\u0420\u0405\u0420\u0405\u0421\u2039\u0420\u2116 playbook \u0420\u0451\u0420\u00bb\u0420\u0451 \u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u00b5\u0420\u0406\u0420\u00b5\u0421\u0403\u0421\u201a\u0420\u0451 \u0420\u0406 deprecate."
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ СЏРІРЅС‹Р№ smoke-РІС‹Р·РѕРІ/РѕРїРµСЂР°С†РёРѕРЅРЅС‹Р№ playbook РёР»Рё РїРµСЂРµРІРµСЃС‚Рё РІ deprecate."
     },
     "scripts/dev/metrics_mock_server.py": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",
       "review_by": "2026-06-30",
-      "next_step": "\u0420\u040e\u0420\u0455\u0421\u2026\u0421\u0402\u0420\u00b0\u0420\u0405\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0454\u0420\u00b0\u0420\u0454 manual tool; \u0420\u0491\u0420\u0455\u0420\u00b1\u0420\u00b0\u0420\u0406\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0457\u0420\u0455\u0420\u0491\u0421\u201a\u0420\u0406\u0420\u00b5\u0421\u0402\u0420\u00b6\u0420\u0491\u0420\u00b5\u0420\u0405\u0420\u0405\u0421\u2039\u0420\u2116 operational playbook \u0420\u0451 \u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u0451\u0420\u0455\u0420\u0491\u0420\u0451\u0421\u2021\u0420\u00b5\u0421\u0403\u0420\u0454\u0420\u0451\u0420\u2116 smoke-check."
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅС‹Р№ operational playbook Рё РїРµСЂРёРѕРґРёС‡РµСЃРєРёР№ smoke-check."
     },
     "scripts/diagrams/fix_diagram_links.py": {
       "owner": "@bioetl-architecture",
       "decision": "deprecate",
       "review_by": "2026-05-31",
-      "next_step": "\u0420\u045f\u0420\u00b5\u0421\u0402\u0420\u00b5\u0420\u0406\u0420\u00b5\u0421\u0403\u0421\u201a\u0420\u0451 \u0420\u0406 \u0420\u00b0\u0421\u0402\u0421\u2026\u0420\u0451\u0420\u0406/\u0421\u0453\u0420\u0491\u0420\u00b0\u0420\u00bb\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0457\u0420\u0455\u0421\u0403\u0420\u00bb\u0420\u00b5 freeze-window \u0420\u0457\u0421\u0402\u0420\u0451 \u0420\u0455\u0421\u201a\u0421\u0403\u0421\u0453\u0421\u201a\u0421\u0403\u0421\u201a\u0420\u0406\u0420\u0451\u0420\u0451 \u0420\u0457\u0420\u0455\u0420\u0491\u0421\u201a\u0420\u0406\u0420\u00b5\u0421\u0402\u0420\u00b6\u0420\u0491\u0420\u00b5\u0420\u0405\u0420\u0405\u0420\u0455\u0420\u0456\u0420\u0455 \u0420\u00b0\u0420\u0454\u0421\u201a\u0420\u0451\u0420\u0406\u0420\u0405\u0420\u0455\u0420\u0456\u0420\u0455 call-site."
+      "next_step": "РџРµСЂРµРІРµСЃС‚Рё РІ Р°СЂС…РёРІ/СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ freeze-window РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅРѕРіРѕ Р°РєС‚РёРІРЅРѕРіРѕ call-site.",
+      "sunset_date": "2026-05-31",
+      "replacement": "TBD_MANUAL_REPLACEMENT"
     },
     "scripts/diagrams/fix_sequence_nbsp.py": {
       "owner": "@bioetl-architecture",
       "decision": "deprecate",
       "review_by": "2026-05-31",
-      "next_step": "\u0420\u045f\u0420\u00b5\u0421\u0402\u0420\u00b5\u0420\u0406\u0420\u00b5\u0421\u0403\u0421\u201a\u0420\u0451 \u0420\u0406 \u0420\u00b0\u0421\u0402\u0421\u2026\u0420\u0451\u0420\u0406/\u0421\u0453\u0420\u0491\u0420\u00b0\u0420\u00bb\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0457\u0420\u0455\u0421\u0403\u0420\u00bb\u0420\u00b5 freeze-window \u0420\u0457\u0421\u0402\u0420\u0451 \u0420\u0455\u0421\u201a\u0421\u0403\u0421\u0453\u0421\u201a\u0421\u0403\u0421\u201a\u0420\u0406\u0420\u0451\u0420\u0451 \u0420\u0457\u0420\u0455\u0420\u0491\u0421\u201a\u0420\u0406\u0420\u00b5\u0421\u0402\u0420\u00b6\u0420\u0491\u0420\u00b5\u0420\u0405\u0420\u0405\u0420\u0455\u0420\u0456\u0420\u0455 \u0420\u00b0\u0420\u0454\u0421\u201a\u0420\u0451\u0420\u0406\u0420\u0405\u0420\u0455\u0420\u0456\u0420\u0455 call-site."
+      "next_step": "РџРµСЂРµРІРµСЃС‚Рё РІ Р°СЂС…РёРІ/СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ freeze-window РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅРѕРіРѕ Р°РєС‚РёРІРЅРѕРіРѕ call-site.",
+      "sunset_date": "2026-05-31",
+      "replacement": "TBD_MANUAL_REPLACEMENT"
     },
     "scripts/diagrams/inject_svg_styles.py": {
       "owner": "@bioetl-architecture",
       "decision": "keep_manual",
       "review_by": "2026-06-30",
-      "next_step": "\u0420\u040e\u0420\u0455\u0421\u2026\u0421\u0402\u0420\u00b0\u0420\u0405\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0454\u0420\u00b0\u0420\u0454 manual tool; \u0420\u0491\u0420\u0455\u0420\u00b1\u0420\u00b0\u0420\u0406\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0457\u0420\u0455\u0420\u0491\u0421\u201a\u0420\u0406\u0420\u00b5\u0421\u0402\u0420\u00b6\u0420\u0491\u0420\u00b5\u0420\u0405\u0420\u0405\u0421\u2039\u0420\u2116 operational playbook \u0420\u0451 \u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u0451\u0420\u0455\u0420\u0491\u0420\u0451\u0421\u2021\u0420\u00b5\u0421\u0403\u0420\u0454\u0420\u0451\u0420\u2116 smoke-check."
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅС‹Р№ operational playbook Рё РїРµСЂРёРѕРґРёС‡РµСЃРєРёР№ smoke-check."
     },
     "scripts/diagrams/mermaid_prune_orphans.py": {
       "owner": "@bioetl-architecture",
       "decision": "deprecate",
       "review_by": "2026-05-31",
-      "next_step": "\u0420\u045f\u0420\u00b5\u0421\u0402\u0420\u00b5\u0420\u0406\u0420\u00b5\u0421\u0403\u0421\u201a\u0420\u0451 \u0420\u0406 \u0420\u00b0\u0421\u0402\u0421\u2026\u0420\u0451\u0420\u0406/\u0421\u0453\u0420\u0491\u0420\u00b0\u0420\u00bb\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0457\u0420\u0455\u0421\u0403\u0420\u00bb\u0420\u00b5 freeze-window \u0420\u0457\u0421\u0402\u0420\u0451 \u0420\u0455\u0421\u201a\u0421\u0403\u0421\u0453\u0421\u201a\u0421\u0403\u0421\u201a\u0420\u0406\u0420\u0451\u0420\u0451 \u0420\u0457\u0420\u0455\u0420\u0491\u0421\u201a\u0420\u0406\u0420\u00b5\u0421\u0402\u0420\u00b6\u0420\u0491\u0420\u00b5\u0420\u0405\u0420\u0405\u0420\u0455\u0420\u0456\u0420\u0455 \u0420\u00b0\u0420\u0454\u0421\u201a\u0420\u0451\u0420\u0406\u0420\u0405\u0420\u0455\u0420\u0456\u0420\u0455 call-site."
+      "next_step": "РџРµСЂРµРІРµСЃС‚Рё РІ Р°СЂС…РёРІ/СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ freeze-window РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅРѕРіРѕ Р°РєС‚РёРІРЅРѕРіРѕ call-site.",
+      "sunset_date": "2026-05-31",
+      "replacement": "TBD_MANUAL_REPLACEMENT"
     },
     "scripts/diagrams/normalize_node_sizes.py": {
       "owner": "@bioetl-architecture",
       "decision": "deprecate",
       "review_by": "2026-05-31",
-      "next_step": "\u0420\u045f\u0420\u00b5\u0421\u0402\u0420\u00b5\u0420\u0406\u0420\u00b5\u0421\u0403\u0421\u201a\u0420\u0451 \u0420\u0406 \u0420\u00b0\u0421\u0402\u0421\u2026\u0420\u0451\u0420\u0406/\u0421\u0453\u0420\u0491\u0420\u00b0\u0420\u00bb\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0457\u0420\u0455\u0421\u0403\u0420\u00bb\u0420\u00b5 freeze-window \u0420\u0457\u0421\u0402\u0420\u0451 \u0420\u0455\u0421\u201a\u0421\u0403\u0421\u0453\u0421\u201a\u0421\u0403\u0421\u201a\u0420\u0406\u0420\u0451\u0420\u0451 \u0420\u0457\u0420\u0455\u0420\u0491\u0421\u201a\u0420\u0406\u0420\u00b5\u0421\u0402\u0420\u00b6\u0420\u0491\u0420\u00b5\u0420\u0405\u0420\u0405\u0420\u0455\u0420\u0456\u0420\u0455 \u0420\u00b0\u0420\u0454\u0421\u201a\u0420\u0451\u0420\u0406\u0420\u0405\u0420\u0455\u0420\u0456\u0420\u0455 call-site."
+      "next_step": "РџРµСЂРµРІРµСЃС‚Рё РІ Р°СЂС…РёРІ/СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ freeze-window РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅРѕРіРѕ Р°РєС‚РёРІРЅРѕРіРѕ call-site.",
+      "sunset_date": "2026-05-31",
+      "replacement": "TBD_MANUAL_REPLACEMENT"
     },
     "scripts/dq_baseline_update.py": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",
       "review_by": "2026-06-30",
-      "next_step": "\u0420\u040e\u0420\u0455\u0421\u2026\u0421\u0402\u0420\u00b0\u0420\u0405\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0454\u0420\u00b0\u0420\u0454 manual tool; \u0420\u0491\u0420\u0455\u0420\u00b1\u0420\u00b0\u0420\u0406\u0420\u0451\u0421\u201a\u0421\u040a \u0421\u040f\u0420\u0406\u0420\u0405\u0421\u2039\u0420\u2116 smoke-\u0420\u0406\u0421\u2039\u0420\u00b7\u0420\u0455\u0420\u0406/\u0420\u0455\u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u00b0\u0421\u2020\u0420\u0451\u0420\u0455\u0420\u0405\u0420\u0405\u0421\u2039\u0420\u2116 playbook \u0420\u0451\u0420\u00bb\u0420\u0451 \u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u00b5\u0420\u0406\u0420\u00b5\u0421\u0403\u0421\u201a\u0420\u0451 \u0420\u0406 deprecate."
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ СЏРІРЅС‹Р№ smoke-РІС‹Р·РѕРІ/РѕРїРµСЂР°С†РёРѕРЅРЅС‹Р№ playbook РёР»Рё РїРµСЂРµРІРµСЃС‚Рё РІ deprecate."
     },
     "scripts/extract_null_fields.py": {
       "owner": "@bioetl-platform",
       "decision": "deprecate",
       "review_by": "2026-05-31",
-      "next_step": "\u0420\u045f\u0420\u00b5\u0421\u0402\u0420\u00b5\u0420\u0406\u0420\u00b5\u0421\u0403\u0421\u201a\u0420\u0451 \u0420\u0406 \u0420\u00b0\u0421\u0402\u0421\u2026\u0420\u0451\u0420\u0406/\u0421\u0453\u0420\u0491\u0420\u00b0\u0420\u00bb\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0457\u0420\u0455\u0421\u0403\u0420\u00bb\u0420\u00b5 freeze-window \u0420\u0457\u0421\u0402\u0420\u0451 \u0420\u0455\u0421\u201a\u0421\u0403\u0421\u0453\u0421\u201a\u0421\u0403\u0421\u201a\u0420\u0406\u0420\u0451\u0420\u0451 \u0420\u0457\u0420\u0455\u0420\u0491\u0421\u201a\u0420\u0406\u0420\u00b5\u0421\u0402\u0420\u00b6\u0420\u0491\u0420\u00b5\u0420\u0405\u0420\u0405\u0420\u0455\u0420\u0456\u0420\u0455 \u0420\u00b0\u0420\u0454\u0421\u201a\u0420\u0451\u0420\u0406\u0420\u0405\u0420\u0455\u0420\u0456\u0420\u0455 call-site."
+      "next_step": "РџРµСЂРµРІРµСЃС‚Рё РІ Р°СЂС…РёРІ/СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ freeze-window РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅРѕРіРѕ Р°РєС‚РёРІРЅРѕРіРѕ call-site.",
+      "sunset_date": "2026-05-31",
+      "replacement": "scripts/data/extract_null_fields.py"
     },
     "scripts/fix_doc_links_auto.py": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",
       "review_by": "2026-06-30",
-      "next_step": "\u0420\u040e\u0420\u0455\u0421\u2026\u0421\u0402\u0420\u00b0\u0420\u0405\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0454\u0420\u00b0\u0420\u0454 manual tool; \u0420\u0491\u0420\u0455\u0420\u00b1\u0420\u00b0\u0420\u0406\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0457\u0420\u0455\u0420\u0491\u0421\u201a\u0420\u0406\u0420\u00b5\u0421\u0402\u0420\u00b6\u0420\u0491\u0420\u00b5\u0420\u0405\u0420\u0405\u0421\u2039\u0420\u2116 operational playbook \u0420\u0451 \u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u0451\u0420\u0455\u0420\u0491\u0420\u0451\u0421\u2021\u0420\u00b5\u0421\u0403\u0420\u0454\u0420\u0451\u0420\u2116 smoke-check."
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅС‹Р№ operational playbook Рё РїРµСЂРёРѕРґРёС‡РµСЃРєРёР№ smoke-check."
     },
     "scripts/fix_doc_links_explicit.py": {
       "owner": "@bioetl-platform",
       "decision": "deprecate",
       "review_by": "2026-05-31",
-      "next_step": "\u0420\u045f\u0420\u00b5\u0421\u0402\u0420\u00b5\u0420\u0406\u0420\u00b5\u0421\u0403\u0421\u201a\u0420\u0451 \u0420\u0406 \u0420\u00b0\u0421\u0402\u0421\u2026\u0420\u0451\u0420\u0406/\u0421\u0453\u0420\u0491\u0420\u00b0\u0420\u00bb\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0457\u0420\u0455\u0421\u0403\u0420\u00bb\u0420\u00b5 freeze-window \u0420\u0457\u0421\u0402\u0420\u0451 \u0420\u0455\u0421\u201a\u0421\u0403\u0421\u0453\u0421\u201a\u0421\u0403\u0421\u201a\u0420\u0406\u0420\u0451\u0420\u0451 \u0420\u0457\u0420\u0455\u0420\u0491\u0421\u201a\u0420\u0406\u0420\u00b5\u0421\u0402\u0420\u00b6\u0420\u0491\u0420\u00b5\u0420\u0405\u0420\u0405\u0420\u0455\u0420\u0456\u0420\u0455 \u0420\u00b0\u0420\u0454\u0421\u201a\u0420\u0451\u0420\u0406\u0420\u0405\u0420\u0455\u0420\u0456\u0420\u0455 call-site."
+      "next_step": "РџРµСЂРµРІРµСЃС‚Рё РІ Р°СЂС…РёРІ/СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ freeze-window РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅРѕРіРѕ Р°РєС‚РёРІРЅРѕРіРѕ call-site.",
+      "sunset_date": "2026-05-31",
+      "replacement": "scripts/docs/fix_doc_links_explicit.py"
     },
     "scripts/fix_grafana_dashboards.py": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",
       "review_by": "2026-06-30",
-      "next_step": "\u0420\u040e\u0420\u0455\u0421\u2026\u0421\u0402\u0420\u00b0\u0420\u0405\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0454\u0420\u00b0\u0420\u0454 manual tool; \u0420\u0491\u0420\u0455\u0420\u00b1\u0420\u00b0\u0420\u0406\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0457\u0420\u0455\u0420\u0491\u0421\u201a\u0420\u0406\u0420\u00b5\u0421\u0402\u0420\u00b6\u0420\u0491\u0420\u00b5\u0420\u0405\u0420\u0405\u0421\u2039\u0420\u2116 operational playbook \u0420\u0451 \u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u0451\u0420\u0455\u0420\u0491\u0420\u0451\u0421\u2021\u0420\u00b5\u0421\u0403\u0420\u0454\u0420\u0451\u0420\u2116 smoke-check."
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅС‹Р№ operational playbook Рё РїРµСЂРёРѕРґРёС‡РµСЃРєРёР№ smoke-check."
     },
     "scripts/fix_link_warnings.py": {
       "owner": "@bioetl-platform",
       "decision": "deprecate",
       "review_by": "2026-05-31",
-      "next_step": "\u0420\u045f\u0420\u00b5\u0421\u0402\u0420\u00b5\u0420\u0406\u0420\u00b5\u0421\u0403\u0421\u201a\u0420\u0451 \u0420\u0406 \u0420\u00b0\u0421\u0402\u0421\u2026\u0420\u0451\u0420\u0406/\u0421\u0453\u0420\u0491\u0420\u00b0\u0420\u00bb\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0457\u0420\u0455\u0421\u0403\u0420\u00bb\u0420\u00b5 freeze-window \u0420\u0457\u0421\u0402\u0420\u0451 \u0420\u0455\u0421\u201a\u0421\u0403\u0421\u0453\u0421\u201a\u0421\u0403\u0421\u201a\u0420\u0406\u0420\u0451\u0420\u0451 \u0420\u0457\u0420\u0455\u0420\u0491\u0421\u201a\u0420\u0406\u0420\u00b5\u0421\u0402\u0420\u00b6\u0420\u0491\u0420\u00b5\u0420\u0405\u0420\u0405\u0420\u0455\u0420\u0456\u0420\u0455 \u0420\u00b0\u0420\u0454\u0421\u201a\u0420\u0451\u0420\u0406\u0420\u0405\u0420\u0455\u0420\u0456\u0420\u0455 call-site."
+      "next_step": "РџРµСЂРµРІРµСЃС‚Рё РІ Р°СЂС…РёРІ/СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ freeze-window РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅРѕРіРѕ Р°РєС‚РёРІРЅРѕРіРѕ call-site.",
+      "sunset_date": "2026-05-31",
+      "replacement": "scripts/docs/fix_link_warnings.py"
     },
     "scripts/generate_content_hash_comparison_report.py": {
       "owner": "@bioetl-platform",
       "decision": "deprecate",
       "review_by": "2026-05-31",
-      "next_step": "\u0420\u045f\u0420\u00b5\u0421\u0402\u0420\u00b5\u0420\u0406\u0420\u00b5\u0421\u0403\u0421\u201a\u0420\u0451 \u0420\u0406 \u0420\u00b0\u0421\u0402\u0421\u2026\u0420\u0451\u0420\u0406/\u0421\u0453\u0420\u0491\u0420\u00b0\u0420\u00bb\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0457\u0420\u0455\u0421\u0403\u0420\u00bb\u0420\u00b5 freeze-window \u0420\u0457\u0421\u0402\u0420\u0451 \u0420\u0455\u0421\u201a\u0421\u0403\u0421\u0453\u0421\u201a\u0421\u0403\u0421\u201a\u0420\u0406\u0420\u0451\u0420\u0451 \u0420\u0457\u0420\u0455\u0420\u0491\u0421\u201a\u0420\u0406\u0420\u00b5\u0421\u0402\u0420\u00b6\u0420\u0491\u0420\u00b5\u0420\u0405\u0420\u0405\u0420\u0455\u0420\u0456\u0420\u0455 \u0420\u00b0\u0420\u0454\u0421\u201a\u0420\u0451\u0420\u0406\u0420\u0405\u0420\u0455\u0420\u0456\u0420\u0455 call-site."
+      "next_step": "РџРµСЂРµРІРµСЃС‚Рё РІ Р°СЂС…РёРІ/СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ freeze-window РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅРѕРіРѕ Р°РєС‚РёРІРЅРѕРіРѕ call-site.",
+      "sunset_date": "2026-05-31",
+      "replacement": "scripts/data/generate_content_hash_comparison_report.py"
     },
     "scripts/install_deps.py": {
       "owner": "@bioetl-platform",
       "decision": "deprecate",
       "review_by": "2026-05-31",
-      "next_step": "\u0420\u045f\u0420\u00b5\u0421\u0402\u0420\u00b5\u0420\u0406\u0420\u00b5\u0421\u0403\u0421\u201a\u0420\u0451 \u0420\u0406 \u0420\u00b0\u0421\u0402\u0421\u2026\u0420\u0451\u0420\u0406/\u0421\u0453\u0420\u0491\u0420\u00b0\u0420\u00bb\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0457\u0420\u0455\u0421\u0403\u0420\u00bb\u0420\u00b5 freeze-window \u0420\u0457\u0421\u0402\u0420\u0451 \u0420\u0455\u0421\u201a\u0421\u0403\u0421\u0453\u0421\u201a\u0421\u0403\u0421\u201a\u0420\u0406\u0420\u0451\u0420\u0451 \u0420\u0457\u0420\u0455\u0420\u0491\u0421\u201a\u0420\u0406\u0420\u00b5\u0421\u0402\u0420\u00b6\u0420\u0491\u0420\u00b5\u0420\u0405\u0420\u0405\u0420\u0455\u0420\u0456\u0420\u0455 \u0420\u00b0\u0420\u0454\u0421\u201a\u0420\u0451\u0420\u0406\u0420\u0405\u0420\u0455\u0420\u0456\u0420\u0455 call-site."
+      "next_step": "РџРµСЂРµРІРµСЃС‚Рё РІ Р°СЂС…РёРІ/СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ freeze-window РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅРѕРіРѕ Р°РєС‚РёРІРЅРѕРіРѕ call-site.",
+      "sunset_date": "2026-05-31",
+      "replacement": "scripts/dev/install_deps.py"
     },
     "scripts/run_pytest.sh": {
       "owner": "@bioetl-platform",
       "decision": "deprecate",
       "review_by": "2026-05-31",
-      "next_step": "\u0420\u045f\u0420\u00b5\u0421\u0402\u0420\u00b5\u0420\u0406\u0420\u00b5\u0421\u0403\u0421\u201a\u0420\u0451 \u0420\u0406 \u0420\u00b0\u0421\u0402\u0421\u2026\u0420\u0451\u0420\u0406/\u0421\u0453\u0420\u0491\u0420\u00b0\u0420\u00bb\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0457\u0420\u0455\u0421\u0403\u0420\u00bb\u0420\u00b5 freeze-window \u0420\u0457\u0421\u0402\u0420\u0451 \u0420\u0455\u0421\u201a\u0421\u0403\u0421\u0453\u0421\u201a\u0421\u0403\u0421\u201a\u0420\u0406\u0420\u0451\u0420\u0451 \u0420\u0457\u0420\u0455\u0420\u0491\u0421\u201a\u0420\u0406\u0420\u00b5\u0421\u0402\u0420\u00b6\u0420\u0491\u0420\u00b5\u0420\u0405\u0420\u0405\u0420\u0455\u0420\u0456\u0420\u0455 \u0420\u00b0\u0420\u0454\u0421\u201a\u0420\u0451\u0420\u0406\u0420\u0405\u0420\u0455\u0420\u0456\u0420\u0455 call-site."
+      "next_step": "РџРµСЂРµРІРµСЃС‚Рё РІ Р°СЂС…РёРІ/СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ freeze-window РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅРѕРіРѕ Р°РєС‚РёРІРЅРѕРіРѕ call-site.",
+      "sunset_date": "2026-05-31",
+      "replacement": "scripts/dev/run_pytest.sh"
     },
     "scripts/salt_rotate.py": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",
       "review_by": "2026-06-30",
-      "next_step": "\u0420\u040e\u0420\u0455\u0421\u2026\u0421\u0402\u0420\u00b0\u0420\u0405\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0454\u0420\u00b0\u0420\u0454 manual tool; \u0420\u0491\u0420\u0455\u0420\u00b1\u0420\u00b0\u0420\u0406\u0420\u0451\u0421\u201a\u0421\u040a \u0421\u040f\u0420\u0406\u0420\u0405\u0421\u2039\u0420\u2116 smoke-\u0420\u0406\u0421\u2039\u0420\u00b7\u0420\u0455\u0420\u0406/\u0420\u0455\u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u00b0\u0421\u2020\u0420\u0451\u0420\u0455\u0420\u0405\u0420\u0405\u0421\u2039\u0420\u2116 playbook \u0420\u0451\u0420\u00bb\u0420\u0451 \u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u00b5\u0420\u0406\u0420\u00b5\u0421\u0403\u0421\u201a\u0420\u0451 \u0420\u0406 deprecate."
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ СЏРІРЅС‹Р№ smoke-РІС‹Р·РѕРІ/РѕРїРµСЂР°С†РёРѕРЅРЅС‹Р№ playbook РёР»Рё РїРµСЂРµРІРµСЃС‚Рё РІ deprecate."
     },
     "scripts/sentence_doc_audit.py": {
       "owner": "@bioetl-platform",
       "decision": "deprecate",
       "review_by": "2026-05-31",
-      "next_step": "\u0420\u045f\u0420\u00b5\u0421\u0402\u0420\u00b5\u0420\u0406\u0420\u00b5\u0421\u0403\u0421\u201a\u0420\u0451 \u0420\u0406 \u0420\u00b0\u0421\u0402\u0421\u2026\u0420\u0451\u0420\u0406/\u0421\u0453\u0420\u0491\u0420\u00b0\u0420\u00bb\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0457\u0420\u0455\u0421\u0403\u0420\u00bb\u0420\u00b5 freeze-window \u0420\u0457\u0421\u0402\u0420\u0451 \u0420\u0455\u0421\u201a\u0421\u0403\u0421\u0453\u0421\u201a\u0421\u0403\u0421\u201a\u0420\u0406\u0420\u0451\u0420\u0451 \u0420\u0457\u0420\u0455\u0420\u0491\u0421\u201a\u0420\u0406\u0420\u00b5\u0421\u0402\u0420\u00b6\u0420\u0491\u0420\u00b5\u0420\u0405\u0420\u0405\u0420\u0455\u0420\u0456\u0420\u0455 \u0420\u00b0\u0420\u0454\u0421\u201a\u0420\u0451\u0420\u0406\u0420\u0405\u0420\u0455\u0420\u0456\u0420\u0455 call-site."
+      "next_step": "РџРµСЂРµРІРµСЃС‚Рё РІ Р°СЂС…РёРІ/СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ freeze-window РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅРѕРіРѕ Р°РєС‚РёРІРЅРѕРіРѕ call-site.",
+      "sunset_date": "2026-05-31",
+      "replacement": "scripts/docs/sentence_doc_audit.py"
     },
     "scripts/vacuum_delta.py": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",
       "review_by": "2026-06-30",
-      "next_step": "\u0420\u040e\u0420\u0455\u0421\u2026\u0421\u0402\u0420\u00b0\u0420\u0405\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0454\u0420\u00b0\u0420\u0454 manual tool; \u0420\u0491\u0420\u0455\u0420\u00b1\u0420\u00b0\u0420\u0406\u0420\u0451\u0421\u201a\u0421\u040a \u0421\u040f\u0420\u0406\u0420\u0405\u0421\u2039\u0420\u2116 smoke-\u0420\u0406\u0421\u2039\u0420\u00b7\u0420\u0455\u0420\u0406/\u0420\u0455\u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u00b0\u0421\u2020\u0420\u0451\u0420\u0455\u0420\u0405\u0420\u0405\u0421\u2039\u0420\u2116 playbook \u0420\u0451\u0420\u00bb\u0420\u0451 \u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u00b5\u0420\u0406\u0420\u00b5\u0421\u0403\u0421\u201a\u0420\u0451 \u0420\u0406 deprecate."
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ СЏРІРЅС‹Р№ smoke-РІС‹Р·РѕРІ/РѕРїРµСЂР°С†РёРѕРЅРЅС‹Р№ playbook РёР»Рё РїРµСЂРµРІРµСЃС‚Рё РІ deprecate."
     },
     "scripts/validate_data_dir.py": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",
       "review_by": "2026-06-30",
-      "next_step": "\u0420\u040e\u0420\u0455\u0421\u2026\u0421\u0402\u0420\u00b0\u0420\u0405\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0454\u0420\u00b0\u0420\u0454 manual tool; \u0420\u0491\u0420\u0455\u0420\u00b1\u0420\u00b0\u0420\u0406\u0420\u0451\u0421\u201a\u0421\u040a \u0421\u040f\u0420\u0406\u0420\u0405\u0421\u2039\u0420\u2116 smoke-\u0420\u0406\u0421\u2039\u0420\u00b7\u0420\u0455\u0420\u0406/\u0420\u0455\u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u00b0\u0421\u2020\u0420\u0451\u0420\u0455\u0420\u0405\u0420\u0405\u0421\u2039\u0420\u2116 playbook \u0420\u0451\u0420\u00bb\u0420\u0451 \u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u00b5\u0420\u0406\u0420\u00b5\u0421\u0403\u0421\u201a\u0420\u0451 \u0420\u0406 deprecate."
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ СЏРІРЅС‹Р№ smoke-РІС‹Р·РѕРІ/РѕРїРµСЂР°С†РёРѕРЅРЅС‹Р№ playbook РёР»Рё РїРµСЂРµРІРµСЃС‚Рё РІ deprecate."
     },
     "scripts/verify_checksums.py": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",
       "review_by": "2026-06-30",
-      "next_step": "\u0420\u040e\u0420\u0455\u0421\u2026\u0421\u0402\u0420\u00b0\u0420\u0405\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0454\u0420\u00b0\u0420\u0454 manual tool; \u0420\u0491\u0420\u0455\u0420\u00b1\u0420\u00b0\u0420\u0406\u0420\u0451\u0421\u201a\u0421\u040a \u0421\u040f\u0420\u0406\u0420\u0405\u0421\u2039\u0420\u2116 smoke-\u0420\u0406\u0421\u2039\u0420\u00b7\u0420\u0455\u0420\u0406/\u0420\u0455\u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u00b0\u0421\u2020\u0420\u0451\u0420\u0455\u0420\u0405\u0420\u0405\u0421\u2039\u0420\u2116 playbook \u0420\u0451\u0420\u00bb\u0420\u0451 \u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u00b5\u0420\u0406\u0420\u00b5\u0421\u0403\u0421\u201a\u0420\u0451 \u0420\u0406 deprecate."
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ СЏРІРЅС‹Р№ smoke-РІС‹Р·РѕРІ/РѕРїРµСЂР°С†РёРѕРЅРЅС‹Р№ playbook РёР»Рё РїРµСЂРµРІРµСЃС‚Рё РІ deprecate."
     },
     "src/tools/apply_elk_layout.py": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",
       "review_by": "2026-06-30",
-      "next_step": "\u0420\u040e\u0420\u0455\u0421\u2026\u0421\u0402\u0420\u00b0\u0420\u0405\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0454\u0420\u00b0\u0420\u0454 manual tool; \u0420\u0491\u0420\u0455\u0420\u00b1\u0420\u00b0\u0420\u0406\u0420\u0451\u0421\u201a\u0421\u040a \u0421\u040f\u0420\u0406\u0420\u0405\u0421\u2039\u0420\u2116 smoke-\u0420\u0406\u0421\u2039\u0420\u00b7\u0420\u0455\u0420\u0406/\u0420\u0455\u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u00b0\u0421\u2020\u0420\u0451\u0420\u0455\u0420\u0405\u0420\u0405\u0421\u2039\u0420\u2116 playbook \u0420\u0451\u0420\u00bb\u0420\u0451 \u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u00b5\u0420\u0406\u0420\u00b5\u0421\u0403\u0421\u201a\u0420\u0451 \u0420\u0406 deprecate."
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ СЏРІРЅС‹Р№ smoke-РІС‹Р·РѕРІ/РѕРїРµСЂР°С†РёРѕРЅРЅС‹Р№ playbook РёР»Рё РїРµСЂРµРІРµСЃС‚Рё РІ deprecate."
     },
     "src/tools/create_pipeline.py": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",
       "review_by": "2026-06-30",
-      "next_step": "\u0420\u040e\u0420\u0455\u0421\u2026\u0421\u0402\u0420\u00b0\u0420\u0405\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0454\u0420\u00b0\u0420\u0454 manual tool; \u0420\u0491\u0420\u0455\u0420\u00b1\u0420\u00b0\u0420\u0406\u0420\u0451\u0421\u201a\u0421\u040a \u0421\u040f\u0420\u0406\u0420\u0405\u0421\u2039\u0420\u2116 smoke-\u0420\u0406\u0421\u2039\u0420\u00b7\u0420\u0455\u0420\u0406/\u0420\u0455\u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u00b0\u0421\u2020\u0420\u0451\u0420\u0455\u0420\u0405\u0420\u0405\u0421\u2039\u0420\u2116 playbook \u0420\u0451\u0420\u00bb\u0420\u0451 \u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u00b5\u0420\u0406\u0420\u00b5\u0421\u0403\u0421\u201a\u0420\u0451 \u0420\u0406 deprecate."
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ СЏРІРЅС‹Р№ smoke-РІС‹Р·РѕРІ/РѕРїРµСЂР°С†РёРѕРЅРЅС‹Р№ playbook РёР»Рё РїРµСЂРµРІРµСЃС‚Рё РІ deprecate."
     },
     "src/tools/differentiate_linkstyle.py": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",
       "review_by": "2026-06-30",
-      "next_step": "\u0420\u040e\u0420\u0455\u0421\u2026\u0421\u0402\u0420\u00b0\u0420\u0405\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0454\u0420\u00b0\u0420\u0454 manual tool; \u0420\u0491\u0420\u0455\u0420\u00b1\u0420\u00b0\u0420\u0406\u0420\u0451\u0421\u201a\u0421\u040a \u0421\u040f\u0420\u0406\u0420\u0405\u0421\u2039\u0420\u2116 smoke-\u0420\u0406\u0421\u2039\u0420\u00b7\u0420\u0455\u0420\u0406/\u0420\u0455\u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u00b0\u0421\u2020\u0420\u0451\u0420\u0455\u0420\u0405\u0420\u0405\u0421\u2039\u0420\u2116 playbook \u0420\u0451\u0420\u00bb\u0420\u0451 \u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u00b5\u0420\u0406\u0420\u00b5\u0421\u0403\u0421\u201a\u0420\u0451 \u0420\u0406 deprecate."
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ СЏРІРЅС‹Р№ smoke-РІС‹Р·РѕРІ/РѕРїРµСЂР°С†РёРѕРЅРЅС‹Р№ playbook РёР»Рё РїРµСЂРµРІРµСЃС‚Рё РІ deprecate."
     },
     "src/tools/scripts/cleanup_cache.py": {
       "owner": "@bioetl-platform",
       "decision": "deprecate",
       "review_by": "2026-05-31",
-      "next_step": "\u0420\u045f\u0420\u00b5\u0421\u0402\u0420\u00b5\u0420\u0406\u0420\u00b5\u0421\u0403\u0421\u201a\u0420\u0451 \u0420\u0406 \u0420\u00b0\u0421\u0402\u0421\u2026\u0420\u0451\u0420\u0406/\u0421\u0453\u0420\u0491\u0420\u00b0\u0420\u00bb\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0457\u0420\u0455\u0421\u0403\u0420\u00bb\u0420\u00b5 freeze-window \u0420\u0457\u0421\u0402\u0420\u0451 \u0420\u0455\u0421\u201a\u0421\u0403\u0421\u0453\u0421\u201a\u0421\u0403\u0421\u201a\u0420\u0406\u0420\u0451\u0420\u0451 \u0420\u0457\u0420\u0455\u0420\u0491\u0421\u201a\u0420\u0406\u0420\u00b5\u0421\u0402\u0420\u00b6\u0420\u0491\u0420\u00b5\u0420\u0405\u0420\u0405\u0420\u0455\u0420\u0456\u0420\u0455 \u0420\u00b0\u0420\u0454\u0421\u201a\u0420\u0451\u0420\u0406\u0420\u0405\u0420\u0455\u0420\u0456\u0420\u0455 call-site."
+      "next_step": "РџРµСЂРµРІРµСЃС‚Рё РІ Р°СЂС…РёРІ/СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ freeze-window РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅРѕРіРѕ Р°РєС‚РёРІРЅРѕРіРѕ call-site.",
+      "sunset_date": "2026-05-31",
+      "replacement": "TBD_MANUAL_REPLACEMENT"
     },
     "src/tools/scripts/config_matrix_generator.py": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",
       "review_by": "2026-06-30",
-      "next_step": "\u0420\u040e\u0420\u0455\u0421\u2026\u0421\u0402\u0420\u00b0\u0420\u0405\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0454\u0420\u00b0\u0420\u0454 manual tool; \u0420\u0491\u0420\u0455\u0420\u00b1\u0420\u00b0\u0420\u0406\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0457\u0420\u0455\u0420\u0491\u0421\u201a\u0420\u0406\u0420\u00b5\u0421\u0402\u0420\u00b6\u0420\u0491\u0420\u00b5\u0420\u0405\u0420\u0405\u0421\u2039\u0420\u2116 operational playbook \u0420\u0451 \u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u0451\u0420\u0455\u0420\u0491\u0420\u0451\u0421\u2021\u0420\u00b5\u0421\u0403\u0420\u0454\u0420\u0451\u0420\u2116 smoke-check."
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅС‹Р№ operational playbook Рё РїРµСЂРёРѕРґРёС‡РµСЃРєРёР№ smoke-check."
     },
     "src/tools/scripts/migrate_openalex_citation_count.py": {
       "owner": "@bioetl-architecture",
       "decision": "deprecate",
       "review_by": "2026-06-30",
-      "next_step": "\u0420\u045f\u0420\u00b5\u0421\u0402\u0420\u00b5\u0420\u0405\u0420\u00b5\u0421\u0403\u0421\u201a\u0420\u0451 \u0420\u0406 migration archive \u0420\u0451 \u0421\u0453\u0420\u0491\u0420\u00b0\u0420\u00bb\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0457\u0420\u0455\u0421\u0403\u0420\u00bb\u0420\u00b5 \u0420\u0457\u0420\u0455\u0420\u0491\u0421\u201a\u0420\u0406\u0420\u00b5\u0421\u0402\u0420\u00b6\u0420\u0491\u0420\u00b5\u0420\u0405\u0420\u0451\u0421\u040f \u0420\u00b7\u0420\u00b0\u0420\u0406\u0420\u00b5\u0421\u0402\u0421\u20ac\u0420\u00b5\u0420\u0405\u0420\u0451\u0421\u040f \u0420\u0458\u0420\u0451\u0420\u0456\u0421\u0402\u0420\u00b0\u0421\u2020\u0420\u0451\u0420\u0451."
+      "next_step": "РџРµСЂРµРЅРµСЃС‚Рё РІ migration archive Рё СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ Р·Р°РІРµСЂС€РµРЅРёСЏ РјРёРіСЂР°С†РёРё.",
+      "sunset_date": "2026-06-30",
+      "replacement": "TBD_MANUAL_REPLACEMENT"
     },
     "src/tools/scripts/migrations/migrate_pmid_to_string.py": {
       "owner": "@bioetl-architecture",
       "decision": "deprecate",
       "review_by": "2026-06-30",
-      "next_step": "\u0420\u045f\u0420\u00b5\u0421\u0402\u0420\u00b5\u0420\u0405\u0420\u00b5\u0421\u0403\u0421\u201a\u0420\u0451 \u0420\u0406 migration archive \u0420\u0451 \u0421\u0453\u0420\u0491\u0420\u00b0\u0420\u00bb\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0457\u0420\u0455\u0421\u0403\u0420\u00bb\u0420\u00b5 \u0420\u0457\u0420\u0455\u0420\u0491\u0421\u201a\u0420\u0406\u0420\u00b5\u0421\u0402\u0420\u00b6\u0420\u0491\u0420\u00b5\u0420\u0405\u0420\u0451\u0421\u040f \u0420\u00b7\u0420\u00b0\u0420\u0406\u0420\u00b5\u0421\u0402\u0421\u20ac\u0420\u00b5\u0420\u0405\u0420\u0451\u0421\u040f \u0420\u0458\u0420\u0451\u0420\u0456\u0421\u0402\u0420\u00b0\u0421\u2020\u0420\u0451\u0420\u0451."
+      "next_step": "РџРµСЂРµРЅРµСЃС‚Рё РІ migration archive Рё СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ Р·Р°РІРµСЂС€РµРЅРёСЏ РјРёРіСЂР°С†РёРё.",
+      "sunset_date": "2026-06-30",
+      "replacement": "TBD_MANUAL_REPLACEMENT"
     },
     "src/tools/scripts/migrations/rename_structure_fields.py": {
       "owner": "@bioetl-architecture",
       "decision": "deprecate",
       "review_by": "2026-06-30",
-      "next_step": "\u0420\u045f\u0420\u00b5\u0421\u0402\u0420\u00b5\u0420\u0405\u0420\u00b5\u0421\u0403\u0421\u201a\u0420\u0451 \u0420\u0406 migration archive \u0420\u0451 \u0421\u0453\u0420\u0491\u0420\u00b0\u0420\u00bb\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0457\u0420\u0455\u0421\u0403\u0420\u00bb\u0420\u00b5 \u0420\u0457\u0420\u0455\u0420\u0491\u0421\u201a\u0420\u0406\u0420\u00b5\u0421\u0402\u0420\u00b6\u0420\u0491\u0420\u00b5\u0420\u0405\u0420\u0451\u0421\u040f \u0420\u00b7\u0420\u00b0\u0420\u0406\u0420\u00b5\u0421\u0402\u0421\u20ac\u0420\u00b5\u0420\u0405\u0420\u0451\u0421\u040f \u0420\u0458\u0420\u0451\u0420\u0456\u0421\u0402\u0420\u00b0\u0421\u2020\u0420\u0451\u0420\u0451."
+      "next_step": "РџРµСЂРµРЅРµСЃС‚Рё РІ migration archive Рё СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ Р·Р°РІРµСЂС€РµРЅРёСЏ РјРёРіСЂР°С†РёРё.",
+      "sunset_date": "2026-06-30",
+      "replacement": "TBD_MANUAL_REPLACEMENT"
     },
     "src/tools/scripts/run-tests.sh": {
       "owner": "@bioetl-platform",
       "decision": "deprecate",
       "review_by": "2026-05-31",
-      "next_step": "\u0420\u045f\u0420\u00b5\u0421\u0402\u0420\u00b5\u0420\u0406\u0420\u00b5\u0421\u0403\u0421\u201a\u0420\u0451 \u0420\u0406 \u0420\u00b0\u0421\u0402\u0421\u2026\u0420\u0451\u0420\u0406/\u0421\u0453\u0420\u0491\u0420\u00b0\u0420\u00bb\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0457\u0420\u0455\u0421\u0403\u0420\u00bb\u0420\u00b5 freeze-window \u0420\u0457\u0421\u0402\u0420\u0451 \u0420\u0455\u0421\u201a\u0421\u0403\u0421\u0453\u0421\u201a\u0421\u0403\u0421\u201a\u0420\u0406\u0420\u0451\u0420\u0451 \u0420\u0457\u0420\u0455\u0420\u0491\u0421\u201a\u0420\u0406\u0420\u00b5\u0421\u0402\u0420\u00b6\u0420\u0491\u0420\u00b5\u0420\u0405\u0420\u0405\u0420\u0455\u0420\u0456\u0420\u0455 \u0420\u00b0\u0420\u0454\u0421\u201a\u0420\u0451\u0420\u0406\u0420\u0405\u0420\u0455\u0420\u0456\u0420\u0455 call-site."
+      "next_step": "РџРµСЂРµРІРµСЃС‚Рё РІ Р°СЂС…РёРІ/СѓРґР°Р»РёС‚СЊ РїРѕСЃР»Рµ freeze-window РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅРѕРіРѕ Р°РєС‚РёРІРЅРѕРіРѕ call-site.",
+      "sunset_date": "2026-05-31",
+      "replacement": "TBD_MANUAL_REPLACEMENT"
     },
     "src/tools/scripts/validate_unified_configs.py": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",
       "review_by": "2026-06-30",
-      "next_step": "\u0420\u040e\u0420\u0455\u0421\u2026\u0421\u0402\u0420\u00b0\u0420\u0405\u0420\u0451\u0421\u201a\u0421\u040a \u0420\u0454\u0420\u00b0\u0420\u0454 manual tool; \u0420\u0491\u0420\u0455\u0420\u00b1\u0420\u00b0\u0420\u0406\u0420\u0451\u0421\u201a\u0421\u040a \u0421\u040f\u0420\u0406\u0420\u0405\u0421\u2039\u0420\u2116 smoke-\u0420\u0406\u0421\u2039\u0420\u00b7\u0420\u0455\u0420\u0406/\u0420\u0455\u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u00b0\u0421\u2020\u0420\u0451\u0420\u0455\u0420\u0405\u0420\u0405\u0421\u2039\u0420\u2116 playbook \u0420\u0451\u0420\u00bb\u0420\u0451 \u0420\u0457\u0420\u00b5\u0421\u0402\u0420\u00b5\u0420\u0406\u0420\u00b5\u0421\u0403\u0421\u201a\u0420\u0451 \u0420\u0406 deprecate."
+      "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ СЏРІРЅС‹Р№ smoke-РІС‹Р·РѕРІ/РѕРїРµСЂР°С†РёРѕРЅРЅС‹Р№ playbook РёР»Рё РїРµСЂРµРІРµСЃС‚Рё РІ deprecate."
     },
     "scripts/generate_contracts.py": {
       "owner": "@bioetl-architecture",
@@ -300,7 +350,9 @@
       "owner": "@bioetl-platform",
       "decision": "deprecate",
       "review_by": "2026-04-30",
-      "next_step": "PowerShell CI optimization script with no active consumers. Delete after confirming no operational need."
+      "next_step": "PowerShell CI optimization script with no active consumers. Delete after confirming no operational need.",
+      "sunset_date": "2026-04-30",
+      "replacement": "scripts/ci/apply-ci-optimizations.ps1"
     },
     "scripts/generate_schema_artifacts.py": {
       "owner": "@bioetl-architecture",

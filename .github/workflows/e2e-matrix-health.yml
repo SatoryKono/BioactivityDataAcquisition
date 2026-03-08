@@ -1,4 +1,7 @@
-name: E2E Matrix Health
+﻿name: E2E Matrix Health
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
     contents: read
@@ -197,3 +200,4 @@ jobs:
                         reports/e2e/pytest_exit_code_live.txt
                     if-no-files-found: warn
                     retention-days: 14
+

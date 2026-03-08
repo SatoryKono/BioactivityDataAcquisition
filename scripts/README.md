@@ -34,6 +34,8 @@ Rules:
   - `python scripts/repo/check_scripts_inventory.py --update --manifest configs/quality/scripts_inventory_manifest.json`
 - Validate lifecycle coverage for non-active scripts:
   - `python scripts/repo/check_scripts_inventory.py --check-lifecycle --forbid-evaluate-active --lifecycle-registry configs/quality/scripts_lifecycle_registry.json`
+- Validate catalog governance policy:
+  - `python scripts/repo/check_scripts_catalog.py --catalog scripts/catalog.yaml`
 
 ## Launcher
 

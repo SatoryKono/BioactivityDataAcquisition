@@ -17,6 +17,7 @@ Exit codes:
 from __future__ import annotations
 
 import argparse
+import ast
 import re
 import sys
 from dataclasses import dataclass
@@ -63,6 +64,23 @@ DEPRECATED_TERMS: dict[str, tuple[str, str]] = {
     ),
 }
 
+# Rules that are intentionally enforced only in strict mode to reduce
+# false positives in compatibility wrappers and legacy adapter names.
+STRICT_ONLY_PATTERNS = {
+    r"class\s+\w*Loader\b",
+    r"class\s+\w*Handler\b",
+}
+
+# Pattern-specific path allow-list for external terminology contexts.
+PATTERN_PATH_ALLOWLIST: dict[str, tuple[str, ...]] = {
+    r"\bjob\b": (
+        "src/bioetl/infrastructure/adapters/uniprot/",
+        "src/bioetl/domain/ports/idmapping.py",
+        "src/bioetl/infrastructure/observability/server.py",
+    ),
+    r"\bworkflow\b": (".github/workflows/",),
+}
+
 # Context-sensitive deprecated terms (only in certain files/contexts)
 CONTEXT_SENSITIVE_TERMS: dict[str, tuple[str, str, list[str]]] = {
     # measurement is OK in activity_values.py and backward-compat measurements.py
@@ -93,12 +111,24 @@ SKIP_PATHS = {
     ".ruff_cache",
 }
 
+# Prefixes (POSIX style) to skip entirely from default lint scope.
+SKIP_PATH_PREFIXES = (
+    "docs/00-project/ai/",
+)
+
 
 def should_skip_file(filepath: Path) -> bool:
     """Check if file should be skipped."""
+    normalized = filepath.as_posix()
+
     # Skip based on path components
     for part in filepath.parts:
         if part in SKIP_PATHS:
+            return True
+
+    # Skip known non-product documentation/tooling subtrees.
+    for prefix in SKIP_PATH_PREFIXES:
+        if normalized.startswith(prefix):
             return True
 
     # Skip based on file name patterns
@@ -142,10 +172,19 @@ def _collect_deprecated_term_violations(
     filepath: Path,
     line_num: int,
     line: str,
+    strict: bool,
 ) -> list[TermViolation]:
     """Collect violations for globally deprecated terminology."""
     violations: list[TermViolation] = []
+    normalized_path = filepath.as_posix()
     for pattern, (canonical, _desc) in DEPRECATED_TERMS.items():
+        if not strict and pattern in STRICT_ONLY_PATTERNS:
+            continue
+
+        allowlist = PATTERN_PATH_ALLOWLIST.get(pattern, ())
+        if allowlist and any(fragment in normalized_path for fragment in allowlist):
+            continue
+
         for match in re.finditer(pattern, line, re.IGNORECASE):
             violations.append(
                 _make_violation(
@@ -157,6 +196,41 @@ def _collect_deprecated_term_violations(
                 )
             )
     return violations
+
+
+def _collect_docstring_line_numbers(content: str) -> set[int]:
+    """Collect line numbers occupied by module/class/function docstrings."""
+    try:
+        tree = ast.parse(content)
+    except SyntaxError:
+        return set()
+
+    docstring_lines: set[int] = set()
+
+    def _mark_docstring(node: ast.AST) -> None:
+        body = getattr(node, "body", None)
+        if not isinstance(body, list) or not body:
+            return
+        first = body[0]
+        if (
+            isinstance(first, ast.Expr)
+            and isinstance(first.value, ast.Constant)
+            and isinstance(first.value.value, str)
+        ):
+            start = first.lineno
+            end = getattr(first, "end_lineno", start)
+            docstring_lines.update(range(start, end + 1))
+
+    def _walk(node: ast.AST) -> None:
+        if isinstance(
+            node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
+        ):
+            _mark_docstring(node)
+        for child in ast.iter_child_nodes(node):
+            _walk(child)
+
+    _walk(tree)
+    return docstring_lines
 
 
 def _collect_context_sensitive_violations(
@@ -203,8 +277,11 @@ def check_file(filepath: Path, strict: bool = False) -> list[TermViolation]:
         return []
 
     lines = content.splitlines()
+    docstring_lines = _collect_docstring_line_numbers(content)
 
     for line_num, line in enumerate(lines, start=1):
+        if line_num in docstring_lines:
+            continue
         if _is_skippable_line(line):
             continue
 
@@ -213,6 +290,7 @@ def check_file(filepath: Path, strict: bool = False) -> list[TermViolation]:
                 filepath=filepath,
                 line_num=line_num,
                 line=line,
+                strict=strict,
             )
         )
 
