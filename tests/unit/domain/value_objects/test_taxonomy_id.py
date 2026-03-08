@@ -43,9 +43,9 @@ class TestTaxonomyId:
 
     def test_known_organisms(self) -> None:
         """Test well-known NCBI taxonomy IDs."""
-        assert TaxonomyId(9606).value == 9606   # Homo sapiens
+        assert TaxonomyId(9606).value == 9606  # Homo sapiens
         assert TaxonomyId(10090).value == 10090  # Mus musculus
-        assert TaxonomyId(562).value == 562      # E. coli
+        assert TaxonomyId(562).value == 562  # E. coli
 
     def test_minimum_valid_value(self) -> None:
         """Test minimum valid taxonomy ID (1)."""
