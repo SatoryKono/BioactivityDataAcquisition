@@ -148,7 +148,12 @@ class TextNormalizationService:
 
 def _strip_html_and_decode_entities(text: str) -> str:
     """Strip HTML tags and decode HTML entities."""
-    return unescape(_HTML_TAG_PATTERN.sub("", text))
+    # Optimization: Conditionally bypass regex and unescape if characters are absent
+    if "<" in text:
+        text = _HTML_TAG_PATTERN.sub("", text)
+    if "&" in text:
+        text = unescape(text)
+    return text
 
 
 def _remove_control_characters(text: str) -> str:
@@ -163,4 +168,5 @@ def _normalize_unicode_nfc(text: str) -> str:
 
 def _collapse_whitespace(text: str) -> str:
     """Collapse any whitespace sequence into a single space."""
-    return _WHITESPACE_PATTERN.sub(" ", text)
+    # Optimization: str.split/join is faster than regex for whitespace collapse
+    return " ".join(text.split())
