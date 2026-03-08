@@ -113,11 +113,11 @@ class ChemblFetchResilienceMixin:
         context: str = "fetch",
     ) -> None:
         """Handle errors with unified classification."""
-        failure_count = self.http_client.circuit_breaker.get_failure_count()
+        failure_count = self._http_client.circuit_breaker.get_failure_count()
         health_status = self._get_health_status()
 
         error_context = {
-            "circuit_breaker_state": self.http_client.circuit_breaker.get_state().value,
+            "circuit_breaker_state": self._http_client.circuit_breaker.get_state().value,
             "circuit_breaker_failures": failure_count,
             "health_status": health_status.value,
         }
@@ -146,7 +146,7 @@ class ChemblFetchResilienceMixin:
         try:
             start_time = time.perf_counter()
             with self._adapter_metrics.measure_request(f"/{entity_type}/{record_id}"):
-                response = await self.http_client.get(direct_url, params=params)
+                response = await self._http_client.get(direct_url, params=params)
             duration_ms = (time.perf_counter() - start_time) * 1000
 
             with contextlib.suppress(Exception):
@@ -154,7 +154,7 @@ class ChemblFetchResilienceMixin:
 
             data = response.json()
             if isinstance(data, dict) and not data.get("page_meta"):
-                self.logger.info(
+                self._logger.info(
                     "direct_endpoint_fallback_success",
                     entity_type=entity_type,
                     record_id=record_id,
@@ -162,7 +162,7 @@ class ChemblFetchResilienceMixin:
                 return data
             return None
         except CHEMBL_ADAPTER_ERRORS as error:
-            self.logger.warning(
+            self._logger.warning(
                 "direct_endpoint_fallback_failed",
                 entity_type=entity_type,
                 record_id=record_id,
@@ -215,7 +215,7 @@ class ChemblFetchResilienceMixin:
             retry_error=error,
             on_split=lambda first_half, second_half, retry_error: (
                 _log_batch_reduction_retry(
-                    self.logger,
+                    self._logger,
                     self.provider_name,
                     entity_type=entity_type,
                     filter_field=filter_field,
@@ -285,7 +285,7 @@ class ChemblFetchResilienceMixin:
         direct_record = await self._fetch_single_record_direct(entity_type, single_id)
         if direct_record is None:
             _log_single_id_failure(
-                self.logger,
+                self._logger,
                 self.provider_name,
                 entity_type,
                 filter_field,

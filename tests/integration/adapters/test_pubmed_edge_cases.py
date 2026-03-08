@@ -60,7 +60,7 @@ class TestPubMedEdgeCases:
                 return_value=Response(200, json=mock_search_json)
             )
 
-            async with pubmed_adapter.http_client:
+            async with pubmed_adapter._http_client:
                 records = []
                 async for record in pubmed_adapter.fetch(
                     "publication", query="xyznonexistent12345", limit=10
@@ -95,7 +95,7 @@ class TestPubMedEdgeCases:
                 return_value=Response(200, text=mock_xml)
             )
 
-            async with pubmed_adapter.http_client:
+            async with pubmed_adapter._http_client:
                 records = []
                 async for record in pubmed_adapter.fetch(
                     "publication", query="test", limit=1
@@ -139,7 +139,7 @@ class TestPubMedEdgeCases:
                 return_value=Response(200, text=mock_xml)
             )
 
-            async with pubmed_adapter.http_client:
+            async with pubmed_adapter._http_client:
                 records = []
                 async for record in pubmed_adapter.fetch(
                     "publication", query="test", limit=1
@@ -181,7 +181,7 @@ class TestPubMedEdgeCases:
                 return_value=Response(200, text=mock_xml)
             )
 
-            async with pubmed_adapter.http_client:
+            async with pubmed_adapter._http_client:
                 records = []
                 async for record in pubmed_adapter.fetch(
                     "publication", query="test", limit=1
@@ -228,7 +228,7 @@ class TestPubMedEdgeCases:
                 return_value=Response(200, text=mock_xml)
             )
 
-            async with pubmed_adapter.http_client:
+            async with pubmed_adapter._http_client:
                 records = []
                 async for record in pubmed_adapter.fetch(
                     "publication", query="test", limit=1
@@ -264,7 +264,7 @@ class TestPubMedEdgeCases:
                 return_value=Response(200, text=mock_xml)
             )
 
-            async with pubmed_adapter.http_client:
+            async with pubmed_adapter._http_client:
                 records = []
                 async for record in pubmed_adapter.fetch(
                     "publication", query="test", limit=1
@@ -307,7 +307,7 @@ class TestPubMedEdgeCases:
                 return_value=Response(200, text=mock_xml)
             )
 
-            async with pubmed_adapter.http_client:
+            async with pubmed_adapter._http_client:
                 records = []
                 async for record in pubmed_adapter.fetch(
                     "publication", query="test", limit=1
@@ -358,7 +358,7 @@ class TestPubMedEdgeCases:
                 return_value=Response(200, text=mock_xml)
             )
 
-            async with pubmed_adapter.http_client:
+            async with pubmed_adapter._http_client:
                 records = []
                 async for record in pubmed_adapter.fetch(
                     "publication", query="test", limit=3
@@ -378,7 +378,7 @@ class TestPubMedEdgeCases:
             # Health check uses einfo.fcgi endpoint (lightweight DB info)
             respx_mock.get("einfo.fcgi").mock(return_value=Response(500, text="Error"))
 
-            async with pubmed_adapter.http_client:
+            async with pubmed_adapter._http_client:
                 status = await pubmed_adapter.health_check()
                 # On error, fallback status is DEGRADED (not UNHEALTHY)
                 assert status in (HealthStatus.UNHEALTHY, HealthStatus.DEGRADED)
@@ -412,7 +412,7 @@ class TestPubMedRateLimiting:
                 return_value=Response(200, text=mock_xml)
             )
 
-            async with pubmed_adapter.http_client:
+            async with pubmed_adapter._http_client:
                 records = []
                 async for record in pubmed_adapter.fetch(
                     "publication", query="test", limit=1
@@ -456,7 +456,7 @@ class TestPubMedXMLParsing:
                 return_value=Response(200, text=mock_xml)
             )
 
-            async with pubmed_adapter.http_client:
+            async with pubmed_adapter._http_client:
                 records = []
                 async for record in pubmed_adapter.fetch(
                     "publication", query="test", limit=1
@@ -502,7 +502,7 @@ class TestPubMedXMLParsing:
                 return_value=Response(200, text=mock_xml)
             )
 
-            async with pubmed_adapter.http_client:
+            async with pubmed_adapter._http_client:
                 records = []
                 async for record in pubmed_adapter.fetch(
                     "publication", query="test", limit=1

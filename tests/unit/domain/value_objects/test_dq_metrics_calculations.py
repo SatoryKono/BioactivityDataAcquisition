@@ -7,6 +7,7 @@ compute_numeric_stats, is_valid_numeric, extract_numeric_values.
 
 from __future__ import annotations
 
+import math
 
 import pytest
 

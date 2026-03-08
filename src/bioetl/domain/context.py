@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from bioetl.domain.context_cached_bronze import CachedBronzeContext
-from bioetl.domain.context_filtering import InputFilterContext, VacuumConfig
+from bioetl.domain.context_filtering import InputFilterContext, VacuumSettings
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import ExecutionContext, RunID, RunType
 
@@ -16,7 +16,7 @@ __all__ = [
     "InputFilterContext",
     "PipelineContext",
     "PipelineRunContext",
-    "VacuumConfig",
+    "VacuumSettings",
 ]
 
 
@@ -91,7 +91,7 @@ class PipelineRunContext:
 
     resume: bool = False
     dry_run: bool = False
-    vacuum: VacuumConfig = field(default_factory=VacuumConfig)
+    vacuum: VacuumSettings = field(default_factory=VacuumSettings)
     input_filter: InputFilterContext = field(
         default_factory=InputFilterContext.disabled
     )

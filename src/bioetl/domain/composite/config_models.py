@@ -127,20 +127,17 @@ class EnricherConfig:
         _coerce_to_tuple(self, "join_keys")
         if isinstance(self.fallback_strategy, str):
             object.__setattr__(
-                self,
-                "fallback_strategy",
+                self, "fallback_strategy",
                 FallbackStrategy.from_string(self.fallback_strategy),
             )
         if isinstance(self.cardinality, str):
             object.__setattr__(
-                self,
-                "cardinality",
+                self, "cardinality",
                 EnricherCardinality.from_string(self.cardinality),
             )
         if isinstance(self.aggregation, dict):
             object.__setattr__(
-                self,
-                "aggregation",
+                self, "aggregation",
                 AggregationConfig(**self.aggregation),
             )
         self._validate()
@@ -182,7 +179,9 @@ def _validate_cross_validation_thresholds(
     quarantine_threshold: int,
 ) -> None:
     if warning_threshold < 1:
-        raise ValueError(f"warning_threshold must be >= 1, got {warning_threshold}")
+        raise ValueError(
+            f"warning_threshold must be >= 1, got {warning_threshold}"
+        )
     if error_threshold < 2:
         raise ValueError(f"error_threshold must be >= 2, got {error_threshold}")
     if warning_threshold >= error_threshold:

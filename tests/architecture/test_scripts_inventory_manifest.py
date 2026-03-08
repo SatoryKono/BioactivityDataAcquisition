@@ -25,7 +25,8 @@ def test_scripts_inventory_manifest_exists_and_has_required_keys() -> None:
     payload = json.loads(manifest_path.read_text(encoding="utf-8"))
     required_keys = {"schema_version", "generated_at", "summary", "scripts"}
     assert required_keys.issubset(payload.keys()), (
-        f"Missing required manifest keys: {sorted(required_keys - set(payload.keys()))}"
+        "Missing required manifest keys: "
+        f"{sorted(required_keys - set(payload.keys()))}"
     )
 
     summary = payload["summary"]

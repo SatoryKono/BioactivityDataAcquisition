@@ -10,11 +10,11 @@ guard). This enables composition-root injection via AdapterHelpersFactory.
 Allowed pattern (conditional fallback):
     self._error_handler = (
         error_handler if error_handler is not None
-        else ErrorService(logger, metrics=self.metrics)
+        else ErrorService(logger, metrics=self._metrics)
     )
 
 Forbidden pattern (unconditional):
-    self._error_handler = ErrorService(logger, metrics=self.metrics)
+    self._error_handler = ErrorService(logger, metrics=self._metrics)
 
 See ai-selfreview-rules.md §2 Anti-Patterns (AP-001, DI-001).
 """

@@ -102,7 +102,7 @@ async def test_fetch_publications(pubmed_adapter: PubMedAdapter):
         # Mock fetch
         respx_mock.get("efetch.fcgi").mock(return_value=Response(200, text=mock_xml))
 
-        async with pubmed_adapter.http_client:
+        async with pubmed_adapter._http_client:
             records = []
             async for record in pubmed_adapter.fetch(
                 "publication", query="crispr", limit=2
@@ -136,7 +136,7 @@ async def test_health_check(pubmed_adapter: PubMedAdapter):
             return_value=Response(200, json=mock_einfo_json)
         )
 
-        async with pubmed_adapter.http_client:
+        async with pubmed_adapter._http_client:
             status = await pubmed_adapter.health_check()
             # Under high local load, latency-based probe may report DEGRADED.
             assert status in (HealthStatus.HEALTHY, HealthStatus.DEGRADED)

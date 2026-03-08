@@ -53,7 +53,6 @@ TPipeline = TypeVar("TPipeline", bound="BasePipeline")
 
 __all__ = ["GenericPipelineFactory", "assemble_runner", "create_pipeline_factory"]
 
-
 def _extract_entity_type(pipeline_name: str) -> str | None:
     """Extract entity_type suffix (e.g. 'chembl_activity' -> 'activity')."""
     return pipeline_name.split("_")[-1] if "_" in pipeline_name else None
@@ -87,9 +86,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         self.pandera_silver_schema = pandera_silver_schema
         self.transformer_class = transformer_class
         # Use custom creator or look up from registry
-        self._create_data_source = data_source_creator or DataSourceRegistry.get(
-            provider
-        )
+        self._create_data_source = data_source_creator or DataSourceRegistry.get(provider)
 
     def create_transformer(
         self,
@@ -283,11 +280,8 @@ class GenericPipelineFactory(Generic[TPipeline]):
             observability=observability,
             silver_schema=self.silver_schema,
             gold_schema=self.gold_schema,
-            strict_gold_validation=(
-                runtime.strict_gold_validation
-                if settings.env != "prod" or settings.test_mode
-                else True
-            ),
+            strict_gold_validation=(runtime.strict_gold_validation
+                                   if settings.env != "prod" or settings.test_mode else True),
             yaml_config=yaml_config,
         )
 

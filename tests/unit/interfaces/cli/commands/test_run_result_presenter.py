@@ -34,30 +34,22 @@ def _make_result(**kwargs: object) -> RunResult:
 class TestEchoRunResultSuccess:
     """Tests for PipelineRunResult.SUCCESS path."""
 
-    def test_success_prints_run_id_prefix(
-        self, capsys: pytest.CaptureFixture[str]
-    ) -> None:
+    def test_success_prints_run_id_prefix(self, capsys: pytest.CaptureFixture[str]) -> None:
         """run_id is truncated to 8 chars in the success message."""
-        result = _make_result(
-            run_id="abcdef1234567890", status=PipelineRunResult.SUCCESS
-        )
+        result = _make_result(run_id="abcdef1234567890", status=PipelineRunResult.SUCCESS)
         echo_run_result(result)
         out = capsys.readouterr().out
         assert "abcdef12" in out
         assert "Pipeline completed successfully" in out
 
-    def test_success_short_run_id_not_truncated(
-        self, capsys: pytest.CaptureFixture[str]
-    ) -> None:
+    def test_success_short_run_id_not_truncated(self, capsys: pytest.CaptureFixture[str]) -> None:
         """Short run_id (<=8 chars) is used as-is."""
         result = _make_result(run_id="short", status=PipelineRunResult.SUCCESS)
         echo_run_result(result)
         out = capsys.readouterr().out
         assert "short" in out
 
-    def test_success_records_gold_nonzero_is_printed(
-        self, capsys: pytest.CaptureFixture[str]
-    ) -> None:
+    def test_success_records_gold_nonzero_is_printed(self, capsys: pytest.CaptureFixture[str]) -> None:
         """Gold record count is printed when records_gold > 0 (line 27)."""
         result = _make_result(
             status=PipelineRunResult.SUCCESS,
@@ -71,9 +63,7 @@ class TestEchoRunResultSuccess:
         assert "Gold records:" in out
         assert "80" in out
 
-    def test_success_records_gold_zero_not_printed(
-        self, capsys: pytest.CaptureFixture[str]
-    ) -> None:
+    def test_success_records_gold_zero_not_printed(self, capsys: pytest.CaptureFixture[str]) -> None:
         """Gold record count is NOT printed when records_gold == 0."""
         result = _make_result(
             status=PipelineRunResult.SUCCESS,
@@ -86,9 +76,7 @@ class TestEchoRunResultSuccess:
         out = capsys.readouterr().out
         assert "Gold records:" not in out
 
-    def test_success_quarantined_nonzero_prints_warning(
-        self, capsys: pytest.CaptureFixture[str]
-    ) -> None:
+    def test_success_quarantined_nonzero_prints_warning(self, capsys: pytest.CaptureFixture[str]) -> None:
         """WARNING prefix shown when records_quarantined > 0."""
         result = _make_result(
             status=PipelineRunResult.SUCCESS,
@@ -102,9 +90,7 @@ class TestEchoRunResultSuccess:
         assert "WARNING" in out
         assert "5" in out
 
-    def test_success_quarantined_zero_prints_zero_line(
-        self, capsys: pytest.CaptureFixture[str]
-    ) -> None:
+    def test_success_quarantined_zero_prints_zero_line(self, capsys: pytest.CaptureFixture[str]) -> None:
         """Quarantined 0 line printed (no WARNING) when records_quarantined == 0."""
         result = _make_result(
             status=PipelineRunResult.SUCCESS,
@@ -122,9 +108,7 @@ class TestEchoRunResultSuccess:
 class TestEchoRunResultDryRun:
     """Tests for PipelineRunResult.DRY_RUN path — covers lines 34-36."""
 
-    def test_dry_run_prints_completed_message(
-        self, capsys: pytest.CaptureFixture[str]
-    ) -> None:
+    def test_dry_run_prints_completed_message(self, capsys: pytest.CaptureFixture[str]) -> None:
         """Dry-run status prints 'no changes made' message (line 35)."""
         result = _make_result(status=PipelineRunResult.DRY_RUN, run_id="dryrun12345678")
         echo_run_result(result)
@@ -133,16 +117,12 @@ class TestEchoRunResultDryRun:
 
     def test_dry_run_includes_run_id(self, capsys: pytest.CaptureFixture[str]) -> None:
         """Dry-run message includes truncated run_id."""
-        result = _make_result(
-            status=PipelineRunResult.DRY_RUN, run_id="abcdef1234567890"
-        )
+        result = _make_result(status=PipelineRunResult.DRY_RUN, run_id="abcdef1234567890")
         echo_run_result(result)
         out = capsys.readouterr().out
         assert "abcdef12" in out
 
-    def test_dry_run_returns_after_message(
-        self, capsys: pytest.CaptureFixture[str]
-    ) -> None:
+    def test_dry_run_returns_after_message(self, capsys: pytest.CaptureFixture[str]) -> None:
         """No FAILED or SHUTDOWN messages appear after DRY_RUN."""
         result = _make_result(status=PipelineRunResult.DRY_RUN)
         echo_run_result(result)
@@ -165,9 +145,7 @@ class TestEchoRunResultShutdown:
         assert "gracefully shut down" in out
         assert "WARNING" in out
 
-    def test_shutdown_prints_processed_count(
-        self, capsys: pytest.CaptureFixture[str]
-    ) -> None:
+    def test_shutdown_prints_processed_count(self, capsys: pytest.CaptureFixture[str]) -> None:
         """SHUTDOWN status prints records_fetched counter."""
         result = _make_result(
             status=PipelineRunResult.SHUTDOWN,
@@ -181,9 +159,7 @@ class TestEchoRunResultShutdown:
 class TestEchoRunResultFailed:
     """Tests for PipelineRunResult.FAILED path."""
 
-    def test_failed_prints_error_to_stderr(
-        self, capsys: pytest.CaptureFixture[str]
-    ) -> None:
+    def test_failed_prints_error_to_stderr(self, capsys: pytest.CaptureFixture[str]) -> None:
         """FAILED status prints error to stderr."""
         result = _make_result(
             status=PipelineRunResult.FAILED,
@@ -195,9 +171,7 @@ class TestEchoRunResultFailed:
         assert "Pipeline failed" in err
         assert "Connection timed out" in err
 
-    def test_failed_uses_unknown_error_when_no_message(
-        self, capsys: pytest.CaptureFixture[str]
-    ) -> None:
+    def test_failed_uses_unknown_error_when_no_message(self, capsys: pytest.CaptureFixture[str]) -> None:
         """FAILED with no error_message falls back to 'Unknown error'."""
         result = _make_result(
             status=PipelineRunResult.FAILED,
@@ -208,9 +182,7 @@ class TestEchoRunResultFailed:
         err = capsys.readouterr().err
         assert "Unknown error" in err
 
-    def test_failed_prints_processed_before_failure(
-        self, capsys: pytest.CaptureFixture[str]
-    ) -> None:
+    def test_failed_prints_processed_before_failure(self, capsys: pytest.CaptureFixture[str]) -> None:
         """FAILED prints records_fetched count."""
         result = _make_result(
             status=PipelineRunResult.FAILED,
