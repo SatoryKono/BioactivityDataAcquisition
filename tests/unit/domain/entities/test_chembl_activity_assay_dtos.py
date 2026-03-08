@@ -9,10 +9,7 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
-from bioetl.domain.entities._chembl_activity_assay_models import (
-    ActivityRecord,
-    AssayRecord,
-)
+from bioetl.domain.entities._chembl_activity_assay_models import ActivityRecord, AssayRecord
 
 
 # ===========================================================================

@@ -90,11 +90,7 @@ def extract_pipeline_callbacks(pipeline: BasePipeline) -> PipelineCallbacksConte
         ),
         gold_transform=cast(
             GoldTransformCallback,
-            getattr(
-                pipeline,
-                "transform_for_gold",
-                lambda _context, silver_record: silver_record,
-            ),
+            getattr(pipeline, "transform_for_gold", lambda _context, silver_record: silver_record),
         ),
     )
 
@@ -348,4 +344,6 @@ def create_data_normalization_service(
         DefaultDataNormalizationService,
     )
 
-    return DefaultDataNormalizationService(config=config or DataNormalizationConfig())
+    return DefaultDataNormalizationService(
+        config=config or DataNormalizationConfig()
+    )

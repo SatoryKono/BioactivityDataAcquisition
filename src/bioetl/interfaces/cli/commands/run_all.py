@@ -149,10 +149,7 @@ async def _run_pipelines_batch(
             elif result.status == PipelineRunResult.FAILED:
                 batch_result.failed += 1
                 batch_result.failed_pipelines.append(pipeline)
-                echo_error(
-                    f"[FAIL] {pipeline}: failed",
-                    result.error_message or "Unknown error",
-                )
+                echo_error(f"[FAIL] {pipeline}: failed", result.error_message or "Unknown error")
         except PipelineNotFoundError as e:
             batch_result.failed += 1
             batch_result.failed_pipelines.append(pipeline)
@@ -275,9 +272,7 @@ def _determine_exit_code(batch_result: BatchRunResult) -> ExitCode:
     return map_batch_run_result_to_exit_code(batch_result)
 
 
-def _handle_run_all_failure(
-    exc: BaseException, *, source: str, reason_code: str
-) -> None:
+def _handle_run_all_failure(exc: BaseException, *, source: str, reason_code: str) -> None:
     """Handle run-all CLI failures with consistent error policy.
 
     Args:
@@ -298,12 +293,8 @@ def _handle_run_all_failure(
 
 
 def _run_batch_with_policy(
-    *,
-    source: str,
-    pipelines: list[str],
-    options: RunOptions,
-    health_server: bool,
-    health_port: int,
+    *, source: str, pipelines: list[str], options: RunOptions,
+    health_server: bool, health_port: int,
 ) -> BatchRunResult | None:
     """Execute async batch run with typed exception policy.
 
@@ -323,19 +314,13 @@ def _run_batch_with_policy(
     try:
         return asyncio.run(coro)
     except PipelineNotFoundError as exc:
-        _handle_run_all_failure(
-            exc, source=source, reason_code="CLI_RUN_ALL_CONFIG_ERROR"
-        )
+        _handle_run_all_failure(exc, source=source, reason_code="CLI_RUN_ALL_CONFIG_ERROR")
     except BioETLError as exc:
-        _handle_run_all_failure(
-            exc, source=source, reason_code="CLI_RUN_ALL_DOMAIN_ERROR"
-        )
+        _handle_run_all_failure(exc, source=source, reason_code="CLI_RUN_ALL_DOMAIN_ERROR")
     except KeyboardInterrupt as exc:
         _handle_run_all_failure(exc, source=source, reason_code="CLI_RUN_ALL_SIGINT")
     except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
-        _handle_run_all_failure(
-            exc, source=source, reason_code="CLI_RUN_ALL_UNEXPECTED_ERROR"
-        )
+        _handle_run_all_failure(exc, source=source, reason_code="CLI_RUN_ALL_UNEXPECTED_ERROR")
     finally:
         if getattr(coro, "cr_frame", None) is not None:
             coro.close()
@@ -343,9 +328,7 @@ def _run_batch_with_policy(
 
 
 @click.command("run-all")
-@click.option(
-    "--source", required=True, help="Provider name (e.g., chembl, pubchem, uniprot)"
-)
+@click.option("--source", required=True, help="Provider name (e.g., chembl, pubchem, uniprot)")
 @click.option(
     "--run-type",
     type=click.Choice(["incremental", "backfill", "rebuild"]),
@@ -353,17 +336,9 @@ def _run_batch_with_policy(
     help="Type of run for all pipelines",
 )
 @click.option("--limit", type=int, help="Maximum records per pipeline")
-@click.option(
-    "--dry-run", is_flag=True, help="Preview mode - show pipelines without execution"
-)
-@click.option(
-    "--yes", "-y", is_flag=True, help="Skip confirmation prompt for rebuild/backfill"
-)
-@click.option(
-    "--list-only",
-    is_flag=True,
-    help="List pipelines for the source without running them",
-)
+@click.option("--dry-run", is_flag=True, help="Preview mode - show pipelines without execution")
+@click.option("--yes", "-y", is_flag=True, help="Skip confirmation prompt for rebuild/backfill")
+@click.option("--list-only", is_flag=True, help="List pipelines for the source without running them")
 @click.option("--debug", is_flag=True, help="Enable DEBUG level logging")
 @click.option(
     "--health-server/--no-health-server",
@@ -380,15 +355,8 @@ def _run_batch_with_policy(
     show_default=True,
 )
 def run_all(
-    source: str,
-    run_type: str,
-    limit: int | None,
-    dry_run: bool,
-    yes: bool,
-    list_only: bool,
-    debug: bool,
-    health_server: bool,
-    health_port: int,
+    source: str, run_type: str, limit: int | None, dry_run: bool,
+    yes: bool, list_only: bool, debug: bool, health_server: bool, health_port: int,
 ) -> None:
     """Run all registered pipelines for one provider sequentially."""
     is_valid, error_msg = _validate_provider(source)
@@ -408,9 +376,7 @@ def run_all(
     echo_health_server_info(health_server, health_port)
 
     options = RunOptions(
-        run_type=run_type,
-        limit=limit,
-        dry_run=dry_run,
+        run_type=run_type, limit=limit, dry_run=dry_run,
         log_level="DEBUG" if debug else "INFO",
     )
     batch_result = _run_batch_with_policy(

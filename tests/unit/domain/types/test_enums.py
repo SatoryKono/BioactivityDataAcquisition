@@ -99,9 +99,7 @@ class TestErrorType:
                 error_type.is_recoverable(),
                 error_type.is_data_quality(),
             ]
-            assert sum(categories) == 1, (
-                f"{error_type} belongs to {sum(categories)} categories"
-            )
+            assert sum(categories) == 1, f"{error_type} belongs to {sum(categories)} categories"
 
 
 @pytest.mark.unit

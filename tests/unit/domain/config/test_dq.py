@@ -73,15 +73,11 @@ class TestDQConfig:
         assert config.hard_fail_threshold == 0.10
 
     def test_soft_exceeds_hard_raises(self) -> None:
-        with pytest.raises(
-            ValueError, match="soft_fail_threshold must be strictly less"
-        ):
+        with pytest.raises(ValueError, match="soft_fail_threshold must be strictly less"):
             DQConfig(soft_fail_threshold=0.30, hard_fail_threshold=0.20)
 
     def test_equal_thresholds_raises(self) -> None:
-        with pytest.raises(
-            ValueError, match="soft_fail_threshold must be strictly less"
-        ):
+        with pytest.raises(ValueError, match="soft_fail_threshold must be strictly less"):
             DQConfig(soft_fail_threshold=0.20, hard_fail_threshold=0.20)
 
     def test_soft_out_of_range_raises(self) -> None:
@@ -104,7 +100,9 @@ class TestDQConfig:
 
     def test_validate_thresholds_static(self) -> None:
         # Should not raise
-        DQConfig.validate_thresholds(soft_fail_threshold=0.01, hard_fail_threshold=0.10)
+        DQConfig.validate_thresholds(
+            soft_fail_threshold=0.01, hard_fail_threshold=0.10
+        )
 
     def test_validate_thresholds_static_raises(self) -> None:
         with pytest.raises(ValueError):

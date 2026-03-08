@@ -144,8 +144,8 @@ class SemanticScholarAdapter(
             self.error_handler
             if self.error_handler is not None
             else _create_default_semanticscholar_error_handler(
-                logger=self.logger,
-                metrics=self.metrics,
+                logger=self._logger,
+                metrics=self._metrics,
             )
         )
         self._fallback_fetch_service = (
@@ -159,8 +159,8 @@ class SemanticScholarAdapter(
             self.title_fallback_handler
             if self.title_fallback_handler is not None
             else _create_default_semanticscholar_title_fallback_handler(
-                http_client=self.http_client,
-                logger=self.logger,
+                http_client=self._http_client,
+                logger=self._logger,
                 metrics=self._adapter_metrics,
                 api_key=self.api_key,
                 fields=self.fields,
@@ -188,7 +188,7 @@ class SemanticScholarAdapter(
             service=self._fallback_fetch_service,
             strategy=strategy,
             config=config,
-            logger=self.logger,
+            logger=self._logger,
         )
 
     def _build_headers(self) -> dict[str, str]:

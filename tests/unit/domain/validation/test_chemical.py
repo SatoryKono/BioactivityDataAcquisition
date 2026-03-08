@@ -93,9 +93,7 @@ class TestValidateMolecularWeight:
         assert validate_molecular_weight(MAX_MOLECULAR_WEIGHT + 1) is None
 
     def test_custom_config_bounds(self) -> None:
-        config = ValidationConfig(
-            min_molecular_weight=100.0, max_molecular_weight=500.0
-        )
+        config = ValidationConfig(min_molecular_weight=100.0, max_molecular_weight=500.0)
         assert validate_molecular_weight(250.0, config=config) is not None
         assert validate_molecular_weight(50.0, config=config) is None
         assert validate_molecular_weight(600.0, config=config) is None
