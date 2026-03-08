@@ -85,7 +85,7 @@ class HealthCheckMixin:
         """
         from bioetl.domain.ports import NoOpMetrics
 
-        return self._metrics if self._metrics is not None else NoOpMetrics()
+        return self.metrics if self.metrics is not None else NoOpMetrics()
 
     def _start_health_check(self) -> HealthCheckContext:
         """Start a health check context for timing.
@@ -130,7 +130,7 @@ class HealthCheckMixin:
         labels = {"provider": ctx.provider}
 
         # Log success at DEBUG level
-        self._logger.debug(
+        self.logger.debug(
             "health_check_passed",
             provider=ctx.provider,
             endpoint=ctx.endpoint,
@@ -172,7 +172,7 @@ class HealthCheckMixin:
         labels = {"provider": ctx.provider}
 
         # Log failure at WARNING level with full context
-        self._logger.warning(
+        self.logger.warning(
             "health_check_failed",
             provider=ctx.provider,
             endpoint=ctx.endpoint,
@@ -218,7 +218,7 @@ class HealthCheckProviderMixin(HealthCheckMixin):
         class MyAdapter(HealthCheckProviderMixin, DataSourcePort):
             @property
             def _circuit_breaker(self) -> CircuitBreaker:
-                return self._http_client.circuit_breaker
+                return self.http_client.circuit_breaker
 
             async def _probe_health(self) -> HealthStatus:
                 # Provider-specific health probe
@@ -233,7 +233,7 @@ class HealthCheckProviderMixin(HealthCheckMixin):
 
         Subclasses MUST implement this property to provide access to
         their circuit breaker, regardless of how it's stored:
-        - BaseHttpAdapter: return self._http_client.circuit_breaker
+        - BaseHttpAdapter: return self.http_client.circuit_breaker
         - BaseSyncAdapter: return self.circuit_breaker
 
         Returns:

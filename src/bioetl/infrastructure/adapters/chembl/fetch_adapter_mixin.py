@@ -94,7 +94,7 @@ class ChemblFetchAdapterMixin(
                 if use_composite:
                     composite_key = self._compute_composite_key(record, pk_fields)
                     if composite_key and composite_key in seen_keys:
-                        self._logger.debug(
+                        self.logger.debug(
                             "skipping_duplicate_record",
                             entity_type=entity_type,
                             pk_fields=pk_fields,
@@ -107,7 +107,7 @@ class ChemblFetchAdapterMixin(
                 else:
                     record_id = str(record.get(pk_field, ""))
                     if record_id and record_id in seen_keys:
-                        self._logger.debug(
+                        self.logger.debug(
                             "skipping_duplicate_record",
                             entity_type=entity_type,
                             pk_field=pk_field,

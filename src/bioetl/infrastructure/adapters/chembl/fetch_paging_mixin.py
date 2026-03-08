@@ -77,7 +77,7 @@ class ChemblFetchPagingMixin:
         try:
             start_time = time.perf_counter()
             with self._adapter_metrics.measure_request(f"/{entity_type}"):
-                response = await self._http_client.get(url, params=params)
+                response = await self.http_client.get(url, params=params)
             duration_ms = (time.perf_counter() - start_time) * 1000
 
             with contextlib.suppress(Exception):
@@ -162,7 +162,7 @@ class ChemblFetchPagingMixin:
                     yield record
                     continue
                 if composite_key in seen_ids:
-                    self._logger.debug(
+                    self.logger.debug(
                         "skipping_duplicate_record",
                         entity_type=entity_type,
                         pk_fields=pk_fields,
@@ -175,7 +175,7 @@ class ChemblFetchPagingMixin:
             else:
                 record_id = str(record.get(pk_field, ""))
                 if record_id and record_id in seen_ids:
-                    self._logger.debug(
+                    self.logger.debug(
                         "skipping_duplicate_record",
                         entity_type=entity_type,
                         pk_field=pk_field,
@@ -227,7 +227,7 @@ class ChemblFetchPagingMixin:
             try:
                 records, has_next = await self._fetch_page(url, params, entity_type)
             except CHEMBL_ADAPTER_ERRORS:
-                self._logger.warning(
+                self.logger.warning(
                     "chembl_pagination_interrupted",
                     entity_type=entity_type,
                     offset=offset,

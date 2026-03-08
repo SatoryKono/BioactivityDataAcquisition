@@ -13,7 +13,67 @@ policy:
         - expires_on
         - removal_step
 registries:
-    file_size_limits: { }
+    file_size_limits:
+        src/bioetl/domain/observability_contract.py:
+            value: 310
+            owner: '@bioetl-data-model'
+            reason: ruff format expansion adds blank lines beyond 305 LOC domain limit
+            expires_on: '2026-06-30'
+            removal_step: refactor to reduce LOC below 305
+        src/bioetl/domain/services/normalization_service.py:
+            value: 325
+            owner: '@bioetl-data-model'
+            reason: ruff format expansion adds blank lines beyond 305 LOC domain limit
+            expires_on: '2026-06-30'
+            removal_step: refactor to reduce LOC below 305
+        src/bioetl/composition/runtime_builders/inputs_resolver.py:
+            value: 375
+            owner: '@bioetl-platform'
+            reason: ruff format expansion adds blank lines beyond 350 LOC composition limit
+            expires_on: '2026-06-30'
+            removal_step: refactor to reduce LOC below 350
+        src/bioetl/composition/factories/services_factory_pipeline_builder.py:
+            value: 360
+            owner: '@bioetl-platform'
+            reason: ruff format expansion adds blank lines beyond 350 LOC composition limit
+            expires_on: '2026-06-30'
+            removal_step: refactor to reduce LOC below 350
+        src/bioetl/composition/factories/_storage_factory_helpers.py:
+            value: 385
+            owner: '@bioetl-platform'
+            reason: ruff format expansion adds blank lines beyond 350 LOC composition limit
+            expires_on: '2026-06-30'
+            removal_step: refactor to reduce LOC below 350
+        src/bioetl/composition/factories/services_builder.py:
+            value: 355
+            owner: '@bioetl-platform'
+            reason: ruff format expansion adds blank lines beyond 350 LOC composition limit
+            expires_on: '2026-06-30'
+            removal_step: refactor to reduce LOC below 350
+        src/bioetl/interfaces/cli/commands/export.py:
+            value: 410
+            owner: '@bioetl-architecture'
+            reason: ruff format expansion adds blank lines beyond 400 LOC interfaces limit
+            expires_on: '2026-06-30'
+            removal_step: refactor to reduce LOC below 400
+        src/bioetl/interfaces/cli/commands/quarantine.py:
+            value: 410
+            owner: '@bioetl-architecture'
+            reason: ruff format expansion adds blank lines beyond 400 LOC interfaces limit
+            expires_on: '2026-06-30'
+            removal_step: refactor to reduce LOC below 400
+        src/bioetl/interfaces/cli/commands/run.py:
+            value: 420
+            owner: '@bioetl-architecture'
+            reason: ruff format expansion adds blank lines beyond 400 LOC interfaces limit
+            expires_on: '2026-06-30'
+            removal_step: refactor to reduce LOC below 400
+        src/bioetl/interfaces/cli/commands/run_all.py:
+            value: 435
+            owner: '@bioetl-architecture'
+            reason: ruff format expansion adds blank lines beyond 400 LOC interfaces limit
+            expires_on: '2026-06-30'
+            removal_step: refactor to reduce LOC below 400
     function_complexity: { }
     function_length: { }
     class_size: { }

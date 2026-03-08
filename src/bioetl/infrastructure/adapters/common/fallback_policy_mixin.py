@@ -118,6 +118,6 @@ class FallbackPolicyMixin:
             service=fallback_fetch_service,
             strategy=strategy,
             config=config,
-            logger=self._logger,  # type: ignore[attr-defined]
+            logger=self.logger,  # type: ignore[attr-defined]
         )
         self._on_fallback_decorator_updated()

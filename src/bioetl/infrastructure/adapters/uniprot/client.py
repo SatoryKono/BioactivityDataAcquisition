@@ -222,14 +222,14 @@ class UniProtAdapter(
             return await probe_uniprot_health(
                 base_url=self.base_url,
                 provider_name=self.provider_name,
-                http_client=self._http_client,
-                logger=self._logger,
+                http_client=self.http_client,
+                logger=self.logger,
                 adapter_metrics=self._adapter_metrics,
                 healthy_status_provider=self._fallback_health_status,
             )
         except UNIPROT_FETCH_ERRORS as error:
             error_type = self._error_handler.get_error_type(error)
-            self._logger.warning(
+            self.logger.warning(
                 "health_check_failed",
                 provider=self.provider_name,
                 error_type=error_type.value,

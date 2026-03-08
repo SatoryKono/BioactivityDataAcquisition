@@ -119,7 +119,7 @@ class TestCrossRefExternalVerification:
             respx_mock.get("/works").mock(
                 return_value=Response(200, json=response_json)
             )
-            async with crossref_adapter._http_client:
+            async with crossref_adapter.http_client:
                 records = [
                     record
                     async for record in crossref_adapter.fetch_filtered(
@@ -141,7 +141,7 @@ class TestCrossRefExternalVerification:
                     json={"status": "ok", "message": {"items": []}},
                 )
             )
-            async with crossref_adapter._http_client:
+            async with crossref_adapter.http_client:
                 records = [
                     record
                     async for record in crossref_adapter.fetch_filtered(
@@ -171,7 +171,7 @@ class TestPubMedExternalVerification:
             respx_mock.get("efetch.fcgi").mock(
                 return_value=Response(200, text=mock_xml)
             )
-            async with pubmed_adapter._http_client:
+            async with pubmed_adapter.http_client:
                 records = [
                     record
                     async for record in pubmed_adapter.fetch_filtered(
@@ -188,7 +188,7 @@ class TestPubMedExternalVerification:
     async def test_invalid_entity_type_raises(
         self, pubmed_adapter: PubMedAdapter
     ) -> None:
-        async with pubmed_adapter._http_client:
+        async with pubmed_adapter.http_client:
             with pytest.raises(ValueError, match="only supports 'publication'"):
                 async for _ in pubmed_adapter.fetch_filtered(
                     entity_type="invalid_entity",
@@ -215,7 +215,7 @@ class TestOpenAlexExternalVerification:
             respx_mock.get("/works").mock(
                 return_value=Response(200, json=response_json)
             )
-            async with openalex_adapter._http_client:
+            async with openalex_adapter.http_client:
                 records = [
                     record
                     async for record in openalex_adapter.fetch_filtered(
@@ -235,7 +235,7 @@ class TestOpenAlexExternalVerification:
             respx_mock.get("/works").mock(
                 return_value=Response(200, json={"results": [], "meta": {"count": 0}})
             )
-            async with openalex_adapter._http_client:
+            async with openalex_adapter.http_client:
                 records = [
                     record
                     async for record in openalex_adapter.fetch_filtered(
@@ -265,7 +265,7 @@ class TestSemanticScholarExternalVerification:
             respx_mock.post(re.compile(r".*/paper/batch.*")).mock(
                 return_value=Response(200, json=batch_response)
             )
-            async with semanticscholar_adapter._http_client:
+            async with semanticscholar_adapter.http_client:
                 records = [
                     record
                     async for record in semanticscholar_adapter.fetch_filtered(
@@ -303,7 +303,7 @@ class TestSemanticScholarExternalVerification:
                     },
                 )
             )
-            async with semanticscholar_adapter._http_client:
+            async with semanticscholar_adapter.http_client:
                 records = [
                     record
                     async for record in semanticscholar_adapter.fetch_filtered_with_fallback(
@@ -334,7 +334,7 @@ class TestChEMBLExternalVerification:
             respx_mock.get("/document").mock(
                 return_value=Response(200, json=response_json)
             )
-            async with chembl_adapter._http_client:
+            async with chembl_adapter.http_client:
                 records = [
                     record
                     async for record in chembl_adapter.fetch_filtered(
@@ -357,7 +357,7 @@ class TestChEMBLExternalVerification:
                     json={"documents": [], "page_meta": {"next": None}},
                 )
             )
-            async with chembl_adapter._http_client:
+            async with chembl_adapter.http_client:
                 records = [
                     record
                     async for record in chembl_adapter.fetch_filtered(

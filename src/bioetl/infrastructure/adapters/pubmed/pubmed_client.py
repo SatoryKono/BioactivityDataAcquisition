@@ -132,8 +132,8 @@ class PubMedAdapter(
             self.error_handler
             if self.error_handler is not None
             else _create_default_pubmed_error_handler(
-                logger=self._logger,
-                metrics=self._metrics,
+                logger=self.logger,
+                metrics=self.metrics,
             )
         )
         self._fallback_fetch_service = (
@@ -148,7 +148,7 @@ class PubMedAdapter(
             self.title_fallback_handler
             if self.title_fallback_handler is not None
             else _create_default_pubmed_title_fallback_handler(
-                logger=self._logger,
+                logger=self.logger,
                 search_fn=self._search_by_title,
             )
         )
@@ -170,7 +170,7 @@ class PubMedAdapter(
             service=self._fallback_fetch_service,
             strategy=strategy,
             config=config,
-            logger=self._logger,
+            logger=self.logger,
         )
 
     async def fetch_as_models(
@@ -219,8 +219,8 @@ class PubMedAdapter(
 
     async def aclose(self) -> None:
         """Close adapter resources."""
-        if self._http_client:
-            await self._http_client.__aexit__(None, None, None)
+        if self.http_client:
+            await self.http_client.__aexit__(None, None, None)
 
 
 def _create_pubmed_adapter(

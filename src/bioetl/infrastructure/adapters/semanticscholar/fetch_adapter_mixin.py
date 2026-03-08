@@ -148,7 +148,7 @@ class SemanticScholarFetchAdapterMixin:
         url = f"{SEMANTICSCHOLAR_BASE_URL}/paper/search"
         start_time = time.perf_counter()
         with self._adapter_metrics.measure_request("/paper/search"):
-            response = await self._http_client.get_once(
+            response = await self.http_client.get_once(
                 url, params=params, headers=self._build_headers()
             )
         duration_ms = (time.perf_counter() - start_time) * 1000
@@ -177,7 +177,7 @@ class SemanticScholarFetchAdapterMixin:
         """
         del entity_type
         if filter_field != "doi":
-            self._logger.warning(
+            self.logger.warning(
                 "unsupported_filter_field",
                 field=filter_field,
                 expected="doi",
