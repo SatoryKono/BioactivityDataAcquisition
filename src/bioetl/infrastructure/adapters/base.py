@@ -116,6 +116,32 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
         else:
             self._init_adapter_metrics()
 
+    def __getattr__(self, name: str) -> object:
+        """Resolve private runtime aliases for dataclass-based adapters.
+
+        Some adapters are dataclasses and initialize public attributes
+        (``http_client``, ``logger``, ``metrics``) without calling this base
+        ``__init__``. This fallback keeps runtime behavior consistent by lazily
+        binding the corresponding private aliases used across adapter code.
+        """
+        if name == "_http_client":
+            http_client = self.__dict__.get("http_client")
+            if http_client is not None:
+                object.__setattr__(self, "_http_client", http_client)
+                return http_client
+        elif name == "_logger":
+            logger = self.__dict__.get("logger")
+            if logger is not None:
+                object.__setattr__(self, "_logger", logger)
+                return logger
+        elif name == "_metrics":
+            metrics = self.__dict__.get("metrics")
+            metrics_port = metrics if metrics is not None else NoOpMetrics()
+            object.__setattr__(self, "_metrics", metrics_port)
+            return metrics_port
+
+        raise AttributeError(f"{type(self).__name__} object has no attribute {name!r}")
+
     def _init_adapter_metrics(self) -> None:
         """Initialize adapter metrics and request collector.
 
