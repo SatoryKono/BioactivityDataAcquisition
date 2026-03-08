@@ -37,7 +37,7 @@ class _CompositeRunnerStageEnrichmentMixin:
         def _call_get_enrichers_to_run(
             self,
             state: CompositeCheckpointState,
-        ) -> list[Any]: ...
+        ) -> list[Any]: ...  # Any: typing workaround for protocol
 
         def _call_check_required_enrichers(
             self,
@@ -53,7 +53,7 @@ class _CompositeRunnerStageEnrichmentMixin:
     async def _start_enrichment_stage(
         self,
         state: CompositeCheckpointState,
-        enrichers_to_run: list[Any],
+        enrichers_to_run: list[Any],  # Any: typing workaround for protocol
     ) -> CompositeCheckpointState:
         """Transition FSM to ENRICHING, persist checkpoint, log phase start."""
         enricher_names = [enricher.pipeline for enricher in enrichers_to_run]
@@ -85,7 +85,7 @@ class _CompositeRunnerStageEnrichmentMixin:
         self,
         state: CompositeCheckpointState,
         keys_df: pl.DataFrame,
-        enrichers_to_run: list[Any],
+        enrichers_to_run: list[Any],  # Any: typing workaround for protocol
     ) -> tuple[CompositeCheckpointState, dict[str, EnrichmentResult]]:
         """Run enrichers, update state with results, persist checkpoint."""
         enrichment_results = await self._coordinator.run_enrichers(

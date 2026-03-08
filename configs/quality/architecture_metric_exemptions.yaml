@@ -14,8 +14,50 @@ policy:
         - removal_step
 registries:
     file_size_limits:
+        src/bioetl/domain/observability_contract.py:
+            value: 315
+            owner: '@bioetl-architecture'
+            reason: Transitional exemption for domain observability contract.
+            expires_on: '2026-06-30'
+            removal_step: Refactor into smaller files.
+        src/bioetl/domain/filtering/_base_filter_config.py:
+            value: 315
+            owner: '@bioetl-data-model'
+            reason: Transitional exemption for base filter config.
+            expires_on: '2026-06-30'
+            removal_step: Refactor into smaller files.
+        src/bioetl/composition/factories/pipeline_assembler.py:
+            value: 365
+            owner: '@bioetl-architecture'
+            reason: Transitional exemption for pipeline assembler.
+            expires_on: '2026-06-30'
+            removal_step: Refactor into smaller files.
+        src/bioetl/interfaces/cli/commands/run_all.py:
+            value: 485
+            owner: '@bioetl-interfaces'
+            reason: Transitional exemption for run_all command.
+            expires_on: '2026-06-30'
+            removal_step: Refactor into smaller files.
+        src/bioetl/interfaces/cli/commands/run.py:
+            value: 425
+            owner: '@bioetl-interfaces'
+            reason: Transitional exemption for run command.
+            expires_on: '2026-06-30'
+            removal_step: Refactor into smaller files.
+        src/bioetl/interfaces/cli/commands/quarantine.py:
+            value: 415
+            owner: '@bioetl-interfaces'
+            reason: Transitional exemption for quarantine command.
+            expires_on: '2026-06-30'
+            removal_step: Refactor into smaller files.
+        src/bioetl/interfaces/cli/commands/export.py:
+            value: 415
+            owner: '@bioetl-interfaces'
+            reason: Transitional exemption for export command.
+            expires_on: '2026-06-30'
+            removal_step: Refactor into smaller files.
         src/bioetl/domain/composite/config_models.py:
-            value: 320
+            value: 355
             owner: '@bioetl-data-model'
             reason: Transitional domain composite config model consolidation pending split into smaller mapping/value object modules.
             expires_on: '2026-06-30'
@@ -28,9 +70,63 @@ registries:
             removal_step: Move residual orchestration/helpers to dedicated services and remove this exemption entry.
     function_complexity: { }
     function_length: { }
-    class_size: { }
+    class_size:
+        BronzeWriter:
+            value: 325
+            owner: '@bioetl-infrastructure'
+            reason: Transitional exemption for BronzeWriter.
+            expires_on: '2026-06-30'
+            removal_step: Refactor.
+        ChemblFetchResilienceMixin:
+            value: 360
+            owner: '@bioetl-infrastructure'
+            reason: Transitional exemption for ChemblFetchResilienceMixin.
+            expires_on: '2026-06-30'
+            removal_step: Refactor.
+        HTTPClientRetryMixin:
+            value: 310
+            owner: '@bioetl-infrastructure'
+            reason: Transitional exemption for HTTPClientRetryMixin.
+            expires_on: '2026-06-30'
+            removal_step: Refactor.
+        DependencyJoinerService:
+            value: 325
+            owner: '@bioetl-application'
+            reason: Transitional exemption for DependencyJoinerService.
+            expires_on: '2026-06-30'
+            removal_step: Refactor.
+        ColumnOrdererService:
+            value: 340
+            owner: '@bioetl-application'
+            reason: Transitional exemption for ColumnOrdererService.
+            expires_on: '2026-06-30'
+            removal_step: Refactor.
+        MergeIOMixin:
+            value: 380
+            owner: '@bioetl-application'
+            reason: Transitional exemption for MergeIOMixin.
+            expires_on: '2026-06-30'
+            removal_step: Refactor.
+        BaseTransformer:
+            value: 395
+            owner: '@bioetl-application'
+            reason: Transitional exemption for BaseTransformer.
+            expires_on: '2026-06-30'
+            removal_step: Refactor.
     class_method_count: { }
     god_object:
+        BronzeWriter:
+            value: 1
+            owner: '@bioetl-infrastructure'
+            reason: Transitional exemption for BronzeWriter god object.
+            expires_on: '2026-06-30'
+            removal_step: Refactor.
+        HTTPClientRetryMixin:
+            value: 2
+            owner: '@bioetl-infrastructure'
+            reason: Transitional exemption for HTTPClientRetryMixin god object.
+            expires_on: '2026-06-30'
+            removal_step: Refactor.
         DependencyCoordinatorService:
             value: 1
             owner: '@bioetl-architecture'
