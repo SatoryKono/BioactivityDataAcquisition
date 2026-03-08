@@ -126,6 +126,23 @@ def _evaluate_owner_allocations(
     return violations
 
 
+def _extract_diversification_policy(
+    scorecard: JsonDict,  # Any: YAML scorecard sections are heterogeneous
+) -> tuple[str, int] | None:
+    """Extract starts_quarter and min_distinct_owners from scorecard, or None if invalid."""
+    governance = scorecard.get("governance", {})
+    if not isinstance(governance, dict):
+        return None
+    policy = governance.get("owner_diversification", {})
+    if not isinstance(policy, dict):
+        return None
+    starts_quarter = policy.get("starts_quarter")
+    min_distinct = policy.get("min_distinct_owners")
+    if not isinstance(starts_quarter, str) or not isinstance(min_distinct, int):
+        return None
+    return (starts_quarter, min_distinct) if min_distinct >= 1 else None
+
+
 def _evaluate_owner_diversification(
     *,
     by_owner: dict[str, int],
@@ -137,20 +154,10 @@ def _evaluate_owner_diversification(
     Returns:
         List of violation message strings, empty if policy is satisfied.
     """
-    governance = scorecard.get("governance", {})
-    if not isinstance(governance, dict):
+    extracted = _extract_diversification_policy(scorecard)
+    if extracted is None:
         return []
-
-    policy = governance.get("owner_diversification", {})
-    if not isinstance(policy, dict):
-        return []
-
-    starts_quarter = policy.get("starts_quarter")
-    min_distinct_owners = policy.get("min_distinct_owners")
-    if not isinstance(starts_quarter, str) or not isinstance(min_distinct_owners, int):
-        return []
-    if min_distinct_owners < 1:
-        return []
+    starts_quarter, min_distinct_owners = extracted
 
     current = _parse_quarter_label(quarter)
     starts_at = _parse_quarter_label(starts_quarter)
@@ -203,6 +210,21 @@ def _evaluate_expiry_cap(
     ]
 
 
+def _check_done_threshold(
+    criteria: dict[str, object],
+    key: str,
+    actual: int | float,
+    comparator: str,
+) -> str | None:
+    """Check a single program-done threshold and return violation message or None."""
+    threshold = criteria.get(key)
+    if comparator == "max" and isinstance(threshold, int) and actual > threshold:
+        return f"program done criteria violated: {key} {actual} exceeds {threshold}"
+    if comparator == "min" and isinstance(threshold, (int, float)) and actual < float(threshold):
+        return f"program done criteria violated: {key} {actual} is below {float(threshold)}"
+    return None
+
+
 def _evaluate_program_done_criteria(
     *,
     scorecard: JsonDict,  # Any: YAML scorecard sections are heterogeneous
@@ -222,35 +244,15 @@ def _evaluate_program_done_criteria(
         if isinstance(deadline_quarter, str)
         else None
     )
-    if (
-        current_tuple is None
-        or deadline_tuple is None
-        or current_tuple < deadline_tuple
-    ):
+    if current_tuple is None or deadline_tuple is None or current_tuple < deadline_tuple:
         return []
 
-    violations: list[str] = []
-    max_total = criteria.get("max_total_exemptions")
-    if isinstance(max_total, int) and total_exemptions > max_total:
-        violations.append(
-            "program done criteria violated: "
-            f"total_exemptions {total_exemptions} exceeds {max_total}"
-        )
-
-    min_score = criteria.get("min_integral_score")
-    if isinstance(min_score, (int, float)) and integral_score < float(min_score):
-        violations.append(
-            "program done criteria violated: "
-            f"integral_score {integral_score} is below {float(min_score)}"
-        )
-
-    max_expired = criteria.get("max_expired_entries")
-    if isinstance(max_expired, int) and expired_entries > max_expired:
-        violations.append(
-            "program done criteria violated: "
-            f"expired_entries {expired_entries} exceeds {max_expired}"
-        )
-    return violations
+    checks = [
+        _check_done_threshold(criteria, "max_total_exemptions", total_exemptions, "max"),
+        _check_done_threshold(criteria, "min_integral_score", integral_score, "min"),
+        _check_done_threshold(criteria, "max_expired_entries", expired_entries, "max"),
+    ]
+    return [msg for msg in checks if msg is not None]
 
 
 __all__ = [

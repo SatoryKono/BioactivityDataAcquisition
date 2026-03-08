@@ -115,7 +115,7 @@ class OpenAlexCursorFlowService:
         Yields:
             BronzeRecord works with _lookup_method set to "title".
         """
-        self.logger.info(
+        self._logger.info(
             "openalex_title_search_start",
             total_titles=len(titles),
             limit=limit,
@@ -139,7 +139,7 @@ class OpenAlexCursorFlowService:
             )
             found += 1
             fetched += 1
-        self.logger.info(
+        self._logger.info(
             "openalex_title_lookup_summary",
             total_titles=len(effective_titles),
             found_by_title=found,
@@ -204,11 +204,11 @@ class OpenAlexCursorFlowService:
             return []
 
         params = build_openalex_doi_filter_params(mailto=self.mailto, dois=normalized)
-        self.logger.debug("openalex_batch_doi_request", doi_count=len(normalized))
+        self._logger.debug("openalex_batch_doi_request", doi_count=len(normalized))
         payload = await self.query_executor.request_works_payload(params)
         results = self.response_mapper.extract_results(payload)
         if len(results) < len(normalized):
-            self.logger.info(
+            self._logger.info(
                 "openalex_batch_partial_results",
                 requested=len(normalized),
                 found=len(results),
@@ -237,12 +237,12 @@ class OpenAlexCursorFlowService:
             escaped_title=self.escape_title_for_search(normalized_title[:200]),
             limit=limit,
         )
-        self.logger.debug("openalex_title_search", title=title[:50])
+        self._logger.debug("openalex_title_search", title=title[:50])
         try:
             payload = await self.query_executor.request_works_payload(params)
             results = self.response_mapper.extract_results(payload)
         except self.runtime_errors as error:
-            self.logger.debug(
+            self._logger.debug(
                 "openalex_title_search_failed",
                 title=title[:50],
                 error=str(error),
