@@ -268,6 +268,11 @@ def check_broken_links(root: Path) -> list[tuple[Path, int, str, str]]:
                 if raw_target.startswith("*") or raw_target.startswith("{"):
                     continue
 
+                # Skip rendered diagram artifacts (.png/.svg) — CI-generated,
+                # gitignored, and not present in the working tree.
+                if raw_target.endswith((".png", ".svg")):
+                    continue
+
                 # Resolve relative to the file's directory
                 resolved = (md_file.parent / raw_target).resolve()
 
