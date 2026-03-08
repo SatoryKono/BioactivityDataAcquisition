@@ -240,7 +240,7 @@ class TestProviderRegistryAdapterCreation:
         )
 
         assert isinstance(adapter, MockAdapter)
-        assert adapter._http_client is mock_client
+        assert adapter.http_client is mock_client
         assert adapter.logger is mock_logger
 
     def test_create_adapter_without_http_client(self):
@@ -260,7 +260,7 @@ class TestProviderRegistryAdapterCreation:
         )
 
         assert isinstance(adapter, MockAdapter)
-        assert adapter._http_client is None
+        assert adapter.http_client is None
         assert adapter.logger is mock_logger
 
     def test_create_adapter_with_custom_creator(self):
