@@ -113,7 +113,9 @@ class DriftRule:
 DRIFT_RULES = (
     DriftRule(
         name="legacy_delta_log_token",
-        pattern=re.compile(r"(?<![A-Za-z0-9_])(?:-delta-log|delta-log)(?![A-Za-z0-9_])"),
+        pattern=re.compile(
+            r"(?<![A-Za-z0-9_])(?:-delta-log|delta-log)(?![A-Za-z0-9_])"
+        ),
     ),
     DriftRule(
         name="legacy_config_path",
@@ -252,7 +254,6 @@ def check_broken_links(root: Path) -> list[tuple[Path, int, str, str]]:
     broken: list[tuple[Path, int, str, str]] = []
 
     for md_file in _collect_link_scan_files(root):
-
         try:
             lines = md_file.read_text(encoding="utf-8", errors="replace").splitlines()
         except OSError:
@@ -295,7 +296,9 @@ def _load_nav_docs() -> list[Path]:
 
 def _collect_link_scan_files(root: Path) -> list[Path]:
     """Collect files for link checks: active tree + all existing nav docs."""
-    tree_docs = {path.resolve() for path in root.rglob("*.md") if not _should_skip(path)}
+    tree_docs = {
+        path.resolve() for path in root.rglob("*.md") if not _should_skip(path)
+    }
     nav_docs = {path.resolve() for path in _load_nav_docs() if path.exists()}
     return sorted(tree_docs | nav_docs)
 
@@ -410,7 +413,11 @@ def _check_path_contracts_for_file(
         line_for_links = INLINE_CODE_RE.sub("", line)
         for match in MD_LINK_RE.finditer(line_for_links):
             raw_target = match.group(2).strip()
-            if not raw_target or raw_target.startswith("*") or raw_target.startswith("{"):
+            if (
+                not raw_target
+                or raw_target.startswith("*")
+                or raw_target.startswith("{")
+            ):
                 continue
 
             resolved = (source_file.parent / raw_target).resolve()
@@ -555,10 +562,14 @@ def check_chembl_provider_overview() -> tuple[list[str], list[str]]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Check documentation links and spec files")
+    parser = argparse.ArgumentParser(
+        description="Check documentation links and spec files"
+    )
     parser.add_argument("--links", action="store_true", help="Only check broken links")
     parser.add_argument("--specs", action="store_true", help="Only check spec files")
-    parser.add_argument("--configs", action="store_true", help="Only check config existence")
+    parser.add_argument(
+        "--configs", action="store_true", help="Only check config existence"
+    )
     parser.add_argument(
         "--contracts-index",
         action="store_true",
@@ -602,9 +613,9 @@ def main() -> int:
     if run_all or args.links:
         broken = check_broken_links(DOCS_DIR)
         if broken:
-            print(f"\n{'='*60}")
+            print(f"\n{'=' * 60}")
             print(f"BROKEN LINKS ({len(broken)} found)")
-            print(f"{'='*60}")
+            print(f"{'=' * 60}")
             for filepath, line_no, text, target in broken:
                 rel = filepath.relative_to(PROJECT_ROOT)
                 print(f"  {rel}:{line_no}: [{text}]({target})")
@@ -614,9 +625,9 @@ def main() -> int:
 
         missing_nav_docs = check_missing_nav_docs()
         if missing_nav_docs:
-            print(f"\n{'='*60}")
+            print(f"\n{'=' * 60}")
             print(f"MISSING NAV DOCS ({len(missing_nav_docs)} found)")
-            print(f"{'='*60}")
+            print(f"{'=' * 60}")
             for filepath in missing_nav_docs:
                 rel = filepath.relative_to(PROJECT_ROOT)
                 print(f"  {rel}")
@@ -626,9 +637,9 @@ def main() -> int:
 
         nav_scope_gaps = check_nav_link_coverage(DOCS_DIR)
         if nav_scope_gaps:
-            print(f"\n{'='*60}")
+            print(f"\n{'=' * 60}")
             print(f"NAV LINK SCOPE GAPS ({len(nav_scope_gaps)} found)")
-            print(f"{'='*60}")
+            print(f"{'=' * 60}")
             for filepath in nav_scope_gaps:
                 rel = filepath.relative_to(PROJECT_ROOT)
                 print(f"  {rel}")
@@ -639,9 +650,9 @@ def main() -> int:
     if run_all or args.specs:
         missing_specs = check_spec_files()
         if missing_specs:
-            print(f"\n{'='*60}")
+            print(f"\n{'=' * 60}")
             print(f"MISSING SPEC FILES ({len(missing_specs)} found)")
-            print(f"{'='*60}")
+            print(f"{'=' * 60}")
             for label, path in missing_specs:
                 print(f"  {label} -> {path}")
             violations += len(missing_specs)
@@ -651,9 +662,9 @@ def main() -> int:
     if run_all or args.configs:
         missing_configs = check_config_existence()
         if missing_configs:
-            print(f"\n{'='*60}")
+            print(f"\n{'=' * 60}")
             print(f"MISSING CONFIG FILES ({len(missing_configs)} found)")
-            print(f"{'='*60}")
+            print(f"{'=' * 60}")
             for pipeline, path in missing_configs:
                 print(f"  {pipeline} -> {path}")
             violations += len(missing_configs)
@@ -663,9 +674,9 @@ def main() -> int:
     if run_all or args.contracts_index:
         missing_in_doc, extra_in_doc = check_gold_contract_index()
         if missing_in_doc or extra_in_doc:
-            print(f"\n{'='*60}")
+            print(f"\n{'=' * 60}")
             print("GOLD CONTRACT INDEX MISMATCH")
-            print(f"{'='*60}")
+            print(f"{'=' * 60}")
             if missing_in_doc:
                 print("  Missing in docs/04-reference/contracts/gold-schemas.md:")
                 for item in missing_in_doc:
@@ -681,9 +692,9 @@ def main() -> int:
     if run_all or args.provider_overview:
         missing_in_readme, extra_in_readme = check_chembl_provider_overview()
         if missing_in_readme or extra_in_readme:
-            print(f"\n{'='*60}")
+            print(f"\n{'=' * 60}")
             print("CHEMBL PROVIDER OVERVIEW MISMATCH")
-            print(f"{'='*60}")
+            print(f"{'=' * 60}")
             if missing_in_readme:
                 print("  Missing in docs/04-reference/providers/README.md:")
                 for item in missing_in_readme:
@@ -701,18 +712,18 @@ def main() -> int:
             check_not_in_nav_growth()
         )
         if not baseline_exists:
-            print(f"\n{'='*60}")
+            print(f"\n{'=' * 60}")
             print("NOT IN NAV BASELINE MISSING")
-            print(f"{'='*60}")
+            print(f"{'=' * 60}")
             rel = NOT_IN_NAV_BASELINE_FILE.relative_to(PROJECT_ROOT)
             print(f"  Missing baseline file: {rel}")
             print(f"  Current not-in-nav docs: {current_count}")
             violations += 1
         elif current_count > baseline_count:
             growth = current_count - baseline_count
-            print(f"\n{'='*60}")
+            print(f"\n{'=' * 60}")
             print(f"NOT IN NAV GROWTH (+{growth})")
-            print(f"{'='*60}")
+            print(f"{'=' * 60}")
             print(f"  baseline: {baseline_count}")
             print(f"  current:  {current_count}")
             if added:
@@ -738,14 +749,12 @@ def main() -> int:
             include_internal=args.legacy_paths_all
         )
         if legacy_hits:
-            print(f"\n{'='*60}")
+            print(f"\n{'=' * 60}")
             print(f"DOC DRIFT VIOLATIONS ({len(legacy_hits)} found)")
-            print(f"{'='*60}")
+            print(f"{'=' * 60}")
             for filepath, line_no, rule_name, matched_text in legacy_hits:
                 rel = filepath.relative_to(PROJECT_ROOT)
-                print(
-                    f"  {rel}:{line_no}: [{rule_name}] contains '{matched_text}'"
-                )
+                print(f"  {rel}:{line_no}: [{rule_name}] contains '{matched_text}'")
             violations += len(legacy_hits)
         else:
             print("Doc drift: OK (no guardrail violations in mkdocs nav docs)")
