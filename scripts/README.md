@@ -5,7 +5,7 @@ This directory uses a **canonical-by-domain** structure.
 ## Canonical Directories
 
 - `scripts/ci/` — CI orchestration and reporting jobs.
-- `scripts/dev/` — local developer workflows and setup.
+- `scripts/dev/` — local developer workflows and setup (entry point: `dev_setup.sh`).
 - `scripts/qa/` — architecture/quality/debt checks and reports.
 - `scripts/docs/` — docs build, lint, drift checks, docs maintenance.
 - `scripts/schema/` — schema/contracts/config invariants tooling.

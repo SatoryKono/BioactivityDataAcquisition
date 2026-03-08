@@ -402,6 +402,12 @@
       "decision": "keep_manual",
       "review_by": "2026-06-30",
       "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ СЏРІРЅС‹Р№ smoke-РІС‹Р·РѕРІ/РѕРїРµСЂР°С†РёРѕРЅРЅС‹Р№ playbook РёР»Рё РїРµСЂРµРІРµСЃС‚Рё РІ deprecate."
+    },
+    "scripts/check_mcp.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Root compatibility wrapper for scripts/ops/check_mcp.sh. Keep per scripts/README.md policy."
     }
   }
 }
