@@ -103,7 +103,7 @@ class TestDocsVersionSync:
 
         REQ-DOC-010: CLAUDE.md является основным справочником для агента.
         """
-        claude_md = project_root / "docs" / "00-project" / "agents" / "CLAUDE.md"
+        claude_md = project_root / "docs" / "00-project" / "ai" / "agents" / "CLAUDE.md"
         assert claude_md.exists(), "CLAUDE.md not found"
 
         content = claude_md.read_text(encoding="utf-8")

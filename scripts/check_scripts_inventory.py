@@ -37,6 +37,12 @@ SEARCH_ROOTS: Final[tuple[str, ...]] = (
     "src/tools",
 )
 MANIFEST_DEFAULT: Final[str] = "reports/quality/scripts_inventory_manifest.json"
+DEPRECATION_REPORT_DEFAULT: Final[str] = (
+    "reports/quality/scripts_deprecation_backlog.md"
+)
+LIFECYCLE_REGISTRY_DEFAULT: Final[str] = (
+    "configs/quality/scripts_lifecycle_registry.json"
+)
 SCHEMA_VERSION: Final[str] = "1.0"
 
 
@@ -84,7 +90,7 @@ def _iter_search_files(root: Path) -> list[Path]:
             if ".git" in file_path.parts:
                 continue
             files.append(file_path)
-    return files
+    return sorted(files)
 
 
 def _source_group(rel_path: str) -> str:
@@ -144,7 +150,7 @@ def _dedupe_refs(refs: list[RefEvidence]) -> list[RefEvidence]:
             continue
         seen.add(key)
         result.append(item)
-    return result
+    return sorted(result, key=lambda item: (item.path, item.line, item.text))
 
 
 def _status_for(script_rel: str, refs: list[RefEvidence]) -> str:
@@ -248,6 +254,146 @@ def _check(manifest_path: Path, actual: dict[str, object]) -> int:
     return 1
 
 
+def _write_deprecation_report(path: Path, payload: dict[str, object]) -> None:
+    scripts = payload["scripts"]
+    assert isinstance(scripts, list)
+
+    grouped: dict[str, list[dict[str, object]]] = defaultdict(list)
+    for item in scripts:
+        assert isinstance(item, dict)
+        status = str(item.get("status", "unknown"))
+        if status in {"unknown", "orphan", "legacy"}:
+            grouped[status].append(item)
+
+    lines = [
+        "# Scripts Deprecation Backlog",
+        "",
+        "Auto-generated from `scripts/check_scripts_inventory.py`.",
+        "",
+    ]
+
+    for status in ("unknown", "orphan", "legacy"):
+        entries = sorted(grouped.get(status, []), key=lambda row: str(row["path"]))
+        lines.append(f"## {status} ({len(entries)})")
+        lines.append("")
+        lines.append("| Script Path | Type | Reference Count | Suggested Next Step |")
+        lines.append("|---|---|---:|---|")
+        for item in entries:
+            path_value = str(item["path"])
+            type_value = str(item["type"])
+            ref_count = int(item["reference_count"])
+            if status == "unknown":
+                next_step = "Validate runtime usage; promote to active or mark deprecated."
+            elif status == "orphan":
+                next_step = "Plan staged removal or add explicit compatibility call-site."
+            else:
+                next_step = "Archive/remove after freeze window if no active consumers."
+            lines.append(
+                f"| `{path_value}` | `{type_value}` | {ref_count} | {next_step} |"
+            )
+        lines.append("")
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
+
+
+def _load_json(path: Path) -> dict[str, object]:
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Invalid JSON in {path}: {exc}") from exc
+    if not isinstance(raw, dict):
+        raise ValueError(f"Expected JSON object in {path}")
+    return raw
+
+
+def _check_lifecycle_registry(
+    root: Path,
+    payload: dict[str, object],
+    registry_rel_path: str,
+    forbid_evaluate_active: bool,
+) -> int:
+    registry_path = root / registry_rel_path
+    if not registry_path.exists():
+        print(f"[FAIL] Lifecycle registry not found: {registry_path}")
+        return 1
+
+    try:
+        registry = _load_json(registry_path)
+    except ValueError as exc:
+        print(f"[FAIL] {exc}")
+        return 1
+
+    entries_raw = registry.get("entries")
+    if not isinstance(entries_raw, dict):
+        print(f"[FAIL] Lifecycle registry must contain object field 'entries': {registry_path}")
+        return 1
+
+    script_rows = payload["scripts"]
+    assert isinstance(script_rows, list)
+    script_map: dict[str, dict[str, object]] = {
+        str(item["path"]): item for item in script_rows if isinstance(item, dict)
+    }
+
+    target_statuses = {"unknown", "orphan", "legacy"}
+    missing: list[str] = []
+    stale: list[str] = []
+    invalid: list[str] = []
+    forbidden: list[str] = []
+
+    for path, row in script_map.items():
+        status = str(row.get("status", "unknown"))
+        if status not in target_statuses:
+            continue
+        entry = entries_raw.get(path)
+        if not isinstance(entry, dict):
+            missing.append(path)
+            continue
+        required = {"owner", "decision", "review_by", "next_step"}
+        absent = sorted(required - set(entry.keys()))
+        if absent:
+            invalid.append(f"{path}: missing fields {absent}")
+        if forbid_evaluate_active and str(entry.get("decision")) == "evaluate_active":
+            forbidden.append(path)
+
+    for path, entry in entries_raw.items():
+        if not isinstance(entry, dict):
+            invalid.append(f"{path}: entry must be object")
+            continue
+        row = script_map.get(path)
+        if row is None:
+            stale.append(f"{path}: script not found in current inventory")
+            continue
+        status = str(row.get("status", "unknown"))
+        if status not in target_statuses:
+            stale.append(f"{path}: status changed to {status}")
+
+    if missing or stale or invalid or forbidden:
+        print(f"[FAIL] Lifecycle registry validation failed: {registry_path}")
+        if missing:
+            print("  Missing entries:")
+            for item in missing:
+                print(f"    - {item}")
+        if forbidden:
+            print("  Forbidden decision values (evaluate_active):")
+            for item in forbidden:
+                print(f"    - {item}")
+        if invalid:
+            print("  Invalid entries:")
+            for item in invalid:
+                print(f"    - {item}")
+        if stale:
+            print("  Stale entries:")
+            for item in stale:
+                print(f"    - {item}")
+        return 1
+
+    print(
+        f"[OK] Lifecycle registry covers unknown/orphan/legacy scripts: {registry_path}"
+    )
+    return 0
+
+
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Scripts inventory drift checker")
     parser.add_argument(
@@ -270,6 +416,29 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         action="store_true",
         help="Validate current inventory against manifest file",
     )
+    parser.add_argument(
+        "--deprecation-report",
+        default="",
+        help=(
+            "Optional path to write markdown backlog for unknown/orphan/legacy scripts. "
+            f"Use default path with --deprecation-report={DEPRECATION_REPORT_DEFAULT}"
+        ),
+    )
+    parser.add_argument(
+        "--lifecycle-registry",
+        default=LIFECYCLE_REGISTRY_DEFAULT,
+        help="Path to lifecycle registry JSON for orphan/legacy scripts",
+    )
+    parser.add_argument(
+        "--check-lifecycle",
+        action="store_true",
+        help="Validate lifecycle registry coverage for unknown/orphan/legacy scripts",
+    )
+    parser.add_argument(
+        "--forbid-evaluate-active",
+        action="store_true",
+        help="Fail lifecycle validation if any entry has decision=evaluate_active",
+    )
     return parser.parse_args(argv)
 
 
@@ -287,6 +456,22 @@ def main(argv: list[str] | None = None) -> int:
         result = _check(manifest_path, payload)
         if result != 0:
             return result
+
+    if args.check_lifecycle:
+        lifecycle_result = _check_lifecycle_registry(
+            root=root,
+            payload=payload,
+            registry_rel_path=str(args.lifecycle_registry),
+            forbid_evaluate_active=bool(args.forbid_evaluate_active),
+        )
+        if lifecycle_result != 0:
+            return lifecycle_result
+
+    report_path_text = str(args.deprecation_report).strip()
+    if report_path_text:
+        report_path = root / report_path_text
+        _write_deprecation_report(report_path, payload)
+        print(f"[OK] Updated scripts deprecation report: {report_path}")
 
     if args.json:
         print(json.dumps(payload, ensure_ascii=False, indent=2))

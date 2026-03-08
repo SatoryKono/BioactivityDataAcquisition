@@ -204,8 +204,8 @@ Collected files: 121
   copied: docs/00-project/ai/agents/snapshots/collected/.claude/agents/sp-powershell-security-hardening.md
 - source: .claude/agents/sp-powershell-module-architect.md
   copied: docs/00-project/ai/agents/snapshots/collected/.claude/agents/sp-powershell-module-architect.md
-- source: .claude/agents/sp-scrum-master.md
-  copied: docs/00-project/ai/agents/snapshots/collected/.claude/agents/sp-scrum-master.md
+- source: .claude/agents/sp-scrum-coach.md
+  copied: docs/00-project/ai/agents/snapshots/collected/.claude/agents/sp-scrum-coach.md
 - source: .claude/agents/sp-scientific-literature-researcher.md
   copied: docs/00-project/ai/agents/snapshots/collected/.claude/agents/sp-scientific-literature-researcher.md
 - source: .claude/agents/sp-sales-engineer.md

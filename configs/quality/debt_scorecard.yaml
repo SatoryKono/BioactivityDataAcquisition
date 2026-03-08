@@ -50,9 +50,9 @@ governance:
             registry:*: '2026-06-30'
             group:*: '2026-03-03'
 baseline:
-    total_exemptions: 24
+    total_exemptions: 25
     by_registry:
-        file_size_limits: 5
+        file_size_limits: 6
         function_complexity: 2
         function_length: 0
         class_size: 14

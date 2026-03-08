@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 __all__ = [
+    "_coerce_to_tuple",
+    "_coerce_to_typed_tuple",
     "_require_non_empty",
     "_validate_optional_threshold",
     "_validate_positive",
@@ -23,6 +25,25 @@ def _require_non_empty(value: object, field_name: str) -> None:
     """
     if not value:
         raise ValueError(f"{field_name} cannot be empty")
+
+
+def _coerce_to_tuple(obj: object, attr: str) -> None:
+    """Convert list values on a dataclass attribute to tuples."""
+    val = getattr(obj, attr, None)
+    if val is None or not isinstance(val, list):
+        return
+    object.__setattr__(obj, attr, tuple(val))
+
+
+def _coerce_to_typed_tuple(obj: object, attr: str, factory: type) -> None:
+    """Convert list values to tuples, coercing dict items into the factory type."""
+    val = getattr(obj, attr, None)
+    if val is None or not isinstance(val, list):
+        return
+    converted = tuple(
+        factory(**item) if isinstance(item, dict) else item for item in val
+    )
+    object.__setattr__(obj, attr, converted)
 
 
 def _validate_positive(value: int | float, field_name: str) -> None:

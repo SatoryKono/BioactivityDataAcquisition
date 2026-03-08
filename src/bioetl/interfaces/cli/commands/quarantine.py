@@ -215,7 +215,8 @@ def quarantine_stats(pipeline: str, output_json: bool) -> None:
         domain_error_title="Failed to get stats",
         unexpected_error_title="Failed to get stats",
     )
-    if stats is None: return
+    if stats is None:
+        return
     if output_json:
         click.echo(json.dumps(stats, indent=2))
     else:
@@ -268,7 +269,8 @@ def quarantine_replay(
         domain_error_title="Failed to replay quarantine records with domain error",
         unexpected_error_title="Unexpected error during quarantine replay",
     )
-    if records is None: return
+    if records is None:
+        return
     if not records:
         echo_info("No records found for replay.")
         return

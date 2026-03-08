@@ -27,3 +27,13 @@ def test_lint_terminology_supports_check_without_paths() -> None:
         "terminology violation" in result.stdout.lower()
         or "no terminology violations found" in result.stdout.lower()
     ), "Expected lint output, got argument parser or unexpected response"
+
+
+def test_lint_terminology_wrapper_delegates_to_canonical() -> None:
+    """Legacy wrapper path must delegate to canonical implementation."""
+    repo_root = Path(__file__).resolve().parents[2]
+    wrapper_path = repo_root / "scripts" / "lint_terminology.py"
+
+    assert wrapper_path.exists(), "scripts/lint_terminology.py must exist"
+    content = wrapper_path.read_text(encoding="utf-8")
+    assert "src/tools/scripts/lint_terminology.py" in content

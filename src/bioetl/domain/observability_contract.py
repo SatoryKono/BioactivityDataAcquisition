@@ -60,7 +60,8 @@ class ObservabilityContractPayload:
 
 
 def _coerce_non_empty(value: object | None, *, fallback: str) -> str:
-    if value is None: return fallback
+    if value is None:
+        return fallback
     text = str(value).strip()
     return text if text else fallback
 
