@@ -180,7 +180,7 @@ Records with identical `content-hash` are deduplicated during merge.
 ### Tests
 
 - `tests/unit/application/core/test_checkpoint_manager.py` — Test `force-full-scan` behavior
-- `tests/architecture/test_force_full_scan_configs.py` — Verify publication configs have flag set
+- `tests/architecture/test_force_full_scan_publication.py` — Verify publication configs have flag set
 
 ## References
 

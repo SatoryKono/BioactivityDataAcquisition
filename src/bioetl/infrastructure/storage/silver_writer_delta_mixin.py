@@ -54,11 +54,7 @@ class SilverWriterDeltaMixin:
 
     @staticmethod
     def _load_silver_writer_module() -> Any:  # Any: return type varies at runtime
-        """Load silver_writer module for backward-compatible patch points.
-
-        Returns:
-            Silver writer module with write_deltalake and DeltaTable references.
-        """
+        """Load silver_writer module for backward-compatible patch points."""
         from bioetl.infrastructure.storage import silver_writer as silver_writer_module
 
         return silver_writer_module
@@ -69,13 +65,7 @@ class SilverWriterDeltaMixin:
         data: pa.Table,
         partition_cols: list[str] | None,
     ) -> None:
-        """Write data in delete mode (overwrite table).
-
-        Args:
-            table_path: File system path to the Delta table.
-            data: PyArrow table containing the records to write.
-            partition_cols: Optional list of column names to partition by.
-        """
+        """Write data in delete mode (overwrite table)."""
         loop = asyncio.get_running_loop()
         await loop.run_in_executor(
             None,
@@ -94,13 +84,7 @@ class SilverWriterDeltaMixin:
         data: pa.Table,
         partition_cols: list[str] | None,
     ) -> None:
-        """Write data in append mode.
-
-        Args:
-            table_path: File system path to the Delta table.
-            data: PyArrow table containing the records to append.
-            partition_cols: Optional list of column names to partition by.
-        """
+        """Write data in append mode."""
         loop = asyncio.get_running_loop()
         await loop.run_in_executor(
             None,
@@ -119,14 +103,7 @@ class SilverWriterDeltaMixin:
         primary_keys: list[str],
         partition_cols: list[str] | None,
     ) -> None:
-        """Write data using merge/upsert strategy with conflict retry.
-
-        Args:
-            table_path: File system path to the Delta table.
-            data: PyArrow table containing the records to merge.
-            primary_keys: List of column names used as merge predicates.
-            partition_cols: Optional list of column names to partition by.
-        """
+        """Write data using merge/upsert strategy with conflict retry."""
         policy = getattr(
             self,
             "_merge_resilience_policy",
@@ -213,15 +190,7 @@ class SilverWriterDeltaMixin:
         primary_keys: list[str],
         partition_cols: list[str] | None,
     ) -> None:
-        """Dispatch write call by mode.
-
-        Args:
-            validated_mode: Silver write mode (DELETE, APPEND, or MERGE).
-            table_path: File system path to the Delta table.
-            arrow_data: PyArrow table containing the records to write.
-            primary_keys: List of column names used as merge predicates.
-            partition_cols: Optional list of column names to partition by.
-        """
+        """Dispatch write call by mode."""
         if validated_mode == SilverWriteMode.DELETE:
             await self._write_delete(table_path, arrow_data, partition_cols)
         elif validated_mode == SilverWriteMode.APPEND:
@@ -240,15 +209,7 @@ class SilverWriterDeltaMixin:
         *,
         timeout_seconds: float,
     ) -> None:
-        """Merge records into an existing Delta table.
-
-        Args:
-            dt: Open DeltaTable instance to merge into.
-            records: PyArrow table or record batch reader with records to merge.
-            primary_keys: List of column names used as merge predicates.
-            table_path: File system path used for timeout error messages.
-            timeout_seconds: Maximum seconds to wait for the merge operation to complete.
-        """
+        """Merge records into an existing Delta table."""
         merge_condition = " AND ".join(
             f"target.{key} = source.{key}" for key in primary_keys
         )
@@ -301,15 +262,7 @@ class SilverWriterDeltaMixin:
         max_retries: int,
         delay_seconds: float,
     ) -> None:
-        """Emit telemetry for a merge retry attempt.
-
-        Args:
-            table_path: File system path to the Delta table being merged.
-            retry_type: Type of retry (e.g., "commit_conflict" or "timeout").
-            attempt: Current retry attempt number (1-based).
-            max_retries: Maximum number of retries configured.
-            delay_seconds: Delay in seconds before this retry attempt.
-        """
+        """Emit telemetry for a merge retry attempt."""
         self._logger.warning(
             "silver_merge_retry",
             table_path=table_path,
@@ -334,12 +287,7 @@ class SilverWriterDeltaMixin:
     def _emit_merge_final_telemetry(
         self, *, table_path: str, final_reason: str
     ) -> None:
-        """Emit telemetry when merge retries are exhausted.
-
-        Args:
-            table_path: File system path to the Delta table that failed to merge.
-            final_reason: Reason string describing the final failure cause.
-        """
+        """Emit telemetry when merge retries are exhausted."""
         self._logger.error(
             "silver_merge_failed",
             table_path=table_path,
@@ -368,20 +316,7 @@ class SilverWriterDeltaMixin:
         primary_keys: list[str],
         partition_cols: list[str] | None,
     ) -> None:
-        """Dispatch write and translate infrastructure errors to domain errors.
-
-        Args:
-            table_name: Logical table name used in domain error messages.
-            validated_mode: Silver write mode (DELETE, APPEND, or MERGE).
-            table_path: File system path to the Delta table.
-            arrow_data: PyArrow table containing the records to write.
-            primary_keys: List of column names used as merge predicates.
-            partition_cols: Optional list of column names to partition by.
-
-        Raises:
-            SchemaViolationError: If schema mismatch or Arrow type error occurs.
-            MergeConflictError: If a merge conflict occurs in the Delta table.
-        """
+        """Dispatch write and translate infrastructure errors to domain errors."""
         try:
             await self._dispatch_write(
                 validated_mode,

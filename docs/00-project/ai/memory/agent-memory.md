@@ -31,6 +31,7 @@
 | Персона агента | `docs/00-project/ai/agents/guides/AGENT.md` |
 | Self-review правила | `.claude/rules/ai-selfreview-rules.md` |
 | Оркестрация субагентов | `.claude/agents/ORCHESTRATION.md` |
+| Папка с промтами проекта | `docs/00-project/ai/prompts/` |
 | Глоссарий | `docs/00-project/glossary.md` |
 | ADR | `docs/02-architecture/decisions/` |
 | Domain Ports | `src/bioetl/domain/ports/` |

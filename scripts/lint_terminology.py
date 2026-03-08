@@ -1,29 +1,33 @@
 #!/usr/bin/env python3
-"""Thin facade for the canonical terminology linter implementation.
+"""Compatibility wrapper for agent-canonical terminology linter wrapper.
 
 Canonical script:
-- src/tools/scripts/lint_terminology.py
+- docs/00-project/ai/agents/scripts/lint_terminology.py
 """
 
 from __future__ import annotations
 
-import subprocess
+import runpy
 import sys
 from pathlib import Path
 
 
-def _canonical_script_path() -> Path:
+def _canonical_script() -> Path:
     repo_root = Path(__file__).resolve().parents[1]
-    return repo_root / "src" / "tools" / "scripts" / "lint_terminology.py"
-
-
-def main(argv: list[str] | None = None) -> int:
-    script = _canonical_script_path()
-    args = sys.argv[1:] if argv is None else argv
-    cmd = [sys.executable, str(script), *args]
-    result = subprocess.run(cmd, check=False)
-    return int(result.returncode)
+    return (
+        repo_root
+        / "docs"
+        / "00-project"
+        / "ai"
+        / "agents"
+        / "scripts"
+        / "lint_terminology.py"
+    )
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    script = _canonical_script()
+    if not script.exists():
+        sys.stderr.write(f"ERROR: canonical script not found: {script}\n")
+        raise SystemExit(2)
+    runpy.run_path(str(script), run_name="__main__")

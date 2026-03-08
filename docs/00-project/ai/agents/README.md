@@ -18,10 +18,8 @@
 | --- | --- | --- |
 | Guides | [guides/AGENT.md](guides/AGENT.md) | Инструкции для конкретных ассистентов |
 | Runtime docs | [runtime/agent-memory.md](runtime/agent-memory.md) | Канонические docs-артефакты агентных prompt/workflow |
-| Agent scripts | [scripts/diagrams/run_diagram_docs_agent.sh](scripts/diagrams/run_diagram_docs_agent.sh) | Оркестратор диаграммного агентного цикла |
+| Agent scripts | [scripts/diagrams/py-doc-bot-4.sh](scripts/diagrams/py-doc-bot-4.sh) | Оркестратор диаграммного агентного цикла |
 | Policy | [policy/AGENT_NAMING_POLICY_AND_RENAME_PLAN_2026-03-08.md](policy/AGENT_NAMING_POLICY_AND_RENAME_PLAN_2026-03-08.md) | Политики именования и стандарты |
-| Audit | [audit/AUDIT_CONSOLIDATION_REPORT_2026-03-08.md](audit/AUDIT_CONSOLIDATION_REPORT_2026-03-08.md) | Отчёты аудита и консолидации |
-| Snapshots | [snapshots/COLLECTED_AGENTS_INDEX.md](snapshots/COLLECTED_AGENTS_INDEX.md) | Исторические/собранные снапшоты (non-SSOT) |
 
 ## Canonical Documents
 
@@ -36,17 +34,8 @@
 | Agent Memory (quick) | [runtime/agent-memory.md](runtime/agent-memory.md) | Краткая оперативная память по проекту |
 | Team Orchestration | [runtime/orchestration/py-team-orchestration.md](runtime/orchestration/py-team-orchestration.md) | Адаптированная docs-копия оркестрации |
 
-## Snapshot Zone
+## Policy & Audit Reports
 
-Папка [snapshots/collected/AGENTS.md](snapshots/collected/AGENTS.md) содержит снапшот материалов для аудита/истории и не является SSOT.
-
-- Индекс снапшота: [snapshots/COLLECTED_AGENTS_INDEX.md](snapshots/COLLECTED_AGENTS_INDEX.md)
-- Scope текущего снапшота: в основном `.claude/agents/*` + связанные артефакты
-- Правило: содержимое snapshot-дерева не редактируется вручную
-
-## Audit Reports
-
-- [audit/AUDIT_CONSOLIDATION_REPORT_2026-03-08.md](audit/AUDIT_CONSOLIDATION_REPORT_2026-03-08.md)
 - [policy/AGENT_NAMING_POLICY_AND_RENAME_PLAN_2026-03-08.md](policy/AGENT_NAMING_POLICY_AND_RENAME_PLAN_2026-03-08.md)
 - [policy/AGENT_CONSOLIDATION_MATRIX_2026-03-08.md](policy/AGENT_CONSOLIDATION_MATRIX_2026-03-08.md)
 - [policy/SPECIALIST_PROFILE_TEMPLATE.md](policy/SPECIALIST_PROFILE_TEMPLATE.md)

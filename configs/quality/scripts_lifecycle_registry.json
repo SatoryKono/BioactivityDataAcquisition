@@ -110,12 +110,6 @@
       "review_by": "2026-06-30",
       "next_step": "Сохранить как manual tool; добавить подтвержденный operational playbook и периодический smoke-check."
     },
-    "scripts/config_gap_analysis.py": {
-      "owner": "@bioetl-platform",
-      "decision": "keep_manual",
-      "review_by": "2026-06-30",
-      "next_step": "Сохранить как manual tool; добавить подтвержденный operational playbook и периодический smoke-check."
-    },
     "scripts/debug_pandera.py": {
       "owner": "@bioetl-platform",
       "decision": "deprecate",
@@ -331,6 +325,12 @@
       "decision": "keep_manual",
       "review_by": "2026-06-30",
       "next_step": "Сохранить как manual tool; добавить явный smoke-вызов/операционный playbook или перевести в deprecate."
+    },
+    "scripts/diagrams/check_class_method_render_integrity.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Сохранить как manual diagram QA tool; при переносе run_diagram_checks в canonical scripts включить явный scripts-callsite."
     }
   }
 }

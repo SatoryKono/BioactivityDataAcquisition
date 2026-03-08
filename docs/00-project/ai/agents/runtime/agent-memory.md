@@ -22,6 +22,7 @@
 - **Quarantine** для невалидных данных; DQ thresholds: >5% warning, >20% fail.
 - **Local-only**: `MemoryLock` (TTL 90s, heartbeat 30s, max 4h).
 - **Secrets** только через `pydantic-settings`/`os.environ`, без хардкода.
+- **Папка с промтами проекта**: `docs/00-project/ai/prompts/`.
 
 ## Разработка и запуск
 - Быстрый старт: `./dev-setup.sh` (или `--quick`).

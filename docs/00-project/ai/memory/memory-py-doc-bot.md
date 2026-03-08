@@ -193,11 +193,8 @@ Key terms to keep synchronized:
 ### Cross-reference Validation
 
 ```bash
-# Check for broken internal links
-grep -rn "\[.*\](.*\.md)" docs/ --include="*.md" | while read line; do
-  link=$(echo "$line" | grep -o '](.*\.md)' | tr -d ']()')
-  if [ ! -f "$link" ]; then echo "BROKEN: $line"; fi
-done
+# Check for broken internal links (canonical checker)
+python scripts/check_doc_links.py --links
 
 # Check ADR references in code
 grep -rn "ADR-[0-9]" src/bioetl/ --include="*.py" | head -20

@@ -15,7 +15,7 @@ def _project_root() -> Path:
 def test_scripts_inventory_manifest_exists_and_has_required_keys() -> None:
     """Inventory manifest must exist and keep a stable schema."""
     root = _project_root()
-    manifest_path = root / "reports" / "quality" / "scripts_inventory_manifest.json"
+    manifest_path = root / "configs" / "quality" / "scripts_inventory_manifest.json"
 
     assert manifest_path.exists(), (
         "Scripts inventory manifest is missing: "
@@ -43,7 +43,7 @@ def test_scripts_inventory_manifest_drift_check_passes() -> None:
         "scripts/check_scripts_inventory.py",
         "--check",
         "--manifest",
-        "reports/quality/scripts_inventory_manifest.json",
+        "configs/quality/scripts_inventory_manifest.json",
     ]
     result = subprocess.run(
         cmd,

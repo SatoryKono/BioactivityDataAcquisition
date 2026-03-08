@@ -40,21 +40,7 @@ class APIRequestCollector:
         retry_after_seconds: float | None = None,
         timestamp: datetime | None = None,
     ) -> None:
-        """Record normalized request telemetry (URL, timing, status, and rate-limit data).
-
-        Args:
-            url: Full request URL including query string.
-            method: HTTP method string (default "GET").
-            response_size: Size of the response body in bytes.
-            duration_ms: Request round-trip duration in milliseconds.
-            status_code: HTTP response status code.
-            params: Explicit query parameters; parsed from URL if None.
-            rate_limit_remaining: Value of X-RateLimit-Remaining header if present.
-            rate_limit_limit: Value of X-RateLimit-Limit header if present.
-            rate_limit_reset: Parsed value of X-RateLimit-Reset header if present.
-            retry_after_seconds: Value of Retry-After header in seconds if present.
-            timestamp: Request timestamp; defaults to current UTC time.
-        """
+        """Record normalized request telemetry (URL, timing, status, and rate-limit data)."""
         parsed = urlparse(url)
         base_url = f"{parsed.scheme}://{parsed.netloc}"
         endpoint = parsed.path
@@ -92,17 +78,7 @@ class APIRequestCollector:
         rate_limit_reset: datetime | None,
         retry_after_seconds: float | None,
     ) -> RateLimitInfo | None:
-        """Build RateLimitInfo when at least one rate-limit attribute is present.
-
-        Args:
-            rate_limit_remaining: Remaining requests in the current rate limit window.
-            rate_limit_limit: Maximum requests allowed in the rate limit window.
-            rate_limit_reset: Time when the rate limit window resets.
-            retry_after_seconds: Seconds to wait before retrying (from Retry-After header).
-
-        Returns:
-            RateLimitInfo instance if any rate-limit attribute is non-None, None otherwise.
-        """
+        """Build RateLimitInfo when at least one rate-limit attribute is present."""
         if not any(
             (
                 rate_limit_remaining,
@@ -125,13 +101,7 @@ class APIRequestCollector:
         duration_ms: float,
         timestamp: datetime | None = None,
     ) -> None:
-        """Record request details from an ``httpx.Response`` object.
-
-        Args:
-            response: httpx.Response to extract URL, status, headers, and body size from.
-            duration_ms: Request round-trip duration in milliseconds.
-            timestamp: Request timestamp; defaults to current UTC time.
-        """
+        """Record request details from an ``httpx.Response`` object."""
         # Extract rate limit headers
         rate_limit_remaining = self._parse_int_header(
             response.headers.get("X-RateLimit-Remaining")
@@ -170,17 +140,7 @@ class APIRequestCollector:
         api_version: str | None = None,
         query_string: str | None = None,
     ) -> SourceMetadata:
-        """Build SourceMetadata with collected request details and aggregates.
-
-        Args:
-            source_type: Type of data source (default "api").
-            url: Base URL of the data source for metadata record.
-            api_version: API version string to include in metadata.
-            query_string: Query string used for the fetch operation.
-
-        Returns:
-            SourceMetadata instance with aggregated request statistics.
-        """
+        """Build SourceMetadata with collected request details and aggregates."""
         with self._lock:
             requests_copy = self._requests.copy()
 
@@ -218,14 +178,7 @@ class APIRequestCollector:
     def _parse_query_params(
         self, query_string: str
     ) -> dict[str, str | int | float | bool | None]:
-        """Parse query string into dict.
-
-        Args:
-            query_string: URL query string without the leading '?'.
-
-        Returns:
-            Dictionary mapping query parameter names to their string values.
-        """
+        """Parse query string into dict."""
         if not query_string:
             return {}
         params: dict[str, str | int | float | bool | None] = {}
@@ -239,16 +192,7 @@ class APIRequestCollector:
         self,
         params: JsonDict,  # Any: untyped API JSON record
     ) -> dict[str, str | int | float | bool | None]:
-        """Sanitize query parameters to exclude sensitive data.
-
-        Removes API keys, tokens, and other sensitive parameter names.
-
-        Args:
-            params: Raw query parameters dictionary to sanitize.
-
-        Returns:
-            Dictionary with sensitive values replaced by '[REDACTED]'.
-        """
+        """Sanitize query parameters to exclude sensitive data."""
         sensitive_keys = {
             "api_key",
             "apikey",
@@ -274,14 +218,7 @@ class APIRequestCollector:
         return result
 
     def _normalize_method(self, method: str) -> Literal["GET", "POST", "HEAD"]:
-        """Normalize HTTP method to SourceMetadata-compatible literal.
-
-        Args:
-            method: HTTP method string in any case (e.g. "get", "POST").
-
-        Returns:
-            Normalized HTTP method string ("GET", "POST", or "HEAD").
-        """
+        """Normalize HTTP method to SourceMetadata-compatible literal."""
         normalized = method.upper()
         if normalized == "GET":
             return "GET"
@@ -292,14 +229,7 @@ class APIRequestCollector:
         return "GET"
 
     def _parse_int_header(self, value: str | None) -> int | None:
-        """Parse integer header value.
-
-        Args:
-            value: Raw HTTP header value string, or None if header is absent.
-
-        Returns:
-            Parsed integer if value is a valid integer string, None otherwise.
-        """
+        """Parse integer header value."""
         if value is None:
             return None
         try:
@@ -308,14 +238,7 @@ class APIRequestCollector:
             return None
 
     def _parse_float_header(self, value: str | None) -> float | None:
-        """Parse float header value.
-
-        Args:
-            value: Raw HTTP header value string, or None if header is absent.
-
-        Returns:
-            Parsed float if value is a valid float string, None otherwise.
-        """
+        """Parse float header value."""
         if value is None:
             return None
         try:
@@ -324,14 +247,7 @@ class APIRequestCollector:
             return None
 
     def _parse_reset_header(self, value: str | None) -> datetime | None:
-        """Parse X-RateLimit-Reset header (Unix timestamp or HTTP date).
-
-        Args:
-            value: Raw X-RateLimit-Reset header value string, or None if absent.
-
-        Returns:
-            datetime from Unix timestamp if parseable, None otherwise.
-        """
+        """Parse X-RateLimit-Reset header (Unix timestamp or HTTP date)."""
         if value is None:
             return None
         try:

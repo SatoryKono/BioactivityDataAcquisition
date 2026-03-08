@@ -48,6 +48,7 @@
     │   ├── refactor_orchestration_prompt_1-2.md
     │   ├── architecture_metric_exemptions_tasks_json_prompt.md
     │   ├── scripts_inventory_consolidation_cleanup_prompt.md
+    │   ├── documentation_diagrams_audit.md  ← Аудит docs/ и диаграмм
     │   ├── ai_workspace_setup.md      ← Этот промт
     │   └── collected/                 ← Исторические промты (non-SSOT)
     └── memory/                        ← Память агентов
@@ -124,6 +125,7 @@
 | `refactor_orchestration_prompt_1-2.md` | Компактная версия (фазы 1-2) |
 | `architecture_metric_exemptions_tasks_json_prompt.md` | Задачи рефакторинга metric exemptions |
 | `scripts_inventory_consolidation_cleanup_prompt.md` | Инвентаризация и очистка скриптов |
+| `documentation_diagrams_audit.md` | Аудит документации и диаграмм (docs/ без ai/) |
 | `ai_workspace_setup.md` | Этот промт (настройка AI workspace) |
 | `COLLECTED_PROMPTS_INDEX.md` | Индекс архивных промтов |
 
