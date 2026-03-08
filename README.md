@@ -90,7 +90,8 @@ The domain layer implements Domain-Driven Design patterns:
 
 - **Python**: Version 3.11 or higher.
 - **Make**: For running automation commands.
-- **Docker**: Optional, legacy-only (see [Legacy Distributed Mode](#legacy-distributed-mode-rejected--unsupported)).
+- **uv**: Recommended package manager ([install](https://docs.astral.sh/uv/getting-started/installation/)).
+- **Docker**: Optional, for Neo4j and monitoring stack only.
 
 ### Installation
 
@@ -106,13 +107,25 @@ cd BioactivityDataAcquisition2
 
 The script will:
 
-- Check prerequisites (Python 3.11+, Git, Make)
+- Check prerequisites (Python 3.11+, Git, Make, uv, Docker, Node.js)
 - Create virtual environment and install dependencies
 - Set up pre-commit hooks
-- Configure environment variables
-- Run verification checks
+- Configure environment variables and create data directories
+- Detect AI tools (Claude Code, Codex) and sync plugins
+- Run verification checks with a summary table
 
-For quick setup without tests: `./scripts/dev/dev_setup.sh --quick`
+Available modes:
+
+| Flag | Description |
+| ---- | ----------- |
+| `--quick` / `-q` | Fast install, skip tests and linters |
+| `--skip-tests` | Run linters but skip test suite |
+| `--force` / `-f` | Recreate virtual environment from scratch |
+| `--ci` | CI mode: no colors, non-interactive |
+| `--verbose` / `-v` | Show detailed dependency installation output |
+| `--no-color` | Disable colored output (also via `NO_COLOR=1`) |
+
+Environment variables: `BIOETL_SKIP_PRECOMMIT=1`, `BIOETL_SKIP_DOCKER=1`.
 
 #### Option B: Manual Setup
 
