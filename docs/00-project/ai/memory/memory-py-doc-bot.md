@@ -263,8 +263,8 @@ Always declare mode at the start of response.
 | Navigation map | `docs/00-map.md` |
 | CHANGELOG | `CHANGELOG.md` |
 | ADR directory | `docs/02-architecture/decisions/` |
-| Agent instructions | `docs/00-project/agents/CLAUDE.md` |
-| Agent persona | `docs/00-project/agents/AGENT.md` |
+| Agent instructions | `docs/00-project/ai/agents/guides/CLAUDE.md` |
+| Agent persona | `docs/00-project/ai/agents/guides/AGENT.md` |
 
 ---
 

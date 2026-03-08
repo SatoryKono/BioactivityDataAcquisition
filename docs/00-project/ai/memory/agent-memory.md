@@ -27,8 +27,8 @@
 |----------|------|
 | Правила проекта (Конституция) | `docs/00-project/RULES.md` |
 | Компактный контекст | `.claude/PROJECT_CONTEXT.md` |
-| Инструкции для Claude | `docs/00-project/agents/CLAUDE.md` |
-| Персона агента | `docs/00-project/agents/AGENT.md` |
+| Инструкции для Claude | `docs/00-project/ai/agents/guides/CLAUDE.md` |
+| Персона агента | `docs/00-project/ai/agents/guides/AGENT.md` |
 | Self-review правила | `.claude/rules/ai-selfreview-rules.md` |
 | Оркестрация субагентов | `.claude/agents/ORCHESTRATION.md` |
 | Глоссарий | `docs/00-project/glossary.md` |

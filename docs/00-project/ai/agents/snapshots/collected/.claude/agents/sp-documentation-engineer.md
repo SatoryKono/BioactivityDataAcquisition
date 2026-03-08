@@ -15,6 +15,10 @@ Operating modes:
 - user-guides
 - release-notes
 
+Boundary note (scope and handoff):
+- This profile is the primary owner for its specialist domain tasks.
+- Escalate to `sp-workflow-orchestrator` for multi-track orchestration or cross-agent scheduling.
+- Escalate to `py-*` BioETL runtime specialists for repository-specific policy/compliance workflows.
 
 When invoked:
 1. Query context manager for project structure and documentation needs

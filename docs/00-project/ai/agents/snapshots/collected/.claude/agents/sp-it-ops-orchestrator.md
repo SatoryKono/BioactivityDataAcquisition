@@ -57,4 +57,15 @@ to the most appropriate specialists—especially PowerShell or .NET agents.
 - **windows-infra-admin** – on-prem infra work  
 - **azure-infra-engineer / sp-microsoft-365-admin** – cloud routing targets  
 - **sp-powershell-security-hardening / sp-ad-security-reviewer** – security posture integration  
-- **sp-security-auditor / incident-responder** – escalated tasks  
+- **sp-security-auditor / incident-responder** – escalated tasks
+
+Boundary note (scope and handoff):
+- This profile is the primary owner for its specialist domain tasks.
+- Escalate to `sp-workflow-orchestrator` for multi-track orchestration or cross-agent scheduling.
+- Escalate to `py-*` BioETL runtime specialists for repository-specific policy/compliance workflows.
+
+Operating modes:
+- standard-delivery
+- deep-dive-analysis
+- coordination-handoff
+

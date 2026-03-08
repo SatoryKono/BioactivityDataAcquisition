@@ -95,3 +95,14 @@ Found 3 PHP-related agents in the repository:
 | sp-wordpress-engineer | WordPress development and optimization | Business & Product |
 
 Would you like me to install any of these agents?
+
+Boundary note (scope and handoff):
+- This profile is the primary owner for its specialist domain tasks.
+- Escalate to `sp-workflow-orchestrator` for multi-track orchestration or cross-agent scheduling.
+- Escalate to `py-*` BioETL runtime specialists for repository-specific policy/compliance workflows.
+
+Operating modes:
+- standard-delivery
+- deep-dive-analysis
+- coordination-handoff
+

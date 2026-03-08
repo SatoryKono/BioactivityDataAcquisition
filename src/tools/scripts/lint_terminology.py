@@ -109,6 +109,81 @@ def should_skip_file(filepath: Path) -> bool:
     return False
 
 
+def _is_skippable_line(line: str) -> bool:
+    """Return True when terminology scanning should skip the line."""
+    stripped = line.strip()
+    if stripped.startswith("#"):
+        return True
+    if stripped.startswith('"""') or stripped.startswith("'''"):
+        return True
+    return False
+
+
+def _make_violation(
+    *,
+    filepath: Path,
+    line_num: int,
+    match_text: str,
+    canonical_term: str,
+    line: str,
+) -> TermViolation:
+    """Create a TermViolation with normalized context formatting."""
+    return TermViolation(
+        file=filepath,
+        line_num=line_num,
+        deprecated_term=match_text,
+        canonical_term=canonical_term,
+        context=line.strip()[:80],
+    )
+
+
+def _collect_deprecated_term_violations(
+    *,
+    filepath: Path,
+    line_num: int,
+    line: str,
+) -> list[TermViolation]:
+    """Collect violations for globally deprecated terminology."""
+    violations: list[TermViolation] = []
+    for pattern, (canonical, _desc) in DEPRECATED_TERMS.items():
+        for match in re.finditer(pattern, line, re.IGNORECASE):
+            violations.append(
+                _make_violation(
+                    filepath=filepath,
+                    line_num=line_num,
+                    match_text=match.group(),
+                    canonical_term=canonical,
+                    line=line,
+                )
+            )
+    return violations
+
+
+def _collect_context_sensitive_violations(
+    *,
+    filepath: Path,
+    line_num: int,
+    line: str,
+) -> list[TermViolation]:
+    """Collect strict-mode violations with per-file allow-list handling."""
+    violations: list[TermViolation] = []
+    for pattern, (canonical, _desc, allowed_files) in CONTEXT_SENSITIVE_TERMS.items():
+        if any(allowed in filepath.name for allowed in allowed_files):
+            continue
+
+        for match in re.finditer(pattern, line, re.IGNORECASE):
+            violations.append(
+                _make_violation(
+                    filepath=filepath,
+                    line_num=line_num,
+                    match_text=match.group(),
+                    canonical_term=canonical,
+                    line=line,
+                )
+            )
+    return violations
+
+
 def check_file(filepath: Path, strict: bool = False) -> list[TermViolation]:
     """Check a file for terminology violations.
 
@@ -119,7 +194,7 @@ def check_file(filepath: Path, strict: bool = False) -> list[TermViolation]:
     Returns:
         List of TermViolation objects.
     """
-    violations = []
+    violations: list[TermViolation] = []
 
     try:
         content = filepath.read_text(encoding="utf-8")
@@ -130,49 +205,25 @@ def check_file(filepath: Path, strict: bool = False) -> list[TermViolation]:
     lines = content.splitlines()
 
     for line_num, line in enumerate(lines, start=1):
-        # Skip comments and docstrings (simple heuristic)
-        stripped = line.strip()
-        if stripped.startswith("#"):
-            continue
-        if stripped.startswith('"""') or stripped.startswith("'''"):
+        if _is_skippable_line(line):
             continue
 
-        # Check deprecated terms
-        for pattern, (canonical, _desc) in DEPRECATED_TERMS.items():
-            matches = list(re.finditer(pattern, line, re.IGNORECASE))
-            for match in matches:
-                violations.append(
-                    TermViolation(
-                        file=filepath,
-                        line_num=line_num,
-                        deprecated_term=match.group(),
-                        canonical_term=canonical,
-                        context=line.strip()[:80],
-                    )
-                )
+        violations.extend(
+            _collect_deprecated_term_violations(
+                filepath=filepath,
+                line_num=line_num,
+                line=line,
+            )
+        )
 
-        # Check context-sensitive terms in strict mode
         if strict:
-            for pattern, (
-                canonical,
-                _desc,
-                allowed_files,
-            ) in CONTEXT_SENSITIVE_TERMS.items():
-                # Skip if file is in allowed list
-                if any(allowed in filepath.name for allowed in allowed_files):
-                    continue
-
-                matches = list(re.finditer(pattern, line, re.IGNORECASE))
-                for match in matches:
-                    violations.append(
-                        TermViolation(
-                            file=filepath,
-                            line_num=line_num,
-                            deprecated_term=match.group(),
-                            canonical_term=canonical,
-                            context=line.strip()[:80],
-                        )
-                    )
+            violations.extend(
+                _collect_context_sensitive_violations(
+                    filepath=filepath,
+                    line_num=line_num,
+                    line=line,
+                )
+            )
 
     return violations
 

@@ -45,4 +45,15 @@ building, and reviewing scripts and workflows across major Microsoft cloud workl
 - **azure-infra-engineer** – identity / hybrid alignment  
 - **powershell-7-expert** – Graph + automation scripting  
 - **sp-powershell-module-architect** – module structure for cloud tooling  
-- **sp-it-ops-orchestrator** – M365 workflows involving infra + automation  
+- **sp-it-ops-orchestrator** – M365 workflows involving infra + automation
+
+Boundary note (scope and handoff):
+- This profile is the primary owner for its specialist domain tasks.
+- Escalate to `sp-workflow-orchestrator` for multi-track orchestration or cross-agent scheduling.
+- Escalate to `py-*` BioETL runtime specialists for repository-specific policy/compliance workflows.
+
+Operating modes:
+- standard-delivery
+- deep-dive-analysis
+- coordination-handoff
+
