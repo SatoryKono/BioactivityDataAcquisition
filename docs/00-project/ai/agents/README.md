@@ -16,12 +16,12 @@
 
 | Zone | Path | Purpose |
 | --- | --- | --- |
-| Guides | [guides/](guides/) | Инструкции для конкретных ассистентов |
-| Runtime docs | [runtime/](runtime/) | Канонические docs-артефакты агентных prompt/workflow |
-| Policy | [policy/](policy/) | Политики именования и стандарты |
-| Audit | [audit/](audit/) | Отчёты аудита и консолидации |
-| Snapshots | [snapshots/](snapshots/) | Исторические/собранные снапшоты (non-SSOT) |
-| Aliases | [aliases/](aliases/) | Документация compatibility-слоя |
+| Guides | [guides/AGENT.md](guides/AGENT.md) | Инструкции для конкретных ассистентов |
+| Runtime docs | [runtime/agent-memory.md](runtime/agent-memory.md) | Канонические docs-артефакты агентных prompt/workflow |
+| Policy | [policy/AGENT_NAMING_POLICY_AND_RENAME_PLAN_2026-03-08.md](policy/AGENT_NAMING_POLICY_AND_RENAME_PLAN_2026-03-08.md) | Политики именования и стандарты |
+| Audit | [audit/AUDIT_CONSOLIDATION_REPORT_2026-03-08.md](audit/AUDIT_CONSOLIDATION_REPORT_2026-03-08.md) | Отчёты аудита и консолидации |
+| Snapshots | [snapshots/COLLECTED_AGENTS_INDEX.md](snapshots/COLLECTED_AGENTS_INDEX.md) | Исторические/собранные снапшоты (non-SSOT) |
+| Aliases | [aliases/README.md](aliases/README.md) | Документация compatibility-слоя |
 
 ## Canonical Documents
 
@@ -38,7 +38,7 @@
 
 ## Snapshot Zone
 
-Папка [snapshots/collected/](snapshots/collected/) содержит снапшот материалов для аудита/истории и не является SSOT.
+Папка [snapshots/collected/AGENTS.md](snapshots/collected/AGENTS.md) содержит снапшот материалов для аудита/истории и не является SSOT.
 
 - Индекс снапшота: [snapshots/COLLECTED_AGENTS_INDEX.md](snapshots/COLLECTED_AGENTS_INDEX.md)
 - Scope текущего снапшота: в основном `.claude/agents/*` + связанные артефакты
@@ -48,6 +48,9 @@
 
 - [audit/AUDIT_CONSOLIDATION_REPORT_2026-03-08.md](audit/AUDIT_CONSOLIDATION_REPORT_2026-03-08.md)
 - [policy/AGENT_NAMING_POLICY_AND_RENAME_PLAN_2026-03-08.md](policy/AGENT_NAMING_POLICY_AND_RENAME_PLAN_2026-03-08.md)
+- [policy/AGENT_CONSOLIDATION_MATRIX_2026-03-08.md](policy/AGENT_CONSOLIDATION_MATRIX_2026-03-08.md)
+- [policy/SPECIALIST_PROFILE_TEMPLATE.md](policy/SPECIALIST_PROFILE_TEMPLATE.md)
+- [policy/CONSOLIDATION_VALIDATION.md](policy/CONSOLIDATION_VALIDATION.md)
 
 ## Compatibility
 

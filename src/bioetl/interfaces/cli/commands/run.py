@@ -78,7 +78,8 @@ def validate_options(start_offset: int | None, run_type: str, resume: bool) -> N
     validation = _CLI_RUN_ORCHESTRATION_SERVICE.validate_start_offset(
         start_offset=start_offset, run_type=run_type, resume=resume,
     )
-    if validation.is_valid: return
+    if validation.is_valid:
+        return
     if validation.error_message is not None:
         echo_error(validation.error_message)
         sys.exit(ExitCode.CONFIG_ERROR)

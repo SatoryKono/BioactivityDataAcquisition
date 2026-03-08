@@ -48,7 +48,7 @@ This reduces discoverability and increases naming drift risk.
 
 ### 3.2 Priority P2 (deduplicate semantics)
 
-1. `ml-engineer` -> alias/deprecate to `sp-machine-learning-engineer`
+1. `ml-engineer` -> alias/deprecate to `sp-ai-engineer`
 2. `mobile-app-developer` -> alias/deprecate to `sp-mobile-developer`
 3. Orchestration cluster unification target:
    - canonical: `sp-workflow-orchestrator`
@@ -99,3 +99,4 @@ Compatibility aliases are retained at old paths as deprecated stubs.
 
 1. This document defines policy and migration intent only.
 2. No runtime agent file was renamed within this change set.
+3. Consolidation updates are tracked separately in `AGENT_CONSOLIDATION_MATRIX_2026-03-08.md`.

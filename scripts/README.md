@@ -47,3 +47,47 @@ Make targets:
 
 - `make scripts-inventory-check`
 - `make scripts-inventory-update`
+
+## Dev Test Runner Consolidation
+
+Canonical implementation:
+
+- `scripts/dev/run_tests.py`
+
+Compatibility wrappers (stable entrypoints):
+
+- `scripts/dev/run_tests.sh`
+- `scripts/dev/run_tests.ps1`
+
+## Copilot/Codex MCP Setup Consolidation
+
+Canonical implementation:
+
+- `scripts/dev/setup_copilot_codex_mcp.py`
+
+Compatibility wrappers (stable entrypoints):
+
+- `scripts/dev/setup_copilot_codex_mcp.sh`
+- `scripts/dev/setup_copilot_codex_mcp.ps1`
+
+## Terminology Linter Consolidation
+
+Canonical implementation:
+
+- `src/tools/scripts/lint_terminology.py`
+
+Compatibility wrapper:
+
+- `scripts/lint_terminology.py`
+
+## Staged Deprecation Backlog
+
+Generate markdown backlog for `unknown` / `orphan` / `legacy` scripts:
+
+- `make scripts-deprecation-report`
+- `python scripts/check_scripts_inventory.py --deprecation-report reports/quality/scripts_deprecation_backlog.md`
+
+Validate lifecycle decisions for non-active scripts (`unknown` / `orphan` / `legacy`):
+
+- `make scripts-lifecycle-check`
+- `python scripts/check_scripts_inventory.py --check-lifecycle --forbid-evaluate-active --lifecycle-registry configs/quality/scripts_lifecycle_registry.json`

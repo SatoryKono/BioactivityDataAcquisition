@@ -113,7 +113,8 @@ def _require_table_argument(table: str | None) -> str:
     Returns:
         Validated table name string.
     """
-    if table: return table
+    if table:
+        return table
     echo_error("TABLE argument is required (or use --list to see available tables)")
     raise SystemExit(ExitCode.FAIL)
 
@@ -126,7 +127,8 @@ def _parse_columns(columns: str | None) -> list[str] | None:
     Returns:
         List of stripped column name strings, or None if no columns were specified.
     """
-    if not columns: return None
+    if not columns:
+        return None
     return [column.strip() for column in columns.split(",")]
 
 def _parse_export_format(output_format: str) -> ExportFormat:
@@ -138,7 +140,8 @@ def _parse_export_format(output_format: str) -> ExportFormat:
     Returns:
         Validated ExportFormat literal; defaults to 'csv' for unrecognized values.
     """
-    if output_format in {"csv", "xlsx", "tsv"}: return cast("ExportFormat", output_format)
+    if output_format in {"csv", "xlsx", "tsv"}:
+        return cast("ExportFormat", output_format)
     return "csv"
 
 def _build_export_options(

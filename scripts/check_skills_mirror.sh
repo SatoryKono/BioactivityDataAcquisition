@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # check_skills_mirror.sh - Verify/sync docs/00-project/ai/skills/local mirror from .codex/skills.
+# Also overlays reference bundles from docs/00-project/ai/skills/_references/local.
 # Usage:
 #   bash scripts/check_skills_mirror.sh --check
 #   bash scripts/check_skills_mirror.sh --sync
@@ -11,7 +12,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 SOURCE_ROOT="$REPO_ROOT/.codex/skills"
 MIRROR_ROOT="$REPO_ROOT/docs/00-project/ai/skills/local"
-REFERENCE_SOURCE_ROOT="$REPO_ROOT/docs/00-project/skills/local"
+REFERENCE_SOURCE_ROOT="$REPO_ROOT/docs/00-project/ai/skills/_references/local"
 MODE="${1:---check}"
 
 BLUE='\033[0;34m'
@@ -58,21 +59,23 @@ if [[ ! -d "$MIRROR_ROOT" ]]; then
     log_err "Mirror directory not found: $MIRROR_ROOT"
     exit 1
 fi
+if [[ ! -d "$REFERENCE_SOURCE_ROOT" ]]; then
+    log_err "Reference source directory not found: $REFERENCE_SOURCE_ROOT"
+    exit 1
+fi
 
 if [[ "$MODE" == "--sync" ]]; then
     log_info "Syncing docs/00-project/ai/skills/local from .codex/skills"
     find "$MIRROR_ROOT" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
     cp -a "$SOURCE_ROOT"/. "$MIRROR_ROOT"/
-    if [[ -d "$REFERENCE_SOURCE_ROOT" ]]; then
-        log_info "Overlaying documentation reference bundles (references/**)"
-        while IFS= read -r ref_dir; do
-            rel_path="${ref_dir#"$REFERENCE_SOURCE_ROOT"/}"
-            target_dir="$MIRROR_ROOT/$rel_path"
-            mkdir -p "$(dirname "$target_dir")"
-            rm -rf "$target_dir"
-            cp -a "$ref_dir" "$target_dir"
-        done < <(find "$REFERENCE_SOURCE_ROOT" -type d -name references | sort)
-    fi
+    log_info "Overlaying documentation reference bundles (references/**)"
+    while IFS= read -r ref_dir; do
+        rel_path="${ref_dir#"$REFERENCE_SOURCE_ROOT"/}"
+        target_dir="$MIRROR_ROOT/$rel_path"
+        mkdir -p "$(dirname "$target_dir")"
+        rm -rf "$target_dir"
+        cp -a "$ref_dir" "$target_dir"
+    done < <(find "$REFERENCE_SOURCE_ROOT" -type d -name references | sort)
     log_ok "Sync completed"
 fi
 

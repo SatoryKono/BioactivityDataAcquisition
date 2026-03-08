@@ -7,6 +7,7 @@ This directory stores documentation mirrors for Codex skills.
 - Canonical published layout is restored:
   - `docs/00-project/ai/skills/local/**` (repo-local mirror from `.codex/skills`)
   - `docs/00-project/ai/skills/global/**` (snapshot of selected global skills)
+  - `docs/00-project/ai/skills/_references/**` (reference bundles overlaid into local mirror)
 - Legacy flat layout (`docs/00-project/ai/skills/<skill>/...`) is removed (Phase-2 complete).
 - Removed obsolete single-file artifacts:
   - `architecture-guardian.openai.yaml`

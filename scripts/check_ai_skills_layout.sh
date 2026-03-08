@@ -3,7 +3,8 @@
 # Canonical top-level directories in docs/00-project/ai/skills:
 #   - local
 #   - global
-#   - collected (internal archive)
+#   - _references
+#   - collected (optional internal archive)
 
 set -euo pipefail
 
@@ -26,7 +27,7 @@ if [[ ! -d "$SKILLS_ROOT" ]]; then
 fi
 
 log_info "Checking required directories"
-for required in local global; do
+for required in local global _references; do
     if [[ ! -d "$SKILLS_ROOT/$required" ]]; then
         log_err "Missing required directory: docs/00-project/ai/skills/$required"
         exit 1
@@ -36,7 +37,7 @@ done
 log_info "Checking forbidden top-level skill folders"
 mapfile -t bad_dirs < <(
     find "$SKILLS_ROOT" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' \
-        | grep -Ev '^(local|global|collected)$' || true
+        | grep -Ev '^(_references|local|global|collected)$' || true
 )
 if (( ${#bad_dirs[@]} > 0 )); then
     log_err "Forbidden top-level directories detected:"
@@ -57,6 +58,51 @@ if (( ${#bad_files[@]} > 0 )); then
     for f in "${bad_files[@]}"; do
         echo "  - docs/00-project/ai/skills/$f"
     done
+    exit 1
+fi
+
+log_info "Checking active docs/scripts for forbidden legacy path docs/00-project/skills/"
+if command -v rg >/dev/null 2>&1; then
+    legacy_hits="$(
+        rg -n --hidden \
+            --glob '!docs/00-project/skills/**' \
+            --glob '!docs/reports/**' \
+            --glob '!docs/exports/**' \
+            --glob '!docs/99-archive/**' \
+            --glob '!scripts/check_ai_skills_layout.sh' \
+            "docs/00-project/skills/" \
+            "$REPO_ROOT/mkdocs.yml" \
+            "$REPO_ROOT/.github" \
+            "$REPO_ROOT/scripts" \
+            "$REPO_ROOT/docs/00-project" \
+            "$REPO_ROOT/docs/01-requirements" \
+            "$REPO_ROOT/docs/02-architecture" \
+            "$REPO_ROOT/docs/03-guides" \
+            "$REPO_ROOT/docs/04-reference" \
+            "$REPO_ROOT/docs/05-operations" || true
+    )"
+else
+    legacy_hits="$(
+        grep -Rsn "docs/00-project/skills/" \
+            "$REPO_ROOT/mkdocs.yml" \
+            "$REPO_ROOT/.github" \
+            "$REPO_ROOT/scripts" \
+            "$REPO_ROOT/docs/00-project" \
+            "$REPO_ROOT/docs/01-requirements" \
+            "$REPO_ROOT/docs/02-architecture" \
+            "$REPO_ROOT/docs/03-guides" \
+            "$REPO_ROOT/docs/04-reference" \
+            "$REPO_ROOT/docs/05-operations" \
+            --exclude-dir=skills \
+            --exclude-dir=reports \
+            --exclude-dir=exports \
+            --exclude-dir=99-archive \
+            --exclude=check_ai_skills_layout.sh || true
+    )"
+fi
+if [[ -n "$legacy_hits" ]]; then
+    log_err "Forbidden references to legacy docs/00-project/skills/ detected:"
+    echo "$legacy_hits"
     exit 1
 fi
 

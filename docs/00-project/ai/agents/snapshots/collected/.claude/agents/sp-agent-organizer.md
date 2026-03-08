@@ -9,4 +9,6 @@ This profile name is deprecated by naming policy.
 
 Canonical profile: [sp-workflow-orchestrator.md](sp-workflow-orchestrator.md)
 
+Planned removal date: 2026-06-30.
+
 Do not edit this alias directly.

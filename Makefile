@@ -1,7 +1,7 @@
 # BioETL Makefile
 # Production-ready ETL system for bioactivity data
 
-.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-local-artifacts sanitize-local clean-preflight clean-all diagram-preflight lint-diagrams report-diagrams-policy validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png render-diagrams-descriptions-docx render-diagrams-descriptions-pdf run-diagram-docs-agent check-diagrams-visibility check-diagrams-pdf-bounds diagrams-all report-diagram-padding docs-lint docs-quality docs-docstrings docs-drift scripts-inventory-check scripts-inventory-update
+.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-local-artifacts sanitize-local clean-preflight clean-all diagram-preflight lint-diagrams report-diagrams-policy validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png render-diagrams-descriptions-docx render-diagrams-descriptions-pdf run-diagram-docs-agent check-diagrams-visibility check-diagrams-pdf-bounds diagrams-all report-diagram-padding docs-lint docs-quality docs-docstrings docs-drift scripts-inventory-check scripts-inventory-update scripts-deprecation-report scripts-lifecycle-check
 .DEFAULT_GOAL := help
 
 # Detect uv availability (preferred package manager)
@@ -506,7 +506,17 @@ scripts-inventory-update: ## Update scripts inventory manifest
 	$(PY_RUN) scripts/check_scripts_inventory.py --update --manifest reports/quality/scripts_inventory_manifest.json
 	@echo "$(GREEN)Scripts inventory manifest updated!$(NC)"
 
-docs-quality: docs-lint docs-docstrings docs-drift scripts-inventory-check ## Run all documentation quality checks
+scripts-deprecation-report: ## Generate staged deprecation backlog for non-active scripts
+	@echo "$(BLUE)Generating scripts deprecation backlog...$(NC)"
+	$(PY_RUN) scripts/check_scripts_inventory.py --deprecation-report reports/quality/scripts_deprecation_backlog.md
+	@echo "$(GREEN)Scripts deprecation backlog updated!$(NC)"
+
+scripts-lifecycle-check: ## Validate lifecycle registry coverage for non-active scripts
+	@echo "$(BLUE)Validating scripts lifecycle registry...$(NC)"
+	$(PY_RUN) scripts/check_scripts_inventory.py --check-lifecycle --forbid-evaluate-active --lifecycle-registry configs/quality/scripts_lifecycle_registry.json
+	@echo "$(GREEN)Scripts lifecycle registry is valid!$(NC)"
+
+docs-quality: docs-lint docs-docstrings docs-drift scripts-inventory-check scripts-lifecycle-check ## Run all documentation quality checks
 	@echo "$(GREEN)All documentation quality checks passed!$(NC)"
 
 schema-artifacts: ## Generate canonical schema artifacts (registry + contracts)

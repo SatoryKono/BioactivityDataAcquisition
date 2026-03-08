@@ -7,6 +7,7 @@
 - `.codex/skills/` — канонический источник репозиторных локальных skills.
 - `docs/00-project/ai/skills/local/` — сгенерированное зеркало, его нельзя редактировать вручную.
 - `docs/00-project/ai/skills/global/` — курируемый snapshot выбранных глобальных skills.
+- `docs/00-project/ai/skills/_references/` — канонический источник reference-бандлов для overlay в `local/`.
 - Плоские корневые папки вида `docs/00-project/ai/skills/<skill>/` запрещены.
 - Frontmatter (`name`, `description`) в каждом `SKILL.md` считается контрактом триггера.
 - Проверка и синхронизация локального зеркала:
@@ -83,6 +84,7 @@ bash scripts/check_skills_mirror.sh --sync
 - Legacy flat-папки skills удалены (Phase-2 завершён).
 - Legacy одиночные артефакты удалены (`*.openai.yaml`, `*.skill.md`).
 - Guardrail: `scripts/check_ai_skills_layout.sh` принудительно проверяет канонический top-level layout.
+- Guardrail: в активной документации и скриптах запрещены ссылки на legacy-зеркало skills.
 
 ## Индекс Зеркала Документации
 

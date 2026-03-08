@@ -41,6 +41,12 @@ registries:
             expires_on: '2026-06-30'
             removal_step: Extract filter resolution and DQ config resolution into separate resolver modules.
         # --- interfaces ---
+        src/bioetl/interfaces/cli/commands/export.py:
+            value: 410
+            owner: '@bioetl-architecture'
+            reason: Export CLI command — async preview/export/list with typed exception handling boilerplate per operation.
+            expires_on: '2026-06-30'
+            removal_step: Extract shared async runner pattern into a reusable CLI async helper.
         src/bioetl/interfaces/cli/commands/run_all.py:
             value: 485
             owner: '@bioetl-architecture'

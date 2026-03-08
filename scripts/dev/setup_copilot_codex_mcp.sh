@@ -1,44 +1,25 @@
 #!/usr/bin/env bash
-# Configure GitHub MCP for VS Code Copilot and Codex CLI.
+# Thin facade for backward compatibility.
+# Canonical implementation: scripts/dev/setup_copilot_codex_mcp.py
 set -euo pipefail
 
-readonly ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-readonly VSCODE_MCP_PATH="${ROOT_DIR}/.vscode/mcp.json"
-readonly GITHUB_MCP_PACKAGE="@modelcontextprotocol/server-github@2025.4.8"
+PROJECT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
+cd "$PROJECT_DIR"
 
-print() {
-    printf '%s\n' "$1"
+detect_python() {
+    local cmd
+    for cmd in py python python3; do
+        if command -v "$cmd" >/dev/null 2>&1; then
+            echo "$cmd"
+            return 0
+        fi
+    done
+    return 1
 }
 
-print "[1/3] Writing VS Code MCP config: ${VSCODE_MCP_PATH}"
-mkdir -p "$(dirname "${VSCODE_MCP_PATH}")"
-cat > "${VSCODE_MCP_PATH}" <<'JSON'
-{
-  "servers": {
-    "github": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-github@2025.4.8"
-      ]
-    }
-  }
+PYTHON_BIN="$(detect_python)" || {
+    echo "[FAIL] Python executable not found in PATH" >&2
+    exit 1
 }
-JSON
 
-if ! command -v codex >/dev/null 2>&1; then
-    print "[2/3] Codex CLI not found. Skipping Codex MCP registration."
-    print "[3/3] Done."
-    exit 0
-fi
-
-print "[2/3] Checking Codex MCP server registration: github"
-if codex mcp get github >/dev/null 2>&1; then
-    print "      github MCP already registered in Codex."
-else
-    codex mcp add github -- npx -y "${GITHUB_MCP_PACKAGE}"
-    print "      github MCP registered in Codex."
-fi
-
-print "[3/3] Done."
-print "Set GITHUB_PERSONAL_ACCESS_TOKEN in your shell before using GitHub MCP tools."
+exec "$PYTHON_BIN" scripts/dev/setup_copilot_codex_mcp.py "$@"

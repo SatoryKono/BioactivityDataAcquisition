@@ -284,7 +284,7 @@ BioETL-специфичные навыки инлайнированы в `.claud
 | `code-simplifier` | Упрощение кода | Рефакторинг для читаемости |
 | `feature-dev:code-architect` | Архитектура фичи | Blueprints, data flows |
 | `feature-dev:code-explorer` | Анализ фичи | Tracing execution paths |
-| `feature-dev:code-reviewer` | Code review | Bugs, security, quality |
+| `feature-dev:sp-code-reviewer` | Code review | Bugs, security, quality |
 
 ---
 

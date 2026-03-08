@@ -336,7 +336,9 @@ def prepare_runner_inputs(
         vacuum=vacuum,
         health_check_mode=resolve_health_check_mode(settings=settings),
     )
-    filter_config = assemble_filter_config_fn(yaml_filter=yaml_config.input_filter, ctx=ctx, test_mode=settings.test_mode)
+    filter_config = assemble_filter_config_fn(
+        yaml_filter=yaml_config.input_filter, ctx=ctx, test_mode=settings.test_mode,
+    )
     _log_filter_config(observability=observability, filter_config=filter_config, from_cli=ctx.input_filter.enabled)
     adjust_batch_size_for_filter(
         yaml_config=yaml_config,

@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from bioetl.domain.composite.aggregation import (
     AggregationConfig,
     EnricherCardinality,
 )
-from bioetl.domain.composite.config_merge import ColumnGroupConfig
+from bioetl.domain.composite.config_schema import DataSchemaConfig, LayerColumnConfig
 from bioetl.domain.composite.config_validators import (
+    _coerce_to_tuple,
+    _coerce_to_typed_tuple,
     _require_non_empty,
     _validate_positive,
     _validate_positive_limit,
@@ -171,103 +173,37 @@ class EnricherConfig:
         return self.cardinality == EnricherCardinality.MANY_TO_ONE
 
 
-def _coerce_to_tuple(obj: object, attr: str, convert_dicts: type | None = None) -> None:
-    """Convert list to tuple, optionally converting dict elements to specified type."""
-    val = getattr(obj, attr, None)
-    if val is not None and isinstance(val, list):
-        if convert_dicts:
-            val = tuple(convert_dicts(**item) if isinstance(item, dict) else item for item in val)
-        else:
-            val = tuple(val)
-        object.__setattr__(obj, attr, val)
-
-
-@dataclass(frozen=True, slots=True)
-class LayerColumnConfig:
-    """Column selection configuration for a single Medallion layer.
-
-    Supports three mutually exclusive selection modes: explicit column list,
-    group inclusion, or full column group definitions. Exactly one mode
-    may be active; specifying more than one raises ``ValueError``.
-    """
-
-    columns: tuple[str, ...] | None = None
-    column_groups: tuple[ColumnGroupConfig, ...] | None = None
-    include_groups: tuple[str, ...] | None = None
-    exclude_fields: tuple[str, ...] | None = None
-    rename_fields: dict[str, str] = field(default_factory=dict)
-
-    def __post_init__(self) -> None:
-        _coerce_to_tuple(self, "columns")
-        _coerce_to_tuple(self, "include_groups")
-        _coerce_to_tuple(self, "exclude_fields")
-        _coerce_to_tuple(self, "column_groups", ColumnGroupConfig)
-        if not isinstance(self.rename_fields, dict):
-            object.__setattr__(self, "rename_fields", dict(self.rename_fields))
-        self._validate()
-
-    def _validate(self) -> None:
-        modes = sum(
-            [
-                self.columns is not None,
-                self.include_groups is not None,
-                self.column_groups is not None,
-            ]
+def _validate_cross_validation_thresholds(
+    warning_threshold: int,
+    error_threshold: int,
+    quarantine_threshold: int,
+) -> None:
+    if warning_threshold < 1:
+        raise ValueError(
+            f"warning_threshold must be >= 1, got {warning_threshold}"
         )
-        if modes > 1:
-            raise ValueError(
-                "LayerColumnConfig: only one of columns/include_groups/column_groups allowed"
-            )
+    if error_threshold < 2:
+        raise ValueError(f"error_threshold must be >= 2, got {error_threshold}")
+    if warning_threshold >= error_threshold:
+        raise ValueError("warning_threshold must be < error_threshold")
+    if quarantine_threshold < 1:
+        raise ValueError(
+            f"quarantine_threshold must be >= 1, got {quarantine_threshold}"
+        )
 
 
-@dataclass(frozen=True, slots=True)
-class DataSchemaConfig:
-    """Top-level schema configuration for composite pipeline column management.
-
-    Defines shared column groups and per-layer (Silver/Gold) column selection
-    rules used during the merge phase of composite pipelines.
-    """
-
-    column_groups: tuple[ColumnGroupConfig, ...] = ()
-    silver: LayerColumnConfig | None = None
-    gold: LayerColumnConfig | None = None
-
-    def __post_init__(self) -> None:
-        _coerce_to_tuple(self, "column_groups", ColumnGroupConfig)
-        if isinstance(self.silver, dict):
-            object.__setattr__(self, "silver", LayerColumnConfig(**self.silver))
-        if isinstance(self.gold, dict):
-            object.__setattr__(self, "gold", LayerColumnConfig(**self.gold))
-
-    def get_layer_groups(self, layer: str) -> tuple[ColumnGroupConfig, ...]:
-        """Return layer-specific column groups, falling back to top-level groups.
-
-        Args:
-            layer: Medallion layer name ('silver' or 'gold').
-
-        Returns:
-            Layer-specific column groups if configured, otherwise the top-level groups.
-        """
-        layer_config: LayerColumnConfig | None = getattr(self, layer, None)
-        if layer_config and layer_config.column_groups:
-            return layer_config.column_groups
-        return self.column_groups
-
-    def should_include_group(self, layer: str, group_name: str) -> bool:
-        """Check whether a column group is included for the given layer.
-
-        Args:
-            layer: Medallion layer name ('silver' or 'gold').
-            group_name: Name of the column group to check for inclusion.
-
-        Returns:
-            True if the group should be included; False if the layer config
-            restricts inclusion and the group name is absent.
-        """
-        layer_config = getattr(self, layer, None)
-        if not layer_config or not layer_config.include_groups:
-            return True
-        return group_name in layer_config.include_groups
+def _validate_cross_validation_tolerances(
+    fuzzy_threshold: float,
+    numeric_tolerance: float,
+) -> None:
+    if not 0.0 < fuzzy_threshold <= 1.0:
+        raise ValueError(
+            f"fuzzy_threshold must be in (0.0, 1.0], got {fuzzy_threshold}"
+        )
+    if not 0.0 < numeric_tolerance <= 1.0:
+        raise ValueError(
+            f"numeric_tolerance must be in (0.0, 1.0], got {numeric_tolerance}"
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -283,22 +219,19 @@ class CrossValidationConfig:
     enricher_pairings: tuple[EnricherFieldPairing, ...] = ()
 
     def __post_init__(self) -> None:
-        _coerce_to_tuple(self, "enricher_pairings")
+        _coerce_to_typed_tuple(self, "enricher_pairings", EnricherFieldPairing)
         self._validate()
 
     def _validate(self) -> None:
-        if self.warning_threshold < 1:
-            raise ValueError(f"warning_threshold must be >= 1, got {self.warning_threshold}")
-        if self.error_threshold < 2:
-            raise ValueError(f"error_threshold must be >= 2, got {self.error_threshold}")
-        if self.warning_threshold >= self.error_threshold:
-            raise ValueError("warning_threshold must be < error_threshold")
-        if self.quarantine_threshold < 1:
-            raise ValueError(f"quarantine_threshold must be >= 1, got {self.quarantine_threshold}")
-        if not 0.0 < self.fuzzy_threshold <= 1.0:
-            raise ValueError(f"fuzzy_threshold must be in (0.0, 1.0], got {self.fuzzy_threshold}")
-        if not 0.0 < self.numeric_tolerance <= 1.0:
-            raise ValueError(f"numeric_tolerance must be in (0.0, 1.0], got {self.numeric_tolerance}")
+        _validate_cross_validation_thresholds(
+            self.warning_threshold,
+            self.error_threshold,
+            self.quarantine_threshold,
+        )
+        _validate_cross_validation_tolerances(
+            self.fuzzy_threshold,
+            self.numeric_tolerance,
+        )
 
     def get_pairing(self, enricher_pipeline: str) -> EnricherFieldPairing | None:
         """Look up field pairing config for the given enricher pipeline.
