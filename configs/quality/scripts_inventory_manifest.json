@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-08T23:15:39.251176+00:00",
+  "generated_at": "2026-03-08T23:26:36.254769+00:00",
   "summary": {
     "total_scripts": 196,
     "status_counts": {
@@ -2014,7 +2014,7 @@
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 51,
+          "line": 52,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_artifacts.py \\"
         },
@@ -2065,7 +2065,7 @@
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 67,
+          "line": 68,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_quality_gates.py \\"
         },
@@ -2122,7 +2122,7 @@
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 61,
+          "line": 62,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_visual_smoke.py \\"
         },
@@ -2218,13 +2218,13 @@
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 56,
+          "line": 57,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_svg_text_visibility.py \\"
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 198,
+          "line": 200,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_svg_text_visibility.py --manifest \"$manifest_tmp\""
         },
@@ -2275,7 +2275,7 @@
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 88,
+          "line": 89,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/enforce_diagram_quality_budget.py \\"
         },
@@ -2440,7 +2440,7 @@
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 74,
+          "line": 75,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/mmd-diagrams --json \\"
         },
@@ -2677,7 +2677,7 @@
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 79,
+          "line": 80,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/run_diagram_nightly_suite.py \\"
         },
@@ -2839,7 +2839,7 @@
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 174,
+          "line": 176,
           "source_group": "ci",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh \\"
         },
@@ -4981,7 +4981,7 @@
       "references": [
         {
           "path": ".github/workflows/duplication-complexity.yml",
-          "line": 237,
+          "line": 240,
           "source_group": "ci",
           "text": "run: python src/tools/scripts/check_constructor_args.py --warn-only"
         },
