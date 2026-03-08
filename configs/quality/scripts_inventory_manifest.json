@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-08T23:26:36.254769+00:00",
+  "generated_at": "2026-03-08T23:48:33.339725+00:00",
   "summary": {
     "total_scripts": 196,
     "status_counts": {
@@ -356,7 +356,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 74,
+          "line": 60,
           "source_group": "ci",
           "text": "run: uv run bash scripts/build_docs_site.sh --strict"
         },
@@ -554,7 +554,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 56,
+          "line": 42,
           "source_group": "ci",
           "text": "run: uv run python scripts/check_doc_links.py"
         },
@@ -920,7 +920,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 50,
+          "line": 36,
           "source_group": "ci",
           "text": "run: python scripts/check_version_consistency.py"
         },
@@ -2020,7 +2020,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 152,
+          "line": 138,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_artifacts.py \\"
         },
@@ -2071,7 +2071,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 172,
+          "line": 158,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_quality_gates.py \\"
         },
@@ -2128,7 +2128,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 162,
+          "line": 148,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_visual_smoke.py \\"
         },
@@ -2230,7 +2230,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 157,
+          "line": 143,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_svg_text_visibility.py \\"
         },
@@ -2446,7 +2446,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 108,
+          "line": 94,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/mmd-diagrams --json > /tmp/diagram-lint.json || true"
         },
@@ -2743,7 +2743,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 109,
+          "line": 95,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/summarize_diagram_lint.py /tmp/diagram-lint.json"
         },
@@ -2845,7 +2845,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 103,
+          "line": 89,
           "source_group": "ci",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh \\"
         },
@@ -3148,13 +3148,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 59,
+          "line": 45,
           "source_group": "ci",
           "text": "run: uv run python scripts/generate_architecture_dependency_map.py --check"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 63,
+          "line": 49,
           "source_group": "ci",
           "text": "run: uv run python scripts/generate_architecture_dependency_map.py --update"
         },
@@ -4904,7 +4904,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 167,
+          "line": 153,
           "source_group": "ci",
           "text": "python3 src/tools/harmonize_link_styles.py --dry-run --fail-on-errors"
         },
