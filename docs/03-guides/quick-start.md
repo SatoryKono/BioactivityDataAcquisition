@@ -7,6 +7,25 @@ TL;DR for setting up and running BioETL locally.
 
 ## Setup (3 minutes)
 
+### Option A: Automated (Recommended)
+
+```bash
+# Clone and enter directory
+git clone https://github.com/SatoryKono/BioactivityDataAcquisition2.git
+cd BioactivityDataAcquisition2
+
+# Full automated setup (checks prereqs, installs deps, configures env)
+./scripts/dev/dev_setup.sh
+
+# Or quick setup without tests:
+# ./scripts/dev/dev_setup.sh --quick
+
+# CI-friendly (no colors, non-interactive):
+# ./scripts/dev/dev_setup.sh --ci
+```
+
+### Option B: Manual
+
 ```bash
 # Clone and enter directory
 git clone https://github.com/SatoryKono/BioactivityDataAcquisition2.git
