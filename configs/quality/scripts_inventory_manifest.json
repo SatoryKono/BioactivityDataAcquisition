@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-08T19:06:42.128861+00:00",
+  "generated_at": "2026-03-08T19:51:34.554793+00:00",
   "summary": {
     "total_scripts": 196,
     "status_counts": {
@@ -845,13 +845,13 @@
         },
         {
           "path": "tests/architecture/test_scripts_inventory_manifest.py",
-          "line": 43,
+          "line": 42,
           "source_group": "tests",
           "text": "\"scripts/check_scripts_inventory.py\","
         },
         {
           "path": "tests/architecture/test_scripts_inventory_manifest.py",
-          "line": 60,
+          "line": 59,
           "source_group": "tests",
           "text": "\"Run scripts/check_scripts_inventory.py --update to refresh manifest.\""
         },
@@ -4951,7 +4951,7 @@
       "references": [
         {
           "path": ".github/workflows/duplication-complexity.yml",
-          "line": 221,
+          "line": 237,
           "source_group": "ci",
           "text": "run: python src/tools/scripts/check_constructor_args.py --warn-only"
         },
