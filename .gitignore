@@ -199,4 +199,4 @@ docs/reports/branch-full-diff-matrix-2026-03-01.csv
 /docs/.claude/settings*
 /data/миграция
 /docs/02-architecture/diagrams/mermaid/png
-/docs/02-architecture/diagrams/mermaid/png
+*.png
