@@ -439,31 +439,172 @@ gold_filters:
 
 ### CrossRef
 
-**Схема**: `CrossRefPublicationGoldSchema` (`domain/contracts/gold/publications_crossref.py`)
+#### crossref_publication
 
-> TODO: Документировать поля контракта. См. исходный код схемы.
+**Primary Key**: `doi`
+**Схема**: `CrossRefPublicationGoldSchema` (`domain/contracts/gold/publications_crossref.py`)
+**Назначение**: Научные публикации CrossRef с метаданными цитирования и издателя
+
+##### Ключевые поля
+
+| Поле | Тип | Nullable | Описание |
+|------|-----|----------|----------|
+| `entity_id` | str | No | Уникальный ID записи |
+| `doi` | str | No | DOI публикации (обязателен, валидируется regex) |
+| `pmid` | str | Yes | PubMed ID |
+| `pmc_id` | str | Yes | PubMed Central ID |
+| `title` | str | Yes | Заголовок публикации |
+| `abstract` | str | Yes | Аннотация |
+| `authors` | str | Yes | Авторы (JSON-сериализованный список) |
+| `affiliation_list` | str | Yes | Аффилиации авторов (JSON) |
+| `journal` | str | Yes | Название журнала |
+| `issn` | str | Yes | Основной ISSN |
+| `issn_list` | str | Yes | Все ISSN журнала (JSON) |
+| `issn_print` | str | Yes | ISSN печатного издания |
+| `issn_electronic` | str | Yes | ISSN электронного издания |
+| `journal_name_short` | str | Yes | Сокращённое название журнала |
+| `publisher` | str | Yes | Издатель |
+| `volume` | str | Yes | Том |
+| `issue` | str | Yes | Номер выпуска |
+| `page_first` | str | Yes | Первая страница |
+| `page_last` | str | Yes | Последняя страница |
+| `publication_year` | float | Yes | Год публикации (диапазон 1500-2100) |
+| `publication_date` | str | Yes | Дата публикации |
+| `published_print` | str | Yes | Дата печатной публикации |
+| `published_online` | str | Yes | Дата онлайн-публикации |
+| `published` | str | Yes | Обобщённая дата публикации |
+| `publication_type` | str | Yes | Тип публикации (raw из API) |
+| `publication_type_unified` | str | Yes | Унифицированный тип публикации |
+| `publication_subclass` | str | Yes | Подкласс публикации |
+| `publication_class` | str | Yes | Класс публикации |
+| `citations_received` | float | Yes | Количество цитирований (>= 0) |
+| `citations_made` | float | Yes | Количество исходящих ссылок (>= 0) |
+| `language` | str | Yes | Язык публикации |
+| `license_url` | str | Yes | URL лицензии |
+| `subject_keywords` | str | Yes | Ключевые слова / предметные области (JSON) |
+| `content_domain_domains` | str | Yes | Домены контента CrossRef (JSON) |
+| `content_domain_crossmark_restriction` | bool | Yes | Ограничение CrossMark |
+| `alternative_id` | str | Yes | Альтернативные идентификаторы (JSON) |
+| `author_keys` | str | Yes | Ключи авторов (JSON) |
+| `author_orcids` | str | Yes | ORCID авторов (JSON) |
+| `author_details` | str | Yes | Детали авторов (JSON) |
+| `references` | str | Yes | Список ссылок (JSON) |
 
 ---
 
 ### OpenAlex
 
-**Схема**: `OpenAlexPublicationGoldSchema` (`domain/contracts/gold/publications_openalex.py`)
+#### openalex_publication
 
-> TODO: Документировать поля контракта. См. исходный код схемы.
+**Primary Key**: `openalex_id`
+**Схема**: `OpenAlexPublicationGoldSchema` (`domain/contracts/gold/publications_openalex.py`)
+**Назначение**: Научные публикации OpenAlex с данными об открытом доступе, институтах и темах
+
+##### Ключевые поля
+
+| Поле | Тип | Nullable | Описание |
+|------|-----|----------|----------|
+| `entity_id` | str | No | Уникальный ID записи |
+| `openalex_id` | str | No | OpenAlex Work ID (обязателен) |
+| `doi` | str | Yes | DOI публикации (валидируется regex) |
+| `pmid` | str | Yes | PubMed ID |
+| `pmc_id` | str | Yes | PubMed Central ID |
+| `mag_id` | str | Yes | Microsoft Academic Graph ID |
+| `title` | str | Yes | Заголовок публикации |
+| `abstract` | str | Yes | Аннотация |
+| `authors` | str | Yes | Авторы (JSON-сериализованный список) |
+| `affiliation_list` | str | Yes | Аффилиации авторов (JSON) |
+| `author_keys` | str | Yes | Ключи авторов (JSON) |
+| `author_openalex_ids` | str | Yes | OpenAlex ID авторов (JSON) |
+| `author_orcids` | str | Yes | ORCID авторов (JSON) |
+| `journal` | str | Yes | Название журнала / источника |
+| `issn` | str | Yes | ISSN журнала |
+| `publisher` | str | Yes | Издатель |
+| `volume` | str | Yes | Том |
+| `issue` | str | Yes | Номер выпуска |
+| `page_first` | str | Yes | Первая страница |
+| `page_last` | str | Yes | Последняя страница |
+| `publication_year` | float | Yes | Год публикации (диапазон 1500-2100) |
+| `publication_date` | str | Yes | Дата публикации |
+| `publication_type` | str | Yes | Тип публикации (raw из API) |
+| `publication_type_unified` | str | Yes | Унифицированный тип публикации |
+| `publication_subclass` | str | Yes | Подкласс публикации |
+| `publication_class` | str | Yes | Класс публикации |
+| `is_oa` | bool | Yes | Признак открытого доступа |
+| `oa_status` | str | Yes | Статус OA (gold/green/hybrid/bronze/closed) |
+| `is_retracted` | bool | No | Признак отозванной публикации |
+| `citations_received` | float | Yes | Количество цитирований (>= 0) |
+| `citations_made` | float | Yes | Количество исходящих ссылок (>= 0) |
+| `fwci` | float | Yes | Field-Weighted Citation Impact (>= 0) |
+| `language` | str | Yes | Язык публикации |
+| `subject_mesh` | str | Yes | MeSH-термины (JSON) |
+| `subject_keywords` | str | Yes | Ключевые слова (JSON) |
+| `subject_topics` | str | Yes | Тематические области OpenAlex (JSON) |
+| `primary_topic` | str | Yes | Основная тема (JSON) |
+| `grants` | str | Yes | Гранты и финансирование (JSON) |
+| `institution_ids` | str | Yes | OpenAlex ID институтов (JSON) |
+| `institution_country_codes` | str | Yes | Коды стран институтов (JSON) |
+| `ror_ids` | str | Yes | ROR идентификаторы институтов (JSON) |
 
 ---
 
 ### Semantic Scholar
 
-**Схема**: `SemanticScholarPublicationGoldSchema` (`domain/contracts/gold/publications_semanticscholar.py`)
+#### semanticscholar_publication
 
-> TODO: Документировать поля контракта. См. исходный код схемы.
+**Primary Key**: `paper_id`
+**Схема**: `SemanticScholarPublicationGoldSchema` (`domain/contracts/gold/publications_semanticscholar.py`)
+**Назначение**: Научные публикации Semantic Scholar с данными об авторах, цитировании и открытом доступе
+
+##### Ключевые поля
+
+| Поле | Тип | Nullable | Описание |
+|------|-----|----------|----------|
+| `entity_id` | str | No | Уникальный ID записи |
+| `paper_id` | str | No | Semantic Scholar Paper ID (обязателен) |
+| `doi` | str | Yes | DOI публикации (валидируется regex) |
+| `pmid` | str | Yes | PubMed ID |
+| `pmc_id` | str | Yes | PubMed Central ID |
+| `corpus_id` | float | Yes | Semantic Scholar Corpus ID |
+| `dblp_id` | str | Yes | DBLP идентификатор |
+| `title` | str | Yes | Заголовок публикации |
+| `abstract` | str | Yes | Аннотация |
+| `tldr` | str | Yes | Автогенерированное краткое резюме (TL;DR) |
+| `authors` | str | Yes | Авторы (JSON-сериализованный список) |
+| `affiliation_list` | str | Yes | Аффилиации авторов (JSON) |
+| `author_keys` | str | Yes | Ключи авторов (JSON) |
+| `author_s2_ids` | str | Yes | Semantic Scholar ID авторов (JSON) |
+| `author_orcids` | str | Yes | ORCID авторов (JSON) |
+| `author_h_indices` | str | Yes | h-индексы авторов (JSON) |
+| `journal` | str | Yes | Название журнала |
+| `volume` | str | Yes | Том |
+| `issue` | str | Yes | Номер выпуска |
+| `page_range` | str | Yes | Диапазон страниц (raw из API) |
+| `page_first` | str | Yes | Первая страница |
+| `page_last` | str | Yes | Последняя страница |
+| `publication_year` | float | Yes | Год публикации (диапазон 1500-2100) |
+| `publication_date` | str | Yes | Дата публикации |
+| `publication_type` | str | Yes | Тип публикации (raw из API) |
+| `publication_type_unified` | str | Yes | Унифицированный тип публикации |
+| `publication_subclass` | str | Yes | Подкласс публикации |
+| `publication_class` | str | Yes | Класс публикации |
+| `publication_types` | str | Yes | Все типы публикации (JSON) |
+| `is_oa` | bool | Yes | Признак открытого доступа |
+| `oa_status` | str | Yes | Статус OA (gold/green/hybrid/bronze/closed) |
+| `open_access_url` | str | Yes | URL открытого доступа |
+| `citations_received` | float | Yes | Количество цитирований (>= 0) |
+| `citations_made` | float | Yes | Количество исходящих ссылок (>= 0) |
+| `influential_citation_count` | float | Yes | Количество влиятельных цитирований (>= 0) |
+| `citation_contexts` | str | Yes | Контексты цитирования (JSON) |
+| `subject_fields` | str | Yes | Предметные области (JSON) |
 
 ---
 
 ### Composite
 
-**Схемы**:
+Composite-схемы объединяют данные из нескольких провайдеров в единую сущность. Все composite-схемы используют `strict=False` и `coerce=True`, поскольку набор бизнес-полей определяется динамически обогащением из нескольких источников.
+
+**Файлы схем**:
 
 | Схема | Файл |
 |-------|------|
@@ -473,7 +614,38 @@ gold_filters:
 | `CompositeMoleculeGoldSchema` | `domain/contracts/gold/composite_molecule.py` |
 | `CompositePublicationGoldSchema` | `domain/contracts/gold/composite_publication.py` |
 
-> TODO: Документировать поля контрактов. См. исходный код схем.
+#### Общие поля для всех Composite-схем
+
+Все composite-схемы гарантируют наличие следующих полей:
+
+| Поле | Тип | Nullable | Описание |
+|------|-----|----------|----------|
+| `entity_id` | str | No | Стабильный бизнес-идентификатор объединённой сущности |
+
+#### Поля линейности (composite lineage)
+
+Поля, специфичные для composite-слоя (хранятся с алиасом `_*`):
+
+| Поле (alias) | Тип | Nullable | Описание |
+|------|-----|----------|----------|
+| `_composite_run_id` | str | No | ID запуска composite-пайплайна |
+| `_source_providers` | str | No | Провайдеры-источники (JSON-список) |
+| `_enrichment_status` | str | No | Статус обогащения (enriched/partial/missing) |
+| `_lineage_created_at` | str | No | Timestamp создания lineage-записи (ISO 8601) |
+
+#### composite_publication (дополнительные поля)
+
+`CompositePublicationGoldSchema` дополнительно содержит поля поиска публикации:
+
+| Поле (alias) | Тип | Nullable | Описание |
+|------|-----|----------|----------|
+| `_source` | str | Yes | Провайдер-источник публикации |
+| `_lookup_method` | str | Yes | Метод поиска при cross-reference |
+| `_original_id` | str | Yes | Исходный ID из провайдера |
+
+#### Примечание по composite-схемам
+
+Composite-схемы используют `strict=False` — бизнес-поля (например, `molecule_id`, `canonical_smiles`, `standard_value` для activity) берутся из соответствующих провайдерных схем и присутствуют в DataFrame, но не декларируются явно в composite-схеме. Валидируются только системные и lineage-поля.
 
 ---
 

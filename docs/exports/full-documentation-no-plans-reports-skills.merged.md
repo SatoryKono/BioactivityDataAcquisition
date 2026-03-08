@@ -33616,7 +33616,7 @@ Production cleanup **MUST** be done through CI/CD only. Manual cleanup **MUST NO
 
 \newpage
 
-# Source: `03-guides/dashboards/DASHBOARD_V2_UPDATES.md`
+# Source: `03-guides/dashboards/dashboard-v2-updates.md`
 
 # Dashboard v2 Updates (Audit 2026-02-24)
 
@@ -33665,7 +33665,7 @@ histogram-quantile(0.95, sum by (le) (rate(bioetl-health_check-latency-ms-bucket
 
 \newpage
 
-# Source: `03-guides/dashboards/DASHBOARD_V2_USAGE.md`
+# Source: `03-guides/dashboards/dashboard-v2-usage.md`
 
 # BioETL Dashboards v2: Usage
 
@@ -33720,7 +33720,7 @@ p95 latency по провайдерам.
 
 \newpage
 
-# Source: `03-guides/dashboards/MONITORING_INDEX.md`
+# Source: `03-guides/dashboards/monitoring-index.md`
 
 # Monitoring Docs Index
 
@@ -33761,7 +33761,7 @@ p95 latency по провайдерам.
 
 \newpage
 
-# Source: `03-guides/dashboards/VARIABLES_GUIDE.md`
+# Source: `03-guides/dashboards/variables-guide.md`
 
 # Variables Guide (Grafana Dashboards)
 
@@ -41828,7 +41828,7 @@ JSON exports для Gold-схем хранятся в `docs/04-reference/contrac
 
 \newpage
 
-# Source: `04-reference/hash_policy.md`
+# Source: `04-reference/hash-policy.md`
 
 # Hash Policy Contract
 
@@ -56314,7 +56314,7 @@ This section contains operational documentation for managing BioETL in productio
 | [Runbooks](runbooks/index.md) | Operational playbooks for incident response |
 | [Performance Baselines](performance-baselines.md) | Expected performance metrics |
 | [VACUUM Retention](vacuum-retention.md) | Delta Lake vacuum retention policies |
-| [Release Checklist](RELEASE_CHECKLIST.md) | Pre-release verification checklist |
+| [Release Checklist](release-checklist.md) | Pre-release verification checklist |
 
 ## Quick Links
 
@@ -56345,7 +56345,7 @@ This section contains operational documentation for managing BioETL in productio
 
 \newpage
 
-# Source: `05-operations/RELEASE_CHECKLIST.md`
+# Source: `05-operations/release-checklist.md`
 
 # Release Checklist v5.9.0
 
@@ -56458,7 +56458,7 @@ Tests now run correctly with `pytest-xdist` using `--dist loadscope`.
 
 \newpage
 
-# Source: `05-operations/deployment/DEPLOYMENT_GUIDE.md`
+# Source: `05-operations/deployment/deployment-guide.md`
 
 # BioETL Kubernetes Deployment Guide
 
@@ -56952,7 +56952,7 @@ resources:
 
 \newpage
 
-# Source: `05-operations/deployment/K8S_SUMMARY.md`
+# Source: `05-operations/deployment/k8s-summary.md`
 
 # BioETL Kubernetes Manifests - Summary
 
@@ -57243,7 +57243,7 @@ See DEPLOYMENT-GUIDE.md for detailed troubleshooting.
 
 \newpage
 
-# Source: `05-operations/deployment/MCP_NEO4J_MEMORY_FINAL_SUMMARY.md`
+# Source: `05-operations/deployment/mcp-neo4j-memory-final-summary.md`
 
 # MCP Neo4j Memory - Complete Setup Summary
 
@@ -57672,7 +57672,7 @@ Thank you for using MCP Neo4j Memory!
 
 \newpage
 
-# Source: `05-operations/deployment/MCP_NEO4J_MEMORY_SUMMARY.md`
+# Source: `05-operations/deployment/mcp-neo4j-memory-summary.md`
 
 # MCP Neo4j Memory Configuration - Setup Summary
 
@@ -58009,7 +58009,7 @@ Let me know if you have any other questions!
 
 \newpage
 
-# Source: `05-operations/deployment/NEO4J_MEMORY_SETUP.md`
+# Source: `05-operations/deployment/neo4j-memory-setup.md`
 
 # Neo4j Memory Configuration Guide
 

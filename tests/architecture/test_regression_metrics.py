@@ -376,7 +376,7 @@ def _load_dep_map_module():  # type: ignore[no-untyped-def]
 
     import sys
 
-    script_path = Path("scripts/generate_architecture_dependency_map.py")
+    script_path = Path("scripts/qa/generate_architecture_dependency_map.py")
     if not script_path.exists():
         return None
 
