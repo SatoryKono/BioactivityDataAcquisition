@@ -203,7 +203,7 @@ class TestPushMetricsToGateway:
         with patch("bioetl.infrastructure.observability.server.pushadd_to_gateway"):
             result = push_metrics_to_gateway(
                 gateway="localhost:9091",
-                job="test_job",
+                run_label="test_job",
                 logger=logger,
             )
 
