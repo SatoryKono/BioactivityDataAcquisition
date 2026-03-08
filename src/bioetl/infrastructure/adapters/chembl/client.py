@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING
 from pydantic import BaseModel
 
 from bioetl.domain.models.filter import ExtractionParams
+from bioetl.domain.ports import NoOpMetrics
 from bioetl.domain.resilience import AdapterConfig
 from bioetl.domain.types import BronzeRecord, JsonDict
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
@@ -86,7 +87,7 @@ class ChemblAdapter(
         # Initialize private base state used by shared adapter helpers.
         self._http_client = self.http_client
         self._logger = self.logger
-        self._metrics = self.metrics
+        self._metrics = self.metrics if self.metrics is not None else NoOpMetrics()
 
         # Initialize error handler: use injected or create fallback
         if self.error_handler is not None:
