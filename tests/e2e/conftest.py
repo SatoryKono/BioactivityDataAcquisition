@@ -1,7 +1,7 @@
 """Fixtures for E2E tests with Local-Only architecture.
 
 E2E тесты используют локальное файловое хранилище и in-memory инфраструктуру:
-- LocalCheckpoint (файловая система)
+- LocalCheckpointAdapter (файловая система)
 - MemoryLock (in-process)
 - SilverWriter (локальный Delta Lake)
 - VCR cassettes для HTTP-запросов

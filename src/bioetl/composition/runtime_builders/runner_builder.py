@@ -14,7 +14,7 @@ from bioetl.composition.runtime_builders.inputs_resolver import (
     RunnerInputs as _RunnerInputs,
 )
 from bioetl.composition.runtime_builders.inputs_resolver import (
-    VacuumSettings,
+    VacuumConfig,
     assemble_cached_bronze_context,
     assemble_filter_config,
     assemble_runtime_config,
@@ -65,7 +65,7 @@ def _assemble_vacuum_settings(
     *,
     cli_vacuum: VacuumConfig,
     yaml_maintenance: MaintenanceConfig,
-) -> VacuumSettings:
+) -> VacuumConfig:
     """Compatibility wrapper for legacy tests/monkeypatching."""
     return assemble_vacuum_settings(
         cli_vacuum=cli_vacuum,
@@ -77,7 +77,7 @@ def _assemble_runtime_config(
     *,
     ctx: PipelineRunContext,
     heartbeat_interval: int,
-    vacuum: VacuumSettings,
+    vacuum: VacuumConfig,
     health_check_mode: Literal["strict", "probe"],
 ) -> RuntimeConfig:
     """Compatibility wrapper for legacy tests/monkeypatching."""
@@ -169,7 +169,7 @@ def _prepare_runner_inputs(
     get_settings_fn: Callable[[], Settings],
     load_pipeline_config_fn: Callable[[str], PipelineYamlConfig],
     build_observability_bundle_fn: Callable[..., ObservabilityBundle],
-    assemble_vacuum_settings_fn: Callable[..., VacuumSettings],
+    assemble_vacuum_settings_fn: Callable[..., VacuumConfig],
     assemble_runtime_config_fn: Callable[..., RuntimeConfig],
     assemble_filter_config_fn: Callable[..., InputFilterConfig | None],
     assemble_cached_bronze_context_fn: Callable[
@@ -223,7 +223,7 @@ def build_pipeline_runner(
         ..., ObservabilityBundle
     ] = _build_observability_bundle,
     assemble_vacuum_settings_fn: Callable[
-        ..., VacuumSettings
+        ..., VacuumConfig
     ] = _assemble_vacuum_settings,
     assemble_runtime_config_fn: Callable[..., RuntimeConfig] = _assemble_runtime_config,
     assemble_filter_config_fn: Callable[

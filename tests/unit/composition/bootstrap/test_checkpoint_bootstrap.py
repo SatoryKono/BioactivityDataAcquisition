@@ -26,8 +26,8 @@ from bioetl.composition.bootstrap.cli.checkpoint import (
     bootstrap_quarantine_service,
 )
 from bioetl.domain.ports import CheckpointPort, QuarantinePort
-from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
-from bioetl.infrastructure.quarantine import UnifiedQuarantine
+from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
+from bioetl.infrastructure.quarantine import UnifiedQuarantineAdapter
 
 
 @pytest.mark.unit
@@ -45,7 +45,7 @@ class TestBootstrapQuarantinePort:
             result = bootstrap_quarantine_port()
 
         assert isinstance(result, QuarantinePort)
-        assert isinstance(result, UnifiedQuarantine)
+        assert isinstance(result, UnifiedQuarantineAdapter)
 
     def test_bootstrap_quarantine_port_creates_valid_instance(self):
         """Test that bootstrap_quarantine_port creates a functional quarantine instance."""
@@ -57,8 +57,8 @@ class TestBootstrapQuarantinePort:
             )
             result = bootstrap_quarantine_port()
 
-        # Verify it's a valid UnifiedQuarantine instance with correct path
-        assert isinstance(result, UnifiedQuarantine)
+        # Verify it's a valid UnifiedQuarantineAdapter instance with correct path
+        assert isinstance(result, UnifiedQuarantineAdapter)
         # Now uses centralized quarantine_path from settings
         # Use Path for cross-platform comparison (Windows uses backslashes)
         assert Path(result.base_path) == Path("/custom/quarantine")
@@ -79,7 +79,7 @@ class TestBootstrapCheckpointPort:
             result = bootstrap_checkpoint_port("test_pipeline")
 
         assert isinstance(result, CheckpointPort)
-        assert isinstance(result, LocalCheckpoint)
+        assert isinstance(result, LocalCheckpointAdapter)
 
     def test_bootstrap_checkpoint_port_passes_pipeline_name(self):
         """Test that bootstrap_checkpoint_port passes pipeline name correctly."""
@@ -145,7 +145,7 @@ class TestBootstrapQuarantineManager:
             result = bootstrap_quarantine_manager("test_pipeline")
 
         # QuarantineManager uses _quarantine attribute
-        assert isinstance(result._quarantine, UnifiedQuarantine)
+        assert isinstance(result._quarantine, UnifiedQuarantineAdapter)
 
 
 @pytest.mark.unit
@@ -187,7 +187,7 @@ class TestBootstrapCheckpointManager:
             result = bootstrap_checkpoint_manager("test_pipeline")
 
         # CheckpointManager uses _checkpoint attribute
-        assert isinstance(result._checkpoint, LocalCheckpoint)
+        assert isinstance(result._checkpoint, LocalCheckpointAdapter)
 
     def test_bootstrap_checkpoint_manager_generates_run_id(self):
         """Test that bootstrap_checkpoint_manager generates a UUID run_id."""
@@ -241,11 +241,11 @@ class TestBootstrapCheckpointService:
             result = bootstrap_checkpoint_service()
 
         # CheckpointService uses checkpoint_port attribute (dataclass)
-        # LocalCheckpoint uses pipeline_name attribute
+        # LocalCheckpointAdapter uses pipeline_name attribute
         assert result.checkpoint_port.pipeline_name == ""
 
     def test_bootstrap_checkpoint_service_wires_checkpoint_port(self):
-        """Test that bootstrap_checkpoint_service wires LocalCheckpoint."""
+        """Test that bootstrap_checkpoint_service wires LocalCheckpointAdapter."""
         with patch(
             "bioetl.composition.bootstrap.cli.checkpoint.get_settings"
         ) as mock_settings:
@@ -255,7 +255,7 @@ class TestBootstrapCheckpointService:
             result = bootstrap_checkpoint_service()
 
         # CheckpointService uses checkpoint_port attribute (dataclass)
-        assert isinstance(result.checkpoint_port, LocalCheckpoint)
+        assert isinstance(result.checkpoint_port, LocalCheckpointAdapter)
 
 
 @pytest.mark.unit
@@ -275,7 +275,7 @@ class TestBootstrapQuarantineService:
         assert isinstance(result, QuarantineService)
 
     def test_bootstrap_quarantine_service_wires_quarantine_port(self):
-        """Test that bootstrap_quarantine_service wires UnifiedQuarantine."""
+        """Test that bootstrap_quarantine_service wires UnifiedQuarantineAdapter."""
         with patch(
             "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
@@ -285,4 +285,4 @@ class TestBootstrapQuarantineService:
             result = bootstrap_quarantine_service()
 
         # QuarantineService uses quarantine_port attribute (dataclass)
-        assert isinstance(result.quarantine_port, UnifiedQuarantine)
+        assert isinstance(result.quarantine_port, UnifiedQuarantineAdapter)

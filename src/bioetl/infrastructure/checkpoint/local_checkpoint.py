@@ -17,7 +17,7 @@ Architecture:
 
 from __future__ import annotations
 
-__all__ = ["LocalCheckpoint"]
+__all__ = ["LocalCheckpointAdapter"]
 
 
 import asyncio
@@ -30,7 +30,7 @@ from bioetl.domain.serialization import deserialize_from_json, serialize_to_json
 from bioetl.domain.types import JsonDict, RunID
 
 
-class LocalCheckpoint:
+class LocalCheckpointAdapter:
     """Checkpoint storage using local filesystem.
 
     Implements CheckpointPort interface from domain/ports.py.

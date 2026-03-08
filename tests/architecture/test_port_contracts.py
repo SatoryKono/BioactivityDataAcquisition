@@ -1162,9 +1162,9 @@ class TestCheckpointPortErrorConditions:
         self, tmp_path: Path
     ) -> None:
         """CheckpointPort.load() MUST return None for non-existent checkpoints."""
-        from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
+        from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 
-        checkpoint = LocalCheckpoint(base_path=tmp_path)
+        checkpoint = LocalCheckpointAdapter(base_path=tmp_path)
 
         try:
             result = await checkpoint.load("non_existent_pipeline")
@@ -1179,9 +1179,9 @@ class TestCheckpointPortErrorConditions:
         self, tmp_path: Path
     ) -> None:
         """CheckpointPort.delete() MUST be idempotent (no error if not exists)."""
-        from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
+        from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 
-        checkpoint = LocalCheckpoint(base_path=tmp_path)
+        checkpoint = LocalCheckpointAdapter(base_path=tmp_path)
 
         try:
             # Should not raise exception
@@ -1194,9 +1194,9 @@ class TestCheckpointPortErrorConditions:
         self, tmp_path: Path
     ) -> None:
         """CheckpointPort.list_all() MUST return empty list when no checkpoints."""
-        from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
+        from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 
-        checkpoint = LocalCheckpoint(base_path=tmp_path)
+        checkpoint = LocalCheckpointAdapter(base_path=tmp_path)
 
         try:
             result = await checkpoint.list_all()
@@ -1443,9 +1443,9 @@ class TestCheckpointPortConcurrentAccess:
         import asyncio
         from uuid import uuid4
 
-        from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
+        from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 
-        checkpoint = LocalCheckpoint(base_path=tmp_path)
+        checkpoint = LocalCheckpointAdapter(base_path=tmp_path)
         num_pipelines = 5
         pipelines = [f"pipeline_{i}" for i in range(num_pipelines)]
 
@@ -1475,9 +1475,9 @@ class TestCheckpointPortConcurrentAccess:
         import asyncio
         from uuid import uuid4
 
-        from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
+        from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 
-        checkpoint = LocalCheckpoint(base_path=tmp_path)
+        checkpoint = LocalCheckpointAdapter(base_path=tmp_path)
         run_id = uuid4()
         metadata = {"key": "value"}
 

@@ -11,7 +11,7 @@ Requirements:
 
 from __future__ import annotations
 
-__all__ = ["UnifiedQuarantine"]
+__all__ = ["UnifiedQuarantineAdapter"]
 
 
 from datetime import datetime
@@ -39,7 +39,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
 
-class UnifiedQuarantine:
+class UnifiedQuarantineAdapter:
     """Unified quarantine table for failed records.
 
     All pipelines write to the same `common.quarantine` table.

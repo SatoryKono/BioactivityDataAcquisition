@@ -136,13 +136,13 @@ async def test_quarantine_records_are_persisted(e2e_data_dir: Path):
 
     from bioetl.application.core.quarantine_manager import QuarantineManager
     from bioetl.domain.types import ErrorType
-    from bioetl.infrastructure.quarantine.unified import UnifiedQuarantine
+    from bioetl.infrastructure.quarantine.unified import UnifiedQuarantineAdapter
 
     # Setup quarantine
     quarantine_path = e2e_data_dir / "quarantine"
     quarantine_path.mkdir(exist_ok=True)
 
-    quarantine = UnifiedQuarantine(
+    quarantine = UnifiedQuarantineAdapter(
         base_path=str(quarantine_path),
     )
 
@@ -181,13 +181,13 @@ async def test_quarantine_can_be_inspected(e2e_data_dir: Path):
     """
     from datetime import UTC, datetime
 
-    from bioetl.infrastructure.quarantine.unified import UnifiedQuarantine
+    from bioetl.infrastructure.quarantine.unified import UnifiedQuarantineAdapter
 
     # Setup quarantine with test data
     quarantine_path = e2e_data_dir / "quarantine"
     quarantine_path.mkdir(exist_ok=True)
 
-    quarantine = UnifiedQuarantine(
+    quarantine = UnifiedQuarantineAdapter(
         base_path=str(quarantine_path),
     )
 
@@ -287,13 +287,13 @@ async def test_pipeline_resumes_from_checkpoint(e2e_data_dir: Path):
 
     Tests checkpoint save/load flow for recovery scenarios.
     """
-    from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
+    from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 
     # Setup checkpoint
     checkpoint_path = e2e_data_dir / "checkpoints"
     checkpoint_path.mkdir(exist_ok=True)
 
-    checkpoint = LocalCheckpoint(
+    checkpoint = LocalCheckpointAdapter(
         base_path=checkpoint_path,
     )
 

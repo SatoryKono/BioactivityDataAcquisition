@@ -37,7 +37,7 @@ class _SourceConfigLike(Protocol):
 
 
 @dataclass(frozen=True, slots=True)
-class VacuumSettings:
+class VacuumConfig:
     """Resolved vacuum settings after merging CLI and YAML config."""
 
     enabled: bool
@@ -58,7 +58,7 @@ class RunnerInputs:
 
 __all__ = [
     "RunnerInputs",
-    "VacuumSettings",
+    "VacuumConfig",
     "adjust_batch_size_for_filter",
     "assemble_cached_bronze_context",
     "assemble_filter_config",
@@ -75,7 +75,7 @@ def assemble_vacuum_settings(
     *,
     cli_vacuum: VacuumConfig,
     yaml_maintenance: MaintenanceConfig,
-) -> VacuumSettings:
+) -> VacuumConfig:
     """Merge CLI and YAML vacuum settings.
 
     Args:
@@ -83,18 +83,18 @@ def assemble_vacuum_settings(
         yaml_maintenance: Maintenance configuration from pipeline YAML defaults.
 
     Returns:
-        VacuumSettings with resolved enabled flag and retention days.
+        VacuumConfig with resolved enabled flag and retention days.
     """
     enabled = cli_vacuum.enabled if cli_vacuum.enabled is not None else yaml_maintenance.auto_vacuum
     retention = cli_vacuum.retention_days if cli_vacuum.enabled is not None else yaml_maintenance.vacuum_retention_days
-    return VacuumSettings(enabled=enabled, retention_days=retention)
+    return VacuumConfig(enabled=enabled, retention_days=retention)
 
 
 def assemble_runtime_config(
     *,
     ctx: PipelineRunContext,
     heartbeat_interval: int,
-    vacuum: VacuumSettings,
+    vacuum: VacuumConfig,
     health_check_mode: Literal["strict", "probe"],
 ) -> RuntimeConfig:
     """Build ``RuntimeConfig`` from run context and resolved vacuum settings.
@@ -285,7 +285,7 @@ def prepare_runner_inputs(
     get_settings_fn: Callable[[], Settings],
     load_pipeline_config_fn: Callable[[str], PipelineYamlConfig],
     build_observability_bundle_fn: Callable[..., ObservabilityBundle],
-    assemble_vacuum_settings_fn: Callable[..., VacuumSettings],
+    assemble_vacuum_settings_fn: Callable[..., VacuumConfig],
     assemble_runtime_config_fn: Callable[..., RuntimeConfig],
     assemble_filter_config_fn: Callable[..., InputFilterConfig | None],
     assemble_cached_bronze_context_fn: Callable[

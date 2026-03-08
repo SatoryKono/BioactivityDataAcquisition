@@ -1,4 +1,4 @@
-"""Security tests for the UnifiedQuarantine component."""
+"""Security tests for the UnifiedQuarantineAdapter component."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from bioetl.domain.types import QuarantineRecordStatus
-from bioetl.infrastructure.quarantine.unified import UnifiedQuarantine
+from bioetl.infrastructure.quarantine.unified import UnifiedQuarantineAdapter
 
 
 @pytest.fixture
@@ -30,7 +30,7 @@ def test_purge_handles_malicious_pipeline_name(mock_delta_table):
     mock_arrow_table.__len__ = MagicMock(return_value=1)
     mock_instance.to_pyarrow_table.return_value = mock_arrow_table
 
-    quarantine = UnifiedQuarantine(base_path="/fake/path")
+    quarantine = UnifiedQuarantineAdapter(base_path="/fake/path")
     malicious_name = "test-pipeline'; DROP TABLE common.quarantine; --"
 
     quarantine.purge(
@@ -62,7 +62,7 @@ def test_update_status_handles_malicious_hash(mock_delta_table):
     mock_arrow_table.__len__.return_value = 1
     mock_instance.to_pyarrow_table.return_value = mock_arrow_table
 
-    quarantine = UnifiedQuarantine(base_path="/fake/path")
+    quarantine = UnifiedQuarantineAdapter(base_path="/fake/path")
     malicious_hash = "abc'; --"
 
     quarantine.update_status(

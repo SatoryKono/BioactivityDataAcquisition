@@ -9,7 +9,7 @@ from uuid import UUID
 import pytest
 
 from bioetl.domain.types import BatchID
-from bioetl.infrastructure.quarantine.unified import UnifiedQuarantine
+from bioetl.infrastructure.quarantine.unified import UnifiedQuarantineAdapter
 
 # Fixed timestamp for test reproducibility
 TEST_INGESTION_TS = datetime(2024, 1, 15, 12, 0, 0, tzinfo=UTC)
@@ -39,16 +39,16 @@ def mock_deltalake():
 
 @pytest.mark.unit
 class TestUnifiedQuarantine:
-    """Test UnifiedQuarantine functionality."""
+    """Test UnifiedQuarantineAdapter functionality."""
 
     def test_unified_quarantine_initialization(self):
-        """Test UnifiedQuarantine can be initialized."""
-        quarantine = UnifiedQuarantine(base_path="/tmp/quarantine")
+        """Test UnifiedQuarantineAdapter can be initialized."""
+        quarantine = UnifiedQuarantineAdapter(base_path="/tmp/quarantine")
         assert quarantine.base_path == "/tmp/quarantine"
 
     async def test_write_calls_write_deltalake(self, mock_deltalake):
         """Test that write calls write_deltalake with correct data."""
-        quarantine = UnifiedQuarantine(base_path="/tmp/quarantine")
+        quarantine = UnifiedQuarantineAdapter(base_path="/tmp/quarantine")
         pipeline = "test_pipeline"
         error_code = "INVALID_DATA"
         payload = {"id": 1, "value": "a"}
@@ -78,7 +78,7 @@ class TestUnifiedQuarantine:
 
     async def test_payload_truncation(self, mock_deltalake):
         """Test that large payloads are truncated at 64KB."""
-        quarantine = UnifiedQuarantine(base_path="/tmp/quarantine")
+        quarantine = UnifiedQuarantineAdapter(base_path="/tmp/quarantine")
         # Create a payload larger than 64KB
         large_value = "a" * (70 * 1024)  # 70KB
         payload = {"key": large_value}
@@ -94,5 +94,5 @@ class TestUnifiedQuarantine:
         mock_deltalake.assert_called_once()
         record = _extract_record_from_call(mock_deltalake)
         # Payload should be truncated to MAX_PAYLOAD_SIZE (64KB)
-        assert len(record["payload"]) <= UnifiedQuarantine.MAX_PAYLOAD_SIZE
+        assert len(record["payload"]) <= UnifiedQuarantineAdapter.MAX_PAYLOAD_SIZE
         assert record["payload_truncated"] is True

@@ -21,7 +21,7 @@ from bioetl.infrastructure.quality.debt_scorecard_validation import (
 )
 from bioetl.infrastructure.quality.exemptions_registry import load_exemptions_registry
 from bioetl.infrastructure.quality.inventory import (
-    ExemptionInventory,
+    ExemptionInventorySummary,
     build_exemption_inventory,
 )
 from bioetl.infrastructure.quality.registry_sync_service import validate_registry_sync
@@ -34,7 +34,7 @@ _DEFAULT_SCORECARD_PATH = Path("configs/quality/debt_scorecard.yaml")
 
 
 @dataclass(frozen=True)
-class DebtScorecardEvaluation:
+class DebtScorecardResult:
     """Result of scorecard budget evaluation."""
 
     quarter: str
@@ -105,7 +105,7 @@ def evaluate_debt_scorecard(
     registry_path: Path | str | None = None,
     scorecard_path: Path | str | None = None,
     today: date | None = None,
-) -> tuple[list[str], DebtScorecardEvaluation | None]:
+) -> tuple[list[str], DebtScorecardResult | None]:
     """Evaluate scorecard budgets and return (violations, summary)."""
     now = today or date.today()
     inventory = build_exemption_inventory(registry_path, today=now)
@@ -148,7 +148,7 @@ def evaluate_debt_scorecard(
     )
 
     total_budget = int(target["max_total_exemptions"]) + allowance_total
-    summary = DebtScorecardEvaluation(
+    summary = DebtScorecardResult(
         quarter=quarter,
         integral_score=score,
         total_exemptions=inventory.total_exemptions,
@@ -166,8 +166,8 @@ def evaluate_debt_scorecard(
 
 
 __all__ = [
-    "DebtScorecardEvaluation",
-    "ExemptionInventory",
+    "DebtScorecardResult",
+    "ExemptionInventorySummary",
     "build_exemption_inventory",
     "compute_integral_debt_score",
     "evaluate_debt_scorecard",

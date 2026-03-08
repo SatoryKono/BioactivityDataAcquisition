@@ -37,10 +37,10 @@ from bioetl.domain.ports import (
     QuarantinePort,
 )
 from bioetl.domain.types import JsonDict
-from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
+from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
-from bioetl.infrastructure.quarantine import UnifiedQuarantine
+from bioetl.infrastructure.quarantine import UnifiedQuarantineAdapter
 
 if TYPE_CHECKING:
     from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
@@ -243,11 +243,11 @@ class BaseServicesFactory:
             storage_ctx: Storage context providing the checkpoints base path.
 
         Returns:
-            LocalCheckpoint instance implementing CheckpointPort.
+            LocalCheckpointAdapter instance implementing CheckpointPort.
         """
-        checkpoint = LocalCheckpoint(base_path=storage_ctx.checkpoints_path)
+        checkpoint = LocalCheckpointAdapter(base_path=storage_ctx.checkpoints_path)
         assert isinstance(checkpoint, CheckpointPort), (
-            f"LocalCheckpoint must implement CheckpointPort, got {type(checkpoint)}"
+            f"LocalCheckpointAdapter must implement CheckpointPort, got {type(checkpoint)}"
         )
         return checkpoint
 
@@ -259,11 +259,11 @@ class BaseServicesFactory:
             settings: Application settings providing the quarantine base path.
 
         Returns:
-            UnifiedQuarantine instance implementing QuarantinePort.
+            UnifiedQuarantineAdapter instance implementing QuarantinePort.
         """
-        quarantine = UnifiedQuarantine(base_path=str(settings.quarantine_path))
+        quarantine = UnifiedQuarantineAdapter(base_path=str(settings.quarantine_path))
         assert isinstance(quarantine, QuarantinePort), (
-            f"UnifiedQuarantine must implement QuarantinePort, got {type(quarantine)}"
+            f"UnifiedQuarantineAdapter must implement QuarantinePort, got {type(quarantine)}"
         )
         return quarantine
 

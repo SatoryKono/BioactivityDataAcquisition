@@ -41,6 +41,16 @@
 - [policy/SPECIALIST_PROFILE_TEMPLATE.md](policy/SPECIALIST_PROFILE_TEMPLATE.md)
 - [policy/CONSOLIDATION_VALIDATION.md](policy/CONSOLIDATION_VALIDATION.md)
 
+## Navigation Entry Points
+
+- [Profiles Catalog](agents/README.md)
+- [Agent Orchestration Rules](policy/agent-orchestration-rules.md)
+- [Agent Naming Policy and Rename Plan (2026-03-08)](policy/AGENT_NAMING_POLICY_AND_RENAME_PLAN_2026-03-08.md)
+- [Consolidation Validation](policy/CONSOLIDATION_VALIDATION.md)
+- [Agent Consolidation Matrix (2026-03-08)](policy/AGENT_CONSOLIDATION_MATRIX_2026-03-08.md)
+- [Collected Prompts Index](../prompts/COLLECTED_PROMPTS_INDEX.md)
+- [Shared Agent Memory](../memory/agent-memory.md)
+
 ## Notes
 
 - `docs/00-project/RULES.md` остаётся canonical source RFC 2119 требований.

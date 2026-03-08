@@ -1,11 +1,11 @@
 """Checkpoint storage implementations.
 
 Provides:
-- LocalCheckpoint: Local filesystem checkpoint storage
+- LocalCheckpointAdapter: Local filesystem checkpoint storage
 """
 
 from __future__ import annotations
 
-from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
+from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 
-__all__ = ["LocalCheckpoint"]
+__all__ = ["LocalCheckpointAdapter"]

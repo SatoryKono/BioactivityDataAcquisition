@@ -12,7 +12,7 @@ from bioetl.infrastructure.quality.exemptions_registry import load_exemptions_re
 
 
 @dataclass(frozen=True)
-class ExemptionInventory:
+class ExemptionInventorySummary:
     """Aggregated exemption inventory for governance calculations."""
 
     total_exemptions: int
@@ -26,11 +26,11 @@ def build_exemption_inventory(
     registry_path: Path | str | None = None,
     *,
     today: date | None = None,
-) -> ExemptionInventory:
+) -> ExemptionInventorySummary:
     """Build aggregated inventory from the exemptions registry.
 
     Returns:
-        ExemptionInventory with aggregated counts by registry, owner, expiry quarter, and expired entries.
+        ExemptionInventorySummary with aggregated counts by registry, owner, expiry quarter, and expired entries.
     """
     now = today or date.today()
     raw = load_exemptions_registry(registry_path)
@@ -68,7 +68,7 @@ def build_exemption_inventory(
                 if expiry_date < now:
                     expired_entries += 1
 
-    return ExemptionInventory(
+    return ExemptionInventorySummary(
         total_exemptions=sum(by_registry.values()),
         by_registry=dict(sorted(by_registry.items())),
         by_owner=dict(sorted(by_owner.items())),
@@ -78,6 +78,6 @@ def build_exemption_inventory(
 
 
 __all__ = [
-    "ExemptionInventory",
+    "ExemptionInventorySummary",
     "build_exemption_inventory",
 ]

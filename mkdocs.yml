@@ -316,6 +316,13 @@ nav:
                     -   "CLAUDE": 00-project/ai/agents/guides/CLAUDE.md
                     -   "CODEX": 00-project/ai/agents/guides/CODEX.md
                     -   "GEMINI": 00-project/ai/agents/guides/GEMINI.md
+                    -   "Profiles Catalog": 00-project/ai/agents/agents/README.md
+                    -   "Agent Orchestration Rules": 00-project/ai/agents/policy/agent-orchestration-rules.md
+                    -   "Agent Naming Policy and Rename Plan (2026-03-08)": 00-project/ai/agents/policy/AGENT_NAMING_POLICY_AND_RENAME_PLAN_2026-03-08.md
+                    -   "Consolidation Validation": 00-project/ai/agents/policy/CONSOLIDATION_VALIDATION.md
+                    -   "Agent Consolidation Matrix (2026-03-08)": 00-project/ai/agents/policy/AGENT_CONSOLIDATION_MATRIX_2026-03-08.md
+                    -   "Collected Prompts Index": 00-project/ai/prompts/COLLECTED_PROMPTS_INDEX.md
+                    -   "Shared Agent Memory": 00-project/ai/memory/agent-memory.md
                     -   "Agent Memory": 00-project/ai/agents/runtime/agent-memory.md
                     -   "QA Orchestrator Prompt": 00-project/ai/agents/runtime/py-qa-orchestrator.md
                     -   "Orchestration": 00-project/ai/agents/runtime/orchestration/py-team-orchestration.md

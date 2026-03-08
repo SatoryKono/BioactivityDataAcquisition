@@ -1,4 +1,4 @@
-"""Unit tests for LocalCheckpoint.
+"""Unit tests for LocalCheckpointAdapter.
 
 Tests checkpoint save/load/delete/list/exists operations
 using local filesystem storage with atomic writes.
@@ -12,7 +12,7 @@ from uuid import uuid4
 import pytest
 
 from bioetl.domain.types import RunID
-from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
+from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 
 
 @pytest.fixture
@@ -24,9 +24,9 @@ def checkpoint_dir(tmp_path: Path) -> Path:
 
 
 @pytest.fixture
-def checkpoint(checkpoint_dir: Path) -> LocalCheckpoint:
-    """Create a LocalCheckpoint instance."""
-    return LocalCheckpoint(base_path=checkpoint_dir)
+def checkpoint(checkpoint_dir: Path) -> LocalCheckpointAdapter:
+    """Create a LocalCheckpointAdapter instance."""
+    return LocalCheckpointAdapter(base_path=checkpoint_dir)
 
 
 @pytest.fixture
@@ -36,26 +36,26 @@ def run_id() -> RunID:
 
 
 class TestLocalCheckpointInit:
-    """Tests for LocalCheckpoint initialization."""
+    """Tests for LocalCheckpointAdapter initialization."""
 
     def test_init_with_string_path(self, tmp_path: Path) -> None:
         """Should accept string path."""
-        cp = LocalCheckpoint(base_path=str(tmp_path))
+        cp = LocalCheckpointAdapter(base_path=str(tmp_path))
         assert cp.base_path == tmp_path
 
     def test_init_with_path_object(self, tmp_path: Path) -> None:
         """Should accept Path object."""
-        cp = LocalCheckpoint(base_path=tmp_path)
+        cp = LocalCheckpointAdapter(base_path=tmp_path)
         assert cp.base_path == tmp_path
 
     def test_init_with_pipeline_name(self, tmp_path: Path) -> None:
         """Should store pipeline_name."""
-        cp = LocalCheckpoint(base_path=tmp_path, pipeline_name="test_pipeline")
+        cp = LocalCheckpointAdapter(base_path=tmp_path, pipeline_name="test_pipeline")
         assert cp.pipeline_name == "test_pipeline"
 
     def test_init_default_pipeline_name_is_none(self, tmp_path: Path) -> None:
         """Pipeline name should default to None."""
-        cp = LocalCheckpoint(base_path=tmp_path)
+        cp = LocalCheckpointAdapter(base_path=tmp_path)
         assert cp.pipeline_name is None
 
 
@@ -64,7 +64,7 @@ class TestLocalCheckpointSaveLoad:
 
     @pytest.mark.asyncio
     async def test_save_creates_file(
-        self, checkpoint: LocalCheckpoint, run_id: RunID
+        self, checkpoint: LocalCheckpointAdapter, run_id: RunID
     ) -> None:
         """Save should create a checkpoint file."""
         await checkpoint.save("chembl_activity", run_id)
@@ -72,7 +72,7 @@ class TestLocalCheckpointSaveLoad:
 
     @pytest.mark.asyncio
     async def test_save_and_load_roundtrip(
-        self, checkpoint: LocalCheckpoint, run_id: RunID
+        self, checkpoint: LocalCheckpointAdapter, run_id: RunID
     ) -> None:
         """Should be able to load a saved checkpoint."""
         metadata = {"offset": 100, "batch": 5}
@@ -87,7 +87,7 @@ class TestLocalCheckpointSaveLoad:
 
     @pytest.mark.asyncio
     async def test_save_without_metadata(
-        self, checkpoint: LocalCheckpoint, run_id: RunID
+        self, checkpoint: LocalCheckpointAdapter, run_id: RunID
     ) -> None:
         """Save without metadata should store empty dict."""
         await checkpoint.save("test_pipeline", run_id)
@@ -98,7 +98,7 @@ class TestLocalCheckpointSaveLoad:
 
     @pytest.mark.asyncio
     async def test_save_with_none_metadata(
-        self, checkpoint: LocalCheckpoint, run_id: RunID
+        self, checkpoint: LocalCheckpointAdapter, run_id: RunID
     ) -> None:
         """Save with None metadata should store empty dict."""
         await checkpoint.save("test_pipeline", run_id, None)
@@ -109,14 +109,14 @@ class TestLocalCheckpointSaveLoad:
 
     @pytest.mark.asyncio
     async def test_load_nonexistent_returns_none(
-        self, checkpoint: LocalCheckpoint
+        self, checkpoint: LocalCheckpointAdapter
     ) -> None:
         """Load for nonexistent pipeline should return None."""
         result = await checkpoint.load("nonexistent")
         assert result is None
 
     @pytest.mark.asyncio
-    async def test_save_overwrites_existing(self, checkpoint: LocalCheckpoint) -> None:
+    async def test_save_overwrites_existing(self, checkpoint: LocalCheckpointAdapter) -> None:
         """Save should overwrite existing checkpoint."""
         run_id1 = RunID(uuid4())
         run_id2 = RunID(uuid4())
@@ -134,7 +134,7 @@ class TestLocalCheckpointSaveLoad:
     async def test_save_creates_parent_dirs(self, tmp_path: Path) -> None:
         """Save should create parent directories if missing."""
         deep_path = tmp_path / "a" / "b" / "c"
-        cp = LocalCheckpoint(base_path=deep_path)
+        cp = LocalCheckpointAdapter(base_path=deep_path)
         run_id = RunID(uuid4())
         await cp.save("test", run_id)
         assert (deep_path / "test.json").exists()
@@ -145,7 +145,7 @@ class TestLocalCheckpointDelete:
 
     @pytest.mark.asyncio
     async def test_delete_removes_file(
-        self, checkpoint: LocalCheckpoint, run_id: RunID
+        self, checkpoint: LocalCheckpointAdapter, run_id: RunID
     ) -> None:
         """Delete should remove checkpoint file."""
         await checkpoint.save("pipeline", run_id)
@@ -156,7 +156,7 @@ class TestLocalCheckpointDelete:
 
     @pytest.mark.asyncio
     async def test_delete_nonexistent_is_noop(
-        self, checkpoint: LocalCheckpoint
+        self, checkpoint: LocalCheckpointAdapter
     ) -> None:
         """Delete for nonexistent pipeline should not raise."""
         await checkpoint.delete("nonexistent")
@@ -166,13 +166,13 @@ class TestLocalCheckpointListAll:
     """Tests for list_all operation."""
 
     @pytest.mark.asyncio
-    async def test_list_all_empty(self, checkpoint: LocalCheckpoint) -> None:
+    async def test_list_all_empty(self, checkpoint: LocalCheckpointAdapter) -> None:
         """Should return empty list when no checkpoints exist."""
         result = await checkpoint.list_all()
         assert result == []
 
     @pytest.mark.asyncio
-    async def test_list_all_multiple(self, checkpoint: LocalCheckpoint) -> None:
+    async def test_list_all_multiple(self, checkpoint: LocalCheckpointAdapter) -> None:
         """Should list all pipelines with checkpoints."""
         for name in ["alpha", "beta", "gamma"]:
             await checkpoint.save(name, RunID(uuid4()))
@@ -181,7 +181,7 @@ class TestLocalCheckpointListAll:
         assert result == ["alpha", "beta", "gamma"]
 
     @pytest.mark.asyncio
-    async def test_list_all_sorted(self, checkpoint: LocalCheckpoint) -> None:
+    async def test_list_all_sorted(self, checkpoint: LocalCheckpointAdapter) -> None:
         """Results should be sorted alphabetically."""
         for name in ["zebra", "alpha", "middle"]:
             await checkpoint.save(name, RunID(uuid4()))
@@ -192,7 +192,7 @@ class TestLocalCheckpointListAll:
     @pytest.mark.asyncio
     async def test_list_all_nonexistent_base_path(self, tmp_path: Path) -> None:
         """Should return empty list when base path doesn't exist."""
-        cp = LocalCheckpoint(base_path=tmp_path / "nonexistent")
+        cp = LocalCheckpointAdapter(base_path=tmp_path / "nonexistent")
         result = await cp.list_all()
         assert result == []
 
@@ -202,20 +202,20 @@ class TestLocalCheckpointExists:
 
     @pytest.mark.asyncio
     async def test_exists_true(
-        self, checkpoint: LocalCheckpoint, run_id: RunID
+        self, checkpoint: LocalCheckpointAdapter, run_id: RunID
     ) -> None:
         """Should return True for existing checkpoint."""
         await checkpoint.save("pipeline", run_id)
         assert await checkpoint.exists("pipeline") is True
 
     @pytest.mark.asyncio
-    async def test_exists_false(self, checkpoint: LocalCheckpoint) -> None:
+    async def test_exists_false(self, checkpoint: LocalCheckpointAdapter) -> None:
         """Should return False for nonexistent checkpoint."""
         assert await checkpoint.exists("nonexistent") is False
 
     @pytest.mark.asyncio
     async def test_exists_after_delete(
-        self, checkpoint: LocalCheckpoint, run_id: RunID
+        self, checkpoint: LocalCheckpointAdapter, run_id: RunID
     ) -> None:
         """Should return False after deletion."""
         await checkpoint.save("pipeline", run_id)
@@ -227,7 +227,7 @@ class TestLocalCheckpointAclose:
     """Tests for aclose operation."""
 
     @pytest.mark.asyncio
-    async def test_aclose_is_noop(self, checkpoint: LocalCheckpoint) -> None:
+    async def test_aclose_is_noop(self, checkpoint: LocalCheckpointAdapter) -> None:
         """aclose should not raise and be a no-op."""
         await checkpoint.aclose()
 
@@ -235,6 +235,6 @@ class TestLocalCheckpointAclose:
 class TestLocalCheckpointGetKey:
     """Tests for _get_key internal method."""
 
-    def test_get_key_format(self, checkpoint: LocalCheckpoint) -> None:
+    def test_get_key_format(self, checkpoint: LocalCheckpointAdapter) -> None:
         """Should return pipeline.json format."""
         assert checkpoint._get_key("chembl_activity") == "chembl_activity.json"

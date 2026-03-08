@@ -222,11 +222,11 @@ class TestCheckpointPortProperties:
         """Property: save() followed by load() MUST preserve data exactly."""
         import tempfile
 
-        from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
+        from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 
         async def test_roundtrip():
             with tempfile.TemporaryDirectory() as tmp_dir:
-                checkpoint = LocalCheckpoint(base_path=tmp_dir)
+                checkpoint = LocalCheckpointAdapter(base_path=tmp_dir)
                 run_id = uuid4()
 
                 try:
@@ -253,11 +253,11 @@ class TestCheckpointPortProperties:
         """Property: list_all() MUST return all saved pipeline names."""
         import tempfile
 
-        from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
+        from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 
         async def test_list():
             with tempfile.TemporaryDirectory() as tmp_dir:
-                checkpoint = LocalCheckpoint(base_path=tmp_dir)
+                checkpoint = LocalCheckpointAdapter(base_path=tmp_dir)
 
                 try:
                     # Save checkpoints for all pipelines
@@ -280,11 +280,11 @@ class TestCheckpointPortProperties:
         """Property: delete() followed by load() MUST return None."""
         import tempfile
 
-        from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
+        from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 
         async def test_delete():
             with tempfile.TemporaryDirectory() as tmp_dir:
-                checkpoint = LocalCheckpoint(base_path=tmp_dir)
+                checkpoint = LocalCheckpointAdapter(base_path=tmp_dir)
 
                 try:
                     # Save and then delete

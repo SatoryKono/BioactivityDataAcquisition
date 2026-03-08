@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from bioetl.domain.types import JsonDict
-from bioetl.infrastructure.quality.inventory import ExemptionInventory
+from bioetl.infrastructure.quality.inventory import ExemptionInventorySummary
 
 __all__ = ["validate_registry_sync"]
 
@@ -33,7 +33,7 @@ def _validate_registry_membership(
 def _validate_registry_baselines(
     *,
     baseline_by_registry: dict[str, object],
-    inventory: ExemptionInventory,
+    inventory: ExemptionInventorySummary,
     comparable_registries: list[str],
 ) -> list[str]:
     errors: list[str] = []
@@ -57,7 +57,7 @@ def _validate_registry_baselines(
 def _validate_total_exemptions(
     *,
     baseline: dict[str, object],
-    inventory: ExemptionInventory,
+    inventory: ExemptionInventorySummary,
 ) -> list[str]:
     baseline_total = baseline.get("total_exemptions")
     if not isinstance(baseline_total, int):
@@ -77,7 +77,7 @@ def validate_registry_sync(
     *,
     raw_registry: JsonDict,
     scorecard: JsonDict,
-    inventory: ExemptionInventory,
+    inventory: ExemptionInventorySummary,
 ) -> list[str]:
     """Validate scorecard baseline synchronization with live registry inventory."""
     raw_registries = raw_registry.get("registries", {})
