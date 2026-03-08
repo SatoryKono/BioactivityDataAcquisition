@@ -82,6 +82,12 @@ class ChemblAdapter(
 
     def __post_init__(self) -> None:
         """Initialize adapter with config values and metrics."""
+        # Dataclass-generated __init__ bypasses BaseHttpAdapter.__init__.
+        # Initialize private base state used by shared adapter helpers.
+        self._http_client = self.http_client
+        self._logger = self.logger
+        self._metrics = self.metrics
+
         # Initialize error handler: use injected or create fallback
         if self.error_handler is not None:
             self._error_handler = self.error_handler
