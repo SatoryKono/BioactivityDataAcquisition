@@ -98,8 +98,8 @@ class BronzeWriterIOMixin:
         def _compute() -> str:
             h = hashlib.blake2b()
             with open(file_path, "rb") as f:
-                for chunk in iter(lambda: f.read(65536), b""):
-                    h.update(chunk)
+                for block in iter(lambda: f.read(65536), b""):
+                    h.update(block)
             return h.hexdigest()
 
         return await asyncio.get_running_loop().run_in_executor(None, _compute)

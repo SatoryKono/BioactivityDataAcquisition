@@ -1,7 +1,14 @@
-name: Schema Governance
+﻿name: Schema Governance
 
 on:
   push:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.ai/**'
+      - '.claude/**'
+      - '.github/workflows/**'
+      - 'LICENSE'
     branches: [main, master]
     paths:
       - 'src/bioetl/domain/contracts/**'
@@ -14,6 +21,13 @@ on:
       - 'docs/03-data-model/json-field-typing-inventory.md'
       - '.github/workflows/schema-governance.yml'
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.ai/**'
+      - '.claude/**'
+      - '.github/workflows/**'
+      - 'LICENSE'
     paths:
       - 'src/bioetl/domain/contracts/**'
       - 'src/bioetl/domain/entities/**'
@@ -146,3 +160,4 @@ jobs:
             echo "::warning::Schema parity check reported mismatches (non-blocking)"
           fi
           echo "::notice::Schema governance checks completed"
+

@@ -1,10 +1,17 @@
-name: Commit Lint
+﻿name: Commit Lint
 
 permissions:
   contents: read
 
 on:
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.ai/**'
+      - '.claude/**'
+      - '.github/workflows/**'
+      - 'LICENSE'
     branches: [main, master, develop]
 
 concurrency:
@@ -22,3 +29,4 @@ jobs:
         with:
           configFile: commitlint.config.js
           helpURL: https://www.conventionalcommits.org/
+

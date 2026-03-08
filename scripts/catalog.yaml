@@ -16,8 +16,29 @@ canonical_roots:
 policies:
   root_wrappers_only: true
   compatibility_root: scripts/
+  root_allowlist:
+    - run.py
   canonical_invocation_required_for_new_integrations: true
   no_new_non_wrapper_scripts_in_root: true
+
+lifecycle:
+  manifest_path: configs/quality/scripts_inventory_manifest.json
+  registry_path: configs/quality/scripts_lifecycle_registry.json
+  non_active_statuses:
+    - unknown
+    - orphan
+    - legacy
+  required_registry_fields:
+    - owner
+    - decision
+    - next_step
+    - review_by
+  deprecated_decisions:
+    - deprecate
+  deprecated_required_fields:
+    - replacement
+    - sunset_date
+  enforce_known_registry_paths: true
 
 groups:
   ci:

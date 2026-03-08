@@ -1,4 +1,7 @@
-name: Diagram Nightly Regression
+﻿name: Diagram Nightly Regression
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 on:
   schedule:
@@ -210,3 +213,4 @@ jobs:
             echo "- Workflow status: ${{ job.status }}"
             echo "- `mmdc --version`: $(mmdc --version || echo 'unavailable')"
           } >> "$GITHUB_STEP_SUMMARY"
+

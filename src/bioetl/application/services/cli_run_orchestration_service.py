@@ -47,7 +47,7 @@ class MetricsFlushCallable(Protocol):
 
     def __call__(
         self,
-        job: str = "bioetl",
+        run_label: str = "bioetl",
         pipeline_name: str | None = None,
     ) -> bool: ...
 

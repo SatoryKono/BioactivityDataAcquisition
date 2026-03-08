@@ -111,51 +111,63 @@ async function convertOne(browser, svgPath, idx, total) {
 
   const svgContent = await fs.readFile(svgPath, "utf-8");
 
-  // Extract SVG dimensions
-  const widthMatch = svgContent.match(/width="([\d.]+)/);
-  const heightMatch = svgContent.match(/height="([\d.]+)/);
-  // Also try viewBox
+  // Extract SVG dimensions — prefer viewBox (always numeric),
+  // width/height may be "100%" which is not useful.
   const viewBoxMatch = svgContent.match(
-    /viewBox="[\d.]+ [\d.]+ ([\d.]+) ([\d.]+)/
+    /viewBox="(-?[\d.]+)\s+(-?[\d.]+)\s+([\d.]+)\s+([\d.]+)/
   );
+  const widthMatch = svgContent.match(/\bwidth="([\d.]+)(?:px)?"/);
+  const heightMatch = svgContent.match(/\bheight="([\d.]+)(?:px)?"/);
 
-  let svgWidth = widthMatch ? parseFloat(widthMatch[1]) : 800;
-  let svgHeight = heightMatch ? parseFloat(heightMatch[1]) : 600;
-  if (
-    (!widthMatch || !heightMatch) &&
-    viewBoxMatch
-  ) {
-    svgWidth = parseFloat(viewBoxMatch[1]);
-    svgHeight = parseFloat(viewBoxMatch[2]);
+  let svgWidth, svgHeight;
+  if (viewBoxMatch) {
+    svgWidth = parseFloat(viewBoxMatch[3]);
+    svgHeight = parseFloat(viewBoxMatch[4]);
+  } else if (widthMatch && heightMatch) {
+    svgWidth = parseFloat(widthMatch[1]);
+    svgHeight = parseFloat(heightMatch[1]);
+  } else {
+    svgWidth = 800;
+    svgHeight = 600;
   }
+
+  // Auto-reduce scale for very large diagrams to avoid Chrome OOM/timeout
+  let effectiveScale = scale;
+  if (svgWidth * svgHeight > 4_000_000) {
+    effectiveScale = Math.min(scale, 2);
+  }
+
+  // Use ceil to avoid fractional pixels
+  const vpWidth = Math.ceil(svgWidth);
+  const vpHeight = Math.ceil(svgHeight);
 
   const page = await browser.newPage();
   await page.setViewport({
-    width: Math.ceil(svgWidth * scale),
-    height: Math.ceil(svgHeight * scale),
-    deviceScaleFactor: scale,
+    width: vpWidth,
+    height: vpHeight,
+    deviceScaleFactor: effectiveScale,
   });
 
-  // Load SVG as data URI in a simple HTML page
+  // Load SVG inline (not as img src) so <text> elements render with full font support
   const html = `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><style>
-  * { margin: 0; padding: 0; }
-  body { background: white; display: flex; align-items: flex-start; justify-content: flex-start; }
-  img { width: ${svgWidth}px; height: ${svgHeight}px; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: ${vpWidth}px; height: ${vpHeight}px; overflow: hidden; background: white; }
+  svg { width: ${vpWidth}px; height: ${vpHeight}px; display: block; }
 </style></head><body>
-  <img src="data:image/svg+xml;base64,${Buffer.from(svgContent).toString("base64")}" />
+${svgContent}
 </body></html>`;
 
   await page.setContent(html, { waitUntil: "networkidle0" });
 
-  // Wait a bit for fonts to load
-  await page.evaluate(
-    () => new Promise((resolve) => setTimeout(resolve, 200))
+  // Wait for fonts to load
+  await page.evaluate(() =>
+    document.fonts ? document.fonts.ready : new Promise((r) => setTimeout(r, 300))
   );
 
   await page.screenshot({
     path: pngPath,
-    clip: { x: 0, y: 0, width: svgWidth, height: svgHeight },
+    clip: { x: 0, y: 0, width: vpWidth, height: vpHeight },
     omitBackground: false,
   });
 
@@ -170,6 +182,7 @@ async function convertOne(browser, svgPath, idx, total) {
 async function main() {
   const browser = await puppeteer.launch({
     headless: "new",
+    protocolTimeout: 120_000,
     args: [
       "--no-sandbox",
       "--disable-setuid-sandbox",

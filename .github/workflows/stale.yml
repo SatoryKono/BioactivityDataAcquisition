@@ -1,4 +1,7 @@
-name: Stale
+﻿name: Stale
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 on:
   schedule:
@@ -30,3 +33,4 @@ jobs:
           stale-issue-label: "stale"
           exempt-pr-labels: "pinned,work-in-progress"
           exempt-issue-labels: "pinned,work-in-progress"
+

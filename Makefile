@@ -1,7 +1,7 @@
 # BioETL Makefile
 # Production-ready ETL system for bioactivity data
 
-.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-local-artifacts sanitize-local clean-preflight clean-all diagram-preflight lint-diagrams report-diagrams-policy validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png render-diagrams-descriptions-docx render-diagrams-descriptions-pdf run-diagram-docs-agent check-diagrams-visibility check-diagrams-pdf-bounds diagrams-all report-diagram-padding docs-lint docs-quality docs-docstrings docs-drift scripts-inventory-check scripts-inventory-update scripts-deprecation-report scripts-lifecycle-check
+.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-local-artifacts sanitize-local clean-preflight clean-all diagram-preflight lint-diagrams report-diagrams-policy validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png render-diagrams-descriptions-docx render-diagrams-descriptions-pdf run-diagram-docs-agent check-diagrams-visibility check-diagrams-pdf-bounds diagrams-all report-diagram-padding docs-lint docs-quality docs-docstrings docs-drift scripts-inventory-check scripts-inventory-update scripts-deprecation-report scripts-lifecycle-check scripts-catalog-check
 .DEFAULT_GOAL := help
 
 # Detect uv availability (preferred package manager)
@@ -516,7 +516,12 @@ scripts-lifecycle-check: ## Validate lifecycle registry coverage for non-active 
 	$(PY_RUN) scripts/repo/check_scripts_inventory.py --check-lifecycle --forbid-evaluate-active --lifecycle-registry configs/quality/scripts_lifecycle_registry.json
 	@echo "$(GREEN)Scripts lifecycle registry is valid!$(NC)"
 
-docs-quality: docs-lint docs-docstrings docs-drift scripts-inventory-check scripts-lifecycle-check ## Run all documentation quality checks
+scripts-catalog-check: ## Validate scripts catalog governance policy
+	@echo "$(BLUE)Validating scripts catalog governance...$(NC)"
+	$(PY_RUN) scripts/repo/check_scripts_catalog.py --catalog scripts/catalog.yaml
+	@echo "$(GREEN)Scripts catalog governance is valid!$(NC)"
+
+docs-quality: docs-lint docs-docstrings docs-drift scripts-inventory-check scripts-lifecycle-check scripts-catalog-check ## Run all documentation quality checks
 	@echo "$(GREEN)All documentation quality checks passed!$(NC)"
 
 schema-artifacts: ## Generate canonical schema artifacts (registry + contracts)

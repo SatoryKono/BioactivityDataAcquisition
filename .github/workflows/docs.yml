@@ -1,13 +1,30 @@
-name: Docs & Diagrams
+﻿name: Docs & Diagrams
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 on:
   push:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.ai/**'
+      - '.claude/**'
+      - '.github/workflows/**'
+      - 'LICENSE'
     branches: [ "main" ]
     paths:
       - 'docs/**'
       - 'mkdocs.yml'
       - '.github/workflows/docs.yml'
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.ai/**'
+      - '.claude/**'
+      - '.github/workflows/**'
+      - 'LICENSE'
     branches: [ "main" ]
     paths:
       - 'docs/**'
@@ -226,3 +243,4 @@ jobs:
           else
             echo "Rendered outputs also updated — OK."
           fi
+

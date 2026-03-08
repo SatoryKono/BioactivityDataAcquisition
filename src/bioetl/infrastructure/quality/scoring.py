@@ -20,7 +20,8 @@ def compute_integral_debt_score(
         Float score in range 0..100 representing debt health, higher is better.
     """
     if baseline_total <= 0:
-        return 0.0
+        # Zero baseline with zero exemptions means zero debt — perfect score.
+        return 100.0 if total_exemptions <= 0 else 0.0
 
     debt_reduction_component = max(
         0.0,
