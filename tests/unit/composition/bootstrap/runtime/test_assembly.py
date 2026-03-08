@@ -20,7 +20,7 @@ from bioetl.composition.bootstrap.runtime.assembly import (
 from bioetl.domain.context import (
     InputFilterContext,
     PipelineRunContext,
-    VacuumConfig,
+    VacuumSettings,
 )
 from bioetl.domain.types import RunType
 from bioetl.infrastructure.schemas.pipeline_config import (
@@ -111,7 +111,7 @@ class TestAssembleVacuumSettings:
         self, yaml_maintenance_default: MaintenanceConfig
     ):
         """Test that CLI enabled=None uses YAML auto_vacuum=False."""
-        cli_vacuum = VacuumConfig(enabled=None, retention_days=7)
+        cli_vacuum = VacuumSettings(enabled=None, retention_days=7)
 
         result = assemble_vacuum_settings(
             cli_vacuum=cli_vacuum,
@@ -125,7 +125,7 @@ class TestAssembleVacuumSettings:
         self, yaml_maintenance_enabled: MaintenanceConfig
     ):
         """Test that CLI enabled=None uses YAML auto_vacuum=True."""
-        cli_vacuum = VacuumConfig(enabled=None, retention_days=3)
+        cli_vacuum = VacuumSettings(enabled=None, retention_days=3)
 
         result = assemble_vacuum_settings(
             cli_vacuum=cli_vacuum,
@@ -140,7 +140,7 @@ class TestAssembleVacuumSettings:
         self, yaml_maintenance_default: MaintenanceConfig
     ):
         """Test that CLI enabled=True overrides YAML auto_vacuum=False."""
-        cli_vacuum = VacuumConfig(enabled=True, retention_days=5)
+        cli_vacuum = VacuumSettings(enabled=True, retention_days=5)
 
         result = assemble_vacuum_settings(
             cli_vacuum=cli_vacuum,
@@ -154,7 +154,7 @@ class TestAssembleVacuumSettings:
         self, yaml_maintenance_enabled: MaintenanceConfig
     ):
         """Test that CLI enabled=False overrides YAML auto_vacuum=True."""
-        cli_vacuum = VacuumConfig(enabled=False, retention_days=3)
+        cli_vacuum = VacuumSettings(enabled=False, retention_days=3)
 
         result = assemble_vacuum_settings(
             cli_vacuum=cli_vacuum,
@@ -168,7 +168,7 @@ class TestAssembleVacuumSettings:
         self, yaml_maintenance_enabled: MaintenanceConfig
     ):
         """Test that CLI override uses CLI retention_days value."""
-        cli_vacuum = VacuumConfig(enabled=True, retention_days=30)
+        cli_vacuum = VacuumSettings(enabled=True, retention_days=30)
 
         result = assemble_vacuum_settings(
             cli_vacuum=cli_vacuum,
@@ -182,7 +182,7 @@ class TestAssembleVacuumSettings:
         self, yaml_maintenance_default: MaintenanceConfig
     ):
         """Test that function returns VacuumSettings type."""
-        cli_vacuum = VacuumConfig(enabled=None, retention_days=7)
+        cli_vacuum = VacuumSettings(enabled=None, retention_days=7)
 
         result = assemble_vacuum_settings(
             cli_vacuum=cli_vacuum,
@@ -466,7 +466,7 @@ class TestAssemblyIntegration:
             run_type=RunType.BACKFILL,
             resume=True,
             limit=500,
-            vacuum=VacuumConfig(enabled=False, retention_days=3),
+            vacuum=VacuumSettings(enabled=False, retention_days=3),
             input_filter=InputFilterContext.from_csv(
                 source_path="/cli/filter.csv",
                 column_name="my_col",
