@@ -14,8 +14,11 @@ import click
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from bioetl.application.core.cleanup_service import CleanupPreview
     from bioetl.application.services import (
+        ColumnInfo,
         ExportResult,
         TableInfo,
         TablePreview,
@@ -202,13 +205,13 @@ def echo_table_list(tables: list[TableInfo]) -> None:
 
 def _format_preview_row(
     row: dict[str, object],
-    columns: list[object],
+    columns: Sequence[ColumnInfo],
     max_cols: int = 5,
 ) -> str:
     """Format a single sample row for preview display."""
     values = []
     for col in columns[:max_cols]:
-        val = str(row.get(col.name, ""))  # type: ignore[union-attr]
+        val = str(row.get(col.name, ""))
         values.append(f"{val[:30]}..." if len(val) > 30 else val)
     if len(columns) > max_cols:
         values.append("...")

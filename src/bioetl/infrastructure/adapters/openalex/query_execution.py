@@ -41,7 +41,7 @@ class OpenAlexQueryExecutor:
         url = f"{self.api_base}/works"
         start_time = time.perf_counter()
         with self.adapter_metrics.measure_request("/works"):
-            response = await self._http_client.get(
+            response = await self.http_client.get(
                 url,
                 params=params,
                 headers=self.headers_provider(),

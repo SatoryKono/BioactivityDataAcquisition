@@ -60,6 +60,8 @@ class ChemblHealthMixin:
     http_client: UnifiedHTTPClient
     logger: LoggerPort
     provider_name: str
+    _http_client: UnifiedHTTPClient
+    _logger: LoggerPort
     _page_size: int
     _adapter_metrics: AdapterMetrics
 

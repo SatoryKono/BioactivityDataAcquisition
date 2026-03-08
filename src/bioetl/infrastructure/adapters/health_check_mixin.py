@@ -75,6 +75,7 @@ class HealthCheckMixin:
     logger: LoggerPort
     metrics: MetricsPort | None
     provider_name: str
+    _logger: LoggerPort
 
     def _get_metrics(self) -> MetricsPort:
         """Get metrics port, falling back to NoOpMetrics if None.
@@ -85,7 +86,7 @@ class HealthCheckMixin:
         """
         from bioetl.domain.ports import NoOpMetrics
 
-        return self._metrics if self._metrics is not None else NoOpMetrics()
+        return self.metrics if self.metrics is not None else NoOpMetrics()
 
     def _start_health_check(self) -> HealthCheckContext:
         """Start a health check context for timing.

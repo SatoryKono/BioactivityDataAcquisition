@@ -43,8 +43,8 @@ if TYPE_CHECKING:
     from bioetl.domain.context import (
         CachedBronzeContext,
         PipelineRunContext,
-        VacuumSettings,
     )
+    from bioetl.domain.context import VacuumSettings as CliVacuumSettings
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import PipelineFactoryPort
     from bioetl.domain.types import RunID
@@ -63,7 +63,7 @@ __all__ = ["build_pipeline_runner"]
 
 def _assemble_vacuum_settings(
     *,
-    cli_vacuum: VacuumSettings,
+    cli_vacuum: CliVacuumSettings,
     yaml_maintenance: MaintenanceConfig,
 ) -> VacuumSettings:
     """Compatibility wrapper for legacy tests/monkeypatching."""

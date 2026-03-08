@@ -49,6 +49,8 @@ class PubMedFetchMixin:
     logger: LoggerPort
     email: str
     api_key: str | None
+    _http_client: UnifiedHTTPClient
+    _logger: LoggerPort
     _adapter_metrics: AdapterMetrics
     _request_collector: APIRequestCollector
     provider_name: str
@@ -110,7 +112,7 @@ class PubMedFetchMixin:
         except PUBMED_FETCH_ERRORS as e:
             from bioetl.infrastructure.adapters.error_handling import ErrorService
 
-            error_handler = ErrorService(self._logger, metrics=self._metrics)
+            error_handler = ErrorService(self._logger, metrics=self.metrics)
             wrapped = error_handler.handle_error(
                 error=e,
                 provider=self.provider_name,
