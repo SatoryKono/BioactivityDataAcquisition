@@ -31,6 +31,7 @@ concurrency:
 jobs:
     lint:
         runs-on: ubuntu-latest
+        timeout-minutes: 15
 
         steps:
             -   name: Checkout
@@ -135,6 +136,7 @@ jobs:
     c901-governance:
         name: C901 Governance (blocking)
         runs-on: ubuntu-latest
+        timeout-minutes: 10
 
         steps:
             -   name: Checkout
@@ -177,6 +179,7 @@ jobs:
 
     arch-tests:
         runs-on: ubuntu-latest
+        timeout-minutes: 15
 
         steps:
             -   name: Checkout
@@ -216,8 +219,8 @@ jobs:
                 run: uv run python src/tools/scripts/check_architecture.py
 
     unit-tests:
-        needs: lint
         runs-on: ubuntu-latest
+        timeout-minutes: 20
 
         steps:
             -   name: Checkout
@@ -308,8 +311,8 @@ jobs:
                     PY
 
     integration-tests:
-        needs: lint
         runs-on: ubuntu-latest
+        timeout-minutes: 15
 
         steps:
             -   name: Checkout
@@ -354,6 +357,7 @@ jobs:
             - integration-tests
             - arch-tests
         runs-on: ubuntu-latest
+        timeout-minutes: 2
         if: ${{ always() }}
         steps:
             -   name: Final status

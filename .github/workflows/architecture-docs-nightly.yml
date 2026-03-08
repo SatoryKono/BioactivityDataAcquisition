@@ -51,4 +51,5 @@ jobs:
             docs/02-architecture/generated/module-dependency-map.json
             /tmp/architecture-docs-status.txt
             /tmp/architecture-docs-summary.txt
+          retention-days: 14
 

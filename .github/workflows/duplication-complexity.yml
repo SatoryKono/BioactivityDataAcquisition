@@ -27,6 +27,7 @@ on:
 jobs:
   duplication-complexity:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - name: Checkout
@@ -220,10 +221,12 @@ jobs:
           name: duplication-complexity-reports
           path: reports
           if-no-files-found: warn
+          retention-days: 14
 
   constructor-args-check:
     name: Constructor Arguments Check
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -239,6 +242,7 @@ jobs:
   executor-complexity:
     name: Executor Complexity Check
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Checkout
         uses: actions/checkout@v4

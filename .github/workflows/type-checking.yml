@@ -24,8 +24,6 @@ on:
       - '.github/workflows/**'
       - 'LICENSE'
   workflow_dispatch:
-  schedule:
-    - cron: '30 2 * * 1'
 
 jobs:
   type-check:
@@ -203,6 +201,6 @@ jobs:
           name: type-checking-reports
           path: |
             reports/
-            .mypy_cache/
           if-no-files-found: warn
+          retention-days: 14
 

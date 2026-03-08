@@ -1,4 +1,4 @@
-﻿name: Reusable CI setup
+name: Reusable CI setup
 
 on:
   workflow_call:
@@ -6,6 +6,22 @@ on:
       python-version:
         required: false
         default: "3.11"
+        type: string
+      uv-extras:
+        description: "Space-separated uv extras to install (e.g. 'dev tracing performance')"
+        required: false
+        default: "dev tracing"
+        type: string
+      enable-pytest-cache:
+        description: "Enable pytest/hypothesis cache restoration"
+        required: false
+        default: false
+        type: boolean
+      pytest-cache-prefix:
+        description: "Cache key prefix for pytest cache (to differentiate cache scopes)"
+        required: false
+        default: "pytest"
+        type: string
 
 jobs:
   setup:
@@ -21,6 +37,9 @@ jobs:
         with:
           python-version: ${{ inputs.python-version }}
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
       - name: Cache uv and virtualenv
         uses: actions/cache@v4
         with:
@@ -31,5 +50,13 @@ jobs:
           restore-keys: |
             uv-${{ runner.os }}-py${{ inputs.python-version }}-
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
+      - name: Cache pytest and hypothesis
+        if: ${{ inputs.enable-pytest-cache }}
+        uses: actions/cache@v4
+        with:
+          path: |
+            .pytest_cache
+            .hypothesis
+          key: ${{ inputs.pytest-cache-prefix }}-${{ runner.os }}-py${{ inputs.python-version }}-${{ hashFiles('tests/**/*.py') }}
+          restore-keys: |
+            ${{ inputs.pytest-cache-prefix }}-${{ runner.os }}-py${{ inputs.python-version }}-
