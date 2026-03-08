@@ -516,9 +516,7 @@ def test_architecture_test_p95_duration_tracked() -> None:
     assert "architecture-heavy-nightly" in content, (
         "Workflow must have architecture-heavy-nightly job for full profile"
     )
-    assert "not slow" in content, (
-        "Fast baseline must exclude @pytest.mark.slow tests"
-    )
+    assert "not slow" in content, "Fast baseline must exclude @pytest.mark.slow tests"
 
 
 # ---------------------------------------------------------------------------

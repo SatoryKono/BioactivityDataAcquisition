@@ -122,7 +122,7 @@ class PubMedAdapterFilterFetchMixin:
             raise ValueError("PubMedAdapter only supports 'publication'")
 
         if filter_field != "pmid":
-            self._logger.warning(
+            self.logger.warning(
                 "unsupported_filter_field", field=filter_field, msg="Assuming PMIDs"
             )
 
@@ -285,7 +285,7 @@ class PubMedAdapterFilterFetchMixin:
         """
         resume_offset = max(0, offset or 0)
         if limit is not None and resume_offset >= limit:
-            self._logger.info(
+            self.logger.info(
                 "pubmed_resume_offset_reached_limit",
                 offset=resume_offset,
                 limit=limit,
@@ -328,7 +328,7 @@ class PubMedAdapterFilterFetchMixin:
         """
         if resume_offset == 0:
             return pmids
-        self._logger.info(
+        self.logger.info(
             "pubmed_resume_skip_processed",
             offset=resume_offset,
             pmids_found=len(pmids),

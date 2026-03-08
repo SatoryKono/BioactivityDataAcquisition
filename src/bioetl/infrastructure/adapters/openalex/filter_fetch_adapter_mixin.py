@@ -162,7 +162,7 @@ class OpenAlexAdapterFilterFetchMixin:
                 yield work
             return
 
-        self._logger.warning(
+        self.logger.warning(
             "unsupported_filter_field",
             field=filter_field,
             msg="OpenAlex only supports 'doi' or 'title' filtering, skipping",

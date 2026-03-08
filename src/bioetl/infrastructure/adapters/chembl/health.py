@@ -71,12 +71,12 @@ class ChemblHealthMixin:
         """
         try:
             with self._adapter_metrics.measure_request("/status"):
-                response = await self._http_client.get_once(CHEMBL_STATUS_URL)
+                response = await self.http_client.get_once(CHEMBL_STATUS_URL)
             return self._handle_health_response(response)
         except CHEMBL_HEALTH_ERRORS as exc:
             status_code = self._extract_http_status_code(exc)
             if status_code is not None and 500 <= status_code < 600:
-                self._logger.warning(
+                self.logger.warning(
                     "health_check_degraded",
                     provider=self.provider_name,
                     reason="status_endpoint_5xx",
@@ -94,7 +94,7 @@ class ChemblHealthMixin:
                     httpx.WriteError,
                 ),
             ):
-                self._logger.warning(
+                self.logger.warning(
                     "health_check_degraded",
                     provider=self.provider_name,
                     reason="transient_network_error",
@@ -110,7 +110,7 @@ class ChemblHealthMixin:
         Returns:
             HealthStatus derived from the circuit breaker's current state.
         """
-        return assess_health_from_circuit_breaker(self._http_client.circuit_breaker)
+        return assess_health_from_circuit_breaker(self.http_client.circuit_breaker)
 
     def _get_effective_batch_size(self) -> int:
         """Return the effective ``limit`` parameter for the next API request.
@@ -127,7 +127,7 @@ class ChemblHealthMixin:
           requests.
         """
         health_status = self._get_health_status()
-        failure_count = self._http_client.circuit_breaker.get_failure_count()
+        failure_count = self.http_client.circuit_breaker.get_failure_count()
 
         if health_status == HealthStatus.UNHEALTHY:
             raise CriticalError(
@@ -136,7 +136,7 @@ class ChemblHealthMixin:
             )
         if health_status == HealthStatus.DEGRADED:
             reduced = max(100, self._page_size // 2)  # Minimum 100
-            self._logger.warning(
+            self.logger.warning(
                 "chembl_degraded_mode",
                 provider="chembl",
                 original_batch_size=self._page_size,
@@ -173,7 +173,7 @@ class ChemblHealthMixin:
             if data.get("status") == "UP":
                 return HealthStatus.HEALTHY
             else:
-                self._logger.warning(
+                self.logger.warning(
                     "health_check_degraded",
                     provider=self.provider_name,
                     reason="status_not_up",
@@ -181,7 +181,7 @@ class ChemblHealthMixin:
                 )
                 return HealthStatus.DEGRADED
         else:
-            self._logger.warning(
+            self.logger.warning(
                 "health_check_degraded",
                 provider=self.provider_name,
                 reason="non_200_response",
@@ -209,12 +209,12 @@ class ChemblHealthMixin:
             Error stats.
         """
         return {
-            "circuit_breaker_failures": self._http_client.circuit_breaker.get_failure_count(),
-            "circuit_breaker_state": self._http_client.circuit_breaker.get_state().value,
+            "circuit_breaker_failures": self.http_client.circuit_breaker.get_failure_count(),
+            "circuit_breaker_state": self.http_client.circuit_breaker.get_state().value,
             "health_status": self._get_health_status().value,
         }
 
     def reset_circuit_breaker(self) -> None:
         """Reset circuit breaker (e.g., after successful recovery)."""
-        self._http_client.circuit_breaker.reset()
-        self._logger.info("chembl_circuit_breaker_reset", provider="chembl")
+        self.http_client.circuit_breaker.reset()
+        self.logger.info("chembl_circuit_breaker_reset", provider="chembl")

@@ -185,9 +185,7 @@ class TestNoHardcodedSecrets:
         """Class-scoped alias for session-cached source file contents."""
         return _src_file_contents
 
-    def test_source_files_exist(
-        self, source_contents: list[tuple[Path, str]]
-    ) -> None:
+    def test_source_files_exist(self, source_contents: list[tuple[Path, str]]) -> None:
         """Verify source files exist."""
         assert len(source_contents) > 0, "No Python source files found"
 
@@ -437,7 +435,6 @@ class TestPIIHandling:
                 continue
             for regex_pattern, pattern_name in pii_patterns:
                 if re.search(regex_pattern, content, re.IGNORECASE):
-
                     # Skip known non-PII address files (email address text, network address)
                     if (
                         pattern_name == "address"

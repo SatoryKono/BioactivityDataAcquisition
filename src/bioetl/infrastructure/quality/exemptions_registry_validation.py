@@ -105,9 +105,12 @@ def _resolve_due_field(
     required_fields: tuple[str, ...],
 ) -> str:
     """Determine the most appropriate due-date field name for an entry."""
-    candidates = list(dict.fromkeys(
-        [f for f in required_fields if f in _DUE_DATE_FIELDS] + list(_DUE_DATE_FIELDS)
-    ))
+    candidates = list(
+        dict.fromkeys(
+            [f for f in required_fields if f in _DUE_DATE_FIELDS]
+            + list(_DUE_DATE_FIELDS)
+        )
+    )
     return next((f for f in candidates if f in entry), candidates[0])
 
 

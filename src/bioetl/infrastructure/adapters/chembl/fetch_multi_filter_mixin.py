@@ -42,7 +42,7 @@ class ChemblFetchMultiFilterMixin:
             if self._get_projected_url_length(url, test_params) <= 1000:
                 break
             batch_size //= 2
-            self._logger.info(
+            self.logger.info(
                 "reducing_multi_filter_batch_size",
                 entity_type=entity_type,
                 new_batch_size=batch_size,

@@ -85,7 +85,7 @@ class PubMedSearchMixin:
         try:
             start_time = time.perf_counter()
             with self._adapter_metrics.measure_request("/esearch"):
-                response = await self._http_client.get(search_url, params=params)
+                response = await self.http_client.get(search_url, params=params)
             duration_ms = (time.perf_counter() - start_time) * 1000
 
             with contextlib.suppress(Exception):
@@ -97,7 +97,7 @@ class PubMedSearchMixin:
         except PUBMED_SEARCH_ERRORS as e:
             from bioetl.infrastructure.adapters.error_handling import ErrorService
 
-            error_handler = ErrorService(self._logger, metrics=self._metrics)
+            error_handler = ErrorService(self.logger, metrics=self.metrics)
             wrapped = error_handler.handle_error(
                 error=e,
                 provider=self.provider_name,
@@ -117,7 +117,7 @@ class PubMedSearchMixin:
         clean_title = title.replace('"', "'").strip()[:200]
         search_term = f'"{clean_title}"[Title]'
 
-        self._logger.debug(
+        self.logger.debug(
             "pubmed_title_search",
             title=clean_title[:50],
         )
@@ -133,7 +133,7 @@ class PubMedSearchMixin:
 
             return results
         except PUBMED_SEARCH_ERRORS as e:
-            self._logger.debug(
+            self.logger.debug(
                 "pubmed_title_search_failed",
                 title=clean_title[:50],
                 error=str(e),
