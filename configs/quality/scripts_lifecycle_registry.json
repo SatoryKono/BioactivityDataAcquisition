@@ -307,6 +307,18 @@
       "decision": "evaluate",
       "review_by": "2026-06-30",
       "next_step": "Evaluate utility and decide on keep/deprecate."
+    },
+    "scripts/diagrams/check_class_method_render_integrity.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Diagram render integrity checker. Keep as manual QA tool."
+    },
+    "src/tools/scripts/test_changed.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "evaluate",
+      "review_by": "2026-06-30",
+      "next_step": "Evaluate if used in CI or local dev workflow. Keep or deprecate."
     }
   }
 }
