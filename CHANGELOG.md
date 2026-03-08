@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Cyclomatic complexity reduction in `normalization_dates.py` (CC-REDUCE)**:
+  - Extracted `_parse_iso8601()` private helper from `parse_date_field()` — reduces CC of `parse_date_field` from ~9 to ~4 by isolating the ISO-8601 fast-path logic into a dedicated, independently-testable function
+  - Removed 2 exemptions from `configs/quality/architecture_metric_exemptions.yaml`: `function_complexity` and `domain_complexity` entries for `parse_date_field` are no longer needed
+  - Updated `configs/quality/debt_scorecard.yaml` baseline: `total_exemptions` 31 → 29, `function_complexity` 1 → 0, `domain_complexity` 1 → 0
+  - Files: `src/bioetl/domain/normalization_dates.py`, `configs/quality/architecture_metric_exemptions.yaml`, `configs/quality/debt_scorecard.yaml`
+
 - **Test suite optimizations P1-P5 (post SWARM-003)**:
   - P1: Added `client_builders.py`, `health_probe.py`, `query_builder.py` to `KNOWN_TECHNICAL_EMAIL_FILES` allowlist in `TestNoPIILeakage` — resolves pre-existing `test_silver_layer_uses_hashing` failure for new CrossRef/OpenAlex files (EXC-010)
   - P2+P4: Created session-scoped `_src_file_contents` fixture in `tests/security/test_security.py` — reads all source `.py` files once per session; 5 security test classes (`TestNoPIILeakage`, `TestNoHardcodedSecrets`, `TestPrivateKeyExposure`, `TestInputValidation`, `TestPathTraversal`) now use class-scoped aliases to this fixture; saving ~2.84s (-27%) on security tests

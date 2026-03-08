@@ -85,16 +85,9 @@ def assemble_vacuum_settings(
     Returns:
         VacuumSettings with resolved enabled flag and retention days.
     """
-    if cli_vacuum.enabled is not None:
-        return VacuumSettings(
-            enabled=cli_vacuum.enabled,
-            retention_days=cli_vacuum.retention_days,
-        )
-
-    return VacuumSettings(
-        enabled=yaml_maintenance.auto_vacuum,
-        retention_days=yaml_maintenance.vacuum_retention_days,
-    )
+    enabled = cli_vacuum.enabled if cli_vacuum.enabled is not None else yaml_maintenance.auto_vacuum
+    retention = cli_vacuum.retention_days if cli_vacuum.enabled is not None else yaml_maintenance.vacuum_retention_days
+    return VacuumSettings(enabled=enabled, retention_days=retention)
 
 
 def assemble_runtime_config(
@@ -149,19 +142,19 @@ def assemble_filter_config(
     Returns:
         Configured InputFilterConfig, or None if filtering is disabled.
     """
+    inp_filter = ctx.input_filter
+    enabled = inp_filter.enabled
     return filter_builder.build(
         yaml_filter=yaml_filter,
-        cli_csv=ctx.input_filter.source_path if ctx.input_filter.enabled else None,
-        cli_column=ctx.input_filter.column_name if ctx.input_filter.enabled else None,
-        cli_field=ctx.input_filter.filter_field if ctx.input_filter.enabled else None,
-        cli_fallback_column=(
-            ctx.input_filter.fallback_column if ctx.input_filter.enabled else None
-        ),
+        cli_csv=inp_filter.source_path if enabled else None,
+        cli_column=inp_filter.column_name if enabled else None,
+        cli_field=inp_filter.filter_field if enabled else None,
+        cli_fallback_column=inp_filter.fallback_column if enabled else None,
         test_mode=test_mode or ctx.ignore_yaml_filter,
-        direct_filter_ids=ctx.input_filter.filter_ids,
-        direct_fallback_mapping=ctx.input_filter.fallback_mapping,
-        direct_multi_filter_ids=ctx.input_filter.multi_filter_ids,
-        direct_valid_combinations=ctx.input_filter.valid_combinations,
+        direct_filter_ids=inp_filter.filter_ids,
+        direct_fallback_mapping=inp_filter.fallback_mapping,
+        direct_multi_filter_ids=inp_filter.multi_filter_ids,
+        direct_valid_combinations=inp_filter.valid_combinations,
     )
 
 
@@ -193,16 +186,11 @@ def validate_pk_contract(config: PipelineYamlConfig) -> None:
 
     if not business_primary_keys:
         raise ValueError("business_primary_keys must be non-empty")
-
-    if (
-        legacy_primary_keys is not None
-        and tuple(legacy_primary_keys) != business_primary_keys
-    ):
+    if legacy_primary_keys is not None and tuple(legacy_primary_keys) != business_primary_keys:
         raise ValueError(
             "PK mismatch: legacy primary_keys differs from business_primary_keys; "
             "fix pipeline config naming"
         )
-
     if not technical_primary_key:
         raise ValueError("technical_primary_key must be non-empty")
 
@@ -218,10 +206,7 @@ def resolve_health_check_mode(*, settings: Settings) -> Literal["strict", "probe
     """
     if settings.test_mode:
         return "probe"
-    return cast(
-        Literal["strict", "probe"],
-        getattr(settings.pipeline, "health_check_mode", "strict"),
-    )
+    return cast(Literal["strict", "probe"], getattr(settings.pipeline, "health_check_mode", "strict"))
 
 
 def _log_filter_config(
@@ -259,9 +244,7 @@ def resolve_filter_batch_size(
     filter_batch_size = getattr(yaml_config, "filter_batch_size", None)
     if isinstance(filter_batch_size, int):
         return filter_batch_size
-    source_loader = (
-        load_source_config if load_source_config_fn is None else load_source_config_fn
-    )
+    source_loader = load_source_config if load_source_config_fn is None else load_source_config_fn
     try:
         source_cfg = cast(_SourceConfigLike, source_loader(yaml_config.provider))
         batch_size = source_cfg.pagination.id_batch_size
@@ -285,10 +268,7 @@ def adjust_batch_size_for_filter(
         observability: ObservabilityBundle used to log batch size adjustments.
         load_source_config_fn: Optional callable to load source config for batch size lookup.
     """
-    filter_batch_size = resolve_filter_batch_size(
-        yaml_config,
-        load_source_config_fn=load_source_config_fn,
-    )
+    filter_batch_size = resolve_filter_batch_size(yaml_config, load_source_config_fn=load_source_config_fn)
     if filter_config and filter_batch_size is not None:
         observability.logger.info(
             "batch_size_auto_adjusted",
@@ -347,31 +327,17 @@ def prepare_runner_inputs(
     yaml_config = load_pipeline_config_fn(ctx.pipeline_name)
     validate_pk_contract(yaml_config)
     observability = build_observability_bundle_fn(
-        pipeline=ctx.pipeline_name,
-        run_id=ctx.run_id,
-        settings=settings,
-        log_level=ctx.log_level,
+        pipeline=ctx.pipeline_name, run_id=ctx.run_id, settings=settings, log_level=ctx.log_level
     )
-    vacuum = assemble_vacuum_settings_fn(
-        cli_vacuum=ctx.vacuum,
-        yaml_maintenance=yaml_config.maintenance,
-    )
+    vacuum = assemble_vacuum_settings_fn(cli_vacuum=ctx.vacuum, yaml_maintenance=yaml_config.maintenance)
     runtime_config = assemble_runtime_config_fn(
         ctx=ctx,
         heartbeat_interval=settings.pipeline.heartbeat_interval,
         vacuum=vacuum,
         health_check_mode=resolve_health_check_mode(settings=settings),
     )
-    filter_config = assemble_filter_config_fn(
-        yaml_filter=yaml_config.input_filter,
-        ctx=ctx,
-        test_mode=settings.test_mode,
-    )
-    _log_filter_config(
-        observability=observability,
-        filter_config=filter_config,
-        from_cli=ctx.input_filter.enabled,
-    )
+    filter_config = assemble_filter_config_fn(yaml_filter=yaml_config.input_filter, ctx=ctx, test_mode=settings.test_mode)
+    _log_filter_config(observability=observability, filter_config=filter_config, from_cli=ctx.input_filter.enabled)
     adjust_batch_size_for_filter(
         yaml_config=yaml_config,
         filter_config=filter_config,

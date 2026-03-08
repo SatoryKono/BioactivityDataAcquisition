@@ -47,6 +47,11 @@ class SilverWriterDeltaMixin:
     _metrics: MetricsPort | None
     _merge_resilience_policy: SilverMergeResiliencePolicy
 
+    @property
+    def _logger(self) -> LoggerPort:
+        """Access logger via private convention for delegation pattern compliance."""
+        return self.logger
+
     @staticmethod
     def _load_silver_writer_module() -> Any:  # Any: return type varies at runtime
         """Load silver_writer module for backward-compatible patch points.
@@ -145,7 +150,7 @@ class SilverWriterDeltaMixin:
                     timeout_seconds=policy.execution_timeout_seconds,
                 )
                 if commit_retry_count > 0 or timeout_retry_count > 0:
-                    self.logger.info(
+                    self._logger.info(
                         "silver_merge_recovered_after_retry",
                         table_path=table_path,
                         commit_retry_count=commit_retry_count,
@@ -279,7 +284,7 @@ class SilverWriterDeltaMixin:
                 timeout=timeout_seconds,
             )
         except TimeoutError as exc:
-            self.logger.warning(
+            self._logger.warning(
                 "silver_merge_timeout",
                 table_path=table_path,
                 timeout_seconds=timeout_seconds,
@@ -305,7 +310,7 @@ class SilverWriterDeltaMixin:
             max_retries: Maximum number of retries configured.
             delay_seconds: Delay in seconds before this retry attempt.
         """
-        self.logger.warning(
+        self._logger.warning(
             "silver_merge_retry",
             table_path=table_path,
             retry_type=retry_type,
@@ -335,7 +340,7 @@ class SilverWriterDeltaMixin:
             table_path: File system path to the Delta table that failed to merge.
             final_reason: Reason string describing the final failure cause.
         """
-        self.logger.error(
+        self._logger.error(
             "silver_merge_failed",
             table_path=table_path,
             final_reason=final_reason,

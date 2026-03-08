@@ -22,8 +22,8 @@ model: sonnet
 ## Memory
 
 > **При старте** прочитай специализированную память:
-> `.ai/memory/memory-py-config-bot.md` — config hierarchy, templates, ADR compliance, composite rules, validation.
-> Общий контекст: `.ai/memory/agent-memory.md`
+> `docs/00-project/ai/memory/memory-py-config-bot.md` — config hierarchy, templates, ADR compliance, composite rules, validation.
+> Общий контекст: `docs/00-project/ai/memory/agent-memory.md`
 
 ---
 

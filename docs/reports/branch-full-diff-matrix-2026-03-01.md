@@ -63,9 +63,9 @@ Full machine-readable matrix: `docs/reports/branch-full-diff-matrix-2026-03-01.c
 | `chrome-headless-shell/linux-146.0.7680.31/chrome-headless-shell-linux64/rpm.deps` | D +0/-92 | - | D +0/-92 | D +0/-92 |
 | `chrome-headless-shell/linux-146.0.7680.31/chrome-headless-shell-linux64/v8_context_snapshot.bin` | D +-/-- | - | D +-/-- | D +-/-- |
 | `docs/00-project/00-map.md` | M +1/-1 | - | M +1/-1 | M +1/-1 |
-| `docs/00-project/agents/AGENT.md` | M +1/-1 | - | M +1/-1 | M +1/-1 |
-| `docs/00-project/agents/CLAUDE.md` | M +3/-3 | - | M +3/-3 | M +3/-3 |
-| `docs/00-project/agents/orchestration/ORCHESTRATION.md` | M +1/-1 | - | M +1/-1 | M +1/-1 |
+| `docs/00-project/ai/agents/AGENT.md` | M +1/-1 | - | M +1/-1 | M +1/-1 |
+| `docs/00-project/ai/agents/CLAUDE.md` | M +3/-3 | - | M +3/-3 | M +3/-3 |
+| `docs/00-project/ai/agents/orchestration/ORCHESTRATION.md` | M +1/-1 | - | M +1/-1 | M +1/-1 |
 | `docs/00-project/glossary.md` | M +1/-0 | - | M +1/-0 | M +1/-0 |
 | `docs/02-architecture/00-overview.md` | M +7/-1 | - | M +7/-1 | M +7/-1 |
 | `docs/02-architecture/06-diagram-policy.md` | - | - | M +4/-15 | - |

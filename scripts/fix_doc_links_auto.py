@@ -18,7 +18,7 @@ def fix_links():
         original_content = content
         
         # 1. Fix absolute-looking links like [text](docs/...) to be relative
-        # Example: from docs/00-project/agents/AGENT.md, [ADR-007](docs/02-architecture/decisions/...)
+        # Example: from docs/00-project/ai/agents/AGENT.md, [ADR-007](docs/02-architecture/decisions/...)
         # should be [ADR-007](../../02-architecture/decisions/...)
         
         def rel_fix(match):

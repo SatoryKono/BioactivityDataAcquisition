@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check_skills_mirror.sh - Verify/sync docs/skills/local mirror from .codex/skills.
+# check_skills_mirror.sh - Verify/sync docs/00-project/ai/skills/local mirror from .codex/skills.
 # Usage:
 #   bash scripts/check_skills_mirror.sh --check
 #   bash scripts/check_skills_mirror.sh --sync
@@ -10,7 +10,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 SOURCE_ROOT="$REPO_ROOT/.codex/skills"
-MIRROR_ROOT="$REPO_ROOT/docs/skills/local"
+MIRROR_ROOT="$REPO_ROOT/docs/00-project/ai/skills/local"
+REFERENCE_SOURCE_ROOT="$REPO_ROOT/docs/00-project/skills/local"
 MODE="${1:---check}"
 
 BLUE='\033[0;34m'
@@ -31,8 +32,8 @@ Usage:
   bash scripts/check_skills_mirror.sh --sync
 
 Modes:
-  --check   Fail if docs/skills/local differs from .codex/skills.
-  --sync    Replace docs/skills/local with .codex/skills and then verify.
+  --check   Fail if docs/00-project/ai/skills/local differs from .codex/skills.
+  --sync    Replace docs/00-project/ai/skills/local with .codex/skills and then verify.
 EOF
 }
 
@@ -59,15 +60,25 @@ if [[ ! -d "$MIRROR_ROOT" ]]; then
 fi
 
 if [[ "$MODE" == "--sync" ]]; then
-    log_info "Syncing docs/skills/local from .codex/skills"
+    log_info "Syncing docs/00-project/ai/skills/local from .codex/skills"
     find "$MIRROR_ROOT" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
     cp -a "$SOURCE_ROOT"/. "$MIRROR_ROOT"/
+    if [[ -d "$REFERENCE_SOURCE_ROOT" ]]; then
+        log_info "Overlaying documentation reference bundles (references/**)"
+        while IFS= read -r ref_dir; do
+            rel_path="${ref_dir#"$REFERENCE_SOURCE_ROOT"/}"
+            target_dir="$MIRROR_ROOT/$rel_path"
+            mkdir -p "$(dirname "$target_dir")"
+            rm -rf "$target_dir"
+            cp -a "$ref_dir" "$target_dir"
+        done < <(find "$REFERENCE_SOURCE_ROOT" -type d -name references | sort)
+    fi
     log_ok "Sync completed"
 fi
 
 log_info "Checking mirror consistency"
-if ! diff -qr "$SOURCE_ROOT" "$MIRROR_ROOT" > /tmp/skills_mirror_diff.txt; then
-    log_err "Mirror drift detected between .codex/skills and docs/skills/local"
+if ! diff -qr -x references "$SOURCE_ROOT" "$MIRROR_ROOT" > /tmp/skills_mirror_diff.txt; then
+    log_err "Mirror drift detected between .codex/skills and docs/00-project/ai/skills/local"
     sed -n '1,200p' /tmp/skills_mirror_diff.txt
     log_warn "Run: bash scripts/check_skills_mirror.sh --sync"
     exit 1

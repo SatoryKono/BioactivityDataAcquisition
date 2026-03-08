@@ -1,0 +1,193 @@
+{
+  "schema_version": "1.0",
+  "task_set": "file_size_limits_refactor_delegation",
+  "defaults": {
+    "behavior_change_allowed": false,
+    "public_interface_change_allowed": false
+  },
+  "tasks": [
+    {
+      "id": "FSL-001",
+      "target_file": "src/bioetl/domain/composite/config_models.py",
+      "current_loc": 347,
+      "limit_loc": 350,
+      "target_loc": 335,
+      "goal": "Reduce file size below limit with safety buffer.",
+      "docstrings_rule": "Докстринги: не удалять. Разрешено только изменять с соблюдением стандартов докстрингов проекта.",
+      "allowed_paths": [
+        "src/bioetl/domain/composite/**",
+        "tests/**"
+      ],
+      "forbidden_paths": [
+        "src/bioetl/interfaces/**",
+        "src/bioetl/infrastructure/**"
+      ],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestFileSizeLimits::test_domain_files_under_limit",
+        "python -m pytest -q tests/architecture/test_quality_burndown_priorities.py::test_file_size_limit_registry_has_no_stale_entries",
+        "make lint",
+        "make test"
+      ]
+    },
+    {
+      "id": "FSL-002",
+      "target_file": "src/bioetl/domain/services/normalization_service.py",
+      "current_loc": 358,
+      "limit_loc": 370,
+      "target_loc": 345,
+      "goal": "Reduce file size below limit with safety buffer.",
+      "docstrings_rule": "Докстринги: не удалять. Разрешено только изменять с соблюдением стандартов докстрингов проекта.",
+      "allowed_paths": [
+        "src/bioetl/domain/services/**",
+        "src/bioetl/domain/value_objects/**",
+        "tests/**"
+      ],
+      "forbidden_paths": [
+        "src/bioetl/composition/**",
+        "src/bioetl/interfaces/**"
+      ],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestFileSizeLimits::test_domain_files_under_limit",
+        "python -m pytest -q tests/architecture/test_quality_burndown_priorities.py::test_file_size_limit_registry_has_no_stale_entries",
+        "make lint",
+        "make test"
+      ]
+    },
+    {
+      "id": "FSL-003",
+      "target_file": "src/bioetl/composition/factories/pipeline_assembler.py",
+      "current_loc": 374,
+      "limit_loc": 380,
+      "target_loc": 360,
+      "goal": "Reduce file size below limit with safety buffer.",
+      "docstrings_rule": "Докстринги: не удалять. Разрешено только изменять с соблюдением стандартов докстрингов проекта.",
+      "allowed_paths": [
+        "src/bioetl/composition/factories/**",
+        "tests/**"
+      ],
+      "forbidden_paths": [
+        "src/bioetl/domain/**",
+        "src/bioetl/interfaces/**"
+      ],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestFileSizeLimits::test_composition_files_under_limit",
+        "python -m pytest -q tests/architecture/test_quality_burndown_priorities.py::test_file_size_limit_registry_has_no_stale_entries",
+        "make lint",
+        "make test"
+      ]
+    },
+    {
+      "id": "FSL-004",
+      "target_file": "src/bioetl/composition/factories/services_builder.py",
+      "current_loc": 403,
+      "limit_loc": 410,
+      "target_loc": 390,
+      "goal": "Reduce file size below limit with safety buffer.",
+      "docstrings_rule": "Докстринги: не удалять. Разрешено только изменять с соблюдением стандартов докстрингов проекта.",
+      "allowed_paths": [
+        "src/bioetl/composition/factories/**",
+        "tests/**"
+      ],
+      "forbidden_paths": [
+        "src/bioetl/interfaces/**"
+      ],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestFileSizeLimits::test_composition_files_under_limit",
+        "python -m pytest -q tests/architecture/test_quality_burndown_priorities.py::test_file_size_limit_registry_has_no_stale_entries",
+        "make lint",
+        "make test"
+      ]
+    },
+    {
+      "id": "FSL-005",
+      "target_file": "src/bioetl/composition/factories/services_factory_pipeline_builder.py",
+      "current_loc": 362,
+      "limit_loc": 370,
+      "target_loc": 345,
+      "goal": "Reduce file size below limit with safety buffer.",
+      "docstrings_rule": "Докстринги: не удалять. Разрешено только изменять с соблюдением стандартов докстрингов проекта.",
+      "allowed_paths": [
+        "src/bioetl/composition/factories/**",
+        "tests/**"
+      ],
+      "forbidden_paths": [
+        "src/bioetl/interfaces/**",
+        "src/bioetl/infrastructure/**"
+      ],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestFileSizeLimits::test_composition_files_under_limit",
+        "python -m pytest -q tests/architecture/test_quality_burndown_priorities.py::test_file_size_limit_registry_has_no_stale_entries",
+        "make lint",
+        "make test"
+      ]
+    },
+    {
+      "id": "FSL-006",
+      "target_file": "src/bioetl/composition/factories/_storage_factory_helpers.py",
+      "current_loc": 400,
+      "limit_loc": 410,
+      "target_loc": 385,
+      "goal": "Reduce file size below limit with safety buffer.",
+      "docstrings_rule": "Докстринги: не удалять. Разрешено только изменять с соблюдением стандартов докстрингов проекта.",
+      "allowed_paths": [
+        "src/bioetl/composition/factories/**",
+        "tests/**"
+      ],
+      "forbidden_paths": [
+        "src/bioetl/interfaces/**"
+      ],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestFileSizeLimits::test_composition_files_under_limit",
+        "python -m pytest -q tests/architecture/test_quality_burndown_priorities.py::test_file_size_limit_registry_has_no_stale_entries",
+        "make lint",
+        "make test"
+      ]
+    },
+    {
+      "id": "FSL-007",
+      "target_file": "src/bioetl/composition/runtime_builders/inputs_resolver.py",
+      "current_loc": 390,
+      "limit_loc": 400,
+      "target_loc": 375,
+      "goal": "Reduce file size below limit with safety buffer.",
+      "docstrings_rule": "Докстринги: не удалять. Разрешено только изменять с соблюдением стандартов докстрингов проекта.",
+      "allowed_paths": [
+        "src/bioetl/composition/runtime_builders/**",
+        "src/bioetl/composition/factories/**",
+        "tests/**"
+      ],
+      "forbidden_paths": [
+        "src/bioetl/interfaces/**"
+      ],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestFileSizeLimits::test_composition_files_under_limit",
+        "python -m pytest -q tests/architecture/test_quality_burndown_priorities.py::test_file_size_limit_registry_has_no_stale_entries",
+        "make lint",
+        "make test"
+      ]
+    },
+    {
+      "id": "FSL-008",
+      "target_file": "src/bioetl/interfaces/cli/commands/run_all.py",
+      "current_loc": 479,
+      "limit_loc": 485,
+      "target_loc": 460,
+      "goal": "Reduce file size below limit with safety buffer.",
+      "docstrings_rule": "Докстринги: не удалять. Разрешено только изменять с соблюдением стандартов докстрингов проекта.",
+      "allowed_paths": [
+        "src/bioetl/interfaces/cli/**",
+        "src/bioetl/application/**",
+        "tests/**"
+      ],
+      "forbidden_paths": [
+        "src/bioetl/domain/**"
+      ],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestFileSizeLimits::test_interfaces_files_under_limit",
+        "python -m pytest -q tests/integration/interfaces/test_cli_exit_code_matrix.py",
+        "make lint",
+        "make test"
+      ]
+    }
+  ]
+}

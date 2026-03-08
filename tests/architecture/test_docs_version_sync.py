@@ -31,7 +31,7 @@ DOC_VERSION_PATTERNS = [
 # Исключаем: archived/, audits/ (исторические), __-prompts/ (шаблоны)
 # Note: docs restructured to 00-project, 01-requirements, etc.
 REQUIRED_SYNC_DOCS = [
-    "docs/00-project/agents/CLAUDE.md",
+    "docs/00-project/ai/agents/CLAUDE.md",
     "docs/00-project/00-map.md",
     "docs/01-requirements/REQUIREMENTS.md",
     "docs/00-project/rules-summary.md",

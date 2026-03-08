@@ -97,7 +97,7 @@ ALLOWED_PYTHON_PATHS: tuple[str, ...] = (
     "src/",
     "tests/",
     "scripts/",
-    "docs/skills/",  # Agent skills scripts
+    "docs/00-project/ai/skills/",  # Agent skills scripts
     ".ai/mcp/",      # MCP server implementations
 )
 
@@ -301,14 +301,14 @@ def _check_no_python_in_docs(project_root: Path) -> Iterator[Violation]:
         rel_path = py_file.relative_to(project_root)
         posix_path = rel_path.as_posix()
 
-        # Allow scripts in docs/skills/
-        if posix_path.startswith("docs/skills/"):
+        # Allow scripts in docs/00-project/ai/skills/
+        if posix_path.startswith("docs/00-project/ai/skills/"):
             continue
 
         yield Violation(
             category="DOCS_CODE",
             path=str(rel_path),
-            message="Python-код в docs/ запрещён (кроме docs/skills/)",
+            message="Python-код в docs/ запрещён (кроме docs/00-project/ai/skills/)",
             severity="MUST",
         )
 

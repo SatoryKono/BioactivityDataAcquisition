@@ -56,6 +56,23 @@ def format_date_parts(date_parts: list[list[int]] | None) -> str | None:
     return _format_parts_to_date(parts)
 
 
+def _parse_iso8601(val_str: str) -> date | None:
+    """Fast-path ISO-8601 parser for YYYY-MM-DD strings (~6x faster than strptime).
+
+    Args:
+        val_str: Stripped date string expected to be in YYYY-MM-DD format.
+
+    Returns:
+        Parsed date object, or None if the string is not valid ISO-8601.
+    """
+    if len(val_str) != 10 or val_str[4] != "-" or val_str[7] != "-":
+        return None
+    try:
+        return date(int(val_str[0:4]), int(val_str[5:7]), int(val_str[8:10]))
+    except (ValueError, IndexError):
+        return None
+
+
 def parse_date_field(value: str | None, fmt: str = "%Y-%m-%d") -> date | None:
     """Parse date string to date object, return None on error.
 
@@ -71,25 +88,15 @@ def parse_date_field(value: str | None, fmt: str = "%Y-%m-%d") -> date | None:
         strptime) by direct character position validation and integer conversion. Falls back
         to strptime for other formats or parsing errors.
     """
-    if value is None:
+    if not isinstance(value, str):
         return None
 
-    try:
-        val_str = value.strip()
-    except AttributeError:
-        return None
+    val_str = value.strip()
 
-    # Fast-path for ISO-8601 dates (YYYY-MM-DD) — ~6x faster than strptime
-    if (
-        fmt == "%Y-%m-%d"
-        and len(val_str) == 10
-        and val_str[4] == "-"
-        and val_str[7] == "-"
-    ):
-        try:
-            return date(int(val_str[0:4]), int(val_str[5:7]), int(val_str[8:10]))
-        except (ValueError, IndexError):
-            pass  # Fall through to strptime
+    if fmt == "%Y-%m-%d":
+        result = _parse_iso8601(val_str)
+        if result is not None:
+            return result
 
     from datetime import datetime
 

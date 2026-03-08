@@ -35,9 +35,7 @@ if TYPE_CHECKING:
 
 
 def create_csv_exporter_from_config(
-    csv_cfg: object | None,
-    logger: LoggerPort,
-    override_path: Path | None = None,
+    csv_cfg: object | None, logger: LoggerPort, override_path: Path | None = None,
 ) -> CsvExporter | None:
     """Create CsvExporter from configuration when export is enabled.
 
@@ -56,18 +54,14 @@ def create_csv_exporter_from_config(
     if path is None:
         return None
     return CsvExporter(
-        base_path=str(path),
-        logger=logger,
+        base_path=str(path), logger=logger,
         delimiter=str(getattr(csv_cfg, "delimiter", ",")),
         header=bool(getattr(csv_cfg, "header", True)),
-        encoding=str(getattr(csv_cfg, "encoding", "utf-8")),
-    )
+        encoding=str(getattr(csv_cfg, "encoding", "utf-8")))
 
 
 def resolve_layer_path(
-    layer_config: SinkLayerConfig | None,
-    default_path: Path,
-    use_yaml_paths: bool,
+    layer_config: SinkLayerConfig | None, default_path: Path, use_yaml_paths: bool,
 ) -> Path:
     """Resolve storage path from sink config or fall back to default.
 
@@ -95,17 +89,12 @@ def get_layer_configs(
     Returns:
         Tuple of (bronze_config, silver_config, gold_config), each may be None.
     """
-    bronze_config = config.sink.get("bronze")
-    silver_config = config.sink.get("silver")
-    gold_config = config.sink.get("gold")
-    return bronze_config, silver_config, gold_config
+    return config.sink.get("bronze"), config.sink.get("silver"), config.sink.get("gold")
 
 
 def resolve_storage_paths(
-    settings: Settings,
-    bronze_config: SinkLayerConfig | None,
-    silver_config: SinkLayerConfig | None,
-    gold_config: SinkLayerConfig | None,
+    settings: Settings, bronze_config: SinkLayerConfig | None,
+    silver_config: SinkLayerConfig | None, gold_config: SinkLayerConfig | None,
 ) -> tuple[bool, Path, Path, Path]:
     """Resolve storage paths for bronze/silver/gold layers.
 
@@ -119,24 +108,16 @@ def resolve_storage_paths(
         Tuple of (use_yaml_paths, bronze_path, silver_path, gold_path).
     """
     use_yaml_paths = not settings.test_mode
-    bronze_path = resolve_layer_path(
-        bronze_config, settings.bronze_path, use_yaml_paths
-    )
-    silver_path = resolve_layer_path(
-        silver_config, settings.silver_path, use_yaml_paths
-    )
-    gold_path = resolve_layer_path(gold_config, settings.gold_path, use_yaml_paths)
-    return use_yaml_paths, bronze_path, silver_path, gold_path
+    return (use_yaml_paths,
+            resolve_layer_path(bronze_config, settings.bronze_path, use_yaml_paths),
+            resolve_layer_path(silver_config, settings.silver_path, use_yaml_paths),
+            resolve_layer_path(gold_config, settings.gold_path, use_yaml_paths))
 
 
 def create_layer_exporters(
-    *,
-    settings: Settings,
-    logger: LoggerPort,
-    silver_config: SinkLayerConfig | None,
-    gold_config: SinkLayerConfig | None,
-    silver_path: Path,
-    gold_path: Path,
+    *, settings: Settings, logger: LoggerPort,
+    silver_config: SinkLayerConfig | None, gold_config: SinkLayerConfig | None,
+    silver_path: Path, gold_path: Path,
 ) -> tuple[CsvExporter | None, CsvExporter | None]:
     """Create optional CSV exporters for Silver and Gold layers.
 
@@ -151,17 +132,13 @@ def create_layer_exporters(
     Returns:
         Tuple of (silver_csv_exporter, gold_csv_exporter), each may be None.
     """
-    silver_csv_exporter = create_csv_exporter_from_config(
-        silver_config.csv_export if silver_config else None,
-        logger,
-        override_path=silver_path if settings.test_mode else None,
-    )
-    gold_csv_exporter = create_csv_exporter_from_config(
-        gold_config.csv_export if gold_config else None,
-        logger,
-        override_path=gold_path if settings.test_mode else None,
-    )
-    return silver_csv_exporter, gold_csv_exporter
+    override = silver_path if settings.test_mode else None
+    silver_csv = create_csv_exporter_from_config(
+        silver_config.csv_export if silver_config else None, logger, override)
+    override = gold_path if settings.test_mode else None
+    gold_csv = create_csv_exporter_from_config(
+        gold_config.csv_export if gold_config else None, logger, override)
+    return silver_csv, gold_csv
 
 
 def resolve_export_flags(
@@ -184,18 +161,13 @@ def resolve_export_flags(
         bronze_config.save_json if bronze_config else False,
         bronze_config.save_metadata if bronze_config else False,
         silver_config.save_metadata if silver_config else False,
-        gold_config.save_metadata if gold_config else False,
-    )
+        gold_config.save_metadata if gold_config else False)
 
 
 def log_export_status(
-    logger: LoggerPort,
-    save_json: bool,
-    silver_csv_exporter: CsvExporter | None,
-    gold_csv_exporter: CsvExporter | None,
-    bronze_save_metadata: bool,
-    silver_save_metadata: bool,
-    gold_save_metadata: bool,
+    logger: LoggerPort, save_json: bool, silver_csv_exporter: CsvExporter | None,
+    gold_csv_exporter: CsvExporter | None, bronze_save_metadata: bool,
+    silver_save_metadata: bool, gold_save_metadata: bool,
 ) -> None:
     """Log active export settings for observability.
 
@@ -217,17 +189,11 @@ def log_export_status(
     if gold_save_metadata:
         logger.info("metadata_export_enabled", layer="gold")
     if silver_csv_exporter:
-        logger.info(
-            "csv_export_enabled",
-            layer="silver",
-            base_path=str(silver_csv_exporter.base_path),
-        )
+        logger.info("csv_export_enabled", layer="silver",
+                    base_path=str(silver_csv_exporter.base_path))
     if gold_csv_exporter:
-        logger.info(
-            "csv_export_enabled",
-            layer="gold",
-            base_path=str(gold_csv_exporter.base_path),
-        )
+        logger.info("csv_export_enabled", layer="gold",
+                    base_path=str(gold_csv_exporter.base_path))
 
 
 def log_configured_export_status(
@@ -249,25 +215,11 @@ def log_configured_export_status(
         silver_csv_exporter: Present when Silver CSV export is active.
         gold_csv_exporter: Present when Gold CSV export is active.
     """
-    (
-        save_json,
-        bronze_save_metadata,
-        silver_save_metadata,
-        gold_save_metadata,
-    ) = resolve_export_flags(
-        bronze_config=bronze_config,
-        silver_config=silver_config,
-        gold_config=gold_config,
-    )
+    save_json, bronze_save_metadata, silver_save_metadata, gold_save_metadata = (
+        resolve_export_flags(bronze_config, silver_config, gold_config))
     log_export_status(
-        logger=logger,
-        save_json=save_json,
-        silver_csv_exporter=silver_csv_exporter,
-        gold_csv_exporter=gold_csv_exporter,
-        bronze_save_metadata=bronze_save_metadata,
-        silver_save_metadata=silver_save_metadata,
-        gold_save_metadata=gold_save_metadata,
-    )
+        logger, save_json, silver_csv_exporter, gold_csv_exporter,
+        bronze_save_metadata, silver_save_metadata, gold_save_metadata)
 
 
 def resolve_flat_structure_flags(
@@ -288,16 +240,10 @@ def resolve_flat_structure_flags(
     Returns:
         Tuple of (bronze_flat_structure, silver_flat_structure, gold_flat_structure).
     """
-    bronze_flat_structure = (
-        bronze_config.flat_structure if bronze_config else False
-    ) and use_yaml_paths
-    silver_flat_structure = (
-        silver_config.flat_structure if silver_config else False
-    ) and use_yaml_paths
-    gold_flat_structure = (
-        gold_config.flat_structure if gold_config else False
-    ) and use_yaml_paths
-    return bronze_flat_structure, silver_flat_structure, gold_flat_structure
+    return (
+        (bronze_config.flat_structure if bronze_config else False) and use_yaml_paths,
+        (silver_config.flat_structure if silver_config else False) and use_yaml_paths,
+        (gold_config.flat_structure if gold_config else False) and use_yaml_paths)
 
 
 def create_storage_adapter(

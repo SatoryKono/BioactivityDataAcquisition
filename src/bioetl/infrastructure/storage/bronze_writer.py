@@ -144,6 +144,7 @@ class BronzeWriter(
 
         self.base_path = Path(base_path)
         self.logger = logger
+        self._logger: LoggerPort = logger
         self._metrics = metrics
         self.save_json = save_json
         self.json_path = json_path or str(self.base_path / "json")

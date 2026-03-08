@@ -93,40 +93,25 @@ def create_batch_processing_components(
     Returns:
         BatchProcessingComponents with batch metrics, transformer, and writer.
     """
-    pipeline_label = f"{config.provider}_{config.entity_type}"
     batch_metrics = BatchMetricsRecorderService(
-        services.metrics,
-        pipeline_label,
-        context.run_type.value,
+        services.metrics, f"{config.provider}_{config.entity_type}", context.run_type.value
+    )
+    quarantine_manager = QuarantineManagerService(
+        quarantine_port=services.quarantine, pipeline_name=config.pipeline_name, metrics=services.metrics
     )
     transformer = BatchTransformer(
-        context=context,
-        config=config,
-        error_classifier=error_classifier,
-        quarantine_manager=QuarantineManagerService(
-            quarantine_port=services.quarantine,
-            pipeline_name=config.pipeline_name,
-            metrics=services.metrics,
-        ),
-        batch_metrics=batch_metrics,
-        transform_callback=transform_callback,
-        gold_filter_callback=gold_filter_callback,
+        context=context, config=config, error_classifier=error_classifier,
+        quarantine_manager=quarantine_manager, batch_metrics=batch_metrics,
+        transform_callback=transform_callback, gold_filter_callback=gold_filter_callback,
         gold_transform_callback=gold_transform_callback,
     )
     writer = BatchWriter(
-        storage=services.storage,
-        context=context,
-        config=config,
-        gold_validator=gold_validator,
-        error_classifier=error_classifier,
-        batch_metrics=batch_metrics,
-        tracer=tracer,
-        lock_validator=lock_validator,
+        storage=services.storage, context=context, config=config,
+        gold_validator=gold_validator, error_classifier=error_classifier,
+        batch_metrics=batch_metrics, tracer=tracer, lock_validator=lock_validator,
     )
     return BatchProcessingComponents(
-        batch_metrics=batch_metrics,
-        transformer=transformer,
-        writer=writer,
+        batch_metrics=batch_metrics, transformer=transformer, writer=writer
     )
 
 
@@ -141,12 +126,8 @@ def create_checkpoint_manager(
 ) -> CheckpointManagerService:
     """Create configured CheckpointManagerService."""
     return CheckpointManagerService(
-        checkpoint_port=checkpoint_port,
-        logger=logger,
-        pipeline_name=pipeline_name,
-        run_id=run_id,
-        resume=resume,
-        loading_strategy=loading_strategy,
+        checkpoint_port=checkpoint_port, logger=logger, pipeline_name=pipeline_name,
+        run_id=run_id, resume=resume, loading_strategy=loading_strategy,
     )
 
 
@@ -200,23 +181,16 @@ def _build_record_processor_config(
     flat_structure: bool,
 ) -> tuple[RecordProcessorConfig, PanderaGoldValidator]:
     processor_config = RecordProcessorConfig(
-        pipeline_name=pipeline.config.pipeline_name,
-        provider=pipeline.config.provider,
-        entity_type=pipeline.config.entity_type,
-        silver_schema=silver_schema,
-        gold_schema=gold_schema,
-        dq_config=cast("DQConfig | None", pipeline.config.dq),
-        table_config=pipeline.config.table,
-        bronze_output_path=bronze_output_path,
-        silver_output_path=silver_output_path,
-        gold_output_path=gold_output_path,
-        flat_structure=flat_structure,
-        column_groups=pipeline.config.column_groups,
+        pipeline_name=pipeline.config.pipeline_name, provider=pipeline.config.provider,
+        entity_type=pipeline.config.entity_type, silver_schema=silver_schema,
+        gold_schema=gold_schema, dq_config=cast("DQConfig | None", pipeline.config.dq),
+        table_config=pipeline.config.table, bronze_output_path=bronze_output_path,
+        silver_output_path=silver_output_path, gold_output_path=gold_output_path,
+        flat_structure=flat_structure, column_groups=pipeline.config.column_groups,
         scd_config=pipeline.config.scd_config,
     )
-    typed_gold_schema = cast("pa.DataFrameSchema | None", gold_schema)
     gold_validator = PanderaGoldValidator(
-        typed_gold_schema, strict=strict_gold_validation
+        cast("pa.DataFrameSchema | None", gold_schema), strict=strict_gold_validation
     )
     return processor_config, gold_validator
 
@@ -239,33 +213,22 @@ def _build_runtime_managers(
 ]:
     initial_batch_size = pipeline.config.batch_size or BatchExecutor.DEFAULT_BATCH_SIZE
     memory_manager = BatchMemoryManagerService(
-        initial_batch_size=initial_batch_size,
-        memory_monitor=memory_monitor,
-        memory_config=memory_config,
-        logger=pipeline.services.logger,
+        initial_batch_size=initial_batch_size, memory_monitor=memory_monitor,
+        memory_config=memory_config, logger=pipeline.services.logger,
     )
     tracing_manager = BatchTracingManagerService(
-        tracer=tracer,
-        context=pipeline.context,
-        config=processor_config,
-        initial_batch_size=initial_batch_size,
-        adaptive_sizing_enabled=memory_manager.enabled,
+        tracer=tracer, context=pipeline.context, config=processor_config,
+        initial_batch_size=initial_batch_size, adaptive_sizing_enabled=memory_manager.enabled,
     )
-    effective_batch_id_factory = batch_id_factory or UuidBatchIdGenerator()
     progress_service = BatchProgressService(
-        logger=pipeline.services.logger,
-        data_source=pipeline.services.data_source,
+        logger=pipeline.services.logger, data_source=pipeline.services.data_source
     )
     checkpoint_recovery_service = BatchCheckpointRecoveryService(
-        checkpoint_manager=checkpoint_manager,
-        logger=pipeline.services.logger,
+        checkpoint_manager=checkpoint_manager, logger=pipeline.services.logger
     )
     return (
-        memory_manager,
-        tracing_manager,
-        effective_batch_id_factory,
-        progress_service,
-        checkpoint_recovery_service,
+        memory_manager, tracing_manager, batch_id_factory or UuidBatchIdGenerator(),
+        progress_service, checkpoint_recovery_service,
     )
 
 
@@ -290,65 +253,36 @@ def create_batch_executor_from_pipeline(
     batch_id_factory: BatchIdGeneratorPort | None = None,
 ) -> BatchExecutor:
     """Create BatchExecutor from pipeline using delegated component factories."""
-    if pipeline.runtime.skip_gold:
-        gold_filter = cast(GoldFilterCallback, lambda _context, _record: False)
-    else:
-        gold_filter = callbacks.gold_filter
-
+    gold_filter = (cast(GoldFilterCallback, lambda _context, _record: False)
+                   if pipeline.runtime.skip_gold else callbacks.gold_filter)
     processor_config, gold_validator = _build_record_processor_config(
-        pipeline=pipeline,
-        silver_schema=silver_schema,
-        gold_schema=gold_schema,
-        strict_gold_validation=strict_gold_validation,
-        bronze_output_path=bronze_output_path,
-        silver_output_path=silver_output_path,
-        gold_output_path=gold_output_path,
+        pipeline=pipeline, silver_schema=silver_schema, gold_schema=gold_schema,
+        strict_gold_validation=strict_gold_validation, bronze_output_path=bronze_output_path,
+        silver_output_path=silver_output_path, gold_output_path=gold_output_path,
         flat_structure=flat_structure,
     )
-    (
-        memory_manager,
-        tracing_manager,
-        effective_batch_id_factory,
-        progress_service,
-        checkpoint_recovery_service,
-    ) = _build_runtime_managers(
-        pipeline=pipeline,
-        processor_config=processor_config,
-        checkpoint_manager=checkpoint_manager,
-        memory_monitor=memory_monitor,
-        memory_config=memory_config,
-        tracer=tracer,
-        batch_id_factory=batch_id_factory,
+    (memory_manager, tracing_manager, effective_batch_id_factory,
+     progress_service, checkpoint_recovery_service) = _build_runtime_managers(
+        pipeline=pipeline, processor_config=processor_config,
+        checkpoint_manager=checkpoint_manager, memory_monitor=memory_monitor,
+        memory_config=memory_config, tracer=tracer, batch_id_factory=batch_id_factory,
     )
     components, batch_processing_service = build_components_and_processing_service(
-        pipeline=pipeline,
-        processor_config=processor_config,
-        error_classifier=ErrorClassifier(),
-        callbacks=callbacks,
-        gold_filter=gold_filter,
-        gold_validator=gold_validator,
-        tracer=tracer,
-        lock_validator=lock_validator,
-        tracing_manager=tracing_manager,
+        pipeline=pipeline, processor_config=processor_config, error_classifier=ErrorClassifier(),
+        callbacks=callbacks, gold_filter=gold_filter, gold_validator=gold_validator,
+        tracer=tracer, lock_validator=lock_validator, tracing_manager=tracing_manager,
         batch_id_factory=effective_batch_id_factory,
         create_batch_processing_components_fn=create_batch_processing_components_fn,
     )
     return BatchExecutor(
-        services=pipeline.services,
-        context=pipeline.context,
-        config=processor_config,
-        checkpoint_manager=checkpoint_manager,
-        shutdown_signal=shutdown_signal,
-        batch_metrics=components.batch_metrics,
-        transformer=components.transformer,
-        writer=components.writer,
-        tracing_manager=tracing_manager,
-        memory_manager=memory_manager,
-        progress_service=progress_service,
+        services=pipeline.services, context=pipeline.context, config=processor_config,
+        checkpoint_manager=checkpoint_manager, shutdown_signal=shutdown_signal,
+        batch_metrics=components.batch_metrics, transformer=components.transformer,
+        writer=components.writer, tracing_manager=tracing_manager,
+        memory_manager=memory_manager, progress_service=progress_service,
         checkpoint_recovery_service=checkpoint_recovery_service,
         batch_processing_service=batch_processing_service,
-        batch_id_factory=effective_batch_id_factory,
-        batch_size=pipeline.config.batch_size,
+        batch_id_factory=effective_batch_id_factory, batch_size=pipeline.config.batch_size,
         checkpoint_interval=pipeline.config.checkpoint_interval,
     )
 

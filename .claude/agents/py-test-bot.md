@@ -20,8 +20,8 @@ model: sonnet
 ## Memory
 
 > **При старте** прочитай специализированную память:
-> `.ai/memory/memory-py-test-bot.md` — test structure, thresholds, VCR, failure classification, selection strategy.
-> Общий контекст: `.ai/memory/agent-memory.md`
+> `docs/00-project/ai/memory/memory-py-test-bot.md` — test structure, thresholds, VCR, failure classification, selection strategy.
+> Общий контекст: `docs/00-project/ai/memory/agent-memory.md`
 
 ---
 

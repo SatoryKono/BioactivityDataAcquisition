@@ -215,7 +215,7 @@ ORCHESTRATOR (главный агент)
 ```
 Шаг 1.1: Прочитать контекст проекта
   → .claude/PROJECT_CONTEXT.md
-  → .ai/memory/agent-memory.md
+  → docs/00-project/ai/memory/agent-memory.md
   → docs/00-project/RULES.md (header + version only)
 
 Шаг 1.2: Собрать метрики
