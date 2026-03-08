@@ -273,8 +273,8 @@ class OpenAlexAdapter(
             self.error_handler
             if self.error_handler is not None
             else _create_default_openalex_error_handler(
-                logger=self.logger,
-                metrics=self.metrics,
+                logger=self._logger,
+                metrics=self._metrics,
             )
         )
         self._fallback_fetch_service = (
@@ -288,7 +288,7 @@ class OpenAlexAdapter(
             self.openalex_query_executor
             if self.openalex_query_executor is not None
             else _create_default_openalex_query_executor(
-                http_client=self.http_client,
+                http_client=self._http_client,
                 adapter_metrics=self._adapter_metrics,
                 request_collector=self._request_collector,
                 headers_provider=self._build_headers,
@@ -311,7 +311,7 @@ class OpenAlexAdapter(
                 escape_title_for_search=self._escape_title_for_search,
                 query_executor=self._query_executor,
                 response_mapper=self._response_mapper,
-                logger=self.logger,
+                logger=self._logger,
                 runtime_errors=OPENALEX_RUNTIME_ERRORS,
             )
         )
@@ -320,7 +320,7 @@ class OpenAlexAdapter(
             self.title_fallback_handler
             if self.title_fallback_handler is not None
             else _create_default_openalex_title_fallback_handler(
-                logger=self.logger,
+                logger=self._logger,
                 search_fn=self._search_by_title,
             )
         )
@@ -332,7 +332,7 @@ class OpenAlexAdapter(
                 fallback_handler=self._fallback_handler,
                 normalize_id=self._normalize_doi,
                 extract_record_id=self._extract_doi_from_record,
-                logger=self.logger,
+                logger=self._logger,
             )
         )
         self.configure_fallback_policy(None)

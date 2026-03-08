@@ -396,7 +396,7 @@ def test_build_params_parse_response_and_repr(adapter):
 
     assert "without API key" in repr(adapter)
     with_key = UniProtAdapter(
-        http_client=adapter.http_client,
+        http_client=adapter._http_client,
         logger=adapter.logger,
         api_key="secret",
     )
@@ -408,7 +408,7 @@ def test_handle_fetch_error_paths(adapter):
     adapter.logger.error.assert_called()
 
     strict = UniProtAdapter(
-        http_client=adapter.http_client,
+        http_client=adapter._http_client,
         logger=MagicMock(),
         strict_error_handling=True,
     )

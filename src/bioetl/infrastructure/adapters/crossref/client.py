@@ -127,8 +127,8 @@ class CrossRefAdapter(FallbackPolicyMixin, BaseHttpAdapter):
             self.error_handler
             if self.error_handler is not None
             else _create_default_crossref_error_handler(
-                logger=self.logger,
-                metrics=self.metrics,
+                logger=self._logger,
+                metrics=self._metrics,
             )
         )
         self._fallback_fetch_service = (
@@ -157,8 +157,8 @@ class CrossRefAdapter(FallbackPolicyMixin, BaseHttpAdapter):
             self.batch_fetcher
             if self.batch_fetcher is not None
             else _create_default_crossref_batch_fetcher(
-                http=self.http_client,
-                logger=self.logger,
+                http=self._http_client,
+                logger=self._logger,
                 metrics=self._adapter_metrics,
                 mailto=self.mailto,
                 api_base=CROSSREF_API_BASE,
@@ -170,8 +170,8 @@ class CrossRefAdapter(FallbackPolicyMixin, BaseHttpAdapter):
             self.search_paginator
             if self.search_paginator is not None
             else _create_default_crossref_search_paginator(
-                http=self.http_client,
-                logger=self.logger,
+                http=self._http_client,
+                logger=self._logger,
                 metrics=self._adapter_metrics,
                 mailto=self.mailto,
                 api_base=CROSSREF_API_BASE,
@@ -183,7 +183,7 @@ class CrossRefAdapter(FallbackPolicyMixin, BaseHttpAdapter):
             self.title_fallback_handler
             if self.title_fallback_handler is not None
             else _create_default_crossref_title_fallback_handler(
-                logger=self.logger,
+                logger=self._logger,
                 search_fn=self._search_paginator.search,
             )
         )
@@ -193,7 +193,7 @@ class CrossRefAdapter(FallbackPolicyMixin, BaseHttpAdapter):
             self.fetch_flow
             if self.fetch_flow is not None
             else _create_default_crossref_fetch_flow(
-                logger=self.logger,
+                logger=self._logger,
                 batch_fetcher=self._batch_fetcher,
                 search_paginator=self._search_paginator,
                 fallback_decorator=self._fallback_decorator,
@@ -310,7 +310,7 @@ class CrossRefAdapter(FallbackPolicyMixin, BaseHttpAdapter):
 
             start_time = time.monotonic()
             with self._adapter_metrics.measure_request("/health"):
-                response = await self.http_client.get_once(
+                response = await self._http_client.get_once(
                     url,
                     params=params,
                     headers=self._build_headers(),
@@ -322,12 +322,12 @@ class CrossRefAdapter(FallbackPolicyMixin, BaseHttpAdapter):
                 elapsed_seconds=elapsed,
             )
             if probe_mapping.event_name == "crossref_health_check_slow":
-                self.logger.warning(
+                self._logger.warning(
                     probe_mapping.event_name,
                     elapsed_seconds=round(elapsed, 2),
                 )
             elif probe_mapping.event_name is not None:
-                self.logger.warning(
+                self._logger.warning(
                     probe_mapping.event_name,
                     status_code=response.status_code,
                     classified_status=probe_mapping.status.value,
@@ -335,7 +335,7 @@ class CrossRefAdapter(FallbackPolicyMixin, BaseHttpAdapter):
             return probe_mapping.status
 
         except CROSSREF_HEALTH_ERRORS as error:
-            self.logger.warning(
+            self._logger.warning(
                 "crossref_health_check_failed",
                 error=str(error),
             )
@@ -382,5 +382,5 @@ class CrossRefAdapter(FallbackPolicyMixin, BaseHttpAdapter):
 
     async def aclose(self) -> None:
         """Close adapter resources via underlying HTTP client context manager."""
-        if self.http_client:
-            await self.http_client.__aexit__(None, None, None)
+        if self._http_client:
+            await self._http_client.__aexit__(None, None, None)

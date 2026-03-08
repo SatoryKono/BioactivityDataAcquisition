@@ -200,6 +200,21 @@ def echo_table_list(tables: list[TableInfo]) -> None:
     click.echo()
 
 
+def _format_preview_row(
+    row: dict[str, object],
+    columns: list[object],
+    max_cols: int = 5,
+) -> str:
+    """Format a single sample row for preview display."""
+    values = []
+    for col in columns[:max_cols]:
+        val = str(row.get(col.name, ""))  # type: ignore[union-attr]
+        values.append(f"{val[:30]}..." if len(val) > 30 else val)
+    if len(columns) > max_cols:
+        values.append("...")
+    return " | ".join(values)
+
+
 def echo_export_preview(preview: TablePreview) -> None:
     """Output table preview with schema and sample data.
 
@@ -214,31 +229,22 @@ def echo_export_preview(preview: TablePreview) -> None:
         nullable = " (nullable)" if col.nullable else ""
         click.echo(f"  {col.name}: {col.type}{nullable}")
 
-    if preview.sample_rows:
-        click.echo(f"\nSample data ({len(preview.sample_rows)} rows):")
+    if not preview.sample_rows:
+        click.echo()
+        return
+
+    click.echo(f"\nSample data ({len(preview.sample_rows)} rows):")
+    click.echo("-" * 60)
+
+    if preview.columns:
+        col_names = [c.name for c in preview.columns[:5]]
+        if len(preview.columns) > 5:
+            col_names.append("...")
+        click.echo(" | ".join(col_names))
         click.echo("-" * 60)
 
-        # Get column names for header
-        if preview.columns:
-            col_names = [c.name for c in preview.columns[:5]]  # First 5 cols
-            if len(preview.columns) > 5:
-                col_names.append("...")
-            click.echo(" | ".join(col_names))
-            click.echo("-" * 60)
-
-        # Display sample rows
-        for row in preview.sample_rows:
-            values = []
-            for col in preview.columns[:5]:
-                val = row.get(col.name, "")
-                # Truncate long values
-                val_str = str(val)[:30]
-                if len(str(val)) > 30:
-                    val_str += "..."
-                values.append(val_str)
-            if len(preview.columns) > 5:
-                values.append("...")
-            click.echo(" | ".join(values))
+    for row in preview.sample_rows:
+        click.echo(_format_preview_row(row, preview.columns))
 
     click.echo()
 

@@ -100,6 +100,17 @@ def _validate_owner(
         metadata_errors.append(f"{prefix}: owner placeholder is not allowed")
 
 
+def _resolve_due_field(
+    entry: JsonDict,  # Any: DQ check values vary by check type
+    required_fields: tuple[str, ...],
+) -> str:
+    """Determine the most appropriate due-date field name for an entry."""
+    candidates = list(dict.fromkeys(
+        [f for f in required_fields if f in _DUE_DATE_FIELDS] + list(_DUE_DATE_FIELDS)
+    ))
+    return next((f for f in candidates if f in entry), candidates[0])
+
+
 def _validate_due_date(
     prefix: str,
     entry: JsonDict,  # Any: DQ check values vary by check type
@@ -109,15 +120,7 @@ def _validate_due_date(
     expired_entries: list[str],
 ) -> None:
     """Validate due-date field format and expiration status."""
-    due_candidates: list[str] = [
-        field for field in required_fields if field in _DUE_DATE_FIELDS
-    ]
-    for field in _DUE_DATE_FIELDS:
-        if field not in due_candidates:
-            due_candidates.append(field)
-
-    due_field = next((field for field in due_candidates if field in entry), None)
-    selected_field = due_field or due_candidates[0]
+    selected_field = _resolve_due_field(entry, required_fields)
     due_value = entry.get(selected_field)
 
     if not isinstance(due_value, str):

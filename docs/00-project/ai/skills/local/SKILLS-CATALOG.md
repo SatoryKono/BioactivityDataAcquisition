@@ -5,7 +5,7 @@ Consolidated registry of BioETL-focused local skills under `.codex/skills/`.
 ## Canonical Rules
 
 - `.codex/skills/` is the canonical source for repository-local skills.
-- `docs/skills/local/` is a generated mirror and must not be edited manually.
+- `docs/00-project/ai/skills/local/` is a generated mirror and must not be edited manually.
 - Treat each `SKILL.md` frontmatter (`name`, `description`) as the trigger contract.
 - Verify and sync the local docs mirror with:
 
