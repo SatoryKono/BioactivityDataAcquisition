@@ -215,12 +215,7 @@ def _echo_batch_summary(result: BatchRunResult, dry_run: bool) -> None:
 
 
 def _handle_list_only(source: str, pipelines: list[str]) -> None:
-    """Handle --list-only mode and exit.
-
-    Args:
-        source: Provider name displayed in the list header.
-        pipelines: List of pipeline names to display.
-    """
+    """Handle --list-only mode and exit."""
     echo_info(f"Pipelines for provider '{source}':")
     for pipeline in pipelines:
         echo_info(f"  - {pipeline}")
@@ -273,14 +268,7 @@ def _show_run_preview(source: str, pipelines: list[str], dry_run: bool) -> None:
 
 
 def _determine_exit_code(batch_result: BatchRunResult) -> ExitCode:
-    """Determine exit code from batch result.
-
-    Args:
-        batch_result: BatchRunResult with aggregate counts from the completed batch run.
-
-    Returns:
-        ExitCode.OK when all pipelines succeeded, ExitCode.FAIL otherwise.
-    """
+    """Determine exit code from batch result."""
     return map_batch_run_result_to_exit_code(batch_result)
 
 

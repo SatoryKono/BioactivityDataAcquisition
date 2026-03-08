@@ -5,7 +5,12 @@
 # 3) regenerate with-descriptions PDF bundles
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if REPO_ROOT_GIT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel 2>/dev/null)"; then
+  REPO_ROOT="$REPO_ROOT_GIT"
+else
+  REPO_ROOT="$(cd "$SCRIPT_DIR/../../../../../.." && pwd)"
+fi
 PROFILE="pr"
 TEXT_LAYER="${TEXT_LAYER:-fallback-only}"
 DIAGRAM_PATH=""
@@ -19,7 +24,7 @@ INPUT_MD=()
 
 usage() {
   cat <<'EOF'
-Usage: scripts/diagrams/run_diagram_docs_agent.sh [options]
+Usage: docs/00-project/ai/agents/scripts/diagrams/run_diagram_docs_agent.sh [options]
 
 Options:
   --profile <pr|nightly|quick>   Diagram checks profile (default: pr)
@@ -35,10 +40,10 @@ Options:
   -h, --help                     Show this help
 
 Examples:
-  scripts/diagrams/run_diagram_docs_agent.sh
-  scripts/diagrams/run_diagram_docs_agent.sh --profile pr --enforce-budget
-  scripts/diagrams/run_diagram_docs_agent.sh --diagram docs/02-architecture/mmd-diagrams/foundation/30-port-adapter-mapping.mmd
-  scripts/diagrams/run_diagram_docs_agent.sh --input-md docs/02-architecture/mmd-diagrams/class-diagrams-with-descriptions.md
+  docs/00-project/ai/agents/scripts/diagrams/run_diagram_docs_agent.sh
+  docs/00-project/ai/agents/scripts/diagrams/run_diagram_docs_agent.sh --profile pr --enforce-budget
+  docs/00-project/ai/agents/scripts/diagrams/run_diagram_docs_agent.sh --diagram docs/02-architecture/mmd-diagrams/foundation/30-port-adapter-mapping.mmd
+  docs/00-project/ai/agents/scripts/diagrams/run_diagram_docs_agent.sh --input-md docs/02-architecture/mmd-diagrams/class-diagrams-with-descriptions.md
 EOF
 }
 

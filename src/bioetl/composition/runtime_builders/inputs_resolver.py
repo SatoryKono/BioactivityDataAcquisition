@@ -159,14 +159,7 @@ def assemble_filter_config(
 
 
 def assemble_cached_bronze_context(ctx: PipelineRunContext) -> CachedBronzeContext:
-    """Resolve cached-bronze context from run context.
-
-    Args:
-        ctx: Pipeline run context providing cached_bronze settings.
-
-    Returns:
-        CachedBronzeContext extracted from the run context.
-    """
+    """Resolve cached-bronze context from run context."""
     return ctx.cached_bronze
 
 
@@ -196,14 +189,7 @@ def validate_pk_contract(config: PipelineYamlConfig) -> None:
 
 
 def resolve_health_check_mode(*, settings: Settings) -> Literal["strict", "probe"]:
-    """Resolve runtime health check mode from settings.
-
-    Args:
-        settings: Application settings providing test_mode flag and pipeline config.
-
-    Returns:
-        'probe' in test mode, otherwise the configured health check mode.
-    """
+    """Resolve runtime health check mode from settings."""
     if settings.test_mode:
         return "probe"
     return cast(Literal["strict", "probe"], getattr(settings.pipeline, "health_check_mode", "strict"))

@@ -35,10 +35,7 @@ from bioetl.interfaces.cli.formatters import (
     echo_table_list,
 )
 
-__all__ = [
-    "ExportFormat",
-    "export_command",
-]
+__all__ = ["ExportFormat", "export_command"]
 
 ExportFormat = Literal["csv", "xlsx", "tsv"]
 

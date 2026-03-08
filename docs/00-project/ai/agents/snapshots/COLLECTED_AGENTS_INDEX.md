@@ -8,12 +8,10 @@ Primary scope: `.claude/agents/*` + related orchestration/skills artifacts
 
 Do not edit collected files manually; regenerate from canonical runtime sources.
 
-Collected files: 121
+Collected files: 120
 
 - source: AGENTS.md
   copied: docs/00-project/ai/agents/snapshots/collected/AGENTS.md
-- source: scripts/diagrams/run_diagram_docs_agent.sh
-  copied: docs/00-project/ai/agents/snapshots/collected/scripts/diagrams/run_diagram_docs_agent.sh
 - source: docs/00-project/ai/skills/local/technical-designer-mermaid/agents/openai.yaml
   copied: docs/00-project/ai/agents/snapshots/collected/docs/00-project/ai/skills/local/technical-designer-mermaid/agents/openai.yaml
 - source: docs/00-project/ai/skills/local/documentation-audit/agents/openai.yaml

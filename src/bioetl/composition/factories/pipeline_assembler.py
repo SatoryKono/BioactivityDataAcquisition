@@ -54,16 +54,7 @@ TPipeline = TypeVar("TPipeline", bound="BasePipeline")
 __all__ = ["GenericPipelineFactory", "assemble_runner", "create_pipeline_factory"]
 
 def _extract_entity_type(pipeline_name: str) -> str | None:
-    """Extract entity_type from pipeline_name.
-
-    Example: "chembl_activity" -> "activity"
-
-    Args:
-        pipeline_name: Full pipeline name with provider prefix.
-
-    Returns:
-        Entity type suffix, or None if no underscore in name.
-    """
+    """Extract entity_type suffix (e.g. 'chembl_activity' -> 'activity')."""
     return pipeline_name.split("_")[-1] if "_" in pipeline_name else None
 
 
@@ -337,19 +328,7 @@ def assemble_runner(
     strict_gold_validation: bool,
     yaml_config: PipelineYamlConfig | None = None,
 ) -> PipelineRunner:
-    """Assemble a PipelineRunner from a pipeline instance.
-
-    Args:
-        pipeline: Configured pipeline instance with services and context.
-        observability: Bundle containing logger, tracer, metrics, and DQ monitor.
-        silver_schema: Optional PyArrow schema for Silver layer validation.
-        gold_schema: Pandera DataFrameModel class for Gold layer validation.
-        strict_gold_validation: If True, raises on Gold schema violations.
-        yaml_config: Optional pre-loaded pipeline YAML config used for DQ extraction.
-
-    Returns:
-        Fully wired PipelineRunner ready for execution.
-    """
+    """Assemble a PipelineRunner from a pipeline instance."""
     return _assemble_runner_impl(
         pipeline=pipeline,
         observability=observability,

@@ -112,23 +112,7 @@ class ServicesBuilder:
         tracer: TracingPort | None = None,
         lock_validator: Callable[[], Awaitable[bool]] | None = None,
     ) -> BatchProcessingComponents:
-        """Create batch metrics/transformer/writer stack via composition DI.
-
-        Args:
-            services: Wired PipelineService bundle with storage, checkpoint, and observability.
-            context: Pipeline execution context with run metadata.
-            config: Record processor configuration (table names, keys, schemas).
-            error_classifier: Classifier for categorizing processing errors.
-            transform_callback: Callback applied to each Bronze record during Silver transform.
-            gold_filter_callback: Predicate determining if a Silver record writes to Gold.
-            gold_transform_callback: Callback applied to each Silver record for Gold output.
-            gold_validator: Validator applied to Gold-layer DataFrames.
-            tracer: Optional TracingPort for distributed tracing.
-            lock_validator: Optional async callable for lock validation before writes.
-
-        Returns:
-            BatchProcessingComponents with batch metrics, transformer, and writer.
-        """
+        """Create batch metrics/transformer/writer stack via composition DI."""
         return _create_batch_processing_components(
             services=services,
             context=context,
@@ -200,35 +184,7 @@ class ServicesBuilder:
         column_groups: tuple[ColumnGroupConfig, ...] = (),
         scd_config: dict[str, str] | None = None,
     ) -> RecordProcessor:
-        """Create configured ``RecordProcessor`` for pipeline execution.
-
-        Args:
-            services: Wired PipelineService bundle with storage and observability.
-            context: Pipeline execution context with run metadata.
-            pipeline_name: Name of the pipeline (e.g., 'chembl_activity').
-            provider: Provider name (e.g., 'chembl').
-            entity_type: Entity type identifier (e.g., 'activity').
-            silver_schema: Optional PyArrow schema for Silver layer validation.
-            gold_schema: Pandera DataFrameModel class for Gold layer validation.
-            dq_config: Optional data quality configuration for DQ checks.
-            primary_keys: Primary key column names for deduplication.
-            silver_table: Delta table name for Silver layer writes.
-            gold_table: Optional Delta table name for Gold layer writes.
-            silver_write_mode: Write strategy for the Silver layer.
-            gold_write_mode: Write strategy for the Gold layer.
-            on_schema_mismatch: Action taken when schema mismatches occur.
-            transform_callback: Callback applied to Bronze records for Silver transform.
-            gold_filter_callback: Predicate determining if a Silver record writes to Gold.
-            gold_transform_callback: Callback applied to Silver records for Gold output.
-            tracer: Optional TracingPort for distributed tracing.
-            strict_gold_validation: If True, raises on Gold schema violations. Defaults to True.
-            lock_validator: Optional async callable for lock validation before writes.
-            column_groups: Tuple of column group configs for column ordering. Defaults to ().
-            scd_config: Optional SCD (Slowly Changing Dimension) configuration.
-
-        Returns:
-            RecordProcessor wired with transformer, writer, and batch metrics.
-        """
+        """Create configured ``RecordProcessor`` for pipeline execution."""
         effective_tracer = tracer or services.tracing
         processor_config = RecordProcessorConfig(
             pipeline_name=pipeline_name,

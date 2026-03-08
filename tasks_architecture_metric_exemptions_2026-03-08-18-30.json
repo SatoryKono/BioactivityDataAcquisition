@@ -1,0 +1,791 @@
+{
+  "schema_version": "1.0",
+  "source_registry_file": "configs/quality/architecture_metric_exemptions.yaml",
+  "generated_at": "2026-03-08T18:30:00+03:00",
+  "defaults": {
+    "behavior_change_allowed": false,
+    "public_interface_change_allowed": false,
+    "docstrings_rule": "Докстринги: не удалять. Разрешено только изменять с соблюдением стандартов докстрингов проекта."
+  },
+  "registry_summary": {
+    "file_size_limits": 6,
+    "function_complexity": 2,
+    "function_length": 0,
+    "class_size": 14,
+    "class_method_count": 0,
+    "god_object": 1,
+    "domain_complexity": 2,
+    "total_tasks": 25
+  },
+  "tasks": [
+    {
+      "id": "AME-file_size_limits-001",
+      "registry": "file_size_limits",
+      "registry_key": "src/bioetl/domain/composite/config_models.py",
+      "owner": "@bioetl-data-model",
+      "reason": "Composite config dataclasses with validation — 7 frozen dataclasses with cross-field validation logic.",
+      "expires_on": "2026-06-30",
+      "removal_step": "Split config model responsibilities into dedicated value-object modules and remove this exemption entry.",
+      "limit_value": 305,
+      "current_value": 315,
+      "delta_to_limit": 10,
+      "status": "needs_refactor",
+      "target_file": "src/bioetl/domain/composite/config_models.py",
+      "symbol_name": null,
+      "goal": "Снизить LOC файла с 315 до ≤305 (лимит domain). Вынести часть dataclass'ов в отдельные модули value-objects.",
+      "acceptance_criteria": [
+        "Поведение не изменено",
+        "Публичные интерфейсы не изменены",
+        "Докстринги не удалены; изменения соответствуют стандартам проекта",
+        "LOC файла ≤305"
+      ],
+      "allowed_paths": ["src/bioetl/**", "tests/**"],
+      "forbidden_paths": ["configs/**", "docs/**", ".github/**"],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestFileSizeLimits",
+        "python -m pytest -q tests/architecture/test_quality_burndown_priorities.py::test_file_size_limit_registry_has_no_stale_entries",
+        "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py",
+        "python scripts/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off"
+      ],
+      "notes": "Exemption value=350, но лимит domain=305. Текущий LOC=315 — ниже exemption, но выше лимита."
+    },
+    {
+      "id": "AME-file_size_limits-002",
+      "registry": "file_size_limits",
+      "registry_key": "src/bioetl/composition/factories/pipeline_assembler.py",
+      "owner": "@bioetl-platform",
+      "reason": "Pipeline assembly wiring — coordinates factory calls to assemble full pipeline graph. Inherently compositional.",
+      "expires_on": "2026-06-30",
+      "removal_step": "Extract sub-assemblers for bronze/silver/gold phase wiring.",
+      "limit_value": 350,
+      "current_value": 361,
+      "delta_to_limit": 11,
+      "status": "needs_refactor",
+      "target_file": "src/bioetl/composition/factories/pipeline_assembler.py",
+      "symbol_name": null,
+      "goal": "Снизить LOC файла с 361 до ≤350 (лимит composition). Вынести sub-assemblers для bronze/silver/gold.",
+      "acceptance_criteria": [
+        "Поведение не изменено",
+        "Публичные интерфейсы не изменены",
+        "Докстринги не удалены; изменения соответствуют стандартам проекта",
+        "LOC файла ≤350"
+      ],
+      "allowed_paths": ["src/bioetl/**", "tests/**"],
+      "forbidden_paths": ["configs/**", "docs/**", ".github/**"],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestFileSizeLimits",
+        "python -m pytest -q tests/architecture/test_quality_burndown_priorities.py::test_file_size_limit_registry_has_no_stale_entries",
+        "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py",
+        "python scripts/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off"
+      ],
+      "notes": null
+    },
+    {
+      "id": "AME-file_size_limits-003",
+      "registry": "file_size_limits",
+      "registry_key": "src/bioetl/composition/factories/services_builder.py",
+      "owner": "@bioetl-platform",
+      "reason": "DI service builder — constructs all application services with injected dependencies. Large due to many services.",
+      "expires_on": "2026-06-30",
+      "removal_step": "Split into domain-grouped service builder modules (storage, observability, quality).",
+      "limit_value": 350,
+      "current_value": 393,
+      "delta_to_limit": 43,
+      "status": "needs_refactor",
+      "target_file": "src/bioetl/composition/factories/services_builder.py",
+      "symbol_name": null,
+      "goal": "Снизить LOC файла с 393 до ≤350 (лимит composition). Разделить на модули: storage, observability, quality builders.",
+      "acceptance_criteria": [
+        "Поведение не изменено",
+        "Публичные интерфейсы не изменены",
+        "Докстринги не удалены; изменения соответствуют стандартам проекта",
+        "LOC файла ≤350"
+      ],
+      "allowed_paths": ["src/bioetl/**", "tests/**"],
+      "forbidden_paths": ["configs/**", "docs/**", ".github/**"],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestFileSizeLimits",
+        "python -m pytest -q tests/architecture/test_quality_burndown_priorities.py::test_file_size_limit_registry_has_no_stale_entries",
+        "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py",
+        "python scripts/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off"
+      ],
+      "notes": null
+    },
+    {
+      "id": "AME-file_size_limits-004",
+      "registry": "file_size_limits",
+      "registry_key": "src/bioetl/composition/runtime_builders/inputs_resolver.py",
+      "owner": "@bioetl-platform",
+      "reason": "Runtime input resolution — resolves configs, filters, DQ rules for pipeline execution. Complex setup logic.",
+      "expires_on": "2026-06-30",
+      "removal_step": "Extract filter resolution and DQ config resolution into separate resolver modules.",
+      "limit_value": 350,
+      "current_value": 358,
+      "delta_to_limit": 8,
+      "status": "needs_refactor",
+      "target_file": "src/bioetl/composition/runtime_builders/inputs_resolver.py",
+      "symbol_name": null,
+      "goal": "Снизить LOC файла с 358 до ≤350 (лимит composition). Вынести filter/DQ resolution в отдельные resolver-модули.",
+      "acceptance_criteria": [
+        "Поведение не изменено",
+        "Публичные интерфейсы не изменены",
+        "Докстринги не удалены; изменения соответствуют стандартам проекта",
+        "LOC файла ≤350"
+      ],
+      "allowed_paths": ["src/bioetl/**", "tests/**"],
+      "forbidden_paths": ["configs/**", "docs/**", ".github/**"],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestFileSizeLimits",
+        "python -m pytest -q tests/architecture/test_quality_burndown_priorities.py::test_file_size_limit_registry_has_no_stale_entries",
+        "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py",
+        "python scripts/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off"
+      ],
+      "notes": null
+    },
+    {
+      "id": "AME-file_size_limits-005",
+      "registry": "file_size_limits",
+      "registry_key": "src/bioetl/interfaces/cli/commands/export.py",
+      "owner": "@bioetl-architecture",
+      "reason": "Export CLI command — async preview/export/list with typed exception handling boilerplate per operation.",
+      "expires_on": "2026-06-30",
+      "removal_step": "Extract shared async runner pattern into a reusable CLI async helper.",
+      "limit_value": 400,
+      "current_value": 403,
+      "delta_to_limit": 3,
+      "status": "needs_refactor",
+      "target_file": "src/bioetl/interfaces/cli/commands/export.py",
+      "symbol_name": null,
+      "goal": "Снизить LOC файла с 403 до ≤400 (лимит interfaces). Вынести async runner pattern в CLI helper.",
+      "acceptance_criteria": [
+        "Поведение не изменено",
+        "Публичные интерфейсы не изменены",
+        "Докстринги не удалены; изменения соответствуют стандартам проекта",
+        "LOC файла ≤400"
+      ],
+      "allowed_paths": ["src/bioetl/**", "tests/**"],
+      "forbidden_paths": ["configs/**", "docs/**", ".github/**"],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestFileSizeLimits",
+        "python -m pytest -q tests/architecture/test_quality_burndown_priorities.py::test_file_size_limit_registry_has_no_stale_entries",
+        "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py",
+        "python scripts/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off"
+      ],
+      "notes": null
+    },
+    {
+      "id": "AME-file_size_limits-006",
+      "registry": "file_size_limits",
+      "registry_key": "src/bioetl/interfaces/cli/commands/run_all.py",
+      "owner": "@bioetl-architecture",
+      "reason": "CLI run-all command — orchestrates batch pipeline execution with progress bars, error handling, summary output.",
+      "expires_on": "2026-06-30",
+      "removal_step": "Extract summary formatting and progress tracking into CLI helper modules.",
+      "limit_value": 400,
+      "current_value": 408,
+      "delta_to_limit": 8,
+      "status": "needs_refactor",
+      "target_file": "src/bioetl/interfaces/cli/commands/run_all.py",
+      "symbol_name": null,
+      "goal": "Снизить LOC файла с 408 до ≤400 (лимит interfaces). Вынести summary formatting и progress tracking в CLI helpers.",
+      "acceptance_criteria": [
+        "Поведение не изменено",
+        "Публичные интерфейсы не изменены",
+        "Докстринги не удалены; изменения соответствуют стандартам проекта",
+        "LOC файла ≤400"
+      ],
+      "allowed_paths": ["src/bioetl/**", "tests/**"],
+      "forbidden_paths": ["configs/**", "docs/**", ".github/**"],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestFileSizeLimits",
+        "python -m pytest -q tests/architecture/test_quality_burndown_priorities.py::test_file_size_limit_registry_has_no_stale_entries",
+        "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py",
+        "python scripts/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off"
+      ],
+      "notes": null
+    },
+    {
+      "id": "AME-function_complexity-001",
+      "registry": "function_complexity",
+      "registry_key": "src/bioetl/domain/composite/config_models.py::_coerce_to_tuple",
+      "owner": "@bioetl-data-model",
+      "reason": "Unified coercion helper with optional dict conversion — CC=6 from isinstance checks and convert_dicts branch.",
+      "expires_on": "2026-06-30",
+      "removal_step": "Simplify by splitting into _coerce_to_tuple and _coerce_to_typed_tuple.",
+      "limit_value": 5,
+      "current_value": 5,
+      "delta_to_limit": 0,
+      "status": "within_limit",
+      "target_file": "src/bioetl/domain/composite/config_models.py",
+      "symbol_name": "_coerce_to_tuple",
+      "goal": "CC уже в пределах лимита (CC=5, лимит domain=5). Exemption можно удалить.",
+      "acceptance_criteria": [
+        "Поведение не изменено",
+        "Публичные интерфейсы не изменены",
+        "Докстринги не удалены; изменения соответствуют стандартам проекта",
+        "CC ≤5"
+      ],
+      "allowed_paths": ["src/bioetl/**", "tests/**"],
+      "forbidden_paths": ["configs/**", "docs/**", ".github/**"],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestFunctionComplexity",
+        "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py",
+        "python scripts/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off"
+      ],
+      "notes": "AST-based CC=5 (на уровне лимита). radon может дать CC=6 из-за разницы в подсчёте. Проверить через radon cc перед удалением exemption."
+    },
+    {
+      "id": "AME-function_complexity-002",
+      "registry": "function_complexity",
+      "registry_key": "src/bioetl/domain/composite/config_models.py::_validate",
+      "owner": "@bioetl-data-model",
+      "reason": "Cross-field validation for CrossValidationConfig — CC=7 from 6 threshold checks.",
+      "expires_on": "2026-06-30",
+      "removal_step": "Extract threshold and tolerance validation into separate helpers.",
+      "limit_value": 5,
+      "current_value": 7,
+      "delta_to_limit": 2,
+      "status": "needs_refactor",
+      "target_file": "src/bioetl/domain/composite/config_models.py",
+      "symbol_name": "_validate",
+      "goal": "Снизить CC функции _validate (line 289) с 7 до ≤5. Вынести threshold/tolerance checks в отдельные helpers.",
+      "acceptance_criteria": [
+        "Поведение не изменено",
+        "Публичные интерфейсы не изменены",
+        "Докстринги не удалены; изменения соответствуют стандартам проекта",
+        "CC ≤5"
+      ],
+      "allowed_paths": ["src/bioetl/**", "tests/**"],
+      "forbidden_paths": ["configs/**", "docs/**", ".github/**"],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestFunctionComplexity",
+        "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py",
+        "python scripts/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off"
+      ],
+      "notes": "Есть 5 _validate() функций в файле (разные dataclass'ы). Exemption относится к CrossValidationConfig._validate (line 289, CC=7)."
+    },
+    {
+      "id": "AME-class_size-001",
+      "registry": "class_size",
+      "registry_key": "src/bioetl/infrastructure/storage/bronze_writer.py::BronzeWriter",
+      "owner": "@bioetl-storage",
+      "reason": "Bronze writer with audit trail, metrics, and error handling. Core storage adapter with mixin composition.",
+      "expires_on": "2026-06-30",
+      "removal_step": "Extract audit and metrics recording into a BronzeWriterObservabilityMixin.",
+      "limit_value": 300,
+      "current_value": 365,
+      "delta_to_limit": 65,
+      "status": "needs_refactor",
+      "target_file": "src/bioetl/infrastructure/storage/bronze_writer.py",
+      "symbol_name": "BronzeWriter",
+      "goal": "Снизить LOC класса с 365 до ≤300. Вынести audit/metrics в BronzeWriterObservabilityMixin.",
+      "acceptance_criteria": [
+        "Поведение не изменено",
+        "Публичные интерфейсы не изменены",
+        "Докстринги не удалены; изменения соответствуют стандартам проекта",
+        "LOC класса ≤300"
+      ],
+      "allowed_paths": ["src/bioetl/**", "tests/**"],
+      "forbidden_paths": ["configs/**", "docs/**", ".github/**"],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestClassSize",
+        "python -m pytest -q tests/architecture/test_quality_burndown_priorities.py::test_class_size_registry_has_no_stale_entries",
+        "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py",
+        "python scripts/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off"
+      ],
+      "notes": null
+    },
+    {
+      "id": "AME-class_size-002",
+      "registry": "class_size",
+      "registry_key": "src/bioetl/infrastructure/storage/bronze_writer_io_mixin.py::BronzeWriterIOMixin",
+      "owner": "@bioetl-storage",
+      "reason": "Bronze I/O mixin — file writing, partitioning, compression. Delegation to _logger and _metrics for god-object compliance.",
+      "expires_on": "2026-06-30",
+      "removal_step": "Further split into write and partition helpers.",
+      "limit_value": 300,
+      "current_value": 344,
+      "delta_to_limit": 44,
+      "status": "needs_refactor",
+      "target_file": "src/bioetl/infrastructure/storage/bronze_writer_io_mixin.py",
+      "symbol_name": "BronzeWriterIOMixin",
+      "goal": "Снизить LOC класса с 344 до ≤300. Разделить на write и partition helpers.",
+      "acceptance_criteria": [
+        "Поведение не изменено",
+        "Публичные интерфейсы не изменены",
+        "Докстринги не удалены; изменения соответствуют стандартам проекта",
+        "LOC класса ≤300"
+      ],
+      "allowed_paths": ["src/bioetl/**", "tests/**"],
+      "forbidden_paths": ["configs/**", "docs/**", ".github/**"],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestClassSize",
+        "python -m pytest -q tests/architecture/test_quality_burndown_priorities.py::test_class_size_registry_has_no_stale_entries",
+        "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py",
+        "python scripts/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off"
+      ],
+      "notes": null
+    },
+    {
+      "id": "AME-class_size-003",
+      "registry": "class_size",
+      "registry_key": "src/bioetl/infrastructure/storage/silver_writer_delta_mixin.py::SilverWriterDeltaMixin",
+      "owner": "@bioetl-storage",
+      "reason": "Delta Lake operations mixin — merge, upsert, schema evolution. Complex DeltaTable API usage.",
+      "expires_on": "2026-06-30",
+      "removal_step": "Extract schema evolution logic into a separate DeltaSchemaManager.",
+      "limit_value": 300,
+      "current_value": 356,
+      "delta_to_limit": 56,
+      "status": "needs_refactor",
+      "target_file": "src/bioetl/infrastructure/storage/silver_writer_delta_mixin.py",
+      "symbol_name": "SilverWriterDeltaMixin",
+      "goal": "Снизить LOC класса с 356 до ≤300. Вынести schema evolution в DeltaSchemaManager.",
+      "acceptance_criteria": [
+        "Поведение не изменено",
+        "Публичные интерфейсы не изменены",
+        "Докстринги не удалены; изменения соответствуют стандартам проекта",
+        "LOC класса ≤300"
+      ],
+      "allowed_paths": ["src/bioetl/**", "tests/**"],
+      "forbidden_paths": ["configs/**", "docs/**", ".github/**"],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestClassSize",
+        "python -m pytest -q tests/architecture/test_quality_burndown_priorities.py::test_class_size_registry_has_no_stale_entries",
+        "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py",
+        "python scripts/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off"
+      ],
+      "notes": null
+    },
+    {
+      "id": "AME-class_size-004",
+      "registry": "class_size",
+      "registry_key": "src/bioetl/infrastructure/storage/silver_writer_metadata_mixin.py::SilverWriterMetadataMixin",
+      "owner": "@bioetl-storage",
+      "reason": "Silver metadata mixin — metadata extraction, column mapping, audit fields. Already extracted.",
+      "expires_on": "2026-06-30",
+      "removal_step": "Inline simple helpers and reduce method count.",
+      "limit_value": 300,
+      "current_value": 320,
+      "delta_to_limit": 20,
+      "status": "needs_refactor",
+      "target_file": "src/bioetl/infrastructure/storage/silver_writer_metadata_mixin.py",
+      "symbol_name": "SilverWriterMetadataMixin",
+      "goal": "Снизить LOC класса с 320 до ≤300. Inline простых helpers, уменьшить количество методов.",
+      "acceptance_criteria": [
+        "Поведение не изменено",
+        "Публичные интерфейсы не изменены",
+        "Докстринги не удалены; изменения соответствуют стандартам проекта",
+        "LOC класса ≤300"
+      ],
+      "allowed_paths": ["src/bioetl/**", "tests/**"],
+      "forbidden_paths": ["configs/**", "docs/**", ".github/**"],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestClassSize",
+        "python -m pytest -q tests/architecture/test_quality_burndown_priorities.py::test_class_size_registry_has_no_stale_entries",
+        "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py",
+        "python scripts/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off"
+      ],
+      "notes": null
+    },
+    {
+      "id": "AME-class_size-005",
+      "registry": "class_size",
+      "registry_key": "src/bioetl/infrastructure/storage/silver_writer_validation_mixin.py::SilverWriterValidationMixin",
+      "owner": "@bioetl-storage",
+      "reason": "Silver validation mixin — DQ checks, quarantine, schema validation. Already extracted.",
+      "expires_on": "2026-06-30",
+      "removal_step": "Extract quarantine logic into a QuarantineHandler.",
+      "limit_value": 300,
+      "current_value": 327,
+      "delta_to_limit": 27,
+      "status": "needs_refactor",
+      "target_file": "src/bioetl/infrastructure/storage/silver_writer_validation_mixin.py",
+      "symbol_name": "SilverWriterValidationMixin",
+      "goal": "Снизить LOC класса с 327 до ≤300. Вынести quarantine logic в QuarantineHandler.",
+      "acceptance_criteria": [
+        "Поведение не изменено",
+        "Публичные интерфейсы не изменены",
+        "Докстринги не удалены; изменения соответствуют стандартам проекта",
+        "LOC класса ≤300"
+      ],
+      "allowed_paths": ["src/bioetl/**", "tests/**"],
+      "forbidden_paths": ["configs/**", "docs/**", ".github/**"],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestClassSize",
+        "python -m pytest -q tests/architecture/test_quality_burndown_priorities.py::test_class_size_registry_has_no_stale_entries",
+        "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py",
+        "python scripts/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off"
+      ],
+      "notes": null
+    },
+    {
+      "id": "AME-class_size-006",
+      "registry": "class_size",
+      "registry_key": "src/bioetl/infrastructure/adapters/chembl/client.py::ChemblAdapter",
+      "owner": "@bioetl-adapters",
+      "reason": "ChEMBL API adapter — handles 8 entity types with pagination, rate limiting, error mapping.",
+      "expires_on": "2026-06-30",
+      "removal_step": "Extract entity-specific fetch methods into per-entity strategy classes.",
+      "limit_value": 300,
+      "current_value": 340,
+      "delta_to_limit": 40,
+      "status": "needs_refactor",
+      "target_file": "src/bioetl/infrastructure/adapters/chembl/client.py",
+      "symbol_name": "ChemblAdapter",
+      "goal": "Снизить LOC класса с 340 до ≤300. Вынести entity-specific fetch в per-entity strategy classes.",
+      "acceptance_criteria": [
+        "Поведение не изменено",
+        "Публичные интерфейсы не изменены",
+        "Докстринги не удалены; изменения соответствуют стандартам проекта",
+        "LOC класса ≤300"
+      ],
+      "allowed_paths": ["src/bioetl/**", "tests/**"],
+      "forbidden_paths": ["configs/**", "docs/**", ".github/**"],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestClassSize",
+        "python -m pytest -q tests/architecture/test_quality_burndown_priorities.py::test_class_size_registry_has_no_stale_entries",
+        "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py",
+        "python scripts/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off"
+      ],
+      "notes": null
+    },
+    {
+      "id": "AME-class_size-007",
+      "registry": "class_size",
+      "registry_key": "src/bioetl/infrastructure/adapters/chembl/fetch_resilience_mixin.py::ChemblFetchResilienceMixin",
+      "owner": "@bioetl-adapters",
+      "reason": "Resilience mixin — retry, circuit breaker, fallback strategies for ChEMBL API calls.",
+      "expires_on": "2026-06-30",
+      "removal_step": "Extract retry and circuit breaker into generic resilience decorators.",
+      "limit_value": 300,
+      "current_value": 353,
+      "delta_to_limit": 53,
+      "status": "needs_refactor",
+      "target_file": "src/bioetl/infrastructure/adapters/chembl/fetch_resilience_mixin.py",
+      "symbol_name": "ChemblFetchResilienceMixin",
+      "goal": "Снизить LOC класса с 353 до ≤300. Вынести retry/circuit breaker в generic resilience decorators.",
+      "acceptance_criteria": [
+        "Поведение не изменено",
+        "Публичные интерфейсы не изменены",
+        "Докстринги не удалены; изменения соответствуют стандартам проекта",
+        "LOC класса ≤300"
+      ],
+      "allowed_paths": ["src/bioetl/**", "tests/**"],
+      "forbidden_paths": ["configs/**", "docs/**", ".github/**"],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestClassSize",
+        "python -m pytest -q tests/architecture/test_quality_burndown_priorities.py::test_class_size_registry_has_no_stale_entries",
+        "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py",
+        "python scripts/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off"
+      ],
+      "notes": null
+    },
+    {
+      "id": "AME-class_size-008",
+      "registry": "class_size",
+      "registry_key": "src/bioetl/infrastructure/adapters/common/api_request_collector.py::APIRequestCollector",
+      "owner": "@bioetl-adapters",
+      "reason": "Request collector — accumulates API responses, handles pagination, deduplication. Core adapter utility.",
+      "expires_on": "2026-06-30",
+      "removal_step": "Extract deduplication into a ResponseDeduplicator.",
+      "limit_value": 300,
+      "current_value": 324,
+      "delta_to_limit": 24,
+      "status": "needs_refactor",
+      "target_file": "src/bioetl/infrastructure/adapters/common/api_request_collector.py",
+      "symbol_name": "APIRequestCollector",
+      "goal": "Снизить LOC класса с 324 до ≤300. Вынести deduplication в ResponseDeduplicator.",
+      "acceptance_criteria": [
+        "Поведение не изменено",
+        "Публичные интерфейсы не изменены",
+        "Докстринги не удалены; изменения соответствуют стандартам проекта",
+        "LOC класса ≤300"
+      ],
+      "allowed_paths": ["src/bioetl/**", "tests/**"],
+      "forbidden_paths": ["configs/**", "docs/**", ".github/**"],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestClassSize",
+        "python -m pytest -q tests/architecture/test_quality_burndown_priorities.py::test_class_size_registry_has_no_stale_entries",
+        "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py",
+        "python scripts/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off"
+      ],
+      "notes": null
+    },
+    {
+      "id": "AME-class_size-009",
+      "registry": "class_size",
+      "registry_key": "src/bioetl/infrastructure/adapters/decorators/retry.py::RetryingDataSourceDecorator",
+      "owner": "@bioetl-adapters",
+      "reason": "Retry decorator — wraps DataSourcePort with configurable retry, backoff, and error classification.",
+      "expires_on": "2026-06-30",
+      "removal_step": "Extract backoff strategy into a BackoffPolicy value object.",
+      "limit_value": 300,
+      "current_value": 328,
+      "delta_to_limit": 28,
+      "status": "needs_refactor",
+      "target_file": "src/bioetl/infrastructure/adapters/decorators/retry.py",
+      "symbol_name": "RetryingDataSourceDecorator",
+      "goal": "Снизить LOC класса с 328 до ≤300. Вынести backoff strategy в BackoffPolicy value object.",
+      "acceptance_criteria": [
+        "Поведение не изменено",
+        "Публичные интерфейсы не изменены",
+        "Докстринги не удалены; изменения соответствуют стандартам проекта",
+        "LOC класса ≤300"
+      ],
+      "allowed_paths": ["src/bioetl/**", "tests/**"],
+      "forbidden_paths": ["configs/**", "docs/**", ".github/**"],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestClassSize",
+        "python -m pytest -q tests/architecture/test_quality_burndown_priorities.py::test_class_size_registry_has_no_stale_entries",
+        "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py",
+        "python scripts/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off"
+      ],
+      "notes": null
+    },
+    {
+      "id": "AME-class_size-010",
+      "registry": "class_size",
+      "registry_key": "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py::HTTPClientRetryMixin",
+      "owner": "@bioetl-adapters",
+      "reason": "HTTP retry mixin — retry logic, status code mapping, timeout handling for httpx client.",
+      "expires_on": "2026-06-30",
+      "removal_step": "Extract status code classification into an HttpStatusClassifier.",
+      "limit_value": 300,
+      "current_value": 376,
+      "delta_to_limit": 76,
+      "status": "needs_refactor",
+      "target_file": "src/bioetl/infrastructure/adapters/http/client_retry_mixin.py",
+      "symbol_name": "HTTPClientRetryMixin",
+      "goal": "Снизить LOC класса с 376 до ≤300. Вынести status code classification в HttpStatusClassifier.",
+      "acceptance_criteria": [
+        "Поведение не изменено",
+        "Публичные интерфейсы не изменены",
+        "Докстринги не удалены; изменения соответствуют стандартам проекта",
+        "LOC класса ≤300"
+      ],
+      "allowed_paths": ["src/bioetl/**", "tests/**"],
+      "forbidden_paths": ["configs/**", "docs/**", ".github/**"],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestClassSize",
+        "python -m pytest -q tests/architecture/test_quality_burndown_priorities.py::test_class_size_registry_has_no_stale_entries",
+        "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py",
+        "python scripts/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off"
+      ],
+      "notes": "Наибольший delta_to_limit (76) среди class_size exemptions."
+    },
+    {
+      "id": "AME-class_size-011",
+      "registry": "class_size",
+      "registry_key": "src/bioetl/application/composite/column_orderer.py::ColumnOrdererService",
+      "owner": "@bioetl-composite",
+      "reason": "Column ordering service — resolves column groups, applies layer-specific rules, handles rename/exclude.",
+      "expires_on": "2026-06-30",
+      "removal_step": "Extract group resolution into a ColumnGroupResolver.",
+      "limit_value": 300,
+      "current_value": 330,
+      "delta_to_limit": 30,
+      "status": "needs_refactor",
+      "target_file": "src/bioetl/application/composite/column_orderer.py",
+      "symbol_name": "ColumnOrdererService",
+      "goal": "Снизить LOC класса с 330 до ≤300. Вынести group resolution в ColumnGroupResolver.",
+      "acceptance_criteria": [
+        "Поведение не изменено",
+        "Публичные интерфейсы не изменены",
+        "Докстринги не удалены; изменения соответствуют стандартам проекта",
+        "LOC класса ≤300"
+      ],
+      "allowed_paths": ["src/bioetl/**", "tests/**"],
+      "forbidden_paths": ["configs/**", "docs/**", ".github/**"],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestClassSize",
+        "python -m pytest -q tests/architecture/test_quality_burndown_priorities.py::test_class_size_registry_has_no_stale_entries",
+        "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py",
+        "python scripts/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off"
+      ],
+      "notes": null
+    },
+    {
+      "id": "AME-class_size-012",
+      "registry": "class_size",
+      "registry_key": "src/bioetl/application/composite/dependency_joiner.py::DependencyJoinerService",
+      "owner": "@bioetl-composite",
+      "reason": "Dependency join service — executes multi-key joins with filter resolution. Complex join logic.",
+      "expires_on": "2026-06-30",
+      "removal_step": "Extract filter resolution into a JoinFilterResolver.",
+      "limit_value": 300,
+      "current_value": 315,
+      "delta_to_limit": 15,
+      "status": "needs_refactor",
+      "target_file": "src/bioetl/application/composite/dependency_joiner.py",
+      "symbol_name": "DependencyJoinerService",
+      "goal": "Снизить LOC класса с 315 до ≤300. Вынести filter resolution в JoinFilterResolver.",
+      "acceptance_criteria": [
+        "Поведение не изменено",
+        "Публичные интерфейсы не изменены",
+        "Докстринги не удалены; изменения соответствуют стандартам проекта",
+        "LOC класса ≤300"
+      ],
+      "allowed_paths": ["src/bioetl/**", "tests/**"],
+      "forbidden_paths": ["configs/**", "docs/**", ".github/**"],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestClassSize",
+        "python -m pytest -q tests/architecture/test_quality_burndown_priorities.py::test_class_size_registry_has_no_stale_entries",
+        "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py",
+        "python scripts/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off"
+      ],
+      "notes": null
+    },
+    {
+      "id": "AME-class_size-013",
+      "registry": "class_size",
+      "registry_key": "src/bioetl/application/composite/merger_io_mixin.py::MergeIOMixin",
+      "owner": "@bioetl-composite",
+      "reason": "Merge I/O mixin — reads/writes Silver/Gold tables, handles Delta Lake operations for composite merges.",
+      "expires_on": "2026-06-30",
+      "removal_step": "Extract table read/write into a CompositeStorageHelper.",
+      "limit_value": 300,
+      "current_value": 370,
+      "delta_to_limit": 70,
+      "status": "needs_refactor",
+      "target_file": "src/bioetl/application/composite/merger_io_mixin.py",
+      "symbol_name": "MergeIOMixin",
+      "goal": "Снизить LOC класса с 370 до ≤300. Вынести table read/write в CompositeStorageHelper.",
+      "acceptance_criteria": [
+        "Поведение не изменено",
+        "Публичные интерфейсы не изменены",
+        "Докстринги не удалены; изменения соответствуют стандартам проекта",
+        "LOC класса ≤300"
+      ],
+      "allowed_paths": ["src/bioetl/**", "tests/**"],
+      "forbidden_paths": ["configs/**", "docs/**", ".github/**"],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestClassSize",
+        "python -m pytest -q tests/architecture/test_quality_burndown_priorities.py::test_class_size_registry_has_no_stale_entries",
+        "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py",
+        "python scripts/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off"
+      ],
+      "notes": null
+    },
+    {
+      "id": "AME-class_size-014",
+      "registry": "class_size",
+      "registry_key": "src/bioetl/application/core/base_transformer/base.py::BaseTransformer",
+      "owner": "@bioetl-core",
+      "reason": "Base transformer — abstract base with 15+ hook methods for the template method pattern. Large by design.",
+      "expires_on": "2026-06-30",
+      "removal_step": "Extract pre/post-transform hooks into a TransformHooksMixin.",
+      "limit_value": 300,
+      "current_value": 382,
+      "delta_to_limit": 82,
+      "status": "needs_refactor",
+      "target_file": "src/bioetl/application/core/base_transformer/base.py",
+      "symbol_name": "BaseTransformer",
+      "goal": "Снизить LOC класса с 382 до ≤300. Вынести pre/post-transform hooks в TransformHooksMixin.",
+      "acceptance_criteria": [
+        "Поведение не изменено",
+        "Публичные интерфейсы не изменены",
+        "Докстринги не удалены; изменения соответствуют стандартам проекта",
+        "LOC класса ≤300"
+      ],
+      "allowed_paths": ["src/bioetl/**", "tests/**"],
+      "forbidden_paths": ["configs/**", "docs/**", ".github/**"],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestClassSize",
+        "python -m pytest -q tests/architecture/test_quality_burndown_priorities.py::test_class_size_registry_has_no_stale_entries",
+        "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py",
+        "python scripts/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off"
+      ],
+      "notes": "Наибольший delta_to_limit (82) среди всех class_size exemptions. 18 methods."
+    },
+    {
+      "id": "AME-god_object-001",
+      "registry": "god_object",
+      "registry_key": "DependencyCoordinatorService",
+      "owner": "@bioetl-architecture",
+      "reason": "Temporary governance anchor exemption while owner diversification policy activation is tracked from 2026-Q2.",
+      "expires_on": "2026-06-30",
+      "removal_step": "Remove after owner-diversification governance/tests support a zero-debt inventory baseline without anchor exemptions.",
+      "limit_value": 1,
+      "current_value": null,
+      "delta_to_limit": null,
+      "status": "not_measurable",
+      "target_file": "src/bioetl/application/composite/dependency_coordinator.py",
+      "symbol_name": "DependencyCoordinatorService",
+      "goal": "Удалить governance anchor exemption после активации owner-diversification policy в Q2 2026. Класс LOC=221, methods=5 — не является god object по метрикам.",
+      "acceptance_criteria": [
+        "Поведение не изменено",
+        "Публичные интерфейсы не изменены",
+        "Докстринги не удалены; изменения соответствуют стандартам проекта"
+      ],
+      "allowed_paths": ["src/bioetl/**", "tests/**"],
+      "forbidden_paths": ["configs/**", "docs/**", ".github/**"],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestGodObjectDetection",
+        "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py",
+        "python scripts/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off"
+      ],
+      "notes": "Это governance anchor exemption, не настоящий god object. LOC=221, methods=5. Exemption нужна для тестовой инфраструктуры owner-diversification, а не для рефакторинга класса."
+    },
+    {
+      "id": "AME-domain_complexity-001",
+      "registry": "domain_complexity",
+      "registry_key": "src/bioetl/domain/composite/config_models.py::_coerce_to_tuple",
+      "owner": "@bioetl-data-model",
+      "reason": "Unified coercion helper with optional dict conversion — CC=6 from isinstance checks and convert_dicts branch.",
+      "expires_on": "2026-06-30",
+      "removal_step": "Simplify by splitting into _coerce_to_tuple and _coerce_to_typed_tuple.",
+      "limit_value": 5,
+      "current_value": 5,
+      "delta_to_limit": 0,
+      "status": "within_limit",
+      "target_file": "src/bioetl/domain/composite/config_models.py",
+      "symbol_name": "_coerce_to_tuple",
+      "goal": "CC уже в пределах лимита (CC=5, лимит domain=5). Exemption можно удалить.",
+      "acceptance_criteria": [
+        "Поведение не изменено",
+        "Публичные интерфейсы не изменены",
+        "Докстринги не удалены; изменения соответствуют стандартам проекта",
+        "CC ≤5"
+      ],
+      "allowed_paths": ["src/bioetl/**", "tests/**"],
+      "forbidden_paths": ["configs/**", "docs/**", ".github/**"],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestFunctionComplexity",
+        "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py",
+        "python scripts/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off"
+      ],
+      "notes": "Дубликат AME-function_complexity-001. AST CC=5 (в пределах), radon может дать CC=6. Проверить через radon перед удалением."
+    },
+    {
+      "id": "AME-domain_complexity-002",
+      "registry": "domain_complexity",
+      "registry_key": "src/bioetl/domain/composite/config_models.py::_validate",
+      "owner": "@bioetl-data-model",
+      "reason": "Cross-field validation for CrossValidationConfig — CC=7 from 6 threshold checks.",
+      "expires_on": "2026-06-30",
+      "removal_step": "Extract threshold and tolerance validation into separate helpers.",
+      "limit_value": 5,
+      "current_value": 7,
+      "delta_to_limit": 2,
+      "status": "needs_refactor",
+      "target_file": "src/bioetl/domain/composite/config_models.py",
+      "symbol_name": "_validate",
+      "goal": "Снизить CC функции CrossValidationConfig._validate (line 289) с 7 до ≤5. Вынести threshold/tolerance checks в helpers.",
+      "acceptance_criteria": [
+        "Поведение не изменено",
+        "Публичные интерфейсы не изменены",
+        "Докстринги не удалены; изменения соответствуют стандартам проекта",
+        "CC ≤5"
+      ],
+      "allowed_paths": ["src/bioetl/**", "tests/**"],
+      "forbidden_paths": ["configs/**", "docs/**", ".github/**"],
+      "checks": [
+        "python -m pytest -q tests/architecture/test_code_metrics.py::TestFunctionComplexity",
+        "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py",
+        "python scripts/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off"
+      ],
+      "notes": "Дубликат AME-function_complexity-002. Есть 5 _validate() в файле — эта относится к CrossValidationConfig (line 289)."
+    }
+  ]
+}
