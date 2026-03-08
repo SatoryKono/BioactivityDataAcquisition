@@ -1,9 +1,26 @@
-name: Validate vendored Mermaid
+﻿name: Validate vendored Mermaid
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 on:
     pull_request:
+      paths-ignore:
+        - 'docs/**'
+        - '*.md'
+        - '.ai/**'
+        - '.claude/**'
+        - '.github/workflows/**'
+        - 'LICENSE'
     push:
-        branches: [ main ]
+      branches: [ main ]
+      paths-ignore:
+        - 'docs/**'
+        - '*.md'
+        - '.ai/**'
+        - '.claude/**'
+        - '.github/workflows/**'
+        - 'LICENSE'
 
 jobs:
     check-mermaid:
@@ -28,3 +45,4 @@ jobs:
                     else
                       echo "Mermaid vendored assets present."
                     fi
+

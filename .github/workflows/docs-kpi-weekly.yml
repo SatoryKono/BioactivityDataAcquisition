@@ -1,4 +1,7 @@
-name: Docs KPI Weekly
+﻿name: Docs KPI Weekly
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 on:
   schedule:
@@ -42,3 +45,4 @@ jobs:
           path: |
             reports/docs-kpi/docs-kpi-weekly.json
             reports/docs-kpi/docs-kpi-weekly.md
+

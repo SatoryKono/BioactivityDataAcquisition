@@ -31,7 +31,7 @@ Agent(subagent_type="py-audit-bot", prompt="...", model="opus")
 |----------|-------------|---------------|
 | orchestrator (direct) | `src/bioetl/`, `tests/` | `configs/`, `docs/` |
 | py-config-bot | `configs/` | `src/bioetl/`, `docs/` |
-| py-doc-bot | `docs/`, docstrings, `scripts/diagrams/` | `configs/`, `tests/` |
+| py-doc-bot | `docs/`, docstrings, `docs/00-project/ai/agents/scripts/diagrams/` | `configs/`, `tests/` |
 | py-test-bot | `tests/` | `src/bioetl/`, `configs/` |
 | py-debug-bot | `src/bioetl/`, `tests/` (fixes) | `configs/`, `docs/` |
 | py-audit-bot | — (read-only) | всё |
@@ -276,7 +276,7 @@ reports/plans/<task_id>/
 3. **No blind changes**: код не меняется без предварительного плана (`RF-*`).
 4. **No untested changes**: каждый `RF-*` проверяется через `py-test-bot`.
 5. **Architecture gate**: финальный аудит (`py-audit-bot`) является обязательным gate перед завершением задачи.
-6. **Config compliance gate**: `config_gap_analysis.py` MUST иметь 0 critical findings после `py-config-bot`.
+6. **Config compliance gate**: `py-config-bot-1.py` MUST иметь 0 critical findings после `py-config-bot`.
 7. **Zone isolation**: orchestrator writes `src/`, py-config-bot — только в `configs/`, py-doc-bot — только в `docs/` + docstrings + diagrams.
 
 ---
@@ -344,7 +344,7 @@ py-audit-bot (baseline, scope=seed + enricher pipelines)
 | `docs/02-architecture/decisions/` | ADR-001..ADR-040 |
 | `docs/00-project/glossary.md` | Терминология |
 | `tests/architecture/` | Автоматические проверки инвариантов |
-| `scripts/config_gap_analysis.py` | Автоматическая проверка конфигов |
+| `docs/00-project/ai/agents/scripts/py-config-bot-1.py` | Автоматическая проверка конфигов |
 
 ---
 

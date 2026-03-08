@@ -25,6 +25,12 @@ class SilverWriterArrowMixin:
     ) -> pa.Table:
         """Prepare Arrow table from records with schema filtering and sorting.
 
+        Args:
+            records: List of Bronze record dicts to convert to Arrow format.
+            schema: PyArrow schema used to filter and type-cast the records.
+            primary_keys: List of column names used for ascending sort order.
+            column_order: Optional explicit column ordering; uses canonical order if None.
+
         Returns:
             PyArrow Table filtered to schema columns, ordered, and sorted by primary keys.
         """
@@ -46,6 +52,14 @@ class SilverWriterArrowMixin:
 
     @staticmethod
     def _collect_string_fields(schema: pa.Schema) -> set[str]:
+        """Return field names whose Arrow type is string or large_string.
+
+        Args:
+            schema: PyArrow schema to inspect.
+
+        Returns:
+            Set of field name strings with string-compatible Arrow types.
+        """
         return {
             field.name
             for field in schema
@@ -58,6 +72,17 @@ class SilverWriterArrowMixin:
         schema_names: list[str],
         string_fields: set[str],
     ) -> BronzeRecord:
+        """Filter a record to schema columns and serialise complex string fields.
+
+        Args:
+            record: Source Bronze record dict to filter.
+            schema_names: List of column names present in the target schema.
+            string_fields: Set of field names that expect a string value in the schema.
+
+        Returns:
+            Filtered record dict containing only schema columns with values JSON-serialised
+            where the field is a string type but the value is a dict or list.
+        """
         filtered_record: BronzeRecord = {}
         for key in schema_names:
             if key not in record:
@@ -77,6 +102,15 @@ class SilverWriterArrowMixin:
         arrow_data: pa.Table,
         column_order: list[str] | None,
     ) -> pa.Table:
+        """Reorder columns in an Arrow table to match the given order.
+
+        Args:
+            arrow_data: PyArrow Table to reorder.
+            column_order: Explicit column order; uses canonical order if None.
+
+        Returns:
+            PyArrow Table with columns reordered according to column_order or canonical order.
+        """
         if column_order:
             ordered_columns = [
                 column for column in column_order if column in arrow_data.column_names

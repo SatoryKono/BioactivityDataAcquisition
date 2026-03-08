@@ -1,4 +1,7 @@
-name: Monthly Contract Tests
+﻿name: Monthly Contract Tests
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 # Runs monthly to verify API contracts haven't changed
 # Also allows manual triggering for ad-hoc verification
@@ -147,3 +150,4 @@ jobs:
         run: |
           echo "::notice::Monthly contract tests passed successfully"
           echo "All provider API contracts verified on $(date -u +%Y-%m-%d)"
+

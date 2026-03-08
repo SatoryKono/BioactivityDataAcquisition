@@ -73,10 +73,20 @@ def test_logger_adapters_share_same_contract_surface() -> None:
 
 @pytest.mark.unit
 def test_tracing_adapters_expose_otel_compatible_surface() -> None:
-    """No-op and production tracing adapters should expose compatible API."""
+    """No-op and production tracing adapters should expose compatible API.
+
+    Forces ConsoleSpanExporter (not OTLP) to avoid a 5-second gRPC
+    flush timeout during close(). The API surface is identical regardless
+    of exporter backend.
+    """
+    from unittest.mock import patch
+
     adapters: list[TracingPort] = [NoOpTracing()]
     if tracing_module.OTEL_AVAILABLE:
-        adapters.append(tracing_module.OpenTelemetryTracer("bioetl-test"))
+        # Disable OTLP so OpenTelemetryTracer uses ConsoleSpanExporter,
+        # avoiding the gRPC connection attempt and 5s flush timeout.
+        with patch.object(tracing_module, "OTLP_AVAILABLE", False):
+            adapters.append(tracing_module.OpenTelemetryTracer("bioetl-test"))
 
     try:
         for tracing_adapter in adapters:

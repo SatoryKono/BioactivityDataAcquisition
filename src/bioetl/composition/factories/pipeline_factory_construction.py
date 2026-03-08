@@ -81,6 +81,12 @@ class RunContextFactory:
     ) -> RunContext:
         """Create metadata ``RunContext`` from runtime and resolved YAML.
 
+        Args:
+            run_id: Unique identifier for this pipeline run.
+            runtime: Runtime configuration providing the run type.
+            yaml_config: Loaded pipeline YAML configuration used for versioning
+                and config hash computation.
+
         Returns:
             RunContext populated with run ID, type, provider, entity, and versioning.
         """
@@ -113,6 +119,10 @@ class DomainConfigResolver:
     ) -> PipelineConfig:
         """Resolve domain config from YAML with DQ loader composition.
 
+        Args:
+            yaml_config: Loaded pipeline YAML configuration to resolve.
+            relaxed_dq: If True, applies relaxed DQ thresholds during resolution.
+
         Returns:
             Resolved domain PipelineConfig with integrated DQ configuration.
         """
@@ -141,6 +151,13 @@ class TransformerBuilder:
     ) -> BaseTransformer | None:
         """Build transformer instance or return ``None`` when class is absent.
 
+        Args:
+            transformer_class: Transformer class to instantiate; returns None if absent.
+            yaml_config: Loaded pipeline YAML config providing content hash settings.
+            domain_config: Resolved domain config with silver and gold filters.
+            tracer: Optional TracingPort for distributed tracing.
+            metrics: Optional MetricsPort for transformer metrics.
+
         Returns:
             Configured BaseTransformer with identity and contract policy, or None.
         """
@@ -167,7 +184,15 @@ class TransformerBuilder:
     def _load_contract_policy(
         self, entity_type: str | None
     ) -> ContractPolicyPort | None:
-        """Load policy for provider/entity and degrade gracefully when missing."""
+        """Load policy for provider/entity and degrade gracefully when missing.
+
+        Args:
+            entity_type: Entity type string used with self.provider to locate the
+                contract policy; returns None if entity_type is None.
+
+        Returns:
+            ContractPolicyPort for the provider/entity, or None if not found.
+        """
         if entity_type is None:
             return None
         try:

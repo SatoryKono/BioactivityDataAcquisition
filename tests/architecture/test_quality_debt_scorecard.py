@@ -167,7 +167,15 @@ def test_debt_scorecard_inventory_has_owner_and_expiry_decomposition() -> None:
     scorecard = load_debt_scorecard()
     starts_quarter, min_distinct_owners = _owner_diversification_settings(scorecard)
     today_quarter = _parse_quarter_label(_quarter_label(date.today()))
-    assert inventory.total_exemptions > 0
+
+    # When registry is empty (zero debt), decomposition checks are not applicable.
+    if inventory.total_exemptions == 0:
+        assert not inventory.by_owner, "Empty registry must have empty owner decomposition"
+        assert not inventory.by_expiry_quarter, (
+            "Empty registry must have empty expiry decomposition"
+        )
+        return
+
     assert inventory.by_owner, "Owner decomposition must not be empty"
     active_owners = [
         owner
@@ -343,9 +351,31 @@ def test_program_done_criteria_applies_after_deadline(tmp_path: Path) -> None:
         "max_expired_entries": 0,
     }
 
+    # Inject a synthetic exemption so done-criteria can detect a violation.
+    tmp_registry = tmp_path / "architecture_metric_exemptions.yaml"
+    tmp_registry.write_text(
+        yaml.safe_dump({
+            "schema_version": 1,
+            "policy": {"required_fields": ["value", "owner", "reason", "expires_on", "removal_step"]},
+            "registries": {
+                "god_object": {
+                    "FakeClass": {
+                        "value": 1,
+                        "owner": "@bioetl-architecture",
+                        "reason": "Synthetic exemption for done-criteria test.",
+                        "expires_on": "2026-06-30",
+                        "removal_step": "Remove after test.",
+                    }
+                }
+            },
+        }),
+        encoding="utf-8",
+    )
+
     tmp_scorecard = tmp_path / "debt_scorecard.done_criteria.invalid.yaml"
     tmp_scorecard.write_text(yaml.safe_dump(scorecard), encoding="utf-8")
     violations, summary = evaluate_debt_scorecard(
+        registry_path=tmp_registry,
         scorecard_path=tmp_scorecard,
         today=date(2026, 3, 4),
     )

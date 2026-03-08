@@ -31,7 +31,22 @@ class SemanticScholarFetchAdapterMixin:
         filter_field: str | None = None,
         offset: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch records via search endpoint or delegated filtered path."""
+        """Fetch records via search endpoint or delegated filtered path.
+
+        Args:
+            entity_type: Entity type to fetch; must be "publication" or "paper".
+            limit: Optional maximum number of records to yield.
+            query: Optional query string for the search endpoint.
+            filter_ids: Optional list of DOIs to resolve via batch endpoint.
+            filter_field: Optional filter field name; defaults to "doi" when filter_ids provided.
+            offset: Ignored; internal pagination manages offset automatically.
+
+        Yields:
+            BronzeRecord entries from the Semantic Scholar API.
+
+        Raises:
+            ValueError: If entity_type is not "publication" or "paper".
+        """
         del offset
         if filter_ids:
             async for record in self._fetch_from_filter_ids(
@@ -70,7 +85,17 @@ class SemanticScholarFetchAdapterMixin:
         filter_field: str | None,
         limit: int | None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Delegate filtered fetch path."""
+        """Delegate filtered fetch path.
+
+        Args:
+            entity_type: Entity type to fetch.
+            filter_ids: List of IDs to filter by.
+            filter_field: Filter field name; defaults to "doi" if None.
+            limit: Optional maximum number of records to yield.
+
+        Yields:
+            BronzeRecord entries resolved from the filter IDs.
+        """
         effective_filter_field = filter_field or "doi"
         async for record in self.fetch_filtered(
             entity_type=entity_type,
@@ -82,7 +107,14 @@ class SemanticScholarFetchAdapterMixin:
 
     @staticmethod
     def _validate_entity_type(entity_type: str) -> None:
-        """Validate supported Semantic Scholar entity types."""
+        """Validate supported Semantic Scholar entity types.
+
+        Args:
+            entity_type: Entity type string to validate.
+
+        Raises:
+            ValueError: If entity_type is not "publication" or "paper".
+        """
         if entity_type in ("publication", "paper"):
             return
         raise ValueError(
@@ -99,6 +131,11 @@ class SemanticScholarFetchAdapterMixin:
     ) -> tuple[list[BronzeRecord], int | None]:
         """Fetch one search page and emit request telemetry.
 
+        Args:
+            query: Optional search query string; defaults to "*" if None.
+            page_size: Number of records to request per page.
+            current_offset: Zero-based record offset for the page request.
+
         Returns:
             Tuple of (list of publication records for the page, next offset integer or None if last page).
         """
@@ -111,7 +148,7 @@ class SemanticScholarFetchAdapterMixin:
         url = f"{SEMANTICSCHOLAR_BASE_URL}/paper/search"
         start_time = time.perf_counter()
         with self._adapter_metrics.measure_request("/paper/search"):
-            response = await self.http_client.get_once(
+            response = await self._http_client.get_once(
                 url, params=params, headers=self._build_headers()
             )
         duration_ms = (time.perf_counter() - start_time) * 1000
@@ -127,10 +164,20 @@ class SemanticScholarFetchAdapterMixin:
         filter_field: str,
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Batch DOI resolution via POST /paper/batch."""
+        """Batch DOI resolution via POST /paper/batch.
+
+        Args:
+            entity_type: Entity type identifier (ignored; always resolves publications).
+            filter_ids: List of DOI strings to resolve via batch endpoint.
+            filter_field: Filter field name; logs a warning if not "doi".
+            limit: Optional maximum number of records to yield.
+
+        Yields:
+            BronzeRecord entries resolved from the batch DOI lookup.
+        """
         del entity_type
         if filter_field != "doi":
-            self.logger.warning(
+            self._logger.warning(
                 "unsupported_filter_field",
                 field=filter_field,
                 expected="doi",
@@ -154,7 +201,17 @@ class SemanticScholarFetchAdapterMixin:
         limit: int | None,
         start_count: int,
     ) -> AsyncIterator[BronzeRecord]:
-        """Phase-1 DOI resolution preserving unresolved markers."""
+        """Phase-1 DOI resolution preserving unresolved markers.
+
+        Args:
+            valid_dois: List of DOI strings to resolve in the primary batch phase.
+            resolved_dois: Mutable set updated in-place with successfully resolved DOIs.
+            limit: Optional maximum total records to yield across all phases.
+            start_count: Record count already yielded before this phase started.
+
+        Yields:
+            BronzeRecord entries from resolved DOIs with lookup metadata.
+        """
         count = start_count
         for idx in range(0, len(valid_dois), self.batch_size):
             if limit and count >= limit:
@@ -181,7 +238,18 @@ class SemanticScholarFetchAdapterMixin:
         fallback_mapping: dict[str, str],
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch by DOI and recover unresolved records through title fallback."""
+        """Fetch by DOI and recover unresolved records through title fallback.
+
+        Args:
+            entity_type: Entity type identifier (ignored; always resolves publications).
+            filter_ids: List of DOI strings for primary batch resolution.
+            filter_field: Filter field name used for the primary lookup phase.
+            fallback_mapping: Mapping of DOI to title for title-based fallback resolution.
+            limit: Optional maximum number of records to yield.
+
+        Yields:
+            BronzeRecord entries from primary DOI resolution and title fallback phases.
+        """
         del entity_type
         resolved_dois: set[str] = set()
 
@@ -212,7 +280,16 @@ class SemanticScholarFetchAdapterMixin:
         filters: dict[str, list[str]],
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Semantic Scholar does not support multi-field filtering."""
+        """Semantic Scholar does not support multi-field filtering.
+
+        Args:
+            entity_type: Entity type identifier (unused).
+            filters: Multi-field filter mapping (unused; raises NotImplementedError).
+            limit: Optional maximum record limit (unused; raises NotImplementedError).
+
+        Raises:
+            NotImplementedError: Always; Semantic Scholar supports only DOI filtering.
+        """
         del entity_type, filters, limit
         raise NotImplementedError(
             "Semantic Scholar adapter supports only DOI filtering. "

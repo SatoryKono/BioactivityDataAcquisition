@@ -59,6 +59,12 @@ class CompositePreflightValidationService(
     ) -> PreflightValidationResult:
         """Validate composite configuration field_priorities.
 
+        Args:
+            config: Composite pipeline configuration containing field_priorities
+                and enricher definitions to validate.
+            fail_on_error: If True, raise PreflightValidationError when any
+                error-severity issue is found; defaults to True.
+
         Returns:
             PreflightValidationResult with validation status, issues, and
             resolved field source mappings.

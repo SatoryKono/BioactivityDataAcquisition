@@ -51,24 +51,10 @@ if TYPE_CHECKING:
 
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
 
-__all__ = [
-    "GenericPipelineFactory",
-    "assemble_runner",
-    "create_pipeline_factory",
-]
-
+__all__ = ["GenericPipelineFactory", "assemble_runner", "create_pipeline_factory"]
 
 def _extract_entity_type(pipeline_name: str) -> str | None:
-    """Extract entity_type from pipeline_name.
-
-    Example: "chembl_activity" -> "activity"
-
-    Args:
-        pipeline_name: Full pipeline name with provider prefix.
-
-    Returns:
-        Entity type suffix, or None if no underscore in name.
-    """
+    """Extract entity_type suffix (e.g. 'chembl_activity' -> 'activity')."""
     return pipeline_name.split("_")[-1] if "_" in pipeline_name else None
 
 
@@ -99,11 +85,8 @@ class GenericPipelineFactory(Generic[TPipeline]):
         self.gold_schema = gold_schema
         self.pandera_silver_schema = pandera_silver_schema
         self.transformer_class = transformer_class
-
         # Use custom creator or look up from registry
-        self._create_data_source = data_source_creator or DataSourceRegistry.get(
-            provider
-        )
+        self._create_data_source = data_source_creator or DataSourceRegistry.get(provider)
 
     def create_transformer(
         self,
@@ -129,7 +112,6 @@ class GenericPipelineFactory(Generic[TPipeline]):
         """
         if self.transformer_class is None:
             return None
-
         return self.transformer_class(
             provider=self.provider,
             entity_type=_extract_entity_type(self.pipeline_name),
@@ -292,18 +274,14 @@ class GenericPipelineFactory(Generic[TPipeline]):
             metrics=observability.metrics,
             cached_bronze=cached_bronze,
         )
-
         # Delegate runner assembly to dedicated function
         return assemble_runner(
             pipeline=pipeline,
             observability=observability,
             silver_schema=self.silver_schema,
             gold_schema=self.gold_schema,
-            strict_gold_validation=(
-                runtime.strict_gold_validation
-                if settings.env != "prod" or settings.test_mode
-                else True
-            ),
+            strict_gold_validation=(runtime.strict_gold_validation
+                                   if settings.env != "prod" or settings.test_mode else True),
             yaml_config=yaml_config,
         )
 
@@ -318,6 +296,15 @@ def create_pipeline_factory(
     transformer_class: type[BaseTransformer] | None = None,
 ) -> GenericPipelineFactory[TPipeline]:
     """Create a configured :class:`GenericPipelineFactory`.
+
+    Args:
+        pipeline_name: Name of the pipeline (e.g., 'chembl_activity').
+        pipeline_class: Concrete pipeline class to instantiate during factory creation.
+        provider: Provider name (e.g., 'chembl') used for data source registry lookup.
+        silver_schema: Optional PyArrow schema for Silver layer validation.
+        gold_schema: Optional Pandera DataFrameModel for Gold layer validation; required.
+        pandera_silver_schema: Optional Pandera schema for Silver-layer Pandera validation.
+        transformer_class: Optional transformer class; no transformer used if None.
 
     Returns:
         GenericPipelineFactory instance wired with the provided schemas and classes.
@@ -341,11 +328,7 @@ def assemble_runner(
     strict_gold_validation: bool,
     yaml_config: PipelineYamlConfig | None = None,
 ) -> PipelineRunner:
-    """Assemble a PipelineRunner from a pipeline instance.
-
-    Returns:
-        Fully wired PipelineRunner ready for execution.
-    """
+    """Assemble a PipelineRunner from a pipeline instance."""
     return _assemble_runner_impl(
         pipeline=pipeline,
         observability=observability,

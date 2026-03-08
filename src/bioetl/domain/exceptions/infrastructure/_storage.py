@@ -15,7 +15,14 @@ class StorageError(RecoverableError):
 
 
 def BucketNotFoundError(bucket: str) -> StorageError:
-    """Compatibility constructor for legacy BucketNotFoundError."""
+    """Compatibility constructor for legacy BucketNotFoundError.
+
+    Args:
+        bucket: Name of the missing storage bucket.
+
+    Returns:
+        StorageError with DB_UNAVAILABLE type and bucket context attached.
+    """
     error = StorageError(f"Bucket '{bucket}' not found")
     error = cast(StorageError, error.with_context(bucket=bucket))
     error.error_type = ErrorType.DB_UNAVAILABLE  # type: ignore[misc]  # instance override of ClassVar
@@ -33,7 +40,15 @@ class TableNotFoundError(StorageError):
 
 
 def UploadError(key: str, reason: str) -> StorageError:
-    """Compatibility constructor for legacy UploadError."""
+    """Compatibility constructor for legacy UploadError.
+
+    Args:
+        key: Storage key or path of the object that failed to upload.
+        reason: Human-readable description of the upload failure.
+
+    Returns:
+        StorageError with NETWORK_ERROR type and upload context attached.
+    """
     error = StorageError(f"Failed to upload '{key}': {reason}")
     error = cast(StorageError, error.with_context(key=key, reason=reason))
     error.error_type = ErrorType.NETWORK_ERROR  # type: ignore[misc]  # instance override of ClassVar
@@ -186,7 +201,16 @@ def BronzeValidationError(
     record_index: int | None = None,
     original_error: str | None = None,
 ) -> StorageError:
-    """Compatibility constructor for legacy BronzeValidationError."""
+    """Compatibility constructor for legacy BronzeValidationError.
+
+    Args:
+        message: Primary error message describing the validation failure.
+        record_index: Optional index of the offending record; defaults to None.
+        original_error: Optional original exception message string; defaults to None.
+
+    Returns:
+        StorageError with INVALID_DATA type and validation context attached.
+    """
     parts = [message]
     if record_index is not None:
         parts.append(f"record_index={record_index}")
@@ -210,7 +234,17 @@ def CachedBronzeEmptyError(
     bronze_path: str,
     date_filter: str | None = None,
 ) -> StorageError:
-    """Compatibility constructor for legacy CachedBronzeEmptyError."""
+    """Compatibility constructor for legacy CachedBronzeEmptyError.
+
+    Args:
+        provider: Provider name whose cached Bronze data was not found.
+        entity_type: Entity type whose cached Bronze data was not found.
+        bronze_path: Path that was searched for Bronze data.
+        date_filter: Optional date filter that was applied; defaults to None.
+
+    Returns:
+        StorageError indicating that no Bronze data was found for the given context.
+    """
     date_info = f" for date {date_filter}" if date_filter else ""
     message = (
         f"No Bronze data found for {provider}/{entity_type}{date_info}. "

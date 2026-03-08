@@ -34,7 +34,24 @@ def build_observability_bundle(
     noop_metrics_factory: Callable[..., MetricsPort] = NoOpMetrics,
     dq_monitor_factory: Callable[..., DataQualityMonitor] = DataQualityMonitor,
 ) -> ObservabilityBundle:
-    """Build observability bundle with optional DQ monitor wiring."""
+    """Build observability bundle with optional DQ monitor wiring.
+
+    Args:
+        pipeline: Pipeline name used as a structured log field and tracer context.
+        run_id: Run UUID for log correlation across all observability components.
+        settings: Application settings driving feature flags for each component.
+        log_level: Minimum log level string (e.g., 'INFO', 'DEBUG'). Defaults to 'INFO'.
+        logger_factory: Callable creating a LoggerPort from pipeline, run_id, and log_level.
+        tracer_factory: Callable creating a TracingPort from a service name string.
+        metrics_factory: Callable creating a MetricsPort (no arguments).
+        noop_tracing_factory: Callable creating a NoOpTracing when tracing is disabled.
+        noop_metrics_factory: Callable creating NoOpMetrics when metrics are disabled.
+        dq_monitor_factory: Callable creating a DataQualityMonitor when DQ monitoring
+            is enabled.
+
+    Returns:
+        ObservabilityBundle with logger, metrics, tracer, and optional DQ monitor.
+    """
     logger = logger_factory(
         pipeline=pipeline,
         run_id=run_id,

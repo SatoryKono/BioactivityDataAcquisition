@@ -26,6 +26,9 @@ class CompositeFilterExtractionService:
     def to_id_str(value: object) -> str:
         """Convert value to stable ID string (e.g. 4044.0 -> 4044).
 
+        Args:
+            value: Value to convert; floats with integer values are truncated.
+
         Returns:
             String representation of value, with float integers converted to ints.
         """
@@ -42,6 +45,11 @@ class CompositeFilterExtractionService:
         join_keys: tuple[str, ...],
     ) -> dict[str, str] | None:
         """Build ID -> title mapping when title is present in join keys.
+
+        Args:
+            keys: DataFrame containing filter key and title columns.
+            filter_key: Column name used as the mapping key.
+            join_keys: Tuple of join key names; title must be present for mapping.
 
         Returns:
             Dict mapping filter key values to titles, or None if title is not a join key.
@@ -63,6 +71,10 @@ class CompositeFilterExtractionService:
     ) -> str | None:
         """Find first usable join key, skipping title if alternatives exist.
 
+        Args:
+            join_keys: Ordered tuple of candidate join key names.
+            columns: Column names present in the keys DataFrame.
+
         Returns:
             First join key present in columns, or None if none found.
         """
@@ -79,6 +91,10 @@ class CompositeFilterExtractionService:
         keys: pl.DataFrame | None,
     ) -> tuple[tuple[str, ...] | None, str | None, dict[str, str] | None]:
         """Extract single-field filters and fallback mapping for enricher.
+
+        Args:
+            enricher_cfg: Enricher configuration providing join keys and pipeline name.
+            keys: DataFrame of available keys from the seed pipeline; None if unavailable.
 
         Returns:
             Tuple of (filter_ids, filter_field, fallback_mapping) for the enricher.
@@ -118,6 +134,10 @@ class CompositeFilterExtractionService:
     ) -> tuple[str, ...] | None:
         """Extract unique non-null values for field from keys DataFrame.
 
+        Args:
+            keys: DataFrame containing the target field column.
+            field: Column name to extract unique values from.
+
         Returns:
             Tuple of unique string values, or None if field is absent or empty.
         """
@@ -134,6 +154,10 @@ class CompositeFilterExtractionService:
         keys: pl.DataFrame | None,
     ) -> dict[str, tuple[str, ...]] | None:
         """Extract multi-field filter IDs for dependency pipeline.
+
+        Args:
+            dep_cfg: Dependency configuration with effective_filter_fields.
+            keys: DataFrame of available keys from the seed pipeline; None if unavailable.
 
         Returns:
             Dict mapping field names to tuples of IDs, or None if extraction fails.
@@ -168,6 +192,10 @@ class CompositeFilterExtractionService:
         keys: pl.DataFrame | None,
     ) -> tuple[tuple[str, ...] | None, str | None, dict[str, tuple[str, ...]] | None]:
         """Resolve single-field or multi-field dependency filter inputs.
+
+        Args:
+            dep_cfg: Dependency configuration; returns empty tuple if None.
+            keys: DataFrame of available keys from the seed pipeline; None if unavailable.
 
         Returns:
             Tuple of (filter_ids, filter_field, multi_filter_ids) for the dependency.

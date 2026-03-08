@@ -1,36 +1,46 @@
 # Scripts Layout
 
-This directory is being consolidated by function to reduce discovery time and
-make CI entrypoints explicit.
+This directory uses a **canonical-by-domain** structure.
 
-## Current Status
+## Canonical Directories
 
-| Area | Canonical Path | Status |
-|---|---|---|
-| Diagram tooling | `scripts/diagrams/` | Done (phase 1) |
-| CI helpers | `scripts/ci/` | Existing |
-| Dev helpers | `scripts/dev/` | Existing |
-| Config tooling | `scripts/config/` | Planned |
-| Docs tooling | `scripts/docs/` | Planned |
-| Data tooling | `scripts/data/` | Planned |
-| Quality/architecture tooling | `scripts/quality/` | Planned |
-| Ops/security tooling | `scripts/ops/`, `scripts/security/` | Planned |
+- `scripts/ci/` — CI orchestration and reporting jobs.
+- `scripts/dev/` — local developer workflows and setup.
+- `scripts/qa/` — architecture/quality/debt checks and reports.
+- `scripts/docs/` — docs build, lint, drift checks, docs maintenance.
+- `scripts/schema/` — schema/contracts/config invariants tooling.
+- `scripts/data/` — data integrity, VCR policy, checksum/Delta utilities.
+- `scripts/repo/` — repository hygiene and governance inventory.
+- `scripts/ops/` — operational and platform support scripts.
+- `scripts/diagnostics/` — manual probes, debug, one-off diagnostics.
+- `scripts/migrations/active/` — active/repeatable migrations.
+- `scripts/migrations/oneoff/` — one-time migration scripts.
+- `scripts/diagrams/` — diagram quality/render tooling.
 
-## Diagram Scripts
+## Compatibility Policy
 
-Canonical diagram scripts now live in:
+Historical entrypoints are kept in `scripts/` root as thin wrappers.
 
-- `scripts/diagrams/`
+Rules:
+- New integrations must target canonical paths under grouped directories.
+- Root wrappers exist only for backward compatibility.
+- Do not add new non-wrapper scripts to `scripts/` root.
 
-## Migration Rule
+## Inventory Governance
 
-For new automation, use canonical paths only:
+- Check inventory drift:
+  - `python scripts/repo/check_scripts_inventory.py --check --manifest configs/quality/scripts_inventory_manifest.json`
+- Update inventory manifest:
+  - `python scripts/repo/check_scripts_inventory.py --update --manifest configs/quality/scripts_inventory_manifest.json`
+- Validate lifecycle coverage for non-active scripts:
+  - `python scripts/repo/check_scripts_inventory.py --check-lifecycle --forbid-evaluate-active --lifecycle-registry configs/quality/scripts_lifecycle_registry.json`
+- Validate catalog governance policy:
+  - `python scripts/repo/check_scripts_catalog.py --catalog scripts/catalog.yaml`
 
-- `scripts/diagrams/run_diagram_checks.sh`
-- `scripts/diagrams/lint_diagrams.py`
-- `scripts/diagrams/validate_mermaid_syntax.sh`
-- `scripts/diagrams/generate_with_descriptions_docx.py`
-- `scripts/diagrams/generate_with_descriptions_pdf.py`
-- `scripts/diagrams/run_diagram_docs_agent.sh`
+## Launcher
 
-Do not add new references to legacy wrapper paths under `scripts/`.
+Use `scripts/run.py` for discovery and consistent invocation:
+
+- `python scripts/run.py list`
+- `python scripts/run.py find quality`
+- `python scripts/run.py exec qa check_c901_baseline -- --help`

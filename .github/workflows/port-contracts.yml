@@ -1,4 +1,7 @@
-name: Port Contract Tests
+﻿name: Port Contract Tests
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 # Runs contract tests for domain ports to verify:
 # - All ports have required methods
@@ -8,6 +11,13 @@ name: Port Contract Tests
 
 on:
   push:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.ai/**'
+      - '.claude/**'
+      - '.github/workflows/**'
+      - 'LICENSE'
     branches: [main, master, develop]
     paths:
       - 'src/bioetl/domain/ports/**'
@@ -15,6 +25,13 @@ on:
       - 'tests/architecture/test_*contract*.py'
       - '.github/workflows/port-contracts.yml'
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.ai/**'
+      - '.claude/**'
+      - '.github/workflows/**'
+      - 'LICENSE'
     branches: [main, master, develop]
     paths:
       - 'src/bioetl/domain/ports/**'
@@ -151,3 +168,4 @@ jobs:
             exit 1
           fi
           echo "::notice::All contract tests passed"
+

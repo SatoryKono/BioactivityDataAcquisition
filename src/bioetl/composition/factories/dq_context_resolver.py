@@ -57,6 +57,11 @@ def extract_single_dq_config(
 ) -> BronzeDQConfigPort | SilverDQConfigPort | GoldDQConfigPort | None:
     """Extract DQ config for a single layer.
 
+    Args:
+        sink: Mapping of layer name to sink configuration objects.
+        layer_name: Layer to extract config for ('bronze', 'silver', or 'gold').
+        config_class: Pydantic model class for validating the sink config.
+
     Returns:
         Enabled DQ config for the layer, or None if absent or disabled.
     """
@@ -83,6 +88,10 @@ def extract_single_dq_config(
 
 def extract_dq_configs(yaml_config: PipelineYamlConfig | None) -> DQConfigsContext:
     """Extract DQ report configs from YAML.
+
+    Args:
+        yaml_config: Pipeline YAML configuration to extract DQ configs from; returns
+            empty context if None.
 
     Returns:
         DQConfigsContext with bronze, silver, and gold DQ configs.
@@ -127,6 +136,9 @@ def extract_dq_configs(yaml_config: PipelineYamlConfig | None) -> DQConfigsConte
 def get_layer_path(config: object) -> str | None:
     """Extract path from layer config if available.
 
+    Args:
+        config: Layer sink configuration object, or None.
+
     Returns:
         Path string from config, or None if config is absent or has no path.
     """
@@ -135,6 +147,9 @@ def get_layer_path(config: object) -> str | None:
 
 def has_flat_structure(config: object) -> bool:
     """Check if layer config has flat_structure enabled.
+
+    Args:
+        config: Layer sink configuration object, or None.
 
     Returns:
         True if flat_structure is set on the config, False otherwise.
@@ -146,6 +161,9 @@ def extract_dq_output_paths(
     yaml_config: PipelineYamlConfig | None,
 ) -> DQOutputPathsContext:
     """Extract DQ output paths and flat_structure from YAML config.
+
+    Args:
+        yaml_config: Pipeline YAML configuration; returns empty context if None.
 
     Returns:
         DQOutputPathsContext with per-layer paths and flat_structure flag.
@@ -257,6 +275,11 @@ def create_dq_services(
     logger: LoggerPort,
 ) -> JsonDict:  # Any: heterogeneous DQ service instances
     """Create DQ analyzers/writer/services when DQ reporting is enabled.
+
+    Args:
+        settings: Application settings providing data_dir and test_mode flag.
+        pipeline_config: Pipeline YAML configuration to check DQ report enablement.
+        logger: LoggerPort for structured DQ logging.
 
     Returns:
         Dict of DQ service instances keyed by role, or empty dict if DQ disabled.

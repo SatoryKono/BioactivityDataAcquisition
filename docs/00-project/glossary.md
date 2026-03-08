@@ -1,6 +1,6 @@
 # BioETL Glossary (Ubiquitous Language)
 
-*Version 2.6 | Updated: 2026-02-25 | Created: 2025-12-29*
+*Version 2.7 | Updated: 2026-03-08 | Created: 2025-12-29*
 
 This glossary defines the canonical terminology used throughout BioETL. Following Domain-Driven Design principles, these terms form the **Ubiquitous Language** — a shared vocabulary understood by both developers and domain experts.
 
@@ -33,6 +33,7 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | **Alert** | Notification from anomaly detection |
 | **Quarantine** | Isolation of failed records |
 | **Circuit Breaker** | Cascading failure prevention pattern |
+| **DQ** | Data Quality — валидация и контроль качества данных |
 
 ---
 
@@ -138,6 +139,7 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | **Bronze** | Raw data layer (JSONL + zstd compression) | `raw`, `landing` |
 | **Silver** | Normalized and deduplicated data layer (Delta Lake) | `cleansed`, `curated` |
 | **Gold** | Refined and validated data layer for analytics | `reporting`, `presentation` |
+| **Delta Lake** | Open-source ACID storage layer used for Silver and Gold layers. Provides time-travel, schema enforcement, and transactional writes (ADR-001) | `parquet` (for Silver/Gold) |
 | **BaseOutputMetadata** | Unified output metadata contract for all Medallion layers (ADR-029) | layer-specific `OutputMetadata` variants |
 
 ### Composite Pipelines (ADR-026)
@@ -174,6 +176,7 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | **External Verification** | Level 3: HTTP-based ID verification with upstream providers | `API validation`, `ID lookup` |
 | **Logical Validation** | Level 4: Range constraints and business invariants | `business rules`, `constraint checking` |
 | **Semantic Validation** | Level 5: NLP-based text consistency checks (similarity, language) | `text validation`, `NLP checks` |
+| **Pandera** | DataFrame schema validation library used for Silver and Gold layer contract enforcement (`strict=True` for Gold, ADR-018) | `pydantic` (for DataFrames) |
 | **DQ Flag** | Data Quality flag: `-dq-error` (FAIL — blocking), `-dq-warn` (WARN — accepted) | `quality flag`, `error flag` |
 | **Validation Mode** | Pipeline execution profile: STRICT, BALANCED, FAST | `validation profile`, `quality mode` |
 | **Clean Record** | Record with `-dq-warn=False` and `-dq-error=False` | `valid record`, `passed record` |
@@ -196,6 +199,13 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 ---
 
 ## Component Terminology
+
+### Architectural Patterns
+
+| Canonical Term | Definition | Avoid |
+|----------------|------------|-------|
+| **Hexagonal Architecture** | Architecture pattern (Ports & Adapters) where domain logic is isolated from external concerns via Port protocols and Adapter implementations. BioETL uses 5 layers: domain, application, infrastructure, composition, interfaces | `layered architecture`, `onion architecture` |
+| **Dependency Injection (DI)** | Design pattern where dependencies are provided to a class via constructor parameters rather than created internally. All DI wiring happens in the `composition/` layer (ADR-005) | `service locator`, `factory` (in business logic) |
 
 ### Application Layer
 
@@ -363,6 +373,15 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | **TTL** | Time-to-live for automatic lock expiration | `timeout`, `expiry` |
 | **Heartbeat** | Periodic lock renewal signal | `keepalive`, `refresh` |
 | **Owner ID** | Identifier of lock holder | `holder`, `client-id` |
+
+---
+
+## Testing Terminology
+
+| Canonical Term | Definition | Avoid |
+|----------------|------------|-------|
+| **VCR** | Video Cassette Recorder pattern — library (VCR.py) that records HTTP interactions as YAML cassettes for deterministic replay in tests. Cassettes stored in `tests/fixtures/vcr/{provider}/` (RULES.md §4.2) | `mock HTTP`, `recorded responses` |
+| **Cassette** | A YAML file containing recorded HTTP request-response pairs for VCR replay | `fixture`, `recording` |
 
 ---
 

@@ -106,6 +106,9 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
     ) -> tuple[str, str]:  # Any: untyped API JSON record
         """Return PubMed PMID for logging.
 
+        Args:
+            result: BronzeRecord or raw API dict from the search response.
+
         Returns:
             Tuple of (field name string, PMID value string) for structured log output.
         """

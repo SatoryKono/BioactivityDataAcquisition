@@ -21,6 +21,10 @@ class PaginatedFetcherMixin:
     def _should_stop_fetching(fetched: int, limit: int | None) -> bool:
         """Check if we've reached the global fetch limit.
 
+        Args:
+            fetched: Number of items fetched so far.
+            limit: Maximum items to fetch, or None for no limit.
+
         Returns:
             True if the limit is set and the fetched count has reached or exceeded it.
         """

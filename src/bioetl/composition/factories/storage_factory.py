@@ -58,7 +58,23 @@ class StorageFactory:
         metadata_coordinator: MetadataCoordinator | None = None,
         silver_validator: SilverValidatorPort | None = None,
     ) -> StorageContext:
-        """Create local storage context with configured layer writers."""
+        """Create local storage context with configured layer writers.
+
+        Args:
+            settings: Application settings providing base paths, test_mode, and
+                resilience configuration.
+            config: Pipeline YAML configuration with sink layer definitions.
+            logger: LoggerPort for structured logging and export status events.
+            metrics: MetricsPort for storage metrics collection.
+            tracing: Optional TracingPort; defaults to NoOpTracing if None.
+            metadata_coordinator: Optional coordinator for metadata side-effects;
+                defaults to None.
+            silver_validator: Optional PyArrow schema validator for Silver records;
+                defaults to None.
+
+        Returns:
+            StorageContext with assembled adapter and resolved layer paths.
+        """
         bronze_config, silver_config, gold_config = get_layer_configs(config)
         use_yaml_paths, bronze_path, silver_path, gold_path = resolve_storage_paths(
             settings=settings,

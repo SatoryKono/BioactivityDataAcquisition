@@ -81,8 +81,8 @@ BioETL — Скрипт настройки окружения разработк
 Документация:
     - docs/03-guides/quick-start.md      Быстрый старт
     - docs/00-project/RULES.md           Конституция проекта (v5.21)
-    - docs/00-project/agents/AGENT.md    Инструкции для разработчика
-    - docs/00-project/agents/CLAUDE.md   Справочник для Claude Code
+    - docs/00-project/ai/agents/AGENT.md    Инструкции для разработчика
+    - docs/00-project/ai/agents/CLAUDE.md   Справочник для Claude Code
 EOF
     exit 0
 }
@@ -506,7 +506,7 @@ ${GREEN}Следующие шаги:${NC}
 3. Изучите документацию:
    - ${YELLOW}docs/03-guides/quick-start.md${NC}    — Быстрый старт
    - ${YELLOW}docs/00-project/RULES.md${NC}         — Конституция проекта (v5.21)
-   - ${YELLOW}docs/00-project/agents/AGENT.md${NC}  — Инструкции для разработчика
+   - ${YELLOW}docs/00-project/ai/agents/AGENT.md${NC}  — Инструкции для разработчика
 
 4. Основные команды:
    ${BLUE}make help${NC}            — Список всех команд
@@ -532,7 +532,7 @@ ${GREEN}Следующие шаги:${NC}
 3. Изучите документацию:
    - ${YELLOW}docs/03-guides/quick-start.md${NC}    — Быстрый старт
    - ${YELLOW}docs/00-project/RULES.md${NC}         — Конституция проекта (v5.21)
-   - ${YELLOW}docs/00-project/agents/AGENT.md${NC}  — Инструкции для разработчика
+   - ${YELLOW}docs/00-project/ai/agents/AGENT.md${NC}  — Инструкции для разработчика
 
 4. Основные команды:
    ${BLUE}make help${NC}            — Список всех команд

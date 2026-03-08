@@ -15,7 +15,14 @@ CROSSREF_SUPPORTED_ENTITY_TYPES = frozenset(("work", "publication"))
 
 
 def validate_crossref_entity_type(entity_type: str) -> None:
-    """Validate CrossRef entity type for fetch/filter operations."""
+    """Validate CrossRef entity type for fetch/filter operations.
+
+    Args:
+        entity_type: Entity type string to validate against supported types.
+
+    Raises:
+        ValueError: If entity_type is not "work" or "publication".
+    """
     if entity_type in CROSSREF_SUPPORTED_ENTITY_TYPES:
         return
     raise ValueError(
@@ -25,6 +32,9 @@ def validate_crossref_entity_type(entity_type: str) -> None:
 
 def resolve_filter_field(filter_field: str | None) -> str:
     """Return effective filter field value for CrossRef flow.
+
+    Args:
+        filter_field: Optional filter field name from the caller; None defaults to "doi".
 
     Returns:
         Filter field string, defaulting to "doi" if None is provided.

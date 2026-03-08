@@ -18,7 +18,7 @@ Define explicit navigation rules for documentation zones so that:
 | Path Prefix | Status | Nav Rule | Required Entrypoint |
 |---|---|---|---|
 | `docs/00-project/**`, `docs/01-requirements/**`, `docs/02-architecture/**`, `docs/03-guides/**`, `docs/04-reference/**`, `docs/05-operations/**` | `published` | MUST be represented in primary nav (except explicit internal/archived subsections) | Section index page in nav |
-| `docs/skills/**` | `internal-published` | MAY be shown only under `Internal / Extended -> Skills` | [docs/skills/README.md](../../skills/README.md) |
+| `docs/00-project/ai/skills/**` | `internal-published` | MAY be shown only under `Internal / Extended -> Skills` | [docs/00-project/ai/skills/README.md](../ai/skills/README.md) |
 | `docs/plans/**` | `internal-published` | Curated pages MAY be shown under `Internal / Extended -> Plans` | [docs/plans/README.md](../../plans/README.md) or curated nav node |
 | `docs/reports/**` | `internal-published` + `internal` | Curated pages MAY be in `Internal / Extended -> Reports`; bulk report artifacts MAY remain non-nav | [docs/reports/index.md](../../reports/index.md) |
 | `docs/99-archive/**` | `archive` | MUST remain non-nav by default; historical context only | [docs/99-archive/README.md](../../99-archive/README.md) (or equivalent archive index) |
@@ -137,27 +137,27 @@ A document SHOULD be promoted when at least two criteria are true:
   - `skills`: `3` (system skill docs)
 
 Interpretation:
-- further reduction SHOULD focus on explicit policy decisions for remaining `skills/global/.system/**`;
+- further reduction SHOULD focus on explicit policy decisions for remaining `00-project/ai/skills/global/.system/**`;
 - `99-archive/**` should remain out of nav unless governance policy changes.
 
 Implementation note:
 - docs KPI and nav-growth checks ignore generated local site artifacts (`docs/site/**`, `.mkdocs-site-tmp/**`).
-- `docs/skills/global/.system/**` is treated as `internal-generated` and SHOULD remain non-nav.
+- `docs/00-project/ai/skills/global/.system/**` is treated as `internal-generated` and SHOULD remain non-nav.
 - docs KPI checks ignore generated documentation export artifacts:
   - `docs/exports/*.merged.md`
   - `docs/reports/docs-export-report-YYYY-MM-DD-HHMMSS.md`
 - architecture sync checks (`tests/architecture/test_documentation_sync.py`) exclude generated docs artifacts from active-doc drift rules and validate them via dedicated generated-doc gates.
-- `docs/skills/local/nci-analysis/references/**` is published in nav (wave-7 curated promotion).
+- `docs/00-project/ai/skills/local/nci-analysis/references/**` is published in nav (wave-7 curated promotion).
 
 ### 6.5 Wave-8 Ratified Decisions (2026-03-03)
 
 Ratified baseline for residual non-nav backlog:
 1. `99-archive/**` remains non-nav by default (`archive`).
-2. `skills/global/.system/**` remains non-nav by default (`internal-generated`).
+2. `00-project/ai/skills/global/.system/**` remains non-nav by default (`internal-generated`).
 3. Any deviation requires explicit governance revision.
 
 Decision record:
-- `docs/plans/wave-8-policy-decisions-2026-03-03.md`
+- `docs/99-archive/plans/wave-8-policy-decisions-2026-03-03.md` *(archived)*
 
 ----------------------------------------------------------------------
 

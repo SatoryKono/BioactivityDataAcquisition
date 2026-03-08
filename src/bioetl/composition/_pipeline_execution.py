@@ -45,7 +45,7 @@ __all__ = [
 
 
 def push_metrics_to_gateway(
-    job: str = "bioetl",
+    run_label: str = "bioetl",
     pipeline_name: str | None = None,
 ) -> bool:
     """Push current metrics to Prometheus Pushgateway.
@@ -55,7 +55,7 @@ def push_metrics_to_gateway(
     successive pipeline runs don't overwrite each other's metrics.
 
     Args:
-        job: Job label for pushed metrics.
+        run_label: Run label for pushed metrics.
         pipeline_name: Pipeline name for grouping (e.g. "chembl_molecule").
 
     Returns:
@@ -68,7 +68,11 @@ def push_metrics_to_gateway(
     settings = get_settings()
     gateway = getattr(settings, "pushgateway_url", None) or "localhost:9091"
     grouping_key = {"pipeline": pipeline_name} if pipeline_name else {}
-    return _push(gateway=gateway, job=job, grouping_key=grouping_key)
+    return _push(
+        gateway=gateway,
+        run_label=run_label,
+        grouping_key=grouping_key,
+    )
 
 
 def ensure_metrics_server_started() -> bool:
@@ -125,7 +129,14 @@ def _ensure_registrations() -> None:
 
 
 def _build_input_filter_context(options: RunOptions) -> InputFilterContext:
-    """Build input filter context from CLI options."""
+    """Build input filter context from CLI options.
+
+    Args:
+        options: User-facing run options containing filter configuration.
+
+    Returns:
+        InputFilterContext configured for multi-field, single-field, or CSV filtering.
+    """
     if options.multi_filter_ids:
         return InputFilterContext.from_multi_ids(
             multi_filter_ids=options.multi_filter_ids,
@@ -147,7 +158,14 @@ def _build_input_filter_context(options: RunOptions) -> InputFilterContext:
 
 
 def _build_vacuum_config(options: RunOptions) -> VacuumConfig:
-    """Build vacuum config from CLI overrides (preserving tri-state)."""
+    """Build vacuum config from CLI overrides (preserving tri-state).
+
+    Args:
+        options: User-facing run options containing vacuum configuration.
+
+    Returns:
+        VacuumConfig with enabled flag and retention_days.
+    """
     return VacuumConfig(
         enabled=options.vacuum_after_run,
         retention_days=options.vacuum_retention_days or 7,
@@ -155,7 +173,14 @@ def _build_vacuum_config(options: RunOptions) -> VacuumConfig:
 
 
 def _build_cached_bronze_context(options: RunOptions) -> CachedBronzeContext:
-    """Build cached bronze context from CLI options."""
+    """Build cached bronze context from CLI options.
+
+    Args:
+        options: User-facing run options containing cached bronze settings.
+
+    Returns:
+        CachedBronzeContext enabled with path/date, or disabled if not requested.
+    """
     if options.use_cached_bronze:
         return CachedBronzeContext.from_options(
             path=options.cached_bronze_path,
@@ -222,6 +247,10 @@ def create_pipeline_runner(name: str, options: RunOptions) -> PipelineRunner:
 
 async def run_pipeline(name: str, options: RunOptions) -> RunResult:
     """Run pipeline end-to-end and return structured execution result.
+
+    Args:
+        name: Pipeline name (e.g., 'chembl_activity').
+        options: User-facing run options controlling execution behaviour.
 
     Returns:
         RunResult with execution status, record counts, and timing information.

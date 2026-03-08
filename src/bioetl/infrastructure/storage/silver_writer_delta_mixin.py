@@ -47,13 +47,14 @@ class SilverWriterDeltaMixin:
     _metrics: MetricsPort | None
     _merge_resilience_policy: SilverMergeResiliencePolicy
 
+    @property
+    def _logger(self) -> LoggerPort:
+        """Access logger via private convention for delegation pattern compliance."""
+        return self.logger
+
     @staticmethod
     def _load_silver_writer_module() -> Any:  # Any: return type varies at runtime
-        """Load silver_writer module for backward-compatible patch points.
-
-        Returns:
-            Silver writer module with write_deltalake and DeltaTable references.
-        """
+        """Load silver_writer module for backward-compatible patch points."""
         from bioetl.infrastructure.storage import silver_writer as silver_writer_module
 
         return silver_writer_module
@@ -126,7 +127,7 @@ class SilverWriterDeltaMixin:
                     timeout_seconds=policy.execution_timeout_seconds,
                 )
                 if commit_retry_count > 0 or timeout_retry_count > 0:
-                    self.logger.info(
+                    self._logger.info(
                         "silver_merge_recovered_after_retry",
                         table_path=table_path,
                         commit_retry_count=commit_retry_count,
@@ -244,7 +245,7 @@ class SilverWriterDeltaMixin:
                 timeout=timeout_seconds,
             )
         except TimeoutError as exc:
-            self.logger.warning(
+            self._logger.warning(
                 "silver_merge_timeout",
                 table_path=table_path,
                 timeout_seconds=timeout_seconds,
@@ -261,7 +262,8 @@ class SilverWriterDeltaMixin:
         max_retries: int,
         delay_seconds: float,
     ) -> None:
-        self.logger.warning(
+        """Emit telemetry for a merge retry attempt."""
+        self._logger.warning(
             "silver_merge_retry",
             table_path=table_path,
             retry_type=retry_type,
@@ -285,7 +287,8 @@ class SilverWriterDeltaMixin:
     def _emit_merge_final_telemetry(
         self, *, table_path: str, final_reason: str
     ) -> None:
-        self.logger.error(
+        """Emit telemetry when merge retries are exhausted."""
+        self._logger.error(
             "silver_merge_failed",
             table_path=table_path,
             final_reason=final_reason,

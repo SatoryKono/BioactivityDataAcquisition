@@ -875,7 +875,7 @@ make security
 ## References
 
 - **RULES.md** — `docs/00-project/RULES.md`
-- **CLAUDE.md** — `docs/00-project/agents/CLAUDE.md`
+- **CLAUDE.md** — `docs/00-project/ai/agents/guides/CLAUDE.md`
 - **ADR Documents** — `docs/02-architecture/decisions/`
 - **Agent Prompts** — `.claude/agents/`
 

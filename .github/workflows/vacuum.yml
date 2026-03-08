@@ -1,4 +1,7 @@
-name: Weekly VACUUM
+﻿name: Weekly VACUUM
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -79,3 +82,4 @@ jobs:
           echo "- **Layer**: ${{ github.event.inputs.layer || 'all' }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "VACUUM removes files older than the retention period that are no longer referenced by the Delta log." >> $GITHUB_STEP_SUMMARY
+

@@ -1,0 +1,79 @@
+schema_version: "1.0"
+canonical_roots:
+  - scripts/ci
+  - scripts/dev
+  - scripts/qa
+  - scripts/docs
+  - scripts/schema
+  - scripts/data
+  - scripts/repo
+  - scripts/ops
+  - scripts/diagnostics
+  - scripts/migrations/active
+  - scripts/migrations/oneoff
+  - scripts/diagrams
+
+policies:
+  root_wrappers_only: true
+  compatibility_root: scripts/
+  root_allowlist:
+    - run.py
+  canonical_invocation_required_for_new_integrations: true
+  no_new_non_wrapper_scripts_in_root: true
+
+lifecycle:
+  manifest_path: configs/quality/scripts_inventory_manifest.json
+  registry_path: configs/quality/scripts_lifecycle_registry.json
+  non_active_statuses:
+    - unknown
+    - orphan
+    - legacy
+  required_registry_fields:
+    - owner
+    - decision
+    - next_step
+    - review_by
+  deprecated_decisions:
+    - deprecate
+  deprecated_required_fields:
+    - replacement
+    - sunset_date
+  enforce_known_registry_paths: true
+
+groups:
+  ci:
+    path: scripts/ci
+    purpose: CI orchestration, resiliency runners, periodic quality reports
+  dev:
+    path: scripts/dev
+    purpose: Local developer setup and test utilities
+  qa:
+    path: scripts/qa
+    purpose: Architecture and quality-gate checks, debt telemetry
+  docs:
+    path: scripts/docs
+    purpose: Documentation lint/build/drift/maintenance
+  schema:
+    path: scripts/schema
+    purpose: Schema generation and validation contracts
+  data:
+    path: scripts/data
+    purpose: Data integrity and storage-level operational checks
+  repo:
+    path: scripts/repo
+    purpose: Repository hygiene and inventory governance tooling
+  ops:
+    path: scripts/ops
+    purpose: Platform/ops automation and skills/tooling checks
+  diagnostics:
+    path: scripts/diagnostics
+    purpose: Manual diagnostics and investigation helpers
+  migrations_active:
+    path: scripts/migrations/active
+    purpose: Active repeatable migration scripts
+  migrations_oneoff:
+    path: scripts/migrations/oneoff
+    purpose: One-time migration scripts with explicit sunset
+  diagrams:
+    path: scripts/diagrams
+    purpose: Diagram lint/render/quality pipeline

@@ -1,11 +1,28 @@
-name: Duplication and Complexity Checks
+﻿name: Duplication and Complexity Checks
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 on:
   push:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.ai/**'
+      - '.claude/**'
+      - '.github/workflows/**'
+      - 'LICENSE'
     branches:
       - main
       - master
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.ai/**'
+      - '.claude/**'
+      - '.github/workflows/**'
+      - 'LICENSE'
 
 jobs:
   duplication-complexity:
@@ -223,3 +240,4 @@ jobs:
           echo "Checking batch_executor.py complexity..."
           xenon --max-absolute B --max-modules B --max-average A \
             src/bioetl/application/core/batch_executor.py
+

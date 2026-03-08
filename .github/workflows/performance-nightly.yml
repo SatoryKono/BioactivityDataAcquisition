@@ -1,4 +1,7 @@
-name: Performance Nightly
+﻿name: Performance Nightly
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 on:
   schedule:
@@ -96,3 +99,4 @@ jobs:
             reports/performance/hotspot-degradation.md
           if-no-files-found: warn
           retention-days: 90
+

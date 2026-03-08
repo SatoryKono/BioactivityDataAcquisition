@@ -11,8 +11,8 @@ model: opus
 ## Memory
 
 При старте прочитай:
-- `.ai/memory/agent-memory.md` — общий контекст проекта
-- `.ai/memory/memory-py-test-bot.md` — test structure, thresholds, VCR, failure classification
+- `docs/00-project/ai/memory/agent-memory.md` — общий контекст проекта
+- `docs/00-project/ai/memory/memory-py-test-bot.md` — test structure, thresholds, VCR, failure classification
 - `.claude/agents/ORCHESTRATION.md` — протокол оркестрации (§2-§7)
 
 ## Контекст проекта

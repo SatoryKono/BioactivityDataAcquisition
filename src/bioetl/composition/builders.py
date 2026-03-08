@@ -178,6 +178,22 @@ class FilterConfigBuilder:
     ) -> InputFilterConfig | None:
         """Build `InputFilterConfig` from YAML settings and CLI overrides.
 
+        Args:
+            yaml_filter: Filter configuration from pipeline YAML providing defaults.
+            cli_csv: CLI-provided CSV path override; defaults to None.
+            cli_column: CLI-provided column name override; defaults to None.
+            cli_field: CLI-provided API filter field override; defaults to None.
+            cli_fallback_column: CLI-provided fallback column override; defaults to None.
+            test_mode: If True, YAML filters are ignored unless CLI CSV is provided;
+                defaults to False.
+            direct_filter_ids: Programmatic filter IDs bypassing CSV; defaults to None.
+            direct_fallback_mapping: Fallback mapping for direct filter IDs; defaults
+                to None.
+            direct_multi_filter_ids: Multi-field filter IDs for AND logic; defaults
+                to None.
+            direct_valid_combinations: Valid combination tuples for client-side
+                filtering; defaults to None.
+
         Returns:
             Configured InputFilterConfig, or None if filtering is disabled.
         """

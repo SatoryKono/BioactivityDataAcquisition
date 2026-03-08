@@ -25,6 +25,14 @@ class BronzeWriterMetadataMixin:
     ) -> dict[str, str]:
         """Build metadata dict for lineage tracking.
 
+        Args:
+            run_id: Pipeline run identifier for lineage.
+            run_type: Run classification (INCREMENTAL, BACKFILL, or REBUILD).
+            effective_ts: UTC ingestion timestamp to embed in the metadata.
+            provider: Data provider name.
+            entity: Entity type name.
+            batch_id: Unique identifier for this write batch.
+
         Returns:
             Dictionary of string metadata fields for Bronze lineage tracking.
         """
@@ -53,6 +61,20 @@ class BronzeWriterMetadataMixin:
         source_metadata: SourceMetadata | None = None,
     ) -> BronzeMetadata:
         """Build rich BronzeMetadata for sidecar file.
+
+        Args:
+            run_id: Pipeline run identifier for lineage.
+            run_type: Run classification (INCREMENTAL, BACKFILL, or REBUILD).
+            provider: Data provider name.
+            entity: Entity type name.
+            batch_id: Unique identifier for this write batch.
+            record_count: Number of records written.
+            compressed_size: Compressed byte size of the written file.
+            output_path: Relative path of the output file for metadata reference.
+            started_at: UTC datetime when the write operation started.
+            completed_at: UTC datetime when the write operation completed.
+            duration_seconds: Total write duration in seconds.
+            source_metadata: Optional provider metadata to embed in the sidecar.
 
         Returns:
             BronzeMetadata instance populated with runtime, pipeline, source, and output fields.
@@ -90,6 +112,19 @@ class BronzeWriterMetadataMixin:
         source_metadata: SourceMetadata | None,
     ) -> JsonDict:  # Any: bronze metadata model fields are heterogeneous
         """Build Bronze metadata constructor payload.
+
+        Args:
+            run_id: Pipeline run identifier for lineage.
+            run_type: Run classification (INCREMENTAL, BACKFILL, or REBUILD).
+            provider: Data provider name.
+            entity: Entity type name.
+            record_count: Number of records written.
+            compressed_size: Compressed byte size of the written file.
+            output_path: Relative path of the output file for metadata reference.
+            started_at: UTC datetime when the write operation started.
+            completed_at: UTC datetime when the write operation completed.
+            duration_seconds: Total write duration in seconds.
+            source_metadata: Optional provider metadata to embed in the sidecar.
 
         Returns:
             Dictionary of constructor keyword arguments for BronzeMetadata.

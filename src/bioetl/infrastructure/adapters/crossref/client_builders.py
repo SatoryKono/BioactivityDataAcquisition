@@ -31,12 +31,24 @@ if TYPE_CHECKING:
 def _create_default_crossref_query_builder(
     *, api_base: str, mailto: str
 ) -> CrossRefQueryBuilder:
-    """Create default query builder for non-DI call sites."""
+    """Create default query builder for non-DI call sites.
+
+    Args:
+        api_base: CrossRef API base URL.
+        mailto: Email address for polite pool identification.
+
+    Returns:
+        CrossRefQueryBuilder instance configured with the given base URL and email.
+    """
     return CrossRefQueryBuilder(api_base=api_base, mailto=mailto)
 
 
 def _create_default_crossref_response_mapper() -> CrossRefResponseMapper:
-    """Create default response mapper for non-DI call sites."""
+    """Create default response mapper for non-DI call sites.
+
+    Returns:
+        CrossRefResponseMapper instance with default configuration.
+    """
     return CrossRefResponseMapper()
 
 
@@ -50,7 +62,20 @@ def _create_default_crossref_batch_fetcher(
     headers_fn: Callable[[], dict[str, str]],
     request_collector: APIRequestCollector,
 ) -> DoiBatchProcessor:
-    """Create default DOI batch processor for non-DI call sites."""
+    """Create default DOI batch processor for non-DI call sites.
+
+    Args:
+        http: HTTP client for making batch requests.
+        logger: Logger port for structured logging.
+        metrics: Adapter metrics for request timing.
+        mailto: Email for polite pool access.
+        api_base: CrossRef API base URL.
+        headers_fn: Callable returning request headers dict.
+        request_collector: Collector for API request metadata.
+
+    Returns:
+        DoiBatchProcessor instance configured with the given transport and logging components.
+    """
     return DoiBatchProcessor(
         http=http,
         logger=logger,
@@ -72,7 +97,20 @@ def _create_default_crossref_search_paginator(
     headers_fn: Callable[[], dict[str, str]],
     request_collector: APIRequestCollector,
 ) -> SearchPaginator:
-    """Create default search paginator for non-DI call sites."""
+    """Create default search paginator for non-DI call sites.
+
+    Args:
+        http: HTTP client for making search requests.
+        logger: Logger port for structured logging.
+        metrics: Adapter metrics for request timing.
+        mailto: Email for polite pool access.
+        api_base: CrossRef API base URL.
+        headers_fn: Callable returning request headers dict.
+        request_collector: Collector for API request metadata.
+
+    Returns:
+        SearchPaginator instance configured with the given transport and logging components.
+    """
     return SearchPaginator(
         http=http,
         logger=logger,
@@ -87,7 +125,15 @@ def _create_default_crossref_search_paginator(
 def _create_default_crossref_title_fallback_handler(
     *, logger: LoggerPort, search_fn: Callable[[str, int], AsyncIterator[JsonDict]]
 ) -> TitleFallbackHandler:
-    """Create default title fallback handler for non-DI call sites."""
+    """Create default title fallback handler for non-DI call sites.
+
+    Args:
+        logger: Logger port for structured logging.
+        search_fn: Async callable to search publications by query string.
+
+    Returns:
+        TitleFallbackHandler instance configured with the given logger and search function.
+    """
     return TitleFallbackHandler(logger=logger, search_fn=search_fn)
 
 
@@ -100,7 +146,19 @@ def _create_default_crossref_fetch_flow(
     batch_size: int,
     response_mapper: CrossRefResponseMapper,
 ) -> CrossRefFetchFlow:
-    """Create default fetch flow for non-DI call sites."""
+    """Create default fetch flow for non-DI call sites.
+
+    Args:
+        logger: Logger port for structured logging.
+        batch_fetcher: DOI batch processor for batch resolution.
+        search_paginator: Search paginator for cursor-based search.
+        fallback_decorator: Composable fallback decorator for title-based fallback.
+        batch_size: Number of DOIs per batch request.
+        response_mapper: Mapper for annotating CrossRef response records.
+
+    Returns:
+        CrossRefFetchFlow instance wired with the given components.
+    """
     return CrossRefFetchFlow(
         logger=logger,
         batch_fetcher=batch_fetcher,

@@ -1,24 +1,49 @@
-name: Skills Consistency
+﻿name: Skills Consistency
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
 
 on:
   push:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.ai/**'
+      - '.claude/**'
+      - '.github/workflows/**'
+      - 'LICENSE'
     branches: [ main ]
     paths:
       - ".codex/skills/**"
-      - "docs/skills/local/**"
-      - "docs/skills/README.md"
+      - "docs/00-project/ai/skills/local/**"
+      - "docs/00-project/ai/skills/global/**"
+      - "docs/00-project/ai/skills/_references/**"
+      - "docs/00-project/ai/skills/README.md"
+      - "docs/00-project/ai/skills/SKILLS-CATALOG.md"
       - "scripts/check_skills_mirror.sh"
+      - "scripts/check_ai_skills_layout.sh"
       - ".github/workflows/skills-consistency.yml"
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.ai/**'
+      - '.claude/**'
+      - '.github/workflows/**'
+      - 'LICENSE'
     branches: [ main ]
     paths:
       - ".codex/skills/**"
-      - "docs/skills/local/**"
-      - "docs/skills/README.md"
+      - "docs/00-project/ai/skills/local/**"
+      - "docs/00-project/ai/skills/global/**"
+      - "docs/00-project/ai/skills/_references/**"
+      - "docs/00-project/ai/skills/README.md"
+      - "docs/00-project/ai/skills/SKILLS-CATALOG.md"
       - "scripts/check_skills_mirror.sh"
+      - "scripts/check_ai_skills_layout.sh"
       - ".github/workflows/skills-consistency.yml"
 
 jobs:
@@ -29,5 +54,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Verify docs/skills/local mirror
+      - name: Verify docs/00-project/ai/skills/local mirror
         run: bash scripts/check_skills_mirror.sh --check
+
+      - name: Verify ai/skills canonical layout
+        run: bash scripts/check_ai_skills_layout.sh
+

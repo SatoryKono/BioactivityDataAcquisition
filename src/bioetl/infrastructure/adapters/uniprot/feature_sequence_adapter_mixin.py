@@ -29,7 +29,7 @@ class UniProtFeatureSequenceAdapterMixin:
         try:
             start_time = time.perf_counter()
             with self._adapter_metrics.measure_request("/uniprotkb/features"):
-                response = await self.http_client.get(
+                response = await self._http_client.get(
                     f"{self.base_url}/uniprotkb/{query}.json"
                 )
             typed_response = cast("object", response)
@@ -90,7 +90,7 @@ class UniProtFeatureSequenceAdapterMixin:
         try:
             start_time = time.perf_counter()
             with self._adapter_metrics.measure_request("/uniprotkb/stream"):
-                response = await self.http_client.get(
+                response = await self._http_client.get(
                     f"{self.base_url}/uniprotkb/stream",
                     params={"query": query, "format": "fasta"},
                 )

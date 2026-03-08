@@ -19,7 +19,7 @@ _BIOETL_ROOT = _SRC_ROOT / "bioetl"
 _LAYER_FILE_LIMITS = {
     "domain": 305,
     "application": 500,
-    "composition": 400,
+    "composition": 350,
     "infrastructure": 650,
     "interfaces": 400,
 }
@@ -122,6 +122,13 @@ def test_function_length_registry_has_no_stale_entries() -> None:
     )
 
 
+def _extract_symbol_name(key: str) -> str:
+    """Extract symbol name from registry key (supports path::Symbol format)."""
+    if "::" in key:
+        return key.split("::", 1)[1]
+    return key
+
+
 def test_class_size_registry_has_no_stale_entries() -> None:
     """class_size exemptions must map to classes still exceeding 300 lines."""
     raw = load_exemptions_registry()
@@ -130,11 +137,12 @@ def test_class_size_registry_has_no_stale_entries() -> None:
     max_sizes = _collect_max_class_sizes()
 
     violations: list[str] = []
-    for class_name in sorted(class_size):
-        max_size = max_sizes.get(class_name, 0)
+    for class_key in sorted(class_size):
+        symbol = _extract_symbol_name(class_key)
+        max_size = max_sizes.get(symbol, 0)
         if max_size <= _DEFAULT_CLASS_SIZE_LIMIT:
             violations.append(
-                f"{class_name}: max_size={max_size} <= {_DEFAULT_CLASS_SIZE_LIMIT}"
+                f"{class_key}: max_size={max_size} <= {_DEFAULT_CLASS_SIZE_LIMIT}"
             )
 
     assert not violations, (

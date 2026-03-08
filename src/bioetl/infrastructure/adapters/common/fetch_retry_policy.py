@@ -50,6 +50,10 @@ def split_filter_ids_for_fallback(
     Empty/whitespace values and ``__title_only_*`` markers are treated as
     title-only entries for phase-3 fallback.
 
+    Args:
+        filter_ids: List of raw filter IDs to split.
+        title_only_marker_prefix: Prefix string that marks title-only fallback entries.
+
     Returns:
         Tuple of (primary_ids, title_only_entries) lists.
     """
@@ -66,6 +70,9 @@ def split_filter_ids_for_fallback(
 
 def is_retry_exhausted_error(error: Exception) -> bool:
     """Return True when ``error`` or its cause/context chain is retry-exhausted.
+
+    Args:
+        error: Exception to check for RetryExhaustedError in the chain.
 
     Returns:
         True if RetryExhaustedError is found anywhere in the exception chain, False otherwise.
@@ -93,7 +100,14 @@ def _track_primary_record(
     extract_record_id: Callable[[BronzeRecord], str | None],
     found_ids: set[str],
 ) -> None:
-    """Apply phase-1 record bookkeeping (lookup method + resolved IDs)."""
+    """Apply phase-1 record bookkeeping (lookup method + resolved IDs).
+
+    Args:
+        record: Bronze record to annotate and track.
+        primary_lookup_method: Lookup method label to inject into record if not already set.
+        extract_record_id: Callable to extract the primary ID from a record.
+        found_ids: Mutable set to add the resolved record ID to.
+    """
     if primary_lookup_method and "_lookup_method" not in record:
         record["_lookup_method"] = primary_lookup_method
 
@@ -108,7 +122,13 @@ def _log_phase1_summary(
     primary_ids: list[str],
     found_ids: set[str],
 ) -> None:
-    """Log phase-1 completion summary when logger and input IDs are available."""
+    """Log phase-1 completion summary when logger and input IDs are available.
+
+    Args:
+        phase1_summary_logger: Optional callable receiving (total_ids, found_ids) counts.
+        primary_ids: Full list of primary IDs requested in phase 1.
+        found_ids: Set of IDs successfully resolved during phase 1.
+    """
     if phase1_summary_logger is None or not primary_ids:
         return
     phase1_summary_logger(len(primary_ids), len(found_ids))
@@ -120,7 +140,16 @@ async def _yield_phase_records(
     state: _FetchState,
     on_record: Callable[[BronzeRecord], None] | None = None,
 ) -> AsyncIterator[BronzeRecord]:
-    """Yield records for one phase with shared limit handling."""
+    """Yield records for one phase with shared limit handling.
+
+    Args:
+        records: Async iterator of Bronze records for this phase.
+        state: Mutable fetch state tracking total count and limit.
+        on_record: Optional callback invoked on each record before yielding.
+
+    Yields:
+        Bronze records until the configured limit is reached or the iterator is exhausted.
+    """
     if state.limit_reached():
         return
 
@@ -151,6 +180,21 @@ async def run_fetch_with_fallback_policy(
     Phase 1: consume ``primary_records``, track resolved IDs.
     Phase 2: ``process_missing_dois`` for unresolved primary IDs.
     Phase 3: ``process_title_only_entries`` for empty/marker entries.
+
+    Args:
+        primary_records: Async iterator of records from the primary fetch phase.
+        primary_ids: List of primary IDs requested in phase 1.
+        title_only_entries: List of title-only marker entries for phase 3.
+        fallback_mapping: Mapping of normalized IDs to fallback values (e.g., titles).
+        normalize_id: Callable to normalize a raw ID for lookup.
+        extract_record_id: Callable to extract the primary ID from a fetched record.
+        fallback_handler: Optional fallback policy port for phase 2 and phase 3.
+        limit: Optional maximum total records to yield across all phases.
+        primary_lookup_method: Optional label injected into phase-1 records as _lookup_method.
+        phase1_summary_logger: Optional callable receiving (total, found) counts after phase 1.
+
+    Yields:
+        Bronze records from all phases in order, respecting the global limit.
     """
     state = _FetchState(limit=limit)
     found_ids: set[str] = set()

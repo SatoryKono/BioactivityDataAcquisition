@@ -23,7 +23,14 @@ class SemanticScholarBatchRequestMixin:
         self,
         dois: list[str],
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch batch DOIs and filter out null/not-found entries."""
+        """Fetch batch DOIs and filter out null/not-found entries.
+
+        Args:
+            dois: List of DOI strings to resolve via batch API.
+
+        Yields:
+            Non-null BronzeRecord entries from the batch API response.
+        """
         if not dois:
             return
         results = await self._fetch_batch_with_nulls(dois)
@@ -36,6 +43,9 @@ class SemanticScholarBatchRequestMixin:
         dois: list[str],
     ) -> list[BronzeRecord | None]:
         """Fetch batch preserving null slots for not-found IDs.
+
+        Args:
+            dois: List of DOI strings to resolve via batch API.
 
         Returns:
             List of BronzeRecord or None values preserving position of not-found DOIs.
@@ -52,10 +62,13 @@ class SemanticScholarBatchRequestMixin:
     ) -> list[BronzeRecord | None]:
         """Execute raw batch request and return response array.
 
+        Args:
+            paper_ids: List of formatted paper ID strings (e.g., "DOI:10.1234/...") for the batch request.
+
         Returns:
             List of BronzeRecord or None values from the batch API response array.
         """
-        self.logger.debug(
+        self._logger.debug(
             "semanticscholar_batch_request",
             paper_count=len(paper_ids),
         )
@@ -64,7 +77,7 @@ class SemanticScholarBatchRequestMixin:
 
         start_time = time.perf_counter()
         with self._adapter_metrics.measure_request("/paper/batch"):
-            response = await self.http_client.post(
+            response = await self._http_client.post(
                 url,
                 json=json_body,
                 headers=self._build_headers(),
@@ -79,6 +92,9 @@ class SemanticScholarBatchRequestMixin:
     @staticmethod
     def _normalize_doi(doi: str) -> str:
         """Normalize DOI by removing URL-style prefixes.
+
+        Args:
+            doi: Raw DOI string potentially including URL-style prefix.
 
         Returns:
             DOI string with URL prefix (https://doi.org/, doi:, DOI:) removed.

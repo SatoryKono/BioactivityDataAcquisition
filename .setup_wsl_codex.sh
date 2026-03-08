@@ -1,50 +1,65 @@
 #!/bin/bash
-# Fix OpenAI DNS in WSL2 (VPN workaround)
-# Run: bash /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/.setup_wsl_codex.sh
-# Use --force to refresh stale IPs: bash .setup_wsl_codex.sh --force
-# Updated: 2026-03-02
+# Fix OpenAI connectivity in WSL2 (VPN workaround using wsl-vpnkit)
+# Run: wsl -d Debian -- bash /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/.setup_wsl_codex.sh
+# Updated: 2026-03-08
+#
+# Prerequisites:
+#   wsl --import wsl-vpnkit --version 2 $env:USERPROFILE\wsl-vpnkit wsl-vpnkit.tar.gz
+#   (download from https://github.com/sakai135/wsl-vpnkit/releases)
 
-FORCE=0
-[[ "$1" == "--force" ]] && FORCE=1
+set -euo pipefail
 
-# Domain -> IPv4 mapping (resolved from Windows host 2026-03-02, refreshed)
-declare -A HOSTS=(
-  [api.openai.com]=172.66.0.243
-  [auth.openai.com]=104.18.41.241
-  [auth0.openai.com]=172.65.90.22
-  [chatgpt.com]=104.18.32.47
-  [developers.openai.com]=64.239.109.1
-  [cdn.openai.com]=104.18.41.241
-  [files.oaiusercontent.com]=104.18.41.241
-)
+echo "=== WSL2 VPN Fix (wsl-vpnkit) ==="
 
-echo "Configuring OpenAI DNS hosts..."
-
-if [[ $FORCE -eq 1 ]]; then
-  sed -i '/openai\|chatgpt/d' /etc/hosts
-  echo "  Cleared all old OpenAI/ChatGPT entries"
+# 1. Check if wsl-vpnkit distro exists and start it
+echo ""
+echo "Step 1: Starting wsl-vpnkit..."
+if wsl.exe -d wsl-vpnkit -- echo "ok" >/dev/null 2>&1; then
+  # Check if already running (tap device exists)
+  if ip link show wsltap >/dev/null 2>&1; then
+    echo "  wsl-vpnkit already running (wsltap present)"
+  else
+    echo "  Launching wsl-vpnkit in background..."
+    # Start wsl-vpnkit from Windows side (it needs to run in its own distro)
+    wsl.exe -d wsl-vpnkit -- /app/wsl-vpnkit &
+    sleep 5
+    echo "  wsl-vpnkit started"
+  fi
+else
+  echo "  ERROR: wsl-vpnkit distro not found!"
+  echo "  Install it first:"
+  echo "    1. Download: https://github.com/sakai135/wsl-vpnkit/releases/download/v0.4.1/wsl-vpnkit.tar.gz"
+  echo "    2. Import:   wsl --import wsl-vpnkit --version 2 \$USERPROFILE\\wsl-vpnkit wsl-vpnkit.tar.gz"
+  exit 1
 fi
 
-for domain in "${!HOSTS[@]}"; do
-  ip="${HOSTS[$domain]}"
-  if grep -q "$domain" /etc/hosts 2>/dev/null; then
-    echo "  = $domain — already present (use --force to refresh)"
-  else
-    echo "$ip $domain" >> /etc/hosts
-    echo "  + $domain -> $ip"
-  fi
-done
-
+# 2. Configure DNS
 echo ""
-echo "Current /etc/hosts entries:"
-grep -E "openai|chatgpt" /etc/hosts
+echo "Step 2: Configuring DNS..."
+echo "nameserver 172.26.16.1" > /etc/resolv.conf
+echo "  Set nameserver to 172.26.16.1"
 
+# 3. Connectivity check
 echo ""
-echo "Quick connectivity check..."
+echo "Step 3: Connectivity check..."
+OK=0
+FAIL=0
 for domain in api.openai.com auth0.openai.com; do
-  if curl -so /dev/null --connect-timeout 5 "https://$domain" 2>/dev/null; then
-    echo "  OK   $domain"
+  HTTP_CODE=$(curl -so /dev/null --connect-timeout 5 -w '%{http_code}' "https://$domain" 2>/dev/null || echo "000")
+  if [[ "$HTTP_CODE" != "000" ]]; then
+    echo "  OK   $domain (HTTP $HTTP_CODE)"
+    ((OK++))
   else
     echo "  FAIL $domain"
+    ((FAIL++))
   fi
 done
+
+echo ""
+if [[ $FAIL -eq 0 ]]; then
+  echo "All checks passed. Codex CLI should work now."
+  echo "Run: codex"
+else
+  echo "Some checks failed. wsl-vpnkit may need more time to start."
+  echo "Retry in a few seconds or check: wsl -d wsl-vpnkit -- /app/wsl-vpnkit"
+fi

@@ -11,7 +11,7 @@ from uuid import uuid4
 
 def _load_module() -> ModuleType:
     repo_root = Path(__file__).resolve().parents[2]
-    module_path = repo_root / "scripts" / "check_doc_links.py"
+    module_path = repo_root / "scripts" / "docs" / "check_doc_links.py"
     module_name = f"check_doc_links_module_{uuid4().hex}"
     spec = importlib.util.spec_from_file_location(module_name, module_path)
     assert spec is not None and spec.loader is not None

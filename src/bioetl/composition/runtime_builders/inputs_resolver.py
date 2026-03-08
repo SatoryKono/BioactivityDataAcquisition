@@ -76,17 +76,18 @@ def assemble_vacuum_settings(
     cli_vacuum: VacuumConfig,
     yaml_maintenance: MaintenanceConfig,
 ) -> VacuumSettings:
-    """Merge CLI and YAML vacuum settings."""
-    if cli_vacuum.enabled is not None:
-        return VacuumSettings(
-            enabled=cli_vacuum.enabled,
-            retention_days=cli_vacuum.retention_days,
-        )
+    """Merge CLI and YAML vacuum settings.
 
-    return VacuumSettings(
-        enabled=yaml_maintenance.auto_vacuum,
-        retention_days=yaml_maintenance.vacuum_retention_days,
-    )
+    Args:
+        cli_vacuum: Vacuum configuration from CLI (tri-state enabled flag).
+        yaml_maintenance: Maintenance configuration from pipeline YAML defaults.
+
+    Returns:
+        VacuumSettings with resolved enabled flag and retention days.
+    """
+    enabled = cli_vacuum.enabled if cli_vacuum.enabled is not None else yaml_maintenance.auto_vacuum
+    retention = cli_vacuum.retention_days if cli_vacuum.enabled is not None else yaml_maintenance.vacuum_retention_days
+    return VacuumSettings(enabled=enabled, retention_days=retention)
 
 
 def assemble_runtime_config(
@@ -96,7 +97,17 @@ def assemble_runtime_config(
     vacuum: VacuumSettings,
     health_check_mode: Literal["strict", "probe"],
 ) -> RuntimeConfig:
-    """Build ``RuntimeConfig`` from run context and resolved vacuum settings."""
+    """Build ``RuntimeConfig`` from run context and resolved vacuum settings.
+
+    Args:
+        ctx: Pipeline run context providing run type, limit, query, and other options.
+        heartbeat_interval: Interval in seconds for lock heartbeat updates.
+        vacuum: Resolved vacuum settings (enabled flag and retention days).
+        health_check_mode: Health check enforcement mode; 'strict' raises on failure.
+
+    Returns:
+        Immutable RuntimeConfig instance for this pipeline run.
+    """
     return RuntimeConfig(
         run_type=ctx.run_type,
         resume=ctx.resume,
@@ -119,20 +130,31 @@ def assemble_filter_config(
     test_mode: bool,
     filter_builder: type[FilterConfigBuilder] = FilterConfigBuilder,
 ) -> InputFilterConfig | None:
-    """Build ``InputFilterConfig`` from YAML and CLI filter inputs."""
+    """Build ``InputFilterConfig`` from YAML and CLI filter inputs.
+
+    Args:
+        yaml_filter: Filter configuration from pipeline YAML.
+        ctx: Pipeline run context containing CLI filter settings and flags.
+        test_mode: If True, YAML-based filters are disabled.
+        filter_builder: FilterConfigBuilder class used to build the config. Defaults
+            to FilterConfigBuilder.
+
+    Returns:
+        Configured InputFilterConfig, or None if filtering is disabled.
+    """
+    inp_filter = ctx.input_filter
+    enabled = inp_filter.enabled
     return filter_builder.build(
         yaml_filter=yaml_filter,
-        cli_csv=ctx.input_filter.source_path if ctx.input_filter.enabled else None,
-        cli_column=ctx.input_filter.column_name if ctx.input_filter.enabled else None,
-        cli_field=ctx.input_filter.filter_field if ctx.input_filter.enabled else None,
-        cli_fallback_column=(
-            ctx.input_filter.fallback_column if ctx.input_filter.enabled else None
-        ),
+        cli_csv=inp_filter.source_path if enabled else None,
+        cli_column=inp_filter.column_name if enabled else None,
+        cli_field=inp_filter.filter_field if enabled else None,
+        cli_fallback_column=inp_filter.fallback_column if enabled else None,
         test_mode=test_mode or ctx.ignore_yaml_filter,
-        direct_filter_ids=ctx.input_filter.filter_ids,
-        direct_fallback_mapping=ctx.input_filter.fallback_mapping,
-        direct_multi_filter_ids=ctx.input_filter.multi_filter_ids,
-        direct_valid_combinations=ctx.input_filter.valid_combinations,
+        direct_filter_ids=inp_filter.filter_ids,
+        direct_fallback_mapping=inp_filter.fallback_mapping,
+        direct_multi_filter_ids=inp_filter.multi_filter_ids,
+        direct_valid_combinations=inp_filter.valid_combinations,
     )
 
 
@@ -142,23 +164,26 @@ def assemble_cached_bronze_context(ctx: PipelineRunContext) -> CachedBronzeConte
 
 
 def validate_pk_contract(config: PipelineYamlConfig) -> None:
-    """Fail-fast validation for PK configuration consistency."""
+    """Fail-fast validation for PK configuration consistency.
+
+    Args:
+        config: Pipeline YAML configuration to validate for primary key consistency.
+
+    Raises:
+        ValueError: If business_primary_keys is empty, PKs are mismatched, or
+            technical_primary_key is empty.
+    """
     business_primary_keys = tuple(getattr(config, "business_primary_keys", ()) or ())
     legacy_primary_keys = getattr(config, "primary_keys", None)
     technical_primary_key = getattr(config, "technical_primary_key", "entity_id")
 
     if not business_primary_keys:
         raise ValueError("business_primary_keys must be non-empty")
-
-    if (
-        legacy_primary_keys is not None
-        and tuple(legacy_primary_keys) != business_primary_keys
-    ):
+    if legacy_primary_keys is not None and tuple(legacy_primary_keys) != business_primary_keys:
         raise ValueError(
             "PK mismatch: legacy primary_keys differs from business_primary_keys; "
             "fix pipeline config naming"
         )
-
     if not technical_primary_key:
         raise ValueError("technical_primary_key must be non-empty")
 
@@ -167,10 +192,7 @@ def resolve_health_check_mode(*, settings: Settings) -> Literal["strict", "probe
     """Resolve runtime health check mode from settings."""
     if settings.test_mode:
         return "probe"
-    return cast(
-        Literal["strict", "probe"],
-        getattr(settings.pipeline, "health_check_mode", "strict"),
-    )
+    return cast(Literal["strict", "probe"], getattr(settings.pipeline, "health_check_mode", "strict"))
 
 
 def _log_filter_config(
@@ -195,13 +217,20 @@ def resolve_filter_batch_size(
     *,
     load_source_config_fn: Callable[..., object] | None = None,
 ) -> int | None:
-    """Resolve batch size override when filter mode is active."""
+    """Resolve batch size override when filter mode is active.
+
+    Args:
+        yaml_config: Pipeline YAML configuration providing filter_batch_size and provider.
+        load_source_config_fn: Optional callable to load source config; uses default
+            load_source_config when None.
+
+    Returns:
+        Integer batch size if configured, None otherwise.
+    """
     filter_batch_size = getattr(yaml_config, "filter_batch_size", None)
     if isinstance(filter_batch_size, int):
         return filter_batch_size
-    source_loader = (
-        load_source_config if load_source_config_fn is None else load_source_config_fn
-    )
+    source_loader = load_source_config if load_source_config_fn is None else load_source_config_fn
     try:
         source_cfg = cast(_SourceConfigLike, source_loader(yaml_config.provider))
         batch_size = source_cfg.pagination.id_batch_size
@@ -217,11 +246,15 @@ def adjust_batch_size_for_filter(
     observability: ObservabilityBundle,
     load_source_config_fn: Callable[..., object] | None = None,
 ) -> None:
-    """Adjust pipeline batch size to source ID-batch size when filter is enabled."""
-    filter_batch_size = resolve_filter_batch_size(
-        yaml_config,
-        load_source_config_fn=load_source_config_fn,
-    )
+    """Adjust pipeline batch size to source ID-batch size when filter is enabled.
+
+    Args:
+        yaml_config: Pipeline YAML configuration; batch_size is mutated in-place if adjusted.
+        filter_config: Active filter configuration; no adjustment if None.
+        observability: ObservabilityBundle used to log batch size adjustments.
+        load_source_config_fn: Optional callable to load source config for batch size lookup.
+    """
+    filter_batch_size = resolve_filter_batch_size(yaml_config, load_source_config_fn=load_source_config_fn)
     if filter_config and filter_batch_size is not None:
         observability.logger.info(
             "batch_size_auto_adjusted",
@@ -260,20 +293,29 @@ def prepare_runner_inputs(
     ],
     load_source_config_fn: Callable[..., object] | None = None,
 ) -> RunnerInputs:
-    """Resolve runtime settings/config/observability into runner constructor inputs."""
+    """Resolve runtime settings/config/observability into runner constructor inputs.
+
+    Args:
+        ctx: Pipeline run context with pipeline name, run type, and filter settings.
+        get_settings_fn: Callable returning global application Settings.
+        load_pipeline_config_fn: Callable returning PipelineYamlConfig for a pipeline name.
+        build_observability_bundle_fn: Callable returning an ObservabilityBundle.
+        assemble_vacuum_settings_fn: Callable merging CLI and YAML vacuum settings.
+        assemble_runtime_config_fn: Callable building RuntimeConfig from context.
+        assemble_filter_config_fn: Callable building InputFilterConfig from YAML and CLI.
+        assemble_cached_bronze_context_fn: Callable resolving cached bronze context.
+        load_source_config_fn: Optional callable to load source config for batch size.
+
+    Returns:
+        RunnerInputs bundle with all resolved dependencies for runner construction.
+    """
     settings = get_settings_fn()
     yaml_config = load_pipeline_config_fn(ctx.pipeline_name)
     validate_pk_contract(yaml_config)
     observability = build_observability_bundle_fn(
-        pipeline=ctx.pipeline_name,
-        run_id=ctx.run_id,
-        settings=settings,
-        log_level=ctx.log_level,
+        pipeline=ctx.pipeline_name, run_id=ctx.run_id, settings=settings, log_level=ctx.log_level
     )
-    vacuum = assemble_vacuum_settings_fn(
-        cli_vacuum=ctx.vacuum,
-        yaml_maintenance=yaml_config.maintenance,
-    )
+    vacuum = assemble_vacuum_settings_fn(cli_vacuum=ctx.vacuum, yaml_maintenance=yaml_config.maintenance)
     runtime_config = assemble_runtime_config_fn(
         ctx=ctx,
         heartbeat_interval=settings.pipeline.heartbeat_interval,
@@ -281,15 +323,9 @@ def prepare_runner_inputs(
         health_check_mode=resolve_health_check_mode(settings=settings),
     )
     filter_config = assemble_filter_config_fn(
-        yaml_filter=yaml_config.input_filter,
-        ctx=ctx,
-        test_mode=settings.test_mode,
+        yaml_filter=yaml_config.input_filter, ctx=ctx, test_mode=settings.test_mode,
     )
-    _log_filter_config(
-        observability=observability,
-        filter_config=filter_config,
-        from_cli=ctx.input_filter.enabled,
-    )
+    _log_filter_config(observability=observability, filter_config=filter_config, from_cli=ctx.input_filter.enabled)
     adjust_batch_size_for_filter(
         yaml_config=yaml_config,
         filter_config=filter_config,

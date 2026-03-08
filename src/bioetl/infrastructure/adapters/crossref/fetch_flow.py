@@ -62,7 +62,7 @@ class CrossRefFetchFlow:
         validate_crossref_entity_type(entity_type)
 
         if filter_field != "doi":
-            self.logger.warning(
+            self._logger.warning(
                 "unsupported_filter_field",
                 field=filter_field,
                 msg="CrossRef only supports DOI filtering, assuming DOIs",

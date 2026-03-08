@@ -30,6 +30,10 @@ __all__ = [
 def generate_html_report(data: JsonDict) -> str:
     """Generate HTML report from serialized DQ payload.
 
+    Args:
+        data: Serialized DQ report payload containing keys such as 'layer',
+            'summary', 'checks', and optionally 'thresholds'.
+
     Returns:
         Complete HTML document string for the DQ report.
     """

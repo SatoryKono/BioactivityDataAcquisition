@@ -2823,7 +2823,7 @@ if __name__ == "__main__":
 
 \newpage
 
-# Source: `00-project/agents/AGENT.md`
+# Source: `00-project/ai/agents/AGENT.md`
 
 # AGENT.md: Инструкции для Агента BioETL (v2.4)
 
@@ -3179,7 +3179,7 @@ git commit -m "..."
 
 \newpage
 
-# Source: `00-project/agents/CLAUDE.md`
+# Source: `00-project/ai/agents/CLAUDE.md`
 
 # CLAUDE.md
 
@@ -3694,13 +3694,13 @@ pytest tests/e2e/ -v -m e2e  # E2E тесты
 | Документ                               | Описание                                                                        |
 | -------------------------------------- | ------------------------------------------------------------------------------- |
 | `docs/00-project/RULES.md`             | **Конституция проекта** — единственный источник истины для архитектурных правил |
-| `docs/00-project/agents/AGENT.md`      | Инструкции для агента (персона, workflow, специфика работы)                     |
+| `docs/00-project/ai/agents/AGENT.md`      | Инструкции для агента (персона, workflow, специфика работы)                     |
 | `.claude/PROJECT_CONTEXT.md`           | Компактный контекст для быстрой справки                                         |
 | `docs/02-architecture/decisions/`      | ADR (001-040) — архитектурные решения                                           |
 | `docs/01-requirements/REQUIREMENTS.md` | 127 тестируемых требований                                                      |
 
 > **Иерархия документации**: При противоречиях приоритет имеет `docs/00-project/RULES.md`.
-> CLAUDE файл (`docs/00-project/agents/CLAUDE.md`) содержит специфику для Claude Code и протокол верификации.
+> CLAUDE файл (`docs/00-project/ai/agents/CLAUDE.md`) содержит специфику для Claude Code и протокол верификации.
 
 ----------------------------------------------------------------------
 
@@ -3709,7 +3709,7 @@ pytest tests/e2e/ -v -m e2e  # E2E тесты
 
 \newpage
 
-# Source: `00-project/agents/CODEX.md`
+# Source: `00-project/ai/agents/CODEX.md`
 
 # CODEX.md — Пользовательские инструкции для Codex (BioETL Architecture Auditor)
 
@@ -3734,11 +3734,11 @@ pytest tests/e2e/ -v -m e2e  # E2E тесты
 Перед изменениями/аудитом обязательно сверяться с:
 
 1. `docs/00-project/RULES.md` (источник требований RFC 2119),
-1. `docs/00-project/agents/AGENT.md`,
-1. `docs/00-project/agents/CLAUDE.md`,
-1. `docs/00-project/agents/GEMINI.md`,
-1. `docs/00-project/agents/memory.md`,
-1. `docs/00-project/agents/orchestration/ORCHESTRATION.md` (для сложных задач).
+1. `docs/00-project/ai/agents/AGENT.md`,
+1. `docs/00-project/ai/agents/CLAUDE.md`,
+1. `docs/00-project/ai/agents/GEMINI.md`,
+1. `docs/00-project/ai/agents/memory.md`,
+1. `docs/00-project/ai/agents/orchestration/ORCHESTRATION.md` (для сложных задач).
 
 Если уверенность недостаточна — помечай **Requires Manual Review**, а не делай предположений.
 
@@ -3924,7 +3924,7 @@ Scope: ...
 
 \newpage
 
-# Source: `00-project/agents/GEMINI.md`
+# Source: `00-project/ai/agents/GEMINI.md`
 
 # GEMINI.md: Context & Instructions for BioETL
 
@@ -4013,7 +4013,7 @@ bioetl run --pipeline chembl_activity --run-type incremental --limit 100
 
 \newpage
 
-# Source: `00-project/agents/README.md`
+# Source: `00-project/ai/agents/README.md`
 
 # AI Agents Context
 
@@ -4046,7 +4046,7 @@ bioetl run --pipeline chembl_activity --run-type incremental --limit 100
 
 \newpage
 
-# Source: `00-project/agents/diagram_docs_orchestrator.md`
+# Source: `00-project/ai/agents/diagram_docs_orchestrator.md`
 
 # BioETL Diagram Docs Orchestrator Agent
 
@@ -4109,7 +4109,7 @@ bash scripts/diagrams/run_diagram_docs_agent.sh --skip-checks
 
 \newpage
 
-# Source: `00-project/agents/memory.md`
+# Source: `00-project/ai/agents/memory.md`
 
 # Memory: BioETL (краткая выжимка)
 
@@ -4148,7 +4148,7 @@ bash scripts/diagrams/run_diagram_docs_agent.sh --skip-checks
 
 \newpage
 
-# Source: `00-project/agents/orchestration/ORCHESTRATION.md`
+# Source: `00-project/ai/agents/orchestration/ORCHESTRATION.md`
 
 # ORCHESTRATION.md — Оркестрация команды субагентов BioETL
 
@@ -4250,7 +4250,7 @@ docs/99-archive/reports/<task-id>/
 
 \newpage
 
-# Source: `00-project/agents/qa_orchestrator.md`
+# Source: `00-project/ai/agents/qa_orchestrator.md`
 
 # BioETL QA Orchestrator Agent System Prompt
 
@@ -6023,7 +6023,7 @@ Define explicit navigation rules for documentation zones so that:
 | Path Prefix | Status | Nav Rule | Required Entrypoint |
 |---|---|---|---|
 | `docs/00-project/**`, `docs/01-requirements/**`, `docs/02-architecture/**`, `docs/03-guides/**`, `docs/04-reference/**`, `docs/05-operations/**` | `published` | MUST be represented in primary nav (except explicit internal/archived subsections) | Section index page in nav |
-| `docs/skills/**` | `internal-published` | MAY be shown only under `Internal / Extended -> Skills` | [docs/skills/README.md](../../skills/README.md) |
+| `docs/00-project/ai/skills/**` | `internal-published` | MAY be shown only under `Internal / Extended -> Skills` | [docs/00-project/ai/skills/README.md](../../skills/README.md) |
 | `docs/plans/**` | `internal-published` | Curated pages MAY be shown under `Internal / Extended -> Plans` | [docs/plans/README.md](../../plans/README.md) or curated nav node |
 | `docs/reports/**` | `internal-published` + `internal` | Curated pages MAY be in `Internal / Extended -> Reports`; bulk report artifacts MAY remain non-nav | [docs/reports/index.md](../../reports/index.md) |
 | `docs/99-archive/**` | `archive` | MUST remain non-nav by default; historical context only | [docs/99-archive/README.md](../../99-archive/README.md) (or equivalent archive index) |
@@ -6147,8 +6147,8 @@ Interpretation:
 
 Implementation note:
 - docs KPI and nav-growth checks ignore generated local site artifacts (`docs/site/**`, `.mkdocs-site-tmp/**`).
-- `docs/skills/global/.system/**` is treated as `internal-generated` and SHOULD remain non-nav.
-- `docs/skills/local/nci-analysis/references/**` is published in nav (wave-7 curated promotion).
+- `docs/00-project/ai/skills/global/.system/**` is treated as `internal-generated` and SHOULD remain non-nav.
+- `docs/00-project/ai/skills/local/nci-analysis/references/**` is published in nav (wave-7 curated promotion).
 
 ### 6.5 Wave-8 Ratified Decisions (2026-03-03)
 
@@ -19255,7 +19255,7 @@ ADR files follow the pattern: `ADR-NNN-kebab-case-title.md`
 ## References
 
 - [RULES.md](../../00-project/RULES.md) — Project rules referencing these ADRs
-- [CLAUDE.md](../../00-project/agents/CLAUDE.md) — Developer guide with ADR context
+- [CLAUDE.md](../../00-project/ai/agents/CLAUDE.md) — Developer guide with ADR context
 - [Michael Nygard's ADR format](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions)
 
 
@@ -33616,7 +33616,7 @@ Production cleanup **MUST** be done through CI/CD only. Manual cleanup **MUST NO
 
 \newpage
 
-# Source: `03-guides/dashboards/DASHBOARD_V2_UPDATES.md`
+# Source: `03-guides/dashboards/dashboard-v2-updates.md`
 
 # Dashboard v2 Updates (Audit 2026-02-24)
 
@@ -33665,7 +33665,7 @@ histogram-quantile(0.95, sum by (le) (rate(bioetl-health_check-latency-ms-bucket
 
 \newpage
 
-# Source: `03-guides/dashboards/DASHBOARD_V2_USAGE.md`
+# Source: `03-guides/dashboards/dashboard-v2-usage.md`
 
 # BioETL Dashboards v2: Usage
 
@@ -33720,7 +33720,7 @@ p95 latency по провайдерам.
 
 \newpage
 
-# Source: `03-guides/dashboards/MONITORING_INDEX.md`
+# Source: `03-guides/dashboards/monitoring-index.md`
 
 # Monitoring Docs Index
 
@@ -33761,7 +33761,7 @@ p95 latency по провайдерам.
 
 \newpage
 
-# Source: `03-guides/dashboards/VARIABLES_GUIDE.md`
+# Source: `03-guides/dashboards/variables-guide.md`
 
 # Variables Guide (Grafana Dashboards)
 
@@ -41828,7 +41828,7 @@ JSON exports для Gold-схем хранятся в `docs/04-reference/contrac
 
 \newpage
 
-# Source: `04-reference/hash_policy.md`
+# Source: `04-reference/hash-policy.md`
 
 # Hash Policy Contract
 
@@ -54534,7 +54534,7 @@ cat /var/log/bioetl/pipeline.log | \
 ### Внутренние
 
 - **RULES.md** — `docs/00-project/RULES.md` (§8 Testing, §9 Anti-Patterns)
-- **CLAUDE.md** — `docs/00-project/agents/CLAUDE.md` (§7.5 Type Annotations, §9 Anti-Patterns)
+- **CLAUDE.md** — `docs/00-project/ai/agents/CLAUDE.md` (§7.5 Type Annotations, §9 Anti-Patterns)
 - **Project Wiki** — `https://wiki.company.com/bioetl/validation`
 - **CI/CD Pipeline** — `.github/workflows/tests.yml`
 
@@ -56314,7 +56314,7 @@ This section contains operational documentation for managing BioETL in productio
 | [Runbooks](runbooks/index.md) | Operational playbooks for incident response |
 | [Performance Baselines](performance-baselines.md) | Expected performance metrics |
 | [VACUUM Retention](vacuum-retention.md) | Delta Lake vacuum retention policies |
-| [Release Checklist](RELEASE_CHECKLIST.md) | Pre-release verification checklist |
+| [Release Checklist](release-checklist.md) | Pre-release verification checklist |
 
 ## Quick Links
 
@@ -56345,7 +56345,7 @@ This section contains operational documentation for managing BioETL in productio
 
 \newpage
 
-# Source: `05-operations/RELEASE_CHECKLIST.md`
+# Source: `05-operations/release-checklist.md`
 
 # Release Checklist v5.9.0
 
@@ -56458,7 +56458,7 @@ Tests now run correctly with `pytest-xdist` using `--dist loadscope`.
 
 \newpage
 
-# Source: `05-operations/deployment/DEPLOYMENT_GUIDE.md`
+# Source: `05-operations/deployment/deployment-guide.md`
 
 # BioETL Kubernetes Deployment Guide
 
@@ -56952,7 +56952,7 @@ resources:
 
 \newpage
 
-# Source: `05-operations/deployment/K8S_SUMMARY.md`
+# Source: `05-operations/deployment/k8s-summary.md`
 
 # BioETL Kubernetes Manifests - Summary
 
@@ -57243,7 +57243,7 @@ See DEPLOYMENT-GUIDE.md for detailed troubleshooting.
 
 \newpage
 
-# Source: `05-operations/deployment/MCP_NEO4J_MEMORY_FINAL_SUMMARY.md`
+# Source: `05-operations/deployment/mcp-neo4j-memory-final-summary.md`
 
 # MCP Neo4j Memory - Complete Setup Summary
 
@@ -57672,7 +57672,7 @@ Thank you for using MCP Neo4j Memory!
 
 \newpage
 
-# Source: `05-operations/deployment/MCP_NEO4J_MEMORY_SUMMARY.md`
+# Source: `05-operations/deployment/mcp-neo4j-memory-summary.md`
 
 # MCP Neo4j Memory Configuration - Setup Summary
 
@@ -58009,7 +58009,7 @@ Let me know if you have any other questions!
 
 \newpage
 
-# Source: `05-operations/deployment/NEO4J_MEMORY_SETUP.md`
+# Source: `05-operations/deployment/neo4j-memory-setup.md`
 
 # Neo4j Memory Configuration Guide
 

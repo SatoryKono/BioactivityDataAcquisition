@@ -22,6 +22,26 @@ class ExemptionInventory:
     expired_entries: int
 
 
+def _resolve_owner(entry: dict[str, object]) -> str:
+    """Extract owner string from an exemption entry, falling back to '<missing>'."""
+    owner = entry.get("owner")
+    return owner.strip() if isinstance(owner, str) and owner.strip() else "<missing>"
+
+
+def _tally_expiry(
+    entry: dict[str, object],
+    now: date,
+    by_expiry_quarter: Counter[str],
+) -> int:
+    """Update expiry quarter counter and return 1 if entry is expired, else 0."""
+    expiry_date = _parse_iso_date(entry.get("expires_on"))
+    if expiry_date is None:
+        by_expiry_quarter["unknown"] += 1
+        return 0
+    by_expiry_quarter[_quarter_label(expiry_date)] += 1
+    return 1 if expiry_date < now else 0
+
+
 def build_exemption_inventory(
     registry_path: Path | str | None = None,
     *,
@@ -52,21 +72,8 @@ def build_exemption_inventory(
                 continue
 
             by_registry[registry_name] += 1
-            owner = entry.get("owner")
-            owner_name = (
-                owner.strip()
-                if isinstance(owner, str) and owner.strip()
-                else "<missing>"
-            )
-            by_owner[owner_name] += 1
-
-            expiry_date = _parse_iso_date(entry.get("expires_on"))
-            if expiry_date is None:
-                by_expiry_quarter["unknown"] += 1
-            else:
-                by_expiry_quarter[_quarter_label(expiry_date)] += 1
-                if expiry_date < now:
-                    expired_entries += 1
+            by_owner[_resolve_owner(entry)] += 1
+            expired_entries += _tally_expiry(entry, now, by_expiry_quarter)
 
     return ExemptionInventory(
         total_exemptions=sum(by_registry.values()),

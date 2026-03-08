@@ -112,18 +112,12 @@ class ChemblFetchResilienceMixin:
         error: Exception,
         context: str = "fetch",
     ) -> None:
-        """Handle errors with unified classification.
-
-        Args:
-            error: The exception to classify, log, and wrap.
-            context: Operation name included in the wrapped error and logs
-                (default ``"fetch"``).
-        """
-        failure_count = self.http_client.circuit_breaker.get_failure_count()
+        """Handle errors with unified classification."""
+        failure_count = self._http_client.circuit_breaker.get_failure_count()
         health_status = self._get_health_status()
 
         error_context = {
-            "circuit_breaker_state": self.http_client.circuit_breaker.get_state().value,
+            "circuit_breaker_state": self._http_client.circuit_breaker.get_state().value,
             "circuit_breaker_failures": failure_count,
             "health_status": health_status.value,
         }
@@ -139,28 +133,20 @@ class ChemblFetchResilienceMixin:
         self,
         error: Exception,
     ) -> bool:
-        """Check if exception is a retry exhausted error (direct or wrapped).
-
-        Returns:
-            True if the exception is or wraps a RetryExhaustedError, False otherwise.
-        """
+        """Check if exception is a retry exhausted error (direct or wrapped)."""
         return is_retry_exhausted_error(error)
 
     async def _fetch_single_record_direct(
         self, entity_type: str, record_id: str
     ) -> BronzeRecord | None:
-        """Fetch a single record using direct endpoint as fallback.
-
-        Returns:
-            Record dictionary if found via direct endpoint, None if not found or on error.
-        """
+        """Fetch a single record using direct endpoint as fallback."""
         direct_url = self._mapper.get_direct_record_url(entity_type, record_id)
         params = {"format": "json"}
 
         try:
             start_time = time.perf_counter()
             with self._adapter_metrics.measure_request(f"/{entity_type}/{record_id}"):
-                response = await self.http_client.get(direct_url, params=params)
+                response = await self._http_client.get(direct_url, params=params)
             duration_ms = (time.perf_counter() - start_time) * 1000
 
             with contextlib.suppress(Exception):
@@ -168,7 +154,7 @@ class ChemblFetchResilienceMixin:
 
             data = response.json()
             if isinstance(data, dict) and not data.get("page_meta"):
-                self.logger.info(
+                self._logger.info(
                     "direct_endpoint_fallback_success",
                     entity_type=entity_type,
                     record_id=record_id,
@@ -176,7 +162,7 @@ class ChemblFetchResilienceMixin:
                 return data
             return None
         except CHEMBL_ADAPTER_ERRORS as error:
-            self.logger.warning(
+            self._logger.warning(
                 "direct_endpoint_fallback_failed",
                 entity_type=entity_type,
                 record_id=record_id,
@@ -196,21 +182,7 @@ class ChemblFetchResilienceMixin:
         error: Exception,
         pk_fields: tuple[str, ...] | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Recover retry-exhausted batch via shared split-or-single policy.
-
-        Args:
-            entity_type: ChEMBL entity type (e.g., ``"activity"``).
-            id_batch: List of IDs that triggered the retry-exhausted error.
-            filter_field: API field name used for filtering.
-            limit: Maximum records to yield, or None for no limit.
-            seen_ids: Mutable set of already-yielded identifiers; shared state.
-            pk_field: Primary key field for single-key deduplication.
-            error: The RetryExhaustedError or wrapping exception that triggered recovery.
-            pk_fields: Optional composite-key tuple; None for single-key dedup.
-
-        Returns:
-            Async iterator of recovered BronzeRecord dicts.
-        """
+        """Recover retry-exhausted batch via shared split-or-single policy."""
 
         async def _fetch_reduced_batch(batch: list[str]) -> AsyncIterator[BronzeRecord]:
             async for record in self._fetch_batch_with_reduction(
@@ -243,7 +215,7 @@ class ChemblFetchResilienceMixin:
             retry_error=error,
             on_split=lambda first_half, second_half, retry_error: (
                 _log_batch_reduction_retry(
-                    self.logger,
+                    self._logger,
                     self.provider_name,
                     entity_type=entity_type,
                     filter_field=filter_field,
@@ -265,11 +237,7 @@ class ChemblFetchResilienceMixin:
         pk_field: str,
         pk_fields: tuple[str, ...] | None = None,
     ) -> bool:
-        """Return True when record is new and register its dedup key.
-
-        Returns:
-            True if the record is new and was registered, False if it was already seen.
-        """
+        """Return True when record is new and register its dedup key."""
         use_composite = pk_fields is not None and len(pk_fields) > 1
         if use_composite:
             assert pk_fields is not None
@@ -295,20 +263,7 @@ class ChemblFetchResilienceMixin:
         pk_field: str,
         pk_fields: tuple[str, ...] | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Yield filtered records while deduplicating by configured keys.
-
-        Args:
-            entity_type: ChEMBL entity type (e.g., ``"activity"``).
-            id_batch: List of IDs to fetch in the filtered query.
-            filter_field: API field name used for filtering.
-            limit: Maximum records to yield, or None for no limit.
-            seen_ids: Mutable set of already-yielded identifiers; updated in place.
-            pk_field: Primary key field for single-key deduplication.
-            pk_fields: Optional composite-key tuple; None for single-key dedup.
-
-        Returns:
-            Async iterator of unique BronzeRecord dicts.
-        """
+        """Yield filtered records while deduplicating by configured keys."""
         async for record in self._fetch_with_filter(
             entity_type, id_batch, filter_field, limit
         ):
@@ -325,25 +280,12 @@ class ChemblFetchResilienceMixin:
         error: Exception,
         pk_fields: tuple[str, ...] | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Try direct endpoint fallback for a single failed filter ID.
-
-        Args:
-            entity_type: ChEMBL entity type (e.g., ``"activity"``).
-            id_batch: Single-element list containing the failed ID.
-            filter_field: API field name used for the original filter.
-            seen_ids: Mutable set of already-yielded identifiers; updated in place.
-            pk_field: Primary key field for single-key deduplication.
-            error: The original exception that caused the batch failure.
-            pk_fields: Optional composite-key tuple; None for single-key dedup.
-
-        Returns:
-            Async iterator of at most one BronzeRecord dict from the direct endpoint.
-        """
+        """Try direct endpoint fallback for a single failed filter ID."""
         single_id = id_batch[0]
         direct_record = await self._fetch_single_record_direct(entity_type, single_id)
         if direct_record is None:
             _log_single_id_failure(
-                self.logger,
+                self._logger,
                 self.provider_name,
                 entity_type,
                 filter_field,
@@ -366,21 +308,7 @@ class ChemblFetchResilienceMixin:
         error: Exception,
         pk_fields: tuple[str, ...] | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Recover from RetryExhaustedError using shared policy orchestrator.
-
-        Args:
-            entity_type: ChEMBL entity type (e.g., ``"activity"``).
-            id_batch: List of IDs from the failed batch.
-            filter_field: API field name used for the original filter.
-            limit: Maximum records to yield, or None for no limit.
-            seen_ids: Mutable set of already-yielded identifiers; shared state.
-            pk_field: Primary key field for single-key deduplication.
-            error: The RetryExhaustedError that triggered recovery.
-            pk_fields: Optional composite-key tuple; None for single-key dedup.
-
-        Returns:
-            Async iterator of recovered BronzeRecord dicts.
-        """
+        """Recover from RetryExhaustedError using shared policy orchestrator."""
         async for record in self._retry_with_split_batches(
             entity_type,
             id_batch,
@@ -403,20 +331,7 @@ class ChemblFetchResilienceMixin:
         pk_field: str,
         pk_fields: tuple[str, ...] | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch filtered batch and recover from retry-exhausted failures.
-
-        Args:
-            entity_type: ChEMBL entity type (e.g., ``"activity"``).
-            id_batch: List of IDs to fetch in the filtered batch.
-            filter_field: API field name used for filtering.
-            limit: Maximum records to yield, or None for no limit.
-            seen_ids: Mutable set of already-yielded identifiers; shared state.
-            pk_field: Primary key field for single-key deduplication.
-            pk_fields: Optional composite-key tuple; None for single-key dedup.
-
-        Returns:
-            Async iterator of BronzeRecord dicts, with retry-exhausted recovery applied.
-        """
+        """Fetch filtered batch and recover from retry-exhausted failures."""
         retry_error: Exception | None = None
         try:
             async for record in self._yield_deduplicated_filtered_records(

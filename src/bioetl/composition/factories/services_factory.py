@@ -81,6 +81,17 @@ class BaseServicesFactory:
     ) -> PipelineService:
         """Create a fully wired `PipelineService` bundle for one pipeline run.
 
+        Args:
+            settings: Application settings for storage paths, environment, and feature flags.
+            logger: LoggerPort for structured logging across all services.
+            data_source: DataSourcePort providing raw records for the pipeline.
+            pipeline_config: Pipeline YAML configuration with table names and source settings.
+            metrics: Optional MetricsPort; creates PrometheusMetrics from settings if None.
+            tracer: Optional TracingPort; uses NoOpTracing if None.
+            dq_monitor: Optional DQMonitorPort for anomaly detection.
+            metadata_coordinator: Optional coordinator for pipeline metadata writes.
+            silver_validator: Optional Silver layer validator; required in production.
+
         Returns:
             PipelineService with storage, checkpoint, observability, and DQ wired.
         """

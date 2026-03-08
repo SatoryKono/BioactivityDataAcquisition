@@ -187,6 +187,32 @@ bioetl checkpoint list
 * Логи локальных запусков сохраняйте в `logs/`.
 * Для ad-hoc команд используйте явное перенаправление (`> logs/<name>.log 2>&1` или `> tmp/<name>.txt 2>&1`).
 
+### MCP Setup (GitHub Copilot + Codex)
+
+To configure the GitHub MCP server for both VS Code Copilot and Codex CLI:
+
+```bash
+./scripts/dev/setup_copilot_codex_mcp.sh
+```
+
+Windows PowerShell:
+
+```powershell
+.\scripts\dev\setup_copilot_codex_mcp.ps1
+```
+
+What this script does:
+
+- Writes workspace MCP config for Copilot at `.vscode/mcp.json`.
+- Registers `github` MCP server in Codex CLI if it is not already configured.
+- Does **not** store tokens in repository files.
+
+Before using GitHub MCP tools, set a token in your shell:
+
+```bash
+export GITHUB_PERSONAL_ACCESS_TOKEN="<your_pat>"
+```
+
 ### Testing
 
 The project uses `pytest` for testing, split into Unit, Integration, and Architecture tests.

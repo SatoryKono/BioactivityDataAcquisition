@@ -30,6 +30,11 @@ def _create_default_fallback_strategy(
 ) -> DefaultFallbackExecutionStrategy:
     """Create default fallback execution strategy for non-DI call sites.
 
+    Args:
+        normalize_id: Callable to normalize ID strings for deduplication.
+        extract_record_id: Callable to extract the canonical ID from a record.
+        fallback_handler: Optional title-based fallback handler; None disables fallback.
+
     Returns:
         DefaultFallbackExecutionStrategy configured with the given normalize and extract hooks.
     """
@@ -48,6 +53,12 @@ def _create_default_fallback_decorator(
     logger: LoggerPort,
 ) -> ComposableFallbackDecorator:
     """Create default fallback decorator for non-DI call sites.
+
+    Args:
+        service: Orchestrator service for executing the fallback fetch pipeline.
+        strategy: Execution strategy with normalize/extract/fallback hooks.
+        config: Configuration controlling fallback policy behavior.
+        logger: Logger port for structured logging.
 
     Returns:
         ComposableFallbackDecorator wired with the given service, strategy, and config.
@@ -96,11 +107,15 @@ class OpenAlexFallbackOrchestrator:
             service=self.fallback_fetch_service,
             strategy=strategy,
             config=self.config,
-            logger=self.logger,
+            logger=self._logger,
         )
 
     def configure_policy(self, policy: object | None) -> None:
-        """Reconfigure fallback policy from provider YAML settings."""
+        """Reconfigure fallback policy from provider YAML settings.
+
+        Args:
+            policy: Provider YAML fallback policy object, or None to use defaults.
+        """
         enabled, config = resolve_fallback_policy(
             policy,
             defaults=self.config,
@@ -122,10 +137,21 @@ class OpenAlexFallbackOrchestrator:
         limit: int | None,
         filter_field: str | None = "doi",
     ) -> AsyncIterator[BronzeRecord]:
-        """Run fallback request through shared policy service."""
+        """Run fallback request through shared policy service.
+
+        Args:
+            filter_ids: List of DOI strings for primary batch resolution.
+            fallback_mapping: Mapping of DOI to title for title-based fallback resolution.
+            primary_record_fetcher: Callable that fetches primary records given IDs and limit.
+            limit: Optional maximum number of records to yield.
+            filter_field: Filter field name used for the primary lookup phase.
+
+        Yields:
+            BronzeRecord works from primary DOI resolution and title fallback phases.
+        """
 
         def _log_phase1_summary(total: int, found: int) -> None:
-            self.logger.info(
+            self._logger.info(
                 "openalex_doi_lookup_summary",
                 total_dois=total,
                 found_by_doi=found,

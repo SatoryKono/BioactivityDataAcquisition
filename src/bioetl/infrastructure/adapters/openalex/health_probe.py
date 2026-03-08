@@ -30,6 +30,14 @@ async def probe_openalex_health(
 ) -> HealthStatus:
     """Probe OpenAlex API health with latency-based degradation threshold.
 
+    Args:
+        api_base: Base URL for the OpenAlex API (e.g., "https://api.openalex.org").
+        mailto: Email address for the polite pool parameter.
+        http_client: HTTP client for making the probe request.
+        logger: Logger port for structured warning output.
+        adapter_metrics: Adapter metrics for measuring request latency.
+        headers: Request headers to include in the probe request.
+
     Returns:
         HealthStatus reflecting the current OpenAlex API availability and response latency.
     """

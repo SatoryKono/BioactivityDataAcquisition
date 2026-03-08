@@ -1,4 +1,7 @@
-name: Type Checking (Strict)
+﻿name: Type Checking (Strict)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 on:
   push:
@@ -202,3 +205,4 @@ jobs:
             reports/
             .mypy_cache/
           if-no-files-found: warn
+

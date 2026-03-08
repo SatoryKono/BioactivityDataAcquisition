@@ -44,6 +44,13 @@ class StoragePort(
         """Compatibility re-declaration for legacy StoragePort patch points.
 
         The authoritative contract lives on ``StorageMaintenancePort``.
+
+        Args:
+            silver_table: Name of the Silver table to preview cleanup for.
+            gold_table: Optional name of the Gold table; defaults to None.
+
+        Returns:
+            MetaDict with preview information about what would be cleared.
         """
         ...
 

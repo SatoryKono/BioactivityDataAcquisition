@@ -87,6 +87,13 @@ def _create_default_semanticscholar_title_fallback_handler(
 ) -> SemanticScholarTitleFallbackHandler:
     """Create default title fallback handler for non-DI call sites.
 
+    Args:
+        http_client: HTTP client for API requests.
+        logger: Logger port for structured logging.
+        metrics: Adapter metrics for request tracking.
+        api_key: Optional Semantic Scholar API key for stable rate limits.
+        fields: Comma-separated list of fields to retrieve per paper.
+
     Returns:
         SemanticScholarTitleFallbackHandler instance configured with HTTP client and API key.
     """
@@ -137,8 +144,8 @@ class SemanticScholarAdapter(
             self.error_handler
             if self.error_handler is not None
             else _create_default_semanticscholar_error_handler(
-                logger=self.logger,
-                metrics=self.metrics,
+                logger=self._logger,
+                metrics=self._metrics,
             )
         )
         self._fallback_fetch_service = (
@@ -152,8 +159,8 @@ class SemanticScholarAdapter(
             self.title_fallback_handler
             if self.title_fallback_handler is not None
             else _create_default_semanticscholar_title_fallback_handler(
-                http_client=self.http_client,
-                logger=self.logger,
+                http_client=self._http_client,
+                logger=self._logger,
                 metrics=self._adapter_metrics,
                 api_key=self.api_key,
                 fields=self.fields,
@@ -162,7 +169,11 @@ class SemanticScholarAdapter(
         self.configure_fallback_policy(None)
 
     def configure_fallback_policy(self, policy: object | None) -> None:
-        """Configure fallback decorator behavior from provider YAML policy."""
+        """Configure fallback decorator behavior from provider YAML policy.
+
+        Args:
+            policy: Provider YAML fallback policy object, or None to use defaults.
+        """
         enabled, config = resolve_fallback_policy(
             policy,
             defaults=_SEMANTICSCHOLAR_DEFAULT_FALLBACK_CONFIG,
@@ -177,7 +188,7 @@ class SemanticScholarAdapter(
             service=self._fallback_fetch_service,
             strategy=strategy,
             config=config,
-            logger=self.logger,
+            logger=self._logger,
         )
 
     def _build_headers(self) -> dict[str, str]:

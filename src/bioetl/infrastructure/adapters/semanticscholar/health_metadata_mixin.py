@@ -201,6 +201,9 @@ class SemanticScholarHealthMetadataMixin(SemanticScholarHealthMetadataMixinABC):
     ) -> SourceMetadata:
         """Return and clear request metadata collector state.
 
+        Args:
+            api_version: Optional API version string to embed in the metadata.
+
         Returns:
             SourceMetadata aggregated from all recorded API requests since last clear.
         """

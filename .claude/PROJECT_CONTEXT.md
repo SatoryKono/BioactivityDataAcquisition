@@ -4,8 +4,8 @@
 
 > **Это сокращённая версия.** Полная документация:
 > - `docs/00-project/RULES.md` — **Единственный источник истины** для архитектурных правил
-> - `docs/00-project/agents/CLAUDE.md` — Протокол верификации и архитектурные пояснения
-> - `docs/00-project/agents/AGENT.md` — Персона, workflow и инструкции для агента
+> - `docs/00-project/ai/agents/guides/CLAUDE.md` — Протокол верификации и архитектурные пояснения
+> - `docs/00-project/ai/agents/guides/AGENT.md` — Персона, workflow и инструкции для агента
 
 ---
 
@@ -20,7 +20,7 @@ make install             # Установка зависимостей
 
 ## 1. Архитектура
 
-> **Полная документация**: См. `docs/00-project/RULES.md` §1 и `docs/00-project/agents/CLAUDE.md` §2
+> **Полная документация**: См. `docs/00-project/RULES.md` §1 и `docs/00-project/ai/agents/guides/CLAUDE.md` §2
 
 ```
 src/bioetl/
@@ -37,7 +37,7 @@ src/bioetl/
 - DI: Зависимости в конструктор. `composition/bootstrap/` — единственное место сборки
 
 > **⚠️ Протокол верификации**: Перед утверждениями о компонентах проверяй код!
-> См. `docs/00-project/agents/CLAUDE.md` §0 и §2.3 для списка частых ложных выводов.
+> См. `docs/00-project/ai/agents/guides/CLAUDE.md` §0 и §2.3 для списка частых ложных выводов.
 
 ---
 

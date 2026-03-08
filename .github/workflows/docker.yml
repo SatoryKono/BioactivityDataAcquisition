@@ -1,10 +1,17 @@
-name: Docker Build & Compose Validation
+﻿name: Docker Build & Compose Validation
 
 permissions:
   contents: read
 
 on:
   push:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.ai/**'
+      - '.claude/**'
+      - '.github/workflows/**'
+      - 'LICENSE'
     branches: [ main, master, develop ]
     paths:
       - 'Dockerfile'
@@ -12,6 +19,13 @@ on:
       - '.dockerignore'
       - 'entrypoint.sh'
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.ai/**'
+      - '.claude/**'
+      - '.github/workflows/**'
+      - 'LICENSE'
     branches: [ main, master, develop ]
     paths:
       - 'Dockerfile'
@@ -132,3 +146,4 @@ jobs:
             ghcr.io/${{ github.repository }}:${{ github.ref_name }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+

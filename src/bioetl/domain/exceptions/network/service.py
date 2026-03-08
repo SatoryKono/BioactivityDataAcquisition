@@ -250,7 +250,18 @@ def DataValidationError(
     field: str | None = None,
     value: str | None = None,
 ) -> ExternalServiceError:
-    """Compatibility constructor for legacy DataValidationError."""
+    """Compatibility constructor for legacy DataValidationError.
+
+    Args:
+        message: Human-readable description of the validation failure.
+        service_name: Optional name of the external service that returned invalid data;
+            defaults to None.
+        field: Optional field name that failed validation; defaults to None.
+        value: Optional string representation of the invalid value; defaults to None.
+
+    Returns:
+        ExternalServiceError with INVALID_DATA type and field/value context attached.
+    """
     error = ExternalServiceError(message, service_name=service_name)
     error = cast(
         ExternalServiceError,

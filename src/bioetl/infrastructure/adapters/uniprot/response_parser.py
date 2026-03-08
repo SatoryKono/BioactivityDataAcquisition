@@ -15,6 +15,9 @@ def parse_uniprot_protein_response(
 ) -> tuple[list[BronzeRecord], str | None]:
     """Parse UniProt protein search response.
 
+    Args:
+        response: HTTP response from the UniProt protein search endpoint.
+
     Returns:
         Tuple of (list of protein records, next cursor string or None if last page).
     """

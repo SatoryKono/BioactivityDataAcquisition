@@ -2,7 +2,7 @@
 
 **Date:** 2026-03-03  
 **Branch:** `main`  
-**Scope:** полный аудит документации проекта (`docs/00-05`, `docs/99-archive`, `docs/plans`, `docs/reports`, `docs/skills`) с верификацией ссылок, nav-покрытия, drift-guardrails и согласованности с ADR.
+**Scope:** полный аудит документации проекта (`docs/00-05`, `docs/99-archive`, `docs/plans`, `docs/reports`, `docs/00-project/ai/skills`) с верификацией ссылок, nav-покрытия, drift-guardrails и согласованности с ADR.
 
 ## 1. Executive Summary
 
@@ -148,7 +148,7 @@
    - метрика изменена `135 -> 109`.
 10. Выполнена wave-3 корректировка и стабилизация:
    - добавлены curated записи для `02-architecture/**` и `skills/**`;
-   - `qa_orchestrator` переведён на канонический путь `00-project/agents/qa_orchestrator.md` (nav + links);
+   - `qa_orchestrator` переведён на канонический путь `00-project/ai/agents/qa_orchestrator.md` (nav + links);
    - generated site artifacts (`site/**`) исключены из KPI/nav-growth как build output;
    - с учётом текущего workspace-состояния (удаления архивных отчётов) метрика снижена до `65`;
    - KPI статус `on_track` (target `<=120` достигнут с запасом).
@@ -231,7 +231,7 @@ Applied result:
 - promoted architecture extras, selected plans/reports/prompts, curated local skills, and additional architecture/skill reference pages in waves 3-6;
 - kept `99-archive/**` out of nav intentionally;
 - retained generated/auxiliary docs as non-nav but linked via indexes;
-- aligned `qa_orchestrator` references to canonical `00-project/agents/` path;
+- aligned `qa_orchestrator` references to canonical `00-project/ai/agents/` path;
 - excluded generated local site artifacts (`site/**`) from KPI/nav-growth accounting;
 - formalized `internal-generated` handling for `skills/global/.system/**`;
 - promoted NCI reference pages to nav in wave-7.

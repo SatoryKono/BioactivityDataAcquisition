@@ -32,6 +32,11 @@ def safe_float(
 ) -> float | None:
     """Safely convert *value* to float, returning *default* on failure.
 
+    Args:
+        value: Input value to convert; None and bool inputs return default immediately.
+        default: Value returned when conversion fails or result is non-finite;
+            defaults to None.
+
     Returns:
         Converted float value, or default if conversion fails or value is non-finite.
     """
@@ -49,6 +54,11 @@ def safe_int(
     default: int | None = None,
 ) -> int | None:
     """Safely convert *value* to int, returning *default* on failure.
+
+    Args:
+        value: Input value to convert; None and bool inputs return default immediately.
+        default: Value returned when conversion fails or result is non-finite;
+            defaults to None.
 
     Returns:
         Converted integer value, or default if conversion fails or value is non-finite.

@@ -4,7 +4,7 @@
 
 # ADR-008: Graceful Shutdown Strategy
 
-**Status:** Superseded
+**Status:** Superseded (signal handlers removed; shutdown handled in CLI and application/core/shutdown.py)
 **Date:** 2025-12-22
 **Last Updated:** 2026-01-02
 **Decision makers:** @BioETL-Team

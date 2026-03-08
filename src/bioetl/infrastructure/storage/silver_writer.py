@@ -263,6 +263,23 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         bronze_refs: list[BronzeWriteResult] | None,
         key_nullability_rules: list[KeyNullabilityRule] | None,
     ) -> SilverWriteResult | None:
+        """Execute the Silver write pipeline within an OTel tracing span.
+
+        Args:
+            table_name: Logical Delta table name (e.g., "chembl/activity").
+            records: Normalized Bronze records to upsert.
+            primary_keys: Field names used to construct the MERGE predicate.
+            schema: PyArrow schema for table creation or evolution.
+            mode: Write mode string ("merge", "append", or "overwrite").
+            partition_cols: Optional column names for Delta table partitioning.
+            on_schema_mismatch: Schema mismatch policy ("error", "evolve", or "ignore").
+            column_order: Optional explicit column ordering applied before writing.
+            bronze_refs: Optional Bronze write results for lineage metadata.
+            key_nullability_rules: Optional per-key nullability override rules.
+
+        Returns:
+            SilverWriteResult with record count and write metadata, or None if no records.
+        """
         started_at, start_perf = datetime.now(UTC), time.perf_counter()
         tracer = self._tracing.get_tracer(__name__)
         with tracer.start_as_current_span("write_silver") as span:
@@ -294,6 +311,15 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         records: list[BronzeRecord],
         ctx: _SilverWriteExecutionContext,
     ) -> SilverWriteResult | None:
+        """Orchestrate the Silver write pipeline stages.
+
+        Args:
+            records: Normalized Bronze records to process and write.
+            ctx: Immutable execution context with write parameters and span.
+
+        Returns:
+            SilverWriteResult with record count and write metadata, or None if no records.
+        """
         (
             records,
             validated_mode,
@@ -338,6 +364,19 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         table_path: str,
         arrow_data: pa.Table,
     ) -> SilverWriteResult | None:
+        """Run post-write stages: CSV export, audit, and result finalization.
+
+        Args:
+            ctx: Immutable execution context with write parameters, span, and timing.
+            records: Normalized Bronze records that were written.
+            validated_mode: Resolved write mode enum from the preparation step.
+            table_name: Logical Delta table name for audit and metadata.
+            table_path: Resolved filesystem path of the Silver Delta table.
+            arrow_data: PyArrow table built from the normalized records.
+
+        Returns:
+            SilverWriteResult with record count and write metadata, or None if no records.
+        """
         await self._maybe_export_csv(
             table_name=ctx.table_name,
             arrow_data=arrow_data,
