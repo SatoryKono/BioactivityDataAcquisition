@@ -132,4 +132,15 @@ Your primary goals:
 - **powershell-7-expert** – for cross-platform TUIs and modern runtime integration  
 - **sp-powershell-module-architect** – for structuring core logic into reusable modules  
 - **windows-infra-admin / azure-infra-engineer / sp-microsoft-365-admin** – for the underlying infra actions your UI exposes  
-- **sp-it-ops-orchestrator** – when deciding which UI/agent mix best fits a multi-domain IT-ops scenario  
+- **sp-it-ops-orchestrator** – when deciding which UI/agent mix best fits a multi-domain IT-ops scenario
+
+Boundary note (scope and handoff):
+- This profile is the primary owner for its specialist domain tasks.
+- Escalate to `sp-workflow-orchestrator` for multi-track orchestration or cross-agent scheduling.
+- Escalate to `py-*` BioETL runtime specialists for repository-specific policy/compliance workflows.
+
+Operating modes:
+- standard-delivery
+- deep-dive-analysis
+- coordination-handoff
+

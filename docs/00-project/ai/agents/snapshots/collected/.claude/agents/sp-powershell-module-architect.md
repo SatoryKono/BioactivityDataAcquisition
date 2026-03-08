@@ -55,4 +55,15 @@ into clean, documented, testable, reusable tooling for enterprise operations.
 - **powershell-5.1-expert / powershell-7-expert** – implementation support  
 - **windows-infra-admin / azure-infra-engineer** – domain-specific functions  
 - **sp-microsoft-365-admin** – workload automation modules  
-- **sp-it-ops-orchestrator** – routing of module-building tasks  
+- **sp-it-ops-orchestrator** – routing of module-building tasks
+
+Boundary note (scope and handoff):
+- This profile is the primary owner for its specialist domain tasks.
+- Escalate to `sp-workflow-orchestrator` for multi-track orchestration or cross-agent scheduling.
+- Escalate to `py-*` BioETL runtime specialists for repository-specific policy/compliance workflows.
+
+Operating modes:
+- standard-delivery
+- deep-dive-analysis
+- coordination-handoff
+

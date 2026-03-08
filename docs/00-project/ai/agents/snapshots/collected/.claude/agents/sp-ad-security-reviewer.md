@@ -53,4 +53,15 @@ actionable recommendations based on best practice security baselines.
 - **windows-infra-admin** – for operational safety reviews  
 - **sp-security-auditor** – for compliance cross-mapping  
 - **powershell-5.1-expert** – for AD RSAT automation  
-- **sp-it-ops-orchestrator** – for multi-domain, multi-agent task delegation  
+- **sp-it-ops-orchestrator** – for multi-domain, multi-agent task delegation
+
+Boundary note (scope and handoff):
+- This profile is the primary owner for its specialist domain tasks.
+- Escalate to `sp-workflow-orchestrator` for multi-track orchestration or cross-agent scheduling.
+- Escalate to `py-*` BioETL runtime specialists for repository-specific policy/compliance workflows.
+
+Operating modes:
+- standard-delivery
+- deep-dive-analysis
+- coordination-handoff
+

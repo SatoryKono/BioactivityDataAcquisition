@@ -14,13 +14,6 @@ policy:
         - removal_step
 registries:
     file_size_limits:
-        # --- domain ---
-        src/bioetl/domain/composite/config_models.py:
-            value: 350
-            owner: '@bioetl-data-model'
-            reason: Composite config dataclasses with validation — 7 frozen dataclasses with cross-field validation logic.
-            expires_on: '2026-06-30'
-            removal_step: Split config model responsibilities into dedicated value-object modules and remove this exemption entry.
         # --- composition ---
         src/bioetl/composition/factories/pipeline_assembler.py:
             value: 380
@@ -53,19 +46,7 @@ registries:
             reason: CLI run-all command — orchestrates batch pipeline execution with progress bars, error handling, summary output.
             expires_on: '2026-06-30'
             removal_step: Extract summary formatting and progress tracking into CLI helper modules.
-    function_complexity:
-        src/bioetl/domain/composite/config_models.py::_coerce_to_tuple:
-            value: 6
-            owner: '@bioetl-data-model'
-            reason: Unified coercion helper with optional dict conversion — CC=6 from isinstance checks and convert_dicts branch.
-            expires_on: '2026-06-30'
-            removal_step: Simplify by splitting into _coerce_to_tuple and _coerce_to_typed_tuple.
-        src/bioetl/domain/composite/config_models.py::_validate:
-            value: 7
-            owner: '@bioetl-data-model'
-            reason: Cross-field validation for CrossValidationConfig — CC=7 from 6 threshold checks.
-            expires_on: '2026-06-30'
-            removal_step: Extract threshold and tolerance validation into separate helpers.
+    function_complexity: { }
     function_length: { }
     class_size:
         # --- infrastructure/storage ---
@@ -163,16 +144,4 @@ registries:
             reason: Temporary governance anchor exemption while owner diversification policy activation is tracked from 2026-Q2.
             expires_on: '2026-06-30'
             removal_step: Remove after owner-diversification governance/tests support a zero-debt inventory baseline without anchor exemptions.
-    domain_complexity:
-        src/bioetl/domain/composite/config_models.py::_coerce_to_tuple:
-            value: 6
-            owner: '@bioetl-data-model'
-            reason: Unified coercion helper with optional dict conversion — CC=6 from isinstance checks and convert_dicts branch.
-            expires_on: '2026-06-30'
-            removal_step: Simplify by splitting into _coerce_to_tuple and _coerce_to_typed_tuple.
-        src/bioetl/domain/composite/config_models.py::_validate:
-            value: 7
-            owner: '@bioetl-data-model'
-            reason: Cross-field validation for CrossValidationConfig — CC=7 from 6 threshold checks.
-            expires_on: '2026-06-30'
-            removal_step: Extract threshold and tolerance validation into separate helpers.
+    domain_complexity: { }
