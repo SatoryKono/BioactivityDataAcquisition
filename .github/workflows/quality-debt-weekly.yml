@@ -46,4 +46,5 @@ jobs:
           path: |
             reports/quality/debt-weekly.json
             reports/quality/debt-weekly.md
+          retention-days: 30
 
