@@ -33,6 +33,10 @@ class CrossRefResponseMapper:
     ) -> BronzeRecord:
         """Annotate publication payload with lookup metadata.
 
+        Args:
+            publication: Bronze record to annotate in-place.
+            lookup_method: Lookup method label to set in the _lookup_method field.
+
         Returns:
             Publication record with the _lookup_method field set to the given value.
         """
@@ -47,6 +51,11 @@ class CrossRefResponseMapper:
         slow_threshold_seconds: float = 5.0,
     ) -> CrossRefHealthProbeMapping:
         """Map raw probe response to adapter health status and event metadata.
+
+        Args:
+            status_code: HTTP response status code from the health probe request.
+            elapsed_seconds: Request duration in seconds for latency classification.
+            slow_threshold_seconds: Duration threshold above which DEGRADED is returned.
 
         Returns:
             CrossRefHealthProbeMapping with the classified HealthStatus and optional log event name.

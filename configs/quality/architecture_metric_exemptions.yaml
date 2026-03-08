@@ -14,10 +14,11 @@ policy:
         - removal_step
 registries:
     file_size_limits:
+        # --- domain ---
         src/bioetl/domain/composite/config_models.py:
-            value: 320
+            value: 350
             owner: '@bioetl-data-model'
-            reason: Transitional domain composite config model consolidation pending split into smaller mapping/value object modules.
+            reason: Composite config dataclasses with validation — 7 frozen dataclasses with cross-field validation logic.
             expires_on: '2026-06-30'
             removal_step: Split config model responsibilities into dedicated value-object modules and remove this exemption entry.
         src/bioetl/domain/services/normalization_service.py:
@@ -26,9 +27,140 @@ registries:
             reason: Transitional normalization service wrapper still hosts mixin composition and adapter-facing glue during staged decomposition.
             expires_on: '2026-06-30'
             removal_step: Move residual orchestration/helpers to dedicated services and remove this exemption entry.
-    function_complexity: { }
+        # --- composition ---
+        src/bioetl/composition/factories/pipeline_assembler.py:
+            value: 380
+            owner: '@bioetl-platform'
+            reason: Pipeline assembly wiring — coordinates factory calls to assemble full pipeline graph. Inherently compositional.
+            expires_on: '2026-06-30'
+            removal_step: Extract sub-assemblers for bronze/silver/gold phase wiring.
+        src/bioetl/composition/factories/services_builder.py:
+            value: 410
+            owner: '@bioetl-platform'
+            reason: DI service builder — constructs all application services with injected dependencies. Large due to many services.
+            expires_on: '2026-06-30'
+            removal_step: Split into domain-grouped service builder modules (storage, observability, quality).
+        src/bioetl/composition/factories/services_factory_pipeline_builder.py:
+            value: 370
+            owner: '@bioetl-platform'
+            reason: Pipeline builder factory — bridges service factory and pipeline assembly. Transitional glue layer.
+            expires_on: '2026-06-30'
+            removal_step: Merge into pipeline_assembler or split by pipeline type.
+        src/bioetl/composition/factories/_storage_factory_helpers.py:
+            value: 410
+            owner: '@bioetl-platform'
+            reason: Storage factory helpers — creates Bronze/Silver/Gold writers with all DI dependencies. Many constructor params.
+            expires_on: '2026-06-30'
+            removal_step: Extract per-layer storage factory helpers (bronze_factory, silver_factory, gold_factory).
+        src/bioetl/composition/runtime_builders/inputs_resolver.py:
+            value: 400
+            owner: '@bioetl-platform'
+            reason: Runtime input resolution — resolves configs, filters, DQ rules for pipeline execution. Complex setup logic.
+            expires_on: '2026-06-30'
+            removal_step: Extract filter resolution and DQ config resolution into separate resolver modules.
+        # --- interfaces ---
+        src/bioetl/interfaces/cli/commands/run_all.py:
+            value: 485
+            owner: '@bioetl-architecture'
+            reason: CLI run-all command — orchestrates batch pipeline execution with progress bars, error handling, summary output.
+            expires_on: '2026-06-30'
+            removal_step: Extract summary formatting and progress tracking into CLI helper modules.
+    function_complexity:
+        src/bioetl/domain/normalization_dates.py::parse_date_field:
+            value: 10
+            owner: '@bioetl-data-model'
+            reason: ISO-8601 fast-path optimization adds branching (CC=9) but provides 9x speedup for the most common date format.
+            expires_on: '2026-09-30'
+            removal_step: Extract fast-path into a dedicated _parse_iso8601() helper and call from parse_date_field.
     function_length: { }
-    class_size: { }
+    class_size:
+        # --- infrastructure/storage ---
+        src/bioetl/infrastructure/storage/bronze_writer.py::BronzeWriter:
+            value: 360
+            owner: '@bioetl-storage'
+            reason: Bronze writer with audit trail, metrics, and error handling. Core storage adapter.
+            expires_on: '2026-06-30'
+            removal_step: Extract audit and metrics recording into a BronzeWriterObservabilityMixin.
+        src/bioetl/infrastructure/storage/bronze_writer_io_mixin.py::BronzeWriterIOMixin:
+            value: 330
+            owner: '@bioetl-storage'
+            reason: Bronze I/O mixin — file writing, partitioning, compression. Already extracted from BronzeWriter.
+            expires_on: '2026-06-30'
+            removal_step: Further split into write and partition helpers.
+        src/bioetl/infrastructure/storage/silver_writer_delta_mixin.py::SilverWriterDeltaMixin:
+            value: 360
+            owner: '@bioetl-storage'
+            reason: Delta Lake operations mixin — merge, upsert, schema evolution. Complex DeltaTable API usage.
+            expires_on: '2026-06-30'
+            removal_step: Extract schema evolution logic into a separate DeltaSchemaManager.
+        src/bioetl/infrastructure/storage/silver_writer_metadata_mixin.py::SilverWriterMetadataMixin:
+            value: 330
+            owner: '@bioetl-storage'
+            reason: Silver metadata mixin — metadata extraction, column mapping, audit fields. Already extracted.
+            expires_on: '2026-06-30'
+            removal_step: Inline simple helpers and reduce method count.
+        src/bioetl/infrastructure/storage/silver_writer_validation_mixin.py::SilverWriterValidationMixin:
+            value: 330
+            owner: '@bioetl-storage'
+            reason: Silver validation mixin — DQ checks, quarantine, schema validation. Already extracted.
+            expires_on: '2026-06-30'
+            removal_step: Extract quarantine logic into a QuarantineHandler.
+        # --- infrastructure/adapters ---
+        src/bioetl/infrastructure/adapters/chembl/client.py::ChemblAdapter:
+            value: 350
+            owner: '@bioetl-adapters'
+            reason: ChEMBL API adapter — handles 8 entity types with pagination, rate limiting, error mapping.
+            expires_on: '2026-06-30'
+            removal_step: Extract entity-specific fetch methods into per-entity strategy classes.
+        src/bioetl/infrastructure/adapters/chembl/fetch_resilience_mixin.py::ChemblFetchResilienceMixin:
+            value: 360
+            owner: '@bioetl-adapters'
+            reason: Resilience mixin — retry, circuit breaker, fallback strategies for ChEMBL API calls.
+            expires_on: '2026-06-30'
+            removal_step: Extract retry and circuit breaker into generic resilience decorators.
+        src/bioetl/infrastructure/adapters/common/api_request_collector.py::APIRequestCollector:
+            value: 330
+            owner: '@bioetl-adapters'
+            reason: Request collector — accumulates API responses, handles pagination, deduplication. Core adapter utility.
+            expires_on: '2026-06-30'
+            removal_step: Extract deduplication into a ResponseDeduplicator.
+        src/bioetl/infrastructure/adapters/decorators/retry.py::RetryingDataSourceDecorator:
+            value: 330
+            owner: '@bioetl-adapters'
+            reason: Retry decorator — wraps DataSourcePort with configurable retry, backoff, and error classification.
+            expires_on: '2026-06-30'
+            removal_step: Extract backoff strategy into a BackoffPolicy value object.
+        src/bioetl/infrastructure/adapters/http/client_retry_mixin.py::HTTPClientRetryMixin:
+            value: 370
+            owner: '@bioetl-adapters'
+            reason: HTTP retry mixin — retry logic, status code mapping, timeout handling for httpx client.
+            expires_on: '2026-06-30'
+            removal_step: Extract status code classification into an HttpStatusClassifier.
+        # --- application ---
+        src/bioetl/application/composite/column_orderer.py::ColumnOrdererService:
+            value: 340
+            owner: '@bioetl-composite'
+            reason: Column ordering service — resolves column groups, applies layer-specific rules, handles rename/exclude.
+            expires_on: '2026-06-30'
+            removal_step: Extract group resolution into a ColumnGroupResolver.
+        src/bioetl/application/composite/dependency_joiner.py::DependencyJoinerService:
+            value: 320
+            owner: '@bioetl-composite'
+            reason: Dependency join service — executes multi-key joins with filter resolution. Complex join logic.
+            expires_on: '2026-06-30'
+            removal_step: Extract filter resolution into a JoinFilterResolver.
+        src/bioetl/application/composite/merger_io_mixin.py::MergeIOMixin:
+            value: 380
+            owner: '@bioetl-composite'
+            reason: Merge I/O mixin — reads/writes Silver/Gold tables, handles Delta Lake operations for composite merges.
+            expires_on: '2026-06-30'
+            removal_step: Extract table read/write into a CompositeStorageHelper.
+        src/bioetl/application/core/base_transformer/base.py::BaseTransformer:
+            value: 390
+            owner: '@bioetl-core'
+            reason: Base transformer — abstract base with 15+ hook methods for the template method pattern. Large by design.
+            expires_on: '2026-06-30'
+            removal_step: Extract pre/post-transform hooks into a TransformHooksMixin.
     class_method_count: { }
     god_object:
         DependencyCoordinatorService:
@@ -37,4 +169,48 @@ registries:
             reason: Temporary governance anchor exemption while owner diversification policy activation is tracked from 2026-Q2.
             expires_on: '2026-06-30'
             removal_step: Remove after owner-diversification governance/tests support a zero-debt inventory baseline without anchor exemptions.
-    domain_complexity: { }
+        # --- infrastructure/storage ---
+        BronzeWriter:
+            value: 1
+            owner: '@bioetl-storage'
+            reason: Bronze writer uses self-contained I/O methods rather than delegation. Mixin-based composition pattern.
+            expires_on: '2026-06-30'
+            removal_step: Refactor to inject I/O strategy via constructor and delegate write operations.
+        BronzeWriterIOMixin:
+            value: 1
+            owner: '@bioetl-storage'
+            reason: I/O mixin — provides methods to BronzeWriter via mixin composition, not DI delegation.
+            expires_on: '2026-06-30'
+            removal_step: Convert mixin methods to a BronzeIOStrategy injected into BronzeWriter.
+        SilverWriterDeltaMixin:
+            value: 1
+            owner: '@bioetl-storage'
+            reason: Delta Lake mixin — provides DeltaTable operations via mixin composition pattern.
+            expires_on: '2026-06-30'
+            removal_step: Convert to a DeltaOperationsStrategy injected into SilverWriter.
+        # --- infrastructure/adapters ---
+        APIRequestCollector:
+            value: 1
+            owner: '@bioetl-adapters'
+            reason: Self-contained request accumulator — collects and deduplicates API responses internally.
+            expires_on: '2026-06-30'
+            removal_step: Extract deduplication into injected ResponseDeduplicator.
+        RetryingDataSourceDecorator:
+            value: 1
+            owner: '@bioetl-adapters'
+            reason: Decorator pattern — wraps DataSourcePort. Low delegation is by design (decorator delegates to wrapped port).
+            expires_on: '2026-06-30'
+            removal_step: Refactor to use injected BackoffPolicy for retry strategy.
+        HTTPClientRetryMixin:
+            value: 1
+            owner: '@bioetl-adapters'
+            reason: HTTP retry mixin — provides retry methods via mixin composition, not DI delegation.
+            expires_on: '2026-06-30'
+            removal_step: Convert to an injected RetryStrategy.
+    domain_complexity:
+        src/bioetl/domain/normalization_dates.py::parse_date_field:
+            value: 10
+            owner: '@bioetl-data-model'
+            reason: ISO-8601 fast-path optimization adds branching (CC=9) but provides 9x speedup for the most common date format.
+            expires_on: '2026-09-30'
+            removal_step: Extract fast-path into a dedicated _parse_iso8601() helper and call from parse_date_field.

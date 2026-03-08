@@ -14,37 +14,83 @@ We have implemented a **port-based observability architecture** with three forma
 
 ### 1. Observability Ports as Formal Protocols
 
-All observability concerns are abstracted through ports in `domain/ports/observability.py`:
+All observability concerns are abstracted through ports in `domain/ports/observability/`:
+
+**LoggerPort** (`domain/ports/observability/logging.py`):
 
 ```python
-@runtime-checkable
+@runtime_checkable
 class LoggerPort(Protocol):
     """Port for structured logging."""
-    def bind(self, **kwargs: Any) -> Self: ...
-    def info(self, -event: str, **kwargs: Any) -> Any: ...
-    def warning(self, -event: str, **kwargs: Any) -> Any: ...
-    def error(self, -event: str, **kwargs: Any) -> Any: ...
-    def debug(self, -event: str, **kwargs: Any) -> Any: ...
-    def exception(self, -event: str, **kwargs: Any) -> Any: ...
 
-@runtime-checkable
+    def bind(self, **kwargs: Any) -> Self:  # Any: structlog-compatible API
+        """Return a new logger with additional bound context key-value pairs."""
+        ...
+
+    def info(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
+        """Emit an informational log event."""
+        ...
+
+    def warning(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
+        """Emit a warning log event."""
+        ...
+
+    def error(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
+        """Emit an error log event."""
+        ...
+
+    def debug(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
+        """Emit a debug log event."""
+        ...
+
+    def exception(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
+        """Emit an error log event with current exception information attached."""
+        ...
+```
+
+**MetricsPort** (`domain/ports/observability/metrics.py`):
+
+```python
+@runtime_checkable
 class MetricsPort(Protocol):
     """Port for metrics collection."""
-    def observe-histogram(self, name: str, value: float, labels: dict[str, str]) -> None: ...
-    def increment-counter(self, name: str, value: int, labels: dict[str, str]) -> None: ...
-    def set-gauge(self, name: str, value: float, labels: dict[str, str]) -> None: ...
-    def close(self) -> None: ...
 
-@runtime-checkable
+    def observe_histogram(self, name: str, value: float, labels: dict[str, str]) -> None:
+        """Record a histogram observation."""
+        ...
+
+    def increment_counter(self, name: str, value: int, labels: dict[str, str]) -> None:
+        """Increment a counter metric."""
+        ...
+
+    def set_gauge(self, name: str, value: float, labels: dict[str, str]) -> None:
+        """Set a gauge metric value."""
+        ...
+
+    def close(self) -> None:
+        """Close and cleanup metrics resources."""
+        ...
+```
+
+**TracingPort** (`domain/ports/observability/tracing.py`):
+
+```python
+@runtime_checkable
 class TracingPort(Protocol):
     """Port for distributed tracing — an OpenTelemetry Tracing API facade.
 
-    Deliberately modeled after the OTel API: get-tracer() returns an
-    OTel-compatible Tracer (start-as-current-span, Span context manager).
+    Deliberately modeled after the OTel API: get_tracer() returns an
+    OTel-compatible Tracer (start_as_current_span, Span context manager).
     This is an intentional design choice — see ADR-022 for the rationale.
     """
-    def get-tracer(self, name: str) -> Any: ...
-    def close(self) -> None: ...
+
+    def get_tracer(self, name: str) -> Any:
+        """Get or create a tracer instance."""
+        ...
+
+    def close(self) -> None:
+        """Close and cleanup tracing resources."""
+        ...
 ```
 
 ### 2. Prometheus Metrics with Standardized Labels

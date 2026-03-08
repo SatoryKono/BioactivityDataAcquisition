@@ -49,6 +49,11 @@ class SilverWriterMergedMixin:
     ) -> pa.Table:
         """Prepare normalized Arrow table for merged silver writes.
 
+        Args:
+            records: List of Bronze record dicts to convert to Arrow format.
+            primary_keys: Optional list of column names used for sorting; no sort applied if None or empty.
+            preserve_column_order: If True, skip canonical column reordering.
+
         Returns:
             PyArrow Table with coerced null types, canonical column order, and primary key sorting applied.
         """
@@ -77,7 +82,12 @@ class SilverWriterMergedMixin:
         table_path: str,
         arrow_table: pa.Table,
     ) -> None:
-        """Write merged Arrow table into Delta Lake."""
+        """Write merged Arrow table into Delta Lake.
+
+        Args:
+            table_path: File system path to the Delta table target.
+            arrow_table: PyArrow Table to write in overwrite mode.
+        """
         loop = asyncio.get_running_loop()
         await loop.run_in_executor(
             None,
@@ -95,7 +105,12 @@ class SilverWriterMergedMixin:
         table_name: str,
         arrow_table: pa.Table,
     ) -> None:
-        """Export merged table to CSV when exporter is configured."""
+        """Export merged table to CSV when exporter is configured.
+
+        Args:
+            table_name: Logical table name used as the CSV export target.
+            arrow_table: PyArrow Table containing the merged records to export.
+        """
         if self.csv_exporter:
             await self.csv_exporter.export(
                 table_name,
@@ -113,7 +128,16 @@ class SilverWriterMergedMixin:
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
     ) -> None:
-        """Write merged records to Silver layer without explicit schema."""
+        """Write merged records to Silver layer without explicit schema.
+
+        Args:
+            table_name: Logical table name for the Silver target.
+            records: List of Bronze record dicts to write.
+            primary_keys: Optional list of column names used for sorting.
+            run_id: Optional run identifier written to metadata sidecar.
+            sources_used: Optional list of source identifiers contributing to the merge.
+            preserve_column_order: If True, skip canonical column reordering.
+        """
         if not records:
             self.logger.warning(
                 "No records to write for merged Silver",

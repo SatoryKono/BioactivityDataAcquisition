@@ -76,6 +76,7 @@ class DependencySnapshot:
     total_internal_imports: int
     layer_edges: list[LayerEdge]
     cross_layer_group_edges: list[GroupEdge]
+    cross_layer_group_edges_total: int
     violations: list[LayerEdge]
 
 
@@ -213,12 +214,15 @@ def collect_dependency_snapshot(src_root: Path) -> DependencySnapshot:
         for (source, target), count in sorted(layer_counter.items())
     ]
 
+    sorted_group_edges = sorted(
+        group_counter.items(),
+        key=lambda item: (-item[1], item[0][0], item[0][1]),
+    )
+    group_edges_total = len(sorted_group_edges)
+
     group_edges = [
         GroupEdge(source=source, target=target, imports=count)
-        for (source, target), count in sorted(
-            group_counter.items(),
-            key=lambda item: (-item[1], item[0][0], item[0][1]),
-        )[:GROUP_EDGE_LIMIT]
+        for (source, target), count in sorted_group_edges[:GROUP_EDGE_LIMIT]
     ]
 
     violations = [edge for edge in layer_edges if not edge.allowed]
@@ -228,6 +232,7 @@ def collect_dependency_snapshot(src_root: Path) -> DependencySnapshot:
         total_internal_imports=total_internal_imports,
         layer_edges=layer_edges,
         cross_layer_group_edges=group_edges,
+        cross_layer_group_edges_total=group_edges_total,
         violations=violations,
     )
 
@@ -246,6 +251,8 @@ def build_markdown(snapshot: DependencySnapshot) -> str:
         f"- Internal import edges (raw): `{snapshot.total_internal_imports}`",
         f"- Aggregated layer edges: `{len(snapshot.layer_edges)}`",
         f"- Layer policy violations: `{len(snapshot.violations)}`",
+        f"- Cross-layer module-group edges (total): "
+        f"`{snapshot.cross_layer_group_edges_total}`",
         f"- Cross-layer module-group edges (top {GROUP_EDGE_LIMIT}): "
         f"`{len(snapshot.cross_layer_group_edges)}`",
         "",
@@ -324,6 +331,7 @@ def build_json(snapshot: DependencySnapshot) -> str:
             "total_internal_imports": snapshot.total_internal_imports,
             "layer_edges": len(snapshot.layer_edges),
             "cross_layer_group_edges": len(snapshot.cross_layer_group_edges),
+            "cross_layer_group_edges_total": snapshot.cross_layer_group_edges_total,
             "violations": len(snapshot.violations),
         },
         "layer_edges": [asdict(edge) for edge in snapshot.layer_edges],

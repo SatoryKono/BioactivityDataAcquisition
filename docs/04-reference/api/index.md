@@ -22,3 +22,6 @@ This section is intentionally compact in navigation to avoid exposing empty plac
 - Generated architecture dependency artifacts are stored in:
   - `docs/02-architecture/generated/module-dependency-map.md`
   - `docs/02-architecture/generated/module-dependency-map.json`
+- The JSON summary section contains two coupling metrics:
+  - `cross_layer_group_edges` — top-60 slice used in the markdown table.
+  - `cross_layer_group_edges_total` — full graph count before slicing; enforced by `test_cross_layer_group_edges_total_budget` with a ratchet budget (baseline: 232, budget: 240).

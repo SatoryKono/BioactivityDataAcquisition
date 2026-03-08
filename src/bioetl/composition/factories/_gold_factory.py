@@ -31,6 +31,18 @@ def create_gold_writer(
 ) -> GoldWriter:
     """Create configured Gold writer.
 
+    Args:
+        writer_cls: GoldWriter class to instantiate.
+        base_path: Root directory for Gold layer storage.
+        config: Optional sink layer config providing save_metadata flag.
+        logger: LoggerPort for structured logging.
+        tracing: Optional TracingPort; defaults to NoOpTracing if None.
+        csv_exporter: Optional CSV exporter for parallel Gold CSV output.
+        metadata_coordinator: Optional coordinator for metadata side-effects.
+        transform_version: Transform version tag written to Gold metadata.
+        transform_steps: Ordered transform step labels for metadata.
+        flat_structure: If True, writes files without provider/entity subdirectories.
+
     Returns:
         Configured GoldWriter instance for the Gold storage layer.
     """

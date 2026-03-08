@@ -201,7 +201,12 @@ class AdapterMetrics:
         self.metrics.set_gauge("adapter_fallback_hit_rate", hit_rate, labels)
 
     def _record_request_p95(self, endpoint: str, duration_seconds: float) -> None:
-        """Update rolling p95 latency gauge for provider+endpoint."""
+        """Update rolling p95 latency gauge for provider+endpoint.
+
+        Args:
+            endpoint: API endpoint being tracked (e.g., "/activity").
+            duration_seconds: Request duration in seconds to add to the rolling window.
+        """
         with self._window_lock:
             samples = self._request_duration_windows[endpoint]
             samples.append(duration_seconds)

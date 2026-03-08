@@ -166,7 +166,18 @@ class PubChemAdapter(PubChemAdapterModelMixin, FilterableStubMixin, BaseSyncAdap
     async def _fetch_compound(
         self, query: str | None, limit: int | None
     ) -> AsyncIterator[JsonDict]:  # Any: untyped API JSON record
-        """Fetch compounds by query."""
+        """Fetch compounds by query.
+
+        Args:
+            query: Compound name or search string; required, raises ValueError if None.
+            limit: Optional maximum number of compounds to yield.
+
+        Yields:
+            Raw compound records from the PubChem API.
+
+        Raises:
+            ValueError: If query is None or empty.
+        """
         if not query:
             raise ValueError("Query is required for compound fetch")
         async for record in self._strategies.fetch_by_query(query, limit):

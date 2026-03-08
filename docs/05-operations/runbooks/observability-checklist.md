@@ -46,8 +46,8 @@ All log messages **MUST** include:
 ```python
 self.logger.info(
     "Fetching records",
-    run-id=ctx.run-id,
-    pipeline=ctx.pipeline-name,
+    run_id=ctx.run_id,
+    pipeline=ctx.pipeline_name,
     stage="extract",
     offset=offset,
     limit=limit,
@@ -97,14 +97,14 @@ curl http://localhost:8000/metrics | grep bioetl-
 
 ```bash
 # Run architecture test
-pytest tests/architecture/test-layer-dependencies.py::test-adapters-have-health_check -v
+pytest tests/architecture/test_layer_dependencies.py::test_adapters_have_health_check -v
 ```
 
 ### Validate Log Schema
 
 ```bash
 # Check logs for required fields
-cat logs/bioetl.log | jq 'select(.run-id and .pipeline and .stage)'
+cat logs/bioetl.log | jq 'select(.run_id and .pipeline and .stage)'
 ```
 
 ## Adding New Adapters
@@ -123,8 +123,8 @@ When creating a new adapter:
 The following test enforces health_check presence:
 
 ```python
-# tests/architecture/test-layer-dependencies.py
-def test-adapters-have-health_check(src-dir: Path) -> None:
+# tests/architecture/test_layer_dependencies.py
+def test_adapters_have_health_check(src_dir: Path) -> None:
     """REQ-OBS-001: All adapters MUST implement health_check()."""
     ...
 ```

@@ -241,7 +241,20 @@ def assemble_runner_impl(
         | None
     ) = None,
 ) -> PipelineRunner:
-    """Assemble a PipelineRunner from a configured pipeline instance."""
+    """Assemble a PipelineRunner from a configured pipeline instance.
+
+    Args:
+        pipeline: Configured pipeline instance with services, context, and runtime.
+        observability: Bundle containing logger, tracer, metrics, and DQ monitor.
+        silver_schema: Optional PyArrow schema for Silver layer validation.
+        gold_schema: Pandera DataFrameModel class for Gold layer validation.
+        strict_gold_validation: If True, raises on Gold schema violations.
+        yaml_config: Optional pre-loaded pipeline YAML config for DQ path extraction.
+        dq_configs_extractor: Optional callable to extract DQ configs from YAML config.
+
+    Returns:
+        Fully wired PipelineRunner ready for execution.
+    """
     logger_port = observability.logger
 
     checkpoint_manager = _build_checkpoint_manager(

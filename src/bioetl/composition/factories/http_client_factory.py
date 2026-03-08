@@ -193,7 +193,19 @@ class HttpClientFactory:
         metrics: MetricsPort | None = None,
         logger: LoggerPort | None = None,
     ) -> UnifiedHTTPClient:
-        """Thin assembler: resolves config, then constructs infrastructure objects."""
+        """Thin assembler: resolves config, then constructs infrastructure objects.
+
+        Args:
+            provider: Provider name used as label in HTTP client configuration.
+            settings: Optional application settings for API-key rate overrides.
+            run_id: Optional run ID for correlation headers; defaults to None.
+            tracer: Optional TracingPort for distributed tracing; defaults to None.
+            metrics: Optional MetricsPort for circuit breaker metrics; defaults to None.
+            logger: Optional LoggerPort for HTTP client logging; defaults to None.
+
+        Returns:
+            Configured UnifiedHTTPClient with rate limiter and circuit breaker.
+        """
         cfg = cls._resolve_config(provider, settings)
 
         return UnifiedHTTPClient(

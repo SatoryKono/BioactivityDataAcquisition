@@ -289,15 +289,7 @@ class BaseFilterConfig:
 
 
 _OPERATOR_CHECKERS: dict[
-    FilterOperator,
-    Callable[
-        [
-            BaseFilterConfig,
-            object,
-            frozenset[str] | None,
-        ],
-        bool,
-    ],
+    FilterOperator, Callable[[BaseFilterConfig, object, frozenset[str] | None], bool]
 ] = {
     FilterOperator.IN: BaseFilterConfig._check_op_in,
     FilterOperator.NOT_IN: BaseFilterConfig._check_op_not_in,

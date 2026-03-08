@@ -28,6 +28,16 @@ def create_bronze_writer(
 ) -> BronzeWriter:
     """Create configured Bronze writer.
 
+    Args:
+        writer_cls: BronzeWriter class to instantiate.
+        base_path: Root directory for Bronze layer storage.
+        config: Optional sink layer config providing save_json and save_metadata flags.
+        logger: LoggerPort for structured logging.
+        metrics: MetricsPort for recording storage metrics.
+        tracing: Optional TracingPort; defaults to NoOpTracing if None.
+        metadata_coordinator: Optional coordinator for metadata side-effects.
+        flat_structure: If True, writes files without provider/entity subdirectories.
+
     Returns:
         Configured BronzeWriter instance for the Bronze storage layer.
     """

@@ -105,7 +105,20 @@ class UniProtAdapter(
         request_collector: APIRequestCollector | None = None,
         fallback_fetch_service: FallbackFetchOrchestratorService | None = None,
     ) -> None:
-        """Initialize UniProt adapter dependencies."""
+        """Initialize UniProt adapter dependencies.
+
+        Args:
+            http_client: HTTP client for making API requests.
+            logger: Logger port for structured logging.
+            api_key: Optional UniProt API key for authenticated access.
+            base_url: Base URL for the UniProt REST API.
+            strict_error_handling: Whether to raise exceptions or log warnings on errors.
+            metrics: Optional metrics port for recording adapter metrics.
+            error_handler: Optional error handler for mapping exceptions to domain errors.
+            adapter_metrics: Optional pre-built adapter metrics instance.
+            request_collector: Optional pre-built request collector instance.
+            fallback_fetch_service: Optional pre-built fallback fetch orchestrator.
+        """
         super().__init__(
             http_client,
             logger,
@@ -161,7 +174,22 @@ class UniProtAdapter(
         filter_field: str | None = None,
         offset: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch records by query or filter IDs."""
+        """Fetch records by query or filter IDs.
+
+        Args:
+            entity_type: Entity type to fetch; must be "protein", "feature", or "sequence".
+            limit: Optional maximum number of records to yield.
+            query: Optional UniProt query string (e.g., "reviewed:true AND organism_id:9606").
+            filter_ids: Optional list of accession IDs to filter by.
+            filter_field: Optional filter field name; required when filter_ids provided.
+            offset: Ignored; internal pagination manages record offset.
+
+        Yields:
+            BronzeRecord entries from the UniProt REST API.
+
+        Raises:
+            ValueError: If entity_type is not "protein", "feature", or "sequence".
+        """
         del offset
         strategy = self._fetch_strategies.get(entity_type)
         if not strategy:
@@ -218,8 +246,17 @@ def _create_uniprot_adapter(
 ) -> UniProtAdapter:
     """Factory helper for registry-based adapter construction.
 
+    Args:
+        http_client: HTTP client for API requests; raises ValueError if None.
+        logger: Logger port for structured logging; raises ValueError if None.
+        _settings: Application settings (unused; present for registry signature compatibility).
+        **kwargs: Additional keyword arguments forwarded to UniProtAdapter constructor.
+
     Returns:
         UniProtAdapter instance configured with the given HTTP client and logger.
+
+    Raises:
+        ValueError: If http_client or logger is None.
     """
     if http_client is None:
         raise ValueError("UniProt adapter requires http_client")

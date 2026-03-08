@@ -40,7 +40,21 @@ def _register_provider_class(
     custom_creator: AdapterCreator | None,
     default_kwargs: dict[str, object],
 ) -> None:
-    """Register decorated adapter class in provider registry."""
+    """Register decorated adapter class in provider registry.
+
+    Args:
+        cls: Adapter class implementing DataSourcePort to register.
+        name: Unique provider name (e.g., 'chembl', 'pubchem').
+        http_rate: Base rate limit in requests per second.
+        http_capacity: Token bucket capacity for burst handling.
+        requires_http_client: If True, http_client is injected at adapter creation.
+        requires_logger: If True, logger is injected at adapter creation.
+        rate_overrides: Optional dict mapping settings attribute names to boosted
+            rate limits when API keys are present.
+        custom_creator: Optional callable replacing the standard adapter creation
+            logic for complex initialization.
+        default_kwargs: Additional kwargs merged into the adapter constructor call.
+    """
     http_config: HttpConfig | None = None
     if requires_http_client:
         http_config = HttpConfig(
@@ -72,7 +86,25 @@ def register_provider(
     custom_creator: AdapterCreator | None = None,
     **default_kwargs: object,
 ) -> Callable[[type[T]], type[T]]:
-    """Decorator for registering a provider adapter class."""
+    """Decorator for registering a provider adapter class.
+
+    Args:
+        name: Unique provider name (e.g., 'chembl', 'pubchem').
+        http_rate: Base rate limit in requests per second; defaults to 5.0.
+        http_capacity: Token bucket capacity; defaults to 10.
+        requires_http_client: If True, http_client is injected at adapter creation;
+            defaults to True.
+        requires_logger: If True, logger is injected at adapter creation;
+            defaults to True.
+        rate_overrides: Optional dict mapping settings attribute names to boosted
+            rate limits when API keys are present; defaults to None.
+        custom_creator: Optional callable replacing standard adapter creation;
+            defaults to None.
+        **default_kwargs: Additional kwargs merged into the adapter constructor.
+
+    Returns:
+        Class decorator that registers the adapter and returns it unchanged.
+    """
     resolved_defaults = dict(default_kwargs)
 
     def decorator(cls: type[T]) -> type[T]:

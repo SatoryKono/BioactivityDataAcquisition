@@ -129,7 +129,15 @@ class HTTPClientRetryMixin:
         attempt: int,
         retries_used: int,
     ) -> bool:
-        """Backward-compatible wrapper for retry-budget decision logic."""
+        """Backward-compatible wrapper for retry-budget decision logic.
+
+        Args:
+            attempt: Current attempt index (0-based).
+            retries_used: Number of retries already consumed in this request.
+
+        Returns:
+            True if another retry is permitted, False otherwise.
+        """
         return _can_retry(self.retry_config, attempt, retries_used)
 
     def _record_retry_budget_exhausted(
@@ -137,7 +145,12 @@ class HTTPClientRetryMixin:
         method: str,
         url: str,
     ) -> None:
-        """Emit retry-budget exhaustion metrics and warning log."""
+        """Emit retry-budget exhaustion metrics and warning log.
+
+        Args:
+            method: HTTP method (GET, POST, etc.) used as metric label.
+            url: Request URL included in the warning log entry.
+        """
         self._metrics.increment_counter(
             "http_retry_budget_exhausted_total",
             1,
@@ -161,7 +174,15 @@ class HTTPClientRetryMixin:
         retries: int,
         last_error: Exception | None,
     ) -> None:
-        """Backward-compatible wrapper for HTTP metrics emission."""
+        """Backward-compatible wrapper for HTTP metrics emission.
+
+        Args:
+            method: HTTP method (GET, POST, etc.) used as metric label.
+            duration: Total request duration in seconds.
+            status_code: HTTP response status code (0 if connection-level error).
+            retries: Number of retry attempts made.
+            last_error: Final exception if the request failed, or None on success.
+        """
         _record_request_metrics(
             self._metrics,
             self.provider,
@@ -182,7 +203,16 @@ class HTTPClientRetryMixin:
         status_code: int | None = None,
         reason: str | None = None,
     ) -> None:
-        """Log structured retry event."""
+        """Log structured retry event.
+
+        Args:
+            url: Request URL included in the log entry.
+            method: HTTP method (GET, POST, etc.) included in the log entry.
+            attempt: Current attempt index (0-based) for display as attempt+1.
+            wait_seconds: Delay before the next attempt in seconds.
+            status_code: HTTP response status code if the failure was an HTTP error.
+            reason: Human-readable reason for the retry (overrides status_code label).
+        """
         if not self.logger:
             return
         self.logger.warning(
@@ -206,6 +236,12 @@ class HTTPClientRetryMixin:
     ) -> httpx.Response:
         """Execute one rate-limited circuit-breaker guarded request.
 
+        Args:
+            client: Active httpx.AsyncClient instance to send the request.
+            method: HTTP method string (e.g. "GET", "POST").
+            url: Target URL for the request.
+            **kwargs: Additional keyword arguments forwarded to the HTTP client.
+
         Returns:
             httpx.Response from the circuit-breaker guarded HTTP call.
         """
@@ -220,8 +256,17 @@ class HTTPClientRetryMixin:
     ) -> httpx.Response:
         """Execute request with retries, backoff, and observability.
 
+        Args:
+            method: HTTP method string (e.g. "GET", "POST").
+            url: Target URL for the request.
+            **kwargs: Additional keyword arguments forwarded to the HTTP client.
+
         Returns:
             httpx.Response on success, raises RetryExhaustedError if all attempts fail.
+
+        Raises:
+            RetryExhaustedError: When all retry attempts are consumed without success.
+            CircuitBreakerOpenError: When the circuit breaker is open and rejects the call.
         """
         client = self._get_client()
         last_error: Exception | None = None
@@ -283,6 +328,9 @@ class HTTPClientRetryMixin:
     ) -> bool:
         """Return True when exception is retryable by policy.
 
+        Args:
+            exc: Exception to evaluate against the retry policy rules.
+
         Returns:
             True if the exception type or HTTP status code is retryable per retry config, False otherwise.
         """
@@ -316,6 +364,15 @@ class HTTPClientRetryMixin:
         ],  # Any: forwarding arbitrary request kwargs to underlying HTTP client
     ) -> httpx.Response | tuple[bool, int, int, Exception | None]:
         """Execute one request attempt and return response or retry decision.
+
+        Args:
+            client: Active httpx.AsyncClient instance to send the request.
+            method: HTTP method string (e.g. "GET", "POST").
+            url: Target URL for the request.
+            attempt: Current attempt index (0-based).
+            retries_used: Number of retries already consumed in this request.
+            span: Active OpenTelemetry span for tracing this request.
+            kwargs: Additional keyword arguments forwarded to the HTTP client.
 
         Returns:
             httpx.Response on success, or tuple of (should_retry, status_code, retries_increment, exception) on failure.

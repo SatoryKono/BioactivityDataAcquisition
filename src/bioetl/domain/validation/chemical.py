@@ -95,6 +95,12 @@ def validate_molecular_weight(
 ) -> float | None:
     """Convert molecular weight to float and enforce configured bounds.
 
+    Args:
+        value: Raw molecular weight value to validate; may be any type
+            convertible to float via str().
+        config: Optional ValidationConfig providing custom min/max bounds and
+            precision; defaults to None, which applies legacy broad bounds.
+
     Returns:
         Validated molecular weight as float, or None if value is invalid or
         outside configured bounds.

@@ -45,6 +45,9 @@ class OpenAlexAdapterHelpersMixin:
     def _normalize_doi(doi: str) -> str | None:
         """Normalize DOI by removing URL prefix.
 
+        Args:
+            doi: Raw DOI string potentially including URL-style prefix.
+
         Returns:
             Normalized DOI string without URL prefix, or None if input is empty.
         """
@@ -63,6 +66,9 @@ class OpenAlexAdapterHelpersMixin:
     def _escape_title_for_search(title: str) -> str:
         """Escape title for OpenAlex title.search filter.
 
+        Args:
+            title: Publication title to clean and escape for API search.
+
         Returns:
             Plus-separated token string with special characters removed for API compatibility.
         """
@@ -72,6 +78,9 @@ class OpenAlexAdapterHelpersMixin:
     @staticmethod
     def _extract_doi_from_record(record: BronzeRecord) -> str | None:
         """Extract normalized DOI from OpenAlex record.
+
+        Args:
+            record: BronzeRecord from the OpenAlex API response.
 
         Returns:
             Lowercased DOI string without URL prefix, or None if absent.
@@ -106,6 +115,9 @@ class OpenAlexAdapterHelpersMixin:
         api_version: str | None = None,
     ) -> SourceMetadata:
         """Get API request metadata and clear collector.
+
+        Args:
+            api_version: Optional API version string to embed in the metadata.
 
         Returns:
             SourceMetadata aggregated from all recorded API requests since last clear.

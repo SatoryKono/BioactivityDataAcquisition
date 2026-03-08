@@ -68,16 +68,36 @@ The domain layer should not depend on infrastructure details. By defining `Logge
 ### LoggerPort Definition
 
 ```python
+@runtime_checkable
 class LoggerPort(Protocol):
     """Port for structured logging."""
 
-    def bind(self, **kwargs: Any) -> "LoggerPort": ...
-    def info(self, msg: str, **kwargs: Any) -> None: ...
-    def warning(self, msg: str, **kwargs: Any) -> None: ...
-    def error(self, msg: str, **kwargs: Any) -> None: ...
-    def debug(self, msg: str, **kwargs: Any) -> None: ...
-    def exception(self, msg: str, **kwargs: Any) -> None: ...
+    def bind(self, **kwargs: Any) -> Self:  # Any: structlog-compatible API
+        """Return a new logger with additional bound context."""
+        ...
+
+    def info(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
+        """Emit an informational log event."""
+        ...
+
+    def warning(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
+        """Emit a warning log event."""
+        ...
+
+    def error(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
+        """Emit an error log event."""
+        ...
+
+    def debug(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
+        """Emit a debug log event."""
+        ...
+
+    def exception(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
+        """Emit an error log event with exception information."""
+        ...
 ```
+
+**Note:** The first parameter `_event` (with underscore prefix) follows structlog convention to indicate it's a positional marker. Return type is `Any` because structlog returns implementation-defined values per the API contract.
 
 ### Backward Compatibility
 

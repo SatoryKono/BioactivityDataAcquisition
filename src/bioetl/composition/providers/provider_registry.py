@@ -181,7 +181,24 @@ class ProviderRegistry:
         settings: Settings | None = None,
         **kwargs: object,
     ) -> DataSourcePort:
-        """Create a provider adapter instance using registry metadata."""
+        """Create a provider adapter instance using registry metadata.
+
+        Args:
+            name: Provider name (e.g., 'chembl', 'pubmed').
+            http_client: Optional HTTP client; required for providers with
+                requires_http_client=True.
+            logger: Optional LoggerPort; required for providers with
+                requires_logger=True.
+            settings: Optional application settings forwarded to custom creators.
+            **kwargs: Additional keyword arguments merged with provider default_kwargs.
+
+        Returns:
+            Configured DataSourcePort adapter for the provider.
+
+        Raises:
+            KeyError: If the provider is not registered.
+            ValueError: If http_client or logger is required but not provided.
+        """
         config = cls.get(name)
 
         # Use custom creator if available

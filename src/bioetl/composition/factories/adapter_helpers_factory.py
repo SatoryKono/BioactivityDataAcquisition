@@ -52,6 +52,9 @@ class AdapterHelpersFactory:
     def supports_provider(cls, provider: str) -> bool:
         """Return True if provider uses helper-service DI profile.
 
+        Args:
+            provider: Provider name to check (e.g., 'chembl', 'pubmed').
+
         Returns:
             True if the provider is in the DI target set, False otherwise.
         """
@@ -66,6 +69,11 @@ class AdapterHelpersFactory:
         metrics: MetricsPort | None = None,
     ) -> AdapterHelperServices:
         """Create helper services for one HTTP-backed provider adapter.
+
+        Args:
+            provider: Provider name used as label in adapter metrics.
+            logger: LoggerPort for structured error and request logging.
+            metrics: Optional MetricsPort; uses NoOpMetrics if None.
 
         Returns:
             AdapterHelperServices bundle with error handler, metrics, request

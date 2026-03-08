@@ -66,7 +66,6 @@ def _handle_quarantine_failure(
         default_exit_code=ExitCode.FAIL,
     )
 
-
 def _run_quarantine_async(
     coro: Coroutine[Any, Any, _T],  # Any: standard Coroutine type params
     *,
@@ -119,7 +118,6 @@ def _run_quarantine_async(
             coro.close()
     return None
 
-
 def _run_quarantine_sync(
     fn: Callable[[], _T],
     *,
@@ -169,11 +167,9 @@ def _run_quarantine_sync(
         )
     return None
 
-
 @click.group()
 def quarantine() -> None:
     """Manage quarantine (failed records)."""
-
 
 @quarantine.command("inspect")
 @click.option("--pipeline", required=True, help="Pipeline name")
@@ -202,7 +198,6 @@ def quarantine_inspect(pipeline: str, limit: int, error_code: str | None) -> Non
         unexpected_error_title="Unexpected error during quarantine inspect",
     )
 
-
 @quarantine.command("stats")
 @click.option("--pipeline", required=True, help="Pipeline name")
 @click.option("--json", "output_json", is_flag=True, help="Output as JSON")
@@ -210,9 +205,7 @@ def quarantine_stats(pipeline: str, output_json: bool) -> None:
     """Show quarantine statistics dashboard for a pipeline."""
     quarantine_manager = get_quarantine_manager(pipeline)
 
-    async def _stats() -> dict[
-        str, Any  # Any: CLI/HTTP response values are heterogeneous
-    ]:  # Any: quarantine record has heterogeneous values
+    async def _stats() -> dict[str, Any]:  # Any: heterogeneous values
         return await quarantine_manager.get_stats()
 
     stats = _run_quarantine_async(
@@ -222,9 +215,7 @@ def quarantine_stats(pipeline: str, output_json: bool) -> None:
         domain_error_title="Failed to get stats",
         unexpected_error_title="Failed to get stats",
     )
-    if stats is None:
-        return
-
+    if stats is None: return
     if output_json:
         click.echo(json.dumps(stats, indent=2))
     else:
@@ -250,7 +241,6 @@ def quarantine_stats(pipeline: str, output_json: bool) -> None:
                 click.echo(f"    - {status}: {count} ({pct:.1f}%)")
 
         click.echo(f"\n{'=' * 50}\n")
-
 
 @quarantine.command("replay")
 @click.option("--pipeline", required=True, help="Pipeline name")
@@ -278,13 +268,10 @@ def quarantine_replay(
         domain_error_title="Failed to replay quarantine records with domain error",
         unexpected_error_title="Unexpected error during quarantine replay",
     )
-    if records is None:
-        return
-
+    if records is None: return
     if not records:
         echo_info("No records found for replay.")
         return
-
     if dry_run:
         click.echo(f"\nWould replay {len(records)} record(s):\n")
         for i, rec in enumerate(records[:10], 1):
@@ -308,7 +295,6 @@ def quarantine_replay(
             return
         click.echo(f"Marked {marked_count} record(s) as REPROCESSED.")
         echo_info("Records are ready for reprocessing by the pipeline.")
-
 
 @quarantine.command("purge")
 @click.option("--pipeline", required=True, help="Pipeline name")

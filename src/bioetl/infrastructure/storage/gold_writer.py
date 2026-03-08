@@ -62,7 +62,15 @@ def _normalize_scd_config(
     scd_config: ScdConfig,
     primary_keys: list[str] | None,
 ) -> ScdConfig:
-    """Normalize YAML scd_config keys to gold_writer expected format."""
+    """Normalize YAML scd_config keys to gold_writer expected format.
+
+    Args:
+        scd_config: Raw SCD configuration from pipeline YAML.
+        primary_keys: Optional primary key list used to fill in missing business_key.
+
+    Returns:
+        Normalized ScdConfig with gold_writer-compatible key names.
+    """
     out: JsonDict = dict(scd_config)  # Any: ScdConfig is heterogeneous
     if "business_key" not in out and primary_keys:
         out["business_key"] = (
@@ -95,7 +103,20 @@ class GoldWriter(
         transform_steps: tuple[str, ...] | None = None,
         flat_structure: bool = False,
     ) -> None:
-        """Initialize Gold writer and optional observability/metadata ports."""
+        """Initialize Gold writer and optional observability/metadata ports.
+
+        Args:
+            base_path: Root directory for Gold layer Delta Lake tables.
+            logger: Structured logger for write events and errors.
+            tracing: Optional tracing port for span propagation; defaults to NoOpTracing.
+            csv_exporter: Optional CSV exporter for post-write snapshots; disabled when None.
+            audit: Optional audit port for Gold lineage logging; disabled when None.
+            metadata_writer: Optional sidecar metadata writer; defaults to NoOpMetadataWriter.
+            metadata_coordinator: Optional coordinator for metadata orchestration; disabled when None.
+            transform_version: Optional version string embedded in Gold metadata.
+            transform_steps: Optional tuple of transform step names for lineage.
+            flat_structure: When True, omit the table-based subdirectory hierarchy.
+        """
         super().__init__(base_path, logger, flat_structure=flat_structure)
 
         if tracing is None:

@@ -10,7 +10,11 @@ from ._styles import _REPORT_STYLES
 
 
 def status_color_class(status: str) -> str:
-    """Get CSS class for status."""
+    """Get CSS class for status.
+
+    Args:
+        status: Status string (e.g., 'pass', 'warn', 'fail').
+    """
     status_lower = status.lower()
     if status_lower in ("pass", "passed"):
         return "pass"
@@ -20,7 +24,11 @@ def status_color_class(status: str) -> str:
 
 
 def render_checks_html(checks: JsonDict) -> str:
-    """Render checks as HTML."""
+    """Render checks as HTML.
+
+    Args:
+        checks: Mapping of check names to check result dicts or scalar values.
+    """
     if not checks:
         return "<p>No checks performed.</p>"
 
@@ -55,7 +63,12 @@ def render_checks_html(checks: JsonDict) -> str:
 
 
 def render_check_details_html(data: JsonDict) -> str:
-    """Render check details as HTML table."""
+    """Render check details as HTML table.
+
+    Args:
+        data: Check result dict containing key-value detail fields;
+            the 'status' key is excluded from the rendered rows.
+    """
     rows: list[str] = []
     for key, value in data.items():
         if key == "status":
@@ -72,7 +85,12 @@ def render_check_details_html(data: JsonDict) -> str:
 
 
 def format_detail_value(value: object) -> str:
-    """Format a detail value for HTML display."""
+    """Format a detail value for HTML display.
+
+    Args:
+        value: Value to format; dicts are pretty-printed as JSON, lists/tuples
+            are joined as comma-separated strings, all others are converted via str().
+    """
     if isinstance(value, dict):
         return f"<pre>{orjson.dumps(value, option=orjson.OPT_INDENT_2).decode()}</pre>"
     if isinstance(value, (list, tuple)):
@@ -81,7 +99,13 @@ def format_detail_value(value: object) -> str:
 
 
 def render_thresholds_html(thresholds: JsonDict) -> str:
-    """Render thresholds card as HTML."""
+    """Render thresholds card as HTML.
+
+    Args:
+        thresholds: Dict containing threshold data with optional keys
+            'threshold_status', 'soft_fail_threshold', 'hard_fail_threshold',
+            and 'current_error_rate'.
+    """
     if not thresholds:
         return ""
     status = str(thresholds.get("threshold_status", "pass"))

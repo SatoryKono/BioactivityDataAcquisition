@@ -250,7 +250,19 @@ def get_transformer_class(
 
 
 def _load_transformer_class(module_path: str, class_name: str) -> type:
-    """Load transformer class by dotted module path and class name."""
+    """Load transformer class by dotted module path and class name.
+
+    Args:
+        module_path: Dotted Python module path (e.g.,
+            'bioetl.application.pipelines.chembl.activity_transformer').
+        class_name: Name of the transformer class within the module.
+
+    Returns:
+        Transformer class type loaded from the module.
+
+    Raises:
+        TypeError: If the resolved attribute is not a class.
+    """
     module = import_module(module_path)
     transformer_class = getattr(module, class_name)
     if not isinstance(transformer_class, type):

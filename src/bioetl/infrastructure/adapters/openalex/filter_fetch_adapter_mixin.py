@@ -122,6 +122,9 @@ class OpenAlexAdapterFilterFetchMixin:
     ) -> JsonDict:  # Any: untyped OpenAlex API payload
         """Backward-compatible wrapper around query-execution component.
 
+        Args:
+            params: Query parameters dict to pass to the OpenAlex works endpoint.
+
         Returns:
             Dictionary containing the decoded JSON payload from the API response.
         """
@@ -134,7 +137,20 @@ class OpenAlexAdapterFilterFetchMixin:
         filter_field: str,
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch OpenAlex records by DOI/title via FilterableDataSourcePort contract."""
+        """Fetch OpenAlex records by DOI/title via FilterableDataSourcePort contract.
+
+        Args:
+            entity_type: Entity type to fetch; must be "work" or "publication".
+            filter_ids: List of DOIs or titles to filter by.
+            filter_field: Filter field name; "doi" or "title".
+            limit: Optional maximum number of records to yield.
+
+        Yields:
+            BronzeRecord works from the filtered query.
+
+        Raises:
+            ValueError: If entity_type is not "work" or "publication".
+        """
         self._validate_entity_type(entity_type)
 
         if filter_field == "doi":
@@ -157,7 +173,15 @@ class OpenAlexAdapterFilterFetchMixin:
         filter_ids: list[str],
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch OpenAlex works by DOI list via cursor-flow component."""
+        """Fetch OpenAlex works by DOI list via cursor-flow component.
+
+        Args:
+            filter_ids: List of DOI strings to resolve.
+            limit: Optional maximum number of records to yield.
+
+        Yields:
+            BronzeRecord works resolved from the DOI filter.
+        """
         async for work in self._cursor_flow.iter_filtered_by_doi(filter_ids, limit):
             yield work
 
@@ -166,7 +190,15 @@ class OpenAlexAdapterFilterFetchMixin:
         titles: list[str],
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch works by title via cursor-flow component."""
+        """Fetch works by title via cursor-flow component.
+
+        Args:
+            titles: List of publication title strings to search for.
+            limit: Optional maximum number of records to yield.
+
+        Yields:
+            BronzeRecord works from the title search results.
+        """
         async for work in self._cursor_flow.iter_filtered_by_title(titles, limit):
             yield work
 
@@ -176,7 +208,16 @@ class OpenAlexAdapterFilterFetchMixin:
         filters: dict[str, list[str]],
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Multi-field filtering not supported by OpenAlex."""
+        """Multi-field filtering not supported by OpenAlex.
+
+        Args:
+            entity_type: Entity type identifier (unused).
+            filters: Multi-field filter mapping (unused; raises NotImplementedError).
+            limit: Optional maximum record limit (unused; raises NotImplementedError).
+
+        Raises:
+            NotImplementedError: Always; OpenAlex supports only doi/title filtering.
+        """
         raise NotImplementedError(
             "OpenAlex adapter does not support multi-field filtering. "
             "Use fetch_filtered() with filter_field='doi' instead."
@@ -189,7 +230,16 @@ class OpenAlexAdapterFilterFetchMixin:
         limit: int | None,
         start_count: int = 0,
     ) -> AsyncIterator[BronzeRecord]:
-        """Phase-1 DOI lookup via cursor-flow component."""
+        """Phase-1 DOI lookup via cursor-flow component.
+
+        Args:
+            valid_dois: List of normalized DOI strings to resolve.
+            limit: Optional maximum total records to yield.
+            start_count: Records already yielded before this phase.
+
+        Yields:
+            BronzeRecord works with _lookup_method set to "doi".
+        """
         async for work in self._cursor_flow.iter_doi_batches_for_fallback(
             primary_ids=valid_dois,
             limit=limit,
@@ -205,7 +255,21 @@ class OpenAlexAdapterFilterFetchMixin:
         fallback_mapping: dict[str, str],
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch DOI-first records with title fallback resolution."""
+        """Fetch DOI-first records with title fallback resolution.
+
+        Args:
+            entity_type: Entity type; must be "work" or "publication".
+            filter_ids: List of DOI strings for primary batch resolution.
+            filter_field: Filter field name used for the primary lookup phase.
+            fallback_mapping: Mapping of DOI to title for title-based fallback.
+            limit: Optional maximum number of records to yield.
+
+        Yields:
+            BronzeRecord works from primary DOI resolution and title fallback phases.
+
+        Raises:
+            ValueError: If entity_type is not "work" or "publication".
+        """
         if not self._is_supported_entity_type(entity_type):
             raise ValueError(
                 f"OpenAlexAdapter supports 'work'/'publication', got: {entity_type}"
@@ -234,7 +298,22 @@ class OpenAlexAdapterFilterFetchMixin:
         filter_field: str | None = None,
         offset: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch OpenAlex works by filters or free-text query."""
+        """Fetch OpenAlex works by filters or free-text query.
+
+        Args:
+            entity_type: Entity type to fetch; must be "work" or "publication".
+            limit: Optional maximum number of records to yield.
+            query: Free-text query string; required when filter_ids is not provided.
+            filter_ids: Optional list of DOIs or titles to filter by.
+            filter_field: Optional filter field name; defaults to "doi" when filter_ids provided.
+            offset: Ignored; cursor-based pagination manages offset internally.
+
+        Yields:
+            BronzeRecord works from the OpenAlex API.
+
+        Raises:
+            ValueError: If entity_type is invalid, or query is missing when filter_ids is not provided.
+        """
         if filter_ids:
             effective_filter_field = filter_field or "doi"
             async for work in self.fetch_filtered(
@@ -258,7 +337,15 @@ class OpenAlexAdapterFilterFetchMixin:
         query: str,
         limit: int | None,
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch works with cursor pagination via cursor-flow component."""
+        """Fetch works with cursor pagination via cursor-flow component.
+
+        Args:
+            query: Free-text search query string.
+            limit: Optional maximum number of records to yield.
+
+        Yields:
+            BronzeRecord works from cursor-paginated query results.
+        """
         async for work in self._cursor_flow.iter_query_results(
             query=query, limit=limit
         ):
@@ -268,7 +355,14 @@ class OpenAlexAdapterFilterFetchMixin:
         self: _OpenAlexFilterFetchHost,
         dois: list[str],
     ) -> AsyncIterator[BronzeRecord]:
-        """Fetch works by DOI via cursor-flow component."""
+        """Fetch works by DOI via cursor-flow component.
+
+        Args:
+            dois: List of DOI strings to resolve in a single batch.
+
+        Yields:
+            BronzeRecord works resolved from the batch DOI query.
+        """
         async for work in self._cursor_flow.iter_by_dois(dois):
             yield work
 
@@ -278,6 +372,10 @@ class OpenAlexAdapterFilterFetchMixin:
         limit: int = 3,
     ) -> list[BronzeRecord]:
         """Search works by title via cursor-flow component.
+
+        Args:
+            title: Publication title string to search for.
+            limit: Maximum number of results to return.
 
         Returns:
             List of matching BronzeRecord dictionaries from the title search.

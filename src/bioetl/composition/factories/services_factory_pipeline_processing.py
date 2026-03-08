@@ -34,7 +34,25 @@ def build_components_and_processing_service(
     batch_id_factory: BatchIdGeneratorPort,
     create_batch_processing_components_fn: Callable[..., BatchProcessingComponents],
 ) -> tuple[BatchProcessingComponents, BatchProcessingService]:
-    """Build component stack and BatchProcessingService."""
+    """Build component stack and BatchProcessingService.
+
+    Args:
+        pipeline: Configured pipeline instance providing services and context.
+        processor_config: Record processor configuration (table names, schemas, keys).
+        error_classifier: Classifier for categorizing processing errors.
+        callbacks: Pipeline transformation callbacks (transform, gold_filter, gold_transform).
+        gold_filter: Predicate determining if a Silver record writes to Gold.
+        gold_validator: Pandera validator applied to Gold-layer DataFrames.
+        tracer: Optional TracingPort for distributed tracing.
+        lock_validator: Optional async callable for lock validation before writes.
+        tracing_manager: Batch-level tracing manager for span lifecycle.
+        batch_id_factory: Generator for unique batch identifiers.
+        create_batch_processing_components_fn: Injectable callable for creating
+            BatchProcessingComponents (allows test substitution).
+
+    Returns:
+        Tuple of (BatchProcessingComponents, BatchProcessingService).
+    """
     components = create_batch_processing_components_fn(
         services=pipeline.services,
         context=pipeline.context,

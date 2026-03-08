@@ -1,3 +1,4 @@
+# Note: Previously had a duplicate in project-automation.yml (removed)
 name: Tests
 
 permissions:

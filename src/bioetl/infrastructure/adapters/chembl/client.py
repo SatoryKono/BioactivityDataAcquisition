@@ -122,6 +122,10 @@ class ChemblAdapter(
     ) -> JsonDict:  # Any: HTTP query params (str|int|bool values)
         """Build API request parameters with health-aware batch size.
 
+        Args:
+            offset: Pagination offset to include in the request parameters.
+            entity_type: Entity type name; some entities skip limit/offset pagination.
+
         Returns:
             Dictionary of query parameters for the API request.
         """
@@ -145,6 +149,10 @@ class ChemblAdapter(
     ) -> tuple[list[BronzeRecord], bool]:
         """Process API response and return records with pagination flag.
 
+        Args:
+            response: HTTP response from the ChEMBL API.
+            entity_type: Entity type being fetched (e.g. "compound", "activity").
+
         Returns:
             Tuple of (list of extracted records, whether there is a next page).
         """
@@ -162,6 +170,10 @@ class ChemblAdapter(
     def _batch_ids(self, ids: list[str], batch_size: int) -> Iterator[list[str]]:
         """Split IDs into batches for API requests.
 
+        Args:
+            ids: Full list of IDs to split into batches.
+            batch_size: Maximum number of IDs per batch.
+
         Returns:
             Iterator yielding successive sub-lists of size batch_size.
         """
@@ -170,6 +182,9 @@ class ChemblAdapter(
 
     def _build_filter_in_params(self, filters: dict[str, list[str]]) -> dict[str, str]:
         """Build ``__in`` filter parameters for multi-field filtering.
+
+        Args:
+            filters: Mapping of field name to list of IDs to filter by.
 
         Returns:
             Dictionary mapping field__in keys to comma-joined ID strings.
@@ -183,6 +198,10 @@ class ChemblAdapter(
     def _normalize_filter_field(self, entity_type: str, filter_field: str) -> str:
         """Map Silver field names to ChEMBL API field names.
 
+        Args:
+            entity_type: Entity type being processed (unused, for interface consistency).
+            filter_field: Silver layer field name to translate to API field name.
+
         Returns:
             ChEMBL API field name corresponding to the Silver layer field name.
         """
@@ -190,6 +209,9 @@ class ChemblAdapter(
 
     def _get_api_pk_field(self, entity_type: str) -> str:
         """Get primary key field name as it appears in raw API responses.
+
+        Args:
+            entity_type: Entity type to look up the primary key field for.
 
         Returns:
             API-level primary key field name string.
@@ -199,6 +221,9 @@ class ChemblAdapter(
 
     def _get_api_dedup_fields(self, entity_type: str) -> tuple[str, ...]:
         """Get dedup key fields as they appear in raw API responses.
+
+        Args:
+            entity_type: Entity type to look up deduplication key fields for.
 
         Returns:
             Tuple of API-level field name strings used for deduplication.
@@ -210,6 +235,11 @@ class ChemblAdapter(
         self, entity_type: str, filter_field: str, id_batch: list[str]
     ) -> dict[str, str]:
         """Build filter params using API-specific field names.
+
+        Args:
+            entity_type: Entity type to resolve the API field name for.
+            filter_field: Silver layer field name to translate and filter by.
+            id_batch: Batch of IDs to include in the __in filter.
 
         Returns:
             Dictionary with the __in filter parameter for the API request.
@@ -225,6 +255,10 @@ class ChemblAdapter(
     ) -> int:  # Any: HTTP query params (str|int|bool values)
         """Estimate length of the final URL with parameters.
 
+        Args:
+            url: Base URL without query string.
+            params: Query parameters to URL-encode and append.
+
         Returns:
             Number of characters in the URL-encoded request URL including query string.
         """
@@ -239,6 +273,10 @@ class ChemblAdapter(
     ) -> str:
         """Compute composite key string from multiple fields.
 
+        Args:
+            record: Bronze record dictionary to extract key fields from.
+            pk_fields: Tuple of field names whose values form the composite key.
+
         Returns:
             Composite key string with field values joined by '|'.
         """
@@ -252,6 +290,12 @@ class ChemblAdapter(
         entity_type: str,
     ) -> bool:
         """Check if record is duplicate and add to seen set if not.
+
+        Args:
+            record: Bronze record to check for duplication.
+            pk_field: Primary key field name to extract from the record.
+            seen_ids: Mutable set of already-seen primary key values.
+            entity_type: Entity type used for logging context.
 
         Returns:
             True if the record is a duplicate, False if it is new.
@@ -268,6 +312,12 @@ class ChemblAdapter(
         entity_type: str,
     ) -> bool:
         """Check if record is duplicate using composite key.
+
+        Args:
+            record: Bronze record to check for duplication.
+            pk_fields: Tuple of field names that form the composite key.
+            seen_keys: Mutable set of already-seen composite key strings.
+            entity_type: Entity type used for logging context.
 
         Returns:
             True if the composite key has been seen before, False if it is new.
@@ -291,7 +341,22 @@ class ChemblAdapter(
         *,
         validate: bool = True,
     ) -> AsyncIterator[BaseModel]:
-        """Fetch ChEMBL records as typed DTO models."""
+        """Fetch ChEMBL records as typed DTO models.
+
+        Args:
+            entity_type: Entity type to fetch (e.g. "compound", "activity").
+            limit: Maximum number of records to return, or None for all.
+            query: Optional free-text query string for the API.
+            filter_ids: Optional list of IDs to filter results by.
+            filter_field: Field name to use for ID filtering.
+            validate: If True, uses strict Pydantic validation; if False, uses fast model_construct.
+
+        Yields:
+            Typed Pydantic model instances for each fetched record.
+
+        Raises:
+            ValueError: If no DTO model is registered for the given entity_type.
+        """
         model_class = CHEMBL_DTO_MODELS.get(entity_type)
         if model_class is None:
             raise ValueError(
@@ -315,6 +380,9 @@ class ChemblAdapter(
 
     async def get_entity_count(self, entity_type: str) -> int:
         """Get total count of entities.
+
+        Args:
+            entity_type: Entity type to count (e.g. "compound", "activity").
 
         Returns:
             Number of entities of the specified type in the ChEMBL database.

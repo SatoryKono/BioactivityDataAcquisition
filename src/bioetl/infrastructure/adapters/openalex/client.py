@@ -94,6 +94,13 @@ def _create_default_openalex_query_executor(
 ) -> OpenAlexQueryExecutor:
     """Create default query executor for non-DI call sites.
 
+    Args:
+        http_client: HTTP client for API requests.
+        adapter_metrics: Adapter metrics for request tracking.
+        request_collector: Collector for API request metadata.
+        headers_provider: Callable returning request headers dict.
+        api_base: Base URL for the OpenAlex API.
+
     Returns:
         OpenAlexQueryExecutor instance configured with HTTP client and telemetry components.
     """
@@ -129,6 +136,17 @@ def _create_default_openalex_cursor_flow(
 ) -> OpenAlexCursorFlowService:
     """Create default cursor flow service for non-DI call sites.
 
+    Args:
+        mailto: Email address for the OpenAlex polite pool.
+        batch_size: Number of DOIs per batch request.
+        title_search_cache_size: Maximum entries for the title search cache.
+        normalize_doi: Callable to normalize DOI strings.
+        escape_title_for_search: Callable to escape titles for search queries.
+        query_executor: Query executor for making OpenAlex API requests.
+        response_mapper: Mapper for extracting results from API responses.
+        logger: Logger port for structured logging.
+        runtime_errors: Tuple of exception types to suppress during title search.
+
     Returns:
         OpenAlexCursorFlowService instance configured with the given query executor and response mapper.
     """
@@ -152,6 +170,10 @@ def _create_default_openalex_title_fallback_handler(
 ) -> TitleFallbackHandler:
     """Create default title fallback handler for non-DI call sites.
 
+    Args:
+        logger: Logger port for structured logging.
+        search_fn: Async callable accepting a title string and returning matching records.
+
     Returns:
         TitleFallbackHandler instance configured with the given logger and search function.
     """
@@ -167,6 +189,13 @@ def _create_default_openalex_fallback_orchestrator(
     logger: LoggerPort,
 ) -> OpenAlexFallbackOrchestrator:
     """Create default fallback orchestrator for non-DI call sites.
+
+    Args:
+        fallback_fetch_service: Orchestrator service for the fallback fetch pipeline.
+        fallback_handler: Title-based fallback handler for unresolved DOIs.
+        normalize_id: Callable to normalize ID strings for deduplication.
+        extract_record_id: Callable to extract the canonical ID from a record.
+        logger: Logger port for structured logging.
 
     Returns:
         OpenAlexFallbackOrchestrator instance wired with the given fallback service and handler.
@@ -309,7 +338,11 @@ class OpenAlexAdapter(
         self.configure_fallback_policy(None)
 
     def configure_fallback_policy(self, policy: object | None) -> None:
-        """Configure fallback orchestrator behavior from provider YAML policy."""
+        """Configure fallback orchestrator behavior from provider YAML policy.
+
+        Args:
+            policy: Provider YAML fallback policy object, or None to use defaults.
+        """
         self._fallback_orchestrator.configure_policy(policy)
 
 
