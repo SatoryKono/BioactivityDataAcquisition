@@ -696,13 +696,13 @@ def test_adapters_implement_protocols(src_dir: Path):
         from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
         from bioetl.infrastructure.adapters.pubchem.client import PubChemAdapter
         from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
-        from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
+        from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
         from bioetl.infrastructure.locking.memory_lock import MemoryLock
         from bioetl.domain.ports import NoOpMetrics
         from bioetl.infrastructure.observability.prometheus_metrics import (
             PrometheusMetrics,
         )
-        from bioetl.infrastructure.quarantine import UnifiedQuarantine
+        from bioetl.infrastructure.quarantine import UnifiedQuarantineAdapter
     except ImportError as e:
         pytest.fail(f"Could not import adapters for protocol check: {e}")
 
@@ -711,9 +711,9 @@ def test_adapters_implement_protocols(src_dir: Path):
         (ChemblAdapter, DataSourcePort),
         (PubChemAdapter, DataSourcePort),
         (UniProtAdapter, DataSourcePort),
-        (LocalCheckpoint, CheckpointPort),
+        (LocalCheckpointAdapter, CheckpointPort),
         (MemoryLock, LockPort),
-        (UnifiedQuarantine, QuarantinePort),
+        (UnifiedQuarantineAdapter, QuarantinePort),
         (StorageAdapter, StoragePort),
         (PrometheusMetrics, MetricsPort),
         (NoOpMetrics, MetricsPort),

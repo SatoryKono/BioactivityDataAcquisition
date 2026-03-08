@@ -1,4 +1,4 @@
-"""Unit tests for the UnifiedQuarantine class."""
+"""Unit tests for the UnifiedQuarantineAdapter class."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from uuid import UUID
 import pytest
 
 from bioetl.domain.types import BatchID, QuarantineRecordStatus
-from bioetl.infrastructure.quarantine import UnifiedQuarantine, quote_literal
+from bioetl.infrastructure.quarantine import UnifiedQuarantineAdapter, quote_literal
 from bioetl.infrastructure.quarantine.record_encoding import calculate_hash
 
 # Fixed timestamp for test reproducibility
@@ -79,8 +79,8 @@ class TestQuoteLiteral:
 
 @pytest.fixture
 def quarantine(tmp_path):
-    """Create a UnifiedQuarantine instance."""
-    return UnifiedQuarantine(base_path=str(tmp_path / "quarantine"))
+    """Create a UnifiedQuarantineAdapter instance."""
+    return UnifiedQuarantineAdapter(base_path=str(tmp_path / "quarantine"))
 
 
 @pytest.fixture
@@ -109,22 +109,22 @@ def mock_delta_table():
 
 @pytest.mark.unit
 class TestUnifiedQuarantineInit:
-    """Tests for UnifiedQuarantine initialization."""
+    """Tests for UnifiedQuarantineAdapter initialization."""
 
     def test_init_with_trailing_slash(self):
         """Test that trailing slash is removed from base_path."""
-        q = UnifiedQuarantine(base_path="s3://bucket/path/")
+        q = UnifiedQuarantineAdapter(base_path="s3://bucket/path/")
         assert q.base_path == "s3://bucket/path"
 
     def test_init_stores_base_path(self):
         """Test initialization stores base path."""
-        q = UnifiedQuarantine(base_path="/tmp/quarantine")
+        q = UnifiedQuarantineAdapter(base_path="/tmp/quarantine")
         assert q.base_path == "/tmp/quarantine"
 
 
 @pytest.mark.unit
 class TestUnifiedQuarantineWrite:
-    """Tests for UnifiedQuarantine.write method."""
+    """Tests for UnifiedQuarantineAdapter.write method."""
 
     @pytest.mark.asyncio
     async def test_write_basic(self, quarantine, batch_id, mock_write_deltalake):
@@ -196,7 +196,7 @@ class TestUnifiedQuarantineWrite:
         )
 
         record = _extract_record_from_call(mock_write_deltalake)
-        assert len(record["payload"]) <= UnifiedQuarantine.MAX_PAYLOAD_SIZE
+        assert len(record["payload"]) <= UnifiedQuarantineAdapter.MAX_PAYLOAD_SIZE
         assert record["payload_truncated"] is True
 
     @pytest.mark.asyncio
@@ -260,7 +260,7 @@ class TestUnifiedQuarantineWrite:
 
 @pytest.mark.unit
 class TestUnifiedQuarantineInspect:
-    """Tests for UnifiedQuarantine.inspect method."""
+    """Tests for UnifiedQuarantineAdapter.inspect method."""
 
     @pytest.mark.asyncio
     async def test_inspect_returns_empty_when_table_not_found(
@@ -307,7 +307,7 @@ class TestUnifiedQuarantineInspect:
 
 @pytest.mark.unit
 class TestUnifiedQuarantineReplay:
-    """Tests for UnifiedQuarantine.replay method."""
+    """Tests for UnifiedQuarantineAdapter.replay method."""
 
     def test_replay_returns_empty_when_table_not_found(
         self, quarantine, mock_delta_table
@@ -358,7 +358,7 @@ class TestUnifiedQuarantineReplay:
 
 @pytest.mark.unit
 class TestUnifiedQuarantinePurge:
-    """Tests for UnifiedQuarantine.purge method."""
+    """Tests for UnifiedQuarantineAdapter.purge method."""
 
     def test_purge_returns_zero_when_table_not_found(
         self,
@@ -405,7 +405,7 @@ class TestUnifiedQuarantinePurge:
 
 @pytest.mark.unit
 class TestUnifiedQuarantineUpdateStatus:
-    """Tests for UnifiedQuarantine.update_status method."""
+    """Tests for UnifiedQuarantineAdapter.update_status method."""
 
     def test_update_status_returns_false_when_table_not_found(
         self,
@@ -455,7 +455,7 @@ class TestUnifiedQuarantineUpdateStatus:
 
 @pytest.mark.unit
 class TestUnifiedQuarantineGetStats:
-    """Tests for UnifiedQuarantine.get_stats method."""
+    """Tests for UnifiedQuarantineAdapter.get_stats method."""
 
     @pytest.mark.asyncio
     async def test_get_stats_returns_empty_when_table_not_found(
@@ -523,7 +523,7 @@ class TestUnifiedQuarantineGetStats:
 
 @pytest.mark.unit
 class TestUnifiedQuarantineAclose:
-    """Tests for UnifiedQuarantine.aclose method."""
+    """Tests for UnifiedQuarantineAdapter.aclose method."""
 
     @pytest.mark.asyncio
     async def test_aclose_does_nothing(self, quarantine):

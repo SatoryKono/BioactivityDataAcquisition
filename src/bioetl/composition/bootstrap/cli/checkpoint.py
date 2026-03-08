@@ -22,7 +22,7 @@ from bioetl.composition.bootstrap.assembly.checkpoint import (
 )
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 from bioetl.domain.types import RunID
-from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
+from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 from bioetl.infrastructure.config import get_settings
 
 __all__ = [
@@ -89,7 +89,7 @@ def bootstrap_checkpoint_service() -> CheckpointService:
     """
     settings = get_settings()
     # Use empty pipeline name for global operations
-    checkpoint_port = LocalCheckpoint(
+    checkpoint_port = LocalCheckpointAdapter(
         base_path=settings.checkpoint_path,
         pipeline_name="",
     )

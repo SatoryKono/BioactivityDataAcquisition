@@ -10,7 +10,7 @@ from bioetl.infrastructure.quality._primitives import (
     _parse_quarter_label,
     _quarter_label,
 )
-from bioetl.infrastructure.quality.inventory import ExemptionInventory
+from bioetl.infrastructure.quality.inventory import ExemptionInventorySummary
 from bioetl.infrastructure.quality.report_formatter import (
     _collect_allowances,
     _is_active_grace_window,
@@ -100,7 +100,7 @@ def resolve_grace_allowances(
 
 def evaluate_budget_violations(
     *,
-    inventory: ExemptionInventory,
+    inventory: ExemptionInventorySummary,
     scorecard: JsonDict,
     target: JsonDict,
     baseline_total: int,
@@ -146,7 +146,7 @@ def evaluate_budget_violations(
 
 def evaluate_governance_violations(
     *,
-    inventory: ExemptionInventory,
+    inventory: ExemptionInventorySummary,
     scorecard: JsonDict,
     quarter: str,
     integral_score: float,

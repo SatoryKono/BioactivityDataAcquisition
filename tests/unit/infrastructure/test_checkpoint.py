@@ -7,16 +7,16 @@ from uuid import UUID
 
 import pytest
 
-from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
+from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 
 
 @pytest.mark.unit
 class TestLocalCheckpoint:
-    """Test LocalCheckpoint functionality."""
+    """Test LocalCheckpointAdapter functionality."""
 
     def test_local_checkpoint_initialization(self, tmp_path):
-        """Test LocalCheckpoint can be initialized."""
-        cp = LocalCheckpoint(base_path=tmp_path)
+        """Test LocalCheckpointAdapter can be initialized."""
+        cp = LocalCheckpointAdapter(base_path=tmp_path)
         assert cp.base_path == tmp_path
 
     async def test_save_creates_file(self, tmp_path):
@@ -24,7 +24,7 @@ class TestLocalCheckpoint:
 
         Flat structure: {base_path}/{pipeline}.json
         """
-        cp = LocalCheckpoint(base_path=tmp_path)
+        cp = LocalCheckpointAdapter(base_path=tmp_path)
 
         pipeline = "test_pipeline"
         run_id = UUID("12345678-1234-5678-1234-567812345678")
@@ -53,7 +53,7 @@ class TestLocalCheckpoint:
             )
         )
 
-        cp = LocalCheckpoint(base_path=tmp_path)
+        cp = LocalCheckpointAdapter(base_path=tmp_path)
 
         result = await cp.load("test_pipeline")
 
@@ -64,7 +64,7 @@ class TestLocalCheckpoint:
 
     async def test_load_nonexistent_returns_none(self, tmp_path):
         """Test load returns None for nonexistent checkpoint."""
-        cp = LocalCheckpoint(base_path=tmp_path)
+        cp = LocalCheckpointAdapter(base_path=tmp_path)
 
         result = await cp.load("nonexistent_pipeline")
 
@@ -72,7 +72,7 @@ class TestLocalCheckpoint:
 
     async def test_save_and_load_roundtrip(self, tmp_path):
         """Test save and load roundtrip."""
-        cp = LocalCheckpoint(base_path=tmp_path)
+        cp = LocalCheckpointAdapter(base_path=tmp_path)
 
         pipeline = "test_pipeline"
         run_id = UUID("12345678-1234-5678-1234-567812345678")
@@ -95,7 +95,7 @@ class TestLocalCheckpoint:
         checkpoint_file = tmp_path / "test_pipeline.json"
         checkpoint_file.write_text(json.dumps({"pipeline": "test"}))
 
-        cp = LocalCheckpoint(base_path=tmp_path)
+        cp = LocalCheckpointAdapter(base_path=tmp_path)
 
         await cp.delete("test_pipeline")
 
@@ -103,7 +103,7 @@ class TestLocalCheckpoint:
 
     async def test_delete_nonexistent_no_error(self, tmp_path):
         """Test delete doesn't raise error for nonexistent checkpoint."""
-        cp = LocalCheckpoint(base_path=tmp_path)
+        cp = LocalCheckpointAdapter(base_path=tmp_path)
 
         # Should not raise
         await cp.delete("nonexistent_pipeline")
@@ -117,7 +117,7 @@ class TestLocalCheckpoint:
         checkpoint_file = tmp_path / "test_pipeline.json"
         checkpoint_file.write_text("{}")
 
-        cp = LocalCheckpoint(base_path=tmp_path)
+        cp = LocalCheckpointAdapter(base_path=tmp_path)
 
         result = await cp.exists("test_pipeline")
 
@@ -125,7 +125,7 @@ class TestLocalCheckpoint:
 
     async def test_exists_returns_false(self, tmp_path):
         """Test exists returns False for nonexistent checkpoint."""
-        cp = LocalCheckpoint(base_path=tmp_path)
+        cp = LocalCheckpointAdapter(base_path=tmp_path)
 
         result = await cp.exists("nonexistent_pipeline")
 
@@ -141,7 +141,7 @@ class TestLocalCheckpoint:
             checkpoint_file = tmp_path / f"{name}.json"
             checkpoint_file.write_text("{}")
 
-        cp = LocalCheckpoint(base_path=tmp_path)
+        cp = LocalCheckpointAdapter(base_path=tmp_path)
 
         result = await cp.list_all()
 
@@ -149,7 +149,7 @@ class TestLocalCheckpoint:
 
     async def test_list_all_empty(self, tmp_path):
         """Test list_all returns empty list when no checkpoints."""
-        cp = LocalCheckpoint(base_path=tmp_path)
+        cp = LocalCheckpointAdapter(base_path=tmp_path)
 
         result = await cp.list_all()
 
@@ -157,7 +157,7 @@ class TestLocalCheckpoint:
 
     async def test_aclose(self, tmp_path):
         """Test aclose completes without error."""
-        cp = LocalCheckpoint(base_path=tmp_path)
+        cp = LocalCheckpointAdapter(base_path=tmp_path)
         await cp.aclose()
         # Should complete without error
 
@@ -166,7 +166,7 @@ class TestLocalCheckpoint:
 
         Flat structure: {base_path}/{pipeline}.json
         """
-        cp = LocalCheckpoint(base_path=tmp_path)
+        cp = LocalCheckpointAdapter(base_path=tmp_path)
 
         pipeline = "test_pipeline"
         run_id = UUID("12345678-1234-5678-1234-567812345678")

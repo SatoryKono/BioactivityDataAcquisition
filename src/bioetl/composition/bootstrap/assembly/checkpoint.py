@@ -12,9 +12,9 @@ Note:
 from __future__ import annotations
 
 from bioetl.domain.ports import CheckpointPort, QuarantinePort
-from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
+from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 from bioetl.infrastructure.config import get_settings
-from bioetl.infrastructure.quarantine import UnifiedQuarantine
+from bioetl.infrastructure.quarantine import UnifiedQuarantineAdapter
 
 __all__ = [
     # Deprecated aliases (backward compatibility)
@@ -29,7 +29,7 @@ __all__ = [
 def bootstrap_quarantine_port() -> QuarantinePort:
     """Create a quarantine port implementation for record quarantine storage.
 
-    Creates a UnifiedQuarantine adapter using centralized quarantine_path
+    Creates a UnifiedQuarantineAdapter adapter using centralized quarantine_path
     from settings (data_dir/quarantine) for unified quarantine storage
     independent of entity paths.
 
@@ -39,9 +39,9 @@ def bootstrap_quarantine_port() -> QuarantinePort:
         QuarantinePort implementation for quarantine operations.
     """
     settings = get_settings()
-    quarantine = UnifiedQuarantine(base_path=str(settings.quarantine_path))
+    quarantine = UnifiedQuarantineAdapter(base_path=str(settings.quarantine_path))
     assert isinstance(quarantine, QuarantinePort), (
-        f"UnifiedQuarantine must implement QuarantinePort, got {type(quarantine)}"
+        f"UnifiedQuarantineAdapter must implement QuarantinePort, got {type(quarantine)}"
     )
     return quarantine
 
@@ -59,7 +59,7 @@ def bootstrap_quarantine() -> QuarantinePort:
 def bootstrap_checkpoint_port(pipeline_name: str) -> CheckpointPort:
     """Create a checkpoint port implementation for pipeline state persistence.
 
-    Creates a LocalCheckpoint adapter for the specified pipeline using
+    Creates a LocalCheckpointAdapter adapter for the specified pipeline using
     the checkpoint_path from settings.
 
     Layer: Returns domain port implementation (CheckpointPort).
@@ -71,12 +71,12 @@ def bootstrap_checkpoint_port(pipeline_name: str) -> CheckpointPort:
         CheckpointPort implementation for checkpoint operations.
     """
     settings = get_settings()
-    checkpoint = LocalCheckpoint(
+    checkpoint = LocalCheckpointAdapter(
         base_path=settings.checkpoint_path,
         pipeline_name=pipeline_name,
     )
     assert isinstance(checkpoint, CheckpointPort), (
-        f"LocalCheckpoint must implement CheckpointPort, got {type(checkpoint)}"
+        f"LocalCheckpointAdapter must implement CheckpointPort, got {type(checkpoint)}"
     )
     return checkpoint
 

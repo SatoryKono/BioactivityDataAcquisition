@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     )
 
 __all__ = [
-    "VacuumSettings",
+    "VacuumConfig",
     "assemble_cached_bronze_context",
     "assemble_filter_config",
     "assemble_runtime_config",
@@ -40,7 +40,7 @@ __all__ = [
 
 
 @dataclass(frozen=True, slots=True)
-class VacuumSettings:
+class VacuumConfig:
     """Resolved vacuum settings after merging CLI and YAML config.
 
     This is a pure data object representing the effective vacuum configuration
@@ -59,7 +59,7 @@ def assemble_vacuum_settings(
     *,
     cli_vacuum: VacuumConfig,
     yaml_maintenance: MaintenanceConfig,
-) -> VacuumSettings:
+) -> VacuumConfig:
     """Assemble effective vacuum settings from CLI overrides and YAML config.
 
     Implements tri-state merge logic:
@@ -74,7 +74,7 @@ def assemble_vacuum_settings(
         yaml_maintenance: Maintenance configuration from pipeline YAML.
 
     Returns:
-        VacuumSettings with resolved enabled flag and retention days.
+        VacuumConfig with resolved enabled flag and retention days.
 
     Example:
         >>> from bioetl.domain.context import VacuumConfig
@@ -97,13 +97,13 @@ def assemble_vacuum_settings(
     """
     # CLI explicit override takes precedence
     if cli_vacuum.enabled is not None:
-        return VacuumSettings(
+        return VacuumConfig(
             enabled=cli_vacuum.enabled,
             retention_days=cli_vacuum.retention_days,
         )
 
     # No CLI override -> use YAML defaults
-    return VacuumSettings(
+    return VacuumConfig(
         enabled=yaml_maintenance.auto_vacuum,
         retention_days=yaml_maintenance.vacuum_retention_days,
     )
@@ -117,7 +117,7 @@ def assemble_runtime_config(
     query: str | None,
     dry_run: bool,
     heartbeat_interval: int,
-    vacuum: VacuumSettings,
+    vacuum: VacuumConfig,
     skip_gold: bool = False,
     health_check_mode: Literal["strict", "probe"] = "strict",
 ) -> RuntimeConfig:
@@ -143,7 +143,7 @@ def assemble_runtime_config(
 
     Example:
         >>> from bioetl.domain.types import RunType
-        >>> vacuum = VacuumSettings(enabled=True, retention_days=7)
+        >>> vacuum = VacuumConfig(enabled=True, retention_days=7)
         >>> config = assemble_runtime_config(
         ...     run_type=RunType.INCREMENTAL,
         ...     resume=False,

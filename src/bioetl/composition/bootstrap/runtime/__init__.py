@@ -19,7 +19,7 @@ Components:
 from __future__ import annotations
 
 from bioetl.composition.bootstrap.runtime.assembly import (
-    VacuumSettings,
+    VacuumConfig,
     assemble_filter_config,
     assemble_runtime_config,
     assemble_vacuum_settings,
@@ -63,7 +63,7 @@ __all__ = [
     # Observability (canonical)
     "MetricsServerError",
     # Assembly (pure functions)
-    "VacuumSettings",
+    "VacuumConfig",
     "assemble_filter_config",
     "assemble_runtime_config",
     "assemble_vacuum_settings",
