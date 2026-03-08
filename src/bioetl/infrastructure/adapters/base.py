@@ -103,8 +103,13 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
 
         """
         self._http_client = http_client
+        self.http_client = http_client  # Public alias for IDMappingHealthMixin and other protocol mixins
         self._logger = logger
+        self.logger = logger  # Public alias required by HealthCheckMixin
         self._metrics = metrics if metrics is not None else NoOpMetrics()
+        self.metrics = (
+            self._metrics
+        )  # Public alias required by HealthCheckMixin._get_metrics()
         self._error_handler = (
             error_handler
             if error_handler is not None

@@ -21,7 +21,8 @@ from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.types import RunType
 
 if TYPE_CHECKING:
-    from bioetl.domain.context import PipelineRunContext, VacuumSettings
+    from bioetl.domain.context import PipelineRunContext
+    from bioetl.domain.context import VacuumSettings as CliVacuumSettings
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.infrastructure.schemas.pipeline_config import (
         InputFilterConfig as YamlInputFilter,
@@ -57,7 +58,7 @@ class VacuumSettings:
 
 def assemble_vacuum_settings(
     *,
-    cli_vacuum: VacuumSettings,
+    cli_vacuum: CliVacuumSettings,
     yaml_maintenance: MaintenanceConfig,
 ) -> VacuumSettings:
     """Assemble effective vacuum settings from CLI overrides and YAML config.
