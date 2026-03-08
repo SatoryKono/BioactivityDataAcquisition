@@ -26,6 +26,7 @@ class _PubMedAdapterFilterFetchHost(Protocol):
     """Structural host contract for PubMed adapter fetch/filter behavior."""
 
     logger: LoggerPort
+    _logger: LoggerPort
     _fallback_decorator: ComposableFallbackDecorator
 
     def _yield_articles_from_pmids(

@@ -182,9 +182,7 @@ class BronzeWriter(
             span.set_attribute("run_id", str(run_id))
 
             labels = {"provider": provider, "entity": entity}
-            self._metrics.increment_counter(
-                "bronze_write_attempts_total", 1, labels
-            )
+            self._metrics.increment_counter("bronze_write_attempts_total", 1, labels)
             start_time = time.perf_counter()
             prepared = self._prepare_bronze_write(
                 records=records,
