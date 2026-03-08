@@ -9,7 +9,7 @@ from bioetl.domain.context import (
     CachedBronzeContext,
     InputFilterContext,
     PipelineRunContext,
-    VacuumConfig,
+    VacuumSettings,
 )
 from bioetl.domain.types import RunID, RunType
 
@@ -69,7 +69,7 @@ class PipelineRunContextService:
             PipelineRunContext assembled from the provided options and context fields.
         """
         input_filter = self._build_input_filter(options)
-        vacuum = VacuumConfig(
+        vacuum = VacuumSettings(
             enabled=options.vacuum_after_run,
             retention_days=options.vacuum_retention_days or 7,
         )
