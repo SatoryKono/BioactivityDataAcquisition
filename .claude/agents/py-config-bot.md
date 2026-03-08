@@ -43,7 +43,7 @@ model: sonnet
 - **Config update**: изменение существующих конфигураций (поля, пороги, пути).
 - **Composite design**: создание/обновление composite pipeline (seed/enrichers/merge).
 - **DQ migration**: миграция inline DQ-правил в externalized-формат (ADR-027).
-- **Gap remediation**: исправление findings из `config_gap_analysis.py`.
+- **Gap remediation**: исправление findings из `py-config-bot-1.py`.
 - **Validate**: проверка compliance без изменений.
 
 ---
@@ -75,7 +75,7 @@ model: sonnet
 
 ## Обязательные правила
 
-1. Все конфигурации MUST проходить `python scripts/config_gap_analysis.py -v` без critical findings.
+1. Все конфигурации MUST проходить `python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v` без critical findings.
 2. Inline DQ-пороги (в pipeline YAML) запрещены — использовать externalized DQ (ADR-027).
 3. Silver sink MUST содержать `sort_by` (ADR-014).
 4. Composite config MUST содержать `seed`, `enrichers`, `merge` (ADR-026).
@@ -218,7 +218,7 @@ composite:
 ### Перед созданием/изменением
 
 ```bash
-python scripts/config_gap_analysis.py -v
+python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v
 find configs/ -path "*/{provider}/*" -name "*.yaml" | sort
 cat configs/pipelines/_defaults.yaml 2>/dev/null
 cat configs/sources/{provider}.yaml 2>/dev/null
@@ -231,7 +231,7 @@ cat configs/sources/{provider}.yaml 2>/dev/null
 python -c "import yaml; yaml.safe_load(open('configs/pipelines/{provider}/{entity}.yaml'))"
 
 # Gap analysis — 0 critical
-python scripts/config_gap_analysis.py -v
+python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v
 
 # sort_by присутствует (ADR-014)
 grep -A3 "sort_by" configs/pipelines/{provider}/{entity}.yaml
@@ -278,7 +278,7 @@ test -f configs/quality/entities/{provider}/{entity}.yaml && echo "OK" || echo "
 
 #### Верификация
 ```bash
-python scripts/config_gap_analysis.py -v
+python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v
 ```
 
 #### ADR compliance
@@ -339,7 +339,7 @@ python scripts/config_gap_analysis.py -v
 | Ссылка | Описание | Verification |
 |--------|----------|-------------|
 | [ADR-014] | Deterministic Writes: sort_by обязателен в Silver sink | `find configs/pipelines/ -name "*.yaml" -exec grep -L "sort_by" {} \;` |
-| [ADR-025] | Pipeline Config Unification | `python scripts/config_gap_analysis.py -v` |
+| [ADR-025] | Pipeline Config Unification | `python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v` |
 | [ADR-026] | Composite Pipeline Pattern: seed/enrichers/merge | Review composite config structure |
 | [ADR-027] | DQ Rules Externalization: no inline thresholds | `grep -rn "soft_fail_threshold" src/bioetl/ --include="*.py"` |
 | [ADR-028] | Filter Rules Externalization | `grep -rn "gold_filters" configs/pipelines/ --include="*.yaml"` |

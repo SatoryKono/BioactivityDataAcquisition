@@ -196,7 +196,7 @@ pytest tests/architecture/ -v --tb=short
 | Pipelines | `src/bioetl/application/pipelines/` |
 | Bootstrap | `src/bioetl/composition/bootstrap/` |
 | ADR | `docs/02-architecture/decisions/` |
-| Configs | `configs/pipelines/{provider}/{entity}.yaml` |
+| Configs | `configs/entities/{provider}/{entity}.yaml` |
 
 ---
 

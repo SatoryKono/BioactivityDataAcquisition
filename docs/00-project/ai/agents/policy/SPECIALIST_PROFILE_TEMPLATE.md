@@ -59,7 +59,7 @@ model: sonnet
 
 This profile name is deprecated by consolidation policy.
 
-Canonical profile: [sp-<canonical-name>.md](sp-<canonical-name>.md)
+Canonical profile: `sp-<canonical-name>.md`
 
 Planned removal date: YYYY-MM-DD.
 

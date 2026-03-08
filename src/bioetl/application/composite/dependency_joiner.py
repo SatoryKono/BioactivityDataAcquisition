@@ -81,26 +81,7 @@ class DependencyJoinerService:
         join_executor: JoinExecutorProtocol,
         system_columns_to_drop: frozenset[str],
     ) -> None:
-        """Initialise the dependency joiner with all required collaborator services.
-
-        Args:
-            logger: Structured logger for debug and warning output.
-            deduplicator: Service that removes duplicate rows from a dependency
-                DataFrame before joining.
-            renamer: Service that qualifies dependency column names to the
-                ``{provider}.{entity}.{field}`` convention.
-            conflict_resolver: Service that detects and resolves column-name conflicts
-                between the merged frame and the dependency frame prior to joining.
-            field_alias_resolver: Callable that returns a field-alias mapping for a
-                given pipeline name, or ``None`` when no aliases are configured.
-            join_key_resolver: Protocol implementation that resolves qualified join key
-                names from unqualified base names and pipeline identifiers.
-            join_executor: Protocol implementation that executes single-key or
-                composite-key Polars join operations.
-            system_columns_to_drop: Frozen set of system column names (e.g.
-                ``"_run_id"``) that must be removed from dependency frames before
-                joining to prevent duplicates from overwriting seed provenance.
-        """
+        """Initialise the dependency joiner with all required collaborator services."""
         self._logger = logger
         self._deduplicator = deduplicator
         self._renamer = renamer
@@ -118,17 +99,7 @@ class DependencyJoinerService:
         dependencies: Sequence[DependencyConfig],
         seed_pipeline: str | None = None,
     ) -> pl.DataFrame:
-        """Apply configured dependency joins to merged DataFrame.
-
-        Args:
-            merged_df: Current merged DataFrame to join dependencies into.
-            dependency_dfs: Mapping from pipeline name to its loaded DataFrame.
-            dependencies: Ordered dependency configurations defining join logic.
-            seed_pipeline: Optional seed pipeline name used for key resolution.
-
-        Returns:
-            DataFrame with all dependency tables joined in.
-        """
+        """Apply configured dependency joins to merged DataFrame."""
         result = merged_df
         for dep in dependencies:
             if dep.pipeline not in dependency_dfs:
@@ -161,17 +132,7 @@ class DependencyJoinerService:
         dep: DependencyConfig,
         seed_pipeline: str | None = None,
     ) -> pl.DataFrame:
-        """Join dependency using all configured composite join keys.
-
-        Args:
-            merged_df: Current merged DataFrame to join the dependency into.
-            dep_df: Dependency DataFrame to join.
-            dep: Dependency configuration specifying join keys and pipeline.
-            seed_pipeline: Optional seed pipeline name used for left-side key resolution.
-
-        Returns:
-            DataFrame with the dependency joined using composite join keys.
-        """
+        """Join dependency using all configured composite join keys."""
         join_keys_list = list(dep.join_keys)
         left_pipeline = _resolve_left_pipeline(dep, seed_pipeline)
         merged_df, dep_df = self._prepare_dependency_join_frames(
@@ -223,14 +184,7 @@ class DependencyJoinerService:
         return result
 
     def drop_system_columns(self, df: pl.DataFrame) -> pl.DataFrame:
-        """Drop system columns that must come only from seed.
-
-        Args:
-            df: DataFrame from which to remove configured system columns.
-
-        Returns:
-            DataFrame with system columns removed.
-        """
+        """Drop system columns that must come only from seed."""
         columns_to_drop = [
             column for column in df.columns if column in self._system_columns_to_drop
         ]

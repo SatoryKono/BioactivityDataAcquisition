@@ -47,8 +47,8 @@ Workflow следует принципу "Safe-by-Design":
 - **Линтинг**: `make lint` (ruff + mypy).
 - **Тесты**: `make test-unit`, `make test-integration` (VCR).
 - **Архитектура**: `pytest tests/architecture/`.
-- **Конфиги**: `python scripts/validate_pipeline_configs.py`, `python scripts/config_gap_analysis.py`.
-- **Терминология**: `python src/tools/scripts/lint_terminology.py`.
+- **Конфиги**: `python docs/00-project/ai/agents/scripts/py-config-bot-2.py`, `python docs/00-project/ai/agents/scripts/py-config-bot-1.py`.
+- **Терминология**: `python docs/00-project/ai/agents/scripts/py-team-orchestration.py`.
 
 ----------------------------------------------------------------------
 
@@ -86,7 +86,7 @@ docs/99-archive/reports/<task-id>/
 1. **Traceability**: Каждое изменение привязано к ID.
 1. **No Blind Changes**: Сначала `Plan`, потом `Implement`.
 1. **Architecture Gate**: Финальный аудит обязателен.
-1. **Config Compliance**: `config_gap_analysis.py` должен иметь 0 критических замечаний.
+1. **Config Compliance**: `py-config-bot-1.py` должен иметь 0 критических замечаний.
 1. **Zone Isolation**: Код в `src/`, конфиги в `configs/`, доки в `docs/`.
 
 ----------------------------------------------------------------------

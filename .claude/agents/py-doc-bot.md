@@ -131,7 +131,7 @@ docs/
 **Зона файлов:**
 - `docs/02-architecture/mmd-diagrams/**`
 - `docs/02-architecture/diagram-descriptions/**`
-- `scripts/diagrams/**`
+- `docs/00-project/ai/agents/scripts/diagrams/**`
 
 **Следуй:** ADR-040, `docs/02-architecture/mmd-diagrams/README.md`
 
@@ -139,11 +139,11 @@ docs/
 
 | Действие | Команда |
 |----------|---------|
-| Unified checks | `bash scripts/diagrams/run_diagram_checks.sh --profile pr` |
+| Unified checks | `bash docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-1.sh --profile pr` |
 | Рендер SVG/PNG | `bash docs/02-architecture/mmd-diagrams/render.sh` |
-| PDF bundles | `python scripts/diagrams/generate_with_descriptions_pdf.py` |
-| DOCX bundles | `python scripts/diagrams/generate_with_descriptions_docx.py` |
-| Full pipeline | `bash scripts/diagrams/run_diagram_docs_agent.sh` |
+| PDF bundles | `python docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-3.py` |
+| DOCX bundles | `python docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-2.py` |
+| Full pipeline | `bash docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-4.sh` |
 
 ### Diagram Modes
 
@@ -155,7 +155,7 @@ docs/
 | `FULL` | полный цикл: checks + render + bundles |
 
 ### Критерии готовности диаграмм
-1. `run_diagram_checks.sh` завершён без ошибок
+1. `py-doc-bot-1.sh` завершён без ошибок
 2. DOCX/PDF бандлы обновлены для `*-with-descriptions.md`
 3. В отчёте указаны ограничения среды (отсутствие `pandoc`/`wkhtmltopdf`)
 

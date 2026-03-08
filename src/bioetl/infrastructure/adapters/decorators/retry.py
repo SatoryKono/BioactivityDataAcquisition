@@ -113,24 +113,7 @@ class RetryingDataSourceDecorator:
         await self._data_source.__aexit__(exc_type, exc_val, exc_tb)
 
     def _is_retryable(self, exc: Exception) -> bool:
-        """Check if exception should trigger a retry.
-
-        Retryable conditions:
-        - RecoverableError (except CircuitBreakerOpenError which should propagate)
-        - Connection/timeout errors
-        - Configured retryable exceptions
-
-        Non-retryable:
-        - CircuitBreakerOpenError (CB decorator handles this)
-        - Critical errors (auth failures, schema errors)
-        - Data quality errors (should skip record, not retry)
-
-        Args:
-            exc: Exception instance to evaluate for retry eligibility.
-
-        Returns:
-            True if the exception should trigger a retry attempt, False otherwise.
-        """
+        """Check if exception should trigger a retry."""
         # Circuit breaker errors should propagate immediately
         if isinstance(exc, CircuitBreakerOpenError):
             return False
@@ -143,11 +126,7 @@ class RetryingDataSourceDecorator:
         return self._retry_config.is_retryable_exception(exc)
 
     def _retryable_exception_types(self) -> tuple[type[Exception], ...]:
-        """Build tuple of retryable exception types for `except` clauses.
-
-        Returns:
-            Tuple of exception classes that should trigger retry logic.
-        """
+        """Build tuple of retryable exception types for `except` clauses."""
         configured = tuple(
             exc_type
             for exc_type in self._retry_config.retryable_exceptions
@@ -156,15 +135,7 @@ class RetryingDataSourceDecorator:
         return (RecoverableError, *configured)
 
     async def _calculate_and_wait(self, attempt: int, url: str = "") -> float:
-        """Calculate delay and wait before retry.
-
-        Args:
-            attempt: Zero-based attempt index used to compute exponential backoff.
-            url: Optional URL or operation label used for jitter calculation.
-
-        Returns:
-            The actual wait time in seconds.
-        """
+        """Calculate delay and wait before retry."""
         delay = self._retry_config.calculate_delay(attempt, url)
         await asyncio.sleep(delay)
         return delay
@@ -176,14 +147,7 @@ class RetryingDataSourceDecorator:
         wait_seconds: float,
         error: Exception,
     ) -> None:
-        """Log retry attempt with structured fields.
-
-        Args:
-            operation: Name of the operation being retried (e.g., "fetch", "health_check").
-            attempt: Zero-based attempt index for the current retry.
-            wait_seconds: Duration waited before this retry attempt.
-            error: Exception that triggered the retry.
-        """
+        """Log retry attempt with structured fields."""
         if not self._logger:
             return
 
@@ -200,12 +164,7 @@ class RetryingDataSourceDecorator:
         )
 
     def _record_retry_metrics(self, operation: str, retries: int) -> None:
-        """Record retry metrics.
-
-        Args:
-            operation: Name of the operation that was retried.
-            retries: Total number of retry attempts made.
-        """
+        """Record retry metrics."""
         if not self._metrics or retries == 0:
             return
 
@@ -219,11 +178,7 @@ class RetryingDataSourceDecorator:
         )
 
     def _record_exhaustion_metrics(self, operation: str) -> None:
-        """Record retry exhaustion metrics.
-
-        Args:
-            operation: Name of the operation that exhausted all retry attempts.
-        """
+        """Record retry exhaustion metrics."""
         if not self._metrics:
             return
 
@@ -245,23 +200,7 @@ class RetryingDataSourceDecorator:
         filter_field: str | None = None,
         offset: int | None = None,
     ) -> AsyncIterator[JsonDict]:  # Any: untyped API JSON record
-        """Fetch records with retry logic.
-
-        Args:
-            entity_type: Entity type to fetch (e.g., "activity", "compound").
-            limit: Optional maximum number of records to return.
-            query: Optional query string to filter records.
-            filter_ids: Optional list of IDs to filter by.
-            filter_field: Optional field name to filter on.
-            offset: Optional record offset for pagination.
-
-        Yields:
-            Bronze records from the wrapped data source.
-
-        Raises:
-            CircuitBreakerOpenError: If circuit breaker is open (not retried).
-            RetryExhaustedError: If all retry attempts are exhausted.
-        """
+        """Fetch records with retry logic."""
         last_error: Exception | None = None
         retries = 0
 
@@ -309,19 +248,7 @@ class RetryingDataSourceDecorator:
         filter_field: str | None,
         offset: int | None,
     ) -> AsyncIterator[JsonDict]:  # Any: untyped API JSON record
-        """Run one fetch attempt against the wrapped data source.
-
-        Args:
-            entity_type: Entity type to fetch.
-            limit: Optional maximum number of records to return.
-            query: Optional query string to filter records.
-            filter_ids: Optional list of IDs to filter by.
-            filter_field: Optional field name to filter on.
-            offset: Optional record offset for pagination.
-
-        Yields:
-            Bronze records from the wrapped data source.
-        """
+        """Run one fetch attempt against the wrapped data source."""
         async for record in self._data_source.fetch(
             entity_type=entity_type,
             limit=limit,
@@ -333,16 +260,7 @@ class RetryingDataSourceDecorator:
             yield record
 
     async def health_check(self) -> HealthStatus:
-        """Check health with retry logic.
-
-        Retries health check on transient failures.
-
-        Returns:
-            Health status from the wrapped data source.
-
-        Raises:
-            RetryExhaustedError: If all retry attempts fail.
-        """
+        """Check health with retry logic."""
         last_error: Exception | None = None
         retries = 0
 

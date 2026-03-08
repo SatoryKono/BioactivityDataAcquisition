@@ -103,16 +103,7 @@ class HTTPClientRetryMixin:
         url: str = "",
         response: httpx.Response | None = None,
     ) -> float:
-        """Calculate and sleep for retry delay, honoring Retry-After.
-
-        Args:
-            attempt: Current attempt index (0-based) used to compute backoff.
-            url: Request URL used for delay calculation (may affect jitter seed).
-            response: Optional HTTP response whose Retry-After header is honored.
-
-        Returns:
-            Actual delay in seconds that was slept, after clamping Retry-After if present.
-        """
+        """Calculate and sleep for retry delay, honoring Retry-After."""
         delay = self.retry_config.calculate_delay(attempt, url)
         if response:
             retry_after = response.headers.get("Retry-After")
@@ -129,15 +120,7 @@ class HTTPClientRetryMixin:
         attempt: int,
         retries_used: int,
     ) -> bool:
-        """Backward-compatible wrapper for retry-budget decision logic.
-
-        Args:
-            attempt: Current attempt index (0-based).
-            retries_used: Number of retries already consumed in this request.
-
-        Returns:
-            True if another retry is permitted, False otherwise.
-        """
+        """Backward-compatible wrapper for retry-budget decision logic."""
         return _can_retry(self.retry_config, attempt, retries_used)
 
     def _record_retry_budget_exhausted(
@@ -145,12 +128,7 @@ class HTTPClientRetryMixin:
         method: str,
         url: str,
     ) -> None:
-        """Emit retry-budget exhaustion metrics and warning log.
-
-        Args:
-            method: HTTP method (GET, POST, etc.) used as metric label.
-            url: Request URL included in the warning log entry.
-        """
+        """Emit retry-budget exhaustion metrics and warning log."""
         self._metrics.increment_counter(
             "http_retry_budget_exhausted_total",
             1,
@@ -174,15 +152,7 @@ class HTTPClientRetryMixin:
         retries: int,
         last_error: Exception | None,
     ) -> None:
-        """Record request duration, retry, and error metrics via _metrics port.
-
-        Args:
-            method: HTTP method (GET, POST, etc.) used as metric label.
-            duration: Total request duration in seconds.
-            status_code: HTTP response status code (0 if connection-level error).
-            retries: Number of retry attempts made.
-            last_error: Final exception if the request failed, or None on success.
-        """
+        """Record request duration, retry, and error metrics via _metrics port."""
         labels = {
             "provider": self.provider,
             "method": method.upper(),
@@ -221,16 +191,7 @@ class HTTPClientRetryMixin:
         status_code: int | None = None,
         reason: str | None = None,
     ) -> None:
-        """Log structured retry event.
-
-        Args:
-            url: Request URL included in the log entry.
-            method: HTTP method (GET, POST, etc.) included in the log entry.
-            attempt: Current attempt index (0-based) for display as attempt+1.
-            wait_seconds: Delay before the next attempt in seconds.
-            status_code: HTTP response status code if the failure was an HTTP error.
-            reason: Human-readable reason for the retry (overrides status_code label).
-        """
+        """Log structured retry event."""
         if not self.logger:
             return
         self.logger.warning(
@@ -252,17 +213,7 @@ class HTTPClientRetryMixin:
         url: str,
         **kwargs: Any,  # Any: forwarding arbitrary request kwargs to underlying HTTP client
     ) -> httpx.Response:
-        """Execute one rate-limited circuit-breaker guarded request.
-
-        Args:
-            client: Active httpx.AsyncClient instance to send the request.
-            method: HTTP method string (e.g. "GET", "POST").
-            url: Target URL for the request.
-            **kwargs: Additional keyword arguments forwarded to the HTTP client.
-
-        Returns:
-            httpx.Response from the circuit-breaker guarded HTTP call.
-        """
+        """Execute one rate-limited circuit-breaker guarded request."""
         await self.rate_limiter.acquire()
         return await self.circuit_breaker.call(client.request, method, url, **kwargs)
 
@@ -272,20 +223,7 @@ class HTTPClientRetryMixin:
         url: str,
         **kwargs: Any,  # Any: forwarding arbitrary request kwargs to underlying HTTP client
     ) -> httpx.Response:
-        """Execute request with retries, backoff, and observability.
-
-        Args:
-            method: HTTP method string (e.g. "GET", "POST").
-            url: Target URL for the request.
-            **kwargs: Additional keyword arguments forwarded to the HTTP client.
-
-        Returns:
-            httpx.Response on success, raises RetryExhaustedError if all attempts fail.
-
-        Raises:
-            RetryExhaustedError: When all retry attempts are consumed without success.
-            CircuitBreakerOpenError: When the circuit breaker is open and rejects the call.
-        """
+        """Execute request with retries, backoff, and observability."""
         client = self._get_client()
         last_error: Exception | None = None
         start_time = time.perf_counter()
@@ -342,14 +280,7 @@ class HTTPClientRetryMixin:
         self,
         exc: Exception,
     ) -> bool:
-        """Return True when exception is retryable by policy.
-
-        Args:
-            exc: Exception to evaluate against the retry policy rules.
-
-        Returns:
-            True if the exception type or HTTP status code is retryable per retry config, False otherwise.
-        """
+        """Return True when exception is retryable by policy."""
         if isinstance(
             exc,
             httpx.ConnectError
@@ -379,20 +310,7 @@ class HTTPClientRetryMixin:
             str, Any  # Any: dynamic payload or structural mixin boundary
         ],  # Any: forwarding arbitrary request kwargs to underlying HTTP client
     ) -> httpx.Response | tuple[bool, int, int, Exception | None]:
-        """Execute one request attempt and return response or retry decision.
-
-        Args:
-            client: Active httpx.AsyncClient instance to send the request.
-            method: HTTP method string (e.g. "GET", "POST").
-            url: Target URL for the request.
-            attempt: Current attempt index (0-based).
-            retries_used: Number of retries already consumed in this request.
-            span: Active OpenTelemetry span for tracing this request.
-            kwargs: Additional keyword arguments forwarded to the HTTP client.
-
-        Returns:
-            httpx.Response on success, or tuple of (should_retry, status_code, retries_increment, exception) on failure.
-        """
+        """Execute one request attempt and return response or retry decision."""
         try:
             response = await self._execute_single_attempt(client, method, url, **kwargs)
             status_code = response.status_code

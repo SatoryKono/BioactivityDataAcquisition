@@ -321,7 +321,7 @@ nav:
                     -   "GEMINI": 00-project/ai/agents/guides/GEMINI.md
                     -   "Agent Memory": 00-project/ai/agents/runtime/agent-memory.md
                     -   "QA Orchestrator Prompt": 00-project/ai/agents/runtime/py-qa-orchestrator.md
-                    -   "Orchestration": 00-project/ai/agents/orchestration/ORCHESTRATION.md
+                    -   "Orchestration": 00-project/ai/agents/runtime/orchestration/py-team-orchestration.md
             -   "Project Architecture Index": 00-project/architecture-index.md
             -   "Architecture Extras":
                     -   "Diagram Policy (Canonical)": 02-architecture/06-diagram-policy.md
@@ -683,7 +683,6 @@ nav:
                 -   "MkDocs Material Migration Track 2026 03 03": plans/mkdocs-material-migration-track-2026-03-03.md
                 -   "Wave 8 Policy Decisions 2026 03 03": plans/wave-8-policy-decisions-2026-03-03.md
             -   "Prompts":
-                -   "QA Orchestrator Prompt": 00-project/ai/agents/runtime/py-qa-orchestrator.md
                 -   "Diagram Docs Orchestrator Agent": 00-project/ai/agents/runtime/py-diagram-docs-orchestrator.md
             -   "Reports":
                 -   "Overview": reports/index.md

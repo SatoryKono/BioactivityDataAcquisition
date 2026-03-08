@@ -20,29 +20,23 @@
 
 ```
 configs/
-├── pipelines/
-│   ├── _defaults.yaml              # Global defaults
-│   ├── {provider}/
-│   │   └── {entity}.yaml           # Pipeline config
-│   └── composite/
-│       └── {name}.yaml             # Composite pipeline config
-├── dq/  (or quality/)
-│   ├── _defaults.yaml              # DQ global defaults
-│   ├── providers/
-│   │   └── {provider}.yaml         # DQ provider defaults
+├── base/
+│   ├── pipeline.yaml               # Global pipeline defaults
+│   └── quality.yaml                # Global quality defaults
+├── entities/
+│   └── {provider}/
+│       └── {entity}.yaml           # Pipeline config
+├── composites/
+│   └── {entity}.yaml               # Composite pipeline config
+├── quality/
 │   └── entities/
 │       └── {provider}/
 │           └── {entity}.yaml       # DQ rules per entity
-├── filter/  (or filters/)
-│   ├── _defaults.yaml              # Filter global defaults
-│   └── entities/
-│       └── {provider}/
-│           └── {entity}.yaml       # Filter rules per entity
-└── sources/
+└── providers/
     └── {provider}.yaml             # API source config
 ```
 
-**Merge order**: `_defaults.yaml -> providers/{provider}.yaml -> entities/{provider}/{entity}.yaml -> inline (deprecated)`
+**Merge order**: `base/*.yaml -> providers/{provider}.yaml -> entities/{provider}/{entity}.yaml -> inline (deprecated)`
 
 ---
 
@@ -50,10 +44,10 @@ configs/
 
 | ADR | Rule | Verification |
 |-----|------|-------------|
-| ADR-014 | `sort_by` MUST be present in Silver sink | `grep -A3 "sort_by" configs/pipelines/{p}/{e}.yaml` |
+| ADR-014 | `sort_by` MUST be present in Silver sink | `grep -A3 "sort_by" configs/entities/{p}/{e}.yaml` |
 | ADR-025 | Pipeline Config Unification (required fields) | `python scripts/config_gap_analysis.py -v` |
 | ADR-026 | Composite: `seed`, `enrichers`, `merge` sections | Review structure |
-| ADR-027 | DQ Rules Externalization: NO inline thresholds | `grep "soft_fail_threshold" configs/pipelines/` |
+| ADR-027 | DQ Rules Externalization: NO inline thresholds | `grep "soft_fail_threshold" configs/entities/` |
 | ADR-028 | Filter Rules Externalization | External filter configs |
 | ADR-029 | Convention-based Config (auto-computed paths) | Don't set `dq_config_file` / `filter_config_file` explicitly |
 
@@ -64,7 +58,7 @@ configs/
 ### A. Pipeline Config (Standard)
 
 ```yaml
-# configs/pipelines/{provider}/{entity}.yaml
+# configs/entities/{provider}/{entity}.yaml
 pipeline_name: {provider}_{entity}
 provider: {provider}
 entity_type: {entity}
@@ -116,7 +110,7 @@ rules:
 ### C. Filter Rules (Externalized)
 
 ```yaml
-# configs/filters/entities/{provider}/{entity}.yaml
+# configs/quality/entities/{provider}/{entity}.yaml
 entity: {entity}
 provider: {provider}
 version: "1.0.0"
@@ -130,7 +124,7 @@ gold_filters:
 ### D. Composite Pipeline Config
 
 ```yaml
-# configs/pipelines/composite/{name}.yaml
+# configs/composites/{name}.yaml
 composite:
   name: composite_{entity}
   version: "1.0.0"
@@ -177,24 +171,24 @@ composite:
 ```bash
 python scripts/config_gap_analysis.py -v
 find configs/ -path "*/{provider}/*" -name "*.yaml" | sort
-cat configs/pipelines/_defaults.yaml 2>/dev/null
-cat configs/sources/{provider}.yaml 2>/dev/null
+cat configs/base/pipeline.yaml 2>/dev/null
+cat configs/providers/{provider}.yaml 2>/dev/null
 ```
 
 ### After Creating/Updating
 
 ```bash
 # YAML syntax
-python -c "import yaml; yaml.safe_load(open('configs/pipelines/{provider}/{entity}.yaml'))"
+python -c "import yaml; yaml.safe_load(open('configs/entities/{provider}/{entity}.yaml'))"
 
 # Gap analysis (0 critical)
 python scripts/config_gap_analysis.py -v
 
 # sort_by present (ADR-014)
-grep -A3 "sort_by" configs/pipelines/{provider}/{entity}.yaml
+grep -A3 "sort_by" configs/entities/{provider}/{entity}.yaml
 
 # No inline DQ thresholds (ADR-027)
-grep -n "soft_fail_threshold\|hard_fail_threshold" configs/pipelines/{provider}/{entity}.yaml
+grep -n "soft_fail_threshold\|hard_fail_threshold" configs/entities/{provider}/{entity}.yaml
 
 # DQ externalized config exists
 test -f configs/quality/entities/{provider}/{entity}.yaml && echo "OK" || echo "MISSING"
@@ -206,9 +200,9 @@ test -f configs/quality/entities/{provider}/{entity}.yaml && echo "OK" || echo "
 
 When creating a new entity, generate 3 configs:
 
-1. `configs/pipelines/{provider}/{entity}.yaml` — pipeline config
-2. `configs/dq/entities/{provider}/{entity}.yaml` (or `quality/`) — DQ rules
-3. `configs/filter/entities/{provider}/{entity}.yaml` (or `filters/`) — filter rules
+1. `configs/entities/{provider}/{entity}.yaml` — pipeline config
+2. `configs/quality/entities/{provider}/{entity}.yaml` — DQ rules
+3. Filter rules are defined by policy in `configs/quality/entities/` + transformer logic (project-specific)
 
 ---
 
@@ -229,9 +223,9 @@ When creating a new entity, generate 3 configs:
 
 | What | Path |
 |------|------|
-| Pipeline defaults | `configs/pipelines/_defaults.yaml` |
-| Source configs | `configs/sources/{provider}.yaml` |
-| DQ defaults | `configs/dq/_defaults.yaml` or `configs/quality/_defaults.yaml` |
+| Pipeline defaults | `configs/base/pipeline.yaml` |
+| Source configs | `configs/providers/{provider}.yaml` |
+| DQ defaults | `configs/base/quality.yaml` |
 | Gap analysis script | `scripts/config_gap_analysis.py` |
 | Config loader code | `src/bioetl/application/` or `src/bioetl/composition/` |
 

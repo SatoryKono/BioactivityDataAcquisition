@@ -67,10 +67,10 @@ setup-dev: install test-deps-dev ## Full development environment setup and verif
 	@echo "$(GREEN)Development environment setup and verified!$(NC)"
 
 setup-plugins: ## Configure pytest/pre-commit plugins for local development
-	@bash scripts/setup_plugins.sh
+	@bash scripts/ops/setup_plugins.sh
 
 setup-skills: ## Sync project Codex skills into CODEX_HOME (default: ~/.codex/skills)
-	@bash scripts/setup_skills.sh
+	@bash scripts/ops/setup_skills.sh
 
 test: test-deps-dev ## Run all tests serially with coverage (stable local default)
 	@echo "$(BLUE)Running tests (serial default, excluding e2e and benchmarks)...$(NC)"
@@ -322,17 +322,17 @@ clean-local-artifacts: ## Clean local-only artifacts in repo root (use DRY_RUN=1
 
 sanitize-local: ## Deep local sanitation (set PURGE_WORKTREES=1 to drop .worktrees/.rollback)
 	$(MAKE) clean-local-artifacts PURGE_WORKTREES=$(PURGE_WORKTREES)
-	$(PY_RUN) scripts/check_root_vcr_cassettes.py
-	$(PY_RUN) scripts/check_vcr_filename_policy.py
-	$(PY_RUN) scripts/audit_root_cleanliness.py --strict-untracked
+	$(PY_RUN) scripts/data/check_root_vcr_cassettes.py
+	$(PY_RUN) scripts/data/check_vcr_filename_policy.py
+	$(PY_RUN) scripts/repo/audit_root_cleanliness.py --strict-untracked
 
 
 clean-preflight: ## Clean preflight artifacts (use DRY_RUN=1 for preview)
 	@echo "$(YELLOW)Running preflight cleanup...$(NC)"
 	@if [ "$(DRY_RUN)" = "1" ]; then \
-		bash scripts/preflight_cleanup.sh --dry-run; \
+		bash scripts/repo/preflight_cleanup.sh --dry-run; \
 	else \
-		bash scripts/preflight_cleanup.sh; \
+		bash scripts/repo/preflight_cleanup.sh; \
 	fi
 
 clean-all: clean ## Clean all (artifacts + logs + temp files)
@@ -479,41 +479,41 @@ docs-serve: ## Serve documentation locally
 	$(RUN) mkdocs serve --site-dir .mkdocs-site-tmp
 
 docs-build: ## Build documentation
-	$(RUN) bash scripts/build_docs_site.sh
+	$(RUN) bash scripts/docs/build_docs_site.sh
 
 docs-lint: ## Run documentation guardrails (links + config conventions + drift checks)
-	$(PY_RUN) scripts/check_doc_links.py --links
-	$(PY_RUN) scripts/check_doc_links.py --configs
-	$(PY_RUN) scripts/check_doc_links.py --legacy-paths
+	$(PY_RUN) scripts/docs/check_doc_links.py --links
+	$(PY_RUN) scripts/docs/check_doc_links.py --configs
+	$(PY_RUN) scripts/docs/check_doc_links.py --legacy-paths
 
 docs-docstrings: ## Check docstring coverage (modules ≥100%, classes ≥95%, functions ≥90%)
 	@echo "$(BLUE)Checking docstring coverage...$(NC)"
-	$(PY_RUN) scripts/check_docstring_coverage.py
+	$(PY_RUN) scripts/docs/check_docstring_coverage.py
 	@echo "$(GREEN)Docstring coverage check complete!$(NC)"
 
 docs-drift: ## Detect documentation drift (code ↔ docs synchronization)
 	@echo "$(BLUE)Running documentation drift detection...$(NC)"
-	$(PY_RUN) scripts/check_doc_drift.py
+	$(PY_RUN) scripts/docs/check_doc_drift.py
 	@echo "$(GREEN)Drift detection complete!$(NC)"
 
 scripts-inventory-check: ## Check scripts inventory manifest drift
 	@echo "$(BLUE)Checking scripts inventory drift...$(NC)"
-	$(PY_RUN) scripts/check_scripts_inventory.py --check --manifest reports/quality/scripts_inventory_manifest.json
+	$(PY_RUN) scripts/repo/check_scripts_inventory.py --check --manifest configs/quality/scripts_inventory_manifest.json
 	@echo "$(GREEN)Scripts inventory is in sync!$(NC)"
 
 scripts-inventory-update: ## Update scripts inventory manifest
 	@echo "$(BLUE)Updating scripts inventory manifest...$(NC)"
-	$(PY_RUN) scripts/check_scripts_inventory.py --update --manifest reports/quality/scripts_inventory_manifest.json
+	$(PY_RUN) scripts/repo/check_scripts_inventory.py --update --manifest configs/quality/scripts_inventory_manifest.json
 	@echo "$(GREEN)Scripts inventory manifest updated!$(NC)"
 
 scripts-deprecation-report: ## Generate staged deprecation backlog for non-active scripts
 	@echo "$(BLUE)Generating scripts deprecation backlog...$(NC)"
-	$(PY_RUN) scripts/check_scripts_inventory.py --deprecation-report reports/quality/scripts_deprecation_backlog.md
+	$(PY_RUN) scripts/repo/check_scripts_inventory.py --deprecation-report reports/quality/scripts_deprecation_backlog.md
 	@echo "$(GREEN)Scripts deprecation backlog updated!$(NC)"
 
 scripts-lifecycle-check: ## Validate lifecycle registry coverage for non-active scripts
 	@echo "$(BLUE)Validating scripts lifecycle registry...$(NC)"
-	$(PY_RUN) scripts/check_scripts_inventory.py --check-lifecycle --forbid-evaluate-active --lifecycle-registry configs/quality/scripts_lifecycle_registry.json
+	$(PY_RUN) scripts/repo/check_scripts_inventory.py --check-lifecycle --forbid-evaluate-active --lifecycle-registry configs/quality/scripts_lifecycle_registry.json
 	@echo "$(GREEN)Scripts lifecycle registry is valid!$(NC)"
 
 docs-quality: docs-lint docs-docstrings docs-drift scripts-inventory-check scripts-lifecycle-check ## Run all documentation quality checks
@@ -521,7 +521,7 @@ docs-quality: docs-lint docs-docstrings docs-drift scripts-inventory-check scrip
 
 schema-artifacts: ## Generate canonical schema artifacts (registry + contracts)
 	@echo "$(BLUE)Generating schema artifacts...$(NC)"
-	$(RUN) python scripts/generate_schema_artifacts.py
+	$(RUN) python scripts/schema/generate_schema_artifacts.py
 	@echo "$(GREEN)Schema artifacts generated!$(NC)"
 
 contracts-check: ## Generate and check data contracts
@@ -562,5 +562,5 @@ check-mermaid: ## Check that vendored mermaid files exist (fails if missing)
 
 schema-artifacts-check: ## Verify generated schema artifacts are up-to-date
 	@echo "$(BLUE)Checking schema artifacts...$(NC)"
-	$(RUN) python scripts/generate_schema_artifacts.py --check
+	$(RUN) python scripts/schema/generate_schema_artifacts.py --check
 	@echo "$(GREEN)Schema artifacts are up-to-date!$(NC)"

@@ -21,6 +21,10 @@
    - [PubChem](#pubchem)
    - [UniProt](#uniprot)
    - [PubMed](#pubmed)
+   - [CrossRef](#crossref)
+   - [OpenAlex](#openalex)
+   - [Semantic Scholar](#semantic-scholar)
+   - [Composite](#composite)
 5. [Системные поля](#системные-поля)
 6. [Режимы записи](#режимы-записи)
 7. [Примеры запросов](#примеры-запросов)
@@ -433,6 +437,46 @@ gold_filters:
 
 ---
 
+### CrossRef
+
+**Схема**: `CrossRefPublicationGoldSchema` (`domain/contracts/gold/publications_crossref.py`)
+
+> TODO: Документировать поля контракта. См. исходный код схемы.
+
+---
+
+### OpenAlex
+
+**Схема**: `OpenAlexPublicationGoldSchema` (`domain/contracts/gold/publications_openalex.py`)
+
+> TODO: Документировать поля контракта. См. исходный код схемы.
+
+---
+
+### Semantic Scholar
+
+**Схема**: `SemanticScholarPublicationGoldSchema` (`domain/contracts/gold/publications_semanticscholar.py`)
+
+> TODO: Документировать поля контракта. См. исходный код схемы.
+
+---
+
+### Composite
+
+**Схемы**:
+
+| Схема | Файл |
+|-------|------|
+| `CompositeActivityGoldSchema` | `domain/contracts/gold/composite_bioassay.py` |
+| `CompositeAssayGoldSchema` | `domain/contracts/gold/composite_bioassay.py` |
+| `CompositeTargetGoldSchema` | `domain/contracts/gold/composite_bioassay.py` |
+| `CompositeMoleculeGoldSchema` | `domain/contracts/gold/composite_molecule.py` |
+| `CompositePublicationGoldSchema` | `domain/contracts/gold/composite_publication.py` |
+
+> TODO: Документировать поля контрактов. См. исходный код схем.
+
+---
+
 ## Системные поля
 
 Все Gold-таблицы содержат следующие метаданные:
@@ -606,7 +650,7 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
 ### Проверка контракта
 
 ```python
-from bioetl.infrastructure.schemas.gold import ChEMBLActivityGoldSchema
+from bioetl.domain.contracts.gold import ChEMBLActivityGoldSchema
 import polars as pl
 
 # Загрузка и валидация

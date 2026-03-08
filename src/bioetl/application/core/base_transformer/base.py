@@ -104,25 +104,11 @@ class BaseTransformer(_BaseTransformerRecordHelpersMixin, ABC):
         self._contract_policy = resolved_contract_policy
 
     def hash_pii_value(self, value: str | None) -> str | None:
-        """Hash a single PII value.
-
-        Args:
-            value: PII string to hash, or None.
-
-        Returns:
-            SHA-256 hex digest of the value, or None if value is None.
-        """
+        """Hash a single PII value."""
         return self._pii_hasher.hash_value(value)
 
     def hash_pii_list(self, values: list[str] | None) -> list[str] | None:
-        """Hash a list of PII values.
-
-        Args:
-            values: List of PII strings to hash, or None.
-
-        Returns:
-            List of SHA-256 hex digests in the same order, or None if values is None.
-        """
+        """Hash a list of PII values."""
         return self._pii_hasher.hash_list(values)
 
     @staticmethod
@@ -132,16 +118,7 @@ class BaseTransformer(_BaseTransformerRecordHelpersMixin, ABC):
         *,
         as_string: bool = True,
     ) -> str | int | None:
-        """Validate a value using a Value Object and return normalized value.
-
-        Args:
-            vo_class: Value Object class with a ``from_raw`` factory method.
-            value: Raw value to validate and normalize.
-            as_string: If True, return ``str(vo)``; if False, return ``vo.value``.
-
-        Returns:
-            Normalized string or int value, or None if validation fails.
-        """
+        """Validate a value using a Value Object and return normalized value."""
         vo = vo_class.from_raw(value)
         if vo is None:
             return None
@@ -154,16 +131,7 @@ class BaseTransformer(_BaseTransformerRecordHelpersMixin, ABC):
         *,
         as_string: bool = True,
     ) -> list[str | int] | None:
-        """Validate a list of values using a Value Object.
-
-        Args:
-            vo_class: Value Object class with a ``from_raw`` factory method.
-            values: Raw values to validate; invalid items are silently dropped.
-            as_string: If True, return ``str(vo)``; if False, return ``vo.value``.
-
-        Returns:
-            List of normalized values, or None if values is None or all fail validation.
-        """
+        """Validate a list of values using a Value Object."""
         if not values:
             return None
         result: list[str | int] = []
@@ -281,16 +249,7 @@ class BaseTransformer(_BaseTransformerRecordHelpersMixin, ABC):
         record: BronzeRecord,
         index: int,
     ) -> SilverRecord | None:
-        """Transform Bronze record to Silver format (Template Method).
-
-        Args:
-            context: Pipeline execution context with run metadata and logger.
-            record: Raw Bronze record from the data source.
-            index: Absolute position of this record within the batch.
-
-        Returns:
-            Transformed SilverRecord, or None if the record is filtered or invalid.
-        """
+        """Transform Bronze record to Silver format (Template Method)."""
         start_time = time.perf_counter()
         error_type: str | None = None
         span = self._start_transform_span(context, index)
@@ -323,15 +282,7 @@ class BaseTransformer(_BaseTransformerRecordHelpersMixin, ABC):
         _context: PipelineContext,
         record: GoldRecord,
     ) -> bool:
-        """Determine whether transformed record should be written to Silver.
-
-        Args:
-            _context: Pipeline context (unused; available for subclass overrides).
-            record: Transformed Silver record to evaluate against filters.
-
-        Returns:
-            True if the record passes all Silver filter rules, False to exclude.
-        """
+        """Determine whether transformed record should be written to Silver."""
         if self._silver_filters is None or self._silver_filters.is_empty():
             return True
         return self._silver_filters.should_include(record)
@@ -341,15 +292,7 @@ class BaseTransformer(_BaseTransformerRecordHelpersMixin, ABC):
         _context: PipelineContext,
         record: GoldRecord,
     ) -> bool:
-        """Determine whether transformed record should be written to Gold.
-
-        Args:
-            _context: Pipeline context (unused; available for subclass overrides).
-            record: Silver record to evaluate against Gold filter rules.
-
-        Returns:
-            True if the record passes all Gold filter rules, False to exclude.
-        """
+        """Determine whether transformed record should be written to Gold."""
         if self._gold_filters is None or self._gold_filters.is_empty():
             return True
         return self._gold_filters.should_include(record)
@@ -359,15 +302,7 @@ class BaseTransformer(_BaseTransformerRecordHelpersMixin, ABC):
         _context: PipelineContext,
         silver_record: GoldRecord,
     ) -> GoldRecord:
-        """Transform Silver record for Gold layer.
-
-        Args:
-            _context: Pipeline context (unused; available for subclass overrides).
-            silver_record: Silver record to project into Gold format.
-
-        Returns:
-            Gold record with GOLD_EXCLUDE_FIELDS removed.
-        """
+        """Transform Silver record for Gold layer."""
         return {
             k: v for k, v in silver_record.items() if k not in self.GOLD_EXCLUDE_FIELDS
         }
@@ -378,15 +313,7 @@ class BaseTransformer(_BaseTransformerRecordHelpersMixin, ABC):
         *,
         exclude_none: bool = True,
     ) -> ContentHash:
-        """Generate canonical content hash for record versioning.
-
-        Args:
-            business_data: Gold record containing business fields to hash.
-            exclude_none: If True, None-valued fields are omitted before hashing.
-
-        Returns:
-            Deterministic hex-digest ContentHash string for change detection.
-        """
+        """Generate canonical content hash for record versioning."""
         hash_input = _apply_hash_policy(self._contract_policy, business_data)
         return self._identity.compute_content_hash(
             self.provider,
@@ -399,15 +326,7 @@ class BaseTransformer(_BaseTransformerRecordHelpersMixin, ABC):
         source_id: str | None,
         record: GoldRecord,
     ) -> EntityID:
-        """Generate stable entity identifier.
-
-        Args:
-            source_id: Provider-native identifier string (e.g. ChEMBL ID), or None.
-            record: Gold record used as fallback context for ID derivation.
-
-        Returns:
-            Deterministic EntityID string combining provider, entity type, and source ID.
-        """
+        """Generate stable entity identifier."""
         return self._identity.compute_entity_id(
             provider=self.provider,
             entity_type=self.entity_type,
@@ -419,17 +338,7 @@ class BaseTransformer(_BaseTransformerRecordHelpersMixin, ABC):
         self,
         entity: object,
     ) -> GoldRecord:
-        """Convert Domain Entity to SilverRecord format using policy rename map.
-
-        Args:
-            entity: Dataclass domain entity to convert.
-
-        Returns:
-            Dictionary representing the Silver record with fields renamed per contract policy.
-
-        Raises:
-            TypeError: If entity is not a dataclass instance.
-        """
+        """Convert Domain Entity to SilverRecord format using policy rename map."""
         if not dataclasses.is_dataclass(entity) or isinstance(entity, type):
             raise TypeError(f"Expected dataclass entity, got {type(entity).__name__}")
 

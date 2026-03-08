@@ -11,36 +11,36 @@
 
 ## Канонические инструменты агента
 
-1. `scripts/diagrams/run_diagram_checks.sh` — единый quality gate (lint/syntax/render/smoke/quality).
-2. `scripts/diagrams/generate_with_descriptions_docx.py` — генерация DOCX из `*-with-descriptions.md`.
-3. `scripts/diagrams/generate_with_descriptions_pdf.py` — генерация PDF из `*-with-descriptions.md`.
-4. `docs/00-project/ai/agents/scripts/diagrams/run_diagram_docs_agent.sh` — единый orchestrator для полного цикла.
+1. `docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-1.sh` — единый quality gate (lint/syntax/render/smoke/quality).
+2. `docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-2.py` — генерация DOCX из `*-with-descriptions.md`.
+3. `docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-3.py` — генерация PDF из `*-with-descriptions.md`.
+4. `docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-4.sh` — единый orchestrator для полного цикла.
 
 ## Базовые команды
 
 ```bash
 # Полный цикл (checks + docx + pdf)
-bash docs/00-project/ai/agents/scripts/diagrams/run_diagram_docs_agent.sh
+bash docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-4.sh
 
 # Полный цикл для одной диаграммы
-bash docs/00-project/ai/agents/scripts/diagrams/run_diagram_docs_agent.sh \
+bash docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-4.sh \
   --diagram docs/02-architecture/mmd-diagrams/foundation/30-port-adapter-mapping.mmd
 
 # Только пересборка бандлов без checks
-bash docs/00-project/ai/agents/scripts/diagrams/run_diagram_docs_agent.sh --skip-checks
+bash docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-4.sh --skip-checks
 ```
 
 ## Режимы
 
 | Режим | Описание |
 |---|---|
-| `CHECK` | Только `run_diagram_checks.sh` |
+| `CHECK` | Только `py-doc-bot-1.sh` |
 | `BUNDLES` | Только `docx/pdf` генерация |
 | `FULL` | Checks + bundles |
 
 ## Инварианты
 
-1. Использовать orchestrator из `docs/00-project/ai/agents/scripts/diagrams/` и канонические диаграммные скрипты из `scripts/diagrams/`.
+1. Использовать orchestrator и канонические скрипты из `docs/00-project/ai/agents/scripts/diagrams/`; путь `scripts/diagrams/` сохраняется как compatibility-слой.
 2. Следовать ADR-040 (diagram governance).
 3. При ошибках окружения (`pandoc`, `wkhtmltopdf`, `mmdc`) завершать с явным сообщением.
 4. Не менять зоны вне диаграммного контура без явного запроса.
