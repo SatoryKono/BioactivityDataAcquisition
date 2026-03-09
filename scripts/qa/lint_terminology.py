@@ -18,8 +18,10 @@ from __future__ import annotations
 
 import argparse
 import ast
+import io
 import re
 import sys
+import tokenize
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -128,7 +130,7 @@ def should_skip_file(filepath: Path) -> bool:
 
     # Skip known non-product documentation/tooling subtrees.
     for prefix in SKIP_PATH_PREFIXES:
-        if normalized.startswith(prefix):
+        if normalized.startswith(prefix) or f"/{prefix}" in normalized:
             return True
 
     # Skip based on file name patterns
@@ -147,6 +149,48 @@ def _is_skippable_line(line: str) -> bool:
     if stripped.startswith('"""') or stripped.startswith("'''"):
         return True
     return False
+
+
+def _mask_line_segment(line: str, start_col: int, end_col: int) -> str:
+    """Replace a line slice with spaces while preserving positions."""
+    if start_col < 0:
+        start_col = 0
+    if end_col < start_col:
+        end_col = start_col
+    return f"{line[:start_col]}{' ' * max(0, end_col - start_col)}{line[end_col:]}"
+
+
+def _mask_non_code_segments(content: str) -> list[str]:
+    """Mask string/comment token spans to reduce false-positive matches."""
+    masked_lines = content.splitlines()
+    if not masked_lines:
+        return masked_lines
+
+    for token in tokenize.generate_tokens(io.StringIO(content).readline):
+        if token.type not in (tokenize.STRING, tokenize.COMMENT):
+            continue
+
+        start_line, start_col = token.start
+        end_line, end_col = token.end
+        if start_line <= 0 or start_line > len(masked_lines):
+            continue
+
+        if start_line == end_line:
+            idx = start_line - 1
+            masked_lines[idx] = _mask_line_segment(masked_lines[idx], start_col, end_col)
+            continue
+
+        for line_no in range(start_line, min(end_line, len(masked_lines)) + 1):
+            idx = line_no - 1
+            line = masked_lines[idx]
+            if line_no == start_line:
+                masked_lines[idx] = _mask_line_segment(line, start_col, len(line))
+            elif line_no == end_line:
+                masked_lines[idx] = _mask_line_segment(line, 0, end_col)
+            else:
+                masked_lines[idx] = " " * len(line)
+
+    return masked_lines
 
 
 def _make_violation(
@@ -276,7 +320,7 @@ def check_file(filepath: Path, strict: bool = False) -> list[TermViolation]:
         print(f"Warning: Could not read {filepath}: {e}", file=sys.stderr)
         return []
 
-    lines = content.splitlines()
+    lines = _mask_non_code_segments(content)
     docstring_lines = _collect_docstring_line_numbers(content)
 
     for line_num, line in enumerate(lines, start=1):

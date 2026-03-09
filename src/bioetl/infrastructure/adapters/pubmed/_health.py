@@ -72,14 +72,14 @@ class PubMedHealthMixin:
 
             start_time = time.monotonic()
             with self._adapter_metrics.measure_request("/health"):
-                response = await self.http_client.get_once(
+                response = await self._http_client.get_once(
                     f"{ENTREZ_API_BASE}einfo.fcgi", params=params
                 )
             elapsed = time.monotonic() - start_time
 
             if response.status_code != 200:
                 status = classify_health_probe_status(response.status_code)
-                self.logger.warning(
+                self._logger.warning(
                     (
                         "pubmed_health_check_degraded"
                         if status == HealthStatus.DEGRADED
@@ -91,7 +91,7 @@ class PubMedHealthMixin:
                 return status
 
             if elapsed > 5.0:
-                self.logger.warning(
+                self._logger.warning(
                     "pubmed_health_check_slow",
                     elapsed_seconds=round(elapsed, 2),
                 )
@@ -100,7 +100,7 @@ class PubMedHealthMixin:
             return HealthStatus.HEALTHY
         except PUBMED_HEALTH_ERRORS as e:
             error_type = self._error_handler.get_error_type(e)
-            self.logger.warning(
+            self._logger.warning(
                 "health_check_failed",
                 provider=self.provider_name,
                 error_type=error_type.value,

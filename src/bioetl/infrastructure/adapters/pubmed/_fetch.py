@@ -87,7 +87,7 @@ class PubMedFetchMixin:
         try:
             start_time = time.perf_counter()
             with self._adapter_metrics.measure_request("/efetch"):
-                response = await self.http_client.get(
+                response = await self._http_client.get(
                     f"{ENTREZ_API_BASE}efetch.fcgi", params=params
                 )
             duration_ms = (time.perf_counter() - start_time) * 1000
@@ -97,7 +97,7 @@ class PubMedFetchMixin:
 
             root = PubMedXmlProcessor.parse_response(response.text)
             if root is None:
-                self.logger.error(
+                self._logger.error(
                     "external_api_error",
                     provider=self.provider_name,
                     operation="batch_fetch",
@@ -110,7 +110,7 @@ class PubMedFetchMixin:
         except PUBMED_FETCH_ERRORS as e:
             from bioetl.infrastructure.adapters.error_handling import ErrorService
 
-            error_handler = ErrorService(self.logger, metrics=self.metrics)
+            error_handler = ErrorService(self._logger, metrics=self._metrics)
             wrapped = error_handler.handle_error(
                 error=e,
                 provider=self.provider_name,

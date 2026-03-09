@@ -70,7 +70,7 @@ async def test_fetch_by_doi_single(crossref_adapter: CrossRefAdapter) -> None:
     with respx.mock(base_url=CROSSREF_API_BASE) as respx_mock:
         respx_mock.get("/works").mock(return_value=Response(200, json=mock_response))
 
-        async with crossref_adapter.http_client:
+        async with crossref_adapter._http_client:
             records = []
             async for record in crossref_adapter.fetch(
                 entity_type="work",
@@ -111,7 +111,7 @@ async def test_fetch_by_doi_batch(crossref_adapter: CrossRefAdapter) -> None:
     with respx.mock(base_url=CROSSREF_API_BASE) as respx_mock:
         respx_mock.get("/works").mock(return_value=Response(200, json=mock_response))
 
-        async with crossref_adapter.http_client:
+        async with crossref_adapter._http_client:
             records = []
             async for record in crossref_adapter.fetch(
                 entity_type="work",
@@ -139,7 +139,7 @@ async def test_fetch_doi_not_found(
     with respx.mock(base_url=CROSSREF_API_BASE) as respx_mock:
         respx_mock.get("/works").mock(return_value=Response(200, json=mock_response))
 
-        async with crossref_adapter.http_client:
+        async with crossref_adapter._http_client:
             records = []
             async for record in crossref_adapter.fetch(
                 entity_type="work",
@@ -166,7 +166,7 @@ async def test_fetch_with_limit(crossref_adapter: CrossRefAdapter) -> None:
     with respx.mock(base_url=CROSSREF_API_BASE) as respx_mock:
         respx_mock.get("/works").mock(return_value=Response(200, json=mock_response))
 
-        async with crossref_adapter.http_client:
+        async with crossref_adapter._http_client:
             records = []
             async for record in crossref_adapter.fetch(
                 entity_type="work",
@@ -190,7 +190,7 @@ async def test_health_check_healthy(crossref_adapter: CrossRefAdapter) -> None:
     with respx.mock(base_url=CROSSREF_API_BASE) as respx_mock:
         respx_mock.get("/works").mock(return_value=Response(200, json=mock_response))
 
-        async with crossref_adapter.http_client:
+        async with crossref_adapter._http_client:
             status = await crossref_adapter.health_check()
             assert status == HealthStatus.HEALTHY
 
@@ -203,7 +203,7 @@ async def test_health_check_unhealthy_on_error(
     with respx.mock(base_url=CROSSREF_API_BASE) as respx_mock:
         respx_mock.get("/works").mock(return_value=Response(503))
 
-        async with crossref_adapter.http_client:
+        async with crossref_adapter._http_client:
             status = await crossref_adapter.health_check()
             assert status == HealthStatus.UNHEALTHY
 
@@ -228,7 +228,7 @@ async def test_search_by_query(crossref_adapter: CrossRefAdapter) -> None:
     with respx.mock(base_url=CROSSREF_API_BASE) as respx_mock:
         respx_mock.get("/works").mock(return_value=Response(200, json=mock_response))
 
-        async with crossref_adapter.http_client:
+        async with crossref_adapter._http_client:
             records = []
             async for record in crossref_adapter.fetch(
                 entity_type="work",
@@ -274,7 +274,7 @@ async def test_fetch_with_fallback_by_title(
     with respx.mock(base_url=CROSSREF_API_BASE) as respx_mock:
         respx_mock.get("/works").mock(side_effect=route_handler)
 
-        async with crossref_adapter.http_client:
+        async with crossref_adapter._http_client:
             records = []
             async for record in crossref_adapter.fetch_filtered_with_fallback(
                 entity_type="work",
@@ -293,7 +293,7 @@ async def test_fetch_with_fallback_by_title(
 async def test_invalid_entity_type_raises(crossref_adapter: CrossRefAdapter) -> None:
     """Test that invalid entity type raises ValueError."""
     with respx.mock(base_url=CROSSREF_API_BASE):
-        async with crossref_adapter.http_client:
+        async with crossref_adapter._http_client:
             with pytest.raises(ValueError, match="CrossRefAdapter supports"):
                 async for _ in crossref_adapter.fetch(
                     entity_type="invalid_type",
@@ -323,7 +323,7 @@ async def test_fetch_preprint_type(crossref_adapter: CrossRefAdapter) -> None:
     with respx.mock(base_url=CROSSREF_API_BASE) as respx_mock:
         respx_mock.get("/works").mock(return_value=Response(200, json=mock_response))
 
-        async with crossref_adapter.http_client:
+        async with crossref_adapter._http_client:
             records = []
             async for record in crossref_adapter.fetch(
                 entity_type="publication",  # Also accepts "publication"
@@ -368,7 +368,7 @@ async def test_batch_fetch_with_http_error_falls_back(
     with respx.mock(base_url=CROSSREF_API_BASE) as respx_mock:
         respx_mock.route().mock(side_effect=route_handler)
 
-        async with crossref_adapter.http_client:
+        async with crossref_adapter._http_client:
             records = []
             async for record in crossref_adapter.fetch(
                 entity_type="work",

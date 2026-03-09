@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from bioetl.domain.context import (
         CachedBronzeContext,
         PipelineRunContext,
-        VacuumConfig,
+        VacuumSettings,
     )
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.infrastructure.config import Settings
@@ -73,7 +73,7 @@ __all__ = [
 
 def assemble_vacuum_settings(
     *,
-    cli_vacuum: VacuumConfig,
+    cli_vacuum: VacuumSettings,
     yaml_maintenance: MaintenanceConfig,
 ) -> VacuumConfig:
     """Merge CLI and YAML vacuum settings.

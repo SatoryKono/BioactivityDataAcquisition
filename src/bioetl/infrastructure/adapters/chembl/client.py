@@ -82,12 +82,18 @@ class ChemblAdapter(
 
     def __post_init__(self) -> None:
         """Initialize adapter with config values and metrics."""
+        # Dataclass-generated __init__ bypasses BaseHttpAdapter.__init__.
+        # Initialize private base state used by shared adapter helpers.
+        self._http_client = self.http_client
+        self._logger = self.logger
+        self._metrics = self.metrics
+
         # Initialize error handler: use injected or create fallback
         if self.error_handler is not None:
             self._error_handler = self.error_handler
         else:
-            metrics_port = self.metrics if self.metrics is not None else None
-            self._error_handler = ErrorService(self.logger, metrics=metrics_port)
+            metrics_port = self._metrics if self._metrics is not None else None
+            self._error_handler = ErrorService(self._logger, metrics=metrics_port)
         # Resolve configuration: use provided config or domain defaults
         config = (
             self.adapter_config if self.adapter_config is not None else AdapterConfig()
@@ -105,7 +111,7 @@ class ChemblAdapter(
         self._extraction_params = self.extraction_params or ExtractionParams.empty()
 
         if not self._extraction_params.is_empty:
-            self.logger.info(
+            self._logger.info(
                 "chembl_extraction_params_configured",
                 provider="chembl",
                 param_count=len(self._extraction_params.params),
@@ -213,7 +219,7 @@ class ChemblAdapter(
     ) -> bool:
         """Check if record is duplicate and add to seen set if not."""
         return is_duplicate_record(
-            record, pk_field, seen_ids, entity_type, self.logger, self._adapter_metrics
+            record, pk_field, seen_ids, entity_type, self._logger, self._adapter_metrics
         )
 
     def _is_duplicate_record_composite(
@@ -229,7 +235,7 @@ class ChemblAdapter(
             pk_fields,
             seen_keys,
             entity_type,
-            self.logger,
+            self._logger,
             self._adapter_metrics,
         )
 
@@ -270,7 +276,7 @@ class ChemblAdapter(
         url = self._mapper.get_resource_url(entity_type)
         params = {"limit": 1, "format": "json"}
         with self._adapter_metrics.measure_request(f"/{entity_type}/count"):
-            response = await self.http_client.get(url, params=params)
+            response = await self._http_client.get(url, params=params)
         data = response.json()
         page_meta = data.get("page_meta", {})
         total_count: int = page_meta.get("total_count", 0)

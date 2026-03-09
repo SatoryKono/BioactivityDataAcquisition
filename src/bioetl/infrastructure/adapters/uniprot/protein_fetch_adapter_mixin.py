@@ -129,7 +129,7 @@ class UniProtProteinFetchAdapterMixin:
             try:
                 start_time = time.perf_counter()
                 with self._adapter_metrics.measure_request("/uniprotkb/search"):
-                    response = await self.http_client.get(
+                    response = await self._http_client.get(
                         f"{self.base_url}/uniprotkb/search", params=params
                     )
                 duration_ms = (time.perf_counter() - start_time) * 1000
@@ -160,7 +160,7 @@ class UniProtProteinFetchAdapterMixin:
                 context=context,
             )
         else:
-            self.logger.error(
+            self._logger.error(
                 "external_api_error",
                 provider=self.provider_name,
                 operation=f"{entity_type}_fetch",

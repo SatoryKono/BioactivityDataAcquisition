@@ -21,7 +21,7 @@ from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.types import RunType
 
 if TYPE_CHECKING:
-    from bioetl.domain.context import PipelineRunContext, VacuumConfig
+    from bioetl.domain.context import PipelineRunContext, VacuumSettings
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.infrastructure.schemas.pipeline_config import (
         InputFilterConfig as YamlInputFilter,
@@ -57,7 +57,7 @@ class VacuumConfig:
 
 def assemble_vacuum_settings(
     *,
-    cli_vacuum: VacuumConfig,
+    cli_vacuum: VacuumSettings,
     yaml_maintenance: MaintenanceConfig,
 ) -> VacuumConfig:
     """Assemble effective vacuum settings from CLI overrides and YAML config.
@@ -70,16 +70,16 @@ def assemble_vacuum_settings(
     otherwise YAML default.
 
     Args:
-        cli_vacuum: Vacuum configuration from CLI (VacuumConfig with tri-state enabled).
+        cli_vacuum: Vacuum configuration from CLI (VacuumSettings with tri-state enabled).
         yaml_maintenance: Maintenance configuration from pipeline YAML.
 
     Returns:
         VacuumConfig with resolved enabled flag and retention days.
 
     Example:
-        >>> from bioetl.domain.context import VacuumConfig
+        >>> from bioetl.domain.context import VacuumSettings
         >>> # CLI doesn't override -> use YAML
-        >>> cli = VacuumConfig(enabled=None, retention_days=7)
+        >>> cli = VacuumSettings(enabled=None, retention_days=7)
         >>> yaml = MaintenanceConfig(auto_vacuum=True, vacuum_retention_days=14)
         >>> result = assemble_vacuum_settings(cli_vacuum=cli, yaml_maintenance=yaml)
         >>> result.enabled
@@ -88,7 +88,7 @@ def assemble_vacuum_settings(
         14
 
         >>> # CLI explicitly overrides -> use CLI values
-        >>> cli = VacuumConfig(enabled=False, retention_days=3)
+        >>> cli = VacuumSettings(enabled=False, retention_days=3)
         >>> result = assemble_vacuum_settings(cli_vacuum=cli, yaml_maintenance=yaml)
         >>> result.enabled
         False
