@@ -69,15 +69,7 @@ def _handle_export_failure(
     domain_error_title: str,
     unexpected_error_title: str,
 ) -> None:
-    """Handle export command failures with shared CLI policy.
-
-    Args:
-        exc: Exception caught at the CLI command boundary.
-        reason_code: Machine-readable code for the failure (e.g., 'CLI_EXPORT_RUN_DOMAIN_ERROR').
-        table: Table name used as subject value in the structured error context.
-        domain_error_title: Human-readable title for BioETLError failures.
-        unexpected_error_title: Human-readable title for unexpected exception failures.
-    """
+    """Handle export command failures with shared CLI policy."""
     handle_cli_execution_failure(
         exc,
         reason_code=reason_code,

@@ -76,15 +76,7 @@ def assemble_vacuum_settings(
     cli_vacuum: CliVacuumSettings,
     yaml_maintenance: MaintenanceConfig,
 ) -> VacuumSettings:
-    """Merge CLI and YAML vacuum settings.
-
-    Args:
-        cli_vacuum: Vacuum configuration from CLI (tri-state enabled flag).
-        yaml_maintenance: Maintenance configuration from pipeline YAML defaults.
-
-    Returns:
-        VacuumSettings with resolved enabled flag and retention days.
-    """
+    """Merge CLI and YAML vacuum settings into resolved VacuumSettings."""
     enabled = (
         cli_vacuum.enabled
         if cli_vacuum.enabled is not None
@@ -105,17 +97,7 @@ def assemble_runtime_config(
     vacuum: VacuumSettings,
     health_check_mode: Literal["strict", "probe"],
 ) -> RuntimeConfig:
-    """Build ``RuntimeConfig`` from run context and resolved vacuum settings.
-
-    Args:
-        ctx: Pipeline run context providing run type, limit, query, and other options.
-        heartbeat_interval: Interval in seconds for lock heartbeat updates.
-        vacuum: Resolved vacuum settings (enabled flag and retention days).
-        health_check_mode: Health check enforcement mode; 'strict' raises on failure.
-
-    Returns:
-        Immutable RuntimeConfig instance for this pipeline run.
-    """
+    """Build ``RuntimeConfig`` from run context and resolved vacuum settings."""
     return RuntimeConfig(
         run_type=ctx.run_type,
         resume=ctx.resume,
@@ -138,18 +120,7 @@ def assemble_filter_config(
     test_mode: bool,
     filter_builder: type[FilterConfigBuilder] = FilterConfigBuilder,
 ) -> InputFilterConfig | None:
-    """Build ``InputFilterConfig`` from YAML and CLI filter inputs.
-
-    Args:
-        yaml_filter: Filter configuration from pipeline YAML.
-        ctx: Pipeline run context containing CLI filter settings and flags.
-        test_mode: If True, YAML-based filters are disabled.
-        filter_builder: FilterConfigBuilder class used to build the config. Defaults
-            to FilterConfigBuilder.
-
-    Returns:
-        Configured InputFilterConfig, or None if filtering is disabled.
-    """
+    """Build ``InputFilterConfig`` from YAML and CLI filter inputs."""
     inp_filter = ctx.input_filter
     enabled = inp_filter.enabled
     return filter_builder.build(
@@ -172,15 +143,7 @@ def assemble_cached_bronze_context(ctx: PipelineRunContext) -> CachedBronzeConte
 
 
 def validate_pk_contract(config: PipelineYamlConfig) -> None:
-    """Fail-fast validation for PK configuration consistency.
-
-    Args:
-        config: Pipeline YAML configuration to validate for primary key consistency.
-
-    Raises:
-        ValueError: If business_primary_keys is empty, PKs are mismatched, or
-            technical_primary_key is empty.
-    """
+    """Fail-fast validation for PK configuration consistency."""
     business_primary_keys = tuple(getattr(config, "business_primary_keys", ()) or ())
     legacy_primary_keys = getattr(config, "primary_keys", None)
     technical_primary_key = getattr(config, "technical_primary_key", "entity_id")
@@ -231,16 +194,7 @@ def resolve_filter_batch_size(
     *,
     load_source_config_fn: Callable[..., object] | None = None,
 ) -> int | None:
-    """Resolve batch size override when filter mode is active.
-
-    Args:
-        yaml_config: Pipeline YAML configuration providing filter_batch_size and provider.
-        load_source_config_fn: Optional callable to load source config; uses default
-            load_source_config when None.
-
-    Returns:
-        Integer batch size if configured, None otherwise.
-    """
+    """Resolve batch size override when filter mode is active."""
     filter_batch_size = getattr(yaml_config, "filter_batch_size", None)
     if isinstance(filter_batch_size, int):
         return filter_batch_size

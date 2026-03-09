@@ -78,17 +78,7 @@ class _NormalizationActivityMixin:
         *,
         validate: bool = True,
     ) -> NormalizationResult:
-        """Normalize a single activity value.
-
-        Args:
-            value: Raw activity measurement (e.g., IC50 in nM).
-            unit: Unit string of the raw measurement (e.g., 'nM', 'uM').
-            activity_type: Activity type label (e.g., 'IC50', 'Ki'). Reserved for future validation.
-            validate: Whether to validate the value against concentration rules. Defaults to True.
-
-        Returns:
-            NormalizationResult with converted value, unit, pChEMBL, and validity flag.
-        """
+        """Normalize a single activity value to canonical unit with pChEMBL."""
         if validate:
             is_valid, error = self.validator.validate_concentration(value, unit)
             if not is_valid:
@@ -120,16 +110,7 @@ class _NormalizationActivityMixin:
         *,
         validate: bool = True,
     ) -> PChemblValue | None:
-        """Normalize activity to pChEMBL value.
-
-        Args:
-            value: Raw activity measurement.
-            unit: Unit string of the measurement (e.g., 'nM').
-            validate: Whether to validate the resulting pChEMBL value. Defaults to True.
-
-        Returns:
-            PChemblValue if conversion succeeds and passes validation, otherwise None.
-        """
+        """Normalize activity to pChEMBL value, or None on failure."""
         try:
             pchembl = self.converter.value_to_pchembl(value, unit)
             if validate:
@@ -153,38 +134,17 @@ class _NormalizationActivityMixin:
             return None, False
 
     def is_potent(self, pchembl_value: float) -> bool:
-        """Check if pChEMBL value indicates potent activity.
-
-        Args:
-            pchembl_value: pChEMBL value to evaluate.
-
-        Returns:
-            True if pchembl_value meets or exceeds the configured potency threshold.
-        """
+        """Check if pChEMBL value meets the configured potency threshold."""
         return self.validator.is_potent(pchembl_value, self.config.potency_threshold)
 
     def is_highly_potent(self, pchembl_value: float) -> bool:
-        """Check if pChEMBL value indicates highly potent activity.
-
-        Args:
-            pchembl_value: pChEMBL value to evaluate.
-
-        Returns:
-            True if pchembl_value meets or exceeds the configured high-potency threshold.
-        """
+        """Check if pChEMBL value meets the configured high-potency threshold."""
         return self.validator.is_highly_potent(
             pchembl_value, self.config.high_potency_threshold
         )
 
     def classify_potency(self, pchembl_value: float) -> str:
-        """Classify potency level based on pChEMBL value.
-
-        Args:
-            pchembl_value: pChEMBL value to classify.
-
-        Returns:
-            Potency label: 'inactive', 'weak', 'moderate', 'potent', or 'highly_potent'.
-        """
+        """Classify potency level based on pChEMBL value."""
         if pchembl_value < 4.0:
             return "inactive"
         if pchembl_value < self.config.potency_threshold:
