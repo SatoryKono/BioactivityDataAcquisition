@@ -3,10 +3,12 @@
 ## Quick Start
 
 ```bash
-# 1. Clone and install
+# 1. Clone and install (automated setup)
 git clone https://github.com/SatoryKono/BioactivityDataAcquisition.git
 cd BioactivityDataAcquisition
-make install
+./scripts/dev/dev_setup.sh          # Full setup with all checks
+# ./scripts/dev/dev_setup.sh --quick  # Fast: skip tests and linters
+# ./scripts/dev/dev_setup.sh --ci     # CI mode: no colors, non-interactive
 
 # 2. Run checks before any changes
 make lint && make test
@@ -126,7 +128,8 @@ This ensures no PR can be merged with failing tests, lint errors, or secret leak
 
 **3. "Missing dependencies"**
 
-- Run `uv sync --extra dev --extra tracing`.
+- Run `./scripts/dev/dev_setup.sh --force` to reinstall from scratch.
+- Or manually: `uv sync --extra dev --extra tracing`.
 - Check `pyproject.toml` for new groups.
 
 **4. "ERROR: Missing required plugins: pytest-asyncio>=0.23, pytest-cov>=4.0"**

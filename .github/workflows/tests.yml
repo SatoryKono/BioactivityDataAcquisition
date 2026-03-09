@@ -484,4 +484,3 @@ jobs:
                     name: pytest-resilient-diagnostics
                     path: reports/pytest/
                     if-no-files-found: warn
-                    retention-days: 30

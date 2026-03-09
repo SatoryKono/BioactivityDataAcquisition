@@ -11,6 +11,7 @@ on:
 jobs:
   nightly-phase2:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -111,6 +112,7 @@ jobs:
             reports/diagrams/diagram-nightly-phase2.md
             reports/diagrams/diagram-quality-budget-nightly.json
             reports/diagrams/diagram-quality-budget-nightly.md
+          retention-days: 14
 
       - name: Publish nightly summary
         if: always()
@@ -204,6 +206,7 @@ jobs:
           name: diagrams-canary-${{ matrix.label }}
           path: |
             /tmp/diagram-canary/svg/*.svg
+          retention-days: 7
 
       - name: Publish canary summary
         if: always()

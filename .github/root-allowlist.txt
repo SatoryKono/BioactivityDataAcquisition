@@ -4,6 +4,7 @@
 .editorconfig
 .setup_wsl_codex.sh
 .env.example
+.wsl-vpn-fix.ps1
 .gitattributes
 .gitignore
 .gitleaks.toml
@@ -17,7 +18,7 @@ Dockerfile
 LICENSE
 Makefile
 README.md
-commitlint.config.js
+commitlint.config.mjs
 docker-compose.monitoring.yml
 docker-compose.yml
 entrypoint.sh

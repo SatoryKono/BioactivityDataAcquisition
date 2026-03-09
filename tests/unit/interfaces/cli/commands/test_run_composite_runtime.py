@@ -112,7 +112,9 @@ class TestBuildRuntimeConfig:
 class TestEchoCompositeStartup:
     """Tests for echo_composite_startup — covers lines 96-101."""
 
-    def test_always_echoes_starting_message(self, capsys: pytest.CaptureFixture[str]) -> None:
+    def test_always_echoes_starting_message(
+        self, capsys: pytest.CaptureFixture[str]
+    ) -> None:
         """Starting message is always printed (line 96)."""
         with patch(
             "bioetl.interfaces.cli.commands.run_composite_runtime.echo_health_server_info"
@@ -128,7 +130,9 @@ class TestEchoCompositeStartup:
         out = capsys.readouterr().out
         assert "Starting composite pipeline: publication" in out
 
-    def test_dry_run_true_echoes_warning(self, capsys: pytest.CaptureFixture[str]) -> None:
+    def test_dry_run_true_echoes_warning(
+        self, capsys: pytest.CaptureFixture[str]
+    ) -> None:
         """Dry-run warning is printed when dry_run=True (line 97-98)."""
         with patch(
             "bioetl.interfaces.cli.commands.run_composite_runtime.echo_health_server_info"
@@ -207,7 +211,9 @@ class TestEchoCompositeStartup:
 
         mock_echo.assert_called_once_with(True, 9090)
 
-    def test_combined_dry_run_and_resume(self, capsys: pytest.CaptureFixture[str]) -> None:
+    def test_combined_dry_run_and_resume(
+        self, capsys: pytest.CaptureFixture[str]
+    ) -> None:
         """Both dry-run warning and resume message appear when both flags are True."""
         with patch(
             "bioetl.interfaces.cli.commands.run_composite_runtime.echo_health_server_info"

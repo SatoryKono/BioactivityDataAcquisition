@@ -14,7 +14,8 @@ def _script_text() -> str:
 def _is_compat_wrapper(script: str) -> bool:
     return (
         "Compatibility wrapper" in script
-        and 'exec bash "$REPO_ROOT/docs/00-project/ai/agents/scripts/diagrams/' in script
+        and 'exec bash "$REPO_ROOT/docs/00-project/ai/agents/scripts/diagrams/'
+        in script
     )
 
 
@@ -23,7 +24,10 @@ def test_runner_wrapper_or_full_implementation_contract() -> None:
     script = _script_text()
 
     if _is_compat_wrapper(script):
-        assert 'exec bash "$REPO_ROOT/docs/00-project/ai/agents/scripts/diagrams/' in script
+        assert (
+            'exec bash "$REPO_ROOT/docs/00-project/ai/agents/scripts/diagrams/'
+            in script
+        )
         assert '.sh" "$@"' in script
         return
 

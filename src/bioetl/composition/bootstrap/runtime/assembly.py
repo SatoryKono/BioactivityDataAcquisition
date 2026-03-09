@@ -21,7 +21,8 @@ from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.types import RunType
 
 if TYPE_CHECKING:
-    from bioetl.domain.context import PipelineRunContext, VacuumSettings
+    from bioetl.domain.context import PipelineRunContext
+    from bioetl.domain.context import VacuumSettings as CliVacuumSettings
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.infrastructure.schemas.pipeline_config import (
         InputFilterConfig as YamlInputFilter,
@@ -31,7 +32,7 @@ if TYPE_CHECKING:
     )
 
 __all__ = [
-    "VacuumConfig",
+    "VacuumSettings",
     "assemble_cached_bronze_context",
     "assemble_filter_config",
     "assemble_runtime_config",
@@ -40,7 +41,7 @@ __all__ = [
 
 
 @dataclass(frozen=True, slots=True)
-class VacuumConfig:
+class VacuumSettings:
     """Resolved vacuum settings after merging CLI and YAML config.
 
     This is a pure data object representing the effective vacuum configuration
@@ -57,9 +58,9 @@ class VacuumConfig:
 
 def assemble_vacuum_settings(
     *,
-    cli_vacuum: VacuumSettings,
+    cli_vacuum: CliVacuumSettings,
     yaml_maintenance: MaintenanceConfig,
-) -> VacuumConfig:
+) -> VacuumSettings:
     """Assemble effective vacuum settings from CLI overrides and YAML config.
 
     Implements tri-state merge logic:
@@ -74,7 +75,7 @@ def assemble_vacuum_settings(
         yaml_maintenance: Maintenance configuration from pipeline YAML.
 
     Returns:
-        VacuumConfig with resolved enabled flag and retention days.
+        VacuumSettings with resolved enabled flag and retention days.
 
     Example:
         >>> from bioetl.domain.context import VacuumSettings
@@ -97,13 +98,13 @@ def assemble_vacuum_settings(
     """
     # CLI explicit override takes precedence
     if cli_vacuum.enabled is not None:
-        return VacuumConfig(
+        return VacuumSettings(
             enabled=cli_vacuum.enabled,
             retention_days=cli_vacuum.retention_days,
         )
 
     # No CLI override -> use YAML defaults
-    return VacuumConfig(
+    return VacuumSettings(
         enabled=yaml_maintenance.auto_vacuum,
         retention_days=yaml_maintenance.vacuum_retention_days,
     )
@@ -117,7 +118,7 @@ def assemble_runtime_config(
     query: str | None,
     dry_run: bool,
     heartbeat_interval: int,
-    vacuum: VacuumConfig,
+    vacuum: VacuumSettings,
     skip_gold: bool = False,
     health_check_mode: Literal["strict", "probe"] = "strict",
 ) -> RuntimeConfig:
@@ -143,7 +144,7 @@ def assemble_runtime_config(
 
     Example:
         >>> from bioetl.domain.types import RunType
-        >>> vacuum = VacuumConfig(enabled=True, retention_days=7)
+        >>> vacuum = VacuumSettings(enabled=True, retention_days=7)
         >>> config = assemble_runtime_config(
         ...     run_type=RunType.INCREMENTAL,
         ...     resume=False,
