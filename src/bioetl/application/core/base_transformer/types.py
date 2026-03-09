@@ -17,8 +17,10 @@ class ValueObjectWithFromRaw(Protocol[V]):
 
     @classmethod
     def from_raw(cls, raw: Any) -> V | None:  # Any: raw input
+        """Create a value object from a raw input, returning None if invalid."""
         ...
 
     @property
     def value(self) -> Any:  # Any: VO value type varies (str | int | float)
+        """Return the unwrapped primitive value of the value object."""
         ...

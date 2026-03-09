@@ -193,12 +193,14 @@ def atomic_write_text(
     """Write text atomically to target file.
 
     Args:
-        target: Path to the final destination file
-        text: Text to write
-        encoding: Text encoding (default: utf-8)
+        target: Path to the final destination file.
+        text: Text to write.
+        encoding: Text encoding (default: utf-8).
+        retry_policy: Optional adaptive retry policy for transient OS errors.
+        on_retry: Optional callback invoked before each retry attempt.
 
     Raises:
-        AtomicWriteError: If write fails
+        AtomicWriteError: If write fails.
 
     """
     with atomic_write(

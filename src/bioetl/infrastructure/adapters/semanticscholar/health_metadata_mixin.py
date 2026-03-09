@@ -42,7 +42,9 @@ class SemanticScholarHTTPClientProtocol(Protocol):
         url: str,
         params: JsonDict | None = None,
         headers: dict[str, str] | None = None,
-    ) -> SemanticScholarHTTPResponseProtocol: ...
+    ) -> SemanticScholarHTTPResponseProtocol:
+        """Send a single HTTP GET request without retry."""
+        ...
 
     async def __aexit__(
         self,
@@ -56,7 +58,9 @@ class SemanticScholarHTTPClientProtocol(Protocol):
 class SemanticScholarAdapterMetricsProtocol(Protocol):
     """Adapter metrics contract required by the health probe."""
 
-    def measure_request(self, endpoint: str) -> AbstractContextManager[None]: ...
+    def measure_request(self, endpoint: str) -> AbstractContextManager[None]:
+        """Return a context manager that records request duration metrics."""
+        ...
 
 
 @runtime_checkable
@@ -69,12 +73,18 @@ class SemanticScholarRequestCollectorProtocol(Protocol):
         url: str | None = None,
         api_version: str | None = None,
         query_string: str | None = None,
-    ) -> SourceMetadata: ...
+    ) -> SourceMetadata:
+        """Build source metadata snapshot from collected request data."""
+        ...
 
-    def clear(self) -> None: ...
+    def clear(self) -> None:
+        """Reset collected request state."""
+        ...
 
     @property
-    def request_count(self) -> int: ...
+    def request_count(self) -> int:
+        """Return the number of HTTP requests recorded so far."""
+        ...
 
 
 @runtime_checkable

@@ -334,14 +334,9 @@ nav:
                     -   "MMD Diagram Descriptions": 02-architecture/mmd-diagrams/diagram-descriptions.md
                     -   "MMD Foundation with Descriptions": 02-architecture/mmd-diagrams/foundation-diagrams-with-descriptions.md
                     -   "MMD Class with Descriptions": 02-architecture/mmd-diagrams/class-diagrams-with-descriptions.md
-                    -   "MMD Architecture SVG Index": 02-architecture/mmd-diagrams/architecture/svg/INDEX.md
-                    -   "MMD Architecture PNG Index": 02-architecture/mmd-diagrams/architecture/png/INDEX.md
-                    -   "MMD Foundation SVG Index": 02-architecture/mmd-diagrams/foundation/svg/INDEX.md
-                    -   "MMD Foundation PNG Index": 02-architecture/mmd-diagrams/foundation/png/INDEX.md
-                    -   "MMD Views SVG Index": 02-architecture/mmd-diagrams/views/svg/INDEX.md
-                    -   "MMD Views PNG Index": 02-architecture/mmd-diagrams/views/png/INDEX.md
-                    -   "MMD Class SVG Index": 02-architecture/mmd-diagrams/class-diagrams/svg/INDEX.md
-                    -   "MMD Class PNG Index": 02-architecture/mmd-diagrams/class-diagrams/png/INDEX.md
+                    # SVG/PNG Index pages excluded from nav: images are gitignored
+                    # (generated locally). Including INDEX.md breaks mkdocs --strict.
+                    # View locally: docs/02-architecture/mmd-diagrams/{category}/svg/INDEX.md
                     -   "MMD Class Diagram Descriptions": 02-architecture/mmd-diagrams/diagram-descriptions/class-diagrams-descriptions.md
                     -   "Diagram Views Plan": 02-architecture/mmd-diagrams/docs/diagram-views-plan.md
                     -   "Diagram Prompt Expansion": 02-architecture/mmd-diagrams/docs/PROMPT-diagram-expansion.md

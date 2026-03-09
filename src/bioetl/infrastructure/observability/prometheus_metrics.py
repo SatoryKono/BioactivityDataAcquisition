@@ -223,7 +223,9 @@ class PrometheusMetrics(MetricsPort):
         Args:
             name: Identifier name.
             value: Input value.
-            labels: Labels.
+            labels: Labels dict (primary parameter).
+            _labels: Alias for labels (backward compatibility).
+            tags: Alias for labels (alternative naming convention).
         """
         resolved_labels = resolve_metric_labels(
             labels,
@@ -247,7 +249,9 @@ class PrometheusMetrics(MetricsPort):
         Args:
             name: Identifier name.
             value: Input value.
-            labels: Labels.
+            labels: Labels dict (primary parameter).
+            _labels: Alias for labels (backward compatibility).
+            tags: Alias for labels (alternative naming convention).
         """
         resolved_labels = resolve_metric_labels(
             labels,
@@ -277,7 +281,9 @@ class PrometheusMetrics(MetricsPort):
         Args:
             name: Identifier name.
             value: Input value.
-            labels: Labels.
+            labels: Labels dict (primary parameter).
+            _labels: Alias for labels (backward compatibility).
+            tags: Alias for labels (alternative naming convention).
         """
         resolved_labels = resolve_metric_labels(
             labels,

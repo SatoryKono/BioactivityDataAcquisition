@@ -50,12 +50,18 @@ class Phase1SummaryLoggerHook(Protocol):
 class FallbackExecutionStrategy(Protocol):
     """Generic strategy interface for fallback execution hooks."""
 
-    def normalize_id(self, value: str, /) -> str | None: ...
+    def normalize_id(self, value: str, /) -> str | None:
+        """Normalize a raw identifier for lookup consistency."""
+        ...
 
-    def extract_record_id(self, record: BronzeRecord, /) -> str | None: ...
+    def extract_record_id(self, record: BronzeRecord, /) -> str | None:
+        """Extract the primary identifier from a fetched record."""
+        ...
 
     @property
-    def fallback_handler(self) -> FallbackPolicyHandler | None: ...
+    def fallback_handler(self) -> FallbackPolicyHandler | None:
+        """Return the fallback policy handler, if configured."""
+        ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -67,13 +73,16 @@ class DefaultFallbackExecutionStrategy:
     fallback_handler_hook: FallbackPolicyHandler | None = None
 
     def normalize_id(self, value: str, /) -> str | None:
+        """Normalize a raw identifier by delegating to the hook."""
         return self.normalize_id_hook(value)
 
     def extract_record_id(self, record: BronzeRecord, /) -> str | None:
+        """Extract the primary identifier by delegating to the hook."""
         return self.extract_record_id_hook(record)
 
     @property
     def fallback_handler(self) -> FallbackPolicyHandler | None:
+        """Return the fallback policy handler, if configured."""
         return self.fallback_handler_hook
 
 
