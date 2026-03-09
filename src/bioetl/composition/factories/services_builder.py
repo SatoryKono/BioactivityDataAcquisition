@@ -335,14 +335,7 @@ class ServicesBuilder:
 def create_data_normalization_service(
     config: DataNormalizationConfig | None = None,
 ) -> DataNormalizationPort:
-    """Create DataNormalizationService with optional configuration.
-
-    Args:
-        config: Optional configuration for normalization behavior.
-
-    Returns:
-        DataNormalizationPort implementation (DefaultDataNormalizationService).
-    """
+    """Create DataNormalizationService with optional configuration."""
     from bioetl.domain.services import (
         DataNormalizationConfig,
         DefaultDataNormalizationService,
