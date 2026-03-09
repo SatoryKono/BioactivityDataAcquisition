@@ -130,9 +130,16 @@ def test_run_fetch_with_fallback_policy_prefix_property(
             for entry in entries:
                 yield {"id": f"t:{entry}"}
 
+    # Production code tracks found IDs in lowercase (case-insensitive dedup).
+    # Build the same lowercase set to predict which IDs phase-2 will skip.
+    found_lower: set[str] = {doi.strip().lower() for doi in primary_ids if doi in resolved_ids}
     expected_ids = [
         *(f"p:{doi}" for doi in primary_ids if doi in resolved_ids),
-        *(f"m:{doi}" for doi in primary_ids if doi not in resolved_ids),
+        *(
+            f"m:{doi}"
+            for doi in primary_ids
+            if doi not in resolved_ids and doi.strip().lower() not in found_lower
+        ),
         *(f"t:{entry}" for entry in title_only_entries),
     ]
     if limit is not None:
