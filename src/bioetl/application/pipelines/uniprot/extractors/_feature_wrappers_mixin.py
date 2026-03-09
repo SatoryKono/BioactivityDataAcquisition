@@ -18,18 +18,26 @@ class _FeatureExtractorProtocol(Protocol):
         cls,
         features: list[JsonDict] | None,
         feature_type: str,
-    ) -> str | None: ...
+    ) -> str | None:
+        """Extract features matching the given UniProt feature type."""
+        ...
 
     @classmethod
     def extract_ptm_by_pattern(
         cls,
         features: list[JsonDict] | None,
         patterns: tuple[str, ...],
-    ) -> str | None: ...
+    ) -> str | None:
+        """Extract post-translational modifications matching the given patterns."""
+        ...
 
 
 class FeatureExtractionWrappersMixin:
-    """Thin wrappers mapped to specific UniProt feature/PTM groups."""
+    """Thin wrappers mapped to specific UniProt feature/PTM groups.
+
+    Each method delegates to ``extract_features_by_type`` or
+    ``extract_ptm_by_pattern`` with the appropriate feature type key.
+    """
 
     FEATURE_TYPES: ClassVar[dict[str, str]]
     PTM_PATTERNS: ClassVar[dict[str, tuple[str, ...]]]
@@ -39,6 +47,7 @@ class FeatureExtractionWrappersMixin:
         cls: type[_FeatureExtractorProtocol],
         features: list[JsonDict] | None,
     ) -> str | None:
+        """Extract protein domain annotations."""
         return cls.extract_features_by_type(features, "Domain")
 
     @classmethod
@@ -46,6 +55,7 @@ class FeatureExtractionWrappersMixin:
         cls: type[_FeatureExtractorProtocol],
         features: list[JsonDict] | None,
     ) -> str | None:
+        """Extract binding site annotations."""
         return cls.extract_features_by_type(features, "Binding site")
 
     @classmethod
@@ -53,6 +63,7 @@ class FeatureExtractionWrappersMixin:
         cls: type[_FeatureExtractorProtocol],
         features: list[JsonDict] | None,
     ) -> str | None:
+        """Extract active site annotations."""
         return cls.extract_features_by_type(features, "Active site")
 
     @classmethod
@@ -60,6 +71,7 @@ class FeatureExtractionWrappersMixin:
         cls: type[_FeatureExtractorProtocol],
         features: list[JsonDict] | None,
     ) -> str | None:
+        """Extract topological domain annotations."""
         return cls.extract_features_by_type(features, cls.FEATURE_TYPES["topology"])
 
     @classmethod
@@ -67,6 +79,7 @@ class FeatureExtractionWrappersMixin:
         cls: type[_FeatureExtractorProtocol],
         features: list[JsonDict] | None,
     ) -> str | None:
+        """Extract transmembrane region annotations."""
         return cls.extract_features_by_type(
             features, cls.FEATURE_TYPES["transmembrane"]
         )
@@ -76,6 +89,7 @@ class FeatureExtractionWrappersMixin:
         cls: type[_FeatureExtractorProtocol],
         features: list[JsonDict] | None,
     ) -> str | None:
+        """Extract intramembrane region annotations."""
         return cls.extract_features_by_type(
             features, cls.FEATURE_TYPES["intramembrane"]
         )
@@ -85,6 +99,7 @@ class FeatureExtractionWrappersMixin:
         cls: type[_FeatureExtractorProtocol],
         features: list[JsonDict] | None,
     ) -> str | None:
+        """Extract glycosylation site annotations."""
         return cls.extract_features_by_type(
             features, cls.FEATURE_TYPES["glycosylation"]
         )
@@ -94,6 +109,7 @@ class FeatureExtractionWrappersMixin:
         cls: type[_FeatureExtractorProtocol],
         features: list[JsonDict] | None,
     ) -> str | None:
+        """Extract lipidation site annotations."""
         return cls.extract_features_by_type(features, cls.FEATURE_TYPES["lipidation"])
 
     @classmethod
@@ -101,6 +117,7 @@ class FeatureExtractionWrappersMixin:
         cls: type[_FeatureExtractorProtocol],
         features: list[JsonDict] | None,
     ) -> str | None:
+        """Extract disulfide bond annotations."""
         return cls.extract_features_by_type(
             features, cls.FEATURE_TYPES["disulfide_bond"]
         )
@@ -110,6 +127,7 @@ class FeatureExtractionWrappersMixin:
         cls: type[_FeatureExtractorProtocol],
         features: list[JsonDict] | None,
     ) -> str | None:
+        """Extract modified residue annotations."""
         return cls.extract_features_by_type(
             features, cls.FEATURE_TYPES["modified_residue"]
         )
@@ -119,6 +137,7 @@ class FeatureExtractionWrappersMixin:
         cls: type[_FeatureExtractorProtocol],
         features: list[JsonDict] | None,
     ) -> str | None:
+        """Extract signal peptide annotations."""
         return cls.extract_features_by_type(
             features, cls.FEATURE_TYPES["signal_peptide"]
         )
@@ -128,6 +147,7 @@ class FeatureExtractionWrappersMixin:
         cls: type[_FeatureExtractorProtocol],
         features: list[JsonDict] | None,
     ) -> str | None:
+        """Extract propeptide annotations."""
         return cls.extract_features_by_type(features, cls.FEATURE_TYPES["propeptide"])
 
     @classmethod
@@ -135,6 +155,7 @@ class FeatureExtractionWrappersMixin:
         cls: type[_FeatureExtractorProtocol],
         features: list[JsonDict] | None,
     ) -> str | None:
+        """Extract phosphorylation PTM annotations."""
         return cls.extract_ptm_by_pattern(features, cls.PTM_PATTERNS["phosphorylation"])
 
     @classmethod
@@ -142,6 +163,7 @@ class FeatureExtractionWrappersMixin:
         cls: type[_FeatureExtractorProtocol],
         features: list[JsonDict] | None,
     ) -> str | None:
+        """Extract acetylation PTM annotations."""
         return cls.extract_ptm_by_pattern(features, cls.PTM_PATTERNS["acetylation"])
 
     @classmethod
@@ -149,4 +171,5 @@ class FeatureExtractionWrappersMixin:
         cls: type[_FeatureExtractorProtocol],
         features: list[JsonDict] | None,
     ) -> str | None:
+        """Extract ubiquitination PTM annotations."""
         return cls.extract_ptm_by_pattern(features, cls.PTM_PATTERNS["ubiquitination"])
