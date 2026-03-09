@@ -32,6 +32,7 @@ if TYPE_CHECKING:
     )
 
 __all__ = [
+    "VacuumConfig",
     "VacuumSettings",
     "assemble_cached_bronze_context",
     "assemble_filter_config",
@@ -54,6 +55,10 @@ class VacuumSettings:
 
     enabled: bool
     retention_days: int
+
+
+# Backward-compat alias for legacy imports/tests.
+VacuumConfig = VacuumSettings
 
 
 def assemble_vacuum_settings(
