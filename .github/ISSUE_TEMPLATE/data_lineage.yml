@@ -1,0 +1,169 @@
+name: Schema-Watch / Data Lineage / DQ
+description: Request schema-watch, data lineage tracking, or data-quality CI guardrails (OpenLineage, Pandera, Great Expectations)
+labels: ["enhancement", "data-quality", "observability"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for features related to **schema governance**, **data lineage** (OpenLineage / Marquez),
+        **Pandera schema contracts**, or **Great Expectations** data-quality suites.
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: Which capability does this issue address?
+      options:
+        - Schema-watch (detect column drift between runs)
+        - Data lineage emission (OpenLineage RunEvent)
+        - Pandera schema contract (CI fast gate)
+        - Great Expectations DQ suite (deep content checks)
+        - Custom OpenLineage facet
+        - Other / combination
+    validations:
+      required: true
+
+  - type: dropdown
+    id: pipeline
+    attributes:
+      label: Affected pipeline / entity
+      description: Which ETL pipeline or entity is in scope?
+      options:
+        - chembl / molecule
+        - chembl / activity
+        - pubchem / compound
+        - pubmed / article
+        - crossref / publication
+        - openalex / work
+        - semantic_scholar / paper
+        - uniprot / protein
+        - composite (multi-provider)
+        - All pipelines
+        - New pipeline (not yet implemented)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: medallion_layer
+    attributes:
+      label: Medallion layer
+      description: Which layer does this apply to?
+      multiple: true
+      options:
+        - Bronze (raw ingestion)
+        - Silver (Delta Lake normalized)
+        - Gold (curated / aggregated)
+        - All layers
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: |
+        Describe what schema drift, lineage gap, or data-quality blind spot this addresses.
+        Include any concrete examples (missing column, type change, unexpected nulls, etc.).
+      placeholder: |
+        Example: After a ChEMBL API update, the `pchembl_value` column silently changed
+        from float64 to string in the Silver layer. There is no automated gate to catch this.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed_solution
+    attributes:
+      label: Proposed solution
+      description: |
+        How should this be implemented? Reference specific tools, ports, or layers where relevant.
+        Snippets from the OpenLineage client, Pandera, or GE are welcome.
+      placeholder: |
+        Add a `SchemaValidationPort` implementation backed by Pandera that:
+        1. Validates Silver DataFrame against a `MoleculeSchema` model (Polars DataFrameModel).
+        2. Emits a `SchemaDatasetFacet` via OpenLineage client on each pipeline run.
+        3. Fails CI with `lazy=True` to surface all violations at once.
+    validations:
+      required: true
+
+  - type: textarea
+    id: openlineage_event
+    attributes:
+      label: OpenLineage RunEvent sketch (optional)
+      description: |
+        If relevant, provide a sketch of the `RunEvent` to emit — job namespace, dataset name,
+        schema facet fields, or custom facets.
+      render: python
+      placeholder: |
+        evt = RunEvent(
+            eventType=RunState.COMPLETE,
+            job=Job(namespace="bioetl", name="chembl/molecule"),
+            outputs=[Dataset(
+                namespace="warehouse",
+                name="silver.chembl_molecule",
+                facets={"schema": SchemaDatasetFacet(fields=[
+                    SchemaDatasetFacetFields(name="molecule_chembl_id", type="string"),
+                    SchemaDatasetFacetFields(name="pchembl_value", type="double"),
+                ])}
+            )]
+        )
+
+  - type: textarea
+    id: pandera_schema
+    attributes:
+      label: Pandera schema model sketch (optional)
+      description: Provide a Pandera `DataFrameModel` outline if known.
+      render: python
+      placeholder: |
+        import pandera.polars as pa_pl
+        import polars as pl
+
+        class MoleculeSchema(pa_pl.DataFrameModel):
+            molecule_chembl_id: pa_pl.Series[str]
+            pchembl_value: pa_pl.Series[float]
+            standard_type: pa_pl.Series[str]
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance criteria
+      description: List the concrete, testable conditions for this issue to be closed.
+      placeholder: |
+        - [ ] Pandera schema validates Silver DataFrame before Delta write; CI fails on drift
+        - [ ] OpenLineage `RunEvent` with `SchemaDatasetFacet` emitted on each pipeline completion
+        - [ ] File transport used in CI (no prod Marquez server needed)
+        - [ ] `pytest` contract test added under `tests/unit/` covering schema validation
+        - [ ] Architecture boundary tests still pass (no layer violations)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: affected_layers
+    attributes:
+      label: Affected architecture layers
+      multiple: true
+      options:
+        - Domain (ports / entities)
+        - Application (use cases / services)
+        - Infrastructure (adapters)
+        - Composition (DI wiring)
+        - Interfaces (CLI)
+        - Configs
+        - CI / GitHub Actions
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any other approaches or libraries you evaluated.
+
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: Links to ADRs, OpenLineage spec, Pandera docs, GE docs, or related issues/PRs.
+      placeholder: |
+        - OpenLineage spec: https://openlineage.io/docs/spec/
+        - Pandera Polars: https://pandera.readthedocs.io/en/stable/polars.html
+        - Related ADR: docs/02-architecture/decisions/ADR-NNN-*.md
