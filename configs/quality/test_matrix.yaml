@@ -1,0 +1,126 @@
+# Test Coverage Matrix — ADR-042
+# Tracks required test types per provider and layer.
+# CI uses this to validate minimum test coverage requirements.
+#
+# Levels: MUST (required), SHOULD (recommended), MAY (optional)
+# Types: unit, integration, contract, property, e2e, smoke
+
+version: "1.0.0"
+adr_ref: ADR-042
+
+# ── Layer-level requirements ─────────────────────────────────
+
+layers:
+  domain:
+    unit: MUST
+    property: SHOULD
+    description: "Pure logic, value objects, ports. No I/O."
+
+  application:
+    unit: MUST
+    integration: SHOULD
+    property: SHOULD  # transformers, normalization only
+    description: "Pipelines, services, orchestration."
+
+  infrastructure:
+    unit: MUST
+    integration: MUST  # VCR-backed
+    contract: MUST
+    description: "HTTP adapters, storage, observability."
+
+  composition:
+    unit: SHOULD
+    integration: SHOULD
+    e2e: MUST
+    description: "DI wiring, factories, bootstrap."
+
+  interfaces:
+    unit: SHOULD
+    e2e: MUST
+    description: "CLI commands, entry points."
+
+# ── Provider-level requirements ──────────────────────────────
+
+providers:
+  chembl:
+    entities: [activity, assay, compound, document, drug, mechanism, molecule,
+               protein_classification, source, subcellular_location, target,
+               target_component, tissue, cell_line]
+    vcr_cassettes: MUST
+    contract_tests: MUST
+    golden_masters: SHOULD
+
+  pubchem:
+    entities: [compound]
+    vcr_cassettes: MUST
+    contract_tests: MUST
+    golden_masters: SHOULD
+
+  uniprot:
+    entities: [protein, id_mapping]
+    vcr_cassettes: MUST
+    contract_tests: MUST
+    golden_masters: SHOULD
+
+  pubmed:
+    entities: [publication]
+    vcr_cassettes: MUST
+    contract_tests: MUST
+    golden_masters: SHOULD
+
+  crossref:
+    entities: [publication]
+    vcr_cassettes: MUST
+    contract_tests: SHOULD
+    golden_masters: MAY
+
+  openalex:
+    entities: [publication]
+    vcr_cassettes: MUST
+    contract_tests: SHOULD
+    golden_masters: MAY
+
+  semanticscholar:
+    entities: [publication]
+    vcr_cassettes: MUST
+    contract_tests: SHOULD
+    golden_masters: MAY
+
+# ── Test boundaries (ADR-042 §Property-Based Testing) ───────
+
+property_test_boundaries:
+  allowed:
+    - domain/entities
+    - domain/policies
+    - domain/value_objects
+    - application/pipelines/*/transformer*
+    - application/core/normalization*
+    - domain/services/schema*
+  forbidden:
+    - infrastructure/storage   # Use fixtures instead
+    - interfaces/cli           # Use e2e instead
+  # Note: infrastructure/adapters/common is exempt — retry/fallback
+  # policies are pure logic tested with property-based approaches.
+
+# ── Mutation testing (ADR-042 §Mutation Gate) ────────────────
+
+mutation_testing:
+  enabled: true
+  tool: mutmut
+  targets:
+    domain:
+      min_score: 70
+    application:
+      min_score: 60
+  excluded:
+    - infrastructure  # I/O-heavy, low mutation value
+    - composition     # Wiring code, tested via e2e
+    - interfaces      # CLI tested via e2e
+
+# ── Fixture governance ───────────────────────────────────────
+
+fixture_governance:
+  vcr_cassette_max_age_days: 90
+  golden_master_location: tests/fixtures/golden/{provider}/
+  contract_snapshot_location: tests/fixtures/contracts/{provider}/v{version}.json
+  cassette_metadata_required: true
