@@ -8,6 +8,8 @@ from pathlib import Path
 from types import ModuleType
 from uuid import uuid4
 
+import pytest
+
 
 def _load_module() -> ModuleType:
     repo_root = Path(__file__).resolve().parents[2]
@@ -139,6 +141,7 @@ def test_legacy_system_meta_field_rule_ignores_cli_double_dash_flags() -> None:
     assert not rule.pattern.search("allowed CLI flag --source")
 
 
+@pytest.mark.slow
 def test_guardrails_pass_for_current_nav_docs() -> None:
     module = _load_module()
 

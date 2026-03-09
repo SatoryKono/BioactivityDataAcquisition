@@ -72,7 +72,7 @@ def _register_provider_class(
         custom_creator=custom_creator,
     )
     ProviderRegistry.register(name, config)
-    cls.__provider_name__ = name  # type: ignore[attr-defined]
+    setattr(cls, "__provider_name__", name)
 
 
 def register_provider(

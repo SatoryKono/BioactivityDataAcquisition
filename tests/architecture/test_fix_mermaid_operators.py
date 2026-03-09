@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import importlib.util
+
+import pytest
 import sys
 from pathlib import Path
 from types import ModuleType
@@ -109,6 +111,7 @@ def test_fix_file_dry_run_does_not_modify_file(tmp_path: Path) -> None:
     assert content_after == original
 
 
+@pytest.mark.slow
 def test_repo_regression_has_no_thick_arrows_in_class_sequence_sources() -> None:
     module = _load_module()
     repo_root = Path(__file__).resolve().parents[2]
