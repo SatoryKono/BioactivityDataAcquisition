@@ -216,14 +216,7 @@ def adjust_batch_size_for_filter(
     observability: ObservabilityBundle,
     load_source_config_fn: Callable[..., object] | None = None,
 ) -> None:
-    """Adjust pipeline batch size to source ID-batch size when filter is enabled.
-
-    Args:
-        yaml_config: Pipeline YAML configuration; batch_size is mutated in-place if adjusted.
-        filter_config: Active filter configuration; no adjustment if None.
-        observability: ObservabilityBundle used to log batch size adjustments.
-        load_source_config_fn: Optional callable to load source config for batch size lookup.
-    """
+    """Adjust pipeline batch size to source ID-batch size when filter is enabled."""
     filter_batch_size = resolve_filter_batch_size(
         yaml_config, load_source_config_fn=load_source_config_fn
     )
@@ -265,22 +258,7 @@ def prepare_runner_inputs(
     ],
     load_source_config_fn: Callable[..., object] | None = None,
 ) -> RunnerInputs:
-    """Resolve runtime settings/config/observability into runner constructor inputs.
-
-    Args:
-        ctx: Pipeline run context with pipeline name, run type, and filter settings.
-        get_settings_fn: Callable returning global application Settings.
-        load_pipeline_config_fn: Callable returning PipelineYamlConfig for a pipeline name.
-        build_observability_bundle_fn: Callable returning an ObservabilityBundle.
-        assemble_vacuum_settings_fn: Callable merging CLI and YAML vacuum settings.
-        assemble_runtime_config_fn: Callable building RuntimeConfig from context.
-        assemble_filter_config_fn: Callable building InputFilterConfig from YAML and CLI.
-        assemble_cached_bronze_context_fn: Callable resolving cached bronze context.
-        load_source_config_fn: Optional callable to load source config for batch size.
-
-    Returns:
-        RunnerInputs bundle with all resolved dependencies for runner construction.
-    """
+    """Resolve runtime settings/config/observability into runner constructor inputs."""
     settings = get_settings_fn()
     yaml_config = load_pipeline_config_fn(ctx.pipeline_name)
     validate_pk_contract(yaml_config)

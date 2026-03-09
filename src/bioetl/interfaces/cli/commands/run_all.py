@@ -66,28 +66,14 @@ def _get_available_providers() -> list[str]:
 
 
 def _filter_pipelines_by_provider(provider: str) -> list[str]:
-    """Filter registered pipelines by provider prefix.
-
-    Args:
-        provider: Provider name prefix used to filter pipeline names (e.g., 'chembl').
-
-    Returns:
-        Sorted list of pipeline names that start with the given provider prefix.
-    """
+    """Filter registered pipelines by provider prefix."""
     registry = get_default_registry()
     all_pipelines = registry.list_pipelines()
     return sorted([name for name in all_pipelines if name.startswith(f"{provider}_")])
 
 
 def _validate_provider(provider: str) -> tuple[bool, str | None]:
-    """Validate that the provider has registered pipelines.
-
-    Args:
-        provider: Provider name to validate against the pipeline registry.
-
-    Returns:
-        Tuple of (is_valid, error_message). error_message is None when valid.
-    """
+    """Validate that the provider has registered pipelines."""
     available_providers = _get_available_providers()
     if not available_providers:
         return False, "No pipelines are registered."
@@ -103,32 +89,14 @@ def _validate_provider(provider: str) -> tuple[bool, str | None]:
 async def _run_pipeline_async(
     service: PipelineRunnerService, pipeline: str, options: RunOptions
 ) -> RunResult:
-    """Run a single pipeline asynchronously.
-
-    Args:
-        service: PipelineRunnerService used to execute the pipeline run.
-        pipeline: Pipeline name to run.
-        options: RunOptions controlling run type, limits, and filter settings.
-
-    Returns:
-        RunResult with pipeline execution status and metrics.
-    """
+    """Run a single pipeline asynchronously."""
     return await service.run(pipeline, options=options)
 
 
 async def _run_pipelines_batch(
     service: PipelineRunnerService, pipelines: list[str], options: RunOptions
 ) -> BatchRunResult:
-    """Run pipelines sequentially within a service context.
-
-    Args:
-        service: PipelineRunnerService used to execute each pipeline.
-        pipelines: Ordered list of pipeline names to run sequentially.
-        options: RunOptions controlling run type, limits, and filter settings.
-
-    Returns:
-        BatchRunResult with counts of succeeded, failed, and skipped pipelines.
-    """
+    """Run pipelines sequentially within a service context."""
     batch_result = BatchRunResult(total=len(pipelines))
 
     for pipeline in pipelines:
