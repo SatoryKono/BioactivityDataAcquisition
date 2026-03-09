@@ -195,7 +195,6 @@ jobs:
                 with:
                     name: ci-quality-metrics
                     path: reports/quality/ci-quality-metrics.json
-                    retention-days: 14
 
     # Fast tests run first for quick feedback
     test-fast:
@@ -485,4 +484,3 @@ jobs:
                     name: pytest-resilient-diagnostics
                     path: reports/pytest/
                     if-no-files-found: warn
-                    retention-days: 30

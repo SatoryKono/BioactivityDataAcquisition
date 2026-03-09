@@ -20,7 +20,6 @@ on:
 jobs:
   validate-mkdocs:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -62,7 +61,6 @@ jobs:
 
   validate-mermaid:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -101,12 +99,10 @@ jobs:
         with:
           name: diagram-lint-report
           path: /tmp/diagram-lint.json
-          retention-days: 14
 
   render-diagrams:
     needs: validate-mermaid
     runs-on: ubuntu-latest
-    timeout-minutes: 20
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -170,7 +166,6 @@ jobs:
           name: diagrams-svg
           path: |
             docs/**/svg/*.svg
-          retention-days: 14
 
       - name: Upload PNG artifacts
         uses: actions/upload-artifact@v4
@@ -178,7 +173,6 @@ jobs:
           name: diagrams-png
           path: |
             docs/**/png/*.png
-          retention-days: 14
 
       - name: Upload diagram quality report
         uses: actions/upload-artifact@v4
@@ -187,7 +181,6 @@ jobs:
           path: |
             reports/diagrams/diagram-quality-report.json
             reports/diagrams/diagram-quality-report.md
-          retention-days: 14
 
       - name: Publish diagram quality summary
         if: always()
@@ -202,7 +195,6 @@ jobs:
     needs: validate-mermaid
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    timeout-minutes: 5
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
