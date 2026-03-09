@@ -41,16 +41,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v5
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
         with:
-          python-version: "3.11"
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-
-      - name: Install dependencies (frozen lock)
-        run: uv sync --frozen
+          uv-extras: ""
+          uv-sync-args: "--frozen"
 
       - name: Run VACUUM on all Delta tables
         run: |

@@ -1,4 +1,7 @@
-name: Reusable CI setup
+name: "[DEPRECATED] Reusable CI setup"
+# DEPRECATED: Use .github/actions/setup-python-uv composite action instead.
+# This workflow_call approach runs in a separate runner, making it unsuitable
+# for setup steps. Kept for backward compatibility; will be removed in a future PR.
 
 on:
   workflow_call:
