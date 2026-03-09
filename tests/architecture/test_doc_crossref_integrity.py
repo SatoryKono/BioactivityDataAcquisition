@@ -75,7 +75,9 @@ class TestProviderRunbooks:
         """Runbooks directory should exist."""
         runbook_dir = DOCS_DIR / "05-operations" / "runbooks"
         if not runbook_dir.exists():
-            pytest.skip("Runbooks directory not yet created (ADR-043 pending implementation)")
+            pytest.skip(
+                "Runbooks directory not yet created (ADR-043 pending implementation)"
+            )
 
 
 @pytest.mark.architecture

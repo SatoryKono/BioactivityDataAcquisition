@@ -18,11 +18,11 @@ class NoOpDebug:
     Used in production mode where no interactive debugging is needed.
     """
 
-    def is_breakpoint_enabled(self, breakpoint: StageBreakpoint) -> bool:
+    def is_breakpoint_enabled(self, _breakpoint: StageBreakpoint) -> bool:
         """Always returns False — no breakpoints in production."""
         return False
 
-    def on_breakpoint(self, hit: BreakpointHit) -> DebugAction:
+    def on_breakpoint(self, _hit: BreakpointHit) -> DebugAction:
         """Always continues — no pausing in production."""
         return DebugAction.CONTINUE
 

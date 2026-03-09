@@ -32,9 +32,7 @@ class TestPipelineDebugService:
     """Tests for PipelineDebugService."""
 
     def test_capture_snapshot_stores_snapshot(self) -> None:
-        service = PipelineDebugService(
-            debug_port=NoOpDebug(), logger=_make_logger()
-        )
+        service = PipelineDebugService(debug_port=NoOpDebug(), logger=_make_logger())
         snapshot = service.capture_snapshot(
             "after_bronze", records_fetched=100, records_bronze=95
         )
@@ -44,9 +42,7 @@ class TestPipelineDebugService:
         assert len(service.snapshots) == 1
 
     def test_capture_multiple_snapshots(self) -> None:
-        service = PipelineDebugService(
-            debug_port=NoOpDebug(), logger=_make_logger()
-        )
+        service = PipelineDebugService(debug_port=NoOpDebug(), logger=_make_logger())
         service.capture_snapshot("after_preflight")
         service.capture_snapshot("after_bronze", records_fetched=50)
         service.capture_snapshot("after_silver", records_silver=45)
@@ -55,28 +51,20 @@ class TestPipelineDebugService:
         assert service.get_latest_snapshot().stage == "after_silver"  # type: ignore[union-attr]
 
     def test_get_latest_snapshot_empty(self) -> None:
-        service = PipelineDebugService(
-            debug_port=NoOpDebug(), logger=_make_logger()
-        )
+        service = PipelineDebugService(debug_port=NoOpDebug(), logger=_make_logger())
         assert service.get_latest_snapshot() is None
 
     def test_clear_snapshots(self) -> None:
-        service = PipelineDebugService(
-            debug_port=NoOpDebug(), logger=_make_logger()
-        )
+        service = PipelineDebugService(debug_port=NoOpDebug(), logger=_make_logger())
         service.capture_snapshot("stage1")
         service.capture_snapshot("stage2")
         service.clear_snapshots()
         assert len(service.snapshots) == 0
 
     def test_check_breakpoint_with_noop_continues(self) -> None:
-        service = PipelineDebugService(
-            debug_port=NoOpDebug(), logger=_make_logger()
-        )
+        service = PipelineDebugService(debug_port=NoOpDebug(), logger=_make_logger())
         snapshot = PipelineSnapshot(stage="test")
-        action = service.check_breakpoint(
-            StageBreakpoint.AFTER_BRONZE, snapshot
-        )
+        action = service.check_breakpoint(StageBreakpoint.AFTER_BRONZE, snapshot)
         assert action == DebugAction.CONTINUE
 
     def test_check_breakpoint_abort_raises(self) -> None:
@@ -84,9 +72,7 @@ class TestPipelineDebugService:
         mock_port.is_breakpoint_enabled.return_value = True
         mock_port.on_breakpoint.return_value = DebugAction.ABORT
 
-        service = PipelineDebugService(
-            debug_port=mock_port, logger=_make_logger()
-        )
+        service = PipelineDebugService(debug_port=mock_port, logger=_make_logger())
         snapshot = PipelineSnapshot(stage="test")
         with pytest.raises(DebugAbortError, match="breakpoint"):
             service.check_breakpoint(StageBreakpoint.AFTER_SILVER, snapshot)
@@ -96,9 +82,7 @@ class TestPipelineDebugService:
         mock_port.is_breakpoint_enabled.return_value = True
         mock_port.on_breakpoint.return_value = DebugAction.CONTINUE
 
-        service = PipelineDebugService(
-            debug_port=mock_port, logger=_make_logger()
-        )
+        service = PipelineDebugService(debug_port=mock_port, logger=_make_logger())
         snapshot = PipelineSnapshot(stage="test", records_fetched=42)
         action = service.check_breakpoint(
             StageBreakpoint.AFTER_BRONZE, snapshot, message="test msg"
@@ -111,9 +95,7 @@ class TestPipelineDebugService:
         assert hit.message == "test msg"
 
     def test_snapshots_returns_copy(self) -> None:
-        service = PipelineDebugService(
-            debug_port=NoOpDebug(), logger=_make_logger()
-        )
+        service = PipelineDebugService(debug_port=NoOpDebug(), logger=_make_logger())
         service.capture_snapshot("stage1")
         snapshots = service.snapshots
         snapshots.clear()

@@ -126,9 +126,7 @@ class PipelineDebugService:
         action = self.debug_port.on_breakpoint(hit)
 
         if action == DebugAction.ABORT:
-            raise DebugAbortError(
-                f"Pipeline aborted at breakpoint {breakpoint.value}"
-            )
+            raise DebugAbortError(f"Pipeline aborted at breakpoint {breakpoint.value}")
 
         self.logger.debug(
             "debug_action_taken",

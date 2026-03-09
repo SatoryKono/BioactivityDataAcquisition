@@ -696,7 +696,9 @@ def test_adapters_implement_protocols(src_dir: Path):
         from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
         from bioetl.infrastructure.adapters.pubchem.client import PubChemAdapter
         from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
-        from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
+        from bioetl.infrastructure.checkpoint.local_checkpoint import (
+            LocalCheckpointAdapter,
+        )
         from bioetl.infrastructure.locking.memory_lock import MemoryLock
         from bioetl.domain.ports import NoOpMetrics
         from bioetl.infrastructure.observability.prometheus_metrics import (

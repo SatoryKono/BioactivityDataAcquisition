@@ -38,7 +38,9 @@ _BREAKPOINT_CHOICES = [bp.value for bp in StageBreakpoint]
     help=f"Comma-separated breakpoints: {', '.join(_BREAKPOINT_CHOICES)}. "
     "Default: all breakpoints enabled.",
 )
-@click.option("--limit", type=int, default=10, help="Max records to process (default: 10)")
+@click.option(
+    "--limit", type=int, default=10, help="Max records to process (default: 10)"
+)
 @click.option(
     "--mode",
     type=click.Choice(["interactive", "log"]),
@@ -71,7 +73,9 @@ def debug(
                 StageBreakpoint(bp.strip()) for bp in breakpoints.split(",")
             }
         except ValueError as exc:
-            echo_error(f"Invalid breakpoint: {exc}. Valid: {', '.join(_BREAKPOINT_CHOICES)}")
+            echo_error(
+                f"Invalid breakpoint: {exc}. Valid: {', '.join(_BREAKPOINT_CHOICES)}"
+            )
             sys.exit(ExitCode.CONFIG_ERROR)
 
     echo_info(f"Starting debug session for pipeline '{pipeline}'")
