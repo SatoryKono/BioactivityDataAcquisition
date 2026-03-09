@@ -149,6 +149,8 @@
 00-project/ai/skills/global/.system/skill-creator/SKILL.md
 00-project/ai/skills/global/.system/skill-creator/references/openai_yaml.md
 00-project/ai/skills/global/.system/skill-installer/SKILL.md
+02-architecture/decisions/ADR-042-testing-strategy-matrix.md
+02-architecture/decisions/ADR-043-documentation-knowledge-management.md
 02-architecture/mmd-diagrams/architecture/png/INDEX.md
 02-architecture/mmd-diagrams/architecture/svg/INDEX.md
 02-architecture/mmd-diagrams/class-diagrams/png/INDEX.md

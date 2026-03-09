@@ -64,12 +64,12 @@ class PipelineSnapshot:
     records_gold: int = 0
     records_quarantined: int = 0
     dq_issues: dict[str, int] = field(default_factory=dict)
-    sample_records: list[dict[str, Any]] = field(
+    sample_records: list[dict[str, Any]] = field(  # Any: raw API records
         default_factory=list
-    )  # Any: raw API records
-    metadata: dict[str, Any] = field(
+    )
+    metadata: dict[str, Any] = field(  # Any: stage-specific metadata
         default_factory=dict
-    )  # Any: stage-specific metadata
+    )
 
 
 @dataclass(frozen=True, slots=True)
