@@ -13,76 +13,10 @@ policy:
         - expires_on
         - removal_step
 registries:
-    file_size_limits:
-        src/bioetl/domain/observability_contract.py:
-            value: 308
-            owner: '@bioetl-data-model'
-            reason: Reformatting blank-line style added 3 lines; below practical refactor threshold.
-            expires_on: '2026-06-30'
-            removal_step: Inline or extract helper functions to reduce below 305 LOC default.
-        src/bioetl/domain/services/normalization_service.py:
-            value: 324
-            owner: '@bioetl-data-model'
-            reason: Reformatting multi-line returns added lines; functional content unchanged.
-            expires_on: '2026-06-30'
-            removal_step: Refactor long methods into helpers to reduce below 305 LOC default.
-        src/bioetl/composition/factories/_storage_factory_helpers.py:
-            value: 381
-            owner: '@bioetl-platform'
-            reason: Reformatting function signatures to multi-line added lines; content unchanged.
-            expires_on: '2026-06-30'
-            removal_step: Extract helper builders to reduce below 350 LOC composition limit.
-        src/bioetl/composition/factories/services_builder.py:
-            value: 351
-            owner: '@bioetl-platform'
-            reason: Reformatting lambda expressions to multi-line added lines; content unchanged.
-            expires_on: '2026-06-30'
-            removal_step: Extract helper functions to reduce below 350 LOC composition limit.
-        src/bioetl/composition/factories/services_factory_pipeline_builder.py:
-            value: 356
-            owner: '@bioetl-platform'
-            reason: Reformatting added lines to meet style guide; functional content unchanged.
-            expires_on: '2026-06-30'
-            removal_step: Extract builder helpers to reduce below 350 LOC composition limit.
-        src/bioetl/composition/runtime_builders/inputs_resolver.py:
-            value: 373
-            owner: '@bioetl-platform'
-            reason: Reformatting function signatures to multi-line added lines; content unchanged.
-            expires_on: '2026-06-30'
-            removal_step: Extract resolver helpers to reduce below 350 LOC composition limit.
-        src/bioetl/interfaces/cli/commands/export.py:
-            value: 405
-            owner: '@bioetl-architecture'
-            reason: Reformatting added lines; CLI command handlers have inherent complexity.
-            expires_on: '2026-06-30'
-            removal_step: Extract option groups or sub-commands to reduce below 400 LOC limit.
-        src/bioetl/interfaces/cli/commands/quarantine.py:
-            value: 405
-            owner: '@bioetl-architecture'
-            reason: Reformatting added lines; CLI command handlers have inherent complexity.
-            expires_on: '2026-06-30'
-            removal_step: Extract option groups or sub-commands to reduce below 400 LOC limit.
-        src/bioetl/interfaces/cli/commands/run.py:
-            value: 416
-            owner: '@bioetl-architecture'
-            reason: Reformatting added lines; CLI run command has many option branches.
-            expires_on: '2026-06-30'
-            removal_step: Extract option groups or sub-commands to reduce below 400 LOC limit.
-        src/bioetl/interfaces/cli/commands/run_all.py:
-            value: 430
-            owner: '@bioetl-architecture'
-            reason: Reformatting added lines; CLI run-all command orchestrates multiple pipelines.
-            expires_on: '2026-06-30'
-            removal_step: Extract option groups or sub-commands to reduce below 400 LOC limit.
+    file_size_limits: { }
     function_complexity: { }
     function_length: { }
-    class_size:
-        src/bioetl/infrastructure/adapters/crossref/client.py::CrossRefAdapter:
-            value: 301
-            owner: '@bioetl-platform'
-            reason: CrossRefAdapter is 301 lines after adding NoOpMetrics fallback initialization; 1 line over limit.
-            expires_on: '2026-06-30'
-            removal_step: Extract initialization helpers from __post_init__ to reduce below 300-line class limit.
+    class_size: { }
     class_method_count: { }
     god_object: { }
     domain_complexity: { }

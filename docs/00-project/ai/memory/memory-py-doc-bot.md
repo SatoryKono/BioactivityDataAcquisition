@@ -50,7 +50,7 @@ docs/
 ## 3. ADR Management
 
 ### Current State
-- 40 ADRs: ADR-001 through ADR-040 (all present, verified 2026-02-27)
+- 41 ADRs: ADR-001 through ADR-041 (all present, verified 2026-03-09)
 - All in status: Accepted (except ADR-008: Superseded)
 - Location: `docs/02-architecture/decisions/`
 
