@@ -289,9 +289,14 @@ def _load_nav_docs() -> list[Path]:
     if not mkdocs_file.exists():
         return []
 
-    text = mkdocs_file.read_text(encoding="utf-8", errors="replace")
+    raw = mkdocs_file.read_text(encoding="utf-8", errors="replace")
+    # Strip YAML comments so regex doesn't pick up paths from comment text
+    text = "\n".join(
+        line.split(" #")[0] if " #" in line else line for line in raw.splitlines()
+    )
     nav_paths = sorted(set(MD_PATH_RE.findall(text)))
-    return [DOCS_DIR / rel_path for rel_path in nav_paths]
+    # Filter out absolute paths that may survive stripping
+    return [DOCS_DIR / rel_path for rel_path in nav_paths if not rel_path.startswith("/")]
 
 
 def _collect_link_scan_files(root: Path) -> list[Path]:
