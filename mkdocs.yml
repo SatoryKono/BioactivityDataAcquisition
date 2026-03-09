@@ -103,6 +103,7 @@ nav:
             -   "Data Layers": 02-architecture/data-layers.md
             -   "Observability Layers": 02-architecture/observability-layers.md
             -   "Module Dependency Map": 02-architecture/generated/module-dependency-map.md
+            -   "Technology Radar": 02-architecture/technology-radar.md
             -   Diagrams:
                     -   "Overview": 02-architecture/diagrams.md
                     -   "Diagramming Policy": 02-architecture/mmd-diagrams/docs/00-diagramming-policy.md
@@ -167,6 +168,7 @@ nav:
             -   "Metrics & Monitoring": 03-guides/metrics-monitoring.md
             -   "Testing": 03-guides/testing.md
             -   "Troubleshooting": 03-guides/troubleshooting.md
+            -   "Reading List": 03-guides/reading-list.md
             -   "Add New Source": 03-guides/add-new-source.md
             -   "Add Pipeline (Existing Source)": 03-guides/add-pipeline-existing-source.md
             -   "Cleanup Policy": 03-guides/cleanup-policy.md
@@ -349,6 +351,8 @@ nav:
                     -   "Hash Policy": 04-reference/hash-policy.md
                     -   "Publication Fields Reference": 04-reference/publication-fields-reference.md
                     -   "Publication Validation Index": 04-reference/publication-validation-index.md
+                    -   "Data Dictionary": 04-reference/data-dictionary.md
+                    -   "Data Lineage": 04-reference/data-lineage.md
                     -   "Pipeline Review Checklist": 04-reference/templates/pipeline-review-checklist.md
                     -   "Pipeline Legacy: ChEMBL Activity": 04-reference/pipelines/chembl-activity.md
                     -   "Pipeline Legacy: ChEMBL Assay": 04-reference/pipelines/chembl-assay.md

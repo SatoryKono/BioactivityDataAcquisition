@@ -25,6 +25,7 @@ BioETL follows a **Hexagonal Architecture** (Ports & Adapters) pattern with **Me
 | [data-flow.md](data-flow.md)                       | Medallion data flow            | -        |
 | [data-layers.md](data-layers.md)                   | Bronze/Silver/Gold details     | -        |
 | [observability-layers.md](observability-layers.md) | Metrics, Tracing, Logging      | -        |
+| [technology-radar.md](technology-radar.md)         | Tool & library selection rationale | -   |
 
 ### Diagrams
 
