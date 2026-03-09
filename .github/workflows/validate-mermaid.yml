@@ -5,26 +5,21 @@ concurrency:
 
 on:
     pull_request:
-      paths-ignore:
-        - 'docs/**'
-        - '*.md'
-        - '.ai/**'
-        - '.claude/**'
-        - '.github/workflows/**'
-        - 'LICENSE'
+      paths:
+        - 'assets/javascripts/mermaid*'
+        - 'assets/stylesheets/mermaid*'
+        - '.github/workflows/validate-mermaid.yml'
     push:
       branches: [ main ]
-      paths-ignore:
-        - 'docs/**'
-        - '*.md'
-        - '.ai/**'
-        - '.claude/**'
-        - '.github/workflows/**'
-        - 'LICENSE'
+      paths:
+        - 'assets/javascripts/mermaid*'
+        - 'assets/stylesheets/mermaid*'
+        - '.github/workflows/validate-mermaid.yml'
 
 jobs:
     check-mermaid:
         runs-on: ubuntu-latest
+        timeout-minutes: 5
         steps:
             -   name: Checkout repository
                 uses: actions/checkout@v4

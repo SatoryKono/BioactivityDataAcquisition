@@ -41,17 +41,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-
-      - name: Install dependencies
-        run: |
-          uv sync --extra tests
+          uv-extras: "tests"
+          uv-sync-args: ""
 
       - name: Run Contract Tests
         id: contract_tests
