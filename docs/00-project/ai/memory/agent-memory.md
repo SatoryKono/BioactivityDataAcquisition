@@ -17,7 +17,7 @@
 | Архитектура | Hexagonal (Ports & Adapters) + Medallion (Bronze→Silver→Gold) + DDD |
 | Deployment | Local-Only (ADR-010) — без Docker/Redis в runtime |
 | Провайдеры | ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar (7 шт.) |
-| ADR | 40 штук (ADR-001..ADR-040), все Accepted кроме ADR-008 (Superseded) |
+| ADR | 41 штук (ADR-001..ADR-041), все Accepted кроме ADR-008 (Superseded) |
 | Coverage target | ≥85% overall, ≥90% domain |
 | RULES.md | v5.23 (2026-03-02) |
 

@@ -1682,6 +1682,7 @@ fields:
 | [ADR-038](../02-architecture/decisions/ADR-038-enum-externalization.md)              | ChEMBL Enum Values Externalization to YAML | Accepted           | 2026-02-16 |
 | [ADR-039](../02-architecture/decisions/ADR-039-unified-entity-config-format.md)      | Unified Entity Configuration Format        | Accepted           | 2026-02-24 |
 | [ADR-040](../02-architecture/decisions/ADR-040-diagram-governance.md)                | Diagram Governance and Layout Policy       | Accepted           | 2026-02-25 |
+| [ADR-041](../02-architecture/decisions/ADR-041-naming-policy-skills-agents.md)       | Naming Policy for Skills, Agents, Commands | Accepted           | 2026-03-04 |
 
 ## История Изменений (Changelog)
 
