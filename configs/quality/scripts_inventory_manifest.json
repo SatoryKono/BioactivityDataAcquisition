@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-08T23:55:25.213193+00:00",
+  "generated_at": "2026-03-09T09:35:41.703442+00:00",
   "summary": {
     "total_scripts": 196,
     "status_counts": {
@@ -14,6 +14,7 @@
       "ci": 41,
       "docs": 80,
       "scripts": 99,
+      "skills": 4,
       "tests": 30
     }
   },
@@ -844,8 +845,20 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 17,
       "references": [
+        {
+          "path": ".codex/skills/SKILLS-CATALOG.md",
+          "line": 13,
+          "source_group": "skills",
+          "text": "bash scripts/check_skills_mirror.sh --check"
+        },
+        {
+          "path": ".codex/skills/SKILLS-CATALOG.md",
+          "line": 14,
+          "source_group": "skills",
+          "text": "bash scripts/check_skills_mirror.sh --sync"
+        },
         {
           "path": ".github/workflows/skills-consistency.yml",
           "line": 26,
@@ -881,18 +894,6 @@
           "line": 16,
           "source_group": "docs",
           "text": "bash scripts/check_skills_mirror.sh --check"
-        },
-        {
-          "path": "docs/00-project/ai/skills/SKILLS-CATALOG.md",
-          "line": 17,
-          "source_group": "docs",
-          "text": "bash scripts/check_skills_mirror.sh --sync"
-        },
-        {
-          "path": "docs/00-project/ai/skills/SKILLS-CATALOG.md",
-          "line": 82,
-          "source_group": "docs",
-          "text": "- Локальное зеркало восстановлено в `docs/00-project/ai/skills/local/` и проверяется через `scripts/check_skills_mirror.sh`."
         }
       ]
     },
@@ -1056,7 +1057,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -1075,6 +1076,12 @@
           "line": 1,
           "source_group": "docs",
           "text": "# Scripts Inventory\\n\\nTotal scripts: **106**\\n\\n## By Folder\\n\\n| Folder | Count |\\n|---|---:|\\n| `.` | 2 |\\n| `assets/javascripts` | 1 |\\n| `docs/02-architecture/mmd-diagrams` | 1 |\\n| `docs/00-proj"
+        },
+        {
+          "path": "makefile",
+          "line": 81,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/ci/run_pytest_resilient.py"
         },
         {
           "path": "tests/architecture/test_ci_test_strategy.py",
@@ -1320,10 +1327,16 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "Makefile",
+          "line": 325,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/data/check_root_vcr_cassettes.py"
+        },
+        {
+          "path": "makefile",
           "line": 325,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/data/check_root_vcr_cassettes.py"
@@ -1341,10 +1354,16 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "Makefile",
+          "line": 326,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/data/check_vcr_filename_policy.py"
+        },
+        {
+          "path": "makefile",
           "line": 326,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/data/check_vcr_filename_policy.py"
@@ -1764,10 +1783,16 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "Makefile",
+          "line": 158,
+          "source_group": "build",
+          "text": "./scripts/dev/test_changed.sh"
+        },
+        {
+          "path": "makefile",
           "line": 158,
           "source_group": "build",
           "text": "./scripts/dev/test_changed.sh"
@@ -2117,9 +2142,17 @@
       "path": "scripts/diagrams/check_diagram_visual_smoke.py",
       "type": "py",
       "status": "active",
-      "agent_usage": [],
-      "reference_count": 11,
+      "agent_usage": [
+        "technical-designer-mermaid"
+      ],
+      "reference_count": 12,
       "references": [
+        {
+          "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
+          "line": 96,
+          "source_group": "skills",
+          "text": "- `python scripts/diagrams/check_diagram_visual_smoke.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`"
+        },
         {
           "path": ".github/workflows/diagram-nightly.yml",
           "line": 62,
@@ -2161,12 +2194,6 @@
           "line": 67,
           "source_group": "docs",
           "text": "python3 scripts/diagrams/check_diagram_visual_smoke.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 8565,
-          "source_group": "docs",
-          "text": "python3 scripts/diagrams/check_diagram_visual_smoke.py"
         }
       ]
     },
@@ -2175,7 +2202,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 7,
       "references": [
         {
           "path": "Makefile",
@@ -2206,6 +2233,18 @@
           "line": 24909,
           "source_group": "docs",
           "text": "- post-check: `scripts/diagrams/check_pdf_image_bounds.py`"
+        },
+        {
+          "path": "makefile",
+          "line": 231,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/diagrams/check_pdf_image_bounds.py --pdf docs/02-architecture/mmd-diagrams/class-diagrams-with-descriptions.pdf"
+        },
+        {
+          "path": "makefile",
+          "line": 232,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/diagrams/check_pdf_image_bounds.py --pdf docs/02-architecture/mmd-diagrams/foundation-diagrams-with-descriptions.pdf"
         }
       ]
     },
@@ -2214,7 +2253,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 20,
+      "reference_count": 21,
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
@@ -2355,7 +2394,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "Makefile",
@@ -2374,6 +2413,12 @@
           "line": 24906,
           "source_group": "docs",
           "text": "- `scripts/diagrams/generate_with_descriptions_docx.py`"
+        },
+        {
+          "path": "makefile",
+          "line": 223,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/diagrams/generate_with_descriptions_docx.py"
         }
       ]
     },
@@ -2382,7 +2427,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "Makefile",
@@ -2401,6 +2446,12 @@
           "line": 24905,
           "source_group": "docs",
           "text": "- `scripts/diagrams/generate_with_descriptions_pdf.py`"
+        },
+        {
+          "path": "makefile",
+          "line": 219,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/diagrams/generate_with_descriptions_pdf.py"
         }
       ]
     },
@@ -2435,9 +2486,17 @@
       "path": "scripts/diagrams/lint_diagrams.py",
       "type": "py",
       "status": "active",
-      "agent_usage": [],
-      "reference_count": 47,
+      "agent_usage": [
+        "technical-designer-mermaid"
+      ],
+      "reference_count": 50,
       "references": [
+        {
+          "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
+          "line": 92,
+          "source_group": "skills",
+          "text": "- `python scripts/diagrams/lint_diagrams.py docs`"
+        },
         {
           "path": ".github/workflows/diagram-nightly.yml",
           "line": 75,
@@ -2477,12 +2536,6 @@
         {
           "path": "docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-1.sh",
           "line": 424,
-          "source_group": "docs",
-          "text": "python3 \"$REPO_ROOT/scripts/diagrams/lint_diagrams.py\" \\"
-        },
-        {
-          "path": "docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-1.sh",
-          "line": 495,
           "source_group": "docs",
           "text": "python3 \"$REPO_ROOT/scripts/diagrams/lint_diagrams.py\" \\"
         }
@@ -2550,7 +2603,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "Makefile",
@@ -2563,6 +2616,12 @@
           "line": 1,
           "source_group": "docs",
           "text": "# Scripts Inventory\\n\\nTotal scripts: **106**\\n\\n## By Folder\\n\\n| Folder | Count |\\n|---|---:|\\n| `.` | 2 |\\n| `assets/javascripts` | 1 |\\n| `docs/02-architecture/mmd-diagrams` | 1 |\\n| `docs/00-proj"
+        },
+        {
+          "path": "makefile",
+          "line": 243,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/diagrams/report_diagram_padding.py --top 30"
         }
       ]
     },
@@ -2628,7 +2687,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": "Makefile",
@@ -2665,6 +2724,12 @@
           "line": 24907,
           "source_group": "docs",
           "text": "- unified orchestrator: `scripts/diagrams/run_diagram_docs_agent.sh`"
+        },
+        {
+          "path": "makefile",
+          "line": 227,
+          "source_group": "build",
+          "text": "bash scripts/diagrams/run_diagram_docs_agent.sh"
         }
       ]
     },
@@ -2739,7 +2804,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -2770,6 +2835,12 @@
           "line": 1,
           "source_group": "docs",
           "text": "# Scripts Inventory\\n\\nTotal scripts: **106**\\n\\n## By Folder\\n\\n| Folder | Count |\\n|---|---:|\\n| `.` | 2 |\\n| `assets/javascripts` | 1 |\\n| `docs/02-architecture/mmd-diagrams` | 1 |\\n| `docs/00-proj"
+        },
+        {
+          "path": "makefile",
+          "line": 197,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/diagrams/summarize_diagram_lint.py /tmp/diagram-lint.json"
         }
       ]
     },
@@ -2834,9 +2905,17 @@
       "path": "scripts/diagrams/validate_mermaid_syntax.sh",
       "type": "sh",
       "status": "active",
-      "agent_usage": [],
-      "reference_count": 20,
+      "agent_usage": [
+        "technical-designer-mermaid"
+      ],
+      "reference_count": 22,
       "references": [
+        {
+          "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
+          "line": 93,
+          "source_group": "skills",
+          "text": "- `bash scripts/diagrams/validate_mermaid_syntax.sh`"
+        },
         {
           "path": ".github/workflows/diagram-nightly.yml",
           "line": 176,
@@ -2878,12 +2957,6 @@
           "line": 114,
           "source_group": "docs",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh"
-        },
-        {
-          "path": "docs/02-architecture/mmd-diagrams/README.md",
-          "line": 278,
-          "source_group": "docs",
-          "text": "bash scripts/diagrams/validate_mermaid_syntax.sh --puppeteer /tmp/puppeteer-config.json"
         }
       ]
     },
@@ -2892,10 +2965,16 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "Makefile",
+          "line": 482,
+          "source_group": "build",
+          "text": "$(RUN) bash scripts/docs/build_docs_site.sh"
+        },
+        {
+          "path": "makefile",
           "line": 482,
           "source_group": "build",
           "text": "$(RUN) bash scripts/docs/build_docs_site.sh"
@@ -2913,10 +2992,16 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "Makefile",
+          "line": 496,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/docs/check_doc_drift.py"
+        },
+        {
+          "path": "makefile",
           "line": 496,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/docs/check_doc_drift.py"
@@ -2934,7 +3019,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 7,
       "references": [
         {
           "path": "Makefile",
@@ -2955,6 +3040,24 @@
           "text": "$(PY_RUN) scripts/docs/check_doc_links.py --legacy-paths"
         },
         {
+          "path": "makefile",
+          "line": 485,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/docs/check_doc_links.py --links"
+        },
+        {
+          "path": "makefile",
+          "line": 486,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/docs/check_doc_links.py --configs"
+        },
+        {
+          "path": "makefile",
+          "line": 487,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/docs/check_doc_links.py --legacy-paths"
+        },
+        {
           "path": "scripts/check_doc_links.py",
           "line": 5,
           "source_group": "scripts",
@@ -2967,10 +3070,16 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "Makefile",
+          "line": 491,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/docs/check_docstring_coverage.py"
+        },
+        {
+          "path": "makefile",
           "line": 491,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/docs/check_docstring_coverage.py"
@@ -3656,10 +3765,16 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "Makefile",
+          "line": 70,
+          "source_group": "build",
+          "text": "@bash scripts/ops/setup_plugins.sh"
+        },
+        {
+          "path": "makefile",
           "line": 70,
           "source_group": "build",
           "text": "@bash scripts/ops/setup_plugins.sh"
@@ -3689,10 +3804,16 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "Makefile",
+          "line": 73,
+          "source_group": "build",
+          "text": "@bash scripts/ops/setup_skills.sh"
+        },
+        {
+          "path": "makefile",
           "line": 73,
           "source_group": "build",
           "text": "@bash scripts/ops/setup_skills.sh"
@@ -3887,10 +4008,16 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "Makefile",
+          "line": 327,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/repo/audit_root_cleanliness.py --strict-untracked"
+        },
+        {
+          "path": "makefile",
           "line": 327,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/repo/audit_root_cleanliness.py --strict-untracked"
@@ -3908,10 +4035,16 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "Makefile",
+          "line": 521,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/repo/check_scripts_catalog.py --catalog scripts/catalog.yaml"
+        },
+        {
+          "path": "makefile",
           "line": 521,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/repo/check_scripts_catalog.py --catalog scripts/catalog.yaml"
@@ -3935,7 +4068,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 12,
       "references": [
         {
           "path": "Makefile",
@@ -3962,28 +4095,28 @@
           "text": "$(PY_RUN) scripts/repo/check_scripts_inventory.py --check-lifecycle --forbid-evaluate-active --lifecycle-registry configs/quality/scripts_lifecycle_registry.json"
         },
         {
-          "path": "scripts/README.md",
-          "line": 32,
-          "source_group": "scripts",
-          "text": "- `python scripts/repo/check_scripts_inventory.py --check --manifest configs/quality/scripts_inventory_manifest.json`"
+          "path": "makefile",
+          "line": 501,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/repo/check_scripts_inventory.py --check --manifest configs/quality/scripts_inventory_manifest.json"
         },
         {
-          "path": "scripts/README.md",
-          "line": 34,
-          "source_group": "scripts",
-          "text": "- `python scripts/repo/check_scripts_inventory.py --update --manifest configs/quality/scripts_inventory_manifest.json`"
+          "path": "makefile",
+          "line": 506,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/repo/check_scripts_inventory.py --update --manifest configs/quality/scripts_inventory_manifest.json"
         },
         {
-          "path": "scripts/README.md",
-          "line": 36,
-          "source_group": "scripts",
-          "text": "- `python scripts/repo/check_scripts_inventory.py --check-lifecycle --forbid-evaluate-active --lifecycle-registry configs/quality/scripts_lifecycle_registry.json`"
+          "path": "makefile",
+          "line": 511,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/repo/check_scripts_inventory.py --deprecation-report reports/quality/scripts_deprecation_backlog.md"
         },
         {
-          "path": "scripts/check_scripts_inventory.py",
-          "line": 5,
-          "source_group": "scripts",
-          "text": "- scripts/repo/check_scripts_inventory.py"
+          "path": "makefile",
+          "line": 516,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/repo/check_scripts_inventory.py --check-lifecycle --forbid-evaluate-active --lifecycle-registry configs/quality/scripts_lifecycle_registry.json"
         }
       ]
     },
@@ -4007,7 +4140,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 5,
       "references": [
         {
           "path": "Makefile",
@@ -4017,6 +4150,18 @@
         },
         {
           "path": "Makefile",
+          "line": 335,
+          "source_group": "build",
+          "text": "bash scripts/repo/preflight_cleanup.sh; \\"
+        },
+        {
+          "path": "makefile",
+          "line": 333,
+          "source_group": "build",
+          "text": "bash scripts/repo/preflight_cleanup.sh --dry-run; \\"
+        },
+        {
+          "path": "makefile",
           "line": 335,
           "source_group": "build",
           "text": "bash scripts/repo/preflight_cleanup.sh; \\"
@@ -4208,7 +4353,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 9,
       "references": [
         {
           "path": ".github/workflows/schema-governance.yml",
@@ -4235,6 +4380,18 @@
           "text": "$(VENV_PYTHON) scripts/schema/generate_contracts.py"
         },
         {
+          "path": "makefile",
+          "line": 535,
+          "source_group": "build",
+          "text": "uv run python scripts/schema/generate_contracts.py"
+        },
+        {
+          "path": "makefile",
+          "line": 537,
+          "source_group": "build",
+          "text": "$(VENV_PYTHON) scripts/schema/generate_contracts.py"
+        },
+        {
           "path": "scripts/generate_contracts.py",
           "line": 5,
           "source_group": "scripts",
@@ -4245,12 +4402,6 @@
           "line": 160,
           "source_group": "scripts",
           "text": "[sys.executable, \"scripts/schema/generate_contracts.py\"],"
-        },
-        {
-          "path": "src/tools/scripts/generate_contracts.py",
-          "line": 5,
-          "source_group": "scripts",
-          "text": "- scripts/schema/generate_contracts.py"
         }
       ]
     },
@@ -4289,7 +4440,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 8,
       "references": [
         {
           "path": ".github/workflows/schema-governance.yml",
@@ -4317,6 +4468,18 @@
         },
         {
           "path": "Makefile",
+          "line": 570,
+          "source_group": "build",
+          "text": "$(RUN) python scripts/schema/generate_schema_artifacts.py --check"
+        },
+        {
+          "path": "makefile",
+          "line": 529,
+          "source_group": "build",
+          "text": "$(RUN) python scripts/schema/generate_schema_artifacts.py"
+        },
+        {
+          "path": "makefile",
           "line": 570,
           "source_group": "build",
           "text": "$(RUN) python scripts/schema/generate_schema_artifacts.py --check"
