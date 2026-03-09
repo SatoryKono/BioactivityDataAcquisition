@@ -134,8 +134,13 @@ def should_skip_file(filepath: Path) -> bool:
             return True
 
     # Skip based on file name patterns
+    filename = filepath.name
     for pattern in SKIP_FILES:
-        if pattern in filepath.name:
+        if pattern == "test_" and filename.startswith("test_"):
+            return True
+        if pattern == "_test.py" and filename.endswith("_test.py"):
+            return True
+        if pattern in {"__pycache__", ".pyc", ".pyo"} and pattern in filename:
             return True
 
     return False
@@ -166,7 +171,12 @@ def _mask_non_code_segments(content: str) -> list[str]:
     if not masked_lines:
         return masked_lines
 
-    for token in tokenize.generate_tokens(io.StringIO(content).readline):
+    try:
+        token_stream = tokenize.generate_tokens(io.StringIO(content).readline)
+    except tokenize.TokenError:
+        return masked_lines
+
+    for token in token_stream:
         if token.type not in (tokenize.STRING, tokenize.COMMENT):
             continue
 
