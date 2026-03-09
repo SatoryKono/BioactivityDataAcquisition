@@ -123,7 +123,7 @@ class TestAtomicWrite:
         assert target.read_text() == "original content"
 
     def test_atomic_write_retries_transient_replace_error(self, tmp_path: Path) -> None:
-        """Transient EACCES during replace should be retried and eventually succeed."""
+        """Transient EBUSY during replace should be retried and eventually succeed."""
         target = tmp_path / "retry_target.txt"
         original_replace = Path.replace
         call_count = {"count": 0}
@@ -131,7 +131,7 @@ class TestAtomicWrite:
         def flaky_replace(self: Path, target_path: Path) -> Path:
             call_count["count"] += 1
             if call_count["count"] < 3:
-                raise OSError(13, "Permission denied")
+                raise OSError(errno.EBUSY, "Device or resource busy")
             return original_replace(self, target_path)
 
         with patch.object(Path, "replace", flaky_replace):
@@ -170,7 +170,7 @@ class TestAtomicWrite:
         def flaky_replace(self: Path, target_path: Path) -> Path:
             call_count["count"] += 1
             if call_count["count"] == 1:
-                raise OSError(13, "Permission denied")
+                raise OSError(errno.EBUSY, "Device or resource busy")
             return original_replace(self, target_path)
 
         policy = AdaptiveRetryPolicy(

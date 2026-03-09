@@ -1,4 +1,4 @@
-﻿name: Reusable CI setup
+name: Reusable CI setup
 
 on:
   workflow_call:
@@ -6,6 +6,7 @@ on:
       python-version:
         required: false
         default: "3.11"
+        type: string
 
 jobs:
   setup:

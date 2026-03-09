@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING, Any
 from pydantic import BaseModel
 
 from bioetl.domain.entities.pubmed import ArticleRecord
+from bioetl.domain.ports import NoOpMetrics
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.common import (
     ComposableFallbackDecorator,
@@ -123,6 +124,9 @@ class PubMedAdapter(
 
     def __post_init__(self) -> None:
         """Initialize metrics, error handler and fallback handler."""
+        self._http_client = self.http_client
+        self._logger = self.logger
+        self._metrics = self.metrics if self.metrics is not None else NoOpMetrics()
         if self.adapter_metrics is not None and self.request_collector is not None:
             self._adapter_metrics = self.adapter_metrics
             self._request_collector = self.request_collector

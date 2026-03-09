@@ -5,26 +5,12 @@ concurrency:
 
 on:
   push:
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
-      - '.ai/**'
-      - '.claude/**'
-      - '.github/workflows/**'
-      - 'LICENSE'
     branches: [ "main" ]
     paths:
       - 'docs/**'
       - 'mkdocs.yml'
       - '.github/workflows/docs.yml'
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
-      - '.ai/**'
-      - '.claude/**'
-      - '.github/workflows/**'
-      - 'LICENSE'
     branches: [ "main" ]
     paths:
       - 'docs/**'

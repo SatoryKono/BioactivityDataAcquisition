@@ -28,6 +28,7 @@ class _OpenAlexFilterFetchHost(Protocol):
     """Structural host contract for OpenAlex fetch/filter mixin."""
 
     logger: LoggerPort
+    _logger: LoggerPort
     _query_executor: OpenAlexQueryExecutor
     _cursor_flow: OpenAlexCursorFlowService
     _fallback_orchestrator: OpenAlexFallbackOrchestrator

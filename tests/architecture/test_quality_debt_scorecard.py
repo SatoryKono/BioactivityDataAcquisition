@@ -170,7 +170,9 @@ def test_debt_scorecard_inventory_has_owner_and_expiry_decomposition() -> None:
 
     # When registry is empty (zero debt), decomposition checks are not applicable.
     if inventory.total_exemptions == 0:
-        assert not inventory.by_owner, "Empty registry must have empty owner decomposition"
+        assert not inventory.by_owner, (
+            "Empty registry must have empty owner decomposition"
+        )
         assert not inventory.by_expiry_quarter, (
             "Empty registry must have empty expiry decomposition"
         )
@@ -354,21 +356,31 @@ def test_program_done_criteria_applies_after_deadline(tmp_path: Path) -> None:
     # Inject a synthetic exemption so done-criteria can detect a violation.
     tmp_registry = tmp_path / "architecture_metric_exemptions.yaml"
     tmp_registry.write_text(
-        yaml.safe_dump({
-            "schema_version": 1,
-            "policy": {"required_fields": ["value", "owner", "reason", "expires_on", "removal_step"]},
-            "registries": {
-                "god_object": {
-                    "FakeClass": {
-                        "value": 1,
-                        "owner": "@bioetl-architecture",
-                        "reason": "Synthetic exemption for done-criteria test.",
-                        "expires_on": "2026-06-30",
-                        "removal_step": "Remove after test.",
+        yaml.safe_dump(
+            {
+                "schema_version": 1,
+                "policy": {
+                    "required_fields": [
+                        "value",
+                        "owner",
+                        "reason",
+                        "expires_on",
+                        "removal_step",
+                    ]
+                },
+                "registries": {
+                    "god_object": {
+                        "FakeClass": {
+                            "value": 1,
+                            "owner": "@bioetl-architecture",
+                            "reason": "Synthetic exemption for done-criteria test.",
+                            "expires_on": "2026-06-30",
+                            "removal_step": "Remove after test.",
+                        }
                     }
-                }
-            },
-        }),
+                },
+            }
+        ),
         encoding="utf-8",
     )
 

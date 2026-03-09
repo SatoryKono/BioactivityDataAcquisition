@@ -14,7 +14,7 @@ from bioetl.composition.runtime_builders.inputs_resolver import (
     RunnerInputs as _RunnerInputs,
 )
 from bioetl.composition.runtime_builders.inputs_resolver import (
-    VacuumConfig,
+    VacuumSettings,
     assemble_cached_bronze_context,
     assemble_filter_config,
     assemble_runtime_config,
@@ -43,8 +43,8 @@ if TYPE_CHECKING:
     from bioetl.domain.context import (
         CachedBronzeContext,
         PipelineRunContext,
-        VacuumSettings,
     )
+    from bioetl.domain.context import VacuumSettings as CliVacuumSettings
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import PipelineFactoryPort
     from bioetl.domain.types import RunID
@@ -63,9 +63,9 @@ __all__ = ["build_pipeline_runner"]
 
 def _assemble_vacuum_settings(
     *,
-    cli_vacuum: VacuumSettings,
+    cli_vacuum: CliVacuumSettings,
     yaml_maintenance: MaintenanceConfig,
-) -> VacuumConfig:
+) -> VacuumSettings:
     """Compatibility wrapper for legacy tests/monkeypatching."""
     return assemble_vacuum_settings(
         cli_vacuum=cli_vacuum,
@@ -77,7 +77,7 @@ def _assemble_runtime_config(
     *,
     ctx: PipelineRunContext,
     heartbeat_interval: int,
-    vacuum: VacuumConfig,
+    vacuum: VacuumSettings,
     health_check_mode: Literal["strict", "probe"],
 ) -> RuntimeConfig:
     """Compatibility wrapper for legacy tests/monkeypatching."""
@@ -169,7 +169,7 @@ def _prepare_runner_inputs(
     get_settings_fn: Callable[[], Settings],
     load_pipeline_config_fn: Callable[[str], PipelineYamlConfig],
     build_observability_bundle_fn: Callable[..., ObservabilityBundle],
-    assemble_vacuum_settings_fn: Callable[..., VacuumConfig],
+    assemble_vacuum_settings_fn: Callable[..., VacuumSettings],
     assemble_runtime_config_fn: Callable[..., RuntimeConfig],
     assemble_filter_config_fn: Callable[..., InputFilterConfig | None],
     assemble_cached_bronze_context_fn: Callable[
@@ -223,7 +223,7 @@ def build_pipeline_runner(
         ..., ObservabilityBundle
     ] = _build_observability_bundle,
     assemble_vacuum_settings_fn: Callable[
-        ..., VacuumConfig
+        ..., VacuumSettings
     ] = _assemble_vacuum_settings,
     assemble_runtime_config_fn: Callable[..., RuntimeConfig] = _assemble_runtime_config,
     assemble_filter_config_fn: Callable[

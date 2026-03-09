@@ -90,7 +90,8 @@ The domain layer implements Domain-Driven Design patterns:
 
 - **Python**: Version 3.11 or higher.
 - **Make**: For running automation commands.
-- **Docker**: Optional, legacy-only (see [Legacy Distributed Mode](#legacy-distributed-mode-rejected--unsupported)).
+- **uv**: Recommended package manager ([install](https://docs.astral.sh/uv/getting-started/installation/)).
+- **Docker**: Optional, for Neo4j and monitoring stack only.
 
 ### Installation
 
@@ -106,13 +107,25 @@ cd BioactivityDataAcquisition2
 
 The script will:
 
-- Check prerequisites (Python 3.11+, Git, Make)
+- Check prerequisites (Python 3.11+, Git, Make, uv, Docker, Node.js)
 - Create virtual environment and install dependencies
 - Set up pre-commit hooks
-- Configure environment variables
-- Run verification checks
+- Configure environment variables and create data directories
+- Detect AI tools (Claude Code, Codex) and sync plugins
+- Run verification checks with a summary table
 
-For quick setup without tests: `./scripts/dev/dev_setup.sh --quick`
+Available modes:
+
+| Flag | Description |
+| ---- | ----------- |
+| `--quick` / `-q` | Fast install, skip tests and linters |
+| `--skip-tests` | Run linters but skip test suite |
+| `--force` / `-f` | Recreate virtual environment from scratch |
+| `--ci` | CI mode: no colors, non-interactive |
+| `--verbose` / `-v` | Show detailed dependency installation output |
+| `--no-color` | Disable colored output (also via `NO_COLOR=1`) |
+
+Environment variables: `BIOETL_SKIP_PRECOMMIT=1`, `BIOETL_SKIP_DOCKER=1`.
 
 #### Option B: Manual Setup
 
@@ -132,7 +145,57 @@ For quick setup without tests: `./scripts/dev/dev_setup.sh --quick`
    cp .env.example .env
    ```
 
-   *Note: Secrets follow the pattern `BIOETL_{PROVIDER}_{KEY}`.*
+   *Note: Secrets follow the pattern `BIOETL_{PROVIDER}_{KEY}`. For local development, the defaults are usually sufficient.*
+
+   **Environment Variables:**
+
+   | Variable | Description | Default |
+   | --- | --- | --- |
+   | **Core** | | |
+   | `BIOETL_ENV` | Environment (`dev` / `staging` / `prod`) | `dev` |
+   | `BIOETL_DATA_DIR` | Base directory for Bronze/Silver/Gold data | `data` |
+   | `BIOETL_DEBUG` | Enable debug features | `false` |
+   | `BIOETL_TEST_MODE` | Use fixtures instead of real APIs | `false` |
+   | **Pipeline** | | |
+   | `BIOETL_PIPELINE__BATCH_SIZE` | Records per batch write (1–10000) | `100` |
+   | `BIOETL_PIPELINE__CHECKPOINT_INTERVAL` | Save checkpoint every N records (≥100) | `1000` |
+   | `BIOETL_PIPELINE__MAX_CONCURRENT_BATCHES` | Max concurrent batch writes (1–16) | `4` |
+   | `BIOETL_PIPELINE__HEARTBEAT_INTERVAL` | Lock heartbeat interval in seconds (5–60) | `20` |
+   | **Provider API Keys** | | |
+   | `BIOETL_UNIPROT_API_KEY` | UniProt API key (higher rate limits) | — |
+   | `BIOETL_PUBMED_API_KEY` | NCBI E-utilities API key | — |
+   | `BIOETL_PUBMED_EMAIL` | Email for NCBI tool identification | — |
+   | `BIOETL_OPENALEX_EMAIL` | Email for OpenAlex polite pool | — |
+   | `BIOETL_SEMANTICSCHOLAR_API_KEY` | Semantic Scholar API key | — |
+   | `BIOETL_CROSSREF_EMAIL` | Email for Crossref polite pool | — |
+   | **Security** | | |
+   | `BIOETL_PII_SALT_CURRENT` | Salt for PII hashing (≥32 chars, required in prod) | — |
+   | `BIOETL_PII_SALT_NEXT` | Next salt for rotation | — |
+   | `BIOETL_SALT_ROTATION_ACTIVE` | Whether salt rotation is active | `false` |
+   | **Observability** | | |
+   | `BIOETL_LOG_LEVEL` | Logging level (`DEBUG`/`INFO`/`WARNING`/`ERROR`/`CRITICAL`) | `INFO` |
+   | `BIOETL_LOG_FORMAT` | Log format (`json` / `text`) | `json` |
+   | `BIOETL_LOG_FILE` | Log file path | `logs/bioetl.log` |
+   | `BIOETL_METRICS_ENABLED` | Enable Prometheus metrics | `true` |
+   | `BIOETL_METRICS_PORT` | Prometheus HTTP server port | `8000` |
+   | `BIOETL_OBSERVABILITY__TRACING_ENABLED` | Enable OpenTelemetry tracing | `false` |
+   | `BIOETL_OBSERVABILITY__DQ_MONITOR_ENABLED` | Enable data quality monitoring | `false` |
+   | **Data Quality** | | |
+   | `BIOETL_DQ_SOFT_THRESHOLD` | Warning error rate threshold | `0.05` |
+   | `BIOETL_DQ_HARD_THRESHOLD` | Fail batch error rate threshold | `0.20` |
+   | **Resilience** | | |
+   | `BIOETL_CB_FAILURE_THRESHOLD` | Consecutive errors to open circuit breaker | `5` |
+   | `BIOETL_CB_RECOVERY_TIMEOUT` | Circuit breaker recovery timeout (seconds) | `300` |
+   | `BIOETL_RETRY_MAX_ATTEMPTS` | Maximum retry attempts | `3` |
+   | `BIOETL_RETRY_MULTIPLIER` | Exponential backoff multiplier | `2.0` |
+   | **Delta Lake** | | |
+   | `BIOETL_DELTA_VACUUM_RETENTION` | VACUUM retention (days) | `7` |
+   | `BIOETL_DELTA_FORENSIC_RETENTION` | Forensic retention (days) | `7` |
+   | **Quarantine** | | |
+   | `BIOETL_QUARANTINE_RETENTION_DAYS` | Quarantine record retention (days) | `30` |
+   | `BIOETL_QUARANTINE_PAYLOAD_MAX_SIZE` | Max payload size (bytes) | `65536` |
+
+   See [`.env.example`](.env.example) for the full list with comments.
 
 1. **Verify Installation**:
    Run tests to ensure everything works.
