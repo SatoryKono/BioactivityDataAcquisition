@@ -269,6 +269,18 @@
       "review_by": "2026-06-30",
       "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ СЏРІРЅС‹Р№ smoke-РІС‹Р·РѕРІ/РѕРїРµСЂР°С†РёРѕРЅРЅС‹Р№ playbook РёР»Рё РїРµСЂРµРІРµСЃС‚Рё РІ deprecate."
     },
+    "scripts/dev/.setup_wsl_codex.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "WSL2 VPN connectivity helper. Keep as dev utility; no CI references expected."
+    },
+    "scripts/dev/.wsl-vpn-fix.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "WSL2 VPN fix PowerShell script. Keep as dev utility; no CI references expected."
+    },
     "scripts/dev/metrics_mock_server.py": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",
