@@ -51,6 +51,7 @@ class UniProtBusinessDataMixin:
         raise NotImplementedError
 
     def serialize_json_list(self, values: Sequence[object] | None) -> str | None:
+        """Serialize a list of values to a JSON string, or None if empty."""
         raise NotImplementedError
 
     def _build_business_data(

@@ -45,23 +45,31 @@ class _SchemaBuilder(Protocol):
     """Schema classes used for optional pandera validator wiring."""
 
     @classmethod
-    def to_schema(cls) -> object: ...
+    def to_schema(cls) -> object:
+        """Build a Pandera schema instance from the model class."""
+        ...
 
 
 class _ServiceBundleDeps(Protocol):
     """Subset of dependencies required by pipeline creation internals."""
 
-    def load_pipeline_config(self, pipeline_name: str) -> PipelineYamlConfig: ...
+    def load_pipeline_config(self, pipeline_name: str) -> PipelineYamlConfig:
+        """Load a pipeline YAML configuration by name."""
+        ...
 
     def yaml_config_to_domain(
         self,
         yaml_config: PipelineYamlConfig,
         resolved_dq_config: DQConfig | None = None,
-    ) -> PipelineConfig: ...
+    ) -> PipelineConfig:
+        """Convert a YAML pipeline config to a domain PipelineConfig."""
+        ...
 
     def compute_config_hash(
         self, config: PipelineYamlConfig | dict[str, object]
-    ) -> str: ...
+    ) -> str:
+        """Compute a deterministic hash of the pipeline configuration."""
+        ...
 
 
 class _BuildPipelineServicesFn(Protocol):
