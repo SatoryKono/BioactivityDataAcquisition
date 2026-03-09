@@ -7,6 +7,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SRC = REPO_ROOT / "src" / "bioetl"
 
@@ -54,6 +56,7 @@ def test_no_sentinel_values() -> None:
     assert not violations, "Sentinel values found:\n" + "\n".join(violations[:50])
 
 
+@pytest.mark.slow
 def test_no_hardcoded_secrets() -> None:
     baseline_path = REPO_ROOT / ".secrets.baseline"
     if not baseline_path.exists():

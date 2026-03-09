@@ -51,6 +51,7 @@ def vcr_config() -> dict[str, Any]:
 
 
 @pytest.mark.e2e
+@pytest.mark.slow
 @pytest.mark.vcr
 @pytest.mark.asyncio
 @pytest.mark.timeout(120)  # Pipeline + Delta table operations need more time
@@ -89,6 +90,7 @@ async def test_vacuum_runs_after_successful_pipeline(e2e_data_dir: Path):
 
 
 @pytest.mark.e2e
+@pytest.mark.slow
 @pytest.mark.vcr
 @pytest.mark.asyncio
 @pytest.mark.timeout(120)  # Multiple pipeline runs need more time

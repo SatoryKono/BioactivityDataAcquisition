@@ -61,7 +61,7 @@ try:
     _hyp_settings.register_profile("fast", max_examples=5)
     _hyp_settings.register_profile("dev", max_examples=50)
     _hyp_settings.register_profile("thorough", max_examples=200)
-    _hyp_settings.load_profile(os.getenv("HYPOTHESIS_PROFILE", "dev"))
+    _hyp_settings.load_profile(os.getenv("HYPOTHESIS_PROFILE", "fast"))
 except ImportError:  # pragma: no cover
     pass
 

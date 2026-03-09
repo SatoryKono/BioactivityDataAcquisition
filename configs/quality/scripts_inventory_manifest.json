@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-09T10:24:14.249695+00:00",
+  "generated_at": "2026-03-09T15:14:13.945719+00:00",
   "summary": {
     "total_scripts": 196,
     "status_counts": {
@@ -810,31 +810,31 @@
         },
         {
           "path": "tests/architecture/test_scripts_deprecation_backlog.py",
-          "line": 22,
+          "line": 25,
           "source_group": "tests",
           "text": "\"scripts/check_scripts_inventory.py\","
         },
         {
           "path": "tests/architecture/test_scripts_inventory_manifest.py",
-          "line": 22,
+          "line": 24,
           "source_group": "tests",
           "text": "f\"{manifest_path}. Run scripts/check_scripts_inventory.py --update.\""
         },
         {
           "path": "tests/architecture/test_scripts_inventory_manifest.py",
-          "line": 42,
+          "line": 45,
           "source_group": "tests",
           "text": "\"scripts/check_scripts_inventory.py\","
         },
         {
           "path": "tests/architecture/test_scripts_inventory_manifest.py",
-          "line": 59,
+          "line": 62,
           "source_group": "tests",
           "text": "\"Run scripts/check_scripts_inventory.py --update to refresh manifest.\""
         },
         {
           "path": "tests/architecture/test_scripts_lifecycle_registry.py",
-          "line": 20,
+          "line": 23,
           "source_group": "tests",
           "text": "\"scripts/check_scripts_inventory.py\","
         }

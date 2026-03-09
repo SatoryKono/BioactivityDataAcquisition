@@ -86,7 +86,7 @@ test-serial: ## Run all tests serially (for debugging)
 
 test-fast: ## Run fast tests only (no slow markers, CI hypothesis profile)
 	@echo "$(BLUE)Running fast tests (parallel mode)...$(NC)"
-	HYPOTHESIS_PROFILE=fast $(RUN) pytest tests/unit/ tests/architecture/ -n auto --dist loadscope --max-worker-restart=0 -m "not slow and not serial" --ignore=tests/benchmarks
+	HYPOTHESIS_PROFILE=fast $(RUN) pytest tests/unit/ tests/architecture/ -n auto --dist loadscope --max-worker-restart=0 -m "not slow and not serial" --timeout=15 --ignore=tests/benchmarks
 
 test-smoke: ## Run smoke tests (quick sanity check for local development)
 	@echo "$(BLUE)Running smoke tests...$(NC)"
@@ -112,7 +112,7 @@ test-unit: ## Run only unit tests (parallel)
 
 test-unit-fast: ## Run unit tests without slow tests (fastest)
 	@echo "$(BLUE)Running fast unit tests...$(NC)"
-	HYPOTHESIS_PROFILE=fast $(RUN) pytest tests/unit/ -n auto --dist loadscope --max-worker-restart=0 -m "not slow and not serial" --ignore=tests/benchmarks
+	HYPOTHESIS_PROFILE=fast $(RUN) pytest tests/unit/ -n auto --dist loadscope --max-worker-restart=0 -m "not slow and not serial" --timeout=15 --ignore=tests/benchmarks
 
 test-integration: ## Run integration tests with VCR
 	@echo "$(BLUE)Running integration tests...$(NC)"
