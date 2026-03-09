@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-10T05:39:47.382613+00:00",
+  "generated_at": "2026-03-10T05:40:54.180384+00:00",
   "summary": {
     "total_scripts": 198,
     "status_counts": {
@@ -2036,7 +2036,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 100,
+          "line": 142,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_artifacts.py \\"
         },
@@ -2087,7 +2087,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 120,
+          "line": 162,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_quality_gates.py \\"
         },
@@ -2144,7 +2144,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 110,
+          "line": 152,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_visual_smoke.py \\"
         },
@@ -2246,7 +2246,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 105,
+          "line": 147,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_svg_text_visibility.py \\"
         },
@@ -2462,7 +2462,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 72,
+          "line": 110,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/mmd-diagrams --json > /tmp/diagram-lint.json || true"
         },
@@ -2759,7 +2759,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 73,
+          "line": 111,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/summarize_diagram_lint.py /tmp/diagram-lint.json"
         },
@@ -2861,7 +2861,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 67,
+          "line": 105,
           "source_group": "ci",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh \\"
         },
@@ -4920,7 +4920,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 115,
+          "line": 157,
           "source_group": "ci",
           "text": "python3 src/tools/harmonize_link_styles.py --dry-run --fail-on-errors"
         },

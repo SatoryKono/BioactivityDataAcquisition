@@ -296,7 +296,9 @@ def _load_nav_docs() -> list[Path]:
     )
     nav_paths = sorted(set(MD_PATH_RE.findall(text)))
     # Filter out absolute paths that may survive stripping
-    return [DOCS_DIR / rel_path for rel_path in nav_paths if not rel_path.startswith("/")]
+    return [
+        DOCS_DIR / rel_path for rel_path in nav_paths if not rel_path.startswith("/")
+    ]
 
 
 def _collect_link_scan_files(root: Path) -> list[Path]:
