@@ -68,21 +68,10 @@ jobs:
             -   name: Validate version consistency
                 run: python scripts/check_version_consistency.py
 
-            -   name: Install uv
-                uses: astral-sh/setup-uv@v7
-
-            -   name: Cache uv and virtualenv
-                uses: actions/cache@v4
+            -   name: Install uv + cache + dependencies
+                uses: ./.github/actions/setup-python-uv
                 with:
-                    path: |
-                        ~/.cache/uv
-                        .venv
-                    key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
-                    restore-keys: |
-                        uv-${{ runner.os }}-py311-
-
-            -   name: Install dependencies (frozen lock)
-                run: uv sync --frozen --extra dev --extra tracing
+                    python-version: "3.11"
 
             -   name: Validate quality exemptions registry (owner/reason/expiry metadata)
                 run: |
@@ -161,26 +150,8 @@ jobs:
             -   name: Checkout code
                 uses: actions/checkout@v4
 
-            -   name: Set up Python 3.11
-                uses: actions/setup-python@v5
-                with:
-                    python-version: "3.11"
-
-            -   name: Install uv
-                uses: astral-sh/setup-uv@v7
-
-            -   name: Cache uv and virtualenv
-                uses: actions/cache@v4
-                with:
-                    path: |
-                        ~/.cache/uv
-                        .venv
-                    key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
-                    restore-keys: |
-                        uv-${{ runner.os }}-py311-
-
-            -   name: Install dependencies (frozen lock)
-                run: uv sync --frozen --extra dev --extra tracing
+            -   name: Setup Python + uv
+                uses: ./.github/actions/setup-python-uv
 
             -   name: Compute quality metrics and enforce integral score gate
                 run: |
@@ -206,36 +177,11 @@ jobs:
             -   name: Checkout code
                 uses: actions/checkout@v4
 
-            -   name: Set up Python 3.11
-                uses: actions/setup-python@v5
+            -   name: Setup Python + uv
+                uses: ./.github/actions/setup-python-uv
                 with:
-                    python-version: "3.11"
-
-            -   name: Install uv
-                uses: astral-sh/setup-uv@v7
-
-            -   name: Cache uv and virtualenv
-                uses: actions/cache@v4
-                with:
-                    path: |
-                        ~/.cache/uv
-                        .venv
-                    key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
-                    restore-keys: |
-                        uv-${{ runner.os }}-py311-
-
-            -   name: Cache pytest and hypothesis
-                uses: actions/cache@v4
-                with:
-                    path: |
-                        .pytest_cache
-                        .hypothesis
-                    key: pytest-fast-${{ runner.os }}-${{ hashFiles('tests/**/*.py') }}
-                    restore-keys: |
-                        pytest-fast-${{ runner.os }}-
-
-            -   name: Install dependencies (frozen lock)
-                run: uv sync --frozen --extra dev --extra tracing
+                    enable-pytest-cache: "true"
+                    pytest-cache-prefix: "pytest-fast"
 
             -   name: Run Fast Unit Tests (no slow markers)
                 run: |
@@ -273,36 +219,12 @@ jobs:
             -   name: Checkout code
                 uses: actions/checkout@v4
 
-            -   name: Set up Python ${{ matrix.python-version }}
-                uses: actions/setup-python@v5
+            -   name: Setup Python + uv
+                uses: ./.github/actions/setup-python-uv
                 with:
                     python-version: ${{ matrix.python-version }}
-
-            -   name: Install uv
-                uses: astral-sh/setup-uv@v7
-
-            -   name: Cache uv and virtualenv
-                uses: actions/cache@v4
-                with:
-                    path: |
-                        ~/.cache/uv
-                        .venv
-                    key: uv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('uv.lock') }}
-                    restore-keys: |
-                        uv-${{ runner.os }}-${{ matrix.python-version }}-
-
-            -   name: Cache pytest and hypothesis
-                uses: actions/cache@v4
-                with:
-                    path: |
-                        .pytest_cache
-                        .hypothesis
-                    key: pytest-${{ matrix.python-version }}-${{ matrix.test-group.name }}-${{ runner.os }}-${{ hashFiles('tests/**/*.py') }}
-                    restore-keys: |
-                        pytest-${{ matrix.python-version }}-${{ matrix.test-group.name }}-${{ runner.os }}-
-
-            -   name: Install dependencies (frozen lock)
-                run: uv sync --frozen --extra dev --extra tracing
+                    enable-pytest-cache: "true"
+                    pytest-cache-prefix: "pytest-${{ matrix.python-version }}-${{ matrix.test-group.name }}"
 
             -   name: Run Tests (${{ matrix.test-group.name }} on Python ${{ matrix.python-version }})
                 run: |
@@ -330,26 +252,10 @@ jobs:
             -   name: Checkout code
                 uses: actions/checkout@v4
 
-            -   name: Set up Python 3.11
-                uses: actions/setup-python@v5
+            -   name: Setup Python + uv
+                uses: ./.github/actions/setup-python-uv
                 with:
-                    python-version: "3.11"
-
-            -   name: Install uv
-                uses: astral-sh/setup-uv@v7
-
-            -   name: Cache uv and virtualenv
-                uses: actions/cache@v4
-                with:
-                    path: |
-                        ~/.cache/uv
-                        .venv
-                    key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
-                    restore-keys: |
-                        uv-${{ runner.os }}-py311-
-
-            -   name: Install dependencies (frozen lock)
-                run: uv sync --frozen --extra dev --extra tracing --extra performance
+                    uv-extras: "dev tracing performance"
 
             -   name: Run performance budget gates (hotspots)
                 run: |
@@ -422,36 +328,11 @@ jobs:
             -   name: Checkout code
                 uses: actions/checkout@v4
 
-            -   name: Set up Python 3.11
-                uses: actions/setup-python@v5
+            -   name: Setup Python + uv
+                uses: ./.github/actions/setup-python-uv
                 with:
-                    python-version: "3.11"
-
-            -   name: Install uv
-                uses: astral-sh/setup-uv@v7
-
-            -   name: Cache uv and virtualenv
-                uses: actions/cache@v4
-                with:
-                    path: |
-                        ~/.cache/uv
-                        .venv
-                    key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
-                    restore-keys: |
-                        uv-${{ runner.os }}-py311-
-
-            -   name: Cache pytest and hypothesis
-                uses: actions/cache@v4
-                with:
-                    path: |
-                        .pytest_cache
-                        .hypothesis
-                    key: pytest-coverage-${{ runner.os }}-${{ hashFiles('tests/**/*.py') }}
-                    restore-keys: |
-                        pytest-coverage-${{ runner.os }}-
-
-            -   name: Install dependencies (frozen lock)
-                run: uv sync --frozen --extra dev --extra tracing
+                    enable-pytest-cache: "true"
+                    pytest-cache-prefix: "pytest-coverage"
 
             -   name: Run Full Tests with Coverage Threshold (resilient)
                 run: |

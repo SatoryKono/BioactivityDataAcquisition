@@ -38,26 +38,8 @@ jobs:
                 with:
                     fetch-depth: 0
 
-            -   name: Set up Python
-                uses: actions/setup-python@v5
-                with:
-                    python-version: "3.11"
-
-            -   name: Install uv
-                uses: astral-sh/setup-uv@v7
-
-            -   name: Cache uv and virtualenv
-                uses: actions/cache@v4
-                with:
-                    path: |
-                        ~/.cache/uv
-                        .venv
-                    key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
-                    restore-keys: |
-                        uv-${{ runner.os }}-py311-
-
-            -   name: Install dependencies (frozen lock)
-                run: uv sync --frozen --extra dev --extra tracing
+            -   name: Setup Python + uv
+                uses: ./.github/actions/setup-python-uv
 
             -   name: Ruff (strict staged profile - domain)
                 run: uv run ruff check src/bioetl/domain --output-format=github
@@ -140,26 +122,8 @@ jobs:
             -   name: Checkout
                 uses: actions/checkout@v4
 
-            -   name: Set up Python
-                uses: actions/setup-python@v5
-                with:
-                    python-version: "3.11"
-
-            -   name: Install uv
-                uses: astral-sh/setup-uv@v7
-
-            -   name: Cache uv and virtualenv
-                uses: actions/cache@v4
-                with:
-                    path: |
-                        ~/.cache/uv
-                        .venv
-                    key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
-                    restore-keys: |
-                        uv-${{ runner.os }}-py311-
-
-            -   name: Install dependencies (frozen lock)
-                run: uv sync --frozen --extra dev --extra tracing
+            -   name: Setup Python + uv
+                uses: ./.github/actions/setup-python-uv
 
             -   name: Ruff C901 snapshot (src/bioetl)
                 run: uv run ruff check src/bioetl --select C901 --output-format github --exit-zero
@@ -182,26 +146,8 @@ jobs:
             -   name: Checkout
                 uses: actions/checkout@v4
 
-            -   name: Set up Python
-                uses: actions/setup-python@v5
-                with:
-                    python-version: "3.11"
-
-            -   name: Install uv
-                uses: astral-sh/setup-uv@v7
-
-            -   name: Cache uv and virtualenv
-                uses: actions/cache@v4
-                with:
-                    path: |
-                        ~/.cache/uv
-                        .venv
-                    key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
-                    restore-keys: |
-                        uv-${{ runner.os }}-py311-
-
-            -   name: Install dependencies (frozen lock)
-                run: uv sync --frozen --extra dev --extra tracing
+            -   name: Setup Python + uv
+                uses: ./.github/actions/setup-python-uv
 
             -   name: Architecture tests (all)
                 run: uv run pytest tests/architecture/ -v --tb=short
@@ -223,32 +169,11 @@ jobs:
             -   name: Checkout
                 uses: actions/checkout@v4
 
-            -   name: Set up Python
-                uses: actions/setup-python@v5
+            -   name: Setup Python + uv
+                uses: ./.github/actions/setup-python-uv
                 with:
-                    python-version: "3.11"
-
-            -   name: Install uv
-                uses: astral-sh/setup-uv@v7
-
-            -   name: Cache uv and virtualenv
-                uses: actions/cache@v4
-                with:
-                    path: |
-                        ~/.cache/uv
-                        .venv
-                    key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
-                    restore-keys: |
-                        uv-${{ runner.os }}-py311-
-
-            -   name: Restore pytest cache
-                uses: actions/cache@v4
-                with:
-                    path: .pytest_cache
-                    key: ${{ runner.os }}-pytest-unit-${{ hashFiles('pyproject.toml') }}
-
-            -   name: Install dependencies (frozen lock)
-                run: uv sync --frozen --extra dev --extra tracing
+                    enable-pytest-cache: "true"
+                    pytest-cache-prefix: "pytest-unit"
 
             -   name: Unit tests with coverage
                 run: |
@@ -315,32 +240,11 @@ jobs:
             -   name: Checkout
                 uses: actions/checkout@v4
 
-            -   name: Set up Python
-                uses: actions/setup-python@v5
+            -   name: Setup Python + uv
+                uses: ./.github/actions/setup-python-uv
                 with:
-                    python-version: "3.11"
-
-            -   name: Install uv
-                uses: astral-sh/setup-uv@v7
-
-            -   name: Cache uv and virtualenv
-                uses: actions/cache@v4
-                with:
-                    path: |
-                        ~/.cache/uv
-                        .venv
-                    key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
-                    restore-keys: |
-                        uv-${{ runner.os }}-py311-
-
-            -   name: Restore pytest cache
-                uses: actions/cache@v4
-                with:
-                    path: .pytest_cache
-                    key: ${{ runner.os }}-pytest-integration-${{ hashFiles('pyproject.toml') }}
-
-            -   name: Install dependencies (frozen lock)
-                run: uv sync --frozen --extra dev --extra tracing
+                    enable-pytest-cache: "true"
+                    pytest-cache-prefix: "pytest-integration"
 
             -   name: Integration tests
                 run: |
