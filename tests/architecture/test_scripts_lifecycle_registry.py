@@ -6,11 +6,14 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 
 def _project_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+@pytest.mark.slow
 def test_scripts_lifecycle_registry_check_passes() -> None:
     """Lifecycle registry must cover all non-active scripts with valid entries."""
     root = _project_root()

@@ -184,6 +184,7 @@ def test_ports_defined_in_domain_layer(src_dir: Path) -> None:
     assert protocol_found, "Ports should be defined using typing.Protocol"
 
 
+@pytest.mark.slow
 def test_import_linter_contracts(project_root: Path, src_dir: Path) -> None:
     """Run import-linter to verify all architectural contracts.
 

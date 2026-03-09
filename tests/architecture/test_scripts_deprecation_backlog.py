@@ -6,11 +6,14 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 
 def _project_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+@pytest.mark.slow
 def test_scripts_deprecation_report_generation(tmp_path: Path) -> None:
     """Inventory tool should generate markdown backlog for non-active scripts."""
     root = _project_root()
