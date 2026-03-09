@@ -1,0 +1,63 @@
+name: Create Data Governance v2 Issues
+
+on:
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  create-issues:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create labels
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          declare -A LABELS=(
+            ["data-lineage"]="0E8A16:Data provenance and lineage tracking"
+            ["reproducibility"]="D93F0B:Scientific reproducibility"
+            ["schema-evolution"]="1D76DB:Schema versioning and evolution"
+            ["breaking-changes"]="B60205:Breaking changes management"
+            ["developer-experience"]="FBCA04:Developer experience improvements"
+          )
+          for name in "${!LABELS[@]}"; do
+            IFS=':' read -r color desc <<< "${LABELS[$name]}"
+            gh label create "$name" --color "$color" --description "$desc" 2>/dev/null || echo "Label '$name' already exists"
+          done
+
+      - name: Create milestone
+        id: milestone
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          MILESTONE_NUM=$(gh api repos/${{ github.repository }}/milestones --jq '.[] | select(.title=="Data Governance v2") | .number' 2>/dev/null)
+          if [ -z "$MILESTONE_NUM" ]; then
+            MILESTONE_NUM=$(gh api repos/${{ github.repository }}/milestones -X POST -f title="Data Governance v2" -f description="Data governance features including lineage, schema evolution, and compliance" --jq '.number')
+            echo "Created milestone #$MILESTONE_NUM"
+          else
+            echo "Milestone already exists: #$MILESTONE_NUM"
+          fi
+          echo "number=$MILESTONE_NUM" >> "$GITHUB_OUTPUT"
+
+      - name: Create Issue 1 - Data Lineage Graph
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "Data Lineage Graph — трассируемость Gold-записей до исходного API-ответа" \
+            --label "data-lineage,reproducibility,priority:critical" \
+            --milestone "Data Governance v2" \
+            --body-file .github/ISSUE_TEMPLATES/data-lineage-graph.md
+
+      - name: Create Issue 2 - Schema Evolution Policy
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "Schema Evolution Policy — автоматизация backward-compatibility checks для Gold-схемы" \
+            --label "schema-evolution,breaking-changes,developer-experience,priority:high" \
+            --milestone "Data Governance v2" \
+            --body-file .github/ISSUE_TEMPLATES/schema-evolution-policy.md
