@@ -146,3 +146,11 @@ repos:
         language: python
         pass_filenames: false
         files: ^(src/bioetl/.*\.py|docs/02-architecture/generated/module-dependency-map\.(md|json)|scripts/generate_architecture_dependency_map\.py)$
+
+      - id: validate-cross-references
+        name: Validate documentation cross-references (fast — internal links + anchors)
+        entry: python scripts/validate_cross_references.py
+        language: python
+        pass_filenames: false
+        files: ^(docs/.*\.md|README\.md|CHANGELOG\.md|src/.*\.py)$
+        stages: [pre-commit]

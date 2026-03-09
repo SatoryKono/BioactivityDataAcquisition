@@ -1,0 +1,65 @@
+name: Cross-Reference Validation (Fast)
+# Fast mode: validates internal links and anchors on every PR.
+# Blocks merge if broken internal links are found.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "docs/**"
+      - "*.md"
+      - "src/**/*.py"
+      - "scripts/docs/validate_cross_references.py"
+      - "scripts/validate_cross_references.py"
+      - ".github/workflows/cross-ref-validation.yml"
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "docs/**"
+      - "*.md"
+      - "src/**/*.py"
+      - "scripts/docs/validate_cross_references.py"
+      - "scripts/validate_cross_references.py"
+      - ".github/workflows/cross-ref-validation.yml"
+
+jobs:
+  validate-cross-refs-fast:
+    name: Validate cross-references (fast — internal + anchors)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          uv-extras: "docs"
+
+      - name: Validate internal links and anchors
+        run: |
+          uv run python scripts/validate_cross_references.py \
+            --markdown-out reports/cross-ref/fast-report.md \
+            --json-out reports/cross-ref/fast-report.json
+
+      - name: Upload validation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cross-ref-fast-report
+          path: |
+            reports/cross-ref/fast-report.md
+            reports/cross-ref/fast-report.json
+          retention-days: 7
+
+      - name: Publish report summary
+        if: always()
+        run: |
+          if [ -f reports/cross-ref/fast-report.md ]; then
+            cat reports/cross-ref/fast-report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
