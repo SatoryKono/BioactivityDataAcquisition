@@ -45,16 +45,7 @@ def _handle_quarantine_failure(
     unexpected_error_title: str,
     interrupted_message: str = "Quarantine command interrupted by user (Ctrl+C)",
 ) -> None:
-    """Handle quarantine command failures with shared CLI policy.
-
-    Args:
-        exc: Exception caught at the CLI command boundary.
-        reason_code: Machine-readable code for the failure (e.g., 'CLI_QUARANTINE_INSPECT_DOMAIN_ERROR').
-        pipeline: Pipeline name used as subject value in the structured error context.
-        domain_error_title: Human-readable title for BioETLError failures.
-        unexpected_error_title: Human-readable title for unexpected exception failures.
-        interrupted_message: Message displayed when KeyboardInterrupt is caught.
-    """
+    """Handle quarantine command failures with shared CLI policy."""
     handle_cli_execution_failure(
         exc,
         reason_code=reason_code,

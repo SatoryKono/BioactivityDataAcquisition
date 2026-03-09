@@ -210,14 +210,7 @@ def enforce_observability_contract_context(
 
 
 def is_observability_contract_valid(context: Mapping[str, object]) -> bool:
-    """Return ``True`` when all required observability contract fields are present.
-
-    Args:
-        context: Event context mapping to validate against the contract.
-
-    Returns:
-        True if all required contract fields are present and non-empty, False otherwise.
-    """
+    """Return ``True`` when all required observability contract fields are present."""
     return len(missing_observability_fields(context)) == 0
 
 
@@ -257,14 +250,7 @@ def normalize_observability_metric_labels(
 
 
 def missing_observability_fields(context: Mapping[str, object]) -> tuple[str, ...]:
-    """Return required contract fields missing from context.
-
-    Args:
-        context: Event context mapping to check for required observability fields.
-
-    Returns:
-        Tuple of field names that are missing or empty in the given context.
-    """
+    """Return required contract fields missing or empty in *context*."""
     return tuple(
         field
         for field in REQUIRED_OBSERVABILITY_FIELDS

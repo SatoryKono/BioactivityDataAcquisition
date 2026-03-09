@@ -106,8 +106,7 @@ class CrossRefAdapter(FallbackPolicyMixin, BaseHttpAdapter):
     title_fallback_handler: TitleFallbackHandler | None = None
     fetch_flow: CrossRefFetchFlow | None = None
 
-    provider_name: str = field(init=False, default="crossref")
-    """Provider identifier (required by DataSourcePort)."""
+    provider_name: str = field(init=False, default="crossref")  # DataSourcePort ID
     _fallback_fetch_service: FallbackFetchOrchestratorService = field(
         init=False, repr=False
     )
