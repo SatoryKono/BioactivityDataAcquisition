@@ -1,6 +1,6 @@
 # AI Self-Review Rules
 
-*Версия: 1.2.0 | Синхронизировано с RULES.md v5.23 (2026-02-24)*
+*Версия: 1.3.0 | Синхронизировано с RULES.md v5.23 (2026-03-02)*
 
 Правила для автоматической самопроверки кода в проекте BioETL.
 Использует RFC 2119 keywords: **MUST**, **SHOULD**, **MAY**.
@@ -14,7 +14,7 @@
 | Architecture | CRITICAL | ARCH-001...ARCH-008 |
 | Anti-Patterns | CRITICAL/HIGH | AP-001...AP-008 |
 | DI Violations | CRITICAL | DI-001...DI-005 |
-| Naming | MEDIUM | NAME-001...NAME-006 |
+| Naming | MEDIUM/HIGH | NAME-001...NAME-009 |
 | Types | HIGH | TYPE-001...TYPE-004 |
 | Testing | HIGH | TEST-001...TEST-005 |
 | Exceptions | INFO | EXC-001...EXC-015 |
@@ -511,6 +511,61 @@ class RunType(Enum):
     BACKFILL = "backfill"
     REBUILD = "rebuild"
 ```
+
+---
+
+### NAME-007: Skill Frontmatter Name (HIGH)
+
+Skill frontmatter `name:` **MUST** equal directory name.
+
+```yaml
+# .claude/skills/my-skill/SKILL.md
+---
+name: my-skill  # ✅ MUST match directory name
+---
+```
+
+**Детекция:** Сравнить `name:` в frontmatter с именем родительской директории.
+
+**Ref:** ADR-041 §Compliance
+
+---
+
+### NAME-008: Agent Frontmatter Name (HIGH)
+
+Agent frontmatter `name:` **MUST** equal filename (sans `.md`).
+
+```yaml
+# .claude/agents/py-test-bot.md
+---
+name: py-test-bot  # ✅ MUST match filename without .md
+---
+```
+
+**Детекция:** Сравнить `name:` в frontmatter с именем файла без расширения.
+
+**Ref:** ADR-041 §Compliance
+
+---
+
+### NAME-009: Agent Model Alias (MEDIUM)
+
+Agent `model:` **MUST** use abstract alias (`opus`/`sonnet`/`haiku`), not versioned ID.
+
+```yaml
+# ✅ ПРАВИЛЬНО
+model: opus
+
+# ❌ НАРУШЕНИЕ
+model: claude-opus-4-20250514
+```
+
+**Детекция:**
+```bash
+grep -rn "model:.*claude-" .claude/agents/ --include="*.md"
+```
+
+**Ref:** ADR-041 §Compliance
 
 ---
 
