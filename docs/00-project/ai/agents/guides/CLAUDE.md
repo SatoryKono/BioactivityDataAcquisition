@@ -68,7 +68,7 @@ grep -n "def " src/bioetl/application/core/runner.py  # Проверить ме�
 
 | Шаг | Действие                                 | Команда                               |
 | --- | ---------------------------------------- | ------------------------------------- |
-| 1   | Проверить `archived/refactoring-plan.md` | Секция "ЛОЖНЫЕ УТВЕРЖДЕНИЯ"           |
+| 1   | Проверить `docs/99-archive/refactoring-plan.md` | Секция "ЛОЖНЫЕ УТВЕРЖДЕНИЯ"           |
 | 2   | Прочитать целевой файл                   | `Read` tool или `cat`                 |
 | 3   | Измерить размер компонента               | `wc -l`, `grep -c "def "`             |
 | 4   | Проверить делегирование                  | `grep` по вызовам сервисов            |
@@ -90,8 +90,8 @@ grep -n "def " src/bioetl/application/core/runner.py  # Проверить ме�
 ### 0.4. Обязательные Проверки Перед Созданием Задачи
 
 - [ ] Утверждение подкреплено ссылками на `файл:строка`
-- [ ] Проверено в `archived/refactoring-plan.md` → "ЛОЖНЫЕ УТВЕРЖДЕНИЯ"
-- [ ] Проверено в `archived/refactoring-plan.md` → "УЖЕ РЕАЛИЗОВАНО"
+- [ ] Проверено в `docs/99-archive/refactoring-plan.md` → "ЛОЖНЫЕ УТВЕРЖДЕНИЯ"
+- [ ] Проверено в `docs/99-archive/refactoring-plan.md` → "УЖЕ РЕАЛИЗОВАНО"
 - [ ] Измерен размер компонента (строки, методы)
 - [ ] Проверено делегирование (какие сервисы вызываются)
 
@@ -132,7 +132,7 @@ ls tests/architecture/test-*.py
 | **Python-файлов**         | ~1,457 (712 src + 745 tests)                        |
 | **Строк кода**            | ~134,776 (src/bioetl/)                              |
 | **Тестов**                | ~11,227 (функций test_)                             |
-| **ADR**                   | ADR-001..ADR-041                                    |
+| **ADR**                   | ADR-001..ADR-040                                    |
 | **Провайдеров**           | 7                                                   |
 | **Pipeline-конфигураций** | 21                                                  |
 | **Конфиг-файлов всего**   | 51 (pipelines, quality, filters, sources, schemas)  |
@@ -256,7 +256,7 @@ src/bioetl/
 | **Отсутствие верификации кодом**         | "Нет валидации X" без `grep`          | Всегда проверять код перед утверждением    |
 | **Ложная корреляция размер → сложность** | "517 LOC = монолит"                   | Проверять делегирование, не только размер  |
 | **Неверная интерпретация паттернов**     | "NoOp default = нарушение DI"         | Знать Null Object Pattern                  |
-| **Устаревшие знания**                    | "Не реализовано" (но уже реализовано) | Сверяться с `archived/refactoring-plan.md` |
+| **Устаревшие знания**                    | "Не реализовано" (но уже реализовано) | Сверяться с `docs/99-archive/refactoring-plan.md` |
 
 ### 2.3.2. Правило Анализа Делегирования
 
@@ -300,7 +300,7 @@ grep -r "SilverWriteMode\|GoldWriteMode" src/bioetl/
 # 3. Проверить архитектурные тесты
 ls tests/architecture/
 
-# 4. Сверить с archived/refactoring-plan.md
+# 4. Сверить с docs/99-archive/refactoring-plan.md
 cat docs/99-archive/refactoring-plan.md | head -60
 ```
 
@@ -354,7 +354,7 @@ cat docs/99-archive/refactoring-plan.md | head -60
 
 **Circuit Breaker**: 5 consecutive errors → Open 5 мин (см. [ADR-007](../../../../02-architecture/decisions/ADR-007-circuit-breaker-implementation.md))
 
-**Актуальный набор ADR (ADR-001..ADR-041)** определяет архитектурные решения: `docs/02-architecture/decisions/ADR-{NNN}-*.md`
+**Актуальный набор ADR (ADR-001..ADR-040)** определяет архитектурные решения: `docs/02-architecture/decisions/ADR-{NNN}-*.md`
 (полный реестр в `docs/00-project/RULES.md` Приложение F)
 
 ----------------------------------------------------------------------
