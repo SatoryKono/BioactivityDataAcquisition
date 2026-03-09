@@ -226,7 +226,7 @@ def test_build_pipeline_runner_forces_probe_mode_in_test_mode() -> None:
         build_observability_bundle_fn=lambda **_: SimpleNamespace(
             logger=SimpleNamespace(info=lambda *_, **__: None)
         ),
-        assemble_vacuum_settings_fn=lambda **_: runner_builder.VacuumConfig(
+        assemble_vacuum_settings_fn=lambda **_: SimpleNamespace(
             enabled=False,
             retention_days=7,
         ),
@@ -288,7 +288,7 @@ def test_build_pipeline_runner_uses_configured_mode_outside_test_mode() -> None:
         build_observability_bundle_fn=lambda **_: SimpleNamespace(
             logger=SimpleNamespace(info=lambda *_, **__: None)
         ),
-        assemble_vacuum_settings_fn=lambda **_: runner_builder.VacuumConfig(
+        assemble_vacuum_settings_fn=lambda **_: SimpleNamespace(
             enabled=False,
             retention_days=7,
         ),

@@ -38,6 +38,9 @@ from bioetl.infrastructure.observability import OpenTelemetryTracer, PrometheusM
 from bioetl.infrastructure.observability.anomaly import DataQualityMonitor
 from bioetl.infrastructure.observability.unified_logger import UnifiedLogger
 
+# Backward-compat alias for legacy imports/tests.
+VacuumConfig = VacuumSettings
+
 if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.domain.context import (
