@@ -132,7 +132,9 @@ def test_run_fetch_with_fallback_policy_prefix_property(
 
     # Production code tracks found IDs in lowercase (case-insensitive dedup).
     # Build the same lowercase set to predict which IDs phase-2 will skip.
-    found_lower: set[str] = {doi.strip().lower() for doi in primary_ids if doi in resolved_ids}
+    found_lower: set[str] = {
+        doi.strip().lower() for doi in primary_ids if doi in resolved_ids
+    }
     expected_ids = [
         *(f"p:{doi}" for doi in primary_ids if doi in resolved_ids),
         *(

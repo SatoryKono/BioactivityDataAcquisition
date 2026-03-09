@@ -408,6 +408,18 @@
       "decision": "keep_manual",
       "review_by": "2026-06-30",
       "next_step": "Root compatibility wrapper for scripts/ops/check_mcp.sh. Keep per scripts/README.md policy."
+    },
+    "scripts/dev/.setup_wsl_codex.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "WSL development helper script. Relocated from repository root for better organization."
+    },
+    "scripts/dev/.wsl-vpn-fix.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "WSL VPN fix PowerShell script. Relocated from repository root for better organization."
     }
   }
 }

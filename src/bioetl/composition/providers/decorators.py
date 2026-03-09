@@ -72,7 +72,7 @@ def _register_provider_class(
         custom_creator=custom_creator,
     )
     ProviderRegistry.register(name, config)
-    setattr(cls, "__provider_name__", name)
+    setattr(cls, "__provider_name__", name)  # noqa: B010
 
 
 def register_provider(
