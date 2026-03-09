@@ -6,7 +6,7 @@ from dataclasses import dataclass
 
 __all__ = [
     "InputFilterContext",
-    "VacuumConfig",
+    "VacuumSettings",
 ]
 
 
@@ -157,7 +157,7 @@ class InputFilterContext:
 
 
 @dataclass(frozen=True, slots=True)
-class VacuumConfig:
+class VacuumSettings:
     """Vacuum operation configuration with tri-state enabled flag."""
 
     enabled: bool | None = None

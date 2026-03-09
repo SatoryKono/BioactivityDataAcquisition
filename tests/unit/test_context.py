@@ -13,7 +13,7 @@ from bioetl.domain.context import (
     InputFilterContext,
     PipelineContext,
     PipelineRunContext,
-    VacuumConfig,
+    VacuumSettings,
 )
 from bioetl.domain.types import RunID, RunType
 
@@ -275,7 +275,7 @@ class TestRunContextValidationAndProperties:
 
     def test_vacuum_config_validation(self) -> None:
         with pytest.raises(ValueError, match="retention_days must be positive"):
-            VacuumConfig(enabled=True, retention_days=0)
+            VacuumSettings(enabled=True, retention_days=0)
 
     def test_pipeline_run_context_properties(self) -> None:
         run_id = uuid4()
@@ -285,7 +285,7 @@ class TestRunContextValidationAndProperties:
             run_type=RunType.INCREMENTAL,
             input_filter=InputFilterContext.from_ids(("P12345",), "accession"),
             cached_bronze=CachedBronzeContext.from_options(),
-            vacuum=VacuumConfig(enabled=True, retention_days=7),
+            vacuum=VacuumSettings(enabled=True, retention_days=7),
         )
 
         assert ctx.has_input_filter is True

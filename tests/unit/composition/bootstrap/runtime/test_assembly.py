@@ -12,7 +12,7 @@ from uuid import uuid4
 import pytest
 
 from bioetl.composition.bootstrap.runtime.assembly import (
-    VacuumConfig,
+    VacuumSettings,
     assemble_filter_config,
     assemble_runtime_config,
     assemble_vacuum_settings,
@@ -20,7 +20,7 @@ from bioetl.composition.bootstrap.runtime.assembly import (
 from bioetl.domain.context import (
     InputFilterContext,
     PipelineRunContext,
-    VacuumConfig,
+    VacuumSettings,
 )
 from bioetl.domain.types import RunType
 from bioetl.infrastructure.schemas.pipeline_config import (
@@ -74,25 +74,25 @@ def base_context() -> PipelineRunContext:
 
 
 # =============================================================================
-# Tests for VacuumConfig
+# Tests for VacuumSettings
 # =============================================================================
 
 
 @pytest.mark.unit
 class TestVacuumSettings:
-    """Tests for VacuumConfig dataclass."""
+    """Tests for VacuumSettings dataclass."""
 
     def test_vacuum_settings_is_frozen(self):
-        """Test that VacuumConfig is immutable."""
-        settings = VacuumConfig(enabled=True, retention_days=7)
+        """Test that VacuumSettings is immutable."""
+        settings = VacuumSettings(enabled=True, retention_days=7)
         with pytest.raises(AttributeError):
             settings.enabled = False  # type: ignore[misc]
 
     def test_vacuum_settings_equality(self):
-        """Test that VacuumConfig supports equality comparison."""
-        s1 = VacuumConfig(enabled=True, retention_days=7)
-        s2 = VacuumConfig(enabled=True, retention_days=7)
-        s3 = VacuumConfig(enabled=False, retention_days=7)
+        """Test that VacuumSettings supports equality comparison."""
+        s1 = VacuumSettings(enabled=True, retention_days=7)
+        s2 = VacuumSettings(enabled=True, retention_days=7)
+        s3 = VacuumSettings(enabled=False, retention_days=7)
 
         assert s1 == s2
         assert s1 != s3
@@ -111,7 +111,7 @@ class TestAssembleVacuumSettings:
         self, yaml_maintenance_default: MaintenanceConfig
     ):
         """Test that CLI enabled=None uses YAML auto_vacuum=False."""
-        cli_vacuum = VacuumConfig(enabled=None, retention_days=7)
+        cli_vacuum = VacuumSettings(enabled=None, retention_days=7)
 
         result = assemble_vacuum_settings(
             cli_vacuum=cli_vacuum,
@@ -125,7 +125,7 @@ class TestAssembleVacuumSettings:
         self, yaml_maintenance_enabled: MaintenanceConfig
     ):
         """Test that CLI enabled=None uses YAML auto_vacuum=True."""
-        cli_vacuum = VacuumConfig(enabled=None, retention_days=3)
+        cli_vacuum = VacuumSettings(enabled=None, retention_days=3)
 
         result = assemble_vacuum_settings(
             cli_vacuum=cli_vacuum,
@@ -140,7 +140,7 @@ class TestAssembleVacuumSettings:
         self, yaml_maintenance_default: MaintenanceConfig
     ):
         """Test that CLI enabled=True overrides YAML auto_vacuum=False."""
-        cli_vacuum = VacuumConfig(enabled=True, retention_days=5)
+        cli_vacuum = VacuumSettings(enabled=True, retention_days=5)
 
         result = assemble_vacuum_settings(
             cli_vacuum=cli_vacuum,
@@ -154,7 +154,7 @@ class TestAssembleVacuumSettings:
         self, yaml_maintenance_enabled: MaintenanceConfig
     ):
         """Test that CLI enabled=False overrides YAML auto_vacuum=True."""
-        cli_vacuum = VacuumConfig(enabled=False, retention_days=3)
+        cli_vacuum = VacuumSettings(enabled=False, retention_days=3)
 
         result = assemble_vacuum_settings(
             cli_vacuum=cli_vacuum,
@@ -168,7 +168,7 @@ class TestAssembleVacuumSettings:
         self, yaml_maintenance_enabled: MaintenanceConfig
     ):
         """Test that CLI override uses CLI retention_days value."""
-        cli_vacuum = VacuumConfig(enabled=True, retention_days=30)
+        cli_vacuum = VacuumSettings(enabled=True, retention_days=30)
 
         result = assemble_vacuum_settings(
             cli_vacuum=cli_vacuum,
@@ -181,15 +181,15 @@ class TestAssembleVacuumSettings:
     def test_returns_vacuum_settings_type(
         self, yaml_maintenance_default: MaintenanceConfig
     ):
-        """Test that function returns VacuumConfig type."""
-        cli_vacuum = VacuumConfig(enabled=None, retention_days=7)
+        """Test that function returns VacuumSettings type."""
+        cli_vacuum = VacuumSettings(enabled=None, retention_days=7)
 
         result = assemble_vacuum_settings(
             cli_vacuum=cli_vacuum,
             yaml_maintenance=yaml_maintenance_default,
         )
 
-        assert isinstance(result, VacuumConfig)
+        assert isinstance(result, VacuumSettings)
 
 
 # =============================================================================
@@ -203,7 +203,7 @@ class TestAssembleRuntimeConfig:
 
     def test_assembles_basic_config(self):
         """Test that assemble_runtime_config creates basic RuntimeConfig."""
-        vacuum = VacuumConfig(enabled=False, retention_days=7)
+        vacuum = VacuumSettings(enabled=False, retention_days=7)
 
         result = assemble_runtime_config(
             run_type=RunType.INCREMENTAL,
@@ -226,7 +226,7 @@ class TestAssembleRuntimeConfig:
 
     def test_assembles_config_with_limit(self):
         """Test that assemble_runtime_config handles limit parameter."""
-        vacuum = VacuumConfig(enabled=False, retention_days=7)
+        vacuum = VacuumSettings(enabled=False, retention_days=7)
 
         result = assemble_runtime_config(
             run_type=RunType.BACKFILL,
@@ -247,7 +247,7 @@ class TestAssembleRuntimeConfig:
 
     def test_assembles_config_with_vacuum_enabled(self):
         """Test that vacuum settings are properly transferred."""
-        vacuum = VacuumConfig(enabled=True, retention_days=14)
+        vacuum = VacuumSettings(enabled=True, retention_days=14)
 
         result = assemble_runtime_config(
             run_type=RunType.REBUILD,
@@ -264,7 +264,7 @@ class TestAssembleRuntimeConfig:
 
     def test_config_is_immutable(self):
         """Test that returned RuntimeConfig is immutable (frozen)."""
-        vacuum = VacuumConfig(enabled=False, retention_days=7)
+        vacuum = VacuumSettings(enabled=False, retention_days=7)
 
         result = assemble_runtime_config(
             run_type=RunType.INCREMENTAL,
@@ -281,7 +281,7 @@ class TestAssembleRuntimeConfig:
 
     def test_all_run_types_supported(self):
         """Test that all RunType values are supported."""
-        vacuum = VacuumConfig(enabled=False, retention_days=7)
+        vacuum = VacuumSettings(enabled=False, retention_days=7)
 
         for run_type in RunType:
             result = assemble_runtime_config(
@@ -466,7 +466,7 @@ class TestAssemblyIntegration:
             run_type=RunType.BACKFILL,
             resume=True,
             limit=500,
-            vacuum=VacuumConfig(enabled=False, retention_days=3),
+            vacuum=VacuumSettings(enabled=False, retention_days=3),
             input_filter=InputFilterContext.from_csv(
                 source_path="/cli/filter.csv",
                 column_name="my_col",

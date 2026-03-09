@@ -68,7 +68,7 @@ class SemanticScholarBatchRequestMixin:
         Returns:
             List of BronzeRecord or None values from the batch API response array.
         """
-        self.logger.debug(
+        self._logger.debug(
             "semanticscholar_batch_request",
             paper_count=len(paper_ids),
         )
@@ -77,7 +77,7 @@ class SemanticScholarBatchRequestMixin:
 
         start_time = time.perf_counter()
         with self._adapter_metrics.measure_request("/paper/batch"):
-            response = await self.http_client.post(
+            response = await self._http_client.post(
                 url,
                 json=json_body,
                 headers=self._build_headers(),

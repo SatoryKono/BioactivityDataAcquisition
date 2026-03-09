@@ -102,13 +102,13 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
                     AdapterHelpersFactory). Falls back to inline APIRequestCollector.
 
         """
-        self.http_client = http_client
-        self.logger = logger
-        self.metrics = metrics if metrics is not None else NoOpMetrics()
+        self._http_client = http_client
+        self._logger = logger
+        self._metrics = metrics if metrics is not None else NoOpMetrics()
         self._error_handler = (
             error_handler
             if error_handler is not None
-            else ErrorService(logger, metrics=self.metrics)
+            else ErrorService(logger, metrics=self._metrics)
         )
         if adapter_metrics is not None and request_collector is not None:
             self._adapter_metrics = adapter_metrics
@@ -152,7 +152,7 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
         that bypass ``__init__``, call explicitly from ``__post_init__``.
 
         """
-        metrics_port = self.metrics if self.metrics is not None else NoOpMetrics()
+        metrics_port = self._metrics if self._metrics is not None else NoOpMetrics()
         self._adapter_metrics = AdapterMetrics(metrics_port, self.provider_name)
         self._request_collector = APIRequestCollector()
 
@@ -166,14 +166,14 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
             CircuitBreakerPort instance for health status assessment.
 
         """
-        return self.http_client.circuit_breaker
+        return self._http_client.circuit_breaker
 
     async def __aenter__(self) -> Self:
         """Enter async context manager.
 
         Delegates to the underlying HTTP client.
         """
-        await self.http_client.__aenter__()
+        await self._http_client.__aenter__()
         return self
 
     async def __aexit__(
@@ -186,7 +186,7 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
 
         Delegates to the underlying HTTP client.
         """
-        await self.http_client.__aexit__(exc_type, exc_val, exc_tb)
+        await self._http_client.__aexit__(exc_type, exc_val, exc_tb)
 
     async def aclose(self) -> None:
         """Close resources.

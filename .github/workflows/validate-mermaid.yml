@@ -13,6 +13,7 @@ on:
         - '.github/workflows/**'
         - 'LICENSE'
     push:
+      branches: [ main ]
       paths-ignore:
         - 'docs/**'
         - '*.md'
@@ -20,7 +21,6 @@ on:
         - '.claude/**'
         - '.github/workflows/**'
         - 'LICENSE'
-        branches: [ main ]
 
 jobs:
     check-mermaid:

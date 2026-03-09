@@ -107,7 +107,7 @@ class OpenAlexFallbackOrchestrator:
             service=self.fallback_fetch_service,
             strategy=strategy,
             config=self.config,
-            logger=self.logger,
+            logger=self._logger,
         )
 
     def configure_policy(self, policy: object | None) -> None:
@@ -151,7 +151,7 @@ class OpenAlexFallbackOrchestrator:
         """
 
         def _log_phase1_summary(total: int, found: int) -> None:
-            self.logger.info(
+            self._logger.info(
                 "openalex_doi_lookup_summary",
                 total_dois=total,
                 found_by_doi=found,

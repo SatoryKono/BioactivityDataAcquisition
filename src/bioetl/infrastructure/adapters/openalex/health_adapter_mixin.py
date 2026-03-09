@@ -38,16 +38,16 @@ class OpenAlexAdapterHealthMixin:
         return await probe_openalex_health(
             api_base="https://api.openalex.org",
             mailto=self.mailto,
-            http_client=self.http_client,
-            logger=self.logger,
+            http_client=self._http_client,
+            logger=self._logger,
             adapter_metrics=self._adapter_metrics,
             headers=self._build_headers(),
         )
 
     async def aclose(self: _OpenAlexHealthHost) -> None:
         """Close adapter resources via underlying HTTP client context."""
-        if self.http_client:
-            await self.http_client.__aexit__(None, None, None)
+        if self._http_client:
+            await self._http_client.__aexit__(None, None, None)
 
 
 __all__ = ["OpenAlexAdapterHealthMixin"]
