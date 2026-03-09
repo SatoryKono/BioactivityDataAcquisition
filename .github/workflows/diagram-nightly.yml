@@ -16,31 +16,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Install Mermaid CLI + librsvg + svgo
-        run: |
-          npm install -g @mermaid-js/mermaid-cli@10.6.1 svgo
-          sudo apt-get update -qq && sudo apt-get install -y -qq librsvg2-bin
-
-      - name: Install Chrome headless shell for Puppeteer
-        run: npx -y puppeteer browsers install chrome-headless-shell
-
-      - name: Create Puppeteer config
-        run: |
-          cat > /tmp/puppeteer-config.json << 'EOF'
-          {
-            "args": ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]
-          }
-          EOF
+      - name: Setup Mermaid CLI
+        uses: ./.github/actions/setup-mermaid
+        with:
+          install-librsvg: "true"
 
       - name: Render diagrams
         run: |
@@ -146,30 +130,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Install Mermaid CLI version
-        run: |
-          npm install -g @mermaid-js/mermaid-cli@${{ matrix.mermaid_version }}
-
-      - name: Install Chrome headless shell for Puppeteer
-        run: npx -y puppeteer browsers install chrome-headless-shell
-
-      - name: Create Puppeteer config
-        run: |
-          cat > /tmp/puppeteer-config.json << 'EOF'
-          {
-            "args": ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]
-          }
-          EOF
+      - name: Setup Mermaid CLI
+        uses: ./.github/actions/setup-mermaid
+        with:
+          mermaid-version: ${{ matrix.mermaid_version }}
 
       - name: Validate Mermaid syntax
         run: |

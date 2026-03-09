@@ -31,7 +31,10 @@ def test_docs_workflow_publishes_step_summary() -> None:
 def test_docs_workflow_installs_puppeteer_chrome_runtime() -> None:
     workflow = Path(".github/workflows/docs.yml").read_text(encoding="utf-8")
 
-    assert "puppeteer browsers install chrome-headless-shell" in workflow
+    # Puppeteer chrome install may be inline or in the composite action
+    composite = Path(".github/actions/setup-mermaid/action.yml")
+    sources = workflow + (composite.read_text(encoding="utf-8") if composite.exists() else "")
+    assert "puppeteer browsers install chrome-headless-shell" in sources
 
 
 def test_docs_workflow_runs_doc_integrity_guardrails() -> None:

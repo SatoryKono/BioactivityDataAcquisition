@@ -24,19 +24,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
         with:
-          python-version: "3.11"
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
+          uv-extras: "docs"
 
       - name: Validate version consistency
         run: python scripts/check_version_consistency.py
-
-      - name: Install docs dependencies
-        run: uv sync --frozen --extra docs
 
       - name: Run documentation integrity guardrails
         run: uv run python scripts/check_doc_links.py
@@ -65,24 +59,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install Mermaid CLI
-        run: npm install -g @mermaid-js/mermaid-cli@10.6.1
-
-      - name: Install Chrome headless shell for Puppeteer
-        run: npx -y puppeteer browsers install chrome-headless-shell
-
-      - name: Create Puppeteer config
-        run: |
-          cat > /tmp/puppeteer-config.json << 'EOF'
-          {
-            "args": ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]
-          }
-          EOF
+      - name: Setup Mermaid CLI
+        uses: ./.github/actions/setup-mermaid
 
       - name: Validate Mermaid diagrams (.mermaid + .mmd)
         run: |
@@ -107,26 +85,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Mermaid CLI
+        uses: ./.github/actions/setup-mermaid
         with:
-          node-version: '20'
-
-      - name: Install Mermaid CLI + librsvg + svgo
-        run: |
-          npm install -g @mermaid-js/mermaid-cli@10.6.1 svgo
-          sudo apt-get update -qq && sudo apt-get install -y -qq librsvg2-bin
-
-      - name: Install Chrome headless shell for Puppeteer
-        run: npx -y puppeteer browsers install chrome-headless-shell
-
-      - name: Create Puppeteer config
-        run: |
-          cat > /tmp/puppeteer-config.json << 'EOF'
-          {
-            "args": ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]
-          }
-          EOF
+          install-librsvg: "true"
 
       - name: Render diagrams with unified script
         run: |
