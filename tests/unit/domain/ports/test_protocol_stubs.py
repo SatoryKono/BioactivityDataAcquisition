@@ -14,44 +14,38 @@ from typing import Any, get_args, get_origin
 
 import pytest
 
-from bioetl.domain.ports.checkpoint import CheckpointPort
-from bioetl.domain.ports.clock import ClockPort
-from bioetl.domain.ports.data_normalization import DataNormalizationPort
-from bioetl.domain.ports.data_source import DataSourcePort, FilterableDataSourcePort
-from bioetl.domain.ports.dq_config import (
-    BronzeDQConfigPort,
-    GoldDQConfigPort,
-    SilverDQConfigPort,
-)
-from bioetl.domain.ports.dq_report import (
+from bioetl.domain.ports import (
     BronzeDQAnalyzerPort,
+    BronzeDQConfigPort,
+    CheckpointPort,
+    CircuitBreakerPort,
+    ClockPort,
+    DQMonitorPort,
     DQReportWriterPort,
+    DataNormalizationPort,
+    DataSourcePort,
+    FallbackPolicyPort,
+    FilterableDataSourcePort,
     GoldDQAnalyzerPort,
-    SilverDQAnalyzerPort,
-)
-from bioetl.domain.ports.fallback_policy import FallbackPolicyPort
-from bioetl.domain.ports.health_check import (
+    GoldDQConfigPort,
     HealthCheckPort,
     HealthMonitorPort,
     HealthStatePort,
-)
-from bioetl.domain.ports.idmapping import IDMappingPort
-from bioetl.domain.ports.locking import LockPort
-from bioetl.domain.ports.memory import MemoryMonitorPort
-from bioetl.domain.ports.observability import (
-    DQMonitorPort,
+    IDMappingPort,
+    LockPort,
     LoggerPort,
-    MetricsPort,
-    TracingPort,
-)
-from bioetl.domain.ports.quarantine import QuarantinePort
-from bioetl.domain.ports.resilience import CircuitBreakerPort, RateLimiterPort
-from bioetl.domain.ports.runner import (
+    MemoryMonitorPort,
     MetricsExtractorPort,
+    MetricsPort,
+    QuarantinePort,
+    RateLimiterPort,
     RunnablePort,
     RunnerFactoryPort,
+    SilverDQAnalyzerPort,
+    SilverDQConfigPort,
+    StoragePort,
+    TracingPort,
 )
-from bioetl.domain.ports.storage import StoragePort
 
 PROTOCOL_CLASSES = [
     DataNormalizationPort,

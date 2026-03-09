@@ -412,7 +412,7 @@ class TestMetadataCoordinatorDataClasses:
         assert ref.table_name == "chembl.activity"
 
     def test_gold_metadata_input_defaults(self) -> None:
-        from bioetl.domain.ports.metadata_coordinator import GoldMetadataInput
+        from bioetl.domain.ports import GoldMetadataInput
 
         inp = GoldMetadataInput(
             table_path="/data/gold/compounds",
