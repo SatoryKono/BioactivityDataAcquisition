@@ -22,7 +22,7 @@ if TYPE_CHECKING:
         CompositeCheckpointService,
         CompositeCheckpointState,
     )
-    from bioetl.application.composite.fsm_helper import FSMStateHelperService
+    from bioetl.application.composite.fsm_helper_port import FSMStateHelperPort
     from bioetl.application.composite.merger import MergeService
     from bioetl.application.composite.runner import CompositeRuntimeConfig
     from bioetl.domain.composite.config import CompositeConfig
@@ -40,7 +40,7 @@ class CompositeRunnerMergeStageHelper:
     """Mixin containing merge execution and finalization."""
 
     _runtime: CompositeRuntimeConfig
-    _fsm: FSMStateHelperService
+    _fsm: FSMStateHelperPort
     _logger: LoggerPort
     _config: CompositeConfig
     _run_id_str: str
@@ -55,7 +55,7 @@ class CompositeRunnerMergeStageHelper:
         """Invoke support-layer checkpoint save helper."""
         save_checkpoint = cast(
             "Callable[[CompositeCheckpointState, str], Awaitable[bool]]",
-            getattr(self, "_save_checkpoint_safe"),
+            self._save_checkpoint_safe,
         )
         return await save_checkpoint(state, operation)
 
@@ -63,7 +63,7 @@ class CompositeRunnerMergeStageHelper:
         """Invoke support-layer DQ report generation helper."""
         generate_reports = cast(
             "Callable[[MergeResult], Awaitable[None]]",
-            getattr(self, "_generate_dq_reports"),
+            self._generate_dq_reports,
         )
         await generate_reports(merge_result)
 
@@ -71,7 +71,7 @@ class CompositeRunnerMergeStageHelper:
         """Invoke support-layer quarantine write helper."""
         write_quarantine = cast(
             "Callable[[MergeResult], Awaitable[None]]",
-            getattr(self, "_write_cv_quarantine"),
+            self._write_cv_quarantine,
         )
         await write_quarantine(merge_result)
 

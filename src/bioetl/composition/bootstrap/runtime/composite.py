@@ -17,6 +17,7 @@ from bioetl.application.composite.cross_validator import (
 from bioetl.application.composite.dependency_coordinator import (
     DependencyCoordinatorService,
 )
+from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.key_extractor import KeyExtractorService
 from bioetl.application.composite.merger import MergeService
 from bioetl.application.composite.runner import (
@@ -571,6 +572,12 @@ def bootstrap_composite_runner(
         resume=runtime.resume,
     )
 
+    fsm_helper = FSMStateHelperService(
+        config=config,
+        logger=logger,
+        run_id=effective_run_id,
+    )
+
     # Create DQ report service for composite
     dq_report_service = _create_dq_report_service(logger, settings)
 
@@ -594,6 +601,7 @@ def bootstrap_composite_runner(
         coordinator=coordinator,
         merger=merger,
         checkpoint_manager=checkpoint_manager,
+        fsm_helper=fsm_helper,
         logger=logger,
         lock=lock,
         run_id=effective_run_id,

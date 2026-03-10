@@ -17,6 +17,7 @@ import polars as pl
 import pytest
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointState
+from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.runner import (
     CompositePipelineRunner,
     CompositeRuntimeConfig,
@@ -233,6 +234,11 @@ def runner(
         coordinator=mock_coordinator,
         merger=mock_merger,
         checkpoint_manager=mock_checkpoint_manager,
+        fsm_helper=FSMStateHelperService(
+            config=sample_composite_config,
+            logger=mock_logger,
+            run_id="00000000-0000-0000-0000-000000000123",
+        ),
         logger=mock_logger,
         lock=mock_lock,
         run_id="00000000-0000-0000-0000-000000000123",
@@ -487,6 +493,11 @@ class TestFSMFailureLogging:
             coordinator=mock_coordinator,
             merger=mock_merger,
             checkpoint_manager=mock_checkpoint_manager,
+            fsm_helper=FSMStateHelperService(
+                config=sample_composite_config,
+                logger=mock_logger,
+                run_id="00000000-0000-0000-0000-000000000123",
+            ),
             logger=mock_logger,
             lock=mock_lock,
             run_id="00000000-0000-0000-0000-000000000123",
@@ -537,6 +548,11 @@ class TestFSMFailureLogging:
             coordinator=mock_coordinator,
             merger=mock_merger,
             checkpoint_manager=mock_checkpoint_manager,
+            fsm_helper=FSMStateHelperService(
+                config=sample_composite_config,
+                logger=mock_logger,
+                run_id="00000000-0000-0000-0000-000000000123",
+            ),
             logger=mock_logger,
             lock=mock_lock,
             run_id="00000000-0000-0000-0000-000000000123",
@@ -587,6 +603,11 @@ class TestFSMFailureLogging:
             coordinator=mock_coordinator,
             merger=mock_merger,
             checkpoint_manager=mock_checkpoint_manager,
+            fsm_helper=FSMStateHelperService(
+                config=sample_composite_config,
+                logger=mock_logger,
+                run_id="00000000-0000-0000-0000-000000000123",
+            ),
             logger=mock_logger,
             lock=mock_lock,
             run_id="00000000-0000-0000-0000-000000000123",
@@ -637,6 +658,11 @@ class TestDryRunLogging:
             coordinator=mock_coordinator,
             merger=mock_merger,
             checkpoint_manager=mock_checkpoint_manager,
+            fsm_helper=FSMStateHelperService(
+                config=sample_composite_config,
+                logger=mock_logger,
+                run_id="00000000-0000-0000-0000-000000000123",
+            ),
             logger=mock_logger,
             lock=mock_lock,
             run_id="00000000-0000-0000-0000-000000000123",
@@ -689,6 +715,11 @@ class TestNoEnrichersLogging:
             coordinator=mock_coordinator,
             merger=mock_merger,
             checkpoint_manager=mock_checkpoint_manager,
+            fsm_helper=FSMStateHelperService(
+                config=sample_composite_config,
+                logger=mock_logger,
+                run_id="00000000-0000-0000-0000-000000000123",
+            ),
             logger=mock_logger,
             lock=mock_lock,
             run_id="00000000-0000-0000-0000-000000000123",

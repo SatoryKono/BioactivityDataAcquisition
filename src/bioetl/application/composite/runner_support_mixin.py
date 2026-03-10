@@ -21,7 +21,7 @@ if TYPE_CHECKING:
         CompositeCheckpointService,
         CompositeCheckpointState,
     )
-    from bioetl.application.composite.fsm_helper import FSMStateHelperService
+    from bioetl.application.composite.fsm_helper_port import FSMStateHelperPort
     from bioetl.application.composite.preflight_validator import (
         CompositePreflightValidationService,
     )
@@ -51,7 +51,7 @@ class CompositeRunnerSupportHelper:
     _preflight_validator: CompositePreflightValidationService | None
     _quarantine_port: QuarantinePort | None
     _metrics: MetricsPort | None
-    _fsm: FSMStateHelperService
+    _fsm: FSMStateHelperPort
 
     def _build_composite_result(
         self,

@@ -17,6 +17,7 @@ from bioetl.application.composite.checkpoint import (
     CompositeCheckpointManager,
     CompositeCheckpointState,
 )
+from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.runner import (
     CompositePipelineRunner,
     CompositeRuntimeConfig,
@@ -203,6 +204,9 @@ class TestResumeFromFailedState:
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),
             checkpoint_manager=checkpoint_manager,
+            fsm_helper=FSMStateHelperService(
+                config=MockCompositeConfig(), logger=logger, run_id="test-run-id"
+            ),
             logger=logger,
             lock=create_mock_lock(),
         )
@@ -266,6 +270,9 @@ class TestResumeFromFailedState:
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),
             checkpoint_manager=checkpoint_manager,
+            fsm_helper=FSMStateHelperService(
+                config=config, logger=logger, run_id="test-run-id"
+            ),
             logger=logger,
             lock=create_mock_lock(),
         )
@@ -337,6 +344,9 @@ class TestResumeFromFailedState:
             coordinator=create_mock_coordinator(),
             merger=merger,
             checkpoint_manager=checkpoint_manager,
+            fsm_helper=FSMStateHelperService(
+                config=config, logger=logger, run_id="test-run-id"
+            ),
             logger=logger,
             lock=create_mock_lock(),
         )
@@ -413,6 +423,9 @@ class TestResumeContextLogging:
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),
             checkpoint_manager=checkpoint_manager,
+            fsm_helper=FSMStateHelperService(
+                config=config, logger=logger, run_id="test-run-id"
+            ),
             logger=logger,
             lock=create_mock_lock(),
         )
@@ -440,6 +453,9 @@ class TestResumeContextLogging:
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),
             checkpoint_manager=checkpoint_manager,
+            fsm_helper=FSMStateHelperService(
+                config=MockCompositeConfig(), logger=logger, run_id="test-run-id"
+            ),
             logger=logger,
             lock=create_mock_lock(),
         )
@@ -617,6 +633,9 @@ class TestFSMStateTransitionOnResume:
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),
             checkpoint_manager=checkpoint_manager,
+            fsm_helper=FSMStateHelperService(
+                config=MockCompositeConfig(), logger=logger, run_id="test-run-id"
+            ),
             logger=logger,
             lock=create_mock_lock(),
         )
@@ -681,6 +700,9 @@ class TestFSMStateTransitionOnResume:
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),
             checkpoint_manager=checkpoint_manager,
+            fsm_helper=FSMStateHelperService(
+                config=config, logger=create_mock_logger(), run_id="test-run-id"
+            ),
             logger=create_mock_logger(),
             lock=create_mock_lock(),
         )

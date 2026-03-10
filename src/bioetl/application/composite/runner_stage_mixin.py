@@ -34,7 +34,7 @@ if TYPE_CHECKING:
     from bioetl.application.composite.dependency_coordinator import (
         DependencyCoordinatorService,
     )
-    from bioetl.application.composite.fsm_helper import FSMStateHelperService
+    from bioetl.application.composite.fsm_helper_port import FSMStateHelperPort
     from bioetl.application.composite.runner import CompositeRuntimeConfig
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
@@ -50,7 +50,7 @@ class _CompositeRunnerStageSupportMixin:
     _runtime: CompositeRuntimeConfig
     _logger: LoggerPort
     _run_id_str: str
-    _fsm: FSMStateHelperService
+    _fsm: FSMStateHelperPort
     _checkpoint_manager: CompositeCheckpointService
     _dependency_coordinator: DependencyCoordinatorService | None
     _dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner] | None
@@ -65,7 +65,7 @@ class _CompositeRunnerStageSupportMixin:
         """Invoke support-layer checkpoint save helper."""
         save_checkpoint = cast(
             "Callable[[CompositeCheckpointState, str], Awaitable[bool]]",
-            getattr(self, "_save_checkpoint_safe"),
+            self._save_checkpoint_safe,
         )
         return await save_checkpoint(state, operation)
 
@@ -73,7 +73,7 @@ class _CompositeRunnerStageSupportMixin:
         """Invoke support-layer seed runner helper."""
         run_seed = cast(
             "Callable[[], Awaitable[SeedResult]]",
-            getattr(self, "_run_seed"),
+            self._run_seed,
         )
         return await run_seed()
 
@@ -84,7 +84,7 @@ class _CompositeRunnerStageSupportMixin:
         """Invoke support-layer enricher selection helper."""
         get_enrichers = cast(
             "Callable[[CompositeCheckpointState], list[EnricherConfig]]",
-            getattr(self, "_get_enrichers_to_run"),
+            self._get_enrichers_to_run,
         )
         return get_enrichers(state)
 
@@ -95,7 +95,7 @@ class _CompositeRunnerStageSupportMixin:
         """Invoke support-layer required-enricher validation helper."""
         check_required = cast(
             "Callable[[dict[str, EnrichmentResult]], None]",
-            getattr(self, "_check_required_enrichers"),
+            self._check_required_enrichers,
         )
         check_required(enrichment_results)
 

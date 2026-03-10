@@ -20,6 +20,7 @@ from bioetl.application.composite.checkpoint import (
     CompositeCheckpointManager,
     CompositeCheckpointState,
 )
+from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.runner import (
     CompositePipelineRunner,
     CompositeRuntimeConfig,
@@ -160,6 +161,9 @@ def create_runner(
         coordinator=mock_coordinator,
         merger=mock_merger,
         checkpoint_manager=checkpoint_manager,
+        fsm_helper=FSMStateHelperService(
+            config=mock_config, logger=mock_logger, run_id=test_run_id
+        ),
         logger=mock_logger,
         lock=mock_lock,
         run_id=test_run_id,
