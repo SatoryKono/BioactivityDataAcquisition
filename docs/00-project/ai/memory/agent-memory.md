@@ -252,8 +252,6 @@ entrypoints допустимы только как дополнительное 
 
 Если нужна фактическая команда для текущего runtime, смотри его собственный
 реестр команд/skills, а не эту память.
-| `/vcr-record` | VCR cassettes management |
-| `/release-checklist` | Pre-release audit |
 
 ---
 
@@ -340,8 +338,8 @@ Claude-specific built-ins и plugin-инвентари допустимо хра
 4. **При использовании логического профиля** — прочитать `.codex/agents/py-{name}.md`
 5. **При scaffolding** — использовать workflow `new-pipeline`
 6. **Перед завершением code/docs changes** — прогнать `verify-architecture` или эквивалентный project check
-7. **Если активный runtime = Claude** — дополнительно прочитать `.claude/PROJECT_CONTEXT.md`
-8. **Если активный runtime = Claude** — дополнительно прочитать `.claude/rules/ai-selfreview-rules.md`
+7. **Только если активный runtime = Claude** — дополнительно прочитать `.claude/PROJECT_CONTEXT.md`
+8. **Только если активный runtime = Claude** — дополнительно прочитать `.claude/rules/ai-selfreview-rules.md`
 
 ### Команда для загрузки полного контекста:
 

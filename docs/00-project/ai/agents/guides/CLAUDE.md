@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+*Статус: internal-published (Internal / Extended)*
+
 Справочник для Claude Code при работе с репозиторием BioETL.
 
 *Синхронизировано с RULES.md v5.23 (2026-03-04) | Дедублирование: ссылки на RULES.md вместо копий | Версия: 6.6.0*

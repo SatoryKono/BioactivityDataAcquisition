@@ -5,9 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING
 
-from bioetl.application.composite.dependency_joiner import DependencyJoinerService
-from bioetl.application.composite.join_execution import JoinExecutorService, JoinHow
-from bioetl.application.composite.join_key_resolution import JoinKeyResolverService
+from bioetl.application.composite.join_execution import JoinHow
 from bioetl.application.composite.join_planner_compat_mixin import (
     JoinPlannerCompatibilityMixin,
 )
@@ -70,19 +68,17 @@ class JoinPlannerService(JoinPlannerCompatibilityMixin):
         aggregator: EnricherAggregatorService,
         renamer: ColumnRenamerService,
         conflict_resolver: ConflictResolverService,
+        join_key_resolver: JoinKeyResolverProtocol,
+        join_executor: JoinExecutorProtocol,
+        dependency_joiner: DependencyJoinerProtocol,
         field_alias_resolver: Callable[[str], dict[str, str] | None] | None = None,
-        join_key_resolver: JoinKeyResolverProtocol | None = None,
-        join_executor: JoinExecutorProtocol | None = None,
-        dependency_joiner: DependencyJoinerProtocol | None = None,
     ) -> None:
-        """Initialise the join planner and construct default collaborator services.
+        """Initialise the join planner with explicit collaborator services.
 
         Required collaborators (``deduplicator``, ``aggregator``, ``renamer``,
-        ``conflict_resolver``) must be provided explicitly. Optional collaborators
-        (``join_key_resolver``, ``join_executor``, ``dependency_joiner``) are
-        instantiated with production defaults when ``None``, enabling lightweight
-        construction in tests via explicit overrides. See ADR-026 for the composite
-        join workflow design.
+        ``conflict_resolver``, ``join_key_resolver``, ``join_executor``,
+        ``dependency_joiner``) must be provided explicitly. See ADR-026 for the
+        composite join workflow design.
 
         Args:
             merge_config: Domain merge configuration containing join strategy,
@@ -99,14 +95,11 @@ class JoinPlannerService(JoinPlannerCompatibilityMixin):
             field_alias_resolver: Optional callable returning a field-alias mapping
                 for a given pipeline name; defaults to
                 ``resolve_field_aliases_from_registry`` when ``None``.
-            join_key_resolver: Optional ``JoinKeyResolverProtocol`` implementation;
-                defaults to ``JoinKeyResolverService`` with production normalisation
-                keys when ``None``.
-            join_executor: Optional ``JoinExecutorProtocol`` implementation; defaults
-                to ``JoinExecutorService`` wired with this planner's join type resolver
-                when ``None``.
-            dependency_joiner: Optional ``DependencyJoinerProtocol`` implementation;
-                defaults to a fully wired ``DependencyJoinerService`` when ``None``.
+            join_key_resolver: ``JoinKeyResolverProtocol`` implementation for
+                qualified/unqualified join-key resolution.
+            join_executor: ``JoinExecutorProtocol`` implementation for Polars joins.
+            dependency_joiner: ``DependencyJoinerProtocol`` implementation for
+                dependency-specific join preparation and execution.
         """
         self._config = merge_config
         self._logger = logger
@@ -117,24 +110,9 @@ class JoinPlannerService(JoinPlannerCompatibilityMixin):
         self._field_alias_resolver = (
             field_alias_resolver or resolve_field_aliases_from_registry
         )
-        self._join_key_resolver = join_key_resolver or JoinKeyResolverService(
-            normalize_join_keys=self._NORMALIZE_JOIN_KEYS,
-            parse_pipeline_name=self._parse_pipeline_name,
-        )
-        self._join_executor = join_executor or JoinExecutorService(
-            logger=logger,
-            join_type_resolver=self.get_polars_join_type,
-        )
-        self._dependency_joiner = dependency_joiner or DependencyJoinerService(
-            logger=logger,
-            deduplicator=deduplicator,
-            renamer=renamer,
-            conflict_resolver=conflict_resolver,
-            field_alias_resolver=self._field_alias_resolver,
-            join_key_resolver=self._join_key_resolver,
-            join_executor=self._join_executor,
-            system_columns_to_drop=self._SYSTEM_COLUMNS_TO_DROP,
-        )
+        self._join_key_resolver = join_key_resolver
+        self._join_executor = join_executor
+        self._dependency_joiner = dependency_joiner
 
     async def apply_joins(
         self,
