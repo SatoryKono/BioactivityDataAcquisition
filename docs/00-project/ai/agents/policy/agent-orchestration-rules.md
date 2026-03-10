@@ -1,5 +1,7 @@
 # Agent Orchestration Rules
 
+*Статус: internal-published (Internal / Extended)*
+
 *Версия: 2.0.0 | Синхронизировано с ORCHESTRATION.md v4.0 (2026-03-04)*
 
 Компактные правила оркестрации субагентов для Claude Code.

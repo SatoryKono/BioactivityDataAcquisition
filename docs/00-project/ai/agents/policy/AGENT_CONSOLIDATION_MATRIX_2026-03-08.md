@@ -1,5 +1,7 @@
 # Agent Consolidation Matrix (Wave 1-4)
 
+*Статус: internal-published (Internal / Extended)*
+
 Date: 2026-03-08
 Scope: `docs/00-project/ai/**`
 
