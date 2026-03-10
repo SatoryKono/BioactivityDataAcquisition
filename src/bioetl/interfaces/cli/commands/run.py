@@ -33,10 +33,16 @@ from bioetl.interfaces.cli.commands.metrics_server_integration import (
 )
 from bioetl.interfaces.cli.commands.run_command_policy import (
     execute_run_step as _execute_run_step_policy,
+)
+from bioetl.interfaces.cli.commands.run_command_policy import (
     finalize_run_step as _finalize_run_step_policy,
+)
+from bioetl.interfaces.cli.commands.run_command_policy import (
     handle_cli_failure,
-    handle_destructive_step as _handle_destructive_step_policy,
     map_status_to_exit_code,
+)
+from bioetl.interfaces.cli.commands.run_command_policy import (
+    handle_destructive_step as _handle_destructive_step_policy,
 )
 from bioetl.interfaces.cli.commands.run_helpers import (
     get_runner_logger,

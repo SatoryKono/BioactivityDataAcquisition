@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-09T15:14:13.945719+00:00",
+  "generated_at": "2026-03-09T18:00:50.199462+00:00",
   "summary": {
-    "total_scripts": 196,
+    "total_scripts": 198,
     "status_counts": {
       "active": 141,
       "legacy": 3,
-      "orphan": 27,
+      "orphan": 29,
       "unknown": 25
     },
     "reference_group_coverage": {
@@ -1501,6 +1501,22 @@
           "text": "# Scripts Inventory\\n\\nTotal scripts: **106**\\n\\n## By Folder\\n\\n| Folder | Count |\\n|---|---:|\\n| `.` | 2 |\\n| `assets/javascripts` | 1 |\\n| `docs/02-architecture/mmd-diagrams` | 1 |\\n| `docs/00-proj"
         }
       ]
+    },
+    {
+      "path": "scripts/dev/.setup_wsl_codex.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/dev/.wsl-vpn-fix.ps1",
+      "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/dev/dev_setup.sh",
