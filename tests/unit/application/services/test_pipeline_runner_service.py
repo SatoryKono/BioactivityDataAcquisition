@@ -11,6 +11,8 @@ from uuid import uuid4
 
 import pytest
 
+from tests.helpers.fixed_clock import FixedClock
+
 from bioetl.application.core.shutdown import PipelineShutdownError
 from bioetl.application.services.pipeline_runner_service import (
     PipelineNotFoundError,
@@ -69,12 +71,19 @@ def mock_metrics_extractor():
 
 
 @pytest.fixture
-def service(mock_runner_factory, mock_metrics_extractor, mock_logger):
+def fixed_clock():
+    """Create deterministic fixed clock for runner service tests."""
+    return FixedClock(datetime(2026, 1, 1, tzinfo=UTC))
+
+
+@pytest.fixture
+def service(mock_runner_factory, mock_metrics_extractor, mock_logger, fixed_clock):
     """Create a PipelineRunnerService instance."""
     return PipelineRunnerService(
         runner_factory=mock_runner_factory,
         metrics_extractor=mock_metrics_extractor,
         logger=mock_logger,
+        clock=fixed_clock,
     )
 
 

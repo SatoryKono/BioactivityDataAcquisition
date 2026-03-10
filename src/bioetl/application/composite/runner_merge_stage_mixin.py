@@ -31,7 +31,7 @@ if TYPE_CHECKING:
         EnrichmentResult,
         MergeResult,
     )
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import ClockPort, LoggerPort
 
 __all__ = ["CompositeRunnerMergeStageHelper"]
 
@@ -42,6 +42,7 @@ class CompositeRunnerMergeStageHelper:
     _runtime: CompositeRuntimeConfig
     _fsm: FSMStateHelperService
     _logger: LoggerPort
+    _clock: ClockPort
     _config: CompositeConfig
     _run_id_str: str
     _merger: MergeService
@@ -55,7 +56,7 @@ class CompositeRunnerMergeStageHelper:
         """Invoke support-layer checkpoint save helper."""
         save_checkpoint = cast(
             "Callable[[CompositeCheckpointState, str], Awaitable[bool]]",
-            getattr(self, "_save_checkpoint_safe"),
+            self._save_checkpoint_safe,
         )
         return await save_checkpoint(state, operation)
 
@@ -63,7 +64,7 @@ class CompositeRunnerMergeStageHelper:
         """Invoke support-layer DQ report generation helper."""
         generate_reports = cast(
             "Callable[[MergeResult], Awaitable[None]]",
-            getattr(self, "_generate_dq_reports"),
+            self._generate_dq_reports,
         )
         await generate_reports(merge_result)
 
@@ -71,7 +72,7 @@ class CompositeRunnerMergeStageHelper:
         """Invoke support-layer quarantine write helper."""
         write_quarantine = cast(
             "Callable[[MergeResult], Awaitable[None]]",
-            getattr(self, "_write_cv_quarantine"),
+            self._write_cv_quarantine,
         )
         await write_quarantine(merge_result)
 
@@ -90,7 +91,9 @@ class CompositeRunnerMergeStageHelper:
                 previous_state,
                 CompositePipelineState.MERGING,
             )
-            state = state.with_state(CompositePipelineState.MERGING)
+            state = state.with_state(
+                CompositePipelineState.MERGING, updated_at=self._clock.now_utc()
+            )
             await self._call_save_checkpoint_safe(state, "merging")
 
             self._fsm.log_fsm_transition(
@@ -150,7 +153,9 @@ class CompositeRunnerMergeStageHelper:
                     error=str(merge_error),
                     error_type=type(merge_error).__name__,
                 )
-                state = state.with_state(CompositePipelineState.FAILED)
+                state = state.with_state(
+                    CompositePipelineState.FAILED, updated_at=self._clock.now_utc()
+                )
                 await self._call_save_checkpoint_safe(state, "merge_failed")
                 raise
             except BioETLError as merge_error:
@@ -168,7 +173,9 @@ class CompositeRunnerMergeStageHelper:
                     error_type=type(merge_error).__name__,
                     reason_code="unexpected_bioetl_error",
                 )
-                state = state.with_state(CompositePipelineState.FAILED)
+                state = state.with_state(
+                    CompositePipelineState.FAILED, updated_at=self._clock.now_utc()
+                )
                 await self._call_save_checkpoint_safe(state, "merge_failed")
                 raise
         else:
@@ -194,7 +201,9 @@ class CompositeRunnerMergeStageHelper:
                 previous_state,
                 CompositePipelineState.COMPLETED,
             )
-            state = state.with_state(CompositePipelineState.COMPLETED)
+            state = state.with_state(
+                CompositePipelineState.COMPLETED, updated_at=self._clock.now_utc()
+            )
             self._fsm.log_fsm_transition(
                 from_state=previous_state,
                 to_state=CompositePipelineState.COMPLETED,

@@ -9,8 +9,9 @@ See ADR-026 for architectural decisions.
 from __future__ import annotations
 
 import json
+import time
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import UTC, datetime, tzinfo
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -25,13 +26,29 @@ from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.exceptions import BioETLError, CheckpointConflictError, StorageError
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import ClockPort, LoggerPort
+
+
+class _DefaultClock:
+    """Fallback clock for backward compatibility in tests."""
+
+    def now_utc(self) -> datetime:
+        return datetime.fromtimestamp(time.time(), tz=UTC)
+
+    def now(self, timezone: tzinfo = UTC) -> datetime:
+        return datetime.fromtimestamp(time.time(), tz=timezone)
+
 
 __all__ = [
     "CompositeCheckpointManager",
     "CompositeCheckpointService",
     "CompositeCheckpointState",
 ]
+
+
+def _current_utc() -> datetime:
+    """Return current UTC timestamp without datetime.now()."""
+    return datetime.fromtimestamp(time.time(), tz=UTC)
 
 
 _CHECKPOINT_READ_ERRORS = (
@@ -101,7 +118,9 @@ class CompositeCheckpointState:
     created_at: datetime | None = None
     updated_at: datetime | None = None
 
-    def with_seed_completed(self, result: SeedResult) -> CompositeCheckpointState:
+    def with_seed_completed(
+        self, result: SeedResult, updated_at: datetime | None = None
+    ) -> CompositeCheckpointState:
         """Create new state with seed marked as completed.
 
         Sets state to SEED_COMPLETED to indicate seed phase is done.
@@ -123,11 +142,14 @@ class CompositeCheckpointState:
             completed_enrichers=self.completed_enrichers,
             enrichment_results=self.enrichment_results,
             created_at=self.created_at,
-            updated_at=datetime.now(tz=UTC),
+            updated_at=updated_at or _current_utc(),
         )
 
     def with_dependency_completed(
-        self, dependency_name: str, result: DependencyResult
+        self,
+        dependency_name: str,
+        result: DependencyResult,
+        updated_at: datetime | None = None,
     ) -> CompositeCheckpointState:
         """Create new state with dependency marked as completed.
 
@@ -155,11 +177,14 @@ class CompositeCheckpointState:
             completed_enrichers=self.completed_enrichers,
             enrichment_results=self.enrichment_results,
             created_at=self.created_at,
-            updated_at=datetime.now(tz=UTC),
+            updated_at=updated_at or _current_utc(),
         )
 
     def with_enricher_completed(
-        self, enricher_name: str, result: EnrichmentResult
+        self,
+        enricher_name: str,
+        result: EnrichmentResult,
+        updated_at: datetime | None = None,
     ) -> CompositeCheckpointState:
         """Create new state with enricher marked as completed.
 
@@ -187,10 +212,12 @@ class CompositeCheckpointState:
             completed_enrichers=frozenset(new_completed),
             enrichment_results=new_results,
             created_at=self.created_at,
-            updated_at=datetime.now(tz=UTC),
+            updated_at=updated_at or _current_utc(),
         )
 
-    def with_state(self, new_state: CompositePipelineState) -> CompositeCheckpointState:
+    def with_state(
+        self, new_state: CompositePipelineState, updated_at: datetime | None = None
+    ) -> CompositeCheckpointState:
         """Create new state with updated FSM state.
 
         Allows Runner to explicitly set state transitions (e.g., to MERGING,
@@ -214,7 +241,7 @@ class CompositeCheckpointState:
             completed_enrichers=self.completed_enrichers,
             enrichment_results=self.enrichment_results,
             created_at=self.created_at,
-            updated_at=datetime.now(tz=UTC),
+            updated_at=updated_at or _current_utc(),
         )
 
     @property
@@ -419,6 +446,7 @@ class CompositeCheckpointService:
         run_id: str,
         checkpoint_dir: Path,
         logger: LoggerPort,
+        clock: ClockPort | None = None,
         resume: bool = False,
     ) -> None:
         """Initialize checkpoint manager.
@@ -434,6 +462,7 @@ class CompositeCheckpointService:
         self._run_id = run_id
         self._checkpoint_dir = checkpoint_dir
         self._logger = logger
+        self._clock = clock or _DefaultClock()
         self._resume = resume
         self._checkpoint_path = self._get_checkpoint_path()
 
@@ -563,7 +592,7 @@ class CompositeCheckpointService:
         return CompositeCheckpointState(
             composite_name=self._composite_name,
             run_id=self._run_id,
-            created_at=datetime.now(tz=UTC),
+            created_at=self._clock.now_utc(),
         )
 
     async def save(self, state: CompositeCheckpointState) -> None:

@@ -8,9 +8,10 @@ See ADR-026 for architectural decisions.
 
 from __future__ import annotations
 
+import time
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, tzinfo
 from typing import TYPE_CHECKING, cast
 from uuid import UUID, uuid4
 
@@ -48,7 +49,24 @@ if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.domain.composite.config import CompositeConfig
-    from bioetl.domain.ports import LockPort, LoggerPort, MetricsPort, QuarantinePort
+    from bioetl.domain.ports import (
+        ClockPort,
+        LockPort,
+        LoggerPort,
+        MetricsPort,
+        QuarantinePort,
+    )
+
+
+class _DefaultClock:
+    """Fallback clock for backward compatibility in tests."""
+
+    def now_utc(self) -> datetime:
+        return datetime.fromtimestamp(time.time(), tz=UTC)
+
+    def now(self, timezone: tzinfo = UTC) -> datetime:
+        return datetime.fromtimestamp(time.time(), tz=timezone)
+
 
 __all__ = [
     "CompositePipelineRunner",
@@ -117,6 +135,7 @@ class CompositePipelineRunnerService(
         checkpoint_manager: CompositeCheckpointService,
         logger: LoggerPort,
         lock: LockPort,
+        clock: ClockPort | None = None,
         run_id: str | None = None,
         dq_report_service: DQReportService | None = None,
         preflight_validator: CompositePreflightValidationService | None = None,
@@ -139,6 +158,7 @@ class CompositePipelineRunnerService(
         self._checkpoint_manager = checkpoint_manager
         self._logger = logger
         self._lock = lock
+        self._clock = clock or _DefaultClock()
         self._run_id_str = run_id or str(uuid4())
         self._run_id: RunID = cast(RunID, UUID(self._run_id_str))
         self._started_at: datetime | None = None
@@ -179,7 +199,7 @@ class CompositePipelineRunnerService(
         self._validate_config_consistency()
         self._run_preflight_validation()
 
-        self._started_at = datetime.now(tz=UTC)
+        self._started_at = self._clock.now_utc()
         self._logger.info(
             PipelineEvent.START,
             composite=self._config.name,

@@ -38,7 +38,7 @@ if TYPE_CHECKING:
     from bioetl.application.composite.runner import CompositeRuntimeConfig
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import ClockPort, LoggerPort
 
 __all__ = ["CompositeRunnerStageHelper"]
 
@@ -49,6 +49,7 @@ class _CompositeRunnerStageSupportMixin:
     _config: CompositeConfig
     _runtime: CompositeRuntimeConfig
     _logger: LoggerPort
+    _clock: ClockPort
     _run_id_str: str
     _fsm: FSMStateHelperService
     _checkpoint_manager: CompositeCheckpointService
@@ -65,7 +66,7 @@ class _CompositeRunnerStageSupportMixin:
         """Invoke support-layer checkpoint save helper."""
         save_checkpoint = cast(
             "Callable[[CompositeCheckpointState, str], Awaitable[bool]]",
-            getattr(self, "_save_checkpoint_safe"),
+            self._save_checkpoint_safe,
         )
         return await save_checkpoint(state, operation)
 
@@ -73,7 +74,7 @@ class _CompositeRunnerStageSupportMixin:
         """Invoke support-layer seed runner helper."""
         run_seed = cast(
             "Callable[[], Awaitable[SeedResult]]",
-            getattr(self, "_run_seed"),
+            self._run_seed,
         )
         return await run_seed()
 
@@ -84,7 +85,7 @@ class _CompositeRunnerStageSupportMixin:
         """Invoke support-layer enricher selection helper."""
         get_enrichers = cast(
             "Callable[[CompositeCheckpointState], list[EnricherConfig]]",
-            getattr(self, "_get_enrichers_to_run"),
+            self._get_enrichers_to_run,
         )
         return get_enrichers(state)
 
@@ -95,7 +96,7 @@ class _CompositeRunnerStageSupportMixin:
         """Invoke support-layer required-enricher validation helper."""
         check_required = cast(
             "Callable[[dict[str, EnrichmentResult]], None]",
-            getattr(self, "_check_required_enrichers"),
+            self._check_required_enrichers,
         )
         check_required(enrichment_results)
 
@@ -140,7 +141,9 @@ class CompositeRunnerStageHelper(_CompositeRunnerStageSupportMixin):
         )
         if state.state != CompositePipelineState.SEED_COMPLETED:
             previous_state = state.state
-            state = state.with_state(CompositePipelineState.SEED_COMPLETED)
+            state = state.with_state(
+                CompositePipelineState.SEED_COMPLETED, updated_at=self._clock.now_utc()
+            )
             self._fsm.log_fsm_transition(
                 from_state=previous_state,
                 to_state=CompositePipelineState.SEED_COMPLETED,
@@ -158,7 +161,9 @@ class CompositeRunnerStageHelper(_CompositeRunnerStageSupportMixin):
             previous_state,
             CompositePipelineState.SEED_RUNNING,
         )
-        state = state.with_state(CompositePipelineState.SEED_RUNNING)
+        state = state.with_state(
+            CompositePipelineState.SEED_RUNNING, updated_at=self._clock.now_utc()
+        )
         self._fsm.log_fsm_transition(
             from_state=previous_state,
             to_state=CompositePipelineState.SEED_RUNNING,
@@ -188,7 +193,9 @@ class CompositeRunnerStageHelper(_CompositeRunnerStageSupportMixin):
                 stage="seed_failed",
                 error=str(error),
             )
-            failed_state = state.with_state(CompositePipelineState.FAILED)
+            failed_state = state.with_state(
+                CompositePipelineState.FAILED, updated_at=self._clock.now_utc()
+            )
             await self._call_save_checkpoint_safe(failed_state, "seed_failed")
             raise
         except BioETLError as error:
@@ -207,11 +214,13 @@ class CompositeRunnerStageHelper(_CompositeRunnerStageSupportMixin):
                 stage="seed_failed",
                 error=str(error),
             )
-            failed_state = state.with_state(CompositePipelineState.FAILED)
+            failed_state = state.with_state(
+                CompositePipelineState.FAILED, updated_at=self._clock.now_utc()
+            )
             await self._call_save_checkpoint_safe(failed_state, "seed_failed")
             raise
 
-        state = state.with_seed_completed(seed_result)
+        state = state.with_seed_completed(seed_result, updated_at=self._clock.now_utc())
         self._fsm.log_fsm_transition(
             from_state=CompositePipelineState.SEED_RUNNING,
             to_state=CompositePipelineState.SEED_COMPLETED,
@@ -247,7 +256,10 @@ class CompositeRunnerStageHelper(_CompositeRunnerStageSupportMixin):
             previous_state,
             CompositePipelineState.DEPENDENCIES_RUNNING,
         )
-        state = state.with_state(CompositePipelineState.DEPENDENCIES_RUNNING)
+        state = state.with_state(
+            CompositePipelineState.DEPENDENCIES_RUNNING,
+            updated_at=self._clock.now_utc(),
+        )
         await self._checkpoint_manager.save(state)
 
         dep_pipelines = [
@@ -281,7 +293,9 @@ class CompositeRunnerStageHelper(_CompositeRunnerStageSupportMixin):
 
         for dep_name, dep_result in dependency_results.items():
             if dep_result.is_success:
-                state = state.with_dependency_completed(dep_name, dep_result)
+                state = state.with_dependency_completed(
+                    dep_name, dep_result, updated_at=self._clock.now_utc()
+                )
 
         required_failed = self._find_required_failures(dependency_results)
         if required_failed:
@@ -290,7 +304,10 @@ class CompositeRunnerStageHelper(_CompositeRunnerStageSupportMixin):
             raise RuntimeError(f"Required dependencies failed: {required_failed}")
 
         previous_state = state.state
-        state = state.with_state(CompositePipelineState.DEPENDENCIES_COMPLETED)
+        state = state.with_state(
+            CompositePipelineState.DEPENDENCIES_COMPLETED,
+            updated_at=self._clock.now_utc(),
+        )
         succeeded = sum(
             1 for result in dependency_results.values() if result.is_success
         )
@@ -328,7 +345,9 @@ class CompositeRunnerStageHelper(_CompositeRunnerStageSupportMixin):
                 previous_state,
                 CompositePipelineState.ENRICHING,
             )
-            state = state.with_state(CompositePipelineState.ENRICHING)
+            state = state.with_state(
+                CompositePipelineState.ENRICHING, updated_at=self._clock.now_utc()
+            )
             await self._checkpoint_manager.save(state)
 
             self._fsm.log_fsm_transition(
@@ -355,7 +374,9 @@ class CompositeRunnerStageHelper(_CompositeRunnerStageSupportMixin):
 
             for name, result in enrichment_results.items():
                 if result.is_success or result.status == EnrichmentStatus.SKIPPED:
-                    state = state.with_enricher_completed(name, result)
+                    state = state.with_enricher_completed(
+                        name, result, updated_at=self._clock.now_utc()
+                    )
             await self._checkpoint_manager.save(state)
 
             log_enrichment_summary(enrichment_results, self._config.name, self._logger)
@@ -432,7 +453,9 @@ class CompositeRunnerStageHelper(_CompositeRunnerStageSupportMixin):
                 previous_state,
                 CompositePipelineState.ENRICHING,
             )
-            state = state.with_state(CompositePipelineState.ENRICHING)
+            state = state.with_state(
+                CompositePipelineState.ENRICHING, updated_at=self._clock.now_utc()
+            )
             self._fsm.log_fsm_transition(
                 from_state=previous_state,
                 to_state=CompositePipelineState.ENRICHING,
@@ -446,7 +469,10 @@ class CompositeRunnerStageHelper(_CompositeRunnerStageSupportMixin):
                 enriching_state,
                 CompositePipelineState.ENRICHMENT_COMPLETED,
             )
-            state = state.with_state(CompositePipelineState.ENRICHMENT_COMPLETED)
+            state = state.with_state(
+                CompositePipelineState.ENRICHMENT_COMPLETED,
+                updated_at=self._clock.now_utc(),
+            )
             await self._call_save_checkpoint_safe(state, "enrichment_completed")
 
             self._fsm.log_fsm_transition(

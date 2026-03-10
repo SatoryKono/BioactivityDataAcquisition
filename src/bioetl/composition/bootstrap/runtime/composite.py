@@ -49,6 +49,7 @@ from bioetl.infrastructure.schemas.composite_config import (
     validate_composite_config_payload,
 )
 from bioetl.infrastructure.storage.delta_reader import DeltaReader
+from bioetl.infrastructure.system import SystemClock
 
 if TYPE_CHECKING:
     import polars as pl
@@ -516,6 +517,7 @@ def bootstrap_composite_runner(
         return bootstrap_pipeline_runner(ctx)
 
     # Create services
+    clock = SystemClock()
     # Base path for resolving Silver table locations
     silver_base_path = str(Path(settings.data_dir) / "output")
 
@@ -568,6 +570,7 @@ def bootstrap_composite_runner(
         run_id=effective_run_id,
         checkpoint_dir=checkpoint_dir,
         logger=logger,
+        clock=clock,
         resume=runtime.resume,
     )
 
@@ -596,6 +599,7 @@ def bootstrap_composite_runner(
         checkpoint_manager=checkpoint_manager,
         logger=logger,
         lock=lock,
+        clock=clock,
         run_id=effective_run_id,
         dq_report_service=dq_report_service,
         quarantine_port=quarantine_port,
