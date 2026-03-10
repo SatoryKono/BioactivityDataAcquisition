@@ -446,3 +446,163 @@ class TestCsvExporterInternals:
             exporter._atomic_csv_write(table, target, write_options)
 
         assert not temp_path.exists()
+
+
+@pytest.mark.unit
+class TestCsvExporterTrueAppend:
+    """Tests for true file-append behavior (no read-back on append)."""
+
+    @pytest.mark.asyncio
+    async def test_append_does_not_read_existing_csv(
+        self, tmp_path: Path, mock_logger: MagicMock, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Append path must NOT call pv.read_csv — it only appends new rows."""
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+
+        # First write creates the file
+        table1 = pa.Table.from_pydict({"id": [1], "name": ["a"]})
+        await exporter.export("test", table1)
+
+        # Patch pv.read_csv to detect if it's called during append
+        read_called = False
+        original_read_csv = pv.read_csv
+
+        def _spy_read_csv(*args: object, **kwargs: object) -> pa.Table:
+            nonlocal read_called
+            read_called = True
+            return original_read_csv(*args, **kwargs)
+
+        monkeypatch.setattr(pv, "read_csv", _spy_read_csv)
+
+        # Second write — append path
+        table2 = pa.Table.from_pydict({"id": [2], "name": ["b"]})
+        await exporter.export("test", table2)
+
+        assert not read_called, "append path must not read the existing CSV"
+
+        # Both records present
+        content = (tmp_path / "test.csv").read_text()
+        assert "a" in content
+        assert "b" in content
+
+    @pytest.mark.asyncio
+    async def test_append_multiple_batches_preserves_all_rows(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
+        """Multiple appends accumulate all rows without data loss."""
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+
+        for i in range(5):
+            table = pa.Table.from_pydict({"id": [i], "val": [f"v{i}"]})
+            await exporter.export("multi", table)
+
+        result = pv.read_csv(tmp_path / "multi.csv")
+        assert result.num_rows == 5
+
+    @pytest.mark.asyncio
+    async def test_append_locked_target_writes_backup(
+        self, tmp_path: Path, mock_logger: MagicMock, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """If target CSV is locked during append, batch goes to backup file."""
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+
+        table1 = pa.Table.from_pydict({"id": [1]})
+        await exporter.export("locked_test", table1)
+
+        # Make the open() call raise PermissionError for the target file
+        original_open = open  # noqa: A001
+
+        def _patched_open(path: object, mode: str = "r", **kwargs: object) -> object:
+            if str(path).endswith("locked_test.csv") and "b" in mode and "a" in mode:
+                raise PermissionError("locked")
+            return original_open(path, mode, **kwargs)
+
+        monkeypatch.setattr("builtins.open", _patched_open)
+        monkeypatch.setattr("time.time", lambda: 9999999999)
+
+        table2 = pa.Table.from_pydict({"id": [2]})
+        await exporter.export("locked_test", table2)
+
+        mock_logger.warning.assert_called()
+        backup = tmp_path / "locked_test.9999999999.csv"
+        assert backup.exists()
+
+
+@pytest.mark.unit
+class TestCsvExporterFinalize:
+    """Tests for finalize_csv one-shot dedup+sort."""
+
+    @pytest.mark.asyncio
+    async def test_finalize_csv_deduplicates_and_sorts(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
+        """finalize_csv must deduplicate by PK and sort."""
+        exporter = CsvExporter(
+            base_path=str(tmp_path), logger=mock_logger, sort_by=["id"]
+        )
+
+        # Write 3 batches with duplicates
+        for batch in ([3, 1], [2, 1], [3, 2]):
+            table = pa.Table.from_pydict(
+                {"id": batch, "val": [f"v{x}" for x in batch]}
+            )
+            await exporter.export("dedup", table)
+
+        # Finalize with dedup + sort
+        result_path = await exporter.finalize_csv(
+            "dedup", primary_keys=["id"]
+        )
+
+        assert result_path is not None
+        result = pv.read_csv(result_path)
+        ids = result.column("id").to_pylist()
+        # Deduplicated (3 unique ids) and sorted ascending
+        assert ids == [1, 2, 3]
+
+    @pytest.mark.asyncio
+    async def test_finalize_csv_nonexistent_file_returns_none(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
+        """finalize_csv returns None when CSV file does not exist."""
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+
+        result = await exporter.finalize_csv("nonexistent")
+
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_finalize_csv_sort_only(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
+        """finalize_csv sorts without dedup when no primary_keys."""
+        exporter = CsvExporter(
+            base_path=str(tmp_path), logger=mock_logger, sort_by=["id"]
+        )
+
+        table = pa.Table.from_pydict({"id": [3, 1, 2], "val": ["c", "a", "b"]})
+        await exporter.export("sortonly", table, append=False)
+
+        result_path = await exporter.finalize_csv("sortonly")
+
+        assert result_path is not None
+        result = pv.read_csv(result_path)
+        assert result.column("id").to_pylist() == [1, 2, 3]
+
+    @pytest.mark.asyncio
+    async def test_finalize_csv_logs_info(
+        self, tmp_path: Path, mock_logger: MagicMock
+    ) -> None:
+        """finalize_csv logs info message with row count."""
+        exporter = CsvExporter(base_path=str(tmp_path), logger=mock_logger)
+
+        table = pa.Table.from_pydict({"id": [1, 2]})
+        await exporter.export("info_test", table, append=False)
+        await exporter.finalize_csv("info_test")
+
+        mock_logger.info.assert_called_with(
+            "csv_export_finalized",
+            table_name="info_test",
+            rows=2,
+            deduplicated=False,
+            sorted=False,
+        )

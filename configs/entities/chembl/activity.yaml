@@ -12,6 +12,8 @@ pipeline:
     sink:
         silver:
             mode: append
+        gold:
+            enabled: false
 schema:
     content_hash:
         include: [ ]

@@ -116,6 +116,24 @@ class _GoldWriterSimpleDeltaMixin(_GoldWriterExecutorArrowMixin):
             )
 
 
+    async def finalize_csv_export(
+        self,
+        table_name: str,
+        primary_keys: list[str] | None = None,
+    ) -> None:
+        """One-shot CSV finalize: deduplicate and sort after all batches.
+
+        Args:
+            table_name: Logical table name whose CSV export to finalize.
+            primary_keys: Optional primary key columns for deduplication.
+        """
+        if self.csv_exporter:
+            await self.csv_exporter.finalize_csv(
+                table_name,
+                primary_keys=primary_keys,
+            )
+
+
 class _GoldWriterScd2MergeMixin(_GoldWriterExecutorArrowMixin):
     """SCD2 write and merge primitives with deterministic retries."""
 

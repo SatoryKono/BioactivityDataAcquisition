@@ -55,6 +55,84 @@ def _serialize_column_to_json(col: pa.ChunkedArray) -> pa.Array:
     return pa.array(vals, type=pa.string())
 
 
+def _atomic_csv_write(
+    data: pa.Table,
+    target_path: Path,
+    write_options: pv.WriteOptions,
+    logger: LoggerPort,
+) -> None:
+    """Write CSV atomically to avoid file lock issues on Windows."""
+    import time
+
+    target_dir = target_path.parent
+    fd, temp_path_str = tempfile.mkstemp(
+        suffix=".csv.tmp",
+        prefix=target_path.stem + "_",
+        dir=target_dir,
+    )
+    temp_path = Path(temp_path_str)
+    try:
+        os.close(fd)
+        pv.write_csv(data, temp_path, write_options=write_options)
+        try:
+            temp_path.replace(target_path)
+        except PermissionError:
+            timestamp = int(time.time())
+            backup_path = target_path.with_suffix(f".{timestamp}.csv")
+            temp_path.replace(backup_path)
+            logger.warning(
+                "Target CSV locked, wrote to backup", backup_path=str(backup_path)
+            )
+            return
+    except (OSError, pa.ArrowException, ValueError, TypeError, RuntimeError):
+        if temp_path.exists():
+            temp_path.unlink()
+        raise
+
+
+def _append_to_csv(
+    data: pa.Table,
+    csv_path: Path,
+    delimiter: str,
+    logger: LoggerPort,
+) -> None:
+    """Append records to an existing CSV without reading it.
+
+    Cost is O(batch_size), not O(total_records).
+    """
+    import time
+
+    fd, temp_path_str = tempfile.mkstemp(
+        suffix=".csv.tmp",
+        prefix=csv_path.stem + "_append_",
+        dir=csv_path.parent,
+    )
+    temp_path = Path(temp_path_str)
+    try:
+        os.close(fd)
+        write_options = pv.WriteOptions(include_header=False, delimiter=delimiter)
+        pv.write_csv(data, temp_path, write_options=write_options)
+        try:
+            with open(csv_path, "ab") as target, open(temp_path, "rb") as source:
+                target.write(source.read())
+        except PermissionError:
+            timestamp = int(time.time())
+            backup_path = csv_path.with_suffix(f".{timestamp}.csv")
+            logger.warning(
+                "Target CSV locked during append, wrote batch to backup",
+                backup_path=str(backup_path),
+            )
+            temp_path.replace(backup_path)
+            return
+    except (OSError, pa.ArrowException, ValueError, TypeError, RuntimeError):
+        if temp_path.exists():
+            temp_path.unlink()
+        raise
+    else:
+        if temp_path.exists():
+            temp_path.unlink()
+
+
 def _flatten_table_for_csv(table: pa.Table) -> pa.Table:
     """Convert complex types (list, struct) to JSON strings for CSV export.
 
@@ -210,7 +288,6 @@ class CsvExporter:
 
         try:
             # Convert to pandas for deduplication
-            # Note: This loads data into memory, which is consistent with _read_and_concat
             df = table.to_pandas()
             original_count = len(df)
             df = df.drop_duplicates(subset=primary_keys, keep="last")
@@ -245,45 +322,8 @@ class CsvExporter:
         target_path: Path,
         write_options: pv.WriteOptions,
     ) -> None:
-        """Write CSV atomically to avoid file lock issues on Windows.
-
-        If target file is locked, writes to a timestamped backup file instead.
-        """
-        import time
-
-        target_dir = target_path.parent
-        fd, temp_path_str = tempfile.mkstemp(
-            suffix=".csv.tmp",
-            prefix=target_path.stem + "_",
-            dir=target_dir,
-        )
-        temp_path = Path(temp_path_str)
-        try:
-            os.close(fd)
-            pv.write_csv(data, temp_path, write_options=write_options)
-
-            # Use Path.replace for atomic overwrite (works on Windows and Unix)
-            try:
-                temp_path.replace(target_path)
-            except PermissionError:
-                # File is locked by another process - use backup filename
-                timestamp = int(time.time())
-                backup_path = target_path.with_suffix(f".{timestamp}.csv")
-                temp_path.replace(backup_path)
-                self._logger.warning(
-                    "Target CSV locked, wrote to backup", backup_path=str(backup_path)
-                )
-                return
-        except (
-            OSError,
-            pa.ArrowException,
-            ValueError,
-            TypeError,
-            RuntimeError,
-        ):
-            if temp_path.exists():
-                temp_path.unlink()
-            raise
+        """Write CSV atomically (delegates to module-level function)."""
+        _atomic_csv_write(data, target_path, write_options, self._logger)
 
     async def export(
         self,
@@ -295,6 +335,11 @@ class CsvExporter:
     ) -> Path:
         """Export PyArrow table to CSV file.
 
+        When ``append=True`` and the target file exists, new records are
+        appended directly without re-reading the existing CSV.  This keeps
+        per-batch cost at O(batch_size) instead of O(total_records).
+        Call :meth:`finalize_csv` after all batches to deduplicate and sort.
+
         Returns:
             Path to the written CSV file.
         """
@@ -302,16 +347,22 @@ class CsvExporter:
         csv_full_path.parent.mkdir(parents=True, exist_ok=True)
         csv_data = self._flatten_for_csv(data)
         loop = asyncio.get_running_loop()
-        csv_data = await self._merge_for_append_mode(
-            loop=loop,
-            csv_full_path=csv_full_path,
-            csv_data=csv_data,
-            append=append,
-            primary_keys=primary_keys,
-        )
+
+        # Fast path: true file-append (no read, no sort, no dedup).
+        if append and csv_full_path.exists():
+            await loop.run_in_executor(
+                None,
+                lambda: self._append_to_csv(csv_data, csv_full_path),
+            )
+            return csv_full_path
+
+        # First write or overwrite: sort in executor to avoid blocking event loop.
         sort_columns = sort_by if sort_by is not None else self.sort_by
         if sort_columns:
-            csv_data = self._sort_table(csv_data, sort_columns)
+            csv_data = await loop.run_in_executor(
+                None,
+                lambda: self._sort_table(csv_data, sort_columns),
+            )
         write_options = self._build_write_options()
         await loop.run_in_executor(
             None,
@@ -319,32 +370,69 @@ class CsvExporter:
         )
         return csv_full_path
 
-    async def _merge_for_append_mode(
+    async def finalize_csv(
         self,
-        *,
-        loop: asyncio.AbstractEventLoop,
-        csv_full_path: Path,
-        csv_data: pa.Table,
-        append: bool,
-        primary_keys: list[str] | None,
-    ) -> pa.Table:
-        """Read/concat and optional deduplication for append workflow.
+        table_name: str,
+        sort_by: list[str] | None = None,
+        primary_keys: list[str] | None = None,
+    ) -> Path | None:
+        """Post-run one-shot: read CSV, deduplicate, sort, rewrite.
+
+        Should be called once after all batches complete.  All heavy work
+        runs in ``run_in_executor`` to avoid blocking the event loop.
+
+        Args:
+            table_name: Logical table name (maps to ``{table_name}.csv``).
+            sort_by: Optional column names to sort by; falls back to
+                ``self.sort_by`` when *None*.
+            primary_keys: Optional column names for deduplication.
 
         Returns:
-            Merged PyArrow table combining existing CSV data with new data, deduplicated if keys provided.
+            Path to the finalized CSV, or *None* if the file does not exist.
         """
-        if not append or not csv_full_path.exists():
-            return csv_data
-        merged = await loop.run_in_executor(
+        csv_full_path = self.base_path / f"{table_name}.csv"
+        if not csv_full_path.exists():
+            return None
+
+        loop = asyncio.get_running_loop()
+        parse_options = pv.ParseOptions(delimiter=self.delimiter)
+
+        table: pa.Table = await loop.run_in_executor(
             None,
-            lambda: self._read_and_concat(csv_full_path, csv_data),
+            lambda: pv.read_csv(csv_full_path, parse_options=parse_options),
         )
-        if not primary_keys:
-            return merged
-        return await loop.run_in_executor(
+
+        if primary_keys:
+            table = await loop.run_in_executor(
+                None,
+                lambda: self._deduplicate(table, primary_keys),
+            )
+
+        sort_columns = sort_by if sort_by is not None else self.sort_by
+        if sort_columns:
+            table = await loop.run_in_executor(
+                None,
+                lambda: self._sort_table(table, sort_columns),
+            )
+
+        write_options = self._build_write_options()
+        await loop.run_in_executor(
             None,
-            lambda: self._deduplicate(merged, primary_keys),
+            lambda: self._atomic_csv_write(table, csv_full_path, write_options),
         )
+
+        self._logger.info(
+            "csv_export_finalized",
+            table_name=table_name,
+            rows=table.num_rows,
+            deduplicated=bool(primary_keys),
+            sorted=bool(sort_columns),
+        )
+        return csv_full_path
+
+    def _append_to_csv(self, data: pa.Table, csv_path: Path) -> None:
+        """Append records without reading existing CSV (delegates to module-level)."""
+        _append_to_csv(data, csv_path, self.delimiter, self._logger)
 
     def _build_write_options(self) -> pv.WriteOptions:
         """Build CSV writer options from exporter configuration.
@@ -356,21 +444,3 @@ class CsvExporter:
             include_header=self.header,
             delimiter=self.delimiter,
         )
-
-    def _read_and_concat(self, existing_path: Path, new_data: pa.Table) -> pa.Table:
-        """Read existing CSV and concatenate with new data."""
-        parse_options = pv.ParseOptions(delimiter=self.delimiter)
-
-        column_types = {field.name: field.type for field in new_data.schema}
-        convert_options = pv.ConvertOptions(column_types=column_types)
-
-        try:
-            existing_table = pv.read_csv(
-                existing_path,
-                parse_options=parse_options,
-                convert_options=convert_options,
-            )
-
-            return pa.concat_tables([existing_table, new_data])
-        except (pa.ArrowInvalid, pa.ArrowTypeError):
-            return new_data
