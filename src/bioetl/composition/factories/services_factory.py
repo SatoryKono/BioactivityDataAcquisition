@@ -17,9 +17,14 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 from bioetl.application.core.batch_executor import BatchExecutor
+from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
+from bioetl.application.core.batch_tracing import BatchTracingManagerService
+from bioetl.application.core.batch_transformer import BatchTransformer
+from bioetl.application.core.batch_writer import BatchWriter
 from bioetl.application.core.checkpoint_manager import CheckpointManagerService
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.core.quarantine_manager import QuarantineManagerService
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
 from bioetl.composition.factories.dq_factory import DQServicesFactory
@@ -405,20 +410,7 @@ class ServicesBuilder:
         *,
         loading_strategy: LoadingStrategy | None = None,
     ) -> CheckpointManagerService:
-        """Create configured CheckpointManagerService.
-
-        Args:
-            checkpoint_port: Checkpoint storage port
-            logger: Structured logger
-            pipeline_name: Name of the pipeline
-            run_id: Unique run identifier
-            resume: Whether to resume from previous checkpoint
-            loading_strategy: Loading strategy (ADR-031).
-                FULL_SCAN_ONLY disables checkpoint resume.
-
-        Returns:
-            Configured CheckpointManagerService instance
-        """
+        """Create a configured checkpoint manager."""
         return CheckpointManagerService(
             checkpoint_port=checkpoint_port,
             logger=logger,
@@ -453,36 +445,7 @@ class ServicesBuilder:
         column_groups: tuple[ColumnGroupConfig, ...] = (),
         scd_config: dict[str, str] | None = None,
     ) -> RecordProcessor:
-        """Create configured RecordProcessor.
-
-        Args:
-            services: Pipeline services
-            context: Pipeline context
-            pipeline_name: Name of the pipeline
-            provider: Data provider name
-            entity_type: Entity type being processed
-            silver_schema: PyArrow schema for Silver layer
-            gold_schema: Pandera schema for Gold layer
-            dq_config: Data quality configuration
-            primary_keys: Primary key fields
-            silver_table: Silver table name
-            gold_table: Gold table name
-            silver_write_mode: Write mode for Silver
-            gold_write_mode: Write mode for Gold
-            on_schema_mismatch: Schema mismatch handling strategy
-            transform_callback: Bronze to Silver transformation callback
-            gold_filter_callback: Gold filtering callback
-            gold_transform_callback: Silver to Gold transformation callback
-            strict_gold_validation: If True, validation fails when gold_schema is None.
-                Default True to enforce strict Gold validation.
-            lock_validator: Async callable that validates lock ownership.
-                Returns True if lock is still held, False otherwise.
-                Typically LockManager.validate(). If None, lock validation
-                is skipped (Safety Guard §4.6).
-
-        Returns:
-            Configured RecordProcessor instance
-        """
+        """Create a configured record processor with injected collaborators."""
         error_classifier = ErrorClassifier()
         table_config = TableConfig(
             primary_keys=tuple(primary_keys),
@@ -505,22 +468,50 @@ class ServicesBuilder:
             scd_config=scd_config,
         )
 
+        pipeline_label = f"{provider}_{entity_type}"
+        batch_metrics = BatchMetricsRecorderService(
+            services.metrics,
+            pipeline_label,
+            context.run_type.value,
+        )
+        quarantine_manager = QuarantineManagerService(
+            quarantine_port=services.quarantine,
+            pipeline_name=pipeline_name,
+            metrics=services.metrics,
+        )
+        transformer = BatchTransformer(
+            context=context,
+            config=processor_config,
+            error_classifier=error_classifier,
+            quarantine_manager=quarantine_manager,
+            batch_metrics=batch_metrics,
+            transform_callback=transform_callback,
+            gold_filter_callback=gold_filter_callback,
+            gold_transform_callback=gold_transform_callback,
+        )
+
         # Create Gold validator from schema (DI pattern)
         # strict mode requires schema to be provided
         gold_validator = PanderaGoldValidator(
             gold_schema, strict=strict_gold_validation
         )
-
-        return RecordProcessor(
-            services=services,
-            error_classifier=error_classifier,
+        writer = BatchWriter(
+            storage=services.storage,
             context=context,
             config=processor_config,
-            transform_callback=transform_callback,
-            gold_filter_callback=gold_filter_callback,
-            gold_transform_callback=gold_transform_callback,
             gold_validator=gold_validator,
+            error_classifier=error_classifier,
+            batch_metrics=batch_metrics,
             lock_validator=lock_validator,
+        )
+
+        return RecordProcessor(
+            context=context,
+            batch_metrics=batch_metrics,
+            transformer=transformer,
+            writer=writer,
+            config=processor_config,
+            tracer=services.tracing,
         )
 
     @staticmethod
@@ -532,24 +523,7 @@ class ServicesBuilder:
         strict_gold_validation: bool = True,
         lock_validator: Callable[[], Awaitable[bool]] | None = None,
     ) -> RecordProcessor:
-        """Create RecordProcessor from pipeline instance.
-
-        Convenience method that extracts configuration from pipeline.
-
-        Args:
-            pipeline: Pipeline instance
-            silver_schema: PyArrow schema for Silver layer
-            gold_schema: Pandera schema for Gold layer
-            strict_gold_validation: If True, validation fails when gold_schema is None.
-                Default True to enforce strict Gold validation.
-            lock_validator: Async callable that validates lock ownership.
-                Returns True if lock is still held, False otherwise.
-                Typically LockManager.validate(). If None, lock validation
-                is skipped (Safety Guard §4.6).
-
-        Returns:
-            Configured RecordProcessor instance
-        """
+        """Create a record processor from a pipeline instance."""
         callbacks = extract_pipeline_callbacks(pipeline)
 
         return ServicesBuilder.create_record_processor(
@@ -595,26 +569,7 @@ class ServicesBuilder:
         gold_output_path: str | None = None,
         flat_structure: bool = False,
     ) -> BatchExecutor:
-        """Create BatchExecutor from pipeline instance.
-
-        This is the preferred method for creating batch executors as it
-        consolidates PipelineExecutor and RecordProcessor into a single component.
-
-        Args:
-            pipeline: Pipeline instance.
-            silver_schema: PyArrow schema for Silver layer.
-            gold_schema: Pandera schema for Gold layer.
-            checkpoint_manager: Checkpoint manager instance.
-            shutdown_signal: Shutdown signal for graceful termination.
-            strict_gold_validation: If True, validation fails when gold_schema is None.
-            lock_validator: Async callable that validates lock ownership (Safety Guard §4.6).
-            tracer: Optional tracing port for distributed tracing.
-            memory_monitor: Optional memory monitor for adaptive batch sizing.
-            memory_config: Memory configuration (used if memory_monitor not provided).
-
-        Returns:
-            Configured BatchExecutor instance.
-        """
+        """Create a batch executor from a pipeline instance."""
         callbacks = extract_pipeline_callbacks(pipeline)
         skip = pipeline.runtime.skip_gold
         gold_filter = (lambda _c, _r: False) if skip else callbacks.gold_filter
@@ -639,9 +594,55 @@ class ServicesBuilder:
             scd_config=pipeline.config.scd_config,
         )
 
+        pipeline_label = f"{pipeline.config.provider}_{pipeline.config.entity_type}"
+        batch_metrics = BatchMetricsRecorderService(
+            pipeline.services.metrics,
+            pipeline_label,
+            pipeline.context.run_type.value,
+        )
+        quarantine_manager = QuarantineManagerService(
+            quarantine_port=pipeline.services.quarantine,
+            pipeline_name=pipeline.config.pipeline_name,
+            metrics=pipeline.services.metrics,
+        )
+        transformer = BatchTransformer(
+            context=pipeline.context,
+            config=processor_config,
+            error_classifier=error_classifier,
+            quarantine_manager=quarantine_manager,
+            batch_metrics=batch_metrics,
+            transform_callback=callbacks.transform,
+            gold_filter_callback=gold_filter,
+            gold_transform_callback=callbacks.gold_transform,
+        )
+
         # Create Gold validator
         gold_validator = PanderaGoldValidator(
             gold_schema, strict=strict_gold_validation
+        )
+        writer = BatchWriter(
+            storage=pipeline.services.storage,
+            context=pipeline.context,
+            config=processor_config,
+            gold_validator=gold_validator,
+            error_classifier=error_classifier,
+            batch_metrics=batch_metrics,
+            tracer=tracer,
+            lock_validator=lock_validator,
+        )
+
+        effective_batch_size = (
+            pipeline.config.batch_size or BatchExecutor.DEFAULT_BATCH_SIZE
+        )
+        tracing_manager = BatchTracingManagerService(
+            tracer=tracer,
+            context=pipeline.context,
+            config=processor_config,
+            initial_batch_size=effective_batch_size,
+            adaptive_sizing_enabled=(
+                memory_monitor is not None
+                or (memory_config is not None and memory_config.enable_adaptive_sizing)
+            ),
         )
 
         return BatchExecutor(
@@ -655,6 +656,10 @@ class ServicesBuilder:
             gold_validator=gold_validator,
             checkpoint_manager=checkpoint_manager,
             shutdown_signal=shutdown_signal,
+            batch_metrics=batch_metrics,
+            transformer=transformer,
+            writer=writer,
+            tracing_manager=tracing_manager,
             batch_size=pipeline.config.batch_size,
             checkpoint_interval=pipeline.config.checkpoint_interval,
             tracer=tracer,

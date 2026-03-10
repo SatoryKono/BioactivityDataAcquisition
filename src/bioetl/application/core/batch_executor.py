@@ -17,11 +17,7 @@ from uuid import uuid4
 
 from bioetl.application.core.batch_executor_dq_mixin import _BatchExecutorDQMixin
 from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
-from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
-from bioetl.application.core.batch_tracing import BatchTracingManagerService
-from bioetl.application.core.batch_transformer import BatchTransformer, TransformResult
-from bioetl.application.core.batch_writer import BatchWriter
-from bioetl.application.core.quarantine_manager import QuarantineManagerService
+from bioetl.application.core.batch_transformer import TransformResult
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.types import BatchID
@@ -31,6 +27,10 @@ if TYPE_CHECKING:
 
     from opentelemetry.trace import Span
 
+    from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
+    from bioetl.application.core.batch_tracing import BatchTracingManagerService
+    from bioetl.application.core.batch_transformer import BatchTransformer
+    from bioetl.application.core.batch_writer import BatchWriter
     from bioetl.application.core.checkpoint_manager import CheckpointManagerService
     from bioetl.application.core.config import RecordProcessorConfig
     from bioetl.application.core.pipeline_services import PipelineServices
@@ -103,6 +103,10 @@ class BatchExecutor(_BatchExecutorDQMixin):
         gold_validator: GoldValidatorPort,
         checkpoint_manager: CheckpointManagerService,
         shutdown_signal: ShutdownSignal,
+        batch_metrics: BatchMetricsRecorderService,
+        transformer: BatchTransformer,
+        writer: BatchWriter,
+        tracing_manager: BatchTracingManagerService,
         *,
         batch_size: int | None = None,
         checkpoint_interval: int | None = None,
@@ -125,6 +129,10 @@ class BatchExecutor(_BatchExecutorDQMixin):
             gold_validator: Validator for Gold layer records.
             checkpoint_manager: Checkpoint manager instance.
             shutdown_signal: Signal to handle graceful shutdown.
+            batch_metrics: Metrics recorder for batch processing stages.
+            transformer: Batch transformer service.
+            writer: Batch writer service.
+            tracing_manager: Tracing manager service.
             batch_size: Number of records per batch.
             checkpoint_interval: Number of records between checkpoints.
             tracer: Optional tracing port for distributed tracing.
@@ -181,46 +189,10 @@ class BatchExecutor(_BatchExecutorDQMixin):
         self._source_batch_ids: list[str] = []
         self._last_bronze_path: str | None = None
 
-        # Create internal components (from RecordProcessor)
-        pipeline_label = f"{config.provider}_{config.entity_type}"
-        self._batch_metrics = BatchMetricsRecorderService(
-            services.metrics, pipeline_label, context.run_type.value
-        )
-
-        self._transformer = BatchTransformer(
-            context=context,
-            config=config,
-            error_classifier=error_classifier,
-            quarantine_manager=QuarantineManagerService(
-                quarantine_port=services.quarantine,
-                pipeline_name=config.pipeline_name,
-                metrics=services.metrics,
-            ),
-            batch_metrics=self._batch_metrics,
-            transform_callback=transform_callback,
-            gold_filter_callback=gold_filter_callback,
-            gold_transform_callback=gold_transform_callback,
-        )
-
-        self._writer = BatchWriter(
-            storage=services.storage,
-            context=context,
-            config=config,
-            gold_validator=gold_validator,
-            error_classifier=error_classifier,
-            batch_metrics=self._batch_metrics,
-            tracer=tracer,
-            lock_validator=lock_validator,
-        )
-
-        # Tracing manager (extracted for class size reduction)
-        self._tracing = BatchTracingManagerService(
-            tracer=tracer,
-            context=context,
-            config=config,
-            initial_batch_size=self._initial_batch_size,
-            adaptive_sizing_enabled=self._memory.enabled,
-        )
+        self._batch_metrics = batch_metrics
+        self._transformer = transformer
+        self._writer = writer
+        self._tracing = tracing_manager
 
         # Query string for metadata (stored during execute())
         self._query_string: str | None = None

@@ -40,6 +40,7 @@ if TYPE_CHECKING:
     from bioetl.application.composite.dependency_coordinator import (
         DependencyCoordinatorService,
     )
+    from bioetl.application.composite.fsm_helper import FSMStateHelperService
     from bioetl.application.composite.key_extractor import KeyExtractorService
     from bioetl.application.composite.merger import MergeService
     from bioetl.application.composite.preflight_validator import (
@@ -117,6 +118,7 @@ class CompositePipelineRunnerService(
         checkpoint_manager: CompositeCheckpointService,
         logger: LoggerPort,
         lock: LockPort,
+        fsm_helper: FSMStateHelperService,
         run_id: str | None = None,
         dq_report_service: DQReportService | None = None,
         preflight_validator: CompositePreflightValidationService | None = None,
@@ -148,14 +150,7 @@ class CompositePipelineRunnerService(
         self._preflight_validator = preflight_validator
         self._quarantine_port = quarantine_port
         self._metrics = metrics
-
-        from bioetl.application.composite.fsm_helper import FSMStateHelperService
-
-        self._fsm = FSMStateHelperService(
-            config=config,
-            logger=logger,
-            run_id=self._run_id_str,
-        )
+        self._fsm = fsm_helper
 
     @property
     def run_id(self) -> str:

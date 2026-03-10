@@ -17,6 +17,7 @@ from bioetl.application.composite.cross_validator import (
 from bioetl.application.composite.dependency_coordinator import (
     DependencyCoordinatorService,
 )
+from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.key_extractor import KeyExtractorService
 from bioetl.application.composite.merger import MergeService
 from bioetl.application.composite.runner import (
@@ -574,6 +575,12 @@ def bootstrap_composite_runner(
     # Create DQ report service for composite
     dq_report_service = _create_dq_report_service(logger, settings)
 
+    fsm_helper = FSMStateHelperService(
+        config=config,
+        logger=logger,
+        run_id=effective_run_id,
+    )
+
     # Create quarantine port for cross-validation quarantine records
     quarantine_port = None
     if config.cross_validation.enabled:
@@ -596,6 +603,7 @@ def bootstrap_composite_runner(
         checkpoint_manager=checkpoint_manager,
         logger=logger,
         lock=lock,
+        fsm_helper=fsm_helper,
         run_id=effective_run_id,
         dq_report_service=dq_report_service,
         quarantine_port=quarantine_port,
@@ -608,7 +616,6 @@ def bootstrap_composite_pipeline(
     run_id: str | None = None,
 ) -> CompositePipelineRunnerService:
     """Bootstrap a CompositePipelineRunnerService with all dependencies.
-
 
     Args:
         config: Composite pipeline configuration.
