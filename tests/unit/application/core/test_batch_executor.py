@@ -12,9 +12,14 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.batch_executor import BatchExecutor, BatchResult
+from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
+from bioetl.application.core.batch_tracing import BatchTracingManagerService
+from bioetl.application.core.batch_transformer import BatchTransformer
+from bioetl.application.core.batch_writer import BatchWriter
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.core.quarantine_manager import QuarantineManagerService
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.domain.config import TableConfig
 from bioetl.domain.context import PipelineContext
@@ -144,6 +149,57 @@ def processor_config():
     )
 
 
+def _build_batch_dependencies(
+    *,
+    services,
+    context,
+    config,
+    transform_callback,
+    gold_filter_callback,
+    gold_transform_callback,
+    gold_validator,
+    tracer=None,
+):
+    error_classifier = ErrorClassifier()
+    batch_metrics = BatchMetricsRecorderService(
+        services.metrics,
+        "test_provider_test_entity",
+        context.run_type.value,
+    )
+    quarantine_manager = QuarantineManagerService(
+        quarantine_port=services.quarantine,
+        pipeline_name=config.pipeline_name,
+        metrics=services.metrics,
+    )
+    transformer = BatchTransformer(
+        context=context,
+        config=config,
+        error_classifier=error_classifier,
+        quarantine_manager=quarantine_manager,
+        batch_metrics=batch_metrics,
+        transform_callback=transform_callback,
+        gold_filter_callback=gold_filter_callback,
+        gold_transform_callback=gold_transform_callback,
+    )
+    writer = BatchWriter(
+        storage=services.storage,
+        context=context,
+        config=config,
+        gold_validator=gold_validator,
+        error_classifier=error_classifier,
+        batch_metrics=batch_metrics,
+        tracer=tracer,
+    )
+    tracing_manager = BatchTracingManagerService(
+        tracer=tracer,
+        context=context,
+        config=config,
+        initial_batch_size=10,
+        adaptive_sizing_enabled=False,
+    )
+    return batch_metrics, transformer, writer, tracing_manager
+
+
 @pytest.fixture
 def batch_executor(
     mock_services,
@@ -157,17 +213,26 @@ def batch_executor(
     mock_gold_validator,
 ):
     """Create BatchExecutor instance."""
-    return BatchExecutor(
+    batch_metrics, transformer, writer, tracing_manager = _build_batch_dependencies(
         services=mock_services,
         context=mock_context,
         config=processor_config,
-        error_classifier=ErrorClassifier(),
         transform_callback=transform_callback,
         gold_filter_callback=gold_filter_callback,
         gold_transform_callback=gold_transform_callback,
         gold_validator=mock_gold_validator,
+    )
+
+    return BatchExecutor(
+        services=mock_services,
+        context=mock_context,
+        config=processor_config,
         checkpoint_manager=mock_checkpoint_manager,
         shutdown_signal=shutdown_signal,
+        batch_metrics=batch_metrics,
+        transformer=transformer,
+        writer=writer,
+        tracing_manager=tracing_manager,
         batch_size=10,
         checkpoint_interval=5,
     )
@@ -198,17 +263,25 @@ class TestBatchExecutorInit:
         mock_gold_validator,
     ):
         """Test default batch size when not specified."""
-        executor = BatchExecutor(
+        batch_metrics, transformer, writer, tracing_manager = _build_batch_dependencies(
             services=mock_services,
             context=mock_context,
             config=processor_config,
-            error_classifier=ErrorClassifier(),
             transform_callback=transform_callback,
             gold_filter_callback=gold_filter_callback,
             gold_transform_callback=gold_transform_callback,
             gold_validator=mock_gold_validator,
+        )
+        executor = BatchExecutor(
+            services=mock_services,
+            context=mock_context,
+            config=processor_config,
             checkpoint_manager=mock_checkpoint_manager,
             shutdown_signal=shutdown_signal,
+            batch_metrics=batch_metrics,
+            transformer=transformer,
+            writer=writer,
+            tracing_manager=tracing_manager,
         )
         assert executor.batch_size == BatchExecutor.DEFAULT_BATCH_SIZE
 
@@ -395,17 +468,25 @@ class TestBatchExecutorProcessBatch:
                 raise DataQualityError("Invalid data")
             return {"entity_id": record.get("id"), "value": record.get("value")}
 
-        executor = BatchExecutor(
+        batch_metrics, transformer, writer, tracing_manager = _build_batch_dependencies(
             services=mock_services,
             context=mock_context,
             config=processor_config,
-            error_classifier=ErrorClassifier(),
             transform_callback=failing_transform,
             gold_filter_callback=lambda c, r: True,
             gold_transform_callback=lambda c, r: r,
             gold_validator=mock_gold_validator,
+        )
+        executor = BatchExecutor(
+            services=mock_services,
+            context=mock_context,
+            config=processor_config,
             checkpoint_manager=mock_checkpoint_manager,
             shutdown_signal=shutdown_signal,
+            batch_metrics=batch_metrics,
+            transformer=transformer,
+            writer=writer,
+            tracing_manager=tracing_manager,
             batch_size=10,
         )
 
@@ -454,20 +535,28 @@ def batch_executor_with_tracer(
     mock_tracer,
 ):
     """Create BatchExecutor instance with tracer."""
-    return BatchExecutor(
+    batch_metrics, transformer, writer, tracing_manager = _build_batch_dependencies(
         services=mock_services,
         context=mock_context,
         config=processor_config,
-        error_classifier=ErrorClassifier(),
         transform_callback=transform_callback,
         gold_filter_callback=gold_filter_callback,
         gold_transform_callback=gold_transform_callback,
         gold_validator=mock_gold_validator,
+        tracer=mock_tracer,
+    )
+    return BatchExecutor(
+        services=mock_services,
+        context=mock_context,
+        config=processor_config,
         checkpoint_manager=mock_checkpoint_manager,
         shutdown_signal=shutdown_signal,
+        batch_metrics=batch_metrics,
+        transformer=transformer,
+        writer=writer,
+        tracing_manager=tracing_manager,
         batch_size=10,
         checkpoint_interval=5,
-        tracer=mock_tracer,
     )
 
 

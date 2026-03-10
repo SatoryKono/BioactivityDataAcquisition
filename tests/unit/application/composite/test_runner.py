@@ -13,6 +13,7 @@ from uuid import UUID, uuid4
 import pytest
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointState
+from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.runner import (
     CompositePipelineRunner,
     CompositeRuntimeConfig,
@@ -162,6 +163,15 @@ def create_mock_merger() -> AsyncMock:
     return merger
 
 
+def create_mock_fsm(
+    config: MockCompositeConfig,
+    logger: MagicMock,
+    run_id: str,
+) -> FSMStateHelperService:
+    """Create FSM helper service for runner DI."""
+    return FSMStateHelperService(config=config, logger=logger, run_id=run_id)
+
+
 def create_runner(
     seed_runner: MockPipelineRunner | None = None,
     checkpoint_manager: AsyncMock | None = None,
@@ -175,8 +185,11 @@ def create_runner(
     if runtime is None:
         runtime = CompositeRuntimeConfig()
 
+    run_id = str(uuid4())
+    config = MockCompositeConfig()
+    logger = create_mock_logger()
     return CompositePipelineRunner(
-        config=MockCompositeConfig(),
+        config=config,
         runtime=runtime,
         seed_runner_factory=lambda: seed_runner,
         enricher_runner_factory=lambda name, df: MockPipelineRunner(),
@@ -184,8 +197,10 @@ def create_runner(
         coordinator=create_mock_coordinator(),
         merger=create_mock_merger(),
         checkpoint_manager=checkpoint_manager,
-        logger=create_mock_logger(),
+        fsm=FSMStateHelperService(config=config, logger=logger, run_id=run_id),
+        logger=logger,
         lock=create_mock_lock(),
+        run_id=run_id,
     )
 
 
@@ -302,9 +317,11 @@ class TestFSMSeedFailure:
         seed_runner = MockPipelineRunner(should_fail=True, error_message="API error")
         checkpoint_manager = create_mock_checkpoint_manager()
         logger = create_mock_logger()
+        config = MockCompositeConfig()
+        run_id = str(uuid4())
 
         runner = CompositePipelineRunner(
-            config=MockCompositeConfig(),
+            config=config,
             runtime=CompositeRuntimeConfig(),
             seed_runner_factory=lambda: seed_runner,
             enricher_runner_factory=lambda name, df: MockPipelineRunner(),
@@ -312,8 +329,10 @@ class TestFSMSeedFailure:
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),
             checkpoint_manager=checkpoint_manager,
+            fsm=create_mock_fsm(config, logger, run_id),
             logger=logger,
             lock=create_mock_lock(),
+            run_id=run_id,
         )
 
         with pytest.raises(RuntimeError):
@@ -411,9 +430,11 @@ class TestFSMSeedResume:
         )
         checkpoint_manager = create_mock_checkpoint_manager(initial_state)
         logger = create_mock_logger()
+        config = MockCompositeConfig()
+        run_id = str(uuid4())
 
         runner = CompositePipelineRunner(
-            config=MockCompositeConfig(),
+            config=config,
             runtime=CompositeRuntimeConfig(resume=True),
             seed_runner_factory=lambda: MockPipelineRunner(),
             enricher_runner_factory=lambda name, df: MockPipelineRunner(),
@@ -421,8 +442,10 @@ class TestFSMSeedResume:
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),
             checkpoint_manager=checkpoint_manager,
+            fsm=create_mock_fsm(config, logger, run_id),
             logger=logger,
             lock=create_mock_lock(),
+            run_id=run_id,
         )
 
         await runner.run()
@@ -444,8 +467,10 @@ class TestFSMTransitionLogging:
     async def test_seed_start_transition_logged(self):
         """Transition to SEED_RUNNING should be logged."""
         logger = create_mock_logger()
+        config = MockCompositeConfig()
+        run_id = str(uuid4())
         runner = CompositePipelineRunner(
-            config=MockCompositeConfig(),
+            config=config,
             runtime=CompositeRuntimeConfig(),
             seed_runner_factory=lambda: MockPipelineRunner(),
             enricher_runner_factory=lambda name, df: MockPipelineRunner(),
@@ -453,8 +478,10 @@ class TestFSMTransitionLogging:
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),
             checkpoint_manager=create_mock_checkpoint_manager(),
+            fsm=create_mock_fsm(config, logger, run_id),
             logger=logger,
             lock=create_mock_lock(),
+            run_id=run_id,
         )
 
         await runner.run()
@@ -469,8 +496,10 @@ class TestFSMTransitionLogging:
     async def test_seed_complete_transition_logged(self):
         """Transition to SEED_COMPLETED should be logged."""
         logger = create_mock_logger()
+        config = MockCompositeConfig()
+        run_id = str(uuid4())
         runner = CompositePipelineRunner(
-            config=MockCompositeConfig(),
+            config=config,
             runtime=CompositeRuntimeConfig(),
             seed_runner_factory=lambda: MockPipelineRunner(),
             enricher_runner_factory=lambda name, df: MockPipelineRunner(),
@@ -478,8 +507,10 @@ class TestFSMTransitionLogging:
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),
             checkpoint_manager=create_mock_checkpoint_manager(),
+            fsm=create_mock_fsm(config, logger, run_id),
             logger=logger,
             lock=create_mock_lock(),
+            run_id=run_id,
         )
 
         await runner.run()
@@ -495,8 +526,10 @@ class TestFSMTransitionLogging:
         """Transition to FAILED should be logged when seed fails."""
         logger = create_mock_logger()
         seed_runner = MockPipelineRunner(should_fail=True)
+        config = MockCompositeConfig()
+        run_id = str(uuid4())
         runner = CompositePipelineRunner(
-            config=MockCompositeConfig(),
+            config=config,
             runtime=CompositeRuntimeConfig(),
             seed_runner_factory=lambda: seed_runner,
             enricher_runner_factory=lambda name, df: MockPipelineRunner(),
@@ -504,8 +537,10 @@ class TestFSMTransitionLogging:
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),
             checkpoint_manager=create_mock_checkpoint_manager(),
+            fsm=create_mock_fsm(config, logger, run_id),
             logger=logger,
             lock=create_mock_lock(),
+            run_id=run_id,
         )
 
         with pytest.raises(RuntimeError):
@@ -530,9 +565,11 @@ class TestCheckpointSaveErrorHandling:
             side_effect=[StorageError("Disk full"), None, None, None, None, None]
         )
         logger = create_mock_logger()
+        config = MockCompositeConfig()
+        run_id = str(uuid4())
 
         runner = CompositePipelineRunner(
-            config=MockCompositeConfig(),
+            config=config,
             runtime=CompositeRuntimeConfig(),
             seed_runner_factory=lambda: MockPipelineRunner(),
             enricher_runner_factory=lambda name, df: MockPipelineRunner(),
@@ -540,8 +577,10 @@ class TestCheckpointSaveErrorHandling:
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),
             checkpoint_manager=checkpoint_manager,
+            fsm=create_mock_fsm(config, logger, run_id),
             logger=logger,
             lock=create_mock_lock(),
+            run_id=run_id,
         )
 
         # Should not raise despite checkpoint save failure
@@ -565,9 +604,11 @@ class TestCheckpointSaveErrorHandling:
             side_effect=[OSError("Permission denied"), None, None, None, None, None]
         )
         logger = create_mock_logger()
+        config = MockCompositeConfig()
+        run_id = str(uuid4())
 
         runner = CompositePipelineRunner(
-            config=MockCompositeConfig(),
+            config=config,
             runtime=CompositeRuntimeConfig(),
             seed_runner_factory=lambda: MockPipelineRunner(),
             enricher_runner_factory=lambda name, df: MockPipelineRunner(),
@@ -575,8 +616,10 @@ class TestCheckpointSaveErrorHandling:
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),
             checkpoint_manager=checkpoint_manager,
+            fsm=create_mock_fsm(config, logger, run_id),
             logger=logger,
             lock=create_mock_lock(),
+            run_id=run_id,
         )
 
         await runner.run()
