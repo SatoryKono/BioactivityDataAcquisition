@@ -23,10 +23,10 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 
-class _WriteMergedMetadataCallable(Protocol):
-    """Callable contract for merged metadata sidecar writer."""
+class _GoldWriterMergedMetadataContract(Protocol):
+    """Contract for classes that can persist merged metadata."""
 
-    def __call__(
+    async def _write_gold_merged_metadata(
         self,
         *,
         table_path: str,
@@ -36,9 +36,7 @@ class _WriteMergedMetadataCallable(Protocol):
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         schema: DataFrameSchema | None = None,
-    ) -> Awaitable[None]:
-        """Write metadata for merged Gold records."""
-        ...
+    ) -> None: ...
 
 
 def _load_gold_writer_module() -> ModuleType:
@@ -123,11 +121,8 @@ class GoldWriterIOMixin:
                 append=False,
             )
 
-        write_merged_metadata = cast(
-            _WriteMergedMetadataCallable,
-            getattr(self, "_write_gold_merged_metadata"),
-        )
-        await write_merged_metadata(
+        metadata_contract = cast(_GoldWriterMergedMetadataContract, self)
+        await metadata_contract._write_gold_merged_metadata(
             table_path=table_path,
             table_name=table_name,
             records=records,

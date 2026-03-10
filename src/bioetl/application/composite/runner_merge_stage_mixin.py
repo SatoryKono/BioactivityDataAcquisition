@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.composite.runner_constants import (
     CHECKPOINT_NON_FATAL_ERRORS,
@@ -36,6 +35,20 @@ if TYPE_CHECKING:
 __all__ = ["CompositeRunnerMergeStageHelper"]
 
 
+class _CompositeRunnerMergeSupportContract(Protocol):
+    """Contract for merge helper methods provided by sibling mixins."""
+
+    async def _save_checkpoint_safe(
+        self,
+        state: CompositeCheckpointState,
+        operation: str,
+    ) -> bool: ...
+
+    async def _generate_dq_reports(self, merge_result: MergeResult) -> None: ...
+
+    async def _write_cv_quarantine(self, merge_result: MergeResult) -> None: ...
+
+
 class CompositeRunnerMergeStageHelper:
     """Mixin containing merge execution and finalization."""
 
@@ -53,27 +66,18 @@ class CompositeRunnerMergeStageHelper:
         operation: str,
     ) -> bool:
         """Invoke support-layer checkpoint save helper."""
-        save_checkpoint = cast(
-            "Callable[[CompositeCheckpointState, str], Awaitable[bool]]",
-            getattr(self, "_save_checkpoint_safe"),
-        )
-        return await save_checkpoint(state, operation)
+        support = cast(_CompositeRunnerMergeSupportContract, self)
+        return await support._save_checkpoint_safe(state, operation)
 
     async def _call_generate_dq_reports(self, merge_result: MergeResult) -> None:
         """Invoke support-layer DQ report generation helper."""
-        generate_reports = cast(
-            "Callable[[MergeResult], Awaitable[None]]",
-            getattr(self, "_generate_dq_reports"),
-        )
-        await generate_reports(merge_result)
+        support = cast(_CompositeRunnerMergeSupportContract, self)
+        await support._generate_dq_reports(merge_result)
 
     async def _call_write_cv_quarantine(self, merge_result: MergeResult) -> None:
         """Invoke support-layer quarantine write helper."""
-        write_quarantine = cast(
-            "Callable[[MergeResult], Awaitable[None]]",
-            getattr(self, "_write_cv_quarantine"),
-        )
-        await write_quarantine(merge_result)
+        support = cast(_CompositeRunnerMergeSupportContract, self)
+        await support._write_cv_quarantine(merge_result)
 
     async def _execute_merge_stage(
         self,
