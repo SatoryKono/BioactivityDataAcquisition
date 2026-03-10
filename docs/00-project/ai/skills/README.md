@@ -1,5 +1,7 @@
 # Skills Mirror in docs/
 
+*Статус: internal-published (Internal / Extended)*
+
 This directory stores documentation mirrors for Codex skills.
 
 ## Consolidation Status (2026-03-08)

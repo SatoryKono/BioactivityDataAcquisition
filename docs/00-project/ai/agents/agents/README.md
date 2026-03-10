@@ -1,5 +1,7 @@
 # Research & Analysis Subagents
 
+*Статус: internal-published (Internal / Extended)*
+
 Research & Analysis subagents are your investigative powerhouses, specializing in finding, analyzing, and synthesizing information from diverse sources. These experts excel at deep research, competitive intelligence, market analysis, and trend identification. They transform raw information into actionable insights, helping you make informed decisions based on comprehensive analysis and data-driven research.
 
 ## When to Use Research & Analysis Subagents

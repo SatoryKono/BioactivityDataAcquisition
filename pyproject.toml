@@ -302,16 +302,7 @@ disallow_untyped_decorators = false
 [[tool.mypy.overrides]]
 module = [
     "bioetl.domain.serialization",
-    "bioetl.domain.models.metadata",
-    "bioetl.domain.value_objects.dq_metrics",
     "bioetl.domain.schemas.validators",
-    "bioetl.application.core.base_transformer",
-    "bioetl.application.services.dq.silver_analyzer",
-    "bioetl.application.services.dq.gold_analyzer",
-    "bioetl.application.services.dq._checks_integrity",
-    "bioetl.infrastructure.adapters.common.api_request_collector",
-    "bioetl.infrastructure.storage.metadata_builder",
-    "bioetl.composition.services.metadata_coordinator",
 ]
 warn_unused_ignores = false
 

@@ -14,7 +14,10 @@ from bioetl.application.composite.column_priority_orderer import (
 )
 from bioetl.application.composite.column_renamer import ColumnRenamerService
 from bioetl.application.composite.conflict_resolver import ConflictResolverService
+from bioetl.application.composite.dependency_joiner import DependencyJoinerService
 from bioetl.application.composite.deduplication import EnricherDeduplicator
+from bioetl.application.composite.join_execution import JoinExecutorService
+from bioetl.application.composite.join_key_resolution import JoinKeyResolverService
 from bioetl.application.composite.join_planner import JoinPlannerService
 from bioetl.application.composite.merger import MergeService, _path_to_table_name
 from bioetl.domain.composite.config import EnricherConfig, MergeConfig
@@ -75,6 +78,24 @@ def merge_service(merge_config, mock_storage, mock_logger):
         logger=mock_logger,
         coalesce_policy=coalesce_policy,
     )
+    join_key_resolver = JoinKeyResolverService(
+        normalize_join_keys=JoinPlannerService._NORMALIZE_JOIN_KEYS,
+        parse_pipeline_name=JoinPlannerService._parse_pipeline_name,
+    )
+    join_executor = JoinExecutorService(
+        logger=mock_logger,
+        join_type_resolver=lambda: "left",
+    )
+    dependency_joiner = DependencyJoinerService(
+        logger=mock_logger,
+        deduplicator=deduplicator,
+        renamer=renamer,
+        conflict_resolver=conflict_resolver,
+        field_alias_resolver=lambda _pipeline: None,
+        join_key_resolver=join_key_resolver,
+        join_executor=join_executor,
+        system_columns_to_drop=JoinPlannerService._SYSTEM_COLUMNS_TO_DROP,
+    )
     join_planner = JoinPlannerService(
         merge_config=merge_config,
         logger=mock_logger,
@@ -82,6 +103,9 @@ def merge_service(merge_config, mock_storage, mock_logger):
         aggregator=aggregator,
         renamer=renamer,
         conflict_resolver=conflict_resolver,
+        join_key_resolver=join_key_resolver,
+        join_executor=join_executor,
+        dependency_joiner=dependency_joiner,
     )
     return MergeService(
         merge_config=merge_config,

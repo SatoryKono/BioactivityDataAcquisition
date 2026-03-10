@@ -1,5 +1,7 @@
 # Collected Prompts Index
 
+*Статус: internal-published (Internal / Extended)*
+
 Target folder: `docs/00-project/ai/prompts/collected`
 
 Collected files: 2

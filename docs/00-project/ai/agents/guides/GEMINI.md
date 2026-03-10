@@ -1,5 +1,7 @@
 # GEMINI.md: Context & Instructions for BioETL
 
+*Статус: internal-published (Internal / Extended)*
+
 ## 1. Project Overview
 **BioETL** is a robust, scalable data engineering framework designed to acquire, normalize, and process bioactivity data from major public repositories (ChEMBL, PubChem, UniProt, PubMed) into a unified **Delta Lake** warehouse.
 

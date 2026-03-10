@@ -8,6 +8,9 @@ from unittest.mock import MagicMock
 import polars as pl
 import pytest
 
+from bioetl.application.composite.dependency_joiner import DependencyJoinerService
+from bioetl.application.composite.join_execution import JoinExecutorService
+from bioetl.application.composite.join_key_resolution import JoinKeyResolverService
 from bioetl.application.composite.join_planner import JoinPlannerService
 from bioetl.domain.composite.aggregation import (
     AggregationConfig,
@@ -55,6 +58,24 @@ def planner_deps() -> tuple[MagicMock, MagicMock, MagicMock, MagicMock]:
 def planner(merge_config: MergeConfig, planner_deps) -> JoinPlannerService:
     deduplicator, aggregator, renamer, conflict_resolver = planner_deps
     logger = MagicMock()
+    join_key_resolver = JoinKeyResolverService(
+        normalize_join_keys=JoinPlannerService._NORMALIZE_JOIN_KEYS,
+        parse_pipeline_name=JoinPlannerService._parse_pipeline_name,
+    )
+    join_executor = JoinExecutorService(
+        logger=logger,
+        join_type_resolver=lambda: "left",
+    )
+    dependency_joiner = DependencyJoinerService(
+        logger=logger,
+        deduplicator=deduplicator,
+        renamer=renamer,
+        conflict_resolver=conflict_resolver,
+        field_alias_resolver=lambda _pipeline: None,
+        join_key_resolver=join_key_resolver,
+        join_executor=join_executor,
+        system_columns_to_drop=JoinPlannerService._SYSTEM_COLUMNS_TO_DROP,
+    )
     return JoinPlannerService(
         merge_config=merge_config,
         logger=logger,
@@ -63,6 +84,9 @@ def planner(merge_config: MergeConfig, planner_deps) -> JoinPlannerService:
         renamer=renamer,
         conflict_resolver=conflict_resolver,
         field_alias_resolver=lambda pipeline: None,
+        join_key_resolver=join_key_resolver,
+        join_executor=join_executor,
+        dependency_joiner=dependency_joiner,
     )
 
 

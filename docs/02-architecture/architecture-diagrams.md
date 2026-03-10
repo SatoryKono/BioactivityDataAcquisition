@@ -216,7 +216,7 @@ End-to-end поток данных от API провайдера до Gold layer
 1. **Medallion Clear** (зависит от run-type)
 
    - Incremental: Load checkpoint
-   - Backfill: Clear Silver
+   - Backfill: Clear Silver + Gold
    - Rebuild: Clear Silver + Gold
 
 1. **Batch Execution Loop**
