@@ -95,6 +95,24 @@ class StorageMaintenancePort(Protocol):
         """
         ...
 
+    async def deduplicate_silver(
+        self,
+        table_name: str,
+        primary_keys: list[str],
+    ) -> int:
+        """Deduplicate Silver table by primary keys after append-mode writes.
+
+        Keeps the latest record per primary key group (by _ingestion_ts).
+
+        Args:
+            table_name: Logical Silver table name.
+            primary_keys: Business key columns for deduplication.
+
+        Returns:
+            Number of duplicate rows removed.
+        """
+        ...
+
     async def clear_csv(self, table_name: str | None = None) -> int:
         """Clear CSV export files for Silver and Gold layers.
 

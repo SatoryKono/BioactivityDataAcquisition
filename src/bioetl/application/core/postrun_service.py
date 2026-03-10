@@ -10,6 +10,9 @@ from typing import TYPE_CHECKING, cast
 from bioetl.application.core.postrun_cleanup_orchestrator import (
     PostrunCleanupService,
 )
+from bioetl.application.core.postrun_compact_orchestrator import (
+    PostrunCompactService,
+)
 from bioetl.application.core.postrun_dq_report_orchestrator import (
     PostrunDQReportService,
 )
@@ -90,6 +93,21 @@ def _create_postrun_metadata_version_resolver(
     )
 
 
+def _create_postrun_compact_service(
+    *,
+    config: PipelineConfig,
+    storage: StorageMaintenancePort,
+    logger: LoggerPort,
+    warning_allowlist: tuple[type[BaseException], ...],
+) -> PostrunCompactService:
+    return PostrunCompactService(
+        config=config,
+        storage=storage,
+        logger=logger,
+        warning_allowlist=warning_allowlist,
+    )
+
+
 @dataclass(frozen=True, slots=True)
 class PostrunResult:
     """Combined result of all post-run operations."""
@@ -114,7 +132,6 @@ class PostrunService:
         logger: LoggerPort,
         metadata_coordinator: MetadataCoordinatorPort | None = None,
         metadata_writer: MetadataWriterPort | None = None,
-        # DQ Report parameters (optional)
         dq_report_service: DQReportService | None = None,
         bronze_dq_config: BronzeDQConfigPort | None = None,
         silver_dq_config: SilverDQConfigPort | None = None,
@@ -131,11 +148,6 @@ class PostrunService:
         self._logger = logger
         self._metadata_coordinator = metadata_coordinator
         self._metadata_writer = metadata_writer
-        # DQ Report services
-        self._dq_report_service = dq_report_service
-        self._bronze_dq_config = bronze_dq_config
-        self._silver_dq_config = silver_dq_config
-        self._gold_dq_config = gold_dq_config
         self._postrun_warning_allowlist = (
             BioETLError,
             OSError,
@@ -171,6 +183,12 @@ class PostrunService:
             runtime=runtime,
             warning_allowlist=self._metadata_version_allowlist,
         )
+        self._compact_orchestrator = _create_postrun_compact_service(
+            config=config,
+            storage=storage,
+            logger=logger,
+            warning_allowlist=self._postrun_warning_allowlist,
+        )
 
     async def run(
         self,
@@ -188,6 +206,7 @@ class PostrunService:
         """
         dq_result = await self.run_dq_checks(executor)
         dq_reports = await self._generate_dq_reports(dq_context)
+        await self.run_silver_compact_if_needed()
         vacuum_result = await self.run_vacuum_if_enabled()
 
         # Write final run-level metadata (aggregates all batches)
@@ -219,6 +238,10 @@ class PostrunService:
             runtime=self._runtime,
             metrics=self._metrics,
         )
+
+    async def run_silver_compact_if_needed(self) -> int:
+        """Deduplicate Silver after append-mode run. Returns duplicates removed."""
+        return await self._compact_orchestrator.run_if_needed()
 
     async def cleanup(self, tracer: TracingPort | None) -> None:
         """Cleanup all resources including observability.

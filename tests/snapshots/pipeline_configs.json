@@ -286,7 +286,7 @@
         "activity_id"
       ],
       "silver_table": "chembl_activity",
-      "silver_write_mode": "merge"
+      "silver_write_mode": "append"
     },
     "transform_steps": [],
     "transform_version": null

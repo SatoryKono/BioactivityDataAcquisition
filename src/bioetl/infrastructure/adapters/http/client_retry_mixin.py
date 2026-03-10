@@ -324,7 +324,12 @@ class HTTPClientRetryMixin:
                 self._log_retry(
                     url, method, attempt, wait_seconds, status_code=status_code
                 )
-                return (True, status_code, 1, None)
+                status_error = httpx.HTTPStatusError(
+                    f"Server error {status_code}",
+                    request=response.request,
+                    response=response,
+                )
+                return (True, status_code, 1, status_error)
 
             response.raise_for_status()
             span.set_attribute("http.status_code", status_code)

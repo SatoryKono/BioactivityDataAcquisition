@@ -4,8 +4,8 @@
 
 ## Summary
 
-- Scanned modules: `990`
-- Internal import edges (raw): `3625`
+- Scanned modules: `991`
+- Internal import edges (raw): `3629`
 - Aggregated layer edges: `14`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `232`
@@ -20,8 +20,8 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|417 OK| application
-    application -->|579 OK| domain
+    application -->|418 OK| application
+    application -->|582 OK| domain
     composition -->|157 OK| application
     composition -->|245 OK| composition
     composition -->|201 OK| domain
@@ -40,8 +40,8 @@ flowchart LR
 
 | From | To | Imports | Policy |
 |---|---|---:|---|
-| `application` | `application` | 417 | allowed |
-| `application` | `domain` | 579 | allowed |
+| `application` | `application` | 418 | allowed |
+| `application` | `domain` | 582 | allowed |
 | `composition` | `application` | 157 | allowed |
 | `composition` | `composition` | 245 | allowed |
 | `composition` | `domain` | 201 | allowed |
@@ -64,7 +64,7 @@ flowchart LR
 | `application.pipelines` | `domain.types` | 70 |
 | `application.composite` | `domain.composite` | 68 |
 | `composition.factories` | `application.core` | 55 |
-| `application.core` | `domain.ports` | 45 |
+| `application.core` | `domain.ports` | 46 |
 | `application.core` | `domain.types` | 45 |
 | `composition.factories` | `infrastructure.storage` | 35 |
 | `composition.bootstrap` | `application.composite` | 34 |
@@ -111,9 +111,9 @@ flowchart LR
 | `composition.bootstrap` | `application.core` | 9 |
 | `composition.factories` | `domain.config` | 9 |
 | `interfaces.cli` | `application.services` | 9 |
+| `application.core` | `domain.config` | 8 |
 | `composition.factories` | `domain.context` | 8 |
 | `infrastructure.schemas` | `domain.composite` | 8 |
-| `application.core` | `domain.config` | 7 |
 | `application.core` | `domain.value_objects` | 7 |
 | `application.pipelines` | `domain.mapping` | 7 |
 | `composition.bootstrap` | `domain.context` | 7 |
