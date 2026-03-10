@@ -23,7 +23,9 @@ def test_lifecycle_registry_covers_non_active_inventory_scripts() -> None:
     assert isinstance(scripts, list), "Manifest key 'scripts' must be a list."
 
     registry_entries = registry_payload.get("entries")
-    assert isinstance(registry_entries, dict), "Lifecycle registry key 'entries' must be a dict."
+    assert isinstance(registry_entries, dict), (
+        "Lifecycle registry key 'entries' must be a dict."
+    )
 
     tracked_statuses = {"unknown", "orphan", "legacy"}
     required_paths = sorted(

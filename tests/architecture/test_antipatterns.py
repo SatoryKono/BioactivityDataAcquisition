@@ -131,7 +131,8 @@ def _extract_code_only(func_source: str) -> str:
 
 
 def test_no_blocking_io_in_async(
-    source_ast_cache: dict, source_content_cache: dict,
+    source_ast_cache: dict,
+    source_content_cache: dict,
 ) -> None:
     violations: list[str] = []
     for path, tree in source_ast_cache.items():

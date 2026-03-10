@@ -34,7 +34,7 @@
 
 - **Сценарий**: `Run ID` -> `Fetch` -> `Bronze` -> `Silver` -> `Gold`.
 - **Архитектура**: Local-Only (MemoryLock, LocalCheckpoint, FileSystem Storage).
-- **Запуск**: `make test-e2e` или `pytest tests/e2e/ -m e2e`.
+- **Запуск**: `uv run python -m pytest tests/e2e/ -m e2e -v`.
 
 ### 2.4. Architecture Tests (`tests/architecture/`)
 
@@ -74,6 +74,9 @@ make test
 # CI-подобный устойчивый прогон (parallel + fallback + serial pass)
 make test-ci
 
+# Запуск E2E в Local-Only режиме
+uv run python -m pytest tests/e2e/ -m e2e -v
+
 # Запуск только архитектурных тестов
 make test-architecture
 
@@ -90,14 +93,16 @@ pytest --cov=src/bioetl tests/
 | --- | --------------------------- | -------------------------------------------------------------------- |
 | 1   | `make install`              | Создать `.venv` и установить зависимости `[dev]` (pytest, cov, lint) |
 | 2   | `source .venv/bin/activate` | Активировать окружение для дальнейших команд                         |
-| 3   | `make test`                 | Запустить весь набор тестов с покрытием ≥85% (архитектурные + e2e)   |
-| 4   | `open htmlcov/index.html`   | Просмотреть детализированный отчёт покрытия локально                 |
+| 3   | `make test`                 | Запустить локальный стабильный прогон с покрытием ≥85% (без E2E)     |
+| 4   | `uv run python -m pytest tests/e2e/ -m e2e -v` | Отдельно запустить E2E в Local-Only режиме |
+| 5   | `open htmlcov/index.html`   | Просмотреть детализированный отчёт покрытия локально                 |
 
 **Примечания:**
 
 - Если нужен быстрый прогон без HTML-отчёта и без бенчмарков, используйте `make test-fast`.
 - Для корректного прохождения трассировки и мониторинга установите опциональные зависимости (`psutil`, `opentelemetry-*`).
 - В CI для полного устойчивого прогона используется `make test-ci`; локальный запуск `make test` обязателен перед коммитом.
+- `make test-e2e` остаётся legacy Docker workflow и не является рекомендуемым способом проверки Local-Only архитектуры.
 
 ## 5. План по устранению избыточности (ChEMBL Target Component)
 

@@ -1,14 +1,17 @@
 # Contracts Registry
 
-JSON-экспорты в `docs/04-reference/contracts/gold/*.json` — **source of truth** для контрактов Gold-слоя.
+Кодовые контракты в `src/bioetl/domain/contracts/gold/` — **source of truth** для
+контрактов Gold-слоя. JSON-экспорты в `docs/04-reference/contracts/gold/*.json`
+являются сгенерированными артефактами для публикации и обзора.
 
 Правило синхронизации:
 
-- либо кодовые Pandera-контракты в `src/bioetl/domain/contracts/gold/` генерируются из exported JSON;
-- либо любые изменения в кодовых контрактах обязаны проходить parity-check с exported JSON (без расхождений по `name/type/nullable/description`).
+- изменения в `src/bioetl/domain/contracts/gold/` выполняются в коде;
+- после изменения кодовых контрактов необходимо перегенерировать exported JSON;
+- parity-check между кодом и exported JSON не должен допускать расхождений по `name/type/nullable/description`.
 
 Обновление выполняется скриптом:
 
 ```bash
-python src/tools/scripts/generate_contracts.py
+python scripts/schema/generate_contracts.py
 ```

@@ -40,7 +40,9 @@ class TestDomainImmutability:
     }
 
     def test_domain_value_objects_are_frozen(
-        self, src_dir: Path, source_ast_cache: dict,
+        self,
+        src_dir: Path,
+        source_ast_cache: dict,
     ) -> None:
         """Domain Value Objects (dataclasses) must be frozen.
 
@@ -100,7 +102,9 @@ class TestDomainImmutability:
         )
 
     def test_no_mutable_defaults_in_frozen_dataclasses(
-        self, src_dir: Path, source_ast_cache: dict,
+        self,
+        src_dir: Path,
+        source_ast_cache: dict,
     ) -> None:
         """Frozen dataclasses should not have mutable default arguments.
 
@@ -164,7 +168,9 @@ class TestDomainPurity:
     """Tests ensuring domain layer has no I/O or side effects."""
 
     def test_no_direct_io_in_domain(
-        self, src_dir: Path, source_content_cache: dict,
+        self,
+        src_dir: Path,
+        source_content_cache: dict,
     ) -> None:
         """Verify domain layer has no direct I/O operations.
 
@@ -221,7 +227,9 @@ class TestDomainComplexity:
     """Tests ensuring domain layer maintains low complexity."""
 
     def test_cyclomatic_complexity_domain_layer(
-        self, src_dir: Path, source_content_cache: dict,
+        self,
+        src_dir: Path,
+        source_content_cache: dict,
     ) -> None:
         """Domain layer functions should have low cyclomatic complexity.
 

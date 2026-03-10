@@ -1,19 +1,12 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.23 | Last updated: 2026-03-08*
+*Synced with RULES.md v5.23 | Last updated: 2026-03-10*
 
-> **Documentation Update:** 2026-03-08
-> - Added Coverage Configuration Guide (coverage-configuration.md) with P3 exclude_lines patterns
->
-> **Previous Update:** 2026-03-02
-> - Source Code Map rewritten to match actual codebase structure (v8.0)
-> - Codebase metrics (snapshot 2026-03-03): 581 src files + 868 test files
-> - ADR count: 40 ADRs (ADR-001 through ADR-040)
-> - Pipeline configs: 27 configurations (21 single-source + 6 composite)
-> - YAML configs total: 39 (`configs/` tree)
-> - Documentation files (snapshot 2026-03-03): 1067 markdown files
-> - All 7 providers documented, all 28 domain ports listed
-> - Diagrams: 271 Mermaid source files (103 .mmd + 168 .mermaid)
+> **Documentation Update:** 2026-03-10
+> - ADR inventory refreshed to ADR-043
+> - Architecture tree paths updated to `mmd-diagrams/`
+> - Quick-start and pipeline command references aligned with current CLI
+> - Inventory-style counts trimmed to avoid stale snapshot drift
 
 ## Quick Links
 
@@ -64,14 +57,12 @@ docs/
 │
 ├── 02-architecture/             # Architecture & Decisions
 │   ├── 00-overview.md           # Architecture overview
-│   ├── decisions/               # ADRs (ADR-001..040)
-│   ├── diagrams/                # System diagrams
-│   │   └── mermaid/             # Mermaid source files
+│   ├── decisions/               # ADRs (ADR-001..043)
+│   ├── mmd-diagrams/            # Canonical Mermaid source files and rendered views
 │   └── ... (Layer docs: 01-domain, 02-application, etc.)
 │
 ├── 03-guides/                   # Guides & Manuals
 │   ├── development/             # Developer guides (config schema, etc.)
-│   ├── quick-ref/               # Quick reference cheat sheets
 │   └── ... (User guides: getting-started, testing, etc.)
 │
 ├── 04-reference/                # Reference Documentation
@@ -492,12 +483,12 @@ graph TD
 | TOOLS.md                 | 2026-03-02   | v2.3 Synced with RULES v5.23 |
 | 03-guides/               | 2026-01-20   | Consolidated (16 guides)     |
 | 03-guides/development/   | 2026-01-26   | Config schema guidelines     |
-| ADR-001..040             | 2026-02-25   | All 40 ADRs documented       |
+| ADR-001..043             | 2026-03-09   | Current ADR set documented   |
 | 05-operations/runbooks/  | 2026-03-02   | 16 active runbooks (Local-Only synced) |
 | domain/schemas/          | 2025-12-28   | ChEMBL schemas (4 entities)  |
 | audits/                  | 2026-02-17   | Consolidated (audit/ merged) |
-| 02-architecture/diagrams/| 2025-12-31   | 50+ Mermaid diagrams         |
+| 02-architecture/mmd-diagrams/ | 2026-03-10   | Canonical diagram source tree |
 
 ---
 
-*Last updated: 2026-03-02. Source Code Map v8.0: rewritten to match actual codebase structure. ADR-040 included.*
+*Last updated: 2026-03-10. Source Code Map tracks stable entry points and avoids snapshot counts that drift quickly.*

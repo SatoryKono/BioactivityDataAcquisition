@@ -52,7 +52,7 @@ bioetl run --pipeline chembl_activity --limit 100 --no-cached-bronze
 # Data will be stored in:
 # - data/output/bronze/chembl/activity/
 # - data/output/silver/chembl/activity/
-# - data/output/gold/chembl/activity/
+# - data/output/gold/chembl/activity/ (only for pipelines with Gold enabled)
 ```
 
 ## Verify
@@ -74,7 +74,7 @@ make lint
 | Run all tests          | `make test`                                       |
 | Run linting            | `make lint`                                       |
 | Run on fixtures        | `make run-local`                                  |
-| List pipelines         | `bioetl list`                                     |
+| List pipelines         | `bioetl config list-pipelines`                    |
 | Full rebuild           | `bioetl run --pipeline <name> --run-type rebuild` |
 | Resume from checkpoint | `bioetl run --pipeline <name> --resume`           |
 

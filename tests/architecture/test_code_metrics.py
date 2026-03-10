@@ -33,30 +33,60 @@ class TestFileSizeLimits:
     # Exemptions are managed in configs/quality/architecture_metric_exemptions.yaml
     EXEMPTIONS = get_registry_values("file_size_limits")
 
-    def test_domain_files_under_limit(self, src_dir: Path, source_content_cache: dict) -> None:
+    def test_domain_files_under_limit(
+        self, src_dir: Path, source_content_cache: dict
+    ) -> None:
         """Domain layer files must be under 300 LOC."""
-        self._check_layer(src_dir, "domain", self.LAYER_LIMITS["domain"], source_content_cache)
-
-    def test_application_files_under_limit(self, src_dir: Path, source_content_cache: dict) -> None:
-        """Application layer files must be under 500 LOC."""
-        self._check_layer(src_dir, "application", self.LAYER_LIMITS["application"], source_content_cache)
-
-    def test_composition_files_under_limit(self, src_dir: Path, source_content_cache: dict) -> None:
-        """Composition layer files must be under 400 LOC."""
-        self._check_layer(src_dir, "composition", self.LAYER_LIMITS["composition"], source_content_cache)
-
-    def test_infrastructure_files_under_limit(self, src_dir: Path, source_content_cache: dict) -> None:
-        """Infrastructure layer files must be under 600 LOC."""
         self._check_layer(
-            src_dir, "infrastructure", self.LAYER_LIMITS["infrastructure"], source_content_cache
+            src_dir, "domain", self.LAYER_LIMITS["domain"], source_content_cache
         )
 
-    def test_interfaces_files_under_limit(self, src_dir: Path, source_content_cache: dict) -> None:
+    def test_application_files_under_limit(
+        self, src_dir: Path, source_content_cache: dict
+    ) -> None:
+        """Application layer files must be under 500 LOC."""
+        self._check_layer(
+            src_dir,
+            "application",
+            self.LAYER_LIMITS["application"],
+            source_content_cache,
+        )
+
+    def test_composition_files_under_limit(
+        self, src_dir: Path, source_content_cache: dict
+    ) -> None:
+        """Composition layer files must be under 400 LOC."""
+        self._check_layer(
+            src_dir,
+            "composition",
+            self.LAYER_LIMITS["composition"],
+            source_content_cache,
+        )
+
+    def test_infrastructure_files_under_limit(
+        self, src_dir: Path, source_content_cache: dict
+    ) -> None:
+        """Infrastructure layer files must be under 600 LOC."""
+        self._check_layer(
+            src_dir,
+            "infrastructure",
+            self.LAYER_LIMITS["infrastructure"],
+            source_content_cache,
+        )
+
+    def test_interfaces_files_under_limit(
+        self, src_dir: Path, source_content_cache: dict
+    ) -> None:
         """Interfaces layer files must be under 400 LOC."""
-        self._check_layer(src_dir, "interfaces", self.LAYER_LIMITS["interfaces"], source_content_cache)
+        self._check_layer(
+            src_dir, "interfaces", self.LAYER_LIMITS["interfaces"], source_content_cache
+        )
 
     def _check_layer(
-        self, src_dir: Path, layer: str, limit: int,
+        self,
+        src_dir: Path,
+        layer: str,
+        limit: int,
         source_content_cache: dict | None = None,
     ) -> None:
         """Check all files in a layer against the limit."""
@@ -67,7 +97,8 @@ class TestFileSizeLimits:
         violations = []
         if source_content_cache is not None:
             items = (
-                (p, c) for p, c in source_content_cache.items()
+                (p, c)
+                for p, c in source_content_cache.items()
                 if layer_path in p.parents and not p.name.startswith("__")
             )
         else:
@@ -115,20 +146,37 @@ class TestFunctionComplexity:
 
     def test_domain_complexity(self, src_dir: Path, source_content_cache: dict) -> None:
         """Domain functions must have CC <= 5."""
-        self._check_layer(src_dir, "domain", self.MAX_COMPLEXITY["domain"], source_content_cache)
+        self._check_layer(
+            src_dir, "domain", self.MAX_COMPLEXITY["domain"], source_content_cache
+        )
 
-    def test_application_complexity(self, src_dir: Path, source_content_cache: dict) -> None:
+    def test_application_complexity(
+        self, src_dir: Path, source_content_cache: dict
+    ) -> None:
         """Application functions must have CC <= 10."""
-        self._check_layer(src_dir, "application", self.MAX_COMPLEXITY["application"], source_content_cache)
+        self._check_layer(
+            src_dir,
+            "application",
+            self.MAX_COMPLEXITY["application"],
+            source_content_cache,
+        )
 
-    def test_infrastructure_complexity(self, src_dir: Path, source_content_cache: dict) -> None:
+    def test_infrastructure_complexity(
+        self, src_dir: Path, source_content_cache: dict
+    ) -> None:
         """Infrastructure functions must have CC <= 15."""
         self._check_layer(
-            src_dir, "infrastructure", self.MAX_COMPLEXITY["infrastructure"], source_content_cache
+            src_dir,
+            "infrastructure",
+            self.MAX_COMPLEXITY["infrastructure"],
+            source_content_cache,
         )
 
     def _check_layer(
-        self, src_dir: Path, layer: str, max_cc: int,
+        self,
+        src_dir: Path,
+        layer: str,
+        max_cc: int,
         source_content_cache: dict | None = None,
     ) -> None:
         """Check all functions in a layer for complexity."""
@@ -144,7 +192,8 @@ class TestFunctionComplexity:
         violations = []
         if source_content_cache is not None:
             items = (
-                (p, c) for p, c in source_content_cache.items()
+                (p, c)
+                for p, c in source_content_cache.items()
                 if layer_path in p.parents and not p.name.startswith("__")
             )
         else:
@@ -198,7 +247,9 @@ class TestFunctionLength:
     )
 
     def test_functions_under_100_lines(
-        self, src_dir: Path, source_ast_cache: dict,
+        self,
+        src_dir: Path,
+        source_ast_cache: dict,
     ) -> None:
         """All functions must be under 100 lines (with exemptions)."""
         violations = []
@@ -245,7 +296,9 @@ class TestClassSize:
     EXEMPTIONS = get_registry_values("class_size")
 
     def test_classes_under_300_lines(
-        self, src_dir: Path, source_ast_cache: dict,
+        self,
+        src_dir: Path,
+        source_ast_cache: dict,
     ) -> None:
         """All classes must be under 300 lines (with exemptions)."""
         violations = []
@@ -281,7 +334,9 @@ class TestClassSize:
             )
 
     def test_classes_under_20_methods(
-        self, src_dir: Path, source_ast_cache: dict,
+        self,
+        src_dir: Path,
+        source_ast_cache: dict,
     ) -> None:
         """Classes should not have more than 20 public methods."""
         violations = []
@@ -337,7 +392,9 @@ class TestGodObjectDetection:
     EXEMPTIONS = get_registry_values("god_object")
 
     def test_large_classes_have_delegation(
-        self, src_dir: Path, source_ast_cache: dict,
+        self,
+        src_dir: Path,
+        source_ast_cache: dict,
     ) -> None:
         """Large classes (>300 LOC) must show delegation patterns.
 

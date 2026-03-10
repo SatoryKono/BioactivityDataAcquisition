@@ -2,7 +2,10 @@
 
 Контракты данных для Gold-слоя BioETL.
 
-> В качестве source-of-truth используйте JSON-контракты в `docs/04-reference/contracts/gold/*.json`.
+> Source of truth для Gold-контрактов находится в
+> `src/bioetl/domain/contracts/gold/`.
+> JSON-файлы в `docs/04-reference/contracts/gold/*.json` публикуются из этих
+> кодовых контрактов скриптом `scripts/schema/generate_contracts.py`.
 > Ниже применяется snake_case нотация полей, синхронизированная с автогенерацией контрактов.
 
 > **Версия**: 1.1.0

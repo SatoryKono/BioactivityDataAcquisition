@@ -23,9 +23,7 @@ import pytest
 def src_python_files(src_dir: Path) -> list[Path]:
     """Sorted list of all *.py files under src/bioetl/ (no __pycache__)."""
     bioetl = src_dir / "bioetl"
-    return sorted(
-        p for p in bioetl.rglob("*.py") if "__pycache__" not in p.parts
-    )
+    return sorted(p for p in bioetl.rglob("*.py") if "__pycache__" not in p.parts)
 
 
 @pytest.fixture(scope="session")
