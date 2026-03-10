@@ -39,6 +39,7 @@ from bioetl.domain.contracts import (
     CompositeTargetGoldSchema,
 )
 from bioetl.domain.ports import LoggerPort
+from bioetl.infrastructure.clock.system_clock import SystemClock
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.config.field_group_loader import (
     FieldGroupLoadError,
@@ -533,12 +534,14 @@ def bootstrap_composite_runner(
     dependency_coordinator = DependencyCoordinator(
         logger=logger,
         delta_reader=delta_reader,
+        clock=SystemClock(),
     )
 
     coordinator = EnrichmentCoordinator(
         logger=logger,
         dq_config=config.dq,
         max_concurrency=config.execution.max_concurrency,
+        clock=SystemClock(),
     )
 
     # Load field group registry for semantic column grouping and Gold filtering
@@ -556,6 +559,7 @@ def bootstrap_composite_runner(
         merge_config=config.merge,
         storage=storage,
         logger=logger,
+        clock=SystemClock(),
         delta_reader=delta_reader,
         field_group_registry=field_group_registry,
         cross_validator=cross_validator,
@@ -568,6 +572,7 @@ def bootstrap_composite_runner(
         run_id=effective_run_id,
         checkpoint_dir=checkpoint_dir,
         logger=logger,
+        clock=SystemClock(),
         resume=runtime.resume,
     )
 
@@ -599,6 +604,7 @@ def bootstrap_composite_runner(
         run_id=effective_run_id,
         dq_report_service=dq_report_service,
         quarantine_port=quarantine_port,
+        clock=SystemClock(),
     )
 
 

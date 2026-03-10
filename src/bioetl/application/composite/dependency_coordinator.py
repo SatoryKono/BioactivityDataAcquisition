@@ -14,11 +14,11 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable, Sequence
-from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 import polars as pl
 
+from bioetl.application.clock import DefaultClock
 from bioetl.domain.composite.result import DependencyResult
 from bioetl.domain.exceptions import (
     BioETLError,
@@ -31,7 +31,7 @@ from bioetl.domain.exceptions import (
 if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.domain.composite.config import DependencyConfig
-    from bioetl.domain.ports import DeltaReaderPort, LoggerPort
+    from bioetl.domain.ports import ClockPort, DeltaReaderPort, LoggerPort
 
 
 _KEY_FILTER_ERRORS = (
@@ -95,6 +95,7 @@ class DependencyCoordinatorService:
         self,
         logger: LoggerPort,
         delta_reader: DeltaReaderPort | None = None,
+        clock: ClockPort | None = None,
     ) -> None:
         """Initialize dependency coordinator.
 
@@ -104,6 +105,7 @@ class DependencyCoordinatorService:
         """
         self._logger = logger
         self._delta_reader = delta_reader
+        self._clock = clock or DefaultClock()
 
     async def run_dependencies(
         self,
@@ -356,7 +358,7 @@ class DependencyCoordinatorService:
         Returns:
             DependencyResult with execution outcome.
         """
-        started_at = datetime.now(tz=UTC)
+        started_at = self._clock.now_utc()
 
         self._logger.info(
             "Starting dependency",
@@ -371,7 +373,7 @@ class DependencyCoordinatorService:
                 runner = runner_factory(dependency.pipeline, keys)
                 await runner.run()
 
-            completed_at = datetime.now(tz=UTC)
+            completed_at = self._clock.now_utc()
             duration = (completed_at - started_at).total_seconds()
 
             # Extract stats from runner
@@ -401,7 +403,7 @@ class DependencyCoordinatorService:
             )
 
         except TimeoutError:
-            duration = (datetime.now(tz=UTC) - started_at).total_seconds()
+            duration = (self._clock.now_utc() - started_at).total_seconds()
             self._logger.warning(
                 "Dependency timed out",
                 dependency=dependency.pipeline,
@@ -413,7 +415,7 @@ class DependencyCoordinatorService:
             )
 
         except _DEPENDENCY_EXECUTION_ERRORS as e:
-            duration = (datetime.now(tz=UTC) - started_at).total_seconds()
+            duration = (self._clock.now_utc() - started_at).total_seconds()
 
             if dependency.required:
                 self._logger.error(

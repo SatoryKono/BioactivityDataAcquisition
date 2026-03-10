@@ -9,12 +9,14 @@ Implements RULES.md §1.1 - Application layer depends only on Domain.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
 
+from bioetl.application.clock import DefaultClock
+
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort, StoragePort
+    from bioetl.domain.ports import ClockPort, LoggerPort, StoragePort
 
 
 @dataclass(frozen=True, slots=True)
@@ -61,6 +63,17 @@ class BronzeCleanupService:
 
     storage: StoragePort
     logger: LoggerPort
+    _clock: ClockPort = field(default_factory=DefaultClock)
+
+    def __init__(
+        self,
+        storage: StoragePort,
+        logger: LoggerPort,
+        clock: ClockPort | None = None,
+    ) -> None:
+        self.storage = storage
+        self.logger = logger
+        self._clock = clock or DefaultClock()
 
     async def cleanup(
         self,
@@ -79,7 +92,7 @@ class BronzeCleanupService:
         Returns:
             BronzeCleanupResult with cleanup statistics.
         """
-        cutoff_date = datetime.now(UTC) - timedelta(days=retention_days)
+        cutoff_date = self._clock.now_utc() - timedelta(days=retention_days)
 
         self.logger.info(
             "Starting Bronze cleanup",

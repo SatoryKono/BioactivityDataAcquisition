@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
+from bioetl.application.clock import DefaultClock
 from bioetl.domain.types import BatchID, BronzeRecord, GoldRecord
 
 if TYPE_CHECKING:
@@ -130,7 +130,7 @@ class _BatchExecutorDQMixin:
                 for rule in self._config.dq_config.key_nullability_rules
             ]
 
-        now_utc = datetime.now(UTC)
+        now_utc = DefaultClock().now_utc()
         current_date_str = now_utc.strftime("%Y-%m-%d")
         dq_entity = self._extract_dq_entity()
 

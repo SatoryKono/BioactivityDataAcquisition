@@ -9,11 +9,12 @@ Implements RULES.md §1.1 - Application layer depends only on Domain.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
+from bioetl.application.clock import DefaultClock
 from bioetl.domain.exceptions import BioETLError, NetworkError
-from bioetl.domain.ports import HealthCheckPort, HealthCheckResult
+from bioetl.domain.ports import ClockPort, HealthCheckPort, HealthCheckResult
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -76,7 +77,7 @@ class HealthResult:
     latency_ms: float | None = None
     endpoint: str | None = None
     error: str | None = None
-    checked_at: datetime = field(default_factory=lambda: datetime.now(tz=UTC))
+    checked_at: datetime = field(default_factory=lambda: DefaultClock().now_utc())
 
     @property
     def is_healthy(self) -> bool:
@@ -123,7 +124,7 @@ class HealthCheckSummary:
 
     results: dict[str, HealthResult]
     all_healthy: bool
-    checked_at: datetime = field(default_factory=lambda: datetime.now(tz=UTC))
+    checked_at: datetime = field(default_factory=lambda: DefaultClock().now_utc())
 
     @property
     def healthy_count(self) -> int:
@@ -165,6 +166,17 @@ class HealthService:
 
     logger: LoggerPort
     _factory: DataSourceFactoryPort
+    _clock: ClockPort
+
+    def __init__(
+        self,
+        logger: LoggerPort,
+        _factory: DataSourceFactoryPort,
+        clock: ClockPort | None = None,
+    ) -> None:
+        self.logger = logger
+        self._factory = _factory
+        self._clock = clock or DefaultClock()
 
     async def check_providers(
         self,
@@ -195,6 +207,7 @@ class HealthService:
         summary = HealthCheckSummary(
             results=results,
             all_healthy=all_healthy,
+            checked_at=self._clock.now_utc(),
         )
 
         self.logger.info(
@@ -242,6 +255,7 @@ class HealthService:
                 provider=provider,
                 status="unknown",
                 error="Adapter does not implement HealthCheckPort",
+                checked_at=self._clock.now_utc(),
             )
 
         except _HEALTH_SERVICE_ERRORS as e:
@@ -254,6 +268,7 @@ class HealthService:
                 provider=provider,
                 status="unhealthy",
                 error=str(e),
+                checked_at=self._clock.now_utc(),
             )
 
     def list_available_providers(self) -> list[str]:

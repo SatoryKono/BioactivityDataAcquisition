@@ -13,13 +13,14 @@ Note:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
+from bioetl.application.clock import DefaultClock
 from bioetl.domain.exceptions import BioETLError, MetricsServerError
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import ClockPort, LoggerPort
 
 # Re-export for backward compatibility
 __all__ = [
@@ -137,8 +138,21 @@ class MetricsService:
 
     logger: LoggerPort
     _server: MetricsServerPort
+    _clock: ClockPort = field(default_factory=DefaultClock, repr=False)
     _port: int | None = field(default=None, repr=False)
     _started_at: datetime | None = field(default=None, repr=False)
+
+    def __init__(
+        self,
+        logger: LoggerPort,
+        _server: MetricsServerPort,
+        clock: ClockPort | None = None,
+    ) -> None:
+        self.logger = logger
+        self._server = _server
+        self._clock = clock or DefaultClock()
+        self._port = None
+        self._started_at = None
 
     def _handle_start_error(
         self, port: int, e: Exception, fail_fast: bool
@@ -198,7 +212,7 @@ class MetricsService:
             )
             if success:
                 object.__setattr__(self, "_port", port)
-                object.__setattr__(self, "_started_at", datetime.now(tz=UTC))
+                object.__setattr__(self, "_started_at", self._clock.now_utc())
                 self.logger.info("Metrics server started", port=port)
                 return StartResult(success=True, port=port)
 

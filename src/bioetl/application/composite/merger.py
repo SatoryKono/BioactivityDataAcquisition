@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
+from bioetl.application.clock import DefaultClock
 from bioetl.application.composite.aggregator import EnricherAggregatorService
 from bioetl.application.composite.coalesce_policy import CoalescePolicyService
 from bioetl.application.composite.column_orderer import ColumnOrdererService
@@ -35,7 +35,7 @@ if TYPE_CHECKING:
         MergeConfig,
     )
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
-    from bioetl.domain.ports import DeltaReaderPort, LoggerPort, StoragePort
+    from bioetl.domain.ports import ClockPort, DeltaReaderPort, LoggerPort, StoragePort
 
 
 def _path_to_table_name(path: str) -> str:
@@ -58,6 +58,7 @@ class MergeService(MergeIOHelper, MergeCompatibilityHelper, MergeMetricsHelper):
         merge_config: MergeConfig,
         storage: StoragePort,
         logger: LoggerPort,
+        clock: ClockPort | None = None,
         delta_reader: DeltaReaderPort | None = None,
         field_group_registry: FieldGroupRegistry | None = None,
         cross_validator: EnrichmentCrossValidationService | None = None,
@@ -75,6 +76,7 @@ class MergeService(MergeIOHelper, MergeCompatibilityHelper, MergeMetricsHelper):
         self._config = merge_config
         self._storage = storage
         self._logger = logger
+        self._clock = clock or DefaultClock()
         self._delta_reader = delta_reader
         self._field_group_registry = field_group_registry
         self._cross_validator = cross_validator
@@ -123,7 +125,7 @@ class MergeService(MergeIOHelper, MergeCompatibilityHelper, MergeMetricsHelper):
         dependency_results: dict[str, DependencyResult] | None = None,
     ) -> MergeResult:
         """Merge seed, dependency, and enricher data into unified output."""
-        started_at = datetime.now(tz=UTC)
+        started_at = self._clock.now_utc()
 
         (
             seed_df,
@@ -199,7 +201,7 @@ class MergeService(MergeIOHelper, MergeCompatibilityHelper, MergeMetricsHelper):
 
         await self._write_outputs(merged_df, run_id=run_id, sources_used=sources_used)
 
-        completed_at = datetime.now(tz=UTC)
+        completed_at = self._clock.now_utc()
         duration = (completed_at - started_at).total_seconds()
 
         self._logger.info(

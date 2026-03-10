@@ -16,6 +16,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
+from bioetl.application.clock import DefaultClock
 from bioetl.application.services.data_quality_service import DataQualityService
 from bioetl.application.services.medallion_types import VacuumResult
 from bioetl.domain.exceptions import BioETLError
@@ -34,6 +35,7 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import (
         BronzeDQConfigPort,
+        ClockPort,
         GoldDQConfigPort,
         LoggerPort,
         MetadataCoordinatorPort,
@@ -117,6 +119,7 @@ class PostrunService:
         bronze_dq_config: BronzeDQConfigPort | None = None,
         silver_dq_config: SilverDQConfigPort | None = None,
         gold_dq_config: GoldDQConfigPort | None = None,
+        clock: ClockPort | None = None,
     ) -> None:
         """Initialize postrun service.
 
@@ -151,6 +154,7 @@ class PostrunService:
         self._bronze_dq_config = bronze_dq_config
         self._silver_dq_config = silver_dq_config
         self._gold_dq_config = gold_dq_config
+        self._clock = clock or DefaultClock()
         self._postrun_warning_allowlist = (
             BioETLError,
             OSError,
@@ -342,8 +346,6 @@ class PostrunService:
             executor: Pipeline executor with accumulated metrics.
             dq_reports: Results from DQ report generation (for cross-links).
         """
-        from datetime import UTC, datetime
-
         from bioetl.domain.ports import GoldMetadataInput, SilverMetadataInput
 
         # Get run-level statistics from executor
@@ -376,7 +378,7 @@ class PostrunService:
                 if dq_reports and dq_reports.silver_report_path
                 else None,
                 started_at=self._context.started_at,
-                completed_at=datetime.now(UTC),
+                completed_at=self._clock.now_utc(),
             )
             silver_metadata = self._metadata_coordinator.create_silver_metadata(
                 silver_input
@@ -407,7 +409,7 @@ class PostrunService:
                 dq_report_path=str(dq_reports.gold_report_path)
                 if dq_reports and dq_reports.gold_report_path
                 else None,
-                completed_at=datetime.now(UTC),
+                completed_at=self._clock.now_utc(),
                 gold_schema=self._config.gold_schema,
             )
             gold_metadata = self._metadata_coordinator.create_gold_metadata(gold_input)

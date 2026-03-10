@@ -57,6 +57,9 @@ ALLOWED_FILES: set[str] = {
     # This is for audit/lineage metadata, not Bronze/Silver/Gold data determinism.
     # Similar to silver_writer.py and gold_writer.py timestamp usage.
     "metadata_builder.py",
+    # infrastructure/clock/system_clock.py
+    # Dedicated infrastructure clock adapter used by composition for ClockPort.
+    "system_clock.py",
 }
 
 

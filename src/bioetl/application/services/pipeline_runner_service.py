@@ -9,11 +9,12 @@ Implements RULES.md §1.1 - Application Layer depends only on Domain.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime
 from enum import StrEnum
 from typing import TYPE_CHECKING, cast
 from uuid import UUID, uuid4
 
+from bioetl.application.clock import DefaultClock
 from bioetl.domain.context import (
     CachedBronzeContext,
     InputFilterContext,
@@ -25,6 +26,7 @@ from bioetl.domain.types import RunID, RunType
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
+        ClockPort,
         LoggerPort,
         MetricsExtractorPort,
         RunnablePort,
@@ -97,8 +99,8 @@ class RunResult:
     records_silver: int = 0
     records_gold: int = 0
     records_quarantined: int = 0
-    started_at: datetime = field(default_factory=lambda: datetime.now(tz=UTC))
-    completed_at: datetime = field(default_factory=lambda: datetime.now(tz=UTC))
+    started_at: datetime = field(default_factory=lambda: datetime(1970, 1, 1))
+    completed_at: datetime = field(default_factory=lambda: datetime(1970, 1, 1))
     error_message: str | None = None
     error_type: str | None = None
 
@@ -214,6 +216,19 @@ class PipelineRunnerService:
     runner_factory: RunnerFactoryPort
     metrics_extractor: MetricsExtractorPort
     logger: LoggerPort
+    _clock: ClockPort
+
+    def __init__(
+        self,
+        runner_factory: RunnerFactoryPort,
+        metrics_extractor: MetricsExtractorPort,
+        logger: LoggerPort,
+        clock: ClockPort | None = None,
+    ) -> None:
+        self.runner_factory = runner_factory
+        self.metrics_extractor = metrics_extractor
+        self.logger = logger
+        self._clock = clock or DefaultClock()
 
     async def run(
         self,
@@ -249,7 +264,7 @@ class PipelineRunnerService:
             >>> if result.status == PipelineRunResult.DRY_RUN:
             ...     logger.info("dry_run_complete", pipeline="chembl_activity")
         """
-        started_at = datetime.now(tz=UTC)
+        started_at = self._clock.now_utc()
 
         # Merge options with individual parameters
         effective_options = self._merge_options(options, dry_run)
@@ -284,7 +299,7 @@ class PipelineRunnerService:
                 run_id=str(effective_run_id),
                 run_type=effective_options.run_type,
                 started_at=started_at,
-                completed_at=datetime.now(tz=UTC),
+                completed_at=self._clock.now_utc(),
             )
 
         # Build context and create runner
@@ -450,7 +465,7 @@ class PipelineRunnerService:
                 error_type=error_type,
             )
 
-        completed_at = datetime.now(tz=UTC)
+        completed_at = self._clock.now_utc()
 
         # Extract metrics from runner
         metrics = self.metrics_extractor.extract_metrics(runner)

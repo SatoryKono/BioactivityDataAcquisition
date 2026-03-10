@@ -26,6 +26,7 @@ from bioetl.application.services.medallion_lifecycle import MedallionLifecycleSe
 from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 from bioetl.composition.registry import get_default_registry
+from bioetl.infrastructure.clock.system_clock import SystemClock
 from bioetl.infrastructure.config import get_settings, load_pipeline_config
 from bioetl.infrastructure.storage.delta_reader import DeltaReader
 
@@ -95,7 +96,11 @@ def bootstrap_bronze_cleanup_service() -> BronzeCleanupService:
     storage = bootstrap_storage_adapter()
     noop_logger = create_noop_logger()
 
-    return BronzeCleanupService(storage=storage, logger=noop_logger)
+    return BronzeCleanupService(
+        storage=storage,
+        logger=noop_logger,
+        clock=SystemClock(),
+    )
 
 
 def bootstrap_vacuum_service() -> VacuumService:

@@ -34,6 +34,7 @@ from bioetl.domain.ports.audit import (
     AuditPort,
 )
 from bioetl.domain.ports.checkpoint import CheckpointPort
+from bioetl.domain.ports.clock import ClockPort
 from bioetl.domain.ports.data_normalization import DataNormalizationPort
 from bioetl.domain.ports.data_source import (
     DataSourcePort,
@@ -112,6 +113,7 @@ __all__ = [
     "BronzeMetadataInput",
     "CheckpointPort",
     "CircuitBreakerPort",
+    "ClockPort",
     "DQMonitorPort",
     "DQReportWriterPort",
     "DataNormalizationPort",

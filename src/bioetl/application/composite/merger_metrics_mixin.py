@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -13,7 +12,7 @@ if TYPE_CHECKING:
 
     from bioetl.domain.composite.config import EnricherConfig, MergeConfig
     from bioetl.domain.composite.result import DependencyResult, EnrichmentResult
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import ClockPort, LoggerPort
 
 
 class MergeMetricsHelper:
@@ -21,6 +20,7 @@ class MergeMetricsHelper:
 
     _config: MergeConfig
     _logger: LoggerPort
+    _clock: ClockPort
     _parse_pipeline_name: Callable[[str], tuple[str, str]]
 
     def _add_lineage(
@@ -46,7 +46,7 @@ class MergeMetricsHelper:
                 pl.lit(run_id).alias("_composite_run_id"),
                 pl.lit(str(sources_used)).alias("_source_providers"),
                 pl.lit(str(status_dict)).alias("_enrichment_status"),
-                pl.lit(datetime.now(tz=UTC).isoformat()).alias("_lineage_created_at"),
+                pl.lit(self._clock.now_utc().isoformat()).alias("_lineage_created_at"),
             ]
         )
 

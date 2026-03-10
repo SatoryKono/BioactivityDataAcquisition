@@ -16,6 +16,7 @@ from bioetl.composition.factories.runner_factory import (
     create_runner_factory,
 )
 from bioetl.composition.registry import PipelineRegistry
+from bioetl.infrastructure.clock.system_clock import SystemClock
 
 __all__ = ["bootstrap_pipeline_runner_service"]
 
@@ -55,4 +56,5 @@ def bootstrap_pipeline_runner_service(
         runner_factory=runner_factory,
         metrics_extractor=metrics_extractor,
         logger=logger,
+        clock=SystemClock(),
     )

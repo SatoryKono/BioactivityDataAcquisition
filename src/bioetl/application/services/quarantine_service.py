@@ -8,14 +8,15 @@ Implements RULES.md §1.1 - Application layer depends only on Domain.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from datetime import UTC, datetime
+from dataclasses import dataclass, field
+from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
+from bioetl.application.clock import DefaultClock
 from bioetl.domain.types import QuarantineRecordStatus
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort, QuarantinePort
+    from bioetl.domain.ports import ClockPort, LoggerPort, QuarantinePort
 
 
 @dataclass(frozen=True, slots=True)
@@ -60,6 +61,18 @@ class QuarantineService:
 
     quarantine_port: QuarantinePort
     logger: LoggerPort
+
+    _clock: ClockPort = field(default_factory=DefaultClock)
+
+    def __init__(
+        self,
+        quarantine_port: QuarantinePort,
+        logger: LoggerPort,
+        clock: ClockPort | None = None,
+    ) -> None:
+        self.quarantine_port = quarantine_port
+        self.logger = logger
+        self._clock = clock or DefaultClock()
 
     async def inspect(
         self,
@@ -152,7 +165,7 @@ class QuarantineService:
         Returns:
             List of quarantine records suitable for replay.
         """
-        now = datetime.now(tz=UTC)
+        now = self._clock.now_utc()
         self.logger.info(
             "Replaying quarantine records",
             pipeline=pipeline,
@@ -224,7 +237,7 @@ class QuarantineService:
         Returns:
             Number of records deleted.
         """
-        now = datetime.now(tz=UTC)
+        now = self._clock.now_utc()
         self.logger.info(
             "Purging old quarantine records",
             pipeline=pipeline,

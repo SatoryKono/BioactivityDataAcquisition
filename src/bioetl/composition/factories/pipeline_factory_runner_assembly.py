@@ -19,6 +19,7 @@ from bioetl.composition.factories.pipeline_factory_dq_helpers import (
 from bioetl.composition.factories.services_factory import ServicesBuilder
 from bioetl.domain.locking import LockContextHolder
 from bioetl.domain.medallion import LoadingStrategy
+from bioetl.infrastructure.clock.system_clock import SystemClock
 
 if TYPE_CHECKING:
     import pyarrow as pa
@@ -113,6 +114,7 @@ def assemble_runner_impl(
         bronze_dq_config=dq_configs.bronze if dq_configs else None,
         silver_dq_config=dq_configs.silver if dq_configs else None,
         gold_dq_config=dq_configs.gold if dq_configs else None,
+        clock=SystemClock(),
     )
 
     observer = PipelineObserver(

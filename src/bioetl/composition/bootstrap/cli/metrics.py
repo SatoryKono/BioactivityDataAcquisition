@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from bioetl.application.services.metrics_service import MetricsService
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
+from bioetl.infrastructure.clock.system_clock import SystemClock
 from bioetl.infrastructure.observability.metrics_server_adapter import (
     MetricsServerAdapter,
 )
@@ -39,4 +40,5 @@ def bootstrap_metrics_service() -> MetricsService:
     return MetricsService(
         logger=logger,
         _server=server,
+        clock=SystemClock(),
     )

@@ -23,6 +23,7 @@ from bioetl.composition.bootstrap.assembly.checkpoint import (
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
+from bioetl.infrastructure.clock.system_clock import SystemClock
 from bioetl.infrastructure.config import get_settings
 
 __all__ = [
@@ -115,4 +116,5 @@ def bootstrap_quarantine_service() -> QuarantineService:
     return QuarantineService(
         quarantine_port=quarantine_port,
         logger=noop_logger,
+        clock=SystemClock(),
     )
