@@ -198,6 +198,8 @@ Rejected because:
 - **Main thread requirement**: Signal handlers can only be set in main thread. Mitigated by try/except in setup.
 - **Blocking operations**: Long-running sync operations can delay shutdown. Mitigated by using async throughout.
 
+> **Note (ADR-010):** BioETL uses Local-Only deployment. The Kubernetes section below is retained for historical reference but is not applicable to the current architecture.
+
 ## Kubernetes Integration
 
 ```yaml

@@ -4,7 +4,9 @@ from __future__ import annotations
 
 __all__ = ["SilverWriterValidationMixin"]
 
+import asyncio
 from collections.abc import Awaitable, Callable
+from functools import partial
 from typing import TYPE_CHECKING, Any, Literal
 
 import pyarrow as pa
@@ -22,6 +24,40 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort, SilverValidatorPort
     from bioetl.domain.types import BronzeRecord
     from bioetl.domain.value_objects.dq_metrics import SchemaDriftInfo
+
+
+def _sync_validate_and_build_arrow(
+    mixin: SilverWriterValidationMixin,
+    *,
+    table_name: str,
+    records: list[BronzeRecord],
+    primary_keys: list[str],
+    schema: pa.Schema,
+    mode: str,
+    column_order: list[str] | None,
+    partition_cols: list[str] | None,
+    key_nullability_rules: list[KeyNullabilityRule] | None,
+) -> tuple[list[BronzeRecord], SilverWriteMode, pa.Table]:
+    """Run synchronous Silver validation steps and build Arrow payload."""
+    records = mixin._deduplicate_by_primary_keys(records, primary_keys)
+    validated_mode = mixin._validate_write_mode(mode)
+    mixin._enforce_write_policy(validated_mode, table_name)
+    mixin._validate_records(records, table_name, schema)
+    mixin._validate_key_nullability(
+        records,
+        primary_keys,
+        partition_cols,
+        key_nullability_rules,
+        table_name,
+    )
+    mixin._validate_silver_pandera(records, table_name)
+    arrow_data = mixin._prepare_arrow_data(
+        records,
+        schema,
+        primary_keys,
+        column_order=column_order,
+    )
+    return records, validated_mode, arrow_data
 
 
 class SilverWriterValidationMixin:
@@ -276,24 +312,22 @@ class SilverWriterValidationMixin:
         key_nullability_rules: list[KeyNullabilityRule] | None,
     ) -> tuple[list[BronzeRecord], SilverWriteMode, str, pa.Table]:
         """Run full validation chain and prepare Arrow data for write."""
-        records = self._deduplicate_by_primary_keys(records, primary_keys)
-        validated_mode = self._validate_write_mode(mode)
-        self._enforce_write_policy(validated_mode, table_name)
-        self._validate_records(records, table_name, schema)
-        self._validate_key_nullability(
-            records,
-            primary_keys,
-            partition_cols,
-            key_nullability_rules,
-            table_name,
+        loop = asyncio.get_running_loop()
+        records, validated_mode, arrow_data = await loop.run_in_executor(
+            None,
+            partial(
+                _sync_validate_and_build_arrow,
+                self,
+                table_name=table_name,
+                records=records,
+                primary_keys=primary_keys,
+                schema=schema,
+                mode=mode,
+                column_order=column_order,
+                partition_cols=partition_cols,
+                key_nullability_rules=key_nullability_rules,
+            ),
         )
-        self._validate_silver_pandera(records, table_name)
         await self._check_schema_drift(table_name, records, on_schema_mismatch)
         table_path = self._resolve_table_path(table_name)
-        arrow_data = self._prepare_arrow_data(
-            records,
-            schema,
-            primary_keys,
-            column_order=column_order,
-        )
         return records, validated_mode, table_path, arrow_data

@@ -18,8 +18,9 @@ src/bioetl/
 ├── application/      # Use Cases, Pipeline definitions
 ├── infrastructure/   # Adapters (implementations of Ports)
 ├── composition/      # Composition Root, DI wiring ← SEPARATE
-│   ├── bootstrap.py
-│   └── factories/
+│   ├── bootstrap/    # Bootstrap package (assembly, CLI, runtime)
+│   ├── factories/
+│   └── ...
 └── interfaces/       # Driving Adapters (CLI, API, Orchestration)
     ├── cli.py
     └── orchestration/

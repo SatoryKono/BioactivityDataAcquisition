@@ -1,160 +1,25 @@
-"""Minimal HTTP CONNECT proxy for WSL2 → Windows VPN tunnel.
+#!/usr/bin/env python3
+"""Compatibility wrapper for canonical script.
 
-Listens on 0.0.0.0:3128 so WSL2 can reach it via the Windows host IP.
-Supports both HTTP CONNECT (for HTTPS) and plain HTTP forwarding.
-
-Usage:
-    python scripts/wsl_proxy.py          # foreground
-    pythonw scripts/wsl_proxy.py         # background (no console)
-    start /B python scripts/wsl_proxy.py # background via cmd
+Canonical script:
+- scripts/ops/wsl_proxy.py
 """
 
 from __future__ import annotations
 
-import logging
-import select
-import socket
-import threading
-
-LISTEN_HOST = "0.0.0.0"
-LISTEN_PORT = 3128
-BUFFER_SIZE = 65536
-CONNECT_TIMEOUT = 10
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    datefmt="%H:%M:%S",
-)
-log = logging.getLogger("wsl-proxy")
+import runpy
+import sys
+from pathlib import Path
 
 
-def relay(src: socket.socket, dst: socket.socket) -> None:
-    """Bidirectional byte relay between two sockets."""
-    try:
-        while True:
-            readable, _, _ = select.select([src, dst], [], [], 60)
-            if not readable:
-                break
-            for sock in readable:
-                data = sock.recv(BUFFER_SIZE)
-                if not data:
-                    return
-                peer = dst if sock is src else src
-                peer.sendall(data)
-    except (OSError, ConnectionResetError):
-        pass
-    finally:
-        src.close()
-        dst.close()
-
-
-def handle_connect(client: socket.socket, host: str, port: int) -> None:
-    """Handle CONNECT method (HTTPS tunneling)."""
-    try:
-        remote = socket.create_connection((host, port), timeout=CONNECT_TIMEOUT)
-    except OSError as exc:
-        client.sendall(f"HTTP/1.1 502 Bad Gateway\r\n\r\n{exc}\r\n".encode())
-        client.close()
-        return
-
-    client.sendall(b"HTTP/1.1 200 Connection Established\r\n\r\n")
-    log.info("CONNECT %s:%d", host, port)
-    relay(client, remote)
-
-
-def handle_plain(client: socket.socket, method: str, url: str, rest: bytes) -> None:
-    """Forward plain HTTP request."""
-    # url = http://host:port/path
-    if url.startswith("http://"):
-        url = url[7:]
-    slash = url.find("/")
-    if slash == -1:
-        host_port, path = url, "/"
-    else:
-        host_port, path = url[:slash], url[slash:]
-
-    if ":" in host_port:
-        host, port = host_port.rsplit(":", 1)
-        port = int(port)
-    else:
-        host, port = host_port, 80
-
-    try:
-        remote = socket.create_connection((host, port), timeout=CONNECT_TIMEOUT)
-    except OSError as exc:
-        client.sendall(f"HTTP/1.1 502 Bad Gateway\r\n\r\n{exc}\r\n".encode())
-        client.close()
-        return
-
-    # Rebuild request with relative path
-    request_line = f"{method} {path} HTTP/1.1\r\n".encode()
-    remote.sendall(request_line + rest)
-    log.info("%s %s:%d%s", method, host, port, path)
-    relay(client, remote)
-
-
-def handle_client(client: socket.socket, addr: tuple[str, int]) -> None:
-    """Parse first line and dispatch."""
-    try:
-        data = client.recv(BUFFER_SIZE)
-        if not data:
-            client.close()
-            return
-
-        line_end = data.find(b"\r\n")
-        if line_end == -1:
-            client.close()
-            return
-
-        first_line = data[:line_end].decode("utf-8", errors="replace")
-        parts = first_line.split()
-        if len(parts) < 2:
-            client.close()
-            return
-
-        method, target = parts[0], parts[1]
-
-        if method.upper() == "CONNECT":
-            # CONNECT host:port HTTP/1.1
-            if ":" in target:
-                host, port = target.rsplit(":", 1)
-                port = int(port)
-            else:
-                host, port = target, 443
-            # Consume remaining headers
-            while b"\r\n\r\n" not in data:
-                more = client.recv(BUFFER_SIZE)
-                if not more:
-                    break
-                data += more
-            handle_connect(client, host, port)
-        else:
-            # Plain HTTP: forward rest of data after first line
-            rest = data[line_end + 2:]
-            handle_plain(client, method, target, rest)
-    except Exception:
-        log.exception("Error handling %s", addr)
-        client.close()
-
-
-def main() -> None:
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server.bind((LISTEN_HOST, LISTEN_PORT))
-    server.listen(128)
-    log.info("WSL proxy listening on %s:%d", LISTEN_HOST, LISTEN_PORT)
-
-    try:
-        while True:
-            client, addr = server.accept()
-            t = threading.Thread(target=handle_client, args=(client, addr), daemon=True)
-            t.start()
-    except KeyboardInterrupt:
-        log.info("Shutting down")
-    finally:
-        server.close()
+def _canonical_script() -> Path:
+    repo_root = Path(__file__).resolve().parents[1]
+    return repo_root / "scripts" / "ops" / "wsl_proxy.py"
 
 
 if __name__ == "__main__":
-    main()
+    script = _canonical_script()
+    if not script.exists():
+        sys.stderr.write(f"ERROR: canonical script not found: {script}\n")
+        raise SystemExit(2)
+    runpy.run_path(str(script), run_name="__main__")

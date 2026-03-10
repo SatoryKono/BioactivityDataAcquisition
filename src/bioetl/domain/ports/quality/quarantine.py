@@ -56,6 +56,21 @@ class QuarantinePort(Protocol):
         """
         ...
 
+    async def write_many(
+        self,
+        records: list[MetaDict],
+    ) -> None:
+        """Write multiple quarantine events in one storage operation.
+
+        Args:
+            records: Normalized quarantine write request dictionaries. Each item
+                is expected to include the same fields as ``write()``:
+                ``pipeline``, ``error_code``, ``payload``, ``bronze_batch_id``,
+                optional ``run_id``, optional ``metadata``, and
+                ``ingestion_ts``.
+        """
+        ...
+
     async def inspect(
         self,
         pipeline: str,

@@ -194,22 +194,24 @@ Considered but mixin preferred because:
 ```python
 from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
 
-class ChEMBLActivityAdapter(PaginatedFetcherMixin):
+class UniProtAdapter(PaginatedFetcherMixin):
     async def fetch(
         self, watermark: Watermark | None, limit: int | None
     ) -> AsyncIterator[dict]:
-        async def fetch-page(offset: int | None, fetched: int):
+        async def fetch_page(offset: int | None, fetched: int):
             page = await self.client.get(
-                "/activity",
-                params={"offset": offset or 0, "limit": self.page-size}
+                "/uniprotkb/search",
+                params={"cursor": offset, "size": self.page_size}
             )
-            items = page.json()["activities"]
-            next-offset = (offset or 0) + len(items) if items else None
-            return items, next-offset
+            items = page.json()["results"]
+            next_cursor = page.headers.get("x-next-cursor")
+            return items, next_cursor
 
-        async for item in self.paginated-fetch(fetch-page, limit=limit):
+        async for item in self.paginated_fetch(fetch_page, limit=limit):
             yield item
 ```
+
+> **Note:** ChEMBL uses a specialized `ChemblFetchPagingMixin` instead of the generic `PaginatedFetcherMixin`.
 
 ## Related ADRs
 

@@ -74,7 +74,7 @@ class _ObserverContextManagerMixin(_ObserverEventMixin):
         if exc_val is None:
             return "success", False
         if isinstance(exc_val, PipelineShutdownError):
-            return "shutdown", True
+            return "shutdown", False
         return "failed", False
 
     def _record_pipeline_run_metrics(self, duration: float, status: str) -> None:

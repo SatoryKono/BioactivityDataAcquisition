@@ -37,7 +37,7 @@ BioETL follows a **Hexagonal Architecture** (Ports & Adapters) pattern with **Me
 
 See [decisions/README.md](decisions/README.md) for full index with categories.
 
-40 ADRs documenting key architectural decisions:
+43 ADRs documenting key architectural decisions:
 
 | ADR                                                               | Topic                                    | RULES.md Reference |
 | ----------------------------------------------------------------- | ---------------------------------------- | ------------------ |
@@ -81,6 +81,9 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 | [ADR-038](decisions/ADR-038-enum-externalization.md)              | Enum Externalization                     | -                  |
 | [ADR-039](decisions/ADR-039-unified-entity-config-format.md)      | Unified Entity Config Format             | App D              |
 | [ADR-040](decisions/ADR-040-diagram-governance.md)                | Diagram Governance                       | -                  |
+| [ADR-041](decisions/ADR-041-naming-policy-skills-agents.md)         | Naming Policy for Skills & Agents        | -                  |
+| [ADR-042](decisions/ADR-042-testing-strategy-matrix.md)             | Testing Strategy Matrix                  | -                  |
+| [ADR-043](decisions/ADR-043-documentation-knowledge-management.md)  | Documentation & Knowledge Management     | -                  |
 
 ----------------------------------------------------------------------
 
@@ -88,13 +91,13 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 
 ### Import Matrix (Layer Dependencies)
 
-| From ↓ / To →      | domain | application | composition | infrastructure | interfaces |
-| ------------------ | ------ | ----------- | ----------- | -------------- | ---------- |
-| **domain**         | ✅     | ❌          | ❌          | ❌             | ❌         |
-| **application**    | ✅     | ✅          | ❌          | ❌             | ❌         |
-| **composition**    | ✅     | ✅          | ✅          | ✅             | ❌         |
-| **infrastructure** | ✅     | ❌          | ❌          | ✅             | ❌         |
-| **interfaces**     | ✅     | ✅          | ✅          | ✅             | ✅         |
+| From ↓ / To →      | domain | application | infrastructure | composition | interfaces |
+| ------------------ | ------ | ----------- | -------------- | ----------- | ---------- |
+| **domain**         | ✅     | ❌          | ❌             | ❌          | ❌         |
+| **application**    | ✅     | ✅          | ❌             | ❌          | ❌         |
+| **infrastructure** | ✅     | ❌          | ✅             | ❌          | ❌         |
+| **composition**    | ✅     | ✅          | ✅             | ✅          | ❌         |
+| **interfaces**     | ✅     | ✅          | ✅             | ✅          | ✅         |
 
 **Violation = PR Blocker.** Enforced by `import-linter` and `tests/architecture/`.
 

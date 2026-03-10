@@ -314,6 +314,6 @@ finally:
 
 ## Связанные документы
 
-- `docs/refactoring/basepipeline-dependency-map.md`
-- `docs/refactoring/entry-criteria-check.md`
 - `RULES.md` Section 1.1 (Ports & Adapters)
+
+> **Note:** Planning docs `docs/refactoring/basepipeline-dependency-map.md` and `docs/refactoring/entry-criteria-check.md` were archived after the refactoring was completed.

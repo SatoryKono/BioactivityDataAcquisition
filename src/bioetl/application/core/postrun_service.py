@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Awaitable
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.postrun_cleanup_orchestrator import (
@@ -106,6 +107,34 @@ def _create_postrun_compact_service(
         logger=logger,
         warning_allowlist=warning_allowlist,
     )
+
+
+def _resolve_report_path(
+    dq_reports: DQReportResult | None,
+    *,
+    layer: str,
+) -> str | None:
+    """Resolve report path by layer from optional DQ report result."""
+    if dq_reports is None:
+        return None
+    if layer == "silver":
+        path = dq_reports.silver_report_path
+    elif layer == "gold":
+        path = dq_reports.gold_report_path
+    else:
+        return None
+    return str(path) if path else None
+
+
+def _get_run_statistics(executor: ExecutorMetricsPort) -> dict[str, object]:
+    """Collect optional run-level statistics from executor."""
+    get_stats = getattr(executor, "get_run_statistics", None)
+    if not callable(get_stats):
+        return {}
+    raw_stats = get_stats()
+    if isinstance(raw_stats, dict):
+        return raw_stats
+    return {}
 
 
 @dataclass(frozen=True, slots=True)
@@ -279,7 +308,7 @@ class PostrunService:
 
         import asyncio
 
-        stats = self._get_run_statistics(executor)
+        stats = _get_run_statistics(executor)
         completed_at = datetime.now(UTC)
         write_coros = [
             coro
@@ -299,34 +328,6 @@ class PostrunService:
         ]
         if write_coros:
             await asyncio.gather(*write_coros)
-
-    @staticmethod
-    def _get_run_statistics(executor: ExecutorMetricsPort) -> dict[str, object]:
-        """Collect optional run-level statistics from executor."""
-        get_stats = getattr(executor, "get_run_statistics", None)
-        if not callable(get_stats):
-            return {}
-        raw_stats = get_stats()
-        if isinstance(raw_stats, dict):
-            return raw_stats
-        return {}
-
-    def _resolve_report_path(
-        self,
-        dq_reports: DQReportResult | None,
-        *,
-        layer: str,
-    ) -> str | None:
-        """Resolve report path by layer from optional DQ report result."""
-        if dq_reports is None:
-            return None
-        if layer == "silver":
-            path = dq_reports.silver_report_path
-        elif layer == "gold":
-            path = dq_reports.gold_report_path
-        else:
-            return None
-        return str(path) if path else None
 
     def _build_silver_metadata_write_coro(
         self,
@@ -356,7 +357,7 @@ class PostrunService:
             total_records=cast("int | None", stats.get("records_silver")),
             source_batch_ids=cast("list[str] | None", stats.get("source_batch_ids")),
             version_after=version_after,
-            dq_report_path=self._resolve_report_path(dq_reports, layer="silver"),
+            dq_report_path=_resolve_report_path(dq_reports, layer="silver"),
             started_at=self._context.started_at,
             completed_at=completed_at,
         )
@@ -382,17 +383,21 @@ class PostrunService:
 
         if not self._metadata_coordinator or not self._metadata_writer:
             return None
+        if self._runtime.skip_gold:
+            return None
         gold_table = self._config.table.gold_table
         if not gold_table:
             return None
 
-        gold_path = self._storage.get_table_path(gold_table, layer="gold")
+        gold_path = Path(self._storage.get_table_path(gold_table, layer="gold"))
+        if not (gold_path / "_delta_log").is_dir():
+            return None
         gold_input = GoldMetadataInput(
             table_path=str(gold_path),
             table_name=gold_table,
             mode=self._config.table.gold_write_mode,
             total_records=cast("int | None", stats.get("records_gold")),
-            dq_report_path=self._resolve_report_path(dq_reports, layer="gold"),
+            dq_report_path=_resolve_report_path(dq_reports, layer="gold"),
             completed_at=completed_at,
             gold_schema=self._config.gold_schema,
         )

@@ -142,7 +142,7 @@ class HttpClientFactory:
 ### Usage in Adapters
 
 ```python
-class ChEMBLAdapter(BaseHttpAdapter):
+class ChemblAdapter(BaseHttpAdapter):
     async def fetch(self, entity_type: str, limit: int | None = None):
         async with self.-http-client:
             response = await self.-http-client.get(

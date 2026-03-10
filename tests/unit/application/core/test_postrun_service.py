@@ -427,6 +427,58 @@ class TestPostrunServiceBatchMetrics:
         assert metrics["silver_yield"] == 0.95
         assert metrics["gold_yield"] == 0.90
 
+
+@pytest.mark.unit
+class TestPostrunServiceMetadata:
+    """Tests for final metadata writing behavior."""
+
+    @pytest.mark.asyncio
+    async def test_write_final_metadata_skips_gold_when_runtime_skip_gold(
+        self,
+        mock_context,
+        mock_dq_service,
+        mock_lifecycle_service,
+        mock_storage,
+        mock_metrics,
+        mock_logger,
+        mock_metadata_coordinator,
+        mock_metadata_writer,
+    ) -> None:
+        """Gold metadata should not be written when Gold output is disabled."""
+        pipeline_config = PipelineConfig(
+            pipeline_name="test_postrun_pipeline",
+            provider="chembl",
+            entity_type="activity",
+            table=TableConfig(
+                primary_keys=["activity_id"],
+                silver_table="test_silver",
+                gold_table="test_gold",
+            ),
+        )
+        runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, skip_gold=True)
+        mock_storage.get_table_path = MagicMock(return_value="/tmp/test_gold")
+
+        service = PostrunService(
+            config=pipeline_config,
+            runtime=runtime,
+            context=mock_context,
+            dq_service=mock_dq_service,
+            lifecycle_service=mock_lifecycle_service,
+            storage=mock_storage,
+            metrics=mock_metrics,
+            logger=mock_logger,
+            metadata_coordinator=mock_metadata_coordinator,
+            metadata_writer=mock_metadata_writer,
+        )
+
+        executor = MagicMock()
+        executor.get_run_statistics = MagicMock(return_value={})
+
+        await service._write_final_metadata(executor, dq_reports=None)
+
+        mock_metadata_writer.write_silver_metadata.assert_awaited_once()
+        mock_metadata_writer.write_gold_metadata.assert_not_awaited()
+
     def test_collect_batch_metrics_handles_zero_records(self, postrun_service):
         """Test batch metrics collection with zero records."""
         zero_executor = MagicMock()

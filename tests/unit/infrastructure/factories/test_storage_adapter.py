@@ -528,6 +528,33 @@ class TestStorageAdapterAdditionalPaths:
         assert removed == 0
 
     @pytest.mark.asyncio
+    async def test_vacuum_skips_metadata_only_gold_directory(
+        self, storage_adapter: StorageAdapter, tmp_path: Path
+    ) -> None:
+        """vacuum should ignore Gold directories that are not real Delta tables."""
+        silver_table = tmp_path / "silver_table"
+        (silver_table / "_delta_log").mkdir(parents=True)
+        (silver_table / "_delta_log" / "00000000000000000000.json").write_text(
+            "{}",
+            encoding="utf-8",
+        )
+        gold_table = tmp_path / "gold_table"
+        gold_table.mkdir()
+        (gold_table / "chembl_activity_metadata.yaml").write_text(
+            "metadata: true\n",
+            encoding="utf-8",
+        )
+
+        storage_adapter.silver.get_table_path = MagicMock(return_value=silver_table)
+        storage_adapter.gold.get_table_path = MagicMock(return_value=gold_table)
+        storage_adapter.silver.vacuum = AsyncMock(return_value=["silver-file.parquet"])
+
+        removed = await storage_adapter.vacuum("chembl.activity", retention_hours=24)
+
+        assert removed == 1
+        storage_adapter.silver.vacuum.assert_awaited_once()
+
+    @pytest.mark.asyncio
     async def test_archive_copies_silver_and_gold_and_optional_remove_source(
         self, storage_adapter: StorageAdapter, tmp_path: Path
     ) -> None:

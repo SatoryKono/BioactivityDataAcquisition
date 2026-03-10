@@ -88,6 +88,7 @@ def test_build_pipeline_runner_wires_dependencies() -> None:
         query=None,
         dry_run=False,
         skip_gold=False,
+        start_offset=None,
         input_filter=SimpleNamespace(enabled=False),
     )
 
@@ -154,6 +155,7 @@ def test_build_pipeline_runner_uses_default_registry() -> None:
         query=None,
         dry_run=False,
         skip_gold=False,
+        start_offset=None,
         input_filter=SimpleNamespace(enabled=False),
     )
 
@@ -213,6 +215,7 @@ def test_build_pipeline_runner_forces_probe_mode_in_test_mode() -> None:
         query=None,
         dry_run=False,
         skip_gold=False,
+        start_offset=None,
         input_filter=SimpleNamespace(enabled=False),
     )
 
@@ -275,6 +278,7 @@ def test_build_pipeline_runner_uses_configured_mode_outside_test_mode() -> None:
         query=None,
         dry_run=False,
         skip_gold=False,
+        start_offset=None,
         input_filter=SimpleNamespace(enabled=False),
     )
 
@@ -298,6 +302,68 @@ def test_build_pipeline_runner_uses_configured_mode_outside_test_mode() -> None:
     )
 
     assert captured["health_check_mode"] == "probe"
+
+
+def test_build_pipeline_runner_forces_skip_gold_when_sink_disabled() -> None:
+    """Builder should disable Gold writes when pipeline YAML disables Gold sink."""
+    fake_factory = _FakeFactory()
+    fake_registry = _FakeRegistry(factory=fake_factory)
+
+    def get_settings_fn() -> SimpleNamespace:
+        return SimpleNamespace(
+            pipeline=SimpleNamespace(heartbeat_interval=30, health_check_mode="strict"),
+            test_mode=False,
+        )
+
+    def load_pipeline_config_fn(_: str) -> SimpleNamespace:
+        return SimpleNamespace(
+            pipeline_name="chembl_activity",
+            maintenance=SimpleNamespace(auto_vacuum=False, vacuum_retention_days=7),
+            input_filter=SimpleNamespace(),
+            business_primary_keys=["activity_id"],
+            technical_primary_key="entity_id",
+            batch_size=100,
+            provider="chembl",
+            sink={"gold": SimpleNamespace(enabled=False)},
+        )
+
+    context = SimpleNamespace(
+        pipeline_name="chembl_activity",
+        run_id=uuid4(),
+        log_level="INFO",
+        vacuum=SimpleNamespace(enabled=None, retention_days=7),
+        run_type="incremental",
+        resume=False,
+        limit=None,
+        query=None,
+        dry_run=False,
+        skip_gold=False,
+        start_offset=None,
+        input_filter=SimpleNamespace(enabled=False),
+    )
+
+    runner_builder.build_pipeline_runner(
+        context,
+        registry=fake_registry,
+        register_all_providers_fn=lambda: None,
+        register_all_pipelines_fn=lambda registry=None: None,
+        get_settings_fn=get_settings_fn,
+        load_pipeline_config_fn=load_pipeline_config_fn,
+        build_observability_bundle_fn=lambda **_: SimpleNamespace(
+            logger=SimpleNamespace(info=lambda *_, **__: None)
+        ),
+        assemble_vacuum_settings_fn=lambda **_: SimpleNamespace(
+            enabled=False,
+            retention_days=7,
+        ),
+        assemble_runtime_config_fn=runner_builder._assemble_runtime_config,
+        assemble_filter_config_fn=lambda **_: None,
+        assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
+    )
+
+    assert fake_factory.kwargs is not None
+    runtime = fake_factory.kwargs["runtime"]
+    assert getattr(runtime, "skip_gold") is True
 
 
 def test_assemble_filter_config_passes_cli_overrides_when_enabled() -> None:

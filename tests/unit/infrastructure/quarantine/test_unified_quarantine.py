@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from datetime import UTC, datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import UUID
 
 import pytest
@@ -28,6 +28,14 @@ def _extract_record_from_call(mock_call) -> dict:
     # data is a RecordBatchReader
     table = data.read_all()
     return table.to_pylist()[0]
+
+
+def _extract_records_from_call(mock_call) -> list[dict]:
+    """Extract all records from a write_deltalake mock call."""
+    call_kwargs = mock_call.call_args.kwargs
+    data = call_kwargs["data"]
+    table = data.read_all()
+    return table.to_pylist()
 
 
 @pytest.mark.unit
@@ -256,6 +264,66 @@ class TestUnifiedQuarantineWrite:
 
         record = _extract_record_from_call(mock_write_deltalake)
         assert record["dq_status"] == QuarantineRecordStatus.NEW.value
+
+    @pytest.mark.asyncio
+    async def test_write_many_batches_records_in_single_append(
+        self, quarantine, batch_id, mock_write_deltalake
+    ):
+        """Bulk write should append all records in one Delta call."""
+        await quarantine.write_many(
+            [
+                {
+                    "pipeline": "test",
+                    "error_code": "ERROR",
+                    "payload": {"id": 1},
+                    "bronze_batch_id": batch_id,
+                    "ingestion_ts": TEST_INGESTION_TS,
+                },
+                {
+                    "pipeline": "test",
+                    "error_code": "ERROR",
+                    "payload": {"id": 2},
+                    "bronze_batch_id": batch_id,
+                    "ingestion_ts": TEST_INGESTION_TS,
+                },
+            ]
+        )
+
+        mock_write_deltalake.assert_called_once()
+        records = _extract_records_from_call(mock_write_deltalake)
+        assert len(records) == 2
+
+    @pytest.mark.asyncio
+    async def test_write_many_uses_to_thread(self, quarantine, batch_id):
+        """Bulk writes should be offloaded from the event loop."""
+        write_mock = MagicMock()
+
+        async def run_inline(func, *args):
+            return func(*args)
+
+        with (
+            patch(
+                "bioetl.infrastructure.quarantine.unified.write_deltalake", write_mock
+            ),
+            patch(
+                "bioetl.infrastructure.quarantine.unified.asyncio.to_thread",
+                AsyncMock(side_effect=run_inline),
+            ) as to_thread_mock,
+        ):
+            await quarantine.write_many(
+                [
+                    {
+                        "pipeline": "test",
+                        "error_code": "ERROR",
+                        "payload": {"id": 1},
+                        "bronze_batch_id": batch_id,
+                        "ingestion_ts": TEST_INGESTION_TS,
+                    }
+                ]
+            )
+
+        to_thread_mock.assert_awaited_once()
+        write_mock.assert_called_once()
 
 
 @pytest.mark.unit
