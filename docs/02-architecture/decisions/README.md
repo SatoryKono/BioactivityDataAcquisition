@@ -47,6 +47,8 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-039](ADR-039-unified-entity-config-format.md)      | Unified Entity Config Format               | Accepted           | Configuration   | 2026-02-24 |
 | [ADR-040](ADR-040-diagram-governance.md)                | Diagram Governance and Layout Policy       | Accepted           | Documentation   | 2026-02-25 |
 | [ADR-041](ADR-041-naming-policy-skills-agents.md)       | Naming Policy for Skills, Agents, Commands | Accepted           | Architecture    | 2026-03-04 |
+| [ADR-042](ADR-042-testing-strategy-matrix.md)           | Testing Strategy Matrix & Fixture Gov.     | Accepted           | Testing         | 2026-03-09 |
+| [ADR-043](ADR-043-documentation-knowledge-management.md)| Documentation & Knowledge Management       | Accepted           | Documentation   | 2026-03-09 |
 
 ## ADRs by Category
 
@@ -60,6 +62,7 @@ This directory contains Architecture Decision Records documenting significant ar
 - [ADR-034](ADR-034-schema-domain-pairs.md): Schema↔Domain Configuration Pairs — Domain frozen dataclasses vs Infrastructure Pydantic models
 - [ADR-040](ADR-040-diagram-governance.md): Diagram Governance and Layout Policy
 - [ADR-041](ADR-041-naming-policy-skills-agents.md): Naming Policy for Skills, Agents, and Commands
+- [ADR-043](ADR-043-documentation-knowledge-management.md): Documentation and Knowledge Management Strategy
 
 ### Storage
 
@@ -115,6 +118,10 @@ This directory contains Architecture Decision Records documenting significant ar
 ### Locking
 
 - [ADR-003](ADR-003-in-memory-locking-strategy.md): In-Memory Locking (MemoryLock) — Local-Only locking strategy
+
+### Testing
+
+- [ADR-042](ADR-042-testing-strategy-matrix.md): Testing Strategy Matrix and Fixture Governance
 
 ### Reproducibility
 
