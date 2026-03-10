@@ -35,7 +35,12 @@ class HTTPClientContextMixin:
             headers["X-Correlation-ID"] = str(self.run_id)
 
         self._client = httpx.AsyncClient(
-            timeout=httpx.Timeout(self.timeout),
+            timeout=httpx.Timeout(
+                connect=self.timeout,
+                read=self.timeout * 2,
+                write=self.timeout,
+                pool=self.timeout,
+            ),
             headers=headers,
             follow_redirects=True,
             limits=httpx.Limits(

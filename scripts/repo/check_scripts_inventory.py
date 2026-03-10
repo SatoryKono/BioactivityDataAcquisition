@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 from collections import Counter, defaultdict
@@ -36,6 +37,48 @@ SEARCH_ROOTS: Final[tuple[str, ...]] = (
     "scripts",
     "src/tools",
 )
+SKIP_DIR_NAMES: Final[set[str]] = {
+    ".git",
+    ".venv",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".tox",
+    ".nox",
+    "__pycache__",
+    "node_modules",
+}
+SKIP_PATH_PREFIXES: Final[tuple[str, ...]] = (
+    "tests/fixtures/",
+    "docs/02-architecture/mmd-diagrams/",
+    "docs/exports/",
+)
+SKIP_FILE_EXTENSIONS: Final[set[str]] = {
+    ".7z",
+    ".avi",
+    ".bmp",
+    ".doc",
+    ".docx",
+    ".gif",
+    ".gz",
+    ".ico",
+    ".jpeg",
+    ".jpg",
+    ".mp3",
+    ".mp4",
+    ".parquet",
+    ".pdf",
+    ".png",
+    ".tar",
+    ".tgz",
+    ".wav",
+    ".webm",
+    ".webp",
+    ".whl",
+    ".xz",
+    ".zip",
+}
+SCRIPT_PATH_TOKENS: Final[tuple[str, ...]] = ("scripts/", "src/tools/")
 MANIFEST_DEFAULT: Final[str] = "configs/quality/scripts_inventory_manifest.json"
 DEPRECATION_REPORT_DEFAULT: Final[str] = (
     "reports/quality/scripts_deprecation_backlog.md"
@@ -82,14 +125,36 @@ def _iter_search_files(root: Path) -> list[Path]:
         if not path.exists():
             continue
         if path.is_file():
+            rel_path = path.relative_to(root).as_posix()
+            if any(
+                rel_path == prefix.rstrip("/") or rel_path.startswith(prefix)
+                for prefix in SKIP_PATH_PREFIXES
+            ):
+                continue
+            if path.suffix.lower() in SKIP_FILE_EXTENSIONS:
+                continue
             files.append(path)
             continue
-        for file_path in path.rglob("*"):
-            if not file_path.is_file():
+        for dirpath, dirnames, filenames in os.walk(path):
+            current_path = Path(dirpath)
+            rel_dir = current_path.relative_to(root).as_posix()
+            rel_dir_prefix = f"{rel_dir}/"
+            if any(rel_dir_prefix.startswith(prefix) for prefix in SKIP_PATH_PREFIXES):
+                dirnames.clear()
                 continue
-            if ".git" in file_path.parts:
-                continue
-            files.append(file_path)
+
+            dirnames[:] = [name for name in dirnames if name not in SKIP_DIR_NAMES]
+            for filename in filenames:
+                file_path = current_path / filename
+                rel_file = file_path.relative_to(root).as_posix()
+                if any(
+                    rel_file == prefix.rstrip("/") or rel_file.startswith(prefix)
+                    for prefix in SKIP_PATH_PREFIXES
+                ):
+                    continue
+                if file_path.suffix.lower() in SKIP_FILE_EXTENSIONS:
+                    continue
+                files.append(file_path)
     return sorted(files)
 
 
@@ -124,8 +189,13 @@ def _discover_refs(root: Path, scripts: list[Path]) -> dict[str, list[RefEvidenc
         except (OSError, UnicodeDecodeError):
             continue
 
+        if not any(token in text for token in SCRIPT_PATH_TOKENS):
+            continue
+
         lines = text.splitlines()
         for line_no, line in enumerate(lines, start=1):
+            if not any(token in line for token in SCRIPT_PATH_TOKENS):
+                continue
             for match in pattern.finditer(line):
                 script_rel = match.group(0)
                 if rel == script_rel:

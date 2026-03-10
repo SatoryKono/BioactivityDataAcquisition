@@ -346,7 +346,7 @@ nav:
                     -   "MMD Class with Descriptions": 02-architecture/mmd-diagrams/class-diagrams-with-descriptions.md
                     # SVG/PNG Index pages excluded from nav: images are gitignored
                     # (generated locally). Including INDEX.md breaks mkdocs --strict.
-                    # View locally: docs/02-architecture/mmd-diagrams/{category}/svg/INDEX.md
+                    # Local generated SVG index pages are under docs/02-architecture/mmd-diagrams/{category}/svg/.
                     -   "MMD Class Diagram Descriptions": 02-architecture/mmd-diagrams/diagram-descriptions/class-diagrams-descriptions.md
                     -   "Diagram Views Plan": 02-architecture/mmd-diagrams/docs/diagram-views-plan.md
                     -   "Diagram Prompt Expansion": 02-architecture/mmd-diagrams/docs/PROMPT-diagram-expansion.md
