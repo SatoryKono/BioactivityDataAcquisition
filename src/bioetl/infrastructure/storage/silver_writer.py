@@ -52,7 +52,7 @@ if TYPE_CHECKING:
 __all__ = ["SilverWriteMode", "SilverWriter"]
 
 
-class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
+class SilverWriter(  # type: ignore[misc]  # safe: deltalake mixin MRO combines sync Callable and async protocols; runtime behavior covered by writer tests
     SilverWriterArrowMixin,
     SilverWriterValidationMixin,
     SilverWriterDeltaMixin,

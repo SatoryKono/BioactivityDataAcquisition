@@ -100,7 +100,7 @@ class SilverFiltersFileConfig(BaseGoldFiltersConfig):
         exclude_if_present: Exclude if field has value.
     """
 
-    def to_domain(self) -> SilverFilterConfig:  # type: ignore[override]
+    def to_domain(self) -> SilverFilterConfig:  # type: ignore[override]  # safe: returns sibling domain type required by Silver pipeline contract
         """Convert to domain SilverFilterConfig dataclass.
 
         Returns:

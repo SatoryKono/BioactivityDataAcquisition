@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TypedDict
 from uuid import UUID, uuid4
 
 import yaml
@@ -278,10 +278,18 @@ def _extract_multi_filter_ids(
     return result
 
 
+class _CachedBronzeOptions(TypedDict):
+    """Typed kwargs subset accepted by RunOptions for cached Bronze mode."""
+
+    use_cached_bronze: bool
+    cached_bronze_path: str | None
+    cached_bronze_date: str | None
+
+
 def _resolve_bronze_opts(
     runtime: CompositeRuntimeConfig,
     phase_override: bool | None,
-) -> dict[str, object]:
+) -> _CachedBronzeOptions:
     """Resolve cached Bronze options for a specific pipeline phase.
 
     Tri-state resolution: phase_override takes precedence over master switch.
@@ -364,7 +372,7 @@ def bootstrap_composite_runner(
             run_type="incremental",
             limit=runtime.seed_limit,
             skip_gold=True,
-            **_seed_bronze_opts,  # type: ignore[arg-type]
+            **_seed_bronze_opts,
         )
         ctx = build_pipeline_context(config.seed.pipeline, options)
         return bootstrap_pipeline_runner(ctx)
@@ -422,7 +430,7 @@ def bootstrap_composite_runner(
             filter_field=filter_field,
             fallback_mapping=fallback_mapping,
             execution_context="enricher",
-            **_enricher_bronze_opts,  # type: ignore[arg-type]
+            **_enricher_bronze_opts,
         )
         ctx = build_pipeline_context(pipeline_name, options)
         return bootstrap_pipeline_runner(ctx)
@@ -510,7 +518,7 @@ def bootstrap_composite_runner(
             ignore_yaml_filter=True,
             skip_gold=True,
             execution_context="dependency",
-            **_dependency_bronze_opts,  # type: ignore[arg-type]
+            **_dependency_bronze_opts,
         )
         ctx = build_pipeline_context(pipeline_name, options)
         return bootstrap_pipeline_runner(ctx)

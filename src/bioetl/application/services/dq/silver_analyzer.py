@@ -16,7 +16,7 @@ Follows RULES.md §3.1 DQ strategy for Silver layer.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import Any, cast
 
 import polars as pl
 import pyarrow as pa
@@ -249,7 +249,7 @@ class SilverDQAnalyzer:
         """
         # Convert PyArrow to Polars for consistent processing
         if isinstance(data, pa.Table):
-            df: pl.DataFrame = pl.from_arrow(data)  # type: ignore[assignment]
+            df = cast(pl.DataFrame, pl.from_arrow(data))
         else:
             df = data
 

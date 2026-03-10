@@ -8,10 +8,12 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
+from typing import cast
 
 import click
 
 from bioetl.application.services import ExportOptions
+from bioetl.application.services.export_service import ExportFormat
 from bioetl.composition.entrypoints import get_export_service
 from bioetl.interfaces.cli.formatters import (
     echo_error,
@@ -156,7 +158,7 @@ def export_command(
 
     # Build export options
     options = ExportOptions(
-        format=output_format,  # type: ignore[arg-type]
+        format=cast(ExportFormat, output_format),
         output_path=output,
         limit=limit,
         columns=column_list,

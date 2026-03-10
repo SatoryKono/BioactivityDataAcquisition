@@ -283,6 +283,8 @@ module = [
     "psutil.*",
     "click",
     "click.*",
+    "typing_inspect",
+    "typing_inspect.*",
 ]
 ignore_missing_imports = true
 

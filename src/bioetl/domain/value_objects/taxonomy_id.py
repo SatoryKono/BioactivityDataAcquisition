@@ -40,7 +40,8 @@ class TaxonomyId(ValueObject[int]):
         Raises:
             ValueError: If validation fails.
         """
-        super().__init__(value)  # type: ignore[arg-type]
+        normalized = self._validate(value)
+        object.__setattr__(self, "_value", normalized)
 
     def _coerce_to_int(self, value: str | int) -> int:
         """Coerce value to integer, raising ValueError on failure."""

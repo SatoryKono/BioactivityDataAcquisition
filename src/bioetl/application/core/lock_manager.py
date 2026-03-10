@@ -157,7 +157,9 @@ class LockManager:
             self._fencing_token = token
             # Update shared context holder for writers
             if self._context_holder is not None:
-                self._context_holder.set(self.get_context())  # type: ignore[arg-type]
+                context = self.get_context()
+                if context is not None:
+                    self._context_holder.set(context)
             self._logger.info(
                 "lock_acquired",
                 lock_key=self._config.lock_key,

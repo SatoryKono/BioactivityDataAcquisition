@@ -10,7 +10,7 @@ __version__ = "6.0.0"
 try:
     import typing
 
-    import typing_inspect  # type: ignore[import-untyped]
+    import typing_inspect
 
     # Fix typing_inspect.get_origin BEFORE importing pandera backends
     _orig_get_origin = typing_inspect.get_origin
@@ -71,10 +71,10 @@ try:
                 typing.Any  # Any: multipledispatch requires erased types
             ]  # Any: multipledispatch requires erased types
         if fn is None:
-            return _orig_dispatcher_call(self, *args, **kwargs)  # type: ignore[no-untyped-call]
+            return _orig_dispatcher_call(self, *args, **kwargs)  # type: ignore[no-untyped-call]  # safe: delegated to pandera dispatcher fallback
         return fn(*args, **kwargs)
 
-    Dispatcher.__call__ = _dispatcher_call_with_any_fallback  # type: ignore[method-assign]
+    Dispatcher.__call__ = _dispatcher_call_with_any_fallback  # type: ignore[method-assign]  # safe: runtime monkeypatch for pandera compatibility
 except (ImportError, AttributeError, TypeError, ValueError, RuntimeError):
     # Fail silently to avoid breaking the entire project if Pandera/Pandas are not present
     pass

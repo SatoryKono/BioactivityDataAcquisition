@@ -283,9 +283,11 @@ class FilteredDataSource(_SourceMetadataDelegationMixin):
         self._ensure_filterable_adapter("Multi-column filtering")
         assert isinstance(self._data_source, FilterableDataSourcePort)
         fetched_count = 0
+        if self._multi_filter_ids is None:
+            raise ValueError("multi_filter_ids must be set in multi-column mode")
         async for record in self._data_source.fetch_multi_filtered(
             entity_type=entity_type,
-            filters=dict(self._multi_filter_ids),  # type: ignore[arg-type]
+            filters={field: list(ids) for field, ids in self._multi_filter_ids.items()},
             limit=None,  # Don't limit server-side, we filter client-side
         ):
             if self._matches_valid_combination(record):
@@ -310,10 +312,14 @@ class FilteredDataSource(_SourceMetadataDelegationMixin):
             )
 
         # Check if we have fallback mapping (adapter implements FilterableDataSourcePort)
+        if self._filter_ids is None:
+            raise ValueError("filter_ids must be set when filtering is enabled")
+        filter_ids = list(self._filter_ids)
+
         if self._fallback_mapping:
             async for record in self._data_source.fetch_filtered_with_fallback(
                 entity_type=entity_type,
-                filter_ids=self._filter_ids,  # type: ignore[arg-type]
+                filter_ids=filter_ids,
                 filter_field=config_filter_field,
                 fallback_mapping=self._fallback_mapping,
                 limit=limit,
@@ -323,7 +329,7 @@ class FilteredDataSource(_SourceMetadataDelegationMixin):
             # Standard path without fallback
             async for record in self._data_source.fetch_filtered(
                 entity_type=entity_type,
-                filter_ids=self._filter_ids,  # type: ignore[arg-type]
+                filter_ids=filter_ids,
                 filter_field=config_filter_field,
                 limit=limit,
             ):

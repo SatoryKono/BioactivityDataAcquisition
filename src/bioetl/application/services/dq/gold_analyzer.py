@@ -15,7 +15,7 @@ Split from monolithic 761-LOC class per audit-package-structure-2026-02-07.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import Any, cast
 
 import polars as pl
 import pyarrow as pa
@@ -172,7 +172,7 @@ class GoldDQAnalyzer:
             GoldDQReport: Complete DQ report for Gold layer.
         """
         if isinstance(data, pa.Table):
-            df: pl.DataFrame = pl.from_arrow(data)  # type: ignore[assignment]
+            df = cast(pl.DataFrame, pl.from_arrow(data))
         else:
             df = data
 
