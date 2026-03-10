@@ -50,7 +50,6 @@ SKIP_DIR_NAMES: Final[set[str]] = {
 }
 SKIP_PATH_PREFIXES: Final[tuple[str, ...]] = (
     "tests/fixtures/",
-    "docs/02-architecture/mmd-diagrams/",
     "docs/exports/",
 )
 SKIP_FILE_EXTENSIONS: Final[set[str]] = {
@@ -79,6 +78,9 @@ SKIP_FILE_EXTENSIONS: Final[set[str]] = {
     ".zip",
 }
 SCRIPT_PATH_TOKENS: Final[tuple[str, ...]] = ("scripts/", "src/tools/")
+SCRIPT_PATH_CANDIDATE_PATTERN: Final[re.Pattern[str]] = re.compile(
+    r"(?:scripts|src/tools)/[A-Za-z0-9._/-]+\.(?:py|sh|ps1|cmd|bat)"
+)
 MANIFEST_DEFAULT: Final[str] = "configs/quality/scripts_inventory_manifest.json"
 DEPRECATION_REPORT_DEFAULT: Final[str] = (
     "reports/quality/scripts_deprecation_backlog.md"
@@ -178,9 +180,9 @@ def _source_group(rel_path: str) -> str:
 
 def _discover_refs(root: Path, scripts: list[Path]) -> dict[str, list[RefEvidence]]:
     rel_scripts = [path.relative_to(root).as_posix() for path in scripts]
+    script_set = set(rel_scripts)
     refs: dict[str, list[RefEvidence]] = {item: [] for item in rel_scripts}
     search_files = _iter_search_files(root)
-    pattern = re.compile("|".join(re.escape(item) for item in rel_scripts))
 
     for file_path in search_files:
         rel = file_path.relative_to(root).as_posix()
@@ -196,8 +198,9 @@ def _discover_refs(root: Path, scripts: list[Path]) -> dict[str, list[RefEvidenc
         for line_no, line in enumerate(lines, start=1):
             if not any(token in line for token in SCRIPT_PATH_TOKENS):
                 continue
-            for match in pattern.finditer(line):
-                script_rel = match.group(0)
+            for script_rel in set(SCRIPT_PATH_CANDIDATE_PATTERN.findall(line)):
+                if script_rel not in script_set:
+                    continue
                 if rel == script_rel:
                     continue
                 refs[script_rel].append(

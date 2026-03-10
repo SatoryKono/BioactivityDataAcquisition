@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-10T07:49:02.277691+00:00",
+  "generated_at": "2026-03-10T09:18:29.371230+00:00",
   "summary": {
     "total_scripts": 198,
     "status_counts": {
@@ -14,6 +14,7 @@
       "ci": 41,
       "docs": 80,
       "scripts": 99,
+      "skills": 4,
       "tests": 30
     }
   },
@@ -238,7 +239,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 6,
       "references": [
         {
           "path": ".github/workflows/compiled-artifacts-block.yml",
@@ -271,22 +272,10 @@
           "text": "python3 scripts/audit_root_cleanliness.py"
         },
         {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 5025,
+          "path": "docs/reports/scripts-inventory-2026-03-01.md",
+          "line": 1,
           "source_group": "docs",
-          "text": "python3 scripts/audit_root_cleanliness.py"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 33474,
-          "source_group": "docs",
-          "text": "python3 scripts/audit_root_cleanliness.py"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 33559,
-          "source_group": "docs",
-          "text": "python3 scripts/audit_root_cleanliness.py"
+          "text": "# Scripts Inventory\\n\\nTotal scripts: **106**\\n\\n## By Folder\\n\\n| Folder | Count |\\n|---|---:|\\n| `.` | 2 |\\n| `assets/javascripts` | 1 |\\n| `docs/02-architecture/mmd-diagrams` | 1 |\\n| `docs/00-proj"
         }
       ]
     },
@@ -295,7 +284,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 8,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -334,16 +323,16 @@
           "text": "python3 scripts/audit_structure.py --path ."
         },
         {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 2528,
+          "path": "docs/reports/scripts-inventory-2026-03-01.md",
+          "line": 1,
           "source_group": "docs",
-          "text": "python scripts/audit_structure.py"
+          "text": "# Scripts Inventory\\n\\nTotal scripts: **106**\\n\\n## By Folder\\n\\n| Folder | Count |\\n|---|---:|\\n| `.` | 2 |\\n| `assets/javascripts` | 1 |\\n| `docs/02-architecture/mmd-diagrams` | 1 |\\n| `docs/00-proj"
         },
         {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 2531,
-          "source_group": "docs",
-          "text": "python scripts/audit_structure.py --json"
+          "path": "scripts/diagnostics/audit_structure.py",
+          "line": 8,
+          "source_group": "scripts",
+          "text": "python scripts/audit_structure.py [--json] [--strict]"
         }
       ]
     },
@@ -352,7 +341,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 9,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -550,7 +539,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 44,
+      "reference_count": 34,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -797,7 +786,7 @@
         },
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 271,
+          "line": 344,
           "source_group": "scripts",
           "text": "\"Auto-generated from `scripts/check_scripts_inventory.py`.\","
         },
@@ -844,8 +833,20 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 17,
       "references": [
+        {
+          "path": ".codex/skills/SKILLS-CATALOG.md",
+          "line": 13,
+          "source_group": "skills",
+          "text": "bash scripts/check_skills_mirror.sh --check"
+        },
+        {
+          "path": ".codex/skills/SKILLS-CATALOG.md",
+          "line": 14,
+          "source_group": "skills",
+          "text": "bash scripts/check_skills_mirror.sh --sync"
+        },
         {
           "path": ".github/workflows/skills-consistency.yml",
           "line": 26,
@@ -881,18 +882,6 @@
           "line": 16,
           "source_group": "docs",
           "text": "bash scripts/check_skills_mirror.sh --check"
-        },
-        {
-          "path": "docs/00-project/ai/skills/SKILLS-CATALOG.md",
-          "line": 17,
-          "source_group": "docs",
-          "text": "bash scripts/check_skills_mirror.sh --sync"
-        },
-        {
-          "path": "docs/00-project/ai/skills/SKILLS-CATALOG.md",
-          "line": 82,
-          "source_group": "docs",
-          "text": "- Локальное зеркало восстановлено в `docs/00-project/ai/skills/local/` и проверяется через `scripts/check_skills_mirror.sh`."
         }
       ]
     },
@@ -1056,7 +1045,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -1077,6 +1066,12 @@
           "text": "# Scripts Inventory\\n\\nTotal scripts: **106**\\n\\n## By Folder\\n\\n| Folder | Count |\\n|---|---:|\\n| `.` | 2 |\\n| `assets/javascripts` | 1 |\\n| `docs/02-architecture/mmd-diagrams` | 1 |\\n| `docs/00-proj"
         },
         {
+          "path": "makefile",
+          "line": 81,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/ci/run_pytest_resilient.py"
+        },
+        {
           "path": "tests/architecture/test_ci_test_strategy.py",
           "line": 16,
           "source_group": "tests",
@@ -1089,7 +1084,7 @@
       "type": "py",
       "status": "unknown",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -1100,18 +1095,6 @@
         {
           "path": "docs/00-project/TOOLS.md",
           "line": 174,
-          "source_group": "docs",
-          "text": "python scripts/cleanup_consolidate.py --apply"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 2416,
-          "source_group": "docs",
-          "text": "python scripts/cleanup_consolidate.py"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 2419,
           "source_group": "docs",
           "text": "python scripts/cleanup_consolidate.py --apply"
         },
@@ -1128,7 +1111,7 @@
       "type": "py",
       "status": "unknown",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 5,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -1155,28 +1138,10 @@
           "text": "python scripts/cleanup_project.py --apply --purge-logs"
         },
         {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 2387,
+          "path": "docs/reports/scripts-inventory-2026-03-01.md",
+          "line": 1,
           "source_group": "docs",
-          "text": "python scripts/cleanup_project.py"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 2390,
-          "source_group": "docs",
-          "text": "python scripts/cleanup_project.py --apply --archive-logs"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 2393,
-          "source_group": "docs",
-          "text": "python scripts/cleanup_project.py --apply --purge-logs"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 2666,
-          "source_group": "docs",
-          "text": "python scripts/cleanup_project.py --apply --purge-logs"
+          "text": "# Scripts Inventory\\n\\nTotal scripts: **106**\\n\\n## By Folder\\n\\n| Folder | Count |\\n|---|---:|\\n| `.` | 2 |\\n| `assets/javascripts` | 1 |\\n| `docs/02-architecture/mmd-diagrams` | 1 |\\n| `docs/00-proj"
         }
       ]
     },
@@ -1248,7 +1213,7 @@
       "type": "py",
       "status": "unknown",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 7,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -1287,16 +1252,10 @@
           "text": "| Config gap analysis | `scripts/config_gap_analysis.py` |"
         },
         {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 2618,
+          "path": "docs/reports/scripts-inventory-2026-03-01.md",
+          "line": 1,
           "source_group": "docs",
-          "text": "python scripts/config_gap_analysis.py"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 4200,
-          "source_group": "docs",
-          "text": "- **Конфиги**: `python scripts/validate_pipeline_configs.py`, `python scripts/config_gap_analysis.py`."
+          "text": "# Scripts Inventory\\n\\nTotal scripts: **106**\\n\\n## By Folder\\n\\n| Folder | Count |\\n|---|---:|\\n| `.` | 2 |\\n| `assets/javascripts` | 1 |\\n| `docs/02-architecture/mmd-diagrams` | 1 |\\n| `docs/00-proj"
         }
       ]
     },
@@ -1320,10 +1279,16 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "Makefile",
+          "line": 325,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/data/check_root_vcr_cassettes.py"
+        },
+        {
+          "path": "makefile",
           "line": 325,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/data/check_root_vcr_cassettes.py"
@@ -1341,10 +1306,16 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "Makefile",
+          "line": 326,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/data/check_vcr_filename_policy.py"
+        },
+        {
+          "path": "makefile",
           "line": 326,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/data/check_vcr_filename_policy.py"
@@ -1780,10 +1751,16 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "Makefile",
+          "line": 158,
+          "source_group": "build",
+          "text": "./scripts/dev/test_changed.sh"
+        },
+        {
+          "path": "makefile",
           "line": 158,
           "source_group": "build",
           "text": "./scripts/dev/test_changed.sh"
@@ -1912,7 +1889,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 7,
       "references": [
         {
           "path": "docs/02-architecture/mmd-diagrams/docs/diagram-modernization-program.md",
@@ -1945,12 +1922,6 @@
           "text": "if ! \"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/add_svg_text_fallback.py\" --fix -f \"$temp_png_svg\" >/dev/null 2>&1; then"
         },
         {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 28459,
-          "source_group": "docs",
-          "text": "5. `scripts/diagrams/add_svg_text_fallback.py`"
-        },
-        {
           "path": "docs/reports/scripts-inventory-2026-03-01.md",
           "line": 1,
           "source_group": "docs",
@@ -1969,7 +1940,7 @@
       "type": "py",
       "status": "unknown",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 6,
       "references": [
         {
           "path": "docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-1.sh",
@@ -2006,18 +1977,6 @@
           "line": 62,
           "source_group": "docs",
           "text": "| DIAG-T033 | Class method render integrity | Целостность сигнатур методов в classDiagram | `scripts/diagrams/check_class_method_render_integrity.py` | Auto | PR | Hard |"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 26524,
-          "source_group": "docs",
-          "text": "- `python scripts/diagrams/check_class_method_render_integrity.py --source-dir docs/02-architecture/mmd-diagrams/class-diagrams --svg-dir docs/02-architecture/mmd-diagrams/class-diagrams/svg`"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 26911,
-          "source_group": "docs",
-          "text": "python scripts/diagrams/check_class_method_render_integrity.py \\"
         }
       ]
     },
@@ -2026,7 +1985,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 6,
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
@@ -2053,12 +2012,6 @@
           "text": "9. **Проверить артефакты SVG/PNG:** `python scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`"
         },
         {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 27017,
-          "source_group": "docs",
-          "text": "9. **Проверить артефакты SVG/PNG:** `python scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`"
-        },
-        {
           "path": "docs/plans/DIAGRAMS_DOCS_SCRIPTS_REFACTOR_PLAN.md",
           "line": 274,
           "source_group": "docs",
@@ -2077,7 +2030,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 29,
+      "reference_count": 19,
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
@@ -2133,9 +2086,17 @@
       "path": "scripts/diagrams/check_diagram_visual_smoke.py",
       "type": "py",
       "status": "active",
-      "agent_usage": [],
-      "reference_count": 11,
+      "agent_usage": [
+        "technical-designer-mermaid"
+      ],
+      "reference_count": 9,
       "references": [
+        {
+          "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
+          "line": 96,
+          "source_group": "skills",
+          "text": "- `python scripts/diagrams/check_diagram_visual_smoke.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`"
+        },
         {
           "path": ".github/workflows/diagram-nightly.yml",
           "line": 46,
@@ -2177,12 +2138,6 @@
           "line": 67,
           "source_group": "docs",
           "text": "python3 scripts/diagrams/check_diagram_visual_smoke.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 8565,
-          "source_group": "docs",
-          "text": "python3 scripts/diagrams/check_diagram_visual_smoke.py"
         }
       ]
     },
@@ -2191,7 +2146,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "Makefile",
@@ -2218,10 +2173,16 @@
           "text": "- post-check: `scripts/diagrams/check_pdf_image_bounds.py`"
         },
         {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 24909,
-          "source_group": "docs",
-          "text": "- post-check: `scripts/diagrams/check_pdf_image_bounds.py`"
+          "path": "makefile",
+          "line": 231,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/diagrams/check_pdf_image_bounds.py --pdf docs/02-architecture/mmd-diagrams/class-diagrams-with-descriptions.pdf"
+        },
+        {
+          "path": "makefile",
+          "line": 232,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/diagrams/check_pdf_image_bounds.py --pdf docs/02-architecture/mmd-diagrams/foundation-diagrams-with-descriptions.pdf"
         }
       ]
     },
@@ -2230,7 +2191,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 20,
+      "reference_count": 14,
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
@@ -2287,7 +2248,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 4,
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
@@ -2310,18 +2271,6 @@
         {
           "path": "docs/02-architecture/mmd-diagrams/README.md",
           "line": 336,
-          "source_group": "docs",
-          "text": "python3 scripts/diagrams/enforce_diagram_quality_budget.py \\"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 24981,
-          "source_group": "docs",
-          "text": "`scripts/diagrams/enforce_diagram_quality_budget.py`."
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 25002,
           "source_group": "docs",
           "text": "python3 scripts/diagrams/enforce_diagram_quality_budget.py \\"
         }
@@ -2386,10 +2335,10 @@
           "text": "- `scripts/diagrams/generate_with_descriptions_docx.py`"
         },
         {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 24906,
-          "source_group": "docs",
-          "text": "- `scripts/diagrams/generate_with_descriptions_docx.py`"
+          "path": "makefile",
+          "line": 223,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/diagrams/generate_with_descriptions_docx.py"
         }
       ]
     },
@@ -2413,10 +2362,10 @@
           "text": "- `scripts/diagrams/generate_with_descriptions_pdf.py`"
         },
         {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 24905,
-          "source_group": "docs",
-          "text": "- `scripts/diagrams/generate_with_descriptions_pdf.py`"
+          "path": "makefile",
+          "line": 219,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/diagrams/generate_with_descriptions_pdf.py"
         }
       ]
     },
@@ -2451,9 +2400,17 @@
       "path": "scripts/diagrams/lint_diagrams.py",
       "type": "py",
       "status": "active",
-      "agent_usage": [],
-      "reference_count": 47,
+      "agent_usage": [
+        "technical-designer-mermaid"
+      ],
+      "reference_count": 33,
       "references": [
+        {
+          "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
+          "line": 92,
+          "source_group": "skills",
+          "text": "- `python scripts/diagrams/lint_diagrams.py docs`"
+        },
         {
           "path": ".github/workflows/diagram-nightly.yml",
           "line": 59,
@@ -2495,12 +2452,6 @@
           "line": 424,
           "source_group": "docs",
           "text": "python3 \"$REPO_ROOT/scripts/diagrams/lint_diagrams.py\" \\"
-        },
-        {
-          "path": "docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-1.sh",
-          "line": 495,
-          "source_group": "docs",
-          "text": "python3 \"$REPO_ROOT/scripts/diagrams/lint_diagrams.py\" \\"
         }
       ]
     },
@@ -2509,7 +2460,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 36,
+      "reference_count": 19,
       "references": [
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
@@ -2566,7 +2517,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "Makefile",
@@ -2579,6 +2530,12 @@
           "line": 1,
           "source_group": "docs",
           "text": "# Scripts Inventory\\n\\nTotal scripts: **106**\\n\\n## By Folder\\n\\n| Folder | Count |\\n|---|---:|\\n| `.` | 2 |\\n| `assets/javascripts` | 1 |\\n| `docs/02-architecture/mmd-diagrams` | 1 |\\n| `docs/00-proj"
+        },
+        {
+          "path": "makefile",
+          "line": 243,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/diagrams/report_diagram_padding.py --top 30"
         }
       ]
     },
@@ -2587,7 +2544,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 30,
+      "reference_count": 17,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -2644,7 +2601,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 3,
       "references": [
         {
           "path": "Makefile",
@@ -2659,28 +2616,10 @@
           "text": "- unified orchestrator: `scripts/diagrams/run_diagram_docs_agent.sh`"
         },
         {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 4073,
-          "source_group": "docs",
+          "path": "makefile",
+          "line": 227,
+          "source_group": "build",
           "text": "bash scripts/diagrams/run_diagram_docs_agent.sh"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 4076,
-          "source_group": "docs",
-          "text": "bash scripts/diagrams/run_diagram_docs_agent.sh \\"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 4080,
-          "source_group": "docs",
-          "text": "bash scripts/diagrams/run_diagram_docs_agent.sh --skip-checks"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 24907,
-          "source_group": "docs",
-          "text": "- unified orchestrator: `scripts/diagrams/run_diagram_docs_agent.sh`"
         }
       ]
     },
@@ -2776,16 +2715,16 @@
           "text": "python3 scripts/diagrams/summarize_diagram_lint.py /tmp/diagram-lint.json"
         },
         {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 28857,
-          "source_group": "docs",
-          "text": "python3 scripts/diagrams/summarize_diagram_lint.py /tmp/diagram-lint.json"
-        },
-        {
           "path": "docs/reports/scripts-inventory-2026-03-01.md",
           "line": 1,
           "source_group": "docs",
           "text": "# Scripts Inventory\\n\\nTotal scripts: **106**\\n\\n## By Folder\\n\\n| Folder | Count |\\n|---|---:|\\n| `.` | 2 |\\n| `assets/javascripts` | 1 |\\n| `docs/02-architecture/mmd-diagrams` | 1 |\\n| `docs/00-proj"
+        },
+        {
+          "path": "makefile",
+          "line": 197,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/diagrams/summarize_diagram_lint.py /tmp/diagram-lint.json"
         }
       ]
     },
@@ -2794,7 +2733,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 6,
       "references": [
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
@@ -2821,28 +2760,16 @@
           "text": "python3 scripts/diagrams/uniform_diagram_sizes.py --fix -f docs/02-architecture/mmd-diagrams/class-diagrams/07-application-core-services.mmd"
         },
         {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 18904,
+          "path": "docs/reports/scripts-inventory-2026-03-01.md",
+          "line": 1,
           "source_group": "docs",
-          "text": "Примечание по size-normalization (`scripts/diagrams/uniform_diagram_sizes.py`):"
+          "text": "# Scripts Inventory\\n\\nTotal scripts: **106**\\n\\n## By Folder\\n\\n| Folder | Count |\\n|---|---:|\\n| `.` | 2 |\\n| `assets/javascripts` | 1 |\\n| `docs/02-architecture/mmd-diagrams` | 1 |\\n| `docs/00-proj"
         },
         {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 25023,
-          "source_group": "docs",
-          "text": "Use `scripts/diagrams/uniform_diagram_sizes.py` to normalize class/flowchart object sizes:"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 25027,
-          "source_group": "docs",
-          "text": "python3 scripts/diagrams/uniform_diagram_sizes.py --check"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 25030,
-          "source_group": "docs",
-          "text": "python3 scripts/diagrams/uniform_diagram_sizes.py --fix -f docs/02-architecture/mmd-diagrams/class-diagrams/07-application-core-services.mmd"
+          "path": "tests/architecture/test_uniform_diagram_group_width.py",
+          "line": 12,
+          "source_group": "tests",
+          "text": "\"\"\"Load scripts/diagrams/uniform_diagram_sizes.py as a module.\"\"\""
         }
       ]
     },
@@ -2850,9 +2777,17 @@
       "path": "scripts/diagrams/validate_mermaid_syntax.sh",
       "type": "sh",
       "status": "active",
-      "agent_usage": [],
-      "reference_count": 20,
+      "agent_usage": [
+        "technical-designer-mermaid"
+      ],
+      "reference_count": 17,
       "references": [
+        {
+          "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
+          "line": 93,
+          "source_group": "skills",
+          "text": "- `bash scripts/diagrams/validate_mermaid_syntax.sh`"
+        },
         {
           "path": ".github/workflows/diagram-nightly.yml",
           "line": 145,
@@ -2894,12 +2829,6 @@
           "line": 114,
           "source_group": "docs",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh"
-        },
-        {
-          "path": "docs/02-architecture/mmd-diagrams/README.md",
-          "line": 278,
-          "source_group": "docs",
-          "text": "bash scripts/diagrams/validate_mermaid_syntax.sh --puppeteer /tmp/puppeteer-config.json"
         }
       ]
     },
@@ -2908,10 +2837,16 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "Makefile",
+          "line": 482,
+          "source_group": "build",
+          "text": "$(RUN) bash scripts/docs/build_docs_site.sh"
+        },
+        {
+          "path": "makefile",
           "line": 482,
           "source_group": "build",
           "text": "$(RUN) bash scripts/docs/build_docs_site.sh"
@@ -2929,10 +2864,16 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "Makefile",
+          "line": 496,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/docs/check_doc_drift.py"
+        },
+        {
+          "path": "makefile",
           "line": 496,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/docs/check_doc_drift.py"
@@ -2950,7 +2891,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 7,
       "references": [
         {
           "path": "Makefile",
@@ -2971,6 +2912,24 @@
           "text": "$(PY_RUN) scripts/docs/check_doc_links.py --legacy-paths"
         },
         {
+          "path": "makefile",
+          "line": 485,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/docs/check_doc_links.py --links"
+        },
+        {
+          "path": "makefile",
+          "line": 486,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/docs/check_doc_links.py --configs"
+        },
+        {
+          "path": "makefile",
+          "line": 487,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/docs/check_doc_links.py --legacy-paths"
+        },
+        {
           "path": "scripts/check_doc_links.py",
           "line": 5,
           "source_group": "scripts",
@@ -2983,10 +2942,16 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "Makefile",
+          "line": 491,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/docs/check_docstring_coverage.py"
+        },
+        {
+          "path": "makefile",
           "line": 491,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/docs/check_docstring_coverage.py"
@@ -3079,7 +3044,7 @@
       "type": "py",
       "status": "unknown",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -3090,18 +3055,6 @@
         {
           "path": "docs/00-project/TOOLS.md",
           "line": 248,
-          "source_group": "docs",
-          "text": "python scripts/dq_baseline_update.py --pipeline chembl_activity"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 2490,
-          "source_group": "docs",
-          "text": "python scripts/dq_baseline_update.py"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 2493,
           "source_group": "docs",
           "text": "python scripts/dq_baseline_update.py --pipeline chembl_activity"
         },
@@ -3312,7 +3265,7 @@
       "type": "py",
       "status": "unknown",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 6,
       "references": [
         {
           "path": "docs/02-architecture/decisions/ADR-037-canonical-schema-generation.md",
@@ -3345,22 +3298,10 @@
           "text": "uv run python scripts/generate_schema_artifacts.py --check"
         },
         {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 18202,
+          "path": "docs/reports/scripts-inventory-2026-03-01.md",
+          "line": 1,
           "source_group": "docs",
-          "text": "На этой основе вводится единый генератор `scripts/generate_schema_artifacts.py`,"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 36629,
-          "source_group": "docs",
-          "text": "uv run python scripts/generate_schema_artifacts.py"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 36635,
-          "source_group": "docs",
-          "text": "uv run python scripts/generate_schema_artifacts.py --check"
+          "text": "# Scripts Inventory\\n\\nTotal scripts: **106**\\n\\n## By Folder\\n\\n| Folder | Count |\\n|---|---:|\\n| `.` | 2 |\\n| `assets/javascripts` | 1 |\\n| `docs/02-architecture/mmd-diagrams` | 1 |\\n| `docs/00-proj"
         }
       ]
     },
@@ -3453,7 +3394,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 8,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -3480,28 +3421,28 @@
           "text": "python scripts/naming_audit.py"
         },
         {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 2561,
+          "path": "docs/reports/scripts-inventory-2026-03-01.md",
+          "line": 1,
           "source_group": "docs",
-          "text": "python scripts/naming_audit.py"
+          "text": "# Scripts Inventory\\n\\nTotal scripts: **106**\\n\\n## By Folder\\n\\n| Folder | Count |\\n|---|---:|\\n| `.` | 2 |\\n| `assets/javascripts` | 1 |\\n| `docs/02-architecture/mmd-diagrams` | 1 |\\n| `docs/00-proj"
         },
         {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 2564,
-          "source_group": "docs",
-          "text": "python scripts/naming_audit.py --check"
+          "path": "scripts/qa/check_naming_package_consistency.py",
+          "line": 5,
+          "source_group": "scripts",
+          "text": "1) strict suffix-policy: delegated to ``scripts/naming_audit.py --check``."
         },
         {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 2567,
-          "source_group": "docs",
-          "text": "python scripts/naming_audit.py --output report.md"
+          "path": "scripts/qa/check_naming_package_consistency.py",
+          "line": 52,
+          "source_group": "scripts",
+          "text": "details=\"scripts/naming_audit.py not found\","
         },
         {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 2681,
-          "source_group": "docs",
-          "text": "python scripts/naming_audit.py"
+          "path": "scripts/qa/check_naming_package_consistency.py",
+          "line": 68,
+          "source_group": "scripts",
+          "text": "location=\"scripts/naming_audit.py --check\","
         }
       ]
     },
@@ -3672,10 +3613,16 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "Makefile",
+          "line": 70,
+          "source_group": "build",
+          "text": "@bash scripts/ops/setup_plugins.sh"
+        },
+        {
+          "path": "makefile",
           "line": 70,
           "source_group": "build",
           "text": "@bash scripts/ops/setup_plugins.sh"
@@ -3705,10 +3652,16 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "Makefile",
+          "line": 73,
+          "source_group": "build",
+          "text": "@bash scripts/ops/setup_skills.sh"
+        },
+        {
+          "path": "makefile",
           "line": 73,
           "source_group": "build",
           "text": "@bash scripts/ops/setup_skills.sh"
@@ -3738,17 +3691,11 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/03-guides/cleanup-policy.md",
           "line": 135,
-          "source_group": "docs",
-          "text": "| `make clean-preflight DRY_RUN=1` | Preview preflight-очистки через `scripts/preflight_cleanup.sh` |"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 33435,
           "source_group": "docs",
           "text": "| `make clean-preflight DRY_RUN=1` | Preview preflight-очистки через `scripts/preflight_cleanup.sh` |"
         },
@@ -3903,10 +3850,16 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "Makefile",
+          "line": 327,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/repo/audit_root_cleanliness.py --strict-untracked"
+        },
+        {
+          "path": "makefile",
           "line": 327,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/repo/audit_root_cleanliness.py --strict-untracked"
@@ -3924,10 +3877,16 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "Makefile",
+          "line": 521,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/repo/check_scripts_catalog.py --catalog scripts/catalog.yaml"
+        },
+        {
+          "path": "makefile",
           "line": 521,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/repo/check_scripts_catalog.py --catalog scripts/catalog.yaml"
@@ -3951,7 +3910,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 12,
       "references": [
         {
           "path": "Makefile",
@@ -3978,28 +3937,28 @@
           "text": "$(PY_RUN) scripts/repo/check_scripts_inventory.py --check-lifecycle --forbid-evaluate-active --lifecycle-registry configs/quality/scripts_lifecycle_registry.json"
         },
         {
-          "path": "scripts/README.md",
-          "line": 32,
-          "source_group": "scripts",
-          "text": "- `python scripts/repo/check_scripts_inventory.py --check --manifest configs/quality/scripts_inventory_manifest.json`"
+          "path": "makefile",
+          "line": 501,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/repo/check_scripts_inventory.py --check --manifest configs/quality/scripts_inventory_manifest.json"
         },
         {
-          "path": "scripts/README.md",
-          "line": 34,
-          "source_group": "scripts",
-          "text": "- `python scripts/repo/check_scripts_inventory.py --update --manifest configs/quality/scripts_inventory_manifest.json`"
+          "path": "makefile",
+          "line": 506,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/repo/check_scripts_inventory.py --update --manifest configs/quality/scripts_inventory_manifest.json"
         },
         {
-          "path": "scripts/README.md",
-          "line": 36,
-          "source_group": "scripts",
-          "text": "- `python scripts/repo/check_scripts_inventory.py --check-lifecycle --forbid-evaluate-active --lifecycle-registry configs/quality/scripts_lifecycle_registry.json`"
+          "path": "makefile",
+          "line": 511,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/repo/check_scripts_inventory.py --deprecation-report reports/quality/scripts_deprecation_backlog.md"
         },
         {
-          "path": "scripts/check_scripts_inventory.py",
-          "line": 5,
-          "source_group": "scripts",
-          "text": "- scripts/repo/check_scripts_inventory.py"
+          "path": "makefile",
+          "line": 516,
+          "source_group": "build",
+          "text": "$(PY_RUN) scripts/repo/check_scripts_inventory.py --check-lifecycle --forbid-evaluate-active --lifecycle-registry configs/quality/scripts_lifecycle_registry.json"
         }
       ]
     },
@@ -4023,7 +3982,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 5,
       "references": [
         {
           "path": "Makefile",
@@ -4033,6 +3992,18 @@
         },
         {
           "path": "Makefile",
+          "line": 335,
+          "source_group": "build",
+          "text": "bash scripts/repo/preflight_cleanup.sh; \\"
+        },
+        {
+          "path": "makefile",
+          "line": 333,
+          "source_group": "build",
+          "text": "bash scripts/repo/preflight_cleanup.sh --dry-run; \\"
+        },
+        {
+          "path": "makefile",
           "line": 335,
           "source_group": "build",
           "text": "bash scripts/repo/preflight_cleanup.sh; \\"
@@ -4050,7 +4021,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 7,
       "references": [
         {
           "path": ".github/workflows/docs-kpi-weekly.yml",
@@ -4077,18 +4048,6 @@
           "text": "- `scripts/report_docs_kpi.py --fail-on-breach`"
         },
         {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 6088,
-          "source_group": "docs",
-          "text": "- Script: `scripts/report_docs_kpi.py`"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 6128,
-          "source_group": "docs",
-          "text": "- `./.venv/Scripts/python.exe scripts/report_docs_kpi.py`"
-        },
-        {
           "path": "docs/reports/documentation-audit-2026-03-03-exhaustive.md",
           "line": 140,
           "source_group": "docs",
@@ -4099,6 +4058,12 @@
           "line": 266,
           "source_group": "docs",
           "text": "- `scripts/report_docs_kpi.py --fail-on-breach` — PASS"
+        },
+        {
+          "path": "tests/architecture/test_docs_kpi_workflow.py",
+          "line": 21,
+          "source_group": "tests",
+          "text": "assert \"scripts/report_docs_kpi.py\" in workflow"
         }
       ]
     },
@@ -4155,7 +4120,7 @@
       "type": "py",
       "status": "unknown",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -4166,18 +4131,6 @@
         {
           "path": "docs/00-project/TOOLS.md",
           "line": 226,
-          "source_group": "docs",
-          "text": "python scripts/salt_rotate.py --emergency"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 2468,
-          "source_group": "docs",
-          "text": "python scripts/salt_rotate.py"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 2471,
           "source_group": "docs",
           "text": "python scripts/salt_rotate.py --emergency"
         },
@@ -4224,7 +4177,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 9,
       "references": [
         {
           "path": ".github/workflows/schema-governance.yml",
@@ -4251,6 +4204,18 @@
           "text": "$(VENV_PYTHON) scripts/schema/generate_contracts.py"
         },
         {
+          "path": "makefile",
+          "line": 535,
+          "source_group": "build",
+          "text": "uv run python scripts/schema/generate_contracts.py"
+        },
+        {
+          "path": "makefile",
+          "line": 537,
+          "source_group": "build",
+          "text": "$(VENV_PYTHON) scripts/schema/generate_contracts.py"
+        },
+        {
           "path": "scripts/generate_contracts.py",
           "line": 5,
           "source_group": "scripts",
@@ -4261,12 +4226,6 @@
           "line": 160,
           "source_group": "scripts",
           "text": "[sys.executable, \"scripts/schema/generate_contracts.py\"],"
-        },
-        {
-          "path": "src/tools/scripts/generate_contracts.py",
-          "line": 5,
-          "source_group": "scripts",
-          "text": "- scripts/schema/generate_contracts.py"
         }
       ]
     },
@@ -4305,7 +4264,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 8,
       "references": [
         {
           "path": ".github/workflows/schema-governance.yml",
@@ -4333,6 +4292,18 @@
         },
         {
           "path": "Makefile",
+          "line": 570,
+          "source_group": "build",
+          "text": "$(RUN) python scripts/schema/generate_schema_artifacts.py --check"
+        },
+        {
+          "path": "makefile",
+          "line": 529,
+          "source_group": "build",
+          "text": "$(RUN) python scripts/schema/generate_schema_artifacts.py"
+        },
+        {
+          "path": "makefile",
           "line": 570,
           "source_group": "build",
           "text": "$(RUN) python scripts/schema/generate_schema_artifacts.py --check"
@@ -4461,7 +4432,7 @@
       "type": "py",
       "status": "unknown",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 5,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -4488,28 +4459,10 @@
           "text": "python scripts/vacuum_delta.py"
         },
         {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 2440,
+          "path": "docs/reports/scripts-inventory-2026-03-01.md",
+          "line": 1,
           "source_group": "docs",
-          "text": "python scripts/vacuum_delta.py"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 2443,
-          "source_group": "docs",
-          "text": "python scripts/vacuum_delta.py --table silver/chembl/activity"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 2446,
-          "source_group": "docs",
-          "text": "python scripts/vacuum_delta.py --retention-days 14"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 2670,
-          "source_group": "docs",
-          "text": "python scripts/vacuum_delta.py"
+          "text": "# Scripts Inventory\\n\\nTotal scripts: **106**\\n\\n## By Folder\\n\\n| Folder | Count |\\n|---|---:|\\n| `.` | 2 |\\n| `assets/javascripts` | 1 |\\n| `docs/02-architecture/mmd-diagrams` | 1 |\\n| `docs/00-proj"
         }
       ]
     },
@@ -4518,7 +4471,7 @@
       "type": "py",
       "status": "unknown",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/00-project/governance/03-file-policy.md",
@@ -4529,18 +4482,6 @@
         {
           "path": "docs/04-reference/templates/pipeline-review-checklist.md",
           "line": 171,
-          "source_group": "docs",
-          "text": "- [ ] `uv run python scripts/validate_data_dir.py` проходит без ошибок"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 5164,
-          "source_group": "docs",
-          "text": "uv run python scripts/validate_data_dir.py"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 56202,
           "source_group": "docs",
           "text": "- [ ] `uv run python scripts/validate_data_dir.py` проходит без ошибок"
         },
@@ -4557,7 +4498,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 8,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -4596,16 +4537,16 @@
           "text": "python scripts/validate_pipeline_configs.py --verbose"
         },
         {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 2634,
+          "path": "docs/reports/scripts-inventory-2026-03-01.md",
+          "line": 1,
           "source_group": "docs",
-          "text": "python scripts/validate_pipeline_configs.py"
+          "text": "# Scripts Inventory\\n\\nTotal scripts: **106**\\n\\n## By Folder\\n\\n| Folder | Count |\\n|---|---:|\\n| `.` | 2 |\\n| `assets/javascripts` | 1 |\\n| `docs/02-architecture/mmd-diagrams` | 1 |\\n| `docs/00-proj"
         },
         {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 4200,
-          "source_group": "docs",
-          "text": "- **Конфиги**: `python scripts/validate_pipeline_configs.py`, `python scripts/config_gap_analysis.py`."
+          "path": "pyproject.toml",
+          "line": 123,
+          "source_group": "build",
+          "text": "# JSON Schema validation (scripts/validate_pipeline_configs.py)"
         }
       ]
     },
@@ -4614,7 +4555,7 @@
       "type": "py",
       "status": "unknown",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -4631,24 +4572,6 @@
         {
           "path": "docs/00-project/TOOLS.md",
           "line": 429,
-          "source_group": "docs",
-          "text": "python scripts/verify_checksums.py"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 2511,
-          "source_group": "docs",
-          "text": "python scripts/verify_checksums.py"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 2512,
-          "source_group": "docs",
-          "text": "python scripts/verify_checksums.py --table silver/chembl/activity"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 2674,
           "source_group": "docs",
           "text": "python scripts/verify_checksums.py"
         },
@@ -4673,7 +4596,7 @@
       "type": "py",
       "status": "unknown",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 9,
       "references": [
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
@@ -4730,7 +4653,7 @@
       "type": "py",
       "status": "unknown",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -4749,24 +4672,6 @@
           "line": 440,
           "source_group": "docs",
           "text": "python src/tools/create_pipeline.py --provider $(PROVIDER) --entity $(ENTITY)"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 2318,
-          "source_group": "docs",
-          "text": "python src/tools/create_pipeline.py --provider chembl --entity document"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 2321,
-          "source_group": "docs",
-          "text": "python src/tools/create_pipeline.py --provider pubchem --entity compound --dry-run"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 2685,
-          "source_group": "docs",
-          "text": "python src/tools/create_pipeline.py --provider $(PROVIDER) --entity $(ENTITY)"
         }
       ]
     },
@@ -4775,7 +4680,7 @@
       "type": "py",
       "status": "unknown",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/02-architecture/mmd-diagrams/docs/DIAGRAM-WORKFLOW-GUIDE.md",
@@ -4800,30 +4705,6 @@
           "line": 356,
           "source_group": "docs",
           "text": "6. **Применить linkStyle** (если flowchart с 5+ связями): `python src/tools/differentiate_linkstyle.py`"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 26848,
-          "source_group": "docs",
-          "text": "Инструмент `src/tools/differentiate_linkstyle.py` классифицирует связи по 6 семантическим типам:"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 26872,
-          "source_group": "docs",
-          "text": "python src/tools/differentiate_linkstyle.py --dry-run   # Предпросмотр"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 26873,
-          "source_group": "docs",
-          "text": "python src/tools/differentiate_linkstyle.py              # Применить"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 27013,
-          "source_group": "docs",
-          "text": "6. **Применить linkStyle** (если flowchart с 5+ связями): `python src/tools/differentiate_linkstyle.py`"
         }
       ]
     },
@@ -4832,17 +4713,11 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 13,
+      "reference_count": 12,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
           "line": 120,
-          "source_group": "docs",
-          "text": "python src/tools/file_merger.py --dir src/bioetl/domain/ --ext .py --output merged.txt"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 2365,
           "source_group": "docs",
           "text": "python src/tools/file_merger.py --dir src/bioetl/domain/ --ext .py --output merged.txt"
         },
@@ -4881,6 +4756,12 @@
           "line": 62,
           "source_group": "scripts",
           "text": "python src/tools/file_merger.py --merge_documentation"
+        },
+        {
+          "path": "src/tools/README.md",
+          "line": 65,
+          "source_group": "scripts",
+          "text": "python src/tools/file_merger.py --merge_documentation -o my_docs.md"
         }
       ]
     },
@@ -5062,7 +4943,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 5,
       "references": [
         {
           "path": "docs/02-architecture/decisions/ADR-037-canonical-schema-generation.md",
@@ -5073,18 +4954,6 @@
         {
           "path": "docs/04-reference/contracts/README.md",
           "line": 13,
-          "source_group": "docs",
-          "text": "python src/tools/scripts/generate_contracts.py"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 18208,
-          "source_group": "docs",
-          "text": "(`src/tools/scripts/generate_contracts.py`),"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 40650,
           "source_group": "docs",
           "text": "python src/tools/scripts/generate_contracts.py"
         },
@@ -5113,7 +4982,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 18,
+      "reference_count": 12,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -5152,16 +5021,16 @@
           "text": "python src/tools/scripts/lint_terminology.py src/bioetl/"
         },
         {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 2581,
+          "path": "docs/reports/scripts-inventory-2026-03-01.md",
+          "line": 1,
           "source_group": "docs",
-          "text": "python src/tools/scripts/lint_terminology.py"
+          "text": "# Scripts Inventory\\n\\nTotal scripts: **106**\\n\\n## By Folder\\n\\n| Folder | Count |\\n|---|---:|\\n| `.` | 2 |\\n| `assets/javascripts` | 1 |\\n| `docs/02-architecture/mmd-diagrams` | 1 |\\n| `docs/00-proj"
         },
         {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 2584,
-          "source_group": "docs",
-          "text": "python src/tools/scripts/lint_terminology.py src/bioetl/domain/models/molecule.py"
+          "path": "scripts/qa/lint_terminology.py",
+          "line": 8,
+          "source_group": "scripts",
+          "text": "python src/tools/scripts/lint_terminology.py src/bioetl/"
         }
       ]
     },
@@ -5193,17 +5062,11 @@
       "type": "py",
       "status": "unknown",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "docs/03-guides/dq-configuration.md",
           "line": 362,
-          "source_group": "docs",
-          "text": "python src/tools/scripts/validate_unified_configs.py"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 34796,
           "source_group": "docs",
           "text": "python src/tools/scripts/validate_unified_configs.py"
         },
@@ -5220,7 +5083,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 5,
       "references": [
         {
           "path": ".github/workflows/schema-governance.yml",
@@ -5243,12 +5106,6 @@
         {
           "path": "docs/00-project/TOOLS.md",
           "line": 102,
-          "source_group": "docs",
-          "text": "python src/tools/verify_schema_parity.py"
-        },
-        {
-          "path": "docs/exports/full-documentation-no-plans-reports-skills.merged.md",
-          "line": 2347,
           "source_group": "docs",
           "text": "python src/tools/verify_schema_parity.py"
         },
