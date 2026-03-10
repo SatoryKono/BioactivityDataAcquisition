@@ -2,6 +2,6 @@
 
 This document path is deprecated.
 
-Canonical file: [../runtime/orchestration/py-team-orchestration.md](../runtime/orchestration/py-team-orchestration.md)
+Canonical file: [../agents/ORCHESTRATION.md](../agents/ORCHESTRATION.md)
 
 Do not edit this alias directly.

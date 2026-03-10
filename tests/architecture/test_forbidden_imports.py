@@ -29,8 +29,9 @@ def _discover_internal_port_modules(src_dir: Path) -> list[str]:
     if not ports_dir.exists():
         return []
     return sorted(
-        f"bioetl.domain.ports.{py_file.stem}"
-        for py_file in ports_dir.glob("*.py")
+        "bioetl.domain.ports."
+        + ".".join(py_file.relative_to(ports_dir).with_suffix("").parts)
+        for py_file in ports_dir.rglob("*.py")
         if py_file.stem != "__init__"
     )
 

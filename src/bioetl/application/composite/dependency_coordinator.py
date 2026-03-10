@@ -12,8 +12,6 @@ import polars as pl
 from bioetl.application.composite.dependency_key_resolvers import (
     ChainedKeyResolver,
     SeedKeyResolver,
-    create_chained_key_resolver,
-    create_seed_key_resolver,
 )
 from bioetl.domain.composite.result import DependencyResult
 from bioetl.domain.exceptions import (
@@ -247,24 +245,22 @@ class DependencyCoordinatorService:
     def __init__(
         self,
         logger: LoggerPort,
+        seed_key_resolver: SeedKeyResolver,
+        chained_key_resolver: ChainedKeyResolver,
         delta_reader: DeltaReaderPort | None = None,
-        seed_key_resolver: SeedKeyResolver | None = None,
-        chained_key_resolver: ChainedKeyResolver | None = None,
     ) -> None:
         """Initialize dependency coordinator.
 
         Args:
             logger: Structured logger.
+            seed_key_resolver: Resolver for seed-key dependencies.
+            chained_key_resolver: Resolver for chained dependencies.
             delta_reader: Reader for Silver tables (required for chained dependencies).
-            seed_key_resolver: Optional custom resolver for seed-key dependencies.
-            chained_key_resolver: Optional custom resolver for chained dependencies.
         """
         self._logger = logger
         self._delta_reader = delta_reader
-        self._seed_key_resolver = seed_key_resolver or create_seed_key_resolver(logger)
-        self._chained_key_resolver = chained_key_resolver or (
-            create_chained_key_resolver(logger)
-        )
+        self._seed_key_resolver = seed_key_resolver
+        self._chained_key_resolver = chained_key_resolver
 
     async def run_dependencies(
         self,

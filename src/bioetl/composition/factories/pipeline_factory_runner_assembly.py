@@ -6,7 +6,6 @@ from collections.abc import Callable
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.lock_manager import LockCoordinator
-from bioetl.application.core.postrun_service import PostrunService
 from bioetl.application.core.preflight_health_aggregator import _HealthAggregator
 from bioetl.application.core.preflight_medallion_validator import (
     _MedallionConfigValidator,
@@ -14,11 +13,13 @@ from bioetl.application.core.preflight_medallion_validator import (
 from bioetl.application.core.preflight_service import PreflightService
 from bioetl.application.core.runner import PipelineRunner
 from bioetl.application.observability.observer import PipelineObserver
-from bioetl.application.services.data_quality_service import DataQualityService
 from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
 from bioetl.composition.bootstrap_contexts import DQConfigsContext
 from bioetl.composition.factories.pipeline_factory_dq_helpers import (
     extract_dq_output_paths,
+)
+from bioetl.composition.factories.pipeline_factory_postrun_assembly import (
+    build_postrun_service,
 )
 from bioetl.composition.factories.services_factory import ServicesBuilder
 from bioetl.domain.locking import LockContextHolder
@@ -31,6 +32,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.batch_executor import BatchExecutor
     from bioetl.application.core.checkpoint_manager import CheckpointManagerService
+    from bioetl.application.core.postrun_service import PostrunService
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -116,39 +118,6 @@ def _resolve_dq_configs(
         or (lambda cfg: DQConfigsContext(bronze=None, silver=None, gold=None))
     )
     return extractor(yaml_config)
-
-
-def _build_postrun_service(
-    *,
-    pipeline: BasePipeline,
-    logger_port: LoggerPort,
-    lifecycle_service: MedallionLifecycleService,
-    dq_configs: DQConfigsContext,
-) -> PostrunService:
-    dq_service = DataQualityService(
-        dq_monitor=pipeline.services.dq_monitor,
-        config=pipeline.config.dq,
-        logger=logger_port,
-        metrics=pipeline.services.metrics,
-        pipeline_name=pipeline.config.pipeline_name,
-        entity_type=pipeline.config.entity_type,
-    )
-    return PostrunService(
-        config=pipeline.config,
-        runtime=pipeline.runtime,
-        context=pipeline.context,
-        dq_service=dq_service,
-        lifecycle_service=lifecycle_service,
-        storage=pipeline.services.storage,
-        metrics=pipeline.services.metrics,
-        logger=logger_port,
-        metadata_coordinator=pipeline.services.metadata_coordinator,
-        metadata_writer=pipeline.services.metadata_writer,
-        dq_report_service=pipeline.services.dq_report_service,
-        bronze_dq_config=dq_configs.bronze if dq_configs else None,
-        silver_dq_config=dq_configs.silver if dq_configs else None,
-        gold_dq_config=dq_configs.gold if dq_configs else None,
-    )
 
 
 def _build_observer(
@@ -282,7 +251,7 @@ def assemble_runner_impl(
         yaml_config=yaml_config,
         dq_configs_extractor=dq_configs_extractor,
     )
-    postrun_service = _build_postrun_service(
+    postrun_service = build_postrun_service(
         pipeline=pipeline,
         logger_port=logger_port,
         lifecycle_service=lifecycle_service,

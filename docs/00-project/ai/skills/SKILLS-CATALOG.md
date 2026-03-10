@@ -1,5 +1,7 @@
 # Каталог Локальных Skills (Ядро BioETL)
 
+*Статус: internal-published (Internal / Extended)*
+
 Сводный реестр локальных BioETL-skills в `.codex/skills/`.
 
 ## Канонические Правила
@@ -32,7 +34,6 @@ bash scripts/check_skills_mirror.sh --sync
 | Skill | Путь | Назначение |
 |------|------|---------|
 | `py-audit-bot` | `.codex/skills/py-audit-bot` | Профиль аудита |
-| `py-code-bot` | `.codex/skills/py-code-bot` | Профиль реализации кода |
 | `py-config-bot` | `.codex/skills/py-config-bot` | Профиль конфигурации |
 | `py-debug-bot` | `.codex/skills/py-debug-bot` | Профиль отладки |
 | `py-doc-bot` | `.codex/skills/py-doc-bot` | Профиль документации |
@@ -85,6 +86,7 @@ bash scripts/check_skills_mirror.sh --sync
 - Legacy одиночные артефакты удалены (`*.openai.yaml`, `*.skill.md`).
 - Guardrail: `scripts/check_ai_skills_layout.sh` принудительно проверяет канонический top-level layout.
 - Guardrail: в активной документации и скриптах запрещены ссылки на legacy-зеркало skills.
+- `py-code-bot` исключён из active published catalog: начиная с `ORCHESTRATION.md v4.0` production-код пишет orchestrator, а legacy runtime-артефакт не считается активным docs-profile.
 
 ## Индекс Зеркала Документации
 
@@ -101,7 +103,6 @@ bash scripts/check_skills_mirror.sh --sync
 - [nci-analysis](local/nci-analysis/SKILL.md)
 - [new-pipeline](local/new-pipeline/SKILL.md)
 - [py-audit-bot](local/py-audit-bot/SKILL.md)
-- [py-code-bot](local/py-code-bot/SKILL.md)
 - [py-config-bot](local/py-config-bot/SKILL.md)
 - [py-debug-bot](local/py-debug-bot/SKILL.md)
 - [py-doc-bot](local/py-doc-bot/SKILL.md)

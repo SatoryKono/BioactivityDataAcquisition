@@ -317,7 +317,7 @@ class SilverWriterValidationMixin:
             None,
             partial(
                 _sync_validate_and_build_arrow,
-                self,
+                mixin=self,
                 table_name=table_name,
                 records=records,
                 primary_keys=primary_keys,

@@ -1,5 +1,7 @@
 # Local Skills Catalog (BioETL Core)
 
+*Статус: internal-published (Internal / Extended)*
+
 Consolidated registry of BioETL-focused local skills under `.codex/skills/`.
 
 ## Canonical Rules
@@ -29,7 +31,6 @@ bash scripts/check_skills_mirror.sh --sync
 | Skill | Path | Purpose |
 |------|------|---------|
 | `py-audit-bot` | `.codex/skills/py-audit-bot` | Audit profile workflow |
-| `py-code-bot` | `.codex/skills/py-code-bot` | Code implementation profile |
 | `py-config-bot` | `.codex/skills/py-config-bot` | Config profile workflow |
 | `py-debug-bot` | `.codex/skills/py-debug-bot` | Debug profile workflow |
 | `py-doc-bot` | `.codex/skills/py-doc-bot` | Documentation profile workflow |
@@ -78,6 +79,7 @@ bash scripts/check_skills_mirror.sh --sync
 
 - All local skills are structurally valid.
 - `documentation-cascade-audit` has been normalized from template/TODO state to an active skill.
+- `py-code-bot` is treated as a deprecated runtime artifact and is excluded from the active published catalog because orchestration writes production code directly via the orchestrator.
 
 ## Mirror Doc Index
 
@@ -94,7 +96,6 @@ bash scripts/check_skills_mirror.sh --sync
 - [nci-analysis](nci-analysis/SKILL.md)
 - [new-pipeline](new-pipeline/SKILL.md)
 - [py-audit-bot](py-audit-bot/SKILL.md)
-- [py-code-bot](py-code-bot/SKILL.md)
 - [py-config-bot](py-config-bot/SKILL.md)
 - [py-debug-bot](py-debug-bot/SKILL.md)
 - [py-doc-bot](py-doc-bot/SKILL.md)

@@ -487,11 +487,14 @@ class TestDQQuarantineBehavior:
         quarantined_records: list[dict] = []
         quarantine_manager = MagicMock(spec=QuarantineManager)
 
-        async def capture_quarantine(record, error_type, batch_id, error_msg, **kwargs):
-            quarantined_records.append(record)
+        async def capture_quarantine_records(records, batch_id, **kwargs):
+            for record, _error_type, _error_msg in records:
+                quarantined_records.append(record)
 
-        quarantine_manager.quarantine_record = AsyncMock(side_effect=capture_quarantine)
-        quarantine_manager.quarantine_filtered_record = AsyncMock()
+        quarantine_manager.quarantine_records = AsyncMock(
+            side_effect=capture_quarantine_records
+        )
+        quarantine_manager.quarantine_filtered_records = AsyncMock()
 
         # Fail specific records
         failed_ids = {"2", "5", "7"}

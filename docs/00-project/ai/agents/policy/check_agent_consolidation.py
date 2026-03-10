@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Validate consolidated agent profiles in docs mirror.
+"""Validate specialist agent profiles in the docs mirror.
 
-Scope: docs/00-project/ai/agents/snapshots/collected/.claude/agents
+Scope: docs/00-project/ai/agents/agents/sp-*.md
 """
 
 from __future__ import annotations
@@ -13,10 +13,7 @@ import re
 import sys
 
 
-AGENTS_DIR = Path(
-    "docs/00-project/ai/agents/snapshots/collected/.claude/agents"
-)
-SKIP = {"README.md", "ORCHESTRATION.md"}
+AGENTS_DIR = Path("docs/00-project/ai/agents/agents")
 BANNED_SUFFIXES = ("-pro", "-master", "-expert")
 
 
@@ -63,7 +60,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"ERROR: directory not found: {AGENTS_DIR}")
         return 2
 
-    files = sorted(p for p in AGENTS_DIR.glob("*.md") if p.name not in SKIP)
+    files = sorted(AGENTS_DIR.glob("sp-*.md"))
     names = {p.stem for p in files}
 
     alias_count = 0

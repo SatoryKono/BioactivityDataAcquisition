@@ -1,7 +1,9 @@
 # Specialist Profile Template
 
+*Статус: internal*
+
 Date: 2026-03-08
-Scope: `docs/00-project/ai/agents/snapshots/collected/.claude/agents/sp-*.md`
+Scope: `docs/00-project/ai/agents/agents/sp-*.md`
 
 ## Canonical Specialist Template
 

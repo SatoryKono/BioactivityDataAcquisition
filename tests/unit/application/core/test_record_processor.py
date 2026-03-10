@@ -114,6 +114,7 @@ def mock_quarantine_port():
     """Create mock quarantine port."""
     port = AsyncMock()
     port.write = AsyncMock()
+    port.write_many = AsyncMock()
     return port
 
 
@@ -381,8 +382,7 @@ class TestRecordProcessorProcessBatch:
         assert result.bronze_count == 2
         assert result.silver_count == 1
         assert result.quarantined_count == 1
-        # Quarantine logic is now internal to Processor via QuarantineManager -> Port
-        mock_services.quarantine.write.assert_called_once()
+        mock_services.quarantine.write_many.assert_called_once()
 
     async def test_process_batch_raises_non_data_quality_errors(
         self, mock_services, mock_error_classifier, mock_context

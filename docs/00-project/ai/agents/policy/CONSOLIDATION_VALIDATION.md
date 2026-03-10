@@ -1,7 +1,9 @@
 # Consolidation Validation
 
+*Статус: internal-published (Internal / Extended)*
+
 Date: 2026-03-08
-Scope: `docs/00-project/ai/**`
+Scope: `docs/00-project/ai/agents/agents/sp-*.md`
 
 ## Commands
 

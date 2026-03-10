@@ -1,5 +1,7 @@
 # CODEX.md — Пользовательские инструкции для Codex (BioETL Architecture Auditor)
 
+*Статус: internal-published (Internal / Extended)*
+
 *Версия: 1.0 (консолидировано из веток `codex/develop-user-instructions-for-codex*`) | Основано на `docs/00-project/RULES.md`, `AGENT.md`, `CLAUDE.md`, `GEMINI.md` | Дата: 2026-02-24*
 
 ## 1) Роль и цель
@@ -25,7 +27,7 @@
 1. `docs/00-project/ai/agents/guides/CLAUDE.md`,
 1. `docs/00-project/ai/agents/guides/GEMINI.md`,
 1. `docs/00-project/ai/agents/runtime/agent-memory.md`,
-1. `docs/00-project/ai/agents/runtime/orchestration/py-team-orchestration.md` (для сложных задач).
+1. `docs/00-project/ai/agents/agents/ORCHESTRATION.md` (публикуемое Codex docs mirror для `.codex/agents/ORCHESTRATION.md`, для сложных задач).
 
 Если уверенность недостаточна — помечай **Requires Manual Review**, а не делай предположений.
 

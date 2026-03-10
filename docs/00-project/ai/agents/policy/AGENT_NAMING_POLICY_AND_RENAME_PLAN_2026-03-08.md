@@ -1,5 +1,7 @@
 # Agent Naming Policy And Rename Plan (Docs Scope)
 
+*Статус: internal-published (Internal / Extended)*
+
 Date: 2026-03-08
 Scope constraint: documentation-only in `docs/00-project/ai/**` (no runtime file renames in `.claude/agents` / `.codex/agents`).
 
@@ -75,7 +77,7 @@ Canonical docs filenames aligned:
 1. `qa_orchestrator.md` -> `runtime/py-qa-orchestrator.md`
 2. `diagram_docs_orchestrator.md` -> `runtime/py-diagram-docs-orchestrator.md`
 3. `memory.md` -> `runtime/agent-memory.md`
-4. `orchestration/ORCHESTRATION.md` -> `runtime/orchestration/py-team-orchestration.md`
+4. `orchestration/ORCHESTRATION.md` -> `agents/ORCHESTRATION.md`
 5. `AGENT.md` -> `guides/AGENT.md`
 6. `CLAUDE.md` -> `guides/CLAUDE.md`
 7. `CODEX.md` -> `guides/CODEX.md`

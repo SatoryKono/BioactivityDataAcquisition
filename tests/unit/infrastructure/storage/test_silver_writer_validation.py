@@ -439,14 +439,15 @@ class TestSilverWriterPreparePayloadExecutor:
         )
         expected_table = pa.Table.from_pylist(records, schema=schema)
         writer._check_schema_drift = AsyncMock(return_value=None)  # type: ignore[method-assign]
-        writer._sync_validate_and_build_arrow = MagicMock(  # type: ignore[method-assign]
-            return_value=(records, SilverWriteMode.APPEND, expected_table)
-        )
 
         loop = asyncio.get_running_loop()
-        with patch.object(
-            loop, "run_in_executor", wraps=loop.run_in_executor
-        ) as mock_exec:
+        with (
+            patch(
+                "bioetl.infrastructure.storage.silver_writer_validation_mixin._sync_validate_and_build_arrow",
+                return_value=(records, SilverWriteMode.APPEND, expected_table),
+            ) as mock_sync,
+            patch.object(loop, "run_in_executor", wraps=loop.run_in_executor) as mock_exec,
+        ):
             payload = await writer._prepare_silver_write_payload(
                 table_name="test.table",
                 records=records,
@@ -465,7 +466,7 @@ class TestSilverWriterPreparePayloadExecutor:
             "/tmp/silver/test/table",
             expected_table,
         )
-        writer._sync_validate_and_build_arrow.assert_called_once()
+        mock_sync.assert_called_once()
         writer._check_schema_drift.assert_awaited_once_with(
             "test.table",
             records,
@@ -505,7 +506,8 @@ class TestSilverWriterPreparePayloadExecutor:
         call_order: list[str] = []
 
         def sync_stage(
-            **_: object,
+            *_: object,
+            **__: object,
         ) -> tuple[list[dict[str, str]], SilverWriteMode, pa.Table]:
             call_order.append("sync")
             return records, SilverWriteMode.APPEND, expected_table
@@ -513,19 +515,22 @@ class TestSilverWriterPreparePayloadExecutor:
         async def schema_stage(*_: object) -> None:
             call_order.append("schema")
 
-        writer._sync_validate_and_build_arrow = MagicMock(side_effect=sync_stage)  # type: ignore[method-assign]
         writer._check_schema_drift = AsyncMock(side_effect=schema_stage)  # type: ignore[method-assign]
 
-        await writer._prepare_silver_write_payload(
-            table_name="test.table",
-            records=records,
-            primary_keys=["entity_id"],
-            schema=schema,
-            mode="append",
-            on_schema_mismatch="ignore",
-            column_order=None,
-            partition_cols=None,
-            key_nullability_rules=None,
-        )
+        with patch(
+            "bioetl.infrastructure.storage.silver_writer_validation_mixin._sync_validate_and_build_arrow",
+            side_effect=sync_stage,
+        ):
+            await writer._prepare_silver_write_payload(
+                table_name="test.table",
+                records=records,
+                primary_keys=["entity_id"],
+                schema=schema,
+                mode="append",
+                on_schema_mismatch="ignore",
+                column_order=None,
+                partition_cols=None,
+                key_nullability_rules=None,
+            )
 
         assert call_order == ["sync", "schema"]

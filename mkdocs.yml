@@ -338,7 +338,7 @@ nav:
                     -   "Shared Agent Memory": 00-project/ai/memory/agent-memory.md
                     -   "Agent Memory": 00-project/ai/agents/runtime/agent-memory.md
                     -   "QA Orchestrator Prompt": 00-project/ai/agents/runtime/py-qa-orchestrator.md
-                    -   "Orchestration": 00-project/ai/agents/runtime/orchestration/py-team-orchestration.md
+                    -   "Orchestration": 00-project/ai/agents/agents/ORCHESTRATION.md
             -   "Project Architecture Index": 00-project/architecture-index.md
             -   "Architecture Extras":
                     -   "Diagram Policy (Canonical)": 02-architecture/06-diagram-policy.md
@@ -709,7 +709,6 @@ nav:
                     -   "Skill": 00-project/ai/skills/global/openai-docs/SKILL.md
                     -   "Skill": 00-project/ai/skills/global/public/architecture-guardian/SKILL.md
                     -   "Skill": 00-project/ai/skills/global/py-audit-bot/SKILL.md
-                    -   "Skill": 00-project/ai/skills/global/py-code-bot/SKILL.md
                     -   "Skill": 00-project/ai/skills/global/py-config-bot/SKILL.md
                     -   "Skill": 00-project/ai/skills/global/py-debug-bot/SKILL.md
                     -   "Skill": 00-project/ai/skills/global/py-doc-bot/SKILL.md
@@ -755,7 +754,6 @@ nav:
                     -   "Skill": 00-project/ai/skills/local/new-pipeline/SKILL.md
                     -   "Skill": 00-project/ai/skills/local/public/architecture-guardian/SKILL.md
                     -   "Skill": 00-project/ai/skills/local/py-audit-bot/SKILL.md
-                    -   "Skill": 00-project/ai/skills/local/py-code-bot/SKILL.md
                     -   "Skill": 00-project/ai/skills/local/py-config-bot/SKILL.md
                     -   "Skill": 00-project/ai/skills/local/py-debug-bot/SKILL.md
                     -   "Skill": 00-project/ai/skills/local/py-doc-bot/SKILL.md
