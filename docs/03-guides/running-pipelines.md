@@ -2,8 +2,8 @@
 
 Руководство по запуску и управлению ETL-пайплайнами в BioETL.
 
-**Версия:** 5.14.0
-**Дата обновления:** 2026-02-10
+**Версия:** 6.0.0
+**Дата обновления:** 2026-03-10
 
 ----------------------------------------------------------------------
 
@@ -147,8 +147,8 @@ bioetl run --pipeline chembl_activity --cached-bronze-path ./my-cache
 ```bash
 bioetl run --pipeline chembl_activity \
     --input-csv data/filter-ids.csv \
-    --filter-column molecule-id \
-    --filter-field molecule-chembl-id
+    --filter-column molecule_id \
+    --filter-field molecule_id
 ```
 
 ----------------------------------------------------------------------
@@ -196,11 +196,11 @@ pipeline:
   pipeline_name: chembl_activity
   provider: chembl
   entity_type: activity
-  business_primary_keys: [activity-id]
+  business_primary_keys: [activity_id]
 
 quality:
-  entity-field-validations:
-    - field: standard-value
+  field_validations:
+    - field: standard_value
       type: range
       min: 0
       nullable: true
@@ -327,7 +327,7 @@ bioetl health server --port 8081
 | ---------- | ------------------------------------------------ | ------------ | --------- |
 | **Bronze** | `data/output/bronze/{provider}/{entity}/{date}/` | JSONL + zstd | 90 дней   |
 | **Silver** | `data/output/silver/{provider}/{entity}/`        | Delta Lake   | Permanent |
-| **Gold**   | `data/output/gold/{provider}/{entity}/`          | Delta Lake   | Permanent |
+| **Gold**   | `data/output/gold/{provider}/{entity}/`          | Delta Lake   | Permanent (if enabled) |
 
 ### Структура директорий
 

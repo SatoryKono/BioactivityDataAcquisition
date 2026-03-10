@@ -28,6 +28,11 @@ pipeline:
     entity_type: activity
     business_primary_keys: [activity_id]
     batch_size: 1000
+    sink:
+        silver:
+            mode: append
+        gold:
+            enabled: false
 
 schema:
     column_groups:
@@ -50,14 +55,6 @@ quality:
         - field: activity_id
           type: required
           nullable: false
-
-filters:
-    version: 1.0.0
-    provider: chembl
-    entity: activity
-    extraction_params:
-        standard_type__in: IC50,Ki
-        standard_units: nM
 ```
 
 ----------------------------------------------------------------------
@@ -376,61 +373,27 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
 )
 ```
 
-| Параметр                 | Значение                         |
-| ------------------------ | -------------------------------- |
-| **Формат**               | Delta Lake                       |
-| **Merge Key**            | `activity_id`                    |
-| **Партиционирование**    | `year`, `month`                  |
-| **Приоритет конфликтов** | REBUILD > BACKFILL > INCREMENTAL |
+| Параметр                 | Значение                                      |
+| ------------------------ | --------------------------------------------- |
+| **Формат**               | Delta Lake                                    |
+| **Режим записи**         | `append` (active pipeline config)             |
+| **Бизнес-ключ**          | `activity_id`                                 |
+| **Партиционирование**    | Не задано в активном entity config            |
+| **Приоритет конфликтов** | REBUILD > BACKFILL > INCREMENTAL (run_type metadata) |
 
 ----------------------------------------------------------------------
 
 ### 6.3. Gold Layer
 
-**Файл:** `src/bioetl/infrastructure/storage/gold_writer.py`
+`chembl_activity` currently does **not** write a Gold dataset.
+In the active config, `sink.gold.enabled: false`, so the pipeline stops after
+Bronze and Silver writes.
 
-#### Фильтр для Gold
-
-```python
-def should_include(self, context, record) -> bool:
-    return all(
-        [
-            record.get("standard_value") is not None,  # Есть значение
-            record.get("standard_units"),  # Есть единицы
-            record.get("target_id"),  # Есть мишень
-            record.get("standard_type") in {"IC50", "Ki", "Kd", "EC50", "AC50", "GI50", "ED50", "MIC", "CC50"},  # 9 типов
-            not record.get("data_validity_comment"),  # Нет флагов проблем
-        ]
-    )
-```
-
-| Параметр      | Значение              |
-| ------------- | --------------------- |
-| **Формат**    | Delta Lake            |
-| **Режим**     | Overwrite             |
-| **Валидация** | Strict Pandera schema |
-
-#### Data Contract
-
-**Файл:** `docs/04-reference/contracts/gold/chembl_activity_v1.0.json`
-
-```json
-{
-    "required": [
-        "activity_id",
-        "molecule_id",
-        "-content_hash",
-        "_ingestion_ts"
-    ],
-    "properties": {
-        "activity_id": {"type": "integer"},
-        "molecule_id": {"type": "string", "pattern": "^CHEMBL\\d+$"},
-        "standard_type": {"type": "string"},
-        "standard_value": {"type": ["number", "null"]},
-        "pchembl_value": {"type": ["number", "null"]}
-    }
-}
-```
+| Параметр        | Значение                                 |
+| --------------- | ---------------------------------------- |
+| **Статус**      | Disabled in `configs/entities/chembl/activity.yaml` |
+| **Причина**     | Активный pipeline config не включает Gold sink |
+| **Контракт**    | Gold contract exports may exist as reference artifacts, but they are not emitted by the current pipeline |
 
 ----------------------------------------------------------------------
 
@@ -458,22 +421,18 @@ ChEMBL API (/activity.json)
 │  SILVER (нормализованные данные)        │
 │  ─────────────────────────────────────  │
 │  • Формат: Delta Lake                   │
-│  • Merge by: activity_id                │
+│  • Append mode; business key = activity_id │
 │  • Schema: 62 поля (PyArrow)            │
-│  • Партиции: year/month                 │
+│  • Gold stage disabled in active config │
 └─────────────────────────────────────────┘
-         │
-         ▼ ActivityGoldFilter.should_include()
-         │
-         ├── Не прошёл? ──► (пропускаем)
          │
          ▼
 ┌─────────────────────────────────────────┐
-│  GOLD (бизнес-данные)                   │
+│  GOLD                                   │
 │  ─────────────────────────────────────  │
-│  • IC50, Ki, Kd, EC50, AC50, GI50, ED50, MIC, CC50 │
-│  • Strict Pandera validation            │
-│  • Режим: Overwrite                     │
+│  • Disabled for `chembl_activity`       │
+│  • No Gold filter or Gold writer stage  │
+│  • Current terminal output: Silver      │
 └─────────────────────────────────────────┘
 ```
 
@@ -486,7 +445,6 @@ ChEMBL API (/activity.json)
 class BatchResult:
     bronze_count: int  # Записей в Bronze
     silver_count: int  # Успешно трансформировано
-    gold_count: int  # Прошло Gold-фильтр
     quarantined_count: int  # Отправлено в карантин
 ```
 
@@ -506,13 +464,13 @@ class BatchResult:
 | Конфигурация  | `configs/entities/chembl/activity.yaml`                          |
 | Сущность      | `src/bioetl/domain/entities/bioactivity.py`                       |
 | Трансформер   | `src/bioetl/application/pipelines/chembl/activity_transformer.py` |
-| Gold-фильтр   | `configs/entities/chembl/activity.yaml` (`filters.gold_filters`)   |
+| Gold sink     | Disabled in `configs/entities/chembl/activity.yaml`                |
 | Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py`            |
 | Silver Schema | `src/bioetl/infrastructure/schemas/silver.py`                     |
 | Bronze Writer | `src/bioetl/infrastructure/storage/bronze_writer.py`              |
 | Delta Writer  | `src/bioetl/infrastructure/storage/delta_writer.py`               |
-| Gold Writer   | `src/bioetl/infrastructure/storage/gold_writer.py`                |
-| Data Contract | `docs/04-reference/contracts/gold/chembl_activity_v1.0.json`                               |
+| Gold Writer   | Not used by the active `chembl_activity` pipeline                  |
+| Data Contract | `src/bioetl/domain/contracts/gold/` (canonical source for generated exports) |
 
 ----------------------------------------------------------------------
 
@@ -534,4 +492,4 @@ bioetl run --pipeline chembl_activity --run-type rebuild
 
 ----------------------------------------------------------------------
 
-*Последнее обновление: 2025-12-24*
+*Последнее обновление: 2026-03-10*

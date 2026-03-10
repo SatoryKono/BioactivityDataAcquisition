@@ -64,7 +64,7 @@ The domain layer implements Domain-Driven Design patterns:
 
 | Provider             | Entity Types                                                                                                                             | Status     | Rate Limit   |
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ------------ |
-| **ChEMBL**           | Activity, Assay, Molecule, Target, Target Component, Protein Class, Cell Line, Compound Record, Publication, Publication Term/Similarity, Subcellular Fraction, Tissue | Production | None         |
+| **ChEMBL**           | Activity, Assay, Molecule, Target, Target Component, Protein Class, Cell Line, Compound Record, Publication, Publication Term/Similarity, Subcellular Fraction, Tissue | Production | 3 req/sec    |
 | **PubChem**          | Compound                                                                                                                                 | Production | 5 req/sec    |
 | **UniProt**          | Protein, ID Mapping                                                                                                                      | Production | 10 req/sec (100 req/sec with API key) |
 | **PubMed**           | Publication                                                                                                                              | Production | 3 req/sec    |
@@ -77,7 +77,7 @@ The domain layer implements Domain-Driven Design patterns:
 | Document                                                  | Description                                 |
 | --------------------------------------------------------- | ------------------------------------------- |
 | [API Reference](docs/04-reference/api/index.md)           | Full API documentation with mkdocstrings    |
-| [Architecture Decisions](docs/02-architecture/decisions/) | 40 ADRs explaining design choices           |
+| [Architecture Decisions](docs/02-architecture/decisions/) | 43 ADRs explaining design choices           |
 | [Ubiquitous Language](docs/00-project/glossary.md)        | Domain terminology and canonical naming     |
 | [RULES.md](docs/00-project/RULES.md)                      | Project governance and requirements (v5.23) |
 | [Project Map](docs/00-project/00-map.md)                  | Documentation navigator and code map        |
@@ -450,25 +450,14 @@ Only approved top-level entries are allowed.
 - Coverage artifacts (`coverage.xml`, `htmlcov/`, `.coverage*`) → keep out of git, generate locally/CI only
 - Reference datasets and static lookup files → `docs/` (documentation reference) or `data/` (runtime/local data)
 
-## Legacy Distributed Mode (REJECTED / UNSUPPORTED)
+## Local-Only Deployment
 
-> **CRITICAL WARNING**: Distributed deployment and Redis Locking are **STRICTLY PROHIBITED** by [ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md).
-> The instructions below are for historical reference only and must NOT be used for new deployments.
-
-For distributed deployments with Redis locking and S3-compatible storage, you can use Docker Compose:
-
-```bash
-# Start infrastructure services (Postgres, Redis, MinIO)
-make docker-up
-
-# Run E2E tests with Docker
-make test-e2e
-
-# Stop services
-make docker-down
-```
-
-> **Decision**: We have officially abandoned Redis Locks in favor of a strictly Local-Only architecture.
+BioETL uses a strictly Local-Only runtime model defined by
+[ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md).
+Active workflows use filesystem-backed checkpoints, local storage, and
+in-memory locking. Distributed deployment, Redis locking, and Docker-based
+runtime orchestration are not supported entry points for current development or
+operations.
 
 ## Security
 
