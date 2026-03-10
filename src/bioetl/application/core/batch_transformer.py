@@ -356,6 +356,10 @@ class BatchTransformer:
         records_filtered_out = 0
 
         for i, raw_record in enumerate(records):
+            # Yield to event loop every 50 records so heartbeat can renew lock
+            if i > 0 and i % 50 == 0:
+                await asyncio.sleep(0)
+
             result = await self.transform_single(raw_record, batch_id, start_index + i)
 
             if result.is_quarantined:
