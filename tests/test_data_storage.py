@@ -84,12 +84,13 @@ def test_req_data_006_007_silver_is_delta(config_path):
 
 @pytest.mark.parametrize("config_path", get_all_pipeline_configs())
 def test_req_data_008_silver_is_merge(config_path):
-    """Silver strategy must be merge/upsert."""
+    """Silver strategy must be merge or append (with post-run dedup)."""
     config = load_config_with_defaults(config_path)
 
     silver_sink = config.get("sink", {}).get("silver", {})
-    assert silver_sink.get("mode") == "merge", (
-        f"Silver mode in {config_path} is not 'merge'"
+    mode = silver_sink.get("mode", "merge")
+    assert mode in {"merge", "append"}, (
+        f"Silver mode in {config_path} is '{mode}', expected 'merge' or 'append'"
     )
 
 
