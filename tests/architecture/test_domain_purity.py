@@ -39,7 +39,9 @@ class TestDomainImmutability:
         "ValueValidator",  # Service with validation configuration
     }
 
-    def test_domain_value_objects_are_frozen(self, src_dir: Path) -> None:
+    def test_domain_value_objects_are_frozen(
+        self, src_dir: Path, source_ast_cache: dict,
+    ) -> None:
         """Domain Value Objects (dataclasses) must be frozen.
 
         REQ-ARCH-014: Domain entities and value objects must be immutable
@@ -51,12 +53,9 @@ class TestDomainImmutability:
 
         violations = []
 
-        for py_file in domain_path.rglob("*.py"):
-            with py_file.open(encoding="utf-8") as f:
-                try:
-                    tree = ast.parse(f.read(), filename=str(py_file))
-                except SyntaxError:
-                    continue
+        for py_file, tree in source_ast_cache.items():
+            if domain_path not in py_file.parents:
+                continue
 
             for node in ast.walk(tree):
                 if isinstance(node, ast.ClassDef):
@@ -100,25 +99,17 @@ class TestDomainImmutability:
             + "\n".join(f"  - {v}" for v in violations)
         )
 
-    def test_no_mutable_defaults_in_frozen_dataclasses(self, src_dir: Path) -> None:
+    def test_no_mutable_defaults_in_frozen_dataclasses(
+        self, src_dir: Path, source_ast_cache: dict,
+    ) -> None:
         """Frozen dataclasses should not have mutable default arguments.
 
         REQ-ARCH-016: Mutable defaults (list, dict, set) in dataclasses
         cause shared state issues even if the class is frozen.
         """
-        bioetl_path = src_dir / "bioetl"
-        if not bioetl_path.exists():
-            pytest.skip("bioetl source not found")
-
         violations = []
 
-        for py_file in bioetl_path.rglob("*.py"):
-            with py_file.open(encoding="utf-8") as f:
-                try:
-                    tree = ast.parse(f.read(), filename=str(py_file))
-                except SyntaxError:
-                    continue
-
+        for py_file, tree in source_ast_cache.items():
             for node in ast.walk(tree):
                 if isinstance(node, ast.ClassDef):
                     # Check if it's a dataclass
@@ -172,7 +163,9 @@ class TestDomainImmutability:
 class TestDomainPurity:
     """Tests ensuring domain layer has no I/O or side effects."""
 
-    def test_no_direct_io_in_domain(self, src_dir: Path) -> None:
+    def test_no_direct_io_in_domain(
+        self, src_dir: Path, source_content_cache: dict,
+    ) -> None:
         """Verify domain layer has no direct I/O operations.
 
         REQ-ARCH-003: Domain layer should be pure business logic without I/O.
@@ -197,13 +190,13 @@ class TestDomainPurity:
 
         violations = []
 
-        for py_file in domain_path.rglob("*.py"):
+        for py_file, content in source_content_cache.items():
+            if domain_path not in py_file.parents:
+                continue
             if py_file.name in excluded_files:
                 continue
 
-            with py_file.open(encoding="utf-8") as f:
-                content = f.read()
-                lines = content.splitlines()
+            lines = content.splitlines()
 
             for i, line in enumerate(lines, 1):
                 # Skip comments and docstrings
@@ -227,7 +220,9 @@ class TestDomainPurity:
 class TestDomainComplexity:
     """Tests ensuring domain layer maintains low complexity."""
 
-    def test_cyclomatic_complexity_domain_layer(self, src_dir: Path) -> None:
+    def test_cyclomatic_complexity_domain_layer(
+        self, src_dir: Path, source_content_cache: dict,
+    ) -> None:
         """Domain layer functions should have low cyclomatic complexity.
 
         REQ-ARCH-010: Domain logic should be simple and testable.
@@ -247,12 +242,11 @@ class TestDomainComplexity:
         violations = []
         max_cc = 5  # Strict threshold for domain layer
 
-        for py_file in domain_path.rglob("*.py"):
+        for py_file, content in source_content_cache.items():
+            if domain_path not in py_file.parents:
+                continue
             if py_file.name.startswith("__"):
                 continue
-
-            with py_file.open(encoding="utf-8") as f:
-                content = f.read()
 
             try:
                 results = cc_visit(content)

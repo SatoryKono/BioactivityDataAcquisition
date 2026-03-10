@@ -214,26 +214,26 @@ class TestMemoryLockTTL:
     @pytest.mark.asyncio
     async def test_heartbeat_extends_ttl(self, fast_ttl_lock):
         """Test that heartbeat extends the lock TTL."""
-        # Acquire lock with TTL (increased for Python 3.14 async timing issues)
+        # Acquire lock with TTL
         await fast_ttl_lock.acquire(
             key="test_key",
             owner_id="owner_1",
-            ttl=2.0,  # 2s TTL (increased for Python 3.14 stability)
+            ttl=1.0,  # 1s TTL (reduced from 2s; sufficient for heartbeat test)
         )
 
         # Wait less than half the TTL
-        await asyncio.sleep(0.3)
+        await asyncio.sleep(0.1)
 
-        # Heartbeat to extend TTL (resets to 2s from now)
+        # Heartbeat to extend TTL (resets to 1s from now)
         result = await fast_ttl_lock.heartbeat(
             key="test_key",
             owner_id="owner_1",
         )
         assert result is True
 
-        # Wait another 0.5s (original TTL would have expired at 2s, but heartbeat extended)
-        # After heartbeat, TTL is 2s, so 0.5s wait leaves 1.5s margin for CI stability
-        await asyncio.sleep(0.5)
+        # Wait another 0.15s (original TTL would have expired at 1s, but heartbeat extended)
+        # After heartbeat, TTL is 1s, so 0.15s wait leaves 0.85s margin for CI stability
+        await asyncio.sleep(0.15)
 
         # Lock should still be held because heartbeat extended it
         result = await fast_ttl_lock.acquire(

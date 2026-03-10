@@ -115,6 +115,7 @@ class PostrunResult:
     dq: DQResult
     dq_reports: DQReportResult | None
     vacuum: VacuumResult
+    duplicates_removed: int = 0
 
 
 class PostrunService:
@@ -204,6 +205,9 @@ class PostrunService:
         Returns:
             PostrunResult with DQ check results, DQ report paths, and vacuum stats.
         """
+        # Silver compact before DQ so checks see deduplicated data
+        duplicates_removed = await self.run_silver_compact_if_needed()
+
         dq_result = await self.run_dq_checks(executor)
         dq_reports = await self._generate_dq_reports(dq_context)
         vacuum_result = await self.run_vacuum_if_enabled()
@@ -212,7 +216,12 @@ class PostrunService:
         if self._metadata_coordinator and self._metadata_writer:
             await self._write_final_metadata(executor, dq_reports)
 
-        return PostrunResult(dq=dq_result, dq_reports=dq_reports, vacuum=vacuum_result)
+        return PostrunResult(
+            dq=dq_result,
+            dq_reports=dq_reports,
+            vacuum=vacuum_result,
+            duplicates_removed=duplicates_removed,
+        )
 
     async def run_dq_checks(self, executor: ExecutorMetricsPort) -> DQResult:
         """Check data quality metrics and report anomalies.

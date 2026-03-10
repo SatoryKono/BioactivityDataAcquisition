@@ -1,0 +1,359 @@
+# OpenAI Codex CLI: Setup and Usage via WSL2
+
+Guide for running OpenAI Codex CLI on Windows through WSL2 Debian,
+with VPN proxy workaround.
+
+## Prerequisites
+
+| Component | Version | Notes |
+|-----------|---------|-------|
+| WSL2 | 2.6+ | `wsl --version` |
+| Debian (WSL) | any | `wsl --install -d Debian` |
+| Node.js (in WSL) | 22.x | Installed to `/usr/local/` |
+| Codex CLI (in WSL) | 0.112+ | `npm install -g @openai/codex` |
+| Python (Windows) | 3.11+ | For proxy server |
+
+> **Why WSL2?** Codex CLI is a Rust binary that doesn't run natively on
+> Windows. WSL2 provides a Linux environment where it works correctly.
+
+---
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────┐
+│  Windows Host                                   │
+│                                                 │
+│  scripts/wsl_proxy.py ──► VPN ──► Internet      │
+│        ▲  (port 3128)                           │
+│        │                                        │
+│  ┌─────┼───────────────────────────────────┐    │
+│  │  WSL2 Debian                            │    │
+│  │     │                                   │    │
+│  │  http_proxy=http://HOST_IP:3128         │    │
+│  │     │                                   │    │
+│  │  codex ──► proxy ──► api.openai.com     │    │
+│  │  npx   ──► proxy ──► registry.npmjs.org │    │
+│  └─────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────┘
+```
+
+WSL2 on Windows 10 cannot route HTTPS traffic through the host VPN
+directly (mirrored networking requires Windows 11 23H2+). The proxy
+bridges this gap.
+
+---
+
+## File Inventory
+
+| File | Location | Purpose |
+|------|----------|---------|
+| `wsl_proxy.py` | `scripts/` | HTTP CONNECT proxy (Python stdlib) |
+| `start-wsl-proxy.bat` | `scripts/` | Start proxy in background |
+| `codex.bat` | `scripts/` | Launch interactive Codex from Windows |
+| `codex-exec.bat` | `scripts/` | Launch full-auto Codex from Windows |
+| `.setup_wsl_codex.sh` | repo root | DNS resolver (dig + PowerShell fallback) |
+| `.wsl_proxy_env.sh` | repo root | Auto-configure proxy env vars |
+| `.codex/config.toml` | repo root | Project-level Codex config |
+| `~/.codex/config.toml` | WSL home | Global Codex config (MCP servers) |
+| `~/.bashrc` | WSL home | Sources DNS + proxy scripts |
+
+---
+
+## Quick Start
+
+### 1. Start the proxy (Windows)
+
+Run once before working with Codex:
+
+```cmd
+scripts\start-wsl-proxy.bat
+```
+
+Or manually:
+
+```cmd
+python scripts\wsl_proxy.py
+```
+
+The proxy listens on `0.0.0.0:3128`. Verify:
+
+```cmd
+netstat -an | findstr 3128
+```
+
+### 2. Open WSL2
+
+```cmd
+wsl -d Debian
+```
+
+### 3. Use Codex
+
+```bash
+cx                              # interactive mode
+cxe "fix the failing test"      # full-auto mode (no confirmations)
+codex review                    # code review mode
+```
+
+### 4. Alternative: launch from Windows
+
+```cmd
+scripts\codex.bat                           # interactive
+scripts\codex.bat "add retry logic"         # interactive with prompt
+scripts\codex-exec.bat "fix the bug"        # full-auto
+```
+
+---
+
+## Initial Setup (one-time)
+
+### Install Codex in WSL2
+
+```bash
+wsl -d Debian
+
+# Node.js (if not installed)
+curl -fsSL https://nodejs.org/dist/v22.14.0/node-v22.14.0-linux-x64.tar.xz \
+  | sudo tar -xJ -C /usr/local --strip-components=1
+
+# Codex CLI
+npm install -g @openai/codex
+codex --version
+```
+
+### Authenticate
+
+```bash
+codex login --device-auth
+```
+
+Follow the prompts: open the URL in your browser and enter the one-time code.
+
+> **VPN note:** The proxy must be running for authentication to work.
+> Make sure `http_proxy` / `https_proxy` are set (happens automatically
+> via `~/.bashrc` → `.wsl_proxy_env.sh`).
+
+### Verify
+
+```bash
+codex login status
+# Expected: "Logged in using ChatGPT"
+```
+
+---
+
+## Configuration
+
+### Project config (`.codex/config.toml`)
+
+```toml
+model = "gpt-5.4"
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+model_reasoning_effort = "high"
+web_search = "cached"
+
+[sandbox_workspace_write]
+network_access = true
+
+[features]
+experimental_windows_sandbox = true
+shell_snapshot = true
+```
+
+### Global config (`~/.codex/config.toml`)
+
+Key settings:
+
+```toml
+model = "gpt-5.4"
+model_provider = "openai"
+personality = "pragmatic"
+
+[model_providers.openai]
+api_key_env = "OPENAI_API_KEY"        # optional, device-auth preferred
+request_max_retries = 10
+stream_idle_timeout_ms = 600000
+stream_max_retries = 20
+
+[projects.'/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2']
+trust_level = "trusted"
+
+[features]
+multi_agent = true
+```
+
+### MCP Servers
+
+All MCP servers use `startup_timeout_sec = 30` to accommodate VPN latency:
+
+| Server | Package | Purpose |
+|--------|---------|---------|
+| memory | `@modelcontextprotocol/server-memory` | Persistent memory |
+| sequential-thinking | `@modelcontextprotocol/server-sequential-thinking` | Reasoning |
+| github | `@modelcontextprotocol/server-github` | GitHub API |
+| filesystem | `@modelcontextprotocol/server-filesystem` | File access |
+| pdf | `@modelcontextprotocol/server-pdf` | PDF reading |
+
+---
+
+## VPN Workaround Details
+
+### Problem
+
+WSL2 on Windows 10 uses a NAT-based virtual network. When a VPN is active,
+WSL2 traffic cannot reach external hosts because:
+
+1. VPN routes bypass the WSL2 virtual adapter
+2. DNS resolution in WSL2 fails (queries go to the gateway, not VPN DNS)
+3. Mirrored networking (`networkingMode=mirrored`) requires Windows 11 23H2+
+
+### Solution: Two-layer workaround
+
+**Layer 1: DNS** (`.setup_wsl_codex.sh`)
+
+Resolves OpenAI and npm hosts using:
+- `dig` (fast, works when WSL DNS is functional)
+- `powershell.exe Resolve-DnsName` fallback (uses Windows DNS via VPN)
+
+Caches IPv4 addresses in `/etc/hosts`. Runs automatically from `~/.bashrc`
+if `api.openai.com` is missing from `/etc/hosts`.
+
+Manual refresh:
+
+```bash
+bash "$BIOETL_DIR/.setup_wsl_codex.sh"
+```
+
+**Layer 2: Proxy** (`scripts/wsl_proxy.py`)
+
+Minimal HTTP CONNECT proxy running on Windows, listening on `0.0.0.0:3128`.
+WSL2 routes all HTTP/HTTPS traffic through it via `http_proxy` / `https_proxy`
+environment variables (set by `.wsl_proxy_env.sh`).
+
+The proxy runs on the Windows host where VPN routing works correctly.
+
+---
+
+## WSL2 Shell Configuration
+
+### `~/.bashrc` additions
+
+```bash
+# BioETL project alias
+export BIOETL_DIR="/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2"
+alias cdp="cd $BIOETL_DIR"
+alias cx="cd $BIOETL_DIR && codex"
+alias cxe="cd $BIOETL_DIR && codex exec --full-auto"
+
+# Ensure OpenAI DNS (VPN workaround)
+if ! grep -q "api.openai.com" /etc/hosts 2>/dev/null; then
+  bash "$BIOETL_DIR/.setup_wsl_codex.sh" 2>/dev/null
+fi
+
+# WSL2 proxy (VPN workaround)
+source "$BIOETL_DIR/.wsl_proxy_env.sh" 2>/dev/null
+```
+
+### Proxy control aliases
+
+```bash
+proxy-on     # enable proxy (auto-detects Windows host IP)
+proxy-off    # disable proxy (when VPN is off)
+```
+
+### `/etc/wsl.conf`
+
+```ini
+[network]
+generateHosts = false       # preserve our DNS entries
+generateResolvConf = false   # keep custom resolv.conf
+```
+
+---
+
+## Troubleshooting
+
+### Codex can't connect to OpenAI
+
+1. **Check proxy is running** (Windows):
+   ```cmd
+   netstat -an | findstr 3128
+   ```
+   If not listening, run `scripts\start-wsl-proxy.bat`.
+
+2. **Check proxy env** (WSL):
+   ```bash
+   echo $http_proxy
+   # Expected: http://172.x.x.x:3128
+   ```
+   If empty, run `proxy-on` or `source ~/.bashrc`.
+
+3. **Test connectivity** (WSL):
+   ```bash
+   curl -x $http_proxy -sI https://api.openai.com | head -3
+   # Expected: HTTP/1.1 200 Connection Established
+   ```
+
+### DNS not resolving
+
+```bash
+# Refresh DNS cache
+bash "$BIOETL_DIR/.setup_wsl_codex.sh"
+
+# Verify
+grep openai /etc/hosts
+```
+
+### MCP servers timeout
+
+All servers have `startup_timeout_sec = 30` in `~/.codex/config.toml`.
+If still failing, increase to 60 or check that `registry.npmjs.org`
+is in `/etc/hosts` and the proxy is running.
+
+### Token expired
+
+```bash
+codex login --device-auth
+# Open URL in browser, enter the code
+```
+
+### Model mismatch
+
+Project config overrides global. Check both:
+
+```bash
+cat "$BIOETL_DIR/.codex/config.toml" | grep model
+cat ~/.codex/config.toml | grep model
+```
+
+### VPN is off, proxy not needed
+
+```bash
+proxy-off    # disable proxy vars
+```
+
+When VPN is back on:
+
+```bash
+proxy-on     # re-enable proxy vars
+```
+
+---
+
+## Useful Commands
+
+| Command | Description |
+|---------|-------------|
+| `cx` | Interactive Codex in project dir |
+| `cxe "prompt"` | Full-auto Codex |
+| `codex review` | Code review |
+| `codex resume` | Resume previous session |
+| `codex login status` | Check auth status |
+| `proxy-on` / `proxy-off` | Toggle proxy |
+| `cdp` | cd to project directory |
+
+---
+
+*Last updated: 2026-03-10*

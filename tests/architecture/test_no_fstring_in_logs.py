@@ -13,8 +13,6 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
-SRC_DIR = Path("src/bioetl")
-
 # Files where f-string in docstrings is acceptable (documentation examples)
 ALLOWED_DOCSTRING_FILES: set[str] = {
     "infrastructure/observability/anomaly/__init__.py",  # Usage example in module docstring
@@ -58,7 +56,7 @@ class FStringLogVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
 
-def test_no_fstring_in_log_calls() -> None:
+def test_no_fstring_in_log_calls(src_dir: Path, source_ast_cache: dict) -> None:
     """Logging MUST use structlog pattern, not f-strings.
 
     REQ-OBS-001: Structured logging for machine parsing.
@@ -75,17 +73,14 @@ def test_no_fstring_in_log_calls() -> None:
     """
     violations: list[str] = []
 
-    for py_file in SRC_DIR.rglob("*.py"):
-        relative_path = py_file.relative_to(SRC_DIR)
+    bioetl_dir = src_dir / "bioetl"
+    for py_file, tree in source_ast_cache.items():
+        if bioetl_dir not in py_file.parents and py_file != bioetl_dir:
+            continue
+        relative_path = py_file.relative_to(bioetl_dir)
 
         # Skip files where docstring examples are allowed
         if str(relative_path) in ALLOWED_DOCSTRING_FILES:
-            continue
-
-        try:
-            source = py_file.read_text(encoding="utf-8")
-            tree = ast.parse(source)
-        except SyntaxError:
             continue
 
         visitor = FStringLogVisitor(py_file)
@@ -103,13 +98,13 @@ def test_no_fstring_in_log_calls() -> None:
     )
 
 
-def test_allowed_docstring_files_still_exist() -> None:
+def test_allowed_docstring_files_still_exist(src_dir: Path) -> None:
     """Ensure allowed exception files still exist.
 
     If a file is removed, it should be removed from ALLOWED_DOCSTRING_FILES.
     """
     for relative_path in ALLOWED_DOCSTRING_FILES:
-        full_path = SRC_DIR / relative_path
+        full_path = src_dir / "bioetl" / relative_path
         assert full_path.exists(), (
             f"File {relative_path} is in ALLOWED_DOCSTRING_FILES but doesn't exist. "
             "Remove it from the allowlist."
