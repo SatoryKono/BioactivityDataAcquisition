@@ -214,6 +214,7 @@
 99-archive/verification/schema-review-2026-02-17.md
 99-archive/verification/semanticscholar-publication-pipeline-verification.md
 99-archive/verification/sync-report-2026-02-17.md
+INDEX.md
 reports/architecture-debt-baseline-2026-03-03.md
 reports/architecture-debt-baseline-2026-03-04.md
 reports/debt-ownership-dashboard-2026-03-06.md
