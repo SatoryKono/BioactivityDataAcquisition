@@ -153,7 +153,7 @@ src/bioetl/domain/
 │   ├── pipeline_run.py   # PipelineRun Aggregate (574 LOC)
 │   ├── quarantine_entry.py # QuarantineEntry Aggregate (517 LOC)
 │   └── events.py         # Domain Events (197 LOC)
-├── value-objects/        # Value Objects
+├── value_objects/        # Value Objects
 │   ├── __init__.py
 │   ├── identifiers.py    # RunID, BatchID, EntityID, ContentHash
 │   └── measurements.py   # Measurement, IC50, etc.

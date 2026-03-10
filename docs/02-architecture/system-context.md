@@ -19,6 +19,9 @@ flowchart TB
         PUBCHEM[("PubChem<br/>(NCBI)")]
         UNIPROT[("UniProt")]
         PUBMED[("PubMed")]
+        CROSSREF[("CrossRef")]
+        OPENALEX[("OpenAlex")]
+        SEMSCHOLAR[("Semantic<br/>Scholar")]
     end
 
     subgraph BioETL System
@@ -42,6 +45,9 @@ flowchart TB
     PUBCHEM -->|REST API| BIOETL
     UNIPROT -->|REST API| BIOETL
     PUBMED -->|REST API| BIOETL
+    CROSSREF -->|REST API| BIOETL
+    OPENALEX -->|REST API| BIOETL
+    SEMSCHOLAR -->|REST API| BIOETL
 
     %% Internal locking
     BIOETL <-->|acquire/release| LOCK
@@ -78,6 +84,9 @@ flowchart TB
 | **PubChem**  | Chemical compound data   | REST API (NCBI) | Active               |
 | **UniProt**  | Protein/target data      | REST API        | Active               |
 | **PubMed**   | Publication metadata     | REST API (NCBI) | Active               |
+| **CrossRef**  | Publication metadata  | REST API        | Active               |
+| **OpenAlex**  | Academic knowledge graph | REST API     | Active               |
+| **Semantic Scholar** | Publication metadata | REST API (AI2) | Active          |
 | **Local FS** | Medallion layers storage | File I/O        | Active (Local-Only)  |
 | **S3/MinIO** | Object storage           | S3 API          | Future (Distributed) |
 | **Redis**    | Distributed locking      | Redis protocol  | Future (Distributed) |

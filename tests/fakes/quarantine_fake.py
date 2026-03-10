@@ -50,6 +50,19 @@ class InMemoryQuarantine:
         }
         self._records[pipeline].append(record)
 
+    async def write_many(self, records: list[dict[str, Any]]) -> None:
+        """Write multiple quarantine records."""
+        for record in records:
+            await self.write(
+                pipeline=record["pipeline"],
+                error_code=record["error_code"],
+                payload=record["payload"],
+                bronze_batch_id=record["bronze_batch_id"],
+                run_id=record.get("run_id"),
+                metadata=record.get("metadata"),
+                ingestion_ts=record["ingestion_ts"],
+            )
+
     async def inspect(
         self,
         pipeline: str,

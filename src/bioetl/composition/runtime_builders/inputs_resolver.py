@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING, Literal, Protocol, cast
 
 from bioetl.composition.builders import FilterConfigBuilder
@@ -244,6 +244,29 @@ def _log_cached_bronze(
     )
 
 
+def _resolve_skip_gold(
+    *,
+    runtime_config: RuntimeConfig,
+    yaml_config: PipelineYamlConfig,
+    observability: ObservabilityBundle,
+) -> RuntimeConfig:
+    """Respect sink.gold.enabled when runtime did not explicitly request Gold."""
+    if not isinstance(runtime_config, RuntimeConfig):
+        return cast(RuntimeConfig, runtime_config)
+    if runtime_config.skip_gold:
+        return runtime_config
+    sink = getattr(yaml_config, "sink", {})
+    gold_sink = sink.get("gold") if isinstance(sink, dict) else None
+    if gold_sink is None or gold_sink.enabled:
+        return runtime_config
+    observability.logger.info(
+        "gold_sink_disabled",
+        reason="sink.gold.enabled_false",
+        pipeline=getattr(yaml_config, "pipeline_name", None),
+    )
+    return replace(runtime_config, skip_gold=True)
+
+
 def prepare_runner_inputs(
     *,
     ctx: PipelineRunContext,
@@ -276,6 +299,11 @@ def prepare_runner_inputs(
         heartbeat_interval=settings.pipeline.heartbeat_interval,
         vacuum=vacuum,
         health_check_mode=resolve_health_check_mode(settings=settings),
+    )
+    runtime_config = _resolve_skip_gold(
+        runtime_config=runtime_config,
+        yaml_config=yaml_config,
+        observability=observability,
     )
     filter_config = assemble_filter_config_fn(
         yaml_filter=yaml_config.input_filter,

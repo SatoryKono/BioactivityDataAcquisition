@@ -101,15 +101,8 @@ class LoggerPort(Protocol):
 
 ### Backward Compatibility
 
-To avoid breaking existing code, `BoundLogger` is preserved as an alias:
-
-```python
-# domain/context.py
-from bioetl.domain.ports import LoggerPort
-
-# Backward compatibility alias
-BoundLogger = LoggerPort
-```
+The `BoundLogger` alias (previously in `domain/context.py`) has been fully removed.
+All code now uses `LoggerPort` directly from `bioetl.domain.ports`.
 
 ### PipelineServices Update
 

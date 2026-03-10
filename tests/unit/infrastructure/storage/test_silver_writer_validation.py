@@ -5,9 +5,10 @@ Tests for the integration of PanderaSilverValidator with SilverWriter.
 
 from __future__ import annotations
 
+import asyncio
 import sys
 import warnings
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -15,6 +16,7 @@ import pytest
 PYTHON_314 = sys.version_info >= (3, 14)
 
 from bioetl.domain.exceptions import SchemaViolationError
+from bioetl.domain.medallion import SilverWriteMode
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.validation.pandera_validator import (
     NoOpSilverValidator,
@@ -403,3 +405,127 @@ class TestSilverWriterWriteSilverWithPanderaValidation:
 
             # Verify write was called
             mock_write.assert_called_once()
+
+
+@pytest.mark.unit
+class TestSilverWriterPreparePayloadExecutor:
+    """Tests for executor offload in Silver payload preparation."""
+
+    @pytest.mark.asyncio
+    async def test_prepare_payload_uses_run_in_executor(self, noop_logger) -> None:
+        """Sync validation should be offloaded from the event loop."""
+        import pyarrow as pa
+
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+        records = [
+            {
+                "entity_id": "CHEMBL123",
+                "_run_id": "uuid-123",
+                "_run_type": "incremental",
+                "_source_batch_id": "batch-456",
+                "_ingestion_ts": "2025-01-15T12:00:00Z",
+            }
+        ]
+        schema = pa.schema(
+            [
+                pa.field("entity_id", pa.string()),
+                pa.field("_run_id", pa.string()),
+                pa.field("_run_type", pa.string()),
+                pa.field("_source_batch_id", pa.string()),
+                pa.field("_ingestion_ts", pa.string()),
+            ]
+        )
+        expected_table = pa.Table.from_pylist(records, schema=schema)
+        writer._check_schema_drift = AsyncMock(return_value=None)  # type: ignore[method-assign]
+        writer._sync_validate_and_build_arrow = MagicMock(  # type: ignore[method-assign]
+            return_value=(records, SilverWriteMode.APPEND, expected_table)
+        )
+
+        loop = asyncio.get_running_loop()
+        with patch.object(
+            loop, "run_in_executor", wraps=loop.run_in_executor
+        ) as mock_exec:
+            payload = await writer._prepare_silver_write_payload(
+                table_name="test.table",
+                records=records,
+                primary_keys=["entity_id"],
+                schema=schema,
+                mode="append",
+                on_schema_mismatch="ignore",
+                column_order=None,
+                partition_cols=None,
+                key_nullability_rules=None,
+            )
+
+        assert payload == (
+            records,
+            SilverWriteMode.APPEND,
+            "/tmp/silver/test/table",
+            expected_table,
+        )
+        writer._sync_validate_and_build_arrow.assert_called_once()
+        writer._check_schema_drift.assert_awaited_once_with(
+            "test.table",
+            records,
+            "ignore",
+        )
+        assert mock_exec.call_count == 1
+
+    @pytest.mark.asyncio
+    async def test_prepare_payload_checks_schema_drift_after_executor(
+        self, noop_logger
+    ) -> None:
+        """Schema drift check should happen after sync payload building completes."""
+        import pyarrow as pa
+
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+        records = [
+            {
+                "entity_id": "CHEMBL123",
+                "_run_id": "uuid-123",
+                "_run_type": "incremental",
+                "_source_batch_id": "batch-456",
+                "_ingestion_ts": "2025-01-15T12:00:00Z",
+            }
+        ]
+        schema = pa.schema(
+            [
+                pa.field("entity_id", pa.string()),
+                pa.field("_run_id", pa.string()),
+                pa.field("_run_type", pa.string()),
+                pa.field("_source_batch_id", pa.string()),
+                pa.field("_ingestion_ts", pa.string()),
+            ]
+        )
+        expected_table = pa.Table.from_pylist(records, schema=schema)
+        call_order: list[str] = []
+
+        def sync_stage(
+            **_: object,
+        ) -> tuple[list[dict[str, str]], SilverWriteMode, pa.Table]:
+            call_order.append("sync")
+            return records, SilverWriteMode.APPEND, expected_table
+
+        async def schema_stage(*_: object) -> None:
+            call_order.append("schema")
+
+        writer._sync_validate_and_build_arrow = MagicMock(side_effect=sync_stage)  # type: ignore[method-assign]
+        writer._check_schema_drift = AsyncMock(side_effect=schema_stage)  # type: ignore[method-assign]
+
+        await writer._prepare_silver_write_payload(
+            table_name="test.table",
+            records=records,
+            primary_keys=["entity_id"],
+            schema=schema,
+            mode="append",
+            on_schema_mismatch="ignore",
+            column_order=None,
+            partition_cols=None,
+            key_nullability_rules=None,
+        )
+
+        assert call_order == ["sync", "schema"]

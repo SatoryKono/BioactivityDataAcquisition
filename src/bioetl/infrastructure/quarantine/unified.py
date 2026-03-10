@@ -14,6 +14,7 @@ from __future__ import annotations
 __all__ = ["UnifiedQuarantineAdapter"]
 
 
+import asyncio
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -22,7 +23,13 @@ from deltalake import DeltaTable, write_deltalake
 from deltalake.exceptions import TableNotFoundError
 
 from bioetl.domain.serialization import serialize_to_json
-from bioetl.domain.types import BatchID, JsonDict, QuarantineRecordStatus, RunID
+from bioetl.domain.types import (
+    BatchID,
+    JsonDict,
+    MetaDict,
+    QuarantineRecordStatus,
+    RunID,
+)
 from bioetl.infrastructure.quarantine.operations import (
     get_statistics,
     inspect_records,
@@ -88,6 +95,36 @@ class UnifiedQuarantineAdapter:
                          (single source of time per ADR-014). Required.
 
         """
+        await self.write_many(
+            [
+                {
+                    "pipeline": pipeline,
+                    "error_code": error_code,
+                    "payload": payload,
+                    "bronze_batch_id": bronze_batch_id,
+                    "run_id": run_id,
+                    "metadata": metadata,
+                    "ingestion_ts": ingestion_ts,
+                }
+            ]
+        )
+
+    async def write_many(
+        self,
+        records: list[MetaDict],
+    ) -> None:
+        """Write multiple quarantine records in one Delta append."""
+        if not records:
+            return
+        normalized_records = [self._normalize_record(record) for record in records]
+        await asyncio.to_thread(self._write_to_delta, normalized_records)
+
+    def _normalize_record(
+        self,
+        record: MetaDict,
+    ) -> JsonDict:
+        """Normalize a write request into the stored quarantine schema."""
+        payload = record["payload"]
         payload_json = serialize_to_json(payload, ensure_ascii=True)
 
         if len(payload_json) > MAX_PAYLOAD_SIZE:
@@ -97,12 +134,15 @@ class UnifiedQuarantineAdapter:
             truncated = False
 
         payload_hash = calculate_hash(payload_json)
-        meta = metadata or {}
+        meta = record.get("metadata") or {}
+        bronze_batch_id = record["bronze_batch_id"]
+        run_id = record.get("run_id")
+        ingestion_ts = record["ingestion_ts"]
 
-        record = {
+        return {
             "ingestion_ts": ingestion_ts.isoformat(),
-            "pipeline": pipeline,
-            "error_code": error_code,
+            "pipeline": record["pipeline"],
+            "error_code": record["error_code"],
             "payload": payload_json,
             "payload_hash": payload_hash,
             "payload_truncated": truncated,
@@ -113,14 +153,12 @@ class UnifiedQuarantineAdapter:
             "run_id": str(run_id) if run_id else "",
         }
 
-        self._write_to_delta(record)
-
     def _write_to_delta(
         self,
-        record: JsonDict,  # Any: quarantine record has heterogeneous values
-    ) -> None:  # Any: quarantine record has heterogeneous values
-        """Write record to Delta table."""
-        arrow_table = pa.Table.from_pylist([record])
+        records: list[JsonDict],  # Any: quarantine record has heterogeneous values
+    ) -> None:
+        """Write normalized records to Delta table."""
+        arrow_table = pa.Table.from_pylist(records)
         arrow_reader = pa.RecordBatchReader.from_batches(
             arrow_table.schema, arrow_table.to_batches()
         )

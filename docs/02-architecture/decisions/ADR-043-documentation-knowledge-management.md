@@ -10,7 +10,7 @@
 
 ## Context
 
-BioETL has 100+ documentation files across `docs/`, 41 ADRs, and extensive
+BioETL has 100+ documentation files across `docs/`, 43 ADRs, and extensive
 inline documentation. However, several knowledge management gaps exist:
 
 1. **ADR Coverage Gap**: No systematic way to identify undocumented architectural decisions

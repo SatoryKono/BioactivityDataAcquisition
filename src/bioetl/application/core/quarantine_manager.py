@@ -6,9 +6,13 @@ Refactored per ADR-005 to accept explicit dependencies instead of full pipeline.
 from __future__ import annotations
 
 from datetime import datetime
+from typing import TypeAlias
 
 from bioetl.domain.ports import MetricsPort, QuarantinePort
 from bioetl.domain.types import BatchID, ErrorType, JsonDict
+
+_DQQuarantineEntry: TypeAlias = tuple[JsonDict, ErrorType, str]
+_FilteredQuarantineEntry: TypeAlias = tuple[JsonDict, str]
 
 
 class QuarantineManagerService:
@@ -71,6 +75,42 @@ class QuarantineManagerService:
                 reason=error_type.value,
             )
 
+    async def quarantine_records(
+        self,
+        records: list[_DQQuarantineEntry],
+        batch_id: BatchID,
+        *,
+        ingestion_ts: datetime,
+    ) -> None:
+        """Write multiple data-quality records to quarantine in one call."""
+        if not records:
+            return
+
+        write_requests = [
+            {
+                "pipeline": self._pipeline_name,
+                "error_code": error_type.value,
+                "payload": record,
+                "bronze_batch_id": batch_id,
+                "metadata": {"error_details": {"message": error_details}},
+                "ingestion_ts": ingestion_ts,
+            }
+            for record, error_type, error_details in records
+        ]
+        await self._quarantine.write_many(write_requests)
+        if self._metrics:
+            counts_by_reason: dict[str, int] = {}
+            for _, error_type, _ in records:
+                counts_by_reason[error_type.value] = (
+                    counts_by_reason.get(error_type.value, 0) + 1
+                )
+            for reason, count in counts_by_reason.items():
+                self._metrics.inc_quarantine_records(
+                    pipeline=self._pipeline_name,
+                    reason=reason,
+                    count=count,
+                )
+
     async def quarantine_filtered_record(
         self,
         record: JsonDict,  # Any: quarantine record has heterogeneous values
@@ -107,6 +147,41 @@ class QuarantineManagerService:
             self._metrics.inc_quarantine_records(
                 pipeline=self._pipeline_name,
                 reason=error_code,
+            )
+
+    async def quarantine_filtered_records(
+        self,
+        records: list[_FilteredQuarantineEntry],
+        batch_id: BatchID,
+        *,
+        ingestion_ts: datetime,
+    ) -> None:
+        """Write multiple filter-excluded records to quasi-quarantine."""
+        if not records:
+            return
+
+        error_code = "FILTERED_OUT_SILVER"
+        write_requests = [
+            {
+                "pipeline": self._pipeline_name,
+                "error_code": error_code,
+                "payload": record,
+                "bronze_batch_id": batch_id,
+                "metadata": {
+                    "error_details": {"message": error_details},
+                    "quasi_quarantine": True,
+                    "classification": "filtered_out",
+                },
+                "ingestion_ts": ingestion_ts,
+            }
+            for record, error_details in records
+        ]
+        await self._quarantine.write_many(write_requests)
+        if self._metrics:
+            self._metrics.inc_quarantine_records(
+                pipeline=self._pipeline_name,
+                reason=error_code,
+                count=len(records),
             )
 
     async def inspect(

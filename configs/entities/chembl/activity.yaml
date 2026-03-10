@@ -8,7 +8,7 @@ pipeline:
     description: Extract biological activity records from ChEMBL API
     business_primary_keys:
         - activity_id
-    batch_size: 1000к
+    batch_size: 1000
     sink:
         silver:
             mode: append

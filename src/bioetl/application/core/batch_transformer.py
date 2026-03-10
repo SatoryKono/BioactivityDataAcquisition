@@ -17,6 +17,8 @@ __all__ = [
     "TransformedRecord",
 ]
 
+import asyncio
+import time
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -36,7 +38,7 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
-    from bioetl.domain.types import BatchID
+    from bioetl.domain.types import BatchID, ErrorType
 
 
 _TRANSFORM_PROCESSING_ERRORS = (
@@ -46,6 +48,7 @@ _TRANSFORM_PROCESSING_ERRORS = (
     ValueError,
     TypeError,
 )
+_YIELD_INTERVAL_SECONDS = 0.5
 
 
 @dataclass(frozen=True, slots=True)
@@ -113,6 +116,58 @@ class BatchTransformer:
         self._gold_filter = gold_filter_callback
         self._gold_transform = gold_transform_callback
 
+    async def _yield_control_if_needed(self, last_yield_at: float) -> float:
+        """Cooperatively yield to the event loop during CPU-heavy transforms."""
+        now = time.monotonic()
+        if now - last_yield_at < _YIELD_INTERVAL_SECONDS:
+            return last_yield_at
+        await asyncio.sleep(0)
+        return time.monotonic()
+
+    async def _flush_filtered_records(
+        self,
+        records: list[tuple[BronzeRecord, str]],
+        batch_id: BatchID,
+    ) -> None:
+        """Persist filtered-out records without blocking pipeline progress."""
+        if not records:
+            return
+        try:
+            await self._quarantine_manager.quarantine_filtered_records(
+                records,
+                batch_id,
+                ingestion_ts=self._context.started_at,
+            )
+        except Exception as exc:
+            self._context.logger.warning(
+                "filtered_quarantine_write_failed",
+                batch_id=str(batch_id),
+                records=len(records),
+                error=str(exc),
+            )
+
+    async def _flush_dq_records(
+        self,
+        records: list[tuple[BronzeRecord, ErrorType, str]],
+        batch_id: BatchID,
+    ) -> None:
+        """Persist DQ quarantine records without failing the batch."""
+        if not records:
+            return
+        try:
+            await self._quarantine_manager.quarantine_records(
+                records,
+                batch_id,
+                ingestion_ts=self._context.started_at,
+            )
+        except Exception as exc:
+            self._context.logger.warning(
+                "dq_quarantine_write_failed",
+                batch_id=str(batch_id),
+                records=len(records),
+                error=str(exc),
+            )
+
     async def transform_batch(
         self, records: list[BronzeRecord], batch_id: BatchID, start_index: int = 0
     ) -> TransformResult:
@@ -134,8 +189,12 @@ class BatchTransformer:
         gold_records: list[GoldRecord] = []
         records_quarantined = 0
         records_filtered_out = 0
+        filtered_records: list[tuple[BronzeRecord, str]] = []
+        dq_records: list[tuple[BronzeRecord, ErrorType, str]] = []
+        last_yield_at = time.monotonic()
 
         for index, raw_record in enumerate(records, start=start_index):
+            last_yield_at = await self._yield_control_if_needed(last_yield_at)
             record_context = self._context.bind_logger(
                 batch_id=str(batch_id),
                 entity_id=raw_record.get("activity_id"),
@@ -149,29 +208,21 @@ class BatchTransformer:
                         gold_record = self._gold_transform(record_context, transformed)
                         gold_records.append(gold_record)
             except FilteredOutError as e:
-                await self._quarantine_manager.quarantine_filtered_record(
-                    raw_record,
-                    batch_id,
-                    str(e),
-                    ingestion_ts=self._context.started_at,
-                )
+                filtered_records.append((raw_record, str(e)))
                 records_filtered_out += 1
                 self._batch_metrics.track_processed_records("filtered_out", 1)
             except _TRANSFORM_PROCESSING_ERRORS as e:
                 error_type = self._error_classifier.classify(e)
                 if error_type.is_data_quality():
-                    await self._quarantine_manager.quarantine_record(
-                        raw_record,
-                        error_type,
-                        batch_id,
-                        str(e),
-                        ingestion_ts=self._context.started_at,
-                    )
+                    dq_records.append((raw_record, error_type, str(e)))
                     records_quarantined += 1
                     self._batch_metrics.track_error("transform", error_type)
                     self._batch_metrics.track_quarantined_records(error_type, 1)
                 else:
                     raise
+
+        await self._flush_filtered_records(filtered_records, batch_id)
+        await self._flush_dq_records(dq_records, batch_id)
 
         # Check DQ thresholds after transformation
         self._check_dq_thresholds(records, records_quarantined)
@@ -278,12 +329,7 @@ class BatchTransformer:
                 is_quarantined=False,
             )
         except FilteredOutError as e:
-            await self._quarantine_manager.quarantine_filtered_record(
-                raw_record,
-                batch_id,
-                str(e),
-                ingestion_ts=self._context.started_at,
-            )
+            await self._flush_filtered_records([(raw_record, str(e))], batch_id)
             self._batch_metrics.track_processed_records("filtered_out", 1)
             return TransformedRecord(
                 silver_record=None,
@@ -295,12 +341,8 @@ class BatchTransformer:
         except _TRANSFORM_PROCESSING_ERRORS as e:
             error_type = self._error_classifier.classify(e)
             if error_type.is_data_quality():
-                await self._quarantine_manager.quarantine_record(
-                    raw_record,
-                    error_type,
-                    batch_id,
-                    str(e),
-                    ingestion_ts=self._context.started_at,
+                await self._flush_dq_records(
+                    [(raw_record, error_type, str(e))], batch_id
                 )
                 self._batch_metrics.track_error("transform", error_type)
                 self._batch_metrics.track_quarantined_records(error_type, 1)
@@ -342,8 +384,10 @@ class BatchTransformer:
         gold_records: list[GoldRecord] = []
         records_quarantined = 0
         records_filtered_out = 0
+        last_yield_at = time.monotonic()
 
         for i, raw_record in enumerate(records):
+            last_yield_at = await self._yield_control_if_needed(last_yield_at)
             result = await self.transform_single(raw_record, batch_id, start_index + i)
 
             if result.is_quarantined:

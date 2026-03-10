@@ -128,8 +128,7 @@ def test_pipeline_observer_shutdown(metrics_mock, logger_mock, run_id):
         logger=logger_mock,
     )
 
-    # PipelineShutdownError should be suppressed by the observer
-    with observer:
+    with pytest.raises(PipelineShutdownError), observer:
         raise PipelineShutdownError()
 
     # Verify metrics show shutdown status

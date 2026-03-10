@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import asyncio
+import time
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
 import pytest
 
+import bioetl.application.core.batch_transformer as batch_transformer_module
 from bioetl.application.core.batch_metrics import BatchMetricsRecorder
 from bioetl.application.core.batch_transformer import BatchTransformer, TransformResult
 from bioetl.application.core.config import RecordProcessorConfig
@@ -41,7 +44,9 @@ def mock_quarantine_manager():
     """Create mock quarantine manager."""
     manager = MagicMock(spec=QuarantineManager)
     manager.quarantine_record = AsyncMock()
+    manager.quarantine_records = AsyncMock()
     manager.quarantine_filtered_record = AsyncMock()
+    manager.quarantine_filtered_records = AsyncMock()
     return manager
 
 
@@ -141,6 +146,64 @@ class TestBatchTransformerTransform:
         assert result.gold_records == []
         assert result.quarantined_count == 0
 
+    async def test_transform_batch_cooperatively_yields_to_event_loop(
+        self,
+        mock_context,
+        mock_error_classifier,
+        mock_quarantine_manager,
+        mock_batch_metrics,
+        gold_filter_callback,
+        gold_transform_callback,
+        monkeypatch,
+    ) -> None:
+        """Long-running transform loops should yield so heartbeat tasks can run."""
+        marker_event = asyncio.Event()
+        saw_background_progress = False
+
+        async def marker() -> None:
+            await asyncio.sleep(0)
+            marker_event.set()
+
+        async def blocking_transform(ctx, record, index):
+            nonlocal saw_background_progress
+            if index > 0 and marker_event.is_set():
+                saw_background_progress = True
+            deadline = time.perf_counter() + 0.003
+            while time.perf_counter() < deadline:
+                pass
+            return {"entity_id": record.get("id"), "value": record.get("value")}
+
+        monkeypatch.setattr(
+            batch_transformer_module,
+            "_YIELD_INTERVAL_SECONDS",
+            0.001,
+        )
+        transformer = BatchTransformer(
+            context=mock_context,
+            config=RecordProcessorConfig(
+                pipeline_name="test",
+                provider="test",
+                entity_type="test",
+                silver_schema=MagicMock(),
+                gold_schema=MagicMock(),
+            ),
+            error_classifier=mock_error_classifier,
+            quarantine_manager=mock_quarantine_manager,
+            batch_metrics=mock_batch_metrics,
+            transform_callback=blocking_transform,
+            gold_filter_callback=gold_filter_callback,
+            gold_transform_callback=gold_transform_callback,
+        )
+        marker_task = asyncio.create_task(marker())
+
+        await transformer.transform_batch(
+            [{"id": str(i), "value": i} for i in range(12)],
+            BatchID(uuid4()),
+        )
+        await marker_task
+
+        assert saw_background_progress is True
+
     async def test_transform_batch_quarantines_dq_errors(
         self,
         mock_context,
@@ -186,7 +249,7 @@ class TestBatchTransformerTransform:
 
         assert len(result.silver_records) == 1
         assert result.quarantined_count == 1
-        mock_quarantine_manager.quarantine_record.assert_called_once()
+        mock_quarantine_manager.quarantine_records.assert_called_once()
 
     async def test_transform_batch_raises_non_dq_errors(
         self,
@@ -275,7 +338,50 @@ class TestBatchTransformerTransform:
         assert len(result.silver_records) == 1
         assert result.quarantined_count == 0
         assert result.filtered_out_count == 1
-        mock_quarantine_manager.quarantine_filtered_record.assert_called_once()
+        mock_quarantine_manager.quarantine_filtered_records.assert_called_once()
+
+    async def test_transform_batch_continues_when_bulk_filtered_quarantine_fails(
+        self,
+        mock_context,
+        mock_error_classifier,
+        mock_quarantine_manager,
+        mock_batch_metrics,
+        gold_filter_callback,
+        gold_transform_callback,
+    ) -> None:
+        """Bulk quarantine failure should not fail batch transformation."""
+        from bioetl.application.core.base_transformer import FilteredOutError
+
+        async def filtered_transform(ctx, record, index):
+            raise FilteredOutError("Record excluded by silver filters")
+
+        mock_quarantine_manager.quarantine_filtered_records.side_effect = RuntimeError(
+            "disk full"
+        )
+        transformer = BatchTransformer(
+            context=mock_context,
+            config=RecordProcessorConfig(
+                pipeline_name="test",
+                provider="test",
+                entity_type="test",
+                silver_schema=MagicMock(),
+                gold_schema=MagicMock(),
+            ),
+            error_classifier=mock_error_classifier,
+            quarantine_manager=mock_quarantine_manager,
+            batch_metrics=mock_batch_metrics,
+            transform_callback=filtered_transform,
+            gold_filter_callback=gold_filter_callback,
+            gold_transform_callback=gold_transform_callback,
+        )
+
+        result = await transformer.transform_batch(
+            [{"id": "filtered", "value": 5}],
+            BatchID(uuid4()),
+        )
+
+        assert result.filtered_out_count == 1
+        mock_context.logger.warning.assert_called()
 
 
 @pytest.mark.unit

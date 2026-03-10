@@ -15,6 +15,14 @@ if TYPE_CHECKING:
 __all__ = ["StorageAdapterMaintenanceMixin"]
 
 
+def _is_delta_table_dir(path: Path) -> bool:
+    """Return True when a directory contains a Delta log with at least one commit file."""
+    delta_log = path / "_delta_log"
+    if not delta_log.is_dir():
+        return False
+    return any(delta_log.iterdir())
+
+
 class StorageAdapterMaintenanceMixin:
     """Mixin providing maintenance operations: optimize, vacuum, archive, cleanup."""
 
@@ -77,7 +85,7 @@ class StorageAdapterMaintenanceMixin:
 
         # Vacuum Silver (only if table exists)
         silver_table_path = self.silver.get_table_path(table_name)
-        if silver_table_path.exists():
+        if _is_delta_table_dir(silver_table_path):
             removed = await self.silver.vacuum(
                 table_name=table_name,
                 retention_hours=retention_hours,
@@ -85,9 +93,10 @@ class StorageAdapterMaintenanceMixin:
             )
             total_removed += len(removed)
 
-        # Vacuum Gold (only if table exists)
+        # Vacuum Gold only when the directory is a real Delta table.
+        # Metadata-only directories can exist when Gold writes are disabled.
         gold_table_path = self.gold.get_table_path(table_name)
-        if gold_table_path.exists():
+        if _is_delta_table_dir(gold_table_path):
             from deltalake import DeltaTable
 
             loop = asyncio.get_running_loop()

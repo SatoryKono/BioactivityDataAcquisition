@@ -450,6 +450,9 @@ class TestQuarantinePortProtocol:
             ) -> None:
                 pass
 
+            async def write_many(self, records: list[dict[str, Any]]) -> None:
+                pass
+
             async def inspect(
                 self,
                 pipeline: str,
