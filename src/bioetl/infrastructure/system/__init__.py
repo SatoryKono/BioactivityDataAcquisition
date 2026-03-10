@@ -7,6 +7,7 @@ This package contains infrastructure adapters for system-level operations:
 
 from __future__ import annotations
 
+from bioetl.infrastructure.system.clock import SystemClock
 from bioetl.infrastructure.system.memory_monitor import MemoryMonitor
 
-__all__ = ["MemoryMonitor"]
+__all__ = ["MemoryMonitor", "SystemClock"]

@@ -21,6 +21,18 @@ from bioetl.application.services.pipeline_runner_service import (
 )
 
 
+class FixedClock:
+    """Deterministic clock for timestamp assertions."""
+
+    def __init__(self, *timestamps: datetime) -> None:
+        self._timestamps = list(timestamps)
+
+    def now(self) -> datetime:
+        if len(self._timestamps) > 1:
+            return self._timestamps.pop(0)
+        return self._timestamps[0]
+
+
 @pytest.fixture
 def mock_logger():
     """Create a mock logger."""
@@ -69,12 +81,22 @@ def mock_metrics_extractor():
 
 
 @pytest.fixture
-def service(mock_runner_factory, mock_metrics_extractor, mock_logger):
+def fixed_clock():
+    """Create a deterministic clock fixture."""
+    return FixedClock(
+        datetime(2024, 1, 1, 12, 0, tzinfo=UTC),
+        datetime(2024, 1, 1, 12, 5, tzinfo=UTC),
+    )
+
+
+@pytest.fixture
+def service(mock_runner_factory, mock_metrics_extractor, mock_logger, fixed_clock):
     """Create a PipelineRunnerService instance."""
     return PipelineRunnerService(
         runner_factory=mock_runner_factory,
         metrics_extractor=mock_metrics_extractor,
         logger=mock_logger,
+        clock=fixed_clock,
     )
 
 
@@ -267,6 +289,8 @@ class TestPipelineRunnerServiceRun:
         assert result.pipeline_name == "test_pipeline"
         assert result.records_fetched == 100
         assert result.records_silver == 90
+        assert result.started_at == datetime(2024, 1, 1, 12, 0, tzinfo=UTC)
+        assert result.completed_at == datetime(2024, 1, 1, 12, 5, tzinfo=UTC)
         mock_runner_factory.contains.assert_called_with("test_pipeline")
         mock_runner_factory.create.assert_called_once()
         mock_runner.run.assert_called_once()

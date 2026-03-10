@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.composite.runner_constants import (
@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
     from bioetl.domain.composite.result import DependencyResult, MergeResult
-    from bioetl.domain.ports import LoggerPort, MetricsPort, QuarantinePort
+    from bioetl.domain.ports import ClockPort, LoggerPort, MetricsPort, QuarantinePort
     from bioetl.domain.types import RunID
 
 __all__ = ["CompositeRunnerSupportHelper"]
@@ -51,6 +51,7 @@ class CompositeRunnerSupportHelper:
     _preflight_validator: CompositePreflightValidationService | None
     _quarantine_port: QuarantinePort | None
     _metrics: MetricsPort | None
+    _clock: ClockPort
     _fsm: FSMStateHelperService
 
     def _build_composite_result(
@@ -61,7 +62,7 @@ class CompositeRunnerSupportHelper:
         merge_result: MergeResult | None,
     ) -> CompositeResult:
         """Build the final CompositeResult."""
-        completed_at = datetime.now(tz=UTC)
+        completed_at = self._clock.now()
         started = self._started_at or completed_at
         total_duration = (completed_at - started).total_seconds()
 
@@ -210,10 +211,10 @@ class CompositeRunnerSupportHelper:
             seed_pipeline=self._config.seed.pipeline,
         )
 
-        started_at = datetime.now(tz=UTC)
+        started_at = self._clock.now()
         runner = self._seed_runner_factory()
         await runner.run()
-        completed_at = datetime.now(tz=UTC)
+        completed_at = self._clock.now()
 
         records_extracted = getattr(runner, "_executor", None)
         records_silver = 0
@@ -289,7 +290,7 @@ class CompositeRunnerSupportHelper:
             context = DQReportContext(
                 run_id=self._run_id_str,
                 pipeline_name=f"composite_{self._config.name}",
-                timestamp=datetime.now(tz=UTC),
+                timestamp=self._clock.now(),
                 provider="composite",
                 entity=self._config.name,
                 silver_target_table=self._config.merge.output_silver_path,
@@ -329,7 +330,7 @@ class CompositeRunnerSupportHelper:
 
         from bioetl.domain.types import BatchID
 
-        now = datetime.now(tz=UTC)
+        now = self._clock.now()
         pipeline_name = f"composite:{self._config.name}"
         written = 0
 

@@ -48,7 +48,21 @@ if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.domain.composite.config import CompositeConfig
-    from bioetl.domain.ports import LockPort, LoggerPort, MetricsPort, QuarantinePort
+    from bioetl.domain.ports import (
+        ClockPort,
+        LockPort,
+        LoggerPort,
+        MetricsPort,
+        QuarantinePort,
+    )
+
+
+class _UtcClock:
+    """Fallback UTC clock for gradual migration."""
+
+    def now(self) -> datetime:
+        return datetime.now(tz=UTC)
+
 
 __all__ = [
     "CompositePipelineRunner",
@@ -125,6 +139,7 @@ class CompositePipelineRunnerService(
         dependency_coordinator: DependencyCoordinatorService | None = None,
         quarantine_port: QuarantinePort | None = None,
         metrics: MetricsPort | None = None,
+        clock: ClockPort | None = None,
     ) -> None:
         """Initialize runner and all stage dependencies."""
         self._config = config
@@ -148,6 +163,7 @@ class CompositePipelineRunnerService(
         self._preflight_validator = preflight_validator
         self._quarantine_port = quarantine_port
         self._metrics = metrics
+        self._clock = clock or _UtcClock()
 
         from bioetl.application.composite.fsm_helper import FSMStateHelperService
 
@@ -179,7 +195,7 @@ class CompositePipelineRunnerService(
         self._validate_config_consistency()
         self._run_preflight_validation()
 
-        self._started_at = datetime.now(tz=UTC)
+        self._started_at = self._clock.now()
         self._logger.info(
             PipelineEvent.START,
             composite=self._config.name,

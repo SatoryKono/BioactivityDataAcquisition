@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.domain.composite.config import CompositeDQConfig, EnricherConfig
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import ClockPort, LoggerPort
 
 
 _FILTER_CONDITION_ERRORS = (
@@ -48,6 +48,13 @@ _ENRICHER_EXECUTION_ERRORS = (
 
 
 __all__ = ["EnrichmentCoordinator", "EnrichmentCoordinatorService"]
+
+
+class _UtcClock:
+    """Fallback UTC clock for gradual migration."""
+
+    def now(self) -> datetime:
+        return datetime.now(tz=UTC)
 
 
 class EnrichmentCoordinatorService:
@@ -85,6 +92,7 @@ class EnrichmentCoordinatorService:
         logger: LoggerPort,
         dq_config: CompositeDQConfig,
         max_concurrency: int = 4,
+        clock: ClockPort | None = None,
     ) -> None:
         """Initialize enrichment coordinator.
 
@@ -97,6 +105,7 @@ class EnrichmentCoordinatorService:
         self._dq_config = dq_config
         self._max_concurrency = max_concurrency
         self._semaphore = asyncio.Semaphore(max_concurrency)
+        self._clock = clock or _UtcClock()
 
     async def run_enrichers(
         self,
@@ -286,7 +295,7 @@ class EnrichmentCoordinatorService:
             EnrichmentResult with execution outcome.
         """
         async with self._semaphore:
-            started_at = datetime.now(tz=UTC)
+            started_at = self._clock.now()
             records_input = len(keys)
 
             self._logger.info(
@@ -302,7 +311,7 @@ class EnrichmentCoordinatorService:
                     runner = runner_factory(enricher.pipeline, keys)
                     await runner.run()
 
-                completed_at = datetime.now(tz=UTC)
+                completed_at = self._clock.now()
                 duration = (completed_at - started_at).total_seconds()
 
                 # Extract stats from runner
@@ -373,7 +382,7 @@ class EnrichmentCoordinatorService:
                 )
 
             except TimeoutError:
-                duration = (datetime.now(tz=UTC) - started_at).total_seconds()
+                duration = (self._clock.now() - started_at).total_seconds()
                 self._logger.warning(
                     "Enricher timed out",
                     enricher=enricher.pipeline,
@@ -386,7 +395,7 @@ class EnrichmentCoordinatorService:
                 )
 
             except _ENRICHER_EXECUTION_ERRORS as e:
-                duration = (datetime.now(tz=UTC) - started_at).total_seconds()
+                duration = (self._clock.now() - started_at).total_seconds()
 
                 # Re-raise for required enrichers (logged as error)
                 if enricher.required:
@@ -415,7 +424,7 @@ class EnrichmentCoordinatorService:
                     duration_seconds=duration,
                 )
             except BioETLError as e:
-                duration = (datetime.now(tz=UTC) - started_at).total_seconds()
+                duration = (self._clock.now() - started_at).total_seconds()
 
                 # Re-raise for required enrichers (logged as error)
                 if enricher.required:

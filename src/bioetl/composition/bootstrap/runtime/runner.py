@@ -10,6 +10,7 @@ from __future__ import annotations
 from uuid import uuid4
 
 from bioetl.application.services import PipelineRunnerService
+from bioetl.composition.bootstrap.runtime.clock import bootstrap_clock_port
 from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger_port
 from bioetl.composition.factories.runner_factory import (
     create_metrics_extractor,
@@ -55,4 +56,5 @@ def bootstrap_pipeline_runner_service(
         runner_factory=runner_factory,
         metrics_extractor=metrics_extractor,
         logger=logger,
+        clock=bootstrap_clock_port(),
     )

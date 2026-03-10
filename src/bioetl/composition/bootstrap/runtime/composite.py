@@ -24,6 +24,7 @@ from bioetl.application.composite.runner import (
     CompositeRuntimeConfig,
 )
 from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
+from bioetl.composition.bootstrap.runtime.clock import bootstrap_clock_port
 from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger_port
 from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
 from bioetl.domain.composite.config import (
@@ -525,6 +526,8 @@ def bootstrap_composite_runner(
         logger=logger,
     )
 
+    clock = bootstrap_clock_port()
+
     key_extractor = KeyExtractorService(
         delta_reader=delta_reader,
         logger=logger,
@@ -536,6 +539,7 @@ def bootstrap_composite_runner(
     )
 
     coordinator = EnrichmentCoordinator(
+        clock=clock,
         logger=logger,
         dq_config=config.dq,
         max_concurrency=config.execution.max_concurrency,
@@ -569,6 +573,7 @@ def bootstrap_composite_runner(
         checkpoint_dir=checkpoint_dir,
         logger=logger,
         resume=runtime.resume,
+        clock=clock,
     )
 
     # Create DQ report service for composite
@@ -599,6 +604,7 @@ def bootstrap_composite_runner(
         run_id=effective_run_id,
         dq_report_service=dq_report_service,
         quarantine_port=quarantine_port,
+        clock=clock,
     )
 
 

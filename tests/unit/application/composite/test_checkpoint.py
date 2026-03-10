@@ -117,8 +117,9 @@ class TestWithSeedCompleted:
             keys_generated=90,
             duration_seconds=10.5,
         )
-        updated = initial.with_seed_completed(seed_result)
-        assert updated.updated_at is not None
+        now = datetime(2024, 1, 1, tzinfo=UTC)
+        updated = initial.with_seed_completed(seed_result, updated_at=now)
+        assert updated.updated_at == now
 
 
 class TestWithEnricherCompleted:
@@ -277,8 +278,11 @@ class TestWithState:
             composite_name="test_composite",
             run_id="run-123",
         )
-        updated = initial.with_state(CompositePipelineState.SEED_RUNNING)
-        assert updated.updated_at is not None
+        now = datetime(2024, 1, 2, tzinfo=UTC)
+        updated = initial.with_state(
+            CompositePipelineState.SEED_RUNNING, updated_at=now
+        )
+        assert updated.updated_at == now
 
 
 class TestIsResumable:

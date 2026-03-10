@@ -25,11 +25,19 @@ from bioetl.domain.types import RunID, RunType
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
+        ClockPort,
         LoggerPort,
         MetricsExtractorPort,
         RunnablePort,
         RunnerFactoryPort,
     )
+
+
+class _UtcClock:
+    """Fallback UTC clock for gradual migration to injected clocks."""
+
+    def now(self) -> datetime:
+        return datetime.now(tz=UTC)
 
 
 _PIPELINE_RUN_ERRORS = (
@@ -214,6 +222,7 @@ class PipelineRunnerService:
     runner_factory: RunnerFactoryPort
     metrics_extractor: MetricsExtractorPort
     logger: LoggerPort
+    clock: ClockPort = field(default_factory=_UtcClock)
 
     async def run(
         self,
@@ -249,7 +258,7 @@ class PipelineRunnerService:
             >>> if result.status == PipelineRunResult.DRY_RUN:
             ...     logger.info("dry_run_complete", pipeline="chembl_activity")
         """
-        started_at = datetime.now(tz=UTC)
+        started_at = self.clock.now()
 
         # Merge options with individual parameters
         effective_options = self._merge_options(options, dry_run)
@@ -284,7 +293,7 @@ class PipelineRunnerService:
                 run_id=str(effective_run_id),
                 run_type=effective_options.run_type,
                 started_at=started_at,
-                completed_at=datetime.now(tz=UTC),
+                completed_at=self.clock.now(),
             )
 
         # Build context and create runner
@@ -450,7 +459,7 @@ class PipelineRunnerService:
                 error_type=error_type,
             )
 
-        completed_at = datetime.now(tz=UTC)
+        completed_at = self.clock.now()
 
         # Extract metrics from runner
         metrics = self.metrics_extractor.extract_metrics(runner)
