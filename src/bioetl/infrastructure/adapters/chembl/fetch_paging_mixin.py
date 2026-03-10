@@ -17,7 +17,15 @@ from bioetl.domain.exceptions import (
 from bioetl.domain.types import BronzeRecord
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator, Iterator
+    from collections.abc import AsyncIterator, Callable, Iterator
+
+    from bioetl.domain.ports import LoggerPort
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+    from bioetl.infrastructure.adapters.chembl.entity_mapper import ChemblEntityMapper
+    from bioetl.infrastructure.adapters.common.api_request_collector import (
+        APIRequestCollector,
+    )
+    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 CHEMBL_ADAPTER_ERRORS = (
     BioETLError,
@@ -38,16 +46,24 @@ class ChemblFetchPagingMixin:
     """Provides ChEMBL pagination and filtered-page iteration helpers."""
 
     # Host-class attributes (provided by ChemblAdapter.__init__)
-    logger: Any  # Any: logger is injected adapter runtime dependency
+    logger: LoggerPort
     provider_name: str
-    _mapper: Any  # Any: mapper concrete type is adapter-internal
-    _adapter_metrics: Any  # Any: metrics collector protocol varies in tests/runtime
-    http_client: Any  # Any: unified HTTP client is injected infrastructure object
-    _request_collector: Any  # Any: collector contract is adapter-internal
+    _mapper: ChemblEntityMapper
+    _adapter_metrics: AdapterMetrics
+    http_client: UnifiedHTTPClient
+    _request_collector: APIRequestCollector
     _compute_composite_key: Callable[[BronzeRecord, tuple[str, ...]], str]
+    _process_response: Callable[[httpx.Response, str], tuple[list[BronzeRecord], bool]]
+    _handle_error: Callable[[Exception, str], None]
+    _build_params: Callable[[int, str | None], dict[str, Any]]
+    _build_filter_params: Callable[[str, str, list[str]], dict[str, str]]
+    _get_api_pk_field: Callable[[str], str]
+    _get_api_dedup_fields: Callable[[str], tuple[str, ...]]
+    _normalize_filter_field: Callable[[str, str], str]
+    _page_size: int
 
     async def _fetch_page(
-        self: Any,  # Any: mixin self type
+        self: ChemblFetchPagingMixin,
         url: str,
         params: dict[str, Any],  # Any: HTTP query params (str|int|bool values)
         entity_type: str,
@@ -69,7 +85,7 @@ class ChemblFetchPagingMixin:
             handle_error(error)
 
     async def _page_iterator(
-        self: Any,  # Any: mixin self type
+        self: ChemblFetchPagingMixin,
         entity_type: str,
         limit: int | None = None,
         start_offset: int = 0,
@@ -97,7 +113,7 @@ class ChemblFetchPagingMixin:
             offset += len(records)
 
     def _yield_deduplicated(
-        self: Any,  # Any: mixin self type
+        self: ChemblFetchPagingMixin,
         records: list[BronzeRecord],
         seen_ids: set[str],
         pk_field: str,
@@ -145,7 +161,7 @@ class ChemblFetchPagingMixin:
             yield record
 
     async def _paginate_filter_results(
-        self: Any,  # Any: mixin self type
+        self: ChemblFetchPagingMixin,
         url: str,
         id_batch: list[str],
         filter_field: str,
@@ -186,7 +202,7 @@ class ChemblFetchPagingMixin:
             offset += len(records)
 
     async def _fetch_with_filter(
-        self: Any,  # Any: mixin self type
+        self: ChemblFetchPagingMixin,
         entity_type: str,
         id_batch: list[str],
         filter_field: str,

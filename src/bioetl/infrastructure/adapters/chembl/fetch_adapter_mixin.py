@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.chembl.fetch_multi_filter_mixin import (
@@ -16,7 +16,10 @@ from bioetl.infrastructure.adapters.chembl.fetch_resilience_mixin import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator
+    from collections.abc import AsyncIterator, Callable, Iterator
+
+    from bioetl.domain.ports import LoggerPort
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
 
 
 class ChemblFetchAdapterMixin(
@@ -26,8 +29,15 @@ class ChemblFetchAdapterMixin(
 ):
     """Provides ChEMBL pagination, filtering, and retry fetch flows."""
 
+    logger: LoggerPort
+    _adapter_metrics: AdapterMetrics
+    _filter_batch_size: int
+    _get_api_pk_field: Callable[[str], str]
+    _get_api_dedup_fields: Callable[[str], tuple[str, ...]]
+    _batch_ids: Callable[[list[str], int], Iterator[list[str]]]
+
     async def _fetch_filtered(
-        self: Any,  # Any: mixin self type
+        self: ChemblFetchAdapterMixin,
         entity_type: str,
         limit: int | None,
         filter_ids: list[str],
@@ -39,7 +49,7 @@ class ChemblFetchAdapterMixin(
         pk_field = self._get_api_pk_field(entity_type)
         pk_fields = self._get_api_dedup_fields(entity_type)
 
-        for id_batch in self._batch_ids(filter_ids, batch_size=self._filter_batch_size):
+        for id_batch in self._batch_ids(filter_ids, self._filter_batch_size):
             async for record in self._fetch_batch_with_reduction(
                 entity_type,
                 id_batch,
@@ -55,7 +65,7 @@ class ChemblFetchAdapterMixin(
                     return
 
     async def _fetch_standard(
-        self: Any,  # Any: mixin self type
+        self: ChemblFetchAdapterMixin,
         entity_type: str,
         limit: int | None,
         offset: int = 0,
@@ -103,7 +113,7 @@ class ChemblFetchAdapterMixin(
                     return
 
     async def fetch(
-        self: Any,  # Any: mixin self type
+        self: ChemblFetchAdapterMixin,
         entity_type: str,
         limit: int | None = None,
         query: str | None = None,
@@ -127,7 +137,7 @@ class ChemblFetchAdapterMixin(
             yield record
 
     async def fetch_filtered(
-        self: Any,  # Any: mixin self type
+        self: ChemblFetchAdapterMixin,
         entity_type: str,
         filter_ids: list[str],
         filter_field: str,
@@ -143,7 +153,7 @@ class ChemblFetchAdapterMixin(
             yield record
 
     async def fetch_filtered_with_fallback(
-        self: Any,  # Any: mixin self type
+        self: ChemblFetchAdapterMixin,
         entity_type: str,
         filter_ids: list[str],
         filter_field: str,

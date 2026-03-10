@@ -5,7 +5,7 @@ from __future__ import annotations
 import contextlib
 import time
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, cast
 
 import httpx
 
@@ -17,7 +17,16 @@ from bioetl.domain.exceptions import (
 from bioetl.domain.types import BronzeRecord
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator
+    from collections.abc import AsyncIterator, Callable
+
+    from bioetl.domain.ports import LoggerPort
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+    from bioetl.infrastructure.adapters.chembl.entity_mapper import ChemblEntityMapper
+    from bioetl.infrastructure.adapters.common.api_request_collector import (
+        APIRequestCollector,
+    )
+    from bioetl.infrastructure.adapters.error_handling import ErrorService
+    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 CHEMBL_ADAPTER_ERRORS = (
     BioETLError,
@@ -38,28 +47,31 @@ class ChemblFetchResilienceMixin:
     """Provides retry, split-batch recovery, and single-ID fallback helpers."""
 
     # Host-class attributes (provided by ChemblAdapter.__init__)
-    logger: Any  # Any: logger is injected adapter runtime dependency
+    logger: LoggerPort
     provider_name: str
-    _mapper: Any  # Any: mapper concrete type is adapter-internal
-    _adapter_metrics: Any  # Any: metrics collector protocol varies in tests/runtime
-    http_client: Any  # Any: unified HTTP client is injected infrastructure object
-    _request_collector: Any  # Any: collector contract is adapter-internal
-    _error_handler: Any  # Any: error handler concrete type is adapter-internal
+    _mapper: ChemblEntityMapper
+    _adapter_metrics: AdapterMetrics
+    http_client: UnifiedHTTPClient
+    _request_collector: APIRequestCollector
+    _error_handler: ErrorService
     _compute_composite_key: Callable[[BronzeRecord, tuple[str, ...]], str]
 
     def _handle_error(
-        self: Any,  # Any: mixin self type
+        self: ChemblFetchResilienceMixin,
         error: Exception,
         context: str = "fetch",
     ) -> None:
         """Handle errors with unified classification."""
         failure_count = self.http_client.circuit_breaker.get_failure_count()
-        health_status = self._get_health_status()
+        health_status = cast(
+            "object",
+            self._get_health_status(),  # type: ignore[attr-defined]
+        )
 
         error_context = {
             "circuit_breaker_state": self.http_client.circuit_breaker.get_state().value,
             "circuit_breaker_failures": failure_count,
-            "health_status": health_status.value,
+            "health_status": getattr(health_status, "value", "unknown"),
         }
         wrapped = self._error_handler.handle_error(
             error=error,
@@ -70,7 +82,7 @@ class ChemblFetchResilienceMixin:
         raise wrapped from error
 
     def _is_retry_exhausted_error(
-        self: Any,  # Any: mixin self type
+        self: ChemblFetchResilienceMixin,
         error: Exception,
     ) -> bool:
         """Check if exception is a retry exhausted error (direct or wrapped)."""
@@ -131,7 +143,7 @@ class ChemblFetchResilienceMixin:
             return None
 
     async def _retry_with_split_batches(
-        self: Any,  # Any: mixin self type
+        self: ChemblFetchResilienceMixin,
         entity_type: str,
         id_batch: list[str],
         filter_field: str,
@@ -189,7 +201,7 @@ class ChemblFetchResilienceMixin:
         return True
 
     async def _yield_deduplicated_filtered_records(
-        self: Any,  # Any: mixin self type
+        self: ChemblFetchResilienceMixin,
         entity_type: str,
         id_batch: list[str],
         filter_field: str,
@@ -199,14 +211,18 @@ class ChemblFetchResilienceMixin:
         pk_fields: tuple[str, ...] | None = None,
     ) -> AsyncIterator[BronzeRecord]:
         """Yield filtered records while deduplicating by configured keys."""
-        async for record in self._fetch_with_filter(
+        fetch_with_filter = cast(
+            "Callable[[str, list[str], str, int | None], AsyncIterator[BronzeRecord]]",
+            self._fetch_with_filter,  # type: ignore[attr-defined]
+        )
+        async for record in fetch_with_filter(
             entity_type, id_batch, filter_field, limit
         ):
             if self._mark_record_as_seen(record, seen_ids, pk_field, pk_fields):
                 yield record
 
     async def _yield_single_id_fallback(
-        self: Any,  # Any: mixin self type
+        self: ChemblFetchResilienceMixin,
         entity_type: str,
         id_batch: list[str],
         filter_field: str,
@@ -226,7 +242,7 @@ class ChemblFetchResilienceMixin:
             yield direct_record
 
     async def _yield_retry_exhausted_recovery(
-        self: Any,  # Any: mixin self type
+        self: ChemblFetchResilienceMixin,
         entity_type: str,
         id_batch: list[str],
         filter_field: str,
@@ -263,7 +279,7 @@ class ChemblFetchResilienceMixin:
             yield record
 
     async def _fetch_batch_with_reduction(
-        self: Any,  # Any: mixin self type
+        self: ChemblFetchResilienceMixin,
         entity_type: str,
         id_batch: list[str],
         filter_field: str,

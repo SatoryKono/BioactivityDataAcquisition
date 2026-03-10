@@ -3,19 +3,37 @@
 from __future__ import annotations
 
 import itertools
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BronzeRecord
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator
+    from collections.abc import AsyncIterator, Awaitable, Callable, Iterator
+
+    from bioetl.domain.ports import LoggerPort
+    from bioetl.infrastructure.adapters.chembl.entity_mapper import ChemblEntityMapper
 
 
 class ChemblFetchMultiFilterMixin:
     """Provides multi-field filter fetch implementation for ChEMBL."""
 
+    logger: LoggerPort
+    _mapper: ChemblEntityMapper
+    _filter_batch_size: int
+    _build_params: Callable[[int, str | None], dict[str, str | int | bool]]
+    _build_filter_in_params: Callable[[dict[str, list[str]]], dict[str, str]]
+    _get_projected_url_length: Callable[[str, dict[str, str | int | bool]], int]
+    _get_api_pk_field: Callable[[str], str]
+    _normalize_filter_field: Callable[[str, str], str]
+    _batch_ids: Callable[[list[str], int], Iterator[list[str]]]
+    _fetch_page: Callable[
+        [str, dict[str, str | int | bool], str],
+        Awaitable[tuple[list[BronzeRecord], bool]],
+    ]
+    _is_duplicate_record: Callable[[BronzeRecord, str, set[str], str], bool]
+
     def _determine_multi_filter_batch_size(
-        self: Any,  # Any: mixin self type
+        self: ChemblFetchMultiFilterMixin,
         url: str,
         filters: dict[str, list[str]],
         entity_type: str,
@@ -38,7 +56,7 @@ class ChemblFetchMultiFilterMixin:
         return batch_size
 
     async def fetch_multi_filtered(
-        self: Any,  # Any: mixin self type
+        self: ChemblFetchMultiFilterMixin,
         entity_type: str,
         filters: dict[str, list[str]],
         limit: int | None = None,
