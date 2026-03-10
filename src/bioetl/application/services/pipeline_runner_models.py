@@ -5,6 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import StrEnum
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bioetl.domain.ports.runtime.pipeline_debug import PipelineDebugPort
 
 
 class PipelineRunResult(StrEnum):
@@ -77,6 +81,7 @@ class RunOptions:
     use_cached_bronze: bool = False
     cached_bronze_path: str | None = None
     cached_bronze_date: str | None = None
+    debug_port: PipelineDebugPort | None = None  # Optional debug port for interactive debugging
 
 
 class PipelineNotFoundError(ValueError):

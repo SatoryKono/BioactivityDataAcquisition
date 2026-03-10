@@ -4,12 +4,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.context_cached_bronze import CachedBronzeContext
 from bioetl.domain.context_filtering import InputFilterContext, VacuumSettings
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import ExecutionContext, RunID, RunType
+
+if TYPE_CHECKING:
+    from bioetl.domain.ports.runtime.pipeline_debug import PipelineDebugPort
 
 __all__ = [
     "CachedBronzeContext",
@@ -106,6 +109,7 @@ class PipelineRunContext:
     ignore_yaml_filter: bool = False
     skip_gold: bool = False
     execution_context: ExecutionContext = ExecutionContext.ISOLATED
+    debug_port: PipelineDebugPort | None = None  # Optional debug port for interactive debugging
 
     @property
     def has_input_filter(self) -> bool:

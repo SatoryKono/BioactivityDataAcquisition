@@ -87,6 +87,7 @@ class PipelineRunContextService:
             vacuum=vacuum,
             log_level=options.log_level,
             cached_bronze=cached_bronze,
+            debug_port=options.debug_port,
         )
 
     def _build_input_filter(self, options: RunOptions) -> InputFilterContext:

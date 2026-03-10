@@ -128,5 +128,35 @@ async def _run_debug_session(
     Returns:
         RunResult from pipeline execution.
     """
+    from dataclasses import replace
+
+    from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger_port
+    from bioetl.infrastructure.observability.debug_adapters import (
+        InteractiveDebugAdapter,
+        LoggingDebugAdapter,
+    )
+
+    # Create debug adapter based on mode
+    logger = bootstrap_logger_port(
+        pipeline=pipeline,
+        run_id=None,  # Will be set by service
+        log_level=options.log_level or "DEBUG",
+    )
+
+    if mode == "interactive":
+        debug_port = InteractiveDebugAdapter(
+            enabled_breakpoints=enabled_breakpoints,
+            logger=logger,
+        )
+    else:  # mode == "log"
+        debug_port = LoggingDebugAdapter(
+            logger=logger,
+            enabled_breakpoints=enabled_breakpoints,
+        )
+
+    # Add debug_port to options
+    options = replace(options, debug_port=debug_port)
+
+    # Get service and run with debug port
     service = get_pipeline_runner_service()
     return await service.run(pipeline, options=options)
