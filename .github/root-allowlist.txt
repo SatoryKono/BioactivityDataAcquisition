@@ -5,6 +5,7 @@
 .setup_wsl_codex.sh
 .env.example
 .wsl-vpn-fix.ps1
+.wsl_proxy_env.sh
 .gitattributes
 .gitignore
 .gitleaks.toml
