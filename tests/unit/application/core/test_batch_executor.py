@@ -24,6 +24,94 @@ from bioetl.domain.ports import MetricsPort
 from bioetl.domain.types import RunType, ValidationResult
 
 
+from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
+from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
+from bioetl.application.core.batch_tracing import BatchTracingManagerService
+from bioetl.application.core.batch_transformer import BatchTransformer
+from bioetl.application.core.batch_writer import BatchWriter
+from bioetl.application.core.quarantine_manager import QuarantineManagerService
+
+
+def create_batch_executor(
+    *,
+    services,
+    context,
+    config,
+    error_classifier,
+    transform_callback,
+    gold_filter_callback,
+    gold_transform_callback,
+    gold_validator,
+    checkpoint_manager,
+    shutdown_signal,
+    batch_size=None,
+    checkpoint_interval=None,
+    tracer=None,
+    lock_validator=None,
+    memory_monitor=None,
+    memory_config=None,
+):
+    resolved_batch_size = (
+        batch_size if batch_size is not None else BatchExecutor.DEFAULT_BATCH_SIZE
+    )
+    batch_metrics = BatchMetricsRecorderService(
+        services.metrics,
+        f"{config.provider}_{config.entity_type}",
+        context.run_type.value,
+    )
+    transformer = BatchTransformer(
+        context=context,
+        config=config,
+        error_classifier=error_classifier,
+        quarantine_manager=QuarantineManagerService(
+            quarantine_port=services.quarantine,
+            pipeline_name=config.pipeline_name,
+            metrics=services.metrics,
+        ),
+        batch_metrics=batch_metrics,
+        transform_callback=transform_callback,
+        gold_filter_callback=gold_filter_callback,
+        gold_transform_callback=gold_transform_callback,
+    )
+    writer = BatchWriter(
+        storage=services.storage,
+        context=context,
+        config=config,
+        gold_validator=gold_validator,
+        error_classifier=error_classifier,
+        batch_metrics=batch_metrics,
+        tracer=tracer,
+        lock_validator=lock_validator,
+    )
+    memory_manager = BatchMemoryManagerService(
+        resolved_batch_size,
+        memory_monitor=memory_monitor,
+        memory_config=memory_config,
+        logger=services.logger,
+    )
+    tracing_manager = BatchTracingManagerService(
+        tracer=tracer,
+        context=context,
+        config=config,
+        initial_batch_size=resolved_batch_size,
+        adaptive_sizing_enabled=memory_manager.enabled,
+    )
+    return BatchExecutor(
+        services=services,
+        context=context,
+        config=config,
+        checkpoint_manager=checkpoint_manager,
+        shutdown_signal=shutdown_signal,
+        batch_metrics=batch_metrics,
+        transformer=transformer,
+        writer=writer,
+        memory_manager=memory_manager,
+        tracing_manager=tracing_manager,
+        batch_size=batch_size,
+        checkpoint_interval=checkpoint_interval,
+    )
+
+
 @pytest.fixture
 def mock_storage():
     """Create mock storage."""
@@ -157,7 +245,7 @@ def batch_executor(
     mock_gold_validator,
 ):
     """Create BatchExecutor instance."""
-    return BatchExecutor(
+    return create_batch_executor(
         services=mock_services,
         context=mock_context,
         config=processor_config,
@@ -198,7 +286,7 @@ class TestBatchExecutorInit:
         mock_gold_validator,
     ):
         """Test default batch size when not specified."""
-        executor = BatchExecutor(
+        executor = create_batch_executor(
             services=mock_services,
             context=mock_context,
             config=processor_config,
@@ -395,7 +483,7 @@ class TestBatchExecutorProcessBatch:
                 raise DataQualityError("Invalid data")
             return {"entity_id": record.get("id"), "value": record.get("value")}
 
-        executor = BatchExecutor(
+        executor = create_batch_executor(
             services=mock_services,
             context=mock_context,
             config=processor_config,
@@ -454,7 +542,7 @@ def batch_executor_with_tracer(
     mock_tracer,
 ):
     """Create BatchExecutor instance with tracer."""
-    return BatchExecutor(
+    return create_batch_executor(
         services=mock_services,
         context=mock_context,
         config=processor_config,

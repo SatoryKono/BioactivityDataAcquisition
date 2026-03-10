@@ -19,6 +19,94 @@ from bioetl.domain.ports import MemoryMonitorPort, MetricsPort
 from bioetl.domain.types import RunType, ValidationResult
 
 
+from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
+from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
+from bioetl.application.core.batch_tracing import BatchTracingManagerService
+from bioetl.application.core.batch_transformer import BatchTransformer
+from bioetl.application.core.batch_writer import BatchWriter
+from bioetl.application.core.quarantine_manager import QuarantineManagerService
+
+
+def create_batch_executor(
+    *,
+    services,
+    context,
+    config,
+    error_classifier,
+    transform_callback,
+    gold_filter_callback,
+    gold_transform_callback,
+    gold_validator,
+    checkpoint_manager,
+    shutdown_signal,
+    batch_size=None,
+    checkpoint_interval=None,
+    tracer=None,
+    lock_validator=None,
+    memory_monitor=None,
+    memory_config=None,
+):
+    resolved_batch_size = (
+        batch_size if batch_size is not None else BatchExecutor.DEFAULT_BATCH_SIZE
+    )
+    batch_metrics = BatchMetricsRecorderService(
+        services.metrics,
+        f"{config.provider}_{config.entity_type}",
+        context.run_type.value,
+    )
+    transformer = BatchTransformer(
+        context=context,
+        config=config,
+        error_classifier=error_classifier,
+        quarantine_manager=QuarantineManagerService(
+            quarantine_port=services.quarantine,
+            pipeline_name=config.pipeline_name,
+            metrics=services.metrics,
+        ),
+        batch_metrics=batch_metrics,
+        transform_callback=transform_callback,
+        gold_filter_callback=gold_filter_callback,
+        gold_transform_callback=gold_transform_callback,
+    )
+    writer = BatchWriter(
+        storage=services.storage,
+        context=context,
+        config=config,
+        gold_validator=gold_validator,
+        error_classifier=error_classifier,
+        batch_metrics=batch_metrics,
+        tracer=tracer,
+        lock_validator=lock_validator,
+    )
+    memory_manager = BatchMemoryManagerService(
+        resolved_batch_size,
+        memory_monitor=memory_monitor,
+        memory_config=memory_config,
+        logger=services.logger,
+    )
+    tracing_manager = BatchTracingManagerService(
+        tracer=tracer,
+        context=context,
+        config=config,
+        initial_batch_size=resolved_batch_size,
+        adaptive_sizing_enabled=memory_manager.enabled,
+    )
+    return BatchExecutor(
+        services=services,
+        context=context,
+        config=config,
+        checkpoint_manager=checkpoint_manager,
+        shutdown_signal=shutdown_signal,
+        batch_metrics=batch_metrics,
+        transformer=transformer,
+        writer=writer,
+        memory_manager=memory_manager,
+        tracing_manager=tracing_manager,
+        batch_size=batch_size,
+        checkpoint_interval=checkpoint_interval,
+    )
+
+
 @pytest.fixture
 def mock_services():
     """Create mock pipeline services."""
@@ -125,7 +213,7 @@ class TestBatchExecutorMemory:
         memory_monitor,
     ):
         """Test that adaptive sizing is enabled when monitor provided."""
-        executor = BatchExecutor(
+        executor = create_batch_executor(
             services=mock_services,
             context=mock_context,
             config=processor_config,
@@ -154,7 +242,7 @@ class TestBatchExecutorMemory:
         """Test that batch size is reduced under memory pressure."""
         memory_monitor.get_recommended_batch_size.return_value = 50
 
-        executor = BatchExecutor(
+        executor = create_batch_executor(
             services=mock_services,
             context=mock_context,
             config=processor_config,
@@ -202,7 +290,7 @@ class TestBatchExecutorMemory:
         # 20 records, check every 1 record -> ~20 checks
         memory_monitor.get_recommended_batch_size.side_effect = [50] * 10 + [100] * 20
 
-        executor = BatchExecutor(
+        executor = create_batch_executor(
             services=mock_services,
             context=mock_context,
             config=processor_config,
@@ -243,7 +331,7 @@ class TestBatchExecutorMemory:
         memory_config,
     ):
         """Test estimation from config without monitor."""
-        executor = BatchExecutor(
+        executor = create_batch_executor(
             services=mock_services,
             context=mock_context,
             config=processor_config,
@@ -276,7 +364,7 @@ class TestBatchExecutorMemory:
         mock_dq_service = MagicMock()
         mock_services.dq_report_service = mock_dq_service
 
-        executor = BatchExecutor(
+        executor = create_batch_executor(
             services=mock_services,
             context=mock_context,
             config=processor_config,
@@ -321,7 +409,7 @@ class TestBatchExecutorMemory:
         """Test get_dq_context returns None when service not available."""
         mock_services.dq_report_service = None  # explicit None
 
-        executor = BatchExecutor(
+        executor = create_batch_executor(
             services=mock_services,
             context=mock_context,
             config=processor_config,
@@ -347,7 +435,7 @@ class TestBatchExecutorMemory:
         mock_gold_validator,
     ):
         """Test public process() method."""
-        executor = BatchExecutor(
+        executor = create_batch_executor(
             services=mock_services,
             context=mock_context,
             config=processor_config,

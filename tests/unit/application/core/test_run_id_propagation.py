@@ -14,13 +14,68 @@ from uuid import uuid4
 import pyarrow as pa
 import pytest
 
+from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
+from bioetl.application.core.batch_transformer import BatchTransformer
+from bioetl.application.core.batch_writer import BatchWriter
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.core.quarantine_manager import QuarantineManagerService
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.domain.config import DQConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.types import BatchID, RunID, RunType, ValidationResult
+
+
+def create_record_processor(
+    *,
+    services,
+    error_classifier,
+    context,
+    config,
+    transform_callback,
+    gold_filter_callback,
+    gold_transform_callback,
+    gold_validator,
+    tracer=None,
+    lock_validator=None,
+):
+    batch_metrics = BatchMetricsRecorderService(
+        services.metrics,
+        f"{config.provider}_{config.entity_type}",
+        context.run_type.value,
+    )
+    transformer = BatchTransformer(
+        context=context,
+        config=config,
+        error_classifier=error_classifier,
+        quarantine_manager=QuarantineManagerService(
+            quarantine_port=services.quarantine,
+            pipeline_name=config.pipeline_name,
+            metrics=services.metrics,
+        ),
+        batch_metrics=batch_metrics,
+        transform_callback=transform_callback,
+        gold_filter_callback=gold_filter_callback,
+        gold_transform_callback=gold_transform_callback,
+    )
+    writer = BatchWriter(
+        storage=services.storage,
+        context=context,
+        config=config,
+        gold_validator=gold_validator,
+        error_classifier=error_classifier,
+        batch_metrics=batch_metrics,
+        tracer=tracer,
+        lock_validator=lock_validator,
+    )
+    return RecordProcessor(
+        context=context,
+        batch_metrics=batch_metrics,
+        transformer=transformer,
+        writer=writer,
+        tracer=tracer,
+    )
 
 
 @pytest.fixture
@@ -140,7 +195,7 @@ class TestRunIdPropagation:
             table_config=TableConfig(primary_keys=["id"]),
         )
 
-        processor = RecordProcessor(
+        processor = create_record_processor(
             services=mock_services,
             error_classifier=ErrorClassifier(),
             context=pipeline_context,
@@ -206,7 +261,7 @@ class TestRunIdPropagation:
             table_config=TableConfig(primary_keys=["id"]),
         )
 
-        processor = RecordProcessor(
+        processor = create_record_processor(
             services=mock_services,
             error_classifier=ErrorClassifier(),
             context=pipeline_context,
@@ -279,7 +334,7 @@ class TestRunIdPropagation:
                 table_config=TableConfig(primary_keys=["id"]),
             )
 
-            processor = RecordProcessor(
+            processor = create_record_processor(
                 services=mock_services,
                 error_classifier=ErrorClassifier(),
                 context=context,

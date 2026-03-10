@@ -9,7 +9,6 @@ Safety Guard (RULES.md §4.6):
 
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.batch_executor import BatchResult
@@ -19,9 +18,11 @@ if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
-    from bioetl.application.core.batch_transformer import BatchTransformer, TransformResult
+    from bioetl.application.core.batch_transformer import (
+        BatchTransformer,
+        TransformResult,
+    )
     from bioetl.application.core.batch_writer import BatchWriter
-    from bioetl.application.core.config import RecordProcessorConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import TracingPort
     from bioetl.domain.types import BatchID
@@ -45,9 +46,8 @@ class RecordProcessor:
         batch_metrics: BatchMetricsRecorderService,
         transformer: BatchTransformer,
         writer: BatchWriter,
-        config: RecordProcessorConfig,
         tracer: TracingPort | None = None,
-    ):
+    ) -> None:
         """Initialize RecordProcessor.
 
         Args:
@@ -55,10 +55,8 @@ class RecordProcessor:
             batch_metrics: Metrics recorder for Bronze/Silver/Gold stages.
             transformer: Batch transformer for Bronze -> Silver/Gold conversion.
             writer: Batch writer orchestrating Bronze/Silver/Gold writes.
-            config: Record processor configuration.
             tracer: Optional tracing port for distributed tracing.
         """
-        _ = config
         self._context = context
         self._tracer = tracer
         self._batch_metrics = batch_metrics

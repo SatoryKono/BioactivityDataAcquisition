@@ -17,9 +17,15 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 from bioetl.application.core.batch_executor import BatchExecutor
+from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
+from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
+from bioetl.application.core.batch_tracing import BatchTracingManagerService
+from bioetl.application.core.batch_transformer import BatchTransformer
+from bioetl.application.core.batch_writer import BatchWriter
 from bioetl.application.core.checkpoint_manager import CheckpointManagerService
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.core.quarantine_manager import QuarantineManagerService
 from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
 from bioetl.composition.factories.dq_factory import DQServicesFactory
@@ -429,6 +435,69 @@ class ServicesBuilder:
         )
 
     @staticmethod
+    def _create_batch_metrics(
+        services: PipelineServices,
+        provider: str,
+        entity_type: str,
+        run_type: str,
+    ) -> BatchMetricsRecorderService:
+        pipeline_label = f"{provider}_{entity_type}"
+        return BatchMetricsRecorderService(services.metrics, pipeline_label, run_type)
+
+    @staticmethod
+    def _create_batch_transformer(
+        context: PipelineContext,
+        config: RecordProcessorConfig,
+        services: PipelineServices,
+        error_classifier: ErrorClassifier,
+        batch_metrics: BatchMetricsRecorderService,
+        transform_callback: Any,
+        gold_filter_callback: Any,
+        gold_transform_callback: Any,
+    ) -> BatchTransformer:
+        quarantine_manager = QuarantineManagerService(
+            quarantine_port=services.quarantine,
+            pipeline_name=config.pipeline_name,
+            metrics=services.metrics,
+        )
+        return BatchTransformer(
+            context=context,
+            config=config,
+            error_classifier=error_classifier,
+            quarantine_manager=quarantine_manager,
+            batch_metrics=batch_metrics,
+            transform_callback=transform_callback,
+            gold_filter_callback=gold_filter_callback,
+            gold_transform_callback=gold_transform_callback,
+        )
+
+    @staticmethod
+    def _create_batch_writer(
+        services: PipelineServices,
+        context: PipelineContext,
+        config: RecordProcessorConfig,
+        gold_schema: Any,
+        strict_gold_validation: bool,
+        error_classifier: ErrorClassifier,
+        batch_metrics: BatchMetricsRecorderService,
+        tracer: TracingPort | None,
+        lock_validator: Callable[[], Awaitable[bool]] | None,
+    ) -> BatchWriter:
+        gold_validator = PanderaGoldValidator(
+            gold_schema, strict=strict_gold_validation
+        )
+        return BatchWriter(
+            storage=services.storage,
+            context=context,
+            config=config,
+            gold_validator=gold_validator,
+            error_classifier=error_classifier,
+            batch_metrics=batch_metrics,
+            tracer=tracer,
+            lock_validator=lock_validator,
+        )
+
+    @staticmethod
     def create_record_processor(
         services: PipelineServices,
         context: PipelineContext,
@@ -505,22 +574,40 @@ class ServicesBuilder:
             scd_config=scd_config,
         )
 
-        # Create Gold validator from schema (DI pattern)
-        # strict mode requires schema to be provided
-        gold_validator = PanderaGoldValidator(
-            gold_schema, strict=strict_gold_validation
-        )
-
-        return RecordProcessor(
+        batch_metrics = ServicesBuilder._create_batch_metrics(
             services=services,
-            error_classifier=error_classifier,
+            provider=provider,
+            entity_type=entity_type,
+            run_type=context.run_type.value,
+        )
+        transformer = ServicesBuilder._create_batch_transformer(
             context=context,
             config=processor_config,
+            services=services,
+            error_classifier=error_classifier,
+            batch_metrics=batch_metrics,
             transform_callback=transform_callback,
             gold_filter_callback=gold_filter_callback,
             gold_transform_callback=gold_transform_callback,
-            gold_validator=gold_validator,
+        )
+        writer = ServicesBuilder._create_batch_writer(
+            services=services,
+            context=context,
+            config=processor_config,
+            gold_schema=gold_schema,
+            strict_gold_validation=strict_gold_validation,
+            error_classifier=error_classifier,
+            batch_metrics=batch_metrics,
+            tracer=None,
             lock_validator=lock_validator,
+        )
+
+        return RecordProcessor(
+            context=context,
+            batch_metrics=batch_metrics,
+            transformer=transformer,
+            writer=writer,
+            tracer=None,
         )
 
     @staticmethod
@@ -639,28 +726,65 @@ class ServicesBuilder:
             scd_config=pipeline.config.scd_config,
         )
 
-        # Create Gold validator
-        gold_validator = PanderaGoldValidator(
-            gold_schema, strict=strict_gold_validation
+        batch_metrics = ServicesBuilder._create_batch_metrics(
+            services=pipeline.services,
+            provider=pipeline.config.provider,
+            entity_type=pipeline.config.entity_type,
+            run_type=pipeline.context.run_type.value,
+        )
+        transformer = ServicesBuilder._create_batch_transformer(
+            context=pipeline.context,
+            config=processor_config,
+            services=pipeline.services,
+            error_classifier=error_classifier,
+            batch_metrics=batch_metrics,
+            transform_callback=callbacks.transform,
+            gold_filter_callback=gold_filter,
+            gold_transform_callback=callbacks.gold_transform,
+        )
+        writer = ServicesBuilder._create_batch_writer(
+            services=pipeline.services,
+            context=pipeline.context,
+            config=processor_config,
+            gold_schema=gold_schema,
+            strict_gold_validation=strict_gold_validation,
+            error_classifier=error_classifier,
+            batch_metrics=batch_metrics,
+            tracer=tracer,
+            lock_validator=lock_validator,
+        )
+        initial_batch_size = (
+            pipeline.config.batch_size
+            if pipeline.config.batch_size is not None
+            else 1000
+        )
+        memory_manager = BatchMemoryManagerService(
+            initial_batch_size,
+            memory_monitor=memory_monitor,
+            memory_config=memory_config,
+            logger=pipeline.services.logger,
+        )
+        tracing_manager = BatchTracingManagerService(
+            tracer=tracer,
+            context=pipeline.context,
+            config=processor_config,
+            initial_batch_size=initial_batch_size,
+            adaptive_sizing_enabled=memory_manager.enabled,
         )
 
         return BatchExecutor(
             services=pipeline.services,
             context=pipeline.context,
             config=processor_config,
-            error_classifier=error_classifier,
-            transform_callback=callbacks.transform,
-            gold_filter_callback=gold_filter,
-            gold_transform_callback=callbacks.gold_transform,
-            gold_validator=gold_validator,
             checkpoint_manager=checkpoint_manager,
             shutdown_signal=shutdown_signal,
+            batch_metrics=batch_metrics,
+            transformer=transformer,
+            writer=writer,
+            memory_manager=memory_manager,
+            tracing_manager=tracing_manager,
             batch_size=pipeline.config.batch_size,
             checkpoint_interval=pipeline.config.checkpoint_interval,
-            tracer=tracer,
-            lock_validator=lock_validator,
-            memory_monitor=memory_monitor,
-            memory_config=memory_config,
         )
 
 
