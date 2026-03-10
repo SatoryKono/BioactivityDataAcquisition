@@ -116,7 +116,9 @@ class TestLocalCheckpointSaveLoad:
         assert result is None
 
     @pytest.mark.asyncio
-    async def test_save_overwrites_existing(self, checkpoint: LocalCheckpointAdapter) -> None:
+    async def test_save_overwrites_existing(
+        self, checkpoint: LocalCheckpointAdapter
+    ) -> None:
         """Save should overwrite existing checkpoint."""
         run_id1 = RunID(uuid4())
         run_id2 = RunID(uuid4())

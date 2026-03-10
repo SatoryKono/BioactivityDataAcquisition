@@ -53,7 +53,45 @@ jobs:
       - name: Build docs in strict mode
         run: uv run bash scripts/build_docs_site.sh --strict
 
+  # Detect whether mermaid/diagram sources changed so the expensive
+  # Puppeteer-based validate-mermaid and render-diagrams jobs can be skipped
+  # when only non-diagram docs or mkdocs.yml are modified.
+  detect-diagram-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      diagrams_changed: ${{ steps.filter.outputs.diagrams_changed }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for diagram file changes
+        id: filter
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            base="origin/${{ github.base_ref }}"
+            git fetch --no-tags --depth=1 origin "${{ github.base_ref }}" 2>/dev/null || true
+          else
+            base="HEAD~1"
+          fi
+          changed=$(git diff --name-only "$base"...HEAD -- \
+            '*.mmd' '*.mermaid' \
+            'scripts/diagrams/**' \
+            '.github/actions/setup-mermaid/**' \
+            'docs/02-architecture/mmd-diagrams/theme/**' || true)
+          if [[ -n "$changed" ]]; then
+            echo "diagrams_changed=true" >> "$GITHUB_OUTPUT"
+            echo "Diagram-related files changed:"
+            echo "$changed"
+          else
+            echo "diagrams_changed=false" >> "$GITHUB_OUTPUT"
+            echo "No diagram-related files changed — mermaid jobs will be skipped."
+          fi
+
   validate-mermaid:
+    needs: detect-diagram-changes
+    if: needs.detect-diagram-changes.outputs.diagrams_changed == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -79,7 +117,11 @@ jobs:
           path: /tmp/diagram-lint.json
 
   render-diagrams:
-    needs: validate-mermaid
+    needs: [detect-diagram-changes, validate-mermaid]
+    if: |
+      always() &&
+      needs.detect-diagram-changes.outputs.diagrams_changed == 'true' &&
+      (needs.validate-mermaid.result == 'success' || needs.validate-mermaid.result == 'skipped')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -154,8 +196,11 @@ jobs:
           fi
 
   check-diagram-drift:
-    needs: validate-mermaid
-    if: github.event_name == 'pull_request'
+    needs: [detect-diagram-changes, validate-mermaid]
+    if: |
+      always() &&
+      github.event_name == 'pull_request' &&
+      needs.detect-diagram-changes.outputs.diagrams_changed == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

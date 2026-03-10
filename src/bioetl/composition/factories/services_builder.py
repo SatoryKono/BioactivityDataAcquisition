@@ -17,9 +17,17 @@ from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
 from bioetl.composition.factories.services_factory_pipeline_builder import (
     BatchProcessingComponents,
+)
+from bioetl.composition.factories.services_factory_pipeline_builder import (
     create_batch_executor_from_pipeline as _create_batch_executor_from_pipeline,
+)
+from bioetl.composition.factories.services_factory_pipeline_builder import (
     create_batch_processing_components as _create_batch_processing_components,
+)
+from bioetl.composition.factories.services_factory_pipeline_builder import (
     create_checkpoint_manager as _create_checkpoint_manager,
+)
+from bioetl.composition.factories.services_factory_pipeline_builder import (
     create_record_processor_from_pipeline as _create_record_processor_from_pipeline,
 )
 from bioetl.domain.composite.config import ColumnGroupConfig
@@ -327,14 +335,7 @@ class ServicesBuilder:
 def create_data_normalization_service(
     config: DataNormalizationConfig | None = None,
 ) -> DataNormalizationPort:
-    """Create DataNormalizationService with optional configuration.
-
-    Args:
-        config: Optional configuration for normalization behavior.
-
-    Returns:
-        DataNormalizationPort implementation (DefaultDataNormalizationService).
-    """
+    """Create DataNormalizationService with optional configuration."""
     from bioetl.domain.services import (
         DataNormalizationConfig,
         DefaultDataNormalizationService,

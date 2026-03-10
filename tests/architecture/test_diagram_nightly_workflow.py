@@ -25,5 +25,7 @@ def test_nightly_workflow_includes_mermaid_canary_matrix() -> None:
 
     # Puppeteer chrome install may be inline or in the composite action
     composite = Path(".github/actions/setup-mermaid/action.yml")
-    sources = workflow + (composite.read_text(encoding="utf-8") if composite.exists() else "")
+    sources = workflow + (
+        composite.read_text(encoding="utf-8") if composite.exists() else ""
+    )
     assert "puppeteer browsers install chrome-headless-shell" in sources

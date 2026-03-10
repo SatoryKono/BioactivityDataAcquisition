@@ -81,11 +81,8 @@ class TransformedRecord:
 class BatchTransformer:
     """Transforms Bronze records to Silver/Gold with error handling.
 
-    Handles:
-    - Bronze → Silver transformation via callback
-    - Silver → Gold filtering and transformation
-    - Error classification and quarantine
-    - DQ threshold checking
+    Handles Bronze→Silver transformation, Silver→Gold filtering,
+    error classification/quarantine, and DQ threshold checking.
     """
 
     def __init__(

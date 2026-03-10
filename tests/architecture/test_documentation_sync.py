@@ -226,11 +226,19 @@ def test_adr_status_is_from_allowed_set() -> None:
 
 def test_mkdocs_nav_references_existing_markdown_files() -> None:
     """All markdown paths referenced in mkdocs navigation MUST exist."""
+    raw = Path("mkdocs.yml").read_text(encoding="utf-8")
+    # Only scan lines after `nav:` — exclude_docs and other top-level keys
+    # may contain glob patterns that look like .md paths but aren't nav entries.
+    nav_start = raw.find("\nnav:")
+    if nav_start == -1:
+        return
+    nav_section = raw[nav_start:]
     active_lines = [
-        line for line in Path("mkdocs.yml").read_text(encoding="utf-8").splitlines()
-        if not line.lstrip().startswith("#")
+        line for line in nav_section.splitlines() if not line.lstrip().startswith("#")
     ]
-    nav_paths = sorted(set(re.findall(r"\b([A-Za-z0-9_./-]+\.md)\b", "\n".join(active_lines))))
+    nav_paths = sorted(
+        set(re.findall(r"\b([A-Za-z0-9_./-]+\.md)\b", "\n".join(active_lines)))
+    )
 
     missing = [path for path in nav_paths if not (Path("docs") / path).exists()]
     assert not missing, (

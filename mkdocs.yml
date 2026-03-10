@@ -11,6 +11,16 @@ exclude_docs: |
     exports/**
     reports/docs-export-report-*.md
     **/~$*.docx
+    02-architecture/mmd-diagrams/**/svg/INDEX.md
+    02-architecture/mmd-diagrams/**/png/INDEX.md
+
+# Rendered SVG/PNG diagram images are gitignored and generated locally or in CI
+# (render-diagrams job). Downgrade broken-link severity so `mkdocs build --strict`
+# does not abort on missing image targets. Real doc-link integrity is enforced by
+# scripts/check_doc_links.py (runs in the same CI job before the build step).
+validation:
+    links:
+        not_found: info
 
 theme:
     name: material

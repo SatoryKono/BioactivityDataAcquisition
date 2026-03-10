@@ -1,6 +1,7 @@
 """No-op implementations facade for observability and utility ports."""
 
 from bioetl.domain.ports.noop._audit_pii import NoOpAudit, NoOpPiiHasher
+from bioetl.domain.ports.noop._debug import NoOpDebug
 from bioetl.domain.ports.noop._memory_metadata import (
     NoOpMemoryMonitor,
     NoOpMetadataWriter,
@@ -10,6 +11,7 @@ from bioetl.domain.ports.noop._tracing import NoOpTracing, _NoOpOtelTracer, _NoO
 
 __all__ = [
     "NoOpAudit",
+    "NoOpDebug",
     "NoOpMemoryMonitor",
     "NoOpMetadataWriter",
     "NoOpMetrics",
