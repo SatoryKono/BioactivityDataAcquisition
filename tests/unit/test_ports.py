@@ -275,6 +275,13 @@ class TestStoragePortProtocol:
             ) -> dict[str, int]:
                 return {"files_removed": 0, "bytes_freed": 0, "directories_removed": 0}
 
+            async def deduplicate_silver(
+                self,
+                table_name: str,
+                primary_keys: list[str],
+            ) -> int:
+                return 0
+
         assert isinstance(ValidStorage(), StoragePort)
 
         # Note: @runtime_checkable protocols only check for method presence,

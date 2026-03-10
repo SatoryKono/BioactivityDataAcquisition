@@ -37,6 +37,7 @@ def test_scripts_inventory_manifest_exists_and_has_required_keys() -> None:
 
 
 @pytest.mark.slow
+@pytest.mark.timeout(300)
 def test_scripts_inventory_manifest_drift_check_passes() -> None:
     """Committed manifest must match current scripts inventory."""
     root = _project_root()

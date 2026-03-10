@@ -80,5 +80,6 @@ class RetryExhaustedError(RecoverableError):
         self.last_error = last_error
         msg = f"Exhausted {attempts} retry attempts for {url}"
         if last_error:
-            msg += f": {last_error}"
+            error_desc = str(last_error) or type(last_error).__name__
+            msg += f": {error_desc}"
         super().__init__(msg)

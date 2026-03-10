@@ -172,6 +172,96 @@ class RetentionManager:
         except DeltaTableNotFoundError as e:
             raise TableNotFoundError(table_path) from e
 
+    async def deduplicate_silver(
+        self,
+        table_name: str,
+        primary_keys: list[str],
+    ) -> int:
+        """Deduplicate Silver table by primary keys, keeping the latest record.
+
+        Performs a self-merge: reads all rows, deduplicates by primary_keys
+        keeping the row with the latest _ingestion_ts, then overwrites the table.
+
+        Used after append-mode pipeline runs to compact duplicates into a
+        single deduplicated table in one pass (vs per-batch merge).
+
+        Args:
+            table_name: Table name (e.g., 'chembl/activity').
+            primary_keys: Columns forming the business key for dedup.
+
+        Returns:
+            Number of duplicate rows removed.
+
+        Raises:
+            TableNotFoundError: If table does not exist.
+        """
+        table_path = self._get_table_path(table_name)
+        loop = asyncio.get_running_loop()
+
+        def _dedup() -> int:
+            import pyarrow as pa
+            import pyarrow.compute as pc
+            from deltalake import DeltaTable as DT
+            from deltalake import write_deltalake
+
+            try:
+                dt = DT(table_path)
+            except DeltaTableNotFoundError as exc:
+                raise TableNotFoundError(table_path) from exc
+
+            table = dt.to_pyarrow_table()
+            total_before = table.num_rows
+            if total_before == 0:
+                return 0
+
+            # Sort by _ingestion_ts descending so first occurrence = latest
+            sort_indices = pc.sort_indices(
+                table,
+                sort_keys=[("_ingestion_ts", "descending")],
+            )
+            sorted_table = table.take(sort_indices)
+
+            # Build composite key column for dedup
+            if len(primary_keys) == 1:
+                key_col = sorted_table.column(primary_keys[0])
+                key_arrays = key_col
+            else:
+                # Concatenate PKs into a single string key
+                pk_cols = [
+                    pc.cast(sorted_table.column(pk), pa.string())
+                    for pk in primary_keys
+                ]
+                sep = pa.scalar("|")
+                key_arrays = pk_cols[0]
+                for col in pk_cols[1:]:
+                    key_arrays = pc.binary_join_element_wise(key_arrays, col, sep)
+
+            # Keep first occurrence (latest by _ingestion_ts)
+            seen: set[Any] = set()  # Any: PK values may be str, int, or None
+            keep_mask = []
+            for val in key_arrays.to_pylist():
+                if val not in seen:
+                    seen.add(val)
+                    keep_mask.append(True)
+                else:
+                    keep_mask.append(False)
+
+            deduped = sorted_table.filter(keep_mask)
+            duplicates_removed: int = total_before - int(deduped.num_rows)
+
+            if duplicates_removed > 0:
+                write_deltalake(
+                    table_or_uri=table_path,
+                    data=deduped,
+                    mode="overwrite",
+                    schema_mode="overwrite",
+                )
+
+            return duplicates_removed
+
+        result: int = await loop.run_in_executor(None, _dedup)
+        return result
+
     async def time_travel(
         self,
         table_name: str,

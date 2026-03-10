@@ -17,18 +17,10 @@ from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
 from bioetl.composition.factories.services_factory_pipeline_builder import (
     BatchProcessingComponents,
-)
-from bioetl.composition.factories.services_factory_pipeline_builder import (
-    create_batch_executor_from_pipeline as _create_batch_executor_from_pipeline,
-)
-from bioetl.composition.factories.services_factory_pipeline_builder import (
-    create_batch_processing_components as _create_batch_processing_components,
-)
-from bioetl.composition.factories.services_factory_pipeline_builder import (
-    create_checkpoint_manager as _create_checkpoint_manager,
-)
-from bioetl.composition.factories.services_factory_pipeline_builder import (
-    create_record_processor_from_pipeline as _create_record_processor_from_pipeline,
+    create_batch_executor_from_pipeline,
+    create_batch_processing_components,
+    create_checkpoint_manager,
+    create_record_processor_from_pipeline,
 )
 from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.config import TableConfig
@@ -117,7 +109,7 @@ class ServicesBuilder:
         lock_validator: Callable[[], Awaitable[bool]] | None = None,
     ) -> BatchProcessingComponents:
         """Create batch metrics/transformer/writer stack via composition DI."""
-        return _create_batch_processing_components(
+        return create_batch_processing_components(
             services=services,
             context=context,
             config=config,
@@ -153,7 +145,7 @@ class ServicesBuilder:
         Returns:
             CheckpointManagerService configured for the pipeline run.
         """
-        return _create_checkpoint_manager(
+        return create_checkpoint_manager(
             checkpoint_port=checkpoint_port,
             logger=logger,
             pipeline_name=pipeline_name,
@@ -256,7 +248,7 @@ class ServicesBuilder:
             RecordProcessor configured from the pipeline's services and context.
         """
         callbacks = extract_pipeline_callbacks(pipeline)
-        return _create_record_processor_from_pipeline(
+        return create_record_processor_from_pipeline(
             pipeline=pipeline,
             silver_schema=silver_schema,
             gold_schema=gold_schema,
@@ -309,7 +301,7 @@ class ServicesBuilder:
             BatchExecutor configured from the pipeline's services, context, and config.
         """
         callbacks = extract_pipeline_callbacks(pipeline)
-        return _create_batch_executor_from_pipeline(
+        return create_batch_executor_from_pipeline(
             pipeline=pipeline,
             callbacks=callbacks,
             silver_schema=silver_schema,

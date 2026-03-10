@@ -14,6 +14,7 @@ def _project_root() -> Path:
 
 
 @pytest.mark.slow
+@pytest.mark.timeout(300)
 def test_scripts_lifecycle_registry_check_passes() -> None:
     """Lifecycle registry must cover all non-active scripts with valid entries."""
     root = _project_root()

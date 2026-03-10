@@ -1,7 +1,7 @@
 {
   "summary": {
-    "scanned_modules": 995,
-    "total_internal_imports": 3644,
+    "scanned_modules": 991,
+    "total_internal_imports": 3629,
     "layer_edges": 14,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 232,
@@ -11,13 +11,13 @@
     {
       "source": "application",
       "target": "application",
-      "imports": 417,
+      "imports": 418,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 581,
+      "imports": 582,
       "allowed": true
     },
     {
@@ -29,7 +29,7 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 249,
+      "imports": 245,
       "allowed": true
     },
     {
@@ -47,13 +47,13 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 687,
+      "imports": 684,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 457,
+      "imports": 455,
       "allowed": true
     },
     {
@@ -65,19 +65,19 @@
     {
       "source": "interfaces",
       "target": "application",
-      "imports": 15,
+      "imports": 13,
       "allowed": true
     },
     {
       "source": "interfaces",
       "target": "composition",
-      "imports": 24,
+      "imports": 23,
       "allowed": true
     },
     {
       "source": "interfaces",
       "target": "domain",
-      "imports": 26,
+      "imports": 25,
       "allowed": true
     },
     {
@@ -89,7 +89,7 @@
     {
       "source": "interfaces",
       "target": "interfaces",
-      "imports": 95,
+      "imports": 91,
       "allowed": true
     }
   ],
@@ -122,7 +122,7 @@
     {
       "source": "application.core",
       "target": "domain.ports",
-      "imports": 45
+      "imports": 46
     },
     {
       "source": "application.core",
@@ -155,11 +155,6 @@
       "imports": 31
     },
     {
-      "source": "application.services",
-      "target": "domain.ports",
-      "imports": 28
-    },
-    {
       "source": "infrastructure.storage",
       "target": "domain.types",
       "imports": 28
@@ -168,6 +163,11 @@
       "source": "infrastructure.adapters",
       "target": "domain.exceptions",
       "imports": 27
+    },
+    {
+      "source": "application.services",
+      "target": "domain.ports",
+      "imports": 26
     },
     {
       "source": "application.pipelines",
@@ -210,13 +210,13 @@
       "imports": 19
     },
     {
-      "source": "interfaces.cli",
-      "target": "composition.entrypoints",
-      "imports": 19
-    },
-    {
       "source": "application.services",
       "target": "domain.value_objects",
+      "imports": 18
+    },
+    {
+      "source": "interfaces.cli",
+      "target": "composition.entrypoints",
       "imports": 18
     },
     {
@@ -311,11 +311,6 @@
     },
     {
       "source": "interfaces.cli",
-      "target": "application.services",
-      "imports": 11
-    },
-    {
-      "source": "interfaces.cli",
       "target": "domain.exceptions",
       "imports": 11
     },
@@ -355,24 +350,24 @@
       "imports": 9
     },
     {
-      "source": "composition.factories",
-      "target": "domain.context",
+      "source": "interfaces.cli",
+      "target": "application.services",
+      "imports": 9
+    },
+    {
+      "source": "application.core",
+      "target": "domain.config",
       "imports": 8
     },
     {
-      "source": "infrastructure.observability",
-      "target": "domain.ports",
+      "source": "composition.factories",
+      "target": "domain.context",
       "imports": 8
     },
     {
       "source": "infrastructure.schemas",
       "target": "domain.composite",
       "imports": 8
-    },
-    {
-      "source": "application.core",
-      "target": "domain.config",
-      "imports": 7
     },
     {
       "source": "application.core",
@@ -391,6 +386,11 @@
     },
     {
       "source": "composition.factories",
+      "target": "domain.filtering",
+      "imports": 7
+    },
+    {
+      "source": "infrastructure.schemas",
       "target": "domain.filtering",
       "imports": 7
     }

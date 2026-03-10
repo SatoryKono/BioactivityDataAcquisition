@@ -17,7 +17,7 @@ async def health_check(self) -> HealthStatus:
     """Check if the external service is reachable.
 
     Returns:
-        True if service is healthy, False otherwise.
+        HealthStatus (HEALTHY, DEGRADED, UNHEALTHY).
     """
 ```
 
@@ -36,7 +36,7 @@ All log messages **MUST** include:
 
 | Field      | Required | Example                        |
 | ---------- | -------- | ------------------------------ |
-| `run-id`   | MUST     | UUID                           |
+| `run_id`   | MUST     | UUID                           |
 | `pipeline` | MUST     | `chembl_activity`              |
 | `stage`    | MUST     | `extract`, `transform`, `load` |
 | `dataset`  | SHOULD   | `chembl/activity`              |
@@ -58,31 +58,31 @@ self.logger.info(
 
 *Reference: [RULES.md §3.2.2](../../00-project/RULES.md#322-prometheus-metrics)*
 
-### Required Metrics (prefix: `bioetl-`)
+### Required Metrics (prefix: `bioetl_`)
 
 | Metric                      | Type      | Labels                            |
 | --------------------------- | --------- | --------------------------------- |
-| `pipeline-duration-seconds` | Histogram | pipeline, stage, status, run-type |
-| `records-processed-total`   | Counter   | pipeline, stage, run-type         |
-| `errors-total`              | Counter   | pipeline, stage, error-code       |
-| `batch-size-records`        | Histogram | pipeline, stage                   |
+| `pipeline_duration_seconds` | Histogram | pipeline, stage, status, run_type |
+| `records_processed_total`   | Counter   | pipeline, stage, run_type         |
+| `errors_total`              | Counter   | pipeline, stage, error_code       |
+| `batch_size_records`        | Histogram | pipeline, stage                   |
 
 ### DQ Metrics
 
 | Metric                   | Type  | Labels                  |
 | ------------------------ | ----- | ----------------------- |
-| `dq-validation-score`    | Gauge | pipeline, column, check |
-| `data-freshness-seconds` | Gauge | pipeline                |
+| `dq_validation_score`    | Gauge | pipeline, entity |
+| `data_freshness_seconds` | Gauge | pipeline, entity |
 
 ### Provider Health Metrics
 
 | Metric                        | Type    | Labels                                        |
 | ----------------------------- | ------- | --------------------------------------------- |
-| `provider-health-status`      | Gauge   | provider (0=Unhealthy, 1=Degraded, 2=Healthy) |
-| `circuit-breaker-state`       | Gauge   | adapter (0=Closed, 1=Half-Open, 2=Open)       |
-| `circuit-breaker-trips-total` | Counter | adapter                                       |
-| `circuit-breaker-success-total` | Counter | adapter                                     |
-| `circuit-breaker-failure-total` | Counter | adapter                                     |
+| `provider_health_status`      | Gauge   | provider (0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY) |
+| `circuit_breaker_state`       | Gauge   | adapter (0=CLOSED, 1=HALF_OPEN, 2=OPEN)       |
+| `circuit_breaker_trips_total` | Counter | adapter                                        |
+| `circuit_breaker_success_total` | Counter | adapter                                      |
+| `circuit_breaker_failure_total` | Counter | adapter                                      |
 
 ## Verification Commands
 
@@ -90,7 +90,7 @@ self.logger.info(
 
 ```bash
 # Start metrics server (default port 8000)
-curl http://localhost:8000/metrics | grep bioetl-
+curl http://localhost:8000/metrics | grep bioetl_
 ```
 
 ### Verify Adapter Health Checks
@@ -113,7 +113,7 @@ When creating a new adapter:
 
 1. [ ] Implement `health_check()` method
 1. [ ] Use `LoggerPort` (injected via DI) for all logging
-1. [ ] Include `run-id`, `pipeline`, `stage` in all log messages (Log Schema §3.2.1)
+1. [ ] Include `run_id`, `pipeline`, `stage` in all log messages (Log Schema §3.2.1)
 1. [ ] Add rate limiting (TokenBucket)
 1. [ ] Register metrics in composition layer (`bootstrap/runtime/observability.py`)
 1. [ ] Add integration test with VCR cassette

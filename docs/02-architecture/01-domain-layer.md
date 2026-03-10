@@ -4,256 +4,197 @@
 
 ## 1. Назначение
 
-Слой `Domain` — это ядро системы, содержащее чистую бизнес-логику и правила. Он не зависит ни от каких других слоёв и не
-содержит кода, связанного с вводом-выводом (I/O), базами данных, веб-фреймворками или другими инфраструктурными
-деталями.
+Слой `Domain` содержит чистую предметную логику BioETL: доменные сущности, value objects, агрегаты, доменные события,
+контракты портов и правила валидации. Слой не должен зависеть от `application`, `infrastructure` и `interfaces`.
 
-**Ключевые характеристики:**
+Ключевые характеристики:
 
-- **Чистота:** Только Python-объекты и чистые функции.
-- **Независимость:** Не импортирует модули из `application`, `infrastructure` или `interfaces`.
-- **Стабильность:** Изменяется только при изменении бизнес-правил, а не технических деталей.
+- Чистота: без I/O и без инфраструктурных зависимостей.
+- Консистентность: инварианты удерживаются внутри aggregate boundaries.
+- Типобезопасность: значения и идентификаторы выражены через отдельные типы и value objects.
 
-## 2. Ключевые Компоненты
+## 2. Актуальная Спецификация (2026-03-10)
 
-### 2.1. `ports/` — Пакет Портов (Контракты)
+### 2.1. Порты (`ports/`)
 
-**Расположение:** `src/bioetl/domain/ports/`
+`src/bioetl/domain/ports/` содержит `Protocol`-контракты для Ports & Adapters:
 
-Этот пакет является краеугольным камнем архитектуры **Ports & Adapters**. Он определяет интерфейсы (через
-`typing.Protocol`), которые должны реализовывать адаптеры из слоя `Infrastructure`.
+- источники и хранение (`DataSourcePort`, `StoragePort`, `CheckpointPort`, `LockPort`);
+- observability (`LoggerPort`, `MetricsPort`, `TracingPort`, `DQMonitorPort`);
+- качество данных (`BronzeDQAnalyzerPort`, `SilverDQAnalyzerPort`, `GoldDQAnalyzerPort`, валидаторы, quarantine/report);
+- runtime/resilience (`RunnerFactoryPort`, `RunnablePort`, `RateLimiterPort`, `CircuitBreakerPort`);
+- NoOp реализации для опциональных зависимостей.
 
-**Структура пакета (33 файла + 6 sub-packages):**
-
-Пакет содержит 33 protocol/compat-файла и 6 sub-packages (актуально на 2026-03-06), организованных по категориям:
-
-**Основные порты:**
-
-- `DataSourcePort`, `FilterableDataSourcePort` — абстракция для источников данных
-- `StoragePort` — хранилища данных (Bronze, Silver, Gold)
-- `LockPort` — распределённые блокировки
-- `CheckpointPort` — сохранение/загрузка состояния пайплайнов
-- `QuarantinePort` — карантин записей, не прошедших валидацию
-
-**Observability порты:**
-
-- `MetricsPort` — сбор метрик
-- `TracingPort` — распределённый трейсинг (OpenTelemetry)
-- `LoggerPort` — структурированное логирование
-- `DQMonitorPort` — Data Quality мониторинг
-- `MetadataCoordinatorPort` — координация метаданных между слоями
-
-**Data Quality порты:**
-
-- `BronzeDQAnalyzerPort`, `SilverDQAnalyzerPort`, `GoldDQAnalyzerPort` — DQ анализ по слоям
-- `DQReportWriterPort` — запись DQ-отчётов
-- `GoldValidatorPort`, `SilverValidatorPort` — валидация записей Gold/Silver слоёв
-- `BronzeDQConfigPort`, `SilverDQConfigPort`, `GoldDQConfigPort` — конфигурация DQ-правил по слоям
-
-**Input/Output порты:**
-
-- `InputFilterPort` — загрузка filter IDs
-- `JsonEncoderPort` — сериализация JSON payload
-
-**Infrastructure порты:**
-
-- `HealthCheckPort`, `HealthMonitorPort`, `HealthStatePort` — проверка и мониторинг здоровья адаптеров
-- `AuditPort` — аудит операций
-- `ShutdownPort`, `MemoryMonitorPort`, `DeltaReaderPort`, `IDMappingPort`, `PiiHasherPort` — системные и вспомогательные
-  порты
-- `RunnablePort`, `RunnerFactoryPort`, `MetricsExtractorPort` — абстракция запуска пайплайнов
-- `RateLimiterPort`, `CircuitBreakerPort` — Resilience-порты (rate limiting, circuit breaker)
-- `DataNormalizationPort` — нормализация текста/данных
-- `MetadataWriterPort` — запись метаданных
-
-**NoOp реализации (Null Object Pattern):**
-
-- `NoOpAudit`, `NoOpMemoryMonitor`, `NoOpMetadataWriter`, `NoOpMetrics`, `NoOpPiiHasher`, `NoOpTracing` —
-  реализации-заглушки для опциональных зависимостей
-
-**Правило импорта (MUST):**
+Правило импорта:
 
 ```python
-# ✅ Правильно — из фасада:
+# ✅ из фасада
 from bioetl.domain.ports import StoragePort, LockPort
 
-# ❌ Неправильно — из внутренних модулей:
-from bioetl.domain.ports.storage import StoragePort  # Запрещено!
+# ❌ из внутренних модулей
+from bioetl.domain.ports.storage import StoragePort
 ```
 
-Это правило проверяется архитектурным тестом `test-ports-imported-only-from-facade`.
+Проверка выполняется архитектурным тестом `test_ports_imported_only_from_facade`.
 
-### 2.2. `aggregates/` — DDD Aggregates
+### 2.2. DDD Aggregates (`aggregates/`)
 
-**Расположение:** `src/bioetl/domain/aggregates/`
+`src/bioetl/domain/aggregates/` реализует публичные фасады агрегатов и приватные split-модули (`_*.py`) для жизненных циклов,
+инвариантов и read-model логики.
 
-Пакет содержит DDD-агрегаты с защищёнными инвариантами и доменными событиями.
-См. [ADR-021: DDD Aggregates](decisions/ADR-021-ddd-aggregates-adoption.md).
+Публичные точки входа:
 
-**Структура:**
+- `batch.py` -> `Batch`, `BatchRecord`, `BatchStatus`
+- `pipeline_run.py` -> `PipelineRun`, `PipelineRunState`, `StageResult`, `StageStatus`
+- `quarantine_entry.py` -> `QuarantineEntry`, `QuarantineStatus`, `ResolutionInfo`
+- `events.py` -> каталог доменных событий
 
-```text
-src/bioetl/domain/aggregates/
-├── __init__.py
-├── batch.py             # Batch Aggregate (536 LOC)
-├── pipeline_run.py      # PipelineRun Aggregate (574 LOC)
-├── quarantine_entry.py  # QuarantineEntry Aggregate (517 LOC)
-└── events.py            # Domain Events (197 LOC)
+#### 2.2.1. Таблица агрегатов
+
+| Aggregate | Root | Children (VO/Entity) | Инварианты | State machine |
+|---|---|---|---|---|
+| `Batch` | `Batch` | `BatchRecord` (VO), `BatchStatus` | `start_index >= 0`; запись/карантин только в `OPEN`; переходы только `OPEN -> SEALED -> WRITING -> COMMITTED/FAILED` | `OPEN -> SEALED -> WRITING -> COMMITTED/FAILED` |
+| `PipelineRun` | `PipelineRun` | `StageResult` (VO), `PipelineRunState`, `StageStatus` | запуск только из `PENDING`; завершение только при наличии стадий и отсутствии `FAILED`; после terminal состояния переходы запрещены | `PENDING -> RUNNING -> COMPLETED/FAILED/SHUTDOWN` |
+| `QuarantineEntry` | `QuarantineEntry` | `ResolutionInfo` (VO), `QuarantineStatus` | обязательны `entry_id`, `pipeline_name`, `error_code`, `payload`, `payload_hash`; resolve разрешён только из `NEW/UNDER_REVIEW`; `new_record_id` обязателен для `REPROCESSED` | `NEW -> UNDER_REVIEW -> IGNORED/REPROCESSED`, а также `NEW/UNDER_REVIEW -> EXPIRED` |
+
+#### 2.2.2. Машины состояний
+
+```mermaid
+stateDiagram-v2
+    [*] --> OPEN
+    OPEN --> SEALED: seal()
+    SEALED --> WRITING: mark_writing()
+    WRITING --> COMMITTED: mark_committed()
+    WRITING --> FAILED: mark_failed()
 ```
 
-**Ключевые агрегаты:**
-
-| Aggregate         | Инварианты                                      | State Machine                                        |
-|-------------------|-------------------------------------------------|------------------------------------------------------|
-| `Batch`           | Records sealed before write; sequential indices | OPEN → SEALED → WRITING → COMMITTED/FAILED           |
-| `PipelineRun`     | COMPLETED only if all stages SUCCESS            | NEW → RUNNING → COMPLETED/FAILED/SHUTDOWN            |
-| `QuarantineEntry` | Controlled resolution lifecycle                 | NEW → UNDER_REVIEW → IGNORED / REPROCESSED / EXPIRED |
-
-`QuarantineStatus(StrEnum)` (актуально по `quarantine_entry.py`):
-
-- `NEW`
-- `UNDER_REVIEW`
-- `IGNORED`
-- `REPROCESSED`
-- `EXPIRED`
-
-Допустимые переходы:
-
-- `NEW` → `UNDER_REVIEW`
-- `NEW` или `UNDER_REVIEW` → `IGNORED`
-- `NEW` или `UNDER_REVIEW` → `REPROCESSED`
-- `NEW` или `UNDER_REVIEW` → `EXPIRED`
-
-**Пример использования:**
-
-```python
-from bioetl.domain.aggregates import Batch
-from bioetl.domain.types import RunID
-
-batch = Batch.create(run_id=RunID(uuid4()))
-batch.add_record({"id": "1", "value": 100})
-batch.seal()
-batch.mark_writing()
-batch.mark_committed("silver")
-
-events = batch.collect_events()  # [BatchCreated, BatchSealed, BatchWritten]
+```mermaid
+stateDiagram-v2
+    [*] --> PENDING
+    PENDING --> RUNNING: start()
+    RUNNING --> COMPLETED: complete()
+    RUNNING --> FAILED: fail()/record_stage_failure()
+    RUNNING --> SHUTDOWN: shutdown()
 ```
 
-### 2.3. `value_objects/` — Value Objects
+```mermaid
+stateDiagram-v2
+    [*] --> NEW
+    NEW --> UNDER_REVIEW: start_review()
+    NEW --> IGNORED: mark_ignored()
+    NEW --> REPROCESSED: mark_reprocessed()
+    NEW --> EXPIRED: mark_expired()
+    UNDER_REVIEW --> IGNORED: mark_ignored()
+    UNDER_REVIEW --> REPROCESSED: mark_reprocessed()
+    UNDER_REVIEW --> EXPIRED: mark_expired()
+```
 
-**Расположение:** `src/bioetl/domain/value_objects/`
+#### 2.2.3. Доменные события
 
-Неизменяемые доменные примитивы с типобезопасностью (18 файлов).
+Каталог событий (`events.py`):
 
-**Идентификаторы:**
+- Pipeline: `PipelineCompleted`, `PipelineFailed`, `PipelineShutdown`
+- Batch: `BatchCreated`, `BatchSealed`, `BatchWritten`, `BatchFailed`, `RecordQuarantined`
+- Quarantine: `QuarantineEntryCreated`, `QuarantineEntryResolved`
 
-- `RunID(UUID)` — идентификатор запуска пайплайна
-- `BatchID(UUID)` — идентификатор batch
-- `EntityID(str)` — бизнес-ключ сущности
-- `ContentHash(str)` — SHA256 хэш содержимого
+### 2.3. Сущности и Bounded Contexts (`entities/`)
 
-**Измерения:**
+В текущей реализации можно выделить следующие bounded contexts (тактический уровень):
 
-- `ActivityValue(value, unit, relation)` (`activity.py`, 329 LOC) — составной value object для биоактивности (IC50,
-  EC50, Ki), включает `RelationOperator` enum и `ConfidenceScore`
+- Pipeline Lifecycle: выполнение пайплайна и стадий (`PipelineRun` aggregate).
+- Batch Lifecycle: пакетная обработка и запись (`Batch` aggregate).
+- Quarantine Management: триаж/разрешение невалидных записей (`QuarantineEntry` aggregate).
+- Publication Metadata: унифицированная модель публикаций для OpenAlex/CrossRef/PubMed/Semantic Scholar (`PublicationEntityBase` и provider-specific entities).
+- Protein & Mapping: белковые записи и ID-mapping (`UniprotTarget`, `IDMappingResult`).
 
-**Data Quality:**
+### 2.4. Value Objects (`value_objects/`)
 
-- `DQMetrics` — метрики качества данных
-- `DQReport` — отчёт о качестве данных
+`src/bioetl/domain/value_objects/` содержит неизменяемые доменные примитивы с валидацией. Ключевые идентификаторы
+публикаций и белков:
 
-**Pipeline Results:**
+| Value object | Минимальные правила валидации |
+|---|---|
+| `DOI` | `10.<digits>/<suffix>`, удаление `doi.org`/`doi:`, lowercase |
+| `PubMedId` | только цифры, `> 0`, ограничение верхней границы |
+| `OpenAlexId` | формат `W<digits>`, поддержка URL-входа |
+| `SemanticScholarId` | ровно 40 hex-символов |
+| `ISSN` | формат `NNNN-NNNN` (check-digit может быть `X`) |
+| `ORCID` | формат `NNNN-NNNN-NNNN-NNNX`, поддержка URL-входа |
+| `UniProtId` | паттерны accession UniProt, длина 6 или 10 |
+| `ChemblId` | `CHEMBL<number>`, нормализация регистра и числа |
+| `PubChemCid` | положительный целочисленный CID |
 
-- `BronzeResult` — результат записи в Bronze
-- `Publications` — value objects для публикаций
-- `ActivityValues` — concentration & unit handling
+Дополнительно: activity/chemical/molecular/DQ/result value objects, а также объекты для field groups и run context.
 
-### 2.4. `types.py` — Пользовательские Типы
+### 2.5. Пользовательские типы (`types/`)
 
-**Источник:** `src/bioetl/domain/types.py`
+`src/bioetl/domain/types/` содержит типизированные идентификаторы и alias-ы, используемые агрегатами и сущностями:
+`RunID`, `BatchID`, `EntityID`, `ContentHash`, `RunType`, `MetaDict`, `JsonDict` и другие.
 
-Определяет простые и составные типы данных, используемые во всей системе для обеспечения консистентности и семантической
-ясности. Включает типизированные идентификаторы: `RunID`, `BatchID`, `EntityID`, `ContentHash`.
+### 2.6. Доменные сервисы (`services/`)
 
-### 2.5. `config/` — Конфигурационные Value Objects
+`src/bioetl/domain/services/` содержит чистые доменные сервисы без I/O, например:
 
-**Источник:** `src/bioetl/domain/config/`
+- `IdentityService` (детерминированные `entity_id`/`content_hash`),
+- нормализация DOI/PMID/текста/дат,
+- вычисление и сериализация DQ-метрик,
+- классификация и валидация доменных значений.
 
-Содержит dataclass Value Objects для конфигурации пайплайнов:
+### 2.7. Конфигурационные модели (`config/` и `configs/`)
 
-- `PipelineConfig` — полная конфигурация пайплайна
-- `RuntimeConfig` — параметры выполнения
-- `DQConfig` — пороги Data Quality
-- `TableConfig` — настройки таблиц
-- `base_provider.py` — базовые конфиги провайдеров: `BaseClientConfig`, `BaseProviderConfig`, `RateLimitConfig`
+- `src/bioetl/domain/config/` — целевой пакет dataclass-конфигов.
+- `src/bioetl/domain/configs/` — backward-compatibility shim (re-export).
 
-> **Backward compatibility:** `src/bioetl/domain/configs/` (с `s`) является shim-пакетом, который re-export'ит классы из `domain.config.base_provider`. Новый код должен импортировать из `bioetl.domain.config.base_provider`.
+### 2.8. Дополнительные поддиректории
 
-### 2.6. `error_classifier.py` — Классификатор Ошибок
+Помимо перечисленных выше, domain-слой включает:
 
-**Источник:** `src/bioetl/domain/error_classifier.py`
+- `composite/`
+- `contracts/`
+- `exceptions/`
+- `filtering/`
+- `mapping/`
+- `models/`
+- `registry/`
+- `schemas/`
+- `transformations/`
+- `validation/`
 
-Реализует логику классификации ошибок в соответствии с правилами из `RULES.md` (раздел 3.1.1):
+## 3. Глобальные Инварианты Слоя
 
-- **Critical**: Ошибки, останавливающие пайплайн.
-- **Recoverable**: Временные сбои, требующие повторной попытки.
-- **Data Quality**: Проблемы с данными, которые можно пропустить, отправив запись в карантин.
-
-### 2.7. Дополнительные поддиректории
-
-Domain содержит 11 дополнительных поддиректорий:
-
-| Директория        | Назначение                      | Содержание                                               |
-|-------------------|---------------------------------|----------------------------------------------------------|
-| `composite/`      | Composite pipeline domain       | Field groups, state, strategy                            |
-| `configs/`        | Конфигурационные базовые классы | Базовые dataclass-ы для конфигураций                     |
-| `contracts/gold/` | Gold-слой контракты данных      | Pandera DataFrameModel схемы                             |
-| `entities/`       | Доменные сущности               | Entity-классы для каждого провайдера                     |
-| `exceptions/`     | Доменные исключения             | 7 файлов с иерархией ошибок (актуально на 2026-02-11)    |
-| `filtering/`      | Фильтрация данных               | Конфигурации и логика фильтров                           |
-| `mapping/`        | Маппинг полей публикаций        | Publication field & type mappings                        |
-| `models/`         | Доменные модели                 | Filter & metadata models                                 |
-| `registry/`       | Реестр публикаций               | Publication registry                                     |
-| `schemas/`        | Pydantic/Pandera схемы          | 25 файлов для всех провайдеров (актуально на 2026-02-11) |
-| `services/`       | Доменные сервисы                | Нормализация, агрегация                                  |
-
-## 3. Принципы Работы
-
-- **Никакого I/O:** В этом слое запрещены любые операции, связанные с сетью, файловой системой или базами данных.
-- **Валидация данных:** Логика валидации бизнес-сущностей (например, проверка SMILES-строк) может находиться здесь, если
-  она не требует внешних зависимостей.
-- **Иммутабельность:** Предпочтение отдаётся иммутабельным структурам данных (например, `NamedTuple`,
-  `dataclasses(frozen=True)`).
-
-----------------------------------------------------------------------
+- Domain не выполняет I/O и не импортирует infrastructure/application/interfaces.
+- Между агрегатами взаимодействие строится через идентификаторы и доменные события, а не через инфраструктурные зависимости.
+- Value objects валидируют и нормализуют данные при создании.
+- Состояние агрегатов изменяется только через явные transition-методы.
 
 ## 4. Связанные Материалы
 
 ### Навигация по Слоям
 
-| ← Предыдущий | Текущий    | Следующий →                                  |
-|--------------|------------|----------------------------------------------|
-| —            | **Domain** | [Application Layer](02-application-layer.md) |
+| <- Предыдущий | Текущий | Следующий -> |
+|---|---|---|
+| - | **Domain** | [Application Layer](02-application-layer.md) |
 
-### Связанные Диаграммы
+### Связанные диаграммы
 
-| Диаграмма            | Файл                                                                                    | Описание                                          |
-|----------------------|-----------------------------------------------------------------------------------------|---------------------------------------------------|
-| Domain Layer Classes | [04-domain-layer-class-diagram.mermaid](mmd-diagrams/foundation/04-domain-layer-class-diagram.mmd) | Классы портов, сущностей, конфигурации            |
-| Domain DDD           | [08-domain-ddd.mermaid](mmd-diagrams/foundation/08-domain-ddd.mmd)                                 | DDD-структура домена                              |
-| Domain Models        | [13-domain-models-relationship.mermaid](mmd-diagrams/foundation/13-domain-models-relationship.mmd) | Связи доменных моделей                            |
-| DDD Aggregates       | [08-domain-ddd.mermaid](mmd-diagrams/foundation/08-domain-ddd.mmd)                                 | DDD агрегаты: Batch, PipelineRun, QuarantineEntry |
-| Ports Architecture   | [30-port-adapter-mapping.mermaid](mmd-diagrams/foundation/26-hexagonal-ports-adapters.mmd)             | Архитектура 28 портов                             |
+| Диаграмма | Файл | Описание |
+|---|---|---|
+| Domain Layer Classes | [04-domain-layer-class-diagram.mermaid](mmd-diagrams/foundation/04-domain-layer-class-diagram.mmd) | Порты, сущности, типы |
+| Domain DDD | [08-domain-ddd.mermaid](mmd-diagrams/foundation/08-domain-ddd.mmd) | Агрегаты и доменные события |
+| Domain Models | [13-domain-models-relationship.mermaid](mmd-diagrams/foundation/13-domain-models-relationship.mmd) | Связи доменных моделей |
+| Ports Architecture | [30-port-adapter-mapping.mermaid](mmd-diagrams/foundation/26-hexagonal-ports-adapters.mmd) | Карта портов и адаптеров |
 
 ### Связанные ADR
 
-| ADR                                                     | Тема                                        |
-|---------------------------------------------------------|---------------------------------------------|
-| [ADR-004](decisions/ADR-004-pydantic-vs-dataclasses.md) | Pydantic vs Dataclasses — выбор dataclasses |
-| [ADR-021](decisions/ADR-021-ddd-aggregates-adoption.md) | DDD Aggregates — внедрение агрегатов        |
+| ADR | Тема |
+|---|---|
+| [ADR-004](decisions/ADR-004-pydantic-vs-dataclasses.md) | Dataclasses/Pydantic в домене |
+| [ADR-014](decisions/ADR-014-deterministic-writes.md) | Детерминизм пайплайнов |
+| [ADR-017](decisions/ADR-017-observability-architecture.md) | Observability source of truth |
+| [ADR-021](decisions/ADR-021-ddd-aggregates-adoption.md) | Внедрение DDD-агрегатов |
 
-### Смежные Разделы Документации
+### Смежные разделы документации
 
-- [RULES.md §1 "Архитектура и Слои"](../00-project/RULES.md) — матрица импортов, правила слоёв
-- [API Reference: Domain](../04-reference/api/domain.md) — API документация слоя
-- [Glossary](../00-project/glossary.md) — терминология Ubiquitous Language
+- [RULES.md §1 "Архитектура и слои"](../00-project/RULES.md)
+- [API Reference: Domain](../04-reference/api/domain.md)
+- [Glossary](../00-project/glossary.md)

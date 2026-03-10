@@ -9,6 +9,9 @@ pipeline:
     business_primary_keys:
         - activity_id
     batch_size: 1000
+    sink:
+        silver:
+            mode: append
 schema:
     content_hash:
         include: [ ]

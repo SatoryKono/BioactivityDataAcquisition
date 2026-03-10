@@ -17,7 +17,6 @@ __all__ = [
     "TransformedRecord",
 ]
 
-import asyncio
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -79,11 +78,7 @@ class TransformedRecord:
 
 
 class BatchTransformer:
-    """Transforms Bronze records to Silver/Gold with error handling.
-
-    Handles Bronze→Silver transformation, Silver→Gold filtering,
-    error classification/quarantine, and DQ threshold checking.
-    """
+    """Transforms Bronze records to Silver/Gold with error handling and DQ checks."""
 
     def __init__(
         self,
@@ -141,10 +136,6 @@ class BatchTransformer:
         records_filtered_out = 0
 
         for index, raw_record in enumerate(records, start=start_index):
-            # Yield to event loop every 50 records so heartbeat can renew lock
-            if index > start_index and (index - start_index) % 50 == 0:
-                await asyncio.sleep(0)
-
             record_context = self._context.bind_logger(
                 batch_id=str(batch_id),
                 entity_id=raw_record.get("activity_id"),
@@ -353,10 +344,6 @@ class BatchTransformer:
         records_filtered_out = 0
 
         for i, raw_record in enumerate(records):
-            # Yield to event loop every 50 records so heartbeat can renew lock
-            if i > 0 and i % 50 == 0:
-                await asyncio.sleep(0)
-
             result = await self.transform_single(raw_record, batch_id, start_index + i)
 
             if result.is_quarantined:

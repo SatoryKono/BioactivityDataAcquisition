@@ -152,6 +152,22 @@ class StorageAdapterMaintenanceMixin:
 
         return total_archived
 
+    async def deduplicate_silver(
+        self,
+        table_name: str,
+        primary_keys: list[str],
+    ) -> int:
+        """Deduplicate Silver table by primary keys after append-mode writes.
+
+        Args:
+            table_name: Logical Silver table name.
+            primary_keys: Business key columns for deduplication.
+
+        Returns:
+            Number of duplicate rows removed.
+        """
+        return await self.silver.deduplicate_silver(table_name, primary_keys)
+
     async def cleanup_bronze(
         self,
         cutoff_date: datetime,

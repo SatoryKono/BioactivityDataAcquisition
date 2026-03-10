@@ -145,6 +145,25 @@ class SilverWriterMaintenanceMixin:
             timestamp=timestamp,
         )
 
+    async def deduplicate_silver(
+        self,
+        table_name: str,
+        primary_keys: list[str],
+    ) -> int:
+        """Deduplicate Silver table by primary keys after append-mode writes.
+
+        Args:
+            table_name: Logical table name to deduplicate.
+            primary_keys: Business key columns for deduplication.
+
+        Returns:
+            Number of duplicate rows removed.
+        """
+        return await self._retention_manager.deduplicate_silver(
+            table_name,
+            primary_keys=primary_keys,
+        )
+
     async def read_silver(
         self,
         table_name: str,

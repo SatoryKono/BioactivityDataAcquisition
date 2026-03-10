@@ -1,473 +1,177 @@
-# Observability Metrics Contract
+# BioETL Observability Specification (DD)
 
-Этот документ определяет обязательные метрики BioETL для Prometheus.
-Все метрики экспортируются через HTTP endpoint на порту 8000 (`/metrics`).
+Этот документ фиксирует **каноническую** спецификацию наблюдаемости BioETL по состоянию на **2026-03-10**.
 
-**Версия контракта:** 2.0.0
-**Дата:** 2026-02-21
-**RFC 2119 Keywords:** MUST, SHOULD, MAY
+- Статус: `active`
+- Версия: `3.0.0`
+- Scope: `logs + metrics + tracing + correlation + provider health`
+- Source of truth: код в `src/bioetl/**/observability*`, `src/bioetl/application/observability/*`, `src/bioetl/infrastructure/adapters/http/*`
 
----
+## 1. Verification Evidence
 
-## Соглашения об именовании
+Проверка выполнена по коду командами:
 
-Все метрики MUST следовать соглашениям:
+```bash
+rg --files src/bioetl/infrastructure/observability src/bioetl/composition/bootstrap src/bioetl/infrastructure/adapters/http docs grafana
+rg -n "observability|metrics|trace|X-Correlation-ID|provider_health|rate_limit|health_check" src/bioetl -g '*.py'
+sed -n '1,220p' src/bioetl/infrastructure/observability/logging_config.py
+sed -n '1,320p' src/bioetl/infrastructure/observability/unified_logger.py
+sed -n '1,320p' src/bioetl/infrastructure/observability/_metrics_defs_*.py
+sed -n '1,340p' src/bioetl/infrastructure/observability/prometheus_metrics.py
+sed -n '1,320p' src/bioetl/domain/types/enums.py
+sed -n '1,320p' src/bioetl/application/observability/observer.py
+sed -n '1,320p' src/bioetl/application/observability/observer_context_mixin.py
+sed -n '1,320p' src/bioetl/infrastructure/adapters/http/client_context_mixin.py
+sed -n '1,320p' configs/providers/{chembl,pubchem,pubmed,crossref,openalex,semanticscholar,uniprot}.yaml
+```
 
-| Правило | Пример |
-|---------|--------|
-| Префикс | `bioetl-` |
-| snake-case | `pipeline-duration-seconds` |
-| Единицы в суффиксе | `-seconds`, `-total`, `-bytes` |
+Ключевые пути:
 
----
+- `src/bioetl/infrastructure/observability/logging_config.py`
+- `src/bioetl/infrastructure/observability/unified_logger.py`
+- `src/bioetl/infrastructure/observability/_metrics_defs_*.py`
+- `src/bioetl/infrastructure/observability/prometheus_metrics.py`
+- `src/bioetl/domain/types/enums.py`
+- `src/bioetl/application/observability/observer.py`
+- `src/bioetl/infrastructure/adapters/http/client_context_mixin.py`
 
-## Pipeline Metrics (MUST)
+## 2. Canonical Conventions
 
-Эти метрики MUST экспортироваться для каждого запуска пайплайна.
+### 2.1 Metric naming
 
-### bioetl-pipeline-duration-seconds
+- Prefix: `bioetl_`
+- Case: `snake_case`
+- Counters: suffix `_total`
+- Units in name: `_seconds`, `_ms`, `_bytes`, `_records`
+- Prometheus exposition endpoint: `http://localhost:${BIOETL_METRICS_PORT:-8000}/metrics`
 
-| Свойство | Значение |
-|----------|----------|
-| Тип | Histogram |
-| Описание | Длительность выполнения этапов пайплайна |
-| Labels | `pipeline`, `stage`, `status`, `run-type` |
+Важно: `kebab-case` вида `bioetl-pipeline-duration-seconds` считается legacy и неканоничным.
 
-**Labels:**
-- `pipeline`: Имя пайплайна (e.g., `chembl_activity`)
-- `stage`: Этап (`fetch`, `transform`, `write-bronze`, `write-silver`, `write-gold`)
-- `status`: Результат (`success`, `failure`, `timeout`)
-- `run-type`: Тип запуска (`incremental`, `backfill`, `rebuild`)
+### 2.2 Logging schema
 
-### bioetl-records-processed-total
+`UnifiedLogger` обеспечивает обязательные поля контекста:
 
-| Свойство | Значение |
-|----------|----------|
-| Тип | Counter |
-| Описание | Общее количество обработанных записей |
-| Labels | `pipeline`, `stage`, `run-type` |
+- `run_id`
+- `pipeline`
+- `stage` (default: `init`)
 
-**Labels:**
-- `stage`: Слой данных (`bronze`, `silver`, `gold`, `quarantined`)
+Поля записи:
 
-### bioetl-errors-total
+- `event` (первый positional аргумент логгера)
+- `level`
+- время: фактически сейчас выводится `timestamp` (через `structlog.processors.TimeStamper(fmt="iso")`)
 
-| Свойство | Значение |
-|----------|----------|
-| Тип | Counter |
-| Описание | Общее количество ошибок |
-| Labels | `pipeline`, `stage`, `error-code` |
+Правило совместимости:
 
-**Labels:**
-- `error-code`: Код ошибки (e.g., `RATE-LIMIT`, `SCHEMA-VIOLATION`, `API-ERROR`)
+- Каноническое runtime-поле времени: `timestamp`
+- Переходный alias `ts` допустим только на уровне downstream-нормализации
 
-### bioetl-batch-size-records
+### 2.3 Correlation
 
-| Свойство | Значение |
-|----------|----------|
-| Тип | Histogram |
-| Описание | Распределение размеров батчей |
-| Labels | `pipeline`, `stage` |
-| Buckets | `[100, 500, 1000, 5000, 10000, 50000]` |
+- Сквозной correlation ID: `run_id`
+- HTTP клиент добавляет заголовок `X-Correlation-ID: <run_id>` при наличии `run_id`
+- Tracing span attributes включают `bioetl.run_id`
 
----
+## 3. Runtime Metrics Contract
 
-## Data Quality Metrics (MUST)
+Полный каталог метрик задаётся в `src/bioetl/infrastructure/observability/_metrics_defs_*.py` и экспортируется через `metrics_definitions.py`.
 
-### bioetl-dq-records-quarantined-total
+Текущий размер каталога: **68** метрик (`metrics_export_names.py`).
 
-| Свойство | Значение |
-|----------|----------|
-| Тип | Counter |
-| Описание | Записи, отправленные в карантин |
-| Labels | `pipeline`, `error-type`, `run-type` |
+Ниже обязательное ядро (MUST для мониторинга запусков):
 
-**Labels:**
-- `error-type`: Тип ошибки качества (`invalid-smiles`, `missing-field`, `schema-violation`)
+| Metric | Type | Labels | Notes |
+|---|---|---|---|
+| `bioetl_pipeline_runs_total` | Counter | `pipeline,run_type,status` | `status` в коде: `success`, `failed`, `shutdown` |
+| `bioetl_pipeline_duration_seconds` | Histogram | `pipeline,stage,status,run_type` | Длительности run/stage |
+| `bioetl_phase_duration_seconds` | Histogram | `pipeline,phase,status` | Lifecycle-фазы |
+| `bioetl_records_processed_total` | Counter | `pipeline,stage,run_type` | throughput |
+| `bioetl_errors_total` | Counter | `pipeline,stage,error_code` | taxonomy входа |
+| `bioetl_http_request_duration_seconds` | Histogram | `provider,method,status` | HTTP latency |
+| `bioetl_http_request_errors_total` | Counter | `provider,method,error_type` | HTTP errors |
+| `bioetl_data_source_retry_exhausted_total` | Counter | `provider,operation` | exhausted retries |
+| `bioetl_provider_health_status` | Gauge | `provider` | см. mapping ниже |
+| `bioetl_circuit_breaker_state` | Gauge | `adapter` | 0/1/2 mapping |
+| `bioetl_dq_validation_score` | Gauge | `pipeline,entity` | 0..1 |
+| `bioetl_data_freshness_seconds` | Gauge | `pipeline,entity` | unix ts последнего успеха |
 
----
+### 3.1 Enum mappings
 
-## Input Filter Metrics (SHOULD)
+Канонические mapping из кода:
 
-### bioetl-filter-ids-loaded-total
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Counter |
-| Описание | Уникальные ID загруженные из фильтра |
-| Labels | `pipeline`, `source-file` |
-
-### bioetl-filter-ids-duplicates-total
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Counter |
-| Описание | Дубликаты ID в источнике фильтра |
-| Labels | `pipeline`, `source-file` |
-
----
-
-## Circuit Breaker Metrics (MUST per ADR-007)
-
-Метрики для мониторинга состояния Circuit Breaker (см. ADR-007).
-
-### bioetl-circuit-breaker-state
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Gauge |
-| Описание | Текущее состояние Circuit Breaker |
-| Labels | `adapter` |
-| Значения | `0` = closed, `1` = half-open, `2` = open |
-
-### bioetl-circuit-breaker-trips-total
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Counter |
-| Описание | Количество срабатываний (transitions to open) |
-| Labels | `adapter` |
-
-### bioetl-circuit-breaker-success-total
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Counter |
-| Описание | Успешные вызовы через Circuit Breaker |
-| Labels | `adapter` |
-
-### bioetl-circuit-breaker-failure-total
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Counter |
-| Описание | Неуспешные вызовы через Circuit Breaker |
-| Labels | `adapter` |
-
----
-
-## Storage Metrics (SHOULD)
-
-### bioetl-vacuum-files-removed-total
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Counter |
-| Описание | Файлы, удалённые операциями VACUUM |
-| Labels | `table`, `layer` |
-
-### bioetl-vacuum-duration-seconds
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Histogram |
-| Описание | Длительность операций VACUUM |
-| Labels | `table` |
-
-### bioetl-storage-optimization-total
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Counter |
-| Описание | Операции оптимизации storage |
-| Labels | `pipeline`, `status` |
-
-### bioetl-bronze-write-duration-seconds
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Histogram |
-| Описание | Длительность записи в Bronze |
-| Labels | `provider`, `entity` |
-
-### bioetl-bronze-records-written-total
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Counter |
-| Описание | Записи, записанные в Bronze |
-| Labels | `provider`, `entity` |
-
-### bioetl-bronze-bytes-written-total
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Counter |
-| Описание | Байты, записанные в Bronze (сжатые) |
-| Labels | `provider`, `entity` |
-
-### bioetl-policy-violations-total
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Counter |
-| Описание | Нарушения политик записи |
-| Labels | `layer`, `mode` |
-
-### bioetl-silver-validation-failures-total
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Counter |
-| Описание | Ошибки валидации Silver-схемы |
-| Labels | `table` |
-
----
-
-## Health Check Metrics (MAY)
-
-### bioetl-health_check-duration-seconds
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Histogram |
-| Описание | Длительность health check адаптеров |
-| Labels | `adapter` |
-
-### bioetl-health_check-status
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Gauge |
-| Описание | Статус health check |
-| Labels | `adapter` |
-| Значения | `0` = unhealthy, `1` = healthy |
-
----
-
-## Pipeline Lifecycle Metrics (MUST)
-
-### bioetl-pipeline-runs-total
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Counter |
-| Описание | Общее количество запусков пайплайна |
-| Labels | `pipeline`, `run-type`, `status` |
-
-### bioetl-phase-duration-seconds
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Histogram |
-| Описание | Длительность фаз lifecycle (preflight, execution, postrun, cleanup) |
-| Labels | `pipeline`, `phase`, `status` |
-
----
-
-## Transformer Metrics (SHOULD)
-
-### bioetl-transform-duration-seconds
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Histogram |
-| Описание | Длительность трансформации данных |
-| Labels | `provider`, `entity-type` |
-
-### bioetl-transform-errors-total
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Counter |
-| Описание | Ошибки трансформации |
-| Labels | `provider`, `entity-type`, `error-type` |
-
----
-
-## DQ Additional Metrics (SHOULD)
-
-### bioetl-dq-validation-score
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Gauge |
-| Описание | Оценка валидности данных (0.0-1.0) |
-| Labels | `pipeline`, `entity` |
-
-### bioetl-dq-soft-threshold-exceeded
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Counter |
-| Описание | Превышения soft DQ threshold |
-| Labels | `pipeline` |
-
-### bioetl-dq-check-duration-ms
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Histogram |
-| Описание | Длительность DQ-проверок (мс) |
-| Labels | `pipeline` |
-
-### bioetl-data-freshness-seconds
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Gauge |
-| Описание | Timestamp последнего успешного ingestion |
-| Labels | `pipeline`, `entity` |
-
----
-
-## Preflight Metrics (SHOULD)
-
-### bioetl-preflight-medallion-policy-valid
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Gauge |
-| Описание | Валидность medallion policy (1=valid, 0=invalid) |
-| Labels | `pipeline`, `run-id` |
-
-### bioetl-preflight-config-errors-total
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Gauge |
-| Описание | Ошибки конфигурации при preflight |
-| Labels | `pipeline`, `run-id` |
-
----
-
-## Adapter / HTTP Metrics (SHOULD)
-
-### bioetl-adapter-request-duration-seconds
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Histogram |
-| Описание | Длительность API-запросов адаптера |
-| Labels | `provider`, `endpoint` |
-
-### bioetl-adapter-requests-total
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Counter |
-| Описание | Общее количество API-запросов |
-| Labels | `provider`, `endpoint`, `status` |
-
-### bioetl-http-request-duration-seconds
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Histogram |
-| Описание | Длительность HTTP-запросов |
-| Labels | `provider`, `method`, `status` |
-
-### bioetl-http-retries-total
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Counter |
-| Описание | HTTP retry-попытки |
-| Labels | `provider`, `method` |
-
-### bioetl-http-request-errors-total
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Counter |
-| Описание | Ошибки HTTP-запросов |
-| Labels | `provider`, `method`, `error-type` |
-
-### bioetl-adapter-dropped-duplicates-total
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Counter |
-| Описание | Дупликаты, отброшенные адаптером |
-| Labels | `provider`, `entity-type` |
-
-### bioetl-data-source-retries-total
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Counter |
-| Описание | Retry-попытки data source |
-| Labels | `provider`, `operation` |
-
-### bioetl-data-source-retry-exhausted-total
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Counter |
-| Описание | Исчерпание retry data source |
-| Labels | `provider`, `operation` |
-
----
-
-## Rate Limiter Metrics (MAY)
-
-### bioetl-rate-limiter-tokens-available
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Gauge |
-| Описание | Доступные токены rate limiter |
-| Labels | `provider` |
-
-### bioetl-rate-limiter-wait-seconds
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Histogram |
-| Описание | Время ожидания rate limiter |
-| Labels | `provider` |
-
----
-
-## Shutdown Metrics (SHOULD)
-
-### bioetl-shutdown-initiated
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Counter |
-| Описание | Инициации graceful shutdown |
-| Labels | `reason` |
-
-### bioetl-shutdown-completed
-
-| Свойство | Значение |
-|----------|----------|
-| Тип | Counter |
-| Описание | Завершения graceful shutdown |
-| Labels | `reason` |
-
----
-
-## Alerting Thresholds
-
-Рекомендуемые пороги для алертов:
-
-| Метрика | Условие | Severity |
-|---------|---------|----------|
-| `bioetl-circuit-breaker-state == 2` | > 5 min | Critical |
-| `bioetl-errors-total` rate | > 10/min | Warning |
-| `bioetl-dq-records-quarantined-total` rate | > 5% of processed | Warning |
-| `bioetl-pipeline-duration-seconds` | > 95th percentile + 50% | Warning |
-
----
-
-## Grafana Dashboard UID
-
-При создании дашбордов использовать UID: `bioetl-pipeline-metrics`
-
----
-
-## Changelog
-
-### v2.0.0 (2026-02-21)
-- Added 30+ new metrics: Pipeline Lifecycle, Transformer, Adapter/HTTP, Rate Limiter, Bronze/Silver, Preflight, Shutdown
-- Fixed CB state values: `0.5=half-open` → `1=half-open`, `1=open` → `2=open`
-- Fixed vacuum labels: `pipeline, layer` → `table, layer`
-- Fixed alerting threshold: `== 1` → `== 2` for open CB state
-- Expanded Storage section with Bronze/Silver metrics
-
-### v1.0.0 (2024-12-24)
-- Initial contract definition
-- Added Circuit Breaker metrics per ADR-007
-- Defined MUST/SHOULD/MAY categories
+- `HealthStatus.to_metric_value()` (`src/bioetl/domain/types/enums.py`):
+  - `UNHEALTHY -> 0`
+  - `DEGRADED -> 1`
+  - `HEALTHY -> 2`
+- `CircuitBreakerState.to_metric_value()`:
+  - `CLOSED -> 0`
+  - `HALF_OPEN -> 1`
+  - `OPEN -> 2`
+
+## 4. Tracing Contract
+
+- По умолчанию: `NoOpTracing` (tracing disabled)
+- При `BIOETL_OBSERVABILITY__TRACING_ENABLED=true`: `OpenTelemetryTracer`
+- Exporter:
+  - OTLP exporter при установленном OTLP пакете
+  - fallback: Console exporter
+
+Текущее состояние:
+
+- Спаны создаются на pipeline и HTTP-операциях
+- Автоматическая инъекция `trace_id/span_id` в structlog-записи в коде не реализована
+- Требуется отдельная задача, если нужна жёсткая log-trace корреляция через поля `trace_id`, `span_id`
+
+## 5. Provider Rate-Limit Baseline (as configured)
+
+Значения ниже берутся из `configs/providers/*.yaml` и отражают **текущую конфигурацию репозитория**, не внешние SLA провайдеров.
+
+| Provider | Base RPS | Burst | API-key override |
+|---|---:|---:|---|
+| chembl | 3 | 10 | - |
+| pubchem | 5.0 | 10 | - |
+| pubmed | 3.0 | 5 | `10 / 20` |
+| crossref | 50 | 100 | polite pool flag |
+| openalex | 10 | 20 | polite pool flag |
+| semanticscholar | 0.1 | 1 | `1.0 / 5` |
+| uniprot | 10.0 | 20 | `100 / 200` |
+
+## 6. Alert Threshold Baseline
+
+Рекомендуемая минимальная таблица (runbook links локальные):
+
+| Metric | Condition | Severity | Runbook |
+|---|---|---|---|
+| `bioetl_pipeline_runs_total{status="failed"}` | `increase(...) > 0` за `15m` | P1 | `docs/05-operations/runbooks/pipeline-failure-critical.md` |
+| `bioetl_pipeline_health_check_passed` | `== 0` за `5m` | P1 | `docs/05-operations/runbooks/pipeline-failure-critical.md` |
+| `bioetl_provider_health_status` | `== 0` за `5m` | P2 | `docs/05-operations/runbooks/incident-response.md` |
+| `bioetl_circuit_breaker_state` | `== 2` за `5m` | P2 | `docs/05-operations/runbooks/incident-response.md` |
+| `bioetl_dq_validation_score` | `< 0.80` на запуск | P2 | `docs/05-operations/runbooks/pipeline-failure-dq.md` |
+| `bioetl_data_source_retry_exhausted_total` | `increase(...) > 0` за `1h` | P2 | `docs/05-operations/runbooks/incident-response.md` |
+| `bioetl_rate_limiter_wait_seconds` | `histogram_quantile(0.95, ...) > 1` за `10m` | P3 | `docs/05-operations/runbooks/observability-checklist.md` |
+
+## 7. Error Taxonomy (domain canonical)
+
+Коды ошибок из `ErrorType` (`src/bioetl/domain/types/enums.py`):
+
+- Critical: `AUTH_FAILURE`, `DB_UNAVAILABLE`, `SCHEMA_MISMATCH_GOLD`, `SCHEMA_EVOLUTION`, `LOCK_LOST`
+- Recoverable: `RATE_LIMIT`, `TIMEOUT`, `NETWORK_ERROR`
+- Data quality: `SCHEMA_VIOLATION`, `INVALID_DATA`, `MISSING_REQUIRED_FIELD`, `DATA_QUALITY`
+
+## 8. Known Drifts and Required Follow-ups
+
+| ID | Severity | Drift | Evidence |
+|---|---|---|---|
+| OBS-001 | HIGH | Часть docs использует `bioetl-...` вместо `bioetl_...` | `docs/02-architecture/observability-layers.md`, `docs/05-operations/runbooks/observability-checklist.md` |
+| OBS-002 | HIGH | `provider_health_status` docstring в `_metrics_defs_adapter.py` противоречит enum mapping | `src/bioetl/infrastructure/observability/_metrics_defs_adapter.py`, `src/bioetl/domain/types/enums.py` |
+| OBS-003 | MEDIUM | `ts` в текстах, но runtime выводит `timestamp` | `logging_config.py` vs doc/comments |
+| OBS-004 | MEDIUM | `run_id` присутствует в label у preflight/infra gauge (высокая кардинальность) | `_metrics_defs_health.py` |
+| OBS-005 | MEDIUM | Нет явной log-trace корреляции (`trace_id/span_id`) в structlog pipeline | `tracing.py`, `logging_config.py` |
+
+## 9. Definition of Done for observability doc sync
+
+- Все спецификации/чеклисты используют `bioetl_...` naming
+- Во всех docs используется `run_id` (не `run-id`)
+- Mapping для `provider_health_status` совпадает с `HealthStatus.to_metric_value()`
+- Поле времени в лог-схеме описано как `timestamp` (или явно как dual-mode `timestamp/ts`)
+- Алерты используют реальные `status` (`failed`, `success`, `shutdown`) из runtime

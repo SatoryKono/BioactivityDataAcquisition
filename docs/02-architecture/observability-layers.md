@@ -33,21 +33,21 @@ sequenceDiagram
 
     App->>Obs: enter()
     Obs->>Port: increment-counter(started)
-    Port->>Infra: INC bioetl-pipeline-runs-total
+    Port->>Infra: INC bioetl_pipeline_runs_total
 
     App->>App: process-batch()
 
     App->>Obs: exit(success)
     Obs->>Port: observe-histogram(duration)
-    Port->>Infra: OBS bioetl-pipeline-duration-seconds
+    Port->>Infra: OBS bioetl_pipeline_duration_seconds
 ```
 
 ## Metrics Standards
 
 All metrics MUST follow these naming conventions:
 
-*   Prefix: `bioetl-` (underscores in Prometheus, hyphens in documentation)
-*   Common Labels: `pipeline`, `run-type`, `stage`, `provider`, `adapter`
-*   **47 metrics** registered across 12 categories: Pipeline Core, Pipeline Lifecycle, Circuit Breaker, Data Quality, Health Checks, Preflight, Transformer, Storage (Bronze/Silver/VACUUM), Adapter/HTTP, Rate Limiter, Shutdown, Input Filters
+*   Prefix: `bioetl_`
+*   Common Labels: `pipeline`, `run_type`, `stage`, `provider`, `adapter`
+*   Current registry size: **68 metrics** (see `src/bioetl/infrastructure/observability/metrics_export_names.py`)
 
-See `docs/04-reference/contracts/observability.md` for the full catalog (v2.0.0).
+See `docs/04-reference/contracts/observability.md` for the current canonical contract (v3.0.0).
