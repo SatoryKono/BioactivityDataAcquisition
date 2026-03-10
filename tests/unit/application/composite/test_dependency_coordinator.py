@@ -16,11 +16,28 @@ import pytest
 from bioetl.application.composite.dependency_coordinator import (
     DependencyCoordinatorService,
 )
+from bioetl.application.composite.dependency_key_resolvers import (
+    ChainedKeyResolver,
+    SeedKeyResolver,
+)
 from bioetl.domain.composite.config import DependencyConfig
 from bioetl.domain.composite.result import DependencyResult, DependencyStatus
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import DeltaReaderPort, LoggerPort
+
+
+def _make_coordinator(
+    logger: LoggerPort,
+    delta_reader: DeltaReaderPort | None = None,
+) -> DependencyCoordinatorService:
+    """Build coordinator with explicit resolver injection for tests."""
+    return DependencyCoordinatorService(
+        logger=logger,
+        seed_key_resolver=SeedKeyResolver(logger),
+        chained_key_resolver=ChainedKeyResolver(logger),
+        delta_reader=delta_reader,
+    )
 
 
 @pytest.fixture
@@ -63,10 +80,7 @@ class TestGetEffectiveKeys:
         seed_keys: pl.DataFrame,
     ) -> None:
         """Standard dependency (uses_seed_keys=True) should return seed keys."""
-        coordinator = DependencyCoordinatorService(
-            logger=mock_logger,
-            delta_reader=mock_delta_reader,
-        )
+        coordinator = _make_coordinator(mock_logger, mock_delta_reader)
 
         config = DependencyConfig(
             pipeline="chembl_target_component",
@@ -99,10 +113,7 @@ class TestGetEffectiveKeys:
         )
         mock_delta_reader.read_table.return_value = source_data
 
-        coordinator = DependencyCoordinatorService(
-            logger=mock_logger,
-            delta_reader=mock_delta_reader,
-        )
+        coordinator = _make_coordinator(mock_logger, mock_delta_reader)
 
         source_config = DependencyConfig(
             pipeline="chembl_target_component",
@@ -152,10 +163,7 @@ class TestGetEffectiveKeys:
         )
         mock_delta_reader.read_table.return_value = source_data
 
-        coordinator = DependencyCoordinatorService(
-            logger=mock_logger,
-            delta_reader=mock_delta_reader,
-        )
+        coordinator = _make_coordinator(mock_logger, mock_delta_reader)
 
         source_config = DependencyConfig(
             pipeline="chembl_target_component",
@@ -186,10 +194,7 @@ class TestGetEffectiveKeys:
         seed_keys: pl.DataFrame,
     ) -> None:
         """Chained dependency should raise if no delta_reader."""
-        coordinator = DependencyCoordinatorService(
-            logger=mock_logger,
-            delta_reader=None,  # No reader!
-        )
+        coordinator = _make_coordinator(mock_logger, None)  # No reader!
 
         chained_config = DependencyConfig(
             pipeline="chembl_protein_class",
@@ -212,10 +217,7 @@ class TestGetEffectiveKeys:
         seed_keys: pl.DataFrame,
     ) -> None:
         """Chained dependency should raise if key_source not found."""
-        coordinator = DependencyCoordinatorService(
-            logger=mock_logger,
-            delta_reader=mock_delta_reader,
-        )
+        coordinator = _make_coordinator(mock_logger, mock_delta_reader)
 
         chained_config = DependencyConfig(
             pipeline="chembl_protein_class",
@@ -240,10 +242,7 @@ class TestGetEffectiveKeys:
         """Chained dependency should fallback to seed if table not found (first run)."""
         mock_delta_reader.read_table.side_effect = FileNotFoundError("Table not found")
 
-        coordinator = DependencyCoordinatorService(
-            logger=mock_logger,
-            delta_reader=mock_delta_reader,
-        )
+        coordinator = _make_coordinator(mock_logger, mock_delta_reader)
 
         source_config = DependencyConfig(
             pipeline="chembl_target_component",
@@ -285,10 +284,7 @@ class TestGetEffectiveKeys:
             }
         )
 
-        coordinator = DependencyCoordinatorService(
-            logger=mock_logger,
-            delta_reader=mock_delta_reader,
-        )
+        coordinator = _make_coordinator(mock_logger, mock_delta_reader)
 
         source_config = DependencyConfig(
             pipeline="chembl_target_component",
@@ -325,10 +321,7 @@ class TestGetEffectiveKeys:
         """Chained dependency should raise on unexpected errors (not silent fallback)."""
         mock_delta_reader.read_table.side_effect = RuntimeError("Unexpected error")
 
-        coordinator = DependencyCoordinatorService(
-            logger=mock_logger,
-            delta_reader=mock_delta_reader,
-        )
+        coordinator = _make_coordinator(mock_logger, mock_delta_reader)
 
         source_config = DependencyConfig(
             pipeline="chembl_target_component",
@@ -366,7 +359,7 @@ class TestDependencyExecution:
         mock_logger: LoggerPort,
         seed_keys: pl.DataFrame,
     ) -> None:
-        coordinator = DependencyCoordinatorService(logger=mock_logger)
+        coordinator = _make_coordinator(mock_logger)
 
         result = await coordinator.run_dependencies(
             keys=seed_keys,
@@ -384,7 +377,7 @@ class TestDependencyExecution:
         mock_logger: LoggerPort,
         seed_keys: pl.DataFrame,
     ) -> None:
-        coordinator = DependencyCoordinatorService(logger=mock_logger)
+        coordinator = _make_coordinator(mock_logger)
         dependency = DependencyConfig(
             pipeline="chembl_publication_term",
             join_keys=("document_chembl_id",),
@@ -409,7 +402,7 @@ class TestDependencyExecution:
         seed_keys: pl.DataFrame,
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
-        coordinator = DependencyCoordinatorService(logger=mock_logger)
+        coordinator = _make_coordinator(mock_logger)
         dep_a = DependencyConfig(
             pipeline="chembl_publication_term",
             join_keys=("document_chembl_id",),
@@ -451,7 +444,7 @@ class TestDependencyExecution:
         mock_logger: LoggerPort,
         seed_keys: pl.DataFrame,
     ) -> None:
-        coordinator = DependencyCoordinatorService(logger=mock_logger)
+        coordinator = _make_coordinator(mock_logger)
         dependency = DependencyConfig(
             pipeline="chembl_publication_term",
             join_keys=("document_chembl_id",),
@@ -481,7 +474,7 @@ class TestDependencyExecution:
         seed_keys: pl.DataFrame,
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
-        coordinator = DependencyCoordinatorService(logger=mock_logger)
+        coordinator = _make_coordinator(mock_logger)
         dependency = DependencyConfig(
             pipeline="chembl_publication_term",
             join_keys=("document_chembl_id",),
@@ -516,7 +509,7 @@ class TestDependencyExecution:
         mock_logger: LoggerPort,
         seed_keys: pl.DataFrame,
     ) -> None:
-        coordinator = DependencyCoordinatorService(logger=mock_logger)
+        coordinator = _make_coordinator(mock_logger)
         dependency = DependencyConfig(
             pipeline="chembl_publication_term",
             join_keys=("document_chembl_id",),
@@ -542,7 +535,7 @@ class TestDependencyExecution:
         mock_logger: LoggerPort,
         seed_keys: pl.DataFrame,
     ) -> None:
-        coordinator = DependencyCoordinatorService(logger=mock_logger)
+        coordinator = _make_coordinator(mock_logger)
         dependency = DependencyConfig(
             pipeline="chembl_publication_term",
             join_keys=("document_chembl_id",),

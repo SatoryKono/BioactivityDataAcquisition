@@ -682,7 +682,9 @@ class TestStorageAdapterVacuum:
 
         # Create mock path that exists for silver but not gold
         silver_path = tmp_path / "silver" / "chembl_activity"
-        silver_path.mkdir(parents=True)
+        delta_log = silver_path / "_delta_log"
+        delta_log.mkdir(parents=True)
+        (delta_log / "00000000000000000000.json").write_text("{}", encoding="utf-8")
         gold_path = tmp_path / "gold" / "chembl_activity"
         # Don't create gold_path so it doesn't exist
 

@@ -9,15 +9,20 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from pathlib import Path
+from types import SimpleNamespace
 from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.application.core.postrun_service import PostrunService
+from bioetl.application.core.batch_executor import BatchExecutor
+from bioetl.application.core.batch_processing_service import BatchProcessingOutput
 from bioetl.application.services.dq_report_service import (
     DQReportContext,
     DQReportResult,
+)
+from tests.unit.application.core.postrun_test_support import (
+    build_test_postrun_service as _make_postrun_service,
 )
 from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 
@@ -146,7 +151,6 @@ def mock_context() -> MagicMock:
     context.started_at = datetime.now(UTC)
     return context
 
-
 @pytest.mark.unit
 class TestPostrunServiceDQReports:
     """Tests for DQ report generation in PostrunService."""
@@ -165,14 +169,13 @@ class TestPostrunServiceDQReports:
         sample_dq_context: DQReportContext,
     ) -> None:
         """DQ reports should be generated when service is available."""
-        service = PostrunService(
+        service = _make_postrun_service(
             config=mock_pipeline_config,
             runtime=mock_runtime_config,
             context=mock_context,
             dq_service=mock_dq_service,
             lifecycle_service=mock_lifecycle_service,
             storage=mock_storage,
-            metrics=None,
             logger=mock_logger,
             dq_report_service=mock_dq_report_service,
         )
@@ -192,21 +195,22 @@ class TestPostrunServiceDQReports:
         self,
         mock_pipeline_config: MagicMock,
         mock_runtime_config: MagicMock,
+        mock_context: MagicMock,
         mock_dq_service: MagicMock,
         mock_lifecycle_service: MagicMock,
+        mock_storage: MagicMock,
         mock_logger: LoggerPort,
         mock_dq_report_service: MagicMock,
         mock_executor: MagicMock,
     ) -> None:
         """DQ reports should be skipped when no context provided."""
-        service = PostrunService(
+        service = _make_postrun_service(
             config=mock_pipeline_config,
             runtime=mock_runtime_config,
             context=mock_context,
             dq_service=mock_dq_service,
             lifecycle_service=mock_lifecycle_service,
             storage=mock_storage,
-            metrics=None,
             logger=mock_logger,
             dq_report_service=mock_dq_report_service,
         )
@@ -223,23 +227,24 @@ class TestPostrunServiceDQReports:
         self,
         mock_pipeline_config: MagicMock,
         mock_runtime_config: MagicMock,
+        mock_context: MagicMock,
         mock_dq_service: MagicMock,
         mock_lifecycle_service: MagicMock,
+        mock_storage: MagicMock,
         mock_logger: LoggerPort,
         mock_executor: MagicMock,
         sample_dq_context: DQReportContext,
     ) -> None:
         """DQ reports should be skipped when service not available."""
-        service = PostrunService(
+        service = _make_postrun_service(
             config=mock_pipeline_config,
             runtime=mock_runtime_config,
             context=mock_context,
             dq_service=mock_dq_service,
             lifecycle_service=mock_lifecycle_service,
             storage=mock_storage,
-            metrics=None,
             logger=mock_logger,
-            dq_report_service=None,  # No service
+            dq_report_service=None,
         )
 
         result = await service.run(
@@ -253,8 +258,10 @@ class TestPostrunServiceDQReports:
         self,
         mock_pipeline_config: MagicMock,
         mock_runtime_config: MagicMock,
+        mock_context: MagicMock,
         mock_dq_service: MagicMock,
         mock_lifecycle_service: MagicMock,
+        mock_storage: MagicMock,
         mock_logger: LoggerPort,
         mock_executor: MagicMock,
         sample_dq_context: DQReportContext,
@@ -265,14 +272,13 @@ class TestPostrunServiceDQReports:
             side_effect=RuntimeError("Report generation failed")
         )
 
-        service = PostrunService(
+        service = _make_postrun_service(
             config=mock_pipeline_config,
             runtime=mock_runtime_config,
             context=mock_context,
             dq_service=mock_dq_service,
             lifecycle_service=mock_lifecycle_service,
             storage=mock_storage,
-            metrics=None,
             logger=mock_logger,
             dq_report_service=mock_dq_report_service,
         )
@@ -292,8 +298,10 @@ class TestPostrunServiceDQReports:
         self,
         mock_pipeline_config: MagicMock,
         mock_runtime_config: MagicMock,
+        mock_context: MagicMock,
         mock_dq_service: MagicMock,
         mock_lifecycle_service: MagicMock,
+        mock_storage: MagicMock,
         mock_logger: LoggerPort,
         mock_dq_report_service: MagicMock,
         mock_executor: MagicMock,
@@ -306,14 +314,13 @@ class TestPostrunServiceDQReports:
         silver_config.enabled = True
         gold_config = None
 
-        service = PostrunService(
+        service = _make_postrun_service(
             config=mock_pipeline_config,
             runtime=mock_runtime_config,
             context=mock_context,
             dq_service=mock_dq_service,
             lifecycle_service=mock_lifecycle_service,
             storage=mock_storage,
-            metrics=None,
             logger=mock_logger,
             dq_report_service=mock_dq_report_service,
             bronze_dq_config=bronze_config,
@@ -339,20 +346,56 @@ class TestPostrunServiceDQReports:
 class TestBatchExecutorDQCollection:
     """Tests for DQ data collection in BatchExecutor."""
 
+    @staticmethod
+    def _make_executor(*, dq_report_service: object | None) -> BatchExecutor:
+        """Build a minimal concrete BatchExecutor with DQ-related dependencies."""
+        services = SimpleNamespace(
+            dq_report_service=dq_report_service,
+            dq_monitor=MagicMock(),
+            metrics=MagicMock(),
+            logger=MagicMock(),
+        )
+        config = SimpleNamespace(
+            dq_config=None,
+            table_config=SimpleNamespace(
+                primary_keys=["activity_id"],
+                silver_table="chembl_activity",
+                gold_table="chembl_activity_gold",
+            ),
+            entity_type="activity",
+            pipeline_name="chembl_activity",
+            provider="chembl",
+            bronze_output_path="bronze/path",
+            silver_output_path="silver/path",
+            gold_output_path="gold/path",
+            flat_structure=False,
+        )
+        context = SimpleNamespace(run_id="run-123")
+        batch_processing_service = MagicMock()
+
+        return BatchExecutor(
+            services=services,
+            context=context,
+            config=config,
+            checkpoint_manager=MagicMock(),
+            shutdown_signal=MagicMock(),
+            batch_metrics=MagicMock(),
+            transformer=MagicMock(),
+            writer=MagicMock(),
+            tracing_manager=MagicMock(),
+            memory_manager=MagicMock(),
+            progress_service=MagicMock(),
+            checkpoint_recovery_service=MagicMock(),
+            batch_processing_service=batch_processing_service,
+            batch_id_factory=MagicMock(),
+            logger=MagicMock(),
+        )
+
     def test_should_collect_dq_data_returns_true_when_service_available(
         self,
     ) -> None:
         """_should_collect_dq_data returns True when dq_report_service is set."""
-        # Create mock services with dq_report_service
-        services = MagicMock()
-        services.dq_report_service = MagicMock()
-
-        # Create executor (partial mock)
-        executor = MagicMock()
-        executor._services = services
-        executor._should_collect_dq_data = lambda: (
-            executor._services.dq_report_service is not None
-        )
+        executor = self._make_executor(dq_report_service=MagicMock())
 
         assert executor._should_collect_dq_data() is True
 
@@ -360,14 +403,7 @@ class TestBatchExecutorDQCollection:
         self,
     ) -> None:
         """_should_collect_dq_data returns False when dq_report_service is None."""
-        services = MagicMock()
-        services.dq_report_service = None
-
-        executor = MagicMock()
-        executor._services = services
-        executor._should_collect_dq_data = lambda: (
-            executor._services.dq_report_service is not None
-        )
+        executor = self._make_executor(dq_report_service=None)
 
         assert executor._should_collect_dq_data() is False
 
@@ -375,19 +411,61 @@ class TestBatchExecutorDQCollection:
         self,
     ) -> None:
         """get_dq_context returns None when DQ collection is disabled."""
-        services = MagicMock()
-        services.dq_report_service = None
-
-        executor = MagicMock()
-        executor._services = services
-        executor._should_collect_dq_data = lambda: (
-            executor._services.dq_report_service is not None
-        )
-        executor.get_dq_context = lambda: (
-            None if not executor._should_collect_dq_data() else MagicMock()
-        )
+        executor = self._make_executor(dq_report_service=None)
 
         assert executor.get_dq_context() is None
+
+    def test_get_dq_context_returns_context_when_enabled(self) -> None:
+        """get_dq_context should build a real DQReportContext when enabled."""
+        executor = self._make_executor(dq_report_service=MagicMock())
+        executor._bronze_records_for_dq = [b'{"id": 1}']
+        executor._source_batch_ids = ["batch-001"]
+        executor._last_bronze_path = "bronze/file.jsonl.zst"
+        executor.records_fetched = 100
+        executor.records_quarantined = 2
+        executor._build_dataframe_from_records = MagicMock(return_value=None)
+
+        context = executor.get_dq_context()
+
+        assert context is not None
+        assert context.run_id == "run-123"
+        assert context.pipeline_name == "chembl_activity"
+        assert context.provider == "chembl"
+        assert context.entity == "activity"
+        assert context.bronze_batch_id == "batch-001"
+        assert context.bronze_source_file == "bronze/file.jsonl.zst"
+        assert context.silver_target_table == "chembl_activity"
+        assert context.silver_input_count == 100
+        assert context.silver_quarantined_count == 2
+
+    @pytest.mark.asyncio
+    async def test_process_collects_dq_data_via_batch_executor_hook(self) -> None:
+        """process() should trigger DQ collection through the production hook path."""
+        executor = self._make_executor(dq_report_service=MagicMock())
+        bronze_result = SimpleNamespace(path="bronze/file.jsonl.zst")
+        records = [{"activity_id": "A1"}]
+        executor._batch_processing_service.process_batch = AsyncMock(
+            return_value=BatchProcessingOutput(
+                batch_id="batch-001",
+                bronze_result=bronze_result,
+                silver_records=[{"activity_id": "A1"}],
+                gold_records=[],
+                quarantined_count=2,
+                filtered_out_count=0,
+            )
+        )
+
+        result = await executor.process(records=records, start_index=0)
+
+        assert result.bronze_count == 1
+        assert result.silver_count == 1
+        assert result.gold_count == 0
+        assert result.quarantined_count == 2
+        assert executor._source_batch_ids == ["batch-001"]
+        assert executor._last_bronze_path == "bronze/file.jsonl.zst"
+        assert len(executor._bronze_records_for_dq) == 1
+        assert executor._silver_records_for_dq == [{"activity_id": "A1"}]
+        assert executor.records_quarantined == 2
 
 
 @pytest.mark.unit

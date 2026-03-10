@@ -53,6 +53,7 @@ def mock_quarantine_port():
     """Create mock quarantine port."""
     port = AsyncMock()
     port.write = AsyncMock()
+    port.write_many = AsyncMock()
     return port
 
 
@@ -577,7 +578,7 @@ class TestBatchExecutorProcessBatch:
         assert executor.records_bronze == 2
         assert executor.records_silver == 1
         assert executor.records_quarantined == 1
-        mock_services.quarantine.write.assert_called_once()
+        mock_services.quarantine.write_many.assert_called_once()
 
     async def test_process_batch_uses_injected_batch_id_factory(
         self,

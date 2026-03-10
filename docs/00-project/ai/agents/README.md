@@ -1,16 +1,18 @@
 # AI Agents Context
 
+*Статус: internal-published (Internal / Extended)*
+
 Этот каталог содержит документацию по агентам для разных рантаймов AI в BioETL.
 
-## Canonical Sources (SSOT)
+## Canonical Sources
 
 | Runtime | Canonical path | Notes |
 | --- | --- | --- |
 | Claude Code | `.claude/agents/` | Основной реестр профилей Claude |
 | Codex | `.codex/agents/` | Основной реестр профилей Codex |
-| Docs mirror | `docs/00-project/ai/agents/` | Документационный слой, не runtime-реестр |
+| Docs mirror | `docs/00-project/ai/agents/` | Публикуемый документационный слой, включая Codex mirror pages |
 
-При расхождении между runtime-реестром и docs приоритет у runtime-реестра.
+При расхождении между runtime-реестрами (`.claude/agents/`, `.codex/agents/`) и docs приоритет у runtime-реестра.
 
 ## Structure
 
@@ -32,7 +34,7 @@
 | QA Orchestrator | [runtime/py-qa-orchestrator.md](runtime/py-qa-orchestrator.md) | Prompt для иерархического QA-оркестратора |
 | Diagram Docs Orchestrator | [runtime/py-diagram-docs-orchestrator.md](runtime/py-diagram-docs-orchestrator.md) | Оркестратор обновления/rerender диаграммных docx/pdf |
 | Agent Memory (quick) | [runtime/agent-memory.md](runtime/agent-memory.md) | Краткая оперативная память по проекту |
-| Team Orchestration | [runtime/orchestration/py-team-orchestration.md](runtime/orchestration/py-team-orchestration.md) | Адаптированная docs-копия оркестрации |
+| Team Orchestration | [agents/ORCHESTRATION.md](agents/ORCHESTRATION.md) | Публикуемое Codex docs mirror для `.codex/agents/ORCHESTRATION.md` |
 
 ## Policy & Audit Reports
 
@@ -50,6 +52,7 @@
 - [Agent Consolidation Matrix (2026-03-08)](policy/AGENT_CONSOLIDATION_MATRIX_2026-03-08.md)
 - [Collected Prompts Index](../prompts/COLLECTED_PROMPTS_INDEX.md)
 - [Shared Agent Memory](../memory/agent-memory.md)
+- [Codex Orchestration Mirror](agents/ORCHESTRATION.md)
 
 ## Notes
 

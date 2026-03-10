@@ -8,8 +8,10 @@ import pytest
 
 from bioetl.application.core.postrun_service import (
     PostrunResult,
-    PostrunService,
     VacuumResult,
+)
+from tests.unit.application.core.postrun_test_support import (
+    build_test_postrun_service as _make_postrun_service,
 )
 from bioetl.application.services.data_quality_service import DataQualityService
 from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
@@ -140,7 +142,6 @@ def mock_context():
     context.started_at = datetime.now(UTC)
     return context
 
-
 @pytest.fixture
 def postrun_service(
     pipeline_config,
@@ -155,7 +156,7 @@ def postrun_service(
     mock_metadata_writer,
 ):
     """Create a PostrunService instance."""
-    return PostrunService(
+    return _make_postrun_service(
         config=pipeline_config,
         runtime=runtime_config,
         context=mock_context,
@@ -187,7 +188,7 @@ class TestPostrunServiceInit:
         mock_metadata_writer,
     ):
         """Test postrun service initializes correctly."""
-        service = PostrunService(
+        service = _make_postrun_service(
             config=pipeline_config,
             runtime=runtime_config,
             context=mock_context,
@@ -295,9 +296,11 @@ class TestPostrunServiceVacuum:
     async def test_vacuum_delegates_to_finalize_run(
         self,
         pipeline_config,
+        mock_context,
         mock_dq_service,
         mock_logger,
         mock_lifecycle_service,
+        mock_storage,
         mock_metrics,
     ):
         """Test run_vacuum_if_enabled delegates to lifecycle service."""
@@ -315,7 +318,7 @@ class TestPostrunServiceVacuum:
             dry_run=False,
         )
 
-        service = PostrunService(
+        service = _make_postrun_service(
             config=pipeline_config,
             runtime=runtime,
             context=mock_context,
@@ -340,9 +343,11 @@ class TestPostrunServiceVacuum:
     async def test_vacuum_returns_finalize_run_result(
         self,
         pipeline_config,
+        mock_context,
         mock_dq_service,
         mock_logger,
         mock_lifecycle_service,
+        mock_storage,
         mock_metrics,
     ):
         """Test run_vacuum_if_enabled returns finalize_run result."""
@@ -359,7 +364,7 @@ class TestPostrunServiceVacuum:
             dry_run=False,
         )
 
-        service = PostrunService(
+        service = _make_postrun_service(
             config=pipeline_config,
             runtime=runtime,
             context=mock_context,
@@ -458,7 +463,7 @@ class TestPostrunServiceMetadata:
         runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, skip_gold=True)
         mock_storage.get_table_path = MagicMock(return_value="/tmp/test_gold")
 
-        service = PostrunService(
+        service = _make_postrun_service(
             config=pipeline_config,
             runtime=runtime,
             context=mock_context,
@@ -544,7 +549,9 @@ class TestPostrunServiceIntegrationWithDataQualityService:
         self,
         pipeline_config,
         runtime_config,
+        mock_context,
         mock_lifecycle_service,
+        mock_storage,
         mock_metrics,
         mock_logger,
         mock_executor,
@@ -560,7 +567,7 @@ class TestPostrunServiceIntegrationWithDataQualityService:
             entity_type=pipeline_config.entity_type,
         )
 
-        service = PostrunService(
+        service = _make_postrun_service(
             config=pipeline_config,
             runtime=runtime_config,
             context=mock_context,
@@ -584,7 +591,9 @@ class TestPostrunServiceIntegrationWithDataQualityService:
         self,
         pipeline_config,
         runtime_config,
+        mock_context,
         mock_lifecycle_service,
+        mock_storage,
         mock_metrics,
         mock_logger,
     ):
@@ -607,7 +616,7 @@ class TestPostrunServiceIntegrationWithDataQualityService:
             entity_type=pipeline_config.entity_type,
         )
 
-        service = PostrunService(
+        service = _make_postrun_service(
             config=pipeline_config,
             runtime=runtime_config,
             context=mock_context,

@@ -1,6 +1,8 @@
 # AI Workspace Setup — Промт для настройки AI-агентов в репозитории
 
-*Версия: 1.3.0 | Дата: 2026-03-08*
+*Статус: internal*
+
+*Версия: 1.3.1 | Дата: 2026-03-10*
 
 ## Назначение
 
@@ -27,21 +29,20 @@
 - `AGENTS.md` — единственный AI-файл в корне (инструкции для OpenAI Codex / общий)
 - CLAUDE.md, CODEX.md, GEMINI.md — НЕ в корне, находятся в `docs/00-project/ai/agents/`
 
-#### Каноническое хранилище (SSOT)
+#### Документационный mirror и runtime SSOT
 
     docs/00-project/ai/
     ├── agents/                        ← Документация агентов
+    │   ├── agents/                    ← Профили агентов и docs-копия ORCHESTRATION
     │   ├── guides/                    ← Инструкции: CLAUDE.md, CODEX.md, GEMINI.md, AGENT.md
-    │   ├── orchestration/             ← ORCHESTRATION.md, py-team-orchestration.md
+    │   ├── orchestration/             ← Deprecated aliases для compatibility
     │   ├── runtime/                   ← Оперативные промты: py-qa-orchestrator, py-diagram-docs-orchestrator, agent-memory
     │   ├── policy/                    ← Политики именования и стандарты агентов
-    │   ├── audit/                     ← Отчёты аудита и консолидации
-    │   └── snapshots/                 ← Исторические снапшоты (non-SSOT, read-only)
+    │   └── scripts/                   ← Вспомогательные docs-side utilities
     ├── skills/                        ← Скилы
-    │   ├── global/                    ← Кросс-проектные скилы (py-audit-bot, py-test-bot, ...)
-    │   ├── local/                     ← Проектно-специфичные скилы (py-test-swarm, documentation-cascade-audit, ...)
-    │   ├── _references/               ← Общие справочные материалы для скилов
-    │   └── collected/                 ← Исторические снапшоты скилов (non-SSOT)
+    │   ├── global/                    ← Курируемый snapshot выбранных global skills
+    │   ├── local/                     ← Сгенерированное зеркало локальных skills
+    │   └── _references/               ← Общие справочные материалы для overlays/reference bundles
     ├── prompts/                       ← Промты оркестрации
     │   ├── architecture_debt_reduction_orchestration.md
     │   ├── refactor_orchestration_prompt.md
@@ -57,9 +58,10 @@
         └── mcp-memory.json            ← MCP knowledge graph (semantic memory)
 
 **Приоритет при расхождениях:**
-- Runtime-реестры (`.claude/agents/`, `.codex/agents/`) > docs mirror (`docs/00-project/ai/agents/`)
-- `guides/` содержит канонические версии инструкций агентов
-- `snapshots/` и `collected/` — read-only архивы, НЕ редактировать
+1. Runtime-реестры (`.claude/agents/`, `.codex/agents/`) имеют приоритет над docs mirror `docs/00-project/ai/agents/`.
+2. `guides/` — канонический docs-layer для agent instructions.
+3. `.codex/skills/` — канонический источник локальных skills; `docs/00-project/ai/skills/` — documentation mirror/snapshot.
+4. `prompts/collected/` — read-only архивные копии, НЕ использовать как SSOT.
 
 #### Dot-директории агентов (runtime-конфигурации)
 
@@ -93,21 +95,20 @@
 
 | Папка | Назначение | Проверка |
 |-------|------------|----------|
+| `agents/` | Профили агентов и docs-копия ORCHESTRATION | `ls docs/00-project/ai/agents/agents/` |
 | `guides/` | Канонические инструкции агентов | `ls docs/00-project/ai/agents/guides/` |
-| `orchestration/` | Оркестрация субагентов (ORCHESTRATION.md) | `ls docs/00-project/ai/agents/orchestration/` |
+| `orchestration/` | Deprecated aliases для compatibility | `ls docs/00-project/ai/agents/orchestration/` |
 | `runtime/` | Оперативные промты (qa-orchestrator, diagram-docs) | `ls docs/00-project/ai/agents/runtime/` |
 | `policy/` | Политики именования агентов | `ls docs/00-project/ai/agents/policy/` |
-| `audit/` | Отчёты аудита конфигурации | `ls docs/00-project/ai/agents/audit/` |
-| `snapshots/` | Архивные снапшоты (read-only) | `ls docs/00-project/ai/agents/snapshots/` |
+| `scripts/` | Docs-side утилиты и вспомогательные скрипты | `ls docs/00-project/ai/agents/scripts/` |
 
 ##### 1c. Подпапки skills/
 
 | Папка | Назначение | Проверка |
 |-------|------------|----------|
-| `global/` | Кросс-проектные скилы (py-audit-bot, py-test-bot, ...) | `ls docs/00-project/ai/skills/global/` |
-| `local/` | Проектно-специфичные (py-test-swarm, documentation-cascade-audit) | `ls docs/00-project/ai/skills/local/` |
+| `global/` | Курируемый global snapshot | `ls docs/00-project/ai/skills/global/` |
+| `local/` | Docs mirror локальных skills | `ls docs/00-project/ai/skills/local/` |
 | `_references/` | Общие справочные материалы | `ls docs/00-project/ai/skills/_references/` |
-| `collected/` | Исторические снапшоты скилов (non-SSOT) | — |
 
 Проверка:
 
@@ -203,7 +204,8 @@ Claude Code plugins (в `.claude/settings.json` → `enabledPlugins`):
 #### 6. Проверка скилов
 
 Скилы загружаются из `.claude/skills/` (Claude) и `.codex/skills/` (Codex).
-SSOT скилов: `docs/00-project/ai/skills/`.
+SSOT локальных skills: `.codex/skills/`.
+`docs/00-project/ai/skills/` — documentation mirror/snapshot.
 
 Каждый скил — директория с обязательной структурой:
 
@@ -213,15 +215,21 @@ SSOT скилов: `docs/00-project/ai/skills/`.
     │   └── openai.yaml       ← Опционально: Codex-совместимый agent descriptor
     └── references/           ← Опционально: справочные материалы (templates, patterns)
 
-**Скилы в `global/`** (кросс-проектные, BioETL субагенты):
+**Скилы в `global/`** (курируемый snapshot выбранных global skills):
 - `py-audit-bot`, `py-test-bot`, `py-doc-bot`, `py-debug-bot`
-- `py-config-bot`, `py-plan-bot`, `py-code-bot`
+- `py-config-bot`, `py-plan-bot`
 - `py-review-orchestrator`
 
-**Скилы в `local/`** (проектно-специфичные):
+**Скилы в `local/`** (docs mirror для `.codex/skills/` и проектно-специфичных skills):
+- `py-audit-bot`, `py-test-bot`, `py-doc-bot`, `py-debug-bot`
+- `py-config-bot`, `py-plan-bot`, `py-review-orchestrator`
 - `py-test-swarm` (L1→L2→L3 иерархическое тестирование)
 - `documentation-cascade-audit` (каскадный аудит документации)
 - `technical-designer-mermaid` (Mermaid-диаграммы с ADR-040)
+
+`py-code-bot` не включается в active docs mirror: с `ORCHESTRATION.md v4.0`
+production-код пишет orchestrator, а legacy runtime-артефакт не используется как
+published profile.
 
 Проверка:
 
@@ -229,8 +237,8 @@ SSOT скилов: `docs/00-project/ai/skills/`.
     find .claude/skills/ .codex/skills/ -name "SKILL.md" -exec grep -l "\.ai/memory/" {} \;
     # Ожидание: пустой вывод (все обновлены)
 
-    # Проверить синхронизацию SSOT ↔ runtime
-    diff <(ls docs/00-project/ai/skills/global/) <(ls .codex/skills/ | grep "^py-")
+    # Проверить синхронизацию SSOT ↔ docs mirror для локальных skills
+    diff <(ls docs/00-project/ai/skills/local/ | grep "^py-" | grep -v "^py-code-bot$") <(ls .codex/skills/ | grep "^py-" | grep -v "^py-code-bot$")
 
 #### 7. Проверка корневых файлов
 
@@ -316,11 +324,11 @@ Claude Code НЕ требует CLAUDE.md в корне — он читает `.
 >
 > 1. Создай agent prompt: `.claude/agents/{name}.md` + `.codex/agents/{name}.md`
 > 2. Создай скил:
->    - `docs/00-project/ai/skills/global/{name}/SKILL.md` (SSOT)
+>    - `.codex/skills/{name}/SKILL.md` (SSOT для локального skill)
 >    - `.claude/skills/{name}/SKILL.md` (runtime copy)
->    - `.codex/skills/{name}/SKILL.md` (runtime copy)
+>    - `docs/00-project/ai/skills/local/{name}/SKILL.md` (docs mirror)
 > 3. Создай файл памяти: `docs/00-project/ai/memory/memory-{name}.md`
-> 4. Добавь в ORCHESTRATION.md (`docs/00-project/ai/agents/orchestration/` + `.claude/agents/`)
+> 4. Добавь в ORCHESTRATION.md (`docs/00-project/ai/agents/agents/` + `.codex/agents/`)
 > 5. Добавь в `agent-orchestration-rules.md` (`.claude/rules/`)
 
 ### Шаблон файла памяти для нового субагента

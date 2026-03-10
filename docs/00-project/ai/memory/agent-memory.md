@@ -1,9 +1,11 @@
 # Agent Memory — BioETL Project
 
-*Версия: 1.0.2 | Дата: 2026-03-03 | Синхронизировано с ORCHESTRATION.md v3.0, RULES.md v5.23*
+*Статус: internal-published (Internal / Extended)*
 
-> **Назначение**: Полный контекст для быстрого онбординга нового чата Claude Code.
-> При старте новой сессии — попроси Claude прочитать этот файл:
+*Версия: 1.0.5 | Дата: 2026-03-10 | Синхронизировано с ORCHESTRATION.md v4.1, RULES.md v5.23*
+
+> **Назначение**: Полный контекст для быстрого онбординга новой AI-сессии в BioETL.
+> При старте новой сессии — попроси агент прочитать этот файл:
 > `Прочитай docs/00-project/ai/memory/agent-memory.md и следуй его инструкциям.`
 
 ---
@@ -17,7 +19,7 @@
 | Архитектура | Hexagonal (Ports & Adapters) + Medallion (Bronze→Silver→Gold) + DDD |
 | Deployment | Local-Only (ADR-010) — без Docker/Redis в runtime |
 | Провайдеры | ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar (7 шт.) |
-| ADR | 41 штук (ADR-001..ADR-041), все Accepted кроме ADR-008 (Superseded) |
+| ADR | 43 файла (ADR-001..ADR-043), исторически superseded: ADR-008 |
 | Coverage target | ≥85% overall, ≥90% domain |
 | RULES.md | v5.23 (2026-03-02) |
 
@@ -26,11 +28,12 @@
 | Артефакт | Путь |
 |----------|------|
 | Правила проекта (Конституция) | `docs/00-project/RULES.md` |
-| Компактный контекст | `.claude/PROJECT_CONTEXT.md` |
+| Правила оркестратора и runtime policy | `AGENTS.md` |
 | Инструкции для Claude | `docs/00-project/ai/agents/guides/CLAUDE.md` |
 | Персона агента | `docs/00-project/ai/agents/guides/AGENT.md` |
-| Self-review правила | `.claude/rules/ai-selfreview-rules.md` |
-| Оркестрация субагентов | `.claude/agents/ORCHESTRATION.md` |
+| Claude compact context (runtime-specific) | `.claude/PROJECT_CONTEXT.md` |
+| Claude self-review rules (runtime-specific) | `.claude/rules/ai-selfreview-rules.md` |
+| Оркестрация субагентов | `.codex/agents/ORCHESTRATION.md` |
 | Папка с промтами проекта | `docs/00-project/ai/prompts/` |
 | Глоссарий | `docs/00-project/glossary.md` |
 | ADR | `docs/02-architecture/decisions/` |
@@ -103,7 +106,7 @@ make run-local     # Запуск на фикстурах
 
 ### 3.1 Доступные субагенты
 
-Вызов: `Task(subagent_type="py-xxx-bot", prompt="...", description="...")`
+Вызов: `spawn_agent(agent_type="default" | "explorer" | "worker", message="...")`
 
 | # | `subagent_type` | Модель | Зона записи | Назначение |
 |:-:|-----------------|--------|-------------|------------|
@@ -121,13 +124,13 @@ make run-local     # Запуск на фикстурах
 Перед вызовом субагента — прочитай его спецификацию и память:
 
 ```
-.claude/agents/py-audit-bot.md    — входы, выходы, чеклисты, scoring
-.claude/agents/py-plan-bot.md     — шаблоны планов, RF-* routing
-.claude/agents/py-test-bot.md     — test selection strategy, VCR management
-.claude/agents/py-config-bot.md   — шаблоны YAML, иерархия configs
-.claude/agents/py-debug-bot.md    — методология отладки, классификация ошибок
-.claude/agents/py-doc-bot.md      — структура docs, ADR management, diagrams
-.claude/agents/ORCHESTRATION.md   — полный workflow, матрица взаимодействий
+.codex/agents/py-audit-bot.md    — входы, выходы, чеклисты, scoring
+.codex/agents/py-plan-bot.md     — шаблоны планов, RF-* routing
+.codex/agents/py-test-bot.md     — test selection strategy, VCR management
+.codex/agents/py-config-bot.md   — шаблоны YAML, иерархия configs
+.codex/agents/py-debug-bot.md    — методология отладки, классификация ошибок
+.codex/agents/py-doc-bot.md      — структура docs, ADR management, diagrams
+.codex/agents/ORCHESTRATION.md   — полный workflow, матрица взаимодействий
 ```
 
 **Специализированная память (фокус на области работы агента):**
@@ -143,7 +146,7 @@ docs/00-project/ai/memory/memory-py-doc-bot.md     — doc structure, ADR manage
 
 ### 3.3 Входы субагентов (обязательные параметры)
 
-При вызове `Task(subagent_type=..., prompt=...)` включай в prompt:
+При вызове `spawn_agent(...)` или соответствующего runtime wrapper включай в `message`:
 
 | Субагент | MUST в prompt |
 |----------|---------------|
@@ -206,8 +209,8 @@ reports/plans/<task_id>/
 | **Quick-fix** | test(baseline) → code(fix) → test(final) → doc(docstring only) |
 | **Doc-only** | doc-bot → audit(targeted, docs) |
 | **Config-only** | audit(targeted, config) → plan → config-bot → test(final) → audit(final) |
-| **New entity** | plan → code-bot(scaffold) → config-bot(3 configs) → test(new+final) → doc → audit |
-| **Composite pipeline** | audit(baseline) → plan(composite) → config-bot → code-bot → test → doc → audit |
+| **New entity** | plan → orchestrator(scaffold) → config-bot(3 configs) → test(new+final) → doc → audit |
+| **Composite pipeline** | audit(baseline) → plan(composite) → config-bot → orchestrator → test → doc → audit |
 
 ### 4.2 Параллелизация
 
@@ -219,73 +222,74 @@ reports/plans/<task_id>/
 
 ## 5. Skills (Навыки)
 
-### 5.1 Зарегистрированные Skills (вызов через `Skill` tool)
+### 5.1 Проектные Skills и entrypoints
 
-| Skill | Вызов | Назначение |
-|-------|-------|------------|
-| code-review | `Skill("code-review:code-review")` | Code review PR |
-| feature-dev | `Skill("feature-dev:feature-dev")` | Guided feature development |
-| new-sdk-app | `Skill("agent-sdk-dev:new-sdk-app")` | Создание Agent SDK app |
-| keybindings-help | `Skill("keybindings-help")` | Настройка keyboard shortcuts |
-| session-start-hook | `Skill("session-start-hook")` | SessionStart hook для web |
+Механика вызова зависит от активного runtime. SSOT для проектных skills и
+workflow-ролей находится в `.codex/skills/` и `.codex/agents/`.
 
-### 5.2 Slash Commands (self-contained, инлайнированы)
+| Skill / entrypoint | Где смотреть SSOT | Назначение |
+|-------------------|-------------------|------------|
+| `agent-orchestration` | `.codex/skills/agent-orchestration/` | Координация multi-agent workflow |
+| `py-audit-bot` | `.codex/skills/py-audit-bot/` | Baseline/final audit |
+| `py-plan-bot` | `.codex/skills/py-plan-bot/` | RF-планирование |
+| `py-test-bot` | `.codex/skills/py-test-bot/` | Post-change verification |
+| `py-doc-bot` | `.codex/skills/py-doc-bot/` | Документационные правки |
+| `py-config-bot` | `.codex/skills/py-config-bot/` | Config/docs sync |
+| `py-debug-bot` | `.codex/skills/py-debug-bot/` | Failure triage |
+| `py-review-orchestrator` | `.codex/skills/py-review-orchestrator/` | Независимый double-check |
+| `py-test-swarm` | `.codex/skills/py-test-swarm/` | Иерархическое тестирование |
+| `new-pipeline` | `.codex/skills/new-pipeline/` | Scaffolding pipeline |
+| `verify-architecture` | `.codex/skills/verify-architecture/` | Архитектурные проверки |
+| `documentation-audit` | `.codex/skills/documentation-audit/` | Аудит документации |
+| `architecture-guardian` | `.codex/skills/public/architecture-guardian/` | Граничный архитектурный review |
 
-BioETL-специфичные навыки инлайнированы в `.claude/commands/`. Вызов через `/command-name`:
+### 5.2 Runtime-specific conveniences
 
-| Command | Назначение |
-|---------|------------|
-| `/verify-architecture` | Pre-commit проверка (43 теста) |
-| `/architecture-guardian` | Аудит arch boundaries |
-| `/new-pipeline` | Scaffolding нового ETL pipeline |
-| `/new-composite` | Создание composite pipeline |
-| `/config-validate` | Валидация YAML vs JSON-schemas |
-| `/documentation-audit` | Аудит документации |
+Claude slash-команды, built-in `Skill(...)` вызовы и прочие runtime-specific
+entrypoints допустимы только как дополнительное удобство. Их нельзя считать
+каноническим workflow для BioETL: приоритет у `.codex/agents/ORCHESTRATION.md`,
+`AGENTS.md` и `.codex/skills/`.
+
+Если нужна фактическая команда для текущего runtime, смотри его собственный
+реестр команд/skills, а не эту память.
 | `/vcr-record` | VCR cassettes management |
 | `/release-checklist` | Pre-release audit |
 
 ---
 
-## 6. Plugins & MCP Servers
+## 6. Runtime Integrations
 
-### 6.1 CLI Plugins (`.claude/settings.json`)
+Runtime-конфигурация зависит от активного AI-клиента и должна читаться из
+его реестров, а не из статического списка в этой памяти.
 
-| Plugin | Назначение |
-|--------|------------|
-| `context7@claude-plugins-official` | Context management |
-| `code-review@claude-plugins-official` | Code review (skill зарегистрирован) |
-| `code-simplifier@claude-plugins-official` | Code simplification (subagent `code-simplifier`) |
-| `feature-dev@claude-plugins-official` | Feature development (skill + subagents) |
-| `agent-sdk-dev@claude-plugins-official` | Agent SDK (skill + subagents) |
+| Runtime | Что проверять |
+|---------|---------------|
+| Codex | `.codex/config.toml`, `.codex/settings.json`, `.codex/agents/`, `.codex/skills/` |
+| Claude | `.claude/settings.json`, `.claude/agents/`, `.claude/skills/` |
+| Copilot | `.github/copilot-instructions.md`, workspace MCP config |
+| Gemini | `.gemini/` |
 
-### 6.2 MCP Servers (настроены, но не всегда активны)
+### 6.1 MCP / Tool Policy
 
-| MCP | Назначение | Использование в проекте |
-|-----|-----------|------------------------|
-| docker | Docker management | — |
-| github | GitHub API | PR, issues |
-| memory | Persistent memory | Контекст между сессиями |
-| fetch | HTTP fetching | Загрузка документации |
-| sequential-thinking | Extended reasoning | Сложные задачи |
-| arxiv | ArXiv search | Научные статьи |
+- Для текущего набора MCP-серверов проверяй активный runtime-конфиг, а не docs mirror.
+- Для Codex используй `codex mcp list`, если нужен фактический список серверов в этой сессии.
+- При расхождениях runtime-реестры имеют приоритет над документационными копиями.
 
 ---
 
-## 7. Встроенные Subagent Types (Claude Code)
+## 7. Native Agent Types (Codex Runtime)
 
-Помимо проектных py-*-bot, доступны встроенные типы:
+В Codex runtime для логических профилей `py-*` используются native `agent_type`:
 
-| `subagent_type` | Назначение | Когда использовать |
-|-----------------|-----------|-------------------|
-| `Bash` | Shell commands | git, npm, docker |
-| `general-purpose` | Универсальный | Исследования, multi-step |
-| `Explore` | Поиск по кодовой базе | Быстрый поиск файлов/кода |
-| `Plan` | Архитектурное планирование | Design implementation plans |
-| `claude-code-guide` | Справка Claude Code | Вопросы по CLI/API/SDK |
-| `code-simplifier` | Упрощение кода | Рефакторинг для читаемости |
-| `feature-dev:code-architect` | Архитектура фичи | Blueprints, data flows |
-| `feature-dev:code-explorer` | Анализ фичи | Tracing execution paths |
-| `feature-dev:sp-code-reviewer` | Code review | Bugs, security, quality |
+| `agent_type` | Назначение | Когда использовать |
+|--------------|------------|-------------------|
+| `default` | Аудит, планирование, оркестрация, review | Baseline/final audit, RF-plan, docs/code review |
+| `explorer` | Read-only discovery | Инвентаризация, поиск фактов, узкие проверки |
+| `worker` | Изолированная write-zone работа | Docs/config/test edits с явной зоной владения |
+
+Claude-specific built-ins и plugin-инвентари допустимо хранить только как
+исторический контекст. Для текущего workflow BioETL их нельзя считать SSOT:
+приоритет у `.codex/agents/ORCHESTRATION.md`.
 
 ---
 
@@ -331,21 +335,22 @@ BioETL-специфичные навыки инлайнированы в `.claud
 ## 10. Что Делать в Первую Очередь в Новом Чате
 
 1. **Прочитать этот файл** — ты уже здесь
-2. **Прочитать `.claude/PROJECT_CONTEXT.md`** — компактный контекст
-3. **Прочитать `.claude/rules/ai-selfreview-rules.md`** — правила самопроверки
-4. **При работе с кодом** — прочитать `.claude/agents/ORCHESTRATION.md` для workflow
-5. **При использовании субагента** — прочитать его спецификацию `.claude/agents/py-{name}.md`
-6. **При scaffolding** — использовать `/new-pipeline` command
-7. **Перед коммитом** — использовать `/verify-architecture` command
+2. **Прочитать `AGENTS.md`** — правила оркестратора, ограничения и tooling
+3. **Прочитать `.codex/agents/ORCHESTRATION.md`** — текущий workflow и роли
+4. **При использовании логического профиля** — прочитать `.codex/agents/py-{name}.md`
+5. **При scaffolding** — использовать workflow `new-pipeline`
+6. **Перед завершением code/docs changes** — прогнать `verify-architecture` или эквивалентный project check
+7. **Если активный runtime = Claude** — дополнительно прочитать `.claude/PROJECT_CONTEXT.md`
+8. **Если активный runtime = Claude** — дополнительно прочитать `.claude/rules/ai-selfreview-rules.md`
 
 ### Команда для загрузки полного контекста:
 
 ```
 Прочитай следующие файлы и следуй их инструкциям:
 1. docs/00-project/ai/memory/agent-memory.md
-2. .claude/PROJECT_CONTEXT.md
-3. .claude/rules/ai-selfreview-rules.md
-4. .claude/agents/ORCHESTRATION.md
+2. AGENTS.md
+3. .codex/agents/ORCHESTRATION.md
+4. .codex/agents/py-{name}.md  # если используется логический профиль
 ```
 
 ---

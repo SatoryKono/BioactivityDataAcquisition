@@ -8,21 +8,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.core.postrun_cleanup_orchestrator import (
-    PostrunCleanupService,
-)
-from bioetl.application.core.postrun_compact_orchestrator import (
-    PostrunCompactService,
-)
-from bioetl.application.core.postrun_dq_report_orchestrator import (
-    PostrunDQReportService,
-)
-from bioetl.application.core.postrun_metadata_version_resolver import (
-    PostrunMetadataVersionResolver,
-)
 from bioetl.application.services.data_quality_service import DataQualityService
 from bioetl.application.services.medallion_types import VacuumResult
-from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.ports import ExecutorMetricsPort
 from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 
@@ -31,6 +18,18 @@ if TYPE_CHECKING:
         DQReportContext,
         DQReportResult,
         DQReportService,
+    )
+    from bioetl.application.core.postrun_cleanup_orchestrator import (
+        PostrunCleanupService,
+    )
+    from bioetl.application.core.postrun_compact_orchestrator import (
+        PostrunCompactService,
+    )
+    from bioetl.application.core.postrun_dq_report_orchestrator import (
+        PostrunDQReportService,
+    )
+    from bioetl.application.core.postrun_metadata_version_resolver import (
+        PostrunMetadataVersionResolver,
     )
     from bioetl.application.services.medallion_lifecycle import (
         MedallionLifecycleService,
@@ -48,66 +47,6 @@ if TYPE_CHECKING:
         StorageMaintenancePort,
         TracingPort,
     )
-
-
-def _create_postrun_cleanup_service(
-    logger: LoggerPort,
-    warning_allowlist: tuple[type[BaseException], ...],
-) -> PostrunCleanupService:
-    return PostrunCleanupService(
-        logger=logger,
-        warning_allowlist=warning_allowlist,
-    )
-
-
-def _create_postrun_dq_report_service(
-    *,
-    logger: LoggerPort,
-    runtime: RuntimeConfig,
-    dq_report_service: DQReportService | None,
-    bronze_dq_config: BronzeDQConfigPort | None,
-    silver_dq_config: SilverDQConfigPort | None,
-    gold_dq_config: GoldDQConfigPort | None,
-    warning_allowlist: tuple[type[BaseException], ...],
-) -> PostrunDQReportService:
-    return PostrunDQReportService(
-        logger=logger,
-        runtime=runtime,
-        dq_report_service=dq_report_service,
-        bronze_dq_config=bronze_dq_config,
-        silver_dq_config=silver_dq_config,
-        gold_dq_config=gold_dq_config,
-        warning_allowlist=warning_allowlist,
-    )
-
-
-def _create_postrun_metadata_version_resolver(
-    *,
-    logger: LoggerPort,
-    runtime: RuntimeConfig,
-    warning_allowlist: tuple[type[BaseException], ...],
-) -> PostrunMetadataVersionResolver:
-    return PostrunMetadataVersionResolver(
-        logger=logger,
-        runtime=runtime,
-        warning_allowlist=warning_allowlist,
-    )
-
-
-def _create_postrun_compact_service(
-    *,
-    config: PipelineConfig,
-    storage: StorageMaintenancePort,
-    logger: LoggerPort,
-    warning_allowlist: tuple[type[BaseException], ...],
-) -> PostrunCompactService:
-    return PostrunCompactService(
-        config=config,
-        storage=storage,
-        logger=logger,
-        warning_allowlist=warning_allowlist,
-    )
-
 
 def _resolve_report_path(
     dq_reports: DQReportResult | None,
@@ -147,6 +86,16 @@ class PostrunResult:
     duplicates_removed: int = 0
 
 
+@dataclass(frozen=True, slots=True)
+class PostrunDependencyContext:
+    """Injected postrun collaborators created by the composition layer."""
+
+    cleanup_orchestrator: PostrunCleanupService
+    dq_report_orchestrator: PostrunDQReportService
+    metadata_version_resolver: PostrunMetadataVersionResolver
+    compact_orchestrator: PostrunCompactService
+
+
 class PostrunService:
     """Handles post-execution operations."""
 
@@ -160,12 +109,9 @@ class PostrunService:
         storage: StorageMaintenancePort,
         metrics: MetricsPort | None,
         logger: LoggerPort,
+        dependencies: PostrunDependencyContext,
         metadata_coordinator: MetadataCoordinatorPort | None = None,
         metadata_writer: MetadataWriterPort | None = None,
-        dq_report_service: DQReportService | None = None,
-        bronze_dq_config: BronzeDQConfigPort | None = None,
-        silver_dq_config: SilverDQConfigPort | None = None,
-        gold_dq_config: GoldDQConfigPort | None = None,
     ) -> None:
         """Initialize postrun service."""
         self._config = config
@@ -178,47 +124,10 @@ class PostrunService:
         self._logger = logger
         self._metadata_coordinator = metadata_coordinator
         self._metadata_writer = metadata_writer
-        self._postrun_warning_allowlist = (
-            BioETLError,
-            OSError,
-            RuntimeError,
-            ValueError,
-            TypeError,
-            AttributeError,
-        )
-        self._metadata_version_allowlist = (
-            ImportError,
-            ModuleNotFoundError,
-            FileNotFoundError,
-            OSError,
-            RuntimeError,
-            ValueError,
-            TypeError,
-        )
-        self._cleanup_orchestrator = _create_postrun_cleanup_service(
-            logger=logger,
-            warning_allowlist=self._postrun_warning_allowlist,
-        )
-        self._dq_report_orchestrator = _create_postrun_dq_report_service(
-            logger=logger,
-            runtime=runtime,
-            dq_report_service=dq_report_service,
-            bronze_dq_config=bronze_dq_config,
-            silver_dq_config=silver_dq_config,
-            gold_dq_config=gold_dq_config,
-            warning_allowlist=self._postrun_warning_allowlist,
-        )
-        self._metadata_version_resolver = _create_postrun_metadata_version_resolver(
-            logger=logger,
-            runtime=runtime,
-            warning_allowlist=self._metadata_version_allowlist,
-        )
-        self._compact_orchestrator = _create_postrun_compact_service(
-            config=config,
-            storage=storage,
-            logger=logger,
-            warning_allowlist=self._postrun_warning_allowlist,
-        )
+        self._cleanup_orchestrator = dependencies.cleanup_orchestrator
+        self._dq_report_orchestrator = dependencies.dq_report_orchestrator
+        self._metadata_version_resolver = dependencies.metadata_version_resolver
+        self._compact_orchestrator = dependencies.compact_orchestrator
 
     async def run(
         self,
@@ -435,6 +344,7 @@ __all__ = [
     "DQEvaluationStatus",
     "DQResult",
     "ExecutorMetricsPort",
+    "PostrunDependencyContext",
     "PostrunResult",
     "PostrunService",
     "VacuumResult",

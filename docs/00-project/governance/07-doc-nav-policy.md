@@ -18,6 +18,9 @@ Define explicit navigation rules for documentation zones so that:
 | Path Prefix | Status | Nav Rule | Required Entrypoint |
 |---|---|---|---|
 | `docs/00-project/**`, `docs/01-requirements/**`, `docs/02-architecture/**`, `docs/03-guides/**`, `docs/04-reference/**`, `docs/05-operations/**` | `published` | MUST be represented in primary nav (except explicit internal/archived subsections) | Section index page in nav |
+| `docs/00-project/ai/agents/**` | `internal-published` + `internal` | Curated entrypoints MAY be shown only under `Internal / Extended -> Agents`; bulk profiles/aliases MAY remain non-nav | [docs/00-project/ai/agents/README.md](../ai/agents/README.md) |
+| `docs/00-project/ai/memory/**` | `internal-published` + `internal` | Shared entrypoints MAY be shown under `Internal / Extended`; specialized memory docs MAY remain non-nav | [docs/00-project/ai/memory/agent-memory.md](../ai/memory/agent-memory.md) |
+| `docs/00-project/ai/prompts/**` | `internal-published` + `internal-generated` | Curated prompt indexes MAY be shown under `Internal / Extended`; collected/raw prompt copies MAY remain non-nav | [docs/00-project/ai/prompts/COLLECTED_PROMPTS_INDEX.md](../ai/prompts/COLLECTED_PROMPTS_INDEX.md) |
 | `docs/00-project/ai/skills/**` | `internal-published` | MAY be shown only under `Internal / Extended -> Skills` | [docs/00-project/ai/skills/README.md](../ai/skills/README.md) |
 | `docs/plans/**` | `internal-published` | Curated pages MAY be shown under `Internal / Extended -> Plans` | [docs/plans/README.md](../../plans/README.md) or curated nav node |
 | `docs/reports/**` | `internal-published` + `internal` | Curated pages MAY be in `Internal / Extended -> Reports`; bulk report artifacts MAY remain non-nav | [docs/reports/index.md](../../reports/index.md) |
@@ -104,7 +107,7 @@ Failure policy:
 | Class | Typical Paths | Default Action |
 |---|---|---|
 | `published` | policy, requirements, active runbooks | MUST be in primary nav |
-| `internal-published` | selected `plans/**`, `reports/**`, `skills/**`, architecture extras | SHOULD be in `Internal / Extended` |
+| `internal-published` | selected `plans/**`, `reports/**`, `00-project/ai/{agents,memory,prompts,skills}/**`, architecture extras | SHOULD be in `Internal / Extended` |
 | `internal-generated` | generated indexes/variants (for example some diagram artifact indexes) | MAY stay outside nav, but MUST be linked from an index |
 | `archive` | `99-archive/**` | MUST stay outside nav with archive disclaimer |
 

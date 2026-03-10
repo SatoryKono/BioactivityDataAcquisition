@@ -14,7 +14,7 @@ import click
 from bioetl.application.services import RunOptions, RunResult
 from bioetl.application.services.pipeline_debug_service import DebugAbortError
 from bioetl.composition.entrypoints import get_pipeline_runner_service
-from bioetl.domain.ports.runtime.pipeline_debug import StageBreakpoint
+from bioetl.domain.ports import StageBreakpoint
 from bioetl.interfaces.cli.commands.run_helpers import validate_pipeline_name
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error, echo_info

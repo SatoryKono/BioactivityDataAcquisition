@@ -18,6 +18,10 @@ import pytest
 from bioetl.application.composite.dependency_coordinator import (
     DependencyCoordinatorService,
 )
+from bioetl.application.composite.dependency_key_resolvers import (
+    ChainedKeyResolver,
+    SeedKeyResolver,
+)
 from bioetl.application.composite.key_extractor import KeyExtractorService
 from bioetl.domain.composite.config import DependencyConfig, SeedConfig
 
@@ -202,6 +206,8 @@ class TestDependencyWithMoleculeFilter:
         """Dependency should receive unique molecule IDs as filter."""
         coordinator = DependencyCoordinatorService(
             logger=mock_logger,
+            seed_key_resolver=SeedKeyResolver(mock_logger),
+            chained_key_resolver=ChainedKeyResolver(mock_logger),
             delta_reader=mock_delta_reader,
         )
 

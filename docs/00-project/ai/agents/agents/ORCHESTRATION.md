@@ -1,15 +1,22 @@
 # ORCHESTRATION.md — Оркестрация команды subagent-ов BioETL
 
-*Версия: 4.0 | Дата: 2026-03-04 | Supersedes v3.0 | Платформа: Claude Code CLI*
+*Статус: internal-published (Internal / Extended)*
+
+*Версия: 4.1 | Дата: 2026-03-10 | Supersedes v4.0 | Платформа: Codex CLI*
 
 ## 1. Обзор
 
-Команда из **9 субагентов** (6 core + 3 orchestrator/swarm) обеспечивает полный жизненный цикл задачи разработки BioETL. Основной агент (Claude Code) выступает оркестратором, делегируя работу субагентам через `Agent` tool с параметром `subagent_type`. Production-код пишется напрямую оркестратором (без отдельного py-code-bot).
+Команда из **9 субагентов** (6 core + 3 orchestrator/swarm) обеспечивает полный жизненный цикл задачи разработки BioETL. Основной агент (Codex) выступает оркестратором, делегируя работу субагентам через native agent roles (`default` / `explorer` / `worker`) с привязкой к логическим профилям `py-*`. Production-код пишется напрямую оркестратором (без отдельного `py-code-bot`).
 
-**Запуск субагента:**
+**Запуск логического профиля в Codex runtime:**
 ```
-Agent(subagent_type="py-audit-bot", prompt="...", model="opus")
+spawn_agent(
+  agent_type="default",
+  message="Follow .codex/agents/py-audit-bot.md for task_id=AUD-001, phase=baseline, scope=src/bioetl/application/."
+)
 ```
+
+> Runtime mapping: см. `.codex/agents/CODEX-RUNTIME.md`.
 
 | # | Субагент (`subagent_type`) | Model | Роль | Артефакт |
 |:-:|----------------------------|-------|------|----------|
@@ -31,7 +38,7 @@ Agent(subagent_type="py-audit-bot", prompt="...", model="opus")
 |----------|-------------|---------------|
 | orchestrator (direct) | `src/bioetl/`, `tests/` | `configs/`, `docs/` |
 | py-config-bot | `configs/` | `src/bioetl/`, `docs/` |
-| py-doc-bot | `docs/`, docstrings, `scripts/diagrams/` | `configs/`, `tests/` |
+| py-doc-bot | `docs/`, docstrings, `docs/00-project/ai/agents/scripts/diagrams/` | `configs/`, `tests/` |
 | py-test-bot | `tests/` | `src/bioetl/`, `configs/` |
 | py-debug-bot | `src/bioetl/`, `tests/` (fixes) | `configs/`, `docs/` |
 | py-audit-bot | — (read-only) | всё |
@@ -39,7 +46,7 @@ Agent(subagent_type="py-audit-bot", prompt="...", model="opus")
 
 ### Определения субагентов
 
-Файлы: `.claude/agents/py-*.md` — каждый содержит YAML-frontmatter (`name`, `description`, `model`) + полную спецификацию с инлайнированными знаниями.
+Файлы: `.codex/agents/py-*.md` — каждый содержит YAML-frontmatter (`name`, `description`, `model`) + полную спецификацию с инлайнированными знаниями.
 
 ---
 
@@ -276,7 +283,7 @@ reports/plans/<task_id>/
 3. **No blind changes**: код не меняется без предварительного плана (`RF-*`).
 4. **No untested changes**: каждый `RF-*` проверяется через `py-test-bot`.
 5. **Architecture gate**: финальный аудит (`py-audit-bot`) является обязательным gate перед завершением задачи.
-6. **Config compliance gate**: `config_gap_analysis.py` MUST иметь 0 critical findings после `py-config-bot`.
+6. **Config compliance gate**: `py-config-bot-1.py` MUST иметь 0 critical findings после `py-config-bot`.
 7. **Zone isolation**: orchestrator writes `src/`, py-config-bot — только в `configs/`, py-doc-bot — только в `docs/` + docstrings + diagrams.
 
 ---
@@ -338,10 +345,10 @@ py-audit-bot (baseline, scope=seed + enricher pipelines)
 
 | Документ | Описание |
 |----------|----------|
-| `.claude/agents/py-*.md` | Спецификации субагентов для Claude Code CLI |
+| `.codex/agents/py-*.md` | Спецификации субагентов для Codex CLI |
 | `.claude/rules/ai-selfreview-rules.md` | Правила автоматической самопроверки кода |
 | `docs/00-project/RULES.md` | Архитектурные правила проекта |
-| `docs/02-architecture/decisions/` | ADR-001..ADR-040 |
+| `docs/02-architecture/decisions/` | ADR-001..ADR-043 |
 | `docs/00-project/glossary.md` | Терминология |
 | `tests/architecture/` | Автоматические проверки инвариантов |
 | `docs/00-project/ai/agents/scripts/py-config-bot-1.py` | Автоматическая проверка конфигов |
@@ -350,7 +357,7 @@ py-audit-bot (baseline, scope=seed + enricher pipelines)
 
 ## 9a. Инлайнированные знания
 
-В Claude Code CLI навыки не загружаются из внешних файлов. Вместо этого ключевые знания инлайнированы непосредственно в файлы субагентов (`.claude/agents/py-*.md`), в секцию `## Инлайнированные знания`.
+В Codex CLI ключевые знания для BioETL-профилей инлайнированы непосредственно в файлы субагентов (`.codex/agents/py-*.md`) и подключаются через skill wrappers в `.codex/skills/`.
 
 ### 9a.1 Маппинг знаний на субагенты
 
@@ -381,7 +388,7 @@ py-audit-bot (baseline, scope=seed + enricher pipelines)
 
 ### 10.1 Матрица MCP-серверы × Субагенты
 
-Каждый субагент имеет доступ к MCP-серверам через `ToolSearch`. Полные описания сценариев — в соответствующих `.claude/agents/py-*.md`, секция `## MCP Tools`.
+Каждый субагент имеет доступ к MCP-серверам через runtime tooling. Полные описания сценариев — в соответствующих `.codex/agents/py-*.md`, секция `## MCP Tools`.
 
 > **Примечание:** Перед использованием MCP инструментов необходимо вызвать `ToolSearch("<provider>")` для загрузки.
 
@@ -433,6 +440,17 @@ py-audit-bot (baseline, scope=seed + enricher pipelines)
 ---
 
 ## 11. Changelog (ORCHESTRATION.md)
+
+> Ниже сохранён исторический changelog. Записи `v3.x` и ниже описывают legacy
+> этапы эволюции orchestration-модели и не переопределяют текущий runtime
+> `v4.x`.
+
+### v4.1 (2026-03-10)
+
+- **PLATFORM**: основной runtime зафиксирован как Codex CLI
+- **ADDED**: `.codex/agents/CODEX-RUNTIME.md` для маппинга logical profiles → native agent roles
+- **CHANGED**: source-of-truth ссылки переключены на `.codex/agents/`
+- **CHANGED**: примеры запуска адаптированы под `spawn_agent(...)`
 
 ### v4.0 (2026-03-04)
 

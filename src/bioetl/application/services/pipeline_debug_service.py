@@ -11,7 +11,7 @@ __all__ = ["PipelineDebugService"]
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from bioetl.domain.ports.runtime.pipeline_debug import (
+from bioetl.domain.ports import (
     BreakpointHit,
     DebugAction,
     PipelineSnapshot,

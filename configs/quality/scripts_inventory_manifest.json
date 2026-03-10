@@ -1,19 +1,19 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-10T15:14:34.542570+00:00",
+  "generated_at": "2026-03-10T19:06:58.796220+00:00",
   "summary": {
-    "total_scripts": 206,
+    "total_scripts": 208,
     "status_counts": {
-      "active": 142,
+      "active": 145,
       "legacy": 3,
-      "orphan": 35,
-      "unknown": 26
+      "orphan": 31,
+      "unknown": 29
     },
     "reference_group_coverage": {
       "build": 26,
       "ci": 41,
-      "docs": 82,
-      "scripts": 100,
+      "docs": 85,
+      "scripts": 103,
       "skills": 4,
       "tests": 30
     }
@@ -375,13 +375,13 @@
         },
         {
           "path": "docs/00-project/governance/07-doc-nav-policy.md",
-          "line": 50,
+          "line": 53,
           "source_group": "docs",
           "text": "bash scripts/build_docs_site.sh --strict"
         },
         {
           "path": "docs/00-project/governance/07-doc-nav-policy.md",
-          "line": 129,
+          "line": 132,
           "source_group": "docs",
           "text": "- `bash scripts/build_docs_site.sh --strict`"
         },
@@ -435,7 +435,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/SKILLS-CATALOG.md",
-          "line": 86,
+          "line": 87,
           "source_group": "docs",
           "text": "- Guardrail: `scripts/check_ai_skills_layout.sh` принудительно проверяет канонический top-level layout."
         },
@@ -585,7 +585,7 @@
         },
         {
           "path": "docs/00-project/governance/07-doc-nav-policy.md",
-          "line": 46,
+          "line": 49,
           "source_group": "docs",
           "text": "./.venv/Scripts/python.exe scripts/check_doc_links.py"
         }
@@ -776,7 +776,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 9,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -786,7 +786,7 @@
         },
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 344,
+          "line": 365,
           "source_group": "scripts",
           "text": "\"Auto-generated from `scripts/check_scripts_inventory.py`.\","
         },
@@ -801,6 +801,12 @@
           "line": 25,
           "source_group": "tests",
           "text": "\"scripts/check_scripts_inventory.py\","
+        },
+        {
+          "path": "tests/architecture/test_scripts_inventory_discovery.py",
+          "line": 111,
+          "source_group": "tests",
+          "text": "[sys.executable, \"scripts/check_scripts_inventory.py\", \"--json\"],"
         },
         {
           "path": "tests/architecture/test_scripts_inventory_manifest.py",
@@ -819,12 +825,6 @@
           "line": 63,
           "source_group": "tests",
           "text": "\"Run scripts/check_scripts_inventory.py --update to refresh manifest.\""
-        },
-        {
-          "path": "tests/architecture/test_scripts_lifecycle_registry.py",
-          "line": 24,
-          "source_group": "tests",
-          "text": "\"scripts/check_scripts_inventory.py\","
         }
       ]
     },
@@ -879,7 +879,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/SKILLS-CATALOG.md",
-          "line": 16,
+          "line": 18,
           "source_group": "docs",
           "text": "bash scripts/check_skills_mirror.sh --check"
         }
@@ -1211,18 +1211,38 @@
     {
       "path": "scripts/codex-exec.bat",
       "type": "bat",
-      "status": "orphan",
+      "status": "unknown",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "docs/03-guides/development/codex-wsl2-setup.md",
+          "line": 104,
+          "source_group": "docs",
+          "text": "scripts\\codex-exec.bat \"fix the bug\"        # full-auto"
+        }
+      ]
     },
     {
       "path": "scripts/codex.bat",
       "type": "bat",
-      "status": "orphan",
+      "status": "unknown",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "docs/03-guides/development/codex-wsl2-setup.md",
+          "line": 102,
+          "source_group": "docs",
+          "text": "scripts\\codex.bat                           # interactive"
+        },
+        {
+          "path": "docs/03-guides/development/codex-wsl2-setup.md",
+          "line": 103,
+          "source_group": "docs",
+          "text": "scripts\\codex.bat \"add retry logic\"         # interactive with prompt"
+        }
+      ]
     },
     {
       "path": "scripts/config_gap_analysis.py",
@@ -2745,6 +2765,14 @@
       ]
     },
     {
+      "path": "scripts/diagrams/svg2png.mjs",
+      "type": "mjs",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/diagrams/uniform_diagram_sizes.py",
       "type": "py",
       "status": "active",
@@ -3567,18 +3595,32 @@
     {
       "path": "scripts/ops/codex-exec.bat",
       "type": "bat",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/codex-exec.bat",
+          "line": 4,
+          "source_group": "scripts",
+          "text": "REM - scripts\\ops\\codex-exec.bat"
+        }
+      ]
     },
     {
       "path": "scripts/ops/codex.bat",
       "type": "bat",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/codex.bat",
+          "line": 4,
+          "source_group": "scripts",
+          "text": "REM - scripts\\ops\\codex.bat"
+        }
+      ]
     },
     {
       "path": "scripts/ops/delete-stale-branches.sh",
@@ -3721,10 +3763,17 @@
     {
       "path": "scripts/ops/start-wsl-proxy.bat",
       "type": "bat",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/start-wsl-proxy.bat",
+          "line": 4,
+          "source_group": "scripts",
+          "text": "REM - scripts\\ops\\start-wsl-proxy.bat"
+        }
+      ]
     },
     {
       "path": "scripts/ops/wsl_proxy.py",
@@ -4086,13 +4135,13 @@
         },
         {
           "path": "docs/00-project/governance/07-doc-nav-policy.md",
-          "line": 83,
+          "line": 86,
           "source_group": "docs",
           "text": "- Script: `scripts/report_docs_kpi.py`"
         },
         {
           "path": "docs/00-project/governance/07-doc-nav-policy.md",
-          "line": 123,
+          "line": 126,
           "source_group": "docs",
           "text": "- `./.venv/Scripts/python.exe scripts/report_docs_kpi.py`"
         },
@@ -4470,10 +4519,23 @@
     {
       "path": "scripts/start-wsl-proxy.bat",
       "type": "bat",
-      "status": "orphan",
+      "status": "unknown",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "docs/03-guides/development/codex-wsl2-setup.md",
+          "line": 70,
+          "source_group": "docs",
+          "text": "scripts\\start-wsl-proxy.bat"
+        },
+        {
+          "path": "docs/03-guides/development/codex-wsl2-setup.md",
+          "line": 284,
+          "source_group": "docs",
+          "text": "If not listening, run `scripts\\start-wsl-proxy.bat`."
+        }
+      ]
     },
     {
       "path": "scripts/test_changed.sh",
@@ -4651,13 +4713,19 @@
       "type": "py",
       "status": "unknown",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
           "line": 27,
           "source_group": "docs",
           "text": "│  scripts/wsl_proxy.py ──► VPN ──► Internet      │"
+        },
+        {
+          "path": "docs/03-guides/development/codex-wsl2-setup.md",
+          "line": 76,
+          "source_group": "docs",
+          "text": "python scripts\\wsl_proxy.py"
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
@@ -4896,6 +4964,14 @@
           "text": "src/tools/harmonize_link_styles.py,M +1/-1,-,M +1/-1,M +1/-1"
         }
       ]
+    },
+    {
+      "path": "src/tools/init_db.sql",
+      "type": "sql",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "src/tools/scripts/__init__.py",

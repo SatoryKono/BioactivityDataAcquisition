@@ -17,7 +17,7 @@ __all__ = [
 ]
 
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, cast
 from uuid import UUID, uuid4
@@ -64,6 +64,8 @@ class PipelineRunnerService:
         runner_factory: Factory for creating pipeline runners (injected).
         metrics_extractor: Extractor for runner execution metrics (injected).
         logger: Structured logger for observability (injected).
+        _context_service: Helper service for building effective options and run context.
+        _execution_service: Helper service for executing the prepared runner.
 
     Example:
         >>> service = get_pipeline_runner_service()
@@ -75,12 +77,8 @@ class PipelineRunnerService:
     runner_factory: RunnerFactoryPort
     metrics_extractor: MetricsExtractorPort
     logger: LoggerPort
-    _context_service: PipelineRunContextService = field(
-        default_factory=PipelineRunContextService
-    )
-    _execution_service: PipelineRunExecutionService = field(
-        default_factory=PipelineRunExecutionService
-    )
+    _context_service: PipelineRunContextService
+    _execution_service: PipelineRunExecutionService
 
     async def run(
         self,

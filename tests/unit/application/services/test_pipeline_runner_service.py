@@ -12,6 +12,12 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.shutdown import PipelineShutdownError
+from bioetl.application.services.pipeline_run_context_service import (
+    PipelineRunContextService,
+)
+from bioetl.application.services.pipeline_run_execution_service import (
+    PipelineRunExecutionService,
+)
 from bioetl.application.services.pipeline_runner_service import (
     PipelineNotFoundError,
     PipelineRunnerService,
@@ -75,6 +81,8 @@ def service(mock_runner_factory, mock_metrics_extractor, mock_logger):
         runner_factory=mock_runner_factory,
         metrics_extractor=mock_metrics_extractor,
         logger=mock_logger,
+        _context_service=PipelineRunContextService(),
+        _execution_service=PipelineRunExecutionService(),
     )
 
 

@@ -23,10 +23,19 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Final
 
-SCRIPT_EXTENSIONS: Final[tuple[str, ...]] = (".py", ".sh", ".ps1", ".cmd", ".bat")
+SCRIPT_EXTENSIONS: Final[tuple[str, ...]] = (
+    ".py",
+    ".sh",
+    ".ps1",
+    ".cmd",
+    ".bat",
+    ".mjs",
+    ".sql",
+)
 SCRIPT_ROOTS: Final[tuple[str, ...]] = ("scripts", "src/tools")
 SEARCH_ROOTS: Final[tuple[str, ...]] = (
     "AGENTS.md",
+    ".codex/agents",
     ".codex/skills",
     ".github/workflows",
     "pyproject.toml",
@@ -79,7 +88,7 @@ SKIP_FILE_EXTENSIONS: Final[set[str]] = {
 }
 SCRIPT_PATH_TOKENS: Final[tuple[str, ...]] = ("scripts/", "src/tools/")
 SCRIPT_PATH_CANDIDATE_PATTERN: Final[re.Pattern[str]] = re.compile(
-    r"(?:scripts|src/tools)/[A-Za-z0-9._/-]+\.(?:py|sh|ps1|cmd|bat)"
+    r"(?:scripts|src/tools)/[A-Za-z0-9._/-]+\.(?:py|sh|ps1|cmd|bat|mjs|sql)"
 )
 MANIFEST_DEFAULT: Final[str] = "configs/quality/scripts_inventory_manifest.json"
 DEPRECATION_REPORT_DEFAULT: Final[str] = (
@@ -165,6 +174,8 @@ def _source_group(rel_path: str) -> str:
         return "ci"
     if rel_path.startswith(".codex/skills/"):
         return "skills"
+    if rel_path.startswith(".codex/agents/"):
+        return "agents"
     if rel_path in {"Makefile", "makefile", "pyproject.toml"}:
         return "build"
     if rel_path.startswith("tests/"):
@@ -191,14 +202,20 @@ def _discover_refs(root: Path, scripts: list[Path]) -> dict[str, list[RefEvidenc
         except (OSError, UnicodeDecodeError):
             continue
 
-        if not any(token in text for token in SCRIPT_PATH_TOKENS):
+        normalized_text = text.replace("\\", "/")
+        if not any(token in normalized_text for token in SCRIPT_PATH_TOKENS):
             continue
 
-        lines = text.splitlines()
-        for line_no, line in enumerate(lines, start=1):
-            if not any(token in line for token in SCRIPT_PATH_TOKENS):
+        original_lines = text.splitlines()
+        normalized_lines = normalized_text.splitlines()
+        for line_no, (raw_line, normalized_line) in enumerate(
+            zip(original_lines, normalized_lines), start=1
+        ):
+            if not any(token in normalized_line for token in SCRIPT_PATH_TOKENS):
                 continue
-            for script_rel in set(SCRIPT_PATH_CANDIDATE_PATTERN.findall(line)):
+            for script_rel in set(
+                SCRIPT_PATH_CANDIDATE_PATTERN.findall(normalized_line)
+            ):
                 if script_rel not in script_set:
                     continue
                 if rel == script_rel:
@@ -207,7 +224,7 @@ def _discover_refs(root: Path, scripts: list[Path]) -> dict[str, list[RefEvidenc
                     RefEvidence(
                         path=rel,
                         line=line_no,
-                        text=line.strip()[:200],
+                        text=raw_line.strip()[:200],
                         source_group=_source_group(rel),
                     )
                 )
@@ -241,11 +258,15 @@ def _status_for(script_rel: str, refs: list[RefEvidence]) -> str:
 def _agent_usage(refs: list[RefEvidence]) -> list[str]:
     usages: set[str] = set()
     for item in refs:
-        if not item.path.startswith(".codex/skills/"):
+        if item.path.startswith(".codex/skills/"):
+            parts = item.path.split("/")
+            if len(parts) >= 4:
+                usages.add(parts[2])
             continue
-        parts = item.path.split("/")
-        if len(parts) >= 4:
-            usages.add(parts[2])
+        if item.path.startswith(".codex/agents/"):
+            agent_name = Path(item.path).stem
+            if agent_name:
+                usages.add(agent_name)
     return sorted(usages)
 
 
@@ -547,7 +568,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"[OK] Updated scripts deprecation report: {report_path}")
 
     if args.json:
-        print(json.dumps(payload, ensure_ascii=False, indent=2))
+        print(json.dumps(payload, ensure_ascii=True, indent=2))
     else:
         summary = payload["summary"]
         print(

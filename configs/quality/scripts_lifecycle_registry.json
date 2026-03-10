@@ -245,6 +245,18 @@
       "review_by": "2026-06-30",
       "next_step": "Root compatibility wrapper for scripts/ops/check_mcp.sh. Keep per scripts/README.md policy."
     },
+    "scripts/codex-exec.bat": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Root compatibility wrapper for scripts/ops/codex-exec.bat. Keep while Windows launchers remain supported."
+    },
+    "scripts/codex.bat": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Root compatibility wrapper for scripts/ops/codex.bat. Keep while Windows launchers remain supported."
+    },
     "scripts/ci/apply-ci-optimizations-fixed.ps1": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",
@@ -305,6 +317,12 @@
       "review_by": "2026-06-30",
       "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ РїРѕРґС‚РІРµСЂР¶РґРµРЅРЅС‹Р№ operational playbook Рё РїРµСЂРёРѕРґРёС‡РµСЃРєРёР№ smoke-check."
     },
+    "scripts/diagrams/svg2png.mjs": {
+      "owner": "@bioetl-architecture",
+      "decision": "evaluate",
+      "review_by": "2026-06-30",
+      "next_step": "Confirm whether the Node/Puppeteer SVG-to-PNG fallback is still needed in any documented render flow; archive if superseded."
+    },
     "scripts/dq_baseline_update.py": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",
@@ -349,11 +367,23 @@
       "review_by": "2026-06-30",
       "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ СЏРІРЅС‹Р№ smoke-РІС‹Р·РѕРІ/РѕРїРµСЂР°С†РёРѕРЅРЅС‹Р№ playbook РёР»Рё РїРµСЂРµРІРµСЃС‚Рё РІ deprecate."
     },
+    "scripts/start-wsl-proxy.bat": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Root compatibility wrapper for scripts/ops/start-wsl-proxy.bat. Keep while Windows setup helpers remain supported."
+    },
     "scripts/vacuum_delta.py": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",
       "review_by": "2026-06-30",
       "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ СЏРІРЅС‹Р№ smoke-РІС‹Р·РѕРІ/РѕРїРµСЂР°С†РёРѕРЅРЅС‹Р№ playbook РёР»Рё РїРµСЂРµРІРµСЃС‚Рё РІ deprecate."
+    },
+    "scripts/wsl_proxy.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Root compatibility wrapper for scripts/ops/wsl_proxy.py. Keep while WSL2 VPN proxy setup is documented."
     },
     "scripts/validate_data_dir.py": {
       "owner": "@bioetl-platform",
@@ -390,6 +420,12 @@
       "decision": "keep_manual",
       "review_by": "2026-06-30",
       "next_step": "РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє manual tool; РґРѕР±Р°РІРёС‚СЊ СЏРІРЅС‹Р№ smoke-РІС‹Р·РѕРІ/РѕРїРµСЂР°С†РёРѕРЅРЅС‹Р№ playbook РёР»Рё РїРµСЂРµРІРµСЃС‚Рё РІ deprecate."
+    },
+    "src/tools/init_db.sql": {
+      "owner": "@bioetl-platform",
+      "decision": "evaluate",
+      "review_by": "2026-06-30",
+      "next_step": "Confirm whether the optional PostgreSQL bootstrap helper is still part of any supported local setup; deprecate if Local-Only workflows no longer rely on it."
     },
     "src/tools/scripts/__init__.py": {
       "owner": "@bioetl-platform",
