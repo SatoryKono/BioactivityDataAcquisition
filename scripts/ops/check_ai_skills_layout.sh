@@ -9,7 +9,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 SKILLS_ROOT="$REPO_ROOT/docs/00-project/ai/skills"
 
 BLUE='\033[0;34m'
@@ -70,6 +70,7 @@ if command -v rg >/dev/null 2>&1; then
             --glob '!docs/exports/**' \
             --glob '!docs/99-archive/**' \
             --glob '!scripts/check_ai_skills_layout.sh' \
+            --glob '!scripts/ops/check_ai_skills_layout.sh' \
             "docs/00-project/skills/" \
             "$REPO_ROOT/mkdocs.yml" \
             "$REPO_ROOT/.github" \
@@ -97,6 +98,7 @@ else
             --exclude-dir=reports \
             --exclude-dir=exports \
             --exclude-dir=99-archive \
+            --exclude=check_ai_skills_layout.sh \
             --exclude=check_ai_skills_layout.sh || true
     )"
 fi

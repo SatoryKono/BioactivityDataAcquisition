@@ -8,7 +8,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 SOURCE_ROOT="$REPO_ROOT/.codex/skills"
 MIRROR_ROOT="$REPO_ROOT/docs/00-project/ai/skills/local"

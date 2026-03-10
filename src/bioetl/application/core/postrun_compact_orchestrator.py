@@ -12,7 +12,10 @@ if TYPE_CHECKING:
 
 
 class PostrunCompactService:
-    """Deduplicates Silver table after append-mode pipeline runs."""
+    """Deduplicates Silver table after APPEND or MERGE pipeline runs."""
+
+    # DELETE overwrites the entire table, so dedup is unnecessary.
+    _COMPACTABLE_MODES = frozenset({SilverWriteMode.APPEND, SilverWriteMode.MERGE})
 
     def __init__(
         self,
@@ -28,13 +31,13 @@ class PostrunCompactService:
         self._warning_allowlist = warning_allowlist
 
     async def run_if_needed(self) -> int:
-        """Deduplicate Silver if write mode is APPEND.
+        """Deduplicate Silver if write mode is APPEND or MERGE.
 
         Returns:
             Number of duplicate rows removed, or 0 if skipped.
         """
         table_cfg = self._config.table
-        if table_cfg.silver_write_mode != SilverWriteMode.APPEND:
+        if table_cfg.silver_write_mode not in self._COMPACTABLE_MODES:
             return 0
         silver_table = self._config.effective_silver_table
         pks = list(table_cfg.primary_keys)

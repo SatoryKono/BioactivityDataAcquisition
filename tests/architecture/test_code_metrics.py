@@ -33,39 +33,51 @@ class TestFileSizeLimits:
     # Exemptions are managed in configs/quality/architecture_metric_exemptions.yaml
     EXEMPTIONS = get_registry_values("file_size_limits")
 
-    def test_domain_files_under_limit(self, src_dir: Path) -> None:
+    def test_domain_files_under_limit(self, src_dir: Path, source_content_cache: dict) -> None:
         """Domain layer files must be under 300 LOC."""
-        self._check_layer(src_dir, "domain", self.LAYER_LIMITS["domain"])
+        self._check_layer(src_dir, "domain", self.LAYER_LIMITS["domain"], source_content_cache)
 
-    def test_application_files_under_limit(self, src_dir: Path) -> None:
+    def test_application_files_under_limit(self, src_dir: Path, source_content_cache: dict) -> None:
         """Application layer files must be under 500 LOC."""
-        self._check_layer(src_dir, "application", self.LAYER_LIMITS["application"])
+        self._check_layer(src_dir, "application", self.LAYER_LIMITS["application"], source_content_cache)
 
-    def test_composition_files_under_limit(self, src_dir: Path) -> None:
+    def test_composition_files_under_limit(self, src_dir: Path, source_content_cache: dict) -> None:
         """Composition layer files must be under 400 LOC."""
-        self._check_layer(src_dir, "composition", self.LAYER_LIMITS["composition"])
+        self._check_layer(src_dir, "composition", self.LAYER_LIMITS["composition"], source_content_cache)
 
-    def test_infrastructure_files_under_limit(self, src_dir: Path) -> None:
+    def test_infrastructure_files_under_limit(self, src_dir: Path, source_content_cache: dict) -> None:
         """Infrastructure layer files must be under 600 LOC."""
         self._check_layer(
-            src_dir, "infrastructure", self.LAYER_LIMITS["infrastructure"]
+            src_dir, "infrastructure", self.LAYER_LIMITS["infrastructure"], source_content_cache
         )
 
-    def test_interfaces_files_under_limit(self, src_dir: Path) -> None:
+    def test_interfaces_files_under_limit(self, src_dir: Path, source_content_cache: dict) -> None:
         """Interfaces layer files must be under 400 LOC."""
-        self._check_layer(src_dir, "interfaces", self.LAYER_LIMITS["interfaces"])
+        self._check_layer(src_dir, "interfaces", self.LAYER_LIMITS["interfaces"], source_content_cache)
 
-    def _check_layer(self, src_dir: Path, layer: str, limit: int) -> None:
+    def _check_layer(
+        self, src_dir: Path, layer: str, limit: int,
+        source_content_cache: dict | None = None,
+    ) -> None:
         """Check all files in a layer against the limit."""
         layer_path = src_dir / "bioetl" / layer
         if not layer_path.exists():
             pytest.skip(f"{layer} layer not found")
 
         violations = []
-        for py_file in layer_path.rglob("*.py"):
-            if py_file.name.startswith("__"):
-                continue
+        if source_content_cache is not None:
+            items = (
+                (p, c) for p, c in source_content_cache.items()
+                if layer_path in p.parents and not p.name.startswith("__")
+            )
+        else:
+            items = (
+                (p, p.read_text(encoding="utf-8"))
+                for p in layer_path.rglob("*.py")
+                if not p.name.startswith("__")
+            )
 
+        for py_file, content in items:
             # Check for exemptions
             file_limit = resolve_registry_value(
                 self.EXEMPTIONS,
@@ -75,7 +87,7 @@ class TestFileSizeLimits:
             if file_limit is None:
                 file_limit = limit
 
-            loc = len(py_file.read_text(encoding="utf-8").splitlines())
+            loc = len(content.splitlines())
             if loc > file_limit:
                 violations.append(
                     f"{py_file.relative_to(src_dir)}: {loc} LOC (limit: {file_limit})"
@@ -101,21 +113,24 @@ class TestFunctionComplexity:
     # Exemptions are managed in configs/quality/architecture_metric_exemptions.yaml
     EXEMPTIONS = get_registry_values("function_complexity")
 
-    def test_domain_complexity(self, src_dir: Path) -> None:
+    def test_domain_complexity(self, src_dir: Path, source_content_cache: dict) -> None:
         """Domain functions must have CC <= 5."""
-        self._check_layer(src_dir, "domain", self.MAX_COMPLEXITY["domain"])
+        self._check_layer(src_dir, "domain", self.MAX_COMPLEXITY["domain"], source_content_cache)
 
-    def test_application_complexity(self, src_dir: Path) -> None:
+    def test_application_complexity(self, src_dir: Path, source_content_cache: dict) -> None:
         """Application functions must have CC <= 10."""
-        self._check_layer(src_dir, "application", self.MAX_COMPLEXITY["application"])
+        self._check_layer(src_dir, "application", self.MAX_COMPLEXITY["application"], source_content_cache)
 
-    def test_infrastructure_complexity(self, src_dir: Path) -> None:
+    def test_infrastructure_complexity(self, src_dir: Path, source_content_cache: dict) -> None:
         """Infrastructure functions must have CC <= 15."""
         self._check_layer(
-            src_dir, "infrastructure", self.MAX_COMPLEXITY["infrastructure"]
+            src_dir, "infrastructure", self.MAX_COMPLEXITY["infrastructure"], source_content_cache
         )
 
-    def _check_layer(self, src_dir: Path, layer: str, max_cc: int) -> None:
+    def _check_layer(
+        self, src_dir: Path, layer: str, max_cc: int,
+        source_content_cache: dict | None = None,
+    ) -> None:
         """Check all functions in a layer for complexity."""
         try:
             from radon.complexity import cc_visit
@@ -127,11 +142,19 @@ class TestFunctionComplexity:
             pytest.skip(f"{layer} layer not found")
 
         violations = []
-        for py_file in layer_path.rglob("*.py"):
-            if py_file.name.startswith("__"):
-                continue
+        if source_content_cache is not None:
+            items = (
+                (p, c) for p, c in source_content_cache.items()
+                if layer_path in p.parents and not p.name.startswith("__")
+            )
+        else:
+            items = (
+                (p, p.read_text(encoding="utf-8"))
+                for p in layer_path.rglob("*.py")
+                if not p.name.startswith("__")
+            )
 
-            content = py_file.read_text(encoding="utf-8")
+        for py_file, content in items:
             try:
                 results = cc_visit(content)
                 for item in results:
@@ -174,32 +197,22 @@ class TestFunctionLength:
         165  # Increased from 145 to account for expanded docstrings (DSWARM-010)
     )
 
-    def test_functions_under_100_lines(self, src_dir: Path) -> None:
+    def test_functions_under_100_lines(
+        self, src_dir: Path, source_ast_cache: dict,
+    ) -> None:
         """All functions must be under 100 lines (with exemptions)."""
-        bioetl_path = src_dir / "bioetl"
-        if not bioetl_path.exists():
-            pytest.skip("bioetl not found")
-
         violations = []
 
-        for py_file in bioetl_path.rglob("*.py"):
+        for py_file, tree in source_ast_cache.items():
             if py_file.name.startswith("__"):
-                continue
-
-            content = py_file.read_text(encoding="utf-8")
-            try:
-                tree = ast.parse(content)
-            except SyntaxError:
                 continue
 
             for node in ast.walk(tree):
                 if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                    # Calculate function length
                     start_line = node.lineno
                     end_line = node.end_lineno or start_line
                     func_lines = end_line - start_line + 1
 
-                    # Check exemptions
                     max_lines = resolve_registry_value(
                         self.EXEMPTIONS,
                         module_path=build_module_path_key(py_file, src_root=src_dir),
@@ -214,7 +227,6 @@ class TestFunctionLength:
                             f"is {func_lines} lines (max={max_lines})"
                         )
 
-        # Allow baseline violations but warn if too many (technical debt)
         if len(violations) > self.MAX_VIOLATIONS:
             pytest.fail(
                 f"Too many long functions ({len(violations)}, max={self.MAX_VIOLATIONS}):\n"
@@ -232,22 +244,14 @@ class TestClassSize:
 
     EXEMPTIONS = get_registry_values("class_size")
 
-    def test_classes_under_300_lines(self, src_dir: Path) -> None:
+    def test_classes_under_300_lines(
+        self, src_dir: Path, source_ast_cache: dict,
+    ) -> None:
         """All classes must be under 300 lines (with exemptions)."""
-        bioetl_path = src_dir / "bioetl"
-        if not bioetl_path.exists():
-            pytest.skip("bioetl not found")
-
         violations = []
 
-        for py_file in bioetl_path.rglob("*.py"):
+        for py_file, tree in source_ast_cache.items():
             if py_file.name.startswith("__"):
-                continue
-
-            content = py_file.read_text(encoding="utf-8")
-            try:
-                tree = ast.parse(content)
-            except SyntaxError:
                 continue
 
             for node in ast.walk(tree):
@@ -276,27 +280,18 @@ class TestClassSize:
                 + "\n".join(f"  - {v}" for v in violations)
             )
 
-    def test_classes_under_20_methods(self, src_dir: Path) -> None:
+    def test_classes_under_20_methods(
+        self, src_dir: Path, source_ast_cache: dict,
+    ) -> None:
         """Classes should not have more than 20 public methods."""
-        bioetl_path = src_dir / "bioetl"
-        if not bioetl_path.exists():
-            pytest.skip("bioetl not found")
-
         violations = []
 
-        for py_file in bioetl_path.rglob("*.py"):
+        for py_file, tree in source_ast_cache.items():
             if py_file.name.startswith("__"):
-                continue
-
-            content = py_file.read_text(encoding="utf-8")
-            try:
-                tree = ast.parse(content)
-            except SyntaxError:
                 continue
 
             for node in ast.walk(tree):
                 if isinstance(node, ast.ClassDef):
-                    # Count public methods (not starting with _)
                     public_methods = [
                         n
                         for n in node.body
@@ -304,7 +299,6 @@ class TestClassSize:
                         and not n.name.startswith("_")
                     ]
 
-                    # Check for exemptions
                     max_methods = resolve_registry_value(
                         self.METHOD_EXEMPTIONS,
                         module_path=build_module_path_key(py_file, src_root=src_dir),
@@ -342,7 +336,9 @@ class TestGodObjectDetection:
 
     EXEMPTIONS = get_registry_values("god_object")
 
-    def test_large_classes_have_delegation(self, src_dir: Path) -> None:
+    def test_large_classes_have_delegation(
+        self, src_dir: Path, source_ast_cache: dict,
+    ) -> None:
         """Large classes (>300 LOC) must show delegation patterns.
 
         Delegation is identified by:
@@ -352,20 +348,10 @@ class TestGodObjectDetection:
 
         Exemptions are allowed for specific patterns (see EXEMPTIONS dict).
         """
-        bioetl_path = src_dir / "bioetl"
-        if not bioetl_path.exists():
-            pytest.skip("bioetl not found")
-
         violations = []
 
-        for py_file in bioetl_path.rglob("*.py"):
+        for py_file, tree in source_ast_cache.items():
             if py_file.name.startswith("__"):
-                continue
-
-            content = py_file.read_text(encoding="utf-8")
-            try:
-                tree = ast.parse(content)
-            except SyntaxError:
                 continue
 
             for node in ast.walk(tree):

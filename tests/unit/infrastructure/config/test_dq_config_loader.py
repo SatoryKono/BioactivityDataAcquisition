@@ -18,9 +18,10 @@ import pytest
 from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
 
 
-@pytest.fixture
-def test_configs_root(tmp_path: Path) -> Path:
+@pytest.fixture(scope="class")
+def test_configs_root(tmp_path_factory: pytest.TempPathFactory) -> Path:
     """Create test config structure with hierarchical DQ configs."""
+    tmp_path = tmp_path_factory.mktemp("dq_configs")
     base_root = tmp_path / "base"
     base_root.mkdir()
     (base_root / "quality.yaml").write_text(

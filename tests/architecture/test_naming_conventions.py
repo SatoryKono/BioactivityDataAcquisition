@@ -4,10 +4,8 @@ import ast
 import re
 from pathlib import Path
 
-SRC = Path("src/bioetl")
 
-
-def test_class_naming_suffixes() -> None:
+def test_class_naming_suffixes(src_dir: Path, source_ast_cache: dict) -> None:
     suffixes = (
         "Factory",
         "Service",
@@ -56,9 +54,11 @@ def test_class_naming_suffixes() -> None:
         "Callable",
         "Assembler",
     )
+    app_path = src_dir / "bioetl" / "application"
     violations: list[str] = []
-    for path in (SRC / "application").rglob("*.py"):
-        tree = ast.parse(path.read_text(encoding="utf-8"))
+    for path, tree in source_ast_cache.items():
+        if app_path not in path.parents:
+            continue
         for node in [n for n in ast.walk(tree) if isinstance(n, ast.ClassDef)]:
             if node.name.startswith("_"):
                 continue
@@ -92,10 +92,10 @@ def test_class_naming_suffixes() -> None:
     assert not violations, "Class naming violations:\n" + "\n".join(violations[:80])
 
 
-def test_module_naming_snake_case() -> None:
+def test_module_naming_snake_case(src_python_files: list) -> None:
     banned = {"dw.py", "helpers.py", "misc.py"}
     violations: list[str] = []
-    for path in SRC.rglob("*.py"):
+    for path in src_python_files:
         name = path.name
         if name in banned:
             violations.append(str(path))
@@ -104,10 +104,9 @@ def test_module_naming_snake_case() -> None:
     assert not violations, "Module naming violations:\n" + "\n".join(violations[:80])
 
 
-def test_constants_upper_snake_case() -> None:
+def test_constants_upper_snake_case(source_ast_cache: dict) -> None:
     violations: list[str] = []
-    for path in SRC.rglob("*.py"):
-        tree = ast.parse(path.read_text(encoding="utf-8"))
+    for path, tree in source_ast_cache.items():
         for node in tree.body:
             if isinstance(node, ast.Assign):
                 for target in node.targets:

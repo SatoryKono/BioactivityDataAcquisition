@@ -126,31 +126,37 @@ def test_mypy_error_count() -> None:
 MAX_ARCHITECTURE_SKIPS = 24
 
 
-class _SkipCounter:
-    """Lightweight pytest plugin that counts skipped test outcomes."""
+class _SkipMarkerCounter:
+    """Lightweight pytest plugin that counts skip markers during collection."""
 
     def __init__(self) -> None:
         self.skipped = 0
-        self._seen: set[str] = set()
+        self.total = 0
 
-    def pytest_runtest_logreport(self, report: pytest.TestReport) -> None:  # type: ignore[name-defined]
-        # A test may be reported as skipped in setup (markers) or call (pytest.skip()).
-        # Deduplicate by nodeid to avoid double-counting.
-        if report.skipped and report.nodeid not in self._seen:
-            self._seen.add(report.nodeid)
-            self.skipped += 1
+    def pytest_collection_modifyitems(self, items: list) -> None:
+        """Count items with skip/skipif markers (without running tests)."""
+        self.total = len(items)
+        for item in items:
+            for marker in item.iter_markers():
+                if marker.name in ("skip", "skipif"):
+                    self.skipped += 1
+                    break
 
 
-@pytest.mark.timeout(600)
+@pytest.mark.timeout(120)
 def test_architecture_skip_count() -> None:
-    """Architecture test skip count must not exceed the ratchet budget."""
-    counter = _SkipCounter()
-    # Run architecture tests in-process via pytest.main() with a custom plugin.
-    # --override-ini="addopts=" clears any default addopts to avoid interference.
+    """Architecture test skip count must not exceed the ratchet budget.
+
+    Uses collect-only mode to count skip markers without re-running all
+    architecture tests.  Only counts marker-based skips (@pytest.mark.skip,
+    @pytest.mark.skipif), not runtime pytest.skip() calls.
+    """
+    counter = _SkipMarkerCounter()
+    # Collect (but don't run) architecture tests to count skip markers.
     pytest.main(
         [
             "tests/architecture/",
-            "--tb=no",
+            "--collect-only",
             "-q",
             "--ignore=tests/architecture/test_regression_metrics.py",
             "-p",
@@ -191,22 +197,25 @@ FORBIDDEN_ADAPTER_CLASSES = frozenset(
 _FORBIDDEN_LAYERS = ("domain", "application", "interfaces")
 
 
-def _find_adapter_instantiations(src_dir: Path) -> list[str]:
+def _find_adapter_instantiations(
+    src_dir: Path,
+    source_ast_cache: dict[Path, ast.Module] | None = None,
+) -> list[str]:
     """Find direct adapter class instantiations outside composition/."""
     violations: list[str] = []
     bioetl = src_dir / "bioetl"
 
-    for layer in _FORBIDDEN_LAYERS:
-        layer_path = bioetl / layer
-        if not layer_path.exists():
-            continue
-        for py_file in sorted(layer_path.rglob("*.py")):
+    if source_ast_cache is not None:
+        for py_file, tree in source_ast_cache.items():
             if py_file.name.startswith("__"):
                 continue
-            source = py_file.read_text(encoding="utf-8")
-            try:
-                tree = ast.parse(source)
-            except SyntaxError:
+            # Check if file is in one of the forbidden layers
+            layer_match = False
+            for layer in _FORBIDDEN_LAYERS:
+                if (bioetl / layer) in py_file.parents:
+                    layer_match = True
+                    break
+            if not layer_match:
                 continue
             for node in ast.walk(tree):
                 if not isinstance(node, ast.Call):
@@ -219,12 +228,38 @@ def _find_adapter_instantiations(src_dir: Path) -> list[str]:
                 if name in FORBIDDEN_ADAPTER_CLASSES:
                     rel = py_file.relative_to(src_dir)
                     violations.append(f"{rel}:{node.lineno}: {name}()")
+    else:
+        for layer in _FORBIDDEN_LAYERS:
+            layer_path = bioetl / layer
+            if not layer_path.exists():
+                continue
+            for py_file in sorted(layer_path.rglob("*.py")):
+                if py_file.name.startswith("__"):
+                    continue
+                source = py_file.read_text(encoding="utf-8")
+                try:
+                    tree = ast.parse(source)
+                except SyntaxError:
+                    continue
+                for node in ast.walk(tree):
+                    if not isinstance(node, ast.Call):
+                        continue
+                    name = None
+                    if isinstance(node.func, ast.Name):
+                        name = node.func.id
+                    elif isinstance(node.func, ast.Attribute):
+                        name = node.func.attr
+                    if name in FORBIDDEN_ADAPTER_CLASSES:
+                        rel = py_file.relative_to(src_dir)
+                        violations.append(f"{rel}:{node.lineno}: {name}()")
     return violations
 
 
-def test_inline_adapter_construction_budget(src_dir: Path) -> None:
+def test_inline_adapter_construction_budget(
+    src_dir: Path, source_ast_cache: dict,
+) -> None:
     """Adapter classes must only be instantiated in composition layer."""
-    violations = _find_adapter_instantiations(src_dir)
+    violations = _find_adapter_instantiations(src_dir, source_ast_cache)
     assert not violations, (
         f"inline_adapter_construction_count={len(violations)} (target: 0)\n"
         "Adapter instantiation outside composition/ detected:\n"

@@ -13,10 +13,6 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 SRC = REPO_ROOT / "src" / "bioetl"
 
 
-def _py_files() -> list[Path]:
-    return [p for p in SRC.rglob("*.py") if "tests" not in p.parts]
-
-
 def _strip_docstrings_and_comments(text: str) -> dict[int, str]:
     """Return mapping of line_number -> code_only for non-docstring, non-comment lines."""
     result: dict[int, str] = {}
@@ -41,14 +37,13 @@ def _strip_docstrings_and_comments(text: str) -> dict[int, str]:
     return result
 
 
-def test_no_sentinel_values() -> None:
+def test_no_sentinel_values(source_content_cache: dict) -> None:
     # Only match assignment sentinels, not mentions in strings/docs
     rx = re.compile(r"=\s*-1\b|=\s*9999\b")
     # UPPER_CASE constants may legitimately use -1 (e.g., zstd thread config)
     const_assign = re.compile(r"^\s*[A-Z_]+\s*=")
     violations: list[str] = []
-    for path in _py_files():
-        text = path.read_text(encoding="utf-8")
+    for path, text in source_content_cache.items():
         code_lines = _strip_docstrings_and_comments(text)
         for i, code in code_lines.items():
             if rx.search(code) and not const_assign.match(code):
@@ -102,12 +97,12 @@ def test_no_hardcoded_secrets() -> None:
     )
 
 
-def test_no_print_in_production() -> None:
+def test_no_print_in_production(source_content_cache: dict) -> None:
     violations: list[str] = []
-    for path in _py_files():
+    for path, text in source_content_cache.items():
         if path.match("src/bioetl/interfaces/cli/*") or "interfaces/cli" in str(path):
             continue
-        for i, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        for i, line in enumerate(text.splitlines(), 1):
             if re.match(r"^\s*print\(", line):
                 violations.append(f"{path}:{i}: {line.strip()}")
     assert not violations, "print() usage found:\n" + "\n".join(violations[:50])
@@ -135,11 +130,12 @@ def _extract_code_only(func_source: str) -> str:
     return "\n".join(lines)
 
 
-def test_no_blocking_io_in_async() -> None:
+def test_no_blocking_io_in_async(
+    source_ast_cache: dict, source_content_cache: dict,
+) -> None:
     violations: list[str] = []
-    for path in _py_files():
-        source = path.read_text(encoding="utf-8")
-        tree = ast.parse(source)
+    for path, tree in source_ast_cache.items():
+        source = source_content_cache[path]
         for node in ast.walk(tree):
             if isinstance(node, ast.AsyncFunctionDef):
                 segment = ast.get_source_segment(source, node) or ""

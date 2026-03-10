@@ -2,8 +2,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
-EXPECTED_MEMORY_PATH="${REPO_ROOT}/.ai/mcp/memory/memory.json"
+REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../.." && pwd)"
+EXPECTED_MEMORY_PATH="${REPO_ROOT}/docs/00-project/ai/memory/mcp-memory.json"
 
 ok() {
   printf "[OK] %s\n" "$1"
