@@ -246,6 +246,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         filter_config: InputFilterConfig | None = None,
         config: PipelineYamlConfig | None = None,
         cached_bronze: CachedBronzeContext | None = None,
+        debug_port: object | None = None,
     ) -> PipelineRunner:
         """Create and assemble a fully configured PipelineRunner instance.
 
@@ -257,6 +258,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             filter_config: Optional input filter configuration; disables filtering if None.
             config: Optional pre-loaded pipeline YAML config; loaded from disk if None.
             cached_bronze: Optional cached Bronze context; uses live API if None or disabled.
+            debug_port: Optional debug port for interactive debugging; no debugging if None.
 
         Returns:
             Fully wired PipelineRunner ready for execution.
@@ -289,6 +291,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
                 else True
             ),
             yaml_config=yaml_config,
+            debug_port=debug_port,
         )
 
 
@@ -333,6 +336,7 @@ def assemble_runner(
     gold_schema: type[pandera.DataFrameModel],
     strict_gold_validation: bool,
     yaml_config: PipelineYamlConfig | None = None,
+    debug_port: object | None = None,
 ) -> PipelineRunner:
     """Assemble a PipelineRunner from a pipeline instance."""
     return _assemble_runner_impl(
@@ -343,4 +347,5 @@ def assemble_runner(
         strict_gold_validation=strict_gold_validation,
         yaml_config=yaml_config,
         dq_configs_extractor=_extract_dq_configs,
+        debug_port=debug_port,
     )

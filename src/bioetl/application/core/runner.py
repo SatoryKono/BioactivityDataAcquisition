@@ -19,6 +19,7 @@ __all__ = ["PipelineRunner"]
 from typing import TYPE_CHECKING
 
 from bioetl.domain.events import PipelineEvent
+from bioetl.domain.ports.runtime.pipeline_debug import StageBreakpoint
 
 if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
@@ -33,6 +34,7 @@ if TYPE_CHECKING:
     from bioetl.application.services.medallion_lifecycle import (
         MedallionLifecycleService,
     )
+    from bioetl.application.services.pipeline_debug_service import PipelineDebugService
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import LoggerPort, TracingPort
@@ -67,6 +69,7 @@ class PipelineRunner:
         observer: PipelineObserver,
         pipeline: BasePipeline | None = None,
         tracer: TracingPort | None = None,
+        debug_service: PipelineDebugService | None = None,
     ) -> None:
         """Initialize pipeline runner.
 
@@ -86,6 +89,7 @@ class PipelineRunner:
             observer: Pipeline observability wrapper for tracing, metrics, logging.
             pipeline: Optional pipeline instance.
             tracer: Optional tracing port.
+            debug_service: Optional debug service for interactive debugging.
         """
         self._config = config
         self._runtime = runtime
@@ -104,6 +108,7 @@ class PipelineRunner:
         self._postrun_service = postrun
         self._lifecycle_service = lifecycle_service
         self._observer = observer
+        self._debug_service = debug_service
 
     @property
     def logger(self) -> LoggerPort:
@@ -143,6 +148,18 @@ class PipelineRunner:
                         self._services
                     )
 
+                    # Debug: breakpoint after preflight
+                    if self._debug_service is not None:
+                        snapshot = self._debug_service.capture_snapshot(
+                            stage="preflight_complete",
+                            records_fetched=0,
+                        )
+                        self._debug_service.check_breakpoint(
+                            StageBreakpoint.AFTER_PREFLIGHT,
+                            snapshot,
+                            message="Infrastructure validation complete",
+                        )
+
                     # Lifecycle: prepare (clear based on run type policy)
                     await self._lifecycle_service.prepare_for_run(
                         config=self._config,
@@ -179,6 +196,28 @@ class PipelineRunner:
                         executor=self._executor,
                         dq_context=dq_context,
                     )
+
+                    # Debug: breakpoint after DQ checks
+                    if self._debug_service is not None:
+                        snapshot = self._debug_service.capture_snapshot(
+                            stage="dq_complete",
+                            records_fetched=self._executor.records_fetched,
+                            records_bronze=getattr(
+                                self._executor, "records_bronze", 0
+                            ),
+                            records_silver=getattr(
+                                self._executor, "records_silver", 0
+                            ),
+                            records_gold=getattr(self._executor, "records_gold", 0),
+                            records_quarantined=getattr(
+                                self._executor, "records_quarantined", 0
+                            ),
+                        )
+                        self._debug_service.check_breakpoint(
+                            StageBreakpoint.AFTER_DQ,
+                            snapshot,
+                            message="Data quality checks complete",
+                        )
 
                     await self._checkpoint_manager.delete_checkpoint()
 

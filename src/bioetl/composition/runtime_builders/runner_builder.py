@@ -209,6 +209,7 @@ def _create_runner_from_factory(
             filter_config=inputs.filter_config,
             config=inputs.yaml_config,
             cached_bronze=inputs.cached_bronze,
+            debug_port=ctx.debug_port,
         ),
     )
 

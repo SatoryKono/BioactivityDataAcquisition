@@ -206,7 +206,37 @@ def _create_pipeline_runner(
     postrun_service: PostrunService,
     lifecycle_service: MedallionLifecycleService,
     observer: PipelineObserver,
+    debug_port: object | None = None,
 ) -> PipelineRunner:
+    """Create PipelineRunner with optional debug service.
+
+    Args:
+        pipeline: Configured pipeline instance.
+        observability: Observability bundle.
+        executor: Batch executor.
+        checkpoint_manager: Checkpoint manager service.
+        lock_manager: Lock coordinator.
+        preflight_service: Preflight validation service.
+        postrun_service: Post-run service.
+        lifecycle_service: Medallion lifecycle service.
+        observer: Pipeline observer.
+        debug_port: Optional debug port for interactive debugging.
+
+    Returns:
+        Fully wired PipelineRunner ready for execution.
+    """
+    # Create debug service if debug_port provided
+    debug_service = None
+    if debug_port is not None:
+        from bioetl.application.services.pipeline_debug_service import (
+            PipelineDebugService,
+        )
+
+        debug_service = PipelineDebugService(
+            debug_port=debug_port,
+            logger=observability.logger,
+        )
+
     return PipelineRunner(
         config=pipeline.config,
         runtime=pipeline.runtime,
@@ -223,6 +253,7 @@ def _create_pipeline_runner(
         observer=observer,
         pipeline=pipeline,
         tracer=observability.tracer,
+        debug_service=debug_service,
     )
 
 
@@ -240,6 +271,7 @@ def assemble_runner_impl(
         ]
         | None
     ) = None,
+    debug_port: object | None = None,
 ) -> PipelineRunner:
     """Assemble a PipelineRunner from a configured pipeline instance.
 
@@ -251,6 +283,7 @@ def assemble_runner_impl(
         strict_gold_validation: If True, raises on Gold schema violations.
         yaml_config: Optional pre-loaded pipeline YAML config for DQ path extraction.
         dq_configs_extractor: Optional callable to extract DQ configs from YAML config.
+        debug_port: Optional debug port for interactive debugging; no debugging if None.
 
     Returns:
         Fully wired PipelineRunner ready for execution.
@@ -314,4 +347,5 @@ def assemble_runner_impl(
         postrun_service=postrun_service,
         lifecycle_service=lifecycle_service,
         observer=observer,
+        debug_port=debug_port,
     )
