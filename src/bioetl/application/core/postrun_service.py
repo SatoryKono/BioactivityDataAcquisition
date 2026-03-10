@@ -206,7 +206,6 @@ class PostrunService:
         """
         dq_result = await self.run_dq_checks(executor)
         dq_reports = await self._generate_dq_reports(dq_context)
-        await self.run_silver_compact_if_needed()
         vacuum_result = await self.run_vacuum_if_enabled()
 
         # Write final run-level metadata (aggregates all batches)
