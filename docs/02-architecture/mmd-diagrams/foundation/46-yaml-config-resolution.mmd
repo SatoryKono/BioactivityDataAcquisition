@@ -19,24 +19,24 @@ flowchart TD
         direction TB
         BASE["configs/base/pipeline.yaml<br/>(global defaults)"]
         PROVIDER_BASE["configs/providers/{provider}.yaml<br/>(provider defaults)"]
-        PIPELINE["configs/entities/{provider}/{entity}.yaml<br/>(pipeline config)"]
+        PIPELINE["configs/entities/{provider}/{entity}.yaml<br/>(unified entity config)"]
         SOURCE["configs/providers/{provider}.yaml<br/>(source config)"]
     end
 
     subgraph DQ_HIERARCHY["DQ Config Hierarchy (DQConfigLoader)"]
         direction TB
-        DQ_DEFAULTS["configs/quality/_defaults.yaml<br/>(global DQ defaults)"]
-        DQ_PROVIDER["configs/quality/providers/{provider}.yaml<br/>(provider DQ)"]
-        DQ_ENTITY["configs/quality/entities/<br/>{provider}/{entity}.yaml<br/>(entity DQ)"]
+        DQ_DEFAULTS["configs/base/quality.yaml<br/>(global DQ defaults)"]
+        DQ_PROVIDER["configs/providers/{provider}.yaml#quality<br/>(provider DQ)"]
+        DQ_ENTITY["configs/entities/<br/>{provider}/{entity}.yaml#quality<br/>(entity DQ)"]
         DQ_INLINE["pipeline.dq_overrides<br/>(inline overrides)"]
     end
 
     subgraph FILTER_HIERARCHY["Filter Config Hierarchy (FilterConfigLoader)"]
         direction TB
-        FILTER_DEFAULTS["configs/filters/_defaults.yaml<br/>(global filter defaults)"]
-        FILTER_PROVIDER["configs/filters/providers/{provider}.yaml<br/>(provider filters)"]
-        FILTER_ENTITY["configs/filters/entities/<br/>{provider}/{entity}.yaml<br/>(entity filters)"]
-        FILTER_INLINE["pipeline.filter_rules<br/>(inline overrides)"]
+        FILTER_DEFAULTS["configs/base/pipeline.yaml#filter_defaults<br/>(global filter defaults)"]
+        FILTER_PROVIDER["configs/providers/{provider}.yaml#filters<br/>(provider filters)"]
+        FILTER_ENTITY["configs/entities/<br/>{provider}/{entity}.yaml#filters<br/>(entity filters)"]
+        FILTER_INLINE["pipeline.filter_rules<br/>(inline overrides, optional)"]
     end
 
     subgraph LOADERS["Infrastructure Config Loaders"]
@@ -50,7 +50,7 @@ flowchart TD
 
     subgraph DOMAIN_CONFIG["Domain Config Objects (Frozen)"]
         direction TB
-        PIPELINE_CONFIG["PipelineConfig<br/>provider/entity/table/dq + batch"]
+        PIPELINE_CONFIG["PipelineConfig<br/>provider/entity/table/dq/filter + batch"]
         TABLE_CONFIG["TableConfig<br/>primary_keys + silver/gold tables"]
     end
 
@@ -96,8 +96,8 @@ flowchart TD
     CONFIG_LOADER -->|"resolve DQ"| DQ_CONFIG_LOADER
 
     %% Convention-based auto-resolution (ADR-029)
-    PIPELINE -.->|"auto-resolve"| SOURCE
-    PIPELINE -.->|"auto-resolve"| PIPELINE_CONFIG
+    PIPELINE -.->|"auto-resolve source"| SOURCE
+    PIPELINE -.->|"merge hierarchy"| PIPELINE_CONFIG
 
     %% Merge rules
     classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:2px

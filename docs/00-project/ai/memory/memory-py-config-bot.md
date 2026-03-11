@@ -28,12 +28,8 @@ configs/
 │       └── {entity}.yaml           # Pipeline config
 ├── composites/
 │   └── {entity}.yaml               # Composite pipeline config
-├── quality/
-│   └── entities/
-│       └── {provider}/
-│           └── {entity}.yaml       # DQ rules per entity
 └── providers/
-    └── {provider}.yaml             # API source config
+    └── {provider}.yaml             # API source + provider quality/filters
 ```
 
 **Merge order**: `base/*.yaml -> providers/{provider}.yaml -> entities/{provider}/{entity}.yaml -> inline (deprecated)`
@@ -47,9 +43,9 @@ configs/
 | ADR-014 | `sort_by` MUST be present in Silver sink | `grep -A3 "sort_by" configs/entities/{p}/{e}.yaml` |
 | ADR-025 | Pipeline Config Unification (required fields) | `python scripts/config_gap_analysis.py -v` |
 | ADR-026 | Composite: `seed`, `enrichers`, `merge` sections | Review structure |
-| ADR-027 | DQ Rules Externalization: NO inline thresholds | `grep "soft_fail_threshold" configs/entities/` |
-| ADR-028 | Filter Rules Externalization | External filter configs |
-| ADR-029 | Convention-based Config (auto-computed paths) | Don't set `dq_config_file` / `filter_config_file` explicitly |
+| ADR-027 | DQ hierarchy: base/provider/entity unified sections | `grep -rn "^quality:" configs/providers configs/entities --include="*.yaml"` |
+| ADR-028 | Filter hierarchy: base/provider/entity unified sections | `grep -rn "^filters:" configs/providers configs/entities --include="*.yaml"` |
+| ADR-029 | Convention-based Config (auto-computed paths) | Don't set legacy `dq_config_file` / `filter_config_file` path overrides unless compatibility requires it |
 
 ---
 
@@ -59,66 +55,70 @@ configs/
 
 ```yaml
 # configs/entities/{provider}/{entity}.yaml
-pipeline_name: {provider}_{entity}
-provider: {provider}
-entity_type: {entity}
 version: "1.0.0"
+provider: {provider}
+entity: {entity}
 
-primary_keys: [{entity}_id]
-silver_table: {provider}_{entity}
-gold_table: {provider}_{entity}
+pipeline:
+  pipeline_name: {provider}_{entity}
+  provider: {provider}
+  entity_type: {entity}
+  business_primary_keys: [{entity}_id]
+  sink:
+    silver:
+      sort_by: [entity_id, {entity}_id]
+    gold:
+      enabled: true
 
-sink:
-  bronze:
-    path: data/output/bronze/{provider}/{entity}
-  silver:
-    path: data/output/silver/{provider}/{entity}
-    primary_key: [{entity}_id]
-    sort_by:                    # MUST (ADR-014)
-      columns: [{entity}_id]
-      ascending: true
-  gold:
-    path: data/output/gold/{provider}/{entity}
-    sort_by:                    # MUST (ADR-014)
-      columns: [{entity}_id]
-      ascending: true
+schema:
+  column_groups:
+    - name: system
+      fields: [entity_id, content_hash]
+    - name: business
+      fields: [{entity}_id]
+
+quality:
+  version: "1.0.0"
+  provider: {provider}
+  entity: {entity}
+
+filters:
+  version: "1.0.0"
+  provider: {provider}
+  entity: {entity}
+
+contracts:
+  primary_key:
+    business: [{entity}_id]
 ```
 
-### B. DQ Rules (Externalized)
+### B. Provider-Level Quality Defaults
 
 ```yaml
-# configs/quality/entities/{provider}/{entity}.yaml
-entity: {entity}
-provider: {provider}
+# configs/providers/{provider}.yaml
 version: "1.0.0"
+provider: {provider}
 
-thresholds:
-  soft_fail: 0.05
-  hard_fail: 0.20
+source:
+  rate_limit:
+    requests_per_second: 5
+    burst: 10
 
-rules:
-  - name: "{entity}_id_not_null"
-    field: "{entity}_id"
-    check: "not_null"
-    severity: critical
-  - name: "content_hash_not_null"
-    field: "content_hash"
-    check: "not_null"
-    severity: critical
+quality:
+  version: "1.0.0"
+  provider: {provider}
+  thresholds:
+    soft_fail: 0.05
+    hard_fail: 0.20
 ```
 
-### C. Filter Rules (Externalized)
+### C. Filter Hierarchy
 
 ```yaml
-# configs/quality/entities/{provider}/{entity}.yaml
-entity: {entity}
-provider: {provider}
-version: "1.0.0"
-
-gold_filters:
-  required_fields:
-    - {entity}_id
-    - content_hash
+# Filter defaults live in:
+# - configs/base/pipeline.yaml#filter_defaults
+# - configs/providers/{provider}.yaml#filters
+# - configs/entities/{provider}/{entity}.yaml#filters
 ```
 
 ### D. Composite Pipeline Config
@@ -169,7 +169,7 @@ composite:
 ### Before Creating/Updating
 
 ```bash
-python scripts/config_gap_analysis.py -v
+uv run python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v
 find configs/ -path "*/{provider}/*" -name "*.yaml" | sort
 cat configs/base/pipeline.yaml 2>/dev/null
 cat configs/providers/{provider}.yaml 2>/dev/null
@@ -179,30 +179,30 @@ cat configs/providers/{provider}.yaml 2>/dev/null
 
 ```bash
 # YAML syntax
-python -c "import yaml; yaml.safe_load(open('configs/entities/{provider}/{entity}.yaml'))"
+uv run python -c "import yaml; yaml.safe_load(open('configs/entities/{provider}/{entity}.yaml', encoding='utf-8'))"
 
 # Gap analysis (0 critical)
-python scripts/config_gap_analysis.py -v
+uv run python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v
 
 # sort_by present (ADR-014)
 grep -A3 "sort_by" configs/entities/{provider}/{entity}.yaml
 
-# No inline DQ thresholds (ADR-027)
-grep -n "soft_fail_threshold\|hard_fail_threshold" configs/entities/{provider}/{entity}.yaml
+# No legacy explicit path overrides (ADR-029)
+grep -n "dq_config_file\|filter_config_file" configs/entities/{provider}/{entity}.yaml
 
-# DQ externalized config exists
-test -f configs/quality/entities/{provider}/{entity}.yaml && echo "OK" || echo "MISSING"
+# Unified entity config contains quality/filters sections
+grep -n "^quality:\|^filters:" configs/entities/{provider}/{entity}.yaml
 ```
 
 ---
 
 ## 7. New Entity Scaffolding (Config Part)
 
-When creating a new entity, generate 3 configs:
+When creating a new entity, generate:
 
-1. `configs/entities/{provider}/{entity}.yaml` — pipeline config
-2. `configs/quality/entities/{provider}/{entity}.yaml` — DQ rules
-3. Filter rules are defined by policy in `configs/quality/entities/` + transformer logic (project-specific)
+1. `configs/entities/{provider}/{entity}.yaml` — unified entity config
+2. Update `configs/providers/{provider}.yaml` only if provider-level source/quality/filter defaults are needed
+3. Composite config only if the entity participates in multi-provider merge flows
 
 ---
 
@@ -210,7 +210,7 @@ When creating a new entity, generate 3 configs:
 
 | Event | Action |
 |-------|--------|
-| orchestrator: new entity scaffolding | -> config-bot creates pipeline + DQ + filter |
+| orchestrator: new entity scaffolding | -> config-bot creates unified entity config and provider overrides only when needed |
 | orchestrator: RF-* with config changes | -> config-bot updates affected configs |
 | py-audit-bot: config gap findings | -> config-bot remediates gaps |
 | py-plan-bot: composite pipeline task | -> config-bot creates composite config |
@@ -223,11 +223,13 @@ When creating a new entity, generate 3 configs:
 
 | What | Path |
 |------|------|
-| Pipeline defaults | `configs/base/pipeline.yaml` |
-| Source configs | `configs/providers/{provider}.yaml` |
+| Pipeline/filter defaults | `configs/base/pipeline.yaml` |
 | DQ defaults | `configs/base/quality.yaml` |
-| Gap analysis script | `scripts/config_gap_analysis.py` |
-| Config loader code | `src/bioetl/application/` or `src/bioetl/composition/` |
+| Provider configs | `configs/providers/{provider}.yaml` |
+| Unified entity configs | `configs/entities/{provider}/{entity}.yaml` |
+| Composite configs | `configs/composites/{entity}.yaml` |
+| Gap analysis script | `docs/00-project/ai/agents/scripts/py-config-bot-1.py` |
+| Config loader code | `src/bioetl/infrastructure/config_loader.py`, `src/bioetl/infrastructure/config/` |
 
 ---
 

@@ -5,6 +5,8 @@ description: Execute BioETL py-debug-bot profile for role-specific workflow and 
 
 # py-debug-bot
 
+*Статус: internal-published (Internal / Extended)*
+
 ## Objective
 Run the role-specific workflow as defined in the py-debug-bot profile.
 

@@ -44,7 +44,6 @@ _POSTRUN_WARNING_ALLOWLIST = (
     RuntimeError,
     ValueError,
     TypeError,
-    AttributeError,
 )
 _METADATA_VERSION_ALLOWLIST = (
     ImportError,
@@ -119,9 +118,9 @@ def build_postrun_service(
         storage=pipeline.services.storage,
         logger_port=logger_port,
         dq_report_service=pipeline.services.dq_report_service,
-        bronze_dq_config=dq_configs.bronze if dq_configs else None,
-        silver_dq_config=dq_configs.silver if dq_configs else None,
-        gold_dq_config=dq_configs.gold if dq_configs else None,
+        bronze_dq_config=dq_configs.bronze,
+        silver_dq_config=dq_configs.silver,
+        gold_dq_config=dq_configs.gold,
     )
     return PostrunService(
         config=pipeline.config,

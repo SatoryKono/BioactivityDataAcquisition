@@ -7,6 +7,8 @@ agent: general-purpose
 
 # Constrained Spec Generation
 
+*Статус: internal-published (Internal / Extended)*
+
 This skill generates PRD and architecture documents that are constrained by the decision ledger.
 
 ## Core Principle

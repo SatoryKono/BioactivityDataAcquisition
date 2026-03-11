@@ -6,7 +6,10 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.application.core.postrun_compact_orchestrator import PostrunCompactService
+from bioetl.application.core.postrun_compact_orchestrator import (
+    CompactionResult,
+    PostrunCompactService,
+)
 from bioetl.domain.medallion import SilverWriteMode
 
 
@@ -43,11 +46,11 @@ def _make_service(
 
 
 @pytest.mark.asyncio
-async def test_skips_when_mode_is_merge() -> None:
+async def test_runs_dedup_for_merge_mode() -> None:
     config = _make_config(silver_write_mode=SilverWriteMode.MERGE)
     svc = _make_service(config=config)
     result = await svc.run_if_needed()
-    assert result == 0
+    assert result == CompactionResult(status="success", duplicates_removed=0)
 
 
 @pytest.mark.asyncio
@@ -55,7 +58,7 @@ async def test_skips_when_no_silver_table() -> None:
     config = _make_config(silver_table="")
     svc = _make_service(config=config)
     result = await svc.run_if_needed()
-    assert result == 0
+    assert result == CompactionResult(status="skipped")
 
 
 @pytest.mark.asyncio
@@ -63,14 +66,14 @@ async def test_skips_when_no_primary_keys() -> None:
     config = _make_config(primary_keys=())
     svc = _make_service(config=config)
     result = await svc.run_if_needed()
-    assert result == 0
+    assert result == CompactionResult(status="skipped")
 
 
 @pytest.mark.asyncio
 async def test_calls_deduplicate_silver() -> None:
     svc = _make_service(dedup_result=42)
     result = await svc.run_if_needed()
-    assert result == 42
+    assert result == CompactionResult(status="success", duplicates_removed=42)
     svc._storage.deduplicate_silver.assert_awaited_once_with(
         "chembl/activity", ["activity_id"]
     )
@@ -90,7 +93,7 @@ async def test_catches_allowlisted_exceptions() -> None:
         warning_allowlist=(RuntimeError,),
     )
     result = await svc.run_if_needed()
-    assert result == 0
+    assert result == CompactionResult(status="failed", error="boom")
     logger.warning.assert_called_once()
 
 

@@ -7,6 +7,8 @@ agent: general-purpose
 
 # Create Pull Request
 
+*Статус: internal-published (Internal / Extended)*
+
 Creates GitHub PRs with Conventional Commits titles adapted for BioETL project.
 
 ## PR Title Format

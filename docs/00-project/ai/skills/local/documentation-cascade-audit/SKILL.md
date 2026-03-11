@@ -5,6 +5,8 @@ description: Run a hierarchical documentation audit for BioETL using cascade dec
 
 # Documentation Cascade Audit
 
+*Статус: internal-published (Internal / Extended)*
+
 ## Overview
 
 Coordinate a multi-scope documentation audit where each scope is analyzed separately and then merged into a single decision-ready report.

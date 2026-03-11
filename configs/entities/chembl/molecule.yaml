@@ -109,8 +109,8 @@ quality:
             error_message: Molecule ChEMBL ID is required
         -   field: property_full_mwt
             type: range
-            min: 10
-            max: 10000
+            min: 100
+            max: 1000
             nullable: true
             error_message: Molecular weight must be between 10 and 10000 Da
         -   field: property_alogp

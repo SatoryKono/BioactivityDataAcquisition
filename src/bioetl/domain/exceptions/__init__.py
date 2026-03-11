@@ -88,14 +88,6 @@ from bioetl.domain.exceptions.internal import (
 )
 
 # =============================================================================
-# PipelineShutdown - Graceful shutdown signal exception and reason enum
-# =============================================================================
-from bioetl.domain.exceptions.pipeline_shutdown import (
-    PipelineShutdownError,
-    ShutdownReason,
-)
-
-# =============================================================================
 # NetworkErrors - Network connectivity and external service errors
 # =============================================================================
 from bioetl.domain.exceptions.network import (
@@ -113,6 +105,14 @@ from bioetl.domain.exceptions.network import (
 )
 
 # =============================================================================
+# PipelineShutdown - Graceful shutdown signal exception and reason enum
+# =============================================================================
+from bioetl.domain.exceptions.pipeline_shutdown import (
+    PipelineShutdownError,
+    ShutdownReason,
+)
+
+# =============================================================================
 # ValidationErrors - Schema and data format validation
 # =============================================================================
 from bioetl.domain.exceptions.validation import (
@@ -125,7 +125,6 @@ from bioetl.domain.exceptions.validation import (
 __all__ = [
     "ApiError",
     "AuthFailureError",
-    # Base classes
     "BioETLError",
     "BronzeValidationError",
     "BucketNotFoundError",
@@ -134,7 +133,6 @@ __all__ = [
     "CircuitBreakerOpenError",
     "CriticalError",
     "DataQualityError",
-    # DataQualityErrors
     "DataQualityThresholdError",
     "DataValidationError",
     "DeltaOptimizeError",
@@ -142,9 +140,7 @@ __all__ = [
     "DeltaTransactionError",
     "DeltaWriteConflictError",
     "DomainExceptionContext",
-    # External service errors (NetworkErrors subcategory)
     "ExternalServiceError",
-    # InfrastructureErrors
     "InfrastructureError",
     "InvalidDataFormatError",
     "InvalidStateError",
@@ -153,7 +149,6 @@ __all__ = [
     "MergeConflictError",
     "MetricsServerError",
     "MissingRequiredFieldError",
-    # NetworkErrors
     "NetworkError",
     "PipelineShutdownError",
     "PolicyViolationError",
@@ -164,15 +159,14 @@ __all__ = [
     "RunnerAlreadyExecutedError",
     "SchemaEvolutionError",
     "SchemaViolationError",
-    "ShutdownReason",
     "ServiceAuthenticationError",
     "ServiceUnavailableError",
+    "ShutdownReason",
     "StorageError",
     "StorageQuotaExceededError",
     "TableNotFoundError",
     "TimeoutError",
     "UploadError",
-    # ValidationErrors
     "ValidationError",
     "get_domain_exception_context",
 ]

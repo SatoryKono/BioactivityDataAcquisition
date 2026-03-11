@@ -20,7 +20,10 @@ from bioetl.composition.runtime_builders.runner_builder import build_pipeline_ru
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
-    from bioetl.domain.ports import RunnablePort
+    from bioetl.domain.ports import (
+        ExecutionMetricsReadablePort,
+        ExecutionMetricsRunnerPort,
+    )
 
 
 __all__ = [
@@ -29,6 +32,17 @@ __all__ = [
     "create_metrics_extractor",
     "create_runner_factory",
 ]
+
+
+def _require_execution_metrics_runner(
+    runner: object,
+) -> ExecutionMetricsRunnerPort:
+    """Validate that a producer returned a metrics-readable runnable."""
+    from bioetl.domain.ports import ExecutionMetricsRunnerPort
+
+    if not isinstance(runner, ExecutionMetricsRunnerPort):
+        raise TypeError("Runner does not implement ExecutionMetricsRunnerPort")
+    return runner
 
 
 class RunnerFactory:
@@ -44,7 +58,7 @@ class RunnerFactory:
     def __init__(
         self,
         registry: PipelineRegistry | None = None,
-        runner_builder: Callable[..., RunnablePort] | None = None,
+        runner_builder: Callable[..., ExecutionMetricsRunnerPort] | None = None,
     ) -> None:
         """Initialize the factory.
 
@@ -71,7 +85,7 @@ class RunnerFactory:
         """Get the effective registry instance."""
         return self._registry if self._registry is not None else get_default_registry()
 
-    def create(self, context: PipelineRunContext) -> RunnablePort:
+    def create(self, context: PipelineRunContext) -> ExecutionMetricsRunnerPort:
         """Create a configured pipeline runner.
 
         Args:
@@ -86,8 +100,8 @@ class RunnerFactory:
         """
         self._ensure_registrations()
         runner_builder = self._runner_builder or build_pipeline_runner
-        runner: RunnablePort = runner_builder(context, registry=self._registry)
-        return runner
+        runner = runner_builder(context, registry=self._registry)
+        return _require_execution_metrics_runner(runner)
 
     def list_pipelines(self) -> list[str]:
         """List all available pipeline names.
@@ -118,7 +132,7 @@ class MetricsExtractor:
     Extracts metrics from the runner's public execution-metrics contract.
     """
 
-    def extract_metrics(self, runner: RunnablePort) -> dict[str, int]:
+    def extract_metrics(self, runner: ExecutionMetricsReadablePort) -> dict[str, int]:
         """Extract execution metrics from a runner.
 
         Args:
@@ -127,7 +141,12 @@ class MetricsExtractor:
         Returns:
             Dictionary with metric names and values.
         """
-        metrics = getattr(runner, "execution_metrics", None)
+        try:
+            metrics = runner.execution_metrics
+        except AttributeError as error:
+            raise TypeError(
+                "Runner does not expose a valid execution_metrics mapping"
+            ) from error
         if not isinstance(metrics, dict):
             raise TypeError(
                 "Runner does not expose a valid execution_metrics mapping"
@@ -144,7 +163,7 @@ class MetricsExtractor:
 
 def create_runner_factory(
     registry: PipelineRegistry | None = None,
-    runner_builder: Callable[..., RunnablePort] | None = None,
+    runner_builder: Callable[..., ExecutionMetricsRunnerPort] | None = None,
 ) -> RunnerFactory:
     """Create a new RunnerFactory instance.
 

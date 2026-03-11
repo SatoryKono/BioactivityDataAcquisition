@@ -124,6 +124,26 @@ class StorageMaintenancePort(Protocol):
         """
         ...
 
+    def is_table_initialized(
+        self,
+        table_name: str,
+        layer: Literal["silver", "gold"] = "silver",
+    ) -> bool:
+        """Check whether a Delta table exists and has been written to.
+
+        This abstracts away the storage-specific check (e.g. ``_delta_log``
+        presence) so that application code does not depend on Delta Lake
+        internals.
+
+        Args:
+            table_name: Logical table name.
+            layer: Medallion layer. Defaults to ``"silver"``.
+
+        Returns:
+            True if the table directory contains a valid Delta log.
+        """
+        ...
+
     async def clear_delta(self, table_name: str | None = None) -> int:
         """Clear Delta tables for Silver and Gold layers.
 

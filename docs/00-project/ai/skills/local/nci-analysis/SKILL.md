@@ -7,6 +7,8 @@ agent: general-purpose
 
 # NCI Manipulation Analysis
 
+*Статус: internal-published (Internal / Extended)*
+
 This skill uses pattern-based manipulation detection that identifies **how** content tries to influence the reader, not whether claims are factually true. Manipulation techniques leave fingerprints regardless of underlying accuracy.
 
 Use TodoWrite to track these mandatory steps:

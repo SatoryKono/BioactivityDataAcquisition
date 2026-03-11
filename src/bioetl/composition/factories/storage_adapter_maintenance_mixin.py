@@ -30,6 +30,16 @@ class StorageAdapterMaintenanceMixin:
     silver: SilverWriter
     gold: GoldWriter
 
+    def is_table_initialized(
+        self,
+        table_name: str,
+        layer: str = "silver",
+    ) -> bool:
+        """Check whether a Delta table has been written to."""
+        writer = self.gold if layer == "gold" else self.silver
+        table_path = writer.get_table_path(table_name)
+        return _is_delta_table_dir(table_path)
+
     async def optimize(
         self,
         table_name: str,

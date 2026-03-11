@@ -40,9 +40,9 @@ from bioetl.domain.types import RunID
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
+        ExecutionMetricsRunnerPort,
         LoggerPort,
         MetricsExtractorPort,
-        RunnablePort,
         RunnerFactoryPort,
     )
 
@@ -79,6 +79,17 @@ class PipelineRunnerService:
     logger: LoggerPort
     _context_service: PipelineRunContextService
     _execution_service: PipelineRunExecutionService
+
+    @staticmethod
+    def _require_execution_runner(
+        runner: object,
+    ) -> ExecutionMetricsRunnerPort:
+        """Validate producer output before pipeline side effects begin."""
+        from bioetl.domain.ports import ExecutionMetricsRunnerPort
+
+        if not isinstance(runner, ExecutionMetricsRunnerPort):
+            raise TypeError("Runner does not implement ExecutionMetricsRunnerPort")
+        return runner
 
     async def run(
         self,
@@ -125,7 +136,7 @@ class PipelineRunnerService:
         context = self._build_context(
             pipeline_name, effective_run_id, effective_options
         )
-        runner = self.runner_factory.create(context)
+        runner = self._require_execution_runner(self.runner_factory.create(context))
         return await self._execute_pipeline(
             runner=runner,
             run_logger=run_logger,
@@ -229,7 +240,7 @@ class PipelineRunnerService:
 
     async def _execute_pipeline(
         self,
-        runner: RunnablePort,
+        runner: ExecutionMetricsRunnerPort,
         run_logger: LoggerPort,
         pipeline_name: str,
         run_id: RunID,

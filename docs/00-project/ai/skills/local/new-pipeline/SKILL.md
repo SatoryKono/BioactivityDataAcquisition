@@ -5,6 +5,8 @@ description: Scaffold a new BioETL provider/entity pipeline with configs, transf
 
 # New Pipeline
 
+*Статус: internal-published (Internal / Extended)*
+
 ## Objective
 Create a new ETL pipeline for a provider/entity pair in BioETL.
 

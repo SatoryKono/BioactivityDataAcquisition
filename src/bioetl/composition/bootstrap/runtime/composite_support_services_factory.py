@@ -23,11 +23,11 @@ from bioetl.application.composite.deduplication import EnricherDeduplicatorServi
 from bioetl.application.composite.dependency_coordinator import (
     DependencyCoordinatorService,
 )
+from bioetl.application.composite.dependency_joiner import DependencyJoinerService
 from bioetl.application.composite.dependency_key_resolvers import (
     create_chained_key_resolver,
     create_seed_key_resolver,
 )
-from bioetl.application.composite.dependency_joiner import DependencyJoinerService
 from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.join_execution import JoinExecutorService, JoinHow
 from bioetl.application.composite.join_key_resolution import JoinKeyResolverService

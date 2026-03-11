@@ -7,6 +7,8 @@ agent: general-purpose
 
 # Pillar Synthesis
 
+*Статус: internal-published (Internal / Extended)*
+
 This skill transforms raw evidence objects into structured insights for a single research pillar.
 
 ## Prerequisites

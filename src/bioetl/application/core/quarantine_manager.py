@@ -6,13 +6,25 @@ Refactored per ADR-005 to accept explicit dependencies instead of full pipeline.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TypeAlias
+from typing import NamedTuple
 
 from bioetl.domain.ports import MetricsPort, QuarantinePort
-from bioetl.domain.types import BatchID, ErrorType, JsonDict
+from bioetl.domain.types import BatchID, BronzeRecord, ErrorType, JsonDict
 
-_DQQuarantineEntry: TypeAlias = tuple[JsonDict, ErrorType, str]
-_FilteredQuarantineEntry: TypeAlias = tuple[JsonDict, str]
+
+class DQQuarantineEntry(NamedTuple):
+    """A record that failed data-quality checks."""
+
+    record: BronzeRecord
+    error_type: ErrorType
+    error_details: str
+
+
+class FilteredQuarantineEntry(NamedTuple):
+    """A record excluded by Silver filters."""
+
+    record: BronzeRecord
+    reason: str
 
 
 class QuarantineManagerService:
@@ -77,7 +89,7 @@ class QuarantineManagerService:
 
     async def quarantine_records(
         self,
-        records: list[_DQQuarantineEntry],
+        records: list[DQQuarantineEntry],
         batch_id: BatchID,
         *,
         ingestion_ts: datetime,
@@ -151,7 +163,7 @@ class QuarantineManagerService:
 
     async def quarantine_filtered_records(
         self,
-        records: list[_FilteredQuarantineEntry],
+        records: list[FilteredQuarantineEntry],
         batch_id: BatchID,
         *,
         ingestion_ts: datetime,
@@ -223,4 +235,9 @@ class QuarantineManagerService:
 
 QuarantineManager = QuarantineManagerService
 
-__all__ = ["QuarantineManager", "QuarantineManagerService"]
+__all__ = [
+    "DQQuarantineEntry",
+    "FilteredQuarantineEntry",
+    "QuarantineManager",
+    "QuarantineManagerService",
+]

@@ -381,7 +381,8 @@ class TestBatchTransformerTransform:
         )
 
         assert result.filtered_out_count == 1
-        mock_context.logger.warning.assert_called()
+        assert result.records_quarantine_failed == 1
+        mock_context.logger.error.assert_called()
 
 
 @pytest.mark.unit

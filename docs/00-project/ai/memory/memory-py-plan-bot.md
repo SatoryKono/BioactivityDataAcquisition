@@ -201,7 +201,7 @@ Every RF-* MUST be validated against this matrix before inclusion in plan.
 | ADR directory | `docs/02-architecture/decisions/` |
 | Domain Ports | `src/bioetl/domain/ports/` |
 | Pipeline configs | `configs/entities/{provider}/{entity}.yaml` |
-| DQ configs | `configs/quality/entities/{provider}/{entity}.yaml` |
+| DQ configs | `configs/entities/{provider}/{entity}.yaml#quality` |
 | Composite configs | `configs/composites/` |
 | Factories | `src/bioetl/composition/factories/` |
 

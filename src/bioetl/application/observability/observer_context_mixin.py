@@ -5,9 +5,9 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING, Self
 
-from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 from bioetl.application.observability.observer_event_mixin import _ObserverEventMixin
 from bioetl.domain.events import PipelineEvent
+from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 
 if TYPE_CHECKING:
     from types import TracebackType

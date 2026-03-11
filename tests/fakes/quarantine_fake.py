@@ -9,6 +9,7 @@ from collections import defaultdict
 from datetime import UTC, datetime  # UTC used in add_record
 from typing import Any
 
+from bioetl.domain.ports.quality.quarantine import QuarantineWriteRequest
 from bioetl.domain.types import BatchID, QuarantineRecordStatus, RunID
 
 
@@ -50,7 +51,7 @@ class InMemoryQuarantine:
         }
         self._records[pipeline].append(record)
 
-    async def write_many(self, records: list[dict[str, Any]]) -> None:
+    async def write_many(self, records: list[QuarantineWriteRequest]) -> None:
         """Write multiple quarantine records."""
         for record in records:
             await self.write(

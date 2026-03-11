@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from datetime import datetime
-from typing import Protocol, runtime_checkable
+from typing import NotRequired, Protocol, TypedDict, runtime_checkable
 
 from bioetl.domain.types import (
     BatchID,
@@ -20,7 +20,24 @@ from bioetl.domain.types import (
 
 __all__ = [
     "QuarantinePort",
+    "QuarantineWriteRequest",
 ]
+
+
+class QuarantineWriteRequest(TypedDict):
+    """Typed contract for a single quarantine write event.
+
+    Mirrors the parameters of ``QuarantinePort.write()`` as a dict
+    so that ``write_many()`` can batch them with compile-time safety.
+    """
+
+    pipeline: str
+    error_code: str
+    payload: BronzeRecord
+    bronze_batch_id: BatchID
+    ingestion_ts: datetime
+    run_id: NotRequired[RunID | None]
+    metadata: NotRequired[MetaDict | None]
 
 
 @runtime_checkable
@@ -58,16 +75,13 @@ class QuarantinePort(Protocol):
 
     async def write_many(
         self,
-        records: list[MetaDict],
+        records: list[QuarantineWriteRequest],
     ) -> None:
         """Write multiple quarantine events in one storage operation.
 
         Args:
-            records: Normalized quarantine write request dictionaries. Each item
-                is expected to include the same fields as ``write()``:
-                ``pipeline``, ``error_code``, ``payload``, ``bronze_batch_id``,
-                optional ``run_id``, optional ``metadata``, and
-                ``ingestion_ts``.
+            records: Typed quarantine write requests. Each item mirrors
+                the parameters of ``write()``.
         """
         ...
 

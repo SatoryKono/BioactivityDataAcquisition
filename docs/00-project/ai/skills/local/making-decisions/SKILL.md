@@ -7,6 +7,8 @@ agent: general-purpose
 
 # Decision Ledger
 
+*Статус: internal-published (Internal / Extended)*
+
 This skill guides the creation of explicit decisions with full trade-off documentation.
 
 ## Prerequisites

@@ -8,6 +8,8 @@ agent: Explore
 
 # Repository Configuration
 
+*Статус: internal-published (Internal / Extended)*
+
 This skill provides dynamic repository configuration for all gh-workflow commands, auto-detecting settings so commands work in any repository without hardcoding.
 
 Use TodoWrite to track these mandatory steps:

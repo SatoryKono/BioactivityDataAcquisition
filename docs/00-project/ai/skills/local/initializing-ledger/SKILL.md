@@ -7,6 +7,8 @@ agent: general-purpose
 
 # Ledger Initialization
 
+*Статус: internal-published (Internal / Extended)*
+
 This skill creates a complete Context Ledger workspace from a project brief.
 
 ## Prerequisites
