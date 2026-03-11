@@ -71,6 +71,3 @@ filters:
     provider: crossref
     input_filter:
         batch_size: 50
-    gold_filters:
-        required_fields: [ ]
-        columns: { }

@@ -20,7 +20,10 @@ from bioetl.application.services.dq._checks_integrity import (
     check_scd_integrity,
 )
 from bioetl.application.services.dq.gold_analyzer import GoldDQAnalyzer
+from bioetl.application.services.dq.silver_check_executor import SilverCheckExecutor
 from bioetl.application.services.dq.silver_analyzer import SilverDQAnalyzer
+from bioetl.application.services.dq.silver_statistics import SilverStatisticsCalculator
+from bioetl.application.services.dq.silver_threshold import SilverThresholdChecker
 from bioetl.domain.value_objects.dq_report import (
     DQCheckStatus,
     GoldDQCheckType,
@@ -50,6 +53,20 @@ def _flags_from_status(*, status: DQCheckStatus, reason: str) -> dict[str, str |
         "severity": "pass",
         "reason": "",
     }
+
+
+def _build_silver_analyzer() -> SilverDQAnalyzer:
+    """Create a fully wired SilverDQAnalyzer for structural tests."""
+    statistics = SilverStatisticsCalculator()
+    threshold_checker = SilverThresholdChecker()
+    return SilverDQAnalyzer(
+        statistics=statistics,
+        threshold_checker=threshold_checker,
+        check_executor=SilverCheckExecutor(
+            statistics=statistics,
+            threshold_checker=threshold_checker,
+        ),
+    )
 
 
 @pytest.mark.unit
@@ -172,7 +189,7 @@ class TestStructuralAnalyzerIntegration:
         assert scd["status"] in {DQCheckStatus.PASS.value, DQCheckStatus.WARN.value}
 
     def test_silver_key_nullability_fail_maps_to_dq_error(self) -> None:
-        analyzer = SilverDQAnalyzer()
+        analyzer = _build_silver_analyzer()
         config = MagicMock()
         config.get_checks_enums.return_value = [SilverDQCheckType.KEY_NULLABILITY]
 

@@ -7,6 +7,7 @@ from uuid import uuid4
 
 import pytest
 
+from bioetl.application.core.shutdown import ShutdownSignal
 from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.application.pipelines.chembl import ChEMBLActivityPipeline
 from bioetl.application.pipelines.chembl.activity_transformer import ActivityTransformer
@@ -47,6 +48,7 @@ def chembl_pipeline() -> ChEMBLActivityPipeline:
         runtime=runtime,
         services=services,
         run_id=run_id,
+        shutdown_signal=ShutdownSignal(),
         transformer=transformer,
     )
 

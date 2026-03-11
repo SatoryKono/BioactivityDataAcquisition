@@ -174,7 +174,7 @@ class TestYamlConfigToDomain:
     def test_basic_mapping(self) -> None:
         """Test basic config mapping with real Pydantic models."""
         from bioetl.infrastructure.schemas.pipeline_config import (
-            DQConfig,
+            DQYamlConfig,
             GoldFiltersConfig,
             PipelineYamlConfig,
             SourceConfig,
@@ -191,7 +191,7 @@ class TestYamlConfigToDomain:
             batch_size=200,
             checkpoint_interval=2000,
             source=SourceConfig(),
-            dq_overrides=DQConfig(
+            dq_overrides=DQYamlConfig(
                 soft_fail_threshold=0.05,
                 hard_fail_threshold=0.20,
             ),
@@ -214,7 +214,7 @@ class TestYamlConfigToDomain:
     def test_fields_extraction(self) -> None:
         """Test field names extraction from source config."""
         from bioetl.infrastructure.schemas.pipeline_config import (
-            DQConfig,
+            DQYamlConfig,
             GoldFiltersConfig,
             PipelineYamlConfig,
             SourceConfig,
@@ -237,7 +237,7 @@ class TestYamlConfigToDomain:
                     {"name": "field3", "type": "float"},
                 ]
             ),
-            dq_overrides=DQConfig(
+            dq_overrides=DQYamlConfig(
                 soft_fail_threshold=0.05,
                 hard_fail_threshold=0.20,
             ),
@@ -252,7 +252,7 @@ class TestYamlConfigToDomain:
     def test_dq_config_mapping(self) -> None:
         """Test DQ config mapping with real Pydantic models."""
         from bioetl.infrastructure.schemas.pipeline_config import (
-            DQConfig,
+            DQYamlConfig,
             GoldFiltersConfig,
             PipelineYamlConfig,
             SourceConfig,
@@ -269,7 +269,7 @@ class TestYamlConfigToDomain:
             batch_size=100,
             checkpoint_interval=1000,
             source=SourceConfig(),
-            dq_overrides=DQConfig(
+            dq_overrides=DQYamlConfig(
                 soft_fail_threshold=0.10,
                 hard_fail_threshold=0.30,
             ),
@@ -286,7 +286,7 @@ class TestYamlConfigToDomain:
     def test_pipeline_yaml_config_converter_function(self) -> None:
         """Test converter function maps PipelineYamlConfig consistently."""
         from bioetl.infrastructure.schemas.pipeline_config import (
-            DQConfig,
+            DQYamlConfig,
             GoldFiltersConfig,
             PipelineYamlConfig,
             SourceConfig,
@@ -303,7 +303,7 @@ class TestYamlConfigToDomain:
             batch_size=100,
             checkpoint_interval=1000,
             source=SourceConfig(),
-            dq_overrides=DQConfig(),
+            dq_overrides=DQYamlConfig(),
             sink={},
             schema_file="../../schemas/test/test.yaml",
         )

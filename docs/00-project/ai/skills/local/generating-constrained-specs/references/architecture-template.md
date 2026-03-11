@@ -1,5 +1,7 @@
 # Architecture Template
 
+*Статус: internal-published (Internal / Extended)*
+
 ## Sections
 1. Context and scope
 2. System boundaries

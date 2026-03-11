@@ -1,5 +1,7 @@
 # L2/L3 Task Brief Templates
 
+*Статус: internal-published (Internal / Extended)*
+
 ## L2 Task Brief
 
 ```text

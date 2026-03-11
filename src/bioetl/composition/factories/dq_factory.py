@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING
 from bioetl.application.services.dq import (
     BronzeDQAnalyzer,
     GoldDQAnalyzer,
+    SilverCheckExecutor,
     SilverDQAnalyzer,
     SilverStatisticsCalculator,
     SilverThresholdChecker,
@@ -66,9 +67,14 @@ class DQServicesFactory:
         """
         statistics = SilverStatisticsCalculator()
         threshold_checker = SilverThresholdChecker()
+        check_executor = SilverCheckExecutor(
+            statistics=statistics,
+            threshold_checker=threshold_checker,
+        )
         return SilverDQAnalyzer(
             statistics=statistics,
             threshold_checker=threshold_checker,
+            check_executor=check_executor,
         )
 
     @staticmethod

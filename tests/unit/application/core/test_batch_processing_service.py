@@ -193,44 +193,6 @@ class TestBatchProcessingOutput:
 
 
 # ---------------------------------------------------------------------------
-# set_batch_id_factory
-# ---------------------------------------------------------------------------
-
-
-@pytest.mark.unit
-class TestSetBatchIdFactory:
-    """Tests for BatchProcessingService.set_batch_id_factory."""
-
-    def test_replaces_factory(
-        self,
-        mock_context,
-        mock_services,
-        mock_config,
-        mock_logger,
-        mock_batch_metrics,
-        mock_transformer,
-        mock_writer,
-        mock_tracing,
-        mock_batch_id_factory,
-    ):
-        """set_batch_id_factory replaces the injected factory."""
-        svc = _make_service(
-            mock_context,
-            mock_services,
-            mock_config,
-            mock_logger,
-            mock_batch_metrics,
-            mock_transformer,
-            mock_writer,
-            mock_tracing,
-            mock_batch_id_factory,
-        )
-        new_factory = MagicMock()
-        svc.set_batch_id_factory(new_factory)
-        assert svc._batch_id_factory is new_factory
-
-
-# ---------------------------------------------------------------------------
 # process_batch — happy path
 # ---------------------------------------------------------------------------
 

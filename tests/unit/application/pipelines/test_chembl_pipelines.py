@@ -7,6 +7,7 @@ from uuid import uuid4
 
 import pytest
 
+from bioetl.application.core.shutdown import ShutdownSignal
 from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.application.pipelines.chembl import (
     AssayTransformer,
@@ -92,6 +93,7 @@ class TestChEMBLAssayPipeline:
             runtime=runtime_config,
             services=mock_services,
             run_id=run_id,
+            shutdown_signal=ShutdownSignal(),
             transformer=AssayTransformer(provider="chembl"),
         )
 
@@ -143,6 +145,7 @@ class TestChEMBLPublicationPipeline:
             runtime=runtime_config,
             services=mock_services,
             run_id=run_id,
+            shutdown_signal=ShutdownSignal(),
             transformer=PublicationTransformer(provider="chembl"),
         )
 
@@ -195,6 +198,7 @@ class TestChEMBLMoleculePipeline:
             runtime=runtime_config,
             services=mock_services,
             run_id=run_id,
+            shutdown_signal=ShutdownSignal(),
             transformer=MoleculeTransformer(provider="chembl"),
         )
 
@@ -246,6 +250,7 @@ class TestChEMBLTargetPipeline:
             runtime=runtime_config,
             services=mock_services,
             run_id=run_id,
+            shutdown_signal=ShutdownSignal(),
             transformer=TargetTransformer(provider="chembl"),
         )
 

@@ -1,5 +1,7 @@
 # NCI Scoring
 
+*Статус: internal-published (Internal / Extended)*
+
 ## Scale
 - 0-20: low concern
 - 21-40: moderate concern

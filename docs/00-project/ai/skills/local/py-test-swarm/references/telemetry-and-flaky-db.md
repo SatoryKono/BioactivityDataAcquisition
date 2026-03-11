@@ -1,5 +1,7 @@
 # Telemetry and Flaky DB Contract
 
+*Статус: internal-published (Internal / Extended)*
+
 ## Raw event JSONL schema
 
 Store events in:

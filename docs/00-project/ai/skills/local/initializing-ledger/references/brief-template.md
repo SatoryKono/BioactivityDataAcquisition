@@ -1,5 +1,7 @@
 # Brief Template
 
+*Статус: internal-published (Internal / Extended)*
+
 ## Fields
 - Product concept
 - Problem and context

@@ -387,7 +387,6 @@ class TestBatchExecutorDQCollection:
             progress_service=MagicMock(),
             checkpoint_recovery_service=MagicMock(),
             batch_processing_service=batch_processing_service,
-            batch_id_factory=MagicMock(),
             logger=MagicMock(),
         )
 

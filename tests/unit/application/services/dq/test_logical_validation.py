@@ -17,7 +17,10 @@ import pytest
 
 from bioetl.application.services.dq._checks_business import check_business_rules
 from bioetl.application.services.dq.gold_analyzer import GoldDQAnalyzer
+from bioetl.application.services.dq.silver_check_executor import SilverCheckExecutor
 from bioetl.application.services.dq.silver_analyzer import SilverDQAnalyzer
+from bioetl.application.services.dq.silver_statistics import SilverStatisticsCalculator
+from bioetl.application.services.dq.silver_threshold import SilverThresholdChecker
 from bioetl.domain.value_objects.dq_report import (
     DQCheckStatus,
     GoldDQCheckType,
@@ -48,6 +51,19 @@ def _derive_row_dq_flags(
         "severity": severity,
         "reason": reason,
     }
+
+
+def _build_silver_analyzer() -> SilverDQAnalyzer:
+    statistics = SilverStatisticsCalculator()
+    threshold_checker = SilverThresholdChecker()
+    return SilverDQAnalyzer(
+        statistics=statistics,
+        threshold_checker=threshold_checker,
+        check_executor=SilverCheckExecutor(
+            statistics=statistics,
+            threshold_checker=threshold_checker,
+        ),
+    )
 
 
 @pytest.fixture()
@@ -210,7 +226,7 @@ class TestLogicalAnalyzerIntegration:
         assert failed[0]["description"]
 
     def test_silver_analyzer_threshold_warn_maps_to_dq_warn(self) -> None:
-        analyzer = SilverDQAnalyzer()
+        analyzer = _build_silver_analyzer()
 
         config = MagicMock()
         config.get_checks_enums.return_value = [SilverDQCheckType.RECORD_COUNT]

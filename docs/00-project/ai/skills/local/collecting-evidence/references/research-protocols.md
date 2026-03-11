@@ -1,5 +1,7 @@
 # Research Protocols
 
+*Статус: internal-published (Internal / Extended)*
+
 ## Goal
 Collect evidence that is reproducible, source-traceable, and decision-ready.
 

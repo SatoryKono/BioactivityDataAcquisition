@@ -20,11 +20,11 @@ class _MedallionConfigValidator:
         self,
         config: PipelineConfig,
         logger: LoggerPort,
-        write_mode_policy: WriteModePolicy | None = None,
+        write_mode_policy: WriteModePolicy,
     ) -> None:
         self._config = config
         self._logger = logger
-        self._write_mode_policy = write_mode_policy or WriteModePolicy()
+        self._write_mode_policy = write_mode_policy
 
     def validate_medallion_config(
         self,

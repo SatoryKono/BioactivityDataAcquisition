@@ -26,40 +26,6 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.dq_metrics import SchemaDriftInfo
 
 
-def _sync_validate_and_build_arrow(
-    mixin: SilverWriterValidationMixin,
-    *,
-    table_name: str,
-    records: list[BronzeRecord],
-    primary_keys: list[str],
-    schema: pa.Schema,
-    mode: str,
-    column_order: list[str] | None,
-    partition_cols: list[str] | None,
-    key_nullability_rules: list[KeyNullabilityRule] | None,
-) -> tuple[list[BronzeRecord], SilverWriteMode, pa.Table]:
-    """Run synchronous Silver validation steps and build Arrow payload."""
-    records = mixin._deduplicate_by_primary_keys(records, primary_keys)
-    validated_mode = mixin._validate_write_mode(mode)
-    mixin._enforce_write_policy(validated_mode, table_name)
-    mixin._validate_records(records, table_name, schema)
-    mixin._validate_key_nullability(
-        records,
-        primary_keys,
-        partition_cols,
-        key_nullability_rules,
-        table_name,
-    )
-    mixin._validate_silver_pandera(records, table_name)
-    arrow_data = mixin._prepare_arrow_data(
-        records,
-        schema,
-        primary_keys,
-        column_order=column_order,
-    )
-    return records, validated_mode, arrow_data
-
-
 class SilverWriterValidationMixin:
     """Mixin with write policy and schema validation logic."""
 
@@ -70,6 +36,39 @@ class SilverWriterValidationMixin:
     _get_table_schema: Callable[[str], Awaitable[pa.Schema | None]]
     _resolve_table_path: Callable[[str], str]
     _prepare_arrow_data: Callable[..., pa.Table]
+
+    def _sync_validate_and_build_arrow(
+        self,
+        *,
+        table_name: str,
+        records: list[BronzeRecord],
+        primary_keys: list[str],
+        schema: pa.Schema,
+        mode: str,
+        column_order: list[str] | None,
+        partition_cols: list[str] | None,
+        key_nullability_rules: list[KeyNullabilityRule] | None,
+    ) -> tuple[list[BronzeRecord], SilverWriteMode, pa.Table]:
+        """Run synchronous Silver validation steps and build Arrow payload."""
+        records = self._deduplicate_by_primary_keys(records, primary_keys)
+        validated_mode = self._validate_write_mode(mode)
+        self._enforce_write_policy(validated_mode, table_name)
+        self._validate_records(records, table_name, schema)
+        self._validate_key_nullability(
+            records,
+            primary_keys,
+            partition_cols,
+            key_nullability_rules,
+            table_name,
+        )
+        self._validate_silver_pandera(records, table_name)
+        arrow_data = self._prepare_arrow_data(
+            records,
+            schema,
+            primary_keys,
+            column_order=column_order,
+        )
+        return records, validated_mode, arrow_data
 
     def _validate_write_mode(self, mode: str) -> SilverWriteMode:
         """Validate and convert write mode string to enum."""
@@ -190,10 +189,7 @@ class SilverWriterValidationMixin:
                 violations.append((key, "partition", count))
 
         if violations:
-            details = [
-                f"{key_type}:{field} null_count={count}"
-                for field, key_type, count in violations
-            ]
+            details = [f"{key_type}:{field} null_count={count}" for field, key_type, count in violations]
             raise ValueError(
                 "Key nullability policy violation for table "
                 f"'{table_name}': {'; '.join(details)}"
@@ -281,9 +277,7 @@ class SilverWriterValidationMixin:
         if not new_fields and not missing_fields:
             return None
 
-        critical_missing = [
-            field for field in missing_fields if not field.startswith("_")
-        ]
+        critical_missing = [field for field in missing_fields if not field.startswith("_")]
         status: Literal["info", "warn", "critical"]
         if critical_missing:
             status = "critical"
@@ -316,8 +310,7 @@ class SilverWriterValidationMixin:
         records, validated_mode, arrow_data = await loop.run_in_executor(
             None,
             partial(
-                _sync_validate_and_build_arrow,
-                mixin=self,
+                self._sync_validate_and_build_arrow,
                 table_name=table_name,
                 records=records,
                 primary_keys=primary_keys,

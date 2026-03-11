@@ -21,6 +21,9 @@ from bioetl.infrastructure.config_loader_filtering import (
     apply_hierarchical_filter_config,
 )
 from bioetl.infrastructure.config_merge import config_merge
+from bioetl.infrastructure.config.source_config_loader import (
+    load_source_config as _load_source_config,
+)
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
@@ -177,18 +180,7 @@ def _validate_schema_config(
     )
 
 
-@lru_cache(maxsize=10)
-def load_source_config(provider: str) -> SourceYamlConfig:
-    """Load source configuration using read -> normalize -> validate -> map.
-
-    Returns:
-        SourceYamlConfig instance for the given provider.
-    """
-    from bioetl.infrastructure.config.source_config_loader import (
-        load_source_config_uncached,
-    )
-
-    return load_source_config_uncached(provider)
+load_source_config = _load_source_config
 
 
 _FILTER_SECTIONS = FILTER_SECTIONS
@@ -342,6 +334,15 @@ def map_pipeline_config(validated_config: PipelineYamlConfig) -> PipelineYamlCon
 @lru_cache(maxsize=10)
 def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
     """Load pipeline configuration using read -> normalize -> validate -> map.
+
+    Returns:
+        PipelineYamlConfig instance for the given pipeline name.
+    """
+    return load_pipeline_config_uncached(pipeline_name)
+
+
+def load_pipeline_config_uncached(pipeline_name: str) -> PipelineYamlConfig:
+    """Load pipeline configuration using the explicit uncached pipeline path.
 
     Returns:
         PipelineYamlConfig instance for the given pipeline name.

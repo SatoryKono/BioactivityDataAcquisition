@@ -1,5 +1,7 @@
 # Constraint Rules
 
+*Статус: internal-published (Internal / Extended)*
+
 ## Mandatory
 - No requirement without evidence or decision reference.
 - No architecture component without ownership and boundaries.

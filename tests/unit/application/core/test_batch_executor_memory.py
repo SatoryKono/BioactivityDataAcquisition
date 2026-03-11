@@ -198,7 +198,6 @@ def _create_batch_executor(
         progress_service=progress_service,
         checkpoint_recovery_service=checkpoint_recovery_service,
         batch_processing_service=batch_processing_service,
-        batch_id_factory=batch_id_factory,
         batch_size=batch_size,
         checkpoint_interval=checkpoint_interval,
     )

@@ -1,5 +1,7 @@
 # NCI Examples
 
+*Статус: internal-published (Internal / Extended)*
+
 ## Example Output Shape
 - Input summary
 - Category scores

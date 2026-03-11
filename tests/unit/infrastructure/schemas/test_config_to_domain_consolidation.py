@@ -8,7 +8,7 @@ class TestConsolidationPattern:
 
     def test_dqconfig_to_domain(self) -> None:
         from bioetl.infrastructure.schemas.pipeline_config import (
-            DQConfig as PydanticDQConfig,
+            DQYamlConfig as PydanticDQConfig,
         )
 
         pydantic_config = PydanticDQConfig(
@@ -24,7 +24,7 @@ class TestConsolidationPattern:
 
     def test_circuit_breaker_to_domain(self) -> None:
         from bioetl.infrastructure.schemas.pipeline_config import (
-            CircuitBreakerConfig as PydanticCBConfig,
+            CircuitBreakerYamlConfig as PydanticCBConfig,
         )
 
         pydantic_config = PydanticCBConfig(

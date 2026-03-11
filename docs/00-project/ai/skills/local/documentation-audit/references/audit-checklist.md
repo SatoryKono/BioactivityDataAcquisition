@@ -1,5 +1,7 @@
 # BioETL Documentation Audit Checklist (v5.23+)
 
+*Статус: internal-published (Internal / Extended)*
+
 ## Scope and inventory
 - Confirm repo root and current target version (v5.23+).
 - Identify doc entry points: README.md and mkdocs.yml.

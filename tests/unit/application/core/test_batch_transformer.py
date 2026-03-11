@@ -9,7 +9,7 @@ from uuid import uuid4
 
 import pytest
 
-import bioetl.application.core.batch_transformer as batch_transformer_module
+import bioetl.application.core.batch_transformer_helpers as batch_transformer_helpers
 from bioetl.application.core.batch_metrics import BatchMetricsRecorder
 from bioetl.application.core.batch_transformer import BatchTransformer, TransformResult
 from bioetl.application.core.config import RecordProcessorConfig
@@ -174,8 +174,8 @@ class TestBatchTransformerTransform:
             return {"entity_id": record.get("id"), "value": record.get("value")}
 
         monkeypatch.setattr(
-            batch_transformer_module,
-            "_YIELD_INTERVAL_SECONDS",
+            batch_transformer_helpers,
+            "YIELD_INTERVAL_SECONDS",
             0.001,
         )
         transformer = BatchTransformer(
@@ -381,6 +381,52 @@ class TestBatchTransformerTransform:
         )
 
         assert result.filtered_out_count == 1
+        assert result.records_quarantine_failed == 1
+        mock_context.logger.error.assert_called()
+
+    async def test_transform_batch_continues_when_bulk_dq_quarantine_fails(
+        self,
+        mock_context,
+        mock_error_classifier,
+        mock_quarantine_manager,
+        mock_batch_metrics,
+        gold_filter_callback,
+        gold_transform_callback,
+    ) -> None:
+        """DQ quarantine write failure should not fail batch transformation."""
+
+        async def failing_transform(ctx, record, index):
+            if record.get("id") == "bad":
+                raise DataQualityError("Invalid data")
+            return {"entity_id": record.get("id"), "value": record.get("value")}
+
+        mock_quarantine_manager.quarantine_records.side_effect = RuntimeError(
+            "disk full"
+        )
+        transformer = BatchTransformer(
+            context=mock_context,
+            config=RecordProcessorConfig(
+                pipeline_name="test",
+                provider="test",
+                entity_type="test",
+                silver_schema=MagicMock(),
+                gold_schema=MagicMock(),
+            ),
+            error_classifier=mock_error_classifier,
+            quarantine_manager=mock_quarantine_manager,
+            batch_metrics=mock_batch_metrics,
+            transform_callback=failing_transform,
+            gold_filter_callback=gold_filter_callback,
+            gold_transform_callback=gold_transform_callback,
+        )
+
+        result = await transformer.transform_batch(
+            [{"id": "good", "value": 10}, {"id": "bad", "value": 5}],
+            BatchID(uuid4()),
+        )
+
+        assert len(result.silver_records) == 1
+        assert result.quarantined_count == 1
         assert result.records_quarantine_failed == 1
         mock_context.logger.error.assert_called()
 

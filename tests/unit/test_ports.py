@@ -268,6 +268,14 @@ class TestStoragePortProtocol:
             ) -> None:
                 pass
 
+            def is_table_initialized(
+                self,
+                table_name: str,
+                layer: Literal["silver", "gold"] = "silver",
+            ) -> bool:
+                del table_name, layer
+                return True
+
             async def cleanup_bronze(
                 self,
                 cutoff_date: Any,
@@ -281,6 +289,13 @@ class TestStoragePortProtocol:
                 primary_keys: list[str],
             ) -> int:
                 return 0
+
+            def is_table_initialized(
+                self,
+                table_name: str,
+                layer: Literal["silver", "gold"] = "silver",
+            ) -> bool:
+                return False
 
         assert isinstance(ValidStorage(), StoragePort)
 

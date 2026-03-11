@@ -1,5 +1,7 @@
 # Report Templates
 
+*Статус: internal-published (Internal / Extended)*
+
 ## Short Report
 - Question
 - Key findings

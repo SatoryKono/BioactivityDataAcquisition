@@ -442,8 +442,9 @@ class TestSilverWriterPreparePayloadExecutor:
 
         loop = asyncio.get_running_loop()
         with (
-            patch(
-                "bioetl.infrastructure.storage.silver_writer_validation_mixin._sync_validate_and_build_arrow",
+            patch.object(
+                writer,
+                "_sync_validate_and_build_arrow",
                 return_value=(records, SilverWriteMode.APPEND, expected_table),
             ) as mock_sync,
             patch.object(loop, "run_in_executor", wraps=loop.run_in_executor) as mock_exec,
@@ -517,8 +518,9 @@ class TestSilverWriterPreparePayloadExecutor:
 
         writer._check_schema_drift = AsyncMock(side_effect=schema_stage)  # type: ignore[method-assign]
 
-        with patch(
-            "bioetl.infrastructure.storage.silver_writer_validation_mixin._sync_validate_and_build_arrow",
+        with patch.object(
+            writer,
+            "_sync_validate_and_build_arrow",
             side_effect=sync_stage,
         ):
             await writer._prepare_silver_write_payload(

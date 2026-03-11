@@ -69,14 +69,6 @@ class BatchProcessingService(
         self._tracing = tracing_manager
         self._batch_id_factory = batch_id_factory
 
-    def set_batch_id_factory(self, batch_id_factory: BatchIdGeneratorPort) -> None:
-        """Replace batch ID generator used for subsequent processed batches.
-
-        Args:
-            batch_id_factory: New factory to use for generating batch identifiers.
-        """
-        self._batch_id_factory = batch_id_factory
-
     async def extract_records(
         self,
         *,

@@ -43,9 +43,10 @@ layers:
 
 providers:
   chembl:
-    entities: [activity, assay, compound, document, drug, mechanism, molecule,
-               protein_classification, source, subcellular_location, target,
-               target_component, tissue, cell_line]
+    entities: [activity, assay, assay_parameters, cell_line, compound_record,
+               publication, publication_similarity, publication_term, molecule,
+               protein_class, subcellular_fraction, target, target_component,
+               tissue]
     vcr_cassettes: MUST
     contract_tests: MUST
     golden_masters: SHOULD
@@ -57,7 +58,7 @@ providers:
     golden_masters: SHOULD
 
   uniprot:
-    entities: [protein, id_mapping]
+    entities: [protein, idmapping]
     vcr_cassettes: MUST
     contract_tests: MUST
     golden_masters: SHOULD

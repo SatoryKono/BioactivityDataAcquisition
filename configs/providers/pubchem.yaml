@@ -50,6 +50,3 @@ filters:
   provider: pubchem
   input_filter:
     batch_size: 1
-  gold_filters:
-    required_fields: []
-    columns: {}

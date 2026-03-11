@@ -40,16 +40,14 @@ class SilverDQAnalyzer:
 
     def __init__(
         self,
-        statistics: SilverStatisticsCalculator | None = None,
-        threshold_checker: SilverThresholdChecker | None = None,
-        check_executor: SilverCheckExecutor | None = None,
+        *,
+        statistics: SilverStatisticsCalculator,
+        threshold_checker: SilverThresholdChecker,
+        check_executor: SilverCheckExecutor,
     ) -> None:
-        self._statistics = statistics or SilverStatisticsCalculator()
-        self._threshold = threshold_checker or SilverThresholdChecker()
-        self._check_executor = check_executor or SilverCheckExecutor(
-            statistics=self._statistics,
-            threshold_checker=self._threshold,
-        )
+        self._statistics = statistics
+        self._threshold = threshold_checker
+        self._check_executor = check_executor
 
     def _to_polars_dataframe(self, data: pl.DataFrame | pa.Table) -> pl.DataFrame:
         """Normalize input to Polars DataFrame."""

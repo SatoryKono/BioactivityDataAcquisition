@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 __all__ = [
-    "CircuitBreakerConfig",
+    "CircuitBreakerYamlConfig",
     "ConditionalValidationConfig",
     "CrossFieldValidationConfig",
     "CsvExportConfig",
-    "DQConfig",
-    "DQReportConfig",
+    "DQReportYamlConfig",
+    "DQYamlConfig",
     "FieldValidationConfig",
 ]
 
@@ -99,7 +99,7 @@ class ConditionalValidationConfig(BaseModel):
     )
 
 
-class DQReportConfig(BaseModel):
+class DQReportYamlConfig(BaseModel):
     """Configuration for DQ report generation."""
 
     enabled: bool = Field(default=True, description="Generate DQ reports")
@@ -115,7 +115,7 @@ class DQReportConfig(BaseModel):
     output_path: str | None = Field(default=None, description="Custom output path")
 
 
-class DQConfig(BaseModel):
+class DQYamlConfig(BaseModel):
     """Data Quality configuration."""
 
     soft_fail_threshold: float = Field(default=0.05)
@@ -136,12 +136,13 @@ class DQConfig(BaseModel):
     invalid_record_policy: Literal["quarantine", "skip", "fail"] = Field(
         default="quarantine", description="Policy for invalid records"
     )
-    report: DQReportConfig = Field(
-        default_factory=DQReportConfig, description="DQ report configuration"
+    report: DQReportYamlConfig = Field(
+        default_factory=DQReportYamlConfig,
+        description="DQ report configuration",
     )
 
     @model_validator(mode="after")
-    def validate_thresholds(self) -> DQConfig:
+    def validate_thresholds(self) -> DQYamlConfig:
         """Validate that thresholds are between 0 and 1."""
         DomainDQConfig.validate_thresholds(
             soft_fail_threshold=self.soft_fail_threshold,
@@ -205,7 +206,9 @@ class DQConfig(BaseModel):
         )
 
     @staticmethod
-    def _to_domain_report_config(config: DQReportConfig) -> DomainDQReportConfig:
+    def _to_domain_report_config(
+        config: DQReportYamlConfig,
+    ) -> DomainDQReportConfig:
         return DomainDQReportConfig(
             enabled=config.enabled,
             format=config.format,
@@ -245,7 +248,7 @@ class DQConfig(BaseModel):
         )
 
 
-class CircuitBreakerConfig(BaseModel):
+class CircuitBreakerYamlConfig(BaseModel):
     """Circuit Breaker configuration."""
 
     failure_threshold: int = Field(default=5, ge=1)

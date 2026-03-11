@@ -30,7 +30,7 @@ from bioetl.domain.config import KeyNullabilityRule as DomainKeyNullabilityRule
 from bioetl.infrastructure.schemas.pipeline_config import (
     ConditionalValidationConfig,
     CrossFieldValidationConfig,
-    DQReportConfig,
+    DQReportYamlConfig,
     FieldValidationConfig,
 )
 
@@ -167,8 +167,8 @@ class DQConfigFile(BaseModel):
         default="quarantine",
         description="Policy for handling invalid records",
     )
-    report: DQReportConfig = Field(
-        default_factory=DQReportConfig,
+    report: DQReportYamlConfig = Field(
+        default_factory=DQReportYamlConfig,
         description="DQ report generation settings",
     )
 

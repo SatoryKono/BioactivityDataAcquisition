@@ -14,6 +14,7 @@ import pytest
 from bioetl.application.core.preflight_medallion_validator import (
     _MedallionConfigValidator,
 )
+from bioetl.domain.medallion import WriteModePolicy
 from bioetl.domain.types import RunType
 
 
@@ -57,9 +58,19 @@ def validator(
     mock_config: MagicMock, mock_logger: MagicMock
 ) -> _MedallionConfigValidator:
     """Create _MedallionConfigValidator with default write mode policy."""
+    return _build_validator(config=mock_config, logger=mock_logger)
+
+
+def _build_validator(
+    *,
+    config: MagicMock,
+    logger: MagicMock,
+) -> _MedallionConfigValidator:
+    """Create validator with explicit WriteModePolicy injection."""
     return _MedallionConfigValidator(
-        config=mock_config,
-        logger=mock_logger,
+        config=config,
+        logger=logger,
+        write_mode_policy=WriteModePolicy(),
     )
 
 
@@ -359,7 +370,7 @@ class TestKeyNullabilityPolicyValidation:
         rule.field = "record_id"  # in primary_keys
         config.dq.key_nullability_rules = [rule]
 
-        validator = _MedallionConfigValidator(config=config, logger=mock_logger)
+        validator = _build_validator(config=config, logger=mock_logger)
         errors = validator.validate_medallion_config(
             runtime=mock_runtime,
             bronze_path="/bronze",
@@ -384,7 +395,7 @@ class TestKeyNullabilityPolicyValidation:
         rule.field = "nonexistent_field"  # not in primary_keys or partition_cols
         config.dq.key_nullability_rules = [rule]
 
-        validator = _MedallionConfigValidator(config=config, logger=mock_logger)
+        validator = _build_validator(config=config, logger=mock_logger)
         errors = validator.validate_medallion_config(
             runtime=mock_runtime,
             bronze_path="/bronze",
@@ -409,7 +420,7 @@ class TestKeyNullabilityPolicyValidation:
         rule.field = "partition_date"  # in partition_cols
         config.dq.key_nullability_rules = [rule]
 
-        validator = _MedallionConfigValidator(config=config, logger=mock_logger)
+        validator = _build_validator(config=config, logger=mock_logger)
         errors = validator.validate_medallion_config(
             runtime=mock_runtime,
             bronze_path="/bronze",
@@ -433,7 +444,7 @@ class TestWriteModeValidation:
         config = MagicMock()
         config.table.silver_write_mode = "merge"
         config.table.gold_write_mode = "merge"
-        validator = _MedallionConfigValidator(config=config, logger=mock_logger)
+        validator = _build_validator(config=config, logger=mock_logger)
         assert validator.validate_write_modes() == []
 
     def test_valid_silver_append_passes(self, mock_logger: MagicMock) -> None:
@@ -441,7 +452,7 @@ class TestWriteModeValidation:
         config = MagicMock()
         config.table.silver_write_mode = "append"
         config.table.gold_write_mode = "merge"
-        validator = _MedallionConfigValidator(config=config, logger=mock_logger)
+        validator = _build_validator(config=config, logger=mock_logger)
         assert validator.validate_write_modes() == []
 
     def test_invalid_silver_overwrite_fails(self, mock_logger: MagicMock) -> None:
@@ -449,7 +460,7 @@ class TestWriteModeValidation:
         config = MagicMock()
         config.table.silver_write_mode = "overwrite"
         config.table.gold_write_mode = "merge"
-        validator = _MedallionConfigValidator(config=config, logger=mock_logger)
+        validator = _build_validator(config=config, logger=mock_logger)
         errors = validator.validate_write_modes()
         assert len(errors) == 1
         assert errors[0].field == "write_mode"
@@ -459,7 +470,7 @@ class TestWriteModeValidation:
         config = MagicMock()
         config.table.silver_write_mode = "merge"
         config.table.gold_write_mode = "merge"
-        validator = _MedallionConfigValidator(config=config, logger=mock_logger)
+        validator = _build_validator(config=config, logger=mock_logger)
         assert validator.validate_write_modes() == []
 
     def test_valid_gold_scd2_passes(self, mock_logger: MagicMock) -> None:
@@ -467,7 +478,7 @@ class TestWriteModeValidation:
         config = MagicMock()
         config.table.silver_write_mode = "merge"
         config.table.gold_write_mode = "scd2"
-        validator = _MedallionConfigValidator(config=config, logger=mock_logger)
+        validator = _build_validator(config=config, logger=mock_logger)
         assert validator.validate_write_modes() == []
 
     def test_valid_gold_overwrite_passes(self, mock_logger: MagicMock) -> None:
@@ -475,7 +486,7 @@ class TestWriteModeValidation:
         config = MagicMock()
         config.table.silver_write_mode = "merge"
         config.table.gold_write_mode = "overwrite"
-        validator = _MedallionConfigValidator(config=config, logger=mock_logger)
+        validator = _build_validator(config=config, logger=mock_logger)
         assert validator.validate_write_modes() == []
 
     def test_invalid_gold_mode_fails(self, mock_logger: MagicMock) -> None:
@@ -483,7 +494,7 @@ class TestWriteModeValidation:
         config = MagicMock()
         config.table.silver_write_mode = "merge"
         config.table.gold_write_mode = "invalid_mode"
-        validator = _MedallionConfigValidator(config=config, logger=mock_logger)
+        validator = _build_validator(config=config, logger=mock_logger)
         errors = validator.validate_write_modes()
         assert len(errors) == 1
         assert errors[0].field == "gold_write_mode"
@@ -495,7 +506,7 @@ class TestWriteModeValidation:
         config = MagicMock()
         config.table.silver_write_mode = "invalid_silver"
         config.table.gold_write_mode = "invalid_gold"
-        validator = _MedallionConfigValidator(config=config, logger=mock_logger)
+        validator = _build_validator(config=config, logger=mock_logger)
         errors = validator.validate_write_modes()
         assert len(errors) == 2
 
@@ -555,7 +566,7 @@ class TestMedallionValidatorLogging:
         config = MagicMock()
         config.table.silver_write_mode = "overwrite"
         config.table.gold_write_mode = "merge"
-        validator = _MedallionConfigValidator(config=config, logger=mock_logger)
+        validator = _build_validator(config=config, logger=mock_logger)
 
         validator.validate_write_modes()
 
@@ -566,7 +577,7 @@ class TestMedallionValidatorLogging:
         config = MagicMock()
         config.table.silver_write_mode = "merge"
         config.table.gold_write_mode = "merge"
-        validator = _MedallionConfigValidator(config=config, logger=mock_logger)
+        validator = _build_validator(config=config, logger=mock_logger)
 
         validator.validate_write_modes()
 

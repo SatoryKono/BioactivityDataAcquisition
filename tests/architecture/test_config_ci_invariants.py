@@ -23,6 +23,9 @@ import pytest
 import yaml
 
 from bioetl.domain.constants import META_FIELDS
+from bioetl.infrastructure.config.contract_policy_loader import (
+    load_pipeline_contract_policy,
+)
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -501,17 +504,18 @@ class TestContractHashExcludeInvariants:
 
     @pytest.mark.parametrize("config_path", _collect_pipeline_configs(), ids=_rel)
     def test_entity_contract_hash_exclude(self, config_path: Path) -> None:
-        """Each entity contracts.hash_exclude must be canonical and META_FIELDS-aligned."""
+        """Each entity's effective hash_exclude must be canonical and META_FIELDS-aligned."""
         data = _load_yaml(config_path)
-        contracts = data.get("contracts")
-        if not isinstance(contracts, dict):
-            pytest.fail(f"{_rel(config_path)}: missing contracts section")
+        provider = str(data.get("provider", "")).strip()
+        entity = str(data.get("entity", "")).strip()
+        if not provider or not entity:
+            pytest.fail(
+                f"{_rel(config_path)}: missing provider/entity for contract policy load"
+            )
 
-        hash_exclude = contracts.get("hash_exclude")
-        if not isinstance(hash_exclude, list):
-            pytest.fail(f"{_rel(config_path)}: contracts.hash_exclude must be list")
-
-        exclude_set = {str(x) for x in hash_exclude}
+        load_pipeline_contract_policy.cache_clear()
+        policy = load_pipeline_contract_policy(provider, entity)
+        exclude_set = {str(x) for x in policy.hash_exclude}
         missing = self._REQUIRED_EXCLUDES - exclude_set
         legacy = self._LEGACY_EXCLUDES & exclude_set
         non_meta = exclude_set - META_FIELDS

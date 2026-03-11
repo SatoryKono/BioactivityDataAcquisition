@@ -8,6 +8,9 @@ import time
 from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BronzeRecord
+from bioetl.infrastructure.adapters.common.doi_helpers import (
+    strip_doi_transport_prefix,
+)
 from bioetl.infrastructure.adapters.semanticscholar.constants import (
     SEMANTICSCHOLAR_BASE_URL,
 )
@@ -99,12 +102,4 @@ class SemanticScholarBatchRequestMixin:
         Returns:
             DOI string with URL prefix (https://doi.org/, doi:, DOI:) removed.
         """
-        if doi.startswith("https://doi.org/"):
-            return doi[16:]
-        if doi.startswith("http://doi.org/"):
-            return doi[15:]
-        if doi.startswith("doi:"):
-            return doi[4:]
-        if doi.startswith("DOI:"):
-            return doi[4:]
-        return doi
+        return strip_doi_transport_prefix(doi, allow_uppercase_prefix=True)

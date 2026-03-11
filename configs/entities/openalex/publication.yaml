@@ -194,12 +194,6 @@ quality:
     error_message: Title should not be empty or whitespace-only
   - field: publication_year
     type: range
-    min: 1500
-    max: 2100
-    nullable: true
-    error_message: Publication year out of valid range
-  - field: publication_year
-    type: range
     min: 1950
     nullable: true
     severity: warn
@@ -287,16 +281,4 @@ contracts:
   - openalex_id
   merge_keys:
   - openalex_id
-  rename_map:
-    run_id: _run_id
-    run_type: _run_type
-    source_batch_id: _source_batch_id
-    ingestion_ts: _ingestion_ts
-    source: _source
   hash_include: []
-  hash_exclude:
-  - _ingestion_ts
-  - _run_id
-  - _run_type
-  - _dq_error
-  - _dq_warn

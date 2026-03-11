@@ -32,7 +32,7 @@ from bioetl.infrastructure.schemas.pipeline_config_dq import (
     FieldValidationConfig,
 )
 from bioetl.infrastructure.schemas.pipeline_config_dq import (
-    DQConfig as InlineDQConfig,
+    DQYamlConfig as InlineDQConfig,
 )
 
 

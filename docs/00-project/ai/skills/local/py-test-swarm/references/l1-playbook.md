@@ -1,5 +1,7 @@
 # L1 Playbook (py-test-swarm)
 
+*Статус: internal-published (Internal / Extended)*
+
 ## 1) Discovery (mandatory before delegation)
 
 ```bash

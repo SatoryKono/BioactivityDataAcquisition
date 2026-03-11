@@ -37,6 +37,9 @@ from bioetl.infrastructure.adapters.semanticscholar.fetch_adapter_mixin import (
 from bioetl.infrastructure.adapters.semanticscholar.health_metadata_mixin import (
     SemanticScholarHealthMetadataMixin,
 )
+from bioetl.infrastructure.adapters.semanticscholar.request_headers import (
+    build_semanticscholar_headers,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import ErrorHandlerPort, LoggerPort, MetricsPort
@@ -201,11 +204,8 @@ class SemanticScholarAdapter(
         Returns:
             Dictionary of HTTP headers including optional x-api-key if configured.
         """
-        headers = {
-            "User-Agent": "BioETL/1.0",
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-        }
-        if self.api_key and not self.api_key.startswith("your_"):
-            headers["x-api-key"] = self.api_key
-        return headers
+        return build_semanticscholar_headers(
+            self.api_key,
+            include_content_type=True,
+            skip_placeholder_api_key=True,
+        )

@@ -9,9 +9,15 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
+from bioetl.application.composite.dependency_progress_tracker import (
+    DependencyProgressTracker,
+)
 from bioetl.application.composite.dependency_key_resolvers import (
     ChainedKeyResolver,
     SeedKeyResolver,
+)
+from bioetl.application.composite.dependency_result_mapper import (
+    DependencyResultMapper,
 )
 from bioetl.domain.composite.result import DependencyResult
 from bioetl.domain.exceptions import (
@@ -43,23 +49,6 @@ _DEPENDENCY_EXECUTION_ERRORS = (
 
 __all__ = ["DependencyCoordinatorService"]
 
-
-def _duration_seconds(started_at: datetime, completed_at: datetime) -> float:
-    """Calculate wall-clock duration in seconds."""
-    return (completed_at - started_at).total_seconds()
-
-
-def _extract_runner_metrics(runner: PipelineRunner) -> tuple[int, int]:
-    """Extract available row counters from runner public metrics view."""
-    metrics = getattr(runner, "execution_metrics", None)
-    if not isinstance(metrics, dict):
-        return 0, 0
-    return (
-        int(metrics.get("records_fetched", 0)),
-        int(metrics.get("records_silver", 0)),
-    )
-
-
 def _build_dependency_lookup(
     *,
     dependencies: Sequence[DependencyConfig],
@@ -69,14 +58,6 @@ def _build_dependency_lookup(
     if dependency_configs is not None:
         return dependency_configs
     return {dependency.pipeline: dependency for dependency in dependencies}
-
-
-def _build_completed_skip_result(*, dependency: DependencyConfig) -> DependencyResult:
-    """Build skipped result payload for already completed dependencies."""
-    return DependencyResult.skipped(
-        pipeline_name=dependency.pipeline,
-        reason="Already completed (resumed from checkpoint)",
-    )
 
 
 def _log_dependencies_batch_start(
@@ -92,44 +73,6 @@ def _log_dependencies_batch_start(
     )
 
 
-def _should_stop_after_result(
-    *,
-    logger: LoggerPort,
-    dependency: DependencyConfig,
-    result: DependencyResult,
-) -> bool:
-    """Return True when required dependency failure must stop execution."""
-    if not dependency.required or result.is_success:
-        return False
-    logger.error(
-        "Required dependency failed, stopping",
-        dependency=dependency.pipeline,
-        status=result.status.value,
-        error=result.error_message,
-    )
-    return True
-
-
-def _maybe_mark_completed_dependency(
-    *,
-    logger: LoggerPort,
-    dependency: DependencyConfig,
-    completed: frozenset[str],
-    results: dict[str, DependencyResult],
-) -> bool:
-    """Store skipped result for completed dependency and return handled flag."""
-    if dependency.pipeline not in completed:
-        return False
-    logger.debug(
-        "Skipping completed dependency",
-        dependency=dependency.pipeline,
-    )
-    results[dependency.pipeline] = _build_completed_skip_result(
-        dependency=dependency,
-    )
-    return True
-
-
 def _log_dependency_start(
     *,
     logger: LoggerPort,
@@ -142,76 +85,6 @@ def _log_dependency_start(
         dependency=dependency.pipeline,
         keys_count=len(keys),
         timeout_seconds=dependency.timeout_seconds,
-    )
-
-
-def _log_dependency_success(
-    *,
-    logger: LoggerPort,
-    dependency: DependencyConfig,
-    records_extracted: int,
-    records_silver: int,
-    duration_seconds: float,
-) -> None:
-    """Emit structured log entry for dependency success."""
-    logger.info(
-        "Dependency completed",
-        dependency=dependency.pipeline,
-        records_extracted=records_extracted,
-        records_silver=records_silver,
-        duration_seconds=duration_seconds,
-    )
-
-
-def _build_timeout_result(
-    *,
-    logger: LoggerPort,
-    dependency: DependencyConfig,
-    started_at: datetime,
-) -> DependencyResult:
-    """Build timeout result and emit warning log."""
-    logger.warning(
-        "Dependency timed out",
-        dependency=dependency.pipeline,
-        timeout_seconds=dependency.timeout_seconds,
-        duration_seconds=_duration_seconds(
-            started_at=started_at,
-            completed_at=datetime.now(tz=UTC),
-        ),
-    )
-    return DependencyResult.timeout(
-        pipeline_name=dependency.pipeline,
-        timeout_seconds=dependency.timeout_seconds,
-    )
-
-
-def _build_failed_result(
-    *,
-    logger: LoggerPort,
-    dependency: DependencyConfig,
-    error: Exception,
-    started_at: datetime,
-) -> DependencyResult:
-    """Build failed result and emit required/optional failure log."""
-    duration = _duration_seconds(
-        started_at=started_at,
-        completed_at=datetime.now(tz=UTC),
-    )
-    log_method = logger.error if dependency.required else logger.warning
-    log_method(
-        "Required dependency failed"
-        if dependency.required
-        else "Optional dependency failed",
-        dependency=dependency.pipeline,
-        error=str(error),
-        error_type=type(error).__name__,
-        required=dependency.required,
-        duration_seconds=duration,
-    )
-    return DependencyResult.failed(
-        pipeline_name=dependency.pipeline,
-        error_message=str(error),
-        duration_seconds=duration,
     )
 
 
@@ -261,6 +134,8 @@ class DependencyCoordinatorService:
         self._delta_reader = delta_reader
         self._seed_key_resolver = seed_key_resolver
         self._chained_key_resolver = chained_key_resolver
+        self._result_mapper = DependencyResultMapper(logger)
+        self._progress_tracker = DependencyProgressTracker(logger)
 
     async def run_dependencies(
         self,
@@ -302,8 +177,7 @@ class DependencyCoordinatorService:
         _log_dependencies_batch_start(logger=self._logger, dependencies=dependencies)
 
         for dependency in dependencies:
-            if _maybe_mark_completed_dependency(
-                logger=self._logger,
+            if self._progress_tracker.maybe_store_completed_skip(
                 dependency=dependency,
                 completed=completed,
                 results=results,
@@ -323,8 +197,7 @@ class DependencyCoordinatorService:
             )
             results[dependency.pipeline] = result
 
-            if _should_stop_after_result(
-                logger=self._logger,
+            if self._progress_tracker.should_stop_after_result(
                 dependency=dependency,
                 result=result,
             ):
@@ -391,34 +264,21 @@ class DependencyCoordinatorService:
                 runner_factory=runner_factory,
             )
         except TimeoutError:
-            return _build_timeout_result(
-                logger=self._logger,
+            return self._result_mapper.build_timeout_result(
                 dependency=dependency,
                 started_at=started_at,
             )
         except _DEPENDENCY_EXECUTION_ERRORS as e:
-            return _build_failed_result(
-                logger=self._logger,
+            return self._result_mapper.build_failed_result(
                 dependency=dependency,
                 error=e,
                 started_at=started_at,
             )
 
         completed_at = datetime.now(tz=UTC)
-        duration = _duration_seconds(started_at=started_at, completed_at=completed_at)
-        records_extracted, records_silver = _extract_runner_metrics(runner)
-        _log_dependency_success(
-            logger=self._logger,
+        return self._result_mapper.build_success_result(
             dependency=dependency,
-            records_extracted=records_extracted,
-            records_silver=records_silver,
-            duration_seconds=duration,
-        )
-        return DependencyResult.success(
-            pipeline_name=dependency.pipeline,
-            records_extracted=records_extracted,
-            records_silver=records_silver,
-            duration_seconds=duration,
+            runner=runner,
             started_at=started_at,
             completed_at=completed_at,
         )

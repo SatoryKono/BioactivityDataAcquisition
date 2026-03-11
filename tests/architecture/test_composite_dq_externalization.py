@@ -49,7 +49,13 @@ def _load_composite_dq_overrides(entity: str) -> dict[str, Any]:
 
 
 class TestCompositeDQExternalization:
-    """Enforce consistent DQ externalization for composite entities."""
+    """Enforce consistent DQ externalization for composite entities.
+
+    The architecture intentionally keeps one external DQ file per composite
+    entity. Some entities currently share the same tiny threshold-only payload,
+    but they still keep distinct files so the externalization contract remains
+    explicit and entity-scoped.
+    """
 
     def test_externalized_entity_list_is_not_empty(self) -> None:
         assert EXTERNALIZED_COMPOSITE_ENTITIES, (
@@ -79,6 +85,11 @@ class TestCompositeDQExternalization:
     def test_composite_keeps_only_minimal_inline_dq_overrides(
         self, entity: str
     ) -> None:
+        """Composite YAML keeps only pointer-style inline DQ overrides.
+
+        Rich validation content belongs in the external per-entity DQ file, not
+        in configs/composites/*.yaml.
+        """
         dq_overrides = _load_composite_dq_overrides(entity)
         extra_keys = set(dq_overrides) - ALLOWED_INLINE_DQ_KEYS
         assert not extra_keys, (
