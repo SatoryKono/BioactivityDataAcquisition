@@ -6,12 +6,11 @@
 set -uo pipefail
 
 # ── Resolve repo root reliably ──────────────────────────────────────
-REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || {
-    # Fallback: script lives at <repo>/.claude/setup.sh
-    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    REPO_ROOT="$(dirname "$SCRIPT_DIR")"
-}
+# Primary: use script's own location (.claude/setup.sh → parent is repo root)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 
+# Validate
 if [ ! -f "$REPO_ROOT/pyproject.toml" ]; then
     echo "[setup] ERROR: pyproject.toml not found in $REPO_ROOT"
     exit 1
