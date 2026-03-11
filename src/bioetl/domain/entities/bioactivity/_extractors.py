@@ -10,7 +10,6 @@ from ._converters import (
     _safe_float,
     _safe_int,
     _safe_json,
-    _safe_str,
 )
 
 
@@ -37,96 +36,195 @@ def _build_content_hash(raw_data: JsonDict) -> ContentHash:
 
 
 def _extract_optional_identifiers(raw_data: JsonDict) -> dict[str, object]:
+    get = raw_data.get
     return {
-        "target_id": _safe_str(raw_data.get("target_id")),
-        "assay_id": _safe_str(raw_data.get("assay_id")),
-        "publication_id": _safe_str(raw_data.get("publication_id")),
-        "record_id": _safe_int(raw_data.get("record_id")),
-        "src_id": _safe_int(raw_data.get("src_id")),
+        "target_id": v
+        if type(v := get("target_id")) is str
+        else (None if v is None else str(v)),
+        "assay_id": v
+        if type(v := get("assay_id")) is str
+        else (None if v is None else str(v)),
+        "publication_id": v
+        if type(v := get("publication_id")) is str
+        else (None if v is None else str(v)),
+        "record_id": v
+        if type(v := get("record_id")) is int
+        else (None if v is None else _safe_int(v)),
+        "src_id": v
+        if type(v := get("src_id")) is int
+        else (None if v is None else _safe_int(v)),
     }
 
 
 def _extract_molecule_fields(raw_data: JsonDict) -> dict[str, object]:
+    get = raw_data.get
     return {
-        "canonical_smiles": _safe_str(raw_data.get("canonical_smiles")),
-        "molecule_pref_name": _safe_str(raw_data.get("molecule_pref_name")),
-        "parent_molecule_id": _safe_str(raw_data.get("parent_molecule_id")),
+        "canonical_smiles": v
+        if type(v := get("canonical_smiles")) is str
+        else (None if v is None else str(v)),
+        "molecule_pref_name": v
+        if type(v := get("molecule_pref_name")) is str
+        else (None if v is None else str(v)),
+        "parent_molecule_id": v
+        if type(v := get("parent_molecule_id")) is str
+        else (None if v is None else str(v)),
     }
 
 
 def _extract_target_fields(raw_data: JsonDict) -> dict[str, object]:
+    get = raw_data.get
     return {
-        "target_pref_name": _safe_str(raw_data.get("target_pref_name")),
-        "target_organism": _safe_str(raw_data.get("target_organism")),
-        "target_taxonomy_id": _safe_int(
-            raw_data.get("target_taxonomy_id")
-            or raw_data.get("taxonomy_id")
-            or raw_data.get("target_tax_id")
-        ),
+        "target_pref_name": v
+        if type(v := get("target_pref_name")) is str
+        else (None if v is None else str(v)),
+        "target_organism": v
+        if type(v := get("target_organism")) is str
+        else (None if v is None else str(v)),
+        "target_taxonomy_id": v
+        if type(
+            v := (
+                get("target_taxonomy_id") or get("taxonomy_id") or get("target_tax_id")
+            )
+        )
+        is int
+        else (None if v is None else _safe_int(v)),
     }
 
 
 def _extract_assay_fields(raw_data: JsonDict) -> dict[str, object]:
+    get = raw_data.get
     return {
-        "assay_type": _safe_str(raw_data.get("assay_type")),
-        "assay_description": _safe_str(raw_data.get("assay_description")),
-        "assay_variant_accession": _safe_str(raw_data.get("assay_variant_accession")),
-        "assay_variant_mutation": _safe_str(raw_data.get("assay_variant_mutation")),
+        "assay_type": v
+        if type(v := get("assay_type")) is str
+        else (None if v is None else str(v)),
+        "assay_description": v
+        if type(v := get("assay_description")) is str
+        else (None if v is None else str(v)),
+        "assay_variant_accession": v
+        if type(v := get("assay_variant_accession")) is str
+        else (None if v is None else str(v)),
+        "assay_variant_mutation": v
+        if type(v := get("assay_variant_mutation")) is str
+        else (None if v is None else str(v)),
     }
 
 
 def _extract_bao_fields(raw_data: JsonDict) -> dict[str, object]:
+    get = raw_data.get
     return {
-        "bao_endpoint": _safe_str(raw_data.get("bao_endpoint")),
-        "bao_format": _safe_str(raw_data.get("bao_format")),
-        "bao_label": _safe_str(raw_data.get("bao_label")),
+        "bao_endpoint": v
+        if type(v := get("bao_endpoint")) is str
+        else (None if v is None else str(v)),
+        "bao_format": v
+        if type(v := get("bao_format")) is str
+        else (None if v is None else str(v)),
+        "bao_label": v
+        if type(v := get("bao_label")) is str
+        else (None if v is None else str(v)),
     }
 
 
 def _extract_activity_measurement_fields(raw_data: JsonDict) -> dict[str, object]:
+    get = raw_data.get
     return {
-        "type": _safe_str(raw_data.get("type")),
-        "value": _safe_float(raw_data.get("value")),
-        "units": _safe_str(raw_data.get("units")),
-        "relation": _safe_str(raw_data.get("relation")),
-        "upper_value": _safe_float(raw_data.get("upper_value")),
-        "text_value": _safe_str(raw_data.get("text_value")),
-        "standard_type": _safe_str(raw_data.get("standard_type")),
-        "standard_value": _safe_float(raw_data.get("standard_value")),
-        "standard_units": _safe_str(raw_data.get("standard_units")),
-        "standard_relation": _safe_str(raw_data.get("standard_relation")),
-        "standard_upper_value": _safe_float(raw_data.get("standard_upper_value")),
-        "standard_text_value": _safe_str(raw_data.get("standard_text_value")),
-        "standard_flag": _safe_int(raw_data.get("standard_flag")),
-        "pchembl_value": _safe_float(raw_data.get("pchembl_value")),
+        "type": v if type(v := get("type")) is str else (None if v is None else str(v)),
+        "value": v
+        if type(v := get("value")) is float
+        else (None if v is None else _safe_float(v)),
+        "units": v
+        if type(v := get("units")) is str
+        else (None if v is None else str(v)),
+        "relation": v
+        if type(v := get("relation")) is str
+        else (None if v is None else str(v)),
+        "upper_value": v
+        if type(v := get("upper_value")) is float
+        else (None if v is None else _safe_float(v)),
+        "text_value": v
+        if type(v := get("text_value")) is str
+        else (None if v is None else str(v)),
+        "standard_type": v
+        if type(v := get("standard_type")) is str
+        else (None if v is None else str(v)),
+        "standard_value": v
+        if type(v := get("standard_value")) is float
+        else (None if v is None else _safe_float(v)),
+        "standard_units": v
+        if type(v := get("standard_units")) is str
+        else (None if v is None else str(v)),
+        "standard_relation": v
+        if type(v := get("standard_relation")) is str
+        else (None if v is None else str(v)),
+        "standard_upper_value": v
+        if type(v := get("standard_upper_value")) is float
+        else (None if v is None else _safe_float(v)),
+        "standard_text_value": v
+        if type(v := get("standard_text_value")) is str
+        else (None if v is None else str(v)),
+        "standard_flag": v
+        if type(v := get("standard_flag")) is int
+        else (None if v is None else _safe_int(v)),
+        "pchembl_value": v
+        if type(v := get("pchembl_value")) is float
+        else (None if v is None else _safe_float(v)),
     }
 
 
 def _extract_publication_fields(raw_data: JsonDict) -> dict[str, object]:
+    get = raw_data.get
     return {
-        "journal": _safe_str(raw_data.get("journal")),
-        "publication_doi": _safe_str(raw_data.get("publication_doi")),
-        "publication_pmid": _safe_str(raw_data.get("publication_pmid")),
-        "publication_pmc_id": _safe_str(raw_data.get("publication_pmc_id")),
-        "publication_year": _safe_int(raw_data.get("publication_year")),
-        "action_type": _safe_str(raw_data.get("action_type")),
-        "action_type_description": _safe_str(raw_data.get("action_type_description")),
-        "action_type_parent_type": _safe_str(raw_data.get("action_type_parent_type")),
+        "journal": v
+        if type(v := get("journal")) is str
+        else (None if v is None else str(v)),
+        "publication_doi": v
+        if type(v := get("publication_doi")) is str
+        else (None if v is None else str(v)),
+        "publication_pmid": v
+        if type(v := get("publication_pmid")) is str
+        else (None if v is None else str(v)),
+        "publication_pmc_id": v
+        if type(v := get("publication_pmc_id")) is str
+        else (None if v is None else str(v)),
+        "publication_year": v
+        if type(v := get("publication_year")) is int
+        else (None if v is None else _safe_int(v)),
+        "action_type": v
+        if type(v := get("action_type")) is str
+        else (None if v is None else str(v)),
+        "action_type_description": v
+        if type(v := get("action_type_description")) is str
+        else (None if v is None else str(v)),
+        "action_type_parent_type": v
+        if type(v := get("action_type_parent_type")) is str
+        else (None if v is None else str(v)),
     }
 
 
 def _extract_quality_fields(raw_data: JsonDict) -> dict[str, object]:
+    get = raw_data.get
     return {
-        "activity_comment": _safe_str(raw_data.get("activity_comment")),
-        "data_validity_comment": _safe_str(raw_data.get("data_validity_comment")),
-        "data_validity_description": _safe_str(
-            raw_data.get("data_validity_description")
-        ),
-        "potential_duplicate": _safe_int(raw_data.get("potential_duplicate")),
-        "manual_curation_flag": _safe_int(raw_data.get("manual_curation_flag")),
-        "original_activity_id": _safe_int(raw_data.get("original_activity_id")),
-        "activity_properties": _safe_json(raw_data.get("activity_properties")),
-        "toid": _safe_int(raw_data.get("toid")),
+        "activity_comment": v
+        if type(v := get("activity_comment")) is str
+        else (None if v is None else str(v)),
+        "data_validity_comment": v
+        if type(v := get("data_validity_comment")) is str
+        else (None if v is None else str(v)),
+        "data_validity_description": v
+        if type(v := get("data_validity_description")) is str
+        else (None if v is None else str(v)),
+        "potential_duplicate": v
+        if type(v := get("potential_duplicate")) is int
+        else (None if v is None else _safe_int(v)),
+        "manual_curation_flag": v
+        if type(v := get("manual_curation_flag")) is int
+        else (None if v is None else _safe_int(v)),
+        "original_activity_id": v
+        if type(v := get("original_activity_id")) is int
+        else (None if v is None else _safe_int(v)),
+        "activity_properties": _safe_json(get("activity_properties")),
+        "toid": v
+        if type(v := get("toid")) is int
+        else (None if v is None else _safe_int(v)),
     }
 
 
