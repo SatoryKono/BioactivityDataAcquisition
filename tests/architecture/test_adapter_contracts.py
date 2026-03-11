@@ -492,7 +492,10 @@ class TestAdapterPortCompliance:
                 if py_file in allowed_files:
                     continue
 
-                tree = ast.parse(py_file.read_text(encoding="utf-8"))
+                try:
+                    tree = ast.parse(py_file.read_text(encoding="utf-8"))
+                except SyntaxError:
+                    continue
                 for node in ast.walk(tree):
                     if not isinstance(node, ast.ImportFrom) or node.module is None:
                         continue

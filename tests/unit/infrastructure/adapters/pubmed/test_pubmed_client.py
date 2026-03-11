@@ -225,24 +225,6 @@ def test_health_endpoint(adapter):
     assert adapter._get_health_endpoint() == "/entrez/eutils/einfo.fcgi"
 
 
-def test_get_source_metadata_returns_collector_state_and_clears_requests(adapter) -> None:
-    """Metadata snapshot should reflect collector state and consume it."""
-    adapter._request_collector.record_request(
-        url="https://eutils.ncbi.nlm.nih.gov/entrez/eutils/einfo.fcgi?db=pubmed",
-        duration_ms=18.0,
-        status_code=200,
-    )
-
-    assert adapter.request_count == 1
-
-    metadata = adapter.get_source_metadata(api_version="v1")
-
-    assert metadata.url == "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
-    assert metadata.api_version == "v1"
-    assert metadata.total_requests == 1
-    assert adapter.request_count == 0
-
-
 @pytest.mark.asyncio
 async def test_fetch_applies_resume_offset_before_article_fetch(adapter) -> None:
     """Fetch should skip PMIDs from checkpoint offset before fetching articles."""

@@ -115,8 +115,8 @@ class TestDataSourceRegistryDelegation:
         assert ds_providers == pr_providers
 
 
-class TestDataSourceCreatorProtocol:
-    """Tests for DataSourceCreator protocol compliance."""
+class TestDataSourceCreatorPortProtocol:
+    """Tests for DataSourceCreatorPort protocol compliance."""
 
     def test_all_creators_match_protocol(self):
         """Verify all registered creators match the protocol signature."""

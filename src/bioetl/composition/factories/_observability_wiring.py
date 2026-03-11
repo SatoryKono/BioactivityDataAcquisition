@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from .datasource.factory import DataSourceCreator
+from .datasource.factory import DataSourceCreatorPort
 from .services.factory import BaseServicesFactory
 
 if TYPE_CHECKING:
@@ -35,7 +35,7 @@ def create_shared_metrics(
 
 def _create_data_source(
     *,
-    create_data_source_fn: DataSourceCreator,
+    create_data_source_fn: DataSourceCreatorPort,
     settings: Settings,
     pipeline_config: PipelineYamlConfig,
     logger: LoggerPort,
@@ -91,7 +91,7 @@ def _create_cached_bronze_data_source(
 
 def create_data_source_with_observability(
     *,
-    create_data_source_fn: DataSourceCreator,
+    create_data_source_fn: DataSourceCreatorPort,
     settings: Settings,
     pipeline_config: PipelineYamlConfig,
     logger: LoggerPort,

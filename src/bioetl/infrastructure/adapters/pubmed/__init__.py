@@ -5,7 +5,7 @@ This package provides the adapter for interacting with the PubMed API.
 
 from __future__ import annotations
 
-from bioetl.infrastructure.adapters.pubmed.client import PubMedAdapter
+from bioetl.infrastructure.adapters.pubmed.client import ENTREZ_API_BASE, PubMedAdapter
 from bioetl.infrastructure.adapters.pubmed.fallback import TitleFallbackHandler
 from bioetl.infrastructure.adapters.pubmed.models import (
     PUBMED_RECORD_MODELS,
@@ -15,6 +15,7 @@ from bioetl.infrastructure.adapters.pubmed.models import (
 )
 
 __all__ = [
+    "ENTREZ_API_BASE",
     "PUBMED_RECORD_MODELS",
     "PubMedAdapter",
     "PubMedArticleRecord",

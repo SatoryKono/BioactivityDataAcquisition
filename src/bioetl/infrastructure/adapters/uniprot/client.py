@@ -25,8 +25,8 @@ from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
 from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
-    ExtractRecordIdHook,
-    NormalizeIdHook,
+    ExtractRecordIdPort,
+    NormalizeIdPort,
 )
 from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
 from bioetl.infrastructure.adapters.uniprot.constants import UNIPROT_API_BASE
@@ -148,11 +148,11 @@ class UniProtAdapter(
         """Return UniProt-specific default fallback config."""
         return _UNIPROT_DEFAULT_FALLBACK_CONFIG
 
-    def _get_normalize_id_hook(self) -> NormalizeIdHook:
+    def _get_normalize_id_hook(self) -> NormalizeIdPort:
         """Return accession strip-normalization hook."""
         return lambda value: value.strip()
 
-    def _get_extract_record_id_hook(self) -> ExtractRecordIdHook:
+    def _get_extract_record_id_hook(self) -> ExtractRecordIdPort:
         """Return hook extracting accession from a UniProt record."""
         return self._extract_accession_from_record
 

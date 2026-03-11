@@ -50,7 +50,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.base_transformer import BaseTransformer
     from bioetl.application.core.pipeline_services import PipelineService
-    from bioetl.composition.factories.datasource.factory import DataSourceCreator
+    from bioetl.composition.factories.datasource.factory import DataSourceCreatorPort
     from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.context import CachedBronzeContext
@@ -90,7 +90,7 @@ def _compat_service_bundle_dependencies() -> ServiceBundleDependencies:
 
 def build_pipeline_services(
     pipeline_name: str,
-    create_data_source_fn: DataSourceCreator,
+    create_data_source_fn: DataSourceCreatorPort,
     settings: Settings,
     logger: LoggerPort,
     config: PipelineYamlConfig | None = None,
@@ -147,7 +147,7 @@ def create_pipeline_with_services(
     pipeline_name: str,
     pipeline_class: type[BasePipeline],
     provider: str,
-    create_data_source_fn: DataSourceCreator,
+    create_data_source_fn: DataSourceCreatorPort,
     transformer_class: type[BaseTransformer] | None,
     run_id: RunID,
     runtime: RuntimeConfig,

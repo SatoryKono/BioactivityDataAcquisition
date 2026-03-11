@@ -87,19 +87,6 @@ async def test_get_entity_count(adapter, mock_http_client):
 
 
 @pytest.mark.asyncio
-async def test_get_source_metadata(adapter):
-    """Test retrieving source metadata."""
-    # Simulate recording a request (requires internals access or mocking)
-    adapter._request_collector.record_request("http://test", "GET", 100, 200)
-
-    metadata = adapter.get_source_metadata(api_version="33")
-    assert metadata.type == "api"
-    assert metadata.url == "https://www.ebi.ac.uk/chembl/api/data"
-    assert metadata.api_version == "33"
-    assert adapter.request_count == 0  # Should be cleared
-
-
-@pytest.mark.asyncio
 async def test_fetch_single_record_direct_success(adapter, mock_http_client):
     """Test successful fallback to direct endpoint."""
     mock_response = MagicMock()

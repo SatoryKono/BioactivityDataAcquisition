@@ -28,7 +28,7 @@ from bioetl.domain.composite.result import (
     MergeResult,
 )
 from bioetl.domain.composite.state import CompositePipelineState
-from bioetl.domain.exceptions import InvalidStateError
+from bioetl.domain.exceptions import InvalidStateError, StorageError
 from bioetl.domain.locking import FencingToken
 
 if TYPE_CHECKING:
@@ -256,6 +256,42 @@ class TestEnrichmentFSMTransitions:
             s for s in saved_states if s.state == CompositePipelineState.ENRICHING
         ]
         assert len(enriching_states) >= 1, "Should transition to ENRICHING"
+
+    @pytest.mark.asyncio
+    async def test_enrichment_checkpoint_save_failure_is_non_fatal(
+        self,
+        runner,
+        mock_checkpoint_manager,
+        mock_logger,
+    ) -> None:
+        """Enrichment checkpoint save failures should degrade gracefully."""
+        saved_states: list[CompositeCheckpointState] = []
+        failed_once = False
+
+        async def save_impl(state: CompositeCheckpointState) -> None:
+            nonlocal failed_once
+            saved_states.append(state)
+            if (
+                state.state == CompositePipelineState.ENRICHING
+                and not failed_once
+            ):
+                failed_once = True
+                raise StorageError("enrichment checkpoint unavailable")
+
+        mock_checkpoint_manager.save = AsyncMock(side_effect=save_impl)
+
+        result = await runner.run()
+
+        assert result is not None
+        assert any(
+            "checkpoint_save_failed" in str(call)
+            and "enrichment checkpoint unavailable" in str(call)
+            for call in mock_logger.warning.call_args_list
+        )
+        assert any(
+            state.state == CompositePipelineState.ENRICHMENT_COMPLETED
+            for state in saved_states
+        ), "Pipeline should continue past ENRICHING after checkpoint save failure"
 
     @pytest.mark.asyncio
     async def test_transitions_to_enrichment_completed_after_success(

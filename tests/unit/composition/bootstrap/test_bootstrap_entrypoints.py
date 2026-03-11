@@ -50,18 +50,31 @@ def mock_logger():
 class TestBootstrapLogger:
     """Tests for bootstrap_logger_port function."""
 
-    def test_bootstrap_logger_port_creates_logger(self):
-        """Test that bootstrap_logger_port creates a logger."""
+    @patch("bioetl.composition.bootstrap.runtime.observability.UnifiedLogger")
+    def test_bootstrap_logger_port_delegates_to_unified_logger(
+        self,
+        mock_unified_logger: MagicMock,
+    ) -> None:
+        """bootstrap_logger_port should pass runtime metadata to UnifiedLogger."""
         from bioetl.composition.bootstrap import bootstrap_logger_port
 
         run_id = uuid4()
+        expected_logger = MagicMock()
+        mock_unified_logger.return_value = expected_logger
+
         logger = bootstrap_logger_port(
             pipeline="test_pipeline",
             run_id=run_id,
             log_level="INFO",
         )
 
-        assert logger is not None
+        assert logger is expected_logger
+        mock_unified_logger.assert_called_once_with(
+            pipeline="test_pipeline",
+            run_id=run_id,
+            log_level="INFO",
+            json_format=True,
+        )
 
 
 @pytest.mark.unit

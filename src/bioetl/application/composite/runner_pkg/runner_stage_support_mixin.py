@@ -143,6 +143,24 @@ class _CompositeRunnerStageSupportMixin:
         )
         return next_state
 
+    async def _persist_failed_state(
+        self,
+        state: CompositeCheckpointState,
+        *,
+        stage: str,
+        error: str,
+    ) -> CompositeCheckpointState:
+        """Transition to FAILED and persist the checkpoint via the shared safe seam."""
+        failed_state = self._transition_state_with_fsm_log(
+            state,
+            CompositePipelineState.FAILED,
+            stage=stage,
+            validate=False,
+            error=error,
+        )
+        await self._call_save_checkpoint_safe(failed_state, stage)
+        return failed_state
+
     async def _start_seed_phase(
         self,
         state: CompositeCheckpointState,
@@ -201,14 +219,11 @@ class _CompositeRunnerStageSupportMixin:
         if isinstance(error, BioETLError):
             log_kwargs["reason_code"] = "unexpected_bioetl_error"
         self._logger.error("Seed pipeline failed", **log_kwargs)
-        failed_state = self._transition_state_with_fsm_log(
+        await self._persist_failed_state(
             state,
-            CompositePipelineState.FAILED,
             stage="seed_failed",
-            validate=False,
             error=str(error),
         )
-        await self._call_save_checkpoint_safe(failed_state, "seed_failed")
 
     async def _fail_required_dependencies(
         self,
@@ -216,14 +231,11 @@ class _CompositeRunnerStageSupportMixin:
         required_failed: list[str],
     ) -> None:
         """Persist dependency failure state when required dependencies fail."""
-        failed_state = self._transition_state_with_fsm_log(
+        await self._persist_failed_state(
             state,
-            CompositePipelineState.FAILED,
             stage="dependencies_failed",
-            validate=False,
             error=f"Required dependencies failed: {required_failed}",
         )
-        await self._call_save_checkpoint_safe(failed_state, "dependencies_failed")
         raise InvalidStateError(f"Required dependencies failed: {required_failed}")
 
     @staticmethod

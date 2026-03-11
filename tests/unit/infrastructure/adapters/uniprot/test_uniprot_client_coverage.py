@@ -71,36 +71,6 @@ async def test_probe_health_error(adapter, mock_http_client):
 
 
 @pytest.mark.asyncio
-async def test_get_source_metadata(adapter):
-    """Test retrieving source metadata."""
-
-    adapter._request_collector.record_request("http://test", "GET", 100, 200)
-
-    metadata = adapter.get_source_metadata(api_version="v1")
-
-    assert metadata.type == "api"
-
-    assert metadata.url == "https://rest.uniprot.org"
-
-    assert metadata.api_version == "v1"
-
-    assert adapter.request_count == 0
-
-
-@pytest.mark.asyncio
-async def test_clear_request_collector(adapter):
-    """Test clearing request collector."""
-
-    adapter._request_collector.record_request("http://test", "GET", 100, 200)
-
-    assert adapter.request_count == 1
-
-    adapter.clear_request_collector()
-
-    assert adapter.request_count == 0
-
-
-@pytest.mark.asyncio
 async def test_fetch_with_filter_batching(adapter, mock_http_client):
     """Test fetch_filtered handles batching."""
 

@@ -17,8 +17,8 @@ from bioetl.infrastructure.adapters.common.composable_fallback import (
     resolve_fallback_policy,
 )
 from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
-    DefaultFallbackExecutionStrategy,
-    FallbackExecutionStrategy,
+    DefaultFallbackExecution,
+    FallbackExecutionPort,
     FallbackFetchOrchestratorService,
     FallbackFetchRequest,
 )
@@ -48,9 +48,9 @@ __all__ = [
     "APIRequestCollector",
     "BaseTitleFallbackHandler",
     "ComposableFallbackDecorator",
-    "DefaultFallbackExecutionStrategy",
+    "DefaultFallbackExecution",
     "FallbackDecoratorConfig",
-    "FallbackExecutionStrategy",
+    "FallbackExecutionPort",
     "FallbackFetchOrchestratorService",
     "FallbackFetchRequest",
     "FallbackPolicyMixin",

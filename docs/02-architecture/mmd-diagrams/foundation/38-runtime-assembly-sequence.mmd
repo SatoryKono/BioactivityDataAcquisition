@@ -60,7 +60,7 @@ sequenceDiagram
     Note over Asm,DSF: Phase 6: Data Source Adapter
     Asm->>DSF: create(provider, http_client)
     DSF->>PR: get_creator(provider)
-    PR-->>DSF: DataSourceCreator
+    PR-->>DSF: DataSourceCreatorPort
     DSF->>DSF: creator(settings, config, logger)
     DSF-.->>Asm: DataSourcePort impl
 

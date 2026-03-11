@@ -49,7 +49,7 @@ FORBIDDEN_HELPER_CONSTRUCTORS = {
     "PubChemEntityMapper",
     "PubChemFetchStrategies",
     # Shared fallback infrastructure
-    "DefaultFallbackExecutionStrategy",
+    "DefaultFallbackExecution",
     "ComposableFallbackDecorator",
     # Error mapping
     "DomainInfraExceptionMapper",

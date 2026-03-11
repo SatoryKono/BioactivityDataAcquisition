@@ -12,9 +12,13 @@ if TYPE_CHECKING:
 
 
 __all__ = [
+    "emit_destructive_confirmation_preview",
+    "emit_run_all_listing",
+    "emit_run_all_preview",
     "create_run_all_options",
     "record_pipeline_failure",
     "record_pipeline_result",
+    "should_prompt_for_destructive_run",
 ]
 
 
@@ -42,6 +46,50 @@ def create_run_all_options(
         dry_run=dry_run,
         log_level="DEBUG" if debug else "INFO",
     )
+
+
+def emit_run_all_listing(*, source: str, pipelines: list[str]) -> None:
+    """Emit list-only output for provider pipelines."""
+    echo_info(f"Pipelines for provider '{source}':")
+    for pipeline in pipelines:
+        echo_info(f"  - {pipeline}")
+    echo_info(f"\nTotal: {len(pipelines)} pipeline(s)")
+
+
+def should_prompt_for_destructive_run(
+    *,
+    run_type: str,
+    dry_run: bool,
+    yes: bool,
+) -> bool:
+    """Return whether the CLI should prompt before destructive execution."""
+    return run_type in ("rebuild", "backfill") and not dry_run and not yes
+
+
+def emit_destructive_confirmation_preview(
+    *,
+    run_type: str,
+    pipelines: list[str],
+) -> None:
+    """Emit the confirmation preview shown before destructive operations."""
+    echo_warning(f"{run_type} will clear existing data for {len(pipelines)} pipelines.")
+    echo_info("Pipelines to be affected:")
+    for pipeline in pipelines:
+        echo_info(f"  - {pipeline}")
+
+
+def emit_run_all_preview(
+    *,
+    source: str,
+    pipelines: list[str],
+    dry_run: bool,
+) -> None:
+    """Emit the preview shown before running provider pipelines."""
+    prefix = "[DRY-RUN] Would run" if dry_run else "Running"
+    echo_info(f"{prefix} {len(pipelines)} pipeline(s) for '{source}':")
+    for pipeline in pipelines:
+        echo_info(f"  - {pipeline}")
+    echo_info("")
 
 
 def record_pipeline_result(

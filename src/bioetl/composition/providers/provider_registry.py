@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "AdapterCreator",
-    "DataSourceCreator",
+    "DataSourceCreatorPort",
     "HttpConfig",
     "ProviderConfig",
     "ProviderRegistry",
@@ -51,7 +51,7 @@ class HttpConfig:
 AdapterCreator = Callable[..., "DataSourcePort"]
 
 
-class DataSourceCreator(Protocol):
+class DataSourceCreatorPort(Protocol):
     """Protocol for high-level data source creator functions.
 
     These functions create fully configured data sources with filtering support.
@@ -106,7 +106,7 @@ class ProviderConfig:
     requires_logger: bool = True
     default_kwargs: dict[str, object] = field(default_factory=dict)
     custom_creator: AdapterCreator | None = None
-    data_source_creator: DataSourceCreator | None = None
+    data_source_creator: DataSourceCreatorPort | None = None
 
 
 class ProviderRegistry:

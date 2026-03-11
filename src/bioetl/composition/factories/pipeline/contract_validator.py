@@ -16,7 +16,7 @@ from bioetl.infrastructure.config import load_pipeline_contract_policy
 if TYPE_CHECKING:
     import pandera
 
-    from bioetl.composition.factories.datasource.factory import DataSourceCreator
+    from bioetl.composition.factories.datasource.factory import DataSourceCreatorPort
     from bioetl.composition.factories.pipeline.assembler import GenericPipelineFactory
 
 
@@ -103,7 +103,7 @@ def create_factory(
     _validate_contract_policy(config)
 
     # Resolve data source creator: use data_source_provider override if set
-    data_source_creator: DataSourceCreator | None = None
+    data_source_creator: DataSourceCreatorPort | None = None
     if config.data_source_provider:
         data_source_creator = DataSourceRegistry.get(config.data_source_provider)
 

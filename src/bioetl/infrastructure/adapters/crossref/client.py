@@ -10,8 +10,6 @@ __all__ = [
     "CrossRefQueryBuilder",
     "CrossRefResponseMapper",
 ]
-
-import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
@@ -36,13 +34,8 @@ from bioetl.infrastructure.adapters.common.adapter_defaults import (
     create_default_fallback_service as _create_default_crossref_fallback_service,
 )
 from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
-    ExtractRecordIdHook,
-    NormalizeIdHook,
-)
-from bioetl.infrastructure.adapters.common.source_metadata_capability import (
-    clear_source_metadata_collector,
-    consume_source_metadata,
-    get_request_count,
+    ExtractRecordIdPort,
+    NormalizeIdPort,
 )
 from bioetl.infrastructure.adapters.crossref._defaults import (
     CROSSREF_DEFAULT_FALLBACK_CONFIG as _CROSSREF_DEFAULT_FALLBACK_CONFIG,
@@ -51,13 +44,15 @@ from bioetl.infrastructure.adapters.crossref.batch import (
     DoiBatchProcessor,
     SearchPaginatorHelper,
 )
-from bioetl.infrastructure.adapters.crossref.client_builders import (
-    _create_default_crossref_batch_fetcher,
-    _create_default_crossref_fetch_flow,
-    _create_default_crossref_query_builder,
-    _create_default_crossref_response_mapper,
-    _create_default_crossref_search_paginator,
-    _create_default_crossref_title_fallback_handler,
+from bioetl.infrastructure.adapters.crossref.client_observability_helpers import (
+    build_crossref_source_metadata,
+    clear_crossref_request_collector,
+    get_crossref_request_count,
+    probe_crossref_health,
+)
+from bioetl.infrastructure.adapters.crossref.client_runtime_helpers import (
+    build_crossref_fetch_flow,
+    build_crossref_runtime_services,
 )
 from bioetl.infrastructure.adapters.crossref.fallback import TitleFallbackHandler
 from bioetl.infrastructure.adapters.crossref.fetch_flow import CrossRefFetchFlow
@@ -147,78 +142,46 @@ class CrossRefAdapter(FallbackPolicyMixin, BaseHttpAdapter):
             )
         )
 
-        self._query_builder = (
-            self.query_builder
-            if self.query_builder is not None
-            else _create_default_crossref_query_builder(
-                api_base=CROSSREF_API_BASE,
-                mailto=self.mailto,
-            )
+        runtime_services = build_crossref_runtime_services(
+            query_builder=self.query_builder,
+            response_mapper=self.response_mapper,
+            batch_fetcher=self.batch_fetcher,
+            search_paginator=self.search_paginator,
+            title_fallback_handler=self.title_fallback_handler,
+            http_client=self._http_client,
+            logger=self._logger,
+            adapter_metrics=self._adapter_metrics,
+            request_collector=self._request_collector,
+            mailto=self.mailto,
+            api_base=CROSSREF_API_BASE,
+            headers_fn=self._build_headers,
         )
-        self._response_mapper = (
-            self.response_mapper
-            if self.response_mapper is not None
-            else _create_default_crossref_response_mapper()
-        )
-
-        self._batch_fetcher = (
-            self.batch_fetcher
-            if self.batch_fetcher is not None
-            else _create_default_crossref_batch_fetcher(
-                http=self._http_client,
-                logger=self._logger,
-                metrics=self._adapter_metrics,
-                mailto=self.mailto,
-                api_base=CROSSREF_API_BASE,
-                headers_fn=self._build_headers,
-                request_collector=self._request_collector,
-            )
-        )
-        self._search_paginator = (
-            self.search_paginator
-            if self.search_paginator is not None
-            else _create_default_crossref_search_paginator(
-                http=self._http_client,
-                logger=self._logger,
-                metrics=self._adapter_metrics,
-                mailto=self.mailto,
-                api_base=CROSSREF_API_BASE,
-                headers_fn=self._build_headers,
-                request_collector=self._request_collector,
-            )
-        )
-        self._fallback_handler = (
-            self.title_fallback_handler
-            if self.title_fallback_handler is not None
-            else _create_default_crossref_title_fallback_handler(
-                logger=self._logger,
-                search_fn=self._search_paginator.search,
-            )
-        )
+        self._query_builder = runtime_services.query_builder
+        self._response_mapper = runtime_services.response_mapper
+        self._batch_fetcher = runtime_services.batch_fetcher
+        self._search_paginator = runtime_services.search_paginator
+        self._fallback_handler = runtime_services.fallback_handler
         self.configure_fallback_policy(None)
 
-        self._fetch_flow = (
-            self.fetch_flow
-            if self.fetch_flow is not None
-            else _create_default_crossref_fetch_flow(
-                logger=self._logger,
-                batch_fetcher=self._batch_fetcher,
-                search_paginator=self._search_paginator,
-                fallback_decorator=self._fallback_decorator,
-                batch_size=self.batch_size,
-                response_mapper=self._response_mapper,
-            )
+        self._fetch_flow = build_crossref_fetch_flow(
+            fetch_flow=self.fetch_flow,
+            logger=self._logger,
+            batch_fetcher=self._batch_fetcher,
+            search_paginator=self._search_paginator,
+            fallback_decorator=self._fallback_decorator,
+            batch_size=self.batch_size,
+            response_mapper=self._response_mapper,
         )
 
     def _get_default_fallback_config(self) -> FallbackDecoratorConfig:
         """Return CrossRef-specific default fallback config."""
         return _CROSSREF_DEFAULT_FALLBACK_CONFIG
 
-    def _get_normalize_id_hook(self) -> NormalizeIdHook:
+    def _get_normalize_id_hook(self) -> NormalizeIdPort:
         """Return DOI normalization hook."""
         return normalize_doi
 
-    def _get_extract_record_id_hook(self) -> ExtractRecordIdHook:
+    def _get_extract_record_id_hook(self) -> ExtractRecordIdPort:
         """Return hook extracting DOI from a CrossRef record."""
         return lambda rec: str(rec.get("DOI", ""))
 
@@ -312,42 +275,15 @@ class CrossRefAdapter(FallbackPolicyMixin, BaseHttpAdapter):
         Returns:
             HealthStatus reflecting the current CrossRef API availability.
         """
-        try:
-            url = self._query_builder.build_health_probe_url()
-            params = self._query_builder.build_health_probe_params()
-
-            start_time = time.monotonic()
-            with self._adapter_metrics.measure_request("/health"):
-                response = await self._http_client.get_once(
-                    url,
-                    params=params,
-                    headers=self._build_headers(),
-                )
-            elapsed = time.monotonic() - start_time
-
-            probe_mapping = self._response_mapper.map_health_probe(
-                status_code=response.status_code,
-                elapsed_seconds=elapsed,
-            )
-            if probe_mapping.event_name == "crossref_health_check_slow":
-                self._logger.warning(
-                    probe_mapping.event_name,
-                    elapsed_seconds=round(elapsed, 2),
-                )
-            elif probe_mapping.event_name is not None:
-                self._logger.warning(
-                    probe_mapping.event_name,
-                    status_code=response.status_code,
-                    classified_status=probe_mapping.status.value,
-                )
-            return probe_mapping.status
-
-        except CROSSREF_HEALTH_ERRORS as error:
-            self._logger.warning(
-                "crossref_health_check_failed",
-                error=str(error),
-            )
-            raise
+        return await probe_crossref_health(
+            http_client=self._http_client,
+            query_builder=self._query_builder,
+            response_mapper=self._response_mapper,
+            adapter_metrics=self._adapter_metrics,
+            headers_provider=self._build_headers,
+            logger=self._logger,
+            health_errors=CROSSREF_HEALTH_ERRORS,
+        )
 
     def _fallback_health_status(self) -> HealthStatus:
         """Return fallback status used when probe execution fails.
@@ -371,20 +307,24 @@ class CrossRefAdapter(FallbackPolicyMixin, BaseHttpAdapter):
         Returns:
             SourceMetadata aggregated from all recorded API requests since last clear.
         """
-        return consume_source_metadata(
-            collector=self._request_collector,
-            url=CROSSREF_API_BASE,
+        return build_crossref_source_metadata(
+            request_collector=self._request_collector,
+            api_base=CROSSREF_API_BASE,
             api_version=api_version,
         )
 
     def clear_request_collector(self) -> None:
         """Clear the collector without returning metadata."""
-        clear_source_metadata_collector(collector=self._request_collector)
+        clear_crossref_request_collector(
+            request_collector=self._request_collector,
+        )
 
     @property
     def request_count(self) -> int:
         """Number of recorded API requests since last clear."""
-        return get_request_count(collector=self._request_collector)
+        return get_crossref_request_count(
+            request_collector=self._request_collector,
+        )
 
     async def aclose(self) -> None:
         """Close adapter resources via underlying HTTP client context manager."""
