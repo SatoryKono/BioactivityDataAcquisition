@@ -3,9 +3,19 @@
 # Runs once when a new session starts (skipped on resume).
 # Ensures the dev environment is ready before Claude begins work.
 
-set -euo pipefail
+set -uo pipefail
 
-REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+# ── Resolve repo root reliably ──────────────────────────────────────
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || {
+    # Fallback: script lives at <repo>/.claude/setup.sh
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    REPO_ROOT="$(dirname "$SCRIPT_DIR")"
+}
+
+if [ ! -f "$REPO_ROOT/pyproject.toml" ]; then
+    echo "[setup] ERROR: pyproject.toml not found in $REPO_ROOT"
+    exit 1
+fi
 cd "$REPO_ROOT"
 
 # ── Colors ──────────────────────────────────────────────────────────
@@ -34,16 +44,20 @@ ok "Python $PYTHON_VERSION"
 # ── 2. Install / sync dependencies via uv (preferred) or pip ──────
 if command -v uv &>/dev/null; then
     info "Syncing dependencies with uv..."
-    uv sync --extra dev --extra tracing --quiet 2>&1 || {
-        warn "uv sync failed — trying uv pip install fallback..."
-        uv pip install -e ".[dev,tracing]" --quiet 2>&1
-    }
-    ok "Dependencies synced (uv)"
+    if uv sync --extra dev --extra tracing --quiet 2>&1; then
+        ok "Dependencies synced (uv sync)"
+    elif uv venv .venv --python python3 --quiet 2>&1 && \
+         uv pip install -e ".[dev,tracing]" --quiet 2>&1; then
+        ok "Dependencies synced (uv pip fallback)"
+    else
+        warn "uv install failed — try 'make install' manually"
+    fi
 else
     info "uv not found — falling back to pip"
     if [ ! -d ".venv" ]; then
         python3 -m venv .venv
     fi
+    # shellcheck disable=SC1091
     . .venv/bin/activate
     pip install --upgrade pip setuptools wheel -q 2>&1
     pip install -e ".[dev,tracing]" -q 2>&1
@@ -60,28 +74,30 @@ print("OK")
 '
 if command -v uv &>/dev/null; then
     RESULT=$(uv run python3 -c "$VERIFY_CMD" 2>&1) || true
-else
+elif [ -f ".venv/bin/python" ]; then
     RESULT=$(.venv/bin/python -c "$VERIFY_CMD" 2>&1) || true
+else
+    RESULT=$(python3 -c "$VERIFY_CMD" 2>&1) || true
 fi
 
 if [ "$RESULT" = "OK" ]; then
     ok "All critical imports verified"
 else
     warn "Some imports failed — run 'make install' to fix"
-    echo "$RESULT" | head -5
+    echo "$RESULT" | tail -5
 fi
 
 # ── 4. Quick lint preflight (non-blocking) ─────────────────────────
 info "Running quick lint preflight..."
 if command -v uv &>/dev/null; then
     RUN="uv run"
-else
+elif [ -f ".venv/bin/python" ]; then
     RUN=".venv/bin/python -m"
+else
+    RUN="python3 -m"
 fi
 
-RUFF_OK=true
-$RUN ruff check src/ --quiet --no-fix 2>&1 | tail -3 || RUFF_OK=false
-if [ "$RUFF_OK" = true ]; then
+if $RUN ruff check src/ --quiet --no-fix 2>&1 | tail -3; then
     ok "Ruff lint: clean"
 else
     warn "Ruff lint: issues found (non-blocking)"
