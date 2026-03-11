@@ -109,6 +109,10 @@ def mock_seed_runner() -> AsyncMock:
     runner = AsyncMock()
     runner.run.return_value = None
     runner._executor = MagicMock(records_fetched=100, records_silver=95)
+    runner.execution_metrics = {
+        "records_fetched": 100,
+        "records_silver": 95,
+    }
     return runner
 
 

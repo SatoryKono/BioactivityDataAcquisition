@@ -226,6 +226,14 @@ class FakePipelineRunner:
             },
         )()
 
+    @property
+    def execution_metrics(self) -> dict[str, int]:
+        return {
+            "records_fetched": self._executor.records_fetched,
+            "records_silver": self._executor.records_silver,
+            "records_quarantined": self._executor.records_quarantined,
+        }
+
     async def run(self) -> None:
         self.execution_count += 1
         if self.should_fail:

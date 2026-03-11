@@ -6,6 +6,8 @@ description: "Use when a user asks to debug or fix failing GitHub PR checks that
 
 # Gh Pr Checks Plan Fix
 
+*Статус: internal-published (Internal / Extended)*
+
 ## Overview
 
 Use gh to locate failing PR checks, fetch GitHub Actions logs for actionable failures, summarize the failure snippet, then propose a fix plan and implement after explicit approval.

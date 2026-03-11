@@ -296,7 +296,7 @@ class AtomicWriteGroup:
                 if temp_path.exists():
                     temp_path.unlink()
             except OSError:
-                pass
+                pass  # Why: temp file cleanup is best-effort; skip if already removed or locked
         self._pending.clear()
 
     def _cleanup_uncommitted(self, committed: list[tuple[Path, Path]]) -> None:
@@ -308,7 +308,7 @@ class AtomicWriteGroup:
                     if temp_path.exists():
                         temp_path.unlink()
                 except OSError:
-                    pass
+                    pass  # Why: temp file cleanup is best-effort; skip if already removed or locked
 
     def __enter__(self) -> AtomicWriteGroup:
         return self

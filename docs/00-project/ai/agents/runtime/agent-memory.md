@@ -1,5 +1,7 @@
 # Memory: BioETL (краткая выжимка)
 
+*Статус: internal-published (Internal / Extended)*
+
 ## Что это
 - BioETL — локальный ETL для биологической активности: ChEMBL, PubChem, UniProt и др.
 - Цель: нормализация и загрузка в **Delta Lake** с воспроизводимыми результатами.

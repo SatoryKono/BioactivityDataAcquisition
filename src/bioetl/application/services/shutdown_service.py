@@ -15,23 +15,12 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass, field
-from enum import Enum
 from typing import TYPE_CHECKING
+
+from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError, ShutdownReason
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort
-
-
-class ShutdownReason(Enum):
-    """Enumeration of shutdown reasons for metrics and logging."""
-
-    SIGNAL_SIGTERM = "SIGTERM"
-    SIGNAL_SIGINT = "SIGINT"
-    LOCK_LOST = "lock_lost"
-    DQ_THRESHOLD_EXCEEDED = "dq_threshold"
-    TIMEOUT = "timeout"
-    USER_REQUESTED = "user_requested"
-    UNKNOWN = "unknown"
 
 
 @dataclass
@@ -242,33 +231,6 @@ class ShutdownService:
             return ShutdownReason.DQ_THRESHOLD_EXCEEDED
 
         return ShutdownReason.UNKNOWN
-
-
-class PipelineShutdownError(Exception):
-    """Raised when pipeline receives shutdown signal.
-
-    This exception signals that the pipeline should gracefully terminate,
-    saving any pending checkpoints before exit.
-
-    Attributes:
-        reason: The reason for shutdown.
-        shutdown_service: Optional reference to the ShutdownService.
-    """
-
-    def __init__(
-        self,
-        message: str = "Pipeline shutdown requested",
-        *,
-        reason: ShutdownReason | None = None,
-    ) -> None:
-        """Initialize PipelineShutdownError.
-
-        Args:
-            message: Error message describing the shutdown cause.
-            reason: Optional ShutdownReason enum value.
-        """
-        super().__init__(message)
-        self.reason = reason or ShutdownReason.UNKNOWN
 
 
 __all__ = [

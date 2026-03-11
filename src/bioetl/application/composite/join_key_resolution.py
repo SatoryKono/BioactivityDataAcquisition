@@ -48,7 +48,7 @@ class JoinKeyResolverService:
                 if qualified in columns:
                     return qualified
             except ValueError:
-                pass
+                pass  # Why: pipeline name not in provider.entity format; skip non-integer key index
 
         if key in columns:
             return key
@@ -115,7 +115,7 @@ class JoinKeyResolverService:
                 if seed_join_key_qualified in merged_columns:
                     seed_join_key = seed_join_key_qualified
             except ValueError:
-                pass
+                pass  # Why: seed pipeline name not parseable; skip qualified key resolution
 
         try:
             enricher_provider, enricher_entity = self._parse_pipeline_name(
@@ -158,7 +158,7 @@ class JoinKeyResolverService:
                 if left_join_key_qualified in merged_columns:
                     left_join_key = left_join_key_qualified
             except ValueError:
-                pass
+                pass  # Why: left pipeline name not parseable; skip qualified key resolution
 
         try:
             right_provider, right_entity = self._parse_pipeline_name(right_pipeline)

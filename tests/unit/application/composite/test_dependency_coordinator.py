@@ -455,6 +455,10 @@ class TestDependencyExecution:
         runner = MagicMock()
         runner.run = AsyncMock(return_value=None)
         runner._executor = MagicMock(records_fetched=7, records_silver=5)
+        runner.execution_metrics = {
+            "records_fetched": 7,
+            "records_silver": 5,
+        }
 
         result = await coordinator._run_single_dependency(
             dependency=dependency,

@@ -116,9 +116,25 @@ class PipelineRunner:
         return self._shutdown_signal
 
     @property
+    def run_id(self) -> str:
+        """Stable run identifier exposed by the runner contract."""
+        return str(self._context.run_id)
+
+    @property
     def services(self) -> PipelineService:
         """Access injected services."""
         return self._services
+
+    @property
+    def execution_metrics(self) -> dict[str, int]:
+        """Return execution counters exposed by the concrete pipeline runner."""
+        return {
+            "records_fetched": int(self._executor.records_fetched),
+            "records_bronze": int(self._executor.records_bronze),
+            "records_silver": int(self._executor.records_silver),
+            "records_gold": int(self._executor.records_gold),
+            "records_quarantined": int(self._executor.records_quarantined),
+        }
 
     async def run(self) -> None:
         """Execute pipeline. Main entry point.

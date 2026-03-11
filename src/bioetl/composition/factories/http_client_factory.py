@@ -148,15 +148,20 @@ class HttpClientFactory:
             max_connections = source_config.max_connections
             max_keepalive = source_config.max_keepalive_connections
         else:
+            # Fallback defaults when no source YAML config is available
+            _FALLBACK_TIMEOUT = 30.0
+            _FALLBACK_MAX_RETRIES = 3
+            _FALLBACK_CB_THRESHOLD = 5
+            _FALLBACK_CB_RECOVERY = 300
             http_config = ProviderRegistry.get_http_config(provider)
             if http_config is None:
                 rate, capacity = 5.0, 10
-                failure_threshold, recovery_timeout = 5, 300
-                timeout, max_retries = 30.0, 3
+                failure_threshold, recovery_timeout = _FALLBACK_CB_THRESHOLD, _FALLBACK_CB_RECOVERY
+                timeout, max_retries = _FALLBACK_TIMEOUT, _FALLBACK_MAX_RETRIES
             else:
                 rate, capacity = http_config.rate, http_config.capacity
-                failure_threshold, recovery_timeout = 5, 300
-                timeout, max_retries = 30.0, 3
+                failure_threshold, recovery_timeout = _FALLBACK_CB_THRESHOLD, _FALLBACK_CB_RECOVERY
+                timeout, max_retries = _FALLBACK_TIMEOUT, _FALLBACK_MAX_RETRIES
             base_delay, max_delay = 1.0, 60.0
             max_connections, max_keepalive = 50, 10
 

@@ -75,5 +75,5 @@ def get_int(node: ET.Element | None) -> int | None:
             try:
                 return int(text)
             except ValueError:
-                pass
+                pass  # Why: XML date text not parseable as integer; return None as fallback
     return None

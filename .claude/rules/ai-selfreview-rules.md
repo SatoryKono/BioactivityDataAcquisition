@@ -434,11 +434,27 @@ runner = PipelineFactory.create()
 | Orderer | `*Orderer` | `ColumnOrderer` |
 | Deduplicator | `*Deduplicator` | `RecordDeduplicator` |
 | Renamer | `*Renamer` | `ColumnRenamer` |
+| Collector | `*Collector` | `MetricsCollector` |
+| Breaker | `*Breaker` | `CircuitBreaker` |
+| Exporter | `*Exporter` | `CsvExporter` |
+| Detector | `*Detector` | `AnomalyDetector` |
+| Paginator | `*Paginator` | `SearchPaginator` |
+| Mapper | `*Mapper` | `ResponseMapper` |
+| Monitor | `*Monitor` | `MemoryMonitor` |
+| Tracker | `*Tracker` | `HealthTracker` |
+| Logger | `*Logger` | `UnifiedLogger` |
+| Tracer | `*Tracer` | `OpenTelemetryTracer` |
+| Decorator | `*Decorator` | `RetryDecorator` |
+| Strategy | `*Strategy` | `MergeStrategy` |
+| Converter | `*Converter` | `UnitConverter` |
 
 > **Value Object suffixes** (не требуют проверки — исключены из NAME-001):
 > `*Record`, `*Options`, `*Status`, `*Preview`, `*Phase`, `*Issue`,
 > `*Ids`, `*Date`, `*Identifiers`, `*Classification`, `*Author`,
-> `*Affiliation`, `*Raw`, `*Output`.
+> `*Affiliation`, `*Raw`, `*Output`, `*Event`, `*Rule`, `*Report`,
+> `*Mapping`, `*Stats`, `*Metadata`, `*Settings`, `*Token`, `*Params`,
+> `*Input`, `*Score`, `*Value`, `*Distribution`, `*Metric`,
+> `*Pairing`, `*Mismatch`, `*Filter`, `*Alias`.
 
 **Детекция:**
 ```bash

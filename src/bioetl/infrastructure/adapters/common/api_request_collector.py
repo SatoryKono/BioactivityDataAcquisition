@@ -255,7 +255,7 @@ class APIRequestCollector:
             timestamp = int(value)
             return datetime.fromtimestamp(timestamp, tz=UTC)
         except ValueError:
-            pass
+            pass  # Why: response body not JSON-parseable as Unix timestamp; return None
         # Could extend to parse HTTP date format if needed
         return None
 

@@ -131,10 +131,12 @@ class EnrichmentCoordinatorResultMixin:
         runner: PipelineRunner,
         records_input: int,
     ) -> tuple[int, int, float]:
-        """Extract enrichment stats from runner executor."""
-        executor = getattr(runner, "_executor", None)
-        records_enriched = getattr(executor, "records_silver", 0) if executor else 0
-        records_errored = getattr(executor, "records_quarantined", 0) if executor else 0
+        """Extract enrichment stats from runner public metrics view."""
+        metrics = getattr(runner, "execution_metrics", None)
+        if not isinstance(metrics, dict):
+            metrics = {}
+        records_enriched = int(metrics.get("records_silver", 0))
+        records_errored = int(metrics.get("records_quarantined", 0))
         dq_error_rate = records_errored / records_input if records_input > 0 else 0.0
         return records_enriched, records_errored, dq_error_rate
 

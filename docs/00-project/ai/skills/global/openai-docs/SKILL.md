@@ -6,6 +6,8 @@ description: "Use when the user asks how to build with OpenAI products or APIs a
 
 # OpenAI Docs
 
+*Статус: internal-published (Internal / Extended)*
+
 Provide authoritative, current guidance from OpenAI developer docs using the developers.openai.com MCP server. Always prioritize the developer docs MCP tools over web.run for OpenAI-related questions. Only if the MCP server is installed and returns no meaningful results should you fall back to web search.
 
 ## Quick start

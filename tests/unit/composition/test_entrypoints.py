@@ -285,14 +285,14 @@ class TestRunPipelineIntegration:
         """Create a mock PipelineRunner."""
         runner = MagicMock()
         runner.run = AsyncMock()
-        runner._context = MagicMock()
-        runner._context.run_id = uuid4()
-        runner._executor = MagicMock()
-        runner._executor.records_fetched = 100
-        runner._executor.records_bronze = 100
-        runner._executor.records_silver = 95
-        runner._executor.records_gold = 90
-        runner._executor.records_quarantined = 5
+        runner.run_id = str(uuid4())
+        runner.execution_metrics = {
+            "records_fetched": 100,
+            "records_bronze": 100,
+            "records_silver": 95,
+            "records_gold": 90,
+            "records_quarantined": 5,
+        }
         return runner
 
     @pytest.fixture(autouse=True)
@@ -371,8 +371,8 @@ class TestRunPipelineIntegration:
         from bioetl.composition.entrypoints import run_pipeline
 
         # Simulate partial processing before failure
-        mock_runner._executor.records_fetched = 50
-        mock_runner._executor.records_silver = 45
+        mock_runner.execution_metrics["records_fetched"] = 50
+        mock_runner.execution_metrics["records_silver"] = 45
         mock_runner.run = AsyncMock(side_effect=RuntimeError("Mid-run failure"))
 
         with patch(

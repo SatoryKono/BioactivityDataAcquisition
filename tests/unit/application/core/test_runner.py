@@ -124,6 +124,7 @@ def mock_executor():
     executor.records_bronze = 100
     executor.records_silver = 95
     executor.records_gold = 90
+    executor.records_quarantined = 5
     return executor
 
 
@@ -359,6 +360,7 @@ class TestPipelineRunnerInit:
         assert runner._config == pipeline_config
         assert runner._runtime == runtime_config
         assert runner.shutdown_signal == shutdown_signal
+        assert runner.run_id == str(mock_context.run_id)
         # Verify services are stored directly
         assert runner._lock_manager == mock_lock_manager
         assert runner._preflight_service == mock_preflight_service
@@ -405,6 +407,47 @@ class TestPipelineRunnerInit:
         assert runner._postrun_service is mock_postrun_service
         assert runner._lifecycle_service is mock_lifecycle_service
         assert runner._observer is mock_observer
+
+    def test_execution_metrics_exposes_executor_counters(
+        self,
+        pipeline_config,
+        runtime_config,
+        mock_services,
+        mock_context,
+        mock_executor,
+        mock_checkpoint_manager,
+        shutdown_signal,
+        mock_logger,
+        mock_lock_manager,
+        mock_preflight_service,
+        mock_postrun_service,
+        mock_lifecycle_service,
+        mock_observer,
+    ):
+        """Test runner exposes a strict public metrics view from executor counters."""
+        runner = PipelineRunner(
+            config=pipeline_config,
+            runtime=runtime_config,
+            services=mock_services,
+            context=mock_context,
+            executor=mock_executor,
+            checkpoint_manager=mock_checkpoint_manager,
+            shutdown_signal=shutdown_signal,
+            logger=mock_logger,
+            lock_manager=mock_lock_manager,
+            preflight=mock_preflight_service,
+            postrun=mock_postrun_service,
+            lifecycle_service=mock_lifecycle_service,
+            observer=mock_observer,
+        )
+
+        assert runner.execution_metrics == {
+            "records_fetched": mock_executor.records_fetched,
+            "records_bronze": mock_executor.records_bronze,
+            "records_silver": mock_executor.records_silver,
+            "records_gold": mock_executor.records_gold,
+            "records_quarantined": mock_executor.records_quarantined,
+        }
 
 
 @pytest.mark.unit

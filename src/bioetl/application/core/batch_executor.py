@@ -13,7 +13,8 @@ from bioetl.application.core.batch_checkpoint_recovery_service import (
 )
 from bioetl.application.core.batch_executor_dq_mixin import _BatchExecutorDQMixin
 from bioetl.application.core.batch_progress_service import BatchProgressService
-from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
+from bioetl.application.core.shutdown import ShutdownSignal
+from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.ports import BatchIdGeneratorPort
 from bioetl.domain.types import BronzeRecord, GoldRecord

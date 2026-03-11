@@ -88,6 +88,14 @@ from bioetl.domain.exceptions.internal import (
 )
 
 # =============================================================================
+# PipelineShutdown - Graceful shutdown signal exception and reason enum
+# =============================================================================
+from bioetl.domain.exceptions.pipeline_shutdown import (
+    PipelineShutdownError,
+    ShutdownReason,
+)
+
+# =============================================================================
 # NetworkErrors - Network connectivity and external service errors
 # =============================================================================
 from bioetl.domain.exceptions.network import (
@@ -147,6 +155,7 @@ __all__ = [
     "MissingRequiredFieldError",
     # NetworkErrors
     "NetworkError",
+    "PipelineShutdownError",
     "PolicyViolationError",
     "RateLimitError",
     "RateLimitExceededError",
@@ -155,6 +164,7 @@ __all__ = [
     "RunnerAlreadyExecutedError",
     "SchemaEvolutionError",
     "SchemaViolationError",
+    "ShutdownReason",
     "ServiceAuthenticationError",
     "ServiceUnavailableError",
     "StorageError",

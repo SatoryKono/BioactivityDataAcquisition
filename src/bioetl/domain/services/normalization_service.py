@@ -259,7 +259,7 @@ class _NormalizationBatchMixin(_NormalizationActivityMixin):
             pchembl = self.converter.to_pchembl(aggregated)
             is_potent = pchembl.value >= self.config.potency_threshold
         except ValueError:
-            pass
+            pass  # Why: pChEMBL conversion not applicable for this unit; return result without pchembl
 
         return NormalizationResult(
             value=aggregated.value,
