@@ -363,7 +363,7 @@ def test_build_pipeline_runner_forces_skip_gold_when_sink_disabled() -> None:
 
     assert fake_factory.kwargs is not None
     runtime = fake_factory.kwargs["runtime"]
-    assert getattr(runtime, "skip_gold") is True
+    assert runtime.skip_gold is True
 
 
 def test_assemble_filter_config_passes_cli_overrides_when_enabled() -> None:

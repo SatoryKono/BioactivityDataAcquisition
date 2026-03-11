@@ -177,6 +177,8 @@ markers = [
     "benchmark: Benchmark tests (excluded from standard runs, run with -m benchmark)",
     "smoke: Smoke tests (quick sanity checks for local development)",
     "serial: Tests that must run serially (not parallel-safe, e.g., shared state)",
+    "no_api: Tests that do not require external API access",
+    "uniprot: UniProt provider-specific tests",
 ]
 # Default timeout: 60 seconds per test (prevents CI hangs from stuck tests)
 # Override per-test with @pytest.mark.timeout(N) or disable with @pytest.mark.timeout(0)

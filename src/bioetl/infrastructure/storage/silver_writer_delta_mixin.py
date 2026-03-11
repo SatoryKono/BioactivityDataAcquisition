@@ -5,9 +5,9 @@ from __future__ import annotations
 __all__ = ["SilverWriterDeltaMixin"]
 
 import asyncio
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, NoReturn
 
 import pyarrow as pa
 from deltalake.exceptions import (
@@ -53,6 +53,18 @@ class _DeltaWriteRequest:
     partition_cols: list[str] | None
 
 
+_DeltaWriteHandler = Callable[[_DeltaWriteRequest], Awaitable[None]]
+
+
+@dataclass(frozen=True, slots=True)
+class _DeltaWriteDispatchPolicy:
+    """Mode-to-handler policy for a normalized Delta write request."""
+
+    write_delete: _DeltaWriteHandler
+    write_append: _DeltaWriteHandler
+    write_merge: _DeltaWriteHandler
+
+
 _RUN_TYPE_PRECEDENCE_PREDICATE = (
     "CASE "
     "WHEN source._run_type = 'rebuild' THEN 3 "
@@ -78,7 +90,7 @@ def _build_merge_execute_callable(
 ) -> Callable[[], Any]:
     """Build the blocking Delta merge callable for ``run_in_executor``."""
 
-    def _execute() -> Any:
+    def _execute() -> Any:  # Any: Delta merge returns heterogeneous result
         return (
             dt.merge(
                 source=records,
@@ -110,6 +122,72 @@ def _build_plain_delta_write_kwargs(
     if schema_mode is not None:
         kwargs["schema_mode"] = schema_mode
     return kwargs
+
+
+def _raise_domain_write_error(
+    *,
+    table_name: str,
+    exc: SchemaMismatchError | pa.ArrowTypeError | DeltaError,
+) -> NoReturn:
+    """Translate Delta-layer write failures to domain errors when applicable."""
+    if isinstance(exc, (SchemaMismatchError, pa.ArrowTypeError)):
+        raise SchemaViolationError(table_name, errors=[str(exc)]) from exc
+    if "Merge-conflict" in str(exc):
+        raise MergeConflictError(table_name, conflicts=1) from exc
+    raise exc
+
+
+def _build_dispatch_policy(
+    *,
+    write_delete: _DeltaWriteHandler,
+    write_append: _DeltaWriteHandler,
+    write_merge: _DeltaWriteHandler,
+) -> _DeltaWriteDispatchPolicy:
+    """Build the Delta write dispatch policy for a writer instance."""
+    return _DeltaWriteDispatchPolicy(
+        write_delete=write_delete,
+        write_append=write_append,
+        write_merge=write_merge,
+    )
+
+
+def _select_dispatch_handler(
+    *,
+    validated_mode: SilverWriteMode,
+    policy: _DeltaWriteDispatchPolicy,
+) -> _DeltaWriteHandler:
+    """Select the mode-specific write handler from the dispatch policy."""
+    if validated_mode == SilverWriteMode.DELETE:
+        return policy.write_delete
+    if validated_mode == SilverWriteMode.APPEND:
+        return policy.write_append
+    return policy.write_merge
+
+
+async def _dispatch_request_by_mode(
+    *,
+    request: _DeltaWriteRequest,
+    policy: _DeltaWriteDispatchPolicy,
+) -> None:
+    """Dispatch a normalized Delta write request to the mode-specific handler."""
+    handler = _select_dispatch_handler(
+        validated_mode=request.validated_mode,
+        policy=policy,
+    )
+    await handler(request)
+
+
+async def _dispatch_request_with_domain_errors(
+    *,
+    table_name: str,
+    request: _DeltaWriteRequest,
+    dispatch_write: _DeltaWriteHandler,
+) -> None:
+    """Execute a Delta write dispatch and translate storage exceptions."""
+    try:
+        await dispatch_write(request)
+    except (SchemaMismatchError, pa.ArrowTypeError, DeltaError) as exc:
+        _raise_domain_write_error(table_name=table_name, exc=exc)
 
 
 async def _write_plain_delta_request(
@@ -307,12 +385,14 @@ class SilverWriterDeltaMixin:
         request: _DeltaWriteRequest,
     ) -> None:
         """Dispatch write call by mode."""
-        if request.validated_mode == SilverWriteMode.DELETE:
-            await self._write_delete(request)
-        elif request.validated_mode == SilverWriteMode.APPEND:
-            await self._write_append(request)
-        else:
-            await self._write_merge(request)
+        await _dispatch_request_by_mode(
+            request=request,
+            policy=_build_dispatch_policy(
+                write_delete=self._write_delete,
+                write_append=self._write_append,
+                write_merge=self._write_merge,
+            ),
+        )
 
     async def _merge_records(
         self,
@@ -408,11 +488,8 @@ class SilverWriterDeltaMixin:
         request: _DeltaWriteRequest,
     ) -> None:
         """Dispatch write and translate infrastructure errors to domain errors."""
-        try:
-            await self._dispatch_write(request)
-        except (SchemaMismatchError, pa.ArrowTypeError) as exc:
-            raise SchemaViolationError(table_name, errors=[str(exc)]) from exc
-        except DeltaError as exc:
-            if "Merge-conflict" in str(exc):
-                raise MergeConflictError(table_name, conflicts=1) from exc
-            raise
+        await _dispatch_request_with_domain_errors(
+            table_name=table_name,
+            request=request,
+            dispatch_write=self._dispatch_write,
+        )

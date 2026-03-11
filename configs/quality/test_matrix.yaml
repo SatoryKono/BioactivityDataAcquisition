@@ -95,10 +95,10 @@ provider_regression_suites:
     providers:
       chembl: tests/unit/infrastructure/adapters/chembl/test_request_metadata.py
       crossref: tests/unit/infrastructure/adapters/crossref/test_request_metadata.py
-      openalex: tests/unit/infrastructure/adapters/openalex/test_client_helpers_adapter_mixin.py
+      openalex: tests/unit/infrastructure/adapters/openalex/test_request_metadata.py
       pubchem: tests/unit/infrastructure/adapters/pubchem/test_request_metadata.py
       pubmed: tests/unit/infrastructure/adapters/pubmed/test_request_metadata.py
-      semanticscholar: tests/unit/infrastructure/adapters/semanticscholar/test_adapter.py
+      semanticscholar: tests/unit/infrastructure/adapters/semanticscholar/test_request_metadata.py
       uniprot: tests/unit/infrastructure/adapters/uniprot/test_request_metadata.py
 
   slow_health_probe_policy:

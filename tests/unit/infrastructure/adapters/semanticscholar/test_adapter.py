@@ -327,27 +327,6 @@ class TestHealthCheck:
         assert status == HealthStatus.DEGRADED
         mock_http_client.get_once.assert_awaited_once()
 
-    def test_get_source_metadata_returns_collector_state_and_clears_requests(
-        self,
-        adapter: SemanticScholarAdapter,
-    ) -> None:
-        """Metadata snapshot should reflect collector state and consume it."""
-        adapter._request_collector.record_request(
-            url="https://api.semanticscholar.org/graph/v1/paper/search?query=test",
-            duration_ms=15.0,
-            status_code=200,
-        )
-
-        assert adapter.request_count == 1
-
-        metadata = adapter.get_source_metadata()
-
-        assert metadata.url == "https://api.semanticscholar.org/graph/v1"
-        assert metadata.api_version == "v1"
-        assert metadata.total_requests == 1
-        assert adapter.request_count == 0
-
-
 class TestFetchMultiFiltered:
     """Tests for fetch_multi_filtered method."""
 

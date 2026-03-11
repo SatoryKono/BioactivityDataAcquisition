@@ -15,8 +15,12 @@ from bioetl.domain.exceptions import DeltaTransactionError, MergeConflictError, 
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.infrastructure.storage.silver_writer_delta_mixin import (
     SilverWriterDeltaMixin,
+    _build_dispatch_policy,
     _DeltaWriteRequest,
     _MergeExecutionTimeoutError,
+    _dispatch_request_by_mode,
+    _raise_domain_write_error,
+    _select_dispatch_handler,
 )
 from bioetl.infrastructure.storage.write_resilience import (
     AdaptiveRetryPolicy,
@@ -418,6 +422,57 @@ class TestDispatchWriteMode:
 
 
 @pytest.mark.unit
+class TestDispatchRequestByMode:
+    """Direct tests for the module-level mode dispatch helper."""
+
+    @pytest.mark.asyncio
+    async def test_dispatch_request_by_mode_routes_append(self) -> None:
+        """Append requests should route to the append handler."""
+        request = _DeltaWriteRequest(
+            validated_mode=SilverWriteMode.APPEND,
+            table_path="path",
+            arrow_data=_make_arrow_table(),
+            primary_keys=[],
+            partition_cols=None,
+        )
+        write_delete = AsyncMock()
+        write_append = AsyncMock()
+        write_merge = AsyncMock()
+        policy = _build_dispatch_policy(
+            write_delete=write_delete,
+            write_append=write_append,
+            write_merge=write_merge,
+        )
+
+        await _dispatch_request_by_mode(
+            request=request,
+            policy=policy,
+        )
+
+        write_delete.assert_not_called()
+        write_append.assert_called_once_with(request)
+        write_merge.assert_not_called()
+
+    def test_select_dispatch_handler_routes_delete(self) -> None:
+        """Delete mode should select the delete handler from dispatch policy."""
+        write_delete = AsyncMock()
+        write_append = AsyncMock()
+        write_merge = AsyncMock()
+        policy = _build_dispatch_policy(
+            write_delete=write_delete,
+            write_append=write_append,
+            write_merge=write_merge,
+        )
+
+        handler = _select_dispatch_handler(
+            validated_mode=SilverWriteMode.DELETE,
+            policy=policy,
+        )
+
+        assert handler is write_delete
+
+
+@pytest.mark.unit
 class TestEmitMergeRetryTelemetry:
     """Tests for _emit_merge_retry_telemetry with metrics (line 275)."""
 
@@ -518,6 +573,31 @@ class TestDispatchWriteWithDomainErrors:
                     table_name="chembl.activity",
                     request=request,
                 )
+
+
+@pytest.mark.unit
+class TestRaiseDomainWriteError:
+    """Direct tests for the Delta-to-domain translation helper."""
+
+    def test_merge_conflict_is_translated(self) -> None:
+        """Merge conflict DeltaError should become MergeConflictError."""
+        from deltalake.exceptions import DeltaError
+
+        with pytest.raises(MergeConflictError):
+            _raise_domain_write_error(
+                table_name="chembl.activity",
+                exc=DeltaError("Merge-conflict detected"),
+            )
+
+    def test_non_conflict_delta_error_is_reraised(self) -> None:
+        """Non-conflict DeltaError should propagate unchanged."""
+        from deltalake.exceptions import DeltaError
+
+        with pytest.raises(DeltaError, match="other delta error"):
+            _raise_domain_write_error(
+                table_name="chembl.activity",
+                exc=DeltaError("other delta error"),
+            )
 
     @pytest.mark.asyncio
     async def test_arrow_type_error_raises_schema_violation_error(self) -> None:

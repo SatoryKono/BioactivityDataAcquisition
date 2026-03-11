@@ -156,6 +156,7 @@ def create_runner(
     checkpoint_manager: CompositeCheckpointManager,
     test_run_id: str,
     runtime: CompositeRuntimeConfig | None = None,
+    preflight_validator: MagicMock | None = None,
 ) -> CompositePipelineRunner:
     """Helper to create a runner with all dependencies."""
     return CompositePipelineRunner(
@@ -171,6 +172,7 @@ def create_runner(
         lock=mock_lock,
         fsm_state_helper=MagicMock(),
         run_id=test_run_id,
+        preflight_validator=preflight_validator,
     )
 
 
@@ -549,6 +551,117 @@ class TestConfigurationConsistency:
         assert len(warning_calls) == 1, (
             "Should log warning about required_enrichers mismatch"
         )
+
+
+class TestPreflightSkipPolicy:
+    """Tests for preflight gating policy."""
+
+    def test_missing_validator_returns_skip_reason(
+        self,
+        mock_config: MagicMock,
+        mock_logger: MagicMock,
+        mock_lock: AsyncMock,
+        mock_merger: AsyncMock,
+        mock_coordinator: AsyncMock,
+        mock_key_extractor: AsyncMock,
+        mock_seed_runner: AsyncMock,
+        tmp_path: Path,
+        test_run_id: str,
+    ) -> None:
+        """Missing validator should skip preflight explicitly."""
+        mock_config.merge.field_priorities = ["doi"]
+        checkpoint_manager = CompositeCheckpointManager(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            storage=FileCompositeCheckpointWriter(tmp_path),
+            logger=mock_logger,
+            resume=False,
+        )
+        runner = create_runner(
+            mock_config=mock_config,
+            mock_logger=mock_logger,
+            mock_lock=mock_lock,
+            mock_merger=mock_merger,
+            mock_coordinator=mock_coordinator,
+            mock_key_extractor=mock_key_extractor,
+            mock_seed_runner=mock_seed_runner,
+            checkpoint_manager=checkpoint_manager,
+            test_run_id=test_run_id,
+        )
+
+        assert runner._get_preflight_skip_reason() == "preflight_validator not configured"
+
+    def test_empty_field_priorities_returns_skip_reason(
+        self,
+        mock_config: MagicMock,
+        mock_logger: MagicMock,
+        mock_lock: AsyncMock,
+        mock_merger: AsyncMock,
+        mock_coordinator: AsyncMock,
+        mock_key_extractor: AsyncMock,
+        mock_seed_runner: AsyncMock,
+        tmp_path: Path,
+        test_run_id: str,
+    ) -> None:
+        """Empty field priorities should skip preflight explicitly."""
+        mock_config.merge.field_priorities = []
+        checkpoint_manager = CompositeCheckpointManager(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            storage=FileCompositeCheckpointWriter(tmp_path),
+            logger=mock_logger,
+            resume=False,
+        )
+        runner = create_runner(
+            mock_config=mock_config,
+            mock_logger=mock_logger,
+            mock_lock=mock_lock,
+            mock_merger=mock_merger,
+            mock_coordinator=mock_coordinator,
+            mock_key_extractor=mock_key_extractor,
+            mock_seed_runner=mock_seed_runner,
+            checkpoint_manager=checkpoint_manager,
+            test_run_id=test_run_id,
+            preflight_validator=MagicMock(),
+        )
+
+        assert runner._get_preflight_skip_reason() == "no field_priorities configured"
+
+    def test_ready_preflight_returns_none(
+        self,
+        mock_config: MagicMock,
+        mock_logger: MagicMock,
+        mock_lock: AsyncMock,
+        mock_merger: AsyncMock,
+        mock_coordinator: AsyncMock,
+        mock_key_extractor: AsyncMock,
+        mock_seed_runner: AsyncMock,
+        tmp_path: Path,
+        test_run_id: str,
+    ) -> None:
+        """Configured validator and field priorities should allow preflight."""
+        mock_config.merge.field_priorities = ["doi"]
+        checkpoint_manager = CompositeCheckpointManager(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            storage=FileCompositeCheckpointWriter(tmp_path),
+            logger=mock_logger,
+            resume=False,
+        )
+        runner = create_runner(
+            mock_config=mock_config,
+            mock_logger=mock_logger,
+            mock_lock=mock_lock,
+            mock_merger=mock_merger,
+            mock_coordinator=mock_coordinator,
+            mock_key_extractor=mock_key_extractor,
+            mock_seed_runner=mock_seed_runner,
+            checkpoint_manager=checkpoint_manager,
+            test_run_id=test_run_id,
+            preflight_validator=MagicMock(),
+        )
+
+        assert runner._get_preflight_skip_reason() is None
 
 
 # ============================================================================

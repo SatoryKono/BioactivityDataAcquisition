@@ -26,11 +26,13 @@ from bioetl.application.composite.runner_pkg import (
     CompositeRuntimeConfig,
 )
 from bioetl.domain.composite.result import (
+    DependencyResult,
     EnrichmentResult,
     MergeResult,
     SeedResult,
 )
 from bioetl.domain.composite.state import CompositePipelineState
+from bioetl.domain.exceptions import RecoverableError
 from bioetl.domain.locking import FencingToken
 
 if TYPE_CHECKING:
@@ -266,6 +268,58 @@ class TestFSMMergeStateTransitions:
 class TestFSMDryRunMode:
     """Tests for FSM state transitions in dry run mode."""
 
+    def test_handle_dry_run_merge_skip_preserves_state(
+        self,
+        mock_config: MagicMock,
+        mock_logger: MagicMock,
+        mock_lock: AsyncMock,
+        mock_merger: AsyncMock,
+        mock_coordinator: AsyncMock,
+        mock_key_extractor: AsyncMock,
+        mock_seed_runner: AsyncMock,
+        tmp_path: Path,
+        test_run_id: str,
+    ) -> None:
+        """Dry-run merge skip helper should only log and keep checkpoint state intact."""
+        checkpoint_manager = CompositeCheckpointManager(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            storage=FileCompositeCheckpointWriter(tmp_path),
+            logger=mock_logger,
+            resume=False,
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=True),
+            seed_runner_factory=lambda: mock_seed_runner,
+            enricher_runner_factory=lambda name, df: AsyncMock(),
+            key_extractor=mock_key_extractor,
+            coordinator=mock_coordinator,
+            merger=mock_merger,
+            checkpoint_manager=checkpoint_manager,
+            logger=mock_logger,
+            lock=mock_lock,
+            fsm_state_helper=FSMStateHelperService(
+                config=mock_config, logger=mock_logger, run_id=test_run_id
+            ),
+            run_id=test_run_id,
+        )
+        state = CompositeCheckpointState(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            state=CompositePipelineState.ENRICHMENT_COMPLETED,
+        )
+
+        next_state = runner._handle_dry_run_merge_skip(state)
+
+        assert next_state is state
+        fsm_calls = [
+            c
+            for c in mock_logger.info.call_args_list
+            if c.args and "FSM state transition" in str(c.args[0])
+        ]
+        assert any(c.kwargs.get("stage") == "dry_run_skip_merge" for c in fsm_calls)
+
     @pytest.mark.asyncio
     async def test_dry_run_skips_merging_state(
         self,
@@ -325,6 +379,99 @@ class TestFSMDryRunMode:
         assert CompositePipelineState.COMPLETED in saved_states
         # Verify result has no merge_result
         assert result.merge_result is None
+
+
+class TestMergeInputPolicy:
+    """Tests for mergeable input selection policy."""
+
+    def test_build_merge_inputs_filters_non_mergeable_results(
+        self,
+        mock_config: MagicMock,
+        mock_logger: MagicMock,
+        mock_lock: AsyncMock,
+        mock_merger: AsyncMock,
+        mock_coordinator: AsyncMock,
+        mock_key_extractor: AsyncMock,
+        mock_seed_runner: AsyncMock,
+        tmp_path: Path,
+        test_run_id: str,
+    ) -> None:
+        """Merge stage should keep only mergeable enricher/dependency inputs."""
+        enricher_ok = MagicMock()
+        enricher_ok.pipeline = "crossref"
+        enricher_skip = MagicMock()
+        enricher_skip.pipeline = "openalex"
+        dep_ok = MagicMock()
+        dep_ok.pipeline = "pubmed"
+        dep_ok.silver_table = "silver/pubmed"
+        dep_missing_table = MagicMock()
+        dep_missing_table.pipeline = "semanticscholar"
+        dep_missing_table.silver_table = ""
+        dep_failed = MagicMock()
+        dep_failed.pipeline = "uniprot"
+        dep_failed.silver_table = "silver/uniprot"
+
+        mock_config.enrichers = [enricher_ok, enricher_skip]
+        mock_config.dependencies = [dep_ok, dep_missing_table, dep_failed]
+
+        checkpoint_manager = CompositeCheckpointManager(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            storage=FileCompositeCheckpointWriter(tmp_path),
+            logger=mock_logger,
+            resume=False,
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            seed_runner_factory=lambda: mock_seed_runner,
+            enricher_runner_factory=lambda name, df: AsyncMock(),
+            key_extractor=mock_key_extractor,
+            coordinator=mock_coordinator,
+            merger=mock_merger,
+            checkpoint_manager=checkpoint_manager,
+            logger=mock_logger,
+            lock=mock_lock,
+            fsm_state_helper=FSMStateHelperService(
+                config=mock_config, logger=mock_logger, run_id=test_run_id
+            ),
+            run_id=test_run_id,
+        )
+
+        mergeable_enrichers, mergeable_dependencies = runner._build_merge_inputs(
+            {
+                "crossref": EnrichmentResult.success(
+                    enricher_name="crossref",
+                    records_input=100,
+                    records_enriched=95,
+                    records_not_found=5,
+                    duration_seconds=10.0,
+                ),
+                "openalex": EnrichmentResult.not_run(
+                    enricher_name="openalex",
+                    reason="Skipped due to required_only mode",
+                ),
+            },
+            {
+                "pubmed": DependencyResult.success(
+                    pipeline_name="pubmed",
+                    records_extracted=100,
+                    records_silver=95,
+                ),
+                "semanticscholar": DependencyResult.success(
+                    pipeline_name="semanticscholar",
+                    records_extracted=50,
+                    records_silver=45,
+                ),
+                "uniprot": DependencyResult.failed(
+                    pipeline_name="uniprot",
+                    error_message="dependency failed",
+                ),
+            },
+        )
+
+        assert [cfg.pipeline for cfg in mergeable_enrichers] == ["crossref"]
+        assert [cfg.pipeline for cfg in mergeable_dependencies] == ["pubmed"]
 
 
 class TestFSMEnrichmentCompletedTransition:
@@ -484,6 +631,58 @@ class TestFSMResumeFromFailed:
 
 class TestFSMCheckpointDeletion:
     """Tests for checkpoint deletion error handling."""
+
+    @pytest.mark.asyncio
+    async def test_delete_checkpoint_safe_logs_reason_code_for_bioetl_error(
+        self,
+        mock_config: MagicMock,
+        mock_logger: MagicMock,
+        mock_lock: AsyncMock,
+        mock_merger: AsyncMock,
+        mock_coordinator: AsyncMock,
+        mock_key_extractor: AsyncMock,
+        mock_seed_runner: AsyncMock,
+        tmp_path: Path,
+        test_run_id: str,
+    ) -> None:
+        """BioETL delete errors should log checkpoint_delete_failed reason code."""
+        checkpoint_manager = CompositeCheckpointManager(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            storage=FileCompositeCheckpointWriter(tmp_path),
+            logger=mock_logger,
+            resume=False,
+        )
+
+        async def failing_delete() -> None:
+            raise RecoverableError("checkpoint cleanup unavailable")
+
+        checkpoint_manager.delete = failing_delete  # type: ignore[method-assign]
+
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            seed_runner_factory=lambda: mock_seed_runner,
+            enricher_runner_factory=lambda name, df: AsyncMock(),
+            key_extractor=mock_key_extractor,
+            coordinator=mock_coordinator,
+            merger=mock_merger,
+            checkpoint_manager=checkpoint_manager,
+            logger=mock_logger,
+            lock=mock_lock,
+            fsm_state_helper=FSMStateHelperService(
+                config=mock_config, logger=mock_logger, run_id=test_run_id
+            ),
+            run_id=test_run_id,
+        )
+
+        await runner._delete_checkpoint_safe()
+
+        mock_logger.warning.assert_called_once()
+        assert (
+            mock_logger.warning.call_args.kwargs["reason_code"]
+            == "checkpoint_delete_failed"
+        )
 
     @pytest.mark.asyncio
     async def test_checkpoint_delete_error_is_non_fatal(
