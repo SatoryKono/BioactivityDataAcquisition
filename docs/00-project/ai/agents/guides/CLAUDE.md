@@ -20,7 +20,7 @@ make lint && make test
 
 # Основные команды
 make install          # Создание venv, установка зависимостей (альтернатива dev-setup.sh)
-make test             # Все тесты (unit + integration)
+make test             # Локальный стабильный прогон (без E2E)
 make lint             # ruff + mypy
 make run-local        # Запуск на фикстурах
 
@@ -182,7 +182,7 @@ src/bioetl/
 | **RecordProcessor**         | "Совмещает метрики/карантин/запись"                       | **Делегирует** в `BatchMetricsRecorder`, `BatchTransformer`, `BatchWriter`, `QuarantineManager` (`record_processor.py:59-85`)                                                                                |
 | **PipelineRunner**          | "Не выпускает метрики по стадиям"                         | Использует `PipelineObserver` через `PipelineServices` (`runner.py:89`)                                                                                                                                      |
 | **Write mode validation**   | "Нет валидации через Enum"                                | **Реализовано**: `SilverWriteMode`, `GoldWriteMode` enums (`delta_writer.py:53-64`, `gold_writer.py:42-54`)                                                                                                  |
-| **Архитектурные тесты**     | "Не связаны с метриками"                                  | 360 тестов в `tests/architecture/`, `make arch-test` в CI                                                                                                                                                    |
+| **Архитектурные тесты**     | "Не связаны с метриками"                                  | Архитектурные проверки живут в `tests/architecture/`; локально используется `make test-architecture`, в CI — `pytest tests/architecture/` и отдельные targeted gates                                                                                 |
 | **MemoryLock**              | "Требуется Redis для распределённых блокировок"           | **MemoryLock достаточен** для локального запуска. Проект **by design** использует локальные пайплайны. См. §5 Блокировки.                                                                                    |
 | **MemoryMonitor**           | "Возвращает захардкоженные нули, баг"                     | **Graceful degradation** — возвращает консервативные оценки (50% использования), не нули. Это **валидный паттерн** при недоступности psutil. См. `memory_monitor.py:170-180`                                 |
 | **DQ метрики**              | "Не экспортируются в Prometheus"                          | **УЖЕ РЕАЛИЗОВАНО**: `postrun_service.py:158-163` эмитит `dq-soft-threshold-exceeded` (counter), `dq-check-duration-ms` (histogram). `DQConfig` имеет `soft-fail-threshold=0.05`, `hard-fail-threshold=0.20` |
@@ -415,7 +415,7 @@ async def aclose() -> None                             # Graceful shutdown
 | ---------------- | --------------------- | ------ | -------------------------------- |
 | **Unit**         | `tests/unit/`         | ~9,746 | In-memory fakes предпочтительны  |
 | **Integration**  | `tests/integration/`  | ~386   | VCR.py для HTTP                  |
-| **Architecture** | `tests/architecture/` | ~638   | Проверка слоёв, контракты портов |
+| **Architecture** | `tests/architecture/` | active suite | Проверка слоёв, контракты портов |
 
 **Всего:** ~11,227 тестов (функций `test_`) | **Цель покрытия:** ≥85% (`--cov-fail-under=85`)
 
@@ -424,7 +424,7 @@ async def aclose() -> None                             # Graceful shutdown
 ```bash
 make test                 # Все тесты с coverage
 make test-unit            # Только unit (быстро)
-make arch-test            # Architecture tests
+make test-architecture    # Architecture tests
 pytest tests/e2e/ -v -m e2e  # E2E тесты
 ```
 

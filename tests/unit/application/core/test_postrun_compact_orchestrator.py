@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.application.core.postrun_compact_orchestrator import (
+from bioetl.application.core.postrun.compact_orchestrator import (
     CompactionResult,
     PostrunCompactService,
 )

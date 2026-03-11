@@ -14,7 +14,11 @@ from bioetl.domain.exceptions import (
 )
 from bioetl.domain.resilience import AdapterConfig
 from bioetl.domain.types import CircuitBreakerState, ErrorType, HealthStatus
+from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
+from bioetl.infrastructure.adapters.common.api_request_collector import (
+    APIRequestCollector,
+)
 from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
     FallbackFetchOrchestratorService,
 )
@@ -40,6 +44,32 @@ def mock_logger():
 @pytest.fixture
 def adapter(mock_http_client, mock_logger):
     return ChemblAdapter(http_client=mock_http_client, logger=mock_logger)
+
+
+def test_post_init_preserves_injected_base_collaborators(
+    mock_http_client, mock_logger
+) -> None:
+    """Dataclass adapter should delegate shared base initialization."""
+    error_handler = MagicMock()
+    metrics = MagicMock()
+    adapter_metrics = AdapterMetrics(metrics, "chembl")
+    request_collector = APIRequestCollector()
+
+    adapter = ChemblAdapter(
+        http_client=mock_http_client,
+        logger=mock_logger,
+        metrics=metrics,
+        error_handler=error_handler,
+        adapter_metrics=adapter_metrics,
+        request_collector=request_collector,
+    )
+
+    assert adapter._http_client is mock_http_client
+    assert adapter._logger is mock_logger
+    assert adapter._metrics is metrics
+    assert adapter._error_handler is error_handler
+    assert adapter._adapter_metrics is adapter_metrics
+    assert adapter._request_collector is request_collector
 
 
 @pytest.mark.asyncio

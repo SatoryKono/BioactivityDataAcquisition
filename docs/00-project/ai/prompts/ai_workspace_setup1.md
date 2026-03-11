@@ -1,3 +1,6 @@
+> **DEPRECATED** — stale duplicate, kept for reference only.
+*Статус: deprecated (stale duplicate)*
+
   Ты — технический аудитор файловой структуры проекта BioETL.
                                                                                                                                                                                                                       
   Задача                                                                                                                                                                                                            

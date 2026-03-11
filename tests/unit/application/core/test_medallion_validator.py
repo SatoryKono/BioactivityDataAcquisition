@@ -10,7 +10,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from bioetl.application.core.preflight_service import (
+from bioetl.application.core.preflight.service import (
     _MedallionConfigValidator as MedallionConfigValidator,
 )
 from bioetl.domain.medallion import WriteModePolicy

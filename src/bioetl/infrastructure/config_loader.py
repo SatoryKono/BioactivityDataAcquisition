@@ -295,7 +295,7 @@ def read_pipeline_config_payload(
 def normalize_pipeline_config_payload(
     payload: PipelineConfigReadPayload,
     *,
-    filter_loader: FilterConfigLoader | None = None,
+    filter_loader: FilterConfigLoader,
 ) -> JsonDict:  # Any: YAML config has heterogeneous values
     """Normalize pipeline payload (new + legacy shapes) before validation.
 
@@ -365,10 +365,11 @@ def load_pipeline_config_uncached(
     Returns:
         PipelineYamlConfig instance for the given pipeline name.
     """
+    effective_filter_loader = filter_loader or FilterConfigLoader(Path("configs"))
     raw_payload = read_pipeline_config_payload(pipeline_name)
     normalized_payload = normalize_pipeline_config_payload(
         raw_payload,
-        filter_loader=filter_loader,
+        filter_loader=effective_filter_loader,
     )
     validated_payload = validate_pipeline_config_payload(normalized_payload)
     return map_pipeline_config(validated_payload)

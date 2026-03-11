@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bioetl.application.core.postrun_metadata_version_resolver import (
+from bioetl.application.core.postrun.metadata_version_resolver import (
     PostrunMetadataVersionResolver,
 )
 

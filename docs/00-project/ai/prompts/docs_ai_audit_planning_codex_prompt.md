@@ -1,3 +1,5 @@
+*Статус: internal-only (historical prompt)*
+
 # Promt: Аудит и планирование улучшений docs/00-project/ai (Codex)
 
 Ты — технический оркестратор документации BioETL.

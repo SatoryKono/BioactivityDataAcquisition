@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
 from bioetl.infrastructure.config_merge import config_merge
@@ -20,7 +18,7 @@ def apply_hierarchical_filter_config(
     config: JsonDict,  # Any: YAML config has heterogeneous values
     entity_config: JsonDict,  # Any: YAML config has heterogeneous values
     *,
-    filter_loader: FilterConfigLoader | None = None,
+    filter_loader: FilterConfigLoader,
 ) -> None:
     """Apply filter config from the hierarchical filter system (ADR-028)."""
     provider = config.get("provider", "")
@@ -38,8 +36,7 @@ def apply_hierarchical_filter_config(
     if isinstance(filter_rules, dict):
         inline_overrides = config_merge(inline_overrides, filter_rules)
 
-    loader = filter_loader or FilterConfigLoader(Path("configs"))
-    merged_filters = loader.load_as_dict(
+    merged_filters = filter_loader.load_as_dict(
         provider,
         entity_type,
         inline_overrides or None,

@@ -28,7 +28,7 @@
 
 ## Разработка и запуск
 - Быстрый старт: `./dev-setup.sh` (или `--quick`).
-- Проверки: `make lint && make test`.
+- Проверки: `make lint && make test` (локальный stable suite, без E2E).
 - Пример запуска: `bioetl run --pipeline chembl_activity --run-type incremental`.
 
 ## Гигиена репозитория

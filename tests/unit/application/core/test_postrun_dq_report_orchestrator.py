@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.application.core.postrun_dq_report_orchestrator import (
+from bioetl.application.core.postrun.dq_report_orchestrator import (
     PostrunDQReportService,
 )
 from bioetl.domain.exceptions import BioETLError

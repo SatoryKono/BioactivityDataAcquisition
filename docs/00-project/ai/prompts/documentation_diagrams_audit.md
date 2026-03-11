@@ -1,3 +1,5 @@
+*Статус: internal-only (historical prompt)*
+
 # Documentation & Diagrams Audit — Промт для аудита и обновления документации
 
 *Версия: 1.0.0 | Дата: 2026-03-08*

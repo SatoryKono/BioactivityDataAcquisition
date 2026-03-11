@@ -8,10 +8,10 @@ directly from their defining submodules:
 - ``bioetl.application.core.batch_executor``      — BatchExecutor
 - ``bioetl.application.core.batch_transformer``   — BatchTransformer, TransformResult
 - ``bioetl.application.core.batch_writer``        — BatchWriter
-- ``bioetl.application.core.checkpoint_manager``  — CheckpointManager
-- ``bioetl.application.core.cleanup_service``     — CleanupService, CleanupResult
-- ``bioetl.application.core.lock_manager``        — LockCoordinator
-- ``bioetl.application.core.shutdown``            — ShutdownService, ShutdownSignal
+- ``bioetl.application.core.lifecycle.checkpoint_manager``  — CheckpointManager
+- ``bioetl.application.core.lifecycle.cleanup_service``     — CleanupService, CleanupResult
+- ``bioetl.application.core.lifecycle.lock_manager``        — LockCoordinator
+- ``bioetl.application.core.lifecycle.shutdown``            — ShutdownService, ShutdownSignal
 
 Configuration consolidation (all in bioetl.domain.config):
 - PipelineConfig: Static pipeline configuration

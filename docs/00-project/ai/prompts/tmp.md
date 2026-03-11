@@ -1,3 +1,6 @@
+> **DEPRECATED** — stale duplicate, kept for reference only.
+*Статус: deprecated (stale duplicate)*
+
   План рефакторинга для RF-006
 
   Цель рефакторинга: сузить composite runtime так, чтобы orchestration policy, runtime assembly и execution plumbing перестали быть слеплены в два перегруженных узла. Ключевая идея здесь не “разнести всё по новым

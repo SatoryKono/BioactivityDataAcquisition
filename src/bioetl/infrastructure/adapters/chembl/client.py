@@ -14,7 +14,6 @@ from typing import TYPE_CHECKING
 from pydantic import BaseModel
 
 from bioetl.domain.models.filter import ExtractionParams
-from bioetl.domain.ports import NoOpMetrics
 from bioetl.domain.resilience import AdapterConfig
 from bioetl.domain.types import BronzeRecord, JsonDict
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
@@ -36,8 +35,6 @@ from bioetl.infrastructure.adapters.chembl.fetch_adapter_mixin import (
 )
 from bioetl.infrastructure.adapters.chembl.health import ChemblHealthMixin
 from bioetl.infrastructure.adapters.chembl.metadata import ChemblMetadataMixin
-from bioetl.infrastructure.adapters.error_handling import ErrorService
-
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Iterator
     from concurrent.futures import ThreadPoolExecutor
@@ -84,29 +81,23 @@ class ChemblAdapter(
     def __post_init__(self) -> None:
         """Initialize adapter with config values and metrics."""
         # Dataclass-generated __init__ bypasses BaseHttpAdapter.__init__.
-        # Initialize private base state used by shared adapter helpers.
-        self._http_client = self.http_client
-        self._logger = self.logger
-        self._metrics = self.metrics if self.metrics is not None else NoOpMetrics()
-
-        # Initialize error handler: use injected or create fallback
-        if self.error_handler is not None:
-            self._error_handler = self.error_handler
-        else:
-            metrics_port = self._metrics if self._metrics is not None else None
-            self._error_handler = ErrorService(self._logger, metrics=metrics_port)
+        # Delegate shared runtime setup to the base class to keep adapter
+        # construction consistent with other HTTP adapters.
+        BaseHttpAdapter.__init__(
+            self,
+            http_client=self.http_client,
+            logger=self.logger,
+            metrics=self.metrics,
+            error_handler=self.error_handler,
+            adapter_metrics=self.adapter_metrics,
+            request_collector=self.request_collector,
+        )
         # Resolve configuration: use provided config or domain defaults
         config = (
             self.adapter_config if self.adapter_config is not None else AdapterConfig()
         )
         self._page_size = config.page_size
         self._filter_batch_size = config.batch_size
-
-        if self.adapter_metrics is not None and self.request_collector is not None:
-            self._adapter_metrics = self.adapter_metrics
-            self._request_collector = self.request_collector
-        else:
-            self._init_adapter_metrics()
 
         # Resolve extraction params
         self._extraction_params = self.extraction_params or ExtractionParams.empty()
