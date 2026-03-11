@@ -12,7 +12,7 @@ from uuid import UUID
 
 import pytest
 
-from bioetl.application.core.checkpoint_manager import CheckpointManager
+from bioetl.application.core.lifecycle.checkpoint_manager import CheckpointManager
 from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.application.services import CheckpointService, QuarantineService
 from bioetl.composition.bootstrap.assembly.checkpoint import (

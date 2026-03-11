@@ -9,12 +9,12 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from bioetl.application.composite.dependency_progress_tracker import (
-    DependencyProgressService,
-)
 from bioetl.application.composite.dependency_key_resolvers import (
     ChainedKeyResolver,
     SeedKeyResolver,
+)
+from bioetl.application.composite.dependency_progress_tracker import (
+    DependencyProgressService,
 )
 from bioetl.application.composite.dependency_result_mapper import (
     DependencyResultService,

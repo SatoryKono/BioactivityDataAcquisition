@@ -412,7 +412,7 @@ class TestSilverWriterPreparePayloadExecutor:
     """Tests for executor offload in Silver payload preparation."""
 
     @pytest.mark.asyncio
-    async def test_prepare_payload_uses_run_in_executor(self, noop_logger) -> None:
+    async def test_prepare_payload_uses_to_thread(self, noop_logger) -> None:
         """Sync validation should be offloaded from the event loop."""
         import pyarrow as pa
 
@@ -440,14 +440,16 @@ class TestSilverWriterPreparePayloadExecutor:
         expected_table = pa.Table.from_pylist(records, schema=schema)
         writer._check_schema_drift = AsyncMock(return_value=None)  # type: ignore[method-assign]
 
-        loop = asyncio.get_running_loop()
         with (
             patch.object(
                 writer,
                 "_sync_validate_and_build_arrow",
                 return_value=(records, SilverWriteMode.APPEND, expected_table),
             ) as mock_sync,
-            patch.object(loop, "run_in_executor", wraps=loop.run_in_executor) as mock_exec,
+            patch(
+                "bioetl.infrastructure.storage.silver_writer_validation_mixin.asyncio.to_thread",
+                wraps=asyncio.to_thread,
+            ) as mock_to_thread,
         ):
             payload = await writer._prepare_silver_write_payload(
                 table_name="test.table",
@@ -461,19 +463,17 @@ class TestSilverWriterPreparePayloadExecutor:
                 key_nullability_rules=None,
             )
 
-        assert payload == (
-            records,
-            SilverWriteMode.APPEND,
-            "/tmp/silver/test/table",
-            expected_table,
-        )
+        assert payload.records == records
+        assert payload.validated_mode is SilverWriteMode.APPEND
+        assert payload.table_path == "/tmp/silver/test/table"
+        assert payload.arrow_data.equals(expected_table)
         mock_sync.assert_called_once()
         writer._check_schema_drift.assert_awaited_once_with(
             "test.table",
             records,
             "ignore",
         )
-        assert mock_exec.call_count == 1
+        assert mock_to_thread.call_count == 1
 
     @pytest.mark.asyncio
     async def test_prepare_payload_checks_schema_drift_after_executor(

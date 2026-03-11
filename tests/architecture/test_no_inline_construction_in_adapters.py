@@ -29,7 +29,7 @@ FORBIDDEN_HELPER_CONSTRUCTORS = {
     # Cross-cutting services (existing guard)
     "FallbackFetchOrchestratorService",
     "ErrorService",
-    "AdapterMetrics",
+    "AdapterMetricsRecorder",
     "APIRequestCollector",
     # OpenAlex provider-specific helpers
     "OpenAlexQueryExecutor",
@@ -41,7 +41,7 @@ FORBIDDEN_HELPER_CONSTRUCTORS = {
     "CrossRefQueryBuilder",
     "CrossRefResponseMapper",
     "DoiBatchProcessor",
-    "SearchPaginator",
+    "SearchPaginatorHelper",
     "CrossRefFetchFlow",
     # SemanticScholar provider-specific helpers
     "SemanticScholarTitleFallbackHandler",

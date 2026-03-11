@@ -19,11 +19,11 @@ SRC_ROOT = Path("src/bioetl/composition")
 # Factory methods that MUST contain isinstance() boundary assertions.
 # Format: (module_path_relative_to_src, function_or_method_name)
 EXPECTED_ASSERTIONS = [
-    ("factories/services_factory.py", "_create_lock", "LockPort"),
-    ("factories/services_factory.py", "_create_checkpoint", "CheckpointPort"),
-    ("factories/services_factory.py", "_create_quarantine", "QuarantinePort"),
-    ("factories/services_factory.py", "_create_metrics", "MetricsPort"),
-    ("factories/data_source_factory.py", "create", "DataSourcePort"),
+    ("factories/services/factory.py", "_create_lock", "LockPort"),
+    ("factories/services/factory.py", "_create_checkpoint", "CheckpointPort"),
+    ("factories/services/factory.py", "_create_quarantine", "QuarantinePort"),
+    ("factories/services/factory.py", "_create_metrics", "MetricsPort"),
+    ("factories/datasource/factory.py", "create", "DataSourcePort"),
     (
         "bootstrap/assembly/checkpoint.py",
         "bootstrap_quarantine_port",

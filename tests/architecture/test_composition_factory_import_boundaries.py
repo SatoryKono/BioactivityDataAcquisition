@@ -8,7 +8,7 @@ from pathlib import Path
 def test_runner_factory_has_no_bootstrap_back_edge(src_dir: Path) -> None:
     """runner_factory must not depend on composition.bootstrap re-export layer."""
     runner_factory = (
-        src_dir / "bioetl" / "composition" / "factories" / "runner_factory.py"
+        src_dir / "bioetl" / "composition" / "factories" / "pipeline" / "runner.py"
     )
     content = runner_factory.read_text(encoding="utf-8")
 

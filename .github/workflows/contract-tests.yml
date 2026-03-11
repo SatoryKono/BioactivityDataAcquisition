@@ -27,6 +27,7 @@ env:
   PYTHON_VERSION: "3.11"
   # Contract tests require network access
   BIOETL_LIVE_API_TESTS: "true"
+  BIOETL_NETWORK_TESTS: "true"
 
 jobs:
   contract-tests:
@@ -56,7 +57,7 @@ jobs:
           SKIP_SLOW="${{ github.event.inputs.skip_slow || 'false' }}"
 
           # Build pytest arguments
-          PYTEST_ARGS="tests/contract/ -v --tb=short"
+          PYTEST_ARGS="tests/contract/ -v --tb=short --network"
 
           if [ "$PROVIDERS" != "all" ]; then
             # Filter by provider marker
@@ -145,4 +146,3 @@ jobs:
         run: |
           echo "::notice::Monthly contract tests passed successfully"
           echo "All provider API contracts verified on $(date -u +%Y-%m-%d)"
-

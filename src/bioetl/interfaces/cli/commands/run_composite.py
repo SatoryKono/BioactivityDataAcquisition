@@ -11,7 +11,7 @@ import sys
 
 import click
 
-from bioetl.application.composite.runner import CompositeRuntimeConfig
+from bioetl.application.composite.runner_pkg import CompositeRuntimeConfig
 from bioetl.composition.bootstrap.runtime.composite import (
     bootstrap_composite_runner,
     load_composite_config,

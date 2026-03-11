@@ -10,8 +10,8 @@ See RULES.md §2.6 for quarantine handling.
 from __future__ import annotations
 
 __all__ = [
+    "RecordValidationResult",
     "T",
-    "ValidationResult",
     "get_record_model",
     "parse_with_validation",
     "validate_record",
@@ -34,7 +34,7 @@ T = TypeVar("T", bound=BaseModel)
 
 
 @dataclass
-class ValidationResult:
+class RecordValidationResult:
     """Result of validating an API record.
 
     Contains either a validated record or validation error details.
@@ -63,15 +63,15 @@ def validate_record(
     model_class: type[T],
     logger: LoggerPort | None = None,
     context: str = "",
-) -> ValidationResult:
+) -> RecordValidationResult:
     """Validate one record against a Pydantic model and capture error details.
 
     Returns:
-        ValidationResult with the validated model or error details.
+        RecordValidationResult with the validated model or error details.
     """
     try:
         validated = model_class.model_validate(record)
-        return ValidationResult(
+        return RecordValidationResult(
             record=record,
             validated=validated,
             is_valid=True,
@@ -95,7 +95,7 @@ def validate_record(
                 errors=error_details[:5],  # Limit to first 5 for logging
             )
 
-        return ValidationResult(
+        return RecordValidationResult(
             record=record,
             validated=None,
             is_valid=False,
@@ -111,7 +111,7 @@ def validate_records(
     model_class: type[T],
     logger: LoggerPort | None = None,
     context: str = "",
-) -> Iterator[ValidationResult]:
+) -> Iterator[RecordValidationResult]:
     """Validate multiple records against a Pydantic model.
 
     Yields ValidationResult for each record, allowing mixed valid/invalid handling.
@@ -133,7 +133,7 @@ def validate_records(
         ...         quarantine_writer.write(result.record, result.error)
 
     Returns:
-        Validated Iterator[ValidationResult].
+        Validated Iterator[RecordValidationResult].
     """
     for record in records:
         yield validate_record(record, model_class, logger, context)

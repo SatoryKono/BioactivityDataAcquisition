@@ -17,7 +17,7 @@ from bioetl.composition.bootstrap_contexts import (
 )
 from bioetl.domain.resilience import AdapterConfig
 from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterReader
-from bioetl.infrastructure.config import load_source_config
+from bioetl.infrastructure.config_load_api import load_source_config
 
 if TYPE_CHECKING:
     from typing import Any
@@ -264,7 +264,7 @@ def _create_http_data_source(
     Returns:
         DataSourcePort, optionally wrapped with FilteredDataSource.
     """
-    from bioetl.composition.factories.adapter_helpers_factory import (
+    from bioetl.composition.factories.datasource.adapter_helpers import (
         AdapterHelpersFactory,
     )
     from bioetl.composition.providers.factory_loader import get_http_client_factory

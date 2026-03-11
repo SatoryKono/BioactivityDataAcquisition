@@ -57,7 +57,7 @@ class TestChemblAdapter:
     @pytest.fixture
     def chembl_adapter(self, chembl_client: Any, mock_logger: MagicMock) -> Any:
         """Create ChemblAdapter instance."""
-        from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
+        from bioetl.infrastructure.adapters.chembl import ChemblAdapter
 
         return ChemblAdapter(http_client=chembl_client, logger=mock_logger)
 
@@ -75,7 +75,7 @@ class TestChemblAdapter:
         Record with: pytest --vcr-record=new_episodes -k test_fetch_activities
         """
         from bioetl.domain.resilience import AdapterConfig
-        from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
+        from bioetl.infrastructure.adapters.chembl import ChemblAdapter
 
         async with chembl_client:
             adapter = ChemblAdapter(
@@ -103,7 +103,7 @@ class TestChemblAdapter:
         Record with: pytest --vcr-record=new_episodes -k test_health_check
         """
         from bioetl.domain.types import HealthStatus
-        from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
+        from bioetl.infrastructure.adapters.chembl import ChemblAdapter
 
         async with chembl_client:
             adapter = ChemblAdapter(http_client=chembl_client, logger=mock_logger)
@@ -125,7 +125,7 @@ class TestChemblAdapter:
         This test requires a VCR cassette.
         Record with: pytest --vcr-record=new_episodes -k test_get_entity_count
         """
-        from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
+        from bioetl.infrastructure.adapters.chembl import ChemblAdapter
 
         async with chembl_client:
             adapter = ChemblAdapter(http_client=chembl_client, logger=mock_logger)

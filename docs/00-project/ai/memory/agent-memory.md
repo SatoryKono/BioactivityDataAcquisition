@@ -48,8 +48,8 @@
 
 ```bash
 make lint          # ruff + mypy
-make test          # Все тесты
-make arch-test     # Архитектурные тесты (1392 collected)
+make test          # Локальный стабильный suite с coverage (без E2E)
+make test-architecture  # Архитектурные тесты
 make install       # Установка зависимостей
 make run-local     # Запуск на фикстурах
 ```

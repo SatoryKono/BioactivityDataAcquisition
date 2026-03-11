@@ -16,8 +16,8 @@ from bioetl.composition.bootstrap import (
     bootstrap_pipeline_runner,
     maybe_start_metrics_server,
 )
-from bioetl.composition.factories.pipeline_factories import register_all_pipelines
-from bioetl.composition.factories.runner_factory import create_metrics_extractor
+from bioetl.composition.factories.pipeline.registry import register_all_pipelines
+from bioetl.composition.factories.pipeline.runner import create_metrics_extractor
 from bioetl.composition.providers.registration import register_all_providers
 from bioetl.domain.context import (
     CachedBronzeContext,

@@ -9,7 +9,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.application.core.cleanup_service import (
+from bioetl.application.core.lifecycle.cleanup_service import (
     CleanupPreview,
     CleanupResult,
     CleanupService,

@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 
 from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.config import DQConfig, MemoryConfig, TableConfig
-from bioetl.domain.types import ArrowSchema
+from bioetl.domain.types import ArrowSchema, ScdConfig
 
 if TYPE_CHECKING:
     import pandera
@@ -35,7 +35,7 @@ class RecordProcessorConfig:
     # Backward-compat for tests/callers still passing data_schema directly.
     data_schema: DataSchemaConfig | None = None
     # SCD Type 2 configuration (Gold layer)
-    scd_config: dict[str, str] | None = None
+    scd_config: ScdConfig | None = None
     # DQ report output paths (for flat_structure support)
     bronze_output_path: str | None = None
     silver_output_path: str | None = None

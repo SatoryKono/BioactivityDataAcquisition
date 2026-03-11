@@ -7,10 +7,10 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
-from bioetl.infrastructure.adapters.pubchem.client import PubChemAdapter
-from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
+from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
+from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
+from bioetl.infrastructure.adapters.pubchem import PubChemAdapter
+from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
 
 
 class TestAdapterProviderNames:
@@ -24,8 +24,8 @@ class TestAdapterProviderNames:
     @pytest.fixture
     def pubchem_dependencies(self):
         """Create dependencies for PubChemAdapter."""
-        rate_limiter = TokenBucket(rate=5.0, capacity=10, provider="pubchem")
-        circuit_breaker = CircuitBreaker(provider="pubchem", failure_threshold=5)
+        rate_limiter = TokenBucketRateLimiter(rate=5.0, capacity=10, provider="pubchem")
+        circuit_breaker = CircuitBreakerGuard(provider="pubchem", failure_threshold=5)
         thread_pool = ThreadPoolExecutor(max_workers=2)
         yield rate_limiter, circuit_breaker, thread_pool
         thread_pool.shutdown(wait=False)

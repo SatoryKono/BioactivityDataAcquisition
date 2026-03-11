@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import asyncio
 import time
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.base_transformer import FilteredOutError
@@ -14,10 +14,11 @@ from bioetl.application.core.quarantine_manager import (
     FilteredQuarantineEntry,
     QuarantineManagerService,
 )
-from bioetl.domain.exceptions import BioETLError
+from bioetl.domain.exceptions import BioETLError, DataQualityThresholdError
 from bioetl.domain.types import BronzeRecord, GoldRecord
 
 if TYPE_CHECKING:
+    from bioetl.application.core.config import RecordProcessorConfig
     from bioetl.application.core.protocols import (
         GoldFilterCallback,
         GoldTransformCallback,
@@ -30,7 +31,9 @@ if TYPE_CHECKING:
 
 __all__ = [
     "RecordTransformOutcome",
+    "accumulate_transform_outcome",
     "bind_record_context",
+    "check_dq_thresholds",
     "flush_dq_records",
     "flush_filtered_records",
     "transform_record_attempt",
@@ -188,3 +191,74 @@ async def transform_record_attempt(
                 dq_entry=DQQuarantineEntry(raw_record, error_type, str(error)),
             )
         raise
+
+
+def accumulate_transform_outcome(
+    *,
+    attempt: RecordTransformOutcome,
+    silver_records: list[BronzeRecord],
+    gold_records: list[GoldRecord],
+    filtered_records: list[FilteredQuarantineEntry],
+    dq_records: list[DQQuarantineEntry],
+) -> tuple[int, int]:
+    """Route a transformed-record outcome into batch accumulators."""
+    if attempt.filtered_entry is not None:
+        filtered_records.append(attempt.filtered_entry)
+        return 0, 1
+    if attempt.dq_entry is not None:
+        dq_records.append(attempt.dq_entry)
+        return 1, 0
+    if attempt.silver_record is not None:
+        silver_records.append(attempt.silver_record)
+        if attempt.gold_record is not None:
+            gold_records.append(attempt.gold_record)
+    return 0, 0
+
+
+def check_dq_thresholds(
+    *,
+    context: PipelineContext,
+    config: RecordProcessorConfig,
+    batch_metrics: BatchMetricsRecorderService,
+    records: list[BronzeRecord],
+    quarantined_count: int,
+) -> None:
+    """Check DQ thresholds and raise or warn as appropriate."""
+    if not records:
+        return
+
+    total_count = len(records)
+    error_rate = quarantined_count / total_count if total_count > 0 else 0.0
+    dq_config = config.dq_config
+
+    if not dq_config:
+        return
+
+    if (
+        dq_config.hard_fail_threshold
+        and dq_config.hard_fail_threshold < 1.0
+        and error_rate >= dq_config.hard_fail_threshold
+    ):
+        batch_metrics.track_dq_validation_failure(
+            stage="transform",
+            severity="hard_fail",
+        )
+        raise DataQualityThresholdError(error_rate, dq_config.hard_fail_threshold)
+
+    if (
+        dq_config.soft_fail_threshold
+        and error_rate >= dq_config.soft_fail_threshold
+    ):
+        context.logger.warning(
+            "DQ Soft Threshold exceeded",
+            error_rate=round(error_rate, 4),
+            threshold=dq_config.soft_fail_threshold,
+            quarantined_count=quarantined_count,
+            total_count=total_count,
+            hard_threshold=dq_config.hard_fail_threshold,
+            pipeline=config.pipeline_name,
+        )
+        batch_metrics.track_dq_validation_failure(
+            stage="transform",
+            severity="soft_fail",
+        )

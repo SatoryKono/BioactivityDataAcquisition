@@ -7,7 +7,7 @@ observability across BaseHttpAdapter and BaseSyncAdapter.
 from __future__ import annotations
 
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -86,6 +86,66 @@ def mock_http_client():
 
 class TestHealthCheckLogging:
     """Tests for health_check logging behavior via HealthCheckMixin."""
+
+    def test_init_uses_default_error_handler_factory(
+        self,
+        mock_http_client: MagicMock,
+        mock_logger: MagicMock,
+        mock_metrics: MagicMock,
+    ) -> None:
+        """Test that constructor delegates default error handler creation."""
+        error_handler = MagicMock()
+
+        with patch(
+            "bioetl.infrastructure.adapters.base.create_default_error_handler",
+            return_value=error_handler,
+        ) as factory:
+            adapter = StubHttpAdapter(
+                http_client=mock_http_client,
+                logger=mock_logger,
+                metrics=mock_metrics,
+            )
+
+        assert adapter._error_handler is error_handler
+        factory.assert_called_once_with(logger=mock_logger, metrics=mock_metrics)
+
+    def test_init_uses_default_metrics_helpers(
+        self,
+        mock_http_client: MagicMock,
+        mock_logger: MagicMock,
+        mock_metrics: MagicMock,
+    ) -> None:
+        """Test that constructor delegates default metrics helper creation."""
+        adapter_metrics = MagicMock()
+        request_collector = MagicMock()
+
+        with (
+            patch(
+                "bioetl.infrastructure.adapters.base.create_default_error_handler",
+                return_value=MagicMock(),
+            ),
+            patch(
+                "bioetl.infrastructure.adapters.base.create_default_adapter_metrics",
+                return_value=adapter_metrics,
+            ) as metrics_factory,
+            patch(
+                "bioetl.infrastructure.adapters.base.create_default_request_collector",
+                return_value=request_collector,
+            ) as collector_factory,
+        ):
+            adapter = StubHttpAdapter(
+                http_client=mock_http_client,
+                logger=mock_logger,
+                metrics=mock_metrics,
+            )
+
+        assert adapter._adapter_metrics is adapter_metrics
+        assert adapter._request_collector is request_collector
+        metrics_factory.assert_called_once_with(
+            metrics=mock_metrics,
+            provider="test_provider",
+        )
+        collector_factory.assert_called_once_with()
 
     async def test_health_check_logs_warning_on_exception(
         self,

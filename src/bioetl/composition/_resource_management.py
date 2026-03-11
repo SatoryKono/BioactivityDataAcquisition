@@ -24,8 +24,10 @@ from bioetl.composition.bootstrap import (
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
-    from bioetl.application.core.checkpoint_manager import CheckpointManagerService
-    from bioetl.application.core.cleanup_service import CleanupPreview
+    from bioetl.application.core.lifecycle.checkpoint_manager import (
+        CheckpointManagerService,
+    )
+    from bioetl.application.core.lifecycle.cleanup_service import CleanupPreview
     from bioetl.application.core.quarantine_manager import QuarantineManagerService
     from bioetl.application.services.medallion_lifecycle import (
         MedallionLifecycleService,

@@ -13,7 +13,7 @@ from __future__ import annotations
 __all__ = [
     "METRIC_CIRCUIT_BREAKER_STATE",
     "METRIC_CIRCUIT_BREAKER_TRIPS",
-    "CircuitBreaker",
+    "CircuitBreakerGuard",
     "P",
     "T",
     "is_circuit_breaker_error",
@@ -57,7 +57,7 @@ CALL_OPERATION_ERRORS: tuple[type[Exception], ...] = (
 
 
 @dataclass
-class CircuitBreaker:
+class CircuitBreakerGuard:
     """Circuit breaker implementation for HTTP clients.
 
     Protects against cascading failures by temporarily blocking requests
@@ -70,7 +70,7 @@ class CircuitBreaker:
         metrics: Optional MetricsPort for emitting circuit breaker metrics
 
     Example:
-        >>> cb = CircuitBreaker(provider="chembl", failure_threshold=5)
+        >>> cb = CircuitBreakerGuard(provider="chembl", failure_threshold=5)
         >>> result = await cb.call(fetch_data, url="https://api.example.com")
 
     Metrics emitted:

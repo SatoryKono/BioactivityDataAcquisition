@@ -13,26 +13,24 @@ from httpx import Response
 import pytest
 import respx
 
-from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
+from bioetl.infrastructure.adapters.chembl import ChemblAdapter
 from bioetl.infrastructure.adapters.chembl.constants import CHEMBL_API_BASE
 from bioetl.infrastructure.adapters.crossref.client import (
     CROSSREF_API_BASE,
-    CrossRefAdapter,
 )
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+from bioetl.infrastructure.adapters.crossref import CrossRefAdapter
+from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 from bioetl.infrastructure.adapters.openalex.client import (
     OPENALEX_API_BASE,
-    OpenAlexAdapter,
 )
-from bioetl.infrastructure.adapters.pubmed.pubmed_client import (
+from bioetl.infrastructure.adapters.openalex import OpenAlexAdapter
+from bioetl.infrastructure.adapters.pubmed.client import (
     ENTREZ_API_BASE,
-    PubMedAdapter,
 )
-from bioetl.infrastructure.adapters.semanticscholar.adapter import (
-    SemanticScholarAdapter,
-)
+from bioetl.infrastructure.adapters.pubmed import PubMedAdapter
+from bioetl.infrastructure.adapters.semanticscholar import SemanticScholarAdapter
 from bioetl.infrastructure.adapters.semanticscholar.constants import (
     SEMANTICSCHOLAR_BASE_URL,
 )
@@ -40,8 +38,8 @@ from bioetl.infrastructure.adapters.semanticscholar.constants import (
 
 def _build_http_client(provider: str) -> UnifiedHTTPClient:
     return UnifiedHTTPClient(
-        rate_limiter=TokenBucket(rate=10.0, capacity=20.0, provider=provider),
-        circuit_breaker=CircuitBreaker(provider=provider),
+        rate_limiter=TokenBucketRateLimiter(rate=10.0, capacity=20.0, provider=provider),
+        circuit_breaker=CircuitBreakerGuard(provider=provider),
         timeout=15.0,
     )
 

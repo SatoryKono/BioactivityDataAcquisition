@@ -24,6 +24,7 @@ from bioetl.domain.types.enums import (
     QuarantineRecordStatus,
     RunType,
 )
+from bioetl.domain.types.gold_contracts import GoldBusinessRuleSpec, ScdConfig
 from bioetl.domain.types.health import (
     ComponentHealthResult,
     HealthReport,
@@ -42,7 +43,6 @@ from bioetl.domain.types.identifiers import (
     MetaDict,
     PrimaryId,
     RunID,
-    ScdConfig,
     SilverRecord,
 )
 from bioetl.domain.types_config_validation import ConfigValidationError
@@ -61,6 +61,7 @@ __all__ = [
     "EntityID",
     "ErrorType",
     "ExecutionContext",
+    "GoldBusinessRuleSpec",
     "GoldRecord",
     "GoldSchemaType",
     "HealthReport",

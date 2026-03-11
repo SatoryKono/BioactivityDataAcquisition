@@ -140,10 +140,10 @@ class TestNoTransformerFallback:
         """
         factories_file = (
             _get_base_path(Path("src/bioetl/composition/factories"))
-            / "pipeline_factories.py"
+            / "pipeline" / "registry.py"
         )
         if not factories_file.exists():
-            pytest.skip("pipeline_factories.py not found")
+            pytest.skip("pipeline/registry.py not found")
 
         content = factories_file.read_text(encoding="utf-8")
 
@@ -174,28 +174,28 @@ class TestTransformerInjectionPath:
         """
         factory_file = (
             _get_base_path(Path("src/bioetl/composition/factories"))
-            / "pipeline_factory.py"
+            / "pipeline" / "facade.py"
         )
         assembler_file = (
             _get_base_path(Path("src/bioetl/composition/factories"))
-            / "pipeline_assembler.py"
+            / "pipeline" / "assembler.py"
         )
         service_bundle_file = (
             _get_base_path(Path("src/bioetl/composition/factories"))
-            / "service_bundle_factory.py"
+            / "services" / "bundle.py"
         )
         construction_file = (
             _get_base_path(Path("src/bioetl/composition/factories"))
-            / "pipeline_factory_construction.py"
+            / "pipeline" / "construction.py"
         )
         if not factory_file.exists():
-            pytest.skip("pipeline_factory.py not found")
+            pytest.skip("pipeline/facade.py not found")
         if not construction_file.exists():
-            pytest.skip("pipeline_factory_construction.py not found")
+            pytest.skip("pipeline/construction.py not found")
         if not assembler_file.exists():
-            pytest.skip("pipeline_assembler.py not found")
+            pytest.skip("pipeline/assembler.py not found")
         if not service_bundle_file.exists():
-            pytest.skip("service_bundle_factory.py not found")
+            pytest.skip("services/bundle.py not found")
 
         content = factory_file.read_text(encoding="utf-8")
         assembler_content = assembler_file.read_text(encoding="utf-8")

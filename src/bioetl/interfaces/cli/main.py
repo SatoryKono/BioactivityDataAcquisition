@@ -9,7 +9,8 @@ from __future__ import annotations
 import click
 
 from bioetl import __version__
-from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+from bioetl.composition.factories.pipeline.registry import register_all_pipelines
+from bioetl.composition.registry import get_default_registry
 from bioetl.interfaces.cli.commands.adr import adr
 from bioetl.interfaces.cli.commands.checkpoint import checkpoint
 from bioetl.interfaces.cli.commands.config import config
@@ -31,8 +32,11 @@ __all__ = [
 
 @click.group()
 @click.version_option(version=__version__)
-def cli() -> None:
+@click.pass_context
+def cli(ctx: click.Context) -> None:
     """BioETL - Bioactivity Data ETL Pipeline."""
+    if ctx.obj is None:
+        ctx.obj = get_default_registry()
 
 
 # Register commands

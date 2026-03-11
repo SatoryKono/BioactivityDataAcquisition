@@ -8,19 +8,19 @@ from unittest.mock import patch
 
 import pytest
 
-from bioetl.composition.factories import pipeline_factory
+from bioetl.composition.factories.pipeline import facade as pipeline_factory
 
 
 @pytest.mark.unit
 def test_service_bundle_factory_has_no_pipeline_factory_proxy_imports() -> None:
     """service_bundle_factory must not depend on pipeline_factory module."""
     source = Path(
-        "src/bioetl/composition/factories/service_bundle_factory.py"
+        "src/bioetl/composition/factories/services/bundle.py"
     ).read_text(encoding="utf-8")
     tree = ast.parse(source)
 
     forbidden_imports = {
-        "bioetl.composition.factories.pipeline_factory",
+        "bioetl.composition.factories.pipeline.facade",
         "pipeline_factory",
     }
     for node in ast.walk(tree):
@@ -32,7 +32,7 @@ def test_service_bundle_factory_has_no_pipeline_factory_proxy_imports() -> None:
 
 
 @pytest.mark.unit
-@patch("bioetl.composition.factories.pipeline_factory._build_pipeline_services")
+@patch("bioetl.composition.factories.pipeline.facade._build_pipeline_services")
 def test_pipeline_factory_build_services_injects_compat_dependencies(
     mock_build_pipeline_services,
 ) -> None:
@@ -56,7 +56,7 @@ def test_pipeline_factory_build_services_injects_compat_dependencies(
 
 
 @pytest.mark.unit
-@patch("bioetl.composition.factories.pipeline_factory._create_pipeline_with_services")
+@patch("bioetl.composition.factories.pipeline.facade._create_pipeline_with_services")
 def test_pipeline_factory_create_with_services_injects_compat_dependencies(
     mock_create_pipeline_with_services,
 ) -> None:

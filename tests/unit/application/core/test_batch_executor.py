@@ -19,11 +19,11 @@ from bioetl.application.core.batch_memory_manager import BatchMemoryManagerServi
 from bioetl.application.core.batch_processing_service import BatchProcessingService
 from bioetl.application.core.batch_progress_service import BatchProgressService
 from bioetl.application.core.batch_tracing import BatchTracingManagerService
-from bioetl.application.core.checkpoint_manager import CheckpointManager
+from bioetl.application.core.lifecycle.checkpoint_manager import CheckpointManager
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.pipeline_services import PipelineService
-from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
-from bioetl.composition.factories.services_factory import ServicesBuilder
+from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError, ShutdownSignal
+from bioetl.composition.factories.services.factory import ServicesBuilder
 from bioetl.domain.config import TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
@@ -628,6 +628,31 @@ class TestBatchExecutorProcessBatch:
         assert executor.get_run_statistics()["source_batch_ids"] == [
             str(fixed_batch_id)
         ]
+
+    def test_get_run_statistics_preserves_source_batch_id_order(
+        self,
+        batch_executor,
+    ) -> None:
+        """Run statistics should deduplicate batch IDs without reordering them."""
+        batch_executor.records_fetched = 5
+        batch_executor.records_bronze = 5
+        batch_executor.records_silver = 4
+        batch_executor.records_gold = 2
+        batch_executor.records_quarantined = 1
+        batch_executor.records_filtered_out = 1
+        batch_executor._source_batch_ids = ["batch-002", "batch-001", "batch-002"]
+
+        stats = batch_executor.get_run_statistics()
+
+        assert stats == {
+            "records_fetched": 5,
+            "records_bronze": 5,
+            "records_silver": 4,
+            "records_gold": 2,
+            "records_quarantined": 1,
+            "records_filtered_out": 1,
+            "source_batch_ids": ["batch-002", "batch-001"],
+        }
 
 
 @pytest.fixture

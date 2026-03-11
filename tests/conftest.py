@@ -147,7 +147,7 @@ def isolated_registry() -> Any:
 @pytest.fixture
 def populated_isolated_registry(isolated_registry: Any) -> Any:
     """Return isolated registry pre-populated with all pipelines."""
-    from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+    from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 
     register_all_pipelines(registry=isolated_registry)
     return isolated_registry

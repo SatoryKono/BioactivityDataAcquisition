@@ -12,7 +12,9 @@ from bioetl.application.core.idmapping_data_source import IDMappingDataSource
 from bioetl.application.core.publication_term_data_source import (
     PublicationTermDataSource,
 )
-from bioetl.composition.factories.adapter_helpers_factory import AdapterHelpersFactory
+from bioetl.composition.factories.datasource.adapter_helpers import (
+    AdapterHelpersFactory,
+)
 from bioetl.composition.providers._config_helpers import (
     _get_adapter_config,
     _get_circuit_breaker_from_config,
@@ -30,12 +32,12 @@ from bioetl.composition.providers.provider_registry import (
     ProviderConfig,
 )
 from bioetl.domain.models.filter import ExtractionParams
-from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+from bioetl.infrastructure.adapters.chembl import ChemblAdapter
+from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
+from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 from bioetl.infrastructure.adapters.input import IDMappingCsvReaderAdapter
-from bioetl.infrastructure.adapters.pubchem.client import PubChemAdapter
-from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
+from bioetl.infrastructure.adapters.pubchem import PubChemAdapter
+from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
 from bioetl.infrastructure.adapters.uniprot.constants import UNIPROT_API_BASE
 from bioetl.infrastructure.adapters.uniprot.idmapping_client import (
     UniProtIDMappingClient,
@@ -129,8 +131,8 @@ def _create_pubchem_adapter(
 
     return PubChemAdapter(
         logger=logger,
-        rate_limiter=TokenBucket(rate=rate, capacity=capacity, provider="pubchem"),
-        circuit_breaker=CircuitBreaker(
+        rate_limiter=TokenBucketRateLimiter(rate=rate, capacity=capacity, provider="pubchem"),
+        circuit_breaker=CircuitBreakerGuard(
             provider="pubchem",
             failure_threshold=cb_threshold,
             recovery_timeout=cb_timeout,

@@ -10,7 +10,7 @@ from bioetl.infrastructure.adapters.uniprot._idmapping_errors import IDMappingJo
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
-    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 
@@ -20,7 +20,7 @@ class IDMappingTransportDependencies(Protocol):
 
     logger: LoggerPort
     http_client: UnifiedHTTPClient
-    _adapter_metrics: AdapterMetrics
+    _adapter_metrics: AdapterMetricsRecorder
     base_url: str
 
     async def _poll_until_ready(self, job_id: str) -> str | None: ...
@@ -43,7 +43,7 @@ class IDMappingTransportMixin:
 
     logger: LoggerPort
     http_client: UnifiedHTTPClient
-    _adapter_metrics: AdapterMetrics
+    _adapter_metrics: AdapterMetricsRecorder
     base_url: str
 
     def _transport_deps(self) -> IDMappingTransportDependencies:

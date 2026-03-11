@@ -8,7 +8,7 @@ import pytest
 from httpx import RequestError
 
 from bioetl.domain.types import HealthStatus
-from bioetl.infrastructure.adapters.crossref import CrossRefAdapter
+from bioetl.infrastructure.adapters.crossref import CROSSREF_API_BASE, CrossRefAdapter
 
 
 @pytest.fixture
@@ -164,6 +164,24 @@ async def test_health_check_unhealthy_on_request_error(adapter, mock_http_client
     result = await adapter.health_check()
 
     assert result == HealthStatus.UNHEALTHY
+
+
+def test_get_source_metadata_returns_collector_state_and_clears_requests(adapter):
+    """Metadata snapshot should reflect collector state and consume it."""
+    adapter._request_collector.record_request(
+        url=f"{CROSSREF_API_BASE}/works?query.title=test",
+        duration_ms=12.5,
+        status_code=200,
+    )
+
+    assert adapter.request_count == 1
+
+    metadata = adapter.get_source_metadata(api_version="v1")
+
+    assert metadata.url == CROSSREF_API_BASE
+    assert metadata.api_version == "v1"
+    assert metadata.total_requests == 1
+    assert adapter.request_count == 0
 
 
 @pytest.mark.asyncio

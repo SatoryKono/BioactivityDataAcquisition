@@ -47,7 +47,7 @@ composition/bootstrap/
 | ----------------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
 | `pipeline_factory.py`         | `GenericPipelineFactory`                                                                    | Универсальный конструктор пайплайнов (декларативно)            |
 | `pipeline_factories.py`       | Реестр фабрик                                                                               | Все зарегистрированные pipeline factories                      |
-| `data_source_factory.py`      | `DataSourceFactory`                                                                         | Создает `DataSourcePort` для провайдера                        |
+| `datasource/factory.py`       | `DataSourceFactory`                                                                         | Создает `DataSourcePort` для провайдера                        |
 | `http_client_factory.py`      | `HttpClientFactory`                                                                         | Настроенные `UnifiedHTTPClient` с Rate Limits, Circuit Breaker |
 | `storage_factory.py`          | `StorageFactory`                                                                            | Сборка `StoragePort` (Bronze + Silver + Gold)                  |
 | `storage_adapter.py`          | `StorageAdapter`                                                                            | Создание отдельных storage адаптеров                           |
@@ -67,7 +67,7 @@ composition/bootstrap/
 
 ### 2.3. Реестр провайдеров и DataSourceRegistry
 
-**Расположение:** `src/bioetl/composition/factories/data_source_factory.py:100` (DataSourceRegistry) и `src/bioetl/composition/providers/` (ProviderRegistry).
+**Расположение:** `src/bioetl/composition/factories/datasource/factory.py` (DataSourceRegistry) и `src/bioetl/composition/providers/` (ProviderRegistry).
 
 Централизованная регистрация всех провайдеров данных (8 провайдеров, включая `uniprot_idmapping`):
 

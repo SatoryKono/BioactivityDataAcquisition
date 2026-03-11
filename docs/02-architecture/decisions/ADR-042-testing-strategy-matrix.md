@@ -49,21 +49,37 @@ These are fundamentally incompatible at the adapter level. Clear boundary needed
 ### Fixture Governance
 
 1. VCR cassettes MUST live in `tests/fixtures/vcr/{provider}/`
-2. Each cassette MUST have a corresponding `_meta.yaml` with recording date and API version
-3. Stale cassettes (>90 days) SHOULD be flagged in CI
-4. Golden master snapshots for transformers stored in `tests/fixtures/golden/{provider}/`
+2. Cassette metadata rollout is staged: `_meta.yaml` sidecars are the target shape, but
+   CI enforcement remains disabled until the existing cassette inventory is backfilled
+3. Stale cassettes (>90 days) remain a configured target threshold, but CI enforcement is
+   still planned until `_meta.yaml` cassette backfill exists repo-wide
+4. A canonical cassette-metadata catalog is reserved at
+   `reports/quality/vcr-metadata-catalog.json`, but both catalog generation and metadata
+   backfill workflow remain planned until the initial repo-wide inventory exists
+5. Future canonical tooling paths are reserved at
+   `scripts/qa/report_vcr_metadata_catalog.py` and
+   `scripts/migrations/active/backfill_vcr_metadata_sidecars.py`; until rollout begins,
+   CI must not reference these paths as active checks
+6. Golden master snapshots for transformers live in `tests/fixtures/golden/{provider}/`
+   with partial rollout allowed while provider coverage is still being expanded
+7. Root-level / legacy cassette placement is already enforced in CI
+8. Extensionless cassette filenames remain on a shrinking allowlist during gradual migration to `*.yaml`
 
 ### Mutation Testing Gate
 
-- `mutmut` MUST run on `domain/` and `application/` layers in CI
-- Minimum mutation score: 70% (domain), 60% (application)
+- `mutmut` runs in CI today for the `domain/` layer with a 70% blocking threshold
+- `application/` mutation testing remains a staged target with a documented 60% threshold
+  but is not yet a blocking CI gate
 - Infrastructure layer excluded (I/O-heavy, low mutation value)
 
 ### Contract Test Versioning
 
-- Schema snapshots stored in `tests/fixtures/contracts/{provider}/v{N}.json`
-- Contract tests verify backward compatibility across versions
-- Breaking changes require explicit version bump with migration note
+- Current schema-stability snapshots live in `tests/contract/silver_schemas/snapshots/`
+- Externalized contract snapshot path is reserved at `tests/fixtures/contracts/{provider}/v{N}.json`
+- Backward-compatibility snapshot enforcement on the externalized registry is staged until that inventory exists
+- Breaking changes require explicit version bump with migration note once snapshot rollout is enabled
+- Live provider contract verification remains active today via the scheduled
+  `contract-tests.yml` workflow and must opt into outbound network access explicitly
 
 ---
 
@@ -77,7 +93,8 @@ These are fundamentally incompatible at the adapter level. Clear boundary needed
 
 ### Negative
 - Mutation testing adds ~5min to CI
-- Fixture governance requires cassette metadata maintenance
+- Fixture governance requires cassette metadata maintenance, an initial backfill, and a
+  later stale-age gate once that metadata inventory exists
 - Property test generators need careful domain modeling
 
 ### Risks

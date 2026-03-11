@@ -5,7 +5,7 @@ from __future__ import annotations
 import pyarrow as pa
 import pytest
 
-from bioetl.composition.factories.pipeline_factories import PIPELINE_CONFIGS
+from bioetl.composition.factories.pipeline.registry import PIPELINE_CONFIGS
 
 # fmt: off
 PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {

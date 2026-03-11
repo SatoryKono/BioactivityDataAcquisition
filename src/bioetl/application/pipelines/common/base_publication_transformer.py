@@ -174,7 +174,7 @@ class BasePublicationTransformer(BaseTransformer):
         context: PipelineContext,
         business_data: JsonDict,
         index: int,
-    ) -> tuple[str, Any] | None:
+    ) -> tuple[str, Any] | None:  # Any: PK value type varies by provider
         """Validate primary ID presence.
 
         Returns:

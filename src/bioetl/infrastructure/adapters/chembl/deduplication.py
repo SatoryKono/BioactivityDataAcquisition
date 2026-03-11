@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
-    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
 
 
 def compute_composite_key(
@@ -45,7 +45,7 @@ def is_duplicate_record_composite(
     seen_keys: set[str],
     entity_type: str,
     logger: LoggerPort,
-    metrics: AdapterMetrics,
+    metrics: AdapterMetricsRecorder,
 ) -> bool:
     """Check if record is duplicate using composite key.
 
@@ -83,7 +83,7 @@ def is_duplicate_record(
     seen_ids: set[str],
     entity_type: str,
     logger: LoggerPort,
-    metrics: AdapterMetrics,
+    metrics: AdapterMetricsRecorder,
 ) -> bool:
     """Check if record is duplicate and add to seen set if not.
 

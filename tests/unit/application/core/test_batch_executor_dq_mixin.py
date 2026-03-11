@@ -61,6 +61,7 @@ class _BatchExecutorDQHarness(_BatchExecutorDQMixin):
             silver_output_path="silver/path",
             gold_output_path="gold/path",
             flat_structure=False,
+            scd_config=None,
         )
         self._logger = _LoggerStub()
         self._bronze_records_for_dq: list[bytes] = []

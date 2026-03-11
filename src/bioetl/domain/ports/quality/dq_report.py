@@ -28,7 +28,7 @@ if TYPE_CHECKING:
         GoldDQReport,
         SilverDQReport,
     )
-from bioetl.domain.types import JsonDict
+from bioetl.domain.types import GoldBusinessRuleSpec, JsonDict, ScdConfig
 
 DataContainer = (
     Any  # Any: polars.DataFrame | pyarrow.Table (avoids infra import in domain)
@@ -155,12 +155,12 @@ class GoldDQAnalyzerPort(Protocol):
         timestamp: datetime,
         required_fields: list[str] | None = None,
         completeness_threshold: float = 0.90,
-        business_rules: list[JsonDict] | None = None,
+        business_rules: list[GoldBusinessRuleSpec] | None = None,
         reference_tables: DataContainerDict | None = None,
         baseline_stats: (
             dict[str, Any] | None  # Any: baseline stat values are float|int|str|None
         ) = None,
-        scd_config: JsonDict | None = None,
+        scd_config: ScdConfig | None = None,
     ) -> GoldDQReport:
         """Analyze Gold data and generate DQ report.
 

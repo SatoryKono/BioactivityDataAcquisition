@@ -118,7 +118,13 @@ def yaml_config_to_domain(
     )
 
     gold_config = yaml_config.sink.get("gold")
-    scd_config = gold_config.scd_config if gold_config else None
+    scd_config = (
+        gold_config.scd_config.to_domain(
+            primary_keys=tuple(yaml_config.business_primary_keys or ())
+        )
+        if gold_config and gold_config.scd_config is not None
+        else None
+    )
 
     return PipelineConfig(
         pipeline_name=yaml_config.pipeline_name,

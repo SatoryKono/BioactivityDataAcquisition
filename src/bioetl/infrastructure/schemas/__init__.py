@@ -28,7 +28,6 @@ YAML configuration files from configs/entities/.
 from bioetl.infrastructure.schemas.base_schemas import (
     BaseApiConfig,
     BaseCircuitBreakerConfig,
-    BaseClientConfig,
     BaseCsvExportConfig,
     BaseDQConfig,
     BaseDQThresholds,
@@ -41,6 +40,7 @@ from bioetl.infrastructure.schemas.base_schemas import (
     BaseInputFilterConfig,
     BaseMaintenanceConfig,
     BaseRateLimitConfig,
+    HttpClientConfig,
 )
 from bioetl.infrastructure.schemas.composite_config import (
     CompositeConfigFileSchema,
@@ -63,10 +63,8 @@ from bioetl.infrastructure.schemas.filter_config import (
 )
 
 __all__ = [
-    # Base schemas (preferred for new code)
     "BaseApiConfig",
     "BaseCircuitBreakerConfig",
-    "BaseClientConfig",
     "BaseCsvExportConfig",
     "BaseDQConfig",
     "BaseDQThresholds",
@@ -79,7 +77,6 @@ __all__ = [
     "BaseInputFilterConfig",
     "BaseMaintenanceConfig",
     "BaseRateLimitConfig",
-    # Composite config
     "CompositeConfigFileSchema",
     "CompositeConfigSchema",
     "CompositeDQSchema",
@@ -89,6 +86,7 @@ __all__ = [
     "ExecutionSchema",
     "FilterConfigFile",
     "GoldFiltersFileConfig",
+    "HttpClientConfig",
     "InputFilterFileConfig",
     "LineageSchema",
     "MergeOutputSchema",

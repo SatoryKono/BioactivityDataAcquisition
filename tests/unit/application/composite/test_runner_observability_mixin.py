@@ -8,7 +8,7 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.composite.runner_observability_mixin import (
+from bioetl.application.composite.runner_pkg.runner_observability_mixin import (
     CompositeRunnerObservabilityMixin,
 )
 from bioetl.domain.composite.result import MergeResult

@@ -1,7 +1,7 @@
 """Architecture test: DI compliance for infrastructure adapter constructors.
 
 REQ-ARCH-DI-012: Infrastructure adapter constructors MUST NOT unconditionally
-instantiate cross-cutting helper services (ErrorService, AdapterMetrics).
+instantiate cross-cutting helper services (ErrorService, AdapterMetricsRecorder).
 
 These services should be accepted as optional constructor parameters with
 inline creation only as a fallback when not injected (behind ``if ... is None``
@@ -30,7 +30,7 @@ import pytest
 ADAPTERS_DIR = Path("src/bioetl/infrastructure/adapters")
 
 # Cross-cutting services that MUST use conditional instantiation in adapters.
-GUARDED_SERVICE_CLASSES: frozenset[str] = frozenset({"ErrorService", "AdapterMetrics"})
+GUARDED_SERVICE_CLASSES: frozenset[str] = frozenset({"ErrorService", "AdapterMetricsRecorder"})
 
 # Files where unconditional instantiation is expected (class definitions).
 DEFINITION_FILES: frozenset[str] = frozenset(
@@ -161,7 +161,7 @@ class TestInfrastructureAdapterDI:
     ) -> None:
         """Adapter __init__/__post_init__ MUST guard service instantiation.
 
-        Cross-cutting helpers (ErrorService, AdapterMetrics) must be behind
+        Cross-cutting helpers (ErrorService, AdapterMetricsRecorder) must be behind
         an ``if ... is None`` check so that AdapterHelpersFactory can inject
         pre-built instances from the composition root.
         """
@@ -262,13 +262,13 @@ class SomeAdapter:
         code = """
 class BadDataclass:
     def __post_init__(self):
-        self._adapter_metrics = AdapterMetrics(metrics, "provider")
+        self._adapter_metrics = AdapterMetricsRecorder(metrics, "provider")
 """
         tree = ast.parse(code)
         finder = _UnconditionalInstantiationFinder(GUARDED_SERVICE_CLASSES)
         finder.visit(tree)
         assert len(finder.violations) == 1
-        assert finder.violations[0][1] == "AdapterMetrics"
+        assert finder.violations[0][1] == "AdapterMetricsRecorder"
 
     def test_allows_injected_assignment(self) -> None:
         code = """

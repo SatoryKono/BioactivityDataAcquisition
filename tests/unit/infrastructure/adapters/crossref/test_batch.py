@@ -1,6 +1,6 @@
 """Unit tests for CrossRef batch processing utilities.
 
-Tests for DoiBatchProcessor and SearchPaginator classes.
+Tests for DoiBatchProcessor and SearchPaginatorHelper classes.
 """
 
 from __future__ import annotations
@@ -12,7 +12,7 @@ from httpx import RequestError
 
 from bioetl.infrastructure.adapters.crossref.batch import (
     DoiBatchProcessor,
-    SearchPaginator,
+    SearchPaginatorHelper,
 )
 from bioetl.infrastructure.adapters.crossref.exceptions import CrossRefApiError
 
@@ -53,8 +53,8 @@ def batch_processor(mock_http, mock_logger, mock_metrics):
 
 @pytest.fixture
 def search_paginator(mock_http, mock_logger, mock_metrics):
-    """Create a SearchPaginator instance."""
-    return SearchPaginator(
+    """Create a SearchPaginatorHelper instance."""
+    return SearchPaginatorHelper(
         http=mock_http,
         logger=mock_logger,
         metrics=mock_metrics,
@@ -212,7 +212,7 @@ async def test_fetch_batch_falls_back_on_exception(
 
 
 # =============================================================================
-# SearchPaginator Tests
+# SearchPaginatorHelper Tests
 # =============================================================================
 
 

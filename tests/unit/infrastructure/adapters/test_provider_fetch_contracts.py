@@ -7,13 +7,11 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.domain.ports import FallbackPolicyPort
-from bioetl.infrastructure.adapters.crossref.client import CrossRefAdapter
-from bioetl.infrastructure.adapters.openalex.client import OpenAlexAdapter
-from bioetl.infrastructure.adapters.pubmed.pubmed_client import PubMedAdapter
-from bioetl.infrastructure.adapters.semanticscholar.adapter import (
-    SemanticScholarAdapter,
-)
-from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
+from bioetl.infrastructure.adapters.crossref import CrossRefAdapter
+from bioetl.infrastructure.adapters.openalex import OpenAlexAdapter
+from bioetl.infrastructure.adapters.pubmed import PubMedAdapter
+from bioetl.infrastructure.adapters.semanticscholar import SemanticScholarAdapter
+from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 

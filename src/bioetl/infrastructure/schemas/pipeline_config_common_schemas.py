@@ -5,8 +5,9 @@ from __future__ import annotations
 import re
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_validator
 
+from bioetl.domain.types import ScdConfig as DomainScdConfig
 from bioetl.infrastructure.schemas.base_schemas import (
     BaseFilterColumnSchema,
     BaseGoldColumnFilterConfig,
@@ -27,8 +28,9 @@ __all__ = [
     "GoldListContainsFilterConfig",
     "GoldListLengthFilterConfig",
     "GoldRangeFilterConfig",
-    "InputFilterConfig",
+    "InputFilterYamlConfig",
     "MaintenanceConfig",
+    "ScdConfigYamlConfig",
     "SinkDQReportConfig",
     "SinkLayerConfig",
     "TransformConfig",
@@ -39,7 +41,7 @@ class FilterColumnSchema(BaseFilterColumnSchema):
     """Schema for a single filter column configuration."""
 
 
-class InputFilterConfig(BaseInputFilterConfig):
+class InputFilterYamlConfig(BaseInputFilterConfig):
     """Configuration for input ID filtering from CSV."""
 
 
@@ -56,6 +58,53 @@ class MaintenanceConfig(BaseModel):
         le=365,
         description="Minimum age of files to remove during VACUUM (days)",
     )
+
+
+class ScdConfigYamlConfig(BaseModel):
+    """Pydantic boundary schema for Gold SCD2 configuration."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    business_key: str | list[str] | None = Field(
+        default=None,
+        description="Business key column or columns used for SCD2 identity.",
+    )
+    scd_type: int = Field(
+        default=2,
+        validation_alias=AliasChoices("type", "scd_type"),
+        description="SCD type. Only value 2 is supported.",
+    )
+    valid_from_col: str = Field(
+        default="valid_from",
+        validation_alias=AliasChoices("valid_from_col", "valid_from"),
+        description="Column storing SCD validity start timestamp.",
+    )
+    valid_to_col: str = Field(
+        default="valid_to",
+        validation_alias=AliasChoices("valid_to_col", "valid_to"),
+        description="Column storing SCD validity end timestamp.",
+    )
+    current_flag_col: str = Field(
+        default="is_current",
+        validation_alias=AliasChoices("current_flag_col", "is_current"),
+        description="Column storing current-row flag.",
+    )
+    version_col: str = Field(
+        default="version",
+        validation_alias=AliasChoices("version_col", "version"),
+        description="Column storing SCD version number.",
+    )
+
+    def to_domain(
+        self,
+        *,
+        primary_keys: tuple[str, ...] | list[str] | None = None,
+    ) -> DomainScdConfig:
+        """Convert validated YAML config to typed domain config."""
+        return DomainScdConfig.from_mapping(
+            self.model_dump(mode="python"),
+            primary_keys=primary_keys,
+        )
 
 
 class SinkDQReportConfig(BaseModel):
@@ -109,7 +158,7 @@ class SinkLayerConfig(BaseModel):
         default_factory=list,
         description="Columns to partition Delta tables by (Silver layer)",
     )
-    scd_config: dict[str, str] | None = Field(
+    scd_config: ScdConfigYamlConfig | None = Field(
         default=None,
         description="SCD Type 2 column mapping (valid_from, valid_to, is_current, version)",
     )

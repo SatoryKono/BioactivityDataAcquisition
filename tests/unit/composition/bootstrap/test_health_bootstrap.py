@@ -13,7 +13,7 @@ from bioetl.composition.bootstrap.cli.health import (
     bootstrap_health_server_dependencies,
     bootstrap_health_service,
 )
-from bioetl.composition.factories.data_source_factory import DataSourceFactory
+from bioetl.composition.factories.datasource.factory import DataSourceFactory
 from bioetl.domain.ports import MetricsPort
 from bioetl.infrastructure.adapters.http.health_monitor import ProviderHealthMonitor
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger

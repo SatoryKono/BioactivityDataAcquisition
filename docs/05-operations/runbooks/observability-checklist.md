@@ -129,4 +129,4 @@ def test_adapters_have_health_check(src_dir: Path) -> None:
     ...
 ```
 
-Run with: `make arch-test`
+Run with: `make test-architecture`

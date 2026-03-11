@@ -195,10 +195,10 @@ async def test_rate_limiter_throttles_requests():
     - Each provider has specific rate limits
     - Rate limiter should enforce these limits
     """
-    from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+    from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 
     # Create rate limiter with low rate for testing
-    limiter = TokenBucket(
+    limiter = TokenBucketRateLimiter(
         rate=2.0,  # 2 tokens per second
         capacity=2,
         provider="test",
@@ -224,9 +224,9 @@ async def test_rate_limiter_burst_capacity():
 
     Token bucket should allow immediate burst requests up to capacity.
     """
-    from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+    from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 
-    limiter = TokenBucket(
+    limiter = TokenBucketRateLimiter(
         rate=10.0,  # 10 tokens per second
         capacity=5,  # Burst capacity of 5
         provider="test",
@@ -257,9 +257,9 @@ async def test_circuit_breaker_opens_on_failures():
     - Open circuit should reject requests immediately
     """
     from bioetl.domain.types import CircuitBreakerState
-    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 
-    breaker = CircuitBreaker(
+    breaker = CircuitBreakerGuard(
         provider="test",
         failure_threshold=3,  # Lower threshold for testing
         recovery_timeout=1,  # Short timeout for testing
@@ -286,9 +286,9 @@ async def test_circuit_breaker_half_open_recovery():
     - Single failure should re-open circuit
     """
     from bioetl.domain.types import CircuitBreakerState
-    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 
-    breaker = CircuitBreaker(
+    breaker = CircuitBreakerGuard(
         provider="test",
         failure_threshold=2,
         recovery_timeout=1,  # 1 second for testing (must be > 0.5 for reliable sleep)

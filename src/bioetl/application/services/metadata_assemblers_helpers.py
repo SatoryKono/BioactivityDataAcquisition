@@ -252,13 +252,9 @@ def _build_gold_scd(input_data: GoldMetadataInput) -> SCDMetadata | None:
         return None
     return SCDMetadata(
         enabled=True,
-        effective_date_column=input_data.scd_config.get(
-            "valid_from_col", "_valid_from"
-        ),
-        end_date_column=input_data.scd_config.get("valid_to_col", "_valid_to"),
-        current_flag_column=input_data.scd_config.get(
-            "current_flag_col", "_is_current"
-        ),
+        effective_date_column=input_data.scd_config.valid_from_col,
+        end_date_column=input_data.scd_config.valid_to_col,
+        current_flag_column=input_data.scd_config.current_flag_col,
     )
 
 

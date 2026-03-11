@@ -179,9 +179,9 @@ class TestStorageFactoryLocal:
     ):
         """Test that local runs use paths from settings."""
         with (
-            patch("bioetl.composition.factories.storage_factory.BronzeWriter"),
-            patch("bioetl.composition.factories.storage_factory.SilverWriter"),
-            patch("bioetl.composition.factories.storage_factory.GoldWriter"),
+            patch("bioetl.composition.factories.storage.factory.BronzeWriter"),
+            patch("bioetl.composition.factories.storage.factory.SilverWriter"),
+            patch("bioetl.composition.factories.storage.factory.GoldWriter"),
         ):
             result = StorageFactory.create(
                 settings=mock_settings,
@@ -215,13 +215,13 @@ class TestStorageFactoryLocal:
 
         with (
             patch(
-                "bioetl.composition.factories.storage_factory.BronzeWriter"
+                "bioetl.composition.factories.storage.factory.BronzeWriter"
             ) as mock_bronze,
             patch(
-                "bioetl.composition.factories.storage_factory.SilverWriter"
+                "bioetl.composition.factories.storage.factory.SilverWriter"
             ) as mock_delta,
             patch(
-                "bioetl.composition.factories.storage_factory.GoldWriter"
+                "bioetl.composition.factories.storage.factory.GoldWriter"
             ) as mock_gold,
         ):
             result = StorageFactory.create(
@@ -256,10 +256,10 @@ class TestStorageFactoryLocal:
         """Test local run with JSON export enabled."""
         with (
             patch(
-                "bioetl.composition.factories.storage_factory.BronzeWriter"
+                "bioetl.composition.factories.storage.factory.BronzeWriter"
             ) as mock_bronze,
-            patch("bioetl.composition.factories.storage_factory.SilverWriter"),
-            patch("bioetl.composition.factories.storage_factory.GoldWriter"),
+            patch("bioetl.composition.factories.storage.factory.SilverWriter"),
+            patch("bioetl.composition.factories.storage.factory.GoldWriter"),
         ):
             StorageFactory.create(
                 settings=mock_settings,
@@ -287,12 +287,12 @@ class TestStorageFactoryLocal:
         mock_settings.test_mode = False
 
         with (
-            patch("bioetl.composition.factories.storage_factory.BronzeWriter"),
+            patch("bioetl.composition.factories.storage.factory.BronzeWriter"),
             patch(
-                "bioetl.composition.factories.storage_factory.SilverWriter"
+                "bioetl.composition.factories.storage.factory.SilverWriter"
             ) as mock_delta,
             patch(
-                "bioetl.composition.factories.storage_factory.GoldWriter"
+                "bioetl.composition.factories.storage.factory.GoldWriter"
             ) as mock_gold,
         ):
             StorageFactory.create(
@@ -335,10 +335,10 @@ class TestStorageFactoryEdgeCases:
         """Test handling of empty sink configuration."""
         with (
             patch(
-                "bioetl.composition.factories.storage_factory.BronzeWriter"
+                "bioetl.composition.factories.storage.factory.BronzeWriter"
             ) as mock_bronze,
-            patch("bioetl.composition.factories.storage_factory.SilverWriter"),
-            patch("bioetl.composition.factories.storage_factory.GoldWriter"),
+            patch("bioetl.composition.factories.storage.factory.SilverWriter"),
+            patch("bioetl.composition.factories.storage.factory.GoldWriter"),
         ):
             result = StorageFactory.create(
                 settings=mock_settings,
@@ -368,13 +368,13 @@ class TestStorageFactoryEdgeCases:
 
         with (
             patch(
-                "bioetl.composition.factories.storage_factory.BronzeWriter"
+                "bioetl.composition.factories.storage.factory.BronzeWriter"
             ) as mock_bronze,
             patch(
-                "bioetl.composition.factories.storage_factory.SilverWriter"
+                "bioetl.composition.factories.storage.factory.SilverWriter"
             ) as mock_delta,
             patch(
-                "bioetl.composition.factories.storage_factory.GoldWriter"
+                "bioetl.composition.factories.storage.factory.GoldWriter"
             ) as mock_gold,
         ):
             mock_bronze.return_value = bronze_instance

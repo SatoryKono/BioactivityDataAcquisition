@@ -6,11 +6,20 @@ import time
 from abc import ABC, abstractmethod
 from contextlib import AbstractContextManager
 from types import TracebackType
-from typing import Literal, Protocol, cast, runtime_checkable
+from typing import Protocol, cast, runtime_checkable
 
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import HealthStatus, JsonDict
+from bioetl.infrastructure.adapters.common.source_metadata_capability import (
+    SourceMetadataCollectorProtocol,
+    clear_source_metadata_collector,
+    consume_source_metadata,
+    get_request_count,
+)
+from bioetl.infrastructure.adapters.health_probe_policy import (
+    is_slow_health_probe,
+)
 from bioetl.infrastructure.adapters.semanticscholar.constants import (
     SEMANTICSCHOLAR_BASE_URL,
 )
@@ -64,27 +73,10 @@ class SemanticScholarAdapterMetricsProtocol(Protocol):
 
 
 @runtime_checkable
-class SemanticScholarRequestCollectorProtocol(Protocol):
+class SemanticScholarRequestCollectorProtocol(
+    SourceMetadataCollectorProtocol, Protocol
+):
     """Request-collector contract used by metadata helpers."""
-
-    def to_source_metadata(
-        self,
-        source_type: Literal["api", "csv", "parquet"] = "api",
-        url: str | None = None,
-        api_version: str | None = None,
-        query_string: str | None = None,
-    ) -> SourceMetadata:
-        """Build source metadata snapshot from collected request data."""
-        ...
-
-    def clear(self) -> None:
-        """Reset collected request state."""
-        ...
-
-    @property
-    def request_count(self) -> int:
-        """Return the number of HTTP requests recorded so far."""
-        ...
 
 
 @runtime_checkable
@@ -168,7 +160,7 @@ class SemanticScholarHealthMetadataMixin(SemanticScholarHealthMetadataMixinABC):
                 )
                 return HealthStatus.UNHEALTHY
 
-            if elapsed > 5.0:
+            if is_slow_health_probe(elapsed_seconds=elapsed):
                 deps.logger.warning(
                     "semanticscholar_health_check_slow",
                     elapsed_seconds=round(elapsed, 2),
@@ -218,24 +210,23 @@ class SemanticScholarHealthMetadataMixin(SemanticScholarHealthMetadataMixinABC):
             SourceMetadata aggregated from all recorded API requests since last clear.
         """
         deps = self._health_metadata_dependencies()
-        metadata = deps._request_collector.to_source_metadata(
-            source_type="api",
+        return consume_source_metadata(
+            collector=deps._request_collector,
             url=SEMANTICSCHOLAR_BASE_URL,
-            api_version=api_version or "v1",
+            api_version=api_version,
+            default_api_version="v1",
         )
-        deps._request_collector.clear()
-        return metadata
 
     def clear_request_collector(self) -> None:
         """Clear request collector without returning metadata."""
         deps = self._health_metadata_dependencies()
-        deps._request_collector.clear()
+        clear_source_metadata_collector(collector=deps._request_collector)
 
     @property
     def request_count(self) -> int:
         """Recorded API-request count since last clear."""
         deps = self._health_metadata_dependencies()
-        return deps._request_collector.request_count
+        return get_request_count(collector=deps._request_collector)
 
     async def aclose(self) -> None:
         """Close adapter resources."""

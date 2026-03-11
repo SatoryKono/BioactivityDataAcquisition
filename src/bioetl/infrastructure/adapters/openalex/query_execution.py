@@ -10,7 +10,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
@@ -24,7 +24,7 @@ class OpenAlexQueryExecutor:
     """Executes OpenAlex `/works` requests with unified telemetry recording."""
 
     http_client: UnifiedHTTPClient
-    adapter_metrics: AdapterMetrics
+    adapter_metrics: AdapterMetricsRecorder
     request_collector: APIRequestCollector
     headers_provider: Callable[[], dict[str, str]]
     api_base: str

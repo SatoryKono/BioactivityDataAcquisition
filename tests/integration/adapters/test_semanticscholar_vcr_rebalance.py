@@ -14,10 +14,10 @@ import pytest
 import pytest_asyncio
 
 from bioetl.domain.types import HealthStatus
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
-from bioetl.infrastructure.adapters.semanticscholar.adapter import (
+from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
+from bioetl.infrastructure.adapters.semanticscholar.client import (
     SemanticScholarAdapter,
 )
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
@@ -50,10 +50,10 @@ def vcr_cassette_name(request: pytest.FixtureRequest) -> str:
 async def http_client() -> AsyncIterator[UnifiedHTTPClient]:
     """Create and manage Semantic Scholar HTTP client lifecycle for integration tests."""
     client = UnifiedHTTPClient(
-        rate_limiter=TokenBucket(
+        rate_limiter=TokenBucketRateLimiter(
             rate=5.0, capacity=10, provider="semanticscholar_rf013"
         ),
-        circuit_breaker=CircuitBreaker(provider="semanticscholar_rf013"),
+        circuit_breaker=CircuitBreakerGuard(provider="semanticscholar_rf013"),
         timeout=30.0,
         provider="semanticscholar",
     )

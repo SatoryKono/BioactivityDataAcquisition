@@ -16,7 +16,7 @@ from bioetl.application.services import (
     RunResult,
 )
 from bioetl.composition.entrypoints import get_pipeline_runner_service
-from bioetl.composition.registry import get_default_registry
+from bioetl.composition.registry import PipelineRegistry, get_default_registry
 from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,
@@ -57,27 +57,35 @@ class BatchRunResult:
         return self.failed == 0 and self.total > 0
 
 
-def _get_available_providers() -> list[str]:
+def _get_available_providers(
+    registry: PipelineRegistry | None = None,
+) -> list[str]:
     """Get sorted list of unique provider names from registered pipelines."""
-    registry = get_default_registry()
-    pipelines = registry.list_pipelines()
+    reg = registry if registry is not None else get_default_registry()
+    pipelines = reg.list_pipelines()
     providers = {p.split("_")[0] for p in pipelines if "_" in p}
     return sorted(providers)
 
 
-def _filter_pipelines_by_provider(provider: str) -> list[str]:
+def _filter_pipelines_by_provider(
+    provider: str,
+    registry: PipelineRegistry | None = None,
+) -> list[str]:
     """Filter registered pipelines by provider prefix."""
-    registry = get_default_registry()
-    all_pipelines = registry.list_pipelines()
+    reg = registry if registry is not None else get_default_registry()
+    all_pipelines = reg.list_pipelines()
     return sorted([name for name in all_pipelines if name.startswith(f"{provider}_")])
 
 
-def _validate_provider(provider: str) -> tuple[bool, str | None]:
+def _validate_provider(
+    provider: str,
+    registry: PipelineRegistry | None = None,
+) -> tuple[bool, str | None]:
     """Validate that the provider has registered pipelines."""
-    available_providers = _get_available_providers()
+    available_providers = _get_available_providers(registry=registry)
     if not available_providers:
         return False, "No pipelines are registered."
-    pipelines = _filter_pipelines_by_provider(provider)
+    pipelines = _filter_pipelines_by_provider(provider, registry=registry)
     if not pipelines:
         return False, (
             f"No pipelines found for provider '{provider}'. "
@@ -359,12 +367,14 @@ def run_all(
     health_port: int,
 ) -> None:
     """Run all registered pipelines for one provider sequentially."""
-    is_valid, error_msg = _validate_provider(source)
+    ctx = click.get_current_context()
+    registry = ctx.obj if isinstance(ctx.obj, PipelineRegistry) else None
+    is_valid, error_msg = _validate_provider(source, registry=registry)
     if not is_valid:
         echo_error("Provider error", error_msg)
         sys.exit(ExitCode.FAIL)
 
-    pipelines = _filter_pipelines_by_provider(source)
+    pipelines = _filter_pipelines_by_provider(source, registry=registry)
 
     if list_only:
         _handle_list_only(source, pipelines)

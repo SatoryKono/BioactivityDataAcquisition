@@ -14,6 +14,7 @@ from bioetl.domain.config._converters import freeze_sequences, resolve_loading_s
 from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.config.table import TableConfig
 from bioetl.domain.medallion import LoadingStrategy
+from bioetl.domain.types import ScdConfig
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
@@ -69,7 +70,7 @@ class PipelineConfig:
     loading_strategy: LoadingStrategy | str | None = None
 
     # SCD Type 2 configuration (Gold layer)
-    scd_config: dict[str, str] | None = None
+    scd_config: ScdConfig | None = None
 
     # Gold schema for validation
     gold_schema: Any | None = None  # Any: Pandera DataFrameModel class or instance

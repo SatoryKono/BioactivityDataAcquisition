@@ -6,7 +6,7 @@ Uses asyncio for non-blocking token acquisition.
 
 from __future__ import annotations
 
-__all__ = ["TokenBucket"]
+__all__ = ["TokenBucketRateLimiter"]
 
 
 import asyncio
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class TokenBucket:
+class TokenBucketRateLimiter:
     """Async token bucket rate limiter.
 
     Implements the token bucket algorithm for rate limiting API requests.
@@ -30,7 +30,7 @@ class TokenBucket:
         capacity: Maximum tokens in bucket
 
     Example:
-        >>> bucket = TokenBucket(rate=5.0, capacity=10)  # 5 req/sec, burst of 10
+        >>> bucket = TokenBucketRateLimiter(rate=5.0, capacity=10)  # 5 req/sec, burst of 10
         >>> await bucket.acquire()  # Wait for token
         >>> await bucket.acquire(tokens=2)  # Acquire multiple tokens
 

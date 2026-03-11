@@ -307,7 +307,7 @@ def mock_observer():
     This mock properly handles context manager protocol and suppresses
     PipelineShutdownError as the real observer would.
     """
-    from bioetl.application.core.shutdown import PipelineShutdownError
+    from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError
 
     observer = MagicMock(spec=PipelineObserver)
 
@@ -843,7 +843,7 @@ class TestPipelineRunnerLifecycle:
         DQ monitoring provides observability into data quality drift.
         """
         from bioetl.infrastructure.observability.anomaly.types import (
-            Anomaly,
+            AnomalyRecord,
             AnomalySeverity,
             AnomalyType,
         )
@@ -865,7 +865,7 @@ class TestPipelineRunnerLifecycle:
         )
 
         # Configure DQ monitor to return critical anomaly
-        critical_anomaly = Anomaly(
+        critical_anomaly = AnomalyRecord(
             metric_name="error_rate",
             current_value=0.25,  # 25% error rate
             baseline_mean=0.02,
@@ -1064,9 +1064,9 @@ class TestPipelineRunnerLifecycle:
 
         from bioetl.domain.exceptions import CircuitBreakerOpenError
         from bioetl.domain.types import CircuitBreakerState
-        from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+        from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 
-        cb = CircuitBreaker(provider="test", failure_threshold=3, recovery_timeout=1)
+        cb = CircuitBreakerGuard(provider="test", failure_threshold=3, recovery_timeout=1)
 
         # Initial state should be CLOSED
         assert cb.get_state() == CircuitBreakerState.CLOSED

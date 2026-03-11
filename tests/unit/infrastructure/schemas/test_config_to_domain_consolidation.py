@@ -38,7 +38,7 @@ class TestConsolidationPattern:
 
     def test_input_filter_config_to_domain_disabled(self) -> None:
         from bioetl.infrastructure.schemas.pipeline_config import (
-            InputFilterConfig as PydanticIFConfig,
+            InputFilterYamlConfig as PydanticIFConfig,
         )
 
         pydantic_config = PydanticIFConfig(enabled=False)
@@ -50,7 +50,7 @@ class TestConsolidationPattern:
 
     def test_input_filter_config_to_domain_enabled(self) -> None:
         from bioetl.infrastructure.schemas.pipeline_config import (
-            InputFilterConfig as PydanticIFConfig,
+            InputFilterYamlConfig as PydanticIFConfig,
         )
 
         pydantic_config = PydanticIFConfig(

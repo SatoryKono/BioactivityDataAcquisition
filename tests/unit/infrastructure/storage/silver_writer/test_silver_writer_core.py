@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from unittest.mock import AsyncMock, MagicMock
+
 import pytest
 
 pytestmark = pytest.mark.unit
@@ -42,6 +44,100 @@ class TestSilverWriterInit:
 @pytest.mark.unit
 class TestSilverWriterValidation:
     """Tests for SilverWriter validation."""
+
+    @pytest.mark.asyncio
+    async def test_execute_pipeline_builds_delta_request_and_forwards_payload(
+        self,
+        noop_logger,
+    ) -> None:
+        """Writer-level pipeline should pass a typed Delta request and payload onward."""
+        from datetime import UTC, datetime
+
+        import pyarrow as pa
+
+        from bioetl.domain.medallion import SilverWriteMode
+        from bioetl.infrastructure.storage.silver_writer import (
+            SilverWriter,
+            _SilverWriteExecutionContext,
+        )
+        from bioetl.infrastructure.storage.silver_writer_delta_mixin import (
+            _DeltaWriteRequest,
+        )
+        from bioetl.infrastructure.storage.silver_writer_validation_mixin import (
+            _PreparedSilverWritePayload,
+        )
+
+        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+        payload_records = [
+            {
+                "entity_id": "CHEMBL123",
+                "_run_id": "uuid-123",
+                "_run_type": "incremental",
+                "_source_batch_id": "batch-456",
+                "_ingestion_ts": "2025-01-15T12:00:00Z",
+            }
+        ]
+        payload = _PreparedSilverWritePayload(
+            records=payload_records,
+            validated_mode=SilverWriteMode.MERGE,
+            table_path="/tmp/silver/test/table",
+            arrow_data=pa.Table.from_pylist(payload_records),
+        )
+        writer._prepare_silver_write_payload = AsyncMock(  # type: ignore[method-assign]
+            return_value=payload
+        )
+        writer._dispatch_write_with_domain_errors = AsyncMock()  # type: ignore[method-assign]
+        expected_result = MagicMock()
+        writer._complete_silver_write_pipeline = AsyncMock(  # type: ignore[method-assign]
+            return_value=expected_result
+        )
+        span = MagicMock()
+        ctx = _SilverWriteExecutionContext(
+            table_name="test.table",
+            primary_keys=["entity_id"],
+            schema=payload.arrow_data.schema,
+            mode="merge",
+            partition_cols=["entity_id"],
+            on_schema_mismatch="ignore",
+            column_order=None,
+            bronze_refs=None,
+            key_nullability_rules=None,
+            started_at=datetime.now(UTC),
+            start_perf=123.0,
+            span=span,
+        )
+
+        result = await writer._execute_silver_write_pipeline(
+            records=payload_records,
+            ctx=ctx,
+        )
+
+        assert result is expected_result
+        writer._prepare_silver_write_payload.assert_awaited_once_with(
+            table_name="test.table",
+            records=payload_records,
+            primary_keys=["entity_id"],
+            schema=payload.arrow_data.schema,
+            mode="merge",
+            on_schema_mismatch="ignore",
+            column_order=None,
+            partition_cols=["entity_id"],
+            key_nullability_rules=None,
+        )
+        dispatch_kwargs = writer._dispatch_write_with_domain_errors.await_args.kwargs
+        assert dispatch_kwargs["table_name"] == "test.table"
+        request = dispatch_kwargs["request"]
+        assert isinstance(request, _DeltaWriteRequest)
+        assert request.validated_mode is SilverWriteMode.MERGE
+        assert request.table_path == payload.table_path
+        assert request.arrow_data.equals(payload.arrow_data)
+        assert request.primary_keys == ["entity_id"]
+        assert request.partition_cols == ["entity_id"]
+        writer._complete_silver_write_pipeline.assert_awaited_once_with(
+            ctx=ctx,
+            payload=payload,
+        )
+        span.set_attribute.assert_called_once_with("record_count", len(payload.records))
 
     @pytest.mark.asyncio
     async def test_write_silver_invalid_mode_raises(self, noop_logger, valid_records):

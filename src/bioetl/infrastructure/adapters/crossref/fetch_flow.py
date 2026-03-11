@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.common import ComposableFallbackDecorator
     from bioetl.infrastructure.adapters.crossref.batch import (
         DoiBatchProcessor,
-        SearchPaginator,
+        SearchPaginatorHelper,
     )
 
 __all__ = ["CrossRefFetchFlow"]
@@ -33,7 +33,7 @@ class CrossRefFetchFlow:
 
     logger: LoggerPort
     batch_fetcher: DoiBatchProcessor
-    search_paginator: SearchPaginator
+    search_paginator: SearchPaginatorHelper
     fallback_decorator: ComposableFallbackDecorator
     batch_size: int
     response_mapper: CrossRefResponseMapper

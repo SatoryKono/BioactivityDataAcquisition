@@ -7,7 +7,7 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.core.lock_manager import LockCoordinator
+from bioetl.application.core.lifecycle.lock_manager import LockCoordinator
 from bioetl.domain.locking import FencingToken
 from bioetl.domain.types import RunID, RunType
 

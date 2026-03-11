@@ -11,6 +11,11 @@ from bioetl.infrastructure.adapters.common.api_request_collector import (
 from bioetl.infrastructure.adapters.common.doi_helpers import (
     strip_doi_transport_prefix,
 )
+from bioetl.infrastructure.adapters.common.source_metadata_capability import (
+    clear_source_metadata_collector,
+    consume_source_metadata,
+    get_request_count,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import SourceMetadata
@@ -119,20 +124,20 @@ class OpenAlexAdapterHelpersMixin:
         Returns:
             SourceMetadata aggregated from all recorded API requests since last clear.
         """
-        metadata = self._request_collector.to_source_metadata(
-            source_type="api", url=_OPENALEX_BASE_URL, api_version=api_version
+        return consume_source_metadata(
+            collector=self._request_collector,
+            url=_OPENALEX_BASE_URL,
+            api_version=api_version,
         )
-        self._request_collector.clear()
-        return metadata
 
     def clear_request_collector(self) -> None:
         """Clear the collector without returning metadata."""
-        self._request_collector.clear()
+        clear_source_metadata_collector(collector=self._request_collector)
 
     @property
     def request_count(self) -> int:
         """Number of recorded API requests since last clear."""
-        return self._request_collector.request_count
+        return get_request_count(collector=self._request_collector)
 
 
 __all__ = ["OpenAlexAdapterHelpersMixin"]

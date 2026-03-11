@@ -33,6 +33,12 @@ from bioetl.infrastructure.adapters.common.fetch_retry_policy import (
 from bioetl.infrastructure.adapters.common.retry_reduction_policy import (
     run_retry_exhausted_recovery_policy,
 )
+from bioetl.infrastructure.adapters.common.source_metadata_capability import (
+    SourceMetadataCollectorProtocol,
+    clear_source_metadata_collector,
+    consume_source_metadata,
+    get_request_count,
+)
 from bioetl.infrastructure.adapters.common.title_matching import (
     normalize_title,
     titles_match,
@@ -48,6 +54,10 @@ __all__ = [
     "FallbackFetchOrchestratorService",
     "FallbackFetchRequest",
     "FallbackPolicyMixin",
+    "SourceMetadataCollectorProtocol",
+    "clear_source_metadata_collector",
+    "consume_source_metadata",
+    "get_request_count",
     "is_retry_exhausted_error",
     "normalize_title",
     "resolve_fallback_policy",

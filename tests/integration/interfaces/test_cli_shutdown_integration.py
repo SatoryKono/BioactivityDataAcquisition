@@ -12,8 +12,8 @@ from uuid import UUID
 
 import pytest
 
-from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
-from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError, ShutdownSignal
+from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.domain.locking import FencingToken
 from bioetl.interfaces.cli import cli
 
@@ -341,7 +341,7 @@ class TestShutdownWithCheckpointManager:
     @pytest.mark.asyncio
     async def test_shutdown_signal_in_lock_manager(self):
         """Test that LockCoordinator uses shutdown_signal correctly."""
-        from bioetl.application.core.lock_manager import LockCoordinator
+        from bioetl.application.core.lifecycle.lock_manager import LockCoordinator
 
         mock_lock = MagicMock()
         mock_lock.acquire = AsyncMock(return_value=_MOCK_TOKEN)
@@ -395,7 +395,7 @@ class TestShutdownWithCheckpointManager:
     @pytest.mark.asyncio
     async def test_heartbeat_failure_triggers_shutdown(self):
         """Test that heartbeat failure triggers shutdown signal."""
-        from bioetl.application.core.lock_manager import LockCoordinator
+        from bioetl.application.core.lifecycle.lock_manager import LockCoordinator
 
         mock_lock = MagicMock()
         mock_lock.acquire = AsyncMock(return_value=_MOCK_TOKEN)

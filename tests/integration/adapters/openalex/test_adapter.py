@@ -14,10 +14,10 @@ import pytest_asyncio
 
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import HealthStatus
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
-from bioetl.infrastructure.adapters.openalex.client import OpenAlexAdapter
+from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
+from bioetl.infrastructure.adapters.openalex import OpenAlexAdapter
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 # VCR cassette directory
@@ -41,8 +41,8 @@ def vcr_config():
 @pytest_asyncio.fixture
 async def http_client():
     """Create HTTP client for integration tests."""
-    rate_limiter = TokenBucket(rate=10.0, capacity=20, provider="openalex")
-    circuit_breaker = CircuitBreaker(
+    rate_limiter = TokenBucketRateLimiter(rate=10.0, capacity=20, provider="openalex")
+    circuit_breaker = CircuitBreakerGuard(
         provider="openalex",
         failure_threshold=5,
         recovery_timeout=300,

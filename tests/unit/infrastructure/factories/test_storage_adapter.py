@@ -9,7 +9,7 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.composition.factories.storage_adapter import StorageAdapter
+from bioetl.composition.factories.storage.adapter import StorageAdapter
 from bioetl.domain.ports import StoragePort
 from bioetl.domain.types import RunType
 
@@ -247,6 +247,28 @@ class TestStorageAdapterWriteGold:
 
         call_kwargs = mock_gold_writer.write_gold.call_args[1]
         assert call_kwargs["mode"] == "overwrite"
+
+    @pytest.mark.asyncio
+    async def test_write_gold_passes_scd_config(
+        self,
+        storage_adapter: StorageAdapter,
+        mock_gold_writer: MagicMock,
+    ) -> None:
+        """SCD config is forwarded unchanged to the gold writer."""
+        mock_schema = MagicMock()
+        scd_config = {"business_key": "entity_id", "valid_from_col": "valid_from"}
+
+        await storage_adapter.write_gold(
+            table_name="gold_table",
+            records=[{"entity_id": "1"}],
+            schema=mock_schema,
+            mode="scd2",
+            scd_config=scd_config,
+        )
+
+        call_kwargs = mock_gold_writer.write_gold.call_args[1]
+        assert call_kwargs["mode"] == "scd2"
+        assert call_kwargs["scd_config"] == scd_config
 
 
 @pytest.mark.unit

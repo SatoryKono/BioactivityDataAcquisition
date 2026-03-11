@@ -32,10 +32,10 @@ ALL_PORT_NAMES = _discover_all_port_classes()
 class TestAllPortsRuntimeCheckable:
     """Every port protocol MUST be @runtime_checkable (TYPE-004)."""
 
-    def test_port_count_is_67(self) -> None:
-        """Sanity check: we expect exactly 67 port protocols."""
-        assert len(ALL_PORT_NAMES) == 67, (
-            f"Expected 67 ports, found {len(ALL_PORT_NAMES)}. "
+    def test_port_count_is_68(self) -> None:
+        """Sanity check: we expect exactly 68 port protocols."""
+        assert len(ALL_PORT_NAMES) == 68, (
+            f"Expected 68 ports, found {len(ALL_PORT_NAMES)}. "
             f"If you added/removed a port, update this test. "
             f"Current ports: {ALL_PORT_NAMES}"
         )

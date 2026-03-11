@@ -17,11 +17,11 @@ import polars as pl
 import pytest
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointState
-from bioetl.application.composite.runner import (
+from bioetl.application.composite.runner_pkg import (
     CompositePipelineRunner,
     CompositeRuntimeConfig,
 )
-from bioetl.application.composite.runner_helpers import log_enrichment_summary
+from bioetl.application.composite.runner_pkg.runner_helpers import log_enrichment_summary
 from bioetl.domain.composite.result import (
     EnrichmentResult,
     EnrichmentStatus,

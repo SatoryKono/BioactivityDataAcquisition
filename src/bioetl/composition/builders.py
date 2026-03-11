@@ -12,7 +12,7 @@ from bioetl.domain.filtering import FilterColumn, InputFilterConfig
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import (
-        InputFilterConfig as YamlInputFilter,
+        InputFilterYamlConfig as YamlInputFilter,
     )
 
 

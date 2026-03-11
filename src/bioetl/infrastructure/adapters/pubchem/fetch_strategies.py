@@ -48,8 +48,8 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.common.api_request_collector import (
         APIRequestCollector,
     )
-    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
-    from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
+    from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
     from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMapper
 
 
@@ -136,12 +136,14 @@ class PubChemFetchStrategies(_PubChemSearchFetchMixin):
     def __init__(
         self,
         logger: LoggerPort,
-        rate_limiter: TokenBucket,
-        circuit_breaker: CircuitBreaker,
+        rate_limiter: TokenBucketRateLimiter,
+        circuit_breaker: CircuitBreakerGuard,
         mapper: PubChemEntityMapper,
         run_in_executor: Callable[..., Awaitable[object]],
         provider_name: str = "pubchem",
         request_collector: APIRequestCollector | None = None,
+        response_mapper: PubChemResponseMapper | None = None,
+        fetch_flow: PubChemFetchFlowService | None = None,
     ) -> None:
         """Initialize fetch strategies."""
         self._logger = logger
@@ -151,8 +153,8 @@ class PubChemFetchStrategies(_PubChemSearchFetchMixin):
         self._run_in_executor = run_in_executor
         self._provider_name = provider_name
         self._request_collector = request_collector
-        self._response_mapper = PubChemResponseMapper(mapper)
-        self._fetch_flow = PubChemFetchFlowService(
+        self._response_mapper = response_mapper or PubChemResponseMapper(mapper)
+        self._fetch_flow = fetch_flow or PubChemFetchFlowService(
             rate_limiter=rate_limiter,
             circuit_breaker=circuit_breaker,
             run_in_executor=run_in_executor,

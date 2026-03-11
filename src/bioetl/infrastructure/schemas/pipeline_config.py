@@ -19,7 +19,7 @@ from bioetl.infrastructure.schemas.pipeline_config_common_schemas import (
     GoldListContainsFilterConfig,
     GoldListLengthFilterConfig,
     GoldRangeFilterConfig,
-    InputFilterConfig,
+    InputFilterYamlConfig,
     MaintenanceConfig,
     SinkDQReportConfig,
     SinkLayerConfig,
@@ -56,7 +56,7 @@ __all__ = [
     "GoldListContainsFilterConfig",
     "GoldListLengthFilterConfig",
     "GoldRangeFilterConfig",
-    "InputFilterConfig",
+    "InputFilterYamlConfig",
     "MaintenanceConfig",
     "PipelineYamlConfig",
     "ProviderSourceConfig",
@@ -151,7 +151,7 @@ class PipelineYamlConfig(BaseModel):
     gold_filters: GoldFiltersConfig = Field(default_factory=GoldFiltersConfig)
     sink: dict[str, SinkLayerConfig] = Field(default_factory=dict)
     source: SourceConfig = Field(default_factory=SourceConfig)
-    input_filter: InputFilterConfig = Field(default_factory=InputFilterConfig)
+    input_filter: InputFilterYamlConfig = Field(default_factory=InputFilterYamlConfig)
     maintenance: MaintenanceConfig = Field(default_factory=MaintenanceConfig)
     transform: TransformConfig = Field(default_factory=TransformConfig)
     column_groups: list[ColumnGroupSchema] = Field(

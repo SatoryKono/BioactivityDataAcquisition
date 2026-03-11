@@ -10,7 +10,7 @@ import pytest
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.application.core.pipeline_services import PipelineService
-from bioetl.application.core.shutdown import ShutdownSignal
+from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
 from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunID, RunType

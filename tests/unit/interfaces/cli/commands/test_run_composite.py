@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
-from bioetl.application.composite.runner import CompositeRuntimeConfig
+from bioetl.application.composite.runner_pkg import CompositeRuntimeConfig
 from tests.unit.interfaces.cli.commands.conftest import mock_asyncio_run
 from bioetl.domain.composite.result import (
     CompositeResult,

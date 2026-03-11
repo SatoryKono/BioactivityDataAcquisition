@@ -1,4 +1,4 @@
-"""Anomaly detector with configurable strategy.
+"""AnomalyRecord detector with configurable strategy.
 
 Main entry point for anomaly detection functionality.
 """
@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING
 
 from bioetl.infrastructure.observability.anomaly.detectors.zscore import ZScoreDetector
 from bioetl.infrastructure.observability.anomaly.types import (
-    Anomaly,
+    AnomalyRecord,
     AnomalySeverity,
     AnomalyType,
 )
@@ -110,7 +110,7 @@ class AnomalyDetector:
 
     def detect(
         self, metric_name: str, current_value: float, timestamp: datetime | None = None
-    ) -> Anomaly | None:
+    ) -> AnomalyRecord | None:
         """Detect anomaly in current value.
 
         Args:
@@ -119,7 +119,7 @@ class AnomalyDetector:
             timestamp: Timestamp for the anomaly (should be created in application layer)
 
         Returns:
-            Anomaly if detected, None otherwise
+            AnomalyRecord if detected, None otherwise
         """
         if anomaly := self._check_thresholds(metric_name, current_value, timestamp):
             return anomaly
@@ -137,11 +137,11 @@ class AnomalyDetector:
 
     def _check_thresholds(
         self, metric_name: str, current_value: float, timestamp: datetime | None = None
-    ) -> Anomaly | None:
+    ) -> AnomalyRecord | None:
         """Check if the current value exceeds configured thresholds.
 
         Returns:
-            Anomaly if a configured threshold is exceeded, None otherwise.
+            AnomalyRecord if a configured threshold is exceeded, None otherwise.
         """
         if metric_name not in self._thresholds:
             return None
@@ -163,11 +163,11 @@ class AnomalyDetector:
         min_val: float,
         max_val: float,
         timestamp: datetime,
-    ) -> Anomaly:
+    ) -> AnomalyRecord:
         """Create anomaly for threshold breach.
 
         Returns:
-            Anomaly instance with THRESHOLD_EXCEEDED type and CRITICAL severity.
+            AnomalyRecord instance with THRESHOLD_EXCEEDED type and CRITICAL severity.
         """
         baseline_mean = (min_val + max_val) / 2
         baseline_stddev = (max_val - min_val) / 4
@@ -185,7 +185,7 @@ class AnomalyDetector:
                 f"Value {current_value:.2f} exceeds maximum threshold {max_val:.2f}"
             )
 
-        return Anomaly(
+        return AnomalyRecord(
             metric_name=metric_name,
             current_value=current_value,
             baseline_mean=baseline_mean,

@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING
 
 from bioetl.infrastructure.observability.anomaly.detectors.base import DetectorStrategy
 from bioetl.infrastructure.observability.anomaly.types import (
-    Anomaly,
+    AnomalyRecord,
     AnomalySeverity,
     AnomalyType,
 )
@@ -41,7 +41,7 @@ class ZScoreDetector(DetectorStrategy):
         baseline: Sequence[float],
         threshold: float = 2.0,
         timestamp: datetime | None = None,
-    ) -> Anomaly | None:
+    ) -> AnomalyRecord | None:
         """Detect anomaly using Z-score method.
 
         Args:
@@ -52,7 +52,7 @@ class ZScoreDetector(DetectorStrategy):
             timestamp: Timestamp.
 
         Returns:
-            The Anomaly | None result.
+            The AnomalyRecord | None result.
         """
         if len(baseline) < self.MIN_SAMPLES:
             return None
@@ -93,11 +93,11 @@ class ZScoreDetector(DetectorStrategy):
         stddev: float,
         z_score: float,
         timestamp: datetime,
-    ) -> Anomaly:
-        """Create Anomaly object from detection results.
+    ) -> AnomalyRecord:
+        """Create AnomalyRecord object from detection results.
 
         Returns:
-            Anomaly instance with SPIKE or DROP type based on deviation direction.
+            AnomalyRecord instance with SPIKE or DROP type based on deviation direction.
         """
         anomaly_type = AnomalyType.SPIKE if current_value > mean else AnomalyType.DROP
         severity = self.get_severity(z_score)
@@ -106,7 +106,7 @@ class ZScoreDetector(DetectorStrategy):
             f"{z_score:.2f} std deviations from baseline mean {mean:.2f}"
         )
 
-        return Anomaly(
+        return AnomalyRecord(
             metric_name=metric_name,
             current_value=current_value,
             baseline_mean=mean,

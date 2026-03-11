@@ -63,6 +63,10 @@ class GoldWriterValidationMixin:
 
         if scd_config is None:
             raise ValueError("scd_config required for SCD Type 2 mode")
+        if scd_config.scd_type != 2:
+            raise ValueError("scd_config.type must be 2 for SCD Type 2 mode")
+        if not scd_config.business_keys:
+            raise ValueError("scd_config.business_key required for SCD Type 2 mode")
         if ingestion_ts is None:
             raise ValueError(
                 "ingestion_ts required for SCD Type 2 mode "

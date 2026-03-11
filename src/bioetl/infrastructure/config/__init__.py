@@ -34,14 +34,29 @@ from bioetl.infrastructure.config.contract_policy_loader import (
 )
 from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
 from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
-from bioetl.infrastructure.config.pipeline_config_loader import PipelineConfigLoader
 from bioetl.infrastructure.config.publication_type_classification_loader import (
     PublicationTypeClassificationLoader,
 )
-from bioetl.infrastructure.config_load_api import (
-    load_pipeline_config,
-    load_source_config,
-)
+
+
+def __getattr__(name: str) -> type:
+    """Lazy imports to break circular dependency with config_loader."""
+    if name == "PipelineConfigLoader":
+        from bioetl.infrastructure.config.pipeline_config_loader import (
+            PipelineConfigLoader,
+        )
+
+        return PipelineConfigLoader
+    if name == "load_pipeline_config":
+        from bioetl.infrastructure.config_load_api import load_pipeline_config
+
+        return load_pipeline_config  # type: ignore[return-value]
+    if name == "load_source_config":
+        from bioetl.infrastructure.config_load_api import load_source_config
+
+        return load_source_config  # type: ignore[return-value]
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
 
 __all__ = [
     "BaseConfigLoader",

@@ -17,7 +17,7 @@ import pytest
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.application.core.record_processor import RecordProcessor
-from bioetl.composition.factories.services_factory import ServicesBuilder
+from bioetl.composition.factories.services.factory import ServicesBuilder
 from bioetl.domain.config import DQConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier

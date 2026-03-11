@@ -15,11 +15,11 @@ from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
-from bioetl.composition.factories._resilience_factory import (
+from bioetl.composition.factories.storage import StorageAdapter
+from bioetl.composition.factories.storage._resilience import (
     create_silver_atomic_retry_policy,
     create_silver_merge_resilience_policy,
 )
-from bioetl.composition.factories.storage import StorageAdapter
 from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
 from bioetl.domain.ports import NoOpMetrics, NoOpTracing
 from bioetl.domain.types import RunID, RunType

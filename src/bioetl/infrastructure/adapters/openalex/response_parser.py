@@ -3,12 +3,17 @@
 from __future__ import annotations
 
 from bioetl.domain.types import BronzeRecord, JsonDict
+from bioetl.infrastructure.adapters.openalex.response_mapping import (
+    OpenAlexResponseMapper,
+)
+
+_RESPONSE_MAPPER = OpenAlexResponseMapper()
 
 
 def parse_openalex_results(
     payload: JsonDict,  # Any: untyped OpenAlex API payload
 ) -> list[BronzeRecord]:
-    """Extract `results` list from OpenAlex payload.
+    """Compatibility shim for extracting `results` from OpenAlex payloads.
 
     Args:
         payload: Raw OpenAlex API JSON response payload.
@@ -16,16 +21,13 @@ def parse_openalex_results(
     Returns:
         List of BronzeRecord dictionaries from the results array, or empty list if absent.
     """
-    raw_results = payload.get("results")
-    if isinstance(raw_results, list):
-        return raw_results
-    return []
+    return _RESPONSE_MAPPER.extract_results(payload)
 
 
 def parse_openalex_next_cursor(
     payload: JsonDict,  # Any: untyped OpenAlex API payload
 ) -> str | None:
-    """Extract next cursor from OpenAlex payload meta.
+    """Compatibility shim for extracting next cursor from OpenAlex payload meta.
 
     Args:
         payload: Raw OpenAlex API JSON response payload.
@@ -33,13 +35,7 @@ def parse_openalex_next_cursor(
     Returns:
         Next cursor string if present in meta, None if last page or meta is absent.
     """
-    raw_meta = payload.get("meta")
-    if not isinstance(raw_meta, dict):
-        return None
-    raw_cursor = raw_meta.get("next_cursor")
-    if isinstance(raw_cursor, str):
-        return raw_cursor
-    return None
+    return _RESPONSE_MAPPER.extract_next_cursor(payload)
 
 
 __all__ = [

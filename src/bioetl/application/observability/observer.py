@@ -197,7 +197,7 @@ class _ObserverLifecycleEmissionMixin(_ObserverEventMixin):
 
         Args:
             metric_name: Name of the metric with anomaly.
-            severity: Anomaly severity ("warning", "critical").
+            severity: AnomalyRecord severity ("warning", "critical").
             anomaly_type: Type of anomaly detected.
             current_value: Current metric value.
             baseline_mean: Baseline mean for comparison.

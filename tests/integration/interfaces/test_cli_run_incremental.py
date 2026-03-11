@@ -11,7 +11,7 @@ from unittest.mock import patch
 import pytest
 from click.testing import CliRunner
 
-from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.interfaces.cli import cli
 
 

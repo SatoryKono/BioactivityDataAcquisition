@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from bioetl.infrastructure.adapters.common import ComposableFallbackDecorator
 from bioetl.infrastructure.adapters.crossref.batch import (
     DoiBatchProcessor,
-    SearchPaginator,
+    SearchPaginatorHelper,
 )
 from bioetl.infrastructure.adapters.crossref.fallback import TitleFallbackHandler
 from bioetl.infrastructure.adapters.crossref.fetch_flow import CrossRefFetchFlow
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.types import JsonDict
-    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
     from bioetl.infrastructure.adapters.common.api_request_collector import (
         APIRequestCollector,
     )
@@ -56,7 +56,7 @@ def _create_default_crossref_batch_fetcher(
     *,
     http: UnifiedHTTPClient,
     logger: LoggerPort,
-    metrics: AdapterMetrics,
+    metrics: AdapterMetricsRecorder,
     mailto: str,
     api_base: str,
     headers_fn: Callable[[], dict[str, str]],
@@ -91,12 +91,12 @@ def _create_default_crossref_search_paginator(
     *,
     http: UnifiedHTTPClient,
     logger: LoggerPort,
-    metrics: AdapterMetrics,
+    metrics: AdapterMetricsRecorder,
     mailto: str,
     api_base: str,
     headers_fn: Callable[[], dict[str, str]],
     request_collector: APIRequestCollector,
-) -> SearchPaginator:
+) -> SearchPaginatorHelper:
     """Create default search paginator for non-DI call sites.
 
     Args:
@@ -109,9 +109,9 @@ def _create_default_crossref_search_paginator(
         request_collector: Collector for API request metadata.
 
     Returns:
-        SearchPaginator instance configured with the given transport and logging components.
+        SearchPaginatorHelper instance configured with the given transport and logging components.
     """
-    return SearchPaginator(
+    return SearchPaginatorHelper(
         http=http,
         logger=logger,
         metrics=metrics,
@@ -141,7 +141,7 @@ def _create_default_crossref_fetch_flow(
     *,
     logger: LoggerPort,
     batch_fetcher: DoiBatchProcessor,
-    search_paginator: SearchPaginator,
+    search_paginator: SearchPaginatorHelper,
     fallback_decorator: ComposableFallbackDecorator,
     batch_size: int,
     response_mapper: CrossRefResponseMapper,

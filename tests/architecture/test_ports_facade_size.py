@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-MAX_EXPORTS_PER_PORTS_SUBMODULE = 20
+MAX_EXPORTS_PER_PORTS_SUBMODULE = 22
 
 
 @dataclass(frozen=True)

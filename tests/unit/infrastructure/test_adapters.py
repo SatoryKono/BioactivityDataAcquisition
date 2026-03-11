@@ -11,12 +11,12 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.domain.resilience import AdapterConfig
-from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+from bioetl.infrastructure.adapters.chembl import ChemblAdapter
+from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
-from bioetl.infrastructure.adapters.pubchem.client import PubChemAdapter
-from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
+from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
+from bioetl.infrastructure.adapters.pubchem import PubChemAdapter
+from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
 
 
 @pytest.mark.unit
@@ -30,8 +30,8 @@ class TestChemblAdapter:
 
     def test_adapter_creation(self, mock_logger):
         """Test ChEMBL adapter can be created."""
-        bucket = TokenBucket(rate=10.0, capacity=10)
-        cb = CircuitBreaker(provider="chembl")
+        bucket = TokenBucketRateLimiter(rate=10.0, capacity=10)
+        cb = CircuitBreakerGuard(provider="chembl")
         http_client = UnifiedHTTPClient(bucket, cb)
         adapter = ChemblAdapter(http_client=http_client, logger=mock_logger)
 
@@ -40,8 +40,8 @@ class TestChemblAdapter:
 
     def test_adapter_with_custom_batch_size(self, mock_logger):
         """Test ChEMBL adapter with custom page size via adapter_config."""
-        bucket = TokenBucket(rate=10.0, capacity=10)
-        cb = CircuitBreaker(provider="chembl")
+        bucket = TokenBucketRateLimiter(rate=10.0, capacity=10)
+        cb = CircuitBreakerGuard(provider="chembl")
         http_client = UnifiedHTTPClient(bucket, cb)
         adapter = ChemblAdapter(
             http_client=http_client,
@@ -84,12 +84,12 @@ class TestPubChemAdapter:
     @pytest.fixture
     def rate_limiter(self):
         """Create a rate limiter for testing."""
-        return TokenBucket(rate=5.0, capacity=10, provider="pubchem")
+        return TokenBucketRateLimiter(rate=5.0, capacity=10, provider="pubchem")
 
     @pytest.fixture
     def circuit_breaker(self):
         """Create a circuit breaker for testing."""
-        return CircuitBreaker(provider="pubchem", failure_threshold=5)
+        return CircuitBreakerGuard(provider="pubchem", failure_threshold=5)
 
     @pytest.fixture
     def thread_pool(self):
@@ -116,7 +116,7 @@ class TestPubChemAdapter:
 
     def test_adapter_with_custom_rate(self, mock_logger, circuit_breaker, thread_pool):
         """Test PubChem adapter with custom rate limit via injected rate limiter."""
-        custom_rate_limiter = TokenBucket(rate=10.0, capacity=20, provider="pubchem")
+        custom_rate_limiter = TokenBucketRateLimiter(rate=10.0, capacity=20, provider="pubchem")
         adapter = PubChemAdapter(
             logger=mock_logger,
             rate_limiter=custom_rate_limiter,
@@ -191,8 +191,8 @@ class TestUniProtAdapter:
     @pytest.fixture
     def http_client(self):
         """Create a UnifiedHTTPClient for testing."""
-        bucket = TokenBucket(rate=10.0, capacity=10)
-        cb = CircuitBreaker(provider="uniprot")
+        bucket = TokenBucketRateLimiter(rate=10.0, capacity=10)
+        cb = CircuitBreakerGuard(provider="uniprot")
         return UnifiedHTTPClient(bucket, cb)
 
     @pytest.fixture
@@ -232,7 +232,7 @@ class TestRateLimiter:
 
     def test_token_bucket_creation(self):
         """Test token bucket initialization."""
-        bucket = TokenBucket(rate=5.0, capacity=10)
+        bucket = TokenBucketRateLimiter(rate=5.0, capacity=10)
 
         assert bucket.rate == 5.0
         assert bucket.capacity == 10
@@ -240,7 +240,7 @@ class TestRateLimiter:
 
     def test_try_acquire_success(self):
         """Test successful token acquisition."""
-        bucket = TokenBucket(rate=100.0, capacity=10)
+        bucket = TokenBucketRateLimiter(rate=100.0, capacity=10)
 
         # Should succeed immediately when bucket is full
         assert bucket.try_acquire(tokens=1) is True
@@ -248,7 +248,7 @@ class TestRateLimiter:
 
     def test_try_acquire_failure(self):
         """Test failed token acquisition when insufficient tokens."""
-        bucket = TokenBucket(rate=1.0, capacity=5)
+        bucket = TokenBucketRateLimiter(rate=1.0, capacity=5)
 
         # Exhaust tokens
         assert bucket.try_acquire(tokens=5) is True
@@ -257,7 +257,7 @@ class TestRateLimiter:
 
     def test_get_available_tokens(self):
         """Test getting available token count."""
-        bucket = TokenBucket(rate=10.0, capacity=100)
+        bucket = TokenBucketRateLimiter(rate=10.0, capacity=100)
 
         available = bucket.available_tokens()
         assert available == 100  # Full capacity initially
@@ -269,7 +269,7 @@ class TestCircuitBreaker:
 
     def test_circuit_breaker_creation(self):
         """Test circuit breaker initialization."""
-        cb = CircuitBreaker(provider="test", failure_threshold=5)
+        cb = CircuitBreakerGuard(provider="test", failure_threshold=5)
 
         assert cb.provider == "test"
         assert cb.failure_threshold == 5
@@ -277,14 +277,14 @@ class TestCircuitBreaker:
 
     def test_initial_state_is_closed(self):
         """Test circuit breaker starts in CLOSED state."""
-        cb = CircuitBreaker(provider="test")
+        cb = CircuitBreakerGuard(provider="test")
 
         assert cb.get_state().value == "CLOSED"
         assert cb._failure_count == 0
 
     def test_failure_count_tracking(self):
         """Test failure count increments via private attribute."""
-        cb = CircuitBreaker(provider="test", failure_threshold=3)
+        cb = CircuitBreakerGuard(provider="test", failure_threshold=3)
 
         # Access private attribute for testing
         cb._failure_count = 1

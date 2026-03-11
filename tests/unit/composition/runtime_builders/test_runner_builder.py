@@ -433,7 +433,7 @@ def test_build_observability_bundle_uses_noop_when_disabled(
 
 
 @pytest.mark.unit
-@patch("bioetl.composition.runtime_builders.runner_builder.DataQualityMonitor")
+@patch("bioetl.composition.runtime_builders.runner_builder.DataQualityMonitorService")
 @patch("bioetl.composition.runtime_builders.runner_builder.PrometheusMetrics")
 @patch("bioetl.composition.runtime_builders.runner_builder.OpenTelemetryTracer")
 @patch("bioetl.composition.runtime_builders.runner_builder.UnifiedLogger")

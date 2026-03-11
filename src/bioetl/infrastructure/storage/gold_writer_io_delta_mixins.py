@@ -146,10 +146,9 @@ class _GoldWriterScd2MergeMixin(_GoldWriterExecutorArrowMixin):
         column_order: list[str] | None = None,
     ) -> None:
         """Write records using SCD Type 2 (history tracking)."""
-        business_key = scd_config["business_key"]
-        sort_keys = [business_key] if isinstance(business_key, str) else business_key
+        business_keys = scd_config.business_keys
 
-        records.sort(key=lambda record: tuple(record.get(key) for key in sort_keys))
+        records.sort(key=lambda record: tuple(record.get(key) for key in business_keys))
         _initialize_scd2_records(records, scd_config, ingestion_ts)
 
         module = _load_gold_writer_module()
@@ -160,7 +159,11 @@ class _GoldWriterScd2MergeMixin(_GoldWriterExecutorArrowMixin):
                     module=module,
                     table_path=table_path,
                     records=records,
-                    business_key=business_key,
+                    business_key=(
+                        scd_config.entity_key
+                        if scd_config.entity_key is not None
+                        else list(business_keys)
+                    ),
                     scd_config=scd_config,
                     ingestion_ts=ingestion_ts,
                     partition_cols=partition_cols,
@@ -187,8 +190,8 @@ class _GoldWriterScd2MergeMixin(_GoldWriterExecutorArrowMixin):
             [business_key] if isinstance(business_key, str) else business_key
         )
         new_data = self._to_arrow_table(records, column_order=column_order)
-        valid_to_col = scd_config.get("valid_to_col", "valid_to")
-        current_flag_col = scd_config.get("current_flag_col", "is_current")
+        valid_to_col = scd_config.valid_to_col
+        current_flag_col = scd_config.current_flag_col
         merge_condition = " AND ".join(
             f"target.{key} = source.{key}" for key in business_keys
         )

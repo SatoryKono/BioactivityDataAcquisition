@@ -35,7 +35,7 @@ from bioetl.application.composite.preflight_validator import (
     PreflightValidationError,
     PreflightValidationResult,
 )
-from bioetl.application.composite.runner import (
+from bioetl.application.composite.runner_pkg import (
     CompositePipelineRunner,
     CompositePipelineRunnerService,
 )

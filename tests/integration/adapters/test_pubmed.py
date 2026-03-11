@@ -19,10 +19,10 @@ from httpx import Response
 # which looks for tests/fixtures/vcr/pubmed/ based on test filename
 
 from bioetl.domain.types import HealthStatus
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
-from bioetl.infrastructure.adapters.pubmed.pubmed_client import (
+from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
+from bioetl.infrastructure.adapters.pubmed.client import (
     ENTREZ_API_BASE,
     PubMedAdapter,
 )
@@ -50,8 +50,8 @@ def pubmed_adapter(monkeypatch, mock_logger) -> PubMedAdapter:
     )
 
     http_client = UnifiedHTTPClient(
-        TokenBucket(rate=rate, capacity=rate * 2),
-        CircuitBreaker(provider="pubmed_test"),
+        TokenBucketRateLimiter(rate=rate, capacity=rate * 2),
+        CircuitBreakerGuard(provider="pubmed_test"),
     )
     return PubMedAdapter(
         http_client=http_client,

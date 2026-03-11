@@ -23,9 +23,9 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.domain.types import HealthStatus
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
-from bioetl.infrastructure.adapters.pubchem.client import PubChemAdapter
+from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
+from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
+from bioetl.infrastructure.adapters.pubchem import PubChemAdapter
 
 # VCR cassette directory for PubChem adapter tests
 CASSETTE_DIR = Path(__file__).parent.parent.parent / "fixtures" / "vcr" / "pubchem"
@@ -51,15 +51,15 @@ def mock_logger() -> MagicMock:
 
 
 @pytest.fixture
-def rate_limiter() -> TokenBucket:
+def rate_limiter() -> TokenBucketRateLimiter:
     """Create rate limiter for PubChem tests."""
-    return TokenBucket(rate=10.0, capacity=100)
+    return TokenBucketRateLimiter(rate=10.0, capacity=100)
 
 
 @pytest.fixture
-def circuit_breaker() -> CircuitBreaker:
+def circuit_breaker() -> CircuitBreakerGuard:
     """Create circuit breaker for PubChem tests."""
-    return CircuitBreaker(provider="pubchem_test")
+    return CircuitBreakerGuard(provider="pubchem_test")
 
 
 @pytest.fixture
@@ -73,8 +73,8 @@ def thread_pool() -> ThreadPoolExecutor:
 @pytest.fixture
 def pubchem_adapter(
     mock_logger: MagicMock,
-    rate_limiter: TokenBucket,
-    circuit_breaker: CircuitBreaker,
+    rate_limiter: TokenBucketRateLimiter,
+    circuit_breaker: CircuitBreakerGuard,
     thread_pool: ThreadPoolExecutor,
 ) -> PubChemAdapter:
     """Create PubChemAdapter instance for testing."""

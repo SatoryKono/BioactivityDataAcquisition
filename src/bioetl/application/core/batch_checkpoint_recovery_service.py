@@ -10,7 +10,9 @@ from typing import TYPE_CHECKING
 from bioetl.domain.exceptions import BioETLError
 
 if TYPE_CHECKING:
-    from bioetl.application.core.checkpoint_manager import CheckpointManagerService
+    from bioetl.application.core.lifecycle.checkpoint_manager import (
+        CheckpointManagerService,
+    )
     from bioetl.domain.ports import LoggerPort
 
 

@@ -82,6 +82,43 @@ class MergeIOMixin(MergeOutputWriterMixin):
     _calculate_field_coverage: Callable[[pl.DataFrame], dict[str, float]]
     _count_fully_enriched: Callable[[pl.DataFrame, Sequence[EnricherConfig]], int]
 
+    async def _read_optional_merge_input(
+        self,
+        *,
+        pipeline: str,
+        table: str,
+        role: str,
+    ) -> pl.DataFrame | None:
+        """Read optional merge input and degrade to ``None`` on read failures."""
+        self._logger.info(
+            "reading_merge_input_table",
+            role=role,
+            **{role: pipeline},
+            table=table,
+        )
+
+        try:
+            return await self._read_silver_table(table)
+        except _MERGE_READ_ERRORS as error:
+            self._logger.warning(
+                "failed_to_read_merge_input_table",
+                role=role,
+                **{role: pipeline},
+                error=str(error),
+                error_type=type(error).__name__,
+            )
+            return None
+        except BioETLError as error:
+            self._logger.warning(
+                "failed_to_read_merge_input_table",
+                role=role,
+                **{role: pipeline},
+                error=str(error),
+                error_type=type(error).__name__,
+                reason_code="unexpected_bioetl_error",
+            )
+            return None
+
     async def _prepare_seed_dataframe(
         self,
         seed_table: str,
@@ -138,30 +175,12 @@ class MergeIOMixin(MergeOutputWriterMixin):
             enricher_table = enricher.silver_table or self._infer_silver_table(
                 enricher.pipeline
             )
-            self._logger.info(
-                "Reading enricher table",
-                enricher=enricher.pipeline,
+            enricher_df = await self._read_optional_merge_input(
+                pipeline=enricher.pipeline,
                 table=enricher_table,
+                role="enricher",
             )
-
-            try:
-                enricher_df = await self._read_silver_table(enricher_table)
-            except _MERGE_READ_ERRORS as error:
-                self._logger.warning(
-                    "Failed to read enricher table",
-                    enricher=enricher.pipeline,
-                    error=str(error),
-                    error_type=type(error).__name__,
-                )
-                continue
-            except BioETLError as error:
-                self._logger.warning(
-                    "Failed to read enricher table",
-                    enricher=enricher.pipeline,
-                    error=str(error),
-                    error_type=type(error).__name__,
-                    reason_code="unexpected_bioetl_error",
-                )
+            if enricher_df is None:
                 continue
 
             enricher_dfs[enricher.pipeline] = enricher_df
@@ -186,30 +205,12 @@ class MergeIOMixin(MergeOutputWriterMixin):
             if dep_result is None or not dep_result.is_success or not dep.silver_table:
                 continue
 
-            self._logger.info(
-                "Reading dependency table",
-                dependency=dep.pipeline,
+            dep_df = await self._read_optional_merge_input(
+                pipeline=dep.pipeline,
                 table=dep.silver_table,
+                role="dependency",
             )
-
-            try:
-                dep_df = await self._read_silver_table(dep.silver_table)
-            except _MERGE_READ_ERRORS as error:
-                self._logger.warning(
-                    "Failed to read dependency table",
-                    dependency=dep.pipeline,
-                    error=str(error),
-                    error_type=type(error).__name__,
-                )
-                continue
-            except BioETLError as error:
-                self._logger.warning(
-                    "Failed to read dependency table",
-                    dependency=dep.pipeline,
-                    error=str(error),
-                    error_type=type(error).__name__,
-                    reason_code="unexpected_bioetl_error",
-                )
+            if dep_df is None:
                 continue
 
             dependency_dfs[dep.pipeline] = dep_df

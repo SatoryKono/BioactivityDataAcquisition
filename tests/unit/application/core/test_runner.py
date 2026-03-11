@@ -7,13 +7,13 @@ from uuid import UUID, uuid4
 
 import pytest
 
-from bioetl.application.core.checkpoint_manager import CheckpointManager
-from bioetl.application.core.lock_manager import LockCoordinator
+from bioetl.application.core.lifecycle.checkpoint_manager import CheckpointManager
+from bioetl.application.core.lifecycle.lock_manager import LockCoordinator
 from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.application.core.postrun.service import PostrunService
 from bioetl.application.core.preflight.service import PreflightService
 from bioetl.application.core.runner import PipelineRunner
-from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
+from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.application.observability.observer import PipelineObserver
 from bioetl.application.services.medallion_lifecycle import (
     MedallionLifecycleService,
@@ -225,7 +225,7 @@ def mock_observer(mock_services, mock_logger):
     This mock properly handles context manager protocol and calls
     metrics/logger as the real observer would.
     """
-    from bioetl.application.core.shutdown import PipelineShutdownError
+    from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError
 
     observer = MagicMock(spec=PipelineObserver)
 

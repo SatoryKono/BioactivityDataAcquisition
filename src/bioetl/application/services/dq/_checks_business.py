@@ -8,11 +8,11 @@ from __future__ import annotations
 __all__ = ["check_business_rules"]
 
 
-from typing import Any
+from collections.abc import Mapping, Sequence
 
 import polars as pl
 
-from bioetl.domain.types import JsonDict
+from bioetl.domain.types import GoldBusinessRuleSpec
 from bioetl.domain.value_objects.dq_report import (
     BusinessRuleResult,
     BusinessRulesResult,
@@ -36,23 +36,23 @@ def _check_not_null_rule(df: pl.DataFrame, column: str) -> tuple[bool, int | Non
 def _check_range_rule(
     df: pl.DataFrame,
     column: str,
-    min_val: Any | None,  # Any: numeric boundary (int/float depending on column type)
-    max_val: Any | None,  # Any: numeric boundary (int/float depending on column type)
+    min_val: object | None,
+    max_val: object | None,
 ) -> tuple[bool, int]:
     """Check range rule for a column."""
     violations = 0
     col_data = df[column].drop_nulls()
     if min_val is not None:
-        violations += (col_data < min_val).sum()
+        violations += int((col_data < min_val).sum())
     if max_val is not None:
-        violations += (col_data > max_val).sum()
+        violations += int((col_data > max_val).sum())
     return violations == 0, violations
 
 
 def _check_in_list_rule(
     df: pl.DataFrame,
     column: str,
-    allowed: list[Any],  # Any: heterogeneous allowed ...
+    allowed: tuple[object, ...],
 ) -> tuple[bool, int | None]:
     """Check in_list rule for a column."""
     if not allowed:
@@ -73,11 +73,11 @@ def _check_regex_rule(
 
 def _evaluate_single_rule(
     df: pl.DataFrame,
-    rule: JsonDict,  # Any: heterogeneous DQ rule config values
+    rule: GoldBusinessRuleSpec,
 ) -> tuple[bool, int | None]:
     """Evaluate a single business rule."""
-    column = rule.get("column")
-    condition = rule.get("condition")
+    column = rule.column
+    condition = rule.condition
 
     if not column or column not in df.columns:
         return True, 0
@@ -85,17 +85,17 @@ def _evaluate_single_rule(
     if condition == "not_null":
         return _check_not_null_rule(df, column)
     if condition == "range":
-        return _check_range_rule(df, column, rule.get("min"), rule.get("max"))
+        return _check_range_rule(df, column, rule.minimum, rule.maximum)
     if condition == "in_list":
-        return _check_in_list_rule(df, column, rule.get("values", []))
+        return _check_in_list_rule(df, column, rule.allowed_values)
     if condition == "regex":
-        return _check_regex_rule(df, column, rule.get("pattern", ""))
+        return _check_regex_rule(df, column, rule.pattern or "")
     return True, 0
 
 
 def check_business_rules(
     df: pl.DataFrame,
-    rules: list[JsonDict],  # Any: heterogeneous DQ rule ...
+    rules: Sequence[GoldBusinessRuleSpec | Mapping[str, object]],
 ) -> BusinessRulesResult:
     """Validate business rules.
 
@@ -119,8 +119,13 @@ def check_business_rules(
     rules_passed = 0
     rules_failed = 0
 
-    for rule in rules:
-        column = rule.get("column")
+    for raw_rule in rules:
+        rule = (
+            raw_rule
+            if isinstance(raw_rule, GoldBusinessRuleSpec)
+            else GoldBusinessRuleSpec.from_mapping(raw_rule)
+        )
+        column = rule.column
         try:
             passed, violations = _evaluate_single_rule(df, rule)
         except _BUSINESS_RULE_EVALUATION_ERRORS:
@@ -135,16 +140,16 @@ def check_business_rules(
 
         results.append(
             BusinessRuleResult(
-                rule_id=rule.get("rule_id", ""),
-                name=rule.get("name", ""),
-                description=rule.get("description", ""),
+                rule_id=rule.rule_id,
+                name=rule.name,
+                description=rule.description,
                 passed=passed,
                 violations=violations,
-                config_path=rule.get("config_path"),
-                layer=rule.get("layer", "gold"),
-                field=rule.get("field", column),
-                severity=rule.get("severity", "error"),
-                decision=rule.get("decision", "pass" if passed else "fail"),
+                config_path=rule.config_path,
+                layer=rule.layer,
+                field=rule.field or column,
+                severity=rule.severity,
+                decision=rule.decision or ("pass" if passed else "fail"),
             )
         )
 

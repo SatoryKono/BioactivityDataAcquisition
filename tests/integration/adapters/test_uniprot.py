@@ -57,7 +57,7 @@ class TestUniProtAdapterIntegration:
     @pytest.fixture
     def uniprot_adapter(self, uniprot_http_client: Any, mock_logger: MagicMock) -> Any:
         """Create UniProtAdapter instance."""
-        from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
+        from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
 
         return UniProtAdapter(http_client=uniprot_http_client, logger=mock_logger)
 
@@ -75,7 +75,7 @@ class TestUniProtAdapterIntegration:
         Record with: pytest --vcr-record=new_episodes -k test_health_check
         """
         from bioetl.domain.types import HealthStatus
-        from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
+        from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
 
         async with uniprot_http_client:
             adapter = UniProtAdapter(
@@ -99,7 +99,7 @@ class TestUniProtAdapterIntegration:
         This test requires a VCR cassette.
         Record with: pytest --vcr-record=new_episodes -k test_fetch_proteins
         """
-        from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
+        from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
 
         async with uniprot_http_client:
             adapter = UniProtAdapter(

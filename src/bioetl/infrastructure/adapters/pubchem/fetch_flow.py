@@ -9,8 +9,8 @@ from typing import TYPE_CHECKING, Protocol
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable
 
-    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
-    from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
+    from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 
 __all__ = ["PubChemFetchFlowService"]
 
@@ -29,8 +29,8 @@ class _RequestRecorder(Protocol):
 class PubChemFetchFlowService:
     """Execute PubChem API fetches with timing, limiter, breaker and telemetry."""
 
-    rate_limiter: TokenBucket
-    circuit_breaker: CircuitBreaker
+    rate_limiter: TokenBucketRateLimiter
+    circuit_breaker: CircuitBreakerGuard
     run_in_executor: Callable[..., Awaitable[object]]
     record_request: _RequestRecorder
     normalize_results: Callable[[object], list[object]]

@@ -384,7 +384,7 @@ class TestAdapterPortCompliance:
                 "OpenAlexAdapter",
             ),
             (
-                "bioetl.infrastructure.adapters.pubmed.pubmed_client",
+                "bioetl.infrastructure.adapters.pubmed.client",
                 "PubMedAdapter",
             ),
             (
@@ -392,7 +392,7 @@ class TestAdapterPortCompliance:
                 "PubChemAdapter",
             ),
             (
-                "bioetl.infrastructure.adapters.semanticscholar.adapter",
+                "bioetl.infrastructure.adapters.semanticscholar.client",
                 "SemanticScholarAdapter",
             ),
             (

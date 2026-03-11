@@ -15,7 +15,7 @@ class TestCreateHttpDataSource:
         "bioetl.composition.providers._config_helpers._wrap_with_filter",
     )
     @patch(
-        "bioetl.composition.factories.adapter_helpers_factory.AdapterHelpersFactory",
+        "bioetl.composition.factories.datasource.adapter_helpers.AdapterHelpersFactory",
     )
     @patch(
         "bioetl.composition.providers.factory_loader.get_http_client_factory",

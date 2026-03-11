@@ -27,7 +27,7 @@ def vcr_config() -> dict[str, Any]:
     }
 
 
-from bioetl.composition.factories.pipeline_factories import chembl_activity_factory
+from bioetl.composition.factories.pipeline.registry import chembl_activity_factory
 from tests.integration.pipelines.base import IntegrationPipelineTestCase
 
 logger = structlog.get_logger()

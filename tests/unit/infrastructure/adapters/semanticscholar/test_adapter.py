@@ -8,9 +8,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.domain.types import HealthStatus
-from bioetl.infrastructure.adapters.semanticscholar.adapter import (
-    SemanticScholarAdapter,
-)
+from bioetl.infrastructure.adapters.semanticscholar import SemanticScholarAdapter
 
 
 @pytest.fixture
@@ -301,6 +299,53 @@ class TestHealthCheck:
         status = await adapter.health_check()
 
         assert status == HealthStatus.UNHEALTHY
+
+    @pytest.mark.asyncio
+    async def test_health_check_degraded_on_slow_response(
+        self,
+        adapter: SemanticScholarAdapter,
+        mock_http_client: MagicMock,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Slow health probes should degrade the provider status."""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_http_client.get_once.return_value = mock_response
+
+        import bioetl.infrastructure.adapters.semanticscholar.health_metadata_mixin as health_module
+
+        call_count = [0]
+
+        def _mock_monotonic() -> float:
+            call_count[0] += 1
+            return 0.0 if call_count[0] == 1 else 6.0
+
+        monkeypatch.setattr(health_module.time, "monotonic", _mock_monotonic)
+
+        status = await adapter._probe_health()
+
+        assert status == HealthStatus.DEGRADED
+        mock_http_client.get_once.assert_awaited_once()
+
+    def test_get_source_metadata_returns_collector_state_and_clears_requests(
+        self,
+        adapter: SemanticScholarAdapter,
+    ) -> None:
+        """Metadata snapshot should reflect collector state and consume it."""
+        adapter._request_collector.record_request(
+            url="https://api.semanticscholar.org/graph/v1/paper/search?query=test",
+            duration_ms=15.0,
+            status_code=200,
+        )
+
+        assert adapter.request_count == 1
+
+        metadata = adapter.get_source_metadata()
+
+        assert metadata.url == "https://api.semanticscholar.org/graph/v1"
+        assert metadata.api_version == "v1"
+        assert metadata.total_requests == 1
+        assert adapter.request_count == 0
 
 
 class TestFetchMultiFiltered:

@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.domain.types import CircuitBreakerState, HealthStatus
-from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
+from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
 
 
 @pytest.fixture

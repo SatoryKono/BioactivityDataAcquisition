@@ -12,7 +12,7 @@ from pydantic import ValidationError
 from bioetl.infrastructure.schemas.base_schemas import (
     BaseApiConfig,
     BaseCircuitBreakerConfig,
-    BaseClientConfig,
+    HttpClientConfig,
     BaseCsvExportConfig,
     BaseDQConfig,
     BaseDQThresholds,
@@ -180,40 +180,40 @@ class TestBaseRateLimitConfig:
 
 
 @pytest.mark.unit
-class TestBaseClientConfig:
-    """Test BaseClientConfig configuration."""
+class TestHttpClientConfig:
+    """Test HttpClientConfig configuration."""
 
     def test_default_values(self) -> None:
         """Test default client config values."""
-        config = BaseClientConfig()
+        config = HttpClientConfig()
         assert config.timeout_sec == 30.0
         assert config.max_retries == 3
 
     def test_custom_values(self) -> None:
         """Test custom client config values."""
-        config = BaseClientConfig(timeout_sec=60.0, max_retries=5)
+        config = HttpClientConfig(timeout_sec=60.0, max_retries=5)
         assert config.timeout_sec == 60.0
         assert config.max_retries == 5
 
     def test_timeout_minimum(self) -> None:
         """Test timeout_sec has minimum of 1.0."""
         with pytest.raises(ValidationError):
-            BaseClientConfig(timeout_sec=0.5)
+            HttpClientConfig(timeout_sec=0.5)
 
     def test_timeout_maximum(self) -> None:
         """Test timeout_sec has maximum of 300.0."""
         with pytest.raises(ValidationError):
-            BaseClientConfig(timeout_sec=301.0)
+            HttpClientConfig(timeout_sec=301.0)
 
     def test_max_retries_minimum(self) -> None:
         """Test max_retries has minimum of 0."""
-        config = BaseClientConfig(max_retries=0)
+        config = HttpClientConfig(max_retries=0)
         assert config.max_retries == 0
 
     def test_max_retries_maximum(self) -> None:
         """Test max_retries has maximum of 10."""
         with pytest.raises(ValidationError):
-            BaseClientConfig(max_retries=11)
+            HttpClientConfig(max_retries=11)
 
 
 @pytest.mark.unit
@@ -528,14 +528,14 @@ class TestInheritanceChain:
     def test_source_config_inherits_base(self) -> None:
         """Test that source_config classes inherit from base classes."""
         from bioetl.infrastructure.schemas.source_config import (
-            CircuitBreakerYamlConfig,
             ClientYamlConfig,
             RateLimitYamlConfig,
+            SourceCircuitBreakerYamlConfig,
         )
 
         assert issubclass(RateLimitYamlConfig, BaseRateLimitConfig)
-        assert issubclass(CircuitBreakerYamlConfig, BaseCircuitBreakerConfig)
-        assert issubclass(ClientYamlConfig, BaseClientConfig)
+        assert issubclass(SourceCircuitBreakerYamlConfig, BaseCircuitBreakerConfig)
+        assert issubclass(ClientYamlConfig, HttpClientConfig)
 
     def test_filter_config_inherits_base(self) -> None:
         """Test that filter_config classes inherit from base classes."""

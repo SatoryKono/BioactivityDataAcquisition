@@ -19,7 +19,7 @@ from bioetl.composition.bootstrap.runtime.classification_init import (
 from bioetl.composition.bootstrap.runtime.observability import (
     bootstrap_observability_bundle,
 )
-from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.composition.providers.registration import register_all_providers
 from bioetl.composition.registry import PipelineRegistry, get_default_registry
 from bioetl.composition.runtime_builders.runner_builder import build_pipeline_runner

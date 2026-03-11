@@ -16,7 +16,10 @@ from bioetl.infrastructure.adapters.common import FallbackFetchOrchestratorServi
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import ErrorHandlerPort, LoggerPort, MetricsPort
-    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
+    from bioetl.infrastructure.adapters.common.api_request_collector import (
+        APIRequestCollector,
+    )
 
 
 def create_default_error_handler(
@@ -36,7 +39,7 @@ def create_default_error_handler(
 
 def create_default_fallback_service(
     *,
-    adapter_metrics: AdapterMetrics,
+    adapter_metrics: AdapterMetricsRecorder,
 ) -> FallbackFetchOrchestratorService:
     """Create fallback orchestrator service for non-DI call sites.
 
@@ -44,3 +47,23 @@ def create_default_fallback_service(
         FallbackFetchOrchestratorService instance wired to the given adapter metrics.
     """
     return FallbackFetchOrchestratorService(adapter_metrics)
+
+
+def create_default_adapter_metrics(
+    *,
+    metrics: MetricsPort,
+    provider: str,
+) -> AdapterMetricsRecorder:
+    """Create default adapter metrics helper for non-DI call sites."""
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
+
+    return AdapterMetricsRecorder(metrics, provider)
+
+
+def create_default_request_collector() -> APIRequestCollector:
+    """Create default request collector for non-DI call sites."""
+    from bioetl.infrastructure.adapters.common.api_request_collector import (
+        APIRequestCollector,
+    )
+
+    return APIRequestCollector()

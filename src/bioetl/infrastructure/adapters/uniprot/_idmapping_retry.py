@@ -12,7 +12,7 @@ from bioetl.infrastructure.adapters.uniprot._idmapping_errors import (
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
-    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 
@@ -22,7 +22,7 @@ class IDMappingRetryDependencies(Protocol):
 
     logger: LoggerPort
     http_client: UnifiedHTTPClient
-    _adapter_metrics: AdapterMetrics
+    _adapter_metrics: AdapterMetricsRecorder
     POLLING_INTERVAL: float
     MAX_POLL_ATTEMPTS: int
     base_url: str
@@ -33,7 +33,7 @@ class IDMappingRetryMixin:
 
     logger: LoggerPort
     http_client: UnifiedHTTPClient
-    _adapter_metrics: AdapterMetrics
+    _adapter_metrics: AdapterMetricsRecorder
     POLLING_INTERVAL: float
     MAX_POLL_ATTEMPTS: int
     base_url: str

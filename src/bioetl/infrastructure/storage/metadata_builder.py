@@ -8,11 +8,12 @@ Implements RULES.md §2.3 and ADR-026 for metadata creation.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from bioetl.domain.services.schema_metadata_extractor import extract_schema_metadata
-from bioetl.domain.types import JsonDict
+from bioetl.domain.types import JsonDict, ScdConfig
 from bioetl.domain.version import get_version as _get_bioetl_version
 from bioetl.infrastructure.storage.metadata_builder_base import (
     _get_git_commit_cached,
@@ -186,7 +187,7 @@ class GoldMetadataBuilder(_MetadataBuilderBase):
         self,
         *,
         mode: GoldWriteMode,
-        scd_config: JsonDict | None,  # Any: dynamic layer config
+        scd_config: ScdConfig | None,
     ) -> SCDMetadata | None:
         """Build SCD metadata only for SCD2 mode with config present.
 
@@ -196,13 +197,19 @@ class GoldMetadataBuilder(_MetadataBuilderBase):
         from bioetl.domain.medallion import GoldWriteMode
         from bioetl.domain.models.metadata import SCDMetadata
 
-        if mode != GoldWriteMode.SCD2 or not scd_config:
+        normalized_scd_config = (
+            ScdConfig.from_mapping(scd_config)
+            if isinstance(scd_config, Mapping)
+            else scd_config
+        )
+
+        if mode != GoldWriteMode.SCD2 or not normalized_scd_config:
             return None
         return SCDMetadata(
             enabled=True,
-            effective_date_column=scd_config.get("valid_from_col", "_valid_from"),
-            end_date_column=scd_config.get("valid_to_col", "_valid_to"),
-            current_flag_column=scd_config.get("current_flag_col", "_is_current"),
+            effective_date_column=normalized_scd_config.valid_from_col,
+            end_date_column=normalized_scd_config.valid_to_col,
+            current_flag_column=normalized_scd_config.current_flag_col,
         )
 
     def build_fallback_metadata(
@@ -210,7 +217,7 @@ class GoldMetadataBuilder(_MetadataBuilderBase):
         table_name: str,
         records: list[JsonDict],  # Any: heterogeneous metadata values
         mode: GoldWriteMode,
-        scd_config: JsonDict | None = None,  # Any: dynamic layer config
+        scd_config: ScdConfig | None = None,
         ingestion_ts: datetime | None = None,
         run_id: object | None = None,
         gold_schema: object | None = None,

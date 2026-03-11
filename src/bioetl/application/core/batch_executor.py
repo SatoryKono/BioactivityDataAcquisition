@@ -12,8 +12,13 @@ from bioetl.application.core.batch_checkpoint_recovery_service import (
     BatchCheckpointRecoveryService,
 )
 from bioetl.application.core.batch_executor_dq_mixin import _BatchExecutorDQMixin
+from bioetl.application.core.batch_executor_helpers import (
+    BatchExecutionStateOutcome,
+    build_batch_execution_state_update,
+    build_run_statistics,
+)
 from bioetl.application.core.batch_progress_service import BatchProgressService
-from bioetl.application.core.shutdown import ShutdownSignal
+from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 from bioetl.domain.types import BronzeRecord, GoldRecord
@@ -27,8 +32,10 @@ if TYPE_CHECKING:
     from bioetl.application.core.batch_tracing import BatchTracingManagerService
     from bioetl.application.core.batch_transformer import BatchTransformer
     from bioetl.application.core.batch_writer import BatchWriter
-    from bioetl.application.core.checkpoint_manager import CheckpointManagerService
     from bioetl.application.core.config import RecordProcessorConfig
+    from bioetl.application.core.lifecycle.checkpoint_manager import (
+        CheckpointManagerService,
+    )
     from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import LoggerPort
@@ -302,14 +309,12 @@ class BatchExecutor(_BatchExecutorDQMixin):
             start_index=start_index,
             query_string=self._query_string,
         )
-
-        self.records_bronze += len(records)
-        self.records_silver += len(output.silver_records)
-        self.records_gold += len(output.gold_records)
-        self.records_quarantined += output.quarantined_count
-        self.records_filtered_out += output.filtered_out_count
-
-        self._source_batch_ids.append(str(output.batch_id))
+        self._apply_batch_state_update(
+            build_batch_execution_state_update(
+                input_record_count=len(records),
+                output=output,
+            )
+        )
 
         if self._should_collect_dq_data():
             self._collect_dq_data(
@@ -320,6 +325,17 @@ class BatchExecutor(_BatchExecutorDQMixin):
                 gold_records=output.gold_records,
             )
 
+    def _apply_batch_state_update(
+        self, state_update: BatchExecutionStateOutcome
+    ) -> None:
+        """Apply one batch of counter deltas to executor-level state."""
+        self.records_bronze += state_update.bronze_count
+        self.records_silver += state_update.silver_count
+        self.records_gold += state_update.gold_count
+        self.records_quarantined += state_update.quarantined_count
+        self.records_filtered_out += state_update.filtered_out_count
+        self._source_batch_ids.append(state_update.source_batch_id)
+
     def get_run_statistics(self) -> dict[str, int | list[str]]:
         """Get aggregated statistics for the entire pipeline run.
 
@@ -327,12 +343,12 @@ class BatchExecutor(_BatchExecutorDQMixin):
             Dictionary with fetched, bronze, silver, gold, quarantined, filtered_out
             record counts and the deduplicated list of source batch IDs.
         """
-        return {
-            "records_fetched": self.records_fetched,
-            "records_bronze": self.records_bronze,
-            "records_silver": self.records_silver,
-            "records_gold": self.records_gold,
-            "records_quarantined": self.records_quarantined,
-            "records_filtered_out": self.records_filtered_out,
-            "source_batch_ids": list(set(self._source_batch_ids)),
-        }
+        return build_run_statistics(
+            records_fetched=self.records_fetched,
+            records_bronze=self.records_bronze,
+            records_silver=self.records_silver,
+            records_gold=self.records_gold,
+            records_quarantined=self.records_quarantined,
+            records_filtered_out=self.records_filtered_out,
+            source_batch_ids=self._source_batch_ids,
+        )

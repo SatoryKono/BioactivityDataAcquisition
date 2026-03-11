@@ -1,3 +1,6 @@
+# Composite DQ stub: relaxed thresholds (0.10/0.30 vs default 0.05/0.20)
+# for multi-source composite pipelines where data quality varies by provider.
+# Keep even if empty — DQConfigLoader reads these at runtime.
 version: "1.0.0"
 provider: composite
 entity: assay

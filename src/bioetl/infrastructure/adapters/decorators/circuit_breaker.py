@@ -12,12 +12,12 @@ This decorator wraps any DataSourcePort implementation and adds:
 
 Usage:
     from bioetl.infrastructure.adapters.decorators import CircuitBreakerDataSourceDecorator
-    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 
 __all__ = ["CircuitBreakerDataSourceDecorator"]
 
 
-    circuit_breaker = CircuitBreaker(provider="chembl", failure_threshold=5)
+    circuit_breaker = CircuitBreakerGuard(provider="chembl", failure_threshold=5)
     decorated = CircuitBreakerDataSourceDecorator(
         data_source=base_adapter,
         circuit_breaker=circuit_breaker,
@@ -70,7 +70,7 @@ class CircuitBreakerDataSourceDecorator:
         metrics: Optional metrics for circuit breaker tracking.
 
     Example:
-        >>> cb = CircuitBreaker(provider="chembl", failure_threshold=5)
+        >>> cb = CircuitBreakerGuard(provider="chembl", failure_threshold=5)
         >>> decorated = CircuitBreakerDataSourceDecorator(
         ...     data_source=chembl_adapter,
         ...     circuit_breaker=cb,

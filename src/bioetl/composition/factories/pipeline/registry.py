@@ -1,0 +1,230 @@
+# src/bioetl/composition/factories/pipeline_factories.py
+"""Consolidated pipeline factory definitions.
+
+This module creates all pipeline factories using the GenericPipelineFactory
+pattern with GenericPipeline as the unified pipeline class.
+
+Pipeline configurations are defined in pipeline_configs.py.
+Contract validation logic is in pipeline_contract_validator.py.
+
+Thread-safety: Registration uses a module-level lock to prevent TOCTOU race conditions.
+
+Instance-level registry support (2025-12):
+- register_all_pipelines() accepts optional registry parameter
+- Default behavior uses global registry for backward compatibility
+- Tests can use isolated registries for parallel execution
+
+Usage:
+    >>> from bioetl.composition.factories.pipeline.registry import register_all_pipelines
+    >>> register_all_pipelines()  # Call once at application startup
+
+    # For test isolation:
+    >>> from bioetl.composition.registry import create_registry
+    >>> registry = create_registry()
+    >>> register_all_pipelines(registry=registry)
+"""
+
+from __future__ import annotations
+
+import threading
+from typing import cast
+
+from bioetl.application.pipelines.generic import GenericPipeline
+from bioetl.composition.factories.pipeline.configs import (
+    PIPELINE_CONFIGS,
+    PipelineFactoryConfig,
+)
+from bioetl.composition.factories.pipeline.contract_validator import create_factory
+from bioetl.composition.factories.pipeline.facade import GenericPipelineFactory
+from bioetl.composition.registry import PipelineRegistry, get_default_registry
+from bioetl.domain.ports import PipelineFactoryPort
+
+# =============================================================================
+# Factory Instances (created from PIPELINE_CONFIGS)
+# =============================================================================
+
+# Create all factories using loop over configurations
+_factories: dict[str, GenericPipelineFactory[GenericPipeline]] = {
+    config.pipeline_name: create_factory(config) for config in PIPELINE_CONFIGS
+}
+
+# Export individual factories for backward compatibility
+chembl_activity_factory = _factories["chembl_activity"]
+chembl_assay_factory = _factories["chembl_assay"]
+chembl_assay_parameters_factory = _factories["chembl_assay_parameters"]
+chembl_cell_line_factory = _factories["chembl_cell_line"]
+chembl_compound_record_factory = _factories["chembl_compound_record"]
+chembl_publication_factory = _factories["chembl_publication"]
+chembl_publication_similarity_factory = _factories["chembl_publication_similarity"]
+chembl_publication_term_factory = _factories["chembl_publication_term"]
+chembl_molecule_factory = _factories["chembl_molecule"]
+chembl_target_factory = _factories["chembl_target"]
+chembl_target_component_factory = _factories["chembl_target_component"]
+chembl_tissue_factory = _factories["chembl_tissue"]
+chembl_subcellular_fraction_factory = _factories["chembl_subcellular_fraction"]
+chembl_protein_class_factory = _factories["chembl_protein_class"]
+pubchem_compound_factory = _factories["pubchem_compound"]
+uniprot_protein_factory = _factories["uniprot_protein"]
+uniprot_idmapping_factory = _factories["uniprot_idmapping"]
+pubmed_publication_factory = _factories["pubmed_publication"]
+crossref_publication_factory = _factories["crossref_publication"]
+openalex_publication_factory = _factories["openalex_publication"]
+semanticscholar_publication_factory = _factories["semanticscholar_publication"]
+
+
+# =============================================================================
+# Registration Functions
+# =============================================================================
+
+# Thread-safe registration state
+_registration_lock = threading.Lock()
+_factories_registered = False
+
+
+def register_all_pipelines(registry: PipelineRegistry | None = None) -> None:
+    """Explicitly register all pipeline factories with PipelineRegistry.
+
+    This function is idempotent and thread-safe - calling it multiple times
+    or from multiple threads has no effect after the first successful call.
+
+    Uses double-checked locking pattern to minimize lock contention while
+    ensuring thread-safe initialization.
+
+    When called with a custom registry, idempotency check is skipped
+    (each registry instance is independent).
+
+    Args:
+        registry: Optional PipelineRegistry instance. If None, uses the
+            default global registry. Pass a custom registry for test isolation.
+
+    Should be called once at application startup (e.g., in cli.py or bootstrap.py).
+    """
+    global _factories_registered
+
+    # For custom registries, register directly without idempotency check
+    if registry is not None:
+        _register_factories_to(registry)
+        return
+
+    # Default registry: use idempotency guard
+    # Fast path: already registered (no lock needed)
+    if _factories_registered:
+        return
+
+    # Slow path: acquire lock and double-check
+    with _registration_lock:
+        # Double-check after acquiring lock (TOCTOU prevention)
+        if _factories_registered:
+            return
+
+        default_registry = get_default_registry()
+        _register_factories_to(default_registry)
+
+        _factories_registered = True
+
+
+def _register_factories_to(registry: PipelineRegistry) -> None:
+    """Register all factory instances to the given registry.
+
+    Internal helper for register_all_pipelines().
+    Uses loop over _factories dict for DRY registration.
+
+    Args:
+        registry: Target registry instance.
+    """
+    for factory in _factories.values():
+        registry.register_factory(cast("PipelineFactoryPort", factory))
+
+
+def is_registered() -> bool:
+    """Check if factories have been registered.
+
+    Thread-safe check of registration state.
+
+    Returns:
+        True if register_all_pipelines() has been called.
+    """
+    # Reading a bool is atomic in Python, no lock needed for read
+    return _factories_registered
+
+
+def reset_registration() -> None:
+    """Reset registration state (for testing only).
+
+    Thread-safe reset of registration flag. Also clears the default PipelineRegistry.
+    WARNING: Only use in tests. Not for production.
+
+    Note: For isolated tests, prefer creating a new registry instance with
+    create_registry() rather than using reset_registration().
+    """
+    global _factories_registered
+    with _registration_lock:
+        get_default_registry().clear()
+        _factories_registered = False
+
+
+def get_factory(pipeline_name: str) -> GenericPipelineFactory[GenericPipeline]:
+    """Get a pipeline factory by name.
+
+    Convenience function for accessing factories without going through registry.
+
+    Args:
+        pipeline_name: Name of the pipeline (e.g., "chembl_activity")
+
+    Returns:
+        GenericPipelineFactory instance
+
+    Raises:
+        KeyError: If pipeline_name is not found
+    """
+    if pipeline_name not in _factories:
+        available = sorted(_factories.keys())
+        raise KeyError(f"Unknown pipeline: {pipeline_name}. Available: {available}")
+    return _factories[pipeline_name]
+
+
+def list_available_pipelines() -> list[str]:
+    """List all available pipeline names.
+
+    Returns:
+        Sorted list of pipeline names
+    """
+    return sorted(_factories.keys())
+
+
+_PIPELINE_FACTORY_API = (
+    get_factory,
+    list_available_pipelines,
+    reset_registration,
+)
+
+__all__ = [
+    "PIPELINE_CONFIGS",
+    "PipelineFactoryConfig",
+    "chembl_activity_factory",
+    "chembl_assay_factory",
+    "chembl_assay_parameters_factory",
+    "chembl_cell_line_factory",
+    "chembl_compound_record_factory",
+    "chembl_molecule_factory",
+    "chembl_protein_class_factory",
+    "chembl_publication_factory",
+    "chembl_publication_similarity_factory",
+    "chembl_publication_term_factory",
+    "chembl_subcellular_fraction_factory",
+    "chembl_target_component_factory",
+    "chembl_target_factory",
+    "chembl_tissue_factory",
+    "crossref_publication_factory",
+    "get_factory",
+    "is_registered",
+    "list_available_pipelines",
+    "openalex_publication_factory",
+    "pubchem_compound_factory",
+    "pubmed_publication_factory",
+    "register_all_pipelines",
+    "reset_registration",
+    "semanticscholar_publication_factory",
+    "uniprot_idmapping_factory",
+    "uniprot_protein_factory",
+]

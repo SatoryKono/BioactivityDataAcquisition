@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 from bioetl.domain.exceptions import BioETLError, DataQualityError, StorageError
-from bioetl.domain.types import JsonDict
+from bioetl.domain.types import GoldBusinessRuleSpec, JsonDict, ScdConfig
 
 _DQ_REPORT_ERRORS = (
     DataQualityError,
@@ -89,17 +90,35 @@ class DQReportContext:
     gold_data: Any | None = None  # Any: pl.DataFrame (avoids polars import)
     gold_target_table: str | None = None
     gold_required_fields: list[str] | None = None
-    gold_business_rules: (
-        list[JsonDict]  # Any: DQ rule definitions have heterogeneous values
-        | None
-    ) = None
+    gold_business_rules: list[GoldBusinessRuleSpec] | None = None
     gold_baseline_stats: JsonDict | None = None  # Any: heterogeneous DQ metrics
+    gold_scd_config: ScdConfig | None = None
     gold_output_path: str | None = None
 
     dq_soft_threshold: float = 0.05
     dq_hard_threshold: float = 0.20
 
     flat_structure: bool = False
+
+    def __post_init__(self) -> None:
+        """Coerce legacy mapping payloads into typed Gold report contracts."""
+        if self.gold_business_rules is not None:
+            object.__setattr__(
+                self,
+                "gold_business_rules",
+                [
+                    rule
+                    if isinstance(rule, GoldBusinessRuleSpec)
+                    else GoldBusinessRuleSpec.from_mapping(rule)
+                    for rule in self.gold_business_rules
+                ],
+            )
+        if isinstance(self.gold_scd_config, Mapping):
+            object.__setattr__(
+                self,
+                "gold_scd_config",
+                ScdConfig.from_mapping(self.gold_scd_config),
+            )
 
 
 __all__ = [

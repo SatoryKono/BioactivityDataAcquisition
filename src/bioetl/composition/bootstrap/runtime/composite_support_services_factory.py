@@ -23,13 +23,13 @@ from bioetl.application.composite.deduplication import EnricherDeduplicatorServi
 from bioetl.application.composite.dependency_coordinator import (
     DependencyCoordinatorService,
 )
-from bioetl.application.composite.dependency_progress_tracker import (
-    DependencyProgressService,
-)
 from bioetl.application.composite.dependency_joiner import DependencyJoinerService
 from bioetl.application.composite.dependency_key_resolvers import (
     create_chained_key_resolver,
     create_seed_key_resolver,
+)
+from bioetl.application.composite.dependency_progress_tracker import (
+    DependencyProgressService,
 )
 from bioetl.application.composite.dependency_result_mapper import (
     DependencyResultService,
@@ -44,8 +44,11 @@ from bioetl.application.composite.join_planner_helpers import (
 )
 from bioetl.application.composite.key_extractor import KeyExtractorService
 from bioetl.application.composite.merger import MergeService
-from bioetl.application.composite.runner import CompositeRuntimeConfig
+from bioetl.application.composite.runner_pkg import CompositeRuntimeConfig
 from bioetl.domain.composite.strategy import MergeStrategy
+from bioetl.infrastructure.storage.composite_checkpoint_writer import (
+    FileCompositeCheckpointWriter,
+)
 from bioetl.infrastructure.storage.delta_reader import DeltaReader
 
 if TYPE_CHECKING:
@@ -186,10 +189,13 @@ class CompositeSupportServicesFactory:
             field_group_registry=field_group_registry,
             cross_validator=cross_validator,
         )
+        checkpoint_storage = FileCompositeCheckpointWriter(
+            checkpoint_dir=Path(self._settings.data_dir) / "checkpoints" / "composite",
+        )
         checkpoint_manager = self._checkpoint_manager_cls(
             composite_name=self._config.name,
             run_id=self._run_id,
-            checkpoint_dir=Path(self._settings.data_dir) / "checkpoints" / "composite",
+            storage=checkpoint_storage,
             logger=self._logger,
             resume=self._runtime.resume,
         )

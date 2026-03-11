@@ -106,7 +106,7 @@ class AnomalyMetric:
 
 @dataclass(frozen=True, slots=True)
 class AnomalyDetectionResult:
-    """Anomaly detection check result."""
+    """AnomalyRecord detection check result."""
 
     cold_start_days: int
     current_day: int

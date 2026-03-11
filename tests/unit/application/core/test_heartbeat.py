@@ -11,8 +11,8 @@ from uuid import UUID
 
 import pytest
 
-from bioetl.application.core.heartbeat import HeartbeatTask
-from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
+from bioetl.application.core.lifecycle.heartbeat import HeartbeatTask
+from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.domain.ports import LockPort
 from bioetl.domain.types import RunID
 

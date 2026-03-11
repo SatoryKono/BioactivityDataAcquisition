@@ -18,7 +18,7 @@ from bioetl.infrastructure.adapters.common.fetch_retry_policy import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
 
 
 class PrimaryRecordFetchHook(Protocol):
@@ -148,7 +148,7 @@ class FallbackFetchRequest:
 class FallbackFetchOrchestratorService:
     """Shared service for fallback-enabled filtered fetch flows."""
 
-    def __init__(self, adapter_metrics: AdapterMetrics | None = None) -> None:
+    def __init__(self, adapter_metrics: AdapterMetricsRecorder | None = None) -> None:
         """Initialize the fallback orchestrator service.
 
         Args:

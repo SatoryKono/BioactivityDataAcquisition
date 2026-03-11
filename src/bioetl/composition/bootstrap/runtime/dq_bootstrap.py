@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.domain.ports import DQMonitorPort, LoggerPort
-from bioetl.infrastructure.observability.anomaly import DataQualityMonitor
+from bioetl.infrastructure.observability.anomaly import DataQualityMonitorService
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 if TYPE_CHECKING:
@@ -21,7 +21,7 @@ __all__ = [
 def bootstrap_dq_monitor_port(
     settings: Settings,
     logger: LoggerPort | None = None,
-    monitor_cls: type[DataQualityMonitor] = DataQualityMonitor,
+    monitor_cls: type[DataQualityMonitorService] = DataQualityMonitorService,
     noop_logger_cls: type[NoOpLogger] = NoOpLogger,
 ) -> DQMonitorPort | None:
     """Create a data quality monitor port implementation.
@@ -31,7 +31,7 @@ def bootstrap_dq_monitor_port(
             Z-score threshold, error rate max, and quality score min.
         logger: Optional LoggerPort for structured DQ monitor logging; uses NoOpLogger
             when None.
-        monitor_cls: DataQualityMonitor class for DI/testing; uses DataQualityMonitor
+        monitor_cls: DataQualityMonitorService class for DI/testing; uses DataQualityMonitorService
             by default.
         noop_logger_cls: NoOpLogger class for DI/testing; used when no logger is provided.
 
@@ -68,7 +68,7 @@ def bootstrap_dq_monitor_port(
 def bootstrap_dq_monitor(
     settings: Settings,
     logger: LoggerPort | None = None,
-    monitor_cls: type[DataQualityMonitor] = DataQualityMonitor,
+    monitor_cls: type[DataQualityMonitorService] = DataQualityMonitorService,
     noop_logger_cls: type[NoOpLogger] = NoOpLogger,
 ) -> DQMonitorPort | None:
     """Deprecated alias for :func:`bootstrap_dq_monitor_port`.
@@ -76,7 +76,7 @@ def bootstrap_dq_monitor(
     Args:
         settings: Application settings providing DQ monitoring configuration.
         logger: Optional LoggerPort for structured DQ monitor logging.
-        monitor_cls: DataQualityMonitor class for DI/testing.
+        monitor_cls: DataQualityMonitorService class for DI/testing.
         noop_logger_cls: NoOpLogger class for DI/testing.
 
     Returns:

@@ -12,7 +12,7 @@ from bioetl.infrastructure.adapters.uniprot.query_builder import (
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
-    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 
@@ -22,7 +22,7 @@ async def probe_uniprot_health(
     provider_name: str,
     http_client: UnifiedHTTPClient,
     logger: LoggerPort,
-    adapter_metrics: AdapterMetrics,
+    adapter_metrics: AdapterMetricsRecorder,
     healthy_status_provider: Callable[[], HealthStatus],
 ) -> HealthStatus:
     """Probe UniProt API health endpoint.

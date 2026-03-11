@@ -1,0 +1,35 @@
+"""Storage Module for Bronze/Silver/Gold layers.
+
+Consolidated module for storage infrastructure - provides backward-compatible
+re-exports from the split modules.
+
+The actual implementations are now in:
+- storage_adapter.py: StorageAdapter class (~330 LOC)
+- storage_factory.py: StorageFactory and StorageContext (~120 LOC)
+
+This module re-exports all public symbols for backward compatibility.
+Existing imports like `from bioetl.composition.factories.storage import StorageFactory`
+will continue to work.
+
+Split per docs/REFACTORING_PLAN.md [P3] Storage Factory Split.
+"""
+
+from __future__ import annotations
+
+# Re-export writers for test patching compatibility
+from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+from bioetl.infrastructure.storage.gold_writer import GoldWriter
+from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+# Re-export from split modules for backward compatibility
+from .adapter import StorageAdapter
+from .factory import StorageContext, StorageFactory
+
+__all__ = [
+    "BronzeWriter",
+    "GoldWriter",
+    "SilverWriter",
+    "StorageAdapter",
+    "StorageContext",
+    "StorageFactory",
+]

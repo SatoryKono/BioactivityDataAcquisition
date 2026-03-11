@@ -12,10 +12,10 @@ extracting configuration assembly logic into discrete, testable units.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal
 
 from bioetl.composition.builders import FilterConfigBuilder
+from bioetl.composition.runtime_builders.inputs_resolver import VacuumSettings
 from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.types import RunType
@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from bioetl.domain.context import VacuumSettings as CliVacuumSettings
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.infrastructure.schemas.pipeline_config import (
-        InputFilterConfig as YamlInputFilter,
+        InputFilterYamlConfig as YamlInputFilter,
     )
     from bioetl.infrastructure.schemas.pipeline_config import (
         MaintenanceConfig,
@@ -39,22 +39,6 @@ __all__ = [
     "assemble_runtime_config",
     "assemble_vacuum_settings",
 ]
-
-
-@dataclass(frozen=True, slots=True)
-class VacuumSettings:
-    """Resolved vacuum settings after merging CLI and YAML config.
-
-    This is a pure data object representing the effective vacuum configuration
-    after applying CLI overrides to YAML defaults.
-
-    Attributes:
-        enabled: Whether vacuum should run after pipeline execution.
-        retention_days: Number of days to retain data during vacuum.
-    """
-
-    enabled: bool
-    retention_days: int
 
 
 # Backward-compat alias for legacy imports/tests.

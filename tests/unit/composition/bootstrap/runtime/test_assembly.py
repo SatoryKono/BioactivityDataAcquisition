@@ -24,7 +24,7 @@ from bioetl.domain.context import (
 )
 from bioetl.domain.types import RunType
 from bioetl.infrastructure.schemas.pipeline_config import (
-    InputFilterConfig as YamlInputFilter,
+    InputFilterYamlConfig as YamlInputFilter,
     MaintenanceConfig,
 )
 

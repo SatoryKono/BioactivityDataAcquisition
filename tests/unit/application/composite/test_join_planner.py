@@ -111,7 +111,7 @@ async def test_apply_joins_skips_missing_enricher(planner: JoinPlannerService) -
 async def test_apply_joins_many_to_one_aggregates_and_joins(
     planner: JoinPlannerService, planner_deps
 ) -> None:
-    deduplicator, aggregator, _renamer, _conflict_resolver = planner_deps
+    deduplicator, aggregator, _renamer, conflict_resolver = planner_deps
     seed_df = pl.DataFrame(
         {
             "chembl.publication.doi": ["10.1/a"],
@@ -152,6 +152,10 @@ async def test_apply_joins_many_to_one_aggregates_and_joins(
     assert "crossref.publication.title" in result.columns
     aggregator.aggregate.assert_called_once()
     deduplicator.deduplicate.assert_called_once()
+    assert conflict_resolver.detect_and_resolve_conflicts.call_args.args[2] == {
+        "chembl.publication.doi",
+        "crossref.publication.doi",
+    }
 
 
 @pytest.mark.unit
@@ -182,6 +186,43 @@ async def test_apply_dependency_joins_with_filter_field(
 
     assert "pubmed.publication.title" in result.columns
     assert conflict_resolver.detect_and_resolve_conflicts.called
+    assert conflict_resolver.detect_and_resolve_conflicts.call_args.args[2] == {
+        "chembl.publication.doi",
+        "pubmed.publication.pmid",
+    }
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_apply_dependency_joins_prefers_key_source_for_left_key_resolution(
+    planner: JoinPlannerService, planner_deps
+) -> None:
+    _deduplicator, _aggregator, _renamer, conflict_resolver = planner_deps
+    merged_df = pl.DataFrame({"openalex.publication.doi": ["10.1/a"]})
+    dep_df = pl.DataFrame(
+        {
+            "pubmed.publication.doi": ["10.1/a"],
+            "pubmed.publication.title": ["From dependency"],
+        }
+    )
+    dep = DependencyConfig(
+        pipeline="pubmed_publication",
+        join_keys=("doi",),
+        key_source="openalex_publication",
+    )
+
+    result = await planner.apply_dependency_joins(
+        merged_df=merged_df,
+        dependency_dfs={"pubmed_publication": dep_df},
+        dependencies=(dep,),
+        seed_pipeline="chembl_publication",
+    )
+
+    assert "pubmed.publication.title" in result.columns
+    assert conflict_resolver.detect_and_resolve_conflicts.call_args.args[2] == {
+        "openalex.publication.doi",
+        "pubmed.publication.doi",
+    }
 
 
 @pytest.mark.unit
@@ -243,7 +284,9 @@ def test_apply_composite_key_dependency_join_missing_columns_returns_input(
 @pytest.mark.unit
 def test_apply_composite_key_dependency_join_success(
     planner: JoinPlannerService,
+    planner_deps,
 ) -> None:
+    _deduplicator, _aggregator, _renamer, conflict_resolver = planner_deps
     merged_df = pl.DataFrame(
         {
             "chembl.publication.doi": ["10.1/a"],
@@ -272,6 +315,12 @@ def test_apply_composite_key_dependency_join_success(
     )
 
     assert "pubmed.publication.year" in result.columns
+    assert conflict_resolver.detect_and_resolve_conflicts.call_args.args[2] == {
+        "chembl.publication.doi",
+        "chembl.publication.pmid",
+        "pubmed.publication.doi",
+        "pubmed.publication.pmid",
+    }
 
 
 @pytest.mark.unit

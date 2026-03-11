@@ -254,6 +254,7 @@ class _BatchExecutorDQMixin:
             silver_key_nullability_rules=key_nullability_rules,
             gold_data=gold_data,
             gold_target_table=self._config.table_config.gold_table,
+            gold_scd_config=self._config.scd_config,
             gold_output_path=self._config.gold_output_path,
             dq_soft_threshold=soft_threshold,
             dq_hard_threshold=hard_threshold,

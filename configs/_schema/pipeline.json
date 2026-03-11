@@ -209,7 +209,7 @@
       "title": "BaseGoldRangeFilterConfig",
       "type": "object"
     },
-    "CircuitBreakerConfig": {
+    "CircuitBreakerYamlConfig": {
       "description": "Circuit Breaker configuration.",
       "properties": {
         "failure_threshold": {
@@ -225,7 +225,7 @@
           "type": "integer"
         }
       },
-      "title": "CircuitBreakerConfig",
+      "title": "CircuitBreakerYamlConfig",
       "type": "object"
     },
     "ClientSourceConfig": {
@@ -512,7 +512,58 @@
       "title": "CsvExportConfig",
       "type": "object"
     },
-    "DQConfig": {
+    "DQReportYamlConfig": {
+      "description": "Configuration for DQ report generation.",
+      "properties": {
+        "enabled": {
+          "default": true,
+          "description": "Generate DQ reports",
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "format": {
+          "default": "json",
+          "description": "Report format",
+          "enum": [
+            "json",
+            "yaml",
+            "csv"
+          ],
+          "title": "Format",
+          "type": "string"
+        },
+        "include_sample_failures": {
+          "default": true,
+          "description": "Include sample failed records",
+          "title": "Include Sample Failures",
+          "type": "boolean"
+        },
+        "sample_size": {
+          "default": 10,
+          "description": "Number of sample failures",
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Sample Size",
+          "type": "integer"
+        },
+        "output_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Custom output path",
+          "title": "Output Path"
+        }
+      },
+      "title": "DQReportYamlConfig",
+      "type": "object"
+    },
+    "DQYamlConfig": {
       "description": "Data Quality configuration.",
       "properties": {
         "soft_fail_threshold": {
@@ -567,62 +618,11 @@
           "type": "string"
         },
         "report": {
-          "$ref": "#/$defs/DQReportConfig",
+          "$ref": "#/$defs/DQReportYamlConfig",
           "description": "DQ report configuration"
         }
       },
-      "title": "DQConfig",
-      "type": "object"
-    },
-    "DQReportConfig": {
-      "description": "Configuration for DQ report generation.",
-      "properties": {
-        "enabled": {
-          "default": true,
-          "description": "Generate DQ reports",
-          "title": "Enabled",
-          "type": "boolean"
-        },
-        "format": {
-          "default": "json",
-          "description": "Report format",
-          "enum": [
-            "json",
-            "yaml",
-            "csv"
-          ],
-          "title": "Format",
-          "type": "string"
-        },
-        "include_sample_failures": {
-          "default": true,
-          "description": "Include sample failed records",
-          "title": "Include Sample Failures",
-          "type": "boolean"
-        },
-        "sample_size": {
-          "default": 10,
-          "description": "Number of sample failures",
-          "maximum": 100,
-          "minimum": 1,
-          "title": "Sample Size",
-          "type": "integer"
-        },
-        "output_path": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Custom output path",
-          "title": "Output Path"
-        }
-      },
-      "title": "DQReportConfig",
+      "title": "DQYamlConfig",
       "type": "object"
     },
     "FieldValidationConfig": {
@@ -840,7 +840,7 @@
       "title": "GoldFiltersConfig",
       "type": "object"
     },
-    "InputFilterConfig": {
+    "InputFilterYamlConfig": {
       "description": "Configuration for input ID filtering from CSV.",
       "properties": {
         "enabled": {
@@ -926,7 +926,7 @@
           "title": "Fallback Column"
         }
       },
-      "title": "InputFilterConfig",
+      "title": "InputFilterYamlConfig",
       "type": "object"
     },
     "MaintenanceConfig": {
@@ -1048,6 +1048,63 @@
         }
       },
       "title": "RateLimitSourceConfig",
+      "type": "object"
+    },
+    "ScdConfigYamlConfig": {
+      "additionalProperties": false,
+      "description": "Pydantic boundary schema for Gold SCD2 configuration.",
+      "properties": {
+        "business_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Business key column or columns used for SCD2 identity.",
+          "title": "Business Key"
+        },
+        "type": {
+          "default": 2,
+          "description": "SCD type. Only value 2 is supported.",
+          "title": "Type",
+          "type": "integer"
+        },
+        "valid_from_col": {
+          "default": "valid_from",
+          "description": "Column storing SCD validity start timestamp.",
+          "title": "Valid From Col",
+          "type": "string"
+        },
+        "valid_to_col": {
+          "default": "valid_to",
+          "description": "Column storing SCD validity end timestamp.",
+          "title": "Valid To Col",
+          "type": "string"
+        },
+        "current_flag_col": {
+          "default": "is_current",
+          "description": "Column storing current-row flag.",
+          "title": "Current Flag Col",
+          "type": "string"
+        },
+        "version_col": {
+          "default": "version",
+          "description": "Column storing SCD version number.",
+          "title": "Version Col",
+          "type": "string"
+        }
+      },
+      "title": "ScdConfigYamlConfig",
       "type": "object"
     },
     "SinkDQReportConfig": {
@@ -1184,18 +1241,14 @@
         "scd_config": {
           "anyOf": [
             {
-              "additionalProperties": {
-                "type": "string"
-              },
-              "type": "object"
+              "$ref": "#/$defs/ScdConfigYamlConfig"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "SCD Type 2 column mapping (valid_from, valid_to, is_current, version)",
-          "title": "Scd Config"
+          "description": "SCD Type 2 column mapping (valid_from, valid_to, is_current, version)"
         },
         "flat_structure": {
           "default": false,
@@ -1258,7 +1311,7 @@
           "$ref": "#/$defs/RateLimitSourceConfig"
         },
         "circuit_breaker": {
-          "$ref": "#/$defs/CircuitBreakerConfig"
+          "$ref": "#/$defs/CircuitBreakerYamlConfig"
         },
         "provider_config": {
           "$ref": "#/$defs/ProviderSourceConfig"
@@ -1386,10 +1439,10 @@
       "title": "Dq Config File"
     },
     "dq_overrides": {
-      "$ref": "#/$defs/DQConfig"
+      "$ref": "#/$defs/DQYamlConfig"
     },
     "circuit_breaker": {
-      "$ref": "#/$defs/CircuitBreakerConfig"
+      "$ref": "#/$defs/CircuitBreakerYamlConfig"
     },
     "filter_config_file": {
       "anyOf": [
@@ -1532,7 +1585,7 @@
       "$ref": "#/$defs/SourceConfig"
     },
     "input_filter": {
-      "$ref": "#/$defs/InputFilterConfig"
+      "$ref": "#/$defs/InputFilterYamlConfig"
     },
     "maintenance": {
       "$ref": "#/$defs/MaintenanceConfig"

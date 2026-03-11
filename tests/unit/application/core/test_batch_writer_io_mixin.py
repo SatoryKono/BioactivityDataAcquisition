@@ -70,6 +70,8 @@ def _make_writer(
     silver_schema=None,
     gold_schema=None,
     primary_keys: list[str] | None = None,
+    gold_write_mode: str = "append",
+    scd_config: dict[str, str] | None = None,
     lock_validator=None,
 ) -> BatchWriter:
     config = RecordProcessorConfig(
@@ -78,7 +80,11 @@ def _make_writer(
         entity_type=entity_type,
         silver_schema=silver_schema or MagicMock(),
         gold_schema=gold_schema or MagicMock(),
-        table_config=TableConfig(primary_keys=primary_keys or []),
+        table_config=TableConfig(
+            primary_keys=primary_keys or [],
+            gold_write_mode=gold_write_mode,
+        ),
+        scd_config=scd_config,
     )
     return BatchWriter(
         storage=storage,
@@ -506,6 +512,28 @@ class TestBatchWriterIOMixinGold:
 
         kwargs = mock_storage.write_gold.call_args[1]
         assert list(kwargs["primary_keys"]) == ["entity_id"]
+
+    async def test_write_gold_passes_scd_config_from_config(
+        self, mock_storage, mock_context, mock_gold_validator
+    ):
+        """SCD config from RecordProcessorConfig is forwarded to storage."""
+        writer = _make_writer(
+            mock_storage,
+            mock_context,
+            mock_gold_validator,
+            primary_keys=["entity_id"],
+            gold_write_mode="scd2",
+            scd_config={"business_key": "entity_id", "valid_from_col": "valid_from"},
+        )
+
+        await writer.write_gold([{"entity_id": "x"}])
+
+        kwargs = mock_storage.write_gold.call_args[1]
+        assert kwargs["mode"] == "scd2"
+        assert kwargs["scd_config"] == {
+            "business_key": "entity_id",
+            "valid_from_col": "valid_from",
+        }
 
 
 # ---------------------------------------------------------------------------

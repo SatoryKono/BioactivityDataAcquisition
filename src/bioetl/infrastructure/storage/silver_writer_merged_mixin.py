@@ -88,15 +88,12 @@ class SilverWriterMergedMixin:
             table_path: File system path to the Delta table target.
             arrow_table: PyArrow Table to write in overwrite mode.
         """
-        loop = asyncio.get_running_loop()
-        await loop.run_in_executor(
-            None,
-            lambda: write_deltalake(
-                table_path,
-                arrow_table,
-                mode="overwrite",
-                schema_mode="overwrite",
-            ),
+        await asyncio.to_thread(
+            write_deltalake,
+            table_path,
+            arrow_table,
+            mode="overwrite",
+            schema_mode="overwrite",
         )
 
     async def _export_silver_merged_csv(

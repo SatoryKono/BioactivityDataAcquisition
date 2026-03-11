@@ -11,7 +11,7 @@ __all__ = [
     "BaseMetrics",
     "DoiBatchProcessor",
     "HttpTransport",
-    "SearchPaginator",
+    "SearchPaginatorHelper",
 ]
 
 
@@ -258,7 +258,7 @@ class DoiBatchProcessor:
                 yield publication
 
 
-class SearchPaginator:
+class SearchPaginatorHelper:
     """Handles cursor-based pagination for CrossRef search.
 
     Extracts pagination logic to reduce main class size.

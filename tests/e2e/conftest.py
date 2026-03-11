@@ -144,7 +144,7 @@ def e2e_environment():
         pass  # Pandera may not have this submodule in all versions
 
     # Register all pipelines (required for bootstrap_pipeline_runner to work)
-    from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+    from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 
     register_all_pipelines()
 

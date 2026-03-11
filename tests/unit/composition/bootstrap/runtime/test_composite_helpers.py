@@ -564,7 +564,7 @@ class TestResolveBronzeOpts:
         cached_bronze_date: str | None = None,
     ) -> Any:
         """Create minimal CompositeRuntimeConfig mock."""
-        from bioetl.application.composite.runner import CompositeRuntimeConfig
+        from bioetl.application.composite.runner_pkg import CompositeRuntimeConfig
 
         return CompositeRuntimeConfig(
             use_cached_bronze=use_cached_bronze,

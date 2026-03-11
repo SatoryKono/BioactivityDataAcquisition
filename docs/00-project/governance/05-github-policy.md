@@ -77,7 +77,7 @@ BioETL uses **19 GitHub Actions workflows** organized by purpose.
 
 | Workflow | File | Schedule | What It Does |
 |----------|------|----------|--------------|
-| **Mutation Testing** | `mutation-testing.yml` | Weekly (Sun 00:00 UTC) + PR | mutmut on domain layer, 60% mutation score threshold |
+| **Mutation Testing** | `mutation-testing.yml` | Weekly (Sun 00:00 UTC) + PR | mutmut on domain layer, 70% mutation score threshold; application gate staged |
 | **Contract Tests** | `contract-tests.yml` | Monthly (1st, 02:00 UTC) | Live API contract tests, creates GitHub issue on failure |
 | **Weekly VACUUM** | `vacuum.yml` | Weekly (Sun 02:00 UTC) | Delta Lake VACUUM on all layers |
 | **Release** | `release.yml` | On release publish | Build, test on 3 Python versions, publish to TestPyPI+PyPI |

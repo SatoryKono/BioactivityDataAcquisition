@@ -10,6 +10,10 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
+from bioetl.infrastructure.adapters.common.api_request_collector import (
+    APIRequestCollector,
+)
 from bioetl.infrastructure.adapters.openalex.client import (
     OpenAlexAdapter,
     _create_openalex_adapter,
@@ -60,6 +64,32 @@ class TestOpenAlexAdapter:
         assert adapter.provider_name == "openalex"
         assert adapter.mailto == "test@example.com"
         assert adapter.batch_size == 50  # Default
+
+    def test_post_init_preserves_injected_base_collaborators(
+        self, mock_http_client: MagicMock, logger: NoOpLogger
+    ) -> None:
+        """Dataclass adapter should delegate shared base initialization."""
+        error_handler = MagicMock()
+        metrics = MagicMock()
+        adapter_metrics = AdapterMetricsRecorder(metrics, "openalex")
+        request_collector = APIRequestCollector()
+
+        adapter = OpenAlexAdapter(
+            http_client=mock_http_client,
+            logger=logger,
+            mailto="test@example.com",
+            metrics=metrics,
+            error_handler=error_handler,
+            adapter_metrics=adapter_metrics,
+            request_collector=request_collector,
+        )
+
+        assert adapter._http_client is mock_http_client
+        assert adapter._logger is logger
+        assert adapter._metrics is metrics
+        assert adapter._error_handler is error_handler
+        assert adapter._adapter_metrics is adapter_metrics
+        assert adapter._request_collector is request_collector
 
     def test_adapter_provider_name(self, adapter: OpenAlexAdapter) -> None:
         """Should return correct provider name."""
@@ -494,6 +524,32 @@ class TestHealthCheck:
         result = await adapter._probe_health()
 
         assert result == HealthStatus.UNHEALTHY
+
+    @pytest.mark.asyncio
+    async def test_health_check_degraded_on_slow_response(
+        self,
+        adapter: OpenAlexAdapter,
+        mock_http_client: MagicMock,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Should return DEGRADED when the health probe exceeds the slow threshold."""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_http_client.get_once.return_value = mock_response
+
+        import bioetl.infrastructure.adapters.openalex.health_probe as health_probe_module
+
+        call_count = [0]
+
+        def _mock_monotonic() -> float:
+            call_count[0] += 1
+            return 0.0 if call_count[0] == 1 else 6.0
+
+        monkeypatch.setattr(health_probe_module.time, "monotonic", _mock_monotonic)
+
+        result = await adapter._probe_health()
+
+        assert result == HealthStatus.DEGRADED
 
 
 class TestCreateOpenAlexAdapter:

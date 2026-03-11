@@ -348,7 +348,7 @@ The project uses `pytest` for testing, split into Unit, Integration, and Archite
 - **Run Architecture Tests**:
 
   ```bash
-  make arch-test
+  make test-architecture
   ```
 
 ### Codex Skills
