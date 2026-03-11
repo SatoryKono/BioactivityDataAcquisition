@@ -8,7 +8,7 @@ Supports three-phase fallback strategy:
 
 from __future__ import annotations
 
-__all__ = ["TitleFallbackHandler"]
+__all__ = ["OpenAlexTitleFallbackHandler"]
 
 
 from typing import TYPE_CHECKING
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from bioetl.domain.types import JsonDict
 
 
-class TitleFallbackHandler(BaseTitleFallbackHandler):
+class OpenAlexTitleFallbackHandler(BaseTitleFallbackHandler):
     """Handles fallback search by title when DOI lookup fails.
 
     Extracts fallback logic to reduce main class size and cyclomatic complexity.

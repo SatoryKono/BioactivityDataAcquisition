@@ -16,7 +16,7 @@ from bioetl.infrastructure.adapters.common import (
     FallbackFetchOrchestratorService,
     resolve_fallback_policy,
 )
-from bioetl.infrastructure.adapters.openalex.fallback import TitleFallbackHandler
+from bioetl.infrastructure.adapters.openalex.fallback import OpenAlexTitleFallbackHandler
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -26,7 +26,7 @@ def _create_default_fallback_strategy(
     *,
     normalize_id: Callable[[str], str | None],
     extract_record_id: Callable[[BronzeRecord], str | None],
-    fallback_handler: TitleFallbackHandler | None,
+    fallback_handler: OpenAlexTitleFallbackHandler | None,
 ) -> DefaultFallbackExecution:
     """Create default fallback execution strategy for non-DI call sites.
 
@@ -76,7 +76,7 @@ class OpenAlexFallbackOrchestrator:
     """Coordinates DOI-first fetch + title fallback flow for OpenAlex."""
 
     fallback_fetch_service: FallbackFetchOrchestratorService
-    fallback_handler: TitleFallbackHandler
+    fallback_handler: OpenAlexTitleFallbackHandler
     normalize_id: Callable[[str], str | None]
     extract_record_id: Callable[[BronzeRecord], str | None]
     logger: LoggerPort

@@ -739,6 +739,62 @@ class TestFSMCheckpointDeletion:
         mock_logger.warning.assert_called()
 
 
+class TestFinalizationPolicy:
+    """Tests for finalization state transition policy."""
+
+    def test_transition_to_completed_state_is_noop_for_completed_state(
+        self,
+        mock_config: MagicMock,
+        mock_logger: MagicMock,
+        mock_lock: AsyncMock,
+        mock_merger: AsyncMock,
+        mock_coordinator: AsyncMock,
+        mock_key_extractor: AsyncMock,
+        mock_seed_runner: AsyncMock,
+        tmp_path: Path,
+        test_run_id: str,
+    ) -> None:
+        """Already completed checkpoints should not emit another FSM transition."""
+        checkpoint_manager = CompositeCheckpointManager(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            storage=FileCompositeCheckpointWriter(tmp_path),
+            logger=mock_logger,
+            resume=False,
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            seed_runner_factory=lambda: mock_seed_runner,
+            enricher_runner_factory=lambda name, df: AsyncMock(),
+            key_extractor=mock_key_extractor,
+            coordinator=mock_coordinator,
+            merger=mock_merger,
+            checkpoint_manager=checkpoint_manager,
+            logger=mock_logger,
+            lock=mock_lock,
+            fsm_state_helper=FSMStateHelperService(
+                config=mock_config, logger=mock_logger, run_id=test_run_id
+            ),
+            run_id=test_run_id,
+        )
+        state = CompositeCheckpointState(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            state=CompositePipelineState.COMPLETED,
+        )
+
+        next_state = runner._transition_to_completed_state(state)
+
+        assert next_state is state
+        fsm_calls = [
+            c
+            for c in mock_logger.info.call_args_list
+            if c.args and "FSM state transition" in str(c.args[0])
+        ]
+        assert not any(c.kwargs.get("stage") == "pipeline_complete" for c in fsm_calls)
+
+
 class TestFSMFailedStateIsResumable:
     """Tests that FAILED state is resumable."""
 

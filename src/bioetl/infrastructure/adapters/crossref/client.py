@@ -54,7 +54,7 @@ from bioetl.infrastructure.adapters.crossref.client_runtime_helpers import (
     build_crossref_fetch_flow,
     build_crossref_runtime_services,
 )
-from bioetl.infrastructure.adapters.crossref.fallback import TitleFallbackHandler
+from bioetl.infrastructure.adapters.crossref.fallback import CrossRefTitleFallbackHandler
 from bioetl.infrastructure.adapters.crossref.fetch_flow import CrossRefFetchFlow
 from bioetl.infrastructure.adapters.crossref.query_builder import CrossRefQueryBuilder
 from bioetl.infrastructure.adapters.crossref.response_mapper import (
@@ -103,7 +103,7 @@ class CrossRefAdapter(FallbackPolicyMixin, BaseHttpAdapter):
     response_mapper: CrossRefResponseMapper | None = None
     batch_fetcher: DoiBatchProcessor | None = None
     search_paginator: SearchPaginatorHelper | None = None
-    title_fallback_handler: TitleFallbackHandler | None = None
+    title_fallback_handler: CrossRefTitleFallbackHandler | None = None
     fetch_flow: CrossRefFetchFlow | None = None
 
     provider_name: str = field(init=False, default="crossref")  # DataSourcePort ID
@@ -185,7 +185,7 @@ class CrossRefAdapter(FallbackPolicyMixin, BaseHttpAdapter):
         """Return hook extracting DOI from a CrossRef record."""
         return lambda rec: str(rec.get("DOI", ""))
 
-    def _get_fallback_handler(self, enabled: bool) -> TitleFallbackHandler | None:
+    def _get_fallback_handler(self, enabled: bool) -> CrossRefTitleFallbackHandler | None:
         """Return title fallback handler when enabled."""
         return self._fallback_handler if enabled else None
 

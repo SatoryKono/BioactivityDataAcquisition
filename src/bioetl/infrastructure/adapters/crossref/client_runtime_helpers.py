@@ -19,7 +19,7 @@ from bioetl.infrastructure.adapters.crossref.client_builders import (
     _create_default_crossref_search_paginator,
     _create_default_crossref_title_fallback_handler,
 )
-from bioetl.infrastructure.adapters.crossref.fallback import TitleFallbackHandler
+from bioetl.infrastructure.adapters.crossref.fallback import CrossRefTitleFallbackHandler
 from bioetl.infrastructure.adapters.crossref.fetch_flow import CrossRefFetchFlow
 from bioetl.infrastructure.adapters.crossref.query_builder import CrossRefQueryBuilder
 from bioetl.infrastructure.adapters.crossref.response_mapper import (
@@ -50,7 +50,7 @@ class CrossRefRuntimeServices:
     response_mapper: CrossRefResponseMapper
     batch_fetcher: DoiBatchProcessor
     search_paginator: SearchPaginatorHelper
-    fallback_handler: TitleFallbackHandler
+    fallback_handler: CrossRefTitleFallbackHandler
 
 
 def build_crossref_runtime_services(
@@ -59,7 +59,7 @@ def build_crossref_runtime_services(
     response_mapper: CrossRefResponseMapper | None,
     batch_fetcher: DoiBatchProcessor | None,
     search_paginator: SearchPaginatorHelper | None,
-    title_fallback_handler: TitleFallbackHandler | None,
+    title_fallback_handler: CrossRefTitleFallbackHandler | None,
     http_client: UnifiedHTTPClient,
     logger: LoggerPort,
     adapter_metrics: AdapterMetricsRecorder,

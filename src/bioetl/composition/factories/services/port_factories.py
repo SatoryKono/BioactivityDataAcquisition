@@ -1,0 +1,90 @@
+"""Port factory functions for local deployment adapters.
+
+Extracted from BaseServicesFactory to keep factory.py within LOC limits.
+"""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, cast
+
+from bioetl.domain.ports import (
+    CheckpointPort,
+    LockPort,
+    MetricsPort,
+    NoOpMetrics,
+    QuarantinePort,
+)
+from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
+from bioetl.infrastructure.locking.memory_lock import MemoryLock
+from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
+from bioetl.infrastructure.quarantine import UnifiedQuarantineAdapter
+
+if TYPE_CHECKING:
+    from bioetl.composition.factories.storage import StorageContext
+    from bioetl.infrastructure.config import Settings
+
+__all__ = [
+    "create_checkpoint",
+    "create_lock",
+    "create_metrics",
+    "create_quarantine",
+    "is_metrics_port_like",
+]
+
+
+def create_lock() -> LockPort:
+    """Create in-memory lock for local deployment."""
+    lock = MemoryLock()
+    assert isinstance(lock, LockPort), (
+        f"MemoryLock must implement LockPort, got {type(lock)}"
+    )
+    return lock
+
+
+def create_checkpoint(storage_ctx: StorageContext) -> CheckpointPort:
+    """Create local filesystem checkpoint."""
+    checkpoint = LocalCheckpointAdapter(base_path=storage_ctx.checkpoints_path)
+    assert isinstance(checkpoint, CheckpointPort), (
+        f"LocalCheckpointAdapter must implement CheckpointPort, got {type(checkpoint)}"
+    )
+    return checkpoint
+
+
+def create_quarantine(settings: Settings) -> QuarantinePort:
+    """Create unified quarantine storage."""
+    quarantine = UnifiedQuarantineAdapter(base_path=str(settings.quarantine_path))
+    assert isinstance(quarantine, QuarantinePort), (
+        f"UnifiedQuarantineAdapter must implement QuarantinePort, got {type(quarantine)}"
+    )
+    return quarantine
+
+
+def create_metrics(settings: Settings) -> MetricsPort:
+    """Create metrics port based on settings."""
+    metrics: object = (
+        PrometheusMetrics() if settings.metrics_enabled else NoOpMetrics()
+    )
+
+    if isinstance(metrics, MetricsPort):
+        return metrics
+    if is_metrics_port_like(metrics):
+        return cast("MetricsPort", metrics)
+    raise TypeError(
+        f"Metrics adapter must implement MetricsPort, got {type(metrics)}"
+    )
+
+
+def is_metrics_port_like(candidate: object) -> bool:
+    """Duck-typed fallback for patched test doubles."""
+    required_methods = (
+        "observe_histogram",
+        "increment_counter",
+        "set_gauge",
+        "inc_quarantine_records",
+        "inc_dq_validation_failures",
+        "close",
+    )
+    return all(
+        callable(getattr(candidate, method_name, None))
+        for method_name in required_methods
+    )

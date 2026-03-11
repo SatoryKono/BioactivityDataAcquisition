@@ -8,7 +8,7 @@ Supports three-phase fallback strategy:
 
 from __future__ import annotations
 
-__all__ = ["PUBMED_FALLBACK_ERRORS", "TitleFallbackHandler"]
+__all__ = ["PUBMED_FALLBACK_ERRORS", "PubMedTitleFallbackHandler"]
 
 from typing import TYPE_CHECKING
 
@@ -35,7 +35,7 @@ PUBMED_FALLBACK_ERRORS = (
 )
 
 
-class TitleFallbackHandler(BaseTitleFallbackHandler):
+class PubMedTitleFallbackHandler(BaseTitleFallbackHandler):
     """Handles fallback search by title when PMID/DOI lookup fails.
 
     Uses PubMed esearch API with title field search:
