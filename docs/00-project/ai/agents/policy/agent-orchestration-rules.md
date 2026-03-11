@@ -4,8 +4,8 @@
 
 *Версия: 2.0.0 | Синхронизировано с ORCHESTRATION.md v4.0 (2026-03-04)*
 
-Компактные правила оркестрации субагентов для Claude Code.
-Полная спецификация: `.claude/agents/ORCHESTRATION.md`.
+Компактные правила оркестрации субагентов для Codex/Claude docs mirror.
+Полная спецификация: `docs/00-project/ai/agents/agents/ORCHESTRATION.md`.
 
 ---
 
@@ -85,4 +85,4 @@ Skills now inlined into commands — invoke directly via `/command-name`:
 При старте нового чата загрузи:
 1. Этот файл (загружается автоматически)
 2. `.claude/PROJECT_CONTEXT.md` — компактный контекст проекта
-3. `.claude/agents/ORCHESTRATION.md` — при оркестрации задач
+3. `docs/00-project/ai/agents/agents/ORCHESTRATION.md` — при оркестрации задач

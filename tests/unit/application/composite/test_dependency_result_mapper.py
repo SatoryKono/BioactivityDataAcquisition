@@ -1,4 +1,4 @@
-"""Unit tests for dependency result mapping helpers."""
+"""Unit tests for dependency result service."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.application.composite.dependency_result_mapper import (
-    DependencyResultMapper,
+    DependencyResultService,
 )
 from bioetl.domain.composite.config import DependencyConfig
 from bioetl.domain.composite.result import DependencyStatus
@@ -16,7 +16,7 @@ from bioetl.domain.composite.result import DependencyStatus
 
 @pytest.fixture
 def mock_logger() -> MagicMock:
-    """Create mock logger for mapper tests."""
+    """Create mock logger for result-service tests."""
     logger = MagicMock()
     logger.info = MagicMock()
     logger.warning = MagicMock()
@@ -28,7 +28,7 @@ def test_build_success_result_uses_runner_execution_metrics(
     mock_logger: MagicMock,
 ) -> None:
     """Success result should read public runner metrics view."""
-    mapper = DependencyResultMapper(mock_logger)
+    mapper = DependencyResultService(mock_logger)
     dependency = DependencyConfig(
         pipeline="chembl_publication_term",
         join_keys=("document_chembl_id",),
@@ -56,11 +56,32 @@ def test_build_success_result_uses_runner_execution_metrics(
     mock_logger.info.assert_called_once()
 
 
+def test_build_success_result_requires_canonical_metric_keys(
+    mock_logger: MagicMock,
+) -> None:
+    """Missing required runner counters should fail loudly."""
+    mapper = DependencyResultService(mock_logger)
+    dependency = DependencyConfig(
+        pipeline="chembl_publication_term",
+        join_keys=("document_chembl_id",),
+    )
+    runner = MagicMock()
+    runner.execution_metrics = {"records_fetched": 7}
+
+    with pytest.raises(KeyError, match="records_silver"):
+        mapper.build_success_result(
+            dependency=dependency,
+            runner=runner,
+            started_at=datetime(2026, 3, 11, 10, 0, tzinfo=UTC),
+            completed_at=datetime(2026, 3, 11, 10, 0, 3, tzinfo=UTC),
+        )
+
+
 def test_build_failed_result_uses_error_log_for_required_dependency(
     mock_logger: MagicMock,
 ) -> None:
     """Required dependency failure should emit error-level log."""
-    mapper = DependencyResultMapper(mock_logger)
+    mapper = DependencyResultService(mock_logger)
     dependency = DependencyConfig(
         pipeline="chembl_publication_term",
         join_keys=("document_chembl_id",),
@@ -83,7 +104,7 @@ def test_build_timeout_result_returns_timeout_status(
     mock_logger: MagicMock,
 ) -> None:
     """Timeout result should preserve dependency timeout threshold."""
-    mapper = DependencyResultMapper(mock_logger)
+    mapper = DependencyResultService(mock_logger)
     dependency = DependencyConfig(
         pipeline="chembl_publication_term",
         join_keys=("document_chembl_id",),

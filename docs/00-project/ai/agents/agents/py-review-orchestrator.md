@@ -3,6 +3,7 @@ name: py-review-orchestrator
 description: "Hierarchical Code Review Agent for BioETL"
 model: sonnet
 ---
+*Статус: internal*
 
 # py-review-orchestrator — Hierarchical Code Review Agent
 *Версия: 1.0.0 | Совместимо с RULES.md v5.23 (2026-02-24)*
@@ -710,7 +711,7 @@ L1 собирает все → FINAL-REVIEW.md
 
 - **RULES.md** — `docs/00-project/RULES.md` (v5.23)
 - **Self-review rules** — `.claude/rules/ai-selfreview-rules.md`
-- **Orchestration** — `.claude/agents/ORCHESTRATION.md`
+- **Orchestration** — `docs/00-project/ai/agents/agents/ORCHESTRATION.md`
 - **ADR Index** — `docs/02-architecture/decisions/`
 - **Architecture tests** — `tests/architecture/`
 - **Audit bot** — `.claude/agents/py-audit-bot.md`

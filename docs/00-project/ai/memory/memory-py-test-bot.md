@@ -1,5 +1,7 @@
 # Memory: py-test-bot
 
+*Статус: internal-only (agent memory)*
+
 *Version: 1.0.0 | Date: 2026-02-23 | Parent: agent-memory.md*
 
 > **Focus**: Test execution, coverage analysis, VCR management, failure classification, baseline/final/retest.

@@ -159,12 +159,12 @@ test-changed: ## Run tests for changed files (compared to main branch)
 
 test-architecture: ## Run architecture enforcement tests
 	@echo "$(BLUE)Running architecture tests...$(NC)"
-	$(RUN) pytest tests/test_architecture_enforcement.py -v --tb=short
+	$(RUN) pytest tests/architecture/ -v --tb=short
 	@echo "$(GREEN)Architecture tests passed!$(NC)"
 
 test-architecture-strict: ## Run architecture tests with import-linter
 	@echo "$(BLUE)Running strict architecture checks...$(NC)"
-	$(RUN) pytest tests/test_architecture_enforcement.py -v
+	$(RUN) pytest tests/architecture/ -v
 	@echo "$(BLUE)Running import-linter...$(NC)"
 	$(RUN) importlinter
 	@echo "$(GREEN)All architecture checks passed!$(NC)"

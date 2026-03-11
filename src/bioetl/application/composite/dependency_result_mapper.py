@@ -1,4 +1,4 @@
-"""Result mapping helpers for dependency execution outcomes."""
+"""Result assembly service for dependency execution outcomes."""
 
 from __future__ import annotations
 
@@ -9,11 +9,10 @@ from typing import TYPE_CHECKING
 from bioetl.domain.composite.result import DependencyResult
 
 if TYPE_CHECKING:
-    from bioetl.application.core.runner import PipelineRunner
     from bioetl.domain.composite.config import DependencyConfig
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import ExecutionMetricsReadablePort, LoggerPort
 
-__all__ = ["DependencyResultMapper"]
+__all__ = ["DependencyResultService"]
 
 
 def _duration_seconds(started_at: datetime, completed_at: datetime) -> float:
@@ -21,20 +20,18 @@ def _duration_seconds(started_at: datetime, completed_at: datetime) -> float:
     return (completed_at - started_at).total_seconds()
 
 
-def _extract_runner_metrics(runner: PipelineRunner) -> tuple[int, int]:
+def _extract_runner_metrics(runner: ExecutionMetricsReadablePort) -> tuple[int, int]:
     """Extract available row counters from runner public metrics view."""
-    metrics = getattr(runner, "execution_metrics", None)
-    if not isinstance(metrics, dict):
-        return 0, 0
+    metrics = runner.execution_metrics
     return (
-        int(metrics.get("records_fetched", 0)),
-        int(metrics.get("records_silver", 0)),
+        int(metrics["records_fetched"]),
+        int(metrics["records_silver"]),
     )
 
 
 @dataclass(frozen=True, slots=True)
-class DependencyResultMapper:
-    """Maps dependency execution outcomes into stable result objects."""
+class DependencyResultService:
+    """Assembles dependency execution outcomes into stable result objects."""
 
     logger: LoggerPort
 
@@ -92,7 +89,7 @@ class DependencyResultMapper:
         self,
         *,
         dependency: DependencyConfig,
-        runner: PipelineRunner,
+        runner: ExecutionMetricsReadablePort,
         started_at: datetime,
         completed_at: datetime,
     ) -> DependencyResult:

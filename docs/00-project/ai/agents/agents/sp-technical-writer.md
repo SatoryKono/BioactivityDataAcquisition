@@ -4,6 +4,7 @@ description: "Deprecated alias profile. Use sp-documentation-engineer as canonic
 tools: Read, Glob, Grep
 model: haiku
 ---
+*Статус: internal-only (generated subagent spec)*
 
 This profile name is deprecated by consolidation policy.
 

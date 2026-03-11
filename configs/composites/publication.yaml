@@ -21,7 +21,7 @@
 # Full field coverage update (2026-01-28):
 # This configuration now includes ALL 181 extractable fields (100% coverage).
 # Previously included 142 of 181 fields (78.5%).
-# See configs/schemas/composite/publication.yaml for complete field mappings.
+# See schema.column_groups and field_aliases below for the current field mapping registry.
 #
 # Version: 1.1.0
 # Reference: ADR-026 Composite Pipeline Pattern
@@ -643,10 +643,9 @@ gold_filters:
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
-# Filter rules are loaded from hierarchical config files:
-#   1. configs/filters/_defaults.yaml (global defaults)
-#   2. configs/filters/providers/composite.yaml (provider-specific)
-#   3. configs/filters/entities/composite/publication.yaml (entity-specific)
+# Filter rules resolve from:
+#   1. configs/base/pipeline.yaml (`filter_defaults`)
+#   2. local `gold_filters` in this composite config
 
 # -----------------------------------------------------------------------------
 # Maintenance Configuration

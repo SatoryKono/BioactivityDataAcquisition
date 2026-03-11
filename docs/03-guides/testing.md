@@ -60,7 +60,7 @@
 
 ## 3. Метрики и Покрытие
 
-- **Line Coverage Target**: **>90%** для доменного слоя и **>80%** для проекта в целом.
+- **Line Coverage Target**: **>=90%** для доменного слоя и **>=85%** для проекта в целом.
 - **Branch Coverage**: Проверяется автоматически через `pytest-cov`.
 - **Regression**: Все исправления багов обязаны сопровождаться регрессионным тестом.
 - **Coverage Configuration**: Подробная информация о настройке покрытия, исключаемых паттернах и troubleshooting — см. [Coverage Configuration Guide](./coverage-configuration.md)

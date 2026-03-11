@@ -27,7 +27,7 @@
 
 #### Корень проекта
 - `AGENTS.md` — единственный AI-файл в корне (инструкции для OpenAI Codex / общий)
-- CLAUDE.md, CODEX.md, GEMINI.md — НЕ в корне, находятся в `docs/00-project/ai/agents/`
+- CLAUDE.md, CODEX.md, GEMINI.md — НЕ в корне, находятся в `docs/00-project/ai/agents/guides/`
 
 #### Документационный mirror и runtime SSOT
 
@@ -58,7 +58,7 @@
         └── mcp-memory.json            ← MCP knowledge graph (semantic memory)
 
 **Приоритет при расхождениях:**
-1. Runtime-реестры (`.claude/agents/`, `.codex/agents/`) имеют приоритет над docs mirror `docs/00-project/ai/agents/`.
+1. Runtime-реестры (`.claude/agents/`, `.codex/agents/`) имеют приоритет над published agent-profile mirror `docs/00-project/ai/agents/agents/`.
 2. `guides/` — канонический docs-layer для agent instructions.
 3. `.codex/skills/` — канонический источник локальных skills; `docs/00-project/ai/skills/` — documentation mirror/snapshot.
 4. `prompts/collected/` — read-only архивные копии, НЕ использовать как SSOT.
@@ -329,7 +329,7 @@ Claude Code НЕ требует CLAUDE.md в корне — он читает `.
 >    - `docs/00-project/ai/skills/local/{name}/SKILL.md` (docs mirror)
 > 3. Создай файл памяти: `docs/00-project/ai/memory/memory-{name}.md`
 > 4. Добавь в ORCHESTRATION.md (`docs/00-project/ai/agents/agents/` + `.codex/agents/`)
-> 5. Добавь в `agent-orchestration-rules.md` (`.claude/rules/`)
+> 5. Добавь в `docs/00-project/ai/agents/policy/agent-orchestration-rules.md` и runtime copy при необходимости
 
 ### Шаблон файла памяти для нового субагента
 

@@ -317,8 +317,7 @@ composite:
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
-# Gold filters and filter rules loaded from hierarchical config files:
-#   1. configs/filters/_defaults.yaml (global defaults)
-#   2. configs/filters/providers/composite.yaml (provider-specific)
-#   3. configs/filters/entities/composite/activity.yaml (entity-specific)
-# No inline gold_filters needed — filter entity config is authoritative.
+# Gold filters resolve from:
+#   1. configs/base/pipeline.yaml (`filter_defaults`)
+#   2. local `gold_filters` in this composite config (if present)
+# No separate composite filter file is used here.

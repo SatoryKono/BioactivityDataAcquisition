@@ -151,6 +151,7 @@ class SilverWriterMetadataMixin:
         partition_by: list[str] | None = None,
         started_at: datetime | None = None,
         completed_at: datetime | None = None,
+        version_after: int | None = None,
     ) -> None:
         """Write Silver layer metadata sidecar file."""
         if not records:
@@ -163,7 +164,11 @@ class SilverWriterMetadataMixin:
                 table_path=table_path,
             )
             return
-        version_after = await self._get_delta_version(table_path)
+        resolved_version = (
+            version_after
+            if version_after is not None
+            else await self._get_delta_version(table_path)
+        )
         silver_input = SilverMetadataInput(
             table_path=table_path,
             records=records,
@@ -171,7 +176,7 @@ class SilverWriterMetadataMixin:
             mode=mode,
             bronze_refs=bronze_refs,
             dq_metrics=dq_metrics,
-            version_after=version_after,
+            version_after=resolved_version,
             transform_version=self._transform_version,
             transform_steps=self._transform_steps,
             dq_report_path=dq_report_path,
@@ -280,6 +285,7 @@ class SilverWriterMetadataMixin:
             partition_by=partition_cols,
             started_at=started_at,
             completed_at=completed_at,
+            version_after=version_after,
         )
         if version_after is None:
             return None

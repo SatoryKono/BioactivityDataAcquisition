@@ -4,6 +4,7 @@ description: "Deprecated alias profile. Use sp-mobile-developer as canonical pro
 tools: Read, Glob, Grep
 model: sonnet
 ---
+*Статус: internal-only (generated subagent spec)*
 
 This profile name is deprecated by naming policy.
 

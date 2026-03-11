@@ -4,6 +4,7 @@ description: "Deprecated alias profile. Use sp-debugger as canonical profile."
 tools: Read, Glob, Grep
 model: sonnet
 ---
+*Статус: internal-only (generated subagent spec)*
 
 This profile name is deprecated by consolidation policy.
 

@@ -45,10 +45,15 @@ if TYPE_CHECKING:
     from bioetl.application.composite.preflight_validator import (
         CompositePreflightValidator,
     )
-    from bioetl.application.core.runner import PipelineRunner
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.domain.composite.config import CompositeConfig
-    from bioetl.domain.ports import LockPort, LoggerPort, MetricsPort, QuarantinePort
+    from bioetl.domain.ports import (
+        ExecutionMetricsRunnerPort,
+        LockPort,
+        LoggerPort,
+        MetricsPort,
+        QuarantinePort,
+    )
 
 
 __all__ = [
@@ -92,8 +97,10 @@ class CompositePipelineRunner(
         self,
         config: CompositeConfig,
         runtime: CompositeRuntimeConfig,
-        seed_runner_factory: Callable[[], PipelineRunner],
-        enricher_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
+        seed_runner_factory: Callable[[], ExecutionMetricsRunnerPort],
+        enricher_runner_factory: Callable[
+            [str, pl.DataFrame], ExecutionMetricsRunnerPort
+        ],
         key_extractor: KeyExtractorService,
         coordinator: EnrichmentCoordinatorService,
         merger: MergeService,
@@ -104,7 +111,9 @@ class CompositePipelineRunner(
         run_id: str | None = None,
         dq_report_service: DQReportService | None = None,
         preflight_validator: CompositePreflightValidator | None = None,
-        dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner]
+        dependencies_runner_factory: Callable[
+            [str, pl.DataFrame], ExecutionMetricsRunnerPort
+        ]
         | None = None,
         dependency_coordinator: DependencyCoordinatorService | None = None,
         quarantine_port: QuarantinePort | None = None,

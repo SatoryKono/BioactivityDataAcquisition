@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -434,3 +434,44 @@ class TestSilverWriterDQMetrics:
             assert value_metrics.min is not None
             assert value_metrics.max is not None
             assert value_metrics.mean is not None
+
+    @pytest.mark.asyncio
+    async def test_finalize_silver_write_result_reuses_delta_version(
+        self, noop_logger, valid_records
+    ):
+        """Finalize path should read Delta version once and pass it to metadata."""
+        from datetime import UTC, datetime
+
+        from bioetl.domain.medallion import SilverWriteMode
+        from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+        writer._compute_dq_metrics = AsyncMock(
+            return_value=BatchDQMetrics(
+                total_records=2,
+                valid_records=2,
+                error_records=0,
+                warning_records=0,
+            )
+        )
+        writer._get_delta_version = AsyncMock(return_value=7)
+        writer._write_silver_metadata = AsyncMock()
+
+        result = await writer._finalize_silver_write_result(
+            table_name="test.table",
+            records=valid_records,
+            table_path="/tmp/silver/test/table",
+            primary_keys=["entity_id"],
+            validated_mode=SilverWriteMode.MERGE,
+            bronze_refs=None,
+            partition_cols=None,
+            started_at=datetime(2026, 3, 11, 12, 0, tzinfo=UTC),
+            start_perf=0.0,
+        )
+
+        assert result is not None
+        assert result.delta_version == 7
+        assert writer._get_delta_version.await_count == 1
+        writer._write_silver_metadata.assert_awaited_once()
+        assert writer._write_silver_metadata.await_args.kwargs["version_after"] == 7

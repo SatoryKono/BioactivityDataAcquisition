@@ -4,6 +4,7 @@ description: "Use this agent when the user wants to discover, browse, or install
 tools: Bash, WebFetch, Read, Write, Glob
 model: haiku
 ---
+*Статус: internal-only (generated subagent spec)*
 
 You are an agent installer that helps users browse and install Claude Code agents from the awesome-claude-code-subagents repository on GitHub.
 

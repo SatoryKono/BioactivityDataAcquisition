@@ -1,5 +1,7 @@
 # Memory: py-debug-bot
 
+*Статус: internal-only (agent memory)*
+
 *Version: 1.0.0 | Date: 2026-02-23 | Parent: agent-memory.md*
 
 > **Focus**: Root cause analysis, test failure debugging, systematic hypothesis verification, error classification.

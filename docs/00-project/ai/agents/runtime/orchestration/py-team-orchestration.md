@@ -1,10 +1,13 @@
 # ORCHESTRATION.md — Оркестрация команды субагентов BioETL
 
-> **DEPRECATED (2026-02-25):** Этот файл — адаптированная копия для Codex/Jules.
-> Канонические версии оркестрации:
+> **DEPRECATED (2026-02-25):** Этот файл — устаревшая адаптированная копия для Codex/Jules.
+> Published docs mirror: `docs/00-project/ai/agents/agents/ORCHESTRATION.md`
+> Runtime copies:
 > - Claude Code: `.claude/agents/ORCHESTRATION.md`
 > - Codex: `.codex/agents/ORCHESTRATION.md`
-> При расхождении с этим docs-файлом приоритет у runtime-реестров выше.
+> При расхождении приоритет у published mirror и runtime-реестров; этот файл сохраняется только как legacy alias.
+>
+> **Historical note:** дальнейшее содержимое ниже сохранено как архивный снимок ранней orchestration-модели и может содержать устаревшие роли вроде `pyCodeBot` и `pyDiagramBot`. Для текущего процесса использовать только published mirror / runtime copies выше.
 
 *Версия: 3.1 (Adapted) | Дата: 2026-02-24 | Под проект BioETL v6.0.0*
 
@@ -95,4 +98,4 @@ docs/99-archive/reports/<task-id>/
 
 - Исторические отчёты в `docs/99-archive/reports/<task-id>/` могут использовать старые имена файлов (например, `04-refactoring-log.md` вместо `04-implementation-log.md`) и старую нумерацию ADR.
 - Такие артефакты считаются **валидными историческими данными** и НЕ являются ошибкой, если сохранён контекст задачи и трассируемость ID (`AUD-*`, `RF-*`, `DBG-*`, `DOC-*`, `CFG-*`).
-- Для новых задач MUST использовать текущую структуру и актуальный контекст проекта BioETL v6.0.0, RULES.md v5.23 и ADR-001..ADR-040.
+- Для новых задач MUST использовать текущую структуру и актуальный контекст проекта BioETL v6.0.0, RULES.md v5.23 и ADR-001..ADR-043.

@@ -61,7 +61,15 @@ class ExecutionMetricsReadablePort(Protocol):
 
     @property
     def execution_metrics(self) -> dict[str, int]:
-        """Execution counters keyed by canonical metric names."""
+        """Execution counters keyed by canonical metric names.
+
+        Required keys:
+        - ``records_fetched``
+        - ``records_bronze``
+        - ``records_silver``
+        - ``records_gold``
+        - ``records_quarantined``
+        """
         ...
 
 
