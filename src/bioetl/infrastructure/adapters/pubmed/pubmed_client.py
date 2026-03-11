@@ -1,8 +1,10 @@
 # src/bioetl/infrastructure/adapters/pubmed/pubmed_client.py
-"""PubMed adapter for Entrez E-utilities API.
+"""PubMed adapter implementation for Entrez E-utilities API.
 
-Implements DataSourcePort for PubMed article metadata extraction.
-Split into mixins to comply with LOC limits.
+Compatibility note:
+    This module remains the implementation home for ``PubMedAdapter``, but new
+    imports should use ``bioetl.infrastructure.adapters.pubmed`` or
+    ``bioetl.infrastructure.adapters.pubmed.client`` as the canonical entrypoint.
 """
 
 from __future__ import annotations

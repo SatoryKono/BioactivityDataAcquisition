@@ -12,6 +12,10 @@ from uuid import UUID, uuid4
 import pytest
 
 from bioetl.application.core.batch_executor import BatchExecutor, BatchResult
+from bioetl.application.core.batch_executor_loop_helpers import (
+    build_batch_progress_payload,
+    build_periodic_checkpoint_payload,
+)
 from bioetl.application.core.batch_checkpoint_recovery_service import (
     BatchCheckpointRecoveryService,
 )
@@ -815,3 +819,34 @@ class TestBatchResult:
         assert result.silver_count == 95
         assert result.gold_count == 80
         assert result.quarantined_count == 5
+
+
+@pytest.mark.unit
+class TestBatchExecutorLoopHelpers:
+    """Tests for extracted extraction-loop helper payloads."""
+
+    def test_build_batch_progress_payload_contains_current_counts(self) -> None:
+        """Progress payload should mirror the current executor counters."""
+        assert build_batch_progress_payload(
+            records_fetched=9,
+            records_bronze=8,
+            records_silver=7,
+            records_filtered_out=2,
+        ) == {
+            "records_fetched": 9,
+            "records_bronze": 8,
+            "records_silver": 7,
+            "records_filtered_out": 2,
+        }
+
+    def test_build_periodic_checkpoint_payload_includes_interval(self) -> None:
+        """Periodic checkpoint payload must preserve interval and resume offset."""
+        assert build_periodic_checkpoint_payload(
+            records_fetched=14,
+            resume_offset=25,
+            checkpoint_interval=5,
+        ) == {
+            "records_fetched": 14,
+            "resume_offset": 25,
+            "checkpoint_interval": 5,
+        }

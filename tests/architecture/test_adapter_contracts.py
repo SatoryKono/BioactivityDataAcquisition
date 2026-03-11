@@ -450,6 +450,69 @@ class TestAdapterPortCompliance:
             "for type-safe Protocol check."
         )
 
+    def test_primary_adapter_classes_use_package_root_imports(
+        self, src_dir: Path
+    ) -> None:
+        """Primary adapter classes should be imported from provider package roots."""
+        disallowed_modules = {
+            "bioetl.infrastructure.adapters.chembl.client": "ChemblAdapter",
+            "bioetl.infrastructure.adapters.crossref.client": "CrossRefAdapter",
+            "bioetl.infrastructure.adapters.openalex.client": "OpenAlexAdapter",
+            "bioetl.infrastructure.adapters.pubchem.client": "PubChemAdapter",
+            "bioetl.infrastructure.adapters.pubmed.client": "PubMedAdapter",
+            "bioetl.infrastructure.adapters.pubmed.pubmed_client": "PubMedAdapter",
+            "bioetl.infrastructure.adapters.semanticscholar.client": "SemanticScholarAdapter",
+            "bioetl.infrastructure.adapters.semanticscholar.adapter": "SemanticScholarAdapter",
+            "bioetl.infrastructure.adapters.uniprot.client": "UniProtAdapter",
+        }
+        allowed_files = {
+            src_dir / "bioetl" / "infrastructure" / "adapters" / "chembl" / "__init__.py",
+            src_dir / "bioetl" / "infrastructure" / "adapters" / "crossref" / "__init__.py",
+            src_dir / "bioetl" / "infrastructure" / "adapters" / "openalex" / "__init__.py",
+            src_dir / "bioetl" / "infrastructure" / "adapters" / "pubchem" / "__init__.py",
+            src_dir / "bioetl" / "infrastructure" / "adapters" / "pubmed" / "__init__.py",
+            src_dir / "bioetl" / "infrastructure" / "adapters" / "pubmed" / "client.py",
+            src_dir / "bioetl" / "infrastructure" / "adapters" / "semanticscholar" / "__init__.py",
+            src_dir / "bioetl" / "infrastructure" / "adapters" / "semanticscholar" / "client.py",
+            src_dir / "bioetl" / "infrastructure" / "adapters" / "uniprot" / "__init__.py",
+            src_dir.parent
+            / "tests"
+            / "unit"
+            / "infrastructure"
+            / "adapters"
+            / "crossref"
+            / "test_compatibility.py",
+        }
+
+        violations: list[str] = []
+        search_roots = [src_dir / "bioetl", src_dir.parent / "tests"]
+
+        for root in search_roots:
+            for py_file in root.rglob("*.py"):
+                if py_file in allowed_files:
+                    continue
+
+                tree = ast.parse(py_file.read_text(encoding="utf-8"))
+                for node in ast.walk(tree):
+                    if not isinstance(node, ast.ImportFrom) or node.module is None:
+                        continue
+                    expected_name = disallowed_modules.get(node.module)
+                    if expected_name is None:
+                        continue
+                    if not any(alias.name == expected_name for alias in node.names):
+                        continue
+
+                    violations.append(
+                        f"{py_file.relative_to(src_dir.parent)}:{node.lineno} imports "
+                        f"{expected_name} from {node.module}; use the provider "
+                        "package root instead"
+                    )
+
+        assert not violations, (
+            "Primary adapter classes must be imported from package-root facades.\n"
+            + "\n".join(f"  - {item}" for item in violations)
+        )
+
 
 def _build_runtime_init_kwargs(
     adapter_cls: type,

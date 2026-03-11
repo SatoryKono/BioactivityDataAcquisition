@@ -14,10 +14,8 @@ from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
-from bioetl.infrastructure.adapters.openalex.client import (
-    OpenAlexAdapter,
-    _create_openalex_adapter,
-)
+from bioetl.infrastructure.adapters.openalex import OpenAlexAdapter
+from bioetl.infrastructure.adapters.openalex.client import _create_openalex_adapter
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 

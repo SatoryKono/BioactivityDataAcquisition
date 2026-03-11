@@ -17,6 +17,11 @@ from bioetl.interfaces.cli.commands.run_all import (
     _get_available_providers,
     _validate_provider,
 )
+from bioetl.interfaces.cli.commands.run_all_helpers import (
+    create_run_all_options,
+    record_pipeline_failure,
+    record_pipeline_result,
+)
 from bioetl.interfaces.cli.main import cli
 
 
@@ -190,6 +195,72 @@ class TestValidateProvider:
             is_valid, error = _validate_provider("chembl")
             assert is_valid is False
             assert "No pipelines are registered" in error
+
+
+@pytest.mark.unit
+class TestRunAllHelpers:
+    """Tests for extracted run-all helper functions."""
+
+    def test_create_run_all_options_enables_debug_log_level(self) -> None:
+        """Debug flag should map to DEBUG log level in RunOptions."""
+        options = create_run_all_options(
+            run_type="incremental",
+            limit=25,
+            dry_run=False,
+            debug=True,
+        )
+
+        assert options.run_type == "incremental"
+        assert options.limit == 25
+        assert options.dry_run is False
+        assert options.log_level == "DEBUG"
+
+    @patch("bioetl.interfaces.cli.commands.run_all_helpers.echo_warning")
+    def test_record_pipeline_result_shutdown_requests_stop(
+        self,
+        mock_echo_warning,
+    ) -> None:
+        """Shutdown result should mark the batch as skipped and stop execution."""
+        batch_result = BatchRunResult(total=2)
+        result = RunResult(
+            status=PipelineRunResult.SHUTDOWN,
+            pipeline_name="chembl_activity",
+            run_id="run-id",
+            run_type="incremental",
+        )
+
+        should_stop = record_pipeline_result(
+            batch_result=batch_result,
+            pipeline="chembl_activity",
+            result=result,
+        )
+
+        assert should_stop is True
+        assert batch_result.skipped == 1
+        assert batch_result.results == [result]
+        mock_echo_warning.assert_called_once()
+
+    @patch("bioetl.interfaces.cli.commands.run_all_helpers.echo_error")
+    def test_record_pipeline_failure_tracks_failed_pipeline(
+        self,
+        mock_echo_error,
+    ) -> None:
+        """Failure helper should update counters and preserve pipeline name."""
+        batch_result = BatchRunResult(total=1)
+
+        record_pipeline_failure(
+            batch_result=batch_result,
+            pipeline="chembl_activity",
+            title="[FAIL] chembl_activity: failed",
+            detail="boom",
+        )
+
+        assert batch_result.failed == 1
+        assert batch_result.failed_pipelines == ["chembl_activity"]
+        mock_echo_error.assert_called_once_with(
+            "[FAIL] chembl_activity: failed",
+            "boom",
+        )
 
 
 # =============================================================================

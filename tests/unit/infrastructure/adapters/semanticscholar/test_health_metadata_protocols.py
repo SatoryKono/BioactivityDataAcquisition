@@ -12,9 +12,7 @@ from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
-from bioetl.infrastructure.adapters.semanticscholar.client import (
-    SemanticScholarAdapter,
-)
+from bioetl.infrastructure.adapters.semanticscholar import SemanticScholarAdapter
 from bioetl.infrastructure.adapters.semanticscholar.health_metadata_mixin import (
     SemanticScholarAdapterMetricsProtocol,
     SemanticScholarHTTPClientProtocol,
