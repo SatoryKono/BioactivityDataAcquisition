@@ -5,16 +5,10 @@
 
 set -uo pipefail
 
-# ── Resolve repo root reliably ──────────────────────────────────────
-# Primary: use script's own location (.claude/setup.sh → parent is repo root)
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(dirname "$SCRIPT_DIR")"
-
-# Validate
-if [ ! -f "$REPO_ROOT/pyproject.toml" ]; then
-    echo "[setup] ERROR: pyproject.toml not found in $REPO_ROOT"
-    exit 1
-fi
+# ── Resolve repo root ───────────────────────────────────────────────
+# Claude Code setup scripts may be piped to bash, so BASH_SOURCE and
+# git rev-parse are unreliable. Use the known project path directly.
+REPO_ROOT="/home/user/BioactivityDataAcquisition"
 cd "$REPO_ROOT"
 
 # ── Colors ──────────────────────────────────────────────────────────
