@@ -237,19 +237,18 @@ class TestRunnerFactoryContains:
 class TestMetricsExtractor:
     """Tests for MetricsExtractor class."""
 
-    def test_extract_metrics_from_runner_with_executor(self):
-        """Test extract_metrics returns metrics from runner's executor."""
+    def test_extract_metrics_from_runner_with_execution_metrics(self):
+        """Test extract_metrics returns metrics from runner's public contract."""
         extractor = MetricsExtractor()
 
-        # Create mock runner with executor
         mock_runner = MagicMock()
-        mock_executor = MagicMock()
-        mock_executor.records_fetched = 100
-        mock_executor.records_bronze = 95
-        mock_executor.records_silver = 90
-        mock_executor.records_gold = 85
-        mock_executor.records_quarantined = 10
-        mock_runner._executor = mock_executor
+        mock_runner.execution_metrics = {
+            "records_fetched": 100,
+            "records_bronze": 95,
+            "records_silver": 90,
+            "records_gold": 85,
+            "records_quarantined": 10,
+        }
 
         result = extractor.extract_metrics(mock_runner)
 
@@ -261,59 +260,34 @@ class TestMetricsExtractor:
             "records_quarantined": 10,
         }
 
-    def test_extract_metrics_from_runner_without_executor(self):
-        """Test extract_metrics returns zeros when runner has no executor."""
+    def test_extract_metrics_from_runner_without_execution_metrics(self):
+        """Test extract_metrics rejects runners without public metrics."""
         extractor = MetricsExtractor()
 
-        # Create mock runner without executor
-        mock_runner = MagicMock(spec=[])  # No _executor attribute
+        mock_runner = MagicMock(spec=[])  # No execution_metrics attribute
 
-        result = extractor.extract_metrics(mock_runner)
+        with pytest.raises(TypeError, match="execution_metrics"):
+            extractor.extract_metrics(mock_runner)
 
-        assert result == {
-            "records_fetched": 0,
-            "records_bronze": 0,
-            "records_silver": 0,
-            "records_gold": 0,
-            "records_quarantined": 0,
-        }
-
-    def test_extract_metrics_with_missing_executor_attributes(self):
-        """Test extract_metrics handles missing executor attributes gracefully."""
-        extractor = MetricsExtractor()
-
-        # Create mock runner with partial executor
-        mock_runner = MagicMock()
-        mock_executor = MagicMock(spec=[])  # No metric attributes
-        mock_runner._executor = mock_executor
-
-        result = extractor.extract_metrics(mock_runner)
-
-        # Should return 0 for all missing attributes
-        assert result == {
-            "records_fetched": 0,
-            "records_bronze": 0,
-            "records_silver": 0,
-            "records_gold": 0,
-            "records_quarantined": 0,
-        }
-
-    def test_extract_metrics_with_none_executor(self):
-        """Test extract_metrics handles None executor."""
+    def test_extract_metrics_with_partial_execution_metrics(self):
+        """Test extract_metrics rejects partial execution metrics payloads."""
         extractor = MetricsExtractor()
 
         mock_runner = MagicMock()
-        mock_runner._executor = None
+        mock_runner.execution_metrics = {"records_fetched": 1}
 
-        result = extractor.extract_metrics(mock_runner)
+        with pytest.raises(KeyError):
+            extractor.extract_metrics(mock_runner)
 
-        assert result == {
-            "records_fetched": 0,
-            "records_bronze": 0,
-            "records_silver": 0,
-            "records_gold": 0,
-            "records_quarantined": 0,
-        }
+    def test_extract_metrics_with_none_execution_metrics(self):
+        """Test extract_metrics rejects None public metrics."""
+        extractor = MetricsExtractor()
+
+        mock_runner = MagicMock()
+        mock_runner.execution_metrics = None
+
+        with pytest.raises(TypeError, match="execution_metrics"):
+            extractor.extract_metrics(mock_runner)
 
 
 @pytest.mark.unit

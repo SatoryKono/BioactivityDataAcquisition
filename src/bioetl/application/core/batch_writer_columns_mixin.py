@@ -31,7 +31,7 @@ class BatchWriterColumnsMixin:
                 converted = schema.to_schema()
                 return set(converted.columns.keys())
             except _SCHEMA_EXTRACTION_ERRORS:
-                pass
+                pass  # Why: schema hint unavailable, use default column order
 
         if hasattr(schema, "columns"):
             return set(schema.columns.keys())

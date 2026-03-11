@@ -114,6 +114,13 @@ class MockPipelineRunner:
         self._executor.records_fetched = 100
         self._executor.records_silver = 95
 
+    @property
+    def execution_metrics(self) -> dict[str, int]:
+        return {
+            "records_fetched": self._executor.records_fetched,
+            "records_silver": self._executor.records_silver,
+        }
+
     async def run(self):
         self.run_called = True
         if self._should_fail:

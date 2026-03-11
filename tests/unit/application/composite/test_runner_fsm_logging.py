@@ -162,6 +162,10 @@ def mock_seed_runner_factory() -> Callable[[], MagicMock]:
         executor.records_fetched = 100
         executor.records_silver = 95
         runner._executor = executor
+        runner.execution_metrics = {
+            "records_fetched": 100,
+            "records_silver": 95,
+        }
         return runner
 
     return factory
@@ -178,6 +182,10 @@ def mock_enricher_runner_factory() -> Callable[[str, pl.DataFrame], MagicMock]:
         executor.records_silver = len(keys)
         executor.records_quarantined = 0
         runner._executor = executor
+        runner.execution_metrics = {
+            "records_silver": len(keys),
+            "records_quarantined": 0,
+        }
         return runner
 
     return factory

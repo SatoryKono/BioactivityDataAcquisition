@@ -14,11 +14,6 @@ from bioetl.domain.ports import ExecutorMetricsPort
 from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 
 if TYPE_CHECKING:
-    from bioetl.application.services.dq_report_service import (
-        DQReportContext,
-        DQReportResult,
-        DQReportService,
-    )
     from bioetl.application.core.postrun_cleanup_orchestrator import (
         PostrunCleanupService,
     )
@@ -31,22 +26,24 @@ if TYPE_CHECKING:
     from bioetl.application.core.postrun_metadata_version_resolver import (
         PostrunMetadataVersionResolver,
     )
+    from bioetl.application.services.dq_report_service import (
+        DQReportContext,
+        DQReportResult,
+    )
     from bioetl.application.services.medallion_lifecycle import (
         MedallionLifecycleService,
     )
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import (
-        BronzeDQConfigPort,
-        GoldDQConfigPort,
         LoggerPort,
         MetadataCoordinatorPort,
         MetadataWriterPort,
         MetricsPort,
-        SilverDQConfigPort,
         StorageMaintenancePort,
         TracingPort,
     )
+
 
 def _resolve_report_path(
     dq_reports: DQReportResult | None,

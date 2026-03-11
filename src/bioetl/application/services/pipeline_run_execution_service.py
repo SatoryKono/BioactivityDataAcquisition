@@ -7,6 +7,7 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from bioetl.domain.exceptions import BioETLError
+from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 from bioetl.domain.types import JsonDict
 
 __all__ = [
@@ -59,9 +60,6 @@ class PipelineRunExecutionService:
             PipelineExecutionResult with status ('success', 'shutdown', or 'failed'),
             optional error details, extracted metrics, and completion timestamp.
         """
-        # Import inside method to avoid circular import at module import time.
-        from bioetl.application.core.shutdown import PipelineShutdownError
-
         status = "success"
         error_message: str | None = None
         error_type: str | None = None

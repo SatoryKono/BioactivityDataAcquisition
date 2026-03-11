@@ -308,8 +308,7 @@ warn_unused_ignores = false
 
 # Note: All layers pass strict mypy checks.
 # RF-007 (2026-03-03): Reduced overrides from 69 to 12 bioetl modules.
-# Removed: disallow_untyped_decorators (18 modules), disable_error_code["misc"] (24),
-# disable_error_code["no-any-return","return-value"] (15). Added inline type:ignore where needed.
+# RF-002 (2026-03-10): Reduced from 11 to 2 bioetl modules (removed 9 with zero type:ignore).
 
 # ============ RUFF ============
 [tool.ruff]

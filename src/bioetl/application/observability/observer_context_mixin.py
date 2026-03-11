@@ -5,7 +5,7 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING, Self
 
-from bioetl.application.core.shutdown import PipelineShutdownError
+from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 from bioetl.application.observability.observer_event_mixin import _ObserverEventMixin
 from bioetl.domain.events import PipelineEvent
 
@@ -153,4 +153,4 @@ class _ObserverContextManagerMixin(_ObserverEventMixin):
                     self.span.set_attribute("error", True)
                 self.span.__exit__(exc_type, exc_val, exc_tb)
             except (AttributeError, RuntimeError, TypeError, ValueError):
-                pass
+                pass  # Why: observer teardown is best-effort; span errors must not mask pipeline result

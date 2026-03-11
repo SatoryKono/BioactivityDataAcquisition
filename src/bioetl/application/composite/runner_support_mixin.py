@@ -212,16 +212,15 @@ class CompositeRunnerSupportMixin:
         await runner.run()
         completed_at = datetime.now(tz=UTC)
 
-        records_extracted = getattr(runner, "_executor", None)
-        records_silver = 0
-        if records_extracted:
-            records_silver = getattr(records_extracted, "records_silver", 0)
+        metrics = getattr(runner, "execution_metrics", None)
+        if not isinstance(metrics, dict):
+            metrics = {}
+        records_extracted = int(metrics.get("records_fetched", 0))
+        records_silver = int(metrics.get("records_silver", 0))
 
         return SeedResult(
             pipeline_name=self._config.seed.pipeline,
-            records_extracted=records_extracted.records_fetched
-            if records_extracted
-            else 0,
+            records_extracted=records_extracted,
             records_silver=records_silver,
             keys_generated=records_silver,
             duration_seconds=(completed_at - started_at).total_seconds(),

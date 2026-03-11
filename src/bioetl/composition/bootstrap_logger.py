@@ -22,7 +22,7 @@ Requirements:
 
 from __future__ import annotations
 
-import structlog
+import structlog  # Allowed: composition root configures logging before DI container
 
 from bioetl.infrastructure.observability.logging_config import (
     configure_logging,

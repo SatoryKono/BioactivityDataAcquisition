@@ -205,6 +205,10 @@ class TestCoordinatorSuccessLogging:
             executor.records_silver = len(keys)
             executor.records_quarantined = 0
             runner._executor = executor
+            runner.execution_metrics = {
+                "records_silver": len(keys),
+                "records_quarantined": 0,
+            }
             return runner
 
         await coordinator.run_enrichers(

@@ -47,6 +47,11 @@ class RunnablePort(Protocol):
         """
         ...
 
+    @property
+    def run_id(self) -> str:
+        """Stable run identifier for the current execution."""
+        ...
+
 
 @runtime_checkable
 class RunnerFactoryPort(Protocol):

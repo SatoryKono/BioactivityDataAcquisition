@@ -10,7 +10,8 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.core.config import LockConfig
 from bioetl.application.core.heartbeat import HeartbeatTask
-from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
+from bioetl.application.core.shutdown import ShutdownSignal
+from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 from bioetl.domain.locking import FencingToken, LockContext, LockContextHolder
 from bioetl.domain.types import RunID, RunType
 

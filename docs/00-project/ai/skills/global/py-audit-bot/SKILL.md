@@ -5,6 +5,8 @@ description: Execute BioETL py-audit-bot profile for role-specific workflow and 
 
 # py-audit-bot
 
+*Статус: internal-published (Internal / Extended)*
+
 ## Objective
 Run the role-specific workflow as defined in the py-audit-bot profile.
 

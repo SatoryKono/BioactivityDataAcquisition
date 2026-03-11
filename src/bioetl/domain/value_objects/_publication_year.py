@@ -123,7 +123,7 @@ class PublicationYear(ValueObject[int]):
             try:
                 return int(stripped[:4])
             except ValueError:
-                pass
+                pass  # Why: year prefix not parseable as int; fall through to full-string parse
         try:
             return int(stripped)
         except ValueError:

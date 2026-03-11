@@ -29,7 +29,7 @@ def _get_git_commit_cached() -> str | None:
             ["git", "rev-parse", "--short", "HEAD"],
             capture_output=True,
             text=True,
-            timeout=5,
+            timeout=5,  # Local git subprocess — 5s is generous
             check=False,
         )
         if result.returncode == 0:

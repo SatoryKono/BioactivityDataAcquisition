@@ -111,5 +111,5 @@ def process_audit_file(
                     if current_count + len(entries) >= limit:
                         break
     except OSError:
-        pass
+        pass  # Why: audit file missing or unreadable; return empty entries list
     return entries

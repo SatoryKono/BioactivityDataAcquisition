@@ -50,13 +50,13 @@ def _duration_seconds(started_at: datetime, completed_at: datetime) -> float:
 
 
 def _extract_runner_metrics(runner: PipelineRunner) -> tuple[int, int]:
-    """Extract available row counters from runner executor."""
-    executor = getattr(runner, "_executor", None)
-    if executor is None:
+    """Extract available row counters from runner public metrics view."""
+    metrics = getattr(runner, "execution_metrics", None)
+    if not isinstance(metrics, dict):
         return 0, 0
     return (
-        getattr(executor, "records_fetched", 0),
-        getattr(executor, "records_silver", 0),
+        int(metrics.get("records_fetched", 0)),
+        int(metrics.get("records_silver", 0)),
     )
 
 

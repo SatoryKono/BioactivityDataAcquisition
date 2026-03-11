@@ -11,12 +11,13 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, cast
 from uuid import uuid4
 
-from bioetl.application.core.shutdown import PipelineShutdownError
+from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 from bioetl.application.services import PipelineRunResult, RunOptions, RunResult
 from bioetl.composition.bootstrap import (
     bootstrap_pipeline_runner,
     maybe_start_metrics_server,
 )
+from bioetl.composition.factories.runner_factory import create_metrics_extractor
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.providers.registration import register_all_providers
 from bioetl.domain.context import (
@@ -30,7 +31,7 @@ from bioetl.domain.types import ExecutionContext, RunID, RunType
 from bioetl.infrastructure.config import get_settings
 
 if TYPE_CHECKING:
-    from bioetl.application.core.runner import PipelineRunner
+    from bioetl.domain.ports import RunnablePort
 
 
 __all__ = [
@@ -216,7 +217,7 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
     )
 
 
-def create_pipeline_runner(name: str, options: RunOptions) -> PipelineRunner:
+def create_pipeline_runner(name: str, options: RunOptions) -> RunnablePort:
     """Create a pipeline runner for the given pipeline and options.
 
     This is the main entrypoint for pipeline execution. It handles:
@@ -229,7 +230,7 @@ def create_pipeline_runner(name: str, options: RunOptions) -> PipelineRunner:
         options: User-facing run options.
 
     Returns:
-        PipelineRunner ready for execution via runner.run().
+        RunnablePort ready for execution via runner.run().
 
     Raises:
         ValueError: If pipeline name is unknown or options are invalid.
@@ -263,7 +264,7 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
     runner = create_pipeline_runner(name, options)
 
     # Extract run context for result
-    run_id = str(runner._context.run_id)
+    run_id = runner.run_id
     run_type = options.run_type
 
     status = PipelineRunResult.SUCCESS
@@ -281,18 +282,17 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
 
     completed_at = datetime.now(tz=UTC)
 
-    # Extract metrics from executor (composition layer has access to internals)
-    executor = runner._executor
+    metrics = create_metrics_extractor().extract_metrics(runner)
     return RunResult(
         status=status,
         pipeline_name=name,
         run_id=run_id,
         run_type=run_type,
-        records_fetched=executor.records_fetched,
-        records_bronze=executor.records_bronze,
-        records_silver=executor.records_silver,
-        records_gold=executor.records_gold,
-        records_quarantined=executor.records_quarantined,
+        records_fetched=int(metrics.get("records_fetched", 0)),
+        records_bronze=int(metrics.get("records_bronze", 0)),
+        records_silver=int(metrics.get("records_silver", 0)),
+        records_gold=int(metrics.get("records_gold", 0)),
+        records_quarantined=int(metrics.get("records_quarantined", 0)),
         started_at=started_at,
         completed_at=completed_at,
         error_message=error_message,

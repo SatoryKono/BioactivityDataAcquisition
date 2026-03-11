@@ -175,7 +175,7 @@ class DeltaReader:
                     typed_num_records = [v for v in num_records if v is not None]
                     return int(sum(typed_num_records))
             except (KeyError, AttributeError, TypeError):
-                pass
+                pass  # Why: Delta metadata field absent; fall through to PyArrow dataset count
             except BaseException:
                 # pyo3_runtime.PanicException on empty Delta tables
                 # (inherits BaseException, not Exception).

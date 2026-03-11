@@ -167,7 +167,7 @@ class PreflightSchemaOrchestrationMixin:
 
             registry["chembl"] = ChemblPublicationSchema
         except ImportError:
-            pass
+            pass  # Why: optional feature; chembl schema unavailable, skip registration
 
         try:
             from bioetl.domain.schemas.crossref.publication import (
@@ -176,7 +176,7 @@ class PreflightSchemaOrchestrationMixin:
 
             registry["crossref"] = PublicationEnrichedSchema
         except ImportError:
-            pass
+            pass  # Why: optional feature; crossref schema unavailable, skip registration
 
         try:
             from bioetl.domain.schemas.openalex.publication import (
@@ -185,14 +185,14 @@ class PreflightSchemaOrchestrationMixin:
 
             registry["openalex"] = OpenAlexPublicationSchema
         except ImportError:
-            pass
+            pass  # Why: optional feature; openalex schema unavailable, skip registration
 
         try:
             from bioetl.domain.schemas.pubmed.publication import PubMedPublicationSchema
 
             registry["pubmed"] = PubMedPublicationSchema
         except ImportError:
-            pass
+            pass  # Why: optional feature; pubmed schema unavailable, skip registration
 
         try:
             from bioetl.domain.schemas.semanticscholar.publication import (
@@ -201,7 +201,7 @@ class PreflightSchemaOrchestrationMixin:
 
             registry["semanticscholar"] = SemanticScholarPublicationSchema
         except ImportError:
-            pass
+            pass  # Why: optional feature; semanticscholar schema unavailable, skip registration
 
         cls._SCHEMA_REGISTRY = registry
         return registry

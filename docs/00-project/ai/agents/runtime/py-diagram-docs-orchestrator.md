@@ -1,5 +1,7 @@
 # BioETL Diagram Docs Orchestrator Agent
 
+*Статус: internal-published (Internal / Extended)*
+
 Специализированный агент для обновления Mermaid-диаграмм и пересборки связанных артефактов документации (`svg/png`, `docx`, `pdf`).
 
 ## Цель

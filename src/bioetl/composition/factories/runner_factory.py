@@ -115,7 +115,7 @@ class MetricsExtractor:
     """Extractor for pipeline execution metrics.
 
     Implements MetricsExtractorPort protocol for PipelineRunnerService.
-    Extracts metrics from the runner's internal executor.
+    Extracts metrics from the runner's public execution-metrics contract.
     """
 
     def extract_metrics(self, runner: RunnablePort) -> dict[str, int]:
@@ -127,24 +127,18 @@ class MetricsExtractor:
         Returns:
             Dictionary with metric names and values.
         """
-        # Access the internal executor if available
-        executor = getattr(runner, "_executor", None)
-
-        if executor is None:
-            return {
-                "records_fetched": 0,
-                "records_bronze": 0,
-                "records_silver": 0,
-                "records_gold": 0,
-                "records_quarantined": 0,
-            }
+        metrics = getattr(runner, "execution_metrics", None)
+        if not isinstance(metrics, dict):
+            raise TypeError(
+                "Runner does not expose a valid execution_metrics mapping"
+            )
 
         return {
-            "records_fetched": getattr(executor, "records_fetched", 0),
-            "records_bronze": getattr(executor, "records_bronze", 0),
-            "records_silver": getattr(executor, "records_silver", 0),
-            "records_gold": getattr(executor, "records_gold", 0),
-            "records_quarantined": getattr(executor, "records_quarantined", 0),
+            "records_fetched": int(metrics["records_fetched"]),
+            "records_bronze": int(metrics["records_bronze"]),
+            "records_silver": int(metrics["records_silver"]),
+            "records_gold": int(metrics["records_gold"]),
+            "records_quarantined": int(metrics["records_quarantined"]),
         }
 
 

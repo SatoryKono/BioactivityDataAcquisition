@@ -24,6 +24,18 @@ __all__ = [
 ]
 
 
+_ARTICLE_ID_KEY_MAP: dict[str, str] = {
+    "pubmed": "pubmed",
+    "doi": "doi",
+    "pmc": "pmc",
+    "pii": "pii",
+    "mid": "mid",
+    "publisher-id": "publisher_id",
+    "pmcid": "pmcid",
+    "medline": "medline",
+}
+
+
 def _assign_known_article_id(
     result: AllArticleIds,
     *,
@@ -31,24 +43,10 @@ def _assign_known_article_id(
     value: str,
 ) -> bool:
     """Assign a mapped ArticleId and return whether assignment was handled."""
-    if id_type == "pubmed":
-        result["pubmed"] = value
-    elif id_type == "doi":
-        result["doi"] = value
-    elif id_type == "pmc":
-        result["pmc"] = value
-    elif id_type == "pii":
-        result["pii"] = value
-    elif id_type == "mid":
-        result["mid"] = value
-    elif id_type == "publisher-id":
-        result["publisher_id"] = value
-    elif id_type == "pmcid":
-        result["pmcid"] = value
-    elif id_type == "medline":
-        result["medline"] = value
-    else:
+    key = _ARTICLE_ID_KEY_MAP.get(id_type)
+    if key is None:
         return False
+    result[key] = value  # type: ignore[literal-required]
     return True
 
 

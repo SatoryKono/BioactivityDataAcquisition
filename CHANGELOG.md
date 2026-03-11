@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Mypy module overrides reduced from 11 to 2 (RF-002)**: Removed 9 bioetl modules from `warn_unused_ignores=false` override list in `pyproject.toml` — they had zero `# type: ignore` comments. Only `bioetl.domain.serialization` (1 cross-env type: ignore) and `bioetl.domain.schemas.validators` (4 Pandera decorator stubs) remain. Verified: `mypy --strict` passes on all 999 source files with 0 issues.
+  - Files: `pyproject.toml`
+
+- **Fixed Backfill clear policy documentation (RF-001)**: Corrected `architecture-diagrams.md` line 219 from "Backfill: Clear Silver" to "Backfill: Clear Silver + Gold" to match ARCH-007 specification. Code was already correct — only the diagram text was inconsistent.
+  - Files: `docs/02-architecture/architecture-diagrams.md`
+
 - **`dev_setup.sh` major improvements**: Added `--ci` mode (no colors, non-interactive), `--verbose`, `--no-color` flags; step timing and summary table (PASS/WARN/FAIL/SKIP); checks for `gh` CLI, Docker, Node.js/mmdc, AI tools (Claude Code, Codex); `.env` drift detection; corrupted venv auto-repair; `BIOETL_SKIP_PRECOMMIT` and `BIOETL_SKIP_DOCKER` env vars; integrated `setup_plugins.sh`/`setup_skills.sh`; fixed MCP path and RULES.md version ref (v5.21 -> v5.23)
   - Files: `scripts/dev/dev_setup.sh`, `README.md`, `docs/03-guides/quick-start.md`, `.github/CONTRIBUTING.md`, `scripts/README.md`
 

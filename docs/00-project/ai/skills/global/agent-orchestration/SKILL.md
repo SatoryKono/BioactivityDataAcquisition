@@ -5,6 +5,8 @@ description: Coordinate BioETL multi-agent workflow across py-* profiles using t
 
 # Agent Orchestration
 
+*Статус: internal-published (Internal / Extended)*
+
 ## Objective
 Coordinate complex tasks across agent profiles (`py-*`) with clear handoffs and artifacts.
 
