@@ -23,9 +23,7 @@ from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
-from bioetl.infrastructure.adapters.semanticscholar.client import (
-    SemanticScholarAdapter,
-)
+from bioetl.infrastructure.adapters.semanticscholar import SemanticScholarAdapter
 
 if TYPE_CHECKING:
     pass

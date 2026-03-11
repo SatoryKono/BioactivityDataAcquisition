@@ -17,6 +17,16 @@ from bioetl.application.core.batch_executor_helpers import (
     build_batch_execution_state_update,
     build_run_statistics,
 )
+from bioetl.application.core.batch_executor_loop_helpers import (
+    append_record_and_update_batch_size,
+    build_batch_progress_payload,
+    build_periodic_checkpoint_payload,
+    build_shutdown_checkpoint_payload,
+    build_start_index,
+    create_batch_extraction_loop_state,
+    reset_batch_after_flush,
+    should_flush_batch,
+)
 from bioetl.application.core.batch_progress_service import BatchProgressService
 from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
 from bioetl.domain.exceptions import BioETLError
@@ -223,9 +233,10 @@ class BatchExecutor(_BatchExecutorDQMixin):
         offset: int | None = None,
     ) -> None:
         """Run the main extraction and processing loop."""
-        batch: list[BronzeRecord] = []
-        current_batch_size = self.batch_size
-        check_interval = self._memory.get_check_interval()
+        loop_state = create_batch_extraction_loop_state(
+            batch_size=self.batch_size,
+            check_interval=self._memory.get_check_interval(),
+        )
 
         async for raw_record in self._batch_processing_service.extract_records(
             limit=limit,
@@ -234,47 +245,66 @@ class BatchExecutor(_BatchExecutorDQMixin):
         ):
             if self._shutdown_signal.is_requested:
                 await self._checkpoint_recovery_service.save_checkpoint_now(
-                    records_fetched=self.records_fetched,
-                    resume_offset=self._resume_offset,
+                    **build_shutdown_checkpoint_payload(
+                        records_fetched=self.records_fetched,
+                        resume_offset=self._resume_offset,
+                    )
                 )
                 raise PipelineShutdownError("Shutdown during extraction")
 
-            batch.append(raw_record)
             self.records_fetched += 1
-            self._progress_service.report_progress(
+            append_record_and_update_batch_size(
+                loop_state=loop_state,
+                raw_record=raw_record,
+                memory_manager=self._memory,
                 records_fetched=self.records_fetched,
-                records_bronze=self.records_bronze,
-                records_silver=self.records_silver,
-                records_filtered_out=self.records_filtered_out,
             )
-
-            current_batch_size = self._memory.check_pressure(
-                current_batch_size,
-                check_interval,
-                self.records_fetched,
-            )
-
-            if len(batch) >= current_batch_size:
-                start_index = self.records_fetched - len(batch)
-                await self._process_batch_and_update_state(batch, start_index)
-                batch = []
-                current_batch_size = self._memory.maybe_recover(current_batch_size)
-                self._progress_service.report_progress(
+            self._progress_service.report_progress(
+                **build_batch_progress_payload(
                     records_fetched=self.records_fetched,
                     records_bronze=self.records_bronze,
                     records_silver=self.records_silver,
                     records_filtered_out=self.records_filtered_out,
                 )
-
-            await self._checkpoint_recovery_service.save_periodic_checkpoint(
-                records_fetched=self.records_fetched,
-                resume_offset=self._resume_offset,
-                checkpoint_interval=self.checkpoint_interval,
             )
 
-        if batch:
-            start_index = self.records_fetched - len(batch)
-            await self._process_batch_and_update_state(batch, start_index)
+            if should_flush_batch(loop_state):
+                await self._process_batch_and_update_state(
+                    loop_state.batch,
+                    build_start_index(
+                        records_fetched=self.records_fetched,
+                        batch=loop_state.batch,
+                    ),
+                )
+                reset_batch_after_flush(
+                    loop_state=loop_state,
+                    memory_manager=self._memory,
+                )
+                self._progress_service.report_progress(
+                    **build_batch_progress_payload(
+                        records_fetched=self.records_fetched,
+                        records_bronze=self.records_bronze,
+                        records_silver=self.records_silver,
+                        records_filtered_out=self.records_filtered_out,
+                    )
+                )
+
+            await self._checkpoint_recovery_service.save_periodic_checkpoint(
+                **build_periodic_checkpoint_payload(
+                    records_fetched=self.records_fetched,
+                    resume_offset=self._resume_offset,
+                    checkpoint_interval=self.checkpoint_interval,
+                )
+            )
+
+        if loop_state.batch:
+            await self._process_batch_and_update_state(
+                loop_state.batch,
+                build_start_index(
+                    records_fetched=self.records_fetched,
+                    batch=loop_state.batch,
+                ),
+            )
 
     async def process(
         self,

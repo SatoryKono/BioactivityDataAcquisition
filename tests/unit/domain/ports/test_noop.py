@@ -8,7 +8,6 @@ from __future__ import annotations
 import pytest
 
 from bioetl.domain.ports.noop import (
-    NoOpAudit,
     NoOpMemoryMonitor,
     NoOpMetrics,
     NoOpPiiHasher,
@@ -132,43 +131,6 @@ class TestNoOpMetrics:
         metrics = NoOpMetrics()
         metrics.close()
         metrics.close()  # Should not raise
-
-
-@pytest.mark.unit
-@pytest.mark.asyncio
-class TestNoOpAudit:
-    """Test NoOpAudit class."""
-
-    async def test_log_write_no_error(self) -> None:
-        """Test log_write is a no-op."""
-        from unittest.mock import MagicMock
-
-        audit = NoOpAudit()
-        entry = MagicMock()
-        await audit.log_write(entry)  # Should not raise
-
-    async def test_get_entries_returns_empty_list(self) -> None:
-        """Test get_entries returns empty list."""
-        audit = NoOpAudit()
-        entries = await audit.get_entries()
-        assert entries == []
-
-    async def test_get_entries_with_filters_returns_empty(self) -> None:
-        """Test get_entries with filters still returns empty."""
-        from datetime import datetime
-
-        audit = NoOpAudit()
-        entries = await audit.get_entries(
-            run_id="test-run",  # type: ignore[arg-type]
-            start_time=datetime.now(),
-            limit=10,
-        )
-        assert entries == []
-
-    async def test_aclose_no_error(self) -> None:
-        """Test aclose is a no-op."""
-        audit = NoOpAudit()
-        await audit.aclose()  # Should not raise
 
 
 @pytest.mark.unit

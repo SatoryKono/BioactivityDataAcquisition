@@ -11,7 +11,6 @@ import click
 
 from bioetl.application.services import (
     PipelineNotFoundError,
-    PipelineRunResult,
     RunOptions,
     RunResult,
 )
@@ -32,6 +31,11 @@ from bioetl.interfaces.cli.commands.health_server_integration import (
 )
 from bioetl.interfaces.cli.commands.metrics_server_integration import (
     ensure_metrics_server_started,
+)
+from bioetl.interfaces.cli.commands.run_all_helpers import (
+    create_run_all_options,
+    record_pipeline_failure,
+    record_pipeline_result,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning
@@ -110,37 +114,30 @@ async def _run_pipelines_batch(
     for pipeline in pipelines:
         try:
             result = await _run_pipeline_async(service, pipeline, options)
-            batch_result.results.append(result)
-
-            if result.status == PipelineRunResult.SUCCESS:
-                batch_result.succeeded += 1
-                echo_info(f"[OK] {pipeline}: completed successfully")
-            elif result.status == PipelineRunResult.DRY_RUN:
-                batch_result.skipped += 1
-                echo_info(f"[DRY] {pipeline}: dry-run (no changes)")
-            elif result.status == PipelineRunResult.SHUTDOWN:
-                batch_result.skipped += 1
-                echo_warning(f"[STOP] {pipeline}: gracefully shut down")
+            if record_pipeline_result(
+                batch_result=batch_result,
+                pipeline=pipeline,
+                result=result,
+            ):
                 break  # Stop processing remaining pipelines on shutdown
-            elif result.status == PipelineRunResult.FAILED:
-                batch_result.failed += 1
-                batch_result.failed_pipelines.append(pipeline)
-                echo_error(
-                    f"[FAIL] {pipeline}: failed",
-                    result.error_message or "Unknown error",
-                )
         except PipelineNotFoundError as e:
-            batch_result.failed += 1
-            batch_result.failed_pipelines.append(pipeline)
-            echo_error(f"[FAIL] {pipeline}: not found", str(e))
+            record_pipeline_failure(
+                batch_result=batch_result,
+                pipeline=pipeline,
+                title=f"[FAIL] {pipeline}: not found",
+                detail=str(e),
+            )
         except (BioETLError, OSError, RuntimeError, ValueError) as exc:
-            batch_result.failed += 1
-            batch_result.failed_pipelines.append(pipeline)
             error_msg = (
                 f"{exc} (reason_code=CLI_RUN_ALL_PIPELINE_ERROR, "
                 f"pipeline={pipeline}, error_type={type(exc).__name__})"
             )
-            echo_error(f"[FAIL] {pipeline}: unexpected error", error_msg)
+            record_pipeline_failure(
+                batch_result=batch_result,
+                pipeline=pipeline,
+                title=f"[FAIL] {pipeline}: unexpected error",
+                detail=error_msg,
+            )
 
     return batch_result
 
@@ -385,11 +382,11 @@ def run_all(
 
     echo_health_server_info(health_server, health_port)
 
-    options = RunOptions(
+    options = create_run_all_options(
         run_type=run_type,
         limit=limit,
         dry_run=dry_run,
-        log_level="DEBUG" if debug else "INFO",
+        debug=debug,
     )
     batch_result = _run_batch_with_policy(
         source=source,
