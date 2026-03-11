@@ -255,7 +255,7 @@ class PubMedPublicationTransformer(
         """Enable fallback lookup logging for PubMed.
 
         PubMed supports title-based fallback when PMID lookup fails.
-        Adapter uses TitleFallbackHandler for three-phase lookup:
+        Adapter uses PubMedTitleFallbackHandler for three-phase lookup:
         1. PMID batch fetch
         2. Title fallback for unresolved PMIDs
         3. Title-only lookup for entries without PMIDs

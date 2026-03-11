@@ -210,7 +210,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         """Enable fallback lookup logging for CrossRef.
 
         CrossRef supports title-based fallback when DOI lookup fails (404).
-        Adapter uses TitleFallbackHandler for three-phase lookup:
+        Adapter uses CrossRefTitleFallbackHandler for three-phase lookup:
         1. DOI batch fetch
         2. Title fallback for unresolved DOIs
         3. Title-only lookup for entries without DOIs

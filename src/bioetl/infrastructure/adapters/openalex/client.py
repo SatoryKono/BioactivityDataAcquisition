@@ -42,7 +42,7 @@ from bioetl.infrastructure.adapters.openalex.client_runtime_helpers import (
 from bioetl.infrastructure.adapters.openalex.cursor_flow import (
     OpenAlexCursorFlowService,
 )
-from bioetl.infrastructure.adapters.openalex.fallback import TitleFallbackHandler
+from bioetl.infrastructure.adapters.openalex.fallback import OpenAlexTitleFallbackHandler
 from bioetl.infrastructure.adapters.openalex.fallback_orchestrator import (
     OpenAlexFallbackOrchestrator,
 )
@@ -124,7 +124,7 @@ class OpenAlexAdapter(
     openalex_query_executor: OpenAlexQueryExecutor | None = None
     openalex_response_mapper: OpenAlexResponseMapper | None = None
     openalex_cursor_flow: OpenAlexCursorFlowService | None = None
-    title_fallback_handler: TitleFallbackHandler | None = None
+    title_fallback_handler: OpenAlexTitleFallbackHandler | None = None
     openalex_fallback_orchestrator: OpenAlexFallbackOrchestrator | None = None
 
     provider_name: str = field(init=False, default="openalex")

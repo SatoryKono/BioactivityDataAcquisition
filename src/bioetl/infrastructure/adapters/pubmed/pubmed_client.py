@@ -38,7 +38,7 @@ from bioetl.infrastructure.adapters.pubmed.adapter_filter_fetch_mixin import (
 from bioetl.infrastructure.adapters.pubmed.constants import (
     ENTREZ_API_BASE as PUBMED_ENTREZ_API_BASE,
 )
-from bioetl.infrastructure.adapters.pubmed.fallback import TitleFallbackHandler
+from bioetl.infrastructure.adapters.pubmed.fallback import PubMedTitleFallbackHandler
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -64,13 +64,13 @@ def _create_default_pubmed_title_fallback_handler(
     *,
     logger: LoggerPort,
     search_fn: Any,  # Any: async callable for title search
-) -> TitleFallbackHandler:
+) -> PubMedTitleFallbackHandler:
     """Create default title fallback handler for non-DI call sites.
 
     Returns:
-        TitleFallbackHandler instance configured with the given logger and search function.
+        PubMedTitleFallbackHandler instance configured with the given logger and search function.
     """
-    return TitleFallbackHandler(logger=logger, search_fn=search_fn)
+    return PubMedTitleFallbackHandler(logger=logger, search_fn=search_fn)
 
 
 _PUBMED_DEFAULT_FALLBACK_CONFIG = FallbackDecoratorConfig(
@@ -112,7 +112,7 @@ class PubMedAdapter(
     adapter_metrics: AdapterMetricsRecorder | None = None
     request_collector: APIRequestCollector | None = None
     fallback_fetch_service: FallbackFetchOrchestratorService | None = None
-    title_fallback_handler: TitleFallbackHandler | None = None
+    title_fallback_handler: PubMedTitleFallbackHandler | None = None
 
     provider_name: str = field(init=False, default="pubmed")
     _fallback_fetch_service: FallbackFetchOrchestratorService = field(

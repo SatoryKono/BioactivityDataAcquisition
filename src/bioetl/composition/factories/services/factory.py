@@ -7,7 +7,7 @@ ServicesBuilder and helpers have been extracted to services_builder.py.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.composition.factories.dq.context_resolver import (
@@ -29,25 +29,24 @@ from bioetl.composition.factories.services.builder import (
     extract_pipeline_callbacks,
 )
 from bioetl.composition.factories.storage import StorageContext, StorageFactory
-from bioetl.domain.ports import (
-    CheckpointPort,
-    LockPort,
-    MetricsPort,
-    NoOpMetrics,
-    QuarantinePort,
+from bioetl.composition.factories.services.port_factories import (
+    create_checkpoint,
+    create_lock,
+    create_metrics,
+    create_quarantine,
 )
 from bioetl.domain.types import JsonDict
-from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
-from bioetl.infrastructure.locking.memory_lock import MemoryLock
-from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
-from bioetl.infrastructure.quarantine import UnifiedQuarantineAdapter
 
 if TYPE_CHECKING:
     from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
     from bioetl.domain.ports import (
+        CheckpointPort,
         DataSourcePort,
         DQMonitorPort,
+        LockPort,
         LoggerPort,
+        MetricsPort,
+        QuarantinePort,
         SilverValidatorPort,
         TracingPort,
     )
@@ -95,7 +94,7 @@ class BaseServicesFactory:
         Returns:
             PipelineService with storage, checkpoint, observability, and DQ wired.
         """
-        metrics_port = metrics if metrics is not None else cls._create_metrics(settings)
+        metrics_port = metrics if metrics is not None else create_metrics(settings)
         cls._ensure_prod_silver_validator(settings, pipeline_config, silver_validator)
         storage_ctx = StorageFactory.create(
             settings,
@@ -105,9 +104,9 @@ class BaseServicesFactory:
             metadata_coordinator=metadata_coordinator,
             silver_validator=silver_validator,
         )
-        lock = cls._create_lock()
-        checkpoint = cls._create_checkpoint(storage_ctx)
-        quarantine = cls._create_quarantine(settings)
+        lock = create_lock()
+        checkpoint = create_checkpoint(storage_ctx)
+        quarantine = create_quarantine(settings)
         tracer_port = cls._resolve_tracer(tracer)
         dq_services = cls._create_dq_services(
             settings=settings,
@@ -220,84 +219,6 @@ class BaseServicesFactory:
             gold_dq_analyzer=dq_services.get("gold_analyzer"),
             dq_report_writer=dq_services.get("report_writer"),
             dq_report_service=dq_services.get("report_service"),
-        )
-
-    @staticmethod
-    def _create_lock() -> LockPort:
-        """Create in-memory lock for local deployment.
-
-        Returns:
-            MemoryLock instance implementing LockPort.
-        """
-        lock = MemoryLock()
-        assert isinstance(lock, LockPort), (
-            f"MemoryLock must implement LockPort, got {type(lock)}"
-        )
-        return lock
-
-    @staticmethod
-    def _create_checkpoint(storage_ctx: StorageContext) -> CheckpointPort:
-        """Create local filesystem checkpoint.
-
-        Args:
-            storage_ctx: Storage context providing the checkpoints base path.
-
-        Returns:
-            LocalCheckpointAdapter instance implementing CheckpointPort.
-        """
-        checkpoint = LocalCheckpointAdapter(base_path=storage_ctx.checkpoints_path)
-        assert isinstance(checkpoint, CheckpointPort), (
-            f"LocalCheckpointAdapter must implement CheckpointPort, got {type(checkpoint)}"
-        )
-        return checkpoint
-
-    @staticmethod
-    def _create_quarantine(settings: Settings) -> QuarantinePort:
-        """Create unified quarantine storage.
-
-        Args:
-            settings: Application settings providing the quarantine base path.
-
-        Returns:
-            UnifiedQuarantineAdapter instance implementing QuarantinePort.
-        """
-        quarantine = UnifiedQuarantineAdapter(base_path=str(settings.quarantine_path))
-        assert isinstance(quarantine, QuarantinePort), (
-            f"UnifiedQuarantineAdapter must implement QuarantinePort, got {type(quarantine)}"
-        )
-        return quarantine
-
-    @staticmethod
-    def _create_metrics(settings: Settings) -> MetricsPort:
-        metrics: object = (
-            PrometheusMetrics() if settings.metrics_enabled else NoOpMetrics()
-        )
-
-        if isinstance(metrics, MetricsPort):
-            assert isinstance(metrics, MetricsPort), (
-                f"Metrics adapter must implement MetricsPort, got {type(metrics)}"
-            )
-            return metrics
-        if BaseServicesFactory._is_metrics_port_like(metrics):
-            return cast("MetricsPort", metrics)
-        raise TypeError(
-            f"Metrics adapter must implement MetricsPort, got {type(metrics)}"
-        )
-
-    @staticmethod
-    def _is_metrics_port_like(candidate: object) -> bool:
-        """Duck-typed fallback for patched test doubles."""
-        required_methods = (
-            "observe_histogram",
-            "increment_counter",
-            "set_gauge",
-            "inc_quarantine_records",
-            "inc_dq_validation_failures",
-            "close",
-        )
-        return all(
-            callable(getattr(candidate, method_name, None))
-            for method_name in required_methods
         )
 
     @staticmethod

@@ -34,10 +34,10 @@ CROSSREF_FALLBACK_ERRORS = (
 
 
 # Re-export titles_match for backwards compatibility
-__all__ = ["TitleFallbackHandler", "titles_match"]
+__all__ = ["CrossRefTitleFallbackHandler", "titles_match"]
 
 
-class TitleFallbackHandler(BaseTitleFallbackHandler):
+class CrossRefTitleFallbackHandler(BaseTitleFallbackHandler):
     """Handles fallback search by title when DOI lookup fails.
 
     Extracts fallback logic to reduce main class size and cyclomatic complexity.

@@ -187,6 +187,27 @@ class CompositeRunnerMergeStageMixin:
                 reason_code="checkpoint_delete_failed",
             )
 
+    def _transition_to_completed_state(
+        self,
+        state: CompositeCheckpointState,
+    ) -> CompositeCheckpointState:
+        """Return finalized COMPLETED state, logging FSM transition only when needed."""
+        if state.state == CompositePipelineState.COMPLETED:
+            return state
+
+        previous_state = state.state
+        self._fsm.validate_fsm_transition(
+            previous_state,
+            CompositePipelineState.COMPLETED,
+        )
+        completed_state = state.with_state(CompositePipelineState.COMPLETED)
+        self._fsm.log_fsm_transition(
+            from_state=previous_state,
+            to_state=CompositePipelineState.COMPLETED,
+            stage="pipeline_complete",
+        )
+        return completed_state
+
     async def _execute_merge_stage(
         self,
         state: CompositeCheckpointState,
@@ -235,17 +256,6 @@ class CompositeRunnerMergeStageMixin:
 
     async def _finalize_pipeline(self, state: CompositeCheckpointState) -> None:
         """Finalize pipeline: set COMPLETED state and clean checkpoint."""
-        if state.state != CompositePipelineState.COMPLETED:
-            previous_state = state.state
-            self._fsm.validate_fsm_transition(
-                previous_state,
-                CompositePipelineState.COMPLETED,
-            )
-            state = state.with_state(CompositePipelineState.COMPLETED)
-            self._fsm.log_fsm_transition(
-                from_state=previous_state,
-                to_state=CompositePipelineState.COMPLETED,
-                stage="pipeline_complete",
-            )
+        state = self._transition_to_completed_state(state)
         await self._call_save_checkpoint_safe(state, "completed")
         await self._delete_checkpoint_safe()

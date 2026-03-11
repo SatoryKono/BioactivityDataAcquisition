@@ -9,7 +9,7 @@ from bioetl.infrastructure.adapters.crossref.batch import (
     DoiBatchProcessor,
     SearchPaginatorHelper,
 )
-from bioetl.infrastructure.adapters.crossref.fallback import TitleFallbackHandler
+from bioetl.infrastructure.adapters.crossref.fallback import CrossRefTitleFallbackHandler
 from bioetl.infrastructure.adapters.crossref.fetch_flow import CrossRefFetchFlow
 from bioetl.infrastructure.adapters.crossref.query_builder import CrossRefQueryBuilder
 from bioetl.infrastructure.adapters.crossref.response_mapper import (
@@ -124,7 +124,7 @@ def _create_default_crossref_search_paginator(
 
 def _create_default_crossref_title_fallback_handler(
     *, logger: LoggerPort, search_fn: Callable[[str, int], AsyncIterator[JsonDict]]
-) -> TitleFallbackHandler:
+) -> CrossRefTitleFallbackHandler:
     """Create default title fallback handler for non-DI call sites.
 
     Args:
@@ -132,9 +132,9 @@ def _create_default_crossref_title_fallback_handler(
         search_fn: Async callable to search publications by query string.
 
     Returns:
-        TitleFallbackHandler instance configured with the given logger and search function.
+        CrossRefTitleFallbackHandler instance configured with the given logger and search function.
     """
-    return TitleFallbackHandler(logger=logger, search_fn=search_fn)
+    return CrossRefTitleFallbackHandler(logger=logger, search_fn=search_fn)
 
 
 def _create_default_crossref_fetch_flow(

@@ -11,7 +11,7 @@ from bioetl.infrastructure.adapters.common import FallbackFetchOrchestratorServi
 from bioetl.infrastructure.adapters.openalex.cursor_flow import (
     OpenAlexCursorFlowService,
 )
-from bioetl.infrastructure.adapters.openalex.fallback import TitleFallbackHandler
+from bioetl.infrastructure.adapters.openalex.fallback import OpenAlexTitleFallbackHandler
 from bioetl.infrastructure.adapters.openalex.fallback_orchestrator import (
     OpenAlexFallbackOrchestrator,
 )
@@ -51,7 +51,7 @@ class OpenAlexRuntimeServices:
     query_executor: OpenAlexQueryExecutor
     response_mapper: OpenAlexResponseMapper
     cursor_flow: OpenAlexCursorFlowService
-    fallback_handler: TitleFallbackHandler
+    fallback_handler: OpenAlexTitleFallbackHandler
     fallback_orchestrator: OpenAlexFallbackOrchestrator
 
 
@@ -108,15 +108,15 @@ def _create_default_openalex_title_fallback_handler(
     *,
     logger: LoggerPort,
     search_fn: SearchByTitleFn,
-) -> TitleFallbackHandler:
+) -> OpenAlexTitleFallbackHandler:
     """Create the default title fallback handler."""
-    return TitleFallbackHandler(logger=logger, search_fn=search_fn)
+    return OpenAlexTitleFallbackHandler(logger=logger, search_fn=search_fn)
 
 
 def _create_default_openalex_fallback_orchestrator(
     *,
     fallback_fetch_service: FallbackFetchOrchestratorService,
-    fallback_handler: TitleFallbackHandler,
+    fallback_handler: OpenAlexTitleFallbackHandler,
     normalize_id: NormalizeDoiFn,
     extract_record_id: ExtractRecordIdFn,
     logger: LoggerPort,
@@ -137,7 +137,7 @@ def build_openalex_runtime_services(
     openalex_query_executor: OpenAlexQueryExecutor | None,
     openalex_response_mapper: OpenAlexResponseMapper | None,
     openalex_cursor_flow: OpenAlexCursorFlowService | None,
-    title_fallback_handler: TitleFallbackHandler | None,
+    title_fallback_handler: OpenAlexTitleFallbackHandler | None,
     openalex_fallback_orchestrator: OpenAlexFallbackOrchestrator | None,
     http_client: UnifiedHTTPClient,
     adapter_metrics: AdapterMetricsRecorder,

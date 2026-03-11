@@ -451,6 +451,8 @@ runner = PipelineFactory.create()
 | Decorator | `*Decorator` | `RetryDecorator` |
 | Strategy | `*Strategy` | `MergeStrategy` |
 | Converter | `*Converter` | `UnitConverter` |
+| Classifier | `*Classifier` | `AdapterErrorClassifier` |
+| Clock | `*Clock` | `SystemClock` |
 
 > **Value Object suffixes** (не требуют проверки — исключены из NAME-001):
 > `*Record`, `*Options`, `*Status`, `*Preview`, `*Phase`, `*Issue`,
