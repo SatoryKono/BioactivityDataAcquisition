@@ -349,7 +349,7 @@ step_check_prerequisites() {
         print_warning "pyproject.toml найден, но это может быть другой проект"
     else
         print_error "Скрипт должен запускаться из корня проекта BioETL (pyproject.toml не найден)"
-        print_info "cd $(dirname "$SCRIPT_DIR")"
+        print_info "cd \"$SCRIPT_DIR\"\"
         ((errors++))
     fi
 
