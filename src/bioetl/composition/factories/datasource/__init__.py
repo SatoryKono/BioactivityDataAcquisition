@@ -1,9 +1,9 @@
 """Data source factory subpackage."""
 
 from bioetl.composition.factories.datasource.factory import (
-    DataSourceCreator,
+    DataSourceCreatorPort,
     DataSourceFactory,
     DataSourceRegistry,
 )
 
-__all__ = ["DataSourceCreator", "DataSourceFactory", "DataSourceRegistry"]
+__all__ = ["DataSourceCreatorPort", "DataSourceFactory", "DataSourceRegistry"]

@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.base_transformer import BaseTransformer
     from bioetl.application.core.pipeline_services import PipelineService
-    from bioetl.composition.factories.datasource.factory import DataSourceCreator
+    from bioetl.composition.factories.datasource.factory import DataSourceCreatorPort
     from bioetl.composition.factories.pipeline.construction import (
         EntityTypeExtractor,
     )
@@ -75,7 +75,7 @@ class _BuildPipelineServicesFn(Protocol):
     def __call__(
         self,
         pipeline_name: str,
-        create_data_source_fn: DataSourceCreator,
+        create_data_source_fn: DataSourceCreatorPort,
         settings: Settings,
         logger: LoggerPort,
         config: PipelineYamlConfig | None = None,
@@ -96,7 +96,7 @@ class _PipelineCreationInputs:
     pipeline_name: str
     pipeline_class: type[BasePipeline]
     provider: str
-    create_data_source_fn: DataSourceCreator
+    create_data_source_fn: DataSourceCreatorPort
     transformer_class: type[BaseTransformer] | None
     run_id: RunID
     runtime: RuntimeConfig

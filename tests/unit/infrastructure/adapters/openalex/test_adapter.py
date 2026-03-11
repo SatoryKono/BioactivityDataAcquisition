@@ -89,6 +89,35 @@ class TestOpenAlexAdapter:
         assert adapter._adapter_metrics is adapter_metrics
         assert adapter._request_collector is request_collector
 
+    def test_post_init_preserves_injected_openalex_runtime_collaborators(
+        self,
+        mock_http_client: MagicMock,
+        logger: NoOpLogger,
+    ) -> None:
+        """Injected OpenAlex runtime collaborators should survive post-init wiring."""
+        query_executor = MagicMock()
+        response_mapper = MagicMock()
+        cursor_flow = MagicMock()
+        fallback_handler = MagicMock()
+        fallback_orchestrator = MagicMock()
+
+        adapter = OpenAlexAdapter(
+            http_client=mock_http_client,
+            logger=logger,
+            mailto="test@example.com",
+            openalex_query_executor=query_executor,
+            openalex_response_mapper=response_mapper,
+            openalex_cursor_flow=cursor_flow,
+            title_fallback_handler=fallback_handler,
+            openalex_fallback_orchestrator=fallback_orchestrator,
+        )
+
+        assert adapter._query_executor is query_executor
+        assert adapter._response_mapper is response_mapper
+        assert adapter._cursor_flow is cursor_flow
+        assert adapter._fallback_handler is fallback_handler
+        assert adapter._fallback_orchestrator is fallback_orchestrator
+
     def test_adapter_provider_name(self, adapter: OpenAlexAdapter) -> None:
         """Should return correct provider name."""
         assert adapter.provider_name == "openalex"

@@ -164,9 +164,7 @@ class MergeIOMixin(MergeOutputWriterMixin):
         enrichment_results: dict[str, EnrichmentResult],
     ) -> tuple[dict[str, pl.DataFrame], list[str]]:
         """Load only successful enricher silver tables."""
-        enricher_dfs: dict[str, pl.DataFrame] = {}
-        sources: list[str] = []
-
+        load_specs: list[tuple[str, str, str]] = []
         for enricher in enrichers:
             result = enrichment_results.get(enricher.pipeline)
             if result is None or not result.is_success:
@@ -175,18 +173,14 @@ class MergeIOMixin(MergeOutputWriterMixin):
             enricher_table = enricher.silver_table or self._infer_silver_table(
                 enricher.pipeline
             )
-            enricher_df = await self._read_optional_merge_input(
-                pipeline=enricher.pipeline,
-                table=enricher_table,
-                role="enricher",
+            load_specs.append(
+                (
+                    enricher.pipeline,
+                    enricher_table,
+                    "enricher",
+                )
             )
-            if enricher_df is None:
-                continue
-
-            enricher_dfs[enricher.pipeline] = enricher_df
-            sources.append(enricher.pipeline)
-
-        return enricher_dfs, sources
+        return await self._load_successful_merge_inputs(load_specs)
 
     async def _load_dependency_dataframes(
         self,
@@ -197,26 +191,42 @@ class MergeIOMixin(MergeOutputWriterMixin):
         if not dependencies or not dependency_results:
             return {}, []
 
-        dependency_dfs: dict[str, pl.DataFrame] = {}
-        sources: list[str] = []
-
+        load_specs: list[tuple[str, str, str]] = []
         for dep in dependencies:
             dep_result = dependency_results.get(dep.pipeline)
             if dep_result is None or not dep_result.is_success or not dep.silver_table:
                 continue
 
-            dep_df = await self._read_optional_merge_input(
-                pipeline=dep.pipeline,
-                table=dep.silver_table,
-                role="dependency",
+            load_specs.append(
+                (
+                    dep.pipeline,
+                    dep.silver_table,
+                    "dependency",
+                )
             )
-            if dep_df is None:
+        return await self._load_successful_merge_inputs(load_specs)
+
+    async def _load_successful_merge_inputs(
+        self,
+        load_specs: Sequence[tuple[str, str, str]],
+    ) -> tuple[dict[str, pl.DataFrame], list[str]]:
+        """Load optional merge inputs that already passed success filtering."""
+        loaded_dfs: dict[str, pl.DataFrame] = {}
+        sources: list[str] = []
+
+        for pipeline, table, role in load_specs:
+            loaded_df = await self._read_optional_merge_input(
+                pipeline=pipeline,
+                table=table,
+                role=role,
+            )
+            if loaded_df is None:
                 continue
 
-            dependency_dfs[dep.pipeline] = dep_df
-            sources.append(dep.pipeline)
+            loaded_dfs[pipeline] = loaded_df
+            sources.append(pipeline)
 
-        return dependency_dfs, sources
+        return loaded_dfs, sources
 
     async def _apply_dependency_joins_if_needed(
         self,

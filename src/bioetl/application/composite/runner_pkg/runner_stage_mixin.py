@@ -227,11 +227,8 @@ class CompositeRunnerStageMixin(
         if reason_code:
             log_kwargs["reason_code"] = reason_code
         self._logger.error("Dependencies phase failed", **log_kwargs)
-        failed_state = self._transition_state_with_fsm_log(
+        await self._persist_failed_state(
             state,
-            CompositePipelineState.FAILED,
             stage="dependencies_failed",
-            validate=False,
             error=str(error),
         )
-        await self._call_save_checkpoint_safe(failed_state, "dependencies_failed")

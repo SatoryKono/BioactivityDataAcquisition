@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 from bioetl.application.core.runner import PipelineRunner
 from bioetl.composition.factories.datasource.factory import (
-    DataSourceCreator,
+    DataSourceCreatorPort,
     DataSourceRegistry,
 )
 from bioetl.composition.factories.pipeline.dq_helpers import (
@@ -70,7 +70,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         silver_schema: pa.Schema | None = None,
         gold_schema: type[pandera.DataFrameModel] | None = None,
         pandera_silver_schema: object | None = None,
-        data_source_creator: DataSourceCreator | None = None,
+        data_source_creator: DataSourceCreatorPort | None = None,
         transformer_class: type[BaseTransformer] | None = None,
     ) -> None:
         """Initialize factory dependencies and schema contracts."""

@@ -18,10 +18,10 @@ from bioetl.infrastructure.adapters.common.composable_fallback import (
     resolve_fallback_policy,
 )
 from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
-    DefaultFallbackExecutionStrategy,
-    ExtractRecordIdHook,
+    DefaultFallbackExecution,
+    ExtractRecordIdPort,
     FallbackFetchOrchestratorService,
-    NormalizeIdHook,
+    NormalizeIdPort,
 )
 
 if TYPE_CHECKING:
@@ -52,7 +52,7 @@ class FallbackPolicyMixin:
         """
         raise NotImplementedError  # pragma: no cover
 
-    def _get_normalize_id_hook(self) -> NormalizeIdHook:
+    def _get_normalize_id_hook(self) -> NormalizeIdPort:
         """Return a callable that normalises an incoming filter-id string.
 
         Raises:
@@ -60,7 +60,7 @@ class FallbackPolicyMixin:
         """
         raise NotImplementedError  # pragma: no cover
 
-    def _get_extract_record_id_hook(self) -> ExtractRecordIdHook:
+    def _get_extract_record_id_hook(self) -> ExtractRecordIdPort:
         """Return a callable that extracts the record-id from a BronzeRecord.
 
         Raises:
@@ -106,7 +106,7 @@ class FallbackPolicyMixin:
             defaults=self._get_default_fallback_config(),
             default_enabled=True,
         )
-        strategy = DefaultFallbackExecutionStrategy(
+        strategy = DefaultFallbackExecution(
             normalize_id_hook=self._get_normalize_id_hook(),
             extract_record_id_hook=self._get_extract_record_id_hook(),
             fallback_handler_hook=self._get_fallback_handler(enabled),

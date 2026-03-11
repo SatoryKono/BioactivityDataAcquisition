@@ -1,4 +1,8 @@
-"""Unit tests for domain ports (Protocols)."""
+"""Illustrative contract examples for richer domain port protocols.
+
+This file intentionally keeps only ports where example implementations add
+signal beyond generic runtime-checkable and stub coverage.
+"""
 
 from __future__ import annotations
 
@@ -7,12 +11,7 @@ from typing import Any, Literal
 
 import pytest
 
-from bioetl.domain.locking import FencingToken
 from bioetl.domain.ports import (
-    CheckpointPort,
-    DataSourcePort,
-    LockPort,
-    MetricsPort,
     QuarantinePort,
     StoragePort,
 )
@@ -20,102 +19,8 @@ from bioetl.domain.types import BatchID, RunID
 
 
 @pytest.mark.unit
-class TestDataSourcePortProtocol:
-    """Tests for the DataSourcePort protocol."""
-
-    def test_provider_name_attribute_required(self) -> None:
-        """DataSourcePort should require provider_name attribute."""
-
-        class ValidDataSource:
-            provider_name = "test"
-
-            async def __aenter__(self):
-                return self
-
-            async def __aexit__(self, exc_type, exc_val, exc_tb):
-                pass
-
-            async def fetch(self, _entity_type, _limit=None, _query=None):
-                yield {}
-
-            async def health_check(self):
-                from bioetl.domain.types import HealthStatus
-
-                return HealthStatus.HEALTHY
-
-            async def aclose(self):
-                pass
-
-        # Should pass isinstance check
-        assert isinstance(ValidDataSource(), DataSourcePort)
-
-        class InvalidDataSource:
-            # Missing provider_name
-            async def fetch(self, _entity_type, _limit=None, _query=None):
-                yield {}
-
-            async def health_check(self):
-                from bioetl.domain.types import HealthStatus
-
-                return HealthStatus.HEALTHY
-
-            async def aclose(self):
-                pass
-
-        # Should fail isinstance check
-        assert not isinstance(InvalidDataSource(), DataSourcePort)
-
-    def test_fetch_method_signature(self) -> None:
-        """DataSourcePort should require a specific fetch signature."""
-
-        class ValidFetch:
-            provider_name = "test"
-
-            async def __aenter__(self):
-                return self
-
-            async def __aexit__(self, exc_type, exc_val, exc_tb):
-                pass
-
-            async def fetch(
-                self,
-                entity_type: str,
-                limit: int | None = None,
-                query: str | None = None,
-            ):
-                yield {"data": entity_type, "limit": limit, "query": query}
-
-            async def health_check(self):
-                from bioetl.domain.types import HealthStatus
-
-                return HealthStatus.HEALTHY
-
-            async def aclose(self):
-                pass
-
-        assert isinstance(ValidFetch(), DataSourcePort)
-
-        class InvalidFetchSignature:
-            provider_name = "test"
-
-            # Missing limit and query
-            async def fetch(self, entity_type: str):
-                yield {}
-
-            async def health_check(self):
-                from bioetl.domain.types import HealthStatus
-
-                return HealthStatus.HEALTHY
-
-            async def aclose(self):
-                pass
-
-        assert not isinstance(InvalidFetchSignature(), DataSourcePort)
-
-
-@pytest.mark.unit
 class TestStoragePortProtocol:
-    """Tests for the StoragePort protocol."""
+    """StoragePort warrants concrete examples because of its wide API surface."""
 
     def test_write_silver_signature(self) -> None:
         """StoragePort should require a specific write_silver signature."""
@@ -309,134 +214,8 @@ class TestStoragePortProtocol:
 
 
 @pytest.mark.unit
-class TestLockPortProtocol:
-    """Tests for the LockPort protocol."""
-
-    def test_valid_lock_implementation(self) -> None:
-        """LockPort should accept valid implementations."""
-
-        class ValidLock:
-            async def acquire(
-                self,
-                key: str,
-                owner_id: RunID,
-                ttl: int | None = None,
-                wait: bool = False,
-                wait_timeout: int = 300,
-                exclusive: bool = False,
-            ) -> FencingToken | None:
-                return FencingToken(
-                    sequence=1,
-                    key=key,
-                    owner_id=owner_id,
-                    issued_at=0.0,
-                )
-
-            async def release(
-                self,
-                key: str,
-                owner_id: RunID,
-                exclusive: bool = False,
-            ) -> bool:
-                return True
-
-            async def heartbeat(
-                self,
-                key: str,
-                owner_id: RunID,
-                exclusive: bool = False,
-            ) -> bool:
-                return True
-
-            async def validate_owner(
-                self,
-                key: str,
-                owner_id: RunID,
-            ) -> bool:
-                return True
-
-            async def validate_fencing_token(
-                self,
-                key: str,
-                token: FencingToken,
-            ) -> bool:
-                return token.key == key
-
-            async def aclose(self) -> None:
-                pass
-
-        assert isinstance(ValidLock(), LockPort)
-
-    def test_missing_method_fails(self) -> None:
-        """LockPort should reject implementations missing methods."""
-
-        class InvalidLock:
-            async def acquire(self, key: str, owner_id: RunID) -> bool:
-                return True
-
-            # Missing release, heartbeat, aclose
-            async def aclose(self) -> None:
-                pass
-
-        assert not isinstance(InvalidLock(), LockPort)
-
-
-@pytest.mark.unit
-class TestCheckpointPortProtocol:
-    """Tests for the CheckpointPort protocol."""
-
-    def test_valid_checkpoint_implementation(self) -> None:
-        """CheckpointPort should accept valid implementations."""
-
-        class ValidCheckpoint:
-            async def save(
-                self,
-                pipeline: str,
-                run_id: RunID,
-                metadata: dict[str, Any],
-            ) -> None:
-                pass
-
-            async def load(
-                self,
-                pipeline: str,
-            ) -> tuple[RunID, dict[str, Any]] | None:
-                return None
-
-            async def list_all(self) -> list[str]:
-                return []
-
-            async def delete(self, pipeline: str) -> None:
-                pass
-
-            async def aclose(self) -> None:
-                pass
-
-        assert isinstance(ValidCheckpoint(), CheckpointPort)
-
-    def test_missing_save_fails(self) -> None:
-        """CheckpointPort should reject implementations missing save."""
-
-        class InvalidCheckpoint:
-            # Missing save method
-            async def load(self, pipeline: str) -> None:
-                return None
-
-            async def list_all(self) -> list[str]:
-                return []
-
-            async def delete(self, pipeline: str) -> None:
-                pass
-
-            async def aclose(self) -> None:
-                pass
-
-        assert not isinstance(InvalidCheckpoint(), CheckpointPort)
-
-
-@pytest.mark.unit
 class TestQuarantinePortProtocol:
-    """Tests for the QuarantinePort protocol."""
+    """QuarantinePort examples document the richer replay/write contract."""
 
     def test_valid_quarantine_implementation(self) -> None:
         """QuarantinePort should accept valid implementations."""
@@ -553,88 +332,3 @@ class TestQuarantinePortProtocol:
 
         assert not isinstance(InvalidQuarantine(), QuarantinePort)
 
-
-@pytest.mark.unit
-class TestMetricsPortProtocol:
-    """Tests for the MetricsPort protocol."""
-
-    def test_valid_metrics_implementation(self) -> None:
-        """MetricsPort should accept valid implementations."""
-
-        class ValidMetrics:
-            def observe_histogram(
-                self,
-                name: str,
-                value: float,
-                labels: dict[str, str],
-            ) -> None:
-                pass
-
-            def increment_counter(
-                self,
-                name: str,
-                value: int,
-                labels: dict[str, str],
-            ) -> None:
-                pass
-
-            def set_gauge(
-                self,
-                name: str,
-                value: float,
-                labels: dict[str, str],
-            ) -> None:
-                pass
-
-            def inc_quarantine_records(
-                self,
-                pipeline: str,
-                reason: str,
-                count: int = 1,
-            ) -> None:
-                pass
-
-            def inc_dq_validation_failures(
-                self,
-                pipeline: str,
-                stage: str,
-                severity: str,
-                count: int = 1,
-            ) -> None:
-                pass
-
-            def close(self) -> None:
-                pass
-
-        assert isinstance(ValidMetrics(), MetricsPort)
-
-    def test_missing_observe_histogram_fails(self) -> None:
-        """MetricsPort should reject implementations missing observe_histogram."""
-
-        class InvalidMetrics:
-            # Missing observe_histogram
-            def increment_counter(
-                self,
-                name: str,
-                value: int,
-                labels: dict[str, str],
-            ) -> None:
-                pass
-
-        assert not isinstance(InvalidMetrics(), MetricsPort)
-
-    def test_missing_increment_counter_fails(self) -> None:
-        """MetricsPort should reject implementations missing increment_counter."""
-
-        class InvalidMetrics:
-            def observe_histogram(
-                self,
-                name: str,
-                value: float,
-                labels: dict[str, str],
-            ) -> None:
-                pass
-
-            # Missing increment_counter
-
-        assert not isinstance(InvalidMetrics(), MetricsPort)

@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.common import (
     ComposableFallbackDecorator,
-    DefaultFallbackExecutionStrategy,
+    DefaultFallbackExecution,
     FallbackDecoratorConfig,
     FallbackFetchOrchestratorService,
     resolve_fallback_policy,
@@ -27,7 +27,7 @@ def _create_default_fallback_strategy(
     normalize_id: Callable[[str], str | None],
     extract_record_id: Callable[[BronzeRecord], str | None],
     fallback_handler: TitleFallbackHandler | None,
-) -> DefaultFallbackExecutionStrategy:
+) -> DefaultFallbackExecution:
     """Create default fallback execution strategy for non-DI call sites.
 
     Args:
@@ -36,9 +36,9 @@ def _create_default_fallback_strategy(
         fallback_handler: Optional title-based fallback handler; None disables fallback.
 
     Returns:
-        DefaultFallbackExecutionStrategy configured with the given normalize and extract hooks.
+        DefaultFallbackExecution configured with the given normalize and extract hooks.
     """
-    return DefaultFallbackExecutionStrategy(
+    return DefaultFallbackExecution(
         normalize_id_hook=normalize_id,
         extract_record_id_hook=extract_record_id,
         fallback_handler_hook=fallback_handler,
@@ -48,7 +48,7 @@ def _create_default_fallback_strategy(
 def _create_default_fallback_decorator(
     *,
     service: FallbackFetchOrchestratorService,
-    strategy: DefaultFallbackExecutionStrategy,
+    strategy: DefaultFallbackExecution,
     config: FallbackDecoratorConfig,
     logger: LoggerPort,
 ) -> ComposableFallbackDecorator:

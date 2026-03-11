@@ -429,6 +429,43 @@ class TestRequiredOnlyMode:
 
         assert "pubmed" in result.not_run_enrichers
 
+
+@pytest.mark.unit
+class TestRuntimeEnricherSelectionPolicy:
+    """Tests for runtime enricher selection rules."""
+
+    def test_enrich_only_filters_out_non_selected_enricher(self):
+        """enrich_only should select only explicitly requested enricher pipelines."""
+        runner = create_runner(
+            runtime=CompositeRuntimeConfig(enrich_only=("pubmed",))
+        )
+        state = CompositeCheckpointState(
+            composite_name="test_composite",
+            run_id=str(uuid4()),
+            created_at=datetime.now(tz=UTC),
+        )
+
+        selected = [e.pipeline for e in runner._get_enrichers_to_run(state)]
+
+        assert selected == ["pubmed"]
+
+    def test_force_enricher_overrides_completed_skip(self):
+        """force_enricher should rerun a completed enricher."""
+        runner = create_runner(
+            runtime=CompositeRuntimeConfig(force_enricher="pubmed")
+        )
+        state = CompositeCheckpointState(
+            composite_name="test_composite",
+            run_id=str(uuid4()),
+            created_at=datetime.now(tz=UTC),
+            completed_enrichers=frozenset({"pubmed"}),
+        )
+        pubmed_cfg = next(
+            enricher for enricher in runner._config.enrichers if enricher.pipeline == "pubmed"
+        )
+
+        assert runner._should_run_enricher(pubmed_cfg, state) is True
+
     @pytest.mark.asyncio
     async def test_not_run_does_not_affect_success(self):
         """NOT_RUN enrichers should not affect pipeline success."""

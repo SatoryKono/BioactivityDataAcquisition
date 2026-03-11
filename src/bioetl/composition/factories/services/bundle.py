@@ -13,7 +13,7 @@ from bioetl.composition.factories._observability_wiring import (
     _create_data_source as _create_data_source_impl,
 )
 from bioetl.composition.factories._observability_wiring import create_shared_metrics
-from bioetl.composition.factories.datasource.factory import DataSourceCreator
+from bioetl.composition.factories.datasource.factory import DataSourceCreatorPort
 from bioetl.composition.factories.pipeline._creation_wiring import (
     _BuildPipelineServicesFn,
     _create_pipeline_with_services_impl,
@@ -140,7 +140,7 @@ _create_cached_bronze_data_source = _create_cached_bronze_data_source_impl
 
 def build_pipeline_services(
     pipeline_name: str,
-    create_data_source_fn: DataSourceCreator,
+    create_data_source_fn: DataSourceCreatorPort,
     settings: Settings,
     logger: LoggerPort,
     config: PipelineYamlConfig | None = None,
@@ -222,7 +222,7 @@ def create_pipeline_with_services(
     pipeline_name: str,
     pipeline_class: type[BasePipeline],
     provider: str,
-    create_data_source_fn: DataSourceCreator,
+    create_data_source_fn: DataSourceCreatorPort,
     transformer_class: type[BaseTransformer] | None,
     run_id: RunID,
     runtime: RuntimeConfig,

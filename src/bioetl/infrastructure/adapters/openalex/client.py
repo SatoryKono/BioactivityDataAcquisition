@@ -36,6 +36,9 @@ from bioetl.infrastructure.adapters.common.adapter_defaults import (
 from bioetl.infrastructure.adapters.openalex.client_helpers_adapter_mixin import (
     OpenAlexAdapterHelpersMixin,
 )
+from bioetl.infrastructure.adapters.openalex.client_runtime_helpers import (
+    build_openalex_runtime_services,
+)
 from bioetl.infrastructure.adapters.openalex.cursor_flow import (
     OpenAlexCursorFlowService,
 )
@@ -79,131 +82,6 @@ OPENALEX_RUNTIME_ERRORS = (
     KeyError,
     Exception,
 )
-
-
-def _create_default_openalex_query_executor(
-    *,
-    http_client: UnifiedHTTPClient,
-    adapter_metrics: AdapterMetricsRecorder,
-    request_collector: APIRequestCollector,
-    headers_provider: Any,  # Any: callable returning dict[str, str]
-    api_base: str,
-) -> OpenAlexQueryExecutor:
-    """Create default query executor for non-DI call sites.
-
-    Args:
-        http_client: HTTP client for API requests.
-        adapter_metrics: Adapter metrics for request tracking.
-        request_collector: Collector for API request metadata.
-        headers_provider: Callable returning request headers dict.
-        api_base: Base URL for the OpenAlex API.
-
-    Returns:
-        OpenAlexQueryExecutor instance configured with HTTP client and telemetry components.
-    """
-    return OpenAlexQueryExecutor(
-        http_client=http_client,
-        adapter_metrics=adapter_metrics,
-        request_collector=request_collector,
-        headers_provider=headers_provider,
-        api_base=api_base,
-    )
-
-
-def _create_default_openalex_response_mapper() -> OpenAlexResponseMapper:
-    """Create default response mapper for non-DI call sites.
-
-    Returns:
-        OpenAlexResponseMapper instance with default configuration.
-    """
-    return OpenAlexResponseMapper()
-
-
-def _create_default_openalex_cursor_flow(
-    *,
-    mailto: str,
-    batch_size: int,
-    title_search_cache_size: int,
-    normalize_doi: Any,  # Any: callable (str) -> str for DOI normalization
-    escape_title_for_search: Any,  # Any: callable (str) -> str for title escaping
-    query_executor: OpenAlexQueryExecutor,
-    response_mapper: OpenAlexResponseMapper,
-    logger: LoggerPort,
-    runtime_errors: tuple[type[Exception], ...],
-) -> OpenAlexCursorFlowService:
-    """Create default cursor flow service for non-DI call sites.
-
-    Args:
-        mailto: Email address for the OpenAlex polite pool.
-        batch_size: Number of DOIs per batch request.
-        title_search_cache_size: Maximum entries for the title search cache.
-        normalize_doi: Callable to normalize DOI strings.
-        escape_title_for_search: Callable to escape titles for search queries.
-        query_executor: Query executor for making OpenAlex API requests.
-        response_mapper: Mapper for extracting results from API responses.
-        logger: Logger port for structured logging.
-        runtime_errors: Tuple of exception types to suppress during title search.
-
-    Returns:
-        OpenAlexCursorFlowService instance configured with the given query executor and response mapper.
-    """
-    return OpenAlexCursorFlowService(
-        mailto=mailto,
-        batch_size=batch_size,
-        title_search_cache_size=title_search_cache_size,
-        normalize_doi=normalize_doi,
-        escape_title_for_search=escape_title_for_search,
-        query_executor=query_executor,
-        response_mapper=response_mapper,
-        logger=logger,
-        runtime_errors=runtime_errors,
-    )
-
-
-def _create_default_openalex_title_fallback_handler(
-    *,
-    logger: LoggerPort,
-    search_fn: Any,  # Any: async callable for title search
-) -> TitleFallbackHandler:
-    """Create default title fallback handler for non-DI call sites.
-
-    Args:
-        logger: Logger port for structured logging.
-        search_fn: Async callable accepting a title string and returning matching records.
-
-    Returns:
-        TitleFallbackHandler instance configured with the given logger and search function.
-    """
-    return TitleFallbackHandler(logger=logger, search_fn=search_fn)
-
-
-def _create_default_openalex_fallback_orchestrator(
-    *,
-    fallback_fetch_service: FallbackFetchOrchestratorService,
-    fallback_handler: TitleFallbackHandler,
-    normalize_id: Any,  # Any: callable (str) -> str for ID normalization
-    extract_record_id: Any,  # Any: callable (dict) -> str for record ID extraction
-    logger: LoggerPort,
-) -> OpenAlexFallbackOrchestrator:
-    """Create default fallback orchestrator for non-DI call sites.
-
-    Args:
-        fallback_fetch_service: Orchestrator service for the fallback fetch pipeline.
-        fallback_handler: Title-based fallback handler for unresolved DOIs.
-        normalize_id: Callable to normalize ID strings for deduplication.
-        extract_record_id: Callable to extract the canonical ID from a record.
-        logger: Logger port for structured logging.
-
-    Returns:
-        OpenAlexFallbackOrchestrator instance wired with the given fallback service and handler.
-    """
-    return OpenAlexFallbackOrchestrator(
-        fallback_fetch_service=fallback_fetch_service,
-        fallback_handler=fallback_handler,
-        normalize_id=normalize_id,
-        extract_record_id=extract_record_id,
-        logger=logger,
-    )
 
 
 @dataclass
@@ -277,57 +155,33 @@ class OpenAlexAdapter(
                 adapter_metrics=self._adapter_metrics,
             )
         )
-        self._query_executor = (
-            self.openalex_query_executor
-            if self.openalex_query_executor is not None
-            else _create_default_openalex_query_executor(
-                http_client=self._http_client,
-                adapter_metrics=self._adapter_metrics,
-                request_collector=self._request_collector,
-                headers_provider=self._build_headers,
-                api_base=OPENALEX_API_BASE,
-            )
+        runtime_services = build_openalex_runtime_services(
+            fallback_fetch_service=self._fallback_fetch_service,
+            openalex_query_executor=self.openalex_query_executor,
+            openalex_response_mapper=self.openalex_response_mapper,
+            openalex_cursor_flow=self.openalex_cursor_flow,
+            title_fallback_handler=self.title_fallback_handler,
+            openalex_fallback_orchestrator=self.openalex_fallback_orchestrator,
+            http_client=self._http_client,
+            adapter_metrics=self._adapter_metrics,
+            request_collector=self._request_collector,
+            headers_provider=self._build_headers,
+            api_base=OPENALEX_API_BASE,
+            mailto=self.mailto,
+            batch_size=self.batch_size,
+            title_search_cache_size=self.title_search_cache_size,
+            normalize_doi=self._normalize_doi,
+            escape_title_for_search=self._escape_title_for_search,
+            extract_record_id=self._extract_doi_from_record,
+            search_by_title=self._search_by_title,
+            logger=self._logger,
+            runtime_errors=OPENALEX_RUNTIME_ERRORS,
         )
-        self._response_mapper = (
-            self.openalex_response_mapper
-            if self.openalex_response_mapper is not None
-            else _create_default_openalex_response_mapper()
-        )
-        self._cursor_flow = (
-            self.openalex_cursor_flow
-            if self.openalex_cursor_flow is not None
-            else _create_default_openalex_cursor_flow(
-                mailto=self.mailto,
-                batch_size=self.batch_size,
-                title_search_cache_size=self.title_search_cache_size,
-                normalize_doi=self._normalize_doi,
-                escape_title_for_search=self._escape_title_for_search,
-                query_executor=self._query_executor,
-                response_mapper=self._response_mapper,
-                logger=self._logger,
-                runtime_errors=OPENALEX_RUNTIME_ERRORS,
-            )
-        )
-
-        self._fallback_handler = (
-            self.title_fallback_handler
-            if self.title_fallback_handler is not None
-            else _create_default_openalex_title_fallback_handler(
-                logger=self._logger,
-                search_fn=self._search_by_title,
-            )
-        )
-        self._fallback_orchestrator = (
-            self.openalex_fallback_orchestrator
-            if self.openalex_fallback_orchestrator is not None
-            else _create_default_openalex_fallback_orchestrator(
-                fallback_fetch_service=self._fallback_fetch_service,
-                fallback_handler=self._fallback_handler,
-                normalize_id=self._normalize_doi,
-                extract_record_id=self._extract_doi_from_record,
-                logger=self._logger,
-            )
-        )
+        self._query_executor = runtime_services.query_executor
+        self._response_mapper = runtime_services.response_mapper
+        self._cursor_flow = runtime_services.cursor_flow
+        self._fallback_handler = runtime_services.fallback_handler
+        self._fallback_orchestrator = runtime_services.fallback_orchestrator
         self.configure_fallback_policy(None)
 
     def configure_fallback_policy(self, policy: object | None) -> None:

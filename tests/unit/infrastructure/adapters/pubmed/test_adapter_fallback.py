@@ -212,70 +212,12 @@ class TestFetchFilteredWithFallback:
                 pass
 
     @pytest.mark.asyncio
-    async def test_separates_valid_ids_from_empty(self, adapter: PubMedAdapter) -> None:
-        """Test correctly separates valid IDs from empty/whitespace entries."""
-        captured_ids: list[str] = []
-
-        async def mock_fetch_filtered(
-            entity_type: str,
-            filter_ids: list[str],
-            filter_field: str,
-            limit: int | None,
-        ) -> AsyncIterator[dict[str, Any]]:
-            captured_ids.extend(filter_ids)
-            return
-            yield  # Make it an async generator
-
-        with patch.object(adapter, "fetch_filtered", mock_fetch_filtered):
-            async for _ in adapter.fetch_filtered_with_fallback(
-                entity_type="publication",
-                filter_ids=["12345", "", "67890", "  ", "11111"],
-                filter_field="pmid",
-                fallback_mapping={},
-            ):
-                pass
-
-        # Only non-empty, non-whitespace IDs should be passed
-        assert "12345" in captured_ids
-        assert "67890" in captured_ids
-        assert "11111" in captured_ids
-        assert "" not in captured_ids
-        assert "  " not in captured_ids
-
-    @pytest.mark.asyncio
-    async def test_adds_primary_lookup_method_to_results(
-        self, adapter: PubMedAdapter
+    async def test_delegates_pubmed_request_to_fallback_service(
+        self, adapter: PubMedAdapter, mock_logger: MagicMock
     ) -> None:
-        """Test primary results are marked with _lookup_method='primary'."""
-
-        async def mock_fetch_filtered(
-            entity_type: str,
-            filter_ids: list[str],
-            filter_field: str,
-            limit: int | None,
-        ) -> AsyncIterator[dict[str, Any]]:
-            yield {"pmid": "12345678", "article_title": "Test Article"}
-
-        with patch.object(adapter, "fetch_filtered", mock_fetch_filtered):
-            results = []
-            async for record in adapter.fetch_filtered_with_fallback(
-                entity_type="publication",
-                filter_ids=["12345678"],
-                filter_field="pmid",
-                fallback_mapping={},
-            ):
-                results.append(record)
-
-        assert len(results) == 1
-        assert results[0]["_lookup_method"] == "pmid"
-
-    @pytest.mark.asyncio
-    async def test_tracks_found_pmids_for_fallback(
-        self, adapter: PubMedAdapter
-    ) -> None:
-        """Test found PMIDs are tracked to avoid duplicate fallback searches."""
-        # Track what IDs the fallback handler receives
-        processed_missing: list[str] = []
+        """Bridge PubMed-specific closure/config into the shared fallback service."""
+        captured: dict[str, Any] = {}
+        forwarded: dict[str, Any] = {}
         assert adapter._fallback_handler is not None
 
         async def mock_fetch_filtered(
@@ -284,249 +226,72 @@ class TestFetchFilteredWithFallback:
             filter_field: str,
             limit: int | None,
         ) -> AsyncIterator[dict[str, Any]]:
-            yield {"pmid": "12345678", "article_title": "Found Article"}
+            forwarded["entity_type"] = entity_type
+            forwarded["filter_ids"] = list(filter_ids)
+            forwarded["filter_field"] = filter_field
+            forwarded["limit"] = limit
+            yield {
+                "pmid": "12345678",
+                "article_title": "Primary Result",
+                "_lookup_method": "pmid",
+            }
 
-        async def mock_process_missing(
-            dois: list[str],
-            found_dois: set[str],
-            fallback_mapping: dict[str, str],
-            normalize_fn: Any,
-            limit: int | None,
-            fetched: int,
-        ) -> AsyncIterator[dict[str, Any]]:
-            # Record which IDs were marked as found
-            processed_missing.extend(dois)
-            # Check that 12345678 is in found set (lowercase)
-            assert "12345678" in found_dois
-            return
-            yield
+        async def capture_execute(request: Any) -> AsyncIterator[dict[str, Any]]:
+            captured["request"] = request
+            async for record in request.primary_record_fetcher(["12345678"], 2):
+                yield record
 
         with (
             patch.object(adapter, "fetch_filtered", mock_fetch_filtered),
-            patch.object(
-                adapter._fallback_handler, "process_missing_dois", mock_process_missing
-            ),
+            patch.object(adapter._fallback_fetch_service, "execute", capture_execute),
         ):
-            async for _ in adapter.fetch_filtered_with_fallback(
-                entity_type="publication",
-                filter_ids=["12345678", "99999999"],
-                filter_field="pmid",
-                fallback_mapping={"99999999": "Missing Title"},
-            ):
-                pass
-
-    @pytest.mark.asyncio
-    async def test_respects_limit(self, adapter: PubMedAdapter) -> None:
-        """Test stops fetching when limit is reached."""
-
-        async def mock_fetch_filtered(
-            entity_type: str,
-            filter_ids: list[str],
-            filter_field: str,
-            limit: int | None,
-        ) -> AsyncIterator[dict[str, Any]]:
-            for i, pmid in enumerate(filter_ids):
-                yield {"pmid": pmid, "article_title": f"Article {i}"}
-
-        with patch.object(adapter, "fetch_filtered", mock_fetch_filtered):
             results = []
             async for record in adapter.fetch_filtered_with_fallback(
                 entity_type="publication",
-                filter_ids=["11111", "22222", "33333", "44444", "55555"],
-                filter_field="pmid",
-                fallback_mapping={},
+                filter_ids=["12345678", "", "99999999"],
+                filter_field="doi",
+                fallback_mapping={
+                    "99999999": "Missing Title",
+                    "": "Title Only Title",
+                },
                 limit=2,
             ):
                 results.append(record)
 
-        assert len(results) == 2
+        request = captured["request"]
+        assert forwarded == {
+            "entity_type": "publication",
+            "filter_ids": ["12345678"],
+            "filter_field": "doi",
+            "limit": 2,
+        }
+        assert len(results) == 1
+        assert results[0]["_lookup_method"] == "pmid"
+        assert request.filter_ids == ["12345678", "", "99999999"]
+        assert request.fallback_mapping == {
+            "99999999": "Missing Title",
+            "": "Title Only Title",
+        }
+        assert request.limit == 2
+        assert request.primary_lookup_method == "pmid"
+        assert request.fallback_operation == "fetch_filtered_with_fallback"
+        assert request.resolve_fallback_handler() is adapter._fallback_handler
+        assert request.resolve_normalize_id()(" 12345678 ") == "12345678"
+        assert request.resolve_extract_record_id()({"pmid": "12345678"}) == "12345678"
+        mock_logger.warning.assert_not_called()
 
-    @pytest.mark.asyncio
-    async def test_fallback_phase_invoked_for_missing_ids(
-        self, adapter: PubMedAdapter
-    ) -> None:
-        """Test Phase 2 fallback is invoked for unresolved IDs."""
-        fallback_invoked = [False]
-        assert adapter._fallback_handler is not None
+    def test_pubmed_fallback_decorator_config(self, adapter: PubMedAdapter) -> None:
+        """PubMed fallback config must keep permissive filter semantics."""
+        config = adapter._fallback_decorator.config
 
-        async def mock_fetch_filtered(
-            entity_type: str,
-            filter_ids: list[str],
-            filter_field: str,
-            limit: int | None,
-        ) -> AsyncIterator[dict[str, Any]]:
-            # Only return result for first ID
-            yield {"pmid": "12345678", "article_title": "Found"}
-
-        async def mock_process_missing(
-            dois: list[str],
-            found_dois: set[str],
-            fallback_mapping: dict[str, str],
-            normalize_fn: Any,
-            limit: int | None,
-            fetched: int,
-        ) -> AsyncIterator[dict[str, Any]]:
-            fallback_invoked[0] = True
-            return
-            yield
-
-        with (
-            patch.object(adapter, "fetch_filtered", mock_fetch_filtered),
-            patch.object(
-                adapter._fallback_handler, "process_missing_dois", mock_process_missing
-            ),
-        ):
-            async for _ in adapter.fetch_filtered_with_fallback(
-                entity_type="publication",
-                filter_ids=["12345678", "99999999"],
-                filter_field="pmid",
-                fallback_mapping={"99999999": "Missing Article Title"},
-            ):
-                pass
-
-        assert fallback_invoked[0] is True
-
-    @pytest.mark.asyncio
-    async def test_title_only_phase_invoked_for_empty_ids(
-        self, adapter: PubMedAdapter
-    ) -> None:
-        """Test Phase 3 title-only lookup is invoked for empty ID entries."""
-        title_only_invoked = [False]
-        assert adapter._fallback_handler is not None
-
-        async def mock_fetch_filtered(
-            entity_type: str,
-            filter_ids: list[str],
-            filter_field: str,
-            limit: int | None,
-        ) -> AsyncIterator[dict[str, Any]]:
-            return
-            yield
-
-        async def mock_process_title_only(
-            entries: list[str],
-            fallback_mapping: dict[str, str],
-            limit: int | None,
-            fetched: int,
-        ) -> AsyncIterator[dict[str, Any]]:
-            title_only_invoked[0] = True
-            # Verify we receive the empty entries
-            assert "" in entries
-            return
-            yield
-
-        with (
-            patch.object(adapter, "fetch_filtered", mock_fetch_filtered),
-            patch.object(
-                adapter._fallback_handler,
-                "process_title_only_entries",
-                mock_process_title_only,
-            ),
-        ):
-            async for _ in adapter.fetch_filtered_with_fallback(
-                entity_type="publication",
-                filter_ids=["12345678", ""],
-                filter_field="pmid",
-                fallback_mapping={"": "Title Only Publication"},
-            ):
-                pass
-
-        assert title_only_invoked[0] is True
-
-    @pytest.mark.asyncio
-    async def test_all_three_phases_execute_in_order(
-        self, adapter: PubMedAdapter
-    ) -> None:
-        """Test all three phases execute in correct order."""
-        execution_order: list[str] = []
-        assert adapter._fallback_handler is not None
-
-        async def mock_fetch_filtered(
-            entity_type: str,
-            filter_ids: list[str],
-            filter_field: str,
-            limit: int | None,
-        ) -> AsyncIterator[dict[str, Any]]:
-            execution_order.append("phase1_primary")
-            yield {"pmid": "11111", "article_title": "Primary Result"}
-
-        async def mock_process_missing(
-            dois: list[str],
-            found_dois: set[str],
-            fallback_mapping: dict[str, str],
-            normalize_fn: Any,
-            limit: int | None,
-            fetched: int,
-        ) -> AsyncIterator[dict[str, Any]]:
-            execution_order.append("phase2_fallback")
-            yield {"pmid": "22222", "article_title": "Fallback Result"}
-
-        async def mock_process_title_only(
-            entries: list[str],
-            fallback_mapping: dict[str, str],
-            limit: int | None,
-            fetched: int,
-        ) -> AsyncIterator[dict[str, Any]]:
-            execution_order.append("phase3_title_only")
-            yield {"pmid": "33333", "article_title": "Title Only Result"}
-
-        with (
-            patch.object(adapter, "fetch_filtered", mock_fetch_filtered),
-            patch.object(
-                adapter._fallback_handler, "process_missing_dois", mock_process_missing
-            ),
-            patch.object(
-                adapter._fallback_handler,
-                "process_title_only_entries",
-                mock_process_title_only,
-            ),
-        ):
-            results = []
-            async for record in adapter.fetch_filtered_with_fallback(
-                entity_type="publication",
-                filter_ids=["11111", "22222", ""],
-                filter_field="pmid",
-                fallback_mapping={
-                    "22222": "Fallback Title",
-                    "": "Title Only Title",
-                },
-            ):
-                results.append(record)
-
-        # Verify correct execution order
-        assert execution_order == [
-            "phase1_primary",
-            "phase2_fallback",
-            "phase3_title_only",
-        ]
-        assert len(results) == 3
-
-    @pytest.mark.asyncio
-    async def test_logs_warning_for_non_pmid_filter_field(
-        self, adapter: PubMedAdapter, mock_logger: MagicMock
-    ) -> None:
-        """Test warning is logged when filter_field is not 'pmid'."""
-
-        async def mock_fetch_filtered(
-            entity_type: str,
-            filter_ids: list[str],
-            filter_field: str,
-            limit: int | None,
-        ) -> AsyncIterator[dict[str, Any]]:
-            return
-            yield
-
-        with patch.object(adapter, "fetch_filtered", mock_fetch_filtered):
-            async for _ in adapter.fetch_filtered_with_fallback(
-                entity_type="publication",
-                filter_ids=["10.1234/test"],
-                filter_field="doi",
-                fallback_mapping={},
-            ):
-                pass
-
-        # fetch_filtered (mocked) would normally log the warning
-        # In real scenario, PubMedAdapter.fetch_filtered logs this
+        assert config.supported_filter_field is None
+        assert config.skip_on_unsupported_filter_field is False
+        assert config.primary_lookup_method == "pmid"
+        assert config.fallback_operation == "fetch_filtered_with_fallback"
+        assert (
+            config.unsupported_filter_message
+            == "PubMed fallback accepts any field and resolves via PMID/title phases"
+        )
 
 
 # =============================================================================

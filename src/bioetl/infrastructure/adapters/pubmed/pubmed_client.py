@@ -20,7 +20,7 @@ from bioetl.domain.entities.pubmed import ArticleRecord
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.common import (
     ComposableFallbackDecorator,
-    DefaultFallbackExecutionStrategy,
+    DefaultFallbackExecution,
     FallbackDecoratorConfig,
     FallbackFetchOrchestratorService,
     resolve_fallback_policy,
@@ -156,7 +156,7 @@ class PubMedAdapter(
             defaults=_PUBMED_DEFAULT_FALLBACK_CONFIG,
             default_enabled=True,
         )
-        strategy = DefaultFallbackExecutionStrategy(
+        strategy = DefaultFallbackExecution(
             normalize_id_hook=lambda value: value.lower().strip(),
             extract_record_id_hook=lambda rec: str(rec.get("pmid", "")),
             fallback_handler_hook=self._fallback_handler if enabled else None,

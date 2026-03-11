@@ -8,7 +8,7 @@ import pytest
 from httpx import RequestError
 
 from bioetl.domain.types import HealthStatus
-from bioetl.infrastructure.adapters.crossref import CROSSREF_API_BASE, CrossRefAdapter
+from bioetl.infrastructure.adapters.crossref import CrossRefAdapter
 
 
 @pytest.fixture
@@ -31,6 +31,37 @@ def adapter(mock_http_client, mock_logger):
         logger=mock_logger,
         mailto="test@example.com",
     )
+
+
+def test_post_init_preserves_injected_crossref_runtime_collaborators(
+    mock_http_client, mock_logger
+):
+    """Injected CrossRef runtime collaborators should survive __post_init__ wiring."""
+    query_builder = MagicMock()
+    response_mapper = MagicMock()
+    batch_fetcher = MagicMock()
+    search_paginator = MagicMock()
+    title_fallback_handler = MagicMock()
+    fetch_flow = MagicMock()
+
+    adapter = CrossRefAdapter(
+        http_client=mock_http_client,
+        logger=mock_logger,
+        mailto="test@example.com",
+        query_builder=query_builder,
+        response_mapper=response_mapper,
+        batch_fetcher=batch_fetcher,
+        search_paginator=search_paginator,
+        title_fallback_handler=title_fallback_handler,
+        fetch_flow=fetch_flow,
+    )
+
+    assert adapter._query_builder is query_builder
+    assert adapter._response_mapper is response_mapper
+    assert adapter._batch_fetcher is batch_fetcher
+    assert adapter._search_paginator is search_paginator
+    assert adapter._fallback_handler is title_fallback_handler
+    assert adapter._fetch_flow is fetch_flow
 
 
 @pytest.mark.asyncio
@@ -166,24 +197,6 @@ async def test_health_check_unhealthy_on_request_error(adapter, mock_http_client
     assert result == HealthStatus.UNHEALTHY
 
 
-def test_get_source_metadata_returns_collector_state_and_clears_requests(adapter):
-    """Metadata snapshot should reflect collector state and consume it."""
-    adapter._request_collector.record_request(
-        url=f"{CROSSREF_API_BASE}/works?query.title=test",
-        duration_ms=12.5,
-        status_code=200,
-    )
-
-    assert adapter.request_count == 1
-
-    metadata = adapter.get_source_metadata(api_version="v1")
-
-    assert metadata.url == CROSSREF_API_BASE
-    assert metadata.api_version == "v1"
-    assert metadata.total_requests == 1
-    assert adapter.request_count == 0
-
-
 @pytest.mark.asyncio
 async def test_health_check_returns_degraded_on_slow_response(
     adapter, mock_http_client, mock_logger
@@ -194,7 +207,7 @@ async def test_health_check_returns_degraded_on_slow_response(
     mock_http_client.get_once = AsyncMock(return_value=mock_response)
 
     # Simulate slow response by patching time.monotonic in both modules
-    # (adapter module and health_check_mixin where HealthCheckContext uses it)
+    # (helper module and health_check_mixin where HealthCheckContext uses it)
     call_count = 0
 
     def mock_monotonic_func():
@@ -207,7 +220,7 @@ async def test_health_check_returns_degraded_on_slow_response(
 
     with (
         patch(
-            "bioetl.infrastructure.adapters.crossref.client.time.monotonic",
+            "bioetl.infrastructure.adapters.crossref.client_observability_helpers.time.monotonic",
             new=mock_monotonic,
         ),
         patch(

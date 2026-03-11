@@ -22,7 +22,7 @@ from bioetl.domain.ports import NoOpMetrics
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.common import (
     ComposableFallbackDecorator,
-    DefaultFallbackExecutionStrategy,
+    DefaultFallbackExecution,
     FallbackDecoratorConfig,
     FallbackFetchOrchestratorService,
     resolve_fallback_policy,
@@ -194,7 +194,7 @@ class SemanticScholarAdapter(
             defaults=_SEMANTICSCHOLAR_DEFAULT_FALLBACK_CONFIG,
             default_enabled=True,
         )
-        strategy = DefaultFallbackExecutionStrategy(
+        strategy = DefaultFallbackExecution(
             normalize_id_hook=self._normalize_doi,
             extract_record_id_hook=lambda rec: str(rec.get("doi", "")),
             fallback_handler_hook=self._fallback_handler if enabled else None,

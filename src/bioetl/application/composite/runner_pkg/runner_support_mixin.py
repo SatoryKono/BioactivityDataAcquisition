@@ -237,26 +237,34 @@ class CompositeRunnerSupportMixin:
             List of EnricherConfig entries that have not been completed and match
             the current runtime filters (required_only, enrich_only, force_enricher).
         """
-        enrichers_to_run: list[EnricherConfig] = []
+        return [
+            enricher
+            for enricher in self._config.enrichers
+            if self._should_run_enricher(enricher, state)
+        ]
 
-        for enricher in self._config.enrichers:
-            if (
-                enricher.pipeline in state.completed_enrichers
-                and self._runtime.force_enricher != enricher.pipeline
-            ):
-                continue
+    def _should_run_enricher(
+        self,
+        enricher: EnricherConfig,
+        state: CompositeCheckpointState,
+    ) -> bool:
+        """Return whether an enricher should execute under current runtime policy."""
+        if (
+            enricher.pipeline in state.completed_enrichers
+            and self._runtime.force_enricher != enricher.pipeline
+        ):
+            return False
 
-            if self._runtime.required_only and not enricher.required:
-                continue
-            if (
-                self._runtime.enrich_only
-                and enricher.pipeline not in self._runtime.enrich_only
-            ):
-                continue
+        if self._runtime.required_only and not enricher.required:
+            return False
 
-            enrichers_to_run.append(enricher)
+        if (
+            self._runtime.enrich_only
+            and enricher.pipeline not in self._runtime.enrich_only
+        ):
+            return False
 
-        return enrichers_to_run
+        return True
 
     def _check_required_enrichers(
         self,

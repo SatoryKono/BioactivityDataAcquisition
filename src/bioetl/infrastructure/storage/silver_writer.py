@@ -4,9 +4,8 @@ from __future__ import annotations
 
 import asyncio as _asyncio
 import time
-from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Literal
 
 import pyarrow as pa
 from deltalake import DeltaTable as _DeltaTable
@@ -23,7 +22,6 @@ from bioetl.infrastructure.storage.silver_writer_arrow_mixin import (
 )
 from bioetl.infrastructure.storage.silver_writer_delta_mixin import (
     SilverWriterDeltaMixin,
-    _DeltaWriteRequest,
 )
 from bioetl.infrastructure.storage.silver_writer_maintenance_mixin import (
     SilverWriterMaintenanceMixin,
@@ -37,9 +35,14 @@ from bioetl.infrastructure.storage.silver_writer_metadata_mixin import (
 from bioetl.infrastructure.storage.silver_writer_postwrite_mixin import (
     SilverWriterPostwriteMixin,
 )
+from bioetl.infrastructure.storage.silver_writer_pipeline_helpers import (
+    _SilverWriteExecutionContext,
+    build_delta_write_request,
+    build_silver_write_execution_context,
+    set_silver_write_span_attributes,
+)
 from bioetl.infrastructure.storage.silver_writer_validation_mixin import (
     SilverWriterValidationMixin,
-    _PreparedSilverWritePayload,
 )
 from bioetl.infrastructure.storage.write_resilience import (
     DEFAULT_SILVER_MERGE_POLICY,
@@ -69,112 +72,6 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
 
 __all__ = ["SilverWriteMode", "SilverWriter"]
-
-
-@dataclass(frozen=True, slots=True)
-class _SilverWriteExecutionContext:
-    """Immutable execution context carried through the Silver write pipeline.
-
-    Bundles the write parameters and per-call timing artefacts created at the start
-    of ``SilverWriter._write_silver_with_tracing``. Passing a single context object
-    between the private pipeline stages avoids wide parameter lists and keeps each
-    stage's interface stable as new cross-cutting concerns are added.
-
-    Attributes:
-        table_name: Logical Delta table name (e.g. ``"chembl/activity"``).
-        primary_keys: List of field names that uniquely identify a record; used for
-            MERGE/upsert predicate construction.
-        schema: PyArrow schema applied when creating or evolving the Delta table.
-        mode: Write mode string (``"merge"``, ``"append"``, ``"overwrite"``).
-        partition_cols: Optional list of column names for Delta table partitioning.
-        on_schema_mismatch: Policy when incoming schema differs from the stored table
-            schema; one of ``"error"``, ``"evolve"``, or ``"ignore"``.
-        column_order: Optional explicit column ordering applied to the Arrow table
-            before writing.
-        bronze_refs: Optional list of ``BronzeWriteResult`` objects written to the
-            Silver metadata as lineage references (ADR-014).
-        key_nullability_rules: Optional per-key nullability override rules applied
-            before the MERGE predicate is evaluated.
-        started_at: Wall-clock UTC datetime at the start of the write call; stored in
-            result metadata.
-        start_perf: High-resolution ``time.perf_counter()`` snapshot for duration
-            measurement.
-        span: Active OpenTelemetry span passed through pipeline stages for attribute
-            updates; type is ``Any`` because the OTel interface is runtime-dependent.
-    """
-
-    table_name: str
-    primary_keys: list[str]
-    schema: pa.Schema
-    mode: str
-    partition_cols: list[str] | None
-    on_schema_mismatch: Literal["error", "evolve", "ignore"]
-    column_order: list[str] | None
-    bronze_refs: list[BronzeWriteResult] | None
-    key_nullability_rules: list[KeyNullabilityRule] | None
-    started_at: datetime
-    start_perf: float
-    span: Any  # Any: OpenTelemetry span interface is runtime-dependent
-
-
-def _set_silver_write_span_attributes(
-    span: Any,
-    *,
-    table_name: str,
-    mode: str,
-    record_count: int,
-) -> None:
-    """Populate core tracing attributes for a Silver write span."""
-    span.set_attribute("table_name", table_name)
-    span.set_attribute("mode", mode)
-    span.set_attribute("record_count", record_count)
-
-
-def _build_silver_write_execution_context(
-    *,
-    table_name: str,
-    primary_keys: list[str],
-    schema: pa.Schema,
-    mode: str,
-    partition_cols: list[str] | None,
-    on_schema_mismatch: Literal["error", "evolve", "ignore"],
-    column_order: list[str] | None,
-    bronze_refs: list[BronzeWriteResult] | None,
-    key_nullability_rules: list[KeyNullabilityRule] | None,
-    started_at: datetime,
-    start_perf: float,
-    span: Any,
-) -> _SilverWriteExecutionContext:
-    """Build immutable execution context for the Silver write pipeline."""
-    return _SilverWriteExecutionContext(
-        table_name=table_name,
-        primary_keys=primary_keys,
-        schema=schema,
-        mode=mode,
-        partition_cols=partition_cols,
-        on_schema_mismatch=on_schema_mismatch,
-        column_order=column_order,
-        bronze_refs=bronze_refs,
-        key_nullability_rules=key_nullability_rules,
-        started_at=started_at,
-        start_perf=start_perf,
-        span=span,
-    )
-
-
-def _build_delta_write_request(
-    *,
-    ctx: _SilverWriteExecutionContext,
-    payload: _PreparedSilverWritePayload,
-) -> _DeltaWriteRequest:
-    """Create the Delta dispatch request from prepared payload and execution context."""
-    return _DeltaWriteRequest(
-        validated_mode=payload.validated_mode,
-        table_path=payload.table_path,
-        arrow_data=payload.arrow_data,
-        primary_keys=ctx.primary_keys,
-        partition_cols=ctx.partition_cols,
-    )
 
 
 class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
@@ -349,13 +246,13 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         started_at, start_perf = datetime.now(UTC), time.perf_counter()
         tracer = self._tracing.get_tracer(__name__)
         with tracer.start_as_current_span("write_silver") as span:
-            _set_silver_write_span_attributes(
+            set_silver_write_span_attributes(
                 span,
                 table_name=table_name,
                 mode=mode,
                 record_count=len(records),
             )
-            ctx = _build_silver_write_execution_context(
+            ctx = build_silver_write_execution_context(
                 table_name=table_name,
                 primary_keys=primary_keys,
                 schema=schema,
@@ -403,7 +300,7 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         ctx.span.set_attribute("record_count", len(payload.records))
         await self._dispatch_write_with_domain_errors(
             table_name=ctx.table_name,
-            request=_build_delta_write_request(ctx=ctx, payload=payload),
+            request=build_delta_write_request(ctx=ctx, payload=payload),
         )
         return await self._complete_silver_write_pipeline(
             ctx=ctx,

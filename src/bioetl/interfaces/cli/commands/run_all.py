@@ -34,8 +34,12 @@ from bioetl.interfaces.cli.commands.metrics_server_integration import (
 )
 from bioetl.interfaces.cli.commands.run_all_helpers import (
     create_run_all_options,
+    emit_destructive_confirmation_preview,
+    emit_run_all_listing,
+    emit_run_all_preview,
     record_pipeline_failure,
     record_pipeline_result,
+    should_prompt_for_destructive_run,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning
@@ -192,10 +196,7 @@ def _echo_batch_summary(result: BatchRunResult, dry_run: bool) -> None:
 
 def _handle_list_only(source: str, pipelines: list[str]) -> None:
     """Handle --list-only mode and exit."""
-    echo_info(f"Pipelines for provider '{source}':")
-    for pipeline in pipelines:
-        echo_info(f"  - {pipeline}")
-    echo_info(f"\nTotal: {len(pipelines)} pipeline(s)")
+    emit_run_all_listing(source=source, pipelines=pipelines)
     sys.exit(ExitCode.OK)
 
 
@@ -214,13 +215,17 @@ def _handle_destructive_confirmation(
     Returns:
         True if should continue, False if cancelled.
     """
-    if run_type not in ("rebuild", "backfill") or dry_run or yes:
+    if not should_prompt_for_destructive_run(
+        run_type=run_type,
+        dry_run=dry_run,
+        yes=yes,
+    ):
         return True
 
-    echo_warning(f"{run_type} will clear existing data for {len(pipelines)} pipelines.")
-    echo_info("Pipelines to be affected:")
-    for pipeline in pipelines:
-        echo_info(f"  - {pipeline}")
+    emit_destructive_confirmation_preview(
+        run_type=run_type,
+        pipelines=pipelines,
+    )
 
     if not click.confirm("\nDo you want to continue?"):
         echo_info("Operation cancelled.")
@@ -236,11 +241,11 @@ def _show_run_preview(source: str, pipelines: list[str], dry_run: bool) -> None:
         pipelines: List of pipeline names that will be (or would be) executed.
         dry_run: When True, prefixes the output with a dry-run indicator.
     """
-    prefix = "[DRY-RUN] Would run" if dry_run else "Running"
-    echo_info(f"{prefix} {len(pipelines)} pipeline(s) for '{source}':")
-    for pipeline in pipelines:
-        echo_info(f"  - {pipeline}")
-    echo_info("")
+    emit_run_all_preview(
+        source=source,
+        pipelines=pipelines,
+        dry_run=dry_run,
+    )
 
 
 def _determine_exit_code(batch_result: BatchRunResult) -> ExitCode:

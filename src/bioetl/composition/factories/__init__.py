@@ -21,7 +21,7 @@ from typing import TYPE_CHECKING
 
 # Data source factory and registry
 from bioetl.composition.factories.datasource.factory import (
-    DataSourceCreator,
+    DataSourceCreatorPort,
     DataSourceFactory,
     DataSourceRegistry,
 )
@@ -90,7 +90,7 @@ def __getattr__(name: str) -> object:
 __all__ = [
     "BaseServicesFactory",
     "DQServicesFactory",
-    "DataSourceCreator",
+    "DataSourceCreatorPort",
     "DataSourceFactory",
     "DataSourceRegistry",
     "GenericPipelineFactory",

@@ -93,13 +93,13 @@ provider_regression_suites:
   metadata_request_capability:
     description: "Canonical provider suites for request-metadata snapshot, clear, and count paths."
     providers:
-      chembl: tests/unit/infrastructure/adapters/chembl/test_chembl_client_coverage.py
-      crossref: tests/unit/infrastructure/adapters/crossref/test_crossref_client.py
+      chembl: tests/unit/infrastructure/adapters/chembl/test_request_metadata.py
+      crossref: tests/unit/infrastructure/adapters/crossref/test_request_metadata.py
       openalex: tests/unit/infrastructure/adapters/openalex/test_client_helpers_adapter_mixin.py
       pubchem: tests/unit/infrastructure/adapters/pubchem/test_request_metadata.py
-      pubmed: tests/unit/infrastructure/adapters/pubmed/test_pubmed_client.py
+      pubmed: tests/unit/infrastructure/adapters/pubmed/test_request_metadata.py
       semanticscholar: tests/unit/infrastructure/adapters/semanticscholar/test_adapter.py
-      uniprot: tests/unit/infrastructure/adapters/uniprot/test_uniprot_client_coverage.py
+      uniprot: tests/unit/infrastructure/adapters/uniprot/test_request_metadata.py
 
   slow_health_probe_policy:
     description: "Canonical provider suites for shared slow-health degradation policy."

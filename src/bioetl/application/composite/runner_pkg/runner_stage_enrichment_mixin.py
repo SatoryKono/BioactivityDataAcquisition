@@ -4,9 +4,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from bioetl.application.composite.runner_pkg.runner_constants import (
-    CHECKPOINT_NON_FATAL_ERRORS,
-)
 from bioetl.application.composite.runner_pkg.runner_helpers import (
     add_not_run_results,
     log_enrichment_summary,
@@ -14,7 +11,7 @@ from bioetl.application.composite.runner_pkg.runner_helpers import (
 from bioetl.domain.composite.result import EnrichmentResult, EnrichmentStatus
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.events import PipelineEvent
-from bioetl.domain.exceptions import BioETLError, InvalidStateError
+from bioetl.domain.exceptions import InvalidStateError
 
 if TYPE_CHECKING:
     import polars as pl
@@ -63,6 +60,14 @@ class _CompositeRunnerStageEnrichmentMixin:
             **transition_kwargs: object,
         ) -> CompositeCheckpointState: ...
 
+        async def _persist_failed_state(
+            self,
+            state: CompositeCheckpointState,
+            *,
+            stage: str,
+            error: str,
+        ) -> CompositeCheckpointState: ...
+
     async def _start_enrichment_stage(
         self,
         state: CompositeCheckpointState,
@@ -77,7 +82,7 @@ class _CompositeRunnerStageEnrichmentMixin:
             enrichers=enricher_names,
             count=len(enrichers_to_run),
         )
-        await self._checkpoint_manager.save(state)
+        await self._call_save_checkpoint_safe(state, "enrichment_running")
         self._logger.info(
             PipelineEvent.phase_started("enrichment"),
             composite=self._config.name,
@@ -104,7 +109,7 @@ class _CompositeRunnerStageEnrichmentMixin:
         for name, result in enrichment_results.items():
             if result.is_success or result.status == EnrichmentStatus.SKIPPED:
                 state = state.with_enricher_completed(name, result)
-        await self._checkpoint_manager.save(state)
+        await self._call_save_checkpoint_safe(state, "enrichment_results")
 
         log_enrichment_summary(enrichment_results, self._config.name, self._logger)
         return state, enrichment_results
@@ -115,32 +120,11 @@ class _CompositeRunnerStageEnrichmentMixin:
         error: InvalidStateError,
     ) -> None:
         """Transition to FAILED, persist checkpoint, log failure."""
-        state = self._transition_state_with_fsm_log(
+        state = await self._persist_failed_state(
             state,
-            CompositePipelineState.FAILED,
             stage="required_enricher_failed",
-            validate=False,
             error=str(error),
         )
-        try:
-            await self._checkpoint_manager.save(state)
-        except CHECKPOINT_NON_FATAL_ERRORS as save_error:
-            self._logger.warning(
-                "Failed to save FAILED state to checkpoint",
-                composite=self._config.name,
-                run_id=self._run_id_str,
-                error=str(save_error),
-                error_type=type(save_error).__name__,
-            )
-        except BioETLError as save_error:
-            self._logger.warning(
-                "Failed to save FAILED state to checkpoint",
-                composite=self._config.name,
-                run_id=self._run_id_str,
-                error=str(save_error),
-                error_type=type(save_error).__name__,
-                reason_code="unexpected_bioetl_error",
-            )
         self._logger.error(
             "Required enricher failed, pipeline transitioning to FAILED",
             composite=self._config.name,

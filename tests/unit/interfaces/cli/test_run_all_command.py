@@ -19,8 +19,10 @@ from bioetl.interfaces.cli.commands.run_all import (
 )
 from bioetl.interfaces.cli.commands.run_all_helpers import (
     create_run_all_options,
+    emit_run_all_listing,
     record_pipeline_failure,
     record_pipeline_result,
+    should_prompt_for_destructive_run,
 )
 from bioetl.interfaces.cli.main import cli
 
@@ -261,6 +263,41 @@ class TestRunAllHelpers:
             "[FAIL] chembl_activity: failed",
             "boom",
         )
+
+    def test_should_prompt_for_destructive_run_only_when_required(self) -> None:
+        """Prompting should be limited to destructive non-dry interactive runs."""
+        assert (
+            should_prompt_for_destructive_run(
+                run_type="rebuild",
+                dry_run=False,
+                yes=False,
+            )
+            is True
+        )
+        assert (
+            should_prompt_for_destructive_run(
+                run_type="incremental",
+                dry_run=False,
+                yes=False,
+            )
+            is False
+        )
+
+    @patch("bioetl.interfaces.cli.commands.run_all_helpers.echo_info")
+    def test_emit_run_all_listing_prints_header_and_total(
+        self,
+        mock_echo_info,
+    ) -> None:
+        """List-only helper should emit the header, entries, and total."""
+        emit_run_all_listing(
+            source="chembl",
+            pipelines=["chembl_activity", "chembl_assay"],
+        )
+
+        calls = [call.args[0] for call in mock_echo_info.call_args_list]
+        assert calls[0] == "Pipelines for provider 'chembl':"
+        assert "  - chembl_activity" in calls
+        assert calls[-1] == "\nTotal: 2 pipeline(s)"
 
 
 # =============================================================================

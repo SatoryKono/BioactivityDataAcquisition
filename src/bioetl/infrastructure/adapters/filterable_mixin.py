@@ -15,8 +15,8 @@ from __future__ import annotations
 
 __all__ = [
     "DelegatingFallbackMixin",
+    "FetchFilteredPort",
     "FilterableStubMixin",
-    "HasFetchFiltered",
     "NotSupportedMultiFilterMixin",
 ]
 
@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 
 
 @runtime_checkable
-class HasFetchFiltered(Protocol):
+class FetchFilteredPort(Protocol):
     """Protocol for adapters that implement fetch_filtered method."""
 
     def fetch_filtered(
@@ -123,7 +123,7 @@ class DelegatingFallbackMixin:
     """
 
     async def fetch_filtered_with_fallback(
-        self: HasFetchFiltered,
+        self: FetchFilteredPort,
         entity_type: str,
         filter_ids: list[str],
         filter_field: str,

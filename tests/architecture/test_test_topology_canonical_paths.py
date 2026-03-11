@@ -73,6 +73,7 @@ def test_legacy_unit_test_paths_are_retired() -> None:
         "tests/unit/test_types.py",
         "tests/unit/application/test_error_classifier.py",
         "tests/unit/domain/test_types.py",
+        "tests/unit/infrastructure/adapters/test_fallback_orchestrator.py",
     ]
 
     existing_paths = [
