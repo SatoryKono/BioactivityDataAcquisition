@@ -8,7 +8,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import NamedTuple
 
-from bioetl.domain.ports import MetricsPort, QuarantinePort
+from bioetl.domain.ports import MetricsPort, QuarantinePort, QuarantineWriteRequest
 from bioetl.domain.types import BatchID, BronzeRecord, ErrorType, JsonDict
 
 
@@ -98,7 +98,7 @@ class QuarantineManagerService:
         if not records:
             return
 
-        write_requests = [
+        write_requests: list[QuarantineWriteRequest] = [
             {
                 "pipeline": self._pipeline_name,
                 "error_code": error_type.value,
@@ -173,7 +173,7 @@ class QuarantineManagerService:
             return
 
         error_code = "FILTERED_OUT_SILVER"
-        write_requests = [
+        write_requests: list[QuarantineWriteRequest] = [
             {
                 "pipeline": self._pipeline_name,
                 "error_code": error_code,

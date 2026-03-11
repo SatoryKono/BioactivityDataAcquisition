@@ -1,5 +1,7 @@
 # Decision Ledger Schema
 
+*Статус: internal-published (Internal / Extended)*
+
 ## Required Fields
 - `id`
 - `decision`

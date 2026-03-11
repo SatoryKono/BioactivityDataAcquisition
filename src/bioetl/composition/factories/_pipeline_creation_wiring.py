@@ -13,6 +13,7 @@ from bioetl.composition.factories.pipeline_factory_construction import (
 )
 from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
 from bioetl.composition.services.versioning import get_git_commit, get_pipeline_version
+from bioetl.application.core.shutdown import ShutdownSignal
 from bioetl.infrastructure.config import load_pipeline_contract_policy
 from bioetl.infrastructure.config.pipeline_config_loader import PipelineConfigLoader
 
@@ -188,6 +189,7 @@ def _create_pipeline_with_services_impl(
         runtime=inputs.runtime,
         services=services,
         config=domain_config,
+        shutdown_signal=ShutdownSignal(),
         transformer=transformer,
     )
 

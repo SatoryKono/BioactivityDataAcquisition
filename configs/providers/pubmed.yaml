@@ -81,6 +81,3 @@ filters:
     provider: pubmed
     input_filter:
         batch_size: 100
-    gold_filters:
-        required_fields: [ ]
-        columns: { }

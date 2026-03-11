@@ -20,6 +20,9 @@ from bioetl.infrastructure.adapters.common import BaseTitleFallbackHandler, titl
 from bioetl.infrastructure.adapters.semanticscholar.constants import (
     SEMANTICSCHOLAR_BASE_URL,
 )
+from bioetl.infrastructure.adapters.semanticscholar.request_headers import (
+    build_semanticscholar_headers,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -94,13 +97,11 @@ class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):
         Returns:
             Dictionary of HTTP headers including optional x-api-key if configured.
         """
-        headers = {
-            "User-Agent": "BioETL/1.0",
-            "Accept": "application/json",
-        }
-        if self._api_key:
-            headers["x-api-key"] = self._api_key
-        return headers
+        return build_semanticscholar_headers(
+            self._api_key,
+            include_content_type=False,
+            skip_placeholder_api_key=False,
+        )
 
     @property
     def _event_no_fallback_title(self) -> str:

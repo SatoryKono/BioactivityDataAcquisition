@@ -1,5 +1,7 @@
 # Synthesis Template
 
+*Статус: internal-published (Internal / Extended)*
+
 ## Required Sections
 1. Executive summary
 2. Key insights with evidence IDs

@@ -1,5 +1,7 @@
 # Pillar Definitions
 
+*Статус: internal-published (Internal / Extended)*
+
 ## Default Pillars
 - market
 - users

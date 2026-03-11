@@ -23,7 +23,10 @@ import polars as pl
 import pyarrow as pa
 import pytest
 
+from bioetl.application.services.dq.silver_check_executor import SilverCheckExecutor
 from bioetl.application.services.dq.silver_analyzer import SilverDQAnalyzer
+from bioetl.application.services.dq.silver_statistics import SilverStatisticsCalculator
+from bioetl.application.services.dq.silver_threshold import SilverThresholdChecker
 from bioetl.domain.value_objects.dq_report import (
     DQCheckStatus,
     MedallionLayer,
@@ -36,10 +39,25 @@ from bioetl.domain.value_objects.dq_report import (
 # ---------------------------------------------------------------------------
 
 
+def _build_analyzer() -> SilverDQAnalyzer:
+    """Create a fully wired SilverDQAnalyzer for unit tests."""
+    statistics = SilverStatisticsCalculator()
+    threshold_checker = SilverThresholdChecker()
+    check_executor = SilverCheckExecutor(
+        statistics=statistics,
+        threshold_checker=threshold_checker,
+    )
+    return SilverDQAnalyzer(
+        statistics=statistics,
+        threshold_checker=threshold_checker,
+        check_executor=check_executor,
+    )
+
+
 @pytest.fixture()
 def analyzer() -> SilverDQAnalyzer:
     """Create SilverDQAnalyzer instance."""
-    return SilverDQAnalyzer()
+    return _build_analyzer()
 
 
 @pytest.fixture()

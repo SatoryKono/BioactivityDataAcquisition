@@ -8,7 +8,9 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.schemas.composite_config import ColumnGroupSchema
-from bioetl.infrastructure.schemas.pipeline_config_common import CircuitBreakerConfig
+from bioetl.infrastructure.schemas.pipeline_config_common import (
+    CircuitBreakerYamlConfig,
+)
 from bioetl.infrastructure.schemas.pipeline_config_common_schemas import (
     ContentHashConfig,
     FilterColumnSchema,
@@ -26,8 +28,8 @@ from bioetl.infrastructure.schemas.pipeline_config_common_schemas import (
 from bioetl.infrastructure.schemas.pipeline_config_dq import (
     ConditionalValidationConfig,
     CrossFieldValidationConfig,
-    DQConfig,
-    DQReportConfig,
+    DQReportYamlConfig,
+    DQYamlConfig,
     FieldValidationConfig,
 )
 from bioetl.infrastructure.schemas.pipeline_config_provider import (
@@ -40,13 +42,13 @@ from bioetl.infrastructure.schemas.pipeline_config_provider import (
 
 __all__ = [
     "ApiConfig",
-    "CircuitBreakerConfig",
+    "CircuitBreakerYamlConfig",
     "ClientSourceConfig",
     "ConditionalValidationConfig",
     "ContentHashConfig",
     "CrossFieldValidationConfig",
-    "DQConfig",
-    "DQReportConfig",
+    "DQReportYamlConfig",
+    "DQYamlConfig",
     "FieldValidationConfig",
     "FilterColumnSchema",
     "GoldColumnFilterConfig",
@@ -101,8 +103,10 @@ class PipelineYamlConfig(BaseModel):
         "When set, DQ config is loaded from the hierarchical DQ system. "
         "Example: ../../entities/chembl/activity.yaml",
     )
-    dq_overrides: DQConfig = Field(default_factory=DQConfig)
-    circuit_breaker: CircuitBreakerConfig = Field(default_factory=CircuitBreakerConfig)
+    dq_overrides: DQYamlConfig = Field(default_factory=DQYamlConfig)
+    circuit_breaker: CircuitBreakerYamlConfig = Field(
+        default_factory=CircuitBreakerYamlConfig
+    )
     filter_config_file: str | None = Field(
         default=None,
         description="Path to filter config file relative to pipeline config. "

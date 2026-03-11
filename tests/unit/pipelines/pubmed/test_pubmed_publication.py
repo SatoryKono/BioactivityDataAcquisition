@@ -8,6 +8,7 @@ from uuid import UUID, uuid4
 
 import pytest
 
+from bioetl.application.core.shutdown import ShutdownSignal
 from bioetl.application.pipelines.pubmed import PubMedPublicationPipeline
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 from bioetl.domain.context import PipelineContext
@@ -39,7 +40,12 @@ def pipeline(mock_config, mock_runtime, mock_services):
     run_id = uuid4()
     transformer = PubMedPublicationTransformer(provider="pubmed")
     return PubMedPublicationPipeline(
-        mock_config, mock_runtime, mock_services, run_id, transformer=transformer
+        mock_config,
+        mock_runtime,
+        mock_services,
+        run_id,
+        shutdown_signal=ShutdownSignal(),
+        transformer=transformer,
     )
 
 

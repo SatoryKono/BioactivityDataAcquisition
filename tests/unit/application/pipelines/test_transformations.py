@@ -7,6 +7,7 @@ from uuid import uuid4
 
 import pytest
 
+from bioetl.application.core.shutdown import ShutdownSignal
 from bioetl.application.pipelines.pubchem import PubChemCompoundPipeline
 from bioetl.application.pipelines.pubchem.transformer import PubChemCompoundTransformer
 from bioetl.application.pipelines.uniprot import UniProtProteinPipeline
@@ -61,6 +62,7 @@ class TestPubChemCompoundPipeline:
             runtime=MagicMock(),
             services=MagicMock(),
             run_id=mock_run_id,
+            shutdown_signal=ShutdownSignal(),
             transformer=transformer,
         )
 
@@ -95,6 +97,7 @@ class TestPubChemCompoundPipeline:
             runtime=MagicMock(),
             services=MagicMock(),
             run_id=mock_run_id,
+            shutdown_signal=ShutdownSignal(),
             transformer=transformer,
         )
         record = {"molecular_formula": "C6H6"}
@@ -120,6 +123,7 @@ class TestUniProtProteinPipeline:
             runtime=MagicMock(),
             services=MagicMock(),
             run_id=mock_run_id,
+            shutdown_signal=ShutdownSignal(),
             transformer=transformer,
         )
 
@@ -158,6 +162,7 @@ class TestUniProtProteinPipeline:
             runtime=MagicMock(),
             services=MagicMock(),
             run_id=mock_run_id,
+            shutdown_signal=ShutdownSignal(),
             transformer=transformer,
         )
         record = {"uniProtkbId": "TEST_ID"}

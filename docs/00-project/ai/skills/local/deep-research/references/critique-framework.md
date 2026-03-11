@@ -1,5 +1,7 @@
 # Critique Framework
 
+*Статус: internal-published (Internal / Extended)*
+
 ## Review Axes
 - Logic integrity
 - Evidence sufficiency

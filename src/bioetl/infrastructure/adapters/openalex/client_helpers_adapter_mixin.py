@@ -8,6 +8,9 @@ from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
+from bioetl.infrastructure.adapters.common.doi_helpers import (
+    strip_doi_transport_prefix,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import SourceMetadata
@@ -53,14 +56,8 @@ class OpenAlexAdapterHelpersMixin:
         """
         if not doi:
             return None
-        doi = doi.strip()
-        if doi.startswith("https://doi.org/"):
-            return doi[16:]
-        if doi.startswith("http://doi.org/"):
-            return doi[15:]
-        if doi.startswith("doi:"):
-            return doi[4:]
-        return doi
+        normalized = strip_doi_transport_prefix(doi.strip())
+        return normalized or None
 
     @staticmethod
     def _escape_title_for_search(title: str) -> str:

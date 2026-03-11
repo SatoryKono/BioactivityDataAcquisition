@@ -1,5 +1,7 @@
 # PRD Template
 
+*Статус: internal-published (Internal / Extended)*
+
 ## Sections
 1. Problem statement
 2. Target users

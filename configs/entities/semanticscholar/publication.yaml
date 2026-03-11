@@ -169,12 +169,6 @@ quality:
     error_message: Title should not be empty or whitespace-only
   - field: publication_year
     type: range
-    min: 1500
-    max: 2100
-    nullable: true
-    error_message: Publication year out of valid range
-  - field: publication_year
-    type: range
     min: 1950
     nullable: true
     severity: warn
@@ -185,11 +179,6 @@ quality:
     nullable: true
     severity: warn
     error_message: Unexpected publication_type format after normalization
-  - field: citations_received
-    type: range
-    min: 0
-    nullable: true
-    error_message: Citation count must be non-negative
   - field: citations_received
     type: range
     min: 0
@@ -252,16 +241,4 @@ contracts:
   - paper_id
   merge_keys:
   - paper_id
-  rename_map:
-    run_id: _run_id
-    run_type: _run_type
-    source_batch_id: _source_batch_id
-    ingestion_ts: _ingestion_ts
-    source: _source
   hash_include: []
-  hash_exclude:
-  - _ingestion_ts
-  - _run_id
-  - _run_type
-  - _dq_error
-  - _dq_warn

@@ -48,8 +48,8 @@ class BasePipeline(ABC):  # noqa: B024
         runtime: RuntimeConfig,
         services: PipelineService,
         config: PipelineConfig,
+        shutdown_signal: ShutdownSignal,
         transformer: BaseTransformer | None = None,
-        shutdown_signal: ShutdownSignal | None = None,
     ) -> Self:
         """Create pipeline instance.
 
@@ -60,11 +60,10 @@ class BasePipeline(ABC):  # noqa: B024
             runtime: Runtime configuration.
             services: Injected services (ports).
             config: Pipeline configuration.
+            shutdown_signal: Injected shutdown signal instance.
             transformer: Injected transformer for Bronze→Silver transformation (DI).
                 If provided, the pipeline will use this transformer instead of
                 creating one internally. This is the preferred DI approach.
-            shutdown_signal: Optional injected shutdown signal instance.
-                If None, BasePipeline creates a default ShutdownSignal.
 
         Returns:
             Newly created Self instance.
@@ -74,8 +73,8 @@ class BasePipeline(ABC):  # noqa: B024
             runtime,
             services,
             run_id,
-            transformer=transformer,
             shutdown_signal=shutdown_signal,
+            transformer=transformer,
         )
 
     def __init__(
@@ -84,8 +83,8 @@ class BasePipeline(ABC):  # noqa: B024
         runtime: RuntimeConfig,
         services: PipelineService,
         run_id: RunID,
+        shutdown_signal: ShutdownSignal,
         transformer: BaseTransformer | None = None,
-        shutdown_signal: ShutdownSignal | None = None,
     ) -> None:
         """Initialize pipeline definition.
 
@@ -95,11 +94,10 @@ class BasePipeline(ABC):  # noqa: B024
             services: Injected services (ports).
             run_id: Unique identifier for this pipeline run.
                     MUST be passed from CLI/orchestrator to ensure consistency.
+            shutdown_signal: Injected shutdown signal instance for graceful stop.
             transformer: Injected transformer for Bronze→Silver transformation.
                 MUST be provided via DI from GenericPipelineFactory.
                 If None, transform_bronze_to_silver() will raise NotImplementedError.
-            shutdown_signal: Optional injected shutdown signal instance.
-                If None, BasePipeline creates a default ShutdownSignal.
 
         """
         self._config = config
@@ -118,7 +116,7 @@ class BasePipeline(ABC):  # noqa: B024
             run_type=runtime.run_type,
             logger=self._logger,
         )
-        self._shutdown_signal = shutdown_signal or ShutdownSignal()
+        self._shutdown_signal = shutdown_signal
 
     # --- Properties for accessing config (read-only) ---
 

@@ -1,5 +1,7 @@
 # Source Evaluation
 
+*Статус: internal-published (Internal / Extended)*
+
 ## Credibility Checklist
 - Is this a primary source?
 - Is methodology explicit?

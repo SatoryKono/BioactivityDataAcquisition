@@ -461,6 +461,7 @@ class TestChemblActivityFactory:
                 runtime=runtime,
                 services=mock_services,
                 config=mock_domain_config,
+                shutdown_signal=ANY,
                 transformer=ANY,  # Transformer instance created by factory
             )
             assert result is mock_pipeline

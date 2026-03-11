@@ -16,7 +16,6 @@ from bioetl.application.core.batch_progress_service import BatchProgressService
 from bioetl.application.core.shutdown import ShutdownSignal
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
-from bioetl.domain.ports import BatchIdGeneratorPort
 from bioetl.domain.types import BronzeRecord, GoldRecord
 
 if TYPE_CHECKING:
@@ -47,13 +46,6 @@ class BatchResult:
 
 class _BatchProcessingServicePort(Protocol):
     """Minimal contract required by BatchExecutor for batch processing service."""
-
-    def set_batch_id_factory(self, batch_id_factory: BatchIdGeneratorPort) -> None:
-        """Inject batch ID factory implementation.
-
-        Args:
-            batch_id_factory: Factory used to generate batch identifiers.
-        """
 
     def extract_records(
         self,
@@ -116,7 +108,6 @@ class BatchExecutor(_BatchExecutorDQMixin):
         progress_service: BatchProgressService,
         checkpoint_recovery_service: BatchCheckpointRecoveryService,
         batch_processing_service: _BatchProcessingServicePort,
-        batch_id_factory: BatchIdGeneratorPort,
         *,
         batch_size: int | None = None,
         checkpoint_interval: int | None = None,
@@ -159,8 +150,6 @@ class BatchExecutor(_BatchExecutorDQMixin):
 
         self._progress_service = progress_service
         self._checkpoint_recovery_service = checkpoint_recovery_service
-        self._batch_id_factory = batch_id_factory
-        batch_processing_service.set_batch_id_factory(self._batch_id_factory)
         self._batch_processing_service = batch_processing_service
 
         self._resume_offset = 0

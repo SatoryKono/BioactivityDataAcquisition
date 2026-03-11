@@ -13,6 +13,7 @@ import pytest
 from bioetl.application.core.preflight_service import (
     _MedallionConfigValidator as MedallionConfigValidator,
 )
+from bioetl.domain.medallion import WriteModePolicy
 from bioetl.domain.types import RunType
 
 
@@ -43,6 +44,7 @@ def validator(mock_config: Mock, mock_logger: Mock) -> MedallionConfigValidator:
     return MedallionConfigValidator(
         config=mock_config,
         logger=mock_logger,
+        write_mode_policy=WriteModePolicy(),
     )
 
 
@@ -235,7 +237,7 @@ class TestWriteModeValidation:
         config.table.silver_write_mode = "merge"
         config.table.gold_write_mode = "merge"
 
-        validator = MedallionConfigValidator(config=config, logger=mock_logger)
+        validator = MedallionConfigValidator(config=config, logger=mock_logger, write_mode_policy=WriteModePolicy())
         errors = validator.validate_write_modes()
         assert len(errors) == 0
 
@@ -245,7 +247,7 @@ class TestWriteModeValidation:
         config.table.silver_write_mode = "append"
         config.table.gold_write_mode = "merge"
 
-        validator = MedallionConfigValidator(config=config, logger=mock_logger)
+        validator = MedallionConfigValidator(config=config, logger=mock_logger, write_mode_policy=WriteModePolicy())
         errors = validator.validate_write_modes()
         assert len(errors) == 0
 
@@ -255,7 +257,7 @@ class TestWriteModeValidation:
         config.table.silver_write_mode = "overwrite"  # Not allowed for silver
         config.table.gold_write_mode = "merge"
 
-        validator = MedallionConfigValidator(config=config, logger=mock_logger)
+        validator = MedallionConfigValidator(config=config, logger=mock_logger, write_mode_policy=WriteModePolicy())
         errors = validator.validate_write_modes()
         assert len(errors) == 1
         assert errors[0].field == "write_mode"
@@ -266,7 +268,7 @@ class TestWriteModeValidation:
         config.table.silver_write_mode = "merge"
         config.table.gold_write_mode = "merge"
 
-        validator = MedallionConfigValidator(config=config, logger=mock_logger)
+        validator = MedallionConfigValidator(config=config, logger=mock_logger, write_mode_policy=WriteModePolicy())
         errors = validator.validate_write_modes()
         assert len(errors) == 0
 
@@ -276,7 +278,7 @@ class TestWriteModeValidation:
         config.table.silver_write_mode = "merge"
         config.table.gold_write_mode = "overwrite"
 
-        validator = MedallionConfigValidator(config=config, logger=mock_logger)
+        validator = MedallionConfigValidator(config=config, logger=mock_logger, write_mode_policy=WriteModePolicy())
         errors = validator.validate_write_modes()
         assert len(errors) == 0
 
@@ -286,7 +288,7 @@ class TestWriteModeValidation:
         config.table.silver_write_mode = "merge"
         config.table.gold_write_mode = "scd2"
 
-        validator = MedallionConfigValidator(config=config, logger=mock_logger)
+        validator = MedallionConfigValidator(config=config, logger=mock_logger, write_mode_policy=WriteModePolicy())
         errors = validator.validate_write_modes()
         assert len(errors) == 0
 
@@ -296,7 +298,7 @@ class TestWriteModeValidation:
         config.table.silver_write_mode = "merge"
         config.table.gold_write_mode = "append"  # Allowed for gold per ALLOWED_MODES
 
-        validator = MedallionConfigValidator(config=config, logger=mock_logger)
+        validator = MedallionConfigValidator(config=config, logger=mock_logger, write_mode_policy=WriteModePolicy())
         errors = validator.validate_write_modes()
         assert len(errors) == 0
 
@@ -306,7 +308,7 @@ class TestWriteModeValidation:
         config.table.silver_write_mode = "merge"
         config.table.gold_write_mode = "invalid_mode"
 
-        validator = MedallionConfigValidator(config=config, logger=mock_logger)
+        validator = MedallionConfigValidator(config=config, logger=mock_logger, write_mode_policy=WriteModePolicy())
         errors = validator.validate_write_modes()
         assert len(errors) == 1
         assert errors[0].field == "gold_write_mode"
@@ -317,6 +319,6 @@ class TestWriteModeValidation:
         config.table.silver_write_mode = "invalid_mode"
         config.table.gold_write_mode = "invalid_mode"
 
-        validator = MedallionConfigValidator(config=config, logger=mock_logger)
+        validator = MedallionConfigValidator(config=config, logger=mock_logger, write_mode_policy=WriteModePolicy())
         errors = validator.validate_write_modes()
         assert len(errors) == 2

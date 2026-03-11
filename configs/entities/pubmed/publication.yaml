@@ -191,12 +191,6 @@ quality:
     error_message: DOI must match format 10.XXXX/suffix (no whitespace)
   - field: publication_year
     type: range
-    min: 1500
-    max: 2100
-    nullable: true
-    error_message: Publication year out of valid range
-  - field: publication_year
-    type: range
     min: 1950
     nullable: true
     severity: warn
@@ -214,11 +208,6 @@ quality:
     - comparative-study
     - evaluation-study
     nullable: true
-  - field: pmc_id
-    type: pattern
-    pattern: ^PMC\d+$
-    nullable: true
-    error_message: PMC ID must start with PMC followed by digits
   - field: citations_received
     type: range
     min: 0
@@ -280,16 +269,4 @@ contracts:
   - pmid
   merge_keys:
   - pmid
-  rename_map:
-    run_id: _run_id
-    run_type: _run_type
-    source_batch_id: _source_batch_id
-    ingestion_ts: _ingestion_ts
-    source: _source
   hash_include: []
-  hash_exclude:
-  - _ingestion_ts
-  - _run_id
-  - _run_type
-  - _dq_error
-  - _dq_warn

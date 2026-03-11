@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.domain.configs import (
+from bioetl.domain.config import (
     BaseClientConfig,
     BaseProviderConfig,
     RateLimitConfig,

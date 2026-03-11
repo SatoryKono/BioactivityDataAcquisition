@@ -1,5 +1,7 @@
 # ID Generation Rules
 
+*Статус: internal-published (Internal / Extended)*
+
 ## Format
 Use stable, semantic IDs with lowercase kebab-case:
 

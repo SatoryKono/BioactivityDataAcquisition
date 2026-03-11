@@ -234,13 +234,18 @@ class TestCompositeConfigColumnGroups:
 
 
 class TestCompositeDQExternalization:
-    """Tests for externalized composite DQ config loading."""
+    """Tests for externalized composite DQ config loading.
+
+    The external file is the canonical composite DQ source; inline keys are
+    intentionally limited to pointer-style and last-mile override values.
+    """
 
     def test_dq_config_file_inline_precedence(
         self,
         tmp_path: Path,
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
+        """External DQ file provides the base payload; inline overrides win last."""
         configs_root = tmp_path / "configs"
         composites_dir = configs_root / "composites"
         quality_file = (

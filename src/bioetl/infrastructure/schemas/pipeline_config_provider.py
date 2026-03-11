@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from bioetl.infrastructure.schemas.pipeline_config_common import CircuitBreakerConfig
+from bioetl.infrastructure.schemas.pipeline_config_common import (
+    CircuitBreakerYamlConfig,
+)
 
 __all__ = [
     "ApiConfig",
@@ -65,5 +67,7 @@ class SourceConfig(BaseModel):
     api: ApiConfig = Field(default_factory=ApiConfig)
     batch_size: int = Field(default=100, ge=1, le=5000)
     rate_limit: RateLimitSourceConfig = Field(default_factory=RateLimitSourceConfig)
-    circuit_breaker: CircuitBreakerConfig = Field(default_factory=CircuitBreakerConfig)
+    circuit_breaker: CircuitBreakerYamlConfig = Field(
+        default_factory=CircuitBreakerYamlConfig
+    )
     provider_config: ProviderSourceConfig = Field(default_factory=ProviderSourceConfig)

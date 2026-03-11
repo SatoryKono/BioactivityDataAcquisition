@@ -7,6 +7,7 @@ Compatibility migration details are delegated to source normalizers.
 
 from __future__ import annotations
 
+from functools import lru_cache
 from pathlib import Path
 
 import yaml
@@ -94,7 +95,18 @@ def load_source_config_uncached(provider: str) -> SourceYamlConfig:
     return map_source_config(validated_payload)
 
 
+@lru_cache(maxsize=10)
+def load_source_config(provider: str) -> SourceYamlConfig:
+    """Load source configuration using the canonical cached entrypoint.
+
+    Returns:
+        Cached SourceYamlConfig instance for the given provider.
+    """
+    return load_source_config_uncached(provider)
+
+
 __all__ = [
+    "load_source_config",
     "load_source_config_uncached",
     "map_source_config",
     "normalize_source_config_payload",

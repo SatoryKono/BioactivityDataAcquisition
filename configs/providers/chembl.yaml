@@ -95,6 +95,3 @@ filters:
     provider: chembl
     input_filter:
         batch_size: 1000
-    gold_filters:
-        required_fields: [ ]
-        columns: { }

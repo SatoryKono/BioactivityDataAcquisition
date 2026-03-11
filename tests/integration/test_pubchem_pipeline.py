@@ -10,6 +10,7 @@ from uuid import UUID, uuid4
 
 import pytest
 
+from bioetl.application.core.shutdown import ShutdownSignal
 from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.application.pipelines.pubchem import PubChemCompoundPipeline
 from bioetl.application.pipelines.pubchem.transformer import PubChemCompoundTransformer
@@ -130,6 +131,7 @@ class TestPubChemCompoundPipelineTransform:
             runtime=pubchem_runtime,
             services=mock_pubchem_services,
             run_id=run_id,
+            shutdown_signal=ShutdownSignal(),
             transformer=PubChemCompoundTransformer(provider="pubchem"),
         )
 
@@ -183,6 +185,7 @@ class TestPubChemCompoundPipelineTransform:
             runtime=pubchem_runtime,
             services=mock_pubchem_services,
             run_id=run_id,
+            shutdown_signal=ShutdownSignal(),
             transformer=PubChemCompoundTransformer(provider="pubchem"),
         )
 
@@ -229,6 +232,7 @@ class TestPubChemCompoundPipelineTransform:
             runtime=pubchem_runtime,
             services=mock_pubchem_services,
             run_id=run_id,
+            shutdown_signal=ShutdownSignal(),
             transformer=PubChemCompoundTransformer(provider="pubchem"),
         )
 
@@ -263,6 +267,7 @@ class TestPubChemCompoundPipelineTransform:
             runtime=pubchem_runtime,
             services=mock_pubchem_services,
             run_id=run_id,
+            shutdown_signal=ShutdownSignal(),
             transformer=PubChemCompoundTransformer(provider="pubchem"),
         )
 
@@ -298,6 +303,7 @@ class TestPubChemCompoundPipelineCreate:
             runtime=pubchem_runtime,
             services=mock_pubchem_services,
             config=pubchem_config,
+            shutdown_signal=ShutdownSignal(),
         )
 
         assert pipeline is not None

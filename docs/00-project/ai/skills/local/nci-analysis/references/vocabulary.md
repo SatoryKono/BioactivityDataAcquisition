@@ -1,5 +1,7 @@
 # NCI Vocabulary
 
+*Статус: internal-published (Internal / Extended)*
+
 Preferred terms:
 - signal
 - indicator

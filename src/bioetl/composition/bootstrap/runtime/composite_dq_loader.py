@@ -47,6 +47,13 @@ def merge_external_dq_overrides(
     1. External dq_config_file payload
     2. Inline dq_overrides values (highest precedence)
 
+    This helper intentionally resolves exactly one external DQ file per
+    composite entity. The per-entity external file is the canonical source for
+    composite DQ defaults, even when several entities currently share the same
+    small threshold-only payload. Shared-base chaining is not supported here on
+    purpose; the architecture contract stays "one composite entity -> one
+    external DQ file" unless a separate refactor changes that policy.
+
     Mutates ``raw`` in-place by replacing the ``composite.dq_overrides`` key
     with the merged result. Returns immediately without error if the
     ``composite``, ``dq_overrides``, or ``dq_config_file`` keys are absent.

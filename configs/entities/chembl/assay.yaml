@@ -15,8 +15,8 @@ pipeline:
                 - assay_type
 schema:
     content_hash:
-        include: [ ]
-        exclude: [ ]
+        include: []
+        exclude: []
     column_groups:
         -   name: system
             fields:
@@ -73,7 +73,7 @@ schema:
             - system
             - business
             - dq
-        exclude_fields: [ ]
+        exclude_fields: []
         alias_policy: preserve
     gold:
         include_groups:
@@ -126,7 +126,7 @@ quality:
                 - description
             condition: all_present
             error_message: Assay must have ID and description
-    conditional_validations: [ ]
+    conditional_validations: []
     key_nullability:
         -   field: assay_id
             key_type: merge
@@ -185,16 +185,4 @@ contracts:
         - assay_id
     merge_keys:
         - assay_id
-    rename_map:
-        run_id: _run_id
-        run_type: _run_type
-        source_batch_id: _source_batch_id
-        ingestion_ts: _ingestion_ts
-        source: _source
-    hash_include: [ ]
-    hash_exclude:
-        - _ingestion_ts
-        - _run_id
-        - _run_type
-        - _dq_error
-        - _dq_warn
+    hash_include: []

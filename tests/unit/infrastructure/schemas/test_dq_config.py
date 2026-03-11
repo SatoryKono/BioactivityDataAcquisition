@@ -20,7 +20,7 @@ from bioetl.infrastructure.schemas.dq_config import (
 from bioetl.infrastructure.schemas.pipeline_config import (
     ConditionalValidationConfig,
     CrossFieldValidationConfig,
-    DQReportConfig,
+    DQReportYamlConfig,
     FieldValidationConfig,
 )
 
@@ -177,7 +177,7 @@ class TestDQConfigFile:
     def test_config_with_report_settings(self) -> None:
         """Config with custom report settings."""
         config = DQConfigFile(
-            report=DQReportConfig(
+            report=DQReportYamlConfig(
                 enabled=True,
                 format="yaml",
                 include_sample_failures=False,
@@ -367,7 +367,7 @@ class TestDQConfigFileToDomain:
     def test_to_domain_report_config(self) -> None:
         """Report config is converted correctly."""
         config = DQConfigFile(
-            report=DQReportConfig(
+            report=DQReportYamlConfig(
                 enabled=False,
                 format="csv",
                 sample_size=25,

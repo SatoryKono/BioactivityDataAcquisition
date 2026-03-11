@@ -200,3 +200,50 @@ def test_contracts_section_is_not_dict(
 
     with pytest.raises(ValueError, match="section 'contracts' not found"):
         load_pipeline_contract_policy("test_provider", "entity4")
+
+
+@pytest.mark.unit
+def test_entity_contract_values_override_base_defaults(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Entity contract values should override base defaults when explicitly set."""
+    load_pipeline_contract_policy.cache_clear()
+    monkeypatch.chdir(tmp_path)
+
+    base_dir = tmp_path / "configs" / "base"
+    base_dir.mkdir(parents=True)
+    (base_dir / "pipeline.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "contract_defaults": {
+                    "rename_map": {"run_id": "_run_id"},
+                    "hash_exclude": ["_ingestion_ts"],
+                    "hash_include": [],
+                }
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+
+    entity_dir = tmp_path / "configs" / "entities" / "test_provider"
+    entity_dir.mkdir(parents=True)
+    (entity_dir / "entity5.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "contracts": {
+                    "primary_key": ["pk"],
+                    "merge_keys": ["pk"],
+                    "rename_map": {"custom": "_custom"},
+                    "hash_exclude": ["_custom_meta"],
+                }
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+
+    policy = load_pipeline_contract_policy("test_provider", "entity5")
+
+    assert policy.rename_map == {"custom": "_custom"}
+    assert policy.hash_exclude == ["_custom_meta"]

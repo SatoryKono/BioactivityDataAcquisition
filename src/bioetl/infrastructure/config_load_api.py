@@ -5,7 +5,8 @@ Use this module from ``infrastructure.config`` internals and re-export from
 ``infrastructure.config.__init__`` for public consumers.
 """
 
-from bioetl.infrastructure.config_loader import load_pipeline_config, load_source_config
+from bioetl.infrastructure.config.source_config_loader import load_source_config
+from bioetl.infrastructure.config_loader import load_pipeline_config
 
 __all__ = [
     "load_pipeline_config",

@@ -1,5 +1,7 @@
 # Documentation Audit Report (BioETL v5.23+)
 
+*Статус: internal-published (Internal / Extended)*
+
 ## Summary
 - Date:
 - Scope:

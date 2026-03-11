@@ -11,7 +11,6 @@ from bioetl.application.composite.join_planner_compat_mixin import (
 )
 from bioetl.application.composite.join_planner_helpers import (
     parse_pipeline_name,
-    resolve_field_aliases_from_registry,
 )
 from bioetl.application.composite.protocols import (
     DependencyJoinerProtocol,
@@ -71,7 +70,7 @@ class JoinPlannerService(JoinPlannerCompatibilityMixin):
         join_key_resolver: JoinKeyResolverProtocol,
         join_executor: JoinExecutorProtocol,
         dependency_joiner: DependencyJoinerProtocol,
-        field_alias_resolver: Callable[[str], dict[str, str] | None] | None = None,
+        field_alias_resolver: Callable[[str], dict[str, str] | None],
     ) -> None:
         """Initialise the join planner with explicit collaborator services.
 
@@ -92,9 +91,8 @@ class JoinPlannerService(JoinPlannerCompatibilityMixin):
                 ``{provider}.{entity}.{field}`` convention.
             conflict_resolver: Service that detects and resolves column-name conflicts
                 between the seed/merged frame and an enricher frame.
-            field_alias_resolver: Optional callable returning a field-alias mapping
-                for a given pipeline name; defaults to
-                ``resolve_field_aliases_from_registry`` when ``None``.
+            field_alias_resolver: Callable returning a field-alias mapping
+                for a given pipeline name.
             join_key_resolver: ``JoinKeyResolverProtocol`` implementation for
                 qualified/unqualified join-key resolution.
             join_executor: ``JoinExecutorProtocol`` implementation for Polars joins.
@@ -107,9 +105,7 @@ class JoinPlannerService(JoinPlannerCompatibilityMixin):
         self._aggregator = aggregator
         self._renamer = renamer
         self._conflict_resolver = conflict_resolver
-        self._field_alias_resolver = (
-            field_alias_resolver or resolve_field_aliases_from_registry
-        )
+        self._field_alias_resolver = field_alias_resolver
         self._join_key_resolver = join_key_resolver
         self._join_executor = join_executor
         self._dependency_joiner = dependency_joiner

@@ -325,7 +325,6 @@ def create_batch_executor_from_pipeline(
         progress_service=progress_service,
         checkpoint_recovery_service=checkpoint_recovery_service,
         batch_processing_service=batch_processing_service,
-        batch_id_factory=effective_batch_id_factory,
         batch_size=pipeline.config.batch_size,
         checkpoint_interval=pipeline.config.checkpoint_interval,
     )

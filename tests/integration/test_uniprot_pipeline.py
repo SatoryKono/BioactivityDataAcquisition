@@ -10,6 +10,7 @@ from uuid import UUID, uuid4
 
 import pytest
 
+from bioetl.application.core.shutdown import ShutdownSignal
 from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.application.pipelines.uniprot import UniProtProteinPipeline
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
@@ -128,6 +129,7 @@ class TestUniProtProteinPipelineTransform:
             runtime=uniprot_runtime,
             services=mock_uniprot_services,
             run_id=run_id,
+            shutdown_signal=ShutdownSignal(),
             transformer=UniProtProteinTransformer(provider="uniprot"),
         )
 
@@ -184,6 +186,7 @@ class TestUniProtProteinPipelineTransform:
             runtime=uniprot_runtime,
             services=mock_uniprot_services,
             run_id=run_id,
+            shutdown_signal=ShutdownSignal(),
             transformer=UniProtProteinTransformer(provider="uniprot"),
         )
 
@@ -228,6 +231,7 @@ class TestUniProtProteinPipelineTransform:
             runtime=uniprot_runtime,
             services=mock_uniprot_services,
             run_id=run_id,
+            shutdown_signal=ShutdownSignal(),
             transformer=UniProtProteinTransformer(provider="uniprot"),
         )
 
@@ -262,6 +266,7 @@ class TestUniProtProteinPipelineTransform:
             runtime=uniprot_runtime,
             services=mock_uniprot_services,
             run_id=run_id,
+            shutdown_signal=ShutdownSignal(),
             transformer=UniProtProteinTransformer(provider="uniprot"),
         )
 
@@ -304,6 +309,7 @@ class TestUniProtProteinPipelineTransform:
             runtime=uniprot_runtime,
             services=mock_uniprot_services,
             run_id=run_id,
+            shutdown_signal=ShutdownSignal(),
             transformer=UniProtProteinTransformer(provider="uniprot"),
         )
 
@@ -343,6 +349,7 @@ class TestUniProtProteinPipelineTransform:
             runtime=uniprot_runtime,
             services=mock_uniprot_services,
             run_id=run_id,
+            shutdown_signal=ShutdownSignal(),
             transformer=UniProtProteinTransformer(provider="uniprot"),
         )
 
@@ -538,6 +545,7 @@ class TestUniProtProteinPipelineCreate:
             runtime=uniprot_runtime,
             services=mock_uniprot_services,
             config=uniprot_config,
+            shutdown_signal=ShutdownSignal(),
         )
 
         assert pipeline is not None
@@ -562,6 +570,7 @@ class TestUniProtProteinPipelineEdgeCases:
             runtime=uniprot_runtime,
             services=mock_uniprot_services,
             run_id=run_id,
+            shutdown_signal=ShutdownSignal(),
             transformer=UniProtProteinTransformer(provider="uniprot"),
         )
 
@@ -607,6 +616,7 @@ class TestUniProtProteinPipelineEdgeCases:
             runtime=uniprot_runtime,
             services=mock_uniprot_services,
             run_id=run_id,
+            shutdown_signal=ShutdownSignal(),
             transformer=UniProtProteinTransformer(provider="uniprot"),
         )
 

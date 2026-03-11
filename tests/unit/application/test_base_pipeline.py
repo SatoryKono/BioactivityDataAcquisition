@@ -34,7 +34,13 @@ class MockTransformer(BaseTransformer):
 
 
 @pytest.fixture
-def mock_pipeline():
+def shutdown_signal() -> ShutdownSignal:
+    """Create explicit ShutdownSignal for BasePipeline tests."""
+    return ShutdownSignal()
+
+
+@pytest.fixture
+def mock_pipeline(shutdown_signal: ShutdownSignal):
     """Fixture for a mocked BasePipeline."""
     config = PipelineConfig(
         pipeline_name="test_pipeline",
@@ -67,7 +73,12 @@ def mock_pipeline():
     # Inject mock transformer
     transformer = MockTransformer()
     pipeline = ConcretePipeline(
-        config, runtime, services, run_id, transformer=transformer
+        config,
+        runtime,
+        services,
+        run_id,
+        shutdown_signal=shutdown_signal,
+        transformer=transformer,
     )
     return pipeline
 
@@ -84,7 +95,7 @@ async def test_base_pipeline_initialization(mock_pipeline):
 
 
 async def test_base_pipeline_accepts_five_params():
-    """Test that BasePipeline.__init__ accepts exactly 5 parameters including transformer."""
+    """Test that BasePipeline.__init__ accepts explicit shutdown signal injection."""
     config = PipelineConfig(
         pipeline_name="test",
         provider="test",
@@ -109,9 +120,16 @@ async def test_base_pipeline_accepts_five_params():
     )
     run_id: RunID = uuid4()
     transformer = MockTransformer()
+    shutdown_signal = ShutdownSignal()
 
-    # Should work with exactly 5 positional args (including run_id and transformer)
-    pipeline = ConcretePipeline(config, runtime, services, run_id, transformer)
+    pipeline = ConcretePipeline(
+        config,
+        runtime,
+        services,
+        run_id,
+        shutdown_signal=shutdown_signal,
+        transformer=transformer,
+    )
     assert pipeline.config == config
     assert pipeline.runtime == runtime
     assert pipeline.services == services
@@ -175,7 +193,13 @@ async def test_run_id_propagation_is_consistent():
 
     # Create pipeline with explicit run_id (simulating CLI -> bootstrap -> pipeline flow)
     expected_run_id: RunID = uuid4()
-    pipeline = ConcretePipeline(config, runtime, services, expected_run_id)
+    pipeline = ConcretePipeline(
+        config,
+        runtime,
+        services,
+        expected_run_id,
+        shutdown_signal=ShutdownSignal(),
+    )
 
     # Verify run_id consistency across all access points
     assert pipeline.run_id == expected_run_id, (
