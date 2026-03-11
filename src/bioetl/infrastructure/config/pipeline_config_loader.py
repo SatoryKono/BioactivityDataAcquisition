@@ -24,7 +24,9 @@ from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config.converters import dq_overrides_to_domain
 from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
 from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
-from bioetl.infrastructure.config_loader import load_pipeline_config as load_yaml_config
+from bioetl.infrastructure.config_loader import (
+    load_pipeline_config_uncached as load_yaml_config_uncached,
+)
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.schemas.pipeline_config_dq import (
     ConditionalValidationConfig,
@@ -93,7 +95,10 @@ class PipelineConfigLoader:
             ValueError: If pipeline config file doesn't exist.
             ValidationError: If config fails validation.
         """
-        return load_yaml_config(pipeline_name)
+        return load_yaml_config_uncached(
+            pipeline_name,
+            filter_loader=self._filter_loader,
+        )
 
     def resolve_dq_config(
         self,

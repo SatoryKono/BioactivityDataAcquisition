@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     from bioetl.application.composite.dependency_coordinator import (
         DependencyCoordinatorService,
     )
-    from bioetl.application.core.runner import PipelineRunner
+    from bioetl.domain.ports import ExecutionMetricsRunnerPort
 
 __all__ = ["CompositeRunnerStageMixin"]
 
@@ -90,9 +90,9 @@ class CompositeRunnerStageMixin(
             return state, {}
 
         coordinator, runner_factory = self._validate_dependency_preconditions()
-
-        dependency_configs = {dep.pipeline: dep for dep in self._config.dependencies}
-        dependency_pipeline_names = list(dependency_configs)
+        dependency_pipeline_names = [
+            dependency.pipeline for dependency in self._config.dependencies
+        ]
 
         previous_state = state.state
         self._fsm.validate_fsm_transition(
@@ -123,7 +123,6 @@ class CompositeRunnerStageMixin(
                 dependencies=self._config.dependencies,
                 completed=state.completed_dependencies,
                 runner_factory=runner_factory,
-                dependency_configs=dependency_configs,
             )
         except (*PIPELINE_EXECUTION_ERRORS, BioETLError) as error:
             await self._handle_dependencies_phase_exception(state, error)
@@ -135,7 +134,8 @@ class CompositeRunnerStageMixin(
     def _validate_dependency_preconditions(
         self,
     ) -> tuple[
-        DependencyCoordinatorService, Callable[[str, pl.DataFrame], PipelineRunner]
+        DependencyCoordinatorService,
+        Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort],
     ]:
         """Validate that coordinator and runner factory are available.
 

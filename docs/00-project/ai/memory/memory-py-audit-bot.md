@@ -1,5 +1,7 @@
 # Memory: py-audit-bot
 
+*Статус: internal-only (agent memory)*
+
 *Version: 1.0.0 | Date: 2026-02-23 | Parent: agent-memory.md*
 
 > **Focus**: Architecture compliance, code review, import boundaries, DI violations, naming, scoring.

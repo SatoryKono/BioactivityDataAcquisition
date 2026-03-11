@@ -24,10 +24,9 @@ if TYPE_CHECKING:
         CompositePreflightValidationService,
     )
     from bioetl.application.composite.runner import CompositeRuntimeConfig
-    from bioetl.application.core.runner import PipelineRunner
     from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
     from bioetl.domain.composite.result import DependencyResult, MergeResult
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import ExecutionMetricsRunnerPort, LoggerPort
 
 __all__ = ["CompositeRunnerSupportMixin"]
 
@@ -37,7 +36,7 @@ class CompositeRunnerSupportMixin:
 
     _config: CompositeConfig
     _runtime: CompositeRuntimeConfig
-    _seed_runner_factory: Callable[[], PipelineRunner]
+    _seed_runner_factory: Callable[[], ExecutionMetricsRunnerPort]
     _checkpoint_manager: CompositeCheckpointService
     _logger: LoggerPort
     _run_id_str: str
@@ -212,11 +211,9 @@ class CompositeRunnerSupportMixin:
         await runner.run()
         completed_at = datetime.now(tz=UTC)
 
-        metrics = getattr(runner, "execution_metrics", None)
-        if not isinstance(metrics, dict):
-            metrics = {}
-        records_extracted = int(metrics.get("records_fetched", 0))
-        records_silver = int(metrics.get("records_silver", 0))
+        metrics = runner.execution_metrics
+        records_extracted = int(metrics["records_fetched"])
+        records_silver = int(metrics["records_silver"])
 
         return SeedResult(
             pipeline_name=self._config.seed.pipeline,

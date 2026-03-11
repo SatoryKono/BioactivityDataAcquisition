@@ -16,6 +16,7 @@ from pathlib import Path
 import yaml
 
 from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
 from bioetl.infrastructure.config_loader_filtering import (
     FILTER_SECTIONS,
     apply_hierarchical_filter_config,
@@ -228,13 +229,20 @@ def _load_source_section(
     source_file = config.get("source_file")
     if not source_file:
         return
-    source_path = config_path.parent / source_file
-    if source_path.exists():
-        with open(source_path, encoding="utf-8") as f:
-            source_config = yaml.safe_load(f) or {}
-        base_source = source_config.get("source", source_config)
-        entity_source = config.get("source", {})
-        config["source"] = _deep_merge(base_source, entity_source)
+    provider = config.get("provider")
+    if not isinstance(provider, str) or not provider:
+        return
+
+    from bioetl.infrastructure.config.source_config_loader import load_source_config
+
+    try:
+        source_config = load_source_config(provider)
+    except ValueError:
+        return
+
+    base_source = source_config.model_dump().get("source", {})
+    entity_source = config.get("source", {})
+    config["source"] = _deep_merge(base_source, entity_source)
 
 
 @dataclass(frozen=True)
@@ -286,6 +294,8 @@ def read_pipeline_config_payload(
 
 def normalize_pipeline_config_payload(
     payload: PipelineConfigReadPayload,
+    *,
+    filter_loader: FilterConfigLoader | None = None,
 ) -> JsonDict:  # Any: YAML config has heterogeneous values
     """Normalize pipeline payload (new + legacy shapes) before validation.
 
@@ -297,7 +307,11 @@ def normalize_pipeline_config_payload(
     )
 
     config = _apply_convention_defaults(payload.config.copy())
-    _apply_hierarchical_filter_config(config, payload.entity_config)
+    _apply_hierarchical_filter_config(
+        config,
+        payload.entity_config,
+        filter_loader=filter_loader,
+    )
     apply_pipeline_schema_normalization(
         config,
         entity_config=payload.entity_config,
@@ -341,13 +355,20 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
     return load_pipeline_config_uncached(pipeline_name)
 
 
-def load_pipeline_config_uncached(pipeline_name: str) -> PipelineYamlConfig:
+def load_pipeline_config_uncached(
+    pipeline_name: str,
+    *,
+    filter_loader: FilterConfigLoader | None = None,
+) -> PipelineYamlConfig:
     """Load pipeline configuration using the explicit uncached pipeline path.
 
     Returns:
         PipelineYamlConfig instance for the given pipeline name.
     """
     raw_payload = read_pipeline_config_payload(pipeline_name)
-    normalized_payload = normalize_pipeline_config_payload(raw_payload)
+    normalized_payload = normalize_pipeline_config_payload(
+        raw_payload,
+        filter_loader=filter_loader,
+    )
     validated_payload = validate_pipeline_config_payload(normalized_payload)
     return map_pipeline_config(validated_payload)

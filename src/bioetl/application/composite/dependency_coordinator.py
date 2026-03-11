@@ -10,14 +10,14 @@ from typing import TYPE_CHECKING
 import polars as pl
 
 from bioetl.application.composite.dependency_progress_tracker import (
-    DependencyProgressTracker,
+    DependencyProgressService,
 )
 from bioetl.application.composite.dependency_key_resolvers import (
     ChainedKeyResolver,
     SeedKeyResolver,
 )
 from bioetl.application.composite.dependency_result_mapper import (
-    DependencyResultMapper,
+    DependencyResultService,
 )
 from bioetl.domain.composite.result import DependencyResult
 from bioetl.domain.exceptions import (
@@ -29,9 +29,12 @@ from bioetl.domain.exceptions import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.application.core.runner import PipelineRunner
     from bioetl.domain.composite.config import DependencyConfig
-    from bioetl.domain.ports import DeltaReaderPort, LoggerPort
+    from bioetl.domain.ports import (
+        DeltaReaderPort,
+        ExecutionMetricsRunnerPort,
+        LoggerPort,
+    )
 
 
 _DEPENDENCY_EXECUTION_ERRORS = (
@@ -48,16 +51,6 @@ _DEPENDENCY_EXECUTION_ERRORS = (
 
 
 __all__ = ["DependencyCoordinatorService"]
-
-def _build_dependency_lookup(
-    *,
-    dependencies: Sequence[DependencyConfig],
-    dependency_configs: dict[str, DependencyConfig] | None,
-) -> dict[str, DependencyConfig]:
-    """Build dependency lookup map with optional explicit override."""
-    if dependency_configs is not None:
-        return dependency_configs
-    return {dependency.pipeline: dependency for dependency in dependencies}
 
 
 def _log_dependencies_batch_start(
@@ -103,13 +96,22 @@ class DependencyCoordinatorService:
 
     Attributes:
         logger: Structured logger.
+        progress_service: Service for skip/stop bookkeeping.
+        result_service: Service for mapping execution outcomes.
         delta_reader: Reader for Silver tables (for chained dependencies).
 
     Example:
-        >>> coordinator = DependencyCoordinator(logger=logger, delta_reader=reader)
+        >>> coordinator = DependencyCoordinatorService(
+        ...     logger=logger,
+        ...     seed_key_resolver=seed_key_resolver,
+        ...     chained_key_resolver=chained_key_resolver,
+        ...     progress_service=progress_service,
+        ...     result_service=result_service,
+        ...     delta_reader=reader,
+        ... )
         >>> results = await coordinator.run_dependencies(
         ...     keys=keys_df,
-        ...     dependencies=dependency_configs,
+        ...     dependencies=dependencies,
         ...     completed=frozenset(),
         ...     runner_factory=factory,
         ... )
@@ -120,6 +122,8 @@ class DependencyCoordinatorService:
         logger: LoggerPort,
         seed_key_resolver: SeedKeyResolver,
         chained_key_resolver: ChainedKeyResolver,
+        progress_service: DependencyProgressService,
+        result_service: DependencyResultService,
         delta_reader: DeltaReaderPort | None = None,
     ) -> None:
         """Initialize dependency coordinator.
@@ -128,22 +132,23 @@ class DependencyCoordinatorService:
             logger: Structured logger.
             seed_key_resolver: Resolver for seed-key dependencies.
             chained_key_resolver: Resolver for chained dependencies.
+            progress_service: Service for dependency progress bookkeeping.
+            result_service: Service for dependency result/log assembly.
             delta_reader: Reader for Silver tables (required for chained dependencies).
         """
         self._logger = logger
         self._delta_reader = delta_reader
         self._seed_key_resolver = seed_key_resolver
         self._chained_key_resolver = chained_key_resolver
-        self._result_mapper = DependencyResultMapper(logger)
-        self._progress_tracker = DependencyProgressTracker(logger)
+        self._result_service = result_service
+        self._progress_service = progress_service
 
     async def run_dependencies(
         self,
         keys: pl.DataFrame,
         dependencies: Sequence[DependencyConfig],
         completed: frozenset[str],
-        runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
-        dependency_configs: dict[str, DependencyConfig] | None = None,
+        runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort],
     ) -> dict[str, DependencyResult]:
         """Run dependencies sequentially and return per-pipeline results.
 
@@ -155,18 +160,16 @@ class DependencyCoordinatorService:
             keys: DataFrame of seed keys passed to each dependency pipeline.
             dependencies: Ordered sequence of dependency configurations to execute.
             completed: Set of pipeline names already completed (skipped when resuming).
-            runner_factory: Callable that creates a PipelineRunner given a pipeline name
-                and key DataFrame.
-            dependency_configs: Optional full config mapping for resolving chained keys.
+            runner_factory: Callable that creates a metrics-readable runner given a
+                pipeline name and key DataFrame.
 
         Returns:
             Mapping from dependency pipeline name to its DependencyResult.
         """
         results: dict[str, DependencyResult] = {}
-        dep_config_lookup = _build_dependency_lookup(
-            dependencies=dependencies,
-            dependency_configs=dependency_configs,
-        )
+        dep_config_lookup = {
+            dependency.pipeline: dependency for dependency in dependencies
+        }
 
         if not dependencies:
             self._logger.debug(
@@ -177,7 +180,7 @@ class DependencyCoordinatorService:
         _log_dependencies_batch_start(logger=self._logger, dependencies=dependencies)
 
         for dependency in dependencies:
-            if self._progress_tracker.maybe_store_completed_skip(
+            if self._progress_service.maybe_store_completed_skip(
                 dependency=dependency,
                 completed=completed,
                 results=results,
@@ -197,7 +200,7 @@ class DependencyCoordinatorService:
             )
             results[dependency.pipeline] = result
 
-            if self._progress_tracker.should_stop_after_result(
+            if self._progress_service.should_stop_after_result(
                 dependency=dependency,
                 result=result,
             ):
@@ -243,14 +246,14 @@ class DependencyCoordinatorService:
         self,
         dependency: DependencyConfig,
         keys: pl.DataFrame,
-        runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
+        runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort],
     ) -> DependencyResult:
         """Run a single dependency with timeout and error handling.
 
         Args:
             dependency: Dependency configuration.
             keys: Keys DataFrame from seed.
-            runner_factory: Factory to create PipelineRunner.
+            runner_factory: Factory to create a metrics-readable dependency runner.
 
         Returns:
             DependencyResult with execution outcome.
@@ -264,19 +267,19 @@ class DependencyCoordinatorService:
                 runner_factory=runner_factory,
             )
         except TimeoutError:
-            return self._result_mapper.build_timeout_result(
+            return self._result_service.build_timeout_result(
                 dependency=dependency,
                 started_at=started_at,
             )
         except _DEPENDENCY_EXECUTION_ERRORS as e:
-            return self._result_mapper.build_failed_result(
+            return self._result_service.build_failed_result(
                 dependency=dependency,
                 error=e,
                 started_at=started_at,
             )
 
         completed_at = datetime.now(tz=UTC)
-        return self._result_mapper.build_success_result(
+        return self._result_service.build_success_result(
             dependency=dependency,
             runner=runner,
             started_at=started_at,
@@ -287,8 +290,8 @@ class DependencyCoordinatorService:
         self,
         dependency: DependencyConfig,
         keys: pl.DataFrame,
-        runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
-    ) -> PipelineRunner:
+        runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort],
+    ) -> ExecutionMetricsRunnerPort:
         """Execute dependency runner under timeout guard."""
         async with asyncio.timeout(dependency.timeout_seconds):
             runner = runner_factory(dependency.pipeline, keys)

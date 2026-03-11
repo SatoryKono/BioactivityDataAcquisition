@@ -1,5 +1,7 @@
 # Memory: py-config-bot
 
+*Статус: internal-only (agent memory)*
+
 *Version: 1.0.0 | Date: 2026-02-23 | Parent: agent-memory.md*
 
 > **Focus**: YAML config creation/update, DQ rules, filter rules, composite pipelines, ADR compliance.

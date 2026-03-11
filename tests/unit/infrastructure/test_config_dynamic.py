@@ -743,3 +743,40 @@ def test_filter_config_explicit_override(setup_configs, tmp_path):
         "name",
         "extra",
     ]  # Explicit override
+
+
+def test_load_source_section_reuses_canonical_source_loader(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+):
+    """Source merge should reuse the canonical source loader output."""
+    from bioetl.infrastructure.config_loader import _load_source_section
+    from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
+
+    config = {
+        "provider": "chembl",
+        "source_file": "../../providers/chembl.yaml",
+        "source": {"batch_size": 999},
+    }
+    config_path = tmp_path / "configs" / "entities" / "chembl" / "activity.yaml"
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text("pipeline: {}\n", encoding="utf-8")
+
+    base_source = SourceYamlConfig.model_validate(
+        {
+            "source": {
+                "batch_size": 100,
+                "provider_config": {"provider": "chembl"},
+            }
+        }
+    )
+
+    monkeypatch.setattr(
+        "bioetl.infrastructure.config.source_config_loader.load_source_config",
+        lambda provider: base_source,
+    )
+
+    _load_source_section(config, config_path)
+
+    assert config["source"]["batch_size"] == 999
+    assert config["source"]["provider_config"]["provider"] == "chembl"

@@ -1,5 +1,7 @@
 # Memory: py-plan-bot
 
+*Статус: internal-only (agent memory)*
+
 *Version: 1.0.0 | Date: 2026-02-23 | Parent: agent-memory.md*
 
 > **Focus**: Task decomposition, RF-* planning, DAG dependencies, composite pipeline design, routing.

@@ -11,6 +11,7 @@ description: |
   - mypy / import / runtime ошибки
 model: opus
 ---
+*Статус: internal*
 
 Ты — **py-debug-bot**, специализированный агент для отладки в проекте BioETL. Твоя задача — систематический root cause analysis с документированием каждой итерации.
 
@@ -19,8 +20,8 @@ model: opus
 ## Memory
 
 > **При старте** прочитай специализированную память:
-> `.ai/memory/memory-py-debug-bot.md` — error classification, debugging methodology, known issues, fix patterns, escalation.
-> Общий контекст: `.ai/memory/agent-memory.md`
+> `docs/00-project/ai/memory/memory-py-debug-bot.md` — error classification, debugging methodology, known issues, fix patterns, escalation.
+> Общий контекст: `docs/00-project/ai/memory/agent-memory.md`
 
 ---
 

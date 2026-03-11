@@ -21,6 +21,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.domain.config import DQConfig
+import bioetl.infrastructure.config.pipeline_config_loader as pipeline_config_loader_module
 from bioetl.infrastructure.config.pipeline_config_loader import PipelineConfigLoader
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
@@ -536,3 +537,41 @@ class TestClearCache:
         )
         loader.clear_cache()
         filter_loader.clear_cache.assert_called_once()
+
+
+@pytest.mark.unit
+def test_load_pipeline_config_forwards_injected_filter_loader(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """PipelineConfigLoader should reuse its injected filter loader."""
+    dq_loader = _DummyDQLoader()
+    filter_loader = MagicMock()
+    expected = PipelineYamlConfig.model_validate(_base_pipeline_dict())
+    captured: dict[str, object] = {}
+
+    def _fake_load_pipeline_config_uncached(
+        pipeline_name: str,
+        *,
+        filter_loader: object | None = None,
+    ) -> PipelineYamlConfig:
+        captured["pipeline_name"] = pipeline_name
+        captured["filter_loader"] = filter_loader
+        return expected
+
+    monkeypatch.setattr(
+        pipeline_config_loader_module,
+        "load_yaml_config_uncached",
+        _fake_load_pipeline_config_uncached,
+    )
+
+    loader = PipelineConfigLoader(
+        Path("configs"),
+        dq_loader=dq_loader,
+        filter_loader=filter_loader,
+    )
+
+    result = loader.load_pipeline_config("test_provider_test_entity")
+
+    assert result is expected
+    assert captured["pipeline_name"] == "test_provider_test_entity"
+    assert captured["filter_loader"] is filter_loader

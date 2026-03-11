@@ -20,6 +20,12 @@ from bioetl.application.composite.dependency_key_resolvers import (
     ChainedKeyResolver,
     SeedKeyResolver,
 )
+from bioetl.application.composite.dependency_progress_tracker import (
+    DependencyProgressService,
+)
+from bioetl.application.composite.dependency_result_mapper import (
+    DependencyResultService,
+)
 from bioetl.domain.composite.config import DependencyConfig
 from bioetl.domain.composite.result import DependencyResult, DependencyStatus
 
@@ -36,6 +42,8 @@ def _make_coordinator(
         logger=logger,
         seed_key_resolver=SeedKeyResolver(logger),
         chained_key_resolver=ChainedKeyResolver(logger),
+        progress_service=DependencyProgressService(logger),
+        result_service=DependencyResultService(logger),
         delta_reader=delta_reader,
     )
 
@@ -439,7 +447,7 @@ class TestDependencyExecution:
         mock_logger.error.assert_called()
 
     @pytest.mark.asyncio
-    async def test_run_single_dependency_success_uses_executor_metrics(
+    async def test_run_single_dependency_success_uses_runner_execution_metrics(
         self,
         mock_logger: LoggerPort,
         seed_keys: pl.DataFrame,
@@ -454,7 +462,6 @@ class TestDependencyExecution:
 
         runner = MagicMock()
         runner.run = AsyncMock(return_value=None)
-        runner._executor = MagicMock(records_fetched=7, records_silver=5)
         runner.execution_metrics = {
             "records_fetched": 7,
             "records_silver": 5,

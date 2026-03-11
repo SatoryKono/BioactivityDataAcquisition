@@ -23,10 +23,16 @@ from bioetl.application.composite.deduplication import EnricherDeduplicatorServi
 from bioetl.application.composite.dependency_coordinator import (
     DependencyCoordinatorService,
 )
+from bioetl.application.composite.dependency_progress_tracker import (
+    DependencyProgressService,
+)
 from bioetl.application.composite.dependency_joiner import DependencyJoinerService
 from bioetl.application.composite.dependency_key_resolvers import (
     create_chained_key_resolver,
     create_seed_key_resolver,
+)
+from bioetl.application.composite.dependency_result_mapper import (
+    DependencyResultService,
 )
 from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.join_execution import JoinExecutorService, JoinHow
@@ -162,6 +168,8 @@ class CompositeSupportServicesFactory:
             logger=self._logger,
             seed_key_resolver=create_seed_key_resolver(self._logger),
             chained_key_resolver=create_chained_key_resolver(self._logger),
+            progress_service=DependencyProgressService(self._logger),
+            result_service=DependencyResultService(self._logger),
             delta_reader=delta_reader,
         )
         coordinator = EnrichmentCoordinatorService(

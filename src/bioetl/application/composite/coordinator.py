@@ -22,9 +22,8 @@ from bioetl.domain.exceptions import (
 if TYPE_CHECKING:
     import polars as pl
 
-    from bioetl.application.core.runner import PipelineRunner
     from bioetl.domain.composite.config import CompositeDQConfig, EnricherConfig
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import ExecutionMetricsRunnerPort, LoggerPort
 
 _FILTER_CONDITION_ERRORS = (
     ValueError,
@@ -56,7 +55,7 @@ def _build_enricher_task(
     keys: pl.DataFrame,
     enricher: EnricherConfig,
     completed: frozenset[str],
-    runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
+    runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort],
 ) -> tuple[str, asyncio.Task[EnrichmentResult]] | None:
     """Build async task for one enricher or return None when skipped."""
     if enricher.pipeline in completed:
@@ -112,7 +111,7 @@ class EnrichmentCoordinatorService(EnrichmentCoordinatorResultMixin):
         keys: pl.DataFrame,
         enrichers: Sequence[EnricherConfig],
         completed: frozenset[str],
-        runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
+        runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort],
     ) -> dict[str, EnrichmentResult]:
         """Run all enrichers concurrently and collect typed enrichment results.
 
@@ -120,8 +119,8 @@ class EnrichmentCoordinatorService(EnrichmentCoordinatorResultMixin):
             keys: DataFrame of seed keys to pass to each enricher pipeline.
             enrichers: Enricher configurations to execute.
             completed: Set of pipeline names already completed (skipped when resuming).
-            runner_factory: Callable that creates a PipelineRunner for a given pipeline name
-                and key DataFrame.
+            runner_factory: Callable that creates a metrics-readable runner for a
+                given pipeline name and key DataFrame.
 
         Returns:
             Mapping from enricher pipeline name to its EnrichmentResult, including
@@ -221,7 +220,7 @@ class EnrichmentCoordinatorService(EnrichmentCoordinatorResultMixin):
         self,
         enricher: EnricherConfig,
         keys: pl.DataFrame,
-        runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
+        runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort],
     ) -> EnrichmentResult:
         """Run a single enricher with timeout and error handling."""
         async with self._semaphore:
@@ -275,9 +274,9 @@ class EnrichmentCoordinatorService(EnrichmentCoordinatorResultMixin):
         *,
         enricher: EnricherConfig,
         keys: pl.DataFrame,
-        runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
+        runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort],
         started_at: datetime,
-    ) -> tuple[PipelineRunner, datetime, float]:
+    ) -> tuple[ExecutionMetricsRunnerPort, datetime, float]:
         async with asyncio.timeout(enricher.timeout_seconds):
             runner = runner_factory(enricher.pipeline, keys)
             await runner.run()

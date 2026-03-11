@@ -1,4 +1,4 @@
-"""Progress and stop-decision helpers for dependency orchestration."""
+"""Progress and stop-decision service for dependency orchestration."""
 
 from __future__ import annotations
 
@@ -11,11 +11,11 @@ if TYPE_CHECKING:
     from bioetl.domain.composite.config import DependencyConfig
     from bioetl.domain.ports import LoggerPort
 
-__all__ = ["DependencyProgressTracker"]
+__all__ = ["DependencyProgressService"]
 
 
 @dataclass(frozen=True, slots=True)
-class DependencyProgressTracker:
+class DependencyProgressService:
     """Encapsulates progress bookkeeping for dependency execution."""
 
     logger: LoggerPort

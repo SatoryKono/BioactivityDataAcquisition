@@ -22,14 +22,13 @@ if TYPE_CHECKING:
     )
     from bioetl.application.composite.fsm_helper import FSMStateHelperService
     from bioetl.application.composite.runner import CompositeRuntimeConfig
-    from bioetl.application.core.runner import PipelineRunner
     from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
     from bioetl.domain.composite.result import (
         DependencyResult,
         EnrichmentResult,
         SeedResult,
     )
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import ExecutionMetricsRunnerPort, LoggerPort
 
 
 class _CompositeRunnerStageSupportMixin:
@@ -42,9 +41,11 @@ class _CompositeRunnerStageSupportMixin:
     _fsm: FSMStateHelperService
     _checkpoint_manager: CompositeCheckpointService
     _dependency_coordinator: DependencyCoordinatorService | None
-    _dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner] | None
+    _dependencies_runner_factory: (
+        Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort] | None
+    )
     _coordinator: EnrichmentCoordinatorService
-    _enricher_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner]
+    _enricher_runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort]
 
     async def _save_checkpoint_safe(
         self,

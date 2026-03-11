@@ -22,6 +22,12 @@ from bioetl.application.composite.dependency_key_resolvers import (
     ChainedKeyResolver,
     SeedKeyResolver,
 )
+from bioetl.application.composite.dependency_progress_tracker import (
+    DependencyProgressService,
+)
+from bioetl.application.composite.dependency_result_mapper import (
+    DependencyResultService,
+)
 from bioetl.application.composite.key_extractor import KeyExtractorService
 from bioetl.domain.composite.config import DependencyConfig, SeedConfig
 
@@ -208,6 +214,8 @@ class TestDependencyWithMoleculeFilter:
             logger=mock_logger,
             seed_key_resolver=SeedKeyResolver(mock_logger),
             chained_key_resolver=ChainedKeyResolver(mock_logger),
+            progress_service=DependencyProgressService(mock_logger),
+            result_service=DependencyResultService(mock_logger),
             delta_reader=mock_delta_reader,
         )
 

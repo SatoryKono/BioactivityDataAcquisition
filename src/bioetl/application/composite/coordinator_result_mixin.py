@@ -8,9 +8,8 @@ from typing import TYPE_CHECKING
 from bioetl.domain.composite.result import EnrichmentResult, EnrichmentStatus
 
 if TYPE_CHECKING:
-    from bioetl.application.core.runner import PipelineRunner
     from bioetl.domain.composite.config import CompositeDQConfig, EnricherConfig
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import ExecutionMetricsReadablePort, LoggerPort
     from bioetl.domain.types import JsonDict
 
 
@@ -24,7 +23,7 @@ class EnrichmentCoordinatorResultMixin:
         self,
         *,
         enricher: EnricherConfig,
-        runner: PipelineRunner,
+        runner: ExecutionMetricsReadablePort,
         records_input: int,
         started_at: datetime,
         completed_at: datetime,
@@ -128,15 +127,13 @@ class EnrichmentCoordinatorResultMixin:
 
     @staticmethod
     def _extract_runner_stats(
-        runner: PipelineRunner,
+        runner: ExecutionMetricsReadablePort,
         records_input: int,
     ) -> tuple[int, int, float]:
         """Extract enrichment stats from runner public metrics view."""
-        metrics = getattr(runner, "execution_metrics", None)
-        if not isinstance(metrics, dict):
-            metrics = {}
-        records_enriched = int(metrics.get("records_silver", 0))
-        records_errored = int(metrics.get("records_quarantined", 0))
+        metrics = runner.execution_metrics
+        records_enriched = int(metrics["records_silver"])
+        records_errored = int(metrics["records_quarantined"])
         dq_error_rate = records_errored / records_input if records_input > 0 else 0.0
         return records_enriched, records_errored, dq_error_rate
 

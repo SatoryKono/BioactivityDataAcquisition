@@ -1,5 +1,7 @@
 # Memory: py-doc-bot
 
+*Статус: internal-only (agent memory)*
+
 *Version: 1.0.0 | Date: 2026-02-23 | Parent: agent-memory.md*
 
 > **Focus**: Documentation, ADR management, CHANGELOG, docstrings, glossary sync, doc-code consistency.
@@ -29,7 +31,7 @@ docs/
 ├── 00-map.md                       # Navigation hub
 ├── 01-getting-started/             # Onboarding guides
 ├── 02-architecture/
-│   ├── decisions/                  # ADRs (ADR-001 through ADR-040)
+│   ├── decisions/                  # ADRs (ADR-001 through ADR-043)
 │   └── diagrams/                   # Mermaid diagrams
 ├── 03-guides/                      # Development guides
 ├── 04-reference/                   # API documentation
@@ -50,7 +52,7 @@ docs/
 ## 3. ADR Management
 
 ### Current State
-- 41 ADRs: ADR-001 through ADR-041 (all present, verified 2026-03-09)
+- 43 ADRs: ADR-001 through ADR-043 (all present, verified 2026-03-11)
 - All in status: Accepted (except ADR-008: Superseded)
 - Location: `docs/02-architecture/decisions/`
 
