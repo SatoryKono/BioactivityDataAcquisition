@@ -5,6 +5,8 @@ description: Full audit and update of BioETL project documentation for v5.23+. U
 
 # Documentation Audit
 
+*Статус: internal-published (Internal / Extended)*
+
 ## Objective
 Perform a full documentation audit of BioETL and bring docs in sync with code and ADRs (v5.23+). Produce a clear audit report, a prioritized plan, and updated documentation changes.
 

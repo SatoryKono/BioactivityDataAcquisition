@@ -5,6 +5,8 @@ description: Execute BioETL hierarchical code review orchestration (L1/L2/L3) ac
 
 # py-review-orchestrator
 
+*Статус: internal-published (Internal / Extended)*
+
 ## Objective
 Run the role-specific workflow as defined in the py-review-orchestrator profile.
 

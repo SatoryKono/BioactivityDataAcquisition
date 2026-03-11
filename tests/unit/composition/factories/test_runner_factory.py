@@ -6,7 +6,7 @@ for the PipelineRunnerService.
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -17,6 +17,22 @@ from bioetl.composition.factories.runner_factory import (
     create_runner_factory,
 )
 from bioetl.composition.registry import PipelineRegistry
+
+
+def _make_mock_runner() -> MagicMock:
+    """Create a runner double satisfying the execution+metrics contract."""
+    runner = MagicMock()
+    runner.run = AsyncMock()
+    runner.shutdown_signal = None
+    runner.run_id = "run-123"
+    runner.execution_metrics = {
+        "records_fetched": 100,
+        "records_bronze": 95,
+        "records_silver": 90,
+        "records_gold": 85,
+        "records_quarantined": 10,
+    }
+    return runner
 
 
 @pytest.mark.unit
@@ -119,7 +135,7 @@ class TestRunnerFactoryCreate:
     def test_create_returns_runner(self, mock_context):
         """Test create returns a runner instance."""
         factory = RunnerFactory()
-        mock_runner = MagicMock()
+        mock_runner = _make_mock_runner()
 
         with (
             patch("bioetl.composition.factories.runner_factory.register_all_providers"),
@@ -137,7 +153,7 @@ class TestRunnerFactoryCreate:
         """Test create uses the configured registry."""
         custom_registry = PipelineRegistry()
         factory = RunnerFactory(registry=custom_registry)
-        mock_runner = MagicMock()
+        mock_runner = _make_mock_runner()
 
         with (
             patch("bioetl.composition.factories.runner_factory.register_all_providers"),
@@ -153,6 +169,28 @@ class TestRunnerFactoryCreate:
             mock_bootstrap.assert_called_once_with(
                 mock_context, registry=custom_registry
             )
+
+    def test_create_rejects_runner_without_metrics_contract(self, mock_context):
+        """Test create fails fast for runners missing execution metrics."""
+        factory = RunnerFactory()
+
+        class MinimalRunner:
+            shutdown_signal = None
+            run_id = "run-123"
+
+            async def run(self) -> None:
+                return None
+
+        with (
+            patch("bioetl.composition.factories.runner_factory.register_all_providers"),
+            patch("bioetl.composition.factories.runner_factory.register_all_pipelines"),
+            patch(
+                "bioetl.composition.factories.runner_factory.build_pipeline_runner",
+                return_value=MinimalRunner(),
+            ),
+        ):
+            with pytest.raises(TypeError, match="ExecutionMetricsRunnerPort"):
+                factory.create(mock_context)
 
 
 @pytest.mark.unit

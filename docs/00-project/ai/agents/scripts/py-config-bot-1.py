@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Gap analysis for pipeline configs against ADR-014/025/027.
+"""Gap analysis for pipeline configs against ADR-014/025/027/028/029.
 
 Checks pipeline configurations for compliance with:
 - ADR-014: Deterministic Writes (sort_by requirements)
 - ADR-025: Pipeline Config Unification (required/recommended fields)
-- ADR-027: DQ Rules Externalization (inline thresholds deprecated)
+- ADR-027/028: unified DQ/filter hierarchy
+- ADR-029: convention-based path resolution
 
 Usage:
     python docs/00-project/ai/agents/scripts/py-config-bot-1.py
@@ -223,7 +224,7 @@ def generate_report(all_gaps: list[ConfigGaps]) -> str:
         "# Config Gap Analysis Report",
         "",
         f"**Date**: {date.today()}",
-        "**Baseline**: ADR-014 (Deterministic Writes), ADR-025 (Config Unification), ADR-027 (DQ Externalization)",
+        "**Baseline**: ADR-014 (Deterministic Writes), ADR-025 (Config Unification), ADR-027/028 (Unified DQ/Filter Hierarchy), ADR-029 (Convention-based Resolution)",
         "",
         "## Summary",
         "",
@@ -307,12 +308,12 @@ def generate_report(all_gaps: list[ConfigGaps]) -> str:
             "",
             "### Priority 1 (Medium - Should Fix)",
             "1. Add `pipeline.description` and semver `version` where missing",
-            "2. Migrate inline `dq_overrides` thresholds to `dq_config_file` (ADR-027)",
+            "2. Migrate inline `dq_overrides` thresholds into the unified `quality` hierarchy when possible (ADR-027)",
             "3. Keep `pipeline.sink` keys aligned with `PipelineYamlConfig` schema",
             "",
             "### Priority 2 (Low - Nice to Have)",
             "1. Unify `sink.*.path` to end with `{provider}/{entity}`",
-            "2. Reference existing DQ config files via `dq_config_file`",
+            "2. Remove legacy explicit path overrides such as `dq_config_file` / `filter_config_file` unless a compatibility case is documented",
             "3. Add `filters.gold_filters.required_fields` where missing",
             "",
             "## ADR References",
@@ -320,6 +321,8 @@ def generate_report(all_gaps: list[ConfigGaps]) -> str:
             "- [ADR-014](docs/02-architecture/decisions/ADR-014-deterministic-writes.md): Deterministic Writes",
             "- [ADR-025](docs/02-architecture/decisions/ADR-025-pipeline-config-unification.md): Pipeline Config Unification",
             "- [ADR-027](docs/02-architecture/decisions/ADR-027-dq-rules-externalization.md): DQ Rules Externalization",
+            "- [ADR-028](docs/02-architecture/decisions/ADR-028-filter-rules-externalization.md): Filter Rules Externalization",
+            "- [ADR-029](docs/02-architecture/decisions/ADR-029-convention-based-configuration.md): Convention-based Configuration",
             "",
         ]
     )

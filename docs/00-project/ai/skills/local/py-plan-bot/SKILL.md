@@ -5,6 +5,8 @@ description: Execute BioETL py-plan-bot profile for role-specific workflow and c
 
 # py-plan-bot
 
+*Статус: internal-published (Internal / Extended)*
+
 ## Objective
 Run the role-specific workflow as defined in the py-plan-bot profile.
 

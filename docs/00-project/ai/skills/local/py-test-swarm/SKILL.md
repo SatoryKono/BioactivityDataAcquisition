@@ -5,6 +5,8 @@ description: Orchestrate hierarchical BioETL test swarms (L1/L2/L3) for full_aud
 
 # py-test-swarm
 
+*Статус: internal-published (Internal / Extended)*
+
 ## Core Role
 Act as L1 orchestrator by default.
 Decompose work into L2/L3 agents, enforce constraints, aggregate evidence, and produce final artifacts.

@@ -5,6 +5,8 @@ description: Record, validate, update, and clean VCR cassettes for BioETL HTTP t
 
 # VCR Record
 
+*Статус: internal-published (Internal / Extended)*
+
 ## Objective
 Manage VCR cassette lifecycle for provider integration tests.
 

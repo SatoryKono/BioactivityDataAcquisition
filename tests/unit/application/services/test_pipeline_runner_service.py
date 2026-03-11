@@ -41,10 +41,18 @@ def mock_logger():
 
 @pytest.fixture
 def mock_runner():
-    """Create a mock runner that implements RunnablePort."""
+    """Create a mock runner that implements execution+metrics runner contract."""
     runner = MagicMock()
     runner.run = AsyncMock()
     runner.shutdown_signal = None
+    runner.run_id = str(uuid4())
+    runner.execution_metrics = {
+        "records_fetched": 100,
+        "records_bronze": 95,
+        "records_silver": 90,
+        "records_gold": 85,
+        "records_quarantined": 5,
+    }
     return runner
 
 
@@ -363,6 +371,32 @@ class TestPipelineRunnerServiceRun:
         assert result.error_message == "Invalid configuration"
         assert result.error_type == "ValueError"
         mock_metrics_extractor.extract_metrics.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_run_fails_before_execution_for_runner_without_metrics(
+        self,
+        service,
+        mock_runner_factory,
+        mock_metrics_extractor,
+    ):
+        """Test producer boundary rejects non-metrics-readable runners pre-run."""
+
+        class MinimalRunner:
+            shutdown_signal = None
+            run_id = "run-123"
+            called = False
+
+            async def run(self) -> None:
+                self.called = True
+
+        runner = MinimalRunner()
+        mock_runner_factory.create.return_value = runner
+
+        with pytest.raises(TypeError, match="ExecutionMetricsRunnerPort"):
+            await service.run("test_pipeline")
+
+        assert runner.called is False
+        mock_metrics_extractor.extract_metrics.assert_not_called()
 
 
 # =============================================================================

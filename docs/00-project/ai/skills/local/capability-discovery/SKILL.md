@@ -8,6 +8,8 @@ agent: Explore
 
 # Capability Discovery
 
+*Статус: internal-published (Internal / Extended)*
+
 This skill discovers available capabilities (skills, agents, commands) in the user's environment to enable dynamic workflow adaptation.
 
 ## Purpose

@@ -17,7 +17,10 @@ import asyncio
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError, ShutdownReason
+from bioetl.domain.exceptions.pipeline_shutdown import (
+    PipelineShutdownError,
+    ShutdownReason,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort

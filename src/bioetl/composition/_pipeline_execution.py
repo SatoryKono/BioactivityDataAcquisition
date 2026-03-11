@@ -11,14 +11,13 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, cast
 from uuid import uuid4
 
-from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 from bioetl.application.services import PipelineRunResult, RunOptions, RunResult
 from bioetl.composition.bootstrap import (
     bootstrap_pipeline_runner,
     maybe_start_metrics_server,
 )
-from bioetl.composition.factories.runner_factory import create_metrics_extractor
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+from bioetl.composition.factories.runner_factory import create_metrics_extractor
 from bioetl.composition.providers.registration import register_all_providers
 from bioetl.domain.context import (
     CachedBronzeContext,
@@ -27,11 +26,12 @@ from bioetl.domain.context import (
     VacuumSettings,
 )
 from bioetl.domain.exceptions import BioETLError
+from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 from bioetl.domain.types import ExecutionContext, RunID, RunType
 from bioetl.infrastructure.config import get_settings
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import RunnablePort
+    from bioetl.domain.ports import ExecutionMetricsRunnerPort
 
 
 __all__ = [
@@ -43,6 +43,17 @@ __all__ = [
     "push_metrics_to_gateway",
     "run_pipeline",
 ]
+
+
+def _require_execution_metrics_runner(
+    runner: object,
+) -> ExecutionMetricsRunnerPort:
+    """Validate that the created runner is runnable and metrics-readable."""
+    from bioetl.domain.ports import ExecutionMetricsRunnerPort
+
+    if not isinstance(runner, ExecutionMetricsRunnerPort):
+        raise TypeError("Runner does not implement ExecutionMetricsRunnerPort")
+    return runner
 
 
 def push_metrics_to_gateway(
@@ -217,7 +228,10 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
     )
 
 
-def create_pipeline_runner(name: str, options: RunOptions) -> RunnablePort:
+def create_pipeline_runner(
+    name: str,
+    options: RunOptions,
+) -> ExecutionMetricsRunnerPort:
     """Create a pipeline runner for the given pipeline and options.
 
     This is the main entrypoint for pipeline execution. It handles:
@@ -230,7 +244,7 @@ def create_pipeline_runner(name: str, options: RunOptions) -> RunnablePort:
         options: User-facing run options.
 
     Returns:
-        RunnablePort ready for execution via runner.run().
+        ExecutionMetricsRunnerPort ready for execution via runner.run().
 
     Raises:
         ValueError: If pipeline name is unknown or options are invalid.
@@ -243,7 +257,7 @@ def create_pipeline_runner(name: str, options: RunOptions) -> RunnablePort:
     """
     _ensure_registrations()
     ctx = build_pipeline_context(name, options)
-    return bootstrap_pipeline_runner(ctx)
+    return _require_execution_metrics_runner(bootstrap_pipeline_runner(ctx))
 
 
 async def run_pipeline(name: str, options: RunOptions) -> RunResult:
@@ -261,7 +275,7 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
     maybe_start_metrics_server(settings)
 
     started_at = datetime.now(tz=UTC)
-    runner = create_pipeline_runner(name, options)
+    runner = _require_execution_metrics_runner(create_pipeline_runner(name, options))
 
     # Extract run context for result
     run_id = runner.run_id

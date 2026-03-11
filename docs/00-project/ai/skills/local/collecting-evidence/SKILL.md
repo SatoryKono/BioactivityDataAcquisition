@@ -7,6 +7,8 @@ agent: general-purpose
 
 # Evidence Collection
 
+*Статус: internal-published (Internal / Extended)*
+
 This skill guides the creation of structured Evidence Objects for a single research pillar.
 
 ## Prerequisites

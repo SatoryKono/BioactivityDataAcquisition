@@ -18,6 +18,7 @@ if TYPE_CHECKING:
         PostrunCleanupService,
     )
     from bioetl.application.core.postrun_compact_orchestrator import (
+        CompactionResult,
         PostrunCompactService,
     )
     from bioetl.application.core.postrun_dq_report_orchestrator import (
@@ -80,7 +81,7 @@ class PostrunResult:
     dq: DQResult
     dq_reports: DQReportResult | None
     vacuum: VacuumResult
-    duplicates_removed: int = 0
+    compaction: CompactionResult
 
 
 @dataclass(frozen=True, slots=True)
@@ -141,7 +142,7 @@ class PostrunService:
             PostrunResult with DQ check results, DQ report paths, and vacuum stats.
         """
         # Silver compact before DQ so checks see deduplicated data
-        duplicates_removed = await self.run_silver_compact_if_needed()
+        compaction = await self.run_silver_compact_if_needed()
 
         dq_result = await self.run_dq_checks(executor)
         dq_reports = await self._generate_dq_reports(dq_context)
@@ -155,7 +156,7 @@ class PostrunService:
             dq=dq_result,
             dq_reports=dq_reports,
             vacuum=vacuum_result,
-            duplicates_removed=duplicates_removed,
+            compaction=compaction,
         )
 
     async def run_dq_checks(self, executor: ExecutorMetricsPort) -> DQResult:
@@ -182,8 +183,8 @@ class PostrunService:
             metrics=self._metrics,
         )
 
-    async def run_silver_compact_if_needed(self) -> int:
-        """Deduplicate Silver after append-mode run. Returns duplicates removed."""
+    async def run_silver_compact_if_needed(self) -> CompactionResult:
+        """Deduplicate Silver after append-mode run."""
         return await self._compact_orchestrator.run_if_needed()
 
     async def cleanup(self, tracer: TracingPort | None) -> None:
@@ -295,9 +296,9 @@ class PostrunService:
         if not gold_table:
             return None
 
-        gold_path = Path(self._storage.get_table_path(gold_table, layer="gold"))
-        if not (gold_path / "_delta_log").is_dir():
+        if not self._storage.is_table_initialized(gold_table, layer="gold"):
             return None
+        gold_path = Path(self._storage.get_table_path(gold_table, layer="gold"))
         gold_input = GoldMetadataInput(
             table_path=str(gold_path),
             table_name=gold_table,

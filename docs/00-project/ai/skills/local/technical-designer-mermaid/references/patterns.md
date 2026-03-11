@@ -1,5 +1,7 @@
 # Mermaid Pattern Library (BioETL-Oriented)
 
+*Статус: internal-published (Internal / Extended)*
+
 Use these templates as starting points for BioETL diagrams, then adapt node names
 to match actual modules/files in the repository.
 

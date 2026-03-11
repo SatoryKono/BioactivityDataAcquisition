@@ -25,7 +25,11 @@ _PIPELINE_RUN_ERRORS = (
 
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort, MetricsExtractorPort, RunnablePort
+    from bioetl.domain.ports import (
+        ExecutionMetricsRunnerPort,
+        LoggerPort,
+        MetricsExtractorPort,
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -45,7 +49,7 @@ class PipelineRunExecutionService:
     async def execute(
         self,
         *,
-        runner: RunnablePort,
+        runner: ExecutionMetricsRunnerPort,
         run_logger: LoggerPort,
         metrics_extractor: MetricsExtractorPort,
     ) -> PipelineExecutionResult:

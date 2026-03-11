@@ -286,6 +286,7 @@ class TestRunPipelineIntegration:
         runner = MagicMock()
         runner.run = AsyncMock()
         runner.run_id = str(uuid4())
+        runner.shutdown_signal = None
         runner.execution_metrics = {
             "records_fetched": 100,
             "records_bronze": 100,
@@ -398,3 +399,29 @@ class TestRunPipelineIntegration:
 
         assert result.duration_seconds >= 0
         assert result.started_at <= result.completed_at
+
+    @pytest.mark.asyncio
+    async def test_run_pipeline_requires_metrics_readable_runner(self):
+        """Test run_pipeline fails clearly for runners without metrics contract."""
+        from bioetl.composition.entrypoints import run_pipeline
+
+        class MinimalRunner:
+            run_id = "run-123"
+            shutdown_signal = None
+            called = False
+
+            async def run(self):
+                self.called = True
+                return None
+
+        runner = MinimalRunner()
+        with patch(
+            "bioetl.composition._pipeline_execution.create_pipeline_runner",
+            return_value=runner,
+        ):
+            with pytest.raises(
+                TypeError,
+                match="ExecutionMetricsRunnerPort",
+            ):
+                await run_pipeline("test_pipeline", RunOptions())
+        assert runner.called is False

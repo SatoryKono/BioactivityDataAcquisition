@@ -1,0 +1,40 @@
+"""Guardrails against stale config-topology references in agent/docs artifacts."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+import pytest
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+TARGET_FILES = (
+    Path(".codex/agents/py-config-bot.md"),
+    Path("docs/00-project/ai/memory/memory-py-config-bot.md"),
+    Path(".codex/agents/py-audit-bot.md"),
+    Path(".codex/agents/py-doc-bot.md"),
+    Path(".codex/agents/py-plan-bot.md"),
+    Path("docs/00-project/ai/memory/memory-py-plan-bot.md"),
+    Path("docs/02-architecture/mmd-diagrams/views/46-yaml-config-resolution-full.mermaid"),
+    Path("docs/02-architecture/mmd-diagrams/foundation/46-yaml-config-resolution.mmd"),
+)
+
+OBSOLETE_PATTERNS = (
+    "configs/pipelines/",
+    "configs/dq/",
+    "configs/filter/",
+    "configs/sources/",
+    "configs/quality/entities/",
+    "configs/filters/entities/",
+)
+
+
+@pytest.mark.parametrize("relative_path", TARGET_FILES)
+def test_agent_and_doc_artifacts_do_not_reference_obsolete_config_topology(
+    relative_path: Path,
+) -> None:
+    text = (PROJECT_ROOT / relative_path).read_text(encoding="utf-8")
+    violations = [pattern for pattern in OBSOLETE_PATTERNS if pattern in text]
+    assert not violations, (
+        f"{relative_path} contains obsolete config-topology references: {violations}"
+    )

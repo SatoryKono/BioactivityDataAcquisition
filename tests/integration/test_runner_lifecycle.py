@@ -259,6 +259,7 @@ def mock_postrun_service(call_recorder):
 
     We mock the run() method to record the expected calls.
     """
+    from bioetl.application.core.postrun_compact_orchestrator import CompactionResult
     from bioetl.application.core.postrun_service import PostrunResult
     from bioetl.application.services.medallion_lifecycle import VacuumResult
     from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
@@ -280,6 +281,7 @@ def mock_postrun_service(call_recorder):
                 gold_files_removed=0,
                 skipped=False,
             ),
+            compaction=CompactionResult(status="skipped"),
         )
 
     async def run_dq_checks(executor):
@@ -922,6 +924,7 @@ class TestPipelineRunnerLifecycle:
                     gold_files_removed=0,
                     skipped=False,
                 ),
+                compaction=CompactionResult(status="skipped"),
             )
 
         mock_postrun_service.run = AsyncMock(side_effect=run_with_dq)
@@ -1012,6 +1015,7 @@ class TestPipelineRunnerLifecycle:
                     gold_files_removed=3,
                     skipped=False,
                 ),
+                compaction=CompactionResult(status="skipped"),
             )
 
         mock_postrun_service.run = AsyncMock(side_effect=run_with_vacuum)

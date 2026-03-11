@@ -20,6 +20,8 @@ if TYPE_CHECKING:
     from bioetl.domain.types import RunID
 
 __all__ = [
+    "ExecutionMetricsReadablePort",
+    "ExecutionMetricsRunnerPort",
     "MetricsExtractorPort",
     "PipelineFactoryPort",
     "RunnablePort",
@@ -54,6 +56,25 @@ class RunnablePort(Protocol):
 
 
 @runtime_checkable
+class ExecutionMetricsReadablePort(Protocol):
+    """Protocol for runners that expose execution counters."""
+
+    @property
+    def execution_metrics(self) -> dict[str, int]:
+        """Execution counters keyed by canonical metric names."""
+        ...
+
+
+@runtime_checkable
+class ExecutionMetricsRunnerPort(
+    RunnablePort,
+    ExecutionMetricsReadablePort,
+    Protocol,
+):
+    """Protocol for runners that are executable and expose counters."""
+
+
+@runtime_checkable
 class RunnerFactoryPort(Protocol):
     """Port for creating pipeline runners.
 
@@ -66,14 +87,14 @@ class RunnerFactoryPort(Protocol):
     def create(
         self,
         context: PipelineRunContext,
-    ) -> RunnablePort:
+    ) -> ExecutionMetricsRunnerPort:
         """Create a configured pipeline runner.
 
         Args:
             context: Pipeline run context containing all execution parameters.
 
         Returns:
-            Runnable object ready for execution.
+            Runnable object ready for execution and metric extraction.
 
         Raises:
             ValueError: If pipeline name is unknown or config is invalid.
@@ -109,11 +130,11 @@ class MetricsExtractorPort(Protocol):
     depending on internal runner structure.
     """
 
-    def extract_metrics(self, runner: RunnablePort) -> dict[str, int]:
+    def extract_metrics(self, runner: ExecutionMetricsReadablePort) -> dict[str, int]:
         """Extract execution metrics from a runner.
 
         Args:
-            runner: Runner to extract metrics from.
+            runner: Runner exposing the execution-metrics contract.
 
         Returns:
             Dictionary with metric names and values:

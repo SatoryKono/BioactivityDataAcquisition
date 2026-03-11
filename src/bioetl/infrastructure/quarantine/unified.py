@@ -22,11 +22,11 @@ import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake
 from deltalake.exceptions import TableNotFoundError
 
+from bioetl.domain.ports import QuarantineWriteRequest
 from bioetl.domain.serialization import serialize_to_json
 from bioetl.domain.types import (
     BatchID,
     JsonDict,
-    MetaDict,
     QuarantineRecordStatus,
     RunID,
 )
@@ -111,7 +111,7 @@ class UnifiedQuarantineAdapter:
 
     async def write_many(
         self,
-        records: list[MetaDict],
+        records: list[QuarantineWriteRequest],
     ) -> None:
         """Write multiple quarantine records in one Delta append."""
         if not records:
@@ -121,7 +121,7 @@ class UnifiedQuarantineAdapter:
 
     def _normalize_record(
         self,
-        record: MetaDict,
+        record: QuarantineWriteRequest,
     ) -> JsonDict:
         """Normalize a write request into the stored quarantine schema."""
         payload = record["payload"]

@@ -858,6 +858,10 @@ class TestPipelineRunnerCheckDataQuality:
         services = create_mock_services()
 
         postrun_service = MagicMock(spec=PostrunService)
+        from bioetl.application.core.postrun_compact_orchestrator import (
+            CompactionResult,
+        )
+
         postrun_service.run = AsyncMock(
             return_value=PostrunResult(
                 dq=DQResult(
@@ -871,6 +875,7 @@ class TestPipelineRunnerCheckDataQuality:
                 vacuum=VacuumResult(
                     silver_files_removed=0, gold_files_removed=0, skipped=True
                 ),
+                compaction=CompactionResult(status="skipped"),
             )
         )
         postrun_service.cleanup = AsyncMock()

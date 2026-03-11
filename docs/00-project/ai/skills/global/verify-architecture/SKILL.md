@@ -5,6 +5,8 @@ description: Run architecture compliance checks for BioETL (quick/full/category 
 
 # Verify Architecture
 
+*Статус: internal-published (Internal / Extended)*
+
 ## Objective
 Execute architecture validation checks and report blocking/non-blocking issues.
 
