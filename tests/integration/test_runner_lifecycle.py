@@ -18,8 +18,8 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.core.postrun_service import PostrunService
-from bioetl.application.core.preflight_service import PreflightService
+from bioetl.application.core.postrun.service import PostrunService
+from bioetl.application.core.preflight.service import PreflightService
 from bioetl.application.core.runner import PipelineRunner
 from bioetl.application.observability.observer import PipelineObserver
 from bioetl.application.services.medallion_lifecycle import (
@@ -259,8 +259,8 @@ def mock_postrun_service(call_recorder):
 
     We mock the run() method to record the expected calls.
     """
-    from bioetl.application.core.postrun_compact_orchestrator import CompactionResult
-    from bioetl.application.core.postrun_service import PostrunResult
+    from bioetl.application.core.postrun.compact_orchestrator import CompactionResult
+    from bioetl.application.core.postrun.service import PostrunResult
     from bioetl.application.services.medallion_lifecycle import VacuumResult
     from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 
@@ -902,7 +902,7 @@ class TestPipelineRunnerLifecycle:
         services_with_dq.__aexit__ = services_dq_aexit
 
         # Mock postrun service to call DQ checks via run()
-        from bioetl.application.core.postrun_service import PostrunResult
+        from bioetl.application.core.postrun.service import PostrunResult
         from bioetl.application.services.medallion_lifecycle import VacuumResult
         from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 
@@ -997,7 +997,7 @@ class TestPipelineRunnerLifecycle:
         )
 
         # Mock postrun service to call vacuum via run()
-        from bioetl.application.core.postrun_service import PostrunResult
+        from bioetl.application.core.postrun.service import PostrunResult
         from bioetl.application.services.medallion_lifecycle import VacuumResult
         from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 

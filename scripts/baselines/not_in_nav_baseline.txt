@@ -101,6 +101,7 @@
 00-project/ai/agents/orchestration/ORCHESTRATION.md
 00-project/ai/agents/orchestration/py-team-orchestration.md
 00-project/ai/agents/policy/SPECIALIST_PROFILE_TEMPLATE.md
+00-project/ai/agents/runtime/orchestration/py-team-orchestration.md
 00-project/ai/memory/memory-py-audit-bot.md
 00-project/ai/memory/memory-py-config-bot.md
 00-project/ai/memory/memory-py-debug-bot.md
@@ -119,6 +120,7 @@
 00-project/ai/prompts/refactor_orchestration_prompt_1-2.md
 00-project/ai/prompts/scripts_inventory_consolidation_cleanup_prompt.md
 00-project/ai/skills/SKILLS-CATALOG.md
+00-project/ai/skills/_references/README.md
 00-project/ai/skills/_references/local/collecting-evidence/references/evidence-object-schema.md
 00-project/ai/skills/_references/local/collecting-evidence/references/id-generation-rules.md
 00-project/ai/skills/_references/local/collecting-evidence/references/research-protocols.md

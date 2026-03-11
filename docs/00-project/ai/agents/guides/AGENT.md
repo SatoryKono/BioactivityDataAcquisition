@@ -20,7 +20,7 @@ make lint && make test
 
 # Основные команды
 make install      # установка зависимостей (альтернатива dev-setup.sh)
-make test         # все тесты (unit + integration)
+make test         # локальный стабильный прогон (без E2E)
 make lint         # ruff + mypy
 make run-local    # запуск на фикстурах
 

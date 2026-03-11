@@ -6,11 +6,11 @@ from collections.abc import Callable
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.lock_manager import LockCoordinator
-from bioetl.application.core.preflight_health_aggregator import _HealthAggregator
-from bioetl.application.core.preflight_medallion_validator import (
+from bioetl.application.core.preflight.health_aggregator import _HealthAggregator
+from bioetl.application.core.preflight.medallion_validator import (
     _MedallionConfigValidator,
 )
-from bioetl.application.core.preflight_service import PreflightService
+from bioetl.application.core.preflight.service import PreflightService
 from bioetl.application.core.runner import PipelineRunner
 from bioetl.application.observability.observer import PipelineObserver
 from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
@@ -32,7 +32,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.batch_executor import BatchExecutor
     from bioetl.application.core.checkpoint_manager import CheckpointManagerService
-    from bioetl.application.core.postrun_service import PostrunService
+    from bioetl.application.core.postrun.service import PostrunService
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig

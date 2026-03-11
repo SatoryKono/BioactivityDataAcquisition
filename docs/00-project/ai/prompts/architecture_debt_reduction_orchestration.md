@@ -1,3 +1,5 @@
+*Статус: internal-only (historical prompt)*
+
 # Architecture Debt Reduction — Orchestration Prompt
 
 *Версия: 2.0.0 | Дата: 2026-03-08*

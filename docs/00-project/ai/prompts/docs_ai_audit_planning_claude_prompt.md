@@ -1,3 +1,5 @@
+*Статус: internal-only (historical prompt)*
+
  Ты — технический оркестратор документации BioETL.
 
   ЗАДАЧА

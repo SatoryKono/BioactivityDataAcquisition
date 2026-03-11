@@ -26,8 +26,8 @@ if TYPE_CHECKING:
     from bioetl.application.core.checkpoint_manager import CheckpointManagerService
     from bioetl.application.core.lock_manager import LockCoordinator
     from bioetl.application.core.pipeline_services import PipelineService
-    from bioetl.application.core.postrun_service import PostrunService
-    from bioetl.application.core.preflight_service import PreflightService
+    from bioetl.application.core.postrun.service import PostrunService
+    from bioetl.application.core.preflight.service import PreflightService
     from bioetl.application.core.shutdown import ShutdownSignal
     from bioetl.application.observability.observer import PipelineObserver
     from bioetl.application.services.medallion_lifecycle import (

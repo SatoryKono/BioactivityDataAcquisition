@@ -8,11 +8,11 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.core.preflight_health_aggregator import _HealthAggregator
-from bioetl.application.core.preflight_medallion_validator import (
+from bioetl.application.core.preflight.health_aggregator import _HealthAggregator
+from bioetl.application.core.preflight.medallion_validator import (
     _MedallionConfigValidator,
 )
-from bioetl.application.core.preflight_service import PreflightService
+from bioetl.application.core.preflight.service import PreflightService
 from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.exceptions import InfrastructureError

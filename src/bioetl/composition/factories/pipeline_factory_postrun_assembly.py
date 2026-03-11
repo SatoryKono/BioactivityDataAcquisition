@@ -4,19 +4,19 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.application.core.postrun_cleanup_orchestrator import (
+from bioetl.application.core.postrun.cleanup_orchestrator import (
     PostrunCleanupService,
 )
-from bioetl.application.core.postrun_compact_orchestrator import (
+from bioetl.application.core.postrun.compact_orchestrator import (
     PostrunCompactService,
 )
-from bioetl.application.core.postrun_dq_report_orchestrator import (
+from bioetl.application.core.postrun.dq_report_orchestrator import (
     PostrunDQReportService,
 )
-from bioetl.application.core.postrun_metadata_version_resolver import (
+from bioetl.application.core.postrun.metadata_version_resolver import (
     PostrunMetadataVersionResolver,
 )
-from bioetl.application.core.postrun_service import (
+from bioetl.application.core.postrun.service import (
     PostrunDependencyContext,
     PostrunService,
 )

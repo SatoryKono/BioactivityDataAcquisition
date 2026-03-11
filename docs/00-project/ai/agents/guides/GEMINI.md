@@ -51,7 +51,7 @@ source .venv/bin/activate
 ### Verification (Run frequently)
 ```bash
 make lint         # ruff + mypy
-make test         # All tests (Unit + Integration + Architecture)
+make test         # Stable local suite (non-E2E)
 make test-unit    # Fast unit tests
 make test-integration # VCR-backed integration tests
 ```

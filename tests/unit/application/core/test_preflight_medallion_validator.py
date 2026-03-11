@@ -11,7 +11,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.application.core.preflight_medallion_validator import (
+from bioetl.application.core.preflight.medallion_validator import (
     _MedallionConfigValidator,
 )
 from bioetl.domain.medallion import WriteModePolicy

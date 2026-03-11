@@ -10,8 +10,8 @@ import pytest
 from bioetl.application.core.checkpoint_manager import CheckpointManager
 from bioetl.application.core.lock_manager import LockCoordinator
 from bioetl.application.core.pipeline_services import PipelineService
-from bioetl.application.core.postrun_service import PostrunService
-from bioetl.application.core.preflight_service import PreflightService
+from bioetl.application.core.postrun.service import PostrunService
+from bioetl.application.core.preflight.service import PreflightService
 from bioetl.application.core.runner import PipelineRunner
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.application.observability.observer import PipelineObserver
@@ -165,7 +165,7 @@ def mock_preflight_service():
 @pytest.fixture
 def mock_postrun_service():
     """Create a mock PostrunService (injected via DI)."""
-    from bioetl.application.core.postrun_service import (
+    from bioetl.application.core.postrun.service import (
         DQEvaluationStatus,
         DQResult,
         VacuumResult,
@@ -782,7 +782,7 @@ class TestPipelineRunnerCheckDataQuality:
         mock_lifecycle_service,
     ):
         """Test _check_data_quality delegates to PostrunService."""
-        from bioetl.application.core.postrun_service import (
+        from bioetl.application.core.postrun.service import (
             DQEvaluationStatus,
             DQResult,
             VacuumResult,
@@ -847,18 +847,18 @@ class TestPipelineRunnerCheckDataQuality:
         mock_lifecycle_service,
     ):
         """Test _check_data_quality is invoked during run()."""
-        from bioetl.application.core.postrun_service import (
+        from bioetl.application.core.postrun.service import (
             DQEvaluationStatus,
             DQResult,
             VacuumResult,
         )
 
-        from bioetl.application.core.postrun_service import PostrunResult
+        from bioetl.application.core.postrun.service import PostrunResult
 
         services = create_mock_services()
 
         postrun_service = MagicMock(spec=PostrunService)
-        from bioetl.application.core.postrun_compact_orchestrator import (
+        from bioetl.application.core.postrun.compact_orchestrator import (
             CompactionResult,
         )
 

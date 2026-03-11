@@ -193,8 +193,13 @@ def test_load_pipeline_config_runs_read_normalize_validate_map_in_order(
         events.append("read")
         return raw_payload
 
-    def fake_normalize(payload: PipelineConfigReadPayload) -> dict[str, Any]:
+    def fake_normalize(
+        payload: PipelineConfigReadPayload,
+        *,
+        filter_loader: object,
+    ) -> dict[str, Any]:
         assert payload is raw_payload
+        assert filter_loader is not None
         events.append("normalize")
         return normalized_payload
 

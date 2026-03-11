@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.application.core.postrun_service import PostrunService
+from bioetl.application.core.postrun.service import PostrunService
 from bioetl.composition.factories.pipeline_factory_postrun_assembly import (
     build_postrun_dependency_context,
 )

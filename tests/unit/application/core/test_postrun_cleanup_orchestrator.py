@@ -10,7 +10,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.application.core.postrun_cleanup_orchestrator import PostrunCleanupService
+from bioetl.application.core.postrun.cleanup_orchestrator import PostrunCleanupService
 
 
 @pytest.fixture

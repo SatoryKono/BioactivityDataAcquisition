@@ -4,8 +4,8 @@
 
 ```bash
 # 1. Clone and install (automated setup)
-git clone https://github.com/SatoryKono/BioactivityDataAcquisition.git
-cd BioactivityDataAcquisition
+git clone https://github.com/SatoryKono/BioactivityDataAcquisition2.git
+cd BioactivityDataAcquisition2
 ./scripts/dev/dev_setup.sh          # Full setup with all checks
 # ./scripts/dev/dev_setup.sh --quick  # Fast: skip tests and linters
 # ./scripts/dev/dev_setup.sh --ci     # CI mode: no colors, non-interactive
@@ -77,7 +77,7 @@ Before contributing, read these documents:
 | ------------ | ---------------------------- | ------------------------------------------------ |
 | Unit         | `tests/unit/`                | No mocking domain entities, mock ports only      |
 | Integration  | `tests/integration/`         | VCR.py for HTTP, sanitize secrets from cassettes |
-| Architecture | `tests/test_architecture.py` | Validates layer imports                          |
+| Architecture | `tests/architecture/`        | Validates layer imports, contracts, naming, governance |
 
 **Coverage target:** ≥85% line coverage
 
@@ -118,13 +118,13 @@ This ensures no PR can be merged with failing tests, lint errors, or secret leak
 
 **1. "Watermark not found" errors**
 
-- Check S3/MinIO connectivity (`make test-integration` usually catches this).
+- Check local state under `data/output/checkpoints/` and `data/output/bronze/`.
 - Ensure `Watermark` class usage is consistent (use `Watermark.from_*` factory methods).
 
 **2. "Lock acquisition failed"**
 
-- Check Redis is running: `docker ps`.
-- Check logs for "Lock lost" messages.
+- BioETL runs in Local-Only mode and uses in-process/local lock implementations, not Redis.
+- Check logs for `Lock lost` / `lock_acquisition_failed` messages and remove stale local state only if the run was interrupted.
 
 **3. "Missing dependencies"**
 
