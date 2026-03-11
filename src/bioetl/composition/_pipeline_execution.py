@@ -71,7 +71,7 @@ def push_metrics_to_gateway(
     return _push(gateway=gateway, job=job, grouping_key=grouping_key)
 
 
-def ensure_metrics_server_started() -> bool:
+async def ensure_metrics_server_started() -> bool:
     """Ensure metrics server is started if enabled in settings.
 
     This function should be called at the start of pipeline execution
@@ -82,11 +82,11 @@ def ensure_metrics_server_started() -> bool:
         True if server was started or already running, False if disabled.
 
     Example:
-        >>> ensure_metrics_server_started()
+        >>> await ensure_metrics_server_started()
         True  # Server started on configured port
     """
     settings = get_settings()
-    return maybe_start_metrics_server(settings)
+    return await maybe_start_metrics_server(settings)
 
 
 @dataclass(frozen=True)
@@ -224,7 +224,7 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
     """Run pipeline end-to-end and return structured execution result."""
     # Start metrics server if enabled (side-effect in entrypoint, not bootstrap)
     settings = get_settings()
-    maybe_start_metrics_server(settings)
+    await maybe_start_metrics_server(settings)
 
     started_at = datetime.now(tz=UTC)
     runner = create_pipeline_runner(name, options)

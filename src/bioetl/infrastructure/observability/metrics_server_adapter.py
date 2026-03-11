@@ -44,7 +44,7 @@ class MetricsServerAdapter:
         """
         self._logger = logger
 
-    def start(
+    async def start(
         self,
         port: int = 8000,
         *,
@@ -63,7 +63,7 @@ class MetricsServerAdapter:
         Returns:
             True if server started successfully, False otherwise.
         """
-        return start_metrics_server(
+        return await start_metrics_server(
             port=port,
             fail_fast=fail_fast,
             retry_count=retry_count,

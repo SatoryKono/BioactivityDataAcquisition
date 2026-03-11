@@ -23,33 +23,34 @@ def reset_server():
 
 
 @pytest.mark.unit
+@pytest.mark.asyncio
 class TestStartMetricsServer:
     """Tests for start_metrics_server function."""
 
-    def test_returns_true_on_success(self):
+    async def test_returns_true_on_success(self):
         """Test successful server start returns True."""
         with patch(
             "bioetl.infrastructure.observability.server.start_http_server"
         ) as mock_server:
-            result = start_metrics_server(port=9999)
+            result = await start_metrics_server(port=9999)
 
             assert result is True
             mock_server.assert_called_once_with(9999, addr="0.0.0.0")
 
-    def test_idempotent_multiple_calls(self):
+    async def test_idempotent_multiple_calls(self):
         """Test server is only started once."""
         with patch(
             "bioetl.infrastructure.observability.server.start_http_server"
         ) as mock_server:
-            result1 = start_metrics_server(port=9999)
-            result2 = start_metrics_server(port=9999)
+            result1 = await start_metrics_server(port=9999)
+            result2 = await start_metrics_server(port=9999)
 
             assert result1 is True
             assert result2 is True
             # Should only be called once
             mock_server.assert_called_once()
 
-    def test_lenient_mode_returns_false_on_port_conflict(self):
+    async def test_lenient_mode_returns_false_on_port_conflict(self):
         """Test fail_fast=False returns False on port conflict instead of raising."""
         with patch(
             "bioetl.infrastructure.observability.server.start_http_server"
@@ -58,11 +59,11 @@ class TestStartMetricsServer:
             error.errno = errno.EADDRINUSE
             mock_server.side_effect = error
 
-            result = start_metrics_server(port=8000, fail_fast=False)
+            result = await start_metrics_server(port=8000, fail_fast=False)
 
             assert result is False
 
-    def test_fail_fast_raises_on_port_conflict(self):
+    async def test_fail_fast_raises_on_port_conflict(self):
         """Test fail_fast=True raises MetricsServerError on port conflict."""
         with patch(
             "bioetl.infrastructure.observability.server.start_http_server"
@@ -72,13 +73,13 @@ class TestStartMetricsServer:
             mock_server.side_effect = error
 
             with pytest.raises(MetricsServerError) as exc_info:
-                start_metrics_server(port=8000, fail_fast=True)
+                await start_metrics_server(port=8000, fail_fast=True)
 
             assert exc_info.value.port == 8000
             assert exc_info.value.reason == "port_in_use"
             assert exc_info.value.original_error is error
 
-    def test_fail_fast_raises_on_other_os_error(self):
+    async def test_fail_fast_raises_on_other_os_error(self):
         """Test fail_fast=True raises on other OS errors."""
         with patch(
             "bioetl.infrastructure.observability.server.start_http_server"
@@ -88,11 +89,11 @@ class TestStartMetricsServer:
             mock_server.side_effect = error
 
             with pytest.raises(MetricsServerError) as exc_info:
-                start_metrics_server(port=80, fail_fast=True, retry_count=1)
+                await start_metrics_server(port=80, fail_fast=True, retry_count=1)
 
             assert exc_info.value.reason == "os_error"
 
-    def test_fail_fast_raises_on_unexpected_error(self):
+    async def test_fail_fast_raises_on_unexpected_error(self):
         """Test fail_fast=True raises on unexpected exceptions."""
         with patch(
             "bioetl.infrastructure.observability.server.start_http_server"
@@ -100,22 +101,22 @@ class TestStartMetricsServer:
             mock_server.side_effect = RuntimeError("Unexpected")
 
             with pytest.raises(MetricsServerError) as exc_info:
-                start_metrics_server(port=8000, fail_fast=True)
+                await start_metrics_server(port=8000, fail_fast=True)
 
             assert exc_info.value.reason == "unexpected"
 
-    def test_lenient_mode_returns_false_on_unexpected_error(self):
+    async def test_lenient_mode_returns_false_on_unexpected_error(self):
         """Test fail_fast=False returns False on unexpected error."""
         with patch(
             "bioetl.infrastructure.observability.server.start_http_server"
         ) as mock_server:
             mock_server.side_effect = RuntimeError("Unexpected")
 
-            result = start_metrics_server(port=8000, fail_fast=False)
+            result = await start_metrics_server(port=8000, fail_fast=False)
 
             assert result is False
 
-    def test_retry_on_transient_os_error(self):
+    async def test_retry_on_transient_os_error(self):
         """Test retries on transient OS errors (not EADDRINUSE)."""
         with patch(
             "bioetl.infrastructure.observability.server.start_http_server"
@@ -125,15 +126,14 @@ class TestStartMetricsServer:
             # Fail twice, succeed on third attempt
             mock_server.side_effect = [error, error, None]
 
-            with patch("bioetl.infrastructure.observability.server.time.sleep"):
-                result = start_metrics_server(
-                    port=8000, fail_fast=False, retry_count=3, retry_delay=0.01
-                )
+            result = await start_metrics_server(
+                port=8000, fail_fast=False, retry_count=3, retry_delay=0.01
+            )
 
             assert result is True
             assert mock_server.call_count == 3
 
-    def test_no_retry_on_port_conflict(self):
+    async def test_no_retry_on_port_conflict(self):
         """Test no retries when port is in use (EADDRINUSE)."""
         with patch(
             "bioetl.infrastructure.observability.server.start_http_server"
@@ -142,7 +142,9 @@ class TestStartMetricsServer:
             error.errno = errno.EADDRINUSE
             mock_server.side_effect = error
 
-            result = start_metrics_server(port=8000, fail_fast=False, retry_count=3)
+            result = await start_metrics_server(
+                port=8000, fail_fast=False, retry_count=3
+            )
 
             assert result is False
             # Should only try once for EADDRINUSE

@@ -149,7 +149,7 @@ async def _run_all_pipelines_async(
 ) -> BatchRunResult:
     """Run all pipelines sequentially with optional health server."""
     # Start metrics server if enabled (side-effect in entrypoint, not bootstrap)
-    ensure_metrics_server_started()
+    await ensure_metrics_server_started()
 
     async with health_server_context(enabled=health_server_enabled, port=health_port):
         service = get_pipeline_runner_service()

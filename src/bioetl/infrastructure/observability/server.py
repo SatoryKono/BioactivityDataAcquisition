@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+import asyncio
 import errno
 import time
-from threading import Lock
 from typing import TYPE_CHECKING
 
 from prometheus_client import REGISTRY, start_http_server
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 _SERVER_STARTED = False
-_SERVER_LOCK = Lock()
+_SERVER_LOCK = asyncio.Lock()
 
 # Re-export for backward compatibility
 __all__ = [
@@ -80,7 +80,7 @@ def _handle_unexpected_error(
     return False
 
 
-def start_metrics_server(
+async def start_metrics_server(
     port: int = 8000,
     addr: str = "0.0.0.0",
     *,
@@ -99,7 +99,7 @@ def start_metrics_server(
         logger.debug("Metrics server already started")
         return True
 
-    with _SERVER_LOCK:
+    async with _SERVER_LOCK:
         if _SERVER_STARTED:
             return True
 
@@ -118,7 +118,7 @@ def start_metrics_server(
                 if e.errno == errno.EADDRINUSE:
                     return _handle_port_in_use(port, e, fail_fast, logger)
                 if attempt < retry_count - 1:
-                    time.sleep(retry_delay * (2**attempt))
+                    await asyncio.sleep(retry_delay * (2**attempt))
                     continue
                 return _handle_os_error(port, e, retry_count, fail_fast, logger)
             except (RuntimeError, ValueError, TypeError, AttributeError) as e:
@@ -190,5 +190,5 @@ def push_metrics_to_gateway(
 def reset_server_state() -> None:
     """Reset server state for testing purposes only."""
     global _SERVER_STARTED
-    with _SERVER_LOCK:
-        _SERVER_STARTED = False
+    # Since it's for testing, we bypass the lock to allow sync usage
+    _SERVER_STARTED = False

@@ -10,8 +10,8 @@ composition layer for server startup, keeping side-effects out of bootstrap.
 
 from __future__ import annotations
 
-from collections.abc import Iterator
-from contextlib import contextmanager
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 
 from bioetl.composition.entrypoints import ensure_metrics_server_started
 
@@ -21,8 +21,8 @@ __all__ = [
 ]
 
 
-@contextmanager
-def metrics_server_context() -> Iterator[bool]:
+@asynccontextmanager
+async def metrics_server_context() -> AsyncIterator[bool]:
     """Context manager that ensures metrics server is started.
 
     Starts the Prometheus metrics HTTP server before yielding.
@@ -32,16 +32,16 @@ def metrics_server_context() -> Iterator[bool]:
         True if server was started, False if disabled.
 
     Example:
-        with metrics_server_context():
+        async with metrics_server_context():
             # Metrics server is running
             await run_pipeline()
         # Server continues running (daemon thread)
 
     Returns:
-        Iterator over results.
+        AsyncIterator over results.
     """
     # Re-exported from entrypoints, use directly
-    started = ensure_metrics_server_started()
+    started = await ensure_metrics_server_started()
     yield started
 
 

@@ -112,7 +112,7 @@ async def _run_composite_async(
         Tuple of (success, error_message).
     """
     # Start metrics server if enabled (side-effect in entrypoint, not bootstrap)
-    ensure_metrics_server_started()
+    await ensure_metrics_server_started()
 
     async with health_server_context(
         enabled=health_server_enabled,

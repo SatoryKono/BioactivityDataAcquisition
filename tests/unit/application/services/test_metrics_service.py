@@ -48,7 +48,7 @@ class TestMetricsServerPort:
         """Test MetricsServerPort is runtime checkable."""
 
         class MockServer:
-            def start(
+            async def start(
                 self,
                 port: int,
                 *,
@@ -129,7 +129,11 @@ class TestMetricsService:
         """Create mock metrics server."""
         server = MagicMock()
         server.is_running.return_value = False
-        server.start.return_value = True
+
+        async def mock_start(*args, **kwargs):
+            return True
+
+        server.start = MagicMock(side_effect=mock_start)
         return server
 
     @pytest.fixture
@@ -137,11 +141,12 @@ class TestMetricsService:
         """Create MetricsService with mocked dependencies."""
         return MetricsService(logger=mock_logger, _server=mock_server)
 
-    def test_start_success(
+    @pytest.mark.asyncio
+    async def test_start_success(
         self, service: MetricsService, mock_server: MagicMock
     ) -> None:
         """Test successful server start."""
-        result = service.start(port=8000)
+        result = await service.start(port=8000)
 
         assert result.success is True
         assert result.port == 8000
@@ -150,70 +155,88 @@ class TestMetricsService:
             port=8000, fail_fast=False, retry_count=3, retry_delay=1.0
         )
 
-    def test_start_already_running(
+    @pytest.mark.asyncio
+    async def test_start_already_running(
         self, service: MetricsService, mock_server: MagicMock
     ) -> None:
         """Test start when server is already running."""
         mock_server.is_running.return_value = True
 
-        result = service.start(port=9000)
+        result = await service.start(port=9000)
 
         assert result.success is True
         assert result.already_running is True
         mock_server.start.assert_not_called()
 
-    def test_start_failure(
+    @pytest.mark.asyncio
+    async def test_start_failure(
         self, service: MetricsService, mock_server: MagicMock
     ) -> None:
         """Test start when server fails to bind."""
-        mock_server.start.return_value = False
 
-        result = service.start(port=8000)
+        async def mock_fail(*args, **kwargs):
+            return False
+
+        mock_server.start.side_effect = mock_fail
+
+        result = await service.start(port=8000)
 
         assert result.success is False
         assert result.error == "Failed to bind port"
 
-    def test_start_with_exception(
+    @pytest.mark.asyncio
+    async def test_start_with_exception(
         self, service: MetricsService, mock_server: MagicMock
     ) -> None:
         """Test start handles exceptions gracefully."""
-        mock_server.start.side_effect = OSError("Address in use")
 
-        result = service.start(port=8000, fail_fast=False)
+        async def mock_error(*args, **kwargs):
+            raise OSError("Address in use")
+
+        mock_server.start.side_effect = mock_error
+
+        result = await service.start(port=8000, fail_fast=False)
 
         assert result.success is False
         assert "Address in use" in (result.error or "")
 
-    def test_start_fail_fast(
+    @pytest.mark.asyncio
+    async def test_start_fail_fast(
         self, service: MetricsService, mock_server: MagicMock
     ) -> None:
         """Test start with fail_fast raises exception."""
-        mock_server.start.side_effect = OSError("Address in use")
+
+        async def mock_error(*args, **kwargs):
+            raise OSError("Address in use")
+
+        mock_server.start.side_effect = mock_error
 
         with pytest.raises(MetricsServerError) as exc_info:
-            service.start(port=8000, fail_fast=True)
+            await service.start(port=8000, fail_fast=True)
 
         assert exc_info.value.port == 8000
         assert "Address in use" in exc_info.value.reason
 
-    def test_start_custom_params(
+    @pytest.mark.asyncio
+    async def test_start_custom_params(
         self, service: MetricsService, mock_server: MagicMock
     ) -> None:
         """Test start with custom retry parameters."""
-        result = service.start(port=8080, retry_count=5, retry_delay=2.0)
+        result = await service.start(port=8080, retry_count=5, retry_delay=2.0)
 
         mock_server.start.assert_called_once_with(
             port=8080, fail_fast=False, retry_count=5, retry_delay=2.0
         )
         assert result.port == 8080
 
-    def test_get_status_running(
+    @pytest.mark.asyncio
+    async def test_get_status_running(
         self, service: MetricsService, mock_server: MagicMock
     ) -> None:
         """Test get_status when server is running."""
         # First start the server to set _port and _started_at
         mock_server.is_running.return_value = False
-        service.start(port=8000)
+        await service.start(port=8000)
         mock_server.is_running.return_value = True
 
         status = service.get_status()
@@ -251,25 +274,33 @@ class TestMetricsServiceEdgeCases:
         """Create mock logger."""
         return MagicMock()
 
-    def test_start_logs_correctly(self, mock_logger: MagicMock) -> None:
+    @pytest.mark.asyncio
+    async def test_start_logs_correctly(self, mock_logger: MagicMock) -> None:
         """Test that start logs appropriately."""
         mock_server = MagicMock()
         mock_server.is_running.return_value = False
-        mock_server.start.return_value = True
+
+        async def mock_start(*args, **kwargs):
+            return True
+
+        mock_server.start.side_effect = mock_start
 
         service = MetricsService(logger=mock_logger, _server=mock_server)
-        service.start(port=8000)
+        await service.start(port=8000)
 
         mock_logger.debug.assert_called()
         mock_logger.info.assert_called()
 
-    def test_start_already_running_logs_debug(self, mock_logger: MagicMock) -> None:
+    @pytest.mark.asyncio
+    async def test_start_already_running_logs_debug(
+        self, mock_logger: MagicMock
+    ) -> None:
         """Test that already running logs debug message."""
         mock_server = MagicMock()
         mock_server.is_running.return_value = True
 
         service = MetricsService(logger=mock_logger, _server=mock_server)
-        service.start(port=8000)
+        await service.start(port=8000)
 
         # Debug should be called for "Starting metrics server" and "already running"
         assert mock_logger.debug.call_count >= 2
@@ -302,39 +333,54 @@ class TestMetricsServiceEdgeCases:
         assert exc_info.value.port == 8000
         assert exc_info.value.original_error is exception
 
-    def test_service_default_port(self, mock_logger: MagicMock) -> None:
+    @pytest.mark.asyncio
+    async def test_service_default_port(self, mock_logger: MagicMock) -> None:
         """Test that service uses default port 8000."""
         mock_server = MagicMock()
         mock_server.is_running.return_value = False
-        mock_server.start.return_value = True
+
+        async def mock_start(*args, **kwargs):
+            return True
+
+        mock_server.start.side_effect = mock_start
 
         service = MetricsService(logger=mock_logger, _server=mock_server)
-        result = service.start()
+        result = await service.start()
 
         assert result.port == 8000
         mock_server.start.assert_called_with(
             port=8000, fail_fast=False, retry_count=3, retry_delay=1.0
         )
 
-    def test_start_failure_logs_warning(self, mock_logger: MagicMock) -> None:
+    @pytest.mark.asyncio
+    async def test_start_failure_logs_warning(self, mock_logger: MagicMock) -> None:
         """Test that start failure logs warning."""
         mock_server = MagicMock()
         mock_server.is_running.return_value = False
-        mock_server.start.return_value = False
+
+        async def mock_fail(*args, **kwargs):
+            return False
+
+        mock_server.start.side_effect = mock_fail
 
         service = MetricsService(logger=mock_logger, _server=mock_server)
-        service.start(port=8000)
+        await service.start(port=8000)
 
         mock_logger.warning.assert_called()
 
-    def test_get_status_uses_stored_port(self, mock_logger: MagicMock) -> None:
+    @pytest.mark.asyncio
+    async def test_get_status_uses_stored_port(self, mock_logger: MagicMock) -> None:
         """Test that get_status uses the stored port from start."""
         mock_server = MagicMock()
         mock_server.is_running.return_value = False
-        mock_server.start.return_value = True
+
+        async def mock_start(*args, **kwargs):
+            return True
+
+        mock_server.start.side_effect = mock_start
 
         service = MetricsService(logger=mock_logger, _server=mock_server)
-        service.start(port=9999)
+        await service.start(port=9999)
 
         mock_server.is_running.return_value = True
         status = service.get_status()

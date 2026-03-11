@@ -46,7 +46,7 @@ class MetricsServerPort(Protocol):
     Abstracts the metrics server infrastructure for application layer.
     """
 
-    def start(
+    async def start(
         self,
         port: int,
         *,
@@ -157,7 +157,7 @@ class MetricsService:
             ) from e
         return StartResult(success=False, port=port, error=error_msg)
 
-    def start(
+    async def start(
         self,
         port: int = 8000,
         *,
@@ -190,7 +190,7 @@ class MetricsService:
             )
 
         try:
-            success = self._server.start(
+            success = await self._server.start(
                 port=port,
                 fail_fast=fail_fast,
                 retry_count=retry_count,

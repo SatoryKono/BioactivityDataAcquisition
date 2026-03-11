@@ -225,7 +225,7 @@ def bootstrap_metrics_port(settings: Settings) -> MetricsPort:
     return PrometheusMetrics()
 
 
-def maybe_start_metrics_server(settings: Settings) -> bool:
+async def maybe_start_metrics_server(settings: Settings) -> bool:
     """Start metrics server if enabled in settings.
 
     This function should be called by entrypoints (CLI, REST API) after
@@ -251,7 +251,7 @@ def maybe_start_metrics_server(settings: Settings) -> bool:
     obs = settings.observability
 
     # Start metrics server - let exceptions propagate to entrypoints
-    return start_metrics_server(
+    return await start_metrics_server(
         port=settings.metrics_port,
         addr=settings.metrics_addr,
         fail_fast=obs.metrics_fail_fast,
