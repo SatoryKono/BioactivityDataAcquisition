@@ -197,6 +197,7 @@ docs/reports/branch-full-diff-matrix-2026-03-01.csv
 .claude/settings*
 .claude/marketplace.json
 .claude/setup.sh
+.codex/setup.sh
 /docs/.claude/settings*
 /data/миграция
 /docs/02-architecture/diagrams/mermaid/png
