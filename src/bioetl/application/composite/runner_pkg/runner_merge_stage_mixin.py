@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from bioetl.application.composite.fsm_helper import FSMStateHelperService
     from bioetl.application.composite.merger import MergeService
     from bioetl.application.composite.runner_pkg.runner import CompositeRuntimeConfig
-    from bioetl.domain.composite.config import CompositeConfig
+    from bioetl.domain.composite.config import CompositeConfig, DependencyConfig, EnricherConfig
     from bioetl.domain.composite.result import (
         DependencyResult,
         EnrichmentResult,
@@ -129,6 +129,64 @@ class CompositeRunnerMergeStageMixin:
         failed_state = state.with_state(CompositePipelineState.FAILED)
         await self._call_save_checkpoint_safe(failed_state, "merge_failed")
 
+    def _build_merge_inputs(
+        self,
+        enrichment_results: dict[str, EnrichmentResult],
+        dependency_results: dict[str, DependencyResult] | None,
+    ) -> tuple[list[EnricherConfig], list[DependencyConfig]]:
+        """Build mergeable enrichers and dependencies for the merge stage."""
+        mergeable_enrichers = get_mergeable_enrichers(
+            enrichment_results,
+            self._config.enrichers,
+            self._logger,
+        )
+        mergeable_dependencies = get_mergeable_dependencies(
+            dependency_results or {},
+            self._config.dependencies,
+            self._logger,
+        )
+        return mergeable_enrichers, mergeable_dependencies
+
+    def _handle_dry_run_merge_skip(
+        self,
+        state: CompositeCheckpointState,
+    ) -> CompositeCheckpointState:
+        """Log dry-run merge skip and leave checkpoint state unchanged."""
+        self._fsm.log_fsm_transition(
+            from_state=state.state,
+            to_state=CompositePipelineState.COMPLETED,
+            stage="dry_run_skip_merge",
+            reason="dry_run_mode",
+        )
+        self._logger.info(
+            "Dry run: merge skipped, pipeline completing",
+            composite=self._config.name,
+            run_id=self._run_id_str,
+        )
+        return state
+
+    async def _delete_checkpoint_safe(self) -> None:
+        """Delete checkpoint with graceful warning-only error handling."""
+        try:
+            await self._checkpoint_manager.delete()
+        except CHECKPOINT_NON_FATAL_ERRORS as delete_error:
+            self._logger.warning(
+                "Failed to delete checkpoint",
+                composite=self._config.name,
+                run_id=self._run_id_str,
+                error=str(delete_error),
+                error_type=type(delete_error).__name__,
+            )
+        except BioETLError as delete_error:
+            self._logger.warning(
+                "Failed to delete checkpoint",
+                composite=self._config.name,
+                run_id=self._run_id_str,
+                error=str(delete_error),
+                error_type=type(delete_error).__name__,
+                reason_code="checkpoint_delete_failed",
+            )
+
     async def _execute_merge_stage(
         self,
         state: CompositeCheckpointState,
@@ -142,15 +200,9 @@ class CompositeRunnerMergeStageMixin:
             state = await self._start_merge_phase(state)
 
             try:
-                mergeable_enrichers = get_mergeable_enrichers(
+                mergeable_enrichers, mergeable_dependencies = self._build_merge_inputs(
                     enrichment_results,
-                    self._config.enrichers,
-                    self._logger,
-                )
-                mergeable_dependencies = get_mergeable_dependencies(
-                    dependency_results or {},
-                    self._config.dependencies,
-                    self._logger,
+                    dependency_results,
                 )
 
                 merge_result = await self._merger.merge(
@@ -177,17 +229,7 @@ class CompositeRunnerMergeStageMixin:
                 await self._handle_merge_phase_exception(state, merge_error)
                 raise
         else:
-            self._fsm.log_fsm_transition(
-                from_state=state.state,
-                to_state=CompositePipelineState.COMPLETED,
-                stage="dry_run_skip_merge",
-                reason="dry_run_mode",
-            )
-            self._logger.info(
-                "Dry run: merge skipped, pipeline completing",
-                composite=self._config.name,
-                run_id=self._run_id_str,
-            )
+            state = self._handle_dry_run_merge_skip(state)
 
         return state, merge_result
 
@@ -206,23 +248,4 @@ class CompositeRunnerMergeStageMixin:
                 stage="pipeline_complete",
             )
         await self._call_save_checkpoint_safe(state, "completed")
-
-        try:
-            await self._checkpoint_manager.delete()
-        except CHECKPOINT_NON_FATAL_ERRORS as delete_error:
-            self._logger.warning(
-                "Failed to delete checkpoint",
-                composite=self._config.name,
-                run_id=self._run_id_str,
-                error=str(delete_error),
-                error_type=type(delete_error).__name__,
-            )
-        except BioETLError as delete_error:
-            self._logger.warning(
-                "Failed to delete checkpoint",
-                composite=self._config.name,
-                run_id=self._run_id_str,
-                error=str(delete_error),
-                error_type=type(delete_error).__name__,
-                reason_code="checkpoint_delete_failed",
-            )
+        await self._delete_checkpoint_safe()

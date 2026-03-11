@@ -45,7 +45,7 @@ class _SilverWriteExecutionContext:
     span: Any  # Any: OpenTelemetry span interface is runtime-dependent
 
 def set_silver_write_span_attributes(
-    span: Any,
+    span: Any,  # Any: OpenTelemetry span type varies by backend
     *,
     table_name: str,
     mode: str,
@@ -70,7 +70,7 @@ def build_silver_write_execution_context(
     key_nullability_rules: list[KeyNullabilityRule] | None,
     started_at: datetime,
     start_perf: float,
-    span: Any,
+    span: Any,  # Any: OpenTelemetry span type varies by backend
 ) -> _SilverWriteExecutionContext:
     """Build immutable execution context for the Silver write pipeline."""
     return _SilverWriteExecutionContext(

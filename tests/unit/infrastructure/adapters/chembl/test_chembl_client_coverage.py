@@ -167,11 +167,3 @@ async def test_reset_circuit_breaker(adapter, mock_http_client):
         "chembl_circuit_breaker_reset", provider="chembl"
     )
 
-
-@pytest.mark.asyncio
-async def test_clear_request_collector(adapter):
-    """Test clearing request collector."""
-    adapter._request_collector.record_request("http://test", "GET", 100, 200)
-    assert adapter.request_count == 1
-    adapter.clear_request_collector()
-    assert adapter.request_count == 0

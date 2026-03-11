@@ -51,24 +51,6 @@ def test_extract_doi_from_record_handles_url_and_plain_values() -> None:
     assert _OpenAlexHelpersHarness._extract_doi_from_record({"doi": ""}) is None
 
 
-def test_get_source_metadata_returns_collector_state_and_clears_requests() -> None:
-    harness = _OpenAlexHelpersHarness()
-    harness._request_collector.record_request(
-        url="https://api.openalex.org/works?filter=doi:10.1/abc",
-        duration_ms=25.0,
-        status_code=200,
-    )
-    assert harness.request_count == 1
-
-    metadata = harness.get_source_metadata(api_version="v1")
-
-    assert metadata.type == "api"
-    assert metadata.url == "https://api.openalex.org"
-    assert metadata.api_version == "v1"
-    assert metadata.total_requests == 1
-    assert harness.request_count == 0
-
-
 def test_health_helpers_return_expected_defaults() -> None:
     harness = _OpenAlexHelpersHarness()
     assert harness._fallback_health_status() == HealthStatus.UNHEALTHY

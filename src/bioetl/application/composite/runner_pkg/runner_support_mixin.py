@@ -125,19 +125,12 @@ class CompositeRunnerSupportMixin:
 
     def _run_preflight_validation(self) -> None:
         """Run preflight validation for field_priorities configuration."""
-        if self._preflight_validator is None:
+        skip_reason = self._get_preflight_skip_reason()
+        if skip_reason is not None:
             self._logger.debug(
                 "Preflight validation skipped",
                 composite=self._config.name,
-                reason="preflight_validator not configured",
-            )
-            return
-
-        if not self._config.merge.field_priorities:
-            self._logger.debug(
-                "Preflight validation skipped",
-                composite=self._config.name,
-                reason="no field_priorities configured",
+                reason=skip_reason,
             )
             return
 
@@ -148,11 +141,14 @@ class CompositeRunnerSupportMixin:
             field_count=len(self._config.merge.field_priorities),
         )
 
-        result = self._preflight_validator.validate(
+        validator = self._preflight_validator
+        assert validator is not None
+
+        result = validator.validate(
             self._config,
             fail_on_error=True,
         )
-        self._preflight_validator.log_resolved_field_sources(result, self._config.name)
+        validator.log_resolved_field_sources(result, self._config.name)
 
         self._logger.info(
             PipelineEvent.phase_completed("preflight_validation"),
@@ -161,6 +157,14 @@ class CompositeRunnerSupportMixin:
             fields_validated=len(result.resolved_fields),
             warnings=len(result.warnings),
         )
+
+    def _get_preflight_skip_reason(self) -> str | None:
+        """Return skip reason for preflight validation when it should not run."""
+        if self._preflight_validator is None:
+            return "preflight_validator not configured"
+        if not self._config.merge.field_priorities:
+            return "no field_priorities configured"
+        return None
 
     async def _save_checkpoint_safe(
         self,
