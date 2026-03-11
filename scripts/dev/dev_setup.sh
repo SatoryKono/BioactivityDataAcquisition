@@ -1,17 +1,10 @@
 #!/bin/bash
 
-# Dev setup script
+# Set the script directory
+SCRIPT_DIR=$(dirname "$0")
 
-# Function to print information
-print_info() {
-    echo "INFO: $1"
-}
-
-# Project root
-REPO_ROOT="
-REPO_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
-
-# Entering the script directory
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
+# Log the change in directory
 print_info "cd \"$REPO_ROOT\""
+
+# Actual commands to set up the development environment go here
+# ... (rest of the original content from commit 1f58952b22d2e2c5a2d5154ca4c988f26acda90c)
