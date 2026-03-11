@@ -8,6 +8,8 @@ from bioetl.domain.types import JsonDict
 
 
 def _safe_int(val: object) -> int | None:
+    if type(val) is int:
+        return val
     if val is None:
         return None
     if isinstance(val, bool):
@@ -19,6 +21,8 @@ def _safe_int(val: object) -> int | None:
 
 
 def _safe_float(val: object) -> float | None:
+    if type(val) is float:
+        return val
     if val is None:
         return None
     if isinstance(val, bool):
@@ -30,7 +34,7 @@ def _safe_float(val: object) -> float | None:
 
 
 def _safe_str(val: object) -> str | None:
-    return None if val is None else str(val)
+    return val if type(val) is str else (None if val is None else str(val))
 
 
 def _require_field(
