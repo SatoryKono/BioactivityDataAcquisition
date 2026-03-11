@@ -46,8 +46,8 @@ def assess_health_from_circuit_breaker(
         - UNHEALTHY: Adapter is not operational (circuit breaker tripped)
 
     Example:
-        >>> from bioetl.infrastructure.adapters.http import CircuitBreaker
-        >>> cb = CircuitBreaker(provider="chembl", failure_threshold=5)
+        >>> from bioetl.infrastructure.adapters.http import CircuitBreakerGuard
+        >>> cb = CircuitBreakerGuard(provider="chembl", failure_threshold=5)
         >>> assess_health_from_circuit_breaker(cb)
         <HealthStatus.HEALTHY: 'healthy'>
         >>> # After some failures (below threshold):

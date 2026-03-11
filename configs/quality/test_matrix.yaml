@@ -87,6 +87,28 @@ providers:
     contract_tests: SHOULD
     golden_masters: MAY
 
+# ── Canonical regression suites for shared provider capabilities ─────────────
+
+provider_regression_suites:
+  metadata_request_capability:
+    description: "Canonical provider suites for request-metadata snapshot, clear, and count paths."
+    providers:
+      chembl: tests/unit/infrastructure/adapters/chembl/test_chembl_client_coverage.py
+      crossref: tests/unit/infrastructure/adapters/crossref/test_crossref_client.py
+      openalex: tests/unit/infrastructure/adapters/openalex/test_client_helpers_adapter_mixin.py
+      pubchem: tests/unit/infrastructure/adapters/pubchem/test_request_metadata.py
+      pubmed: tests/unit/infrastructure/adapters/pubmed/test_pubmed_client.py
+      semanticscholar: tests/unit/infrastructure/adapters/semanticscholar/test_adapter.py
+      uniprot: tests/unit/infrastructure/adapters/uniprot/test_uniprot_client_coverage.py
+
+  slow_health_probe_policy:
+    description: "Canonical provider suites for shared slow-health degradation policy."
+    providers:
+      crossref: tests/unit/infrastructure/adapters/crossref/test_crossref_client.py
+      openalex: tests/unit/infrastructure/adapters/openalex/test_adapter.py
+      pubmed: tests/unit/infrastructure/adapters/pubmed/test_pubmed_client.py
+      semanticscholar: tests/unit/infrastructure/adapters/semanticscholar/test_adapter.py
+
 # ── Test boundaries (ADR-042 §Property-Based Testing) ───────
 
 property_test_boundaries:
@@ -107,12 +129,16 @@ property_test_boundaries:
 
 mutation_testing:
   enabled: true
+  workflow_present: true
+  ci_gate_mode: partial  # Domain enforced in dedicated workflow; application target staged
   tool: mutmut
   targets:
     domain:
       min_score: 70
+      enforced: true
     application:
       min_score: 60
+      enforced: false
   excluded:
     - infrastructure  # I/O-heavy, low mutation value
     - composition     # Wiring code, tested via e2e
@@ -123,5 +149,34 @@ mutation_testing:
 fixture_governance:
   vcr_cassette_max_age_days: 90
   golden_master_location: tests/fixtures/golden/{provider}/
+  current_silver_schema_snapshot_location: tests/contract/silver_schemas/snapshots/
   contract_snapshot_location: tests/fixtures/contracts/{provider}/v{version}.json
-  cassette_metadata_required: true
+  cassette_metadata_catalog_location: reports/quality/vcr-metadata-catalog.json
+  cassette_metadata_catalog_script: scripts/qa/report_vcr_metadata_catalog.py
+  cassette_metadata_required: false
+  canonical_vcr_location: tests/fixtures/vcr/{provider}/
+  extensionless_allowlist: .github/vcr-noext-allowlist.txt
+  root_vcr_policy_enforced: true
+  cassette_metadata_backfill_workflow_present: false
+  cassette_metadata_backfill_script: scripts/migrations/active/backfill_vcr_metadata_sidecars.py
+  rollout:
+    cassette_metadata: planned
+    cassette_staleness_age: planned
+    cassette_metadata_catalog: planned
+    cassette_metadata_backfill: planned
+    contract_snapshots: planned
+    golden_masters: partial
+    extensionless_filenames: partial
+
+contract_testing:
+  workflow_present: true
+  live_api_gate_mode: scheduled
+  network_opt_in_required: true
+  provider_live_api:
+    chembl: enforced
+    pubchem: enforced
+    uniprot: enforced
+    pubmed: enforced
+    crossref: planned
+    openalex: planned
+    semanticscholar: planned

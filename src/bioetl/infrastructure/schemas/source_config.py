@@ -30,8 +30,8 @@ from bioetl.domain.resilience import CircuitBreakerConfig as DomainCircuitBreake
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.schemas.base_schemas import (
     BaseCircuitBreakerConfig,
-    BaseClientConfig,
     BaseRateLimitConfig,
+    HttpClientConfig,
 )
 from bioetl.infrastructure.schemas.source_config_pagination_helpers import (
     build_pagination_from_legacy as _build_pagination_from_legacy,
@@ -47,7 +47,7 @@ RateLimitYamlConfig = BaseRateLimitConfig
 RateLimitYamlConfig.__doc__ = """Rate limit configuration from YAML."""
 
 
-class CircuitBreakerYamlConfig(BaseCircuitBreakerConfig):
+class SourceCircuitBreakerYamlConfig(BaseCircuitBreakerConfig):
     """Circuit breaker configuration from YAML.
 
     Inherits from BaseCircuitBreakerConfig for consistency with other schemas.
@@ -66,7 +66,7 @@ class CircuitBreakerYamlConfig(BaseCircuitBreakerConfig):
         return super().to_domain()
 
 
-ClientYamlConfig = BaseClientConfig
+ClientYamlConfig = HttpClientConfig
 ClientYamlConfig.__doc__ = """HTTP client configuration from YAML."""
 
 
@@ -190,8 +190,8 @@ class SourceSectionConfig(BaseModel):
     provider_config: ProviderConfigYaml = Field(
         default_factory=lambda: ProviderConfigYaml()
     )
-    circuit_breaker: CircuitBreakerYamlConfig = Field(
-        default_factory=lambda: CircuitBreakerYamlConfig()
+    circuit_breaker: SourceCircuitBreakerYamlConfig = Field(
+        default_factory=lambda: SourceCircuitBreakerYamlConfig()
     )
     rate_limit: RateLimitYamlConfig = Field(
         default_factory=lambda: RateLimitYamlConfig()
@@ -240,7 +240,7 @@ class SourceYamlConfig(BaseModel):
         return self.source.rate_limit
 
     @property
-    def circuit_breaker(self) -> CircuitBreakerYamlConfig:
+    def circuit_breaker(self) -> SourceCircuitBreakerYamlConfig:
         """Get circuit breaker config."""
         return self.source.circuit_breaker
 
@@ -370,12 +370,12 @@ class SourceYamlConfig(BaseModel):
 
 
 __all__ = [
-    "CircuitBreakerYamlConfig",
     "ClientYamlConfig",
     "FallbackPolicyYamlConfig",
     "PaginationConfig",
     "ProviderConfigYaml",
     "RateLimitYamlConfig",
+    "SourceCircuitBreakerYamlConfig",
     "SourceSectionConfig",
     "SourceYamlConfig",
 ]

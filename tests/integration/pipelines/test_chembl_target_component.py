@@ -14,8 +14,6 @@ import pyarrow as pa
 import pytest
 import structlog
 
-from bioetl.infrastructure.config import load_pipeline_config
-
 # VCR cassette directory for ChEMBL pipeline tests
 CASSETTE_DIR = Path(__file__).parent.parent.parent / "fixtures" / "vcr" / "chembl"
 
@@ -31,7 +29,7 @@ def vcr_config() -> dict[str, Any]:
     }
 
 
-from bioetl.composition.factories.pipeline_factories import (
+from bioetl.composition.factories.pipeline.registry import (
     chembl_target_component_factory,
 )
 from bioetl.infrastructure.schemas.silver import CHEMBL_TARGET_COMPONENT_SCHEMA
@@ -56,22 +54,6 @@ def _patched_silver_schema() -> pa.Schema:
     return pa.schema(fields)
 
 
-def _gold_overwrite_sink_overrides() -> dict[str, Any]:
-    """Build config_overrides to use 'overwrite' gold mode.
-
-    The StorageAdapter does not yet forward scd_config to GoldWriter,
-    so integration tests use 'overwrite' mode to avoid the missing
-    scd_config validation error at the Gold layer.
-    """
-    cfg = load_pipeline_config("chembl_target_component")
-    gold_sink = cfg.sink["gold"].model_copy(
-        update={"mode": "overwrite", "scd_config": None}
-    )
-    new_sink = dict(cfg.sink)
-    new_sink["gold"] = gold_sink
-    return {"sink": new_sink}
-
-
 class TestChemblTargetComponentPipeline(IntegrationPipelineTestCase):
     @pytest.mark.vcr
     async def test_chembl_target_component_happy_path(
@@ -93,7 +75,6 @@ class TestChemblTargetComponentPipeline(IntegrationPipelineTestCase):
                 settings=settings,
                 runtime_config=runtime_config,
                 run_id=run_id,
-                config_overrides=_gold_overwrite_sink_overrides(),
             )
 
             await runner.run()

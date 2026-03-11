@@ -1,4 +1,4 @@
-"""Unit tests for CircuitBreaker degradation scenarios.
+"""Unit tests for CircuitBreakerGuard degradation scenarios.
 
 These tests cover degradation patterns NOT covered by existing tests:
 - Flapping behavior (rapid OPEN/CLOSED alternation)
@@ -26,7 +26,7 @@ from bioetl.domain.exceptions import CircuitBreakerOpenError
 from bioetl.domain.ports import MetricsPort
 from bioetl.domain.types import CircuitBreakerState
 from bioetl.infrastructure.adapters.http.circuit_breaker import (
-    CircuitBreaker,
+    CircuitBreakerGuard,
     is_circuit_breaker_error,
 )
 
@@ -44,7 +44,7 @@ class TestFlappingBehavior:
         Scenario: Provider intermittently recovers and fails.
         Expected: Circuit tracks trips correctly through multiple cycles.
         """
-        cb = CircuitBreaker(
+        cb = CircuitBreakerGuard(
             provider="flapping_provider",
             failure_threshold=2,
             recovery_timeout=0,  # Immediate recovery for testing
@@ -82,7 +82,7 @@ class TestFlappingBehavior:
         Expected: Each trip increments counter, state gauge updates for each transition.
         """
         mock_metrics = MagicMock(spec=MetricsPort)
-        cb = CircuitBreaker(
+        cb = CircuitBreakerGuard(
             provider="test",
             failure_threshold=2,
             recovery_timeout=0,
@@ -123,7 +123,7 @@ class TestFlappingBehavior:
         Scenario: Provider fails during recovery probe multiple times.
         Expected: Each probe failure reopens circuit and increments trips.
         """
-        cb = CircuitBreaker(
+        cb = CircuitBreakerGuard(
             provider="test",
             failure_threshold=2,
             recovery_timeout=0,
@@ -158,7 +158,7 @@ class TestSustainedPartialFailure:
         Pattern: fail-fail-succeed-fail-fail-succeed (never 3 consecutive)
         Expected: Circuit stays CLOSED.
         """
-        cb = CircuitBreaker(provider="test", failure_threshold=3)
+        cb = CircuitBreakerGuard(provider="test", failure_threshold=3)
 
         async def fail() -> None:
             raise RuntimeError("error")
@@ -184,7 +184,7 @@ class TestSustainedPartialFailure:
         Simulates degraded service that fails often but with successful responses
         interspersed, preventing circuit from opening.
         """
-        cb = CircuitBreaker(provider="test", failure_threshold=5)
+        cb = CircuitBreakerGuard(provider="test", failure_threshold=5)
 
         failures = 0
         successes = 0
@@ -219,7 +219,7 @@ class TestRecoveryUnderLoad:
         When circuit transitions to HALF_OPEN, only one request should be allowed
         as probe; others should be blocked until probe completes.
         """
-        cb = CircuitBreaker(
+        cb = CircuitBreakerGuard(
             provider="test",
             failure_threshold=2,
             recovery_timeout=0,
@@ -264,7 +264,7 @@ class TestRecoveryUnderLoad:
 
         After successful recovery probe, pending requests should proceed normally.
         """
-        cb = CircuitBreaker(
+        cb = CircuitBreakerGuard(
             provider="test",
             failure_threshold=2,
             recovery_timeout=0,
@@ -301,7 +301,7 @@ class TestMultipleConsecutiveTrips:
         Simulates progressively degrading service that fails, recovers briefly,
         then fails again.
         """
-        cb = CircuitBreaker(
+        cb = CircuitBreakerGuard(
             provider="degrading_service",
             failure_threshold=3,
             recovery_timeout=0,
@@ -336,7 +336,7 @@ class TestMultipleConsecutiveTrips:
 
         Reset() should not affect trips_total counter.
         """
-        cb = CircuitBreaker(provider="test", failure_threshold=2, recovery_timeout=0)
+        cb = CircuitBreakerGuard(provider="test", failure_threshold=2, recovery_timeout=0)
 
         async def fail() -> None:
             raise RuntimeError("error")
@@ -400,10 +400,10 @@ class TestMixedErrorTypesDuringDegradation:
         Pattern: 500, 404, 500, 401, 500 -> only 3 x 500 count, but circuit
         breaker counts all exceptions passed to it, not classifying internally.
 
-        Note: CircuitBreaker.call() doesn't distinguish errors - it counts all.
+        Note: CircuitBreakerGuard.call() doesn't distinguish errors - it counts all.
         Error classification happens at HTTP client level before calling circuit.
         """
-        cb = CircuitBreaker(provider="test", failure_threshold=3)
+        cb = CircuitBreakerGuard(provider="test", failure_threshold=3)
 
         failure_count_before = cb.get_failure_count()
 
@@ -422,11 +422,11 @@ class TestMixedErrorTypesDuringDegradation:
     async def test_business_errors_count_as_failures(self) -> None:
         """Mixed errors: All exceptions count in circuit breaker.
 
-        Note: CircuitBreaker itself counts all exceptions. Error classification
+        Note: CircuitBreakerGuard itself counts all exceptions. Error classification
         (is_circuit_breaker_error) is used at HTTP client level to demolecule_ide
         whether to pass failure to circuit breaker.
         """
-        cb = CircuitBreaker(provider="test", failure_threshold=2)
+        cb = CircuitBreakerGuard(provider="test", failure_threshold=2)
 
         async def business_error() -> None:
             raise ValueError("Invalid data")
@@ -449,7 +449,7 @@ class TestConcurrentHalfOpenProbes:
 
         Multiple concurrent calls during HALF_OPEN should be serialized.
         """
-        cb = CircuitBreaker(
+        cb = CircuitBreakerGuard(
             provider="test",
             failure_threshold=2,
             recovery_timeout=0,
@@ -488,7 +488,7 @@ class TestConcurrentHalfOpenProbes:
     @pytest.mark.unit
     async def test_rapid_concurrent_half_open_attempts(self) -> None:
         """Concurrent probes: High concurrency during recovery maintains consistency."""
-        cb = CircuitBreaker(
+        cb = CircuitBreakerGuard(
             provider="test",
             failure_threshold=2,
             recovery_timeout=0,
@@ -527,7 +527,7 @@ class TestTimeoutBoundaryConditions:
         Request exactly at recovery_timeout should transition to HALF_OPEN.
         """
         recovery_timeout = 0.1
-        cb = CircuitBreaker(
+        cb = CircuitBreakerGuard(
             provider="test",
             failure_threshold=2,
             recovery_timeout=recovery_timeout,
@@ -560,7 +560,7 @@ class TestTimeoutBoundaryConditions:
         # Use larger timeout (1s) for robustness against timer precision variance
         # (especially on Windows where timer resolution is ~15.6ms)
         recovery_timeout = 1.0
-        cb = CircuitBreaker(
+        cb = CircuitBreakerGuard(
             provider="test",
             failure_threshold=2,
             recovery_timeout=recovery_timeout,
@@ -592,7 +592,7 @@ class TestTimeoutBoundaryConditions:
     async def test_retry_after_decreases_over_time(self) -> None:
         """Timeout: retry_after decreases as time passes."""
         recovery_timeout = 1.0
-        cb = CircuitBreaker(
+        cb = CircuitBreakerGuard(
             provider="test",
             failure_threshold=2,
             recovery_timeout=recovery_timeout,
@@ -635,7 +635,7 @@ class TestGracefulDegradationWithoutMetrics:
     @pytest.mark.unit
     async def test_all_operations_work_without_metrics(self) -> None:
         """No metrics: All operations succeed when metrics=None."""
-        cb = CircuitBreaker(
+        cb = CircuitBreakerGuard(
             provider="test",
             failure_threshold=2,
             recovery_timeout=0,
@@ -674,7 +674,7 @@ class TestGracefulDegradationWithoutMetrics:
     @pytest.mark.unit
     async def test_trips_tracking_without_metrics(self) -> None:
         """No metrics: Trip counting works correctly without metrics."""
-        cb = CircuitBreaker(
+        cb = CircuitBreakerGuard(
             provider="test",
             failure_threshold=2,
             recovery_timeout=0,
@@ -763,7 +763,7 @@ class TestStateInvariantsUnderStress:
     @pytest.mark.unit
     async def test_state_always_valid(self) -> None:
         """Stress: State is always one of the valid enum values."""
-        cb = CircuitBreaker(
+        cb = CircuitBreakerGuard(
             provider="test",
             failure_threshold=3,
             recovery_timeout=0,
@@ -796,7 +796,7 @@ class TestStateInvariantsUnderStress:
     @pytest.mark.unit
     async def test_failure_count_never_negative(self) -> None:
         """Stress: Failure count is never negative."""
-        cb = CircuitBreaker(
+        cb = CircuitBreakerGuard(
             provider="test",
             failure_threshold=5,
             recovery_timeout=0,
@@ -819,7 +819,7 @@ class TestStateInvariantsUnderStress:
     @pytest.mark.unit
     async def test_trips_total_monotonically_increases(self) -> None:
         """Stress: trips_total only increases, never decreases."""
-        cb = CircuitBreaker(
+        cb = CircuitBreakerGuard(
             provider="test",
             failure_threshold=2,
             recovery_timeout=0,

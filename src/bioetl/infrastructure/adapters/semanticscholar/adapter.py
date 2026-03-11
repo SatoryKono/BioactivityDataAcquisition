@@ -43,7 +43,7 @@ from bioetl.infrastructure.adapters.semanticscholar.request_headers import (
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import ErrorHandlerPort, LoggerPort, MetricsPort
-    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
     from bioetl.infrastructure.adapters.common.api_request_collector import (
         APIRequestCollector,
     )
@@ -85,7 +85,7 @@ def _create_default_semanticscholar_title_fallback_handler(
     *,
     http_client: UnifiedHTTPClient,
     logger: LoggerPort,
-    metrics: AdapterMetrics,
+    metrics: AdapterMetricsRecorder,
     api_key: str,
     fields: str,
 ) -> SemanticScholarTitleFallbackHandler:
@@ -126,7 +126,7 @@ class SemanticScholarAdapter(
     fields: str = DEFAULT_FIELDS
     metrics: MetricsPort | None = None
     error_handler: ErrorHandlerPort | None = None
-    adapter_metrics: AdapterMetrics | None = None
+    adapter_metrics: AdapterMetricsRecorder | None = None
     request_collector: APIRequestCollector | None = None
     fallback_fetch_service: FallbackFetchOrchestratorService | None = None
     title_fallback_handler: SemanticScholarTitleFallbackHandler | None = None

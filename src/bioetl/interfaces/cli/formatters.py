@@ -16,7 +16,7 @@ from bioetl.domain.types import JsonDict
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-    from bioetl.application.core.cleanup_service import CleanupPreview
+    from bioetl.application.core.lifecycle.cleanup_service import CleanupPreview
     from bioetl.application.services import (
         ColumnInfo,
         ExportResult,

@@ -17,8 +17,11 @@ from bioetl.application.composite.checkpoint import (
     CompositeCheckpointManager,
     CompositeCheckpointState,
 )
+from bioetl.infrastructure.storage.composite_checkpoint_writer import (
+    FileCompositeCheckpointWriter,
+)
 from bioetl.application.composite.fsm_helper import FSMStateHelperService
-from bioetl.application.composite.runner import (
+from bioetl.application.composite.runner_pkg import (
     CompositePipelineRunner,
     CompositeRuntimeConfig,
 )
@@ -491,7 +494,7 @@ class TestCheckpointExistsWarning:
         manager = CompositeCheckpointManager(
             composite_name="test_composite",
             run_id=run_id,
-            checkpoint_dir=tmp_path,
+            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=logger,
             resume=False,  # No resume
         )
@@ -529,7 +532,7 @@ class TestCheckpointExistsWarning:
         manager_no_resume = CompositeCheckpointManager(
             composite_name="test_composite",
             run_id=str(uuid4()),  # New run
-            checkpoint_dir=tmp_path,
+            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=logger,
             resume=False,
         )
@@ -553,7 +556,7 @@ class TestCheckpointExistsWarning:
         manager = CompositeCheckpointManager(
             composite_name="test_composite",
             run_id=str(uuid4()),
-            checkpoint_dir=tmp_path,
+            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=logger,
             resume=False,
         )
@@ -577,7 +580,7 @@ class TestCheckpointExistsWarning:
         manager_setup = CompositeCheckpointManager(
             composite_name="test_composite",
             run_id=run_id,
-            checkpoint_dir=tmp_path,
+            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=MagicMock(),
             resume=False,
         )
@@ -595,7 +598,7 @@ class TestCheckpointExistsWarning:
         manager_no_resume = CompositeCheckpointManager(
             composite_name="test_composite",
             run_id=str(uuid4()),
-            checkpoint_dir=tmp_path,
+            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=logger,
             resume=False,
         )

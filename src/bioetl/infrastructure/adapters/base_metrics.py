@@ -10,7 +10,7 @@ Metrics collected:
 
 from __future__ import annotations
 
-__all__ = ["ADAPTER_REQUEST_ERRORS", "AdapterMetrics"]
+__all__ = ["ADAPTER_REQUEST_ERRORS", "AdapterMetricsRecorder"]
 
 
 import time
@@ -39,7 +39,7 @@ ADAPTER_REQUEST_ERRORS = (
 
 
 @dataclass
-class AdapterMetrics:
+class AdapterMetricsRecorder:
     """Metrics instrumentation for adapter requests.
 
     Collects SLA-relevant metrics for adapter HTTP requests including
@@ -51,7 +51,7 @@ class AdapterMetrics:
 
     Example:
         >>> from bioetl.domain.ports import NoOpMetrics
-        >>> metrics = AdapterMetrics(NoOpMetrics(), "chembl")
+        >>> metrics = AdapterMetricsRecorder(NoOpMetrics(), "chembl")
         >>> with metrics.measure_request("/activity"):
         ...     # perform HTTP request
         ...     pass

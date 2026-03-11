@@ -5,6 +5,8 @@ from __future__ import annotations
 from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING
 
+from bioetl.application.composite.join_planner_helpers import parse_pipeline_name
+
 if TYPE_CHECKING:
     import polars as pl
 
@@ -186,12 +188,7 @@ class ColumnPriorityOrdererService:
     @staticmethod
     def _parse_pipeline_name(pipeline: str) -> tuple[str, str]:
         """Parse provider_entity pipeline name into tuple."""
-        if "_" not in pipeline:
-            raise ValueError(
-                f"Pipeline name '{pipeline}' must be in format 'provider_entity'"
-            )
-        provider, entity = pipeline.split("_", 1)
-        return provider, entity
+        return parse_pipeline_name(pipeline)
 
     @staticmethod
     def _resolve_priority_column(

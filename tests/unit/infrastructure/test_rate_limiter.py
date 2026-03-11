@@ -1,4 +1,4 @@
-"""Unit tests for TokenBucket rate limiter."""
+"""Unit tests for TokenBucketRateLimiter rate limiter."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 
 
 def create_mock_metrics() -> MagicMock:
@@ -19,32 +19,32 @@ def create_mock_metrics() -> MagicMock:
 
 
 class TestTokenBucket:
-    """Tests for TokenBucket rate limiter."""
+    """Tests for TokenBucketRateLimiter rate limiter."""
 
     @pytest.mark.unit
     def test_initial_capacity(self) -> None:
         """Bucket should start at full capacity."""
-        bucket = TokenBucket(rate=5.0, capacity=10)
+        bucket = TokenBucketRateLimiter(rate=5.0, capacity=10)
         assert bucket.available_tokens() == 10
 
     @pytest.mark.unit
     def test_try_acquire_success(self) -> None:
         """try_acquire should succeed when tokens available."""
-        bucket = TokenBucket(rate=5.0, capacity=10)
+        bucket = TokenBucketRateLimiter(rate=5.0, capacity=10)
         assert bucket.try_acquire(5) is True
         assert bucket.available_tokens() == 5
 
     @pytest.mark.unit
     def test_try_acquire_failure(self) -> None:
         """try_acquire should fail when insufficient tokens."""
-        bucket = TokenBucket(rate=5.0, capacity=5)
+        bucket = TokenBucketRateLimiter(rate=5.0, capacity=5)
         assert bucket.try_acquire(10) is False
         assert bucket.available_tokens() == 5  # Unchanged
 
     @pytest.mark.unit
     async def test_acquire_immediate(self) -> None:
         """acquire should return immediately when tokens available."""
-        bucket = TokenBucket(rate=5.0, capacity=10)
+        bucket = TokenBucketRateLimiter(rate=5.0, capacity=10)
 
         start = time.monotonic()
         await bucket.acquire(5)
@@ -56,7 +56,7 @@ class TestTokenBucket:
     @pytest.mark.unit
     async def test_acquire_waits_for_tokens(self) -> None:
         """acquire should wait when insufficient tokens."""
-        bucket = TokenBucket(rate=10.0, capacity=1)  # 10 tokens/sec
+        bucket = TokenBucketRateLimiter(rate=10.0, capacity=1)  # 10 tokens/sec
 
         # Consume the only token
         await bucket.acquire(1)
@@ -73,7 +73,7 @@ class TestTokenBucket:
     @pytest.mark.unit
     async def test_acquire_exceeds_capacity_raises(self) -> None:
         """acquire should raise if tokens > capacity."""
-        bucket = TokenBucket(rate=5.0, capacity=5)
+        bucket = TokenBucketRateLimiter(rate=5.0, capacity=5)
 
         with pytest.raises(ValueError, match="Cannot acquire 10 tokens"):
             await bucket.acquire(10)
@@ -81,7 +81,7 @@ class TestTokenBucket:
     @pytest.mark.unit
     def test_refill_over_time(self) -> None:
         """Tokens should refill over time."""
-        bucket = TokenBucket(rate=100.0, capacity=10)  # 100 tokens/sec
+        bucket = TokenBucketRateLimiter(rate=100.0, capacity=10)  # 100 tokens/sec
 
         # Consume all tokens
         bucket.try_acquire(10)
@@ -96,7 +96,7 @@ class TestTokenBucket:
     @pytest.mark.unit
     def test_refill_capped_at_capacity(self) -> None:
         """Refill should not exceed capacity."""
-        bucket = TokenBucket(rate=1000.0, capacity=5)  # Fast refill
+        bucket = TokenBucketRateLimiter(rate=1000.0, capacity=5)  # Fast refill
 
         # Wait longer than needed to fill
         time.sleep(0.1)
@@ -106,13 +106,13 @@ class TestTokenBucket:
 
 
 class TestTokenBucketMetrics:
-    """Tests for TokenBucket metrics integration."""
+    """Tests for TokenBucketRateLimiter metrics integration."""
 
     @pytest.mark.unit
     async def test_acquire_records_metrics(self) -> None:
         """acquire should record metrics when MetricsPort is provided."""
         mock_metrics = create_mock_metrics()
-        bucket = TokenBucket(
+        bucket = TokenBucketRateLimiter(
             rate=5.0,
             capacity=10,
             provider="test_provider",
@@ -135,7 +135,7 @@ class TestTokenBucketMetrics:
     @pytest.mark.unit
     async def test_acquire_no_metrics_when_none(self) -> None:
         """acquire should not fail when metrics is None."""
-        bucket = TokenBucket(rate=5.0, capacity=10, provider="test")
+        bucket = TokenBucketRateLimiter(rate=5.0, capacity=10, provider="test")
 
         # Should not raise any exception
         await bucket.acquire(1)
@@ -146,7 +146,7 @@ class TestTokenBucketMetrics:
     async def test_acquire_records_wait_time(self) -> None:
         """acquire should record non-zero wait time when waiting for tokens."""
         mock_metrics = create_mock_metrics()
-        bucket = TokenBucket(
+        bucket = TokenBucketRateLimiter(
             rate=10.0,  # 10 tokens/sec = 0.1s per token (slow enough to measure wait)
             capacity=1,
             provider="test_wait",
@@ -177,7 +177,7 @@ class TestTokenBucketMetrics:
     async def test_metrics_called_with_correct_provider(self) -> None:
         """Metrics should use the correct provider label."""
         mock_metrics = create_mock_metrics()
-        bucket = TokenBucket(
+        bucket = TokenBucketRateLimiter(
             rate=5.0,
             capacity=10,
             provider="custom_provider",

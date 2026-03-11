@@ -13,7 +13,9 @@ from __future__ import annotations
 
 from uuid import uuid4
 
-from bioetl.application.core.checkpoint_manager import CheckpointManagerService
+from bioetl.application.core.lifecycle.checkpoint_manager import (
+    CheckpointManagerService,
+)
 from bioetl.application.core.quarantine_manager import QuarantineManagerService
 from bioetl.application.services import CheckpointService, QuarantineService
 from bioetl.composition.bootstrap.assembly.checkpoint import (

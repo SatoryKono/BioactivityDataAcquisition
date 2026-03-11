@@ -1386,7 +1386,7 @@ grep -B2 -A2 "ComponentName" docs/99-archive/refactoring-plan.md
 
 ```bash
 make install      # создание venv, установка зависимостей
-make test         # unit + integration (на кассетах)
+make test         # локальный стабильный suite с coverage (без E2E)
 make lint         # ruff + mypy
 make run-local    # запуск сэмплового пайплайна на фикстурах
 ```

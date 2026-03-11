@@ -150,7 +150,7 @@ class TestHealthCheckCommand:
         assert "--provider" in result.output
         assert "--json" in result.output
 
-    @patch("bioetl.composition.factories.data_source_factory.DataSourceFactory")
+    @patch("bioetl.composition.factories.datasource.factory.DataSourceFactory")
     def test_health_check_all_providers_healthy(
         self,
         mock_factory: MagicMock,
@@ -172,7 +172,7 @@ class TestHealthCheckCommand:
         assert "All providers healthy." in result.output
         assert result.exit_code == ExitCode.OK.value
 
-    @patch("bioetl.composition.factories.data_source_factory.DataSourceFactory")
+    @patch("bioetl.composition.factories.datasource.factory.DataSourceFactory")
     def test_health_check_some_unhealthy(
         self,
         mock_factory: MagicMock,
@@ -192,7 +192,7 @@ class TestHealthCheckCommand:
         assert "Some providers unhealthy." in result.output
         assert result.exit_code == ExitCode.FAIL.value
 
-    @patch("bioetl.composition.factories.data_source_factory.DataSourceFactory")
+    @patch("bioetl.composition.factories.datasource.factory.DataSourceFactory")
     def test_health_check_degraded_status(
         self,
         mock_factory: MagicMock,
@@ -216,7 +216,7 @@ class TestHealthCheckCommand:
         assert "Some providers unhealthy." in result.output
         assert result.exit_code == ExitCode.FAIL.value
 
-    @patch("bioetl.composition.factories.data_source_factory.DataSourceFactory")
+    @patch("bioetl.composition.factories.datasource.factory.DataSourceFactory")
     def test_health_check_json_output(
         self,
         mock_factory: MagicMock,
@@ -237,7 +237,7 @@ class TestHealthCheckCommand:
         assert '"status": "healthy"' in result.output
         assert '"latency_ms": "10.50"' in result.output
 
-    @patch("bioetl.composition.factories.data_source_factory.DataSourceFactory")
+    @patch("bioetl.composition.factories.datasource.factory.DataSourceFactory")
     def test_health_check_specific_providers(
         self,
         mock_factory: MagicMock,
@@ -261,7 +261,7 @@ class TestHealthCheckCommand:
         assert "Running health checks..." in result.output
         assert result.exit_code == ExitCode.OK.value
 
-    @patch("bioetl.composition.factories.data_source_factory.DataSourceFactory")
+    @patch("bioetl.composition.factories.datasource.factory.DataSourceFactory")
     def test_health_check_display_latency(
         self,
         mock_factory: MagicMock,
@@ -280,7 +280,7 @@ class TestHealthCheckCommand:
         assert "25.50ms" in result.output
         assert "[OK]" in result.output
 
-    @patch("bioetl.composition.factories.data_source_factory.DataSourceFactory")
+    @patch("bioetl.composition.factories.datasource.factory.DataSourceFactory")
     def test_health_check_display_error(
         self,
         mock_factory: MagicMock,
@@ -310,7 +310,7 @@ class TestHealthCheckCommand:
         assert "Error running health checks" in result.output
         assert result.exit_code == ExitCode.FAIL.value
 
-    @patch("bioetl.composition.factories.data_source_factory.DataSourceFactory")
+    @patch("bioetl.composition.factories.datasource.factory.DataSourceFactory")
     def test_health_check_unknown_status(
         self,
         mock_factory: MagicMock,

@@ -8,6 +8,11 @@ __all__ = ["ChemblMetadataMixin"]
 from typing import TYPE_CHECKING
 
 from bioetl.infrastructure.adapters.chembl.constants import CHEMBL_API_BASE
+from bioetl.infrastructure.adapters.common.source_metadata_capability import (
+    clear_source_metadata_collector,
+    consume_source_metadata,
+    get_request_count,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.models.filter import ExtractionParams
@@ -35,20 +40,18 @@ class ChemblMetadataMixin:
             the internal request collector is cleared after construction.
         """
         extraction_qs = self._extraction_params.to_query_string() or None
-        metadata = self._request_collector.to_source_metadata(
-            source_type="api",
+        return consume_source_metadata(
+            collector=self._request_collector,
             url=CHEMBL_API_BASE,
             api_version=api_version,
             query_string=extraction_qs,
         )
-        self._request_collector.clear()
-        return metadata
 
     def clear_request_collector(self) -> None:
         """Clear the collector without returning metadata."""
-        self._request_collector.clear()
+        clear_source_metadata_collector(collector=self._request_collector)
 
     @property
     def request_count(self) -> int:
         """Number of recorded API requests since last clear."""
-        return self._request_collector.request_count
+        return get_request_count(collector=self._request_collector)

@@ -46,6 +46,8 @@ class ClientSourceConfig(BaseModel):
 class ProviderSourceConfig(BaseModel):
     """Provider-specific configuration from source YAML."""
 
+    model_config = ConfigDict(extra="ignore")
+
     provider: str | None = None
     base_url: str | None = None
     client: ClientSourceConfig = Field(default_factory=ClientSourceConfig)

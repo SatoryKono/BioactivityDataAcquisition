@@ -14,10 +14,10 @@ import pytest
 import pytest_asyncio
 
 from bioetl.domain.types import HealthStatus
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
-from bioetl.infrastructure.adapters.pubmed.pubmed_client import PubMedAdapter
+from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
+from bioetl.infrastructure.adapters.pubmed import PubMedAdapter
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 CASSETTE_DIR = Path(__file__).parent.parent.parent / "fixtures" / "vcr" / "pubmed"
@@ -46,8 +46,8 @@ def vcr_cassette_name(request: pytest.FixtureRequest) -> str:
 async def http_client() -> AsyncIterator[UnifiedHTTPClient]:
     """Create and manage PubMed HTTP client lifecycle for integration tests."""
     client = UnifiedHTTPClient(
-        rate_limiter=TokenBucket(rate=3.0, capacity=6, provider="pubmed_rf013"),
-        circuit_breaker=CircuitBreaker(provider="pubmed_rf013"),
+        rate_limiter=TokenBucketRateLimiter(rate=3.0, capacity=6, provider="pubmed_rf013"),
+        circuit_breaker=CircuitBreakerGuard(provider="pubmed_rf013"),
         timeout=30.0,
         provider="pubmed",
     )

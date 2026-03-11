@@ -188,10 +188,12 @@
     "pipeline_name": "chembl_activity",
     "provider": "chembl",
     "scd_config": {
-      "is_current": "_is_current",
-      "valid_from": "_valid_from",
-      "valid_to": "_valid_to",
-      "version": "_version"
+      "business_key": "activity_id",
+      "current_flag_col": "_is_current",
+      "scd_type": 2,
+      "valid_from_col": "_valid_from",
+      "valid_to_col": "_valid_to",
+      "version_col": "_version"
     },
     "silver_filters": {
       "column_filters": [
@@ -523,10 +525,12 @@
     "pipeline_name": "pubchem_compound",
     "provider": "pubchem",
     "scd_config": {
-      "is_current": "_is_current",
-      "valid_from": "_valid_from",
-      "valid_to": "_valid_to",
-      "version": "_version"
+      "business_key": "molecule_id",
+      "current_flag_col": "_is_current",
+      "scd_type": 2,
+      "valid_from_col": "_valid_from",
+      "valid_to_col": "_valid_to",
+      "version_col": "_version"
     },
     "silver_filters": {
       "column_filters": [],
@@ -889,10 +893,12 @@
     "pipeline_name": "pubmed_publication",
     "provider": "pubmed",
     "scd_config": {
-      "is_current": "_is_current",
-      "valid_from": "_valid_from",
-      "valid_to": "_valid_to",
-      "version": "_version"
+      "business_key": "pmid",
+      "current_flag_col": "_is_current",
+      "scd_type": 2,
+      "valid_from_col": "_valid_from",
+      "valid_to_col": "_valid_to",
+      "version_col": "_version"
     },
     "silver_filters": {
       "column_filters": [],
@@ -1092,10 +1098,12 @@
     "pipeline_name": "uniprot_protein",
     "provider": "uniprot",
     "scd_config": {
-      "is_current": "_is_current",
-      "valid_from": "_valid_from",
-      "valid_to": "_valid_to",
-      "version": "_version"
+      "business_key": "accession",
+      "current_flag_col": "_is_current",
+      "scd_type": 2,
+      "valid_from_col": "_valid_from",
+      "valid_to_col": "_valid_to",
+      "version_col": "_version"
     },
     "silver_filters": {
       "column_filters": [],

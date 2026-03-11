@@ -15,7 +15,6 @@ from typing import TYPE_CHECKING, Any
 from pydantic import BaseModel
 
 from bioetl.domain.entities.pubmed import ArticleRecord
-from bioetl.domain.ports import NoOpMetrics
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.common import (
     ComposableFallbackDecorator,
@@ -23,9 +22,6 @@ from bioetl.infrastructure.adapters.common import (
     FallbackDecoratorConfig,
     FallbackFetchOrchestratorService,
     resolve_fallback_policy,
-)
-from bioetl.infrastructure.adapters.common.adapter_defaults import (
-    create_default_error_handler as _create_default_pubmed_error_handler,
 )
 from bioetl.infrastructure.adapters.common.adapter_defaults import (
     create_default_fallback_service as _create_default_pubmed_fallback_service,
@@ -46,7 +42,7 @@ if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
     from bioetl.domain.ports import ErrorHandlerPort, LoggerPort, MetricsPort
-    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
     from bioetl.infrastructure.adapters.common.api_request_collector import (
         APIRequestCollector,
     )
@@ -111,7 +107,7 @@ class PubMedAdapter(
     batch_size: int = 200
     metrics: MetricsPort | None = None
     error_handler: ErrorHandlerPort | None = None
-    adapter_metrics: AdapterMetrics | None = None
+    adapter_metrics: AdapterMetricsRecorder | None = None
     request_collector: APIRequestCollector | None = None
     fallback_fetch_service: FallbackFetchOrchestratorService | None = None
     title_fallback_handler: TitleFallbackHandler | None = None
@@ -124,21 +120,14 @@ class PubMedAdapter(
 
     def __post_init__(self) -> None:
         """Initialize metrics, error handler and fallback handler."""
-        self._http_client = self.http_client
-        self._logger = self.logger
-        self._metrics = self.metrics if self.metrics is not None else NoOpMetrics()
-        if self.adapter_metrics is not None and self.request_collector is not None:
-            self._adapter_metrics = self.adapter_metrics
-            self._request_collector = self.request_collector
-        else:
-            self._init_adapter_metrics()
-        self._error_handler = (
-            self.error_handler
-            if self.error_handler is not None
-            else _create_default_pubmed_error_handler(
-                logger=self._logger,
-                metrics=self._metrics,
-            )
+        BaseHttpAdapter.__init__(
+            self,
+            http_client=self.http_client,
+            logger=self.logger,
+            metrics=self.metrics,
+            error_handler=self.error_handler,
+            adapter_metrics=self.adapter_metrics,
+            request_collector=self.request_collector,
         )
         self._fallback_fetch_service = (
             self.fallback_fetch_service

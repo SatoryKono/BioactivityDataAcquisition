@@ -7,7 +7,7 @@ Tests for GoldDQAnalyzer validation checks including:
 - Business rules validation
 - Referential integrity checks
 - Statistical profiling with MA30 baseline
-- Anomaly detection
+- AnomalyRecord detection
 - SCD (Slowly Changing Dimension) integrity
 - Data freshness
 """
@@ -467,7 +467,7 @@ class TestAnomalyDetectionCheck:
     """Tests for anomaly detection."""
 
     def test_anomaly_detection_cold_start(self) -> None:
-        """Anomaly detection in cold start mode."""
+        """AnomalyRecord detection in cold start mode."""
         df = pl.DataFrame({"id": [1, 2, 3]})
         baseline_stats = {"days_since_start": 10}  # Less than 30 days
 
@@ -477,7 +477,7 @@ class TestAnomalyDetectionCheck:
         assert result.status == DQCheckStatus.PASS
 
     def test_anomaly_detection_no_baseline(self) -> None:
-        """Anomaly detection passes without baseline."""
+        """AnomalyRecord detection passes without baseline."""
         df = pl.DataFrame({"id": [1, 2, 3]})
 
         result = check_anomaly_detection(df, None)
@@ -486,7 +486,7 @@ class TestAnomalyDetectionCheck:
         assert result.status == DQCheckStatus.PASS
 
     def test_anomaly_detection_normal(self) -> None:
-        """Anomaly detection passes with normal values."""
+        """AnomalyRecord detection passes with normal values."""
         df = pl.DataFrame(
             {"id": [1, 2, 3, 4, 5], "value": [10.0, 20.0, 30.0, 40.0, 50.0]}
         )

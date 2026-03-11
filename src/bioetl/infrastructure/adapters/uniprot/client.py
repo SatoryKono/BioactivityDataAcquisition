@@ -12,7 +12,7 @@ from typing_extensions import override
 from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
-from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
 from bioetl.infrastructure.adapters.common import (
     FallbackDecoratorConfig,
     FallbackFetchOrchestratorService,
@@ -101,7 +101,7 @@ class UniProtAdapter(
         strict_error_handling: bool = False,
         metrics: MetricsPort | None = None,
         error_handler: ErrorHandlerPort | None = None,
-        adapter_metrics: AdapterMetrics | None = None,
+        adapter_metrics: AdapterMetricsRecorder | None = None,
         request_collector: APIRequestCollector | None = None,
         fallback_fetch_service: FallbackFetchOrchestratorService | None = None,
     ) -> None:

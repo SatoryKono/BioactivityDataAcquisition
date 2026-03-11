@@ -17,12 +17,14 @@ __all__ = [
     "TransformedRecord",
 ]
 
-from dataclasses import dataclass
 import time
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
 from bioetl.application.core.batch_transformer_helpers import (
+    accumulate_transform_outcome,
+    check_dq_thresholds,
     flush_dq_records,
     flush_filtered_records,
     transform_record_attempt,
@@ -30,7 +32,6 @@ from bioetl.application.core.batch_transformer_helpers import (
 )
 from bioetl.application.core.batch_transformer_streaming import StreamingBatchProcessor
 from bioetl.application.core.quarantine_manager import QuarantineManagerService
-from bioetl.domain.exceptions import DataQualityThresholdError
 from bioetl.domain.types import BronzeRecord, GoldRecord
 
 if TYPE_CHECKING:
@@ -143,18 +144,15 @@ class BatchTransformer:
                 index=index,
             )
 
-            if attempt.filtered_entry is not None:
-                filtered_records.append(attempt.filtered_entry)
-                records_filtered_out += 1
-                continue
-            if attempt.dq_entry is not None:
-                dq_records.append(attempt.dq_entry)
-                records_quarantined += 1
-                continue
-            if attempt.silver_record is not None:
-                silver_records.append(attempt.silver_record)
-                if attempt.gold_record is not None:
-                    gold_records.append(attempt.gold_record)
+            quarantined_delta, filtered_delta = accumulate_transform_outcome(
+                attempt=attempt,
+                silver_records=silver_records,
+                gold_records=gold_records,
+                filtered_records=filtered_records,
+                dq_records=dq_records,
+            )
+            records_quarantined += quarantined_delta
+            records_filtered_out += filtered_delta
 
         filtered_failed = await flush_filtered_records(
             context=self._context,
@@ -169,8 +167,13 @@ class BatchTransformer:
             batch_id=batch_id,
         )
 
-        # Check DQ thresholds after transformation
-        self._check_dq_thresholds(records, records_quarantined)
+        check_dq_thresholds(
+            context=self._context,
+            config=self._config,
+            batch_metrics=self._batch_metrics,
+            records=records,
+            quarantined_count=records_quarantined,
+        )
 
         return TransformResult(
             silver_records=silver_records,
@@ -179,60 +182,6 @@ class BatchTransformer:
             filtered_out_count=records_filtered_out,
             records_quarantine_failed=filtered_failed + dq_failed,
         )
-
-    def _check_dq_thresholds(
-        self, records: list[BronzeRecord], quarantined_count: int
-    ) -> None:
-        """Check DQ thresholds and raise/warn as appropriate.
-
-        Args:
-            records: Original records in the batch.
-            quarantined_count: Number of quarantined records.
-
-        Raises:
-            DataQualityThresholdError: If hard threshold exceeded.
-
-        """
-        if not records:
-            return
-
-        total_count = len(records)
-        error_rate = quarantined_count / total_count if total_count > 0 else 0.0
-        dq_config = self._config.dq_config
-
-        if not dq_config:
-            return
-
-        # Hard fail check (hard_fail >= 1.0 treated as disabled, e.g. test mode)
-        if (
-            dq_config.hard_fail_threshold
-            and dq_config.hard_fail_threshold < 1.0
-            and error_rate >= dq_config.hard_fail_threshold
-        ):
-            self._batch_metrics.track_dq_validation_failure(
-                stage="transform",
-                severity="hard_fail",
-            )
-            raise DataQualityThresholdError(error_rate, dq_config.hard_fail_threshold)
-
-        # Soft fail check with detailed logging
-        if (
-            dq_config.soft_fail_threshold
-            and error_rate >= dq_config.soft_fail_threshold
-        ):
-            self._context.logger.warning(
-                "DQ Soft Threshold exceeded",
-                error_rate=round(error_rate, 4),
-                threshold=dq_config.soft_fail_threshold,
-                quarantined_count=quarantined_count,
-                total_count=total_count,
-                hard_threshold=dq_config.hard_fail_threshold,
-                pipeline=self._config.pipeline_name,
-            )
-            self._batch_metrics.track_dq_validation_failure(
-                stage="transform",
-                severity="soft_fail",
-            )
 
     async def transform_single(
         self, raw_record: BronzeRecord, batch_id: BatchID, index: int = 0
@@ -351,8 +300,13 @@ class BatchTransformer:
                 if result.gold_record is not None:
                     gold_records.append(result.gold_record)
 
-        # Check DQ thresholds after transformation
-        self._check_dq_thresholds(records, records_quarantined)
+        check_dq_thresholds(
+            context=self._context,
+            config=self._config,
+            batch_metrics=self._batch_metrics,
+            records=records,
+            quarantined_count=records_quarantined,
+        )
 
         return TransformResult(
             silver_records=silver_records,

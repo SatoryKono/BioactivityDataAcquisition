@@ -10,7 +10,7 @@ from uuid import UUID, uuid4
 
 import pytest
 
-from bioetl.application.core.shutdown import ShutdownSignal
+from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
 from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.application.pipelines.uniprot import UniProtProteinPipeline
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer

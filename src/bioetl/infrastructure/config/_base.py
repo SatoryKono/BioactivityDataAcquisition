@@ -33,10 +33,7 @@ from pydantic_settings import (
 from bioetl.domain.config import PipelineConfig
 from bioetl.infrastructure.config._yaml_settings_source import YamlSettingsSource
 from bioetl.infrastructure.config.converters import yaml_config_to_domain
-from bioetl.infrastructure.config_load_api import (
-    load_pipeline_config,
-    load_source_config,
-)
+from bioetl.infrastructure.config.source_config_loader import load_source_config
 from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
 
@@ -67,6 +64,7 @@ def get_pipeline_config(
 
     """
     from bioetl.infrastructure.config.pipeline_config_loader import PipelineConfigLoader
+    from bioetl.infrastructure.config_load_api import load_pipeline_config
 
     yaml_config = load_pipeline_config(pipeline_name)
 
@@ -353,7 +351,6 @@ __all__ = [
     "SourceYamlConfig",
     "get_pipeline_config",
     "get_settings",
-    "load_pipeline_config",
     "load_source_config",
     "yaml_config_to_domain",
 ]

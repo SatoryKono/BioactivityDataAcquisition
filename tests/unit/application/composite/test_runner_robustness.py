@@ -20,7 +20,10 @@ from bioetl.application.composite.checkpoint import (
     CompositeCheckpointManager,
     CompositeCheckpointState,
 )
-from bioetl.application.composite.runner import (
+from bioetl.infrastructure.storage.composite_checkpoint_writer import (
+    FileCompositeCheckpointWriter,
+)
+from bioetl.application.composite.runner_pkg import (
     CompositePipelineRunner,
     CompositeRuntimeConfig,
 )
@@ -196,7 +199,7 @@ class TestDoubleExecutionProtection:
         checkpoint_manager = CompositeCheckpointManager(
             composite_name="test_composite",
             run_id=test_run_id,
-            checkpoint_dir=tmp_path,
+            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -246,7 +249,7 @@ class TestDoubleExecutionProtection:
         checkpoint_manager = CompositeCheckpointManager(
             composite_name="test_composite",
             run_id=test_run_id,
-            checkpoint_dir=tmp_path,
+            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -290,7 +293,7 @@ class TestDoubleExecutionProtection:
         checkpoint_manager = CompositeCheckpointManager(
             composite_name="test_composite",
             run_id=test_run_id,
-            checkpoint_dir=tmp_path,
+            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -343,7 +346,7 @@ class TestFSMTransitionValidation:
         checkpoint_manager = CompositeCheckpointManager(
             composite_name="test_composite",
             run_id=test_run_id,
-            checkpoint_dir=tmp_path,
+            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -405,7 +408,7 @@ class TestFSMTransitionValidation:
         checkpoint_manager = CompositeCheckpointManager(
             composite_name="test_composite",
             run_id=test_run_id,
-            checkpoint_dir=tmp_path,
+            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=True,
         )
@@ -467,7 +470,7 @@ class TestConfigurationConsistency:
         checkpoint_manager = CompositeCheckpointManager(
             composite_name="test_composite",
             run_id=test_run_id,
-            checkpoint_dir=tmp_path,
+            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -518,7 +521,7 @@ class TestConfigurationConsistency:
         checkpoint_manager = CompositeCheckpointManager(
             composite_name="test_composite",
             run_id=test_run_id,
-            checkpoint_dir=tmp_path,
+            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -577,7 +580,7 @@ class TestEdgeCases:
         checkpoint_manager = CompositeCheckpointManager(
             composite_name="test_composite",
             run_id=test_run_id,
-            checkpoint_dir=tmp_path,
+            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -623,7 +626,7 @@ class TestEdgeCases:
         checkpoint_manager = CompositeCheckpointManager(
             composite_name="test_composite",
             run_id=test_run_id,
-            checkpoint_dir=tmp_path,
+            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )

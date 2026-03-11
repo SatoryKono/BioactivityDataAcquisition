@@ -10,6 +10,22 @@
 - **Property-based**: `Hypothesis`
 - **Mocking**: In-memory fakes предпочтительны, `unittest.mock.MagicMock` допустим
 
+Source of truth для тестовой governance:
+- [ADR-042](../02-architecture/decisions/ADR-042-testing-strategy-matrix.md)
+- [configs/quality/test_matrix.yaml](../../configs/quality/test_matrix.yaml)
+
+Текущее состояние rollout по ADR-042:
+- mutation testing в CI блокирует только `domain/` с порогом `70%`
+- `application/` mutation target (`60%`) задокументирован, но пока staged и не является blocking gate
+- VCR cassette metadata (`*_meta.yaml`) и contract snapshots зарезервированы как целевая структура, но их инвентарь ещё backfill-ится и потому enforcement пока не включён для всего репозитория
+- `vcr_cassette_max_age_days: 90` уже зафиксирован в matrix как целевой stale-age threshold, но age gate остаётся planned до появления repo-wide `_meta.yaml` inventory
+- canonical VCR metadata catalog уже зарезервирован как future artifact в `reports/quality/vcr-metadata-catalog.json`, но его генерация и backfill workflow ещё не включены
+- canonical future tooling paths тоже уже зафиксированы: `scripts/qa/report_vcr_metadata_catalog.py` для catalog generation и `scripts/migrations/active/backfill_vcr_metadata_sidecars.py` для sidecar backfill, но до начала rollout CI не должен ссылаться на них как на активные шаги
+- monthly `contract-tests.yml` остаётся активным live-network workflow и должен запускать `tests/contract/` с `BIOETL_LIVE_API_TESTS=true`, `BIOETL_NETWORK_TESTS=true` и `--network`
+- текущие silver schema snapshots уже живут в `tests/contract/silver_schemas/snapshots/`; внешний registry `tests/fixtures/contracts/{provider}/v{version}.json` остаётся future target из ADR-042
+- canonical VCR placement уже enforced в CI: кассеты вне `tests/fixtures/vcr/{provider}/` блокируются
+- extensionless VCR files пока допустимы только через `.github/vcr-noext-allowlist.txt`; новые такие файлы добавлять нельзя
+
 ## 2. Уровни Тестирования
 
 ### 2.1. Unit Tests (`tests/unit/`)
@@ -27,6 +43,8 @@
 - **Адаптеры**: Тестирование HTTP-клиентов (ChEMBL, PubChem, UniProt) с использованием VCR-кассет.
 - **Storage**: Проверка записи в Delta Lake и Bronze хранилище (используются локальные временные пути).
 - **VCR Policy**: Кассеты хранятся в `tests/fixtures/vcr/`. При запуске в CI сетевые вызовы запрещены (`--vcr-record=none`).
+- **Fixture Governance**: `_meta.yaml` sidecars и stale-age policy описаны в ADR-042, но глобальный enforcement включится только после backfill существующей cassette inventory и включения age rollout в matrix.
+- **Catalog / Backfill Policy**: пока rollout остаётся `planned`, репозиторий не должен притворяться, что canonical VCR metadata catalog или automated backfill workflow уже существуют; это состояние фиксируется matrix и architecture guard'ами.
 
 ### 2.3. End-to-End (E2E) Tests (`tests/e2e/`)
 
@@ -49,6 +67,7 @@
     - Проверяет: `datetime.now()`, `datetime.datetime.now()`
     - Область: `src/bioetl/infrastructure/**/*.py` (с исключениями)
   - `test-all-ports-have-implementations`: Проверка наличия реализаций для всех протоколов (портов).
+  - `test_test_matrix_coverage`: Проверка, что ADR-042 matrix, fixture rollout и mutation governance не расходятся с текущим состоянием репозитория и workflow.
 
 **Документация:** См. [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md) для обоснования детерминизма.
 
@@ -68,7 +87,7 @@
 ## 4. Как запускать тесты
 
 ```bash
-# Запуск всех тестов (кроме E2E)
+# Запуск локального стабильного test suite (без E2E)
 make test
 
 # CI-подобный устойчивый прогон (parallel + fallback + serial pass)
@@ -87,7 +106,7 @@ pytest --vcr-record=once tests/integration/
 pytest --cov=src/bioetl tests/
 ```
 
-### 4.1. Быстрый старт для полного набора тестов
+### 4.1. Быстрый старт для рекомендуемого локального прогона
 
 | Шаг | Команда                     | Назначение                                                           |
 | --- | --------------------------- | -------------------------------------------------------------------- |
@@ -237,7 +256,7 @@ make setup-dev
 ```bash
 make test-deps
 ```
-Проверяет доступность `pandas`, `pandera`, `polars` и др. В CI этот шаг является пререквизитом для `make test`.
+Проверяет доступность `pandas`, `pandera`, `polars` и др. Локально это быстрый smoke-check перед `make test`; в CI аналогичная проверка выполняется отдельным `smoke-check` job в `.github/workflows/tests.yml`.
 
 **Инструменты разработки:**
 ```bash
@@ -252,4 +271,4 @@ make test-deps-dev
 2. Убедитесь, что используете `uv run` или активировали виртуальное окружение.
 3. Проверьте статус инструментов через `make test-deps-dev`.
 
-В CI-конвейере шаг `make test` автоматически включает `test-deps-dev` как пререквизит, что гарантирует достоверность отчётов о покрытии и результатах статического анализа.
+В CI для этого используется не `make test`, а отдельный набор шагов в `.github/workflows/tests.yml`: `smoke-check`, quality gates и затем `test-fast` / `test-matrix` / `coverage-verify`.

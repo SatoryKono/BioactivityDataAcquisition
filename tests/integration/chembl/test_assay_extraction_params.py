@@ -16,7 +16,7 @@ import pytest
 
 from bioetl.domain.models.filter import ExtractionParams
 from bioetl.domain.resilience import AdapterConfig
-from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
+from bioetl.infrastructure.adapters.chembl import ChemblAdapter
 
 # VCR cassette directory for ChEMBL extraction params tests
 CASSETTE_DIR = Path(__file__).parent.parent.parent / "fixtures" / "vcr" / "chembl"

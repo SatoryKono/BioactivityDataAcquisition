@@ -9,9 +9,15 @@ import pytest
 from bioetl.application.composite.aggregator import EnricherAggregatorService
 from bioetl.application.composite.deduplication import EnricherDeduplicator
 from bioetl.application.composite.merger import MergeService, _path_to_table_name
-from bioetl.domain.composite.config import EnricherConfig, MergeConfig
-from bioetl.domain.composite.result import EnrichmentResult, EnrichmentStatus
+from bioetl.domain.composite.config import DependencyConfig, EnricherConfig, MergeConfig
+from bioetl.domain.composite.result import (
+    DependencyResult,
+    DependencyStatus,
+    EnrichmentResult,
+    EnrichmentStatus,
+)
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
+from bioetl.domain.exceptions import BioETLError
 from tests.unit.application.composite.merge_test_support import build_merge_service
 
 
@@ -435,6 +441,81 @@ class TestMergeServiceMergeOperation:
         assert mock_storage.read_silver.call_count == 2
         assert result.records_from_seed == 1
         assert "test_enricher" in result.sources_used
+
+
+@pytest.mark.unit
+class TestMergeServiceOptionalReadPolicy:
+    """Tests for optional merge input read degradation."""
+
+    @pytest.mark.asyncio
+    async def test_load_enricher_dataframes_skips_failed_read(
+        self, merge_service, mock_storage, mock_logger
+    ) -> None:
+        """Successful enricher result should be dropped when table read fails."""
+        mock_storage.read_silver.side_effect = OSError("disk issue")
+
+        enrichers = [
+            EnricherConfig(
+                pipeline="crossref_publication",
+                join_keys=("doi",),
+                required=False,
+                silver_table="silver/crossref/publication",
+            )
+        ]
+        enrichment_results = {
+            "crossref_publication": EnrichmentResult(
+                enricher_name="crossref_publication",
+                status=EnrichmentStatus.SUCCESS,
+                records_input=1,
+                records_enriched=1,
+            )
+        }
+
+        enricher_dfs, sources = await merge_service._load_enricher_dataframes(
+            enrichers,
+            enrichment_results,
+        )
+
+        assert enricher_dfs == {}
+        assert sources == []
+        mock_logger.warning.assert_called_once()
+        assert mock_logger.warning.call_args.kwargs["enricher"] == "crossref_publication"
+
+    @pytest.mark.asyncio
+    async def test_load_dependency_dataframes_skips_failed_read_with_reason_code(
+        self, merge_service, mock_storage, mock_logger
+    ) -> None:
+        """BioETLError read failure should be logged and degraded for dependencies."""
+        mock_storage.read_silver.side_effect = BioETLError("delta read failed")
+
+        dependencies = [
+            DependencyConfig(
+                pipeline="chembl_target_component",
+                silver_table="silver/chembl/target_component",
+                join_keys=("target_chembl_id",),
+                required=False,
+            )
+        ]
+        dependency_results = {
+            "chembl_target_component": DependencyResult(
+                pipeline_name="chembl_target_component",
+                status=DependencyStatus.SUCCESS,
+                records_extracted=1,
+                records_silver=1,
+            )
+        }
+
+        dependency_dfs, sources = await merge_service._load_dependency_dataframes(
+            dependencies,
+            dependency_results,
+        )
+
+        assert dependency_dfs == {}
+        assert sources == []
+        mock_logger.warning.assert_called_once()
+        warning_kwargs = mock_logger.warning.call_args.kwargs
+        assert warning_kwargs["dependency"] == "chembl_target_component"
+        assert warning_kwargs["reason_code"] == "unexpected_bioetl_error"
 
 
 @pytest.mark.unit

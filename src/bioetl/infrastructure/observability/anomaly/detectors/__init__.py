@@ -1,4 +1,4 @@
-"""Anomaly detection strategies.
+"""AnomalyRecord detection strategies.
 
 Implements Strategy pattern for different detection algorithms.
 """

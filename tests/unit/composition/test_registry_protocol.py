@@ -9,7 +9,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 
 
 class TestPipelineRegistryUnifiedAPI:
@@ -73,7 +73,7 @@ class TestDataSourceRegistryUnifiedAPI:
     @pytest.fixture(autouse=True)
     def setup_and_teardown(self):
         """Restore registry after test."""
-        from bioetl.composition.factories.data_source_factory import (
+        from bioetl.composition.factories.datasource.factory import (
             DataSourceRegistry,
         )
 
@@ -86,7 +86,7 @@ class TestDataSourceRegistryUnifiedAPI:
 
     def test_list_keys_returns_list(self):
         """DataSourceRegistry.list_keys() should return a list."""
-        from bioetl.composition.factories.data_source_factory import (
+        from bioetl.composition.factories.datasource.factory import (
             DataSourceRegistry,
         )
 
@@ -95,7 +95,7 @@ class TestDataSourceRegistryUnifiedAPI:
 
     def test_list_keys_matches_list_providers(self):
         """list_keys() should return same result as list_providers()."""
-        from bioetl.composition.factories.data_source_factory import (
+        from bioetl.composition.factories.datasource.factory import (
             DataSourceRegistry,
         )
 
@@ -103,7 +103,7 @@ class TestDataSourceRegistryUnifiedAPI:
 
     def test_contains_returns_true_for_registered(self):
         """contains() should return True for registered providers."""
-        from bioetl.composition.factories.data_source_factory import (
+        from bioetl.composition.factories.datasource.factory import (
             DataSourceRegistry,
         )
 
@@ -111,7 +111,7 @@ class TestDataSourceRegistryUnifiedAPI:
 
     def test_contains_returns_false_for_unknown(self):
         """contains() should return False for unknown provider."""
-        from bioetl.composition.factories.data_source_factory import (
+        from bioetl.composition.factories.datasource.factory import (
             DataSourceRegistry,
         )
 
@@ -119,7 +119,7 @@ class TestDataSourceRegistryUnifiedAPI:
 
     def test_clear_empties_registry(self):
         """clear() should empty the registry."""
-        from bioetl.composition.factories.data_source_factory import (
+        from bioetl.composition.factories.datasource.factory import (
             DataSourceRegistry,
         )
 
@@ -135,7 +135,7 @@ class TestDataSourceRegistryUnifiedAPI:
 
     def test_get_raises_keyerror_for_unknown(self):
         """get() should raise KeyError for unknown provider."""
-        from bioetl.composition.factories.data_source_factory import (
+        from bioetl.composition.factories.datasource.factory import (
             DataSourceRegistry,
         )
 
@@ -155,7 +155,7 @@ class TestUnifiedAPIConsistency:
 
     def test_both_registries_have_list_keys(self):
         """Both registries should have list_keys() method."""
-        from bioetl.composition.factories.data_source_factory import (
+        from bioetl.composition.factories.datasource.factory import (
             DataSourceRegistry,
         )
 
@@ -166,7 +166,7 @@ class TestUnifiedAPIConsistency:
 
     def test_both_registries_have_contains(self):
         """Both registries should have contains() method."""
-        from bioetl.composition.factories.data_source_factory import (
+        from bioetl.composition.factories.datasource.factory import (
             DataSourceRegistry,
         )
 
@@ -177,7 +177,7 @@ class TestUnifiedAPIConsistency:
 
     def test_both_registries_have_clear(self):
         """Both registries should have clear() method."""
-        from bioetl.composition.factories.data_source_factory import (
+        from bioetl.composition.factories.datasource.factory import (
             DataSourceRegistry,
         )
 
@@ -188,7 +188,7 @@ class TestUnifiedAPIConsistency:
 
     def test_both_registries_have_get(self):
         """Both registries should have get() method."""
-        from bioetl.composition.factories.data_source_factory import (
+        from bioetl.composition.factories.datasource.factory import (
             DataSourceRegistry,
         )
 

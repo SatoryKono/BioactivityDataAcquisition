@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 
     import polars as pl
 
-    from bioetl.application.composite.runner import (
+    from bioetl.application.composite.runner_pkg import (
         CompositePipelineRunnerService,
         CompositeRuntimeConfig,
     )

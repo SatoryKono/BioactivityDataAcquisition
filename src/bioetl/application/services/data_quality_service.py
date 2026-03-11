@@ -5,7 +5,7 @@ Extracted from PostrunService to follow Single Responsibility Principle.
 
 Responsibilities:
 - Threshold checks (soft/hard fail)
-- Anomaly detection via DQMonitorPort
+- AnomalyRecord detection via DQMonitorPort
 - DQ metrics emission
 - Baseline updates
 

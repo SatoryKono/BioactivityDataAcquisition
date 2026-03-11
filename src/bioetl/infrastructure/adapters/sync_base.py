@@ -36,19 +36,21 @@ from bioetl.domain.ports import (
     MetricsPort,
     NoOpMetrics,
 )
-from bioetl.infrastructure.adapters.error_handling import ErrorService
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_error_handler,
+)
 from bioetl.infrastructure.adapters.health_check_mixin import HealthCheckProviderMixin
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import CircuitBreakerPort
-    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
-    from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
+    from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 
 
 class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
     """Base class for adapters using synchronous libraries.
 
-    Manages a ThreadPoolExecutor, RateLimiter, and CircuitBreaker.
+    Manages a ThreadPoolExecutor, RateLimiter, and CircuitBreakerGuard.
     All dependencies are injected via constructor (Composition Root pattern).
 
     Uses Template Method pattern for health checks via HealthCheckProviderMixin:
@@ -76,16 +78,16 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
     provider_name: str
     logger: LoggerPort
     metrics: MetricsPort | None  # Runtime-resolved to NoOpMetrics if None
-    rate_limiter: TokenBucket
-    circuit_breaker: CircuitBreaker
+    rate_limiter: TokenBucketRateLimiter
+    circuit_breaker: CircuitBreakerGuard
     thread_pool: ThreadPoolExecutor
     _error_handler: ErrorHandlerPort
 
     def __init__(
         self,
         logger: LoggerPort,
-        rate_limiter: TokenBucket,
-        circuit_breaker: CircuitBreaker,
+        rate_limiter: TokenBucketRateLimiter,
+        circuit_breaker: CircuitBreakerGuard,
         thread_pool: ThreadPoolExecutor,
         strict_error_handling: bool = False,
         metrics: MetricsPort | None = None,
@@ -117,7 +119,7 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
         self._error_handler = (
             error_handler
             if error_handler is not None
-            else ErrorService(logger, metrics=self.metrics)
+            else create_default_error_handler(logger=logger, metrics=self.metrics)
         )
 
         # Safety: ensure shutdown if aclose/context manager is misused

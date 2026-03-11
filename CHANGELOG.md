@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **CompositeCheckpointService refactored behind CompositeCheckpointPort (RF-002)**: Extracted 18 direct file I/O operations (`Path`, `glob`, `read_text`, `write_text`, `unlink`, `replace`) from `application/composite/checkpoint/service.py` into `infrastructure/storage/composite_checkpoint_writer.py` via new `CompositeCheckpointPort` protocol. Eliminates ARCH-002 violation (no direct I/O in application layer). Atomic write safety preserved.
+  - New: `src/bioetl/domain/ports/runtime/composite_checkpoint.py` — `CompositeCheckpointPort` protocol
+  - New: `src/bioetl/infrastructure/storage/composite_checkpoint_writer.py` — `FileCompositeCheckpointWriter` adapter
+  - Modified: `src/bioetl/application/composite/checkpoint/service.py` — delegates all I/O to injected port
+  - Modified: `src/bioetl/composition/bootstrap/runtime/composite_support_services_factory.py` — wires adapter
+
+- **Registry ambient state → explicit DI in CLI (RF-003)**: `PipelineRegistry` now passed through Click `ctx.obj` from `main()`. CLI helpers `validate_pipeline_name()`, `_get_available_providers()`, `_filter_pipelines_by_provider()` accept optional `registry` parameter, falling back to `get_default_registry()` for backward compatibility.
+  - Modified: `src/bioetl/interfaces/cli/main.py`, `commands/run_helpers.py`, `commands/run_all.py`
+
+## [6.1.0] - 2026-03-11
+
+### Changed
+
 - **Mypy module overrides reduced from 11 to 2 (RF-002)**: Removed 9 bioetl modules from `warn_unused_ignores=false` override list in `pyproject.toml` — they had zero `# type: ignore` comments. Only `bioetl.domain.serialization` (1 cross-env type: ignore) and `bioetl.domain.schemas.validators` (4 Pandera decorator stubs) remain. Verified: `mypy --strict` passes on all 999 source files with 0 issues.
   - Files: `pyproject.toml`
 

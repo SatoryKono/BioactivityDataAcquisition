@@ -20,8 +20,8 @@ from bioetl.domain.exceptions import BioETLError, NetworkError
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-    from bioetl.domain.ports import LoggerPort, MetricsPort
-    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+    from bioetl.domain.ports import ErrorHandlerPort, LoggerPort, MetricsPort
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
     from bioetl.infrastructure.adapters.common.api_request_collector import (
         APIRequestCollector,
     )
@@ -50,8 +50,9 @@ class PubMedSearchMixin:
     api_key: str | None
     _http_client: UnifiedHTTPClient
     _logger: LoggerPort
-    _adapter_metrics: AdapterMetrics
+    _adapter_metrics: AdapterMetricsRecorder
     _request_collector: APIRequestCollector
+    _error_handler: ErrorHandlerPort
     provider_name: str
     batch_size: int
     metrics: MetricsPort | None
@@ -97,10 +98,7 @@ class PubMedSearchMixin:
             idlist: list[str] = data.get("esearchresult", {}).get("idlist", [])
             return idlist
         except PUBMED_SEARCH_ERRORS as e:
-            from bioetl.infrastructure.adapters.error_handling import ErrorService
-
-            error_handler = ErrorService(self._logger, metrics=self.metrics)
-            wrapped = error_handler.handle_error(
+            wrapped = self._error_handler.handle_error(
                 error=e,
                 provider=self.provider_name,
                 operation="search",

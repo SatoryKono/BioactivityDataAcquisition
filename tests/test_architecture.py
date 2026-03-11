@@ -693,9 +693,9 @@ def test_adapters_implement_protocols(src_dir: Path):
     # Import Adapters (Lazy import to avoid import errors if deps are missing)
     try:
         from bioetl.composition.factories.storage import StorageAdapter
-        from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
-        from bioetl.infrastructure.adapters.pubchem.client import PubChemAdapter
-        from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
+        from bioetl.infrastructure.adapters.chembl import ChemblAdapter
+        from bioetl.infrastructure.adapters.pubchem import PubChemAdapter
+        from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
         from bioetl.infrastructure.checkpoint.local_checkpoint import (
             LocalCheckpointAdapter,
         )
@@ -774,8 +774,8 @@ def test_http_adapters_inherit_base(src_dir: Path):
     from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 
     try:
-        from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
-        from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
+        from bioetl.infrastructure.adapters.chembl import ChemblAdapter
+        from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
     except ImportError as e:
         pytest.fail(f"Could not import adapters: {e}")
 

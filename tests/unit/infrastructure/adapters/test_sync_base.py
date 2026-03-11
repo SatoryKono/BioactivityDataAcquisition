@@ -8,13 +8,13 @@ from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
 from bioetl.domain.types import HealthStatus
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
+from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
 
 
@@ -26,8 +26,8 @@ class StubSyncAdapter(BaseSyncAdapter):
     def __init__(
         self,
         logger: Any,
-        rate_limiter: TokenBucket,
-        circuit_breaker: CircuitBreaker,
+        rate_limiter: TokenBucketRateLimiter,
+        circuit_breaker: CircuitBreakerGuard,
         thread_pool: ThreadPoolExecutor,
         metrics: Any = None,
         fail_probe: bool = False,
@@ -81,13 +81,13 @@ def mock_metrics():
 @pytest.fixture
 def rate_limiter():
     """Create a rate limiter for testing."""
-    return TokenBucket(rate=100.0, capacity=200, provider="test")
+    return TokenBucketRateLimiter(rate=100.0, capacity=200, provider="test")
 
 
 @pytest.fixture
 def circuit_breaker():
     """Create a circuit breaker for testing."""
-    return CircuitBreaker(provider="test", failure_threshold=5, recovery_timeout=300)
+    return CircuitBreakerGuard(provider="test", failure_threshold=5, recovery_timeout=300)
 
 
 @pytest.fixture
@@ -101,12 +101,38 @@ def thread_pool():
 class TestHealthCheckLogging:
     """Tests for health_check logging behavior via HealthCheckMixin."""
 
+    def test_init_uses_default_error_handler_factory(
+        self,
+        mock_logger: MagicMock,
+        mock_metrics: MagicMock,
+        rate_limiter: TokenBucketRateLimiter,
+        circuit_breaker: CircuitBreakerGuard,
+        thread_pool: ThreadPoolExecutor,
+    ) -> None:
+        """Test that constructor delegates default error handler creation."""
+        error_handler = MagicMock()
+
+        with patch(
+            "bioetl.infrastructure.adapters.sync_base.create_default_error_handler",
+            return_value=error_handler,
+        ) as factory:
+            adapter = StubSyncAdapter(
+                logger=mock_logger,
+                rate_limiter=rate_limiter,
+                circuit_breaker=circuit_breaker,
+                thread_pool=thread_pool,
+                metrics=mock_metrics,
+            )
+
+        assert adapter._error_handler is error_handler
+        factory.assert_called_once_with(logger=mock_logger, metrics=mock_metrics)
+
     async def test_health_check_logs_warning_on_exception(
         self,
         mock_logger: MagicMock,
         mock_metrics: MagicMock,
-        rate_limiter: TokenBucket,
-        circuit_breaker: CircuitBreaker,
+        rate_limiter: TokenBucketRateLimiter,
+        circuit_breaker: CircuitBreakerGuard,
         thread_pool: ThreadPoolExecutor,
     ) -> None:
         """Test that health_check logs warning when _probe_health raises."""
@@ -142,8 +168,8 @@ class TestHealthCheckLogging:
         self,
         mock_logger: MagicMock,
         mock_metrics: MagicMock,
-        rate_limiter: TokenBucket,
-        circuit_breaker: CircuitBreaker,
+        rate_limiter: TokenBucketRateLimiter,
+        circuit_breaker: CircuitBreakerGuard,
         thread_pool: ThreadPoolExecutor,
     ) -> None:
         """Test that health_check increments failure metric when _probe_health raises."""
@@ -171,8 +197,8 @@ class TestHealthCheckLogging:
         self,
         mock_logger: MagicMock,
         mock_metrics: MagicMock,
-        rate_limiter: TokenBucket,
-        circuit_breaker: CircuitBreaker,
+        rate_limiter: TokenBucketRateLimiter,
+        circuit_breaker: CircuitBreakerGuard,
         thread_pool: ThreadPoolExecutor,
     ) -> None:
         """Test that health_check logs debug and increments success metric on success."""
@@ -211,8 +237,8 @@ class TestHealthCheckLogging:
         self,
         mock_logger: MagicMock,
         mock_metrics: MagicMock,
-        rate_limiter: TokenBucket,
-        circuit_breaker: CircuitBreaker,
+        rate_limiter: TokenBucketRateLimiter,
+        circuit_breaker: CircuitBreakerGuard,
         thread_pool: ThreadPoolExecutor,
     ) -> None:
         """Test that health_check records latency histogram for both success and failure."""
@@ -238,8 +264,8 @@ class TestHealthCheckLogging:
     async def test_health_check_uses_noop_metrics_by_default(
         self,
         mock_logger: MagicMock,
-        rate_limiter: TokenBucket,
-        circuit_breaker: CircuitBreaker,
+        rate_limiter: TokenBucketRateLimiter,
+        circuit_breaker: CircuitBreakerGuard,
         thread_pool: ThreadPoolExecutor,
     ) -> None:
         """Test that health_check works without explicit metrics (uses NoOpMetrics)."""
@@ -266,8 +292,8 @@ class TestHealthCheckLogging:
         self,
         mock_logger: MagicMock,
         mock_metrics: MagicMock,
-        rate_limiter: TokenBucket,
-        circuit_breaker: CircuitBreaker,
+        rate_limiter: TokenBucketRateLimiter,
+        circuit_breaker: CircuitBreakerGuard,
         thread_pool: ThreadPoolExecutor,
     ) -> None:
         """Test that health_check logs the correct error type name."""

@@ -9,7 +9,7 @@ from bioetl.infrastructure.adapters.openalex.health_probe import probe_openalex_
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
-    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 
@@ -21,7 +21,7 @@ class _OpenAlexHealthHost(Protocol):
     logger: LoggerPort
     _http_client: UnifiedHTTPClient
     _logger: LoggerPort
-    _adapter_metrics: AdapterMetrics
+    _adapter_metrics: AdapterMetricsRecorder
 
     def _build_headers(self) -> dict[str, str]:
         """Build request headers."""

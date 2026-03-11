@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 import pytest
 
-from bioetl.application.composite.runner import CompositeRuntimeConfig
+from bioetl.application.composite.runner_pkg import CompositeRuntimeConfig
 from bioetl.interfaces.cli.commands.run_composite_runtime import (
     build_runtime_config,
     echo_composite_startup,

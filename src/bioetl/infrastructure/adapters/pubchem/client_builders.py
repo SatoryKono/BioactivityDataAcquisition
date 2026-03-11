@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING
 from pydantic import BaseModel
 
 from bioetl.domain.entities.pubchem import PubchemMoleculeRecord
-from bioetl.infrastructure.adapters.common.api_request_collector import (
-    APIRequestCollector,
+from bioetl.infrastructure.adapters.common.adapter_defaults import (
+    create_default_request_collector,
 )
 from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMapper
 
@@ -17,8 +17,11 @@ if TYPE_CHECKING:
     from collections.abc import Awaitable
 
     from bioetl.domain.ports import LoggerPort
-    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
-    from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+    from bioetl.infrastructure.adapters.common.api_request_collector import (
+        APIRequestCollector,
+    )
+    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
+    from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
     from bioetl.infrastructure.adapters.pubchem.fetch_strategies import (
         PubChemFetchStrategies,
     )
@@ -35,14 +38,14 @@ def _create_default_pubchem_entity_mapper() -> PubChemEntityMapper:
 
 def _create_default_pubchem_request_collector() -> APIRequestCollector:
     """Create default request collector for non-DI call sites."""
-    return APIRequestCollector()
+    return create_default_request_collector()
 
 
 def _create_default_pubchem_fetch_strategies(
     *,
     logger: LoggerPort,
-    rate_limiter: TokenBucket,
-    circuit_breaker: CircuitBreaker,
+    rate_limiter: TokenBucketRateLimiter,
+    circuit_breaker: CircuitBreakerGuard,
     mapper: PubChemEntityMapper,
     run_in_executor: Callable[..., Awaitable[object]],
     provider_name: str,

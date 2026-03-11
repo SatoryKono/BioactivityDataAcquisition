@@ -8,7 +8,7 @@ from uuid import uuid4
 
 from pydantic import ValidationError
 
-from bioetl.application.composite.runner import (
+from bioetl.application.composite.runner_pkg import (
     CompositePipelineRunnerService,
     CompositeRuntimeConfig,
 )

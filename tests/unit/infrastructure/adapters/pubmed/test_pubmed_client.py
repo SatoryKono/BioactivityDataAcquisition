@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.domain.types import HealthStatus
-from bioetl.infrastructure.adapters.pubmed.pubmed_client import PubMedAdapter
+from bioetl.infrastructure.adapters.pubmed import PubMedAdapter
 
 
 @pytest.fixture
@@ -182,6 +182,34 @@ async def test_health_check_returns_unhealthy_on_exception(adapter, mock_http_cl
     assert result == HealthStatus.UNHEALTHY
 
 
+@pytest.mark.asyncio
+async def test_fetch_batch_uses_injected_error_handler(adapter, mock_http_client) -> None:
+    """Batch fetch should delegate wrapping to the adapter-level error handler."""
+    mock_http_client.get = AsyncMock(side_effect=RuntimeError("boom"))
+    wrapped_error = RuntimeError("wrapped")
+    adapter._error_handler = MagicMock()
+    adapter._error_handler.handle_error.return_value = wrapped_error
+
+    with pytest.raises(RuntimeError, match="wrapped"):
+        await adapter._fetch_batch(["12345"])
+
+    adapter._error_handler.handle_error.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_get_pmids_uses_injected_error_handler(adapter, mock_http_client) -> None:
+    """Search path should delegate wrapping to the adapter-level error handler."""
+    mock_http_client.get = AsyncMock(side_effect=RuntimeError("boom"))
+    wrapped_error = RuntimeError("wrapped-search")
+    adapter._error_handler = MagicMock()
+    adapter._error_handler.handle_error.return_value = wrapped_error
+
+    with pytest.raises(RuntimeError, match="wrapped-search"):
+        await adapter._get_pmids("query", 10)
+
+    adapter._error_handler.handle_error.assert_called_once()
+
+
 # =============================================================================
 # Provider Name Tests
 # =============================================================================
@@ -195,6 +223,24 @@ def test_provider_name(adapter):
 def test_health_endpoint(adapter):
     """Test that health endpoint is correct."""
     assert adapter._get_health_endpoint() == "/entrez/eutils/einfo.fcgi"
+
+
+def test_get_source_metadata_returns_collector_state_and_clears_requests(adapter) -> None:
+    """Metadata snapshot should reflect collector state and consume it."""
+    adapter._request_collector.record_request(
+        url="https://eutils.ncbi.nlm.nih.gov/entrez/eutils/einfo.fcgi?db=pubmed",
+        duration_ms=18.0,
+        status_code=200,
+    )
+
+    assert adapter.request_count == 1
+
+    metadata = adapter.get_source_metadata(api_version="v1")
+
+    assert metadata.url == "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
+    assert metadata.api_version == "v1"
+    assert metadata.total_requests == 1
+    assert adapter.request_count == 0
 
 
 @pytest.mark.asyncio

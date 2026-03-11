@@ -19,7 +19,7 @@ from bioetl.infrastructure.observability import (
     UnifiedLogger,
     start_metrics_server,
 )
-from bioetl.infrastructure.observability.anomaly import DataQualityMonitor
+from bioetl.infrastructure.observability.anomaly import DataQualityMonitorService
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 from .dq_bootstrap import bootstrap_dq_monitor as _bootstrap_dq_monitor_impl
@@ -255,7 +255,7 @@ def bootstrap_dq_monitor_port(
     return _bootstrap_dq_monitor_port_impl(
         settings=settings,
         logger=logger,
-        monitor_cls=DataQualityMonitor,
+        monitor_cls=DataQualityMonitorService,
         noop_logger_cls=NoOpLogger,
     )
 
@@ -276,7 +276,7 @@ def bootstrap_dq_monitor(
     return _bootstrap_dq_monitor_impl(
         settings=settings,
         logger=logger,
-        monitor_cls=DataQualityMonitor,
+        monitor_cls=DataQualityMonitorService,
         noop_logger_cls=NoOpLogger,
     )
 

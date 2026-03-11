@@ -14,7 +14,7 @@ import pytest
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointState
 from bioetl.application.composite.fsm_helper import FSMStateHelperService
-from bioetl.application.composite.runner import (
+from bioetl.application.composite.runner_pkg import (
     CompositePipelineRunner,
     CompositeRuntimeConfig,
 )

@@ -26,7 +26,7 @@ from bioetl.infrastructure.adapters.semanticscholar.request_headers import (
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
-    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 # Re-export for backwards compatibility
@@ -63,7 +63,7 @@ class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):
 
     Attributes:
         _http_client: UnifiedHTTPClient for making HTTP requests.
-        _metrics: Optional AdapterMetrics for recording request metrics.
+        _metrics: Optional AdapterMetricsRecorder for recording request metrics.
         _api_key: Optional API key for stable rate limits.
         _fields: Comma-separated list of fields to retrieve.
     """
@@ -72,7 +72,7 @@ class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):
         self,
         http_client: UnifiedHTTPClient,
         logger: LoggerPort,
-        metrics: AdapterMetrics | None = None,
+        metrics: AdapterMetricsRecorder | None = None,
         api_key: str = "",
         fields: str = DEFAULT_SEARCH_FIELDS,
     ) -> None:
@@ -81,7 +81,7 @@ class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):
         Args:
             http_client: UnifiedHTTPClient instance for API requests.
             logger: Logger port for structured logging.
-            metrics: Optional AdapterMetrics for tracking request metrics.
+            metrics: Optional AdapterMetricsRecorder for tracking request metrics.
             api_key: Optional API key for stable rate limits.
             fields: Comma-separated list of fields to retrieve.
         """

@@ -8,11 +8,11 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.domain.ports import NoOpMetrics
-from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
-from bioetl.infrastructure.adapters.semanticscholar.adapter import (
+from bioetl.infrastructure.adapters.semanticscholar.client import (
     SemanticScholarAdapter,
 )
 from bioetl.infrastructure.adapters.semanticscholar.health_metadata_mixin import (
@@ -61,8 +61,8 @@ def test_request_collector_protocol_contract() -> None:
 
 @pytest.mark.unit
 def test_adapter_metrics_protocol_contract() -> None:
-    """AdapterMetrics satisfies runtime protocol contract."""
-    metrics = AdapterMetrics(metrics=NoOpMetrics(), provider="semanticscholar")
+    """AdapterMetricsRecorder satisfies runtime protocol contract."""
+    metrics = AdapterMetricsRecorder(metrics=NoOpMetrics(), provider="semanticscholar")
     assert isinstance(metrics, SemanticScholarAdapterMetricsProtocol)
 
 

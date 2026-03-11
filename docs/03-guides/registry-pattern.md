@@ -51,10 +51,10 @@ if ProviderRegistry.is-registered("chembl"):
 
 ### DataSourceRegistry (Facade)
 
-Thin facade over ProviderRegistry for backward compatibility. Located in `src/bioetl/composition/factories/data_source_factory.py`.
+Thin facade over ProviderRegistry for backward compatibility. Located in `src/bioetl/composition/factories/datasource/factory.py`.
 
 ```python
-from bioetl.composition.factories.data_source_factory import DataSourceRegistry
+from bioetl.composition.factories.datasource.factory import DataSourceRegistry
 
 # Old way (still works, delegates to ProviderRegistry)
 creator = DataSourceRegistry.get("chembl")

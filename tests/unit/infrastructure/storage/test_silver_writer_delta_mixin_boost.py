@@ -15,6 +15,7 @@ from bioetl.domain.exceptions import DeltaTransactionError, MergeConflictError, 
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.infrastructure.storage.silver_writer_delta_mixin import (
     SilverWriterDeltaMixin,
+    _DeltaWriteRequest,
     _MergeExecutionTimeoutError,
 )
 from bioetl.infrastructure.storage.write_resilience import (
@@ -85,6 +86,13 @@ class TestWriteDeleteLines:
         """Lines 69-70: _write_delete uses overwrite mode."""
         mixin = _ConcreteDeltaMixin()
         data = _make_arrow_table()
+        request = _DeltaWriteRequest(
+            validated_mode=SilverWriteMode.DELETE,
+            table_path="path/to/table",
+            arrow_data=data,
+            primary_keys=[],
+            partition_cols=None,
+        )
 
         write_calls: list[dict] = []
 
@@ -95,7 +103,7 @@ class TestWriteDeleteLines:
         mock_module.write_deltalake = fake_write_deltalake
 
         with patch.object(mixin, "_load_silver_writer_module", return_value=mock_module):
-            await mixin._write_delete("path/to/table", data, None)
+            await mixin._write_delete(request)
 
         assert len(write_calls) == 1
         assert write_calls[0]["mode"] == "overwrite"
@@ -106,6 +114,13 @@ class TestWriteDeleteLines:
         """Lines 69-70: partition_cols passed through."""
         mixin = _ConcreteDeltaMixin()
         data = _make_arrow_table()
+        request = _DeltaWriteRequest(
+            validated_mode=SilverWriteMode.DELETE,
+            table_path="path/table",
+            arrow_data=data,
+            primary_keys=[],
+            partition_cols=["date"],
+        )
 
         write_calls: list[dict] = []
 
@@ -116,14 +131,75 @@ class TestWriteDeleteLines:
         mock_module.write_deltalake = fake_write
 
         with patch.object(mixin, "_load_silver_writer_module", return_value=mock_module):
-            await mixin._write_delete("path/table", data, ["date"])
+            await mixin._write_delete(request)
 
         assert write_calls[0]["partition_by"] == ["date"]
+
+    @pytest.mark.asyncio
+    async def test_write_append_calls_append_mode(self) -> None:
+        """Append writes should forward mode and partitioning to write_deltalake."""
+        mixin = _ConcreteDeltaMixin()
+        data = _make_arrow_table()
+        request = _DeltaWriteRequest(
+            validated_mode=SilverWriteMode.APPEND,
+            table_path="path/table",
+            arrow_data=data,
+            primary_keys=[],
+            partition_cols=["date"],
+        )
+
+        write_calls: list[dict] = []
+
+        def fake_write_deltalake(**kwargs: object) -> None:
+            write_calls.append(kwargs)
+
+        mock_module = MagicMock()
+        mock_module.write_deltalake = fake_write_deltalake
+
+        with patch.object(mixin, "_load_silver_writer_module", return_value=mock_module):
+            await mixin._write_append(request)
+
+        assert len(write_calls) == 1
+        assert write_calls[0]["mode"] == "append"
+        assert write_calls[0]["partition_by"] == ["date"]
+        assert "schema_mode" not in write_calls[0]
 
 
 @pytest.mark.unit
 class TestWriteMergeRetrySuccess:
     """Tests for _write_merge retry paths (lines 130, 142-158)."""
+
+    @pytest.mark.asyncio
+    async def test_merge_records_builds_predicate_and_executes_merge_chain(self) -> None:
+        """Merge path should build the expected predicate and execute full chain."""
+        mixin = _ConcreteDeltaMixin()
+        data = _make_arrow_table()
+        dt = MagicMock()
+        merge_builder = MagicMock()
+        dt.merge.return_value = merge_builder
+        merge_builder.when_matched_update_all.return_value = merge_builder
+        merge_builder.when_not_matched_insert_all.return_value = merge_builder
+
+        await mixin._merge_records(
+            dt,
+            data,
+            ["id", "value"],
+            "path/table",
+            timeout_seconds=5.0,
+        )
+
+        dt.merge.assert_called_once_with(
+            source=data,
+            predicate="target.id = source.id AND target.value = source.value",
+            source_alias="source",
+            target_alias="target",
+        )
+        merge_builder.when_matched_update_all.assert_called_once()
+        matched_kwargs = merge_builder.when_matched_update_all.call_args.kwargs
+        assert "source._run_type = 'rebuild'" in matched_kwargs["predicate"]
+        assert "target._run_type = 'backfill'" in matched_kwargs["predicate"]
+        merge_builder.when_not_matched_insert_all.assert_called_once()
+        merge_builder.execute.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_write_merge_logs_recovery_after_retry(self) -> None:
@@ -133,6 +209,13 @@ class TestWriteMergeRetrySuccess:
         policy = _make_policy(commit_retries=3, delay=0.0)
         mixin = _ConcreteDeltaMixin(policy=policy)
         data = _make_arrow_table()
+        request = _DeltaWriteRequest(
+            validated_mode=SilverWriteMode.MERGE,
+            table_path="path/table",
+            arrow_data=data,
+            primary_keys=["id"],
+            partition_cols=None,
+        )
 
         call_count = {"count": 0}
 
@@ -157,9 +240,7 @@ class TestWriteMergeRetrySuccess:
 
         with patch.object(mixin, "_load_silver_writer_module", return_value=mock_module):
             with patch("asyncio.sleep", new_callable=AsyncMock):
-                await mixin._write_merge(
-                    "path/table", data, ["id"], None
-                )
+                await mixin._write_merge(request)
 
         # Should log recovery
         mixin.logger.info.assert_called()
@@ -180,6 +261,13 @@ class TestWriteMergeRetrySuccess:
         policy = _make_policy()
         mixin = _ConcreteDeltaMixin(policy=policy)
         data = _make_arrow_table()
+        request = _DeltaWriteRequest(
+            validated_mode=SilverWriteMode.MERGE,
+            table_path="path/table",
+            arrow_data=data,
+            primary_keys=["id"],
+            partition_cols=None,
+        )
 
         mock_module = MagicMock()
         mock_module.DeltaTable = MagicMock(
@@ -195,7 +283,7 @@ class TestWriteMergeRetrySuccess:
         mock_module.write_deltalake = fake_write_deltalake
 
         with patch.object(mixin, "_load_silver_writer_module", return_value=mock_module):
-            await mixin._write_merge("path/table", data, ["id"], None)
+            await mixin._write_merge(request)
 
         assert len(append_calls) == 1
         assert append_calls[0]["mode"] == "append"
@@ -209,6 +297,13 @@ class TestWriteMergeRetrySuccess:
         policy = _make_policy(commit_retries=1, delay=0.0)
         mixin = _ConcreteDeltaMixin(policy=policy)
         data = _make_arrow_table()
+        request = _DeltaWriteRequest(
+            validated_mode=SilverWriteMode.MERGE,
+            table_path="path/table",
+            arrow_data=data,
+            primary_keys=["id"],
+            partition_cols=None,
+        )
 
         mock_module = MagicMock()
 
@@ -226,7 +321,7 @@ class TestWriteMergeRetrySuccess:
         with patch.object(mixin, "_load_silver_writer_module", return_value=mock_module):
             with patch("asyncio.sleep", new_callable=AsyncMock):
                 with pytest.raises(CommitFailedError):
-                    await mixin._write_merge("path/table", data, ["id"], None)
+                    await mixin._write_merge(request)
 
         # Final telemetry should be emitted
         mixin.logger.error.assert_called()
@@ -240,6 +335,13 @@ class TestWriteMergeRetrySuccess:
         policy = _make_policy(timeout_retries=0, timeout_seconds=30.0, delay=0.0)
         mixin = _ConcreteDeltaMixin(policy=policy)
         data = _make_arrow_table()
+        request = _DeltaWriteRequest(
+            validated_mode=SilverWriteMode.MERGE,
+            table_path="path/table",
+            arrow_data=data,
+            primary_keys=["id"],
+            partition_cols=None,
+        )
 
         # Directly mock _merge_records to raise _MergeExecutionTimeoutError
         async def always_timeout(dt, records, primary_keys, table_path, *, timeout_seconds):
@@ -256,7 +358,7 @@ class TestWriteMergeRetrySuccess:
         with patch.object(mixin, "_load_silver_writer_module", return_value=mock_module):
             with patch.object(mixin, "_merge_records", side_effect=always_timeout):
                 with pytest.raises(DeltaTransactionError):
-                    await mixin._write_merge("path/table", data, ["id"], None)
+                    await mixin._write_merge(request)
 
 
 @pytest.mark.unit
@@ -268,9 +370,16 @@ class TestDispatchWriteMode:
         """Line 194-195: DELETE mode dispatches to _write_delete."""
         mixin = _ConcreteDeltaMixin()
         data = _make_arrow_table()
+        request = _DeltaWriteRequest(
+            validated_mode=SilverWriteMode.DELETE,
+            table_path="path",
+            arrow_data=data,
+            primary_keys=[],
+            partition_cols=None,
+        )
 
         with patch.object(mixin, "_write_delete", new_callable=AsyncMock) as mock_del:
-            await mixin._dispatch_write(SilverWriteMode.DELETE, "path", data, [], None)
+            await mixin._dispatch_write(request)
         mock_del.assert_called_once()
 
     @pytest.mark.asyncio
@@ -278,9 +387,16 @@ class TestDispatchWriteMode:
         """Line 195: APPEND mode dispatches to _write_append."""
         mixin = _ConcreteDeltaMixin()
         data = _make_arrow_table()
+        request = _DeltaWriteRequest(
+            validated_mode=SilverWriteMode.APPEND,
+            table_path="path",
+            arrow_data=data,
+            primary_keys=[],
+            partition_cols=None,
+        )
 
         with patch.object(mixin, "_write_append", new_callable=AsyncMock) as mock_app:
-            await mixin._dispatch_write(SilverWriteMode.APPEND, "path", data, [], None)
+            await mixin._dispatch_write(request)
         mock_app.assert_called_once()
 
     @pytest.mark.asyncio
@@ -288,9 +404,16 @@ class TestDispatchWriteMode:
         """Line 195: MERGE mode dispatches to _write_merge."""
         mixin = _ConcreteDeltaMixin()
         data = _make_arrow_table()
+        request = _DeltaWriteRequest(
+            validated_mode=SilverWriteMode.MERGE,
+            table_path="path",
+            arrow_data=data,
+            primary_keys=["id"],
+            partition_cols=None,
+        )
 
         with patch.object(mixin, "_write_merge", new_callable=AsyncMock) as mock_merge:
-            await mixin._dispatch_write(SilverWriteMode.MERGE, "path", data, ["id"], None)
+            await mixin._dispatch_write(request)
         mock_merge.assert_called_once()
 
 
@@ -377,6 +500,13 @@ class TestDispatchWriteWithDomainErrors:
 
         mixin = _ConcreteDeltaMixin()
         data = _make_arrow_table()
+        request = _DeltaWriteRequest(
+            validated_mode=SilverWriteMode.MERGE,
+            table_path="path/table",
+            arrow_data=data,
+            primary_keys=["id"],
+            partition_cols=None,
+        )
 
         with patch.object(
             mixin,
@@ -386,11 +516,7 @@ class TestDispatchWriteWithDomainErrors:
             with pytest.raises(SchemaViolationError):
                 await mixin._dispatch_write_with_domain_errors(
                     table_name="chembl.activity",
-                    validated_mode=SilverWriteMode.MERGE,
-                    table_path="path/table",
-                    arrow_data=data,
-                    primary_keys=["id"],
-                    partition_cols=None,
+                    request=request,
                 )
 
     @pytest.mark.asyncio
@@ -398,6 +524,13 @@ class TestDispatchWriteWithDomainErrors:
         """Line 328-329: ArrowTypeError translated to SchemaViolationError."""
         mixin = _ConcreteDeltaMixin()
         data = _make_arrow_table()
+        request = _DeltaWriteRequest(
+            validated_mode=SilverWriteMode.MERGE,
+            table_path="path/table",
+            arrow_data=data,
+            primary_keys=["id"],
+            partition_cols=None,
+        )
 
         with patch.object(
             mixin,
@@ -407,11 +540,7 @@ class TestDispatchWriteWithDomainErrors:
             with pytest.raises(SchemaViolationError):
                 await mixin._dispatch_write_with_domain_errors(
                     table_name="chembl.activity",
-                    validated_mode=SilverWriteMode.MERGE,
-                    table_path="path/table",
-                    arrow_data=data,
-                    primary_keys=["id"],
-                    partition_cols=None,
+                    request=request,
                 )
 
     @pytest.mark.asyncio
@@ -423,6 +552,13 @@ class TestDispatchWriteWithDomainErrors:
 
         mixin = _ConcreteDeltaMixin()
         data = _make_arrow_table()
+        request = _DeltaWriteRequest(
+            validated_mode=SilverWriteMode.MERGE,
+            table_path="path/table",
+            arrow_data=data,
+            primary_keys=["id"],
+            partition_cols=None,
+        )
 
         with patch.object(
             mixin,
@@ -432,20 +568,22 @@ class TestDispatchWriteWithDomainErrors:
             with pytest.raises(MergeConflictError):
                 await mixin._dispatch_write_with_domain_errors(
                     table_name="chembl.activity",
-                    validated_mode=SilverWriteMode.MERGE,
-                    table_path="path/table",
-                    arrow_data=data,
-                    primary_keys=["id"],
-                    partition_cols=None,
+                    request=request,
                 )
 
     @pytest.mark.asyncio
     async def test_delta_error_without_merge_conflict_reraises(self) -> None:
         """Line 333: DeltaError without 'Merge-conflict' is re-raised as-is."""
         from deltalake.exceptions import DeltaError
-
         mixin = _ConcreteDeltaMixin()
         data = _make_arrow_table()
+        request = _DeltaWriteRequest(
+            validated_mode=SilverWriteMode.MERGE,
+            table_path="path/table",
+            arrow_data=data,
+            primary_keys=["id"],
+            partition_cols=None,
+        )
 
         with patch.object(
             mixin,
@@ -455,11 +593,7 @@ class TestDispatchWriteWithDomainErrors:
             with pytest.raises(DeltaError):
                 await mixin._dispatch_write_with_domain_errors(
                     table_name="chembl.activity",
-                    validated_mode=SilverWriteMode.MERGE,
-                    table_path="path/table",
-                    arrow_data=data,
-                    primary_keys=["id"],
-                    partition_cols=None,
+                    request=request,
                 )
 
 

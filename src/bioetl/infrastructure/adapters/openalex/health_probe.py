@@ -6,6 +6,9 @@ import time
 from typing import TYPE_CHECKING
 
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.health_probe_policy import (
+    is_slow_health_probe,
+)
 from bioetl.infrastructure.adapters.health_status_policy import (
     classify_health_probe_status,
 )
@@ -15,7 +18,7 @@ from bioetl.infrastructure.adapters.openalex.query_builder import (
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
-    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 
@@ -25,7 +28,7 @@ async def probe_openalex_health(
     mailto: str,
     http_client: UnifiedHTTPClient,
     logger: LoggerPort,
-    adapter_metrics: AdapterMetrics,
+    adapter_metrics: AdapterMetricsRecorder,
     headers: dict[str, str],
 ) -> HealthStatus:
     """Probe OpenAlex API health with latency-based degradation threshold.
@@ -62,7 +65,7 @@ async def probe_openalex_health(
         )
         return status
 
-    if elapsed > 5.0:
+    if is_slow_health_probe(elapsed_seconds=elapsed):
         logger.warning(
             "openalex_health_check_slow",
             elapsed_seconds=round(elapsed, 2),

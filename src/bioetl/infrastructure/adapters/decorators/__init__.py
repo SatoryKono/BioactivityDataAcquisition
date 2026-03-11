@@ -95,13 +95,13 @@ def wrap_with_resilience(
 
     Example:
         >>> from bioetl.domain.resilience import RetryConfig
-        >>> from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+        >>> from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
         >>>
         >>> adapter = ChemblAdapter(...)
         >>> protected = wrap_with_resilience(
         ...     data_source=adapter,
         ...     retry_config=RetryConfig(max_attempts=3),
-        ...     circuit_breaker=CircuitBreaker(provider="chembl"),
+        ...     circuit_breaker=CircuitBreakerGuard(provider="chembl"),
         ...     logger=logger,
         ... )
     """

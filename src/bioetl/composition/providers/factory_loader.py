@@ -5,8 +5,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from bioetl.composition.factories.data_source_factory import DataSourceFactory
-    from bioetl.composition.factories.http_client_factory import HttpClientFactory
+    from bioetl.composition.factories.datasource.factory import DataSourceFactory
+    from bioetl.composition.factories.datasource.http_client import HttpClientFactory
 
 
 __all__ = [
@@ -21,7 +21,7 @@ def get_data_source_factory() -> type[DataSourceFactory]:
     Returns:
         Data source factory.
     """
-    from bioetl.composition.factories.data_source_factory import DataSourceFactory
+    from bioetl.composition.factories.datasource.factory import DataSourceFactory
 
     return DataSourceFactory
 
@@ -32,6 +32,6 @@ def get_http_client_factory() -> type[HttpClientFactory]:
     Returns:
         Http client factory.
     """
-    from bioetl.composition.factories.http_client_factory import HttpClientFactory
+    from bioetl.composition.factories.datasource.http_client import HttpClientFactory
 
     return HttpClientFactory

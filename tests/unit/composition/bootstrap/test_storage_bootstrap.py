@@ -49,7 +49,7 @@ class TestBootstrapCleanupService:
 
         result = bootstrap_cleanup_service()
 
-        from bioetl.application.core.cleanup_service import CleanupService
+        from bioetl.application.core.lifecycle.cleanup_service import CleanupService
 
         assert isinstance(result, CleanupService)
 

@@ -72,9 +72,9 @@ class TestUniProtAdapterErrorPaths:
     @pytest.fixture
     def mock_circuit_breaker(self):
         """Create a mock circuit breaker that raises an exception."""
-        from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+        from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 
-        cb = MagicMock(spec=CircuitBreaker)
+        cb = MagicMock(spec=CircuitBreakerGuard)
         cb.call = AsyncMock(side_effect=ConnectionError("Network error"))
         return cb
 
@@ -82,7 +82,7 @@ class TestUniProtAdapterErrorPaths:
         self, mock_http_client, mock_logger
     ):
         """Test that _fetch_proteins logs error when fetch fails."""
-        from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
+        from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
 
         with patch.dict(
             os.environ,
@@ -117,7 +117,7 @@ class TestUniProtAdapterErrorPaths:
 
         With unified error handling, exceptions are wrapped in ExternalServiceError.
         """
-        from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
+        from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
 
         # Make http_client.get raise an exception
         mock_http_client.get = AsyncMock(side_effect=ConnectionError("Network error"))
@@ -132,7 +132,7 @@ class TestUniProtAdapterErrorPaths:
         self, mock_http_client, mock_logger
     ):
         """Test that _fetch_features logs error when fetch fails."""
-        from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
+        from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
 
         with patch.dict(
             os.environ,
@@ -169,7 +169,7 @@ class TestUniProtAdapterErrorPaths:
 
         With unified error handling, exceptions are wrapped in ExternalServiceError.
         """
-        from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
+        from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
 
         # Make http_client.get raise an exception
         mock_http_client.get = AsyncMock(side_effect=TimeoutError("Request timeout"))
@@ -184,7 +184,7 @@ class TestUniProtAdapterErrorPaths:
         self, mock_http_client, mock_logger
     ):
         """Test that _fetch_sequences logs error when fetch fails."""
-        from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
+        from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
 
         with patch.dict(
             os.environ,
@@ -225,7 +225,7 @@ class TestUniProtAdapterErrorPaths:
 
         With unified error handling, exceptions are wrapped in ExternalServiceError.
         """
-        from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
+        from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
 
         # Make http_client.get raise an exception
         error = httpx.HTTPStatusError(

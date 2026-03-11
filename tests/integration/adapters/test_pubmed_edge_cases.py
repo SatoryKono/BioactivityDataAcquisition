@@ -13,10 +13,10 @@ import respx
 from httpx import Response
 
 from bioetl.domain.types import HealthStatus
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
-from bioetl.infrastructure.adapters.pubmed.pubmed_client import (
+from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
+from bioetl.infrastructure.adapters.pubmed.client import (
     ENTREZ_API_BASE,
     PubMedAdapter,
 )
@@ -36,8 +36,8 @@ def pubmed_adapter(monkeypatch, mock_logger) -> PubMedAdapter:
     get_settings.cache_clear()
 
     http_client = UnifiedHTTPClient(
-        TokenBucket(rate=3.0, capacity=6.0),
-        CircuitBreaker(provider="pubmed_test"),
+        TokenBucketRateLimiter(rate=3.0, capacity=6.0),
+        CircuitBreakerGuard(provider="pubmed_test"),
     )
     return PubMedAdapter(
         http_client=http_client,

@@ -12,7 +12,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from bioetl.infrastructure.adapters.pubmed.pubmed_client import PubMedAdapter
+from bioetl.infrastructure.adapters.pubmed import PubMedAdapter
 
 
 @pytest.fixture

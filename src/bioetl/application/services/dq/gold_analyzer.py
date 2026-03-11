@@ -41,7 +41,7 @@ from bioetl.application.services.dq.dq_report_builders import (
 )
 from bioetl.domain.ports import GoldDQConfigPort
 from bioetl.domain.services.dq_serializer import to_dict
-from bioetl.domain.types import JsonDict
+from bioetl.domain.types import GoldBusinessRuleSpec, JsonDict, ScdConfig
 from bioetl.domain.value_objects.dq_report import (
     GoldDQCheckType,
     GoldDQReport,
@@ -66,13 +66,13 @@ class GoldDQAnalyzer:
         enabled_checks: set[GoldDQCheckType],
         required_fields: list[str],
         completeness_threshold: float,
-        business_rules: list[JsonDict],  # Any: DQ check values vary by check type
+        business_rules: list[GoldBusinessRuleSpec],
         reference_tables: dict[str, pl.DataFrame | pa.Table],
         baseline_stats: (
             dict[str, Any]  # Any: DQ baseline statistics have heterogeneous values
             | None
         ),
-        scd_config: JsonDict | None,  # Any: DQ check values vary by check type
+        scd_config: ScdConfig | None,
     ) -> tuple[
         JsonDict, int, int, int  # Any: DQ check values vary by check type
     ]:  # Any: DQ check values vary by check type
@@ -142,10 +142,10 @@ class GoldDQAnalyzer:
         completeness_threshold: float = 0.90,
         business_rules: (
             list[
-                JsonDict  # Any: DQ check values vary by check type
-            ]  # Any: DQ rule definitions have heterogeneous values
+                GoldBusinessRuleSpec
+            ]
             | None
-        ) = None,  # Any: DQ check values vary by check type
+        ) = None,
         reference_tables: dict[str, pl.DataFrame | pa.Table] | None = None,
         baseline_stats: (
             dict[
@@ -153,9 +153,7 @@ class GoldDQAnalyzer:
             ]  # Any: DQ baseline statistics have heterogeneous values
             | None
         ) = None,  # Any: DQ check values vary by check type
-        scd_config: (
-            JsonDict | None  # Any: SCD config has heterogeneous values
-        ) = None,  # Any: DQ check values vary by check type
+        scd_config: ScdConfig | None = None,
     ) -> GoldDQReport:
         """Analyze Gold data and generate DQ report.
 

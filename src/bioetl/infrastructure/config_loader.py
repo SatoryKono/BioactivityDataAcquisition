@@ -17,16 +17,15 @@ import yaml
 
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
+from bioetl.infrastructure.config.source_config_loader import (
+    load_source_config as _load_source_config,
+)
 from bioetl.infrastructure.config_loader_filtering import (
     FILTER_SECTIONS,
     apply_hierarchical_filter_config,
 )
 from bioetl.infrastructure.config_merge import config_merge
-from bioetl.infrastructure.config.source_config_loader import (
-    load_source_config as _load_source_config,
-)
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
-from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
 
 def _deep_merge(
@@ -240,7 +239,7 @@ def _load_source_section(
     except ValueError:
         return
 
-    base_source = source_config.model_dump().get("source", {})
+    base_source = source_config.model_dump(exclude_none=True).get("source", {})
     entity_source = config.get("source", {})
     config["source"] = _deep_merge(base_source, entity_source)
 

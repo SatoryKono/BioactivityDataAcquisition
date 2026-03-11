@@ -9,6 +9,7 @@ from bioetl.application.composite.column_priority_orderer import (
     ColumnPriorityOrdererService,
 )
 from bioetl.application.composite.conflict_resolver import ConflictResolverService
+from bioetl.application.composite.join_planner_helpers import parse_pipeline_name
 from bioetl.application.composite.merger_compat_join_planner_mixin import (
     _MergeCompatibilityJoinPlannerMixin,
 )
@@ -67,12 +68,7 @@ class _MergeCompatibilityParsingMixin:
 
     def _parse_pipeline_name(self, pipeline: str) -> tuple[str, str]:
         """Parse 'provider_entity' into (provider, entity)."""
-        if "_" not in pipeline:
-            raise ValueError(
-                f"Pipeline name '{pipeline}' must be in format 'provider_entity'"
-            )
-        parts = pipeline.split("_", 1)
-        return parts[0], parts[1]
+        return parse_pipeline_name(pipeline)
 
     def _get_field_aliases(self, pipeline: str) -> dict[str, str] | None:
         """Get provider field alias mapping for pipeline provider."""

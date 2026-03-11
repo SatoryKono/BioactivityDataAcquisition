@@ -1,4 +1,4 @@
-"""Anomaly detection for data quality monitoring.
+"""AnomalyRecord detection for data quality monitoring.
 
 Implements baseline comparison and threshold-based detection for:
 - Record count anomalies (sudden drops/spikes)
@@ -17,7 +17,7 @@ Usage:
     # Check for anomalies
     anomaly = detector.detect("record_count", 500)
     if anomaly:
-        logger.warning(f"Anomaly detected: {anomaly}")
+        logger.warning(f"AnomalyRecord detected: {anomaly}")
 """
 
 from __future__ import annotations
@@ -27,19 +27,21 @@ from bioetl.infrastructure.observability.anomaly.detectors import (
     DetectorStrategy,
     ZScoreDetector,
 )
-from bioetl.infrastructure.observability.anomaly.monitor import DataQualityMonitor
+from bioetl.infrastructure.observability.anomaly.monitor import (
+    DataQualityMonitorService,
+)
 from bioetl.infrastructure.observability.anomaly.types import (
-    Anomaly,
+    AnomalyRecord,
     AnomalySeverity,
     AnomalyType,
 )
 
 __all__ = [
-    "Anomaly",
     "AnomalyDetector",
+    "AnomalyRecord",
     "AnomalySeverity",
     "AnomalyType",
-    "DataQualityMonitor",
+    "DataQualityMonitorService",
     "DetectorStrategy",
     "ZScoreDetector",
 ]

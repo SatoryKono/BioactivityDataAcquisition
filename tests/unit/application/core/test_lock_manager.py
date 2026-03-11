@@ -6,8 +6,8 @@ from uuid import UUID
 import pytest
 
 from bioetl.application.core.config import LockConfig
-from bioetl.application.core.lock_manager import LockCoordinator
-from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
+from bioetl.application.core.lifecycle.lock_manager import LockCoordinator
+from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.domain.locking import FencingToken
 from bioetl.domain.ports import LockPort
 from bioetl.domain.types import RunID, RunType

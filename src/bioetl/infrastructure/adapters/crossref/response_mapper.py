@@ -5,6 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from bioetl.domain.types import BronzeRecord, HealthStatus
+from bioetl.infrastructure.adapters.health_probe_policy import (
+    DEFAULT_SLOW_HEALTH_PROBE_THRESHOLD_SECONDS,
+    is_slow_health_probe,
+)
 from bioetl.infrastructure.adapters.health_status_policy import (
     classify_health_probe_status,
 )
@@ -48,7 +52,7 @@ class CrossRefResponseMapper:
         *,
         status_code: int,
         elapsed_seconds: float,
-        slow_threshold_seconds: float = 5.0,
+        slow_threshold_seconds: float = DEFAULT_SLOW_HEALTH_PROBE_THRESHOLD_SECONDS,
     ) -> CrossRefHealthProbeMapping:
         """Map raw probe response to adapter health status and event metadata.
 
@@ -69,7 +73,10 @@ class CrossRefResponseMapper:
             )
             return CrossRefHealthProbeMapping(status=status, event_name=event_name)
 
-        if elapsed_seconds > slow_threshold_seconds:
+        if is_slow_health_probe(
+            elapsed_seconds=elapsed_seconds,
+            slow_threshold_seconds=slow_threshold_seconds,
+        ):
             return CrossRefHealthProbeMapping(
                 status=HealthStatus.DEGRADED,
                 event_name="crossref_health_check_slow",

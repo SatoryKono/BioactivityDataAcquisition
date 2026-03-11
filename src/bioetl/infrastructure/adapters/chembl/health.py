@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from httpx import Response
 
     from bioetl.domain.ports import LoggerPort
-    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 CHEMBL_HEALTH_ERRORS = (
@@ -63,7 +63,7 @@ class ChemblHealthMixin:
     _http_client: UnifiedHTTPClient
     _logger: LoggerPort
     _page_size: int
-    _adapter_metrics: AdapterMetrics
+    _adapter_metrics: AdapterMetricsRecorder
 
     async def _probe_health(self) -> HealthStatus:
         """Perform ChEMBL-specific health probe.

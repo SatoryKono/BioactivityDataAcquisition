@@ -7,7 +7,6 @@ from pathlib import Path
 
 
 CRITICAL_MODULES = (
-    "src/bioetl/application/core/idmapping_data_source.py",
     "src/bioetl/infrastructure/adapters/uniprot/idmapping_client.py",
 )
 ALLOWED_BROAD_EXCEPTION_POLICIES = {
@@ -17,9 +16,9 @@ ALLOWED_BROAD_EXCEPTION_POLICIES = {
 }
 P0_2_CRITICAL_ERROR_MODULES = (
     "src/bioetl/application/core/batch_executor.py",
-    "src/bioetl/application/core/postrun_cleanup_orchestrator.py",
-    "src/bioetl/application/core/postrun_dq_report_orchestrator.py",
-    "src/bioetl/application/core/postrun_metadata_version_resolver.py",
+    "src/bioetl/application/core/postrun/cleanup_orchestrator.py",
+    "src/bioetl/application/core/postrun/dq_report_orchestrator.py",
+    "src/bioetl/application/core/postrun/metadata_version_resolver.py",
     "src/bioetl/application/composite/runner.py",
     "src/bioetl/interfaces/http/health_server.py",
     "src/bioetl/interfaces/http/health_server_http_mixin.py",
@@ -67,23 +66,6 @@ def test_critical_modules_have_no_broad_exception_handlers() -> None:
 
     assert not violations, "Broad exception handlers found:\n" + "\n".join(violations)
 
-
-def test_idmapping_data_source_has_no_direct_file_io_imports() -> None:
-    """Application-layer ID mapping source must not import file I/O modules."""
-    path = "src/bioetl/application/core/idmapping_data_source.py"
-    tree = _load_tree(path)
-    forbidden_imports = {"csv", "pathlib"}
-    violations: list[str] = []
-
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            for name in node.names:
-                if name.name in forbidden_imports:
-                    violations.append(f"{path}:{node.lineno} imports {name.name}")
-        elif isinstance(node, ast.ImportFrom) and node.module in forbidden_imports:
-            violations.append(f"{path}:{node.lineno} imports from {node.module}")
-
-    assert not violations, "Direct file I/O imports found:\n" + "\n".join(violations)
 
 
 def test_broad_exception_handlers_are_limited_to_cli_entrypoints() -> None:

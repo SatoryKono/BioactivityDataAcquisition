@@ -16,7 +16,7 @@ from bioetl.application.composite.key_extractor import (
     KeyExtractorService as _KeyExtractorService,
 )
 from bioetl.application.composite.merger import MergeService as _MergeService
-from bioetl.application.composite.runner import (
+from bioetl.application.composite.runner_pkg import (
     CompositePipelineRunnerService,
     CompositeRuntimeConfig,
 )

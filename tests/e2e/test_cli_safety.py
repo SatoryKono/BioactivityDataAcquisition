@@ -21,7 +21,17 @@ def mock_registry():
     mock = MagicMock()
     mock.list_pipelines.return_value = ["test_pipe"]
     mock.contains.return_value = True
-    return mock
+    with (
+        patch(
+            "bioetl.interfaces.cli.main.get_default_registry",
+            return_value=mock,
+        ),
+        patch(
+            "bioetl.interfaces.cli.commands.run_helpers.get_default_registry",
+            return_value=mock,
+        ),
+    ):
+        yield mock
 
 
 def test_cli_rebuild_requires_confirmation(cli_runner, mock_registry):

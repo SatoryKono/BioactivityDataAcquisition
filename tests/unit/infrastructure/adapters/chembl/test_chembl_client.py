@@ -14,8 +14,8 @@ from bioetl.domain.exceptions import (
 )
 from bioetl.domain.resilience import AdapterConfig
 from bioetl.domain.types import CircuitBreakerState, ErrorType, HealthStatus
-from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
-from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
+from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
+from bioetl.infrastructure.adapters.chembl import ChemblAdapter
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
@@ -52,7 +52,7 @@ def test_post_init_preserves_injected_base_collaborators(
     """Dataclass adapter should delegate shared base initialization."""
     error_handler = MagicMock()
     metrics = MagicMock()
-    adapter_metrics = AdapterMetrics(metrics, "chembl")
+    adapter_metrics = AdapterMetricsRecorder(metrics, "chembl")
     request_collector = APIRequestCollector()
 
     adapter = ChemblAdapter(

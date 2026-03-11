@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Sequence
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite.join_execution import JoinHow
@@ -33,6 +34,15 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 __all__ = ["JoinHow", "JoinPlannerService"]
+
+
+@dataclass(frozen=True, slots=True)
+class _EnricherJoinMetadata:
+    join_keys_list: list[str]
+    primary_key: str
+    seed_join_key: str
+    enricher_join_key: str
+    join_key_set: set[str]
 
 
 class JoinPlannerService(JoinPlannerCompatibilityMixin):
@@ -149,39 +159,34 @@ class JoinPlannerService(JoinPlannerCompatibilityMixin):
         enricher: EnricherConfig,
         seed_pipeline: str | None,
     ) -> pl.DataFrame:
-        join_keys_list = list(enricher.join_keys)
-        primary_key = join_keys_list[0]
+        metadata = self._build_enricher_join_metadata(
+            enricher=enricher,
+            seed_pipeline=seed_pipeline,
+            merged_columns=merged_df.columns,
+        )
         merged_df = self.normalize_join_key_columns(
             merged_df,
-            join_keys_list,
+            metadata.join_keys_list,
             pipeline=seed_pipeline,
         )
         prepared_enricher_df = self._prepare_enricher_dataframe(
             enricher_df=enricher_df,
             enricher=enricher,
-            join_keys_list=join_keys_list,
+            join_keys_list=metadata.join_keys_list,
         )
 
-        seed_join_key, enricher_join_key, join_key_set = (
-            self._build_enricher_join_key_set(
-                primary_key=primary_key,
-                seed_pipeline=seed_pipeline,
-                enricher_pipeline=enricher.pipeline,
-                merged_columns=merged_df.columns,
-            )
-        )
         merged_df, prepared_enricher_df = (
             self._conflict_resolver.detect_and_resolve_conflicts(
                 merged_df,
                 prepared_enricher_df,
-                join_key_set,
+                metadata.join_key_set,
             )
         )
         return self.execute_polars_join(
             merged_df,
             prepared_enricher_df,
-            seed_join_key,
-            enricher_join_key,
+            metadata.seed_join_key,
+            metadata.enricher_join_key,
             enricher.pipeline,
         )
 
@@ -242,6 +247,31 @@ class JoinPlannerService(JoinPlannerCompatibilityMixin):
         if seed_join_key_qualified and seed_join_key_qualified != seed_join_key:
             join_key_set.add(seed_join_key_qualified)
         return seed_join_key, enricher_join_key, join_key_set
+
+    def _build_enricher_join_metadata(
+        self,
+        *,
+        enricher: EnricherConfig,
+        seed_pipeline: str | None,
+        merged_columns: list[str],
+    ) -> _EnricherJoinMetadata:
+        join_keys_list = list(enricher.join_keys)
+        primary_key = enricher.primary_join_key
+        seed_join_key, enricher_join_key, join_key_set = (
+            self._build_enricher_join_key_set(
+                primary_key=primary_key,
+                seed_pipeline=seed_pipeline,
+                enricher_pipeline=enricher.pipeline,
+                merged_columns=merged_columns,
+            )
+        )
+        return _EnricherJoinMetadata(
+            join_keys_list=join_keys_list,
+            primary_key=primary_key,
+            seed_join_key=seed_join_key,
+            enricher_join_key=enricher_join_key,
+            join_key_set=join_key_set,
+        )
 
     @staticmethod
     def _count_qualified_columns(columns: list[str]) -> int:

@@ -15,11 +15,11 @@ from bioetl.application.core.batch_memory_manager import BatchMemoryManagerServi
 from bioetl.application.core.batch_processing_service import BatchProcessingService
 from bioetl.application.core.batch_progress_service import BatchProgressService
 from bioetl.application.core.batch_tracing import BatchTracingManagerService
-from bioetl.application.core.checkpoint_manager import CheckpointManager
+from bioetl.application.core.lifecycle.checkpoint_manager import CheckpointManager
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.pipeline_services import PipelineService
-from bioetl.application.core.shutdown import ShutdownSignal
-from bioetl.composition.factories.services_factory import ServicesBuilder
+from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
+from bioetl.composition.factories.services.factory import ServicesBuilder
 from bioetl.domain.config import MemoryConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-10T19:06:58.796220+00:00",
+  "generated_at": "2026-03-11T17:40:43.708270+00:00",
   "summary": {
     "total_scripts": 208,
     "status_counts": {
@@ -12,10 +12,10 @@
     "reference_group_coverage": {
       "build": 26,
       "ci": 41,
-      "docs": 85,
+      "docs": 87,
       "scripts": 103,
       "skills": 4,
-      "tests": 30
+      "tests": 32
     }
   },
   "scripts": [
@@ -363,13 +363,13 @@
         },
         {
           "path": "docs/00-project/ai/skills/global/documentation-audit/references/audit-checklist.md",
-          "line": 56,
+          "line": 58,
           "source_group": "docs",
           "text": "- Verify strict docs build behavior (`bash scripts/build_docs_site.sh --strict`) and note nav exclusions/warnings."
         },
         {
           "path": "docs/00-project/ai/skills/local/documentation-audit/references/audit-checklist.md",
-          "line": 56,
+          "line": 58,
           "source_group": "docs",
           "text": "- Verify strict docs build behavior (`bash scripts/build_docs_site.sh --strict`) and note nav exclusions/warnings."
         },
@@ -477,7 +477,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 127,
+          "line": 125,
           "source_group": "ci",
           "text": "run: uv run python scripts/check_config_invariants.py"
         },
@@ -555,13 +555,13 @@
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-doc-bot.md",
-          "line": 197,
+          "line": 199,
           "source_group": "docs",
           "text": "python scripts/check_doc_links.py --links"
         },
         {
           "path": "docs/00-project/ai/prompts/documentation_diagrams_audit.md",
-          "line": 73,
+          "line": 75,
           "source_group": "docs",
           "text": "python scripts/check_doc_links.py --links"
         },
@@ -648,7 +648,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 100,
+          "line": 98,
           "source_group": "ci",
           "text": "run: uv run python scripts/check_naming_package_consistency.py --check"
         },
@@ -675,13 +675,13 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 78,
+          "line": 76,
           "source_group": "ci",
           "text": "uv run python scripts/check_quality_exemptions.py \\"
         },
         {
           "path": "docs/00-project/ai/prompts/architecture_metric_exemptions_tasks_json_prompt.md",
-          "line": 129,
+          "line": 131,
           "source_group": "docs",
           "text": "- `python scripts/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off`"
         },
@@ -728,11 +728,11 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 63,
+          "line": 61,
           "source_group": "ci",
           "text": "run: python scripts/check_root_vcr_cassettes.py"
         },
@@ -741,6 +741,12 @@
           "line": 1,
           "source_group": "docs",
           "text": "# Scripts Inventory\\n\\nTotal scripts: **106**\\n\\n## By Folder\\n\\n| Folder | Count |\\n|---|---:|\\n| `.` | 2 |\\n| `assets/javascripts` | 1 |\\n| `docs/02-architecture/mmd-diagrams` | 1 |\\n| `docs/00-proj"
+        },
+        {
+          "path": "tests/architecture/test_test_matrix_coverage.py",
+          "line": 172,
+          "source_group": "tests",
+          "text": "assert \"python scripts/check_root_vcr_cassettes.py\" in workflow"
         }
       ]
     },
@@ -753,7 +759,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 97,
+          "line": 95,
           "source_group": "ci",
           "text": "run: uv run python scripts/check_scripts_catalog.py --catalog scripts/catalog.yaml"
         },
@@ -780,7 +786,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 89,
+          "line": 87,
           "source_group": "ci",
           "text": "uv run python scripts/check_scripts_inventory.py \\"
         },
@@ -867,13 +873,13 @@
         },
         {
           "path": "docs/00-project/ai/skills/README.md",
-          "line": 26,
+          "line": 28,
           "source_group": "docs",
           "text": "- `bash scripts/check_skills_mirror.sh --check`"
         },
         {
           "path": "docs/00-project/ai/skills/README.md",
-          "line": 28,
+          "line": 30,
           "source_group": "docs",
           "text": "- `bash scripts/check_skills_mirror.sh --sync`"
         },
@@ -890,13 +896,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 66,
+          "line": 64,
           "source_group": "ci",
           "text": "run: python scripts/check_vcr_filename_policy.py"
+        },
+        {
+          "path": "tests/architecture/test_test_matrix_coverage.py",
+          "line": 173,
+          "source_group": "tests",
+          "text": "assert \"python scripts/check_vcr_filename_policy.py\" in workflow"
         }
       ]
     },
@@ -915,7 +927,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 69,
+          "line": 67,
           "source_group": "ci",
           "text": "run: python scripts/check_version_consistency.py"
         },
@@ -1007,7 +1019,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 158,
+          "line": 156,
           "source_group": "ci",
           "text": "uv run python scripts/ci/quality_integral_gate.py \\"
         },
@@ -1049,7 +1061,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 341,
+          "line": 339,
           "source_group": "ci",
           "text": "uv run python scripts/ci/run_pytest_resilient.py \\"
         },
@@ -1249,7 +1261,7 @@
       "type": "py",
       "status": "unknown",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -1259,31 +1271,13 @@
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-config-bot.md",
-          "line": 48,
+          "line": 46,
           "source_group": "docs",
           "text": "| ADR-025 | Pipeline Config Unification (required fields) | `python scripts/config_gap_analysis.py -v` |"
         },
         {
-          "path": "docs/00-project/ai/memory/memory-py-config-bot.md",
-          "line": 172,
-          "source_group": "docs",
-          "text": "python scripts/config_gap_analysis.py -v"
-        },
-        {
-          "path": "docs/00-project/ai/memory/memory-py-config-bot.md",
-          "line": 185,
-          "source_group": "docs",
-          "text": "python scripts/config_gap_analysis.py -v"
-        },
-        {
-          "path": "docs/00-project/ai/memory/memory-py-config-bot.md",
-          "line": 229,
-          "source_group": "docs",
-          "text": "| Gap analysis script | `scripts/config_gap_analysis.py` |"
-        },
-        {
           "path": "docs/00-project/ai/memory/memory-py-test-bot.md",
-          "line": 199,
+          "line": 201,
           "source_group": "docs",
           "text": "| Config gap analysis | `scripts/config_gap_analysis.py` |"
         },
@@ -2153,7 +2147,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
-          "line": 96,
+          "line": 98,
           "source_group": "docs",
           "text": "- `python scripts/diagrams/check_diagram_visual_smoke.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`"
         },
@@ -2858,13 +2852,13 @@
         },
         {
           "path": "docs/00-project/ai/prompts/documentation_diagrams_audit.md",
-          "line": 164,
+          "line": 166,
           "source_group": "docs",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh"
         },
         {
           "path": "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
-          "line": 93,
+          "line": 95,
           "source_group": "docs",
           "text": "- `bash scripts/diagrams/validate_mermaid_syntax.sh`"
         },
@@ -3173,7 +3167,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 133,
+          "line": 131,
           "source_group": "ci",
           "text": "run: uv run python scripts/generate_architecture_dependency_map.py --check"
         },
@@ -3220,7 +3214,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 275,
+          "line": 273,
           "source_group": "ci",
           "text": "uv run python scripts/generate_hotspot_degradation_report.py \\"
         },
@@ -3247,7 +3241,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 130,
+          "line": 128,
           "source_group": "ci",
           "text": "run: uv run python scripts/generate_pipeline_schema.py --check"
         },
@@ -3495,8 +3489,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
+        {
+          "path": "docs/00-project/ai/skills/_references/README.md",
+          "line": 19,
+          "source_group": "docs",
+          "text": "| `scripts/ops/check_ai_skills_layout.sh` | Validates `_references` exists as a required subdirectory |"
+        },
         {
           "path": "scripts/check_ai_skills_layout.sh",
           "line": 6,
@@ -3537,8 +3537,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
+        {
+          "path": "docs/00-project/ai/skills/_references/README.md",
+          "line": 18,
+          "source_group": "docs",
+          "text": "| `scripts/ops/check_skills_mirror.sh` | Overlays reference bundles from `_references/local` onto skill mirrors |"
+        },
         {
           "path": "scripts/check_skills_mirror.sh",
           "line": 6,
@@ -4627,7 +4633,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 124,
+          "line": 122,
           "source_group": "ci",
           "text": "run: uv run python scripts/validate_pipeline_configs.py"
         },

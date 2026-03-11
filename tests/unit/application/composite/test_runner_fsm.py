@@ -17,8 +17,11 @@ from bioetl.application.composite.checkpoint import (
     CompositeCheckpointManager,
     CompositeCheckpointState,
 )
+from bioetl.infrastructure.storage.composite_checkpoint_writer import (
+    FileCompositeCheckpointWriter,
+)
 from bioetl.application.composite.fsm_helper import FSMStateHelperService
-from bioetl.application.composite.runner import (
+from bioetl.application.composite.runner_pkg import (
     CompositePipelineRunner,
     CompositeRuntimeConfig,
 )
@@ -154,7 +157,7 @@ class TestFSMMergeStateTransitions:
         checkpoint_manager = CompositeCheckpointManager(
             composite_name="test_composite",
             run_id=test_run_id,
-            checkpoint_dir=tmp_path,
+            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -217,7 +220,7 @@ class TestFSMMergeStateTransitions:
         checkpoint_manager = CompositeCheckpointManager(
             composite_name="test_composite",
             run_id=test_run_id,
-            checkpoint_dir=tmp_path,
+            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -280,7 +283,7 @@ class TestFSMDryRunMode:
         checkpoint_manager = CompositeCheckpointManager(
             composite_name="test_composite",
             run_id=test_run_id,
-            checkpoint_dir=tmp_path,
+            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -347,7 +350,7 @@ class TestFSMEnrichmentCompletedTransition:
         checkpoint_manager = CompositeCheckpointManager(
             composite_name="test_composite",
             run_id=test_run_id,
-            checkpoint_dir=tmp_path,
+            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )
@@ -436,7 +439,7 @@ class TestFSMResumeFromFailed:
         checkpoint_manager = CompositeCheckpointManager(
             composite_name="test_composite",
             run_id=test_run_id,
-            checkpoint_dir=tmp_path,
+            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=True,
         )
@@ -499,7 +502,7 @@ class TestFSMCheckpointDeletion:
         checkpoint_manager = CompositeCheckpointManager(
             composite_name="test_composite",
             run_id=test_run_id,
-            checkpoint_dir=tmp_path,
+            storage=FileCompositeCheckpointWriter(tmp_path),
             logger=mock_logger,
             resume=False,
         )

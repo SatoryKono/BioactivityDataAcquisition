@@ -333,7 +333,7 @@ class TestRunPipelineIntegration:
     @pytest.mark.asyncio
     async def test_run_pipeline_shutdown(self, mock_runner):
         """Test run_pipeline handles shutdown gracefully."""
-        from bioetl.application.core.shutdown import PipelineShutdownError
+        from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError
         from bioetl.composition.entrypoints import run_pipeline
 
         mock_runner.run = AsyncMock(

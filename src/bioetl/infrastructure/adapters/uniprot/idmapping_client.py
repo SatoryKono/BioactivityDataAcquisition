@@ -36,7 +36,7 @@ from bioetl.infrastructure.adapters.uniprot.constants import UNIPROT_API_BASE
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort
-    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 
@@ -62,7 +62,7 @@ class UniProtIDMappingClient(
         metrics: MetricsPort | None = None,
         base_url: str = BASE_URL,
         *,
-        adapter_metrics: AdapterMetrics | None = None,
+        adapter_metrics: AdapterMetricsRecorder | None = None,
     ) -> None:
         super().__init__(
             http_client,

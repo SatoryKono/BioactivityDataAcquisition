@@ -5,8 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from .data_source_factory import DataSourceCreator
-from .services_factory import BaseServicesFactory
+from .datasource.factory import DataSourceCreator
+from .services.factory import BaseServicesFactory
 
 if TYPE_CHECKING:
     from bioetl.domain.context import CachedBronzeContext

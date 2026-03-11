@@ -119,7 +119,7 @@ Ports & Adapters паттерн - ключевой архитектурный п
 
 - `tests/architecture/test_layer_dependencies.py`
 - `import-linter` configuration
-- CI pipeline (`make arch-test`)
+- CI pipeline (`make test-architecture`)
 
 **Правила:**
 

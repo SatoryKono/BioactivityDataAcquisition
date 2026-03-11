@@ -1,8 +1,8 @@
 """HTTP infrastructure components.
 
 Provides:
-- TokenBucket: Rate limiting (implements RateLimiterPort)
-- CircuitBreaker: Fault tolerance (implements CircuitBreakerPort)
+- TokenBucketRateLimiter: Rate limiting (implements RateLimiterPort)
+- CircuitBreakerGuard: Fault tolerance (implements CircuitBreakerPort)
 - UnifiedHTTPClient: Async HTTP client with rate limiting and circuit breaker
 - RetryConfig: Configuration for retry strategies
 - ProviderHealthMonitor: Centralized provider health monitoring (RULES.md §3.5)
@@ -12,7 +12,7 @@ Provides:
 
 from __future__ import annotations
 
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import RetryConfig, UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.health_monitor import (
     HealthAdjustedConfig,
@@ -20,15 +20,15 @@ from bioetl.infrastructure.adapters.http.health_monitor import (
     ProviderHealthState,
     ProviderHealthTracker,
 )
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 
 __all__ = [
-    "CircuitBreaker",
+    "CircuitBreakerGuard",
     "HealthAdjustedConfig",
     "ProviderHealthMonitor",
     "ProviderHealthState",
     "ProviderHealthTracker",
     "RetryConfig",
-    "TokenBucket",
+    "TokenBucketRateLimiter",
     "UnifiedHTTPClient",
 ]

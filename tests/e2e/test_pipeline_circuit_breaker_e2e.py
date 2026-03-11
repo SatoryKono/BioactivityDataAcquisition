@@ -22,7 +22,7 @@ import pytest
 from bioetl.domain.exceptions import CircuitBreakerOpenError
 from bioetl.domain.types import CircuitBreakerState
 from bioetl.infrastructure.adapters.http.circuit_breaker import (
-    CircuitBreaker,
+    CircuitBreakerGuard,
     is_circuit_breaker_error,
 )
 
@@ -34,7 +34,7 @@ class TestCircuitBreakerStateTransitions:
 
     async def test_initial_state_is_closed(self):
         """E2E: Circuit breaker starts in CLOSED state."""
-        cb = CircuitBreaker(provider="test_provider")
+        cb = CircuitBreakerGuard(provider="test_provider")
 
         assert cb.get_state() == CircuitBreakerState.CLOSED
         assert cb.get_failure_count() == 0
@@ -42,7 +42,7 @@ class TestCircuitBreakerStateTransitions:
 
     async def test_successful_calls_keep_circuit_closed(self):
         """E2E: Successful calls maintain CLOSED state."""
-        cb = CircuitBreaker(provider="test_provider", failure_threshold=5)
+        cb = CircuitBreakerGuard(provider="test_provider", failure_threshold=5)
 
         async def success():
             return "ok"
@@ -56,7 +56,7 @@ class TestCircuitBreakerStateTransitions:
 
     async def test_failures_increment_count(self):
         """E2E: Failures increment the failure counter."""
-        cb = CircuitBreaker(provider="test_provider", failure_threshold=5)
+        cb = CircuitBreakerGuard(provider="test_provider", failure_threshold=5)
 
         async def fail():
             raise RuntimeError("Provider error")
@@ -70,7 +70,7 @@ class TestCircuitBreakerStateTransitions:
 
     async def test_threshold_failures_open_circuit(self):
         """E2E: Reaching failure threshold opens circuit."""
-        cb = CircuitBreaker(provider="test_provider", failure_threshold=5)
+        cb = CircuitBreakerGuard(provider="test_provider", failure_threshold=5)
 
         async def fail():
             raise RuntimeError("Provider error")
@@ -84,7 +84,7 @@ class TestCircuitBreakerStateTransitions:
 
     async def test_open_circuit_blocks_calls(self):
         """E2E: Open circuit blocks subsequent calls."""
-        cb = CircuitBreaker(
+        cb = CircuitBreakerGuard(
             provider="test_provider",
             failure_threshold=3,
             recovery_timeout=300,  # Long timeout
@@ -112,7 +112,7 @@ class TestCircuitBreakerStateTransitions:
 
     async def test_half_open_after_timeout(self):
         """E2E: Circuit transitions to HALF_OPEN after timeout."""
-        cb = CircuitBreaker(
+        cb = CircuitBreakerGuard(
             provider="test_provider",
             failure_threshold=3,
             recovery_timeout=0,  # Immediate recovery for testing
@@ -141,7 +141,7 @@ class TestCircuitBreakerStateTransitions:
 
     async def test_half_open_failure_reopens(self):
         """E2E: Failed probe in HALF_OPEN reopens circuit."""
-        cb = CircuitBreaker(
+        cb = CircuitBreakerGuard(
             provider="test_provider",
             failure_threshold=3,
             recovery_timeout=0,
@@ -176,7 +176,7 @@ class TestCircuitBreakerRecovery:
 
     async def test_success_resets_failure_count(self):
         """E2E: Successful call resets consecutive failure count."""
-        cb = CircuitBreaker(provider="test_provider", failure_threshold=5)
+        cb = CircuitBreakerGuard(provider="test_provider", failure_threshold=5)
 
         async def fail():
             raise RuntimeError("Error")
@@ -199,7 +199,7 @@ class TestCircuitBreakerRecovery:
 
     async def test_manual_reset(self):
         """E2E: Manual reset returns circuit to CLOSED state."""
-        cb = CircuitBreaker(
+        cb = CircuitBreakerGuard(
             provider="test_provider",
             failure_threshold=2,
             recovery_timeout=300,
@@ -223,7 +223,7 @@ class TestCircuitBreakerRecovery:
 
     async def test_force_open(self):
         """E2E: force_open() manually opens circuit."""
-        cb = CircuitBreaker(provider="test_provider", failure_threshold=5)
+        cb = CircuitBreakerGuard(provider="test_provider", failure_threshold=5)
 
         assert cb.get_state() == CircuitBreakerState.CLOSED
 
@@ -298,7 +298,7 @@ class TestCircuitBreakerMetrics:
 
     async def test_trips_total_increments_on_open(self):
         """E2E: trips_total increments each time circuit opens."""
-        cb = CircuitBreaker(
+        cb = CircuitBreakerGuard(
             provider="test_provider",
             failure_threshold=2,
             recovery_timeout=0,
@@ -330,7 +330,7 @@ class TestCircuitBreakerMetrics:
 
     async def test_retry_after_calculation(self):
         """E2E: retry_after correctly calculates remaining timeout."""
-        cb = CircuitBreaker(
+        cb = CircuitBreakerGuard(
             provider="test_provider",
             failure_threshold=2,
             recovery_timeout=10,  # 10 seconds
@@ -363,7 +363,7 @@ class TestCircuitBreakerConcurrency:
 
     async def test_concurrent_calls_consistent_state(self):
         """E2E: Concurrent calls maintain consistent state."""
-        cb = CircuitBreaker(
+        cb = CircuitBreakerGuard(
             provider="test_provider",
             failure_threshold=10,
         )
@@ -405,7 +405,7 @@ class TestCircuitBreakerConcurrency:
 
     async def test_rapid_failures_open_circuit(self):
         """E2E: Rapid failures correctly open circuit."""
-        cb = CircuitBreaker(
+        cb = CircuitBreakerGuard(
             provider="test_provider",
             failure_threshold=5,
         )
@@ -437,8 +437,8 @@ class TestCircuitBreakerProviderIsolation:
 
     async def test_separate_providers_independent(self):
         """E2E: Separate providers have independent circuit breakers."""
-        cb_chembl = CircuitBreaker(provider="chembl", failure_threshold=3)
-        cb_pubchem = CircuitBreaker(provider="pubchem", failure_threshold=3)
+        cb_chembl = CircuitBreakerGuard(provider="chembl", failure_threshold=3)
+        cb_pubchem = CircuitBreakerGuard(provider="pubchem", failure_threshold=3)
 
         async def fail():
             raise RuntimeError("Error")
@@ -461,7 +461,7 @@ class TestCircuitBreakerProviderIsolation:
 
     async def test_provider_name_in_error(self):
         """E2E: Provider name included in CircuitBreakerOpenError."""
-        cb = CircuitBreaker(
+        cb = CircuitBreakerGuard(
             provider="test_api_v2",
             failure_threshold=2,
             recovery_timeout=60,

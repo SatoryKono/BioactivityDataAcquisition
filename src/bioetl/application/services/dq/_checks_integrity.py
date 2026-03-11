@@ -8,12 +8,13 @@ from __future__ import annotations
 __all__ = ["check_referential_integrity", "check_scd_integrity"]
 
 
+from collections.abc import Mapping
 from typing import cast
 
 import polars as pl
 import pyarrow as pa
 
-from bioetl.domain.types import JsonDict
+from bioetl.domain.types import ScdConfig
 from bioetl.domain.value_objects.dq_report import (
     DQCheckStatus,
     ForeignKeyResult,
@@ -75,6 +76,19 @@ def _count_scd_overlaps(
         # Skip malformed partitions during overlap analysis.
         return overlaps
     return overlaps
+
+
+def _materialize_entity_key(
+    df: pl.DataFrame,
+    *,
+    entity_keys: tuple[str, ...],
+) -> tuple[pl.DataFrame, str]:
+    """Build a single grouping key for simple and composite business keys."""
+    if len(entity_keys) == 1:
+        return df, entity_keys[0]
+    return df.with_columns(
+        pl.struct(list(entity_keys)).alias("__scd_entity_key")
+    ), "__scd_entity_key"
 
 
 def _parse_reference_key(ref_key: str) -> tuple[str, str] | None:
@@ -185,54 +199,70 @@ def check_referential_integrity(
     )
 
 
+def _normalize_scd_config(
+    df: pl.DataFrame,
+    scd_config: ScdConfig | Mapping[str, object] | None,
+) -> ScdConfig | None:
+    """Normalize and validate SCD config. Returns None when defaults apply."""
+    normalized = (
+        ScdConfig.from_mapping(scd_config)
+        if isinstance(scd_config, Mapping)
+        else scd_config
+    )
+    if not normalized:
+        return None
+    entity_keys = normalized.business_keys
+    if not entity_keys:
+        return None
+    if any(key not in df.columns for key in entity_keys):
+        return None
+    return normalized
+
+
 def check_scd_integrity(
     df: pl.DataFrame,
-    scd_config: JsonDict | None,  # Any: SCD config has heterogeneous values
+    scd_config: ScdConfig | Mapping[str, object] | None,
 ) -> SCDIntegrityResult:
     """Check Slowly Changing Dimension (SCD) integrity metrics.
 
     Args:
         df: Input Polars DataFrame to check SCD validity on.
-        scd_config: SCD configuration dict with keys 'type', 'entity_key',
-            'valid_from_col', and 'valid_to_col'. Pass None to return a
+        scd_config: Typed SCD configuration with business key and validity
+            column names. Pass None to return a
             default PASS result without checking.
 
     Returns:
         SCDIntegrityResult with entity counts, version statistics, and
         overlapping validity period count with a PASS or WARN status.
     """
-    scd_type = 2 if not scd_config else scd_config.get("type", 2)
-    if not scd_config:
+    config = _normalize_scd_config(df, scd_config)
+    scd_type = config.scd_type if config else 2
+    if config is None:
         return _build_default_scd_result(
             scd_type=scd_type,
             total_entities=len(df),
         )
 
-    entity_key = scd_config.get("entity_key")
-    valid_from = scd_config.get("valid_from_col", "_valid_from")
-    valid_to = scd_config.get("valid_to_col", "_valid_to")
+    entity_keys = config.business_keys
+    valid_from = config.valid_from_col
+    valid_to = config.valid_to_col
 
-    if not entity_key or entity_key not in df.columns:
-        return _build_default_scd_result(
-            scd_type=scd_type,
-            total_entities=len(df),
-        )
+    analysis_df, entity_key = _materialize_entity_key(df, entity_keys=entity_keys)
+    unique_entities = analysis_df[entity_key].n_unique()
+    total_records = len(analysis_df)
 
-    unique_entities = df[entity_key].n_unique()
-    total_records = len(df)
-
-    version_counts = df.group_by(entity_key).agg(pl.count().alias("versions"))
+    version_counts = analysis_df.group_by(entity_key).agg(pl.count().alias("versions"))
     entities_with_history = int((version_counts["versions"] > 1).sum())
     avg_versions = total_records / unique_entities if unique_entities > 0 else 1.0
 
     overlapping = (
         _count_scd_overlaps(
-            df=df,
+            df=analysis_df,
             entity_key=entity_key,
             valid_from=valid_from,
             valid_to=valid_to,
         )
-        if valid_from in df.columns and valid_to in df.columns
+        if valid_from in analysis_df.columns and valid_to in analysis_df.columns
         else 0
     )
 

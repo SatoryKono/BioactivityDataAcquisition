@@ -374,7 +374,7 @@ Status: PASS ≥ 8.0 | WARN 6.0-7.9 | FAIL < 6.0
 | S6.2 | tests/unit/domain/ | ~104 |
 | S6.3 | tests/unit/application/ | ~120 |
 | S6.4 | tests/unit/infrastructure/ | ~115 |
-| S6.5 | tests/unit/composition/ + tests/unit/interfaces/ + tests/unit/cli/ + tests/unit/contracts/ + tests/unit/pipelines/ | ~75 |
+| S6.5 | tests/unit/composition/ + tests/unit/interfaces/ (including cli/) + tests/unit/contracts/ + tests/unit/pipelines/ | ~75 |
 | S6.6 | tests/integration/ + tests/e2e/ + tests/contract/ + tests/security/ + tests/smoke/ + tests/performance/ + tests/benchmarks/ | ~117 |
 
 **Для S8 (Documentation, ~600 файлов):**

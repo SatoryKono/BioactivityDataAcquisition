@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from bioetl.infrastructure.observability.anomaly.types import (
-        Anomaly,
+        AnomalyRecord,
         AnomalySeverity,
     )
 
@@ -39,7 +39,7 @@ class DetectorStrategy(ABC):
         baseline: Sequence[float],
         threshold: float,
         timestamp: datetime,
-    ) -> Anomaly | None:
+    ) -> AnomalyRecord | None:
         """Detect anomaly in current value.
 
         Args:
@@ -50,7 +50,7 @@ class DetectorStrategy(ABC):
             timestamp: Timestamp for the anomaly (created in application layer)
 
         Returns:
-            Anomaly if detected, None otherwise
+            AnomalyRecord if detected, None otherwise
 
         """
 

@@ -14,9 +14,9 @@ from httpx import Response
 
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.crossref import CrossRefAdapter
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 
 CROSSREF_API_BASE = "https://api.crossref.org"
 
@@ -31,8 +31,8 @@ def mock_logger() -> MagicMock:
 def crossref_adapter(mock_logger: MagicMock) -> CrossRefAdapter:
     """Fixture to provide a CrossRefAdapter instance for testing."""
     http_client = UnifiedHTTPClient(
-        TokenBucket(rate=50.0, capacity=100.0),
-        CircuitBreaker(provider="crossref_test"),
+        TokenBucketRateLimiter(rate=50.0, capacity=100.0),
+        CircuitBreakerGuard(provider="crossref_test"),
     )
     return CrossRefAdapter(
         http_client=http_client,

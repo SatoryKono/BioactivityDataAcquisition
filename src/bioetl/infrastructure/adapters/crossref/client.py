@@ -39,12 +39,17 @@ from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
     ExtractRecordIdHook,
     NormalizeIdHook,
 )
+from bioetl.infrastructure.adapters.common.source_metadata_capability import (
+    clear_source_metadata_collector,
+    consume_source_metadata,
+    get_request_count,
+)
 from bioetl.infrastructure.adapters.crossref._defaults import (
     CROSSREF_DEFAULT_FALLBACK_CONFIG as _CROSSREF_DEFAULT_FALLBACK_CONFIG,
 )
 from bioetl.infrastructure.adapters.crossref.batch import (
     DoiBatchProcessor,
-    SearchPaginator,
+    SearchPaginatorHelper,
 )
 from bioetl.infrastructure.adapters.crossref.client_builders import (
     _create_default_crossref_batch_fetcher,
@@ -65,7 +70,7 @@ if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
     from bioetl.domain.ports import ErrorHandlerPort, LoggerPort, MetricsPort
-    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
     from bioetl.infrastructure.adapters.common.api_request_collector import (
         APIRequestCollector,
     )
@@ -96,13 +101,13 @@ class CrossRefAdapter(FallbackPolicyMixin, BaseHttpAdapter):
     batch_size: int = 50
     metrics: MetricsPort | None = None
     error_handler: ErrorHandlerPort | None = None
-    adapter_metrics: AdapterMetrics | None = None
+    adapter_metrics: AdapterMetricsRecorder | None = None
     request_collector: APIRequestCollector | None = None
     fallback_fetch_service: FallbackFetchOrchestratorService | None = None
     query_builder: CrossRefQueryBuilder | None = None
     response_mapper: CrossRefResponseMapper | None = None
     batch_fetcher: DoiBatchProcessor | None = None
-    search_paginator: SearchPaginator | None = None
+    search_paginator: SearchPaginatorHelper | None = None
     title_fallback_handler: TitleFallbackHandler | None = None
     fetch_flow: CrossRefFetchFlow | None = None
 
@@ -366,22 +371,20 @@ class CrossRefAdapter(FallbackPolicyMixin, BaseHttpAdapter):
         Returns:
             SourceMetadata aggregated from all recorded API requests since last clear.
         """
-        metadata = self._request_collector.to_source_metadata(
-            source_type="api",
+        return consume_source_metadata(
+            collector=self._request_collector,
             url=CROSSREF_API_BASE,
             api_version=api_version,
         )
-        self._request_collector.clear()
-        return metadata
 
     def clear_request_collector(self) -> None:
         """Clear the collector without returning metadata."""
-        self._request_collector.clear()
+        clear_source_metadata_collector(collector=self._request_collector)
 
     @property
     def request_count(self) -> int:
         """Number of recorded API requests since last clear."""
-        return self._request_collector.request_count
+        return get_request_count(collector=self._request_collector)
 
     async def aclose(self) -> None:
         """Close adapter resources via underlying HTTP client context manager."""

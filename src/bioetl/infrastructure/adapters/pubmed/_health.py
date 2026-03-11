@@ -15,13 +15,21 @@ from httpx import RequestError
 from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.common.source_metadata_capability import (
+    clear_source_metadata_collector,
+    consume_source_metadata,
+    get_request_count,
+)
+from bioetl.infrastructure.adapters.health_probe_policy import (
+    is_slow_health_probe,
+)
 from bioetl.infrastructure.adapters.health_status_policy import (
     classify_health_probe_status,
 )
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import ErrorHandlerPort, LoggerPort
-    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
     from bioetl.infrastructure.adapters.common.api_request_collector import (
         APIRequestCollector,
     )
@@ -49,7 +57,7 @@ class PubMedHealthMixin:
     api_key: str | None
     _http_client: UnifiedHTTPClient
     _logger: LoggerPort
-    _adapter_metrics: AdapterMetrics
+    _adapter_metrics: AdapterMetricsRecorder
     _request_collector: APIRequestCollector
     provider_name: str
     _error_handler: ErrorHandlerPort
@@ -92,7 +100,7 @@ class PubMedHealthMixin:
                 )
                 return status
 
-            if elapsed > 5.0:
+            if is_slow_health_probe(elapsed_seconds=elapsed):
                 self._logger.warning(
                     "pubmed_health_check_slow",
                     elapsed_seconds=round(elapsed, 2),
@@ -135,17 +143,17 @@ class PubMedHealthMixin:
         Returns:
             Source metadata.
         """
-        metadata = self._request_collector.to_source_metadata(
-            source_type="api", url=ENTREZ_API_BASE, api_version=api_version
+        return consume_source_metadata(
+            collector=self._request_collector,
+            url=ENTREZ_API_BASE,
+            api_version=api_version,
         )
-        self._request_collector.clear()
-        return metadata
 
     def clear_request_collector(self) -> None:
         """Clear the collector without returning metadata."""
-        self._request_collector.clear()
+        clear_source_metadata_collector(collector=self._request_collector)
 
     @property
     def request_count(self) -> int:
         """Number of recorded API requests since last clear."""
-        return self._request_collector.request_count
+        return get_request_count(collector=self._request_collector)

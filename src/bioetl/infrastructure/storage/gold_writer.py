@@ -3,15 +3,16 @@
 from __future__ import annotations
 
 import asyncio  # noqa: F401 - compatibility monkeypatch target in tests
+from collections.abc import Mapping
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
 import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake  # noqa: F401
 from deltalake.exceptions import TableNotFoundError  # noqa: F401
 
 from bioetl.domain.medallion import GoldWriteMode
-from bioetl.domain.types import GoldRecord, JsonDict, RunID, ScdConfig
+from bioetl.domain.types import GoldRecord, RunID, ScdConfig
 from bioetl.infrastructure.storage.base_delta_writer import (
     BaseDeltaWriter,
     coerce_null_types_for_delta,  # noqa: F401
@@ -41,13 +42,6 @@ if TYPE_CHECKING:
 
 __all__ = ["GoldWriteMode", "GoldWriter"]
 
-_SCD_KEY_MAP = {
-    "valid_from": "valid_from_col",
-    "valid_to": "valid_to_col",
-    "is_current": "current_flag_col",
-    "version": "version_col",
-}
-
 GOLD_WRITE_RETRY_ERRORS = (
     OSError,
     RuntimeError,
@@ -62,24 +56,17 @@ def _normalize_scd_config(
     scd_config: ScdConfig,
     primary_keys: list[str] | None,
 ) -> ScdConfig:
-    """Normalize YAML scd_config keys to gold_writer expected format.
+    """Return the already-normalized domain SCD config.
 
     Args:
-        scd_config: Raw SCD configuration from pipeline YAML.
-        primary_keys: Optional primary key list used to fill in missing business_key.
+        scd_config: Typed SCD configuration from the domain/application layers.
+        primary_keys: Unused compatibility parameter.
 
     Returns:
-        Normalized ScdConfig with gold_writer-compatible key names.
+        The same typed ScdConfig instance.
     """
-    out: JsonDict = dict(scd_config)  # Any: ScdConfig is heterogeneous
-    if "business_key" not in out and primary_keys:
-        out["business_key"] = (
-            primary_keys[0] if len(primary_keys) == 1 else primary_keys
-        )
-    for src, dst in _SCD_KEY_MAP.items():
-        if src in out and dst not in out:
-            out[dst] = out[src]
-    return cast(ScdConfig, out)
+    del primary_keys
+    return scd_config
 
 
 class GoldWriter(
@@ -179,13 +166,18 @@ class GoldWriter(
         """
         tracer = self._tracing.get_tracer(__name__)
         with tracer.start_as_current_span("write_gold") as span:
+            normalized_scd_config = (
+                ScdConfig.from_mapping(scd_config, primary_keys=primary_keys)
+                if isinstance(scd_config, Mapping)
+                else scd_config
+            )
             self._set_write_span_attributes(span, table_name, mode, len(records))
             validated_mode, table_path = await self._prepare_write_gold(
                 table_name=table_name,
                 records=records,
                 mode=mode,
                 schema=schema,
-                scd_config=scd_config,
+                scd_config=normalized_scd_config,
                 ingestion_ts=ingestion_ts,
             )
             await self._dispatch_write(
@@ -196,7 +188,7 @@ class GoldWriter(
                 partition_cols,
                 primary_keys,
                 schema,
-                scd_config,
+                normalized_scd_config,
                 ingestion_ts,
                 column_order,
             )
@@ -207,7 +199,7 @@ class GoldWriter(
                 validated_mode=validated_mode,
                 ingestion_ts=ingestion_ts,
                 run_id=run_id,
-                scd_config=scd_config,
+                scd_config=normalized_scd_config,
                 silver_refs=silver_refs,
                 schema=schema,
             )

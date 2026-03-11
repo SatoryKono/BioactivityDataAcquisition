@@ -15,7 +15,7 @@ from bioetl.domain.ports import (
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.config import Settings
 from bioetl.infrastructure.observability import OpenTelemetryTracer, PrometheusMetrics
-from bioetl.infrastructure.observability.anomaly import DataQualityMonitor
+from bioetl.infrastructure.observability.anomaly import DataQualityMonitorService
 from bioetl.infrastructure.observability.unified_logger import UnifiedLogger
 
 __all__ = ["build_observability_bundle"]
@@ -32,7 +32,7 @@ def build_observability_bundle(
     metrics_factory: Callable[[], MetricsPort] = PrometheusMetrics,
     noop_tracing_factory: Callable[[], TracingPort] = NoOpTracing,
     noop_metrics_factory: Callable[..., MetricsPort] = NoOpMetrics,
-    dq_monitor_factory: Callable[..., DataQualityMonitor] = DataQualityMonitor,
+    dq_monitor_factory: Callable[..., DataQualityMonitorService] = DataQualityMonitorService,
 ) -> ObservabilityBundle:
     """Build observability bundle with optional DQ monitor wiring.
 
@@ -46,7 +46,7 @@ def build_observability_bundle(
         metrics_factory: Callable creating a MetricsPort (no arguments).
         noop_tracing_factory: Callable creating a NoOpTracing when tracing is disabled.
         noop_metrics_factory: Callable creating NoOpMetrics when metrics are disabled.
-        dq_monitor_factory: Callable creating a DataQualityMonitor when DQ monitoring
+        dq_monitor_factory: Callable creating a DataQualityMonitorService when DQ monitoring
             is enabled.
 
     Returns:

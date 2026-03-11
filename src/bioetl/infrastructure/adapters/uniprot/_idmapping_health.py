@@ -8,7 +8,7 @@ from bioetl.domain.types import HealthStatus
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
-    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 
@@ -19,7 +19,7 @@ class IDMappingHealthDependencies(Protocol):
     provider_name: str
     logger: LoggerPort
     http_client: UnifiedHTTPClient
-    _adapter_metrics: AdapterMetrics
+    _adapter_metrics: AdapterMetricsRecorder
     base_url: str
 
 
@@ -29,7 +29,7 @@ class IDMappingHealthMixin:
     provider_name: str
     logger: LoggerPort
     http_client: UnifiedHTTPClient
-    _adapter_metrics: AdapterMetrics
+    _adapter_metrics: AdapterMetricsRecorder
     base_url: str
 
     def _health_deps(self) -> IDMappingHealthDependencies:

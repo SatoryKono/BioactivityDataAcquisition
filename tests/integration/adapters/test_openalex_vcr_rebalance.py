@@ -15,10 +15,10 @@ import pytest_asyncio
 
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import HealthStatus
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
-from bioetl.infrastructure.adapters.openalex.client import OpenAlexAdapter
+from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
+from bioetl.infrastructure.adapters.openalex import OpenAlexAdapter
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 CASSETTE_DIR = Path(__file__).parent.parent.parent / "fixtures" / "vcr" / "openalex"
@@ -47,8 +47,8 @@ def vcr_cassette_name(request: pytest.FixtureRequest) -> str:
 async def http_client() -> AsyncIterator[UnifiedHTTPClient]:
     """Create and manage OpenAlex HTTP client lifecycle for integration tests."""
     client = UnifiedHTTPClient(
-        rate_limiter=TokenBucket(rate=10.0, capacity=20, provider="openalex_rf013"),
-        circuit_breaker=CircuitBreaker(provider="openalex_rf013"),
+        rate_limiter=TokenBucketRateLimiter(rate=10.0, capacity=20, provider="openalex_rf013"),
+        circuit_breaker=CircuitBreakerGuard(provider="openalex_rf013"),
         timeout=30.0,
         provider="openalex",
     )

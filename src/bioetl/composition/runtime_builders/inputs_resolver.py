@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import (
-        InputFilterConfig as YamlInputFilter,
+        InputFilterYamlConfig as YamlInputFilter,
     )
     from bioetl.infrastructure.schemas.pipeline_config import (
         MaintenanceConfig,

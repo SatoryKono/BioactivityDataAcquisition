@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.application.composite.runner import CompositeRuntimeConfig
+from bioetl.application.composite.runner_pkg import CompositeRuntimeConfig
 from bioetl.interfaces.cli.commands.health_server_integration import (
     echo_health_server_info,
 )

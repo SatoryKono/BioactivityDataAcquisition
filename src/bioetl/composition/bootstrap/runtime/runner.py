@@ -17,7 +17,7 @@ from bioetl.application.services.pipeline_run_execution_service import (
     PipelineRunExecutionService,
 )
 from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger_port
-from bioetl.composition.factories.runner_factory import (
+from bioetl.composition.factories.pipeline.runner import (
     create_metrics_extractor,
     create_runner_factory,
 )

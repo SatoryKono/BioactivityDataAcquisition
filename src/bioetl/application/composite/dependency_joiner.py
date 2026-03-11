@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite.protocols import (
@@ -64,6 +65,50 @@ def _count_qualified_columns(columns: list[str]) -> int:
 
 def _find_missing_keys(columns: list[str], keys: list[str]) -> list[str]:
     return [key for key in keys if key not in columns]
+
+
+def _build_composite_join_metadata(
+    *,
+    dep: DependencyConfig,
+    seed_pipeline: str | None,
+) -> _CompositeJoinMetadata:
+    return _CompositeJoinMetadata(
+        join_keys_list=list(dep.join_keys),
+        left_pipeline=_resolve_left_pipeline(dep, seed_pipeline),
+    )
+
+
+def _build_single_key_join_metadata(
+    *,
+    dep: DependencyConfig,
+    seed_pipeline: str | None,
+) -> _SingleKeyJoinMetadata:
+    join_keys_list = list(dep.join_keys)
+    primary_key = dep.primary_join_key
+    right_key = dep.filter_field if dep.filter_field else primary_key
+    right_keys_list = [right_key] if dep.filter_field else join_keys_list
+    return _SingleKeyJoinMetadata(
+        join_keys_list=join_keys_list,
+        primary_key=primary_key,
+        right_key=right_key,
+        right_keys_list=right_keys_list,
+        left_pipeline=_resolve_left_pipeline(dep, seed_pipeline),
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class _CompositeJoinMetadata:
+    join_keys_list: list[str]
+    left_pipeline: str | None
+
+
+@dataclass(frozen=True, slots=True)
+class _SingleKeyJoinMetadata:
+    join_keys_list: list[str]
+    primary_key: str
+    right_key: str
+    right_keys_list: list[str]
+    left_pipeline: str | None
 
 
 class DependencyJoinerService:
@@ -133,20 +178,22 @@ class DependencyJoinerService:
         seed_pipeline: str | None = None,
     ) -> pl.DataFrame:
         """Join dependency using all configured composite join keys."""
-        join_keys_list = list(dep.join_keys)
-        left_pipeline = _resolve_left_pipeline(dep, seed_pipeline)
+        metadata = _build_composite_join_metadata(
+            dep=dep,
+            seed_pipeline=seed_pipeline,
+        )
         merged_df, dep_df = self._prepare_dependency_join_frames(
             merged_df=merged_df,
             dep_df=dep_df,
             dep=dep,
-            left_join_keys=join_keys_list,
-            right_join_keys=join_keys_list,
+            left_join_keys=metadata.join_keys_list,
+            right_join_keys=metadata.join_keys_list,
             seed_pipeline=seed_pipeline,
         )
         left_keys, right_keys, all_join_key_set = (
             self._join_key_resolver.resolve_composite_join_keys(
-                join_keys_list,
-                left_pipeline,
+                metadata.join_keys_list,
+                metadata.left_pipeline,
                 dep.pipeline,
                 merged_df.columns,
             )
@@ -167,21 +214,23 @@ class DependencyJoinerService:
             )
             return merged_df
 
-        result = self._join_executor.execute_composite_key_join(
-            merged_df,
-            dep_df,
-            left_keys,
-            right_keys,
-            dep.pipeline,
-        )
-        self._logger.debug(
-            "Joined dependency with composite key",
+        return self._execute_dependency_join(
+            merged_df=merged_df,
+            dep_df=dep_df,
+            join_key_set=all_join_key_set,
+            execute_join=lambda resolved_merged, resolved_dep: (
+                self._join_executor.execute_composite_key_join(
+                    resolved_merged,
+                    resolved_dep,
+                    left_keys,
+                    right_keys,
+                    dep.pipeline,
+                )
+            ),
+            log_message="Joined dependency with composite key",
             dependency=dep.pipeline,
-            left_keys=left_keys,
-            right_keys=right_keys,
-            result_rows=len(result),
+            log_fields={"left_keys": left_keys, "right_keys": right_keys},
         )
-        return result
 
     def drop_system_columns(self, df: pl.DataFrame) -> pl.DataFrame:
         """Drop system columns that must come only from seed."""
@@ -205,24 +254,23 @@ class DependencyJoinerService:
         dep: DependencyConfig,
         seed_pipeline: str | None,
     ) -> pl.DataFrame:
-        join_keys_list = list(dep.join_keys)
-        primary_key = join_keys_list[0]
-        right_key = dep.filter_field if dep.filter_field else primary_key
-        right_keys_list = [right_key] if dep.filter_field else join_keys_list
-        left_pipeline = _resolve_left_pipeline(dep, seed_pipeline)
+        metadata = _build_single_key_join_metadata(
+            dep=dep,
+            seed_pipeline=seed_pipeline,
+        )
         result, dep_df = self._prepare_dependency_join_frames(
             merged_df=result,
             dep_df=dep_df,
             dep=dep,
-            left_join_keys=join_keys_list,
-            right_join_keys=right_keys_list,
+            left_join_keys=metadata.join_keys_list,
+            right_join_keys=metadata.right_keys_list,
             seed_pipeline=seed_pipeline,
         )
         seed_join_key, dep_join_key, seed_join_key_qualified = (
             self._join_key_resolver.resolve_join_key_names_asymmetric(
-                left_key=primary_key,
-                right_key=right_key,
-                left_pipeline=left_pipeline,
+                left_key=metadata.primary_key,
+                right_key=metadata.right_key,
+                left_pipeline=metadata.left_pipeline,
                 right_pipeline=dep.pipeline,
                 merged_columns=result.columns,
             )
@@ -234,26 +282,26 @@ class DependencyJoinerService:
             left_join_key_qualified=seed_join_key_qualified,
         )
 
-        result, dep_df = self._conflict_resolver.detect_and_resolve_conflicts(
-            result,
-            dep_df,
-            join_key_set,
-        )
-        result = self._join_executor.execute_polars_join(
-            result,
-            dep_df,
-            seed_join_key,
-            dep_join_key,
-            dep.pipeline,
-        )
-        self._logger.debug(
-            "Joined dependency",
+        return self._execute_dependency_join(
+            merged_df=result,
+            dep_df=dep_df,
+            join_key_set=join_key_set,
+            execute_join=lambda resolved_merged, resolved_dep: (
+                self._join_executor.execute_polars_join(
+                    resolved_merged,
+                    resolved_dep,
+                    seed_join_key,
+                    dep_join_key,
+                    dep.pipeline,
+                )
+            ),
+            log_message="Joined dependency",
             dependency=dep.pipeline,
-            seed_join_key=seed_join_key,
-            dep_join_key=dep_join_key,
-            result_rows=len(result),
+            log_fields={
+                "seed_join_key": seed_join_key,
+                "dep_join_key": dep_join_key,
+            },
         )
-        return result
 
     def _prepare_dependency_dataframe(
         self,
@@ -335,3 +383,30 @@ class DependencyJoinerService:
             qualified_count=_count_qualified_columns(renamed.columns),
         )
         return self.drop_system_columns(renamed)
+
+    def _execute_dependency_join(
+        self,
+        *,
+        merged_df: pl.DataFrame,
+        dep_df: pl.DataFrame,
+        join_key_set: set[str],
+        execute_join: Callable[[pl.DataFrame, pl.DataFrame], pl.DataFrame],
+        log_message: str,
+        dependency: str,
+        log_fields: Mapping[str, object],
+    ) -> pl.DataFrame:
+        resolved_merged, resolved_dep = (
+            self._conflict_resolver.detect_and_resolve_conflicts(
+                merged_df,
+                dep_df,
+                join_key_set,
+            )
+        )
+        result = execute_join(resolved_merged, resolved_dep)
+        self._logger.debug(
+            log_message,
+            dependency=dependency,
+            result_rows=len(result),
+            **log_fields,
+        )
+        return result

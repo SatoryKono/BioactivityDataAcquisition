@@ -12,7 +12,7 @@ import pytest
 from pydantic import BaseModel, Field
 
 from bioetl.infrastructure.adapters.validation import (
-    ValidationResult,
+    RecordValidationResult,
     get_record_model,
     parse_with_validation,
     validate_record,
@@ -30,12 +30,12 @@ class SampleModel(BaseModel):
 
 
 @pytest.mark.unit
-class TestValidationResult:
-    """Test ValidationResult dataclass."""
+class TestRecordValidationResult:
+    """Test RecordValidationResult dataclass."""
 
     def test_default_values(self) -> None:
         """Test default field values."""
-        result = ValidationResult()
+        result = RecordValidationResult()
         assert result.record is None
         assert result.validated is None
         assert result.is_valid is False
@@ -45,7 +45,7 @@ class TestValidationResult:
     def test_successful_validation(self) -> None:
         """Test successful validation result."""
         model = SampleModel(id="1", name="test", value=10)
-        result = ValidationResult(
+        result = RecordValidationResult(
             record={"id": "1", "name": "test", "value": 10},
             validated=model,
             is_valid=True,
@@ -56,7 +56,7 @@ class TestValidationResult:
 
     def test_failed_validation(self) -> None:
         """Test failed validation result."""
-        result = ValidationResult(
+        result = RecordValidationResult(
             record={"id": "1"},
             validated=None,
             is_valid=False,

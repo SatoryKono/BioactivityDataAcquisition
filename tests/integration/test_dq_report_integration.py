@@ -19,7 +19,7 @@ from bioetl.application.services.dq_report_service import (
     DQReportContext,
     DQReportService,
 )
-from bioetl.composition.factories.dq_factory import DQServicesFactory
+from bioetl.composition.factories.dq.factory import DQServicesFactory
 from bioetl.domain.value_objects.dq_report import DQReportFormat
 from bioetl.infrastructure.schemas.dq_report_config import (
     BronzeDQReportConfig,

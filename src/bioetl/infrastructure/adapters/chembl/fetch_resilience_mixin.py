@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
     from bioetl.domain.ports import ErrorHandlerPort, LoggerPort
-    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
     from bioetl.infrastructure.adapters.chembl.entity_mapper import (
         ChemblEntityMapper,
     )
@@ -101,7 +101,7 @@ class ChemblFetchResilienceMixin:
     logger: LoggerPort
     provider_name: str
     _mapper: ChemblEntityMapper
-    _adapter_metrics: AdapterMetrics
+    _adapter_metrics: AdapterMetricsRecorder
     http_client: UnifiedHTTPClient
     _request_collector: APIRequestCollector
     _error_handler: ErrorHandlerPort

@@ -27,7 +27,7 @@ class TestFileSizeLimits:
         "application": 500,  # Application can be larger
         "composition": 350,  # Composition is wiring only (buffer below hard cap)
         "infrastructure": 650,  # Infrastructure adapters may be complex (bumped from 600)
-        "interfaces": 400,  # CLI and entry points
+        "interfaces": 420,  # CLI and entry points (bumped: registry DI params)
     }
 
     # Exemptions are managed in configs/quality/architecture_metric_exemptions.yaml

@@ -6,7 +6,7 @@ from collections.abc import Callable
 from typing import TYPE_CHECKING, Literal, cast
 
 from bioetl.composition.builders import FilterConfigBuilder
-from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.providers.registration import register_all_providers
 from bioetl.composition.registry import PipelineRegistry, get_default_registry
@@ -35,7 +35,7 @@ from bioetl.infrastructure.config import (
     load_source_config,
 )
 from bioetl.infrastructure.observability import OpenTelemetryTracer, PrometheusMetrics
-from bioetl.infrastructure.observability.anomaly import DataQualityMonitor
+from bioetl.infrastructure.observability.anomaly import DataQualityMonitorService
 from bioetl.infrastructure.observability.unified_logger import UnifiedLogger
 
 # Backward-compat alias for legacy imports/tests.
@@ -53,7 +53,7 @@ if TYPE_CHECKING:
     from bioetl.domain.types import RunID
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import (
-        InputFilterConfig as YamlInputFilter,
+        InputFilterYamlConfig as YamlInputFilter,
     )
     from bioetl.infrastructure.schemas.pipeline_config import (
         MaintenanceConfig,
@@ -130,7 +130,7 @@ def _build_observability_bundle(
         metrics_factory=PrometheusMetrics,
         noop_tracing_factory=NoOpTracing,
         noop_metrics_factory=NoOpMetrics,
-        dq_monitor_factory=DataQualityMonitor,
+        dq_monitor_factory=DataQualityMonitorService,
     )
 
 

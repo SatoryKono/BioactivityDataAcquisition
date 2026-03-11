@@ -12,10 +12,10 @@ from pydantic import SecretStr
 from bioetl.domain.entities.pubmed import ArticleRecord
 from bioetl.domain.resilience import RetryConfig
 from bioetl.domain.types import HealthStatus
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
-from bioetl.infrastructure.adapters.pubmed.pubmed_client import (
+from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
+from bioetl.infrastructure.adapters.pubmed.client import (
     ENTREZ_API_BASE,
     PubMedAdapter,
     _create_pubmed_adapter,
@@ -30,8 +30,8 @@ def mock_logger() -> MagicMock:
 @pytest.fixture
 def pubmed_adapter(mock_logger) -> PubMedAdapter:
     http_client = UnifiedHTTPClient(
-        TokenBucket(rate=10.0, capacity=20.0),
-        CircuitBreaker(provider="pubmed_test"),
+        TokenBucketRateLimiter(rate=10.0, capacity=20.0),
+        CircuitBreakerGuard(provider="pubmed_test"),
         retry_config=RetryConfig(max_attempts=1, base_delay=0.0),
         timeout=0.5,
     )

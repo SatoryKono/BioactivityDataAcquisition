@@ -4,7 +4,7 @@ Implements RULES.md Appendix A - PubChem specifications.
 
 Requirements:
 - Uses pubchempy library (legacy sync)
-- Rate limit: 5 req/sec (TokenBucket)
+- Rate limit: 5 req/sec (TokenBucketRateLimiter)
 - Health: lightweight query
 - Entities: compounds, substances, assays, bioassays
 
@@ -51,8 +51,8 @@ if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
     from bioetl.domain.ports import ErrorHandlerPort, LoggerPort
-    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
-    from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+    from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
+    from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
     from bioetl.infrastructure.adapters.pubchem.fetch_strategies import (
         PubChemFetchStrategies,
     )
@@ -82,8 +82,8 @@ class PubChemAdapter(PubChemAdapterModelMixin, FilterableStubMixin, BaseSyncAdap
 
     Example:
         >>> # Dependencies created in Composition Root
-        >>> rate_limiter = TokenBucket(rate=5.0, capacity=10)
-        >>> circuit_breaker = CircuitBreaker(provider="pubchem")
+        >>> rate_limiter = TokenBucketRateLimiter(rate=5.0, capacity=10)
+        >>> circuit_breaker = CircuitBreakerGuard(provider="pubchem")
         >>> thread_pool = ThreadPoolExecutor(max_workers=4)
         >>> adapter = PubChemAdapter(
         ...     logger=logger,
@@ -103,8 +103,8 @@ class PubChemAdapter(PubChemAdapterModelMixin, FilterableStubMixin, BaseSyncAdap
     def __init__(
         self,
         logger: LoggerPort,
-        rate_limiter: TokenBucket,
-        circuit_breaker: CircuitBreaker,
+        rate_limiter: TokenBucketRateLimiter,
+        circuit_breaker: CircuitBreakerGuard,
         thread_pool: ThreadPoolExecutor,
         strict_error_handling: bool = False,
         *,

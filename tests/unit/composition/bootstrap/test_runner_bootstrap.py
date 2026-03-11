@@ -13,7 +13,7 @@ from bioetl.application.services import PipelineRunnerService
 from bioetl.composition.bootstrap.runtime.runner import (
     bootstrap_pipeline_runner_service,
 )
-from bioetl.composition.factories.runner_factory import (
+from bioetl.composition.factories.pipeline.runner import (
     MetricsExtractor,
     RunnerFactory,
 )

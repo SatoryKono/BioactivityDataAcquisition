@@ -16,7 +16,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from pathlib import Path
 
-from bioetl.application.core.cleanup_service import CleanupService
+from bioetl.application.core.lifecycle.cleanup_service import CleanupService
 from bioetl.application.services import (
     BronzeCleanupService,
     ExportService,

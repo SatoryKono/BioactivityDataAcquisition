@@ -213,12 +213,12 @@ class HealthCheckProviderMixin(HealthCheckMixin):
     - _get_error_context(): Build error context for logging
 
     Subclasses MUST implement:
-    - _circuit_breaker: Property returning the CircuitBreaker instance
+    - _circuit_breaker: Property returning the CircuitBreakerGuard instance
 
     Usage:
         class MyAdapter(HealthCheckProviderMixin, DataSourcePort):
             @property
-            def _circuit_breaker(self) -> CircuitBreaker:
+            def _circuit_breaker(self) -> CircuitBreakerGuard:
                 return self._http_client.circuit_breaker
 
             async def _probe_health(self) -> HealthStatus:

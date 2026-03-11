@@ -3,6 +3,7 @@
 from bioetl.domain.ports.runtime.batch_id import BatchIdGeneratorPort
 from bioetl.domain.ports.runtime.checkpoint import CheckpointPort
 from bioetl.domain.ports.runtime.clock import ClockPort
+from bioetl.domain.ports.runtime.composite_checkpoint import CompositeCheckpointPort
 from bioetl.domain.ports.runtime.locking import LockPort
 from bioetl.domain.ports.runtime.memory import MemoryMonitorPort, MemoryStats
 from bioetl.domain.ports.runtime.pipeline_debug import (
@@ -31,6 +32,7 @@ __all__ = [
     "BreakpointHit",
     "CheckpointPort",
     "ClockPort",
+    "CompositeCheckpointPort",
     "DebugAction",
     "ExecutionMetricsReadablePort",
     "ExecutionMetricsRunnerPort",

@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.composition.factories.crossref_adapter_factory import (
+from bioetl.composition.factories.datasource.crossref import (
     create_crossref_adapter,
 )
 from bioetl.composition.providers._config_helpers import (
@@ -20,18 +20,14 @@ from bioetl.composition.providers.provider_registry import (
     HttpConfig,
     ProviderConfig,
 )
-from bioetl.infrastructure.adapters.crossref.client import CrossRefAdapter
+from bioetl.infrastructure.adapters.crossref import CrossRefAdapter
+from bioetl.infrastructure.adapters.openalex import OpenAlexAdapter
 from bioetl.infrastructure.adapters.openalex.client import (
-    OpenAlexAdapter,
     _create_openalex_adapter,
 )
-from bioetl.infrastructure.adapters.pubmed.pubmed_client import (
-    PubMedAdapter,
-    _create_pubmed_adapter,
-)
-from bioetl.infrastructure.adapters.semanticscholar.adapter import (
-    SemanticScholarAdapter,
-)
+from bioetl.infrastructure.adapters.pubmed import PubMedAdapter
+from bioetl.infrastructure.adapters.pubmed.client import _create_pubmed_adapter
+from bioetl.infrastructure.adapters.semanticscholar import SemanticScholarAdapter
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import InputFilterConfig

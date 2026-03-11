@@ -8,11 +8,12 @@ Implements RULES.md §1.2 - Domain Ports pattern.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
-from bioetl.domain.types import JsonDict
+from bioetl.domain.types import JsonDict, ScdConfig
 
 if TYPE_CHECKING:
     from bioetl.domain.models.metadata import (
@@ -161,7 +162,7 @@ class GoldMetadataInput:
     mode: object  # object: GoldWriteMode - avoid circular import, only stored
     records: list[JsonDict] | None = None
     total_records: int | None = None
-    scd_config: JsonDict | None = None  # Any: SCD2 config values
+    scd_config: ScdConfig | None = None
     started_at: datetime | None = None  # ADR-029: Write start timestamp
     completed_at: datetime | None = None
     silver_refs: list[SilverRef] | None = None
@@ -176,6 +177,15 @@ class GoldMetadataInput:
     partition_count: int = 0  # ADR-029: Number of partitions
     schema_validation_enabled: bool = False
     schema_validation_strict: bool | None = None
+
+    def __post_init__(self) -> None:
+        """Coerce legacy mapping payloads into typed SCD config."""
+        if isinstance(self.scd_config, Mapping):
+            object.__setattr__(
+                self,
+                "scd_config",
+                ScdConfig.from_mapping(self.scd_config),
+            )
 
 
 @runtime_checkable

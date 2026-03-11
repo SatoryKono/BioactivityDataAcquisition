@@ -341,12 +341,12 @@ class TestDataQualityServiceAnomalyDetection:
     ):
         """Test anomaly detection with anomalies detected."""
         from bioetl.infrastructure.observability.anomaly.types import (
-            Anomaly,
+            AnomalyRecord,
             AnomalySeverity,
             AnomalyType,
         )
 
-        anomaly = Anomaly(
+        anomaly = AnomalyRecord(
             metric_name="error_rate",
             current_value=0.15,
             baseline_mean=0.05,
@@ -389,12 +389,12 @@ class TestDataQualityServiceAnomalyDetection:
     ):
         """Test anomaly detection with critical anomaly."""
         from bioetl.infrastructure.observability.anomaly.types import (
-            Anomaly,
+            AnomalyRecord,
             AnomalySeverity,
             AnomalyType,
         )
 
-        critical_anomaly = Anomaly(
+        critical_anomaly = AnomalyRecord(
             metric_name="error_rate",
             current_value=0.50,
             baseline_mean=0.05,
@@ -505,12 +505,12 @@ class TestDataQualityServiceBaselineUpdates:
     ):
         """Test that baseline is not updated when critical anomaly detected."""
         from bioetl.infrastructure.observability.anomaly.types import (
-            Anomaly,
+            AnomalyRecord,
             AnomalySeverity,
             AnomalyType,
         )
 
-        critical_anomaly = Anomaly(
+        critical_anomaly = AnomalyRecord(
             metric_name="error_rate",
             current_value=0.50,
             baseline_mean=0.05,

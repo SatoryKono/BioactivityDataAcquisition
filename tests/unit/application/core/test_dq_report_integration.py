@@ -369,6 +369,7 @@ class TestBatchExecutorDQCollection:
             silver_output_path="silver/path",
             gold_output_path="gold/path",
             flat_structure=False,
+            scd_config=None,
         )
         context = SimpleNamespace(run_id="run-123")
         batch_processing_service = MagicMock()

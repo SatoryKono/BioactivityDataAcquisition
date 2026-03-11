@@ -16,7 +16,7 @@ __all__ = ["BasePipeline"]
 from abc import ABC
 from typing import TYPE_CHECKING, Self
 
-from bioetl.application.core.shutdown import ShutdownSignal
+from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
 from bioetl.domain.context import PipelineContext
 
 if TYPE_CHECKING:

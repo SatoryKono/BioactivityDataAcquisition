@@ -6,7 +6,7 @@ __all__ = ["SilverWriterValidationMixin"]
 
 import asyncio
 from collections.abc import Awaitable, Callable
-from functools import partial
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Literal
 
 import pyarrow as pa
@@ -24,6 +24,16 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort, SilverValidatorPort
     from bioetl.domain.types import BronzeRecord
     from bioetl.domain.value_objects.dq_metrics import SchemaDriftInfo
+
+
+@dataclass(frozen=True, slots=True)
+class _PreparedSilverWritePayload:
+    """Validated write payload produced before Delta write execution."""
+
+    records: list[BronzeRecord]
+    validated_mode: SilverWriteMode
+    table_path: str
+    arrow_data: pa.Table
 
 
 class SilverWriterValidationMixin:
@@ -304,23 +314,24 @@ class SilverWriterValidationMixin:
         column_order: list[str] | None,
         partition_cols: list[str] | None,
         key_nullability_rules: list[KeyNullabilityRule] | None,
-    ) -> tuple[list[BronzeRecord], SilverWriteMode, str, pa.Table]:
+    ) -> _PreparedSilverWritePayload:
         """Run full validation chain and prepare Arrow data for write."""
-        loop = asyncio.get_running_loop()
-        records, validated_mode, arrow_data = await loop.run_in_executor(
-            None,
-            partial(
-                self._sync_validate_and_build_arrow,
-                table_name=table_name,
-                records=records,
-                primary_keys=primary_keys,
-                schema=schema,
-                mode=mode,
-                column_order=column_order,
-                partition_cols=partition_cols,
-                key_nullability_rules=key_nullability_rules,
-            ),
+        records, validated_mode, arrow_data = await asyncio.to_thread(
+            self._sync_validate_and_build_arrow,
+            table_name=table_name,
+            records=records,
+            primary_keys=primary_keys,
+            schema=schema,
+            mode=mode,
+            column_order=column_order,
+            partition_cols=partition_cols,
+            key_nullability_rules=key_nullability_rules,
         )
         await self._check_schema_drift(table_name, records, on_schema_mismatch)
         table_path = self._resolve_table_path(table_name)
-        return records, validated_mode, table_path, arrow_data
+        return _PreparedSilverWritePayload(
+            records=records,
+            validated_mode=validated_mode,
+            table_path=table_path,
+            arrow_data=arrow_data,
+        )

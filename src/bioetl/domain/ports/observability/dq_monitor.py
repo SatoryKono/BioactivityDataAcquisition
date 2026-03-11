@@ -30,7 +30,7 @@ class DQMonitorPort(Protocol):
     def check_quality(
         self,
         metrics: dict[str, float],
-    ) -> list[Any]:  # Any: list[Anomaly] (infrastructure type)
+    ) -> list[Any]:  # Any: list[AnomalyRecord] (infrastructure type)
         """Evaluate metrics against baselines and return detected anomalies.
 
         Args:

@@ -378,7 +378,7 @@ def test_probe_mode_fallback_counter_exists() -> None:
     metrics_defs = Path(
         "src/bioetl/infrastructure/observability/metrics_definitions.py"
     )
-    aggregator = Path("src/bioetl/application/core/preflight_health_aggregator.py")
+    aggregator = Path("src/bioetl/application/core/preflight/health_aggregator.py")
 
     assert metrics_defs.exists(), "metrics_definitions.py not found"
     assert aggregator.exists(), "preflight_health_aggregator.py not found"

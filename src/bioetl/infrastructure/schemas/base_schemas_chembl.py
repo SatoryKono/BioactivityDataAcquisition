@@ -102,7 +102,7 @@ class BaseRateLimitConfig(BaseModel):
     )
 
 
-class BaseClientConfig(BaseModel):
+class HttpClientConfig(BaseModel):
     """Base HTTP client config for pipeline and source configs."""
 
     model_config = ConfigDict(extra="ignore")
@@ -170,10 +170,10 @@ class BaseMaintenanceConfig(BaseModel):
 __all__ = [
     "BaseApiConfig",
     "BaseCircuitBreakerConfig",
-    "BaseClientConfig",
     "BaseCsvExportConfig",
     "BaseDQConfig",
     "BaseDQThresholds",
     "BaseMaintenanceConfig",
     "BaseRateLimitConfig",
+    "HttpClientConfig",
 ]

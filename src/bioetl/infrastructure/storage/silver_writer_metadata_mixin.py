@@ -38,6 +38,11 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 
+def _read_delta_version(table_path: str) -> int:
+    """Read the current Delta table version synchronously."""
+    return DeltaTable(table_path).version()
+
+
 class SilverWriterMetadataMixin:
     """Mixin with metadata, lineage, and audit helpers."""
 
@@ -128,12 +133,8 @@ class SilverWriterMetadataMixin:
 
     async def _get_delta_version(self, table_path: str) -> int | None:
         """Get current Delta table version, if table exists."""
-        loop = asyncio.get_running_loop()
         try:
-            delta_table = await loop.run_in_executor(
-                None, lambda: DeltaTable(table_path)
-            )
-            version: int = delta_table.version()
+            version = await asyncio.to_thread(_read_delta_version, table_path)
             return version
         except DeltaTableNotFoundError:
             return None

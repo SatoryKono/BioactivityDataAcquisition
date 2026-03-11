@@ -11,7 +11,7 @@ from bioetl.infrastructure.adapters.decorators import (
     wrap_with_resilience,
 )
 from bioetl.infrastructure.adapters.validation import (
-    ValidationResult,
+    RecordValidationResult,
     get_record_model,
     parse_with_validation,
     validate_record,
@@ -21,8 +21,8 @@ from bioetl.infrastructure.adapters.validation import (
 __all__ = [
     "CachedBronzeDataSource",
     "CircuitBreakerDataSourceDecorator",
+    "RecordValidationResult",
     "RetryingDataSourceDecorator",
-    "ValidationResult",
     "get_record_model",
     "parse_with_validation",
     "validate_record",

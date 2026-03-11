@@ -11,7 +11,7 @@ import pytest
 from bioetl.composition.bootstrap.runtime.runner_assembly import (
     create_composite_runner_with_legacy_fsm_adapter,
 )
-from bioetl.composition.factories import pipeline_factory
+from bioetl.composition.factories.pipeline import facade as pipeline_factory
 from bioetl.domain.types import BatchID
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.infrastructure.storage.bronze_write_result_helpers import (
@@ -22,7 +22,7 @@ from bioetl.infrastructure.storage.bronze_write_result_helpers import (
 def test_pipeline_factory_build_pipeline_services_warns() -> None:
     """Deprecated pipeline_factory facade must emit ``DeprecationWarning``."""
     with patch(
-        "bioetl.composition.factories.pipeline_factory._build_pipeline_services"
+        "bioetl.composition.factories.pipeline.facade._build_pipeline_services"
     ):
         with pytest.warns(DeprecationWarning, match="pipeline_factory facade"):
             pipeline_factory.build_pipeline_services(
@@ -36,7 +36,7 @@ def test_pipeline_factory_build_pipeline_services_warns() -> None:
 def test_pipeline_factory_create_pipeline_with_services_warns() -> None:
     """Deprecated pipeline_factory constructor facade must emit warning."""
     with patch(
-        "bioetl.composition.factories.pipeline_factory._create_pipeline_with_services"
+        "bioetl.composition.factories.pipeline.facade._create_pipeline_with_services"
     ):
         with pytest.warns(DeprecationWarning, match="pipeline_factory facade"):
             pipeline_factory.create_pipeline_with_services(

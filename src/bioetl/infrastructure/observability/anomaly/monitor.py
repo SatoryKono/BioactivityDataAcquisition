@@ -5,14 +5,17 @@ Combines multiple detectors to monitor data quality metrics.
 
 from __future__ import annotations
 
-__all__ = ["DataQualityMonitor"]
+__all__ = ["DataQualityMonitorService"]
 
 
 from datetime import datetime
 from typing import TYPE_CHECKING
 
 from bioetl.infrastructure.observability.anomaly.detector import AnomalyDetector
-from bioetl.infrastructure.observability.anomaly.types import Anomaly, AnomalySeverity
+from bioetl.infrastructure.observability.anomaly.types import (
+    AnomalyRecord,
+    AnomalySeverity,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -20,7 +23,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
-class DataQualityMonitor:
+class DataQualityMonitorService:
     """Monitor data quality metrics and detect issues.
 
     Combines multiple detectors to monitor:
@@ -30,7 +33,7 @@ class DataQualityMonitor:
     - Validation failure rates
 
     Usage:
-        monitor = DataQualityMonitor(logger=my_logger)
+        monitor = DataQualityMonitorService(logger=my_logger)
         monitor.add_metric("record_count", baseline=[1000, 1050, 980])
 
         issues = monitor.check_quality({
@@ -91,7 +94,7 @@ class DataQualityMonitor:
 
     def check_quality(
         self, metrics: dict[str, float], timestamp: datetime | None = None
-    ) -> list[Anomaly]:
+    ) -> list[AnomalyRecord]:
         """Check metrics for quality issues.
 
         Args:
@@ -101,7 +104,7 @@ class DataQualityMonitor:
         Returns:
             List of detected anomalies
         """
-        anomalies: list[Anomaly] = []
+        anomalies: list[AnomalyRecord] = []
 
         for metric_name, current_value in metrics.items():
             anomaly = self.detector.detect(metric_name, current_value, timestamp)

@@ -25,14 +25,10 @@ from typing import TYPE_CHECKING, Any
 from httpx import HTTPStatusError, RequestError
 
 from bioetl.domain.exceptions import BioETLError, NetworkError
-from bioetl.domain.ports import NoOpMetrics
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.common import (
     FallbackFetchOrchestratorService,
     FallbackPolicyMixin,
-)
-from bioetl.infrastructure.adapters.common.adapter_defaults import (
-    create_default_error_handler as _create_default_openalex_error_handler,
 )
 from bioetl.infrastructure.adapters.common.adapter_defaults import (
     create_default_fallback_service as _create_default_openalex_fallback_service,
@@ -62,7 +58,7 @@ from bioetl.infrastructure.adapters.openalex.response_mapping import (
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import ErrorHandlerPort, LoggerPort, MetricsPort
-    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
     from bioetl.infrastructure.adapters.common.api_request_collector import (
         APIRequestCollector,
     )
@@ -88,7 +84,7 @@ OPENALEX_RUNTIME_ERRORS = (
 def _create_default_openalex_query_executor(
     *,
     http_client: UnifiedHTTPClient,
-    adapter_metrics: AdapterMetrics,
+    adapter_metrics: AdapterMetricsRecorder,
     request_collector: APIRequestCollector,
     headers_provider: Any,  # Any: callable returning dict[str, str]
     api_base: str,
@@ -244,7 +240,7 @@ class OpenAlexAdapter(
     metrics: MetricsPort | None = None
     title_search_cache_size: int = 256
     error_handler: ErrorHandlerPort | None = None
-    adapter_metrics: AdapterMetrics | None = None
+    adapter_metrics: AdapterMetricsRecorder | None = None
     request_collector: APIRequestCollector | None = None
     fallback_fetch_service: FallbackFetchOrchestratorService | None = None
     openalex_query_executor: OpenAlexQueryExecutor | None = None
@@ -265,21 +261,14 @@ class OpenAlexAdapter(
 
     def __post_init__(self) -> None:
         """Initialize adapter metrics and decomposed OpenAlex components."""
-        self._http_client = self.http_client
-        self._logger = self.logger
-        self._metrics = self.metrics if self.metrics is not None else NoOpMetrics()
-        if self.adapter_metrics is not None and self.request_collector is not None:
-            self._adapter_metrics = self.adapter_metrics
-            self._request_collector = self.request_collector
-        else:
-            self._init_adapter_metrics()
-        self._error_handler = (
-            self.error_handler
-            if self.error_handler is not None
-            else _create_default_openalex_error_handler(
-                logger=self._logger,
-                metrics=self._metrics,
-            )
+        BaseHttpAdapter.__init__(
+            self,
+            http_client=self.http_client,
+            logger=self.logger,
+            metrics=self.metrics,
+            error_handler=self.error_handler,
+            adapter_metrics=self.adapter_metrics,
+            request_collector=self.request_collector,
         )
         self._fallback_fetch_service = (
             self.fallback_fetch_service

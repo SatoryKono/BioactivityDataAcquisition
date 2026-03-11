@@ -8,7 +8,7 @@ from uuid import UUID, uuid4
 
 import pytest
 
-from bioetl.application.core.shutdown import ShutdownSignal
+from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
 from bioetl.application.pipelines.pubmed import PubMedPublicationPipeline
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 from bioetl.domain.context import PipelineContext

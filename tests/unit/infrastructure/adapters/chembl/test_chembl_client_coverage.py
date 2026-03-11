@@ -9,7 +9,7 @@ import pytest
 from bioetl.domain.entities.chembl import ActivityRecord
 from bioetl.domain.exceptions import ExternalServiceError, RetryExhaustedError
 from bioetl.domain.types import CircuitBreakerState
-from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
+from bioetl.infrastructure.adapters.chembl import ChemblAdapter
 
 
 @pytest.fixture

@@ -7,7 +7,7 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.core.checkpoint_manager import CheckpointManager
+from bioetl.application.core.lifecycle.checkpoint_manager import CheckpointManager
 
 
 @pytest.fixture

@@ -27,10 +27,10 @@ def initialize_scd2_records(
     ingestion_ts: datetime,
 ) -> None:
     """Populate SCD2 metadata fields before writing."""
-    version_col = scd_config.get("version_col", "version")
-    valid_from_col = scd_config.get("valid_from_col", "valid_from")
-    valid_to_col = scd_config.get("valid_to_col", "valid_to")
-    current_flag_col = scd_config.get("current_flag_col", "is_current")
+    version_col = scd_config.version_col
+    valid_from_col = scd_config.valid_from_col
+    valid_to_col = scd_config.valid_to_col
+    current_flag_col = scd_config.current_flag_col
     ts_iso = ingestion_ts.isoformat()
     for record in records:
         record[valid_from_col] = ts_iso

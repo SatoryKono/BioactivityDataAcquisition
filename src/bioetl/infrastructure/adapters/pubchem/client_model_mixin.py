@@ -6,6 +6,11 @@ from typing import TYPE_CHECKING
 
 from pydantic import BaseModel
 
+from bioetl.infrastructure.adapters.common.source_metadata_capability import (
+    clear_source_metadata_collector,
+    consume_source_metadata,
+    get_request_count,
+)
 from bioetl.infrastructure.adapters.pubchem.client_builders import PUBCHEM_DTO_MODELS
 from bioetl.infrastructure.adapters.pubchem.constants import PUBCHEM_API_BASE
 
@@ -17,14 +22,14 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.common.api_request_collector import (
         APIRequestCollector,
     )
-    from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+    from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 
 
 class PubChemAdapterModelMixin:
     """Adds DTO conversion and request metadata methods to `PubChemAdapter`."""
 
     _request_collector: APIRequestCollector
-    rate_limiter: TokenBucket
+    rate_limiter: TokenBucketRateLimiter
 
     def fetch(
         self,
@@ -107,22 +112,20 @@ class PubChemAdapterModelMixin:
         Returns:
             SourceMetadata aggregated from recorded API requests since last clear.
         """
-        metadata = self._request_collector.to_source_metadata(
-            source_type="api",
+        return consume_source_metadata(
+            collector=self._request_collector,
             url=PUBCHEM_API_BASE,
             api_version=api_version,
         )
-        self._request_collector.clear()
-        return metadata
 
     def clear_request_collector(self) -> None:
         """Clear the API request collector without generating metadata."""
-        self._request_collector.clear()
+        clear_source_metadata_collector(collector=self._request_collector)
 
     @property
     def request_count(self) -> int:
         """Get the number of recorded API requests since last clear."""
-        return self._request_collector.request_count
+        return get_request_count(collector=self._request_collector)
 
     def __repr__(self) -> str:
         """Return string representation."""

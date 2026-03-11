@@ -19,7 +19,7 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
+from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError, ShutdownSignal
 
 
 @pytest.mark.e2e

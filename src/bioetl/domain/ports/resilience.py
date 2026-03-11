@@ -36,7 +36,7 @@ class RateLimiterPort(Protocol):
     waiting for token availability.
 
     Example:
-        >>> limiter: RateLimiterPort = TokenBucket(rate=5.0, capacity=10)
+        >>> limiter: RateLimiterPort = TokenBucketRateLimiter(rate=5.0, capacity=10)
         >>> await limiter.acquire()  # Wait for token
         >>> await limiter.acquire(tokens=2)  # Acquire multiple tokens
     """
@@ -82,7 +82,7 @@ class CircuitBreakerPort(Protocol):
     - Configurable recovery timeout (default: 5 minutes)
 
     Example:
-        >>> breaker: CircuitBreakerPort = CircuitBreaker(provider="chembl")
+        >>> breaker: CircuitBreakerPort = CircuitBreakerGuard(provider="chembl")
         >>> result = await breaker.call(async_func, arg1, arg2)
     """
 

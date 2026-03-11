@@ -5,7 +5,7 @@ Contains enums and data classes shared across detection strategies.
 
 from __future__ import annotations
 
-__all__ = ["Anomaly", "AnomalySeverity", "AnomalyType"]
+__all__ = ["AnomalyRecord", "AnomalySeverity", "AnomalyType"]
 
 
 from dataclasses import dataclass
@@ -35,7 +35,7 @@ class AnomalySeverity(StrEnum):
 
 
 @dataclass(frozen=True)
-class Anomaly:
+class AnomalyRecord:
     """Detected anomaly with context.
 
     Attributes:

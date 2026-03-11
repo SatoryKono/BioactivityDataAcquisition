@@ -28,7 +28,7 @@ def mock_logger():
 
 @pytest.fixture
 def mock_rate_limiter():
-    """Create a mock TokenBucket rate limiter."""
+    """Create a mock TokenBucketRateLimiter rate limiter."""
     limiter = MagicMock()
     limiter.acquire = AsyncMock()
     return limiter
@@ -36,7 +36,7 @@ def mock_rate_limiter():
 
 @pytest.fixture
 def mock_circuit_breaker():
-    """Create a mock CircuitBreaker."""
+    """Create a mock CircuitBreakerGuard."""
     breaker = MagicMock()
     breaker.call = AsyncMock()
     return breaker
@@ -124,6 +124,31 @@ class TestPubChemFetchStrategiesInit:
         assert strategies._mapper is mock_entity_mapper
         assert strategies._run_in_executor is mock_run_in_executor
         assert strategies._provider_name == "test_provider"
+
+    def test_init_preserves_injected_collaborators(
+        self,
+        mock_logger,
+        mock_rate_limiter,
+        mock_circuit_breaker,
+        mock_entity_mapper,
+        mock_run_in_executor,
+    ):
+        """Injected mapper collaborators should bypass inline construction."""
+        response_mapper = MagicMock()
+        fetch_flow = MagicMock()
+
+        strategies = PubChemFetchStrategies(
+            logger=mock_logger,
+            rate_limiter=mock_rate_limiter,
+            circuit_breaker=mock_circuit_breaker,
+            mapper=mock_entity_mapper,
+            run_in_executor=mock_run_in_executor,
+            response_mapper=response_mapper,
+            fetch_flow=fetch_flow,
+        )
+
+        assert strategies._response_mapper is response_mapper
+        assert strategies._fetch_flow is fetch_flow
 
     def test_init_default_provider_name(
         self,

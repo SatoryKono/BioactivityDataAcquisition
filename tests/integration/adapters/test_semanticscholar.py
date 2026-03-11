@@ -20,10 +20,10 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.domain.types import HealthStatus
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
-from bioetl.infrastructure.adapters.semanticscholar.adapter import (
+from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
+from bioetl.infrastructure.adapters.semanticscholar.client import (
     SemanticScholarAdapter,
 )
 
@@ -59,8 +59,8 @@ def mock_logger() -> MagicMock:
 def http_client() -> UnifiedHTTPClient:
     """Create HTTP client for testing."""
     return UnifiedHTTPClient(
-        rate_limiter=TokenBucket(rate=10.0, capacity=100),
-        circuit_breaker=CircuitBreaker(provider="semanticscholar_test"),
+        rate_limiter=TokenBucketRateLimiter(rate=10.0, capacity=100),
+        circuit_breaker=CircuitBreakerGuard(provider="semanticscholar_test"),
         timeout=30.0,
     )
 
@@ -396,8 +396,8 @@ class TestSemanticScholarAdapterRateLimiting:
     ) -> None:
         """Test that adapter respects rate limiter configuration."""
         # Create a slow rate limiter
-        slow_rate_limiter = TokenBucket(rate=1.0, capacity=2)
-        circuit_breaker = CircuitBreaker(provider="semanticscholar_rate_test")
+        slow_rate_limiter = TokenBucketRateLimiter(rate=1.0, capacity=2)
+        circuit_breaker = CircuitBreakerGuard(provider="semanticscholar_rate_test")
 
         http_client = UnifiedHTTPClient(
             rate_limiter=slow_rate_limiter,

@@ -237,6 +237,7 @@ class DQReportGenerationMixin:
                 required_fields=context.gold_required_fields,
                 business_rules=context.gold_business_rules,
                 baseline_stats=context.gold_baseline_stats,
+                scd_config=context.gold_scd_config,
             )
 
             output_path: Path | None = None

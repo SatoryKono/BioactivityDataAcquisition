@@ -7,12 +7,12 @@ provider-split modules.
 from bioetl.infrastructure.schemas.base_schemas_chembl import (
     BaseApiConfig,
     BaseCircuitBreakerConfig,
-    BaseClientConfig,
     BaseCsvExportConfig,
     BaseDQConfig,
     BaseDQThresholds,
     BaseMaintenanceConfig,
     BaseRateLimitConfig,
+    HttpClientConfig,
 )
 from bioetl.infrastructure.schemas.base_schemas_pubchem import (
     BaseFilterColumnSchema,
@@ -27,7 +27,6 @@ from bioetl.infrastructure.schemas.base_schemas_pubchem import (
 __all__ = [
     "BaseApiConfig",
     "BaseCircuitBreakerConfig",
-    "BaseClientConfig",
     "BaseCsvExportConfig",
     "BaseDQConfig",
     "BaseDQThresholds",
@@ -40,4 +39,5 @@ __all__ = [
     "BaseInputFilterConfig",
     "BaseMaintenanceConfig",
     "BaseRateLimitConfig",
+    "HttpClientConfig",
 ]

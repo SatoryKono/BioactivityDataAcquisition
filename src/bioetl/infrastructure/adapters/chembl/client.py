@@ -35,6 +35,7 @@ from bioetl.infrastructure.adapters.chembl.fetch_adapter_mixin import (
 )
 from bioetl.infrastructure.adapters.chembl.health import ChemblHealthMixin
 from bioetl.infrastructure.adapters.chembl.metadata import ChemblMetadataMixin
+
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Iterator
     from concurrent.futures import ThreadPoolExecutor
@@ -42,7 +43,7 @@ if TYPE_CHECKING:
     from httpx import Response
 
     from bioetl.domain.ports import ErrorHandlerPort, LoggerPort, MetricsPort
-    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
     from bioetl.infrastructure.adapters.common.api_request_collector import (
         APIRequestCollector,
     )
@@ -65,7 +66,7 @@ class ChemblAdapter(
     metrics: MetricsPort | None = None
     extraction_params: ExtractionParams | None = None
     error_handler: ErrorHandlerPort | None = None
-    adapter_metrics: AdapterMetrics | None = None
+    adapter_metrics: AdapterMetricsRecorder | None = None
     request_collector: APIRequestCollector | None = None
     fallback_fetch_service: FallbackFetchOrchestratorService | None = None
 
