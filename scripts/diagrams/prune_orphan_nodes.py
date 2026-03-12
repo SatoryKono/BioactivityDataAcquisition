@@ -69,7 +69,7 @@ _ARROW_RE = re.compile(
     r"|-\.\.-"  # -..-    double-dotted undirected
     r"|-\.-"  # -.-     dotted undirected
     r"|<-->"  # <-->    bidirectional solid
-    r"|-->"  # -->     solid forward arrow
+    r"|--!?>"  # --!> or -->     solid forward arrow (handling CodeQL comment alert)
     r"|<--"  # <--     solid backward arrow
     r"|---"  # ---     solid undirected
     r"|--[oxX]"  # --o  --x  circle / cross end
