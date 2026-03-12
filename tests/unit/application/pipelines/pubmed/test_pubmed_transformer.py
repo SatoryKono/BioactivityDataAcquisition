@@ -1442,3 +1442,453 @@ class TestPubMedTransformerContentHashStability:
         assert result1["mid"] == "NIHMS123456"
         assert result1["publisher_id"] == "pub.12345"
         assert result1["content_hash"] == result2["content_hash"]
+
+
+# ---------------------------------------------------------------------------
+# Tests merged from orphan tests/unit/pipelines/pubmed/test_pubmed_transformer.py
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture
+def _orphan_transformer() -> PubMedPublicationTransformer:
+    """Create a PubMedPublicationTransformer instance (orphan fixture)."""
+    return PubMedPublicationTransformer(provider="pubmed")
+
+
+@pytest.fixture
+def _orphan_mock_logger() -> MagicMock:
+    """Create a mock logger (orphan fixture)."""
+    logger = MagicMock()
+    logger.bind.return_value = logger
+    return logger
+
+
+@pytest.fixture
+def _orphan_pipeline_context(_orphan_mock_logger: MagicMock) -> PipelineContext:
+    """Create a pipeline context for testing (orphan fixture)."""
+    from uuid import UUID
+
+    return PipelineContext(
+        run_id=UUID("00000000-0000-0000-0000-000000000000"),
+        run_type=RunType.INCREMENTAL,
+        logger=_orphan_mock_logger,
+    )
+
+
+@pytest.mark.unit
+class TestTransformNonStringRawXml:
+    """Test that non-string _raw_xml raises ValueError."""
+
+    @pytest.mark.asyncio
+    async def test_transform_non_string_raw_xml(
+        self,
+        _orphan_transformer: PubMedPublicationTransformer,
+        _orphan_pipeline_context: PipelineContext,
+    ) -> None:
+        """Test that non-string _raw_xml raises ValueError."""
+        from typing import cast
+
+        from bioetl.domain.types import BronzeRecord
+
+        bronze_record: BronzeRecord = cast(
+            "BronzeRecord",
+            {"pmid": "12345", "_raw_xml": 12345, "source_batch_id": "test"},
+        )
+
+        with pytest.raises(ValueError, match="Missing or invalid _raw_xml"):
+            await _orphan_transformer._transform_impl(
+                _orphan_pipeline_context, bronze_record, 0
+            )
+
+
+@pytest.mark.unit
+class TestExtractJournalData:
+    """Tests for journal data extraction (private method)."""
+
+    def test_extract_journal_data_complete(
+        self, _orphan_transformer: PubMedPublicationTransformer
+    ) -> None:
+        """Test extraction of complete journal data."""
+        xml = """
+        <Article>
+            <Journal>
+                <Title>Nature Medicine</Title>
+                <ISOAbbreviation>Nat Med</ISOAbbreviation>
+                <ISSN>1234-5678</ISSN>
+                <JournalIssue>
+                    <Volume>25</Volume>
+                    <Issue>10</Issue>
+                </JournalIssue>
+            </Journal>
+            <Pagination>
+                <MedlinePgn>100-110</MedlinePgn>
+            </Pagination>
+        </Article>
+        """
+        article = ET.fromstring(xml)
+
+        result = _orphan_transformer._extract_journal_data(article)
+
+        assert result["journal"] == "Nature Medicine"
+        assert result["journal_name_short"] == "Nat Med"
+        assert result["issn"] == "1234-5678"
+        assert result["volume"] == "25"
+        assert result["issue"] == "10"
+        assert result["page_range"] == "100-110"
+
+    def test_extract_journal_data_missing_journal(
+        self, _orphan_transformer: PubMedPublicationTransformer
+    ) -> None:
+        """Test extraction when Journal element is missing."""
+        xml = """
+        <Article>
+            <Pagination>
+                <MedlinePgn>100-110</MedlinePgn>
+            </Pagination>
+        </Article>
+        """
+        article = ET.fromstring(xml)
+
+        result = _orphan_transformer._extract_journal_data(article)
+
+        assert result["journal"] is None
+        assert result["journal_name_short"] is None
+        assert result["issn"] is None
+        assert result["volume"] is None
+        assert result["issue"] is None
+        assert result["page_range"] == "100-110"
+
+    def test_extract_journal_data_partial(
+        self, _orphan_transformer: PubMedPublicationTransformer
+    ) -> None:
+        """Test extraction with partial journal data."""
+        xml = """
+        <Article>
+            <Journal>
+                <Title>Test Journal</Title>
+            </Journal>
+        </Article>
+        """
+        article = ET.fromstring(xml)
+
+        result = _orphan_transformer._extract_journal_data(article)
+
+        assert result["journal"] == "Test Journal"
+        assert result["journal_name_short"] is None
+        assert result["issn"] is None
+        assert result["volume"] is None
+        assert result["issue"] is None
+        assert result["page_range"] is None
+
+    def test_extract_journal_data_missing_journal_issue(
+        self, _orphan_transformer: PubMedPublicationTransformer
+    ) -> None:
+        """Test extraction when JournalIssue is missing."""
+        xml = """
+        <Article>
+            <Journal>
+                <Title>Test Journal</Title>
+                <ISOAbbreviation>Test J</ISOAbbreviation>
+            </Journal>
+        </Article>
+        """
+        article = ET.fromstring(xml)
+
+        result = _orphan_transformer._extract_journal_data(article)
+
+        assert result["journal"] == "Test Journal"
+        assert result["journal_name_short"] == "Test J"
+        assert result["volume"] is None
+        assert result["issue"] is None
+
+
+@pytest.mark.unit
+class TestExtractDateData:
+    """Tests for date data extraction (private method)."""
+
+    def test_extract_date_data_complete(
+        self, _orphan_transformer: PubMedPublicationTransformer
+    ) -> None:
+        """Test extraction of complete date data."""
+        article_xml = """
+        <Article>
+            <Journal>
+                <JournalIssue>
+                    <PubDate>
+                        <Year>2023</Year>
+                        <Month>Mar</Month>
+                        <Day>15</Day>
+                    </PubDate>
+                </JournalIssue>
+            </Journal>
+            <ArticleDate DateType="Electronic">
+                <Year>2023</Year>
+                <Month>03</Month>
+                <Day>10</Day>
+            </ArticleDate>
+        </Article>
+        """
+        pubmed_data_xml = """
+        <PubmedData>
+            <History>
+                <PubMedPubDate PubStatus="received">
+                    <Year>2022</Year><Month>12</Month><Day>01</Day>
+                </PubMedPubDate>
+                <PubMedPubDate PubStatus="accepted">
+                    <Year>2023</Year><Month>02</Month><Day>15</Day>
+                </PubMedPubDate>
+                <PubMedPubDate PubStatus="revised">
+                    <Year>2023</Year><Month>01</Month><Day>20</Day>
+                </PubMedPubDate>
+            </History>
+        </PubmedData>
+        """
+        article = ET.fromstring(article_xml)
+        pubmed_data = ET.fromstring(pubmed_data_xml)
+
+        result = _orphan_transformer._extract_date_data(article, pubmed_data, None)
+
+        assert result["pub_date"] == "2023-03-15"
+        assert result["publication_year"] == 2023
+        assert result["date_completed"] is None
+        assert result["date_revised"] is None
+
+    def test_extract_date_data_year_only(
+        self, _orphan_transformer: PubMedPublicationTransformer
+    ) -> None:
+        """Test extraction with year-only publication date (end-of-period: Dec 31)."""
+        article_xml = """
+        <Article>
+            <Journal>
+                <JournalIssue>
+                    <PubDate>
+                        <Year>2023</Year>
+                    </PubDate>
+                </JournalIssue>
+            </Journal>
+        </Article>
+        """
+        article = ET.fromstring(article_xml)
+
+        result = _orphan_transformer._extract_date_data(article, None, None)
+
+        assert result["pub_date"] == "2023-12-31"
+        assert result["publication_year"] == 2023
+        assert result["date_completed"] is None
+        assert result["date_revised"] is None
+
+    def test_extract_date_data_no_dates(
+        self, _orphan_transformer: PubMedPublicationTransformer
+    ) -> None:
+        """Test extraction with no date data."""
+        article_xml = "<Article></Article>"
+        article = ET.fromstring(article_xml)
+
+        result = _orphan_transformer._extract_date_data(article, None, None)
+
+        assert result["pub_date"] is None
+        assert result["publication_year"] is None
+        assert result["date_completed"] is None
+        assert result["date_revised"] is None
+
+    def test_extract_date_data_missing_journal(
+        self, _orphan_transformer: PubMedPublicationTransformer
+    ) -> None:
+        """Test extraction when Journal element is missing."""
+        article_xml = """
+        <Article>
+            <ArticleTitle>Test</ArticleTitle>
+        </Article>
+        """
+        article = ET.fromstring(article_xml)
+
+        result = _orphan_transformer._extract_date_data(article, None, None)
+
+        assert result["pub_date"] is None
+        assert result["publication_year"] is None
+        assert result["date_completed"] is None
+        assert result["date_revised"] is None
+
+    def test_extract_date_data_with_medline_dates(
+        self, _orphan_transformer: PubMedPublicationTransformer
+    ) -> None:
+        """Test extraction of DateCompleted and DateRevised from MedlineCitation."""
+        article_xml = """
+        <Article>
+            <Journal>
+                <JournalIssue>
+                    <PubDate>
+                        <Year>2023</Year>
+                    </PubDate>
+                </JournalIssue>
+            </Journal>
+        </Article>
+        """
+        medline_xml = """
+        <MedlineCitation>
+            <DateCompleted>
+                <Year>2023</Year>
+                <Month>05</Month>
+                <Day>15</Day>
+            </DateCompleted>
+            <DateRevised>
+                <Year>2024</Year>
+                <Month>01</Month>
+                <Day>10</Day>
+            </DateRevised>
+        </MedlineCitation>
+        """
+        article = ET.fromstring(article_xml)
+        medline = ET.fromstring(medline_xml)
+
+        result = _orphan_transformer._extract_date_data(article, None, medline)
+
+        assert result["date_completed"] == "2023-05-15"
+        assert result["date_revised"] == "2024-01-10"
+        assert result["publication_year"] == 2023
+
+
+@pytest.mark.unit
+class TestExtractBusinessData:
+    """Tests for business data extraction (private method).
+
+    After refactoring to BasePublicationTransformer:
+    - _extract_business_data now takes only record (BronzeRecord)
+    - It uses the cached _cached_xml_root set by _pre_extract_validation
+    - Tests must set up _cached_xml_root before calling _extract_business_data
+    """
+
+    def test_extract_business_data_complete(
+        self, _orphan_transformer: PubMedPublicationTransformer
+    ) -> None:
+        """Test extraction of complete business data."""
+        import json
+
+        xml = """
+        <PubmedArticle>
+            <MedlineCitation>
+                <PMID>12345</PMID>
+                <Article>
+                    <ArticleTitle>Complete Test Article</ArticleTitle>
+                    <Abstract>
+                        <AbstractText>Full abstract text here.</AbstractText>
+                    </Abstract>
+                    <AuthorList>
+                        <Author>
+                            <LastName>Doe</LastName>
+                            <Initials>J</Initials>
+                        </Author>
+                        <Author>
+                            <LastName>Smith</LastName>
+                            <ForeName>Jane</ForeName>
+                        </Author>
+                    </AuthorList>
+                    <Journal>
+                        <Title>Test Journal</Title>
+                        <ISOAbbreviation>Test J</ISOAbbreviation>
+                        <ISSN>1234-5678</ISSN>
+                        <JournalIssue>
+                            <Volume>10</Volume>
+                            <Issue>5</Issue>
+                            <PubDate>
+                                <Year>2023</Year>
+                                <Month>Mar</Month>
+                                <Day>15</Day>
+                            </PubDate>
+                        </JournalIssue>
+                    </Journal>
+                    <Language>eng</Language>
+                    <PublicationTypeList>
+                        <PublicationType>Journal Article</PublicationType>
+                        <PublicationType>Review</PublicationType>
+                    </PublicationTypeList>
+                    <ELocationID EIdType="doi">10.1234/test.2023</ELocationID>
+                </Article>
+                <MedlineJournalInfo>
+                    <Country>United States</Country>
+                </MedlineJournalInfo>
+                <KeywordList>
+                    <Keyword>keyword1</Keyword>
+                    <Keyword>keyword2</Keyword>
+                </KeywordList>
+                <MeshHeadingList>
+                    <MeshHeading>
+                        <DescriptorName>Proteins</DescriptorName>
+                    </MeshHeading>
+                </MeshHeadingList>
+            </MedlineCitation>
+            <PubmedData>
+                <ArticleIdList>
+                    <ArticleId IdType="pmc">PMC123456</ArticleId>
+                </ArticleIdList>
+            </PubmedData>
+        </PubmedArticle>
+        """
+        root = ET.fromstring(xml)
+        _orphan_transformer._cached_xml_root = root
+
+        result = _orphan_transformer._extract_business_data({})
+
+        assert result["pmid"] == "12345"
+        assert result["doi"] == "10.1234/test.2023"
+        assert result["title"] == "Complete Test Article"
+        assert result["abstract"] == "Full abstract text here."
+        assert json.loads(result["authors"]) == [
+            "Doe, J",
+            "Smith, Jane",
+        ]
+        assert result["journal"] == "Test Journal"
+        assert result["journal_name_short"] == "Test J"
+        assert result["issn"] == "1234-5678"
+        assert result["volume"] == "10"
+        assert result["issue"] == "5"
+        assert result["pub_date"] == "2023-03-15"
+        assert result["publication_year"] == 2023
+        assert result["publication_types"] == '["Journal Article","Review"]'
+        assert result["subject_keywords"] == '["keyword1","keyword2"]'
+        assert result["subject_mesh"] == '["Proteins"]'
+        assert result["language"] == "eng"
+        assert result["country"] == "United States"
+        assert result["pmc_id"] == "PMC123456"
+
+    def test_extract_business_data_minimal(
+        self, _orphan_transformer: PubMedPublicationTransformer
+    ) -> None:
+        """Test extraction with minimal data (PMID only in article)."""
+        xml = """
+        <PubmedArticle>
+            <MedlineCitation>
+                <PMID>12345</PMID>
+            </MedlineCitation>
+        </PubmedArticle>
+        """
+        root = ET.fromstring(xml)
+        _orphan_transformer._cached_xml_root = root
+
+        result = _orphan_transformer._extract_business_data({})
+
+        assert result["pmid"] == "12345"
+
+    def test_extract_business_data_missing_article_element(
+        self, _orphan_transformer: PubMedPublicationTransformer
+    ) -> None:
+        """Test extraction when Article element is missing."""
+        xml = """
+        <PubmedArticle>
+            <MedlineCitation>
+                <PMID>12345</PMID>
+            </MedlineCitation>
+            <PubmedData>
+                <ArticleIdList>
+                    <ArticleId IdType="pmc">PMC123456</ArticleId>
+                </ArticleIdList>
+            </PubmedData>
+        </PubmedArticle>
+        """
+        root = ET.fromstring(xml)
+        _orphan_transformer._cached_xml_root = root
+
+        result = _orphan_transformer._extract_business_data({})
+
+        assert result["pmid"] == "12345"
+        assert len(result) == 1
