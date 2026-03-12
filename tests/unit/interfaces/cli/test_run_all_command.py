@@ -18,6 +18,8 @@ from bioetl.interfaces.cli.commands.run_all import (
     _validate_provider,
 )
 from bioetl.interfaces.cli.commands.run_all_helpers import (
+    RunAllExecutionPlan,
+    create_run_all_execution_plan,
     create_run_all_options,
     emit_run_all_listing,
     record_pipeline_failure,
@@ -208,6 +210,52 @@ class TestRunAllHelpers:
         assert options.limit == 25
         assert options.dry_run is False
         assert options.log_level == "DEBUG"
+
+    def test_create_run_all_execution_plan_resolves_pipelines_and_options(
+        self, mock_registry
+    ) -> None:
+        """Execution plan helper should validate provider and build RunOptions."""
+        plan, error = create_run_all_execution_plan(
+            source="chembl",
+            run_type="incremental",
+            limit=25,
+            dry_run=True,
+            debug=False,
+            registry=mock_registry,
+        )
+
+        assert error is None
+        assert plan == RunAllExecutionPlan(
+            pipelines=[
+                "chembl_activity",
+                "chembl_assay",
+                "chembl_molecule",
+                "chembl_target",
+            ],
+            options=create_run_all_options(
+                run_type="incremental",
+                limit=25,
+                dry_run=True,
+                debug=False,
+            ),
+        )
+
+    def test_create_run_all_execution_plan_returns_error_for_invalid_provider(
+        self, mock_registry
+    ) -> None:
+        """Execution plan helper should preserve provider validation failures."""
+        plan, error = create_run_all_execution_plan(
+            source="missing",
+            run_type="incremental",
+            limit=None,
+            dry_run=False,
+            debug=False,
+            registry=mock_registry,
+        )
+
+        assert plan is None
+        assert error is not None
+        assert "No pipelines found for provider 'missing'" in error
 
     @patch("bioetl.interfaces.cli.commands.run_all_helpers.echo_warning")
     def test_record_pipeline_result_shutdown_requests_stop(

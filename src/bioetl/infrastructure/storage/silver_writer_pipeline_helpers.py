@@ -16,14 +16,20 @@ from bioetl.infrastructure.storage.silver_writer_validation_mixin import (
 
 if TYPE_CHECKING:
     from bioetl.domain.config import KeyNullabilityRule
+    from bioetl.domain.ports import TracingPort
+    from bioetl.domain.types import BronzeRecord
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+    from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 
 __all__ = [
     "_SilverWriteExecutionContext",
+    "_SilverWriteInvocation",
     "build_delta_write_request",
-    "dispatch_prepared_silver_write",
     "build_silver_write_execution_context",
+    "dispatch_prepared_silver_write",
+    "execute_silver_write_with_tracing",
+    "execute_silver_write_pipeline",
     "set_silver_write_span_attributes",
 ]
 
@@ -46,6 +52,22 @@ class _SilverWriteExecutionContext:
     span: Any  # Any: OpenTelemetry span interface is runtime-dependent
 
 
+@dataclass(frozen=True, slots=True)
+class _SilverWriteInvocation:
+    """Immutable write request shared across tracing and pipeline stages."""
+
+    table_name: str
+    records: list[BronzeRecord]
+    primary_keys: list[str]
+    schema: pa.Schema
+    mode: str
+    partition_cols: list[str] | None
+    on_schema_mismatch: Literal["error", "evolve", "ignore"]
+    column_order: list[str] | None
+    bronze_refs: list[BronzeWriteResult] | None
+    key_nullability_rules: list[KeyNullabilityRule] | None
+
+
 class _PreparedSilverWriteDispatcher(Protocol):
     """Callable contract for dispatching prepared Silver write payloads."""
 
@@ -55,6 +77,47 @@ class _PreparedSilverWriteDispatcher(Protocol):
         table_name: str,
         request: _DeltaWriteRequest,
     ) -> Awaitable[None]: ...
+
+
+class _PreparedSilverWritePayloadBuilder(Protocol):
+    """Async contract for Silver payload preparation."""
+
+    def __call__(
+        self,
+        *,
+        table_name: str,
+        records: list[BronzeRecord],
+        primary_keys: list[str],
+        schema: pa.Schema,
+        mode: str,
+        on_schema_mismatch: Literal["error", "evolve", "ignore"],
+        column_order: list[str] | None,
+        partition_cols: list[str] | None,
+        key_nullability_rules: list[KeyNullabilityRule] | None,
+    ) -> Awaitable[_PreparedSilverWritePayload]: ...
+
+
+class _SilverWritePipelineCompleter(Protocol):
+    """Async contract for finalizing one prepared Silver write."""
+
+    def __call__(
+        self,
+        *,
+        ctx: _SilverWriteExecutionContext,
+        payload: _PreparedSilverWritePayload,
+    ) -> Awaitable[SilverWriteResult | None]: ...
+
+
+class _SilverWritePipelineExecutor(Protocol):
+    """Async contract for running one Silver write pipeline within a span."""
+
+    def __call__(
+        self,
+        *,
+        invocation: _SilverWriteInvocation,
+        ctx: _SilverWriteExecutionContext,
+    ) -> Awaitable[SilverWriteResult | None]: ...
+
 
 def set_silver_write_span_attributes(
     span: Any,  # Any: OpenTelemetry span type varies by backend
@@ -71,30 +134,22 @@ def set_silver_write_span_attributes(
 
 def build_silver_write_execution_context(
     *,
-    table_name: str,
-    primary_keys: list[str],
-    schema: pa.Schema,
-    mode: str,
-    partition_cols: list[str] | None,
-    on_schema_mismatch: Literal["error", "evolve", "ignore"],
-    column_order: list[str] | None,
-    bronze_refs: list[BronzeWriteResult] | None,
-    key_nullability_rules: list[KeyNullabilityRule] | None,
+    invocation: _SilverWriteInvocation,
     started_at: datetime,
     start_perf: float,
     span: Any,  # Any: OpenTelemetry span type varies by backend
 ) -> _SilverWriteExecutionContext:
     """Build immutable execution context for the Silver write pipeline."""
     return _SilverWriteExecutionContext(
-        table_name=table_name,
-        primary_keys=primary_keys,
-        schema=schema,
-        mode=mode,
-        partition_cols=partition_cols,
-        on_schema_mismatch=on_schema_mismatch,
-        column_order=column_order,
-        bronze_refs=bronze_refs,
-        key_nullability_rules=key_nullability_rules,
+        table_name=invocation.table_name,
+        primary_keys=invocation.primary_keys,
+        schema=invocation.schema,
+        mode=invocation.mode,
+        partition_cols=invocation.partition_cols,
+        on_schema_mismatch=invocation.on_schema_mismatch,
+        column_order=invocation.column_order,
+        bronze_refs=invocation.bronze_refs,
+        key_nullability_rules=invocation.key_nullability_rules,
         started_at=started_at,
         start_perf=start_perf,
         span=span,
@@ -131,3 +186,64 @@ async def dispatch_prepared_silver_write(
             payload=payload,
         ),
     )
+
+
+async def execute_silver_write_pipeline(
+    *,
+    invocation: _SilverWriteInvocation,
+    ctx: _SilverWriteExecutionContext,
+    prepare_payload: _PreparedSilverWritePayloadBuilder,
+    dispatch_write: _PreparedSilverWriteDispatcher,
+    complete_pipeline: _SilverWritePipelineCompleter,
+) -> SilverWriteResult | None:
+    """Execute prepare, dispatch, and finalize stages for one Silver write."""
+    payload = await prepare_payload(
+        table_name=invocation.table_name,
+        records=invocation.records,
+        primary_keys=invocation.primary_keys,
+        schema=invocation.schema,
+        mode=invocation.mode,
+        on_schema_mismatch=invocation.on_schema_mismatch,
+        column_order=invocation.column_order,
+        partition_cols=invocation.partition_cols,
+        key_nullability_rules=invocation.key_nullability_rules,
+    )
+    await dispatch_prepared_silver_write(
+        ctx=ctx,
+        payload=payload,
+        dispatch_write=dispatch_write,
+    )
+    return await complete_pipeline(
+        ctx=ctx,
+        payload=payload,
+    )
+
+
+async def execute_silver_write_with_tracing(
+    *,
+    tracing: TracingPort,
+    module_name: str,
+    invocation: _SilverWriteInvocation,
+    started_at: datetime,
+    start_perf: float,
+    execute_pipeline: _SilverWritePipelineExecutor,
+) -> SilverWriteResult | None:
+    """Create the tracing span/context and delegate the Silver write pipeline."""
+    tracer = tracing.get_tracer(module_name)
+    with tracer.start_as_current_span("write_silver") as span:
+        set_silver_write_span_attributes(
+            span,
+            table_name=invocation.table_name,
+            mode=invocation.mode,
+            record_count=len(invocation.records),
+        )
+        ctx = build_silver_write_execution_context(
+            invocation=invocation,
+            started_at=started_at,
+            start_perf=start_perf,
+            span=span,
+        )
+        return await execute_pipeline(
+            invocation=invocation,
+            ctx=ctx,
+        )

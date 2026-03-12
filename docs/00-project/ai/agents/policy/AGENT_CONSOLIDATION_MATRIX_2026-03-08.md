@@ -84,16 +84,41 @@ Reduce duplicate specialist profiles by keeping one canonical profile per functi
 | `sp-ml-engineer` | `sp-ai-engineer` | 2026-06-30 |
 | `sp-business-analyst` | `sp-project-manager` | 2026-06-30 |
 
-## Next Wave Candidates
+## Wave 6 Applied (2026-03-12)
 
-1. Wire consolidation checker into repository CI pipeline.
-2. Remove alias profiles after planned date and update collected index accordingly.
-3. Add auto-fix mode for stale alias removal date.
+| Area | Change | Status |
+| --- | --- | --- |
+| Full consolidation | Deleted 77 generic agents from `.claude/agents/` (runtime) | done |
+| Mirror sync | Deleted 77 `sp-*` mirrors from `docs/00-project/ai/agents/agents/` | done |
+| Alias retirement | All aliases removed (ahead of 2026-06-30 schedule) | done |
+| Retained generic | 12 `sp-*` profiles kept (relevant to Python ETL project) | done |
 
-## Exit Criteria For Wave 5
+### Retained Generic Agents (12)
 
-1. No duplicate non-canonical profiles without explicit alias marker.
-2. Routing docs reference canonical profiles by default.
-3. Review/compliance flow defaults to `py-review-orchestrator` + `py-audit-bot`.
-4. All alias profiles include planned removal date and canonical pointer.
-5. Consolidation checker is executed automatically in CI.
+`sp-api-designer`, `sp-architect-reviewer`, `sp-code-reviewer`, `sp-data-engineer`,
+`sp-database-optimizer`, `sp-debugger`, `sp-dependency-manager`, `sp-git-workflow-manager`,
+`sp-prompt-engineer`, `sp-refactoring-specialist`, `sp-scientific-literature-researcher`,
+`sp-test-automator`
+
+### Deletion Criteria
+
+- Agent never referenced in `subagent_type` calls within project
+- Agent domain irrelevant to Python ETL / bioinformatics (blockchain, game-dev, IoT, PowerShell, M365, etc.)
+- Agent functionality covered by existing `py-*` core agents (e.g., `sp-documentation-engineer` → `py-doc-bot`)
+- Agent is a duplicate of another retained agent (e.g., `sp-error-detective` → `sp-debugger`)
+
+### Final Inventory
+
+| Category | Count |
+| --- | --- |
+| BioETL core (`py-*`) | 9 |
+| Generic utility (`sp-*`) | 12 |
+| Service files (ORCHESTRATION.md, README.md) | 2 |
+| **Total** | **23** |
+
+## Exit Criteria For Wave 6
+
+1. `.claude/agents/` contains exactly 23 files (9 py-* + 12 generic + 2 service).
+2. `docs/00-project/ai/agents/agents/` mirrors the same 23 files (with sp-* prefix for generic).
+3. No broken references in ORCHESTRATION.md, rules, or skills.
+4. README.md in both locations updated to reflect new inventory.

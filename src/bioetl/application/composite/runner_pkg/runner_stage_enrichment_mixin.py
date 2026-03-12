@@ -130,6 +130,18 @@ class _CompositeRunnerStageEnrichmentMixin:
             error=str(error),
         )
 
+    async def _skip_enrichment_stage(
+        self,
+        state: CompositeCheckpointState,
+    ) -> tuple[CompositeCheckpointState, dict[str, EnrichmentResult]]:
+        """Log skipped enrichment stage and keep checkpoint state unchanged."""
+        self._logger.info(
+            "No enrichers to run, skipping enrichment stage",
+            composite=self._config.name,
+            reason="all_completed_or_filtered",
+        )
+        return state, {}
+
     async def _execute_enrichment_phase(
         self,
         state: CompositeCheckpointState,
@@ -147,10 +159,8 @@ class _CompositeRunnerStageEnrichmentMixin:
                 enrichers_to_run,
             )
         else:
-            self._logger.info(
-                "No enrichers to run, skipping enrichment stage",
-                composite=self._config.name,
-                reason="all_completed_or_filtered",
+            state, enrichment_results = await self._skip_enrichment_stage(
+                state,
             )
 
         enrichment_results = self._finalize_enrichment_results(
@@ -159,11 +169,7 @@ class _CompositeRunnerStageEnrichmentMixin:
             enrichment_results=enrichment_results,
         )
 
-        try:
-            self._call_check_required_enrichers(enrichment_results)
-        except InvalidStateError as error:
-            await self._save_failed_enrichment_state(state, error)
-            raise
+        await self._validate_required_enrichment_results(state, enrichment_results)
 
         return state, enrichment_results
 
@@ -224,6 +230,18 @@ class _CompositeRunnerStageEnrichmentMixin:
             if result.is_success or result.status == EnrichmentStatus.SKIPPED:
                 state = state.with_enricher_completed(name, result)
         return state
+
+    async def _validate_required_enrichment_results(
+        self,
+        state: CompositeCheckpointState,
+        enrichment_results: dict[str, EnrichmentResult],
+    ) -> None:
+        """Validate required enrichers and persist FAILED state before re-raising."""
+        try:
+            self._call_check_required_enrichers(enrichment_results)
+        except InvalidStateError as error:
+            await self._save_failed_enrichment_state(state, error)
+            raise
 
     async def _complete_enrichment_stage(
         self,

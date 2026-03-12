@@ -111,18 +111,34 @@ model: sonnet
 
 ## Структура документации
 
-```
+```text
 docs/
-+-- 00-map.md                    # Navigation hub
-+-- 01-getting-started/          # Onboarding guides
++-- 00-project/
+|   +-- 00-map.md               # Navigation hub
+|   +-- RULES.md                # Canonical rules document
+|   +-- glossary.md             # Ubiquitous Language terminology
+|   +-- ai/                     # Agent docs, memory, prompts
+|   +-- governance/             # Project governance policies
++-- 01-requirements/
+|   +-- REQUIREMENTS.md         # Testable requirements
 +-- 02-architecture/
-|   +-- decisions/               # ADRs (ADR-001 through ADR-043)
-|   +-- diagrams/                # Mermaid diagrams
-+-- 03-guides/                   # Development guides
-+-- 04-reference/                # API documentation
+|   +-- decisions/              # ADRs (ADR-001 through ADR-043)
+|   +-- mmd-diagrams/           # Canonical Mermaid sources and rendered views
+|   +-- policies/               # Architecture and review policies
++-- 03-guides/
+|   +-- development/            # Developer guides and implementation manuals
++-- 04-reference/
+|   +-- api/                    # API reference
+|   +-- contracts/              # Contract artifacts
+|   +-- pipelines/              # Pipeline specs and xwalks
+|   +-- providers/              # Provider reference docs
+|   +-- schemas/                # Auxiliary schemas and field maps
+|   +-- templates/              # Review and doc templates
 +-- 05-operations/
-|   +-- runbooks/                # Operational runbooks
-+-- 06-providers/                # Provider-specific docs
+|   +-- deployment/             # Deployment and runtime ops guides
+|   +-- runbooks/               # Operational playbooks
+|   +-- verification/           # Verification reports
++-- 99-archive/                 # Historical artifacts and archived docs
 ```
 
 ---

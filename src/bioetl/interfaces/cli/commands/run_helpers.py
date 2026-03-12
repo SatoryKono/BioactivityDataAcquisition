@@ -23,7 +23,7 @@ __all__ = [
 ]
 
 from bioetl.composition.entrypoints import preview_cleanup
-from bioetl.composition.registry import PipelineRegistry, get_default_registry
+from bioetl.composition.registry import PipelineRegistry
 from bioetl.interfaces.cli.commands.execution_policy import (
     build_failure_context,
     render_failure_context,
@@ -36,6 +36,7 @@ from bioetl.interfaces.cli.formatters import (
     echo_info,
     echo_warning,
 )
+from bioetl.interfaces.cli.registry_helpers import get_default_registry
 
 if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
@@ -60,7 +61,7 @@ def validate_pipeline_name(
 
     Args:
         ctx: Click context; if ``ctx.obj`` is a ``PipelineRegistry``,
-            it is used directly, otherwise falls back to the global registry.
+            it is used directly, otherwise falls back to a fresh CLI registry.
         _param: Click parameter (unused).
         value: Pipeline name to validate.
 

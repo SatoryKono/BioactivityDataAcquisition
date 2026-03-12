@@ -139,7 +139,7 @@ Historical/foundational diagrams consolidated from `docs/02-architecture/diagram
 | 24 | `foundation/24-hash-service-class.mmd` | Hash service class diagram |
 | 25 | `foundation/25-circuit-breaker-observer-class.mmd` | CircuitBreaker class diagram |
 
-### Foundation 26–50 (TOP-25 Architecture)
+### Foundation 26–50 (TOP-24 Architecture)
 
 | # | File | Type | Description |
 |---|------|------|-------------|

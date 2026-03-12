@@ -1,113 +1,40 @@
-# Research & Analysis Subagents
+# Agent Catalog — BioETL
 
-*Статус: internal-published (Internal / Extended)*
+*Статус: internal-published | Synced with `.claude/agents/` (2026-03-12)*
 
-Research & Analysis subagents are your investigative powerhouses, specializing in finding, analyzing, and synthesizing information from diverse sources. These experts excel at deep research, competitive intelligence, market analysis, and trend identification. They transform raw information into actionable insights, helping you make informed decisions based on comprehensive analysis and data-driven research.
+Consolidated agent registry. Runtime source of truth: `.claude/agents/`.
 
-## When to Use Research & Analysis Subagents
+## BioETL Core (9 agents)
 
-Use these subagents when you need to:
-- **Conduct comprehensive research** on any topic
-- **Find specific information** across multiple sources
-- **Analyze market dynamics** and opportunities
-- **Track competitive intelligence** systematically
-- **Identify emerging trends** before others
-- **Gather and analyze data** for insights
-- **Synthesize complex information** into clear findings
-- **Make data-driven decisions** with confidence
+| Agent | Model | Role |
+|-------|-------|------|
+| [py-audit-bot](py-audit-bot.md) | opus | Code/architecture audit, RULES.md compliance |
+| [py-plan-bot](py-plan-bot.md) | opus | Task planning, RF-* decomposition |
+| [py-test-bot](py-test-bot.md) | sonnet | Tests (baseline/final/retest), coverage |
+| [py-config-bot](py-config-bot.md) | sonnet | YAML configs (pipeline/DQ/filter) |
+| [py-debug-bot](py-debug-bot.md) | opus | RCA, bug fixes, regression debugging |
+| [py-doc-bot](py-doc-bot.md) | sonnet | Docs, ADR, CHANGELOG, Mermaid diagrams |
+| [py-test-swarm](py-test-swarm.md) | opus | Hierarchical testing (L1->L2->L3) |
+| [py-doc-swarm](py-doc-swarm.md) | opus | Hierarchical docs, drift detection |
+| [py-review-orchestrator](py-review-orchestrator.md) | opus | Code review (S1-S8 stages) |
 
-## Available Subagents
+## Generic Utilities (12 agents)
 
-### [**sp-research-analyst**](sp-research-analyst.md) - Comprehensive research specialist
-Research expert conducting thorough investigations across domains. Masters research methodologies, source validation, and insight synthesis. Delivers comprehensive research reports on any topic.
+| Agent | Model | Role |
+|-------|-------|------|
+| [sp-code-reviewer](sp-code-reviewer.md) | sonnet | General-purpose code review |
+| [sp-debugger](sp-debugger.md) | sonnet | Bug diagnosis, root cause analysis |
+| [sp-refactoring-specialist](sp-refactoring-specialist.md) | sonnet | Code refactoring |
+| [sp-architect-reviewer](sp-architect-reviewer.md) | sonnet | Architecture evaluation |
+| [sp-test-automator](sp-test-automator.md) | sonnet | Test framework automation |
+| [sp-api-designer](sp-api-designer.md) | sonnet | API design, OpenAPI specs |
+| [sp-data-engineer](sp-data-engineer.md) | sonnet | Data pipelines, ETL patterns |
+| [sp-database-optimizer](sp-database-optimizer.md) | sonnet | Query optimization, indexing |
+| [sp-dependency-manager](sp-dependency-manager.md) | sonnet | CVE audit, version conflicts |
+| [sp-git-workflow-manager](sp-git-workflow-manager.md) | sonnet | Git branching strategies |
+| [sp-prompt-engineer](sp-prompt-engineer.md) | sonnet | LLM prompt design and testing |
+| [sp-scientific-literature-researcher](sp-scientific-literature-researcher.md) | sonnet | Scientific paper search (BGPT MCP) |
 
-**Use when:** Conducting deep research, investigating complex topics, validating information, creating research reports, or synthesizing multiple sources.
+## Orchestration Workflow
 
-### [**sp-search-specialist**](sp-search-specialist.md) - Advanced information retrieval expert
-Search optimization expert finding needles in information haystacks. Masters advanced search techniques, query optimization, and source discovery. Locates hard-to-find information efficiently.
-
-**Use when:** Finding specific information, optimizing search queries, discovering new sources, conducting systematic searches, or retrieving obscure data.
-
-### [**sp-trend-analyst**](sp-trend-analyst.md) - Emerging trends and forecasting expert
-Trend identification specialist spotting patterns before they become obvious. Expert in trend analysis, future forecasting, and weak signal detection. Helps organizations stay ahead of change.
-
-**Use when:** Identifying emerging trends, forecasting future developments, analyzing pattern changes, monitoring industry evolution, or planning strategic responses.
-
-### [**sp-competitive-analyst**](sp-competitive-analyst.md) - Competitive intelligence specialist
-Competitive intelligence expert analyzing competitor strategies and market positioning. Masters competitive benchmarking, SWOT analysis, and strategic recommendations. Provides actionable competitive insights.
-
-**Use when:** Analyzing competitors, benchmarking performance, identifying competitive advantages, monitoring competitor moves, or developing competitive strategies.
-
-### [**sp-market-researcher**](sp-market-researcher.md) - Market analysis and consumer insights
-Market analysis specialist understanding market dynamics and consumer behavior. Expert in market sizing, segmentation, and opportunity identification. Reveals market opportunities and risks.
-
-**Use when:** Analyzing market opportunities, understanding consumer behavior, sizing markets, identifying segments, or evaluating market entry strategies.
-
-### [**sp-data-researcher**](sp-data-researcher.md) - Data discovery and analysis expert
-Data investigation specialist extracting insights from complex datasets. Masters data mining, statistical analysis, and pattern recognition. Transforms raw data into meaningful findings.
-
-**Use when:** Analyzing datasets, discovering data patterns, performing statistical analysis, mining for insights, or investigating data anomalies.
-
-### [**sp-scientific-literature-researcher**](sp-scientific-literature-researcher.md) - Scientific paper search and evidence synthesis
-Scientific literature specialist using [BGPT MCP](https://github.com/connerlambden/bgpt-mcp) to search a database of papers with structured experimental data extracted from full-text studies. Retrieves methods, results, sample sizes, and quality scores to deliver evidence-grounded analysis.
-
-**Use when:** Searching scientific literature, conducting systematic reviews, synthesizing experimental evidence, fact-checking claims against published data, or building evidence-grounded research reports.
-
-## Quick Selection Guide
-
-| If you need to... | Use this subagent |
-|-------------------|-------------------|
-| Deep topic research | **sp-research-analyst** |
-| Find specific information | **sp-search-specialist** |
-| Identify future trends | **sp-trend-analyst** |
-| Analyze competitors | **sp-competitive-analyst** |
-| Understand markets | **sp-market-researcher** |
-| Analyze data patterns | **sp-data-researcher** |
-| Search scientific papers | **sp-scientific-literature-researcher** |
-
-## Common Research Patterns
-
-**Market Intelligence:**
-- **sp-market-researcher** for market analysis
-- **sp-competitive-analyst** for competitor insights
-- **sp-trend-analyst** for future directions
-- **sp-data-researcher** for data validation
-
-**Strategic Research:**
-- **sp-research-analyst** for comprehensive analysis
-- **sp-search-specialist** for information gathering
-- **sp-trend-analyst** for future planning
-- **sp-competitive-analyst** for positioning
-
-**Data-Driven Insights:**
-- **sp-data-researcher** for data analysis
-- **sp-market-researcher** for market data
-- **sp-trend-analyst** for pattern identification
-- **sp-research-analyst** for synthesis
-
-**Competitive Intelligence:**
-- **sp-competitive-analyst** for competitor analysis
-- **sp-market-researcher** for market context
-- **sp-search-specialist** for information discovery
-- **sp-trend-analyst** for industry evolution
-
-## Getting Started
-
-1. **Define research objectives** clearly
-2. **Choose appropriate specialists** for your needs
-3. **Provide context and constraints** for focused research
-4. **Validate findings** through multiple sources
-5. **Apply insights** to decision-making
-
-## Best Practices
-
-- **Start with clear questions:** Focus drives better research
-- **Use multiple sources:** Single sources can mislead
-- **Validate information:** Trust but verify
-- **Document methodology:** Research should be reproducible
-- **Consider biases:** All sources have perspectives
-- **Synthesize findings:** Raw data needs interpretation
-- **Update regularly:** Research has expiration dates
-- **Share insights:** Knowledge multiplies when shared
-
-Choose your research & analysis specialist and make better decisions today!
+See [ORCHESTRATION.md](ORCHESTRATION.md) for the standard 8-step workflow.

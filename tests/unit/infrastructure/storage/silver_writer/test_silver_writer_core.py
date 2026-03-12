@@ -40,10 +40,264 @@ class TestSilverWriterInit:
         writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
         assert writer.csv_exporter is None
 
+    def test_runtime_helper_builds_defaults(self) -> None:
+        """Runtime helper should resolve the standard SilverWriter defaults."""
+        from bioetl.domain.medallion import WriteModePolicy
+        from bioetl.domain.ports import NoOpMetadataWriter, NoOpTracing
+        from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
+        from bioetl.infrastructure.storage.silver_writer_runtime_helpers import (
+            resolve_silver_writer_runtime,
+        )
+        from bioetl.infrastructure.storage.write_resilience import (
+            DEFAULT_SILVER_MERGE_POLICY,
+        )
+        from bioetl.infrastructure.validation.pandera_validator import (
+            NoOpSilverValidator,
+        )
+
+        (
+            tracing,
+            write_policy,
+            silver_validator,
+            metadata_writer,
+            dq_calculator,
+            merge_resilience_policy,
+        ) = resolve_silver_writer_runtime(
+            tracing=None,
+            write_policy=None,
+            silver_validator=None,
+            metadata_writer=None,
+            dq_calculator=None,
+            merge_resilience_policy=None,
+        )
+
+        assert isinstance(tracing, NoOpTracing)
+        assert isinstance(write_policy, WriteModePolicy)
+        assert isinstance(silver_validator, NoOpSilverValidator)
+        assert isinstance(metadata_writer, NoOpMetadataWriter)
+        assert isinstance(dq_calculator, DQMetricsCalculator)
+        assert merge_resilience_policy is DEFAULT_SILVER_MERGE_POLICY
+
+    def test_runtime_helper_preserves_custom_dependencies(self) -> None:
+        """Runtime helper should preserve explicitly provided dependencies."""
+        from bioetl.domain.medallion import WriteModePolicy
+        from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
+        from bioetl.infrastructure.storage.silver_writer_runtime_helpers import (
+            resolve_silver_writer_runtime,
+        )
+        from bioetl.infrastructure.storage.write_resilience import (
+            build_default_silver_merge_policy,
+        )
+
+        custom_tracing = MagicMock()
+        custom_policy = WriteModePolicy()
+        custom_validator = MagicMock()
+        custom_metadata_writer = MagicMock()
+        custom_dq_calculator = DQMetricsCalculator()
+        custom_merge_policy = build_default_silver_merge_policy()
+
+        resolved = resolve_silver_writer_runtime(
+            tracing=custom_tracing,
+            write_policy=custom_policy,
+            silver_validator=custom_validator,
+            metadata_writer=custom_metadata_writer,
+            dq_calculator=custom_dq_calculator,
+            merge_resilience_policy=custom_merge_policy,
+        )
+
+        assert resolved == (
+            custom_tracing,
+            custom_policy,
+            custom_validator,
+            custom_metadata_writer,
+            custom_dq_calculator,
+            custom_merge_policy,
+        )
+
 
 @pytest.mark.unit
 class TestSilverWriterValidation:
     """Tests for SilverWriter validation."""
+
+    @pytest.mark.asyncio
+    async def test_execute_silver_write_with_tracing_builds_context_and_runs_pipeline(
+        self,
+    ) -> None:
+        """Tracing helper should create span context and delegate pipeline execution."""
+        from datetime import UTC, datetime
+
+        import pyarrow as pa
+
+        from bioetl.infrastructure.storage.silver_writer_pipeline_helpers import (
+            _SilverWriteExecutionContext,
+            _SilverWriteInvocation,
+            execute_silver_write_with_tracing,
+        )
+
+        records = [
+            {
+                "entity_id": "CHEMBL123",
+                "_run_id": "uuid-123",
+                "_run_type": "incremental",
+                "_source_batch_id": "batch-456",
+                "_ingestion_ts": "2025-01-15T12:00:00Z",
+            }
+        ]
+        schema = pa.Table.from_pylist(records).schema
+        tracing = MagicMock()
+        tracer = MagicMock()
+        span_cm = MagicMock()
+        span = MagicMock()
+        tracing.get_tracer.return_value = tracer
+        tracer.start_as_current_span.return_value = span_cm
+        span_cm.__enter__.return_value = span
+        expected_result = MagicMock()
+        started_at = datetime.now(UTC)
+        start_perf = 123.0
+        invocation = _SilverWriteInvocation(
+            table_name="test.table",
+            records=records,
+            primary_keys=["entity_id"],
+            schema=schema,
+            mode="merge",
+            partition_cols=["entity_id"],
+            on_schema_mismatch="ignore",
+            column_order=None,
+            bronze_refs=None,
+            key_nullability_rules=None,
+        )
+
+        async def execute_pipeline(
+            *,
+            invocation: _SilverWriteInvocation,
+            ctx: _SilverWriteExecutionContext,
+        ) -> object:
+            assert ctx.table_name == "test.table"
+            assert ctx.primary_keys == ["entity_id"]
+            assert ctx.schema == schema
+            assert ctx.mode == "merge"
+            assert ctx.partition_cols == ["entity_id"]
+            assert ctx.on_schema_mismatch == "ignore"
+            assert ctx.bronze_refs is None
+            assert ctx.key_nullability_rules is None
+            assert ctx.span is span
+            assert isinstance(ctx.start_perf, float)
+            assert invocation.records == [
+                {
+                    "entity_id": "CHEMBL123",
+                    "_run_id": "uuid-123",
+                    "_run_type": "incremental",
+                    "_source_batch_id": "batch-456",
+                    "_ingestion_ts": "2025-01-15T12:00:00Z",
+                }
+            ]
+            return expected_result
+
+        result = await execute_silver_write_with_tracing(
+            tracing=tracing,
+            module_name="bioetl.test",
+            invocation=invocation,
+            started_at=started_at,
+            start_perf=start_perf,
+            execute_pipeline=execute_pipeline,
+        )
+
+        assert result is expected_result
+        tracing.get_tracer.assert_called_once_with("bioetl.test")
+        tracer.start_as_current_span.assert_called_once_with("write_silver")
+        span.set_attribute.assert_any_call("table_name", "test.table")
+        span.set_attribute.assert_any_call("mode", "merge")
+        span.set_attribute.assert_any_call("record_count", 1)
+
+    @pytest.mark.asyncio
+    async def test_execute_silver_write_pipeline_helper_runs_stages_in_order(
+        self,
+    ) -> None:
+        """Pipeline helper should prepare, dispatch, and finalize in sequence."""
+        from datetime import UTC, datetime
+
+        import pyarrow as pa
+
+        from bioetl.domain.medallion import SilverWriteMode
+        from bioetl.infrastructure.storage.silver_writer_pipeline_helpers import (
+            _SilverWriteExecutionContext,
+            _SilverWriteInvocation,
+            execute_silver_write_pipeline,
+        )
+        from bioetl.infrastructure.storage.silver_writer_validation_mixin import (
+            _PreparedSilverWritePayload,
+        )
+
+        payload_records = [
+            {
+                "entity_id": "CHEMBL123",
+                "_run_id": "uuid-123",
+                "_run_type": "incremental",
+                "_source_batch_id": "batch-456",
+                "_ingestion_ts": "2025-01-15T12:00:00Z",
+            }
+        ]
+        payload = _PreparedSilverWritePayload(
+            records=payload_records,
+            validated_mode=SilverWriteMode.MERGE,
+            table_path="/tmp/silver/test/table",
+            arrow_data=pa.Table.from_pylist(payload_records),
+        )
+        prepare_payload = AsyncMock(return_value=payload)
+        dispatch_write = AsyncMock()
+        expected_result = MagicMock()
+        complete_pipeline = AsyncMock(return_value=expected_result)
+        span = MagicMock()
+        invocation = _SilverWriteInvocation(
+            table_name="test.table",
+            records=payload_records,
+            primary_keys=["entity_id"],
+            schema=payload.arrow_data.schema,
+            mode="merge",
+            partition_cols=["entity_id"],
+            on_schema_mismatch="ignore",
+            column_order=None,
+            bronze_refs=None,
+            key_nullability_rules=None,
+        )
+        ctx = _SilverWriteExecutionContext(
+            table_name="test.table",
+            primary_keys=["entity_id"],
+            schema=payload.arrow_data.schema,
+            mode="merge",
+            partition_cols=["entity_id"],
+            on_schema_mismatch="ignore",
+            column_order=None,
+            bronze_refs=None,
+            key_nullability_rules=None,
+            started_at=datetime.now(UTC),
+            start_perf=123.0,
+            span=span,
+        )
+
+        result = await execute_silver_write_pipeline(
+            invocation=invocation,
+            ctx=ctx,
+            prepare_payload=prepare_payload,
+            dispatch_write=dispatch_write,
+            complete_pipeline=complete_pipeline,
+        )
+
+        assert result is expected_result
+        prepare_payload.assert_awaited_once_with(
+            table_name="test.table",
+            records=payload_records,
+            primary_keys=["entity_id"],
+            schema=payload.arrow_data.schema,
+            mode="merge",
+            on_schema_mismatch="ignore",
+            column_order=None,
+            partition_cols=["entity_id"],
+            key_nullability_rules=None,
+        )
+        dispatch_write.assert_awaited_once()
+        complete_pipeline.assert_awaited_once_with(ctx=ctx, payload=payload)
+        span.set_attribute.assert_called_once_with("record_count", len(payload.records))
 
     @pytest.mark.asyncio
     async def test_execute_pipeline_builds_delta_request_and_forwards_payload(
@@ -59,6 +313,9 @@ class TestSilverWriterValidation:
         from bioetl.infrastructure.storage.silver_writer import (
             SilverWriter,
             _SilverWriteExecutionContext,
+        )
+        from bioetl.infrastructure.storage.silver_writer_pipeline_helpers import (
+            _SilverWriteInvocation,
         )
         from bioetl.infrastructure.storage.silver_writer_delta_mixin import (
             _DeltaWriteRequest,
@@ -92,6 +349,18 @@ class TestSilverWriterValidation:
             return_value=expected_result
         )
         span = MagicMock()
+        invocation = _SilverWriteInvocation(
+            table_name="test.table",
+            records=payload_records,
+            primary_keys=["entity_id"],
+            schema=payload.arrow_data.schema,
+            mode="merge",
+            partition_cols=["entity_id"],
+            on_schema_mismatch="ignore",
+            column_order=None,
+            bronze_refs=None,
+            key_nullability_rules=None,
+        )
         ctx = _SilverWriteExecutionContext(
             table_name="test.table",
             primary_keys=["entity_id"],
@@ -108,7 +377,7 @@ class TestSilverWriterValidation:
         )
 
         result = await writer._execute_silver_write_pipeline(
-            records=payload_records,
+            invocation=invocation,
             ctx=ctx,
         )
 

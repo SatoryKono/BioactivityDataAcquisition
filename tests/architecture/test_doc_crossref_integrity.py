@@ -2,7 +2,8 @@
 
 Validates ADR-043 requirements:
 - ADR references in code comments point to existing ADRs
-- Provider runbooks exist for active providers
+- Provider reference docs exist for active providers
+- Runbooks index exists for operational playbooks
 - Glossary exists as single source of truth
 """
 
@@ -58,8 +59,8 @@ class TestADRReferencesValid:
 
 
 @pytest.mark.architecture
-class TestProviderRunbooks:
-    """Verify provider runbooks exist per ADR-043."""
+class TestProviderDocumentationTopology:
+    """Verify provider docs and runbooks topology per ADR-043."""
 
     _ACTIVE_PROVIDERS = [
         "chembl",
@@ -74,10 +75,25 @@ class TestProviderRunbooks:
     def test_runbook_dir_exists(self) -> None:
         """Runbooks directory should exist."""
         runbook_dir = DOCS_DIR / "05-operations" / "runbooks"
-        if not runbook_dir.exists():
-            pytest.skip(
-                "Runbooks directory not yet created (ADR-043 pending implementation)"
-            )
+        assert runbook_dir.exists(), "docs/05-operations/runbooks/ directory missing"
+
+    def test_runbook_index_exists(self) -> None:
+        """Operational runbooks must be indexed from runbooks/index.md."""
+        index_path = DOCS_DIR / "05-operations" / "runbooks" / "index.md"
+        assert index_path.exists(), "docs/05-operations/runbooks/index.md missing"
+
+    def test_provider_reference_docs_exist(self) -> None:
+        """Each active provider should have reference docs under docs/04-reference/providers."""
+        providers_dir = DOCS_DIR / "04-reference" / "providers"
+        missing = [
+            provider
+            for provider in self._ACTIVE_PROVIDERS
+            if not (providers_dir / provider).exists()
+        ]
+        assert not missing, (
+            "Missing provider reference docs under docs/04-reference/providers/: "
+            + ", ".join(sorted(missing))
+        )
 
 
 @pytest.mark.architecture
@@ -85,11 +101,6 @@ class TestGlossaryExists:
     """Verify glossary exists as single source of truth."""
 
     def test_glossary_file_exists(self) -> None:
-        """Glossary should exist in docs/04-reference/."""
-        glossary_candidates = [
-            DOCS_DIR / "04-reference" / "glossary.md",
-            DOCS_DIR / "04-reference" / "GLOSSARY.md",
-        ]
-        found = any(p.exists() for p in glossary_candidates)
-        if not found:
-            pytest.skip("Glossary not yet created (ADR-043 pending implementation)")
+        """Glossary should exist at docs/00-project/glossary.md."""
+        glossary_path = DOCS_DIR / "00-project" / "glossary.md"
+        assert glossary_path.exists(), "docs/00-project/glossary.md missing"

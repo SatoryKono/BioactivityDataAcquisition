@@ -340,12 +340,6 @@ code_review:
 3. Сравнить с domain entity и Pandera schema
 4. При расхождении → finding `AUD-SCHEMA-*` с severity MUST
 
-### Open Targets — валидация таргетов
-
-| Сценарий | Инструмент | Параметры | Результат |
-|----------|------------|-----------|-----------|
-| Проверка target ID | `Open Targets:search_entities` | `query_strings=["EGFR"]` | Валидация ENSEMBL ID mapping |
-
 ### Mermaid Chart — архитектурные диаграммы
 
 | Сценарий | Инструмент | Параметры |

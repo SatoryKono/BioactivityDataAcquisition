@@ -24,9 +24,11 @@ from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
 from bioetl.application.core.batch_transformer_helpers import (
     TransformResult,
     TransformedRecord,
-    accumulate_transform_outcome,
-    accumulate_stream_transform_result,
+    apply_stream_transform_result_to_state,
+    apply_transform_outcome_to_state,
+    build_transform_result,
     check_dq_thresholds,
+    create_transform_aggregation_state,
     flush_dq_records,
     flush_filtered_records,
     route_single_transform_attempt,
@@ -94,10 +96,7 @@ class BatchTransformer:
             DataQualityThresholdError: If DQ hard threshold exceeded.
 
         """
-        silver_records: list[BronzeRecord] = []
-        gold_records: list[GoldRecord] = []
-        records_quarantined = 0
-        records_filtered_out = 0
+        state = create_transform_aggregation_state()
         filtered_records: list[FilteredQuarantineEntry] = []
         dq_records: list[DQQuarantineEntry] = []
         last_yield_at = time.monotonic()
@@ -116,15 +115,12 @@ class BatchTransformer:
                 index=index,
             )
 
-            quarantined_delta, filtered_delta = accumulate_transform_outcome(
+            apply_transform_outcome_to_state(
+                state=state,
                 attempt=attempt,
-                silver_records=silver_records,
-                gold_records=gold_records,
                 filtered_records=filtered_records,
                 dq_records=dq_records,
             )
-            records_quarantined += quarantined_delta
-            records_filtered_out += filtered_delta
 
         filtered_failed = await flush_filtered_records(
             context=self._context,
@@ -144,16 +140,11 @@ class BatchTransformer:
             config=self._config,
             batch_metrics=self._batch_metrics,
             records=records,
-            quarantined_count=records_quarantined,
+            quarantined_count=state.quarantined_count,
         )
 
-        return TransformResult(
-            silver_records=silver_records,
-            gold_records=gold_records,
-            quarantined_count=records_quarantined,
-            filtered_out_count=records_filtered_out,
-            records_quarantine_failed=filtered_failed + dq_failed,
-        )
+        state.records_quarantine_failed = filtered_failed + dq_failed
+        return build_transform_result(state)
 
     async def transform_single(
         self, raw_record: BronzeRecord, batch_id: BatchID, index: int = 0
@@ -216,39 +207,23 @@ class BatchTransformer:
             DataQualityThresholdError: If DQ hard threshold exceeded.
 
         """
-        silver_records: list[BronzeRecord] = []
-        gold_records: list[GoldRecord] = []
-        records_quarantined = 0
-        records_filtered_out = 0
-        records_quarantine_failed = 0
+        state = create_transform_aggregation_state()
         last_yield_at = time.monotonic()
 
         for i, raw_record in enumerate(records):
             last_yield_at = await yield_control_if_needed(last_yield_at)
             result = await self.transform_single(raw_record, batch_id, start_index + i)
-            quarantined_delta, filtered_delta, failed_delta = (
-                accumulate_stream_transform_result(
-                    result=result,
-                    silver_records=silver_records,
-                    gold_records=gold_records,
-                )
+            apply_stream_transform_result_to_state(
+                state=state,
+                result=result,
             )
-            records_quarantined += quarantined_delta
-            records_filtered_out += filtered_delta
-            records_quarantine_failed += failed_delta
 
         check_dq_thresholds(
             context=self._context,
             config=self._config,
             batch_metrics=self._batch_metrics,
             records=records,
-            quarantined_count=records_quarantined,
+            quarantined_count=state.quarantined_count,
         )
 
-        return TransformResult(
-            silver_records=silver_records,
-            gold_records=gold_records,
-            quarantined_count=records_quarantined,
-            filtered_out_count=records_filtered_out,
-            records_quarantine_failed=records_quarantine_failed,
-        )
+        return build_transform_result(state)

@@ -20,9 +20,9 @@ from __future__ import annotations
 
 # Re-export entrypoint functions for convenience
 from bioetl.composition.entrypoints import create_pipeline_runner
-from bioetl.composition.registry import get_default_registry
 from bioetl.interfaces.cli.commands.run_helpers import validate_pipeline_name
 from bioetl.interfaces.cli.main import cli, main
+from bioetl.interfaces.cli.registry_helpers import get_default_registry
 
 __all__ = [
     "cli",

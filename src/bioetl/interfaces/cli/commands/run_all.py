@@ -16,9 +16,6 @@ from bioetl.application.services import (
 )
 from bioetl.composition.entrypoints import get_pipeline_runner_service
 from bioetl.composition.registry import PipelineRegistry
-from bioetl.composition.registry import (
-    get_default_registry as _legacy_get_default_registry,
-)
 from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,
@@ -35,21 +32,32 @@ from bioetl.interfaces.cli.commands.metrics_server_integration import (
     ensure_metrics_server_started,
 )
 from bioetl.interfaces.cli.commands.run_all_helpers import (
-    create_run_all_options,
-    determine_batch_exit_code as _determine_exit_code,
+    create_run_all_execution_plan,
     emit_destructive_confirmation_preview,
     emit_run_all_listing,
     emit_run_all_preview,
-    filter_pipelines_by_provider as _filter_pipelines_by_provider,
-    get_available_providers as _get_available_providers,
     record_pipeline_failure,
     record_pipeline_result,
     should_prompt_for_destructive_run,
+)
+from bioetl.interfaces.cli.commands.run_all_helpers import (
+    determine_batch_exit_code as _determine_exit_code,
+)
+from bioetl.interfaces.cli.commands.run_all_helpers import (
+    filter_pipelines_by_provider as _filter_pipelines_by_provider,
+)
+from bioetl.interfaces.cli.commands.run_all_helpers import (
+    get_available_providers as _get_available_providers,
+)
+from bioetl.interfaces.cli.commands.run_all_helpers import (
     validate_provider as _validate_provider,
 )
 from bioetl.interfaces.cli.commands.run_helpers import resolve_context_registry
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error, echo_info
+from bioetl.interfaces.cli.registry_helpers import (
+    get_default_registry as _legacy_get_default_registry,
+)
 
 if TYPE_CHECKING:
     from bioetl.application.services import PipelineRunnerService
@@ -323,12 +331,19 @@ def run_all(
 ) -> None:
     """Run all registered pipelines for one provider sequentially."""
     registry = resolve_context_registry(ctx)
-    is_valid, error_msg = _validate_provider(source, registry=registry)
-    if not is_valid:
+    execution_plan, error_msg = create_run_all_execution_plan(
+        source=source,
+        run_type=run_type,
+        limit=limit,
+        dry_run=dry_run,
+        debug=debug,
+        registry=registry,
+    )
+    if execution_plan is None:
         echo_error("Provider error", error_msg)
         sys.exit(ExitCode.FAIL)
 
-    pipelines = _filter_pipelines_by_provider(source, registry=registry)
+    pipelines = execution_plan.pipelines
 
     if list_only:
         emit_run_all_listing(source=source, pipelines=pipelines)
@@ -344,16 +359,10 @@ def run_all(
 
     echo_health_server_info(health_server, health_port)
 
-    options = create_run_all_options(
-        run_type=run_type,
-        limit=limit,
-        dry_run=dry_run,
-        debug=debug,
-    )
     batch_result = _run_batch_with_policy(
         source=source,
         pipelines=pipelines,
-        options=options,
+        options=execution_plan.options,
         health_server=health_server,
         health_port=health_port,
         registry=registry,

@@ -237,7 +237,7 @@ When creating a new entity, generate:
 
 ## 10. Providers Reference
 
-ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar, IUPHAR, Open Targets
+ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar
 
 Common entity types per provider:
 - ChEMBL: activity, molecule, target, mechanism, assay

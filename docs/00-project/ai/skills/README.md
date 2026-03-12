@@ -1,49 +1,35 @@
 # Skills Mirror in docs/
 
 *Статус: internal-published (Internal / Extended)*
+*Обновлено: 2026-03-12 (Wave 6 consolidation)*
 
-This directory stores documentation mirrors for Codex skills.
-
-## Consolidation Status (2026-03-08)
-
-- Canonical published layout is restored:
-  - `docs/00-project/ai/skills/local/**` (repo-local mirror from `.codex/skills`)
-  - `docs/00-project/ai/skills/global/**` (snapshot of selected global skills)
-  - `docs/00-project/ai/skills/_references/**` (reference bundles overlaid into local mirror)
-- Legacy flat layout (`docs/00-project/ai/skills/<skill>/...`) is removed (Phase-2 complete).
-- Removed obsolete single-file artifacts:
-  - `architecture-guardian.openai.yaml`
-  - `documentation-audit.openai.yaml`
-  - `documentation-cascade-audit.skill.md`
+This directory stores documentation mirrors for Claude Code skills.
 
 ## Canonical Source
 
-- Canonical local skill source: `.codex/skills/`
+- Canonical local skill source: `.claude/skills/`
 - Canonical local mirror: `docs/00-project/ai/skills/local/`
-- Rule: edit skills only in `.codex/skills/`; never edit `docs/00-project/ai/skills/local/` manually.
+- Rule: edit skills only in `.claude/skills/`; never edit `docs/00-project/ai/skills/local/` manually.
 
-## Mirror Operations
+## Layout
 
-- Check mirror drift:
-  - `bash scripts/check_skills_mirror.sh --check`
-- Sync mirror from canonical source:
-  - `bash scripts/check_skills_mirror.sh --sync`
+- `local/` — repo-local mirror from `.claude/skills/`
+- `global/` — snapshot of selected global skills
+- `_references/` — reference bundles overlaid into local mirror
+- `SKILLS-CATALOG.md` — consolidated skill registry
 
-The check is also enforced in CI by `.github/workflows/skills-consistency.yml`.
+## Wave 6 Consolidation (2026-03-12)
+
+Removed 6 skills (Ledger framework + nci-analysis) and 2 OpenAI metadata files.
+Runtime `.claude/skills/` now contains 6 active skills.
+See `SKILLS-CATALOG.md` for full details.
 
 ## Global Snapshot
 
-- `docs/00-project/ai/skills/global/` is a documentation snapshot of selected global skills from `/root/.codex/skills/`.
+- `docs/00-project/ai/skills/global/` is a documentation snapshot of selected global skills.
 - It is not the canonical source for repository-local skill behavior.
 
 ### System Skill References
 
 - Internal system skills are mirrored under `docs/00-project/ai/skills/global/.system/`.
 - These files are intentionally excluded from the published docs site.
-
-### Internal-Generated Policy
-
-- `docs/00-project/ai/skills/global/.system/**` is classified as `internal-generated` and remains non-nav by design.
-- For NCI references, canonical entrypoint is:
-  - `docs/00-project/ai/skills/local/nci-analysis/SKILL.md`
-- `docs/00-project/ai/skills/local/nci-analysis/references/**` is published in mkdocs nav under `Internal / Extended -> Skills -> Local Skills`.

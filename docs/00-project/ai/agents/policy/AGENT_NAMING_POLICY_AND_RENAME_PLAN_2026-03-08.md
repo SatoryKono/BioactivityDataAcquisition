@@ -97,8 +97,16 @@ Compatibility aliases are retained at old paths as deprecated stubs.
 3. Banned suffix check (`-pro`, `-master`, `-expert`).
 4. Registry parity check between runtime agent catalogs where required by governance.
 
-## 6. Notes
+## 6. Wave 6 Update (2026-03-12)
+
+All P1 renames and P2 deduplication are now superseded by full consolidation:
+- 77 generic agents removed from `.claude/agents/` (runtime) and `docs/.../agents/` (mirror)
+- 12 generic agents retained (relevant to Python ETL project)
+- All alias profiles removed (ahead of 2026-06-30 schedule)
+- See `AGENT_CONSOLIDATION_MATRIX_2026-03-08.md` Wave 6 for details
+
+## 7. Notes
 
 1. This document defines policy and migration intent only.
-2. No runtime agent file was renamed within this change set.
-3. Consolidation updates are tracked separately in `AGENT_CONSOLIDATION_MATRIX_2026-03-08.md`.
+2. Wave 6 applied runtime + docs mirror cleanup simultaneously.
+3. Consolidation updates tracked in `AGENT_CONSOLIDATION_MATRIX_2026-03-08.md`.
