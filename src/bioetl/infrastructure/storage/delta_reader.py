@@ -164,7 +164,9 @@ class DeltaReader:
             if callable(native_count):
                 try:
                     return int(native_count())
-                except Exception:
+                except (KeyboardInterrupt, SystemExit):
+                    raise
+                except BaseException:
                     pass  # Why: delta-rs may panic on empty tables; fall through
 
             # Fall back to add-action metadata on older delta-rs builds.
@@ -180,16 +182,27 @@ class DeltaReader:
                 if num_records and all(v is not None for v in num_records):
                     typed_num_records = [v for v in num_records if v is not None]
                     return int(sum(typed_num_records))
-            except (KeyError, AttributeError, TypeError):
-                pass  # Why: Delta metadata field absent; fall through to PyArrow dataset count
+            except (KeyboardInterrupt, SystemExit):
+                raise
+            except BaseException:
+                pass  # Why: delta-rs may panic on empty tables, poisoning internal lock
 
-            # Fallback: read only row count via PyArrow dataset
-            # (reads footer metadata, not full data)
-            dataset = dt.to_pyarrow_dataset()
-            count_rows = getattr(dataset, "count_rows", None)
-            if not callable(count_rows):
-                raise TypeError("PyArrow dataset object does not expose count_rows()")
-            return int(count_rows())
+            # Fallback: re-create DeltaTable (prior panic may poison internal lock)
+            # and read row count via PyArrow dataset (reads footer metadata, not full data).
+            try:
+                dt_fresh = DeltaTable(str(resolved_path))
+                dataset = dt_fresh.to_pyarrow_dataset()
+                count_rows = getattr(dataset, "count_rows", None)
+                if callable(count_rows):
+                    return int(count_rows())
+            except (KeyboardInterrupt, SystemExit):
+                raise
+            except BaseException:
+                pass  # Why: dataset fallback may also fail on corrupted tables
+
+            # Ultimate fallback: read table into memory (works for any table).
+            dt_final = DeltaTable(str(resolved_path))
+            return int(dt_final.to_pyarrow_table(columns=[]).num_rows)
 
         return await loop.run_in_executor(None, _count_rows)
 

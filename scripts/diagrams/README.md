@@ -58,6 +58,33 @@ python -m scripts.diagrams <command> [args...]
 |---------|--------|-------------|
 | `nightly` | `run_diagram_nightly_suite.py` | Run full diagram nightly suite |
 
+## When to Use
+
+| Command | When | Trigger |
+|---------|------|---------|
+| `lint` | After editing `.mmd`/`.mermaid` files; validates metadata, naming, staleness, palettes | Pre-commit hook + nightly CI |
+| `lint-summarize` | After `lint` produces a report; generates human-readable summary | Manual, post-lint |
+| `lint-budget` | After lint run; enforces quality budget thresholds | CI gate (nightly) |
+| `check-artifacts` | After rendering diagrams; validates SVG/PNG artifacts exist and are non-empty | Nightly CI (post-render) |
+| `check-quality-gates` | Before merge; implements DIAG-T018..T023 regression gates (edge markers, classdefs, node counts) | CI gate (`architecture.yml` + nightly) |
+| `check-visual-smoke` | After rendering; visual baseline comparison (DIAG-T026) | Nightly CI |
+| `check-svg-text` | After rendering SVGs; validates text readability (DIAG-T014..T015) | Nightly CI |
+| `check-class-methods` | After modifying class diagrams; validates method render integrity | Manual or nightly |
+| `check-pdf-bounds` | After generating PDF bundles; validates image bounds | Manual, post-render |
+| `check-padding` | When diagrams have layout issues; analyzes padding problems | Manual, on-demand |
+| `fix-operators` | When diagrams contain invalid thick-arrow operators (`==>` → `-->`) | Manual codemod |
+| `fix-svg-text` | When SVG text is not rendering properly; injects text fallback | Manual codemod |
+| `fix-svg-styles` | When SVG styles are missing or inconsistent; injects standard styles | Manual codemod |
+| `fix-foreign-object` | When SVGs contain incompatible foreignObject elements; strips them | Manual codemod |
+| `fix-orphans` | After diagram edits leave disconnected nodes; use `--check` to detect, `--fix` to remove | Pre-commit hook or manual |
+| `fix-sizes` | When diagrams have inconsistent dimensions; normalizes sizes | Manual codemod |
+| `fix-pagebreaks` | When PDF bundles have pagebreak issues | Manual, post-render |
+| `render-pdf` | Before release or documentation delivery; generates architecture PDF bundle | Manual, pre-release |
+| `render-pdf-desc` | When PDF with full descriptions is needed | Manual, on-demand |
+| `render-docx` | When DOCX export is needed for external review | Manual, on-demand |
+| `render-views` | When views-focused bundle is needed | Manual, on-demand |
+| `nightly` | Full Phase 2 diagram validation (DIAG-T024..T029) | Scheduled nightly (2:20 UTC) |
+
 ## Other Files
 
 | File | Description |

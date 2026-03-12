@@ -22,3 +22,17 @@ python -m scripts.data <command> [args...]
 | `dq-baseline` | `dq_baseline_update.py` | Update DQ baseline metrics |
 | `report-null-fields` | `extract_null_fields.py` | Extract null field statistics |
 | `report-content-hash` | `generate_content_hash_comparison_report.py` | Generate content hash comparison report |
+
+## When to Use
+
+| Command | When | Trigger |
+|---------|------|---------|
+| `check-vcr-placement` | After adding VCR cassettes; blocks cassettes placed outside `tests/fixtures/vcr/` | Pre-commit hook |
+| `check-vcr-naming` | After adding/renaming VCR cassettes; enforces filename policy and extension rules | Pre-commit hook |
+| `check-delta` | When Delta Lake tables show unexpected behavior; verifies table structure and file consistency | Manual, troubleshooting |
+| `check-data-dir` | After adding files to `data/`; validates tracked files against size limits and allowlist | CI gate or manual |
+| `vacuum` | Weekly maintenance; cleans old Delta Lake files from Silver tables (`--retention-days`, `--dry-run`) | Weekly scheduled or manual |
+| `checksums` | After DR recovery or data migration; verifies file checksums against committed baselines | Manual, post-recovery |
+| `dq-baseline` | After model changes or periodically; recalculates Data Quality baseline from historical runs | Manual, periodic maintenance |
+| `report-null-fields` | When investigating data quality; extracts null-valued field statistics from CSV | Manual, data exploration |
+| `report-content-hash` | After hash algorithm changes; compares legacy vs current content hash results | Manual, validation |
