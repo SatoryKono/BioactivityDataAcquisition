@@ -187,9 +187,3 @@ def vcr_cassette_dir(request: pytest.FixtureRequest, project_root: Path) -> Path
     )
     cassette_dir.mkdir(parents=True, exist_ok=True)
     return cassette_dir
-
-
-@pytest.fixture(scope="session")
-def project_root() -> Path:
-    """Returns the root directory of the project."""
-    return Path(__file__).parent.parent.parent.parent

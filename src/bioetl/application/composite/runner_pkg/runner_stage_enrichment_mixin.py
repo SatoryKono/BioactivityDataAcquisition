@@ -184,12 +184,7 @@ class _CompositeRunnerStageEnrichmentMixin:
             CompositePipelineState.SEED_COMPLETED,
             CompositePipelineState.DEPENDENCIES_COMPLETED,
         ):
-            state = self._transition_state_with_fsm_log(
-                state,
-                CompositePipelineState.ENRICHING,
-                stage="enrichment_start_empty",
-                reason="no_enrichers_to_run",
-            )
+            state = self._transition_to_empty_enrichment_start(state)
 
         if state.state == CompositePipelineState.ENRICHING:
             state = self._transition_state_with_fsm_log(
@@ -204,6 +199,18 @@ class _CompositeRunnerStageEnrichmentMixin:
                 run_id=self._run_id_str,
             )
         return state
+
+    def _transition_to_empty_enrichment_start(
+        self,
+        state: CompositeCheckpointState,
+    ) -> CompositeCheckpointState:
+        """Emit ENRICHING transition for the no-enrichers path."""
+        return self._transition_state_with_fsm_log(
+            state,
+            CompositePipelineState.ENRICHING,
+            stage="enrichment_start_empty",
+            reason="no_enrichers_to_run",
+        )
 
 
 __all__ = ["_CompositeRunnerStageEnrichmentMixin"]

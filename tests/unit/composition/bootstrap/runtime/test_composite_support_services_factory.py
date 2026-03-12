@@ -79,3 +79,57 @@ def test_create_merge_service_wires_join_planner_field_alias_resolver(
     join_planner_kwargs = mock_join_planner_cls.call_args.kwargs
     assert join_planner_kwargs["field_alias_resolver"] is resolve_field_aliases_from_registry
     assert join_planner_kwargs["dependency_joiner"] is dependency_joiner
+
+
+@pytest.mark.unit
+@patch(
+    "bioetl.composition.bootstrap.runtime.composite_support_services_factory.FSMStateHelperService"
+)
+@patch(
+    "bioetl.composition.bootstrap.runtime.composite_support_services_factory.EnrichmentCoordinatorService"
+)
+@patch(
+    "bioetl.composition.bootstrap.runtime.composite_support_services_factory.DependencyCoordinatorService"
+)
+@patch(
+    "bioetl.composition.bootstrap.runtime.composite_support_services_factory.KeyExtractorService"
+)
+@patch(
+    "bioetl.composition.bootstrap.assembly.checkpoint.bootstrap_composite_checkpoint_port"
+)
+def test_build_uses_canonical_composite_checkpoint_port(
+    mock_bootstrap_checkpoint_port: MagicMock,
+    mock_key_extractor_cls: MagicMock,
+    mock_dependency_coordinator_cls: MagicMock,
+    mock_enrichment_coordinator_cls: MagicMock,
+    mock_fsm_state_helper_cls: MagicMock,
+) -> None:
+    factory = _make_factory()
+    checkpoint_storage = MagicMock(name="checkpoint_storage")
+    checkpoint_manager = MagicMock(name="checkpoint_manager")
+    merger = MagicMock(name="merger")
+
+    mock_bootstrap_checkpoint_port.return_value = checkpoint_storage
+    mock_key_extractor_cls.return_value = MagicMock(name="key_extractor")
+    mock_dependency_coordinator_cls.return_value = MagicMock(
+        name="dependency_coordinator"
+    )
+    mock_enrichment_coordinator_cls.return_value = MagicMock(name="coordinator")
+    mock_fsm_state_helper_cls.return_value = MagicMock(name="fsm_state_helper")
+    factory._create_delta_reader = MagicMock(return_value=MagicMock(name="delta_reader"))
+    factory._create_cross_validator = MagicMock(return_value=None)
+    factory._create_merge_service = MagicMock(return_value=merger)
+    factory._create_quarantine_port_if_enabled = MagicMock(return_value=None)
+    factory._checkpoint_manager_cls = MagicMock(return_value=checkpoint_manager)
+
+    result = factory.build()
+
+    assert result.checkpoint_manager is checkpoint_manager
+    mock_bootstrap_checkpoint_port.assert_called_once_with()
+    factory._checkpoint_manager_cls.assert_called_once_with(
+        composite_name="composite_publication",
+        run_id="run-123",
+        storage=checkpoint_storage,
+        logger=factory._logger,
+        resume=False,
+    )

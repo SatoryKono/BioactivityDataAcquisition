@@ -20,6 +20,7 @@ from bioetl.composition.bootstrap.assembly.checkpoint import (
     bootstrap_checkpoint,
     # Canonical names
     bootstrap_checkpoint_port,
+    bootstrap_composite_checkpoint_port,
     bootstrap_quarantine,
     bootstrap_quarantine_port,
 )
@@ -35,6 +36,7 @@ __all__ = [
     "bootstrap_checkpoint",
     # Canonical names (use these)
     "bootstrap_checkpoint_port",
+    "bootstrap_composite_checkpoint_port",
     "bootstrap_quarantine",
     "bootstrap_quarantine_port",
     "bootstrap_storage",

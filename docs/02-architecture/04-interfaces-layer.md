@@ -22,25 +22,38 @@
 
 Реализует CLI для взаимодействия с пользователем. Использует библиотеку **Click** для определения команд.
 
-**Доступные команды (17 модулей в `commands/`, актуально на 2026-02-11):**
+**Доступные команды (24 модуля в `commands/`, актуально на 2026-03-12):**
 
-| Команда         | Модуль             | Описание                                |
-| --------------- | ------------------ | --------------------------------------- |
-| `run`           | `run.py`           | Запуск одного пайплайна                 |
-| `run-all`       | `run_all.py`       | Запуск всех пайплайнов провайдера       |
-| `run-composite` | `run_composite.py` | Запуск композитного пайплайна (ADR-026) |
-| `export`        | `export.py`        | Экспорт данных из Gold                  |
-| `quarantine`    | `quarantine.py`    | Управление карантинными записями        |
-| `health`        | `health.py`        | Проверка здоровья провайдеров           |
-| `config`        | `config.py`        | Просмотр и валидация конфигураций       |
-| `checkpoint`    | `checkpoint.py`    | Управление checkpoint-ами               |
-| `lock`          | `lock.py`          | Управление блокировками                 |
-| `vacuum`        | `vacuum.py`        | VACUUM операции для Delta Lake          |
-| `cleanup`       | `cleanup.py`       | Очистка Bronze данных                   |
-| `maintenance`   | `maintenance.py`   | Maintenance операции                    |
-| `archive`       | `archive.py`       | Архивирование данных                    |
+| Команда         | Модуль                       | Описание                                |
+| --------------- | ---------------------------- | --------------------------------------- |
+| `run`           | `run.py`                     | Запуск одного пайплайна                 |
+| `run-all`       | `run_all.py`                 | Запуск всех пайплайнов провайдера       |
+| `run-composite` | `run_composite.py`           | Запуск композитного пайплайна (ADR-026) |
+| `export`        | `export.py`                  | Экспорт данных из Gold                  |
+| `quarantine`    | `quarantine.py`              | Управление карантинными записями        |
+| `health`        | `health.py`                  | Проверка здоровья провайдеров           |
+| `config`        | `config.py`                  | Просмотр и валидация конфигураций       |
+| `checkpoint`    | `checkpoint.py`              | Управление checkpoint-ами               |
+| `lock`          | `lock.py`                    | Управление блокировками                 |
+| `vacuum`        | `vacuum.py`                  | VACUUM операции для Delta Lake          |
+| `cleanup`       | `cleanup.py`                 | Очистка Bronze данных                   |
+| `maintenance`   | `maintenance.py`             | Maintenance операции                    |
+| `archive`       | `archive.py`                 | Архивирование данных                    |
+| `adr`           | `adr.py`                     | Управление ADR (Architecture Decisions) |
+| `debug`         | `debug.py`                   | Диагностические утилиты                 |
 
-Дополнительно в слое `interfaces/cli/` используются модули: `health_server_integration.py`, `metrics_server_integration.py`, `run_helpers.py`.
+**Вспомогательные модули в `commands/`:**
+
+| Модуль                          | Назначение                              |
+| ------------------------------- | --------------------------------------- |
+| `execution_policy.py`           | Политики исполнения команд              |
+| `run_helpers.py`                | Вспомогательные функции для run-команд  |
+| `run_all_helpers.py`            | Вспомогательные функции для run-all     |
+| `run_command_policy.py`         | Политики run-команд                     |
+| `run_composite_runtime.py`      | Runtime для composite                   |
+| `run_result_presenter.py`       | Форматирование результатов запуска      |
+| `health_server_integration.py`  | Интеграция health-сервера               |
+| `metrics_server_integration.py` | Интеграция metrics-сервера              |
 
 **Примеры использования:**
 

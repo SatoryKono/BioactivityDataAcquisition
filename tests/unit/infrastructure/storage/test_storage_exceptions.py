@@ -10,14 +10,7 @@ from pyarrow import ArrowTypeError
 
 from bioetl.domain.exceptions import MergeConflictError, SchemaViolationError
 from bioetl.domain.exceptions import TableNotFoundError as CustomTableNotFoundError
-from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
-
-
-@pytest.fixture
-def noop_logger():
-    """Provide a NoOpLogger for tests."""
-    return NoOpLogger()
 
 
 @pytest.fixture

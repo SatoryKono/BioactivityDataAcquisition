@@ -26,6 +26,7 @@ from __future__ import annotations
 # Assembly (shared infrastructure without side-effects)
 # =============================================================================
 from bioetl.composition.bootstrap.assembly import (
+    bootstrap_composite_checkpoint_port,
     bootstrap_quarantine_port,
 )
 
@@ -75,6 +76,7 @@ __all__ = [
     "bootstrap_checkpoint_manager",
     "bootstrap_checkpoint_service",
     "bootstrap_cleanup_service",
+    "bootstrap_composite_checkpoint_port",
     "bootstrap_config_service",
     "bootstrap_export_service",
     "bootstrap_health_server_dependencies",

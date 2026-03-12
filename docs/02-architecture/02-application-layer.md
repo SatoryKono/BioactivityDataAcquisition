@@ -39,17 +39,17 @@
 
 **Расположение:** `src/bioetl/application/core/`
 
-Содержит базовые классы и общие компоненты, используемые пайплайнами (27 файлов):
+Содержит базовые классы и общие компоненты, используемые пайплайнами (44 .py файла + 4 подпакета: `lifecycle/`, `postrun/`, `preflight/`, `base_transformer/`):
 
 **Базовые классы:**
 
 - **`BasePipeline`** (`base.py`) — Базовый класс для всех пайплайнов
-- **`BaseTransformer`** (`base_transformer.py`) — Базовый класс для трансформеров (Template Method паттерн)
+- **`BaseTransformer`** (`base_transformer/base.py`) — Базовый класс для трансформеров (Template Method паттерн)
 - **`RecordProcessor`** (`record_processor.py`) — Обработка batch-ов записей через Bronze→Silver→Gold
 
 **Исполнение:**
 
-- **`BatchExecutor`** (`batch_executor.py`, 786 LOC) — Unified batch executor (extract→transform→write)
+- **`BatchExecutor`** (`batch_executor.py`) — Unified batch executor (extract→transform→write)
 - **`BatchTransformer`** (`batch_transformer.py`) — Координация трансформаций
 - **`BatchWriter`** (`batch_writer.py`) — Запись batch-ов в medallion слои
 - **`PipelineRunner`** (`runner.py`) — Оркестрация жизненного цикла пайплайна
@@ -58,17 +58,17 @@
 
 - **`PipelineServices`** (`pipeline_services.py`) — DI bundle портов для пайплайна
 - **`LockCoordinator`** (`lock_manager.py`) — Координация блокировок
-- **`PreflightService`** (`preflight_service.py`) — Pre-run health checks
-- **`PostrunService`** (`postrun_service.py`) — Post-run операции (DQ, VACUUM, cleanup)
-- **`CheckpointManager`** (`checkpoint_manager.py`) — Checkpoint I/O
+- **`PreflightService`** (`preflight/service.py`) — Pre-run health checks
+- **`PostrunService`** (`postrun/service.py`) — Post-run операции (DQ, VACUUM, cleanup)
+- **`CheckpointManagerService`** (`lifecycle/checkpoint_manager.py`) — Checkpoint I/O
 - **`QuarantineManager`** (`quarantine_manager.py`) — Quarantine record handling
-- **`CleanupService`** (`cleanup_service.py`) — Bronze cleanup
+- **`CleanupService`** (`lifecycle/cleanup_service.py`) — Bronze cleanup
 
 **Observability:**
 
-- **`BatchMetricsRecorder`** (`batch_metrics.py`) — Метрики per batch
-- **`BatchTracingManager`** (`batch_tracing.py`) — Tracing span management
-- **`HeartbeatTask`** (`heartbeat.py:21`) — Heartbeat мониторинг
+- **`BatchMetricsRecorderService`** (`batch_metrics.py`) — Метрики per batch
+- **`BatchTracingManagerService`** (`batch_tracing.py`) — Tracing span management
+- **`HeartbeatTask`** (`lifecycle/heartbeat.py`) — Heartbeat мониторинг
 
 **Data Sources:**
 
@@ -140,7 +140,7 @@ factory = GenericPipelineFactory(
 | Файл                              | Компонент                   | Назначение                                                               |
 | --------------------------------- | --------------------------- | ------------------------------------------------------------------------ |
 | `runner.py`                       | `PipelineRunner`            | Оркестрирует жизненный цикл пайплайна: блокировки, чекпоинты, исполнение |
-| `batch_executor.py`               | `BatchExecutor`             | Координирует data flow: извлечение → трансформация → запись (774 LOC)    |
+| `batch_executor.py`               | `BatchExecutor`             | Координирует data flow: извлечение → трансформация → запись              |
 | `../services/medallion_lifecycle.py` | `MedallionLifecycleService` | Управляет очисткой Silver/Gold слоёв по политике, VACUUM (`application/services/`) |
 | `pipeline_services.py`            | `PipelineServices`          | DI bundle сервисов для PipelineRunner                                    |
 
@@ -181,13 +181,13 @@ class PipelineServices:
 
 **Ключевые компоненты:**
 
-| Файл               | Компонент                    | Назначение                                                |
-| ------------------ | ---------------------------- | --------------------------------------------------------- |
-| `runner.py`        | `CompositePipelineRunner`    | Оркестрирует: seed → enrich (fan-out) → merge             |
-| `coordinator.py`   | `EnrichmentCoordinator`      | Параллельный запуск enrichers через asyncio.gather        |
-| `merger.py`        | `MergeService`               | Объединение данных из разных источников (LEFT OUTER JOIN) |
-| `key_extractor.py` | `KeyExtractorService`        | Извлечение join keys из seed pipeline                     |
-| `checkpoint.py`    | `CompositeCheckpointManager` | Resume после сбоя                                         |
+| Файл/Пакет              | Компонент                       | Назначение                                                |
+| ------------------------ | ------------------------------- | --------------------------------------------------------- |
+| `runner_pkg/runner.py`   | `CompositePipelineRunner`       | Оркестрирует: seed → enrich (fan-out) → merge             |
+| `coordinator.py`         | `EnrichmentCoordinatorService`  | Параллельный запуск enrichers через asyncio.gather        |
+| `merger.py`              | `MergeService`                  | Объединение данных из разных источников (LEFT OUTER JOIN) |
+| `key_extractor.py`       | `KeyExtractorService`           | Извлечение join keys из seed pipeline                     |
+| `checkpoint/service.py`  | `CompositeCheckpointService`    | Resume после сбоя                                         |
 
 **Workflow Composite Pipeline:**
 

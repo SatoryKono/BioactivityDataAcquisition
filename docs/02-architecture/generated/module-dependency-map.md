@@ -4,8 +4,8 @@
 
 ## Summary
 
-- Scanned modules: `1035`
-- Internal import edges (raw): `3821`
+- Scanned modules: `1036`
+- Internal import edges (raw): `3825`
 - Aggregated layer edges: `14`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `238`
@@ -20,15 +20,15 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|440 OK| application
+    application -->|441 OK| application
     application -->|603 OK| domain
     composition -->|175 OK| application
     composition -->|266 OK| composition
     composition -->|211 OK| domain
     composition -->|199 OK| infrastructure
     domain -->|690 OK| domain
-    infrastructure -->|470 OK| domain
-    infrastructure -->|595 OK| infrastructure
+    infrastructure -->|471 OK| domain
+    infrastructure -->|597 OK| infrastructure
     interfaces -->|17 OK| application
     interfaces -->|28 OK| composition
     interfaces -->|26 OK| domain
@@ -40,15 +40,15 @@ flowchart LR
 
 | From | To | Imports | Policy |
 |---|---|---:|---|
-| `application` | `application` | 440 | allowed |
+| `application` | `application` | 441 | allowed |
 | `application` | `domain` | 603 | allowed |
 | `composition` | `application` | 175 | allowed |
 | `composition` | `composition` | 266 | allowed |
 | `composition` | `domain` | 211 | allowed |
 | `composition` | `infrastructure` | 199 | allowed |
 | `domain` | `domain` | 690 | allowed |
-| `infrastructure` | `domain` | 470 | allowed |
-| `infrastructure` | `infrastructure` | 595 | allowed |
+| `infrastructure` | `domain` | 471 | allowed |
+| `infrastructure` | `infrastructure` | 597 | allowed |
 | `interfaces` | `application` | 17 | allowed |
 | `interfaces` | `composition` | 28 | allowed |
 | `interfaces` | `domain` | 26 | allowed |

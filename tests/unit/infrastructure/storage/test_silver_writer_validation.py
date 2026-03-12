@@ -33,12 +33,6 @@ def suppress_pandera_future_warnings():
 
 
 @pytest.fixture
-def noop_logger():
-    """Provide a NoOpLogger for tests."""
-    return NoOpLogger()
-
-
-@pytest.fixture
 def valid_records():
     """Create valid records with all required metadata."""
     return [

@@ -8,14 +8,7 @@ import pyarrow as pa
 import pytest
 from deltalake import DeltaTable
 
-from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
-
-
-@pytest.fixture
-def noop_logger():
-    """Provide a NoOpLogger for tests."""
-    return NoOpLogger()
 
 
 @pytest.fixture

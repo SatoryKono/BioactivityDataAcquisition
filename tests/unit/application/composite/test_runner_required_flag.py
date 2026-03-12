@@ -515,6 +515,29 @@ class TestRuntimeEnricherSelectionPolicy:
         ]
         assert len(info_calls) >= 1
 
+    def test_required_enricher_missing_reports_failure_reason(self):
+        """Required enricher validation should explain missing required result."""
+        runner = create_runner()
+
+        failure = runner._get_required_enricher_failure({})
+
+        assert failure == "Required enricher 'crossref' did not run"
+
+    def test_required_enricher_failed_reports_error_message(self):
+        """Required enricher validation should surface the required failure reason."""
+        runner = create_runner()
+
+        failure = runner._get_required_enricher_failure(
+            {
+                "crossref": EnrichmentResult.failed(
+                    enricher_name="crossref",
+                    error_message="timeout from upstream",
+                ),
+            }
+        )
+
+        assert failure == "Required enricher 'crossref' failed: timeout from upstream"
+
 
 class TestMergeableEnrichers:
     """Tests for mergeable enricher filtering."""

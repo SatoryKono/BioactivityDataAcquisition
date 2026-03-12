@@ -529,6 +529,58 @@ class TestMergeInputPolicy:
 class TestFSMEnrichmentCompletedTransition:
     """Tests for ENRICHMENT_COMPLETED state transition."""
 
+    def test_transition_to_empty_enrichment_start_sets_enriching_state(
+        self,
+        mock_config: MagicMock,
+        mock_logger: MagicMock,
+        mock_lock: AsyncMock,
+        mock_merger: AsyncMock,
+        mock_coordinator: AsyncMock,
+        mock_key_extractor: AsyncMock,
+        mock_seed_runner: AsyncMock,
+        tmp_path: Path,
+        test_run_id: str,
+    ) -> None:
+        """Empty enrichment start helper should move state to ENRICHING and log the stage."""
+        checkpoint_manager = CompositeCheckpointManager(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            storage=FileCompositeCheckpointWriter(tmp_path),
+            logger=mock_logger,
+            resume=False,
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            seed_runner_factory=lambda: mock_seed_runner,
+            enricher_runner_factory=lambda name, df: AsyncMock(),
+            key_extractor=mock_key_extractor,
+            coordinator=mock_coordinator,
+            merger=mock_merger,
+            checkpoint_manager=checkpoint_manager,
+            logger=mock_logger,
+            lock=mock_lock,
+            fsm_state_helper=FSMStateHelperService(
+                config=mock_config, logger=mock_logger, run_id=test_run_id
+            ),
+            run_id=test_run_id,
+        )
+        state = CompositeCheckpointState(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            state=CompositePipelineState.SEED_COMPLETED,
+        )
+
+        next_state = runner._transition_to_empty_enrichment_start(state)
+
+        assert next_state.state == CompositePipelineState.ENRICHING
+        fsm_calls = [
+            c
+            for c in mock_logger.info.call_args_list
+            if c.args and "FSM state transition" in str(c.args[0])
+        ]
+        assert any(c.kwargs.get("stage") == "enrichment_start_empty" for c in fsm_calls)
+
     @pytest.mark.asyncio
     async def test_transitions_through_enriching_to_enrichment_completed(
         self,

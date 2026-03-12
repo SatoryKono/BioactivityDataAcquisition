@@ -46,9 +46,6 @@ from bioetl.application.composite.key_extractor import KeyExtractorService
 from bioetl.application.composite.merger import MergeService
 from bioetl.application.composite.runner_pkg import CompositeRuntimeConfig
 from bioetl.domain.composite.strategy import MergeStrategy
-from bioetl.infrastructure.storage.composite_checkpoint_writer import (
-    FileCompositeCheckpointWriter,
-)
 from bioetl.infrastructure.storage.delta_reader import DeltaReader
 
 if TYPE_CHECKING:
@@ -73,6 +70,39 @@ class CompositeSupportServices:
     dq_report_service: DQReportService
     fsm_state_helper: FSMStateHelperService
     quarantine_port: QuarantinePort | None
+
+
+@dataclass(slots=True)
+class _CompositeExecutionSupportServices:
+    """Execution-facing services shared across composite runtime phases."""
+
+    key_extractor: KeyExtractorService
+    dependency_coordinator: DependencyCoordinatorService
+    coordinator: EnrichmentCoordinatorService
+
+
+@dataclass(slots=True)
+class _CompositeRuntimeManagementServices:
+    """Runtime management services that do not participate in merge wiring."""
+
+    checkpoint_manager: CompositeCheckpointService
+    dq_report_service: DQReportService
+    fsm_state_helper: FSMStateHelperService
+    quarantine_port: QuarantinePort | None
+
+
+@dataclass(slots=True)
+class _CompositeMergeDependencies:
+    """Typed bundle for merge-specific collaborators assembled in composition."""
+
+    deduplicator: EnricherDeduplicatorService
+    aggregator: EnricherAggregatorService
+    renamer: ColumnRenamerService
+    orderer: ColumnOrdererService
+    priority_orderer: ColumnPriorityOrdererService
+    coalesce_policy: CoalescePolicyService
+    conflict_resolver: ConflictResolverService
+    join_planner: JoinPlannerService
 
 
 class CompositeSupportServicesFactory:
@@ -163,59 +193,25 @@ class CompositeSupportServicesFactory:
             CompositeSupportServices bundle with all services required by CompositePipelineRunner.
         """
         delta_reader = self._create_delta_reader()
-        key_extractor = KeyExtractorService(
-            delta_reader=delta_reader,
-            logger=self._logger,
-        )
-        dependency_coordinator = DependencyCoordinatorService(
-            logger=self._logger,
-            seed_key_resolver=create_seed_key_resolver(self._logger),
-            chained_key_resolver=create_chained_key_resolver(self._logger),
-            progress_service=DependencyProgressService(self._logger),
-            result_service=DependencyResultService(self._logger),
-            delta_reader=delta_reader,
-        )
-        coordinator = EnrichmentCoordinatorService(
-            logger=self._logger,
-            dq_config=self._config.dq,
-            max_concurrency=self._config.execution.max_concurrency,
-        )
-        field_group_registry = self._load_field_group_registry(
-            self._config.name, self._logger
-        )
+        execution_services = self._build_execution_support_services(delta_reader)
+        field_group_registry = self._load_field_group_registry_for_composite()
         cross_validator = self._create_cross_validator()
         merger = self._create_merge_service(
             delta_reader=delta_reader,
             field_group_registry=field_group_registry,
             cross_validator=cross_validator,
         )
-        checkpoint_storage = FileCompositeCheckpointWriter(
-            checkpoint_dir=Path(self._settings.data_dir) / "checkpoints" / "composite",
-        )
-        checkpoint_manager = self._checkpoint_manager_cls(
-            composite_name=self._config.name,
-            run_id=self._run_id,
-            storage=checkpoint_storage,
-            logger=self._logger,
-            resume=self._runtime.resume,
-        )
-        dq_report_service = self._create_dq_report_service(self._logger, self._settings)
-        fsm_state_helper = FSMStateHelperService(
-            config=self._config,
-            logger=self._logger,
-            run_id=self._run_id,
-        )
-        quarantine_port = self._create_quarantine_port_if_enabled()
+        runtime_management_services = self._build_runtime_management_services()
 
         return CompositeSupportServices(
-            key_extractor=key_extractor,
-            dependency_coordinator=dependency_coordinator,
-            coordinator=coordinator,
+            key_extractor=execution_services.key_extractor,
+            dependency_coordinator=execution_services.dependency_coordinator,
+            coordinator=execution_services.coordinator,
             merger=merger,
-            checkpoint_manager=checkpoint_manager,
-            dq_report_service=dq_report_service,
-            fsm_state_helper=fsm_state_helper,
-            quarantine_port=quarantine_port,
+            checkpoint_manager=runtime_management_services.checkpoint_manager,
+            dq_report_service=runtime_management_services.dq_report_service,
+            fsm_state_helper=runtime_management_services.fsm_state_helper,
+            quarantine_port=runtime_management_services.quarantine_port,
         )
 
     def _create_delta_reader(self) -> DeltaReader:
@@ -224,6 +220,66 @@ class CompositeSupportServicesFactory:
             base_path=silver_base_path,
             logger=self._logger,
         )
+
+    def _build_execution_support_services(
+        self,
+        delta_reader: DeltaReader,
+    ) -> _CompositeExecutionSupportServices:
+        """Build execution-facing support services shared across runtime stages."""
+        return _CompositeExecutionSupportServices(
+            key_extractor=KeyExtractorService(
+                delta_reader=delta_reader,
+                logger=self._logger,
+            ),
+            dependency_coordinator=DependencyCoordinatorService(
+                logger=self._logger,
+                seed_key_resolver=create_seed_key_resolver(self._logger),
+                chained_key_resolver=create_chained_key_resolver(self._logger),
+                progress_service=DependencyProgressService(self._logger),
+                result_service=DependencyResultService(self._logger),
+                delta_reader=delta_reader,
+            ),
+            coordinator=EnrichmentCoordinatorService(
+                logger=self._logger,
+                dq_config=self._config.dq,
+                max_concurrency=self._config.execution.max_concurrency,
+            ),
+        )
+
+    def _build_runtime_management_services(
+        self,
+    ) -> _CompositeRuntimeManagementServices:
+        """Build checkpoint, FSM, DQ, and quarantine runtime services."""
+        from bioetl.composition.bootstrap.assembly.checkpoint import (
+            bootstrap_composite_checkpoint_port,
+        )
+
+        checkpoint_storage = bootstrap_composite_checkpoint_port()
+        return _CompositeRuntimeManagementServices(
+            checkpoint_manager=self._checkpoint_manager_cls(
+                composite_name=self._config.name,
+                run_id=self._run_id,
+                storage=checkpoint_storage,
+                logger=self._logger,
+                resume=self._runtime.resume,
+            ),
+            dq_report_service=self._create_dq_report_service(
+                self._logger,
+                self._settings,
+            ),
+            fsm_state_helper=FSMStateHelperService(
+                config=self._config,
+                logger=self._logger,
+                run_id=self._run_id,
+            ),
+            quarantine_port=self._create_quarantine_port_if_enabled(),
+        )
+
+    def _load_field_group_registry_for_composite(
+        self,
+    ) -> FieldGroupRegistry | None:
+        """Resolve optional field-group registry for the active composite."""
+        return self._load_field_group_registry(self._config.name, self._logger)
 
     def _create_cross_validator(self) -> EnrichmentCrossValidationService | None:
         if not self._config.cross_validation.enabled:
@@ -250,6 +306,27 @@ class CompositeSupportServicesFactory:
         field_group_registry: FieldGroupRegistry | None,
         cross_validator: EnrichmentCrossValidationService | None,
     ) -> MergeService:
+        merge_dependencies = self._build_merge_dependencies()
+        return MergeService(
+            merge_config=self._config.merge,
+            storage=self._storage,
+            logger=self._logger,
+            delta_reader=delta_reader,
+            field_group_registry=field_group_registry,
+            cross_validator=cross_validator,
+            gold_schema=self._resolve_gold_schema(self._config.name),
+            deduplicator=merge_dependencies.deduplicator,
+            aggregator=merge_dependencies.aggregator,
+            renamer=merge_dependencies.renamer,
+            orderer=merge_dependencies.orderer,
+            priority_orderer=merge_dependencies.priority_orderer,
+            coalesce_policy=merge_dependencies.coalesce_policy,
+            conflict_resolver=merge_dependencies.conflict_resolver,
+            join_planner=merge_dependencies.join_planner,
+        )
+
+    def _build_merge_dependencies(self) -> _CompositeMergeDependencies:
+        """Assemble merge-specific collaborators used by MergeService."""
         merge_column_groups = getattr(self._config.merge, "column_groups", None)
         deduplicator = EnricherDeduplicatorService(self._logger)
         aggregator = EnricherAggregatorService(self._logger)
@@ -297,15 +374,7 @@ class CompositeSupportServicesFactory:
             join_executor=join_executor,
             dependency_joiner=dependency_joiner,
         )
-
-        return MergeService(
-            merge_config=self._config.merge,
-            storage=self._storage,
-            logger=self._logger,
-            delta_reader=delta_reader,
-            field_group_registry=field_group_registry,
-            cross_validator=cross_validator,
-            gold_schema=self._resolve_gold_schema(self._config.name),
+        return _CompositeMergeDependencies(
             deduplicator=deduplicator,
             aggregator=aggregator,
             renamer=renamer,
