@@ -19,6 +19,9 @@ from bioetl.interfaces.cli.commands.health_server_integration import (
     echo_health_server_info,
     health_server_context,
 )
+from bioetl.interfaces.cli.commands.metrics_server_integration import (
+    ensure_metrics_server_started,
+)
 from bioetl.interfaces.cli.commands.run_composite_helpers import (
     emit_composite_startup as _emit_composite_startup_impl,
 )
@@ -30,9 +33,6 @@ from bioetl.interfaces.cli.commands.run_composite_helpers import (
 )
 from bioetl.interfaces.cli.commands.run_composite_helpers import (
     run_composite_with_cli_policy as _run_composite_with_cli_policy_impl,
-)
-from bioetl.interfaces.cli.commands.metrics_server_integration import (
-    ensure_metrics_server_started,
 )
 from bioetl.interfaces.cli.commands.run_composite_runtime import (
     build_runtime_config,

@@ -62,9 +62,27 @@ def planner(merge_config: MergeConfig, planner_deps) -> JoinPlannerService:
         normalize_join_keys=JoinPlannerService._NORMALIZE_JOIN_KEYS,
         parse_pipeline_name=JoinPlannerService._parse_pipeline_name,
     )
+    # Use a mutable ref so test can swap planner._config and resolver follows
+    planner_ref: list[JoinPlannerService] = []
+
+    def _resolve_join_type() -> str:
+        from bioetl.domain.composite.strategy import MergeStrategy
+
+        if not planner_ref:
+            return "left"
+        cfg = planner_ref[0]._config
+        strategy = getattr(cfg, "strategy", MergeStrategy.LEFT_OUTER)
+        match strategy:
+            case MergeStrategy.INNER:
+                return "inner"
+            case MergeStrategy.UNION:
+                return "full"
+            case _:
+                return "left"
+
     join_executor = JoinExecutorService(
         logger=logger,
-        join_type_resolver=lambda: "left",
+        join_type_resolver=_resolve_join_type,
     )
     dependency_joiner = DependencyJoinerService(
         logger=logger,
@@ -76,7 +94,7 @@ def planner(merge_config: MergeConfig, planner_deps) -> JoinPlannerService:
         join_executor=join_executor,
         system_columns_to_drop=JoinPlannerService._SYSTEM_COLUMNS_TO_DROP,
     )
-    return JoinPlannerService(
+    svc = JoinPlannerService(
         merge_config=merge_config,
         logger=logger,
         deduplicator=deduplicator,
@@ -88,6 +106,8 @@ def planner(merge_config: MergeConfig, planner_deps) -> JoinPlannerService:
         join_executor=join_executor,
         dependency_joiner=dependency_joiner,
     )
+    planner_ref.append(svc)
+    return svc
 
 
 @pytest.mark.unit

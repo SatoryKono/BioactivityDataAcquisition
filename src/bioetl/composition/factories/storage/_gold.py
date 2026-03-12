@@ -9,7 +9,7 @@ from bioetl.domain.ports import NoOpMetadataWriter, NoOpTracing
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 
 if TYPE_CHECKING:
-    from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
+    from bioetl.application.services.metadata_coordinator import MetadataCoordinator
     from bioetl.domain.ports import LoggerPort, TracingPort
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
     from bioetl.infrastructure.schemas.pipeline_config import SinkLayerConfig

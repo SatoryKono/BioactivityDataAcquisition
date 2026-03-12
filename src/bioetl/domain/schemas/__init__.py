@@ -40,13 +40,13 @@ from bioetl.domain.schemas.constants import (
     UO_ID_PATTERN,
 )
 from bioetl.domain.schemas.validators import (
+    JSON_ARRAY_CHECK,
+    JSON_CHECK,
+    JSON_OBJECT_CHECK,
     # Registered check methods (imported for side-effect registration)
     in_closed_range,
     is_non_negative,
     is_positive,
-    JSON_ARRAY_CHECK,
-    JSON_CHECK,
-    JSON_OBJECT_CHECK,
     max_str_length,
     str_matches_pattern,
     str_starts_with,
@@ -54,45 +54,36 @@ from bioetl.domain.schemas.validators import (
 
 __all__ = [
     "ACTIVITY_STANDARD_TYPES",
-    # Column ordering
     "ALL_SYSTEM_FIELDS",
     "ASSAY_CATEGORIES",
     "ASSAY_TEST_TYPES",
-    # Assay enums
     "ASSAY_TYPES",
     "BAO_ID_PATTERN",
     "CELLOSAURUS_ID_PATTERN",
-    # Regex patterns
     "CHEMBL_ID_PATTERN",
     "CLO_ID_PATTERN",
     "DATA_VALIDITY_COMMENTS",
     "DQ_FIELDS_SUFFIX",
     "EFO_ID_PATTERN",
     "ISO_DATE_PATTERN",
+    "JSON_ARRAY_CHECK",
+    "JSON_CHECK",
+    "JSON_OBJECT_CHECK",
     "LOOKUP_FIELDS_PREFIX",
     "MAX_PHASE_VALUES",
-    # Molecule enums
     "MOLECULE_TYPES",
-    # Publication enums
     "PUBLICATION_TYPES",
     "RELATIONSHIP_TYPES",
-    # Activity enums
     "STANDARD_RELATIONS",
     "STRUCTURE_TYPES",
     "SYSTEM_FIELDS_PREFIX",
     "TARGET_COMPONENT_RELATIONSHIPS",
-    # Target enums
     "TARGET_TYPES",
     "UO_ID_PATTERN",
     "canonical_column_order",
-    # Registered check methods
     "in_closed_range",
     "is_non_negative",
     "is_positive",
-    # JSON validators
-    "JSON_ARRAY_CHECK",
-    "JSON_CHECK",
-    "JSON_OBJECT_CHECK",
     "max_str_length",
     "str_matches_pattern",
     "str_starts_with",

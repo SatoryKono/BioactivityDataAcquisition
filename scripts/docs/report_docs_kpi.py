@@ -35,6 +35,10 @@ GENERATED_EXPORT_MERGED_RE = re.compile(r"^exports/.+\.merged\.md$")
 GENERATED_DOCS_EXPORT_REPORT_RE = re.compile(
     r"^reports/docs-export-report-\d{4}-\d{2}-\d{2}-\d{6}\.md$"
 )
+ORPHAN_EXCLUDED_PREFIXES = (
+    "00-project/ai/",
+    "99-archive/",
+)
 
 DEFAULT_TARGET_NOT_IN_NAV = 120
 DEFAULT_HARD_LIMIT_NOT_IN_NAV = 135
@@ -106,7 +110,12 @@ def _load_baseline_count(baseline_file: Path) -> tuple[int, bool]:
 
 def _collect_orphans(all_docs: list[Path], not_in_nav: set[str]) -> list[str]:
     """Return docs outside nav that have no inbound relative links."""
-    inbound = dict.fromkeys(not_in_nav, 0)
+    tracked_not_in_nav = {
+        rel_path
+        for rel_path in not_in_nav
+        if not rel_path.startswith(ORPHAN_EXCLUDED_PREFIXES)
+    }
+    inbound = dict.fromkeys(tracked_not_in_nav, 0)
     docs_root = DOCS_DIR.resolve()
 
     for source in all_docs:

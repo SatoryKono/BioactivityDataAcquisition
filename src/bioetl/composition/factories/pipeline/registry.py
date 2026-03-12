@@ -32,7 +32,6 @@ from typing import cast
 from bioetl.application.pipelines.generic import GenericPipeline
 from bioetl.composition.factories.pipeline.configs import (
     PIPELINE_CONFIGS,
-    PipelineFactoryConfig,
 )
 from bioetl.composition.factories.pipeline.contract_validator import create_factory
 from bioetl.composition.factories.pipeline.pipeline_assembler import (
@@ -206,8 +205,6 @@ _PIPELINE_FACTORY_API = (
 )
 
 __all__ = [
-    "PIPELINE_CONFIGS",
-    "PipelineFactoryConfig",
     "chembl_activity_factory",
     "chembl_assay_factory",
     "chembl_assay_parameters_factory",

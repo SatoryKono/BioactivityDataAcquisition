@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+from dataclasses import dataclass
+
 from bioetl.domain.registry.field_aliases import get_alias_map_for_provider
 
 
@@ -81,7 +84,105 @@ def extract_base_column(column: str, prefix: str) -> str | None:
     return None
 
 
+@dataclass(frozen=True, slots=True)
+class EnricherJoinMetadataContext:
+    """Join metadata for a single enricher pipeline."""
+
+    join_keys_list: list[str]
+    primary_key: str
+    seed_join_key: str
+    enricher_join_key: str
+    join_key_set: set[str]
+
+
+def count_qualified_columns(columns: list[str]) -> int:
+    """Count columns in qualified ``provider.entity.field`` format."""
+    return len([col for col in columns if "." in col and not col.startswith("_")])
+
+
+def build_enricher_join_key_set(
+    *,
+    primary_key: str,
+    seed_pipeline: str | None,
+    enricher_pipeline: str,
+    merged_columns: list[str],
+    resolve_join_key_names: Callable[
+        [str, str | None, str, list[str]], tuple[str, str, str | None]
+    ],
+) -> tuple[str, str, set[str]]:
+    """Build the set of join key column names for an enricher.
+
+    Args:
+        primary_key: Primary join key field name.
+        seed_pipeline: Optional seed pipeline name for qualified key resolution.
+        enricher_pipeline: Enricher pipeline name.
+        merged_columns: Current merged DataFrame column names.
+        resolve_join_key_names: Callable that resolves join key names given
+            (primary_key, seed_pipeline, enricher_pipeline, merged_columns).
+
+    Returns:
+        Tuple of (seed_join_key, enricher_join_key, join_key_set).
+    """
+    seed_join_key, enricher_join_key, seed_join_key_qualified = (
+        resolve_join_key_names(
+            primary_key,
+            seed_pipeline,
+            enricher_pipeline,
+            merged_columns,
+        )
+    )
+    join_key_set = {seed_join_key, enricher_join_key}
+    if seed_join_key_qualified and seed_join_key_qualified != seed_join_key:
+        join_key_set.add(seed_join_key_qualified)
+    return seed_join_key, enricher_join_key, join_key_set
+
+
+def build_enricher_join_metadata(
+    *,
+    join_keys: tuple[str, ...],
+    primary_join_key: str,
+    enricher_pipeline: str,
+    seed_pipeline: str | None,
+    merged_columns: list[str],
+    resolve_join_key_names: Callable[
+        [str, str | None, str, list[str]], tuple[str, str, str | None]
+    ],
+) -> EnricherJoinMetadataContext:
+    """Build complete join metadata for a single enricher.
+
+    Args:
+        join_keys: Enricher join key field names.
+        primary_join_key: Primary join key field name.
+        enricher_pipeline: Enricher pipeline name.
+        seed_pipeline: Optional seed pipeline name for qualified key resolution.
+        merged_columns: Current merged DataFrame column names.
+        resolve_join_key_names: Callable that resolves join key names.
+
+    Returns:
+        Populated ``EnricherJoinMetadataContext`` with all resolved key information.
+    """
+    join_keys_list = list(join_keys)
+    seed_join_key, enricher_join_key, join_key_set = build_enricher_join_key_set(
+        primary_key=primary_join_key,
+        seed_pipeline=seed_pipeline,
+        enricher_pipeline=enricher_pipeline,
+        merged_columns=merged_columns,
+        resolve_join_key_names=resolve_join_key_names,
+    )
+    return EnricherJoinMetadataContext(
+        join_keys_list=join_keys_list,
+        primary_key=primary_join_key,
+        seed_join_key=seed_join_key,
+        enricher_join_key=enricher_join_key,
+        join_key_set=join_key_set,
+    )
+
+
 __all__ = [
+    "EnricherJoinMetadataContext",
+    "build_enricher_join_key_set",
+    "build_enricher_join_metadata",
+    "count_qualified_columns",
     "extract_base_column",
     "infer_pipeline_from_table",
     "infer_silver_table",

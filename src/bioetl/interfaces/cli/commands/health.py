@@ -22,6 +22,12 @@ from bioetl.interfaces.cli.commands.execution_policy import (
 from bioetl.interfaces.cli.commands.execution_policy import (
     handle_cli_failure as handle_cli_execution_failure,
 )
+from bioetl.interfaces.cli.commands.health_rendering import (
+    all_health_results_healthy,
+    build_health_result_lines,
+    build_health_server_info_lines,
+    render_health_results_json,
+)
 from bioetl.interfaces.cli.exit_codes import ExitCode
 
 
@@ -75,13 +81,8 @@ def _echo_health_server_info(host: str, port: int) -> None:
         host: IP address the server will bind to.
         port: TCP port the server will listen on.
     """
-    click.echo(f"Starting health server on http://{host}:{port}")
-    click.echo("Endpoints:")
-    click.echo(f"  - http://{host}:{port}/health")
-    click.echo(f"  - http://{host}:{port}/health/live")
-    click.echo(f"  - http://{host}:{port}/health/ready")
-    click.echo(f"  - http://{host}:{port}/health/providers")
-    click.echo("\nPress Ctrl+C to stop.")
+    for line in build_health_server_info_lines(host, port):
+        click.echo(line)
 
 
 async def _run_health_server(host: str, port: int) -> None:
@@ -222,29 +223,12 @@ def _render_health_results(
         output_json: When True, outputs results as JSON; otherwise uses a
             human-readable text format.
     """
-    import json as json_module
-
-    all_healthy = all(
-        result.get("status", "unknown") == "healthy" for result in results.values()
-    )
+    all_healthy = all_health_results_healthy(results)
     if output_json:
-        click.echo(json_module.dumps(results, indent=2))
+        click.echo(render_health_results_json(results))
         sys.exit(ExitCode.OK if all_healthy else ExitCode.FAIL)
 
-    for prov, result in results.items():
-        status = result.get("status", "unknown")
-        status_icon = (
-            "[OK]"
-            if status == "healthy"
-            else "[WARN]"
-            if status == "degraded"
-            else "[FAIL]"
-        )
-        line = f"  {status_icon} {prov}: {status}"
-        if "latency_ms" in result:
-            line += f" ({result['latency_ms']}ms)"
-        if "error" in result:
-            line += f" - {result['error']}"
+    for line in build_health_result_lines(results):
         click.echo(line)
 
     if all_healthy:

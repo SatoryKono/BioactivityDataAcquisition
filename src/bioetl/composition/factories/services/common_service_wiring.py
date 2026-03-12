@@ -6,6 +6,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from bioetl.application.services.metadata_coordinator import MetadataCoordinator
 from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.composition.factories.services.port_factories import (
     create_checkpoint,
@@ -17,7 +18,6 @@ from bioetl.composition.factories.storage import StorageContext, StorageFactory
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
-    from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
     from bioetl.domain.ports import (
         CheckpointPort,
         DataSourcePort,

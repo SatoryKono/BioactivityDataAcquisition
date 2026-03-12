@@ -11,6 +11,9 @@ from bioetl.application.composite.join_planner_compat_mixin import (
     JoinPlannerCompatibilityMixin,
 )
 from bioetl.application.composite.join_planner_helpers import (
+    EnricherJoinMetadataContext,
+    build_enricher_join_metadata,
+    count_qualified_columns,
     parse_pipeline_name,
 )
 from bioetl.application.composite.protocols import (
@@ -37,12 +40,10 @@ __all__ = ["JoinHow", "JoinPlannerService"]
 
 
 @dataclass(frozen=True, slots=True)
-class _EnricherJoinMetadata:
-    join_keys_list: list[str]
-    primary_key: str
-    seed_join_key: str
-    enricher_join_key: str
-    join_key_set: set[str]
+class _PreparedEnricherJoinContext:
+    metadata: EnricherJoinMetadataContext
+    merged_df: pl.DataFrame
+    enricher_df: pl.DataFrame
 
 
 class JoinPlannerService(JoinPlannerCompatibilityMixin):
@@ -64,10 +65,7 @@ class JoinPlannerService(JoinPlannerCompatibilityMixin):
         }
     )
 
-    @staticmethod
-    def _parse_pipeline_name(pipeline: str) -> tuple[str, str]:
-        """Compatibility shim delegating to helper parser."""
-        return parse_pipeline_name(pipeline)
+    _parse_pipeline_name = staticmethod(parse_pipeline_name)
 
     def __init__(
         self,
@@ -159,10 +157,32 @@ class JoinPlannerService(JoinPlannerCompatibilityMixin):
         enricher: EnricherConfig,
         seed_pipeline: str | None,
     ) -> pl.DataFrame:
-        metadata = self._build_enricher_join_metadata(
+        prepared_context = self._prepare_enricher_join_context(
+            merged_df=merged_df,
+            enricher_df=enricher_df,
             enricher=enricher,
             seed_pipeline=seed_pipeline,
+        )
+        return self._execute_prepared_enricher_join(
+            prepared_context=prepared_context,
+            enricher_pipeline=enricher.pipeline,
+        )
+
+    def _prepare_enricher_join_context(
+        self,
+        *,
+        merged_df: pl.DataFrame,
+        enricher_df: pl.DataFrame,
+        enricher: EnricherConfig,
+        seed_pipeline: str | None,
+    ) -> _PreparedEnricherJoinContext:
+        metadata = build_enricher_join_metadata(
+            join_keys=enricher.join_keys,
+            primary_join_key=enricher.primary_join_key,
+            enricher_pipeline=enricher.pipeline,
+            seed_pipeline=seed_pipeline,
             merged_columns=merged_df.columns,
+            resolve_join_key_names=self.resolve_join_key_names,
         )
         merged_df = self.normalize_join_key_columns(
             merged_df,
@@ -174,20 +194,31 @@ class JoinPlannerService(JoinPlannerCompatibilityMixin):
             enricher=enricher,
             join_keys_list=metadata.join_keys_list,
         )
+        return _PreparedEnricherJoinContext(
+            metadata=metadata,
+            merged_df=merged_df,
+            enricher_df=prepared_enricher_df,
+        )
 
-        merged_df, prepared_enricher_df = (
+    def _execute_prepared_enricher_join(
+        self,
+        *,
+        prepared_context: _PreparedEnricherJoinContext,
+        enricher_pipeline: str,
+    ) -> pl.DataFrame:
+        resolved_merged_df, resolved_enricher_df = (
             self._conflict_resolver.detect_and_resolve_conflicts(
-                merged_df,
-                prepared_enricher_df,
-                metadata.join_key_set,
+                prepared_context.merged_df,
+                prepared_context.enricher_df,
+                prepared_context.metadata.join_key_set,
             )
         )
         return self.execute_polars_join(
-            merged_df,
-            prepared_enricher_df,
-            metadata.seed_join_key,
-            metadata.enricher_join_key,
-            enricher.pipeline,
+            resolved_merged_df,
+            resolved_enricher_df,
+            prepared_context.metadata.seed_join_key,
+            prepared_context.metadata.enricher_join_key,
+            enricher_pipeline,
         )
 
     def _prepare_enricher_dataframe(
@@ -223,59 +254,9 @@ class JoinPlannerService(JoinPlannerCompatibilityMixin):
         self._logger.debug(
             "Renamed enricher columns to qualified format",
             enricher=enricher.pipeline,
-            qualified_count=self._count_qualified_columns(prepared_df.columns),
+            qualified_count=count_qualified_columns(prepared_df.columns),
         )
         return self.drop_system_columns(prepared_df)
-
-    def _build_enricher_join_key_set(
-        self,
-        *,
-        primary_key: str,
-        seed_pipeline: str | None,
-        enricher_pipeline: str,
-        merged_columns: list[str],
-    ) -> tuple[str, str, set[str]]:
-        seed_join_key, enricher_join_key, seed_join_key_qualified = (
-            self.resolve_join_key_names(
-                primary_key,
-                seed_pipeline,
-                enricher_pipeline,
-                merged_columns,
-            )
-        )
-        join_key_set = {seed_join_key, enricher_join_key}
-        if seed_join_key_qualified and seed_join_key_qualified != seed_join_key:
-            join_key_set.add(seed_join_key_qualified)
-        return seed_join_key, enricher_join_key, join_key_set
-
-    def _build_enricher_join_metadata(
-        self,
-        *,
-        enricher: EnricherConfig,
-        seed_pipeline: str | None,
-        merged_columns: list[str],
-    ) -> _EnricherJoinMetadata:
-        join_keys_list = list(enricher.join_keys)
-        primary_key = enricher.primary_join_key
-        seed_join_key, enricher_join_key, join_key_set = (
-            self._build_enricher_join_key_set(
-                primary_key=primary_key,
-                seed_pipeline=seed_pipeline,
-                enricher_pipeline=enricher.pipeline,
-                merged_columns=merged_columns,
-            )
-        )
-        return _EnricherJoinMetadata(
-            join_keys_list=join_keys_list,
-            primary_key=primary_key,
-            seed_join_key=seed_join_key,
-            enricher_join_key=enricher_join_key,
-            join_key_set=join_key_set,
-        )
-
-    @staticmethod
-    def _count_qualified_columns(columns: list[str]) -> int:
-        return len([col for col in columns if "." in col and not col.startswith("_")])
 
     async def apply_dependency_joins(
         self,

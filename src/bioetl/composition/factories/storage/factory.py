@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from bioetl.application.services.metadata_coordinator import MetadataCoordinator
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
@@ -21,7 +22,6 @@ from ._helpers import (
 from .adapter import StorageAdapter
 
 if TYPE_CHECKING:
-    from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
     from bioetl.domain.ports import (
         LoggerPort,
         MetricsPort,

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 from uuid import uuid4
@@ -91,6 +92,21 @@ COMPOSITE_GOLD_SCHEMA_REGISTRY: dict[str, type] = dict(
 
 # Backward-compatible patch point used by legacy bootstrap tests.
 CompositePipelineRunner = create_composite_runner_with_legacy_fsm_adapter
+
+
+@dataclass(frozen=True, slots=True)
+class _CompositeBootstrapPlan:
+    """Resolved bootstrap plan passed to the final runner factory."""
+
+    run_id: str
+    settings: Settings
+    logger: LoggerPort
+    storage: object
+    lock: LockPort
+    seed_runner_factory: Callable[[], PipelineRunner]
+    dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner]
+    enricher_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner]
+    support_services: CompositeSupportServices
 
 
 def _resolve_composite_gold_schema(composite_name: str) -> type | None:
@@ -232,6 +248,45 @@ def _create_composite_runner(
     )
 
 
+def _build_composite_bootstrap_plan(
+    *,
+    config: CompositeConfig,
+    runtime: CompositeRuntimeConfig,
+    run_id: str | None,
+) -> _CompositeBootstrapPlan:
+    """Resolve declarative bootstrap plan for the composite runner."""
+    effective_run_id, settings, logger, storage, lock = _bootstrap_runtime_basics(
+        config=config,
+        run_id=run_id,
+    )
+    seed_runner_factory, dependencies_runner_factory, enricher_runner_factory = (
+        _build_runner_factories(
+            config=config,
+            runtime=runtime,
+            logger=logger,
+        )
+    )
+    support_services = _build_support_services(
+        config=config,
+        runtime=runtime,
+        settings=settings,
+        logger=logger,
+        storage=storage,
+        run_id=effective_run_id,
+    )
+    return _CompositeBootstrapPlan(
+        run_id=effective_run_id,
+        settings=settings,
+        logger=logger,
+        storage=storage,
+        lock=lock,
+        seed_runner_factory=seed_runner_factory,
+        dependencies_runner_factory=dependencies_runner_factory,
+        enricher_runner_factory=enricher_runner_factory,
+        support_services=support_services,
+    )
+
+
 def bootstrap_composite_runner(
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
@@ -250,14 +305,21 @@ def bootstrap_composite_runner(
     Returns:
         Fully wired CompositePipelineRunnerService ready for execution.
     """
-    return _bootstrap_composite_runner_impl(
+    plan = _build_composite_bootstrap_plan(
         config=config,
         runtime=runtime,
         run_id=run_id,
-        bootstrap_runtime_basics_fn=_bootstrap_runtime_basics,
-        build_runner_factories_fn=_build_runner_factories,
-        build_support_services_fn=_build_support_services,
-        create_composite_runner_fn=_create_composite_runner,
+    )
+    return _create_composite_runner(
+        config=config,
+        runtime=runtime,
+        run_id=plan.run_id,
+        logger=plan.logger,
+        lock=plan.lock,
+        seed_runner_factory=plan.seed_runner_factory,
+        dependencies_runner_factory=plan.dependencies_runner_factory,
+        enricher_runner_factory=plan.enricher_runner_factory,
+        support_services=plan.support_services,
     )
 
 

@@ -25,6 +25,7 @@ __all__ = [
 
 import time
 from abc import abstractmethod
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from httpx import HTTPStatusError, RequestError
@@ -45,6 +46,15 @@ if TYPE_CHECKING:
         LoggerPort,
         MetricsPort,
     )
+
+
+@dataclass(frozen=True, slots=True)
+class _HealthCheckProbeOutcome:
+    """Internal probe result used to build ``HealthCheckResult`` consistently."""
+
+    status: HealthStatus
+    last_error: str | None = None
+    consecutive_failures: int = 0
 
 
 class HealthCheckMixin:
@@ -302,31 +312,42 @@ class HealthCheckProviderMixin(HealthCheckMixin):
         from bioetl.domain.ports import HealthCheckResult
 
         ctx = self._start_health_check()
-        last_error: str | None = None
-        consecutive_failures = 0
+        probe_outcome = await self._collect_probe_outcome(ctx)
+        return HealthCheckResult(
+            status=probe_outcome.status,
+            latency_ms=ctx.elapsed_seconds * 1000,
+            provider=self.provider_name,
+            endpoint=self._get_health_endpoint(),
+            last_error=probe_outcome.last_error,
+            consecutive_failures=probe_outcome.consecutive_failures,
+        )
 
+    async def _collect_probe_outcome(
+        self,
+        ctx: HealthCheckContext,
+    ) -> _HealthCheckProbeOutcome:
+        """Execute one provider probe and capture the normalized result state."""
         try:
             status = await self._probe_health()
             self._handle_health_check_success(ctx, status)
-        except HEALTH_CHECK_ERRORS as e:
-            last_error = str(e)
-            status = HealthStatus.UNHEALTHY
-            self._handle_health_check_failure(ctx, e)
-            try:
-                consecutive_failures = self._circuit_breaker.get_failure_count()
-            except HEALTH_CHECK_ERRORS:
-                consecutive_failures = 1
+            return _HealthCheckProbeOutcome(status=status)
+        except HEALTH_CHECK_ERRORS as error:
+            self._handle_health_check_failure(ctx, error)
+            return _HealthCheckProbeOutcome(
+                status=self._resolve_failure_health_status(
+                    error=error,
+                    fallback_status=HealthStatus.UNHEALTHY,
+                ),
+                last_error=str(error),
+                consecutive_failures=self._get_consecutive_health_failures(),
+            )
 
-        latency_ms = ctx.elapsed_seconds * 1000
-
-        return HealthCheckResult(
-            status=status,
-            latency_ms=latency_ms,
-            provider=self.provider_name,
-            endpoint=self._get_health_endpoint(),
-            last_error=last_error,
-            consecutive_failures=consecutive_failures,
-        )
+    def _get_consecutive_health_failures(self) -> int:
+        """Read circuit-breaker failure count with a conservative fallback."""
+        try:
+            return self._circuit_breaker.get_failure_count()
+        except HEALTH_CHECK_ERRORS:
+            return 1
 
     async def _probe_health(self) -> HealthStatus:
         """Perform provider-specific health probe.

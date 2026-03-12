@@ -71,6 +71,15 @@ class _BronzeWritePrepared:
     meta_path: Path
 
 
+@dataclass(frozen=True, slots=True)
+class _BronzeWriteArtifacts:
+    """Measured write output produced before post-write side effects."""
+
+    record_count: int
+    uncompressed_size: int
+    compressed_size: int
+
+
 class BronzeWriter(
     BronzeWriterValidationMixin,
     BronzeWriterMetadataMixin,
@@ -194,11 +203,7 @@ class BronzeWriter(
                 run_type=run_type,
                 ingestion_ts=ingestion_ts,
             )
-            (
-                record_count,
-                uncompressed_size,
-                compressed_size,
-            ) = await self._write_bronze_data_and_sidecar(prepared)
+            write_artifacts = await self._write_bronze_data_and_sidecar(prepared)
             duration = time.perf_counter() - start_time
             await self._run_bronze_post_write_actions(
                 prepared=prepared,
@@ -208,9 +213,7 @@ class BronzeWriter(
                 run_id=run_id,
                 run_type=run_type,
                 ingestion_ts=ingestion_ts,
-                record_count=record_count,
-                uncompressed_size=uncompressed_size,
-                compressed_size=compressed_size,
+                write_artifacts=write_artifacts,
                 duration=duration,
                 source_metadata=source_metadata,
             )
@@ -223,9 +226,9 @@ class BronzeWriter(
             return await self._build_bronze_write_result(
                 prepared=prepared,
                 batch_id=batch_id,
-                record_count=record_count,
-                uncompressed_size=uncompressed_size,
-                compressed_size=compressed_size,
+                record_count=write_artifacts.record_count,
+                uncompressed_size=write_artifacts.uncompressed_size,
+                compressed_size=write_artifacts.compressed_size,
                 span=span,
             )
 
@@ -279,7 +282,7 @@ class BronzeWriter(
     async def _write_bronze_data_and_sidecar(
         self,
         prepared: _BronzeWritePrepared,
-    ) -> tuple[int, int, int]:
+    ) -> _BronzeWriteArtifacts:
         """Write compressed JSONL data and metadata sidecar to disk."""
         loop = asyncio.get_running_loop()
 
@@ -293,8 +296,11 @@ class BronzeWriter(
             return count, size
 
         record_count, uncompressed_size = await loop.run_in_executor(None, _write_task)
-        compressed_size = prepared.full_path.stat().st_size
-        return record_count, uncompressed_size, compressed_size
+        return _BronzeWriteArtifacts(
+            record_count=record_count,
+            uncompressed_size=uncompressed_size,
+            compressed_size=prepared.full_path.stat().st_size,
+        )
 
     async def _run_bronze_post_write_actions(
         self,
@@ -306,9 +312,7 @@ class BronzeWriter(
         run_id: RunID,
         run_type: RunType,
         ingestion_ts: datetime,
-        record_count: int,
-        uncompressed_size: int,
-        compressed_size: int,
+        write_artifacts: _BronzeWriteArtifacts,
         duration: float,
         source_metadata: SourceMetadata | None,
     ) -> None:
@@ -317,9 +321,9 @@ class BronzeWriter(
             duration=duration,
             provider=provider,
             entity=entity,
-            record_count=record_count,
-            compressed_size=compressed_size,
-            uncompressed_size=uncompressed_size,
+            record_count=write_artifacts.record_count,
+            compressed_size=write_artifacts.compressed_size,
+            uncompressed_size=write_artifacts.uncompressed_size,
             relative_path=prepared.relative_path,
             batch_id=batch_id,
             run_id=run_id,
@@ -340,9 +344,9 @@ class BronzeWriter(
                 relative_path=prepared.relative_path,
                 batch_id=batch_id,
                 run_type=run_type,
-                record_count=record_count,
-                compressed_size=compressed_size,
-                uncompressed_size=uncompressed_size,
+                record_count=write_artifacts.record_count,
+                compressed_size=write_artifacts.compressed_size,
+                uncompressed_size=write_artifacts.uncompressed_size,
                 provider=provider,
                 entity=entity,
             )
@@ -353,8 +357,8 @@ class BronzeWriter(
                 provider=provider,
                 entity=entity,
                 batch_id=batch_id,
-                record_count=record_count,
-                compressed_size=compressed_size,
+                record_count=write_artifacts.record_count,
+                compressed_size=write_artifacts.compressed_size,
                 relative_path=prepared.relative_path,
                 ingestion_ts=ingestion_ts,
                 duration=duration,

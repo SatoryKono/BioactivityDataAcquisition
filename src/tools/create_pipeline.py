@@ -127,22 +127,19 @@ PIPELINE_TEMPLATE = Template(
 
 Defines the pipeline structure for ${provider_title} ${entity_title} data.
 Transformation logic is delegated to ${entity_title}Transformer.
+
+Registration: Add a PipelineFactoryConfig entry to
+``bioetl.composition.factories.pipeline.configs`` and call
+``register_all_pipelines()`` at application startup.
 """
 
 from __future__ import annotations
 
-from bioetl.application.core.base import BasePipeline
-from bioetl.composition.registry import register_pipeline
+from bioetl.application.pipelines.generic import GenericPipeline
 
-
-@register_pipeline(name="${pipeline_name}")
-class ${class_prefix}Pipeline(BasePipeline):
-    """Pipeline for ${provider_title} ${entity_title} data processing.
-
-    Inherits standard behavior from BasePipeline.
-    Transformation logic is injected via DI (GenericPipelineFactory).
-    """
-    pass
+# ${provider_title} ${entity_title} uses GenericPipeline via GenericPipelineFactory.
+# Register by adding PipelineFactoryConfig to configs.py.
+# See: src/bioetl/composition/factories/pipeline/configs.py
 '''
 )
 

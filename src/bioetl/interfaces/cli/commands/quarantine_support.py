@@ -18,6 +18,11 @@ from bioetl.interfaces.cli.commands.execution_policy import (
 from bioetl.interfaces.cli.commands.execution_policy import (
     handle_cli_failure as handle_cli_execution_failure,
 )
+from bioetl.interfaces.cli.commands.quarantine_rendering import (
+    build_purge_preview_lines,
+    build_quarantine_stats_lines,
+    build_replay_preview_lines,
+)
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import (
     echo_error,
@@ -185,28 +190,8 @@ def _run_quarantine_sync(
 
 def _render_stats_dashboard(stats: JsonDict, *, pipeline: str) -> None:
     """Render human-readable quarantine statistics."""
-    click.echo(f"\n{'=' * 50}")
-    click.echo(f"  Quarantine Dashboard: {pipeline}")
-    click.echo(f"{'=' * 50}")
-
-    total = stats.get("total_count", 0)
-    click.echo(f"\n  Total Records: {total}")
-
-    by_error = stats.get("by_error_code", {})
-    if by_error:
-        click.echo("\n  By Error Code:")
-        for code, count in sorted(by_error.items(), key=lambda item: -item[1]):
-            pct = (count / total * 100) if total > 0 else 0
-            click.echo(f"    - {code}: {count} ({pct:.1f}%)")
-
-    by_status = stats.get("by_status", {})
-    if by_status:
-        click.echo("\n  By Status:")
-        for status, count in sorted(by_status.items()):
-            pct = (count / total * 100) if total > 0 else 0
-            click.echo(f"    - {status}: {count} ({pct:.1f}%)")
-
-    click.echo(f"\n{'=' * 50}\n")
+    for line in build_quarantine_stats_lines(stats, pipeline=pipeline):
+        click.echo(line)
 
 
 def _inspect_quarantine(
@@ -290,15 +275,8 @@ def _replay_quarantine(
         echo_info("No records found for replay.")
         return
     if dry_run:
-        click.echo(f"\nWould replay {len(records)} record(s):\n")
-        for index, record in enumerate(records[:10], 1):
-            payload_hash = record.get("payload_hash")
-            hash_display = payload_hash[:16] if payload_hash else "—"
-            click.echo(
-                f"  {index}. Error: {record.get('error_code')} | Hash: {hash_display}..."
-            )
-        if len(records) > 10:
-            click.echo(f"  ... and {len(records) - 10} more")
+        for line in build_replay_preview_lines(records):
+            click.echo(line)
         return
 
     click.echo(f"\nReplaying {len(records)} record(s)...")
@@ -339,9 +317,11 @@ def _purge_quarantine(
         if stats is None:
             return
         total = stats.get("total_count", 0)
-        click.echo(f"\nWould purge records older than {older_than_days} days.")
-        click.echo(f"Current total in quarantine: {total}")
-        click.echo("\nUse without --dry-run to actually purge.")
+        for line in build_purge_preview_lines(
+            older_than_days=older_than_days,
+            total_count=total,
+        ):
+            click.echo(line)
         return
 
     if not force:

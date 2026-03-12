@@ -10,7 +10,6 @@ from bioetl.application.composite.protocols import (
     JoinExecutorProtocol,
     JoinKeyResolverProtocol,
 )
-from bioetl.domain.composite.strategy import MergeStrategy
 
 if TYPE_CHECKING:
     import polars as pl
@@ -134,16 +133,8 @@ class JoinPlannerCompatibilityMixin:
         )
 
     def get_polars_join_type(self) -> JoinHow:
-        """Map MergeStrategy to Polars join type."""
-        match self._config.strategy:
-            case MergeStrategy.LEFT_OUTER:
-                return "left"
-            case MergeStrategy.INNER:
-                return "inner"
-            case MergeStrategy.UNION:
-                return "full"
-            case _:
-                return "left"
+        """Map MergeStrategy to Polars join type via executor."""
+        return self._join_executor.get_polars_join_type()
 
 
 __all__ = ["JoinPlannerCompatibilityMixin"]
