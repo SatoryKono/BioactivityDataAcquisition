@@ -139,16 +139,29 @@ class PostrunService:
         gold_dq_config: GoldDQConfigPort | None = None,
     ) -> None:
         """Initialize postrun service."""
-        self._config = config
-        self._runtime = runtime
-        self._context = context
-        self._dq_service = dq_service
-        self._lifecycle_service = lifecycle_service
-        self._storage = storage
-        self._metrics = metrics
-        self._logger = logger
-        self._metadata_coordinator = metadata_coordinator
-        self._metadata_writer = metadata_writer
+        (
+            self._config,
+            self._runtime,
+            self._context,
+            self._dq_service,
+            self._lifecycle_service,
+            self._storage,
+            self._metrics,
+            self._logger,
+            self._metadata_coordinator,
+            self._metadata_writer,
+        ) = (
+            config,
+            runtime,
+            context,
+            dq_service,
+            lifecycle_service,
+            storage,
+            metrics,
+            logger,
+            metadata_coordinator,
+            metadata_writer,
+        )
         self._postrun_warning_allowlist = (
             BioETLError,
             OSError,

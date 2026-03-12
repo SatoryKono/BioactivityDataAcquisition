@@ -16,7 +16,13 @@ registries:
     file_size_limits: { }
     function_complexity: { }
     function_length: { }
-    class_size: { }
+    class_size:
+        src/bioetl/application/core/postrun_service.py::PostrunService:
+            value: 319
+            owner: f.kuzmin
+            reason: "Legacy orchestrator component pending refactoring"
+            expires_on: "2026-06-30"
+            removal_step: "Split PostrunService into smaller specific processors"
     class_method_count: { }
     god_object: { }
     domain_complexity: { }

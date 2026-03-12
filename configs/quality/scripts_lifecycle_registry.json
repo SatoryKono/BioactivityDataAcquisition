@@ -281,6 +281,30 @@
       "review_by": "2026-06-30",
       "next_step": "Keep as manual WSL/Codex setup helper and add explicit usage documentation in dev onboarding docs."
     },
+    "scripts/dev/codex-exec.bat": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as manual wrapper script."
+    },
+    "scripts/dev/codex.bat": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as manual wrapper script."
+    },
+    "scripts/dev/start-wsl-proxy.bat": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as manual wrapper script."
+    },
+    "scripts/dev/wsl_proxy.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Keep as manual helper."
+    },
     "scripts/dev/.wsl-vpn-fix.ps1": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",

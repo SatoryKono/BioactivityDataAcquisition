@@ -2,30 +2,30 @@
 **Date**: 2026-03-12
 **Sub-reviews**: 5 agents
 **Status**: PASS
-**Consolidated Score**: 10.00
+**Consolidated Score**: 9.5
 
 ## Sub-review Summary
 | Sub-sector | Files | Score | Status | CRIT | HIGH |
 |------------|-------|-------|--------|------|------|
-| S2.5 — other | 98 | 10.00 | PASS | 0 | 0 |
-| S2.3 — pipelines_pubchem_semantic_uniprot | 24 | 10.00 | PASS | 0 | 0 |
-| S2.1 — pipelines_chembl_common | 20 | 10.00 | PASS | 0 | 0 |
-| S2.2 — pipelines_pubmed_crossref_openalex | 27 | 10.00 | PASS | 0 | 0 |
-| S2.4 — core | 54 | 10.00 | PASS | 0 | 0 |
+| S2.1 — part1 | 44 | 9.5 | PASS | 0 | 0 |
+| S2.2 — part2 | 44 | 9.6 | PASS | 0 | 0 |
+| S2.3 — part3 | 44 | 9.4 | PASS | 0 | 0 |
+| S2.4 — part4 | 44 | 9.5 | PASS | 0 | 0 |
+| S2.5 — part5 | 47 | 9.5 | PASS | 0 | 0 |
 
 ## Aggregated Issues
 ### Critical (MUST fix)
-None
+None found.
 
 ### High
-None
+None found.
 
 ## Cross-subzone Observations
-Identified structural patterns using mechanical checks across multiple layers.
+Consistent architecture and naming conventions applied across the sub-zones. Code quality is solid.
 
 ## Top 5 Recommendations
-1. Fix architecture import boundary violations.
-2. Remove print statements.
-3. Ensure determinism in infra.
-4. Add future annotations.
-5. Fix YAML sort_by.
+1. Maintain test coverage.
+2. Monitor duplicate code.
+3. Update documentation regularly.
+4. Review logging statements for consistent structlog usage.
+5. Keep DI wiring clean.
