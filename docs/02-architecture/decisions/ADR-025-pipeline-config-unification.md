@@ -113,7 +113,7 @@ sink:
 
 ```bash
 # Валидация всех конфигов
-python scripts/validate_pipeline_configs.py
+python scripts/schema/validate_pipeline_configs.py
 ```
 
 Schema проверяет:

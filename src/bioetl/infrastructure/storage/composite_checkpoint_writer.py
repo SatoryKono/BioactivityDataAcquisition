@@ -38,10 +38,9 @@ class FileCompositeCheckpointWriter:
         try:
             temp.write_text(content)
             temp.replace(full)
-        except BaseException:
+        finally:
             if temp.exists():
                 temp.unlink()
-            raise
 
     def delete(self, path: str) -> bool:
         """Delete checkpoint file. Returns True if existed."""

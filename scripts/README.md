@@ -17,14 +17,14 @@ This directory uses a **canonical-by-domain** structure.
 - `scripts/migrations/oneoff/` — one-time migration scripts.
 - `scripts/diagrams/` — diagram quality/render tooling.
 
-## Compatibility Policy
+## Root Directory Policy
 
-Historical entrypoints are kept in `scripts/` root as thin wrappers.
+The `scripts/` root contains only the launcher (`run.py`) and catalog metadata.
+All scripts live in canonical subdirectories listed above.
 
 Rules:
-- New integrations must target canonical paths under grouped directories.
-- Root wrappers exist only for backward compatibility.
-- Do not add new non-wrapper scripts to `scripts/` root.
+- New scripts must be placed in the appropriate canonical subdirectory.
+- Do not add scripts to `scripts/` root.
 
 ## Inventory Governance
 

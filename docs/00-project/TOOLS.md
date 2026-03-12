@@ -33,9 +33,9 @@
 - `mkdocs` pinned to `<2.0` in `pyproject.toml` to avoid known compatibility risk with current Material stack.
 - Standard docs checks:
 ```bash
-python scripts/check_doc_links.py
+python scripts/docs/check_doc_links.py
 make docs-build
-bash scripts/build_docs_site.sh --strict
+bash scripts/docs/build_docs_site.sh --strict
 ```
 - Migration to MkDocs 2.x must be tracked as a dedicated task with explicit compatibility validation.
 
@@ -139,13 +139,13 @@ python src/tools/file_merger.py --dir src/bioetl/domain/ --ext .py --output merg
 **Использование:**
 ```bash
 # Dry-run (по умолчанию)
-python scripts/cleanup_project.py
+python scripts/diagnostics/cleanup_project.py
 
 # Применить изменения с архивированием логов
-python scripts/cleanup_project.py --apply --archive-logs
+python scripts/diagnostics/cleanup_project.py --apply --archive-logs
 
 # Полная очистка (включая логи)
-python scripts/cleanup_project.py --apply --purge-logs
+python scripts/diagnostics/cleanup_project.py --apply --purge-logs
 ```
 
 | Флаг | Описание |
@@ -168,10 +168,10 @@ python scripts/cleanup_project.py --apply --purge-logs
 **Использование:**
 ```bash
 # Dry-run (по умолчанию)
-python scripts/cleanup_consolidate.py
+python scripts/diagnostics/cleanup_consolidate.py
 
 # Применить удаление .pyc/--pycache--/temp файлов
-python scripts/cleanup_consolidate.py --apply
+python scripts/diagnostics/cleanup_consolidate.py --apply
 ```
 
 **Что анализирует:**
@@ -192,13 +192,13 @@ python scripts/cleanup_consolidate.py --apply
 **Использование:**
 ```bash
 # VACUUM всех Silver таблиц
-python scripts/vacuum_delta.py
+python scripts/data/vacuum_delta.py
 
 # VACUUM конкретной таблицы
-python scripts/vacuum_delta.py --table silver/chembl/activity
+python scripts/data/vacuum_delta.py --table silver/chembl/activity
 
 # С кастомным retention
-python scripts/vacuum_delta.py --retention-days 14
+python scripts/data/vacuum_delta.py --retention-days 14
 ```
 
 | Параметр | Описание | Default |
@@ -220,10 +220,10 @@ python scripts/vacuum_delta.py --retention-days 14
 **Использование:**
 ```bash
 # Стандартная ротация
-python scripts/salt_rotate.py
+python scripts/ops/salt_rotate.py
 
 # Экстренная ротация (инцидент безопасности)
-python scripts/salt_rotate.py --emergency
+python scripts/ops/salt_rotate.py --emergency
 ```
 
 | Параметр | Описание |
@@ -242,10 +242,10 @@ python scripts/salt_rotate.py --emergency
 **Использование:**
 ```bash
 # Пересчитать baseline для всех пайплайнов
-python scripts/dq_baseline_update.py
+python scripts/data/dq_baseline_update.py
 
 # Для конкретного пайплайна
-python scripts/dq_baseline_update.py --pipeline chembl_activity
+python scripts/data/dq_baseline_update.py --pipeline chembl_activity
 ```
 
 | Параметр | Описание |
@@ -263,8 +263,8 @@ python scripts/dq_baseline_update.py --pipeline chembl_activity
 
 **Использование:**
 ```bash
-python scripts/verify_checksums.py
-python scripts/verify_checksums.py --table silver/chembl/activity
+python scripts/data/verify_checksums.py
+python scripts/data/verify_checksums.py --table silver/chembl/activity
 ```
 
 **Ссылки:** 05-cleanup-policy.md §5.2
@@ -280,13 +280,13 @@ python scripts/verify_checksums.py --table silver/chembl/activity
 **Использование:**
 ```bash
 # Стандартный аудит
-python scripts/audit_structure.py
+python scripts/diagnostics/audit_structure.py
 
 # JSON вывод для CI
-python scripts/audit_structure.py --json
+python scripts/diagnostics/audit_structure.py --json
 
 # Строгий режим (SHOULD violations = exit 1)
-python scripts/audit_structure.py --strict
+python scripts/diagnostics/audit_structure.py --strict
 ```
 
 | Флаг | Описание |
@@ -313,13 +313,13 @@ python scripts/audit_structure.py --strict
 **Использование:**
 ```bash
 # Полный аудит
-python scripts/naming_audit.py
+python scripts/qa/naming_audit.py
 
 # CI режим (exit 1 при нарушениях)
-python scripts/naming_audit.py --check
+python scripts/qa/naming_audit.py --check
 
 # Сохранить отчёт в файл
-python scripts/naming_audit.py --output report.md
+python scripts/qa/naming_audit.py --output report.md
 ```
 
 **Ссылки:** RULES.md §2, docs/glossary.md
@@ -333,13 +333,13 @@ python scripts/naming_audit.py --output report.md
 **Использование:**
 ```bash
 # Проверить весь проект
-python src/tools/scripts/lint_terminology.py
+python src/tools/scripts/qa/lint_terminology.py
 
 # Проверить конкретный файл
-python src/tools/scripts/lint_terminology.py src/bioetl/domain/models/molecule.py
+python src/tools/scripts/qa/lint_terminology.py src/bioetl/domain/models/molecule.py
 
 # Строгий режим (дополнительные context-sensitive проверки)
-python src/tools/scripts/lint_terminology.py --strict src/bioetl/
+python src/tools/scripts/qa/lint_terminology.py --strict src/bioetl/
 ```
 
 **Что проверяет:**
@@ -370,7 +370,7 @@ bash scripts/diagrams/run_diagram_checks.sh
 
 **Использование:**
 ```bash
-python scripts/config_gap_analysis.py
+python scripts/schema/config_gap_analysis.py
 ```
 
 **Что анализирует:**
@@ -386,7 +386,7 @@ python scripts/config_gap_analysis.py
 
 **Использование:**
 ```bash
-python scripts/validate_pipeline_configs.py
+python scripts/schema/validate_pipeline_configs.py
 ```
 
 **Что проверяет:**
@@ -418,22 +418,22 @@ pytest src/tools/benchmarks/ -v --benchmark-only
 ```makefile
 # Очистка
 clean-dev:
-    python scripts/cleanup_project.py --apply --purge-logs
+    python scripts/diagnostics/cleanup_project.py --apply --purge-logs
 
 # Delta Lake maintenance
 vacuum-silver:
-    python scripts/vacuum_delta.py
+    python scripts/data/vacuum_delta.py
 
 # Верификация
 verify-checksums:
-    python scripts/verify_checksums.py
+    python scripts/data/verify_checksums.py
 
 # Аудит
 audit-structure:
-    python scripts/audit_structure.py
+    python scripts/diagnostics/audit_structure.py
 
 audit-naming:
-    python scripts/naming_audit.py
+    python scripts/qa/naming_audit.py
 
 # Создание пайплайна (требует bioetl)
 new-pipeline:

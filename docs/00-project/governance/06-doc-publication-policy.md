@@ -52,7 +52,7 @@
 2. Документы класса `internal-published` публикуются для удобства команды, но не являются нормативным источником требований.
 3. При миграции структуры (пути, команды, конфиги) сначала обновлять `published`, затем `internal-published` и `internal`.
 4. Исторические упоминания legacy-путей в `published` документах должны быть явно помечены как historical context.
-5. Для активных docs использовать автоматические проверки (`scripts/check_doc_links.py`) в CI.
+5. Для активных docs использовать автоматические проверки (`scripts/docs/check_doc_links.py`) в CI.
 6. Документы по runtime, который не является стандартным (например Kubernetes при ADR-010 Local-Only), публикуются только как `internal-published` в разделе `Internal / Extended` и должны содержать явный experimental/disclaimer баннер.
 7. `internal-generated` документы не используются как первичный источник архитектурной или операционной политики.
 
@@ -60,11 +60,11 @@
 
 1. Проверить ссылки:
 ```bash
-python scripts/check_doc_links.py --links
+python scripts/docs/check_doc_links.py --links
 ```
 2. Проверить legacy-токены в активных docs:
 ```bash
-python scripts/check_doc_links.py --legacy-paths
+python scripts/docs/check_doc_links.py --legacy-paths
 ```
 3. Проверить, что изменения не сломали nav:
 ```bash

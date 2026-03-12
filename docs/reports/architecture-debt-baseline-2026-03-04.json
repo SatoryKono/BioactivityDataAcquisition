@@ -61,7 +61,7 @@
     "blocking": [
       {
         "name": "quality_exemptions_registry",
-        "command": "./.venv/Scripts/python.exe scripts/check_quality_exemptions.py --mode warn",
+        "command": "./.venv/Scripts/python.exe scripts/qa/check_quality_exemptions.py --mode warn",
         "status": "pass"
       },
       {
@@ -76,7 +76,7 @@
       },
       {
         "name": "docs_link_spec_config_guard",
-        "command": "./.venv/Scripts/python.exe scripts/check_doc_links.py",
+        "command": "./.venv/Scripts/python.exe scripts/docs/check_doc_links.py",
         "status": "pass"
       }
     ],

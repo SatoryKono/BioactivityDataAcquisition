@@ -150,6 +150,29 @@ async def test_fetch_batch_success(batch_processor, mock_http):
 
 
 @pytest.mark.asyncio
+async def test_fetch_batch_ignores_non_mapping_items(batch_processor, mock_http):
+    """Only mapping-shaped items should be yielded as BronzeRecord values."""
+    mock_response = MagicMock()
+    mock_response.status_code = 200
+    mock_response.json.return_value = {
+        "message": {
+            "items": [
+                {"DOI": "10.1038/nature12373", "title": ["Title 1"]},
+                "unexpected-string-item",
+                123,
+            ]
+        }
+    }
+    mock_http.get.return_value = mock_response
+
+    results = []
+    async for item in batch_processor.fetch_batch(["10.1038/nature12373"]):
+        results.append(item)
+
+    assert results == [{"DOI": "10.1038/nature12373", "title": ["Title 1"]}]
+
+
+@pytest.mark.asyncio
 async def test_fetch_batch_empty_list(batch_processor):
     """Test batch fetch with empty DOI list."""
     results = []
@@ -311,6 +334,20 @@ async def test_search_stops_on_empty_page(search_paginator, mock_http):
 
     assert len(results) == 0
     assert mock_http.get.call_count == 1
+
+
+@pytest.mark.asyncio
+async def test_search_invalid_message_body_raises_api_error(search_paginator, mock_http):
+    """Non-mapping message payloads should fail with a typed CrossRefApiError."""
+    mock_response = MagicMock()
+    mock_response.status_code = 200
+    mock_response.json.return_value = {"message": "invalid"}
+    mock_http.get.return_value = mock_response
+
+    with pytest.raises(CrossRefApiError, match="invalid response body"):
+        results = []
+        async for item in search_paginator.search("test"):
+            results.append(item)
 
 
 @pytest.mark.asyncio

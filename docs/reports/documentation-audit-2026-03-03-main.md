@@ -77,8 +77,8 @@
 - ADR alignment (ADR-010, ADR-014, ADR-017):
   - Подтверждено в `README.md`, `mkdocs.yml`, `docs/00-project/RULES.md`, `docs/02-architecture/**`.
 - Link check:
-  - `./.venv/Scripts/python.exe scripts/check_doc_links.py` — PASS
-  - `./.venv/Scripts/python.exe scripts/check_doc_links.py --legacy-paths` — PASS
+  - `./.venv/Scripts/python.exe scripts/docs/check_doc_links.py` — PASS
+  - `./.venv/Scripts/python.exe scripts/docs/check_doc_links.py --legacy-paths` — PASS
 - Additional validation:
   - `./.venv/Scripts/python.exe -m pytest tests/architecture/test_docs_version_sync.py -q -p no:xdist --tb=short` — PASS
   - `./.venv/Scripts/python.exe -m pytest tests/architecture/test_check_doc_links_guardrails.py -q -p no:xdist --tb=short` — PASS

@@ -9,11 +9,7 @@ from pathlib import Path
 CRITICAL_MODULES = (
     "src/bioetl/infrastructure/adapters/uniprot/idmapping_client.py",
 )
-ALLOWED_BROAD_EXCEPTION_POLICIES = {
-    "src/bioetl/interfaces/cli/commands/run_command_policy.py": frozenset(
-        {"CLI_CLEANUP_PREVIEW_UNEXPECTED_ERROR"}
-    ),
-}
+ALLOWED_BROAD_EXCEPTION_POLICIES: dict[str, frozenset[str]] = {}
 P0_2_CRITICAL_ERROR_MODULES = (
     "src/bioetl/application/core/batch_executor.py",
     "src/bioetl/application/core/postrun/cleanup_orchestrator.py",

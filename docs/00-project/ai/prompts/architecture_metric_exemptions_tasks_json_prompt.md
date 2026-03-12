@@ -128,7 +128,7 @@
   - `python -m pytest -q tests/architecture/test_code_metrics.py::TestGodObjectDetection`
 - Для всех задач добавь:
   - `python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py`
-  - `python scripts/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off`
+  - `python scripts/qa/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off`
 
 ФИНАЛЬНЫЙ ВЫВОД
 1) Сохрани JSON-файл в корне проекта с требуемым именем.

@@ -72,7 +72,7 @@
 
 ## 5. Verification (executed)
 
-- `./.venv/Scripts/python.exe scripts/check_doc_links.py` — PASS
+- `./.venv/Scripts/python.exe scripts/docs/check_doc_links.py` — PASS
 - `./.venv/Scripts/python.exe -m mkdocs build --strict` — PASS
 - `./.venv/Scripts/python.exe -m pytest tests/architecture/test_docs_version_sync.py -q -p no:xdist --tb=short` — PASS
 - `./.venv/Scripts/python.exe -m pytest tests/architecture/test_check_doc_links_guardrails.py -q -p no:xdist --tb=short` — PASS
@@ -131,13 +131,13 @@
    - добавлены связующие индексы/ссылки для `99-archive/**`, `plans/**`,
      `reports/**`, `skills/**` и non-nav индексов `mmd-diagrams/**`.
 6. Перепроверка:
-   - `scripts/check_doc_links.py` — PASS;
+   - `scripts/docs/check_doc_links.py` — PASS;
    - `tests/architecture/test_check_doc_links_guardrails.py` — PASS;
    - `tests/architecture/test_documentation_sync.py` — PASS;
    - `mkdocs build --strict` — PASS.
 7. Введён weekly KPI-контроль docs-nav:
    - новый workflow `.github/workflows/docs-kpi-weekly.yml` (schedule + manual);
-   - новый отчётный скрипт `scripts/report_docs_kpi.py`;
+   - новый отчётный скрипт `scripts/docs/report_docs_kpi.py`;
    - KPI: target `not_in_nav <= 120` (до `2026-06-30`), hard-limit `<= 135`, orphan budget `<= 0`.
 8. Расширен `check_doc_links` path-contract guardrails:
    - добавлена проверка канонического пути `REQUIREMENTS.md`;
@@ -179,7 +179,7 @@
 
 ### Verification
 
-- `./.venv/Scripts/python.exe scripts/check_doc_links.py` — PASS
+- `./.venv/Scripts/python.exe scripts/docs/check_doc_links.py` — PASS
 - `./.venv/Scripts/python.exe -m pytest tests/architecture/test_docs_version_sync.py -q -p no:xdist --tb=short` — PASS
 - `./.venv/Scripts/python.exe -m pytest tests/architecture/test_check_doc_links_guardrails.py -q -p no:xdist --tb=short` — PASS
 - `./.venv/Scripts/python.exe -m pytest tests/architecture/test_documentation_sync.py -q -p no:xdist --tb=short` — PASS
@@ -261,9 +261,9 @@ Expected effect:
 
 ### 10.5 Safety Gates for Each Wave
 
-- `scripts/check_doc_links.py` — PASS
+- `scripts/docs/check_doc_links.py` — PASS
 - `mkdocs build --strict` — PASS
-- `scripts/report_docs_kpi.py --fail-on-breach` — PASS
+- `scripts/docs/report_docs_kpi.py --fail-on-breach` — PASS
 - no baseline growth unless intentional and justified
 
 ## 11. MkDocs/Material Migration Track

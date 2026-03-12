@@ -16,7 +16,7 @@ Registry under governance:
 
 Validation checks:
 - Required metadata per entry: `value`, `owner`, `reason`, `expires_on`, `removal_step`
-- Validation command: `./.venv/Scripts/python.exe scripts/check_quality_exemptions.py --mode warn`
+- Validation command: `./.venv/Scripts/python.exe scripts/qa/check_quality_exemptions.py --mode warn`
 
 Snapshot results (2026-03-04):
 - Registry buckets: `7`
@@ -83,10 +83,10 @@ Layer split (`except Exception`):
 
 | Gate | Command | Status (2026-03-04) |
 |---|---|---|
-| Debt registry validity | `./.venv/Scripts/python.exe scripts/check_quality_exemptions.py --mode warn` | PASS |
+| Debt registry validity | `./.venv/Scripts/python.exe scripts/qa/check_quality_exemptions.py --mode warn` | PASS |
 | Debt scorecard consistency | `./.venv/Scripts/python.exe -m pytest tests/architecture/test_quality_debt_scorecard.py -q -p no:xdist --tb=short` | PASS |
 | Docs architecture sync | `./.venv/Scripts/python.exe -m pytest tests/architecture/test_documentation_sync.py tests/architecture/test_docs_version_sync.py tests/architecture/test_docs_kpi_workflow.py -q -p no:xdist --tb=short` | PASS |
-| Docs link/spec/config validity | `./.venv/Scripts/python.exe scripts/check_doc_links.py` | PASS |
+| Docs link/spec/config validity | `./.venv/Scripts/python.exe scripts/docs/check_doc_links.py` | PASS |
 
 ### Non-blocking / observational gates
 
@@ -101,9 +101,9 @@ Policy decision:
 ## Control Commands Used
 
 ```bash
-./.venv/Scripts/python.exe scripts/check_quality_exemptions.py --mode warn
+./.venv/Scripts/python.exe scripts/qa/check_quality_exemptions.py --mode warn
 ./.venv/Scripts/python.exe -m pytest tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_documentation_sync.py tests/architecture/test_docs_version_sync.py tests/architecture/test_docs_kpi_workflow.py -q -p no:xdist --tb=short
-./.venv/Scripts/python.exe scripts/check_doc_links.py
+./.venv/Scripts/python.exe scripts/docs/check_doc_links.py
 rg -n ': Any|-> Any' src/bioetl -g '*.py'
 rg -n '\bAny\b' src/bioetl -g '*.py'
 rg -n 'except\s+Exception\b' src/bioetl -g '*.py'

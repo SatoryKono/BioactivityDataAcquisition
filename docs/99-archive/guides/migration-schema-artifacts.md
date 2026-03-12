@@ -12,13 +12,13 @@ This guide describes migration to the canonical schema generation flow introduce
 - Generated artifacts are managed via a single command:
 
 ```bash
-uv run python scripts/generate_schema_artifacts.py
+uv run python scripts/schema/generate_schema_artifacts.py
 ```
 
 - CI now blocks pull requests when generated artifacts are stale:
 
 ```bash
-uv run python scripts/generate_schema_artifacts.py --check
+uv run python scripts/schema/generate_schema_artifacts.py --check
 ```
 
 ## Required Developer Workflow
@@ -28,7 +28,7 @@ uv run python scripts/generate_schema_artifacts.py --check
 1. Regenerate artifacts locally:
 
    ```bash
-   uv run python scripts/generate_schema_artifacts.py
+   uv run python scripts/schema/generate_schema_artifacts.py
    ```
 
 1. Commit all generated changes:
@@ -40,7 +40,7 @@ uv run python scripts/generate_schema_artifacts.py --check
 1. Run check mode before push:
 
    ```bash
-   uv run python scripts/generate_schema_artifacts.py --check
+   uv run python scripts/schema/generate_schema_artifacts.py --check
    ```
 
 ## Notes

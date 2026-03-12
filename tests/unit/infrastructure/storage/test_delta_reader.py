@@ -13,6 +13,7 @@ import pyarrow as pa
 import pytest
 from deltalake import write_deltalake
 
+import bioetl.infrastructure.storage.delta_reader as delta_reader_module
 from bioetl.infrastructure.storage.delta_reader import DeltaReader
 
 
@@ -239,6 +240,52 @@ class TestGetRowCount:
             await reader.get_row_count("nonexistent/table")
 
         assert "Delta table not found" in str(exc_info.value)
+
+    async def test_get_row_count_prefers_native_count_api(
+        self,
+        tmp_path: Path,
+        mock_logger: MagicMock,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Use DeltaTable.count() when available instead of metadata fallbacks."""
+
+        class _FakeDeltaTable:
+            def __init__(self, _table_uri: str) -> None:
+                self._table_uri = _table_uri
+
+            def count(self) -> int:
+                return 7
+
+            def get_add_actions(self, *, flatten: bool) -> object:
+                raise AssertionError(f"unexpected metadata fallback: flatten={flatten}")
+
+        monkeypatch.setattr(delta_reader_module, "DeltaTable", _FakeDeltaTable)
+        reader = DeltaReader(base_path=tmp_path, logger=mock_logger)
+
+        result = await reader.get_row_count("provider/entity")
+
+        assert result == 7
+
+    async def test_get_row_count_propagates_keyboard_interrupt(
+        self,
+        tmp_path: Path,
+        mock_logger: MagicMock,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Do not swallow cancellation-style BaseException subclasses."""
+
+        class _FakeDeltaTable:
+            def __init__(self, _table_uri: str) -> None:
+                self._table_uri = _table_uri
+
+            def count(self) -> int:
+                raise KeyboardInterrupt()
+
+        monkeypatch.setattr(delta_reader_module, "DeltaTable", _FakeDeltaTable)
+        reader = DeltaReader(base_path=tmp_path, logger=mock_logger)
+
+        with pytest.raises(KeyboardInterrupt):
+            await reader.get_row_count("provider/entity")
 
 
 @pytest.mark.unit

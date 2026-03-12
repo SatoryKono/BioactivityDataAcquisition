@@ -1,8 +1,8 @@
 # Compatibility Entry Points
 
-This folder reserves compatibility-only assets for script path migrations.
+This folder is reserved for temporary compatibility assets during script path migrations.
 
-Current policy:
-- Backward-compatible wrappers currently remain in `scripts/` root.
-- New canonical automation must use grouped paths under `scripts/*/`.
-- New wrappers should be temporary and linked to a deprecation/removal step.
+Current status:
+- All root-level wrappers have been removed (2026-03-12).
+- All CI, pre-commit, and documentation now reference canonical paths directly.
+- This directory is empty and can be used for future migration shims if needed.

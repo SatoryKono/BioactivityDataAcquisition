@@ -171,8 +171,8 @@ make quarantine-purge PIPELINE=chembl_activity
 After cleanup, verify repository hygiene and structure policy:
 
 ```bash
-python3 scripts/audit_root_cleanliness.py
-python3 scripts/audit_structure.py --path .
+python3 scripts/repo/audit_root_cleanliness.py
+python3 scripts/diagnostics/audit_structure.py --path .
 ```
 
 ## 6. Commands
@@ -256,7 +256,7 @@ Enforcement:
 
 ```bash
 # 1. Validate repository hygiene
-python3 scripts/audit_root_cleanliness.py
+python3 scripts/repo/audit_root_cleanliness.py
 
 # 2. Run cleanup preflight
 make clean-preflight DRY_RUN=1

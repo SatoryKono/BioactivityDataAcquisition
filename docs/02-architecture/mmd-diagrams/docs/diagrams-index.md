@@ -60,7 +60,7 @@ scripts/diagrams/run_diagram_checks.sh --profile pr --diagram docs/02-architectu
 python3 scripts/diagrams/lint_diagrams.py docs
 python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/mmd-diagrams --json > /tmp/diagram-lint.json || true
 python3 scripts/diagrams/summarize_diagram_lint.py /tmp/diagram-lint.json
-python3 scripts/check_doc_links.py --links
+python3 scripts/docs/check_doc_links.py --links
 bash scripts/diagrams/validate_mermaid_syntax.sh
 bash docs/02-architecture/mmd-diagrams/render.sh
 python3 scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt
