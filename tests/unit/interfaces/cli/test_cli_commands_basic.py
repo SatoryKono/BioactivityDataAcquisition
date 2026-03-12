@@ -481,13 +481,13 @@ class TestDryRunMode:
         assert "2 files" in result.output
 
     @patch("bioetl.interfaces.cli.commands.run_helpers.preview_cleanup")
-    def test_dry_run_preview_exception(
+    def test_dry_run_preview_runtime_error(
         self,
         mock_preview_cleanup,
         runner,
     ):
-        """Test that dry-run handles exceptions during preview."""
-        mock_preview_cleanup.side_effect = Exception("Preview error")
+        """Test that dry-run handles preview runtime failures gracefully."""
+        mock_preview_cleanup.side_effect = RuntimeError("Preview error")
 
         result = runner.invoke(
             cli,

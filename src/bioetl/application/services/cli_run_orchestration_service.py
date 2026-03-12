@@ -6,7 +6,9 @@ __all__ = [
     "CliRunOrchestrationService",
     "MetricsFlushCallable",
     "RunCoroutineCallable",
-    "RunPipelineAsyncCallable",
+    "RunExecutionRequest",
+    "RunPreparationResult",
+    "RunPreparedPipelineCallable",
     "StartOffsetValidationResult",
 ]
 
@@ -18,16 +20,12 @@ from typing import Any, Protocol
 from bioetl.application.services.pipeline_runner_service import RunOptions, RunResult
 
 
-class RunPipelineAsyncCallable(Protocol):
-    """Callable contract for async pipeline execution."""
+class RunPreparedPipelineCallable(Protocol):
+    """Callable contract for async execution of a prepared run request."""
 
     def __call__(
         self,
-        pipeline: str,
-        options: RunOptions,
-        *,
-        health_server_enabled: bool = True,
-        health_port: int,
+        request: RunExecutionRequest,
     ) -> Coroutine[Any, Any, RunResult]: ...  # Any: standard Coroutine type params
 
 
@@ -58,6 +56,32 @@ class StartOffsetValidationResult:
 
     is_valid: bool
     error_message: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class RunExecutionContext:
+    """Prepared run context passed across CLI orchestration boundaries."""
+
+    pipeline: str
+    options: RunOptions
+    health_server: bool
+    health_port: int
+
+
+RunExecutionRequest = RunExecutionContext
+
+
+@dataclass(frozen=True, slots=True)
+class RunPreparationResult:
+    """Result of translating raw CLI inputs into a prepared run request."""
+
+    request: RunExecutionRequest | None = None
+    error_message: str | None = None
+
+    @property
+    def is_valid(self) -> bool:
+        """Whether CLI inputs were valid enough to build a run request."""
+        return self.request is not None
 
 
 class CliRunOrchestrationService:
@@ -157,24 +181,72 @@ class CliRunOrchestrationService:
             cached_bronze_date=cached_bronze_date,
         )
 
-    def execute_pipeline(
+    def prepare_execution_request(
         self,
         *,
         pipeline: str,
-        options: RunOptions,
+        run_type: str,
+        resume: bool,
+        start_offset: int | None,
+        limit: int | None,
+        input_csv: str | None,
+        filter_column: str | None,
+        filter_field: str | None,
+        dry_run: bool,
+        vacuum_after_run: bool | None,
+        vacuum_retention_days: int | None,
+        debug: bool,
         health_server: bool,
         health_port: int,
-        run_pipeline_async: RunPipelineAsyncCallable,
+        use_cached_bronze: bool,
+        cached_bronze_date: str | None,
+        cached_bronze_path: str | None,
+    ) -> RunPreparationResult:
+        """Validate raw CLI inputs and build a prepared execution request."""
+        validation = self.validate_start_offset(
+            start_offset=start_offset,
+            run_type=run_type,
+            resume=resume,
+        )
+        if not validation.is_valid:
+            return RunPreparationResult(error_message=validation.error_message)
+
+        return RunPreparationResult(
+            request=RunExecutionRequest(
+                pipeline=pipeline,
+                options=self.build_options(
+                    run_type=run_type,
+                    resume=resume,
+                    start_offset=start_offset,
+                    limit=limit,
+                    input_csv=input_csv,
+                    filter_column=filter_column,
+                    filter_field=filter_field,
+                    dry_run=dry_run,
+                    vacuum_after_run=vacuum_after_run,
+                    vacuum_retention_days=vacuum_retention_days,
+                    debug=debug,
+                    use_cached_bronze=use_cached_bronze,
+                    cached_bronze_date=cached_bronze_date,
+                    cached_bronze_path=cached_bronze_path,
+                ),
+                health_server=health_server,
+                health_port=health_port,
+            )
+        )
+
+    def execute_pipeline(
+        self,
+        *,
+        request: RunExecutionRequest,
+        run_pipeline_async: RunPreparedPipelineCallable,
         run_coroutine: RunCoroutineCallable,
         flush_metrics: MetricsFlushCallable,
     ) -> RunResult:
         """Execute pipeline with deterministic metrics flush.
 
         Args:
-            pipeline: Pipeline name identifier to execute.
-            options: RunOptions controlling run behaviour (type, limit, etc.).
-            health_server: Whether to enable the HTTP health-check server.
-            health_port: Port number for the health-check server.
+            request: Prepared run request with execution options and health settings.
             run_pipeline_async: Callable that creates the async pipeline coroutine.
             run_coroutine: Callable that runs the coroutine in a sync context.
             flush_metrics: Callable to flush metrics after the pipeline finishes.
@@ -182,15 +254,10 @@ class CliRunOrchestrationService:
         Returns:
             RunResult from the completed pipeline execution.
         """
-        coro = run_pipeline_async(
-            pipeline,
-            options,
-            health_server_enabled=health_server,
-            health_port=health_port,
-        )
+        coro = run_pipeline_async(request)
         try:
             return run_coroutine(coro)
         finally:
-            flush_metrics(pipeline_name=pipeline)
+            flush_metrics(pipeline_name=request.pipeline)
             if getattr(coro, "cr_frame", None) is not None:
                 coro.close()

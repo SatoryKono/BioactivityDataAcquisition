@@ -72,7 +72,7 @@ MUST NOT:
 Run before PR:
 
 ```bash
-uv run python scripts/schema/validate_pipeline_configs.py --verbose
+uv run python -m scripts.schema validate-configs --verbose
 uv run python -m pytest tests/architecture/test_registry_contracts.py -q
 uv run python -m pytest tests/architecture/test_source_config_usage.py -q
 ```

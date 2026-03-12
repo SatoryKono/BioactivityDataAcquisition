@@ -6,6 +6,7 @@ from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite.dependency_join_support import (
+    PreparedDependencyJoinContext,
     build_asymmetric_join_key_set,
     build_composite_join_metadata,
     build_single_key_join_metadata,
@@ -81,7 +82,7 @@ class DependencyJoinerService:
                 continue
 
             result = self._apply_single_key_dependency_join(
-                result=result,
+                merged_df=result,
                 dep_df=dep_df,
                 dep=dep,
                 seed_pipeline=seed_pipeline,
@@ -102,13 +103,7 @@ class DependencyJoinerService:
             dep=dep,
             seed_pipeline=seed_pipeline,
         )
-        merged_df, dep_df = prepare_dependency_join_frames(
-            deduplicator=self._deduplicator,
-            join_key_resolver=self._join_key_resolver,
-            renamer=self._renamer,
-            logger=self._logger,
-            field_alias_resolver=self._field_alias_resolver,
-            drop_system_columns=self.drop_system_columns,
+        prepared_context = self._prepare_dependency_join_context(
             merged_df=merged_df,
             dep_df=dep_df,
             dep=dep,
@@ -121,12 +116,12 @@ class DependencyJoinerService:
                 metadata.join_keys_list,
                 metadata.left_pipeline,
                 dep.pipeline,
-                merged_df.columns,
+                prepared_context.merged_df.columns,
             )
         )
         merged_df, dep_df = self._conflict_resolver.detect_and_resolve_conflicts(
-            merged_df,
-            dep_df,
+            prepared_context.merged_df,
+            prepared_context.dep_df,
             all_join_key_set,
         )
         missing_left = find_missing_keys(merged_df.columns, left_keys)
@@ -177,7 +172,7 @@ class DependencyJoinerService:
     def _apply_single_key_dependency_join(
         self,
         *,
-        result: pl.DataFrame,
+        merged_df: pl.DataFrame,
         dep_df: pl.DataFrame,
         dep: DependencyConfig,
         seed_pipeline: str | None,
@@ -186,14 +181,8 @@ class DependencyJoinerService:
             dep=dep,
             seed_pipeline=seed_pipeline,
         )
-        result, dep_df = prepare_dependency_join_frames(
-            deduplicator=self._deduplicator,
-            join_key_resolver=self._join_key_resolver,
-            renamer=self._renamer,
-            logger=self._logger,
-            field_alias_resolver=self._field_alias_resolver,
-            drop_system_columns=self.drop_system_columns,
-            merged_df=result,
+        prepared_context = self._prepare_dependency_join_context(
+            merged_df=merged_df,
             dep_df=dep_df,
             dep=dep,
             left_join_keys=metadata.join_keys_list,
@@ -206,7 +195,7 @@ class DependencyJoinerService:
                 right_key=metadata.right_key,
                 left_pipeline=metadata.left_pipeline,
                 right_pipeline=dep.pipeline,
-                merged_columns=result.columns,
+                merged_columns=prepared_context.merged_df.columns,
             )
         )
 
@@ -219,8 +208,8 @@ class DependencyJoinerService:
         return execute_dependency_join(
             conflict_resolver=self._conflict_resolver,
             logger=self._logger,
-            merged_df=result,
-            dep_df=dep_df,
+            merged_df=prepared_context.merged_df,
+            dep_df=prepared_context.dep_df,
             join_key_set=join_key_set,
             execute_join=lambda resolved_merged, resolved_dep: (
                 self._join_executor.execute_polars_join(
@@ -237,4 +226,33 @@ class DependencyJoinerService:
                 "seed_join_key": seed_join_key,
                 "dep_join_key": dep_join_key,
             },
+        )
+
+    def _prepare_dependency_join_context(
+        self,
+        *,
+        merged_df: pl.DataFrame,
+        dep_df: pl.DataFrame,
+        dep: DependencyConfig,
+        left_join_keys: list[str],
+        right_join_keys: list[str],
+        seed_pipeline: str | None,
+    ) -> PreparedDependencyJoinContext:
+        prepared_merged_df, prepared_dep_df = prepare_dependency_join_frames(
+            deduplicator=self._deduplicator,
+            join_key_resolver=self._join_key_resolver,
+            renamer=self._renamer,
+            logger=self._logger,
+            field_alias_resolver=self._field_alias_resolver,
+            drop_system_columns=self.drop_system_columns,
+            merged_df=merged_df,
+            dep_df=dep_df,
+            dep=dep,
+            left_join_keys=left_join_keys,
+            right_join_keys=right_join_keys,
+            seed_pipeline=seed_pipeline,
+        )
+        return PreparedDependencyJoinContext(
+            merged_df=prepared_merged_df,
+            dep_df=prepared_dep_df,
         )

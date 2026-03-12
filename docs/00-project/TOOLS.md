@@ -1,6 +1,6 @@
 # BioETL: Утилиты Проекта
 
-*Версия: 2.3 | Синхронизировано с RULES.md v5.23 (2026-03-02)*
+*Версия: 2.4 | Синхронизировано с RULES.md v5.23 (2026-03-12)*
 
 ---
 
@@ -33,7 +33,7 @@
 - `mkdocs` pinned to `<2.0` in `pyproject.toml` to avoid known compatibility risk with current Material stack.
 - Standard docs checks:
 ```bash
-python scripts/docs/check_doc_links.py
+python -m scripts.docs check-links
 make docs-build
 bash scripts/docs/build_docs_site.sh --strict
 ```
@@ -132,6 +132,28 @@ python src/tools/file_merger.py --dir src/bioetl/domain/ --ext .py --output merg
 
 Эти скрипты **НЕ импортируют** `bioetl` и используют только stdlib/внешние библиотеки.
 
+### Unified Entry Points
+
+Каждая каноническая директория предоставляет `__main__.py` dispatcher.
+Вместо запоминания имён файлов можно использовать domain-команды:
+
+```bash
+python -m scripts.repo check-inventory --check
+python -m scripts.qa check-c901 --target src/bioetl
+python -m scripts.schema validate-configs
+python -m scripts.data check-vcr-naming
+python -m scripts.docs check-drift
+python -m scripts.diagrams lint
+python -m scripts.ci quality-gate
+```
+
+Полный список команд: `python -m scripts.<group> --help`
+
+Каждый скрипт также можно запустить напрямую:
+```bash
+python scripts/qa/check_c901_baseline.py --target src/bioetl
+```
+
 ### cleanup_project.py
 
 **Назначение:** Очистка кэшей, build-артефактов и временных файлов.
@@ -192,13 +214,16 @@ python scripts/diagnostics/cleanup_consolidate.py --apply
 **Использование:**
 ```bash
 # VACUUM всех Silver таблиц
-python scripts/data/vacuum_delta.py
+python -m scripts.data vacuum
 
 # VACUUM конкретной таблицы
-python scripts/data/vacuum_delta.py --table silver/chembl/activity
+python -m scripts.data vacuum --table silver/chembl/activity
 
 # С кастомным retention
-python scripts/data/vacuum_delta.py --retention-days 14
+python -m scripts.data vacuum --retention-days 14
+
+# Alternative (direct script path):
+# python scripts/data/vacuum_delta.py [--table ...] [--retention-days ...]
 ```
 
 | Параметр | Описание | Default |
@@ -242,10 +267,13 @@ python scripts/ops/salt_rotate.py --emergency
 **Использование:**
 ```bash
 # Пересчитать baseline для всех пайплайнов
-python scripts/data/dq_baseline_update.py
+python -m scripts.data dq-baseline
 
 # Для конкретного пайплайна
-python scripts/data/dq_baseline_update.py --pipeline chembl_activity
+python -m scripts.data dq-baseline --pipeline chembl_activity
+
+# Alternative (direct script path):
+# python scripts/data/dq_baseline_update.py [--pipeline ...]
 ```
 
 | Параметр | Описание |
@@ -263,8 +291,11 @@ python scripts/data/dq_baseline_update.py --pipeline chembl_activity
 
 **Использование:**
 ```bash
-python scripts/data/verify_checksums.py
-python scripts/data/verify_checksums.py --table silver/chembl/activity
+python -m scripts.data checksums
+python -m scripts.data checksums --table silver/chembl/activity
+
+# Alternative (direct script path):
+# python scripts/data/verify_checksums.py [--table ...]
 ```
 
 **Ссылки:** 05-cleanup-policy.md §5.2
@@ -313,13 +344,16 @@ python scripts/diagnostics/audit_structure.py --strict
 **Использование:**
 ```bash
 # Полный аудит
-python scripts/qa/naming_audit.py
+python -m scripts.qa check-naming
 
 # CI режим (exit 1 при нарушениях)
-python scripts/qa/naming_audit.py --check
+python -m scripts.qa check-naming --check
 
 # Сохранить отчёт в файл
-python scripts/qa/naming_audit.py --output report.md
+python -m scripts.qa check-naming --output report.md
+
+# Alternative (direct script path):
+# python scripts/qa/naming_audit.py [--check] [--output ...]
 ```
 
 **Ссылки:** RULES.md §2, docs/glossary.md
@@ -333,13 +367,13 @@ python scripts/qa/naming_audit.py --output report.md
 **Использование:**
 ```bash
 # Проверить весь проект
-python src/tools/scripts/qa/lint_terminology.py
+python -m scripts.qa check-terminology
 
 # Проверить конкретный файл
-python src/tools/scripts/qa/lint_terminology.py src/bioetl/domain/models/molecule.py
+python scripts/qa/lint_terminology.py src/bioetl/domain/models/molecule.py
 
 # Строгий режим (дополнительные context-sensitive проверки)
-python src/tools/scripts/qa/lint_terminology.py --strict src/bioetl/
+python scripts/qa/lint_terminology.py --strict src/bioetl/
 ```
 
 **Что проверяет:**
@@ -370,7 +404,10 @@ bash scripts/diagrams/run_diagram_checks.sh
 
 **Использование:**
 ```bash
-python scripts/schema/config_gap_analysis.py
+python -m scripts.schema analyze-gaps
+
+# Alternative (direct script path):
+# python scripts/schema/config_gap_analysis.py
 ```
 
 **Что анализирует:**
@@ -386,7 +423,10 @@ python scripts/schema/config_gap_analysis.py
 
 **Использование:**
 ```bash
-python scripts/schema/validate_pipeline_configs.py
+python -m scripts.schema validate-configs
+
+# Alternative (direct script path):
+# python scripts/schema/validate_pipeline_configs.py
 ```
 
 **Что проверяет:**
@@ -533,22 +573,22 @@ if __name__ == "__main__":
 
 ## Сводная таблица
 
-| Файл | Директория | Импортирует bioetl | Make-цель |
-|------|------------|-------------------|-----------|
-| `create_pipeline.py` | src/tools/ | Да | `make new-pipeline` |
-| `verify_schema_parity.py` | src/tools/ | Да | — |
-| `file_merger.py` | src/tools/ | Нет | — |
-| `cleanup_project.py` | scripts/ | Нет | `make clean-dev` |
-| `vacuum_delta.py` | scripts/ | Нет | `make vacuum-silver` |
-| `salt_rotate.py` | scripts/ | Нет | — |
-| `dq_baseline_update.py` | scripts/ | Нет | — |
-| `verify_checksums.py` | scripts/ | Нет | `make verify-checksums` |
-| `audit_structure.py` | scripts/ | Нет | `make audit-structure` |
-| `naming_audit.py` | scripts/ | Нет | `make audit-naming` |
-| `lint_terminology.py` | scripts/ | Нет | — |
-| `build_diagram_docs.py` | src/tools/ | Да | — |
-| `config_gap_analysis.py` | scripts/ | Нет | — |
-| `validate_pipeline_configs.py` | scripts/ | Нет | — |
+| Файл | Директория | Импортирует bioetl | Unified command | Make-цель |
+|------|------------|-------------------|-----------------|-----------|
+| `create_pipeline.py` | src/tools/ | Да | — | `make new-pipeline` |
+| `verify_schema_parity.py` | src/tools/ | Да | — | — |
+| `file_merger.py` | src/tools/ | Нет | — | — |
+| `cleanup_project.py` | scripts/ | Нет | — | `make clean-dev` |
+| `vacuum_delta.py` | scripts/ | Нет | `python -m scripts.data vacuum` | `make vacuum-silver` |
+| `salt_rotate.py` | scripts/ | Нет | — | — |
+| `dq_baseline_update.py` | scripts/ | Нет | `python -m scripts.data dq-baseline` | — |
+| `verify_checksums.py` | scripts/ | Нет | `python -m scripts.data checksums` | `make verify-checksums` |
+| `audit_structure.py` | scripts/ | Нет | — | `make audit-structure` |
+| `naming_audit.py` | scripts/ | Нет | `python -m scripts.qa check-naming` | `make audit-naming` |
+| `lint_terminology.py` | scripts/ | Нет | `python -m scripts.qa check-terminology` | — |
+| `build_diagram_docs.py` | src/tools/ | Да | — | — |
+| `config_gap_analysis.py` | scripts/ | Нет | `python -m scripts.schema analyze-gaps` | — |
+| `validate_pipeline_configs.py` | scripts/ | Нет | `python -m scripts.schema validate-configs` | — |
 
 ---
 
@@ -571,6 +611,7 @@ if __name__ == "__main__":
 
 | Версия | Дата | Изменения |
 |--------|------|-----------|
+| 2.4 | 2026-03-12 | Unified entry points (`python -m scripts.<group>`) для всех доменов |
 | 2.0 | 2026-01-07 | Разделение на src/tools/ и scripts/ по критерию импорта bioetl |
 | 1.1 | 2026-01-07 | Добавлены все инструменты |
 | 1.0 | 2025-01-07 | Начальная версия |
