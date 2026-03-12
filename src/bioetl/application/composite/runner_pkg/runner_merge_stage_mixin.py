@@ -24,7 +24,11 @@ if TYPE_CHECKING:
     from bioetl.application.composite.fsm_helper import FSMStateHelperService
     from bioetl.application.composite.merger import MergeService
     from bioetl.application.composite.runner_pkg.runner import CompositeRuntimeConfig
-    from bioetl.domain.composite.config import CompositeConfig, DependencyConfig, EnricherConfig
+    from bioetl.domain.composite.config import (
+        CompositeConfig,
+        DependencyConfig,
+        EnricherConfig,
+    )
     from bioetl.domain.composite.result import (
         DependencyResult,
         EnrichmentResult,

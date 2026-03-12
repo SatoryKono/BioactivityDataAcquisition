@@ -1,6 +1,6 @@
 """Unit tests for OpenAlex fallback handler.
 
-Tests the TitleFallbackHandler class for title-based search fallback.
+Tests the OpenAlexTitleFallbackHandler class for title-based search fallback.
 """
 
 from __future__ import annotations
@@ -9,7 +9,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.infrastructure.adapters.openalex.fallback import TitleFallbackHandler
+from bioetl.infrastructure.adapters.openalex.fallback import OpenAlexTitleFallbackHandler
 
 
 @pytest.fixture
@@ -29,15 +29,15 @@ def mock_search_fn() -> AsyncMock:
 
 
 @pytest.fixture
-def handler(mock_logger: MagicMock, mock_search_fn: AsyncMock) -> TitleFallbackHandler:
+def handler(mock_logger: MagicMock, mock_search_fn: AsyncMock) -> OpenAlexTitleFallbackHandler:
     """Create a fallback handler for testing."""
-    return TitleFallbackHandler(logger=mock_logger, search_fn=mock_search_fn)
+    return OpenAlexTitleFallbackHandler(logger=mock_logger, search_fn=mock_search_fn)
 
 
 class TestGetFallbackTitle:
     """Tests for _get_fallback_title method."""
 
-    def test_get_title_with_original_id(self, handler: TitleFallbackHandler) -> None:
+    def test_get_title_with_original_id(self, handler: OpenAlexTitleFallbackHandler) -> None:
         """Should return title from original DOI."""
         fallback_mapping = {"10.1038/test": "Test Title"}
         result = handler._get_fallback_title(
@@ -45,7 +45,7 @@ class TestGetFallbackTitle:
         )
         assert result == "Test Title"
 
-    def test_get_title_with_normalized_doi(self, handler: TitleFallbackHandler) -> None:
+    def test_get_title_with_normalized_doi(self, handler: OpenAlexTitleFallbackHandler) -> None:
         """Should fall back to normalized DOI."""
         fallback_mapping = {"10.1038/test": "Test Title"}
         result = handler._get_fallback_title(
@@ -54,14 +54,14 @@ class TestGetFallbackTitle:
         assert result == "Test Title"
 
     def test_get_title_without_normalized_doi(
-        self, handler: TitleFallbackHandler
+        self, handler: OpenAlexTitleFallbackHandler
     ) -> None:
         """Should work when normalized DOI is None."""
         fallback_mapping = {"10.1038/test": "Test Title"}
         result = handler._get_fallback_title("10.1038/test", None, fallback_mapping)
         assert result == "Test Title"
 
-    def test_get_title_not_found(self, handler: TitleFallbackHandler) -> None:
+    def test_get_title_not_found(self, handler: OpenAlexTitleFallbackHandler) -> None:
         """Should return None when title not in mapping."""
         fallback_mapping = {"other_doi": "Other Title"}
         result = handler._get_fallback_title(
@@ -73,19 +73,19 @@ class TestGetFallbackTitle:
 class TestTruncateTitle:
     """Tests for _truncate_title method."""
 
-    def test_truncate_short_title(self, handler: TitleFallbackHandler) -> None:
+    def test_truncate_short_title(self, handler: OpenAlexTitleFallbackHandler) -> None:
         """Should not truncate short titles."""
         result = handler._truncate_title("Short title", max_len=50)
         assert result == "Short title"
 
-    def test_truncate_long_title(self, handler: TitleFallbackHandler) -> None:
+    def test_truncate_long_title(self, handler: OpenAlexTitleFallbackHandler) -> None:
         """Should truncate long titles with ellipsis."""
         long_title = "A" * 100
         result = handler._truncate_title(long_title, max_len=50)
         assert result == "A" * 50 + "..."
         assert len(result) == 53
 
-    def test_truncate_exact_length(self, handler: TitleFallbackHandler) -> None:
+    def test_truncate_exact_length(self, handler: OpenAlexTitleFallbackHandler) -> None:
         """Should not truncate titles at exact max length."""
         title = "A" * 50
         result = handler._truncate_title(title, max_len=50)
@@ -98,7 +98,7 @@ class TestProcessMissingDois:
 
     @pytest.mark.asyncio
     async def test_process_found_doi_is_skipped(
-        self, handler: TitleFallbackHandler, mock_search_fn: AsyncMock
+        self, handler: OpenAlexTitleFallbackHandler, mock_search_fn: AsyncMock
     ) -> None:
         """Should skip DOIs that were already found."""
         dois = ["10.1038/test"]
@@ -122,7 +122,7 @@ class TestProcessMissingDois:
     @pytest.mark.asyncio
     async def test_process_missing_doi_with_fallback_success(
         self,
-        handler: TitleFallbackHandler,
+        handler: OpenAlexTitleFallbackHandler,
         mock_search_fn: AsyncMock,
         mock_logger: MagicMock,
     ) -> None:
@@ -156,7 +156,7 @@ class TestProcessMissingDois:
     @pytest.mark.asyncio
     async def test_process_missing_doi_with_fallback_not_found(
         self,
-        handler: TitleFallbackHandler,
+        handler: OpenAlexTitleFallbackHandler,
         mock_search_fn: AsyncMock,
         mock_logger: MagicMock,
     ) -> None:
@@ -183,7 +183,7 @@ class TestProcessMissingDois:
     @pytest.mark.asyncio
     async def test_process_missing_doi_without_title(
         self,
-        handler: TitleFallbackHandler,
+        handler: OpenAlexTitleFallbackHandler,
         mock_search_fn: AsyncMock,
         mock_logger: MagicMock,
     ) -> None:
@@ -209,7 +209,7 @@ class TestProcessMissingDois:
 
     @pytest.mark.asyncio
     async def test_process_respects_limit(
-        self, handler: TitleFallbackHandler, mock_search_fn: AsyncMock
+        self, handler: OpenAlexTitleFallbackHandler, mock_search_fn: AsyncMock
     ) -> None:
         """Should stop when limit is reached."""
         dois = ["10.1038/test1", "10.1038/test2", "10.1038/test3"]
@@ -238,7 +238,7 @@ class TestProcessMissingDois:
 
     @pytest.mark.asyncio
     async def test_process_with_normalized_doi_lookup(
-        self, handler: TitleFallbackHandler, mock_search_fn: AsyncMock
+        self, handler: OpenAlexTitleFallbackHandler, mock_search_fn: AsyncMock
     ) -> None:
         """Should normalize DOIs when checking found set."""
         dois = ["https://doi.org/10.1038/TEST"]  # URL format, uppercase
@@ -273,7 +273,7 @@ class TestSearchByTitleEdgeCases:
     @pytest.mark.asyncio
     async def test_returns_first_no_title_candidate_when_no_match(
         self,
-        handler: TitleFallbackHandler,
+        handler: OpenAlexTitleFallbackHandler,
         mock_search_fn: AsyncMock,
     ) -> None:
         mock_search_fn.return_value = [
@@ -290,7 +290,7 @@ class TestSearchByTitleEdgeCases:
     @pytest.mark.asyncio
     async def test_returns_none_when_candidates_have_non_matching_titles(
         self,
-        handler: TitleFallbackHandler,
+        handler: OpenAlexTitleFallbackHandler,
         mock_search_fn: AsyncMock,
     ) -> None:
         mock_search_fn.return_value = [

@@ -16,7 +16,9 @@ from bioetl.infrastructure.adapters.common import (
     FallbackFetchOrchestratorService,
     resolve_fallback_policy,
 )
-from bioetl.infrastructure.adapters.openalex.fallback import OpenAlexTitleFallbackHandler
+from bioetl.infrastructure.adapters.openalex.fallback import (
+    OpenAlexTitleFallbackHandler,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort

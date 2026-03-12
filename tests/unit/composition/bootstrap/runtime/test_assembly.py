@@ -12,7 +12,7 @@ from uuid import uuid4
 import pytest
 
 from bioetl.composition.bootstrap.runtime.assembly import (
-    VacuumSettings as AssemblyVacuumSettings,
+    ResolvedVacuumSettings as AssemblyVacuumSettings,
     assemble_filter_config,
     assemble_runtime_config,
     assemble_vacuum_settings,

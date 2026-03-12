@@ -16,7 +16,10 @@ from bioetl.application.core.protocols import (
     TransformCallback,
 )
 from bioetl.application.core.record_processor import RecordProcessor
-from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
+from bioetl.composition.factories.services.callbacks import (
+    create_data_normalization_service,
+    extract_pipeline_callbacks,
+)
 from bioetl.composition.factories.services.pipeline_builder import (
     BatchProcessingComponents,
     create_batch_executor_from_pipeline,
@@ -42,13 +45,11 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import (
         BatchIdGeneratorPort,
         CheckpointPort,
-        DataNormalizationPort,
         GoldValidatorPort,
         LoggerPort,
         MemoryMonitorPort,
         TracingPort,
     )
-    from bioetl.domain.services import DataNormalizationConfig
     from bioetl.domain.types import RunID, ScdConfig
 
 __all__ = [
@@ -56,41 +57,6 @@ __all__ = [
     "create_data_normalization_service",
     "extract_pipeline_callbacks",
 ]
-
-
-def extract_pipeline_callbacks(pipeline: BasePipeline) -> PipelineCallbacksContext:
-    """Extract transformation callbacks from transformer or legacy methods.
-
-    Args:
-        pipeline: Pipeline instance from which to extract transform callbacks.
-
-    Returns:
-        PipelineCallbacksContext with transform, gold filter, and gold transform callbacks.
-    """
-    transformer = pipeline.transformer
-    if transformer is not None:
-        return PipelineCallbacksContext(
-            transform=cast(TransformCallback, transformer.transform),
-            gold_filter=cast(GoldFilterCallback, transformer.should_write_gold),
-            gold_transform=cast(GoldTransformCallback, transformer.transform_for_gold),
-        )
-
-    # Fallback for pipelines without explicit transformer (legacy)
-    return PipelineCallbacksContext(
-        transform=cast(TransformCallback, pipeline.transform_bronze_to_silver),
-        gold_filter=cast(
-            GoldFilterCallback,
-            getattr(pipeline, "should_write_gold", lambda _context, record: True),
-        ),
-        gold_transform=cast(
-            GoldTransformCallback,
-            getattr(
-                pipeline,
-                "transform_for_gold",
-                lambda _context, silver_record: silver_record,
-            ),
-        ),
-    )
 
 
 class ServicesBuilder:
@@ -324,15 +290,3 @@ class ServicesBuilder:
             flat_structure=flat_structure,
             batch_id_factory=batch_id_factory,
         )
-
-
-def create_data_normalization_service(
-    config: DataNormalizationConfig | None = None,
-) -> DataNormalizationPort:
-    """Create DataNormalizationService with optional configuration."""
-    from bioetl.domain.services import (
-        DataNormalizationConfig,
-        DefaultDataNormalizationService,
-    )
-
-    return DefaultDataNormalizationService(config=config or DataNormalizationConfig())

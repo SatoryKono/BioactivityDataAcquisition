@@ -15,7 +15,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Literal
 
 from bioetl.composition.builders import FilterConfigBuilder
-from bioetl.composition.runtime_builders.inputs_resolver import VacuumSettings
+from bioetl.composition.runtime_builders.inputs_resolver import ResolvedVacuumSettings
 from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.types import RunType
@@ -32,8 +32,8 @@ if TYPE_CHECKING:
     )
 
 __all__ = [
+    "ResolvedVacuumSettings",
     "VacuumConfig",
-    "VacuumSettings",
     "assemble_cached_bronze_context",
     "assemble_filter_config",
     "assemble_runtime_config",
@@ -42,14 +42,14 @@ __all__ = [
 
 
 # Backward-compat alias for legacy imports/tests.
-VacuumConfig = VacuumSettings
+VacuumConfig = ResolvedVacuumSettings
 
 
 def assemble_vacuum_settings(
     *,
     cli_vacuum: CliVacuumSettings,
     yaml_maintenance: MaintenanceConfig,
-) -> VacuumSettings:
+) -> ResolvedVacuumSettings:
     """Assemble effective vacuum settings from CLI overrides and YAML config.
 
     Implements tri-state merge logic:
@@ -64,7 +64,7 @@ def assemble_vacuum_settings(
         yaml_maintenance: Maintenance configuration from pipeline YAML.
 
     Returns:
-        VacuumSettings with resolved enabled flag and retention days.
+        ResolvedVacuumSettings with resolved enabled flag and retention days.
 
     Example:
         >>> from bioetl.domain.context import VacuumSettings
@@ -87,13 +87,13 @@ def assemble_vacuum_settings(
     """
     # CLI explicit override takes precedence
     if cli_vacuum.enabled is not None:
-        return VacuumSettings(
+        return ResolvedVacuumSettings(
             enabled=cli_vacuum.enabled,
             retention_days=cli_vacuum.retention_days,
         )
 
     # No CLI override -> use YAML defaults
-    return VacuumSettings(
+    return ResolvedVacuumSettings(
         enabled=yaml_maintenance.auto_vacuum,
         retention_days=yaml_maintenance.vacuum_retention_days,
     )
@@ -107,7 +107,7 @@ def assemble_runtime_config(
     query: str | None,
     dry_run: bool,
     heartbeat_interval: int,
-    vacuum: VacuumSettings,
+    vacuum: ResolvedVacuumSettings,
     skip_gold: bool = False,
     health_check_mode: Literal["strict", "probe"] = "strict",
 ) -> RuntimeConfig:
