@@ -47,6 +47,9 @@ Available groups and example commands:
 | `data` | `python -m scripts.data check-vcr-naming` | Data integrity |
 | `docs` | `python -m scripts.docs check-drift` | Documentation checks |
 | `diagrams` | `python -m scripts.diagrams lint` | Diagram tooling |
+| `ops` | `python -m scripts.ops salt-rotate` | Operational automation |
+| `dev` | `python -m scripts.dev setup --quick` | Developer workflows |
+| `diagnostics` | `python -m scripts.diagnostics cleanup` | Debug & diagnostics |
 
 Each script also remains standalone-executable:
 ```bash
@@ -174,4 +177,42 @@ render-pdf-desc    Generate PDF with descriptions
 render-docx        Generate DOCX with descriptions
 render-views       Generate views bundle
 nightly            Run full diagram nightly suite
+```
+
+### scripts.ops
+
+```
+salt-rotate        Rotate PII hashing salt
+fix-grafana        Fix Grafana dashboard configurations
+wsl-proxy          Start WSL proxy helper
+setup-plugins      Setup plugins (shell)
+setup-skills       Setup skills (shell)
+check-skills       Check AI skills layout (shell)
+check-mirror       Check skills mirror sync (shell)
+check-mcp          Check MCP server configuration (shell)
+deploy             Deploy BioETL (shell)
+delete-branches    Delete stale git branches (shell)
+```
+
+### scripts.dev
+
+```
+setup              Full developer environment setup (shell)
+install-deps       Install project dependencies
+run-tests          Run tests
+mock-metrics       Start mock metrics server
+test-changed       Run tests for changed files only (shell)
+setup-mcp          Setup Copilot/Codex MCP integration
+```
+
+### scripts.diagnostics
+
+```
+cleanup            Clean caches, build artifacts, and temp files
+cleanup-audit      Consolidated cleanup and quality audit
+audit-structure    Validate project structure against file policy
+ast-inventory      AST-based code inventory
+debug-pandera      Debug Pandera schema validation
+debug-storage      Debug storage health checks
+inspect-vcr        Temporary VCR cassette inspector
 ```

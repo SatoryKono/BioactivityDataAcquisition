@@ -19,6 +19,16 @@ python -m scripts.repo <command> [args...]
 | `check-cleanliness` | `audit_root_cleanliness.py` | Audit repository root layout allowlist |
 | `all` | *(all above)* | Run all checks sequentially |
 
+## When to Use
+
+| Command | When | Trigger |
+|---------|------|---------|
+| `check-inventory` | After adding/removing/renaming scripts | Manual or CI drift check |
+| `check-catalog` | After modifying `scripts/catalog.yaml` or adding new script directories | CI gate (`architecture.yml`) |
+| `check-versions` | Before release or after bumping version in any file | CI gate (`docs.yml`) |
+| `check-cleanliness` | After adding files to repository root | Pre-commit hook |
+| `all` | Quick local sanity check before PR | Manual |
+
 ## Other Files
 
 | File | Description |
