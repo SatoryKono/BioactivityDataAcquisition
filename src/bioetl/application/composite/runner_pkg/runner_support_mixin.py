@@ -262,13 +262,10 @@ class CompositeRunnerSupportMixin:
         if self._runtime.required_only and not enricher.required:
             return False
 
-        if (
+        return not (
             self._runtime.enrich_only
             and enricher.pipeline not in self._runtime.enrich_only
-        ):
-            return False
-
-        return True
+        )
 
     def _check_required_enrichers(
         self,

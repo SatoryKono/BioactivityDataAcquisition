@@ -10,9 +10,9 @@ from pathlib import Path
 def test_lint_terminology_supports_check_without_paths() -> None:
     """CLI must allow --check with no positional paths."""
     repo_root = Path(__file__).resolve().parents[2]
-    script_path = repo_root / "src" / "tools" / "scripts" / "lint_terminology.py"
+    script_path = repo_root / "scripts" / "qa" / "lint_terminology.py"
 
-    assert script_path.exists(), "src/tools/scripts/lint_terminology.py must exist"
+    assert script_path.exists(), "scripts/qa/lint_terminology.py must exist"
 
     result = subprocess.run(
         [sys.executable, str(script_path), "--check"],
@@ -32,9 +32,9 @@ def test_lint_terminology_supports_check_without_paths() -> None:
 def test_lint_terminology_wrapper_delegates_to_canonical() -> None:
     """Legacy wrapper path must delegate to canonical implementation."""
     repo_root = Path(__file__).resolve().parents[2]
-    wrapper_path = repo_root / "scripts" / "lint_terminology.py"
+    wrapper_path = repo_root / "src" / "tools" / "scripts" / "lint_terminology.py"
 
-    assert wrapper_path.exists(), "scripts/lint_terminology.py must exist"
+    assert wrapper_path.exists(), "src/tools/scripts/lint_terminology.py must exist"
     content = wrapper_path.read_text(encoding="utf-8")
     assert "runpy.run_path" in content
     assert "qa" in content

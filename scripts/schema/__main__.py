@@ -1,0 +1,66 @@
+#!/usr/bin/env python3
+"""Unified entry point for scripts/schema/ commands.
+
+Usage:
+    python -m scripts.schema <command> [args...]
+    python -m scripts.schema --help
+
+Commands:
+    check-invariants       Validate config CI invariants (naming, schemas, auth, keys)
+    check-config-paths     Check for legacy dq/filter config path references
+    generate-pipeline      Generate pipeline JSON schema
+    generate-artifacts     Generate schema artifacts
+    generate-pubtype       Generate publication type classification artifacts
+    generate-contracts     Generate contracts
+    validate-configs       Validate unified pipeline YAML configs
+    analyze-gaps           Config gap analysis
+"""
+from __future__ import annotations
+
+import subprocess
+import sys
+from pathlib import Path
+
+COMMANDS: dict[str, str] = {
+    "check-invariants": "check_config_invariants.py",
+    "check-config-paths": "lint_config_paths.py",
+    "generate-pipeline": "generate_pipeline_schema.py",
+    "generate-artifacts": "generate_schema_artifacts.py",
+    "generate-pubtype": "generate_publication_type_classification_artifacts.py",
+    "generate-contracts": "generate_contracts.py",
+    "validate-configs": "validate_pipeline_configs.py",
+    "analyze-gaps": "config_gap_analysis.py",
+}
+
+_DIR = Path(__file__).parent
+
+
+def _run_script(name: str, argv: list[str]) -> int:
+    script = _DIR / name
+    result = subprocess.run([sys.executable, str(script), *argv], check=False)
+    return result.returncode
+
+
+def _print_help() -> None:
+    print(__doc__ or "", end="")
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = argv if argv is not None else sys.argv[1:]
+
+    if not args or args[0] in ("--help", "-h"):
+        _print_help()
+        return 0
+
+    cmd, rest = args[0], args[1:]
+
+    if cmd not in COMMANDS:
+        print(f"Unknown command: {cmd}", file=sys.stderr)
+        print(f"Available: {', '.join(COMMANDS)}", file=sys.stderr)
+        return 2
+
+    return _run_script(COMMANDS[cmd], rest)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

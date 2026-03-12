@@ -17,6 +17,11 @@ from bioetl.application.core.batch_transformer_finalization import (
 from bioetl.application.core.batch_transformer_finalization import (
     finalize_stream_transform_result as _finalize_stream_transform_result,
 )
+from bioetl.application.core.batch_transformer_quarantine import (
+    flush_dq_records,
+    flush_filtered_records,
+    route_single_transform_attempt,
+)
 from bioetl.application.core.batch_transformer_state import (
     RecordTransformOutcome,
     TransformAggregationState,
@@ -79,7 +84,6 @@ TRANSFORM_PROCESSING_ERRORS = (
     ValueError,
     TypeError,
 )
-QUARANTINE_WRITE_WARN_ONLY_ERRORS = TRANSFORM_PROCESSING_ERRORS
 YIELD_INTERVAL_SECONDS = 0.5
 
 
@@ -90,60 +94,6 @@ async def yield_control_if_needed(last_yield_at: float) -> float:
         return last_yield_at
     await asyncio.sleep(0)
     return time.monotonic()
-
-
-async def flush_filtered_records(
-    *,
-    context: PipelineContext,
-    quarantine_manager: QuarantineManagerService,
-    records: list[FilteredQuarantineEntry],
-    batch_id: BatchID,
-) -> int:
-    """Persist filtered-out records without blocking pipeline progress."""
-    if not records:
-        return 0
-    try:
-        await quarantine_manager.quarantine_filtered_records(
-            records,
-            batch_id,
-            ingestion_ts=context.started_at,
-        )
-        return 0
-    except QUARANTINE_WRITE_WARN_ONLY_ERRORS as exc:
-        context.logger.error(
-            "filtered_quarantine_write_failed",
-            batch_id=str(batch_id),
-            records=len(records),
-            error=str(exc),
-        )
-        return len(records)
-
-
-async def flush_dq_records(
-    *,
-    context: PipelineContext,
-    quarantine_manager: QuarantineManagerService,
-    records: list[DQQuarantineEntry],
-    batch_id: BatchID,
-) -> int:
-    """Persist DQ quarantine records without failing the batch."""
-    if not records:
-        return 0
-    try:
-        await quarantine_manager.quarantine_records(
-            records,
-            batch_id,
-            ingestion_ts=context.started_at,
-        )
-        return 0
-    except QUARANTINE_WRITE_WARN_ONLY_ERRORS as exc:
-        context.logger.error(
-            "dq_quarantine_write_failed",
-            batch_id=str(batch_id),
-            records=len(records),
-            error=str(exc),
-        )
-        return len(records)
 
 
 def bind_record_context(
@@ -212,54 +162,6 @@ async def transform_record_attempt(
                 dq_entry=DQQuarantineEntry(raw_record, error_type, str(error)),
             )
         raise
-
-
-async def route_single_transform_attempt(
-    *,
-    context: PipelineContext,
-    quarantine_manager: QuarantineManagerService,
-    attempt: RecordTransformOutcome,
-    batch_id: BatchID,
-) -> TransformedRecord:
-    """Route one transform attempt to a public single-record result."""
-    if attempt.silver_record is not None:
-        return TransformedRecord(
-            silver_record=attempt.silver_record,
-            gold_record=attempt.gold_record,
-            is_quarantined=False,
-        )
-    if attempt.filtered_entry is not None:
-        failed = await flush_filtered_records(
-            context=context,
-            quarantine_manager=quarantine_manager,
-            records=[attempt.filtered_entry],
-            batch_id=batch_id,
-        )
-        return TransformedRecord(
-            silver_record=None,
-            gold_record=None,
-            is_quarantined=False,
-            is_filtered_out=True,
-            quarantine_write_failed=failed > 0,
-        )
-    if attempt.dq_entry is not None:
-        failed = await flush_dq_records(
-            context=context,
-            quarantine_manager=quarantine_manager,
-            records=[attempt.dq_entry],
-            batch_id=batch_id,
-        )
-        return TransformedRecord(
-            silver_record=None,
-            gold_record=None,
-            is_quarantined=True,
-            quarantine_write_failed=failed > 0,
-        )
-    return TransformedRecord(
-        silver_record=None,
-        gold_record=None,
-        is_quarantined=False,
-    )
 
 
 async def finalize_batch_transform_result(

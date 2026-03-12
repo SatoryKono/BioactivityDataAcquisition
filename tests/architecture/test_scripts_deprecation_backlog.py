@@ -22,7 +22,7 @@ def test_scripts_deprecation_report_generation(tmp_path: Path) -> None:
     result = subprocess.run(
         [
             sys.executable,
-            "scripts/check_scripts_inventory.py",
+            "scripts/repo/check_scripts_inventory.py",
             "--deprecation-report",
             str(report_rel),
         ],

@@ -263,6 +263,18 @@
       "review_by": "2026-06-30",
       "next_step": "Сохранить как manual tool; добавить подтвержденный operational playbook и периодический smoke-check."
     },
+    "scripts/diagrams/generate_architecture_bundle.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Diagram bundle generator is currently orphaned in inventory; keep as manual maintenance tool until bundle regeneration workflow is either restored or the script is archived."
+    },
+    "scripts/diagrams/generate_views_bundle.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Views bundle generator is currently orphaned in inventory; keep as manual maintenance tool until bundle regeneration workflow is either restored or the script is archived."
+    },
     "scripts/diagnostics/cleanup_project.py": {
       "owner": "@bioetl-platform",
       "decision": "keep_manual",
@@ -337,11 +349,9 @@
     },
     "scripts/dev/run_pytest.sh": {
       "owner": "@bioetl-platform",
-      "decision": "deprecate",
+      "decision": "keep_manual",
       "review_by": "2026-05-31",
-      "next_step": "Перевести в архив/удалить после freeze-window при отсутствии подтвержденного активного call-site.",
-      "sunset_date": "2026-05-31",
-      "replacement": "scripts/dev/run_pytest.sh"
+      "next_step": "Сохранить как manual helper до следующего governance review; при отсутствии подтвержденных call-site либо перевести в archive, либо удалить."
     },
     "scripts/ops/salt_rotate.py": {
       "owner": "@bioetl-platform",
@@ -378,6 +388,66 @@
       "decision": "keep_manual",
       "review_by": "2026-06-30",
       "next_step": "Сохранить как manual tool; добавить явный smoke-вызов/операционный playbook или перевести в deprecate."
+    },
+    "scripts/__init__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Package marker for the scripts namespace. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
+    },
+    "scripts/ci/__init__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Package marker for canonical CI scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
+    },
+    "scripts/data/__init__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Package marker for canonical data scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
+    },
+    "scripts/diagrams/__init__.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Package marker for canonical diagram scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
+    },
+    "scripts/diagrams/fix_pagebreaks_in_bundles.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Recently added diagram bundle helper is currently orphaned in inventory; keep as manual maintenance tool until it gains an explicit workflow/docs call-site or is archived."
+    },
+    "scripts/docs/__init__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Package marker for canonical docs scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
+    },
+    "scripts/qa/__init__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Package marker for canonical QA scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
+    },
+    "scripts/repo/__init__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Package marker for canonical repo-governance scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
+    },
+    "scripts/repo/__main__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Canonical CLI entrypoint for scripts.repo package. Keep until inventory tooling explicitly classifies package entrypoints separately from non-active scripts."
+    },
+    "scripts/schema/__init__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "keep_manual",
+      "review_by": "2026-06-30",
+      "next_step": "Package marker for canonical schema scripts. Keep until inventory tooling explicitly excludes package markers from non-active script governance."
     },
     "src/tools/__init__.py": {
       "owner": "@bioetl-platform",

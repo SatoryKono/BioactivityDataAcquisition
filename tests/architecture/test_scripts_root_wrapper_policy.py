@@ -17,6 +17,8 @@ def test_scripts_root_contains_only_wrappers_or_allowed_entrypoints() -> None:
     for path in sorted(root.glob("*")):
         if not path.is_file():
             continue
+        if path.name == "__init__.py":
+            continue
         if path.suffix not in {".py", ".sh", ".ps1", ".cmd", ".bat"}:
             continue
 

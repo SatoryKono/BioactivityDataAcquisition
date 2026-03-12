@@ -20,6 +20,7 @@ def _resolve_repo_root() -> Path:
 
 
 REPO_ROOT = _resolve_repo_root()
+PAGEBREAK_LUA = REPO_ROOT / "scripts" / "diagrams" / "pagebreak.lua"
 DEFAULT_INPUTS = [
     Path("docs/02-architecture/mmd-diagrams/class-diagrams-with-descriptions.md"),
     Path("docs/02-architecture/mmd-diagrams/foundation-diagrams-with-descriptions.md"),
@@ -90,7 +91,7 @@ def render_one(input_md: Path, reference_doc: Path | None) -> Path:
         "pandoc",
         input_md.name,
         "--from",
-        "gfm",
+        "markdown",
         "--to",
         "docx",
         "--standalone",
@@ -99,6 +100,8 @@ def render_one(input_md: Path, reference_doc: Path | None) -> Path:
         "--output",
         str(output_docx),
     ]
+    if PAGEBREAK_LUA.exists():
+        cmd.extend(["--lua-filter", str(PAGEBREAK_LUA)])
     if reference_doc is not None:
         cmd.extend(["--reference-doc", str(reference_doc)])
 

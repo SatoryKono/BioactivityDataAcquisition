@@ -17,7 +17,7 @@ def test_scripts_catalog_governance_check_passes() -> None:
     result = subprocess.run(
         [
             sys.executable,
-            "scripts/check_scripts_catalog.py",
+            "scripts/repo/check_scripts_catalog.py",
             "--catalog",
             "scripts/catalog.yaml",
         ],

@@ -22,8 +22,8 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
 from bioetl.application.core.batch_transformer_helpers import (
-    TransformResult,
     TransformedRecord,
+    TransformResult,
     apply_stream_transform_result_to_state,
     apply_transform_outcome_to_state,
     create_transform_aggregation_state,
@@ -35,7 +35,7 @@ from bioetl.application.core.batch_transformer_helpers import (
 )
 from bioetl.application.core.batch_transformer_streaming import StreamingBatchProcessor
 from bioetl.application.core.quarantine_manager import QuarantineManagerService
-from bioetl.domain.types import BronzeRecord, GoldRecord
+from bioetl.domain.types import BronzeRecord
 
 if TYPE_CHECKING:
     from bioetl.application.core.config import RecordProcessorConfig

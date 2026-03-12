@@ -2,7 +2,7 @@
 """Pre-merge gate for naming/package consistency rules.
 
 Rules:
-1) strict suffix-policy: delegated to ``scripts/naming_audit.py --check``.
+1) strict suffix-policy: delegated to ``scripts/qa/naming_audit.py --check``.
 2) factory-only-in-composition: no ``Factory`` classes or ``*factory*.py`` modules
    outside ``src/bioetl/composition``.
 3) canonical role subpackage names: ``contracts/mappers/services/facades`` only
@@ -43,13 +43,13 @@ class Violation:
 
 
 def _run_suffix_policy_check(repo_root: Path) -> list[Violation]:
-    script = repo_root / "scripts" / "naming_audit.py"
+    script = repo_root / "scripts" / "qa" / "naming_audit.py"
     if not script.exists():
         return [
             Violation(
                 rule="suffix-policy",
                 location=str(script),
-                details="scripts/naming_audit.py not found",
+                details="scripts/qa/naming_audit.py not found",
             )
         ]
     result = subprocess.run(
@@ -65,7 +65,7 @@ def _run_suffix_policy_check(repo_root: Path) -> list[Violation]:
     return [
         Violation(
             rule="suffix-policy",
-            location="scripts/naming_audit.py --check",
+            location="scripts/qa/naming_audit.py --check",
             details=preview or "naming_audit returned non-zero exit code",
         )
     ]

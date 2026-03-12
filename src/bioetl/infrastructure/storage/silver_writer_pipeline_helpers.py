@@ -28,8 +28,8 @@ __all__ = [
     "build_delta_write_request",
     "build_silver_write_execution_context",
     "dispatch_prepared_silver_write",
-    "execute_silver_write_with_tracing",
     "execute_silver_write_pipeline",
+    "execute_silver_write_with_tracing",
     "set_silver_write_span_attributes",
 ]
 
