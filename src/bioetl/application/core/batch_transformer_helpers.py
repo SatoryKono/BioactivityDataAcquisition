@@ -30,12 +30,16 @@ if TYPE_CHECKING:
 
 
 __all__ = [
+    "TransformResult",
+    "TransformedRecord",
     "RecordTransformOutcome",
     "accumulate_transform_outcome",
+    "accumulate_stream_transform_result",
     "bind_record_context",
     "check_dq_thresholds",
     "flush_dq_records",
     "flush_filtered_records",
+    "route_single_transform_attempt",
     "transform_record_attempt",
     "yield_control_if_needed",
 ]
@@ -60,6 +64,28 @@ class RecordTransformOutcome:
     gold_record: GoldRecord | None
     filtered_entry: FilteredQuarantineEntry | None = None
     dq_entry: DQQuarantineEntry | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class TransformResult:
+    """Result of batch transformation."""
+
+    silver_records: list[BronzeRecord]
+    gold_records: list[GoldRecord]
+    quarantined_count: int
+    filtered_out_count: int = 0
+    records_quarantine_failed: int = 0
+
+
+@dataclass(frozen=True, slots=True)
+class TransformedRecord:
+    """Single transformed record with routing info."""
+
+    silver_record: BronzeRecord | None
+    gold_record: GoldRecord | None
+    is_quarantined: bool
+    is_filtered_out: bool = False
+    quarantine_write_failed: bool = False
 
 
 async def yield_control_if_needed(last_yield_at: float) -> float:
@@ -213,6 +239,73 @@ def accumulate_transform_outcome(
         if attempt.gold_record is not None:
             gold_records.append(attempt.gold_record)
     return 0, 0
+
+
+async def route_single_transform_attempt(
+    *,
+    context: PipelineContext,
+    quarantine_manager: QuarantineManagerService,
+    attempt: RecordTransformOutcome,
+    batch_id: BatchID,
+) -> TransformedRecord:
+    """Route one transform attempt to a public single-record result."""
+    if attempt.silver_record is not None:
+        return TransformedRecord(
+            silver_record=attempt.silver_record,
+            gold_record=attempt.gold_record,
+            is_quarantined=False,
+        )
+    if attempt.filtered_entry is not None:
+        failed = await flush_filtered_records(
+            context=context,
+            quarantine_manager=quarantine_manager,
+            records=[attempt.filtered_entry],
+            batch_id=batch_id,
+        )
+        return TransformedRecord(
+            silver_record=None,
+            gold_record=None,
+            is_quarantined=False,
+            is_filtered_out=True,
+            quarantine_write_failed=failed > 0,
+        )
+    if attempt.dq_entry is not None:
+        failed = await flush_dq_records(
+            context=context,
+            quarantine_manager=quarantine_manager,
+            records=[attempt.dq_entry],
+            batch_id=batch_id,
+        )
+        return TransformedRecord(
+            silver_record=None,
+            gold_record=None,
+            is_quarantined=True,
+            quarantine_write_failed=failed > 0,
+        )
+    return TransformedRecord(
+        silver_record=None,
+        gold_record=None,
+        is_quarantined=False,
+    )
+
+
+def accumulate_stream_transform_result(
+    *,
+    result: TransformedRecord,
+    silver_records: list[BronzeRecord],
+    gold_records: list[GoldRecord],
+) -> tuple[int, int, int]:
+    """Route a single streaming transform result into accumulators."""
+    quarantine_failed_delta = int(result.quarantine_write_failed)
+    if result.is_quarantined:
+        return 1, 0, quarantine_failed_delta
+    if result.is_filtered_out:
+        return 0, 1, quarantine_failed_delta
+    if result.silver_record is not None:
+        silver_records.append(result.silver_record)
+        if result.gold_record is not None:
+            gold_records.append(result.gold_record)
+    return 0, 0, quarantine_failed_delta
 
 
 def check_dq_thresholds(

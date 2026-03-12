@@ -44,6 +44,13 @@ from bioetl.infrastructure.adapters.crossref.batch import (
     DoiBatchProcessor,
     SearchPaginatorHelper,
 )
+from bioetl.infrastructure.adapters.crossref.client_fetch_helpers import (
+    aclose_crossref_http_client,
+    fetch_crossref_publications,
+    fetch_crossref_publications_filtered,
+    fetch_crossref_publications_with_fallback,
+    raise_crossref_multifilter_not_supported,
+)
 from bioetl.infrastructure.adapters.crossref.client_observability_helpers import (
     build_crossref_source_metadata,
     clear_crossref_request_collector,
@@ -212,7 +219,8 @@ class CrossRefAdapter(FallbackPolicyMixin, BaseHttpAdapter):
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
         """Fetch CrossRef publications by DOI list (FilterableDataSourcePort)."""
-        async for publication in self._fetch_flow.fetch_filtered(
+        async for publication in fetch_crossref_publications_filtered(
+            fetch_flow=self._fetch_flow,
             entity_type=entity_type,
             filter_ids=filter_ids,
             filter_field=filter_field,
@@ -227,10 +235,8 @@ class CrossRefAdapter(FallbackPolicyMixin, BaseHttpAdapter):
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
         """Multi-field filtering is not supported by CrossRef API."""
-        raise NotImplementedError(
-            "CrossRef API does not support multi-field filtering. "
-            "Use fetch_filtered() with filter_field='doi' instead."
-        )
+        del entity_type, filters, limit
+        raise_crossref_multifilter_not_supported()
         yield {}  # pragma: no cover - keeps AsyncIterator contract
 
     async def fetch_filtered_with_fallback(
@@ -242,7 +248,8 @@ class CrossRefAdapter(FallbackPolicyMixin, BaseHttpAdapter):
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
         """Fetch publications by DOI with title-search fallback for misses."""
-        async for publication in self._fetch_flow.fetch_filtered_with_fallback(
+        async for publication in fetch_crossref_publications_with_fallback(
+            fetch_flow=self._fetch_flow,
             entity_type=entity_type,
             filter_ids=filter_ids,
             filter_field=filter_field,
@@ -262,7 +269,8 @@ class CrossRefAdapter(FallbackPolicyMixin, BaseHttpAdapter):
     ) -> AsyncIterator[BronzeRecord]:
         """Fetch CrossRef publications via DOI filters or free-text query."""
         del offset
-        async for publication in self._fetch_flow.fetch(
+        async for publication in fetch_crossref_publications(
+            fetch_flow=self._fetch_flow,
             entity_type=entity_type,
             limit=limit,
             query=query,
@@ -330,5 +338,4 @@ class CrossRefAdapter(FallbackPolicyMixin, BaseHttpAdapter):
 
     async def aclose(self) -> None:
         """Close adapter resources via underlying HTTP client context manager."""
-        if self._http_client:
-            await self._http_client.__aexit__(None, None, None)
+        await aclose_crossref_http_client(http_client=self._http_client)

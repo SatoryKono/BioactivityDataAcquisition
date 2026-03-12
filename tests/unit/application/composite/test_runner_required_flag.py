@@ -538,6 +538,32 @@ class TestRuntimeEnricherSelectionPolicy:
 
         assert failure == "Required enricher 'crossref' failed: timeout from upstream"
 
+    def test_finalize_enrichment_results_adds_not_run_for_optional(
+        self,
+    ) -> None:
+        """Post-enrichment normalization should add NOT_RUN results for skipped optional enrichers."""
+        runner = create_runner(runtime=CompositeRuntimeConfig(required_only=True))
+        state = CompositeCheckpointState(
+            composite_name="test_composite",
+            run_id=str(uuid4()),
+            created_at=datetime.now(tz=UTC),
+        )
+
+        finalized = runner._finalize_enrichment_results(
+            state=state,
+            enrichers_to_run=[runner._config.enrichers[0]],
+            enrichment_results={
+                "crossref": EnrichmentResult.success(
+                    enricher_name="crossref",
+                    records_input=100,
+                    records_enriched=90,
+                ),
+            },
+        )
+
+        assert finalized["crossref"].status == EnrichmentStatus.SUCCESS
+        assert finalized["pubmed"].status == EnrichmentStatus.NOT_RUN
+
 
 class TestMergeableEnrichers:
     """Tests for mergeable enricher filtering."""

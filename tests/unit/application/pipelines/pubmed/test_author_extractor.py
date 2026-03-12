@@ -20,6 +20,8 @@ from __future__ import annotations
 
 import xml.etree.ElementTree as ET
 
+import pytest
+
 from bioetl.application.pipelines.pubmed.extractors.author import AuthorExtractor
 
 
@@ -444,3 +446,46 @@ class TestProcess:
         extractor = AuthorExtractor()
         result = extractor.process(None)
         assert result == []
+
+
+# ---------------------------------------------------------------------------
+# Tests merged from orphan tests/unit/pipelines/pubmed/extractors/test_author_extractor.py
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+class TestParseAuthorsEdgeCases:
+    """Edge-case tests for parse_authors (merged from orphan)."""
+
+    def test_author_with_both_initials_and_forename(self) -> None:
+        """Test author with both Initials and ForeName (Initials takes precedence)."""
+        xml = """
+        <Article>
+            <AuthorList>
+                <Author>
+                    <LastName>Doe</LastName>
+                    <Initials>JM</Initials>
+                    <ForeName>John Michael</ForeName>
+                </Author>
+            </AuthorList>
+        </Article>
+        """
+        node = ET.fromstring(xml)
+        authors = AuthorExtractor.parse_authors(node)
+        assert authors == ["Doe, JM"]
+
+    def test_author_with_empty_elements(self) -> None:
+        """Test author with empty text elements."""
+        xml = """
+        <Article>
+            <AuthorList>
+                <Author>
+                    <LastName></LastName>
+                    <Initials></Initials>
+                </Author>
+            </AuthorList>
+        </Article>
+        """
+        node = ET.fromstring(xml)
+        authors = AuthorExtractor.parse_authors(node)
+        assert authors == []
