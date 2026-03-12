@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio  # noqa: F401 - compatibility monkeypatch target in tests
 from collections.abc import Mapping
+from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
@@ -50,6 +51,15 @@ GOLD_WRITE_RETRY_ERRORS = (
     KeyError,
     pa.ArrowException,
 )
+
+
+@dataclass(frozen=True, slots=True)
+class _PreparedGoldWriteContext:
+    """Prepared pre-write state shared by Gold write phases."""
+
+    table_name: str
+    table_path: str
+    validated_mode: GoldWriteMode
 
 
 def _normalize_scd_config(
@@ -172,7 +182,7 @@ class GoldWriter(
                 else scd_config
             )
             self._set_write_span_attributes(span, table_name, mode, len(records))
-            validated_mode, table_path = await self._prepare_write_gold(
+            prepared = await self._prepare_write_gold(
                 table_name=table_name,
                 records=records,
                 mode=mode,
@@ -181,9 +191,9 @@ class GoldWriter(
                 ingestion_ts=ingestion_ts,
             )
             await self._dispatch_write(
-                validated_mode,
-                table_path,
-                table_name,
+                prepared.validated_mode,
+                prepared.table_path,
+                prepared.table_name,
                 records,
                 partition_cols,
                 primary_keys,
@@ -193,10 +203,8 @@ class GoldWriter(
                 column_order,
             )
             await self._post_write_gold(
-                table_path=table_path,
-                table_name=table_name,
+                prepared=prepared,
                 records=records,
-                validated_mode=validated_mode,
                 ingestion_ts=ingestion_ts,
                 run_id=run_id,
                 scd_config=normalized_scd_config,
@@ -213,7 +221,7 @@ class GoldWriter(
         schema: DataFrameSchema,
         scd_config: ScdConfig | None,
         ingestion_ts: datetime | None,
-    ) -> tuple[GoldWriteMode, str]:
+    ) -> _PreparedGoldWriteContext:
         """Run validation steps and resolve target path.
 
         Args:
@@ -225,22 +233,24 @@ class GoldWriter(
             ingestion_ts: Optional UTC timestamp required for SCD2 writes.
 
         Returns:
-            Tuple of (validated GoldWriteMode enum, resolved filesystem path string).
+            Prepared write context with validated mode and resolved target path.
         """
         validated_mode = self._validate_write_mode(mode)
         self._validate_records(records)
         self._validate_scd2_requirements(validated_mode, scd_config, ingestion_ts)
         self._validate_schema_strict(schema)
         await self._validate_records_against_schema(records, schema)
-        return validated_mode, self._resolve_table_path(table_name)
+        return _PreparedGoldWriteContext(
+            table_name=table_name,
+            table_path=self._resolve_table_path(table_name),
+            validated_mode=validated_mode,
+        )
 
     async def _post_write_gold(
         self,
         *,
-        table_path: str,
-        table_name: str,
+        prepared: _PreparedGoldWriteContext,
         records: list[GoldRecord],
-        validated_mode: GoldWriteMode,
         ingestion_ts: datetime | None,
         run_id: RunID | None,
         scd_config: ScdConfig | None,
@@ -250,10 +260,8 @@ class GoldWriter(
         """Emit audit and metadata after successful Gold write.
 
         Args:
-            table_path: Resolved filesystem path of the Gold Delta table.
-            table_name: Logical Delta table name for audit and metadata.
+            prepared: Prepared pre-write context with resolved path and mode.
             records: Gold records that were written; used for count reporting.
-            validated_mode: Resolved write mode enum from the preparation step.
             ingestion_ts: UTC ingestion timestamp embedded in metadata; None
                 skips timestamp in audit output.
             run_id: Pipeline run ID for lineage; None excludes it from audit.
@@ -263,18 +271,18 @@ class GoldWriter(
         """
         if self._audit:
             await self._log_gold_audit(
-                table_name=table_name,
+                table_name=prepared.table_name,
                 records=records,
-                mode=validated_mode,
+                mode=prepared.validated_mode,
                 ingestion_ts=ingestion_ts,
                 run_id=run_id,
             )
 
         await self._write_gold_metadata(
-            table_path=table_path,
-            table_name=table_name,
+            table_path=prepared.table_path,
+            table_name=prepared.table_name,
             records=records,
-            mode=validated_mode,
+            mode=prepared.validated_mode,
             scd_config=scd_config,
             ingestion_ts=ingestion_ts,
             run_id=run_id,

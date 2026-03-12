@@ -23,13 +23,13 @@ from bioetl.composition.providers._config_helpers import (
     _validate_extraction_input_filter_overlap,
     _wrap_with_filter,
 )
-from bioetl.composition.providers.factory_loader import (
-    get_data_source_factory,
-    get_http_client_factory,
-)
 from bioetl.composition.providers._models import (
     HttpConfig,
     ProviderConfig,
+)
+from bioetl.composition.providers.factory_loader import (
+    get_data_source_factory,
+    get_http_client_factory,
 )
 from bioetl.domain.models.filter import ExtractionParams
 from bioetl.infrastructure.adapters.chembl import ChemblAdapter

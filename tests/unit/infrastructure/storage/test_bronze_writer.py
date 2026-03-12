@@ -1111,6 +1111,58 @@ class TestBronzeWriterMetadataDeterminism:
     """Tests for metadata determinism (REQ-ARCH-030)."""
 
     @pytest.mark.asyncio
+    async def test_compressed_payload_bitwise_identical_on_repeated_calls(
+        self,
+        tmp_path: Path,
+        noop_logger: NoOpLogger,
+        sample_records: list[bytes],
+        run_id: RunID,
+        run_type: RunType,
+        ingestion_ts: datetime,
+    ) -> None:
+        """Repeated Bronze writes must produce identical compressed payload bytes.
+
+        This black-box check protects the actual ``.jsonl.zst`` artifact, not only
+        metadata formatting helpers, so deterministic-write regressions surface
+        immediately when compression or write assembly changes.
+        """
+        writer = BronzeWriter(
+            base_path=tmp_path,
+            logger=noop_logger,
+            metrics=NoOpMetrics(),
+        )
+        date = datetime(2024, 1, 15, tzinfo=UTC)
+
+        result_1 = await writer.write_bronze(
+            records=iter(sample_records),
+            provider="chembl",
+            entity="activity",
+            date=date,
+            batch_id=BatchID(uuid4()),
+            run_id=run_id,
+            run_type=run_type,
+            ingestion_ts=ingestion_ts,
+        )
+        result_2 = await writer.write_bronze(
+            records=iter(sample_records),
+            provider="chembl",
+            entity="activity",
+            date=date,
+            batch_id=BatchID(uuid4()),
+            run_id=run_id,
+            run_type=run_type,
+            ingestion_ts=ingestion_ts,
+        )
+
+        payload_1 = (tmp_path / result_1.relative_path).read_bytes()
+        payload_2 = (tmp_path / result_2.relative_path).read_bytes()
+
+        assert payload_1 == payload_2, (
+            "Repeated Bronze writes with identical logical input must emit "
+            "bitwise-identical compressed payloads"
+        )
+
+    @pytest.mark.asyncio
     async def test_metadata_bitwise_identical_on_repeated_calls(
         self,
         tmp_path: Path,

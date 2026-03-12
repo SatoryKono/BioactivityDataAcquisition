@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Callable
-from typing import TYPE_CHECKING, Any, TypeVar
+from collections.abc import Awaitable, Callable
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any, Protocol, TypeVar, cast
 
 import pyarrow as pa
 
@@ -28,6 +29,168 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.types import GoldRecord, ScdConfig
     from bioetl.infrastructure.export.csv_exporter import CsvExporter
+
+
+@dataclass(frozen=True, slots=True)
+class _SimpleGoldWriteRequest:
+    """Normalized request for one simple Gold Delta write."""
+
+    table_path: str
+    table_name: str
+    records: list[GoldRecord]
+    mode: str
+    partition_cols: list[str] | None
+    primary_keys: list[str] | None = None
+    column_order: list[str] | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class _PreparedSimpleGoldWrite:
+    """Prepared simple Gold write payload shared across write stages."""
+
+    request: _SimpleGoldWriteRequest
+    arrow_data: pa.Table
+    schema_mode: str | None
+
+
+@dataclass(frozen=True, slots=True)
+class _PreparedScd2GoldWrite:
+    """Prepared SCD2 Gold write carried through retry dispatch."""
+
+    table_path: str
+    records: list[GoldRecord]
+    business_key: str | list[str]
+    scd_config: ScdConfig
+    ingestion_ts: datetime
+    partition_cols: list[str] | None
+    column_order: list[str] | None
+
+
+class _GoldWriterSimpleDeltaHostProtocol(Protocol):
+    """Structural host contract for simple Gold Delta write helpers."""
+
+    csv_exporter: CsvExporter | None
+
+    async def _run_in_executor(
+        self,
+        func: Callable[..., object],
+        *args: object,
+    ) -> object: ...
+
+    def _to_arrow_table(
+        self, records: list[GoldRecord], column_order: list[str] | None = None
+    ) -> pa.Table: ...
+
+
+class _GoldWriteAsyncioProtocol(Protocol):
+    """Minimal asyncio surface needed by the Gold retry helper."""
+
+    async def sleep(self, delay: float) -> None: ...
+
+
+class _GoldWriteRetryModuleProtocol(Protocol):
+    """Retry-related runtime contract exposed by the canonical gold module."""
+
+    GOLD_WRITE_RETRY_ERRORS: tuple[type[BaseException], ...]
+    asyncio: _GoldWriteAsyncioProtocol
+
+
+class _GoldWriterDeltaModuleProtocol(_GoldWriteRetryModuleProtocol, Protocol):
+    """Runtime contract for the simple Delta write path."""
+
+    def write_deltalake(
+        self,
+        *,
+        table_or_uri: str,
+        data: pa.RecordBatchReader,
+        mode: str,
+        partition_by: list[str] | None,
+        schema_mode: str | None,
+    ) -> None: ...
+
+
+def _build_simple_gold_write(
+    host: _GoldWriterSimpleDeltaHostProtocol,
+    request: _SimpleGoldWriteRequest,
+) -> _PreparedSimpleGoldWrite:
+    """Prepare deterministic Arrow payload and schema mode for simple writes."""
+    arrow_data = host._to_arrow_table(
+        request.records,
+        column_order=request.column_order,
+    )
+    if request.primary_keys:
+        arrow_data = arrow_data.sort_by(
+            [(pk, "ascending") for pk in request.primary_keys]
+        )
+    return _PreparedSimpleGoldWrite(
+        request=request,
+        arrow_data=arrow_data,
+        schema_mode="overwrite" if request.mode == "overwrite" else None,
+    )
+
+
+def _write_prepared_simple_delta(
+    module: _GoldWriterDeltaModuleProtocol,
+    prepared: _PreparedSimpleGoldWrite,
+) -> None:
+    """Execute one simple Gold Delta write attempt."""
+    module.write_deltalake(
+        table_or_uri=prepared.request.table_path,
+        data=pa.RecordBatchReader.from_batches(
+            prepared.arrow_data.schema, prepared.arrow_data.to_batches()
+        ),
+        mode=prepared.request.mode,
+        partition_by=prepared.request.partition_cols,
+        schema_mode=prepared.schema_mode,
+    )
+
+
+def _prepare_scd2_gold_write(
+    *,
+    table_path: str,
+    records: list[GoldRecord],
+    scd_config: ScdConfig,
+    partition_cols: list[str] | None,
+    ingestion_ts: datetime,
+    column_order: list[str] | None,
+) -> _PreparedScd2GoldWrite:
+    """Normalize and annotate records before SCD2 write retries begin."""
+    business_keys = scd_config.business_keys
+    records.sort(key=lambda record: tuple(record.get(key) for key in business_keys))
+    _initialize_scd2_records(records, scd_config, ingestion_ts)
+    return _PreparedScd2GoldWrite(
+        table_path=table_path,
+        records=records,
+        business_key=(
+            scd_config.entity_key
+            if scd_config.entity_key is not None
+            else list(business_keys)
+        ),
+        scd_config=scd_config,
+        ingestion_ts=ingestion_ts,
+        partition_cols=partition_cols,
+        column_order=column_order,
+    )
+
+
+def _gold_write_retry_delay(attempt: int) -> float:
+    """Return deterministic retry delay used by Gold write helpers."""
+    return float(0.5 * (2**attempt) + 0.05)
+
+
+async def _run_gold_write_with_retry(
+    module: _GoldWriteRetryModuleProtocol,
+    operation: Callable[[], Awaitable[object]],
+) -> None:
+    """Run one Gold write operation under the canonical retry policy."""
+    for attempt in range(3):
+        try:
+            await operation()
+            return
+        except module.GOLD_WRITE_RETRY_ERRORS as error:
+            if attempt == 2:
+                raise error
+            await module.asyncio.sleep(_gold_write_retry_delay(attempt))
 
 
 class _GoldWriterExecutorArrowMixin:
@@ -74,43 +237,31 @@ class _GoldWriterSimpleDeltaMixin(_GoldWriterExecutorArrowMixin):
         column_order: list[str] | None = None,
     ) -> None:
         """Write records using simple overwrite or append mode."""
-        arrow_data = self._to_arrow_table(records, column_order=column_order)
-        if primary_keys:
-            arrow_data = arrow_data.sort_by([(pk, "ascending") for pk in primary_keys])
-
-        schema_mode = "overwrite" if mode == "overwrite" else None
-        module = _load_gold_writer_module()
-        for attempt in range(3):
-            try:
-
-                def _write_delta_with_mode(
-                    table_or_uri: str = table_path,
-                    data: pa.Table = arrow_data,
-                    write_mode: str = mode,
-                    partition_by: list[str] | None = partition_cols,
-                    resolved_schema_mode: str | None = schema_mode,
-                ) -> None:
-                    module.write_deltalake(
-                        table_or_uri=table_or_uri,
-                        data=pa.RecordBatchReader.from_batches(
-                            data.schema, data.to_batches()
-                        ),
-                        mode=write_mode,
-                        partition_by=partition_by,
-                        schema_mode=resolved_schema_mode,
-                    )
-
-                await self._run_in_executor(_write_delta_with_mode)
-                break
-            except module.GOLD_WRITE_RETRY_ERRORS as error:
-                if attempt == 2:
-                    raise error
-                delay = 0.5 * (2**attempt) + 0.05
-                await module.asyncio.sleep(delay)
+        prepared = _build_simple_gold_write(
+            self,
+            _SimpleGoldWriteRequest(
+                table_path=table_path,
+                table_name=table_name,
+                records=records,
+                mode=mode,
+                partition_cols=partition_cols,
+                primary_keys=primary_keys,
+                column_order=column_order,
+            ),
+        )
+        module = cast(_GoldWriterDeltaModuleProtocol, _load_gold_writer_module())
+        await _run_gold_write_with_retry(
+            module,
+            lambda: self._run_in_executor(
+                _write_prepared_simple_delta,
+                module,
+                prepared,
+            ),
+        )
         if self.csv_exporter:
             await self.csv_exporter.export(
                 table_name,
-                arrow_data,
+                prepared.arrow_data,
                 append=mode != "overwrite",
                 primary_keys=primary_keys if mode != "overwrite" else None,
             )
@@ -146,35 +297,29 @@ class _GoldWriterScd2MergeMixin(_GoldWriterExecutorArrowMixin):
         column_order: list[str] | None = None,
     ) -> None:
         """Write records using SCD Type 2 (history tracking)."""
-        business_keys = scd_config.business_keys
-
-        records.sort(key=lambda record: tuple(record.get(key) for key in business_keys))
-        _initialize_scd2_records(records, scd_config, ingestion_ts)
-
+        prepared = _prepare_scd2_gold_write(
+            table_path=table_path,
+            records=records,
+            scd_config=scd_config,
+            partition_cols=partition_cols,
+            ingestion_ts=ingestion_ts,
+            column_order=column_order,
+        )
         module = _load_gold_writer_module()
-        for attempt in range(3):
-            try:
-                await _write_scd2_once(
-                    self,
-                    module=module,
-                    table_path=table_path,
-                    records=records,
-                    business_key=(
-                        scd_config.entity_key
-                        if scd_config.entity_key is not None
-                        else list(business_keys)
-                    ),
-                    scd_config=scd_config,
-                    ingestion_ts=ingestion_ts,
-                    partition_cols=partition_cols,
-                    column_order=column_order,
-                )
-                break
-            except module.GOLD_WRITE_RETRY_ERRORS as error:
-                if attempt == 2:
-                    raise error
-                delay = 0.5 * (2**attempt) + 0.05
-                await module.asyncio.sleep(delay)
+        await _run_gold_write_with_retry(
+            cast(_GoldWriteRetryModuleProtocol, module),
+            lambda: _write_scd2_once(
+                self,
+                module=module,
+                table_path=prepared.table_path,
+                records=prepared.records,
+                business_key=prepared.business_key,
+                scd_config=prepared.scd_config,
+                ingestion_ts=prepared.ingestion_ts,
+                partition_cols=prepared.partition_cols,
+                column_order=prepared.column_order,
+            ),
+        )
 
     async def _merge_scd2(
         self,

@@ -157,6 +157,23 @@ class TestGoldWriterValidation:
                 mode="invalid",
             )
 
+    async def test_prepare_write_gold_returns_named_context(
+        self, gold_writer, valid_records, strict_schema
+    ):
+        """Test _prepare_write_gold returns a named pre-write context."""
+        prepared = await gold_writer._prepare_write_gold(
+            table_name="test.table",
+            records=valid_records,
+            mode="overwrite",
+            schema=strict_schema,
+            scd_config=None,
+            ingestion_ts=None,
+        )
+
+        assert prepared.table_name == "test.table"
+        assert prepared.table_path == "s3://test-bucket/gold/test/table"
+        assert prepared.validated_mode.value == "overwrite"
+
     async def test_write_gold_scd2_without_config_raises(
         self, gold_writer, valid_records, strict_schema
     ):

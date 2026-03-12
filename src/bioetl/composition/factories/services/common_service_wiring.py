@@ -6,8 +6,8 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.metadata_coordinator import MetadataCoordinator
 from bioetl.application.core.pipeline_services import PipelineService
+from bioetl.application.services.metadata_coordinator import MetadataCoordinator
 from bioetl.composition.factories.services.port_factories import (
     create_checkpoint,
     create_lock,

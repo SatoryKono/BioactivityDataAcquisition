@@ -52,9 +52,6 @@ from bioetl.composition.bootstrap.runtime.config_loader import (
 )
 from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger_port
 from bioetl.composition.bootstrap.runtime.runner_assembly import (
-    bootstrap_composite_runner as _bootstrap_composite_runner_impl,
-)
-from bioetl.composition.bootstrap.runtime.runner_assembly import (
     create_composite_runner_with_legacy_fsm_adapter,
 )
 from bioetl.composition.bootstrap.runtime.runner_factory_builder_service import (

@@ -1,7 +1,7 @@
 {
   "summary": {
-    "scanned_modules": 1062,
-    "total_internal_imports": 3947,
+    "scanned_modules": 1065,
+    "total_internal_imports": 3964,
     "layer_edges": 13,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 237,
@@ -11,7 +11,7 @@
     {
       "source": "application",
       "target": "application",
-      "imports": 467,
+      "imports": 468,
       "allowed": true
     },
     {
@@ -29,19 +29,19 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 267,
+      "imports": 274,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 222,
+      "imports": 226,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 206,
+      "imports": 211,
       "allowed": true
     },
     {
@@ -236,7 +236,7 @@
     {
       "source": "composition.providers",
       "target": "infrastructure.adapters",
-      "imports": 17
+      "imports": 18
     },
     {
       "source": "infrastructure.storage",
