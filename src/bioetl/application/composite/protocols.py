@@ -1,4 +1,8 @@
-"""Protocols for composite join orchestration collaborators."""
+"""Application-local protocols for composite join orchestration.
+
+These contracts describe internal composite collaborators. They are not part of
+the cross-layer ``bioetl.domain.ports`` facade.
+"""
 
 from __future__ import annotations
 

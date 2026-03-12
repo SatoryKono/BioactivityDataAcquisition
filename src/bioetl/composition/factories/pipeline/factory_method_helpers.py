@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.composition.factories.datasource.data_source_factory import (
-        DataSourceCreatorPort,
+        DataSourceCreatorProtocol,
     )
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.config import RuntimeConfig
@@ -76,7 +76,7 @@ def create_transformer_instance(
 
 def create_factory_data_source(
     *,
-    create_data_source_fn: DataSourceCreatorPort,
+    create_data_source_fn: DataSourceCreatorProtocol,
     settings: Settings,
     pipeline_config: PipelineYamlConfig,
     logger: LoggerPort,
@@ -96,7 +96,7 @@ def create_factory_data_source(
 def build_factory_services(
     *,
     pipeline_name: str,
-    create_data_source_fn: DataSourceCreatorPort,
+    create_data_source_fn: DataSourceCreatorProtocol,
     settings: Settings,
     logger: LoggerPort,
     config: PipelineYamlConfig | None = None,
@@ -122,7 +122,7 @@ def create_pipeline_instance_with_services(
     pipeline_name: str,
     pipeline_class: type[TPipeline],
     provider: str,
-    create_data_source_fn: DataSourceCreatorPort,
+    create_data_source_fn: DataSourceCreatorProtocol,
     transformer_class: type[BaseTransformer] | None,
     run_id: RunID,
     runtime: RuntimeConfig,

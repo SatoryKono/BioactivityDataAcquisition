@@ -3,13 +3,13 @@
 
 Tests for protocol compliance and structural subtyping verification.
 Ensures TransformCallback, GoldFilterCallback, GoldTransformCallback,
-and TransformerPort are properly defined and implementable.
+and TransformerProtocol are properly defined and implementable.
 """
 
 from __future__ import annotations
 
-from typing import Any
 from collections.abc import Awaitable
+from typing import Any
 
 import pytest
 
@@ -18,6 +18,7 @@ from bioetl.application.core.protocols import (
     GoldTransformCallback,
     TransformCallback,
     TransformerPort,
+    TransformerProtocol,
 )
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import BronzeRecord, SilverRecord
@@ -120,24 +121,24 @@ class TestGoldTransformCallbackProtocol:
         assert callable(callback)
 
 
-class TestTransformerPortProtocol:
-    """Tests for TransformerPort protocol."""
+class TestTransformerProtocol:
+    """Tests for TransformerProtocol."""
 
     def test_protocol_has_transform_method(self) -> None:
-        """TransformerPort has transform method."""
-        assert hasattr(TransformerPort, "transform")
+        """TransformerProtocol has transform method."""
+        assert hasattr(TransformerProtocol, "transform")
 
     def test_transform_method_is_async(self) -> None:
         """Transform method is async (coroutine)."""
         # Get the transform method
-        transform_method = getattr(TransformerPort, "transform", None)
+        transform_method = getattr(TransformerProtocol, "transform", None)
         assert transform_method is not None
 
     def test_implementation_satisfies_protocol(self) -> None:
         """Implementation with correct signature satisfies protocol."""
 
         class ValidTransformer:
-            """Valid TransformerPort implementation."""
+            """Valid TransformerProtocol implementation."""
 
             async def transform(
                 self,
@@ -205,12 +206,16 @@ class TestProtocolCompatibility:
         # and return dict
         assert GoldTransformCallback is not None
 
-    def test_transformer_port_signature(self) -> None:
-        """Verify TransformerPort signature components."""
+    def test_transformer_protocol_signature(self) -> None:
+        """Verify TransformerProtocol signature components."""
         # The protocol should have async transform method
         # accepting PipelineContext, BronzeRecord, int
         # and returning SilverRecord | None
-        assert TransformerPort is not None
+        assert TransformerProtocol is not None
+
+    def test_legacy_transformer_port_alias(self) -> None:
+        """Legacy TransformerPort alias resolves to TransformerProtocol."""
+        assert TransformerPort is TransformerProtocol
 
 
 class TestProtocolDocumentation:
@@ -231,14 +236,14 @@ class TestProtocolDocumentation:
         assert GoldTransformCallback.__doc__ is not None
         assert len(GoldTransformCallback.__doc__) > 0
 
-    def test_transformer_port_has_docstring(self) -> None:
-        """TransformerPort has docstring."""
-        assert TransformerPort.__doc__ is not None
-        assert len(TransformerPort.__doc__) > 0
+    def test_transformer_protocol_has_docstring(self) -> None:
+        """TransformerProtocol has docstring."""
+        assert TransformerProtocol.__doc__ is not None
+        assert len(TransformerProtocol.__doc__) > 0
 
-    def test_transformer_port_transform_has_docstring(self) -> None:
-        """TransformerPort.transform has docstring."""
-        transform_doc = TransformerPort.transform.__doc__
+    def test_transformer_protocol_transform_has_docstring(self) -> None:
+        """TransformerProtocol.transform has docstring."""
+        transform_doc = TransformerProtocol.transform.__doc__
         assert transform_doc is not None
         assert "Bronze" in transform_doc or "Silver" in transform_doc
 

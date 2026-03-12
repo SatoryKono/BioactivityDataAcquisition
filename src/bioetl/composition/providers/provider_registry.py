@@ -4,7 +4,8 @@ Centralizes provider registration, eliminating the need
 to modify multiple files when adding a new provider.
 
 After unification with DataSourceRegistry, this module is also responsible for
-high-level data source creation with filtering support.
+high-level data source creation with filtering support. Its callback protocols
+are composition-local contracts, not domain ports.
 """
 
 from __future__ import annotations
@@ -23,7 +24,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "AdapterCreator",
-    "DataSourceCreatorPort",
+    "DataSourceCreatorProtocol",
     "HttpConfig",
     "ProviderConfig",
     "ProviderRegistry",
@@ -51,10 +52,12 @@ class HttpConfig:
 AdapterCreator = Callable[..., "DataSourcePort"]
 
 
-class DataSourceCreatorPort(Protocol):
-    """Protocol for high-level data source creator functions.
+class DataSourceCreatorProtocol(Protocol):
+    """Protocol for composition-side data source creator callables.
 
-    These functions create fully configured data sources with filtering support.
+    These callables create fully configured data sources with filtering support.
+    The returned object is a domain ``DataSourcePort``, but this callback itself
+    remains a composition-layer wiring contract.
     """
 
     def __call__(
@@ -106,7 +109,11 @@ class ProviderConfig:
     requires_logger: bool = True
     default_kwargs: dict[str, object] = field(default_factory=dict)
     custom_creator: AdapterCreator | None = None
-    data_source_creator: DataSourceCreatorPort | None = None
+    data_source_creator: DataSourceCreatorProtocol | None = None
+
+
+# Backward-compatible alias kept during the RF-008 terminology cleanup.
+DataSourceCreatorPort = DataSourceCreatorProtocol
 
 
 class ProviderRegistry:

@@ -2,9 +2,11 @@
 from __future__ import annotations
 
 from bioetl.composition.factories.datasource.data_source_factory import (
-    DataSourceCreatorPort,
+    DataSourceCreatorProtocol,
     DataSourceFactory,
     DataSourceRegistry,
 )
 
-__all__ = ["DataSourceCreatorPort", "DataSourceFactory", "DataSourceRegistry"]
+DataSourceCreatorPort = DataSourceCreatorProtocol
+
+__all__ = ["DataSourceCreatorProtocol", "DataSourceFactory", "DataSourceRegistry"]

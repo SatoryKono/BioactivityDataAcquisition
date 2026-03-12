@@ -22,7 +22,7 @@ from typing import TYPE_CHECKING
 
 # Data source factory and registry
 from bioetl.composition.factories.datasource.data_source_factory import (
-    DataSourceCreatorPort,
+    DataSourceCreatorProtocol,
     DataSourceFactory,
     DataSourceRegistry,
 )
@@ -78,6 +78,8 @@ _PIPELINE_FACTORY_EXPORTS = frozenset(
     }
 )
 
+DataSourceCreatorPort = DataSourceCreatorProtocol
+
 
 def __getattr__(name: str) -> object:
     """Lazily expose heavy pipeline factory singletons to avoid import cycles."""
@@ -91,7 +93,7 @@ def __getattr__(name: str) -> object:
 __all__ = [
     "BaseServicesFactory",
     "DQServicesFactory",
-    "DataSourceCreatorPort",
+    "DataSourceCreatorProtocol",
     "DataSourceFactory",
     "DataSourceRegistry",
     "GenericPipelineFactory",

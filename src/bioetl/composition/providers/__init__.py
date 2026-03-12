@@ -25,15 +25,17 @@ from bioetl.composition.providers.loader import (
     load_providers,
 )
 from bioetl.composition.providers.provider_registry import (
-    DataSourceCreatorPort,
+    DataSourceCreatorProtocol,
     HttpConfig,
     ProviderConfig,
     ProviderRegistry,
 )
 from bioetl.composition.providers.registration import register_all_providers
 
+DataSourceCreatorPort = DataSourceCreatorProtocol
+
 __all__ = [
-    "DataSourceCreatorPort",
+    "DataSourceCreatorProtocol",
     "HttpConfig",
     "ProviderConfig",
     "ProviderRegistry",
