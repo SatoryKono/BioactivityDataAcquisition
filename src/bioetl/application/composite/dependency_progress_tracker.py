@@ -3,13 +3,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
 
+from bioetl.domain.composite.config import DependencyConfig
 from bioetl.domain.composite.result import DependencyResult
-
-if TYPE_CHECKING:
-    from bioetl.domain.composite.config import DependencyConfig
-    from bioetl.domain.ports import LoggerPort
+from bioetl.domain.ports import LoggerPort
 
 __all__ = ["DependencyProgressService"]
 

@@ -2,25 +2,23 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Protocol
+from typing import Protocol
 
-if TYPE_CHECKING:
-    from collections.abc import Sequence
+import polars as pl
 
-    import polars as pl
-
-    from bioetl.application.composite.column_orderer import ColumnOrdererService
-    from bioetl.application.composite.conflict_resolver import ConflictResolverService
-    from bioetl.domain.composite.config import EnricherConfig
-    from bioetl.domain.composite.cross_validation import CrossValidationStats
-    from bioetl.domain.composite.result import (
-        DependencyResult,
-        EnrichmentResult,
-        MergeResult,
-    )
-    from bioetl.domain.ports import LoggerPort
+from bioetl.application.composite.column_orderer import ColumnOrdererService
+from bioetl.application.composite.conflict_resolver import ConflictResolverService
+from bioetl.domain.composite.config import EnricherConfig
+from bioetl.domain.composite.cross_validation import CrossValidationStats
+from bioetl.domain.composite.result import (
+    DependencyResult,
+    EnrichmentResult,
+    MergeResult,
+)
+from bioetl.domain.ports import LoggerPort
 
 
 @dataclass(frozen=True, slots=True)
