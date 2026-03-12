@@ -18,7 +18,6 @@ from httpx import HTTPStatusError, RequestError
 from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.normalization import normalize_doi
-from bioetl.domain.ports import NoOpMetrics
 from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.common import (
@@ -26,9 +25,6 @@ from bioetl.infrastructure.adapters.common import (
     FallbackDecoratorConfig,
     FallbackFetchOrchestratorService,
     FallbackPolicyMixin,
-)
-from bioetl.infrastructure.adapters.common.adapter_defaults import (
-    create_default_error_handler as _create_default_crossref_error_handler,
 )
 from bioetl.infrastructure.adapters.common.adapter_defaults import (
     create_default_fallback_service as _create_default_crossref_fallback_service,
@@ -126,22 +122,14 @@ class CrossRefAdapter(FallbackPolicyMixin, BaseHttpAdapter):
 
     def __post_init__(self) -> None:
         """Initialize helper services and decomposed CrossRef flow components."""
-        self._http_client = self.http_client
-        self._logger = self.logger
-        self._metrics = self.metrics if self.metrics is not None else NoOpMetrics()
-        if self.adapter_metrics is not None and self.request_collector is not None:
-            self._adapter_metrics = self.adapter_metrics
-            self._request_collector = self.request_collector
-        else:
-            self._init_adapter_metrics()
-
-        self._error_handler = (
-            self.error_handler
-            if self.error_handler is not None
-            else _create_default_crossref_error_handler(
-                logger=self._logger,
-                metrics=self._metrics,
-            )
+        BaseHttpAdapter.__init__(
+            self,
+            http_client=self.http_client,
+            logger=self.logger,
+            metrics=self.metrics,
+            error_handler=self.error_handler,
+            adapter_metrics=self.adapter_metrics,
+            request_collector=self.request_collector,
         )
         self._fallback_fetch_service = (
             self.fallback_fetch_service

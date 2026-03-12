@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from bioetl.composition.factories.pipeline import facade as pipeline_factory
-from bioetl.composition.factories.pipeline.facade import GenericPipelineFactory
+from bioetl.composition.factories.pipeline import GenericPipelineFactory
 
 
 @pytest.mark.unit

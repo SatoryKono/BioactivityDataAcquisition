@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.composite.join_planner import JoinHow, JoinPlannerService
 
@@ -19,6 +19,21 @@ class _MergeCompatibilityJoinPlannerMixin:
 
     _join_planner: JoinPlannerService
 
+    def _delegate_join_planner(self, method_name: str, *args: object) -> Any:
+        """Route sync compatibility wrappers to the canonical join planner."""
+        method = cast(Any, getattr(self._join_planner, method_name))
+        return method(*args)
+
+    async def _delegate_join_planner_async(
+        self,
+        method_name: str,
+        *args: object,
+        **kwargs: object,
+    ) -> Any:
+        """Route async compatibility wrappers to the canonical join planner."""
+        method = cast(Any, getattr(self._join_planner, method_name))
+        return await method(*args, **kwargs)
+
     def _find_join_key_column(
         self,
         key: str,
@@ -26,7 +41,12 @@ class _MergeCompatibilityJoinPlannerMixin:
         pipeline: str | None = None,
     ) -> str | None:
         """Compatibility wrapper for join-key column lookup."""
-        return self._join_planner.find_join_key_column(key, columns, pipeline)
+        return self._delegate_join_planner(
+            "find_join_key_column",
+            key,
+            columns,
+            pipeline,
+        )
 
     def _normalize_join_key_columns(
         self,
@@ -35,7 +55,12 @@ class _MergeCompatibilityJoinPlannerMixin:
         pipeline: str | None = None,
     ) -> pl.DataFrame:
         """Compatibility wrapper for join-key normalization."""
-        return self._join_planner.normalize_join_key_columns(df, join_keys, pipeline)
+        return self._delegate_join_planner(
+            "normalize_join_key_columns",
+            df,
+            join_keys,
+            pipeline,
+        )
 
     async def _apply_joins(
         self,
@@ -45,7 +70,8 @@ class _MergeCompatibilityJoinPlannerMixin:
         seed_pipeline: str | None = None,
     ) -> pl.DataFrame:
         """Compatibility wrapper for enricher joins."""
-        return await self._join_planner.apply_joins(
+        return await self._delegate_join_planner_async(
+            "apply_joins",
             seed_df=seed_df,
             enricher_dfs=enricher_dfs,
             enrichers=enrichers,
@@ -61,7 +87,8 @@ class _MergeCompatibilityJoinPlannerMixin:
         pipeline_name: str,
     ) -> pl.DataFrame:
         """Compatibility wrapper for single-key Polars join."""
-        return self._join_planner.execute_polars_join(
+        return self._delegate_join_planner(
+            "execute_polars_join",
             left_df,
             right_df,
             left_key,
@@ -77,7 +104,8 @@ class _MergeCompatibilityJoinPlannerMixin:
         seed_pipeline: str | None = None,
     ) -> pl.DataFrame:
         """Compatibility wrapper for dependency joins."""
-        return await self._join_planner.apply_dependency_joins(
+        return await self._delegate_join_planner_async(
+            "apply_dependency_joins",
             merged_df=merged_df,
             dependency_dfs=dependency_dfs,
             dependencies=dependencies,
@@ -92,7 +120,8 @@ class _MergeCompatibilityJoinPlannerMixin:
         merged_columns: list[str],
     ) -> tuple[list[str], list[str], set[str]]:
         """Compatibility wrapper for composite join-key resolution."""
-        return self._join_planner.resolve_composite_join_keys(
+        return self._delegate_join_planner(
+            "resolve_composite_join_keys",
             join_keys_list,
             left_pipeline,
             right_pipeline,
@@ -108,7 +137,8 @@ class _MergeCompatibilityJoinPlannerMixin:
         pipeline_name: str,
     ) -> pl.DataFrame:
         """Compatibility wrapper for composite-key join."""
-        return self._join_planner.execute_composite_key_join(
+        return self._delegate_join_planner(
+            "execute_composite_key_join",
             left_df,
             right_df,
             left_keys,
@@ -124,7 +154,8 @@ class _MergeCompatibilityJoinPlannerMixin:
         seed_pipeline: str | None = None,
     ) -> pl.DataFrame:
         """Compatibility wrapper for composite-key dependency joins."""
-        return self._join_planner.apply_composite_key_dependency_join(
+        return self._delegate_join_planner(
+            "apply_composite_key_dependency_join",
             merged_df,
             dep_df,
             dep,
@@ -133,11 +164,11 @@ class _MergeCompatibilityJoinPlannerMixin:
 
     def _get_polars_join_type(self) -> JoinHow:
         """Compatibility wrapper for join strategy mapping."""
-        return self._join_planner.get_polars_join_type()
+        return self._delegate_join_planner("get_polars_join_type")
 
     def _drop_system_columns(self, df: pl.DataFrame) -> pl.DataFrame:
         """Compatibility wrapper for system-column cleanup."""
-        return self._join_planner.drop_system_columns(df)
+        return self._delegate_join_planner("drop_system_columns", df)
 
     def _resolve_join_key_names(
         self,
@@ -147,7 +178,8 @@ class _MergeCompatibilityJoinPlannerMixin:
         merged_columns: list[str],
     ) -> tuple[str, str, str | None]:
         """Compatibility wrapper for symmetric join-key resolution."""
-        return self._join_planner.resolve_join_key_names(
+        return self._delegate_join_planner(
+            "resolve_join_key_names",
             primary_key,
             seed_pipeline,
             enricher_pipeline,
@@ -163,7 +195,8 @@ class _MergeCompatibilityJoinPlannerMixin:
         merged_columns: list[str],
     ) -> tuple[str, str, str | None]:
         """Compatibility wrapper for asymmetric join-key resolution."""
-        return self._join_planner.resolve_join_key_names_asymmetric(
+        return self._delegate_join_planner(
+            "resolve_join_key_names_asymmetric",
             left_key,
             right_key,
             left_pipeline,

@@ -1,0 +1,309 @@
+"""Unit tests for _CompositeRunnerStageEnrichmentMixin."""
+
+from __future__ import annotations
+
+from types import SimpleNamespace
+from typing import Any
+from unittest.mock import AsyncMock, MagicMock
+
+import pytest
+
+from bioetl.application.composite.runner_pkg.runner_stage_enrichment_mixin import (
+    _CompositeRunnerStageEnrichmentMixin,
+)
+from bioetl.domain.composite.result import (
+    EnrichmentResult,
+    EnrichmentStatus,
+)
+from bioetl.domain.composite.state import CompositePipelineState
+from bioetl.domain.exceptions import InvalidStateError
+
+
+# ---------------------------------------------------------------------------
+# Fakes / factories
+# ---------------------------------------------------------------------------
+
+
+def _make_enricher_cfg(pipeline: str, *, required: bool = False) -> SimpleNamespace:
+    return SimpleNamespace(pipeline=pipeline, required=required)
+
+
+def _success_enrichment(name: str) -> EnrichmentResult:
+    return EnrichmentResult(enricher_name=name, status=EnrichmentStatus.SUCCESS)
+
+
+def _failed_enrichment(name: str) -> EnrichmentResult:
+    return EnrichmentResult(
+        enricher_name=name,
+        status=EnrichmentStatus.FAILED,
+        error_message="test failure",
+    )
+
+
+def _make_state(
+    state: CompositePipelineState = CompositePipelineState.SEED_COMPLETED,
+    completed_enrichers: frozenset[str] | None = None,
+    enrichment_results: dict[str, EnrichmentResult] | None = None,
+) -> MagicMock:
+    mock = MagicMock()
+    mock.state = state
+    mock.completed_enrichers = completed_enrichers or frozenset()
+    mock.enrichment_results = enrichment_results or {}
+    mock.with_state = MagicMock(return_value=mock)
+    mock.with_enricher_completed = MagicMock(return_value=mock)
+    return mock
+
+
+# ---------------------------------------------------------------------------
+# Harness
+# ---------------------------------------------------------------------------
+
+
+class _EnrichmentHarness(_CompositeRunnerStageEnrichmentMixin):
+    """Concrete test harness wiring all abstract seam methods."""
+
+    def __init__(
+        self,
+        config: Any | None = None,
+        enricher_results: dict[str, EnrichmentResult] | None = None,
+    ) -> None:
+        self._config = config or SimpleNamespace(
+            name="test_composite",
+            enrichers=[],
+            required_enrichers=[],
+        )
+        self._runtime = SimpleNamespace(required_only=False)
+        self._logger = MagicMock()
+        self._run_id_str = "run-enrich-test"
+        self._coordinator = MagicMock()
+        self._coordinator.run_enrichers = AsyncMock(
+            return_value=enricher_results or {}
+        )
+        self._enricher_runner_factory = MagicMock()
+        self._checkpoint_manager = AsyncMock()
+        self._fsm = MagicMock()
+
+        # Seam implementations
+        self._seam_enrichers_to_run: list[Any] = []
+        self._seam_check_required_raises: bool = False
+
+    # --- seam stubs ---
+
+    def _call_get_enrichers_to_run(self, state: Any) -> list[Any]:
+        return self._seam_enrichers_to_run
+
+    def _call_check_required_enrichers(self, results: Any) -> None:
+        if self._seam_check_required_raises:
+            raise InvalidStateError("Required enricher failed: req_a")
+
+    async def _call_save_checkpoint_safe(self, state: Any, operation: str) -> bool:
+        return True
+
+    def _transition_state_with_fsm_log(
+        self,
+        state: Any,
+        to_state: CompositePipelineState,
+        *,
+        stage: str,
+        validate: bool = True,
+        **kwargs: object,
+    ) -> Any:
+        state.with_state(to_state)
+        return state
+
+    async def _persist_failed_state(
+        self,
+        state: Any,
+        *,
+        stage: str,
+        error: str,
+    ) -> Any:
+        return state
+
+
+# ---------------------------------------------------------------------------
+# _record_completed_enrichment_results
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+def test_record_completed_enrichment_results_when_success_then_state_updated() -> None:
+    harness = _EnrichmentHarness()
+    state = _make_state()
+    results = {"enricher_a": _success_enrichment("enricher_a")}
+
+    new_state = harness._record_completed_enrichment_results(state, results)
+
+    state.with_enricher_completed.assert_called_once_with(
+        "enricher_a", results["enricher_a"]
+    )
+    assert new_state is state
+
+
+@pytest.mark.unit
+def test_record_completed_enrichment_results_when_failed_then_state_not_updated() -> None:
+    harness = _EnrichmentHarness()
+    state = _make_state()
+    results = {"enricher_a": _failed_enrichment("enricher_a")}
+
+    harness._record_completed_enrichment_results(state, results)
+
+    state.with_enricher_completed.assert_not_called()
+
+
+@pytest.mark.unit
+def test_record_completed_enrichment_results_when_skipped_then_state_updated() -> None:
+    harness = _EnrichmentHarness()
+    state = _make_state()
+    skipped = EnrichmentResult(enricher_name="enricher_a", status=EnrichmentStatus.SKIPPED)
+    results = {"enricher_a": skipped}
+
+    harness._record_completed_enrichment_results(state, results)
+
+    state.with_enricher_completed.assert_called_once()
+
+
+# ---------------------------------------------------------------------------
+# _skip_enrichment_stage
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_skip_enrichment_stage_when_called_then_logs_and_returns_empty() -> None:
+    harness = _EnrichmentHarness()
+    state = _make_state()
+
+    new_state, results = await harness._skip_enrichment_stage(state)
+
+    assert new_state is state
+    assert results == {}
+    harness._logger.info.assert_called_once()
+
+
+# ---------------------------------------------------------------------------
+# _finalize_enrichment_results
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+def test_finalize_enrichment_results_when_required_only_false_then_no_not_run_added() -> None:
+    enrichers = [_make_enricher_cfg("opt_a", required=False)]
+    config = SimpleNamespace(
+        name="composite",
+        enrichers=enrichers,
+        required_enrichers=[],
+    )
+    harness = _EnrichmentHarness(config=config)
+    harness._runtime.required_only = False
+    state = _make_state(enrichment_results={})
+    enrichers_to_run = enrichers
+
+    result = harness._finalize_enrichment_results(
+        state=state,
+        enrichers_to_run=enrichers_to_run,
+        enrichment_results={},
+    )
+
+    # In non-required_only mode: add_not_run_results returns unchanged dict
+    assert "opt_a" not in result
+
+
+@pytest.mark.unit
+def test_finalize_enrichment_results_when_checkpoint_has_results_then_merged() -> None:
+    enrichers = [_make_enricher_cfg("enricher_a")]
+    config = SimpleNamespace(
+        name="composite",
+        enrichers=enrichers,
+        required_enrichers=[],
+    )
+    harness = _EnrichmentHarness(config=config)
+    completed_result = _success_enrichment("enricher_a")
+    state = _make_state(
+        enrichment_results={"enricher_a": completed_result},
+    )
+
+    result = harness._finalize_enrichment_results(
+        state=state,
+        enrichers_to_run=[],
+        enrichment_results={},
+    )
+
+    assert "enricher_a" in result
+
+
+# ---------------------------------------------------------------------------
+# _transition_to_enrichment_completed
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_transition_to_enrichment_completed_when_enriching_then_calls_complete() -> None:
+    harness = _EnrichmentHarness()
+    state = _make_state(state=CompositePipelineState.ENRICHING)
+    harness._call_save_checkpoint_safe = AsyncMock(return_value=True)  # type: ignore[method-assign]
+
+    result_state = await harness._transition_to_enrichment_completed(state)
+
+    # _complete_enrichment_stage logs and saves checkpoint
+    harness._logger.info.assert_called()
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_transition_to_enrichment_completed_when_seed_completed_then_transitions_through_enriching() -> None:
+    harness = _EnrichmentHarness()
+    state = _make_state(state=CompositePipelineState.SEED_COMPLETED)
+    harness._call_save_checkpoint_safe = AsyncMock(return_value=True)  # type: ignore[method-assign]
+
+    await harness._transition_to_enrichment_completed(state)
+
+    # FSM log should have been called for enrichment_start_empty
+    harness._fsm.log_fsm_transition.assert_not_called()  # our stub replaces it
+    state.with_state.assert_called()
+
+
+# ---------------------------------------------------------------------------
+# _save_failed_enrichment_state
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_save_failed_enrichment_state_when_called_then_logs_error() -> None:
+    harness = _EnrichmentHarness()
+    state = _make_state()
+    error = InvalidStateError("Required enricher failed")
+
+    await harness._save_failed_enrichment_state(state, error)
+
+    harness._logger.error.assert_called_once()
+    error_args = harness._logger.error.call_args.args[0]
+    assert "FAILED" in error_args or "failed" in error_args.lower()
+
+
+# ---------------------------------------------------------------------------
+# _validate_required_enrichment_results
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_validate_required_enrichment_results_when_all_ok_then_no_exception() -> None:
+    harness = _EnrichmentHarness()
+    harness._seam_check_required_raises = False
+    state = _make_state()
+
+    await harness._validate_required_enrichment_results(state, {})  # must not raise
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_validate_required_enrichment_results_when_required_failed_then_raises() -> None:
+    harness = _EnrichmentHarness()
+    harness._seam_check_required_raises = True
+    state = _make_state()
+
+    with pytest.raises(InvalidStateError):
+        await harness._validate_required_enrichment_results(state, {})

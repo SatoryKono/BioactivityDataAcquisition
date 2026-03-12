@@ -31,7 +31,7 @@ from bioetl.composition.factories.datasource.data_source_factory import (
 from bioetl.composition.factories.dq.dq_services_factory import DQServicesFactory
 
 # Pipeline factory and runner assembly
-from bioetl.composition.factories.pipeline.facade import (
+from bioetl.composition.factories.pipeline import (
     GenericPipelineFactory,
     assemble_runner,
     build_pipeline_services,
