@@ -58,7 +58,9 @@ def adapter() -> _FakePubChemAdapter:
 
 @pytest.mark.unit
 class TestFetchAsModels:
-    async def test_converts_records_to_models(self, adapter: _FakePubChemAdapter) -> None:
+    async def test_converts_records_to_models(
+        self, adapter: _FakePubChemAdapter
+    ) -> None:
         """Records yielded from fetch() are converted via model_validate."""
         adapter._records_to_yield = [
             {"molecule_id": "123", "molecular_formula": "C9H8O4"},

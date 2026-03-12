@@ -6,9 +6,7 @@ import ast
 from pathlib import Path
 
 
-CRITICAL_MODULES = (
-    "src/bioetl/infrastructure/adapters/uniprot/idmapping_client.py",
-)
+CRITICAL_MODULES = ("src/bioetl/infrastructure/adapters/uniprot/idmapping_client.py",)
 ALLOWED_BROAD_EXCEPTION_POLICIES: dict[str, frozenset[str]] = {}
 P0_2_CRITICAL_ERROR_MODULES = (
     "src/bioetl/application/core/batch_executor.py",
@@ -61,7 +59,6 @@ def test_critical_modules_have_no_broad_exception_handlers() -> None:
                 violations.append(f"{path}:{node.lineno} catches Exception")
 
     assert not violations, "Broad exception handlers found:\n" + "\n".join(violations)
-
 
 
 def test_broad_exception_handlers_are_limited_to_cli_entrypoints() -> None:

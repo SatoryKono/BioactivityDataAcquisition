@@ -77,7 +77,10 @@ def test_create_merge_service_wires_join_planner_field_alias_resolver(
         is resolve_field_aliases_from_registry
     )
     join_planner_kwargs = mock_join_planner_cls.call_args.kwargs
-    assert join_planner_kwargs["field_alias_resolver"] is resolve_field_aliases_from_registry
+    assert (
+        join_planner_kwargs["field_alias_resolver"]
+        is resolve_field_aliases_from_registry
+    )
     assert join_planner_kwargs["dependency_joiner"] is dependency_joiner
 
 
@@ -116,7 +119,9 @@ def test_build_uses_canonical_composite_checkpoint_port(
     )
     mock_enrichment_coordinator_cls.return_value = MagicMock(name="coordinator")
     mock_fsm_state_helper_cls.return_value = MagicMock(name="fsm_state_helper")
-    factory._create_delta_reader = MagicMock(return_value=MagicMock(name="delta_reader"))
+    factory._create_delta_reader = MagicMock(
+        return_value=MagicMock(name="delta_reader")
+    )
     factory._create_cross_validator = MagicMock(return_value=None)
     factory._create_merge_service = MagicMock(return_value=merger)
     factory._checkpoint_manager_cls = MagicMock(return_value=checkpoint_manager)

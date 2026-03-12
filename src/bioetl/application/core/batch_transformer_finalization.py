@@ -49,10 +49,7 @@ def classify_dq_threshold_breach(
     ):
         return "hard_fail"
 
-    if (
-        dq_config.soft_fail_threshold
-        and error_rate >= dq_config.soft_fail_threshold
-    ):
+    if dq_config.soft_fail_threshold and error_rate >= dq_config.soft_fail_threshold:
         return "soft_fail"
 
     return "none"

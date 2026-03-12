@@ -6,6 +6,7 @@ This package provides:
 
 All public classes are re-exported from this module for backwards compatibility.
 """
+
 from __future__ import annotations
 
 from bioetl.domain.filtering._base_filter_config import BaseFilterConfig

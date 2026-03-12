@@ -140,12 +140,7 @@ class GoldDQAnalyzer:
         timestamp: datetime,
         required_fields: list[str] | None = None,
         completeness_threshold: float = 0.90,
-        business_rules: (
-            list[
-                GoldBusinessRuleSpec
-            ]
-            | None
-        ) = None,
+        business_rules: (list[GoldBusinessRuleSpec] | None) = None,
         reference_tables: dict[str, pl.DataFrame | pa.Table] | None = None,
         baseline_stats: (
             dict[

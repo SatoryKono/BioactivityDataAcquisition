@@ -14,9 +14,6 @@ from bioetl.composition.bootstrap.runtime.composite import (
     load_composite_config,
 )
 from bioetl.domain.exceptions import BioETLError
-from bioetl.interfaces.cli.commands.execution_policy import (
-    CLI_ENTRYPOINT_TYPED_ERRORS,
-)
 from bioetl.interfaces.cli.commands.health_server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
     echo_health_server_info,

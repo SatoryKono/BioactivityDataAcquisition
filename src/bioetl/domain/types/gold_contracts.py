@@ -30,8 +30,7 @@ def _normalize_column_name(value: object, *, field_name: str) -> str:
 
 def _normalize_business_key_sequence(value: Sequence[object]) -> tuple[str, ...]:
     normalized = tuple(
-        _normalize_column_name(item, field_name="business_key item")
-        for item in value
+        _normalize_column_name(item, field_name="business_key item") for item in value
     )
     if not normalized:
         raise ValueError("business_key sequence must not be empty")
@@ -186,15 +185,25 @@ class GoldBusinessRuleSpec:
     decision: GoldBusinessRuleDecision | None = None
 
     def __post_init__(self) -> None:
-        object.__setattr__(self, "column", _normalize_column_name(self.column, field_name="column"))
+        object.__setattr__(
+            self, "column", _normalize_column_name(self.column, field_name="column")
+        )
         object.__setattr__(self, "pattern", _normalize_optional_text(self.pattern))
-        object.__setattr__(self, "config_path", _normalize_optional_text(self.config_path))
+        object.__setattr__(
+            self, "config_path", _normalize_optional_text(self.config_path)
+        )
         field = self.field if self.field is not None else self.column
-        object.__setattr__(self, "field", _normalize_column_name(field, field_name="field"))
-        object.__setattr__(self, "layer", _normalize_optional_text(self.layer) or "gold")
+        object.__setattr__(
+            self, "field", _normalize_column_name(field, field_name="field")
+        )
+        object.__setattr__(
+            self, "layer", _normalize_optional_text(self.layer) or "gold"
+        )
         object.__setattr__(self, "rule_id", _normalize_text_or_empty(self.rule_id))
         object.__setattr__(self, "name", _normalize_text_or_empty(self.name))
-        object.__setattr__(self, "description", _normalize_text_or_empty(self.description))
+        object.__setattr__(
+            self, "description", _normalize_text_or_empty(self.description)
+        )
         object.__setattr__(self, "allowed_values", tuple(self.allowed_values))
 
     @staticmethod
@@ -216,9 +225,7 @@ class GoldBusinessRuleSpec:
     @staticmethod
     def _validate_decision(raw: object) -> GoldBusinessRuleDecision | None:
         if raw is not None and raw not in ("pass", "warn", "fail", "quarantine"):
-            raise ValueError(
-                "decision must be one of: pass, warn, fail, quarantine"
-            )
+            raise ValueError("decision must be one of: pass, warn, fail, quarantine")
         return cast("GoldBusinessRuleDecision | None", raw)
 
     @classmethod

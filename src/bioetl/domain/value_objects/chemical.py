@@ -3,6 +3,7 @@
 Re-export facade: actual definitions live in sub-modules
 (_chemical_identifiers, _publication_year, _molecular_weight).
 """
+
 from __future__ import annotations
 
 from bioetl.domain.value_objects._chemical_identifiers import (

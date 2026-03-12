@@ -35,7 +35,10 @@ from bioetl.application.core.batch_tracing import BatchTracingManagerService
 from bioetl.application.core.lifecycle.checkpoint_manager import CheckpointManager
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.pipeline_services import PipelineService
-from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError, ShutdownSignal
+from bioetl.application.core.lifecycle.shutdown import (
+    PipelineShutdownError,
+    ShutdownSignal,
+)
 from bioetl.composition.factories.services.factory import ServicesBuilder
 from bioetl.domain.config import TableConfig
 from bioetl.domain.context import PipelineContext

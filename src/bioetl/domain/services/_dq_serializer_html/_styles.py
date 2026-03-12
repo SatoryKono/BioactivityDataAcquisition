@@ -1,4 +1,5 @@
 """CSS styles for the DQ HTML report."""
+
 from __future__ import annotations
 
 _REPORT_STYLES = """

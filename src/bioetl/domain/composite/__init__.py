@@ -11,6 +11,7 @@ This package contains domain models for composite pipeline orchestration:
 
 See ADR-026 for architectural decisions.
 """
+
 from __future__ import annotations
 
 from bioetl.domain.composite.config import (

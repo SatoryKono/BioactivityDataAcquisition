@@ -125,7 +125,9 @@ def _make_gold_metadata() -> GoldMetadata:
             version="1.0",
             validation="strict",
         ),
-        dq_summary=DQSummary(total_records=90, valid_records=90, validation_passed=True),
+        dq_summary=DQSummary(
+            total_records=90, valid_records=90, validation_passed=True
+        ),
         output=BaseOutputMetadata(record_count=90),
         output_ext=GoldOutputExt(partition_count=3, format="delta"),
         environment=_make_environment(),
@@ -216,9 +218,7 @@ class TestEmitFinalTelemetry:
     """Tests for _emit_final_telemetry (lines 118, 136)."""
 
     @pytest.mark.asyncio
-    async def test_final_telemetry_failed_path_uses_error(
-        self, tmp_path: Path
-    ) -> None:
+    async def test_final_telemetry_failed_path_uses_error(self, tmp_path: Path) -> None:
         """Line 118: status='failed' calls logger.error."""
         logger = MagicMock()
         writer = MetadataWriter(logger=logger)
@@ -231,9 +231,7 @@ class TestEmitFinalTelemetry:
 
         with patch(
             "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
-            side_effect=AtomicWriteError(
-                base_path / "test.yaml", "simulated_error"
-            ),
+            side_effect=AtomicWriteError(base_path / "test.yaml", "simulated_error"),
         ):
             with pytest.raises(AtomicWriteError):
                 await writer.write_bronze_metadata(base_path, _make_bronze_metadata())
@@ -294,9 +292,7 @@ class TestEmitFinalTelemetry:
 
         with patch(
             "bioetl.infrastructure.storage.metadata_writer.atomic_write_text",
-            side_effect=AtomicWriteError(
-                base_path / "test.yaml", "simulated"
-            ),
+            side_effect=AtomicWriteError(base_path / "test.yaml", "simulated"),
         ):
             with pytest.raises(AtomicWriteError):
                 await writer.write_bronze_metadata(base_path, _make_bronze_metadata())
@@ -418,9 +414,7 @@ class TestWriteMetadataPathLogic:
         assert info_calls[0].kwargs.get("pipeline") == "bronze_metadata"
 
     @pytest.mark.asyncio
-    async def test_success_after_retry_final_reason(
-        self, tmp_path: Path
-    ) -> None:
+    async def test_success_after_retry_final_reason(self, tmp_path: Path) -> None:
         """Lines 306-315: final_reason = 'success_after_retry' when retry_count > 0."""
         logger = MagicMock()
         writer = MetadataWriter(
@@ -460,9 +454,7 @@ class TestWriteMetadataPathLogic:
         assert info_calls[0].kwargs["final_reason"] == "success_after_retry"
 
     @pytest.mark.asyncio
-    async def test_success_without_retry_final_reason(
-        self, tmp_path: Path
-    ) -> None:
+    async def test_success_without_retry_final_reason(self, tmp_path: Path) -> None:
         """Lines 306-315: final_reason = 'success_without_retry' on clean write."""
         logger = MagicMock()
         writer = MetadataWriter(logger=logger)

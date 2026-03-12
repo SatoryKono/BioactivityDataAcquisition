@@ -46,7 +46,9 @@ def vcr_cassette_name(request: pytest.FixtureRequest) -> str:
 async def http_client() -> AsyncIterator[UnifiedHTTPClient]:
     """Create and manage CrossRef HTTP client lifecycle for integration tests."""
     client = UnifiedHTTPClient(
-        rate_limiter=TokenBucketRateLimiter(rate=10.0, capacity=20, provider="crossref_rf013"),
+        rate_limiter=TokenBucketRateLimiter(
+            rate=10.0, capacity=20, provider="crossref_rf013"
+        ),
         circuit_breaker=CircuitBreakerGuard(provider="crossref_rf013"),
         timeout=30.0,
         provider="crossref",

@@ -198,10 +198,7 @@ def build_pipeline_runner(
     build_observability_bundle_fn: Callable[..., ObservabilityBundle] | None = None,
     assemble_vacuum_settings_fn: Callable[..., VacuumSettings] | None = None,
     assemble_runtime_config_fn: Callable[..., RuntimeConfig] | None = None,
-    assemble_filter_config_fn: Callable[
-        ..., InputFilterConfig | None
-    ]
-    | None = None,
+    assemble_filter_config_fn: Callable[..., InputFilterConfig | None] | None = None,
     assemble_cached_bronze_context_fn: Callable[
         [PipelineRunContext], CachedBronzeContext
     ]

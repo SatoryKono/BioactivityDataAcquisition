@@ -32,6 +32,27 @@ class _RequestAttemptOutcome:
     last_error: Exception | None
 
 
+@dataclass(slots=True)
+class _RetryRequestState:
+    """Mutable request-level retry state for the main retry loop."""
+
+    status_code: int = 0
+    retries: int = 0
+    attempts_made: int = 0
+    last_error: Exception | None = None
+
+    def record_attempt(self, attempt: int) -> None:
+        """Track the most recent attempt index as a 1-based count."""
+        self.attempts_made = attempt + 1
+
+    def apply_attempt_outcome(self, outcome: _RequestAttemptOutcome) -> bool:
+        """Apply one retry outcome and report whether the loop should continue."""
+        self.status_code = outcome.status_code
+        self.retries += outcome.retries_increment
+        self.last_error = outcome.last_error
+        return outcome.should_retry
+
+
 def _can_retry(
     retry_config: Any,  # Any: concrete retry policy object
     attempt: int,
@@ -225,11 +246,8 @@ class HTTPClientRetryMixin:
     ) -> httpx.Response:
         """Execute request with retries, backoff, and observability."""
         client = self._get_client()
-        last_error: Exception | None = None
+        retry_state = _RetryRequestState()
         start_time = time.perf_counter()
-        status_code = 0
-        retries = 0
-        attempts_made = 0
 
         otel_tracer = self._tracer.get_tracer("bioetl.http")
         span = otel_tracer.start_as_current_span(
@@ -245,36 +263,37 @@ class HTTPClientRetryMixin:
 
         try:
             for attempt in range(self.retry_config.max_attempts):
-                attempts_made = attempt + 1
+                retry_state.record_attempt(attempt)
                 result = await self._attempt_request(
-                    client, method, url, attempt, retries, span, kwargs
+                    client, method, url, attempt, retry_state.retries, span, kwargs
                 )
                 if isinstance(result, httpx.Response):
-                    status_code = result.status_code
+                    retry_state.status_code = result.status_code
                     return result
 
-                status_code = result.status_code
-                retries += result.retries_increment
-                last_error = result.last_error
-                if not result.should_retry:
+                if not retry_state.apply_attempt_outcome(result):
                     break
 
             span.set_attribute("error", True)
             span.set_attribute("error.type", "retry_exhausted")
-            if last_error:
-                span.record_exception(last_error)
-            raise RetryExhaustedError(url, attempts_made, last_error)
+            if retry_state.last_error:
+                span.record_exception(retry_state.last_error)
+            raise RetryExhaustedError(
+                url,
+                retry_state.attempts_made,
+                retry_state.last_error,
+            )
         finally:
             duration = time.perf_counter() - start_time
-            span.set_attribute("http.retries", retries)
+            span.set_attribute("http.retries", retry_state.retries)
             span.set_attribute("bioetl.duration_ms", duration * 1000)
             span.__exit__(None, None, None)
             self._record_request_metrics(
                 method,
                 duration,
-                status_code,
-                retries,
-                last_error,
+                retry_state.status_code,
+                retry_state.retries,
+                retry_state.last_error,
             )
 
     def _is_retryable_error(

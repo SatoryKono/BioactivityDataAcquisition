@@ -261,7 +261,13 @@ class TestValidateExemptionsRegistry:
             registries[name] = {}  # empty (allowed for all required ones)
         return {
             "policy": {
-                "required_fields": ["value", "owner", "reason", "expires_on", "removal_step"]
+                "required_fields": [
+                    "value",
+                    "owner",
+                    "reason",
+                    "expires_on",
+                    "removal_step",
+                ]
             },
             "registries": registries,
         }

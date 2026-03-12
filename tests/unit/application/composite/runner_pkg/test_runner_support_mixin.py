@@ -97,7 +97,9 @@ def test_get_preflight_skip_reason_when_no_validator_then_returns_reason() -> No
 
 
 @pytest.mark.unit
-def test_get_preflight_skip_reason_when_no_field_priorities_then_returns_reason() -> None:
+def test_get_preflight_skip_reason_when_no_field_priorities_then_returns_reason() -> (
+    None
+):
     harness = _SupportMixinHarness()
     harness._preflight_validator = MagicMock()
     harness._config.merge.field_priorities = []
@@ -290,7 +292,9 @@ def test_should_run_enricher_when_force_enricher_matches_then_returns_true() -> 
 
 
 @pytest.mark.unit
-def test_should_run_enricher_when_required_only_and_optional_then_returns_false() -> None:
+def test_should_run_enricher_when_required_only_and_optional_then_returns_false() -> (
+    None
+):
     harness = _SupportMixinHarness()
     harness._runtime.required_only = True
     enricher = _make_enricher_cfg("opt_enricher", required=False)
@@ -300,7 +304,9 @@ def test_should_run_enricher_when_required_only_and_optional_then_returns_false(
 
 
 @pytest.mark.unit
-def test_should_run_enricher_when_required_only_and_required_then_returns_true() -> None:
+def test_should_run_enricher_when_required_only_and_required_then_returns_true() -> (
+    None
+):
     harness = _SupportMixinHarness()
     harness._runtime.required_only = True
     enricher = _make_enricher_cfg("req_enricher", required=True)
@@ -310,7 +316,9 @@ def test_should_run_enricher_when_required_only_and_required_then_returns_true()
 
 
 @pytest.mark.unit
-def test_should_run_enricher_when_enrich_only_excludes_enricher_then_returns_false() -> None:
+def test_should_run_enricher_when_enrich_only_excludes_enricher_then_returns_false() -> (
+    None
+):
     harness = _SupportMixinHarness()
     harness._runtime.enrich_only = {"other_enricher"}
     enricher = _make_enricher_cfg("enricher_a")
@@ -320,7 +328,9 @@ def test_should_run_enricher_when_enrich_only_excludes_enricher_then_returns_fal
 
 
 @pytest.mark.unit
-def test_should_run_enricher_when_enrich_only_includes_enricher_then_returns_true() -> None:
+def test_should_run_enricher_when_enrich_only_includes_enricher_then_returns_true() -> (
+    None
+):
     harness = _SupportMixinHarness()
     harness._runtime.enrich_only = {"enricher_a"}
     enricher = _make_enricher_cfg("enricher_a")
@@ -384,7 +394,9 @@ def test_get_required_enricher_failure_when_all_succeed_then_returns_none() -> N
 
 
 @pytest.mark.unit
-def test_get_required_enricher_failure_when_required_not_run_then_returns_message() -> None:
+def test_get_required_enricher_failure_when_required_not_run_then_returns_message() -> (
+    None
+):
     config = _make_composite_config(required_enrichers=["req_a"])
     harness = _SupportMixinHarness(config=config)
 
@@ -396,7 +408,9 @@ def test_get_required_enricher_failure_when_required_not_run_then_returns_messag
 
 
 @pytest.mark.unit
-def test_get_required_enricher_failure_when_required_failed_then_returns_message() -> None:
+def test_get_required_enricher_failure_when_required_failed_then_returns_message() -> (
+    None
+):
     config = _make_composite_config(required_enrichers=["req_a"])
     harness = _SupportMixinHarness(config=config)
     results = {
@@ -414,7 +428,9 @@ def test_get_required_enricher_failure_when_required_failed_then_returns_message
 
 
 @pytest.mark.unit
-def test_check_required_enrichers_when_required_failed_then_raises_invalid_state() -> None:
+def test_check_required_enrichers_when_required_failed_then_raises_invalid_state() -> (
+    None
+):
     config = _make_composite_config(required_enrichers=["req_a"])
     harness = _SupportMixinHarness(config=config)
 

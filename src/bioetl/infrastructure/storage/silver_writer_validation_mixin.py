@@ -79,7 +79,6 @@ class SilverWriterValidationMixin:
             column_order=column_order,
         )
         return records, validated_mode, arrow_data
-
     def _validate_write_mode(self, mode: str) -> SilverWriteMode:
         """Validate and convert write mode string to enum."""
         try:
@@ -104,7 +103,6 @@ class SilverWriterValidationMixin:
             key = tuple(record.get(primary_key) for primary_key in primary_keys)
             unique_records[key] = record
         return list(unique_records.values())
-
     def _to_policy_write_mode(self, mode: SilverWriteMode) -> WriteMode:
         """Map SilverWriteMode to WriteMode for policy validation."""
         mapping = {
@@ -113,7 +111,6 @@ class SilverWriterValidationMixin:
             SilverWriteMode.DELETE: WriteMode.OVERWRITE,
         }
         return mapping[mode]
-
     def _enforce_write_policy(
         self,
         mode: SilverWriteMode,
@@ -164,7 +161,6 @@ class SilverWriterValidationMixin:
                     table=table_name,
                     missing=optional_missing,
                 )
-
     def _validate_key_nullability(
         self,
         records: list[BronzeRecord],
@@ -199,7 +195,10 @@ class SilverWriterValidationMixin:
                 violations.append((key, "partition", count))
 
         if violations:
-            details = [f"{key_type}:{field} null_count={count}" for field, key_type, count in violations]
+            details = [
+                f"{key_type}:{field} null_count={count}"
+                for field, key_type, count in violations
+            ]
             raise ValueError(
                 "Key nullability policy violation for table "
                 f"'{table_name}': {'; '.join(details)}"
@@ -287,7 +286,9 @@ class SilverWriterValidationMixin:
         if not new_fields and not missing_fields:
             return None
 
-        critical_missing = [field for field in missing_fields if not field.startswith("_")]
+        critical_missing = [
+            field for field in missing_fields if not field.startswith("_")
+        ]
         status: Literal["info", "warn", "critical"]
         if critical_missing:
             status = "critical"

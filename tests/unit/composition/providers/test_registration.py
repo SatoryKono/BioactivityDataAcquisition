@@ -156,7 +156,9 @@ class TestBuildProviderConfigs:
         """Should return a merged dict of bio + biblio configs."""
         mock_adapter = MagicMock()
         mock_bio.return_value = {"chembl": ProviderConfig(adapter_class=mock_adapter)}
-        mock_biblio.return_value = {"pubmed": ProviderConfig(adapter_class=mock_adapter)}
+        mock_biblio.return_value = {
+            "pubmed": ProviderConfig(adapter_class=mock_adapter)
+        }
 
         result = _build_provider_configs()
 
@@ -174,8 +176,12 @@ class TestBuildProviderConfigs:
         """When same key in both groups, biblio wins (dict merge order)."""
         mock_adapter_bio = MagicMock(name="bio")
         mock_adapter_biblio = MagicMock(name="biblio")
-        mock_bio.return_value = {"shared": ProviderConfig(adapter_class=mock_adapter_bio)}
-        mock_biblio.return_value = {"shared": ProviderConfig(adapter_class=mock_adapter_biblio)}
+        mock_bio.return_value = {
+            "shared": ProviderConfig(adapter_class=mock_adapter_bio)
+        }
+        mock_biblio.return_value = {
+            "shared": ProviderConfig(adapter_class=mock_adapter_biblio)
+        }
 
         result = _build_provider_configs()
 

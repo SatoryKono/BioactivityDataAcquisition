@@ -131,7 +131,9 @@ def _create_pubchem_adapter(
 
     return PubChemAdapter(
         logger=logger,
-        rate_limiter=TokenBucketRateLimiter(rate=rate, capacity=capacity, provider="pubchem"),
+        rate_limiter=TokenBucketRateLimiter(
+            rate=rate, capacity=capacity, provider="pubchem"
+        ),
         circuit_breaker=CircuitBreakerGuard(
             provider="pubchem",
             failure_threshold=cb_threshold,

@@ -2,6 +2,7 @@
 
 Implements FilterableDataSourcePort for batch DOI resolution with title fallback.
 """
+
 from __future__ import annotations
 
 from bioetl.infrastructure.adapters.openalex.client import (

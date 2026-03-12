@@ -63,7 +63,9 @@ def test_get_layer_configs_extracts_all() -> None:
     bronze_cfg = SimpleNamespace(path="/b")
     silver_cfg = SimpleNamespace(path="/s")
     gold_cfg = SimpleNamespace(path="/g")
-    config = SimpleNamespace(sink={"bronze": bronze_cfg, "silver": silver_cfg, "gold": gold_cfg})
+    config = SimpleNamespace(
+        sink={"bronze": bronze_cfg, "silver": silver_cfg, "gold": gold_cfg}
+    )
     b, s, g = get_layer_configs(config)  # type: ignore[arg-type]
     assert b is bronze_cfg
     assert s is silver_cfg
@@ -93,7 +95,10 @@ def test_resolve_storage_paths_test_mode() -> None:
         gold_path=Path("/default/gold"),
     )
     use_yaml, bronze, silver, gold = resolve_storage_paths(
-        settings, None, None, None  # type: ignore[arg-type]
+        settings,
+        None,
+        None,
+        None,  # type: ignore[arg-type]
     )
     assert use_yaml is False
     assert bronze == Path("/default/bronze")
@@ -114,7 +119,10 @@ def test_resolve_storage_paths_prod_mode_with_configs() -> None:
     silver_cfg = SimpleNamespace(path="/yaml/silver")
     gold_cfg = SimpleNamespace(path="/yaml/gold")
     use_yaml, bronze, silver, gold = resolve_storage_paths(
-        settings, bronze_cfg, silver_cfg, gold_cfg  # type: ignore[arg-type]
+        settings,
+        bronze_cfg,
+        silver_cfg,
+        gold_cfg,  # type: ignore[arg-type]
     )
     assert use_yaml is True
     assert bronze == Path("/yaml/bronze")

@@ -873,7 +873,10 @@ class TestEchoCleanupPreview:
 
     def test_echo_cleanup_preview_with_existing_layers(self, cli_runner):
         """Test echo_cleanup_preview when both layers exist."""
-        from bioetl.application.core.lifecycle.cleanup_service import CleanupPreview, LayerInfo
+        from bioetl.application.core.lifecycle.cleanup_service import (
+            CleanupPreview,
+            LayerInfo,
+        )
         from bioetl.interfaces.cli.formatters import echo_cleanup_preview
 
         preview = CleanupPreview(
@@ -895,7 +898,10 @@ class TestEchoCleanupPreview:
 
     def test_echo_cleanup_preview_with_non_existing_silver(self, cli_runner):
         """Test echo_cleanup_preview when silver doesn't exist."""
-        from bioetl.application.core.lifecycle.cleanup_service import CleanupPreview, LayerInfo
+        from bioetl.application.core.lifecycle.cleanup_service import (
+            CleanupPreview,
+            LayerInfo,
+        )
         from bioetl.interfaces.cli.formatters import echo_cleanup_preview
 
         preview = CleanupPreview(
@@ -913,7 +919,10 @@ class TestEchoCleanupPreview:
 
     def test_echo_cleanup_preview_with_non_existing_gold(self, cli_runner):
         """Test echo_cleanup_preview when gold doesn't exist."""
-        from bioetl.application.core.lifecycle.cleanup_service import CleanupPreview, LayerInfo
+        from bioetl.application.core.lifecycle.cleanup_service import (
+            CleanupPreview,
+            LayerInfo,
+        )
         from bioetl.interfaces.cli.formatters import echo_cleanup_preview
 
         preview = CleanupPreview(
@@ -933,7 +942,10 @@ class TestEchoCleanupPreview:
 
     def test_echo_cleanup_preview_without_gold(self, cli_runner):
         """Test echo_cleanup_preview when gold is None."""
-        from bioetl.application.core.lifecycle.cleanup_service import CleanupPreview, LayerInfo
+        from bioetl.application.core.lifecycle.cleanup_service import (
+            CleanupPreview,
+            LayerInfo,
+        )
         from bioetl.interfaces.cli.formatters import echo_cleanup_preview
 
         preview = CleanupPreview(

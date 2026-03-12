@@ -116,7 +116,9 @@ class TestPubChemAdapter:
 
     def test_adapter_with_custom_rate(self, mock_logger, circuit_breaker, thread_pool):
         """Test PubChem adapter with custom rate limit via injected rate limiter."""
-        custom_rate_limiter = TokenBucketRateLimiter(rate=10.0, capacity=20, provider="pubchem")
+        custom_rate_limiter = TokenBucketRateLimiter(
+            rate=10.0, capacity=20, provider="pubchem"
+        )
         adapter = PubChemAdapter(
             logger=mock_logger,
             rate_limiter=custom_rate_limiter,

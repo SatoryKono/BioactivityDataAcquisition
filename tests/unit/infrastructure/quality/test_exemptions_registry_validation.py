@@ -150,33 +150,21 @@ class TestGetPolicyRequiredFields:
 
     def test_missing_owner_in_fields(self) -> None:
         """Policy without 'owner' should add error."""
-        raw = {
-            "policy": {
-                "required_fields": ["reason", "expires_on", "removal_step"]
-            }
-        }
+        raw = {"policy": {"required_fields": ["reason", "expires_on", "removal_step"]}}
         errors: list[str] = []
         get_policy_required_fields(raw, errors)
         assert any("owner" in e for e in errors)
 
     def test_missing_removal_step(self) -> None:
         """Policy without 'removal_step' should add error."""
-        raw = {
-            "policy": {
-                "required_fields": ["owner", "expires_on"]
-            }
-        }
+        raw = {"policy": {"required_fields": ["owner", "expires_on"]}}
         errors: list[str] = []
         get_policy_required_fields(raw, errors)
         assert any("removal_step" in e for e in errors)
 
     def test_missing_due_date_field(self) -> None:
         """Policy without any due-date field should add error."""
-        raw = {
-            "policy": {
-                "required_fields": ["owner", "reason", "removal_step"]
-            }
-        }
+        raw = {"policy": {"required_fields": ["owner", "reason", "removal_step"]}}
         errors: list[str] = []
         get_policy_required_fields(raw, errors)
         assert any("due date" in e for e in errors)

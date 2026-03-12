@@ -143,6 +143,7 @@ def mock_context():
     context.started_at = datetime.now(UTC)
     return context
 
+
 @pytest.fixture
 def postrun_service(
     pipeline_config,

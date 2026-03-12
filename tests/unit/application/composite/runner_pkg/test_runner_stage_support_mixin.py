@@ -120,7 +120,9 @@ async def test_call_save_checkpoint_safe_when_invoked_then_delegates() -> None:
 
 
 @pytest.mark.unit
-def test_has_dependencies_configured_when_missing_coordinator_then_returns_false() -> None:
+def test_has_dependencies_configured_when_missing_coordinator_then_returns_false() -> (
+    None
+):
     harness = _StageSupportHarness()
     harness._config.dependencies = [_make_dependency_cfg("dep_a")]
     harness._dependency_coordinator = None
@@ -140,7 +142,9 @@ def test_has_dependencies_configured_when_all_present_then_returns_true() -> Non
 
 
 @pytest.mark.unit
-def test_has_dependencies_configured_when_no_deps_configured_then_returns_false() -> None:
+def test_has_dependencies_configured_when_no_deps_configured_then_returns_false() -> (
+    None
+):
     harness = _StageSupportHarness()
     harness._config.dependencies = []
 
@@ -230,7 +234,9 @@ def test_summarize_dependency_outcomes_when_various_inputs_then_correct_counts(
 
 
 @pytest.mark.unit
-def test_transition_state_with_fsm_log_when_validate_true_then_calls_fsm_validate() -> None:
+def test_transition_state_with_fsm_log_when_validate_true_then_calls_fsm_validate() -> (
+    None
+):
     harness = _StageSupportHarness()
     state = _make_checkpoint_state(CompositePipelineState.NOT_STARTED)
     to_state = CompositePipelineState.SEED_RUNNING
@@ -244,7 +250,9 @@ def test_transition_state_with_fsm_log_when_validate_true_then_calls_fsm_validat
 
 
 @pytest.mark.unit
-def test_transition_state_with_fsm_log_when_validate_false_then_skips_fsm_validate() -> None:
+def test_transition_state_with_fsm_log_when_validate_false_then_skips_fsm_validate() -> (
+    None
+):
     harness = _StageSupportHarness()
     state = _make_checkpoint_state(CompositePipelineState.NOT_STARTED)
 
@@ -282,7 +290,9 @@ def test_transition_state_with_fsm_log_when_called_then_logs_transition() -> Non
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_persist_failed_state_when_called_then_transitions_to_failed_and_saves() -> None:
+async def test_persist_failed_state_when_called_then_transitions_to_failed_and_saves() -> (
+    None
+):
     harness = _StageSupportHarness()
     save_mock = AsyncMock(return_value=True)
     harness._save_checkpoint_safe = save_mock  # type: ignore[method-assign]
@@ -308,7 +318,9 @@ async def test_persist_failed_state_when_called_then_transitions_to_failed_and_s
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_fail_required_dependencies_when_called_then_raises_invalid_state() -> None:
+async def test_fail_required_dependencies_when_called_then_raises_invalid_state() -> (
+    None
+):
     harness = _StageSupportHarness()
     harness._save_checkpoint_safe = AsyncMock(return_value=True)  # type: ignore[method-assign]
     state = _make_checkpoint_state(CompositePipelineState.DEPENDENCIES_RUNNING)

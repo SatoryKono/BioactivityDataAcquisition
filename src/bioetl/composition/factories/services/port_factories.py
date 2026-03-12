@@ -61,9 +61,7 @@ def create_quarantine(settings: Settings) -> QuarantinePort:
 
 def create_metrics(settings: Settings) -> MetricsPort:
     """Create metrics port based on settings."""
-    metrics: object = (
-        PrometheusMetrics() if settings.metrics_enabled else NoOpMetrics()
-    )
+    metrics: object = PrometheusMetrics() if settings.metrics_enabled else NoOpMetrics()
 
     if isinstance(metrics, MetricsPort):
         assert isinstance(metrics, MetricsPort), (
@@ -72,9 +70,7 @@ def create_metrics(settings: Settings) -> MetricsPort:
         return metrics
     if is_metrics_port_like(metrics):
         return cast("MetricsPort", metrics)
-    raise TypeError(
-        f"Metrics adapter must implement MetricsPort, got {type(metrics)}"
-    )
+    raise TypeError(f"Metrics adapter must implement MetricsPort, got {type(metrics)}")
 
 
 def is_metrics_port_like(candidate: object) -> bool:

@@ -255,11 +255,17 @@ class TestBuildPostrunDependencyContext:
         assert BioETLError in cleanup_allowlist
         assert mock_dq_report_cls.call_args.kwargs["logger"] is logger
         assert mock_dq_report_cls.call_args.kwargs["runtime"] is runtime
-        assert mock_dq_report_cls.call_args.kwargs["dq_report_service"] is dq_report_service
+        assert (
+            mock_dq_report_cls.call_args.kwargs["dq_report_service"]
+            is dq_report_service
+        )
         assert mock_dq_report_cls.call_args.kwargs["bronze_dq_config"] is bronze_config
         assert mock_dq_report_cls.call_args.kwargs["silver_dq_config"] is silver_config
         assert mock_dq_report_cls.call_args.kwargs["gold_dq_config"] is gold_config
-        assert mock_dq_report_cls.call_args.kwargs["warning_allowlist"] == cleanup_allowlist
+        assert (
+            mock_dq_report_cls.call_args.kwargs["warning_allowlist"]
+            == cleanup_allowlist
+        )
         assert mock_metadata_cls.call_args.kwargs["logger"] is logger
         assert mock_metadata_cls.call_args.kwargs["runtime"] is runtime
         metadata_allowlist = mock_metadata_cls.call_args.kwargs["warning_allowlist"]

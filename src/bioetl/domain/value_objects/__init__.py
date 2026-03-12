@@ -38,6 +38,7 @@ See also:
 - DDD patterns: https://martinfowler.com/bliki/ValueObject.html
 - RULES.md §2.8: Entity ID - stable identifiers
 """
+
 from __future__ import annotations
 
 from bioetl.domain.value_objects.academic_ids import (

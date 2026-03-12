@@ -117,13 +117,17 @@ class TestFixtureGovernanceRollout:
         vcr_dir = TESTS_DIR / "fixtures" / "vcr"
         golden_dir = TESTS_DIR / "fixtures" / "golden"
         contract_dir = TESTS_DIR / "fixtures" / "contracts"
-        current_snapshot_dir = ROOT / fixture_governance["current_silver_schema_snapshot_location"]
+        current_snapshot_dir = (
+            ROOT / fixture_governance["current_silver_schema_snapshot_location"]
+        )
 
         metadata_files = list(vcr_dir.rglob("*_meta.yaml")) if vcr_dir.exists() else []
         golden_files = list(golden_dir.rglob("*")) if golden_dir.exists() else []
         contract_files = list(contract_dir.rglob("*")) if contract_dir.exists() else []
         current_snapshot_files = (
-            list(current_snapshot_dir.rglob("*.json")) if current_snapshot_dir.exists() else []
+            list(current_snapshot_dir.rglob("*.json"))
+            if current_snapshot_dir.exists()
+            else []
         )
 
         assert rollout.get("cassette_metadata") in {"planned", "partial", "enforced"}
@@ -137,7 +141,9 @@ class TestFixtureGovernanceRollout:
 
         if fixture_governance.get("cassette_metadata_required"):
             assert rollout.get("cassette_metadata") == "enforced"
-            assert metadata_files, "cassette metadata is required but *_meta.yaml files are missing"
+            assert metadata_files, (
+                "cassette metadata is required but *_meta.yaml files are missing"
+            )
         else:
             assert rollout.get("cassette_metadata") in {"planned", "partial"}
 
@@ -175,22 +181,32 @@ class TestFixtureGovernanceRollout:
         assert rollout.get("extensionless_filenames") in {"partial", "enforced"}
         assert "python scripts/data/check_root_vcr_cassettes.py" in workflow
         assert "python scripts/data/check_vcr_filename_policy.py" in workflow
-        assert not legacy_dir.exists(), "legacy tests/fixtures/vcr_cassettes directory must stay removed"
-        assert not from_root_markers, "legacy *.from_root.yaml markers must stay removed"
+        assert not legacy_dir.exists(), (
+            "legacy tests/fixtures/vcr_cassettes directory must stay removed"
+        )
+        assert not from_root_markers, (
+            "legacy *.from_root.yaml markers must stay removed"
+        )
 
         if rollout.get("extensionless_filenames") == "partial":
-            assert allowlist_path.exists(), "partial extensionless rollout requires an allowlist file"
+            assert allowlist_path.exists(), (
+                "partial extensionless rollout requires an allowlist file"
+            )
             allowlist_entries = {
                 line.strip()
                 for line in allowlist_path.read_text(encoding="utf-8").splitlines()
                 if line.strip() and not line.lstrip().startswith("#")
             }
-            assert extensionless, "partial extensionless rollout is declared but no extensionless files remain"
+            assert extensionless, (
+                "partial extensionless rollout is declared but no extensionless files remain"
+            )
             assert set(extensionless) <= allowlist_entries, (
                 "extensionless VCR inventory must stay fully allowlisted during partial rollout"
             )
         else:
-            assert not extensionless, "enforced extensionless rollout must not leave extensionless VCR files"
+            assert not extensionless, (
+                "enforced extensionless rollout must not leave extensionless VCR files"
+            )
 
     def test_vcr_cassette_age_rollout_matches_metadata_backfill_state(self) -> None:
         matrix = _load_matrix()
@@ -212,7 +228,9 @@ class TestFixtureGovernanceRollout:
         }
 
         if rollout.get("cassette_staleness_age") == "metadata_gated":
-            assert fixture_governance.get("cassette_staleness_requires_metadata") is True
+            assert (
+                fixture_governance.get("cassette_staleness_requires_metadata") is True
+            )
             assert fixture_governance.get("cassette_metadata_required") is False
             assert not metadata_files, (
                 "metadata-gated cassette stale-age policy must be updated once *_meta.yaml backfill begins"
@@ -220,12 +238,20 @@ class TestFixtureGovernanceRollout:
             assert "check_vcr_cassette_age" not in workflow
             assert "check_vcr_metadata_age" not in workflow
         elif rollout.get("cassette_staleness_age") == "partial":
-            assert fixture_governance.get("cassette_staleness_requires_metadata") is True
-            assert metadata_files, "partial cassette stale-age rollout requires *_meta.yaml inventory"
+            assert (
+                fixture_governance.get("cassette_staleness_requires_metadata") is True
+            )
+            assert metadata_files, (
+                "partial cassette stale-age rollout requires *_meta.yaml inventory"
+            )
         else:
-            assert fixture_governance.get("cassette_staleness_requires_metadata") is True
+            assert (
+                fixture_governance.get("cassette_staleness_requires_metadata") is True
+            )
             assert fixture_governance.get("cassette_metadata_required") is True
-            assert metadata_files, "enforced cassette stale-age rollout requires *_meta.yaml inventory"
+            assert metadata_files, (
+                "enforced cassette stale-age rollout requires *_meta.yaml inventory"
+            )
 
     def test_vcr_metadata_catalog_and_backfill_policy_match_current_state(self) -> None:
         matrix = _load_matrix()
@@ -238,19 +264,34 @@ class TestFixtureGovernanceRollout:
         catalog_script = ROOT / fixture_governance["cassette_metadata_catalog_script"]
         backfill_script = ROOT / fixture_governance["cassette_metadata_backfill_script"]
 
-        assert rollout.get("cassette_metadata_catalog") in {"planned", "partial", "enforced"}
-        assert rollout.get("cassette_metadata_backfill") in {"planned", "partial", "enforced"}
-        assert fixture_governance.get("cassette_metadata_backfill_workflow_present") in {True, False}
+        assert rollout.get("cassette_metadata_catalog") in {
+            "planned",
+            "partial",
+            "enforced",
+        }
+        assert rollout.get("cassette_metadata_backfill") in {
+            "planned",
+            "partial",
+            "enforced",
+        }
+        assert fixture_governance.get(
+            "cassette_metadata_backfill_workflow_present"
+        ) in {True, False}
 
         if rollout.get("cassette_metadata_catalog") == "planned":
             assert not catalog_path.exists(), (
                 "planned metadata catalog rollout must be updated once the canonical catalog exists"
             )
         else:
-            assert catalog_path.exists(), "active metadata catalog rollout requires canonical catalog artifact"
+            assert catalog_path.exists(), (
+                "active metadata catalog rollout requires canonical catalog artifact"
+            )
 
         if rollout.get("cassette_metadata_backfill") == "planned":
-            assert fixture_governance.get("cassette_metadata_backfill_workflow_present") is False
+            assert (
+                fixture_governance.get("cassette_metadata_backfill_workflow_present")
+                is False
+            )
             assert not metadata_files, (
                 "planned metadata backfill rollout must be updated once *_meta.yaml inventory appears"
             )
@@ -263,7 +304,9 @@ class TestFixtureGovernanceRollout:
             assert "backfill_vcr_metadata" not in workflow
             assert "generate_vcr_metadata_catalog" not in workflow
         else:
-            assert metadata_files, "active metadata backfill rollout requires *_meta.yaml inventory"
+            assert metadata_files, (
+                "active metadata backfill rollout requires *_meta.yaml inventory"
+            )
 
 
 @pytest.mark.architecture
@@ -314,13 +357,15 @@ class TestContractTestingGovernance:
         assert contract_testing["provider_live_api"]["openalex"] == "vcr_only"
         assert contract_testing["provider_live_api"]["semanticscholar"] == "vcr_only"
 
-        assert "BIOETL_LIVE_API_TESTS: \"true\"" in workflow
-        assert "BIOETL_NETWORK_TESTS: \"true\"" in workflow
+        assert 'BIOETL_LIVE_API_TESTS: "true"' in workflow
+        assert 'BIOETL_NETWORK_TESTS: "true"' in workflow
         assert "tests/contract/ -v --tb=short --network" in workflow
         assert "cron: '0 2 1 * *'" in workflow
         assert "Create Issue on Failure" in workflow
 
-    def test_enforced_live_contract_providers_have_test_modules_and_markers(self) -> None:
+    def test_enforced_live_contract_providers_have_test_modules_and_markers(
+        self,
+    ) -> None:
         matrix = _load_matrix()
         provider_live_api = matrix["contract_testing"]["provider_live_api"]
         providers = matrix["providers"]

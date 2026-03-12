@@ -325,6 +325,7 @@ def _purge_quarantine(
 ) -> None:
     """Purge old quarantine records or preview the purge."""
     if dry_run:
+
         async def _get_stats() -> JsonDict:
             return await service.get_stats(pipeline)
 

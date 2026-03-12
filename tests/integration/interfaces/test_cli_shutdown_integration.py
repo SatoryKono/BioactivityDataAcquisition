@@ -12,7 +12,10 @@ from uuid import UUID
 
 import pytest
 
-from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError, ShutdownSignal
+from bioetl.application.core.lifecycle.shutdown import (
+    PipelineShutdownError,
+    ShutdownSignal,
+)
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
 from bioetl.domain.locking import FencingToken
 from bioetl.interfaces.cli import cli

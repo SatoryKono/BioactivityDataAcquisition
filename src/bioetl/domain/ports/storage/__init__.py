@@ -17,6 +17,7 @@ Note:
     Lock validation is performed at Application layer (BatchWriter)
     per RULES.md §4.6 Safety Guard. Infrastructure writers are pure I/O adapters.
 """
+
 from __future__ import annotations
 
 from bioetl.domain.ports.storage.aggregate_port import StoragePort

@@ -1,4 +1,5 @@
 """ChEMBL Silver layer schemas facade."""
+
 from __future__ import annotations
 
 from bioetl.infrastructure.schemas.silver_chembl_core import (

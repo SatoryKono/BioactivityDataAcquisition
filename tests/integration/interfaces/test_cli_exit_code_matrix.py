@@ -151,7 +151,7 @@ class TestCliExitCodeMatrix:
 
     def test_run_composite_exit_code_matrix(self, cli_runner) -> None:
         with patch(
-            "bioetl.interfaces.cli.commands.run_composite.asyncio.run"
+            "bioetl.interfaces.cli.commands.run_composite_helpers.asyncio.run"
         ) as mock_run:
             mock_run.return_value = (True, None)
             result = cli_runner.invoke(

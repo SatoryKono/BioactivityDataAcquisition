@@ -13,7 +13,10 @@ from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.application.core.postrun.service import PostrunService
 from bioetl.application.core.preflight.service import PreflightService
 from bioetl.application.core.runner import PipelineRunner
-from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError, ShutdownSignal
+from bioetl.application.core.lifecycle.shutdown import (
+    PipelineShutdownError,
+    ShutdownSignal,
+)
 from bioetl.application.observability.observer import PipelineObserver
 from bioetl.application.services.medallion_lifecycle import (
     MedallionLifecycleService,

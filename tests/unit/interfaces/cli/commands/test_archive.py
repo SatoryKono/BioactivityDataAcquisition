@@ -103,9 +103,7 @@ class TestArchiveCommand:
             remove_source=True,
         )
 
-    def test_archive_domain_error_exits_nonzero(
-        self, cli_runner: CliRunner
-    ) -> None:
+    def test_archive_domain_error_exits_nonzero(self, cli_runner: CliRunner) -> None:
         """Test that BioETLError causes non-zero exit code."""
         with mock_asyncio_run(side_effect=BioETLError("archive failed")):
             with patch(

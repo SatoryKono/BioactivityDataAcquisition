@@ -121,6 +121,8 @@ def build_run_options(
         cached_bronze_date=cached_bronze_date,
         cached_bronze_path=cached_bronze_path,
     )
+
+
 def execute_run(
     request: RunExecutionRequest,
     registry: PipelineRegistry | None = None,
@@ -186,6 +188,7 @@ async def _run_pipeline_async(
     ):
         service = get_pipeline_runner_service(registry=registry)
         return await service.run(pipeline, options=options)
+
 
 @click.command()
 @click.option(

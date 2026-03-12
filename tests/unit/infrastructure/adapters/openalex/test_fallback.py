@@ -9,7 +9,9 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.infrastructure.adapters.openalex.fallback import OpenAlexTitleFallbackHandler
+from bioetl.infrastructure.adapters.openalex.fallback import (
+    OpenAlexTitleFallbackHandler,
+)
 
 
 @pytest.fixture
@@ -29,7 +31,9 @@ def mock_search_fn() -> AsyncMock:
 
 
 @pytest.fixture
-def handler(mock_logger: MagicMock, mock_search_fn: AsyncMock) -> OpenAlexTitleFallbackHandler:
+def handler(
+    mock_logger: MagicMock, mock_search_fn: AsyncMock
+) -> OpenAlexTitleFallbackHandler:
     """Create a fallback handler for testing."""
     return OpenAlexTitleFallbackHandler(logger=mock_logger, search_fn=mock_search_fn)
 
@@ -37,7 +41,9 @@ def handler(mock_logger: MagicMock, mock_search_fn: AsyncMock) -> OpenAlexTitleF
 class TestGetFallbackTitle:
     """Tests for _get_fallback_title method."""
 
-    def test_get_title_with_original_id(self, handler: OpenAlexTitleFallbackHandler) -> None:
+    def test_get_title_with_original_id(
+        self, handler: OpenAlexTitleFallbackHandler
+    ) -> None:
         """Should return title from original DOI."""
         fallback_mapping = {"10.1038/test": "Test Title"}
         result = handler._get_fallback_title(
@@ -45,7 +51,9 @@ class TestGetFallbackTitle:
         )
         assert result == "Test Title"
 
-    def test_get_title_with_normalized_doi(self, handler: OpenAlexTitleFallbackHandler) -> None:
+    def test_get_title_with_normalized_doi(
+        self, handler: OpenAlexTitleFallbackHandler
+    ) -> None:
         """Should fall back to normalized DOI."""
         fallback_mapping = {"10.1038/test": "Test Title"}
         result = handler._get_fallback_title(

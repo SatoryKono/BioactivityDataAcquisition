@@ -56,7 +56,9 @@ class _ObservabilityHarness(CompositeRunnerObservabilityMixin):
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_generate_dq_reports_when_service_absent_then_logs_debug_and_returns() -> None:
+async def test_generate_dq_reports_when_service_absent_then_logs_debug_and_returns() -> (
+    None
+):
     harness = _ObservabilityHarness()
 
     await harness._generate_dq_reports(MergeResult(records_from_seed=0))
@@ -67,7 +69,9 @@ async def test_generate_dq_reports_when_service_absent_then_logs_debug_and_retur
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_generate_dq_reports_when_service_present_then_generates_and_logs() -> None:
+async def test_generate_dq_reports_when_service_present_then_generates_and_logs() -> (
+    None
+):
     harness = _ObservabilityHarness()
     harness._dq_report_service = MagicMock()
     harness._dq_report_service.generate_reports = AsyncMock(return_value=None)
@@ -98,7 +102,9 @@ async def test_generate_dq_reports_when_runtime_error_then_logs_warning_only() -
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_generate_dq_reports_when_bioetl_error_then_includes_reason_code() -> None:
+async def test_generate_dq_reports_when_bioetl_error_then_includes_reason_code() -> (
+    None
+):
     harness = _ObservabilityHarness()
     harness._dq_report_service = MagicMock()
     harness._dq_report_service.generate_reports = AsyncMock(
@@ -123,9 +129,7 @@ async def test_write_cv_quarantine_when_port_absent_then_does_nothing() -> None:
     harness = _ObservabilityHarness()
     harness._quarantine_port = None
 
-    await harness._write_cv_quarantine(
-        MergeResult(quarantine_payloads=({"id": "x"},))
-    )
+    await harness._write_cv_quarantine(MergeResult(quarantine_payloads=({"id": "x"},)))
 
     harness._logger.info.assert_not_called()
 
@@ -145,7 +149,9 @@ async def test_write_cv_quarantine_when_empty_payloads_then_does_nothing() -> No
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_write_cv_quarantine_when_payloads_written_then_logs_and_emits_metric() -> None:
+async def test_write_cv_quarantine_when_payloads_written_then_logs_and_emits_metric() -> (
+    None
+):
     harness = _ObservabilityHarness()
     harness._quarantine_port = MagicMock()
     harness._quarantine_port.write = AsyncMock(return_value=None)
@@ -165,7 +171,9 @@ async def test_write_cv_quarantine_when_payloads_written_then_logs_and_emits_met
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_write_cv_quarantine_when_all_writes_fail_then_no_metric_emitted() -> None:
+async def test_write_cv_quarantine_when_all_writes_fail_then_no_metric_emitted() -> (
+    None
+):
     harness = _ObservabilityHarness()
     harness._quarantine_port = MagicMock()
     harness._quarantine_port.write = AsyncMock(
@@ -183,15 +191,15 @@ async def test_write_cv_quarantine_when_all_writes_fail_then_no_metric_emitted()
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_write_cv_quarantine_when_no_metrics_port_then_skips_metric_call() -> None:
+async def test_write_cv_quarantine_when_no_metrics_port_then_skips_metric_call() -> (
+    None
+):
     harness = _ObservabilityHarness()
     harness._quarantine_port = MagicMock()
     harness._quarantine_port.write = AsyncMock(return_value=None)
     harness._metrics = None
 
     # Must not raise even without metrics
-    await harness._write_cv_quarantine(
-        MergeResult(quarantine_payloads=({"id": "x"},))
-    )
+    await harness._write_cv_quarantine(MergeResult(quarantine_payloads=({"id": "x"},)))
 
     harness._logger.info.assert_called_once()

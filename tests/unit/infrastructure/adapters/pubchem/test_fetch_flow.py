@@ -160,7 +160,9 @@ class TestFetchFlowExecute:
         """normalize_results receives the raw output from circuit_breaker."""
         raw = ("tuple_result",)
         mock_circuit_breaker.call.return_value = raw
-        mock_normalize_results.side_effect = lambda x: list(x) if isinstance(x, tuple) else []
+        mock_normalize_results.side_effect = lambda x: (
+            list(x) if isinstance(x, tuple) else []
+        )
 
         result = await fetch_flow.execute(
             endpoint="/test",

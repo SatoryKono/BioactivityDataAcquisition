@@ -128,7 +128,8 @@ class TestNoDatetimeNowInInfrastructure:
         reintroduction of ambiguous basename-based exemptions like `client.py`.
         """
         existing_paths = {
-            _relative_infrastructure_path(py_file) for py_file in infrastructure_python_files
+            _relative_infrastructure_path(py_file)
+            for py_file in infrastructure_python_files
         }
         missing = ALLOWED_PATHS - existing_paths
 

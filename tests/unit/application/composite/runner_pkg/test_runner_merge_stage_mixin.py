@@ -138,7 +138,9 @@ def test_handle_dry_run_merge_skip_when_called_then_logs_and_returns_state() -> 
 
 
 @pytest.mark.unit
-def test_transition_to_completed_state_when_already_completed_then_returns_same_state() -> None:
+def test_transition_to_completed_state_when_already_completed_then_returns_same_state() -> (
+    None
+):
     harness = _MergeHarness()
     state = _make_state(CompositePipelineState.COMPLETED)
 
@@ -221,7 +223,9 @@ async def test_delete_checkpoint_safe_when_non_fatal_error_then_logs_warning() -
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_delete_checkpoint_safe_when_bioetl_error_then_logs_with_reason_code() -> None:
+async def test_delete_checkpoint_safe_when_bioetl_error_then_logs_with_reason_code() -> (
+    None
+):
     harness = _MergeHarness()
     harness._checkpoint_manager.delete = AsyncMock(
         side_effect=BioETLError("unexpected domain error")
@@ -241,7 +245,9 @@ async def test_delete_checkpoint_safe_when_bioetl_error_then_logs_with_reason_co
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_handle_merge_phase_exception_when_called_then_logs_error_and_saves_failed() -> None:
+async def test_handle_merge_phase_exception_when_called_then_logs_error_and_saves_failed() -> (
+    None
+):
     harness = _MergeHarness()
     state = _make_state(CompositePipelineState.MERGING)
 
@@ -255,7 +261,9 @@ async def test_handle_merge_phase_exception_when_called_then_logs_error_and_save
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_handle_merge_phase_exception_when_bioetl_error_then_includes_reason_code() -> None:
+async def test_handle_merge_phase_exception_when_bioetl_error_then_includes_reason_code() -> (
+    None
+):
     harness = _MergeHarness()
     state = _make_state(CompositePipelineState.MERGING)
 
@@ -290,7 +298,9 @@ async def test_execute_merge_stage_when_dry_run_then_skips_merge() -> None:
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_execute_merge_stage_when_merge_succeeds_then_returns_merge_result() -> None:
+async def test_execute_merge_stage_when_merge_succeeds_then_returns_merge_result() -> (
+    None
+):
     harness = _MergeHarness()
     harness._runtime.dry_run = False
     state = _make_state(CompositePipelineState.ENRICHMENT_COMPLETED)
@@ -329,7 +339,9 @@ async def test_execute_merge_stage_when_merger_raises_then_propagates_error() ->
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_finalize_pipeline_when_called_then_sets_completed_and_deletes_checkpoint() -> None:
+async def test_finalize_pipeline_when_called_then_sets_completed_and_deletes_checkpoint() -> (
+    None
+):
     harness = _MergeHarness()
     state = _make_state(CompositePipelineState.MERGING)
 

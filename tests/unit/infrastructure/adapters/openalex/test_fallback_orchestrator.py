@@ -31,7 +31,8 @@ def _make_orchestrator(
 ) -> OpenAlexFallbackOrchestrator:
     """Build an OpenAlexFallbackOrchestrator with injectable collaborators."""
     return OpenAlexFallbackOrchestrator(
-        fallback_fetch_service=service or MagicMock(spec=FallbackFetchOrchestratorService),
+        fallback_fetch_service=service
+        or MagicMock(spec=FallbackFetchOrchestratorService),
         fallback_handler=fallback_handler or MagicMock(),
         normalize_id=normalize_id or (lambda doi: doi.strip().lower() if doi else None),
         extract_record_id=extract_record_id or (lambda rec: str(rec.get("id", ""))),
@@ -195,7 +196,9 @@ async def test_configure_policy_can_disable_fallback_handler() -> None:
     service = MagicMock(spec=FallbackFetchOrchestratorService)
     service.execute = capture_execute
     fallback_handler = MagicMock()
-    orchestrator = _make_orchestrator(service=service, fallback_handler=fallback_handler)
+    orchestrator = _make_orchestrator(
+        service=service, fallback_handler=fallback_handler
+    )
 
     orchestrator.configure_policy(
         SimpleNamespace(

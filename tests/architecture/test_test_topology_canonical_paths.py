@@ -24,7 +24,8 @@ def test_cli_unit_tests_use_interfaces_cli_canonical_path() -> None:
         path.relative_to(ROOT).as_posix()
         for path in legacy_interfaces_dir.glob("test_*.py")
         if path.name.startswith("test_cli")
-        or path.name in {
+        or path.name
+        in {
             "test_exit_codes.py",
             "test_run_all_command.py",
             "test_run_all_service_mock.py",
@@ -34,7 +35,8 @@ def test_cli_unit_tests_use_interfaces_cli_canonical_path() -> None:
 
     assert not legacy_cli_tests, (
         "legacy tests/unit/cli ownership is deprecated; move files under "
-        "tests/unit/interfaces/cli:\n" + "\n".join(f"  - {path}" for path in legacy_cli_tests)
+        "tests/unit/interfaces/cli:\n"
+        + "\n".join(f"  - {path}" for path in legacy_cli_tests)
     )
     assert not legacy_top_level_cli.exists(), (
         "legacy top-level tests/unit/test_cli.py is deprecated; move it under "
@@ -76,14 +78,11 @@ def test_legacy_unit_test_paths_are_retired() -> None:
         "tests/unit/infrastructure/adapters/test_fallback_orchestrator.py",
     ]
 
-    existing_paths = [
-        path for path in deprecated_paths if (ROOT / path).exists()
-    ]
+    existing_paths = [path for path in deprecated_paths if (ROOT / path).exists()]
 
     assert not existing_paths, (
         "legacy unit test paths are deprecated; keep tests under their canonical "
-        "layer/package owners:\n"
-        + "\n".join(f"  - {path}" for path in existing_paths)
+        "layer/package owners:\n" + "\n".join(f"  - {path}" for path in existing_paths)
     )
 
 
@@ -97,6 +96,5 @@ def test_top_level_unit_root_has_no_legacy_test_modules() -> None:
 
     assert not top_level_tests, (
         "top-level tests/unit/test_*.py files are deprecated; move them under the "
-        "owning layer/package:\n"
-        + "\n".join(f"  - {path}" for path in top_level_tests)
+        "owning layer/package:\n" + "\n".join(f"  - {path}" for path in top_level_tests)
     )

@@ -331,4 +331,3 @@ class TestQuarantinePortProtocol:
                 pass
 
         assert not isinstance(InvalidQuarantine(), QuarantinePort)
-

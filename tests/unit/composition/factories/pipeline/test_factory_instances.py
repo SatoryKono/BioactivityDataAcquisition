@@ -94,7 +94,9 @@ class TestChemblActivityFactory:
 
         mock_load_config.return_value = _make_pipeline_config()
         mock_base_services.create_common_services.return_value = _make_services()
-        chembl_activity_factory._create_data_source = MagicMock(return_value=MagicMock())
+        chembl_activity_factory._create_data_source = MagicMock(
+            return_value=MagicMock()
+        )
 
         services = chembl_activity_factory.build_services(
             settings=_make_settings(),
@@ -117,7 +119,9 @@ class TestChemblActivityFactory:
 
         mock_load_config.return_value = _make_pipeline_config()
         mock_base_services.create_common_services.return_value = _make_services()
-        chembl_activity_factory._create_data_source = MagicMock(return_value=MagicMock())
+        chembl_activity_factory._create_data_source = MagicMock(
+            return_value=MagicMock()
+        )
 
         chembl_activity_factory.build_services(
             settings=_make_settings(),
@@ -138,7 +142,9 @@ class TestChemblActivityFactory:
         )
 
         mock_base_services.create_common_services.return_value = _make_services()
-        chembl_activity_factory._create_data_source = MagicMock(return_value=MagicMock())
+        chembl_activity_factory._create_data_source = MagicMock(
+            return_value=MagicMock()
+        )
 
         chembl_activity_factory.build_services(
             settings=_make_settings(),
@@ -174,7 +180,9 @@ class TestChemblActivityFactory:
         mock_domain_config = MagicMock()
         mock_yaml_to_domain.return_value = mock_domain_config
         mock_compute_hash.return_value = "mock_config_hash_12345"
-        chembl_activity_factory._create_data_source = MagicMock(return_value=MagicMock())
+        chembl_activity_factory._create_data_source = MagicMock(
+            return_value=MagicMock()
+        )
 
         mock_pipeline_class = MagicMock()
         mock_pipeline = MagicMock()

@@ -1,4 +1,5 @@
 """No-op implementations facade for observability and utility ports."""
+
 from __future__ import annotations
 
 from bioetl.domain.ports.noop._audit_pii import NoOpAudit, NoOpPiiHasher

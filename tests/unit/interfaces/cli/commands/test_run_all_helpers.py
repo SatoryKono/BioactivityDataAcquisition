@@ -60,7 +60,9 @@ class TestResolveRunAllRegistry:
     def test_raises_when_no_registry_available(self) -> None:
         """Test RuntimeError is raised when no registry is available."""
         with patch("click.get_current_context", return_value=None):
-            with pytest.raises(RuntimeError, match="require an explicit PipelineRegistry"):
+            with pytest.raises(
+                RuntimeError, match="require an explicit PipelineRegistry"
+            ):
                 resolve_run_all_registry(None)
 
 
@@ -68,9 +70,7 @@ class TestResolveRunAllRegistry:
 class TestGetAvailableProviders:
     """Tests for get_available_providers helper."""
 
-    def test_returns_sorted_unique_providers(
-        self, mock_registry: MagicMock
-    ) -> None:
+    def test_returns_sorted_unique_providers(self, mock_registry: MagicMock) -> None:
         """Test that unique providers are extracted, sorted, from pipeline names."""
         result = get_available_providers(mock_registry)
 

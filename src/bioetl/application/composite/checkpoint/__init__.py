@@ -5,6 +5,7 @@ Public API remains stable at:
 - bioetl.application.composite.checkpoint.CompositeCheckpointService
 - bioetl.application.composite.checkpoint.CompositeCheckpointManager
 """
+
 from __future__ import annotations
 
 from bioetl.application.composite.checkpoint.service import (

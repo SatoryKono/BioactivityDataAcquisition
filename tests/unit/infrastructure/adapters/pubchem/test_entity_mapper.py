@@ -151,7 +151,13 @@ class TestExtractStructuralFields:
     def test_missing_attrs_return_none(self) -> None:
         c = MagicMock(spec=[])
         result = _extract_structural_fields(c)
-        for key in ("canonical_smiles", "isomeric_smiles", "inchi", "inchi_key", "inchikey"):
+        for key in (
+            "canonical_smiles",
+            "isomeric_smiles",
+            "inchi",
+            "inchi_key",
+            "inchikey",
+        ):
             assert result[key] is None
 
 

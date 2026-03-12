@@ -59,14 +59,18 @@ class _ConcreteGoldMixin(GoldWriterMetadataMixin):
         self._audit = audit
         self._metadata_coordinator = metadata_coordinator
         self._metadata_writer = metadata_writer or MagicMock()
-        self._metadata_writer.write_gold_metadata = AsyncMock(return_value="path/meta.yaml")
+        self._metadata_writer.write_gold_metadata = AsyncMock(
+            return_value="path/meta.yaml"
+        )
         self._flat_structure = False
         self._transform_version = "1.0.0"
         self._transform_steps = ("step1", "step2")
 
         # Gold writer module stub
         self._gold_module = MagicMock()
-        self._gold_module.TableNotFoundError = type("TableNotFoundError", (Exception,), {})
+        self._gold_module.TableNotFoundError = type(
+            "TableNotFoundError", (Exception,), {}
+        )
 
     def _load_gold_writer_module(self) -> Any:
         return self._gold_module

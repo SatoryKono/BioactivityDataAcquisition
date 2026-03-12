@@ -236,7 +236,9 @@ class TestValidateQuarterlyTargetsSection:
             baseline_registry_names=set(),
             errors=errors,
         )
-        assert any("max_total_exemptions" in e and "strictly decrease" in e for e in errors)
+        assert any(
+            "max_total_exemptions" in e and "strictly decrease" in e for e in errors
+        )
 
     def test_non_increasing_min_score_violation(self) -> None:
         """Non-increasing min_integral_score should add error."""
@@ -265,7 +267,9 @@ class TestValidateQuarterlyTargetsSection:
             baseline_registry_names=set(),
             errors=errors,
         )
-        assert any("min_integral_score" in e and "strictly increase" in e for e in errors)
+        assert any(
+            "min_integral_score" in e and "strictly increase" in e for e in errors
+        )
 
     def test_duplicate_quarters(self) -> None:
         """Duplicate quarter entries should add error."""

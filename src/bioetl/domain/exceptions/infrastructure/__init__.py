@@ -1,4 +1,5 @@
 """Infrastructure exceptions facade."""
+
 from __future__ import annotations
 
 from bioetl.domain.exceptions.infrastructure._base import InfrastructureError

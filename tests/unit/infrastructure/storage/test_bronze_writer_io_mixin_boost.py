@@ -101,9 +101,7 @@ class TestListBatches:
     """Tests for list_batches (lines 160-182)."""
 
     @pytest.mark.asyncio
-    async def test_list_batches_no_date_uses_glob_pattern(
-        self, tmp_path: Path
-    ) -> None:
+    async def test_list_batches_no_date_uses_glob_pattern(self, tmp_path: Path) -> None:
         """Line 173: no date uses '**/*.jsonl.zst' glob."""
         mixin = _ConcreteBronzeMixin(tmp_path)
         provider_path = tmp_path / "chembl" / "activity" / "2025-01-15"
@@ -116,9 +114,7 @@ class TestListBatches:
         assert "2025-01-15" in result[0]
 
     @pytest.mark.asyncio
-    async def test_list_batches_with_date_uses_date_glob(
-        self, tmp_path: Path
-    ) -> None:
+    async def test_list_batches_with_date_uses_date_glob(self, tmp_path: Path) -> None:
         """Line 173: with date uses 'batch_*.jsonl.zst' pattern."""
         mixin = _ConcreteBronzeMixin(tmp_path)
         date = datetime(2025, 1, 15, tzinfo=timezone.utc)
@@ -340,9 +336,7 @@ class TestPreviewCleanupBronze:
 
         assert result["path"] == str(tmp_path)
 
-    def test_preview_cleanup_flat_structure_returns_base(
-        self, tmp_path: Path
-    ) -> None:
+    def test_preview_cleanup_flat_structure_returns_base(self, tmp_path: Path) -> None:
         """Line 287: flat_structure=True returns base_path."""
         mixin = _ConcreteBronzeMixin(tmp_path, flat_structure=True)
 

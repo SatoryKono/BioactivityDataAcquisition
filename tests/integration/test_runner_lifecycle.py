@@ -1064,9 +1064,13 @@ class TestPipelineRunnerLifecycle:
 
         from bioetl.domain.exceptions import CircuitBreakerOpenError
         from bioetl.domain.types import CircuitBreakerState
-        from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
+        from bioetl.infrastructure.adapters.http.circuit_breaker import (
+            CircuitBreakerGuard,
+        )
 
-        cb = CircuitBreakerGuard(provider="test", failure_threshold=3, recovery_timeout=1)
+        cb = CircuitBreakerGuard(
+            provider="test", failure_threshold=3, recovery_timeout=1
+        )
 
         # Initial state should be CLOSED
         assert cb.get_state() == CircuitBreakerState.CLOSED

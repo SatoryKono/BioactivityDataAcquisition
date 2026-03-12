@@ -34,27 +34,11 @@ if TYPE_CHECKING:
 class _MergeCompatibilityParsingMixin:
     """Legacy parsing/name helpers for merge compatibility surface."""
 
-    _config: MergeConfig
-
-    def _infer_silver_table(self, pipeline_name: str) -> str:
-        """Infer Silver table path from pipeline name."""
-        return infer_silver_table(pipeline_name)
-
-    def _infer_pipeline_from_table(self, table_path: str) -> str | None:
-        """Infer pipeline name from table path (silver/provider/entity)."""
-        return infer_pipeline_from_table(table_path)
-
-    def _parse_pipeline_name(self, pipeline: str) -> tuple[str, str]:
-        """Parse 'provider_entity' into (provider, entity)."""
-        return parse_pipeline_name(pipeline)
-
-    def _get_field_aliases(self, pipeline: str) -> dict[str, str] | None:
-        """Get provider field alias mapping for pipeline provider."""
-        return resolve_field_aliases_from_registry(pipeline)
-
-    def _extract_base_column(self, column: str, prefix: str) -> str | None:
-        """Extract base column name from prefixed column name."""
-        return extract_base_column(column, prefix)
+    _infer_silver_table = staticmethod(infer_silver_table)
+    _infer_pipeline_from_table = staticmethod(infer_pipeline_from_table)
+    _parse_pipeline_name = staticmethod(parse_pipeline_name)
+    _get_field_aliases = staticmethod(resolve_field_aliases_from_registry)
+    _extract_base_column = staticmethod(extract_base_column)
 
 
 class _MergeCompatibilityConflictPolicyMixin:

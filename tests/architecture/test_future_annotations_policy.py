@@ -94,8 +94,7 @@ def test_future_annotations_policy_is_enforced(
         )
         tree = source_ast_cache[path]
         assert path.name == "__init__.py", (
-            "Future-annotations exception must stay package-scoped: "
-            f"{rel_path}"
+            f"Future-annotations exception must stay package-scoped: {rel_path}"
         )
         assert _is_reexport_only_package_facade(tree), (
             "Allowlisted future-annotations exception must remain a "

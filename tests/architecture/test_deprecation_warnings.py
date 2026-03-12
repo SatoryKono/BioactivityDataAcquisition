@@ -21,9 +21,7 @@ from bioetl.infrastructure.storage.bronze_write_result_helpers import (
 
 def test_pipeline_factory_build_pipeline_services_warns() -> None:
     """Deprecated pipeline_factory facade must emit ``DeprecationWarning``."""
-    with patch(
-        "bioetl.composition.factories.pipeline.facade._build_pipeline_services"
-    ):
+    with patch("bioetl.composition.factories.pipeline.facade._build_pipeline_services"):
         with pytest.warns(DeprecationWarning, match="pipeline_factory facade"):
             pipeline_factory.build_pipeline_services(
                 "chembl_activity",

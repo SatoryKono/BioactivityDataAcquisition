@@ -3,6 +3,7 @@
 Contains Pydantic models for structured data that requires validation.
 These models define data contracts for metadata sidecar files.
 """
+
 from __future__ import annotations
 
 from bioetl.domain.medallion import Layer

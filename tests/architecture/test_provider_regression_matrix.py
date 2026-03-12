@@ -18,7 +18,9 @@ def _load_matrix() -> dict:
 
 
 @pytest.mark.architecture
-def test_provider_regression_suites_reference_known_providers_and_existing_files() -> None:
+def test_provider_regression_suites_reference_known_providers_and_existing_files() -> (
+    None
+):
     """Canonical regression suites must stay aligned with matrix provider inventory."""
     matrix = _load_matrix()
     providers = set(matrix["providers"])
@@ -29,7 +31,9 @@ def test_provider_regression_suites_reference_known_providers_and_existing_files
 
     for suite_name, suite_config in regression_suites.items():
         provider_paths = suite_config.get("providers", {})
-        assert provider_paths, f"provider_regression_suites.{suite_name} must not be empty"
+        assert provider_paths, (
+            f"provider_regression_suites.{suite_name} must not be empty"
+        )
 
         unknown_providers = sorted(set(provider_paths) - providers)
         assert not unknown_providers, (

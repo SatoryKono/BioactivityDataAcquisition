@@ -36,6 +36,7 @@ if TYPE_CHECKING:
         APIRequestCollector,
     )
 
+
 class HttpTransport(Protocol):
     """Minimal async HTTP transport required by the batch helpers."""
 
@@ -52,6 +53,7 @@ class BaseMetrics(Protocol):
     """Minimal metrics wrapper used around request timing."""
 
     def measure_request(self, route: str) -> AbstractContextManager[object]: ...
+
 
 CROSSREF_RUNTIME_ERRORS = (
     BioETLError,
