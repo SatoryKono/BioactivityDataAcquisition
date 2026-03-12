@@ -21,17 +21,23 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
 from bioetl.application.core.batch_transformer_helpers import (
-    TransformedRecord,
-    TransformResult,
-    finalize_batch_transform_result,
-    finalize_stream_transform_result,
+    flush_dq_records,
+    flush_filtered_records,
     route_single_transform_attempt,
     transform_record_attempt,
     yield_control_if_needed,
 )
+from bioetl.application.core.batch_transformer_finalization import (
+    finalize_batch_transform_result,
+    finalize_stream_transform_result,
+)
 from bioetl.application.core.batch_transformer_orchestration import (
     collect_batch_transform_state,
     collect_stream_transform_state,
+)
+from bioetl.application.core.batch_transformer_state import (
+    TransformResult,
+    TransformedRecord,
 )
 from bioetl.application.core.batch_transformer_streaming import StreamingBatchProcessor
 from bioetl.application.core.quarantine_manager import QuarantineManagerService
@@ -122,10 +128,20 @@ class BatchTransformer:
             context=self._context,
             config=self._config,
             batch_metrics=self._batch_metrics,
-            quarantine_manager=self._quarantine_manager,
             state=state,
-            batch_id=batch_id,
             records=records,
+            flush_filtered_records=lambda: flush_filtered_records(
+                context=self._context,
+                quarantine_manager=self._quarantine_manager,
+                records=state.filtered_records,
+                batch_id=batch_id,
+            ),
+            flush_dq_records=lambda: flush_dq_records(
+                context=self._context,
+                quarantine_manager=self._quarantine_manager,
+                records=state.dq_records,
+                batch_id=batch_id,
+            ),
         )
 
     async def transform_single(

@@ -8,7 +8,6 @@ All implementation has been extracted to:
 
 from __future__ import annotations
 
-import warnings
 from typing import TYPE_CHECKING
 
 from bioetl.composition.factories.dq.context_resolver import (
@@ -30,6 +29,11 @@ from bioetl.composition.factories.pipeline.pipeline_assembler import (
     GenericPipelineFactory,
     assemble_runner,
     create_pipeline_factory,
+)
+from bioetl.composition.factories.pipeline.facade_compat import (
+    build_compat_service_bundle_dependencies,
+    call_build_pipeline_services_compat,
+    call_create_pipeline_with_services_compat,
 )
 from bioetl.composition.factories.services.bundle import (
     ServiceBundleDependencies,
@@ -78,18 +82,6 @@ _LEGACY_REEXPORTS = (
     _create_cached_bronze_data_source,
     _create_data_source,
 )
-
-
-def _compat_service_bundle_dependencies() -> ServiceBundleDependencies:
-    """Build compatibility dependencies bound to pipeline_factory facade symbols."""
-    return ServiceBundleDependencies(
-        load_pipeline_config=load_pipeline_config,
-        yaml_config_to_domain=yaml_config_to_domain,
-        compute_config_hash=compute_config_hash,
-        base_services_factory=BaseServicesFactory,
-    )
-
-
 def build_pipeline_services(
     pipeline_name: str,
     create_data_source_fn: DataSourceCreatorProtocol,
@@ -123,13 +115,8 @@ def build_pipeline_services(
     Returns:
         Fully wired PipelineService bundle for the pipeline run.
     """
-    warnings.warn(
-        "Use bioetl.composition.factories.services.bundle.build_pipeline_services "
-        "for direct wiring. pipeline_factory facade remains for compatibility.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return _build_pipeline_services(
+    return call_build_pipeline_services_compat(
+        build_pipeline_services_fn=_build_pipeline_services,
         pipeline_name=pipeline_name,
         create_data_source_fn=create_data_source_fn,
         settings=settings,
@@ -141,7 +128,7 @@ def build_pipeline_services(
         metadata_coordinator=metadata_coordinator,
         cached_bronze=cached_bronze,
         silver_validator=silver_validator,
-        _deps=_deps or _compat_service_bundle_dependencies(),
+        deps=_deps,
     )
 
 
@@ -188,13 +175,8 @@ def create_pipeline_with_services(
     Returns:
         Configured BasePipeline instance ready for execution.
     """
-    warnings.warn(
-        "Use bioetl.composition.factories.services.bundle.create_pipeline_with_services "
-        "for direct wiring. pipeline_factory facade remains for compatibility.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return _create_pipeline_with_services(
+    return call_create_pipeline_with_services_compat(
+        create_pipeline_with_services_fn=_create_pipeline_with_services,
         pipeline_name=pipeline_name,
         pipeline_class=pipeline_class,
         provider=provider,
@@ -211,7 +193,7 @@ def create_pipeline_with_services(
         metrics=metrics,
         cached_bronze=cached_bronze,
         pandera_silver_schema=pandera_silver_schema,
-        _deps=_deps or _compat_service_bundle_dependencies(),
+        deps=_deps,
     )
 
 
