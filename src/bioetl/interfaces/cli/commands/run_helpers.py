@@ -23,6 +23,7 @@ __all__ = [
 ]
 
 from bioetl.composition.entrypoints import preview_cleanup
+from bioetl.interfaces.cli.commands.execution_policy import CLI_ENTRYPOINT_TYPED_ERRORS
 from bioetl.composition.registry import PipelineRegistry
 from bioetl.interfaces.cli.commands.execution_policy import (
     build_failure_context,
@@ -111,7 +112,7 @@ def show_cleanup_preview(pipeline: str) -> None:
     """
     try:
         asyncio.run(_preview_cleanup_async(pipeline))
-    except Exception as exc:
+    except (BioETLError, *CLI_ENTRYPOINT_TYPED_ERRORS) as exc:
         failure_context = build_failure_context(
             exc,
             reason_code="CLI_CLEANUP_PREVIEW_ERROR",

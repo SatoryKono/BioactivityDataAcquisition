@@ -10,8 +10,20 @@ from bioetl.composition.factories.datasource.factory import (
     DataSourceCreatorProtocol,
     DataSourceFactory,
     DataSourceRegistry,
+    _build_data_source_creator,
 )
 
 DataSourceCreatorPort = DataSourceCreatorProtocol
 
-__all__ = ["DataSourceCreatorProtocol", "DataSourceFactory", "DataSourceRegistry"]
+
+def get_data_source_creator(provider: str) -> DataSourceCreatorProtocol:
+    """Return the canonical provider-bound data-source creator."""
+    return _build_data_source_creator(provider)
+
+
+__all__ = [
+    "DataSourceCreatorProtocol",
+    "DataSourceFactory",
+    "DataSourceRegistry",
+    "get_data_source_creator",
+]

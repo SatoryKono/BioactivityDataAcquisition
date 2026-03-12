@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any
 
 from bioetl.application.composite.column_renamer import ColumnRenamerService
 from bioetl.application.composite.join_planner import JoinPlannerService
+from bioetl.application.composite.join_planner_helpers import table_path_to_name
 from bioetl.application.composite.merger_output_mixin import MergeOutputWriterMixin
 from bioetl.domain.composite.result import MergeResult
 from bioetl.domain.exceptions import (
@@ -49,18 +50,6 @@ _MERGE_READ_ERRORS = (
     ValueError,
     TypeError,
 )
-
-
-def _path_to_table_name_local(path: str) -> str:
-    """Convert a full path to a table name by stripping layer prefix."""
-    normalized = path.replace("\\", "/")
-
-    for layer in ("silver/", "gold/", "bronze/"):
-        if layer in normalized:
-            idx = normalized.find(layer)
-            return normalized[idx + len(layer) :]
-
-    return path
 
 
 class MergeIOMixin(MergeOutputWriterMixin):
@@ -358,7 +347,7 @@ class MergeIOMixin(MergeOutputWriterMixin):
                 return result.to_frame()
             return result
 
-        table_name = _path_to_table_name_local(path)
+        table_name = table_path_to_name(path)
         records = await self._storage.read_silver(table_name)
         if not records:
             return pl.DataFrame()

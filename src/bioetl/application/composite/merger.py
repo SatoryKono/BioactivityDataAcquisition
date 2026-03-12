@@ -7,6 +7,7 @@ __all__ = ["MergeService"]
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any
 
+from bioetl.application.composite.join_planner_helpers import table_path_to_name
 from bioetl.application.composite.merger_compat_mixin import MergeCompatibilityMixin
 from bioetl.application.composite.merger_io_mixin import MergeIOMixin
 from bioetl.application.composite.merger_metrics_mixin import MergeMetricsRecorderMixin
@@ -45,14 +46,7 @@ if TYPE_CHECKING:
 
 def _path_to_table_name(path: str) -> str:
     """Convert a full path to a table name by stripping layer prefix."""
-    normalized = path.replace("\\", "/")
-
-    for layer in ("silver/", "gold/", "bronze/"):
-        if layer in normalized:
-            idx = normalized.find(layer)
-            return normalized[idx + len(layer) :]
-
-    return path
+    return table_path_to_name(path)
 
 
 class MergeService(MergeIOMixin, MergeCompatibilityMixin, MergeMetricsRecorderMixin):

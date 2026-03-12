@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.pipelines.generic import GenericPipeline
 from bioetl.composition.factories.datasource.data_source_factory import (
-    DataSourceRegistry,
+    get_data_source_creator,
 )
 from bioetl.composition.factories.pipeline.configs import PipelineFactoryConfig
 from bioetl.infrastructure.config import load_pipeline_contract_policy
@@ -114,7 +114,7 @@ def create_factory(
     # Resolve data source creator: use data_source_provider override if set
     data_source_creator: DataSourceCreatorProtocol | None = None
     if config.data_source_provider:
-        data_source_creator = DataSourceRegistry.get(config.data_source_provider)
+        data_source_creator = get_data_source_creator(config.data_source_provider)
 
     return GenericPipelineFactory(
         pipeline_name=config.pipeline_name,

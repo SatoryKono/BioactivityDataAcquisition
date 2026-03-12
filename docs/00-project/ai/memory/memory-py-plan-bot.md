@@ -209,4 +209,36 @@ Every RF-* MUST be validated against this matrix before inclusion in plan.
 
 ---
 
+## 14. Unified Script Commands (for planning/analysis)
+
+Скрипты доступны через `python -m scripts.<group> <command>`:
+
+```bash
+# Architecture & quality analysis
+python -m scripts.qa check-naming --check --output reports/naming.json
+python -m scripts.qa check-c901 --mode report
+python -m scripts.qa report-dep-map --check
+python -m scripts.qa report-hotspots --json-out reports/hotspots.json
+
+# Schema/config gap analysis
+python -m scripts.schema analyze-gaps
+python -m scripts.schema check-invariants --verbose
+python -m scripts.schema validate-configs
+
+# Repo inventory (for scope assessment)
+python -m scripts.repo check-inventory --check
+python -m scripts.repo check-catalog
+python -m scripts.repo check-versions
+
+# Documentation health (for doc RF-* planning)
+python -m scripts.docs check-drift --ports --classes
+python -m scripts.docs check-docstrings --summary --json
+
+# CI quality metrics
+python -m scripts.ci quality-gate
+python -m scripts.ci debt-report
+```
+
+---
+
 *This memory file is specific to py-plan-bot. For general project context see `agent-memory.md`.*

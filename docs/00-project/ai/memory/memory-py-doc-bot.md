@@ -204,12 +204,44 @@ Key terms to keep synchronized:
 ### Cross-reference Validation
 
 ```bash
-# Check for broken internal links (canonical checker)
-python scripts/docs/check_doc_links.py --links
+# Check for broken internal links (canonical checker — unified)
+python -m scripts.docs check-links --links
 
 # Check ADR references in code
 grep -rn "ADR-[0-9]" src/bioetl/ --include="*.py" | head -20
 ```
+
+### Unified Script Commands (docs & diagrams)
+
+```bash
+# Documentation checks
+python -m scripts.docs check-links --links --specs --configs
+python -m scripts.docs check-drift --ports --classes --json
+python -m scripts.docs check-docstrings --summary --json --fail-under 90
+python -m scripts.docs check-kpi --json-out reports/docs-kpi.json
+
+# Documentation fixes
+python -m scripts.docs fix-links-auto
+python -m scripts.docs fix-links-explicit
+python -m scripts.docs fix-link-warnings [paths...]
+python -m scripts.docs audit-sentence
+
+# Diagram management
+python -m scripts.diagrams lint [paths...]
+python -m scripts.diagrams lint-summarize <report>
+python -m scripts.diagrams check quality-gates
+python -m scripts.diagrams check svg-text
+python -m scripts.diagrams fix operators [paths...]
+python -m scripts.diagrams fix svg-text-fallback
+python -m scripts.diagrams fix svg-styles
+python -m scripts.diagrams render-pdf
+python -m scripts.diagrams render-docx
+python -m scripts.diagrams suite nightly
+```
+
+CI gates: `check-links` (`docs.yml`), `check-drift` (`architecture.yml`), `check-docstrings` (`architecture.yml`).
+Pre-commit: `lint` (diagrams), `fix-orphans`.
+Scheduled: `check-kpi` (Monday 4:00 UTC), `suite nightly` (2:20 UTC).
 
 ---
 

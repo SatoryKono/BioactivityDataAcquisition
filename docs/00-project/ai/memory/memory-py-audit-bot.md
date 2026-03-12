@@ -225,4 +225,41 @@ make security                               # Security scan
 
 ---
 
+## 12. Unified Script Commands (for audit)
+
+Скрипты доступны через `python -m scripts.<group> <command>`:
+
+```bash
+# QA checks (naming, complexity, terminology)
+python -m scripts.qa check-naming --check
+python -m scripts.qa check-c901
+python -m scripts.qa check-naming-pkg --check
+python -m scripts.qa check-terminology --strict --check
+
+# Repo hygiene
+python -m scripts.repo check-inventory --check
+python -m scripts.repo check-catalog
+python -m scripts.repo check-versions
+python -m scripts.repo check-cleanliness --strict-untracked
+
+# Schema/config invariants
+python -m scripts.schema check-invariants --verbose
+python -m scripts.schema check-config-paths
+python -m scripts.schema validate-configs
+
+# Documentation drift
+python -m scripts.docs check-links --links --specs --configs
+python -m scripts.docs check-drift --ports --classes
+python -m scripts.docs check-docstrings --summary
+
+# Architecture diagrams quality
+python -m scripts.diagrams check quality-gates
+python -m scripts.diagrams lint
+```
+
+CI gates (автоматические): `check-links`, `check-drift`, `check-docstrings` — в `docs.yml` / `architecture.yml`.
+Pre-commit hooks: `check-naming`, `check-c901`, `lint` (diagrams), `fix-orphans`.
+
+---
+
 *This memory file is specific to py-audit-bot. For general project context see `agent-memory.md`.*

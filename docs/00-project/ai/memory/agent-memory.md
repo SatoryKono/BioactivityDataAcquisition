@@ -54,6 +54,57 @@ make install       # Установка зависимостей
 make run-local     # Запуск на фикстурах
 ```
 
+### Unified Script Entry Points
+
+Все скрипты доступны через `python -m scripts.<group> <command>`:
+
+| Group | Entry Point | Назначение |
+|-------|-------------|------------|
+| `scripts.qa` | `python -m scripts.qa` | Quality checks: naming, C901, terminology |
+| `scripts.ci` | `python -m scripts.ci` | CI pipeline: pytest runner, quality gates |
+| `scripts.schema` | `python -m scripts.schema` | Schema/config validation и генерация |
+| `scripts.data` | `python -m scripts.data` | Data integrity: VCR, checksums, delta |
+| `scripts.docs` | `python -m scripts.docs` | Documentation: links, drift, docstrings |
+| `scripts.diagrams` | `python -m scripts.diagrams` | Diagram lint, check, fix, render |
+| `scripts.repo` | `python -m scripts.repo` | Repo hygiene: inventory, catalog, versions |
+| `scripts.ops` | `python -m scripts.ops` | Ops: salt rotation, Grafana, deploy |
+| `scripts.dev` | `python -m scripts.dev` | Dev setup, test runner, mock metrics |
+| `scripts.diagnostics` | `python -m scripts.diagnostics` | Debug: cleanup, pandera, storage |
+
+Каждая группа поддерживает `--help` и `<command> --help`. Скрипты также доступны напрямую: `python scripts/qa/naming_audit.py`.
+
+#### Ключевые команды по задачам
+
+```bash
+# Архитектурная валидация
+python -m scripts.qa check-naming --check
+python -m scripts.qa check-c901
+python -m scripts.repo check-inventory --check
+
+# Config/schema
+python -m scripts.schema validate-configs
+python -m scripts.schema check-invariants
+python -m scripts.schema generate-pipeline --check
+
+# Документация
+python -m scripts.docs check-links --links --specs --configs
+python -m scripts.docs check-drift --ports --classes
+python -m scripts.docs check-docstrings --summary
+
+# Диаграммы
+python -m scripts.diagrams lint
+python -m scripts.diagrams check quality-gates
+python -m scripts.diagrams render-pdf
+
+# Data integrity
+python -m scripts.data check-vcr-placement
+python -m scripts.data checksums --generate
+
+# CI / Quality gates
+python -m scripts.ci quality-gate
+python -m scripts.ci run-tests
+```
+
 ---
 
 ## 2. Архитектурные Инварианты (CRITICAL)
