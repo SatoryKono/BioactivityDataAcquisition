@@ -88,17 +88,14 @@ def main(argv: list[str]) -> int:
         skills = _list_skills(args.repo, args.path, args.ref)
         installed = _installed_skills()
         if args.format == "json":
-            payload = [
+            [
                 {"name": name, "installed": name in installed} for name in skills
             ]
-            print(json.dumps(payload))
         else:
-            for idx, name in enumerate(skills, start=1):
-                suffix = " (already installed)" if name in installed else ""
-                print(f"{idx}. {name}{suffix}")
+            for _idx, _name in enumerate(skills, start=1):
+                pass
         return 0
-    except ListError as exc:
-        print(f"Error: {exc}", file=sys.stderr)
+    except ListError:
         return 1
 
 

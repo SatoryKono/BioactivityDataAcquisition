@@ -9,6 +9,7 @@ Validations:
 from __future__ import annotations
 
 import argparse
+import itertools
 import json
 import re
 import sys
@@ -122,7 +123,7 @@ def parse_svg_methods(svg_path: Path) -> tuple[dict[str, str], list[tuple[str, s
                 for tspan in label.findall(".//svg:tspan", NS)
             ]
             spans = [s for s in spans if s]
-            for left, right in zip(spans, spans[1:]):
+            for left, right in itertools.pairwise(spans):
                 # Broken split example: "start_execution_sp" + "an()"
                 if re.search(r"[A-Za-z0-9_]$", left) and re.match(r"^[A-Za-z0-9_]", right):
                     split_issues.append((class_name, left, right))

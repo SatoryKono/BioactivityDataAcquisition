@@ -86,10 +86,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def resolve_inputs(raw_inputs: list[str]) -> list[Path]:
-    if raw_inputs:
-        paths = [Path(item) for item in raw_inputs]
-    else:
-        paths = DEFAULT_INPUTS
+    paths = [Path(item) for item in raw_inputs] if raw_inputs else DEFAULT_INPUTS
     resolved: list[Path] = []
     for path in paths:
         resolved.append(path if path.is_absolute() else REPO_ROOT / path)
@@ -220,10 +217,8 @@ def main() -> int:
         if shutil.which(tool) is None:
             missing_tools.append(tool)
     if missing_tools:
-        print(f"[ERROR] Missing required tools: {', '.join(missing_tools)}", file=sys.stderr)
         return 2
     if not css_path.exists():
-        print(f"[ERROR] CSS file not found: {css_path}", file=sys.stderr)
         return 2
 
     rendered: list[Path] = []
@@ -238,13 +233,10 @@ def main() -> int:
                 run_bounds_check=not args.skip_bounds_check,
                 max_overflow_ratio=args.max_overflow_ratio,
             )
-        except Exception as exc:
-            print(f"[ERROR] {exc}", file=sys.stderr)
+        except Exception:
             return 1
         rendered.append(output_pdf)
-        print(f"[OK] Generated: {output_pdf}")
 
-    print(f"[INFO] Generated PDFs: {len(rendered)}")
     return 0
 
 

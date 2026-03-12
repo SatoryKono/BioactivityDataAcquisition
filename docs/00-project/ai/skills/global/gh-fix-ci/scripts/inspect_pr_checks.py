@@ -5,7 +5,6 @@ import argparse
 import json
 import re
 import subprocess
-import sys
 from collections.abc import Iterable, Sequence
 from pathlib import Path
 from shutil import which
@@ -102,7 +101,6 @@ def main() -> int:
     args = parse_args()
     repo_root = find_git_root(Path(args.repo))
     if repo_root is None:
-        print("Error: not inside a Git repository.", file=sys.stderr)
         return 1
 
     if not ensure_gh_available(repo_root):
@@ -118,7 +116,6 @@ def main() -> int:
 
     failing = [c for c in checks if is_failing(c)]
     if not failing:
-        print(f"PR #{pr_value}: no failing checks detected.")
         return 0
 
     results = []
@@ -133,7 +130,7 @@ def main() -> int:
         )
 
     if args.json:
-        print(json.dumps({"pr": pr_value, "results": results}, indent=2))
+        pass
     else:
         render_results(pr_value, results)
 
@@ -154,13 +151,11 @@ def find_git_root(start: Path) -> Path | None:
 
 def ensure_gh_available(repo_root: Path) -> bool:
     if which("gh") is None:
-        print("Error: gh is not installed or not on PATH.", file=sys.stderr)
         return False
     result = run_gh_command(["auth", "status"], cwd=repo_root)
     if result.returncode == 0:
         return True
-    message = (result.stderr or result.stdout or "").strip()
-    print(message or "Error: gh not authenticated.", file=sys.stderr)
+    (result.stderr or result.stdout or "").strip()
     return False
 
 
@@ -169,17 +164,14 @@ def resolve_pr(pr_value: str | None, repo_root: Path) -> str | None:
         return pr_value
     result = run_gh_command(["pr", "view", "--json", "number"], cwd=repo_root)
     if result.returncode != 0:
-        message = (result.stderr or result.stdout or "").strip()
-        print(message or "Error: unable to resolve PR.", file=sys.stderr)
+        (result.stderr or result.stdout or "").strip()
         return None
     try:
         data = json.loads(result.stdout or "{}")
     except json.JSONDecodeError:
-        print("Error: unable to parse PR JSON.", file=sys.stderr)
         return None
     number = data.get("number")
     if not number:
-        print("Error: no PR number found.", file=sys.stderr)
         return None
     return str(number)
 
@@ -214,10 +206,6 @@ def fetch_checks(pr_value: str, repo_root: Path) -> list[dict[str, Any]] | None:
                 field for field in fallback_fields if field in available_fields
             ]
             if not selected_fields:
-                print(
-                    "Error: no usable fields available for gh pr checks.",
-                    file=sys.stderr,
-                )
                 return None
             result = run_gh_command(
                 ["pr", "checks", pr_value, "--json", ",".join(selected_fields)],
@@ -225,18 +213,14 @@ def fetch_checks(pr_value: str, repo_root: Path) -> list[dict[str, Any]] | None:
             )
             if result.returncode != 0:
                 message = (result.stderr or result.stdout or "").strip()
-                print(message or "Error: gh pr checks failed.", file=sys.stderr)
                 return None
         else:
-            print(message or "Error: gh pr checks failed.", file=sys.stderr)
             return None
     try:
         data = json.loads(result.stdout or "[]")
     except json.JSONDecodeError:
-        print("Error: unable to parse checks JSON.", file=sys.stderr)
         return None
     if not isinstance(data, list):
-        print("Error: unexpected checks JSON shape.", file=sys.stderr)
         return None
     return data
 
@@ -479,47 +463,39 @@ def tail_lines(text: str, max_lines: int) -> str:
 
 def render_results(pr_number: str, results: Iterable[dict[str, Any]]) -> None:
     results_list = list(results)
-    print(f"PR #{pr_number}: {len(results_list)} failing checks analyzed.")
     for result in results_list:
-        print("-" * 60)
-        print(f"Check: {result.get('name', '')}")
         if result.get("detailsUrl"):
-            print(f"Details: {result['detailsUrl']}")
+            pass
         run_id = result.get("runId")
         if run_id:
-            print(f"Run ID: {run_id}")
+            pass
         job_id = result.get("jobId")
         if job_id:
-            print(f"Job ID: {job_id}")
-        status = result.get("status", "unknown")
-        print(f"Status: {status}")
+            pass
+        result.get("status", "unknown")
 
         run_meta = result.get("run", {})
         if run_meta:
             branch = run_meta.get("headBranch", "")
             sha = (run_meta.get("headSha") or "")[:12]
-            workflow = run_meta.get("workflowName") or run_meta.get("name") or ""
-            conclusion = run_meta.get("conclusion") or run_meta.get("status") or ""
-            print(f"Workflow: {workflow} ({conclusion})")
+            run_meta.get("workflowName") or run_meta.get("name") or ""
+            run_meta.get("conclusion") or run_meta.get("status") or ""
             if branch or sha:
-                print(f"Branch/SHA: {branch} {sha}")
+                pass
             if run_meta.get("url"):
-                print(f"Run URL: {run_meta['url']}")
+                pass
 
         if result.get("note"):
-            print(f"Note: {result['note']}")
+            pass
 
         if result.get("error"):
-            print(f"Error fetching logs: {result['error']}")
             continue
 
         snippet = result.get("logSnippet") or ""
         if snippet:
-            print("Failure snippet:")
-            print(indent_block(snippet, prefix="  "))
+            pass
         else:
-            print("No snippet available.")
-    print("-" * 60)
+            pass
 
 
 def indent_block(text: str, prefix: str = "  ") -> str:

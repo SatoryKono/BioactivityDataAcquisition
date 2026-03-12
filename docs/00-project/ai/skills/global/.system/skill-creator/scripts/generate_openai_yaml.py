@@ -104,12 +104,10 @@ def generate_short_description(display_name):
 def read_frontmatter_name(skill_dir):
     skill_md = Path(skill_dir) / "SKILL.md"
     if not skill_md.exists():
-        print(f"[ERROR] SKILL.md not found in {skill_dir}")
         return None
     content = skill_md.read_text()
     match = re.match(r"^---\n(.*?)\n---", content, re.DOTALL)
     if not match:
-        print("[ERROR] Invalid SKILL.md frontmatter format.")
         return None
     frontmatter_text = match.group(1)
 
@@ -117,15 +115,12 @@ def read_frontmatter_name(skill_dir):
 
     try:
         frontmatter = yaml.safe_load(frontmatter_text)
-    except yaml.YAMLError as exc:
-        print(f"[ERROR] Invalid YAML frontmatter: {exc}")
+    except yaml.YAMLError:
         return None
     if not isinstance(frontmatter, dict):
-        print("[ERROR] Frontmatter must be a YAML dictionary.")
         return None
     name = frontmatter.get("name", "")
     if not isinstance(name, str) or not name.strip():
-        print("[ERROR] Frontmatter 'name' is missing or invalid.")
         return None
     return name.strip()
 
@@ -135,17 +130,14 @@ def parse_interface_overrides(raw_overrides):
     optional_order = []
     for item in raw_overrides:
         if "=" not in item:
-            print(f"[ERROR] Invalid interface override '{item}'. Use key=value.")
             return None, None
         key, value = item.split("=", 1)
         key = key.strip()
         value = value.strip()
         if not key:
-            print(f"[ERROR] Invalid interface override '{item}'. Key is empty.")
             return None, None
         if key not in ALLOWED_INTERFACE_KEYS:
-            allowed = ", ".join(sorted(ALLOWED_INTERFACE_KEYS))
-            print(f"[ERROR] Unknown interface field '{key}'. Allowed: {allowed}")
+            ", ".join(sorted(ALLOWED_INTERFACE_KEYS))
             return None, None
         overrides[key] = value
         if (
@@ -167,10 +159,6 @@ def write_openai_yaml(skill_dir, skill_name, raw_overrides):
     ) or generate_short_description(display_name)
 
     if not (25 <= len(short_description) <= 64):
-        print(
-            "[ERROR] short_description must be 25-64 characters "
-            f"(got {len(short_description)})."
-        )
         return None
 
     interface_lines = [
@@ -188,7 +176,6 @@ def write_openai_yaml(skill_dir, skill_name, raw_overrides):
     agents_dir.mkdir(parents=True, exist_ok=True)
     output_path = agents_dir / "openai.yaml"
     output_path.write_text("\n".join(interface_lines) + "\n")
-    print("[OK] Created agents/openai.yaml")
     return output_path
 
 
@@ -211,10 +198,8 @@ def main():
 
     skill_dir = Path(args.skill_dir).resolve()
     if not skill_dir.exists():
-        print(f"[ERROR] Skill directory not found: {skill_dir}")
         sys.exit(1)
     if not skill_dir.is_dir():
-        print(f"[ERROR] Path is not a directory: {skill_dir}")
         sys.exit(1)
 
     skill_name = args.name or read_frontmatter_name(skill_dir)
