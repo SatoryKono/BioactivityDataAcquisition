@@ -31,7 +31,13 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
-__all__ = ["StorageContext", "StorageFactory"]
+__all__ = [
+    "BronzeWriter",
+    "GoldWriter",
+    "SilverWriter",
+    "StorageContext",
+    "StorageFactory",
+]
 
 
 @dataclass(frozen=True)

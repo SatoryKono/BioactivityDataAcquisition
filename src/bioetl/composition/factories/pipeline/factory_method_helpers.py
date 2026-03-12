@@ -20,7 +20,9 @@ if TYPE_CHECKING:
     from bioetl.application.core.base_transformer import BaseTransformer
     from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.application.core.runner import PipelineRunner
-    from bioetl.composition.factories.datasource.factory import DataSourceCreatorPort
+    from bioetl.composition.factories.datasource.data_source_factory import (
+        DataSourceCreatorPort,
+    )
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.context import CachedBronzeContext

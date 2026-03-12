@@ -502,6 +502,64 @@ class TestSilverWriterValidation:
                 schema=dummy_schema,
             )
 
+    @pytest.mark.asyncio
+    async def test_write_silver_builds_invocation_and_delegates_to_tracing_helper(
+        self,
+        noop_logger,
+        monkeypatch,
+    ) -> None:
+        """Public write path should build one invocation object for tracing helper."""
+        import pyarrow as pa
+
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        writer = SilverWriter(base_path="s3://bucket", logger=noop_logger)
+        records = [
+            {
+                "entity_id": "CHEMBL123",
+                "value": 5.5,
+                "_run_id": "uuid-123",
+                "_run_type": "incremental",
+                "_source_batch_id": "batch-456",
+                "_ingestion_ts": "2025-01-15T12:00:00Z",
+            }
+        ]
+        schema = pa.Table.from_pylist(records).schema
+        expected_result = MagicMock()
+        captured: dict[str, object] = {}
+
+        async def fake_execute_silver_write_with_tracing(**kwargs):
+            captured.update(kwargs)
+            return expected_result
+
+        monkeypatch.setattr(
+            "bioetl.infrastructure.storage.silver_writer.execute_silver_write_with_tracing",
+            fake_execute_silver_write_with_tracing,
+        )
+
+        result = await writer.write_silver(
+            table_name="test.table",
+            records=records,
+            primary_keys=["entity_id"],
+            schema=schema,
+            mode="merge",
+            partition_cols=["entity_id"],
+            on_schema_mismatch="ignore",
+        )
+
+        assert result is expected_result
+        invocation = captured["invocation"]
+        assert invocation.table_name == "test.table"
+        assert invocation.records == records
+        assert invocation.primary_keys == ["entity_id"]
+        assert invocation.schema == schema
+        assert invocation.mode == "merge"
+        assert invocation.partition_cols == ["entity_id"]
+        assert invocation.on_schema_mismatch == "ignore"
+        assert captured["tracing"] is writer._tracing
+        assert captured["module_name"] == "bioetl.infrastructure.storage.silver_writer"
+        assert captured["execute_pipeline"] == writer._execute_silver_write_pipeline
+
 
 @pytest.mark.unit
 class TestSilverWriterWriteModeEnum:

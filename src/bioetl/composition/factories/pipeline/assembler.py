@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 from bioetl.application.core.runner import PipelineRunner
-from bioetl.composition.factories.datasource.factory import (
+from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorPort,
     DataSourceRegistry,
 )

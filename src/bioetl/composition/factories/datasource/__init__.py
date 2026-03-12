@@ -1,6 +1,6 @@
 """Data source factory subpackage."""
 
-from bioetl.composition.factories.datasource.factory import (
+from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorPort,
     DataSourceFactory,
     DataSourceRegistry,

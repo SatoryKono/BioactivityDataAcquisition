@@ -13,7 +13,9 @@ from bioetl.composition.factories._observability_wiring import (
     _create_data_source as _create_data_source_impl,
 )
 from bioetl.composition.factories._observability_wiring import create_shared_metrics
-from bioetl.composition.factories.datasource.factory import DataSourceCreatorPort
+from bioetl.composition.factories.datasource.data_source_factory import (
+    DataSourceCreatorPort,
+)
 from bioetl.composition.factories.pipeline._creation_wiring import (
     _BuildPipelineServicesFn,
     _create_pipeline_with_services_impl,

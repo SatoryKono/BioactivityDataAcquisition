@@ -228,7 +228,7 @@ class TestBootstrapAdapterIsolation:
         REQ-ARCH-COMP-001: Composition Root delegates adapter creation to factories.
         Adding a new provider should only require changes in:
         - providers/registration.py (ProviderRegistry)
-        - factories/data_source_registry.py (DataSourceRegistry)
+        - factories/datasource/data_source_factory.py (DataSourceRegistry)
 
         This prevents tight coupling and ensures the factory pattern is enforced.
 

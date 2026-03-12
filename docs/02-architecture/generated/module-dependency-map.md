@@ -4,8 +4,8 @@
 
 ## Summary
 
-- Scanned modules: `1043`
-- Internal import edges (raw): `3891`
+- Scanned modules: `1048`
+- Internal import edges (raw): `3895`
 - Aggregated layer edges: `14`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `238`
@@ -20,10 +20,10 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|446 OK| application
+    application -->|445 OK| application
     application -->|606 OK| domain
     composition -->|188 OK| application
-    composition -->|274 OK| composition
+    composition -->|279 OK| composition
     composition -->|222 OK| domain
     composition -->|205 OK| infrastructure
     domain -->|690 OK| domain
@@ -40,10 +40,10 @@ flowchart LR
 
 | From | To | Imports | Policy |
 |---|---|---:|---|
-| `application` | `application` | 446 | allowed |
+| `application` | `application` | 445 | allowed |
 | `application` | `domain` | 606 | allowed |
 | `composition` | `application` | 188 | allowed |
-| `composition` | `composition` | 274 | allowed |
+| `composition` | `composition` | 279 | allowed |
 | `composition` | `domain` | 222 | allowed |
 | `composition` | `infrastructure` | 205 | allowed |
 | `domain` | `domain` | 690 | allowed |

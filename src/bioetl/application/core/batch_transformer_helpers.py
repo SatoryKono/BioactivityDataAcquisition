@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.base_transformer import FilteredOutError
@@ -42,6 +42,8 @@ __all__ = [
     "build_transform_result",
     "check_dq_thresholds",
     "create_transform_aggregation_state",
+    "finalize_batch_transform_result",
+    "finalize_stream_transform_result",
     "flush_dq_records",
     "flush_filtered_records",
     "route_single_transform_attempt",
@@ -99,6 +101,8 @@ class TransformAggregationState:
 
     silver_records: list[BronzeRecord]
     gold_records: list[GoldRecord]
+    filtered_records: list[FilteredQuarantineEntry] = field(default_factory=list)
+    dq_records: list[DQQuarantineEntry] = field(default_factory=list)
     quarantined_count: int = 0
     filtered_out_count: int = 0
     records_quarantine_failed: int = 0
@@ -269,16 +273,14 @@ def apply_transform_outcome_to_state(
     *,
     state: TransformAggregationState,
     attempt: RecordTransformOutcome,
-    filtered_records: list[FilteredQuarantineEntry],
-    dq_records: list[DQQuarantineEntry],
 ) -> None:
     """Apply one batch transform outcome to aggregate state."""
     quarantined_delta, filtered_delta = accumulate_transform_outcome(
         attempt=attempt,
         silver_records=state.silver_records,
         gold_records=state.gold_records,
-        filtered_records=filtered_records,
-        dq_records=dq_records,
+        filtered_records=state.filtered_records,
+        dq_records=state.dq_records,
     )
     state.quarantined_count += quarantined_delta
     state.filtered_out_count += filtered_delta
@@ -367,6 +369,60 @@ def apply_stream_transform_result_to_state(
     state.quarantined_count += quarantined_delta
     state.filtered_out_count += filtered_delta
     state.records_quarantine_failed += failed_delta
+
+
+async def finalize_batch_transform_result(
+    *,
+    context: PipelineContext,
+    config: RecordProcessorConfig,
+    batch_metrics: BatchMetricsRecorderService,
+    quarantine_manager: QuarantineManagerService,
+    state: TransformAggregationState,
+    batch_id: BatchID,
+    records: list[BronzeRecord],
+) -> TransformResult:
+    """Flush batch quarantine buffers, validate thresholds, and build result."""
+    filtered_failed = await flush_filtered_records(
+        context=context,
+        quarantine_manager=quarantine_manager,
+        records=state.filtered_records,
+        batch_id=batch_id,
+    )
+    dq_failed = await flush_dq_records(
+        context=context,
+        quarantine_manager=quarantine_manager,
+        records=state.dq_records,
+        batch_id=batch_id,
+    )
+
+    check_dq_thresholds(
+        context=context,
+        config=config,
+        batch_metrics=batch_metrics,
+        records=records,
+        quarantined_count=state.quarantined_count,
+    )
+    state.records_quarantine_failed = filtered_failed + dq_failed
+    return build_transform_result(state)
+
+
+def finalize_stream_transform_result(
+    *,
+    context: PipelineContext,
+    config: RecordProcessorConfig,
+    batch_metrics: BatchMetricsRecorderService,
+    state: TransformAggregationState,
+    records: list[BronzeRecord],
+) -> TransformResult:
+    """Validate streaming thresholds and build result."""
+    check_dq_thresholds(
+        context=context,
+        config=config,
+        batch_metrics=batch_metrics,
+        records=records,
+        quarantined_count=state.quarantined_count,
+    )
+    return build_transform_result(state)
 
 
 def build_transform_result(state: TransformAggregationState) -> TransformResult:
