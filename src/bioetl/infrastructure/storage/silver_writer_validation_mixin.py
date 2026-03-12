@@ -36,6 +36,15 @@ class _PreparedSilverWritePayload:
     arrow_data: pa.Table
 
 
+@dataclass(frozen=True, slots=True)
+class _ValidatedSilverWriteContext:
+    """Validated pre-write state before path resolution and Delta dispatch."""
+
+    records: list[BronzeRecord]
+    validated_mode: SilverWriteMode
+    arrow_data: pa.Table
+
+
 def _validate_write_mode_impl(mode: str) -> SilverWriteMode:
     """Validate and convert write mode string to enum."""
     try:
@@ -154,7 +163,7 @@ class SilverWriterValidationMixin:
         column_order: list[str] | None,
         partition_cols: list[str] | None,
         key_nullability_rules: list[KeyNullabilityRule] | None,
-    ) -> tuple[list[BronzeRecord], SilverWriteMode, pa.Table]:
+    ) -> _ValidatedSilverWriteContext:
         """Run synchronous Silver validation steps and build Arrow payload."""
         records = self._deduplicate_by_primary_keys(records, primary_keys)
         validated_mode = self._validate_write_mode(mode)
@@ -174,7 +183,11 @@ class SilverWriterValidationMixin:
             primary_keys,
             column_order=column_order,
         )
-        return records, validated_mode, arrow_data
+        return _ValidatedSilverWriteContext(
+            records=records,
+            validated_mode=validated_mode,
+            arrow_data=arrow_data,
+        )
 
     def _enforce_write_policy(
         self,
@@ -340,7 +353,7 @@ class SilverWriterValidationMixin:
         key_nullability_rules: list[KeyNullabilityRule] | None,
     ) -> _PreparedSilverWritePayload:
         """Run full validation chain and prepare Arrow data for write."""
-        records, validated_mode, arrow_data = await asyncio.to_thread(
+        validated = await asyncio.to_thread(
             self._sync_validate_and_build_arrow,
             table_name=table_name,
             records=records,
@@ -351,13 +364,17 @@ class SilverWriterValidationMixin:
             partition_cols=partition_cols,
             key_nullability_rules=key_nullability_rules,
         )
-        await self._check_schema_drift(table_name, records, on_schema_mismatch)
+        await self._check_schema_drift(
+            table_name,
+            validated.records,
+            on_schema_mismatch,
+        )
         table_path = self._resolve_table_path(table_name)
         return _PreparedSilverWritePayload(
-            records=records,
-            validated_mode=validated_mode,
+            records=validated.records,
+            validated_mode=validated.validated_mode,
             table_path=table_path,
-            arrow_data=arrow_data,
+            arrow_data=validated.arrow_data,
         )
 
 

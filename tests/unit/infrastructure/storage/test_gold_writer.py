@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pyarrow as pa
 import pytest
@@ -699,6 +699,48 @@ class TestGoldWriterDeterministicBackoff:
 @pytest.mark.unit
 class TestGoldWriterAudit:
     """Tests for GoldWriter audit logging."""
+
+    async def test_post_write_gold_uses_named_context(
+        self, gold_writer, valid_records, strict_schema, fixed_ingestion_ts
+    ):
+        """Test _post_write_gold consumes a named post-write context."""
+        from bioetl.infrastructure.storage.gold_writer import (
+            GoldWriteMode,
+            _GoldWritePostwriteContext,
+            _PreparedGoldWriteContext,
+        )
+
+        gold_writer._audit = AsyncMock()
+        gold_writer._write_gold_metadata = AsyncMock()  # type: ignore[method-assign]
+
+        context = _GoldWritePostwriteContext(
+            prepared=_PreparedGoldWriteContext(
+                table_name="test.table",
+                table_path="s3://test-bucket/gold/test/table",
+                validated_mode=GoldWriteMode.APPEND,
+            ),
+            records=valid_records,
+            ingestion_ts=fixed_ingestion_ts,
+            run_id=None,
+            scd_config=None,
+            silver_refs=None,
+            schema=strict_schema,
+        )
+
+        await gold_writer._post_write_gold(context)
+
+        gold_writer._audit.log_write.assert_called_once()
+        gold_writer._write_gold_metadata.assert_awaited_once_with(
+            table_path="s3://test-bucket/gold/test/table",
+            table_name="test.table",
+            records=valid_records,
+            mode=GoldWriteMode.APPEND,
+            scd_config=None,
+            ingestion_ts=fixed_ingestion_ts,
+            run_id=None,
+            silver_refs=None,
+            gold_schema=strict_schema,
+        )
 
     @pytest.mark.asyncio
     async def test_log_gold_audit_requires_ingestion_ts(

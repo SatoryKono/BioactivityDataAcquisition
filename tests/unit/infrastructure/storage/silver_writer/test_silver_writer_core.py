@@ -119,6 +119,44 @@ class TestSilverWriterInit:
 class TestSilverWriterValidation:
     """Tests for SilverWriter validation."""
 
+    def test_sync_validate_and_build_arrow_returns_named_context(
+        self, noop_logger, valid_records
+    ) -> None:
+        """Validation helper should return a named pre-write context."""
+        import pyarrow as pa
+
+        from bioetl.infrastructure.storage.silver_writer import (
+            SilverWriteMode,
+            SilverWriter,
+        )
+
+        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+        schema = pa.schema(
+            [
+                pa.field("entity_id", pa.string()),
+                pa.field("value", pa.float64()),
+                pa.field("_run_id", pa.string()),
+                pa.field("_run_type", pa.string()),
+                pa.field("_source_batch_id", pa.string()),
+                pa.field("_ingestion_ts", pa.string()),
+            ]
+        )
+
+        validated = writer._sync_validate_and_build_arrow(
+            table_name="test.table",
+            records=valid_records,
+            primary_keys=["entity_id"],
+            schema=schema,
+            mode="merge",
+            column_order=None,
+            partition_cols=["entity_id"],
+            key_nullability_rules=None,
+        )
+
+        assert validated.records == valid_records
+        assert validated.validated_mode is SilverWriteMode.MERGE
+        assert validated.arrow_data.num_rows == len(valid_records)
+
     @pytest.mark.asyncio
     async def test_execute_silver_write_with_tracing_builds_context_and_runs_pipeline(
         self,
