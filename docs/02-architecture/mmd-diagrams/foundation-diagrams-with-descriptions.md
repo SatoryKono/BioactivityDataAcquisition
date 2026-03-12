@@ -1,6 +1,6 @@
 # BioETL Foundation Diagrams With Descriptions
 
-- Generated: 2026-03-12T14:16:19
+- Generated: 2026-03-12T15:50:17
 - Diagram count: 55
 
 ## Table of Contents
@@ -139,7 +139,7 @@
 ![04-domain-layer-class-diagram](foundation/png/04-domain-layer-class-diagram.png)
 
 ### Описание
-Диаграмма «Domain Layer Class Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Domain Layer), §1.2 (Ports), §1.3 (Entities). На схеме отражено примерно 26 узлов и 5 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга.
+Диаграмма «Domain Layer Class Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Domain Layer), §1.2 (Ports), §1.3 (Entities). На схеме отражено примерно 26 узлов и 11 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Ports, Entities, Config, Types. Показательные узлы для быстрого чтения: DataSourcePort, FilterableDataSourcePort, StoragePort, LockPort, CheckpointPort, QuarantinePort.
 
 ### Метаданные
 - Тип: `classDiagram`
@@ -207,7 +207,7 @@
 ![06-application-layer-class-diagram](foundation/png/06-application-layer-class-diagram.png)
 
 ### Описание
-Диаграмма «Application Layer Class Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Application Layer), §3 (Pipeline Execution). На схеме отражено примерно 22 узлов и 14 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга.
+Диаграмма «Application Layer Class Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Application Layer), §3 (Pipeline Execution). На схеме отражено примерно 22 узлов и 14 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Core, Services, Transformers. Показательные узлы для быстрого чтения: BasePipeline, PipelineRunner, PipelineExecutor, RecordProcessor, BatchTransformer, PipelineServices.
 
 ### Метаданные
 - Тип: `classDiagram`
@@ -326,7 +326,7 @@
 ![10-infrastructure-layer-class-diagram](foundation/png/10-infrastructure-layer-class-diagram.png)
 
 ### Описание
-Диаграмма «Infrastructure Layer Class Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Infrastructure Layer), §3.6 (Resilience). На схеме отражено примерно 18 узлов и 9 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга.
+Диаграмма «Infrastructure Layer Class Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Infrastructure Layer), §3.6 (Resilience). На схеме отражено примерно 18 узлов и 25 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: HTTP Infrastructure, DataSource Adapters, Storage Writers, Locking, Quarantine, Checkpoint. Показательные узлы для быстрого чтения: UnifiedHTTPClient, CircuitBreaker, TokenBucket, RetryPolicy, ChemblAdapter, PubchemAdapter.
 
 ### Метаданные
 - Тип: `classDiagram`
@@ -377,7 +377,7 @@
 ![13-domain-models-relationship](foundation/png/13-domain-models-relationship.png)
 
 ### Описание
-Диаграмма «Domain Models Relationship Hierarchy» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.3 (Domain Entities), §1.1 (Domain Layer). На схеме отражено примерно 15 узлов и 6 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга.
+Диаграмма «Domain Models Relationship Hierarchy» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.3 (Domain Entities), §1.1 (Domain Layer). На схеме отражено примерно 15 узлов и 24 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: BaseEntity, Activity, Assay, Target, Molecule, PublicationEntityBase.
 
 ### Метаданные
 - Тип: `classDiagram`
@@ -428,7 +428,7 @@
 ![16-memory-lock-class](foundation/png/16-memory-lock-class.png)
 
 ### Описание
-Диаграмма «MemoryLock Class Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §3.3 (Locking), ADR-010. На схеме отражено примерно 7 узлов и 4 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга.
+Диаграмма «MemoryLock Class Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §3.3 (Locking), ADR-010. На схеме отражено примерно 7 узлов и 5 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: LockPort, MemoryLock, LockEntry, LockResult, LockNotHeldError, LockCoordinator.
 
 ### Метаданные
 - Тип: `classDiagram`
@@ -445,7 +445,7 @@
 ![17-pipeline-hierarchy](foundation/png/17-pipeline-hierarchy.png)
 
 ### Описание
-Диаграмма «Pipeline and Transformer Class Hierarchy» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §3 (Pipeline Execution), §2.8 (Transformation). На схеме отражено примерно 14 узлов и 1 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга.
+Диаграмма «Pipeline and Transformer Class Hierarchy» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §3 (Pipeline Execution), §2.8 (Transformation). На схеме отражено примерно 14 узлов и 13 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: BasePipeline, BaseTransformer, BaseChemblTransformer, ActivityTransformer, MoleculeTransformer, AssayTransformer.
 
 ### Метаданные
 - Тип: `classDiagram`
@@ -547,7 +547,7 @@
 ![23-silver-writer-class](foundation/png/23-silver-writer-class.png)
 
 ### Описание
-Диаграмма «SilverWriter Class Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §2.1 (Silver Layer), §2.5 (ACID via Delta Lake). На схеме отражено примерно 8 узлов и 6 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга.
+Диаграмма «SilverWriter Class Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §2.1 (Silver Layer), §2.5 (ACID via Delta Lake). На схеме отражено примерно 8 узлов и 10 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: StoragePort, SilverWriter, WriteResult, MergeResult, SilverWriteMode, WriteModePolicy.
 
 ### Метаданные
 - Тип: `classDiagram`
@@ -564,7 +564,7 @@
 ![24-hash-service-class](foundation/png/24-hash-service-class.png)
 
 ### Описание
-Диаграмма «ContentHashService Class Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §2.4 (Deduplication via content_hash). На схеме отражено примерно 5 узлов и 4 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга.
+Диаграмма «ContentHashService Class Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §2.4 (Deduplication via content_hash). На схеме отражено примерно 5 узлов и 4 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: ContentHashService, NormalizationRules, ContentHash, BaseTransformer, HashFlow.
 
 ### Метаданные
 - Тип: `classDiagram`
@@ -581,7 +581,7 @@
 ![25-circuit-breaker-observer-class](foundation/png/25-circuit-breaker-observer-class.png)
 
 ### Описание
-Диаграмма «Circuit Breaker and Observer Classes» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §3.6 (Resilience), ADR-007. На схеме отражено примерно 8 узлов и 5 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга.
+Диаграмма «Circuit Breaker and Observer Classes» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §3.6 (Resilience), ADR-007. На схеме отражено примерно 8 узлов и 6 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: CircuitState, CircuitBreakerPort, CircuitBreaker, CircuitBreakerMetrics, CircuitBreakerConfig, CircuitOpenError.
 
 ### Метаданные
 - Тип: `classDiagram`
@@ -870,7 +870,7 @@
 ![42-pipeline-runner-class](foundation/png/42-pipeline-runner-class.png)
 
 ### Описание
-Диаграмма «PipelineRunner Internal Component Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: application/core/runner.py, application/core/pipeline_services.py. На схеме отражено примерно 9 узлов и 8 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга.
+Диаграмма «PipelineRunner Internal Component Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: application/core/runner.py, application/core/pipeline_services.py. На схеме отражено примерно 9 узлов и 8 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: PipelineRunner, PipelineServices, LockCoordinator, PreflightService, BatchExecutor, PostrunService.
 
 ### Метаданные
 - Тип: `classDiagram`
@@ -972,7 +972,7 @@
 ![49-composite-runner-class](foundation/png/49-composite-runner-class.png)
 
 ### Описание
-Диаграмма «CompositePipelineRunner — Component Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: application/composite/ (runner, coordinator, merger, checkpoint, etc.). На схеме отражено примерно 13 узлов и 10 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга.
+Диаграмма «CompositePipelineRunner — Component Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: application/composite/ (runner, coordinator, merger, checkpoint, etc.). На схеме отражено примерно 13 узлов и 12 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Показательные узлы для быстрого чтения: CompositePipelineRunner, CompositeConfig, CompositeRuntimeConfig, FSMStateHelper, KeyExtractorService, DependencyCoordinator.
 
 ### Метаданные
 - Тип: `classDiagram`
