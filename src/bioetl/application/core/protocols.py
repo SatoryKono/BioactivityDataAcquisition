@@ -1,7 +1,8 @@
-"""Callback protocols for the pipeline.
+"""Application-layer callback and transformer protocols.
 
-Defines Protocol classes for pipeline callbacks and transformer ports.
-Implements RULES.md §1 (Domain Layer - Ports).
+These structural protocols model internal pipeline callbacks and transformer
+contracts. They are intentionally application-local helpers, not domain-layer
+ports from ``bioetl.domain.ports``.
 """
 
 from __future__ import annotations
@@ -12,7 +13,7 @@ __all__ = [
     "GoldFilterCallback",
     "GoldTransformCallback",
     "TransformCallback",
-    "TransformerPort",
+    "TransformerProtocol",
 ]
 
 
@@ -65,13 +66,12 @@ class GoldTransformCallback(Protocol):
         ...
 
 
-class TransformerPort(Protocol):
-    """Protocol defining the contract for Bronze → Silver transformers.
+class TransformerProtocol(Protocol):
+    """Application-level contract for Bronze → Silver transformers.
 
-    All transformer implementations MUST implement this protocol.
-    Enables polymorphism and testability through dependency injection.
-
-    Implements RULES.md §2.8 (Bronze → Silver transformation).
+    Transformer implementations satisfy this protocol to enable polymorphism and
+    dependency injection within the application layer. Cross-layer ports remain
+    defined in ``bioetl.domain.ports``.
 
     Example:
         >>> class MyTransformer:
@@ -104,3 +104,8 @@ class TransformerPort(Protocol):
 
         """
         ...
+
+
+# Backward-compatible alias kept while internal call sites migrate to the
+# canonical *Protocol naming used outside the domain layer.
+TransformerPort = TransformerProtocol

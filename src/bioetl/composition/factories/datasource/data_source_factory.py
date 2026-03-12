@@ -7,9 +7,11 @@ The legacy ``factory`` module remains for backward compatibility.
 from __future__ import annotations
 
 from bioetl.composition.factories.datasource.factory import (
-    DataSourceCreatorPort,
+    DataSourceCreatorProtocol,
     DataSourceFactory,
     DataSourceRegistry,
 )
 
-__all__ = ["DataSourceCreatorPort", "DataSourceFactory", "DataSourceRegistry"]
+DataSourceCreatorPort = DataSourceCreatorProtocol
+
+__all__ = ["DataSourceCreatorProtocol", "DataSourceFactory", "DataSourceRegistry"]

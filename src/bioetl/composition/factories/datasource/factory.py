@@ -21,7 +21,7 @@ from bioetl.composition.factories.datasource.adapter_helpers import (
     AdapterHelpersFactory,
 )
 from bioetl.composition.providers.provider_registry import (
-    DataSourceCreatorPort,
+    DataSourceCreatorProtocol,
     ProviderRegistry,
 )
 from bioetl.domain.ports import DataSourcePort
@@ -33,8 +33,11 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
-# Re-export DataSourceCreatorPort for backward compatibility
-__all__ = ["DataSourceCreatorPort", "DataSourceFactory", "DataSourceRegistry"]
+# Re-export the canonical protocol name while keeping the legacy alias present
+# on the module for compatibility.
+DataSourceCreatorPort = DataSourceCreatorProtocol
+
+__all__ = ["DataSourceCreatorProtocol", "DataSourceFactory", "DataSourceRegistry"]
 
 
 def _ensure_providers_loaded() -> None:
@@ -175,10 +178,10 @@ class DataSourceRegistry:
     """
 
     # Empty dict - we delegate everything to ProviderRegistry
-    _creators: ClassVar[dict[str, DataSourceCreatorPort]] = {}
+    _creators: ClassVar[dict[str, DataSourceCreatorProtocol]] = {}
 
     @classmethod
-    def get(cls, provider: str) -> DataSourceCreatorPort:
+    def get(cls, provider: str) -> DataSourceCreatorProtocol:
         """Get creator function for provider.
 
         Returns a closure that delegates to ProviderRegistry.create_data_source().

@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     import pandera
 
     from bioetl.composition.factories.datasource.data_source_factory import (
-        DataSourceCreatorPort,
+        DataSourceCreatorProtocol,
     )
     from bioetl.composition.factories.pipeline.pipeline_assembler import (
         GenericPipelineFactory,
@@ -112,7 +112,7 @@ def create_factory(
     )
 
     # Resolve data source creator: use data_source_provider override if set
-    data_source_creator: DataSourceCreatorPort | None = None
+    data_source_creator: DataSourceCreatorProtocol | None = None
     if config.data_source_provider:
         data_source_creator = DataSourceRegistry.get(config.data_source_provider)
 
