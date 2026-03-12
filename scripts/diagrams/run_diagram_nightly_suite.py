@@ -15,8 +15,12 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_SOURCE_MANIFEST = Path("docs/02-architecture/mmd-diagrams/quality-gate-manifest.txt")
-DEFAULT_RENDER_MANIFEST = Path("docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt")
+DEFAULT_SOURCE_MANIFEST = Path(
+    "docs/02-architecture/mmd-diagrams/quality-gate-manifest.txt"
+)
+DEFAULT_RENDER_MANIFEST = Path(
+    "docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt"
+)
 DEFAULT_CONFIG = Path("docs/02-architecture/mmd-diagrams/theme/mermaid-config.json")
 DEFAULT_CSS = Path("docs/02-architecture/mmd-diagrams/theme/custom.css")
 
@@ -76,7 +80,9 @@ def load_manifest(manifest_path: Path, allowed_suffixes: tuple[str, ...]) -> lis
         path = Path(line)
         if path.suffix.lower() not in allowed_suffixes:
             allowed = ", ".join(allowed_suffixes)
-            raise ValueError(f"Unsupported suffix in manifest ({allowed} expected): {line}")
+            raise ValueError(
+                f"Unsupported suffix in manifest ({allowed} expected): {line}"
+            )
         paths.append(path)
 
     if not paths:
@@ -117,7 +123,9 @@ def has_interactivity_markers(lines: list[str]) -> bool:
 def derive_png_path(svg_path: Path) -> Path:
     parts = list(svg_path.parts)
     if "svg" not in parts:
-        raise ValueError(f"Cannot derive PNG path from SVG path without '/svg/': {svg_path}")
+        raise ValueError(
+            f"Cannot derive PNG path from SVG path without '/svg/': {svg_path}"
+        )
     idx = parts.index("svg")
     parts[idx] = "png"
     return Path(*parts).with_suffix(".png")
@@ -238,7 +246,7 @@ def extract_anchor_node(lines: list[str]) -> str:
 def inject_growth_node(lines: list[str]) -> list[str]:
     anchor = extract_anchor_node(lines)
     result = lines[:]
-    result.append("    __stress_node__[\"Stress Node\"]")
+    result.append('    __stress_node__["Stress Node"]')
     result.append(f"    {anchor} --> __stress_node__")
     return result
 
@@ -313,7 +321,9 @@ def check_diag_t024(source_paths: list[Path], max_len: int, max_br: int) -> list
     for rel in source_paths:
         path = REPO_ROOT / rel
         if not path.exists():
-            issues.append(Issue("DIAG-T024", "WARNING", str(rel), "source file missing"))
+            issues.append(
+                Issue("DIAG-T024", "WARNING", str(rel), "source file missing")
+            )
             continue
 
         lines = path.read_text(encoding="utf-8").splitlines()
@@ -335,19 +345,25 @@ def check_diag_t025(render_paths: list[Path]) -> list[Issue]:
     for svg_rel in render_paths:
         svg = REPO_ROOT / svg_rel
         if not svg.exists():
-            issues.append(Issue("DIAG-T025", "WARNING", str(svg_rel), "SVG render missing"))
+            issues.append(
+                Issue("DIAG-T025", "WARNING", str(svg_rel), "SVG render missing")
+            )
             continue
 
         try:
             shape = analyze_svg_shape(svg)
         except ET.ParseError as exc:
-            issues.append(Issue("DIAG-T025", "WARNING", str(svg_rel), f"SVG parse error: {exc}"))
+            issues.append(
+                Issue("DIAG-T025", "WARNING", str(svg_rel), f"SVG parse error: {exc}")
+            )
             continue
 
         png_rel = derive_png_path(svg_rel)
         png = REPO_ROOT / png_rel
         if not png.exists():
-            issues.append(Issue("DIAG-T025", "WARNING", str(png_rel), "PNG render missing"))
+            issues.append(
+                Issue("DIAG-T025", "WARNING", str(png_rel), "PNG render missing")
+            )
             continue
 
         try:
@@ -356,7 +372,10 @@ def check_diag_t025(render_paths: list[Path]) -> list[Issue]:
             issues.append(Issue("DIAG-T025", "WARNING", str(png_rel), str(exc)))
             continue
 
-        if shape.edge_labels > 0 and (shape.text_nodes + shape.foreign_object_text_nodes) == 0:
+        if (
+            shape.edge_labels > 0
+            and (shape.text_nodes + shape.foreign_object_text_nodes) == 0
+        ):
             issues.append(
                 Issue(
                     "DIAG-T025",
@@ -396,7 +415,9 @@ def check_diag_t026(render_paths: list[Path]) -> list[Issue]:
     cmd = ["git", "diff", "--name-only", "--", *[str(path) for path in render_paths]]
     code, details = run_command(cmd)
     if code != 0:
-        return [Issue("DIAG-T026", "WARNING", "<git-diff>", f"git diff failed: {details}")]
+        return [
+            Issue("DIAG-T026", "WARNING", "<git-diff>", f"git diff failed: {details}")
+        ]
 
     changed = [line.strip() for line in details.splitlines() if line.strip()]
     if not changed:
@@ -433,7 +454,9 @@ def check_diag_t027(
     for rel in source_paths:
         path = REPO_ROOT / rel
         if not path.exists():
-            issues.append(Issue("DIAG-T027", "WARNING", str(rel), "source file missing"))
+            issues.append(
+                Issue("DIAG-T027", "WARNING", str(rel), "source file missing")
+            )
             continue
 
         lines = path.read_text(encoding="utf-8").splitlines()
@@ -467,10 +490,24 @@ def check_diag_t027(
         )
 
         if not ok_base:
-            issues.append(Issue("DIAG-T027", "WARNING", str(rel), f"baseline render failed: {err_base}"))
+            issues.append(
+                Issue(
+                    "DIAG-T027",
+                    "WARNING",
+                    str(rel),
+                    f"baseline render failed: {err_base}",
+                )
+            )
             continue
         if not ok_chaos:
-            issues.append(Issue("DIAG-T027", "WARNING", str(rel), f"reorder render failed: {err_chaos}"))
+            issues.append(
+                Issue(
+                    "DIAG-T027",
+                    "WARNING",
+                    str(rel),
+                    f"reorder render failed: {err_chaos}",
+                )
+            )
             continue
 
         base_shape = analyze_svg_shape(base_svg)
@@ -507,7 +544,9 @@ def check_diag_t028(
     for rel in source_paths:
         path = REPO_ROOT / rel
         if not path.exists():
-            issues.append(Issue("DIAG-T028", "WARNING", str(rel), "source file missing"))
+            issues.append(
+                Issue("DIAG-T028", "WARNING", str(rel), "source file missing")
+            )
             continue
 
         lines = path.read_text(encoding="utf-8").splitlines()
@@ -538,10 +577,24 @@ def check_diag_t028(
         )
 
         if not ok_base:
-            issues.append(Issue("DIAG-T028", "WARNING", str(rel), f"baseline render failed: {err_base}"))
+            issues.append(
+                Issue(
+                    "DIAG-T028",
+                    "WARNING",
+                    str(rel),
+                    f"baseline render failed: {err_base}",
+                )
+            )
             continue
         if not ok_stress:
-            issues.append(Issue("DIAG-T028", "WARNING", str(rel), f"growth render failed: {err_stress}"))
+            issues.append(
+                Issue(
+                    "DIAG-T028",
+                    "WARNING",
+                    str(rel),
+                    f"growth render failed: {err_stress}",
+                )
+            )
             continue
 
         base_shape = analyze_svg_shape(base_svg)
@@ -584,7 +637,9 @@ def check_diag_t029(
     for rel in source_paths:
         path = REPO_ROOT / rel
         if not path.exists():
-            issues.append(Issue("DIAG-T029", "WARNING", str(rel), "source file missing"))
+            issues.append(
+                Issue("DIAG-T029", "WARNING", str(rel), "source file missing")
+            )
             continue
 
         canonical_svg = tmpdir / f"theme-canonical-{path.stem}.svg"
@@ -609,11 +664,23 @@ def check_diag_t029(
 
         if not ok_canonical:
             issues.append(
-                Issue("DIAG-T029", "WARNING", str(rel), f"canonical theme render failed: {err_canonical}")
+                Issue(
+                    "DIAG-T029",
+                    "WARNING",
+                    str(rel),
+                    f"canonical theme render failed: {err_canonical}",
+                )
             )
             continue
         if not ok_alt:
-            issues.append(Issue("DIAG-T029", "WARNING", str(rel), f"alt theme render failed: {err_alt}"))
+            issues.append(
+                Issue(
+                    "DIAG-T029",
+                    "WARNING",
+                    str(rel),
+                    f"alt theme render failed: {err_alt}",
+                )
+            )
             continue
 
         can_shape = analyze_svg_shape(canonical_svg)
@@ -649,7 +716,9 @@ def render_markdown(report: Report) -> str:
         lines.append("## Findings")
         lines.append("")
         for issue in report.issues:
-            lines.append(f"- `{issue.rule_id}` [{issue.severity}] {issue.file}: {issue.message}")
+            lines.append(
+                f"- `{issue.rule_id}` [{issue.severity}] {issue.file}: {issue.message}"
+            )
 
     return "\n".join(lines) + "\n"
 
@@ -677,13 +746,25 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
 
-    src_manifest = args.source_manifest if args.source_manifest.is_absolute() else REPO_ROOT / args.source_manifest
-    rnd_manifest = args.render_manifest if args.render_manifest.is_absolute() else REPO_ROOT / args.render_manifest
+    src_manifest = (
+        args.source_manifest
+        if args.source_manifest.is_absolute()
+        else REPO_ROOT / args.source_manifest
+    )
+    rnd_manifest = (
+        args.render_manifest
+        if args.render_manifest.is_absolute()
+        else REPO_ROOT / args.render_manifest
+    )
     config = args.config if args.config.is_absolute() else REPO_ROOT / args.config
     css = args.css if args.css.is_absolute() else REPO_ROOT / args.css
     puppeteer = None
     if args.puppeteer is not None:
-        puppeteer = args.puppeteer if args.puppeteer.is_absolute() else REPO_ROOT / args.puppeteer
+        puppeteer = (
+            args.puppeteer
+            if args.puppeteer.is_absolute()
+            else REPO_ROOT / args.puppeteer
+        )
 
     try:
         source_paths = load_manifest(src_manifest, (".mmd", ".mermaid"))
@@ -694,13 +775,17 @@ def main() -> int:
 
     issues: list[Issue] = []
 
-    issues.extend(check_diag_t024(source_paths, max_len=args.max_label_length, max_br=args.max_br))
+    issues.extend(
+        check_diag_t024(source_paths, max_len=args.max_label_length, max_br=args.max_br)
+    )
     issues.extend(check_diag_t025(render_paths))
     issues.extend(check_diag_t026(render_paths))
 
     with tempfile.TemporaryDirectory(prefix="diagram-nightly-") as temp_dir:
         tmpdir = Path(temp_dir)
-        needs_render_backend = not (args.skip_chaos and args.skip_growth and args.skip_theme)
+        needs_render_backend = not (
+            args.skip_chaos and args.skip_growth and args.skip_theme
+        )
         backend_ok = True
         backend_error = ""
         if needs_render_backend:
@@ -774,12 +859,20 @@ def main() -> int:
     }
 
     if args.json_out is not None:
-        json_out = args.json_out if args.json_out.is_absolute() else REPO_ROOT / args.json_out
+        json_out = (
+            args.json_out if args.json_out.is_absolute() else REPO_ROOT / args.json_out
+        )
         json_out.parent.mkdir(parents=True, exist_ok=True)
-        json_out.write_text(json.dumps(payload, ensure_ascii=True, indent=2) + "\n", encoding="utf-8")
+        json_out.write_text(
+            json.dumps(payload, ensure_ascii=True, indent=2) + "\n", encoding="utf-8"
+        )
 
     if args.markdown_out is not None:
-        md_out = args.markdown_out if args.markdown_out.is_absolute() else REPO_ROOT / args.markdown_out
+        md_out = (
+            args.markdown_out
+            if args.markdown_out.is_absolute()
+            else REPO_ROOT / args.markdown_out
+        )
         md_out.parent.mkdir(parents=True, exist_ok=True)
         md_out.write_text(render_markdown(report), encoding="utf-8")
 
@@ -792,7 +885,9 @@ def main() -> int:
             f"warnings={report.warnings}, errors={report.errors}"
         )
         for issue in report.issues:
-            _out(f"[INFO] {issue.rule_id} [{issue.severity}] {issue.file}: {issue.message}")
+            _out(
+                f"[INFO] {issue.rule_id} [{issue.severity}] {issue.file}: {issue.message}"
+            )
 
     if args.strict:
         return 1 if (errors > 0 or warnings > 0) else 0

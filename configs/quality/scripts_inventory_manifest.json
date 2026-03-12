@@ -1,18 +1,18 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-12T22:02:19.395002+00:00",
+  "generated_at": "2026-03-12T22:08:57.495983+00:00",
   "summary": {
     "total_scripts": 202,
     "status_counts": {
       "active": 141,
       "legacy": 3,
-      "orphan": 32,
-      "unknown": 26
+      "orphan": 33,
+      "unknown": 25
     },
     "reference_group_coverage": {
       "build": 26,
       "ci": 41,
-      "docs": 81,
+      "docs": 80,
       "scripts": 99,
       "tests": 30
     }
@@ -1202,22 +1202,6 @@
       ]
     },
     {
-      "path": "scripts/codex-exec.bat",
-      "type": "bat",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/codex.bat",
-      "type": "bat",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
       "path": "scripts/config_gap_analysis.py",
       "type": "py",
       "status": "unknown",
@@ -1462,6 +1446,22 @@
     {
       "path": "scripts/dev/.wsl-vpn-fix.ps1",
       "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/dev/codex-exec.bat",
+      "type": "bat",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/dev/codex.bat",
+      "type": "bat",
       "status": "orphan",
       "agent_usage": [],
       "reference_count": 0,
@@ -1744,6 +1744,14 @@
       ]
     },
     {
+      "path": "scripts/dev/start-wsl-proxy.bat",
+      "type": "bat",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/dev/test_changed.sh",
       "type": "sh",
       "status": "active",
@@ -1769,6 +1777,14 @@
           "text": "exec bash \"$REPO_ROOT/scripts/dev/test_changed.sh\" \"$@\""
         }
       ]
+    },
+    {
+      "path": "scripts/dev/wsl_proxy.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/diagnostics/_tmp_inspect_vcr.py",
@@ -4230,14 +4246,6 @@
       ]
     },
     {
-      "path": "scripts/start-wsl-proxy.bat",
-      "type": "bat",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
       "path": "scripts/test_changed.sh",
       "type": "sh",
       "status": "active",
@@ -4405,27 +4413,6 @@
           "line": 1,
           "source_group": "docs",
           "text": "# Scripts Inventory\\n\\nTotal scripts: **106**\\n\\n## By Folder\\n\\n| Folder | Count |\\n|---|---:|\\n| `.` | 2 |\\n| `assets/javascripts` | 1 |\\n| `docs/02-architecture/mmd-diagrams` | 1 |\\n| `docs/00-proj"
-        }
-      ]
-    },
-    {
-      "path": "scripts/wsl_proxy.py",
-      "type": "py",
-      "status": "unknown",
-      "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 27,
-          "source_group": "docs",
-          "text": "│  scripts/wsl_proxy.py ──► VPN ──► Internet      │"
-        },
-        {
-          "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 229,
-          "source_group": "docs",
-          "text": "**Layer 2: Proxy** (`scripts/wsl_proxy.py`)"
         }
       ]
     },

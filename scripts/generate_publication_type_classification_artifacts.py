@@ -14,7 +14,11 @@ from pathlib import Path
 
 def _canonical_script() -> Path:
     repo_root = Path(__file__).resolve().parents[1]
-    return repo_root / "scripts" / "schema/generate_publication_type_classification_artifacts.py"
+    return (
+        repo_root
+        / "scripts"
+        / "schema/generate_publication_type_classification_artifacts.py"
+    )
 
 
 if __name__ == "__main__":

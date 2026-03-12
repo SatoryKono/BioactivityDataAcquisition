@@ -131,7 +131,7 @@ def handle_client(client: socket.socket, addr: tuple[str, int]) -> None:
             handle_connect(client, host, port)
         else:
             # Plain HTTP: forward rest of data after first line
-            rest = data[line_end + 2:]
+            rest = data[line_end + 2 :]
             handle_plain(client, method, target, rest)
     except Exception:
         log.exception("Error handling %s", addr)

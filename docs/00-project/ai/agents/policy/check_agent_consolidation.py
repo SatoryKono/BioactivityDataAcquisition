@@ -7,15 +7,12 @@ Scope: docs/00-project/ai/agents/snapshots/collected/.claude/agents
 from __future__ import annotations
 
 import argparse
-from dataclasses import dataclass
-from pathlib import Path
 import re
 import sys
+from dataclasses import dataclass
+from pathlib import Path
 
-
-AGENTS_DIR = Path(
-    "docs/00-project/ai/agents/snapshots/collected/.claude/agents"
-)
+AGENTS_DIR = Path("docs/00-project/ai/agents/snapshots/collected/.claude/agents")
 SKIP = {"README.md", "ORCHESTRATION.md"}
 BANNED_SUFFIXES = ("-pro", "-master", "-expert")
 
@@ -118,7 +115,9 @@ def main(argv: list[str] | None = None) -> int:
                 if "Boundary note (" not in text:
                     findings.append(Finding(path.name, "missing Boundary note section"))
                 if "Operating modes:" not in text:
-                    findings.append(Finding(path.name, "missing Operating modes section"))
+                    findings.append(
+                        Finding(path.name, "missing Operating modes section")
+                    )
 
         # Basic naming policy check for specialist profiles
         if path.stem.startswith("sp-") and path.stem not in names:

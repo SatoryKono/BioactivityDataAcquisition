@@ -37,6 +37,7 @@ Groupwise sizing (add to .mmd file header):
     %% @uniform-group base    nodes=BaseHttpAdapter,BaseSyncAdapter
     %% @uniform-group adapter nodes=ChemblAdapter,PubMedAdapter,...
 """
+
 from __future__ import annotations
 
 import argparse
@@ -72,9 +73,7 @@ _CLASS_BLOCK_START_RE = re.compile(r"^\s+class\s+(\w+)\s*\{")
 _CLASS_BLOCK_END_RE = re.compile(r"^\s+\}")
 _UNIFORM_TAG_RE = re.compile(r"^%% @uniform(?:\s|$).*$")
 _UNIFORM_STATS_RE = re.compile(r"^%% @uniform-stats\b.*$")
-_UNIFORM_GROUP_RE = re.compile(
-    r"^%%\s*@uniform-group\s+(\S+)\s+nodes=(.+)$"
-)
+_UNIFORM_GROUP_RE = re.compile(r"^%%\s*@uniform-group\s+(\S+)\s+nodes=(.+)$")
 _UNIFORM_WIDTH_RE = re.compile(
     r"^%%\s*@uniform-width\s+(global|group|grouped)\s*$",
     re.IGNORECASE,
@@ -89,16 +88,17 @@ _NBSP = "&nbsp;"
 #   ID{{"Label text"}}       — hexagon
 # We capture: ID, opening bracket sequence, label content, closing bracket sequence
 _FLOWCHART_NODE_RE = re.compile(
-    r'^(\s+)'                       # leading indent
-    r'(\w+)'                        # node ID
+    r"^(\s+)"  # leading indent
+    r"(\w+)"  # node ID
     r'(\["|\(\["|\[\("|\(\("|\{\{")'  # opening brackets
-    r'(.+?)'                        # label content (non-greedy)
+    r"(.+?)"  # label content (non-greedy)
     r'("\]|"\)\]|"\)\]|"\)\)|"\}\})'  # closing brackets
-    r'\s*$'                         # trailing whitespace
+    r"\s*$"  # trailing whitespace
 )
 
 
 # ── Data structures ─────────────────────────────────────────────────────────
+
 
 @dataclass
 class ClassBlock:
@@ -210,6 +210,7 @@ def _partition_by_group(
 
 # ── Helpers ─────────────────────────────────────────────────────────────────
 
+
 def _strip_nbsp(text: str) -> str:
     """Remove trailing &nbsp; sequences from text."""
     while text.endswith(_NBSP):
@@ -238,6 +239,7 @@ def _pad_width(text: str, target_width: int) -> str:
 
 
 # ── Class diagram parser ───────────────────────────────────────────────────
+
 
 def _detect_diagram_type(lines: list[str]) -> str | None:
     """Detect whether file is classDiagram or flowchart."""
@@ -443,9 +445,7 @@ def _normalize_class_diagram(lines: list[str]) -> list[str]:
                     max_title_len=gs.max_title_len,
                 )
 
-        stats_map = {
-            b.name: group_stats[assignment[b.name]] for b in blocks
-        }
+        stats_map = {b.name: group_stats[assignment[b.name]] for b in blocks}
 
     # Rebuild file, replacing block bodies
     result: list[str] = []
@@ -483,6 +483,7 @@ def _normalize_class_diagram(lines: list[str]) -> list[str]:
 
 
 # ── Flowchart parser ────────────────────────────────────────────────────────
+
 
 def _parse_flowchart_nodes(lines: list[str]) -> list[FlowchartNode]:
     """Parse flowchart nodes that use multi-line labels (with <br/>)."""
@@ -560,10 +561,7 @@ def _rebuild_flowchart_node(
         padded_parts.append(_NBSP)
 
     label = "<br/>".join(padded_parts)
-    return (
-        f"{node.indent}{node.node_id}"
-        f"{node.open_bracket}{label}{node.close_bracket}"
-    )
+    return f"{node.indent}{node.node_id}{node.open_bracket}{label}{node.close_bracket}"
 
 
 def _normalize_flowchart(lines: list[str]) -> list[str]:
@@ -613,9 +611,7 @@ def _normalize_flowchart(lines: list[str]) -> list[str]:
                     max_title_len=gs.max_title_len,
                 )
 
-        stats_map = {
-            n.node_id: group_stats[assignment[n.node_id]] for n in nodes
-        }
+        stats_map = {n.node_id: group_stats[assignment[n.node_id]] for n in nodes}
 
     # Build index of lines to replace
     replacements: dict[int, str] = {}
@@ -768,10 +764,7 @@ def _update_uniform_tag(
         )
 
     # Remove any stale @uniform-stats lines (leftover from grouped mode)
-    lines = [
-        line for line in lines
-        if not _UNIFORM_STATS_RE.match(line.strip())
-    ]
+    lines = [line for line in lines if not _UNIFORM_STATS_RE.match(line.strip())]
 
     # Find and replace existing @uniform, or insert before diagram declaration
     for i, line in enumerate(lines):
@@ -794,6 +787,7 @@ def _update_uniform_tag(
 
 
 # ── Main processing ─────────────────────────────────────────────────────────
+
 
 def normalize_file(path: Path) -> tuple[str, str, bool]:
     """Normalize a single diagram file.
@@ -867,6 +861,7 @@ def show_diff(path: Path, original: str, normalized: str) -> None:
 
 
 # ── CLI ─────────────────────────────────────────────────────────────────────
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(

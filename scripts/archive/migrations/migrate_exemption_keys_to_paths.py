@@ -14,7 +14,9 @@ from pathlib import Path
 
 def _canonical_script() -> Path:
     repo_root = Path(__file__).resolve().parents[1]
-    return repo_root / "scripts" / "migrations/oneoff/migrate_exemption_keys_to_paths.py"
+    return (
+        repo_root / "scripts" / "migrations/oneoff/migrate_exemption_keys_to_paths.py"
+    )
 
 
 if __name__ == "__main__":

@@ -346,8 +346,7 @@ def check_documentation(docs_path: Path) -> Iterator[Violation]:
         if rel_parts and rel_parts[0] in _DOC_EXCLUDED_DIRS:
             continue
         if rel is not None and any(
-            str(rel).replace("\\", "/").startswith(sp)
-            for sp in _DOC_EXCLUDED_SUBPATHS
+            str(rel).replace("\\", "/").startswith(sp) for sp in _DOC_EXCLUDED_SUBPATHS
         ):
             continue
 
@@ -467,7 +466,9 @@ def format_report(results: dict[str, list[Violation]]) -> str:
             lines.append("")
 
     if total_violations == 0:
-        lines.append("OK: **No violations found. All naming conventions are followed.**")
+        lines.append(
+            "OK: **No violations found. All naming conventions are followed.**"
+        )
 
     return "\n".join(lines)
 

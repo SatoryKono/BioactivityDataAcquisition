@@ -39,7 +39,7 @@ def _strip_class_id_suffix(raw_class_id: str) -> str:
     """Convert Mermaid node id `classId-Name-3` to class name `Name`."""
     if not raw_class_id.startswith("classId-"):
         return raw_class_id
-    candidate = raw_class_id[len("classId-"):]
+    candidate = raw_class_id[len("classId-") :]
     if "-" not in candidate:
         return candidate
     maybe_name, maybe_idx = candidate.rsplit("-", 1)
@@ -80,7 +80,9 @@ def parse_expected_methods(mmd_path: Path) -> dict[str, list[str]]:
     return methods
 
 
-def parse_svg_methods(svg_path: Path) -> tuple[dict[str, str], list[tuple[str, str, str]]]:
+def parse_svg_methods(
+    svg_path: Path,
+) -> tuple[dict[str, str], list[tuple[str, str, str]]]:
     tree = ET.parse(svg_path)
     root = tree.getroot()
     parent_map = {child: parent for parent in root.iter() for child in parent}
@@ -124,7 +126,9 @@ def parse_svg_methods(svg_path: Path) -> tuple[dict[str, str], list[tuple[str, s
             spans = [s for s in spans if s]
             for left, right in zip(spans, spans[1:]):
                 # Broken split example: "start_execution_sp" + "an()"
-                if re.search(r"[A-Za-z0-9_]$", left) and re.match(r"^[A-Za-z0-9_]", right):
+                if re.search(r"[A-Za-z0-9_]$", left) and re.match(
+                    r"^[A-Za-z0-9_]", right
+                ):
                     split_issues.append((class_name, left, right))
 
     return rendered_by_class, split_issues
@@ -231,9 +235,15 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    source_dir = args.source_dir if args.source_dir.is_absolute() else Path.cwd() / args.source_dir
+    source_dir = (
+        args.source_dir
+        if args.source_dir.is_absolute()
+        else Path.cwd() / args.source_dir
+    )
     svg_dir_input = args.svg_dir if args.svg_dir is not None else source_dir / "svg"
-    svg_dir = svg_dir_input if svg_dir_input.is_absolute() else Path.cwd() / svg_dir_input
+    svg_dir = (
+        svg_dir_input if svg_dir_input.is_absolute() else Path.cwd() / svg_dir_input
+    )
 
     explicit_files = [Path(raw) for raw in args.file]
     sources = resolve_sources(source_dir, explicit_files)

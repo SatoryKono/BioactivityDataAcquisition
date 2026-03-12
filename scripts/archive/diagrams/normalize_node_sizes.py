@@ -225,7 +225,7 @@ def visible_length(text: str) -> int:
     no_tags = re.sub(r"<[^>]+>", "", text)
     unescaped = html.unescape(no_tags)
     # Ignore non-breaking spaces used as width fillers.
-    normalized = unescaped.replace("\u00A0", "")
+    normalized = unescaped.replace("\u00a0", "")
     return len(normalized.strip())
 
 
@@ -431,11 +431,7 @@ def normalize_label(
         lines = [""]
 
     title = strip_trailing_nbsp(lines[0].strip())
-    desc = [
-        strip_trailing_nbsp(ln.strip())
-        for ln in lines[1:]
-        if is_semantic_line(ln)
-    ]
+    desc = [strip_trailing_nbsp(ln.strip()) for ln in lines[1:] if is_semantic_line(ln)]
 
     pad_count = max(0, max_title_len - visible_length(title))
     padded_title = title + ("&nbsp;" * pad_count)
@@ -490,9 +486,7 @@ def process_file(path: Path, fix: bool) -> FileResult:
         return result
 
     # Skip files managed by uniform_diagram_sizes.py groupwise sizing
-    if any(
-        re.match(r"^\s*%%\s*@uniform-group\b", ln) for ln in lines
-    ):
+    if any(re.match(r"^\s*%%\s*@uniform-group\b", ln) for ln in lines):
         result.skipped_reason = "has-uniform-groups"
         return result
 
@@ -516,7 +510,9 @@ def process_file(path: Path, fix: bool) -> FileResult:
         result.width = width
         result.height = height
 
-        updated_lines = normalize_class_lines(lines, blocks, max_title_len, max_desc_lines)
+        updated_lines = normalize_class_lines(
+            lines, blocks, max_title_len, max_desc_lines
+        )
         updated_lines = upsert_uniform_metadata(
             updated_lines,
             (
@@ -542,10 +538,7 @@ def process_file(path: Path, fix: bool) -> FileResult:
         updated_lines = normalize_sequence_lines(lines, participants, max_title_len)
         updated_lines = upsert_uniform_metadata(
             updated_lines,
-            (
-                "%% @uniform sequence "
-                f"width={width} max_title_len={max_title_len}"
-            ),
+            (f"%% @uniform sequence width={width} max_title_len={max_title_len}"),
         )
 
     if updated_lines != lines:

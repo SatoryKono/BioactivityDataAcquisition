@@ -32,6 +32,7 @@ USAGE
 
 ADR reference: ADR-040-diagram-governance.md (D6 CI Validation)
 """
+
 from __future__ import annotations
 
 import argparse
@@ -63,20 +64,20 @@ _NID = r"[A-Za-z_][A-Za-z0-9_]*"
 # so that -.-  never matches the first 3 chars of  -.->  (which would leave
 # a stray  >  before the target node ID and break ID extraction).
 _ARROW_RE = re.compile(
-    r"-\.\.->"      # -..->   double-dotted forward arrow
-    r"|-\.->"       # -.->    dotted forward arrow   ← must precede  -.-
-    r"|-\.\.-"      # -..-    double-dotted undirected
-    r"|-\.-"        # -.-     dotted undirected
-    r"|<-->"        # <-->    bidirectional solid
-    r"|-->"         # -->     solid forward arrow
-    r"|<--"         # <--     solid backward arrow
-    r"|---"         # ---     solid undirected
-    r"|--[oxX]"     # --o  --x  circle / cross end
-    r"|o--o"        # o--o    circle bidirectional
-    r"|x--x"        # x--x    cross bidirectional
-    r"|==>>"        # ==>>    thick double arrow
-    r"|==>"         # ==>     thick arrow
-    r"|~~~"         # ~~~     tilde link
+    r"-\.\.->"  # -..->   double-dotted forward arrow
+    r"|-\.->"  # -.->    dotted forward arrow   ← must precede  -.-
+    r"|-\.\.-"  # -..-    double-dotted undirected
+    r"|-\.-"  # -.-     dotted undirected
+    r"|<-->"  # <-->    bidirectional solid
+    r"|-->"  # -->     solid forward arrow
+    r"|<--"  # <--     solid backward arrow
+    r"|---"  # ---     solid undirected
+    r"|--[oxX]"  # --o  --x  circle / cross end
+    r"|o--o"  # o--o    circle bidirectional
+    r"|x--x"  # x--x    cross bidirectional
+    r"|==>>"  # ==>>    thick double arrow
+    r"|==>"  # ==>     thick arrow
+    r"|~~~"  # ~~~     tilde link
 )
 
 # Flowchart: subgraph open — capture the subgraph ID
@@ -92,11 +93,11 @@ _STYLE_DIRECTIVE_RE = re.compile(r"^\s*style\s+(\w+)\b")
 # Matches: id[".."], id(["..]), id{{"..}}, id[("..], id(("..)), id>"..], id[, id(, id{
 _NODE_SHAPE_RE = re.compile(
     r"^\s*(\w+)\s*(?:"
-    r'\[{1,2}[^]]*\]?'          # [text], [[text]], [(text)]
-    r'|\({1,2}[^)]*\)?'          # (text), ((text)), ([text])
-    r'|\{{1,2}[^}]*\}?'          # {text}, {{text}}
-    r"|>[^]]*\]"                  # >text]
-    r"|/[^/]*/?"                  # /text/
+    r"\[{1,2}[^]]*\]?"  # [text], [[text]], [(text)]
+    r"|\({1,2}[^)]*\)?"  # (text), ((text)), ([text])
+    r"|\{{1,2}[^}]*\}?"  # {text}, {{text}}
+    r"|>[^]]*\]"  # >text]
+    r"|/[^/]*/?"  # /text/
     r")"
 )
 
@@ -133,7 +134,7 @@ _SEQ_BOX_RE = re.compile(r"^\s*box\b", re.IGNORECASE)
 @dataclass
 class OrphanResult:
     file: Path
-    diagram_type: str            # "flowchart" | "sequence" | "skipped"
+    diagram_type: str  # "flowchart" | "sequence" | "skipped"
     orphan_ids: set[str] = field(default_factory=set)
     skipped_reason: str = ""
 
@@ -227,11 +228,11 @@ def parse_flowchart_orphans(
     ``Bronze --> Silver`` exists).
     """
     subgraph_names: set[str] = set()
-    all_defined: set[str] = set()          # standalone node definition IDs
-    connected: set[str] = set()            # IDs appearing in edge lines
+    all_defined: set[str] = set()  # standalone node definition IDs
+    connected: set[str] = set()  # IDs appearing in edge lines
     definition_lines: dict[str, list[int]] = {}
-    node_parent: dict[str, str] = {}       # node_id → immediate parent subgraph
-    subgraph_stack: list[str] = []         # stack of open subgraph names
+    node_parent: dict[str, str] = {}  # node_id → immediate parent subgraph
+    subgraph_stack: list[str] = []  # stack of open subgraph names
 
     for i, ln in enumerate(lines):
         s = ln.strip()
@@ -291,7 +292,11 @@ def parse_flowchart_orphans(
         if m:
             nid = m.group(1)
             if nid.lower() not in {
-                "end", "direction", "graph", "flowchart", "sequencediagram"
+                "end",
+                "direction",
+                "graph",
+                "flowchart",
+                "sequencediagram",
             }:
                 all_defined.add(nid)
                 definition_lines.setdefault(nid, []).append(i)
@@ -312,7 +317,8 @@ def parse_flowchart_orphans(
     # Lenient rule: a node inside a *connected* subgraph is not an orphan —
     # it is a descriptive child of that subgraph.
     orphans = {
-        nid for nid in raw_orphans
+        nid
+        for nid in raw_orphans
         if node_parent.get(nid) not in connected_subgraph_names
     }
 
@@ -567,9 +573,7 @@ def format_text_check(results: list[OrphanResult]) -> str:
         lines.append(
             "To remove: python scripts/diagrams/diagrams/prune_orphan_nodes.py --fix"
         )
-        lines.append(
-            "To keep:   add  %% keep-orphan: NodeId  to the file"
-        )
+        lines.append("To keep:   add  %% keep-orphan: NodeId  to the file")
 
     return "\n".join(lines)
 
@@ -713,10 +717,7 @@ def main() -> int:
             if modified:
                 total_modified += 1
                 total_grandfathered.extend(sorted(gf_ids))
-                print(
-                    f"  [GF] {fpath.name}  "
-                    f"keep-orphan: {', '.join(sorted(gf_ids))}"
-                )
+                print(f"  [GF] {fpath.name}  keep-orphan: {', '.join(sorted(gf_ids))}")
 
         print("=" * 60)
         print(f"Modified files:        {total_modified}")

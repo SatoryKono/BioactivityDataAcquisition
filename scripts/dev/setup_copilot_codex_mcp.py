@@ -51,7 +51,9 @@ def _codex_registration() -> int:
     if codex_bin is None:
         print("[2/3] Codex CLI not found. Skipping Codex MCP registration.")
         print("[3/3] Done.")
-        print("Set GITHUB_PERSONAL_ACCESS_TOKEN in your shell before using GitHub MCP tools.")
+        print(
+            "Set GITHUB_PERSONAL_ACCESS_TOKEN in your shell before using GitHub MCP tools."
+        )
         return 0
 
     print("[2/3] Checking Codex MCP server registration: github")
@@ -75,7 +77,9 @@ def _codex_registration() -> int:
         print("      github MCP registered in Codex.")
 
     print("[3/3] Done.")
-    print("Set GITHUB_PERSONAL_ACCESS_TOKEN in your shell before using GitHub MCP tools.")
+    print(
+        "Set GITHUB_PERSONAL_ACCESS_TOKEN in your shell before using GitHub MCP tools."
+    )
     return 0
 
 
@@ -87,7 +91,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.skip_codex:
         print("[2/3] Skipping Codex MCP registration (requested).")
         print("[3/3] Done.")
-        print("Set GITHUB_PERSONAL_ACCESS_TOKEN in your shell before using GitHub MCP tools.")
+        print(
+            "Set GITHUB_PERSONAL_ACCESS_TOKEN in your shell before using GitHub MCP tools."
+        )
         return 0
 
     return _codex_registration()

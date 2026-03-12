@@ -58,14 +58,18 @@ def to_png_path(svg_path: Path) -> Path:
     try:
         svg_idx = parts.index("svg")
     except ValueError:
-        raise ValueError(f"Cannot derive PNG path (missing '/svg/' segment): {svg_path}") from None
+        raise ValueError(
+            f"Cannot derive PNG path (missing '/svg/' segment): {svg_path}"
+        ) from None
 
     parts[svg_idx] = "png"
     png = Path(*parts).with_suffix(".png")
     return png
 
 
-def validate_artifacts(repo_root: Path, svg_rel_paths: list[Path]) -> list[ArtifactIssue]:
+def validate_artifacts(
+    repo_root: Path, svg_rel_paths: list[Path]
+) -> list[ArtifactIssue]:
     issues: list[ArtifactIssue] = []
 
     for svg_rel in svg_rel_paths:
@@ -111,7 +115,9 @@ def validate_artifacts(repo_root: Path, svg_rel_paths: list[Path]) -> list[Artif
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Validate diagram SVG/PNG artifact existence")
+    parser = argparse.ArgumentParser(
+        description="Validate diagram SVG/PNG artifact existence"
+    )
     parser.add_argument(
         "--manifest",
         type=Path,
@@ -129,7 +135,9 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     repo_root = Path.cwd()
-    manifest = args.manifest if args.manifest.is_absolute() else repo_root / args.manifest
+    manifest = (
+        args.manifest if args.manifest.is_absolute() else repo_root / args.manifest
+    )
 
     try:
         svg_paths = load_manifest(manifest)

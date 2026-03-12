@@ -19,7 +19,7 @@ import re
 import sys
 from collections import Counter, defaultdict
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 from typing import Final
 
@@ -228,7 +228,9 @@ def _dedupe_refs(refs: list[RefEvidence]) -> list[RefEvidence]:
 
 def _status_for(script_rel: str, refs: list[RefEvidence]) -> str:
     if not refs:
-        return "legacy" if ("_tmp" in script_rel or "debug_" in script_rel) else "orphan"
+        return (
+            "legacy" if ("_tmp" in script_rel or "debug_" in script_rel) else "orphan"
+        )
 
     groups = {item.source_group for item in refs}
     if groups & {"ci", "build", "skills", "tests", "scripts", "agents"}:
@@ -291,7 +293,7 @@ def _build_inventory(root: Path) -> dict[str, object]:
     }
     return {
         "schema_version": SCHEMA_VERSION,
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
         "summary": summary,
         "scripts": rows,
     }
@@ -356,9 +358,13 @@ def _write_deprecation_report(path: Path, payload: dict[str, object]) -> None:
             type_value = str(item["type"])
             ref_count = int(item["reference_count"])
             if status == "unknown":
-                next_step = "Validate runtime usage; promote to active or mark deprecated."
+                next_step = (
+                    "Validate runtime usage; promote to active or mark deprecated."
+                )
             elif status == "orphan":
-                next_step = "Plan staged removal or add explicit compatibility call-site."
+                next_step = (
+                    "Plan staged removal or add explicit compatibility call-site."
+                )
             else:
                 next_step = "Archive/remove after freeze window if no active consumers."
             lines.append(
@@ -399,7 +405,9 @@ def _check_lifecycle_registry(
 
     entries_raw = registry.get("entries")
     if not isinstance(entries_raw, dict):
-        print(f"[FAIL] Lifecycle registry must contain object field 'entries': {registry_path}")
+        print(
+            f"[FAIL] Lifecycle registry must contain object field 'entries': {registry_path}"
+        )
         return 1
 
     script_rows = payload["scripts"]

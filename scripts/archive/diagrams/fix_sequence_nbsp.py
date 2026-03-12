@@ -1,6 +1,7 @@
 """Fix &nbsp; in sequence diagram participant/actor lines."""
-import re
+
 import glob
+import re
 
 
 def fix_file(filepath: str) -> bool:
@@ -16,7 +17,9 @@ def fix_file(filepath: str) -> bool:
 
     for line in lines:
         stripped = line.lstrip()
-        if (stripped.startswith("participant ") or stripped.startswith("actor ")) and "&nbsp;" in line:
+        if (
+            stripped.startswith("participant ") or stripped.startswith("actor ")
+        ) and "&nbsp;" in line:
             new_line = line.replace("&nbsp;", "").rstrip()
             # Clean up redundant 'as SameName' (e.g., 'participant CLI as CLI' -> 'participant CLI')
             m = re.match(r"^(\s*(?:participant|actor)\s+)(\w+)\s+as\s+\2\s*$", new_line)

@@ -6,7 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 from dataclasses import asdict, dataclass
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime, timezone
 from pathlib import Path
 
 from bioetl.infrastructure.quality import (
@@ -95,7 +95,7 @@ def _build_snapshot(
     new_debt = max(0, inventory.total_exemptions - baseline_total)
 
     return WeeklyDebtSnapshot(
-        generated_at_utc=datetime.now(timezone.utc).isoformat(),
+        generated_at_utc=datetime.now(UTC).isoformat(),
         quarter=evaluation.quarter,
         total_debt=inventory.total_exemptions,
         expired_debt=inventory.expired_entries,

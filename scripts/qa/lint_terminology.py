@@ -114,9 +114,7 @@ SKIP_PATHS = {
 }
 
 # Prefixes (POSIX style) to skip entirely from default lint scope.
-SKIP_PATH_PREFIXES = (
-    "docs/00-project/ai/",
-)
+SKIP_PATH_PREFIXES = ("docs/00-project/ai/",)
 
 
 def should_skip_file(filepath: Path) -> bool:
@@ -187,7 +185,9 @@ def _mask_non_code_segments(content: str) -> list[str]:
 
         if start_line == end_line:
             idx = start_line - 1
-            masked_lines[idx] = _mask_line_segment(masked_lines[idx], start_col, end_col)
+            masked_lines[idx] = _mask_line_segment(
+                masked_lines[idx], start_col, end_col
+            )
             continue
 
         for line_no in range(start_line, min(end_line, len(masked_lines)) + 1):

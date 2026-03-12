@@ -10,6 +10,7 @@ Usage:
     python scripts/diagrams/mermaid_prune_orphans.py --apply        # modify files
     python scripts/diagrams/mermaid_prune_orphans.py --apply --filter "03-*"
 """
+
 from __future__ import annotations
 
 import argparse
@@ -26,17 +27,17 @@ DEFAULT_DIRS = ["architecture", "class-diagrams", "foundation"]
 
 # Flowchart node declarations: A[label], A(label), A{label}, A((label)), A>label]
 RE_FC_NODE = re.compile(
-    r"^\s*([A-Za-z_][\w]*)"       # node id
-    r"\s*[\[\(\{<>]"              # opening bracket
+    r"^\s*([A-Za-z_][\w]*)"  # node id
+    r"\s*[\[\(\{<>]"  # opening bracket
 )
 
 # Flowchart edges: A --> B, A ---|text| B, A -. text .-> B, etc.
 RE_FC_EDGE = re.compile(
-    r"([A-Za-z_][\w]*)"           # source
+    r"([A-Za-z_][\w]*)"  # source
     r"\s*"
     r"(?:--+>|--+|==+>|==+|-\.+->|-\.+|~~~|<--+>)"  # arrow
     r"[^A-Za-z_]*"
-    r"([A-Za-z_][\w]*)"           # target
+    r"([A-Za-z_][\w]*)"  # target
 )
 
 # Also catch edges with label syntax: A -->|text| B or A -- text --> B
@@ -58,9 +59,7 @@ RE_SEQ_PARTICIPANT = re.compile(
 )
 
 # Sequence message: A->>B: text, A-->>B: text, etc.
-RE_SEQ_MSG = re.compile(
-    r"^\s*([A-Za-z_][\w]*)\s*-+>>?\+?\s*-?\s*([A-Za-z_][\w]*)"
-)
+RE_SEQ_MSG = re.compile(r"^\s*([A-Za-z_][\w]*)\s*-+>>?\+?\s*-?\s*([A-Za-z_][\w]*)")
 
 # Also match right-to-left and other sequence patterns
 RE_SEQ_MSG2 = re.compile(
@@ -116,7 +115,10 @@ def analyze_flowchart(text: str) -> tuple[dict[str, int], set[str], set[str]]:
             continue
 
         # Skip direction declarations and style/class lines
-        if re.match(r"^\s*(?:graph|flowchart|direction|style|classDef|class |linkStyle|click )", stripped):
+        if re.match(
+            r"^\s*(?:graph|flowchart|direction|style|classDef|class |linkStyle|click )",
+            stripped,
+        ):
             continue
 
         # Edges (check first — they also contain node refs)
@@ -131,8 +133,18 @@ def analyze_flowchart(text: str) -> tuple[dict[str, int], set[str], set[str]]:
         if nm:
             nid = nm.group(1)
             # Skip keywords
-            if nid.lower() in ("subgraph", "end", "graph", "flowchart", "direction",
-                               "style", "classdef", "click", "linkstyle", "class"):
+            if nid.lower() in (
+                "subgraph",
+                "end",
+                "graph",
+                "flowchart",
+                "direction",
+                "style",
+                "classdef",
+                "click",
+                "linkstyle",
+                "class",
+            ):
                 continue
             if nid not in nodes:
                 nodes[nid] = i
@@ -177,17 +189,14 @@ def find_orphans(path: Path) -> tuple[str, list[tuple[str, int]]] | None:
         orphans = [
             (nid, lineno)
             for nid, lineno in sorted(nodes.items(), key=lambda x: x[1])
-            if nid not in connected
-            and nid not in subgraphs
-            and nid not in keep
+            if nid not in connected and nid not in subgraphs and nid not in keep
         ]
     else:  # sequence
         participants, connected = analyze_sequence(text)
         orphans = [
             (pid, lineno)
             for pid, lineno in sorted(participants.items(), key=lambda x: x[1])
-            if pid not in connected
-            and pid not in keep
+            if pid not in connected and pid not in keep
         ]
 
     if not orphans:
@@ -236,10 +245,16 @@ def remove_orphan_lines(path: Path, orphan_ids: set[str], dtype: str) -> int:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Prune orphan nodes from Mermaid diagrams")
+    parser = argparse.ArgumentParser(
+        description="Prune orphan nodes from Mermaid diagrams"
+    )
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("--dry-run", action="store_true", help="Report orphans without modifying")
-    group.add_argument("--apply", action="store_true", help="Remove orphan declarations")
+    group.add_argument(
+        "--dry-run", action="store_true", help="Report orphans without modifying"
+    )
+    group.add_argument(
+        "--apply", action="store_true", help="Remove orphan declarations"
+    )
     parser.add_argument("--filter", default="*", help="Glob filter for filenames")
     parser.add_argument("--dir", action="append", dest="dirs", help="Extra source dirs")
     args = parser.parse_args()
@@ -269,10 +284,10 @@ def main() -> None:
         total_files_affected += 1
 
         rel = f.relative_to(REPO_ROOT)
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"  {rel}")
         print(f"  Type: {dtype} | Orphans: {len(orphans)}")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
         for oid, lineno in orphans:
             print(f"  L{lineno:>4d}  {oid}")
@@ -283,7 +298,7 @@ def main() -> None:
             total_lines_removed += removed
             print(f"  --> Removed {removed} lines")
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"  Files analyzed:  {len(files)}")
     print(f"  Files affected:  {total_files_affected}")
     print(f"  Total orphans:   {total_orphans}")
@@ -291,7 +306,7 @@ def main() -> None:
         print(f"  Lines removed:   {total_lines_removed}")
     else:
         print(f"  Mode: DRY-RUN (no changes)")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
     sys.exit(1 if total_orphans > 0 and args.dry_run else 0)
 

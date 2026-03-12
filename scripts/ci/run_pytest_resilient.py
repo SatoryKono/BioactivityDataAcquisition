@@ -208,8 +208,7 @@ def _create_parser() -> argparse.ArgumentParser:
         type=float,
         default=900.0,
         help=(
-            "Timeout for parallel pass in seconds (0 disables timeout). "
-            "Default: 900."
+            "Timeout for parallel pass in seconds (0 disables timeout). Default: 900."
         ),
     )
     parser.add_argument(
@@ -217,8 +216,7 @@ def _create_parser() -> argparse.ArgumentParser:
         type=float,
         default=1200.0,
         help=(
-            "Timeout for fallback pass in seconds (0 disables timeout). "
-            "Default: 1200."
+            "Timeout for fallback pass in seconds (0 disables timeout). Default: 1200."
         ),
     )
     parser.add_argument(
@@ -226,8 +224,7 @@ def _create_parser() -> argparse.ArgumentParser:
         type=float,
         default=1200.0,
         help=(
-            "Timeout for serial pass in seconds (0 disables timeout). "
-            "Default: 1200."
+            "Timeout for serial pass in seconds (0 disables timeout). Default: 1200."
         ),
     )
     return parser
@@ -266,7 +263,9 @@ def main() -> int:
 
     if parallel_result.failed_nodeids:
         summary_lines.append("parallel_failed_nodeids:")
-        summary_lines.extend(f"  - {nodeid}" for nodeid in parallel_result.failed_nodeids)
+        summary_lines.extend(
+            f"  - {nodeid}" for nodeid in parallel_result.failed_nodeids
+        )
 
     run_serial_pass = not args.skip_serial_pass
 
@@ -328,7 +327,9 @@ def main() -> int:
     )
     if fallback_result.failed_nodeids:
         summary_lines.append("fallback_failed_nodeids:")
-        summary_lines.extend(f"  - {nodeid}" for nodeid in fallback_result.failed_nodeids)
+        summary_lines.extend(
+            f"  - {nodeid}" for nodeid in fallback_result.failed_nodeids
+        )
 
     if fallback_rc != 0:
         _write_summary(reports_dir / "summary.txt", summary_lines)

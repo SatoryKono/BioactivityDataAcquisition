@@ -135,7 +135,10 @@ def _build_markdown(
     ]
     if recurrent_cases:
         lines.append("## Recurrent Cases")
-        lines.extend(f"- `{name}`: `{classification}`" for name, classification in recurrent_cases)
+        lines.extend(
+            f"- `{name}`: `{classification}`"
+            for name, classification in recurrent_cases
+        )
         lines.append("")
     if violations:
         lines.append("## Violations")
@@ -164,7 +167,10 @@ def main() -> int:
     recurrent_cases: list[tuple[str, str]] = []
 
     for name in case_names:
-        outcomes = [report.get(name, CaseOutcome("missing", "unknown")) for report in run_outcomes]
+        outcomes = [
+            report.get(name, CaseOutcome("missing", "unknown"))
+            for report in run_outcomes
+        ]
         if any(item.status == "passed" for item in outcomes):
             continue
         classifications = [item.classification for item in outcomes]

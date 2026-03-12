@@ -25,7 +25,9 @@ DEFAULT_INPUTS = [
     Path("docs/02-architecture/mmd-diagrams/class-diagrams-with-descriptions.md"),
     Path("docs/02-architecture/mmd-diagrams/foundation-diagrams-with-descriptions.md"),
 ]
-DEFAULT_CSS = Path("docs/02-architecture/mmd-diagrams/theme/with-descriptions-print.css")
+DEFAULT_CSS = Path(
+    "docs/02-architecture/mmd-diagrams/theme/with-descriptions-print.css"
+)
 DEFAULT_BOUNDS_CHECKER = Path("scripts/diagrams/check_pdf_image_bounds.py")
 
 
@@ -116,13 +118,17 @@ def rewrite_image_links(markdown_text: str, *, base_dir: Path, prefer_svg: bool)
 
 
 def run(cmd: list[str], cwd: Path | None = None) -> None:
-    completed = subprocess.run(cmd, cwd=str(cwd) if cwd else None, capture_output=True, text=True)
+    completed = subprocess.run(
+        cmd, cwd=str(cwd) if cwd else None, capture_output=True, text=True
+    )
     if completed.returncode == 0:
         return
     stderr = completed.stderr.strip()
     stdout = completed.stdout.strip()
     details = stderr or stdout or "(no output)"
-    raise RuntimeError(f"Command failed ({completed.returncode}): {' '.join(cmd)}\n{details}")
+    raise RuntimeError(
+        f"Command failed ({completed.returncode}): {' '.join(cmd)}\n{details}"
+    )
 
 
 def render_one(
@@ -220,7 +226,10 @@ def main() -> int:
         if shutil.which(tool) is None:
             missing_tools.append(tool)
     if missing_tools:
-        print(f"[ERROR] Missing required tools: {', '.join(missing_tools)}", file=sys.stderr)
+        print(
+            f"[ERROR] Missing required tools: {', '.join(missing_tools)}",
+            file=sys.stderr,
+        )
         return 2
     if not css_path.exists():
         print(f"[ERROR] CSS file not found: {css_path}", file=sys.stderr)
@@ -238,7 +247,7 @@ def main() -> int:
                 run_bounds_check=not args.skip_bounds_check,
                 max_overflow_ratio=args.max_overflow_ratio,
             )
-        except Exception as exc:  # noqa: BLE001 - CLI boundary
+        except Exception as exc:
             print(f"[ERROR] {exc}", file=sys.stderr)
             return 1
         rendered.append(output_pdf)

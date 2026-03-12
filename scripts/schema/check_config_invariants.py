@@ -168,15 +168,11 @@ def _deep_string_search(obj: Any, fragment: str) -> bool:
 
 
 def _entity_configs() -> list[Path]:
-    return sorted(
-        p for p in ENTITIES_DIR.rglob("*.yaml") if not p.name.startswith("_")
-    )
+    return sorted(p for p in ENTITIES_DIR.rglob("*.yaml") if not p.name.startswith("_"))
 
 
 def _provider_configs() -> list[Path]:
-    return sorted(
-        p for p in PROVIDERS_DIR.glob("*.yaml") if not p.name.startswith("_")
-    )
+    return sorted(p for p in PROVIDERS_DIR.glob("*.yaml") if not p.name.startswith("_"))
 
 
 def _composite_configs() -> list[Path]:
@@ -268,7 +264,9 @@ def check_inv_002(verbose: bool) -> list[str]:
         )
 
     if verbose and not errors:
-        sys.stdout.write("  INV-CFG-002: PASS (entity/provider declarations consistent)\n")
+        sys.stdout.write(
+            "  INV-CFG-002: PASS (entity/provider declarations consistent)\n"
+        )
     return errors
 
 

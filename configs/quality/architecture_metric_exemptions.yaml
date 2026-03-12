@@ -1,22 +1,29 @@
 schema_version: 1
 policy:
-    warning_mode_until: '2026-03-10'
-    default_gate_mode: block
-    owner_diversification_sync:
-        source: configs/quality/debt_scorecard.yaml#governance.owner_diversification
-        starts_quarter: 2026-Q2
-        review_on: '2026-06-30'
-    required_fields:
-        - value
-        - owner
-        - reason
-        - expires_on
-        - removal_step
+  warning_mode_until: '2026-03-10'
+  default_gate_mode: block
+  owner_diversification_sync:
+    source: configs/quality/debt_scorecard.yaml#governance.owner_diversification
+    starts_quarter: 2026-Q2
+    review_on: '2026-06-30'
+  required_fields:
+  - value
+  - owner
+  - reason
+  - expires_on
+  - removal_step
 registries:
-    file_size_limits: { }
-    function_complexity: { }
-    function_length: { }
-    class_size: { }
-    class_method_count: { }
-    god_object: { }
-    domain_complexity: { }
+  file_size_limits: {}
+  function_complexity: {}
+  function_length: {}
+  class_size:
+    src/bioetl/application/core/postrun_service.py::PostrunService:
+      value: 310
+      owner: '@bioetl-architecture'
+      expires_on: '2026-06-30'
+      reason: Service encapsulates complex post-run validation and summarization logic
+        requiring large sequential steps.
+      removal_step: Refactor summarization to separate component.
+  class_method_count: {}
+  god_object: {}
+  domain_complexity: {}

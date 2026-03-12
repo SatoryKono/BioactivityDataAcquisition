@@ -13,10 +13,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-
-DEFAULT_MANIFEST = Path(
-    "docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt"
-)
+DEFAULT_MANIFEST = Path("docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt")
 
 
 def load_manifest(manifest_path: Path) -> list[str]:
@@ -75,7 +72,9 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     repo_root = Path.cwd()
-    manifest = args.manifest if args.manifest.is_absolute() else repo_root / args.manifest
+    manifest = (
+        args.manifest if args.manifest.is_absolute() else repo_root / args.manifest
+    )
 
     try:
         rel_paths = load_manifest(manifest)
@@ -86,7 +85,10 @@ def main() -> int:
         return 2
 
     if changed:
-        print("[ERROR] Visual smoke regression detected in baseline SVG(s):", file=sys.stderr)
+        print(
+            "[ERROR] Visual smoke regression detected in baseline SVG(s):",
+            file=sys.stderr,
+        )
         for path in changed:
             print(f"  - {path}", file=sys.stderr)
         print(
