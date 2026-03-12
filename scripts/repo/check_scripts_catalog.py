@@ -112,6 +112,8 @@ def _check_root_wrappers(
     for path in sorted(scripts_root.glob("*")):
         if not path.is_file():
             continue
+        if path.name == "__init__.py":
+            continue
         if path.suffix not in SCRIPT_EXTENSIONS:
             continue
         if path.name in allowlist:

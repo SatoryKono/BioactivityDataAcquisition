@@ -35,8 +35,8 @@ from bioetl.infrastructure.storage.silver_writer_metadata_mixin import (
 from bioetl.infrastructure.storage.silver_writer_pipeline_helpers import (
     _SilverWriteExecutionContext,
     _SilverWriteInvocation,
-    execute_silver_write_with_tracing,
     execute_silver_write_pipeline,
+    execute_silver_write_with_tracing,
 )
 from bioetl.infrastructure.storage.silver_writer_postwrite_mixin import (
     SilverWriterPostwriteMixin,

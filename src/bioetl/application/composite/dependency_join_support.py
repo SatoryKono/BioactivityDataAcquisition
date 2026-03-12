@@ -1,0 +1,229 @@
+"""Support helpers for dependency join preparation and execution."""
+
+from __future__ import annotations
+
+from collections.abc import Callable, Mapping
+from dataclasses import dataclass
+
+import polars as pl
+
+from bioetl.application.composite.column_renamer import ColumnRenamerService
+from bioetl.application.composite.conflict_resolver import ConflictResolverService
+from bioetl.application.composite.deduplication import EnricherDeduplicatorService
+from bioetl.application.composite.protocols import JoinKeyResolverProtocol
+from bioetl.domain.composite.config import DependencyConfig
+from bioetl.domain.ports import LoggerPort
+
+
+@dataclass(frozen=True, slots=True)
+class CompositeJoinContext:
+    join_keys_list: list[str]
+    left_pipeline: str | None
+
+
+@dataclass(frozen=True, slots=True)
+class SingleKeyJoinContext:
+    join_keys_list: list[str]
+    primary_key: str
+    right_key: str
+    right_keys_list: list[str]
+    left_pipeline: str | None
+
+
+def resolve_left_pipeline(
+    dep: DependencyConfig,
+    seed_pipeline: str | None,
+) -> str | None:
+    if dep.key_source and dep.key_source != "seed":
+        return dep.key_source
+    return seed_pipeline
+
+
+def build_asymmetric_join_key_set(
+    *,
+    left_join_key: str,
+    right_join_key: str,
+    left_join_key_qualified: str | None,
+) -> set[str]:
+    join_key_set = {left_join_key, right_join_key}
+    if left_join_key_qualified and left_join_key_qualified != left_join_key:
+        join_key_set.add(left_join_key_qualified)
+    return join_key_set
+
+
+def count_qualified_columns(columns: list[str]) -> int:
+    return len([col for col in columns if "." in col and not col.startswith("_")])
+
+
+def find_missing_keys(columns: list[str], keys: list[str]) -> list[str]:
+    return [key for key in keys if key not in columns]
+
+
+def build_composite_join_metadata(
+    *,
+    dep: DependencyConfig,
+    seed_pipeline: str | None,
+) -> CompositeJoinContext:
+    return CompositeJoinContext(
+        join_keys_list=list(dep.join_keys),
+        left_pipeline=resolve_left_pipeline(dep, seed_pipeline),
+    )
+
+
+def build_single_key_join_metadata(
+    *,
+    dep: DependencyConfig,
+    seed_pipeline: str | None,
+) -> SingleKeyJoinContext:
+    join_keys_list = list(dep.join_keys)
+    primary_key = dep.primary_join_key
+    right_key = dep.filter_field if dep.filter_field else primary_key
+    right_keys_list = [right_key] if dep.filter_field else join_keys_list
+    return SingleKeyJoinContext(
+        join_keys_list=join_keys_list,
+        primary_key=primary_key,
+        right_key=right_key,
+        right_keys_list=right_keys_list,
+        left_pipeline=resolve_left_pipeline(dep, seed_pipeline),
+    )
+
+
+def log_missing_composite_key_columns(
+    *,
+    logger: LoggerPort,
+    dependency: str,
+    missing_left: list[str],
+    missing_right: list[str],
+) -> None:
+    logger.warning(
+        "Composite key join skipped: missing columns",
+        dependency=dependency,
+        missing_left=missing_left,
+        missing_right=missing_right,
+    )
+
+
+def prepare_dependency_dataframe(
+    *,
+    deduplicator: EnricherDeduplicatorService,
+    dep_df: pl.DataFrame,
+    dep: DependencyConfig,
+    deduplicate_keys: list[str],
+) -> pl.DataFrame:
+    return deduplicator.deduplicate(
+        enricher_df=dep_df,
+        join_keys=deduplicate_keys,
+        enricher_name=dep.pipeline,
+    )
+
+
+def normalize_dependency_join_inputs(
+    *,
+    join_key_resolver: JoinKeyResolverProtocol,
+    merged_df: pl.DataFrame,
+    dep_df: pl.DataFrame,
+    left_join_keys: list[str],
+    right_join_keys: list[str],
+    seed_pipeline: str | None,
+) -> tuple[pl.DataFrame, pl.DataFrame]:
+    normalized_merged = join_key_resolver.normalize_join_key_columns(
+        merged_df,
+        left_join_keys,
+        pipeline=seed_pipeline,
+    )
+    normalized_dep = join_key_resolver.normalize_join_key_columns(
+        dep_df,
+        right_join_keys,
+        pipeline=None,
+    )
+    return normalized_merged, normalized_dep
+
+
+def rename_dependency_dataframe(
+    *,
+    renamer: ColumnRenamerService,
+    logger: LoggerPort,
+    field_alias_resolver: Callable[[str], dict[str, str] | None],
+    drop_system_columns: Callable[[pl.DataFrame], pl.DataFrame],
+    dep_df: pl.DataFrame,
+    dependency: str,
+) -> pl.DataFrame:
+    renamed = renamer.rename_dataframe(
+        dep_df,
+        dependency,
+        exclude_join_keys=False,
+        field_aliases=field_alias_resolver(dependency),
+    )
+    logger.debug(
+        "Renamed dependency columns to qualified format",
+        dependency=dependency,
+        qualified_count=count_qualified_columns(renamed.columns),
+    )
+    return drop_system_columns(renamed)
+
+
+def prepare_dependency_join_frames(
+    *,
+    deduplicator: EnricherDeduplicatorService,
+    join_key_resolver: JoinKeyResolverProtocol,
+    renamer: ColumnRenamerService,
+    logger: LoggerPort,
+    field_alias_resolver: Callable[[str], dict[str, str] | None],
+    drop_system_columns: Callable[[pl.DataFrame], pl.DataFrame],
+    merged_df: pl.DataFrame,
+    dep_df: pl.DataFrame,
+    dep: DependencyConfig,
+    left_join_keys: list[str],
+    right_join_keys: list[str],
+    seed_pipeline: str | None,
+) -> tuple[pl.DataFrame, pl.DataFrame]:
+    prepared_dep = prepare_dependency_dataframe(
+        deduplicator=deduplicator,
+        dep_df=dep_df,
+        dep=dep,
+        deduplicate_keys=right_join_keys,
+    )
+    normalized_merged, normalized_dep = normalize_dependency_join_inputs(
+        join_key_resolver=join_key_resolver,
+        merged_df=merged_df,
+        dep_df=prepared_dep,
+        left_join_keys=left_join_keys,
+        right_join_keys=right_join_keys,
+        seed_pipeline=seed_pipeline,
+    )
+    renamed_dep = rename_dependency_dataframe(
+        renamer=renamer,
+        logger=logger,
+        field_alias_resolver=field_alias_resolver,
+        drop_system_columns=drop_system_columns,
+        dep_df=normalized_dep,
+        dependency=dep.pipeline,
+    )
+    return normalized_merged, renamed_dep
+
+
+def execute_dependency_join(
+    *,
+    conflict_resolver: ConflictResolverService,
+    logger: LoggerPort,
+    merged_df: pl.DataFrame,
+    dep_df: pl.DataFrame,
+    join_key_set: set[str],
+    execute_join: Callable[[pl.DataFrame, pl.DataFrame], pl.DataFrame],
+    log_message: str,
+    dependency: str,
+    log_fields: Mapping[str, object],
+) -> pl.DataFrame:
+    resolved_merged, resolved_dep = conflict_resolver.detect_and_resolve_conflicts(
+        merged_df,
+        dep_df,
+        join_key_set,
+    )
+    result = execute_join(resolved_merged, resolved_dep)
+    logger.debug(
+        log_message,
+        dependency=dependency,
+        result_rows=len(result),
+        **log_fields,
+    )
+    return result

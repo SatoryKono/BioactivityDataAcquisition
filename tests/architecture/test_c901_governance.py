@@ -13,7 +13,7 @@ def test_c901_governance_job_is_declared_in_workflow() -> None:
     assert "c901-governance:" in workflow
     assert "C901 Governance (blocking)" in workflow
     assert "ruff check src/bioetl --select C901" in workflow
-    assert "scripts/check_c901_baseline.py" in workflow
+    assert "scripts/qa/check_c901_baseline.py" in workflow
     assert "--mode" in workflow
 
 

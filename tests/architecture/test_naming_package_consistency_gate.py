@@ -10,8 +10,8 @@ from pathlib import Path
 def test_consistency_gate_script_runs_clean_in_check_mode() -> None:
     """Repository baseline should satisfy consistency gate."""
     repo_root = Path(__file__).resolve().parents[2]
-    script = repo_root / "scripts" / "check_naming_package_consistency.py"
-    assert script.exists(), "scripts/check_naming_package_consistency.py must exist"
+    script = repo_root / "scripts" / "qa" / "check_naming_package_consistency.py"
+    assert script.exists(), "scripts/qa/check_naming_package_consistency.py must exist"
 
     result = subprocess.run(
         [sys.executable, str(script), "--check"],
@@ -30,4 +30,4 @@ def test_tests_workflow_runs_naming_package_consistency_gate() -> None:
     repo_root = Path(__file__).resolve().parents[2]
     workflow = (repo_root / ".github/workflows/tests.yml").read_text(encoding="utf-8")
     assert "Pre-merge naming/package consistency gate" in workflow
-    assert "scripts/check_naming_package_consistency.py --check" in workflow
+    assert "scripts/qa/check_naming_package_consistency.py --check" in workflow

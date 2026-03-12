@@ -1,24 +1,32 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-03-12T10:01:31.353964+00:00",
+  "generated_at": "2026-03-12T11:08:57.639975+00:00",
   "summary": {
-    "total_scripts": 155,
+    "total_scripts": 165,
     "status_counts": {
-      "active": 85,
+      "active": 87,
       "legacy": 3,
-      "orphan": 44,
-      "unknown": 23
+      "orphan": 53,
+      "unknown": 22
     },
     "reference_group_coverage": {
       "build": 25,
       "ci": 41,
       "docs": 71,
-      "scripts": 34,
+      "scripts": 35,
       "skills": 3,
-      "tests": 22
+      "tests": 31
     }
   },
   "scripts": [
+    {
+      "path": "scripts/__init__.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
     {
       "path": "scripts/archive/build_diagram_docs.py",
       "type": "py",
@@ -220,6 +228,14 @@
       "references": []
     },
     {
+      "path": "scripts/ci/__init__.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/ci/apply-ci-optimizations-fixed.ps1",
       "type": "ps1",
       "status": "orphan",
@@ -372,6 +388,14 @@
       ]
     },
     {
+      "path": "scripts/data/__init__.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/data/check_delta_integrity.py",
       "type": "py",
       "status": "active",
@@ -391,7 +415,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -416,6 +440,12 @@
           "line": 325,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/data/check_root_vcr_cassettes.py"
+        },
+        {
+          "path": "tests/architecture/test_test_matrix_coverage.py",
+          "line": 176,
+          "source_group": "tests",
+          "text": "assert \"python scripts/data/check_root_vcr_cassettes.py\" in workflow"
         }
       ]
     },
@@ -424,7 +454,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -443,6 +473,12 @@
           "line": 326,
           "source_group": "build",
           "text": "$(PY_RUN) scripts/data/check_vcr_filename_policy.py"
+        },
+        {
+          "path": "tests/architecture/test_test_matrix_coverage.py",
+          "line": 177,
+          "source_group": "tests",
+          "text": "assert \"python scripts/data/check_vcr_filename_policy.py\" in workflow"
         }
       ]
     },
@@ -1092,6 +1128,14 @@
       ]
     },
     {
+      "path": "scripts/diagrams/__init__.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/diagrams/add_svg_text_fallback.py",
       "type": "py",
       "status": "active",
@@ -1369,7 +1413,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-3.py",
-          "line": 29,
+          "line": 31,
           "source_group": "docs",
           "text": "DEFAULT_BOUNDS_CHECKER = Path(\"scripts/diagrams/check_pdf_image_bounds.py\")"
         },
@@ -1521,6 +1565,14 @@
           "text": "\"\"\"Tests for scripts/diagrams/fix_mermaid_operators.py.\"\"\""
         }
       ]
+    },
+    {
+      "path": "scripts/diagrams/fix_pagebreaks_in_bundles.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/diagrams/generate_architecture_bundle.py",
@@ -2064,6 +2116,14 @@
       ]
     },
     {
+      "path": "scripts/docs/__init__.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/docs/build_docs_site.sh",
       "type": "sh",
       "status": "active",
@@ -2146,7 +2206,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 30,
+      "reference_count": 31,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -2269,7 +2329,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": ".github/workflows/docs-kpi-weekly.yml",
@@ -2306,6 +2366,12 @@
           "line": 266,
           "source_group": "docs",
           "text": "- `scripts/docs/report_docs_kpi.py --fail-on-breach` — PASS"
+        },
+        {
+          "path": "tests/architecture/test_docs_kpi_workflow.py",
+          "line": 21,
+          "source_group": "tests",
+          "text": "assert \"scripts/docs/report_docs_kpi.py\" in workflow"
         }
       ]
     },
@@ -2615,6 +2681,14 @@
       "references": []
     },
     {
+      "path": "scripts/qa/__init__.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/qa/calibrate_hotspot_budgets.py",
       "type": "py",
       "status": "unknown",
@@ -2634,13 +2708,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": ".github/workflows/import-linter.yml",
           "line": 137,
           "source_group": "ci",
           "text": "uv run python scripts/qa/check_c901_baseline.py \\"
+        },
+        {
+          "path": "tests/architecture/test_c901_governance.py",
+          "line": 16,
+          "source_group": "tests",
+          "text": "assert \"scripts/qa/check_c901_baseline.py\" in workflow"
         }
       ]
     },
@@ -2649,13 +2729,25 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 3,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
           "line": 98,
           "source_group": "ci",
           "text": "run: uv run python scripts/qa/check_naming_package_consistency.py --check"
+        },
+        {
+          "path": "tests/architecture/test_naming_package_consistency_gate.py",
+          "line": 14,
+          "source_group": "tests",
+          "text": "assert script.exists(), \"scripts/qa/check_naming_package_consistency.py must exist\""
+        },
+        {
+          "path": "tests/architecture/test_naming_package_consistency_gate.py",
+          "line": 33,
+          "source_group": "tests",
+          "text": "assert \"scripts/qa/check_naming_package_consistency.py --check\" in workflow"
         }
       ]
     },
@@ -2721,7 +2813,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 15,
       "references": [
         {
           "path": ".github/workflows/architecture-docs-nightly.yml",
@@ -2766,10 +2858,10 @@
           "text": "`scripts/qa/generate_architecture_dependency_map.py --check`."
         },
         {
-          "path": "tests/architecture/test_regression_metrics.py",
-          "line": 415,
+          "path": "tests/architecture/test_architecture_dependency_docs_drift.py",
+          "line": 12,
           "source_group": "tests",
-          "text": "script_path = Path(\"scripts/qa/generate_architecture_dependency_map.py\")"
+          "text": "script = Path(\"scripts/qa/generate_architecture_dependency_map.py\")"
         }
       ]
     },
@@ -2811,7 +2903,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/reports/scripts-inventory-2026-03-01.md",
@@ -2824,15 +2916,21 @@
           "line": 5,
           "source_group": "scripts",
           "text": "- scripts/qa/lint_terminology.py"
+        },
+        {
+          "path": "tests/architecture/test_lint_terminology_script.py",
+          "line": 15,
+          "source_group": "tests",
+          "text": "assert script_path.exists(), \"scripts/qa/lint_terminology.py must exist\""
         }
       ]
     },
     {
       "path": "scripts/qa/naming_audit.py",
       "type": "py",
-      "status": "unknown",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 8,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -2863,8 +2961,42 @@
           "line": 1,
           "source_group": "docs",
           "text": "# Scripts Inventory\\n\\nTotal scripts: **106**\\n\\n## By Folder\\n\\n| Folder | Count |\\n|---|---:|\\n| `.` | 2 |\\n| `assets/javascripts` | 1 |\\n| `docs/02-architecture/mmd-diagrams` | 1 |\\n| `docs/00-proj"
+        },
+        {
+          "path": "scripts/qa/check_naming_package_consistency.py",
+          "line": 5,
+          "source_group": "scripts",
+          "text": "1) strict suffix-policy: delegated to ``scripts/qa/naming_audit.py --check``."
+        },
+        {
+          "path": "scripts/qa/check_naming_package_consistency.py",
+          "line": 52,
+          "source_group": "scripts",
+          "text": "details=\"scripts/qa/naming_audit.py not found\","
+        },
+        {
+          "path": "scripts/qa/check_naming_package_consistency.py",
+          "line": 68,
+          "source_group": "scripts",
+          "text": "location=\"scripts/qa/naming_audit.py --check\","
         }
       ]
+    },
+    {
+      "path": "scripts/repo/__init__.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/repo/__main__.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/repo/audit_root_cleanliness.py",
@@ -2928,7 +3060,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 6,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -2953,6 +3085,18 @@
           "line": 38,
           "source_group": "scripts",
           "text": "- `python scripts/repo/check_scripts_catalog.py --catalog scripts/catalog.yaml`"
+        },
+        {
+          "path": "tests/architecture/test_quality_governance_workflow.py",
+          "line": 68,
+          "source_group": "tests",
+          "text": "assert \"scripts/repo/check_scripts_catalog.py\" in workflow"
+        },
+        {
+          "path": "tests/architecture/test_scripts_catalog_governance.py",
+          "line": 20,
+          "source_group": "tests",
+          "text": "\"scripts/repo/check_scripts_catalog.py\","
         }
       ]
     },
@@ -2961,7 +3105,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 13,
+      "reference_count": 19,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -3107,6 +3251,14 @@
       ]
     },
     {
+      "path": "scripts/schema/__init__.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/schema/check_config_invariants.py",
       "type": "py",
       "status": "active",
@@ -3241,10 +3393,17 @@
     {
       "path": "scripts/schema/generate_publication_type_classification_artifacts.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_publication_type_codegen_contract.py",
+          "line": 69,
+          "source_group": "tests",
+          "text": "\"Run: python scripts/schema/generate_publication_type_classification_artifacts.py\""
+        }
+      ]
     },
     {
       "path": "scripts/schema/generate_schema_artifacts.py",
@@ -3786,9 +3945,9 @@
         },
         {
           "path": "tests/architecture/test_lint_terminology_script.py",
-          "line": 15,
+          "line": 37,
           "source_group": "tests",
-          "text": "assert script_path.exists(), \"src/tools/scripts/lint_terminology.py must exist\""
+          "text": "assert wrapper_path.exists(), \"src/tools/scripts/lint_terminology.py must exist\""
         }
       ]
     },
