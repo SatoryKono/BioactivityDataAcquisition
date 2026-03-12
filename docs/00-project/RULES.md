@@ -973,7 +973,8 @@ from __future__ import annotations
 - Поддержка forward references без кавычек
 - Совместимость с Python 3.10+ стилем типизации
 
-**Проверка:** `ruff check --select FA` (Future Annotations rules).
+**Проверка:** `ruff check --select FA` и
+`pytest tests/architecture/test_future_annotations_policy.py`.
 
 **Расположение в файле:**
 
@@ -983,14 +984,14 @@ from __future__ import annotations
 1. `from __future__ import annotations` ← сразу после docstring
 1. Другие импорты
 
-> **Исключение**: `__init__.py` файлы, содержащие только re-exports (`from ... import ...`)
-> и `__all__`, **MAY** опускать `from __future__ import annotations`, так как
-> они не содержат type annotations, требующих отложенной эвалюации.
-
-<!-- Updated: was 497/534 (93.1%), now 501/534 (93.8%); was 37, now 33 (audit 2026-02-17) -->
-
-> Текущее состояние: 501 из 534 файлов (93.8%) содержат импорт;
-> 33 файла без импорта — все `__init__.py` (re-export only).
+> **Исключение**: минимальные package-facade `__init__.py`, содержащие только
+> re-exports (`from ... import ...`) и `__all__`, **MAY** опускать
+> `from __future__ import annotations`.
+>
+> Исключение намеренно узкое и machine-checked:
+> `tests/architecture/test_future_annotations_policy.py` не допускает
+> расширения исключения на обычные модули, compatibility facades и `__init__.py`
+> с любой runtime-логикой.
 
 #### 4.4.2. Type Hints
 

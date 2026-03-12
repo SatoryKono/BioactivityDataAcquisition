@@ -9,6 +9,7 @@ Components:
 - GoldDQAnalyzer: Strict validation for data marts
 - DQReportSerializer: Report serialization to JSON/YAML/HTML
 """
+from __future__ import annotations
 
 from bioetl.application.services.dq.bronze_analyzer import BronzeDQAnalyzer
 from bioetl.application.services.dq.gold_analyzer import GoldDQAnalyzer

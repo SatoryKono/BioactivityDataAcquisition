@@ -5,6 +5,7 @@ representative values with uncertainty estimates.
 
 Pure domain service (no I/O) per RULES.md §1.1.
 """
+from __future__ import annotations
 
 from bioetl.domain.services.activity_aggregator._aggregator import ActivityAggregator
 from bioetl.domain.services.activity_aggregator._methods import AggregationMethod

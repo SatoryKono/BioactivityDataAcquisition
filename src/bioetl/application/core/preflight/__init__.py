@@ -2,6 +2,7 @@
 
 Pre-pipeline health checks, medallion config validation, and aggregation.
 """
+from __future__ import annotations
 
 from bioetl.application.core.preflight.health_aggregator import _HealthAggregator
 from bioetl.application.core.preflight.medallion_validator import (

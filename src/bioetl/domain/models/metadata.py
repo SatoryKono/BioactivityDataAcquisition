@@ -15,6 +15,7 @@ Version: 1.1
 Re-export facade: actual definitions live in sub-modules
 (_metadata_common, _metadata_bronze, _metadata_silver, _metadata_gold).
 """
+from __future__ import annotations
 
 from bioetl.domain.models._metadata_bronze import (
     APIRequestDetails,

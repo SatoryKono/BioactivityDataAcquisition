@@ -1,4 +1,5 @@
 """Runtime and pipeline execution port sub-facade."""
+from __future__ import annotations
 
 from bioetl.domain.ports.runtime.batch_id import BatchIdGeneratorPort
 from bioetl.domain.ports.runtime.checkpoint import CheckpointPort

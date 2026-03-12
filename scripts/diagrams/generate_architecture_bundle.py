@@ -119,12 +119,25 @@ def main() -> int:
         stem = mf.stem
         lines.append(f"- [{stem}](#{stem})")
     lines.append("\n---\n")
+    lines.append("\\newpage")
+    lines.append("")
+    lines.append('<div style="page-break-before: always;"></div>')
+    lines.append("")
 
     # Entries
+    first = True
     for mf in mmd_files:
         stem = mf.stem
         png_file = PNG_DIR / f"{stem}.png"
         meta = extract_metadata(mf)
+
+        # Page break before each diagram section (except first)
+        if not first:
+            lines.append("\\newpage")
+            lines.append("")
+            lines.append('<div style="page-break-before: always;"></div>')
+            lines.append("")
+        first = False
 
         lines.append(f"## {stem}\n")
         if png_file.exists():
@@ -134,7 +147,7 @@ def main() -> int:
 
         lines.append(f"- Исходная диаграмма: `mmd-diagrams/architecture/{mf.name}`\n")
 
-        lines.append("## Описание")
+        lines.append("### Описание")
         lines.append(build_description(stem, meta))
         lines.append("")
 
@@ -149,11 +162,9 @@ def main() -> int:
         if "nodes" in meta:
             meta_lines.append(f"- Узлы: `{meta['nodes']}`")
         if meta_lines:
-            lines.append("## Метаданные")
+            lines.append("### Метаданные")
             lines.extend(meta_lines)
             lines.append("")
-
-        lines.append('<div style="page-break-after: always;"></div>\n')
 
     OUTPUT_MD.write_text("\n".join(lines), encoding="utf-8")
     print(f"[OK] Generated: {OUTPUT_MD}")

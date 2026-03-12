@@ -1,4 +1,5 @@
 """Domain mapping utilities for cross-provider field unification."""
+from __future__ import annotations
 
 from bioetl.domain.mapping.activity_fields import ACTIVITY_FIELD_MAPPING
 from bioetl.domain.mapping.classification_data import ClassificationData

@@ -1,4 +1,5 @@
 """Configuration port sub-facade."""
+from __future__ import annotations
 
 from bioetl.domain.ports.config.config_loader_port import (
     DomainConfigMapperPort,

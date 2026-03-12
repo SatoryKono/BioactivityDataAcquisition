@@ -26,38 +26,62 @@ INFRASTRUCTURE_DIR = Path("src/bioetl/infrastructure")
 # 2. Timestamp is required for real-time monitoring/operations
 # 3. Timestamp is not used in Bronze/Silver/Gold data
 #
-# REFACTORED (no longer need datetime.now()):
-# - operations.py: Now accepts `now: datetime` parameter from caller
-# - gold_writer.py: Now accepts `ingestion_ts: datetime` parameter for SCD2
-# REMOVED (dead code cleanup):
-# - lineage.py: Removed - unused in production
-# - iqr.py, mad.py: Removed - unused detector strategies
-ALLOWED_FILES: set[str] = {
-    # infrastructure/observability/anomaly/detector.py
-    # Uses datetime.now(UTC) for timestamp in AnomalyResult when critical anomalies detected.
-    "detector.py",
-    # infrastructure/observability/anomaly/detectors/zscore.py
-    # Z-score anomaly detector: timestamp in detection result for monitoring.
-    "zscore.py",
-    # infrastructure/adapters/**/client.py
-    # Reserved for TTL-based HTTP response caching logic.
-    "client.py",
+# Path-based allowlist only. Basename matching can silently widen exemptions
+# when the same filename exists in multiple infrastructure subpackages.
+ALLOWED_PATHS: set[str] = {
     # infrastructure/storage/silver_writer.py
     # Uses datetime.now(UTC) for audit logging timestamps.
-    "silver_writer.py",
-    # infrastructure/storage/gold_writer.py
-    # Uses datetime.now(UTC) for audit logging timestamps.
-    "gold_writer.py",
+    "storage/silver_writer.py",
     # infrastructure/adapters/common/api_request_collector.py
     # Uses datetime.now(UTC) for request timestamp when caller doesn't provide one.
     # This is for audit/debugging metadata, not Bronze/Silver/Gold data determinism.
-    "api_request_collector.py",
+    "adapters/common/api_request_collector.py",
     # infrastructure/storage/metadata_builder.py
     # Uses datetime.now(UTC) for metadata sidecar timestamps (build_merged_metadata).
     # This is for audit/lineage metadata, not Bronze/Silver/Gold data determinism.
     # Similar to silver_writer.py and gold_writer.py timestamp usage.
-    "metadata_builder.py",
+    "storage/metadata_builder.py",
 }
+
+
+def _infrastructure_base() -> Path:
+    """Resolve infrastructure base path from either repo root or tests cwd."""
+    if INFRASTRUCTURE_DIR.exists():
+        return INFRASTRUCTURE_DIR
+    return Path(__file__).parent.parent.parent / INFRASTRUCTURE_DIR
+
+
+def _relative_infrastructure_path(py_file: Path) -> str:
+    """Return repo-stable infrastructure-relative path using POSIX separators."""
+    return py_file.relative_to(_infrastructure_base()).as_posix()
+
+
+def _datetime_now_calls(py_file: Path) -> list[str]:
+    """Collect datetime.now()/utcnow() calls for a Python file."""
+    source = py_file.read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    relative_path = _relative_infrastructure_path(py_file)
+    calls: list[str] = []
+
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        if not isinstance(node.func, ast.Attribute):
+            continue
+        if node.func.attr not in ("now", "utcnow"):
+            continue
+
+        if isinstance(node.func.value, ast.Name) and node.func.value.id == "datetime":
+            calls.append(f"{relative_path}:{node.lineno}: datetime.{node.func.attr}()")
+        elif (
+            isinstance(node.func.value, ast.Attribute)
+            and node.func.value.attr == "datetime"
+        ):
+            calls.append(
+                f"{relative_path}:{node.lineno}: datetime.datetime.{node.func.attr}()"
+            )
+
+    return calls
 
 
 class TestNoDatetimeNowInInfrastructure:
@@ -66,11 +90,7 @@ class TestNoDatetimeNowInInfrastructure:
     @pytest.fixture
     def infrastructure_python_files(self) -> list[Path]:
         """Get all Python files in infrastructure directory."""
-        # Handle both running from project root and tests directory
-        if INFRASTRUCTURE_DIR.exists():
-            base = INFRASTRUCTURE_DIR
-        else:
-            base = Path(__file__).parent.parent.parent / INFRASTRUCTURE_DIR
+        base = _infrastructure_base()
         return list(base.rglob("*.py"))
 
     def test_no_datetime_now_in_infrastructure(
@@ -86,41 +106,10 @@ class TestNoDatetimeNowInInfrastructure:
         violations = []
 
         for py_file in infrastructure_python_files:
-            if py_file.name in ALLOWED_FILES:
+            relative_path = _relative_infrastructure_path(py_file)
+            if relative_path in ALLOWED_PATHS:
                 continue
-
-            source = py_file.read_text(encoding="utf-8")
-            tree = ast.parse(source)
-
-            for node in ast.walk(tree):
-                if isinstance(node, ast.Call):
-                    # Check for datetime.now() and datetime.utcnow() patterns
-                    if isinstance(node.func, ast.Attribute):
-                        if node.func.attr in ("now", "utcnow"):
-                            # datetime.now()/utcnow() after "from datetime import datetime"
-                            if isinstance(node.func.value, ast.Name):
-                                if node.func.value.id == "datetime":
-                                    relative_path = py_file.relative_to(
-                                        INFRASTRUCTURE_DIR
-                                        if INFRASTRUCTURE_DIR.exists()
-                                        else Path(__file__).parent.parent.parent
-                                        / INFRASTRUCTURE_DIR
-                                    )
-                                    violations.append(
-                                        f"{relative_path}:{node.lineno}: datetime.{node.func.attr}()"
-                                    )
-                            # datetime.datetime.now()/utcnow() - full path
-                            elif isinstance(node.func.value, ast.Attribute):
-                                if node.func.value.attr == "datetime":
-                                    relative_path = py_file.relative_to(
-                                        INFRASTRUCTURE_DIR
-                                        if INFRASTRUCTURE_DIR.exists()
-                                        else Path(__file__).parent.parent.parent
-                                        / INFRASTRUCTURE_DIR
-                                    )
-                                    violations.append(
-                                        f"{relative_path}:{node.lineno}: datetime.datetime.{node.func.attr}()"
-                                    )
+            violations.extend(_datetime_now_calls(py_file))
 
         assert not violations, (
             "datetime.now()/utcnow() found in infrastructure layer:\n"
@@ -130,17 +119,54 @@ class TestNoDatetimeNowInInfrastructure:
             "See ADR-014."
         )
 
-    def test_allowed_files_still_exist(
+    def test_allowed_paths_still_exist_and_are_unambiguous(
         self, infrastructure_python_files: list[Path]
     ) -> None:
-        """Verify that files in ALLOWED_FILES actually exist.
+        """Verify that path-based exceptions still exist and avoid basename drift.
 
-        This prevents stale exceptions from accumulating.
+        This prevents stale exceptions from accumulating and blocks future
+        reintroduction of ambiguous basename-based exemptions like `client.py`.
         """
-        existing_names = {f.name for f in infrastructure_python_files}
-        missing = ALLOWED_FILES - existing_names
+        existing_paths = {
+            _relative_infrastructure_path(py_file) for py_file in infrastructure_python_files
+        }
+        missing = ALLOWED_PATHS - existing_paths
 
         assert not missing, (
-            f"ALLOWED_FILES contains non-existent files: {missing}. "
+            f"ALLOWED_PATHS contains non-existent files: {missing}. "
             "Remove stale entries from the allowed list."
+        )
+
+        basename_to_paths: dict[str, list[str]] = {}
+        for path_str in existing_paths:
+            basename_to_paths.setdefault(Path(path_str).name, []).append(path_str)
+
+        ambiguous = {
+            allowed_path: sorted(basename_to_paths[Path(allowed_path).name])
+            for allowed_path in ALLOWED_PATHS
+            if len(basename_to_paths.get(Path(allowed_path).name, [])) > 1
+        }
+
+        assert not ambiguous, (
+            "ALLOWED_PATHS must stay basename-unique to prevent silent widening of "
+            f"datetime exceptions: {ambiguous}"
+        )
+
+    def test_allowed_paths_still_require_exception(
+        self, infrastructure_python_files: list[Path]
+    ) -> None:
+        """Force removal of allowlist entries once datetime usage is refactored away."""
+        file_by_path = {
+            _relative_infrastructure_path(py_file): py_file
+            for py_file in infrastructure_python_files
+        }
+        stale_exemptions = [
+            allowed_path
+            for allowed_path in sorted(ALLOWED_PATHS)
+            if not _datetime_now_calls(file_by_path[allowed_path])
+        ]
+
+        assert not stale_exemptions, (
+            "Remove stale datetime exceptions that no longer need allowlisting: "
+            f"{stale_exemptions}"
         )

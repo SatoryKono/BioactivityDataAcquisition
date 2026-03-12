@@ -3,6 +3,7 @@
 This module preserves stable import paths while implementations live in
 provider-split modules.
 """
+from __future__ import annotations
 
 from bioetl.infrastructure.schemas.base_schemas_chembl import (
     BaseApiConfig,

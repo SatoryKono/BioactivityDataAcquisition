@@ -5,6 +5,7 @@ Contains validation schemas for CrossRef data entities.
 Terminology:
 - Uses "Publication" instead of CrossRef API term "Work" for Ubiquitous Language
 """
+from __future__ import annotations
 
 from bioetl.domain.schemas.crossref.publication import PublicationEnrichedSchema
 from bioetl.domain.schemas.crossref.work import (

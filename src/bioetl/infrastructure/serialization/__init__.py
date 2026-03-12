@@ -6,6 +6,7 @@ Provides pluggable JSON encoder implementations:
 
 Use get_json_encoder() factory function to get the configured encoder.
 """
+from __future__ import annotations
 
 from bioetl.infrastructure.serialization.encoders import (
     OrjsonEncoder,

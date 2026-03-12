@@ -24,6 +24,7 @@ Usage:
 These schemas ensure type safety and validation when loading
 YAML configuration files from configs/entities/.
 """
+from __future__ import annotations
 
 from bioetl.infrastructure.schemas.base_schemas import (
     BaseApiConfig,

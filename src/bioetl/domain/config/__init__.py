@@ -27,6 +27,7 @@ _converters
 base_provider
     BaseClientConfig, BaseProviderConfig, RateLimitConfig
 """
+from __future__ import annotations
 
 from bioetl.domain.config._converters import (
     convert_write_mode,

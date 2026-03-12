@@ -17,6 +17,7 @@ Example:
     >>> config.http_config.rate
     10.0
 """
+from __future__ import annotations
 
 from bioetl.composition.providers.decorators import register_provider
 from bioetl.composition.providers.loader import (
