@@ -47,10 +47,10 @@ def _make_factory() -> CompositeSupportServicesFactory:
     "bioetl.composition.bootstrap.runtime.composite_support_services_factory.MergeService"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_support_services_factory.JoinPlannerService"
+    "bioetl.composition.bootstrap.runtime.composite_support_service_builders.JoinPlannerService"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_support_services_factory.DependencyJoinerService"
+    "bioetl.composition.bootstrap.runtime.composite_support_service_builders.DependencyJoinerService"
 )
 def test_create_merge_service_wires_join_planner_field_alias_resolver(
     mock_dependency_joiner_cls: MagicMock,
@@ -83,19 +83,19 @@ def test_create_merge_service_wires_join_planner_field_alias_resolver(
 
 @pytest.mark.unit
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_support_services_factory.FSMStateHelperService"
+    "bioetl.composition.bootstrap.runtime.composite_support_service_builders.FSMStateHelperService"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_support_services_factory.EnrichmentCoordinatorService"
+    "bioetl.composition.bootstrap.runtime.composite_support_service_builders.EnrichmentCoordinatorService"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_support_services_factory.DependencyCoordinatorService"
+    "bioetl.composition.bootstrap.runtime.composite_support_service_builders.DependencyCoordinatorService"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_support_services_factory.KeyExtractorService"
+    "bioetl.composition.bootstrap.runtime.composite_support_service_builders.KeyExtractorService"
 )
 @patch(
-    "bioetl.composition.bootstrap.assembly.checkpoint.bootstrap_composite_checkpoint_port"
+    "bioetl.composition.bootstrap.runtime.composite_support_service_builders.bootstrap_composite_checkpoint_port"
 )
 def test_build_uses_canonical_composite_checkpoint_port(
     mock_bootstrap_checkpoint_port: MagicMock,
@@ -119,7 +119,6 @@ def test_build_uses_canonical_composite_checkpoint_port(
     factory._create_delta_reader = MagicMock(return_value=MagicMock(name="delta_reader"))
     factory._create_cross_validator = MagicMock(return_value=None)
     factory._create_merge_service = MagicMock(return_value=merger)
-    factory._create_quarantine_port_if_enabled = MagicMock(return_value=None)
     factory._checkpoint_manager_cls = MagicMock(return_value=checkpoint_manager)
 
     result = factory.build()

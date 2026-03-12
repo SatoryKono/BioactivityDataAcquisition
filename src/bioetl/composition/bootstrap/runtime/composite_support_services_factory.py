@@ -6,51 +6,30 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from bioetl.application.composite.aggregator import EnricherAggregatorService
 from bioetl.application.composite.checkpoint import CompositeCheckpointService
-from bioetl.application.composite.coalesce_policy import CoalescePolicyService
-from bioetl.application.composite.column_orderer import ColumnOrdererService
-from bioetl.application.composite.column_priority_orderer import (
-    ColumnPriorityOrdererService,
-)
-from bioetl.application.composite.column_renamer import ColumnRenamerService
-from bioetl.application.composite.conflict_resolver import ConflictResolverService
-from bioetl.application.composite.coordinator import EnrichmentCoordinatorService
 from bioetl.application.composite.cross_validator import (
     EnrichmentCrossValidationService,
 )
-from bioetl.application.composite.deduplication import EnricherDeduplicatorService
-from bioetl.application.composite.dependency_coordinator import (
-    DependencyCoordinatorService,
-)
-from bioetl.application.composite.dependency_joiner import DependencyJoinerService
-from bioetl.application.composite.dependency_key_resolvers import (
-    create_chained_key_resolver,
-    create_seed_key_resolver,
-)
-from bioetl.application.composite.dependency_progress_tracker import (
-    DependencyProgressService,
-)
-from bioetl.application.composite.dependency_result_mapper import (
-    DependencyResultService,
-)
-from bioetl.application.composite.fsm_helper import FSMStateHelperService
-from bioetl.application.composite.join_execution import JoinExecutorService, JoinHow
-from bioetl.application.composite.join_key_resolution import JoinKeyResolverService
-from bioetl.application.composite.join_planner import JoinPlannerService
-from bioetl.application.composite.join_planner_helpers import (
-    parse_pipeline_name,
-    resolve_field_aliases_from_registry,
-)
-from bioetl.application.composite.key_extractor import KeyExtractorService
+from bioetl.application.composite.join_execution import JoinHow
 from bioetl.application.composite.merger import MergeService
 from bioetl.application.composite.runner_pkg import CompositeRuntimeConfig
+from bioetl.composition.bootstrap.runtime.composite_support_service_builders import (
+    build_execution_support_services,
+    build_merge_dependencies,
+    build_runtime_management_services,
+)
 from bioetl.domain.composite.strategy import MergeStrategy
 from bioetl.infrastructure.storage.delta_reader import DeltaReader
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    from bioetl.application.composite.coordinator import EnrichmentCoordinatorService
+    from bioetl.application.composite.dependency_coordinator import (
+        DependencyCoordinatorService,
+    )
+    from bioetl.application.composite.fsm_helper import FSMStateHelperService
+    from bioetl.application.composite.key_extractor import KeyExtractorService
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.domain.composite.config import CompositeConfig
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
@@ -70,39 +49,6 @@ class CompositeSupportServices:
     dq_report_service: DQReportService
     fsm_state_helper: FSMStateHelperService
     quarantine_port: QuarantinePort | None
-
-
-@dataclass(slots=True)
-class _CompositeExecutionSupportServices:
-    """Execution-facing services shared across composite runtime phases."""
-
-    key_extractor: KeyExtractorService
-    dependency_coordinator: DependencyCoordinatorService
-    coordinator: EnrichmentCoordinatorService
-
-
-@dataclass(slots=True)
-class _CompositeRuntimeManagementServices:
-    """Runtime management services that do not participate in merge wiring."""
-
-    checkpoint_manager: CompositeCheckpointService
-    dq_report_service: DQReportService
-    fsm_state_helper: FSMStateHelperService
-    quarantine_port: QuarantinePort | None
-
-
-@dataclass(slots=True)
-class _CompositeMergeDependencies:
-    """Typed bundle for merge-specific collaborators assembled in composition."""
-
-    deduplicator: EnricherDeduplicatorService
-    aggregator: EnricherAggregatorService
-    renamer: ColumnRenamerService
-    orderer: ColumnOrdererService
-    priority_orderer: ColumnPriorityOrdererService
-    coalesce_policy: CoalescePolicyService
-    conflict_resolver: ConflictResolverService
-    join_planner: JoinPlannerService
 
 
 class CompositeSupportServicesFactory:
@@ -193,15 +139,30 @@ class CompositeSupportServicesFactory:
             CompositeSupportServices bundle with all services required by CompositePipelineRunner.
         """
         delta_reader = self._create_delta_reader()
-        execution_services = self._build_execution_support_services(delta_reader)
-        field_group_registry = self._load_field_group_registry_for_composite()
+        execution_services = build_execution_support_services(
+            config=self._config,
+            logger=self._logger,
+            delta_reader=delta_reader,
+        )
+        field_group_registry = self._load_field_group_registry(
+            self._config.name,
+            self._logger,
+        )
         cross_validator = self._create_cross_validator()
         merger = self._create_merge_service(
             delta_reader=delta_reader,
             field_group_registry=field_group_registry,
             cross_validator=cross_validator,
         )
-        runtime_management_services = self._build_runtime_management_services()
+        runtime_management_services = build_runtime_management_services(
+            config=self._config,
+            runtime=self._runtime,
+            settings=self._settings,
+            logger=self._logger,
+            run_id=self._run_id,
+            checkpoint_manager_cls=self._checkpoint_manager_cls,
+            create_dq_report_service=self._create_dq_report_service,
+        )
 
         return CompositeSupportServices(
             key_extractor=execution_services.key_extractor,
@@ -221,66 +182,6 @@ class CompositeSupportServicesFactory:
             logger=self._logger,
         )
 
-    def _build_execution_support_services(
-        self,
-        delta_reader: DeltaReader,
-    ) -> _CompositeExecutionSupportServices:
-        """Build execution-facing support services shared across runtime stages."""
-        return _CompositeExecutionSupportServices(
-            key_extractor=KeyExtractorService(
-                delta_reader=delta_reader,
-                logger=self._logger,
-            ),
-            dependency_coordinator=DependencyCoordinatorService(
-                logger=self._logger,
-                seed_key_resolver=create_seed_key_resolver(self._logger),
-                chained_key_resolver=create_chained_key_resolver(self._logger),
-                progress_service=DependencyProgressService(self._logger),
-                result_service=DependencyResultService(self._logger),
-                delta_reader=delta_reader,
-            ),
-            coordinator=EnrichmentCoordinatorService(
-                logger=self._logger,
-                dq_config=self._config.dq,
-                max_concurrency=self._config.execution.max_concurrency,
-            ),
-        )
-
-    def _build_runtime_management_services(
-        self,
-    ) -> _CompositeRuntimeManagementServices:
-        """Build checkpoint, FSM, DQ, and quarantine runtime services."""
-        from bioetl.composition.bootstrap.assembly.checkpoint import (
-            bootstrap_composite_checkpoint_port,
-        )
-
-        checkpoint_storage = bootstrap_composite_checkpoint_port()
-        return _CompositeRuntimeManagementServices(
-            checkpoint_manager=self._checkpoint_manager_cls(
-                composite_name=self._config.name,
-                run_id=self._run_id,
-                storage=checkpoint_storage,
-                logger=self._logger,
-                resume=self._runtime.resume,
-            ),
-            dq_report_service=self._create_dq_report_service(
-                self._logger,
-                self._settings,
-            ),
-            fsm_state_helper=FSMStateHelperService(
-                config=self._config,
-                logger=self._logger,
-                run_id=self._run_id,
-            ),
-            quarantine_port=self._create_quarantine_port_if_enabled(),
-        )
-
-    def _load_field_group_registry_for_composite(
-        self,
-    ) -> FieldGroupRegistry | None:
-        """Resolve optional field-group registry for the active composite."""
-        return self._load_field_group_registry(self._config.name, self._logger)
-
     def _create_cross_validator(self) -> EnrichmentCrossValidationService | None:
         if not self._config.cross_validation.enabled:
             return None
@@ -289,16 +190,6 @@ class CompositeSupportServicesFactory:
             logger=self._logger,
         )
 
-    def _create_quarantine_port_if_enabled(self) -> QuarantinePort | None:
-        if not self._config.cross_validation.enabled:
-            return None
-
-        from bioetl.composition.bootstrap.assembly.checkpoint import (
-            bootstrap_quarantine_port,
-        )
-
-        return bootstrap_quarantine_port()
-
     def _create_merge_service(
         self,
         *,
@@ -306,7 +197,13 @@ class CompositeSupportServicesFactory:
         field_group_registry: FieldGroupRegistry | None,
         cross_validator: EnrichmentCrossValidationService | None,
     ) -> MergeService:
-        merge_dependencies = self._build_merge_dependencies()
+        merge_dependencies = build_merge_dependencies(
+            config=self._config,
+            logger=self._logger,
+            resolve_join_how=self._resolve_join_how,
+            normalize_join_keys=self._NORMALIZE_JOIN_KEYS,
+            system_columns_to_drop=self._SYSTEM_COLUMNS_TO_DROP,
+        )
         return MergeService(
             merge_config=self._config.merge,
             storage=self._storage,
@@ -323,66 +220,6 @@ class CompositeSupportServicesFactory:
             coalesce_policy=merge_dependencies.coalesce_policy,
             conflict_resolver=merge_dependencies.conflict_resolver,
             join_planner=merge_dependencies.join_planner,
-        )
-
-    def _build_merge_dependencies(self) -> _CompositeMergeDependencies:
-        """Assemble merge-specific collaborators used by MergeService."""
-        merge_column_groups = getattr(self._config.merge, "column_groups", None)
-        deduplicator = EnricherDeduplicatorService(self._logger)
-        aggregator = EnricherAggregatorService(self._logger)
-        renamer = ColumnRenamerService(self._logger)
-        orderer = ColumnOrdererService(
-            self._logger,
-            column_groups=merge_column_groups if merge_column_groups else None,
-        )
-        priority_orderer = ColumnPriorityOrdererService(self._logger)
-        coalesce_policy = CoalescePolicyService(self._logger, priority_orderer)
-        conflict_resolver = ConflictResolverService(
-            self._config.merge,
-            self._logger,
-            coalesce_policy,
-        )
-        join_key_resolver = JoinKeyResolverService(
-            normalize_join_keys=self._NORMALIZE_JOIN_KEYS,
-            parse_pipeline_name=parse_pipeline_name,
-        )
-        join_executor = JoinExecutorService(
-            logger=self._logger,
-            join_type_resolver=lambda: self._resolve_join_how(
-                self._config.merge.strategy
-            ),
-        )
-        dependency_joiner = DependencyJoinerService(
-            logger=self._logger,
-            deduplicator=deduplicator,
-            renamer=renamer,
-            conflict_resolver=conflict_resolver,
-            field_alias_resolver=resolve_field_aliases_from_registry,
-            join_key_resolver=join_key_resolver,
-            join_executor=join_executor,
-            system_columns_to_drop=self._SYSTEM_COLUMNS_TO_DROP,
-        )
-        join_planner = JoinPlannerService(
-            merge_config=self._config.merge,
-            logger=self._logger,
-            deduplicator=deduplicator,
-            aggregator=aggregator,
-            renamer=renamer,
-            conflict_resolver=conflict_resolver,
-            field_alias_resolver=resolve_field_aliases_from_registry,
-            join_key_resolver=join_key_resolver,
-            join_executor=join_executor,
-            dependency_joiner=dependency_joiner,
-        )
-        return _CompositeMergeDependencies(
-            deduplicator=deduplicator,
-            aggregator=aggregator,
-            renamer=renamer,
-            orderer=orderer,
-            priority_orderer=priority_orderer,
-            coalesce_policy=coalesce_policy,
-            conflict_resolver=conflict_resolver,
-            join_planner=join_planner,
         )
 
     @staticmethod
