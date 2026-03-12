@@ -99,7 +99,7 @@ def _download_repo_zip(owner: str, repo: str, ref: str, dest_dir: str) -> str:
 
 def _run_git(args: list[str]) -> None:
     result = subprocess.run(
-        args, capture_output=True, text=True
+        args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
     )
     if result.returncode != 0:
         raise InstallError(result.stderr.strip() or "Git command failed.")
@@ -302,9 +302,10 @@ def main(argv: list[str]) -> int:
             if os.path.isdir(tmp_dir):
                 shutil.rmtree(tmp_dir, ignore_errors=True)
         for skill_name, dest_dir in installed:
-            pass
+            print(f"Installed {skill_name} to {dest_dir}")
         return 0
-    except InstallError:
+    except InstallError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
         return 1
 
 

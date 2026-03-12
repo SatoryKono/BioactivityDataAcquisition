@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import sys
 from typing import Any
 
 QUERY = """\
@@ -112,6 +113,7 @@ def _ensure_gh_authenticated() -> None:
     try:
         _run(["gh", "auth", "status"])
     except RuntimeError:
+        print("run `gh auth login` to authenticate the GitHub CLI", file=sys.stderr)
         raise RuntimeError(
             "gh auth status failed; run `gh auth login` to authenticate the GitHub CLI"
         ) from None
@@ -239,7 +241,8 @@ def fetch_all(owner: str, repo: str, number: int) -> dict[str, Any]:
 def main() -> None:
     _ensure_gh_authenticated()
     owner, repo, number = get_current_pr_ref()
-    fetch_all(owner, repo, number)
+    result = fetch_all(owner, repo, number)
+    print(json.dumps(result, indent=2))
 
 
 if __name__ == "__main__":

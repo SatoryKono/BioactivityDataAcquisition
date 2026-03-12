@@ -59,6 +59,7 @@ def main(argv: list[str] | None = None) -> int:
     findings: list[Finding] = []
 
     if not AGENTS_DIR.exists():
+        print(f"ERROR: directory not found: {AGENTS_DIR}")
         return 2
 
     files = sorted(p for p in AGENTS_DIR.glob("*.md") if p.name not in SKIP)
@@ -122,9 +123,15 @@ def main(argv: list[str] | None = None) -> int:
         if path.stem.startswith("sp-") and path.stem not in names:
             findings.append(Finding(path.name, "unexpected missing stem in file set"))
 
+    mode = "strict" if args.strict else "default"
+    print(f"mode={mode}")
+    print(f"checked_files={len(files)}")
+    print(f"canonical_profiles={canonical_count}")
+    print(f"alias_profiles={alias_count}")
+    print(f"findings={len(findings)}")
 
-    for _finding in findings:
-        pass
+    for finding in findings:
+        print(f"- {finding.file}: {finding.message}")
 
     return 1 if findings else 0
 

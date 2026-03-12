@@ -339,6 +339,7 @@ def _print_priority_registry_trend(
     if not isinstance(baseline_by_registry, dict):
         baseline_by_registry = {}
 
+    print("[quality-exemptions] burn-down trend (ratchet-only registries):")
     for registry_name in priority_registries:
         current_count = int(summary_by_registry.get(registry_name, 0))
         baseline_count_raw = baseline_by_registry.get(registry_name, current_count)
@@ -353,13 +354,22 @@ def _print_priority_registry_trend(
             if registry_name in next_budget_by_registry
             else None
         )
-        current_count - baseline_count
+        delta_from_baseline = current_count - baseline_count
         headroom = current_budget - current_count
-        if headroom < 0 or (next_budget is not None and current_count > next_budget):
-            pass
+        if headroom < 0:
+            status = "over_budget"
+        elif next_budget is not None and current_count > next_budget:
+            status = "at_risk_next_quarter"
         else:
-            pass
-        "-" if next_budget is None else str(next_budget)
+            status = "on_track"
+        next_budget_label = "-" if next_budget is None else str(next_budget)
+        print(
+            "  - "
+            f"{registry_name}: current={current_count}, "
+            f"baseline={baseline_count}, delta_baseline={delta_from_baseline:+d}, "
+            f"budget[{summary_quarter}]={current_budget}, headroom={headroom}, "
+            f"next_budget={next_budget_label}, status={status}"
+        )
 
 
 def main() -> int:
@@ -405,18 +415,21 @@ def main() -> int:
     )
 
     if metadata_errors:
-        for _item in metadata_errors:
-            pass
+        print("[quality-exemptions] metadata validation failed:")
+        for item in metadata_errors:
+            print(f"  - {item}")
         return 1
 
     if scorecard_errors:
-        for _item in scorecard_errors:
-            pass
+        print("[quality-exemptions] scorecard validation failed:")
+        for item in scorecard_errors:
+            print(f"  - {item}")
         return 1
 
     if sync_errors:
-        for _item in sync_errors:
-            pass
+        print("[quality-exemptions] scorecard/registry sync validation failed:")
+        for item in sync_errors:
+            print(f"  - {item}")
         return 1
 
     if temp_window_mode == "budget-only":
@@ -426,21 +439,37 @@ def main() -> int:
             max_window_days=max_grace_window_days,
         )
         if grace_window_errors:
-            for _item in grace_window_errors:
-                pass
+            print(
+                "[quality-exemptions] budget-only grace-window policy failed "
+                f"(max-window-days={max_grace_window_days}):"
+            )
+            for item in grace_window_errors:
+                print(f"  - {item}")
             return 1
 
     if summary is None:
+        print("[quality-exemptions] scorecard evaluation failed: no summary")
         return 1
 
-    for _registry_name, _count in summary.by_registry.items():
-        pass
-    for _owner, _count in summary.by_owner.items():
-        pass
-    for _quarter, _count in summary.by_expiry_quarter.items():
-        pass
+    print(
+        "[quality-exemptions] scorecard snapshot "
+        f"(quarter={summary.quarter}, score={summary.integral_score}, "
+        f"total={summary.total_exemptions}/{summary.total_budget})"
+    )
+    print("[quality-exemptions] breakdown by registry:")
+    for registry_name, count in summary.by_registry.items():
+        print(f"  - {registry_name}: {count}")
+    print("[quality-exemptions] breakdown by owner:")
+    for owner, count in summary.by_owner.items():
+        print(f"  - {owner}: {count}")
+    print("[quality-exemptions] breakdown by expiry quarter:")
+    for quarter, count in summary.by_expiry_quarter.items():
+        print(f"  - {quarter}: {count}")
     if summary.active_grace_windows:
-        pass
+        print(
+            "[quality-exemptions] active grace windows: "
+            + ", ".join(summary.active_grace_windows)
+        )
     if args.trend_report == "on":
         _print_priority_registry_trend(
             scorecard_raw=scorecard_raw,
@@ -449,10 +478,15 @@ def main() -> int:
         )
 
     if expired_entries:
-        for _item in expired_entries:
-            pass
+        print(
+            "[quality-exemptions] expired exemptions detected "
+            f"(mode={expiry_mode}, count={len(expired_entries)}):"
+        )
+        for item in expired_entries:
+            print(f"  - {item}")
         if expiry_mode == "block":
             return 1
+        print("[quality-exemptions] WARNING mode enabled: not blocking this run.")
 
     if growth_violations:
         blocking_growth, warning_growth = split_growth_violations_by_severity(
@@ -462,12 +496,32 @@ def main() -> int:
             fallback_mode=growth_mode,
         )
         if warning_growth:
-            for _item in warning_growth:
-                pass
+            print(
+                "[quality-exemptions] budget growth warnings detected "
+                f"(growth-mode={growth_mode}, count={len(warning_growth)}):"
+            )
+            for item in warning_growth:
+                print(f"  - {item}")
+            print(
+                "[quality-exemptions] WARNING mode enabled by staged rollout "
+                "for listed sections."
+            )
         if blocking_growth:
-            for _item in blocking_growth:
-                pass
+            print(
+                "[quality-exemptions] budget growth violations detected "
+                f"(growth-mode={growth_mode}, count={len(blocking_growth)}):"
+            )
+            for item in blocking_growth:
+                print(f"  - {item}")
             return 1
+    print(
+        "[quality-exemptions] registry validation passed "
+        "(expiry-mode="
+        f"{expiry_mode}, growth-mode={growth_mode}, expired={len(expired_entries)}, "
+        f"violations={len(growth_violations)}, "
+        f"temp-window-mode={temp_window_mode}, "
+        f"max-window-days={max_grace_window_days})."
+    )
     return 0
 
 

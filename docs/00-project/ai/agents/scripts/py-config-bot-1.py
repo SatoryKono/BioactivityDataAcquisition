@@ -350,26 +350,41 @@ def main() -> int:
         all_gaps.append(gaps)
 
         if args.verbose:
+            rel = cfg
             for root in (ENTITY_CONFIGS_DIR, COMPOSITES_DIR):
                 try:
-                    cfg.relative_to(root)
+                    rel = cfg.relative_to(root)
                     break
                 except ValueError:
                     continue
+            status = (
+                "[FAIL]"
+                if gaps.critical
+                else ("[WARN]" if gaps.medium else ("[INFO]" if gaps.low else "[OK]"))
+            )
+            print(
+                f"{status} {rel}: {len(gaps.critical)} critical, {len(gaps.medium)} medium, {len(gaps.low)} low"
+            )
 
     report = generate_report(all_gaps)
 
     if args.output:
         Path(args.output).parent.mkdir(parents=True, exist_ok=True)
         Path(args.output).write_text(report)
+        print(f"Report written to: {args.output}")
     else:
-        pass
+        print(report)
 
     # Summary
     critical_count = sum(len(g.critical) for g in all_gaps)
-    sum(len(g.medium) for g in all_gaps)
-    sum(len(g.low) for g in all_gaps)
+    medium_count = sum(len(g.medium) for g in all_gaps)
+    low_count = sum(len(g.low) for g in all_gaps)
 
+    print(f"\n{'=' * 60}")
+    print(
+        f"Summary: {critical_count} critical, {medium_count} medium, {low_count} low issues"
+    )
+    print(f"{'=' * 60}")
 
     # Exit code based on critical issues
     return 1 if critical_count else 0

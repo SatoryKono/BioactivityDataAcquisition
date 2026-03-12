@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 
@@ -47,7 +48,10 @@ def parse_args() -> argparse.Namespace:
 
 
 def resolve_inputs(raw_inputs: list[str]) -> list[Path]:
-    paths = [Path(item) for item in raw_inputs] if raw_inputs else DEFAULT_INPUTS
+    if raw_inputs:
+        paths = [Path(item) for item in raw_inputs]
+    else:
+        paths = DEFAULT_INPUTS
     resolved: list[Path] = []
     for path in paths:
         resolved.append(path if path.is_absolute() else REPO_ROOT / path)
@@ -101,18 +105,23 @@ def main() -> int:
         reference_doc = REPO_ROOT / reference_doc
 
     if shutil.which("pandoc") is None:
+        print("[ERROR] Missing required tool: pandoc", file=sys.stderr)
         return 2
     if reference_doc is not None and not reference_doc.exists():
+        print(f"[ERROR] Reference DOCX not found: {reference_doc}", file=sys.stderr)
         return 2
 
     rendered: list[Path] = []
     for input_md in input_paths:
         try:
             output_docx = render_one(input_md=input_md, reference_doc=reference_doc)
-        except Exception:
+        except Exception as exc:
+            print(f"[ERROR] {exc}", file=sys.stderr)
             return 1
         rendered.append(output_docx)
+        print(f"[OK] Generated: {output_docx}")
 
+    print(f"[INFO] Generated DOCX files: {len(rendered)}")
     return 0
 
 
