@@ -22,8 +22,8 @@
 Проверка:
 
 ```bash
-python3 scripts/audit_root_cleanliness.py
-python3 scripts/audit_structure.py --path .
+python3 scripts/repo/audit_root_cleanliness.py
+python3 scripts/diagnostics/audit_structure.py --path .
 ```
 
 ----------------------------------------------------------------------
@@ -161,7 +161,7 @@ sink:
 - Перед релизом запускать allowlist-проверку:
 
 ```bash
-uv run python scripts/validate_data_dir.py
+uv run python scripts/data/validate_data_dir.py
 ```
 
 ----------------------------------------------------------------------

@@ -58,13 +58,13 @@ jobs:
                     python-version: "3.11"
 
             -   name: Validate VCR cassette placement
-                run: python scripts/check_root_vcr_cassettes.py
+                run: python scripts/data/check_root_vcr_cassettes.py
 
             -   name: Validate VCR filename policy
-                run: python scripts/check_vcr_filename_policy.py
+                run: python scripts/data/check_vcr_filename_policy.py
 
             -   name: Validate version consistency
-                run: python scripts/check_version_consistency.py
+                run: python scripts/repo/check_version_consistency.py
 
             -   name: Install uv + cache + dependencies
                 uses: ./.github/actions/setup-python-uv
@@ -73,7 +73,7 @@ jobs:
 
             -   name: Validate quality exemptions registry (owner/reason/expiry metadata)
                 run: |
-                    uv run python scripts/check_quality_exemptions.py \
+                    uv run python scripts/qa/check_quality_exemptions.py \
                       --registry "${QUALITY_EXEMPTIONS_REGISTRY}" \
                       --scorecard "${QUALITY_EXEMPTIONS_SCORECARD}" \
                       --mode "${QUALITY_EXEMPTIONS_GATE_MODE}" \
@@ -84,7 +84,7 @@ jobs:
 
             -   name: Validate scripts inventory + lifecycle governance
                 run: |
-                    uv run python scripts/check_scripts_inventory.py \
+                    uv run python scripts/repo/check_scripts_inventory.py \
                       --check \
                       --manifest configs/quality/scripts_inventory_manifest.json \
                       --check-lifecycle \
@@ -92,10 +92,10 @@ jobs:
                       --lifecycle-registry configs/quality/scripts_lifecycle_registry.json
 
             -   name: Validate scripts catalog governance policy
-                run: uv run python scripts/check_scripts_catalog.py --catalog scripts/catalog.yaml
+                run: uv run python scripts/repo/check_scripts_catalog.py --catalog scripts/catalog.yaml
 
             -   name: Pre-merge naming/package consistency gate
-                run: uv run python scripts/check_naming_package_consistency.py --check
+                run: uv run python scripts/qa/check_naming_package_consistency.py --check
 
             -   name: "Quality ratchet (fail-fast: domain)"
                 run: |
@@ -119,16 +119,16 @@ jobs:
                       -q --tb=short
 
             -   name: Validate pipeline configs + schema links (blocking)
-                run: uv run python scripts/validate_pipeline_configs.py
+                run: uv run python scripts/schema/validate_pipeline_configs.py
 
             -   name: Validate config invariants (blocking)
-                run: uv run python scripts/check_config_invariants.py
+                run: uv run python scripts/schema/check_config_invariants.py
 
             -   name: Check generated config schemas are up to date
-                run: uv run python scripts/generate_pipeline_schema.py --check
+                run: uv run python scripts/schema/generate_pipeline_schema.py --check
 
             -   name: Check architecture dependency docs drift
-                run: uv run python scripts/generate_architecture_dependency_map.py --check
+                run: uv run python scripts/qa/generate_architecture_dependency_map.py --check
 
             -   name: Validate docker-compose.yml syntax
                 run: docker compose config > /dev/null
@@ -270,7 +270,7 @@ jobs:
                 run: |
                     mkdir -p reports/performance
                     if [ -f reports/performance/hotspot-observations.jsonl ]; then
-                      uv run python scripts/generate_hotspot_degradation_report.py \
+                      uv run python scripts/qa/generate_hotspot_degradation_report.py \
                         --observations reports/performance/hotspot-observations.jsonl \
                         --budgets tests/performance/hotspot_budgets.json \
                         --window-size 5 \

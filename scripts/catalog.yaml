@@ -14,12 +14,10 @@ canonical_roots:
   - scripts/diagrams
 
 policies:
-  root_wrappers_only: true
-  compatibility_root: scripts/
   root_allowlist:
     - run.py
   canonical_invocation_required_for_new_integrations: true
-  no_new_non_wrapper_scripts_in_root: true
+  no_scripts_in_root: true
 
 lifecycle:
   manifest_path: configs/quality/scripts_inventory_manifest.json

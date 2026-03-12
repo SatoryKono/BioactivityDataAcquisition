@@ -198,7 +198,7 @@ pytest tests/integration/ --vcr-record=none -v
 | Conftest (root) | `tests/conftest.py` |
 | VCR fixtures | `tests/fixtures/vcr/` |
 | Architecture tests | `tests/architecture/` |
-| Config gap analysis | `scripts/config_gap_analysis.py` |
+| Config gap analysis | `scripts/schema/config_gap_analysis.py` |
 
 ---
 

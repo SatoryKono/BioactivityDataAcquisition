@@ -16,7 +16,7 @@ Registry under governance:
 
 Validation checks:
 - Required metadata per entry: `value`, `owner`, `reason`, `expires_on`, `removal_step`
-- Validation command: `./.venv/Scripts/python.exe scripts/check_quality_exemptions.py --mode warn`
+- Validation command: `./.venv/Scripts/python.exe scripts/qa/check_quality_exemptions.py --mode warn`
 
 Snapshot results (2026-03-03):
 - Registry sections: `7`
@@ -80,7 +80,7 @@ Layer split (`except Exception`):
 ## Control Commands Used
 
 ```bash
-./.venv/Scripts/python.exe scripts/check_quality_exemptions.py --mode warn
+./.venv/Scripts/python.exe scripts/qa/check_quality_exemptions.py --mode warn
 rg -n ': Any|-> Any' src/bioetl -g '*.py'
 rg -n '\bAny\b' src/bioetl -g '*.py'
 rg -n 'except\s+Exception\b' src/bioetl -g '*.py'

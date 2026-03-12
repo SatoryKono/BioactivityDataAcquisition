@@ -30,17 +30,17 @@ jobs:
           uv-extras: "docs"
 
       - name: Validate version consistency
-        run: python scripts/check_version_consistency.py
+        run: python scripts/repo/check_version_consistency.py
 
       - name: Run documentation integrity guardrails
-        run: uv run python scripts/check_doc_links.py
+        run: uv run python scripts/docs/check_doc_links.py
 
       - name: Check architecture dependency docs drift
-        run: uv run python scripts/generate_architecture_dependency_map.py --check
+        run: uv run python scripts/qa/generate_architecture_dependency_map.py --check
 
       - name: Regenerate architecture dependency docs (PR preflight)
         if: github.event_name == 'pull_request'
-        run: uv run python scripts/generate_architecture_dependency_map.py --update
+        run: uv run python scripts/qa/generate_architecture_dependency_map.py --update
 
       - name: Assert regenerated dependency docs are committed
         if: github.event_name == 'pull_request'
@@ -51,7 +51,7 @@ jobs:
             (echo "::error::Dependency map docs were regenerated. Commit updated generated files before merge." && exit 1)
 
       - name: Build docs in strict mode
-        run: uv run bash scripts/build_docs_site.sh --strict
+        run: uv run bash scripts/docs/build_docs_site.sh --strict
 
   # Detect whether mermaid/diagram sources changed so the expensive
   # Puppeteer-based validate-mermaid and render-diagrams jobs can be skipped

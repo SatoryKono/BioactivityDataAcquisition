@@ -98,7 +98,7 @@ Expected result:
 
 1. Apply **B2** first (small, low-risk impact up to `-3`).
 2. Re-run safety gates:
-   - `scripts/check_doc_links.py`
-   - `scripts/report_docs_kpi.py --fail-on-breach`
-   - `bash scripts/build_docs_site.sh --strict`
+   - `scripts/docs/check_doc_links.py`
+   - `scripts/docs/report_docs_kpi.py --fail-on-breach`
+   - `bash scripts/docs/build_docs_site.sh --strict`
 3. Reassess whether archive policy should change before considering any `99-archive/**` promotion.

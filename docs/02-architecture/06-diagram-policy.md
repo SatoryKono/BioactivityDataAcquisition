@@ -109,7 +109,7 @@
 
 ```bash
 python3 scripts/diagrams/lint_diagrams.py docs
-python3 scripts/check_doc_links.py --links
+python3 scripts/docs/check_doc_links.py --links
 python3 scripts/diagrams/check_diagram_visual_smoke.py
 bash scripts/diagrams/validate_mermaid_syntax.sh
 ```

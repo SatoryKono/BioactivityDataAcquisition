@@ -18,9 +18,10 @@ __all__ = [
 import contextlib
 import time
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any
+from contextlib import AbstractContextManager
+from typing import TYPE_CHECKING, Protocol, cast
 
-from httpx import RequestError
+from httpx import RequestError, Response
 
 from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.normalization import normalize_doi
@@ -35,9 +36,22 @@ if TYPE_CHECKING:
         APIRequestCollector,
     )
 
-# Type aliases for helper class parameters
-HttpTransport = Any  # Any: untyped HTTP transport
-BaseMetrics = Any  # Any: untyped adapter metrics wrapper
+class HttpTransport(Protocol):
+    """Minimal async HTTP transport required by the batch helpers."""
+
+    async def get(
+        self,
+        url: str,
+        *,
+        params: dict[str, str] | None = None,
+        headers: dict[str, str] | None = None,
+    ) -> Response: ...
+
+
+class BaseMetrics(Protocol):
+    """Minimal metrics wrapper used around request timing."""
+
+    def measure_request(self, route: str) -> AbstractContextManager[object]: ...
 
 CROSSREF_RUNTIME_ERRORS = (
     BioETLError,
@@ -103,7 +117,7 @@ class DoiBatchProcessor:
         """
         normalized_doi = normalize_doi(doi) or ""
         url = f"{self._api_base}/works/{normalized_doi}"
-        response: Any | None = None  # Any: untyped HTTP response object
+        response: Response | None = None
 
         try:
             start_time = time.perf_counter()
@@ -112,7 +126,7 @@ class DoiBatchProcessor:
             duration_ms = (time.perf_counter() - start_time) * 1000
 
             # Record request for metadata enrichment
-            if self._request_collector:
+            if self._request_collector and response is not None:
                 with contextlib.suppress(Exception):
                     self._request_collector.record_from_response(response, duration_ms)
 
@@ -132,7 +146,7 @@ class DoiBatchProcessor:
                 )
 
             data = response.json()
-            publication: BronzeRecord = data.get("message", {})
+            publication = cast(BronzeRecord, data.get("message", {}))
             return publication
 
         except CrossRefApiError:
@@ -177,7 +191,7 @@ class DoiBatchProcessor:
 
     async def _execute_batch_request(
         self, normalized_dois: list[str]
-    ) -> Any | None:  # Any: untyped HTTP response object
+    ) -> Response | None:
         """Execute the batch DOI filter request.
 
         Args:
@@ -193,7 +207,7 @@ class DoiBatchProcessor:
             "rows": str(len(normalized_dois)),
             "mailto": self._mailto,
         }
-        response: Any | None = None  # Any: untyped HTTP response object
+        response: Response | None = None
 
         start_time = time.perf_counter()
         with self._metrics.measure_request("/works?filter=doi"):
@@ -202,7 +216,7 @@ class DoiBatchProcessor:
             )
         duration_ms = (time.perf_counter() - start_time) * 1000
 
-        if self._request_collector:
+        if self._request_collector and response is not None:
             with contextlib.suppress(Exception):
                 self._request_collector.record_from_response(response, duration_ms)
 
@@ -246,9 +260,11 @@ class DoiBatchProcessor:
                 return
 
             data = response.json()
-            items = data.get("message", {}).get("items", [])
+            message = data.get("message", {})
+            items = message.get("items", []) if isinstance(message, dict) else []
             for item in items:
-                yield item
+                if isinstance(item, dict):
+                    yield cast(BronzeRecord, item)
 
         except CROSSREF_RUNTIME_ERRORS as e:
             self._logger.warning(
@@ -313,7 +329,7 @@ class SearchPaginatorHelper:
             "cursor": cursor,
             "mailto": self._mailto,
         }
-        response: Any | None = None  # Any: untyped HTTP response object
+        response: Response | None = None
 
         start_time = time.perf_counter()
         with self._metrics.measure_request("/works?query"):
@@ -323,7 +339,7 @@ class SearchPaginatorHelper:
         duration_ms = (time.perf_counter() - start_time) * 1000
 
         # Record request for metadata enrichment
-        if self._request_collector:
+        if self._request_collector and response is not None:
             with contextlib.suppress(Exception):
                 self._request_collector.record_from_response(response, duration_ms)
 
@@ -343,8 +359,15 @@ class SearchPaginatorHelper:
 
         data = response.json()
         message = data.get("message", {})
-        items = message.get("items", [])
-        next_cursor = message.get("next-cursor")
+        if not isinstance(message, dict):
+            raise CrossRefApiError("CrossRef search failed: invalid response body")
+
+        items_raw = message.get("items", [])
+        items = [
+            cast(BronzeRecord, item) for item in items_raw if isinstance(item, dict)
+        ]
+        next_cursor_value = message.get("next-cursor")
+        next_cursor = next_cursor_value if isinstance(next_cursor_value, str) else None
 
         return items, next_cursor
 

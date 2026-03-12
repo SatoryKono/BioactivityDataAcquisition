@@ -160,8 +160,11 @@ class DeltaReader:
                     f"Delta table not found: {resolved_path}"
                 ) from e
 
-            # Sum row counts from Parquet file metadata (add actions)
-            # to avoid loading the entire table into memory.
+            native_count = getattr(dt, "count", None)
+            if callable(native_count):
+                return int(native_count())
+
+            # Fall back to add-action metadata on older delta-rs builds.
             try:
                 add_actions_obj = dt.get_add_actions(flatten=True)
                 to_pydict = getattr(add_actions_obj, "to_pydict", None)
@@ -176,12 +179,6 @@ class DeltaReader:
                     return int(sum(typed_num_records))
             except (KeyError, AttributeError, TypeError):
                 pass  # Why: Delta metadata field absent; fall through to PyArrow dataset count
-            except BaseException:
-                # pyo3_runtime.PanicException on empty Delta tables
-                # (inherits BaseException, not Exception).
-                # After panic the DeltaTable lock is poisoned, so
-                # return 0 for empty tables.
-                return 0
 
             # Fallback: read only row count via PyArrow dataset
             # (reads footer metadata, not full data)

@@ -61,7 +61,7 @@ contracts:
 
 ### Шаг 5: Verify
 ```bash
-python scripts/validate_pipeline_configs.py --verbose
+python scripts/schema/validate_pipeline_configs.py --verbose
 python -m pytest tests/architecture/test_registry_contracts.py -q
 python -m pytest tests/unit/application/pipelines/{provider}/ -q
 ```

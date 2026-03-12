@@ -2278,9 +2278,9 @@ fields:
 - `mkdocs` pinned to `<2.0` in `pyproject.toml` to avoid known compatibility risk with current Material stack.
 - Standard docs checks:
 ```bash
-python scripts/check_doc_links.py
+python scripts/docs/check_doc_links.py
 make docs-build
-bash scripts/build_docs_site.sh --strict
+bash scripts/docs/build_docs_site.sh --strict
 ```
 - Migration to MkDocs 2.x must be tracked as a dedicated task with explicit compatibility validation.
 
@@ -2384,13 +2384,13 @@ python src/tools/file_merger.py --dir src/bioetl/domain/ --ext .py --output merg
 **Использование:**
 ```bash
 # Dry-run (по умолчанию)
-python scripts/cleanup_project.py
+python scripts/diagnostics/cleanup_project.py
 
 # Применить изменения с архивированием логов
-python scripts/cleanup_project.py --apply --archive-logs
+python scripts/diagnostics/cleanup_project.py --apply --archive-logs
 
 # Полная очистка (включая логи)
-python scripts/cleanup_project.py --apply --purge-logs
+python scripts/diagnostics/cleanup_project.py --apply --purge-logs
 ```
 
 | Флаг | Описание |
@@ -2413,10 +2413,10 @@ python scripts/cleanup_project.py --apply --purge-logs
 **Использование:**
 ```bash
 # Dry-run (по умолчанию)
-python scripts/cleanup_consolidate.py
+python scripts/diagnostics/cleanup_consolidate.py
 
 # Применить удаление .pyc/--pycache--/temp файлов
-python scripts/cleanup_consolidate.py --apply
+python scripts/diagnostics/cleanup_consolidate.py --apply
 ```
 
 **Что анализирует:**
@@ -2437,13 +2437,13 @@ python scripts/cleanup_consolidate.py --apply
 **Использование:**
 ```bash
 # VACUUM всех Silver таблиц
-python scripts/vacuum_delta.py
+python scripts/data/vacuum_delta.py
 
 # VACUUM конкретной таблицы
-python scripts/vacuum_delta.py --table silver/chembl/activity
+python scripts/data/vacuum_delta.py --table silver/chembl/activity
 
 # С кастомным retention
-python scripts/vacuum_delta.py --retention-days 14
+python scripts/data/vacuum_delta.py --retention-days 14
 ```
 
 | Параметр | Описание | Default |
@@ -2465,10 +2465,10 @@ python scripts/vacuum_delta.py --retention-days 14
 **Использование:**
 ```bash
 # Стандартная ротация
-python scripts/salt_rotate.py
+python scripts/ops/salt_rotate.py
 
 # Экстренная ротация (инцидент безопасности)
-python scripts/salt_rotate.py --emergency
+python scripts/ops/salt_rotate.py --emergency
 ```
 
 | Параметр | Описание |
@@ -2487,10 +2487,10 @@ python scripts/salt_rotate.py --emergency
 **Использование:**
 ```bash
 # Пересчитать baseline для всех пайплайнов
-python scripts/dq_baseline_update.py
+python scripts/data/dq_baseline_update.py
 
 # Для конкретного пайплайна
-python scripts/dq_baseline_update.py --pipeline chembl_activity
+python scripts/data/dq_baseline_update.py --pipeline chembl_activity
 ```
 
 | Параметр | Описание |
@@ -2508,8 +2508,8 @@ python scripts/dq_baseline_update.py --pipeline chembl_activity
 
 **Использование:**
 ```bash
-python scripts/verify_checksums.py
-python scripts/verify_checksums.py --table silver/chembl/activity
+python scripts/data/verify_checksums.py
+python scripts/data/verify_checksums.py --table silver/chembl/activity
 ```
 
 **Ссылки:** 05-cleanup-policy.md §5.2
@@ -2525,13 +2525,13 @@ python scripts/verify_checksums.py --table silver/chembl/activity
 **Использование:**
 ```bash
 # Стандартный аудит
-python scripts/audit_structure.py
+python scripts/diagnostics/audit_structure.py
 
 # JSON вывод для CI
-python scripts/audit_structure.py --json
+python scripts/diagnostics/audit_structure.py --json
 
 # Строгий режим (SHOULD violations = exit 1)
-python scripts/audit_structure.py --strict
+python scripts/diagnostics/audit_structure.py --strict
 ```
 
 | Флаг | Описание |
@@ -2558,13 +2558,13 @@ python scripts/audit_structure.py --strict
 **Использование:**
 ```bash
 # Полный аудит
-python scripts/naming_audit.py
+python scripts/qa/naming_audit.py
 
 # CI режим (exit 1 при нарушениях)
-python scripts/naming_audit.py --check
+python scripts/qa/naming_audit.py --check
 
 # Сохранить отчёт в файл
-python scripts/naming_audit.py --output report.md
+python scripts/qa/naming_audit.py --output report.md
 ```
 
 **Ссылки:** RULES.md §2, docs/glossary.md
@@ -2578,13 +2578,13 @@ python scripts/naming_audit.py --output report.md
 **Использование:**
 ```bash
 # Проверить весь проект
-python src/tools/scripts/lint_terminology.py
+python src/tools/scripts/qa/lint_terminology.py
 
 # Проверить конкретный файл
-python src/tools/scripts/lint_terminology.py src/bioetl/domain/models/molecule.py
+python src/tools/scripts/qa/lint_terminology.py src/bioetl/domain/models/molecule.py
 
 # Строгий режим (дополнительные context-sensitive проверки)
-python src/tools/scripts/lint_terminology.py --strict src/bioetl/
+python src/tools/scripts/qa/lint_terminology.py --strict src/bioetl/
 ```
 
 **Что проверяет:**
@@ -2615,7 +2615,7 @@ bash scripts/diagrams/run_diagram_checks.sh
 
 **Использование:**
 ```bash
-python scripts/config_gap_analysis.py
+python scripts/schema/config_gap_analysis.py
 ```
 
 **Что анализирует:**
@@ -2631,7 +2631,7 @@ python scripts/config_gap_analysis.py
 
 **Использование:**
 ```bash
-python scripts/validate_pipeline_configs.py
+python scripts/schema/validate_pipeline_configs.py
 ```
 
 **Что проверяет:**
@@ -2663,22 +2663,22 @@ pytest src/tools/benchmarks/ -v --benchmark-only
 ```makefile
 # Очистка
 clean-dev:
-    python scripts/cleanup_project.py --apply --purge-logs
+    python scripts/diagnostics/cleanup_project.py --apply --purge-logs
 
 # Delta Lake maintenance
 vacuum-silver:
-    python scripts/vacuum_delta.py
+    python scripts/data/vacuum_delta.py
 
 # Верификация
 verify-checksums:
-    python scripts/verify_checksums.py
+    python scripts/data/verify_checksums.py
 
 # Аудит
 audit-structure:
-    python scripts/audit_structure.py
+    python scripts/diagnostics/audit_structure.py
 
 audit-naming:
-    python scripts/naming_audit.py
+    python scripts/qa/naming_audit.py
 
 # Создание пайплайна (требует bioetl)
 new-pipeline:
@@ -4197,8 +4197,8 @@ Workflow следует принципу "Safe-by-Design":
 - **Линтинг**: `make lint` (ruff + mypy).
 - **Тесты**: `make test-unit`, `make test-integration` (VCR).
 - **Архитектура**: `pytest tests/architecture/`.
-- **Конфиги**: `python scripts/validate_pipeline_configs.py`, `python scripts/config_gap_analysis.py`.
-- **Терминология**: `python src/tools/scripts/lint_terminology.py`.
+- **Конфиги**: `python scripts/schema/validate_pipeline_configs.py`, `python scripts/schema/config_gap_analysis.py`.
+- **Терминология**: `python src/tools/scripts/qa/lint_terminology.py`.
 
 ----------------------------------------------------------------------
 
@@ -4863,11 +4863,11 @@ These terms should NOT be used in new code:
 
 ### Lint Script
 
-A terminology linter is available at `src/tools/scripts/lint_terminology.py`:
+A terminology linter is available at `src/tools/scripts/qa/lint_terminology.py`:
 
 ```bash
 # Check for deprecated terms
-python src/tools/scripts/lint_terminology.py src/bioetl/
+python src/tools/scripts/qa/lint_terminology.py src/bioetl/
 
 # Pre-commit hook (see .pre-commit-config.yaml)
 ```
@@ -5022,8 +5022,8 @@ grep -ri "class.*Loader\|class.*Handler" src/bioetl/ --include="*.py"
 Проверка:
 
 ```bash
-python3 scripts/audit_root_cleanliness.py
-python3 scripts/audit_structure.py --path .
+python3 scripts/repo/audit_root_cleanliness.py
+python3 scripts/diagnostics/audit_structure.py --path .
 ```
 
 ----------------------------------------------------------------------
@@ -5161,7 +5161,7 @@ sink:
 - Перед релизом запускать allowlist-проверку:
 
 ```bash
-uv run python scripts/validate_data_dir.py
+uv run python scripts/data/validate_data_dir.py
 ```
 
 ----------------------------------------------------------------------
@@ -5280,7 +5280,7 @@ pre-commit run validate-pipeline-configs --all-files
 ## 1. Чек-лист создания нового Pipeline
 
 - [ ] Создать entity config в `configs/entities/<provider>/<entity>.yaml`
-- [ ] Валидировать через `configs/-schema/pipeline.json` и `scripts/validate_pipeline_configs.py`
+- [ ] Валидировать через `configs/-schema/pipeline.json` и `scripts/schema/validate_pipeline_configs.py`
 - [ ] Выбрать каноническое имя согласно [02-naming-policy.md](02-naming-policy.md)
 - [ ] Создать трансформер в `src/bioetl/application/pipelines/`
 - [ ] Зарегистрировать в `PipelineRegistry`
@@ -5356,7 +5356,7 @@ sink:
   hooks:
     - id: validate-pipeline-configs
       name: Validate pipeline configs
-      entry: python scripts/validate_pipeline_configs.py
+      entry: python scripts/schema/validate_pipeline_configs.py
       language: python
       files: ^configs/entities/.+\.yaml$
       exclude: ^configs/entities/.*/-
@@ -5366,13 +5366,13 @@ sink:
 
 ```bash
 # Валидация всех entity/composite конфигов
-python scripts/validate_pipeline_configs.py --verbose
+python scripts/schema/validate_pipeline_configs.py --verbose
 
 # Валидация всех конфигов
-python scripts/validate_pipeline_configs.py
+python scripts/schema/validate_pipeline_configs.py
 
 # Строгий режим (warnings как errors)
-python scripts/validate_pipeline_configs.py --strict
+python scripts/schema/validate_pipeline_configs.py --strict
 ```
 
 ### 3.3. Структура JSON Schema
@@ -5571,7 +5571,7 @@ input_filter:
 
 ```bash
 # Проверить соответствие схемам
-python scripts/validate_pipeline_configs.py --verbose
+python scripts/schema/validate_pipeline_configs.py --verbose
 ```
 
 ----------------------------------------------------------------------
@@ -5975,7 +5975,7 @@ concurrency:
 2. Документы класса `internal-published` публикуются для удобства команды, но не являются нормативным источником требований.
 3. При миграции структуры (пути, команды, конфиги) сначала обновлять `published`, затем `internal-published` и `internal`.
 4. Исторические упоминания legacy-путей в `published` документах должны быть явно помечены как historical context.
-5. Для активных docs использовать автоматические проверки (`scripts/check_doc_links.py`) в CI.
+5. Для активных docs использовать автоматические проверки (`scripts/docs/check_doc_links.py`) в CI.
 6. Документы по runtime, который не является стандартным (например Kubernetes при ADR-010 Local-Only), публикуются только как `internal-published` в разделе `Internal / Extended` и должны содержать явный experimental/disclaimer баннер.
 7. `internal-generated` документы не используются как первичный источник архитектурной или операционной политики.
 
@@ -5983,11 +5983,11 @@ concurrency:
 
 1. Проверить ссылки:
 ```bash
-python scripts/check_doc_links.py --links
+python scripts/docs/check_doc_links.py --links
 ```
 2. Проверить legacy-токены в активных docs:
 ```bash
-python scripts/check_doc_links.py --legacy-paths
+python scripts/docs/check_doc_links.py --legacy-paths
 ```
 3. Проверить, что изменения не сломали nav:
 ```bash
@@ -6048,17 +6048,17 @@ Notes:
 
 ```bash
 # Full docs checks (links + legacy + nav + baseline growth)
-./.venv/Scripts/python.exe scripts/check_doc_links.py
+./.venv/Scripts/python.exe scripts/docs/check_doc_links.py
 
 # Optional focused checks
-./.venv/Scripts/python.exe scripts/check_doc_links.py --not-in-nav-growth
-bash scripts/build_docs_site.sh --strict
+./.venv/Scripts/python.exe scripts/docs/check_doc_links.py --not-in-nav-growth
+bash scripts/docs/build_docs_site.sh --strict
 ```
 
 If non-nav growth is intentional:
 1. Regenerate baseline list:
    `./.venv/Scripts/python.exe -c "from scripts.check_doc_links import get_not_in_nav_docs, NOT_IN_NAV_BASELINE_FILE; docs=get_not_in_nav_docs(); NOT_IN_NAV_BASELINE_FILE.write_text('\\n'.join(docs)+'\\n', encoding='utf-8')"`
-2. Re-run `./.venv/Scripts/python.exe scripts/check_doc_links.py`.
+2. Re-run `./.venv/Scripts/python.exe scripts/docs/check_doc_links.py`.
 3. Include a short rationale in PR/commit message (why growth is expected).
 
 ----------------------------------------------------------------------
@@ -6085,7 +6085,7 @@ Current KPI model for docs outside nav:
 Weekly CI control:
 
 - Workflow: `.github/workflows/docs-kpi-weekly.yml`
-- Script: `scripts/report_docs_kpi.py`
+- Script: `scripts/docs/report_docs_kpi.py`
 - Outputs:
   - `reports/docs-kpi/docs-kpi-weekly.json`
   - `reports/docs-kpi/docs-kpi-weekly.md`
@@ -6125,13 +6125,13 @@ A document SHOULD be promoted when at least two criteria are true:
 ### 6.3 Execution Loop
 
 1. Compute current state:
-   - `./.venv/Scripts/python.exe scripts/report_docs_kpi.py`
+   - `./.venv/Scripts/python.exe scripts/docs/report_docs_kpi.py`
 2. Classify each outside-nav cluster (`archive`, `internal-generated`, `internal-published`).
 3. Promote a small curated batch to nav (`Internal / Extended` first).
 4. Ensure every non-promoted cluster has a discoverable index entrypoint.
 5. Re-run:
-   - `./.venv/Scripts/python.exe scripts/check_doc_links.py`
-   - `bash scripts/build_docs_site.sh --strict`
+   - `./.venv/Scripts/python.exe scripts/docs/check_doc_links.py`
+   - `bash scripts/docs/build_docs_site.sh --strict`
 6. Update baseline only when growth is intentional and justified.
 
 ### 6.4 Current Backlog Snapshot (2026-03-03, wave-7)
@@ -8561,7 +8561,7 @@ runner = bootstrap_composite_runner(
 
 ```bash
 python3 scripts/diagrams/lint_diagrams.py docs
-python3 scripts/check_doc_links.py --links
+python3 scripts/docs/check_doc_links.py --links
 python3 scripts/diagrams/check_diagram_visual_smoke.py
 bash scripts/diagrams/validate_mermaid_syntax.sh
 ```
@@ -14589,7 +14589,7 @@ sink:
 
 ```bash
 # Валидация всех конфигов
-python scripts/validate_pipeline_configs.py
+python scripts/schema/validate_pipeline_configs.py
 ```
 
 Schema проверяет:
@@ -18199,13 +18199,13 @@ Breaking change откатывается если:
   композиция полей,
 - typed annotations в Silver Pandera schema classes — типовая семантика полей.
 
-На этой основе вводится единый генератор `scripts/generate_schema_artifacts.py`,
+На этой основе вводится единый генератор `scripts/schema/generate_schema_artifacts.py`,
 который:
 
 1. генерирует Pandera-canonical registry
    (`src/bioetl/domain/schemas/generated/registry.py`),
 1. генерирует Gold JSON contracts через существующий exporter
-   (`src/tools/scripts/generate_contracts.py`),
+   (`src/tools/scripts/schema/generate_contracts.py`),
 1. поддерживает режим `--check` для CI gate по stale generated artifacts.
 
 ## Consequences
@@ -28855,7 +28855,7 @@ scripts/diagrams/run_diagram_checks.sh --profile pr --diagram docs/02-architectu
 python3 scripts/diagrams/lint_diagrams.py docs
 python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/mmd-diagrams --json > /tmp/diagram-lint.json || true
 python3 scripts/diagrams/summarize_diagram_lint.py /tmp/diagram-lint.json
-python3 scripts/check_doc_links.py --links
+python3 scripts/docs/check_doc_links.py --links
 bash scripts/diagrams/validate_mermaid_syntax.sh
 bash docs/02-architecture/mmd-diagrams/render.sh
 python3 scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt
@@ -33471,8 +33471,8 @@ make quarantine-purge PIPELINE=chembl_activity
 After cleanup, verify repository hygiene and structure policy:
 
 ```bash
-python3 scripts/audit_root_cleanliness.py
-python3 scripts/audit_structure.py --path .
+python3 scripts/repo/audit_root_cleanliness.py
+python3 scripts/diagnostics/audit_structure.py --path .
 ```
 
 ## 6. Commands
@@ -33556,7 +33556,7 @@ Enforcement:
 
 ```bash
 # 1. Validate repository hygiene
-python3 scripts/audit_root_cleanliness.py
+python3 scripts/repo/audit_root_cleanliness.py
 
 # 2. Run cleanup preflight
 make clean-preflight DRY_RUN=1
@@ -36626,13 +36626,13 @@ This guide describes migration to the canonical schema generation flow introduce
 - Generated artifacts are managed via a single command:
 
 ```bash
-uv run python scripts/generate_schema_artifacts.py
+uv run python scripts/schema/generate_schema_artifacts.py
 ```
 
 - CI now blocks pull requests when generated artifacts are stale:
 
 ```bash
-uv run python scripts/generate_schema_artifacts.py --check
+uv run python scripts/schema/generate_schema_artifacts.py --check
 ```
 
 ## Required Developer Workflow
@@ -36642,7 +36642,7 @@ uv run python scripts/generate_schema_artifacts.py --check
 1. Regenerate artifacts locally:
 
    ```bash
-   uv run python scripts/generate_schema_artifacts.py
+   uv run python scripts/schema/generate_schema_artifacts.py
    ```
 
 1. Commit all generated changes:
@@ -36654,7 +36654,7 @@ uv run python scripts/generate_schema_artifacts.py --check
 1. Run check mode before push:
 
    ```bash
-   uv run python scripts/generate_schema_artifacts.py --check
+   uv run python scripts/schema/generate_schema_artifacts.py --check
    ```
 
 ## Notes
@@ -40647,7 +40647,7 @@ JSON-экспорты в `docs/04-reference/contracts/gold/*.json` — **source 
 Обновление выполняется скриптом:
 
 ```bash
-python src/tools/scripts/generate_contracts.py
+python src/tools/scripts/schema/generate_contracts.py
 ```
 
 
@@ -56199,7 +56199,7 @@ Use this checklist when reviewing new or modified pipelines.
 
 ## 17. Pre-flight Repository Hygiene
 
-- [ ] `uv run python scripts/validate_data_dir.py` проходит без ошибок
+- [ ] `uv run python scripts/data/validate_data_dir.py` проходит без ошибок
 - [ ] Тяжёлые/временные локальные артефакты вынесены в `data/local/` или `tmp/`
 - [ ] В релиз не попадают локальные артефакты (`data/local/**`, `tmp/**`)
 

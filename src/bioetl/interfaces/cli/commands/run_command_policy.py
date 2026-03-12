@@ -153,13 +153,6 @@ def handle_destructive_step(
             reason_code="CLI_CLEANUP_PREVIEW_UNEXPECTED_ERROR",
         )
         return False
-    except Exception as exc:
-        handle_cli_failure(
-            exc,
-            pipeline=pipeline,
-            reason_code="CLI_CLEANUP_PREVIEW_UNEXPECTED_ERROR",
-        )
-        return False
 
 
 def execute_run_step(

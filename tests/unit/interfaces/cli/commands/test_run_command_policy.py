@@ -213,10 +213,8 @@ class TestHandleDestructiveStep:
         err = capsys.readouterr().err
         assert "Error previewing cleanup" in err
 
-    def test_generic_exception_returns_false(
-        self, capsys: pytest.CaptureFixture[str]
-    ) -> None:
-        """Generic Exception is caught, handle_cli_failure called, returns False."""
+    def test_generic_exception_is_not_swallowed(self) -> None:
+        """Unexpected exception subclasses should propagate to preserve diagnostics."""
 
         class _WeirdError(Exception):
             pass
@@ -224,16 +222,13 @@ class TestHandleDestructiveStep:
         with patch(
             "bioetl.interfaces.cli.commands.run_command_policy.handle_destructive_run_confirmation",
             side_effect=_WeirdError("weird"),
-        ):
-            result = handle_destructive_step(
+        ), pytest.raises(_WeirdError, match="weird"):
+            handle_destructive_step(
                 pipeline="chembl_activity",
                 run_type="rebuild",
                 dry_run=True,
                 yes=True,
             )
-        assert result is False
-        err = capsys.readouterr().err
-        assert "Error previewing cleanup" in err
 
 
 # ---------------------------------------------------------------------------

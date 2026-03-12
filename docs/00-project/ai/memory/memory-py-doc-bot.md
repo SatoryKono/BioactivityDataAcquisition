@@ -205,7 +205,7 @@ Key terms to keep synchronized:
 
 ```bash
 # Check for broken internal links (canonical checker)
-python scripts/check_doc_links.py --links
+python scripts/docs/check_doc_links.py --links
 
 # Check ADR references in code
 grep -rn "ADR-[0-9]" src/bioetl/ --include="*.py" | head -20

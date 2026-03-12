@@ -1,0 +1,41 @@
+"""Unit tests for FileCompositeCheckpointWriter."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+import pytest
+
+from bioetl.infrastructure.storage.composite_checkpoint_writer import (
+    FileCompositeCheckpointWriter,
+)
+
+
+def test_write_atomic_persists_content(tmp_path: Path) -> None:
+    """Successful atomic writes should leave only the final checkpoint file."""
+    writer = FileCompositeCheckpointWriter(tmp_path)
+
+    writer.write_atomic("state.json", '{"status": "ok"}')
+
+    assert (tmp_path / "state.json").read_text() == '{"status": "ok"}'
+    assert not (tmp_path / "state.tmp").exists()
+
+
+def test_write_atomic_cleans_temp_and_propagates_keyboard_interrupt(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Cleanup temp files while preserving cancellation semantics."""
+    writer = FileCompositeCheckpointWriter(tmp_path)
+    path_cls = type(tmp_path)
+
+    def _raise_keyboard_interrupt(self: Path, target: Path) -> Path:
+        raise KeyboardInterrupt()
+
+    monkeypatch.setattr(path_cls, "replace", _raise_keyboard_interrupt)
+
+    with pytest.raises(KeyboardInterrupt):
+        writer.write_atomic("state.json", '{"status": "interrupted"}')
+
+    assert not (tmp_path / "state.json").exists()
+    assert not (tmp_path / "state.tmp").exists()

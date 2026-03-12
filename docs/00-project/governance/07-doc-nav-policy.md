@@ -46,17 +46,17 @@ Notes:
 
 ```bash
 # Full docs checks (links + legacy + nav + baseline growth)
-./.venv/Scripts/python.exe scripts/check_doc_links.py
+./.venv/Scripts/python.exe scripts/docs/check_doc_links.py
 
 # Optional focused checks
-./.venv/Scripts/python.exe scripts/check_doc_links.py --not-in-nav-growth
-bash scripts/build_docs_site.sh --strict
+./.venv/Scripts/python.exe scripts/docs/check_doc_links.py --not-in-nav-growth
+bash scripts/docs/build_docs_site.sh --strict
 ```
 
 If non-nav growth is intentional:
 1. Regenerate baseline list:
    `./.venv/Scripts/python.exe -c "from scripts.check_doc_links import get_not_in_nav_docs, NOT_IN_NAV_BASELINE_FILE; docs=get_not_in_nav_docs(); NOT_IN_NAV_BASELINE_FILE.write_text('\\n'.join(docs)+'\\n', encoding='utf-8')"`
-2. Re-run `./.venv/Scripts/python.exe scripts/check_doc_links.py`.
+2. Re-run `./.venv/Scripts/python.exe scripts/docs/check_doc_links.py`.
 3. Include a short rationale in PR/commit message (why growth is expected).
 
 ----------------------------------------------------------------------
@@ -83,7 +83,7 @@ Current KPI model for docs outside nav:
 Weekly CI control:
 
 - Workflow: `.github/workflows/docs-kpi-weekly.yml`
-- Script: `scripts/report_docs_kpi.py`
+- Script: `scripts/docs/report_docs_kpi.py`
 - Outputs:
   - `reports/docs-kpi/docs-kpi-weekly.json`
   - `reports/docs-kpi/docs-kpi-weekly.md`
@@ -123,13 +123,13 @@ A document SHOULD be promoted when at least two criteria are true:
 ### 6.3 Execution Loop
 
 1. Compute current state:
-   - `./.venv/Scripts/python.exe scripts/report_docs_kpi.py`
+   - `./.venv/Scripts/python.exe scripts/docs/report_docs_kpi.py`
 2. Classify each outside-nav cluster (`archive`, `internal-generated`, `internal-published`).
 3. Promote a small curated batch to nav (`Internal / Extended` first).
 4. Ensure every non-promoted cluster has a discoverable index entrypoint.
 5. Re-run:
-   - `./.venv/Scripts/python.exe scripts/check_doc_links.py`
-   - `bash scripts/build_docs_site.sh --strict`
+   - `./.venv/Scripts/python.exe scripts/docs/check_doc_links.py`
+   - `bash scripts/docs/build_docs_site.sh --strict`
 6. Update baseline only when growth is intentional and justified.
 
 ### 6.4 Current Backlog Snapshot (2026-03-03, wave-7)

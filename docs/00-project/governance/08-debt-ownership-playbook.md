@@ -30,7 +30,7 @@ Mandatory enforcement points:
 1. New exemption declares explicit `owner` and concrete `removal_step`.
 2. `owner` is mapped to the correct subsystem in scorecard governance.
 3. `removal_step` references concrete follow-up action (refactor/task/RF).
-4. `scripts/check_quality_exemptions.py --mode warn` passes.
+4. `scripts/qa/check_quality_exemptions.py --mode warn` passes.
 5. Active owner count in registry remains >= 3.
 
 ## Dashboard

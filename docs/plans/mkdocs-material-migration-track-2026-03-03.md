@@ -8,7 +8,7 @@ Mitigate forward-compatibility risk around MkDocs/Material while preserving curr
 
 ## Trigger
 
-`bash scripts/build_docs_site.sh --strict` is green, but Material emits a compatibility advisory for MkDocs 2.0.
+`bash scripts/docs/build_docs_site.sh --strict` is green, but Material emits a compatibility advisory for MkDocs 2.0.
 
 ## Owner and Cadence
 

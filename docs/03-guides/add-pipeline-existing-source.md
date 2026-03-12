@@ -103,7 +103,7 @@ Update `configs/providers/{provider}.yaml`:
 Config validation:
 
 ```bash
-python scripts/validate_pipeline_configs.py --verbose
+python scripts/schema/validate_pipeline_configs.py --verbose
 ```
 
 Config load smoke:

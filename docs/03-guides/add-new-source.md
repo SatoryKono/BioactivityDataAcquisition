@@ -158,7 +158,7 @@ For the first provider entity, complete all items from
 Configuration:
 
 ```bash
-python scripts/validate_pipeline_configs.py --verbose
+python scripts/schema/validate_pipeline_configs.py --verbose
 ```
 
 Loadability smoke (provider + one pipeline):
