@@ -19,7 +19,9 @@ from bioetl.infrastructure.adapters.crossref.client_builders import (
     _create_default_crossref_search_paginator,
     _create_default_crossref_title_fallback_handler,
 )
-from bioetl.infrastructure.adapters.crossref.fallback import CrossRefTitleFallbackHandler
+from bioetl.infrastructure.adapters.crossref.fallback import (
+    CrossRefTitleFallbackHandler,
+)
 from bioetl.infrastructure.adapters.crossref.fetch_flow import CrossRefFetchFlow
 from bioetl.infrastructure.adapters.crossref.query_builder import CrossRefQueryBuilder
 from bioetl.infrastructure.adapters.crossref.response_mapper import (

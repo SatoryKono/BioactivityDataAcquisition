@@ -1,6 +1,6 @@
 """Unit tests for CrossRef fallback search utilities.
 
-Tests for TitleFallbackHandler and title matching functions.
+Tests for CrossRefTitleFallbackHandler and title matching functions.
 """
 
 from __future__ import annotations
@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.infrastructure.adapters.crossref.fallback import (
-    TitleFallbackHandler,
+    CrossRefTitleFallbackHandler,
     titles_match,
 )
 
@@ -78,7 +78,7 @@ class TestTitlesMatch:
 
 
 # =============================================================================
-# TitleFallbackHandler Tests
+# CrossRefTitleFallbackHandler Tests
 # =============================================================================
 
 
@@ -96,8 +96,8 @@ def mock_search_fn():
 
 @pytest.fixture
 def fallback_handler(mock_logger, mock_search_fn):
-    """Create a TitleFallbackHandler instance."""
-    return TitleFallbackHandler(
+    """Create a CrossRefTitleFallbackHandler instance."""
+    return CrossRefTitleFallbackHandler(
         logger=mock_logger,
         search_fn=mock_search_fn,
     )
@@ -113,7 +113,7 @@ async def test_search_by_title_success(mock_logger):
             "title": ["Crystal structure of rhodopsin"],
         }
 
-    handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
+    handler = CrossRefTitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
     result = await handler.search_by_title("Crystal structure of rhodopsin")
 
     assert result is not None
@@ -130,7 +130,7 @@ async def test_search_by_title_no_match(mock_logger):
             "title": ["Completely different topic"],
         }
 
-    handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
+    handler = CrossRefTitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
     result = await handler.search_by_title("Crystal structure of rhodopsin")
 
     assert result is None
@@ -144,7 +144,7 @@ async def test_search_by_title_empty_results(mock_logger):
         return
         yield  # Make it a generator
 
-    handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
+    handler = CrossRefTitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
     result = await handler.search_by_title("Nonexistent publication")
 
     assert result is None
@@ -161,7 +161,7 @@ async def test_search_by_title_truncates_long_title(mock_logger):
         return
         yield
 
-    handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
+    handler = CrossRefTitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
     await handler.search_by_title(long_title)
 
     # Verify the query was truncated (200 chars + quotes + "title:")
@@ -177,7 +177,7 @@ async def test_search_by_title_handles_exception(mock_logger):
         raise RuntimeError("Search failed")
         yield
 
-    handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
+    handler = CrossRefTitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
     result = await handler.search_by_title("Test title")
 
     assert result is None
@@ -197,7 +197,7 @@ async def test_search_by_title_checks_multiple_results(mock_logger):
             "title": ["Crystal structure of rhodopsin"],
         }
 
-    handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
+    handler = CrossRefTitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
     result = await handler.search_by_title("Crystal structure of rhodopsin")
 
     assert result is not None
@@ -253,7 +253,7 @@ async def test_process_missing_dois_success(mock_logger):
             "title": ["Crystal structure of rhodopsin"],
         }
 
-    handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
+    handler = CrossRefTitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
 
     fallback_mapping = {
         "10.1234/notfound": "Crystal structure of rhodopsin",
@@ -285,7 +285,7 @@ async def test_process_missing_dois_skips_found(mock_logger):
         return
         yield
 
-    handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
+    handler = CrossRefTitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
 
     results = []
     async for pub in handler.process_missing_dois(
@@ -310,7 +310,7 @@ async def test_process_missing_dois_no_fallback_title(mock_logger):
         return
         yield
 
-    handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
+    handler = CrossRefTitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
 
     results = []
     async for pub in handler.process_missing_dois(
@@ -336,7 +336,7 @@ async def test_process_missing_dois_respects_limit(mock_logger):
     async def mock_search(query, limit):
         yield {"DOI": "10.found/1", "title": ["Title 1"]}
 
-    handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
+    handler = CrossRefTitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
 
     results = []
     async for pub in handler.process_missing_dois(
@@ -365,7 +365,7 @@ async def test_process_missing_dois_logs_not_found(mock_logger):
         return
         yield
 
-    handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
+    handler = CrossRefTitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
 
     results = []
     async for pub in handler.process_missing_dois(
@@ -389,7 +389,7 @@ async def test_process_missing_dois_logs_not_found(mock_logger):
 
 def test_title_only_event_names(mock_logger, mock_search_fn):
     """Test that title-only event names are correctly prefixed."""
-    handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search_fn)
+    handler = CrossRefTitleFallbackHandler(logger=mock_logger, search_fn=mock_search_fn)
 
     assert handler._event_title_only_attempt == "crossref_title_only_attempt"
     assert handler._event_title_only_success == "crossref_title_only_success"
@@ -398,7 +398,7 @@ def test_title_only_event_names(mock_logger, mock_search_fn):
 
 def test_process_found_result_adds_metadata(mock_logger, mock_search_fn):
     """Test that process_found_result adds lookup method metadata."""
-    handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search_fn)
+    handler = CrossRefTitleFallbackHandler(logger=mock_logger, search_fn=mock_search_fn)
 
     result = {"DOI": "10.1038/nature12373", "title": ["Test Paper"]}
     processed = handler._process_found_result(result, "10.1234/original")
@@ -417,7 +417,7 @@ async def test_process_title_only_entries_success(mock_logger):
             "title": ["Crystal structure of rhodopsin"],
         }
 
-    handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
+    handler = CrossRefTitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
 
     fallback_mapping = {
         "": "Crystal structure of rhodopsin",
@@ -446,7 +446,7 @@ async def test_process_title_only_entries_no_mapping(mock_logger):
         return
         yield
 
-    handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
+    handler = CrossRefTitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
 
     results = []
     async for pub in handler.process_title_only_entries(
@@ -467,7 +467,7 @@ async def test_process_title_only_entries_respects_limit(mock_logger):
     async def mock_search(query, limit):
         yield {"DOI": "10.found/1", "title": ["Title 1"]}
 
-    handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
+    handler = CrossRefTitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
 
     fallback_mapping = {
         "": "Title 1",
@@ -495,7 +495,7 @@ async def test_process_title_only_entries_not_found(mock_logger):
         return
         yield
 
-    handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
+    handler = CrossRefTitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
 
     fallback_mapping = {
         "": "Some title",

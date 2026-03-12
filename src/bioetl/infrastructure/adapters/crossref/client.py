@@ -54,7 +54,9 @@ from bioetl.infrastructure.adapters.crossref.client_runtime_helpers import (
     build_crossref_fetch_flow,
     build_crossref_runtime_services,
 )
-from bioetl.infrastructure.adapters.crossref.fallback import CrossRefTitleFallbackHandler
+from bioetl.infrastructure.adapters.crossref.fallback import (
+    CrossRefTitleFallbackHandler,
+)
 from bioetl.infrastructure.adapters.crossref.fetch_flow import CrossRefFetchFlow
 from bioetl.infrastructure.adapters.crossref.query_builder import CrossRefQueryBuilder
 from bioetl.infrastructure.adapters.crossref.response_mapper import (

@@ -42,7 +42,7 @@ from bioetl.interfaces.cli.commands.run_all_helpers import (
     should_prompt_for_destructive_run,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
-from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning
+from bioetl.interfaces.cli.formatters import echo_error, echo_info
 
 if TYPE_CHECKING:
     from bioetl.application.services import PipelineRunnerService

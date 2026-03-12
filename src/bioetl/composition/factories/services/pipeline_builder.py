@@ -6,14 +6,8 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.core.batch_checkpoint_recovery_service import (
-    BatchCheckpointRecoveryService,
-)
 from bioetl.application.core.batch_executor import BatchExecutor
-from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
 from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
-from bioetl.application.core.batch_progress_service import BatchProgressService
-from bioetl.application.core.batch_tracing import BatchTracingManagerService
 from bioetl.application.core.batch_transformer import BatchTransformer
 from bioetl.application.core.batch_writer import BatchWriter
 from bioetl.application.core.config import RecordProcessorConfig
@@ -27,9 +21,11 @@ from bioetl.application.core.protocols import (
 )
 from bioetl.application.core.quarantine_manager import QuarantineManagerService
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
-from bioetl.composition.factories.batch_id_generator import UuidBatchIdGenerator
 from bioetl.composition.factories.services.pipeline_processing import (
     build_components_and_processing_service,
+)
+from bioetl.composition.factories.services.runtime_managers import (
+    build_runtime_managers,
 )
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.infrastructure.validation import PanderaGoldValidator
@@ -204,51 +200,6 @@ def _build_record_processor_config(
     return processor_config, gold_validator
 
 
-def _build_runtime_managers(
-    *,
-    pipeline: BasePipeline,
-    processor_config: RecordProcessorConfig,
-    checkpoint_manager: CheckpointManagerService,
-    memory_monitor: MemoryMonitorPort | None,
-    memory_config: MemoryConfig | None,
-    tracer: TracingPort | None,
-    batch_id_factory: BatchIdGeneratorPort | None,
-) -> tuple[
-    BatchMemoryManagerService,
-    BatchTracingManagerService,
-    BatchIdGeneratorPort,
-    BatchProgressService,
-    BatchCheckpointRecoveryService,
-]:
-    initial_batch_size = pipeline.config.batch_size or BatchExecutor.DEFAULT_BATCH_SIZE
-    memory_manager = BatchMemoryManagerService(
-        initial_batch_size=initial_batch_size,
-        memory_monitor=memory_monitor,
-        memory_config=memory_config,
-        logger=pipeline.services.logger,
-    )
-    tracing_manager = BatchTracingManagerService(
-        tracer=tracer,
-        context=pipeline.context,
-        config=processor_config,
-        initial_batch_size=initial_batch_size,
-        adaptive_sizing_enabled=memory_manager.enabled,
-    )
-    progress_service = BatchProgressService(
-        logger=pipeline.services.logger, data_source=pipeline.services.data_source
-    )
-    checkpoint_recovery_service = BatchCheckpointRecoveryService(
-        checkpoint_manager=checkpoint_manager, logger=pipeline.services.logger
-    )
-    return (
-        memory_manager,
-        tracing_manager,
-        batch_id_factory or UuidBatchIdGenerator(),
-        progress_service,
-        checkpoint_recovery_service,
-    )
-
-
 def create_batch_executor_from_pipeline(
     *,
     pipeline: BasePipeline,
@@ -291,7 +242,7 @@ def create_batch_executor_from_pipeline(
         effective_batch_id_factory,
         progress_service,
         checkpoint_recovery_service,
-    ) = _build_runtime_managers(
+    ) = build_runtime_managers(
         pipeline=pipeline,
         processor_config=processor_config,
         checkpoint_manager=checkpoint_manager,

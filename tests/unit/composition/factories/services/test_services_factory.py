@@ -8,11 +8,16 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from bioetl.composition.factories.services.callbacks import (
+    create_data_normalization_service,
+    extract_pipeline_callbacks,
+)
 from bioetl.composition.factories.services.factory import (
     BaseServicesFactory,
     ServicesBuilder,
-    create_data_normalization_service,
-    extract_pipeline_callbacks,
+)
+from bioetl.composition.factories.services.port_factories import (
+    create_metrics,
 )
 
 
@@ -73,9 +78,9 @@ def test_create_common_services_requires_silver_validator_in_prod() -> None:
 
 @pytest.mark.unit
 @patch("bioetl.composition.factories.services.factory.StorageFactory.create")
-@patch.object(BaseServicesFactory, "_create_lock")
-@patch.object(BaseServicesFactory, "_create_checkpoint")
-@patch.object(BaseServicesFactory, "_create_quarantine")
+@patch("bioetl.composition.factories.services.factory.create_lock")
+@patch("bioetl.composition.factories.services.factory.create_checkpoint")
+@patch("bioetl.composition.factories.services.factory.create_quarantine")
 @patch.object(BaseServicesFactory, "_create_dq_services")
 def test_create_common_services_uses_noop_tracing_when_not_provided(
     mock_create_dq_services: MagicMock,
@@ -115,13 +120,13 @@ def test_create_common_services_uses_noop_tracing_when_not_provided(
 def test_create_metrics_returns_noop_when_disabled() -> None:
     settings = SimpleNamespace(metrics_enabled=False)
 
-    metrics = BaseServicesFactory._create_metrics(settings)
+    metrics = create_metrics(settings)
 
     assert metrics.__class__.__name__ == "NoOpMetrics"
 
 
 @pytest.mark.unit
-@patch("bioetl.composition.factories.services.factory.PrometheusMetrics")
+@patch("bioetl.composition.factories.services.port_factories.PrometheusMetrics")
 def test_create_metrics_returns_prometheus_when_enabled(
     mock_prometheus_metrics: MagicMock,
 ) -> None:
@@ -129,7 +134,7 @@ def test_create_metrics_returns_prometheus_when_enabled(
     expected = MagicMock()
     mock_prometheus_metrics.return_value = expected
 
-    metrics = BaseServicesFactory._create_metrics(settings)
+    metrics = create_metrics(settings)
 
     assert metrics is expected
 

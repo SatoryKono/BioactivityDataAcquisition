@@ -11,7 +11,9 @@ from bioetl.infrastructure.adapters.common import FallbackFetchOrchestratorServi
 from bioetl.infrastructure.adapters.openalex.cursor_flow import (
     OpenAlexCursorFlowService,
 )
-from bioetl.infrastructure.adapters.openalex.fallback import OpenAlexTitleFallbackHandler
+from bioetl.infrastructure.adapters.openalex.fallback import (
+    OpenAlexTitleFallbackHandler,
+)
 from bioetl.infrastructure.adapters.openalex.fallback_orchestrator import (
     OpenAlexFallbackOrchestrator,
 )

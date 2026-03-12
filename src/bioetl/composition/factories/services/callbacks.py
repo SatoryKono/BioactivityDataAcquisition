@@ -1,0 +1,66 @@
+"""Pipeline callback extraction and normalization service factory.
+
+Extracted from builder.py to keep it within LOC limits.
+"""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, cast
+
+from bioetl.application.core.protocols import (
+    GoldFilterCallback,
+    GoldTransformCallback,
+    TransformCallback,
+)
+from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
+
+if TYPE_CHECKING:
+    from bioetl.application.core.base import BasePipeline
+    from bioetl.domain.ports import DataNormalizationPort
+    from bioetl.domain.services import DataNormalizationConfig
+
+__all__ = ["create_data_normalization_service", "extract_pipeline_callbacks"]
+
+
+def extract_pipeline_callbacks(pipeline: BasePipeline) -> PipelineCallbacksContext:
+    """Extract transformation callbacks from transformer or legacy methods.
+
+    Returns:
+        PipelineCallbacksContext with transform, gold filter, and gold transform callbacks.
+    """
+    transformer = pipeline.transformer
+    if transformer is not None:
+        return PipelineCallbacksContext(
+            transform=cast(TransformCallback, transformer.transform),
+            gold_filter=cast(GoldFilterCallback, transformer.should_write_gold),
+            gold_transform=cast(GoldTransformCallback, transformer.transform_for_gold),
+        )
+
+    # Fallback for pipelines without explicit transformer (legacy)
+    return PipelineCallbacksContext(
+        transform=cast(TransformCallback, pipeline.transform_bronze_to_silver),
+        gold_filter=cast(
+            GoldFilterCallback,
+            getattr(pipeline, "should_write_gold", lambda _context, record: True),
+        ),
+        gold_transform=cast(
+            GoldTransformCallback,
+            getattr(
+                pipeline,
+                "transform_for_gold",
+                lambda _context, silver_record: silver_record,
+            ),
+        ),
+    )
+
+
+def create_data_normalization_service(
+    config: DataNormalizationConfig | None = None,
+) -> DataNormalizationPort:
+    """Create DataNormalizationService with optional configuration."""
+    from bioetl.domain.services import (
+        DataNormalizationConfig,
+        DefaultDataNormalizationService,
+    )
+
+    return DefaultDataNormalizationService(config=config or DataNormalizationConfig())

@@ -32,14 +32,14 @@ from bioetl.infrastructure.storage.silver_writer_merged_mixin import (
 from bioetl.infrastructure.storage.silver_writer_metadata_mixin import (
     SilverWriterMetadataMixin,
 )
-from bioetl.infrastructure.storage.silver_writer_postwrite_mixin import (
-    SilverWriterPostwriteMixin,
-)
 from bioetl.infrastructure.storage.silver_writer_pipeline_helpers import (
     _SilverWriteExecutionContext,
     build_delta_write_request,
     build_silver_write_execution_context,
     set_silver_write_span_attributes,
+)
+from bioetl.infrastructure.storage.silver_writer_postwrite_mixin import (
+    SilverWriterPostwriteMixin,
 )
 from bioetl.infrastructure.storage.silver_writer_validation_mixin import (
     SilverWriterValidationMixin,

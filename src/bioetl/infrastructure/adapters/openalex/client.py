@@ -42,7 +42,9 @@ from bioetl.infrastructure.adapters.openalex.client_runtime_helpers import (
 from bioetl.infrastructure.adapters.openalex.cursor_flow import (
     OpenAlexCursorFlowService,
 )
-from bioetl.infrastructure.adapters.openalex.fallback import OpenAlexTitleFallbackHandler
+from bioetl.infrastructure.adapters.openalex.fallback import (
+    OpenAlexTitleFallbackHandler,
+)
 from bioetl.infrastructure.adapters.openalex.fallback_orchestrator import (
     OpenAlexFallbackOrchestrator,
 )

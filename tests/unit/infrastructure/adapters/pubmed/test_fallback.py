@@ -1,6 +1,6 @@
 """Unit tests for PubMed fallback handler.
 
-Tests the TitleFallbackHandler class for title-based search fallback.
+Tests the PubMedTitleFallbackHandler class for title-based search fallback.
 """
 
 from __future__ import annotations
@@ -9,7 +9,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.infrastructure.adapters.pubmed.fallback import TitleFallbackHandler
+from bioetl.infrastructure.adapters.pubmed.fallback import PubMedTitleFallbackHandler
 
 
 @pytest.fixture
@@ -29,39 +29,39 @@ def mock_search_fn() -> AsyncMock:
 
 
 @pytest.fixture
-def handler(mock_logger: MagicMock, mock_search_fn: AsyncMock) -> TitleFallbackHandler:
+def handler(mock_logger: MagicMock, mock_search_fn: AsyncMock) -> PubMedTitleFallbackHandler:
     """Create a fallback handler for testing."""
-    return TitleFallbackHandler(logger=mock_logger, search_fn=mock_search_fn)
+    return PubMedTitleFallbackHandler(logger=mock_logger, search_fn=mock_search_fn)
 
 
 class TestEventProperties:
     """Tests for event name properties."""
 
-    def test_event_no_fallback_title(self, handler: TitleFallbackHandler) -> None:
+    def test_event_no_fallback_title(self, handler: PubMedTitleFallbackHandler) -> None:
         """Should return pubmed-specific event name."""
         assert handler._event_no_fallback_title == "pubmed_no_fallback_title"
 
-    def test_event_fallback_attempt(self, handler: TitleFallbackHandler) -> None:
+    def test_event_fallback_attempt(self, handler: PubMedTitleFallbackHandler) -> None:
         """Should return pubmed-specific event name."""
         assert handler._event_fallback_attempt == "pubmed_title_fallback_attempt"
 
-    def test_event_fallback_success(self, handler: TitleFallbackHandler) -> None:
+    def test_event_fallback_success(self, handler: PubMedTitleFallbackHandler) -> None:
         """Should return pubmed-specific event name."""
         assert handler._event_fallback_success == "pubmed_title_fallback_success"
 
-    def test_event_fallback_not_found(self, handler: TitleFallbackHandler) -> None:
+    def test_event_fallback_not_found(self, handler: PubMedTitleFallbackHandler) -> None:
         """Should return pubmed-specific event name."""
         assert handler._event_fallback_not_found == "pubmed_title_fallback_not_found"
 
-    def test_event_title_only_attempt(self, handler: TitleFallbackHandler) -> None:
+    def test_event_title_only_attempt(self, handler: PubMedTitleFallbackHandler) -> None:
         """Should return pubmed-specific event name."""
         assert handler._event_title_only_attempt == "pubmed_title_only_attempt"
 
-    def test_event_title_only_success(self, handler: TitleFallbackHandler) -> None:
+    def test_event_title_only_success(self, handler: PubMedTitleFallbackHandler) -> None:
         """Should return pubmed-specific event name."""
         assert handler._event_title_only_success == "pubmed_title_only_success"
 
-    def test_event_title_only_not_found(self, handler: TitleFallbackHandler) -> None:
+    def test_event_title_only_not_found(self, handler: PubMedTitleFallbackHandler) -> None:
         """Should return pubmed-specific event name."""
         assert handler._event_title_only_not_found == "pubmed_title_only_not_found"
 
@@ -69,12 +69,12 @@ class TestEventProperties:
 class TestGetResultIdentifier:
     """Tests for _get_result_identifier method."""
 
-    def test_get_identifier_with_pmid(self, handler: TitleFallbackHandler) -> None:
+    def test_get_identifier_with_pmid(self, handler: PubMedTitleFallbackHandler) -> None:
         """Should return PMID from record."""
         result = handler._get_result_identifier({"pmid": "12345678"})
         assert result == ("found_pmid", "12345678")
 
-    def test_get_identifier_without_pmid(self, handler: TitleFallbackHandler) -> None:
+    def test_get_identifier_without_pmid(self, handler: PubMedTitleFallbackHandler) -> None:
         """Should return 'unknown' when no PMID."""
         result = handler._get_result_identifier({})
         assert result == ("found_pmid", "unknown")
@@ -83,14 +83,14 @@ class TestGetResultIdentifier:
 class TestProcessFoundResult:
     """Tests for _process_found_result method."""
 
-    def test_adds_lookup_method(self, handler: TitleFallbackHandler) -> None:
+    def test_adds_lookup_method(self, handler: PubMedTitleFallbackHandler) -> None:
         """Should add _lookup_method field."""
         record = {"pmid": "12345678", "article_title": "Test"}
         result = handler._process_found_result(record, "10.1234/test")
 
         assert result["_lookup_method"] == "title_fallback"
 
-    def test_adds_original_id(self, handler: TitleFallbackHandler) -> None:
+    def test_adds_original_id(self, handler: PubMedTitleFallbackHandler) -> None:
         """Should add _original_id field."""
         record = {"pmid": "12345678", "article_title": "Test"}
         result = handler._process_found_result(record, "10.1234/test")
@@ -103,7 +103,7 @@ class TestSearchByTitle:
 
     @pytest.mark.asyncio
     async def test_search_found_with_matching_title(
-        self, handler: TitleFallbackHandler, mock_search_fn: AsyncMock
+        self, handler: PubMedTitleFallbackHandler, mock_search_fn: AsyncMock
     ) -> None:
         """Should return publication when title matches."""
         mock_search_fn.return_value = [
@@ -118,7 +118,7 @@ class TestSearchByTitle:
 
     @pytest.mark.asyncio
     async def test_search_found_with_case_insensitive_match(
-        self, handler: TitleFallbackHandler, mock_search_fn: AsyncMock
+        self, handler: PubMedTitleFallbackHandler, mock_search_fn: AsyncMock
     ) -> None:
         """Should match titles case-insensitively."""
         mock_search_fn.return_value = [
@@ -132,7 +132,7 @@ class TestSearchByTitle:
 
     @pytest.mark.asyncio
     async def test_search_found_with_substring_match(
-        self, handler: TitleFallbackHandler, mock_search_fn: AsyncMock
+        self, handler: PubMedTitleFallbackHandler, mock_search_fn: AsyncMock
     ) -> None:
         """Should match when query is substring of found title."""
         mock_search_fn.return_value = [
@@ -149,7 +149,7 @@ class TestSearchByTitle:
 
     @pytest.mark.asyncio
     async def test_search_empty_results(
-        self, handler: TitleFallbackHandler, mock_search_fn: AsyncMock
+        self, handler: PubMedTitleFallbackHandler, mock_search_fn: AsyncMock
     ) -> None:
         """Should return None when no results."""
         mock_search_fn.return_value = []
@@ -160,7 +160,7 @@ class TestSearchByTitle:
 
     @pytest.mark.asyncio
     async def test_search_returns_first_result_when_no_title_match(
-        self, handler: TitleFallbackHandler, mock_search_fn: AsyncMock
+        self, handler: PubMedTitleFallbackHandler, mock_search_fn: AsyncMock
     ) -> None:
         """Should return first result when no title matches (API may vary format)."""
         mock_search_fn.return_value = [
@@ -176,7 +176,7 @@ class TestSearchByTitle:
     @pytest.mark.asyncio
     async def test_search_handles_exception(
         self,
-        handler: TitleFallbackHandler,
+        handler: PubMedTitleFallbackHandler,
         mock_search_fn: AsyncMock,
         mock_logger: MagicMock,
     ) -> None:
@@ -190,7 +190,7 @@ class TestSearchByTitle:
 
     @pytest.mark.asyncio
     async def test_search_truncates_long_title(
-        self, handler: TitleFallbackHandler, mock_search_fn: AsyncMock
+        self, handler: PubMedTitleFallbackHandler, mock_search_fn: AsyncMock
     ) -> None:
         """Should truncate titles longer than 200 chars."""
         mock_search_fn.return_value = []
@@ -208,7 +208,7 @@ class TestProcessMissingDois:
 
     @pytest.mark.asyncio
     async def test_process_found_pmid_is_skipped(
-        self, handler: TitleFallbackHandler, mock_search_fn: AsyncMock
+        self, handler: PubMedTitleFallbackHandler, mock_search_fn: AsyncMock
     ) -> None:
         """Should skip PMIDs that were already found."""
         pmids = ["12345678"]
@@ -232,7 +232,7 @@ class TestProcessMissingDois:
     @pytest.mark.asyncio
     async def test_process_missing_pmid_with_fallback_success(
         self,
-        handler: TitleFallbackHandler,
+        handler: PubMedTitleFallbackHandler,
         mock_search_fn: AsyncMock,
         mock_logger: MagicMock,
     ) -> None:
@@ -263,7 +263,7 @@ class TestProcessMissingDois:
     @pytest.mark.asyncio
     async def test_process_missing_pmid_with_fallback_not_found(
         self,
-        handler: TitleFallbackHandler,
+        handler: PubMedTitleFallbackHandler,
         mock_search_fn: AsyncMock,
         mock_logger: MagicMock,
     ) -> None:
@@ -290,7 +290,7 @@ class TestProcessMissingDois:
     @pytest.mark.asyncio
     async def test_process_missing_pmid_without_title(
         self,
-        handler: TitleFallbackHandler,
+        handler: PubMedTitleFallbackHandler,
         mock_search_fn: AsyncMock,
         mock_logger: MagicMock,
     ) -> None:
@@ -316,7 +316,7 @@ class TestProcessMissingDois:
 
     @pytest.mark.asyncio
     async def test_process_respects_limit(
-        self, handler: TitleFallbackHandler, mock_search_fn: AsyncMock
+        self, handler: PubMedTitleFallbackHandler, mock_search_fn: AsyncMock
     ) -> None:
         """Should stop when limit is reached."""
         pmids = ["11111111", "22222222", "33333333"]
@@ -349,7 +349,7 @@ class TestProcessTitleOnlyEntries:
     @pytest.mark.asyncio
     async def test_process_title_only_success(
         self,
-        handler: TitleFallbackHandler,
+        handler: PubMedTitleFallbackHandler,
         mock_search_fn: AsyncMock,
         mock_logger: MagicMock,
     ) -> None:
@@ -375,7 +375,7 @@ class TestProcessTitleOnlyEntries:
     @pytest.mark.asyncio
     async def test_process_title_only_not_found(
         self,
-        handler: TitleFallbackHandler,
+        handler: PubMedTitleFallbackHandler,
         mock_search_fn: AsyncMock,
         mock_logger: MagicMock,
     ) -> None:
@@ -398,7 +398,7 @@ class TestProcessTitleOnlyEntries:
 
     @pytest.mark.asyncio
     async def test_process_title_only_no_mapping(
-        self, handler: TitleFallbackHandler, mock_search_fn: AsyncMock
+        self, handler: PubMedTitleFallbackHandler, mock_search_fn: AsyncMock
     ) -> None:
         """Should skip when no title in mapping."""
         entries = [""]
@@ -420,7 +420,7 @@ class TestProcessTitleOnlyEntries:
 class TestEventNamesUniqueness:
     """Tests for event name uniqueness across all handlers."""
 
-    def test_all_event_names_are_unique(self, handler: TitleFallbackHandler) -> None:
+    def test_all_event_names_are_unique(self, handler: PubMedTitleFallbackHandler) -> None:
         """All 7 event names should be unique for proper log filtering."""
         event_names = [
             handler._event_no_fallback_title,
@@ -435,7 +435,7 @@ class TestEventNamesUniqueness:
         assert len(set(event_names)) == 7, "All event names should be unique"
 
     def test_all_event_names_have_pubmed_prefix(
-        self, handler: TitleFallbackHandler
+        self, handler: PubMedTitleFallbackHandler
     ) -> None:
         """All event names should have 'pubmed_' prefix for log filtering."""
         event_names = [
@@ -468,7 +468,7 @@ class TestSearchByTitleMatchingPriority:
                 {"pmid": "33333333", "article_title": "Another Wrong Title"},
             ]
         )
-        handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search_fn)
+        handler = PubMedTitleFallbackHandler(logger=mock_logger, search_fn=mock_search_fn)
 
         result = await handler._search_by_title("Exact Query Title")
 
@@ -486,7 +486,7 @@ class TestSearchByTitleMatchingPriority:
                 {"pmid": "12345678", "article_title": "CRISPR-Cas9: A Review (2023)"}
             ]
         )
-        handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search_fn)
+        handler = PubMedTitleFallbackHandler(logger=mock_logger, search_fn=mock_search_fn)
 
         result = await handler._search_by_title("CRISPR-Cas9: A Review (2023)")
 
@@ -504,7 +504,7 @@ class TestSearchByTitleMatchingPriority:
                 {"pmid": "22222222", "article_title": "Test Publication Title"},
             ]
         )
-        handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search_fn)
+        handler = PubMedTitleFallbackHandler(logger=mock_logger, search_fn=mock_search_fn)
 
         result = await handler._search_by_title("Test Publication Title")
 
@@ -523,7 +523,7 @@ class TestSearchByTitleMatchingPriority:
                 {"pmid": "22222222", "article_title": ""},
             ]
         )
-        handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search_fn)
+        handler = PubMedTitleFallbackHandler(logger=mock_logger, search_fn=mock_search_fn)
 
         result = await handler._search_by_title("Test Title")
 
@@ -539,7 +539,7 @@ class TestSearchByTitleMatchingPriority:
                 {"pmid": "12345678", "article_title": "Title  with   extra   spaces"}
             ]
         )
-        handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search_fn)
+        handler = PubMedTitleFallbackHandler(logger=mock_logger, search_fn=mock_search_fn)
 
         result = await handler._search_by_title("Title with extra spaces")
 

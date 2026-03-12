@@ -300,7 +300,7 @@ class TestFetchFilteredWithFallback:
 
 
 class TestFallbackHandlerIntegration:
-    """Tests for proper integration between PubMedAdapter and TitleFallbackHandler."""
+    """Tests for proper integration between PubMedAdapter and PubMedTitleFallbackHandler."""
 
     def test_fallback_handler_initialized(self, adapter: PubMedAdapter) -> None:
         """Test fallback handler is initialized in __post_init__."""

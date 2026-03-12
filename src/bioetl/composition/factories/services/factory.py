@@ -23,18 +23,18 @@ from bioetl.composition.factories.dq.context_resolver import (
     is_dq_report_enabled as _is_dq_report_enabled_impl,
 )
 from bioetl.composition.factories.dq.factory import DQServicesFactory
-from bioetl.composition.factories.services.builder import (
-    ServicesBuilder,
+from bioetl.composition.factories.services.builder import ServicesBuilder
+from bioetl.composition.factories.services.callbacks import (
     create_data_normalization_service,
     extract_pipeline_callbacks,
 )
-from bioetl.composition.factories.storage import StorageContext, StorageFactory
 from bioetl.composition.factories.services.port_factories import (
     create_checkpoint,
     create_lock,
     create_metrics,
     create_quarantine,
 )
+from bioetl.composition.factories.storage import StorageContext, StorageFactory
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
@@ -64,6 +64,11 @@ __all__ = [
 
 class BaseServicesFactory:
     """Reusable factory for common services (local deployment)."""
+
+    @staticmethod
+    def _create_metrics(settings: Settings) -> MetricsPort:
+        """Compatibility wrapper delegating metrics creation to port factories."""
+        return create_metrics(settings)
 
     @classmethod
     def create_common_services(

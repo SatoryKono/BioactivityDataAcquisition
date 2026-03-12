@@ -37,11 +37,15 @@ class _SourceConfigLike(Protocol):
 
 
 @dataclass(frozen=True, slots=True)
-class VacuumSettings:
+class ResolvedVacuumSettings:
     """Resolved vacuum settings after merging CLI and YAML config."""
 
     enabled: bool
     retention_days: int
+
+
+# Backward-compat alias for legacy imports/tests.
+VacuumSettings = ResolvedVacuumSettings
 
 
 @dataclass(frozen=True, slots=True)
