@@ -1117,6 +1117,70 @@ class TestFSMDependenciesCompletedTransition:
             for c in mock_logger.info.call_args_list
         )
 
+    @pytest.mark.asyncio
+    async def test_postprocess_dependency_results_records_successes_then_completes(
+        self,
+        mock_config: MagicMock,
+        mock_logger: MagicMock,
+        mock_lock: AsyncMock,
+        mock_merger: AsyncMock,
+        mock_coordinator: AsyncMock,
+        mock_key_extractor: AsyncMock,
+        mock_seed_runner: AsyncMock,
+        tmp_path: Path,
+        test_run_id: str,
+    ) -> None:
+        """Dependency postprocess helper should record successful results and finalize the stage."""
+        checkpoint_manager = CompositeCheckpointManager(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            storage=FileCompositeCheckpointWriter(tmp_path),
+            logger=mock_logger,
+            resume=False,
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            seed_runner_factory=lambda: mock_seed_runner,
+            enricher_runner_factory=lambda name, df: AsyncMock(),
+            key_extractor=mock_key_extractor,
+            coordinator=mock_coordinator,
+            merger=mock_merger,
+            checkpoint_manager=checkpoint_manager,
+            logger=mock_logger,
+            lock=mock_lock,
+            fsm_state_helper=FSMStateHelperService(
+                config=mock_config, logger=mock_logger, run_id=test_run_id
+            ),
+            run_id=test_run_id,
+        )
+        state = CompositeCheckpointState(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            state=CompositePipelineState.DEPENDENCIES_RUNNING,
+        )
+        runner._save_checkpoint_safe = AsyncMock(return_value=True)  # type: ignore[method-assign]
+        dependency_results = {
+            "pubmed": DependencyResult.success(
+                pipeline_name="pubmed",
+                records_extracted=100,
+                records_silver=95,
+            )
+        }
+
+        next_state, returned_results = await runner._postprocess_dependency_results(
+            state,
+            dependency_results,
+        )
+
+        assert returned_results == dependency_results
+        assert next_state.state == CompositePipelineState.DEPENDENCIES_COMPLETED
+        assert next_state.completed_dependencies == frozenset({"pubmed"})
+        runner._save_checkpoint_safe.assert_awaited_once_with(
+            next_state,
+            "dependencies_completed",
+        )
+
 
 class TestFSMResumeFromFailed:
     """Tests for resuming from FAILED state."""

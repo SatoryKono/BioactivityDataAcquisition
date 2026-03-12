@@ -49,6 +49,14 @@ class CompositeRunnerStageMixin(
         if not state.seed_completed:
             return await self._run_seed_with_fsm(state)
 
+        state = self._resume_seed_phase(state)
+        return state, SeedResult(pipeline_name=self._config.seed.pipeline, resumed=True)
+
+    def _resume_seed_phase(
+        self,
+        state: CompositeCheckpointState,
+    ) -> CompositeCheckpointState:
+        """Normalize resumed seed state and emit resume logging."""
         self._logger.info(
             "Seed already completed, resuming from checkpoint",
             composite=self._config.name,
@@ -62,7 +70,7 @@ class CompositeRunnerStageMixin(
                 to_state=CompositePipelineState.SEED_COMPLETED,
                 stage="seed_resume",
             )
-        return state, SeedResult(pipeline_name=self._config.seed.pipeline, resumed=True)
+        return state
 
     async def _run_seed_with_fsm(
         self,
@@ -109,8 +117,7 @@ class CompositeRunnerStageMixin(
             await self._handle_dependencies_phase_exception(state, error)
             raise
 
-        state = self._collect_successful_dependencies(state, dependency_results)
-        return await self._finalize_dependencies_phase(state, dependency_results)
+        return await self._postprocess_dependency_results(state, dependency_results)
 
     async def _skip_dependencies_phase(
         self,
@@ -172,6 +179,15 @@ class CompositeRunnerStageMixin(
             count=len(dependencies),
         )
         return state
+
+    async def _postprocess_dependency_results(
+        self,
+        state: CompositeCheckpointState,
+        dependency_results: dict[str, DependencyResult],
+    ) -> tuple[CompositeCheckpointState, dict[str, DependencyResult]]:
+        """Record successful dependencies and finalize the dependency phase."""
+        state = self._collect_successful_dependencies(state, dependency_results)
+        return await self._finalize_dependencies_phase(state, dependency_results)
 
     def _validate_dependency_preconditions(
         self,

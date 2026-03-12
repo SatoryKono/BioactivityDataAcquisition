@@ -19,6 +19,8 @@ from bioetl.application.core.batch_transformer_helpers import (
     apply_transform_outcome_to_state,
     build_transform_result,
     create_transform_aggregation_state,
+    finalize_batch_transform_result,
+    finalize_stream_transform_result,
 )
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.quarantine_manager import QuarantineManager
@@ -446,8 +448,6 @@ class TestBatchTransformerAggregationHelpers:
     def test_apply_transform_outcome_updates_state_and_builds_result(self) -> None:
         """Batch aggregation helper should track quarantined and filtered counts."""
         state = create_transform_aggregation_state()
-        filtered_records: list = []
-        dq_records: list = []
 
         apply_transform_outcome_to_state(
             state=state,
@@ -456,8 +456,6 @@ class TestBatchTransformerAggregationHelpers:
                 gold_record=None,
                 filtered_entry=({"id": "filtered"}, "why"),
             ),
-            filtered_records=filtered_records,
-            dq_records=dq_records,
         )
         apply_transform_outcome_to_state(
             state=state,
@@ -466,18 +464,51 @@ class TestBatchTransformerAggregationHelpers:
                 gold_record=None,
                 dq_entry=({"id": "bad"}, MagicMock(), "error"),
             ),
-            filtered_records=filtered_records,
-            dq_records=dq_records,
         )
 
         state.records_quarantine_failed = 3
         result = build_transform_result(state)
 
-        assert len(filtered_records) == 1
-        assert len(dq_records) == 1
+        assert len(state.filtered_records) == 1
+        assert len(state.dq_records) == 1
         assert result.quarantined_count == 1
         assert result.filtered_out_count == 1
         assert result.records_quarantine_failed == 3
+
+    async def test_finalize_batch_transform_result_flushes_and_builds_result(
+        self,
+        mock_context,
+        mock_quarantine_manager,
+        mock_batch_metrics,
+    ) -> None:
+        """Batch finalizer should flush quarantine state and build result."""
+        state = create_transform_aggregation_state()
+        state.filtered_records.append(({"id": "filtered"}, "why"))
+        state.dq_records.append(({"id": "bad"}, MagicMock(), "error"))
+        state.filtered_out_count = 1
+        state.quarantined_count = 1
+
+        result = await finalize_batch_transform_result(
+            context=mock_context,
+            config=RecordProcessorConfig(
+                pipeline_name="test_provider_test_entity",
+                provider="test_provider",
+                entity_type="test_entity",
+                silver_schema=MagicMock(),
+                gold_schema=MagicMock(),
+            ),
+            batch_metrics=mock_batch_metrics,
+            quarantine_manager=mock_quarantine_manager,
+            state=state,
+            batch_id=BatchID(uuid4()),
+            records=[{"id": "filtered"}, {"id": "bad"}],
+        )
+
+        mock_quarantine_manager.quarantine_filtered_records.assert_called_once()
+        mock_quarantine_manager.quarantine_records.assert_called_once()
+        assert result.filtered_out_count == 1
+        assert result.quarantined_count == 1
+        assert result.records_quarantine_failed == 0
 
     def test_apply_stream_transform_result_updates_state(self) -> None:
         """Stream aggregation helper should accumulate counters and records."""
@@ -506,6 +537,36 @@ class TestBatchTransformerAggregationHelpers:
         assert len(result.gold_records) == 1
         assert result.quarantined_count == 1
         assert result.records_quarantine_failed == 1
+
+    def test_finalize_stream_transform_result_builds_result(self, mock_context) -> None:
+        """Stream finalizer should validate thresholds and build result."""
+        state = create_transform_aggregation_state()
+        apply_stream_transform_result_to_state(
+            state=state,
+            result=TransformedRecord(
+                silver_record={"entity_id": "1"},
+                gold_record=None,
+                is_quarantined=False,
+            ),
+        )
+
+        result = finalize_stream_transform_result(
+            context=mock_context,
+            config=RecordProcessorConfig(
+                pipeline_name="test_provider_test_entity",
+                provider="test_provider",
+                entity_type="test_entity",
+                silver_schema=MagicMock(),
+                gold_schema=MagicMock(),
+            ),
+            batch_metrics=MagicMock(spec=BatchMetricsRecorder),
+            state=state,
+            records=[{"id": "1"}],
+        )
+
+        assert len(result.silver_records) == 1
+        assert result.filtered_out_count == 0
+        assert result.quarantined_count == 0
 
 
 @pytest.mark.unit

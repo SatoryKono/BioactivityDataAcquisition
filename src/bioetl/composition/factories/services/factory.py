@@ -22,7 +22,7 @@ from bioetl.composition.factories.dq.context_resolver import (
 from bioetl.composition.factories.dq.context_resolver import (
     is_dq_report_enabled as _is_dq_report_enabled_impl,
 )
-from bioetl.composition.factories.dq.factory import DQServicesFactory
+from bioetl.composition.factories.dq.dq_services_factory import DQServicesFactory
 from bioetl.composition.factories.services.builder import ServicesBuilder
 from bioetl.composition.factories.services.callbacks import (
     create_data_normalization_service,

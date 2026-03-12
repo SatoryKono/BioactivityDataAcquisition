@@ -26,11 +26,9 @@ from bioetl.application.core.batch_transformer_helpers import (
     TransformedRecord,
     apply_stream_transform_result_to_state,
     apply_transform_outcome_to_state,
-    build_transform_result,
-    check_dq_thresholds,
     create_transform_aggregation_state,
-    flush_dq_records,
-    flush_filtered_records,
+    finalize_batch_transform_result,
+    finalize_stream_transform_result,
     route_single_transform_attempt,
     transform_record_attempt,
     yield_control_if_needed,
@@ -45,10 +43,6 @@ if TYPE_CHECKING:
         GoldFilterCallback,
         GoldTransformCallback,
         TransformCallback,
-    )
-    from bioetl.application.core.quarantine_manager import (
-        DQQuarantineEntry,
-        FilteredQuarantineEntry,
     )
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
@@ -97,8 +91,6 @@ class BatchTransformer:
 
         """
         state = create_transform_aggregation_state()
-        filtered_records: list[FilteredQuarantineEntry] = []
-        dq_records: list[DQQuarantineEntry] = []
         last_yield_at = time.monotonic()
 
         for index, raw_record in enumerate(records, start=start_index):
@@ -118,33 +110,17 @@ class BatchTransformer:
             apply_transform_outcome_to_state(
                 state=state,
                 attempt=attempt,
-                filtered_records=filtered_records,
-                dq_records=dq_records,
             )
 
-        filtered_failed = await flush_filtered_records(
-            context=self._context,
-            quarantine_manager=self._quarantine_manager,
-            records=filtered_records,
-            batch_id=batch_id,
-        )
-        dq_failed = await flush_dq_records(
-            context=self._context,
-            quarantine_manager=self._quarantine_manager,
-            records=dq_records,
-            batch_id=batch_id,
-        )
-
-        check_dq_thresholds(
+        return await finalize_batch_transform_result(
             context=self._context,
             config=self._config,
             batch_metrics=self._batch_metrics,
+            quarantine_manager=self._quarantine_manager,
+            state=state,
+            batch_id=batch_id,
             records=records,
-            quarantined_count=state.quarantined_count,
         )
-
-        state.records_quarantine_failed = filtered_failed + dq_failed
-        return build_transform_result(state)
 
     async def transform_single(
         self, raw_record: BronzeRecord, batch_id: BatchID, index: int = 0
@@ -218,12 +194,10 @@ class BatchTransformer:
                 result=result,
             )
 
-        check_dq_thresholds(
+        return finalize_stream_transform_result(
             context=self._context,
             config=self._config,
             batch_metrics=self._batch_metrics,
+            state=state,
             records=records,
-            quarantined_count=state.quarantined_count,
         )
-
-        return build_transform_result(state)

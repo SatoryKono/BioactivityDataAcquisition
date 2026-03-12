@@ -9,15 +9,21 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.pipelines.generic import GenericPipeline
-from bioetl.composition.factories.datasource.factory import DataSourceRegistry
+from bioetl.composition.factories.datasource.data_source_factory import (
+    DataSourceRegistry,
+)
 from bioetl.composition.factories.pipeline.configs import PipelineFactoryConfig
 from bioetl.infrastructure.config import load_pipeline_contract_policy
 
 if TYPE_CHECKING:
     import pandera
 
-    from bioetl.composition.factories.datasource.factory import DataSourceCreatorPort
-    from bioetl.composition.factories.pipeline.assembler import GenericPipelineFactory
+    from bioetl.composition.factories.datasource.data_source_factory import (
+        DataSourceCreatorPort,
+    )
+    from bioetl.composition.factories.pipeline.pipeline_assembler import (
+        GenericPipelineFactory,
+    )
 
 
 class _SchemaBuilder(Protocol):
@@ -101,13 +107,14 @@ def create_factory(
         Configured GenericPipelineFactory instance
     """
     _validate_contract_policy(config)
+    from bioetl.composition.factories.pipeline.assembler import (
+        GenericPipelineFactory,
+    )
 
     # Resolve data source creator: use data_source_provider override if set
     data_source_creator: DataSourceCreatorPort | None = None
     if config.data_source_provider:
         data_source_creator = DataSourceRegistry.get(config.data_source_provider)
-
-    from bioetl.composition.factories.pipeline.assembler import GenericPipelineFactory
 
     return GenericPipelineFactory(
         pipeline_name=config.pipeline_name,

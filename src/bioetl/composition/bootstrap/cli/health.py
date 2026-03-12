@@ -10,7 +10,9 @@ from dataclasses import dataclass
 
 from bioetl.application.services import HealthService
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
-from bioetl.composition.factories.datasource.factory import DataSourceFactory
+from bioetl.composition.factories.datasource.data_source_factory import (
+    DataSourceFactory,
+)
 from bioetl.domain.ports import MetricsPort
 from bioetl.infrastructure.adapters.http.health_monitor import ProviderHealthMonitor
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics

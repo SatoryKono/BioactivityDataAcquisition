@@ -26,7 +26,7 @@ from bioetl.composition.factories.dq.context_resolver import (
 from bioetl.composition.factories.dq.context_resolver import (
     has_flat_structure as _has_flat_structure,
 )
-from bioetl.composition.factories.pipeline.assembler import (
+from bioetl.composition.factories.pipeline.pipeline_assembler import (
     GenericPipelineFactory,
     assemble_runner,
     create_pipeline_factory,
@@ -50,7 +50,9 @@ if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.base_transformer import BaseTransformer
     from bioetl.application.core.pipeline_services import PipelineService
-    from bioetl.composition.factories.datasource.factory import DataSourceCreatorPort
+    from bioetl.composition.factories.datasource.data_source_factory import (
+        DataSourceCreatorPort,
+    )
     from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.context import CachedBronzeContext

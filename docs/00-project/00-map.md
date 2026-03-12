@@ -354,7 +354,7 @@ src/bioetl/
 │       ├── runner_factory.py    # Runner factory
 │       ├── storage_factory.py   # Multi-layer storage factory
 │       ├── http_client_factory.py   # HTTP client factory
-│       ├── datasource/factory.py    # Data source factory
+│       ├── datasource/data_source_factory.py   # Data source factory
 │       ├── transformer_factory.py   # Transformer factory
 │       └── ...
 │

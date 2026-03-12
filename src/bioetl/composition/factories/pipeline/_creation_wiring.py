@@ -23,7 +23,9 @@ if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.base_transformer import BaseTransformer
     from bioetl.application.core.pipeline_services import PipelineService
-    from bioetl.composition.factories.datasource.factory import DataSourceCreatorPort
+    from bioetl.composition.factories.datasource.data_source_factory import (
+        DataSourceCreatorPort,
+    )
     from bioetl.composition.factories.pipeline.construction import (
         EntityTypeExtractor,
     )

@@ -55,7 +55,7 @@ from bioetl.composition.bootstrap.runtime.pipeline import (
     # Canonical name
     bootstrap_pipeline_runner,
 )
-from bioetl.composition.bootstrap.runtime.runner import (
+from bioetl.composition.bootstrap.runtime.pipeline_runner_service_bootstrap import (
     bootstrap_pipeline_runner_service,
 )
 

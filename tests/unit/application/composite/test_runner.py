@@ -468,6 +468,45 @@ class TestFSMSeedResume:
             "Should log seed_resume transition"
         )
 
+    def test_resume_seed_phase_corrects_state_and_logs_transition(self):
+        """Seed resume helper should normalize old checkpoint state and emit seed_resume transition."""
+        logger = create_mock_logger()
+        runner = CompositePipelineRunner(
+            config=MockCompositeConfig(),
+            runtime=CompositeRuntimeConfig(resume=True),
+            seed_runner_factory=lambda: MockPipelineRunner(),
+            enricher_runner_factory=lambda name, df: MockPipelineRunner(),
+            key_extractor=create_mock_key_extractor(),
+            coordinator=create_mock_coordinator(),
+            merger=create_mock_merger(),
+            checkpoint_manager=create_mock_checkpoint_manager(),
+            logger=logger,
+            lock=create_mock_lock(),
+            fsm_state_helper=create_mock_fsm_state_helper(logger=logger),
+        )
+        state = CompositeCheckpointState(
+            composite_name="test_composite",
+            run_id=str(uuid4()),
+            state=CompositePipelineState.NOT_STARTED,
+            seed_completed=True,
+            seed_result=SeedResult(
+                pipeline_name="chembl_activity",
+                records_extracted=100,
+                records_silver=95,
+                keys_generated=90,
+                duration_seconds=10.0,
+            ),
+            created_at=datetime.now(tz=UTC),
+        )
+
+        next_state = runner._resume_seed_phase(state)
+
+        assert next_state.state == CompositePipelineState.SEED_COMPLETED
+        transition_calls = [
+            c for c in logger.info.call_args_list if "FSM state transition" in str(c)
+        ]
+        assert any("seed_resume" in str(c) for c in transition_calls)
+
 
 class TestFSMTransitionLogging:
     """Tests for FSM transition logging."""

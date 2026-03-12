@@ -14,20 +14,20 @@ Consolidated modules (v5.2):
 - services_factory: BaseServicesFactory, ServicesBuilder
 - data_source_factory: DataSourceFactory, DataSourceRegistry
 - storage: StorageAdapter, StorageContext, StorageFactory
-- dq_factory: DQServicesFactory for DQ report components
+- dq_services_factory: DQServicesFactory for DQ report components
 """
 
 from typing import TYPE_CHECKING
 
 # Data source factory and registry
-from bioetl.composition.factories.datasource.factory import (
+from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorPort,
     DataSourceFactory,
     DataSourceRegistry,
 )
 
 # DQ services factory
-from bioetl.composition.factories.dq.factory import DQServicesFactory
+from bioetl.composition.factories.dq.dq_services_factory import DQServicesFactory
 
 # Pipeline factory and runner assembly
 from bioetl.composition.factories.pipeline.facade import (

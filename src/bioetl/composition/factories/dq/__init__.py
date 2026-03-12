@@ -1,5 +1,5 @@
 """DQ (Data Quality) factory subpackage."""
 
-from bioetl.composition.factories.dq.factory import DQServicesFactory
+from bioetl.composition.factories.dq.dq_services_factory import DQServicesFactory
 
 __all__ = ["DQServicesFactory"]

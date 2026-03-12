@@ -194,7 +194,10 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             SilverWriteResult with record count and write metadata, or None if
             no records were provided.
         """
-        return await self._write_silver_with_tracing(
+        started_at, start_perf = datetime.now(UTC), time.perf_counter()
+        return await execute_silver_write_with_tracing(
+            tracing=self._tracing,
+            module_name=__name__,
             invocation=_SilverWriteInvocation(
                 table_name=table_name,
                 records=records,
@@ -207,26 +210,6 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
                 bronze_refs=bronze_refs,
                 key_nullability_rules=key_nullability_rules,
             ),
-        )
-
-    async def _write_silver_with_tracing(
-        self,
-        *,
-        invocation: _SilverWriteInvocation,
-    ) -> SilverWriteResult | None:
-        """Execute the Silver write pipeline within an OTel tracing span.
-
-        Args:
-            invocation: Immutable write request for this Silver write.
-
-        Returns:
-            SilverWriteResult with record count and write metadata, or None if no records.
-        """
-        started_at, start_perf = datetime.now(UTC), time.perf_counter()
-        return await execute_silver_write_with_tracing(
-            tracing=self._tracing,
-            module_name=__name__,
-            invocation=invocation,
             started_at=started_at,
             start_perf=start_perf,
             execute_pipeline=self._execute_silver_write_pipeline,

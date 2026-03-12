@@ -36,9 +36,11 @@ Creates GitHub PRs with Conventional Commits titles adapted for BioETL project.
 **By provider:**
 - `chembl` - ChEMBL adapter/pipeline
 - `pubchem` - PubChem adapter/pipeline
+- `uniprot` - UniProt adapter/pipeline
 - `pubmed` - PubMed adapter/pipeline
-- `opentargets` - Open Targets adapter/pipeline
-- `fda` - FDA adapter/pipeline
+- `crossref` - CrossRef adapter/pipeline
+- `openalex` - OpenAlex adapter/pipeline
+- `semanticscholar` - Semantic Scholar adapter/pipeline
 
 **By layer:**
 - `domain` - Domain layer (ports, entities, types)
