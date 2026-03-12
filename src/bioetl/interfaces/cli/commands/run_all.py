@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import sys
-from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 import click
@@ -32,10 +31,12 @@ from bioetl.interfaces.cli.commands.metrics_server_integration import (
     ensure_metrics_server_started,
 )
 from bioetl.interfaces.cli.commands.run_all_helpers import (
+    BatchRunResult,
     create_run_all_execution_plan,
-    emit_destructive_confirmation_preview,
+    echo_batch_summary as _echo_batch_summary_impl,
     emit_run_all_listing,
     emit_run_all_preview,
+    handle_destructive_confirmation as _handle_destructive_confirmation_impl,
     record_pipeline_failure,
     record_pipeline_result,
     should_prompt_for_destructive_run,
@@ -64,23 +65,6 @@ if TYPE_CHECKING:
 
 
 get_default_registry = _legacy_get_default_registry
-
-
-@dataclass
-class BatchRunResult:
-    """Result of running multiple pipelines."""
-
-    total: int = 0
-    succeeded: int = 0
-    failed: int = 0
-    skipped: int = 0
-    results: list[RunResult] = field(default_factory=list)
-    failed_pipelines: list[str] = field(default_factory=list)
-
-    @property
-    def all_succeeded(self) -> bool:
-        """Check if all pipelines succeeded."""
-        return self.failed == 0 and self.total > 0
 
 
 async def _run_pipeline_async(
@@ -162,18 +146,12 @@ def _echo_batch_summary(result: BatchRunResult, dry_run: bool) -> None:
         result: BatchRunResult with aggregate counts for the completed batch.
         dry_run: When True, prints a dry-run preview summary instead of execution stats.
     """
-    echo_info("\n" + "=" * 50)
-    if dry_run:
-        echo_info(f"Dry-run complete: {result.total} pipelines previewed")
-    else:
-        echo_info(f"Batch run complete: {result.total} pipelines")
-        echo_info(f"  Succeeded: {result.succeeded}")
-        if result.failed > 0:
-            echo_info(f"  Failed: {result.failed}")
-        if result.skipped > 0:
-            echo_info(f"  Skipped: {result.skipped}")
-    if result.failed_pipelines:
-        echo_error("Failed pipelines:", ", ".join(result.failed_pipelines))
+    _echo_batch_summary_impl(
+        result=result,
+        dry_run=dry_run,
+        info_printer=echo_info,
+        error_printer=echo_error,
+    )
 
 def _handle_destructive_confirmation(
     run_type: str, pipelines: list[str], dry_run: bool, yes: bool
@@ -196,16 +174,15 @@ def _handle_destructive_confirmation(
         yes=yes,
     ):
         return True
-
-    emit_destructive_confirmation_preview(
+    return _handle_destructive_confirmation_impl(
         run_type=run_type,
         pipelines=pipelines,
+        dry_run=dry_run,
+        yes=yes,
+        confirm_fn=click.confirm,
+        info_printer=echo_info,
+        exit_func=sys.exit,
     )
-
-    if not click.confirm("\nDo you want to continue?"):
-        echo_info("Operation cancelled.")
-        sys.exit(ExitCode.OK)
-    return True
 
 def _handle_run_all_failure(
     exc: BaseException, *, source: str, reason_code: str

@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, Protocol, cast
+import sys
+from collections.abc import Callable
+from dataclasses import dataclass, field
+from typing import NoReturn, Protocol, cast
 
 import click
 
@@ -14,20 +16,19 @@ from bioetl.interfaces.cli.commands.execution_policy import (
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning
 
-if TYPE_CHECKING:
-    from bioetl.application.services import RunResult
-
-
 __all__ = [
+    "BatchRunResult",
     "RunAllExecutionPlan",
     "create_run_all_execution_plan",
     "create_run_all_options",
     "determine_batch_exit_code",
+    "echo_batch_summary",
     "emit_destructive_confirmation_preview",
     "emit_run_all_listing",
     "emit_run_all_preview",
     "filter_pipelines_by_provider",
     "get_available_providers",
+    "handle_destructive_confirmation",
     "record_pipeline_failure",
     "record_pipeline_result",
     "resolve_run_all_registry",
@@ -45,6 +46,23 @@ class _BatchRunAccumulator(Protocol):
     skipped: int
     results: list[RunResult]
     failed_pipelines: list[str]
+
+
+@dataclass
+class BatchRunResult:
+    """Result of running multiple pipelines."""
+
+    total: int = 0
+    succeeded: int = 0
+    failed: int = 0
+    skipped: int = 0
+    results: list[RunResult] = field(default_factory=list)
+    failed_pipelines: list[str] = field(default_factory=list)
+
+    @property
+    def all_succeeded(self) -> bool:
+        """Check if all pipelines succeeded."""
+        return self.failed == 0 and self.total > 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -184,6 +202,35 @@ def emit_destructive_confirmation_preview(
         echo_info(f"  - {pipeline}")
 
 
+def handle_destructive_confirmation(
+    *,
+    run_type: str,
+    pipelines: list[str],
+    dry_run: bool,
+    yes: bool,
+    confirm_fn: Callable[[str], bool] = click.confirm,
+    info_printer: Callable[..., None] = echo_info,
+    exit_func: Callable[[int | str | None], NoReturn] = sys.exit,
+) -> bool:
+    """Handle confirmation flow for destructive run-all operations."""
+    if not should_prompt_for_destructive_run(
+        run_type=run_type,
+        dry_run=dry_run,
+        yes=yes,
+    ):
+        return True
+
+    emit_destructive_confirmation_preview(
+        run_type=run_type,
+        pipelines=pipelines,
+    )
+
+    if not confirm_fn("\nDo you want to continue?"):
+        info_printer("Operation cancelled.")
+        exit_func(ExitCode.OK)
+    return True
+
+
 def emit_run_all_preview(
     *,
     source: str,
@@ -249,3 +296,25 @@ def record_pipeline_failure(
 def determine_batch_exit_code(result: _BatchRunAccumulator) -> ExitCode:
     """Determine the CLI exit code from aggregate batch state."""
     return map_batch_run_result_to_exit_code(result)
+
+
+def echo_batch_summary(
+    *,
+    result: _BatchRunAccumulator,
+    dry_run: bool,
+    info_printer: Callable[..., None] = echo_info,
+    error_printer: Callable[..., None] = echo_error,
+) -> None:
+    """Emit batch run summary using injected output sinks."""
+    info_printer("\n" + "=" * 50)
+    if dry_run:
+        info_printer(f"Dry-run complete: {result.total} pipelines previewed")
+    else:
+        info_printer(f"Batch run complete: {result.total} pipelines")
+        info_printer(f"  Succeeded: {result.succeeded}")
+        if result.failed > 0:
+            info_printer(f"  Failed: {result.failed}")
+        if result.skipped > 0:
+            info_printer(f"  Skipped: {result.skipped}")
+    if result.failed_pipelines:
+        error_printer("Failed pipelines:", ", ".join(result.failed_pipelines))

@@ -4,8 +4,8 @@
 
 ## Summary
 
-- Scanned modules: `1057`
-- Internal import edges (raw): `3934`
+- Scanned modules: `1058`
+- Internal import edges (raw): `3941`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `237`
@@ -20,7 +20,7 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|463 OK| application
+    application -->|464 OK| application
     application -->|614 OK| domain
     composition -->|188 OK| application
     composition -->|279 OK| composition
@@ -31,15 +31,15 @@ flowchart LR
     infrastructure -->|604 OK| infrastructure
     interfaces -->|18 OK| application
     interfaces -->|29 OK| composition
-    interfaces -->|26 OK| domain
-    interfaces -->|112 OK| interfaces
+    interfaces -->|27 OK| domain
+    interfaces -->|117 OK| interfaces
 ```
 
 ## Layer Edge Table
 
 | From | To | Imports | Policy |
 |---|---|---:|---|
-| `application` | `application` | 463 | allowed |
+| `application` | `application` | 464 | allowed |
 | `application` | `domain` | 614 | allowed |
 | `composition` | `application` | 188 | allowed |
 | `composition` | `composition` | 279 | allowed |
@@ -50,8 +50,8 @@ flowchart LR
 | `infrastructure` | `infrastructure` | 604 | allowed |
 | `interfaces` | `application` | 18 | allowed |
 | `interfaces` | `composition` | 29 | allowed |
-| `interfaces` | `domain` | 26 | allowed |
-| `interfaces` | `interfaces` | 112 | allowed |
+| `interfaces` | `domain` | 27 | allowed |
+| `interfaces` | `interfaces` | 117 | allowed |
 
 ## Cross-Layer Module-Group Edges (Compact)
 
@@ -95,16 +95,16 @@ flowchart LR
 | `application.composite` | `domain.exceptions` | 14 |
 | `application.pipelines` | `domain.value_objects` | 14 |
 | `infrastructure.schemas` | `domain.config` | 14 |
-| `interfaces.cli` | `application.services` | 14 |
 | `application.pipelines` | `domain.ports` | 13 |
 | `infrastructure.config` | `domain.types` | 13 |
 | `infrastructure.quality` | `domain.types` | 13 |
+| `interfaces.cli` | `application.services` | 13 |
 | `composition.bootstrap` | `infrastructure.observability` | 12 |
 | `composition.factories` | `domain.config` | 12 |
 | `infrastructure.adapters` | `domain.models` | 12 |
+| `interfaces.cli` | `domain.exceptions` | 12 |
 | `application.services` | `domain.exceptions` | 11 |
 | `composition.factories` | `infrastructure.adapters` | 11 |
-| `interfaces.cli` | `domain.exceptions` | 11 |
 | `application.pipelines` | `domain.services` | 10 |
 | `application.core` | `domain.config` | 9 |
 | `application.pipelines` | `domain.filtering` | 9 |

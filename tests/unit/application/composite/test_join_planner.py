@@ -257,7 +257,9 @@ async def test_apply_dependency_joins_delegates_composite_key(
 @pytest.mark.unit
 def test_apply_composite_key_dependency_join_missing_columns_returns_input(
     planner: JoinPlannerService,
+    planner_deps,
 ) -> None:
+    _deduplicator, _aggregator, _renamer, conflict_resolver = planner_deps
     merged_df = pl.DataFrame({"chembl.publication.doi": ["10.1/a"]})
     dep_df = pl.DataFrame(
         {
@@ -279,6 +281,7 @@ def test_apply_composite_key_dependency_join_missing_columns_returns_input(
     )
 
     assert result.equals(merged_df)
+    conflict_resolver.detect_and_resolve_conflicts.assert_not_called()
 
 
 @pytest.mark.unit
@@ -321,6 +324,7 @@ def test_apply_composite_key_dependency_join_success(
         "pubmed.publication.doi",
         "pubmed.publication.pmid",
     }
+    assert conflict_resolver.detect_and_resolve_conflicts.call_count == 1
 
 
 @pytest.mark.unit

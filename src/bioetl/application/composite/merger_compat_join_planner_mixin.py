@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.application.composite.conflict_resolver import ConflictResolverService
 from bioetl.application.composite.join_planner import JoinHow, JoinPlannerService
 
 if TYPE_CHECKING:
@@ -19,7 +18,6 @@ class _MergeCompatibilityJoinPlannerMixin:
     """Join-planner delegation wrappers preserved for compatibility."""
 
     _join_planner: JoinPlannerService
-    _conflict_resolver: ConflictResolverService
 
     def _find_join_key_column(
         self,
@@ -38,23 +36,6 @@ class _MergeCompatibilityJoinPlannerMixin:
     ) -> pl.DataFrame:
         """Compatibility wrapper for join-key normalization."""
         return self._join_planner.normalize_join_key_columns(df, join_keys, pipeline)
-
-    def _find_next_suffix(self, base_col: str, existing_cols: set[str]) -> str:
-        """Compatibility wrapper for suffix allocation."""
-        return self._conflict_resolver.find_next_suffix(base_col, existing_cols)
-
-    def _detect_and_resolve_conflicts(
-        self,
-        seed_df: pl.DataFrame,
-        enricher_df: pl.DataFrame,
-        join_keys: set[str],
-    ) -> tuple[pl.DataFrame, pl.DataFrame]:
-        """Compatibility wrapper for conflict detection and renaming."""
-        return self._conflict_resolver.detect_and_resolve_conflicts(
-            seed_df,
-            enricher_df,
-            join_keys,
-        )
 
     async def _apply_joins(
         self,

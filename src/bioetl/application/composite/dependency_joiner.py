@@ -9,13 +9,14 @@ from typing import TYPE_CHECKING
 from bioetl.application.composite.dependency_join_support import (
     CompositeJoinContext,
     PreparedDependencyJoinContext,
+    ResolvedCompositeJoinContext,
+    SingleKeyJoinContext,
     build_asymmetric_join_key_set,
     build_composite_join_metadata,
     build_single_key_join_metadata,
     execute_dependency_join,
-    find_missing_keys,
-    log_missing_composite_key_columns,
     prepare_dependency_join_frames,
+    resolve_composite_join_context,
 )
 from bioetl.application.composite.protocols import (
     JoinExecutorProtocol,
@@ -35,11 +36,39 @@ __all__ = ["DependencyJoinerService"]
 
 
 @dataclass(frozen=True, slots=True)
-class _ResolvedCompositeJoinContext:
+class _ResolvedSingleKeyJoinContext:
     prepared_context: PreparedDependencyJoinContext
-    left_keys: list[str]
-    right_keys: list[str]
+    seed_join_key: str
+    dep_join_key: str
     join_key_set: set[str]
+
+
+def _resolve_single_key_join_context(
+    *,
+    join_key_resolver: JoinKeyResolverProtocol,
+    metadata: SingleKeyJoinContext,
+    dep_pipeline: str,
+    prepared_context: PreparedDependencyJoinContext,
+) -> _ResolvedSingleKeyJoinContext:
+    seed_join_key, dep_join_key, seed_join_key_qualified = (
+        join_key_resolver.resolve_join_key_names_asymmetric(
+            left_key=metadata.primary_key,
+            right_key=metadata.right_key,
+            left_pipeline=metadata.left_pipeline,
+            right_pipeline=dep_pipeline,
+            merged_columns=prepared_context.merged_df.columns,
+        )
+    )
+    return _ResolvedSingleKeyJoinContext(
+        prepared_context=prepared_context,
+        seed_join_key=seed_join_key,
+        dep_join_key=dep_join_key,
+        join_key_set=build_asymmetric_join_key_set(
+            left_join_key=seed_join_key,
+            right_join_key=dep_join_key,
+            left_join_key_qualified=seed_join_key_qualified,
+        ),
+    )
 
 
 class DependencyJoinerService:
@@ -162,39 +191,29 @@ class DependencyJoinerService:
             right_join_keys=metadata.right_keys_list,
             seed_pipeline=seed_pipeline,
         )
-        seed_join_key, dep_join_key, seed_join_key_qualified = (
-            self._join_key_resolver.resolve_join_key_names_asymmetric(
-                left_key=metadata.primary_key,
-                right_key=metadata.right_key,
-                left_pipeline=metadata.left_pipeline,
-                right_pipeline=dep.pipeline,
-                merged_columns=prepared_context.merged_df.columns,
-            )
-        )
-
-        join_key_set = build_asymmetric_join_key_set(
-            left_join_key=seed_join_key,
-            right_join_key=dep_join_key,
-            left_join_key_qualified=seed_join_key_qualified,
-        )
-
-        return self._execute_prepared_dependency_join(
+        resolved_context = _resolve_single_key_join_context(
+            join_key_resolver=self._join_key_resolver,
+            metadata=metadata,
+            dep_pipeline=dep.pipeline,
             prepared_context=prepared_context,
-            join_key_set=join_key_set,
+        )
+        return self._execute_prepared_dependency_join(
+            prepared_context=resolved_context.prepared_context,
+            join_key_set=resolved_context.join_key_set,
             dep=dep,
             execute_join=lambda resolved_merged, resolved_dep: (
                 self._join_executor.execute_polars_join(
                     resolved_merged,
                     resolved_dep,
-                    seed_join_key,
-                    dep_join_key,
+                    resolved_context.seed_join_key,
+                    resolved_context.dep_join_key,
                     dep.pipeline,
                 )
             ),
             log_message="Joined dependency",
             log_fields={
-                "seed_join_key": seed_join_key,
-                "dep_join_key": dep_join_key,
+                "seed_join_key": resolved_context.seed_join_key,
+                "dep_join_key": resolved_context.dep_join_key,
             },
         )
 
@@ -232,7 +251,7 @@ class DependencyJoinerService:
         dep_df: pl.DataFrame,
         dep: DependencyConfig,
         metadata: CompositeJoinContext,
-    ) -> _ResolvedCompositeJoinContext | None:
+    ) -> ResolvedCompositeJoinContext | None:
         join_keys_list = metadata.join_keys_list
         prepared_context = self._prepare_dependency_join_context(
             merged_df=merged_df,
@@ -242,40 +261,12 @@ class DependencyJoinerService:
             right_join_keys=join_keys_list,
             seed_pipeline=metadata.left_pipeline,
         )
-        left_keys, right_keys, join_key_set = (
-            self._join_key_resolver.resolve_composite_join_keys(
-                join_keys_list,
-                metadata.left_pipeline,
-                dep.pipeline,
-                prepared_context.merged_df.columns,
-            )
-        )
-        resolved_merged_df, resolved_dep_df = (
-            self._conflict_resolver.detect_and_resolve_conflicts(
-                prepared_context.merged_df,
-                prepared_context.dep_df,
-                join_key_set,
-            )
-        )
-        missing_left = find_missing_keys(resolved_merged_df.columns, left_keys)
-        missing_right = find_missing_keys(resolved_dep_df.columns, right_keys)
-        if missing_left or missing_right:
-            log_missing_composite_key_columns(
-                logger=self._logger,
-                dependency=dep.pipeline,
-                missing_left=missing_left,
-                missing_right=missing_right,
-            )
-            return None
-
-        return _ResolvedCompositeJoinContext(
-            prepared_context=PreparedDependencyJoinContext(
-                merged_df=resolved_merged_df,
-                dep_df=resolved_dep_df,
-            ),
-            left_keys=left_keys,
-            right_keys=right_keys,
-            join_key_set=join_key_set,
+        return resolve_composite_join_context(
+            join_key_resolver=self._join_key_resolver,
+            logger=self._logger,
+            prepared_context=prepared_context,
+            metadata=metadata,
+            dependency=dep.pipeline,
         )
 
     def _prepare_dependency_join_context(

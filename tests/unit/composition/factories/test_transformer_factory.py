@@ -12,10 +12,13 @@ import pytest
 
 from bioetl.composition.factories.transformer_factory import (
     _TRANSFORMER_REGISTRY,
+    TransformerRegistrationSpec,
     create_transformer,
+    get_builtin_transformer_specs,
     get_transformer_class,
     register_all_transformers,
     register_transformer,
+    register_transformer_spec,
 )
 
 
@@ -82,6 +85,34 @@ class TestRegisterTransformer:
         register_transformer("provider", "entity", AnotherMockTransformer)
 
         assert _TRANSFORMER_REGISTRY[("provider", "entity")] is AnotherMockTransformer
+
+
+class TestTransformerRegistrationSpecs:
+    """Tests for declarative transformer registration specs."""
+
+    def test_get_builtin_transformer_specs_returns_specs(self) -> None:
+        """Built-in registry metadata is exposed as declarative specs."""
+        specs = get_builtin_transformer_specs()
+
+        assert specs
+        assert all(isinstance(spec, TransformerRegistrationSpec) for spec in specs)
+        assert specs[0].provider == "chembl"
+        assert specs[0].entity_type == "activity"
+
+    def test_register_transformer_spec_uses_loader(self) -> None:
+        """register_transformer_spec loads and registers from declarative spec."""
+        loader = MagicMock(return_value=MockTransformer)
+        spec = TransformerRegistrationSpec(
+            provider="custom",
+            entity_type="record",
+            module_path="pkg.transformer",
+            class_name="CustomTransformer",
+        )
+
+        register_transformer_spec(spec, load_transformer_class_fn=loader)
+
+        loader.assert_called_once_with("pkg.transformer", "CustomTransformer")
+        assert _TRANSFORMER_REGISTRY[("custom", "record")] is MockTransformer
 
 
 class TestGetTransformerClass:
@@ -240,6 +271,34 @@ class TestCreateTransformer:
 class TestRegisterAllTransformers:
     """Tests for register_all_transformers function."""
 
+    def test_register_all_accepts_explicit_specs(self) -> None:
+        """register_all_transformers can register a provided spec set."""
+        another_transformer = type("AnotherMockTransformer", (), {})
+        loader = MagicMock(side_effect=[MockTransformer, another_transformer])
+        specs = (
+            TransformerRegistrationSpec(
+                provider="provider_a",
+                entity_type="entity_a",
+                module_path="pkg.a",
+                class_name="TransformerA",
+            ),
+            TransformerRegistrationSpec(
+                provider="provider_b",
+                entity_type="entity_b",
+                module_path="pkg.b",
+                class_name="TransformerB",
+            ),
+        )
+
+        register_all_transformers(specs=specs, load_transformer_class_fn=loader)
+
+        assert _TRANSFORMER_REGISTRY[("provider_a", "entity_a")] is MockTransformer
+        assert (
+            _TRANSFORMER_REGISTRY[("provider_b", "entity_b")]
+            is another_transformer
+        )
+        assert loader.call_count == 2
+
     def test_register_all_populates_registry(self) -> None:
         """register_all_transformers populates the registry."""
         register_all_transformers()
@@ -312,10 +371,13 @@ class TestModuleExports:
         from bioetl.composition.factories import transformer_factory
 
         expected = [
+            "TransformerRegistrationSpec",
             "create_transformer",
+            "get_builtin_transformer_specs",
             "get_transformer_class",
             "register_all_transformers",
             "register_transformer",
+            "register_transformer_spec",
         ]
         for name in expected:
             assert name in transformer_factory.__all__

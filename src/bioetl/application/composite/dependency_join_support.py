@@ -36,6 +36,14 @@ class PreparedDependencyJoinContext:
     dep_df: pl.DataFrame
 
 
+@dataclass(frozen=True, slots=True)
+class ResolvedCompositeJoinContext:
+    prepared_context: PreparedDependencyJoinContext
+    left_keys: list[str]
+    right_keys: list[str]
+    join_key_set: set[str]
+
+
 def resolve_left_pipeline(
     dep: DependencyConfig,
     seed_pipeline: str | None,
@@ -206,6 +214,39 @@ def prepare_dependency_join_frames(
         dependency=dep.pipeline,
     )
     return normalized_merged, renamed_dep
+
+
+def resolve_composite_join_context(
+    *,
+    join_key_resolver: JoinKeyResolverProtocol,
+    logger: LoggerPort,
+    prepared_context: PreparedDependencyJoinContext,
+    metadata: CompositeJoinContext,
+    dependency: str,
+) -> ResolvedCompositeJoinContext | None:
+    left_keys, right_keys, join_key_set = join_key_resolver.resolve_composite_join_keys(
+        metadata.join_keys_list,
+        metadata.left_pipeline,
+        dependency,
+        prepared_context.merged_df.columns,
+    )
+    missing_left = find_missing_keys(prepared_context.merged_df.columns, left_keys)
+    missing_right = find_missing_keys(prepared_context.dep_df.columns, right_keys)
+    if missing_left or missing_right:
+        log_missing_composite_key_columns(
+            logger=logger,
+            dependency=dependency,
+            missing_left=missing_left,
+            missing_right=missing_right,
+        )
+        return None
+
+    return ResolvedCompositeJoinContext(
+        prepared_context=prepared_context,
+        left_keys=left_keys,
+        right_keys=right_keys,
+        join_key_set=join_key_set,
+    )
 
 
 def execute_dependency_join(
