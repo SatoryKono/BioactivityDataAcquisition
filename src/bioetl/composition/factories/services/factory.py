@@ -28,16 +28,23 @@ from bioetl.composition.factories.services.callbacks import (
     create_data_normalization_service,
     extract_pipeline_callbacks,
 )
+from bioetl.composition.factories.services.common_service_wiring import (
+    CommonServicePorts,
+    assemble_pipeline_service,
+    build_common_service_ports,
+    resolve_tracer,
+)
 from bioetl.composition.factories.services.port_factories import (
     create_checkpoint,
     create_lock,
     create_metrics,
     create_quarantine,
 )
-from bioetl.composition.factories.storage import StorageContext, StorageFactory
+from bioetl.composition.factories.storage import StorageFactory
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
+    from bioetl.composition.factories.storage import StorageContext
     from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
     from bioetl.domain.ports import (
         CheckpointPort,
@@ -99,37 +106,28 @@ class BaseServicesFactory:
         Returns:
             PipelineService with storage, checkpoint, observability, and DQ wired.
         """
-        metrics_port = metrics if metrics is not None else create_metrics(settings)
         cls._ensure_prod_silver_validator(settings, pipeline_config, silver_validator)
-        storage_ctx = StorageFactory.create(
-            settings,
-            pipeline_config,
-            logger,
-            metrics=metrics_port,
+        common_ports = build_common_service_ports(
+            settings=settings,
+            logger=logger,
+            pipeline_config=pipeline_config,
+            metrics=metrics,
+            tracer=tracer,
             metadata_coordinator=metadata_coordinator,
             silver_validator=silver_validator,
+            create_dq_services_fn=cls._create_dq_services,
+            create_metrics_fn=create_metrics,
+            storage_factory=StorageFactory,
+            create_lock_fn=create_lock,
+            create_checkpoint_fn=create_checkpoint,
+            create_quarantine_fn=create_quarantine,
         )
-        lock = create_lock()
-        checkpoint = create_checkpoint(storage_ctx)
-        quarantine = create_quarantine(settings)
-        tracer_port = cls._resolve_tracer(tracer)
-        dq_services = cls._create_dq_services(
-            settings=settings,
-            pipeline_config=pipeline_config,
-            logger=logger,
-        )
-        return cls._build_pipeline_services(
+        return assemble_pipeline_service(
             data_source=data_source,
-            storage_ctx=storage_ctx,
-            lock=lock,
-            checkpoint=checkpoint,
-            quarantine=quarantine,
-            metrics_port=metrics_port,
-            tracer=tracer_port,
             logger=logger,
             dq_monitor=dq_monitor,
             metadata_coordinator=metadata_coordinator,
-            dq_services=dq_services,
+            common_ports=common_ports,
         )
 
     @staticmethod
@@ -165,11 +163,7 @@ class BaseServicesFactory:
         Returns:
             A non-None TracingPort (either the provided tracer or a NoOp fallback).
         """
-        if tracer is None:
-            from bioetl.domain.ports import NoOpTracing
-
-            return NoOpTracing()
-        return tracer
+        return resolve_tracer(tracer)
 
     @staticmethod
     def _build_pipeline_services(
@@ -204,26 +198,20 @@ class BaseServicesFactory:
         Returns:
             Fully assembled PipelineService instance.
         """
-        from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
-
-        metadata_writer = MetadataWriter(logger=logger)
-        return PipelineService(
+        return assemble_pipeline_service(
             data_source=data_source,
-            storage=storage_ctx.adapter,
-            lock=lock,
-            checkpoint=checkpoint,
-            quarantine=quarantine,
-            metrics=metrics_port,
-            tracing=tracer,
             logger=logger,
             dq_monitor=dq_monitor,
             metadata_coordinator=metadata_coordinator,
-            metadata_writer=metadata_writer,
-            bronze_dq_analyzer=dq_services.get("bronze_analyzer"),
-            silver_dq_analyzer=dq_services.get("silver_analyzer"),
-            gold_dq_analyzer=dq_services.get("gold_analyzer"),
-            dq_report_writer=dq_services.get("report_writer"),
-            dq_report_service=dq_services.get("report_service"),
+            common_ports=CommonServicePorts(
+                storage_ctx=storage_ctx,
+                lock=lock,
+                checkpoint=checkpoint,
+                quarantine=quarantine,
+                metrics_port=metrics_port,
+                tracer=tracer,
+                dq_services=dq_services,
+            ),
         )
 
     @staticmethod

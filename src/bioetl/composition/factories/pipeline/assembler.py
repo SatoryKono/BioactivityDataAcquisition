@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Generic, TypeVar, cast
+from typing import TYPE_CHECKING, Generic, TypeVar
 
 from bioetl.application.core.runner import PipelineRunner
 from bioetl.composition.factories.datasource.factory import (
@@ -12,15 +12,17 @@ from bioetl.composition.factories.datasource.factory import (
 from bioetl.composition.factories.pipeline.dq_helpers import (
     extract_dq_configs as _extract_dq_configs,
 )
+from bioetl.composition.factories.pipeline.factory_method_helpers import (
+    build_factory_services,
+    create_factory_data_source,
+    create_factory_runner,
+    create_pipeline_instance_with_services,
+    create_transformer_instance,
+)
 from bioetl.composition.factories.pipeline.runner_assembly import (
     assemble_runner_impl as _assemble_runner_impl,
 )
-from bioetl.composition.factories.services.bundle import (
-    build_pipeline_services,
-    create_pipeline_with_services,
-)
 from bioetl.domain.services import IdentityService
-from bioetl.infrastructure.config import load_pipeline_config
 
 if TYPE_CHECKING:
     import pandera
@@ -101,11 +103,11 @@ class GenericPipelineFactory(Generic[TPipeline]):
         pii_hasher: PiiHasherPort | None = None,
     ) -> BaseTransformer | None:
         """Create transformer when a transformer class is configured."""
-        if self.transformer_class is None:
-            return None
-        return self.transformer_class(
+        return create_transformer_instance(
+            transformer_class=self.transformer_class,
             provider=self.provider,
-            entity_type=_extract_entity_type(self.pipeline_name),
+            pipeline_name=self.pipeline_name,
+            extract_entity_type=_extract_entity_type,
             tracer=tracer,
             metrics=metrics,
             silver_filters=silver_filters,
@@ -122,12 +124,13 @@ class GenericPipelineFactory(Generic[TPipeline]):
         filter_config: InputFilterConfig | None = None,
     ) -> DataSourcePort:
         """Create provider data source via injected data-source creator."""
-        return self._create_data_source(
-            settings,
-            pipeline_config,
-            logger,
-            filter_config,
+        return create_factory_data_source(
+            create_data_source_fn=self._create_data_source,
+            settings=settings,
+            pipeline_config=pipeline_config,
+            logger=logger,
             pipeline_name=self.pipeline_name,
+            filter_config=filter_config,
         )
 
     def build_services(
@@ -140,7 +143,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         dq_monitor: DQMonitorPort | None = None,
     ) -> PipelineService:
         """Build shared pipeline services for the configured pipeline."""
-        return build_pipeline_services(
+        return build_factory_services(
             pipeline_name=self.pipeline_name,
             create_data_source_fn=self._create_data_source,
             settings=settings,
@@ -165,26 +168,23 @@ class GenericPipelineFactory(Generic[TPipeline]):
         cached_bronze: CachedBronzeContext | None = None,
     ) -> TPipeline:
         """Create pipeline instance with wired services and optional transformer."""
-        return cast(
-            TPipeline,
-            create_pipeline_with_services(
-                pipeline_name=self.pipeline_name,
-                pipeline_class=self.pipeline_class,
-                provider=self.provider,
-                create_data_source_fn=self._create_data_source,
-                transformer_class=self.transformer_class,
-                pandera_silver_schema=self.pandera_silver_schema,
-                run_id=run_id,
-                runtime=runtime,
-                settings=settings,
-                logger=logger,
-                config=config,
-                filter_config=filter_config,
-                tracer=tracer,
-                dq_monitor=dq_monitor,
-                metrics=metrics,
-                cached_bronze=cached_bronze,
-            ),
+        return create_pipeline_instance_with_services(
+            pipeline_name=self.pipeline_name,
+            pipeline_class=self.pipeline_class,
+            provider=self.provider,
+            create_data_source_fn=self._create_data_source,
+            transformer_class=self.transformer_class,
+            run_id=run_id,
+            runtime=runtime,
+            settings=settings,
+            logger=logger,
+            config=config,
+            filter_config=filter_config,
+            tracer=tracer,
+            dq_monitor=dq_monitor,
+            metrics=metrics,
+            cached_bronze=cached_bronze,
+            pandera_silver_schema=self.pandera_silver_schema,
         )
 
     def create_runner(
@@ -198,34 +198,19 @@ class GenericPipelineFactory(Generic[TPipeline]):
         cached_bronze: CachedBronzeContext | None = None,
     ) -> PipelineRunner:
         """Create and assemble a fully configured PipelineRunner instance."""
-        # Load config once if not provided
-        yaml_config = config or load_pipeline_config(self.pipeline_name)
-
-        # Create pipeline instance with services
-        pipeline = self.create_with_services(
+        return create_factory_runner(
+            pipeline_name=self.pipeline_name,
+            silver_schema=self.silver_schema,
+            gold_schema=self.gold_schema,
             run_id=run_id,
             runtime=runtime,
             settings=settings,
-            logger=observability.logger,
-            config=yaml_config,
-            filter_config=filter_config,
-            tracer=observability.tracer,
-            dq_monitor=observability.dq_monitor,
-            metrics=observability.metrics,
-            cached_bronze=cached_bronze,
-        )
-        # Delegate runner assembly to dedicated function
-        return assemble_runner(
-            pipeline=pipeline,
             observability=observability,
-            silver_schema=self.silver_schema,
-            gold_schema=self.gold_schema,
-            strict_gold_validation=(
-                runtime.strict_gold_validation
-                if settings.env != "prod" or settings.test_mode
-                else True
-            ),
-            yaml_config=yaml_config,
+            create_with_services_fn=self.create_with_services,
+            assemble_runner_fn=assemble_runner,
+            filter_config=filter_config,
+            config=config,
+            cached_bronze=cached_bronze,
         )
 
 

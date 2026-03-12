@@ -530,6 +530,59 @@ class TestMergeInputPolicy:
 class TestFSMEnrichmentCompletedTransition:
     """Tests for ENRICHMENT_COMPLETED state transition."""
 
+    @pytest.mark.asyncio
+    async def test_skip_enrichment_stage_keeps_state_and_returns_empty_results(
+        self,
+        mock_config: MagicMock,
+        mock_logger: MagicMock,
+        mock_lock: AsyncMock,
+        mock_merger: AsyncMock,
+        mock_coordinator: AsyncMock,
+        mock_key_extractor: AsyncMock,
+        mock_seed_runner: AsyncMock,
+        tmp_path: Path,
+        test_run_id: str,
+    ) -> None:
+        """Skip helper should keep checkpoint state and return no enrichment results."""
+        checkpoint_manager = CompositeCheckpointManager(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            storage=FileCompositeCheckpointWriter(tmp_path),
+            logger=mock_logger,
+            resume=False,
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            seed_runner_factory=lambda: mock_seed_runner,
+            enricher_runner_factory=lambda name, df: AsyncMock(),
+            key_extractor=mock_key_extractor,
+            coordinator=mock_coordinator,
+            merger=mock_merger,
+            checkpoint_manager=checkpoint_manager,
+            logger=mock_logger,
+            lock=mock_lock,
+            fsm_state_helper=FSMStateHelperService(
+                config=mock_config, logger=mock_logger, run_id=test_run_id
+            ),
+            run_id=test_run_id,
+        )
+        state = CompositeCheckpointState(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            state=CompositePipelineState.SEED_COMPLETED,
+        )
+
+        next_state, enrichment_results = await runner._skip_enrichment_stage(state)
+
+        assert next_state is state
+        assert enrichment_results == {}
+        mock_logger.info.assert_called_once_with(
+            "No enrichers to run, skipping enrichment stage",
+            composite="test_composite",
+            reason="all_completed_or_filtered",
+        )
+
     def test_transition_to_empty_enrichment_start_sets_enriching_state(
         self,
         mock_config: MagicMock,
@@ -766,6 +819,303 @@ class TestFSMEnrichmentCompletedTransition:
         assert CompositePipelineState.SEED_COMPLETED in saved_states
         assert CompositePipelineState.MERGING in saved_states
         assert CompositePipelineState.COMPLETED in saved_states
+
+
+class TestFSMDependenciesCompletedTransition:
+    """Tests for DEPENDENCIES_COMPLETED state transition."""
+
+    def test_prepare_dependencies_run_context_returns_runner_and_pipeline_names(
+        self,
+        mock_config: MagicMock,
+        mock_logger: MagicMock,
+        mock_lock: AsyncMock,
+        mock_merger: AsyncMock,
+        mock_coordinator: AsyncMock,
+        mock_key_extractor: AsyncMock,
+        mock_seed_runner: AsyncMock,
+        tmp_path: Path,
+        test_run_id: str,
+    ) -> None:
+        """Dependency run-context helper should return runtime collaborators and dependency names."""
+        dep_pubmed = MagicMock()
+        dep_pubmed.pipeline = "pubmed"
+        dep_crossref = MagicMock()
+        dep_crossref.pipeline = "crossref"
+        mock_config.dependencies = [dep_pubmed, dep_crossref]
+
+        checkpoint_manager = CompositeCheckpointManager(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            storage=FileCompositeCheckpointWriter(tmp_path),
+            logger=mock_logger,
+            resume=False,
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            seed_runner_factory=lambda: mock_seed_runner,
+            enricher_runner_factory=lambda name, df: AsyncMock(),
+            key_extractor=mock_key_extractor,
+            coordinator=mock_coordinator,
+            merger=mock_merger,
+            checkpoint_manager=checkpoint_manager,
+            logger=mock_logger,
+            lock=mock_lock,
+            fsm_state_helper=FSMStateHelperService(
+                config=mock_config, logger=mock_logger, run_id=test_run_id
+            ),
+            run_id=test_run_id,
+        )
+        runner._dependency_coordinator = mock_coordinator  # type: ignore[attr-defined]
+        runner._dependencies_runner_factory = MagicMock()  # type: ignore[attr-defined]
+
+        coordinator, runner_factory, dependency_names = (
+            runner._prepare_dependencies_run_context()
+        )
+
+        assert coordinator is runner._dependency_coordinator
+        assert runner_factory is runner._dependencies_runner_factory
+        assert dependency_names == ["pubmed", "crossref"]
+
+    @pytest.mark.asyncio
+    async def test_run_dependencies_delegates_to_coordinator_with_state_context(
+        self,
+        mock_config: MagicMock,
+        mock_logger: MagicMock,
+        mock_lock: AsyncMock,
+        mock_merger: AsyncMock,
+        mock_coordinator: AsyncMock,
+        mock_key_extractor: AsyncMock,
+        mock_seed_runner: AsyncMock,
+        tmp_path: Path,
+        test_run_id: str,
+    ) -> None:
+        """Dependency run helper should delegate to coordinator with configured dependencies and completed state."""
+        dep_pubmed = MagicMock()
+        dep_pubmed.pipeline = "pubmed"
+        mock_config.dependencies = [dep_pubmed]
+
+        checkpoint_manager = CompositeCheckpointManager(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            storage=FileCompositeCheckpointWriter(tmp_path),
+            logger=mock_logger,
+            resume=False,
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            seed_runner_factory=lambda: mock_seed_runner,
+            enricher_runner_factory=lambda name, df: AsyncMock(),
+            key_extractor=mock_key_extractor,
+            coordinator=mock_coordinator,
+            merger=mock_merger,
+            checkpoint_manager=checkpoint_manager,
+            logger=mock_logger,
+            lock=mock_lock,
+            fsm_state_helper=FSMStateHelperService(
+                config=mock_config, logger=mock_logger, run_id=test_run_id
+            ),
+            run_id=test_run_id,
+        )
+        state = CompositeCheckpointState(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            state=CompositePipelineState.DEPENDENCIES_RUNNING,
+            completed_dependencies=frozenset({"crossref"}),
+        )
+        runner_factory = MagicMock()
+        keys_df = pl.DataFrame({"doi": ["10.1234/test"]})
+        expected_results = {
+            "pubmed": DependencyResult.success(
+                pipeline_name="pubmed",
+                records_extracted=100,
+                records_silver=95,
+            )
+        }
+        mock_coordinator.run_dependencies.return_value = expected_results
+
+        dependency_results = await runner._run_dependencies(
+            coordinator=mock_coordinator,
+            runner_factory=runner_factory,
+            keys_df=keys_df,
+            state=state,
+        )
+
+        assert dependency_results == expected_results
+        mock_coordinator.run_dependencies.assert_awaited_once_with(
+            keys=keys_df,
+            dependencies=mock_config.dependencies,
+            completed=state.completed_dependencies,
+            runner_factory=runner_factory,
+        )
+
+    @pytest.mark.asyncio
+    async def test_skip_dependencies_phase_keeps_state_and_returns_empty_results(
+        self,
+        mock_config: MagicMock,
+        mock_logger: MagicMock,
+        mock_lock: AsyncMock,
+        mock_merger: AsyncMock,
+        mock_coordinator: AsyncMock,
+        mock_key_extractor: AsyncMock,
+        mock_seed_runner: AsyncMock,
+        tmp_path: Path,
+        test_run_id: str,
+    ) -> None:
+        """Dependencies skip helper should keep checkpoint state and return no results."""
+        checkpoint_manager = CompositeCheckpointManager(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            storage=FileCompositeCheckpointWriter(tmp_path),
+            logger=mock_logger,
+            resume=False,
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            seed_runner_factory=lambda: mock_seed_runner,
+            enricher_runner_factory=lambda name, df: AsyncMock(),
+            key_extractor=mock_key_extractor,
+            coordinator=mock_coordinator,
+            merger=mock_merger,
+            checkpoint_manager=checkpoint_manager,
+            logger=mock_logger,
+            lock=mock_lock,
+            fsm_state_helper=FSMStateHelperService(
+                config=mock_config, logger=mock_logger, run_id=test_run_id
+            ),
+            run_id=test_run_id,
+        )
+        state = CompositeCheckpointState(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            state=CompositePipelineState.SEED_COMPLETED,
+        )
+
+        next_state, dependency_results = await runner._skip_dependencies_phase(state)
+
+        assert next_state is state
+        assert dependency_results == {}
+
+    @pytest.mark.asyncio
+    async def test_start_dependencies_phase_persists_running_state(
+        self,
+        mock_config: MagicMock,
+        mock_logger: MagicMock,
+        mock_lock: AsyncMock,
+        mock_merger: AsyncMock,
+        mock_coordinator: AsyncMock,
+        mock_key_extractor: AsyncMock,
+        mock_seed_runner: AsyncMock,
+        tmp_path: Path,
+        test_run_id: str,
+    ) -> None:
+        """Dependencies start helper should save and log the running dependencies stage."""
+        checkpoint_manager = CompositeCheckpointManager(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            storage=FileCompositeCheckpointWriter(tmp_path),
+            logger=mock_logger,
+            resume=False,
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            seed_runner_factory=lambda: mock_seed_runner,
+            enricher_runner_factory=lambda name, df: AsyncMock(),
+            key_extractor=mock_key_extractor,
+            coordinator=mock_coordinator,
+            merger=mock_merger,
+            checkpoint_manager=checkpoint_manager,
+            logger=mock_logger,
+            lock=mock_lock,
+            fsm_state_helper=FSMStateHelperService(
+                config=mock_config, logger=mock_logger, run_id=test_run_id
+            ),
+            run_id=test_run_id,
+        )
+        state = CompositeCheckpointState(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            state=CompositePipelineState.SEED_COMPLETED,
+        )
+        runner._save_checkpoint_safe = AsyncMock(return_value=True)  # type: ignore[method-assign]
+
+        next_state = await runner._start_dependencies_phase(
+            state,
+            dependencies=["pubmed", "crossref"],
+        )
+
+        assert next_state.state == CompositePipelineState.DEPENDENCIES_RUNNING
+        runner._save_checkpoint_safe.assert_awaited_once_with(
+            next_state,
+            "dependencies_running",
+        )
+        assert any(
+            c.args and c.args[0] == "dependencies_started"
+            for c in mock_logger.info.call_args_list
+        )
+
+    @pytest.mark.asyncio
+    async def test_complete_dependencies_phase_persists_completed_state(
+        self,
+        mock_config: MagicMock,
+        mock_logger: MagicMock,
+        mock_lock: AsyncMock,
+        mock_merger: AsyncMock,
+        mock_coordinator: AsyncMock,
+        mock_key_extractor: AsyncMock,
+        mock_seed_runner: AsyncMock,
+        tmp_path: Path,
+        test_run_id: str,
+    ) -> None:
+        """Dependencies completion helper should save and log the completed dependencies stage."""
+        checkpoint_manager = CompositeCheckpointManager(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            storage=FileCompositeCheckpointWriter(tmp_path),
+            logger=mock_logger,
+            resume=False,
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            seed_runner_factory=lambda: mock_seed_runner,
+            enricher_runner_factory=lambda name, df: AsyncMock(),
+            key_extractor=mock_key_extractor,
+            coordinator=mock_coordinator,
+            merger=mock_merger,
+            checkpoint_manager=checkpoint_manager,
+            logger=mock_logger,
+            lock=mock_lock,
+            fsm_state_helper=FSMStateHelperService(
+                config=mock_config, logger=mock_logger, run_id=test_run_id
+            ),
+            run_id=test_run_id,
+        )
+        state = CompositeCheckpointState(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            state=CompositePipelineState.DEPENDENCIES_RUNNING,
+        )
+        runner._save_checkpoint_safe = AsyncMock(return_value=True)  # type: ignore[method-assign]
+
+        next_state = await runner._complete_dependencies_phase(
+            state,
+            succeeded=2,
+            failed=1,
+        )
+
+        assert next_state.state == CompositePipelineState.DEPENDENCIES_COMPLETED
+        runner._save_checkpoint_safe.assert_awaited_once_with(
+            next_state,
+            "dependencies_completed",
+        )
+        assert any(
+            c.args and c.args[0] == "dependencies_completed"
+            for c in mock_logger.info.call_args_list
+        )
 
 
 class TestFSMResumeFromFailed:

@@ -564,6 +564,27 @@ class TestRuntimeEnricherSelectionPolicy:
         assert finalized["crossref"].status == EnrichmentStatus.SUCCESS
         assert finalized["pubmed"].status == EnrichmentStatus.NOT_RUN
 
+    @pytest.mark.asyncio
+    async def test_validate_required_enrichment_results_persists_failed_state(
+        self,
+    ) -> None:
+        """Required enrichment validation should persist FAILED state before re-raising."""
+        runner = create_runner()
+        runner._save_failed_enrichment_state = AsyncMock()  # type: ignore[method-assign]
+        state = CompositeCheckpointState(
+            composite_name="test_composite",
+            run_id=str(uuid4()),
+            created_at=datetime.now(tz=UTC),
+        )
+
+        with pytest.raises(InvalidStateError, match="crossref"):
+            await runner._validate_required_enrichment_results(state, {})
+
+        runner._save_failed_enrichment_state.assert_awaited_once()
+        saved_state, saved_error = runner._save_failed_enrichment_state.await_args.args
+        assert saved_state is state
+        assert "crossref" in str(saved_error)
+
 
 class TestMergeableEnrichers:
     """Tests for mergeable enricher filtering."""

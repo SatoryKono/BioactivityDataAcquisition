@@ -87,35 +87,23 @@ class CompositeRunnerStageMixin(
     ) -> tuple[CompositeCheckpointState, dict[str, DependencyResult]]:
         """Execute dependencies stage and persist FSM/checkpoint transitions."""
         if not self._has_dependencies_configured():
-            return state, {}
+            return await self._skip_dependencies_phase(state)
 
-        coordinator, runner_factory = self._validate_dependency_preconditions()
-        dependency_pipeline_names = [
-            dependency.pipeline for dependency in self._config.dependencies
-        ]
-
-        state = self._transition_state_with_fsm_log(
-            state,
-            CompositePipelineState.DEPENDENCIES_RUNNING,
-            stage="dependencies_start",
-            dependencies=dependency_pipeline_names,
-            count=len(dependency_pipeline_names),
+        coordinator, runner_factory, dependency_pipeline_names = (
+            self._prepare_dependencies_run_context()
         )
-        await self._call_save_checkpoint_safe(state, "dependencies_running")
-        self._logger.info(
-            PipelineEvent.phase_started("dependencies"),
-            composite=self._config.name,
-            run_id=self._run_id_str,
+
+        state = await self._start_dependencies_phase(
+            state,
             dependencies=dependency_pipeline_names,
-            count=len(dependency_pipeline_names),
         )
 
         try:
-            dependency_results = await coordinator.run_dependencies(
-                keys=keys_df,
-                dependencies=self._config.dependencies,
-                completed=state.completed_dependencies,
+            dependency_results = await self._run_dependencies(
+                coordinator=coordinator,
                 runner_factory=runner_factory,
+                keys_df=keys_df,
+                state=state,
             )
         except (*PIPELINE_EXECUTION_ERRORS, BioETLError) as error:
             await self._handle_dependencies_phase_exception(state, error)
@@ -123,6 +111,67 @@ class CompositeRunnerStageMixin(
 
         state = self._collect_successful_dependencies(state, dependency_results)
         return await self._finalize_dependencies_phase(state, dependency_results)
+
+    async def _skip_dependencies_phase(
+        self,
+        state: CompositeCheckpointState,
+    ) -> tuple[CompositeCheckpointState, dict[str, DependencyResult]]:
+        """Keep checkpoint state unchanged when no dependencies are configured."""
+        return state, {}
+
+    def _prepare_dependencies_run_context(
+        self,
+    ) -> tuple[
+        DependencyCoordinatorService,
+        Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort],
+        list[str],
+    ]:
+        """Resolve dependency runtime collaborators and pipeline names for execution."""
+        coordinator, runner_factory = self._validate_dependency_preconditions()
+        dependency_pipeline_names = [
+            dependency.pipeline for dependency in self._config.dependencies
+        ]
+        return coordinator, runner_factory, dependency_pipeline_names
+
+    async def _run_dependencies(
+        self,
+        *,
+        coordinator: DependencyCoordinatorService,
+        runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort],
+        keys_df: pl.DataFrame,
+        state: CompositeCheckpointState,
+    ) -> dict[str, DependencyResult]:
+        """Run configured dependencies through the coordinator."""
+        return await coordinator.run_dependencies(
+            keys=keys_df,
+            dependencies=self._config.dependencies,
+            completed=state.completed_dependencies,
+            runner_factory=runner_factory,
+        )
+
+    async def _start_dependencies_phase(
+        self,
+        state: CompositeCheckpointState,
+        *,
+        dependencies: list[str],
+    ) -> CompositeCheckpointState:
+        """Transition to DEPENDENCIES_RUNNING, persist checkpoint, and emit phase log."""
+        state = self._transition_state_with_fsm_log(
+            state,
+            CompositePipelineState.DEPENDENCIES_RUNNING,
+            stage="dependencies_start",
+            dependencies=dependencies,
+            count=len(dependencies),
+        )
+        await self._call_save_checkpoint_safe(state, "dependencies_running")
+        self._logger.info(
+            PipelineEvent.phase_started("dependencies"),
+            composite=self._config.name,
+            run_id=self._run_id_str,
+            dependencies=dependencies,
+            count=len(dependencies),
+        )
+        return state
 
     def _validate_dependency_preconditions(
         self,
@@ -191,6 +240,21 @@ class CompositeRunnerStageMixin(
             await self._fail_required_dependencies(state, required_failed)
 
         succeeded, failed = self._summarize_dependency_outcomes(dependency_results)
+        completed_state = await self._complete_dependencies_phase(
+            state,
+            succeeded=succeeded,
+            failed=failed,
+        )
+        return completed_state, dependency_results
+
+    async def _complete_dependencies_phase(
+        self,
+        state: CompositeCheckpointState,
+        *,
+        succeeded: int,
+        failed: int,
+    ) -> CompositeCheckpointState:
+        """Transition to DEPENDENCIES_COMPLETED, log, and persist checkpoint."""
         completed_state = self._transition_state_with_fsm_log(
             state,
             CompositePipelineState.DEPENDENCIES_COMPLETED,
@@ -207,7 +271,7 @@ class CompositeRunnerStageMixin(
             failed=failed,
         )
         await self._call_save_checkpoint_safe(completed_state, "dependencies_completed")
-        return completed_state, dependency_results
+        return completed_state
 
     async def _handle_dependencies_phase_exception(
         self,

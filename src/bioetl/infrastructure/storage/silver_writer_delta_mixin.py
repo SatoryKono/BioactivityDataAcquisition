@@ -18,8 +18,6 @@ from bioetl.infrastructure.storage.silver_writer_delta_helpers import (
     _load_delta_table,
     _merge_records_with_timeout,
     _MergeExecutionTimeoutError,
-    _raise_domain_write_error,
-    _select_dispatch_handler,
     _write_plain_delta_request,
 )
 from bioetl.infrastructure.storage.silver_writer_merge_resilience_helpers import (

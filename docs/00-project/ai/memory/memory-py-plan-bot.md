@@ -33,7 +33,7 @@ src/bioetl/
 
 ### Providers
 
-ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar, IUPHAR, Open Targets
+ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar
 
 ### Medallion Architecture
 

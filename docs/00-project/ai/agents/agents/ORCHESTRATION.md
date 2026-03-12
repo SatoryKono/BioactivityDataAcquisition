@@ -397,7 +397,6 @@ py-audit-bot (baseline, scope=seed + enricher pipelines)
 | **ChEMBL** | ✅ Schema validation | — | ✅ Golden data, contracts | ✅ Field reference | ✅ Error repro | — |
 | **PubMed** | — | ✅ Coverage eval | ✅ Test data | — | — | ✅ Citations |
 | **bioRxiv** | — | ✅ Trends, research | ✅ Preprint test data | — | — | ✅ Context |
-| **Open Targets** | ✅ Target validation | ✅ Data availability | — | ✅ Join key validation | — | — |
 | **Mermaid Chart** | ✅ Arch diagrams | — | — | — | — | ✅ All diagrams |
 | **BioRender** | — | — | — | — | — | ✅ Scientific figs |
 

@@ -33,10 +33,15 @@ __all__ = [
     "TransformResult",
     "TransformedRecord",
     "RecordTransformOutcome",
+    "TransformAggregationState",
     "accumulate_transform_outcome",
     "accumulate_stream_transform_result",
+    "apply_transform_outcome_to_state",
+    "apply_stream_transform_result_to_state",
     "bind_record_context",
+    "build_transform_result",
     "check_dq_thresholds",
+    "create_transform_aggregation_state",
     "flush_dq_records",
     "flush_filtered_records",
     "route_single_transform_attempt",
@@ -86,6 +91,25 @@ class TransformedRecord:
     is_quarantined: bool
     is_filtered_out: bool = False
     quarantine_write_failed: bool = False
+
+
+@dataclass(slots=True)
+class TransformAggregationState:
+    """Mutable aggregation state shared by batch and streaming transforms."""
+
+    silver_records: list[BronzeRecord]
+    gold_records: list[GoldRecord]
+    quarantined_count: int = 0
+    filtered_out_count: int = 0
+    records_quarantine_failed: int = 0
+
+
+def create_transform_aggregation_state() -> TransformAggregationState:
+    """Create empty aggregation state for one transform run."""
+    return TransformAggregationState(
+        silver_records=[],
+        gold_records=[],
+    )
 
 
 async def yield_control_if_needed(last_yield_at: float) -> float:
@@ -241,6 +265,25 @@ def accumulate_transform_outcome(
     return 0, 0
 
 
+def apply_transform_outcome_to_state(
+    *,
+    state: TransformAggregationState,
+    attempt: RecordTransformOutcome,
+    filtered_records: list[FilteredQuarantineEntry],
+    dq_records: list[DQQuarantineEntry],
+) -> None:
+    """Apply one batch transform outcome to aggregate state."""
+    quarantined_delta, filtered_delta = accumulate_transform_outcome(
+        attempt=attempt,
+        silver_records=state.silver_records,
+        gold_records=state.gold_records,
+        filtered_records=filtered_records,
+        dq_records=dq_records,
+    )
+    state.quarantined_count += quarantined_delta
+    state.filtered_out_count += filtered_delta
+
+
 async def route_single_transform_attempt(
     *,
     context: PipelineContext,
@@ -306,6 +349,35 @@ def accumulate_stream_transform_result(
         if result.gold_record is not None:
             gold_records.append(result.gold_record)
     return 0, 0, quarantine_failed_delta
+
+
+def apply_stream_transform_result_to_state(
+    *,
+    state: TransformAggregationState,
+    result: TransformedRecord,
+) -> None:
+    """Apply one streaming transform result to aggregate state."""
+    quarantined_delta, filtered_delta, failed_delta = (
+        accumulate_stream_transform_result(
+            result=result,
+            silver_records=state.silver_records,
+            gold_records=state.gold_records,
+        )
+    )
+    state.quarantined_count += quarantined_delta
+    state.filtered_out_count += filtered_delta
+    state.records_quarantine_failed += failed_delta
+
+
+def build_transform_result(state: TransformAggregationState) -> TransformResult:
+    """Build public transform result from aggregate state."""
+    return TransformResult(
+        silver_records=state.silver_records,
+        gold_records=state.gold_records,
+        quarantined_count=state.quarantined_count,
+        filtered_out_count=state.filtered_out_count,
+        records_quarantine_failed=state.records_quarantine_failed,
+    )
 
 
 def check_dq_thresholds(

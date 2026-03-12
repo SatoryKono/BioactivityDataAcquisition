@@ -135,46 +135,40 @@ pipeline:
         columns: [{entity}_id]
         ascending: true
 
-# Convention-based (ADR-029): dq_config_file and filter_config_file are
-# auto-computed from provider/entity_type when external files are used.
-# DO NOT set legacy configs/filters or configs/pipelines paths explicitly.
-# Resolved paths:
-#   dq_config_file: ../../quality/entities/{provider}/{entity}.yaml
+# Convention-based (ADR-029): filter paths are not configured via legacy
+# external files. DQ and filters live inside the unified hierarchy:
+# configs/base/* -> configs/providers/{provider}.yaml ->
+# configs/entities/{provider}/{entity}.yaml
 ```
 
-### B. DQ rules (externalized)
+### B. Provider-level quality defaults
 
 ```yaml
-# configs/quality/entities/{provider}/{entity}.yaml
-entity: {entity}
-provider: {provider}
+# configs/providers/{provider}.yaml
 version: "1.0.0"
+provider: {provider}
 
-thresholds:
-  soft_fail: 0.05
-  hard_fail: 0.20
+source:
+  rate_limit:
+    requests_per_second: 5
+    burst: 10
 
-rules:
-  - name: "{entity}_id_not_null"
-    field: "{entity}_id"
-    check: "not_null"
-    severity: critical
-  - name: "content_hash_not_null"
-    field: "content_hash"
-    check: "not_null"
-    severity: critical
+quality:
+  version: "1.0.0"
+  provider: {provider}
+  thresholds:
+    soft_fail: 0.05
+    hard_fail: 0.20
 ```
 
-### C. Filter rules (externalized)
+### C. Filter hierarchy
 
 ```yaml
-# filters section inside configs/base|providers|entities hierarchy
-filters:
-  version: "1.0.0"
-  gold_filters:
-    required_fields:
-      - {entity}_id
-      - content_hash
+# Filter defaults live in:
+# - configs/base/pipeline.yaml#filter_defaults
+# - configs/providers/{provider}.yaml#filters
+# - configs/entities/{provider}/{entity}.yaml#filters
+# Separate filter files are not the canonical model.
 ```
 
 ### D. Composite pipeline config
@@ -229,8 +223,8 @@ grep -A3 "sort_by" configs/entities/{provider}/{entity}.yaml
 # quality section присутствует
 grep -n "^quality:" configs/entities/{provider}/{entity}.yaml
 
-# filters section или documented external override присутствует
-grep -n "^filters:" configs/entities/{provider}/{entity}.yaml || test -f configs/quality/entities/{provider}/{entity}.yaml
+# filters section присутствует
+grep -n "^filters:" configs/entities/{provider}/{entity}.yaml
 ```
 
 ---
@@ -293,13 +287,6 @@ python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v
 | Поля Molecule | `ChEMBL:compound_search` | `name="aspirin", limit=1` | Список полей для config |
 | Поля Activity | `ChEMBL:get_bioactivity` | `molecule_chembl_id="CHEMBL25"` | Поля для activity config |
 | Поля Target | `ChEMBL:target_search` | `gene_symbol="EGFR"` | Поля для target config |
-
-### Open Targets — reference для composite config
-
-| Сценарий | Инструмент | Параметры | Результат |
-|----------|------------|-----------|-----------|
-| Available fields | `Open Targets:get_open_targets_graphql_schema` | — | Поля для composite merge |
-| Join key validation | `Open Targets:search_entities` | `query_strings=["EGFR"]` | Проверка join keys |
 
 ---
 

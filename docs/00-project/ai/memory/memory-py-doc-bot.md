@@ -23,21 +23,30 @@
 ```
 docs/
 ├── 00-project/
+│   ├── 00-map.md                   # Navigation hub
 │   ├── RULES.md                    # Constitution (единственный источник истины)
 │   ├── glossary.md                 # Glossary (canonical terminology)
-│   └── agents/
-│       ├── CLAUDE.md               # Agent instructions
-│       └── AGENT.md                # Agent persona
-├── 00-map.md                       # Navigation hub
-├── 01-getting-started/             # Onboarding guides
+│   ├── ai/                         # Agent docs, memory, prompts
+│   └── governance/                 # Governance policies
+├── 01-requirements/
+│   └── REQUIREMENTS.md             # Testable requirements
 ├── 02-architecture/
 │   ├── decisions/                  # ADRs (ADR-001 through ADR-043)
-│   └── diagrams/                   # Mermaid diagrams
-├── 03-guides/                      # Development guides
+│   ├── mmd-diagrams/               # Canonical Mermaid source/render trees
+│   └── policies/                   # Architecture and review policies
+├── 03-guides/                      # Guides & manuals
+│   └── development/                # Developer-focused guides
 ├── 04-reference/                   # API documentation
+│   ├── providers/                  # Provider reference docs
+│   ├── pipelines/                  # Pipeline specs and xwalks
+│   ├── contracts/                  # Contract artifacts
+│   ├── schemas/                    # Auxiliary schemas
+│   └── templates/                  # Templates and checklists
 ├── 05-operations/
-│   └── runbooks/                   # Operational runbooks
-└── 04-reference/pipelines/          # Provider-specific pipeline docs
+│   ├── deployment/                 # Deployment and runtime ops
+│   ├── runbooks/                   # Operational playbooks
+│   └── verification/               # Verification reports
+└── 99-archive/                     # Historical docs
 ```
 
 ### Root-level Docs
@@ -259,7 +268,7 @@ Always declare mode at the start of response.
 |------|------|
 | RULES.md (Constitution) | `docs/00-project/RULES.md` |
 | Glossary | `docs/00-project/glossary.md` |
-| Navigation map | `docs/00-map.md` |
+| Navigation map | `docs/00-project/00-map.md` |
 | CHANGELOG | `CHANGELOG.md` |
 | ADR directory | `docs/02-architecture/decisions/` |
 | Agent instructions | `docs/00-project/ai/agents/guides/CLAUDE.md` |
@@ -269,7 +278,10 @@ Always declare mode at the start of response.
 
 ## 12. Provider Documentation
 
-Location: `docs/04-reference/pipelines/{provider}/`
+Locations:
+- Provider reference docs: `docs/04-reference/providers/{provider}/`
+- Pipeline specs and xwalks: `docs/04-reference/pipelines/{provider}/`
+- Operational playbooks: `docs/05-operations/runbooks/` (not 1:1 with providers)
 
 Each provider doc should cover:
 - API overview and base URL

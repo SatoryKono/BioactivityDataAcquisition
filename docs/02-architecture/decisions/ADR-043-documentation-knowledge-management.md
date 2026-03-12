@@ -15,7 +15,7 @@ inline documentation. However, several knowledge management gaps exist:
 
 1. **ADR Coverage Gap**: No systematic way to identify undocumented architectural decisions
 2. **Cross-reference Integrity**: Links between docs break as files move
-3. **Provider Runbook Template**: New providers lack standardized onboarding docs
+3. **Provider Docs vs Runbooks Drift**: Provider reference docs and operational playbooks are separate concerns, but the docs policy does not state that clearly
 4. **Glossary Synchronization**: Domain terms defined in multiple places without single source
 5. **Documentation Drift**: Code changes without corresponding doc updates
 
@@ -47,27 +47,38 @@ CI MUST validate internal documentation links:
 - ADR references in code comments point to existing ADRs
 - RULES.md section references are valid
 
-### 3. Provider Runbook Template
+### 3. Provider Reference Docs and Operational Runbooks
 
-Each provider MUST have a runbook in `docs/05-operations/runbooks/{provider}.md`:
+Documentation MUST be split by concern:
 
-```yaml
-# Template sections:
-- Overview: Provider purpose, data types, API version
-- Authentication: How to obtain and configure credentials
-- Rate Limits: Provider-specific limits and BioETL configuration
-- VCR Recording: Steps to record/update cassettes
-- Troubleshooting: Common errors and resolutions
-- Data Quality: Provider-specific DQ considerations
-- Contacts: API support, documentation links
-```
+- Provider reference docs MUST live under `docs/04-reference/providers/`
+- Operational playbooks MUST live under `docs/05-operations/runbooks/`
+- `docs/05-operations/runbooks/index.md` MUST index the active operational runbooks
+
+For new providers:
+
+- Provider reference documentation SHOULD be added under `docs/04-reference/providers/{provider}/`
+- Provider-specific operational runbooks MAY be added when a provider has unique incident or recovery procedures
+- A dedicated `docs/05-operations/runbooks/{provider}.md` file is NOT required by default
 
 ### 4. Glossary as Single Source of Truth
 
-`docs/04-reference/glossary.md` MUST be the canonical source for domain terms.
+`docs/00-project/glossary.md` MUST be the canonical source for domain terms.
 All other docs SHOULD link to glossary definitions rather than redefining.
 
-### 5. Doc Freshness Tracking
+### 5. AI Agent Profile Source of Truth
+
+Runtime agent profiles under `.codex/agents/*.md` MUST be treated as the
+canonical operational source for Codex workflows.
+
+Published documentation mirrors under `docs/00-project/ai/agents/agents/*.md`
+SHOULD mirror the runtime profiles and MUST NOT intentionally diverge on:
+
+- provider inventory
+- ADR inventory
+- documentation topology and canonical paths
+
+### 6. Doc Freshness Tracking
 
 Each doc file SHOULD include a `Last verified:` date in frontmatter or header.
 CI weekly job flags docs not verified in 90+ days.
@@ -79,12 +90,13 @@ CI weekly job flags docs not verified in 90+ days.
 ### Positive
 - Systematic ADR coverage prevents undocumented decisions
 - Cross-reference validation catches broken links before merge
-- Provider runbooks standardize onboarding experience
+- Provider docs and operational runbooks have explicit boundaries
 - Glossary unification reduces term ambiguity
+- Runtime AI profiles and published mirrors use one shared fact model
 
 ### Negative
 - ADR gap detection may initially flag many missing ADRs
-- Provider runbook requirement adds docs work for new providers
+- Provider reference docs still add maintenance work for new providers
 - Freshness tracking needs human verification dates
 
 ### Risks

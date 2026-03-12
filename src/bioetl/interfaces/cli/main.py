@@ -10,7 +10,7 @@ import click
 
 from bioetl import __version__
 from bioetl.composition.factories.pipeline.registry import register_all_pipelines
-from bioetl.composition.registry import create_registry, get_default_registry
+from bioetl.composition.registry import create_registry
 from bioetl.interfaces.cli.commands.adr import adr
 from bioetl.interfaces.cli.commands.checkpoint import checkpoint
 from bioetl.interfaces.cli.commands.config import config
@@ -23,6 +23,9 @@ from bioetl.interfaces.cli.commands.quarantine import quarantine
 from bioetl.interfaces.cli.commands.run import run
 from bioetl.interfaces.cli.commands.run_all import run_all
 from bioetl.interfaces.cli.commands.run_composite import run_composite
+from bioetl.interfaces.cli.registry_helpers import (
+    get_default_registry,
+)
 
 __all__ = [
     "cli",

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol, cast
 
 import click
@@ -18,7 +19,9 @@ if TYPE_CHECKING:
 
 
 __all__ = [
+    "RunAllExecutionPlan",
     "create_run_all_options",
+    "create_run_all_execution_plan",
     "determine_batch_exit_code",
     "emit_destructive_confirmation_preview",
     "emit_run_all_listing",
@@ -42,6 +45,14 @@ class _BatchRunAccumulator(Protocol):
     skipped: int
     results: list[RunResult]
     failed_pipelines: list[str]
+
+
+@dataclass(frozen=True, slots=True)
+class RunAllExecutionPlan:
+    """Resolved pipelines and RunOptions for one run-all invocation."""
+
+    pipelines: list[str]
+    options: RunOptions
 
 
 class PipelineRegistryView(Protocol):
@@ -112,6 +123,34 @@ def create_run_all_options(
         limit=limit,
         dry_run=dry_run,
         log_level="DEBUG" if debug else "INFO",
+    )
+
+
+def create_run_all_execution_plan(
+    *,
+    source: str,
+    run_type: str,
+    limit: int | None,
+    dry_run: bool,
+    debug: bool,
+    registry: PipelineRegistryView | None = None,
+) -> tuple[RunAllExecutionPlan | None, str | None]:
+    """Resolve validated provider pipelines and canonical RunOptions."""
+    is_valid, error = validate_provider(source, registry=registry)
+    if not is_valid:
+        return None, error
+
+    return (
+        RunAllExecutionPlan(
+            pipelines=filter_pipelines_by_provider(source, registry=registry),
+            options=create_run_all_options(
+                run_type=run_type,
+                limit=limit,
+                dry_run=dry_run,
+                debug=debug,
+            ),
+        ),
+        None,
     )
 
 

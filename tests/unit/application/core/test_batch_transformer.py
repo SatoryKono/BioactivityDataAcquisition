@@ -12,6 +12,14 @@ import pytest
 import bioetl.application.core.batch_transformer_helpers as batch_transformer_helpers
 from bioetl.application.core.batch_metrics import BatchMetricsRecorder
 from bioetl.application.core.batch_transformer import BatchTransformer, TransformResult
+from bioetl.application.core.batch_transformer_helpers import (
+    RecordTransformOutcome,
+    TransformedRecord,
+    apply_stream_transform_result_to_state,
+    apply_transform_outcome_to_state,
+    build_transform_result,
+    create_transform_aggregation_state,
+)
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.domain.config import DQConfig
@@ -429,6 +437,75 @@ class TestBatchTransformerTransform:
         assert result.quarantined_count == 1
         assert result.records_quarantine_failed == 1
         mock_context.logger.error.assert_called()
+
+
+@pytest.mark.unit
+class TestBatchTransformerAggregationHelpers:
+    """Tests for batch-transform aggregation helpers."""
+
+    def test_apply_transform_outcome_updates_state_and_builds_result(self) -> None:
+        """Batch aggregation helper should track quarantined and filtered counts."""
+        state = create_transform_aggregation_state()
+        filtered_records: list = []
+        dq_records: list = []
+
+        apply_transform_outcome_to_state(
+            state=state,
+            attempt=RecordTransformOutcome(
+                silver_record=None,
+                gold_record=None,
+                filtered_entry=({"id": "filtered"}, "why"),
+            ),
+            filtered_records=filtered_records,
+            dq_records=dq_records,
+        )
+        apply_transform_outcome_to_state(
+            state=state,
+            attempt=RecordTransformOutcome(
+                silver_record=None,
+                gold_record=None,
+                dq_entry=({"id": "bad"}, MagicMock(), "error"),
+            ),
+            filtered_records=filtered_records,
+            dq_records=dq_records,
+        )
+
+        state.records_quarantine_failed = 3
+        result = build_transform_result(state)
+
+        assert len(filtered_records) == 1
+        assert len(dq_records) == 1
+        assert result.quarantined_count == 1
+        assert result.filtered_out_count == 1
+        assert result.records_quarantine_failed == 3
+
+    def test_apply_stream_transform_result_updates_state(self) -> None:
+        """Stream aggregation helper should accumulate counters and records."""
+        state = create_transform_aggregation_state()
+
+        apply_stream_transform_result_to_state(
+            state=state,
+            result=TransformedRecord(
+                silver_record={"entity_id": "1"},
+                gold_record={"entity_id": "1"},
+                is_quarantined=False,
+            ),
+        )
+        apply_stream_transform_result_to_state(
+            state=state,
+            result=TransformedRecord(
+                silver_record=None,
+                gold_record=None,
+                is_quarantined=True,
+                quarantine_write_failed=True,
+            ),
+        )
+
+        result = build_transform_result(state)
+        assert len(result.silver_records) == 1
+        assert len(result.gold_records) == 1
+        assert result.quarantined_count == 1
+        assert result.records_quarantine_failed == 1
 
 
 @pytest.mark.unit
