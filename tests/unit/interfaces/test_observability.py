@@ -14,7 +14,7 @@ from bioetl.interfaces import observability
 
 # This module tests the observability interface.
 # MetricsServerError is now defined in domain.exceptions and re-exported by all layers.
-# start_metrics_server is defined in infrastructure.observability.server.
+# interfaces.observability exposes start_metrics_server via composition runtime.
 
 
 # Mock `_SERVER_STARTED` to isolate state among test cases.
@@ -50,11 +50,12 @@ def test_start_metrics_server_failure():
         assert result is False
 
 
-def test_interface_re_exports_from_infrastructure():
-    """Verify interface re-exports start_metrics_server from infrastructure layer.
+def test_interface_re_exports_from_composition_runtime():
+    """Verify interface re-exports start_metrics_server via composition runtime.
 
     interfaces/observability.py imports start_metrics_server from
-    infrastructure.observability to provide the function to external consumers.
+    composition.bootstrap.runtime.observability, which preserves the canonical
+    implementation object from infrastructure.observability.
     """
     # The function should be the same object since it's a re-export
     assert (

@@ -293,7 +293,7 @@
 #### REQ-LOAD-002
 - **Уровень**: MUST
 - **Описание**: Publication-related pipeline configs MUST явно задавать `loading-strategy: full-scan-only`
-- **Проверка**: Архитектурный тест `tests/architecture/test-force-full-scan-publication.py`
+- **Проверка**: Архитектурный тест `tests/architecture/test_force_full_scan_publication.py`
 
 ### 2.12 Entity ID Generation
 

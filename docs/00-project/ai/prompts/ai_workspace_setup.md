@@ -45,8 +45,8 @@
     │   └── _references/               ← Общие справочные материалы для overlays/reference bundles
     ├── prompts/                       ← Промты оркестрации
     │   ├── architecture_debt_reduction_orchestration.md
-    │   ├── refactor_orchestration_prompt.md
-    │   ├── refactor_orchestration_prompt_1-2.md
+    │   ├── refactor_orchestration_prompt.md     ← Канонический refactor prompt (active)
+    │   ├── refactor_orchestration_prompt_1-2.md ← Deprecated stale duplicate, reference only
     │   ├── architecture_metric_exemptions_tasks_json_prompt.md
     │   ├── scripts_inventory_consolidation_cleanup_prompt.md
     │   ├── documentation_diagrams_audit.md  ← Аудит docs/ и диаграмм
@@ -122,8 +122,8 @@
 | Файл | Назначение |
 |------|------------|
 | `architecture_debt_reduction_orchestration.md` | Оркестрация снижения архитектурного долга |
-| `refactor_orchestration_prompt.md` | Промт для рефакторинг-оркестрации |
-| `refactor_orchestration_prompt_1-2.md` | Компактная версия (фазы 1-2) |
+| `refactor_orchestration_prompt.md` | Канонический промт для рефакторинг-оркестрации |
+| `refactor_orchestration_prompt_1-2.md` | Deprecated stale duplicate для фаз 1-2; reference only, не использовать как SSOT |
 | `architecture_metric_exemptions_tasks_json_prompt.md` | Задачи рефакторинга metric exemptions |
 | `scripts_inventory_consolidation_cleanup_prompt.md` | Инвентаризация и очистка скриптов |
 | `documentation_diagrams_audit.md` | Аудит документации и диаграмм (docs/ без ai/) |
