@@ -62,6 +62,19 @@ class _PreparedGoldWriteContext:
     validated_mode: GoldWriteMode
 
 
+@dataclass(frozen=True, slots=True)
+class _GoldWritePostwriteContext:
+    """Post-write data passed through Gold audit and metadata stages."""
+
+    prepared: _PreparedGoldWriteContext
+    records: list[GoldRecord]
+    ingestion_ts: datetime | None
+    run_id: RunID | None
+    scd_config: ScdConfig | None
+    silver_refs: list[SilverWriteResult] | None
+    schema: DataFrameSchema
+
+
 def _normalize_scd_config(
     scd_config: ScdConfig,
     primary_keys: list[str] | None,
@@ -203,13 +216,15 @@ class GoldWriter(
                 column_order,
             )
             await self._post_write_gold(
-                prepared=prepared,
-                records=records,
-                ingestion_ts=ingestion_ts,
-                run_id=run_id,
-                scd_config=normalized_scd_config,
-                silver_refs=silver_refs,
-                schema=schema,
+                _GoldWritePostwriteContext(
+                    prepared=prepared,
+                    records=records,
+                    ingestion_ts=ingestion_ts,
+                    run_id=run_id,
+                    scd_config=normalized_scd_config,
+                    silver_refs=silver_refs,
+                    schema=schema,
+                )
             )
 
     async def _prepare_write_gold(
@@ -248,46 +263,34 @@ class GoldWriter(
 
     async def _post_write_gold(
         self,
-        *,
-        prepared: _PreparedGoldWriteContext,
-        records: list[GoldRecord],
-        ingestion_ts: datetime | None,
-        run_id: RunID | None,
-        scd_config: ScdConfig | None,
-        silver_refs: list[SilverWriteResult] | None,
-        schema: DataFrameSchema,
+        context: _GoldWritePostwriteContext,
     ) -> None:
         """Emit audit and metadata after successful Gold write.
 
         Args:
-            prepared: Prepared pre-write context with resolved path and mode.
-            records: Gold records that were written; used for count reporting.
-            ingestion_ts: UTC ingestion timestamp embedded in metadata; None
-                skips timestamp in audit output.
-            run_id: Pipeline run ID for lineage; None excludes it from audit.
-            scd_config: SCD2 configuration passed to metadata writers.
-            silver_refs: Silver write results for lineage metadata.
-            schema: Pandera schema passed to Gold metadata writers.
+            context: Named post-write context containing prepared path/mode,
+                records, lineage inputs, and schema for metadata emission.
         """
+        prepared = context.prepared
         if self._audit:
             await self._log_gold_audit(
                 table_name=prepared.table_name,
-                records=records,
+                records=context.records,
                 mode=prepared.validated_mode,
-                ingestion_ts=ingestion_ts,
-                run_id=run_id,
+                ingestion_ts=context.ingestion_ts,
+                run_id=context.run_id,
             )
 
         await self._write_gold_metadata(
             table_path=prepared.table_path,
             table_name=prepared.table_name,
-            records=records,
+            records=context.records,
             mode=prepared.validated_mode,
-            scd_config=scd_config,
-            ingestion_ts=ingestion_ts,
-            run_id=run_id,
-            silver_refs=silver_refs,
-            gold_schema=schema,
+            scd_config=context.scd_config,
+            ingestion_ts=context.ingestion_ts,
+            run_id=context.run_id,
+            silver_refs=context.silver_refs,
+            gold_schema=context.schema,
         )
 
     @staticmethod

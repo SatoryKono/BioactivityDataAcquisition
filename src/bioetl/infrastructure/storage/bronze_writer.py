@@ -59,6 +59,21 @@ BRONZE_REQUIRED_METADATA_FIELDS = (
 
 
 @dataclass(frozen=True, slots=True)
+class _BronzeWriteRequest:
+    """Normalized request carried through one Bronze write pipeline."""
+
+    records: Iterator[bytes]
+    provider: str
+    entity: str
+    date: datetime
+    batch_id: BatchID
+    run_id: RunID
+    run_type: RunType
+    ingestion_ts: datetime
+    source_metadata: SourceMetadata | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class _BronzeWritePrepared:
     """Prepared context used by internal bronze write stages."""
 
@@ -78,6 +93,16 @@ class _BronzeWriteArtifacts:
     record_count: int
     uncompressed_size: int
     compressed_size: int
+
+
+@dataclass(frozen=True, slots=True)
+class _BronzeWritePostwriteContext:
+    """All data needed by Bronze post-write side effects."""
+
+    request: _BronzeWriteRequest
+    prepared: _BronzeWritePrepared
+    write_artifacts: _BronzeWriteArtifacts
+    duration: float
 
 
 class BronzeWriter(
@@ -159,41 +184,7 @@ class BronzeWriter(
     ) -> BronzeWriteResult:
         """Write raw records to Bronze layer (JSONL + zstd)."""
         return await self._write_bronze_with_tracing(
-            records=records,
-            provider=provider,
-            entity=entity,
-            date=date,
-            batch_id=batch_id,
-            run_id=run_id,
-            run_type=run_type,
-            ingestion_ts=ingestion_ts,
-            source_metadata=source_metadata,
-        )
-
-    async def _write_bronze_with_tracing(
-        self,
-        *,
-        records: Iterator[bytes],
-        provider: str,
-        entity: str,
-        date: datetime,
-        batch_id: BatchID,
-        run_id: RunID,
-        run_type: RunType,
-        ingestion_ts: datetime,
-        source_metadata: SourceMetadata | None,
-    ) -> BronzeWriteResult:
-        tracer = self._tracing.get_tracer(__name__)
-        with tracer.start_as_current_span("write_bronze") as span:
-            span.set_attribute("provider", provider)
-            span.set_attribute("entity", entity)
-            span.set_attribute("batch_id", str(batch_id))
-            span.set_attribute("run_id", str(run_id))
-
-            labels = {"provider": provider, "entity": entity}
-            self._metrics.increment_counter("bronze_write_attempts_total", 1, labels)
-            start_time = time.perf_counter()
-            prepared = self._prepare_bronze_write(
+            _BronzeWriteRequest(
                 records=records,
                 provider=provider,
                 entity=entity,
@@ -202,20 +193,34 @@ class BronzeWriter(
                 run_id=run_id,
                 run_type=run_type,
                 ingestion_ts=ingestion_ts,
+                source_metadata=source_metadata,
             )
+        )
+
+    async def _write_bronze_with_tracing(
+        self,
+        request: _BronzeWriteRequest,
+    ) -> BronzeWriteResult:
+        tracer = self._tracing.get_tracer(__name__)
+        with tracer.start_as_current_span("write_bronze") as span:
+            span.set_attribute("provider", request.provider)
+            span.set_attribute("entity", request.entity)
+            span.set_attribute("batch_id", str(request.batch_id))
+            span.set_attribute("run_id", str(request.run_id))
+
+            labels = {"provider": request.provider, "entity": request.entity}
+            self._metrics.increment_counter("bronze_write_attempts_total", 1, labels)
+            start_time = time.perf_counter()
+            prepared = self._prepare_bronze_write(request)
             write_artifacts = await self._write_bronze_data_and_sidecar(prepared)
             duration = time.perf_counter() - start_time
             await self._run_bronze_post_write_actions(
-                prepared=prepared,
-                provider=provider,
-                entity=entity,
-                batch_id=batch_id,
-                run_id=run_id,
-                run_type=run_type,
-                ingestion_ts=ingestion_ts,
-                write_artifacts=write_artifacts,
-                duration=duration,
-                source_metadata=source_metadata,
+                _BronzeWritePostwriteContext(
+                    request=request,
+                    prepared=prepared,
+                    write_artifacts=write_artifacts,
+                    duration=duration,
+                )
             )
             total_duration = time.perf_counter() - start_time
             self._metrics.observe_histogram(
@@ -225,7 +230,7 @@ class BronzeWriter(
             )
             return await self._build_bronze_write_result(
                 prepared=prepared,
-                batch_id=batch_id,
+                batch_id=request.batch_id,
                 record_count=write_artifacts.record_count,
                 uncompressed_size=write_artifacts.uncompressed_size,
                 compressed_size=write_artifacts.compressed_size,
@@ -234,31 +239,33 @@ class BronzeWriter(
 
     def _prepare_bronze_write(
         self,
-        *,
-        records: Iterator[bytes],
-        provider: str,
-        entity: str,
-        date: datetime,
-        batch_id: BatchID,
-        run_id: RunID,
-        run_type: RunType,
-        ingestion_ts: datetime,
+        request: _BronzeWriteRequest,
     ) -> _BronzeWritePrepared:
         """Validate inputs and build the prepared write context."""
-        self._validate_bronze_names(provider, entity)
-        self._validate_records_iterator(records)
-        self._validate_utc_datetime(date, "date")
-        self._validate_utc_datetime(ingestion_ts, "ingestion_ts")
+        self._validate_bronze_names(request.provider, request.entity)
+        self._validate_records_iterator(request.records)
+        self._validate_utc_datetime(request.date, "date")
+        self._validate_utc_datetime(request.ingestion_ts, "ingestion_ts")
 
-        validated_records = iter(records)
+        validated_records = iter(request.records)
         if self.validate_json:
             validated_records = self._validate_json_records(validated_records)
 
-        date_str = date.strftime("%Y-%m-%d")
-        filename = f"batch_{date_str}_{batch_id}.jsonl.zst"
-        relative_path = self._resolve_bronze_path(provider, entity, date_str, filename)
+        date_str = request.date.strftime("%Y-%m-%d")
+        filename = f"batch_{date_str}_{request.batch_id}.jsonl.zst"
+        relative_path = self._resolve_bronze_path(
+            request.provider,
+            request.entity,
+            date_str,
+            filename,
+        )
         metadata = self._build_bronze_metadata(
-            run_id, run_type, ingestion_ts, provider, entity, batch_id
+            request.run_id,
+            request.run_type,
+            request.ingestion_ts,
+            request.provider,
+            request.entity,
+            request.batch_id,
         )
         if self.save_json:
             record_list = list(validated_records)
@@ -278,6 +285,62 @@ class BronzeWriter(
             full_path=full_path,
             meta_path=meta_path,
         )
+
+    async def _run_bronze_post_write_actions(
+        self,
+        context: _BronzeWritePostwriteContext,
+    ) -> None:
+        """Emit metrics, optional JSON copy, audit log, and metadata sidecar."""
+        request = context.request
+        prepared = context.prepared
+        write_artifacts = context.write_artifacts
+        self._emit_bronze_write_metrics(
+            duration=context.duration,
+            provider=request.provider,
+            entity=request.entity,
+            record_count=write_artifacts.record_count,
+            compressed_size=write_artifacts.compressed_size,
+            uncompressed_size=write_artifacts.uncompressed_size,
+            relative_path=prepared.relative_path,
+            batch_id=request.batch_id,
+            run_id=request.run_id,
+            run_type=request.run_type,
+        )
+        if self.save_json:
+            await self._write_json_copy(
+                prepared.record_list,
+                request.provider,
+                request.entity,
+                prepared.date_str,
+                request.batch_id,
+            )
+        if self._audit:
+            await self._log_bronze_audit(
+                run_id=request.run_id,
+                ingestion_ts=request.ingestion_ts,
+                relative_path=prepared.relative_path,
+                batch_id=request.batch_id,
+                run_type=request.run_type,
+                record_count=write_artifacts.record_count,
+                compressed_size=write_artifacts.compressed_size,
+                uncompressed_size=write_artifacts.uncompressed_size,
+                provider=request.provider,
+                entity=request.entity,
+            )
+        if self._save_metadata:
+            await self._maybe_write_bronze_metadata(
+                run_id=request.run_id,
+                run_type=request.run_type,
+                provider=request.provider,
+                entity=request.entity,
+                batch_id=request.batch_id,
+                record_count=write_artifacts.record_count,
+                compressed_size=write_artifacts.compressed_size,
+                relative_path=prepared.relative_path,
+                ingestion_ts=request.ingestion_ts,
+                duration=context.duration,
+                source_metadata=request.source_metadata,
+            )
 
     async def _write_bronze_data_and_sidecar(
         self,
@@ -301,66 +364,3 @@ class BronzeWriter(
             uncompressed_size=uncompressed_size,
             compressed_size=prepared.full_path.stat().st_size,
         )
-
-    async def _run_bronze_post_write_actions(
-        self,
-        *,
-        prepared: _BronzeWritePrepared,
-        provider: str,
-        entity: str,
-        batch_id: BatchID,
-        run_id: RunID,
-        run_type: RunType,
-        ingestion_ts: datetime,
-        write_artifacts: _BronzeWriteArtifacts,
-        duration: float,
-        source_metadata: SourceMetadata | None,
-    ) -> None:
-        """Emit metrics, optional JSON copy, audit log, and metadata sidecar."""
-        self._emit_bronze_write_metrics(
-            duration=duration,
-            provider=provider,
-            entity=entity,
-            record_count=write_artifacts.record_count,
-            compressed_size=write_artifacts.compressed_size,
-            uncompressed_size=write_artifacts.uncompressed_size,
-            relative_path=prepared.relative_path,
-            batch_id=batch_id,
-            run_id=run_id,
-            run_type=run_type,
-        )
-        if self.save_json:
-            await self._write_json_copy(
-                prepared.record_list,
-                provider,
-                entity,
-                prepared.date_str,
-                batch_id,
-            )
-        if self._audit:
-            await self._log_bronze_audit(
-                run_id=run_id,
-                ingestion_ts=ingestion_ts,
-                relative_path=prepared.relative_path,
-                batch_id=batch_id,
-                run_type=run_type,
-                record_count=write_artifacts.record_count,
-                compressed_size=write_artifacts.compressed_size,
-                uncompressed_size=write_artifacts.uncompressed_size,
-                provider=provider,
-                entity=entity,
-            )
-        if self._save_metadata:
-            await self._maybe_write_bronze_metadata(
-                run_id=run_id,
-                run_type=run_type,
-                provider=provider,
-                entity=entity,
-                batch_id=batch_id,
-                record_count=write_artifacts.record_count,
-                compressed_size=write_artifacts.compressed_size,
-                relative_path=prepared.relative_path,
-                ingestion_ts=ingestion_ts,
-                duration=duration,
-                source_metadata=source_metadata,
-            )
