@@ -154,6 +154,7 @@ fixture_governance:
   cassette_metadata_catalog_location: reports/quality/vcr-metadata-catalog.json
   cassette_metadata_catalog_script: scripts/qa/report_vcr_metadata_catalog.py
   cassette_metadata_required: false
+  cassette_staleness_requires_metadata: true
   canonical_vcr_location: tests/fixtures/vcr/{provider}/
   extensionless_allowlist: .github/vcr-noext-allowlist.txt
   root_vcr_policy_enforced: true
@@ -161,7 +162,7 @@ fixture_governance:
   cassette_metadata_backfill_script: scripts/migrations/active/backfill_vcr_metadata_sidecars.py
   rollout:
     cassette_metadata: planned
-    cassette_staleness_age: planned
+    cassette_staleness_age: metadata_gated
     cassette_metadata_catalog: planned
     cassette_metadata_backfill: planned
     contract_snapshots: planned
@@ -172,11 +173,14 @@ contract_testing:
   workflow_present: true
   live_api_gate_mode: scheduled
   network_opt_in_required: true
+  live_api_minimum_baseline:
+    enforced_providers: [chembl, pubchem, uniprot, pubmed]
+    vcr_only_providers: [crossref, openalex, semanticscholar]
   provider_live_api:
     chembl: enforced
     pubchem: enforced
     uniprot: enforced
     pubmed: enforced
-    crossref: planned
-    openalex: planned
-    semanticscholar: planned
+    crossref: vcr_only
+    openalex: vcr_only
+    semanticscholar: vcr_only
