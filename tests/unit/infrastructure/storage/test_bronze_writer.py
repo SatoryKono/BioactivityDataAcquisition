@@ -20,6 +20,12 @@ from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 
 
 @pytest.fixture
+def noop_logger() -> NoOpLogger:
+    """Provide a local no-op logger fixture for sibling storage suites."""
+    return NoOpLogger()
+
+
+@pytest.fixture
 def noop_metrics() -> MetricsPort:
     """Provide a NoOpMetrics for BronzeWriter tests."""
     return NoOpMetrics()

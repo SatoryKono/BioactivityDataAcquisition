@@ -582,6 +582,62 @@ class TestFSMEnrichmentCompletedTransition:
         assert any(c.kwargs.get("stage") == "enrichment_start_empty" for c in fsm_calls)
 
     @pytest.mark.asyncio
+    async def test_complete_enrichment_stage_persists_completed_state(
+        self,
+        mock_config: MagicMock,
+        mock_logger: MagicMock,
+        mock_lock: AsyncMock,
+        mock_merger: AsyncMock,
+        mock_coordinator: AsyncMock,
+        mock_key_extractor: AsyncMock,
+        mock_seed_runner: AsyncMock,
+        tmp_path: Path,
+        test_run_id: str,
+    ) -> None:
+        """Enrichment completion helper should save and log the completed enrichment stage."""
+        checkpoint_manager = CompositeCheckpointManager(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            storage=FileCompositeCheckpointWriter(tmp_path),
+            logger=mock_logger,
+            resume=False,
+        )
+        runner = CompositePipelineRunner(
+            config=mock_config,
+            runtime=CompositeRuntimeConfig(dry_run=False),
+            seed_runner_factory=lambda: mock_seed_runner,
+            enricher_runner_factory=lambda name, df: AsyncMock(),
+            key_extractor=mock_key_extractor,
+            coordinator=mock_coordinator,
+            merger=mock_merger,
+            checkpoint_manager=checkpoint_manager,
+            logger=mock_logger,
+            lock=mock_lock,
+            fsm_state_helper=FSMStateHelperService(
+                config=mock_config, logger=mock_logger, run_id=test_run_id
+            ),
+            run_id=test_run_id,
+        )
+        state = CompositeCheckpointState(
+            composite_name="test_composite",
+            run_id=test_run_id,
+            state=CompositePipelineState.ENRICHING,
+        )
+        runner._save_checkpoint_safe = AsyncMock(return_value=True)  # type: ignore[method-assign]
+
+        next_state = await runner._complete_enrichment_stage(state)
+
+        assert next_state.state == CompositePipelineState.ENRICHMENT_COMPLETED
+        runner._save_checkpoint_safe.assert_awaited_once_with(
+            next_state,
+            "enrichment_completed",
+        )
+        assert any(
+            c.args and c.args[0] == "enrichment_completed"
+            for c in mock_logger.info.call_args_list
+        )
+
+    @pytest.mark.asyncio
     async def test_transitions_through_enriching_to_enrichment_completed(
         self,
         mock_config: MagicMock,

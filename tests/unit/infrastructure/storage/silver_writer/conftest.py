@@ -6,6 +6,15 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+
+
+@pytest.fixture
+def noop_logger() -> NoOpLogger:
+    """Provide a local no-op logger fixture for split SilverWriter suites."""
+    return NoOpLogger()
+
+
 @pytest.fixture
 def valid_records():
     """Create valid records with all required metadata."""

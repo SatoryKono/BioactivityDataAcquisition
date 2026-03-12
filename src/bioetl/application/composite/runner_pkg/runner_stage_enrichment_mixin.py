@@ -155,16 +155,10 @@ class _CompositeRunnerStageEnrichmentMixin:
                 reason="all_completed_or_filtered",
             )
 
-        enrichment_results.update(state.enrichment_results)
-
-        enrichment_results = add_not_run_results(
-            enrichment_results,
-            enrichers_to_run,
-            self._config.enrichers,
-            state.completed_enrichers,
-            self._runtime.required_only,
-            self._config.name,
-            self._logger,
+        enrichment_results = self._finalize_enrichment_results(
+            state=state,
+            enrichers_to_run=enrichers_to_run,
+            enrichment_results=enrichment_results,
         )
 
         try:
@@ -187,17 +181,7 @@ class _CompositeRunnerStageEnrichmentMixin:
             state = self._transition_to_empty_enrichment_start(state)
 
         if state.state == CompositePipelineState.ENRICHING:
-            state = self._transition_state_with_fsm_log(
-                state,
-                CompositePipelineState.ENRICHMENT_COMPLETED,
-                stage="enrichment_complete",
-            )
-            await self._call_save_checkpoint_safe(state, "enrichment_completed")
-            self._logger.info(
-                PipelineEvent.phase_completed("enrichment"),
-                composite=self._config.name,
-                run_id=self._run_id_str,
-            )
+            state = await self._complete_enrichment_stage(state)
         return state
 
     def _transition_to_empty_enrichment_start(
@@ -211,6 +195,44 @@ class _CompositeRunnerStageEnrichmentMixin:
             stage="enrichment_start_empty",
             reason="no_enrichers_to_run",
         )
+
+    def _finalize_enrichment_results(
+        self,
+        state: CompositeCheckpointState,
+        enrichers_to_run: list[EnricherConfig],
+        enrichment_results: dict[str, EnrichmentResult],
+    ) -> dict[str, EnrichmentResult]:
+        """Merge checkpoint results and add NOT_RUN entries when runtime policy skips optional enrichers."""
+        enrichment_results = dict(enrichment_results)
+        enrichment_results.update(state.enrichment_results)
+
+        return add_not_run_results(
+            enrichment_results,
+            enrichers_to_run,
+            self._config.enrichers,
+            state.completed_enrichers,
+            self._runtime.required_only,
+            self._config.name,
+            self._logger,
+        )
+
+    async def _complete_enrichment_stage(
+        self,
+        state: CompositeCheckpointState,
+    ) -> CompositeCheckpointState:
+        """Transition to ENRICHMENT_COMPLETED, persist checkpoint, and emit phase log."""
+        state = self._transition_state_with_fsm_log(
+            state,
+            CompositePipelineState.ENRICHMENT_COMPLETED,
+            stage="enrichment_complete",
+        )
+        await self._call_save_checkpoint_safe(state, "enrichment_completed")
+        self._logger.info(
+            PipelineEvent.phase_completed("enrichment"),
+            composite=self._config.name,
+            run_id=self._run_id_str,
+        )
+        return state
 
 
 __all__ = ["_CompositeRunnerStageEnrichmentMixin"]

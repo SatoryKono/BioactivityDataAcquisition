@@ -18,15 +18,18 @@ __all__ = [
 ]
 
 import time
-from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
 from bioetl.application.core.batch_transformer_helpers import (
+    TransformResult,
+    TransformedRecord,
     accumulate_transform_outcome,
+    accumulate_stream_transform_result,
     check_dq_thresholds,
     flush_dq_records,
     flush_filtered_records,
+    route_single_transform_attempt,
     transform_record_attempt,
     yield_control_if_needed,
 )
@@ -48,37 +51,6 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
     from bioetl.domain.types import BatchID
-
-
-@dataclass(frozen=True, slots=True)
-class TransformResult:
-    """Result of batch transformation."""
-
-    silver_records: list[BronzeRecord]
-    gold_records: list[GoldRecord]
-    quarantined_count: int
-    filtered_out_count: int = 0
-    records_quarantine_failed: int = 0
-
-
-@dataclass(frozen=True, slots=True)
-class TransformedRecord:
-    """Single transformed record with routing info.
-
-    Used in streaming mode to yield individual records.
-
-    Attributes:
-        silver_record: The transformed Silver record (None if quarantined).
-        gold_record: The Gold record (None if filtered out or quarantined).
-        is_quarantined: Whether this record was quarantined due to DQ error.
-
-    """
-
-    silver_record: BronzeRecord | None
-    gold_record: GoldRecord | None
-    is_quarantined: bool
-    is_filtered_out: bool = False
-    quarantine_write_failed: bool = False
 
 
 class BatchTransformer:
@@ -211,45 +183,11 @@ class BatchTransformer:
             batch_id=batch_id,
             index=index,
         )
-
-        if attempt.silver_record is not None:
-            return TransformedRecord(
-                silver_record=attempt.silver_record,
-                gold_record=attempt.gold_record,
-                is_quarantined=False,
-            )
-        if attempt.filtered_entry is not None:
-            failed = await flush_filtered_records(
-                context=self._context,
-                quarantine_manager=self._quarantine_manager,
-                records=[attempt.filtered_entry],
-                batch_id=batch_id,
-            )
-            return TransformedRecord(
-                silver_record=None,
-                gold_record=None,
-                is_quarantined=False,
-                is_filtered_out=True,
-                quarantine_write_failed=failed > 0,
-            )
-        if attempt.dq_entry is not None:
-            failed = await flush_dq_records(
-                context=self._context,
-                quarantine_manager=self._quarantine_manager,
-                records=[attempt.dq_entry],
-                batch_id=batch_id,
-            )
-            return TransformedRecord(
-                silver_record=None,
-                gold_record=None,
-                is_quarantined=True,
-                quarantine_write_failed=failed > 0,
-            )
-        # Transform returned None without explicit quarantine/filtered state.
-        return TransformedRecord(
-            silver_record=None,
-            gold_record=None,
-            is_quarantined=False,
+        return await route_single_transform_attempt(
+            context=self._context,
+            quarantine_manager=self._quarantine_manager,
+            attempt=attempt,
+            batch_id=batch_id,
         )
 
     async def transform_stream(
@@ -288,17 +226,16 @@ class BatchTransformer:
         for i, raw_record in enumerate(records):
             last_yield_at = await yield_control_if_needed(last_yield_at)
             result = await self.transform_single(raw_record, batch_id, start_index + i)
-
-            if result.quarantine_write_failed:
-                records_quarantine_failed += 1
-            if result.is_quarantined:
-                records_quarantined += 1
-            elif result.is_filtered_out:
-                records_filtered_out += 1
-            elif result.silver_record is not None:
-                silver_records.append(result.silver_record)
-                if result.gold_record is not None:
-                    gold_records.append(result.gold_record)
+            quarantined_delta, filtered_delta, failed_delta = (
+                accumulate_stream_transform_result(
+                    result=result,
+                    silver_records=silver_records,
+                    gold_records=gold_records,
+                )
+            )
+            records_quarantined += quarantined_delta
+            records_filtered_out += filtered_delta
+            records_quarantine_failed += failed_delta
 
         check_dq_thresholds(
             context=self._context,
