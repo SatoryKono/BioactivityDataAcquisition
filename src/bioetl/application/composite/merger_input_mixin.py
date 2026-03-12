@@ -65,7 +65,7 @@ class _MergeInputLoaderMixin:
     """Mixin for loading seed, enricher, and dependency DataFrames."""
 
     # -- Host-class attributes (set by MergeService.__init__) --
-    _config: Any  # MergeConfig
+    _config: Any  # Any: host mixin stores injected MergeConfig without importing concrete type here
     _logger: LoggerPort
     _storage: MergedStoragePort
     _delta_reader: DeltaReaderPort | None

@@ -399,6 +399,77 @@ class TestPipelineRunnerServiceRun:
         mock_metrics_extractor.extract_metrics.assert_not_called()
 
 
+@pytest.mark.unit
+class TestPipelineRunnerServiceObservability:
+    """Black-box coverage for runner service observability signals."""
+
+    @pytest.mark.asyncio
+    async def test_success_path_binds_run_context_and_logs_completion(
+        self, service, mock_logger
+    ) -> None:
+        """Successful runs should emit start + completion signals via bound logger."""
+        result = await service.run("test_pipeline")
+
+        assert result.status == PipelineRunResult.SUCCESS
+        mock_logger.bind.assert_called_once()
+        bind_kwargs = mock_logger.bind.call_args.kwargs
+        assert bind_kwargs["pipeline"] == "test_pipeline"
+        assert bind_kwargs["run_id"] == result.run_id
+        mock_logger.info.assert_any_call(
+            "Starting pipeline run",
+            run_type="incremental",
+            dry_run=False,
+            limit=None,
+        )
+        mock_logger.info.assert_any_call("Pipeline completed successfully")
+
+    @pytest.mark.asyncio
+    async def test_dry_run_logs_start_and_skip_execution_signal(
+        self, service, mock_logger, mock_runner_factory
+    ) -> None:
+        """Dry-run branch should stay observable without constructing a runner."""
+        result = await service.run("test_pipeline", dry_run=True)
+
+        assert result.status == PipelineRunResult.DRY_RUN
+        mock_runner_factory.create.assert_not_called()
+        mock_logger.info.assert_any_call(
+            "Starting pipeline run",
+            run_type="incremental",
+            dry_run=True,
+            limit=None,
+        )
+        mock_logger.info.assert_any_call("Dry-run mode: no execution performed")
+
+    @pytest.mark.asyncio
+    async def test_shutdown_path_logs_warning_signal(
+        self, service, mock_runner, mock_logger
+    ) -> None:
+        """Graceful shutdown should emit warning-level observability signal."""
+        mock_runner.run.side_effect = PipelineShutdownError("Signal received")
+
+        result = await service.run("test_pipeline")
+
+        assert result.status == PipelineRunResult.SHUTDOWN
+        mock_logger.warning.assert_called_once_with(
+            "Pipeline was gracefully shut down"
+        )
+
+    @pytest.mark.asyncio
+    async def test_failure_path_logs_exception_with_error_type(
+        self, service, mock_runner, mock_logger
+    ) -> None:
+        """Failure branch should emit exception signal with normalized error type."""
+        mock_runner.run.side_effect = ValueError("Invalid configuration")
+
+        result = await service.run("test_pipeline")
+
+        assert result.status == PipelineRunResult.FAILED
+        mock_logger.exception.assert_called_once_with(
+            "Pipeline failed with exception",
+            error_type="ValueError",
+        )
+
+
 # =============================================================================
 # Test PipelineRunnerService helper methods
 # =============================================================================

@@ -9,6 +9,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = ROOT / "src"
 TESTS_ROOT = ROOT / "tests"
+CURRENT_TEST_FILE = Path(__file__).resolve()
 LEGACY_IMPLEMENTATION_PATHS = frozenset(
     {
         "bioetl.infrastructure.adapters.pubmed.pubmed_client",
@@ -29,6 +30,7 @@ ALLOWED_SRC_FILES = frozenset(
 )
 ALLOWED_TEST_FILES = frozenset(
     {
+        CURRENT_TEST_FILE,
         ROOT
         / "tests"
         / "unit"

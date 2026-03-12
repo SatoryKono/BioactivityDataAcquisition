@@ -11,7 +11,9 @@ from __future__ import annotations
 import ast
 import importlib.util
 import json
+import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -48,20 +50,35 @@ def test_workflow_yaml_validity() -> None:
 # ---------------------------------------------------------------------------
 
 
-MAX_RUFF_ERRORS = 8  # ratchet: reduce to 0
+MAX_RUFF_ERRORS = 0
+
+
+def _resolve_quality_tool_command(module_name: str) -> list[str] | None:
+    """Resolve a deterministic command for running a Python quality tool.
+
+    Prefer the current interpreter when the tool is installed in the active
+    environment so the ratchet does not silently skip on hosts without ``uv``.
+    Fall back to ``uv run`` only when the module is not importable directly.
+    """
+    if importlib.util.find_spec(module_name) is not None:
+        return [sys.executable, "-m", module_name]
+    if shutil.which("uv") is not None:
+        return ["uv", "run", module_name]
+    return None
 
 
 def test_ruff_error_count() -> None:
     """Ruff linter error count must not exceed the ratchet budget."""
-    try:
-        result = subprocess.run(
-            ["uv", "run", "ruff", "check", "src/bioetl/", "--output-format=json"],
-            capture_output=True,
-            text=True,
-            timeout=120,
-        )
-    except FileNotFoundError:
-        pytest.skip("uv or ruff not found")
+    tool_cmd = _resolve_quality_tool_command("ruff")
+    if tool_cmd is None:
+        pytest.skip("ruff executable/runtime not found")
+
+    result = subprocess.run(
+        [*tool_cmd, "check", "src/bioetl/", "--output-format=json"],
+        capture_output=True,
+        text=True,
+        timeout=120,
+    )
 
     if result.returncode == 0:
         return  # no errors
@@ -82,7 +99,7 @@ def test_ruff_error_count() -> None:
     )
 
 
-MAX_MYPY_ERRORS = 152  # ratchet: reduce toward 0
+MAX_MYPY_ERRORS = 0
 
 
 @pytest.mark.slow
@@ -94,22 +111,21 @@ def test_mypy_error_count() -> None:
     Run explicitly with: pytest -m slow
     Skipped by default in addopts (``-m 'not benchmark and not slow'``).
     """
-    try:
-        result = subprocess.run(
-            [
-                "uv",
-                "run",
-                "mypy",
-                "--strict",
-                "src/bioetl/",
-                "--no-error-summary",
-            ],
-            capture_output=True,
-            text=True,
-            timeout=300,
-        )
-    except FileNotFoundError:
-        pytest.skip("uv or mypy not found")
+    tool_cmd = _resolve_quality_tool_command("mypy")
+    if tool_cmd is None:
+        pytest.skip("mypy executable/runtime not found")
+
+    result = subprocess.run(
+        [
+            *tool_cmd,
+            "--strict",
+            "src/bioetl/",
+            "--no-error-summary",
+        ],
+        capture_output=True,
+        text=True,
+        timeout=300,
+    )
 
     error_lines = [line for line in result.stdout.splitlines() if ": error:" in line]
     error_count = len(error_lines)
@@ -123,7 +139,7 @@ def test_mypy_error_count() -> None:
 # Metric 3: architecture_skip_count (target: ≤24, ratchet)
 # ---------------------------------------------------------------------------
 
-MAX_ARCHITECTURE_SKIPS = 24
+MAX_ARCHITECTURE_SKIPS = 6
 
 
 class _SkipMarkerCounter:

@@ -4,8 +4,8 @@
 
 ## Summary
 
-- Scanned modules: `1062`
-- Internal import edges (raw): `3947`
+- Scanned modules: `1065`
+- Internal import edges (raw): `3964`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `237`
@@ -20,12 +20,12 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|467 OK| application
+    application -->|468 OK| application
     application -->|618 OK| domain
     composition -->|200 OK| application
-    composition -->|267 OK| composition
-    composition -->|222 OK| domain
-    composition -->|206 OK| infrastructure
+    composition -->|274 OK| composition
+    composition -->|226 OK| domain
+    composition -->|211 OK| infrastructure
     domain -->|692 OK| domain
     infrastructure -->|481 OK| domain
     infrastructure -->|602 OK| infrastructure
@@ -39,12 +39,12 @@ flowchart LR
 
 | From | To | Imports | Policy |
 |---|---|---:|---|
-| `application` | `application` | 467 | allowed |
+| `application` | `application` | 468 | allowed |
 | `application` | `domain` | 618 | allowed |
 | `composition` | `application` | 200 | allowed |
-| `composition` | `composition` | 267 | allowed |
-| `composition` | `domain` | 222 | allowed |
-| `composition` | `infrastructure` | 206 | allowed |
+| `composition` | `composition` | 274 | allowed |
+| `composition` | `domain` | 226 | allowed |
+| `composition` | `infrastructure` | 211 | allowed |
 | `domain` | `domain` | 692 | allowed |
 | `infrastructure` | `domain` | 481 | allowed |
 | `infrastructure` | `infrastructure` | 602 | allowed |
@@ -86,7 +86,7 @@ flowchart LR
 | `application.services` | `domain.value_objects` | 18 |
 | `composition.bootstrap` | `application.services` | 18 |
 | `composition.factories` | `domain.types` | 18 |
-| `composition.providers` | `infrastructure.adapters` | 17 |
+| `composition.providers` | `infrastructure.adapters` | 18 |
 | `infrastructure.storage` | `domain.value_objects` | 17 |
 | `composition.factories` | `application.services` | 16 |
 | `application.core` | `domain.exceptions` | 15 |
