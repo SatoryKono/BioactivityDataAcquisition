@@ -23,8 +23,10 @@ These artifacts are intentionally outside primary nav but linked here for discov
 - [foundation/png/INDEX.md](foundation/png/INDEX.md)
 - [views/svg/INDEX.md](views/svg/INDEX.md)
 - [views/png/INDEX.md](views/png/INDEX.md)
+- [architecture-diagrams-with-descriptions.md](architecture-diagrams-with-descriptions.md)
 - [diagram-descriptions/class-diagrams-descriptions.md](diagram-descriptions/class-diagrams-descriptions.md)
 - [foundation-diagrams-with-descriptions.md](foundation-diagrams-with-descriptions.md)
+- [views-diagrams-with-descriptions.md](views-diagrams-with-descriptions.md)
 
 ---
 

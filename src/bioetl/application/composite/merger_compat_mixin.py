@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from collections.abc import Sequence
+
+import polars as pl
 
 from bioetl.application.composite.coalesce_policy import CoalescePolicyService
 from bioetl.application.composite.column_priority_orderer import (
@@ -19,16 +21,7 @@ from bioetl.application.composite.join_planner_helpers import (
 from bioetl.application.composite.merger_compat_join_planner_mixin import (
     _MergeCompatibilityJoinPlannerMixin,
 )
-
-if TYPE_CHECKING:
-    from collections.abc import Sequence
-
-    import polars as pl
-
-    from bioetl.domain.composite.config import (
-        EnricherConfig,
-        MergeConfig,
-    )
+from bioetl.domain.composite.config import EnricherConfig, MergeConfig
 
 
 class _MergeCompatibilityParsingMixin:
@@ -94,10 +87,6 @@ class _MergeCompatibilityConflictPolicyMixin:
             seed_pipeline,
         )
 
-    def _can_coalesce(self, df: pl.DataFrame, col1: str, col2: str) -> bool:
-        """Compatibility wrapper for type-compatibility checks."""
-        return self._coalesce_policy.can_coalesce(df, col1, col2)
-
     def _coalesce_prefer_seed(
         self,
         df: pl.DataFrame,
@@ -117,77 +106,6 @@ class _MergeCompatibilityConflictPolicyMixin:
         return self._coalesce_policy.coalesce_prefer_enricher(
             df,
             enrichers,
-            seed_pipeline,
-        )
-
-    def _coalesce_first_non_null(
-        self,
-        df: pl.DataFrame,
-        enrichers: Sequence[EnricherConfig],
-        seed_pipeline: str | None = None,
-    ) -> pl.DataFrame:
-        """Compatibility wrapper for first-non-null coalesce policy."""
-        return self._coalesce_policy.coalesce_first_non_null(
-            df,
-            enrichers,
-            seed_pipeline,
-        )
-
-    def _collect_field_columns(
-        self,
-        field: str,
-        enrichers: Sequence[EnricherConfig],
-        available_columns: set[str],
-        seed_pipeline: str | None = None,
-    ) -> list[str]:
-        """Compatibility wrapper for field-column collection."""
-        return self._priority_orderer.collect_field_columns(
-            field,
-            enrichers,
-            available_columns,
-            seed_pipeline,
-        )
-
-    def _order_columns_by_priority(
-        self,
-        field: str,
-        columns: list[str],
-        priorities: Sequence[str],
-        seed_pipeline: str | None = None,
-    ) -> list[str]:
-        """Compatibility wrapper for source-priority ordering."""
-        return self._priority_orderer.order_columns_by_priority(
-            field,
-            columns,
-            priorities,
-            seed_pipeline,
-        )
-
-    def _filter_compatible_columns(
-        self,
-        df: pl.DataFrame,
-        field: str,
-        ordered_cols: list[str],
-    ) -> tuple[list[str], list[str]]:
-        """Compatibility wrapper for explicit-rule compatibility filtering."""
-        return self._priority_orderer.filter_compatible_columns(
-            df,
-            field,
-            ordered_cols,
-            self._coalesce_policy.can_coalesce,
-        )
-
-    def _apply_explicit_rules(
-        self,
-        df: pl.DataFrame,
-        enrichers: Sequence[EnricherConfig],
-        seed_pipeline: str | None = None,
-    ) -> pl.DataFrame:
-        """Compatibility wrapper for explicit priority rules."""
-        return self._coalesce_policy.apply_explicit_rules(
-            df,
-            enrichers,
-            self._config.field_priorities,
             seed_pipeline,
         )
 

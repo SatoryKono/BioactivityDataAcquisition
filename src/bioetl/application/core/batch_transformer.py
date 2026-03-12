@@ -36,21 +36,21 @@ from bioetl.application.core.batch_transformer_quarantine import (
     route_single_transform_attempt,
 )
 from bioetl.application.core.batch_transformer_state import (
-    TransformResult,
     TransformedRecord,
+    TransformResult,
 )
 from bioetl.application.core.batch_transformer_streaming import StreamingBatchProcessor
 from bioetl.application.core.quarantine_manager import QuarantineManagerService
 from bioetl.domain.types import BronzeRecord
 
 if TYPE_CHECKING:
+    from bioetl.application.core.batch_transformer_state import RecordTransformOutcome
     from bioetl.application.core.config import RecordProcessorConfig
     from bioetl.application.core.protocols import (
         GoldFilterCallback,
         GoldTransformCallback,
         TransformCallback,
     )
-    from bioetl.application.core.batch_transformer_state import RecordTransformOutcome
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
     from bioetl.domain.types import BatchID

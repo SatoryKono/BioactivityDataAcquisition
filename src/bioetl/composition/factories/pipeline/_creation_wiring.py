@@ -7,12 +7,12 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.core.lifecycle.shutdown import ShutdownSignal
+from bioetl.application.services.metadata_coordinator import MetadataCoordinator
 from bioetl.composition.factories.pipeline.construction import (
     DomainConfigResolver,
     RunContextFactory,
     TransformerBuilder,
 )
-from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
 from bioetl.composition.services.versioning import get_git_commit, get_pipeline_version
 from bioetl.infrastructure.config import load_pipeline_contract_policy
 from bioetl.infrastructure.config.pipeline_config_loader import PipelineConfigLoader

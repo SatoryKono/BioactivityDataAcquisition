@@ -36,6 +36,17 @@ class MergeInputContext:
     dependency_dfs: dict[str, pl.DataFrame]
 
 
+@dataclass(frozen=True, slots=True)
+class MergePostJoinContext:
+    """Post-join merge state ready for persistence and result assembly."""
+
+    merged_df: pl.DataFrame
+    records_merged: int
+    records_enriched: int
+    cv_stats: CrossValidationStats | None
+    quarantine_payloads: list[dict[str, object]]
+
+
 class MergeWorkflowContext(Protocol):
     """Subset of MergeService API required by orchestration helpers."""
 
@@ -192,6 +203,51 @@ def finalize_merged_dataframe(
     return merged_df
 
 
+def finalize_post_join_context(
+    host: MergeWorkflowContext,
+    *,
+    merged_df: pl.DataFrame,
+    enrichers: Sequence[EnricherConfig],
+    enrichment_results: dict[str, EnrichmentResult],
+    effective_seed_pipeline: str | None,
+    run_id: str,
+    sources_used: list[str],
+    dependency_results: dict[str, DependencyResult] | None,
+    enricher_dfs: dict[str, pl.DataFrame],
+) -> MergePostJoinContext:
+    """Run post-join validation/finalization and derive merge result counters."""
+    merged_df, cv_stats, quarantine_payloads = host._run_cross_validation(
+        merged_df=merged_df,
+        enrichers=enrichers,
+        enricher_dfs=enricher_dfs,
+        effective_seed_pipeline=effective_seed_pipeline,
+    )
+    merged_df = finalize_merged_dataframe(
+        host,
+        merged_df=merged_df,
+        enrichers=enrichers,
+        enrichment_results=enrichment_results,
+        effective_seed_pipeline=effective_seed_pipeline,
+        run_id=run_id,
+        sources_used=sources_used,
+        dependency_results=dependency_results,
+        enricher_dfs=enricher_dfs,
+    )
+    records_merged = len(merged_df)
+    records_enriched = host._count_enriched_records(
+        merged_df,
+        enrichers,
+        effective_seed_pipeline,
+    )
+    return MergePostJoinContext(
+        merged_df=merged_df,
+        records_merged=records_merged,
+        records_enriched=records_enriched,
+        cv_stats=cv_stats,
+        quarantine_payloads=quarantine_payloads,
+    )
+
+
 async def persist_and_build_result(
     host: MergeWorkflowContext,
     *,
@@ -265,13 +321,7 @@ async def execute_merge_workflow(
         dependencies=dependencies,
         seed_pipeline=loaded.effective_seed_pipeline,
     )
-    merged_df, cv_stats, quarantine_payloads = host._run_cross_validation(
-        merged_df=merged_df,
-        enrichers=enrichers,
-        enricher_dfs=loaded.enricher_dfs,
-        effective_seed_pipeline=loaded.effective_seed_pipeline,
-    )
-    merged_df = finalize_merged_dataframe(
+    post_join_context = finalize_post_join_context(
         host,
         merged_df=merged_df,
         enrichers=enrichers,
@@ -282,22 +332,16 @@ async def execute_merge_workflow(
         dependency_results=dependency_results,
         enricher_dfs=loaded.enricher_dfs,
     )
-    records_merged = len(merged_df)
-    records_enriched = host._count_enriched_records(
-        merged_df,
-        enrichers,
-        loaded.effective_seed_pipeline,
-    )
     return await persist_and_build_result(
         host,
-        merged_df=merged_df,
+        merged_df=post_join_context.merged_df,
         enrichers=enrichers,
-        records_merged=records_merged,
+        records_merged=post_join_context.records_merged,
         records_from_seed=loaded.records_from_seed,
-        records_enriched=records_enriched,
+        records_enriched=post_join_context.records_enriched,
         sources_used=loaded.sources_used,
-        cv_stats=cv_stats,
-        quarantine_payloads=quarantine_payloads,
+        cv_stats=post_join_context.cv_stats,
+        quarantine_payloads=post_join_context.quarantine_payloads,
         run_id=run_id,
         started_at=started_at,
     )

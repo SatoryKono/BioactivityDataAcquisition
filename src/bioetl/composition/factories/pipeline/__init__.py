@@ -1,4 +1,12 @@
-"""Pipeline factory subpackage."""
+"""Pipeline factory subpackage.
+
+Canonical import paths::
+
+    GenericPipelineFactory : from bioetl.composition.factories.pipeline import GenericPipelineFactory
+    PIPELINE_CONFIGS       : from bioetl.composition.factories.pipeline.configs import PIPELINE_CONFIGS
+    register_all_pipelines : from bioetl.composition.factories.pipeline.registry import register_all_pipelines
+    PipelineRegistry       : from bioetl.composition.registry import PipelineRegistry
+"""
 
 from __future__ import annotations
 

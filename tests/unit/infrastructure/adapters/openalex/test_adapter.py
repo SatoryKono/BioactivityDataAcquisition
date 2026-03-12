@@ -494,6 +494,40 @@ class TestFetch:
         assert len(results) == 1
 
     @pytest.mark.asyncio
+    async def test_fetch_with_filter_ids_defaults_filter_field_to_doi(
+        self, adapter: OpenAlexAdapter, mock_http_client: MagicMock
+    ) -> None:
+        """Should default fetch(filter_ids=...) to DOI routing."""
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"results": [{"id": "W123"}]}
+        mock_http_client.get.return_value = mock_response
+
+        results = []
+        async for work in adapter.fetch("publication", filter_ids=["10.1038/test"]):
+            results.append(work)
+
+        assert len(results) == 1
+
+    @pytest.mark.asyncio
+    async def test_fetch_with_filter_ids_defaults_to_doi(
+        self, adapter: OpenAlexAdapter, mock_http_client: MagicMock
+    ) -> None:
+        """Should default filter_field to DOI when filter_ids are provided."""
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"results": [{"id": "W123"}]}
+        mock_http_client.get.return_value = mock_response
+
+        results = []
+        async for work in adapter.fetch(
+            "publication",
+            filter_ids=["10.1038/test"],
+        ):
+            results.append(work)
+
+        assert len(results) == 1
+        mock_http_client.get.assert_called_once()
+
+    @pytest.mark.asyncio
     async def test_fetch_invalid_entity_type(self, adapter: OpenAlexAdapter) -> None:
         """Should raise ValueError for invalid entity type."""
         with pytest.raises(ValueError, match="supports 'work' or 'publication'"):

@@ -25,17 +25,15 @@ if TYPE_CHECKING:
     pass
 
 __all__ = [
-    "in_closed_range",
-    # Registered check methods (use in pa.Field)
-    "is_non_negative",
-    "is_positive",
-    # JSON validators
-    "is_valid_json",
-    "is_valid_json_array",
-    "is_valid_json_object",
     "JSON_ARRAY_CHECK",
     "JSON_CHECK",
     "JSON_OBJECT_CHECK",
+    "in_closed_range",
+    "is_non_negative",
+    "is_positive",
+    "is_valid_json",
+    "is_valid_json_array",
+    "is_valid_json_object",
     "max_str_length",
     "str_matches_pattern",
     "str_starts_with",

@@ -1,4 +1,4 @@
-"""Targeted branch-coverage tests for composition pipeline_factory helpers."""
+"""Targeted branch-coverage tests for canonical composition pipeline helpers."""
 
 from __future__ import annotations
 
@@ -8,8 +8,17 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bioetl.composition.factories.pipeline import facade as pipeline_factory
+from bioetl.composition.factories.dq.context_resolver import (
+    extract_dq_configs,
+    extract_dq_output_paths,
+    extract_single_dq_config,
+)
 from bioetl.composition.factories.pipeline import GenericPipelineFactory
+from bioetl.composition.factories.services.bundle import (
+    _create_cached_bronze_data_source,
+    build_pipeline_services,
+)
+from bioetl.composition.factories.services.factory import BaseServicesFactory
 
 
 @pytest.mark.unit
@@ -67,7 +76,7 @@ def test_create_cached_bronze_data_source_uses_explicit_path(
     mock_cached_source.return_value = expected_source
     logger = MagicMock()
 
-    result = pipeline_factory._create_cached_bronze_data_source(
+    result = _create_cached_bronze_data_source(
         settings=SimpleNamespace(bronze_path=Path("/data/output/bronze")),
         pipeline_config=SimpleNamespace(provider="chembl", entity_type="publication"),
         logger=logger,
@@ -95,7 +104,7 @@ def test_create_cached_bronze_data_source_falls_back_to_convention_path(
     mock_cached_source.return_value = expected_source
     logger = MagicMock()
 
-    result = pipeline_factory._create_cached_bronze_data_source(
+    result = _create_cached_bronze_data_source(
         settings=SimpleNamespace(bronze_path=Path("/data/output/bronze")),
         pipeline_config=SimpleNamespace(provider="chembl", entity_type="publication"),
         logger=logger,
@@ -113,8 +122,8 @@ def test_create_cached_bronze_data_source_falls_back_to_convention_path(
 
 
 @pytest.mark.unit
-@patch.object(pipeline_factory.BaseServicesFactory, "create_common_services")
-@patch.object(pipeline_factory.BaseServicesFactory, "_create_metrics")
+@patch.object(BaseServicesFactory, "create_common_services")
+@patch.object(BaseServicesFactory, "_create_metrics")
 @patch("bioetl.composition.factories.services.bundle._create_data_source")
 @patch("bioetl.composition.factories.services.bundle._create_cached_bronze_data_source")
 def test_build_pipeline_services_uses_cached_bronze_when_enabled(
@@ -136,7 +145,7 @@ def test_build_pipeline_services_uses_cached_bronze_when_enabled(
     mock_cached_source.return_value = "cached-source"
     mock_create_common_services.return_value = "services"
 
-    result = pipeline_factory.build_pipeline_services(
+    result = build_pipeline_services(
         pipeline_name="chembl_publication",
         create_data_source_fn=MagicMock(),
         settings=settings,
@@ -153,8 +162,8 @@ def test_build_pipeline_services_uses_cached_bronze_when_enabled(
 
 
 @pytest.mark.unit
-@patch.object(pipeline_factory.BaseServicesFactory, "create_common_services")
-@patch.object(pipeline_factory.BaseServicesFactory, "_create_metrics")
+@patch.object(BaseServicesFactory, "create_common_services")
+@patch.object(BaseServicesFactory, "_create_metrics")
 @patch("bioetl.composition.factories.services.bundle._create_data_source")
 @patch("bioetl.composition.factories.services.bundle._create_cached_bronze_data_source")
 def test_build_pipeline_services_uses_regular_data_source_when_cached_disabled(
@@ -172,7 +181,7 @@ def test_build_pipeline_services_uses_regular_data_source_when_cached_disabled(
     mock_data_source.return_value = "regular-source"
     mock_create_common_services.return_value = "services"
 
-    result = pipeline_factory.build_pipeline_services(
+    result = build_pipeline_services(
         pipeline_name="chembl_publication",
         create_data_source_fn=MagicMock(),
         settings=settings,
@@ -188,7 +197,7 @@ def test_build_pipeline_services_uses_regular_data_source_when_cached_disabled(
 
 @pytest.mark.unit
 def test_extract_single_dq_config_returns_none_when_layer_absent() -> None:
-    result = pipeline_factory._extract_single_dq_config(
+    result = extract_single_dq_config(
         sink={"bronze": None},
         layer_name="bronze",
         config_class=MagicMock(),
@@ -199,7 +208,7 @@ def test_extract_single_dq_config_returns_none_when_layer_absent() -> None:
 
 @pytest.mark.unit
 def test_extract_single_dq_config_returns_none_when_not_pydantic_model() -> None:
-    result = pipeline_factory._extract_single_dq_config(
+    result = extract_single_dq_config(
         sink={"bronze": object()},
         layer_name="bronze",
         config_class=MagicMock(),
@@ -226,7 +235,7 @@ class _DisabledConfigClass:
 def test_extract_single_dq_config_returns_enabled_dq_report() -> None:
     sink_cfg = SimpleNamespace(model_dump=lambda: {"path": "data/output/bronze"})
 
-    result = pipeline_factory._extract_single_dq_config(
+    result = extract_single_dq_config(
         sink={"bronze": sink_cfg},
         layer_name="bronze",
         config_class=_EnabledConfigClass,
@@ -240,7 +249,7 @@ def test_extract_single_dq_config_returns_enabled_dq_report() -> None:
 def test_extract_single_dq_config_returns_none_when_dq_disabled() -> None:
     sink_cfg = SimpleNamespace(model_dump=lambda: {"path": "data/output/bronze"})
 
-    result = pipeline_factory._extract_single_dq_config(
+    result = extract_single_dq_config(
         sink={"bronze": sink_cfg},
         layer_name="bronze",
         config_class=_DisabledConfigClass,
@@ -251,7 +260,7 @@ def test_extract_single_dq_config_returns_none_when_dq_disabled() -> None:
 
 @pytest.mark.unit
 def test_extract_dq_configs_returns_empty_context_for_none_yaml() -> None:
-    dq_configs = pipeline_factory._extract_dq_configs(None)
+    dq_configs = extract_dq_configs(None)
 
     assert dq_configs.bronze is None
     assert dq_configs.silver is None
@@ -262,7 +271,7 @@ def test_extract_dq_configs_returns_empty_context_for_none_yaml() -> None:
 def test_extract_dq_configs_returns_empty_context_for_missing_sink() -> None:
     yaml_config = SimpleNamespace(sink=None)
 
-    dq_configs = pipeline_factory._extract_dq_configs(yaml_config)
+    dq_configs = extract_dq_configs(yaml_config)
 
     assert dq_configs.bronze is None
     assert dq_configs.silver is None
@@ -271,7 +280,7 @@ def test_extract_dq_configs_returns_empty_context_for_missing_sink() -> None:
 
 @pytest.mark.unit
 def test_extract_dq_output_paths_returns_defaults_for_none_yaml() -> None:
-    paths = pipeline_factory._extract_dq_output_paths(None)
+    paths = extract_dq_output_paths(None)
 
     assert paths.bronze_path is None
     assert paths.silver_path is None
@@ -283,7 +292,7 @@ def test_extract_dq_output_paths_returns_defaults_for_none_yaml() -> None:
 def test_extract_dq_output_paths_returns_defaults_for_missing_sink() -> None:
     yaml_config = SimpleNamespace(sink=None)
 
-    paths = pipeline_factory._extract_dq_output_paths(yaml_config)
+    paths = extract_dq_output_paths(yaml_config)
 
     assert paths.bronze_path is None
     assert paths.silver_path is None

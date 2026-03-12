@@ -1,15 +1,13 @@
-"""Storage Module for Bronze/Silver/Gold layers.
+"""Storage compatibility-only facade for Bronze/Silver/Gold wiring.
 
-Consolidated module for storage infrastructure - provides backward-compatible
-re-exports from the split modules.
+Provides backward-compatible re-exports from the split storage modules.
 
 The actual implementations are now in:
 - storage_adapter.py: StorageAdapter class (~330 LOC)
 - storage_factory.py: StorageFactory and StorageContext (~120 LOC)
 
-This module re-exports all public symbols for backward compatibility.
-Existing imports like `from bioetl.composition.factories.storage import StorageFactory`
-will continue to work.
+This module exists to preserve legacy import paths only. New first-party code
+should import canonical modules directly instead of introducing new usages here.
 
 Split per docs/REFACTORING_PLAN.md [P3] Storage Factory Split.
 """

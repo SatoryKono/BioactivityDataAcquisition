@@ -34,16 +34,10 @@ from bioetl.interfaces.cli.commands.metrics_server_integration import (
     ensure_metrics_server_started,
 )
 from bioetl.interfaces.cli.commands.run_command_policy import (
-    execute_run_step,
-)
-from bioetl.interfaces.cli.commands.run_command_policy import (
-    finalize_run_step,
-)
-from bioetl.interfaces.cli.commands.run_command_policy import (
-    handle_destructive_step,
     handle_cli_failure,
     map_status_to_exit_code,
-    prepare_run_request,
+    RunCommandInput,
+    run_command_flow,
 )
 from bioetl.interfaces.cli.commands.run_helpers import (
     get_runner_logger,
@@ -312,44 +306,33 @@ def run(
 ) -> None:
     """Run an ETL pipeline."""
     registry = resolve_context_registry(ctx)
-    if not handle_destructive_step(
-        pipeline=pipeline,
-        run_type=run_type,
-        dry_run=dry_run,
-        yes=yes,
-    ):
-        return
-    request = prepare_run_request(
+    run_command_flow(
+        cli_input=RunCommandInput(
+            pipeline=pipeline,
+            run_type=run_type,
+            resume=resume,
+            start_offset=start_offset,
+            limit=limit,
+            input_csv=input_csv,
+            filter_column=filter_column,
+            filter_field=filter_field,
+            dry_run=dry_run,
+            yes=yes,
+            vacuum_after_run=vacuum_after_run,
+            vacuum_retention_days=vacuum_retention_days,
+            debug=debug,
+            health_server=health_server,
+            health_port=health_port,
+            use_cached_bronze=use_cached_bronze,
+            cached_bronze_date=cached_bronze_date,
+            cached_bronze_path=cached_bronze_path,
+        ),
         service=_CLI_RUN_ORCHESTRATION_SERVICE,
-        pipeline=pipeline,
-        run_type=run_type,
-        resume=resume,
-        start_offset=start_offset,
-        limit=limit,
-        input_csv=input_csv,
-        filter_column=filter_column,
-        filter_field=filter_field,
-        dry_run=dry_run,
-        vacuum_after_run=vacuum_after_run,
-        vacuum_retention_days=vacuum_retention_days,
-        debug=debug,
-        health_server=health_server,
-        health_port=health_port,
-        use_cached_bronze=use_cached_bronze,
-        cached_bronze_date=cached_bronze_date,
-        cached_bronze_path=cached_bronze_path,
-        exit_func=_exit_with_code,
-    )
-    echo_health_server_info(request.health_server, request.health_port)
-    result = execute_run_step(
-        request=request,
         execute_run=lambda prepared_request: execute_run(
             request=prepared_request,
             registry=registry,
         ),
-    )
-    finalize_run_step(
-        result=result,
+        health_info_presenter=echo_health_server_info,
         result_presenter=_echo_run_result,
         exit_func=_exit_with_code,
     )

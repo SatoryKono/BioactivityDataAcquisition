@@ -19,6 +19,30 @@ from bioetl.infrastructure.storage.bronze_write_result_helpers import (
 )
 
 
+_FACADE_PATH = (
+    Path(__file__).resolve().parents[2]
+    / "src"
+    / "bioetl"
+    / "composition"
+    / "factories"
+    / "pipeline"
+    / "facade.py"
+)
+
+# Snapshot at RF-007: facade must not grow beyond current size.
+_FACADE_MAX_LINES = 248
+
+
+@pytest.mark.architecture
+def test_pipeline_factory_facade_does_not_grow() -> None:
+    """Compatibility facade must not grow — migrate callers to canonical imports."""
+    line_count = len(_FACADE_PATH.read_text(encoding="utf-8").splitlines())
+    assert line_count <= _FACADE_MAX_LINES, (
+        f"pipeline/facade.py grew to {line_count} lines (max {_FACADE_MAX_LINES}). "
+        "Add new wiring to canonical modules, not the compat facade."
+    )
+
+
 def test_pipeline_factory_build_pipeline_services_warns() -> None:
     """Deprecated pipeline_factory facade must emit ``DeprecationWarning``."""
     with patch("bioetl.composition.factories.pipeline.facade._build_pipeline_services"):

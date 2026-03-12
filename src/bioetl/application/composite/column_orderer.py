@@ -2,13 +2,18 @@
 
 from __future__ import annotations
 
-import re
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
+from bioetl.application.composite.column_orderer_helpers import (
+    collect_explicit_group_columns,
+    collect_pattern_columns,
+    extract_field_from_qualified_name,
+    resolve_publication_field_aliases,
+    sort_columns_by_provider,
+)
 from bioetl.application.core.publication_aliases import (
     LEGACY_PUBLICATION_ALIASES_CUTOFF_DATE,
-    PUBLICATION_SCHEMA_FIELD_ALIASES,
 )
 from bioetl.domain.schemas.column_order import DQ_FIELDS_SUFFIX
 from bioetl.domain.value_objects.column_order import (
@@ -19,45 +24,12 @@ from bioetl.domain.value_objects.column_order import (
 from bioetl.domain.value_objects.column_qualifier import ColumnQualifier
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
-
     import polars as pl
 
     from bioetl.domain.composite.config import ColumnGroupConfig, LayerColumnConfig
     from bioetl.domain.ports import LoggerPort
 
-    _SortFn = Callable[[list[str], tuple[str, ...]], list[str]]
-
 __all__ = ["ColumnOrdererService"]
-
-
-def _collect_pattern_columns(
-    available: set[str],
-    used: set[str],
-    group: ColumnGroupConfig,
-    sort_fn: _SortFn,
-    logger: LoggerPort,
-) -> list[str]:
-    """Collect columns matching a group regex pattern."""
-    if not group.pattern:
-        return []
-    try:
-        pattern_re = re.compile(group.pattern, re.IGNORECASE)
-    except re.error as e:
-        logger.warning(
-            "Invalid regex pattern in column group",
-            group=group.name,
-            pattern=group.pattern,
-            error=str(e),
-        )
-        return []
-
-    pattern_matches: list[str] = []
-    for col in available:
-        if col not in used and pattern_re.search(col):
-            pattern_matches.append(col)
-            used.add(col)
-    return sort_fn(pattern_matches, group.provider_order)
 
 
 class ColumnOrdererService:
@@ -75,12 +47,13 @@ class ColumnOrdererService:
         self._column_groups = tuple(column_groups) if column_groups else None
         self._warned_legacy_aliases: set[str] = set()
 
+    # === Public API ===
+
     def order_columns(self, df: pl.DataFrame) -> pl.DataFrame:
         """Order DataFrame columns by semantic groups."""
         if not df.columns:
             return df
 
-        # Use YAML-based column groups if available
         if self._column_groups:
             ordered = self._order_by_yaml_groups(df.columns)
             self._logger.debug(
@@ -111,25 +84,14 @@ class ColumnOrdererService:
     def get_ordered_columns(self, columns: Sequence[str]) -> list[str]:
         """Get columns in semantic order."""
 
-        # Create sort key for each column
         def sort_key(col: str) -> tuple[int, int, str]:
             """Sort by (group, provider_rank, column_name)."""
             group = self._config.get_group(col)
             provider_rank = self._config.get_provider_rank(col)
-            # For alphabetical sort, use field name (not full qualified name)
             field_name = ColumnQualifier.extract_field(col)
             return (group.value, provider_rank, field_name.lower())
 
         return sorted(columns, key=sort_key)
-
-    def _count_groups(self, columns: Sequence[str]) -> dict[str, int]:
-        """Count columns per semantic group."""
-        counts: dict[str, int] = {}
-        for col in columns:
-            group = self._config.get_group(col)
-            group_name = group.name
-            counts[group_name] = counts.get(group_name, 0) + 1
-        return counts
 
     def group_columns(self, columns: Sequence[str]) -> dict[SemanticGroup, list[str]]:
         """Group columns by semantic type."""
@@ -141,7 +103,6 @@ class ColumnOrdererService:
                 groups[group] = []
             groups[group].append(col)
 
-        # Sort columns within each group
         for group in groups:
             groups[group] = sorted(
                 groups[group],
@@ -153,7 +114,30 @@ class ColumnOrdererService:
 
         return groups
 
-    # === YAML-based column ordering methods ===
+    def filter_by_layer_config(
+        self,
+        columns: Sequence[str],
+        layer_config: LayerColumnConfig,
+    ) -> list[str]:
+        """Filter columns by layer-specific configuration."""
+        if layer_config.columns:
+            return self._filter_columns_by_explicit(columns, layer_config)
+
+        if layer_config.include_groups:
+            return self._filter_columns_by_groups(columns, layer_config)
+
+        return list(columns)
+
+    # === Internal helpers ===
+
+    def _count_groups(self, columns: Sequence[str]) -> dict[str, int]:
+        """Count columns per semantic group."""
+        counts: dict[str, int] = {}
+        for col in columns:
+            group = self._config.get_group(col)
+            group_name = group.name
+            counts[group_name] = counts.get(group_name, 0) + 1
+        return counts
 
     def _order_by_yaml_groups(self, columns: Sequence[str]) -> list[str]:
         """Order columns using YAML-configured groups."""
@@ -172,8 +156,6 @@ class ColumnOrdererService:
             ordered_columns.extend(group_columns)
             used_columns.update(group_columns)
 
-        # Add remaining columns at the end (alphabetically),
-        # excluding DQ suffix fields which must come last
         dq_suffix_set = frozenset(DQ_FIELDS_SUFFIX)
         remaining = sorted(all_columns - used_columns - dq_suffix_set)
         if remaining:
@@ -184,13 +166,10 @@ class ColumnOrdererService:
                 sample=remaining[:5],
             )
 
-        # DQ suffix fields MUST be last (DQ_FIELDS_SUFFIX convention)
-        # Remove any DQ fields that may have been captured by groups earlier
         for dq_field in DQ_FIELDS_SUFFIX:
             if dq_field in ordered_columns:
                 ordered_columns.remove(dq_field)
 
-        # Re-append DQ fields at the very end, preserving DQ_FIELDS_SUFFIX order
         for dq_field in DQ_FIELDS_SUFFIX:
             if dq_field in all_columns:
                 ordered_columns.append(dq_field)
@@ -203,25 +182,16 @@ class ColumnOrdererService:
         group: ColumnGroupConfig,
     ) -> list[str]:
         """Collect columns for a group, preserving field order from config."""
-        ordered: list[str] = []
-        used: set[str] = set()
+        ordered, used = collect_explicit_group_columns(
+            available=available,
+            group=group,
+            sort_fn=self._sort_by_provider,
+            extract_field_fn=self._extract_field_from_qualified,
+            resolve_aliases_fn=self._field_aliases,
+        )
 
-        # Match by explicit field names, preserving field order
-        for field_name in group.fields:
-            field_matches: list[str] = []
-            aliases = self._field_aliases(field_name)
-            for col in available:
-                if col in used:
-                    continue
-                extracted = self._extract_field_from_qualified(col)
-                if extracted in aliases or col in aliases:
-                    field_matches.append(col)
-                    used.add(col)
-            ordered.extend(self._sort_by_provider(field_matches, group.provider_order))
-
-        # Match by pattern (appended after explicit fields)
         ordered.extend(
-            _collect_pattern_columns(
+            collect_pattern_columns(
                 available, used, group, self._sort_by_provider, self._logger
             )
         )
@@ -234,70 +204,37 @@ class ColumnOrdererService:
         provider_order: tuple[str, ...],
     ) -> list[str]:
         """Sort columns by provider prefix order."""
-
-        def sort_key(col: str) -> tuple[int, str]:
-            """Return (provider_index, name) placing seed columns first."""
-            # Seed columns (no dot or single dot like 'field.A') come first
-            parts = col.split(".")
-            if len(parts) < 3:
-                return (0, col.lower())
-
-            # Extract provider from qualified name (provider.entity.field)
-            provider = parts[0].lower()
-            try:
-                idx = provider_order.index(provider)
-                return (idx + 1, col.lower())
-            except ValueError:
-                # Unknown provider - at the end
-                return (len(provider_order) + 1, col.lower())
-
-        return sorted(columns, key=sort_key)
+        return sort_columns_by_provider(columns, provider_order)
 
     def _extract_field_from_qualified(self, column: str) -> str:
         """Extract field name from qualified column name."""
-        parts = column.split(".")
-        if len(parts) == 3:
-            return parts[2]  # provider.entity.field -> field
-        if len(parts) == 2:
-            return parts[1]  # field.A -> A (conflict suffix) - keep original
-        return column
+        return extract_field_from_qualified_name(column)
 
     def _field_aliases(self, field_name: str) -> set[str]:
         """Return compatibility aliases for evolving field names."""
-        aliases = {field_name}
-        legacy_to_unified = PUBLICATION_SCHEMA_FIELD_ALIASES
-
-        if field_name in legacy_to_unified:
-            aliases.add(legacy_to_unified[field_name])
-            if field_name not in self._warned_legacy_aliases:
-                self._logger.warning(
-                    "Legacy publication field alias used on read path",
-                    legacy_field=field_name,
-                    canonical_field=legacy_to_unified[field_name],
-                    deprecation_cutoff_date=LEGACY_PUBLICATION_ALIASES_CUTOFF_DATE,
-                )
-                self._warned_legacy_aliases.add(field_name)
-
-        # Allow reverse matching when config already uses canonical names.
-        for legacy, unified in legacy_to_unified.items():
-            if field_name == unified:
-                aliases.add(legacy)
+        aliases, legacy_field, canonical_field = resolve_publication_field_aliases(
+            field_name
+        )
+        if (
+            legacy_field is not None
+            and canonical_field is not None
+            and legacy_field not in self._warned_legacy_aliases
+        ):
+            self._logger.warning(
+                "Legacy publication field alias used on read path",
+                legacy_field=legacy_field,
+                canonical_field=canonical_field,
+                deprecation_cutoff_date=LEGACY_PUBLICATION_ALIASES_CUTOFF_DATE,
+            )
+            self._warned_legacy_aliases.add(legacy_field)
 
         return aliases
 
-    def filter_by_layer_config(
-        self,
-        columns: Sequence[str],
-        layer_config: LayerColumnConfig,
+    def _apply_renames(
+        self, columns: list[str], rename_map: dict[str, str]
     ) -> list[str]:
-        """Filter columns by layer-specific configuration."""
-        if layer_config.columns:
-            return self._filter_columns_by_explicit(columns, layer_config)
-
-        if layer_config.include_groups:
-            return self._filter_columns_by_groups(columns, layer_config)
-
-        return list(columns)
+        """Apply column renames from rename_fields mapping."""
+        return _apply_renames(columns, rename_map)
 
     def _filter_columns_by_explicit(
         self,
@@ -307,7 +244,7 @@ class ColumnOrdererService:
         """Apply explicit include list from layer config."""
         explicit_columns = layer_config.columns or ()
         filtered = [c for c in explicit_columns if c in columns]
-        return self._apply_renames(filtered, layer_config.rename_fields)
+        return _apply_renames(filtered, layer_config.rename_fields)
 
     def _filter_columns_by_groups(
         self,
@@ -342,13 +279,12 @@ class ColumnOrdererService:
             }
 
         ordered = self._order_by_yaml_groups(list(matched))
-        return self._apply_renames(ordered, layer_config.rename_fields)
+        return _apply_renames(ordered, layer_config.rename_fields)
 
-    def _apply_renames(
-        self, columns: list[str], rename_map: dict[str, str]
-    ) -> list[str]:
-        """Apply column renames from rename_fields mapping."""
-        if not rename_map:
-            return columns
 
-        return [rename_map.get(col, col) for col in columns]
+def _apply_renames(columns: list[str], rename_map: dict[str, str]) -> list[str]:
+    """Apply column renames from rename_fields mapping."""
+    if not rename_map:
+        return columns
+
+    return [rename_map.get(col, col) for col in columns]

@@ -9,6 +9,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from bioetl.application.services.metadata_coordinator import MetadataCoordinator
 from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.composition.factories.dq.context_resolver import (
     create_dq_services as _create_dq_services_impl,
@@ -45,7 +46,6 @@ from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from bioetl.composition.factories.storage import StorageContext
-    from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
     from bioetl.domain.ports import (
         CheckpointPort,
         DataSourcePort,

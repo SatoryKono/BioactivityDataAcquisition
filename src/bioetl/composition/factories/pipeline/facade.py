@@ -1,10 +1,11 @@
-"""Pipeline Factory - backward-compatibility re-export facade.
+"""Pipeline factory compatibility-only facade.
 
-All implementation has been extracted to:
+Implementation lives in:
 - pipeline_assembler.py: GenericPipelineFactory, assemble_runner, create_pipeline_factory
 - service_bundle_factory.py: build_pipeline_services, create_pipeline_with_services
 - dq_context_resolver.py: DQ config extraction helpers
-"""
+This module is retained only to preserve legacy import paths; new first-party
+code must import canonical modules directly instead of adding new usages here."""
 
 from __future__ import annotations
 
@@ -50,10 +51,10 @@ if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.base_transformer import BaseTransformer
     from bioetl.application.core.pipeline_services import PipelineService
+    from bioetl.application.services.metadata_coordinator import MetadataCoordinator
     from bioetl.composition.factories.datasource.data_source_factory import (
         DataSourceCreatorProtocol,
     )
-    from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.context import CachedBronzeContext
     from bioetl.domain.filtering import InputFilterConfig
