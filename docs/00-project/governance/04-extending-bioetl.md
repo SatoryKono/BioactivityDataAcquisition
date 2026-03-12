@@ -72,9 +72,9 @@ MUST NOT:
 Run before PR:
 
 ```bash
-python scripts/validate_pipeline_configs.py --verbose
-python -m pytest tests/architecture/test_registry_contracts.py -q
-python -m pytest tests/architecture/test_source_config_usage.py -q
+uv run python scripts/validate_pipeline_configs.py --verbose
+uv run python -m pytest tests/architecture/test_registry_contracts.py -q
+uv run python -m pytest tests/architecture/test_source_config_usage.py -q
 ```
 
 Then run targeted unit tests for changed provider/pipeline.
