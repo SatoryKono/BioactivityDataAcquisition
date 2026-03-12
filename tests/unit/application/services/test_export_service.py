@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from pathlib import Path
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 import pyarrow as pa
@@ -12,7 +13,12 @@ from bioetl.application.services.export_service import (
     ExportService,
     TablePreview,
 )
-from bioetl.domain.ports import DeltaReaderPort, LoggerPort
+from bioetl.domain.ports import (
+    DeltaReaderPort,
+    ExportCatalogPort,
+    ExportWriterPort,
+    LoggerPort,
+)
 
 
 @pytest.fixture
@@ -48,20 +54,60 @@ def mock_logger():
 
 
 @pytest.fixture
-def export_service(mock_reader, mock_logger, tmp_path):
+def mock_catalog(tmp_path: Path):
+    catalog = MagicMock(spec=ExportCatalogPort)
+    table_path = tmp_path / "silver" / "chembl" / "default" / "chembl.activity"
+    catalog.list_tables.side_effect = lambda *, base_path, layer: (
+        [("chembl.activity", table_path)] if layer == "silver" else []
+    )
+
+    def _resolve_table_path(*, base_path, table_name, layer):
+        del base_path
+        if table_name == "chembl.activity":
+            return table_path
+        raise FileNotFoundError(f"Table '{table_name}' not found in {layer} layer")
+
+    catalog.resolve_table_path.side_effect = _resolve_table_path
+    return catalog
+
+
+@pytest.fixture
+def mock_writer():
+    writer = MagicMock(spec=ExportWriterPort)
+
+    def _write_export(
+        *,
+        table,
+        table_name,
+        layer,
+        fmt,
+        output_dir,
+    ):
+        del table
+        output_dir.mkdir(parents=True, exist_ok=True)
+        output_path = output_dir / f"{layer}_{table_name.replace('.', '_')}.{fmt}"
+        output_path.write_text("export", encoding="utf-8")
+        return output_path
+
+    writer.write_export.side_effect = _write_export
+    return writer
+
+
+@pytest.fixture
+def export_service(mock_reader, mock_catalog, mock_writer, mock_logger, tmp_path):
     silver = tmp_path / "silver"
     gold = tmp_path / "gold"
     silver.mkdir()
     gold.mkdir()
 
-    # Create dummy table structure: provider/group/table/_delta_log
-    # The service expects tables to be nested under an entity/group directory
     (silver / "chembl" / "default" / "chembl.activity" / "_delta_log").mkdir(
         parents=True
     )
 
     return ExportService(
         reader=mock_reader,
+        catalog=mock_catalog,
+        writer=mock_writer,
         logger=mock_logger,
         silver_path=silver,
         gold_path=gold,
@@ -141,20 +187,13 @@ async def test_export_path_not_found(export_service):
 async def test_export_xlsx_import_error(export_service):
     """Test XLSX export handles missing dependency."""
     options = ExportOptions(format="xlsx")
+    export_service.writer.write_export.side_effect = ImportError("openpyxl missing")
+    result = await export_service.export(
+        "chembl.activity", layer="silver", options=options
+    )
 
-    # Mock pandas to raise ImportError on to_excel with openpyxl
-    # Or mock _write_xlsx_file directly if easier
-    # Let's patch _write_xlsx_file inside the module
-    with patch(
-        "bioetl.application.services.export_service._write_xlsx_file"
-    ) as mock_write:
-        mock_write.side_effect = ImportError("openpyxl missing")
-        result = await export_service.export(
-            "chembl.activity", layer="silver", options=options
-        )
-
-        assert not result.success
-        assert "openpyxl missing" in result.error
+    assert not result.success
+    assert "openpyxl missing" in result.error
 
 
 def test_get_table_path_invalid_layer(export_service):
@@ -164,7 +203,10 @@ def test_get_table_path_invalid_layer(export_service):
 
 
 def test_get_table_path_missing_base(export_service, tmp_path):
-    """Test _get_table_path when layer dir missing."""
+    """Test _get_table_path when catalog cannot resolve layer dir."""
     export_service.gold_path = tmp_path / "missing"
+    export_service.catalog.resolve_table_path.side_effect = FileNotFoundError(
+        f"Layer path not found: {export_service.gold_path}"
+    )
     with pytest.raises(FileNotFoundError, match="Layer path not found"):
         export_service._get_table_path("t", "gold")

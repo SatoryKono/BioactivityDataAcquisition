@@ -67,6 +67,10 @@ if DataSourceRegistry.contains("chembl"):
 
 **Note:** For new code, prefer using `ProviderRegistry.create-data-source()` directly.
 
+The broader module-level status and deprecation plan for `DataSourceRegistry` and other
+compatibility facades is tracked in
+[`docs/02-architecture/07-compatibility-facade-inventory.md`](../02-architecture/07-compatibility-facade-inventory.md).
+
 ## Legacy Aliases
 
 For backward compatibility, the following legacy methods are available:

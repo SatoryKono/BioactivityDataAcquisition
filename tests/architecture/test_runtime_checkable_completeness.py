@@ -1,6 +1,6 @@
 """Tests for comprehensive @runtime_checkable coverage on all ports.
 
-Ensures that all 67 port protocols in domain/ports/ are decorated with
+Ensures that all public port protocols in domain/ports/ are decorated with
 @runtime_checkable, enabling isinstance() boundary checks at composition time.
 
 See: TYPE-004 in ai-selfreview-rules.md
@@ -32,10 +32,10 @@ ALL_PORT_NAMES = _discover_all_port_classes()
 class TestAllPortsRuntimeCheckable:
     """Every port protocol MUST be @runtime_checkable (TYPE-004)."""
 
-    def test_port_count_is_68(self) -> None:
-        """Sanity check: we expect exactly 68 port protocols."""
-        assert len(ALL_PORT_NAMES) == 68, (
-            f"Expected 68 ports, found {len(ALL_PORT_NAMES)}. "
+    def test_port_count_is_70(self) -> None:
+        """Sanity check: we expect exactly 70 port protocols."""
+        assert len(ALL_PORT_NAMES) == 70, (
+            f"Expected 70 ports, found {len(ALL_PORT_NAMES)}. "
             f"If you added/removed a port, update this test. "
             f"Current ports: {ALL_PORT_NAMES}"
         )
