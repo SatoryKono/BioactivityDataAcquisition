@@ -26,3 +26,4 @@ mkdocs.yml
 pyproject.toml
 requirements.txt
 uv.lock
+.wsl_proxy_env.sh
