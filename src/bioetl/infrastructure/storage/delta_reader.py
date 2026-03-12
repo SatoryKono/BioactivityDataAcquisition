@@ -162,7 +162,10 @@ class DeltaReader:
 
             native_count = getattr(dt, "count", None)
             if callable(native_count):
-                return int(native_count())
+                try:
+                    return int(native_count())
+                except Exception:
+                    pass  # Why: delta-rs may panic on empty tables; fall through
 
             # Fall back to add-action metadata on older delta-rs builds.
             try:

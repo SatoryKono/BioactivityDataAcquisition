@@ -8,6 +8,8 @@ All implementation has been extracted to:
 
 from __future__ import annotations
 
+import warnings
+from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 from bioetl.composition.factories.dq.context_resolver import (
@@ -29,11 +31,6 @@ from bioetl.composition.factories.pipeline.pipeline_assembler import (
     GenericPipelineFactory,
     assemble_runner,
     create_pipeline_factory,
-)
-from bioetl.composition.factories.pipeline.facade_compat import (
-    build_compat_service_bundle_dependencies,
-    call_build_pipeline_services_compat,
-    call_create_pipeline_with_services_compat,
 )
 from bioetl.composition.factories.services.bundle import (
     ServiceBundleDependencies,
@@ -82,6 +79,113 @@ _LEGACY_REEXPORTS = (
     _create_cached_bronze_data_source,
     _create_data_source,
 )
+
+_BUILD_PIPELINE_SERVICES_WARNING = (
+    "Use bioetl.composition.factories.services.bundle.build_pipeline_services "
+    "for direct wiring. pipeline_factory facade remains for compatibility."
+)
+_CREATE_PIPELINE_WITH_SERVICES_WARNING = (
+    "Use bioetl.composition.factories.services.bundle.create_pipeline_with_services "
+    "for direct wiring. pipeline_factory facade remains for compatibility."
+)
+
+
+def _compat_service_bundle_dependencies() -> ServiceBundleDependencies:
+    """Build compatibility dependencies bound to pipeline_factory facade symbols."""
+    return ServiceBundleDependencies(
+        load_pipeline_config=load_pipeline_config,
+        yaml_config_to_domain=yaml_config_to_domain,
+        compute_config_hash=compute_config_hash,
+        base_services_factory=BaseServicesFactory,
+    )
+
+
+def _call_build_pipeline_services_compat(
+    *,
+    build_pipeline_services_fn: Callable[..., PipelineService],
+    pipeline_name: str,
+    create_data_source_fn: DataSourceCreatorProtocol,
+    settings: Settings,
+    logger: LoggerPort,
+    config: PipelineYamlConfig | None = None,
+    filter_config: InputFilterConfig | None = None,
+    tracer: TracingPort | None = None,
+    dq_monitor: DQMonitorPort | None = None,
+    metadata_coordinator: MetadataCoordinator | None = None,
+    cached_bronze: CachedBronzeContext | None = None,
+    silver_validator: SilverValidatorPort | None = None,
+    deps: ServiceBundleDependencies | None = None,
+) -> PipelineService:
+    """Run deprecated build facade with warning and compat dependencies."""
+    warnings.warn(
+        _BUILD_PIPELINE_SERVICES_WARNING,
+        DeprecationWarning,
+        stacklevel=3,
+    )
+    return build_pipeline_services_fn(
+        pipeline_name=pipeline_name,
+        create_data_source_fn=create_data_source_fn,
+        settings=settings,
+        logger=logger,
+        config=config,
+        filter_config=filter_config,
+        tracer=tracer,
+        dq_monitor=dq_monitor,
+        metadata_coordinator=metadata_coordinator,
+        cached_bronze=cached_bronze,
+        silver_validator=silver_validator,
+        _deps=deps or _compat_service_bundle_dependencies(),
+    )
+
+
+def _call_create_pipeline_with_services_compat(
+    *,
+    create_pipeline_with_services_fn: Callable[..., BasePipeline],
+    pipeline_name: str,
+    pipeline_class: type[BasePipeline],
+    provider: str,
+    create_data_source_fn: DataSourceCreatorProtocol,
+    transformer_class: type[BaseTransformer] | None,
+    run_id: RunID,
+    runtime: RuntimeConfig,
+    settings: Settings,
+    logger: LoggerPort,
+    config: PipelineYamlConfig | None = None,
+    filter_config: InputFilterConfig | None = None,
+    tracer: TracingPort | None = None,
+    dq_monitor: DQMonitorPort | None = None,
+    metrics: MetricsPort | None = None,
+    cached_bronze: CachedBronzeContext | None = None,
+    pandera_silver_schema: object | None = None,
+    deps: ServiceBundleDependencies | None = None,
+) -> BasePipeline:
+    """Run deprecated create facade with warning and compat dependencies."""
+    warnings.warn(
+        _CREATE_PIPELINE_WITH_SERVICES_WARNING,
+        DeprecationWarning,
+        stacklevel=3,
+    )
+    return create_pipeline_with_services_fn(
+        pipeline_name=pipeline_name,
+        pipeline_class=pipeline_class,
+        provider=provider,
+        create_data_source_fn=create_data_source_fn,
+        transformer_class=transformer_class,
+        run_id=run_id,
+        runtime=runtime,
+        settings=settings,
+        logger=logger,
+        config=config,
+        filter_config=filter_config,
+        tracer=tracer,
+        dq_monitor=dq_monitor,
+        metrics=metrics,
+        cached_bronze=cached_bronze,
+        pandera_silver_schema=pandera_silver_schema,
+        _deps=deps or _compat_service_bundle_dependencies(),
+    )
+
+
 def build_pipeline_services(
     pipeline_name: str,
     create_data_source_fn: DataSourceCreatorProtocol,
@@ -115,7 +219,7 @@ def build_pipeline_services(
     Returns:
         Fully wired PipelineService bundle for the pipeline run.
     """
-    return call_build_pipeline_services_compat(
+    return _call_build_pipeline_services_compat(
         build_pipeline_services_fn=_build_pipeline_services,
         pipeline_name=pipeline_name,
         create_data_source_fn=create_data_source_fn,
@@ -175,7 +279,7 @@ def create_pipeline_with_services(
     Returns:
         Configured BasePipeline instance ready for execution.
     """
-    return call_create_pipeline_with_services_compat(
+    return _call_create_pipeline_with_services_compat(
         create_pipeline_with_services_fn=_create_pipeline_with_services,
         pipeline_name=pipeline_name,
         pipeline_class=pipeline_class,

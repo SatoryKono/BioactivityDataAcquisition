@@ -111,7 +111,7 @@ def show_cleanup_preview(pipeline: str) -> None:
     """
     try:
         asyncio.run(_preview_cleanup_async(pipeline))
-    except (BioETLError, FileNotFoundError, OSError, RuntimeError, ValueError) as exc:
+    except Exception as exc:
         failure_context = build_failure_context(
             exc,
             reason_code="CLI_CLEANUP_PREVIEW_ERROR",
