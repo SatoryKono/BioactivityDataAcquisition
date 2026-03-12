@@ -32,6 +32,7 @@ COLLECTIONS = [
     ("foundation", ".mmd", "foundation-diagrams-with-descriptions", "BioETL Foundation Diagrams With Descriptions"),
     ("architecture", ".mmd", "architecture-diagrams-with-descriptions", "BioETL Architecture Diagrams With Descriptions"),
     ("views", ".mermaid", "views-diagrams-with-descriptions", "BioETL Views Diagrams With Descriptions"),
+    ("class-diagrams", ".mmd", "class-diagrams-with-descriptions", "BioETL Class Diagrams With Descriptions"),
 ]
 
 # ── Diagram type labels for Russian descriptions ──
@@ -59,6 +60,10 @@ COLLECTION_PHRASES = {
     "views": (
         "из views-набора представляет фокусированный срез "
         "родительской диаграммы для точечного анализа"
+    ),
+    "class-diagrams": (
+        "показывает архитектурную модель модуля и фиксирует контракты, "
+        "роли и отношения между сущностями слоя"
     ),
 }
 
@@ -111,11 +116,15 @@ def parse_mermaid(path: Path) -> dict[str, object]:
         elif m := re.match(r"Shows\s+(.+)", stripped):
             if "covers" not in meta:
                 meta["covers"] = m.group(1).strip()
-        # First non-@, non-keyword line as fallback title
-        if "title" not in meta and not stripped.startswith("@"):
-            # "BioETL — Something" pattern
-            if "—" in stripped:
-                meta["title"] = stripped.split("—", 1)[1].strip()
+        # First non-@, non-keyword line as fallback title / covers
+        if not stripped.startswith("@"):
+            if "title" not in meta:
+                # "BioETL — Something" pattern
+                if "—" in stripped:
+                    meta["title"] = stripped.split("—", 1)[1].strip()
+            elif "covers" not in meta and len(stripped) > 10:
+                # Second comment line as fallback covers (e.g. class-diagrams)
+                meta["covers"] = stripped
 
     # ── Detect diagram type from content ──
     if "type" not in meta:
@@ -132,35 +141,58 @@ def parse_mermaid(path: Path) -> dict[str, object]:
 
     # ── Count nodes (named elements) ──
     node_names: list[str] = []
-    node_pattern = re.compile(
-        r'^\s+(\w+)\["([^"]+)"\]'  # N1["Label"]
-        r'|^\s+(\w+)\["([^"]+)"'   # N1["Label"
-        r'|^\s+(\w+)\[([^\]]+)\]'  # N1[Label]
-    )
-    for line in lines:
-        m = node_pattern.match(line)
-        if m:
-            # Get the label (second capture group that matched)
-            label = m.group(2) or m.group(4) or m.group(6) or ""
-            # Clean HTML tags
-            label = re.sub(r"<br\s*/?>", " ", label)
-            label = re.sub(r"<[^>]+>", "", label).strip()
-            if label and len(label) < 80:
-                node_names.append(label)
+    is_class_diagram = str(meta.get("type", "")).lower() == "classdiagram"
+
+    if is_class_diagram:
+        # classDiagram: class ClassName { ... }
+        class_pattern = re.compile(r"^\s+class\s+(\w+)\s*[\{:]?")
+        for line in lines:
+            m = class_pattern.match(line)
+            if m:
+                name = m.group(1)
+                if name and len(name) < 80:
+                    node_names.append(name)
+    else:
+        # flowchart / graph / other: N1["Label"] or N1[Label]
+        node_pattern = re.compile(
+            r'^\s+(\w+)\["([^"]+)"\]'  # N1["Label"]
+            r'|^\s+(\w+)\["([^"]+)"'   # N1["Label"
+            r'|^\s+(\w+)\[([^\]]+)\]'  # N1[Label]
+        )
+        for line in lines:
+            m = node_pattern.match(line)
+            if m:
+                label = m.group(2) or m.group(4) or m.group(6) or ""
+                label = re.sub(r"<br\s*/?>", " ", label)
+                label = re.sub(r"<[^>]+>", "", label).strip()
+                if label and len(label) < 80:
+                    node_names.append(label)
 
     # ── Count edges ──
-    edge_pattern = re.compile(r"-->|==>|-.->|--[>o]|<--|~~~")
-    edge_count = sum(len(edge_pattern.findall(line)) for line in lines)
+    if is_class_diagram:
+        # classDiagram edges: <|--, *--, o--, -->, ..|>, ..>
+        class_edge_pattern = re.compile(
+            r"<\|--|--\*|--o|-->|<--|\.\.>|\.\.\|>|\*--(?!>)|o--(?!>)"
+        )
+        edge_count = sum(len(class_edge_pattern.findall(line)) for line in lines)
+    else:
+        edge_pattern = re.compile(r"-->|==>|-.->|--[>o]|<--|~~~")
+        edge_count = sum(len(edge_pattern.findall(line)) for line in lines)
 
-    # ── Extract subgraph names ──
+    # ── Extract subgraph / namespace names ──
     subgraph_names: list[str] = []
     subgraph_pattern = re.compile(r'subgraph\s+\w+\["([^"]+)"\]|subgraph\s+(\w+)\s*$')
+    namespace_pattern = re.compile(r"^\s+namespace\s+(\w+)\s*\{?\s*$")
     for line in lines:
         m = subgraph_pattern.search(line)
         if m:
             name = m.group(1) or m.group(2) or ""
             if name and name != "direction":
                 subgraph_names.append(name)
+        m2 = namespace_pattern.match(line)
+        if m2:
+            name = m2.group(1).replace("_", " ")
+            subgraph_names.append(name)
 
     meta["node_count"] = len(node_names)
     meta["node_names"] = node_names
