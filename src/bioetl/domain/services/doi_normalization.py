@@ -8,11 +8,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from bioetl.domain.normalization import strip_doi_prefix
+
 __all__ = [
     "DoiNormalizationService",
 ]
-
-_DOI_URL_PREFIXES = ("https://doi.org/", "http://doi.org/", "doi:")
 
 
 @dataclass(frozen=True, slots=True)
@@ -24,6 +24,7 @@ class DoiNormalizationService:
     - HTTPS URL: "https://doi.org/10.1038/nature12373"
     - HTTP URL: "http://doi.org/10.1038/nature12373"
     - doi: prefix: "doi:10.1038/nature12373"
+    - DOI: prefix: "DOI:10.1038/nature12373"
     """
 
     def normalize_doi(self, doi: str | None) -> str | None:
@@ -37,14 +38,6 @@ class DoiNormalizationService:
         """
         if not doi:
             return None
-        stripped = self._strip_doi_prefix(doi)
+        stripped = strip_doi_prefix(doi)
         result = stripped.strip().lower()
         return result if result else None
-
-    @staticmethod
-    def _strip_doi_prefix(doi: str) -> str:
-        """Strip known DOI URL prefixes (https://doi.org/, http://doi.org/, doi:)."""
-        for prefix in _DOI_URL_PREFIXES:
-            if doi.startswith(prefix):
-                return doi[len(prefix) :]
-        return doi

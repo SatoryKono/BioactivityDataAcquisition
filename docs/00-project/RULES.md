@@ -1692,7 +1692,7 @@ fields:
 ## История Изменений (Changelog)
 
 - **5.23** (2026-03-02): Dependency Policy Sync. Уточнена политика зависимостей: mixed strategy (`pyproject.toml` с диапазонами + воспроизводимость через `uv.lock`), строгие `==` оставлены как исключение для критичных инструментов.
-- **5.22** (2026-02-24): Unified Entity Config. ADR-039 добавлен — Unified Entity Config Format. 21 стандартных pipeline config переведены из `configs/pipelines/` в `configs/entities/`; composite configs перенесены в `configs/composites/`; provider source configs — в `configs/providers/`.
+- **5.22** (2026-02-24): Unified Entity Config. ADR-039 добавлен — Unified Entity Config Format. 21 стандартных pipeline config переведены из legacy pipeline config directory в `configs/entities/`; composite configs перенесены в `configs/composites/`; provider source configs — в `configs/providers/`.
 - **5.21** (2026-02-21): Deduplication Policy Implementation.
 - **5.20** (2026-02-17): Audit Sync. Future annotations (497→501, 93.8%). Тест-функций (`def test-`): ~9,442; параметризованных кейсов (`pytest --collect-only`): ~11,985. Python-файлов (~1,114→~1,161). Исправлен .importlinter gap (infrastructure→composition). Архивирован orphaned ADR-030. TYPE-002 `Any` justification — 21 инстанс.
 - **5.19** (2026-02-16): Documentation Sync. Файлов кода (517→534), future annotations (481→497, 93.1%). ADR-034 (Schema↔Domain Configuration Pairs) добавлен в реестр. Тестов (~7,090→~11,985). Python-файлов (~1,094→~1,114). Синхронизация 00-map.md, CLAUDE.md, 00-overview.md, decisions/README.md.

@@ -5,6 +5,7 @@ from __future__ import annotations
 from bioetl.application.pipelines.openalex._extractors_common import (
     _extract_id_from_url,
 )
+from bioetl.domain.normalization import strip_doi_prefix
 from bioetl.domain.types import JsonDict
 
 
@@ -19,13 +20,7 @@ def extract_doi(doi_url: str | None) -> str | None:
     """
     if not doi_url:
         return None
-    if doi_url.startswith("https://doi.org/"):
-        return doi_url[16:]
-    if doi_url.startswith("http://doi.org/"):
-        return doi_url[15:]
-    if doi_url.startswith("doi:"):
-        return doi_url[4:]
-    return doi_url
+    return strip_doi_prefix(doi_url)
 
 
 def extract_openalex_id(openalex_url: str | None) -> str | None:

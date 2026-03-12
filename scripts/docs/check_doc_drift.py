@@ -219,7 +219,7 @@ def check_classes(report: DriftReport) -> None:
             [
                 "BronzeWriter", "SilverWriter", "GoldWriter",
                 "BaseHttpAdapter", "UnifiedHTTPClient",
-                "TokenBucket", "CircuitBreaker", "MemoryLock",
+                "TokenBucketRateLimiter", "CircuitBreakerGuard", "MemoryLock",
             ],
         ),
         (
