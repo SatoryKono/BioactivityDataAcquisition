@@ -247,7 +247,7 @@ class TestCliDryRunErrorHandling:
         """Test that --dry-run handles preview errors gracefully."""
         with patch(
             "bioetl.interfaces.cli.commands.run_helpers.preview_cleanup",
-            new=AsyncMock(side_effect=Exception("Preview failed")),
+            new=AsyncMock(side_effect=RuntimeError("Preview failed")),
         ):
             result = cli_runner.invoke(
                 cli,

@@ -33,9 +33,9 @@ __all__ = [
     "is_valid_json",
     "is_valid_json_array",
     "is_valid_json_object",
-    "json_array_check",
-    "json_check",
-    "json_object_check",
+    "JSON_ARRAY_CHECK",
+    "JSON_CHECK",
+    "JSON_OBJECT_CHECK",
     "max_str_length",
     "str_matches_pattern",
     "str_starts_with",
@@ -133,9 +133,9 @@ def is_valid_json_object(series: pd.Series) -> pd.Series:
 
 
 # Pre-built checks for use in schema definitions
-json_check = pa.Check(is_valid_json, name="valid_json")
-json_array_check = pa.Check(is_valid_json_array, name="valid_json_array")
-json_object_check = pa.Check(is_valid_json_object, name="valid_json_object")
+JSON_CHECK = pa.Check(is_valid_json, name="valid_json")
+JSON_ARRAY_CHECK = pa.Check(is_valid_json_array, name="valid_json_array")
+JSON_OBJECT_CHECK = pa.Check(is_valid_json_object, name="valid_json_object")
 
 
 # =============================================================================

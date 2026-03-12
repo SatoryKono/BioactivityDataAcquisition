@@ -8,6 +8,10 @@ import pytest
 from httpx import RequestError
 
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
+from bioetl.infrastructure.adapters.common.api_request_collector import (
+    APIRequestCollector,
+)
 from bioetl.infrastructure.adapters.crossref import CrossRefAdapter
 
 
@@ -62,6 +66,33 @@ def test_post_init_preserves_injected_crossref_runtime_collaborators(
     assert adapter._search_paginator is search_paginator
     assert adapter._fallback_handler is title_fallback_handler
     assert adapter._fetch_flow is fetch_flow
+
+
+def test_post_init_preserves_injected_base_collaborators(
+    mock_http_client, mock_logger
+) -> None:
+    """Dataclass adapter should delegate shared base initialization."""
+    error_handler = MagicMock()
+    metrics = MagicMock()
+    adapter_metrics = AdapterMetricsRecorder(metrics, "crossref")
+    request_collector = APIRequestCollector()
+
+    adapter = CrossRefAdapter(
+        http_client=mock_http_client,
+        logger=mock_logger,
+        mailto="test@example.com",
+        metrics=metrics,
+        error_handler=error_handler,
+        adapter_metrics=adapter_metrics,
+        request_collector=request_collector,
+    )
+
+    assert adapter._http_client is mock_http_client
+    assert adapter._logger is mock_logger
+    assert adapter._metrics is metrics
+    assert adapter._error_handler is error_handler
+    assert adapter._adapter_metrics is adapter_metrics
+    assert adapter._request_collector is request_collector
 
 
 @pytest.mark.asyncio

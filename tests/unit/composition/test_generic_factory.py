@@ -7,10 +7,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from bioetl.composition.factories.datasource.factory import DataSourceRegistry
-from bioetl.composition.factories.pipeline.facade import (
-    GenericPipelineFactory,
-    create_pipeline_factory,
-)
+from bioetl.composition.factories.pipeline import GenericPipelineFactory
+from bioetl.composition.factories.pipeline import create_pipeline_factory
 
 
 @pytest.fixture

@@ -8,6 +8,10 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
+from bioetl.infrastructure.adapters.common.api_request_collector import (
+    APIRequestCollector,
+)
 from bioetl.infrastructure.adapters.semanticscholar import SemanticScholarAdapter
 
 
@@ -47,6 +51,33 @@ def adapter(
 
 class TestSemanticScholarAdapter:
     """Tests for SemanticScholarAdapter."""
+
+    def test_post_init_preserves_injected_base_collaborators(
+        self,
+        mock_http_client: MagicMock,
+        mock_logger: MagicMock,
+    ) -> None:
+        """Dataclass adapter should delegate shared base initialization."""
+        error_handler = MagicMock()
+        metrics = MagicMock()
+        adapter_metrics = AdapterMetricsRecorder(metrics, "semanticscholar")
+        request_collector = APIRequestCollector()
+
+        adapter = SemanticScholarAdapter(
+            http_client=mock_http_client,
+            logger=mock_logger,
+            metrics=metrics,
+            error_handler=error_handler,
+            adapter_metrics=adapter_metrics,
+            request_collector=request_collector,
+        )
+
+        assert adapter._http_client is mock_http_client
+        assert adapter._logger is mock_logger
+        assert adapter._metrics is metrics
+        assert adapter._error_handler is error_handler
+        assert adapter._adapter_metrics is adapter_metrics
+        assert adapter._request_collector is request_collector
 
     def test_provider_name(self, adapter: SemanticScholarAdapter) -> None:
         """Test provider name is set correctly."""

@@ -11,6 +11,8 @@ from uuid import uuid4
 import pyarrow as pa
 import pytest
 
+from bioetl.domain.medallion import SilverWriteMode
+from bioetl.infrastructure.storage.silver_writer import SilverWriter
 from tests.benchmarks.conftest import calculate_payload_size_mb
 
 
@@ -84,10 +86,8 @@ def _prepare_records_for_delta(
 @pytest.mark.benchmark(group="delta")
 def test_delta_write_append_small(benchmark, small_payload, delta_output_dir):
     """Benchmark Delta append with small payload (100 records)."""
-    from bioetl.infrastructure.storage.delta_writer import DeltaWriter, SilverWriteMode
-
     logger = FakeLogger()
-    writer = DeltaWriter(base_path=delta_output_dir, logger=logger)
+    writer = SilverWriter(base_path=delta_output_dir, logger=logger)
 
     schema = _create_activity_schema()
     records = _prepare_records_for_delta(small_payload)
@@ -115,10 +115,8 @@ def test_delta_write_append_small(benchmark, small_payload, delta_output_dir):
 @pytest.mark.benchmark(group="delta")
 def test_delta_write_append_medium(benchmark, medium_payload, delta_output_dir):
     """Benchmark Delta append with medium payload (1000 records)."""
-    from bioetl.infrastructure.storage.delta_writer import DeltaWriter, SilverWriteMode
-
     logger = FakeLogger()
-    writer = DeltaWriter(base_path=delta_output_dir, logger=logger)
+    writer = SilverWriter(base_path=delta_output_dir, logger=logger)
 
     schema = _create_activity_schema()
     records = _prepare_records_for_delta(medium_payload)
@@ -146,10 +144,8 @@ def test_delta_write_append_medium(benchmark, medium_payload, delta_output_dir):
 @pytest.mark.benchmark(group="delta")
 def test_delta_write_append_large(benchmark, large_payload, delta_output_dir):
     """Benchmark Delta append with large payload (5000 records)."""
-    from bioetl.infrastructure.storage.delta_writer import DeltaWriter, SilverWriteMode
-
     logger = FakeLogger()
-    writer = DeltaWriter(base_path=delta_output_dir, logger=logger)
+    writer = SilverWriter(base_path=delta_output_dir, logger=logger)
 
     schema = _create_activity_schema()
     records = _prepare_records_for_delta(large_payload)
@@ -180,10 +176,8 @@ def test_delta_write_merge_medium(benchmark, medium_payload, delta_output_dir):
 
     Merge is more expensive than append due to deduplication logic.
     """
-    from bioetl.infrastructure.storage.delta_writer import DeltaWriter, SilverWriteMode
-
     logger = FakeLogger()
-    writer = DeltaWriter(base_path=delta_output_dir, logger=logger)
+    writer = SilverWriter(base_path=delta_output_dir, logger=logger)
 
     schema = _create_activity_schema()
     records = _prepare_records_for_delta(medium_payload)

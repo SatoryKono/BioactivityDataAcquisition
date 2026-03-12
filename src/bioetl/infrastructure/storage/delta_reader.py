@@ -13,7 +13,7 @@ __all__ = ["DeltaReader"]
 
 import asyncio
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 import pyarrow as pa
 from deltalake import DeltaTable
@@ -91,14 +91,12 @@ class DeltaReader:
                     f"Delta table not found: {resolved_path}"
                 ) from e
 
-            # Build read with optional column projection
-            table = dt.to_pyarrow_table(columns=columns)
+            # Use scanner with early-stop for limited reads (avoids full table load).
+            if limit is not None:
+                scanner = dt.to_pyarrow_dataset().scanner(columns=columns)
+                return scanner.head(limit)
 
-            # Apply row limit if specified
-            if limit is not None and limit < table.num_rows:
-                table = table.slice(0, limit)
-
-            return table
+            return dt.to_pyarrow_table(columns=columns)
 
         self._logger.debug(
             "Reading Delta table",
@@ -169,41 +167,10 @@ class DeltaReader:
                 except BaseException:
                     pass  # Why: delta-rs may panic on empty tables; fall through
 
-            # Fall back to add-action metadata on older delta-rs builds.
-            try:
-                add_actions_obj = dt.get_add_actions(flatten=True)
-                to_pydict = getattr(add_actions_obj, "to_pydict", None)
-                if not callable(to_pydict):
-                    raise AttributeError(
-                        "get_add_actions result does not support to_pydict"
-                    )
-                add_actions = cast("dict[str, list[int | None]]", to_pydict())
-                num_records = add_actions.get("num_records")
-                if num_records and all(v is not None for v in num_records):
-                    typed_num_records = [v for v in num_records if v is not None]
-                    return int(sum(typed_num_records))
-            except (KeyboardInterrupt, SystemExit):
-                raise
-            except BaseException:
-                pass  # Why: delta-rs may panic on empty tables, poisoning internal lock
-
-            # Fallback: re-create DeltaTable (prior panic may poison internal lock)
-            # and read row count via PyArrow dataset (reads footer metadata, not full data).
-            try:
-                dt_fresh = DeltaTable(str(resolved_path))
-                dataset = dt_fresh.to_pyarrow_dataset()
-                count_rows = getattr(dataset, "count_rows", None)
-                if callable(count_rows):
-                    return int(count_rows())
-            except (KeyboardInterrupt, SystemExit):
-                raise
-            except BaseException:
-                pass  # Why: dataset fallback may also fail on corrupted tables
-
-            # Ultimate fallback: read table into memory (works for any table).
-            dt_final = DeltaTable(str(resolved_path))
-            final_row_count = cast(int, dt_final.to_pyarrow_table(columns=[]).num_rows)
-            return final_row_count
+            # Fallback: re-create DeltaTable (prior call may poison internal lock)
+            # and count rows via PyArrow (reads footer metadata, not full data).
+            dt_fresh = DeltaTable(str(resolved_path))
+            return int(dt_fresh.to_pyarrow_table(columns=[]).num_rows)
 
         return await loop.run_in_executor(None, _count_rows)
 

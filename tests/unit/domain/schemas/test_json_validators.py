@@ -140,23 +140,23 @@ class TestIsValidJsonObject:
 class TestPanderaChecks:
     """Tests for pre-built Pandera checks."""
 
-    def test_json_check_importable(self) -> None:
-        """Should be able to import json_check."""
-        from bioetl.domain.schemas.validators import json_check
+    def test_JSON_CHECK_importable(self) -> None:
+        """Should be able to import JSON_CHECK."""
+        from bioetl.domain.schemas.validators import JSON_CHECK
 
-        assert json_check is not None
-        assert json_check.name == "valid_json"
+        assert JSON_CHECK is not None
+        assert JSON_CHECK.name == "valid_json"
 
-    def test_json_array_check_importable(self) -> None:
-        """Should be able to import json_array_check."""
-        from bioetl.domain.schemas.validators import json_array_check
+    def test_JSON_ARRAY_CHECK_importable(self) -> None:
+        """Should be able to import JSON_ARRAY_CHECK."""
+        from bioetl.domain.schemas.validators import JSON_ARRAY_CHECK
 
-        assert json_array_check is not None
-        assert json_array_check.name == "valid_json_array"
+        assert JSON_ARRAY_CHECK is not None
+        assert JSON_ARRAY_CHECK.name == "valid_json_array"
 
-    def test_json_object_check_importable(self) -> None:
-        """Should be able to import json_object_check."""
-        from bioetl.domain.schemas.validators import json_object_check
+    def test_JSON_OBJECT_CHECK_importable(self) -> None:
+        """Should be able to import JSON_OBJECT_CHECK."""
+        from bioetl.domain.schemas.validators import JSON_OBJECT_CHECK
 
-        assert json_object_check is not None
-        assert json_object_check.name == "valid_json_object"
+        assert JSON_OBJECT_CHECK is not None
+        assert JSON_OBJECT_CHECK.name == "valid_json_object"

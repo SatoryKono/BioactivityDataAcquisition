@@ -1,0 +1,127 @@
+"""Unit tests for CLI config bootstrap.
+
+Tests bootstrap_config_service wires ConfigService with correct
+infrastructure dependencies via DI.
+"""
+
+from __future__ import annotations
+
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+from bioetl.application.services import ConfigService
+from bioetl.composition.bootstrap.cli.config import bootstrap_config_service
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+
+
+@pytest.mark.unit
+class TestBootstrapConfigService:
+    """Tests for bootstrap_config_service function."""
+
+    @patch("bioetl.composition.bootstrap.cli.config.register_all_pipelines")
+    def test_returns_config_service(
+        self,
+        mock_register: MagicMock,
+    ) -> None:
+        """bootstrap_config_service should return a ConfigService instance."""
+        result = bootstrap_config_service()
+
+        assert isinstance(result, ConfigService)
+
+    @patch("bioetl.composition.bootstrap.cli.config.register_all_pipelines")
+    def test_wires_noop_logger(
+        self,
+        mock_register: MagicMock,
+    ) -> None:
+        """bootstrap_config_service should wire a NoOpLogger."""
+        result = bootstrap_config_service()
+
+        assert isinstance(result.logger, NoOpLogger)
+
+    @patch("bioetl.composition.bootstrap.cli.config.register_all_pipelines")
+    def test_calls_register_all_pipelines(
+        self,
+        mock_register: MagicMock,
+    ) -> None:
+        """bootstrap_config_service should call register_all_pipelines for registry."""
+        bootstrap_config_service()
+
+        mock_register.assert_called_once()
+
+    @patch("bioetl.composition.bootstrap.cli.config.register_all_pipelines")
+    def test_each_call_creates_new_instance(
+        self,
+        mock_register: MagicMock,
+    ) -> None:
+        """Each call to bootstrap_config_service should create a new ConfigService."""
+        result1 = bootstrap_config_service()
+        result2 = bootstrap_config_service()
+
+        assert result1 is not result2
+
+    @patch("bioetl.composition.bootstrap.cli.config.register_all_pipelines")
+    def test_wires_settings_loader(
+        self,
+        mock_register: MagicMock,
+    ) -> None:
+        """bootstrap_config_service should wire a settings loader callable."""
+        result = bootstrap_config_service()
+
+        # _settings_loader should be callable
+        assert callable(result._settings_loader)
+
+    @patch("bioetl.composition.bootstrap.cli.config.register_all_pipelines")
+    def test_wires_pipeline_config_loader(
+        self,
+        mock_register: MagicMock,
+    ) -> None:
+        """bootstrap_config_service should wire a pipeline config loader."""
+        result = bootstrap_config_service()
+
+        assert callable(result._pipeline_config_loader)
+
+    @patch("bioetl.composition.bootstrap.cli.config.register_all_pipelines")
+    def test_wires_registry_accessor(
+        self,
+        mock_register: MagicMock,
+    ) -> None:
+        """bootstrap_config_service should wire a registry accessor callable."""
+        result = bootstrap_config_service()
+
+        assert callable(result._registry_accessor)
+
+    @patch("bioetl.composition.bootstrap.cli.config.register_all_pipelines")
+    def test_wires_domain_config_mapper(
+        self,
+        mock_register: MagicMock,
+    ) -> None:
+        """bootstrap_config_service should wire a domain config mapper."""
+        result = bootstrap_config_service()
+
+        assert callable(result._domain_config_mapper)
+
+    @patch("bioetl.composition.bootstrap.cli.config.register_all_pipelines")
+    def test_register_all_pipelines_called_before_service_creation(
+        self,
+        mock_register: MagicMock,
+    ) -> None:
+        """register_all_pipelines must be called before ConfigService is returned."""
+        call_order: list[str] = []
+        mock_register.side_effect = lambda: call_order.append("register")
+
+        # Monkeypatch ConfigService to track call order
+        original_init = ConfigService.__init__
+
+        def patched_init(self, *args, **kwargs):  # type: ignore[no-untyped-def]
+            call_order.append("init")
+            original_init(self, *args, **kwargs)
+
+        ConfigService.__init__ = patched_init  # type: ignore[method-assign]
+        try:
+            bootstrap_config_service()
+        finally:
+            ConfigService.__init__ = original_init  # type: ignore[method-assign]
+
+        # register must come before init
+        assert call_order.index("register") < call_order.index("init")

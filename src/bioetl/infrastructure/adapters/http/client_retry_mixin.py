@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import asyncio
 import time
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 import httpx
@@ -19,6 +20,16 @@ from bioetl.domain.exceptions import (
 
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
+
+
+@dataclass(frozen=True, slots=True)
+class _RequestAttemptOutcome:
+    """Retry-stage outcome for a single request attempt."""
+
+    should_retry: bool
+    status_code: int
+    retries_increment: int
+    last_error: Exception | None
 
 
 def _can_retry(
@@ -84,6 +95,13 @@ def _record_request_metrics(
                 "error_type": error_type,
             },
         )
+
+
+def _status_code_from_error(exc: Exception) -> int:
+    """Extract HTTP status code from retryable errors when available."""
+    if isinstance(exc, httpx.HTTPStatusError):
+        return exc.response.status_code
+    return 0
 
 
 class HTTPClientRetryMixin:
@@ -153,33 +171,15 @@ class HTTPClientRetryMixin:
         last_error: Exception | None,
     ) -> None:
         """Record request duration, retry, and error metrics via _metrics port."""
-        labels = {
-            "provider": self.provider,
-            "method": method.upper(),
-            "status": str(status_code) if status_code else "error",
-        }
-        self._metrics.observe_histogram(
-            "http_request_duration_seconds", duration, labels
+        _record_request_metrics(
+            self._metrics,
+            self.provider,
+            method,
+            duration,
+            status_code,
+            retries,
+            last_error,
         )
-        if retries > 0:
-            self._metrics.increment_counter(
-                "http_retries_total",
-                retries,
-                {"provider": self.provider, "method": method.upper()},
-            )
-        if last_error is not None or status_code >= 400:
-            error_type = (
-                type(last_error).__name__ if last_error else f"http_{status_code}"
-            )
-            self._metrics.increment_counter(
-                "http_request_errors_total",
-                1,
-                {
-                    "provider": self.provider,
-                    "method": method.upper(),
-                    "error_type": error_type,
-                },
-            )
 
     def _log_retry(
         self,
@@ -253,9 +253,10 @@ class HTTPClientRetryMixin:
                     status_code = result.status_code
                     return result
 
-                should_retry, status_code, retries_inc, last_error = result
-                retries += retries_inc
-                if not should_retry:
+                status_code = result.status_code
+                retries += result.retries_increment
+                last_error = result.last_error
+                if not result.should_retry:
                     break
 
             span.set_attribute("error", True)
@@ -309,7 +310,7 @@ class HTTPClientRetryMixin:
         kwargs: dict[
             str, Any  # Any: dynamic payload or structural mixin boundary
         ],  # Any: forwarding arbitrary request kwargs to underlying HTTP client
-    ) -> httpx.Response | tuple[bool, int, int, Exception | None]:
+    ) -> httpx.Response | _RequestAttemptOutcome:
         """Execute one request attempt and return response or retry decision."""
         try:
             response = await self._execute_single_attempt(client, method, url, **kwargs)
@@ -329,7 +330,7 @@ class HTTPClientRetryMixin:
                     request=response.request,
                     response=response,
                 )
-                return (True, status_code, 1, status_error)
+                return _RequestAttemptOutcome(True, status_code, 1, status_error)
 
             response.raise_for_status()
             span.set_attribute("http.status_code", status_code)
@@ -367,21 +368,21 @@ class HTTPClientRetryMixin:
             if _can_retry(self.retry_config, attempt, retries_used):
                 wait_seconds = await self._handle_retry_delay(attempt, url)
                 self._log_retry(url, method, attempt, wait_seconds, reason=str(exc))
-                status_code = (
-                    exc.response.status_code
-                    if isinstance(exc, httpx.HTTPStatusError)
-                    else 0
+                return _RequestAttemptOutcome(
+                    True,
+                    _status_code_from_error(exc),
+                    1,
+                    exc,
                 )
-                return (True, status_code, 1, exc)
 
             if (
                 self.retry_config.retry_budget_per_request is not None
                 and not self.retry_config.is_last_attempt(attempt)
             ):
                 self._record_retry_budget_exhausted(method, url)
-            status_code = (
-                exc.response.status_code
-                if isinstance(exc, httpx.HTTPStatusError)
-                else 0
+            return _RequestAttemptOutcome(
+                False,
+                _status_code_from_error(exc),
+                0,
+                exc,
             )
-            return (False, status_code, 0, exc)

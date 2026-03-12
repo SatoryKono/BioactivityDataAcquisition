@@ -1,5 +1,4 @@
-> **DEPRECATED** — stale duplicate, kept for reference only.
-*Статус: deprecated (stale duplicate)*
+
 
  Ты — технический оркестратор рефакторинга и архитектурного аудита BioETL.                                                                                                                                           
                                                                                                                                                                                                                       
