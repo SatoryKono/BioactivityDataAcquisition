@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import shutil
 import subprocess
 import sys
@@ -58,8 +59,15 @@ def resolve_inputs(raw_inputs: list[str]) -> list[Path]:
     return resolved
 
 
-def run(cmd: list[str]) -> None:
-    completed = subprocess.run(cmd, capture_output=True, text=True)
+def _resource_path_sep() -> str:
+    """Return the resource-path separator: ';' on Windows, ':' on POSIX."""
+    return ";" if os.name == "nt" else ":"
+
+
+def run(cmd: list[str], cwd: Path | None = None) -> None:
+    completed = subprocess.run(
+        cmd, cwd=str(cwd) if cwd else None, capture_output=True, text=True,
+    )
     if completed.returncode == 0:
         return
     stderr = completed.stderr.strip()
@@ -75,11 +83,12 @@ def render_one(input_md: Path, reference_doc: Path | None) -> Path:
         raise FileNotFoundError(f"Input markdown not found: {input_md}")
 
     output_docx = input_md.with_suffix(".docx")
-    resource_path = f"{input_md.parent}:{REPO_ROOT}"
+    sep = _resource_path_sep()
+    resource_path = f"{input_md.parent}{sep}{REPO_ROOT}"
 
     cmd = [
         "pandoc",
-        str(input_md),
+        input_md.name,
         "--from",
         "gfm",
         "--to",
@@ -93,7 +102,7 @@ def render_one(input_md: Path, reference_doc: Path | None) -> Path:
     if reference_doc is not None:
         cmd.extend(["--reference-doc", str(reference_doc)])
 
-    run(cmd)
+    run(cmd, cwd=input_md.parent)
     return output_docx
 
 

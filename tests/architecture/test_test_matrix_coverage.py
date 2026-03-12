@@ -127,7 +127,11 @@ class TestFixtureGovernanceRollout:
         )
 
         assert rollout.get("cassette_metadata") in {"planned", "partial", "enforced"}
-        assert rollout.get("cassette_staleness_age") in {"planned", "partial", "enforced"}
+        assert rollout.get("cassette_staleness_age") in {
+            "metadata_gated",
+            "partial",
+            "enforced",
+        }
         assert rollout.get("golden_masters") in {"planned", "partial", "enforced"}
         assert rollout.get("contract_snapshots") in {"planned", "partial", "enforced"}
 
@@ -169,8 +173,8 @@ class TestFixtureGovernanceRollout:
 
         assert fixture_governance.get("root_vcr_policy_enforced") is True
         assert rollout.get("extensionless_filenames") in {"partial", "enforced"}
-        assert "python scripts/check_root_vcr_cassettes.py" in workflow
-        assert "python scripts/check_vcr_filename_policy.py" in workflow
+        assert "python scripts/data/check_root_vcr_cassettes.py" in workflow
+        assert "python scripts/data/check_vcr_filename_policy.py" in workflow
         assert not legacy_dir.exists(), "legacy tests/fixtures/vcr_cassettes directory must stay removed"
         assert not from_root_markers, "legacy *.from_root.yaml markers must stay removed"
 
@@ -197,18 +201,29 @@ class TestFixtureGovernanceRollout:
         metadata_files = list(vcr_dir.rglob("*_meta.yaml")) if vcr_dir.exists() else []
 
         assert fixture_governance.get("vcr_cassette_max_age_days") == 90
-        assert rollout.get("cassette_staleness_age") in {"planned", "partial", "enforced"}
+        assert rollout.get("cassette_staleness_age") in {
+            "metadata_gated",
+            "partial",
+            "enforced",
+        }
+        assert fixture_governance.get("cassette_staleness_requires_metadata") in {
+            True,
+            False,
+        }
 
-        if rollout.get("cassette_staleness_age") == "planned":
+        if rollout.get("cassette_staleness_age") == "metadata_gated":
+            assert fixture_governance.get("cassette_staleness_requires_metadata") is True
             assert fixture_governance.get("cassette_metadata_required") is False
             assert not metadata_files, (
-                "planned cassette stale-age rollout must be updated once *_meta.yaml backfill begins"
+                "metadata-gated cassette stale-age policy must be updated once *_meta.yaml backfill begins"
             )
             assert "check_vcr_cassette_age" not in workflow
             assert "check_vcr_metadata_age" not in workflow
         elif rollout.get("cassette_staleness_age") == "partial":
+            assert fixture_governance.get("cassette_staleness_requires_metadata") is True
             assert metadata_files, "partial cassette stale-age rollout requires *_meta.yaml inventory"
         else:
+            assert fixture_governance.get("cassette_staleness_requires_metadata") is True
             assert fixture_governance.get("cassette_metadata_required") is True
             assert metadata_files, "enforced cassette stale-age rollout requires *_meta.yaml inventory"
 
@@ -282,17 +297,22 @@ class TestContractTestingGovernance:
         matrix = _load_matrix()
         contract_testing = matrix.get("contract_testing", {})
         workflow = (WORKFLOWS_DIR / "contract-tests.yml").read_text(encoding="utf-8")
+        live_api_baseline = contract_testing.get("live_api_minimum_baseline", {})
 
         assert contract_testing.get("workflow_present") is True
         assert contract_testing.get("live_api_gate_mode") == "scheduled"
         assert contract_testing.get("network_opt_in_required") is True
+        assert live_api_baseline == {
+            "enforced_providers": ["chembl", "pubchem", "uniprot", "pubmed"],
+            "vcr_only_providers": ["crossref", "openalex", "semanticscholar"],
+        }
         assert contract_testing["provider_live_api"]["chembl"] == "enforced"
         assert contract_testing["provider_live_api"]["pubchem"] == "enforced"
         assert contract_testing["provider_live_api"]["uniprot"] == "enforced"
         assert contract_testing["provider_live_api"]["pubmed"] == "enforced"
-        assert contract_testing["provider_live_api"]["crossref"] == "planned"
-        assert contract_testing["provider_live_api"]["openalex"] == "planned"
-        assert contract_testing["provider_live_api"]["semanticscholar"] == "planned"
+        assert contract_testing["provider_live_api"]["crossref"] == "vcr_only"
+        assert contract_testing["provider_live_api"]["openalex"] == "vcr_only"
+        assert contract_testing["provider_live_api"]["semanticscholar"] == "vcr_only"
 
         assert "BIOETL_LIVE_API_TESTS: \"true\"" in workflow
         assert "BIOETL_NETWORK_TESTS: \"true\"" in workflow
@@ -303,8 +323,10 @@ class TestContractTestingGovernance:
     def test_enforced_live_contract_providers_have_test_modules_and_markers(self) -> None:
         matrix = _load_matrix()
         provider_live_api = matrix["contract_testing"]["provider_live_api"]
+        providers = matrix["providers"]
         contract_dir = TESTS_DIR / "contract"
         conftest = (contract_dir / "conftest.py").read_text(encoding="utf-8")
+        vcr_dir = TESTS_DIR / "fixtures" / "vcr"
 
         for provider, status in provider_live_api.items():
             contract_test = contract_dir / f"test_{provider}_contract.py"
@@ -317,8 +339,18 @@ class TestContractTestingGovernance:
                 assert marker_registration in conftest, (
                     f"provider '{provider}' is live-enforced but pytest marker is not registered"
                 )
-            elif status == "planned":
+            elif status == "vcr_only":
                 assert not contract_test.exists(), (
-                    f"provider '{provider}' is still planned but already has a live contract suite; "
+                    f"provider '{provider}' is VCR-only in the live baseline but already has a live contract suite; "
                     "promote matrix status before enabling enforcement"
+                )
+                assert providers[provider]["vcr_cassettes"] == "MUST", (
+                    f"provider '{provider}' is VCR-only but the matrix does not require VCR cassettes"
+                )
+                assert (vcr_dir / provider).is_dir(), (
+                    f"provider '{provider}' is VCR-only but {vcr_dir / provider} is missing"
+                )
+            else:
+                pytest.fail(
+                    f"unexpected provider_live_api status for '{provider}': {status}"
                 )

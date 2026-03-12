@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import shutil
 import subprocess
@@ -152,7 +153,8 @@ def render_one(
         tmp_html = tmp_dir / f"{input_md.stem}.html"
 
         tmp_md.write_text(markdown_text, encoding="utf-8")
-        resource_path = f"{input_md.parent}:{REPO_ROOT}"
+        sep = ";" if os.name == "nt" else ":"
+        resource_path = f"{input_md.parent}{sep}{REPO_ROOT}"
 
         run(
             [
