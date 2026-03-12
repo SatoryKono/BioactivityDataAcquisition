@@ -64,6 +64,11 @@ composition/bootstrap/
 | `dq/factory.py`             | `DQServicesFactory`                          | Создание Data Quality компонентов                              |
 | `transformer_factory.py`    | `register_transformer() / create_transformer()` | Создание трансформеров по провайдеру                        |
 
+Часть модулей в `composition/factories/`, `composition/services/` и `composition/runtime_builders/`
+сохраняет compatibility facade / shim роль ради стабильности import-paths во время рефакторинга.
+Курируемый список таких модулей, их status-модель и exit criteria ведутся в
+[Compatibility Facade Inventory](07-compatibility-facade-inventory.md).
+
 **Root-level файлы:**
 
 Также в корне `composition/` находятся: `bootstrap_contexts.py`, `bootstrap_logger.py`, `builders.py`, `entrypoints.py`, `observability.py`, `registry.py`, `types.py`, `_pipeline_execution.py`, `_resource_management.py`, `_services.py`.
@@ -78,6 +83,9 @@ composition/bootstrap/
 
 - **`ProviderRegistry`**: Главный реестр провайдеров. Хранит конфигурацию каждого провайдера (data source creator, transformer class, pipelines).
 - **`DataSourceRegistry`**: Фасад для backward compatibility. Делегирует создание в `ProviderRegistry`.
+
+Полная deprecation/inventory картина по `DataSourceRegistry` и соседним compat-модулям описана в
+[Compatibility Facade Inventory](07-compatibility-facade-inventory.md).
 
 **Пример использования:**
 
@@ -163,4 +171,5 @@ runner = bootstrap_composite_runner(
 - [Interfaces Layer](04-interfaces-layer.md) — CLI использует bootstrap
 - [Application Layer](02-application-layer.md) — пайплайны, создаваемые фабриками
 - [Infrastructure Layer](03-infrastructure-layer.md) — адаптеры, регистрируемые в ProviderRegistry
+- [Compatibility Facade Inventory](07-compatibility-facade-inventory.md) — статус и план вывода compat-модулей
 - [API Reference: Composition](../04-reference/api/composition.md) — API документация слоя

@@ -27,6 +27,7 @@ from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adap
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 from bioetl.composition.registry import get_default_registry
 from bioetl.infrastructure.config import get_settings, load_pipeline_config
+from bioetl.infrastructure.export import ExportCatalogAdapter, ExportWriterAdapter
 from bioetl.infrastructure.storage.delta_reader import DeltaReader
 
 __all__ = [
@@ -183,6 +184,8 @@ def bootstrap_export_service() -> ExportService:
 
     return ExportService(
         reader=reader,
+        catalog=ExportCatalogAdapter(),
+        writer=ExportWriterAdapter(),
         logger=noop_logger,
         silver_path=silver_path,
         gold_path=gold_path,

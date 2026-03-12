@@ -6,10 +6,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.export_discovery import (
-    _scan_layer_for_tables,
-    _scan_provider_for_tables,
-)
 from bioetl.application.services.export_models import (
     ColumnInfo,
     ExportFormat,
@@ -18,16 +14,15 @@ from bioetl.application.services.export_models import (
     TableInfo,
     TablePreview,
 )
-from bioetl.application.services.export_writers import (
-    _write_delimited_file,
-    _write_xlsx_file,
-)
 from bioetl.domain.exceptions import BioETLError, StorageError
 
 if TYPE_CHECKING:
-    import pyarrow as pa
-
-    from bioetl.domain.ports import DeltaReaderPort, LoggerPort
+    from bioetl.domain.ports import (
+        DeltaReaderPort,
+        ExportCatalogPort,
+        ExportWriterPort,
+        LoggerPort,
+    )
 
 _EXPORT_OPERATION_ERRORS = (
     StorageError,
@@ -46,6 +41,8 @@ class ExportService:
     """Service for exporting Delta Lake tables to various formats."""
 
     reader: DeltaReaderPort
+    catalog: ExportCatalogPort
+    writer: ExportWriterPort
     logger: LoggerPort
     silver_path: Path
     gold_path: Path
@@ -62,9 +59,21 @@ class ExportService:
         """
         tables: list[TableInfo] = []
         if layer in ("all", "silver"):
-            tables.extend(_scan_layer_for_tables(self.silver_path, "silver"))
+            tables.extend(
+                TableInfo(name=name, layer="silver", path=path)
+                for name, path in self.catalog.list_tables(
+                    base_path=self.silver_path,
+                    layer="silver",
+                )
+            )
         if layer in ("all", "gold"):
-            tables.extend(_scan_layer_for_tables(self.gold_path, "gold"))
+            tables.extend(
+                TableInfo(name=name, layer="gold", path=path)
+                for name, path in self.catalog.list_tables(
+                    base_path=self.gold_path,
+                    layer="gold",
+                )
+            )
         return sorted(tables, key=lambda t: (t.layer, t.name))
 
     async def preview(
@@ -169,9 +178,12 @@ class ExportService:
         )
         row_count = table.num_rows
         output_dir = options.output_path or self.export_path
-        output_dir.mkdir(parents=True, exist_ok=True)
-        output_path = self._write_export(
-            table, table_name, layer, options.format, output_dir
+        output_path = self.writer.write_export(
+            table=table,
+            table_name=table_name,
+            layer=layer,
+            fmt=options.format,
+            output_dir=output_dir,
         )
         self.logger.info(
             "Export completed",
@@ -241,49 +253,22 @@ class ExportService:
             error=error,
         )
 
-    def _write_export(
-        self,
-        table: pa.Table,
-        table_name: str,
-        layer: str,
-        fmt: ExportFormat,
-        output_dir: Path,
-    ) -> Path:
-        """Write table to export file using appropriate format."""
-        safe_name = f"{layer}_{table_name.replace('.', '_')}"
-        if fmt == "csv":
-            return _write_delimited_file(table, output_dir / f"{safe_name}.csv", ",")
-        if fmt == "tsv":
-            return _write_delimited_file(table, output_dir / f"{safe_name}.tsv", "\t")
-        if fmt == "xlsx":
-            return _write_xlsx_file(table, output_dir / f"{safe_name}.xlsx")
-        raise ValueError(f"Unsupported format: {fmt}")
-
     def _get_table_path(self, table_name: str, layer: str) -> Path:
-        """Get the filesystem path for a table."""
-        if layer == "silver":
-            base_path = self.silver_path
-        elif layer == "gold":
-            base_path = self.gold_path
-        else:
-            raise ValueError(f"Invalid layer: {layer}")
-
-        if not base_path.exists():
-            raise FileNotFoundError(f"Layer path not found: {base_path}")
-
-        for provider_dir in base_path.iterdir():
-            if not provider_dir.is_dir():
-                continue
-            for entity_dir in provider_dir.iterdir():
-                if not entity_dir.is_dir():
-                    continue
-                table_dir = entity_dir / table_name
-                if table_dir.exists() and (table_dir / "_delta_log").exists():
-                    return table_dir.resolve()
-
-        raise FileNotFoundError(
-            f"Table '{table_name}' not found in {layer} layer at {base_path}"
+        """Get the table path through the catalog adapter."""
+        base_path = self._get_layer_base_path(layer)
+        return self.catalog.resolve_table_path(
+            base_path=base_path,
+            table_name=table_name,
+            layer=layer,
         )
+
+    def _get_layer_base_path(self, layer: str) -> Path:
+        """Resolve the root path for one export layer."""
+        if layer == "silver":
+            return self.silver_path
+        if layer == "gold":
+            return self.gold_path
+        raise ValueError(f"Invalid layer: {layer}")
 
 
 __all__ = [
@@ -294,8 +279,4 @@ __all__ = [
     "ExportService",
     "TableInfo",
     "TablePreview",
-    "_scan_layer_for_tables",
-    "_scan_provider_for_tables",
-    "_write_delimited_file",
-    "_write_xlsx_file",
 ]
