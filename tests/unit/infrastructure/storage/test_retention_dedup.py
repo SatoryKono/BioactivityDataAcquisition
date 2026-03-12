@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import tempfile
 from pathlib import Path
 
 import pyarrow as pa
@@ -50,16 +49,32 @@ async def test_deduplicate_removes_duplicates(tmp_delta_dir: Path) -> None:
     _write_test_table(
         table_path,
         [
-            {"activity_id": "1", "value": 10.0, "_ingestion_ts": "2024-01-01T00:00:00Z"},
-            {"activity_id": "2", "value": 20.0, "_ingestion_ts": "2024-01-01T00:00:00Z"},
+            {
+                "activity_id": "1",
+                "value": 10.0,
+                "_ingestion_ts": "2024-01-01T00:00:00Z",
+            },
+            {
+                "activity_id": "2",
+                "value": 20.0,
+                "_ingestion_ts": "2024-01-01T00:00:00Z",
+            },
         ],
     )
     # Append batch 2 (newer, with duplicate for id=1)
     _write_test_table(
         table_path,
         [
-            {"activity_id": "1", "value": 15.0, "_ingestion_ts": "2024-01-02T00:00:00Z"},
-            {"activity_id": "3", "value": 30.0, "_ingestion_ts": "2024-01-02T00:00:00Z"},
+            {
+                "activity_id": "1",
+                "value": 15.0,
+                "_ingestion_ts": "2024-01-02T00:00:00Z",
+            },
+            {
+                "activity_id": "3",
+                "value": 30.0,
+                "_ingestion_ts": "2024-01-02T00:00:00Z",
+            },
         ],
         mode="append",
     )
@@ -90,8 +105,16 @@ async def test_deduplicate_no_duplicates(tmp_delta_dir: Path) -> None:
     _write_test_table(
         table_path,
         [
-            {"activity_id": "1", "value": 10.0, "_ingestion_ts": "2024-01-01T00:00:00Z"},
-            {"activity_id": "2", "value": 20.0, "_ingestion_ts": "2024-01-01T00:00:00Z"},
+            {
+                "activity_id": "1",
+                "value": 10.0,
+                "_ingestion_ts": "2024-01-01T00:00:00Z",
+            },
+            {
+                "activity_id": "2",
+                "value": 20.0,
+                "_ingestion_ts": "2024-01-01T00:00:00Z",
+            },
         ],
     )
 
@@ -115,7 +138,11 @@ async def test_deduplicate_empty_table(tmp_delta_dir: Path) -> None:
         ]
     )
     empty = pa.table(
-        [pa.array([], type=pa.string()), pa.array([], type=pa.float64()), pa.array([], type=pa.string())],
+        [
+            pa.array([], type=pa.string()),
+            pa.array([], type=pa.float64()),
+            pa.array([], type=pa.string()),
+        ],
         schema=schema,
     )
     write_deltalake(str(table_path), empty)
