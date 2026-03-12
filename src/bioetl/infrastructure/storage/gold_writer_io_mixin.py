@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol, cast
 
 import pyarrow as pa
@@ -71,6 +72,153 @@ class _GoldWriteDispatchTargetProtocol(Protocol):
     ) -> None: ...
 
 
+class _GoldMergedWriteHostProtocol(Protocol):
+    """Structural host contract for merged Gold write helpers."""
+
+    logger: LoggerPort
+    csv_exporter: CsvExporter | None
+    _resolve_table_path: Callable[[str], str]
+    _validate_records_against_schema: Callable[
+        [list[GoldRecord], DataFrameSchema], Awaitable[None]
+    ]
+
+    async def _run_in_executor(
+        self,
+        func: Callable[..., object],
+        *args: object,
+    ) -> object: ...
+
+
+@dataclass(frozen=True, slots=True)
+class _GoldMergedWriteRequest:
+    """Normalized request for one merged Gold write."""
+
+    table_name: str
+    records: list[GoldRecord]
+    primary_keys: list[str] | None
+    schema: DataFrameSchema | None
+    run_id: str | None
+    sources_used: list[str] | None
+    preserve_column_order: bool = False
+
+
+@dataclass(frozen=True, slots=True)
+class _PreparedGoldMergedWrite:
+    """Prepared merged Gold write carried across post-write stages."""
+
+    request: _GoldMergedWriteRequest
+    table_path: str
+    arrow_table: pa.Table
+
+
+def _prepare_gold_merged_table(
+    *,
+    records: list[GoldRecord],
+    primary_keys: list[str] | None,
+    preserve_column_order: bool,
+) -> pa.Table:
+    """Build deterministic arrow table for merged Gold output."""
+    from bioetl.domain.schemas.column_order import canonical_column_order
+
+    module = _load_gold_writer_module()
+    arrow_table = module.coerce_null_types_for_delta(pa.Table.from_pylist(records))
+    if not preserve_column_order:
+        ordered_columns = canonical_column_order(list(arrow_table.column_names))
+        arrow_table = arrow_table.select(ordered_columns)
+    if primary_keys:
+        valid_keys = [pk for pk in primary_keys if pk in arrow_table.schema.names]
+        if valid_keys:
+            arrow_table = arrow_table.sort_by([(pk, "ascending") for pk in valid_keys])
+    return arrow_table
+
+
+async def _prepare_gold_merged_write(
+    host: _GoldMergedWriteHostProtocol,
+    request: _GoldMergedWriteRequest,
+) -> _PreparedGoldMergedWrite:
+    """Validate and prepare one merged Gold write request."""
+    if request.schema is not None:
+        await host._validate_records_against_schema(request.records, request.schema)
+    return _PreparedGoldMergedWrite(
+        request=request,
+        table_path=host._resolve_table_path(request.table_name),
+        arrow_table=_prepare_gold_merged_table(
+            records=request.records,
+            primary_keys=request.primary_keys,
+            preserve_column_order=request.preserve_column_order,
+        ),
+    )
+
+
+def _log_prepared_gold_merged_write(
+    host: _GoldMergedWriteHostProtocol,
+    prepared: _PreparedGoldMergedWrite,
+) -> None:
+    """Log merged Gold write intent after request preparation."""
+    host.logger.info(
+        "Writing merged Gold records",
+        table_name=prepared.request.table_name,
+        path=prepared.table_path,
+        records=len(prepared.request.records),
+    )
+
+
+async def _write_gold_merged_delta(
+    host: _GoldMergedWriteHostProtocol,
+    prepared: _PreparedGoldMergedWrite,
+) -> None:
+    """Persist merged Gold table to Delta."""
+    module = _load_gold_writer_module()
+    await host._run_in_executor(
+        lambda: module.write_deltalake(
+            prepared.table_path,
+            prepared.arrow_table,
+            mode="overwrite",
+            schema_mode="overwrite",
+        )
+    )
+
+
+async def _export_gold_merged_csv(
+    host: _GoldMergedWriteHostProtocol,
+    prepared: _PreparedGoldMergedWrite,
+) -> None:
+    """Export merged Gold table to CSV when exporter is configured."""
+    if host.csv_exporter:
+        await host.csv_exporter.export(
+            prepared.request.table_name,
+            prepared.arrow_table,
+            append=False,
+        )
+
+
+async def _write_gold_merged_sidecar(
+    host: _GoldMergedWriteHostProtocol,
+    prepared: _PreparedGoldMergedWrite,
+) -> None:
+    """Write merged Gold metadata sidecar after data write completes."""
+    metadata_writer = cast(_GoldMergedMetadataWriterProtocol, host)
+    await metadata_writer._write_gold_merged_metadata(
+        table_path=prepared.table_path,
+        table_name=prepared.request.table_name,
+        records=prepared.request.records,
+        primary_keys=prepared.request.primary_keys or [],
+        run_id=prepared.request.run_id,
+        sources_used=prepared.request.sources_used,
+        schema=prepared.request.schema,
+    )
+
+
+async def _complete_gold_merged_write(
+    host: _GoldMergedWriteHostProtocol,
+    prepared: _PreparedGoldMergedWrite,
+) -> None:
+    """Run Delta write plus post-write side effects for merged Gold."""
+    await _write_gold_merged_delta(host, prepared)
+    await _export_gold_merged_csv(host, prepared)
+    await _write_gold_merged_sidecar(host, prepared)
+
+
 class _GoldWriterMergedDispatchMixin(_GoldWriterExecutorArrowMixin):
     """Merged-write orchestration and mode dispatch."""
 
@@ -100,104 +248,18 @@ class _GoldWriterMergedDispatchMixin(_GoldWriterExecutorArrowMixin):
             )
             return
 
-        if schema is not None:
-            await self._validate_records_against_schema(records, schema)
-        arrow_table = self._prepare_gold_merged_table(
+        request = _GoldMergedWriteRequest(
+            table_name=table_name,
             records=records,
             primary_keys=primary_keys,
+            schema=schema,
+            run_id=run_id,
+            sources_used=sources_used,
             preserve_column_order=preserve_column_order,
         )
-        table_path = self._resolve_table_path(table_name)
-        self._log_gold_merged_write(table_name, table_path, len(records))
-        await self._write_gold_merged_delta(table_path, arrow_table)
-        await self._export_gold_merged_csv(table_name, arrow_table)
-        await self._write_gold_merged_sidecar(
-            table_path=table_path,
-            table_name=table_name,
-            records=records,
-            primary_keys=primary_keys,
-            run_id=run_id,
-            sources_used=sources_used,
-            schema=schema,
-        )
-
-    def _prepare_gold_merged_table(
-        self,
-        *,
-        records: list[GoldRecord],
-        primary_keys: list[str] | None,
-        preserve_column_order: bool,
-    ) -> pa.Table:
-        """Build deterministic arrow table for merged Gold output."""
-        from bioetl.domain.schemas.column_order import canonical_column_order
-
-        module = _load_gold_writer_module()
-        arrow_table = module.coerce_null_types_for_delta(pa.Table.from_pylist(records))
-        if not preserve_column_order:
-            ordered_columns = canonical_column_order(list(arrow_table.column_names))
-            arrow_table = arrow_table.select(ordered_columns)
-        if primary_keys:
-            valid_keys = [pk for pk in primary_keys if pk in arrow_table.schema.names]
-            if valid_keys:
-                arrow_table = arrow_table.sort_by(
-                    [(pk, "ascending") for pk in valid_keys]
-                )
-        return arrow_table
-
-    def _log_gold_merged_write(
-        self, table_name: str, table_path: str, count: int
-    ) -> None:
-        """Log merged Gold write intent."""
-        self.logger.info(
-            "Writing merged Gold records",
-            table_name=table_name,
-            path=table_path,
-            records=count,
-        )
-
-    async def _write_gold_merged_delta(
-        self, table_path: str, arrow_table: pa.Table
-    ) -> None:
-        """Persist merged Gold table to Delta."""
-        module = _load_gold_writer_module()
-        await self._run_in_executor(
-            lambda: module.write_deltalake(
-                table_path,
-                arrow_table,
-                mode="overwrite",
-                schema_mode="overwrite",
-            )
-        )
-
-    async def _export_gold_merged_csv(
-        self, table_name: str, arrow_table: pa.Table
-    ) -> None:
-        """Export merged Gold table to CSV when exporter is configured."""
-        if self.csv_exporter:
-            await self.csv_exporter.export(table_name, arrow_table, append=False)
-
-    async def _write_gold_merged_sidecar(
-        self,
-        *,
-        table_path: str,
-        table_name: str,
-        records: list[GoldRecord],
-        primary_keys: list[str] | None,
-        run_id: str | None,
-        sources_used: list[str] | None,
-        schema: DataFrameSchema | None,
-    ) -> None:
-        """Write merged Gold metadata sidecar via mixin protocol."""
-        metadata_writer = cast(_GoldMergedMetadataWriterProtocol, self)
-        await metadata_writer._write_gold_merged_metadata(
-            table_path=table_path,
-            table_name=table_name,
-            records=records,
-            primary_keys=primary_keys or [],
-            run_id=run_id,
-            sources_used=sources_used,
-            schema=schema,
-        )
+        prepared = await _prepare_gold_merged_write(self, request)
+        _log_prepared_gold_merged_write(self, prepared)
+        await _complete_gold_merged_write(self, prepared)
 
     async def _dispatch_write(
         self,

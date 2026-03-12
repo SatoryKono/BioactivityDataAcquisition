@@ -1,7 +1,8 @@
-"""Canonical PubMed adapter entrypoint.
+"""Retained PubMed adapter entrypoint.
 
-Keeps backward compatibility while steering new imports away from
-``pubmed_client``.
+This module is the stable canonical import path for first-party code. It
+remains intentionally retained in the current cycle while the implementation
+continues to live in ``pubmed_client``.
 """
 
 from __future__ import annotations

@@ -27,7 +27,7 @@ from bioetl.composition.providers.factory_loader import (
     get_data_source_factory,
     get_http_client_factory,
 )
-from bioetl.composition.providers.provider_registry import (
+from bioetl.composition.providers._models import (
     HttpConfig,
     ProviderConfig,
 )

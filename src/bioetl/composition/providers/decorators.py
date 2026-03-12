@@ -7,10 +7,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, TypeVar
 
-from bioetl.composition.providers.provider_registry import (
+from bioetl.composition.providers._models import (
     AdapterCreator,
     HttpConfig,
     ProviderConfig,
+)
+from bioetl.composition.providers.provider_registry import (
     ProviderRegistry,
 )
 

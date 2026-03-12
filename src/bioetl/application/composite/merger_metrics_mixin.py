@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
+
+from bioetl.application.composite.join_planner_helpers import parse_pipeline_name
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -21,7 +22,6 @@ class MergeMetricsRecorderMixin:
 
     _config: MergeConfig
     _logger: LoggerPort
-    _parse_pipeline_name: Callable[[str], tuple[str, str]]
 
     def _add_lineage(
         self,
@@ -116,7 +116,7 @@ class MergeMetricsRecorderMixin:
 
         for enricher in enrichers:
             try:
-                provider, entity = self._parse_pipeline_name(enricher.pipeline)
+                provider, entity = parse_pipeline_name(enricher.pipeline)
                 prefix = f"{provider}.{entity}."
             except ValueError:
                 prefix = f"{enricher.pipeline}_"
