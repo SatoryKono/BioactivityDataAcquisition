@@ -18,6 +18,7 @@ Field Classification:
 - API-OPTIONAL: Fields from external APIs (may be None)
 - COMPUTED: Derived fields (calculated from other fields)
 """
+from __future__ import annotations
 
 from bioetl.domain.entities.base import BaseEntity
 from bioetl.domain.entities.bioactivity import Bioactivity, BioactivityState

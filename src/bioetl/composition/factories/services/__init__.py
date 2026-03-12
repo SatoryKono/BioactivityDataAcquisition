@@ -1,4 +1,5 @@
 """Services factory subpackage (DI for PipelineRunner)."""
+from __future__ import annotations
 
 from bioetl.composition.factories.services.factory import (
     BaseServicesFactory,

@@ -2,6 +2,7 @@
 
 Provides DOI resolution and citation metadata from CrossRef API.
 """
+from __future__ import annotations
 
 from bioetl.infrastructure.adapters.crossref.client import (
     CROSSREF_API_BASE,

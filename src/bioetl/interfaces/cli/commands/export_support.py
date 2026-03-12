@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable, Coroutine
 from pathlib import Path
-from typing import Any, Literal, Protocol, TypeVar, cast
+from typing import Literal, Protocol, TypeVar, cast
 
 from bioetl.application.services import (
     ExportOptions,
@@ -86,7 +86,7 @@ def _handle_export_failure(
 
 
 def _run_export_async(
-    coro: Coroutine[Any, Any, _T],
+    coro: Coroutine[object, object, _T],
     *,
     table: str,
     reason_prefix: str,

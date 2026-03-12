@@ -1,4 +1,5 @@
 """Quality governance utilities for technical-debt gates."""
+from __future__ import annotations
 
 from bioetl.infrastructure.quality.debt_scorecard import (
     build_exemption_inventory,

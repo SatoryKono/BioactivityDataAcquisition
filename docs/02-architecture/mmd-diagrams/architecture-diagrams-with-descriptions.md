@@ -1,945 +1,944 @@
 # BioETL Architecture Diagrams With Descriptions
 
-- Generated: 2026-03-12T13:00:59
+- Generated: 2026-03-12T14:16:19
 - Diagram count: 52
 
 ## Table of Contents
 
-- [01-high-level-hexagonal](#01-high-level-hexagonal)
-- [01a-hexagonal-overview](#01a-hexagonal-overview)
-- [01b-hexagonal-domain-app](#01b-hexagonal-domain-app)
-- [01c-hexagonal-infra-comp](#01c-hexagonal-infra-comp)
-- [01d-hexagonal-overview-rounded](#01d-hexagonal-overview-rounded)
-- [02-layer-dependency-matrix](#02-layer-dependency-matrix)
-- [03-medallion-data-flow](#03-medallion-data-flow)
-- [03a-medallion-layers-overview](#03a-medallion-layers-overview)
-- [04-pipeline-execution-flow](#04-pipeline-execution-flow)
-- [05-provider-adapter-hierarchy](#05-provider-adapter-hierarchy)
-- [05a-adapter-hierarchy-base](#05a-adapter-hierarchy-base)
-- [05b-adapter-hierarchy-providers](#05b-adapter-hierarchy-providers)
-- [06-storage-layer](#06-storage-layer)
-- [06a-storage-writers](#06a-storage-writers)
-- [06b-storage-support](#06b-storage-support)
-- [07-dq-system](#07-dq-system)
-- [07a-dq-analysis](#07a-dq-analysis)
-- [07b-dq-pipeline](#07b-dq-pipeline)
-- [08-composite-pipeline](#08-composite-pipeline)
-- [08a-composite-config](#08a-composite-config)
-- [08b-composite-execution](#08b-composite-execution)
-- [09-observability-stack](#09-observability-stack)
-- [09a-observability-app](#09a-observability-app)
-- [09b-observability-infra](#09b-observability-infra)
-- [10-resilience-patterns](#10-resilience-patterns)
-- [11-configuration-system](#11-configuration-system)
-- [11a-config-loading](#11a-config-loading)
-- [11b-config-domain](#11b-config-domain)
-- [12-bootstrap-di-container](#12-bootstrap-di-container)
-- [12a-bootstrap-factories](#12a-bootstrap-factories)
-- [12b-bootstrap-wiring](#12b-bootstrap-wiring)
-- [13-port-protocol-contracts](#13-port-protocol-contracts)
-- [13a-data-storage-ports](#13a-data-storage-ports)
-- [13a-port-contracts-data-sources](#13a-port-contracts-data-sources)
-- [13b-operational-ports](#13b-operational-ports)
-- [13b-port-contracts-storage](#13b-port-contracts-storage)
-- [13c-port-contracts-observability](#13c-port-contracts-observability)
-- [13c-validation-dq-ports](#13c-validation-dq-ports)
-- [13d-port-contracts-services](#13d-port-contracts-services)
-- [13e-operational-ports-domain](#13e-operational-ports-domain)
-- [13f-operational-ports-infra](#13f-operational-ports-infra)
-- [14-cli-interface-layer](#14-cli-interface-layer)
-- [14a-cli-commands](#14a-cli-commands)
-- [14b-cli-routing](#14b-cli-routing)
-- [15-batch-executor-internals](#15-batch-executor-internals)
-- [16-transformer-hierarchy](#16-transformer-hierarchy)
-- [16a-transformer-base](#16a-transformer-base)
-- [16b-transformer-pub-other](#16b-transformer-pub-other)
-- [17-security-pii-audit](#17-security-pii-audit)
-- [18-lock-checkpoint-shutdown](#18-lock-checkpoint-shutdown)
-- [18a-lock-system](#18a-lock-system)
-- [18b-checkpoint-shutdown](#18b-checkpoint-shutdown)
+- [01-high-level-hexagonal — High-Level Hexagonal Architecture](#01-high-level-hexagonal)
+- [01a-hexagonal-overview — Hexagonal Overview](#01a-hexagonal-overview)
+- [01b-hexagonal-domain-app — Hexagonal Domain and Application](#01b-hexagonal-domain-app)
+- [01c-hexagonal-infra-comp — Hexagonal Infrastructure and Composition](#01c-hexagonal-infra-comp)
+- [01d-hexagonal-overview-rounded — Hexagonal Overview (Rounded Nodes)](#01d-hexagonal-overview-rounded)
+- [02-layer-dependency-matrix — Layer Dependency Matrix (ARCH-001)](#02-layer-dependency-matrix)
+- [03-medallion-data-flow — Medallion Architecture Data Flow (Bronze → Silver → Gold)](#03-medallion-data-flow)
+- [03a-medallion-layers-overview — Medallion Layers Overview](#03a-medallion-layers-overview)
+- [04-pipeline-execution-flow — Pipeline Execution Lifecycle](#04-pipeline-execution-flow)
+- [05-provider-adapter-hierarchy — Provider Adapter Hierarchy](#05-provider-adapter-hierarchy)
+- [05a-adapter-hierarchy-base — Adapter Hierarchy: Base Types](#05a-adapter-hierarchy-base)
+- [05b-adapter-hierarchy-providers — Adapter Hierarchy: Provider Implementations](#05b-adapter-hierarchy-providers)
+- [06-storage-layer — Storage Layer Components](#06-storage-layer)
+- [06a-storage-writers — Storage Writers](#06a-storage-writers)
+- [06b-storage-support — Storage Support Components](#06b-storage-support)
+- [07-dq-system — Data Quality (DQ) System](#07-dq-system)
+- [07a-dq-analysis — DQ Analysis Services](#07a-dq-analysis)
+- [07b-dq-pipeline — DQ Pipeline Integration](#07b-dq-pipeline)
+- [08-composite-pipeline — Composite Pipeline Architecture](#08-composite-pipeline)
+- [08a-composite-config — Composite Pipeline Configuration & FSM](#08a-composite-config)
+- [08b-composite-execution — Composite Pipeline Execution](#08b-composite-execution)
+- [09-observability-stack — Observability Stack](#09-observability-stack)
+- [09a-observability-app — Observability: Application Layer](#09a-observability-app)
+- [09b-observability-infra — Observability: Infrastructure Layer](#09b-observability-infra)
+- [10-resilience-patterns — Resilience Patterns](#10-resilience-patterns)
+- [11-configuration-system — Configuration System](#11-configuration-system)
+- [11a-config-loading — Configuration: Loading Pipeline](#11a-config-loading)
+- [11b-config-domain — Configuration: Domain & Application Config](#11b-config-domain)
+- [12-bootstrap-di-container — Bootstrap / DI Container (Composition Root)](#12-bootstrap-di-container)
+- [12a-bootstrap-factories — Bootstrap: Factories and Registries](#12a-bootstrap-factories)
+- [12b-bootstrap-wiring — Bootstrap: Wiring Graph](#12b-bootstrap-wiring)
+- [13-port-protocol-contracts — Port/Protocol Contracts (Full Map)](#13-port-protocol-contracts)
+- [13a-data-storage-ports — DataSource and Storage Ports](#13a-data-storage-ports)
+- [13a-port-contracts-data-sources — Port Contracts: Data Sources](#13a-port-contracts-data-sources)
+- [13b-operational-ports — Operational and Observability Ports](#13b-operational-ports)
+- [13b-port-contracts-storage — Port Contracts: Storage](#13b-port-contracts-storage)
+- [13c-port-contracts-observability — Port Contracts: Observability and Resilience](#13c-port-contracts-observability)
+- [13c-validation-dq-ports — Validation and Data Quality Ports](#13c-validation-dq-ports)
+- [13d-port-contracts-services — Port Contracts: Services and Controls](#13d-port-contracts-services)
+- [13e-operational-ports-domain — Domain Operational Ports](#13e-operational-ports-domain)
+- [13f-operational-ports-infra — Infrastructure Operational Implementations](#13f-operational-ports-infra)
+- [14-cli-interface-layer — CLI / Interface Layer](#14-cli-interface-layer)
+- [14a-cli-commands — CLI: Command Structure](#14a-cli-commands)
+- [14b-cli-routing — CLI: Routing to Composition & Application](#14b-cli-routing)
+- [15-batch-executor-internals — BatchExecutor Internal Architecture](#15-batch-executor-internals)
+- [16-transformer-hierarchy — Transformer Hierarchy](#16-transformer-hierarchy)
+- [16a-transformer-base — Base Transformer and ChEMBL Transformers](#16a-transformer-base)
+- [16b-transformer-pub-other — Publication, UniProt, Other Transformers and Extractors](#16b-transformer-pub-other)
+- [17-security-pii-audit — Security, PII Hashing, and Audit Trail](#17-security-pii-audit)
+- [18-lock-checkpoint-shutdown — Locking, Checkpoint, and Graceful Shutdown](#18-lock-checkpoint-shutdown)
+- [18a-lock-system — Lock System](#18a-lock-system)
+- [18b-checkpoint-shutdown — Checkpoint and Shutdown System](#18b-checkpoint-shutdown)
 
----
+\newpage
 
-## 01-high-level-hexagonal
+<div style="page-break-before: always;"></div>
+
+## 01-high-level-hexagonal — High-Level Hexagonal Architecture
 
 ![01-high-level-hexagonal](architecture/png/01-high-level-hexagonal.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/01-high-level-hexagonal.mmd`
+### Описание
+Диаграмма «High-Level Hexagonal Architecture» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: the Ports & Adapters (Hexagonal) pattern across all layers.. На схеме отражено примерно 46 узлов и 29 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: External Systems, External APIs, interfaces layer, composition layer, application layer, domain layer (pure, no I/O). Показательные узлы для быстрого чтения: ChEMBL, PubMed, UniProt, PubChem, CrossRef, OpenAlex. Примечание: Decomposed into 01a, 01b, 01c sub-diagrams.
 
-## Описание
-Архитектурная диаграмма «High-Level Hexagonal Architecture» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Показывает: the Ports & Adapters (Hexagonal) pattern across all layers.. Количество узлов: 46. Примечание: Decomposed into 01a, 01b, 01c sub-diagrams.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-24`
-- Узлы: `46`
+- Дата: `2026-02-24`
+- Узлы (metadata): `46`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 01a-hexagonal-overview
+<div style="page-break-before: always;"></div>
+
+## 01a-hexagonal-overview — Hexagonal Overview
 
 ![01a-hexagonal-overview](architecture/png/01a-hexagonal-overview.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/01a-hexagonal-overview.mmd`
+### Описание
+Диаграмма «Hexagonal Overview» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 11 узлов и 14 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Interfaces Layer, Composition Layer, Application Layer, Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: CLI Commands (Click), Orchestration, Bootstrap / Assembly, Application Core, Port Protocols, Provider Adapters.
 
-## Описание
-Архитектурная диаграмма «Hexagonal Overview» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 11.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-25`
-- Узлы: `11`
+- Дата: `2026-02-25`
+- Узлы (metadata): `11`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 01b-hexagonal-domain-app
+<div style="page-break-before: always;"></div>
+
+## 01b-hexagonal-domain-app — Hexagonal Domain and Application
 
 ![01b-hexagonal-domain-app](architecture/png/01b-hexagonal-domain-app.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/01b-hexagonal-domain-app.mmd`
+### Описание
+Диаграмма «Hexagonal Domain and Application» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 13 узлов и 7 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Application Layer, Domain Layer. Показательные узлы для быстрого чтения: Core (Runner, Executor, Transformer, Writer), Services (DQ, Export, Health, Lifecycle), Composite Pipeline (Coordinator, Merger, FSM), Pipeline Transformers (per provider), PipelineObserver, Port Protocols.
 
-## Описание
-Архитектурная диаграмма «Hexagonal Domain and Application» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 13.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-25`
-- Узлы: `13`
+- Дата: `2026-02-25`
+- Узлы (metadata): `13`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 01c-hexagonal-infra-comp
+<div style="page-break-before: always;"></div>
+
+## 01c-hexagonal-infra-comp — Hexagonal Infrastructure and Composition
 
 ![01c-hexagonal-infra-comp](architecture/png/01c-hexagonal-infra-comp.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/01c-hexagonal-infra-comp.mmd`
+### Описание
+Диаграмма «Hexagonal Infrastructure and Composition» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 14 узлов и 11 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Composition Layer, Infrastructure Layer, Domain Layer. Показательные узлы для быстрого чтения: Bootstrap / Assembly, Factories, Provider Registry, Runtime Builders, HTTP Adapters, Storage.
 
-## Описание
-Архитектурная диаграмма «Hexagonal Infrastructure and Composition» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 14.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-25`
-- Узлы: `14`
+- Дата: `2026-02-25`
+- Узлы (metadata): `14`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 01d-hexagonal-overview-rounded
+<div style="page-break-before: always;"></div>
+
+## 01d-hexagonal-overview-rounded — Hexagonal Overview (Rounded Nodes)
 
 ![01d-hexagonal-overview-rounded](architecture/png/01d-hexagonal-overview-rounded.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/01d-hexagonal-overview-rounded.mmd`
+### Описание
+Диаграмма «Hexagonal Overview (Rounded Nodes)» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 11 узлов и 14 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Interfaces Layer, Composition Layer, Application Layer, Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: CLI Commands (Click), Orchestration, Bootstrap / Assembly, Application Core, Port Protocols, Provider Adapters.
 
-## Описание
-Архитектурная диаграмма «Hexagonal Overview (Rounded Nodes)» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 11.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-03-01`
-- Узлы: `11`
+- Дата: `2026-03-01`
+- Узлы (metadata): `11`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 02-layer-dependency-matrix
+<div style="page-break-before: always;"></div>
+
+## 02-layer-dependency-matrix — Layer Dependency Matrix (ARCH-001)
 
 ![02-layer-dependency-matrix](architecture/png/02-layer-dependency-matrix.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/02-layer-dependency-matrix.mmd`
+### Описание
+Диаграмма «Layer Dependency Matrix (ARCH-001)» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 5 узлов и 14 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Legend, Architectural Layers. Показательные узлы для быстрого чтения: ✅ Allowed, ❌ Forbidden, domain (pure business logic, no I/O, no frameworks), application (use cases, orchestration, transformers), infrastructure (adapters, storage, observability), composition (DI wiring, factories, bootstrap).
 
-## Описание
-Архитектурная диаграмма «Layer Dependency Matrix (ARCH-001)» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 5.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-24`
-- Узлы: `5`
+- Дата: `2026-02-24`
+- Узлы (metadata): `5`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 03-medallion-data-flow
+<div style="page-break-before: always;"></div>
+
+## 03-medallion-data-flow — Medallion Architecture Data Flow (Bronze → Silver → Gold)
 
 ![03-medallion-data-flow](architecture/png/03-medallion-data-flow.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/03-medallion-data-flow.mmd`
+### Описание
+Диаграмма «Medallion Architecture Data Flow (Bronze → Silver → Gold)» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: how data flows through the three medallion layers.. На схеме отражено примерно 36 узлов и 31 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: External Data Sources, Data Ingestion, Bronze Layer (Raw), Transformation, Silver Layer (Normalized), Gold Transformation. Показательные узлы для быстрого чтения: Semantic Scholar API, DataSourcePort fetch() / fetch_filtered(), RateLimiter (TokenBucket), CircuitBreaker, Retry Logic, BronzeWriter. Примечание: Canonical medallion flow — at threshold boundary.
 
-## Описание
-Архитектурная диаграмма «Medallion Architecture Data Flow (Bronze → Silver → Gold)» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Показывает: how data flows through the three medallion layers.. Количество узлов: 36. Примечание: Canonical medallion flow — at threshold boundary.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-24`
-- Узлы: `36`
+- Дата: `2026-02-24`
+- Узлы (metadata): `36`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 03a-medallion-layers-overview
+<div style="page-break-before: always;"></div>
+
+## 03a-medallion-layers-overview — Medallion Layers Overview
 
 ![03a-medallion-layers-overview](architecture/png/03a-medallion-layers-overview.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/03a-medallion-layers-overview.mmd`
+### Описание
+Диаграмма «Medallion Layers Overview» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 12 узлов и 9 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Ingestion, Processing, Serving. Показательные узлы для быстрого чтения: Provider APIs, Bronze Layer\nRaw JSON, Normalize + Validate, Silver Layer\nDelta Tables, DQ Checks, Quarantine. Связанный ADR: ADR-002, ADR-040.
 
-## Описание
-Архитектурная диаграмма «Medallion Layers Overview» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 12.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-27`
-- Узлы: `12`
+- Дата: `2026-02-27`
+- Узлы (metadata): `12`
+- ADR: `ADR-002, ADR-040`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 04-pipeline-execution-flow
+<div style="page-break-before: always;"></div>
+
+## 04-pipeline-execution-flow — Pipeline Execution Lifecycle
 
 ![04-pipeline-execution-flow](architecture/png/04-pipeline-execution-flow.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/04-pipeline-execution-flow.mmd`
+### Описание
+Диаграмма «Pipeline Execution Lifecycle» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате диаграмма последовательности (sequence) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 12 узлов и 9 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга.
 
-## Описание
-Архитектурная диаграмма «Pipeline Execution Lifecycle» из набора architecture представлена в формате sequenceDiagram. Уровень детализации: System / Component. Количество узлов: 12.
-
-## Метаданные
+### Метаданные
 - Тип: `sequenceDiagram`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-24`
-- Узлы: `12`
+- Дата: `2026-02-24`
+- Узлы (metadata): `12`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 05-provider-adapter-hierarchy
+<div style="page-break-before: always;"></div>
+
+## 05-provider-adapter-hierarchy — Provider Adapter Hierarchy
 
 ![05-provider-adapter-hierarchy](architecture/png/05-provider-adapter-hierarchy.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/05-provider-adapter-hierarchy.mmd`
+### Описание
+Диаграмма «Provider Adapter Hierarchy» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: how each provider adapter inherits from base classes and implements DataSourcePort.. На схеме отражено примерно 27 узлов и 24 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Ports, Mixins, Base Adapters, ChEMBL, PubMed, UniProt. Показательные узлы для быстрого чтения: DataSourcePort (Protocol), HealthCheckPort (Protocol), HealthCheckMixin, HealthCheckProviderMixin, NotSupportedMultiFilterMixin, DelegatingFallbackMixin. Примечание: Decomposed into 05a, 05b sub-diagrams.
 
-## Описание
-Архитектурная диаграмма «Provider Adapter Hierarchy» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Показывает: how each provider adapter inherits from base classes and implements DataSourcePort.. Количество узлов: 27. Примечание: Decomposed into 05a, 05b sub-diagrams.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-24`
-- Узлы: `27`
+- Дата: `2026-02-24`
+- Узлы (metadata): `27`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 05a-adapter-hierarchy-base
+<div style="page-break-before: always;"></div>
+
+## 05a-adapter-hierarchy-base — Adapter Hierarchy: Base Types
 
 ![05a-adapter-hierarchy-base](architecture/png/05a-adapter-hierarchy-base.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/05a-adapter-hierarchy-base.mmd`
+### Описание
+Диаграмма «Adapter Hierarchy: Base Types» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 12 узлов и 8 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: DataSourcePort, HealthCheckPort, HealthCheckProviderMixin, NotSupportedMultiFilterMixin, FilterableStubMixin, PaginatedFetcherMixin.
 
-## Описание
-Архитектурная диаграмма «Adapter Hierarchy: Base Types» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 12.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-25`
-- Узлы: `12`
+- Дата: `2026-02-25`
+- Узлы (metadata): `12`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 05b-adapter-hierarchy-providers
+<div style="page-break-before: always;"></div>
+
+## 05b-adapter-hierarchy-providers — Adapter Hierarchy: Provider Implementations
 
 ![05b-adapter-hierarchy-providers](architecture/png/05b-adapter-hierarchy-providers.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/05b-adapter-hierarchy-providers.mmd`
+### Описание
+Диаграмма «Adapter Hierarchy: Provider Implementations» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 15 узлов и 12 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Infrastructure Layer. Показательные узлы для быстрого чтения: BaseHttpAdapter, BaseSyncAdapter, ChemblAdapter, PubMedAdapter, UniProtAdapter, CrossRefAdapter.
 
-## Описание
-Архитектурная диаграмма «Adapter Hierarchy: Provider Implementations» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 15.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-25`
-- Узлы: `15`
+- Дата: `2026-02-25`
+- Узлы (metadata): `15`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 06-storage-layer
+<div style="page-break-before: always;"></div>
+
+## 06-storage-layer — Storage Layer Components
 
 ![06-storage-layer](architecture/png/06-storage-layer.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/06-storage-layer.mmd`
+### Описание
+Диаграмма «Storage Layer Components» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Bronze/Silver/Gold writers, Delta Lake, metadata, and validation.. На схеме отражено примерно 21 узлов и 23 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Port, Storage Writers, Bronze Storage, Silver Storage, Gold Storage, Delta Reader. Показательные узлы для быстрого чтения: StoragePort (Protocol), AtomicWriteGroup ━━━━━━━━━━━━━━━━━ Atomic multi-file writes with rollback, GoldWriter csv_exporter + audit + metadata_writer write_gold / clear_gold, ArrowDataConverter (records → PyArrow), RetentionManager (vacuum/retention), MetadataWriter (_metadata.yaml). Примечание: Decomposed into 06a-storage-writers, 06b-storage-support.
 
-## Описание
-Архитектурная диаграмма «Storage Layer Components» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Показывает: Bronze/Silver/Gold writers, Delta Lake, metadata, and validation.. Количество узлов: 21. Примечание: Decomposed into 06a-storage-writers, 06b-storage-support.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-24`
-- Узлы: `21`
+- Дата: `2026-02-24`
+- Узлы (metadata): `21`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 06a-storage-writers
+<div style="page-break-before: always;"></div>
+
+## 06a-storage-writers — Storage Writers
 
 ![06a-storage-writers](architecture/png/06a-storage-writers.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/06a-storage-writers.mmd`
+### Описание
+Диаграмма «Storage Writers» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 10 узлов и 10 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Port, Bronze Storage, Silver Storage, Gold Storage, Delta Reader, File System Layout. Показательные узлы для быстрого чтения: StoragePort (Protocol), BronzeWriter write_bronze() / aclose(), AtomicWriteGroup atomic multi-file writes, BaseDeltaWriter get_table_path() / clear(), SilverWriter write_silver() / merge_silver(), GoldWriter write_gold() / clear_gold().
 
-## Описание
-Архитектурная диаграмма «Storage Writers» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 10.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-27`
-- Узлы: `10`
+- Дата: `2026-02-27`
+- Узлы (metadata): `10`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 06b-storage-support
+<div style="page-break-before: always;"></div>
+
+## 06b-storage-support — Storage Support Components
 
 ![06b-storage-support](architecture/png/06b-storage-support.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/06b-storage-support.mmd`
+### Описание
+Диаграмма «Storage Support Components» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 11 узлов и 7 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Support Components, Validation, Metadata Builders. Показательные узлы для быстрого чтения: ArrowDataConverter records → PyArrow, RetentionManager vacuum / retention, MetadataWriter _metadata.yaml, CsvExporter Delta → CSV export, DQReportWriter DQ reports JSON, PanderaSilverValidator SilverValidatorPort impl.
 
-## Описание
-Архитектурная диаграмма «Storage Support Components» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 11.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-27`
-- Узлы: `11`
+- Дата: `2026-02-27`
+- Узлы (metadata): `11`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 07-dq-system
+<div style="page-break-before: always;"></div>
+
+## 07-dq-system — Data Quality (DQ) System
 
 ![07-dq-system](architecture/png/07-dq-system.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/07-dq-system.mmd`
+### Описание
+Диаграмма «Data Quality (DQ) System» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: DQ monitoring, analysis, and reporting across all medallion layers.. На схеме отражено примерно 22 узлов и 24 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Ports, Application Services, Application DQ Analysis, Pipeline Integration, Domain Value Objects, Infrastructure Implementations. Показательные узлы для быстрого чтения: DQMonitorPort, BronzeDQAnalyzerPort, SilverDQAnalyzerPort, GoldDQAnalyzerPort, DQReportWriterPort, DataQualityService -------- + evaluate(context, executor). Примечание: Decomposed into 07a-dq-analysis, 07b-dq-pipeline.
 
-## Описание
-Архитектурная диаграмма «Data Quality (DQ) System» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Показывает: DQ monitoring, analysis, and reporting across all medallion layers.. Количество узлов: 22. Примечание: Decomposed into 07a-dq-analysis, 07b-dq-pipeline.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-27`
-- Узлы: `22`
+- Дата: `2026-02-27`
+- Узлы (metadata): `22`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 07a-dq-analysis
+<div style="page-break-before: always;"></div>
+
+## 07a-dq-analysis — DQ Analysis Services
 
 ![07a-dq-analysis](architecture/png/07a-dq-analysis.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/07a-dq-analysis.mmd`
+### Описание
+Диаграмма «DQ Analysis Services» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 12 узлов и 11 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Ports, Application Services, DQ Analyzers, Anomaly Detection. Показательные узлы для быстрого чтения: DQMonitorPort, BronzeDQAnalyzerPort, SilverDQAnalyzerPort, GoldDQAnalyzerPort, DQReportWriterPort, DataQualityService evaluate(context, executor).
 
-## Описание
-Архитектурная диаграмма «DQ Analysis Services» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 12.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-27`
-- Узлы: `12`
+- Дата: `2026-02-27`
+- Узлы (metadata): `12`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 07b-dq-pipeline
+<div style="page-break-before: always;"></div>
+
+## 07b-dq-pipeline — DQ Pipeline Integration
 
 ![07b-dq-pipeline](architecture/png/07b-dq-pipeline.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/07b-dq-pipeline.mmd`
+### Описание
+Диаграмма «DQ Pipeline Integration» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 10 узлов и 4 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Pipeline Integration, Domain Value Objects, Infrastructure Implementations. Показательные узлы для быстрого чтения: BatchTransformer _check_dq_thresholds(), QuarantineManager quarantines failed records, ErrorClassifier recoverable vs fatal, DQMetrics null_rate / duplicate_rate, DQResult passed / error_rate, DQReport layer / table_name / results.
 
-## Описание
-Архитектурная диаграмма «DQ Pipeline Integration» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 10.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-27`
-- Узлы: `10`
+- Дата: `2026-02-27`
+- Узлы (metadata): `10`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 08-composite-pipeline
+<div style="page-break-before: always;"></div>
+
+## 08-composite-pipeline — Composite Pipeline Architecture
 
 ![08-composite-pipeline](architecture/png/08-composite-pipeline.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/08-composite-pipeline.mmd`
+### Описание
+Диаграмма «Composite Pipeline Architecture» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: seed → dependencies → enrichers (parallel) → merge flow.. На схеме отражено примерно 33 узлов и 34 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Composite Configuration, CompositePipelineRunner, State Machine, Execution Components, Dependencies (Sequential), Enrichers (Parallel Fan-Out). Показательные узлы для быстрого чтения: CompositeConfig, SeedConfig, DependencyConfig, EnricherConfig, MergeConfig, Config overview seed + dependencies enrichers + merge. Примечание: Decomposed into 08a-composite-config, 08b-composite-execution.
 
-## Описание
-Архитектурная диаграмма «Composite Pipeline Architecture» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Показывает: seed → dependencies → enrichers (parallel) → merge flow.. Количество узлов: 33. Примечание: Decomposed into 08a-composite-config, 08b-composite-execution.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-24`
-- Узлы: `33`
+- Дата: `2026-02-24`
+- Узлы (metadata): `33`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 08a-composite-config
+<div style="page-break-before: always;"></div>
+
+## 08a-composite-config — Composite Pipeline Configuration & FSM
 
 ![08a-composite-config](architecture/png/08a-composite-config.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/08a-composite-config.mmd`
+### Описание
+Диаграмма «Composite Pipeline Configuration & FSM» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 13 узлов и 13 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Composite Configuration, State Machine. Показательные узлы для быстрого чтения: CompositeConfig name / seed / deps / enrichers / merge, SeedConfig, DependencyConfig, EnricherConfig, MergeConfig, Config Details: seed → deps → enrichers → merge.
 
-## Описание
-Архитектурная диаграмма «Composite Pipeline Configuration & FSM» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 13.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-27`
-- Узлы: `13`
+- Дата: `2026-02-27`
+- Узлы (metadata): `13`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 08b-composite-execution
+<div style="page-break-before: always;"></div>
+
+## 08b-composite-execution — Composite Pipeline Execution
 
 ![08b-composite-execution](architecture/png/08b-composite-execution.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/08b-composite-execution.mmd`
+### Описание
+Диаграмма «Composite Pipeline Execution» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 20 узлов и 20 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: CompositePipelineRunner, Preflight, Execution Components, Dependencies (Sequential), Enrichers (Parallel Fan-Out), Merge Phase. Показательные узлы для быстрого чтения: CompositePipelineRunner orchestrates full execution, PreflightValidator, Seed Pipeline, DependencyCoordinator, Dependency 1, EnrichmentCoordinator.
 
-## Описание
-Архитектурная диаграмма «Composite Pipeline Execution» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 20.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-27`
-- Узлы: `20`
+- Дата: `2026-02-27`
+- Узлы (metadata): `20`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 09-observability-stack
+<div style="page-break-before: always;"></div>
+
+## 09-observability-stack — Observability Stack
 
 ![09-observability-stack](architecture/png/09-observability-stack.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/09-observability-stack.mmd`
+### Описание
+Диаграмма «Observability Stack» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 24 узлов и 14 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Ports, Application Observability, Infrastructure: Logging, Infrastructure: Metrics, Infrastructure: Tracing, Infrastructure: Anomaly Detection. Показательные узлы для быстрого чтения: LoggerPort (Protocol) bind + info/warn/error/debug/exception, MetricsPort (Protocol) observe_histogram + increment_counter set_gauge + close, TracingPort (Protocol) get_tracer + close, DQMonitorPort (Protocol) add_metric + check_quality update_baseline, PipelineObserver logger + metrics + tracing hooks, BatchMetricsRecorder track size/processed/error/quarantine. Примечание: Decomposed into 09a-observability-app, 09b-observability-infra.
 
-## Описание
-Архитектурная диаграмма «Observability Stack» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 24. Примечание: Decomposed into 09a-observability-app, 09b-observability-infra.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-24`
-- Узлы: `24`
+- Дата: `2026-02-24`
+- Узлы (metadata): `24`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 09a-observability-app
+<div style="page-break-before: always;"></div>
+
+## 09a-observability-app — Observability: Application Layer
 
 ![09a-observability-app](architecture/png/09a-observability-app.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/09a-observability-app.mmd`
+### Описание
+Диаграмма «Observability: Application Layer» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 8 узлов и 4 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Ports, Application Observability, Adapter-Level Metrics. Показательные узлы для быстрого чтения: LoggerPort (Protocol), MetricsPort (Protocol), TracingPort (Protocol), DQMonitorPort (Protocol), PipelineObserver, BatchMetricsRecorder.
 
-## Описание
-Архитектурная диаграмма «Observability: Application Layer» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 8.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-27`
-- Узлы: `8`
+- Дата: `2026-02-27`
+- Узлы (metadata): `8`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 09b-observability-infra
+<div style="page-break-before: always;"></div>
+
+## 09b-observability-infra — Observability: Infrastructure Layer
 
 ![09b-observability-infra](architecture/png/09b-observability-infra.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/09b-observability-infra.mmd`
+### Описание
+Диаграмма «Observability: Infrastructure Layer» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 13 узлов и 7 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Infrastructure: Logging, Infrastructure: Metrics, Infrastructure: Tracing, Infrastructure: Anomaly Detection, External Systems. Показательные узлы для быстрого чтения: UnifiedLogger (impl LoggerPort), MetricsCollector (impl MetricsPort), PrometheusMetrics (impl MetricsPort), MetricsServerAdapter, NoOpMetrics, OpenTelemetryTracer (impl TracingPort).
 
-## Описание
-Архитектурная диаграмма «Observability: Infrastructure Layer» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 13.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-27`
-- Узлы: `13`
+- Дата: `2026-02-27`
+- Узлы (metadata): `13`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 10-resilience-patterns
+<div style="page-break-before: always;"></div>
+
+## 10-resilience-patterns — Resilience Patterns
 
 ![10-resilience-patterns](architecture/png/10-resilience-patterns.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/10-resilience-patterns.mmd`
+### Описание
+Диаграмма «Resilience Patterns» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 15 узлов и 13 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Ports, Circuit Breaker Pattern, State Machine, Rate Limiter (Token Bucket), Provider Rate Limits, Retry Logic. Показательные узлы для быстрого чтения: CircuitBreakerPort (Protocol) -------- + get_state() + call(fn), RateLimiterPort (Protocol) -------- + acquire(tokens) + try_acquire(), HealthCheckPort (Protocol) -------- + check_health(), CircuitBreaker -------- provider failure_threshold recovery_timeout, CLOSED (normal operation), OPEN (fail fast).
 
-## Описание
-Архитектурная диаграмма «Resilience Patterns» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 15.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-24`
-- Узлы: `15`
+- Дата: `2026-02-24`
+- Узлы (metadata): `15`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 11-configuration-system
+<div style="page-break-before: always;"></div>
+
+## 11-configuration-system — Configuration System
 
 ![11-configuration-system](architecture/png/11-configuration-system.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/11-configuration-system.mmd`
+### Описание
+Диаграмма «Configuration System» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: how YAML configs are loaded, validated, and used across the system.. На схеме отражено примерно 29 узлов и 20 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: YAML Config Files, Infrastructure Config Loaders, Infrastructure Schemas (Pydantic), Domain Configuration, Composite Domain Config, Application Config. Показательные узлы для быстрого чтения: configs/entities/*/*.yaml pipeline configs, configs/quality/*.yaml DQ rules, configs/filters/*.yaml filter configs, configs/composites/*.yaml composite configs, configs/field_groups/*.yaml field groups, PipelineConfigLoader load(path) -> PipelineConfig. Примечание: Decomposed into 11a-config-loading, 11b-config-domain.
 
-## Описание
-Архитектурная диаграмма «Configuration System» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Показывает: how YAML configs are loaded, validated, and used across the system.. Количество узлов: 29. Примечание: Decomposed into 11a-config-loading, 11b-config-domain.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-27`
-- Узлы: `29`
+- Дата: `2026-02-27`
+- Узлы (metadata): `29`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 11a-config-loading
+<div style="page-break-before: always;"></div>
+
+## 11a-config-loading — Configuration: Loading Pipeline
 
 ![11a-config-loading](architecture/png/11a-config-loading.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/11a-config-loading.mmd`
+### Описание
+Диаграмма «Configuration: Loading Pipeline» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 13 узлов и 11 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: YAML Config Files, Infrastructure Config Loaders, Infrastructure Schemas (Pydantic). Показательные узлы для быстрого чтения: configs/entities/*/*.yaml, configs/quality/*.yaml, configs/filters/*.yaml, configs/composites/*.yaml, configs/field_groups/*.yaml, BaseConfigLoader.
 
-## Описание
-Архитектурная диаграмма «Configuration: Loading Pipeline» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 13.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-27`
-- Узлы: `13`
+- Дата: `2026-02-27`
+- Узлы (metadata): `13`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 11b-config-domain
+<div style="page-break-before: always;"></div>
+
+## 11b-config-domain — Configuration: Domain & Application Config
 
 ![11b-config-domain](architecture/png/11b-config-domain.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/11b-config-domain.mmd`
+### Описание
+Диаграмма «Configuration: Domain & Application Config» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 16 узлов и 6 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Infrastructure Schemas, Domain Configuration, Composite Domain Config, Application Config, Infrastructure Settings. Показательные узлы для быстрого чтения: ApiConfig, SourceConfig, CircuitBreakerConfig, PipelineContractPolicy, PipelineConfig, TableConfig.
 
-## Описание
-Архитектурная диаграмма «Configuration: Domain & Application Config» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 16.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-27`
-- Узлы: `16`
+- Дата: `2026-02-27`
+- Узлы (metadata): `16`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 12-bootstrap-di-container
+<div style="page-break-before: always;"></div>
+
+## 12-bootstrap-di-container — Bootstrap / DI Container (Composition Root)
 
 ![12-bootstrap-di-container](architecture/png/12-bootstrap-di-container.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/12-bootstrap-di-container.mmd`
+### Описание
+Диаграмма «Bootstrap / DI Container (Composition Root)» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: how dependencies are assembled and wired together.. На схеме отражено примерно 29 узлов и 38 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Entry Points, composition layer, Bootstrap Assembly, Factories, Provider Registry, Runtime Builders. Показательные узлы для быстрого чтения: CLI Commands (Click), HTTP Interface, RuntimeAssembly central DI wiring point creates infra + app components, RunnerBootstrap ━━━━━━━━━━━━━━━━━ + assemble_runner(), StorageBootstrap ━━━━━━━━━━━━━━━━━ + assemble_storage(), HealthBootstrap ━━━━━━━━━━━━━━━━━ + assemble_health(). Примечание: Decomposed into 12a, 12b sub-diagrams.
 
-## Описание
-Архитектурная диаграмма «Bootstrap / DI Container (Composition Root)» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Показывает: how dependencies are assembled and wired together.. Количество узлов: 29. Примечание: Decomposed into 12a, 12b sub-diagrams.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-24`
-- Узлы: `29`
+- Дата: `2026-02-24`
+- Узлы (metadata): `29`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 12a-bootstrap-factories
+<div style="page-break-before: always;"></div>
+
+## 12a-bootstrap-factories — Bootstrap: Factories and Registries
 
 ![12a-bootstrap-factories](architecture/png/12a-bootstrap-factories.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/12a-bootstrap-factories.mmd`
+### Описание
+Диаграмма «Bootstrap: Factories and Registries» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 10 узлов и 10 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Interfaces Layer, Composition Layer. Показательные узлы для быстрого чтения: CLI Commands (Click), HTTP Interface, bootstrap_pipeline_runner, DataSourceRegistry, GenericPipelineFactory, RunnerFactory.
 
-## Описание
-Архитектурная диаграмма «Bootstrap: Factories and Registries» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 10.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-25`
-- Узлы: `10`
+- Дата: `2026-02-25`
+- Узлы (metadata): `10`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 12b-bootstrap-wiring
+<div style="page-break-before: always;"></div>
+
+## 12b-bootstrap-wiring — Bootstrap: Wiring Graph
 
 ![12b-bootstrap-wiring](architecture/png/12b-bootstrap-wiring.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/12b-bootstrap-wiring.mmd`
+### Описание
+Диаграмма «Bootstrap: Wiring Graph» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 15 узлов и 22 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Composition Layer, Infrastructure Layer, Application Layer. Показательные узлы для быстрого чтения: bootstrap_pipeline_runner, RunnerBootstrap, StorageBootstrap, CheckpointBootstrap, LockBootstrap, Provider Adapter (DataSourcePort).
 
-## Описание
-Архитектурная диаграмма «Bootstrap: Wiring Graph» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 15.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-25`
-- Узлы: `15`
+- Дата: `2026-02-25`
+- Узлы (metadata): `15`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 13-port-protocol-contracts
+<div style="page-break-before: always;"></div>
+
+## 13-port-protocol-contracts — Port/Protocol Contracts (Full Map)
 
 ![13-port-protocol-contracts](architecture/png/13-port-protocol-contracts.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/13-port-protocol-contracts.mmd`
+### Описание
+Диаграмма «Port/Protocol Contracts (Full Map)» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 68 узлов, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Ports (Protocols), Infrastructure Implementations, Application Implementations. Показательные узлы для быстрого чтения: DataSourcePort, FilterableDataSourcePort, StoragePort, LockPort, CheckpointPort, QuarantinePort. Примечание: Decomposed into 13a, 13b, 13c, 13d sub-diagrams.
 
-## Описание
-Архитектурная диаграмма «Port/Protocol Contracts (Full Map)» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 68. Примечание: Decomposed into 13a, 13b, 13c, 13d sub-diagrams.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-24`
-- Узлы: `68`
+- Дата: `2026-02-24`
+- Узлы (metadata): `68`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 13a-data-storage-ports
+<div style="page-break-before: always;"></div>
+
+## 13a-data-storage-ports — DataSource and Storage Ports
 
 ![13a-data-storage-ports](architecture/png/13a-data-storage-ports.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/13a-data-storage-ports.mmd`
+### Описание
+Диаграмма «DataSource and Storage Ports» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 20 узлов, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Ports, Implementations. Показательные узлы для быстрого чтения: fa:fa-plug DataSourcePort, fa:fa-filter FilterableDataSourcePort, fa:fa-database StoragePort, fa:fa-book-open DeltaReaderPort, fa:fa-file-import InputFilterPort, ChemblAdapter.
 
-## Описание
-Архитектурная диаграмма «DataSource and Storage Ports» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 20.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-27`
-- Узлы: `20`
+- Дата: `2026-02-27`
+- Узлы (metadata): `20`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 13a-port-contracts-data-sources
+<div style="page-break-before: always;"></div>
+
+## 13a-port-contracts-data-sources — Port Contracts: Data Sources
 
 ![13a-port-contracts-data-sources](architecture/png/13a-port-contracts-data-sources.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/13a-port-contracts-data-sources.mmd`
+### Описание
+Диаграмма «Port Contracts: Data Sources» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 9 узлов, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: DataSourcePort, FilterableDataSourcePort, ChemblAdapter.
 
-## Описание
-Архитектурная диаграмма «Port Contracts: Data Sources» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 9.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-25`
-- Узлы: `9`
+- Дата: `2026-02-25`
+- Узлы (metadata): `9`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 13b-operational-ports
+<div style="page-break-before: always;"></div>
+
+## 13b-operational-ports — Operational and Observability Ports
 
 ![13b-operational-ports](architecture/png/13b-operational-ports.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/13b-operational-ports.mmd`
+### Описание
+Диаграмма «Operational and Observability Ports» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 25 узлов, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Ports, Implementations. Показательные узлы для быстрого чтения: fa:fa-lock LockPort, fa:fa-flag CheckpointPort, fa:fa-list LoggerPort, fa:fa-chart-line MetricsPort, fa:fa-wave-square TracingPort, fa:fa-bolt CircuitBreakerPort. Примечание: Decomposed into 13e-operational-ports-domain, 13f-operational-ports-infra.
 
-## Описание
-Архитектурная диаграмма «Operational and Observability Ports» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 25. Примечание: Decomposed into 13e-operational-ports-domain, 13f-operational-ports-infra.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-27`
-- Узлы: `25`
+- Дата: `2026-02-27`
+- Узлы (metadata): `25`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 13b-port-contracts-storage
+<div style="page-break-before: always;"></div>
+
+## 13b-port-contracts-storage — Port Contracts: Storage
 
 ![13b-port-contracts-storage](architecture/png/13b-port-contracts-storage.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/13b-port-contracts-storage.mmd`
+### Описание
+Диаграмма «Port Contracts: Storage» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 9 узлов, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: StoragePort, DeltaReaderPort, MetadataWriterPort, BronzeWriter, DeltaReader, MetadataWriter.
 
-## Описание
-Архитектурная диаграмма «Port Contracts: Storage» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 9.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-25`
-- Узлы: `9`
+- Дата: `2026-02-25`
+- Узлы (metadata): `9`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 13c-port-contracts-observability
+<div style="page-break-before: always;"></div>
+
+## 13c-port-contracts-observability — Port Contracts: Observability and Resilience
 
 ![13c-port-contracts-observability](architecture/png/13c-port-contracts-observability.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/13c-port-contracts-observability.mmd`
+### Описание
+Диаграмма «Port Contracts: Observability and Resilience» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 15 узлов, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: LoggerPort, MetricsPort, TracingPort, CircuitBreakerPort, RateLimiterPort, UnifiedLogger.
 
-## Описание
-Архитектурная диаграмма «Port Contracts: Observability and Resilience» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 15.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-25`
-- Узлы: `15`
+- Дата: `2026-02-25`
+- Узлы (metadata): `15`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 13c-validation-dq-ports
+<div style="page-break-before: always;"></div>
+
+## 13c-validation-dq-ports — Validation and Data Quality Ports
 
 ![13c-validation-dq-ports](architecture/png/13c-validation-dq-ports.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/13c-validation-dq-ports.mmd`
+### Описание
+Диаграмма «Validation and Data Quality Ports» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 20 узлов, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Ports, Infrastructure, Application. Показательные узлы для быстрого чтения: SilverValidatorPort, GoldValidatorPort, BronzeDQ AnalyzerPort, SilverDQ AnalyzerPort, GoldDQ AnalyzerPort, DQReportWriterPort.
 
-## Описание
-Архитектурная диаграмма «Validation and Data Quality Ports» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 20.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-27`
-- Узлы: `20`
+- Дата: `2026-02-27`
+- Узлы (metadata): `20`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 13d-port-contracts-services
+<div style="page-break-before: always;"></div>
+
+## 13d-port-contracts-services — Port Contracts: Services and Controls
 
 ![13d-port-contracts-services](architecture/png/13d-port-contracts-services.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/13d-port-contracts-services.mmd`
+### Описание
+Диаграмма «Port Contracts: Services and Controls» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 20 узлов и 2 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer, Application Layer, NoOp Implementations (fallback defaults). Показательные узлы для быстрого чтения: LockPort, CheckpointPort, QuarantinePort, AuditPort, PiiHasherPort, InputFilterPort.
 
-## Описание
-Архитектурная диаграмма «Port Contracts: Services and Controls» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 20.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-25`
-- Узлы: `20`
+- Дата: `2026-02-25`
+- Узлы (metadata): `20`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 13e-operational-ports-domain
+<div style="page-break-before: always;"></div>
+
+## 13e-operational-ports-domain — Domain Operational Ports
 
 ![13e-operational-ports-domain](architecture/png/13e-operational-ports-domain.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/13e-operational-ports-domain.mmd`
+### Описание
+Диаграмма «Domain Operational Ports» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 8 узлов, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Operational Ports. Показательные узлы для быстрого чтения: fa:fa-lock LockPort, fa:fa-flag CheckpointPort, fa:fa-list LoggerPort, fa:fa-chart-line MetricsPort, fa:fa-wave-square TracingPort, fa:fa-bolt CircuitBreakerPort.
 
-## Описание
-Архитектурная диаграмма «Domain Operational Ports» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 8.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-27`
-- Узлы: `8`
+- Дата: `2026-02-27`
+- Узлы (metadata): `8`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 13f-operational-ports-infra
+<div style="page-break-before: always;"></div>
+
+## 13f-operational-ports-infra — Infrastructure Operational Implementations
 
 ![13f-operational-ports-infra](architecture/png/13f-operational-ports-infra.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/13f-operational-ports-infra.mmd`
+### Описание
+Диаграмма «Infrastructure Operational Implementations» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 7 узлов, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Infrastructure Implementations. Показательные узлы для быстрого чтения: MemoryLock, LocalCheckpoint, UnifiedLogger, MetricsCollector, OpenTelemetryTracer, CircuitBreaker.
 
-## Описание
-Архитектурная диаграмма «Infrastructure Operational Implementations» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 7.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-27`
-- Узлы: `7`
+- Дата: `2026-02-27`
+- Узлы (metadata): `7`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 14-cli-interface-layer
+<div style="page-break-before: always;"></div>
+
+## 14-cli-interface-layer — CLI / Interface Layer
 
 ![14-cli-interface-layer](architecture/png/14-cli-interface-layer.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/14-cli-interface-layer.mmd`
+### Описание
+Диаграмма «CLI / Interface Layer» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: CLI commands, their routing, and interaction with composition.. На схеме отражено примерно 24 узлов и 17 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: User, CLI Interface (Click), Run Commands, Health Commands, Data Commands, Maintenance Commands. Показательные узлы для быстрого чтения: Terminal, bioetl (main group), bioetl run --provider --entity --run-type --limit --resume --dry-run, bioetl run-composite ━━━━━━━━━━━━━━━━━ --config --run-type --resume, bioetl health ━━━━━━━━━━━━━━━━━ --provider Check API health, bioetl export ━━━━━━━━━━━━━━━━━ --table --format csv. Примечание: Decomposed into 14a-cli-commands, 14b-cli-routing.
 
-## Описание
-Архитектурная диаграмма «CLI / Interface Layer» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Показывает: CLI commands, their routing, and interaction with composition.. Количество узлов: 24. Примечание: Decomposed into 14a-cli-commands, 14b-cli-routing.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-24`
-- Узлы: `24`
+- Дата: `2026-02-24`
+- Узлы (metadata): `24`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 14a-cli-commands
+<div style="page-break-before: always;"></div>
+
+## 14a-cli-commands — CLI: Command Structure
 
 ![14a-cli-commands](architecture/png/14a-cli-commands.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/14a-cli-commands.mmd`
+### Описание
+Диаграмма «CLI: Command Structure» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 12 узлов и 3 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: User, CLI Interface (Click), Run Commands, Health Commands, Data Commands, Maintenance Commands. Показательные узлы для быстрого чтения: Terminal, bioetl group, bioetl run, bioetl run-composite, bioetl health, bioetl export.
 
-## Описание
-Архитектурная диаграмма «CLI: Command Structure» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 12.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-27`
-- Узлы: `12`
+- Дата: `2026-02-27`
+- Узлы (metadata): `12`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 14b-cli-routing
+<div style="page-break-before: always;"></div>
+
+## 14b-cli-routing — CLI: Routing to Composition & Application
 
 ![14b-cli-routing](architecture/png/14b-cli-routing.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/14b-cli-routing.mmd`
+### Описание
+Диаграмма «CLI: Routing to Composition & Application» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 12 узлов и 11 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Composition Layer, Application Layer. Показательные узлы для быстрого чтения: bioetl run, bioetl run-composite, bioetl health, bioetl export, bioetl quarantine, bioetl checkpoint.
 
-## Описание
-Архитектурная диаграмма «CLI: Routing to Composition & Application» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 12.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-27`
-- Узлы: `12`
+- Дата: `2026-02-27`
+- Узлы (metadata): `12`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 15-batch-executor-internals
+<div style="page-break-before: always;"></div>
+
+## 15-batch-executor-internals — BatchExecutor Internal Architecture
 
 ![15-batch-executor-internals](architecture/png/15-batch-executor-internals.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/15-batch-executor-internals.mmd`
+### Описание
+Диаграмма «BatchExecutor Internal Architecture» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: the composition of BatchExecutor and its helper components.. На схеме отражено примерно 15 узлов и 14 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: BatchExecutor, Composed Helper Components, Data Flow Through Batch, TransformResult, Error Classification. Показательные узлы для быстрого чтения: BatchTracingManager -------- execution spans + start_batch_span() + end_span(), QuarantineManager -------- quarantine failed records + quarantine_record(), CheckpointManager -------- offset checkpoints + load/save/delete, Raw API Records (dict[str, Any]), Silver Records (Delta Lake), TransformResult silver_records + gold_records quarantined_count + errors.
 
-## Описание
-Архитектурная диаграмма «BatchExecutor Internal Architecture» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Показывает: the composition of BatchExecutor and its helper components.. Количество узлов: 15.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-24`
-- Узлы: `15`
+- Дата: `2026-02-24`
+- Узлы (metadata): `15`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 16-transformer-hierarchy
+<div style="page-break-before: always;"></div>
+
+## 16-transformer-hierarchy — Transformer Hierarchy
 
 ![16-transformer-hierarchy](architecture/png/16-transformer-hierarchy.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/16-transformer-hierarchy.mmd`
+### Описание
+Диаграмма «Transformer Hierarchy» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: the Template Method pattern and all provider-specific transformers.. На схеме отражено примерно 35 узлов и 10 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Template Method Pattern, ChEMBL Transformers, Publication Transformers, UniProt Transformers, Other Transformers, Extractor Pattern. Показательные узлы для быстрого чтения: BaseChemblTransformer entity_class + primary_id_field _extract_business_data(), ActivityTransformer, PubMedPublicationTransformer XML parsing + extractor stack, UniProtProteinTransformer taxonomy/gene/feature extractors, IDMappingTransformer, PubChemCompoundTransformer. Примечание: Decomposed into 16a-transformer-base, 16b-transformer-pub-other.
 
-## Описание
-Архитектурная диаграмма «Transformer Hierarchy» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Показывает: the Template Method pattern and all provider-specific transformers.. Количество узлов: 35. Примечание: Decomposed into 16a-transformer-base, 16b-transformer-pub-other.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-24`
-- Узлы: `35`
+- Дата: `2026-02-24`
+- Узлы (metadata): `35`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 16a-transformer-base
+<div style="page-break-before: always;"></div>
+
+## 16a-transformer-base — Base Transformer and ChEMBL Transformers
 
 ![16a-transformer-base](architecture/png/16a-transformer-base.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/16a-transformer-base.mmd`
+### Описание
+Диаграмма «Base Transformer and ChEMBL Transformers» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 17 узлов и 2 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Template Method Pattern, ChEMBL Transformers, Extractor Root. Показательные узлы для быстрого чтения: BaseTransformer ABC, BaseChemblTransformer, ActivityTransformer, AssayTransformer, ApprovedProductTransformer, MechanismTransformer.
 
-## Описание
-Архитектурная диаграмма «Base Transformer and ChEMBL Transformers» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 17.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-27`
-- Узлы: `17`
+- Дата: `2026-02-27`
+- Узлы (metadata): `17`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 16b-transformer-pub-other
+<div style="page-break-before: always;"></div>
+
+## 16b-transformer-pub-other — Publication, UniProt, Other Transformers and Extractors
 
 ![16b-transformer-pub-other](architecture/png/16b-transformer-pub-other.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/16b-transformer-pub-other.mmd`
+### Описание
+Диаграмма «Publication, UniProt, Other Transformers and Extractors» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 18 узлов и 3 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Publication Transformers, UniProt Transformers, Other Transformers, Field Extractors. Показательные узлы для быстрого чтения: BasePublicationTransformer, PubMedPublicationTransformer, CrossRefTransformer, OpenAlexTransformer, SemanticScholarTransformer, UniProtProteinTransformer.
 
-## Описание
-Архитектурная диаграмма «Publication, UniProt, Other Transformers and Extractors» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 18.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-27`
-- Узлы: `18`
+- Дата: `2026-02-27`
+- Узлы (metadata): `18`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 17-security-pii-audit
+<div style="page-break-before: always;"></div>
+
+## 17-security-pii-audit — Security, PII Hashing, and Audit Trail
 
 ![17-security-pii-audit](architecture/png/17-security-pii-audit.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/17-security-pii-audit.mmd`
+### Описание
+Диаграмма «Security, PII Hashing, and Audit Trail» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: how PII is handled and audit trail is maintained.. На схеме отражено примерно 16 узлов и 11 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Ports, Domain Types, PII Hashing Flow, Infrastructure: PII Hasher, Infrastructure: Audit, Usage in Transformers. Показательные узлы для быстрого чтения: PiiHasherPort (Protocol) -------- + hash(value: str) -> str, AuditPort (Protocol) -------- + log_write(entry) + get_entries(filters), AuditLayer -------- BRONZE / SILVER / GOLD, AuditOperation -------- WRITE / MERGE / APPEND DELETE / OVERWRITE, Raw PII Data (names, emails, affiliations), SHA256(lowercase(value) + salt).
 
-## Описание
-Архитектурная диаграмма «Security, PII Hashing, and Audit Trail» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Показывает: how PII is handled and audit trail is maintained.. Количество узлов: 16.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-24`
-- Узлы: `16`
+- Дата: `2026-02-24`
+- Узлы (metadata): `16`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 18-lock-checkpoint-shutdown
+<div style="page-break-before: always;"></div>
+
+## 18-lock-checkpoint-shutdown — Locking, Checkpoint, and Graceful Shutdown
 
 ![18-lock-checkpoint-shutdown](architecture/png/18-lock-checkpoint-shutdown.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/18-lock-checkpoint-shutdown.mmd`
+### Описание
+Диаграмма «Locking, Checkpoint, and Graceful Shutdown» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: distributed safety mechanisms.. На схеме отражено примерно 22 узлов и 15 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Ports, Domain Lock Types, Application: LockCoordinator, Application: CheckpointManager, Application: Shutdown, Infrastructure: MemoryLock. Показательные узлы для быстрого чтения: LockPort (Protocol) acquire/release/heartbeat validate_owner + validate_token, CheckpointPort (Protocol) save/load/list/delete, ShutdownPort (Protocol), FencingToken sequence + key + owner_id + issued_at, LockNotHeldError, LockCoordinator lock + run_id + shutdown_signal acquire/release/validate. Примечание: Decomposed into 18a-lock-system, 18b-checkpoint-shutdown.
 
-## Описание
-Архитектурная диаграмма «Locking, Checkpoint, and Graceful Shutdown» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Показывает: distributed safety mechanisms.. Количество узлов: 22. Примечание: Decomposed into 18a-lock-system, 18b-checkpoint-shutdown.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-24`
-- Узлы: `22`
+- Дата: `2026-02-24`
+- Узлы (metadata): `22`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 18a-lock-system
+<div style="page-break-before: always;"></div>
+
+## 18a-lock-system — Lock System
 
 ![18a-lock-system](architecture/png/18a-lock-system.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/18a-lock-system.mmd`
+### Описание
+Диаграмма «Lock System» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 8 узлов и 5 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Port, Domain Lock Types, Application: LockCoordinator, Infrastructure: MemoryLock, Safety Guard. Показательные узлы для быстрого чтения: fa:fa-lock LockPort, FencingToken, LockNotHeldError, LockCoordinator, HeartbeatTask, MemoryLock.
 
-## Описание
-Архитектурная диаграмма «Lock System» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 8.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-27`
-- Узлы: `8`
+- Дата: `2026-02-27`
+- Узлы (metadata): `8`
 
-<div style="page-break-after: always;"></div>
+\newpage
 
-## 18b-checkpoint-shutdown
+<div style="page-break-before: always;"></div>
+
+## 18b-checkpoint-shutdown — Checkpoint and Shutdown System
 
 ![18b-checkpoint-shutdown](architecture/png/18b-checkpoint-shutdown.png)
 
-- Исходная диаграмма: `mmd-diagrams/architecture/18b-checkpoint-shutdown.mmd`
+### Описание
+Диаграмма «Checkpoint and Shutdown System» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». На схеме отражено примерно 14 узлов и 10 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые блоки/подграфы: Domain Ports, Application: CheckpointManager, Application: Shutdown, Infrastructure: LocalCheckpoint, Pipeline Lifecycle. Показательные узлы для быстрого чтения: fa:fa-flag CheckpointPort, fa:fa-power-off ShutdownPort, CheckpointManager, ShutdownSignal, ShutdownReason, LocalCheckpoint.
 
-## Описание
-Архитектурная диаграмма «Checkpoint and Shutdown System» из набора architecture представлена в формате flowchart. Уровень детализации: System / Component. Количество узлов: 14.
-
-## Метаданные
+### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата метаданных: `2026-02-27`
-- Узлы: `14`
-
-<div style="page-break-after: always;"></div>
+- Дата: `2026-02-27`
+- Узлы (metadata): `14`

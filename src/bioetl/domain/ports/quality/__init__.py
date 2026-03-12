@@ -1,4 +1,5 @@
 """Data quality and validation port sub-facade."""
+from __future__ import annotations
 
 from bioetl.domain.ports.quality.contract_policy import ContractPolicyPort
 from bioetl.domain.ports.quality.dq_config import (

@@ -16,6 +16,7 @@ Consolidated modules (v5.2):
 - storage: StorageAdapter, StorageContext, StorageFactory
 - dq_services_factory: DQServicesFactory for DQ report components
 """
+from __future__ import annotations
 
 from typing import TYPE_CHECKING
 

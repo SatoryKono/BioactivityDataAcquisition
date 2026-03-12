@@ -2,6 +2,7 @@
 
 Provides specialized extractors for different aspects of UniProt data.
 """
+from __future__ import annotations
 
 from bioetl.application.pipelines.uniprot.extractors.comments import CommentExtractor
 from bioetl.application.pipelines.uniprot.extractors.crossrefs import CrossRefExtractor

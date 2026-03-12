@@ -31,6 +31,7 @@ Provider-Specific Exceptions:
     defined in infrastructure.adapters.{provider}.exceptions. Application layer
     should catch ExternalServiceError instead.
 """
+from __future__ import annotations
 
 # =============================================================================
 # Base Classes

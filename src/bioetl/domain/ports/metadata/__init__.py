@@ -1,4 +1,5 @@
 """Metadata port sub-facade."""
+from __future__ import annotations
 
 from bioetl.domain.ports.metadata.coordinator import (
     BronzeMetadataInput,

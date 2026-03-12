@@ -1,4 +1,5 @@
 """Facade for Data Quality report value objects and enums."""
+from __future__ import annotations
 
 from bioetl.domain.value_objects.dq_report_builder import (
     BronzeDQReport,

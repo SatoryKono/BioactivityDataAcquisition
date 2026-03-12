@@ -5,6 +5,7 @@ Compatibility note for architecture guards:
 - State transitions still use ``with_state(`` and ``_log_fsm_transition`` in the
   runner package implementation.
 """
+from __future__ import annotations
 
 from bioetl.application.composite.runner_pkg.runner import (
     CompositePipelineRunner,

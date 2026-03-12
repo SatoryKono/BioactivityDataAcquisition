@@ -3,6 +3,7 @@
 
 Provides transformer and extractors for Semantic Scholar publication data.
 """
+from __future__ import annotations
 
 from bioetl.application.pipelines.semanticscholar.extractors import (
     extract_external_ids,

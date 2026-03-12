@@ -1,4 +1,5 @@
 """Pipeline factory subpackage."""
+from __future__ import annotations
 
 from bioetl.composition.factories.pipeline.facade import (
     GenericPipelineFactory,

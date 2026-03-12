@@ -8,6 +8,7 @@ Services:
 - MetadataCoordinator: Centralized metadata creation for Medallion layers
 - Versioning utilities: Git commit, config hash, pipeline version
 """
+from __future__ import annotations
 
 from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
 from bioetl.composition.services.versioning import (

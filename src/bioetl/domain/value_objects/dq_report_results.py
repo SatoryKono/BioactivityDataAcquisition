@@ -1,4 +1,5 @@
 """Facade exports for DQ check result value objects."""
+from __future__ import annotations
 
 from bioetl.domain.value_objects.dq_report_results_core import (
     CategoricalDistribution,

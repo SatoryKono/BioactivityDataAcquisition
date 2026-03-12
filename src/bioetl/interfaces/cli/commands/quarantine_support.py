@@ -6,12 +6,12 @@ import asyncio
 import json
 import sys
 from collections.abc import Callable, Coroutine
-from typing import Any, Protocol, TypeVar
+from typing import Protocol, TypeVar
 
 import click
 
 from bioetl.domain.exceptions import BioETLError
-from bioetl.domain.types import QuarantineRecordStatus
+from bioetl.domain.types import JsonDict, QuarantineRecordStatus
 from bioetl.interfaces.cli.commands.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,
 )
@@ -43,11 +43,11 @@ class _QuarantineManager(Protocol):
         self,
         limit: int,
         error_code: str | None = None,
-    ) -> list[dict[str, Any]]:
+    ) -> list[JsonDict]:
         """Return quarantined records."""
         ...
 
-    async def get_stats(self) -> dict[str, Any]:
+    async def get_stats(self) -> JsonDict:
         """Return aggregate quarantine statistics."""
         ...
 
@@ -61,15 +61,15 @@ class _QuarantineService(Protocol):
         pipeline: str,
         error_code: str | None,
         max_age_days: int,
-    ) -> list[dict[str, Any]]:
+    ) -> list[JsonDict]:
         """Find records eligible for replay."""
         ...
 
-    def mark_as_reprocessed(self, records: list[dict[str, Any]]) -> int:
+    def mark_as_reprocessed(self, records: list[JsonDict]) -> int:
         """Mark replay candidates as reprocessed."""
         ...
 
-    async def get_stats(self, pipeline: str) -> dict[str, Any]:
+    async def get_stats(self, pipeline: str) -> JsonDict:
         """Return stats for purge preview."""
         ...
 
@@ -105,7 +105,7 @@ def _handle_quarantine_failure(
 
 
 def _run_quarantine_async(
-    coro: Coroutine[Any, Any, _T],
+    coro: Coroutine[object, object, _T],
     *,
     pipeline: str,
     reason_prefix: str,
@@ -183,7 +183,7 @@ def _run_quarantine_sync(
     return None
 
 
-def _render_stats_dashboard(stats: dict[str, Any], *, pipeline: str) -> None:
+def _render_stats_dashboard(stats: JsonDict, *, pipeline: str) -> None:
     """Render human-readable quarantine statistics."""
     click.echo(f"\n{'=' * 50}")
     click.echo(f"  Quarantine Dashboard: {pipeline}")
@@ -219,7 +219,7 @@ def _inspect_quarantine(
     """Inspect quarantined records for one pipeline."""
     echo_info(f"Inspecting quarantine for {pipeline} (limit {limit})...")
 
-    async def _inspect() -> list[dict[str, Any]]:
+    async def _inspect() -> list[JsonDict]:
         return await manager.inspect(limit=limit, error_code=error_code)
 
     records = _run_quarantine_async(
@@ -246,7 +246,7 @@ def _show_quarantine_stats(
 ) -> None:
     """Display quarantine statistics for one pipeline."""
 
-    async def _stats() -> dict[str, Any]:
+    async def _stats() -> JsonDict:
         return await manager.get_stats()
 
     stats = _run_quarantine_async(
@@ -325,7 +325,7 @@ def _purge_quarantine(
 ) -> None:
     """Purge old quarantine records or preview the purge."""
     if dry_run:
-        async def _get_stats() -> dict[str, Any]:
+        async def _get_stats() -> JsonDict:
             return await service.get_stats(pipeline)
 
         stats = _run_quarantine_async(
